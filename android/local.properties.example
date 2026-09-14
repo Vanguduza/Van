@@ -1,0 +1,4 @@
+# Copy to local.properties and adjust paths for your machine.
+sdk.dir=C\:\\Users\\Admin\\AppData\\Local\\android-sdk
+# Optional: override JDK used by Gradle (Android Studio usually sets this)
+# org.gradle.java.home=C\:\\Users\\Admin\\Documents\\dde\\.tooling\\jdk-17

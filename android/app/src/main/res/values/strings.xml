@@ -1,0 +1,6 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="app_name">Van</string>
+    <string name="overlay_notification_title">Van is active</string>
+    <string name="overlay_notification_body">Owner assistant overlay running</string>
+</resources>

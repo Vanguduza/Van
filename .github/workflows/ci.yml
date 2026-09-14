@@ -1,0 +1,45 @@
+name: van-ci
+
+on:
+  push:
+  pull_request:
+
+jobs:
+  backend:
+    runs-on: ubuntu-latest
+    defaults:
+      run:
+        working-directory: backend
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+      - name: Install
+        run: pip install -r requirements.txt
+      - name: Test
+        run: pytest -q
+      - name: Visual contract
+        working-directory: .
+        run: pytest -q tests/contracts
+
+  android:
+    runs-on: ubuntu-latest
+    defaults:
+      run:
+        working-directory: android
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-java@v4
+        with:
+          distribution: temurin
+          java-version: "17"
+      - name: Assemble + lint
+        run: |
+          if [ -f gradlew ]; then
+            chmod +x gradlew
+            ./gradlew :app:assembleDebug :app:lintDebug :app:testDebugUnitTest
+          else
+            echo "Android Gradle wrapper not present yet"
+            exit 1
+          fi

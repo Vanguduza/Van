@@ -1,0 +1,43 @@
+{
+  "schema_version": 1,
+  "product": "van",
+  "hermes_profile": "van",
+  "projects": [
+    {
+      "id": "van",
+      "name": "VAN",
+      "truth_path": "docs/PROJECT_TRUTH_PROTOCOL.md",
+      "repo_hint": "https://github.com/Vanguduza/Van"
+    },
+    {
+      "id": "dial",
+      "name": "DIAL",
+      "truth_path": null,
+      "repo_hint": "https://github.com/Vanguduza/dial-new"
+    },
+    {
+      "id": "dde",
+      "name": "DDE",
+      "truth_path": null,
+      "repo_hint": "https://github.com/Vanguduza/dde"
+    },
+    {
+      "id": "gtr",
+      "name": "Nissan GTR Auto",
+      "truth_path": null,
+      "repo_hint": "https://github.com/Vanguduza/Nissan-Gtr-Auto"
+    },
+    {
+      "id": "goat",
+      "name": "Goat App / Farm OS",
+      "truth_path": null,
+      "repo_hint": "https://github.com/Vanguduza/goat-app"
+    },
+    {
+      "id": "aeci",
+      "name": "AECI",
+      "truth_path": null,
+      "repo_hint": "https://github.com/Vanguduza/AECI-"
+    }
+  ]
+}

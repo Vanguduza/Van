@@ -1,0 +1,52 @@
+# Byte-compiled / cache
+__pycache__/
+*.py[cod]
+.venv/
+.venv-*/
+*.egg-info/
+.pytest_cache/
+.mypy_cache/
+.ruff_cache/
+.coverage
+htmlcov/
+
+# Android / Gradle
+android/.gradle/
+android/**/build/
+android/local.properties
+android/**/*.iml
+android/.idea/
+*.apk
+*.aab
+*.ap_
+*.dex
+
+# Secrets / local
+.env
+.env.*
+!.env.example
+*.pem
+*.p12
+keystore.properties
+*.jks
+google-oauth-client.json
+gemini.env
+
+# OS / IDE
+.DS_Store
+Thumbs.db
+.idea/
+.vscode/
+*.swp
+
+# Release scratch
+dist/
+artifacts/local/
+*.log
+
+# Keep release manifests; ignore bulky local APK copies
+artifacts/release/*.apk
+artifacts/release/*.aab
+
+# Node (tooling)
+node_modules/

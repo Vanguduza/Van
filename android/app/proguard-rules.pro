@@ -1,0 +1,2 @@
+-keep class com.dial.van.visual.** { *; }
+-keepclassmembers class com.dial.van.visual.** { *; }

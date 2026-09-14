@@ -1,0 +1,63 @@
+{
+  "artboard": "Van",
+  "state_machine": "VanRuntime",
+  "inputs": [
+    {"name": "state", "type": "number"},
+    {"name": "speaking", "type": "boolean"},
+    {"name": "listening", "type": "boolean"},
+    {"name": "attention_x", "type": "number", "min": -1.0, "max": 1.0},
+    {"name": "attention_y", "type": "number", "min": -1.0, "max": 1.0},
+    {"name": "mouth_open", "type": "number", "min": 0.0, "max": 1.0},
+    {"name": "urgency", "type": "number", "min": 0.0, "max": 1.0},
+    {"name": "viseme", "type": "number"},
+    {"name": "action_code", "type": "number"}
+  ],
+  "triggers": ["point", "ack", "celebrate", "warning", "wave", "shrug", "present", "panel"],
+  "durable_states": {
+    "OFFLINE": 0,
+    "CONNECTING": 1,
+    "IDLE": 2,
+    "ATTENTIVE": 3,
+    "LISTENING": 4,
+    "THINKING": 5,
+    "SEARCHING": 6,
+    "WORKING": 7,
+    "DELEGATING": 8,
+    "SPEAKING": 9,
+    "WAITING": 10,
+    "WAITING_FOR_OWNER": 11,
+    "DEGRADED": 12,
+    "WARNING": 13,
+    "ERROR": 14,
+    "SUCCESS": 15,
+    "URGENT": 16,
+    "SLEEPING": 17
+  },
+  "finite_actions": {
+    "HELLO_WAVE": 1,
+    "ACK_NOD": 2,
+    "POINT_LEFT": 3,
+    "POINT_RIGHT": 4,
+    "POINT_UP": 5,
+    "POINT_DOWN": 6,
+    "POINT_TARGET": 7,
+    "CELEBRATE": 8,
+    "CAUTION": 9,
+    "CONFIRM": 10,
+    "SHRUG": 11,
+    "PRESENT_CARD": 12,
+    "OPEN_PANEL": 13,
+    "CLOSE_PANEL": 14
+  },
+  "identity_lock": {
+    "hair": "silver_white_swept",
+    "visor": "cyan_blue_transparent",
+    "skin": "medium_brown",
+    "eyes": "blue",
+    "jacket": "black_white_technical",
+    "underlayer": "charcoal_technical",
+    "accents": "dial_cyan",
+    "companion": "cyan_holographic_orb",
+    "forbid": ["dark_hair", "generic_robot", "random_mascot"]
+  }
+}
