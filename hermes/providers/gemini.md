@@ -2,49 +2,82 @@
 
 Profile: **`van`**
 
+## Canonical rule
+
+Hermes profile `van` is the sole VAN agent runtime. Gemini is a provider and
+specialist capability beneath Hermes. Android and VAN Gateway do not run a
+parallel Gemini agent loop.
+
+## Google Account Sovereignty
+
+All Google capabilities used by VAN must trace ownership, entitlement or
+infrastructure administration to the owner's canonical Google account.
+Credential separation does not imply identity separation.
+
+```text
+Owner Google Account
+ ├── consumer entitlements / sessions
+ ├── Workspace OAuth delegation
+ ├── Google Cloud project/service identity
+ └── Gemini runtime credential used by Hermes
+```
+
 ## Separation of credentials
 
-Gemini uses a **separate runtime API credential** — not Google OAuth workspace tokens, not consumer Gemini web session scraping, not Google One subscription UI automation.
-
-| Credential | Used for | In LLM prompts? |
+| Credential plane | Used for | In LLM prompts? |
 |---|---|---|
-| Google OAuth (gateway) | Gmail, Calendar, Drive API | **Never** |
-| Gemini API key / service account (runtime env) | Gemini model calls via Hermes | Key never echoed; routing only |
+| Workspace OAuth | Gmail, Calendar, Drive, Contacts, Tasks | **Never** |
+| Gemini runtime | Gemini, Live, Deep Research, Nano Banana, Veo via Hermes | **Never** |
+| Google Cloud/service identity | Optional Notebook Enterprise / ADK/A2A services | **Never** |
+| Consumer account session | Notebook, Mixboard, Stitch, Antigravity, Jules, Flow, AI Studio | Cookies/tokens are **never** copied into prompts |
 
-Store Gemini credential in host env (e.g. `GEMINI_API_KEY` or deployment secret manager). Do not commit `gemini.env` (see repo `.gitignore`).
+Store runtime credentials in host environment or a deployment secret manager.
+Do not commit credential files.
 
 ## Invocation path
 
 ```text
-Owner → gateway → Hermes profile van → Gemini provider route → response → Van
+Owner
+  → VAN Gateway
+  → Hermes profile van
+  → deterministic Google capability route
+  → Gemini/provider worker
+  → provenance/evidence
+  → Hermes
+  → VAN
 ```
 
-Hermes owns the call. Android does not call Gemini directly. No parallel on-device Gemini agent loop.
+## Capability roles
 
-## When to prefer Gemini
+- **Gemini** — reasoning and multimodal worker.
+- **Gemini Live** — perception/conversation; it does not authorize mutations.
+- **Deep Research** — cited investigator; its output is evidence, not Project Truth.
+- **Nano Banana / Veo** — artifact generators behind Hermes media capabilities.
 
-Prefer Gemini routing (still through Hermes) for:
-
-- Google API / Workspace documentation interpretation
-- Google-cloud architecture questions
-- Multimodal tasks when gateway attaches attested media (not raw OAuth-backed fetches in prompt)
-
-Use other Hermes-configured models when better suited; preference is not exclusivity.
+Consumer products such as Notebook, Mixboard, Stitch, Antigravity, Jules and Flow
+are described in `docs/GOOGLE_INTELLIGENCE_MESH.md` and the associated skills.
 
 ## Policy and action classes
 
-- Gemini inference alone is typically A1/A2 (read/analysis) depending on external data attached
-- Acting on Gemini output (send email, write repo) still requires appropriate A3/A4 gates and Project Truth checks
-- Gemini suggestions inside untrusted documents remain untrusted
+- Gemini inference alone is usually A1/A2.
+- Provider output remains external/untrusted until validated.
+- A3/A4 project work requires an explicit capability grant.
+- A3/A4 project mutation requires current Project Truth SHA.
+- A4 still requires explicit owner approval.
+- A5 is always denied.
 
 ## Fail closed
 
-- Missing Gemini credential → report `DEGRADED`; do not fake Gemini-specific answers
-- Do not claim Gemini was used without provider receipt in Hermes logs
-- Do not disable audit/policy because Gemini path is selected
+- Missing Gemini runtime credential → `DEGRADED`/`UNAVAILABLE`.
+- Merely configuring a runtime never creates `READY` state.
+- Never claim Gemini/Live/Deep Research was used without a provider receipt or retained execution evidence in Hermes logs.
+- Never fall back to consumer web-session scraping to imitate an API.
+- Never disable VAN audit/policy because a Google path is selected.
 
 ## References
 
-- `docs/SECURITY_POLICY.md` — secrets
-- `hermes/mcp/README.md` — `gemini` server
-- `hermes/skills/research/SKILL.md`
+- `docs/GOOGLE_INTELLIGENCE_MESH.md`
+- `docs/SECURITY_POLICY.md`
+- `registries/google_capabilities.json`
+- `hermes/mcp/README.md`
+- `hermes/skills/google-intelligence/SKILL.md`

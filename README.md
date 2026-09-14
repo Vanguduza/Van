@@ -18,23 +18,38 @@ Van secure gateway / owner-authority layer
         ▼
 DIAL Hermes profile: van
         ├── Claude / Codex / GPT-SOL / Gemini / Antigravity
+        ├── Google Intelligence Mesh
+        │     ├── Gemini Live / Deep Research
+        │     ├── Gemini Notebook
+        │     ├── Mixboard / Stitch
+        │     ├── Antigravity / Jules
+        │     ├── Workspace APIs / Studio
+        │     └── Nano Banana / Veo / Flow / ADK-A2A
         ├── skills / MCP / Bot Chat / message_agent
         ├── group rooms / councils
         └── registered projects (dial, dde, gtr, goat, aeci, van)
 ```
+
+## Google Account Sovereignty
+
+All Google capabilities used by VAN trace ownership, entitlement, delegated access, or Cloud administration to the owner's canonical Google account.
+
+Credentials remain compartmentalized into Workspace OAuth, Gemini runtime, Google Cloud/service identity, and consumer-session planes. There is no Google master credential. Hermes remains the sole agent runtime.
+
+Canonical specification: `docs/GOOGLE_INTELLIGENCE_MESH.md`.
 
 ## Repository layout
 
 | Path | Role |
 |---|---|
 | `android/` | Owner Android application |
-| `backend/` | Secure gateway, authority, deterministic engines |
-| `hermes/` | Profile `van` install pack (SOUL, skills, policy, MCP) |
+| `backend/` | Secure gateway, authority, deterministic engines and Google broker |
+| `hermes/` | Profile `van` install pack (SOUL, skills, policy, MCP/providers) |
 | `visual-authority/` | Locked character identity and Rive contract |
 | `docs/` | Canonical product authority |
-| `registries/` | Project registrations and capability catalogs |
+| `registries/` | Projects and Google capability catalogs |
 | `tests/` | Cross-cutting contract and acceptance tests |
-| `tools/` | Bootstrap, release, certification scripts |
+| `tools/` | Bootstrap, Google setup/certification, release and certification scripts |
 
 ## Quick start
 
@@ -46,8 +61,14 @@ pip install -r requirements.txt
 pytest
 uvicorn van_gateway.app:app --reload --port 8787
 
+# Register owner Google principal (raw subject is hashed before persistence)
+python ../tools/google/configure_google_identity.py --subject "<google-subject>"
+
+# Inspect Google mesh readiness
+python ../tools/google/certify_google_mesh.py
+
 # Android (JDK 17 + Android SDK required)
-cd android
+cd ../android
 ./gradlew :app:assembleDebug :app:lintDebug
 
 # Hermes profile install (on Hermes host)
@@ -57,11 +78,12 @@ cd android
 ## Non-negotiables
 
 1. Hermes owns reasoning/tool/project execution.
-2. Project Truth outranks chat memory.
+2. Project Truth outranks chat memory and Google-generated output.
 3. Fail closed — never guess, mutate, or claim success without proof.
 4. Visual identity is locked under `visual-authority/`.
-5. OAuth tokens never enter LLM prompts.
+5. OAuth/API/service/session credentials never enter LLM prompts.
+6. `CONFIGURED` is not `READY`; live Google claims require evidence.
 
 ## Version
 
-See `VERSION` and `docs/RELEASE.md`.
+See `VERSION` and release/acceptance documentation.

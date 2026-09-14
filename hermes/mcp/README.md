@@ -1,55 +1,68 @@
-# VAN Profile — Expected MCP Servers
+# VAN Profile — Expected MCP / Capability Servers
 
-Hermes profile **`van`** expects MCP tooling to be brokered through the Van secure gateway where credentials are involved. MCP servers listed here are **required for full capability**; if a server is unreachable, fail closed for operations that depend on it — do not simulate results.
+Hermes profile **`van`** is the sole agent runtime. Credentials are brokered through the VAN gateway or provider runtime; raw secrets never enter prompts. A missing server/capability fails closed.
 
-## Core (Hermes host / gateway)
+## Core
 
 | Server | Purpose | Credential model |
 |---|---|---|
-| `van-gateway` | Owner auth envelope, capability grants, attention/reminders, health | Device-signed requests; no token passthrough to prompts |
-| `filesystem` (scoped) | Repo reads/writes within registered project roots | Path allowlist from Project Truth + grants |
-| `git` (scoped) | SHA/evidence capture, status, bounded diff | Read default; write requires grant |
+| `van-gateway` | Owner auth, grants, Google planner, evidence, attention/reminders, health | Device-signed; no secret passthrough |
+| `filesystem` (scoped) | Registered project files | Path allowlist + Project Truth + grants |
+| `git` (scoped) | SHA/evidence/diff/write | Read default; writes require grant |
 
-## Google (gateway-mediated only)
+## Google Workspace — gateway mediated
 
-| Server | Purpose | Notes |
+| Capability | Purpose | Gate |
 |---|---|---|
-| `google-gmail` | Bounded mail read/send | OAuth stays in gateway; A2 read / A4 send |
-| `google-calendar` | Events read/write | Timezone from owner device |
-| `google-drive` | File list/read/write | Content labeled untrusted_content |
+| `google-gmail` | Mail read/draft/send | A2 read; A4 send |
+| `google-calendar` | Events read/write | A2/A3; irreversible/external effects as A4 |
+| `google-drive` | File metadata/content | External content is untrusted |
+| `google-contacts` | Contact resolution | A2 |
+| `google-tasks` | Task reads/writes | A2/A3 |
 
-**Never** configure raw Google OAuth tokens on Hermes MCP env for prompt access. See `docs/SECURITY_POLICY.md`.
+Workspace refresh tokens are encrypted in the gateway and exchanged for short-lived access tokens before API calls. Neither token is visible to Hermes prompts.
 
-## Communication
+## Google intelligence mesh
 
-| Server | Purpose | Notes |
+The canonical capability registry is `registries/google_capabilities.json`. Hermes requests deterministic plans through the VAN gateway before invoking Google specialists.
+
+| Capability | Role | Credential plane |
 |---|---|---|
-| `hermes-bot` | Bot Chat surfaces per `bot/BOT_CHAT.md` | Direct messaging always available fallback |
-| `hermes-rooms` | Native group rooms for councils | Required for council mode; else fail closed |
+| `gemini` | Reasoning/multimodal | Gemini runtime |
+| `gemini_live` | Live voice/screen perception | Gemini runtime |
+| `deep_research` | Cited autonomous investigation | Gemini runtime |
+| `gemini_notebook` | Personal source-grounded research | Consumer session |
+| `gemini_notebook_enterprise` | Programmatic notebook/source lifecycle | Google Cloud/service |
+| `mixboard` | Divergent visual ideation | Consumer session |
+| `stitch` | UI design convergence | Consumer session |
+| `antigravity` | Complex development worker | Consumer/developer session |
+| `jules` | Bounded GitHub maintenance worker | Consumer/developer session |
+| `workspace_api` | Deterministic Workspace actions | Workspace OAuth |
+| `workspace_studio` | Multi-step Workspace-native workflows | Consumer session |
+| `nano_banana` | Image generation/editing | Gemini runtime |
+| `veo` | Video generation | Gemini runtime |
+| `flow` | Human-facing video creative surface | Consumer session |
+| `ai_studio` | Google model prototyping | Consumer session |
+| `a2a_adk` | External Google-agent interoperability | Cloud/service |
 
-## Diagnostics
-
-| Server | Purpose |
-|---|---|
-| `hermes-admin` | Profile doctor signals, policy hook status |
-| `process` / `shell` (restricted) | Infrastructure diagnostics only with explicit grant; no secret env dumps |
+A configured consumer session is not automatically `READY`. Recorded certification evidence is required before VAN claims successful live use.
 
 ## Provider routing
 
-| Server | Purpose |
-|---|---|
-| `gemini` | Google-centric research/generation via separate API credential — see `providers/gemini.md` |
-
-Claude/Codex/GPT-SOL/Antigravity routes are Hermes-native model providers, not duplicated as MCP unless your Hermes deployment wraps them.
+Gemini is a Hermes provider route, not a second assistant. Antigravity/Jules are workers. Google ADK/A2A peers are external workers. All remain subordinate to the `van` profile, action classes, Project Truth, grants and evidence rules.
 
 ## Configuration checklist
 
-1. MCP config lives on Hermes host — not committed with secrets
-2. Each server has health probe used by `infrastructure-diagnostics` skill
-3. Missing server → operations that need it return `DEGRADED` with explicit missing dependency
-4. Councils: if `hermes-rooms` unavailable, use direct bot messaging only (`bot/councils.md`)
+1. No committed secrets.
+2. Register the canonical owner Google principal with `tools/google/configure_google_identity.py`.
+3. Configure each credential plane independently.
+4. Use `tools/google/certify_google_mesh.py` to inspect readiness.
+5. `CONFIGURED` means wiring exists; `READY` requires certification evidence.
+6. Missing capability => `DEGRADED`; never simulate results.
+7. Consumer cookies/session tokens may not be exported or injected into prompts.
 
 ## References
 
+- `docs/GOOGLE_INTELLIGENCE_MESH.md`
 - `hermes/profile/van/config.yaml`
-- `hermes/skills/infrastructure-diagnostics/SKILL.md`
+- `hermes/providers/gemini.md`
