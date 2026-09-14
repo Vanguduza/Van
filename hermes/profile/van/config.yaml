@@ -7,6 +7,13 @@ product: DIAL owner assistant
 pack_version_file: ../../VERSION
 
 owner: single-owner
+
+# Primary VAN reasoning/runtime model. Authentication is resolved by Hermes
+# from the owner's existing Claude Code/Anthropic credential store.
+model:
+  provider: anthropic
+  default: claude-sonnet-5
+
 execution:
   runtime: hermes
   secondary_agent_allowed: false
@@ -52,16 +59,29 @@ bot:
   native_rooms_required_for_councils: true
   fail_closed_fallback: direct_bot_messaging
 
-providers:
-  gemini_spec: providers/gemini.md
-  google_identity_root: owner_google_account
-  google_credential_planes:
+# Google capabilities are specialist tools beneath Hermes. They use Gemini
+# where a Google AI runtime is needed, but do not replace Sonnet 5 as VAN's
+# primary reasoning/orchestration model.
+google_runtime:
+  provider: gemini
+  identity_root: owner_google_account
+  credential_plane: gemini_runtime
+  account_owned_runtime_required: true
+  prefer_gemini_for_google_ai: true
+  primary_hermes_model_override_allowed: false
+  workspace_oauth_reuse_for_gemini: false
+  consumer_account_session_for_google_apps: true
+  credential_env_names:
+    - GOOGLE_API_KEY
+    - GEMINI_API_KEY
+  credential_planes:
     - workspace_oauth
     - gemini_runtime
     - cloud_service
     - consumer_session
-  google_oauth_in_prompts: false
+  oauth_in_prompts: false
   consumer_cookie_export_allowed: false
+  spec: providers/gemini.md
 
 mcp:
   readme: mcp/README.md
