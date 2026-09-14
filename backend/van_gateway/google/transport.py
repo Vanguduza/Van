@@ -7,6 +7,7 @@ the refresh token for a short-lived access token before API calls. Test doubles
 explicitly opt out of access-token exchange and never imply live Google state.
 """
 
+import os
 from datetime import datetime, timezone
 from typing import Any
 
@@ -109,11 +110,19 @@ class GoogleHttpTransport:
 
 
 class FakeGoogleTransport:
-    """Deterministic test double — not presented as live Google state."""
+    """Deterministic test double — never available accidentally in production.
+
+    Pytest sets ``PYTEST_CURRENT_TEST`` while a test is executing. Outside tests,
+    operators must explicitly set ``VAN_ALLOW_FAKE_GOOGLE_TRANSPORT=1`` before
+    this transport can be constructed. This prevents the public test helper from
+    silently replacing a live Google transport in normal runtime.
+    """
 
     requires_access_token = False
 
     def __init__(self) -> None:
+        if not os.getenv("PYTEST_CURRENT_TEST") and os.getenv("VAN_ALLOW_FAKE_GOOGLE_TRANSPORT") != "1":
+            raise RuntimeError("fake_google_transport_disabled")
         self.calls: list[tuple[str, tuple]] = []
 
     async def gmail_search(self, token: str, query: str) -> list[dict]:
