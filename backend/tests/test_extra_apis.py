@@ -15,6 +15,7 @@ def _env(tmp_path, monkeypatch):
     monkeypatch.setenv("VAN_DATABASE_PATH", str(tmp_path / "extra.sqlite3"))
     monkeypatch.setenv("VAN_HERMES_BASE_URL", "http://hermes.test")
     monkeypatch.setenv("VAN_GOOGLE_TOKEN_FERNET_KEY", Fernet.generate_key().decode())
+    monkeypatch.setenv("VAN_INTERNAL_CONTROL_TOKEN", "test-internal-token")
     get_settings.cache_clear()
     yield
     get_settings.cache_clear()
@@ -78,9 +79,11 @@ async def test_reminder_parse_expression(client):
 
 @pytest.mark.asyncio
 async def test_google_fake_transport_and_approval(client):
-    ac, app = client
-    await ac.post(
+    ac, _app = client
+    headers = {"X-Van-Internal-Token": "test-internal-token"}
+    connected = await ac.post(
         "/v1/google/connect",
+        headers=headers,
         json={
             "refresh_token": "refresh-xyz",
             "scopes": [
@@ -89,14 +92,26 @@ async def test_google_fake_transport_and_approval(client):
             ],
         },
     )
-    await ac.post("/v1/google/test-transport")
-    denied = await ac.post("/v1/google/gmail/send", params={"draft_id": "d1", "approved": False})
+    assert connected.status_code == 200
+    enabled = await ac.post("/v1/google/test-transport", headers=headers)
+    assert enabled.status_code == 200
+    denied = await ac.post("/v1/google/gmail/send", headers=headers, params={"draft_id": "d1", "approved": False})
     assert denied.status_code == 403
-    ok = await ac.post("/v1/google/gmail/send", params={"draft_id": "d1", "approved": True})
+    ok = await ac.post("/v1/google/gmail/send", headers=headers, params={"draft_id": "d1", "approved": True})
     assert ok.status_code == 200
     scrubbed = GoogleService.scrub_for_prompt({"access_token": "tok", "snippet": "hi"})
     assert "access_token" not in scrubbed
     assert scrubbed["snippet"] == "hi"
+
+
+@pytest.mark.asyncio
+async def test_google_control_plane_rejects_missing_internal_token(client):
+    ac, _app = client
+    response = await ac.post(
+        "/v1/google/connect",
+        json={"refresh_token": "refresh-xyz", "scopes": ["https://www.googleapis.com/auth/gmail.readonly"]},
+    )
+    assert response.status_code == 403
 
 
 @pytest.mark.asyncio
