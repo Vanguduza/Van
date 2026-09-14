@@ -1,0 +1,134 @@
+from __future__ import annotations
+
+from pathlib import Path
+
+import pytest
+from cryptography.fernet import Fernet
+
+from van_gateway.config import Settings
+from van_gateway.google.control import GoogleControlAuthError, verify_internal_control
+from van_gateway.google.mesh import GoogleCapabilityRegistry, GoogleCapabilityRouter, GoogleCapabilityState, GoogleIdentityBroker, GoogleRouteRequest
+from van_gateway.google.service import GoogleService
+from van_gateway.models import ActionClass
+from van_gateway.storage.db import SCHEMA_VERSION, Store
+
+
+def registry_path() -> str:
+    return str(Path(__file__).resolve().parents[2] / "registries" / "google_capabilities.json")
+
+
+@pytest.mark.asyncio
+async def test_google_migration_and_principal_hash(tmp_path):
+    store = Store(str(tmp_path / "mesh.sqlite3"))
+    await store.migrate()
+    row = await store.fetchone("SELECT MAX(version) AS version FROM schema_migrations")
+    assert row["version"] == SCHEMA_VERSION == 2
+    broker = GoogleIdentityBroker(store, GoogleCapabilityRegistry(registry_path()), ai_plan="PRO")
+    status = await broker.register_principal(subject="owner-google-subject", ai_plan="PRO")
+    assert status.registered is True
+    assert status.ai_plan == "PRO"
+    raw = await store.fetchone("SELECT subject_hash FROM google_principal WHERE owner_id='owner'")
+    assert raw["subject_hash"] != "owner-google-subject"
+    assert len(raw["subject_hash"]) == 64
+
+
+@pytest.mark.asyncio
+async def test_consumer_capability_requires_canonical_principal(tmp_path):
+    store = Store(str(tmp_path / "mesh.sqlite3")); await store.migrate()
+    broker = GoogleIdentityBroker(store, GoogleCapabilityRegistry(registry_path()), consumer_connected_capabilities="mixboard,stitch")
+    assert (await broker.capability_status("mixboard")).state == GoogleCapabilityState.UNVERIFIED
+    await broker.register_principal(subject="sub-1", ai_plan="PRO")
+    after = await broker.capability_status("mixboard")
+    assert after.state == GoogleCapabilityState.CONFIGURED
+    assert after.configured_by_account is True
+
+
+@pytest.mark.asyncio
+async def test_runtime_route_is_deterministic_and_persisted(tmp_path):
+    store = Store(str(tmp_path / "mesh.sqlite3")); await store.migrate()
+    broker = GoogleIdentityBroker(store, GoogleCapabilityRegistry(registry_path()), ai_plan="PRO", gemini_runtime_configured=True)
+    await broker.register_principal(subject="sub-2", ai_plan="PRO")
+    router = GoogleCapabilityRouter(store, broker)
+    decision = await router.plan(GoogleRouteRequest(owner_intent_id="intent-1", intent="deep_research", action_class=ActionClass.A2, input_refs=["artifact://a", "artifact://b"]))
+    assert decision.status == "planned" and decision.capability_id == "deep_research" and decision.job_id
+    job = await router.job(decision.job_id)
+    assert job["capability_id"] == "deep_research" and job["status"] == "PLANNED" and len(job["input_hash"]) == 64
+
+
+@pytest.mark.asyncio
+async def test_mutation_requires_truth_and_a4_requires_approval(tmp_path):
+    store = Store(str(tmp_path / "mesh.sqlite3")); await store.migrate()
+    broker = GoogleIdentityBroker(store, GoogleCapabilityRegistry(registry_path()), consumer_connected_capabilities="antigravity")
+    await broker.register_principal(subject="sub-3", ai_plan="PRO")
+    router = GoogleCapabilityRouter(store, broker)
+    a3 = await router.plan(GoogleRouteRequest(owner_intent_id="intent-a3", intent="development", action_class=ActionClass.A3, project_id="gtr", grant_id="grant-1"))
+    assert a3.status == "degraded" and "STALE_PROJECT_TRUTH" in a3.degraded
+    a4 = await router.plan(GoogleRouteRequest(owner_intent_id="intent-a4", intent="workspace_operation", action_class=ActionClass.A4, owner_approved=False))
+    assert a4.status == "approval_required" and a4.requires_approval is True
+
+
+@pytest.mark.asyncio
+async def test_explicit_fallback_is_used_deterministically(tmp_path):
+    store = Store(str(tmp_path / "mesh.sqlite3")); await store.migrate()
+    broker = GoogleIdentityBroker(store, GoogleCapabilityRegistry(registry_path()), consumer_connected_capabilities="workspace_studio")
+    await broker.register_principal(subject="sub-fallback", ai_plan="PRO")
+    decision = await GoogleCapabilityRouter(store, broker).plan(GoogleRouteRequest(owner_intent_id="intent-fallback", intent="workspace_operation", action_class=ActionClass.A2))
+    assert decision.status == "planned" and decision.capability_id == "workspace_studio"
+
+
+@pytest.mark.asyncio
+async def test_a3_google_job_requires_explicit_grant(tmp_path):
+    store = Store(str(tmp_path / "mesh.sqlite3")); await store.migrate()
+    broker = GoogleIdentityBroker(store, GoogleCapabilityRegistry(registry_path()), consumer_connected_capabilities="antigravity")
+    await broker.register_principal(subject="sub-grant", ai_plan="PRO")
+    decision = await GoogleCapabilityRouter(store, broker).plan(GoogleRouteRequest(owner_intent_id="intent-no-grant", intent="development", action_class=ActionClass.A3, project_id="gtr", truth_sha="truth-sha"))
+    assert decision.status == "degraded" and "capability grant" in decision.reason
+
+
+@pytest.mark.asyncio
+async def test_provider_artifact_is_never_owner_authority(tmp_path):
+    store = Store(str(tmp_path / "mesh.sqlite3")); await store.migrate()
+    broker = GoogleIdentityBroker(store, GoogleCapabilityRegistry(registry_path()), gemini_runtime_configured=True)
+    await broker.register_principal(subject="sub-4", ai_plan="PRO")
+    router = GoogleCapabilityRouter(store, broker)
+    decision = await router.plan(GoogleRouteRequest(owner_intent_id="intent-2", intent="image_generation", action_class=ActionClass.A2))
+    with pytest.raises(ValueError, match="provider_artifact_cannot_be_owner_signed"):
+        await router.record_artifact(job_id=decision.job_id, source_tool="nano_banana", output_hash="a" * 64, trust="OWNER_SIGNED")
+    artifact = await router.record_artifact(job_id=decision.job_id, source_tool="nano_banana", output_hash="b" * 64, validation_state="VALIDATED")
+    assert artifact.trust == "UNTRUSTED" and artifact.validation_state == "VALIDATED"
+
+
+@pytest.mark.asyncio
+async def test_workspace_refresh_token_exchanged_before_live_transport(tmp_path):
+    class OAuthSpy:
+        def __init__(self): self.seen = None
+        async def access_token(self, refresh_token: str) -> str:
+            self.seen = refresh_token; return "access-token"
+    class LiveSpyTransport:
+        requires_access_token = True
+        def __init__(self): self.token = None
+        async def gmail_search(self, token: str, query: str):
+            self.token = token; return [{"id": "m1"}]
+    store = Store(str(tmp_path / "oauth.sqlite3")); await store.migrate()
+    oauth, transport = OAuthSpy(), LiveSpyTransport()
+    service = GoogleService(store, Fernet.generate_key().decode(), transport=transport, oauth=oauth)
+    await service.store_refresh_token("owner", "refresh-secret", ["https://www.googleapis.com/auth/gmail.readonly"])
+    assert await service.gmail_search("from:supplier") == [{"id": "m1"}]
+    assert oauth.seen == "refresh-secret" and transport.token == "access-token"
+
+
+def test_settings_keep_google_credential_planes_separate(monkeypatch):
+    monkeypatch.setenv("VAN_GOOGLE_AI_PLAN", "PRO")
+    monkeypatch.setenv("VAN_GOOGLE_CLOUD_PROJECT_ID", "van-google-ai")
+    monkeypatch.setenv("VAN_GOOGLE_GEMINI_RUNTIME_CONFIGURED", "true")
+    settings = Settings()
+    assert settings.google_ai_plan == "PRO" and settings.google_cloud_project_id == "van-google-ai"
+    assert settings.google_gemini_runtime_configured is True and settings.google_oauth_client_secret == ""
+
+
+def test_internal_google_control_plane_fails_closed():
+    with pytest.raises(GoogleControlAuthError, match="internal_control_token_unconfigured"):
+        verify_internal_control("", None)
+    with pytest.raises(GoogleControlAuthError, match="internal_control_unauthorized"):
+        verify_internal_control("secret", "wrong")
+    verify_internal_control("secret", "secret")

@@ -8,7 +8,7 @@ from typing import Any, AsyncIterator
 
 import aiosqlite
 
-SCHEMA_VERSION = 1
+SCHEMA_VERSION = 2
 
 MIGRATIONS: dict[int, str] = {
     1: """
@@ -128,6 +128,64 @@ MIGRATIONS: dict[int, str] = {
       revoked_at_unix INTEGER,
       created_at_unix INTEGER NOT NULL
     );
+    """,
+    2: """
+    CREATE TABLE IF NOT EXISTS google_principal (
+      owner_id TEXT PRIMARY KEY,
+      subject_hash TEXT NOT NULL,
+      account_kind TEXT NOT NULL,
+      ai_plan TEXT NOT NULL,
+      status TEXT NOT NULL,
+      updated_at_unix INTEGER NOT NULL
+    );
+
+    CREATE TABLE IF NOT EXISTS google_capability_connections (
+      capability_id TEXT PRIMARY KEY,
+      owner_id TEXT NOT NULL,
+      state TEXT NOT NULL,
+      credential_plane TEXT NOT NULL,
+      evidence_pointer TEXT,
+      verified_at_unix INTEGER,
+      metadata_json TEXT NOT NULL,
+      updated_at_unix INTEGER NOT NULL
+    );
+
+    CREATE TABLE IF NOT EXISTS google_jobs (
+      job_id TEXT PRIMARY KEY,
+      owner_intent_id TEXT NOT NULL,
+      project_id TEXT,
+      capability_id TEXT NOT NULL,
+      action_class TEXT NOT NULL,
+      truth_sha TEXT,
+      grant_id TEXT,
+      input_hash TEXT NOT NULL,
+      status TEXT NOT NULL,
+      output_hash TEXT,
+      evidence_pointer TEXT,
+      created_at_unix INTEGER NOT NULL,
+      updated_at_unix INTEGER NOT NULL
+    );
+
+    CREATE TABLE IF NOT EXISTS google_artifacts (
+      artifact_id TEXT PRIMARY KEY,
+      job_id TEXT NOT NULL,
+      project_id TEXT,
+      source_provider TEXT NOT NULL,
+      source_tool TEXT NOT NULL,
+      tool_version TEXT,
+      input_hashes_json TEXT NOT NULL,
+      output_hash TEXT NOT NULL,
+      trust TEXT NOT NULL,
+      validation_state TEXT NOT NULL,
+      parent_artifact_ids_json TEXT NOT NULL,
+      created_at_unix INTEGER NOT NULL
+    );
+
+    CREATE INDEX IF NOT EXISTS idx_google_jobs_project
+      ON google_jobs(project_id, created_at_unix);
+
+    CREATE INDEX IF NOT EXISTS idx_google_artifacts_job
+      ON google_artifacts(job_id, created_at_unix);
     """,
 }
 

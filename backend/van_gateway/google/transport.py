@@ -1,18 +1,65 @@
 from __future__ import annotations
 
-"""Google Workspace HTTP transport.
+"""Google Workspace HTTP and OAuth transports.
 
-Requires live OAuth access token obtained via refresh. Without credentials, callers
-must fail closed — this module never invents mailbox/calendar data.
+Refresh tokens are encrypted by GoogleService. Live Workspace requests exchange
+the refresh token for a short-lived access token before API calls. Test doubles
+explicitly opt out of access-token exchange and never imply live Google state.
 """
 
+import os
 from datetime import datetime, timezone
 from typing import Any
 
 import httpx
 
 
+class GoogleOAuthTokenClient:
+    def __init__(
+        self,
+        client_id: str,
+        client_secret: str,
+        client: httpx.AsyncClient | None = None,
+    ) -> None:
+        self.client_id = client_id
+        self.client_secret = client_secret
+        self._client = client
+
+    @property
+    def configured(self) -> bool:
+        return bool(self.client_id and self.client_secret)
+
+    async def access_token(self, refresh_token: str) -> str:
+        if not self.configured:
+            raise RuntimeError("google_oauth_client_unconfigured")
+        client = self._client or httpx.AsyncClient(timeout=30.0)
+        owns = self._client is None
+        try:
+            resp = await client.post(
+                "https://oauth2.googleapis.com/token",
+                data={
+                    "client_id": self.client_id,
+                    "client_secret": self.client_secret,
+                    "refresh_token": refresh_token,
+                    "grant_type": "refresh_token",
+                },
+                headers={"Accept": "application/json"},
+            )
+            if resp.status_code >= 400:
+                raise RuntimeError(f"google_oauth_refresh_{resp.status_code}")
+            data = resp.json()
+            token = data.get("access_token")
+            if not token:
+                raise RuntimeError("google_oauth_access_token_missing")
+            return str(token)
+        finally:
+            if owns:
+                await client.aclose()
+
+
 class GoogleHttpTransport:
+    requires_access_token = True
+
     def __init__(self, client: httpx.AsyncClient | None = None) -> None:
         self._client = client
 
@@ -32,79 +79,50 @@ class GoogleHttpTransport:
                 await client.aclose()
 
     async def gmail_search(self, token: str, query: str) -> list[dict]:
-        data = await self._request(
-            "GET",
-            "https://gmail.googleapis.com/gmail/v1/users/me/messages",
-            token,
-            params={"q": query, "maxResults": 25},
-        )
+        data = await self._request("GET", "https://gmail.googleapis.com/gmail/v1/users/me/messages", token, params={"q": query, "maxResults": 25})
         return data.get("messages", [])
 
     async def gmail_draft(self, token: str, thread_id: str, body: str) -> dict:
-        return await self._request(
-            "POST",
-            "https://gmail.googleapis.com/gmail/v1/users/me/drafts",
-            token,
-            json={"message": {"threadId": thread_id, "raw": body}},
-        )
+        return await self._request("POST", "https://gmail.googleapis.com/gmail/v1/users/me/drafts", token, json={"message": {"threadId": thread_id, "raw": body}})
 
     async def gmail_send(self, token: str, draft_id: str) -> dict:
-        return await self._request(
-            "POST",
-            f"https://gmail.googleapis.com/gmail/v1/users/me/drafts/{draft_id}/send",
-            token,
-            json={},
-        )
+        return await self._request("POST", f"https://gmail.googleapis.com/gmail/v1/users/me/drafts/{draft_id}/send", token, json={})
 
     async def calendar_agenda(self, token: str) -> list[dict]:
-        data = await self._request(
-            "GET",
-            "https://www.googleapis.com/calendar/v3/calendars/primary/events",
-            token,
-            params={"maxResults": 20, "singleEvents": "true", "orderBy": "startTime"},
-        )
+        data = await self._request("GET", "https://www.googleapis.com/calendar/v3/calendars/primary/events", token, params={"maxResults": 20, "singleEvents": "true", "orderBy": "startTime"})
         return data.get("items", [])
 
     async def calendar_reschedule(self, token: str, event_id: str, new_start_unix: int) -> dict:
         start = datetime.fromtimestamp(new_start_unix, tz=timezone.utc).isoformat().replace("+00:00", "Z")
-        return await self._request(
-            "PATCH",
-            f"https://www.googleapis.com/calendar/v3/calendars/primary/events/{event_id}",
-            token,
-            json={"start": {"dateTime": start}},
-        )
+        return await self._request("PATCH", f"https://www.googleapis.com/calendar/v3/calendars/primary/events/{event_id}", token, json={"start": {"dateTime": start}})
 
     async def drive_search(self, token: str, query: str) -> list[dict]:
-        data = await self._request(
-            "GET",
-            "https://www.googleapis.com/drive/v3/files",
-            token,
-            params={"q": query, "pageSize": 25, "fields": "files(id,name,mimeType,modifiedTime)"},
-        )
+        data = await self._request("GET", "https://www.googleapis.com/drive/v3/files", token, params={"q": query, "pageSize": 25, "fields": "files(id,name,mimeType,modifiedTime)"})
         return data.get("files", [])
 
     async def contacts_resolve(self, token: str, query: str) -> list[dict]:
-        data = await self._request(
-            "GET",
-            "https://people.googleapis.com/v1/people:searchContacts",
-            token,
-            params={"query": query, "readMask": "names,emailAddresses"},
-        )
+        data = await self._request("GET", "https://people.googleapis.com/v1/people:searchContacts", token, params={"query": query, "readMask": "names,emailAddresses"})
         return data.get("results", [])
 
     async def tasks_list(self, token: str) -> list[dict]:
-        data = await self._request(
-            "GET",
-            "https://tasks.googleapis.com/tasks/v1/lists/@default/tasks",
-            token,
-        )
+        data = await self._request("GET", "https://tasks.googleapis.com/tasks/v1/lists/@default/tasks", token)
         return data.get("items", [])
 
 
 class FakeGoogleTransport:
-    """Deterministic test double — not presented as live Google state."""
+    """Deterministic test double — never available accidentally in production.
+
+    Pytest sets ``PYTEST_CURRENT_TEST`` while a test is executing. Outside tests,
+    operators must explicitly set ``VAN_ALLOW_FAKE_GOOGLE_TRANSPORT=1`` before
+    this transport can be constructed. This prevents the public test helper from
+    silently replacing a live Google transport in normal runtime.
+    """
+
+    requires_access_token = False
 
     def __init__(self) -> None:
+        if not os.getenv("PYTEST_CURRENT_TEST") and os.getenv("VAN_ALLOW_FAKE_GOOGLE_TRANSPORT") != "1":
+            raise RuntimeError("fake_google_transport_disabled")
         self.calls: list[tuple[str, tuple]] = []
 
     async def gmail_search(self, token: str, query: str) -> list[dict]:

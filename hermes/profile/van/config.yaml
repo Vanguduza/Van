@@ -16,6 +16,8 @@ authority:
   security_policy: docs/SECURITY_POLICY.md
   visual_contract: visual-authority/rive_contract.json
   project_registry: registries/projects.json
+  google_capability_registry: registries/google_capabilities.json
+  google_architecture: docs/GOOGLE_INTELLIGENCE_MESH.md
 
 policy:
   hook_module: policy/van_policy_hook.py
@@ -24,12 +26,17 @@ policy:
   deny_a5: true
   require_approval_a4: true
   protect_audit_truth: true
+  protect_google_identity_broker: true
 
 skills:
   root: skills
   names:
     - owner-briefing
     - google-workspace
+    - google-intelligence
+    - gemini-notebook
+    - google-design
+    - google-development
     - project-steering
     - research
     - decision-support
@@ -47,8 +54,14 @@ bot:
 
 providers:
   gemini_spec: providers/gemini.md
-  gemini_credential: separate_runtime_env
+  google_identity_root: owner_google_account
+  google_credential_planes:
+    - workspace_oauth
+    - gemini_runtime
+    - cloud_service
+    - consumer_session
   google_oauth_in_prompts: false
+  consumer_cookie_export_allowed: false
 
 mcp:
   readme: mcp/README.md
