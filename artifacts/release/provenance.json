@@ -1,8 +1,8 @@
 {
   "product": "van",
   "version": "0.5.0-dev",
-  "git_commit": "UNKNOWN",
-  "built_at_unix": 1789365672,
+  "git_commit": "959a67e9901f8004159170239573f235769d8741",
+  "built_at_unix": 1789365693,
   "builder": "tools/release/generate_release_metadata.py",
   "artifacts": {
     "VERSION": "8b1ddcda7ec0d30e40cd6d3317f1132086ebb5711763e7071816eaa24790c956",
