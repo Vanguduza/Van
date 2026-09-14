@@ -14,6 +14,9 @@ htmlcov/
 android/.gradle/
 android/**/build/
 android/local.properties
+keystore.properties
+*.jks
+van-release.jks
 android/**/*.iml
 android/.idea/
 *.apk

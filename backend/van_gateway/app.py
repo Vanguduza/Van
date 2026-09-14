@@ -11,12 +11,15 @@ from van_gateway.audit.service import AuditService
 from van_gateway.auth.service import AuthError, AuthService
 from van_gateway.briefing.service import BriefingService
 from van_gateway.config import get_settings
+from van_gateway.decisions.service import DecisionCreate, DecisionService
 from van_gateway.degraded.registry import DegradedRegistry
 from van_gateway.events.bus import EventBus
 from van_gateway.google.service import GoogleAuthError, GoogleService, NARROW_SCOPES
+from van_gateway.google.transport import FakeGoogleTransport
 from van_gateway.hermes.bridge import HermesBridge
 from van_gateway.idempotency.service import IdempotencyService
 from van_gateway.models import (
+    ActionClass,
     AttentionSeverity,
     CommandRequest,
     ReminderCreate,
@@ -25,6 +28,7 @@ from van_gateway.notifications.intelligence import NotificationIntelligence, Pho
 from van_gateway.orchestrator import CommandOrchestrator
 from van_gateway.projects.router import ProjectRouter
 from van_gateway.reminders.service import ReminderService
+from van_gateway.reminders.timeparse import TimeParseError, parse_due_expression
 from van_gateway.storage.db import Store
 
 
@@ -48,6 +52,23 @@ class AttentionUpsertBody(BaseModel):
     project_id: str | None = None
 
 
+class ReminderParseBody(BaseModel):
+    text: str
+    due_expression: str
+    idempotency_key: str
+    project_id: str | None = None
+
+
+class ProjectTruthBody(BaseModel):
+    truth: dict
+    truth_sha: str
+    repo_sha: str | None = None
+
+
+class DecisionResolveBody(BaseModel):
+    approved: bool
+
+
 def create_app() -> FastAPI:
     settings = get_settings()
     store = Store(settings.database_path)
@@ -61,6 +82,7 @@ def create_app() -> FastAPI:
     attention = AttentionEngine(store, settings.attention_budget_per_hour)
     briefing = BriefingService(store, attention)
     reminders = ReminderService(store)
+    decisions = DecisionService(store, attention)
     google = GoogleService(store, settings.google_token_fernet_key)
     events = EventBus(store, settings.event_page_size)
     notifications = NotificationIntelligence()
@@ -85,6 +107,9 @@ def create_app() -> FastAPI:
     app.state.degraded = degraded
     app.state.google = google
     app.state.orchestrator = orchestrator
+    app.state.decisions = decisions
+    app.state.projects = projects
+    app.state.reminders = reminders
 
     @app.get("/health")
     async def health():
@@ -157,6 +182,66 @@ def create_app() -> FastAPI:
     async def cancel_reminder(reminder_id: str):
         await reminders.cancel(reminder_id)
         return {"cancelled": True}
+
+    @app.post("/v1/reminders/parse")
+    async def parse_reminder(body: ReminderParseBody):
+        try:
+            due = parse_due_expression(body.due_expression)
+        except TimeParseError as exc:
+            raise HTTPException(status_code=400, detail=str(exc)) from exc
+        return await reminders.create(
+            ReminderCreate(
+                text=body.text,
+                due_at_unix=due,
+                idempotency_key=body.idempotency_key,
+                project_id=body.project_id,
+            )
+        )
+
+    @app.post("/v1/decisions/escalate")
+    async def escalate_decision(body: DecisionCreate):
+        item = await decisions.escalate(body)
+        await events.publish("decision.escalated", item.model_dump())
+        return item
+
+    @app.get("/v1/decisions")
+    async def list_decisions():
+        return await decisions.list_open()
+
+    @app.post("/v1/decisions/{decision_id}/resolve")
+    async def resolve_decision(decision_id: str, body: DecisionResolveBody):
+        try:
+            return await decisions.resolve(decision_id, approved=body.approved)
+        except KeyError as exc:
+            raise HTTPException(status_code=404, detail="decision_not_found") from exc
+
+    @app.put("/v1/projects/{project_id}/truth")
+    async def put_project_truth(project_id: str, body: ProjectTruthBody):
+        if project_id not in projects.known_projects():
+            raise HTTPException(status_code=404, detail="unknown_project")
+        await projects.cache_truth(project_id, body.truth, body.truth_sha, body.repo_sha)
+        return await projects.load_truth(project_id)
+
+    @app.post("/v1/google/test-transport")
+    async def enable_fake_google_transport():
+        """Test-only helper: attach FakeGoogleTransport. Never implies live Google success."""
+        google.transport = FakeGoogleTransport()
+        return {"transport": "fake", "live": False}
+
+    @app.get("/v1/google/gmail/search")
+    async def gmail_search(q: str):
+        try:
+            return {"messages": await google.gmail_search(q), "live": google.transport is not None and not isinstance(google.transport, FakeGoogleTransport)}
+        except GoogleAuthError as exc:
+            raise HTTPException(status_code=503, detail=str(exc)) from exc
+
+    @app.post("/v1/google/gmail/send")
+    async def gmail_send(draft_id: str, approved: bool = False):
+        try:
+            return await google.gmail_send(draft_id, action_class=ActionClass.A4, approved=approved)
+        except GoogleAuthError as exc:
+            code = 403 if str(exc) == "approval_required" else 503
+            raise HTTPException(status_code=code, detail=str(exc)) from exc
 
     @app.post("/v1/attention")
     async def upsert_attention(body: AttentionUpsertBody):

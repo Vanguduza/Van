@@ -45,11 +45,13 @@ data class DegradedMode(
 
         fun defaultSubsystems(): List<DegradedSubsystem> = listOf(
             DegradedSubsystem("hermes", "Hermes uplink", SubsystemStatus.WORKING, "Agent execution via Hermes profile van"),
+            DegradedSubsystem("gateway", "Van gateway", SubsystemStatus.WORKING, "Owner-authority secure gateway"),
             DegradedSubsystem("overlay", "Floating overlay", SubsystemStatus.WORKING, "Owner assistant embodiment"),
             DegradedSubsystem("queue", "Offline command queue", SubsystemStatus.WORKING, "Encrypted local queue"),
             DegradedSubsystem("notifications", "Notification listener", SubsystemStatus.WORKING, "Context ingestion with redaction"),
             DegradedSubsystem("voice", "Voice I/O", SubsystemStatus.WORKING, "Speech input and TTS output"),
             DegradedSubsystem("biometric", "Biometric gate", SubsystemStatus.WORKING, "A4 approval gate"),
+            DegradedSubsystem("google", "Google Workspace", SubsystemStatus.WORKING, "OAuth-mediated Gmail/Calendar/Drive/Contacts/Tasks"),
         )
     }
 }
