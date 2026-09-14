@@ -60,6 +60,24 @@ def test_profile_name_and_sole_runtime_in_config():
     assert "secondary_agent_allowed: false" in config
 
 
+def test_van_primary_model_is_claude_sonnet_5():
+    config = (PROFILE_ROOT / "config.yaml").read_text(encoding="utf-8")
+    assert "model:" in config
+    assert "provider: anthropic" in config
+    assert "default: claude-sonnet-5" in config
+
+
+def test_google_runtime_is_gemini_and_owner_account_rooted():
+    config = (PROFILE_ROOT / "config.yaml").read_text(encoding="utf-8")
+    assert "google_runtime:" in config
+    assert "provider: gemini" in config
+    assert "identity_root: owner_google_account" in config
+    assert "account_owned_runtime_required: true" in config
+    assert "prefer_gemini_for_google_ai: true" in config
+    assert "primary_hermes_model_override_allowed: false" in config
+    assert "workspace_oauth_reuse_for_gemini: false" in config
+
+
 def test_soul_mentions_project_truth_authority_order():
     soul = (PROFILE_ROOT / "SOUL.md").read_text(encoding="utf-8")
     for marker in AUTHORITY_ORDER_MARKERS:
