@@ -14,8 +14,8 @@ from van_gateway.config import get_settings
 from van_gateway.decisions.service import DecisionCreate, DecisionService
 from van_gateway.degraded.registry import DegradedRegistry
 from van_gateway.events.bus import EventBus
-from van_gateway.google.mesh import GoogleCapabilityRegistry, GoogleCapabilityRouter, GoogleIdentityBroker, GoogleRouteRequest
 from van_gateway.google.control import GoogleControlAuthError, verify_internal_control
+from van_gateway.google.mesh import GoogleCapabilityRegistry, GoogleCapabilityRouter, GoogleIdentityBroker, GoogleRouteRequest
 from van_gateway.google.service import GoogleAuthError, GoogleService, NARROW_SCOPES
 from van_gateway.google.transport import FakeGoogleTransport, GoogleHttpTransport, GoogleOAuthTokenClient
 from van_gateway.hermes.bridge import HermesBridge
@@ -259,20 +259,23 @@ def create_app() -> FastAPI:
         return await projects.load_truth(project_id)
 
     @app.post("/v1/google/test-transport")
-    async def enable_fake_google_transport():
+    async def enable_fake_google_transport(x_van_internal_token: str | None = Header(default=None)):
+        require_internal_control(x_van_internal_token)
         google.transport = FakeGoogleTransport()
         google.oauth = None
         return {"transport": "fake", "live": False}
 
     @app.get("/v1/google/gmail/search")
-    async def gmail_search(q: str):
+    async def gmail_search(q: str, x_van_internal_token: str | None = Header(default=None)):
+        require_internal_control(x_van_internal_token)
         try:
             return {"messages": await google.gmail_search(q), "live": google.transport is not None and not isinstance(google.transport, FakeGoogleTransport)}
         except GoogleAuthError as exc:
             raise HTTPException(status_code=503, detail=str(exc)) from exc
 
     @app.post("/v1/google/gmail/send")
-    async def gmail_send(draft_id: str, approved: bool = False):
+    async def gmail_send(draft_id: str, approved: bool = False, x_van_internal_token: str | None = Header(default=None)):
+        require_internal_control(x_van_internal_token)
         try:
             return await google.gmail_send(draft_id, action_class=ActionClass.A4, approved=approved)
         except GoogleAuthError as exc:
@@ -284,7 +287,8 @@ def create_app() -> FastAPI:
         return await google.status()
 
     @app.post("/v1/google/connect")
-    async def google_connect(body: GoogleConnectBody):
+    async def google_connect(body: GoogleConnectBody, x_van_internal_token: str | None = Header(default=None)):
+        require_internal_control(x_van_internal_token)
         try:
             await google.store_refresh_token("owner", body.refresh_token, body.scopes)
         except GoogleAuthError as exc:
@@ -292,7 +296,8 @@ def create_app() -> FastAPI:
         return await google.status()
 
     @app.post("/v1/google/revoke")
-    async def google_revoke():
+    async def google_revoke(x_van_internal_token: str | None = Header(default=None)):
+        require_internal_control(x_van_internal_token)
         await google.revoke()
         return await google.status()
 
