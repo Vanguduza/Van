@@ -52,6 +52,9 @@ async def import_attestation(path: Path, database_path: str) -> dict:
         consumer_csv = ",".join(str(x) for x in consumer)
 
     registry = GoogleCapabilityRegistry(str(ROOT / "registries" / "google_capabilities.json"))
+    identity_alias = str(raw.get("identity_alias") or registry.default_identity)
+    if identity_alias != registry.default_identity and identity_alias not in registry.delegated_identities:
+        raise SystemExit(f"unknown identity_alias:{identity_alias}")
     broker = GoogleIdentityBroker(
         store,
         registry,
@@ -63,6 +66,7 @@ async def import_attestation(path: Path, database_path: str) -> dict:
     )
     await broker.register_principal(
         subject=subject,
+        owner_id=identity_alias,
         account_kind=str(principal.get("account_kind") or "personal"),
         ai_plan=str(principal.get("ai_plan") or "UNKNOWN"),
     )
@@ -70,6 +74,11 @@ async def import_attestation(path: Path, database_path: str) -> dict:
     recorded: list[dict] = []
     for item in raw.get("capabilities") or []:
         capability_id = str(item["id"])
+        descriptor = registry.get(capability_id)
+        if descriptor.identity_alias != identity_alias:
+            raise SystemExit(
+                f"capability {capability_id} is bound to {descriptor.identity_alias}, not attestation identity {identity_alias}"
+            )
         state = GoogleCapabilityState(str(item["state"]))
         if state not in ALLOWED_STATES:
             raise SystemExit(f"unsupported state for {capability_id}: {state}")
@@ -92,14 +101,16 @@ async def import_attestation(path: Path, database_path: str) -> dict:
             state=state,
             evidence_pointer=evidence,
             metadata=metadata,
+            owner_id=identity_alias,
         )
-        status = await broker.capability_status(capability_id)
+        status = await broker.capability_status(capability_id, owner_id=identity_alias)
         recorded.append({"capability_id": capability_id, "state": status.state.value, "evidence": status.evidence_pointer})
 
-    mesh = await broker.mesh_status()
+    mesh = await broker.mesh_status(owner_id=identity_alias)
     return {
         "ok": True,
         "host": raw.get("host"),
+        "identity_alias": identity_alias,
         "principal_registered": mesh["principal"]["registered"],
         "recorded": recorded,
         "excluded_until_cloud_setup": raw.get("excluded_until_cloud_setup") or [],

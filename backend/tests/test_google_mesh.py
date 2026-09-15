@@ -27,7 +27,7 @@ async def test_google_migration_and_principal_hash(tmp_path):
     status = await broker.register_principal(subject="owner-google-subject", ai_plan="PRO")
     assert status.registered is True
     assert status.ai_plan == "PRO"
-    raw = await store.fetchone("SELECT subject_hash FROM google_principal WHERE owner_id='owner'")
+    raw = await store.fetchone("SELECT subject_hash FROM google_principal WHERE owner_id='owner_google_account'")
     assert raw["subject_hash"] != "owner-google-subject"
     assert len(raw["subject_hash"]) == 64
 
@@ -41,6 +41,37 @@ async def test_consumer_capability_requires_canonical_principal(tmp_path):
     after = await broker.capability_status("mixboard")
     assert after.state == GoogleCapabilityState.CONFIGURED
     assert after.configured_by_account is True
+
+
+@pytest.mark.asyncio
+async def test_antigravity_requires_its_delegated_identity(tmp_path):
+    store = Store(str(tmp_path / "mesh.sqlite3")); await store.migrate()
+    registry = GoogleCapabilityRegistry(registry_path())
+    broker = GoogleIdentityBroker(store, registry, consumer_connected_capabilities="antigravity,jules")
+    await broker.register_principal(subject="canonical-subject")
+    antigravity = await broker.capability_status("antigravity")
+    assert antigravity.identity_alias == "antigravity_worker_account"
+    assert antigravity.state == GoogleCapabilityState.UNVERIFIED
+    jules = await broker.capability_status("jules")
+    assert jules.identity_alias == "owner_google_account"
+    assert jules.state == GoogleCapabilityState.CONFIGURED
+    await broker.register_principal(subject="worker-subject", owner_id="antigravity_worker_account")
+    antigravity = await broker.capability_status("antigravity")
+    assert antigravity.state == GoogleCapabilityState.CONFIGURED
+    with pytest.raises(ValueError, match="google_identity_binding_mismatch"):
+        await broker.record_capability_evidence("antigravity", state=GoogleCapabilityState.READY, owner_id="owner_google_account")
+
+
+@pytest.mark.asyncio
+async def test_antigravity_route_exposes_delegated_identity(tmp_path):
+    store = Store(str(tmp_path / "mesh.sqlite3")); await store.migrate()
+    registry = GoogleCapabilityRegistry(registry_path())
+    broker = GoogleIdentityBroker(store, registry, consumer_connected_capabilities="antigravity")
+    await broker.register_principal(subject="worker-subject", owner_id="antigravity_worker_account")
+    decision = await GoogleCapabilityRouter(store, broker).plan(GoogleRouteRequest(owner_intent_id="intent-dev", intent="development", action_class=ActionClass.A2))
+    assert decision.status == "planned"
+    assert decision.capability_id == "antigravity"
+    assert decision.identity_alias == "antigravity_worker_account"
 
 
 @pytest.mark.asyncio
@@ -143,12 +174,14 @@ async def test_antigravity_capacity_limited_falls_back_to_jules(tmp_path):
         GoogleCapabilityRegistry(registry_path()),
         consumer_connected_capabilities="antigravity,jules",
     )
-    await broker.register_principal(subject="sub-ag", ai_plan="PRO")
+    await broker.register_principal(subject="sub-owner", ai_plan="PRO")
+    await broker.register_principal(subject="sub-ag", owner_id="antigravity_worker_account", ai_plan="PRO")
     await broker.record_capability_evidence(
         "antigravity",
         state=GoogleCapabilityState.CAPACITY_LIMITED,
         evidence_pointer="live://antigravity/capacity_limited",
         metadata={"classification": "CAPACITY_LIMITED", "scope": "antigravity_only"},
+        owner_id="antigravity_worker_account",
     )
     await broker.record_capability_evidence(
         "jules",
@@ -160,6 +193,7 @@ async def test_antigravity_capacity_limited_falls_back_to_jules(tmp_path):
     )
     assert decision.status == "planned"
     assert decision.capability_id == "jules"
+    assert decision.identity_alias == "owner_google_account"
     assert "ANTIGRAVITY_CAPACITY_LIMITED" in decision.degraded
     ag = await broker.capability_status("antigravity")
     assert ag.state == GoogleCapabilityState.CAPACITY_LIMITED

@@ -1,0 +1,48 @@
+{
+  "schema_version": 1,
+  "host": "dial-hermes-control",
+  "attested_at": "2026-09-15",
+  "identity_alias": "antigravity_worker_account",
+  "authority": [
+    "owner-directed account split",
+    "Hermes VAN policy",
+    "live provider canary"
+  ],
+  "notes": "Delegated Antigravity worker identity is isolated from the canonical VAN Google identity. Raw email, OAuth code, tokens and cookies are intentionally not persisted.",
+  "principal": {
+    "subject": "hermes:dial-hermes-control:antigravity-worker-google",
+    "account_kind": "personal",
+    "ai_plan": "UNKNOWN"
+  },
+  "flags": {
+    "gemini_runtime_configured": false,
+    "cloud_runtime_configured": false,
+    "cloud_project_id": "",
+    "consumer_connected_capabilities": [
+      "antigravity"
+    ]
+  },
+  "capabilities": [
+    {
+      "id": "antigravity",
+      "state": "READY",
+      "evidence": "live://dial-hermes-control/antigravity-worker/2026-09-15",
+      "metadata": {
+        "auth_method": "consumer_oauth",
+        "account_binding_verified": true,
+        "account_identifier_persisted": false,
+        "isolated_runtime_home": true,
+        "canonical_credential_inheritance": false,
+        "model_discovery_count": 14,
+        "canary_model": "gemini-3.8-flash-low",
+        "canary_response": "VAN_ANTIGRAVITY_SECONDARY_OK",
+        "installed_profile_doctor": "PASS",
+        "installed_wrapper_sha256": "c3091abe3fb7956e45fc0cfb9d566d88e10d8761c130530692a6f7390f8c18c4",
+        "installed_profile_model_discovery_count": 14,
+        "installed_profile_canary_model": "gemini-3.8-flash-low",
+        "installed_profile_canary_response": "VAN_INSTALLED_ANTIGRAVITY_OK"
+      }
+    }
+  ],
+  "excluded_until_cloud_setup": []
+}

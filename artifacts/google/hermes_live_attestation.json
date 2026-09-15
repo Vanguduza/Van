@@ -6,7 +6,7 @@
     "owner_confirmed_hermes_authentication",
     "docs/PRODUCTION_ACCEPTANCE_LEDGER.md#live-hermes-certification-2026-09-15"
   ],
-  "notes": "Google credential planes are authenticated on the live Hermes host. Van gateway stores hashed principal + capability evidence only; raw tokens never enter the repo. Antigravity live generation remains CAPACITY_LIMITED. CONFIGURED is not READY.",
+  "notes": "Canonical VAN Google credential planes are authenticated on the live Hermes host. VAN stores hashed principal + capability evidence only; raw tokens never enter the repo. Antigravity is excluded here because it is bound to a separately attested delegated identity.",
   "principal": {
     "subject": "hermes:dial-hermes-control:owner-google",
     "account_kind": "personal",
@@ -20,7 +20,6 @@
       "gemini_notebook",
       "mixboard",
       "stitch",
-      "antigravity",
       "jules",
       "workspace_studio",
       "flow",
@@ -28,33 +27,78 @@
     ]
   },
   "capabilities": [
-    {"id": "gemini", "state": "CONFIGURED", "evidence": "hermes://dial-hermes-control/gemini-runtime"},
-    {"id": "gemini_live", "state": "CONFIGURED", "evidence": "hermes://dial-hermes-control/gemini-live"},
-    {"id": "deep_research", "state": "CONFIGURED", "evidence": "hermes://dial-hermes-control/deep-research"},
-    {"id": "nano_banana", "state": "CONFIGURED", "evidence": "hermes://dial-hermes-control/nano-banana"},
-    {"id": "veo", "state": "CONFIGURED", "evidence": "hermes://dial-hermes-control/veo"},
-    {"id": "workspace_api", "state": "CONFIGURED", "evidence": "hermes://dial-hermes-control/workspace-oauth"},
-    {"id": "gemini_notebook", "state": "CONFIGURED", "evidence": "hermes://dial-hermes-control/gemini-notebook"},
-    {"id": "mixboard", "state": "CONFIGURED", "evidence": "hermes://dial-hermes-control/mixboard"},
-    {"id": "stitch", "state": "CONFIGURED", "evidence": "hermes://dial-hermes-control/stitch"},
-    {"id": "jules", "state": "CONFIGURED", "evidence": "hermes://dial-hermes-control/jules"},
-    {"id": "workspace_studio", "state": "CONFIGURED", "evidence": "hermes://dial-hermes-control/workspace-studio"},
-    {"id": "flow", "state": "CONFIGURED", "evidence": "hermes://dial-hermes-control/flow"},
-    {"id": "ai_studio", "state": "CONFIGURED", "evidence": "hermes://dial-hermes-control/ai-studio"},
     {
-      "id": "antigravity",
-      "state": "CAPACITY_LIMITED",
-      "evidence": "live://antigravity/capacity_limited",
-      "metadata": {
-        "classification": "CAPACITY_LIMITED",
-        "scope": "antigravity_only",
-        "fallback": "jules",
-        "note": "Auth and model discovery OK on Hermes; live generation blocked by provider quota"
-      }
+      "id": "gemini",
+      "state": "CONFIGURED",
+      "evidence": "hermes://dial-hermes-control/gemini-runtime"
+    },
+    {
+      "id": "gemini_live",
+      "state": "CONFIGURED",
+      "evidence": "hermes://dial-hermes-control/gemini-live"
+    },
+    {
+      "id": "deep_research",
+      "state": "CONFIGURED",
+      "evidence": "hermes://dial-hermes-control/deep-research"
+    },
+    {
+      "id": "nano_banana",
+      "state": "CONFIGURED",
+      "evidence": "hermes://dial-hermes-control/nano-banana"
+    },
+    {
+      "id": "veo",
+      "state": "CONFIGURED",
+      "evidence": "hermes://dial-hermes-control/veo"
+    },
+    {
+      "id": "workspace_api",
+      "state": "CONFIGURED",
+      "evidence": "hermes://dial-hermes-control/workspace-oauth"
+    },
+    {
+      "id": "gemini_notebook",
+      "state": "CONFIGURED",
+      "evidence": "hermes://dial-hermes-control/gemini-notebook"
+    },
+    {
+      "id": "mixboard",
+      "state": "CONFIGURED",
+      "evidence": "hermes://dial-hermes-control/mixboard"
+    },
+    {
+      "id": "stitch",
+      "state": "CONFIGURED",
+      "evidence": "hermes://dial-hermes-control/stitch"
+    },
+    {
+      "id": "jules",
+      "state": "CONFIGURED",
+      "evidence": "hermes://dial-hermes-control/jules"
+    },
+    {
+      "id": "workspace_studio",
+      "state": "CONFIGURED",
+      "evidence": "hermes://dial-hermes-control/workspace-studio"
+    },
+    {
+      "id": "flow",
+      "state": "CONFIGURED",
+      "evidence": "hermes://dial-hermes-control/flow"
+    },
+    {
+      "id": "ai_studio",
+      "state": "CONFIGURED",
+      "evidence": "hermes://dial-hermes-control/ai-studio"
     }
   ],
   "excluded_until_cloud_setup": [
     "gemini_notebook_enterprise",
     "a2a_adk"
+  ],
+  "identity_alias": "owner_google_account",
+  "delegated_capabilities": [
+    "antigravity"
   ]
 }

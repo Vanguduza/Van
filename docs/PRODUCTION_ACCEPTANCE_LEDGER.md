@@ -23,17 +23,18 @@
 | SBOM / provenance / checksums | PASS at prior HEAD |
 | Project Truth canonical state contract | PASS — canonical state added and guarded for PR-based integration |
 | Backend bootstrap | PASS — repository root resolution and `python3` invocation corrected; bootstrap executed successfully |
-| Complete Python suite at closure HEAD | PASS — 72 passed |
+| Complete Python suite at closure HEAD | PASS — 79 passed |
 
 ## Google Intelligence Mesh repository gates
 
-Validated 2026-09-15 in a clean repository environment after installing the declared backend dependencies: the complete Python suite passed **72/72** tests.
+Validated 2026-09-15 in a clean repository environment after installing the declared backend dependencies: the complete Python suite passed **79/79** tests.
 
 | Gate | Status |
 |---|---|
 | Migration v2: Google principal/capability/job/artifact tables | PASS |
 | Canonical Google subject stored only as hash | PASS |
-| Same-account ownership with credential-plane isolation | PASS |
+| Canonical Google identity plus bounded delegated-identity isolation | PASS |
+| Antigravity isolated runtime/account binding | PASS — wrapper + registry + route contract tests + live isolated OAuth/model discovery/generation canary |
 | Workspace refresh-token → access-token exchange | PASS |
 | Deterministic capability routing + fallback | PASS |
 | A3 requires grant; project mutation requires truth SHA | PASS |
@@ -45,7 +46,7 @@ Validated 2026-09-15 in a clean repository environment after installing the decl
 
 ## External gates blocking v1.0
 
-See `docs/EXTERNAL_GATES.md`. **Google auth lives on Hermes** and is imported into Van mesh as `CONFIGURED` evidence (not `READY`). Remaining blockers: Antigravity live generation capacity, Cloud/Enterprise Google planes, physical Samsung certification, artist `.riv` / owner visual acceptance, production keystore, and GitHub `workflow` scope for `.github/workflows/ci.yml`. Local Project Truth mounts are closed on this workstation.
+See `docs/EXTERNAL_GATES.md`. Canonical Google auth lives on Hermes and is imported into the VAN mesh as `CONFIGURED` evidence unless a capability has its own live canary. The delegated Antigravity worker is live-certified. Remaining blockers include Cloud/Enterprise Google planes, uncertified per-capability Google surfaces, physical Samsung certification, artist `.riv` / owner visual acceptance, production keystore, and GitHub `workflow` scope for `.github/workflows/ci.yml`. Local Project Truth mounts are closed on this workstation.
 
 ## Tag policy
 
@@ -68,8 +69,10 @@ Live host: `dial-hermes-control`; control path: authorised `oracle-admin` Comman
 | Delegation core | PASS | live Hermes-source tests: 81 passed |
 | Delegate capability inheritance / toolset scope | PASS | live Hermes-source tests: 10 passed |
 | Core Hermes/DIAL services | PASS | runtime, orchestrator, gateway, chat-control, owner-steering and private-MCP-bind all active |
-| Google account authentication for Google worker plane | PASS | authenticated on Hermes; Van imports attestation (`artifacts/google/hermes_live_attestation.json`) |
+| Canonical Google identity authentication | PASS | authenticated on Hermes; VAN imports hashed attestation evidence without copying tokens |
 | Hermes Google mesh usable (gemini/jules/workspace_api) | PASS | CONFIGURED via attestation import; not claimed READY without canary receipts |
-| Antigravity live generation capacity | DEGRADED (`CAPACITY_LIMITED`) | Antigravity-only; Jules fallback selected when configured; other Google planes remain usable/CONFIGURED |
+| Delegated Antigravity worker identity | PASS | isolated OAuth store, no inherited canonical Google/API credentials, 14 models discovered; token-free receipt: `artifacts/google/antigravity_worker_live_attestation.json` |
+| Delegated Antigravity live generation | PASS | isolated pre-deploy canary returned `VAN_ANTIGRAVITY_SECONDARY_OK`; installed profile doctor passed, wrapper hash matched, 14 models were discovered, and installed-profile canary returned `VAN_INSTALLED_ANTIGRAVITY_OK` |
+| Antigravity capacity fallback contract | PASS | if the delegated route later becomes `CAPACITY_LIMITED`/`RATE_LIMITED`, deterministic routing may fall back to owner-account Jules while preserving identity attribution |
 
-**Live Hermes gate verdict:** COMPLETE. Antigravity provider capacity is a separate Google-capability external gate and does not invalidate Hermes/VAN runtime acceptance.
+**Live Hermes gate verdict:** COMPLETE. The delegated Antigravity worker is live-certified. Remaining Google capability readiness is evaluated independently per capability and credential plane.

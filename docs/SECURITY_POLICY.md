@@ -32,7 +32,7 @@ Read grants never imply write. A3/A4 Google jobs require an explicit grant. Proj
 
 ## Google Account Sovereignty and credential isolation
 
-The owner's canonical Google account is the identity/entitlement root for Google capabilities, but credentials MUST remain split into Workspace OAuth, Gemini runtime, Google Cloud/service identity, and consumer Google sessions. No Google master credential exists.
+The owner's canonical Google account is VAN's default Google identity, but credentials MUST remain split into Workspace OAuth, Gemini runtime, Google Cloud/service identity, and consumer Google sessions. Explicit secondary Google identities are allowed only as bounded capability identities. `antigravity_worker_account` is restricted to Antigravity and MUST NOT inherit owner authority, Workspace access, Project Truth authority, or credentials from `owner_google_account`. No Google master credential exists.
 
 Forbidden A5 patterns include exporting/copying Google sessions or cookies, reusing Workspace OAuth as a Gemini runtime credential, bypassing the Google identity broker, or disabling credential isolation.
 

@@ -52,6 +52,7 @@ class GoogleRouteDecision(BaseModel):
     capability_id: str | None = None
     fallback_capability_id: str | None = None
     state: GoogleCapabilityState | None = None
+    identity_alias: str | None = None
     action_class: ActionClass
     requires_approval: bool = False
     reason: str
@@ -74,6 +75,7 @@ class GoogleCapabilityStatus(BaseModel):
     family: str
     display_name: str
     credential_plane: GoogleCredentialPlane
+    identity_alias: str
     state: GoogleCapabilityState
     reason: str
     public_api: bool
@@ -108,6 +110,7 @@ class CapabilityDescriptor:
     intents: tuple[str, ...]
     fallback: str | None
     action_classes: tuple[str, ...]
+    identity_alias: str
     notes: str
 
 
@@ -115,6 +118,9 @@ class GoogleCapabilityRegistry:
     def __init__(self, path: str) -> None:
         raw = json.loads(Path(path).read_text(encoding="utf-8"))
         self.version = str(raw.get("version", "1"))
+        identity_policy = raw.get("identity_policy", {})
+        self.default_identity = str(identity_policy.get("default_identity", "owner_google_account"))
+        self.delegated_identities = dict(identity_policy.get("delegated_identities", {}))
         self._descriptors: dict[str, CapabilityDescriptor] = {}
         for item in raw["capabilities"]:
             descriptor = CapabilityDescriptor(
@@ -126,8 +132,14 @@ class GoogleCapabilityRegistry:
                 intents=tuple(item.get("intents", [])),
                 fallback=item.get("fallback"),
                 action_classes=tuple(item.get("action_classes", ["A1", "A2"])),
+                identity_alias=str(item.get("identity_alias", self.default_identity)),
                 notes=item.get("notes", ""),
             )
+            if descriptor.identity_alias != self.default_identity:
+                delegated = self.delegated_identities.get(descriptor.identity_alias)
+                allowed = set(delegated.get("allowed_capabilities", [])) if delegated else set()
+                if descriptor.capability_id not in allowed:
+                    raise ValueError(f"invalid_google_identity_binding:{descriptor.capability_id}:{descriptor.identity_alias}")
             self._descriptors[descriptor.capability_id] = descriptor
 
     def get(self, capability_id: str) -> CapabilityDescriptor:
@@ -144,7 +156,7 @@ class GoogleCapabilityRegistry:
 
 
 class GoogleIdentityBroker:
-    """Single Google owner principal; four isolated credential planes."""
+    """Canonical owner principal plus explicitly bounded delegated identities."""
 
     def __init__(
         self,
@@ -169,7 +181,7 @@ class GoogleIdentityBroker:
     def hash_subject(subject: str) -> str:
         return hashlib.sha256(subject.encode("utf-8")).hexdigest()
 
-    async def register_principal(self, *, subject: str, owner_id: str = "owner", account_kind: str = "personal", ai_plan: str | None = None) -> GooglePrincipalStatus:
+    async def register_principal(self, *, subject: str, owner_id: str = "owner_google_account", account_kind: str = "personal", ai_plan: str | None = None) -> GooglePrincipalStatus:
         if not subject.strip():
             raise ValueError("google_subject_required")
         now = int(time.time())
@@ -188,14 +200,18 @@ class GoogleIdentityBroker:
         )
         return await self.principal_status(owner_id)
 
-    async def principal_status(self, owner_id: str = "owner") -> GooglePrincipalStatus:
+    async def principal_status(self, owner_id: str = "owner_google_account") -> GooglePrincipalStatus:
         row = await self.store.fetchone("SELECT * FROM google_principal WHERE owner_id = ?", (owner_id,))
         if row is None:
             return GooglePrincipalStatus(owner_id=owner_id, registered=False)
         return GooglePrincipalStatus(owner_id=owner_id, registered=True, account_kind=row["account_kind"], ai_plan=row["ai_plan"], subject_hash_present=bool(row["subject_hash"]), status=row["status"], updated_at_unix=row["updated_at_unix"])
 
-    async def record_capability_evidence(self, capability_id: str, *, state: GoogleCapabilityState, credential_plane: GoogleCredentialPlane | None = None, evidence_pointer: str | None = None, metadata: dict[str, Any] | None = None, owner_id: str = "owner") -> None:
+    async def record_capability_evidence(self, capability_id: str, *, state: GoogleCapabilityState, credential_plane: GoogleCredentialPlane | None = None, evidence_pointer: str | None = None, metadata: dict[str, Any] | None = None, owner_id: str | None = None) -> None:
         descriptor = self.registry.get(capability_id)
+        selected_identity = descriptor.identity_alias
+        if owner_id is not None and owner_id != selected_identity:
+            raise ValueError("google_identity_binding_mismatch")
+        owner_id = selected_identity
         plane = credential_plane or descriptor.credential_plane
         now = int(time.time())
         verified_at = now if state == GoogleCapabilityState.READY else None
@@ -218,9 +234,12 @@ class GoogleIdentityBroker:
     async def _evidence(self, capability_id: str) -> Any | None:
         return await self.store.fetchone("SELECT * FROM google_capability_connections WHERE capability_id = ?", (capability_id,))
 
-    async def capability_status(self, capability_id: str, *, workspace: GoogleConnectionStatus | None = None, owner_id: str = "owner") -> GoogleCapabilityStatus:
+    async def capability_status(self, capability_id: str, *, workspace: GoogleConnectionStatus | None = None, owner_id: str | None = None) -> GoogleCapabilityStatus:
         descriptor = self.registry.get(capability_id)
-        principal = await self.principal_status(owner_id)
+        selected_identity = descriptor.identity_alias
+        if owner_id is not None and owner_id != selected_identity:
+            return GoogleCapabilityStatus(capability_id=descriptor.capability_id, family=descriptor.family, display_name=descriptor.display_name, credential_plane=descriptor.credential_plane, identity_alias=selected_identity, state=GoogleCapabilityState.POLICY_BLOCKED, reason="google_identity_binding_mismatch", public_api=descriptor.public_api)
+        principal = await self.principal_status(selected_identity)
         evidence = await self._evidence(capability_id)
         if evidence is not None:
             state = GoogleCapabilityState(evidence["state"])
@@ -228,7 +247,7 @@ class GoogleIdentityBroker:
             if not principal.registered and state in {GoogleCapabilityState.CONFIGURED, GoogleCapabilityState.READY}:
                 state = GoogleCapabilityState.UNVERIFIED
                 reason = "canonical_google_principal_not_registered"
-            return GoogleCapabilityStatus(capability_id=descriptor.capability_id, family=descriptor.family, display_name=descriptor.display_name, credential_plane=descriptor.credential_plane, state=state, reason=reason, public_api=descriptor.public_api, configured_by_account=principal.registered, evidence_pointer=evidence["evidence_pointer"], verified_at_unix=evidence["verified_at_unix"])
+            return GoogleCapabilityStatus(capability_id=descriptor.capability_id, family=descriptor.family, display_name=descriptor.display_name, credential_plane=descriptor.credential_plane, identity_alias=selected_identity, state=state, reason=reason, public_api=descriptor.public_api, configured_by_account=principal.registered, evidence_pointer=evidence["evidence_pointer"], verified_at_unix=evidence["verified_at_unix"])
 
         plane = descriptor.credential_plane
         state = GoogleCapabilityState.UNAVAILABLE
@@ -247,11 +266,11 @@ class GoogleIdentityBroker:
                 state, reason = GoogleCapabilityState.AUTH_REQUIRED, "owner_google_session_not_certified"
         if not principal.registered and state in {GoogleCapabilityState.CONFIGURED, GoogleCapabilityState.READY}:
             state, reason = GoogleCapabilityState.UNVERIFIED, "canonical_google_principal_not_registered"
-        return GoogleCapabilityStatus(capability_id=descriptor.capability_id, family=descriptor.family, display_name=descriptor.display_name, credential_plane=descriptor.credential_plane, state=state, reason=reason, public_api=descriptor.public_api, configured_by_account=principal.registered)
+        return GoogleCapabilityStatus(capability_id=descriptor.capability_id, family=descriptor.family, display_name=descriptor.display_name, credential_plane=descriptor.credential_plane, identity_alias=selected_identity, state=state, reason=reason, public_api=descriptor.public_api, configured_by_account=principal.registered)
 
-    async def mesh_status(self, *, workspace: GoogleConnectionStatus | None = None, owner_id: str = "owner") -> dict[str, Any]:
-        principal = await self.principal_status(owner_id)
-        capabilities = [await self.capability_status(d.capability_id, workspace=workspace, owner_id=owner_id) for d in self.registry.list()]
+    async def mesh_status(self, *, workspace: GoogleConnectionStatus | None = None, owner_id: str | None = None) -> dict[str, Any]:
+        principal = await self.principal_status(owner_id or self.registry.default_identity)
+        capabilities = [await self.capability_status(d.capability_id, workspace=workspace) for d in self.registry.list()]
         return {"principal": principal.model_dump(), "capabilities": [c.model_dump() for c in capabilities], "registry_version": self.registry.version, "hermes_is_sole_agent_runtime": True}
 
 
@@ -306,6 +325,7 @@ class GoogleCapabilityRouter:
                 capability_id=descriptor.capability_id,
                 fallback_capability_id=descriptor.fallback,
                 state=status.state,
+                identity_alias=descriptor.identity_alias,
                 action_class=request.action_class,
                 reason="deterministic capability route selected; Hermes must execute the job",
                 job_id=job_id,
@@ -318,10 +338,14 @@ class GoogleCapabilityRouter:
             GoogleCapabilityState.RATE_LIMITED,
         }:
             degraded_codes = ["ANTIGRAVITY_CAPACITY_LIMITED"]
+        identity_alias = None
+        if first_unusable is not None:
+            identity_alias = self.broker.registry.get(first_unusable.capability_id).identity_alias
         return GoogleRouteDecision(
             status="degraded",
             capability_id=first_unusable.capability_id if first_unusable else None,
             state=first_unusable.state if first_unusable else GoogleCapabilityState.UNAVAILABLE,
+            identity_alias=identity_alias,
             action_class=request.action_class,
             reason=first_unusable.reason if first_unusable else "no usable Google capability",
             degraded=degraded_codes,
@@ -329,7 +353,7 @@ class GoogleCapabilityRouter:
 
     async def _create_job(self, request: GoogleRouteRequest, capability_id: str) -> str:
         job_id, now = str(uuid.uuid4()), int(time.time())
-        canonical = {"owner_intent_id": request.owner_intent_id, "intent": request.intent, "action_class": request.action_class.value, "project_id": request.project_id, "truth_sha": request.truth_sha, "grant_id": request.grant_id, "input_refs": sorted(request.input_refs), "constraints": request.constraints, "capability_id": capability_id}
+        canonical = {"owner_intent_id": request.owner_intent_id, "intent": request.intent, "action_class": request.action_class.value, "project_id": request.project_id, "truth_sha": request.truth_sha, "grant_id": request.grant_id, "input_refs": sorted(request.input_refs), "constraints": request.constraints, "capability_id": capability_id, "identity_alias": self.broker.registry.get(capability_id).identity_alias}
         input_hash = hashlib.sha256(Store.dumps(canonical).encode("utf-8")).hexdigest()
         await self.store.execute("""
             INSERT INTO google_jobs(job_id, owner_intent_id, project_id, capability_id, action_class, truth_sha, grant_id, input_hash, status, created_at_unix, updated_at_unix)

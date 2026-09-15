@@ -13,9 +13,9 @@ Android and VAN Gateway do not run a parallel Gemini agent loop.
 
 ## Google Account Sovereignty
 
-All Google capabilities used by VAN must trace ownership, entitlement or
-infrastructure administration to the owner's canonical Google account.
-Credential separation does not imply identity separation.
+The canonical owner Google identity is the default for VAN's Google capability mesh. A secondary Google identity may be delegated to one explicitly named capability without becoming an owner identity. Credential separation and identity delegation are both explicit; neither implies inheritance.
+
+Antigravity is the only currently delegated capability and MUST execute through `antigravity_worker_account` in an isolated runtime home. All other Google capabilities remain bound to `owner_google_account`.
 
 ```text
 Owner Google Account
