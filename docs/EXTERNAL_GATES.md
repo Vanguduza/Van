@@ -2,9 +2,10 @@
 
 These require owner credentials, live Google surfaces, provider/runtime access, physical hardware, or environments that repository CI cannot truthfully certify.
 
+Resolved 2026-09-15: the live Hermes `van` profile is installed and certified on `dial-hermes-control`; Sonnet 5 executed a live VAN canary and the core Hermes/DIAL services and delegation suites passed. This is no longer an external gate.
+
 | Gate | Prerequisite | Repo-side readiness |
 |---|---|---|
-| Live Hermes profile install | SSH/API to Hermes host | install/doctor scripts, profile/policy tests |
 | Canonical owner Google principal | owner runs identity setup with their Google account subject | identity broker + hashed-subject registration tool |
 | Google Workspace OAuth live | OAuth client + owner consent + refresh token | encrypted vault + proper refresh→access-token exchange + revoke/status |
 | Gemini runtime | separate Gemini runtime credential under owner-administered Google environment | capability registry, Hermes provider policy, planner |
