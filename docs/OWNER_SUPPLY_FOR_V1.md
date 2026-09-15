@@ -21,7 +21,7 @@ Hermes host reachability (previously items 1–2) is **closed** — see below.
 ## Already closed (do not re-block)
 
 - Google Intelligence Mesh ancestor `5b111e8` on `main` (re-verified as ancestor 2026-09-15)
-- Live Hermes gate COMPLETE — certified on `dial-hermes-control` by commits `2656b93` (*Certify live VAN Hermes runtime*) and `1a0c85f` (*Close repository acceptance and Project Truth*), merged via `a578c12` (PR #3). Ledger: `docs/PRODUCTION_ACCEPTANCE_LEDGER.md#live-hermes-certification-2026-09-15`. Hermes certification is owned by the ChatGPT run; this agent stood down from install/doctor at owner direction.
+- Live Hermes gate COMPLETE — certified on `dial-hermes-control` by commits `2656b93` (*Certify live VAN Hermes runtime*) and `1a0c85f` (*Close repository acceptance and Project Truth*), merged via `a578c12` (PR #3) — re-verified 2026-09-15 as ancestors of `origin/main` at `a994597`, with no Hermes commits landed after it. Ledger: `docs/PRODUCTION_ACCEPTANCE_LEDGER.md#live-hermes-certification-2026-09-15`. Hermes certification is owned by the ChatGPT run; this agent stood down from install/doctor at owner direction.
 - Hermes host reachability from this workstation (former owner-supply items 1–2) — OCI `DIALRECOVERY` session + bastion allowlist (`66.9.173.77/32`) + `MANAGED_SSH` to `10.0.0.184` established and SSH login as `ubuntu` (sudo) confirmed live Hermes runtime under `/home/ubuntu/.hermes`. Evidence: `artifacts/release/hermes_recert_probe.json`. Note the `Bastion` instance-agent plugin on `dial-hermes-control` was `STOPPED` and had to be enabled before `MANAGED_SSH` would attach.
 - Hermes-hosted Google auth imported as `CONFIGURED` (not READY)
 - Project Truth mounts for van/dial/dde/gtr/goat/aeci (offline cache)

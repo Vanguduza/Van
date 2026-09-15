@@ -32,7 +32,20 @@
     },
     "new_chatgpt_cert_observed_on_origin_main": false,
     "origin_main_at_check": "96279f710ea47277b15ef28764eda6aec0fea744",
-    "origin_main_check_time_local": "2026-09-15T18:38:00+02:00"
+    "origin_main_check_time_local": "2026-09-15T18:38:00+02:00",
+    "reverification": {
+      "checked_at_local": "2026-09-15T18:50:00+02:00",
+      "origin_main": "a994597c03c45a33c0d2e00da77f0c429d8e87a3",
+      "local_main_equals_origin_main": true,
+      "merge_commit_is_ancestor_of_main": {
+        "a578c12a4669d639159e2ddab426b3d5a0d875f3": true,
+        "2656b931b6248d2eadeb5205ac6e570b83305971": true,
+        "1a0c85fcfed589424984680d337e012bf830b801": true
+      },
+      "commits_on_main_after_a994597": 0,
+      "note": "`new_chatgpt_cert_observed_on_origin_main: false` above means no Hermes certification commits newer than a578c12; the ChatGPT Hermes certification merge itself is on main and is an ancestor of a994597. No further Hermes commits have landed, so the Live Hermes closure stands unchanged.",
+      "python_suite_at_this_head": "83 passed"
+    }
   },
   "verified_by_this_agent": {
     "oci_cli_version": "3.92.1",
