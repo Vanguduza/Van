@@ -65,6 +65,14 @@ bot:
 google_runtime:
   provider: gemini
   identity_root: owner_google_account
+  delegated_identities:
+    antigravity:
+      identity_alias: antigravity_worker_account
+      isolated_runtime_home: true
+      credential_inheritance_allowed: false
+      owner_authority: false
+      workspace_access: false
+      project_truth_authority: false
   credential_plane: gemini_runtime
   account_owned_runtime_required: true
   prefer_gemini_for_google_ai: true

@@ -12,7 +12,7 @@
 - Android embodiment: overlay, Command Centre, encrypted queue, notification listener, share intent, voice/TTS hooks, biometric gate, onboarding and degraded-mode model.
 - Google Workspace token vault: encrypted refresh tokens, narrow scopes, revocation and prompt scrubbing.
 - **Google OAuth correctness:** live Workspace transport exchanges encrypted refresh tokens for short-lived access tokens before Google API requests.
-- **Google Account Sovereignty:** one logical owner Google principal with separate Workspace OAuth, Gemini runtime, Cloud/service and consumer-session credential planes.
+- **Google Account Sovereignty:** `owner_google_account` remains VAN's canonical/default Google identity with separate Workspace OAuth, Gemini runtime, Cloud/service and consumer-session credential planes. Explicit delegated identities are bounded to named capabilities and cannot inherit owner authority or credentials.
 - **Google Intelligence Mesh:** versioned capability registry covering Gemini, Gemini Live, Deep Research, Gemini Notebook (personal + Enterprise), Mixboard, Stitch, Antigravity, Jules, Workspace API/Studio, Nano Banana, Veo, Flow, AI Studio and ADK/A2A.
 - **Deterministic Google router:** action-class, approval, grant and Project Truth gates; registry-order deterministic selection; explicit fallback; persisted input hash and job state.
 - **Google readiness model:** READY / CONFIGURED / UNVERIFIED / AUTH_REQUIRED / DEGRADED / RATE_LIMITED / CAPACITY_LIMITED / POLICY_BLOCKED / UNSUPPORTED / UNAVAILABLE.
@@ -21,6 +21,7 @@
 - **Google provenance:** persistent jobs and artifact lineage with project, provider, tool version, input/output hashes, validation state and evidence pointer; provider artifacts can never be marked `OWNER_SIGNED`.
 - **Google operator tooling:** hashed owner-principal configuration and certification/status scripts; `tools/google/mark_antigravity_capacity_limited.py`; `tools/google/import_hermes_google_attestation.py` for Hermes-hosted auth evidence.
 - **Hermes Google skills:** google-intelligence, gemini-notebook, google-design, google-development; Google providers remain subordinate to Hermes.
+- **Antigravity delegated identity:** Antigravity alone is bound to `antigravity_worker_account` and executes through an isolated HOME/XDG/OAuth store with inherited Google/API credentials stripped. Live OAuth, 14-model discovery and a Gemini 3.8 Flash canary are certified on `dial-hermes-control` (2026-09-15); token-free evidence is stored in `artifacts/google/antigravity_worker_live_attestation.json`.
 - **Policy hardening:** Google broker/registry protected; session-cookie export, credential-plane collapse and broker bypass are prohibited patterns.
 - Comprehensive canonical specification: `docs/GOOGLE_INTELLIGENCE_MESH.md`.
 - Device/CI helpers: `tools/certification/device_cert_probe.py`; `tools/ci/install_github_workflow.py`; Windows `tools/bootstrap_backend.ps1`, `tools/run_gateway.ps1`, `tools/sync_project_truth_live.ps1`.
@@ -29,7 +30,7 @@
 ## EXTERNALLY BLOCKED / REQUIRES LIVE CERTIFICATION
 
 - Google credential planes are authenticated on Hermes and imported into Van as `CONFIGURED` (not `READY` without canary receipts).
-- Antigravity live generation remains `CAPACITY_LIMITED` (Jules fallback). Other Google planes are not failed by Antigravity quota.
+- The delegated Antigravity worker is live-certified. Capacity/rate limits, if they recur, remain capability-scoped and may fall back to Jules without degrading other Google planes.
 - Notebook Enterprise / ADK-A2A require eligible owner-administered Google Cloud/Enterprise setup.
 - Live Hermes install is certified on `dial-hermes-control` (2026-09-15). Local Project Truth mounts for van/dial/dde/gtr/goat/aeci are resolved on this workstation. Physical Samsung certification, `.riv` authoring, production signing, and GitHub workflow-scope install remain external gates.
 

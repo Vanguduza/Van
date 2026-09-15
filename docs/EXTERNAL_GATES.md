@@ -6,6 +6,8 @@ Resolved 2026-09-15: the live Hermes `van` profile is installed and certified on
 
 Resolved 2026-09-15: Google credential planes used by VAN are **authenticated on Hermes** (`dial-hermes-control`). Van records that fact via `artifacts/google/hermes_live_attestation.json` + `tools/google/import_hermes_google_attestation.py` as `CONFIGURED` evidence (hashed principal only). `CONFIGURED` is still not `READY`. Cloud/Enterprise-only capabilities remain separate.
 
+Resolved 2026-09-15: the delegated `antigravity_worker_account` is authenticated in a separate isolated runtime home. Live model discovery and a Gemini 3.8 Flash generation canary passed; no canonical Google/API credential inheritance is permitted. Token-free evidence is recorded at `artifacts/google/antigravity_worker_live_attestation.json`. Antigravity is no longer an external authentication/generation gate.
+
 Resolved 2026-09-15 (workstation): local Project Truth mounts for `van`, `dial`, `dde`, `gtr`, `goat`, and `aeci` resolve via `registries/project_mounts.json` + `tools/projects/sync_project_truth.py` offline cache. Gateway live PUT still requires a running gateway.
 
 | Gate | Prerequisite | Repo-side readiness |
@@ -18,7 +20,6 @@ Resolved 2026-09-15 (workstation): local Project Truth mounts for `van`, `dial`,
 | Gemini Notebook personal | owner Google session on Hermes | consumer capability CONFIGURED via attestation |
 | Gemini Notebook Enterprise | eligible Cloud/Enterprise setup | still EXTERNAL (cloud plane) |
 | Mixboard / Stitch / Flow / AI Studio / Workspace Studio | owner Google session on Hermes | consumer capabilities CONFIGURED via attestation |
-| Antigravity live generation | provider quota (auth/model-discovery already verified on Hermes; currently `CAPACITY_LIMITED`) | Jules fallback + `ANTIGRAVITY_CAPACITY_LIMITED` |
 | Jules | owner Google sign-in on Hermes | CONFIGURED via attestation; READY needs live worker receipt |
 | Nano Banana / Veo | Hermes Gemini runtime + quota canary | CONFIGURED via attestation |
 | Google ADK/A2A | owner-administered Cloud/runtime | still EXTERNAL (cloud plane) |
@@ -34,7 +35,7 @@ Resolved 2026-09-15 (workstation): local Project Truth mounts for `van`, `dial`,
 2. Consumer Google sessions may not be certified by cookie presence alone.
 3. `READY` requires an evidence pointer recorded through the Google identity broker.
 4. No raw Google email, cookie, OAuth token, API key, or service-account private material is stored in the capability registry or artifact provenance.
-5. Workspace OAuth, Gemini runtime, Cloud/service identity and consumer sessions must remain separate credential planes even though they trace to the same owner Google account.
+5. Workspace OAuth, Gemini runtime, Cloud/service identity and consumer sessions must remain separate credential planes. Explicit delegated identities are allowed only for their bound capabilities and may not inherit owner authority or credentials.
 6. Missing or unverified capability must return an explicit degraded/auth-required state; never simulate success.
 7. Hermes-hosted authentication is recorded as attestation evidence; it does not copy tokens into Van.
 

@@ -16,7 +16,7 @@ uvicorn van_gateway.app:app --port 8787
 
 ## Google Account Sovereignty
 
-Every Google capability used by VAN must trace ownership, entitlement, delegated access, or Cloud administration back to the owner's canonical Google account. Credential separation does **not** imply identity separation.
+VAN uses `owner_google_account` as its canonical/default Google identity. Explicit delegated identities may be bound to individual capabilities without inheriting owner authority or credentials. Antigravity is bound to `antigravity_worker_account`; every other Google capability defaults to `owner_google_account`.
 
 Do not create or configure a single Google "master credential". The supported credential planes are:
 

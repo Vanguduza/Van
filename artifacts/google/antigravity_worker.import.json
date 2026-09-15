@@ -1,0 +1,14 @@
+{
+  "ok": true,
+  "host": "dial-hermes-control",
+  "identity_alias": "antigravity_worker_account",
+  "principal_registered": true,
+  "recorded": [
+    {
+      "capability_id": "antigravity",
+      "state": "READY",
+      "evidence": "live://dial-hermes-control/antigravity-worker/2026-09-15"
+    }
+  ],
+  "excluded_until_cloud_setup": []
+}
