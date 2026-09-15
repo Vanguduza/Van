@@ -19,21 +19,19 @@
 - **Antigravity capacity scoping:** live generation `CAPACITY_LIMITED` records `ANTIGRAVITY_CAPACITY_LIMITED` and falls back to Jules when configured; does not fail Workspace/Gemini/Jules planes.
 - **Project Truth mounts:** `registries/project_mounts.json` + sync tool prefer per-project `truth_path`; offline cache under `artifacts/project-truth/`.
 - **Google provenance:** persistent jobs and artifact lineage with project, provider, tool version, input/output hashes, validation state and evidence pointer; provider artifacts can never be marked `OWNER_SIGNED`.
-- **Google operator tooling:** hashed owner-principal configuration and certification/status scripts; `tools/google/mark_antigravity_capacity_limited.py` for Antigravity-only evidence.
+- **Google operator tooling:** hashed owner-principal configuration and certification/status scripts; `tools/google/mark_antigravity_capacity_limited.py`; `tools/google/import_hermes_google_attestation.py` for Hermes-hosted auth evidence.
 - **Hermes Google skills:** google-intelligence, gemini-notebook, google-design, google-development; Google providers remain subordinate to Hermes.
 - **Policy hardening:** Google broker/registry protected; session-cookie export, credential-plane collapse and broker bypass are prohibited patterns.
 - Comprehensive canonical specification: `docs/GOOGLE_INTELLIGENCE_MESH.md`.
-- Test coverage added for migration v2, principal hashing, deterministic routing, mutation/approval gates, provenance authority, OAuth refresh exchange and credential-plane separation.
+- Device/CI helpers: `tools/certification/device_cert_probe.py`; `tools/ci/install_github_workflow.py`.
+- Test coverage added for migration v2, principal hashing, deterministic routing, mutation/approval gates, provenance authority, OAuth refresh exchange, credential-plane separation, and Hermes Google attestation import.
 
 ## EXTERNALLY BLOCKED / REQUIRES LIVE CERTIFICATION
 
-- Owner Google principal has not been registered in a deployed VAN gateway.
-- Workspace OAuth consent/client credentials are not supplied in repository.
-- Gemini runtime/API credentials are not supplied in repository.
-- Consumer Google surfaces require normal owner Google sign-in and live certification evidence.
-- Google owner-account OAuth is verified for the Antigravity worker plane and model discovery succeeds; Antigravity live generation remains `CAPACITY_LIMITED` (Jules fallback). Other Google planes are separately gated, not failed by Antigravity quota.
-- Notebook Enterprise / Cloud-service capabilities require eligible owner-administered Google Cloud/Enterprise setup.
-- Live Hermes install is certified on `dial-hermes-control` (2026-09-15). Local Project Truth mounts for van/dial/dde/gtr/goat/aeci are resolved on this workstation. Physical Samsung certification, `.riv` authoring, and production signing remain external gates.
+- Google credential planes are authenticated on Hermes and imported into Van as `CONFIGURED` (not `READY` without canary receipts).
+- Antigravity live generation remains `CAPACITY_LIMITED` (Jules fallback). Other Google planes are not failed by Antigravity quota.
+- Notebook Enterprise / ADK-A2A require eligible owner-administered Google Cloud/Enterprise setup.
+- Live Hermes install is certified on `dial-hermes-control` (2026-09-15). Local Project Truth mounts for van/dial/dde/gtr/goat/aeci are resolved on this workstation. Physical Samsung certification, `.riv` authoring, production signing, and GitHub workflow-scope install remain external gates.
 
 ## SUPERSEDED / FORBIDDEN
 

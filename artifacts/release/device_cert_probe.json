@@ -1,0 +1,27 @@
+{
+  "ok": false,
+  "blocked": true,
+  "devices": [],
+  "checklist": [
+    "install",
+    "overlay",
+    "notification_listener",
+    "mic",
+    "tts",
+    "biometric",
+    "drag_dock",
+    "rotation",
+    "process_kill",
+    "doze",
+    "reboot",
+    "offline_queue",
+    "reconnect",
+    "secret_notification",
+    "barge_in",
+    "share_to_van",
+    "google_capability_status",
+    "rive_failure_to_canvas",
+    "reduced_motion"
+  ],
+  "reason": "PHYSICAL_DEVICE_REQUIRED"
+}

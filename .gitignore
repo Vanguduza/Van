@@ -50,6 +50,8 @@ artifacts/local/
 # Keep release manifests; ignore bulky local APK copies
 artifacts/release/*.apk
 artifacts/release/*.aab
+artifacts/google/*.sqlite3
+artifacts/google/*.sqlite3-*
 
 # Node (tooling)
 node_modules/

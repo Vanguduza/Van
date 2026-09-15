@@ -1,0 +1,81 @@
+{
+  "ok": true,
+  "host": "dial-hermes-control",
+  "principal_registered": true,
+  "recorded": [
+    {
+      "capability_id": "gemini",
+      "state": "CONFIGURED",
+      "evidence": "hermes://dial-hermes-control/gemini-runtime"
+    },
+    {
+      "capability_id": "gemini_live",
+      "state": "CONFIGURED",
+      "evidence": "hermes://dial-hermes-control/gemini-live"
+    },
+    {
+      "capability_id": "deep_research",
+      "state": "CONFIGURED",
+      "evidence": "hermes://dial-hermes-control/deep-research"
+    },
+    {
+      "capability_id": "nano_banana",
+      "state": "CONFIGURED",
+      "evidence": "hermes://dial-hermes-control/nano-banana"
+    },
+    {
+      "capability_id": "veo",
+      "state": "CONFIGURED",
+      "evidence": "hermes://dial-hermes-control/veo"
+    },
+    {
+      "capability_id": "workspace_api",
+      "state": "CONFIGURED",
+      "evidence": "hermes://dial-hermes-control/workspace-oauth"
+    },
+    {
+      "capability_id": "gemini_notebook",
+      "state": "CONFIGURED",
+      "evidence": "hermes://dial-hermes-control/gemini-notebook"
+    },
+    {
+      "capability_id": "mixboard",
+      "state": "CONFIGURED",
+      "evidence": "hermes://dial-hermes-control/mixboard"
+    },
+    {
+      "capability_id": "stitch",
+      "state": "CONFIGURED",
+      "evidence": "hermes://dial-hermes-control/stitch"
+    },
+    {
+      "capability_id": "jules",
+      "state": "CONFIGURED",
+      "evidence": "hermes://dial-hermes-control/jules"
+    },
+    {
+      "capability_id": "workspace_studio",
+      "state": "CONFIGURED",
+      "evidence": "hermes://dial-hermes-control/workspace-studio"
+    },
+    {
+      "capability_id": "flow",
+      "state": "CONFIGURED",
+      "evidence": "hermes://dial-hermes-control/flow"
+    },
+    {
+      "capability_id": "ai_studio",
+      "state": "CONFIGURED",
+      "evidence": "hermes://dial-hermes-control/ai-studio"
+    },
+    {
+      "capability_id": "antigravity",
+      "state": "CAPACITY_LIMITED",
+      "evidence": "live://antigravity/capacity_limited"
+    }
+  ],
+  "excluded_until_cloud_setup": [
+    "gemini_notebook_enterprise",
+    "a2a_adk"
+  ]
+}

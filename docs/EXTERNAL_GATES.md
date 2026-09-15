@@ -4,30 +4,29 @@ These require owner credentials, live Google surfaces, provider/runtime access, 
 
 Resolved 2026-09-15: the live Hermes `van` profile is installed and certified on `dial-hermes-control`; Sonnet 5 executed a live VAN canary and the core Hermes/DIAL services and delegation suites passed. This is no longer an external gate.
 
-| Gate | Prerequisite | Repo-side readiness |
-|---|---|---|
-| Canonical owner Google principal | owner runs identity setup with their Google account subject | identity broker + hashed-subject registration tool |
-| Google Workspace OAuth live | OAuth client + owner consent + refresh token | encrypted vault + proper refresh→access-token exchange + revoke/status |
-| Gemini runtime | separate Gemini runtime credential under owner-administered Google environment | capability registry, Hermes provider policy, planner |
-| Gemini Live | runtime credential + live endpoint access | deterministic capability route; live session adapter remains external-runtime work |
-| Deep Research | supported Gemini runtime + quota | deterministic route + provenance contract; live execution requires provider runtime |
-| Gemini Notebook personal | owner Google session/account availability | consumer capability bridge contract + Android/share/Drive path; no private API dependency |
-| Gemini Notebook Enterprise | eligible Cloud/Enterprise setup and service identity | separate cloud-service capability route |
-| Mixboard | owner account + current Labs availability | governed artifact packet/consumer-surface route; no fake public API |
-| Stitch | owner account + current Labs availability | governed design route; no private API dependency |
-| Antigravity live generation | owner Google sign-in + provider quota (auth/model-discovery already verified; currently `CAPACITY_LIMITED`) | Hermes worker contract + deterministic Jules fallback + `ANTIGRAVITY_CAPACITY_LIMITED` degraded code |
-| Jules | owner Google sign-in + GitHub connection | bounded repo-worker contract + deterministic route |
-| Workspace Studio | eligible owner Workspace/account surface | governed consumer workflow route |
-| Nano Banana / Veo | Gemini/API runtime credential and quota | media capability routes and provenance contract |
-| Flow / AI Studio | owner Google session | governed consumer-surface route |
-| Google ADK/A2A | owner-administered Cloud/runtime where used | interoperability route; Hermes remains orchestration authority |
-| Physical Samsung device | USB device + permissions | Android app and share ingress exist; device checklist required |
-| Artist `.riv` | Rive editor | contract + Canvas fallback + handoff |
-| Owner visual acceptance | owner review | acceptance matrix |
-| Signed production release | production keystore | Gradle wiring/docs ready |
-| GitHub Actions canonical workflow path | credential with workflow scope | YAML retained in `tools/ci/` |
+Resolved 2026-09-15: Google credential planes used by VAN are **authenticated on Hermes** (`dial-hermes-control`). Van records that fact via `artifacts/google/hermes_live_attestation.json` + `tools/google/import_hermes_google_attestation.py` as `CONFIGURED` evidence (hashed principal only). `CONFIGURED` is still not `READY`. Cloud/Enterprise-only capabilities remain separate.
 
 Resolved 2026-09-15 (workstation): local Project Truth mounts for `van`, `dial`, `dde`, `gtr`, `goat`, and `aeci` resolve via `registries/project_mounts.json` + `tools/projects/sync_project_truth.py` offline cache. Gateway live PUT still requires a running gateway.
+
+| Gate | Prerequisite | Repo-side readiness |
+|---|---|---|
+| Canonical owner Google principal | Hermes-authenticated owner Google account | hashed principal registration + Hermes attestation import |
+| Google Workspace OAuth live | authenticated on Hermes worker/Workspace plane | mesh `workspace_api` CONFIGURED via Hermes attestation; gateway vault remains available for device-mediated grants |
+| Gemini runtime | authenticated on Hermes | mesh Gemini family CONFIGURED via Hermes attestation; live READY needs per-capability canary receipt |
+| Gemini Live | Hermes runtime + live endpoint canary | deterministic route; CONFIGURED on Hermes auth |
+| Deep Research | Hermes Gemini runtime + quota canary | deterministic route; CONFIGURED on Hermes auth |
+| Gemini Notebook personal | owner Google session on Hermes | consumer capability CONFIGURED via attestation |
+| Gemini Notebook Enterprise | eligible Cloud/Enterprise setup | still EXTERNAL (cloud plane) |
+| Mixboard / Stitch / Flow / AI Studio / Workspace Studio | owner Google session on Hermes | consumer capabilities CONFIGURED via attestation |
+| Antigravity live generation | provider quota (auth/model-discovery already verified on Hermes; currently `CAPACITY_LIMITED`) | Jules fallback + `ANTIGRAVITY_CAPACITY_LIMITED` |
+| Jules | owner Google sign-in on Hermes | CONFIGURED via attestation; READY needs live worker receipt |
+| Nano Banana / Veo | Hermes Gemini runtime + quota canary | CONFIGURED via attestation |
+| Google ADK/A2A | owner-administered Cloud/runtime | still EXTERNAL (cloud plane) |
+| Physical Samsung device | USB device + permissions | `tools/certification/device_cert_probe.py` + checklist |
+| Artist `.riv` | Rive editor | contract + Canvas fallback + handoff |
+| Owner visual acceptance | owner review | acceptance matrix |
+| Signed production release | production keystore | Gradle wiring + `android/keystore.properties.example` |
+| GitHub Actions canonical workflow path | credential with workflow scope | `tools/ci/install_github_workflow.py` + YAML in `tools/ci/` |
 
 ## Google certification rules
 
@@ -37,6 +36,7 @@ Resolved 2026-09-15 (workstation): local Project Truth mounts for `van`, `dial`,
 4. No raw Google email, cookie, OAuth token, API key, or service-account private material is stored in the capability registry or artifact provenance.
 5. Workspace OAuth, Gemini runtime, Cloud/service identity and consumer sessions must remain separate credential planes even though they trace to the same owner Google account.
 6. Missing or unverified capability must return an explicit degraded/auth-required state; never simulate success.
+7. Hermes-hosted authentication is recorded as attestation evidence; it does not copy tokens into Van.
 
 ## Physical device checklist
 
