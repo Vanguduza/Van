@@ -263,6 +263,9 @@ def create_app() -> FastAPI:
         require_internal_control(x_van_internal_token)
         if project_id not in projects.known_projects():
             raise HTTPException(status_code=404, detail="unknown_project")
+        body_project = body.truth.get("project_id") if isinstance(body.truth, dict) else None
+        if body_project is not None and str(body_project) != project_id:
+            raise HTTPException(status_code=400, detail="truth_project_mismatch")
         await projects.cache_truth(project_id, body.truth, body.truth_sha, body.repo_sha)
         return await projects.load_truth(project_id)
 

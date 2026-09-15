@@ -1,0 +1,130 @@
+{
+  "gate": "live_hermes_recert",
+  "generated_at_local": "2026-09-15T18:40:00+02:00",
+  "status": "WORKSTATION_ACCESS_VERIFIED_CERT_OWNED_ELSEWHERE",
+  "ok": true,
+  "blocked": false,
+  "host": "dial-hermes-control",
+  "private_ip": "10.0.0.184",
+  "note": "Owner directed this agent to stand down from Live Hermes install/certification mid-run; the Hermes profile certification is owned by the parallel ChatGPT run. Facts below are limited to what this agent directly verified. install_van_profile.sh and doctor_van_profile.sh were NOT executed by this agent.",
+  "certification_of_record": {
+    "source": "docs/PRODUCTION_ACCEPTANCE_LEDGER.md#live-hermes-certification-2026-09-15",
+    "verdict_on_main": "COMPLETE",
+    "commits_on_main": [
+      {
+        "sha": "2656b93",
+        "subject": "Certify live VAN Hermes runtime"
+      },
+      {
+        "sha": "1a0c85f",
+        "subject": "Close repository acceptance and Project Truth"
+      },
+      {
+        "sha": "a578c12",
+        "subject": "Merge pull request #3 from Vanguduza/gpt/live-hermes-cert-20260915"
+      }
+    ],
+    "canonical_source_under_prior_cert": "66f6c6ef0d8cc2289dc7a851746194148405b10d",
+    "ancestor_check": {
+      "commit": "5b111e8",
+      "subject": "Integrate Google Intelligence Mesh under Hermes VAN",
+      "is_ancestor_of_main": true
+    },
+    "new_chatgpt_cert_observed_on_origin_main": false,
+    "origin_main_at_check": "96279f710ea47277b15ef28764eda6aec0fea744",
+    "origin_main_check_time_local": "2026-09-15T18:38:00+02:00"
+  },
+  "verified_by_this_agent": {
+    "oci_cli_version": "3.92.1",
+    "oci_profile": "DIALRECOVERY",
+    "oci_auth": "security_token",
+    "session_valid_until": "2026-09-15T19:11:02",
+    "bastion": {
+      "ocid": "ocid1.bastion.oc1.af-johannesburg-1.amaaaaaavbgkoeqa33ngu2uh7qplw66y7gxxkvzpqploxzuds5ssxifx6zza",
+      "name": "Bastion202609111117",
+      "state": "ACTIVE",
+      "allow_list_before": [
+        "129.151.189.253/32",
+        "216.234.215.144/32",
+        "84.12.118.178/32"
+      ],
+      "allow_list_after": [
+        "129.151.189.253/32",
+        "216.234.215.144/32",
+        "66.9.173.77/32",
+        "84.12.118.178/32"
+      ],
+      "workstation_cidr_added": "66.9.173.77/32"
+    },
+    "target_instance": {
+      "ocid": "ocid1.instance.oc1.af-johannesburg-1.anvg4ljrvbgkoeqcvkuwtp3s43hc6jlod77k6to6gf7uhv5g43u3vkkgav4a",
+      "display_name": "dial-hermes-control",
+      "lifecycle_state": "RUNNING",
+      "shape": "VM.Standard.A1.Flex",
+      "bastion_plugin_before": "STOPPED",
+      "bastion_plugin_action": "agent_config plugins_config Bastion -> ENABLED via update_instance",
+      "bastion_plugin_after": "RUNNING"
+    },
+    "managed_ssh_sessions": [
+      {
+        "target": "dial-hermes-control",
+        "ip": "10.0.0.184",
+        "os_user": "ubuntu",
+        "session_ocid": "ocid1.bastionsession.oc1.af-johannesburg-1.amaaaaaavbgkoeqa5qrwxckey5cey43v3wbixex7xzbzgkc4sikomzt7hyra",
+        "state": "ACTIVE",
+        "ttl_seconds": 10800,
+        "used": true
+      },
+      {
+        "target": "oracle-admin",
+        "ip": "10.0.0.123",
+        "os_user": "ubuntu",
+        "session_ocid": "ocid1.bastionsession.oc1.af-johannesburg-1.amaaaaaavbgkoeqaup6kipsyprkx24o2jlzbqd3bsyfb2v3ofan673uabadq",
+        "state": "ACTIVE",
+        "ttl_seconds": 10800,
+        "used": false,
+        "purpose": "jump-host fallback, not required"
+      }
+    ],
+    "ssh_login": {
+      "path": "workstation -> OCI Bastion (host.bastion.af-johannesburg-1.oci.oraclecloud.com) -> 10.0.0.184",
+      "key": "~/.ssh/oci_rescue (private key never transmitted or printed)",
+      "user": "uid=1001(ubuntu)",
+      "sudo_nopasswd": true,
+      "hostname": "dial-hermes-control",
+      "host_role": "ROLE=CONTROL_AUTHORITY",
+      "fabric": "PROVIDER_FIRST_EXECUTION_FABRIC",
+      "revision": "2.0",
+      "os": "Ubuntu 24.04.4 LTS",
+      "arch": "aarch64"
+    },
+    "live_hermes_runtime_observed": {
+      "hermes_home": "/home/ubuntu/.hermes",
+      "agent_tree_present": true,
+      "profiles_dir_present": true,
+      "skills_dir_present": true,
+      "gateway_socket_present": true,
+      "gateway_state_file_present": true,
+      "van_source_worktrees": [
+        "/home/ubuntu/work/van-live-current",
+        "/home/ubuntu/work/van-live-5b111e8",
+        "/home/ubuntu/work/van-sonnet5-google-account"
+      ],
+      "caveat": "Directory-level observation only. No doctor_van_profile.sh run, no profile install, no skill/policy/Bot Chat assertions made by this agent."
+    },
+    "run_command_channel": {
+      "plugin": "Compute Instance Run Command",
+      "status": "RUNNING",
+      "executes_as": "uid=999(ocarun)",
+      "sudo_nopasswd": false,
+      "verdict": "usable for unprivileged reads only; insufficient for Hermes profile install"
+    }
+  },
+  "not_verified_by_this_agent": [
+    "install_van_profile.sh execution",
+    "doctor_van_profile.sh checks",
+    "Bot Chat / message_agent / councils live tests",
+    "van_policy_hook registration in live policy pipeline",
+    "Google Workspace or Gemini live READY receipts"
+  ]
+}
