@@ -54,6 +54,8 @@ class VanGatewayClient(context: Context) {
 
     suspend fun health(): JSONObject = withContext(Dispatchers.IO) { getJson("/health") }
 
+    suspend fun googleMesh(): JSONObject = withContext(Dispatchers.IO) { getJson("/v1/google/mesh") }
+
     suspend fun briefing(): JSONObject = withContext(Dispatchers.IO) { getJson("/v1/briefing") }
 
     suspend fun decisions(): org.json.JSONArray = withContext(Dispatchers.IO) {

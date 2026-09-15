@@ -22,7 +22,7 @@ Resolved 2026-09-15 (workstation): local Project Truth mounts for `van`, `dial`,
 | Jules | owner Google sign-in on Hermes | CONFIGURED via attestation; READY needs live worker receipt |
 | Nano Banana / Veo | Hermes Gemini runtime + quota canary | CONFIGURED via attestation |
 | Google ADK/A2A | owner-administered Cloud/runtime | still EXTERNAL (cloud plane) |
-| Physical Samsung device | USB device + permissions | `tools/certification/device_cert_probe.py` + checklist |
+| Physical Samsung device | USB device + permissions | `tools/certification/device_cert_probe.py` + `docs/DEVICE_ACCEPTANCE_CHECKLIST.md` |
 | Artist `.riv` | Rive editor | contract + Canvas fallback + handoff |
 | Owner visual acceptance | owner review | acceptance matrix |
 | Signed production release | production keystore | Gradle wiring + `android/keystore.properties.example` |

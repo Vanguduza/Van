@@ -45,6 +45,10 @@ async def run(args: argparse.Namespace) -> int:
         if "=" not in pair:
             raise SystemExit("--verified-capability must be capability_id=evidence_pointer")
         capability_id, evidence_pointer = pair.split("=", 1)
+        if not evidence_pointer.startswith(("live://", "hermes://", "receipt://")):
+            raise SystemExit(
+                f"READY refused for {capability_id}: evidence must start with live://, hermes://, or receipt://"
+            )
         registry.get(capability_id)
         await broker.record_capability_evidence(
             capability_id,

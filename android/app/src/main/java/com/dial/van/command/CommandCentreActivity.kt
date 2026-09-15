@@ -19,8 +19,13 @@ import androidx.compose.material3.Text
 import androidx.compose.material3.TopAppBar
 import androidx.compose.material3.darkColorScheme
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.LaunchedEffect
+import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
+import androidx.compose.runtime.setValue
+import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.withContext
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.platform.LocalContext
@@ -28,7 +33,6 @@ import androidx.compose.ui.unit.dp
 import androidx.fragment.app.FragmentActivity
 import com.dial.van.VanApplication
 import com.dial.van.degraded.RestoreAction
-import com.dial.van.degraded.SubsystemStatus
 import com.dial.van.overlay.FloatingOverlayService
 import com.dial.van.queue.CommandKind
 import com.dial.van.queue.CommandSensitivity
@@ -74,8 +78,31 @@ private fun CommandCentreScreen(
 ) {
     val activity = LocalContext.current as FragmentActivity
     val gate = remember(activity) { BiometricGate(activity) }
-    val sections = remember { commandSections(app) }
-    val statusMessage = remember { mutableStateOf("") }
+    var meshSummary by remember { mutableStateOf("Google mesh: awaiting gateway evidence") }
+    var statusMessage by remember { mutableStateOf("") }
+    var sections by remember { mutableStateOf(commandSections(app, meshSummary)) }
+
+    LaunchedEffect(Unit) {
+        try {
+            val health = withContext(Dispatchers.IO) { app.gatewayClient.health() }
+            val mesh = health.optJSONObject("google_mesh")
+            val configured = mesh?.optInt("configured_capabilities") ?: 0
+            val total = mesh?.optInt("total_capabilities") ?: 0
+            val principal = mesh?.optJSONObject("principal")?.optBoolean("registered") == true
+            app.degradedModeStore.applyGoogleMesh(configured, total, principal)
+            if (!health.optBoolean("ok", false)) {
+                app.degradedModeStore.markBroken("hermes", "Hermes offline from /health", RestoreAction.RETRY_CONNECTION)
+            } else {
+                app.degradedModeStore.markWorking("hermes")
+                app.degradedModeStore.markWorking("gateway")
+            }
+            meshSummary = "Google mesh configured=$configured/$total principal=${if (principal) "registered" else "missing"}"
+        } catch (exc: Exception) {
+            app.degradedModeStore.markBroken("gateway", "health unreachable: ${exc.message}", RestoreAction.RETRY_CONNECTION)
+            meshSummary = "Google mesh: gateway unreachable"
+        }
+        sections = commandSections(app, meshSummary)
+    }
 
     LazyColumn(
         modifier = Modifier
@@ -107,14 +134,14 @@ private fun CommandCentreScreen(
                             sensitivity = CommandSensitivity.DESTRUCTIVE,
                         ),
                     )
-                    statusMessage.value = "A4 action queued with biometric approval"
+                    statusMessage = "A4 action queued with biometric approval"
                 }
             }) {
                 Text("Approve A4 action (biometric)")
             }
         }
-        if (statusMessage.value.isNotEmpty()) {
-            item { Text(statusMessage.value) }
+        if (statusMessage.isNotEmpty()) {
+            item { Text(statusMessage) }
         }
     }
 }
@@ -126,7 +153,7 @@ private data class CommandSection(
     val items: List<String>,
 )
 
-private fun commandSections(app: VanApplication): List<CommandSection> {
+private fun commandSections(app: VanApplication, meshSummary: String): List<CommandSection> {
     val queueSize = app.commandQueue.size()
     val degraded = app.degradedModeStore.snapshot()
     return listOf(
@@ -137,7 +164,7 @@ private fun commandSections(app: VanApplication): List<CommandSection> {
         CommandSection("reminders", "Reminders / Follow-ups", "Time-bound follow-ups", listOf("None due")),
         CommandSection("memory", "Memory", "Owner memory context (untrusted labels)", listOf("Local context only")),
         CommandSection("audit", "Audit", "Recent capability grants & actions", listOf("Audit trail via Hermes")),
-        CommandSection("connections", "Connections", "Device + Hermes connectivity", listOf("Hermes profile: van")),
+        CommandSection("connections", "Connections", "Device + Hermes connectivity", listOf("Hermes profile: van", meshSummary)),
         CommandSection("hermes", "Hermes", "Agent execution uplink (no embedded loop)", listOf("Dispatch-only — Hermes owns execution")),
         CommandSection(
             "degraded",

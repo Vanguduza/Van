@@ -37,11 +37,15 @@ data class DegradedMode(
     val workingCount: Int = subsystems.count { it.status == SubsystemStatus.WORKING }
 
     companion object {
-        fun healthy(): DegradedMode = DegradedMode(
-            active = false,
-            reason = "All subsystems nominal",
-            subsystems = defaultSubsystems(),
-        )
+        fun healthy(): DegradedMode {
+            val subsystems = defaultSubsystems()
+            val broken = subsystems.any { it.status == SubsystemStatus.BROKEN }
+            return DegradedMode(
+                active = broken,
+                reason = if (broken) "Awaiting Google mesh evidence" else "All subsystems nominal",
+                subsystems = subsystems,
+            )
+        }
 
         fun defaultSubsystems(): List<DegradedSubsystem> = listOf(
             DegradedSubsystem("hermes", "Hermes uplink", SubsystemStatus.WORKING, "Agent execution via Hermes profile van"),
@@ -51,7 +55,14 @@ data class DegradedMode(
             DegradedSubsystem("notifications", "Notification listener", SubsystemStatus.WORKING, "Context ingestion with redaction"),
             DegradedSubsystem("voice", "Voice I/O", SubsystemStatus.WORKING, "Speech input and TTS output"),
             DegradedSubsystem("biometric", "Biometric gate", SubsystemStatus.WORKING, "A4 approval gate"),
-            DegradedSubsystem("google", "Google Workspace", SubsystemStatus.WORKING, "OAuth-mediated Gmail/Calendar/Drive/Contacts/Tasks"),
+            // Fail closed: Google stays unverified until /health google_mesh evidence arrives.
+            DegradedSubsystem(
+                "google",
+                "Google mesh",
+                SubsystemStatus.BROKEN,
+                "Awaiting gateway google_mesh evidence (CONFIGURED/READY)",
+                RestoreAction.RETRY_CONNECTION,
+            ),
         )
     }
 }
@@ -64,6 +75,33 @@ class DegradedModeStore {
 
     fun update(transform: (DegradedMode) -> DegradedMode) {
         current = transform(current).copy(updatedAtEpochMs = System.currentTimeMillis())
+    }
+
+    fun applyGoogleMesh(configuredCapabilities: Int, totalCapabilities: Int, principalRegistered: Boolean) {
+        if (principalRegistered && configuredCapabilities > 0) {
+            update { mode ->
+                val detail = "google_mesh configured=$configuredCapabilities/$totalCapabilities"
+                val subs = mode.subsystems.map { sub ->
+                    if (sub.id == "google") {
+                        sub.copy(status = SubsystemStatus.WORKING, detail = detail, restoreAction = RestoreAction.NONE)
+                    } else {
+                        sub
+                    }
+                }
+                val stillBroken = subs.any { it.status == SubsystemStatus.BROKEN }
+                mode.copy(
+                    active = stillBroken,
+                    reason = if (stillBroken) mode.reason else "All subsystems nominal",
+                    subsystems = subs,
+                )
+            }
+        } else {
+            markBroken(
+                "google",
+                "google_mesh unverified (configured=$configuredCapabilities/$totalCapabilities, principal=$principalRegistered)",
+                RestoreAction.RETRY_CONNECTION,
+            )
+        }
     }
 
     fun markBroken(id: String, detail: String, restore: RestoreAction) {

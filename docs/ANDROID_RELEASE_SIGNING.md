@@ -24,4 +24,4 @@ cd android
 gradlew.bat :app:assembleRelease
 ```
 
-Without keystore properties, release signing is unavailable and the build must fail closed rather than shipping an unsigned “production” claim.
+Without `android/keystore.properties` (and a resolvable `storeFile`), `:app:assembleRelease` / `:app:bundleRelease` **fail closed** and refuse to produce an unsigned release artifact.

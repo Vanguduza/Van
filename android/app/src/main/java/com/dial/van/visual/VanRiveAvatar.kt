@@ -8,25 +8,39 @@ import app.rive.runtime.kotlin.core.Fit
 import app.rive.runtime.kotlin.core.Loop
 
 @Composable
-fun VanRiveAvatar(state: VanVisualState, modifier: Modifier = Modifier) {
+fun VanRiveAvatar(
+    state: VanVisualState,
+    modifier: Modifier = Modifier,
+    onLoadFailed: () -> Unit = {},
+) {
     AndroidView(
         modifier = modifier,
         factory = { ctx ->
             RiveAnimationView(ctx).apply {
-                val bytes = ctx.assets.open(RiveBindingContract.ASSET_FILE).readBytes()
-                setRiveBytes(
-                    bytes,
-                    artboardName = RiveBindingContract.ARTBOARD,
-                    stateMachineName = RiveBindingContract.STATE_MACHINE,
-                    animationName = null,
-                    autoplay = true,
-                    fit = Fit.CONTAIN,
-                    alignment = app.rive.runtime.kotlin.core.Alignment.CENTER,
-                    loop = Loop.LOOP,
-                )
+                try {
+                    val bytes = ctx.assets.open(RiveBindingContract.ASSET_FILE).readBytes()
+                    setRiveBytes(
+                        bytes,
+                        artboardName = RiveBindingContract.ARTBOARD,
+                        stateMachineName = RiveBindingContract.STATE_MACHINE,
+                        animationName = null,
+                        autoplay = true,
+                        fit = Fit.CONTAIN,
+                        alignment = app.rive.runtime.kotlin.core.Alignment.CENTER,
+                        loop = Loop.LOOP,
+                    )
+                } catch (_: Throwable) {
+                    onLoadFailed()
+                }
             }
         },
-        update = { view -> applyVisualState(view, state) },
+        update = { view ->
+            try {
+                applyVisualState(view, state)
+            } catch (_: Throwable) {
+                onLoadFailed()
+            }
+        },
     )
 }
 

@@ -150,13 +150,16 @@ def create_app() -> FastAPI:
     @app.get("/health")
     async def health():
         hermes_health = await hermes.health()
-        if not hermes_health.get("ok"):
+        hermes_ok = bool(hermes_health.get("ok"))
+        if hermes_ok:
+            degraded.set(__import__("van_gateway.models", fromlist=["DegradedCode"]).DegradedCode.HERMES_OFFLINE, False)
+        else:
             degraded.set(__import__("van_gateway.models", fromlist=["DegradedCode"]).DegradedCode.HERMES_OFFLINE, True)
         gstatus = await google.status()
         mesh = await google_broker.mesh_status(workspace=gstatus)
         configured = sum(1 for item in mesh["capabilities"] if item["state"] in {"READY", "CONFIGURED"})
         return {
-            "ok": True,
+            "ok": hermes_ok,
             "service": "van-gateway",
             "hermes": hermes_health,
             "google": gstatus.model_dump(),
@@ -252,7 +255,12 @@ def create_app() -> FastAPI:
             raise HTTPException(status_code=404, detail="decision_not_found") from exc
 
     @app.put("/v1/projects/{project_id}/truth")
-    async def put_project_truth(project_id: str, body: ProjectTruthBody):
+    async def put_project_truth(
+        project_id: str,
+        body: ProjectTruthBody,
+        x_van_internal_token: str | None = Header(default=None),
+    ):
+        require_internal_control(x_van_internal_token)
         if project_id not in projects.known_projects():
             raise HTTPException(status_code=404, detail="unknown_project")
         await projects.cache_truth(project_id, body.truth, body.truth_sha, body.repo_sha)

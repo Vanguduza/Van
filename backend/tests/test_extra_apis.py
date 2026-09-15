@@ -55,10 +55,44 @@ async def test_decision_escalation_surfaces_attention(client):
 
 
 @pytest.mark.asyncio
+async def test_project_truth_put_requires_internal_token(client):
+    ac, _app = client
+    denied = await ac.put(
+        "/v1/projects/dde/truth",
+        json={"truth": {"project": "dde", "rules": ["fail_closed"]}, "truth_sha": "abc", "repo_sha": "def"},
+    )
+    assert denied.status_code in {403, 503}
+    put = await ac.put(
+        "/v1/projects/dde/truth",
+        headers={"X-Van-Internal-Token": "test-internal-token"},
+        json={"truth": {"project": "dde", "rules": ["fail_closed"]}, "truth_sha": "abc", "repo_sha": "def"},
+    )
+    assert put.status_code == 200
+    assert put.json()["ok"] is True
+    loaded = await ac.get("/v1/projects/dde/truth")
+    assert loaded.json()["truth_sha"] == "abc"
+
+
+@pytest.mark.asyncio
+async def test_health_ok_false_when_hermes_offline(client, monkeypatch):
+    ac, app = client
+
+    async def offline():
+        return {"ok": False, "degraded": "HERMES_OFFLINE"}
+
+    monkeypatch.setattr(app.state.orchestrator.hermes, "health", offline)
+    body = (await ac.get("/health")).json()
+    assert body["ok"] is False
+    assert body["hermes"]["ok"] is False
+    assert any(item["code"] == "HERMES_OFFLINE" for item in body["degraded"])
+
+
+@pytest.mark.asyncio
 async def test_project_truth_put_enables_mutation_gate(client):
     ac, _app = client
     put = await ac.put(
         "/v1/projects/dde/truth",
+        headers={"X-Van-Internal-Token": "test-internal-token"},
         json={"truth": {"project": "dde", "rules": ["fail_closed"]}, "truth_sha": "abc", "repo_sha": "def"},
     )
     assert put.json()["ok"] is True

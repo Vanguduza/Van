@@ -23,8 +23,8 @@
 - **Hermes Google skills:** google-intelligence, gemini-notebook, google-design, google-development; Google providers remain subordinate to Hermes.
 - **Policy hardening:** Google broker/registry protected; session-cookie export, credential-plane collapse and broker bypass are prohibited patterns.
 - Comprehensive canonical specification: `docs/GOOGLE_INTELLIGENCE_MESH.md`.
-- Device/CI helpers: `tools/certification/device_cert_probe.py`; `tools/ci/install_github_workflow.py`.
-- Test coverage added for migration v2, principal hashing, deterministic routing, mutation/approval gates, provenance authority, OAuth refresh exchange, credential-plane separation, and Hermes Google attestation import.
+- Device/CI helpers: `tools/certification/device_cert_probe.py`; `tools/ci/install_github_workflow.py`; Windows `tools/bootstrap_backend.ps1`, `tools/run_gateway.ps1`, `tools/sync_project_truth_live.ps1`.
+- Fail-closed hardening: unsigned release refused; `/health` `ok` tracks Hermes; Project Truth PUT requires internal token; Google mesh defaults unverified until evidence; Rive load failures fall back to Canvas.
 
 ## EXTERNALLY BLOCKED / REQUIRES LIVE CERTIFICATION
 

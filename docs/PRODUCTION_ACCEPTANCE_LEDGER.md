@@ -11,9 +11,9 @@
 | No fake success paths for Hermes/Google offline | PASS (fail closed) |
 | Existing backend suite | PASS at prior HEAD |
 | Existing cross-cutting contracts/scenarios/hermes | PASS at prior HEAD |
-| Android assembleDebug | PASS at gap-closure HEAD |
-| Android lintDebug | PASS at gap-closure HEAD |
-| Android unit tests | PASS at prior HEAD |
+| Android assembleDebug | PASS at fail-closed hardening HEAD |
+| Android lintDebug | PASS at fail-closed hardening HEAD |
+| Android unit tests | PASS at fail-closed hardening HEAD |
 | Visual authority contract tests | PASS at prior HEAD |
 | Owner escalation / decisions API | PASS |
 | Reminder time-expression parse | PASS |
@@ -23,11 +23,11 @@
 | SBOM / provenance / checksums | PASS at prior HEAD |
 | Project Truth canonical state contract | PASS — canonical state added and guarded for PR-based integration |
 | Backend bootstrap | PASS — repository root resolution and `python3` invocation corrected; bootstrap executed successfully |
-| Complete Python suite at closure HEAD | PASS — 70 passed |
+| Complete Python suite at closure HEAD | PASS — 72 passed |
 
 ## Google Intelligence Mesh repository gates
 
-Validated 2026-09-15 in a clean repository environment after installing the declared backend dependencies: the complete Python suite passed **70/70** tests.
+Validated 2026-09-15 in a clean repository environment after installing the declared backend dependencies: the complete Python suite passed **72/72** tests.
 
 | Gate | Status |
 |---|---|

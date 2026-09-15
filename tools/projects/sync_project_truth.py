@@ -70,6 +70,11 @@ def main() -> int:
     parser.add_argument("--project", action="append", dest="projects", help="project_id=path")
     parser.add_argument("--from-mounts", action="store_true", help="Use registries/project_mounts.json")
     parser.add_argument("--offline-cache", action="store_true", help="Write local cache under artifacts/project-truth without gateway")
+    parser.add_argument(
+        "--internal-token",
+        default=__import__("os").environ.get("VAN_INTERNAL_CONTROL_TOKEN", ""),
+        help="X-Van-Internal-Token for live gateway PUT (or env VAN_INTERNAL_CONTROL_TOKEN)",
+    )
     parser.add_argument("--dry-run", action="store_true")
     args = parser.parse_args()
 
@@ -121,7 +126,16 @@ def main() -> int:
         if args.offline_cache:
             (cache_dir / f"{project_id}.json").write_text(json.dumps(payload, indent=2) + "\n", encoding="utf-8")
             continue
-        resp = httpx.put(f"{args.gateway.rstrip('/')}/v1/projects/{project_id}/truth", json=payload, timeout=30.0)
+        if not args.internal_token:
+            print("FAIL internal_token_required for live gateway PUT", file=sys.stderr)
+            return 2
+        headers = {"X-Van-Internal-Token": args.internal_token}
+        resp = httpx.put(
+            f"{args.gateway.rstrip('/')}/v1/projects/{project_id}/truth",
+            json=payload,
+            headers=headers,
+            timeout=30.0,
+        )
         if resp.status_code >= 400:
             print(f"FAIL gateway:{project_id}:{resp.status_code}:{resp.text}", file=sys.stderr)
             failures += 1

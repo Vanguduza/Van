@@ -56,6 +56,27 @@ android {
         }
     }
 
+    // Fail closed: never ship an unsigned production APK/AAB.
+    // Check when the task graph is ready so dependent minify/package steps also abort early.
+    gradle.taskGraph.whenReady {
+        val releaseRequested = allTasks.any { task ->
+            val n = task.name
+            n == "assembleRelease" || n == "bundleRelease" || n.endsWith(":assembleRelease") || n.endsWith(":bundleRelease")
+        }
+        if (releaseRequested) {
+            if (!keystorePropertiesFile.exists()) {
+                throw GradleException(
+                    "Release signing refused: android/keystore.properties missing. " +
+                        "Copy android/keystore.properties.example and supply a production keystore.",
+                )
+            }
+            val storePath = keystoreProperties["storeFile"] as String?
+            if (storePath.isNullOrBlank() || !file(storePath).exists()) {
+                throw GradleException("Release signing refused: storeFile missing or not found ($storePath)")
+            }
+        }
+    }
+
     compileOptions {
         sourceCompatibility = JavaVersion.VERSION_17
         targetCompatibility = JavaVersion.VERSION_17
