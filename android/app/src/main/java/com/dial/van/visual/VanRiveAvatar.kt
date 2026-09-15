@@ -1,5 +1,6 @@
 package com.dial.van.visual
 
+import android.view.View
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.viewinterop.AndroidView
@@ -7,6 +8,14 @@ import app.rive.runtime.kotlin.RiveAnimationView
 import app.rive.runtime.kotlin.core.Fit
 import app.rive.runtime.kotlin.core.Loop
 
+/**
+ * Binds the authored `van.riv` artboard to the contract inputs.
+ *
+ * Construction, load and every state push are guarded: constructing [RiveAnimationView] can
+ * itself throw when the native library is missing, so a bare [View] is handed back and
+ * [onLoadFailed] flips the caller to the Canvas character rather than leaving a blank hole
+ * where Van should be.
+ */
 @Composable
 fun VanRiveAvatar(
     state: VanVisualState,
@@ -16,9 +25,9 @@ fun VanRiveAvatar(
     AndroidView(
         modifier = modifier,
         factory = { ctx ->
-            RiveAnimationView(ctx).apply {
-                try {
-                    val bytes = ctx.assets.open(RiveBindingContract.ASSET_FILE).readBytes()
+            try {
+                RiveAnimationView(ctx).apply {
+                    val bytes = ctx.assets.open(RiveBindingContract.ASSET_FILE).use { it.readBytes() }
                     setRiveBytes(
                         bytes,
                         artboardName = RiveBindingContract.ARTBOARD,
@@ -29,16 +38,19 @@ fun VanRiveAvatar(
                         alignment = app.rive.runtime.kotlin.core.Alignment.CENTER,
                         loop = Loop.LOOP,
                     )
-                } catch (_: Throwable) {
-                    onLoadFailed()
                 }
+            } catch (_: Throwable) {
+                onLoadFailed()
+                View(ctx)
             }
         },
         update = { view ->
-            try {
-                applyVisualState(view, state)
-            } catch (_: Throwable) {
-                onLoadFailed()
+            if (view is RiveAnimationView) {
+                try {
+                    applyVisualState(view, state)
+                } catch (_: Throwable) {
+                    onLoadFailed()
+                }
             }
         },
     )

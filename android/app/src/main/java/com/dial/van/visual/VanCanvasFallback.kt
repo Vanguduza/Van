@@ -1,145 +1,404 @@
 package com.dial.van.visual
 
+import android.content.Context
+import android.os.Build
+import android.os.PowerManager
+import android.provider.Settings
+import android.view.WindowManager
+import androidx.compose.animation.core.LinearEasing
+import androidx.compose.animation.core.RepeatMode
+import androidx.compose.animation.core.animateFloat
+import androidx.compose.animation.core.infiniteRepeatable
+import androidx.compose.animation.core.rememberInfiniteTransition
+import androidx.compose.animation.core.tween
 import androidx.compose.foundation.Canvas
+import androidx.compose.foundation.Image
+import androidx.compose.foundation.layout.Box
+import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
+import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.geometry.CornerRadius
 import androidx.compose.ui.geometry.Offset
 import androidx.compose.ui.geometry.Size
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.graphics.ColorFilter
+import androidx.compose.ui.graphics.ColorMatrix
 import androidx.compose.ui.graphics.Path
+import androidx.compose.ui.graphics.drawscope.DrawScope
 import androidx.compose.ui.graphics.drawscope.Stroke
+import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.platform.LocalContext
+import androidx.compose.ui.res.painterResource
+import androidx.compose.ui.semantics.contentDescription
+import androidx.compose.ui.semantics.semantics
+import androidx.compose.ui.tooling.preview.Preview
+import androidx.compose.foundation.background
+import androidx.compose.foundation.layout.size
+import androidx.compose.ui.unit.dp
 import java.io.IOException
+import kotlin.math.PI
+import kotlin.math.min
+import kotlin.math.sin
 
 /**
- * Canvas fallback painter drawing canonical Van silhouette cues:
- * silver hair, blue eyes, cyan visor, cyan orb companion.
- * Rive asset/runtime failures always fall back here (fail closed on visual).
+ * Entry point for every Van appearance.
+ *
+ * Resolves the renderer once per composition target and degrades to the interim Canvas
+ * character whenever Rive cannot be trusted to paint a truthful Van.
  */
 @Composable
-fun VanAvatar(state: VanVisualState, modifier: Modifier = Modifier) {
+fun VanAvatar(
+    state: VanVisualState,
+    modifier: Modifier = Modifier,
+    presentation: VanPresentation = VanPresentation.COMPACT,
+    onDecision: (VanRenderDecision) -> Unit = {},
+) {
     val context = LocalContext.current
-    var useRive by remember {
-        mutableStateOf(
-            try {
-                context.assets.open(RiveBindingContract.ASSET_FILE).close()
-                true
-            } catch (_: IOException) {
-                false
-            },
-        )
-    }
-    if (useRive) {
-        VanRiveAvatar(
+    var decision by remember(context) { mutableStateOf(resolveRenderer(context)) }
+
+    LaunchedEffect(decision) { onDecision(decision) }
+
+    when (decision.renderer) {
+        VanRenderer.RIVE -> VanRiveAvatar(
             state = state,
             modifier = modifier,
-            onLoadFailed = { useRive = false },
+            onLoadFailed = {
+                decision = VanVisualRuntime.decide(
+                    assetBytes = null,
+                    riveRuntimeAvailable = false,
+                    ownerArtAvailable = VanStateArt.artAvailable(context),
+                    loadFailed = true,
+                )
+            },
         )
-    } else {
-        VanCanvasAvatar(state = state, modifier = modifier)
+
+        VanRenderer.OWNER_ART -> VanOwnerArtAvatar(state = state, modifier = modifier)
+
+        VanRenderer.CANVAS -> VanCanvasAvatar(
+            state = state,
+            modifier = modifier,
+            presentation = presentation,
+        )
     }
 }
 
+/**
+ * Owner-supplied bitmap pose.
+ *
+ * Per §1 the character is the solid anchor, so the bitmap is drawn opaque — the only
+ * modulation permitted is §6's truthful muting for OFFLINE and DEGRADED, applied with the same
+ * [VanStatusPalette] desaturation and dim values the Canvas character uses.
+ */
 @Composable
-fun VanCanvasAvatar(state: VanVisualState, modifier: Modifier = Modifier) {
-    val hairColor = Color(0xFFE8E8F0)
-    val skinColor = Color(0xFF8D5524)
-    val eyeColor = Color(0xFF1E88E5)
-    val visorColor = Color(0x9900E5FF)
-    val visorStroke = Color(0xFF00E5FF)
-    val jacketColor = Color(0xFF1A1A1A)
-    val orbColor = Color(0xFF00E5FF)
-    val urgencyTint = Color(0xFFFF5252).copy(alpha = state.urgency.coerceIn(0f, 1f) * 0.4f)
-    val offlineDim = if (state.durableState == VanDurableState.OFFLINE) 0.45f else 1f
+fun VanOwnerArtAvatar(state: VanVisualState, modifier: Modifier = Modifier) {
+    val palette = VanStatusPalette.forState(state.durableState)
+    val resId = VanStateArt.drawableFor(state.durableState) ?: return
+    val description = vanContentDescription(state)
 
-    Canvas(modifier = modifier) {
-        val w = size.width
-        val h = size.height
-        val cx = w / 2f
-        val headR = w * 0.22f
+    val filter = if (palette.desaturation > 0.01f) {
+        ColorFilter.colorMatrix(ColorMatrix().apply { setToSaturation(1f - palette.desaturation) })
+    } else {
+        null
+    }
 
-        // Jacket shoulders
-        drawRoundRect(
-            color = jacketColor.copy(alpha = offlineDim),
-            topLeft = Offset(w * 0.2f, h * 0.55f),
-            size = Size(w * 0.6f, h * 0.35f),
-            cornerRadius = androidx.compose.ui.geometry.CornerRadius(12f, 12f),
+    Image(
+        painter = painterResource(id = resId),
+        contentDescription = description,
+        modifier = modifier,
+        contentScale = ContentScale.Fit,
+        alpha = palette.dim,
+        colorFilter = filter,
+    )
+}
+
+/**
+ * Van in his interaction shell, composed in the order fixed by §10:
+ * aura bloom → filaments → character → orb, with the glass supplied by the caller underneath.
+ */
+@Composable
+fun VanEmbodiment(
+    state: VanVisualState,
+    modifier: Modifier = Modifier,
+    presentation: VanPresentation = VanPresentation.COMPACT,
+    budget: VanEffectBudget = VanEffectBudget.FULL,
+    onDecision: (VanRenderDecision) -> Unit = {},
+) {
+    val spec = VanAuraSpecs.forState(state.durableState, budget)
+    val phase = vanIdlePhase(state.durableState, !budget.allowMotion)
+
+    Box(modifier = modifier, contentAlignment = Alignment.Center) {
+        // 5 & 6. Aura bloom and electrical filaments, behind Van and in front of the glass.
+        VanAuraLayer(
+            spec = spec,
+            phase = phase,
+            budget = budget,
+            modifier = Modifier.matchParentSize(),
         )
-
-        // Neck
-        drawRect(
-            color = skinColor.copy(alpha = offlineDim),
-            topLeft = Offset(cx - headR * 0.35f, h * 0.48f),
-            size = Size(headR * 0.7f, h * 0.1f),
+        // 7 & 8. Van and his orb — the art poses already carry the orb.
+        VanAvatar(
+            state = state,
+            modifier = Modifier.fillMaxSize(),
+            presentation = presentation,
+            onDecision = onDecision,
         )
+    }
+}
 
-        // Face
-        drawCircle(color = skinColor.copy(alpha = offlineDim), radius = headR, center = Offset(cx, h * 0.38f))
-
-        // Silver swept hair
-        val hairPath = Path().apply {
-            moveTo(cx - headR * 1.1f, h * 0.28f)
-            quadraticBezierTo(cx - headR * 0.2f, h * 0.05f, cx + headR * 1.2f, h * 0.22f)
-            lineTo(cx + headR * 0.9f, h * 0.42f)
-            quadraticBezierTo(cx, h * 0.18f, cx - headR * 1.0f, h * 0.42f)
-            close()
+/** Resolves §11's effect budget from live device signals. */
+@Composable
+fun rememberVanEffectBudget(): VanEffectBudget {
+    val context = LocalContext.current
+    val reducedMotion = rememberReducedMotion()
+    return remember(context, reducedMotion) {
+        val power = context.getSystemService(PowerManager::class.java)
+        val thermal = if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.Q) {
+            runCatching { power?.currentThermalStatus ?: 0 }.getOrDefault(0)
+        } else {
+            0
         }
-        drawPath(hairPath, hairColor.copy(alpha = offlineDim))
-
-        // Blue eyes (under visor cues)
-        val eyeY = h * 0.36f
-        val eyeR = headR * 0.08f
-        drawCircle(color = eyeColor.copy(alpha = offlineDim), radius = eyeR, center = Offset(cx - headR * 0.35f, eyeY))
-        drawCircle(color = eyeColor.copy(alpha = offlineDim), radius = eyeR, center = Offset(cx + headR * 0.35f, eyeY))
-        drawCircle(color = Color.White.copy(alpha = 0.7f * offlineDim), radius = eyeR * 0.35f, center = Offset(cx - headR * 0.38f, eyeY - eyeR * 0.25f))
-        drawCircle(color = Color.White.copy(alpha = 0.7f * offlineDim), radius = eyeR * 0.35f, center = Offset(cx + headR * 0.32f, eyeY - eyeR * 0.25f))
-
-        // Cyan visor band
-        drawRoundRect(
-            color = visorColor.copy(alpha = offlineDim),
-            topLeft = Offset(cx - headR * 0.85f, h * 0.32f),
-            size = Size(headR * 1.7f, headR * 0.45f),
-            cornerRadius = androidx.compose.ui.geometry.CornerRadius(headR * 0.2f, headR * 0.2f),
+        val blurEnabled = if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.S) {
+            runCatching {
+                context.getSystemService(WindowManager::class.java)?.isCrossWindowBlurEnabled ?: false
+            }.getOrDefault(false)
+        } else {
+            false
+        }
+        VanEffectPolicy.resolve(
+            VanEffectConditions(
+                batterySaver = power?.isPowerSaveMode == true,
+                thermalStatus = thermal,
+                reducedMotion = reducedMotion,
+                crossWindowBlurEnabled = blurEnabled,
+            ),
         )
-        drawRoundRect(
-            color = visorStroke.copy(alpha = offlineDim),
-            topLeft = Offset(cx - headR * 0.85f, h * 0.32f),
-            size = Size(headR * 1.7f, headR * 0.45f),
-            cornerRadius = androidx.compose.ui.geometry.CornerRadius(headR * 0.2f, headR * 0.2f),
-            style = Stroke(width = 2f),
-        )
+    }
+}
 
-        // Mouth cue from speech sync
-        if (state.speaking || state.mouthOpen > 0.05f) {
-            val openH = headR * 0.15f * state.mouthOpen.coerceIn(0f, 1f)
-            drawOval(
-                color = Color(0xFF442211).copy(alpha = offlineDim),
-                topLeft = Offset(cx - headR * 0.15f, h * 0.42f),
-                size = Size(headR * 0.3f, openH.coerceAtLeast(2f)),
+private fun resolveRenderer(context: Context): VanRenderDecision {
+    val bytes = try {
+        context.assets.open(RiveBindingContract.ASSET_FILE).use { stream ->
+            var total = 0L
+            val buffer = ByteArray(8192)
+            while (true) {
+                val read = stream.read(buffer)
+                if (read <= 0) break
+                total += read
+            }
+            total
+        }
+    } catch (_: IOException) {
+        null
+    }
+    return VanVisualRuntime.decide(
+        assetBytes = bytes,
+        riveRuntimeAvailable = riveRuntimeAvailable(),
+        ownerArtAvailable = VanStateArt.artAvailable(context),
+    )
+}
+
+private fun riveRuntimeAvailable(): Boolean = try {
+    Class.forName("app.rive.runtime.kotlin.RiveAnimationView")
+    true
+} catch (_: Throwable) {
+    false
+}
+
+/**
+ * True when the owner has turned system animations off. Van then holds a still, readable
+ * pose instead of breathing, spinning or blinking.
+ */
+@Composable
+fun rememberReducedMotion(): Boolean {
+    val context = LocalContext.current
+    return remember(context) {
+        runCatching {
+            Settings.Global.getFloat(
+                context.contentResolver,
+                Settings.Global.ANIMATOR_DURATION_SCALE,
+                1f,
+            ) == 0f
+        }.getOrDefault(false)
+    }
+}
+
+/**
+ * The interim character. Every element traces to the locked identity, and the status layer
+ * stays inside the acceptance matrix bounds: bounded motion, restrained glow, and truthful
+ * muting when offline or degraded.
+ */
+@Composable
+fun VanCanvasAvatar(
+    state: VanVisualState,
+    modifier: Modifier = Modifier,
+    presentation: VanPresentation = VanPresentation.COMPACT,
+) {
+    val reducedMotion = rememberReducedMotion()
+    val phase = vanIdlePhase(state.durableState, reducedMotion)
+    val frame = VanSceneFrame(
+        presentation = presentation,
+        phase = phase,
+        blink = if (reducedMotion) 0f else blinkFor(phase),
+        reducedMotion = reducedMotion,
+    )
+    val ops = VanScene.build(state, frame)
+    val description = vanContentDescription(state)
+
+    Canvas(modifier = modifier.semantics { contentDescription = description }) {
+        drawVanScene(ops)
+    }
+}
+
+/** Idle clock. Alert states tick faster but never leave the bounded-motion range. */
+@Composable
+private fun vanIdlePhase(state: VanDurableState, reducedMotion: Boolean): Float {
+    if (reducedMotion) return NEUTRAL_PHASE
+    val durationMs = when (state) {
+        VanDurableState.LISTENING,
+        VanDurableState.WORKING,
+        VanDurableState.SEARCHING,
+        VanDurableState.CONNECTING,
+        -> 2000
+        VanDurableState.URGENT,
+        VanDurableState.WARNING,
+        VanDurableState.ERROR,
+        VanDurableState.WAITING_FOR_OWNER,
+        -> 2800
+        VanDurableState.SLEEPING,
+        VanDurableState.OFFLINE,
+        -> 6000
+        else -> 4200
+    }
+    val transition = rememberInfiniteTransition(label = "van-idle")
+    val value by transition.animateFloat(
+        initialValue = 0f,
+        targetValue = 1f,
+        animationSpec = infiniteRepeatable(
+            animation = tween(durationMillis = durationMs, easing = LinearEasing),
+            repeatMode = RepeatMode.Restart,
+        ),
+        label = "van-phase",
+    )
+    return value
+}
+
+/** One unhurried blink at the end of each idle cycle. */
+private fun blinkFor(phase: Float): Float {
+    val start = 0.93f
+    if (phase < start) return 0f
+    val t = ((phase - start) / (1f - start)).coerceIn(0f, 1f)
+    return sin(t * PI.toFloat())
+}
+
+internal fun vanContentDescription(state: VanVisualState): String {
+    val label = VanScene.statusLabel(state.durableState)
+    return "Van assistant, $label"
+}
+
+/** Paints a [VanScene] program, fitted and centred so proportions never stretch. */
+fun DrawScope.drawVanScene(ops: List<VanDrawOp>) {
+    val s = min(size.width, size.height)
+    if (s <= 0f) return
+    val dx = (size.width - s) / 2f
+    val dy = (size.height - s) / 2f
+
+    fun px(v: Float) = v * s
+    fun x(v: Float) = dx + v * s
+    fun y(v: Float) = dy + v * s
+
+    ops.forEach { op ->
+        val color = Color(op.color)
+        val stroke = op.strokeWidth?.let { Stroke(width = px(it).coerceAtLeast(1f)) }
+        when (op) {
+            is VanDrawOp.Circle -> if (stroke == null) {
+                drawCircle(color, radius = px(op.r), center = Offset(x(op.cx), y(op.cy)))
+            } else {
+                drawCircle(color, radius = px(op.r), center = Offset(x(op.cx), y(op.cy)), style = stroke)
+            }
+
+            is VanDrawOp.Oval -> {
+                val topLeft = Offset(x(op.cx - op.rx), y(op.cy - op.ry))
+                val boxSize = Size(px(op.rx * 2f), px(op.ry * 2f))
+                if (stroke == null) drawOval(color, topLeft, boxSize) else drawOval(color, topLeft, boxSize, style = stroke)
+            }
+
+            is VanDrawOp.RoundRect -> {
+                val topLeft = Offset(x(op.cx - op.halfW), y(op.cy - op.halfH))
+                val boxSize = Size(px(op.halfW * 2f), px(op.halfH * 2f))
+                val radius = CornerRadius(px(op.radius), px(op.radius))
+                if (stroke == null) {
+                    drawRoundRect(color, topLeft, boxSize, radius)
+                } else {
+                    drawRoundRect(color, topLeft, boxSize, radius, style = stroke)
+                }
+            }
+
+            is VanDrawOp.Arc -> drawArc(
+                color = color,
+                startAngle = op.startDegrees,
+                sweepAngle = op.sweepDegrees,
+                useCenter = false,
+                topLeft = Offset(x(op.cx - op.r), y(op.cy - op.r)),
+                size = Size(px(op.r * 2f), px(op.r * 2f)),
+                style = stroke ?: Stroke(width = 1f),
             )
-        }
 
-        // Cyan holographic orb companion
-        val orbR = w * 0.08f
-        val orbX = cx + headR * 1.3f + state.attentionX * orbR
-        val orbY = h * 0.35f + state.attentionY * orbR
-        val orbAlpha = if (state.durableState == VanDurableState.OFFLINE) 0.2f else 1f
-        drawCircle(color = orbColor.copy(alpha = 0.35f * orbAlpha), radius = orbR * 1.4f, center = Offset(orbX, orbY))
-        drawCircle(color = orbColor.copy(alpha = orbAlpha), radius = orbR, center = Offset(orbX, orbY))
-        drawCircle(color = Color.White.copy(alpha = 0.6f * orbAlpha), radius = orbR * 0.25f, center = Offset(orbX - orbR * 0.3f, orbY - orbR * 0.3f))
-
-        when (state.durableState) {
-            VanDurableState.DEGRADED, VanDurableState.WARNING, VanDurableState.URGENT -> {
-                drawCircle(color = urgencyTint, radius = w * 0.48f, center = Offset(cx, h * 0.45f))
+            is VanDrawOp.PathOp -> {
+                val path = Path()
+                op.segments.forEach { seg ->
+                    when (seg) {
+                        is VanPathSeg.MoveTo -> path.moveTo(x(seg.x), y(seg.y))
+                        is VanPathSeg.LineTo -> path.lineTo(x(seg.x), y(seg.y))
+                        is VanPathSeg.QuadTo -> path.quadraticBezierTo(x(seg.cx), y(seg.cy), x(seg.x), y(seg.y))
+                        VanPathSeg.Close -> path.close()
+                    }
+                }
+                if (stroke == null) drawPath(path, color) else drawPath(path, color, style = stroke)
             }
-            VanDurableState.OFFLINE -> {
-                drawCircle(color = Color(0xFF607D8B).copy(alpha = 0.25f), radius = w * 0.48f, center = Offset(cx, h * 0.45f))
-            }
-            else -> Unit
         }
     }
+}
+
+private const val NEUTRAL_PHASE = 0.25f
+
+@Preview(name = "Van compact — ready", widthDp = 96, heightDp = 96)
+@Composable
+private fun PreviewVanCompactReady() {
+    VanCanvasAvatar(
+        state = VanVisualState(durableState = VanDurableState.IDLE),
+        modifier = Modifier.size(96.dp).background(Color(0xFF0B0F14)),
+    )
+}
+
+@Preview(name = "Van compact — degraded", widthDp = 96, heightDp = 96)
+@Composable
+private fun PreviewVanCompactDegraded() {
+    VanCanvasAvatar(
+        state = VanVisualState(durableState = VanDurableState.DEGRADED, urgency = 0.3f),
+        modifier = Modifier.size(96.dp).background(Color(0xFF0B0F14)),
+    )
+}
+
+@Preview(name = "Van compact — offline", widthDp = 96, heightDp = 96)
+@Composable
+private fun PreviewVanCompactOffline() {
+    VanCanvasAvatar(
+        state = VanVisualState(durableState = VanDurableState.OFFLINE),
+        modifier = Modifier.size(96.dp).background(Color(0xFF0B0F14)),
+    )
+}
+
+@Preview(name = "Van command centre — speaking", widthDp = 220, heightDp = 220)
+@Composable
+private fun PreviewVanCommandCentre() {
+    VanCanvasAvatar(
+        state = VanVisualState(durableState = VanDurableState.SPEAKING, speaking = true, mouthOpen = 0.6f),
+        presentation = VanPresentation.COMMAND_CENTRE,
+        modifier = Modifier.size(220.dp).background(Color(0xFF0B0F14)),
+    )
 }

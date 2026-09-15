@@ -47,6 +47,10 @@ dist/
 artifacts/local/
 *.log
 
+# Scratch extraction of the owner image pack; the boards are committed under
+# visual-authority/assets/pack/ instead.
+.tmp_vanpack/
+
 # Keep release manifests; ignore bulky local APK copies
 artifacts/release/*.apk
 artifacts/release/*.aab

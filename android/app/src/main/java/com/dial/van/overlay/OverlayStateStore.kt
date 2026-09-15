@@ -5,8 +5,14 @@ import android.content.SharedPreferences
 import androidx.core.content.edit
 
 enum class OverlayMode {
+    /** Glass capsule with status and 1–3 quick actions; Van breaks the capsule edge (§4, §5). */
     COMPACT,
+
+    /** Full glass card with status, mesh cue and the action rail. */
     EXPANDED,
+
+    /** Tucked to a screen edge: glass controls collapse to a cyan presence line (§13 Dock). */
+    DOCKED,
 }
 
 enum class DockEdge {
