@@ -4,6 +4,15 @@ GitHub rejected pushing `.github/workflows/ci.yml` because the current credentia
 
 Canonical workflow source: `tools/ci/github-actions-ci.yml`
 
-To enable Actions, copy it into `.github/workflows/ci.yml` with a token that has `workflow` scope:
-`gh auth refresh -h github.com -s workflow`
-then restore the path and push.
+Installer:
+
+```bash
+python tools/ci/install_github_workflow.py --apply --commit-push
+```
+
+If push is rejected, refresh auth with workflow scope then retry:
+
+```bash
+gh auth refresh -h github.com -s workflow
+python tools/ci/install_github_workflow.py --apply --commit-push
+```
