@@ -1,0 +1,10 @@
+{
+  "truth": {
+    "project_id": "goat",
+    "truth_path": "docs/00_PROJECT_TRUTH.md",
+    "excerpt_sha256": "9b5326d5a958a31bf7058b6a5ab64b0a1eece242e329011df4bd2db439e91403",
+    "bytes": 6201
+  },
+  "truth_sha": "9b5326d5a958a31bf7058b6a5ab64b0a1eece242e329011df4bd2db439e91403",
+  "repo_sha": "9ed4f281092f2ee493d1a5045dfe287164197c58"
+}

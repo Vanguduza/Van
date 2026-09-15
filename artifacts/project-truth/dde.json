@@ -1,0 +1,10 @@
+{
+  "truth": {
+    "project_id": "dde",
+    "truth_path": "PROJECT_TRUTH_PROTOCOL.md",
+    "excerpt_sha256": "2a2e53d983bf057357476c7661f11407fd26a81c56adad7d20e8a204b7d4e80b",
+    "bytes": 1009
+  },
+  "truth_sha": "2a2e53d983bf057357476c7661f11407fd26a81c56adad7d20e8a204b7d4e80b",
+  "repo_sha": "649ac496f4737d63ab207bcdac91d8351d47baa6"
+}

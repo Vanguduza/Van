@@ -1,0 +1,10 @@
+{
+  "truth": {
+    "project_id": "van",
+    "truth_path": "docs/PROJECT_TRUTH_PROTOCOL.md",
+    "excerpt_sha256": "ed269a1b6a562a9a7cc5e46134cd3ca1935e35568347405ea93df18bc3c5ef01",
+    "bytes": 1543
+  },
+  "truth_sha": "ed269a1b6a562a9a7cc5e46134cd3ca1935e35568347405ea93df18bc3c5ef01",
+  "repo_sha": "a578c12a4669d639159e2ddab426b3d5a0d875f3"
+}

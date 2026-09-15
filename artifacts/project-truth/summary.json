@@ -1,0 +1,42 @@
+{
+  "ok": true,
+  "mounted": [
+    {
+      "project_id": "van",
+      "truth_sha": "ed269a1b6a562a9a7cc5e46134cd3ca1935e35568347405ea93df18bc3c5ef01",
+      "repo_sha": "a578c12a4669d639159e2ddab426b3d5a0d875f3",
+      "truth_path": "docs/PROJECT_TRUTH_PROTOCOL.md"
+    },
+    {
+      "project_id": "dial",
+      "truth_sha": "4f121271ddfe4bf3d94dd04d369133d6a4c50c8e13f42c9acb3bee1af379fd32",
+      "repo_sha": "11933e9fbb00eb2f4686ad420a71007263de6a37",
+      "truth_path": "agent-system/canon/PROJECT_TRUTH.md"
+    },
+    {
+      "project_id": "goat",
+      "truth_sha": "9b5326d5a958a31bf7058b6a5ab64b0a1eece242e329011df4bd2db439e91403",
+      "repo_sha": "9ed4f281092f2ee493d1a5045dfe287164197c58",
+      "truth_path": "docs/00_PROJECT_TRUTH.md"
+    },
+    {
+      "project_id": "dde",
+      "truth_sha": "2a2e53d983bf057357476c7661f11407fd26a81c56adad7d20e8a204b7d4e80b",
+      "repo_sha": "649ac496f4737d63ab207bcdac91d8351d47baa6",
+      "truth_path": "PROJECT_TRUTH_PROTOCOL.md"
+    },
+    {
+      "project_id": "gtr",
+      "truth_sha": "8094177e102934855b197ef9bbbad3a28f34fe9f9421235bbc8d8ae08b0a80dd",
+      "repo_sha": "a08835007efece3531e83bbcabe62134d397cbbc",
+      "truth_path": "PROJECT_TRUTH_PROTOCOL.md"
+    },
+    {
+      "project_id": "aeci",
+      "truth_sha": "f3f5277b181eb76305f76be3aaaf362072928e578eb75104720fba293a065b53",
+      "repo_sha": "545d7f4e55a4a4b34494ddd778e8af06559e8c02",
+      "truth_path": "PROJECT_TRUTH_PROTOCOL.md"
+    }
+  ],
+  "failures": 0
+}

@@ -197,11 +197,13 @@ The gateway does **not** become a second agent runtime.
 - `AUTH_REQUIRED` — owner sign-in/consent is required.
 - `DEGRADED` — partial capability.
 - `RATE_LIMITED` — provider quota currently blocks execution.
+- `CAPACITY_LIMITED` — provider capacity blocks live generation for that capability only (not a global Google outage).
 - `POLICY_BLOCKED` — VAN policy prevents use.
 - `UNSUPPORTED` — intent has no registered Google route.
 - `UNAVAILABLE` — prerequisite/runtime absent.
 
 No UI or agent may translate `CONFIGURED` into a claim of successful live use.
+`CAPACITY_LIMITED` on Antigravity must surface as `ANTIGRAVITY_CAPACITY_LIMITED` and must not mark Workspace, Gemini runtime, or Jules as failed.
 
 ## 8. Tool roles and symbiosis
 
@@ -249,9 +251,12 @@ may invent product requirements or override Visual Authority.
 ### Antigravity + Jules
 
 Antigravity is the primary Google complex-development worker. Jules is preferred
-for bounded asynchronous GitHub maintenance. Hermes remains lead engineer:
-planning, work boundaries, truth checks, testing, reconciliation and final
-acceptance remain Hermes responsibilities.
+for bounded asynchronous GitHub maintenance. When Antigravity is
+`CAPACITY_LIMITED` / `RATE_LIMITED`, the deterministic router falls back to Jules
+(when configured) and records `ANTIGRAVITY_CAPACITY_LIMITED` without degrading
+other Google credential planes. Hermes remains lead engineer: planning, work
+boundaries, truth checks, testing, reconciliation and final acceptance remain
+Hermes responsibilities.
 
 ### Workspace API + Workspace Studio
 

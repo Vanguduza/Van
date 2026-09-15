@@ -11,23 +11,23 @@
 | No fake success paths for Hermes/Google offline | PASS (fail closed) |
 | Existing backend suite | PASS at prior HEAD |
 | Existing cross-cutting contracts/scenarios/hermes | PASS at prior HEAD |
-| Android assembleDebug | PASS at prior HEAD |
-| Android lintDebug | PASS at prior HEAD |
+| Android assembleDebug | PASS at gap-closure HEAD |
+| Android lintDebug | PASS at gap-closure HEAD |
 | Android unit tests | PASS at prior HEAD |
 | Visual authority contract tests | PASS at prior HEAD |
 | Owner escalation / decisions API | PASS |
 | Reminder time-expression parse | PASS |
-| Project Truth put/sync tooling | PASS (van local dry-run; others fail closed without truth) |
+| Project Truth put/sync tooling | PASS (van/dial/dde/gtr/goat/aeci offline mounts; fail closed if truth missing) |
 | Existing Google fake-transport + A4 send gate | PASS |
 | Existing migration idempotence | PASS |
 | SBOM / provenance / checksums | PASS at prior HEAD |
 | Project Truth canonical state contract | PASS — canonical state added and guarded for PR-based integration |
 | Backend bootstrap | PASS — repository root resolution and `python3` invocation corrected; bootstrap executed successfully |
-| Complete Python suite at closure HEAD | PASS — 68 passed |
+| Complete Python suite at closure HEAD | PASS — 69 passed |
 
 ## Google Intelligence Mesh repository gates
 
-Validated 2026-09-15 in a clean repository environment after installing the declared backend dependencies: the complete Python suite passed **68/68** tests.
+Validated 2026-09-15 in a clean repository environment after installing the declared backend dependencies: the complete Python suite passed **69/69** tests.
 
 | Gate | Status |
 |---|---|
@@ -45,7 +45,7 @@ Validated 2026-09-15 in a clean repository environment after installing the decl
 
 ## External gates blocking v1.0
 
-See `docs/EXTERNAL_GATES.md`. Google account registration, Workspace OAuth, Gemini runtime, Notebook/Mixboard/Stitch/Antigravity/Jules/Workspace Studio/media live certifications and existing device/signing gates remain blocked until the corresponding owner credentials/environments are available. Live Hermes is certified below.
+See `docs/EXTERNAL_GATES.md`. Google account registration, Workspace OAuth, Gemini runtime, Notebook/Mixboard/Stitch/Jules/Workspace Studio/media live certifications and existing device/signing gates remain blocked until the corresponding owner credentials/environments are available. Live Hermes is certified below. Antigravity auth/model-discovery is verified; live Antigravity generation is separately `CAPACITY_LIMITED` (not a global Google failure). Local Project Truth mounts for registered projects are closed on this workstation.
 
 ## Tag policy
 
@@ -69,6 +69,6 @@ Live host: `dial-hermes-control`; control path: authorised `oracle-admin` Comman
 | Delegate capability inheritance / toolset scope | PASS | live Hermes-source tests: 10 passed |
 | Core Hermes/DIAL services | PASS | runtime, orchestrator, gateway, chat-control, owner-steering and private-MCP-bind all active |
 | Google account authentication for Google worker plane | PASS | cached Google OAuth present; Antigravity model discovery succeeds |
-| Google live generation capacity | DEGRADED | authenticated/model-discovery verified; latest live qualification classified `CAPACITY_LIMITED`; do not mark Google execution `READY` until provider quota permits a passing canary |
+| Antigravity live generation capacity | DEGRADED (`CAPACITY_LIMITED`) | Antigravity-only; Jules fallback selected when configured; Workspace/Gemini/Jules planes are not marked failed by this state |
 
-**Live Hermes gate verdict:** COMPLETE. Google provider capacity is a separate Google-capability external gate and does not invalidate Hermes/VAN runtime acceptance.
+**Live Hermes gate verdict:** COMPLETE. Antigravity provider capacity is a separate Google-capability external gate and does not invalidate Hermes/VAN runtime acceptance.

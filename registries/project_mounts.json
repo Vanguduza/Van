@@ -1,0 +1,30 @@
+{
+  "schema_version": 1,
+  "description": "Local owner workstation mounts for Project Truth sync. Paths are machine-local; fail closed if missing.",
+  "mounts": [
+    {
+      "project_id": "van",
+      "path": "C:/Users/Admin/Documents/Van"
+    },
+    {
+      "project_id": "dial",
+      "path": "C:/Users/Admin/Documents/dial new"
+    },
+    {
+      "project_id": "goat",
+      "path": "C:/Users/Admin/Desktop/goat-app"
+    },
+    {
+      "project_id": "dde",
+      "path": "C:/Users/Admin/Documents/dde"
+    },
+    {
+      "project_id": "gtr",
+      "path": "C:/Users/Admin/Documents/nissan gtr auto/Nissan-Gtr-Auto"
+    },
+    {
+      "project_id": "aeci",
+      "path": "C:/Users/Admin/Documents/AECI-"
+    }
+  ]
+}

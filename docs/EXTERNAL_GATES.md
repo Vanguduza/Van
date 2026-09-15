@@ -15,7 +15,7 @@ Resolved 2026-09-15: the live Hermes `van` profile is installed and certified on
 | Gemini Notebook Enterprise | eligible Cloud/Enterprise setup and service identity | separate cloud-service capability route |
 | Mixboard | owner account + current Labs availability | governed artifact packet/consumer-surface route; no fake public API |
 | Stitch | owner account + current Labs availability | governed design route; no private API dependency |
-| Antigravity | owner Google sign-in + authorised dev environment | Hermes worker contract + deterministic route |
+| Antigravity live generation | owner Google sign-in + provider quota (auth/model-discovery already verified; currently `CAPACITY_LIMITED`) | Hermes worker contract + deterministic Jules fallback + `ANTIGRAVITY_CAPACITY_LIMITED` degraded code |
 | Jules | owner Google sign-in + GitHub connection | bounded repo-worker contract + deterministic route |
 | Workspace Studio | eligible owner Workspace/account surface | governed consumer workflow route |
 | Nano Banana / Veo | Gemini/API runtime credential and quota | media capability routes and provenance contract |
@@ -24,9 +24,10 @@ Resolved 2026-09-15: the live Hermes `van` profile is installed and certified on
 | Physical Samsung device | USB device + permissions | Android app and share ingress exist; device checklist required |
 | Artist `.riv` | Rive editor | contract + Canvas fallback + handoff |
 | Owner visual acceptance | owner review | acceptance matrix |
-| Live Project Truth mounts for other projects | accessible truth files + SHA capture | sync tooling exists |
 | Signed production release | production keystore | Gradle wiring/docs ready |
 | GitHub Actions canonical workflow path | credential with workflow scope | YAML retained in `tools/ci/` |
+
+Resolved 2026-09-15 (workstation): local Project Truth mounts for `van`, `dial`, `dde`, `gtr`, `goat`, and `aeci` resolve via `registries/project_mounts.json` + `tools/projects/sync_project_truth.py` offline cache. Gateway live PUT still requires a running gateway.
 
 ## Google certification rules
 

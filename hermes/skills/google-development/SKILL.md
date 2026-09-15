@@ -24,6 +24,11 @@ forbidden/protected surfaces.
 Antigravity may not independently rewrite canonical architecture, security policy,
 Project Truth or Visual Authority.
 
+When Antigravity is `CAPACITY_LIMITED` / `RATE_LIMITED`, route development via Jules
+(if configured) or Hermes Claude/Codex delegates. Surface
+`ANTIGRAVITY_CAPACITY_LIMITED` only — do not mark Workspace, Gemini runtime, or
+Jules as failed because Antigravity quota is exhausted.
+
 ## Jules
 
 Prefer for bounded asynchronous repository work such as dependency updates,

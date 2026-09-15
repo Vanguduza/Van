@@ -132,3 +132,35 @@ def test_internal_google_control_plane_fails_closed():
     with pytest.raises(GoogleControlAuthError, match="internal_control_unauthorized"):
         verify_internal_control("secret", "wrong")
     verify_internal_control("secret", "secret")
+
+
+@pytest.mark.asyncio
+async def test_antigravity_capacity_limited_falls_back_to_jules(tmp_path):
+    store = Store(str(tmp_path / "mesh.sqlite3"))
+    await store.migrate()
+    broker = GoogleIdentityBroker(
+        store,
+        GoogleCapabilityRegistry(registry_path()),
+        consumer_connected_capabilities="antigravity,jules",
+    )
+    await broker.register_principal(subject="sub-ag", ai_plan="PRO")
+    await broker.record_capability_evidence(
+        "antigravity",
+        state=GoogleCapabilityState.CAPACITY_LIMITED,
+        evidence_pointer="live://antigravity/capacity_limited",
+        metadata={"classification": "CAPACITY_LIMITED", "scope": "antigravity_only"},
+    )
+    await broker.record_capability_evidence(
+        "jules",
+        state=GoogleCapabilityState.CONFIGURED,
+        evidence_pointer="config://jules",
+    )
+    decision = await GoogleCapabilityRouter(store, broker).plan(
+        GoogleRouteRequest(owner_intent_id="dev-1", intent="development", action_class=ActionClass.A2)
+    )
+    assert decision.status == "planned"
+    assert decision.capability_id == "jules"
+    assert "ANTIGRAVITY_CAPACITY_LIMITED" in decision.degraded
+    ag = await broker.capability_status("antigravity")
+    assert ag.state == GoogleCapabilityState.CAPACITY_LIMITED
+

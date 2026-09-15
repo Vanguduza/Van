@@ -1,0 +1,10 @@
+{
+  "truth": {
+    "project_id": "gtr",
+    "truth_path": "PROJECT_TRUTH_PROTOCOL.md",
+    "excerpt_sha256": "8094177e102934855b197ef9bbbad3a28f34fe9f9421235bbc8d8ae08b0a80dd",
+    "bytes": 986
+  },
+  "truth_sha": "8094177e102934855b197ef9bbbad3a28f34fe9f9421235bbc8d8ae08b0a80dd",
+  "repo_sha": "a08835007efece3531e83bbcabe62134d397cbbc"
+}

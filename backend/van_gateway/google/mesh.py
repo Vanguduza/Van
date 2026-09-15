@@ -29,6 +29,7 @@ class GoogleCapabilityState(str, Enum):
     AUTH_REQUIRED = "AUTH_REQUIRED"
     DEGRADED = "DEGRADED"
     RATE_LIMITED = "RATE_LIMITED"
+    CAPACITY_LIMITED = "CAPACITY_LIMITED"
     POLICY_BLOCKED = "POLICY_BLOCKED"
     UNSUPPORTED = "UNSUPPORTED"
     UNAVAILABLE = "UNAVAILABLE"
@@ -284,17 +285,47 @@ class GoogleCapabilityRouter:
             if descriptor.fallback and descriptor.fallback not in seen:
                 candidates.append(self.broker.registry.get(descriptor.fallback))
                 seen.add(descriptor.fallback)
-        first_unusable: GoogleCapabilityStatus | None = None
+        skipped: list[GoogleCapabilityStatus] = []
         for descriptor in candidates:
             if request.action_class.value not in descriptor.action_classes:
                 continue
             status = await self.broker.capability_status(descriptor.capability_id, workspace=workspace)
             if status.state not in self.USABLE_STATES:
-                first_unusable = first_unusable or status
+                skipped.append(status)
                 continue
             job_id = await self._create_job(request, descriptor.capability_id)
-            return GoogleRouteDecision(status="planned", capability_id=descriptor.capability_id, fallback_capability_id=descriptor.fallback, state=status.state, action_class=request.action_class, reason="deterministic capability route selected; Hermes must execute the job", job_id=job_id)
-        return GoogleRouteDecision(status="degraded", capability_id=first_unusable.capability_id if first_unusable else None, state=first_unusable.state if first_unusable else GoogleCapabilityState.UNAVAILABLE, action_class=request.action_class, reason=first_unusable.reason if first_unusable else "no usable Google capability", degraded=["GOOGLE_CAPABILITY_UNAVAILABLE"])
+            degraded: list[str] = []
+            for item in skipped:
+                if item.capability_id == "antigravity" and item.state in {
+                    GoogleCapabilityState.CAPACITY_LIMITED,
+                    GoogleCapabilityState.RATE_LIMITED,
+                }:
+                    degraded.append("ANTIGRAVITY_CAPACITY_LIMITED")
+            return GoogleRouteDecision(
+                status="planned",
+                capability_id=descriptor.capability_id,
+                fallback_capability_id=descriptor.fallback,
+                state=status.state,
+                action_class=request.action_class,
+                reason="deterministic capability route selected; Hermes must execute the job",
+                job_id=job_id,
+                degraded=degraded,
+            )
+        first_unusable = skipped[0] if skipped else None
+        degraded_codes = ["GOOGLE_CAPABILITY_UNAVAILABLE"]
+        if first_unusable and first_unusable.capability_id == "antigravity" and first_unusable.state in {
+            GoogleCapabilityState.CAPACITY_LIMITED,
+            GoogleCapabilityState.RATE_LIMITED,
+        }:
+            degraded_codes = ["ANTIGRAVITY_CAPACITY_LIMITED"]
+        return GoogleRouteDecision(
+            status="degraded",
+            capability_id=first_unusable.capability_id if first_unusable else None,
+            state=first_unusable.state if first_unusable else GoogleCapabilityState.UNAVAILABLE,
+            action_class=request.action_class,
+            reason=first_unusable.reason if first_unusable else "no usable Google capability",
+            degraded=degraded_codes,
+        )
 
     async def _create_job(self, request: GoogleRouteRequest, capability_id: str) -> str:
         job_id, now = str(uuid.uuid4()), int(time.time())

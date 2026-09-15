@@ -15,9 +15,11 @@
 - **Google Account Sovereignty:** one logical owner Google principal with separate Workspace OAuth, Gemini runtime, Cloud/service and consumer-session credential planes.
 - **Google Intelligence Mesh:** versioned capability registry covering Gemini, Gemini Live, Deep Research, Gemini Notebook (personal + Enterprise), Mixboard, Stitch, Antigravity, Jules, Workspace API/Studio, Nano Banana, Veo, Flow, AI Studio and ADK/A2A.
 - **Deterministic Google router:** action-class, approval, grant and Project Truth gates; registry-order deterministic selection; explicit fallback; persisted input hash and job state.
-- **Google readiness model:** READY / CONFIGURED / UNVERIFIED / AUTH_REQUIRED / DEGRADED / RATE_LIMITED / POLICY_BLOCKED / UNSUPPORTED / UNAVAILABLE.
+- **Google readiness model:** READY / CONFIGURED / UNVERIFIED / AUTH_REQUIRED / DEGRADED / RATE_LIMITED / CAPACITY_LIMITED / POLICY_BLOCKED / UNSUPPORTED / UNAVAILABLE.
+- **Antigravity capacity scoping:** live generation `CAPACITY_LIMITED` records `ANTIGRAVITY_CAPACITY_LIMITED` and falls back to Jules when configured; does not fail Workspace/Gemini/Jules planes.
+- **Project Truth mounts:** `registries/project_mounts.json` + sync tool prefer per-project `truth_path`; offline cache under `artifacts/project-truth/`.
 - **Google provenance:** persistent jobs and artifact lineage with project, provider, tool version, input/output hashes, validation state and evidence pointer; provider artifacts can never be marked `OWNER_SIGNED`.
-- **Google operator tooling:** hashed owner-principal configuration and certification/status scripts.
+- **Google operator tooling:** hashed owner-principal configuration and certification/status scripts; `tools/google/mark_antigravity_capacity_limited.py` for Antigravity-only evidence.
 - **Hermes Google skills:** google-intelligence, gemini-notebook, google-design, google-development; Google providers remain subordinate to Hermes.
 - **Policy hardening:** Google broker/registry protected; session-cookie export, credential-plane collapse and broker bypass are prohibited patterns.
 - Comprehensive canonical specification: `docs/GOOGLE_INTELLIGENCE_MESH.md`.
@@ -29,9 +31,9 @@
 - Workspace OAuth consent/client credentials are not supplied in repository.
 - Gemini runtime/API credentials are not supplied in repository.
 - Consumer Google surfaces require normal owner Google sign-in and live certification evidence.
-- Google owner-account OAuth is verified for the Antigravity worker plane and model discovery succeeds; live Google generation remains `DEGRADED` while provider quota is capacity-limited.
+- Google owner-account OAuth is verified for the Antigravity worker plane and model discovery succeeds; Antigravity live generation remains `CAPACITY_LIMITED` (Jules fallback). Other Google planes are separately gated, not failed by Antigravity quota.
 - Notebook Enterprise / Cloud-service capabilities require eligible owner-administered Google Cloud/Enterprise setup.
-- Live Hermes install is certified on `dial-hermes-control` (2026-09-15). Physical Samsung certification, `.riv` authoring, cross-project truth mounts and production signing remain external gates.
+- Live Hermes install is certified on `dial-hermes-control` (2026-09-15). Local Project Truth mounts for van/dial/dde/gtr/goat/aeci are resolved on this workstation. Physical Samsung certification, `.riv` authoring, and production signing remain external gates.
 
 ## SUPERSEDED / FORBIDDEN
 

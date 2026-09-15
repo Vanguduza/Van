@@ -1,0 +1,10 @@
+{
+  "truth": {
+    "project_id": "dial",
+    "truth_path": "agent-system/canon/PROJECT_TRUTH.md",
+    "excerpt_sha256": "4f121271ddfe4bf3d94dd04d369133d6a4c50c8e13f42c9acb3bee1af379fd32",
+    "bytes": 5470
+  },
+  "truth_sha": "4f121271ddfe4bf3d94dd04d369133d6a4c50c8e13f42c9acb3bee1af379fd32",
+  "repo_sha": "11933e9fbb00eb2f4686ad420a71007263de6a37"
+}

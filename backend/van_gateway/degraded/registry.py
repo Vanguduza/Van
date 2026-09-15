@@ -32,6 +32,13 @@ CATALOG: dict[DegradedCode, DegradedCapability] = {
         will_not_do="Operations requiring missing scopes",
         restore_action="Reconnect Google with required narrow scopes",
     ),
+    DegradedCode.ANTIGRAVITY_CAPACITY_LIMITED: DegradedCapability(
+        code=DegradedCode.ANTIGRAVITY_CAPACITY_LIMITED,
+        broken="Antigravity live generation is capacity-limited by Google provider quota",
+        still_works="Hermes van runtime, Jules/Codex/Claude development fallbacks, Workspace APIs when connected, Gemini runtime when credentialed",
+        will_not_do="Antigravity live model generation until provider quota recovers",
+        restore_action="Wait for Antigravity capacity / retry canary; route development via Jules or Hermes Claude/Codex delegates",
+    ),
     DegradedCode.NOTIFICATION_PERMISSION_REVOKED: DegradedCapability(
         code=DegradedCode.NOTIFICATION_PERMISSION_REVOKED,
         broken="Notification listener permission revoked",

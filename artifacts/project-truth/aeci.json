@@ -1,0 +1,10 @@
+{
+  "truth": {
+    "project_id": "aeci",
+    "truth_path": "PROJECT_TRUTH_PROTOCOL.md",
+    "excerpt_sha256": "f3f5277b181eb76305f76be3aaaf362072928e578eb75104720fba293a065b53",
+    "bytes": 291
+  },
+  "truth_sha": "f3f5277b181eb76305f76be3aaaf362072928e578eb75104720fba293a065b53",
+  "repo_sha": "545d7f4e55a4a4b34494ddd778e8af06559e8c02"
+}
