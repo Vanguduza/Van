@@ -1,6 +1,6 @@
 # VAN Implementation Ledger
 
-**Updated:** 2026-09-14  
+**Updated:** 2026-09-15
 **Version:** 0.5.0-dev  
 **Repository:** `Vanguduza/Van`
 
@@ -29,8 +29,9 @@
 - Workspace OAuth consent/client credentials are not supplied in repository.
 - Gemini runtime/API credentials are not supplied in repository.
 - Consumer Google surfaces require normal owner Google sign-in and live certification evidence.
+- Google owner-account OAuth is verified for the Antigravity worker plane and model discovery succeeds; live Google generation remains `DEGRADED` while provider quota is capacity-limited.
 - Notebook Enterprise / Cloud-service capabilities require eligible owner-administered Google Cloud/Enterprise setup.
-- Live Hermes install, physical Samsung certification, `.riv` authoring, cross-project truth mounts and production signing remain external gates.
+- Live Hermes install is certified on `dial-hermes-control` (2026-09-15). Physical Samsung certification, `.riv` authoring, cross-project truth mounts and production signing remain external gates.
 
 ## SUPERSEDED / FORBIDDEN
 

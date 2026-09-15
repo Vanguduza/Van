@@ -1,0 +1,44 @@
+{
+  "schema_version": 2,
+  "repository": "Vanguduza/Van",
+  "policy": {
+    "default_branch_is_not_authority": true,
+    "newest_commit_is_not_authority": true,
+    "canonical_lineage_must_be_verified_before_release": true,
+    "silent_feature_thinning_forbidden": true,
+    "release_requires_provenance": true,
+    "canonicalized_commits_are_logged": true,
+    "feature_branch_commits_are_locally_guarded": true,
+    "owner_instruction_is_project_truth_authority": true,
+    "agent_self_authorization_forbidden": true,
+    "project_truth_generation_is_pr_native": true,
+    "ci_is_not_project_truth_authority": true
+  },
+  "canonical_state": {
+    "status": "VAN_CANONICAL_LINEAGE_ESTABLISHED",
+    "release_blocked": true,
+    "release_block_reason": "VAN remains 0.5.0-dev and applicable external certification gates in docs/EXTERNAL_GATES.md are not all green.",
+    "default_branch_at_bootstrap": "main",
+    "canonical_integration_branch": "main",
+    "required_ancestors": [
+      "66f6c6ef0d8cc2289dc7a851746194148405b10d"
+    ],
+    "locked_authorities": [
+      "docs/PROJECT_TRUTH_PROTOCOL.md",
+      "docs/SECURITY_POLICY.md",
+      "hermes/profile/van/SOUL.md",
+      "hermes/profile/van/AGENTS.md",
+      "registries/projects.json",
+      "registries/google_capabilities.json",
+      "visual-authority/rive_contract.json"
+    ],
+    "notes": "Canonical lineage is established by explicit authority documents and required ancestry. Live capability evidence changes readiness state only; it does not silently rewrite authority or release status."
+  },
+  "tracking": {
+    "ledger": "docs/project-state/LOCAL_CHANGE_LEDGER.jsonl",
+    "protocol": "docs/PROJECT_TRUTH_PROTOCOL.md",
+    "production_acceptance": "docs/PRODUCTION_ACCEPTANCE_LEDGER.md",
+    "external_gates": "docs/EXTERNAL_GATES.md",
+    "workflow_mode": "LOCAL_GUARD_PLUS_PR"
+  }
+}

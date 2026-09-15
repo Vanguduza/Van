@@ -1,7 +1,7 @@
 # Production Acceptance Ledger
 
 **Version under test:** 0.5.0-dev  
-**Date:** 2026-09-14  
+**Date:** 2026-09-15
 **Verdict:** NOT v1.0 PRODUCTION ACCEPTED — external gates remain
 
 ## Previously certified repository gates
@@ -21,24 +21,27 @@
 | Existing Google fake-transport + A4 send gate | PASS |
 | Existing migration idempotence | PASS |
 | SBOM / provenance / checksums | PASS at prior HEAD |
+| Project Truth canonical state contract | PASS — canonical state added and guarded for PR-based integration |
+| Backend bootstrap | PASS — repository root resolution and `python3` invocation corrected; bootstrap executed successfully |
+| Complete Python suite at closure HEAD | PASS — 68 passed |
 
 ## Google Intelligence Mesh repository gates
 
-These gates are implemented in this change but must not be called `PASS` until the updated test suite executes against the declared repository dependencies in a suitable checkout/CI environment.
+Validated 2026-09-15 in a clean repository environment after installing the declared backend dependencies: the complete Python suite passed **68/68** tests.
 
 | Gate | Status |
 |---|---|
-| Migration v2: Google principal/capability/job/artifact tables | IMPLEMENTED — TEST ADDED |
-| Canonical Google subject stored only as hash | IMPLEMENTED — TEST ADDED |
-| Same-account ownership with credential-plane isolation | IMPLEMENTED — TEST ADDED |
-| Workspace refresh-token → access-token exchange | IMPLEMENTED — TEST ADDED |
-| Deterministic capability routing + fallback | IMPLEMENTED — TEST ADDED |
-| A3 requires grant; project mutation requires truth SHA | IMPLEMENTED — TEST ADDED |
-| A4 requires explicit owner approval | IMPLEMENTED — TEST ADDED |
-| Provider artifact cannot become owner authority | IMPLEMENTED — TEST ADDED |
-| Consumer capability configured != live-certified READY | IMPLEMENTED — TEST ADDED |
-| Google session export / broker bypass policy denial | IMPLEMENTED — TEST ADDED |
-| Hermes remains sole agent runtime | IMPLEMENTED — CONTRACT TEST UPDATED |
+| Migration v2: Google principal/capability/job/artifact tables | PASS |
+| Canonical Google subject stored only as hash | PASS |
+| Same-account ownership with credential-plane isolation | PASS |
+| Workspace refresh-token → access-token exchange | PASS |
+| Deterministic capability routing + fallback | PASS |
+| A3 requires grant; project mutation requires truth SHA | PASS |
+| A4 requires explicit owner approval | PASS |
+| Provider artifact cannot become owner authority | PASS |
+| Consumer capability configured != live-certified READY | PASS |
+| Google session export / broker bypass policy denial | PASS |
+| Hermes remains sole agent runtime | PASS |
 
 ## External gates blocking v1.0
 
