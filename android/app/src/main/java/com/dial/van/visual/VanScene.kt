@@ -81,11 +81,10 @@ object VanScene {
         val headBob = sin(frame.phase * tau + 0.6f) * 0.005f * motion
 
         val character = buildList {
-            addAll(halo(rig, palette))
             addAll(torso(rig, palette))
             if (rig.withLimbs) addAll(limbs(rig, palette, state))
             addAll(neck(rig))
-        }.translated(0f, bodyBob)
+        }.translated(0f, bodyBob + actionHeadDrop(state))
 
         val head = buildList {
             addAll(headShape(rig))
@@ -103,7 +102,10 @@ object VanScene {
 
         val muted = (character + head).muted(palette.desaturation, palette.dim)
 
-        return muted + statusRing(rig, palette, state, frame) + orb
+        return muted +
+            statusMarks(rig, palette, state, frame) +
+            hologramGlyph(rig, palette, state) +
+            orb
     }
 
     /** Exposed so overlay chrome and previews can label state with the same words. */
@@ -121,7 +123,7 @@ object VanScene {
             orbCy = 0.192f,
             orbR = 0.078f,
             ringR = 0.452f,
-            withLimbs = false,
+            withLimbs = true,
         )
         VanPresentation.EXPANDED -> VanRig(
             headCx = 0.480f,
@@ -134,7 +136,7 @@ object VanScene {
             orbCy = 0.168f,
             orbR = 0.070f,
             ringR = 0.462f,
-            withLimbs = false,
+            withLimbs = true,
         )
         VanPresentation.COMMAND_CENTRE -> VanRig(
             headCx = 0.492f,
@@ -151,22 +153,10 @@ object VanScene {
         )
     }
 
-    private fun halo(rig: VanRig, palette: VanStatusPalette): List<VanDrawOp> {
-        if (palette.glow <= 0f) return emptyList()
-        return listOf(
-            VanDrawOp.Circle(
-                cx = rig.headCx,
-                cy = rig.headCy,
-                r = rig.headRx * 1.75f,
-                color = VanColors.scaleAlpha(palette.accent, palette.glow * 0.18f),
-            ),
-            VanDrawOp.Circle(
-                cx = rig.headCx,
-                cy = rig.headCy,
-                r = rig.headRx * 1.30f,
-                color = VanColors.scaleAlpha(palette.accent, palette.glow * 0.22f),
-            ),
-        )
+    private fun actionHeadDrop(state: VanVisualState): Float = when (VanFiniteAction.fromCode(state.actionCode)) {
+        VanFiniteAction.ACK_NOD -> 0.028f
+        VanFiniteAction.SHRUG -> 0.012f
+        else -> 0f
     }
 
     private fun torso(rig: VanRig, palette: VanStatusPalette): List<VanDrawOp> {
@@ -247,19 +237,80 @@ object VanScene {
         val cx = rig.headCx
         val hw = rig.torsoHalfW
         val shoulderY = rig.torsoTop + 0.075f
+        val action = VanFiniteAction.fromCode(state.actionCode)
         val presenting = state.durableState == VanDurableState.SPEAKING ||
             state.durableState == VanDurableState.DELEGATING ||
-            state.actionCode == VanFiniteAction.PRESENT_CARD.code
+            action == VanFiniteAction.PRESENT_CARD
 
-        val handLift = if (presenting) 0.085f else 0f
+        var leftHandX = cx - hw * 1.12f
+        var leftHandY = 0.885f
+        var rightHandX = cx + hw * 1.14f
+        var rightHandY = 0.868f
+        if (presenting) rightHandY -= 0.085f
+
+        when (action) {
+            VanFiniteAction.HELLO_WAVE -> {
+                rightHandX = cx + hw * 0.92f
+                rightHandY = rig.headCy - rig.headRy * 0.15f
+            }
+            VanFiniteAction.ACK_NOD -> rightHandY -= 0.02f
+            VanFiniteAction.POINT_LEFT -> {
+                leftHandX = cx - hw * 1.38f
+                leftHandY = rig.headCy + rig.headRy * 0.10f
+            }
+            VanFiniteAction.POINT_RIGHT -> {
+                rightHandX = cx + hw * 1.42f
+                rightHandY = rig.headCy + rig.headRy * 0.08f
+            }
+            VanFiniteAction.POINT_UP -> {
+                rightHandX = cx + hw * 0.70f
+                rightHandY = rig.headCy - rig.headRy * 0.55f
+            }
+            VanFiniteAction.POINT_DOWN -> {
+                rightHandX = cx + hw * 0.70f
+                rightHandY = 0.97f
+            }
+            VanFiniteAction.POINT_TARGET -> {
+                rightHandX = cx + hw * 1.30f
+                rightHandY = rig.headCy
+            }
+            VanFiniteAction.CELEBRATE -> {
+                leftHandX = cx - hw * 0.85f
+                leftHandY = rig.headCy - rig.headRy * 0.20f
+                rightHandX = cx + hw * 0.85f
+                rightHandY = rig.headCy - rig.headRy * 0.28f
+            }
+            VanFiniteAction.CAUTION -> {
+                rightHandX = cx + hw * 0.55f
+                rightHandY = rig.headCy + rig.headRy * 0.05f
+            }
+            VanFiniteAction.CONFIRM -> {
+                rightHandX = cx + hw * 0.62f
+                rightHandY = rig.torsoTop + 0.18f
+            }
+            VanFiniteAction.SHRUG -> {
+                leftHandY = 0.72f
+                rightHandY = 0.72f
+                leftHandX = cx - hw * 1.28f
+                rightHandX = cx + hw * 1.28f
+            }
+            VanFiniteAction.OPEN_PANEL -> {
+                leftHandX = cx - hw * 1.22f
+                rightHandX = cx + hw * 1.22f
+                leftHandY = 0.70f
+                rightHandY = 0.70f
+            }
+            VanFiniteAction.CLOSE_PANEL -> {
+                leftHandX = cx - hw * 0.55f
+                rightHandX = cx + hw * 0.55f
+                leftHandY = 0.78f
+                rightHandY = 0.78f
+            }
+            VanFiniteAction.PRESENT_CARD -> Unit
+            null -> Unit
+        }
+
         val sleeve = 0.062f
-
-        // Sleeves are thick round-capped strokes so they stay visually attached to the shoulders.
-        val leftHandX = cx - hw * 1.12f
-        val leftHandY = 0.885f
-        val rightHandX = cx + hw * 1.14f
-        val rightHandY = 0.868f - handLift
-
         val leftSleeve = vanPath {
             moveTo(cx - hw * 0.80f, shoulderY)
             quadTo(cx - hw * 1.24f, shoulderY + 0.150f, leftHandX, leftHandY - 0.020f)
@@ -274,13 +325,11 @@ object VanScene {
             VanDrawOp.PathOp(rightSleeve, VanColors.of(JACKET), strokeWidth = sleeve),
             VanDrawOp.Oval(leftHandX, leftHandY, 0.030f, 0.026f, VanColors.of(SKIN)),
             VanDrawOp.Oval(rightHandX, rightHandY, 0.030f, 0.026f, VanColors.of(SKIN)),
-            // Cyan cuffs read as the DIAL accent and hide the sleeve/hand seam.
             VanDrawOp.Circle(leftHandX, leftHandY - 0.026f, 0.026f, VanColors.scaleAlpha(palette.accent, 0.8f), 0.008f),
             VanDrawOp.Circle(rightHandX, rightHandY - 0.026f, 0.026f, VanColors.scaleAlpha(palette.accent, 0.8f), 0.008f),
         )
 
-        // PRESENT_CARD: Van holds up a holographic card instead of gesturing at nothing.
-        if (state.actionCode == VanFiniteAction.PRESENT_CARD.code) {
+        if (action == VanFiniteAction.PRESENT_CARD) {
             ops += VanDrawOp.RoundRect(
                 cx = rightHandX + 0.010f,
                 cy = rightHandY - 0.105f,
@@ -298,16 +347,28 @@ object VanScene {
                 color = VanColors.scaleAlpha(palette.accent, 0.75f),
                 strokeWidth = 0.006f,
             )
-            listOf(-0.022f, 0f, 0.022f).forEach { dy ->
-                ops += VanDrawOp.RoundRect(
-                    cx = rightHandX + 0.010f,
-                    cy = rightHandY - 0.105f + dy,
-                    halfW = 0.044f,
-                    halfH = 0.005f,
-                    radius = 0.005f,
-                    color = VanColors.scaleAlpha(palette.accent, 0.45f),
-                )
+        }
+        if (action == VanFiniteAction.POINT_LEFT || action == VanFiniteAction.POINT_RIGHT ||
+            action == VanFiniteAction.POINT_UP || action == VanFiniteAction.POINT_DOWN ||
+            action == VanFiniteAction.POINT_TARGET
+        ) {
+            val fromLeft = action == VanFiniteAction.POINT_LEFT
+            val originX = if (fromLeft) leftHandX else rightHandX
+            val originY = if (fromLeft) leftHandY else rightHandY
+            val tipX = originX + if (fromLeft) -0.08f else 0.06f
+            val tipY = when (action) {
+                VanFiniteAction.POINT_UP -> originY - 0.08f
+                VanFiniteAction.POINT_DOWN -> originY + 0.08f
+                else -> originY
             }
+            ops += VanDrawOp.PathOp(
+                vanPath {
+                    moveTo(originX, originY)
+                    lineTo(tipX, tipY)
+                },
+                VanColors.of(SKIN),
+                strokeWidth = 0.016f,
+            )
         }
         return ops
     }
@@ -678,79 +739,137 @@ object VanScene {
         return ops
     }
 
-    private fun statusRing(
+    /**
+     * State marks are broken arcs and hologram fragments — never a full ring (Gate A).
+     * Distinct shapes carry warning/error/success/urgent/approval in grayscale (Gate E).
+     */
+    private fun statusMarks(
         rig: VanRig,
         palette: VanStatusPalette,
-        state: VanVisualState,
+        @Suppress("UNUSED_PARAMETER") state: VanVisualState,
         frame: VanSceneFrame,
     ): List<VanDrawOp> {
         val cx = 0.5f
-        val cy = 0.5f
+        val cy = 0.48f
         val r = rig.ringR
         val motion = if (frame.reducedMotion) 0f else 1f
-        val spin = frame.phase * 360f * motion
-        val width = 0.020f
+        val spin = frame.phase * 40f * motion
+        val width = 0.018f
         val ops = mutableListOf<VanDrawOp>()
+        val ink = VanColors.scaleAlpha(palette.accent, 0.88f)
 
         when (palette.ringStyle) {
             VanRingStyle.NONE -> Unit
-
             VanRingStyle.PROGRESS -> {
-                ops += VanDrawOp.Circle(cx, cy, r, VanColors.scaleAlpha(palette.accent, 0.16f), width)
-                ops += VanDrawOp.Arc(cx, cy, r, -90f + spin, 110f, VanColors.scaleAlpha(palette.accent, 0.95f), width)
+                ops += VanDrawOp.Arc(cx, cy, r, -48f + spin, 86f, ink, width)
+                ops += VanDrawOp.Arc(cx, cy, r * 1.06f, 122f - spin * 0.4f, 54f, VanColors.scaleAlpha(palette.accent, 0.45f), width * 0.8f)
             }
-
             VanRingStyle.DOTS -> {
                 repeat(3) { i ->
-                    val a = Math.toRadians((spin + i * 40f - 20f).toDouble()).toFloat() - (PI / 2f).toFloat()
+                    val a = Math.toRadians((spin + i * 48f + 18f).toDouble()).toFloat()
                     ops += VanDrawOp.Circle(
-                        cx + cos(a) * r,
-                        cy + sin(a) * r,
-                        0.017f,
-                        VanColors.scaleAlpha(palette.accent, 0.55f + 0.15f * i),
+                        cx + cos(a) * r * 0.92f,
+                        cy + sin(a) * r * 0.78f,
+                        0.016f,
+                        VanColors.scaleAlpha(palette.accent, 0.55f + 0.12f * i),
                     )
                 }
             }
-
             VanRingStyle.DASHED -> {
-                // Gaps are the message: something is genuinely not connected.
-                repeat(8) { i ->
-                    val start = -90f + i * 45f + spin * 0.25f
-                    val dim = if (i % 2 == 0) 0.85f else 0.22f
-                    ops += VanDrawOp.Arc(cx, cy, r, start, 26f, VanColors.scaleAlpha(palette.accent, dim), width)
+                repeat(5) { i ->
+                    val start = -70f + i * 52f
+                    ops += VanDrawOp.Arc(cx, cy, r, start, 22f, VanColors.scaleAlpha(palette.accent, if (i % 2 == 0) 0.8f else 0.28f), width)
                 }
             }
-
             VanRingStyle.PULSE -> {
-                val breath = if (frame.reducedMotion) 0.5f else (0.5f + 0.5f * sin(frame.phase * (2f * PI).toFloat()))
-                ops += VanDrawOp.Circle(cx, cy, r, VanColors.scaleAlpha(palette.accent, 0.20f), width)
-                ops += VanDrawOp.Circle(
-                    cx,
-                    cy,
-                    r * (0.965f + 0.035f * breath),
-                    VanColors.scaleAlpha(palette.accent, 0.45f + 0.45f * breath),
-                    width * 0.9f,
-                )
+                ops += VanDrawOp.Arc(cx, cy, r, -30f, 72f, ink, width)
+                ops += VanDrawOp.Arc(cx, cy, r * 0.90f, 150f, 64f, VanColors.scaleAlpha(palette.accent, 0.4f), width * 0.8f)
             }
-
             VanRingStyle.DOUBLE -> {
-                ops += VanDrawOp.Arc(cx, cy, r, -158f, 116f, VanColors.scaleAlpha(palette.accent, 0.9f), width)
-                ops += VanDrawOp.Arc(cx, cy, r, 22f, 116f, VanColors.scaleAlpha(palette.accent, 0.9f), width)
-                ops += VanDrawOp.Arc(cx, cy, r * 0.90f, -142f, 84f, VanColors.scaleAlpha(palette.accent, 0.35f), width * 0.7f)
-                ops += VanDrawOp.Arc(cx, cy, r * 0.90f, 38f, 84f, VanColors.scaleAlpha(palette.accent, 0.35f), width * 0.7f)
+                ops += VanDrawOp.Arc(cx, cy, r, -150f, 96f, ink, width)
+                ops += VanDrawOp.Arc(cx, cy, r, 28f, 88f, ink, width)
             }
-        }
-
-        val urgency = state.urgency.coerceIn(0f, 1f)
-        if (urgency > 0.01f) {
-            ops += VanDrawOp.Circle(
-                cx,
-                cy,
-                r * 1.055f,
-                VanColors.scaleAlpha(palette.accent, 0.18f + 0.42f * urgency),
-                0.010f,
-            )
         }
         return ops
+    }
+
+    private fun hologramGlyph(
+        rig: VanRig,
+        palette: VanStatusPalette,
+        state: VanVisualState,
+    ): List<VanDrawOp> {
+        val gx = rig.headCx + rig.headRx * 1.05f
+        val gy = rig.headCy + rig.headRy * 1.05f
+        val ink = VanColors.scaleAlpha(palette.accent, 0.92f)
+        val fill = VanColors.scaleAlpha(palette.accent, 0.42f)
+        return when (state.durableState) {
+            VanDurableState.WAITING_FOR_OWNER -> listOf(
+                VanDrawOp.RoundRect(gx, gy, 0.110f, 0.078f, 0.018f, fill),
+                VanDrawOp.RoundRect(gx, gy, 0.110f, 0.078f, 0.018f, ink, 0.012f),
+                VanDrawOp.RoundRect(gx, gy - 0.012f, 0.055f, 0.010f, 0.006f, ink),
+            )
+            VanDurableState.WARNING -> listOf(
+                VanDrawOp.PathOp(
+                    vanPath {
+                        moveTo(gx, gy - 0.095f)
+                        lineTo(gx + 0.090f, gy + 0.070f)
+                        lineTo(gx - 0.090f, gy + 0.070f)
+                        close()
+                    },
+                    fill,
+                ),
+                VanDrawOp.PathOp(
+                    vanPath {
+                        moveTo(gx, gy - 0.095f)
+                        lineTo(gx + 0.090f, gy + 0.070f)
+                        lineTo(gx - 0.090f, gy + 0.070f)
+                        close()
+                    },
+                    ink,
+                    strokeWidth = 0.014f,
+                ),
+            )
+            VanDurableState.ERROR -> listOf(
+                VanDrawOp.Oval(gx, gy, 0.072f, 0.072f, fill),
+                VanDrawOp.PathOp(vanPath { moveTo(gx - 0.048f, gy - 0.048f); lineTo(gx + 0.048f, gy + 0.048f) }, ink, 0.018f),
+                VanDrawOp.PathOp(vanPath { moveTo(gx + 0.048f, gy - 0.048f); lineTo(gx - 0.048f, gy + 0.048f) }, ink, 0.018f),
+            )
+            VanDurableState.SUCCESS -> listOf(
+                VanDrawOp.Circle(gx, gy, 0.078f, fill),
+                VanDrawOp.PathOp(
+                    vanPath {
+                        moveTo(gx - 0.042f, gy)
+                        lineTo(gx - 0.010f, gy + 0.036f)
+                        lineTo(gx + 0.052f, gy - 0.040f)
+                    },
+                    ink,
+                    strokeWidth = 0.018f,
+                ),
+            )
+            VanDurableState.URGENT -> listOf(
+                VanDrawOp.PathOp(
+                    vanPath {
+                        moveTo(gx - 0.078f, gy + 0.070f)
+                        lineTo(gx, gy - 0.095f)
+                        lineTo(gx + 0.078f, gy + 0.070f)
+                        close()
+                    },
+                    fill,
+                ),
+                VanDrawOp.PathOp(
+                    vanPath {
+                        moveTo(gx - 0.078f, gy + 0.070f)
+                        lineTo(gx, gy - 0.095f)
+                        lineTo(gx + 0.078f, gy + 0.070f)
+                    },
+                    ink,
+                    strokeWidth = 0.016f,
+                ),
+            )
+            VanDurableState.LISTENING -> listOf(-0.048f, 0f, 0.048f).mapIndexed { i, dx ->
+                VanDrawOp.RoundRect(gx + dx, gy, 0.014f, 0.028f + i * 0.014f, 0.006f, ink)
+            }
+            else -> emptyList()
+        }
     }
 }

@@ -1,6 +1,6 @@
 # VAN Visual Rev 2.1 — Implementation notes
 
-Authority: `docs/VAN_VISUAL_PRODUCTION_SYSTEM_REV_2_1_MASTER_BLUEPRINT.md` and `docs/CURSOR_PROMPT_VAN_VISUAL_CORRECTIONS_REV_2_1.md`.
+Authority: `docs/VAN_VISUAL_PRODUCTION_SYSTEM_REV_2_1_MASTER_BLUEPRINT.md` and `docs/CURSOR_PROMPT_VAN_VISUAL_CORRECTIONS_REV_2_1.md`. Token file: `visual-authority/van-visual-authority-v2.yaml`.
 
 ## Thesis shipped
 
@@ -10,14 +10,15 @@ VAN is a solid expressive character surrounded by a living refractive field. Whe
 
 | Area | Before | After |
 |---|---|---|
-| Aura | Radial ellipse + accent ring | Deformable field, filaments 2–5, broken arcs (max 110° / 220° total). Full ring forbidden. |
+| Aura | Radial ellipse + accent ring | Offset-lobe field, filaments 2–5, broken arcs (max 110° / 220° total). Full ring forbidden. |
 | Glass | Fill + uniform glow stroke | Tint, shaping gradient, grain, inner highlight, faint structural edge, selective specular, aura contamination |
-| Overlay rest | Permanent compact capsule | `OverlayMode.RESTING` — frameless VAN + aura |
-| Compact / expanded | Card beside VAN | Glass condenses under VAN with 20dp overlap |
-| Dock | 5dp cyan bar | 88dp hit / 76dp character crescent edge slice |
+| Overlay rest | Permanent compact capsule | `OverlayMode.RESTING` — frameless VAN + aura, 104dp hit / 92dp character |
+| Compact / expanded | Card beside VAN | 280dp glass condenses under VAN with 20dp overlap; Ask / Projects / Tasks / Decisions; no rail |
+| Dock | 5dp cyan bar | 88dp hit / 76dp character crescent edge slice, face/visor on-screen |
 | Command Centre | Generic placeholder cards | Hero → state/mission → attention → decisions → tasks → projects → connections → solid A4 |
 | Reduced motion | Mapped to `STATIC` | `VanEffectBudget.REDUCED_MOTION` — designed stillness |
-| Evidence | 12 states | All 18 durable states + 14 actions + LOW/STATIC boards |
+| Actions | Idle art reused for every code | 14 unique Canvas poses; owner art skipped when `actionCode != 0` |
+| Evidence | Combined boards only | Named Rev 2.1 matrix, grayscale board, busy-backdrop board, SHA-256 `manifest.json` |
 
 ## Files
 
@@ -26,6 +27,7 @@ VAN is a solid expressive character surrounded by a living refractive field. Whe
 - `android/app/src/main/java/com/dial/van/visual/VanGlassTokens.kt`
 - `android/app/src/main/java/com/dial/van/visual/VanGlassSurface.kt`
 - `android/app/src/main/java/com/dial/van/visual/VanEffectBudget.kt`
+- `android/app/src/main/java/com/dial/van/visual/VanScene.kt`
 - `android/app/src/main/java/com/dial/van/overlay/OverlayStateStore.kt`
 - `android/app/src/main/java/com/dial/van/overlay/OverlayTheme.kt`
 - `android/app/src/main/java/com/dial/van/overlay/FloatingOverlayService.kt`
@@ -33,6 +35,9 @@ VAN is a solid expressive character surrounded by a living refractive field. Whe
 - `android/visual-preview/src/main/kotlin/com/dial/van/preview/GlassPainter.kt`
 - `android/visual-preview/src/main/kotlin/com/dial/van/preview/VanPreviewSheets.kt`
 - `android/visual-preview/src/main/kotlin/com/dial/van/preview/VanPreviewMain.kt`
+- `android/visual-preview/src/main/kotlin/com/dial/van/preview/VanEvidenceMatrix.kt`
+- `android/visual-preview/src/test/kotlin/com/dial/van/preview/VanAcceptanceGateTest.kt`
+- `visual-authority/van-visual-authority-v2.yaml`
 
 ## Evidence
 
@@ -46,9 +51,10 @@ Written by `:visual-preview:renderVanPreviews` into `artifacts/release/preview/`
 - `van_action_board.png`
 - `van_command_centre.png`
 - `van_glass_tokens.png`
+- `rev21/` named shots, `grayscale-state-clarity.png`, `busy-backdrop-resilience.png`, `manifest.json`
 
 ## Residual gaps (EXTERNAL)
 
 - Authored `van.riv` artboard and owner visual sign-off
 - Physical device / production keystore
-- Finite-action *poses* still reuse identity-locked idle/success/warning art; action *codes* are complete
+- Figma source boards

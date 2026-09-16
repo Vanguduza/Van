@@ -39,4 +39,6 @@ fun main(args: Array<String>) {
         ImageIO.write(image, "png", file)
         println("wrote ${file.absolutePath} (${image.width}x${image.height}, ${file.length()} bytes)")
     }
+    VanEvidenceMatrix.writeAll(outputDir)
+    println("wrote named Rev 2.1 evidence matrix under ${File(outputDir, "rev21").absolutePath}")
 }

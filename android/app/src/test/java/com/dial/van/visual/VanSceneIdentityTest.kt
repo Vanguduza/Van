@@ -125,6 +125,19 @@ class VanSceneIdentityTest {
     }
 
     @Test
+    fun eighteenStatesAndFourteenDistinctActionPoses() {
+        assertEquals(18, VanDurableState.entries.size)
+        assertEquals(14, VanFiniteAction.entries.size)
+        val signatures = VanFiniteAction.entries.map { action ->
+            VanScene.build(
+                VanVisualState(durableState = VanDurableState.IDLE, actionCode = action.code),
+                VanSceneFrame(presentation = VanPresentation.COMMAND_CENTRE, phase = 0.2f),
+            ).toString()
+        }
+        assertEquals("each finite action must change the pose", 14, signatures.toSet().size)
+    }
+
+    @Test
     fun glowStaysRestrainedAcrossEveryState() {
         VanDurableState.entries.forEach { state ->
             val palette = VanStatusPalette.forState(state)

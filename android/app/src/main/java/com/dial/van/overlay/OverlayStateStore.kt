@@ -11,7 +11,7 @@ enum class OverlayMode {
     /** Glass condenses from the aura; VAN overlaps the panel; 1–3 quick actions. */
     COMPACT,
 
-    /** Working surface: glass grown from VAN, status, mesh cue and the action rail. */
+    /** Working surface: glass grown from VAN, status, mesh cue and in-panel actions. */
     EXPANDED,
 
     /** Intentional edge dock: crescent aura, face/visor preserved, 88dp hit target. */

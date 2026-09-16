@@ -310,7 +310,12 @@ private fun commandSections(app: VanApplication, meshSummary: String, cue: VanPr
         ),
         CommandSection("decisions", "Decisions", "Open decisions awaiting input", listOf("No pending decisions")),
         CommandSection("tasks", "Tasks", "Actionable work", listOf("$queueSize queued commands")),
-        CommandSection("projects", "Projects", "Mounted Project Truth registries", listOf("Synced from registries/projects.json")),
+        CommandSection(
+            "projects",
+            "Projects",
+            "Mounted Project Truth registries",
+            listOf("van", "dial", "dde", "gtr", "goat", "aeci"),
+        ),
         CommandSection(
             "connections",
             "Connections",

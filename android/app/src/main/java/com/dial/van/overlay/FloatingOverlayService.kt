@@ -27,12 +27,6 @@ import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.shape.RoundedCornerShape
-import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.filled.Apps
-import androidx.compose.material.icons.filled.Chat
-import androidx.compose.material.icons.filled.Close
-import androidx.compose.material.icons.filled.Mic
-import androidx.compose.material3.Icon
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
@@ -245,7 +239,7 @@ class FloatingOverlayService : Service(), LifecycleOwner, SavedStateRegistryOwne
     ) {
         Box(
             modifier = Modifier
-                .size(CHARACTER_DP.dp)
+                .size(OverlayTheme.RESTING_HIT_DP.dp)
                 .semantics { contentDescription = "Van resting. Tap to form glass." }
                 .clickable {
                     overlayMode = OverlayMode.COMPACT
@@ -257,7 +251,7 @@ class FloatingOverlayService : Service(), LifecycleOwner, SavedStateRegistryOwne
                 state = visualState,
                 budget = budget,
                 presentation = VanPresentation.COMPACT,
-                modifier = Modifier.size(CHARACTER_DP.dp),
+                modifier = Modifier.size(OverlayTheme.RESTING_AVATAR_DP.dp),
             )
         }
     }
@@ -276,21 +270,22 @@ class FloatingOverlayService : Service(), LifecycleOwner, SavedStateRegistryOwne
         accent: Int,
     ) {
         Box(
-            modifier = Modifier.width(SHELL_WIDTH_DP.dp).height(COMPACT_HEIGHT_DP.dp),
-            contentAlignment = Alignment.TopCenter,
+            modifier = Modifier
+                .width(OverlayTheme.COMPACT_WIDTH_DP.dp)
+                .height(COMPACT_HEIGHT_DP.dp),
+            contentAlignment = Alignment.TopStart,
         ) {
             VanGlassSurface(
                 style = glass,
                 modifier = Modifier
                     .align(Alignment.BottomCenter)
                     .fillMaxWidth()
-                    .height(CAPSULE_HEIGHT_DP.dp),
+                    .height(OverlayTheme.COMPACT_CAPSULE_HEIGHT_DP.dp),
             ) {
                 Column(
                     modifier = Modifier
                         .fillMaxWidth()
-                        .padding(horizontal = 10.dp, vertical = 6.dp),
-                    horizontalAlignment = Alignment.CenterHorizontally,
+                        .padding(start = 88.dp, end = 10.dp, top = 8.dp, bottom = 8.dp),
                 ) {
                     Text(
                         text = caption,
@@ -300,29 +295,29 @@ class FloatingOverlayService : Service(), LifecycleOwner, SavedStateRegistryOwne
                         maxLines = 1,
                     )
                     Spacer(modifier = Modifier.height(4.dp))
-                    // §5: 1–3 immediate quick actions, never dominating Van.
-                    Row(horizontalArrangement = Arrangement.spacedBy(10.dp)) {
-                        GlassAction(Icons.Default.Mic, "Talk to Van", accent) {
-                            app.voiceSession.beginOwnerTurn()
+                    OverlayTheme.COMPACT_ACTIONS.chunked(2).forEach { row ->
+                        Row(horizontalArrangement = Arrangement.spacedBy(6.dp)) {
+                            row.forEach { label ->
+                                CompactChip(label, accent) {
+                                    when (label) {
+                                        "Ask" -> app.voiceSession.beginOwnerTurn()
+                                        else -> openCommandCentre()
+                                    }
+                                }
+                            }
                         }
-                        GlassAction(Icons.Default.Chat, "Open Command Centre", accent) {
-                            openCommandCentre()
-                        }
-                        GlassAction(Icons.Default.Apps, "Expand", accent) {
-                            overlayMode = OverlayMode.EXPANDED
-                            persistState()
-                        }
+                        Spacer(modifier = Modifier.height(4.dp))
                     }
                 }
             }
 
-            // §4: character partly outside the glass, and the primary focal point.
             VanEmbodiment(
                 state = visualState,
                 budget = budget,
                 presentation = VanPresentation.COMPACT,
                 modifier = Modifier
-                    .size(CHARACTER_DP.dp)
+                    .size(OverlayTheme.RESTING_AVATAR_DP.dp)
+                    .offset(x = (-4).dp)
                     .clickable {
                         overlayMode = OverlayMode.EXPANDED
                         persistState()
@@ -331,7 +326,7 @@ class FloatingOverlayService : Service(), LifecycleOwner, SavedStateRegistryOwne
         }
     }
 
-    /** Expanded glass card plus the right-edge action rail from the owner design sheet. */
+    /** Expanded working surface: glass grown from VAN, actions inside the same field. */
     @Composable
     private fun ExpandedShell(
         app: VanApplication,
@@ -343,76 +338,73 @@ class FloatingOverlayService : Service(), LifecycleOwner, SavedStateRegistryOwne
         meshCue: String,
         accent: Int,
     ) {
-        Row(verticalAlignment = Alignment.CenterVertically) {
-            Box(
-                modifier = Modifier.width(EXPANDED_WIDTH_DP.dp).height(EXPANDED_HEIGHT_DP.dp),
-                contentAlignment = Alignment.TopStart,
+        val solid = glass.requiresSolidControls
+        Box(
+            modifier = Modifier
+                .width(OverlayTheme.EXPANDED_WIDTH_DP.dp)
+                .height(OverlayTheme.EXPANDED_HEIGHT_DP.dp),
+            contentAlignment = Alignment.TopStart,
+        ) {
+            VanGlassSurface(
+                style = glass,
+                modifier = Modifier
+                    .align(Alignment.BottomCenter)
+                    .fillMaxWidth()
+                    .height((OverlayTheme.EXPANDED_HEIGHT_DP - 18).dp),
             ) {
-                VanGlassSurface(
-                    style = glass,
-                    modifier = Modifier
-                        .align(Alignment.BottomCenter)
-                        .fillMaxWidth()
-                        .height((EXPANDED_HEIGHT_DP - 26).dp),
-                ) {
-                    Column(modifier = Modifier.padding(start = 96.dp, end = 12.dp, top = 12.dp)) {
-                        Text("Van", color = Color.White, fontSize = 17.sp, fontWeight = FontWeight.Bold)
-                        Text(
-                            text = headline,
-                            color = Color(accent),
-                            fontSize = 13.sp,
-                            fontWeight = FontWeight.SemiBold,
-                        )
-                        Text(text = caption, color = Color(0xFFB6C2D0), fontSize = 11.sp, maxLines = 2)
-                        Spacer(modifier = Modifier.height(4.dp))
-                        Text(text = meshCue, color = Color(0xFF8A97A6), fontSize = 10.sp, maxLines = 1)
+                Column(modifier = Modifier.padding(start = 100.dp, end = 12.dp, top = 10.dp, bottom = 8.dp)) {
+                    Text("Van", color = Color.White, fontSize = 16.sp, fontWeight = FontWeight.Bold)
+                    Text(text = headline, color = Color(accent), fontSize = 13.sp, fontWeight = FontWeight.SemiBold)
+                    Text(text = caption, color = Color(0xFFB6C2D0), fontSize = 11.sp, maxLines = 2)
+                    Text(text = meshCue, color = Color(0xFF8A97A6), fontSize = 10.sp, maxLines = 1)
+                    Spacer(modifier = Modifier.height(6.dp))
+                    Row(horizontalArrangement = Arrangement.spacedBy(6.dp)) {
+                        OverlayTheme.COMPACT_ACTIONS.forEach { label ->
+                            CompactChip(label, accent) {
+                                when (label) {
+                                    "Ask" -> app.voiceSession.beginOwnerTurn()
+                                    else -> openCommandCentre()
+                                }
+                            }
+                        }
+                        CompactChip("Dock", accent) {
+                            overlayMode = OverlayMode.DOCKED
+                            persistState()
+                        }
+                    }
+                    if (solid) {
+                        Spacer(modifier = Modifier.height(6.dp))
+                        Box(
+                            modifier = Modifier
+                                .fillMaxWidth()
+                                .height(36.dp)
+                                .clip(RoundedCornerShape(10.dp))
+                                .background(Color(glass.borderColor))
+                                .clickable { openCommandCentre() },
+                            contentAlignment = Alignment.Center,
+                        ) {
+                            Text("Approve", color = Color(0xFF10151F), fontWeight = FontWeight.Bold, fontSize = 12.sp)
+                        }
                     }
                 }
-
-                VanEmbodiment(
-                    state = visualState,
-                    budget = budget,
-                    presentation = VanPresentation.EXPANDED,
-                    modifier = Modifier
-                        .align(Alignment.TopStart)
-                        .offset(x = 2.dp)
-                        .size(CHARACTER_DP.dp)
-                        .clickable { openCommandCentre() },
-                )
             }
 
-            Spacer(modifier = Modifier.width(8.dp))
-            ActionRail(app = app, glass = glass, accent = accent)
-        }
-    }
-
-    /** Glass rail: Chat, Apps/Agents, Mic, Close — the owner sheet's right-edge control stack. */
-    @Composable
-    private fun ActionRail(
-        app: VanApplication,
-        glass: com.dial.van.visual.VanGlassStyle,
-        accent: Int,
-    ) {
-        VanGlassSurface(style = glass, modifier = Modifier.width(48.dp)) {
-            Column(
-                modifier = Modifier.padding(vertical = 8.dp),
-                horizontalAlignment = Alignment.CenterHorizontally,
-                verticalArrangement = Arrangement.spacedBy(6.dp),
-            ) {
-                GlassAction(Icons.Default.Chat, "Chat", accent, active = true) { openCommandCentre() }
-                GlassAction(Icons.Default.Apps, "Agents", accent) { openCommandCentre() }
-                GlassAction(Icons.Default.Mic, "Voice", accent) { app.voiceSession.beginOwnerTurn() }
-                GlassAction(Icons.Default.Close, "Dock Van", accent) {
-                    overlayMode = OverlayMode.DOCKED
-                    persistState()
-                }
-            }
+            VanEmbodiment(
+                state = visualState,
+                budget = budget,
+                presentation = VanPresentation.EXPANDED,
+                modifier = Modifier
+                    .align(Alignment.TopStart)
+                    .offset(x = (-6).dp, y = (-2).dp)
+                    .size(OverlayTheme.RESTING_AVATAR_DP.dp)
+                    .clickable { openCommandCentre() },
+            )
         }
     }
 
     /**
-     * Intentional edge dock: 88dp hit, ~76dp character as an edge slice, crescent aura.
-     * Face and visor stay readable. Tap restores frameless rest.
+     * Intentional edge dock: 88dp hit, 76dp character. Face/visor stay fully on-screen;
+     * body crops at the bottom. Crescent field sits toward the screen interior.
      */
     @Composable
     private fun DockedPresence(
@@ -421,49 +413,47 @@ class FloatingOverlayService : Service(), LifecycleOwner, SavedStateRegistryOwne
     ) {
         Box(
             modifier = Modifier
-                .size(width = 56.dp, height = OverlayTheme.DOCK_HIT_DP.dp)
-                .clip(RoundedCornerShape(topStart = 40.dp, bottomStart = 40.dp))
+                .size(width = OverlayTheme.DOCK_WIDTH_DP.dp, height = OverlayTheme.DOCK_HIT_DP.dp)
                 .semantics { contentDescription = "Van docked. Tap to restore." }
                 .clickable {
                     overlayMode = OverlayMode.RESTING
                     persistState()
                 },
-            contentAlignment = Alignment.CenterStart,
         ) {
+            androidx.compose.foundation.Canvas(modifier = Modifier.fillMaxWidth().height(OverlayTheme.DOCK_HIT_DP.dp)) {
+                val field = Color(VanGlassTokens.ACCENT_CYAN).copy(alpha = 0.28f)
+                val path = androidx.compose.ui.graphics.Path()
+                path.moveTo(size.width * 0.08f, size.height * 0.12f)
+                path.quadraticBezierTo(size.width * 0.95f, size.height * 0.08f, size.width, size.height * 0.42f)
+                path.quadraticBezierTo(size.width * 0.92f, size.height * 0.92f, size.width * 0.10f, size.height * 0.88f)
+                path.quadraticBezierTo(size.width * 0.02f, size.height * 0.50f, size.width * 0.08f, size.height * 0.12f)
+                path.close()
+                drawPath(path, field)
+            }
             VanEmbodiment(
                 state = visualState,
                 budget = budget,
                 presentation = VanPresentation.COMPACT,
                 modifier = Modifier
                     .size(OverlayTheme.DOCK_CHARACTER_DP.dp)
-                    .offset(x = (-16).dp),
+                    .align(Alignment.TopCenter)
+                    .offset(y = (-4).dp),
             )
         }
     }
 
     @Composable
-    private fun GlassAction(
-        icon: androidx.compose.ui.graphics.vector.ImageVector,
-        label: String,
-        accent: Int,
-        active: Boolean = false,
-        onClick: () -> Unit,
-    ) {
+    private fun CompactChip(label: String, accent: Int, onClick: () -> Unit) {
         Box(
             modifier = Modifier
-                // §5 minimum 48dp touch target.
-                .size(TOUCH_TARGET_DP.dp)
-                .clip(RoundedCornerShape(12.dp))
-                .background(Color(accent).copy(alpha = if (active) 0.26f else 0.12f))
-                .clickable(onClick = onClick),
+                .height(32.dp)
+                .clip(RoundedCornerShape(10.dp))
+                .background(Color(accent).copy(alpha = 0.16f))
+                .clickable(onClick = onClick)
+                .padding(horizontal = 8.dp),
             contentAlignment = Alignment.Center,
         ) {
-            Icon(
-                imageVector = icon,
-                contentDescription = label,
-                tint = if (active) Color(accent) else Color(0xFFE7ECF2),
-                modifier = Modifier.size(20.dp),
-            )
+            Text(label, color = Color(0xFFE7ECF2), fontSize = 11.sp, fontWeight = FontWeight.SemiBold)
         }
     }
 
@@ -542,14 +532,9 @@ class FloatingOverlayService : Service(), LifecycleOwner, SavedStateRegistryOwne
         private const val CHANNEL_ID = "van_overlay"
         private const val NOTIFICATION_ID = 1001
 
-        /** Resting / compact character visual height. */
-        private const val CHARACTER_DP = OverlayTheme.RESTING_AVATAR_DP
-        private const val SHELL_WIDTH_DP = 150
-        private const val CAPSULE_HEIGHT_DP = 60
-        private const val COMPACT_HEIGHT_DP = OverlayTheme.RESTING_AVATAR_DP + 60 - OverlayTheme.VAN_GLASS_OVERLAP_DP
-        private const val EXPANDED_WIDTH_DP = OverlayTheme.EXPANDED_WIDTH_DP
-        private const val EXPANDED_HEIGHT_DP = 128
-        private const val TOUCH_TARGET_DP = 34
+        private const val SHELL_WIDTH_DP = OverlayTheme.COMPACT_WIDTH_DP
+        private const val COMPACT_HEIGHT_DP =
+            OverlayTheme.RESTING_AVATAR_DP + OverlayTheme.COMPACT_CAPSULE_HEIGHT_DP - OverlayTheme.VAN_GLASS_OVERLAP_DP
 
         fun start(context: Context) {
             context.startForegroundService(Intent(context, FloatingOverlayService::class.java))

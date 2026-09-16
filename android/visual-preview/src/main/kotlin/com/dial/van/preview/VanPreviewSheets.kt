@@ -54,8 +54,8 @@ object VanPreviewSheets {
 
     // Overlay geometry mirrored from OverlayTheme / FloatingOverlayService.
     private const val CHARACTER_DP = OverlayTheme.RESTING_AVATAR_DP
-    private const val SHELL_WIDTH_DP = 132
-    private const val CAPSULE_HEIGHT_DP = 62
+    private const val SHELL_WIDTH_DP = OverlayTheme.COMPACT_WIDTH_DP
+    private const val CAPSULE_HEIGHT_DP = OverlayTheme.COMPACT_CAPSULE_HEIGHT_DP
     private const val EXPANDED_WIDTH_DP = OverlayTheme.EXPANDED_WIDTH_DP
     private const val OVERLAP_DP = OverlayTheme.VAN_GLASS_OVERLAP_DP
 
@@ -315,17 +315,21 @@ object VanPreviewSheets {
                 else -> VanDurableState.IDLE
             }
             val spec = VanAuraSpecs.forState(state)
-            drawPresenceTile(
-                g = g,
-                x = x + 16,
-                y = y,
-                size = cellW - 32,
-                state = state,
-                spec = spec,
-                budget = VanEffectBudget.FULL,
+            if (condenses) {
+                val chip = RoundRectangle2D.Float((x + 24).toFloat(), (y + cellH - 90).toFloat(), (cellW - 48).toFloat(), 48f, 18f, 18f)
+                GlassPainter.fillGlass(g, glass(state), chip, DENSITY)
+            }
+            GlassPainter.drawAura(g, spec, x + cellW / 2f, y + 110f, 70f, VanEffectBudget.FULL, PHASE)
+            drawCharacter(
+                g,
+                state,
+                (x + 30).toFloat(),
+                (y + 8).toFloat(),
+                (cellW - 60).toFloat(),
+                180f,
+                VanPresentation.COMMAND_CENTRE,
                 reducedMotion = false,
-                condenseGlass = condenses,
-                style = glass(state),
+                actionCode = action.code,
             )
             g.color = Color(VanGlassTokens.EDGE_CYAN, true)
             g.font = font(16, bold = true)
@@ -435,7 +439,7 @@ object VanPreviewSheets {
             Triple("Attention", attentionBody, live.active),
             Triple("Decisions", "No pending decisions", false),
             Triple("Tasks", "0 queued commands", false),
-            Triple("Projects", "Synced from registries/projects.json", false),
+            Triple("Projects", "van · dial · dde · gtr · goat · aeci", false),
             Triple("Connections", "Hermes profile: van · " + VanPresence.meshCue(live), false),
         )
         val colW = (w - margin * 2 - 24) / 2
@@ -692,6 +696,7 @@ object VanPreviewSheets {
         val charSize = dp(CHARACTER_DP)
         // Van's boots break the capsule's top edge; the copy below stays clear of the overlap.
         val capsuleY = y + charSize - dp(OVERLAP_DP)
+        val charX = x + dp(4)
 
         val capsule = RoundRectangle2D.Float(
             x.toFloat(),
@@ -707,30 +712,38 @@ object VanPreviewSheets {
         }
         GlassPainter.fillGlass(g, style, capsule, DENSITY)
 
-        // Status copy, then 1–3 quick actions (§5).
         g.color = Color(palette.accent, true)
         g.font = font(12, bold = true)
-        centerString(g, clip(VanCaptions.forState(state), 22), x + shellW / 2, capsuleY + dp(20))
+        g.drawString(clip(VanCaptions.forState(state), 32), x + dp(88), capsuleY + dp(18))
 
-        val actionR = dp(15)
-        val actions = listOf("mic", "chat", "grid")
-        val totalW = actions.size * actionR * 2 + (actions.size - 1) * dp(10)
-        actions.forEachIndexed { i, kind ->
-            val ax = x + (shellW - totalW) / 2 + i * (actionR * 2 + dp(10))
-            val ay = capsuleY + dp(28)
-            g.color = GlassPainter.argb(palette.accent, if (i == 0) 0.26f else 0.12f)
-            g.fill(RoundRectangle2D.Float(ax.toFloat(), ay.toFloat(), (actionR * 2).toFloat(), (actionR * 2).toFloat(), 10f, 10f))
-            g.color = Color(if (i == 0) palette.accent else 0xFFE7ECF2.toInt(), true)
-            g.stroke = BasicStroke(2.2f)
-            drawGlyph(g, kind, ax + actionR, ay + actionR, actionR * 0.5f)
+        val actions = OverlayTheme.COMPACT_ACTIONS.chunked(2)
+        g.font = font(11, bold = true)
+        actions.forEachIndexed { row, labels ->
+            var ax = x + dp(88)
+            labels.forEach { label ->
+                val tw = g.fontMetrics.stringWidth(label) + dp(14)
+                g.color = GlassPainter.argb(palette.accent, if (row == 0 && label == labels.first()) 0.26f else 0.14f)
+                g.fill(
+                    RoundRectangle2D.Float(
+                        ax.toFloat(),
+                        (capsuleY + dp(32) + row * dp(28)).toFloat(),
+                        tw.toFloat(),
+                        dp(24).toFloat(),
+                        10f,
+                        10f,
+                    ),
+                )
+                g.color = Color(0xFFE7ECF2.toInt(), true)
+                g.drawString(label, ax + dp(7), capsuleY + dp(49) + row * dp(28))
+                ax += tw + dp(6)
+            }
         }
 
-        // Aura between glass and character (§2 hierarchy), then Van on top.
         GlassPainter.drawAura(
             g,
             spec,
-            (x + shellW / 2).toFloat(),
-            (y + charSize * 0.48f),
+            charX + charSize * 0.48f,
+            y + charSize * 0.48f,
             charSize * 0.40f,
             budget,
             PHASE,
@@ -738,7 +751,7 @@ object VanPreviewSheets {
         drawCharacter(
             g,
             state,
-            (x + (shellW - charSize) / 2).toFloat(),
+            charX.toFloat(),
             y.toFloat(),
             charSize.toFloat(),
             charSize.toFloat(),
@@ -747,7 +760,7 @@ object VanPreviewSheets {
         )
     }
 
-    /** Expanded glass card plus the owner design sheet's right-edge action rail. */
+    /** Expanded glass grown from VAN; actions live inside the same field, not a separate rail. */
     private fun drawExpandedShell(
         g: Graphics2D,
         canvas: BufferedImage,
@@ -810,9 +823,19 @@ object VanPreviewSheets {
             g.color = Color(0xFF10151F.toInt(), true)
             g.font = font(12, bold = true)
             centerString(g, "Approve", textX + dp(42), cardY + dp(95))
+        } else {
+            g.font = font(11, bold = true)
+            var ax = textX
+            OverlayTheme.COMPACT_ACTIONS.forEach { label ->
+                val tw = g.fontMetrics.stringWidth(label) + dp(12)
+                g.color = GlassPainter.argb(palette.accent, 0.16f)
+                g.fill(RoundRectangle2D.Float(ax.toFloat(), (cardY + dp(82)).toFloat(), tw.toFloat(), dp(18).toFloat(), 8f, 8f))
+                g.color = Color(0xFFE7ECF2.toInt(), true)
+                g.drawString(label, ax + dp(6), cardY + dp(95))
+                ax += tw + dp(5)
+            }
         }
 
-        // Aura, then Van breaking the card's left edge and rising above its top.
         GlassPainter.drawAura(
             g,
             spec,
@@ -830,33 +853,6 @@ object VanPreviewSheets {
             charSize.toFloat(),
             VanPresentation.EXPANDED,
         )
-
-        // Action rail.
-        val railX = x + cardW + dp(8)
-        val railW = dp(48)
-        val railH = dp(4) + 4 * dp(38)
-        val rail = RoundRectangle2D.Float(
-            railX.toFloat(),
-            cardY.toFloat(),
-            railW.toFloat(),
-            railH.toFloat(),
-            dpf(VanGlassTokens.CORNER_RADIUS_DP.toInt()),
-            dpf(VanGlassTokens.CORNER_RADIUS_DP.toInt()),
-        )
-        if (style.blurDp > 0f) {
-            GlassPainter.blurBehind(g, canvas, rail, (style.blurDp * DENSITY).toInt())
-        }
-        GlassPainter.fillGlass(g, style, rail, DENSITY)
-        listOf("chat", "grid", "mic", "close").forEachIndexed { i, kind ->
-            val r = dp(14)
-            val ax = railX + (railW - r * 2) / 2
-            val ay = cardY + dp(6) + i * dp(38)
-            g.color = GlassPainter.argb(palette.accent, if (i == 0) 0.26f else 0.12f)
-            g.fill(RoundRectangle2D.Float(ax.toFloat(), ay.toFloat(), (r * 2).toFloat(), (r * 2).toFloat(), 9f, 9f))
-            g.color = Color(if (i == 0) palette.accent else 0xFFE7ECF2.toInt(), true)
-            g.stroke = BasicStroke(2.1f)
-            drawGlyph(g, kind, ax + r, ay + r, r * 0.5f)
-        }
     }
 
     /**
@@ -872,38 +868,27 @@ object VanPreviewSheets {
         val spec = VanAuraSpecs.forState(state)
         val hit = dp(OverlayTheme.DOCK_HIT_DP)
         val charSize = dp(OverlayTheme.DOCK_CHARACTER_DP)
-        val sliceW = dp(52)
+        val sliceW = dp(OverlayTheme.DOCK_WIDTH_DP)
         val boxX = screenRight - sliceW
-        val boxY = y + (dp(CHARACTER_DP) - hit) / 2
+        val boxY = y
 
-        val previous = g.clip
-        val crescent = java.awt.geom.RoundRectangle2D.Float(
+        GlassPainter.drawCrescentAura(
+            g,
+            spec,
             boxX.toFloat(),
             boxY.toFloat(),
             sliceW.toFloat(),
             hit.toFloat(),
-            sliceW * 0.9f,
-            sliceW * 0.9f,
-        )
-        g.clip = crescent
-        GlassPainter.drawAura(
-            g,
-            spec,
-            boxX + charSize * 0.28f,
-            boxY + hit * 0.48f,
-            charSize * 0.42f,
-            phase = PHASE,
         )
         drawCharacter(
             g,
             state,
-            (boxX - dp(18)).toFloat(),
-            (boxY + (hit - charSize) / 2).toFloat(),
+            (boxX + (sliceW - charSize) / 2).toFloat(),
+            (boxY - dp(4)).toFloat(),
             charSize.toFloat(),
             charSize.toFloat(),
             VanPresentation.COMPACT,
         )
-        g.clip = previous
     }
 
     /** Frameless VAN + field. Approval-class states optionally condense a small glass chip. */
@@ -968,8 +953,9 @@ object VanPreviewSheets {
         h: Float,
         presentation: VanPresentation,
         reducedMotion: Boolean = false,
+        actionCode: Int = 0,
     ) {
-        if (OwnerArt.paint(g, state, x, y, w, h)) return
+        if (actionCode == 0 && OwnerArt.paint(g, state, x, y, w, h)) return
         AwtVanRenderer.paint(
             g,
             VanScene.build(
@@ -977,6 +963,8 @@ object VanPreviewSheets {
                     durableState = state,
                     listening = state == VanDurableState.LISTENING,
                     speaking = state == VanDurableState.SPEAKING,
+                    actionCode = actionCode,
+                    urgency = if (state == VanDurableState.URGENT) 1f else 0f,
                 ),
                 frame(presentation, reducedMotion),
             ),

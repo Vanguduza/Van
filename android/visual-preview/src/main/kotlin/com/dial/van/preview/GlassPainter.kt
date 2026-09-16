@@ -240,11 +240,26 @@ object GlassPainter {
         val cyan = VanGlassTokens.ACCENT_CYAN
         val fieldColor = spec.alertAccent ?: cyan
         val breath = if (budget.allowMotion) 0.94f + 0.06f * sin(phase * 2f * PI.toFloat()) else 1f
-        val rx = radius * (1.18f + 0.16f * spec.intensity) * (1f + spec.fieldAsymmetry * 0.35f) * budget.bloomScale * breath
-        val ry = radius * (1.28f + 0.10f * spec.intensity) * budget.bloomScale * breath
+        val rx = radius * (1.05f + 0.10f * spec.intensity) * budget.bloomScale * breath
+        val ry = radius * (0.82f + 0.08f * spec.intensity) * budget.bloomScale * breath
 
-        fillDeformableField(g, cx, cy, rx, ry, spec, argb(fieldColor, 0.07f + 0.12f * spec.intensity), innerPass = false)
-        fillDeformableField(g, cx, cy, rx * 0.58f, ry * 0.52f, spec, argb(fieldColor, 0.10f + 0.18f * spec.intensity), innerPass = true)
+        // Offset lobes only when the field is energetic enough not to read as a plate (Gate A).
+        if (spec.intensity > 0.32f) {
+            radial(
+                g,
+                cx - rx * 0.22f,
+                cy + ry * 0.06f,
+                rx * 0.55f,
+                argb(fieldColor, 0.05f + 0.08f * spec.intensity),
+            )
+            radial(
+                g,
+                cx + rx * 0.28f,
+                cy - ry * 0.10f,
+                rx * 0.42f,
+                argb(fieldColor, 0.04f + 0.06f * spec.intensity),
+            )
+        }
 
         if (spec.groundGlow > 0.01f) {
             val crescent = Path2D.Float()
@@ -365,35 +380,39 @@ object GlassPainter {
         }
     }
 
-    private fun fillDeformableField(
+    /** Edge-dock field: a crescent opening toward the screen, never a clipped disk. */
+    fun drawCrescentAura(
         g: Graphics2D,
-        cx: Float,
-        cy: Float,
-        rx: Float,
-        ry: Float,
         spec: VanAuraSpec,
-        inner: Color,
-        innerPass: Boolean,
+        left: Float,
+        top: Float,
+        width: Float,
+        height: Float,
+        budget: VanEffectBudget = VanEffectBudget.FULL,
+        phase: Float = 0.18f,
     ) {
-        if (rx <= 1f || ry <= 1f) return
-        val path = Path2D.Float()
-        val n = 14
-        for (i in 0..n) {
-            val t = i.toFloat() / n
-            val ang = t * 2f * PI.toFloat()
-            val wobble = 1f +
-                spec.deformation * sin(ang * 3f + spec.intensity * 5f + if (innerPass) 0.8f else 0f) +
-                spec.fieldAsymmetry * 0.35f * cos(ang * 2f + 0.6f) +
-                0.06f * sin(ang * 5f + spec.arcActivity)
-            val x = cx + cos(ang) * rx * wobble
-            val y = cy + sin(ang) * ry * wobble
-            if (i == 0) path.moveTo(x, y) else path.lineTo(x, y)
-        }
-        path.closePath()
+        val cyan = spec.alertAccent ?: VanGlassTokens.ACCENT_CYAN
+        val crescent = Path2D.Float()
+        crescent.moveTo(left + width * 0.08f, top + height * 0.12f)
+        crescent.quadTo(left + width * 0.95f, top + height * 0.08f, left + width, top + height * 0.42f)
+        crescent.quadTo(left + width * 0.92f, top + height * 0.92f, left + width * 0.10f, top + height * 0.88f)
+        crescent.quadTo(left + width * 0.02f, top + height * 0.50f, left + width * 0.08f, top + height * 0.12f)
+        crescent.closePath()
         val previous = g.clip
-        g.clip(path)
-        radial(g, cx, cy, max(rx, ry), inner)
+        g.clip(crescent)
+        drawAura(
+            g,
+            spec,
+            left + width * 0.58f,
+            top + height * 0.42f,
+            height * 0.42f,
+            budget,
+            phase,
+        )
         g.clip = previous
+        g.color = argb(cyan, 0.22f)
+        g.stroke = BasicStroke(max(width * 0.04f, 1.6f), BasicStroke.CAP_ROUND, BasicStroke.JOIN_ROUND)
+        g.draw(crescent)
     }
 
     // Gradient stops always fade to the *same* hue at zero alpha. Fading to transparent black

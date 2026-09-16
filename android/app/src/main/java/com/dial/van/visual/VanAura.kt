@@ -48,27 +48,27 @@ fun DrawScope.drawVanAura(spec: VanAuraSpec, phase: Float, budget: VanEffectBudg
     val accent = spec.alertAccent?.let { Color(it) }
     val field = accent?.copy(alpha = 1f)?.let { mix(cyan, it, 0.28f) } ?: cyan
     val tau = (2f * PI).toFloat()
-    val breath = if (budget.allowMotion) 0.94f + 0.06f * sin(phase * tau) else 1f
 
-    val rx = minEdge * (0.46f + 0.08f * spec.intensity) * spec.fieldAsymmetry.let { 1f + it } * budget.bloomScale * breath
-    val ry = minEdge * (0.50f + 0.06f * spec.intensity) * budget.bloomScale * breath
-
-    drawDeformableField(
-        center = center,
-        rx = rx,
-        ry = ry,
-        color = field.copy(alpha = 0.08f * spec.intensity),
-        spec = spec,
-        inner = false,
-    )
-    drawDeformableField(
-        center = center,
-        rx = rx * 0.62f,
-        ry = ry * 0.58f,
-        color = field.copy(alpha = 0.16f * spec.intensity),
-        spec = spec,
-        inner = true,
-    )
+    if (spec.intensity > 0.32f) {
+        drawCircle(
+            brush = Brush.radialGradient(
+                colors = listOf(field.copy(alpha = 0.07f * spec.intensity), Color.Transparent),
+                center = Offset(center.x - minEdge * 0.10f, center.y + minEdge * 0.04f),
+                radius = minEdge * 0.28f,
+            ),
+            radius = minEdge * 0.28f,
+            center = Offset(center.x - minEdge * 0.10f, center.y + minEdge * 0.04f),
+        )
+        drawCircle(
+            brush = Brush.radialGradient(
+                colors = listOf(field.copy(alpha = 0.05f * spec.intensity), Color.Transparent),
+                center = Offset(center.x + minEdge * 0.14f, center.y - minEdge * 0.06f),
+                radius = minEdge * 0.22f,
+            ),
+            radius = minEdge * 0.22f,
+            center = Offset(center.x + minEdge * 0.14f, center.y - minEdge * 0.06f),
+        )
+    }
 
     if (spec.groundGlow > 0.01f) {
         val crescent = Path()
@@ -195,38 +195,6 @@ fun DrawScope.drawVanAura(spec: VanAuraSpec, phase: Float, budget: VanEffectBudg
             style = Stroke(width = minEdge * 0.014f, cap = StrokeCap.Round),
         )
     }
-}
-
-private fun DrawScope.drawDeformableField(
-    center: Offset,
-    rx: Float,
-    ry: Float,
-    color: Color,
-    spec: VanAuraSpec,
-    inner: Boolean,
-) {
-    val path = Path()
-    val n = 14
-    for (i in 0..n) {
-        val t = i.toFloat() / n
-        val ang = t * (2f * PI).toFloat()
-        val wobble = 1f +
-            spec.deformation * sin(ang * 3f + spec.intensity * 5f + if (inner) 0.8f else 0f) +
-            spec.fieldAsymmetry * 0.35f * cos(ang * 2f + 0.6f) +
-            0.06f * sin(ang * 5f + spec.arcActivity)
-        val x = center.x + cos(ang) * rx * wobble
-        val y = center.y + sin(ang) * ry * wobble
-        if (i == 0) path.moveTo(x, y) else path.lineTo(x, y)
-    }
-    path.close()
-    drawPath(
-        path = path,
-        brush = Brush.radialGradient(
-            colors = listOf(color, color.copy(alpha = color.alpha * 0.35f), Color.Transparent),
-            center = center,
-            radius = maxOf(rx, ry),
-        ),
-    )
 }
 
 private fun mix(a: Color, b: Color, t: Float): Color = Color(
