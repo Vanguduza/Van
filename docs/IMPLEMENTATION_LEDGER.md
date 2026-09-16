@@ -1,6 +1,6 @@
 # VAN Implementation Ledger
 
-**Updated:** 2026-09-15
+**Updated:** 2026-09-16
 **Version:** 0.5.0-dev  
 **Repository:** `Vanguduza/Van`
 
@@ -11,6 +11,10 @@
 - Hermes pack: profile `van` SOUL, skills, fail-closed policy hook, Bot Chat/councils contracts and install/doctor tooling.
 - Android embodiment: overlay, Command Centre, encrypted queue, notification listener, share intent, voice/TTS hooks, biometric gate, onboarding and degraded-mode model.
 - Google Workspace token vault: encrypted refresh tokens, narrow scopes, revocation and prompt scrubbing.
+- **Restart-durable device authentication:** per-device HMAC credentials are encrypted at rest with a dedicated Fernet key, rehydrated at gateway startup, and fail closed on key mismatch.
+- **Atomic device revocation:** revoking an owner device marks the device and all outstanding capability grants revoked in one transaction; revoked credentials are never rehydrated.
+- **Owner ingress boundary:** every externally reachable Android-facing gateway route requires `X-Van-Ingress-Token`; Android stores the bearer in encrypted preferences while command authority still requires the independent per-device HMAC.
+- **Named tunnel production tooling:** `van-cloudflare-tunnel.service` + installer require a token file and stable HTTPS hostname, reject `trycloudflare.com`, and require an authenticated public health canary.
 - **Google OAuth correctness:** live Workspace transport exchanges encrypted refresh tokens for short-lived access tokens before Google API requests.
 - **Google Account Sovereignty:** `owner_google_account` remains VAN's canonical/default Google identity with separate Workspace OAuth, Gemini runtime, Cloud/service and consumer-session credential planes. Explicit delegated identities are bounded to named capabilities and cannot inherit owner authority or credentials.
 - **Google Intelligence Mesh:** versioned capability registry covering Gemini, Gemini Live, Deep Research, Gemini Notebook (personal + Enterprise), Mixboard, Stitch, Antigravity, Jules, Workspace API/Studio, Nano Banana, Veo, Flow, AI Studio and ADK/A2A.
@@ -32,7 +36,7 @@
 - Google credential planes are authenticated on Hermes and imported into Van as `CONFIGURED` (not `READY` without canary receipts).
 - The delegated Antigravity worker is live-certified. Capacity/rate limits, if they recur, remain capability-scoped and may fall back to Jules without degrading other Google planes.
 - Notebook Enterprise / ADK-A2A require eligible owner-administered Google Cloud/Enterprise setup.
-- Live Hermes install is certified on `dial-hermes-control` (2026-09-15). Local Project Truth mounts for van/dial/dde/gtr/goat/aeci are resolved on this workstation. Physical Samsung certification, `.riv` authoring, production signing, and GitHub workflow-scope install remain external gates.
+- Live Hermes install is certified on `dial-hermes-control` (2026-09-15). Local Project Truth mounts for van/dial/dde/gtr/goat/aeci are resolved on this workstation. Physical Samsung certification, stable named Cloudflare hostname/token provisioning, `.riv` authoring, production signing, and GitHub workflow-scope install remain external gates.
 
 ## SUPERSEDED / FORBIDDEN
 
