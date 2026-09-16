@@ -11,6 +11,9 @@ aura_v2_3:
     degraded_health_must_not_suppress_local_activity: true
     offline_uplink_may_force_pose: true
     semantic_field_may_differ_from_character_pose: true
+    speech_is_articulation_not_activity: true
+    speech_end_restores_underlying_activity: true
+    critical_authority_overrides_speech_pose: true
   inner_presence:
     radius_scale: 1.00
     colour_mode: dial_identity
@@ -41,8 +44,12 @@ aura_v2_3:
     reduced_motion_freezes_geometry: true
   evidence:
     compose_and_java2d_must_share_geometry: true
+    activity_and_semantic_specs_must_be_independently_composable: true
     gradle_gates: [":app:testDebugUnitTest", ":app:assembleDebug", ":app:lintDebug", ":visual-preview:test", ":visual-preview:renderVanPreviews"]
     owner_board_may_not_claim_current_geometry_unless_generated_from_shared_engine: true
+    canonical_named_directory: "artifacts/release/preview/rev23"
+    required_composite_board: "van_orthogonal_presence.png"
+    required_composite_cases: ["LISTENING+DEGRADED", "THINKING+DEGRADED", "SPEAKING+DEGRADED", "WORKING+DEGRADED", "LISTENING+OFFLINE", "SPEAKING+WAITING_FOR_OWNER"]
   overlay:
     resting_hit_dp: 168
     resting_avatar_dp: 92
@@ -51,5 +58,8 @@ aura_v2_3:
     compact_actions: [Ask, Projects, Tasks, Decisions]
     dock_hit_dp: 88
     dock_character_dp: 76
+    primary_chrome_follows_activity: true
+    degraded_health_is_secondary_copy: true
+    offline_and_critical_authority_may_take_over_primary_chrome: true
   states: [OFFLINE, CONNECTING, IDLE, ATTENTIVE, LISTENING, THINKING, SEARCHING, WORKING, DELEGATING, SPEAKING, WAITING, WAITING_FOR_OWNER, DEGRADED, WARNING, ERROR, SUCCESS, URGENT, SLEEPING]
   actions: [HELLO_WAVE, ACK_NOD, POINT_LEFT, POINT_RIGHT, POINT_UP, POINT_DOWN, POINT_TARGET, CELEBRATE, CAUTION, CONFIRM, SHRUG, PRESENT_CARD, OPEN_PANEL, CLOSE_PANEL]
