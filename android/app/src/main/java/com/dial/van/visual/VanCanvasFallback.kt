@@ -13,8 +13,11 @@ import androidx.compose.animation.core.rememberInfiniteTransition
 import androidx.compose.animation.core.tween
 import androidx.compose.foundation.Canvas
 import androidx.compose.foundation.Image
+import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.fillMaxSize
+import androidx.compose.foundation.layout.offset
+import androidx.compose.foundation.layout.size
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
@@ -32,14 +35,13 @@ import androidx.compose.ui.graphics.ColorMatrix
 import androidx.compose.ui.graphics.Path
 import androidx.compose.ui.graphics.drawscope.DrawScope
 import androidx.compose.ui.graphics.drawscope.Stroke
+import androidx.compose.ui.graphics.graphicsLayer
 import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.semantics.contentDescription
 import androidx.compose.ui.semantics.semantics
 import androidx.compose.ui.tooling.preview.Preview
-import androidx.compose.foundation.background
-import androidx.compose.foundation.layout.size
 import androidx.compose.ui.unit.dp
 import java.io.IOException
 import kotlin.math.PI
@@ -91,15 +93,19 @@ fun VanAvatar(
 /**
  * Owner-supplied bitmap pose.
  *
- * Per §1 the character is the solid anchor, so the bitmap is drawn opaque — the only
- * modulation permitted is §6's truthful muting for OFFLINE and DEGRADED, applied with the same
- * [VanStatusPalette] desaturation and dim values the Canvas character uses.
+ * Per §1 the character is the solid anchor, so the bitmap remains opaque and restrained. Unlike
+ * the old static fallback, the pose receives tiny state-aware whole-character motion so VAN never
+ * freezes while the living field moves around him. The motion is intentionally much smaller than
+ * the aura motion; it must read as breathing/attention, not as a floating sticker effect.
  */
 @Composable
 fun VanOwnerArtAvatar(state: VanVisualState, modifier: Modifier = Modifier) {
     val palette = VanStatusPalette.forState(state.durableState)
     val resId = VanStateArt.drawableFor(state.durableState) ?: return
     val description = vanContentDescription(state)
+    val reducedMotion = rememberReducedMotion()
+    val phase = vanIdlePhase(state.durableState, reducedMotion)
+    val motion = VanCharacterMotion.sample(state, phase, reducedMotion)
 
     val filter = if (palette.desaturation > 0.01f) {
         ColorFilter.colorMatrix(ColorMatrix().apply { setToSaturation(1f - palette.desaturation) })
@@ -110,7 +116,13 @@ fun VanOwnerArtAvatar(state: VanVisualState, modifier: Modifier = Modifier) {
     Image(
         painter = painterResource(id = resId),
         contentDescription = description,
-        modifier = modifier,
+        modifier = modifier
+            .offset(x = motion.offsetXDp.dp, y = motion.offsetYDp.dp)
+            .graphicsLayer {
+                rotationZ = motion.rotationDeg
+                scaleX = motion.scale
+                scaleY = motion.scale
+            },
         contentScale = ContentScale.Fit,
         alpha = palette.dim,
         colorFilter = filter,
