@@ -1,6 +1,6 @@
 {
   "$schema_note": "VATI Industry Integration Architecture stack lock (Rev 2.1 Part E). One canonical choice per layer; overlaps are rejected by trading/tests/test_stack_lock.py. Versions are observations at lock time and are NOT pins: exact pins happen at adoption through the donor gate with Context7/official release facts.",
-  "revision": "3.0.0",
+  "revision": "4.0.0",
   "locked_at": "2026-09-16",
   "observation_sources": {
     "pypi_json": "https://pypi.org/pypi/<package>/json read 2026-09-16",
@@ -53,7 +53,8 @@
         "vectorbt as production",
         "freqtrade",
         "LEAN as production kernel"
-      ]
+      ],
+      "build_status": "VAN-owned DecisionCycle/backtest engine built; Nautilus adoption pending Phase 3 donor gate"
     },
     {
       "layer": "independent_validation_oracle",
@@ -73,7 +74,8 @@
       ],
       "rejected_alternatives": [
         "second Nautilus configuration as 'independent' check"
-      ]
+      ],
+      "build_status": "not started"
     },
     {
       "layer": "mt5_execution",
@@ -92,7 +94,8 @@
         "Windows worker isolated",
         "orders carry sealed decision hash",
         "protective stop atomic or flatten"
-      ]
+      ],
+      "build_status": "bridge client + adapter contract built (signed requests, replay protection, fail-closed transport)"
     },
     {
       "layer": "deriv_execution",
@@ -109,7 +112,8 @@
       "constraints": [
         "FULL_STAKE loss model",
         "synthetic isolation"
-      ]
+      ],
+      "build_status": "adapter contract built (contract mapping, synthetic refusal, fail-closed transport)"
     },
     {
       "layer": "futures_options_reference_data",
@@ -126,7 +130,8 @@
       "constraints": [
         "paid subscription; entitlement is an external gate",
         "Nautilus in-tree adapter used"
-      ]
+      ],
+      "build_status": "not started"
     },
     {
       "layer": "implied_volatility",
@@ -143,7 +148,8 @@
       "constraints": [
         "entitlement is an external gate",
         "ATR/realised vol remain fallback features, not the primary vol state"
-      ]
+      ],
+      "build_status": "not started"
     },
     {
       "layer": "research_data_facade",
@@ -160,7 +166,8 @@
       "constraints": [
         "research process only",
         "owner-signed adoption decision required for AGPL"
-      ]
+      ],
+      "build_status": "not started"
     },
     {
       "layer": "ai_quant_research",
@@ -177,7 +184,8 @@
       "constraints": [
         "Qlib execution layer never used",
         "FX/futures data handlers are VAN-written"
-      ]
+      ],
+      "build_status": "not started"
     },
     {
       "layer": "hyperparameter_search",
@@ -190,7 +198,8 @@
       "licence": "MIT",
       "licence_class": "PERMISSIVE",
       "observed_version": "5.0.0",
-      "pin_status": "UNPINNED_VERIFY_AT_ADOPTION"
+      "pin_status": "UNPINNED_VERIFY_AT_ADOPTION",
+      "build_status": "not started"
     },
     {
       "layer": "feature_store",
@@ -206,7 +215,8 @@
       "pin_status": "UNPINNED_VERIFY_AT_ADOPTION",
       "constraints": [
         "online store read is T1, never T0"
-      ]
+      ],
+      "build_status": "not started"
     },
     {
       "layer": "model_registry",
@@ -222,7 +232,8 @@
       "pin_status": "UNPINNED_VERIFY_AT_ADOPTION",
       "constraints": [
         "a model alias is not a promotion; StrategyCapsule signature is"
-      ]
+      ],
+      "build_status": "not started"
     },
     {
       "layer": "event_backbone",
@@ -240,7 +251,8 @@
         "never inside the tick-to-order path",
         "M1 uses the Nautilus message bus + event ledger with the same event contracts; Redpanda is introduced at M2 without contract change",
         "owner-signed adoption decision required for BSL"
-      ]
+      ],
+      "build_status": "not started"
     },
     {
       "layer": "hot_market_timeseries",
@@ -256,7 +268,8 @@
       "pin_status": "UNPINNED_VERIFY_AT_ADOPTION",
       "constraints": [
         "never transactional authority"
-      ]
+      ],
+      "build_status": "not started"
     },
     {
       "layer": "historical_lake",
@@ -269,7 +282,8 @@
       "licence": "Apache-2.0",
       "licence_class": "PERMISSIVE",
       "observed_version": null,
-      "pin_status": "UNPINNED_VERIFY_AT_ADOPTION"
+      "pin_status": "UNPINNED_VERIFY_AT_ADOPTION",
+      "build_status": "CSV bar loader built; Parquet at Phase 1"
     },
     {
       "layer": "research_timeseries_accelerator",
@@ -286,7 +300,8 @@
       "pin_status": "UNPINNED_VERIFY_AT_ADOPTION",
       "constraints": [
         "owner-signed adoption decision required for BSL"
-      ]
+      ],
+      "build_status": "not started"
     },
     {
       "layer": "transactional_authority_store",
@@ -303,7 +318,8 @@
       "constraints": [
         "separate database from any DIAL business/finance database; VATI is not a DIAL money authority",
         "Phase 0-3 may use the Van gateway SQLite store with the same schemas"
-      ]
+      ],
+      "build_status": "SQLite hash-chained ledger built (PostgreSQL at Phase 4)"
     },
     {
       "layer": "durable_workflows",
@@ -319,7 +335,8 @@
       "pin_status": "UNPINNED_VERIFY_AT_ADOPTION",
       "constraints": [
         "never inside the tick-to-order path"
-      ]
+      ],
+      "build_status": "not started"
     },
     {
       "layer": "trading_knowledge_layer",
@@ -336,7 +353,8 @@
       "constraints": [
         "separate registry namespace from DIAL engineering VEKL",
         "may be forked into a dedicated VEKL instance if trading output/performance evidence justifies it"
-      ]
+      ],
+      "build_status": "VTIL registry + admission ledger built; DIAL resolver probe GREEN"
     },
     {
       "layer": "google_research_mesh",
@@ -349,7 +367,8 @@
       "licence": "vendor terms",
       "licence_class": "VENDOR_TERMS",
       "observed_version": null,
-      "pin_status": "N/A"
+      "pin_status": "N/A",
+      "build_status": "not started"
     },
     {
       "layer": "observability",
@@ -365,7 +384,8 @@
       "pin_status": "UNPINNED_VERIFY_AT_ADOPTION",
       "constraints": [
         "Grafana is AGPL; used as an unmodified operator tool, not linked into VATI"
-      ]
+      ],
+      "build_status": "metrics registry with Prometheus exposition built"
     },
     {
       "layer": "zse_market_data",
@@ -382,7 +402,8 @@
       "constraints": [
         "no real-time feed exists for retail; intraday ZSE strategies are ineligible",
         "kwayisi/afx pages are display-only; scraping ZSE Direct/C-Trade is forbidden"
-      ]
+      ],
+      "build_status": "market facts, cost schedule, currency regime, liquidity model built"
     },
     {
       "layer": "zse_execution",
@@ -400,7 +421,8 @@
         "VAN never automates the ZSE Direct or C-Trade apps",
         "every ticket is Risk-Authority approved before the owner sees it",
         "ILLIQUID_EQUITY loss model; software stops with liquidity haircut"
-      ]
+      ],
+      "build_status": "OWNER_TICKET adapter built"
     }
   ],
   "single_order_sender": "vati-execution-router (Nautilus ExecutionEngine \u2192 VAN RiskGate \u2192 venue ExecutionClient)",

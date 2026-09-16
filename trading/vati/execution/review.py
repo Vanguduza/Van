@@ -20,6 +20,8 @@ class Outcome(str, Enum):
     EXECUTION_FAILURE = "EXECUTION_FAILURE"
     DATA_FAILURE = "DATA_FAILURE"
     RISK_FAILURE = "RISK_FAILURE"
+    BROKER_FAILURE = "BROKER_FAILURE"     # venue rejected/lost the protective stop or the position (reconciliation class), not a strategy lesson
+    UNKNOWN = "UNKNOWN"                   # exit could not be established; never reinforced either way
 
 
 @dataclass(frozen=True)
@@ -42,15 +44,20 @@ class TradeReview:
 
 
 def review_trade(*, trade_intent_id: str, strategy_id: str, entry: Decimal, exit_price: Decimal, stop: Decimal, direction_long: bool, pnl: Decimal,
-                 thesis_correct: bool, process_ok: bool, execution_ok: bool = True, data_ok: bool = True, risk_ok: bool = True, exit_reason: str = "") -> TradeReview:
+                 thesis_correct: bool, process_ok: bool, execution_ok: bool = True, data_ok: bool = True, risk_ok: bool = True, broker_ok: bool = True,
+                 exit_reason: str = "", exit_known: bool = True) -> TradeReview:
     risk_per_unit = abs(entry - stop)
     move = (exit_price - entry) if direction_long else (entry - exit_price)
     r = move / risk_per_unit if risk_per_unit > ZERO else ZERO
     lessons: list[str] = []
-    if not data_ok:
+    if not exit_known:
+        outcome = Outcome.UNKNOWN; lessons.append("exit not established; reconcile before this trade teaches anything")
+    elif not data_ok:
         outcome = Outcome.DATA_FAILURE; lessons.append("stale or divergent data at decision; verify freshness gate")
     elif not risk_ok:
         outcome = Outcome.RISK_FAILURE; lessons.append("risk process breached; inspect authority and mandate")
+    elif not broker_ok:
+        outcome = Outcome.BROKER_FAILURE; lessons.append("venue lost or rejected protection/position; broker profile evidence, not strategy evidence")
     elif not execution_ok:
         outcome = Outcome.EXECUTION_FAILURE; lessons.append("execution shortfall exceeded model; review venue/session")
     elif pnl >= ZERO:

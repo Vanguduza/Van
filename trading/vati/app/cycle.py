@@ -25,13 +25,15 @@ from vati.execution.tca import compute_tca
 from vati.intelligence.events import EventMatrix
 from vati.intelligence.market_state import MarketState, build_market_state
 from vati.intelligence.regimes import RegimeEngine
+from vati.learning.hooks import LearningHooks, to_payload
 from vati.market_data.bars import Bar
 from vati.market_data.calendars import MarketCalendar
 from vati.observability import metrics
 from vati.risk import Decision, KillSwitch, MarketIntegrityState, OpenPosition, RiskAuthority, RiskSnapshot, SymbolContract, TradingMandate
-from vati.risk.contracts import Direction, LossModel
+from vati.risk.contracts import Direction, LossModel, StrategyState
 from vati.risk.serde import intent_to_dict, snapshot_to_dict
 from vati.strategies.base import StrategyContext
+from vati.arbiter.strategy_arbiter import ACTIVE_STATES
 from vati.vtil import AdmissionLedger
 
 ZERO = Decimal("0")
@@ -67,8 +69,10 @@ class CycleResult:
 class DecisionCycle:
     def __init__(self, *, cfg: SessionConfig, adapter: VenueAdapter, ledger: Ledger, engine: OpportunityEngine, cost_fn: Callable[[MarketState], Decimal],
                  calendar: MarketCalendar, events: EventMatrix, regime_engine: Optional[RegimeEngine] = None, kill_switch: Optional[KillSwitch] = None,
-                 admission: Optional[AdmissionLedger] = None, ctx_fn: Optional[Callable[[MarketState, Decimal], StrategyContext]] = None) -> None:
+                 admission: Optional[AdmissionLedger] = None, ctx_fn: Optional[Callable[[MarketState, Decimal], StrategyContext]] = None,
+                 learning: Optional[LearningHooks] = None) -> None:
         self.cfg, self.adapter, self.ledger, self.engine, self.cost_fn, self.calendar, self.events = cfg, adapter, ledger, engine, cost_fn, calendar, events
+        self.learning = learning
         self.regime = regime_engine or RegimeEngine()
         self.kill = kill_switch or KillSwitch()
         self.mandate = TradingMandate.from_mapping(cfg.mandate_dict)
@@ -162,6 +166,10 @@ class DecisionCycle:
             if rec.average_fill is not None and rec.filled_qty > ZERO:
                 tca = compute_tca(rec, direction=intent.direction, qty=rec.filled_qty, value_per_unit=cfg.contract.value_per_price_unit_per_lot if cfg.contract.loss_model is LossModel.STOP_DISTANCE else Decimal(1), modelled_cost_pct=cost)
                 self._log(EventKind.TCA_RECORD, tca.as_dict(), now_ms=now_ms, corr=intent.trade_intent_id)
+                self._entries[intent.trade_intent_id]["cost_ratio"] = tca.cost_ratio
+                if self.learning is not None:
+                    self.learning.on_tca(symbol=cfg.symbol, session=state.session.value, event_window=state.event_window.value, cost_ratio=tca.cost_ratio, slippage=tca.slippage)
+                    self.engine.m.broker_liquidity[cfg.symbol] = self.learning.broker_liquidity(cfg.symbol)
         return CycleResult(state.as_of_ms, state.state_hash, decision.decision.value, "", decision.approved_size)
 
     # ------------------------------------------------------- marks and exits
@@ -192,3 +200,27 @@ class DecisionCycle:
         self._log(EventKind.TRADE_REVIEW, {k: (v.value if hasattr(v, "value") else (str(v) if isinstance(v, Decimal) else (list(v) if isinstance(v, tuple) else v))) for k, v in asdict(rv).items()}, now_ms=now_ms, corr=intent_id)
         self.admission.propose(rv.artifact_hash, knowledge_class="TRADE_EXPERIENCE", proposed_by=rv.proposed_by, trust_tier="T0_VAN_TRADING_POLICY")
         metrics.inc("vati_trades_closed_total", outcome=rv.outcome.value)
+        if self.learning is not None:
+            self._learn(intent_id, rv, e.get("cost_ratio", Decimal(1)), now_ms)
+
+    # ------------------------------------------------------------ learning
+    def _learn(self, intent_id: str, rv, cost_ratio: Decimal, now_ms: int) -> None:
+        """Observe the closed trade; apply only LearningBoundary-checked, reduce-only effects."""
+        assert self.learning is not None
+        ep, adj = self.learning.on_review(self.ledger, trade_intent_id=intent_id, strategy_id=rv.strategy_id, r_multiple=rv.r_multiple, process_ok=rv.process_ok, cost_ratio=cost_ratio)
+        if ep is not None:
+            self._log(EventKind.TRADE_EXPERIENCE_ARTIFACT, to_payload(ep), now_ms=now_ms, corr=intent_id)
+            self.admission.propose(ep.artifact_hash, knowledge_class="TRADE_EXPERIENCE", proposed_by="vati-learning", trust_tier="T0_VAN_TRADING_POLICY")
+        if adj is None:
+            return
+        self.engine.m.capsule_health[rv.strategy_id] = adj.multiplier
+        if adj.demote_to:
+            cap = self.engine.registry.get(rv.strategy_id)
+            # Live capsules step down to SHADOW (observe, no orders); pre-live capsules become DEGRADED (inactive).
+            target = StrategyState.SHADOW if cap.state in (StrategyState.LIMITED_LIVE, StrategyState.CERTIFIED_LIVE) else StrategyState.DEGRADED
+            if cap.state in ACTIVE_STATES and cap.state is not target:
+                new = self.engine.registry.demote(rv.strategy_id, target, reason=f"learning health {adj.multiplier}: {'; '.join(self.learning.health.verdict(rv.strategy_id).reasons)}")
+                self.learning.demotions.append((rv.strategy_id, target.value))
+                self._log(EventKind.CAPSULE_STATE, {"strategy_id": rv.strategy_id, "from": cap.state.value, "to": target.value, "capsule_hash": new.capsule_hash, "supersedes": cap.capsule_hash,
+                                                    "by": "vati-learning", "authority": "AUTOMATIC_DEMOTION_ONLY"}, now_ms=now_ms, corr=intent_id)
+                metrics.inc("vati_capsule_demotions_total", strategy=rv.strategy_id, to=target.value)

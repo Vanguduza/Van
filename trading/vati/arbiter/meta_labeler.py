@@ -43,9 +43,11 @@ class MetaVerdict:
 
 
 class MetaLabeler:
-    def __init__(self, *, capsule_health: dict[str, Decimal] | None = None, t2_assessment: dict | None = None) -> None:
+    def __init__(self, *, capsule_health: dict[str, Decimal] | None = None, t2_assessment: dict | None = None, broker_liquidity: dict[str, Decimal] | None = None) -> None:
         self.capsule_health = capsule_health or {}
         self.t2 = t2_assessment or {}
+        # Learned broker execution profile per symbol (Rev 4 Part L): reduce-only, ≤ 1, 0 = SUSPENDED
+        self.broker_liquidity = broker_liquidity or {}
 
     def score(self, state: MarketState, signal: Signal, cost_multiple: Decimal, ctx: StrategyContext | None = None) -> MetaVerdict:
         reasons: list[str] = []
@@ -73,6 +75,11 @@ class MetaLabeler:
                 liq_m = Decimal("0.5"); reasons.append("spread in top quintile")
             elif f.spread_percentile > Decimal("0.6"):
                 liq_m = Decimal("0.75")
+        bl = min(ONE, max(ZERO, self.broker_liquidity.get(signal.symbol, ONE)))
+        if bl == ZERO:
+            return MetaVerdict(MetaLabel.SKIP, ZERO, vol_m, ZERO, ONE, regime_m, tuple(reasons + ["broker execution profile SUSPENDED for symbol"]))
+        if bl < liq_m:
+            liq_m = bl; reasons.append(f"learned broker liquidity {bl}")
         ev_m = ONE
         if state.event_window is EventWindowState.QUIET:
             ev_m = Decimal("0.5"); reasons.append("quiet window after Tier-1 release")

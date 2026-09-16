@@ -1,44 +1,29 @@
-# VAN Adaptive Trading Intelligence (VATI) — `trading/`
+# VAN Trading System (VATI) — `trading/`
 
-Canonical authority: `docs/VAN_ADAPTIVE_TRADING_INTELLIGENCE_TECHNICAL_BLUEPRINT_REV2.md` (core) and `docs/VAN_ADAPTIVE_TRADING_INTELLIGENCE_TECHNICAL_BLUEPRINT_REV3.md` (research-grounded decisions and the ZSE module).
+Canonical authority: `docs/VAN_TRADING_SYSTEM_BLUEPRINT_REV4_CONSOLIDATED.md` (Rev 4 consolidates Rev 2, 2.1 and 3; earlier revisions remain provenance).
 
-This tree holds VATI code. Phase 0 (Canon & Risk Boundary) is delivered here;
-later phases add packages under the layout in Rev 2 §49.
-
-| Path | Phase | Role |
-|---|---|---|
-| `vati/risk/` | 0 | Deterministic Risk Authority: mandate, sizing, portfolio heat, currency legs, drawdown governor, kill switch, sealed `RiskDecision`. Pure Python, stdlib only. |
-| `vati/contracts/schemas/` | 0 | JSON Schema for `TradingMandate`, `SymbolContract`, `RiskSnapshot`, `TradeIntent`, `RiskDecision`, `ExecutionReceipt`, `StrategyCapsule`. |
-| `examples/` | 0 | Example mandate (unsigned placeholder signature; not a live mandate). |
-| `tests/` | 0 | Unit tests, fail-closed path tests and seeded property fuzz (P1–P8). |
-| `architecture/stack_lock.json` | 0 (Rev 2.1) | Machine-checked tool-per-layer lock with adoption phase, latency tier, licence class and observed version. |
-| `vati/zse/` | ZSE-F001 (seed now) | Zimbabwe Stock Exchange / VFEX module: market facts with verification state, cost schedule, ZiG currency regime, liquidity model (Rev 3 Part D). |
-| `vtil/` | 2 (seed now) | VTIL registry in DIAL VEKL schema plus the probe that runs DIAL's unmodified resolver against it. |
-
-## Invariants the code enforces
-
-- Nothing in `vati/risk` imports a model, a broker SDK or the network.
-- Multipliers can only reduce risk: every multiplier is clamped into `[0, 1]`.
-- Lot sizes round **down** to the venue step; below venue minimum is `NO_TRADE`.
-- Approved risk ≤ min(requested, mandate) and a mandate cannot exceed platform ceilings.
-- Any unprovable health flag (stale quote, disconnected venue, failed
-  reconciliation, clock, risk store, unverified account, kill switch) rejects.
-- A replayed idempotency key is rejected as `DUPLICATE_INTENT`.
-- A Deriv fixed-payout contract is sized by stake (stake = maximum loss).
-
-## Run
-
-```bash
-python3 -m pytest trading -q
+```
+python3 -m pytest trading -q                       # all trading tests
+python3 -m vati backtest --bars bars.csv --config session.json --ledger run.sqlite
+python3 -m vati replay-verify --ledger run.sqlite  # recompute every RiskDecision from its stored inputs
+python3 -m vati zse-facts                          # ZSE/VFEX facts with verification state and live blockers
+python3 trading/tools/induce_gate_failures.py      # break the risk gate deliberately; fuzz must catch it
+DIAL_REPO=../dial-new node trading/vtil/tools/resolve_probe.mjs   # DIAL VEKL resolver over the Van registry
 ```
 
-The property fuzz (`tests/test_authority_properties.py`) must exercise both
-approval and rejection branches; it asserts that it did. The gate was broken
-deliberately five ways (multiplier clamp, mandate clamp, heat check,
-duplicate latch, kill switch) and the fuzz failed each time — see Rev 2 Part D.
+| Package | Role |
+|---|---|
+| `vati/core` | canonical JSON/hash, event envelope (3 clocks), hash-chained SQLite ledger with decision replay |
+| `vati/market_data` | session calendars (FX 24×5, ZSE fail-closed until verified), integrity state machine, bar aggregation, FX cost model |
+| `vati/intelligence` | features, regime engine (CUSUM change-point + hysteresis), Tier-1 event matrix, MarketState |
+| `vati/strategies` | signed StrategyCapsule registry (`strategies/registry/*.json`) and five deterministic strategies |
+| `vati/arbiter` | horizon arbiter (k × cost), strategy arbiter, rule meta-labeller (uncalibrated, reduce-only), opportunity engine → sealed TradeIntent |
+| `vati/risk` | Deterministic Risk Authority: mandate + ceilings, sizing for STOP_DISTANCE / FULL_STAKE / ILLIQUID_EQUITY, heat, currency legs, drawdown governor, kill switch, EDGE_BELOW_COST |
+| `vati/execution` | router (sealed-decision verification, idempotency, flatten-on-stop-reject), adapters: paper, owner ticket (ZSE), MT5 bridge client, Deriv; protection (stops only tighten), reconciliation, TCA, review |
+| `vati/zse` | Zimbabwe Stock Exchange / VFEX: sourced market facts with verification state, cost schedule, ZiG regime, liquidity haircut |
+| `vati/vtil` | admission ledger (no self-admission; T4 needs validation); registry + DIAL resolver probe under `vtil/` |
+| `vati/backtest` | deterministic backtest over the live DecisionCycle; expectancy, drawdown, deflated Sharpe, PBO (CSCV), walk-forward; leakage switch |
+| `vati/app` | DecisionCycle (shared by backtest and live), SessionRunner (startup reconciliation, owner halt) |
+| `architecture/stack_lock.json` | one tool per layer, licence class, adoption phase, build status; tested |
 
-## Not in this tree yet
-
-Market data, strategies, execution adapters (MT5/Deriv), reconciliation, TCA,
-VTIL admission and GraphRAG are Phases 1–12. No adapter may be added before the
-Phase 0 gate evidence in Rev 2 Part D is accepted by the owner.
+Not built yet (by design, gated): NautilusTrader kernel adoption, real MT5 Windows worker and Deriv transports, ZSE data ingestion adapters, PostgreSQL/Parquet migration, calibrated meta-labeller, LEAN reproduction. Nothing here has traded on demo or live.

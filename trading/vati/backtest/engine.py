@@ -18,6 +18,7 @@ from vati.core.ledger import Ledger
 from vati.execution.paper import PaperAdapter
 from vati.intelligence.events import EventMatrix
 from vati.intelligence.market_state import MarketState
+from vati.learning.hooks import LearningHooks
 from vati.market_data.bars import Bar
 from vati.market_data.calendars import MarketCalendar
 from vati.strategies.base import StrategyContext
@@ -45,8 +46,9 @@ class BacktestResult:
 class BacktestEngine:
     def __init__(self, *, cfg: SessionConfig, engine: OpportunityEngine, cost_fn: Callable[[MarketState], Decimal], calendar: MarketCalendar, events: EventMatrix,
                  start_equity: Decimal = Decimal("10000"), spread: Decimal = Decimal("0.00010"), slippage: Decimal = Decimal("0.00002"),
-                 ctx_fn: Optional[Callable[[MarketState, Decimal], StrategyContext]] = None, ledger_path: str = ":memory:") -> None:
+                 ctx_fn: Optional[Callable[[MarketState, Decimal], StrategyContext]] = None, ledger_path: str = ":memory:", learning: Optional[LearningHooks] = None) -> None:
         self.cfg, self.engine, self.cost_fn, self.calendar, self.events, self.ctx_fn = cfg, engine, cost_fn, calendar, events, ctx_fn
+        self.learning = learning
         self.start_equity, self.spread, self.slippage, self.ledger_path = start_equity, spread, slippage, ledger_path
 
     def run(self, bars: Sequence[Bar], *, peek: bool = False) -> BacktestResult:
@@ -54,7 +56,7 @@ class BacktestEngine:
         paper = PaperAdapter(venue=cfg.venue, account_alias=cfg.account_alias, equity=self.start_equity, spread=self.spread, slippage=self.slippage,
                              value_per_price_unit_per_lot=cfg.contract.value_per_price_unit_per_lot)
         ledger = Ledger(self.ledger_path)
-        cycle = DecisionCycle(cfg=cfg, adapter=paper, ledger=ledger, engine=self.engine, cost_fn=self.cost_fn, calendar=self.calendar, events=self.events, ctx_fn=self.ctx_fn)
+        cycle = DecisionCycle(cfg=cfg, adapter=paper, ledger=ledger, engine=self.engine, cost_fn=self.cost_fn, calendar=self.calendar, events=self.events, ctx_fn=self.ctx_fn, learning=self.learning)
         curve: list[tuple[int, Decimal]] = []
         cycles: list[CycleResult] = []
         rejections: dict[str, int] = {}

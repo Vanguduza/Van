@@ -81,6 +81,8 @@ import pytest
         "remove_stop_loss", "widen_protective_stop", "martingale", "unlimited_grid",
         "revenge_risk_increase", "disable_kill_switch", "trade_unverified_account",
         "trade_stale_data", "silent_strategy_mutation", "unvalidated_research_to_live", "broker_token_in_prompt",
+        "learning_engine_writes_mandate", "learning_widens_risk", "learning_raises_multiplier", "auto_promote_strategy",
+        "self_admit_knowledge", "broker_credentials_in_memory", "memory_as_evidence",
     ],
 )
 def test_trading_forbidden_behaviours_are_a5(name):
@@ -121,3 +123,10 @@ def test_risk_authority_code_write_requires_truth_verified_owner_signature():
 def test_ordinary_trade_intent_submission_is_allowed_under_mandate():
     result = hook.evaluate({"action_class": "A3", "name": "submit_trade_intent", "target": "opportunity_engine", "mutating": True})
     assert result["decision"] == "allow"
+
+
+def test_learning_boundary_module_is_a_protected_surface():
+    result = hook.evaluate({"action_class": "A3", "operation": "patch", "path": "trading/vati/learning/boundary.py", "mutating": True})
+    assert result["decision"] == "deny" and result["code"] == "protected_surface"
+    ok = hook.evaluate({"action_class": "A3", "operation": "read", "path": "trading/vati/learning/boundary.py"})
+    assert ok["decision"] != "deny"

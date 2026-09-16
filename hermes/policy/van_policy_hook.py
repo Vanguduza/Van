@@ -32,6 +32,9 @@ A5_PATTERNS = frozenset({"disable_audit","disable_approvals","disable_authority_
     "martingale","unlimited_grid","unlimited_averaging_down","revenge_risk_increase","double_risk_after_loss",
     "disable_kill_switch","trade_unverified_account","trade_stale_data","duplicate_order",
     "silent_strategy_mutation","unvalidated_research_to_live","broker_token_in_prompt",
+    # Continuous learning boundary (Rev 4 Part L): learning may reduce; it may never promote, widen or hold credentials.
+    "learning_engine_writes_mandate","learning_widens_risk","learning_raises_multiplier","auto_promote_strategy",
+    "self_admit_knowledge","broker_credentials_in_memory","memory_as_evidence",
 })
 
 
@@ -83,7 +86,7 @@ def _targets_protected_surface(action: Mapping[str, Any]) -> bool:
             return True
     path = str(action.get("path") or "").lower()
     protected_markers = ("project_truth", "truth_protocol", "security_policy", "google_capabilities.json", "google_intelligence_mesh",
-                         "trading_mandate", "mandate.", "risk_policy", "platform_ceilings", "strategy_capsule", "trading/vati/risk")
+                         "trading_mandate", "mandate.", "risk_policy", "platform_ceilings", "strategy_capsule", "trading/vati/risk", "trading/vati/learning/boundary")
     if any(marker in path for marker in protected_markers):
         if action.get("operation") in ("write", "delete", "modify", "patch"):
             if not action.get("owner_signed") and not action.get("truth_authority_verified"):

@@ -65,6 +65,39 @@ Canonical authority: `docs/VAN_ADAPTIVE_TRADING_INTELLIGENCE_TECHNICAL_BLUEPRINT
    `owner_authority: MANDATE`. Never state a size; the Risk Authority sizes.
 7. Report what would change the decision.
 
+## Operating the built system (Rev 4)
+
+- Status questions are answered from the VATI ledger through the gateway (`GET /v1/trading/status`), never from memory.
+- A ZSE ticket appears as an OWNER_TICKET event; the owner enters it and confirms through `POST /v1/trading/tickets/{id}/confirm` (A4). Hermes may explain the ticket; it never confirms it.
+- An owner halt is `POST /v1/trading/halt` with owner-signed authority (A4); Hermes may recommend it, never send it.
+- Backtests: `python -m vati backtest --bars ... --config ...`; the result is a candidate, never a promotion. Decision replay: `python -m vati replay-verify --ledger ...`.
+
+## Continuous learning (Rev 4 Part L)
+
+Learning is continuous; production authority is not. The learning engine (`trading/vati/learning`) turns every closed
+trade, rejected setup, counterfactual and macro event into sealed evidence, and it may push exactly three things back
+into the live path, all reduce-only and all checked by `LearningBoundary`: a capsule-health multiplier (≤ 1, with
+automatic demotion to DEGRADED/SHADOW after a sustained breach), a regime-probability multiplier (≤ 1), and a broker
+execution profile (liquidity multiplier ≤ 1; SUSPENDED = 0). It can never promote a capsule, raise a multiplier, change a
+mandate, ceiling, instrument list, leverage or credential, or admit its own findings as knowledge.
+
+- Evidence is weighted by environment: LIVE/LIMITED_LIVE 1.0, SHADOW 0.7, DEMO 0.5, REPLAY/BACKTEST 0.3, COUNTERFACTUAL 0.2.
+  Execution facts (spread, slippage, fills) from BACKTEST/REPLAY/COUNTERFACTUAL weigh 0: only real venues teach execution.
+  A live adjustment needs ≥ 30 environment-weighted samples and must cite artifact hashes.
+- Missed-opportunity learning judges the setup from its frozen ex-ante snapshot hash; the later path only scores the
+  outcome over the setup's own horizon window. A Risk Authority rejection is a GOOD_NO_TRADE by definition.
+- Counterfactuals are six predefined variants on the same bar path; they are SIMULATED_EVIDENCE_NOT_CAUSAL and only
+  ever aggregate at capsule level.
+- Failure clusters propose a new capsule version in RESEARCH. The parent is preserved; the candidate takes the ordinary
+  owner-signed promotion path and the curriculum gates (stages 1–8) in order.
+- Daily/weekly/monthly reports are computed from the ledger. Hermes narrates them; it does not compute the numbers and
+  it does not invent lessons the report does not contain.
+- Hermes memory is continuity, never evidence: the memory bridge stores what VAN was working on in the `trading`
+  namespace with TTLs, refuses credential-shaped text, and cites evidence only by 64-hex artifact hash.
+- A5 (never, even with owner approval in-session): `learning_engine_writes_mandate`, `learning_widens_risk`,
+  `learning_raises_multiplier`, `auto_promote_strategy`, `self_admit_knowledge`, `broker_credentials_in_memory`,
+  `memory_as_evidence`.
+
 ## Owner-facing output template
 
 ```markdown

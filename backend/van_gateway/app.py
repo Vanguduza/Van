@@ -27,6 +27,7 @@ from van_gateway.projects.router import ProjectRouter
 from van_gateway.reminders.service import ReminderService
 from van_gateway.reminders.timeparse import TimeParseError, parse_due_expression
 from van_gateway.storage.db import Store
+from van_gateway.trading import TradingControlError, TradingService
 
 
 class EnrollBody(BaseModel):
@@ -77,6 +78,20 @@ class DecisionResolveBody(BaseModel):
     approved: bool
 
 
+class OwnerHaltRequest(BaseModel):
+    """A4: an owner halt is owner-signed; the gateway only records it in the VATI ledger."""
+    owner_signature_ref: str = Field(min_length=1)
+    reason: str = ""
+
+
+class TicketConfirmRequest(BaseModel):
+    """A4: the owner confirms a ZSE OWNER_TICKET against the broker contract note."""
+    owner_signature_ref: str = Field(min_length=1)
+    fill_price: str
+    filled_qty: str
+    contract_note_ref: str = Field(min_length=1)
+
+
 def create_app() -> FastAPI:
     settings = get_settings()
     store = Store(settings.database_path)
@@ -92,6 +107,7 @@ def create_app() -> FastAPI:
     briefing = BriefingService(store, attention)
     reminders = ReminderService(store)
     decisions = DecisionService(store, attention)
+    trading = TradingService(settings.vati_ledger_path)
 
     google_transport = None
     google_oauth = None
@@ -139,6 +155,7 @@ def create_app() -> FastAPI:
     app.state.decisions = decisions
     app.state.projects = projects
     app.state.reminders = reminders
+    app.state.trading = trading
 
     def require_internal_control(x_van_internal_token: str | None) -> None:
         try:
@@ -381,6 +398,56 @@ def create_app() -> FastAPI:
     @app.get("/v1/events")
     async def get_events(device_id: str, after_seq: int = 0):
         return await events.replay(device_id, after_seq)
+
+    # ------------------------------------------------------------ trading (Rev 4 Part K)
+    def _trading_status_payload() -> dict:
+        from van_gateway.models import DegradedCode
+        try:
+            st = trading.status()
+        except Exception as exc:  # ledger unreadable
+            degraded.set(DegradedCode.TRADING_LEDGER_UNAVAILABLE, True)
+            return {"ledger_available": False, "ledger_path": trading.ledger_path, "chain_ok": None, "error": str(exc), "degraded": degraded.codes()}
+        degraded.set(DegradedCode.TRADING_LEDGER_UNAVAILABLE, not (st.get("ledger_available") and st.get("chain_ok")))
+        st["degraded"] = degraded.codes()
+        return st
+
+    @app.get("/v1/trading/status")
+    async def trading_status():
+        return _trading_status_payload()
+
+    @app.get("/v1/trading/tickets")
+    async def trading_tickets(status: str | None = None):
+        return {"tickets": trading.tickets(status=status)}
+
+    @app.post("/v1/trading/halt")
+    async def trading_halt(req: OwnerHaltRequest, x_van_internal_token: str | None = Header(default=None)):
+        require_internal_control(x_van_internal_token)
+        try:
+            out = trading.halt(owner_signature_ref=req.owner_signature_ref, reason=req.reason)
+        except TradingControlError as exc:
+            raise HTTPException(status_code=403, detail=str(exc))
+        except FileNotFoundError as exc:
+            raise HTTPException(status_code=503, detail=str(exc))
+        await audit.record(result="owner_halt_recorded", capability="trading.owner_halt", approval=req.owner_signature_ref, tool="vati_ledger",
+                           after={"event_hash": out["event_hash"], "chain_hash": out["chain_hash"]}, evidence_pointer=out["event_hash"])
+        return out
+
+    @app.post("/v1/trading/tickets/{ticket_id}/confirm")
+    async def trading_confirm_ticket(ticket_id: str, req: TicketConfirmRequest, x_van_internal_token: str | None = Header(default=None)):
+        require_internal_control(x_van_internal_token)
+        try:
+            out = trading.confirm_ticket(ticket_id, owner_signature_ref=req.owner_signature_ref, fill_price=req.fill_price, filled_qty=req.filled_qty, contract_note_ref=req.contract_note_ref)
+        except TradingControlError as exc:
+            raise HTTPException(status_code=409, detail=str(exc))
+        except KeyError as exc:
+            raise HTTPException(status_code=404, detail=str(exc))
+        except ValueError as exc:
+            raise HTTPException(status_code=422, detail=str(exc))
+        except FileNotFoundError as exc:
+            raise HTTPException(status_code=503, detail=str(exc))
+        await audit.record(result="owner_ticket_confirmed", capability="trading.ticket_confirm", approval=req.owner_signature_ref, tool="vati_ledger",
+                           after={"ticket": ticket_id, "event_hash": out["event_hash"]}, evidence_pointer=out["event_hash"])
+        return out
 
     @app.post("/v1/events/reset")
     async def reset_events(device_id: str):
