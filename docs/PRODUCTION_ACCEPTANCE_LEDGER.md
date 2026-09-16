@@ -23,7 +23,7 @@
 | SBOM / provenance / checksums | PASS at prior HEAD |
 | Project Truth canonical state contract | PASS — canonical state added and guarded for PR-based integration |
 | Backend bootstrap | PASS — repository root resolution and `python3` invocation corrected; bootstrap executed successfully |
-| Complete Python suite at secure-ingress closure HEAD | PASS — 90 passed |
+| Complete Python suite at schema-4 pairing closure HEAD | PASS — 97 passed |
 
 ## Google Intelligence Mesh repository gates
 
@@ -44,19 +44,22 @@ Validated 2026-09-15 in a clean repository environment after installing the decl
 | Google session export / broker bypass policy denial | PASS |
 | Hermes remains sole agent runtime | PASS |
 
-## Live VAN gateway ingress certification — 2026-09-16
+## Live VAN gateway pairing certification — 2026-09-16
 
-Live host: `dial-hermes-control`; certified source: `b585195fe6cfab3d02c626c007d623631539f2de`. Token-free receipt: `artifacts/runtime/van_ingress_live_attestation.json`.
+Live host: `dial-hermes-control`; certified source: `b075817401fc02ae7ffbaea311f8d9b560c9dea0`. Token-free receipt: `artifacts/runtime/van_pairing_v4_live_attestation.json`.
 
 | Gate | Status | Evidence |
 |---|---|---|
-| Loopback-only gateway service | PASS | `van-gateway.service` active + enabled on `127.0.0.1:8787` |
-| External owner bearer boundary | PASS | unauthenticated `/health` returned HTTP 401; authenticated `/health` returned healthy |
-| Workspace continuity through gateway restart | PASS | `workspace_api` remained `READY` after two service restarts |
-| Device HMAC secret at-rest protection | PASS | live canary secret stored encrypted; plaintext absent from persisted credential field |
-| Restart-durable device authentication | PASS | signed stale command returned `expired` after restart, proving signature verification survived restart without executing Hermes |
-| Atomic device/grant revocation | PASS | revoke returned HTTP 200 and active grants became 0 |
-| Revocation survives restart | PASS | signed command from revoked canary returned `denied` after second restart |
+| Loopback-only gateway service | PASS | `van-gateway.service` active + enabled on `127.0.0.1:8787`; schema 4 applied |
+| Outer ingress boundary | PASS | unauthenticated `/health` returned HTTP 401; ingress-authenticated `/health` remained healthy |
+| Single-use pairing ticket | PASS | ticket stored only as SHA-256; first pair HTTP 200; reuse HTTP 400 |
+| Device HMAC secret at-rest protection | PASS | live canary secret stored encrypted; plaintext absent from persisted field |
+| Per-device access-token protection | PASS | token stored only as SHA-256; ingress bearer alone received HTTP 401 on normal client API |
+| Dual-token client authority | PASS | ingress bearer + device token received HTTP 200 before and after gateway restart |
+| Restart-durable command authentication | PASS | signed stale command returned `expired` before and after restart, proving HMAC rehydration without executing Hermes |
+| Workspace continuity through restart | PASS | `workspace_api` remained `READY` before, after first restart, and after second restart |
+| Atomic device/grant revocation | PASS | revoke HTTP 200 and active grants became 0 |
+| Revocation survives restart | PASS | old device token received HTTP 401 for API and command after second restart |
 | Stable public HTTPS route | EXTERNAL | named Cloudflare Tunnel token + stable hostname still required; quick tunnels are rejected |
 
 ## External gates blocking v1.0
