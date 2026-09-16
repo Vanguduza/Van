@@ -5,8 +5,8 @@ import com.dial.van.degraded.SubsystemStatus
 
 /**
  * Pure resolver from subsystem truth + orthogonal live presence into chrome and embodiment.
- * Android/Compose surfaces must pass their observed live frame explicitly; this keeps the resolver
- * usable by the JVM visual-evidence renderer and deterministic tests.
+ * Android/Compose surfaces should pass their observed live frame explicitly. Legacy callers that
+ * still pass [VanVisualState] are losslessly promoted for the critical authority channels.
  */
 object VanPresence {
 
@@ -64,6 +64,18 @@ object VanPresence {
             )
         }
 
+        if (live.authority != VanAuthorityState.NONE) {
+            val state = live.semanticState
+            return Cue(
+                durableState = state,
+                health = health,
+                headline = VanStatusPalette.forState(state).label,
+                detail = VanCaptions.forState(state),
+                brokenLabels = brokenLabels,
+                urgency = live.urgency,
+            )
+        }
+
         if (broken.isNotEmpty()) {
             val lead = broken.firstOrNull { it.id == GOOGLE } ?: broken.first()
             return Cue(
@@ -111,6 +123,7 @@ object VanPresence {
         if (cue.health == VanHealthState.OFFLINE) {
             frame = frame.copy(
                 activity = VanDurableState.OFFLINE,
+                authority = VanAuthorityState.NONE,
                 speech = VanSpeechState.QUIET,
                 turn = VanTurnPhase.IDLE,
                 mouthOpen = 0f,
@@ -133,20 +146,36 @@ object VanPresence {
         }
     }
 
-    private fun frameFromVisual(base: VanVisualState): VanPresenceFrame = VanPresenceFrame(
-        activity = base.durableState,
-        speech = when {
-            base.speaking -> VanSpeechState.SPEAKING
-            base.listening -> VanSpeechState.LISTENING
-            else -> VanSpeechState.QUIET
-        },
-        attentionX = base.attentionX,
-        attentionY = base.attentionY,
-        mouthOpen = base.mouthOpen,
-        viseme = base.viseme,
-        urgency = base.urgency,
-        actionCode = base.actionCode,
-    )
+    private fun frameFromVisual(base: VanVisualState): VanPresenceFrame {
+        val authority = when (base.durableState) {
+            VanDurableState.WAITING_FOR_OWNER -> VanAuthorityState.WAITING_FOR_OWNER
+            VanDurableState.WARNING -> VanAuthorityState.WARNING
+            VanDurableState.ERROR -> VanAuthorityState.ERROR
+            VanDurableState.URGENT -> VanAuthorityState.URGENT
+            else -> VanAuthorityState.NONE
+        }
+        val inferredHealth = when (base.resolvedSemanticState) {
+            VanDurableState.OFFLINE -> VanHealthState.OFFLINE
+            VanDurableState.DEGRADED -> VanHealthState.DEGRADED
+            else -> VanHealthState.NOMINAL
+        }
+        return VanPresenceFrame(
+            activity = if (authority == VanAuthorityState.NONE) base.durableState else VanDurableState.IDLE,
+            health = inferredHealth,
+            authority = authority,
+            speech = when {
+                base.speaking -> VanSpeechState.SPEAKING
+                base.listening -> VanSpeechState.LISTENING
+                else -> VanSpeechState.QUIET
+            },
+            attentionX = base.attentionX,
+            attentionY = base.attentionY,
+            mouthOpen = base.mouthOpen,
+            viseme = base.viseme,
+            urgency = base.urgency,
+            actionCode = base.actionCode,
+        )
+    }
 
     private fun nominal(state: VanDurableState, detail: String) = Cue(
         durableState = state,
