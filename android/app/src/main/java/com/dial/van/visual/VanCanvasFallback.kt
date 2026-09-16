@@ -143,12 +143,11 @@ fun VanEmbodiment(
     /** Body size relative to the aura canvas. Rest uses hit/avatar so Zone C has air. */
     characterFraction: Float = 1f,
 ) {
-    val spec = VanAuraSpecs.forState(state.durableState, budget)
+    val spec = VanAuraSpecs.forState(state.resolvedSemanticState, budget)
     val phase = vanIdlePhase(state.durableState, !budget.allowMotion)
     val body = characterFraction.coerceIn(0.40f, 1f)
 
     Box(modifier = modifier, contentAlignment = Alignment.Center) {
-        // 5 & 6. Aura bloom and electrical filaments, behind Van and in front of the glass.
         VanAuraLayer(
             spec = spec,
             phase = phase,
@@ -156,7 +155,6 @@ fun VanEmbodiment(
             characterScale = body,
             modifier = Modifier.matchParentSize(),
         )
-        // 7 & 8. Van and his orb — the art poses already carry the orb.
         VanAvatar(
             state = state,
             modifier = Modifier.fillMaxSize(body),
@@ -225,10 +223,6 @@ private fun riveRuntimeAvailable(): Boolean = try {
     false
 }
 
-/**
- * True when the owner has turned system animations off. Van then holds a still, readable
- * pose instead of breathing, spinning or blinking.
- */
 @Composable
 fun rememberReducedMotion(): Boolean {
     val context = LocalContext.current
@@ -243,11 +237,6 @@ fun rememberReducedMotion(): Boolean {
     }
 }
 
-/**
- * The interim character. Every element traces to the locked identity, and the status layer
- * stays inside the acceptance matrix bounds: bounded motion, restrained glow, and truthful
- * muting when offline or degraded.
- */
 @Composable
 fun VanCanvasAvatar(
     state: VanVisualState,
@@ -270,7 +259,6 @@ fun VanCanvasAvatar(
     }
 }
 
-/** Idle clock. Alert states tick faster but never leave the bounded-motion range. */
 @Composable
 private fun vanIdlePhase(state: VanDurableState, reducedMotion: Boolean): Float {
     if (reducedMotion) return NEUTRAL_PHASE
@@ -303,7 +291,6 @@ private fun vanIdlePhase(state: VanDurableState, reducedMotion: Boolean): Float 
     return value
 }
 
-/** One unhurried blink at the end of each idle cycle. */
 private fun blinkFor(phase: Float): Float {
     val start = 0.93f
     if (phase < start) return 0f
@@ -316,7 +303,6 @@ internal fun vanContentDescription(state: VanVisualState): String {
     return "Van assistant, $label"
 }
 
-/** Paints a [VanScene] program, fitted and centred so proportions never stretch. */
 fun DrawScope.drawVanScene(ops: List<VanDrawOp>) {
     val s = min(size.width, size.height)
     if (s <= 0f) return
