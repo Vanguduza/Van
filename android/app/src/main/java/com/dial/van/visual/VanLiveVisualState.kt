@@ -58,11 +58,19 @@ object VanLiveVisualState {
         )
     }
 
-    fun settleToIdle(delayMs: Long = IDLE_SETTLE_MS) = onMain {
+    /**
+     * Ease a transient interaction back to idle. [allowCritical] is only for locally-created,
+     * time-bounded indications such as a SpeechRecognizer warning; subsystem truth still wins in
+     * [VanPresence] and therefore cannot be hidden by this visual settle.
+     */
+    fun settleToIdle(
+        delayMs: Long = IDLE_SETTLE_MS,
+        allowCritical: Boolean = false,
+    ) = onMain {
         val token = ++generation
         main.postDelayed({
             if (token != generation) return@postDelayed
-            if (isCritical(current.durableState)) return@postDelayed
+            if (!allowCritical && isCritical(current.durableState)) return@postDelayed
             stateStartedAtMs = SystemClock.uptimeMillis()
             current = current.copy(
                 durableState = VanDurableState.IDLE,
