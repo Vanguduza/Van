@@ -8,11 +8,14 @@ import com.dial.van.visual.VanPresentation
 import com.dial.van.visual.VanScene
 import com.dial.van.visual.VanSceneFrame
 import com.dial.van.visual.VanSpeechState
+import com.dial.van.visual.VanStatusPalette
 import com.dial.van.visual.VanVisualState
 import org.junit.Assert.assertTrue
 import org.junit.Test
 import java.awt.image.BufferedImage
 import kotlin.math.abs
+import kotlin.math.max
+import kotlin.math.min
 
 /**
  * Measures the acceptance-matrix distinctness requirements on real pixels, so "offline,
@@ -82,12 +85,25 @@ class VanPreviewRenderTest {
     }
 
     @Test
-    fun offlineReadsAsTheDimmestState() {
-        val idle = averageLuma(renderCompact(VanDurableState.IDLE))
-        val degraded = averageLuma(renderCompact(VanDurableState.DEGRADED))
-        val offline = averageLuma(renderCompact(VanDurableState.OFFLINE))
-        assertTrue("offline should be dimmer than degraded ($offline vs $degraded)", offline < degraded)
-        assertTrue("degraded should be dimmer than ready ($degraded vs $idle)", degraded < idle)
+    fun offlineAndDegradedLoseColourWithoutFadingTheCharacter() {
+        val idleChroma = averageChroma(renderCompact(VanDurableState.IDLE))
+        val degradedChroma = averageChroma(renderCompact(VanDurableState.DEGRADED))
+        val offlineChroma = averageChroma(renderCompact(VanDurableState.OFFLINE))
+
+        assertTrue(
+            "degraded should visibly lose colour versus ready ($degradedChroma vs $idleChroma)",
+            degradedChroma < idleChroma,
+        )
+        assertTrue(
+            "offline should visibly lose more colour than degraded ($offlineChroma vs $degradedChroma)",
+            offlineChroma < degradedChroma,
+        )
+        listOf(VanDurableState.IDLE, VanDurableState.DEGRADED, VanDurableState.OFFLINE).forEach { state ->
+            assertTrue(
+                "$state must keep full character opacity",
+                abs(VanStatusPalette.forState(state).dim - 1f) < 0.0001f,
+            )
+        }
     }
 
     @Test
@@ -151,15 +167,18 @@ class VanPreviewRenderTest {
         return total.toDouble() / (a.width * a.height * 3)
     }
 
-    private fun averageLuma(image: BufferedImage): Double {
-        var total = 0.0
+    private fun averageChroma(image: BufferedImage): Double {
+        var total = 0L
         for (y in 0 until image.height) {
             for (x in 0 until image.width) {
                 val p = image.getRGB(x, y)
-                total += 0.299 * ((p shr 16) and 0xFF) + 0.587 * ((p shr 8) and 0xFF) + 0.114 * (p and 0xFF)
+                val r = (p shr 16) and 0xFF
+                val g = (p shr 8) and 0xFF
+                val b = p and 0xFF
+                total += max(r, max(g, b)) - min(r, min(g, b))
             }
         }
-        return total / (image.width * image.height)
+        return total.toDouble() / (image.width * image.height)
     }
 
     private fun nonBackgroundRatio(image: BufferedImage): Double {

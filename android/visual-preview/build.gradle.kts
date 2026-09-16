@@ -22,6 +22,7 @@ private val sharedVisualSources = listOf(
     "visual/VanAuraSpec.kt",
     "visual/VanEffectBudget.kt",
     "visual/VanWindFieldMotion.kt",
+    "visual/VanBodyExclusionProfile.kt",
     "visual/VanFieldGeometry.kt",
     "visual/VanArtPose.kt",
     "degraded/DegradedMode.kt",
