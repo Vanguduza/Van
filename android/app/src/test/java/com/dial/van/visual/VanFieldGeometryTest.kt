@@ -28,14 +28,50 @@ class VanFieldGeometryTest {
             )
             val semantic = geometry.strokes.filter { it.ink == VanFieldInk.SEMANTIC }
             assertTrue("$state missing semantic windy geometry", semantic.isNotEmpty())
-            semantic.joinToString("|") { stroke ->
-                val first = stroke.points.first()
-                val last = stroke.points.last()
-                "${first.x.roundToInt()},${first.y.roundToInt()}->${last.x.roundToInt()},${last.y.roundToInt()}:${stroke.points.size}"
-            }
+            signature(semantic)
         }
 
         assertEquals(states.size, signatures.toSet().size)
+    }
+
+    @Test
+    fun degradedSemanticEnvelopeDoesNotReplaceListeningInteractionField() {
+        val listening = VanAuraSpecs.forState(VanDurableState.LISTENING)
+        val degraded = VanAuraSpecs.forState(VanDurableState.DEGRADED)
+        val listeningOnly = VanFieldGeometryEngine.build(
+            spec = listening,
+            phase = 0.31f,
+            budget = VanEffectBudget.FULL,
+            bodyEdge = 200f,
+            centerX = 160f,
+            centerY = 160f,
+        )
+        val degradedOnly = VanFieldGeometryEngine.build(
+            spec = degraded,
+            phase = 0.31f,
+            budget = VanEffectBudget.FULL,
+            bodyEdge = 200f,
+            centerX = 160f,
+            centerY = 160f,
+        )
+        val composite = VanFieldGeometryEngine.build(
+            spec = listening,
+            semanticSpec = degraded,
+            phase = 0.31f,
+            budget = VanEffectBudget.FULL,
+            bodyEdge = 200f,
+            centerX = 160f,
+            centerY = 160f,
+        )
+
+        assertEquals(
+            signature(listeningOnly.strokes.filter { it.ink == VanFieldInk.IDENTITY }),
+            signature(composite.strokes.filter { it.ink == VanFieldInk.IDENTITY }),
+        )
+        assertEquals(
+            signature(degradedOnly.strokes.filter { it.ink == VanFieldInk.SEMANTIC }),
+            signature(composite.strokes.filter { it.ink == VanFieldInk.SEMANTIC }),
+        )
     }
 
     @Test
@@ -62,9 +98,15 @@ class VanFieldGeometryTest {
         val a = VanFieldGeometryEngine.build(spec, 0.15f, VanEffectBudget.REDUCED_MOTION, 180f, 120f, 120f)
         val b = VanFieldGeometryEngine.build(spec, 0.85f, VanEffectBudget.REDUCED_MOTION, 180f, 120f, 120f)
 
-        fun signature(g: VanFieldGeometry): List<Pair<Int, Int>> = g.strokes.flatMap { it.points }.map {
+        fun points(g: VanFieldGeometry): List<Pair<Int, Int>> = g.strokes.flatMap { it.points }.map {
             it.x.roundToInt() to it.y.roundToInt()
         }
-        assertEquals(signature(a), signature(b))
+        assertEquals(points(a), points(b))
+    }
+
+    private fun signature(strokes: List<VanFieldStroke>): String = strokes.joinToString("|") { stroke ->
+        val first = stroke.points.first()
+        val last = stroke.points.last()
+        "${first.x.roundToInt()},${first.y.roundToInt()}->${last.x.roundToInt()},${last.y.roundToInt()}:${stroke.points.size}"
     }
 }
