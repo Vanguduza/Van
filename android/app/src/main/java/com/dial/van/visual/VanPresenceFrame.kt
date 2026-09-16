@@ -121,15 +121,17 @@ object VanPresenceReducer {
         },
     )
 
-    /** Speech changes articulation, never authority/health truth. */
+    /**
+     * Speech is an articulation channel, not an activity transition. [VanPresenceFrame.poseState]
+     * gives SPEAKING temporary visual precedence while preserving THINKING/DELEGATING/WORKING
+     * underneath so the correct activity automatically reappears when TTS ends.
+     */
     fun speechStarted(frame: VanPresenceFrame): VanPresenceFrame = frame.copy(
         speech = VanSpeechState.SPEAKING,
-        activity = if (frame.authority == VanAuthorityState.NONE) VanDurableState.SPEAKING else frame.activity,
     )
 
     fun speechFrame(frame: VanPresenceFrame, mouthOpen: Float, viseme: Int): VanPresenceFrame = frame.copy(
         speech = VanSpeechState.SPEAKING,
-        activity = if (frame.authority == VanAuthorityState.NONE) VanDurableState.SPEAKING else frame.activity,
         mouthOpen = mouthOpen.coerceIn(0f, 1f),
         viseme = viseme.coerceAtLeast(0),
     )
@@ -138,11 +140,6 @@ object VanPresenceReducer {
         speech = VanSpeechState.QUIET,
         mouthOpen = 0f,
         viseme = 0,
-        activity = if (frame.authority == VanAuthorityState.NONE && frame.turn == VanTurnPhase.IDLE) {
-            VanDurableState.IDLE
-        } else {
-            frame.activity
-        },
     )
 
     fun idle(frame: VanPresenceFrame): VanPresenceFrame = frame.copy(
