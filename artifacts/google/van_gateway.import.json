@@ -1,6 +1,7 @@
 {
   "ok": true,
   "host": "dial-hermes-control",
+  "identity_alias": "owner_google_account",
   "principal_registered": true,
   "recorded": [
     {
@@ -30,8 +31,8 @@
     },
     {
       "capability_id": "workspace_api",
-      "state": "CONFIGURED",
-      "evidence": "hermes://dial-hermes-control/workspace-oauth"
+      "state": "READY",
+      "evidence": "live://dial-hermes-control/workspace-oauth/canary"
     },
     {
       "capability_id": "gemini_notebook",
@@ -67,11 +68,6 @@
       "capability_id": "ai_studio",
       "state": "CONFIGURED",
       "evidence": "hermes://dial-hermes-control/ai-studio"
-    },
-    {
-      "capability_id": "antigravity",
-      "state": "CAPACITY_LIMITED",
-      "evidence": "live://antigravity/capacity_limited"
     }
   ],
   "excluded_until_cloud_setup": [

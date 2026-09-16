@@ -1,0 +1,25 @@
+#!/usr/bin/env bash
+set -euo pipefail
+HOST_HOME="$HOME"
+ANTIGRAVITY_BIN="${VAN_ANTIGRAVITY_BIN:-}"
+if [ -z "$ANTIGRAVITY_BIN" ]; then
+  ANTIGRAVITY_BIN="$(command -v antigravity || command -v agy || true)"
+fi
+if [ -z "$ANTIGRAVITY_BIN" ]; then
+  for candidate in "$HOST_HOME/.local/bin/antigravity" "$HOST_HOME/.local/bin/agy"; do
+    if [ -x "$candidate" ]; then ANTIGRAVITY_BIN="$candidate"; break; fi
+  done
+fi
+if [ -z "$ANTIGRAVITY_BIN" ]; then
+  echo "ANTIGRAVITY_UNAVAILABLE" >&2
+  exit 127
+fi
+WORKER_HOME="${VAN_ANTIGRAVITY_HOME:-$HOST_HOME/.local/share/van/identities/antigravity-worker}"
+mkdir -p "$WORKER_HOME"
+chmod 700 "$WORKER_HOME"
+export HOME="$WORKER_HOME"
+export XDG_CONFIG_HOME="$WORKER_HOME/.config"
+export XDG_CACHE_HOME="$WORKER_HOME/.cache"
+export XDG_DATA_HOME="$WORKER_HOME/.local/share"
+unset GOOGLE_API_KEY GEMINI_API_KEY GOOGLE_APPLICATION_CREDENTIALS CLOUDSDK_CONFIG GOOGLE_CLOUD_PROJECT GOOGLE_CLOUD_PROJECT_ID
+exec "$ANTIGRAVITY_BIN" "$@"

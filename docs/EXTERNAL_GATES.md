@@ -4,21 +4,22 @@ These require owner credentials, live Google surfaces, provider/runtime access, 
 
 Resolved 2026-09-15: the live Hermes `van` profile is installed and certified on `dial-hermes-control`; Sonnet 5 executed a live VAN canary and the core Hermes/DIAL services and delegation suites passed. This is no longer an external gate.
 
-Resolved 2026-09-15: Google credential planes used by VAN are **authenticated on Hermes** (`dial-hermes-control`). Van records that fact via `artifacts/google/hermes_live_attestation.json` + `tools/google/import_hermes_google_attestation.py` as `CONFIGURED` evidence (hashed principal only). `CONFIGURED` is still not `READY`. Cloud/Enterprise-only capabilities remain separate.
+Resolved 2026-09-16: permanent Workspace Desktop OAuth consent is complete, the refresh credential is encrypted in the VAN gateway vault, and live Gmail, Calendar, Drive, People/Contacts and Tasks metadata canaries all returned HTTP 200. `workspace_api` is `READY`. Cloud/Enterprise-only capabilities remain separate.
+
+Resolved 2026-09-15: the delegated `antigravity_worker_account` is authenticated in a separate isolated runtime home. Live model discovery and a Gemini 3.8 Flash generation canary passed; no canonical Google/API credential inheritance is permitted. Token-free evidence is recorded at `artifacts/google/antigravity_worker_live_attestation.json`. Antigravity is no longer an external authentication/generation gate.
 
 Resolved 2026-09-15 (workstation): local Project Truth mounts for `van`, `dial`, `dde`, `gtr`, `goat`, and `aeci` resolve via `registries/project_mounts.json` + `tools/projects/sync_project_truth.py` offline cache. Gateway live PUT still requires a running gateway.
 
 | Gate | Prerequisite | Repo-side readiness |
 |---|---|---|
 | Canonical owner Google principal | Hermes-authenticated owner Google account | hashed principal registration + Hermes attestation import |
-| Google Workspace OAuth live | authenticated on Hermes worker/Workspace plane | mesh `workspace_api` CONFIGURED via Hermes attestation; gateway vault remains available for device-mediated grants |
+| Google Workspace OAuth live | permanent Desktop OAuth + owner consent | READY — encrypted refresh credential installed; Gmail/Calendar/Drive/Contacts/Tasks live canaries all HTTP 200 |
 | Gemini runtime | authenticated on Hermes | mesh Gemini family CONFIGURED via Hermes attestation; live READY needs per-capability canary receipt |
 | Gemini Live | Hermes runtime + live endpoint canary | deterministic route; CONFIGURED on Hermes auth |
 | Deep Research | Hermes Gemini runtime + quota canary | deterministic route; CONFIGURED on Hermes auth |
 | Gemini Notebook personal | owner Google session on Hermes | consumer capability CONFIGURED via attestation |
 | Gemini Notebook Enterprise | eligible Cloud/Enterprise setup | still EXTERNAL (cloud plane) |
 | Mixboard / Stitch / Flow / AI Studio / Workspace Studio | owner Google session on Hermes | consumer capabilities CONFIGURED via attestation |
-| Antigravity live generation | provider quota (auth/model-discovery already verified on Hermes; currently `CAPACITY_LIMITED`) | Jules fallback + `ANTIGRAVITY_CAPACITY_LIMITED` |
 | Jules | owner Google sign-in on Hermes | CONFIGURED via attestation; READY needs live worker receipt |
 | Nano Banana / Veo | Hermes Gemini runtime + quota canary | CONFIGURED via attestation |
 | Google ADK/A2A | owner-administered Cloud/runtime | still EXTERNAL (cloud plane) |
@@ -34,7 +35,7 @@ Resolved 2026-09-15 (workstation): local Project Truth mounts for `van`, `dial`,
 2. Consumer Google sessions may not be certified by cookie presence alone.
 3. `READY` requires an evidence pointer recorded through the Google identity broker.
 4. No raw Google email, cookie, OAuth token, API key, or service-account private material is stored in the capability registry or artifact provenance.
-5. Workspace OAuth, Gemini runtime, Cloud/service identity and consumer sessions must remain separate credential planes even though they trace to the same owner Google account.
+5. Workspace OAuth, Gemini runtime, Cloud/service identity and consumer sessions must remain separate credential planes. Explicit delegated identities are allowed only for their bound capabilities and may not inherit owner authority or credentials.
 6. Missing or unverified capability must return an explicit degraded/auth-required state; never simulate success.
 7. Hermes-hosted authentication is recorded as attestation evidence; it does not copy tokens into Van.
 

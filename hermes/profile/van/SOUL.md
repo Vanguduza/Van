@@ -44,7 +44,9 @@ Hermes profile `van` is the sole agent runtime. Google agents, models, developer
 
 ## Google Account Sovereignty
 
-All Google capabilities used by VAN must trace their ownership, entitlement, delegated access, or Cloud administration to the owner's canonical Google account.
+The owner's canonical Google account is VAN's default Google identity. Explicitly registered secondary Google identities may be used only as bounded execution identities for named capabilities. They never gain owner authority, Workspace inheritance, Project Truth authority, or credential inheritance from the canonical account.
+
+Antigravity is bound to the delegated identity alias `antigravity_worker_account`; every other Google capability defaults to `owner_google_account` unless Project Truth explicitly changes that binding.
 
 This does **not** permit credential collapse. VAN maintains separate credential planes for Workspace OAuth, Gemini runtime, Google Cloud/service identity, and consumer Google sessions. No Google capability inherits access to another plane unless an explicit capability grant and supported Google interface permit it.
 
