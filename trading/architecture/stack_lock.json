@@ -1,6 +1,6 @@
 {
   "$schema_note": "VATI Industry Integration Architecture stack lock (Rev 2.1 Part E). One canonical choice per layer; overlaps are rejected by trading/tests/test_stack_lock.py. Versions are observations at lock time and are NOT pins: exact pins happen at adoption through the donor gate with Context7/official release facts.",
-  "revision": "4.0.0",
+  "revision": "5.0.0",
   "locked_at": "2026-09-16",
   "observation_sources": {
     "pypi_json": "https://pypi.org/pypi/<package>/json read 2026-09-16",
@@ -54,7 +54,7 @@
         "freqtrade",
         "LEAN as production kernel"
       ],
-      "build_status": "VAN-owned DecisionCycle/backtest engine built; Nautilus adoption pending Phase 3 donor gate"
+      "build_status": "VAN-owned DecisionCycle + session service (python -m vati serve) built; nautilus_trader 1.231.0 installs at --with-nautilus (aarch64 wheel verified on PyPI)"
     },
     {
       "layer": "independent_validation_oracle",
@@ -70,7 +70,7 @@
       "pin_status": "UNPINNED_VERIFY_AT_ADOPTION",
       "constraints": [
         "validation_only",
-        "agreement metric defined in Rev 2.1 \u00a7E.6"
+        "agreement metric defined in Rev 2.1 §E.6"
       ],
       "rejected_alternatives": [
         "second Nautilus configuration as 'independent' check"
@@ -95,7 +95,7 @@
         "orders carry sealed decision hash",
         "protective stop atomic or flatten"
       ],
-      "build_status": "bridge client + adapter contract built (signed requests, replay protection, fail-closed transport)"
+      "build_status": "bridge client + mTLS HTTPS transport + Windows worker (mTLS, HMAC, SL-only, tighten-only) built and tested end to end; live terminal pending on the owner's Windows host"
     },
     {
       "layer": "deriv_execution",
@@ -113,7 +113,7 @@
         "FULL_STAKE loss model",
         "synthetic isolation"
       ],
-      "build_status": "adapter contract built (contract mapping, synthetic refusal, fail-closed transport)"
+      "build_status": "adapter + WebSocket transport (req_id correlation, token at authorize only) + history feed built and tested; live account pending owner token"
     },
     {
       "layer": "futures_options_reference_data",
@@ -283,7 +283,7 @@
       "licence_class": "PERMISSIVE",
       "observed_version": null,
       "pin_status": "UNPINNED_VERIFY_AT_ADOPTION",
-      "build_status": "CSV bar loader built; Parquet at Phase 1"
+      "build_status": "gzip-CSV bar lake with sha256 manifest, Dukascopy bi5 codec/downloader, CSV import built; Parquet at the pyarrow gate"
     },
     {
       "layer": "research_timeseries_accelerator",
@@ -319,7 +319,7 @@
         "separate database from any DIAL business/finance database; VATI is not a DIAL money authority",
         "Phase 0-3 may use the Van gateway SQLite store with the same schemas"
       ],
-      "build_status": "SQLite hash-chained ledger built (PostgreSQL at Phase 4)"
+      "build_status": "PostgreSQL ledger built (vati.core.ledger_pg, byte-identical chain, row-locked head; tested on PostgreSQL 16); Supabase self-hosted compose staged with append-only role"
     },
     {
       "layer": "durable_workflows",
@@ -354,7 +354,7 @@
         "separate registry namespace from DIAL engineering VEKL",
         "may be forked into a dedicated VEKL instance if trading output/performance evidence justifies it"
       ],
-      "build_status": "VTIL registry + admission ledger built; DIAL resolver probe GREEN"
+      "build_status": "dedicated trading VEKL service built (vendored DIAL resolver with provenance, activation store, loopback :9134); DIAL resolver probe GREEN"
     },
     {
       "layer": "google_research_mesh",
@@ -374,7 +374,7 @@
       "layer": "observability",
       "canonical": "OpenTelemetry + Prometheus + Grafana",
       "package": "opentelemetry-sdk",
-      "role": "trace market event \u2192 feature \u2192 signal \u2192 risk \u2192 order \u2192 fill \u2192 P&L",
+      "role": "trace market event → feature → signal → risk → order → fill → P&L",
       "adoption_phase": 1,
       "executes_live_orders": false,
       "latency_tier": "T1",
@@ -385,11 +385,11 @@
       "constraints": [
         "Grafana is AGPL; used as an unmodified operator tool, not linked into VATI"
       ],
-      "build_status": "metrics registry with Prometheus exposition built"
+      "build_status": "metrics registry + heartbeat files + commander status/doctor; Prometheus/Grafana on the VM at Phase 4"
     },
     {
       "layer": "zse_market_data",
-      "canonical": "Broker/ZSE price sheets (T1) + Mansa/mystocks.africa API + africanfinancials documents (T2); CC0 2020\u20132025 archive as history seed",
+      "canonical": "Broker/ZSE price sheets (T1) + Mansa/mystocks.africa API + africanfinancials documents (T2); CC0 2020–2025 archive as history seed",
       "package": "vati.zse",
       "role": "daily OHLC/volume, indices, corporate documents for ZSE/VFEX; end-of-day cadence",
       "adoption_phase": 1,
@@ -425,7 +425,10 @@
       "build_status": "OWNER_TICKET adapter built"
     }
   ],
-  "single_order_sender": "vati-execution-router (Nautilus ExecutionEngine \u2192 VAN RiskGate \u2192 venue ExecutionClient)",
+  "single_order_sender": "vati-execution-router (Nautilus ExecutionEngine → VAN RiskGate → venue ExecutionClient)",
   "single_sizer": "trading/vati/risk RiskAuthority",
-  "single_transactional_authority": "PostgreSQL (SQLite in Phases 0-3)"
+  "single_transactional_authority": "PostgreSQL (SQLite in Phases 0-3)",
+  "notes": [
+    "Rev 5 (2026-09-16): deployment package deploy/van-trading-core; MT5 runs on a Windows worker because the ARM64 VM cannot host it"
+  ]
 }

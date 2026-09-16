@@ -50,7 +50,8 @@ Canonical specification: `docs/GOOGLE_INTELLIGENCE_MESH.md`.
 | `registries/` | Projects and Google capability catalogs |
 | `tests/` | Cross-cutting contract and acceptance tests |
 | `tools/` | Bootstrap, Google setup/certification, release and certification scripts |
-| `trading/` | VAN Adaptive Trading Intelligence (VATI): deterministic Risk Authority, market brain, capsules, execution, shared backtest/live decision cycle, continuous learning with a reduce-only boundary, Zimbabwe Stock Exchange module — see `docs/VAN_TRADING_SYSTEM_BLUEPRINT_REV4_CONSOLIDATED.md` (Rev 2/3 retained as provenance) |
+| `trading/` | VAN Adaptive Trading Intelligence (VATI): deterministic Risk Authority, market brain, capsules, execution, shared backtest/live decision cycle, continuous learning, ZSE module, account registry, PostgreSQL ledger, live MT5/Deriv transports, bar lake, session service, dedicated trading VEKL (`trading/vekl`) and the Hermes subordinate commander (`trading/commander`) — see `docs/VAN_TRADING_SYSTEM_BLUEPRINT_REV4_CONSOLIDATED.md` and `docs/VAN_TRADING_PRODUCTION_DEPLOYMENT_BLUEPRINT_REV5.md` |
+| `deploy/van-trading-core/` | Bootstrap, systemd units, Supabase donor, PKI, qualify report, Hermes registration and the Windows MT5 bridge worker for the dedicated trading VM |
 
 ## Quick start
 

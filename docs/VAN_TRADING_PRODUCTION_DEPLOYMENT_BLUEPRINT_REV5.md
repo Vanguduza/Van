@@ -1,0 +1,183 @@
+# VAN Trading System — Production Deployment Blueprint, Revision 5
+
+**Status:** active engineering authority for deployment, live-readiness and the Trading Command Center.
+**Builds on:** `docs/VAN_TRADING_SYSTEM_BLUEPRINT_REV4_CONSOLIDATED.md` (system design, Parts A–O stay authoritative);
+`docs/archive/VAN_TRADING_COMMAND_CENTER_BLUEPRINT_REV_1.md` (owner product/UX contract for the dashboard, provenance).
+**Owner direction (2026-09-16):** build all infrastructure required for live production so that MT5 or Deriv accounts
+can be plugged in when ready; market data arrives when demo testing starts; test with internet data where possible;
+bootstrap the dedicated `van-trading-core` VM (MT5, Python 3.12, a local Desktop-Commander-style Hermes subordinate,
+local Supabase, a complete trading VEKL, future NautilusTrader, Market Brain, Risk Authority, NFP/Event Engine,
+Execution Router, Deriv adapter, MT5 bridge); add a visually pleasing trading dashboard to the Van Command Centre app
+with screens for trades, their charts and details.
+**Branch / builds:** `claude/van-autonomous-trader-r81vyn`, builds H (infrastructure), I (deployment), J (Command Center).
+
+---
+
+## Part A — Estate topology
+
+```text
+ dial-hermes-control 10.0.0.184           van-trading-core 10.0.1.233 (A1.Flex 2 OCPU/12 GB, Ubuntu 24.04 ARM64)      Windows MT5 worker (owner's host)
+ ┌───────────────────────────┐            ┌────────────────────────────────────────────────────────────────────┐    ┌─────────────────────────────┐
+ │ Hermes profile van        │  HTTPS     │ vati-commander :9133   typed commands, HMAC + nonce, TLS            │    │ MetaTrader 5 terminal        │
+ │  mcp_servers.             │──HMAC────► │ vati-vekl      :9134   dedicated trading VEKL (loopback)            │    │ mt5_bridge_worker :9443      │
+ │  van_trading_commander    │            │ vati-session@<alias>   DecisionCycle per account (paper/MT5/Deriv)   │◄──►│  mTLS server, HMAC, SL-only  │
+ │  (stdio shim)             │            │ vati-supabase          PostgreSQL 17 authority store (loopback)      │mTLS│  tighten-only stops          │
+ └───────────────────────────┘            │ bar lake (gzip CSV + sha256 manifest), heartbeats, audit             │    └─────────────────────────────┘
+                                          │ outbound: Deriv wss, Dukascopy https, PyPI/apt at bootstrap only     │
+ VAN gateway (existing, owner device)     └────────────────────────────────────────────────────────────────────┘
+   /v1/trading/* read models ──────────────► ledger (postgres:// or sqlite), account registry, lake
+```
+
+Rules carried from Rev 4 Part J: the DIAL Oracle estate stays a control plane; the trading data plane lives only on
+Van-owned hosts; attachment to DIAL is the project-binding seam (here: the Hermes subordinate MCP). No dial-new change.
+
+**MetaTrader 5 cannot run on the ARM64 VM.** MT5 is a Windows x86-64 program; Wine-on-ARM emulation is not a
+production trading substrate. The design therefore keeps the terminal and the `MetaTrader5` Python package on a
+Windows host (an x86 OCI Windows instance in the same VCN is the straightforward choice) and puts only the mTLS
+bridge *client* on `van-trading-core`. `bootstrap.sh` records this instead of pretending.
+
+---
+
+## Part B — Accounts: how the owner plugs in MT5 or Deriv
+
+`vati.accounts.AccountRegistry` (`/opt/van-trading/config/accounts.json`) holds **non-secret** records: alias, broker
+kind (`MT5 | DERIV | PAPER | ZSE_OWNER_TICKET`), mode, currency, server/login identifiers, bridge URL, demo flag,
+mandate reference and a *credential reference* (env var name or a 0600 secrets file). The registry refuses a
+credential-shaped field, a live record without a mandate reference and a secrets file with loose permissions.
+`python -m vati accounts add|list|remove|verify` is the owner CLI; `verify` prints key names, never values.
+
+Safety identity (blueprint §9) is derived, not typed: PAPER, DEMO, LIVE, READ ONLY. The session service refuses to
+start when the mandate's mode or account alias disagrees with the account record.
+
+| Broker | Secrets file keys | Transport |
+|---|---|---|
+| Deriv | `DERIV_API_TOKEN` | `DerivWebSocketTransport` → `wss://ws.derivws.com/websockets/v3?app_id=<server>`; token injected at `authorize` only |
+| MT5 | `BRIDGE_SIGNING_KEY`, `BRIDGE_CA_FILE`, `BRIDGE_CLIENT_CERT`, `BRIDGE_CLIENT_KEY` | `Mt5HttpTransport` (https only, pinned CA, client certificate) → Windows worker |
+| Paper | none | in-process `PaperAdapter` |
+| ZSE | none | `OwnerTicketAdapter` (owner enters tickets; gateway records confirmations) |
+
+---
+
+## Part C — Ledger on the transactional authority store
+
+`vati.core.ledger_pg.PostgresLedger` implements the SQLite `Ledger` API on PostgreSQL with byte-identical chain
+hashes: `append` locks the chain head row, so two writers cannot fork; `verify_chain` re-derives every hash and
+checks the head; tampering with a stored payload is detected. `open_ledger(spec)` picks the backend from the DSN.
+The Supabase init SQL creates role `vati` with INSERT/SELECT on `vati.events` and no UPDATE/DELETE: the ledger is
+append-only at the database, not only by convention.
+
+---
+
+## Part D — Live transports and the MT5 worker
+
+- **Deriv**: one socket, `req_id` correlation, out-of-order frames tolerated, API errors returned as data so the
+  adapter emits a REJECTED receipt (never an exception on the order path), reconnect on failure, `DerivMarketFeed`
+  for candles/ticks/active symbols. Tested against an in-memory Deriv and a real `websockets` server.
+- **MT5**: `Mt5HttpTransport` refuses plaintext and a missing CA, presents the client certificate; the Windows worker
+  (`deploy/van-trading-core/windows/mt5_worker`) requires that certificate (mTLS), verifies HMAC + nonce + 5 s skew,
+  binds the alias to the terminal login, refuses orders without SL, refuses stop widening, refuses when the terminal
+  has trading disabled, and never logs request bodies. The full path client → TLS → worker is tested in the repo.
+- Two adapter defects were found by these tests and fixed: reads signed with `issued_ms = 0` (any real worker rejects
+  it as skew) and the worker's rejection reason being dropped.
+
+---
+
+## Part E — Market data
+
+- **Bar lake** (`vati.market_data.feeds.lake`): gzip CSV slices per symbol/timeframe with a sha256 manifest; reads
+  verify bytes and return the slice hashes consumed, so a backtest can name its data. Parquet is the Phase 1 pyarrow
+  gate; the manifest does not change.
+- **Sources**: Dukascopy tick history (`.bi5` codec verified by round trip; zero-based month URL; FX week hours),
+  Deriv history (unauthenticated with an app id), CSV import. `python -m vati lake dukascopy|import-csv|list`.
+- **Internet reachability from this build container**: Dukascopy, Deriv, Stooq, Yahoo and Frankfurter were all
+  blocked by the container's egress policy, so downloads were verified against exact-format fixtures rather than
+  live bytes. On the VM the same commands run against the real hosts; `qualify.sh` reports what it could fetch.
+- **Data truth**: every session loop writes `MARKET_DATA_HEALTH` (LIVE / DELAYED / STALE / NO_DATA) and every
+  read model carries it; the Command Center never shows stale data as current (blueprint §46).
+
+---
+
+## Part F — Session service (NFP/Event Engine, Market Brain, Risk Authority, Router, adapters)
+
+`python -m vati serve --config /opt/van-trading/config/sessions/<alias>.json` runs one `DecisionCycle` per account
+alias: startup reconciliation, then per closed bar: MARKET_STATE → OPPORTUNITY → RISK AUTHORITY → ROUTER → PROTECT
+→ RECONCILE → TCA → REVIEW → LEARN, plus `ACCOUNT_SNAPSHOT` and a heartbeat file each loop. The Tier-1 calendar
+(`vati.intelligence.calendar_feed`) loads an owner or vendor file; an event is live-eligible only with two independent
+sources, otherwise the matrix fails closed (whole pre-window is blackout). An `OWNER_HALT` written by the gateway or
+the commander is observed on the next loop: new orders stop, venue stops stay. SIGTERM is graceful.
+
+---
+
+## Part G — Dedicated trading VEKL
+
+`trading/vekl/server.mjs` runs DIAL's resolver code vendored byte-for-byte (`vendor/dial/PROVENANCE.json`, DIAL commit
+`fa7c655`) against the Van trading registry, on loopback :9134, and persists every resolution as an activation
+record with a deterministic `activation_id` (hash of policy version, resolver version, selected ids, registry
+fingerprint and donor commit). A modified vendored file is refused at start. Hermes reaches it through the commander's
+`vekl_resolve`; sessions cite the activation id in `MarketState`. DIAL's vekl-worker is no longer on the trading path.
+
+---
+
+## Part H — Hermes subordinate: the trading commander
+
+`trading/commander` is the local "Desktop Commander" analogue for the trading VM, built as DIAL's local MCP plane
+prescribes: a *subordinate capability, never a second authority*, and **not a shell**. Ten typed commands
+(`status, ledger_status, services, restart_service, tail_log, run_backtest, vekl_resolve, halt, doctor, accounts`),
+HMAC-signed requests bound to timestamp, nonce, method, path and body hash; allowlisted systemd units; secret
+redaction on log tails; backtests confined to the data directory; `halt` requires an owner signature reference (A4)
+and only appends a ledger event. `mcp_stdio.mjs` is the MCP shim Hermes spawns (`mcp_servers.van_trading_commander`);
+`deploy/van-trading-core/hermes/register-commander-mcp.sh` splices that block into the live Hermes config without
+touching another byte.
+
+---
+
+## Part I — Trading Command Center (Android)
+
+Screens: **Overview** (account scope chips, balance/equity/floating/today/heat/drawdown tiles, chart with data-state
+and SIMULATED badges, Van Market State with the animated embodiment and per-symbol summaries, open positions,
+potential trades, recent trades, accounts, quick access), **Trades** (Past / Current / Potential), **Trade workspace**
+(chart with entry/stop/target/exit levels, risk and reward zones and entry/exit markers; size, risk, R:R, P&L, R,
+outcome; deterministic timeline from the ledger; Van's interpretation and review lessons; evidence hashes and
+multipliers), **Instrument workspace** (timeframes, market context, indicators, setups and positions on the symbol),
+**Risk Center** (heat utilisation against the mandate ceiling, drawdown, daily/weekly, concentration by instrument and
+currency leg, position risk, mandate limits), **Accounts** (safety identity, connection state, equity, day P&L, kill
+switch). Entry points: Command Centre button, overlay Trades panel (tap a row → trade workspace).
+
+Design obligations kept from the owner's blueprint: one contextual system on shared trading objects; account scope
+always visible; LIVE / DEMO / PAPER / READ ONLY on every account surface; data truth badges; confidence explicitly
+labelled as an uncalibrated rule score; nothing fabricated (empty and unavailable states are explicit); no order path
+anywhere in the app. Pure-Kotlin models and chart geometry are unit-tested off-device; the Compose screens could not be
+compiled in this container (no Android SDK, Google Maven blocked) and are the first thing to build on a workstation.
+
+---
+
+## Part J — Evidence (2026-09-16)
+
+```text
+$ python3 -m pytest -q                       340 passed
+$ node --test trading/vekl/test/server.test.mjs          3 passed
+$ node --test trading/commander/test/mcp_stdio.test.mjs  1 passed  (spawns the real commander under uvicorn)
+$ kotlinc + JUnit: TradeBookTest, TradingModelsTest, ChartGeometryTest   13 passed
+$ bash deploy/van-trading-core/bootstrap.sh --dry-run    full plan printed; every script passes bash -n
+$ deploy/van-trading-core/supabase/generate-env.sh       demo secrets replaced; anon/service JWTs decode to their roles
+$ deploy/van-trading-core/pki/make-bridge-pki.sh         CA + commander/mt5-worker/client certs; openssl verify OK
+$ deploy/van-trading-core/hermes/register-commander-mcp.sh   splice verified on a commented YAML; idempotent; backup taken
+PostgreSQL ledger tests ran against a real PostgreSQL 16 in the container (VATI_TEST_PG_DSN).
+```
+
+Induced failures kept: nonce replay, wrong signing key, wrong CA, missing client certificate, widened stop, order
+without SL, mandate/account mismatch, stale feed, tampered lake slice, tampered ledger row, modified vendored resolver.
+
+---
+
+## Part K — What only the VM and the owner can close
+
+1. `sudo bash deploy/van-trading-core/bootstrap.sh` on `van-trading-core`, then `qualify.sh` GREEN (arm64 packages,
+   Supabase image pulls, systemd, ufw, commander over the VCN).
+2. Hermes registration on `dial-hermes-control` (`register-commander-mcp.sh`) and a first `status` call.
+3. Windows MT5 worker host: owner decision, `install.ps1`, certificates copied, `bridge.key` into the alias secrets.
+4. Accounts: `vati accounts add` for a Deriv demo and/or an MT5 demo; session config; `vati-session@<alias>`.
+5. Market data: `vati lake dukascopy …` for FX/gold history on the VM (the container could not reach Dukascopy).
+6. Android build on a workstation with the SDK; device check of the Trading Command Center and the overlay panel.
+7. Everything Rev 4 Part M already listed: real-data validation, Nautilus donor gate, curriculum, ZSE broker facts,
+   independent security review, owner-signed LIMITED_LIVE.

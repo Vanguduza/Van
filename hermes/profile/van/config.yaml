@@ -29,6 +29,7 @@ authority:
   trading_architecture_rev3: docs/VAN_ADAPTIVE_TRADING_INTELLIGENCE_TECHNICAL_BLUEPRINT_REV3.md
   trading_architecture_consolidated: docs/VAN_TRADING_SYSTEM_BLUEPRINT_REV4_CONSOLIDATED.md
   trading_research_corpus: docs/research/VATI_REV3_RESEARCH_CORPUS.md
+  trading_deployment: docs/VAN_TRADING_PRODUCTION_DEPLOYMENT_BLUEPRINT_REV5.md
 
 policy:
   hook_module: policy/van_policy_hook.py

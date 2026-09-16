@@ -92,3 +92,12 @@ The expanded glass rail has a **Trades** action that opens a read-only panel wit
 Current, Potential — read from the gateway's `GET /v1/trading/trades?view=`. Each row shows the trade and its
 confidence score/band as the gateway computed it (`trading/TradeBook.kt` parses; `FloatingOverlayService.TradesPanel`
 renders). The client has no call that could place, size, modify or cancel a trade. JVM tests: `TradeBookTest`.
+
+## Trading Command Center (`com.dial.van.trading`)
+
+`TradingCommandCentreActivity` (routes `overview`, `trades/{view}`, `trade/{id}`, `instrument/{symbol}`, `risk`,
+`accounts`) implements the owner's Command Center blueprint on the gateway's `/v1/trading/*` read models. Pure-Kotlin
+models (`TradingModels.kt`), chart geometry (`ChartGeometry.kt`) and the trade-book parser are unit-tested off-device
+(`TradingModelsTest`, `ChartGeometryTest`, `TradeBookTest`); Compose screens live under `trading/ui`. Entry points:
+the Command Centre button and the overlay Trades panel. The app has no order path: nothing on these screens can
+place, size, modify or cancel a trade.

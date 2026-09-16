@@ -1,6 +1,6 @@
 # VAN Trading System — Consolidated Blueprint, Revision 4
 
-**Status:** active engineering authority for the VAN Adaptive Trading Intelligence (VATI).
+**Status:** active engineering authority for the VAN Adaptive Trading Intelligence (VATI). Deployment, live-readiness and the Trading Command Center are specified in `docs/VAN_TRADING_PRODUCTION_DEPLOYMENT_BLUEPRINT_REV5.md` (Rev 5), which extends this document.
 **Consolidates:** Rev 2 (canon + development plan), Rev 2.1 (industry integration architecture), Rev 3 (research-grounded
 expert-trader decisions + Zimbabwe Stock Exchange module) and the continuous-learning integration review. Those
 documents remain in the repository as **provenance**; where they disagree with this document, this document wins.

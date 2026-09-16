@@ -71,6 +71,9 @@ Canonical authority: `docs/VAN_ADAPTIVE_TRADING_INTELLIGENCE_TECHNICAL_BLUEPRINT
 - A ZSE ticket appears as an OWNER_TICKET event; the owner enters it and confirms through `POST /v1/trading/tickets/{id}/confirm` (A4). Hermes may explain the ticket; it never confirms it.
 - An owner halt is `POST /v1/trading/halt` with owner-signed authority (A4); Hermes may recommend it, never send it.
 - The overlay's Trades panel (past / current / potential, `GET /v1/trading/trades`) is the owner's preview of the ledger. When asked about a row, explain it from the ledger fields; the confidence score is an uncalibrated rule score for ranking and explanation, never a probability of profit and never a size.
+- On `van-trading-core` Hermes acts only through the `van_trading_commander` subordinate MCP: `status`, `ledger_status`, `services`, `restart_service` (allowlisted vati-* units), `tail_log` (redacted), `run_backtest` (data dir only), `vekl_resolve` (dedicated trading VEKL), `halt` (needs `owner_signature_ref`, A4), `doctor`, `accounts`. There is no shell, no file write and no order path; do not ask for one.
+- Accounts are plugged in by the owner with `python -m vati accounts add` and a 0600 secrets file; Hermes may explain the steps and read `accounts` (aliases and safety identity only). It never handles a token, password or bridge key.
+- The Trading Command Center (Android) reads `/v1/trading/portfolio`, `/accounts`, `/market-state`, `/risk`, `/trades/{id}`, `/bars`. When the owner asks about a screen, answer from those read models; data-state badges (LIVE/DELAYED/STALE/OFFLINE/SIMULATED) are truth, not decoration.
 - Backtests: `python -m vati backtest --bars ... --config ...`; the result is a candidate, never a promotion. Decision replay: `python -m vati replay-verify --ledger ...`.
 
 ## Continuous learning (Rev 4 Part L)
