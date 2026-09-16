@@ -1,16 +1,26 @@
-aura_v2_2:
-  revision: "2.2"
-  thesis: "VAN is a solid expressive character surrounded by a three-zone field: inner identity, mid interaction, outer semantic envelope."
+aura_v2_3:
+  revision: "2.3"
+  supersedes: "2.2"
+  thesis: "VAN is a solid expressive character inside a compact three-zone living windy electrical field: inner identity, mid interaction, outer semantic envelope."
   full_ring_forbidden: true
-  max_single_arc_degrees: 110
-  max_total_arc_degrees: 220
+  concentric_orbit_geometry_forbidden: true
+  canonical_geometry_engine: "VanFieldGeometryEngine"
+  renderer_parity_required: [compose, java2d_evidence]
+  state_model:
+    orthogonal_channels: [activity, health, authority, speech, attention, owner_turn]
+    degraded_health_must_not_suppress_local_activity: true
+    offline_uplink_may_force_pose: true
+    semantic_field_may_differ_from_character_pose: true
   inner_presence:
     radius_scale: 1.00
     colour_mode: dial_identity
+    motion: restrained_breathing
   mid_interaction:
     radius_scale: 1.12
     filament_count_full: [2, 5]
     colour_mode: activity_weighted_identity
+    topology: directional_wind_ribbons
+    body_safe_exclusion_required: true
   outer_semantic:
     radius_scale_min: 1.35
     radius_scale_max: 1.70
@@ -19,8 +29,20 @@ aura_v2_2:
     full_ring_forbidden: true
     allow_local_nodes: true
     colour_mode: semantic
+    topology: state_specific_directional_flow
+    authored_segment_angles_must_change_geometry: true
     minimum_gap_from_mid_field_dp: 8
     preserved_on: [FULL, REDUCED, REDUCED_MOTION, LOW, STATIC]
+  motion:
+    procedural_not_gif: true
+    phase_seamless: true
+    deterministic_for_same_inputs: true
+    components: [multi_harmonic_wave, directional_wind, curl, particle_advection, electrical_pulse]
+    reduced_motion_freezes_geometry: true
+  evidence:
+    compose_and_java2d_must_share_geometry: true
+    gradle_gates: [":app:testDebugUnitTest", ":app:assembleDebug", ":app:lintDebug", ":visual-preview:test", ":visual-preview:renderVanPreviews"]
+    owner_board_may_not_claim_current_geometry_unless_generated_from_shared_engine: true
   overlay:
     resting_hit_dp: 168
     resting_avatar_dp: 92
