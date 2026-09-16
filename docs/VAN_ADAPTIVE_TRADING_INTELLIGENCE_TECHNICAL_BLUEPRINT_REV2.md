@@ -1,6 +1,9 @@
 # VAN Adaptive Trading Intelligence (VATI)
 ## Technical Blueprint & Development Plan — Revision 2
 
+> **Status (2026-09-16):** consolidated into `docs/VAN_TRADING_SYSTEM_BLUEPRINT_REV4_CONSOLIDATED.md`, which is now the active authority. This revision is retained as provenance and detailed rationale.
+
+
 **Revision:** 2.1 (Rev 2.0 + Part E Industry Integration Architecture)  
 **Date:** 2026-09-16  
 **Status:** Proposed Canonical Architecture / Development Authority Candidate. Becomes locked authority only on owner acceptance (A4). Supersedes Rev 1 for active intent; Rev 1 is retained verbatim as provenance at `docs/archive/VAN_ADAPTIVE_TRADING_INTELLIGENCE_TECHNICAL_BLUEPRINT_REV1.md`.  

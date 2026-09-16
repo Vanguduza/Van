@@ -38,7 +38,7 @@ Forbidden A5 patterns include exporting/copying Google sessions or cookies, reus
 
 ## Trading authority (VATI)
 
-Owner mandates, platform risk ceilings, the Risk Authority, kill switch, strategy registry and trading ledger are protected surfaces; writes require owner-signed authority. Forbidden A5 patterns include a model sending a broker order, bypassing the Risk Authority, removing or widening a protective stop, martingale/unlimited grid, revenge sizing, trading stale data or an unverified account, and placing a broker token in a prompt. Broker accounts appear only as aliases. See `docs/VAN_ADAPTIVE_TRADING_INTELLIGENCE_TECHNICAL_BLUEPRINT_REV2.md` §37–§39, §43.
+Owner mandates, platform risk ceilings, the Risk Authority, kill switch, strategy registry and trading ledger are protected surfaces; writes require owner-signed authority. Forbidden A5 patterns include a model sending a broker order, bypassing the Risk Authority, removing or widening a protective stop, martingale/unlimited grid, revenge sizing, trading stale data or an unverified account, and placing a broker token in a prompt. Broker accounts appear only as aliases. The continuous-learning engine may only reduce (capsule health, regime probability, broker profile) and its boundary module is a protected surface; learning outputs that write mandates, widen risk, raise multipliers, promote strategies, self-admit knowledge, hold broker credentials in memory or treat memory as evidence are A5. Gateway trading writes (`/v1/trading/halt`, ticket confirmation) require the internal control token and an owner signature reference and only append ledger events. See `docs/VAN_TRADING_SYSTEM_BLUEPRINT_REV4_CONSOLIDATED.md` Parts F, K and L.
 
 ## Secrets
 

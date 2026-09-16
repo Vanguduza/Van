@@ -1,6 +1,9 @@
 # VAN Adaptive Trading Intelligence (VATI)
 ## Technical Blueprint — Revision 3: research-grounded expert trader, with the Zimbabwe Stock Exchange module
 
+> **Status (2026-09-16):** consolidated into `docs/VAN_TRADING_SYSTEM_BLUEPRINT_REV4_CONSOLIDATED.md`, which is now the active authority. This revision is retained as provenance and detailed rationale.
+
+
 **Revision:** 3.0  
 **Date:** 2026-09-16  
 **Status:** Proposed Canonical Architecture / Development Authority Candidate; owner acceptance (A4) makes it locked authority.  
