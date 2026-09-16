@@ -1,6 +1,8 @@
 package com.dial.van
 
 import android.app.Application
+import com.dial.van.control.VanCommandController
+import com.dial.van.control.VanCommandSource
 import com.dial.van.degraded.DegradedModeStore
 import com.dial.van.gateway.QueueReplayer
 import com.dial.van.gateway.VanGatewayClient
@@ -35,6 +37,8 @@ class VanApplication : Application(), VoiceInputCallback, TtsOutputCallback {
         private set
     lateinit var gatewayClient: VanGatewayClient
         private set
+    lateinit var commandController: VanCommandController
+        private set
     lateinit var queueReplayer: QueueReplayer
         private set
 
@@ -48,6 +52,7 @@ class VanApplication : Application(), VoiceInputCallback, TtsOutputCallback {
         ttsOutput = TtsOutputManager(this, this)
         voiceSession = VoiceSessionCoordinator(voiceInput, ttsOutput)
         gatewayClient = VanGatewayClient(this)
+        commandController = VanCommandController(gatewayClient, appScope)
         queueReplayer = QueueReplayer(commandQueue, gatewayClient, degradedModeStore, appScope)
         queueReplayer.replayAsync()
     }
@@ -57,9 +62,16 @@ class VanApplication : Application(), VoiceInputCallback, TtsOutputCallback {
     }
 
     override fun onFinal(text: String) {
-        // Final recognition explicitly owns the THINKING transition. Microphone end is a separate
-        // event and can no longer erase this owner-turn phase.
-        VanLiveVisualState.finalTranscript(hasText = text.isNotBlank())
+        val hasText = text.isNotBlank()
+        // Final recognition owns THINKING. The same transcript then enters the exact command path
+        // used by typed chat; voice is not a visual-only state transition or parallel authority path.
+        VanLiveVisualState.finalTranscript(hasText = hasText)
+        if (hasText) {
+            commandController.submitText(
+                text = text,
+                source = VanCommandSource.VOICE,
+            )
+        }
     }
 
     override fun onError(code: Int) {
