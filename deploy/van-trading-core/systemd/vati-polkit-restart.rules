@@ -1,0 +1,10 @@
+// Allow the vati service user to restart only its own vati-* units (commander restart_service).
+polkit.addRule(function(action, subject) {
+    if (action.id == "org.freedesktop.systemd1.manage-units" && subject.user == "vati") {
+        var unit = action.lookup("unit") || "";
+        var verb = action.lookup("verb") || "";
+        if (/^vati-(session@[a-z0-9_]+|commander|vekl|supabase|mt5-tunnel)\.service$/.test(unit) && (verb == "restart" || verb == "start" || verb == "stop")) {
+            return polkit.Result.YES;
+        }
+    }
+});

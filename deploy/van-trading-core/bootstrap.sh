@@ -1,0 +1,151 @@
+#!/usr/bin/env bash
+# =============================================================================
+# van-trading-core bootstrap — Ubuntu 24.04 ARM64 (OCI VM.Standard.A1.Flex, 2 OCPU / 12 GB)
+#
+# Installs, idempotently and fail-closed, everything the trading estate needs on this host:
+#   python3.12 + venv (Ubuntu 24.04 ships 3.12)   node 22 (NodeSource)   docker + compose plugin
+#   vati service user, /opt/van-trading layout, secrets (0700), commander + VEKL tokens, bridge PKI
+#   repo checkout, venv with requirements-vm.txt [+ nautilus_trader at --with-nautilus]
+#   local Supabase (PostgreSQL authority store) with fresh secrets and the VATI ledger schema
+#   systemd: vati-supabase, vati-vekl, vati-commander, vati-session@<alias> (enabled per account)
+#   ufw: deny incoming; 22 and 9133 from the private VCN only
+#
+# MetaTrader 5 CANNOT run on this host: MT5 is a Windows x86-64 program and this VM is ARM64
+# Linux. The MT5 bridge worker runs on a Windows host (windows/mt5_worker) and this VM holds only
+# the bridge CLIENT (mTLS). The script records that fact instead of pretending.
+#
+# Usage:  sudo bash bootstrap.sh [--dry-run] [--with-nautilus] [--repo-url URL] [--branch NAME] [--skip-supabase] [--skip-docker]
+# Re-running is safe; each step checks its own state.
+# =============================================================================
+set -euo pipefail
+
+DRY_RUN=0; WITH_NAUTILUS=0; SKIP_SUPABASE=0; SKIP_DOCKER=0
+REPO_URL="${VAN_REPO_URL:-https://github.com/Vanguduza/Van.git}"
+BRANCH="${VAN_BRANCH:-claude/van-autonomous-trader-r81vyn}"
+for a in "$@"; do case "$a" in
+  --dry-run) DRY_RUN=1;; --with-nautilus) WITH_NAUTILUS=1;; --skip-supabase) SKIP_SUPABASE=1;; --skip-docker) SKIP_DOCKER=1;;
+  --repo-url=*) REPO_URL="${a#*=}";; --branch=*) BRANCH="${a#*=}";;
+  *) echo "unknown arg $a" >&2; exit 2;; esac; done
+
+BASE=/opt/van-trading; APP=$BASE/app; VENV=$BASE/venv; SECRETS=$BASE/secrets; CONFIG=$BASE/config; DATA=/var/lib/van-trading; LOGS=/var/log/van-trading
+VCN_CIDR="${VAN_VCN_CIDR:-10.0.0.0/16}"; CORE_IP="${VAN_CORE_IP:-10.0.1.233}"
+HERE="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
+STEPS=(); ok() { STEPS+=("OK   $1"); echo "[bootstrap] OK   $1"; }; skip() { STEPS+=("SKIP $1"); echo "[bootstrap] SKIP $1"; }; plan() { STEPS+=("PLAN $1"); echo "[bootstrap] PLAN $1"; }
+run() { if (( DRY_RUN )); then plan "$*"; else "$@"; fi; }
+die() { echo "[bootstrap] ERROR: $*" >&2; exit 1; }
+
+# ---------------------------------------------------------------- preflight
+ARCH="$(uname -m)"; . /etc/os-release 2>/dev/null || true
+echo "[bootstrap] host=$(hostname) arch=$ARCH os=${PRETTY_NAME:-unknown} dry_run=$DRY_RUN"
+if (( ! DRY_RUN )); then
+  [[ "$(id -u)" == "0" ]] || die "run as root (sudo)"
+  [[ "${ID:-}" == "ubuntu" && "${VERSION_ID:-}" == "24.04" ]] || die "expects Ubuntu 24.04 (got ${PRETTY_NAME:-?})"
+fi
+MT5_NATIVE=0; [[ "$ARCH" == "x86_64" ]] && MT5_NATIVE=1
+if (( ! MT5_NATIVE )); then echo "[bootstrap] NOTE: $ARCH host — MetaTrader 5 cannot run here; only the MT5 bridge client is installed. Use windows/mt5_worker on a Windows host."; fi
+
+# ---------------------------------------------------------------- packages
+export DEBIAN_FRONTEND=noninteractive
+if (( ! DRY_RUN )); then
+  apt-get update -qq
+  apt-get install -y -qq --no-install-recommends ca-certificates curl gnupg git jq ufw openssl build-essential python3.12 python3.12-venv python3-pip python3-yaml rsync >/dev/null
+fi
+ok "apt base packages (python3.12, venv, yaml, ufw, openssl, jq, git)"
+python3.12 --version >/dev/null 2>&1 || (( DRY_RUN )) || die "python3.12 missing after install"
+
+if ! command -v node >/dev/null 2>&1 || [[ "$(node -v | cut -c2- | cut -d. -f1)" -lt 20 ]]; then
+  if (( DRY_RUN )); then plan "install Node 22 from NodeSource (deb.nodesource.com/node_22.x, key verified via signing key)"; else
+    install -m 0755 -d /etc/apt/keyrings
+    curl -fsSL https://deb.nodesource.com/gpgkey/nodesource-repo.gpg.key | gpg --dearmor -o /etc/apt/keyrings/nodesource.gpg
+    echo "deb [signed-by=/etc/apt/keyrings/nodesource.gpg] https://deb.nodesource.com/node_22.x nodistro main" > /etc/apt/sources.list.d/nodesource.list
+    apt-get update -qq && apt-get install -y -qq nodejs >/dev/null
+  fi
+  ok "node 22"
+else skip "node $(node -v) present"; fi
+
+if (( ! SKIP_DOCKER )); then
+  if ! command -v docker >/dev/null 2>&1; then
+    if (( DRY_RUN )); then plan "install docker-ce + compose plugin from download.docker.com (arm64)"; else
+      install -m 0755 -d /etc/apt/keyrings
+      curl -fsSL https://download.docker.com/linux/ubuntu/gpg | gpg --dearmor -o /etc/apt/keyrings/docker.gpg
+      echo "deb [arch=$(dpkg --print-architecture) signed-by=/etc/apt/keyrings/docker.gpg] https://download.docker.com/linux/ubuntu ${VERSION_CODENAME} stable" > /etc/apt/sources.list.d/docker.list
+      apt-get update -qq && apt-get install -y -qq docker-ce docker-ce-cli containerd.io docker-compose-plugin >/dev/null
+      systemctl enable --now docker
+    fi
+    ok "docker engine + compose plugin"
+  else skip "docker present"; fi
+fi
+
+# ---------------------------------------------------------------- user + layout
+if ! id vati >/dev/null 2>&1; then run useradd --system --home-dir "$BASE" --shell /usr/sbin/nologin vati; ok "user vati"; else skip "user vati exists"; fi
+for d in "$BASE" "$APP" "$CONFIG" "$CONFIG/sessions" "$DATA" "$DATA/heartbeats" "$DATA/lake" "$DATA/vekl" "$DATA/backtests" "$LOGS"; do run install -d -o vati -g vati -m 0750 "$d"; done
+run install -d -o vati -g vati -m 0700 "$SECRETS" "$SECRETS/pki"
+ok "layout under $BASE, $DATA, $LOGS"
+
+# ---------------------------------------------------------------- repo
+if [[ -d "$APP/.git" ]]; then
+  run sudo -u vati git -C "$APP" fetch -q origin "$BRANCH"; run sudo -u vati git -C "$APP" checkout -q "$BRANCH"; run sudo -u vati git -C "$APP" reset -q --hard "origin/$BRANCH"; ok "repo updated to origin/$BRANCH"
+else
+  run sudo -u vati git clone -q --branch "$BRANCH" "$REPO_URL" "$APP"; ok "repo cloned ($BRANCH)"
+fi
+
+# ---------------------------------------------------------------- python venv
+if [[ ! -x "$VENV/bin/python" ]]; then run sudo -u vati python3.12 -m venv "$VENV"; ok "venv (python3.12)"; else skip "venv present"; fi
+run sudo -u vati "$VENV/bin/pip" install -q --upgrade pip
+run sudo -u vati "$VENV/bin/pip" install -q -r "$APP/deploy/van-trading-core/requirements-vm.txt"
+ok "python requirements"
+if (( WITH_NAUTILUS )); then run sudo -u vati "$VENV/bin/pip" install -q "nautilus_trader==1.231.0"; ok "nautilus_trader 1.231.0 (Phase 3 donor gate acknowledged by --with-nautilus)"; else skip "nautilus_trader (pass --with-nautilus at the Phase 3 gate)"; fi
+
+# ---------------------------------------------------------------- secrets + pki
+gen_token() { local f="$1"; if [[ ! -f "$f" ]]; then run bash -c "umask 077; openssl rand -hex 32 > '$f'"; run chown vati:vati "$f"; ok "token $f"; else skip "token $f exists"; fi; }
+gen_token "$SECRETS/commander.token"; gen_token "$SECRETS/vekl.token"
+if [[ ! -f "$SECRETS/pki/ca.crt" ]]; then run bash -c "OUT='$SECRETS/pki' CORE_IP='$CORE_IP' bash '$HERE/pki/make-bridge-pki.sh' >/dev/null"; run chown -R vati:vati "$SECRETS/pki"; ok "bridge PKI (ca, commander, mt5-worker, client)"; else skip "PKI present"; fi
+
+# ---------------------------------------------------------------- config
+if [[ ! -f "$CONFIG/van-trading-core.env" ]]; then run install -o root -g vati -m 0640 "$HERE/env/van-trading-core.env.example" "$CONFIG/van-trading-core.env"; ok "config env"; else skip "config env exists"; fi
+if [[ ! -f "$CONFIG/accounts.json" ]]; then run bash -c "echo '{\"schema_version\": 1, \"accounts\": []}' > '$CONFIG/accounts.json'"; run chown vati:vati "$CONFIG/accounts.json"; run chmod 0640 "$CONFIG/accounts.json"; ok "empty account registry (add accounts with: sudo -u vati $VENV/bin/python -m vati accounts add ...)"; fi
+
+# ---------------------------------------------------------------- supabase
+if (( ! SKIP_SUPABASE )); then
+  run install -d -o root -g root -m 0750 "$BASE/supabase" "$BASE/supabase/init"
+  run rsync -a --chown=root:root "$HERE/supabase/docker-compose.yml" "$HERE/supabase/docker-compose.override.yml" "$HERE/supabase/env.example" "$HERE/supabase/DONOR_PROVENANCE.json" "$BASE/supabase/"
+  run rsync -a "$HERE/supabase/init/01_vati_ledger.sql.tpl" "$BASE/supabase/init/"
+  if [[ ! -f "$BASE/supabase/.env" ]]; then run bash "$HERE/supabase/generate-env.sh" "$BASE/supabase/.env"; ok "supabase secrets generated (0600)"; else skip "supabase .env exists"; fi
+  if (( ! DRY_RUN )); then
+    PW="$(grep '^VATI_LEDGER_PASSWORD=' "$BASE/supabase/.env" | cut -d= -f2-)"
+    sed -i "s#__VATI_LEDGER_PASSWORD__#${PW}#" "$CONFIG/van-trading-core.env"
+    (cd "$BASE/supabase" && docker compose --env-file .env pull -q) || die "supabase image pull failed (arm64 images must resolve)"
+  else plan "docker compose pull (supabase arm64 images)"; fi
+  run install -m 0644 "$HERE/systemd/vati-supabase.service" /etc/systemd/system/vati-supabase.service
+  ok "supabase staged under $BASE/supabase (loopback only)"
+fi
+
+# ---------------------------------------------------------------- systemd
+for u in vati-commander.service vati-vekl.service vati-session@.service; do run install -m 0644 "$HERE/systemd/$u" "/etc/systemd/system/$u"; done
+run install -d -m 0755 /etc/polkit-1/rules.d
+run install -m 0644 "$HERE/systemd/vati-polkit-restart.rules" /etc/polkit-1/rules.d/49-vati-restart.rules
+run systemctl daemon-reload
+if (( ! SKIP_SUPABASE )); then run systemctl enable --now vati-supabase.service; fi
+run systemctl enable --now vati-vekl.service
+run systemctl enable --now vati-commander.service
+ok "systemd units installed and enabled (sessions: systemctl enable --now vati-session@<alias> after adding an account)"
+
+# ---------------------------------------------------------------- firewall
+if (( ! DRY_RUN )); then
+  ufw --force reset >/dev/null; ufw default deny incoming >/dev/null; ufw default allow outgoing >/dev/null
+  ufw allow from "$VCN_CIDR" to any port 22 proto tcp >/dev/null
+  ufw allow from "$VCN_CIDR" to any port 9133 proto tcp >/dev/null
+  ufw --force enable >/dev/null
+else plan "ufw: deny incoming; allow 22/tcp and 9133/tcp from $VCN_CIDR; 9134 and 5432 stay loopback"; fi
+ok "firewall"
+
+# ---------------------------------------------------------------- record
+STAMP="$(date -u +%Y%m%dT%H%M%SZ)"
+REPORT="{\"host\":\"$(hostname)\",\"arch\":\"$ARCH\",\"dry_run\":$DRY_RUN,\"mt5_native\":$MT5_NATIVE,\"branch\":\"$BRANCH\",\"with_nautilus\":$WITH_NAUTILUS,\"steps\":$(printf '%s\n' "${STEPS[@]}" | jq -R . | jq -s .),\"at\":\"$STAMP\"}"
+if (( ! DRY_RUN )); then echo "$REPORT" > "$DATA/bootstrap-$STAMP.json"; chown vati:vati "$DATA/bootstrap-$STAMP.json"; fi
+echo "$REPORT" | jq .
+echo "[bootstrap] next: 1) copy $SECRETS/pki/mt5-worker.{crt,key} + ca.crt to the Windows worker and run windows/mt5_worker/install.ps1"
+echo "[bootstrap]       2) sudo -u vati $VENV/bin/python -m vati accounts add --registry $CONFIG/accounts.json --alias <alias> --broker MT5|DERIV|PAPER ..."
+echo "[bootstrap]       3) write $CONFIG/sessions/<alias>.json and: systemctl enable --now vati-session@<alias>"
+echo "[bootstrap]       4) on dial-hermes-control: bash deploy/van-trading-core/hermes/register-commander-mcp.sh"
+echo "[bootstrap]       5) bash deploy/van-trading-core/qualify.sh"

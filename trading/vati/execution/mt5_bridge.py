@@ -7,6 +7,7 @@ from __future__ import annotations
 
 import hmac
 import hashlib
+import time
 from dataclasses import dataclass, field
 from decimal import Decimal
 from typing import Any, Callable, Optional
@@ -66,14 +67,15 @@ class Mt5BridgeAdapter:
     client: Mt5BridgeClient
     account_alias: str = "fx_primary"
     venue: str = "mt5"
+    clock: Callable[[], int] = field(default=lambda: int(time.time() * 1000))   # reads are signed with real time too: a worker rejects issued_ms=0 as skew
 
     def sync_account(self) -> AccountState:
-        r = self.client.call("sync_account", {"alias": self.account_alias}, now_ms=0)
+        r = self.client.call("sync_account", {"alias": self.account_alias}, now_ms=self.clock())
         a = r["account"]
         return AccountState(self.account_alias, Decimal(str(a["equity"])), Decimal(str(a["balance"])), a["currency"], bool(a.get("verified")), bool(a.get("hedging", True)), int(a.get("server_time_ms", 0)))
 
     def positions(self) -> list[VenuePosition]:
-        r = self.client.call("positions", {"alias": self.account_alias}, now_ms=0)
+        r = self.client.call("positions", {"alias": self.account_alias}, now_ms=self.clock())
         return [VenuePosition(str(p["ticket"]), p["symbol"], Direction.LONG if p["type"] == "BUY" else Direction.SHORT, Decimal(str(p["volume"])), Decimal(str(p["price_open"])),
                               Decimal(str(p["sl"])) if p.get("sl") else None, str(p.get("comment", "")).replace("vati:", ""), LossModel.STOP_DISTANCE) for p in r.get("positions", [])]
 
@@ -97,7 +99,8 @@ class Mt5BridgeAdapter:
         filled = Decimal(str(r.get("volume", "0")))
         return ExecutionReceipt(cmd.trade_intent_id, cmd.decision_hash, self.venue, r.get("status", "UNKNOWN"), filled, Decimal(str(r["price"])) if r.get("price") else None,
                                 cmd.entry_price, Decimal(str(r.get("arrival", cmd.entry_price))), cmd.entry_price, bool(r.get("sl_confirmed")), int(r.get("server_time_ms", now_ms)), now_ms,
-                                broker_order_id=str(r.get("order", "")), broker_position_id=str(r.get("position", "")), protective_stop_price=cmd.protective_stop if r.get("sl_confirmed") else None).sealed()
+                                broker_order_id=str(r.get("order", "")), broker_position_id=str(r.get("position", "")), protective_stop_price=cmd.protective_stop if r.get("sl_confirmed") else None,
+                                reject_reason=str(r.get("reason") or r.get("error") or "") if r.get("status", "UNKNOWN") in ("REJECTED", "UNKNOWN") else "").sealed()
 
     def modify_stop(self, position_id: str, new_stop: Decimal, *, now_ms: int) -> ExecutionReceipt:
         r = self.client.call("modify_sl_tp", {"alias": self.account_alias, "position": position_id, "sl": str(new_stop)}, now_ms=now_ms)
