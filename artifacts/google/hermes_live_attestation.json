@@ -55,7 +55,7 @@
     {
       "id": "workspace_api",
       "state": "CONFIGURED",
-      "evidence": "hermes://dial-hermes-control/workspace-oauth"
+      "evidence": "live://dial-hermes-control/workspace-oauth/credential-installed-20260916"
     },
     {
       "id": "gemini_notebook",
@@ -100,5 +100,7 @@
   "identity_alias": "owner_google_account",
   "delegated_capabilities": [
     "antigravity"
-  ]
+  ],
+  "workspace_oauth_rechecked_at": "2026-09-16",
+  "workspace_oauth_recheck": "desktop_client_installed_refresh_credential_encrypted_workspace_apis_disabled"
 }
