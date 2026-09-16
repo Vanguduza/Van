@@ -28,45 +28,50 @@ data class VanPresenceFrame(
     val urgency: Float = 0f,
     val actionCode: Int = 0,
 ) {
-    /** Character pose/activity. Health DEGRADED does not suppress local interaction. */
+    /** DEGRADED does not suppress local activity; OFFLINE uplink truth does. */
     val poseState: VanDurableState
-        get() = when (authority) {
-            VanAuthorityState.WAITING_FOR_OWNER -> VanDurableState.WAITING_FOR_OWNER
-            VanAuthorityState.WARNING -> VanDurableState.WARNING
-            VanAuthorityState.ERROR -> VanDurableState.ERROR
-            VanAuthorityState.URGENT -> VanDurableState.URGENT
-            VanAuthorityState.NONE -> when {
-                health == VanHealthState.OFFLINE -> VanDurableState.OFFLINE
-                speech == VanSpeechState.SPEAKING -> VanDurableState.SPEAKING
-                speech == VanSpeechState.LISTENING -> VanDurableState.LISTENING
-                else -> activity
+        get() {
+            if (health == VanHealthState.OFFLINE) return VanDurableState.OFFLINE
+            return when (authority) {
+                VanAuthorityState.WAITING_FOR_OWNER -> VanDurableState.WAITING_FOR_OWNER
+                VanAuthorityState.WARNING -> VanDurableState.WARNING
+                VanAuthorityState.ERROR -> VanDurableState.ERROR
+                VanAuthorityState.URGENT -> VanDurableState.URGENT
+                VanAuthorityState.NONE -> when (speech) {
+                    VanSpeechState.SPEAKING -> VanDurableState.SPEAKING
+                    VanSpeechState.LISTENING -> VanDurableState.LISTENING
+                    VanSpeechState.QUIET -> activity
+                }
             }
         }
 
-    /** Outer semantic field/chrome truth. Degraded truth remains visible while pose stays active. */
+    /** Outer semantic field/chrome truth. */
     val semanticState: VanDurableState
-        get() = when (authority) {
-            VanAuthorityState.WAITING_FOR_OWNER -> VanDurableState.WAITING_FOR_OWNER
-            VanAuthorityState.WARNING -> VanDurableState.WARNING
-            VanAuthorityState.ERROR -> VanDurableState.ERROR
-            VanAuthorityState.URGENT -> VanDurableState.URGENT
-            VanAuthorityState.NONE -> when (health) {
-                VanHealthState.OFFLINE -> VanDurableState.OFFLINE
-                VanHealthState.DEGRADED -> VanDurableState.DEGRADED
-                VanHealthState.NOMINAL -> poseState
+        get() {
+            if (health == VanHealthState.OFFLINE) return VanDurableState.OFFLINE
+            return when (authority) {
+                VanAuthorityState.WAITING_FOR_OWNER -> VanDurableState.WAITING_FOR_OWNER
+                VanAuthorityState.WARNING -> VanDurableState.WARNING
+                VanAuthorityState.ERROR -> VanDurableState.ERROR
+                VanAuthorityState.URGENT -> VanDurableState.URGENT
+                VanAuthorityState.NONE -> when (health) {
+                    VanHealthState.DEGRADED -> VanDurableState.DEGRADED
+                    VanHealthState.NOMINAL -> poseState
+                    VanHealthState.OFFLINE -> VanDurableState.OFFLINE
+                }
             }
         }
 
     fun toVisualState(): VanVisualState = VanVisualState(
         durableState = poseState,
         semanticState = semanticState,
-        speaking = speech == VanSpeechState.SPEAKING,
-        listening = speech == VanSpeechState.LISTENING,
+        speaking = health != VanHealthState.OFFLINE && speech == VanSpeechState.SPEAKING,
+        listening = health != VanHealthState.OFFLINE && speech == VanSpeechState.LISTENING,
         attentionX = attentionX.coerceIn(-1f, 1f),
         attentionY = attentionY.coerceIn(-1f, 1f),
-        mouthOpen = mouthOpen.coerceIn(0f, 1f),
+        mouthOpen = if (health == VanHealthState.OFFLINE) 0f else mouthOpen.coerceIn(0f, 1f),
         urgency = urgency.coerceIn(0f, 1f),
-        viseme = viseme.coerceAtLeast(0),
+        viseme = if (health == VanHealthState.OFFLINE) 0 else viseme.coerceAtLeast(0),
         actionCode = actionCode,
     )
 }
