@@ -1,4 +1,6 @@
-# VAN Visual Acceptance Matrix
+# VAN Visual Acceptance Matrix — Rev 2.3
+
+Canonical authority: `visual-authority/van-visual-authority-v2.yaml` revision 2.3.
 
 | Check | Pass criteria |
 |---|---|
@@ -10,48 +12,64 @@
 | Proportions | Compact friendly stylized |
 | Orb | Present where required |
 | Compact readability | Recognizable at overlay size |
-| Motion | Bounded — not frantic |
+| Motion | Bounded, continuous and lifelike — not frantic |
 | Glow | Restrained — not excessive |
-| Warning/Urgent | Distinct without false calm or panic |
-| Offline/Degraded | Truthful muted presentation |
-| Rive failure | Canvas fallback still canonical Van |
+| Warning/Urgent | Distinct in geometry, wording and semantic colour |
+| Offline/Degraded | Truthful without suppressing locally valid activity |
+| Rive failure | Owner-art/Canvas fallback still canonical Van |
 
-## Glassmorphic shell criteria
-
-From `docs/VAN_GLASSMORPHIC_FLOATING_ASSISTANT_DESIGN.md` §16. Every row is enforced in code
-by `VanGlassTokens`, `VanAuraSpecs` or `VanEffectPolicy`, not by hand-tuning a screenshot.
+## Living-field criteria
 
 | Check | Pass criteria | Enforced by |
 |---|---|---|
-| Character never glassy | Glass applies to the shell only; Van stays opaque | `VanGlassStyle` describes the shell alone |
-| Van breaks the glass edge | Character is not trapped in a rectangular card (§4) | Compact/expanded shell composition |
-| Aura layering | Aura sits between Van and the glass, never over his face (§2) | `VanAuraSpecs` + draw order |
-| Glass opacity envelope | 55–72% compact; Command Centre panels more opaque (§3, §14) | `VanGlassTokens.forState(panel = …)` |
-| Approval legibility | Approval/warning glass becomes solid enough to prevent mis-taps (§6) | `requiresSolidControls` |
-| No colour-only state | Every state carries accent *and* words *and* a silhouette cue (§16) | `VanCaptions` + ring styles |
-| Reduced motion | Still, complete pose — phase-independent output (§12) | `reducedMotion` in `VanSceneFrame` |
-| Battery / thermal | Fixed fallback ladder; a static cyan rim always survives (§11) | `VanEffectBudget` |
-| Blur fallback | Live blur off keeps borders, radii, depth, glow and geometry (§10) | `liveBlurAvailable` pre-tint |
+| No halo reconstruction | Frozen frame cannot be read as a complete or broken concentric ring | `VanFieldGeometryEngine` |
+| Body detachment | Zone B/C samples remain outside the body-safe exclusion geometry | `VanFieldGeometryEngine` + tests |
+| Identity ownership | Zone A/B identity energy remains cyan | `VanAuraSpecs` + renderer ink ownership |
+| Semantic ownership | Warning/error/success/degraded colour lives in Zone C | `VanAuraSpecs` + `semanticState` |
+| State topology | Waiting/warning/error/urgent/success differ geometrically, not only by colour | authored envelope segments + shared geometry engine |
+| Continuous field | Wind/waves/curl/particles are procedural and phase-seamless | `VanWindFieldMotion` |
+| Renderer parity | Compose runtime and Java2D evidence consume the same Zone B/C geometry | `VanFieldGeometryEngine` |
+| Reduced motion | Autonomous field geometry freezes while state remains readable | `VanEffectBudget.REDUCED_MOTION` |
+| Power / thermal | Effects reduce before semantic truth is removed | `VanEffectBudget` |
 
-## Evidence
+## Presence/state criteria
 
-Preview sheets are rendered from the shipping draw program and design tokens by
-`./gradlew :visual-preview:renderVanPreviews`, and land in `artifacts/release/preview/`:
+| Check | Pass criteria | Enforced by |
+|---|---|---|
+| Orthogonal truth | Activity, health, authority, speech, attention and owner-turn phase do not overwrite one another | `VanPresenceFrame` |
+| Google-unverified + listening | Character can visibly LISTEN while chrome/Zone C remain DEGRADED | `VanPresence` + `VanPresenceTest` |
+| Uplink loss | Gateway/Hermes loss forces OFFLINE | `VanPresence` |
+| Thinking latch | Microphone end cannot erase THINKING before dispatch/result | `VanPresenceReducer` |
+| Critical authority | TTS frames cannot replace WAITING_FOR_OWNER / ERROR / URGENT | `VanPresenceReducer` |
+| Cross-surface coherence | Floating overlay and Command Centre consume the same live presence and subsystem-health sources | `VanLiveVisualState` + `DegradedModeStore.state` |
+| Accepted ≠ success | Gateway acceptance may show hand-off/working but never SUCCESS | `VanGatewayClient` |
 
-| Sheet | Shows |
-|---|---|
-| `van_floating_overlay_preview.png` | Compact, expanded, approval and docked shells |
-| `van_state_matrix.png` | All durable states with aura, arc and glass values |
-| `van_state_matrix_reduced_motion.png` | The same matrix with motion disabled |
-| `van_command_centre.png` | §14 panel composition and solid critical controls |
-| `van_glass_tokens.png` | §8 tokens, §12 noisy-backdrop glass, §11 fallback ladder |
+## Glassmorphic shell criteria
 
-`VanPreviewRenderTest` measures the distinctness and dimming requirements on real pixels, so
-"offline, degraded and urgent are distinct" is evidence rather than a claim.
+| Check | Pass criteria | Enforced by |
+|---|---|---|
+| Character never glassy | Glass applies to the shell only; Van stays opaque | `VanGlassStyle` |
+| Van breaks the glass edge | Character is not trapped in a rectangular card | overlay composition |
+| Aura layering | Field sits behind Van and in front of condensed glass, never over his face | draw order |
+| Glass opacity envelope | Compact glass remains restrained; Command Centre panels are more opaque | `VanGlassTokens.forState(panel = …)` |
+| Approval legibility | Critical controls become solid enough to prevent mis-taps | `requiresSolidControls` |
+| No colour-only state | Critical states also carry text and geometry/topology cues | captions + field topology |
+| Blur fallback | Live blur off preserves borders, depth and semantic readability | `liveBlurAvailable` handling |
 
-## Outstanding
+## Automated evidence
 
-Owner acceptance required for final visual lock on device.
+`.github/workflows/van-ci.yml` must pass:
 
-The authored `van.riv` artboard is EXTERNAL and undelivered; Rive must not be reported as
-`READY` anywhere until a real artboard loads and binds on device.
+```text
+:app:testDebugUnitTest
+:app:assembleDebug
+:app:lintDebug
+:visual-preview:test
+:visual-preview:renderVanPreviews
+```
+
+Preview sheets are generated from the same renderer-neutral Zone B/C geometry used by Compose and uploaded as the `van-visual-evidence` workflow artifact. The evidence set includes the floating overlay, durable-state matrices, reduced/low/static budgets, command centre, glass tokens and aura topology sheets.
+
+## Final external gates
+
+Owner acceptance on a physical Android device remains required for final visual lock. The authored `van.riv` artboard remains EXTERNAL/undelivered and must not be reported READY until a real artboard loads, binds and is certified on device.
