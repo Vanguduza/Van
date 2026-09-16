@@ -6,15 +6,18 @@ import androidx.security.crypto.MasterKey
 import com.dial.van.visual.VanLiveVisualState
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.withContext
+import org.json.JSONArray
 import org.json.JSONObject
 import java.net.HttpURLConnection
 import java.net.URL
+import java.net.URLEncoder
 import java.nio.charset.StandardCharsets
 import javax.crypto.Mac
 import javax.crypto.spec.SecretKeySpec
 
 /**
- * Signed client for Van secure gateway. Does not launch models; Hermes stays behind the gateway.
+ * VAN secure gateway client. Android UI never executes shell/SSH directly; owner commands and
+ * authoritative admin reads cross this boundary into the gateway/Hermes control plane.
  */
 class VanGatewayClient(context: Context) {
 
@@ -47,7 +50,7 @@ class VanGatewayClient(context: Context) {
                 .put("device_secret", deviceSecret)
                 .put("public_key_pem", "android-device")
                 .put("label", label)
-            val resp = postJson("/v1/devices/enroll", body, signed = false)
+            val resp = postJson("/v1/devices/enroll", body)
             this@VanGatewayClient.deviceId = deviceId
             this@VanGatewayClient.deviceSecret = deviceSecret
             resp
@@ -59,9 +62,32 @@ class VanGatewayClient(context: Context) {
 
     suspend fun briefing(): JSONObject = withContext(Dispatchers.IO) { getJson("/v1/briefing") }
 
-    suspend fun decisions(): org.json.JSONArray = withContext(Dispatchers.IO) {
-        val text = rawGet("/v1/decisions")
-        org.json.JSONArray(text)
+    suspend fun decisions(): JSONArray = withContext(Dispatchers.IO) {
+        JSONArray(rawGet("/v1/decisions"))
+    }
+
+    suspend fun resolveDecision(decisionId: String, approved: Boolean): JSONObject = withContext(Dispatchers.IO) {
+        postJson(
+            "/v1/decisions/${encodeSegment(decisionId)}/resolve",
+            JSONObject().put("approved", approved),
+        )
+    }
+
+    suspend fun projects(): JSONArray = withContext(Dispatchers.IO) {
+        getJson("/v1/projects").optJSONArray("projects") ?: JSONArray()
+    }
+
+    suspend fun projectTruth(projectId: String): JSONObject = withContext(Dispatchers.IO) {
+        getJson("/v1/projects/${encodeSegment(projectId)}/truth")
+    }
+
+    suspend fun attention(): JSONArray = withContext(Dispatchers.IO) {
+        JSONArray(rawGet("/v1/attention"))
+    }
+
+    suspend fun events(afterSeq: Long = 0L): JSONObject = withContext(Dispatchers.IO) {
+        val id = deviceId ?: error("not_enrolled")
+        getJson("/v1/events?device_id=${encodeQuery(id)}&after_seq=$afterSeq")
     }
 
     suspend fun dispatchCommand(
@@ -99,7 +125,7 @@ class VanGatewayClient(context: Context) {
 
         VanLiveVisualState.dispatchStarted()
         try {
-            val response = postJson("/v1/commands", body, signed = false)
+            val response = postJson("/v1/commands", body)
             publishCommandVisualStatus(response)
             response
         } catch (exc: Throwable) {
@@ -114,21 +140,26 @@ class VanGatewayClient(context: Context) {
         when (response.optString("status")) {
             "approval_required" -> VanLiveVisualState.waitingForOwner()
 
-            // Accepted/in_flight means Hermes owns the work. This is not SUCCESS; the owner-turn
-            // handoff is complete, so it may settle after a brief WORKING acknowledgement.
             "accepted", "in_flight" -> {
                 VanLiveVisualState.dispatchAccepted()
                 VanLiveVisualState.settleToIdle(delayMs = 900L)
             }
 
-            // Command-scoped degradation is a visible warning. Persistent subsystem degradation
-            // is independently sourced from DegradedModeStore and cannot be hidden by this settle.
+            "succeeded", "success", "completed" -> {
+                // Only an explicit authoritative completion may become success.
+                VanLiveVisualState.transition(
+                    state = com.dial.van.visual.VanDurableState.SUCCESS,
+                    urgency = 0f,
+                )
+                VanLiveVisualState.settleToIdle(delayMs = 1_200L)
+            }
+
             "degraded" -> {
                 VanLiveVisualState.warning(urgency = 0.35f)
                 VanLiveVisualState.settleToIdle(delayMs = 1_500L, allowCritical = true)
             }
 
-            "denied", "expired", "conflict", "rejected", "rejected_untrusted" -> {
+            "denied", "expired", "conflict", "rejected", "rejected_untrusted", "failed", "error" -> {
                 VanLiveVisualState.warning(urgency = 0.40f)
                 VanLiveVisualState.settleToIdle(delayMs = 1_800L, allowCritical = true)
             }
@@ -144,7 +175,7 @@ class VanGatewayClient(context: Context) {
         return raw.joinToString("") { b -> "%02x".format(b) }
     }
 
-    private fun postJson(path: String, body: JSONObject, signed: Boolean): JSONObject {
+    private fun postJson(path: String, body: JSONObject): JSONObject {
         val conn = (URL("$baseUrl$path").openConnection() as HttpURLConnection).apply {
             requestMethod = "POST"
             setRequestProperty("Content-Type", "application/json")
@@ -174,6 +205,11 @@ class VanGatewayClient(context: Context) {
         if (code !in 200..299) throw GatewayHttpException(code, text)
         return text
     }
+
+    private fun encodeSegment(value: String): String = URLEncoder.encode(value, StandardCharsets.UTF_8.name())
+        .replace("+", "%20")
+
+    private fun encodeQuery(value: String): String = URLEncoder.encode(value, StandardCharsets.UTF_8.name())
 
     companion object {
         private const val KEY_BASE = "base_url"
