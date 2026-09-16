@@ -1,0 +1,61 @@
+"""Event envelope (Rev 2.1 §E.5). Every event carries three clocks, a producer,
+a schema version and a content hash; T0 events also carry decision_time."""
+
+from __future__ import annotations
+
+from dataclasses import dataclass, field
+from enum import Enum
+from typing import Any, Optional
+
+from vati.core.canonical import canonical_hash
+
+
+class EventKind(str, Enum):
+    MARKET_TICK = "MARKET_TICK"
+    MARKET_BAR = "MARKET_BAR"
+    MARKET_STATE = "MARKET_STATE"
+    INTEGRITY_STATE_CHANGE = "INTEGRITY_STATE_CHANGE"
+    FEATURE_VECTOR = "FEATURE_VECTOR"
+    OPPORTUNITY_ASSESSMENT = "OPPORTUNITY_ASSESSMENT"
+    TRADE_INTENT = "TRADE_INTENT"
+    RISK_DECISION = "RISK_DECISION"
+    ORDER_COMMAND = "ORDER_COMMAND"
+    EXECUTION_RECEIPT = "EXECUTION_RECEIPT"
+    POSITION_CHANGE = "POSITION_CHANGE"
+    RECONCILIATION_RESULT = "RECONCILIATION_RESULT"
+    TCA_RECORD = "TCA_RECORD"
+    TRADE_REVIEW = "TRADE_REVIEW"
+    TRADE_EXPERIENCE_ARTIFACT = "TRADE_EXPERIENCE_ARTIFACT"
+    ACTIVATION_MANIFEST = "ACTIVATION_MANIFEST"
+    KILL_SWITCH = "KILL_SWITCH"
+    MANDATE = "MANDATE"
+    CAPSULE_STATE = "CAPSULE_STATE"
+    OWNER_TICKET = "OWNER_TICKET"
+    SESSION = "SESSION"
+
+
+@dataclass(frozen=True)
+class Event:
+    kind: EventKind
+    producer: str
+    event_time_ms: int          # when it happened at the source
+    received_time_ms: int       # when VATI received it
+    payload: dict[str, Any]
+    schema_version: int = 1
+    decision_time_ms: Optional[int] = None  # T0 only
+    correlation_id: str = ""    # trade_intent_id or session id that ties the chain together
+    hash: str = ""
+
+    def body(self) -> dict[str, Any]:
+        d = {
+            "kind": self.kind.value, "producer": self.producer, "event_time_ms": self.event_time_ms,
+            "received_time_ms": self.received_time_ms, "payload": self.payload, "schema_version": self.schema_version,
+            "decision_time_ms": self.decision_time_ms, "correlation_id": self.correlation_id,
+        }
+        return d
+
+
+def make_event(kind: EventKind, producer: str, payload: dict[str, Any], *, event_time_ms: int, received_time_ms: int,
+               decision_time_ms: Optional[int] = None, correlation_id: str = "", schema_version: int = 1) -> Event:
+    e = Event(kind, producer, event_time_ms, received_time_ms, payload, schema_version, decision_time_ms, correlation_id)
+    return Event(**{**e.__dict__, "hash": canonical_hash(e.body())})
