@@ -1,0 +1,49 @@
+name: van-ci
+
+on:
+  push:
+    branches: [main, "feature/**"]
+  pull_request:
+
+jobs:
+  backend:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+      - name: Install backend dependencies
+        working-directory: backend
+        run: pip install -r requirements.txt
+      - name: Backend tests
+        working-directory: backend
+        run: pytest -q
+      - name: Contract tests
+        run: pytest -q tests/contracts
+
+  android-and-visual-evidence:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-java@v4
+        with:
+          distribution: temurin
+          java-version: "17"
+      - name: Android unit tests, build and lint
+        working-directory: android
+        run: |
+          chmod +x gradlew
+          ./gradlew :app:testDebugUnitTest :app:assembleDebug :app:lintDebug
+      - name: Shared visual geometry tests
+        working-directory: android
+        run: ./gradlew :visual-preview:test
+      - name: Render owner visual evidence from shipping geometry
+        working-directory: android
+        run: ./gradlew :visual-preview:renderVanPreviews
+      - name: Upload visual evidence
+        uses: actions/upload-artifact@v4
+        with:
+          name: van-visual-evidence
+          path: artifacts/release/preview/
+          if-no-files-found: error
