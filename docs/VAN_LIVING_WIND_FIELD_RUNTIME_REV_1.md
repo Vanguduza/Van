@@ -1,4 +1,4 @@
-# VAN Living Wind Field Runtime — Rev 1.1
+# VAN Living Wind Field Runtime — Rev 1.2
 
 Status: implementation companion to canonical visual authority Rev 2.3  
 Baseline: `a6756df`  
@@ -12,7 +12,7 @@ Rev 2.2 established correct three-zone semantic ownership but still allowed brok
 
 ## 2. Canonical state model
 
-Runtime truth is now represented by `VanPresenceFrame` with orthogonal channels:
+Runtime truth is represented by `VanPresenceFrame` with orthogonal channels:
 
 - `activity`: IDLE, THINKING, SEARCHING, WORKING, DELEGATING, etc.;
 - `health`: NOMINAL, DEGRADED, OFFLINE;
@@ -28,7 +28,7 @@ activity = LISTENING
 health   = DEGRADED     # Google mesh not yet verified
 ```
 
-The character therefore listens while Zone C/chrome still shows degraded truth. Uplink OFFLINE remains stronger and forces an offline pose. `VanVisualState.semanticState` carries outer-field truth separately from `durableState`, which continues to drive the character/Rive pose contract.
+The character and primary interaction copy therefore remain LISTENING while Zone C and the secondary health line communicate DEGRADED truth. Uplink OFFLINE remains stronger and takes over pose, semantic field and primary chrome. `VanVisualState.semanticState` carries outer-field truth separately from `durableState`, which continues to drive the character/Rive pose contract.
 
 ## 3. Observable subsystem truth
 
@@ -36,9 +36,11 @@ The character therefore listens while Zone C/chrome still shows degraded truth. 
 
 The floating overlay and Command Centre both collect the same health stream and both read the same application-scoped `VanLiveVisualState.frame`. A gateway/Google health update therefore recomposes both surfaces immediately; neither relies on a coincidental voice animation or a one-time snapshot to discover changed subsystem truth.
 
+`VanPresence.healthCue()` exposes subsystem truth separately from activity copy. The overlay uses `VanOverlayChrome` so non-uplink degradation remains visible without relabelling a functioning LISTENING/THINKING/SPEAKING/WORKING Van as “Degraded.” OFFLINE and critical owner-authority states are allowed to take over the primary chrome.
+
 ## 4. Owner-turn lifecycle
 
-Speech capture ending is no longer treated as owner-turn completion.
+Speech capture ending is not owner-turn completion.
 
 ```text
 microphone ready/partial -> CAPTURING / LISTENING
@@ -49,30 +51,32 @@ accepted/in_flight        -> brief WORKING acknowledgement, then ambient
 approval_required         -> WAITING_FOR_OWNER
 ```
 
-Callback ordering can therefore vary without erasing THINKING. `speechFrame()` updates articulation but does not replace health or authority truth, so TTS cannot hide WAITING_FOR_OWNER, ERROR or URGENT.
+Callback ordering can therefore vary without erasing THINKING.
+
+TTS is an articulation channel, not an activity transition. `speechStarted()` / `speechFrame()` temporarily give the pose SPEAKING precedence but do not mutate the underlying activity. When TTS ends, the previous THINKING, DELEGATING or WORKING activity automatically reappears. Speech also cannot hide WAITING_FOR_OWNER, ERROR or URGENT authority.
 
 ## 5. Three-zone field
 
 - **Zone A — identity presence:** restrained cyan bloom and shallow ground crescent.
-- **Zone B — interaction field:** detached windy ribbons, ion fragments and orb-link energy.
-- **Zone C — semantic envelope:** sparse, detached, state-specific directional flow carrying semantic colour.
+- **Zone B — interaction field:** detached windy ribbons, ion fragments and orb-link energy driven by local activity.
+- **Zone C — semantic envelope:** sparse, detached, state-specific directional flow driven independently by health/authority semantic truth.
 
 Full rings and concentric orbit geometry are forbidden. Zone B/C paths are clipped away from a body-safe ellipse.
 
 ## 6. Shared renderer-neutral geometry
 
-`VanFieldGeometryEngine` is the canonical Zone B/C geometry source. It has no Compose, Android or AWT dependency and outputs strokes/dots from:
+`VanFieldGeometryEngine` is the canonical Zone B/C geometry source. It has no Compose, Android or AWT dependency and accepts independent activity and semantic specs:
 
 ```text
-VanAuraSpec + phase + VanEffectBudget + body bounds
+activity VanAuraSpec + semantic VanAuraSpec + phase + VanEffectBudget + body bounds
 ```
 
-Both renderers consume it:
+Both renderers consume it with the same composition contract:
 
 - shipping Compose: `VanAura.kt`;
 - JVM evidence renderer: `GlassPainter.kt`.
 
-This removes the previous dual-painter drift. Owner preview boards generated after Rev 2.3 now represent the same Zone B/C geometry that ships on device.
+This removes the previous dual-painter drift and allows evidence for the exact orthogonal combinations introduced by Rev 2.3, not only single-state boards.
 
 ## 7. Wind motion
 
@@ -88,16 +92,16 @@ The field frame also supplies bounded breathing, prevailing wind, meander, turbu
 
 ## 8. State-specific semantic topology
 
-Zone C no longer maps every state onto the same wind axis. Each authored envelope segment rotates and shapes a local flow direction from its `startDeg`, `sweepDeg` and `node` properties. This preserves topology distinction in geometry as well as colour.
+Zone C does not map every state onto the same wind axis. Each authored envelope segment rotates and shapes a local flow direction from its `startDeg`, `sweepDeg` and `node` properties. This preserves topology distinction in geometry as well as colour.
 
 Expected readings include:
 
 | State | Geometry intent |
 | --- | --- |
-| LISTENING | inward-attentive cyan flow |
+| LISTENING | inward-attentive cyan Zone B flow |
 | SEARCHING | probing lateral streams |
 | WORKING | higher-throughput directional transport |
-| WAITING_FOR_OWNER | amber converging/bracketing flow |
+| WAITING_FOR_OWNER | amber converging/bracketing Zone C flow |
 | WARNING | interrupted amber disturbance |
 | ERROR | fractured/diverging red flow |
 | URGENT | compressed directional red flow |
@@ -111,12 +115,12 @@ The procedural Canvas rig retains body/head bob, blink, gaze, orb drift, speech 
 
 `VanPresence` is a pure resolver and remains fail-closed:
 
-- gateway/Hermes uplink loss -> OFFLINE pose and semantic state;
-- non-uplink degraded truth -> semantic/chrome DEGRADED while local activity can remain visible;
-- owner-decision/error authority -> authority semantic/pose state;
-- speech remains an orthogonal articulation channel.
+- gateway/Hermes uplink loss -> OFFLINE pose, semantic state and primary chrome;
+- non-uplink degraded truth -> Zone C + secondary health copy while local activity remains primary;
+- owner-decision/error authority -> authority semantic/pose/primary chrome state;
+- speech -> temporary articulation/pose precedence while underlying activity is preserved.
 
-The floating overlay and Command Centre both consume the same application-scoped presence and subsystem-health sources, preventing surface-local state forks.
+The floating overlay and Command Centre consume the same application-scoped presence and subsystem-health sources, preventing surface-local state forks.
 
 ## 11. Performance and accessibility
 
@@ -138,19 +142,21 @@ The implementation is mergeable only when all are true:
 2. Zone B/C remain detached from the body-safe region;
 3. semantic states have distinct geometry, not only distinct colour;
 4. phase wrapping is seamless;
-5. Google-unverified + LISTENING renders a LISTENING pose with DEGRADED semantic field/chrome;
+5. Google-unverified + LISTENING renders a LISTENING pose and primary copy with DEGRADED Zone C + secondary health line;
 6. microphone-end ordering cannot erase THINKING;
-7. TTS speech frames cannot replace WAITING_FOR_OWNER/ERROR/URGENT authority;
-8. OFFLINE uplink truth still forces OFFLINE;
-9. Compose and Java2D evidence use `VanFieldGeometryEngine`;
-10. reduced-motion produces stable geometry;
-11. gateway `accepted` never displays SUCCESS;
-12. overlay and Command Centre react to health changes from `DegradedModeStore.state`;
-13. Android and visual-evidence Gradle gates pass.
+7. TTS round-trips restore underlying THINKING/DELEGATING/WORKING activity;
+8. TTS speech frames cannot replace WAITING_FOR_OWNER/ERROR/URGENT authority;
+9. OFFLINE uplink truth forces OFFLINE pose/semantics/primary chrome;
+10. Compose and Java2D evidence both compose independent activity and semantic specs through `VanFieldGeometryEngine`;
+11. reduced-motion produces stable geometry;
+12. gateway `accepted` never displays SUCCESS;
+13. overlay and Command Centre react to health changes from `DegradedModeStore.state`;
+14. Android and visual-evidence Gradle gates pass;
+15. generated Rev 2.3 evidence includes the orthogonal presence board and is manually inspected before merge.
 
 ## 13. CI / evidence gates
 
-`.github/workflows/van-ci.yml` runs on pull requests and `main`, with obsolete runs cancelled by concurrency control:
+`.github/workflows/van-ci.yml` runs on pull requests and `main`, with obsolete runs cancelled by concurrency control. `tools/ci/github-actions-ci.yml` is kept aligned with the live workflow and `tools/ci/install_github_workflow.py` installs only `.github/workflows/van-ci.yml`.
 
 ```text
 pytest backend
@@ -162,7 +168,20 @@ pytest tests/contracts
 :visual-preview:renderVanPreviews
 ```
 
-Generated preview evidence is uploaded as the `van-visual-evidence` workflow artifact. PR promotion must use those results, not descriptive claims.
+Generated preview evidence is uploaded as the `van-visual-evidence` workflow artifact. Canonical named evidence is written under `artifacts/release/preview/rev23/`; the Rev 2.3 generator no longer writes a `rev21/` directory.
+
+The top-level `van_orthogonal_presence.png` and `rev23/orthogonal-presence.png` board certify:
+
+```text
+LISTENING + DEGRADED
+THINKING  + DEGRADED
+SPEAKING  + DEGRADED
+WORKING   + DEGRADED
+LISTENING + OFFLINE          -> OFFLINE takeover
+SPEAKING  + WAITING_FOR_OWNER -> authority takeover
+```
+
+PR promotion must use the generated results, not descriptive claims.
 
 ## 14. Key files
 
@@ -175,10 +194,12 @@ Generated preview evidence is uploaded as the `van-visual-evidence` workflow art
 - `android/app/src/main/java/com/dial/van/visual/VanWindFieldMotion.kt`
 - `android/app/src/main/java/com/dial/van/visual/VanFieldGeometry.kt`
 - `android/app/src/main/java/com/dial/van/visual/VanAura.kt`
+- `android/app/src/main/java/com/dial/van/overlay/VanOverlayChrome.kt`
+- `android/app/src/main/java/com/dial/van/overlay/FloatingOverlayService.kt`
 - `android/visual-preview/src/main/kotlin/com/dial/van/preview/GlassPainter.kt`
+- `android/visual-preview/src/main/kotlin/com/dial/van/preview/VanEvidenceMatrix.kt`
 - `android/app/src/main/java/com/dial/van/VanApplication.kt`
 - `android/app/src/main/java/com/dial/van/gateway/VanGatewayClient.kt`
-- `android/app/src/main/java/com/dial/van/overlay/FloatingOverlayService.kt`
 - `android/app/src/main/java/com/dial/van/command/CommandCentreActivity.kt`
 
 ## 15. Renderer truth
