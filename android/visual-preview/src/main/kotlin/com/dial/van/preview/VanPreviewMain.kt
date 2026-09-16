@@ -49,6 +49,7 @@ fun main(args: Array<String>) {
         println("wrote ${file.absolutePath} (${image.width}x${image.height}, ${file.length()} bytes)")
     }
     VanEvidenceMatrix.writeAll(outputDir)
+    VanCommandCentreEvidence.reconcile(outputDir)
     println(
         "wrote named Rev ${VanEvidenceMatrix.AUTHORITY_REVISION} evidence matrix under " +
             File(outputDir, VanEvidenceMatrix.EVIDENCE_DIR).absolutePath,
