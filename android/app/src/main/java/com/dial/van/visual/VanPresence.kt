@@ -4,11 +4,12 @@ import com.dial.van.degraded.DegradedMode
 import com.dial.van.degraded.SubsystemStatus
 
 /**
- * Translates subsystem truth into how Van *appears*.
+ * Translates subsystem truth and live interaction state into how Van *appears*.
  *
  * The overlay must never look healthy while a subsystem is broken, so this mapping fails
- * closed: any uplink loss presents OFFLINE, any other broken subsystem presents DEGRADED,
- * and only a fully nominal snapshot is allowed to reach the calm states.
+ * closed: any uplink loss presents OFFLINE, any other broken subsystem presents DEGRADED.
+ * When subsystem truth is nominal, the live visual controller is allowed to surface listening,
+ * speaking, thinking, working and other activity states continuously.
  */
 object VanPresence {
 
@@ -71,12 +72,33 @@ object VanPresence {
         }
     }
 
-    fun visualState(cue: Cue, base: VanVisualState = VanVisualState()): VanVisualState = base.copy(
-        durableState = cue.durableState,
-        listening = cue.durableState == VanDurableState.LISTENING,
-        speaking = cue.durableState == VanDurableState.SPEAKING,
-        urgency = maxOf(base.urgency, cue.urgency),
-    )
+    /**
+     * Merges truth with the continuously changing live presence state.
+     *
+     * Precedence is deliberately asymmetric: OFFLINE/DEGRADED and explicit owner-decision cues
+     * always override the live controller. A nominal IDLE cue is merely permission for the live
+     * state (LISTENING, THINKING, WORKING, SPEAKING, etc.) to show through.
+     *
+     * The default [base] is Compose snapshot state, so callers such as the floating overlay and
+     * Command Centre automatically recompose when voice/task state changes, without polling.
+     */
+    fun visualState(
+        cue: Cue,
+        base: VanVisualState = VanLiveVisualState.current,
+    ): VanVisualState {
+        val resolved = when {
+            cue.degraded -> cue.durableState
+            cue.durableState != VanDurableState.IDLE -> cue.durableState
+            else -> base.durableState
+        }
+        return base.copy(
+            durableState = resolved,
+            listening = resolved == VanDurableState.LISTENING ||
+                (base.listening && resolved != VanDurableState.SPEAKING),
+            speaking = resolved == VanDurableState.SPEAKING || base.speaking,
+            urgency = maxOf(base.urgency, cue.urgency),
+        )
+    }
 
     /** One-line mesh cue for the overlay chrome; kept short enough to read at overlay width. */
     fun meshCue(mode: DegradedMode): String {
