@@ -4,20 +4,7 @@ import android.content.Context
 import android.content.SharedPreferences
 import androidx.core.content.edit
 
-enum class OverlayMode {
-    /** Frameless rest: VAN and his living aura only. No glass until interaction. */
-    RESTING,
-
-    /** Glass condenses from the aura; VAN overlaps the panel; 1–3 quick actions. */
-    COMPACT,
-
-    /** Working surface: glass grown from VAN, status, mesh cue and in-panel actions. */
-    EXPANDED,
-
-    /** Intentional edge dock: crescent aura, face/visor preserved, 88dp hit target. */
-    DOCKED,
-}
-
+/** Edge dock is distinct from the circular minimized representation. */
 enum class DockEdge {
     NONE,
     LEFT,
@@ -29,7 +16,7 @@ enum class DockEdge {
 data class OverlayPersistedState(
     val x: Int,
     val y: Int,
-    val mode: OverlayMode,
+    val presentation: VanOverlayPresentation,
     val dock: DockEdge,
     val serviceRunning: Boolean,
 )
@@ -42,31 +29,48 @@ class OverlayStateStore(context: Context) {
         prefs.edit {
             putInt(KEY_X, state.x)
             putInt(KEY_Y, state.y)
-            putString(KEY_MODE, state.mode.name)
+            putString(KEY_PRESENTATION, state.presentation.name)
             putString(KEY_DOCK, state.dock.name)
             putBoolean(KEY_RUNNING, state.serviceRunning)
         }
     }
 
-    fun load(defaultX: Int, defaultY: Int): OverlayPersistedState = OverlayPersistedState(
-        x = prefs.getInt(KEY_X, defaultX),
-        y = prefs.getInt(KEY_Y, defaultY),
-        mode = runCatching { OverlayMode.valueOf(prefs.getString(KEY_MODE, OverlayMode.RESTING.name)!!) }
-            .getOrDefault(OverlayMode.RESTING),
-        dock = runCatching { DockEdge.valueOf(prefs.getString(KEY_DOCK, DockEdge.NONE.name)!!) }
-            .getOrDefault(DockEdge.NONE),
-        serviceRunning = prefs.getBoolean(KEY_RUNNING, false),
-    )
+    fun load(defaultX: Int, defaultY: Int): OverlayPersistedState {
+        val presentation = runCatching {
+            VanOverlayPresentation.valueOf(
+                prefs.getString(KEY_PRESENTATION, null)
+                    ?: legacyPresentation(prefs.getString(KEY_LEGACY_MODE, null)).name,
+            )
+        }.getOrDefault(VanOverlayPresentation.FULL_FLOATING)
+
+        return OverlayPersistedState(
+            x = prefs.getInt(KEY_X, defaultX),
+            y = prefs.getInt(KEY_Y, defaultY),
+            presentation = presentation,
+            dock = runCatching {
+                DockEdge.valueOf(prefs.getString(KEY_DOCK, DockEdge.NONE.name)!!)
+            }.getOrDefault(DockEdge.NONE),
+            serviceRunning = prefs.getBoolean(KEY_RUNNING, false),
+        )
+    }
 
     fun markRunning(running: Boolean) {
         prefs.edit { putBoolean(KEY_RUNNING, running) }
+    }
+
+    private fun legacyPresentation(value: String?): VanOverlayPresentation = when (value) {
+        "COMPACT" -> VanOverlayPresentation.WORKBOARD_COMPACT
+        "EXPANDED" -> VanOverlayPresentation.WORKBOARD_EXPANDED
+        "DOCKED" -> VanOverlayPresentation.DOCKED
+        else -> VanOverlayPresentation.FULL_FLOATING
     }
 
     companion object {
         private const val PREFS = "van_overlay_state"
         private const val KEY_X = "x"
         private const val KEY_Y = "y"
-        private const val KEY_MODE = "mode"
+        private const val KEY_PRESENTATION = "presentation"
+        private const val KEY_LEGACY_MODE = "mode"
         private const val KEY_DOCK = "dock"
         private const val KEY_RUNNING = "running"
     }
@@ -82,7 +86,7 @@ object EdgeDocking {
         if (y <= DOCK_THRESHOLD_PX) ny = 0
         if (x + avatarSize >= screenW - DOCK_THRESHOLD_PX) nx = screenW - avatarSize
         if (y + avatarSize >= screenH - DOCK_THRESHOLD_PX) ny = screenH - avatarSize
-        return nx to ny
+        return nx.coerceAtLeast(0) to ny.coerceAtLeast(0)
     }
 
     fun detectEdge(x: Int, y: Int, avatarSize: Int, screenW: Int, screenH: Int): DockEdge = when {
