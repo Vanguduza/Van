@@ -25,6 +25,7 @@ fun main(args: Array<String>) {
         "van_command_centre.png" to VanPreviewSheets.commandCentreSheet(),
         "van_glass_tokens.png" to VanPreviewSheets.glassTokenSheet(),
         "van_aura_topology.png" to VanPreviewSheets.auraTopologySheet(),
+        "van_orthogonal_presence.png" to VanEvidenceMatrix.orthogonalPresenceBoard(),
     )
 
     println(
@@ -41,5 +42,8 @@ fun main(args: Array<String>) {
         println("wrote ${file.absolutePath} (${image.width}x${image.height}, ${file.length()} bytes)")
     }
     VanEvidenceMatrix.writeAll(outputDir)
-    println("wrote named Rev 2.1 evidence matrix under ${File(outputDir, "rev21").absolutePath}")
+    println(
+        "wrote named Rev ${VanEvidenceMatrix.AUTHORITY_REVISION} evidence matrix under " +
+            File(outputDir, VanEvidenceMatrix.EVIDENCE_DIR).absolutePath,
+    )
 }
