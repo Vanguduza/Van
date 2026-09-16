@@ -33,11 +33,17 @@ class VanPreviewRenderTest {
             VanPreviewSheets.commandCentreSheet(),
             VanPreviewSheets.glassTokenSheet(),
             VanPreviewSheets.auraTopologySheet(),
-            VanEvidenceMatrix.orthogonalPresenceBoard(),
         ).forEach { sheet ->
             assertTrue("sheet too small: ${sheet.width}x${sheet.height}", sheet.width > 600 && sheet.height > 400)
             assertTrue("sheet rendered blank", nonBackgroundRatio(sheet) > 0.02)
         }
+
+        val orthogonal = VanEvidenceMatrix.orthogonalPresenceBoard()
+        assertTrue(
+            "orthogonal board too small: ${orthogonal.width}x${orthogonal.height}",
+            orthogonal.width > 1200 && orthogonal.height >= 360,
+        )
+        assertTrue("orthogonal board rendered blank", nonBackgroundRatio(orthogonal) > 0.02)
     }
 
     @Test
