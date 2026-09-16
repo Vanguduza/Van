@@ -22,7 +22,10 @@ object VanLiveVisualState {
     private const val IDLE_SETTLE_MS = 420L
     private const val TRANSIENT_HOLD_MS = 320L
 
-    private val main = Handler(Looper.getMainLooper())
+    // Lazy keeps pure JVM tests that only read [current] away from Android Looper stubs.
+    private val main by lazy(LazyThreadSafetyMode.SYNCHRONIZED) {
+        Handler(Looper.getMainLooper())
+    }
     private var generation = 0L
     private var stateStartedAtMs = 0L
 
