@@ -6,6 +6,8 @@ import com.dial.van.gateway.QueueReplayer
 import com.dial.van.gateway.VanGatewayClient
 import com.dial.van.notification.NotificationPolicyStore
 import com.dial.van.queue.EncryptedCommandQueue
+import com.dial.van.visual.VanDurableState
+import com.dial.van.visual.VanLiveVisualState
 import com.dial.van.voice.SpeechSyncFrame
 import com.dial.van.voice.TtsOutputCallback
 import com.dial.van.voice.TtsOutputManager
@@ -52,13 +54,67 @@ class VanApplication : Application(), VoiceInputCallback, TtsOutputCallback {
         queueReplayer.replayAsync()
     }
 
-    override fun onPartial(text: String) = Unit
-    override fun onFinal(text: String) = Unit
-    override fun onError(code: Int) = Unit
-    override fun onListeningChanged(listening: Boolean) = Unit
-    override fun onSpeakingChanged(speaking: Boolean) = Unit
-    override fun onSpeechFrame(frame: SpeechSyncFrame) = Unit
-    override fun onUtteranceDone(utteranceId: String) = Unit
+    override fun onPartial(text: String) {
+        if (text.isNotBlank()) {
+            VanLiveVisualState.transition(
+                state = VanDurableState.LISTENING,
+                listening = true,
+            )
+        }
+    }
+
+    override fun onFinal(text: String) {
+        if (text.isBlank()) {
+            VanLiveVisualState.settleToIdle()
+        } else {
+            // Recognition has ended but the owner turn is not resolved yet. THINKING gives the
+            // hand-off to Hermes a distinct visual beat instead of snapping straight to idle.
+            VanLiveVisualState.transition(VanDurableState.THINKING)
+        }
+    }
+
+    override fun onError(code: Int) {
+        // A recognizer failure is visible but does not masquerade as a system-wide outage;
+        // degraded subsystem truth still has precedence in VanPresence.
+        VanLiveVisualState.transition(
+            state = VanDurableState.WARNING,
+            urgency = 0.25f,
+        )
+        VanLiveVisualState.settleToIdle(delayMs = 1_200L)
+    }
+
+    override fun onListeningChanged(listening: Boolean) {
+        if (listening) {
+            VanLiveVisualState.transition(
+                state = VanDurableState.LISTENING,
+                listening = true,
+            )
+        } else {
+            VanLiveVisualState.settleToIdle()
+        }
+    }
+
+    override fun onSpeakingChanged(speaking: Boolean) {
+        if (speaking) {
+            VanLiveVisualState.transition(
+                state = VanDurableState.SPEAKING,
+                speaking = true,
+            )
+        } else {
+            VanLiveVisualState.settleToIdle()
+        }
+    }
+
+    override fun onSpeechFrame(frame: SpeechSyncFrame) {
+        VanLiveVisualState.speechFrame(
+            mouthOpen = frame.mouthOpen,
+            viseme = frame.viseme,
+        )
+    }
+
+    override fun onUtteranceDone(utteranceId: String) {
+        VanLiveVisualState.settleToIdle()
+    }
 
     companion object {
         lateinit var instance: VanApplication
