@@ -112,6 +112,27 @@ def test_service_never_exposes_an_order_path():
     """The gateway trading surface has no method that could create, size, modify or cancel an order."""
     from van_gateway.trading import TradingService
     names = {n for n in dir(TradingService) if not n.startswith("_")}
-    assert names == {"available", "status", "tickets", "halt", "confirm_ticket", "producer"}
+    assert names == {"available", "status", "tickets", "halt", "confirm_ticket", "trade_book", "producer"}
     for banned in ("order", "submit", "size", "cancel", "modify", "credential", "token"):
         assert not any(banned in n.lower() for n in names), banned
+
+
+@pytest.mark.asyncio
+async def test_trade_book_views_without_and_with_ledger(client, tmp_path):
+    ac, app = client
+    empty = (await ac.get("/v1/trading/trades?view=potential")).json()
+    assert empty["ledger_available"] is False and empty["potential"] == [] and empty["counts"] == {"potential": 0}
+    assert (await ac.get("/v1/trading/trades?view=bogus")).status_code == 422
+    led = seed_ledger(tmp_path / "vati.sqlite")
+    intent = {"trade_intent_id": "intent-1", "symbol": "DELTA", "venue": "zse", "direction": "LONG", "strategy_id": "ZSE-VALUE-ROTATION-01", "strategy_version": "1.0.0", "horizon": "POSITION",
+              "entry": "25.00", "stop": "23.50", "expected_gross_move_pct": "0.12", "regime_multiplier": "0.8", "volatility_multiplier": "1", "liquidity_multiplier": "0.9", "event_risk_multiplier": "1", "confidence_multiplier": "0.9"}
+    dec = {"decision": "REDUCED", "reason_code": "", "requested_risk_pct": "0.01", "approved_risk_pct": "0.008", "approved_size": "1200", "decision_hash": "d" * 64}
+    led.append(make_event(EventKind.RISK_DECISION, "vati-cycle", {"inputs": {"intent": intent, "snapshot": {}, "mandate": {}}, "decision": dec}, event_time_ms=1_500, received_time_ms=1_500, correlation_id="intent-1"))
+    led.append(make_event(EventKind.EXECUTION_RECEIPT, "vati-router", {"status": "ACCEPTED", "average_fill": None, "filled_qty": "0", "protective_stop_confirmed": True, "protective_stop_price": "23.50", "execution_channel": "OWNER_TICKET"},
+                          event_time_ms=1_900, received_time_ms=1_900, correlation_id="intent-1"))
+    led.close()
+    book = (await ac.get("/v1/trading/trades?view=all")).json()
+    assert book["ledger_available"] and book["counts"] == {"past": 0, "current": 1, "potential": 0}
+    cur = book["current"][0]
+    assert cur["state"] == "AWAITING_OWNER_TICKET" and cur["owner_ticket"] == {"ticket": "ZSE-T-1", "status": "OPEN"} and cur["confidence"] == {"score": "0.65", "band": "MEDIUM", "basis": book["confidence_basis"]}
+    assert "never a size" in book["confidence_basis"] and cur["approved_size"] == "1200"

@@ -415,6 +415,14 @@ def create_app() -> FastAPI:
     async def trading_status():
         return _trading_status_payload()
 
+    @app.get("/v1/trading/trades")
+    async def trading_trades(view: str = "all", limit: int = 50):
+        """Owner preview surface: past, current and potential trades with confidence scores (read-only)."""
+        try:
+            return trading.trade_book(view=view, limit=limit)
+        except ValueError as exc:
+            raise HTTPException(status_code=422, detail=str(exc))
+
     @app.get("/v1/trading/tickets")
     async def trading_tickets(status: str | None = None):
         return {"tickets": trading.tickets(status=status)}

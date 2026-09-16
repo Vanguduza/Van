@@ -34,6 +34,12 @@ def _import_vati():
     return EventKind, make_event, Ledger
 
 
+def _import_trade_book():
+    _import_vati()
+    from vati.app.tradebook import VIEWS, build_trade_book
+    return VIEWS, build_trade_book
+
+
 @dataclass
 class TradingService:
     ledger_path: str
@@ -99,6 +105,27 @@ class TradingService:
         finally:
             led.close()
         return [t for t in out if status is None or t["status"] == status]
+
+    # ------------------------------------------------------------ trade book
+    def trade_book(self, *, view: str = "all", limit: int = 50) -> dict[str, Any]:
+        """Past / current / potential trades with confidence scores, read from the ledger (Rev 4 K.4)."""
+        views, build = _import_trade_book()
+        if view not in views:
+            raise ValueError(f"view must be one of {views}")
+        limit = max(1, min(int(limit), 200))
+        if not self.available():
+            book = {"view": view, "ledger_available": False, "ledger_path": self.ledger_path, "counts": {}}
+            for k in ("past", "current", "potential"):
+                if view in (k, "all"):
+                    book[k] = []; book["counts"][k] = 0
+            return book
+        _, _, led = self._open()
+        try:
+            book = build(led, view=view, limit=limit)
+        finally:
+            led.close()
+        book["ledger_available"] = True
+        return book
 
     # --------------------------------------------------------- owner writes
     @staticmethod

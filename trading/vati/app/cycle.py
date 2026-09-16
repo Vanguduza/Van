@@ -136,7 +136,7 @@ class DecisionCycle:
         regime_label = ctx.zse.currency_regime.value if ctx.zse is not None else state.regime.trend.value
         oa = self.engine.assess(state, ctx, regime_label=state.regime.trend.value, currency_regime_label=(ctx.zse.currency_regime.value if ctx.zse is not None else None),
                                 account_alias=cfg.account_alias, venue=cfg.venue, idempotency_seed=f"{cfg.session_id}:{state.as_of_ms}")
-        self._log(EventKind.OPPORTUNITY_ASSESSMENT, {"decision": oa.decision, "reason": oa.abstain_reason, "candidates": list(oa.candidates), "assessment_hash": oa.assessment_hash}, now_ms=now_ms)
+        self._log(EventKind.OPPORTUNITY_ASSESSMENT, {"symbol": cfg.symbol, "decision": oa.decision, "reason": oa.abstain_reason, "candidates": list(oa.candidates), "assessment_hash": oa.assessment_hash}, now_ms=now_ms)
         metrics.inc("vati_cycles_total", symbol=cfg.symbol)
         if oa.intent is None:
             return CycleResult(state.as_of_ms, state.state_hash, oa.decision, oa.abstain_reason)

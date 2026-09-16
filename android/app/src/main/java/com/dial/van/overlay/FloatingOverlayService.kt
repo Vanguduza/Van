@@ -15,6 +15,8 @@ import android.view.WindowManager
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.gestures.detectDragGestures
+import androidx.compose.foundation.rememberScrollState
+import androidx.compose.foundation.verticalScroll
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
@@ -32,14 +34,22 @@ import androidx.compose.material.icons.filled.Apps
 import androidx.compose.material.icons.filled.Chat
 import androidx.compose.material.icons.filled.Close
 import androidx.compose.material.icons.filled.Mic
+import androidx.compose.material.icons.filled.Refresh
+import androidx.compose.material.icons.filled.ShowChart
 import androidx.compose.material3.Icon
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.LaunchedEffect
+import androidx.compose.runtime.remember
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableIntStateOf
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.setValue
+import com.dial.van.trading.TradeBookParser
+import com.dial.van.trading.TradeBookState
+import com.dial.van.trading.TradeRow
+import com.dial.van.trading.TradeView
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
@@ -96,6 +106,8 @@ class FloatingOverlayService : Service(), LifecycleOwner, SavedStateRegistryOwne
     private var posY by mutableIntStateOf(0)
     private var dockEdge by mutableStateOf(DockEdge.NONE)
     private var blurBehindActive by mutableStateOf(false)
+    private var tradeView by mutableStateOf(TradeView.CURRENT)
+    private var tradeRefreshTick by mutableIntStateOf(0)
 
     private var shellWidthPx = 0
 
@@ -220,6 +232,14 @@ class FloatingOverlayService : Service(), LifecycleOwner, SavedStateRegistryOwne
                         headline = cue.headline,
                         caption = VanCaptions.forState(cue.durableState),
                         meshCue = VanPresence.meshCue(degraded),
+                        accent = palette.accent,
+                    )
+
+                    OverlayMode.TRADES -> TradesShell(
+                        app = app,
+                        glass = glass,
+                        budget = budget,
+                        visualState = visualState,
                         accent = palette.accent,
                     )
                 }
@@ -367,12 +387,160 @@ class FloatingOverlayService : Service(), LifecycleOwner, SavedStateRegistryOwne
             ) {
                 GlassAction(Icons.Default.Chat, "Chat", accent, active = true) { openCommandCentre() }
                 GlassAction(Icons.Default.Apps, "Agents", accent) { openCommandCentre() }
+                GlassAction(Icons.Default.ShowChart, "Trades", accent) {
+                    overlayMode = OverlayMode.TRADES
+                    persistState()
+                }
                 GlassAction(Icons.Default.Mic, "Voice", accent) { app.voiceSession.beginOwnerTurn() }
                 GlassAction(Icons.Default.Close, "Dock Van", accent) {
                     overlayMode = OverlayMode.DOCKED
                     persistState()
                 }
             }
+        }
+    }
+
+    /**
+     * Rev 4 K.4 — trade preview on the working surface. Van stays on the glass edge; the panel
+     * shows past / current / potential trades from the VATI ledger with the gateway's confidence
+     * score per trade. It is read-only by construction: the client has no order call and the
+     * rows carry no action. Data is fetched on demand (open, tab change, refresh), never polled.
+     */
+    @Composable
+    private fun TradesShell(
+        app: VanApplication,
+        glass: com.dial.van.visual.VanGlassStyle,
+        budget: com.dial.van.visual.VanEffectBudget,
+        visualState: com.dial.van.visual.VanVisualState,
+        accent: Int,
+    ) {
+        Box(
+            modifier = Modifier.width(TRADES_WIDTH_DP.dp).height(TRADES_HEIGHT_DP.dp),
+            contentAlignment = Alignment.TopStart,
+        ) {
+            VanGlassSurface(
+                style = glass,
+                modifier = Modifier
+                    .align(Alignment.BottomCenter)
+                    .fillMaxWidth()
+                    .height((TRADES_HEIGHT_DP - 26).dp),
+            ) {
+                TradesPanel(app = app, accent = accent)
+            }
+            VanEmbodiment(
+                state = visualState,
+                budget = budget,
+                presentation = VanPresentation.EXPANDED,
+                modifier = Modifier
+                    .align(Alignment.TopStart)
+                    .offset(x = 2.dp)
+                    .size((CHARACTER_DP * 0.6f).dp)
+                    .clickable {
+                        overlayMode = OverlayMode.EXPANDED
+                        persistState()
+                    },
+            )
+        }
+    }
+
+    @Composable
+    private fun TradesPanel(app: VanApplication, accent: Int) {
+        var state: TradeBookState by remember { mutableStateOf<TradeBookState>(TradeBookState.Loading) }
+        val view = tradeView
+        val tick = tradeRefreshTick
+        LaunchedEffect(view, tick) {
+            state = TradeBookState.Loading
+            state = runCatching { app.gatewayClient.tradingTrades(view.query) }
+                .fold(
+                    onSuccess = { TradeBookParser.parse(view, it) },
+                    onFailure = { TradeBookState.Unavailable(view, "Gateway unreachable: trade ledger not available") },
+                )
+        }
+        Column(modifier = Modifier.fillMaxWidth().padding(start = 64.dp, end = 10.dp, top = 8.dp, bottom = 6.dp)) {
+            Row(verticalAlignment = Alignment.CenterVertically) {
+                Text("Trades", color = Color.White, fontSize = 15.sp, fontWeight = FontWeight.Bold)
+                Spacer(modifier = Modifier.width(6.dp))
+                Text("preview · read-only", color = Color(0xFF8A97A6), fontSize = 9.sp)
+                Spacer(modifier = Modifier.weight(1f))
+                GlassAction(Icons.Default.Refresh, "Refresh trades", accent) { tradeRefreshTick += 1 }
+                Spacer(modifier = Modifier.width(4.dp))
+                GlassAction(Icons.Default.Close, "Back to Van", accent) {
+                    overlayMode = OverlayMode.EXPANDED
+                    persistState()
+                }
+            }
+            Row(horizontalArrangement = Arrangement.spacedBy(6.dp), modifier = Modifier.padding(vertical = 4.dp)) {
+                TradeView.entries.forEach { v ->
+                    val active = v == view
+                    Box(
+                        modifier = Modifier
+                            .clip(RoundedCornerShape(10.dp))
+                            .background(Color(accent).copy(alpha = if (active) 0.28f else 0.10f))
+                            .clickable {
+                                tradeView = v
+                                persistState()
+                            }
+                            .padding(horizontal = 10.dp, vertical = 5.dp),
+                    ) {
+                        Text(v.label, color = if (active) Color(accent) else Color(0xFFE7ECF2), fontSize = 11.sp, fontWeight = FontWeight.SemiBold)
+                    }
+                }
+            }
+            when (val st = state) {
+                TradeBookState.Loading -> Text("Reading the trading ledger…", color = Color(0xFFB6C2D0), fontSize = 11.sp)
+                is TradeBookState.Unavailable -> Text(st.reason, color = Color(0xFFFFB300), fontSize = 11.sp, maxLines = 2)
+                is TradeBookState.Ready -> {
+                    if (!st.ledgerAvailable) {
+                        Text("Trading ledger unavailable on the gateway.", color = Color(0xFFFFB300), fontSize = 11.sp)
+                    } else if (st.rows.isEmpty()) {
+                        Text(view.emptyCopy, color = Color(0xFFB6C2D0), fontSize = 11.sp)
+                    } else {
+                        Column(modifier = Modifier.weight(1f).verticalScroll(rememberScrollState())) {
+                            st.rows.take(MAX_TRADE_ROWS).forEach { TradeRowLine(it) }
+                        }
+                    }
+                }
+            }
+            Spacer(modifier = Modifier.height(2.dp))
+            Text(
+                text = "Confidence = uncalibrated rule score · sizes come only from the Risk Authority · nothing here can place a trade",
+                color = Color(0xFF6F7C8A),
+                fontSize = 8.sp,
+                maxLines = 2,
+            )
+        }
+    }
+
+    @Composable
+    private fun TradeRowLine(row: TradeRow) {
+        Column(modifier = Modifier.fillMaxWidth().padding(vertical = 3.dp)) {
+            Row(verticalAlignment = Alignment.CenterVertically) {
+                Text(
+                    text = row.headline,
+                    color = Color.White,
+                    fontSize = 11.sp,
+                    fontWeight = FontWeight.SemiBold,
+                    maxLines = 1,
+                    modifier = Modifier.weight(1f),
+                )
+                Spacer(modifier = Modifier.width(6.dp))
+                Box(
+                    modifier = Modifier
+                        .clip(RoundedCornerShape(8.dp))
+                        .background(Color(row.confidence.band.argb).copy(alpha = 0.22f))
+                        .padding(horizontal = 6.dp, vertical = 2.dp),
+                ) {
+                    Text(
+                        text = "${row.confidence.percentLabel} ${row.confidence.band.label}",
+                        color = Color(row.confidence.band.argb),
+                        fontSize = 9.sp,
+                        fontWeight = FontWeight.Bold,
+                        maxLines = 1,
+                    )
+                }
+            }
+            Text(text = row.detail, color = Color(0xFFB6C2D0), fontSize = 9.sp, maxLines = 1)
+            row.reasons.firstOrNull()?.let { Text(text = it, color = Color(0xFF8A97A6), fontSize = 9.sp, maxLines = 1) }
         }
     }
 
@@ -509,6 +677,9 @@ class FloatingOverlayService : Service(), LifecycleOwner, SavedStateRegistryOwne
         private const val COMPACT_HEIGHT_DP = 150
         private const val EXPANDED_WIDTH_DP = 250
         private const val EXPANDED_HEIGHT_DP = 128
+        private const val TRADES_WIDTH_DP = 312
+        private const val TRADES_HEIGHT_DP = 268
+        private const val MAX_TRADE_ROWS = 8
         private const val TOUCH_TARGET_DP = 34
 
         fun start(context: Context) {

@@ -70,6 +70,7 @@ Canonical authority: `docs/VAN_ADAPTIVE_TRADING_INTELLIGENCE_TECHNICAL_BLUEPRINT
 - Status questions are answered from the VATI ledger through the gateway (`GET /v1/trading/status`), never from memory.
 - A ZSE ticket appears as an OWNER_TICKET event; the owner enters it and confirms through `POST /v1/trading/tickets/{id}/confirm` (A4). Hermes may explain the ticket; it never confirms it.
 - An owner halt is `POST /v1/trading/halt` with owner-signed authority (A4); Hermes may recommend it, never send it.
+- The overlay's Trades panel (past / current / potential, `GET /v1/trading/trades`) is the owner's preview of the ledger. When asked about a row, explain it from the ledger fields; the confidence score is an uncalibrated rule score for ranking and explanation, never a probability of profit and never a size.
 - Backtests: `python -m vati backtest --bars ... --config ...`; the result is a candidate, never a promotion. Decision replay: `python -m vati replay-verify --ledger ...`.
 
 ## Continuous learning (Rev 4 Part L)

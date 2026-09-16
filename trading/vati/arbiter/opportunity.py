@@ -8,6 +8,7 @@ from dataclasses import dataclass, field
 from decimal import Decimal
 from typing import Optional
 
+from vati.arbiter.confidence import confidence_score
 from vati.arbiter.horizon import HorizonArbiter
 from vati.arbiter.meta_labeler import MetaLabel, MetaLabeler, MetaVerdict
 from vati.arbiter.strategy_arbiter import StrategyArbiter
@@ -57,7 +58,12 @@ class OpportunityEngine:
             if hv.horizon is None:
                 row["reasons"] = [hv.reason]; cands.append(row); continue
             mv = self.m.score(state, sig, hv.cost_multiple, ctx)
-            row.update({"label": mv.label.value, "meta_reasons": list(mv.reasons)})
+            mults = {"regime_multiplier": str(mv.regime_multiplier), "volatility_multiplier": str(mv.volatility_multiplier), "liquidity_multiplier": str(mv.liquidity_multiplier),
+                     "event_risk_multiplier": str(mv.event_risk_multiplier), "confidence_multiplier": str(mv.confidence_multiplier)}
+            conf = confidence_score(mults, capsule_health=self.m.capsule_health.get(cap.strategy_id))
+            row.update({"label": mv.label.value, "meta_reasons": list(mv.reasons), "direction": sig.direction.value, "entry": str(sig.entry), "stop": str(sig.stop),
+                        "expected_gross_move_pct": str(sig.expected_gross_move_pct) if sig.expected_gross_move_pct is not None else None,
+                        "multipliers": mults, "confidence": conf.as_dict()})
             cands.append(row)
             if mv.label in (MetaLabel.TRADE, MetaLabel.REDUCE_SIZE):
                 score = hv.cost_multiple * mv.confidence_multiplier * mv.regime_multiplier

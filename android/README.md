@@ -84,3 +84,11 @@ Example path: `C:\Users\Admin\AppData\Local\android-sdk\platform-tools\adb.exe`
 ```bat
 adb install -r app\build\outputs\apk\debug\app-debug.apk
 ```
+
+
+## Trade preview (overlay `TRADES` mode)
+
+The expanded glass rail has a **Trades** action that opens a read-only panel with three on-demand tabs — Past,
+Current, Potential — read from the gateway's `GET /v1/trading/trades?view=`. Each row shows the trade and its
+confidence score/band as the gateway computed it (`trading/TradeBook.kt` parses; `FloatingOverlayService.TradesPanel`
+renders). The client has no call that could place, size, modify or cancel a trade. JVM tests: `TradeBookTest`.

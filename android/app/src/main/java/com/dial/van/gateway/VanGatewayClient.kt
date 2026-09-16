@@ -58,6 +58,15 @@ class VanGatewayClient(context: Context) {
 
     suspend fun briefing(): JSONObject = withContext(Dispatchers.IO) { getJson("/v1/briefing") }
 
+    /**
+     * Trade book read model (Rev 4 K.4): `view` is past | current | potential | all. Raw text so the
+     * pure-Kotlin [com.dial.van.trading.TradeBookParser] can parse it off-device. Read-only: this
+     * client has no call that could place, size, modify or cancel a trade.
+     */
+    suspend fun tradingTrades(view: String, limit: Int = 12): String = withContext(Dispatchers.IO) {
+        rawGet("/v1/trading/trades?view=$view&limit=$limit")
+    }
+
     suspend fun decisions(): org.json.JSONArray = withContext(Dispatchers.IO) {
         val text = rawGet("/v1/decisions")
         org.json.JSONArray(text)

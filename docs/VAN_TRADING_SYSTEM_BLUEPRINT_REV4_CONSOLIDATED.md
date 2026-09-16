@@ -231,10 +231,28 @@ host the trading data plane. No dial-new change is requested by Rev 4.
 |---|---|---|
 | `GET /v1/trading/status` | A1 | chain verification, counts by kind, active kill-switch triggers, open tickets, last event; sets/clears `TRADING_LEDGER_UNAVAILABLE` |
 | `GET /v1/trading/tickets?status=` | A1 | OWNER_TICKET events paired with confirmations |
+| `GET /v1/trading/trades?view=&limit=` | A1 | past / current / potential trades with confidence scores (K.4) |
 | `POST /v1/trading/halt` | A4 | internal control token **and** `owner_signature_ref`; appends `KILL_SWITCH{OWNER_HALT}`; audited |
 | `POST /v1/trading/tickets/{id}/confirm` | A4 | token + signature + fill/qty/contract note; once per OPEN ticket; qty ≤ ticket; audited |
 
 The service exposes no method that could create, size, modify or cancel an order (tested by name).
+
+**K.4 Trade preview on the floating overlay.** The overlay's working surface gains a `TRADES` mode (rail action
+"Trades", Van stays on the glass edge) with three on-demand tabs read from `GET /v1/trading/trades?view=`:
+
+| Tab | Source in the ledger | Row shows |
+|---|---|---|
+| Past | intents with a `TRADE_REVIEW` | symbol, direction, R multiple, P&L, outcome class, exit reason, first lesson |
+| Current | approved intents with an entry receipt and no review | state (OPEN / WORKING / AWAITING_OWNER_TICKET), approved size, fill, protective stop (loud when unconfirmed), owner ticket status |
+| Potential | latest `OPPORTUNITY_ASSESSMENT` per symbol (every candidate that produced a signal) plus Risk Authority / router refusals from the last day of ledger time | label (TRADE / REDUCE_SIZE / WAIT / SKIP / REJECTED:<code>), entry, stop, edge multiple, first reason |
+
+Every row carries a **confidence score** (`vati.arbiter.confidence`): the product of the five reduce-only rule
+multipliers the meta-labeller emitted for that trade × learned capsule health, clamped to [0, 1], banded HIGH ≥ 0.75,
+MEDIUM ≥ 0.50, LOW ≥ 0.25, MINIMAL. It is labelled `RULES_V0_UNCALIBRATED`, it ranks and explains, and it never sizes:
+sizes come only from the Risk Authority. The trade book is a read model (`vati/app/tradebook.py`); the gateway
+service and the Android client expose no call that could place, size, modify or cancel a trade, and both are tested
+for that by name. Data is fetched on open, tab change and refresh, never polled; a missing ledger or unreachable
+gateway shows as such rather than as an empty book.
 
 **K.2 Hermes.** Profile `van` lists the `trading-intelligence` skill; SOUL.md carries the trading-authority section;
 the skill's "Operating the built system" and "Continuous learning" sections tell Hermes to answer status from the ledger,
@@ -314,6 +332,7 @@ evidence citable only by 64-hex artifact hash, `authority = CONTINUITY_ONLY_NOT_
 | D | Router, Paper / OwnerTicket / MT5-bridge / Deriv adapters, protection, reconciliation, TCA, review, VTIL admission | done |
 | E | Shared decision cycle, backtest engine with DSR/PBO/walk-forward and leakage switch, session runner, CLI | done |
 | F | Continuous learning engine + boundary wired into the cycle; gateway trading surface; learning A5 patterns | done |
+| G | Trade book read model with confidence scores; overlay TRADES mode (past / current / potential) | done (Android build unverified in this container: no SDK; Kotlin logic compiled and tested with kotlinc) |
 | 1 | Parquet lake + historical tick ingestion (Dukascopy / TrueFX); real-data backtests for the FX capsules | next |
 | 2 | VTIL registry growth (≥ 40 resources), ≥ 8 ZSE golden cases | next |
 | 3 | NautilusTrader donor gate (Python 3.12 runtime step, Context7 version facts), plane-2 RiskEngine | gated |

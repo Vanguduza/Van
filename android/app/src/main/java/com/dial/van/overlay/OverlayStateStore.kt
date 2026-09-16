@@ -13,6 +13,9 @@ enum class OverlayMode {
 
     /** Tucked to a screen edge: glass controls collapse to a cyan presence line (§13 Dock). */
     DOCKED,
+
+    /** Trade preview panel (Rev 4 K.4): past / current / potential trades with confidence, read-only. */
+    TRADES,
 }
 
 enum class DockEdge {
