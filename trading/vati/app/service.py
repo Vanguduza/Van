@@ -85,6 +85,21 @@ def build_adapter(account: Account, registry: AccountRegistry, *, equity_hint: D
         transport = DerivWebSocketTransport(app_id=account.server or "1089", token_provider=lambda: registry.credentials(account.alias).get("DERIV_API_TOKEN") or registry.credentials(account.alias).get("TOKEN", ""),
                                             endpoint=account.bridge_url or "wss://ws.derivws.com/websockets/v3")
         return DerivAdapter(venue=account.router_venue, account_alias=account.alias, transport=transport)
+    if account.broker == BrokerKind.CTRADER:
+        from vati.execution.ctrader import DEMO_HOST, LIVE_HOST, CtraderAdapter, CtraderTransport
+        secrets = registry.credentials(account.alias)
+        for k in ("CTRADER_CLIENT_ID", "CTRADER_CLIENT_SECRET", "CTRADER_ACCESS_TOKEN"):
+            if not secrets.get(k):
+                raise RuntimeError(f"{account.alias}: {k} missing from secrets")
+        host = LIVE_HOST if (account.server or "demo").lower() == "live" or not account.demo else DEMO_HOST
+        return CtraderAdapter(CtraderTransport(host=host), client_id=secrets["CTRADER_CLIENT_ID"], client_secret_provider=lambda: registry.credentials(account.alias)["CTRADER_CLIENT_SECRET"],
+                              access_token_provider=lambda: registry.credentials(account.alias)["CTRADER_ACCESS_TOKEN"], ctid_trader_account_id=int(account.login), account_alias=account.alias, venue=account.router_venue)
+    if account.broker == BrokerKind.MT5_EA:
+        from vati.execution.mt5_pull import Mt5PullAdapter, open_bridge_queue
+        secrets = registry.credentials(account.alias)
+        if not secrets.get("BRIDGE_SIGNING_KEY"):
+            raise RuntimeError(f"{account.alias}: BRIDGE_SIGNING_KEY missing from secrets")
+        return Mt5PullAdapter(open_bridge_queue(secrets.get("BRIDGE_QUEUE", "")), account_alias=account.alias, venue=account.router_venue)
     if account.broker == BrokerKind.ZSE_OWNER_TICKET:
         from vati.execution.zse_ticket import OwnerTicketAdapter
         return OwnerTicketAdapter(equity=equity_hint, csd_verified=False)

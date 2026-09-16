@@ -25,11 +25,13 @@ class AccountRegistryError(ValueError):
 
 
 class BrokerKind:
-    MT5 = "MT5"
+    MT5 = "MT5"                    # Windows bridge worker (push, mTLS)
+    MT5_EA = "MT5_EA"              # MQL5 pull-bridge Expert Advisor on a MetaQuotes/broker VPS (Windows-free)
     DERIV = "DERIV"
+    CTRADER = "CTRADER"            # cTrader Open API (Linux-native)
     PAPER = "PAPER"
     ZSE_OWNER_TICKET = "ZSE_OWNER_TICKET"
-    ALL = (MT5, DERIV, PAPER, ZSE_OWNER_TICKET)
+    ALL = (MT5, MT5_EA, DERIV, CTRADER, PAPER, ZSE_OWNER_TICKET)
 
 
 @dataclass(frozen=True)
@@ -67,7 +69,7 @@ class Account:
             raise AccountRegistryError(f"unknown broker kind {self.broker}")
         if self.mode not in MODES:
             raise AccountRegistryError(f"unknown mode {self.mode}")
-        if self.broker in (BrokerKind.MT5, BrokerKind.DERIV):
+        if self.broker in (BrokerKind.MT5, BrokerKind.MT5_EA, BrokerKind.DERIV, BrokerKind.CTRADER):
             self.credential_ref.validate()
         for k, v in asdict(self).items():
             if k == "credential_ref":
@@ -81,7 +83,7 @@ class Account:
 
     @property
     def router_venue(self) -> str:
-        return self.venue or {BrokerKind.MT5: "mt5", BrokerKind.DERIV: "deriv", BrokerKind.PAPER: "paper", BrokerKind.ZSE_OWNER_TICKET: "zse"}[self.broker]
+        return self.venue or {BrokerKind.MT5: "mt5", BrokerKind.MT5_EA: "mt5", BrokerKind.DERIV: "deriv", BrokerKind.CTRADER: "ctrader", BrokerKind.PAPER: "paper", BrokerKind.ZSE_OWNER_TICKET: "zse"}[self.broker]
 
     def public(self) -> dict[str, Any]:
         d = asdict(self)

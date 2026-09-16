@@ -19,12 +19,12 @@
 # =============================================================================
 set -euo pipefail
 
-DRY_RUN=0; WITH_NAUTILUS=0; SKIP_SUPABASE=0; SKIP_DOCKER=0
+DRY_RUN=0; WITH_NAUTILUS=0; SKIP_SUPABASE=0; SKIP_DOCKER=0; PUBLIC_HOST="${VAN_PUBLIC_HOST:-}"
 REPO_URL="${VAN_REPO_URL:-https://github.com/Vanguduza/Van.git}"
 BRANCH="${VAN_BRANCH:-claude/van-autonomous-trader-r81vyn}"
 for a in "$@"; do case "$a" in
   --dry-run) DRY_RUN=1;; --with-nautilus) WITH_NAUTILUS=1;; --skip-supabase) SKIP_SUPABASE=1;; --skip-docker) SKIP_DOCKER=1;;
-  --repo-url=*) REPO_URL="${a#*=}";; --branch=*) BRANCH="${a#*=}";;
+  --repo-url=*) REPO_URL="${a#*=}";; --branch=*) BRANCH="${a#*=}";; --public-host=*) PUBLIC_HOST="${a#*=}";;
   *) echo "unknown arg $a" >&2; exit 2;; esac; done
 
 BASE=/opt/van-trading; APP=$BASE/app; VENV=$BASE/venv; SECRETS=$BASE/secrets; CONFIG=$BASE/config; DATA=/var/lib/van-trading; LOGS=/var/log/van-trading
@@ -121,20 +121,39 @@ if (( ! SKIP_SUPABASE )); then
 fi
 
 # ---------------------------------------------------------------- systemd
-for u in vati-commander.service vati-vekl.service vati-session@.service; do run install -m 0644 "$HERE/systemd/$u" "/etc/systemd/system/$u"; done
+for u in vati-commander.service vati-vekl.service vati-session@.service vati-mt5-pull.service; do run install -m 0644 "$HERE/systemd/$u" "/etc/systemd/system/$u"; done
 run install -d -m 0755 /etc/polkit-1/rules.d
 run install -m 0644 "$HERE/systemd/vati-polkit-restart.rules" /etc/polkit-1/rules.d/49-vati-restart.rules
 run systemctl daemon-reload
 if (( ! SKIP_SUPABASE )); then run systemctl enable --now vati-supabase.service; fi
 run systemctl enable --now vati-vekl.service
 run systemctl enable --now vati-commander.service
+run systemctl enable --now vati-mt5-pull.service
 ok "systemd units installed and enabled (sessions: systemctl enable --now vati-session@<alias> after adding an account)"
+
+# ---------------------------------------------------------------- public TLS front for the MT5 pull bridge (optional)
+if [[ -n "$PUBLIC_HOST" ]]; then
+  if ! command -v caddy >/dev/null 2>&1; then
+    if (( DRY_RUN )); then plan "install caddy (apt repo dl.cloudsmith.io/public/caddy/stable)"; else
+      apt-get install -y -qq debian-keyring debian-archive-keyring apt-transport-https >/dev/null
+      curl -fsSL 'https://dl.cloudsmith.io/public/caddy/stable/gpg.key' | gpg --dearmor -o /etc/apt/keyrings/caddy-stable-archive-keyring.gpg
+      curl -fsSL 'https://dl.cloudsmith.io/public/caddy/stable/debian.deb.txt' > /etc/apt/sources.list.d/caddy-stable.list
+      apt-get update -qq && apt-get install -y -qq caddy >/dev/null
+    fi
+  fi
+  run install -m 0644 "$HERE/caddy/Caddyfile" /etc/caddy/Caddyfile
+  run bash -c "grep -q '^VAN_PUBLIC_HOST=' '$CONFIG/van-trading-core.env' && sed -i 's#^VAN_PUBLIC_HOST=.*#VAN_PUBLIC_HOST=$PUBLIC_HOST#' '$CONFIG/van-trading-core.env' || echo 'VAN_PUBLIC_HOST=$PUBLIC_HOST' >> '$CONFIG/van-trading-core.env'"
+  run bash -c "mkdir -p /etc/systemd/system/caddy.service.d && printf '[Service]\nEnvironment=VAN_PUBLIC_HOST=%s\n' '$PUBLIC_HOST' > /etc/systemd/system/caddy.service.d/van.conf"
+  run systemctl daemon-reload; run systemctl enable --now caddy
+  ok "caddy public TLS front for $PUBLIC_HOST → 127.0.0.1:9443 (Let's Encrypt; ports 80/443 must be open to the internet for ACME + the EA)"
+else skip "public host for the MT5 pull bridge (pass --public-host=<dns> when using VanBridgeEA)"; fi
 
 # ---------------------------------------------------------------- firewall
 if (( ! DRY_RUN )); then
   ufw --force reset >/dev/null; ufw default deny incoming >/dev/null; ufw default allow outgoing >/dev/null
   ufw allow from "$VCN_CIDR" to any port 22 proto tcp >/dev/null
   ufw allow from "$VCN_CIDR" to any port 9133 proto tcp >/dev/null
+  if [[ -n "$PUBLIC_HOST" ]]; then ufw allow 80/tcp >/dev/null; ufw allow 443/tcp >/dev/null; fi
   ufw --force enable >/dev/null
 else plan "ufw: deny incoming; allow 22/tcp and 9133/tcp from $VCN_CIDR; 9134 and 5432 stay loopback"; fi
 ok "firewall"
