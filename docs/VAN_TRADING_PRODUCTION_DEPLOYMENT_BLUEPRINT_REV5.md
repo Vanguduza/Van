@@ -9,7 +9,8 @@ bootstrap the dedicated `van-trading-core` VM (MT5, Python 3.12, a local Desktop
 local Supabase, a complete trading VEKL, future NautilusTrader, Market Brain, Risk Authority, NFP/Event Engine,
 Execution Router, Deriv adapter, MT5 bridge); add a visually pleasing trading dashboard to the Van Command Centre app
 with screens for trades, their charts and details.
-**Branch / builds:** `claude/van-autonomous-trader-r81vyn`, builds H (infrastructure), I (deployment), J (Command Center).
+**Branch / builds:** `claude/van-autonomous-trader-r81vyn`, builds H (infrastructure), I (deployment), J (Command Center), K (cTrader + MT5 pull bridge), L (in-app account onboarding).
+**Owner direction (2026-09-16, later):** no Windows machine is available; use routes 1 (cTrader Open API) and 4 (MQL5 pull-bridge EA); accounts are configured from the Android trading dashboard, including creating new Deriv/cTrader accounts, never through CLI commands.
 
 ---
 
@@ -38,7 +39,27 @@ bridge *client* on `van-trading-core`. `bootstrap.sh` records this instead of pr
 
 ---
 
-## Part B — Accounts: how the owner plugs in MT5 or Deriv
+## Part B — Accounts: plugged in from the Van app
+
+Accounts are added, linked, verified and removed on the phone (Trading Command Center → Accounts → **+ Add
+account**), never with CLI commands. Each action is gated by the owner biometric (A4), signed with the enrolled
+device secret over the exact argument bytes (`AccountOnboarding.sign` ≡ gateway `canonical_action`, cross-checked by
+a shared test vector), audited with secrets redacted, and forwarded by the gateway to the trading VM's commander
+(`account_upsert`, `account_credentials`, `account_verify`, `account_remove`, `deriv_verify_email`,
+`deriv_create_demo`, `deriv_oauth_link`, `ctrader_discover`, `ctrader_oauth_exchange`, `ctrader_link`,
+`mt5_ea_issue_key`). The VM writes only the non-secret registry and the alias' 0600 secrets file; credentials never
+persist on the phone or the gateway, and OAuth tokens in flight live in an encrypted 15-minute pending row.
+
+| Broker | In-app flows | Where the secret lives |
+|---|---|---|
+| Deriv | Sign in with Deriv (OAuth → pick account), paste an API token, **create a new demo account** (email code → password → residence, via `new_account_virtual`) | `DERIV_API_TOKEN` on the VM |
+| cTrader | Application credentials once; sign in with cTrader ID (OAuth → discovered ctid accounts → pick); or paste playground tokens | `CTRADER_*` on the VM |
+| MT5 via Expert Advisor | Register login/server; Van issues the EA signing key once; verify the EA is polling | `BRIDGE_SIGNING_KEY` on the VM; MT5 password only in the terminal |
+| Paper | Alias + currency | none |
+
+A real (non-demo) account links as READ ONLY (`OBSERVE`) until an owner-signed mandate raises its mode.
+
+### B.1 Registry model (unchanged underneath)
 
 `vati.accounts.AccountRegistry` (`/opt/van-trading/config/accounts.json`) holds **non-secret** records: alias, broker
 kind (`MT5 | DERIV | PAPER | ZSE_OWNER_TICKET`), mode, currency, server/login identifiers, bridge URL, demo flag,
@@ -68,7 +89,24 @@ append-only at the database, not only by convention.
 
 ---
 
-## Part D — Live transports and the MT5 worker
+## Part D — Live transports: cTrader (route 1), MT5 pull bridge (route 4), Deriv, Windows worker
+
+- **cTrader Open API** (`vati.execution.ctrader`): the official `.proto` files are vendored with provenance and parsed
+  at import into a schema-driven codec (no protoc); framed TLS to `demo|live.ctraderapi.com:5035` with clientMsgId
+  correlation, heartbeats and an event queue; app + account auth; symbols with lot-size volume conversion; MARKET
+  orders carry `relativeStopLoss` in the same request (absolute SL is not accepted on MARKET by the API), LIMIT orders
+  carry absolute SL; tighten-only SL amend; close; spots and trendbars. Tested against a fake cTrader speaking the same
+  codec. Linux-native: nothing to host beyond the VM.
+- **MT5 pull bridge** (`vati.execution.mt5_pull` + `deploy/van-trading-core/mql5/VanBridgeEA.mq5`): the EA runs in any
+  MT5 terminal (MetaQuotes VPS after migration, broker VPS, desktop) and polls `https://<public-host>/ea/v1/<alias>/poll`
+  every second with HMAC-SHA256 (implemented in MQL5) over timestamp, nonce, alias and body hash, reporting account and
+  positions and executing pipe-delimited commands (`ORDER_SEND` with SL required, `MODIFY_SL` tighten-only, `CLOSE`).
+  The session-side adapter fails closed when the EA snapshot is older than 30 s and times out as UNKNOWN. Caddy fronts
+  the pull service with a Let's Encrypt certificate because `WebRequest` trusts only the system store.
+  Honest constraint: compiling/attaching the EA needs a terminal once (MetaEditor); the mobile apps cannot.
+- **Deriv** and the **Windows worker** as before (Part D of the previous text follows).
+
+### D.0 Previous text
 
 - **Deriv**: one socket, `req_id` correlation, out-of-order frames tolerated, API errors returned as data so the
   adapter emits a REJECTED receipt (never an exception on the order path), reconnect on failure, `DerivMarketFeed`
@@ -151,7 +189,21 @@ compiled in this container (no Android SDK, Google Maven blocked) and are the fi
 
 ---
 
-## Part J — Evidence (2026-09-16)
+## Part J — Evidence (2026-09-16, updated after builds K–L)
+
+```text
+$ python3 -m pytest -q                       354 passed (PostgreSQL ledger tests on a real PostgreSQL 16)
+$ node --test trading/vekl/test/server.test.mjs          3 passed
+$ node --test trading/commander/test/mcp_stdio.test.mjs  1 passed
+$ kotlinc + JUnit: AccountOnboardingTest, TradeBookTest, TradingModelsTest, ChartGeometryTest   16 passed
+   (AccountOnboardingTest checks the device signature against a vector computed by the gateway's own code)
+cTrader: codec against hand-verified wire bytes; adapter, OAuth, discovery against a fake cTrader over the same codec
+MT5 pull: adapter ↔ shared queue ↔ signed pull server ↔ simulated Expert Advisor (replay, skew, key, alias refusals)
+Onboarding: commander commands with injected Deriv/cTrader endpoints; gateway route with signature tampering, stale
+actions, Deriv demo creation, OAuth link (tokens encrypted at rest, consumed after link), MT5-EA key issue
+```
+
+### J.0 Earlier evidence
 
 ```text
 $ python3 -m pytest -q                       340 passed

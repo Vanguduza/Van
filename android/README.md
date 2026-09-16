@@ -101,3 +101,5 @@ models (`TradingModels.kt`), chart geometry (`ChartGeometry.kt`) and the trade-b
 (`TradingModelsTest`, `ChartGeometryTest`, `TradeBookTest`); Compose screens live under `trading/ui`. Entry points:
 the Command Centre button and the overlay Trades panel. The app has no order path: nothing on these screens can
 place, size, modify or cancel a trade.
+
+Accounts are onboarded in-app (`trading/ui/AccountOnboardingScreen.kt`, logic in `trading/AccountOnboarding.kt`): Deriv sign-in / token / new demo account, cTrader ID sign-in or tokens, MT5 via Expert Advisor (signing key issued once), Paper. Each change is biometric-gated (A4) and device-signed; the signature scheme is verified against a gateway-computed vector in `AccountOnboardingTest`.

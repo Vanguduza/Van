@@ -21,7 +21,9 @@ dial-hermes-control (10.0.0.184)                 van-trading-core (10.0.1.233)  
 | Supabase (PostgreSQL 17, studio, auth, rest, realtime, storage) | `vati-supabase.service` | loopback only | donor compose pinned in `supabase/DONOR_PROVENANCE.json`; secrets generated, never the demo keys |
 | Ledger schema | `supabase/init/01_vati_ledger.sql.tpl` | — | append-only `vati.events`; role `vati` cannot UPDATE/DELETE events |
 | Bridge PKI | `pki/make-bridge-pki.sh` | — | private CA; commander TLS cert; MT5 worker server cert; vati-core client cert |
-| MT5 | `windows/mt5_worker` | 9443/tcp on the Windows host | **MT5 cannot run on ARM64 Linux**; this VM holds the bridge client only |
+| MT5 (no Windows) | `vati-mt5-pull.service` + `mql5/VanBridgeEA.mq5` | 127.0.0.1:9443 behind Caddy :443 (`--public-host`) | pull bridge: the EA on a MetaQuotes/broker VPS polls signed commands |
+| cTrader | in-process adapter | outbound 5035/tcp | Linux-native Open API, no terminal |
+| MT5 (Windows worker, optional) | `windows/mt5_worker` | 9443/tcp on a Windows host | only if a Windows host exists; not required |
 | NautilusTrader | `--with-nautilus` | — | `nautilus_trader==1.231.0` (aarch64 wheel, Python 3.12) installed only at the Phase 3 donor gate |
 
 ## Run
@@ -40,7 +42,11 @@ scp van-trading-core:/opt/van-trading/secrets/pki/ca.crt ~/.van/van-trading-brid
 bash deploy/van-trading-core/hermes/register-commander-mcp.sh --dry-run && bash deploy/van-trading-core/hermes/register-commander-mcp.sh
 ```
 
-## Plugging in an account (when the owner is ready)
+## Plugging in an account
+
+From the Van app (Accounts → + Add account). The CLI below remains for recovery only.
+
+### Recovery CLI
 
 ```bash
 # secrets never enter the registry: one 0600 file per alias

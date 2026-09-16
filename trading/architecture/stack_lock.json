@@ -1,6 +1,6 @@
 {
   "$schema_note": "VATI Industry Integration Architecture stack lock (Rev 2.1 Part E). One canonical choice per layer; overlaps are rejected by trading/tests/test_stack_lock.py. Versions are observations at lock time and are NOT pins: exact pins happen at adoption through the donor gate with Context7/official release facts.",
-  "revision": "5.0.0",
+  "revision": "5.1.0",
   "locked_at": "2026-09-16",
   "observation_sources": {
     "pypi_json": "https://pypi.org/pypi/<package>/json read 2026-09-16",
@@ -95,7 +95,7 @@
         "orders carry sealed decision hash",
         "protective stop atomic or flatten"
       ],
-      "build_status": "bridge client + mTLS HTTPS transport + Windows worker (mTLS, HMAC, SL-only, tighten-only) built and tested end to end; live terminal pending on the owner's Windows host"
+      "build_status": "two paths built: (a) MQL5 pull-bridge EA + signed pull service (Windows-free; EA needs a terminal once to attach), (b) Windows worker over mTLS; both tested end to end with simulators"
     },
     {
       "layer": "deriv_execution",
@@ -113,7 +113,7 @@
         "FULL_STAKE loss model",
         "synthetic isolation"
       ],
-      "build_status": "adapter + WebSocket transport (req_id correlation, token at authorize only) + history feed built and tested; live account pending owner token"
+      "build_status": "adapter + WebSocket transport (req_id correlation, token at authorize only) + history feed built and tested; live account pending owner token; in-app onboarding incl. demo-account creation"
     },
     {
       "layer": "futures_options_reference_data",
@@ -423,6 +423,15 @@
         "ILLIQUID_EQUITY loss model; software stops with liquidity haircut"
       ],
       "build_status": "OWNER_TICKET adapter built"
+    },
+    {
+      "layer": "ctrader_execution",
+      "canonical": "cTrader Open API (spotware/openapi-proto-messages, vendored with provenance)",
+      "licence_class": "MIT (proto) / broker terms",
+      "latency_tier": "T1",
+      "adoption_phase": 5,
+      "build_status": "adapter + schema codec + TLS transport + OAuth + discovery + trendbars built and tested against a fake cTrader; live account pending owner link in the app",
+      "one_tool_per_layer": true
     }
   ],
   "single_order_sender": "vati-execution-router (Nautilus ExecutionEngine → VAN RiskGate → venue ExecutionClient)",
