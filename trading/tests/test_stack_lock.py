@@ -26,12 +26,12 @@ def test_one_canonical_choice_per_layer():
 
 def test_only_kernel_and_venue_adapters_send_live_orders():
     senders = {l["layer"] for l in LAYERS if l["executes_live_orders"]}
-    assert senders == {"trading_kernel", "mt5_execution", "deriv_execution"}
+    assert senders == {"trading_kernel", "mt5_execution", "deriv_execution", "ctrader_execution"}
 
 
 def test_t0_path_contains_no_network_brokers_workflows_or_llms():
     t0 = {l["layer"] for l in LAYERS if l["latency_tier"] == "T0"}
-    assert t0 == {"trading_kernel", "mt5_execution", "deriv_execution"}
+    assert t0 == {"trading_kernel", "mt5_execution", "deriv_execution", "ctrader_execution"}
     for l in LAYERS:
         if l["layer"] in ("event_backbone", "durable_workflows", "google_research_mesh", "research_data_facade"):
             assert l["latency_tier"] != "T0"

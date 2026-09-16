@@ -14,7 +14,7 @@ Hermes profile **`van`** is the sole agent runtime. Credentials are brokered thr
 
 | Server | Purpose | Credential model |
 |---|---|---|
-| `van_trading_commander` | Hermes subordinate on the trading VM: status, ledger, services, bounded log tail, bounded backtest, trading-VEKL resolve, owner-signed halt, doctor, accounts | HMAC-signed requests with a 0600 token file; no shell, no file writes, no order path |
+| `van_trading_commander` | Hermes subordinate on the trading VM: status, ledger, services, bounded log tail, bounded backtest, trading-VEKL resolve, owner-signed halt, doctor, accounts | HMAC-signed requests with a 0600 token file; no shell, no file writes, no order path; account-credential commands are hidden from MCP and refused for agent requesters |
 
 The commander reaches the dedicated trading VEKL (`trading/vekl`, loopback :9134 on the VM) and the VATI ledger. It cannot place, size, modify or cancel an order; halting is the only trading effect and it needs an owner signature reference (A4). Registration is spliced into `~/.hermes/config.yaml` by `deploy/van-trading-core/hermes/register-commander-mcp.sh`.
 

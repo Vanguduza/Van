@@ -8,7 +8,8 @@ from pathlib import Path
 import pytest
 from fastapi.testclient import TestClient
 
-from commander.app import COMMANDS, CommanderSettings, create_app, redact
+from commander.accounts import ACCOUNT_COMMANDS
+from commander.app import AGENT_HIDDEN_COMMANDS, COMMANDS, CommanderSettings, create_app, redact
 from commander.auth import HDR_NONCE, HDR_SIG, HDR_TS, NonceCache, sign_headers, verify_request
 from vati.core import EventKind, Ledger, make_event
 
@@ -135,3 +136,24 @@ def test_session_service_observes_commander_halt(tmp_path, eurusd):
     clock["now"] = bars[102].end_ms + 1
     assert svc.step_once() == "NEW_TRADES_BLOCKED" and not svc.runner.permit_new_orders
     hb = json.loads((tmp_path / "hb.json").read_text()); assert "OWNER_HALT" in hb["kill_switch"]
+
+
+def test_credential_commands_are_hidden_from_agents_but_open_to_the_gateway(env):
+    client, _, _ = env
+    r = client.get("/v1/tools", headers=sign_headers(TOKEN, "GET", "/v1/tools", b""))
+    assert r.status_code == 200
+    listed = {t["name"] for t in r.json()["tools"]}
+    assert listed.isdisjoint(ACCOUNT_COMMANDS) and "status" in listed and "accounts" in listed
+    assert AGENT_HIDDEN_COMMANDS == set(ACCOUNT_COMMANDS)
+    args = {"alias": "deriv_demo", "broker": "DERIV", "server": "1089", "label": "Deriv demo"}
+    for who in ("hermes", "Hermes", "sol", "model"):
+        body = json.dumps({"args": args, "requested_by": who}).encode()
+        r = client.post("/v1/cmd/account_upsert", content=body, headers={**sign_headers(TOKEN, "POST", "/v1/cmd/account_upsert", body), "content-type": "application/json"})
+        assert r.status_code == 403, who
+    body = json.dumps({"args": args, "requested_by": "van-gateway"}).encode()
+    r = client.post("/v1/cmd/account_upsert", content=body, headers={**sign_headers(TOKEN, "POST", "/v1/cmd/account_upsert", body), "content-type": "application/json"})
+    assert r.status_code == 200
+    # a non-credential command stays open to Hermes
+    body = json.dumps({"args": {}, "requested_by": "hermes"}).encode()
+    r = client.post("/v1/cmd/accounts", content=body, headers={**sign_headers(TOKEN, "POST", "/v1/cmd/accounts", body), "content-type": "application/json"})
+    assert r.status_code == 200 and r.json()["result"]["accounts"][0]["alias"] == "deriv_demo"

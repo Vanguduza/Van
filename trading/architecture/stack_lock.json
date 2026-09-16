@@ -426,12 +426,23 @@
     },
     {
       "layer": "ctrader_execution",
-      "canonical": "cTrader Open API (spotware/openapi-proto-messages, vendored with provenance)",
-      "licence_class": "MIT (proto) / broker terms",
-      "latency_tier": "T1",
+      "canonical": "VAN cTrader adapter (schema-driven proto2 codec over framed TLS; vendored spotware/openapi-proto-messages with provenance)",
+      "licence_class": "PERMISSIVE",
+      "latency_tier": "T0",
       "adoption_phase": 5,
       "build_status": "adapter + schema codec + TLS transport + OAuth + discovery + trendbars built and tested against a fake cTrader; live account pending owner link in the app",
-      "one_tool_per_layer": true
+      "package": "spotware/openapi-proto-messages (vendored .proto, no generated code)",
+      "role": "cTrader venue adapter — route 1 replacement for MT5 on brokers that offer cTrader",
+      "executes_live_orders": true,
+      "licence": "MIT",
+      "observed_version": null,
+      "pin_status": "PIN_TO_DIAL_COMMIT_AT_ADOPTION",
+      "constraints": [
+        "orders carry sealed decision hash",
+        "protective stop set at order time (relativeStopLoss) or flatten",
+        "OAuth tokens live in the VM secrets dir only",
+        "one live account per alias"
+      ]
     }
   ],
   "single_order_sender": "vati-execution-router (Nautilus ExecutionEngine → VAN RiskGate → venue ExecutionClient)",

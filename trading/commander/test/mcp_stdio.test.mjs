@@ -26,9 +26,10 @@ st = CommanderSettings(token='${TOKEN}', ledger='${tmp}/l.sqlite', heartbeat_dir
 uvicorn.run(create_app(st), host='127.0.0.1', port=${port}, log_level='warning')
 `], { env: { ...process.env, PYTHONPATH: TRADING }, stdio: ['ignore', 'ignore', 'pipe'] });
   let pyErr = ''; py.stderr.on('data', (d) => { pyErr += d; });
+  let shim;
   try {
     await waitHealth(`http://127.0.0.1:${port}`).catch((e) => { throw new Error(e.message + ' ' + pyErr.slice(-500)); });
-    const shim = spawn(process.execPath, [path.join(here, '../mcp_stdio.mjs')], { env: { ...process.env, VAN_COMMANDER_URL: `http://127.0.0.1:${port}`, VAN_COMMANDER_TOKEN: TOKEN }, stdio: ['pipe', 'pipe', 'inherit'] });
+    shim = spawn(process.execPath, [path.join(here, '../mcp_stdio.mjs')], { env: { ...process.env, VAN_COMMANDER_URL: `http://127.0.0.1:${port}`, VAN_COMMANDER_TOKEN: TOKEN }, stdio: ['pipe', 'pipe', 'inherit'] });
     const lines = [];
     let buf = '';
     shim.stdout.on('data', (d) => { buf += d; let i; while ((i = buf.indexOf('\n')) >= 0) { lines.push(JSON.parse(buf.slice(0, i))); buf = buf.slice(i + 1); } });
@@ -51,8 +52,11 @@ uvicorn.run(create_app(st), host='127.0.0.1', port=${port}, log_level='warning')
     assert.equal(halt.result.isError, true);
     const unknown = await ask({ jsonrpc: '2.0', id: 6, method: 'resources/list' });
     assert.equal(unknown.error.code, -32601);
-    shim.kill();
+    const acct = await ask({ jsonrpc: '2.0', id: 7, method: 'tools/call', params: { name: 'account_credentials', arguments: { alias: 'x', secrets: { token: 'never' } } } });
+    assert.equal(acct.result.isError, true);
+    assert.match(acct.result.content[0].text, /403/);
   } finally {
+    if (shim) shim.kill();
     py.kill('SIGTERM');
   }
 });

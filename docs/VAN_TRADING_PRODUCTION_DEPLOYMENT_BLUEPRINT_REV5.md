@@ -167,6 +167,13 @@ and only appends a ledger event. `mcp_stdio.mjs` is the MCP shim Hermes spawns (
 `deploy/van-trading-core/hermes/register-commander-mcp.sh` splices that block into the live Hermes config without
 touching another byte.
 
+**Agent boundary for credentials.** The eleven account-onboarding commands (`account_upsert … mt5_ea_issue_key`)
+exist on the same commander but are reachable only from the gateway's device-signed onboarding path. They are
+omitted from `/v1/tools` (so Hermes never sees them as MCP tools; the shim refuses names it has not listed) and
+the command route returns 403 when the requester is an agent (`hermes`, `sol`, `sonnet`, `codex`, `model`…), with
+the refusal audited. A broker credential therefore has no route into a model prompt or tool call
+(`test_credential_commands_are_hidden_from_agents_but_open_to_the_gateway`, and the stdio test's 403 case).
+
 ---
 
 ## Part I — Trading Command Center (Android)
@@ -189,12 +196,14 @@ compiled in this container (no Android SDK, Google Maven blocked) and are the fi
 
 ---
 
-## Part J — Evidence (2026-09-16, updated after builds K–L)
+## Part J — Evidence (2026-09-16, updated after builds K–L and the stack-lock/agent-boundary fix)
 
 ```text
-$ python3 -m pytest -q                       354 passed (PostgreSQL ledger tests on a real PostgreSQL 16)
+$ python3 -m pytest -q                       355 passed (PostgreSQL ledger tests on a real PostgreSQL 16)
 $ node --test trading/vekl/test/server.test.mjs          3 passed
-$ node --test trading/commander/test/mcp_stdio.test.mjs  1 passed
+$ node --test trading/commander/test/mcp_stdio.test.mjs  1 passed  (tool list = 10; account_credentials → 403)
+$ python3 -m pytest trading/tests/test_stack_lock.py     7 passed  (ctrader_execution added to the sender/T0 sets;
+                                                          an extra sender on event_backbone was induced and refused)
 $ kotlinc + JUnit: AccountOnboardingTest, TradeBookTest, TradingModelsTest, ChartGeometryTest   16 passed
    (AccountOnboardingTest checks the device signature against a vector computed by the gateway's own code)
 cTrader: codec against hand-verified wire bytes; adapter, OAuth, discovery against a fake cTrader over the same codec
@@ -218,7 +227,12 @@ PostgreSQL ledger tests ran against a real PostgreSQL 16 in the container (VATI_
 ```
 
 Induced failures kept: nonce replay, wrong signing key, wrong CA, missing client certificate, widened stop, order
-without SL, mandate/account mismatch, stale feed, tampered lake slice, tampered ledger row, modified vendored resolver.
+without SL, mandate/account mismatch, stale feed, tampered lake slice, tampered ledger row, modified vendored resolver,
+rogue order sender in the stack lock, agent requester on a credential command (boundary disabled → test fails).
+
+Correction on record: the build-L evidence line "Node 4 passed" was stale. After build L added the account commands
+the stdio test's expected tool list no longer matched and the test hung on failure (the shim child was only killed
+on the success path). Both are fixed here; the tool list Hermes sees is the original ten.
 
 ---
 

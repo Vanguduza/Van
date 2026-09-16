@@ -26,6 +26,11 @@ REDACT = re.compile(r"(?i)(password|passwd|token|api[_-]?key|secret|bearer|signi
 UNIT_RE = re.compile(r"^[A-Za-z0-9@._-]+$")
 DEFAULT_UNITS = ("vati-session@*.service", "vati-commander.service", "vati-vekl.service", "vati-supabase.service", "vati-mt5-pull.service", "caddy.service")
 COMMANDS = ("status", "ledger_status", "services", "restart_service", "tail_log", "run_backtest", "vekl_resolve", "halt", "doctor", "accounts") + ACCOUNT_COMMANDS
+# Credential-bearing commands are reachable only from the gateway's device-signed onboarding path.
+# They are never listed as MCP tools and are refused when an agent (Hermes) is the requester,
+# so broker credentials cannot enter a model prompt or tool call.
+AGENT_HIDDEN_COMMANDS = frozenset(ACCOUNT_COMMANDS)
+AGENT_REQUESTERS = frozenset({"hermes", "agent", "model", "claude", "codex", "sol", "sonnet"})
 Runner = Callable[[list[str], int], tuple[int, str, str]]
 
 
@@ -272,7 +277,8 @@ def create_app(settings: Optional[CommanderSettings] = None) -> FastAPI:
         ok, why = verify_request(st.load_token(), request.headers, "GET", "/v1/tools", b"", nonces=nonces)
         if not ok:
             raise HTTPException(401, why)
-        return {"tools": [{"name": n, "description": s["description"], "inputSchema": {"type": "object", "properties": s["properties"], "required": s.get("required", [])}} for n, s in TOOL_SCHEMAS.items()]}
+        return {"tools": [{"name": n, "description": s["description"], "inputSchema": {"type": "object", "properties": s["properties"], "required": s.get("required", [])}}
+                          for n, s in TOOL_SCHEMAS.items() if n not in AGENT_HIDDEN_COMMANDS]}
 
     @app.post("/v1/cmd/{name}")
     async def command(name: str, request: FastRequest):
@@ -286,6 +292,9 @@ def create_app(settings: Optional[CommanderSettings] = None) -> FastAPI:
             parsed = CmdBody.model_validate_json(body or b"{}")
         except Exception as exc:  # noqa: BLE001
             raise HTTPException(422, str(exc)[:200])
+        if name in AGENT_HIDDEN_COMMANDS and parsed.requested_by.lower() in AGENT_REQUESTERS:
+            audit(name, parsed.requested_by, parsed.args, "refused:agent_requester")
+            raise HTTPException(403, "credential-bearing account commands are not available to agents; use the app onboarding path")
         try:
             result = handlers[name](parsed.args)
         except HTTPException as exc:
