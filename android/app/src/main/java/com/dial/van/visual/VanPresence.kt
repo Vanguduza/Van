@@ -4,14 +4,11 @@ import com.dial.van.degraded.DegradedMode
 import com.dial.van.degraded.SubsystemStatus
 
 /**
- * Translates subsystem truth and live interaction state into how Van *appears*.
+ * Resolves subsystem truth and the orthogonal live presence frame into UI chrome and embodiment.
  *
- * The overlay must never look healthy while a subsystem is broken, so this mapping fails
- * closed: any uplink loss presents OFFLINE, any other broken subsystem presents DEGRADED.
- * When subsystem truth is nominal, an explicitly supplied live visual state may surface
- * listening, speaking, thinking, working and other activity states continuously.
- *
- * This mapper stays pure Kotlin because the JVM visual-preview module compiles the same source.
+ * Health remains fail-closed, but DEGRADED is no longer allowed to erase a locally truthful
+ * LISTENING/THINKING/SPEAKING pose. The character can therefore interact while Zone C and chrome
+ * continue to show an unverified Google mesh. Uplink loss remains stronger and forces OFFLINE.
  */
 object VanPresence {
 
@@ -20,14 +17,15 @@ object VanPresence {
     private const val GOOGLE = "google"
 
     data class Cue(
+        /** State for chrome/status copy; may differ from the character pose. */
         val durableState: VanDurableState,
+        val health: VanHealthState,
         val headline: String,
         val detail: String,
         val brokenLabels: List<String>,
         val urgency: Float,
     ) {
-        val degraded: Boolean
-            get() = durableState == VanDurableState.OFFLINE || durableState == VanDurableState.DEGRADED
+        val degraded: Boolean get() = health != VanHealthState.NOMINAL
     }
 
     fun cue(
@@ -35,73 +33,117 @@ object VanPresence {
         listening: Boolean = false,
         speaking: Boolean = false,
         awaitingOwner: Boolean = false,
-        live: VanVisualState = VanVisualState(),
+        live: VanPresenceFrame = VanLiveVisualState.frame,
     ): Cue {
         val broken = mode.subsystems.filter { it.status == SubsystemStatus.BROKEN }
         val brokenLabels = broken.map { it.label }
         val uplinkDown = broken.any { it.id == HERMES || it.id == GATEWAY }
+        val health = when {
+            uplinkDown -> VanHealthState.OFFLINE
+            broken.isNotEmpty() -> VanHealthState.DEGRADED
+            else -> VanHealthState.NOMINAL
+        }
 
-        return when {
-            uplinkDown -> Cue(
+        if (uplinkDown) {
+            val lead = broken.first { it.id == HERMES || it.id == GATEWAY }
+            return Cue(
                 durableState = VanDurableState.OFFLINE,
+                health = VanHealthState.OFFLINE,
                 headline = VanStatusPalette.forState(VanDurableState.OFFLINE).label,
-                detail = broken.first { it.id == HERMES || it.id == GATEWAY }.detail,
+                detail = lead.detail,
                 brokenLabels = brokenLabels,
                 urgency = 0.25f,
             )
+        }
 
-            broken.isNotEmpty() -> {
-                val lead = broken.firstOrNull { it.id == GOOGLE } ?: broken.first()
-                Cue(
-                    durableState = VanDurableState.DEGRADED,
-                    headline = VanStatusPalette.forState(VanDurableState.DEGRADED).label,
-                    detail = "${lead.label}: ${lead.detail}",
-                    brokenLabels = brokenLabels,
-                    urgency = 0.30f,
-                )
-            }
-
-            awaitingOwner -> Cue(
+        if (awaitingOwner || live.authority == VanAuthorityState.WAITING_FOR_OWNER) {
+            return Cue(
                 durableState = VanDurableState.WAITING_FOR_OWNER,
+                health = health,
                 headline = VanStatusPalette.forState(VanDurableState.WAITING_FOR_OWNER).label,
                 detail = "Waiting on your decision",
-                brokenLabels = emptyList(),
+                brokenLabels = brokenLabels,
                 urgency = 0.45f,
             )
-
-            listening -> nominal(VanDurableState.LISTENING, "Listening for you")
-            speaking -> nominal(VanDurableState.SPEAKING, "Speaking")
-            live.durableState != VanDurableState.IDLE -> nominal(
-                live.durableState,
-                VanCaptions.forState(live.durableState),
-            )
-            else -> nominal(VanDurableState.IDLE, mode.reason)
         }
+
+        // Non-uplink breakage remains visible in chrome/Zone C, while visualState() preserves the
+        // local activity pose. This is the default Google-unverified startup case.
+        if (broken.isNotEmpty()) {
+            val lead = broken.firstOrNull { it.id == GOOGLE } ?: broken.first()
+            return Cue(
+                durableState = VanDurableState.DEGRADED,
+                health = VanHealthState.DEGRADED,
+                headline = VanStatusPalette.forState(VanDurableState.DEGRADED).label,
+                detail = "${lead.label}: ${lead.detail}",
+                brokenLabels = brokenLabels,
+                urgency = 0.30f,
+            )
+        }
+
+        val state = when {
+            listening -> VanDurableState.LISTENING
+            speaking -> VanDurableState.SPEAKING
+            live.semanticState != VanDurableState.IDLE -> live.semanticState
+            else -> VanDurableState.IDLE
+        }
+        return nominal(state, if (state == VanDurableState.IDLE) mode.reason else VanCaptions.forState(state))
     }
 
     /**
-     * Merges truth with a live presence state supplied by the Android runtime.
-     * OFFLINE/DEGRADED and explicit owner-decision cues always override optimistic live state.
+     * Merges fail-closed health with local activity without leaking contradictory flags.
      */
     fun visualState(
         cue: Cue,
-        base: VanVisualState = VanVisualState(),
+        base: VanPresenceFrame = VanLiveVisualState.frame,
     ): VanVisualState {
-        val resolved = when {
-            cue.degraded -> cue.durableState
-            cue.durableState != VanDurableState.IDLE -> cue.durableState
-            else -> base.durableState
+        var frame = base.copy(health = cue.health)
+
+        frame = when (cue.durableState) {
+            VanDurableState.WAITING_FOR_OWNER ->
+                frame.copy(authority = VanAuthorityState.WAITING_FOR_OWNER, urgency = maxOf(frame.urgency, cue.urgency))
+            VanDurableState.WARNING ->
+                frame.copy(authority = VanAuthorityState.WARNING, urgency = maxOf(frame.urgency, cue.urgency))
+            VanDurableState.ERROR ->
+                frame.copy(authority = VanAuthorityState.ERROR, urgency = maxOf(frame.urgency, cue.urgency))
+            VanDurableState.URGENT ->
+                frame.copy(authority = VanAuthorityState.URGENT, urgency = maxOf(frame.urgency, cue.urgency))
+            else -> frame.copy(urgency = maxOf(frame.urgency, cue.urgency))
         }
-        return base.copy(
-            durableState = resolved,
-            listening = resolved == VanDurableState.LISTENING ||
-                (base.listening && resolved != VanDurableState.SPEAKING),
-            speaking = resolved == VanDurableState.SPEAKING || base.speaking,
-            urgency = maxOf(base.urgency, cue.urgency),
-        )
+
+        // OFFLINE is an execution-path truth and forces the pose; DEGRADED only owns the semantic
+        // field/chrome, so local LISTENING/SPEAKING/THINKING remains visible.
+        if (cue.health == VanHealthState.OFFLINE) {
+            frame = frame.copy(
+                activity = VanDurableState.OFFLINE,
+                speech = VanSpeechState.QUIET,
+                turn = VanTurnPhase.IDLE,
+                mouthOpen = 0f,
+                viseme = 0,
+            )
+        }
+        return frame.toVisualState()
     }
 
-    /** One-line mesh cue for the overlay chrome; kept short enough to read at overlay width. */
+    /** Compatibility overload for legacy tests/callers that only have a flattened visual state. */
+    fun visualState(cue: Cue, base: VanVisualState): VanVisualState {
+        val frame = VanPresenceFrame(
+            activity = base.durableState,
+            speech = when {
+                base.speaking -> VanSpeechState.SPEAKING
+                base.listening -> VanSpeechState.LISTENING
+                else -> VanSpeechState.QUIET
+            },
+            attentionX = base.attentionX,
+            attentionY = base.attentionY,
+            mouthOpen = base.mouthOpen,
+            viseme = base.viseme,
+            urgency = base.urgency,
+            actionCode = base.actionCode,
+        )
+        return visualState(cue, frame)
+    }
+
     fun meshCue(mode: DegradedMode): String {
         val google = mode.subsystems.firstOrNull { it.id == GOOGLE }
             ?: return "Google mesh: unknown"
@@ -114,6 +156,7 @@ object VanPresence {
 
     private fun nominal(state: VanDurableState, detail: String) = Cue(
         durableState = state,
+        health = VanHealthState.NOMINAL,
         headline = VanStatusPalette.forState(state).label,
         detail = detail,
         brokenLabels = emptyList(),
