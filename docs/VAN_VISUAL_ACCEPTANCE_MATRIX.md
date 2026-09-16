@@ -29,6 +29,7 @@ Canonical authority: `visual-authority/van-visual-authority-v2.yaml` revision 2.
 | State topology | Waiting/warning/error/urgent/success differ geometrically, not only by colour | authored envelope segments + shared geometry engine |
 | Continuous field | Wind/waves/curl/particles are procedural and phase-seamless | `VanWindFieldMotion` |
 | Renderer parity | Compose runtime and Java2D evidence consume the same Zone B/C geometry | `VanFieldGeometryEngine` |
+| Orthogonal renderer parity | Compose and Java2D can render activity Zone A/B with independent semantic Zone C | `semanticSpec` in both render paths |
 | Reduced motion | Autonomous field geometry freezes while state remains readable | `VanEffectBudget.REDUCED_MOTION` |
 | Power / thermal | Effects reduce before semantic truth is removed | `VanEffectBudget` |
 
@@ -37,9 +38,10 @@ Canonical authority: `visual-authority/van-visual-authority-v2.yaml` revision 2.
 | Check | Pass criteria | Enforced by |
 |---|---|---|
 | Orthogonal truth | Activity, health, authority, speech, attention and owner-turn phase do not overwrite one another | `VanPresenceFrame` |
-| Google-unverified + listening | Character can visibly LISTEN while chrome/Zone C remain DEGRADED | `VanPresence` + `VanPresenceTest` |
-| Uplink loss | Gateway/Hermes loss forces OFFLINE | `VanPresence` |
+| Google-unverified + listening | Character and primary compact/expanded copy remain LISTENING while Zone C + secondary health line remain DEGRADED | `VanPresence` + `VanOverlayChrome` + tests |
+| Uplink loss | Gateway/Hermes loss forces OFFLINE pose, semantic field and primary chrome | `VanPresence` + `VanOverlayChrome` |
 | Thinking latch | Microphone end cannot erase THINKING before dispatch/result | `VanPresenceReducer` |
+| Speech articulation | TTS temporarily shows SPEAKING without overwriting underlying THINKING/DELEGATING/WORKING activity | `VanPresenceReducer` + tests |
 | Critical authority | TTS frames cannot replace WAITING_FOR_OWNER / ERROR / URGENT | `VanPresenceReducer` |
 | Cross-surface coherence | Floating overlay and Command Centre consume the same live presence and subsystem-health sources | `VanLiveVisualState` + `DegradedModeStore.state` |
 | Accepted ≠ success | Gateway acceptance may show hand-off/working but never SUCCESS | `VanGatewayClient` |
@@ -50,6 +52,8 @@ Canonical authority: `visual-authority/van-visual-authority-v2.yaml` revision 2.
 |---|---|---|
 | Character never glassy | Glass applies to the shell only; Van stays opaque | `VanGlassStyle` |
 | Van breaks the glass edge | Character is not trapped in a rectangular card | overlay composition |
+| Activity-first chrome | Compact/expanded headline, caption, accent and glass state follow active pose unless OFFLINE/critical authority takes over | `VanOverlayChrome` |
+| Health remains visible | Non-uplink degradation appears as secondary health copy and Zone C, not by relabelling active Van as broken | `VanPresence.healthCue` + `semanticState` |
 | Aura layering | Field sits behind Van and in front of condensed glass, never over his face | draw order |
 | Glass opacity envelope | Compact glass remains restrained; Command Centre panels are more opaque | `VanGlassTokens.forState(panel = …)` |
 | Approval legibility | Critical controls become solid enough to prevent mis-taps | `requiresSolidControls` |
@@ -68,7 +72,16 @@ Canonical authority: `visual-authority/van-visual-authority-v2.yaml` revision 2.
 :visual-preview:renderVanPreviews
 ```
 
-Preview sheets are generated from the same renderer-neutral Zone B/C geometry used by Compose and uploaded as the `van-visual-evidence` workflow artifact. The evidence set includes the floating overlay, durable-state matrices, reduced/low/static budgets, command centre, glass tokens and aura topology sheets.
+Preview sheets are generated from the same renderer-neutral Zone B/C geometry used by Compose and uploaded as the `van-visual-evidence` workflow artifact. The canonical named evidence directory is `artifacts/release/preview/rev23/`; `rev21/` is no longer produced by the Rev 2.3 generator.
+
+The evidence set includes the floating overlay, durable-state matrices, reduced/low/static budgets, command centre, glass tokens, aura topology, and `van_orthogonal_presence.png`. The orthogonal board must show:
+
+- LISTENING + DEGRADED;
+- THINKING + DEGRADED;
+- SPEAKING + DEGRADED;
+- WORKING + DEGRADED;
+- LISTENING + OFFLINE → OFFLINE takeover;
+- SPEAKING + WAITING_FOR_OWNER → owner-authority takeover.
 
 ## Final external gates
 
