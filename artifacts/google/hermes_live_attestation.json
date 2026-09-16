@@ -54,8 +54,8 @@
     },
     {
       "id": "workspace_api",
-      "state": "CONFIGURED",
-      "evidence": "live://dial-hermes-control/workspace-oauth/credential-installed-20260916"
+      "state": "READY",
+      "evidence": "live://dial-hermes-control/workspace-oauth/canary"
     },
     {
       "id": "gemini_notebook",
@@ -102,5 +102,5 @@
     "antigravity"
   ],
   "workspace_oauth_rechecked_at": "2026-09-16",
-  "workspace_oauth_recheck": "desktop_client_installed_refresh_credential_encrypted_workspace_apis_disabled"
+  "workspace_oauth_recheck": "desktop_client_installed_refresh_credential_encrypted_all_workspace_canaries_200_ready"
 }

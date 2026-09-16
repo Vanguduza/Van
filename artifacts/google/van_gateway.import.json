@@ -31,8 +31,8 @@
     },
     {
       "capability_id": "workspace_api",
-      "state": "CONFIGURED",
-      "evidence": "live://dial-hermes-control/workspace-oauth/credential-installed-20260916"
+      "state": "READY",
+      "evidence": "live://dial-hermes-control/workspace-oauth/canary"
     },
     {
       "capability_id": "gemini_notebook",

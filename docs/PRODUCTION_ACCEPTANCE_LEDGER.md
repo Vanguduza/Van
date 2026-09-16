@@ -70,7 +70,7 @@ Live host: `dial-hermes-control`; control path: authorised `oracle-admin` Comman
 | Delegate capability inheritance / toolset scope | PASS | live Hermes-source tests: 10 passed |
 | Core Hermes/DIAL services | PASS | runtime, orchestrator, gateway, chat-control, owner-steering and private-MCP-bind all active |
 | Canonical Google identity authentication | PASS | authenticated on Hermes; VAN imports hashed attestation evidence without copying tokens |
-| Hermes Google mesh usable (gemini/jules/workspace_api) | PASS | CONFIGURED via attestation import; not claimed READY without canary receipts |
+| Hermes Google mesh usable (gemini/jules/workspace_api) | PASS | `workspace_api` READY via live Gmail/Calendar/Drive/Contacts/Tasks HTTP 200 canary receipt; other Google capabilities retain their independently evidenced states |
 | Delegated Antigravity worker identity | PASS | isolated OAuth store, no inherited canonical Google/API credentials, 14 models discovered; token-free receipt: `artifacts/google/antigravity_worker_live_attestation.json` |
 | Delegated Antigravity live generation | PASS | isolated pre-deploy canary returned `VAN_ANTIGRAVITY_SECONDARY_OK`; installed profile doctor passed, wrapper hash matched, 14 models were discovered, and installed-profile canary returned `VAN_INSTALLED_ANTIGRAVITY_OK` |
 | Antigravity capacity fallback contract | PASS | if the delegated route later becomes `CAPACITY_LIMITED`/`RATE_LIMITED`, deterministic routing may fall back to owner-account Jules while preserving identity attribution |
