@@ -4,11 +4,9 @@ import com.dial.van.degraded.DegradedMode
 import com.dial.van.degraded.SubsystemStatus
 
 /**
- * Resolves subsystem truth and the orthogonal live presence frame into UI chrome and embodiment.
- *
- * Health remains fail-closed, but DEGRADED is no longer allowed to erase a locally truthful
- * LISTENING/THINKING/SPEAKING pose. The character can therefore interact while Zone C and chrome
- * continue to show an unverified Google mesh. Uplink loss remains stronger and forces OFFLINE.
+ * Pure resolver from subsystem truth + orthogonal live presence into chrome and embodiment.
+ * Android/Compose surfaces must pass their observed live frame explicitly; this keeps the resolver
+ * usable by the JVM visual-evidence renderer and deterministic tests.
  */
 object VanPresence {
 
@@ -32,7 +30,7 @@ object VanPresence {
         listening: Boolean = false,
         speaking: Boolean = false,
         awaitingOwner: Boolean = false,
-        live: VanPresenceFrame = VanLiveVisualState.frame,
+        live: VanPresenceFrame = VanPresenceFrame(),
     ): Cue {
         val broken = mode.subsystems.filter { it.status == SubsystemStatus.BROKEN }
         val brokenLabels = broken.map { it.label }
@@ -87,7 +85,6 @@ object VanPresence {
         return nominal(state, if (state == VanDurableState.IDLE) mode.reason else VanCaptions.forState(state))
     }
 
-    /** Legacy/overlay bridge while call sites migrate to [VanPresenceFrame]. */
     fun cue(mode: DegradedMode, live: VanVisualState): Cue = cue(
         mode = mode,
         live = frameFromVisual(live),
@@ -95,7 +92,7 @@ object VanPresence {
 
     fun visualState(
         cue: Cue,
-        base: VanPresenceFrame = VanLiveVisualState.frame,
+        base: VanPresenceFrame = VanPresenceFrame(),
     ): VanVisualState {
         var frame = base.copy(health = cue.health)
 
