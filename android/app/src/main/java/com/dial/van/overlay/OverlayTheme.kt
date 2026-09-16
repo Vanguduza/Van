@@ -21,6 +21,12 @@ object OverlayTheme {
     const val MAXIMIZED_HORIZONTAL_MARGIN_DP: Int = 12
     const val MAXIMIZED_HEIGHT_FRACTION: Float = 0.86f
 
+    /**
+     * Compatibility alias used by the JVM evidence painter while it renders the optical body of
+     * the compact workboard. Shipping Compose uses [COMPACT_HEIGHT_DP].
+     */
+    const val COMPACT_CAPSULE_HEIGHT_DP: Int = 150
+
     /** Circular minimized portrait: face is the representation, not a generic dot. */
     const val MINIMIZED_VISUAL_DP: Int = 62
     const val MINIMIZED_TOUCH_DP: Int = 72
