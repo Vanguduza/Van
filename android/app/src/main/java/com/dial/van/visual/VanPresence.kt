@@ -8,8 +8,10 @@ import com.dial.van.degraded.SubsystemStatus
  *
  * The overlay must never look healthy while a subsystem is broken, so this mapping fails
  * closed: any uplink loss presents OFFLINE, any other broken subsystem presents DEGRADED.
- * When subsystem truth is nominal, the live visual controller is allowed to surface listening,
- * speaking, thinking, working and other activity states continuously.
+ * When subsystem truth is nominal, an explicitly supplied live visual state may surface
+ * listening, speaking, thinking, working and other activity states continuously.
+ *
+ * This mapper stays pure Kotlin because the JVM visual-preview module compiles the same source.
  */
 object VanPresence {
 
@@ -33,7 +35,7 @@ object VanPresence {
         listening: Boolean = false,
         speaking: Boolean = false,
         awaitingOwner: Boolean = false,
-        live: VanVisualState = VanLiveVisualState.current,
+        live: VanVisualState = VanVisualState(),
     ): Cue {
         val broken = mode.subsystems.filter { it.status == SubsystemStatus.BROKEN }
         val brokenLabels = broken.map { it.label }
@@ -78,18 +80,12 @@ object VanPresence {
     }
 
     /**
-     * Merges truth with the continuously changing live presence state.
-     *
-     * Precedence is deliberately asymmetric: OFFLINE/DEGRADED and explicit owner-decision cues
-     * always override the live controller. A nominal IDLE cue is merely permission for the live
-     * state (LISTENING, THINKING, WORKING, SPEAKING, etc.) to show through.
-     *
-     * The default [base] is Compose snapshot state, so callers such as the floating overlay and
-     * Command Centre automatically recompose when voice/task state changes, without polling.
+     * Merges truth with a live presence state supplied by the Android runtime.
+     * OFFLINE/DEGRADED and explicit owner-decision cues always override optimistic live state.
      */
     fun visualState(
         cue: Cue,
-        base: VanVisualState = VanLiveVisualState.current,
+        base: VanVisualState = VanVisualState(),
     ): VanVisualState {
         val resolved = when {
             cue.degraded -> cue.durableState
