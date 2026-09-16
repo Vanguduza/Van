@@ -554,6 +554,16 @@ Idle life combines asynchronous low-amplitude movement:
 
 Do not synchronize all phases.
 
+The interim owner-art transform must remain within 1.6 dp horizontal displacement, 2.5 dp
+vertical displacement, 1.65 degrees of rotation, scale 0.992–1.008 and 0.5 degrees of head
+counter-motion across all states, attention directions and urgency levels. These bounds preserve
+the stronger phone-visible Rev 3 motion without allowing cartoon bouncing.
+
+Reduced motion removes all phase-driven hover, breathing, sway and tension. A static owner-facing
+attention pose may retain up to 0.45 dp horizontal lean and 0.12 degrees of tilt, clamped to the
+attention input. Vertical displacement and head counter-motion are zero and scale remains 1.0.
+The neutral attention pose has zero lean and tilt. Advancing animation time must not change the pose.
+
 ---
 
 ## 24. State-specific body behavior

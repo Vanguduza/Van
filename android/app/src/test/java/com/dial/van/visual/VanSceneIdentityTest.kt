@@ -109,14 +109,21 @@ class VanSceneIdentityTest {
     }
 
     @Test
-    fun offlineAndDegradedMuteTheCharacterWhileUrgentDoesNot() {
+    fun offlineAndDegradedDesaturateWithoutFadingTheCharacter() {
         val idle = VanStatusPalette.forState(VanDurableState.IDLE)
         val offline = VanStatusPalette.forState(VanDurableState.OFFLINE)
         val degraded = VanStatusPalette.forState(VanDurableState.DEGRADED)
         val urgent = VanStatusPalette.forState(VanDurableState.URGENT)
 
         assertTrue("offline must be the most muted", offline.desaturation > degraded.desaturation)
-        assertTrue("offline must dim", offline.dim < degraded.dim)
+        VanDurableState.entries.forEach { state ->
+            assertEquals(
+                "$state must keep the character optically solid",
+                1f,
+                VanStatusPalette.forState(state).dim,
+                0.0001f,
+            )
+        }
         assertEquals("idle is never muted", 0f, idle.desaturation)
         assertEquals("urgent must not look drained", 0f, urgent.desaturation)
         assertNotEquals("offline and degraded need different ring accents", offline.accent, degraded.accent)

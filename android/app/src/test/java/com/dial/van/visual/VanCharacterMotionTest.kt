@@ -20,35 +20,66 @@ class VanCharacterMotionTest {
 
     @Test
     fun reducedMotionRemovesAutonomousMovement() {
-        val state = VanVisualState(
-            durableState = VanDurableState.URGENT,
-            attentionX = 0.8f,
-            urgency = 1f,
-        )
-        val a = VanCharacterMotion.sample(state, 0.12f, reducedMotion = true)
-        val b = VanCharacterMotion.sample(state, 0.83f, reducedMotion = true)
-
-        assertEquals(a, b)
-        assertEquals(0f, a.offsetYDp, 0.0001f)
-        assertEquals(0f, a.rotationDeg, 0.0001f)
-        assertEquals(1f, a.scale, 0.0001f)
+        VanDurableState.entries.forEach { durable ->
+            listOf(-1f, 0f, 1f).forEach { attention ->
+                val state = VanVisualState(
+                    durableState = durable,
+                    attentionX = attention,
+                    attentionY = attention,
+                    urgency = 1f,
+                )
+                val still = VanCharacterMotion.sample(state, 0f, reducedMotion = true)
+                listOf(-0.2f, 0.12f, 0.83f, 1f, 1.2f).forEach { phase ->
+                    assertEquals(
+                        "$durable must not animate in reduced motion",
+                        still,
+                        VanCharacterMotion.sample(state, phase, reducedMotion = true),
+                    )
+                }
+                assertEquals(0f, still.offsetYDp, 0.0001f)
+                assertEquals(1f, still.scale, 0.0001f)
+                assertEquals(0f, still.headCounterDeg, 0.0001f)
+                assertTrue(kotlin.math.abs(still.offsetXDp) <= 0.45f)
+                assertTrue(kotlin.math.abs(still.rotationDeg) <= 0.12f)
+                if (attention == 0f) {
+                    assertEquals(0f, still.offsetXDp, 0.0001f)
+                    assertEquals(0f, still.rotationDeg, 0.0001f)
+                } else {
+                    assertTrue("static lean must face the owner", still.offsetXDp * attention > 0f)
+                    assertTrue("static tilt must face the owner", still.rotationDeg * attention > 0f)
+                }
+                assertEquals(
+                    "owner attention must be clamped",
+                    still,
+                    VanCharacterMotion.sample(state.copy(attentionX = attention * 2f), 0f, reducedMotion = true),
+                )
+            }
+        }
     }
 
     @Test
     fun ownerArtMotionStaysSubtle() {
         VanDurableState.entries.forEach { durable ->
-            val state = VanVisualState(
-                durableState = durable,
-                attentionX = 1f,
-                attentionY = 1f,
-                urgency = 1f,
-            )
-            repeat(21) { index ->
-                val frame = VanCharacterMotion.sample(state, index / 20f, reducedMotion = false)
-                assertTrue("$durable x offset too large", kotlin.math.abs(frame.offsetXDp) <= 1.5f)
-                assertTrue("$durable y offset too large", kotlin.math.abs(frame.offsetYDp) <= 1.4f)
-                assertTrue("$durable rotation too large", kotlin.math.abs(frame.rotationDeg) <= 1.4f)
-                assertTrue("$durable scale too large", frame.scale in 0.992f..1.008f)
+            listOf(-1f, 0f, 1f).forEach { attentionX ->
+                listOf(-1f, 0f, 1f).forEach { attentionY ->
+                    listOf(0f, 1f).forEach { urgency ->
+                        val state = VanVisualState(
+                            durableState = durable,
+                            attentionX = attentionX,
+                            attentionY = attentionY,
+                            urgency = urgency,
+                        )
+                        repeat(201) { index ->
+                            val frame = VanCharacterMotion.sample(state, index / 200f, reducedMotion = false)
+                            // Rev 3's stronger phone-visible motion remains inside this bounded envelope.
+                            assertTrue("$durable x offset too large", kotlin.math.abs(frame.offsetXDp) <= 1.6f)
+                            assertTrue("$durable y offset too large", kotlin.math.abs(frame.offsetYDp) <= 2.5f)
+                            assertTrue("$durable rotation too large", kotlin.math.abs(frame.rotationDeg) <= 1.65f)
+                            assertTrue("$durable scale too large", frame.scale in 0.992f..1.008f)
+                            assertTrue("$durable head counter-motion too large", kotlin.math.abs(frame.headCounterDeg) <= 0.5f)
+                        }
+                    }
+                }
             }
         }
     }
