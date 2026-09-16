@@ -27,10 +27,13 @@ class DegradedModeStore {
         configuredCapabilities: Int,
         totalCapabilities: Int,
         principalRegistered: Boolean,
+        workspaceApiState: String?,
     ) {
-        if (principalRegistered && configuredCapabilities > 0) {
+        val workspaceReady = workspaceApiState == "READY"
+        if (principalRegistered && workspaceReady) {
             update { mode ->
-                val detail = "google_mesh configured=$configuredCapabilities/$totalCapabilities"
+                val detail =
+                    "google_mesh workspace_api=READY configured=$configuredCapabilities/$totalCapabilities"
                 val subs = mode.subsystems.map { sub ->
                     if (sub.id == "google") {
                         sub.copy(
@@ -52,7 +55,8 @@ class DegradedModeStore {
         } else {
             markBroken(
                 "google",
-                "google_mesh unverified (configured=$configuredCapabilities/$totalCapabilities, principal=$principalRegistered)",
+                "google_mesh not READY (workspace_api=${workspaceApiState ?: "UNVERIFIED"}, " +
+                    "configured=$configuredCapabilities/$totalCapabilities, principal=$principalRegistered)",
                 RestoreAction.RETRY_CONNECTION,
             )
         }

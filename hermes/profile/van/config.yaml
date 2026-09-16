@@ -101,3 +101,9 @@ registered_projects:
   - gtr
   - goat
   - aeci
+
+# The shared loopback API listener is owned by the default Hermes gateway.
+# VAN is served through /p/van with its own profile-scoped API_SERVER_KEY.
+platforms:
+  api_server:
+    enabled: false

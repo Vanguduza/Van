@@ -295,3 +295,23 @@ async def test_hermes_failure_degraded(client, monkeypatch):
     body = (await ac.post("/v1/commands", json=req)).json()
     assert body["status"] == "degraded"
     assert body["degraded"] == ["HERMES_OFFLINE"]
+
+
+@pytest.mark.asyncio
+async def test_health_exposes_workspace_ready_truth(client):
+    ac, app = client
+    await app.state.google_broker.register_principal(subject="owner-google-subject", ai_plan="PRO")
+    from van_gateway.google.mesh import GoogleCapabilityState
+    await app.state.google_broker.record_capability_evidence(
+        "workspace_api",
+        state=GoogleCapabilityState.READY,
+        evidence_pointer="live://test/workspace-canary",
+    )
+
+    response = await ac.get("/health")
+    assert response.status_code == 200
+    mesh = response.json()["google_mesh"]
+    assert mesh["principal"]["registered"] is True
+    assert mesh["workspace_api_state"] == "READY"
+    assert mesh["workspace_api_ready"] is True
+    assert mesh["ready_capabilities"] >= 1

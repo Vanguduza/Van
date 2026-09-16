@@ -158,6 +158,16 @@ def create_app() -> FastAPI:
         gstatus = await google.status()
         mesh = await google_broker.mesh_status(workspace=gstatus)
         configured = sum(1 for item in mesh["capabilities"] if item["state"] in {"READY", "CONFIGURED"})
+        ready = sum(1 for item in mesh["capabilities"] if item["state"] == "READY")
+        workspace = next(
+            (item for item in mesh["capabilities"] if item["capability_id"] == "workspace_api"),
+            None,
+        )
+        if workspace:
+            raw_workspace_state = workspace["state"]
+            workspace_state = getattr(raw_workspace_state, "value", str(raw_workspace_state))
+        else:
+            workspace_state = "UNVERIFIED"
         return {
             "ok": hermes_ok,
             "service": "van-gateway",
@@ -166,7 +176,10 @@ def create_app() -> FastAPI:
             "google_mesh": {
                 "principal": mesh["principal"],
                 "configured_capabilities": configured,
+                "ready_capabilities": ready,
                 "total_capabilities": len(mesh["capabilities"]),
+                "workspace_api_state": workspace_state,
+                "workspace_api_ready": workspace_state == "READY",
                 "hermes_is_sole_agent_runtime": True,
             },
             "degraded": degraded.snapshot(),

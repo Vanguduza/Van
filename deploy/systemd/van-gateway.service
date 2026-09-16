@@ -1,0 +1,26 @@
+[Unit]
+Description=VAN secure owner-authority gateway
+After=network-online.target hermes-gateway.service
+Wants=network-online.target
+
+[Service]
+Type=simple
+WorkingDirectory=%h/.local/share/van/runtime/backend
+Environment=PYTHONUNBUFFERED=1
+Environment=PYTHONPATH=%h/.local/share/van/runtime/backend
+EnvironmentFile=%h/.config/van/google-workspace.env
+EnvironmentFile=%h/.config/van/gateway.env
+ExecStart=%h/.local/share/van/venv/bin/uvicorn van_gateway.app:app --host 127.0.0.1 --port 8787
+Restart=on-failure
+RestartSec=3
+UMask=0077
+NoNewPrivileges=true
+PrivateTmp=true
+ProtectSystem=strict
+ProtectHome=read-only
+ReadWritePaths=%h/.local/share/van %h/.local/state/van
+RestrictSUIDSGID=true
+LockPersonality=true
+
+[Install]
+WantedBy=default.target

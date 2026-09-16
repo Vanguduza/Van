@@ -19,6 +19,9 @@ import com.dial.van.voice.VoiceSessionCoordinator
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.SupervisorJob
+import kotlinx.coroutines.delay
+import kotlinx.coroutines.isActive
+import kotlinx.coroutines.launch
 
 class VanApplication : Application(), VoiceInputCallback, TtsOutputCallback {
 
@@ -59,6 +62,59 @@ class VanApplication : Application(), VoiceInputCallback, TtsOutputCallback {
         commandController = VanCommandController(gatewayClient, appScope)
         queueReplayer = QueueReplayer(commandQueue, gatewayClient, degradedModeStore, appScope)
         queueReplayer.replayAsync()
+        startGatewayHealthMonitor()
+    }
+
+    private fun startGatewayHealthMonitor() {
+        appScope.launch {
+            while (isActive) {
+                refreshGatewayHealth()
+                delay(GATEWAY_HEALTH_INTERVAL_MS)
+            }
+        }
+    }
+
+    private suspend fun refreshGatewayHealth() {
+        try {
+            val health = gatewayClient.health()
+            degradedModeStore.markWorking("gateway")
+
+            if (health.optBoolean("ok", false)) {
+                degradedModeStore.markWorking("hermes")
+            } else {
+                val detail = health.optJSONObject("hermes")
+                    ?.optString("degraded")
+                    ?.takeIf { it.isNotBlank() }
+                    ?: "Hermes health check failed"
+                degradedModeStore.markBroken(
+                    "hermes",
+                    detail,
+                    com.dial.van.degraded.RestoreAction.RETRY_CONNECTION,
+                )
+            }
+
+            val mesh = health.optJSONObject("google_mesh")
+            val principalRegistered =
+                mesh?.optJSONObject("principal")?.optBoolean("registered", false) == true
+            degradedModeStore.applyGoogleMesh(
+                configuredCapabilities = mesh?.optInt("configured_capabilities", 0) ?: 0,
+                totalCapabilities = mesh?.optInt("total_capabilities", 0) ?: 0,
+                principalRegistered = principalRegistered,
+                workspaceApiState = mesh?.optString("workspace_api_state")
+                    ?.takeIf { it.isNotBlank() },
+            )
+        } catch (exc: Throwable) {
+            degradedModeStore.markBroken(
+                "gateway",
+                "Gateway health unavailable: ${exc.javaClass.simpleName}",
+                com.dial.van.degraded.RestoreAction.RETRY_CONNECTION,
+            )
+            degradedModeStore.markBroken(
+                "hermes",
+                "Hermes health unavailable through gateway",
+                com.dial.van.degraded.RestoreAction.RETRY_CONNECTION,
+            )
+        }
     }
 
     override fun onPartial(text: String) {
@@ -118,6 +174,8 @@ class VanApplication : Application(), VoiceInputCallback, TtsOutputCallback {
     }
 
     companion object {
+        private const val GATEWAY_HEALTH_INTERVAL_MS = 60_000L
+
         lateinit var instance: VanApplication
             private set
     }

@@ -3,6 +3,7 @@ package com.dial.van.gateway
 import android.content.Context
 import androidx.security.crypto.EncryptedSharedPreferences
 import androidx.security.crypto.MasterKey
+import com.dial.van.BuildConfig
 import com.dial.van.visual.VanLiveVisualState
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.withContext
@@ -30,8 +31,40 @@ class VanGatewayClient(context: Context) {
     )
 
     var baseUrl: String
-        get() = prefs.getString(KEY_BASE, "http://127.0.0.1:8787")!!
-        set(value) = prefs.edit().putString(KEY_BASE, value.trimEnd('/')).apply()
+        get() {
+            val configured = prefs.getString(KEY_BASE, null)
+            return if (configured.isNullOrBlank()) {
+                defaultGatewayBaseUrl()
+            } else {
+                try {
+                    normalizeGatewayBaseUrl(configured)
+                } catch (_: IllegalArgumentException) {
+                    defaultGatewayBaseUrl()
+                }
+            }
+        }
+        set(value) = prefs.edit().putString(KEY_BASE, normalizeGatewayBaseUrl(value)).apply()
+
+    private fun defaultGatewayBaseUrl(): String {
+        val buildConfigured = BuildConfig.VAN_GATEWAY_BASE_URL.trim()
+        if (buildConfigured.isNotBlank()) return normalizeGatewayBaseUrl(buildConfigured)
+        check(BuildConfig.DEBUG) {
+            "Production VAN_GATEWAY_BASE_URL is missing; release builds must inject a stable HTTPS endpoint."
+        }
+        return "http://127.0.0.1:8787"
+    }
+
+    private fun normalizeGatewayBaseUrl(value: String): String {
+        val normalized = value.trim().trimEnd('/')
+        require(normalized.isNotBlank()) { "gateway_url_blank" }
+        val secure = normalized.startsWith("https://", ignoreCase = true)
+        val debugLoopback = BuildConfig.DEBUG && (
+            normalized.startsWith("http://127.0.0.1", ignoreCase = true) ||
+                normalized.startsWith("http://localhost", ignoreCase = true)
+            )
+        require(secure || debugLoopback) { "gateway_url_must_use_https" }
+        return normalized
+    }
 
     var deviceId: String?
         get() = prefs.getString(KEY_DEVICE, null)

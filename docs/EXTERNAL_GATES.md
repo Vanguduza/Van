@@ -42,3 +42,9 @@ Resolved 2026-09-15 (workstation): local Project Truth mounts for `van`, `dial`,
 ## Physical device checklist
 
 Install, overlay, notification listener, mic, TTS, biometric, drag/dock, rotation, process kill, Doze, reboot, offline queue, reconnect, secret notification, barge-in, share-to-VAN routing, Google capability status display, Rive failure → Canvas, reduced motion.
+
+## Android production gateway ingress
+
+Repository and host-side closure require the VAN gateway itself to remain loopback-only on `dial-hermes-control`. Android release builds must receive `VAN_GATEWAY_BASE_URL` as a stable `https://` endpoint; release assembly fails closed when it is absent or insecure.
+
+A volatile `trycloudflare.com` quick tunnel is not production authority. The remaining external routing gate is creation/assignment of a stable authenticated TLS ingress (for example a named Cloudflare Tunnel/Access hostname) to the loopback VAN gateway. This gate does not affect Workspace OAuth durability or live Google READY certification.

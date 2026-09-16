@@ -6,6 +6,15 @@ plugins {
 
 import java.util.Properties
 
+val vanGatewayBaseUrl = providers.gradleProperty("VAN_GATEWAY_BASE_URL")
+    .orElse(providers.environmentVariable("VAN_GATEWAY_BASE_URL"))
+    .orElse("")
+    .get()
+    .trim()
+val escapedVanGatewayBaseUrl = vanGatewayBaseUrl
+    .replace("\\", "\\\\")
+    .replace("\"", "\\\"")
+
 android {
     namespace = "com.dial.van"
     compileSdk = 34
@@ -16,6 +25,7 @@ android {
         targetSdk = 34
         versionCode = 5
         versionName = "0.5.0-dev"
+        buildConfigField("String", "VAN_GATEWAY_BASE_URL", "\"$escapedVanGatewayBaseUrl\"")
 
         testInstrumentationRunner = "androidx.test.runner.AndroidJUnitRunner"
         vectorDrawables {
@@ -64,6 +74,11 @@ android {
             n == "assembleRelease" || n == "bundleRelease" || n.endsWith(":assembleRelease") || n.endsWith(":bundleRelease")
         }
         if (releaseRequested) {
+            if (!vanGatewayBaseUrl.startsWith("https://")) {
+                throw GradleException(
+                    "Release gateway configuration refused: VAN_GATEWAY_BASE_URL must be a stable HTTPS URL.",
+                )
+            }
             if (!keystorePropertiesFile.exists()) {
                 throw GradleException(
                     "Release signing refused: android/keystore.properties missing. " +
@@ -88,6 +103,7 @@ android {
 
     buildFeatures {
         compose = true
+        buildConfig = true
     }
 
     composeOptions {
