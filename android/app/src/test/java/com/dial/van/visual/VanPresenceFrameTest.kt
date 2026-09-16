@@ -43,6 +43,42 @@ class VanPresenceFrameTest {
     }
 
     @Test
+    fun thinkingActivityReturnsAfterTtsRoundTrip() {
+        var frame = VanPresenceReducer.finalTranscript(VanPresenceFrame(), hasText = true)
+        assertEquals(VanDurableState.THINKING, frame.activity)
+
+        frame = VanPresenceReducer.speechStarted(frame)
+        assertEquals(VanDurableState.SPEAKING, frame.poseState)
+        assertEquals(VanDurableState.THINKING, frame.activity)
+
+        frame = VanPresenceReducer.speechFrame(frame, mouthOpen = 0.72f, viseme = 5)
+        assertEquals(VanDurableState.SPEAKING, frame.poseState)
+        assertEquals(VanDurableState.THINKING, frame.activity)
+
+        frame = VanPresenceReducer.speechEnded(frame)
+        assertEquals(VanDurableState.THINKING, frame.poseState)
+        assertEquals(VanDurableState.THINKING, frame.activity)
+        assertEquals(VanTurnPhase.THINKING, frame.turn)
+    }
+
+    @Test
+    fun delegatingActivityReturnsAfterTtsRoundTrip() {
+        var frame = VanPresenceReducer.dispatchStarted(
+            VanPresenceReducer.finalTranscript(VanPresenceFrame(), hasText = true),
+        )
+        assertEquals(VanDurableState.DELEGATING, frame.activity)
+
+        frame = VanPresenceReducer.speechFrame(frame, mouthOpen = 0.4f, viseme = 2)
+        assertEquals(VanDurableState.SPEAKING, frame.poseState)
+        assertEquals(VanDurableState.DELEGATING, frame.activity)
+
+        frame = VanPresenceReducer.speechEnded(frame)
+        assertEquals(VanDurableState.DELEGATING, frame.poseState)
+        assertEquals(VanDurableState.DELEGATING, frame.activity)
+        assertEquals(VanTurnPhase.DISPATCHING, frame.turn)
+    }
+
+    @Test
     fun speechFrameCannotReplaceWaitingForOwnerAuthority() {
         var frame = VanPresenceReducer.authority(
             VanPresenceFrame(activity = VanDurableState.WORKING),
@@ -54,7 +90,12 @@ class VanPresenceFrameTest {
         assertEquals(VanDurableState.WAITING_FOR_OWNER, frame.poseState)
         assertEquals(VanDurableState.WAITING_FOR_OWNER, frame.semanticState)
         assertEquals(VanSpeechState.SPEAKING, frame.speech)
+        assertEquals(VanDurableState.WORKING, frame.activity)
         assertEquals(0.8f, frame.mouthOpen, 0.0001f)
+
+        frame = VanPresenceReducer.speechEnded(frame)
+        assertEquals(VanDurableState.WAITING_FOR_OWNER, frame.poseState)
+        assertEquals(VanDurableState.WORKING, frame.activity)
     }
 
     @Test
