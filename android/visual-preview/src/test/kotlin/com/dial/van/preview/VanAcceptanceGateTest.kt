@@ -15,14 +15,24 @@ import org.junit.Test
 class VanAcceptanceGateTest {
 
     @Test
-    fun compactGeometryMatchesBlueprint() {
-        assertEquals(280, OverlayTheme.COMPACT_WIDTH_DP)
+    fun compactGeometryMatchesRev3Blueprint() {
+        assertEquals(300, OverlayTheme.COMPACT_WIDTH_DP)
+        assertEquals(188, OverlayTheme.COMPACT_HEIGHT_DP)
         assertTrue(OverlayTheme.VAN_GLASS_OVERLAP_DP in 12..24)
-        assertEquals(168, OverlayTheme.RESTING_HIT_DP)
-        assertEquals(92, OverlayTheme.RESTING_AVATAR_DP)
+        assertEquals(184, OverlayTheme.RESTING_HIT_DP)
+        assertEquals(96, OverlayTheme.RESTING_AVATAR_DP)
+        assertEquals(62, OverlayTheme.MINIMIZED_VISUAL_DP)
+        assertTrue(OverlayTheme.MINIMIZED_TOUCH_DP >= 64)
         assertEquals(88, OverlayTheme.DOCK_HIT_DP)
         assertEquals(76, OverlayTheme.DOCK_CHARACTER_DP)
-        assertEquals(listOf("Ask", "Projects", "Tasks", "Decisions"), OverlayTheme.COMPACT_ACTIONS)
+        assertEquals(
+            listOf("Chat", "Voice", "Projects", "Tasks", "Decisions"),
+            OverlayTheme.COMPACT_ACTIONS,
+        )
+        assertEquals(
+            listOf("Chat", "Voice", "Minimize", "Command Centre", "Dock", "Close"),
+            OverlayTheme.QUICK_CONTROLS,
+        )
     }
 
     @Test
