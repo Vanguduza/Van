@@ -22,7 +22,7 @@ async def test_google_migration_and_principal_hash(tmp_path):
     store = Store(str(tmp_path / "mesh.sqlite3"))
     await store.migrate()
     row = await store.fetchone("SELECT MAX(version) AS version FROM schema_migrations")
-    assert row["version"] == SCHEMA_VERSION == 3
+    assert row["version"] == SCHEMA_VERSION == 4
     broker = GoogleIdentityBroker(store, GoogleCapabilityRegistry(registry_path()), ai_plan="PRO")
     status = await broker.register_principal(subject="owner-google-subject", ai_plan="PRO")
     assert status.registered is True

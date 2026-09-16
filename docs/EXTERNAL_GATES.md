@@ -25,7 +25,7 @@ Resolved 2026-09-15 (workstation): local Project Truth mounts for `van`, `dial`,
 | Jules | owner Google sign-in on Hermes | CONFIGURED via attestation; READY needs live worker receipt |
 | Nano Banana / Veo | Hermes Gemini runtime + quota canary | CONFIGURED via attestation |
 | Google ADK/A2A | owner-administered Cloud/runtime | still EXTERNAL (cloud plane) |
-| Android owner gateway authentication | owner ingress bearer + enrolled device HMAC | LIVE-CERTIFIED — unauthenticated requests rejected; encrypted device credential survived restart; atomic revoke survived second restart |
+| Android owner gateway authentication | ingress bearer + revocable device token + enrolled device HMAC | Current deployed b585195 two-layer path is LIVE-CERTIFIED; schema-4 single-use pairing/device-token hardening is repository-certified and requires a fresh live canary before named public ingress is enabled |
 | Stable public HTTPS ingress | named Cloudflare Tunnel token + stable hostname | EXTERNAL — fail-closed installer/service ready; `trycloudflare.com` is rejected for production |
 | Physical Samsung device | USB device + permissions | `tools/certification/device_cert_probe.py` + `docs/DEVICE_ACCEPTANCE_CHECKLIST.md` |
 | Artist `.riv` | Rive editor | contract + Canvas fallback + handoff |
@@ -51,6 +51,6 @@ Install, overlay, notification listener, mic, TTS, biometric, drag/dock, rotatio
 
 Repository and host-side closure require the VAN gateway itself to remain loopback-only on `dial-hermes-control`. Android release builds must receive `VAN_GATEWAY_BASE_URL` as a stable `https://` endpoint; release assembly fails closed when it is absent or insecure.
 
-The externally reachable API is separately gated by `VAN_INGRESS_TOKEN` / `X-Van-Ingress-Token`. Android stores this bearer in encrypted preferences; it is never embedded in the APK. Device command execution remains independently protected by the enrolled per-device HMAC secret. Privileged Hermes control routes retain their separate internal-control credential and that credential is not accepted as a general external bearer.
+The externally reachable API uses layered client authority. `VAN_INGRESS_TOKEN` / `X-Van-Ingress-Token` is the outer transport bearer. Except for ingress-only `/health`, normal Android API calls also require a revocable per-device access token. Device command execution additionally requires the enrolled per-device HMAC secret. New devices can obtain these credentials only through a short-lived single-use pairing ticket issued by the internal control plane. Privileged Hermes control routes retain their separate internal-control credential and that credential is not accepted as a general external bearer.
 
 A volatile `trycloudflare.com` quick tunnel is not production authority. Repo-side named-tunnel tooling is provided by `deploy/systemd/van-cloudflare-tunnel.service` and `tools/runtime/install_van_cloudflare_tunnel.sh`; the installer rejects quick-tunnel hostnames and requires an authenticated public `/health` canary before success. The remaining external routing gate is provisioning a named Cloudflare Tunnel token and stable hostname mapped to `http://127.0.0.1:8787`. This gate does not affect Workspace OAuth durability or live Google READY certification.

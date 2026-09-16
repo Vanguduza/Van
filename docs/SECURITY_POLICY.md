@@ -4,9 +4,13 @@ Status: CANONICAL
 
 ## Owner device authentication
 
-- External gateway HTTP routes require the high-entropy owner ingress bearer in `X-Van-Ingress-Token`; a tunnel hostname alone grants no authority.
-- One-time enrollment creates a per-device HMAC secret, encrypted at rest with a dedicated Fernet key and rehydrated only inside the gateway process.
-- Revocation removes the usable secret from memory and prevents restart rehydration.
+- Stable public ingress is an outer transport gate only: normal Android-facing routes require the high-entropy `X-Van-Ingress-Token` **and** a revocable per-device `X-Van-Device-Token`.
+- `/health` is ingress-only for service/tunnel probes. `/v1/devices/pair` is the only unauthenticated client route and accepts only a short-lived, single-use pairing ticket.
+- Pairing tickets are created only by the internal control plane, stored only as SHA-256 hashes, expire in at most one hour, and are atomically consumed with device enrollment.
+- Pairing returns the outer ingress bearer plus a per-device access token exactly once with `Cache-Control: no-store`; Android stores both in encrypted preferences. The gateway stores only the device-token hash.
+- Device command authenticity remains a third independent layer: each paired device has an HMAC secret encrypted at rest with a dedicated Fernet key and rehydrated only inside the gateway process.
+- Direct enrollment, pairing-ticket issuance, and device revocation require `X-Van-Internal-Token`; the ingress bearer or a valid device token cannot create or revoke device authority.
+- Revocation atomically revokes capability grants and makes the per-device access token unusable; the HMAC secret is removed from memory and is never rehydrated after restart.
 - Owner-directed mutations are signed, timestamped, replay-protected and idempotent.
 
 ## Hermes execution boundary

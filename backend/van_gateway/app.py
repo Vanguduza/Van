@@ -38,6 +38,15 @@ class EnrollBody(BaseModel):
     label: str | None = None
 
 
+class PairDeviceBody(EnrollBody):
+    pairing_token: str = Field(min_length=32)
+
+
+class PairingTicketCreate(BaseModel):
+    label: str | None = None
+    ttl_seconds: int = Field(default=600, ge=60, le=3600)
+
+
 class GoogleConnectBody(BaseModel):
     refresh_token: str
     scopes: list[str] = Field(default_factory=lambda: list(NARROW_SCOPES))
@@ -146,6 +155,13 @@ def create_app() -> FastAPI:
     def internal_control_route(method: str, path: str) -> bool:
         if method == "PUT" and path.startswith("/v1/projects/") and path.endswith("/truth"):
             return True
+        if method == "POST" and path in {
+            "/v1/devices/enroll",
+            "/v1/devices/pairing-ticket",
+        }:
+            return True
+        if method == "POST" and path.startswith("/v1/devices/") and path.endswith("/revoke"):
+            return True
         if path in {
             "/v1/google/test-transport",
             "/v1/google/gmail/search",
@@ -159,22 +175,33 @@ def create_app() -> FastAPI:
 
     @app.middleware("http")
     async def require_ingress_auth(request: Request, call_next):
-        configured = settings.ingress_token.strip()
-        presented = request.headers.get("X-Van-Ingress-Token", "")
-        if configured and presented and hmac.compare_digest(configured, presented):
+        if request.method == "POST" and request.url.path == "/v1/devices/pair":
             return await call_next(request)
 
-        # Hermes internal control retains its independent machine credential on
-        # privileged control routes; it does not become a general client bearer.
+        # Privileged local Hermes control uses an independent machine credential.
         if internal_control_route(request.method, request.url.path):
             expected_internal = settings.internal_control_token.strip()
             presented_internal = request.headers.get("X-Van-Internal-Token", "")
             if expected_internal and presented_internal and hmac.compare_digest(expected_internal, presented_internal):
                 return await call_next(request)
 
+        configured = settings.ingress_token.strip()
+        presented = request.headers.get("X-Van-Ingress-Token", "")
         if not configured:
             return JSONResponse(status_code=503, content={"detail": "ingress_auth_unconfigured"})
-        return JSONResponse(status_code=401, content={"detail": "ingress_auth_failed"})
+        if not presented or not hmac.compare_digest(configured, presented):
+            return JSONResponse(status_code=401, content={"detail": "ingress_auth_failed"})
+
+        # Health is the only ingress-only route, used by local/tunnel probes.
+        if request.method == "GET" and request.url.path == "/health":
+            return await call_next(request)
+
+        try:
+            device = await auth.require_access_token(request.headers.get("X-Van-Device-Token", ""))
+        except AuthError:
+            return JSONResponse(status_code=401, content={"detail": "device_access_denied"})
+        request.state.van_device_id = device.device_id
+        return await call_next(request)
 
     def require_internal_control(x_van_internal_token: str | None) -> None:
         try:
@@ -221,8 +248,54 @@ def create_app() -> FastAPI:
             "degraded": degraded.snapshot(),
         }
 
+    @app.post("/v1/devices/pairing-ticket")
+    async def create_pairing_ticket(
+        body: PairingTicketCreate,
+        x_van_internal_token: str | None = Header(default=None),
+    ):
+        require_internal_control(x_van_internal_token)
+        ticket = await auth.create_pairing_ticket(body.label, body.ttl_seconds)
+        return JSONResponse(
+            {
+                "pairing_token": ticket.token,
+                "expires_at_unix": ticket.expires_at_unix,
+            },
+            headers={"Cache-Control": "no-store"},
+        )
+
+    @app.post("/v1/devices/pair")
+    async def pair_device(body: PairDeviceBody):
+        ingress_token = settings.ingress_token.strip()
+        if not ingress_token:
+            raise HTTPException(status_code=503, detail="ingress_auth_unconfigured")
+        try:
+            result = await auth.pair_device(
+                body.pairing_token,
+                body.device_id,
+                body.device_secret,
+                body.public_key_pem,
+                body.label,
+            )
+        except AuthError as exc:
+            code = 409 if exc.code in {"already_enrolled", "device_revoked"} else 400
+            raise HTTPException(status_code=code, detail=exc.message) from exc
+        return JSONResponse(
+            {
+                "device_id": result.device.device_id,
+                "enrolled_at_unix": result.device.enrolled_at_unix,
+                "ingress_token": ingress_token,
+                "device_access_token": result.access_token,
+            },
+            headers={"Cache-Control": "no-store"},
+        )
+
+
     @app.post("/v1/devices/enroll")
-    async def enroll(body: EnrollBody):
+    async def enroll(
+        body: EnrollBody,
+        x_van_internal_token: str | None = Header(default=None),
+    ):
+        require_internal_control(x_van_internal_token)
         try:
             device = await auth.enroll(body.device_id, body.device_secret, body.public_key_pem, body.label)
         except AuthError as exc:
@@ -230,7 +303,11 @@ def create_app() -> FastAPI:
         return {"device_id": device.device_id, "enrolled_at_unix": device.enrolled_at_unix}
 
     @app.post("/v1/devices/{device_id}/revoke")
-    async def revoke(device_id: str):
+    async def revoke(
+        device_id: str,
+        x_van_internal_token: str | None = Header(default=None),
+    ):
+        require_internal_control(x_van_internal_token)
         try:
             await auth.revoke(device_id)
         except AuthError as exc:
@@ -238,7 +315,9 @@ def create_app() -> FastAPI:
         return {"revoked": True, "device_id": device_id}
 
     @app.post("/v1/commands")
-    async def commands(req: CommandRequest):
+    async def commands(req: CommandRequest, request: Request):
+        if getattr(request.state, "van_device_id", None) != req.device_id:
+            raise HTTPException(status_code=403, detail="device_identity_mismatch")
         return await orchestrator.handle(req)
 
     @app.get("/v1/briefing")
@@ -428,11 +507,15 @@ def create_app() -> FastAPI:
         return await projects.load_truth(project_id)
 
     @app.get("/v1/events")
-    async def get_events(device_id: str, after_seq: int = 0):
+    async def get_events(request: Request, device_id: str, after_seq: int = 0):
+        if getattr(request.state, "van_device_id", None) != device_id:
+            raise HTTPException(status_code=403, detail="device_identity_mismatch")
         return await events.replay(device_id, after_seq)
 
     @app.post("/v1/events/reset")
-    async def reset_events(device_id: str):
+    async def reset_events(request: Request, device_id: str):
+        if getattr(request.state, "van_device_id", None) != device_id:
+            raise HTTPException(status_code=403, detail="device_identity_mismatch")
         await events.reset_cursor(device_id)
         from van_gateway.models import DegradedCode
         degraded.set(DegradedCode.EVENT_CURSOR_RESET, True)

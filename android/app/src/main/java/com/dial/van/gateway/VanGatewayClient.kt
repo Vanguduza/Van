@@ -80,39 +80,49 @@ class VanGatewayClient(context: Context) {
         get() = prefs.getString(KEY_INGRESS_TOKEN, null)
         set(value) = prefs.edit().putString(KEY_INGRESS_TOKEN, value).apply()
 
-    fun hasIngressToken(): Boolean = !ingressToken.isNullOrBlank()
+    private var deviceAccessToken: String?
+        get() = prefs.getString(KEY_DEVICE_ACCESS_TOKEN, null)
+        set(value) = prefs.edit().putString(KEY_DEVICE_ACCESS_TOKEN, value).apply()
 
-    fun configureIngress(baseUrl: String, token: String) {
-        val normalizedToken = token.trim()
-        require(normalizedToken.length >= MIN_INGRESS_TOKEN_CHARS) { "ingress_token_too_short" }
-        val normalizedUrl = normalizeGatewayBaseUrl(baseUrl)
-        prefs.edit()
-            .putString(KEY_BASE, normalizedUrl)
-            .putString(KEY_INGRESS_TOKEN, normalizedToken)
-            .apply()
-    }
+    fun hasIngressToken(): Boolean = !ingressToken.isNullOrBlank()
 
     fun isEnrolled(): Boolean = !deviceId.isNullOrBlank() && !deviceSecret.isNullOrBlank()
 
-    suspend fun enrollThisDevice(label: String = "android"): JSONObject {
+    fun isPaired(): Boolean = isEnrolled() && hasIngressToken() && !deviceAccessToken.isNullOrBlank()
+
+    suspend fun pairThisDevice(
+        gatewayUrl: String,
+        pairingToken: String,
+        label: String = "android",
+    ): JSONObject = withContext(Dispatchers.IO) {
+        val normalizedUrl = normalizeGatewayBaseUrl(gatewayUrl)
+        val normalizedPairingToken = pairingToken.trim()
+        require(normalizedPairingToken.length >= MIN_PAIRING_TOKEN_CHARS) { "pairing_token_too_short" }
         val bytes = ByteArray(32).also { SecureRandom().nextBytes(it) }
         val secret = Base64.encodeToString(bytes, Base64.URL_SAFE or Base64.NO_WRAP or Base64.NO_PADDING)
         val id = "android-${java.util.UUID.randomUUID()}"
-        return enroll(id, secret, label)
+        val body = JSONObject()
+            .put("pairing_token", normalizedPairingToken)
+            .put("device_id", id)
+            .put("device_secret", secret)
+            .put("public_key_pem", "android-device")
+            .put("label", label)
+        val response = postJsonAt(normalizedUrl, "/v1/devices/pair", body, useIngress = false)
+        val returnedIngress = response.optString("ingress_token").trim()
+        val returnedDeviceAccess = response.optString("device_access_token").trim()
+        require(returnedIngress.length >= MIN_INGRESS_TOKEN_CHARS) { "pairing_response_missing_ingress_token" }
+        require(returnedDeviceAccess.length >= MIN_DEVICE_ACCESS_TOKEN_CHARS) { "pairing_response_missing_device_access_token" }
+        prefs.edit()
+            .putString(KEY_BASE, normalizedUrl)
+            .putString(KEY_INGRESS_TOKEN, returnedIngress)
+            .putString(KEY_DEVICE_ACCESS_TOKEN, returnedDeviceAccess)
+            .putString(KEY_DEVICE, id)
+            .putString(KEY_SECRET, secret)
+            .apply()
+        response.remove("ingress_token")
+        response.remove("device_access_token")
+        response
     }
-
-    suspend fun enroll(deviceId: String, deviceSecret: String, label: String = "android"): JSONObject =
-        withContext(Dispatchers.IO) {
-            val body = JSONObject()
-                .put("device_id", deviceId)
-                .put("device_secret", deviceSecret)
-                .put("public_key_pem", "android-device")
-                .put("label", label)
-            val resp = postJson("/v1/devices/enroll", body)
-            this@VanGatewayClient.deviceId = deviceId
-            this@VanGatewayClient.deviceSecret = deviceSecret
-            resp
-        }
 
     suspend fun health(): JSONObject = withContext(Dispatchers.IO) { getJson("/health") }
 
@@ -233,11 +243,19 @@ class VanGatewayClient(context: Context) {
         return raw.joinToString("") { b -> "%02x".format(b) }
     }
 
-    private fun postJson(path: String, body: JSONObject): JSONObject {
-        val conn = (URL("$baseUrl$path").openConnection() as HttpURLConnection).apply {
+    private fun postJson(path: String, body: JSONObject): JSONObject =
+        postJsonAt(baseUrl, path, body, useIngress = true)
+
+    private fun postJsonAt(
+        rootUrl: String,
+        path: String,
+        body: JSONObject,
+        useIngress: Boolean,
+    ): JSONObject {
+        val conn = (URL("$rootUrl$path").openConnection() as HttpURLConnection).apply {
             requestMethod = "POST"
             setRequestProperty("Content-Type", "application/json")
-            applyIngressAuth(this)
+            if (useIngress) applyIngressAuth(this)
             doOutput = true
             connectTimeout = 15_000
             readTimeout = 60_000
@@ -253,8 +271,10 @@ class VanGatewayClient(context: Context) {
     private fun getJson(path: String): JSONObject = JSONObject(rawGet(path))
 
     private fun applyIngressAuth(conn: HttpURLConnection) {
-        val token = ingressToken?.takeIf { it.isNotBlank() } ?: error("ingress_token_unconfigured")
-        conn.setRequestProperty("X-Van-Ingress-Token", token)
+        val ingress = ingressToken?.takeIf { it.isNotBlank() } ?: error("ingress_token_unconfigured")
+        val device = deviceAccessToken?.takeIf { it.isNotBlank() } ?: error("device_access_token_unconfigured")
+        conn.setRequestProperty("X-Van-Ingress-Token", ingress)
+        conn.setRequestProperty("X-Van-Device-Token", device)
     }
 
     private fun rawGet(path: String): String {
@@ -281,7 +301,10 @@ class VanGatewayClient(context: Context) {
         private const val KEY_DEVICE = "device_id"
         private const val KEY_SECRET = "device_secret"
         private const val KEY_INGRESS_TOKEN = "ingress_token"
+        private const val KEY_DEVICE_ACCESS_TOKEN = "device_access_token"
         private const val MIN_INGRESS_TOKEN_CHARS = 32
+        private const val MIN_DEVICE_ACCESS_TOKEN_CHARS = 32
+        private const val MIN_PAIRING_TOKEN_CHARS = 32
     }
 }
 

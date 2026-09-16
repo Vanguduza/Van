@@ -37,7 +37,7 @@ See `../docs/GOOGLE_INTELLIGENCE_MESH.md`.
 | `VAN_HERMES_BASE_URL` | Hermes gateway |
 | `VAN_HERMES_BEARER_TOKEN` | Hermes API token |
 | `VAN_INTERNAL_CONTROL_TOKEN` | Shared secret for privileged Hermes→gateway Google job/evidence APIs; never prompt-visible |
-| `VAN_INGRESS_TOKEN` | Owner-device bearer required on externally reachable gateway routes; stored encrypted on Android |
+| `VAN_INGRESS_TOKEN` | Outer high-entropy ingress bearer. Paired Android stores it encrypted; normal client APIs also require the separately revocable per-device token |
 | `VAN_DEVICE_SECRET_FERNET_KEY` | Dedicated Fernet key for restart-durable encrypted device HMAC secrets |
 | `VAN_GOOGLE_TOKEN_FERNET_KEY` | Fernet key for encrypted Workspace OAuth refresh tokens |
 | `VAN_GOOGLE_OAUTH_CLIENT_ID` | OAuth client ID used to exchange refresh tokens for access tokens |
@@ -49,3 +49,9 @@ See `../docs/GOOGLE_INTELLIGENCE_MESH.md`.
 | `VAN_GOOGLE_CONSUMER_CONNECTED_CAPABILITIES` | Comma-separated account surfaces configured on an authorised browser/device; still unverified until certified |
 
 Google OAuth tokens, API keys, service credentials, browser cookies and session tokens never enter LLM prompts. Gemini uses a separate Hermes runtime credential.
+
+## Android owner pairing
+
+`POST /v1/devices/pairing-ticket` is internal-control-only and creates a short-lived single-use ticket. `POST /v1/devices/pair` consumes that ticket atomically with encrypted HMAC enrollment, owner-grant creation, and issuance of a per-device access token. The gateway persists only hashes of pairing/device-access tokens. Direct enroll/revoke routes remain internal-control-only.
+
+Normal Android calls carry both `X-Van-Ingress-Token` and `X-Van-Device-Token`; command requests additionally carry the existing signed HMAC payload. `/health` intentionally requires only the ingress bearer so service/tunnel probes do not need a device identity.

@@ -2,6 +2,7 @@ from __future__ import annotations
 
 import hashlib
 import hmac
+import secrets
 import time
 from dataclasses import dataclass
 
@@ -17,6 +18,19 @@ class DeviceRecord:
     enrolled_at_unix: int
     revoked_at_unix: int | None
     label: str | None
+
+
+@dataclass
+class PairingTicket:
+    token: str
+    expires_at_unix: int
+    label: str | None
+
+
+@dataclass
+class PairingResult:
+    device: DeviceRecord
+    access_token: str
 
 
 class AuthError(Exception):
@@ -73,6 +87,106 @@ class AuthService:
                 ) from exc
             self._device_secrets[str(row["device_id"])] = secret
         return len(self._device_secrets)
+
+    async def create_pairing_ticket(
+        self,
+        label: str | None = None,
+        ttl_seconds: int = 600,
+    ) -> PairingTicket:
+        ttl = max(60, min(int(ttl_seconds), 3600))
+        token = secrets.token_urlsafe(32)
+        ticket_hash = hashlib.sha256(token.encode("utf-8")).hexdigest()
+        now = int(time.time())
+        expires = now + ttl
+        async with self.store.connection() as db:
+            await db.execute("BEGIN IMMEDIATE")
+            if label is None:
+                await db.execute(
+                    "UPDATE pairing_tickets SET used_at_unix = ? WHERE used_at_unix IS NULL AND expires_at_unix >= ?",
+                    (now, now),
+                )
+            else:
+                await db.execute(
+                    "UPDATE pairing_tickets SET used_at_unix = ? WHERE label = ? AND used_at_unix IS NULL AND expires_at_unix >= ?",
+                    (now, label, now),
+                )
+            await db.execute(
+                "INSERT INTO pairing_tickets(ticket_hash, label, expires_at_unix, used_at_unix, created_at_unix) VALUES (?, ?, ?, NULL, ?)",
+                (ticket_hash, label, expires, now),
+            )
+            await db.commit()
+        return PairingTicket(token=token, expires_at_unix=expires, label=label)
+
+    async def pair_device(
+        self,
+        pairing_token: str,
+        device_id: str,
+        device_secret: str,
+        public_key_pem: str,
+        label: str | None = None,
+    ) -> PairingResult:
+        if not pairing_token:
+            raise AuthError("pairing_ticket_invalid", "Pairing ticket invalid or expired")
+        cipher = self._cipher()
+        encrypted_secret = cipher.encrypt(device_secret.encode("utf-8")).decode("utf-8")
+        secret_hash = hashlib.sha256(device_secret.encode("utf-8")).hexdigest()
+        access_token = secrets.token_urlsafe(32)
+        access_token_hash = hashlib.sha256(access_token.encode("utf-8")).hexdigest()
+        ticket_hash = hashlib.sha256(pairing_token.encode("utf-8")).hexdigest()
+        now = int(time.time())
+        async with self.store.connection() as db:
+            await db.execute("BEGIN IMMEDIATE")
+            cur = await db.execute(
+                "SELECT label, expires_at_unix, used_at_unix FROM pairing_tickets WHERE ticket_hash = ?",
+                (ticket_hash,),
+            )
+            ticket = await cur.fetchone()
+            if ticket is None or ticket["used_at_unix"] is not None or int(ticket["expires_at_unix"]) <= now:
+                await db.rollback()
+                raise AuthError("pairing_ticket_invalid", "Pairing ticket invalid or expired")
+            cur = await db.execute(
+                "SELECT device_id, revoked_at_unix FROM devices WHERE device_id = ?",
+                (device_id,),
+            )
+            existing = await cur.fetchone()
+            if existing is not None:
+                await db.rollback()
+                code = "device_revoked" if existing["revoked_at_unix"] is not None else "already_enrolled"
+                raise AuthError(code, "Device cannot be enrolled")
+            effective_label = label or ticket["label"]
+            await db.execute(
+                "INSERT INTO devices(device_id, public_key_pem, enrolled_at_unix, revoked_at_unix, label, encrypted_secret, access_token_hash) VALUES (?, ?, ?, NULL, ?, ?, ?)",
+                (device_id, public_key_pem, now, effective_label, encrypted_secret, access_token_hash),
+            )
+            await db.execute(
+                "INSERT INTO capability_grants(grant_id, device_id, capabilities_json, expires_at_unix, task_id, revoked_at_unix, created_at_unix) VALUES (?, ?, ?, ?, NULL, NULL, ?)",
+                (
+                    f"enroll-{device_id}",
+                    device_id,
+                    Store.dumps({"secret_sha256": secret_hash, "capabilities": ["owner"]}),
+                    now + 10 * 365 * 24 * 3600,
+                    now,
+                ),
+            )
+            await db.execute(
+                "UPDATE pairing_tickets SET used_at_unix = ? WHERE ticket_hash = ? AND used_at_unix IS NULL",
+                (now, ticket_hash),
+            )
+            await db.commit()
+        self._device_secrets[device_id] = device_secret.encode("utf-8")
+        return PairingResult(DeviceRecord(device_id, public_key_pem, now, None, effective_label), access_token)
+
+    async def require_access_token(self, access_token: str) -> DeviceRecord:
+        if not access_token:
+            raise AuthError("device_access_denied", "Device access token invalid or revoked")
+        digest = hashlib.sha256(access_token.encode("utf-8")).hexdigest()
+        row = await self.store.fetchone(
+            "SELECT device_id, public_key_pem, enrolled_at_unix, revoked_at_unix, label FROM devices WHERE access_token_hash = ? AND revoked_at_unix IS NULL",
+            (digest,),
+        )
+        if row is None:
+            raise AuthError("device_access_denied", "Device access token invalid or revoked")
+        return DeviceRecord(row["device_id"], row["public_key_pem"], int(row["enrolled_at_unix"]), None, row["label"])
 
     async def enroll(self, device_id: str, device_secret: str, public_key_pem: str, label: str | None = None) -> DeviceRecord:
         existing = await self.store.fetchone("SELECT device_id, revoked_at_unix FROM devices WHERE device_id = ?", (device_id,))

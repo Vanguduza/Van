@@ -38,6 +38,15 @@ async def client(monkeypatch):
     transport = ASGITransport(app=app)
     async with AsyncClient(transport=transport, base_url="http://test", headers={"X-Van-Ingress-Token": "test-ingress-token-0123456789abcdef"}) as ac:
         async with app.router.lifespan_context(app):
+            ticket = await app.state.auth.create_pairing_ticket("pytest-client")
+            paired = await app.state.auth.pair_device(
+                ticket.token,
+                "pytest-client",
+                "pytest-client-secret",
+                "PEM",
+                "pytest-client",
+            )
+            ac.headers.update({"X-Van-Device-Token": paired.access_token})
             yield ac, app
 
 
