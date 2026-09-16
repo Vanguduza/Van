@@ -136,6 +136,19 @@ object VanPresence {
     fun visualState(cue: Cue, base: VanVisualState): VanVisualState =
         visualState(cue, frameFromVisual(base))
 
+    /** Secondary subsystem truth that may coexist with a locally active VAN pose. */
+    fun healthCue(mode: DegradedMode): String? {
+        val broken = mode.subsystems.filter { it.status == SubsystemStatus.BROKEN }
+        if (broken.isEmpty()) return null
+        val lead = broken.firstOrNull { it.id == HERMES || it.id == GATEWAY }
+            ?: broken.firstOrNull { it.id == GOOGLE }
+            ?: broken.first()
+        return when (lead.id) {
+            GOOGLE -> meshCue(mode)
+            else -> "${lead.label}: ${lead.detail}"
+        }
+    }
+
     fun meshCue(mode: DegradedMode): String {
         val google = mode.subsystems.firstOrNull { it.id == GOOGLE }
             ?: return "Google mesh: unknown"
