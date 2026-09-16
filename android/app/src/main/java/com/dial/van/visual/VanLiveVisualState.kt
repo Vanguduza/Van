@@ -34,7 +34,7 @@ object VanLiveVisualState {
 
     fun transition(
         state: VanDurableState,
-        urgency: Float = current.urgency,
+        urgency: Float = 0f,
         listening: Boolean = state == VanDurableState.LISTENING,
         speaking: Boolean = state == VanDurableState.SPEAKING,
     ) = onMain {
@@ -43,9 +43,16 @@ object VanLiveVisualState {
         val currentPriority = priority(current.durableState)
         val insideHold = now - stateStartedAtMs < TRANSIENT_HOLD_MS
 
-        // Safety/error truth and direct owner interaction always win immediately. A low-priority
-        // cosmetic transition may not erase a stronger state during its minimum readable hold.
-        if (insideHold && nextPriority < currentPriority && !isCritical(state)) return@onMain
+        // Lower-priority visual noise cannot erase a stronger state during its readable hold.
+        // Direct owner interaction and safety/error truth always bypass this cosmetic hysteresis.
+        if (
+            insideHold &&
+            nextPriority < currentPriority &&
+            !isCritical(state) &&
+            !isDirectInteraction(state)
+        ) {
+            return@onMain
+        }
 
         generation += 1L
         stateStartedAtMs = now
@@ -91,6 +98,7 @@ object VanLiveVisualState {
             listening = false,
             mouthOpen = mouthOpen.coerceIn(0f, 1f),
             viseme = viseme.coerceAtLeast(0),
+            urgency = 0f,
         )
     }
 
@@ -111,6 +119,14 @@ object VanLiveVisualState {
 
     private fun onMain(block: () -> Unit) {
         if (Looper.myLooper() == Looper.getMainLooper()) block() else main.post(block)
+    }
+
+    private fun isDirectInteraction(state: VanDurableState): Boolean = when (state) {
+        VanDurableState.ATTENTIVE,
+        VanDurableState.LISTENING,
+        VanDurableState.SPEAKING,
+        -> true
+        else -> false
     }
 
     private fun isCritical(state: VanDurableState): Boolean = when (state) {
