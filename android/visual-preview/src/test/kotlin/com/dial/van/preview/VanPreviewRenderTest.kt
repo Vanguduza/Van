@@ -2,9 +2,12 @@ package com.dial.van.preview
 
 import com.dial.van.overlay.OverlayTheme
 import com.dial.van.visual.VanDurableState
+import com.dial.van.visual.VanHealthState
+import com.dial.van.visual.VanPresenceFrame
 import com.dial.van.visual.VanPresentation
 import com.dial.van.visual.VanScene
 import com.dial.van.visual.VanSceneFrame
+import com.dial.van.visual.VanSpeechState
 import com.dial.van.visual.VanVisualState
 import org.junit.Assert.assertTrue
 import org.junit.Test
@@ -13,7 +16,8 @@ import kotlin.math.abs
 
 /**
  * Measures the acceptance-matrix distinctness requirements on real pixels, so "offline,
- * degraded and urgent are distinct" is evidence rather than a claim.
+ * degraded and urgent are distinct" and orthogonal activity/health composition are evidence
+ * rather than claims.
  */
 class VanPreviewRenderTest {
 
@@ -29,10 +33,25 @@ class VanPreviewRenderTest {
             VanPreviewSheets.commandCentreSheet(),
             VanPreviewSheets.glassTokenSheet(),
             VanPreviewSheets.auraTopologySheet(),
+            VanEvidenceMatrix.orthogonalPresenceBoard(),
         ).forEach { sheet ->
             assertTrue("sheet too small: ${sheet.width}x${sheet.height}", sheet.width > 600 && sheet.height > 400)
             assertTrue("sheet rendered blank", nonBackgroundRatio(sheet) > 0.02)
         }
+    }
+
+    @Test
+    fun orthogonalListeningAndDegradedEvidenceIsNotAPlainDegradedFrame() {
+        val composite = VanEvidenceMatrix.orthogonalPresenceTile(
+            VanPresenceFrame(
+                activity = VanDurableState.LISTENING,
+                health = VanHealthState.DEGRADED,
+                speech = VanSpeechState.LISTENING,
+            ),
+        )
+        val plainDegraded = VanEvidenceMatrix.presenceTile(VanDurableState.DEGRADED)
+        val delta = meanAbsoluteDifference(composite, plainDegraded)
+        assertTrue("LISTENING+DEGRADED evidence collapsed to plain DEGRADED (delta $delta)", delta > 1.0)
     }
 
     @Test
