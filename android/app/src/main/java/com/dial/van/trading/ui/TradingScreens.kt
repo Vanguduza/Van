@@ -450,15 +450,15 @@ private fun ConcentrationBars(title: String, values: Map<String, Double>) {
 
 // ---------------------------------------------------------------- Accounts
 @Composable
-fun AccountsScreen(env: ScreenEnv, padding: PaddingValues) {
+fun AccountsScreen(env: ScreenEnv, padding: PaddingValues, onAdd: () -> Unit = {}, onVerify: ((String) -> Unit)? = null) {
     var tick by remember { mutableIntStateOf(0) }
     var accounts: Loaded<List<AccountCard>> by remember { mutableStateOf(Loaded.Loading) }
     LaunchedEffect(tick) { accounts = Loaded.Loading; accounts = env.repo.accounts() }
     LazyColumn(modifier = Modifier.fillMaxSize().padding(padding).padding(horizontal = 14.dp), verticalArrangement = Arrangement.spacedBy(8.dp), contentPadding = PaddingValues(vertical = 10.dp)) {
-        item { Row(verticalAlignment = Alignment.CenterVertically) { Text("Accounts", color = Color.White, fontSize = 20.sp, fontWeight = FontWeight.Bold); Spacer(Modifier.weight(1f)); RefreshAction { tick += 1 } } }
+        item { Row(verticalAlignment = Alignment.CenterVertically) { Text("Accounts", color = Color.White, fontSize = 20.sp, fontWeight = FontWeight.Bold); Spacer(Modifier.weight(1f)); Text("+ Add account", color = TradingColors.accent, fontSize = 12.sp, fontWeight = FontWeight.SemiBold, modifier = Modifier.clickable(onClick = onAdd).padding(end = 10.dp)); RefreshAction { tick += 1 } } }
         item {
             LoadedBox(accounts) { list ->
-                if (list.isEmpty()) EmptyState("No trading accounts registered.", "Register on van-trading-core: python -m vati accounts add --alias … --broker MT5|DERIV|PAPER. Credentials stay in a 0600 secrets file and never reach this app.")
+                if (list.isEmpty()) EmptyState("No trading accounts yet.", "Tap + Add account to link Deriv, cTrader or MT5 (via Expert Advisor), or create a Deriv demo account here.")
                 Column(verticalArrangement = Arrangement.spacedBy(6.dp)) { list.forEach { AccountRow(it, env.now()) } }
             }
         }

@@ -75,6 +75,23 @@ class VanGatewayClient(context: Context) {
     suspend fun tradingTradeDetail(tradeIntentId: String): String = withContext(Dispatchers.IO) { rawGet("/v1/trading/trades/" + java.net.URLEncoder.encode(tradeIntentId, "UTF-8")) }
     suspend fun tradingBars(symbol: String, timeframe: String = "H1", limit: Int = 300): String = withContext(Dispatchers.IO) { rawGet("/v1/trading/bars?symbol=$symbol&timeframe=$timeframe&limit=$limit") }
 
+    /**
+     * Owner account onboarding (Rev 5 Part B): device-signed action forwarded by the gateway to the trading VM.
+     * Returns (http status, body). The device secret signs; it never leaves this object.
+     */
+    suspend fun tradingAccountAction(action: String, args: kotlinx.serialization.json.JsonObject): Pair<Int, String> = withContext(Dispatchers.IO) {
+        val id = deviceId ?: error("not_enrolled")
+        val secret = deviceSecret ?: error("not_enrolled")
+        val body = com.dial.van.trading.AccountOnboarding.requestBody(secret, id, System.currentTimeMillis() / 1000L, action, args)
+        val conn = (URL("$baseUrl/v1/trading/accounts/action").openConnection() as HttpURLConnection).apply {
+            requestMethod = "POST"; setRequestProperty("Content-Type", "application/json"); doOutput = true; connectTimeout = 15_000; readTimeout = 90_000
+        }
+        conn.outputStream.use { it.write(body.toString().toByteArray(StandardCharsets.UTF_8)) }
+        val code = conn.responseCode
+        val stream = if (code in 200..299) conn.inputStream else conn.errorStream
+        code to (stream?.bufferedReader()?.readText() ?: "{}")
+    }
+
     suspend fun decisions(): org.json.JSONArray = withContext(Dispatchers.IO) {
         val text = rawGet("/v1/decisions")
         org.json.JSONArray(text)

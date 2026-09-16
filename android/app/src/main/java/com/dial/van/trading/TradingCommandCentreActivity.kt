@@ -40,6 +40,7 @@ import androidx.navigation.compose.rememberNavController
 import androidx.navigation.navArgument
 import com.dial.van.VanApplication
 import com.dial.van.command.CommandCentreActivity
+import com.dial.van.trading.ui.AccountOnboardingScreen
 import com.dial.van.trading.ui.AccountsScreen
 import com.dial.van.trading.ui.InstrumentScreen
 import com.dial.van.trading.ui.OverviewScreen
@@ -99,7 +100,8 @@ class TradingCommandCentreActivity : FragmentActivity() {
                             composable("trade/{id}", arguments = listOf(navArgument("id") { type = NavType.StringType })) { entry -> TradeDetailScreen(env, tnav, padding, entry.arguments?.getString("id") ?: "") }
                             composable("instrument/{symbol}", arguments = listOf(navArgument("symbol") { type = NavType.StringType })) { entry -> InstrumentScreen(env, tnav, padding, entry.arguments?.getString("symbol") ?: "") }
                             composable(ROUTE_RISK) { RiskScreen(env, tnav, padding) }
-                            composable(ROUTE_ACCOUNTS) { AccountsScreen(env, padding) }
+                            composable(ROUTE_ACCOUNTS) { AccountsScreen(env, padding, onAdd = { nav.navigate(ROUTE_ACCOUNT_ADD) }) }
+                            composable(ROUTE_ACCOUNT_ADD) { AccountOnboardingScreen(env, padding, app) { nav.popBackStack() } }
                         }
                         // Deep links from the overlay / Command Centre land on the requested object once the graph exists.
                         if (startRoute != ROUTE_OVERVIEW) {
@@ -145,6 +147,7 @@ class TradingCommandCentreActivity : FragmentActivity() {
         const val ROUTE_OVERVIEW = "overview"
         const val ROUTE_RISK = "risk"
         const val ROUTE_ACCOUNTS = "accounts"
+        const val ROUTE_ACCOUNT_ADD = "accounts/add"
 
         fun intent(context: Context, route: String = ROUTE_OVERVIEW): Intent =
             Intent(context, TradingCommandCentreActivity::class.java).putExtra(EXTRA_ROUTE, route).addFlags(Intent.FLAG_ACTIVITY_NEW_TASK)
