@@ -59,14 +59,12 @@ import androidx.savedstate.setViewTreeSavedStateRegistryOwner
 import com.dial.van.R
 import com.dial.van.VanApplication
 import com.dial.van.command.CommandCentreActivity
-import com.dial.van.visual.VanCaptions
 import com.dial.van.visual.VanEmbodiment
 import com.dial.van.visual.VanGlassSurface
 import com.dial.van.visual.VanGlassTokens
 import com.dial.van.visual.VanLiveVisualState
 import com.dial.van.visual.VanPresence
 import com.dial.van.visual.VanPresentation
-import com.dial.van.visual.VanStatusPalette
 import com.dial.van.visual.rememberVanEffectBudget
 
 /**
@@ -180,17 +178,23 @@ class FloatingOverlayService : Service(), LifecycleOwner, SavedStateRegistryOwne
     private fun OverlayContent() {
         val app = application as VanApplication
         val degraded by app.degradedModeStore.state.collectAsState()
-        // Both channels are observable: subsystem truth can change independently of local activity.
+        // Activity and subsystem health are observed independently. Non-uplink degradation remains
+        // visible in Zone C + the secondary health line without relabelling an active VAN as broken.
         val liveFrame = VanLiveVisualState.frame
         val cue = VanPresence.cue(degraded, live = liveFrame)
         val visualState = VanPresence.visualState(cue, liveFrame)
-        val palette = VanStatusPalette.forState(cue.durableState)
+        val chrome = VanOverlayChrome.resolve(
+            cue = cue,
+            live = liveFrame.copy(health = cue.health),
+            healthLine = VanPresence.healthCue(degraded),
+        )
         val budget = rememberVanEffectBudget()
         val glass = VanGlassTokens.forState(
-            state = cue.durableState,
+            state = chrome.primaryState,
             liveBlurAvailable = blurBehindActive,
             budget = budget,
         )
+        val systemLine = chrome.healthLine ?: VanPresence.meshCue(degraded)
 
         MaterialTheme {
             Box(modifier = Modifier.pointerInput(Unit) { dragHandler() }) {
@@ -210,8 +214,9 @@ class FloatingOverlayService : Service(), LifecycleOwner, SavedStateRegistryOwne
                         glass = glass,
                         budget = budget,
                         visualState = visualState,
-                        caption = VanCaptions.forState(cue.durableState),
-                        accent = palette.accent,
+                        caption = chrome.caption,
+                        healthLine = chrome.healthLine,
+                        accent = chrome.accent,
                     )
 
                     OverlayMode.EXPANDED -> ExpandedShell(
@@ -219,10 +224,10 @@ class FloatingOverlayService : Service(), LifecycleOwner, SavedStateRegistryOwne
                         glass = glass,
                         budget = budget,
                         visualState = visualState,
-                        headline = cue.headline,
-                        caption = VanCaptions.forState(cue.durableState),
-                        meshCue = VanPresence.meshCue(degraded),
-                        accent = palette.accent,
+                        headline = chrome.headline,
+                        caption = chrome.caption,
+                        systemLine = systemLine,
+                        accent = chrome.accent,
                     )
                 }
             }
@@ -261,6 +266,7 @@ class FloatingOverlayService : Service(), LifecycleOwner, SavedStateRegistryOwne
         budget: com.dial.van.visual.VanEffectBudget,
         visualState: com.dial.van.visual.VanVisualState,
         caption: String,
+        healthLine: String?,
         accent: Int,
     ) {
         Box(
@@ -279,7 +285,7 @@ class FloatingOverlayService : Service(), LifecycleOwner, SavedStateRegistryOwne
                 Column(
                     modifier = Modifier
                         .fillMaxWidth()
-                        .padding(start = 88.dp, end = 10.dp, top = 8.dp, bottom = 8.dp),
+                        .padding(start = 88.dp, end = 10.dp, top = 6.dp, bottom = 6.dp),
                 ) {
                     Text(
                         text = caption,
@@ -288,7 +294,15 @@ class FloatingOverlayService : Service(), LifecycleOwner, SavedStateRegistryOwne
                         fontWeight = FontWeight.SemiBold,
                         maxLines = 1,
                     )
-                    Spacer(modifier = Modifier.height(4.dp))
+                    if (healthLine != null) {
+                        Text(
+                            text = healthLine,
+                            color = Color(0xFF8A97A6),
+                            fontSize = 9.sp,
+                            maxLines = 1,
+                        )
+                    }
+                    Spacer(modifier = Modifier.height(2.dp))
                     OverlayTheme.COMPACT_ACTIONS.chunked(2).forEach { row ->
                         Row(horizontalArrangement = Arrangement.spacedBy(6.dp)) {
                             row.forEach { label ->
@@ -300,7 +314,7 @@ class FloatingOverlayService : Service(), LifecycleOwner, SavedStateRegistryOwne
                                 }
                             }
                         }
-                        Spacer(modifier = Modifier.height(4.dp))
+                        Spacer(modifier = Modifier.height(2.dp))
                     }
                 }
             }
@@ -328,7 +342,7 @@ class FloatingOverlayService : Service(), LifecycleOwner, SavedStateRegistryOwne
         visualState: com.dial.van.visual.VanVisualState,
         headline: String,
         caption: String,
-        meshCue: String,
+        systemLine: String,
         accent: Int,
     ) {
         val solid = glass.requiresSolidControls
@@ -349,7 +363,7 @@ class FloatingOverlayService : Service(), LifecycleOwner, SavedStateRegistryOwne
                     Text("Van", color = Color.White, fontSize = 16.sp, fontWeight = FontWeight.Bold)
                     Text(text = headline, color = Color(accent), fontSize = 13.sp, fontWeight = FontWeight.SemiBold)
                     Text(text = caption, color = Color(0xFFB6C2D0), fontSize = 11.sp, maxLines = 2)
-                    Text(text = meshCue, color = Color(0xFF8A97A6), fontSize = 10.sp, maxLines = 1)
+                    Text(text = systemLine, color = Color(0xFF8A97A6), fontSize = 10.sp, maxLines = 1)
                     Spacer(modifier = Modifier.height(6.dp))
                     Row(horizontalArrangement = Arrangement.spacedBy(6.dp)) {
                         OverlayTheme.COMPACT_ACTIONS.forEach { label ->
