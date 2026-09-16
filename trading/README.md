@@ -11,6 +11,8 @@ later phases add packages under the layout in Rev 2 §49.
 | `vati/contracts/schemas/` | 0 | JSON Schema for `TradingMandate`, `SymbolContract`, `RiskSnapshot`, `TradeIntent`, `RiskDecision`, `ExecutionReceipt`, `StrategyCapsule`. |
 | `examples/` | 0 | Example mandate (unsigned placeholder signature; not a live mandate). |
 | `tests/` | 0 | Unit tests, fail-closed path tests and seeded property fuzz (P1–P8). |
+| `architecture/stack_lock.json` | 0 (Rev 2.1) | Machine-checked tool-per-layer lock with adoption phase, latency tier, licence class and observed version. |
+| `vtil/` | 2 (seed now) | VTIL registry in DIAL VEKL schema plus the probe that runs DIAL's unmodified resolver against it. |
 
 ## Invariants the code enforces
 

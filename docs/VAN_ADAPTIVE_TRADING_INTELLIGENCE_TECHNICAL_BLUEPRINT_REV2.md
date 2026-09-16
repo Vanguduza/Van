@@ -1,13 +1,14 @@
 # VAN Adaptive Trading Intelligence (VATI)
 ## Technical Blueprint & Development Plan — Revision 2
 
-**Revision:** 2.0  
+**Revision:** 2.1 (Rev 2.0 + Part E Industry Integration Architecture)  
 **Date:** 2026-09-16  
 **Status:** Proposed Canonical Architecture / Development Authority Candidate. Becomes locked authority only on owner acceptance (A4). Supersedes Rev 1 for active intent; Rev 1 is retained verbatim as provenance at `docs/archive/VAN_ADAPTIVE_TRADING_INTELLIGENCE_TECHNICAL_BLUEPRINT_REV1.md`.  
 **Product:** VAN — DIAL owner-facing assistant, Hermes profile `van`  
 **Scope:** Forex majors, major indices, metals, MetaTrader 5, Deriv, research intelligence, adaptive strategy selection, deterministic risk, execution, learning and owner-facing trading UX.  
 **Parent authority:** `docs/PROJECT_TRUTH_PROTOCOL.md`, `docs/SECURITY_POLICY.md`, `hermes/profile/van/SOUL.md`. VAN remains a Hermes bot; Hermes remains the sole agent runtime; deterministic risk and execution controls outrank model opinion.  
-**Delivered with this revision (Phase 0):** `trading/vati/risk` deterministic Risk Authority, `trading/vati/contracts/schemas` core event contracts, `trading/tests` (unit, fail-closed and property fuzz), `trading/tools/induce_gate_failures.py`, `hermes/skills/trading-intelligence`, trading prohibitions in `hermes/policy/van_policy_hook.py`.
+**Owner direction recorded 2026-09-16:** VAN trader is a new project integrated into the existing Van product. It borrows DIAL's VEKL *infrastructure* (resolver, registries, manifests, snapshot substrate) rather than only its pattern; a dedicated VEKL instance for trading may be created later if evidence shows it improves trading output and performance (Part E §E.4).  
+**Delivered with this revision (Phase 0):** `trading/vati/risk` deterministic Risk Authority, `trading/vati/contracts/schemas` core event contracts, `trading/tests` (unit, fail-closed and property fuzz), `trading/tools/induce_gate_failures.py`, `hermes/skills/trading-intelligence`, trading prohibitions in `hermes/policy/van_policy_hook.py`; **Rev 2.1 adds** `trading/architecture/stack_lock.json` (machine-checked tool-per-layer lock), `trading/vtil/registry` (VTIL seed registry in DIAL VEKL schema) and `trading/vtil/tools/resolve_probe.mjs` (DIAL's unmodified resolver running against it).
 
 ---
 
@@ -604,3 +605,242 @@ Three things this probe taught, recorded because the correction is the deliverab
 **Reference sizing check (worked example from Rev 1 §41, now a test):** equity 10 000, requested 0.40 %, EURUSD long 1.10010 / stop 1.09790 (22 pips), 1 standard lot = 100 000 per price unit → raw 0.1818 lots → **0.18 lots**, realised risk 39.60 (0.396 %), heat after 0.396 %. Rev 1's example receipt of `approved_size: 0.42` at `approved_risk_pct: 0.0032` is inconsistent with its own intent at standard lot size (0.42 lots × 22 pips = 92.40 = 0.92 % of 10 000); Rev 2's number is the one the code produces.
 
 **What Phase 0 does not claim.** No market data, strategy, adapter, reconciliation or VTIL service exists yet; nothing here has traded on demo or live; the mandate example carries a placeholder signature reference and is not a live mandate. Rev 2 becomes locked authority only when the owner accepts it (A4).
+
+---
+
+# Part E — Industry Integration Architecture (Rev 2.1)
+
+## E.0 Why this part exists
+
+The owner's review notes (2026-09-16) judged Rev 1 correct in philosophy but not yet a deterministic build authority: it did not lock one best-fit tool per layer, reject overlapping alternatives, define interface contracts, pin repositories/versions/licences, set data-source precedence and fallback, or lay out deployment topology and end-to-end wiring. Part E does that. It also records the owner's two directions: VAN trader is a new project inside the existing Van product, and it borrows DIAL's VEKL infrastructure, with a dedicated trading VEKL instance permitted later if evidence justifies it.
+
+Every external fact below was read from a primary artefact on 2026-09-16 (PyPI JSON, upstream LICENSE files, the published `nautilus_trader` wheel) and is recorded in `trading/architecture/stack_lock.json`. None of it is a version pin; pins happen at each adoption gate through Context7/official releases.
+
+## E.1 Review of the proposed stack, layer by layer
+
+The notes' table is adopted with the corrections below. Verdicts: **ADOPT** as proposed; **ADOPT+FIX** with a correction; **STAGE** right tool, later phase.
+
+| Layer | Proposed | Verdict | Verified facts and corrections |
+|---|---|---|---|
+| Trading kernel | NautilusTrader | **ADOPT** | Wheel 1.231.0 ships `BinaryOption`, `Cfd`, `CurrencyPair`, `FuturesContract`, `OptionContract`, `RiskEngine` (+ `risk/sizing`), `ParquetDataCatalog`, `backtest/node`, `live/node`, `execution/algorithm`, in-tree `databento`, `sandbox` and `_template` adapters. **No MT5, Deriv or cTrader adapter exists**; VAN writes both venue adapters from `_template`. Licence LGPL-3.0-or-later (weak copyleft: use as a library is fine; modifications to Nautilus itself must be published). Requires Python ≥ 3.12; the Van gateway runs 3.11, so the kernel gets its own runtime/container. |
+| Independent validation oracle | QuantConnect LEAN | **ADOPT+FIX** | Apache-2.0. Validation only, never a live account. Cost is real: every Tier-A capsule is implemented twice. Rev 2.1 limits LEAN reproduction to Tier-A capsules (those eligible for more than 25 % of mandate risk budget) and defines the agreement metric (§E.6). |
+| MT5 execution | Nautilus ExecutionClient → VAN Risk Authority → MT5 worker | **ADOPT+FIX** | The notes place the Risk Authority *after* the ExecutionClient; that is too late, because an order object already exists. Correct chain in §E.2: Strategy → **VAN RiskGate** (sizing, before any order exists) → `SubmitOrder` → **Nautilus RiskEngine** (venue-level quantity/price/notional/rate checks) → **ExecutionClient** (refuses any order without a sealed `decision_hash`) → Windows worker → broker. Three planes, one sizer. `MetaTrader5` 5.0.6180 ships `win_amd64` wheels only. |
+| Deriv execution | VAN-native first-class venue | **ADOPT** | Implemented as a Nautilus adapter, not a separate bot: Rise/Fall, Accumulators, Turbos, Vanillas map to `BinaryOption`/`OptionContract`; Multipliers and CFDs map to `Cfd`. All fixed-payout products use the `FULL_STAKE` loss model already enforced in `vati/risk`. |
+| Futures/options reference data | Databento + direct CME/Cboe | **STAGE (Phase 10)** | `databento` 0.86.0, Apache-2.0; Nautilus in-tree adapter. Needed for Stage C indices and gold order-flow reference, not for Stage A FX demo. Paid entitlement is an external gate. |
+| Implied volatility | CME CVOL + Cboe VIX family | **STAGE (Phase 10)** | Named as the primary forward-looking volatility state; ATR/realised volatility become fallback features, never the primary state. Vendor terms and entitlement are external gates. |
+| Research-data façade | OpenBB | **ADOPT+FIX** | 4.7.2, **AGPL-3.0-only**. Research process only; never market-data truth; never in the latency path. AGPL requires an owner-signed adoption decision; DIAL's own ERP doctrine allows AGPL only as a self-hosted sibling or read-only reference, and VATI follows the same rule. |
+| AI quant research | Microsoft Qlib | **ADOPT+FIX** | `pyqlib` 0.9.7, MIT. Terminates at the model boundary (MLflow). Qlib's data handlers are equity-centric; FX/futures handlers are VAN-written. Its execution layer is never used. |
+| Hyperparameter search | Optuna | **ADOPT** | 5.0.0, MIT. Research only; output is a candidate. |
+| Feature store | Feast | **STAGE (Phase 8)** | 0.66.0, Apache-2.0. Adopted when the calibrated meta-labeller arrives; online reads are T1, never T0. |
+| Model/experiment registry | MLflow | **STAGE (Phase 8)** | 3.16.0, Apache-2.0. A model alias is not a promotion; the signed `StrategyCapsule` is. |
+| Live event backbone | Redpanda | **STAGE (Phase 12)** | **BSL-1.1** (converts to Apache-2.0 per release schedule). Never inside the tick-to-order path. M1 uses the Nautilus message bus plus the event ledger with the *same event contracts*; Redpanda is introduced at M2 without a contract change. Owner-signed adoption decision required. |
+| Hot market time-series | QuestDB | **STAGE (Phase 12)** | Apache-2.0. Never transactional authority. |
+| Historical lake | Parquet + object storage | **ADOPT** | Nautilus `ParquetDataCatalog` for kernel-consumable data plus normalised research Parquet. Phase 1. |
+| Research accelerator | ArcticDB (optional) | **STAGE (Phase 11, optional)** | 6.26.0, **BSL-1.1**. Owner-signed adoption decision required. |
+| Transactional authority | PostgreSQL | **ADOPT+FIX** | Phases 0–3 may use the Van gateway SQLite store with the same schemas; PostgreSQL from Phase 4. Always a **separate database from any DIAL business/finance database**: VATI is not a DIAL money authority and must not become a second ledger inside DIAL. |
+| Durable workflows | Temporal | **STAGE (Phase 11)** | `temporalio` MIT. Certification, promotion and broker-recovery workflows; never in the tick path. |
+| VEKL / GraphRAG | "Existing DIAL system" | **ADOPT+FIX** | Borrow the **resource-selection, manifest and immutable-snapshot substrate** (proven in §E.4). Do **not** borrow the GraphRAG/Development-Unit half initially: it presumes DIAL's Feature Registry, Contract Registry and Decision Log. VTIL's analogue graph is compiled from VATI's own event ledger. |
+| Google research mesh | Gemini / Deep Research / NotebookLM | **ADOPT** | Via the existing VAN gateway planner; T2/T3 only. |
+| Observability | OpenTelemetry + Prometheus + Grafana | **ADOPT (Phase 1)** | Grafana is AGPL; used as an unmodified operator tool, not linked into VATI. |
+
+Overlaps rejected explicitly: no second production kernel (LEAN, backtrader, vectorbt); no ML framework execution layer; no analytical store as transactional authority; no OpenBB in the latency path; no LLM in T0/T1; no message broker in T0.
+
+## E.2 Canonical wiring (deterministic stitching)
+
+```text
+EXTERNAL SOURCES
+  venue feeds (MT5 / Deriv)     reference feeds (Databento, CME, Cboe)     macro/news (BLS, Fed, ALFRED, OpenBB façade)
+        │                                  │                                          │
+        └──────────────────────────────────┴──────────────────────────────────────────┘
+                                           │
+                                   INGESTION GATE  (schema, clocks, freshness, hash)      T1
+                                           │
+                            CANONICAL EVENT STREAM                                        T1
+                     M1: Nautilus message bus + event ledger | M2+: Redpanda (same contracts)
+                                           │
+              ┌────────────────────────────┼─────────────────────────────┐
+              ▼                            ▼                             ▼
+        QuestDB (M2)               Parquet lake                    EVENT LEDGER
+        live / hot            ParquetDataCatalog + research      PostgreSQL (SQLite ≤ Phase 3)
+              │                            │                             ▲
+              └──────────────┬─────────────┘                             │
+                             ▼                                           │
+                      FEATURE ENGINE ── Feast (M2) offline ↔ online      │
+                             │                                           │
+             ┌───────────────┴─────────────────┐                         │
+             ▼                                 ▼                         │
+      LIVE MARKET STATE                   RESEARCH (T3)                  │
+      regimes, integrity,            Qlib · Optuna · OpenBB façade       │
+      activation_id                  MLflow lineage                      │
+             │                       purged / walk-forward               │
+             │                       LEAN independent reproduction       │
+             │                       Nautilus realistic backtest         │
+             │                       cost / latency / slippage stress    │
+             │                                 │                         │
+             │                          VTIL admission ◄── TradeExperience / TCA artefacts
+             │                                 │                         │
+             └────────────────┬────────────────┘                         │
+                              ▼                                          │
+                     STRATEGY REGISTRY  (signed StrategyCapsules)        │
+                              │                                          │
+                     NautilusTrader Strategy  ─────────────────────────┐ │
+                              │                                        │ │
+                     OPPORTUNITY ENGINE → TradeIntent                  │ │
+                              │                                        │ │
+   ═══════════ VAN RISK GATE  (trading/vati/risk, in-process, T0) ═════│═│═══  plane 1: the only sizer
+                              │  sealed RiskDecision                   │ │
+                     Nautilus RiskEngine (qty / price / notional / rate) │ │  plane 2
+                              │                                        │ │
+                     ExecutionClient  (refuses without decision_hash)  │ │  plane 3
+                       /               \                               │ │
+             MT5 ExecutionClient      Deriv ExecutionClient            │ │
+                    │                        │                         │ │
+          mTLS bridge → Windows worker    Deriv WebSocket              │ │
+                    │                        │                         │ │
+                 broker                    Deriv                       │ │
+                    └───────────┬────────────┘                         │ │
+                                ▼                                      │ │
+                         RECONCILIATION ───────────────────────────────┘─┘
+                                ▼
+                               TCA
+                                ▼
+                          TRADE REVIEW
+                                ▼
+                         VTIL LEARNING (admission, never authority)
+```
+
+Every arrow is a typed contract (§E.5). Nothing on the T0 line crosses a network broker, a workflow engine or a model.
+
+## E.3 Research-to-production supply chain
+
+```text
+IDEA / OBSERVATION
+  ↓ VTIL hypothesis (CAUSAL_HYPOTHESIS, activation_id)
+  ↓ Qlib / deterministic research (trial ledger sequence number)
+  ↓ Optuna exploration (candidate only)
+  ↓ MLflow experiment lineage (dataset hash, vintage, seeds, cost model)
+  ↓ purged / embargoed / walk-forward validation; calibration gate (§22)
+  ↓ LEAN independent reproduction (Tier-A capsules; agreement metric §E.6)
+  ↓ Nautilus realistic backtest (ParquetDataCatalog, spread curve, latency)
+  ↓ cost / latency / slippage stress; deflated Sharpe; PBO ≤ 0.10
+  ↓ DEMO → SHADOW → LIMITED_LIVE
+  ↓ StrategyCapsule signature (owner A4; MLflow model version + Feast feature version + VTIL evidence refs frozen in the capsule)
+  ↓ CERTIFIED_LIVE
+```
+
+Production model path: `MLflow model version → Feast exact feature version → VATI meta-labeller`. VTIL records why the model exists, what evidence supports it, which regimes it works in, which failures were observed and what superseded it. MLflow owns the machine-learning lifecycle; VTIL owns trading knowledge and provenance; neither duplicates the other, and neither can promote a capsule.
+
+## E.4 VTIL on borrowed DIAL VEKL infrastructure
+
+### What DIAL actually has (mapped 2026-09-16)
+- The VEKL engine is plain ESM in `dial-new/agent-system/orchestration/` with **zero npm dependencies** and `repoDir`/`root` already parameterised on every public function. The resource-selection slice (`engineering-resource-resolver.mjs`, `engineering-resource-registry.mjs`, `skill-registry.mjs` loaders, `skill-activation-store.mjs` manifest/hash/verify, immutable `knowledge/vendor` snapshot jail) is about 1 100 lines.
+- Registries are JSON arrays with JSON Schema files (`engineering-resource.schema.json`, `engineering-resource-source.schema.json`, `skill-activation-manifest.schema.json`). Trust tiers are `T0_…`–`T4_…` strings; `sensitive_data_allowed` is schema-level `const false`.
+- Task classes are registry-owned (`TASK_CLASS_SIGNAL_POLICY.json` prose/path rules), so a new domain adds vocabulary without code changes.
+- DIAL coupling is a handful of hard-coded relative paths (`agent-system/engineering-knowledge/registries`, `agent-system/registries/TASK_CLASS_SIGNAL_POLICY.json`, `FEATURE_REGISTRY.json`, seven canon `AUTHORITY_PATHS`), one Feature-ID regex, a `HEALTH`/`zie619` guard and `MANDATORY_TASK_CLASSES`. The GraphRAG/Development-Unit half is deeply coupled to DIAL's Feature Registry, Contract Registry and Decision Log.
+
+### Borrow plan
+1. **Now (delivered):** Van keeps a trading registry in DIAL's exact schema at `trading/vtil/registry/` (14 sources, 16 resources, a T0 `van.trading` policy source that always binds, one T4 community source restricted to discovery). `trading/vtil/tools/resolve_probe.mjs` mirrors the two directory names DIAL hard-codes and runs DIAL's **unmodified** resolver against it.
+2. **Phase 2 (VATI-F002):** vendor the resource-selection slice into Van as a pinned DIAL commit (git subtree or package), with a `vekl-config.mjs` seam proposed upstream in dial-new so paths, project ID, entity-ID pattern, sensitive-domain guards and mandatory classes are injected rather than hard-coded. That upstream change is a DIAL Project Truth change and needs an `OWNER_EXPLICIT` authorization record in dial-new; until then Van runs the mirror approach.
+3. **Phase 2:** VTIL persists Trading Knowledge Activation Manifests with the same fields as DIAL's manifest (`activation_id`, resources with `selection_role`/`selection_purpose`, `registry_fingerprint`, `manifest_sha256`, `previous_activation_id`), under VATI's own control home, never under `/var/lib/dial-control`.
+4. **Not borrowed initially:** GraphRAG compiler, Development Units, admission guard tied to DIAL canon. VTIL's analogue graph (Rev 2 §7) is compiled from VATI's event ledger and `TradeExperienceArtifact`s.
+5. **Fork trigger (owner decision, evidence-based):** VTIL becomes a dedicated VEKL instance if any of: (a) trading task classes or trading-specific eligibility rules (regime validity, decay, polarity) cannot be expressed in the shared resolver without DIAL-facing changes; (b) retrieval-eval on the trading golden set stays below floor for two consecutive re-resolutions after registry tuning; (c) VTIL freshness needs (minutes) conflict with DIAL's engineering cadence (hours/days). Until then, one substrate, two registries.
+
+### Proof (`DIAL_REPO=../dial-new node trading/vtil/tools/resolve_probe.mjs`)
+
+```text
+status GREEN | validation ok True 14 sources 16 resources
+VT-001 ok= True | classes ['NFP_EVENT_TRADING', 'MACRO_POINT_IN_TIME']
+   selected ['van.trading.rules.rev2-canon', 'ref.bls.employment-situation', 'ref.alfred.vintages', 'community.forums.nfp-trading-anecdotes']
+   community(corroboration only) ['community.forums.nfp-trading-anecdotes']
+VT-002 ok= True | classes ['MT5_EXECUTION', 'SYMBOL_CONTRACT_SYNC', 'TRADING_KERNEL', 'VENUE_ADAPTER']
+   selected ['van.trading.rules.rev2-canon', 'ref.nautilus.adapter-template', 'ref.nautilus.docs', 'ref.metaquotes.mt5-python']
+VT-003 ok= True | classes ['DERIV_EXECUTION', 'DERIV_SYNTHETIC', 'RECONCILIATION', 'VENUE_ADAPTER']
+   selected ['van.trading.rules.rev2-canon', 'ref.deriv.api', 'ref.nautilus.adapter-template', 'ref.nautilus.docs']
+VT-004 ok= True | classes ['RATES_POLICY', 'FOMC_EVENT_TRADING', 'POSITIONING_COT', 'IMPLIED_VOLATILITY', 'INDEX_VOLATILITY_REGIME', 'GOLD_MACRO']
+   selected ['van.trading.rules.rev2-canon', 'ref.cme.cvol', 'ref.fomc.statements', 'ref.cftc.cot', 'ref.cboe.vix-term-structure', 'ref.wgc.gold-demand', 'ref.cme.gold-futures-spec']
+```
+
+The first run was RED on three of four cases. The cause was not the resolver: resources without an explicit `selection_purpose` fell into the same (purpose, role) slot and DIAL's minimal-coalition law kept only one per slot (BLS lost to ALFRED, CVOL to Cboe, WGC to the CME spec). Giving each resource its purpose fixed it, which is exactly how that law is meant to be driven. The probe is wrapped by `trading/tests/test_vtil_borrow.py` and skips, never passes silently, when Node or a dial-new checkout is absent.
+
+## E.5 Interface contracts and data precedence
+
+**Event contracts** (JSON Schema, `trading/vati/contracts/schemas`; new schemas land with their phase): `MarketTick`, `MarketBar`, `MarketState`, `IntegrityStateChange`, `FeatureVector`, `OpportunityAssessment`, `TradeIntent`, `RiskDecision`, `OrderCommand`, `ExecutionReceipt`, `PositionChange`, `ReconciliationResult`, `TcaRecord`, `TradeExperienceArtifact`, `ActivationManifest`, `StrategyCapsule`, `TradingMandate`. Every event carries `event_time`, `received_time`, `producer`, `schema_version`, `hash`; T0 events also carry `decision_time`.
+
+**Data-source precedence and fallback**
+
+| Need | Primary | Fallback | Rule |
+|---|---|---|---|
+| Executable price for MT5 instruments | MT5 venue feed | none | venue feed is execution truth; if stale → `STALE_DATA` |
+| Executable price for Deriv | Deriv WebSocket | none | as above |
+| Cross-feed divergence reference | Databento (futures), second broker feed (FX) | none | divergence drives integrity state, never a price |
+| Futures order flow (ES, NQ, GC, SI) | Databento MBP-10/trades | none | absent → order-flow features are `MISSING`, strategies requiring them ineligible |
+| Implied volatility | CME CVOL, Cboe VIX family | realised-vol proxy flagged `PROXY` | proxy can only reduce size |
+| Macro point-in-time | ALFRED vintages | none for backtests | live decisions may use FRED current; backtests may not |
+| Event calendar | agency schedule (BLS, Fed) | vendor calendar | disagreement extends blackout |
+| Slow research data | OpenBB façade → provider | direct provider | research only |
+
+## E.6 LEAN agreement metric
+
+A Tier-A capsule passes independent reproduction when, on the same out-of-sample window and cost model: expectancy has the same sign and differs by ≤ 25 %; maximum drawdown differs by ≤ 25 %; trade count differs by ≤ 15 %; the top-10 trades by R overlap ≥ 70 % by timestamp. Failure is a finding about the strategy or the cost model, recorded in VTIL as `COUNTERFACTUAL_RESULT`, and blocks promotion.
+
+## E.7 Deployment topology
+
+The DIAL Oracle estate (`dial-hermes-control` A1, `vekl-worker` and `oracle-admin` micro nodes) is a control plane with about 3 GB steady-state headroom on the control host and 1 GB micro nodes, an explicit "Oracle is not a compute source" principle, no data-plane services (no Postgres, streaming, time-series or observability), and a placement engine that rejects any workload class not in `hosts.json`. It cannot host the trading data plane and must not be asked to.
+
+```text
+DIAL fabric (control plane only)                     VATI estate (Van-owned)
+┌──────────────────────────────┐   project binding   ┌───────────────────────────────────────────┐
+│ dial-hermes-control          │◄───────────────────►│ vati-core (Linux, ≥ 8 GB, Python 3.12)     │
+│  Hermes profile van          │  MCP endpoint,      │  Nautilus TradingNode + VAN RiskGate (T0)  │
+│  trading-intelligence skill  │  signed decisions,  │  Deriv adapter, MT5 bridge client          │
+│  Oracle mission / research   │  audit sink         │  event ledger (PostgreSQL), Parquet lake   │
+└──────────────────────────────┘                     │  OTel → Prometheus → Grafana               │
+                                                     │  VTIL registry + activation store          │
+   VAN gateway (existing)                            ├───────────────────────────────────────────┤
+   decisions / attention / audit  ◄─────────────────►│ vati-mt5-worker (Windows, isolated VLAN)   │
+   owner device: mandates (A4), FLATTEN_ALL          │  MT5 terminal + MetaTrader5 worker, mTLS   │
+                                                     ├───────────────────────────────────────────┤
+                                                     │ vati-data (M2+, optional second host)      │
+                                                     │  Redpanda, QuestDB, Feast online, MLflow,  │
+                                                     │  Temporal, LEAN runner                     │
+                                                     └───────────────────────────────────────────┘
+```
+
+Rules: M1 runs on `vati-core` + `vati-mt5-worker` only; M2 adds `vati-data`. Attachment to the DIAL fabric uses only the sanctioned project-binding seam (`project_id`, MCP endpoint, capability subset, job-scoped credentials, attempt budget, audit sink). Any shared datastore or new workload class on the DIAL side requires an owner authorization record in dial-new with the `locked_provider_change` flag and a `hosts.json` change; none is requested by Rev 2.1.
+
+## E.8 How the stack delivers the five properties
+
+| Property | Mechanism |
+|---|---|
+| **Deterministic** | one event-driven kernel (Nautilus), one in-process sizer (Risk Authority), sealed hashes on every decision, ParquetDataCatalog replay, registry fingerprints and activation manifests for knowledge, decision replay as an acceptance gate |
+| **Profitable** | net-edge objective after costs, spread curve and slippage model, calibration gate, deflated Sharpe and PBO, LEAN cross-check for Tier-A capsules, capital-scaling law tied to realised cost and live expectancy |
+| **Dynamic** | regime/horizon arbiters, Feast online features, calibrated meta-labeller, strategy health with hysteresis, drawdown governor, integrity state machine, forward-looking volatility state |
+| **Symbiotic** | VTIL on DIAL's VEKL substrate, Hermes as analyst under the same profile and policy hook, Google mesh through the same gateway planner, MLflow↔VTIL complementarity, owner decisions/attention/audit engines reused |
+| **Cohesive** | one kernel, one sizer, one order sender, one transactional authority, typed contracts on every arrow, stack lock tested in CI, no overlapping tools |
+
+## E.9 Feature plan deltas (Part C)
+
+- **VATI-F002** now reads: vendor the DIAL VEKL resource-selection slice at a pinned commit; VTIL registry, activation store, admission pipeline; retrieval golden set for trading (extend the four probe cases to ≥ 12). Gate: DIAL resolver selects trading knowledge from the Van registry (delivered as a probe), community source never admitted without validation, manifest hash changes on any registry change.
+- **VATI-F003** adds LEAN as validation-only with the §E.6 metric for Tier-A capsules, and the Python 3.12 kernel runtime.
+- **VATI-F005/F006** are Nautilus adapters built from `_template` with the three-plane execution chain; gate adds "an order without a sealed decision hash is refused by the ExecutionClient".
+- **VATI-F008** adds Feast + MLflow; gate adds "feature definitions identical offline and online (skew test)".
+- **VATI-F012** adds Redpanda + QuestDB behind unchanged event contracts; gate adds "T0 path latency unchanged with the broker present".
+- **VATI-F011** adds Temporal, Qlib, Optuna, OpenBB (AGPL decision), ArcticDB (BSL decision, optional).
+- New standing gate for every phase: `trading/tests/test_stack_lock.py` stays green; a new tool is added to the lock before it is added to code.
+
+## E.10 Evidence for Rev 2.1
+
+```text
+$ python3 -m pytest trading/tests/test_stack_lock.py -q        → 7 passed
+$ DIAL_REPO=../dial-new node trading/vtil/tools/resolve_probe.mjs → status GREEN, 4/4 cases (output above)
+$ python3 -m pytest trading/tests/test_vtil_borrow.py -q       → 2 passed
+wheel inspection: nautilus_trader-1.231.0-cp312-manylinux_2_35_x86_64.whl, 765 entries;
+  BinaryOption/Cfd/CurrencyPair/FuturesContract/OptionContract, risk/engine + risk/sizing,
+  persistence/catalog/parquet.py, adapters: architect_ax betfair binance bitmex bybit databento
+  deribit dydx hyperliquid interactive_brokers kraken okx polymarket sandbox tardis _template;
+  METADATA: Version 1.231.0, License LGPL-3.0-or-later, Requires-Python >=3.12,<3.15
+licences read from upstream LICENSE files: LEAN Apache-2.0; Redpanda BSL-1.1; QuestDB Apache-2.0;
+  Feast Apache-2.0; MLflow Apache-2.0; Temporal MIT; ArcticDB BSL-1.1; Qlib MIT; OpenBB AGPL-3.0; Optuna MIT; databento Apache-2.0
+```
+
+What Rev 2.1 does not claim: no tool above is installed, pinned or wired; no adapter exists; the VTIL registry is a seed, not an admitted corpus; the DIAL-side `vekl-config.mjs` seam is a proposal awaiting an owner authorization record in dial-new.

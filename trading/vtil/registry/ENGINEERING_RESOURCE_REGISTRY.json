@@ -1,0 +1,441 @@
+[
+  {
+    "resource_id": "van.trading.rules.rev2-canon",
+    "name": "VATI Rev 2 blueprint and Risk Authority policy",
+    "source_id": "van.trading",
+    "resource_class": "RULESET",
+    "authority": "PROJECT_LOCAL_ENGINEERING_POLICY",
+    "status": "ACTIVE",
+    "activation_mode": "PROCESS_RULE",
+    "locator": "docs/VAN_ADAPTIVE_TRADING_INTELLIGENCE_TECHNICAL_BLUEPRINT_REV2.md",
+    "task_classes": [
+      "*"
+    ],
+    "technologies": [],
+    "keywords": [
+      "mandate",
+      "risk authority",
+      "kill switch",
+      "no trade"
+    ],
+    "forbidden_effects": [],
+    "always_bind": true,
+    "selection_role": "POLICY",
+    "selection_purpose": "VAN_TRADING_GOVERNANCE"
+  },
+  {
+    "resource_id": "ref.bls.employment-situation",
+    "name": "BLS Employment Situation release and schedule",
+    "source_id": "official.bls",
+    "resource_class": "OFFICIAL_DOC",
+    "authority": "ENGINEERING_GUIDANCE_ONLY",
+    "status": "REFERENCE_APPROVED",
+    "activation_mode": "REFERENCE_ONLY",
+    "locator": "https://www.bls.gov/schedule/news_release/empsit.htm",
+    "task_classes": [
+      "NFP_EVENT_TRADING",
+      "LABOUR_DATA",
+      "MACRO_POINT_IN_TIME"
+    ],
+    "technologies": [],
+    "keywords": [
+      "nfp",
+      "nonfarm",
+      "payrolls",
+      "employment situation",
+      "unemployment rate",
+      "average hourly earnings"
+    ],
+    "forbidden_effects": [
+      "PLACE_ORDER",
+      "CHANGE_MANDATE"
+    ],
+    "selection_purpose": "LABOUR_RELEASE_SCHEDULE"
+  },
+  {
+    "resource_id": "ref.alfred.vintages",
+    "name": "ALFRED archival vintage data (point-in-time macro)",
+    "source_id": "official.fred_alfred",
+    "resource_class": "OFFICIAL_DOC",
+    "authority": "ENGINEERING_GUIDANCE_ONLY",
+    "status": "REFERENCE_APPROVED",
+    "activation_mode": "REFERENCE_ONLY",
+    "locator": "https://alfred.stlouisfed.org/",
+    "task_classes": [
+      "MACRO_POINT_IN_TIME",
+      "BACKTEST_VALIDATION"
+    ],
+    "technologies": [],
+    "keywords": [
+      "vintage",
+      "revision",
+      "point-in-time",
+      "alfred",
+      "fred"
+    ],
+    "forbidden_effects": [
+      "PLACE_ORDER"
+    ],
+    "selection_purpose": "MACRO_VINTAGES"
+  },
+  {
+    "resource_id": "ref.fomc.statements",
+    "name": "FOMC statements, minutes and projections",
+    "source_id": "official.federalreserve",
+    "resource_class": "OFFICIAL_DOC",
+    "authority": "ENGINEERING_GUIDANCE_ONLY",
+    "status": "REFERENCE_APPROVED",
+    "activation_mode": "REFERENCE_ONLY",
+    "locator": "https://www.federalreserve.gov/monetarypolicy/fomccalendars.htm",
+    "task_classes": [
+      "RATES_POLICY",
+      "CENTRAL_BANK_LANGUAGE",
+      "FOMC_EVENT_TRADING"
+    ],
+    "technologies": [],
+    "keywords": [
+      "fomc",
+      "fed funds",
+      "dot plot",
+      "forward guidance",
+      "federal reserve"
+    ],
+    "forbidden_effects": [
+      "PLACE_ORDER"
+    ],
+    "selection_purpose": "FED_POLICY_COMMUNICATION"
+  },
+  {
+    "resource_id": "ref.cftc.cot",
+    "name": "CFTC Commitments of Traders reports",
+    "source_id": "official.cftc",
+    "resource_class": "OFFICIAL_DOC",
+    "authority": "ENGINEERING_GUIDANCE_ONLY",
+    "status": "REFERENCE_APPROVED",
+    "activation_mode": "REFERENCE_ONLY",
+    "locator": "https://www.cftc.gov/MarketReports/CommitmentsofTraders/index.htm",
+    "task_classes": [
+      "POSITIONING_COT"
+    ],
+    "technologies": [],
+    "keywords": [
+      "cot",
+      "commitments of traders",
+      "positioning",
+      "open interest",
+      "leveraged funds"
+    ],
+    "forbidden_effects": [
+      "PLACE_ORDER"
+    ],
+    "selection_purpose": "FUTURES_POSITIONING"
+  },
+  {
+    "resource_id": "ref.cme.cvol",
+    "name": "CME CVOL implied volatility index methodology",
+    "source_id": "official.cmegroup",
+    "resource_class": "OFFICIAL_DOC",
+    "authority": "ENGINEERING_GUIDANCE_ONLY",
+    "status": "REFERENCE_APPROVED",
+    "activation_mode": "REFERENCE_ONLY",
+    "locator": "https://www.cmegroup.com/market-data/cme-group-benchmark-administration/cme-group-volatility-indexes.html",
+    "task_classes": [
+      "IMPLIED_VOLATILITY"
+    ],
+    "technologies": [],
+    "keywords": [
+      "cvol",
+      "implied volatility",
+      "skew",
+      "convexity",
+      "upvar",
+      "dnvar"
+    ],
+    "forbidden_effects": [
+      "PLACE_ORDER"
+    ],
+    "selection_purpose": "CROSS_ASSET_IMPLIED_VOL"
+  },
+  {
+    "resource_id": "ref.cme.gold-futures-spec",
+    "name": "CME Gold (GC) futures contract specifications",
+    "source_id": "official.cmegroup",
+    "resource_class": "OFFICIAL_DOC",
+    "authority": "ENGINEERING_GUIDANCE_ONLY",
+    "status": "REFERENCE_APPROVED",
+    "activation_mode": "REFERENCE_ONLY",
+    "locator": "https://www.cmegroup.com/markets/metals/precious/gold.contractSpecs.html",
+    "task_classes": [
+      "GOLD_MACRO",
+      "FUTURES_ORDERFLOW_REFERENCE"
+    ],
+    "technologies": [],
+    "keywords": [
+      "gold futures",
+      "gc",
+      "comex",
+      "contract specs"
+    ],
+    "forbidden_effects": [
+      "PLACE_ORDER"
+    ],
+    "selection_purpose": "GOLD_FUTURES_REFERENCE"
+  },
+  {
+    "resource_id": "ref.cboe.vix-term-structure",
+    "name": "Cboe VIX index family and term structure",
+    "source_id": "official.cboe",
+    "resource_class": "OFFICIAL_DOC",
+    "authority": "ENGINEERING_GUIDANCE_ONLY",
+    "status": "REFERENCE_APPROVED",
+    "activation_mode": "REFERENCE_ONLY",
+    "locator": "https://www.cboe.com/tradable_products/vix/",
+    "task_classes": [
+      "IMPLIED_VOLATILITY",
+      "INDEX_VOLATILITY_REGIME"
+    ],
+    "technologies": [],
+    "keywords": [
+      "vix",
+      "term structure",
+      "vix9d",
+      "vix3m",
+      "contango",
+      "backwardation"
+    ],
+    "forbidden_effects": [
+      "PLACE_ORDER"
+    ],
+    "selection_purpose": "INDEX_VOL_TERM_STRUCTURE"
+  },
+  {
+    "resource_id": "ref.wgc.gold-demand",
+    "name": "World Gold Council demand trends, ETF flows, central-bank purchases",
+    "source_id": "official.worldgoldcouncil",
+    "resource_class": "OFFICIAL_DOC",
+    "authority": "ENGINEERING_GUIDANCE_ONLY",
+    "status": "REFERENCE_APPROVED",
+    "activation_mode": "REFERENCE_ONLY",
+    "locator": "https://www.gold.org/goldhub",
+    "task_classes": [
+      "GOLD_MACRO"
+    ],
+    "technologies": [],
+    "keywords": [
+      "gold demand",
+      "etf flows",
+      "central bank purchases",
+      "goldhub",
+      "xauusd"
+    ],
+    "forbidden_effects": [
+      "PLACE_ORDER"
+    ],
+    "selection_purpose": "GOLD_DEMAND_FLOWS"
+  },
+  {
+    "resource_id": "ref.metaquotes.mt5-python",
+    "name": "MetaTrader 5 Python integration reference (order_check, order_send, symbol_info)",
+    "source_id": "official.metaquotes",
+    "resource_class": "OFFICIAL_DOC",
+    "authority": "ENGINEERING_GUIDANCE_ONLY",
+    "status": "REFERENCE_APPROVED",
+    "activation_mode": "REFERENCE_ONLY",
+    "locator": "https://www.mql5.com/en/docs/python_metatrader5",
+    "task_classes": [
+      "MT5_EXECUTION",
+      "SYMBOL_CONTRACT_SYNC"
+    ],
+    "technologies": [
+      "MetaTrader5"
+    ],
+    "keywords": [
+      "order_send",
+      "order_check",
+      "symbol_info",
+      "positions_get",
+      "trade_stops_level",
+      "volume_step",
+      "mt5",
+      "metatrader"
+    ],
+    "forbidden_effects": [
+      "PLACE_ORDER"
+    ],
+    "selection_purpose": "MT5_VENUE_API"
+  },
+  {
+    "resource_id": "ref.deriv.api",
+    "name": "Deriv API reference (contracts, buy, proposal, portfolio, websocket)",
+    "source_id": "official.deriv",
+    "resource_class": "OFFICIAL_DOC",
+    "authority": "ENGINEERING_GUIDANCE_ONLY",
+    "status": "REFERENCE_APPROVED",
+    "activation_mode": "REFERENCE_ONLY",
+    "locator": "https://api.deriv.com/api-explorer",
+    "task_classes": [
+      "DERIV_EXECUTION",
+      "DERIV_SYNTHETIC",
+      "RECONCILIATION"
+    ],
+    "technologies": [
+      "Deriv"
+    ],
+    "keywords": [
+      "deriv",
+      "rise/fall",
+      "multipliers",
+      "accumulators",
+      "synthetic index",
+      "volatility 75",
+      "proposal",
+      "buy contract"
+    ],
+    "forbidden_effects": [
+      "PLACE_ORDER"
+    ],
+    "selection_purpose": "DERIV_VENUE_API"
+  },
+  {
+    "resource_id": "ref.nautilus.docs",
+    "name": "NautilusTrader concepts (instruments, execution, RiskEngine, ParquetDataCatalog, adapters)",
+    "source_id": "official.nautilustrader",
+    "resource_class": "OFFICIAL_DOC",
+    "authority": "ENGINEERING_GUIDANCE_ONLY",
+    "status": "REFERENCE_APPROVED",
+    "activation_mode": "REFERENCE_ONLY",
+    "locator": "https://nautilustrader.io/docs/latest/",
+    "task_classes": [
+      "TRADING_KERNEL",
+      "BACKTEST_VALIDATION",
+      "VENUE_ADAPTER"
+    ],
+    "technologies": [
+      "NautilusTrader"
+    ],
+    "keywords": [
+      "nautilus",
+      "executionclient",
+      "dataclient",
+      "riskengine",
+      "parquetdatacatalog",
+      "backtestnode",
+      "tradingnode",
+      "binaryoption",
+      "cfd"
+    ],
+    "forbidden_effects": [
+      "PLACE_ORDER"
+    ],
+    "selection_purpose": "KERNEL_CONCEPTS"
+  },
+  {
+    "resource_id": "ref.nautilus.adapter-template",
+    "name": "NautilusTrader adapter template (nautilus_trader/adapters/_template)",
+    "source_id": "official.nautilustrader",
+    "resource_class": "REPOSITORY",
+    "authority": "ENGINEERING_GUIDANCE_ONLY",
+    "status": "REFERENCE_APPROVED",
+    "activation_mode": "REFERENCE_ONLY",
+    "locator": "https://github.com/nautechsystems/nautilus_trader/tree/develop/nautilus_trader/adapters/_template",
+    "task_classes": [
+      "VENUE_ADAPTER",
+      "MT5_EXECUTION",
+      "DERIV_EXECUTION"
+    ],
+    "technologies": [
+      "NautilusTrader"
+    ],
+    "keywords": [
+      "adapter",
+      "executionclient",
+      "dataclient",
+      "instrumentprovider"
+    ],
+    "forbidden_effects": [
+      "PLACE_ORDER"
+    ],
+    "selection_purpose": "ADAPTER_TEMPLATE"
+  },
+  {
+    "resource_id": "ref.lean.docs",
+    "name": "QuantConnect LEAN engine documentation",
+    "source_id": "official.quantconnect_lean",
+    "resource_class": "OFFICIAL_DOC",
+    "authority": "ENGINEERING_GUIDANCE_ONLY",
+    "status": "REFERENCE_APPROVED",
+    "activation_mode": "REFERENCE_ONLY",
+    "locator": "https://www.quantconnect.com/docs/v2/lean-engine",
+    "task_classes": [
+      "INDEPENDENT_REPRODUCTION",
+      "BACKTEST_VALIDATION"
+    ],
+    "technologies": [
+      "LEAN"
+    ],
+    "keywords": [
+      "lean",
+      "quantconnect",
+      "independent reproduction",
+      "algorithm framework"
+    ],
+    "forbidden_effects": [
+      "PLACE_ORDER",
+      "CONTROL_LIVE_ACCOUNT"
+    ],
+    "selection_purpose": "INDEPENDENT_VALIDATION_ENGINE"
+  },
+  {
+    "resource_id": "ref.databento.docs",
+    "name": "Databento schemas, live and historical API",
+    "source_id": "official.databento",
+    "resource_class": "OFFICIAL_DOC",
+    "authority": "ENGINEERING_GUIDANCE_ONLY",
+    "status": "REFERENCE_APPROVED",
+    "activation_mode": "REFERENCE_ONLY",
+    "locator": "https://databento.com/docs",
+    "task_classes": [
+      "FUTURES_ORDERFLOW_REFERENCE",
+      "MARKET_DATA_REFERENCE"
+    ],
+    "technologies": [
+      "Databento"
+    ],
+    "keywords": [
+      "databento",
+      "mbp-10",
+      "trades",
+      "definition",
+      "dbn",
+      "glbx"
+    ],
+    "forbidden_effects": [
+      "PLACE_ORDER"
+    ],
+    "selection_purpose": "FUTURES_REFERENCE_FEED"
+  },
+  {
+    "resource_id": "community.forums.nfp-trading-anecdotes",
+    "name": "Retail forum NFP trading anecdotes (discovery only)",
+    "source_id": "community.retail_fx_forums",
+    "resource_class": "FORUM_QA",
+    "authority": "COMMUNITY_SIGNAL_ONLY",
+    "status": "DISCOVERY_APPROVED",
+    "activation_mode": "DISCOVERY_ONLY",
+    "locator": "vtil://community/nfp-anecdotes",
+    "task_classes": [
+      "NFP_EVENT_TRADING"
+    ],
+    "technologies": [],
+    "keywords": [
+      "nfp",
+      "payrolls"
+    ],
+    "forbidden_effects": [
+      "PLACE_ORDER",
+      "CHANGE_MANDATE",
+      "PROMOTE_STRATEGY"
+    ],
+    "selection_purpose": "COMMUNITY_NFP_SIGNAL"
+  }
+]
