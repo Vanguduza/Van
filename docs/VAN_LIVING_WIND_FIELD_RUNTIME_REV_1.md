@@ -1,31 +1,76 @@
-# VAN Living Wind Field Runtime — Rev 1
+# VAN Living Wind Field Runtime — Rev 1.1
 
-Status: implementation companion to commit `a6756df` / Rev 2.2 aura topology  
-Scope: Android floating overlay, Canvas/owner-art/Rive-compatible state inputs, reduced-motion and power fallbacks
+Status: implementation companion to canonical visual authority Rev 2.3  
+Baseline: `a6756df`  
+Scope: floating overlay, Command Centre, owner-art/Canvas/Rive-compatible inputs, shared field geometry, reduced-motion and power fallbacks
 
 ## 1. Purpose
 
-The Rev 2.2 aura in `a6756df` established the correct three-zone semantic ownership, but its shipping Canvas implementation still used broken ellipses/arcs. Even when fragmented, those arcs shared a common centre and radius, so the eye reconstructed a halo around VAN.
+Rev 2.2 established correct three-zone semantic ownership but still allowed broken orbital geometry to read as a halo. Rev 2.3 replaces that with a compact, continuously animated windy electrical field and removes a second architectural flaw exposed during review: activity, health, owner-decision authority and speech can be true at the same time and therefore must not compete for one enum.
 
-Rev 1 changes the runtime model from **orbit geometry** to a **directional living field**. VAN is now visually located inside a small windy electrical atmosphere. The field is continuously sampled from deterministic time/state parameters; it is not a GIF, sprite loop or pre-rendered video.
+“Lifelike” and “attention-aware” describe animation behaviour only. They do not claim that VAN is conscious.
 
-“Lifelike” and “attention-aware” in this document describe animation behaviour only. They do not assert that VAN is conscious.
+## 2. Canonical state model
 
-## 2. Runtime layers
+Runtime truth is now represented by `VanPresenceFrame` with orthogonal channels:
 
-The field keeps the existing three semantic zones:
+- `activity`: IDLE, THINKING, SEARCHING, WORKING, DELEGATING, etc.;
+- `health`: NOMINAL, DEGRADED, OFFLINE;
+- `authority`: NONE, WAITING_FOR_OWNER, WARNING, ERROR, URGENT;
+- `speech`: QUIET, LISTENING, SPEAKING;
+- `turn`: IDLE, CAPTURING, THINKING, DISPATCHING;
+- attention, mouth/viseme, urgency and finite action data.
 
-- **Zone A — identity presence:** restrained cyan radiance and a shallow ground crescent. It breathes by only a few percent so it never becomes a pulsing disk.
-- **Zone B — interaction field:** detached travelling ribbons, ion streaks, small sparks and the orb bridge. This is the main windy/electrical motion layer.
-- **Zone C — semantic envelope:** sparse outer flow ribbons carrying warning/error/success/waiting colour. Semantic colour remains outside the body.
+This permits truthful combinations such as:
 
-No renderer may reconstruct a full circular ring. Zone B/C strands are directional flow lines and are cut away inside a body-safe ellipse.
+```text
+activity = LISTENING
+health   = DEGRADED     # Google mesh not yet verified
+```
 
-## 3. Motion equation
+The character therefore listens while Zone C/chrome still shows degraded truth. Uplink OFFLINE remains stronger and forces an offline pose. `VanVisualState.semanticState` carries outer-field truth separately from `durableState`, which continues to drive the character/Rive pose contract.
 
-`VanWindFieldMotion` produces one deterministic `VanWindFieldFrame` from `(VanAuraSpec, phase, VanEffectBudget)`.
+## 3. Owner-turn lifecycle
 
-Each ribbon is sampled along a wind-aligned axis. Its cross-flow displacement combines several harmonics:
+Speech capture ending is no longer treated as owner-turn completion.
+
+```text
+microphone ready/partial -> CAPTURING / LISTENING
+capture end               -> microphone quiet only
+final transcript          -> THINKING
+command dispatch begins   -> DISPATCHING / DELEGATING
+accepted/in_flight        -> brief WORKING acknowledgement, then ambient
+approval_required         -> WAITING_FOR_OWNER
+```
+
+Callback ordering can therefore vary without erasing THINKING. `speechFrame()` updates articulation but does not replace health or authority truth, so TTS cannot hide WAITING_FOR_OWNER, ERROR or URGENT.
+
+## 4. Three-zone field
+
+- **Zone A — identity presence:** restrained cyan bloom and shallow ground crescent.
+- **Zone B — interaction field:** detached windy ribbons, ion fragments and orb-link energy.
+- **Zone C — semantic envelope:** sparse, detached, state-specific directional flow carrying semantic colour.
+
+Full rings and concentric orbit geometry are forbidden. Zone B/C paths are clipped away from a body-safe ellipse.
+
+## 5. Shared renderer-neutral geometry
+
+`VanFieldGeometryEngine` is the canonical Zone B/C geometry source. It has no Compose, Android or AWT dependency and outputs strokes/dots from:
+
+```text
+VanAuraSpec + phase + VanEffectBudget + body bounds
+```
+
+Both renderers consume it:
+
+- shipping Compose: `VanAura.kt`;
+- JVM evidence renderer: `GlassPainter.kt`.
+
+This removes the previous dual-painter drift. Owner preview boards generated after Rev 2.3 now represent the same Zone B/C geometry that ships on device.
+
+## 6. Wind motion
+
+`VanWindFieldMotion` produces a deterministic, phase-seamless motion frame. Each ribbon combines multiple temporal harmonics:
 
 ```text
 w(u,t) = A · [ sin(2π(2u − 2t + s))
@@ -33,143 +78,100 @@ w(u,t) = A · [ sin(2π(2u − 2t + s))
              + 0.14 sin(2π(5u − t + 0.47s)) ]
 ```
 
-A lower-amplitude curl term bends the longitudinal direction. Because every temporal term uses integer cycles, phase `0` and phase `1` are identical: the Compose infinite transition can wrap without a visible seam.
+The field frame also supplies bounded breathing, prevailing wind, meander, turbulence, pulse energy, particle advection and budget-driven field scale.
 
-The field frame also supplies:
+## 7. State-specific semantic topology
 
-- slow breathing;
-- prevailing wind direction plus bounded meander;
-- state-derived wind strength;
-- turbulence;
-- wave amplitude;
-- electrical pulse intensity;
-- particle advection;
-- effect-budget field scale.
+Zone C no longer maps every state onto the same wind axis. Each authored envelope segment rotates and shapes a local flow direction from its `startDeg`, `sweepDeg` and `node` properties. This preserves topology distinction in geometry as well as colour.
 
-## 4. State semantics
+Expected readings include:
 
-The existing `VanAuraSpecs.forState()` remains the authority for state meaning. The same motion system therefore changes character by parameter rather than swapping animations:
-
-| State family | Motion behaviour |
+| State | Geometry intent |
 | --- | --- |
-| IDLE / WAITING | low wind, low turbulence, sparse ion movement |
-| ATTENTIVE / LISTENING | stronger convergent-looking flow and orb activity |
-| THINKING / SEARCHING | moderate travelling waves and information-like particle motion |
-| WORKING | highest normal wind, wave amplitude, filament count and spark density |
-| SPEAKING | moderate field while mouth/viseme inputs animate VAN |
-| WAITING_FOR_OWNER | amber semantic envelope, deliberate low-frequency motion |
-| WARNING / ERROR / URGENT | semantic outer colour plus sparse electrical branching |
-| SUCCESS | green semantic outer flow; calm positive field rather than an alert flash |
-| OFFLINE / SLEEPING | very low energy; readable field remains |
+| LISTENING | inward-attentive cyan flow |
+| SEARCHING | probing lateral streams |
+| WORKING | higher-throughput directional transport |
+| WAITING_FOR_OWNER | amber converging/bracketing flow |
+| WARNING | interrupted amber disturbance |
+| ERROR | fractured/diverging red flow |
+| URGENT | compressed directional red flow |
+| SUCCESS | green release/expansion flow |
 
-## 5. Lifelike character motion
+## 8. Character motion
 
-The field is not the only moving layer.
+The procedural Canvas rig retains body/head bob, blink, gaze, orb drift, speech articulation and finite actions. Owner bitmap poses receive bounded `VanCharacterMotion` micro-motion. Reduced-motion freezes autonomous motion. The authored Rive asset remains external/not READY unless repository evidence changes that status.
 
-- The procedural Canvas rig already animates body bob, head bob, blink, orb drift, gaze, mouth/visemes and finite actions.
-- Owner bitmap poses now pass through `VanCharacterMotion`, which applies tiny state-aware bob, lateral drift, sway and breathing scale. This prevents the owner-art fallback from looking like a frozen sticker inside a moving field.
-- Reduced-motion removes autonomous owner-art motion while preserving a tiny explicit attention offset.
-- The future authored Rive artboard remains responsible for its internal articulated animation and must consume the same `VanVisualState` contract rather than creating a second state model.
+## 9. Truth composition
 
-Whole-character motion is deliberately small. VAN remains the stable visual anchor while the field carries most semantic energy.
+`VanPresence` is a pure resolver and remains fail-closed:
 
-## 6. Live visual-state arbiter
+- gateway/Hermes uplink loss -> OFFLINE pose and semantic state;
+- non-uplink degraded truth -> semantic/chrome DEGRADED while local activity can remain visible;
+- owner-decision/error authority -> authority semantic/pose state;
+- speech remains an orthogonal articulation channel.
 
-`VanLiveVisualState` is the Android runtime bridge between real activity and visual state. It is Compose snapshot state. `FloatingOverlayService` reads it during composition, so live state changes recompose the full floating shell without polling.
+The floating overlay and Command Centre both observe the same application-scoped `VanLiveVisualState.frame`, preventing surface-local state forks.
 
-It provides:
+## 10. Performance and accessibility
 
-- state priority so weak cosmetic changes cannot immediately erase a stronger state;
-- short minimum readable holds to prevent flicker;
-- a 420 ms idle settle so LISTENING/SPEAKING do not snap to IDLE between callbacks;
-- direct attention X/Y inputs for future pointer/vision/voice-direction gaze control;
-- finite action code support;
-- speech frame updates for mouth opening and visemes.
+`VanEffectBudget` remains authoritative:
 
-`VanPresence` remains a pure fail-closed mapper because the JVM visual-preview module compiles the same source. `FloatingOverlayService` explicitly supplies the live state to it. OFFLINE/DEGRADED subsystem truth always overrides optimistic live activity. When system truth is nominal, live state drives character, aura, caption, glass style and semantic accent together.
+- `FULL`: full field motion and particles;
+- `REDUCED`: fewer filaments, smaller field;
+- `LOW`: tighter field and fewer effects;
+- `REDUCED_MOTION`: designed still field, semantics preserved;
+- `STATIC`: thermal floor, still readable field.
 
-## 7. Voice and command lifecycle wiring
+Critical semantic information is preserved before decorative effects.
 
-`VanApplication` forwards actual voice callbacks into the live visual state:
+## 11. Acceptance requirements
+
+The implementation is mergeable only when all are true:
+
+1. no full or implied concentric ring is visible in a frozen frame;
+2. Zone B/C remain detached from the body-safe region;
+3. semantic states have distinct geometry, not only distinct colour;
+4. phase wrapping is seamless;
+5. Google-unverified + LISTENING renders a LISTENING pose with DEGRADED semantic field/chrome;
+6. microphone-end ordering cannot erase THINKING;
+7. TTS speech frames cannot replace WAITING_FOR_OWNER/ERROR/URGENT authority;
+8. OFFLINE uplink truth still forces OFFLINE;
+9. Compose and Java2D evidence use `VanFieldGeometryEngine`;
+10. reduced-motion produces stable geometry;
+11. gateway `accepted` never displays SUCCESS;
+12. Android and visual-evidence Gradle gates pass.
+
+## 12. CI / evidence gates
+
+`.github/workflows/van-ci.yml` runs:
 
 ```text
-recognizer ready/partial  -> LISTENING
-final transcript          -> THINKING
-TTS start/frame           -> SPEAKING + mouth/viseme
-TTS completion            -> eased IDLE
-recognizer failure        -> transient WARNING, then eased IDLE
+pytest backend
+pytest tests/contracts
+:app:testDebugUnitTest
+:app:assembleDebug
+:app:lintDebug
+:visual-preview:test
+:visual-preview:renderVanPreviews
 ```
 
-`VanGatewayClient.dispatchCommand()` also publishes truthful local lifecycle cues:
+Generated preview evidence is uploaded as the `van-visual-evidence` workflow artifact. PR promotion must use those results, not descriptive claims.
 
-```text
-starting hand-off          -> DELEGATING
-approval_required          -> WAITING_FOR_OWNER
-accepted / in_flight       -> brief DELEGATING acknowledgement, then ambient
-protocol reject/conflict   -> transient WARNING
-transport exception        -> transient WARNING
-backend degraded           -> DEGRADED
-```
+## 13. Key files
 
-`accepted` is intentionally **not** mapped to SUCCESS. The gateway response only proves that Hermes accepted the run. A future run-status stream must own long-running WORKING/SUCCESS completion states.
-
-## 8. Power, thermal and accessibility behaviour
-
-The field obeys `VanEffectBudget` rather than running a second independent performance policy:
-
-- `FULL`: complete field motion and particles.
-- `REDUCED`: fewer filaments and a slightly smaller field.
-- `LOW`: tighter field, fewer effects, motion retained.
-- `REDUCED_MOTION`: designed still field; semantic state remains readable.
-- `STATIC`: severe thermal floor; field freezes but does not disappear.
-
-`budget.bloomScale` now affects the actual field footprint. State meaning and critical semantic colour are never removed to save effects.
-
-## 9. Acceptance requirements
-
-The implementation is acceptable only when all of the following hold:
-
-1. No full or implied concentric aura ring is visible in a frozen frame.
-2. Zone B/C strands are visibly detached from VAN and are clipped away from the body-safe ellipse.
-3. Phase 0 and phase 1 produce the same motion frame, so infinite animation has no restart jump.
-4. WORKING has greater wind strength, turbulence and wave amplitude than IDLE.
-5. LOW/STATIC reduce footprint/effects before removing semantic information.
-6. Reduced motion freezes autonomous motion while retaining a composed readable field.
-7. Broken gateway/Hermes truth still forces OFFLINE regardless of optimistic live activity.
-8. Live voice events cause visible LISTENING/THINKING/SPEAKING transitions without overlay polling.
-9. Owner bitmap poses remain subtly alive without competing with aura motion.
-10. Gateway acceptance never falsely displays SUCCESS.
-11. The field remains compact enough for the floating overlay and must not expand into the large cinematic poster-scale aura.
-
-## 10. Files
-
-Runtime implementation:
-
-- `android/app/src/main/java/com/dial/van/visual/VanWindFieldMotion.kt`
-- `android/app/src/main/java/com/dial/van/visual/VanAura.kt`
-- `android/app/src/main/java/com/dial/van/visual/VanCharacterMotion.kt`
+- `visual-authority/van-visual-authority-v2.yaml` — canonical Rev 2.3 authority
+- `android/app/src/main/java/com/dial/van/visual/VanPresenceFrame.kt`
 - `android/app/src/main/java/com/dial/van/visual/VanLiveVisualState.kt`
 - `android/app/src/main/java/com/dial/van/visual/VanPresence.kt`
-- `android/app/src/main/java/com/dial/van/visual/VanCanvasFallback.kt`
-- `android/app/src/main/java/com/dial/van/visual/VanLivingFieldPreviews.kt`
-- `android/app/src/main/java/com/dial/van/overlay/FloatingOverlayService.kt`
-- `android/app/src/main/java/com/dial/van/gateway/VanGatewayClient.kt`
+- `android/app/src/main/java/com/dial/van/visual/VanWindFieldMotion.kt`
+- `android/app/src/main/java/com/dial/van/visual/VanFieldGeometry.kt`
+- `android/app/src/main/java/com/dial/van/visual/VanAura.kt`
+- `android/visual-preview/src/main/kotlin/com/dial/van/preview/GlassPainter.kt`
 - `android/app/src/main/java/com/dial/van/VanApplication.kt`
+- `android/app/src/main/java/com/dial/van/gateway/VanGatewayClient.kt`
+- `android/app/src/main/java/com/dial/van/overlay/FloatingOverlayService.kt`
+- `android/app/src/main/java/com/dial/van/command/CommandCentreActivity.kt`
 
-Tests:
+## 14. Renderer truth
 
-- `android/app/src/test/java/com/dial/van/visual/VanWindFieldMotionTest.kt`
-- `android/app/src/test/java/com/dial/van/visual/VanCharacterMotionTest.kt`
-- `android/app/src/test/java/com/dial/van/visual/VanPresenceTest.kt`
-
-## 11. Preview truth
-
-`VanLivingFieldPreviews.kt` provides Android Studio previews of the actual shipping Compose aura renderer for IDLE, WORKING, WARNING and REDUCED_MOTION.
-
-The existing JVM `visual-preview` Java2D aura painter is a separate certification surface and still uses the older Rev 2.2 geometry. It must not be cited as pixel evidence for this new runtime field until that painter is migrated to the same directional-flow algorithm. This limitation is explicit rather than silently claiming the old sheets represent the new runtime.
-
-## 12. Renderer truth
-
-The authored `van.riv` remains external unless repository evidence changes that status. The renderer selection remains fail-closed: valid Rive artboard -> complete owner art -> procedural Canvas fallback. This revision does not claim Rive READY.
-
-The live windy field itself is drawn by Compose behind whichever character renderer is selected, so the field does not depend on the authored Rive asset being present. Character-level motion is richest in the Canvas rig today; owner art now has bounded micro-motion; the future Rive artboard should implement the same durable-state, attention, speech and finite-action contract.
+The authored `van.riv` remains external/not READY. Renderer selection stays fail-closed: usable Rive artboard -> complete owner art -> procedural Canvas fallback. The living field is rendered independently behind whichever character renderer is active.
