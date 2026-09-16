@@ -62,8 +62,8 @@ def broken_authority(name: str, edits: list[tuple[str, str]], *, sizing_edits: l
             sz.__dict__["clamp_multiplier"] = lambda v: Decimal(str(v))
             sz.__dict__["Multipliers"].clamped = lambda self: self
         auth_edits.append((
-            "from vati.risk.sizing import Multipliers, SizingRejected, size_stake_contract, size_stop_contract",
-            f"from {name}.sizing import Multipliers, SizingRejected, size_stake_contract, size_stop_contract",
+            "from vati.risk.sizing import Multipliers, SizingRejected, size_illiquid_equity, size_stake_contract, size_stop_contract",
+            f"from {name}.sizing import Multipliers, SizingRejected, size_illiquid_equity, size_stake_contract, size_stop_contract",
         ))
     mod = _module(name, AUTHORITY_SRC, auth_edits)
     # Preserve enum/dataclass identity so `is` comparisons in the fuzz measure the gate, not class identity.

@@ -132,13 +132,16 @@ VAN never automates the retail apps and never contacts a broker without the owne
 # Part E — Evidence for Rev 3
 
 ```text
-$ python3 -m pytest trading -q                                   → 138 passed
+$ python3 -m pytest trading -q                                   → 138 passed  (full Van suite: 248 passed)
 $ DIAL_REPO=../dial-new node trading/vtil/tools/resolve_probe.mjs → GREEN, 5/5 cases (VT-005 = ZSE study task)
    VT-005 classes ['ZSE_MARKET_RULES','ZSE_COMPLIANCE','ZIG_CURRENCY_REGIME','ZSE_MARKET_DATA']
           selected van.trading.rules.rev2-canon, ref.rbz.exchange-control, ref.zse.currency-rebasing-2024,
                    ref.zse.trading-procedures, community.zim.parallel-rate-trackers (corroboration only),
                    ref.vfex.investor-faq, ref.seczim.securities-dealers, ref.data.zse-daily-pricesheets-archive
-$ python3 trading/tools/induce_gate_failures.py                   → see commit evidence (probe re-run after the loss-model change)
+$ python3 trading/tools/induce_gate_failures.py                   → 13/13 probes behaved as expected
+   (the first run after the loss-model change aborted because the probe's import-line edit target had changed;
+    the probe was repaired and re-run before this line was written — commit b0ffa81's message overstated this and
+    the suite count; the correcting commit is the one that carries this text)
 ```
 
 Worked ZSE sizing (test `test_illiquid_equity_sizing_reference`): equity ZiG 1 000 000, 0.5% risk = ZiG 5 000; entry 25.00, software stop 22.50 (10%), haircut 3% → per-share risk 3.25 → 1 538 raw → **1 500 shares** (15 board lots), risk ZiG 4 875. With ADV 12 345 the same intent is capped at 1 200 shares. A SHORT is refused (`SYMBOL_TRADE_MODE`); an intent expecting a 5% move is refused against a 7.14% round trip (`EDGE_BELOW_COST`).
