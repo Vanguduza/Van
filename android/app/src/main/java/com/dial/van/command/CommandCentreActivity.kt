@@ -54,7 +54,9 @@ import com.dial.van.visual.VanDurableState
 import com.dial.van.visual.VanEmbodiment
 import com.dial.van.visual.VanGlassSurface
 import com.dial.van.visual.VanGlassTokens
+import com.dial.van.visual.VanLiveVisualState
 import com.dial.van.visual.VanPresence
+import com.dial.van.visual.VanPresenceFrame
 import com.dial.van.visual.VanPresentation
 import com.dial.van.visual.VanStatusPalette
 import com.dial.van.visual.rememberVanEffectBudget
@@ -65,14 +67,6 @@ import kotlinx.serialization.json.Json
 import kotlinx.serialization.json.buildJsonObject
 import kotlinx.serialization.json.put
 
-/**
- * Command Centre.
- *
- * §14 of `docs/VAN_GLASSMORPHIC_FLOATING_ASSISTANT_DESIGN.md` governs this surface: glass stays
- * the top-level material language, panels are more opaque than the floating compact shell, Van
- * remains present without dominating operational content, and critical actions switch from
- * translucent to solid controls.
- */
 class CommandCentreActivity : FragmentActivity() {
 
     @OptIn(ExperimentalMaterial3Api::class)
@@ -85,7 +79,6 @@ class CommandCentreActivity : FragmentActivity() {
                 Box(
                     modifier = Modifier
                         .fillMaxSize()
-                        // §10 step 1: the app background the glass samples against.
                         .background(
                             Brush.verticalGradient(
                                 listOf(Color(0xFF060A14), Color(0xFF0B1424), Color(0xFF04070F)),
@@ -128,7 +121,6 @@ private fun CommandCentreScreen(
     val gate = remember(activity) { BiometricGate(activity) }
     var meshSummary by remember { mutableStateOf("Google mesh: awaiting gateway evidence") }
     var statusMessage by remember { mutableStateOf("") }
-    var sections by remember { mutableStateOf(commandSections(app, meshSummary, VanPresence.cue(app.degradedModeStore.snapshot()))) }
 
     LaunchedEffect(Unit) {
         try {
@@ -149,11 +141,13 @@ private fun CommandCentreScreen(
             app.degradedModeStore.markBroken("gateway", "health unreachable: ${exc.message}", RestoreAction.RETRY_CONNECTION)
             meshSummary = "Google mesh: gateway unreachable"
         }
-        sections = commandSections(app, meshSummary, VanPresence.cue(app.degradedModeStore.snapshot()))
     }
 
+    // Same application-scoped snapshot state as the floating overlay. No surface-local fork.
+    val live = VanLiveVisualState.frame
     val degraded = app.degradedModeStore.snapshot()
-    val cue = VanPresence.cue(degraded)
+    val cue = VanPresence.cue(degraded, live = live)
+    val sections = commandSections(app, meshSummary, cue)
     val budget = rememberVanEffectBudget()
     val panelGlass = VanGlassTokens.forState(
         state = cue.durableState,
@@ -176,6 +170,7 @@ private fun CommandCentreScreen(
                 glass = panelGlass,
                 budget = budget,
                 cue = cue,
+                live = live,
                 meshCue = VanPresence.meshCue(degraded),
             )
         }
@@ -183,7 +178,6 @@ private fun CommandCentreScreen(
             CommandSectionPanel(section = section, glass = panelGlass)
         }
         item {
-            // Non-destructive control: translucent glass is fine here.
             Button(
                 onClick = { FloatingOverlayService.start(app) },
                 colors = ButtonDefaults.buttonColors(
@@ -197,7 +191,6 @@ private fun CommandCentreScreen(
             }
         }
         item {
-            // §14: critical actions switch from translucent to solid controls.
             Button(
                 onClick = {
                     onA4Approve(gate) {
@@ -229,13 +222,13 @@ private fun CommandCentreScreen(
     }
 }
 
-/** Hero panel: Van present and expressive, but sized so operational content still leads. */
 @Composable
 private fun VanHeroPanel(
     app: VanApplication,
     glass: com.dial.van.visual.VanGlassStyle,
     budget: com.dial.van.visual.VanEffectBudget,
     cue: VanPresence.Cue,
+    live: VanPresenceFrame,
     meshCue: String,
 ) {
     val palette = VanStatusPalette.forState(cue.durableState)
@@ -245,7 +238,7 @@ private fun VanHeroPanel(
             verticalAlignment = Alignment.CenterVertically,
         ) {
             VanEmbodiment(
-                state = VanPresence.visualState(cue),
+                state = VanPresence.visualState(cue, live),
                 budget = budget,
                 presentation = VanPresentation.EXPANDED,
                 modifier = Modifier.size(112.dp),
@@ -277,7 +270,6 @@ private data class CommandSection(
     val title: String,
     val summary: String,
     val items: List<String>,
-    /** Degraded/attention panels get amber emphasis and higher contrast copy (§6, §12). */
     val alert: Boolean = false,
 )
 
@@ -325,7 +317,6 @@ private fun commandSections(app: VanApplication, meshSummary: String, cue: VanPr
     )
 }
 
-/** §14: structured glass cards for project status, commands, approvals and tool output. */
 @Composable
 private fun CommandSectionPanel(
     section: CommandSection,
@@ -350,7 +341,6 @@ private fun CommandSectionPanel(
             )
             Text(
                 text = section.summary,
-                // §12: text never relies on translucency alone for legibility.
                 color = if (section.alert) Color(VanGlassTokens.ACCENT_AMBER) else Color(0xFF9AA7B6),
                 fontSize = 12.sp,
                 modifier = Modifier.padding(bottom = 8.dp),
@@ -362,7 +352,6 @@ private fun CommandSectionPanel(
     }
 }
 
-/** Kept for reference by tests: the durable state whose panels must be solid. */
 internal val SOLID_CONTROL_STATES = setOf(
     VanDurableState.WAITING_FOR_OWNER,
     VanDurableState.URGENT,
