@@ -18,9 +18,9 @@ import kotlin.math.sqrt
 /**
  * Three-zone living refractive aura.
  *
- * Zone A is the quiet identity presence. Zone B and Zone C consume the renderer-neutral
- * [VanFieldGeometryEngine], which is also used by the JVM evidence painter. This prevents the
- * shipping Compose field and owner-facing boards from drifting into different topologies.
+ * Zone A/B follow local activity while Zone C follows independent semantic truth. This allows VAN
+ * to visibly listen/work while an outer degraded/approval/error envelope remains truthful.
+ * Zone B/C geometry comes from [VanFieldGeometryEngine], shared with JVM evidence rendering.
  */
 @Composable
 fun VanAuraLayer(
@@ -29,8 +29,17 @@ fun VanAuraLayer(
     budget: VanEffectBudget,
     modifier: Modifier = Modifier,
     characterScale: Float = 1f,
+    semanticSpec: VanAuraSpec = spec,
 ) {
-    Canvas(modifier = modifier) { drawVanAura(spec, phase, budget, characterScale) }
+    Canvas(modifier = modifier) {
+        drawVanAura(
+            spec = spec,
+            phase = phase,
+            budget = budget,
+            characterScale = characterScale,
+            semanticSpec = semanticSpec,
+        )
+    }
 }
 
 const val FACE_SAFE_RADIUS = 0.34f
@@ -41,14 +50,15 @@ fun DrawScope.drawVanAura(
     phase: Float,
     budget: VanEffectBudget,
     characterScale: Float = 1f,
+    semanticSpec: VanAuraSpec = spec,
 ) {
     val minEdge = minOf(size.width, size.height)
-    if (minEdge <= 0f || spec.intensity <= 0.01f) return
+    if (minEdge <= 0f || (spec.intensity <= 0.01f && semanticSpec.intensity <= 0.01f)) return
 
     val bodyEdge = minEdge * characterScale.coerceIn(0.40f, 1f)
     val center = Offset(size.width / 2f, size.height * 0.48f)
     val cyan = Color(VanGlassTokens.ACCENT_CYAN)
-    val semantic = Color(spec.semanticColor ?: VanGlassTokens.ACCENT_CYAN)
+    val semantic = Color(semanticSpec.semanticColor ?: VanGlassTokens.ACCENT_CYAN)
     val motion = VanWindFieldMotion.sample(spec, phase, budget)
 
     drawZoneA(spec, motion, center, bodyEdge, cyan)
@@ -60,6 +70,7 @@ fun DrawScope.drawVanAura(
         bodyEdge = bodyEdge,
         centerX = center.x,
         centerY = center.y,
+        semanticSpec = semanticSpec,
     )
 
     geometry.strokes.forEach { stroke ->
@@ -98,7 +109,6 @@ fun DrawScope.drawVanAura(
         )
     }
 
-    // Orb link remains a local identity detail rather than part of semantic Zone C topology.
     if (spec.orbLink > 0.05f) {
         val pulse = 0.24f + 0.30f * motion.electricPulse
         val path = Path().apply {
@@ -172,7 +182,6 @@ private fun DrawScope.drawZoneA(
     }
 }
 
-/** Retained for acceptance tests that verify body detachment mathematically. */
 internal fun normalizedEllipseDistance(point: Offset, center: Offset, rx: Float, ry: Float): Float {
     if (rx <= 0f || ry <= 0f) return Float.POSITIVE_INFINITY
     val nx = (point.x - center.x) / rx
