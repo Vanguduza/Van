@@ -1,7 +1,6 @@
 package com.dial.van.visual
 
 import com.dial.van.degraded.DegradedMode
-import com.dial.van.degraded.DegradedSubsystem
 import com.dial.van.degraded.RestoreAction
 import com.dial.van.degraded.SubsystemStatus
 import org.junit.Assert.assertEquals
@@ -32,7 +31,7 @@ class VanPresenceTest {
 
     @Test
     fun defaultRuntimeTruthPresentsDegradedBecauseGoogleMeshIsUnverified() {
-        val cue = VanPresence.cue(DegradedMode.healthy())
+        val cue = VanPresence.cue(DegradedMode.healthy(), live = VanVisualState())
         assertEquals(VanDurableState.DEGRADED, cue.durableState)
         assertTrue("google mesh should lead the cue", cue.detail.contains("Google mesh"))
         assertEquals("Google mesh unverified", VanPresence.meshCue(DegradedMode.healthy()))
@@ -40,20 +39,20 @@ class VanPresenceTest {
 
     @Test
     fun lostUplinkPresentsOfflineNotMerelyDegraded() {
-        assertEquals(VanDurableState.OFFLINE, VanPresence.cue(mode("hermes")).durableState)
-        assertEquals(VanDurableState.OFFLINE, VanPresence.cue(mode("gateway")).durableState)
+        assertEquals(VanDurableState.OFFLINE, VanPresence.cue(mode("hermes"), live = VanVisualState()).durableState)
+        assertEquals(VanDurableState.OFFLINE, VanPresence.cue(mode("gateway"), live = VanVisualState()).durableState)
     }
 
     @Test
     fun uplinkLossOutranksOtherBrokenSubsystems() {
-        val cue = VanPresence.cue(mode("gateway", "google", "voice"))
+        val cue = VanPresence.cue(mode("gateway", "google", "voice"), live = VanVisualState())
         assertEquals(VanDurableState.OFFLINE, cue.durableState)
         assertEquals(3, cue.brokenLabels.size)
     }
 
     @Test
     fun nonUplinkBreakagePresentsDegraded() {
-        val cue = VanPresence.cue(mode("voice"))
+        val cue = VanPresence.cue(mode("voice"), live = VanVisualState())
         assertEquals(VanDurableState.DEGRADED, cue.durableState)
         assertTrue(cue.degraded)
     }
@@ -61,28 +60,51 @@ class VanPresenceTest {
     @Test
     fun healthyMeshReachesTheCalmStates() {
         val healthy = mode()
-        assertEquals(VanDurableState.IDLE, VanPresence.cue(healthy).durableState)
-        assertEquals(VanDurableState.LISTENING, VanPresence.cue(healthy, listening = true).durableState)
-        assertEquals(VanDurableState.SPEAKING, VanPresence.cue(healthy, speaking = true).durableState)
+        val idle = VanVisualState()
+        assertEquals(VanDurableState.IDLE, VanPresence.cue(healthy, live = idle).durableState)
+        assertEquals(VanDurableState.LISTENING, VanPresence.cue(healthy, listening = true, live = idle).durableState)
+        assertEquals(VanDurableState.SPEAKING, VanPresence.cue(healthy, speaking = true, live = idle).durableState)
         assertEquals("Google mesh verified", VanPresence.meshCue(healthy))
-        assertFalse(VanPresence.cue(healthy).degraded)
+        assertFalse(VanPresence.cue(healthy, live = idle).degraded)
+    }
+
+    @Test
+    fun nominalTruthAllowsLiveWorkingStateToDriveChromeAndEmbodiment() {
+        val live = VanVisualState(durableState = VanDurableState.WORKING, urgency = 0.2f)
+        val cue = VanPresence.cue(mode(), live = live)
+        val resolved = VanPresence.visualState(cue, live)
+
+        assertEquals(VanDurableState.WORKING, cue.durableState)
+        assertEquals(VanDurableState.WORKING, resolved.durableState)
+        assertEquals(0.2f, resolved.urgency, 0.0001f)
+    }
+
+    @Test
+    fun brokenTruthAlwaysOverridesOptimisticLiveState() {
+        val live = VanVisualState(durableState = VanDurableState.SUCCESS)
+        val cue = VanPresence.cue(mode("gateway"), live = live)
+        val resolved = VanPresence.visualState(cue, live)
+
+        assertEquals(VanDurableState.OFFLINE, cue.durableState)
+        assertEquals(VanDurableState.OFFLINE, resolved.durableState)
     }
 
     @Test
     fun ownerDecisionOutranksIdleButNotBreakage() {
+        val idle = VanVisualState()
         assertEquals(
             VanDurableState.WAITING_FOR_OWNER,
-            VanPresence.cue(mode(), awaitingOwner = true).durableState,
+            VanPresence.cue(mode(), awaitingOwner = true, live = idle).durableState,
         )
         assertEquals(
             VanDurableState.DEGRADED,
-            VanPresence.cue(mode("google"), awaitingOwner = true).durableState,
+            VanPresence.cue(mode("google"), awaitingOwner = true, live = idle).durableState,
         )
     }
 
     @Test
     fun visualStateNeverLowersAnExistingUrgency() {
-        val cue = VanPresence.cue(mode("google"))
+        val cue = VanPresence.cue(mode("google"), live = VanVisualState())
         val state = VanPresence.visualState(cue, VanVisualState(urgency = 0.9f))
         assertEquals(0.9f, state.urgency, 0.0001f)
         assertEquals(VanDurableState.DEGRADED, state.durableState)
