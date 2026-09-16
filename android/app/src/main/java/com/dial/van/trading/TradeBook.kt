@@ -61,6 +61,10 @@ data class TradeRow(
     val confidence: TradeConfidence,
     val timestampMs: Long,
     val reasons: List<String> = emptyList(),
+    /** Ledger intent id when the row is a real intent (past, current, risk-rejected); null for assessment candidates. */
+    val tradeIntentId: String? = null,
+    val stopPrice: Double? = null,
+    val entryPrice: Double? = null,
 )
 
 sealed class TradeBookState {
@@ -88,6 +92,9 @@ object TradeBookParser {
         val direction = o.str("direction") ?: ""
         val strategy = o.str("strategy_id") ?: "?"
         val conf = confidence(o["confidence"])
+        val id = o.str("trade_intent_id")?.takeIf { it.isNotBlank() }
+        val stopPx = o.num("protective_stop_price") ?: o.num("stop")
+        val entryPx = o.num("fill") ?: o.num("entry")
         return when (view) {
             TradeView.PAST -> {
                 val r = o.num("r_multiple")
@@ -100,6 +107,7 @@ object TradeBookParser {
                     confidence = conf,
                     timestampMs = o.long("closed_ms") ?: 0L,
                     reasons = o.strList("lessons"),
+                    tradeIntentId = id, stopPrice = stopPx, entryPrice = entryPx,
                 )
             }
             TradeView.CURRENT -> {
@@ -118,6 +126,7 @@ object TradeBookParser {
                     ).joinToString(" · "),
                     confidence = conf,
                     timestampMs = o.long("opened_ms") ?: o.long("decided_ms") ?: 0L,
+                    tradeIntentId = id, stopPrice = stopPx, entryPrice = entryPx,
                 )
             }
             TradeView.POTENTIAL -> {
@@ -135,6 +144,7 @@ object TradeBookParser {
                     confidence = conf,
                     timestampMs = o.long("assessed_ms") ?: o.long("decided_ms") ?: 0L,
                     reasons = o.strList("reasons"),
+                    tradeIntentId = id, stopPrice = stopPx, entryPrice = entryPx,
                 )
             }
         }

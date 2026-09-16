@@ -123,7 +123,7 @@ def test_session_service_observes_commander_halt(tmp_path, eurusd):
     from vati.risk.serde import contract_to_dict
     AccountRegistry(tmp_path / "a.json").add(Account(alias="paper_lab", broker="PAPER", mode="DEMO_TRADER", currency="USD"))
     lake = BarLake(tmp_path / "lake"); bars = synthetic_bars(); lake.write(bars, symbol="EURUSD", timeframe="H1", source="t", provenance="SYNTHETIC")
-    cfg = ServiceConfig(account_alias="paper_lab", symbol="EURUSD", base="EUR", quote="USD", timeframe="H1", contract=contract_to_dict(eurusd), mandate=mandate_dict(venue="paper", mode="DEMO_TRADER", allowed_strategies=["FX-TREND-PULLBACK-01"]),
+    cfg = ServiceConfig(account_alias="paper_lab", symbol="EURUSD", base="EUR", quote="USD", timeframe="H1", contract=contract_to_dict(eurusd), mandate=mandate_dict(venue="paper", mode="DEMO_TRADER", account_alias="paper_lab", allowed_strategies=["FX-TREND-PULLBACK-01"]),
                         capsules=["FX-TREND-PULLBACK-01"], registry_path=str(tmp_path / "a.json"), ledger=str(tmp_path / "l.sqlite"), lake_root=str(tmp_path / "lake"), heartbeat_path=str(tmp_path / "hb.json"))
     clock = {"now": bars[100].end_ms}
     svc = SessionService(cfg, lake_bar_source(lake, "EURUSD", "H1"), clock=lambda: clock["now"]).build(); svc.start()

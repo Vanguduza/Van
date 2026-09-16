@@ -40,18 +40,94 @@ def _import_trade_book():
     return VIEWS, build_trade_book
 
 
+def _import_portfolio():
+    _import_vati()
+    import importlib
+    pf = importlib.import_module("vati.app.portfolio")   # the package re-exports a `portfolio` function under the same name; import the module explicitly
+    from vati.market_data.feeds.lake import TIMEFRAMES_MS, BarLake
+    return pf, BarLake, TIMEFRAMES_MS
+
+
 @dataclass
 class TradingService:
     ledger_path: str
     producer: str = "van-gateway"
+    accounts_registry: str = ""
+    lake_root: str = ""
+    reporting_currency: str = "USD"
 
     # ---------------------------------------------------------------- state
     def available(self) -> bool:
-        return self.ledger_path == ":memory:" or Path(self.ledger_path).is_file()
+        return self.ledger_path == ":memory:" or self.ledger_path.startswith(("postgres://", "postgresql://")) or Path(self.ledger_path).is_file()
 
     def _open(self):
         EventKind, make_event, Ledger = _import_vati()
+        if self.ledger_path.startswith(("postgres://", "postgresql://")):
+            from vati.core.ledger_pg import PostgresLedger
+            return EventKind, make_event, PostgresLedger(self.ledger_path)
         return EventKind, make_event, Ledger(self.ledger_path)
+
+    def _registry_public(self) -> list[dict]:
+        if not self.accounts_registry or not Path(self.accounts_registry).is_file():
+            return []
+        _import_vati()
+        from vati.accounts import AccountRegistry
+        return AccountRegistry(self.accounts_registry).public()
+
+    def _lake(self):
+        if not self.lake_root or not Path(self.lake_root).is_dir():
+            return None
+        _, BarLake, _ = _import_portfolio()
+        return BarLake(self.lake_root)
+
+    def _with_ledger(self, fn, *, empty):
+        if not self.available():
+            return empty
+        _, _, led = self._open()
+        try:
+            return fn(led)
+        finally:
+            led.close()
+
+    # ------------------------------------------------------------ command-center read models
+    def portfolio(self) -> dict[str, Any]:
+        pf, _, _ = _import_portfolio()
+        reg = self._registry_public()
+        empty = {"ledger_available": False, "reporting_currency": self.reporting_currency, "accounts": [{**a, "equity": None, "balance": None, "connection_state": "NEVER_SYNCED"} for a in reg],
+                 "totals": {}, "risk": {}, "exposure": {}, "recent_trades": [], "open_positions": [], "potential_trades": [], "data_state": {}}
+        out = self._with_ledger(lambda led: pf.portfolio(led, reg, reporting_currency=self.reporting_currency), empty=empty)
+        out.setdefault("ledger_available", True)
+        return out
+
+    def accounts(self) -> dict[str, Any]:
+        pf, _, _ = _import_portfolio()
+        reg = self._registry_public()
+        return {"accounts": self._with_ledger(lambda led: pf.account_states(led, reg), empty=reg), "registry": self.accounts_registry or None}
+
+    def market_state(self, symbol: Optional[str] = None) -> dict[str, Any]:
+        pf, _, _ = _import_portfolio()
+        return self._with_ledger(lambda led: pf.market_state(led, symbol), empty={"symbols": [], "ledger_available": False})
+
+    def risk(self) -> dict[str, Any]:
+        pf, _, _ = _import_portfolio()
+        return self._with_ledger(lambda led: pf.risk(led), empty={"ledger_available": False, "positions": [], "concentration": {}})
+
+    def trade_detail(self, trade_intent_id: str) -> Optional[dict[str, Any]]:
+        pf, _, _ = _import_portfolio()
+        lake = self._lake()
+        return self._with_ledger(lambda led: pf.trade_detail(led, trade_intent_id, lake=lake), empty=None)
+
+    def bars(self, symbol: str, timeframe: str, *, limit: int = 300, end_ms: Optional[int] = None) -> dict[str, Any]:
+        pf, _, TIMEFRAMES_MS = _import_portfolio()
+        if timeframe not in TIMEFRAMES_MS:
+            raise ValueError(f"timeframe must be one of {sorted(TIMEFRAMES_MS)}")
+        lake = self._lake()
+        if lake is None:
+            return {"symbol": symbol.upper(), "timeframe": timeframe, "bars": [], "count": 0, "provenance": [], "data_state": {"state": "UNAVAILABLE"}, "lake_available": False}
+        limit = max(10, min(int(limit), 2000))
+        if not self.available():
+            return {**pf.bars(lake, symbol, timeframe, limit=limit, end_ms=end_ms), "lake_available": True}
+        return self._with_ledger(lambda led: {**pf.bars(lake, symbol, timeframe, limit=limit, end_ms=end_ms, ledger=led), "lake_available": True}, empty={})
 
     def status(self) -> dict[str, Any]:
         if not self.available():

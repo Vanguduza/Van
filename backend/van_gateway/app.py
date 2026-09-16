@@ -107,7 +107,7 @@ def create_app() -> FastAPI:
     briefing = BriefingService(store, attention)
     reminders = ReminderService(store)
     decisions = DecisionService(store, attention)
-    trading = TradingService(settings.vati_ledger_path)
+    trading = TradingService(settings.vati_ledger_path, accounts_registry=settings.vati_accounts_registry, lake_root=settings.vati_lake_root, reporting_currency=settings.vati_reporting_currency)
 
     google_transport = None
     google_oauth = None
@@ -420,6 +420,37 @@ def create_app() -> FastAPI:
         """Owner preview surface: past, current and potential trades with confidence scores (read-only)."""
         try:
             return trading.trade_book(view=view, limit=limit)
+        except ValueError as exc:
+            raise HTTPException(status_code=422, detail=str(exc))
+
+    @app.get("/v1/trading/portfolio")
+    async def trading_portfolio():
+        """Command Center landing read model: accounts, totals, risk, open/recent/potential trades, data state."""
+        return trading.portfolio()
+
+    @app.get("/v1/trading/accounts")
+    async def trading_accounts():
+        return trading.accounts()
+
+    @app.get("/v1/trading/market-state")
+    async def trading_market_state(symbol: str | None = None):
+        return trading.market_state(symbol)
+
+    @app.get("/v1/trading/risk")
+    async def trading_risk():
+        return trading.risk()
+
+    @app.get("/v1/trading/trades/{trade_intent_id}")
+    async def trading_trade_detail(trade_intent_id: str):
+        d = trading.trade_detail(trade_intent_id)
+        if d is None:
+            raise HTTPException(status_code=404, detail="unknown trade intent")
+        return d
+
+    @app.get("/v1/trading/bars")
+    async def trading_bars(symbol: str, timeframe: str = "H1", limit: int = 300, end_ms: int | None = None):
+        try:
+            return trading.bars(symbol, timeframe, limit=limit, end_ms=end_ms)
         except ValueError as exc:
             raise HTTPException(status_code=422, detail=str(exc))
 

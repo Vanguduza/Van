@@ -44,6 +44,7 @@ import androidx.fragment.app.FragmentActivity
 import com.dial.van.VanApplication
 import com.dial.van.degraded.RestoreAction
 import com.dial.van.overlay.FloatingOverlayService
+import com.dial.van.trading.TradingCommandCentreActivity
 import com.dial.van.queue.CommandKind
 import com.dial.van.queue.CommandSensitivity
 import com.dial.van.queue.QueueEnqueueRequest
@@ -180,6 +181,20 @@ private fun CommandCentreScreen(
         }
         items(sections) { section ->
             CommandSectionPanel(section = section, glass = panelGlass)
+        }
+        item {
+            // Trading Command Center: read models of the VATI ledger; never an order path.
+            Button(
+                onClick = { activity.startActivity(TradingCommandCentreActivity.intent(activity)) },
+                colors = ButtonDefaults.buttonColors(
+                    containerColor = Color(VanGlassTokens.ACCENT_CYAN).copy(alpha = 0.18f),
+                    contentColor = Color(VanGlassTokens.EDGE_CYAN),
+                ),
+                shape = RoundedCornerShape(VanGlassTokens.CORNER_RADIUS_DP.dp),
+                modifier = Modifier.fillMaxWidth(),
+            ) {
+                Text("Open Trading Command Center")
+            }
         }
         item {
             // Non-destructive control: translucent glass is fine here.

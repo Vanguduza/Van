@@ -3,6 +3,7 @@ VATI ledger; halt and ticket confirmation need the internal control token AND
 an owner signature reference (A4), and only ever append events."""
 from __future__ import annotations
 
+import json
 from decimal import Decimal
 
 import pytest
@@ -11,6 +12,8 @@ from httpx import ASGITransport, AsyncClient
 
 from van_gateway.app import create_app
 from van_gateway.config import get_settings
+import sys as _sys, pathlib as _pl
+_sys.path[:0] = [str(_pl.Path(__file__).resolve().parents[2] / "trading" / "tests")]
 from van_gateway.trading.service import _import_vati
 
 EventKind, make_event, Ledger = _import_vati()   # resolves <repo>/trading without a pytest path entry
@@ -112,7 +115,7 @@ def test_service_never_exposes_an_order_path():
     """The gateway trading surface has no method that could create, size, modify or cancel an order."""
     from van_gateway.trading import TradingService
     names = {n for n in dir(TradingService) if not n.startswith("_")}
-    assert names == {"available", "status", "tickets", "halt", "confirm_ticket", "trade_book", "producer"}
+    assert names == {"available", "status", "tickets", "halt", "confirm_ticket", "trade_book", "portfolio", "accounts", "market_state", "risk", "trade_detail", "bars", "producer", "accounts_registry", "lake_root", "reporting_currency"}
     for banned in ("order", "submit", "size", "cancel", "modify", "credential", "token"):
         assert not any(banned in n.lower() for n in names), banned
 
@@ -136,3 +139,31 @@ async def test_trade_book_views_without_and_with_ledger(client, tmp_path):
     cur = book["current"][0]
     assert cur["state"] == "AWAITING_OWNER_TICKET" and cur["owner_ticket"] == {"ticket": "ZSE-T-1", "status": "OPEN"} and cur["confidence"] == {"score": "0.65", "band": "MEDIUM", "basis": book["confidence_basis"]}
     assert "never a size" in book["confidence_basis"] and cur["approved_size"] == "1200"
+
+
+@pytest.mark.asyncio
+async def test_command_center_read_models_without_and_with_data(client, tmp_path, monkeypatch):
+    ac, app = client
+    pf = (await ac.get("/v1/trading/portfolio")).json()
+    assert pf["ledger_available"] is False and pf["accounts"] == [] and pf["open_positions"] == []
+    assert (await ac.get("/v1/trading/accounts")).json() == {"accounts": [], "registry": "data/vati_accounts.json"}
+    assert (await ac.get("/v1/trading/market-state")).json()["symbols"] == [] and (await ac.get("/v1/trading/risk")).json()["positions"] == []
+    assert (await ac.get("/v1/trading/trades/nope")).status_code == 404
+    b = (await ac.get("/v1/trading/bars?symbol=EURUSD&timeframe=H1")).json()
+    assert b["lake_available"] is False and b["data_state"] == {"state": "UNAVAILABLE"} and b["bars"] == []
+    assert (await ac.get("/v1/trading/bars?symbol=EURUSD&timeframe=W1")).status_code == 422
+    # with a registry, a lake and a ledger from a real paper session
+    reg_path = tmp_path / "accounts.json"; lake_root = tmp_path / "lake"
+    from vati.accounts import Account, AccountRegistry
+    AccountRegistry(reg_path).add(Account(alias="paper_lab", broker="PAPER", mode="DEMO_TRADER", currency="USD", label="Paper Lab"))
+    from test_backtest_runner_cli import synthetic_bars
+    from vati.market_data.feeds import BarLake
+    lake = BarLake(lake_root); bars = synthetic_bars(); lake.write(bars, symbol="EURUSD", timeframe="H1", source="t", provenance="SYNTHETIC")
+    app.state.trading.accounts_registry = str(reg_path); app.state.trading.lake_root = str(lake_root)
+    seed_ledger(tmp_path / "vati.sqlite").close()
+    pf = (await ac.get("/v1/trading/portfolio")).json()
+    assert pf["ledger_available"] and pf["accounts"][0]["alias"] == "paper_lab" and pf["accounts"][0]["safety_identity"] == "PAPER" and pf["accounts"][0]["connection_state"] == "NEVER_SYNCED"
+    acc = (await ac.get("/v1/trading/accounts")).json()["accounts"]
+    assert acc[0]["label"] == "Paper Lab" and "credential" not in json.dumps(acc).lower().replace("credential_ref", "")
+    b = (await ac.get("/v1/trading/bars?symbol=eurusd&timeframe=H1&limit=20")).json()
+    assert b["count"] == 20 and b["provenance"] == ["SYNTHETIC"] and b["lake_available"] and set(b["bars"][0]) == {"t", "o", "h", "l", "c", "v"}

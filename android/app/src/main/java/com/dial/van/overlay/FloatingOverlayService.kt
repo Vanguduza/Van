@@ -46,6 +46,8 @@ import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableIntStateOf
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.setValue
+import androidx.compose.material.icons.filled.OpenInFull
+import com.dial.van.trading.TradingCommandCentreActivity
 import com.dial.van.trading.TradeBookParser
 import com.dial.van.trading.TradeBookState
 import com.dial.van.trading.TradeRow
@@ -462,6 +464,10 @@ class FloatingOverlayService : Service(), LifecycleOwner, SavedStateRegistryOwne
                 Spacer(modifier = Modifier.width(6.dp))
                 Text("preview · read-only", color = Color(0xFF8A97A6), fontSize = 9.sp)
                 Spacer(modifier = Modifier.weight(1f))
+                GlassAction(Icons.Default.OpenInFull, "Open Trading Command Center", accent) {
+                    startActivity(TradingCommandCentreActivity.intent(this@FloatingOverlayService, TradingCommandCentreActivity.tradesRoute(view)))
+                }
+                Spacer(modifier = Modifier.width(4.dp))
                 GlassAction(Icons.Default.Refresh, "Refresh trades", accent) { tradeRefreshTick += 1 }
                 Spacer(modifier = Modifier.width(4.dp))
                 GlassAction(Icons.Default.Close, "Back to Van", accent) {
@@ -496,7 +502,13 @@ class FloatingOverlayService : Service(), LifecycleOwner, SavedStateRegistryOwne
                         Text(view.emptyCopy, color = Color(0xFFB6C2D0), fontSize = 11.sp)
                     } else {
                         Column(modifier = Modifier.weight(1f).verticalScroll(rememberScrollState())) {
-                            st.rows.take(MAX_TRADE_ROWS).forEach { TradeRowLine(it) }
+                            st.rows.take(MAX_TRADE_ROWS).forEach { row ->
+                                TradeRowLine(row) {
+                                    // Tap → full trade workspace (chart, timeline, evidence) in the Command Center.
+                                    val route = row.tradeIntentId?.let { TradingCommandCentreActivity.tradeRoute(it) } ?: "instrument/${row.symbol}"
+                                    startActivity(TradingCommandCentreActivity.intent(this@FloatingOverlayService, route))
+                                }
+                            }
                         }
                     }
                 }
@@ -512,8 +524,8 @@ class FloatingOverlayService : Service(), LifecycleOwner, SavedStateRegistryOwne
     }
 
     @Composable
-    private fun TradeRowLine(row: TradeRow) {
-        Column(modifier = Modifier.fillMaxWidth().padding(vertical = 3.dp)) {
+    private fun TradeRowLine(row: TradeRow, onOpen: () -> Unit) {
+        Column(modifier = Modifier.fillMaxWidth().clickable(onClick = onOpen).padding(vertical = 3.dp)) {
             Row(verticalAlignment = Alignment.CenterVertically) {
                 Text(
                     text = row.headline,

@@ -308,7 +308,7 @@ def test_session_service_runs_paper_account_from_lake_and_logs_portfolio_truth(t
     reg = AccountRegistry(tmp_path / "accounts.json")
     reg.add(Account(alias="paper_lab", broker="PAPER", mode="DEMO_TRADER", currency="USD"))
     lake = BarLake(tmp_path / "lake"); bars = synthetic_bars(); lake.write(bars, symbol="EURUSD", timeframe="H1", source="t", provenance="SYNTHETIC")
-    cfg = ServiceConfig(account_alias="paper_lab", symbol="EURUSD", base="EUR", quote="USD", timeframe="H1", contract=contract_to_dict(eurusd), mandate=mandate_dict(venue="paper", mode="DEMO_TRADER", allowed_strategies=["FX-TREND-PULLBACK-01", "FX-LONDON-BREAKOUT-01"]),
+    cfg = ServiceConfig(account_alias="paper_lab", symbol="EURUSD", base="EUR", quote="USD", timeframe="H1", contract=contract_to_dict(eurusd), mandate=mandate_dict(venue="paper", mode="DEMO_TRADER", account_alias="paper_lab", allowed_strategies=["FX-TREND-PULLBACK-01", "FX-LONDON-BREAKOUT-01"]),
                         capsules=["FX-TREND-PULLBACK-01", "FX-LONDON-BREAKOUT-01"], registry_path=str(tmp_path / "accounts.json"), ledger=str(tmp_path / "l.sqlite"), lake_root=str(tmp_path / "lake"), heartbeat_path=str(tmp_path / "hb.json"))
     clock = {"now": bars[100].end_ms}
     svc = SessionService(cfg, lake_bar_source(lake, "EURUSD", "H1"), clock=lambda: clock["now"]).build()
@@ -332,10 +332,12 @@ def test_session_service_runs_paper_account_from_lake_and_logs_portfolio_truth(t
     assert list(led.iter(EventKind.MARKET_DATA_HEALTH))[-1].payload["state"] == "STALE"        # a stale feed is named, never shown as live
     hb = json.loads((tmp_path / "hb.json").read_text()); assert hb["data_state"] == "STALE" and hb["cycles"] == 60
     # safety identity mismatch refuses to start
-    bad = ServiceConfig(**{**cfg.__dict__, "mandate": mandate_dict(venue="paper", mode="LIMITED_LIVE", allowed_strategies=["FX-TREND-PULLBACK-01"])})
+    bad = ServiceConfig(**{**cfg.__dict__, "mandate": mandate_dict(venue="paper", mode="LIMITED_LIVE", account_alias="mt5_demo", allowed_strategies=["FX-TREND-PULLBACK-01"])})
     reg.add(Account(alias="mt5_demo", broker="MT5", mode="LIMITED_LIVE", currency="USD", credential_ref=CredentialRef(env_var="NOPE"), demo=True))
     with pytest.raises(RuntimeError, match="safety identity"):
         SessionService(ServiceConfig(**{**bad.__dict__, "account_alias": "mt5_demo"}), lake_bar_source(lake, "EURUSD", "H1")).build()
+    with pytest.raises(RuntimeError, match="ACCOUNT_MISMATCH"):
+        SessionService(ServiceConfig(**{**cfg.__dict__, "mandate": mandate_dict(venue="paper", mode="DEMO_TRADER", account_alias="someone_else", allowed_strategies=["FX-TREND-PULLBACK-01"])}), lake_bar_source(lake, "EURUSD", "H1")).build()
 
 
 def test_cli_accounts_lake_calendar_serve(tmp_path, eurusd, capsys):
@@ -358,7 +360,7 @@ def test_cli_accounts_lake_calendar_serve(tmp_path, eurusd, capsys):
     cal = tmp_path / "cal.json"; cal.write_text(json.dumps({"events": [{"name": "NFP", "release": "2099-01-08T13:30:00Z", "currencies": "USD", "source": "a"}]}))
     assert main(["calendar", "--file", str(cal)]) == 0
     cfg = {"account_alias": "paper_lab", "symbol": "EURUSD", "base": "EUR", "quote": "USD", "timeframe": "H1", "contract": contract_to_dict(eurusd),
-           "mandate": mandate_dict(venue="paper", mode="DEMO_TRADER", allowed_strategies=["FX-TREND-PULLBACK-01"]), "capsules": ["FX-TREND-PULLBACK-01"], "registry_path": reg,
+           "mandate": mandate_dict(venue="paper", mode="DEMO_TRADER", account_alias="paper_lab", allowed_strategies=["FX-TREND-PULLBACK-01"]), "capsules": ["FX-TREND-PULLBACK-01"], "registry_path": reg,
            "ledger": str(tmp_path / "l.sqlite"), "lake_root": str(tmp_path / "lake"), "heartbeat_path": str(tmp_path / "hb.json")}
     (tmp_path / "svc.json").write_text(json.dumps(cfg))
     assert main(["serve", "--config", str(tmp_path / "svc.json"), "--once"]) == 0

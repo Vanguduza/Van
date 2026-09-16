@@ -67,6 +67,14 @@ class VanGatewayClient(context: Context) {
         rawGet("/v1/trading/trades?view=$view&limit=$limit")
     }
 
+    /** Trading Command Center read models (Rev 5 Part I). All GET, all read-only, raw text for the pure-Kotlin parsers. */
+    suspend fun tradingPortfolio(): String = withContext(Dispatchers.IO) { rawGet("/v1/trading/portfolio") }
+    suspend fun tradingAccounts(): String = withContext(Dispatchers.IO) { rawGet("/v1/trading/accounts") }
+    suspend fun tradingMarketState(symbol: String? = null): String = withContext(Dispatchers.IO) { rawGet("/v1/trading/market-state" + (symbol?.let { "?symbol=$it" } ?: "")) }
+    suspend fun tradingRisk(): String = withContext(Dispatchers.IO) { rawGet("/v1/trading/risk") }
+    suspend fun tradingTradeDetail(tradeIntentId: String): String = withContext(Dispatchers.IO) { rawGet("/v1/trading/trades/" + java.net.URLEncoder.encode(tradeIntentId, "UTF-8")) }
+    suspend fun tradingBars(symbol: String, timeframe: String = "H1", limit: Int = 300): String = withContext(Dispatchers.IO) { rawGet("/v1/trading/bars?symbol=$symbol&timeframe=$timeframe&limit=$limit") }
+
     suspend fun decisions(): org.json.JSONArray = withContext(Dispatchers.IO) {
         val text = rawGet("/v1/decisions")
         org.json.JSONArray(text)

@@ -14,7 +14,10 @@ class Settings(BaseSettings):
     hermes_profile: str = "van"
     hermes_bearer_token: str = ""
     internal_control_token: str = ""  # Hermes→gateway privileged Google job API
-    vati_ledger_path: str = "data/vati_ledger.sqlite3"  # VATI hash-chained trading ledger (read; owner A4 writes only)
+    vati_ledger_path: str = "data/vati_ledger.sqlite3"  # VATI hash-chained trading ledger (read; owner A4 writes only); postgres://… also accepted
+    vati_accounts_registry: str = "data/vati_accounts.json"  # non-secret account registry (aliases, broker kind, safety identity)
+    vati_lake_root: str = "data/vati_lake"  # bar lake for charts
+    vati_reporting_currency: str = "USD"
     owner_intent_max_age_seconds: int = 24 * 60 * 60
     attention_budget_per_hour: int = 12
 
