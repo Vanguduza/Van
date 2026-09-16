@@ -34,6 +34,10 @@ data class VanFieldGeometry(
 /**
  * Canonical Zone B/C geometry. No Android, Compose or AWT types are used here, so preview boards
  * and the shipping overlay cannot silently evolve different aura topologies.
+ *
+ * [spec] owns Zone B activity. [semanticSpec] independently owns Zone C. This is essential for
+ * truthful combinations such as LISTENING + Google-unverified: cyan interaction flow can remain
+ * visibly active while the outer semantic envelope continues to communicate DEGRADED truth.
  */
 object VanFieldGeometryEngine {
     private const val TAU = (2.0 * PI).toFloat()
@@ -45,14 +49,19 @@ object VanFieldGeometryEngine {
         bodyEdge: Float,
         centerX: Float,
         centerY: Float,
+        semanticSpec: VanAuraSpec = spec,
     ): VanFieldGeometry {
-        if (bodyEdge <= 1f || spec.intensity <= 0.01f) return VanFieldGeometry(emptyList(), emptyList())
-        val motion = VanWindFieldMotion.sample(spec, phase, budget)
-        val midRadius = bodyEdge * 0.42f * VanAuraSpec.MID_RADIUS_SCALE * motion.fieldScale
+        if (bodyEdge <= 1f || (spec.intensity <= 0.01f && semanticSpec.intensity <= 0.01f)) {
+            return VanFieldGeometry(emptyList(), emptyList())
+        }
+
+        val activityMotion = VanWindFieldMotion.sample(spec, phase, budget)
+        val semanticMotion = VanWindFieldMotion.sample(semanticSpec, phase, budget)
+        val midRadius = bodyEdge * 0.42f * VanAuraSpec.MID_RADIUS_SCALE * activityMotion.fieldScale
         val strokes = mutableListOf<VanFieldStroke>()
         val dots = mutableListOf<VanFieldDot>()
 
-        val baseWind = direction(motion.windAngleRad)
+        val baseWind = direction(activityMotion.windAngleRad)
         val baseNormal = VanFieldPoint(-baseWind.y, baseWind.x)
         val safeRxB = bodyEdge * 0.34f * 1.08f
         val safeRyB = bodyEdge * 0.43f
@@ -64,12 +73,24 @@ object VanFieldGeometryEngine {
                 val tier = 0.34f + (index / 2) * 0.19f
                 val lateral = side * midRadius * tier
                 val longitudinal = (seed - 0.5f) * midRadius * 0.32f
-                val length = midRadius * (1.75f + 0.48f * motion.windStrength + seed * 0.18f)
-                val amplitude = midRadius * (0.10f + 0.17f * motion.waveAmplitude) * (0.82f + seed * 0.28f)
+                val length = midRadius * (1.75f + 0.48f * activityMotion.windStrength + seed * 0.18f)
+                val amplitude = midRadius * (0.10f + 0.17f * activityMotion.waveAmplitude) *
+                    (0.82f + seed * 0.28f)
                 val alpha = (0.25f + spec.arcActivity * 0.34f).coerceIn(0.24f, 0.66f)
                 ribbonSegments(
-                    centerX, centerY, baseWind, baseNormal, length, lateral, longitudinal,
-                    amplitude, motion.phase, seed, motion.turbulence, safeRxB, safeRyB,
+                    centerX,
+                    centerY,
+                    baseWind,
+                    baseNormal,
+                    length,
+                    lateral,
+                    longitudinal,
+                    amplitude,
+                    activityMotion.phase,
+                    seed,
+                    activityMotion.turbulence,
+                    safeRxB,
+                    safeRyB,
                     budget.allowMotion,
                 ).forEach { points ->
                     strokes += VanFieldStroke(
@@ -88,18 +109,29 @@ object VanFieldGeometryEngine {
             repeat(count) { index ->
                 val seed = seed01(index + 31, spec.sparkRate + spec.intensity)
                 val progress = if (budget.allowMotion) {
-                    (motion.particleAdvection * (0.65f + seed * 0.70f) + seed) % 1f
-                } else seed
+                    (activityMotion.particleAdvection * (0.65f + seed * 0.70f) + seed) % 1f
+                } else {
+                    seed
+                }
                 val side = if (index % 2 == 0) -1f else 1f
                 val lateral = side * midRadius * (0.30f + 0.46f * seed)
                 val point = flowPoint(
-                    centerX, centerY, baseWind, baseNormal,
-                    midRadius * (1.55f + motion.windStrength * 0.35f), lateral, 0f,
-                    midRadius * (0.06f + motion.waveAmplitude * 0.08f), progress,
-                    motion.phase, seed, motion.turbulence, budget.allowMotion,
+                    centerX,
+                    centerY,
+                    baseWind,
+                    baseNormal,
+                    midRadius * (1.55f + activityMotion.windStrength * 0.35f),
+                    lateral,
+                    0f,
+                    midRadius * (0.06f + activityMotion.waveAmplitude * 0.08f),
+                    progress,
+                    activityMotion.phase,
+                    seed,
+                    activityMotion.turbulence,
+                    budget.allowMotion,
                 )
                 if (!insideEllipse(point, centerX, centerY, safeRxB, safeRyB)) {
-                    val alpha = ((0.28f + 0.52f * motion.electricPulse) *
+                    val alpha = ((0.28f + 0.52f * activityMotion.electricPulse) *
                         (0.45f + 0.55f * spec.sparkRate)).coerceIn(0.12f, 0.78f)
                     dots += VanFieldDot(
                         point = point,
@@ -111,35 +143,51 @@ object VanFieldGeometryEngine {
             }
         }
 
-        val segments = spec.segmentsForBudget(budget)
+        val segments = semanticSpec.segmentsForBudget(budget)
         if (segments.isNotEmpty()) {
-            val outerRadius = midRadius * spec.envelopeRadiusScale.coerceIn(
+            val semanticMidRadius = bodyEdge * 0.42f * VanAuraSpec.MID_RADIUS_SCALE * semanticMotion.fieldScale
+            val outerRadius = semanticMidRadius * semanticSpec.envelopeRadiusScale.coerceIn(
                 VanAuraSpec.MIN_ENVELOPE_SCALE,
                 VanAuraSpec.MAX_ENVELOPE_SCALE,
             )
             val safeRxC = bodyEdge * 0.52f
             val safeRyC = bodyEdge * 0.56f
-            val baseAlpha = spec.envelopeAlpha.coerceIn(0.05f, 0.22f)
-            val semanticBoost = if (spec.semanticColor != null) 1f else 0.68f
+            val baseAlpha = semanticSpec.envelopeAlpha.coerceIn(0.05f, 0.22f)
+            val semanticBoost = if (semanticSpec.semanticColor != null) 1f else 0.68f
 
             segments.forEachIndexed { index, segment ->
                 val absolute = Math.toRadians(segment.startDeg.toDouble()).toFloat()
-                // Preserve state topology: each authored segment bends the prevailing wind into a
-                // distinct local direction instead of collapsing every semantic state to one axis.
+                // Preserve authored semantic topology while letting each state have its own outer
+                // wind response. This avoids collapsing all Zone C states onto one common axis.
                 val topologyTurn = wrapPi(absolute) * 0.44f
-                val localWind = direction(motion.windAngleRad + topologyTurn)
+                val localWind = direction(semanticMotion.windAngleRad + topologyTurn)
                 val localNormal = VanFieldPoint(-localWind.y, localWind.x)
-                val seed = seed01(index + 11, segment.startDeg * 0.017f + segment.sweepDeg * 0.011f)
+                val seed = seed01(
+                    index + 11,
+                    segment.startDeg * 0.017f + segment.sweepDeg * 0.011f + semanticSpec.deformation,
+                )
                 val side = if (sin(absolute) >= 0f) 1f else -1f
                 val lateral = side * outerRadius * (0.50f + 0.18f * abs(sin(absolute)))
                 val longitudinal = cos(absolute) * outerRadius * 0.30f
                 val sweepFactor = segment.sweepDeg.coerceIn(20f, 110f) / 110f
                 val length = outerRadius * (0.88f + 0.56f * sweepFactor)
-                val amplitude = outerRadius * (0.065f + 0.13f * motion.waveAmplitude + 0.025f * sweepFactor)
+                val amplitude = outerRadius *
+                    (0.065f + 0.13f * semanticMotion.waveAmplitude + 0.025f * sweepFactor)
 
                 ribbonSegments(
-                    centerX, centerY, localWind, localNormal, length, lateral, longitudinal,
-                    amplitude, motion.phase, seed, motion.turbulence * 0.85f, safeRxC, safeRyC,
+                    centerX,
+                    centerY,
+                    localWind,
+                    localNormal,
+                    length,
+                    lateral,
+                    longitudinal,
+                    amplitude,
+                    semanticMotion.phase,
+                    seed,
+                    semanticMotion.turbulence * 0.85f,
+                    safeRxC,
+                    safeRyC,
                     budget.allowMotion,
                 ).forEach { points ->
                     strokes += VanFieldStroke(
@@ -152,10 +200,22 @@ object VanFieldGeometryEngine {
                 }
 
                 if (segment.node || segments.size == 1) {
-                    val nodeProgress = (0.20f + seed * 0.62f + motion.particleAdvection * 0.18f) % 1f
+                    val nodeProgress = (
+                        0.20f + seed * 0.62f + semanticMotion.particleAdvection * 0.18f
+                        ) % 1f
                     val node = flowPoint(
-                        centerX, centerY, localWind, localNormal, length, lateral, longitudinal,
-                        amplitude, nodeProgress, motion.phase, seed, motion.turbulence,
+                        centerX,
+                        centerY,
+                        localWind,
+                        localNormal,
+                        length,
+                        lateral,
+                        longitudinal,
+                        amplitude,
+                        nodeProgress,
+                        semanticMotion.phase,
+                        seed,
+                        semanticMotion.turbulence,
                         budget.allowMotion,
                     )
                     if (!insideEllipse(node, centerX, centerY, safeRxC, safeRyC)) {
@@ -163,7 +223,8 @@ object VanFieldGeometryEngine {
                             point = node,
                             ink = VanFieldInk.SEMANTIC,
                             alpha = (baseAlpha + 0.12f).coerceAtMost(0.34f),
-                            radius = (bodyEdge * (0.010f + 0.006f * motion.electricPulse)).coerceAtLeast(1.2f),
+                            radius = (bodyEdge *
+                                (0.010f + 0.006f * semanticMotion.electricPulse)).coerceAtLeast(1.2f),
                         )
                     }
                 }
@@ -194,8 +255,19 @@ object VanFieldGeometryEngine {
         val steps = 28
         repeat(steps + 1) { index ->
             val point = flowPoint(
-                cx, cy, wind, normal, length, lateral, longitudinal, amplitude,
-                index / steps.toFloat(), phase, seed, turbulence, allowMotion,
+                cx,
+                cy,
+                wind,
+                normal,
+                length,
+                lateral,
+                longitudinal,
+                amplitude,
+                index / steps.toFloat(),
+                phase,
+                seed,
+                turbulence,
+                allowMotion,
             )
             if (insideEllipse(point, cx, cy, safeRx, safeRy)) {
                 current = null
@@ -231,9 +303,17 @@ object VanFieldGeometryEngine {
         val wave1 = sin(TAU * (2f * u - 2f * phase * moving + seed))
         val wave2 = sin(TAU * (3f * u + 3f * phase * moving + seed * 1.71f))
         val wave3 = sin(TAU * (5f * u - phase * moving + seed * 0.47f))
-        val wave = (wave1 + wave2 * 0.38f + wave3 * 0.14f) * amplitude * (0.58f + 0.42f * envelope)
+        val wave = (wave1 + wave2 * 0.38f + wave3 * 0.14f) * amplitude *
+            (0.58f + 0.42f * envelope)
         val curl = sin(TAU * (u + phase * moving + seed * 0.31f)) * amplitude * turbulence * 0.34f
-        return point(cx, cy, wind, normal, (u - 0.5f) * length + longitudinal + curl, lateral + wave)
+        return point(
+            cx,
+            cy,
+            wind,
+            normal,
+            (u - 0.5f) * length + longitudinal + curl,
+            lateral + wave,
+        )
     }
 
     private fun point(
@@ -250,7 +330,13 @@ object VanFieldGeometryEngine {
 
     private fun direction(angle: Float) = VanFieldPoint(cos(angle), sin(angle))
 
-    private fun insideEllipse(point: VanFieldPoint, cx: Float, cy: Float, rx: Float, ry: Float): Boolean {
+    private fun insideEllipse(
+        point: VanFieldPoint,
+        cx: Float,
+        cy: Float,
+        rx: Float,
+        ry: Float,
+    ): Boolean {
         if (rx <= 0f || ry <= 0f) return false
         val nx = (point.x - cx) / rx
         val ny = (point.y - cy) / ry
