@@ -17,7 +17,6 @@ object VanPresence {
     private const val GOOGLE = "google"
 
     data class Cue(
-        /** State for chrome/status copy; may differ from the character pose. */
         val durableState: VanDurableState,
         val health: VanHealthState,
         val headline: String,
@@ -67,8 +66,6 @@ object VanPresence {
             )
         }
 
-        // Non-uplink breakage remains visible in chrome/Zone C, while visualState() preserves the
-        // local activity pose. This is the default Google-unverified startup case.
         if (broken.isNotEmpty()) {
             val lead = broken.firstOrNull { it.id == GOOGLE } ?: broken.first()
             return Cue(
@@ -90,9 +87,12 @@ object VanPresence {
         return nominal(state, if (state == VanDurableState.IDLE) mode.reason else VanCaptions.forState(state))
     }
 
-    /**
-     * Merges fail-closed health with local activity without leaking contradictory flags.
-     */
+    /** Legacy/overlay bridge while call sites migrate to [VanPresenceFrame]. */
+    fun cue(mode: DegradedMode, live: VanVisualState): Cue = cue(
+        mode = mode,
+        live = frameFromVisual(live),
+    )
+
     fun visualState(
         cue: Cue,
         base: VanPresenceFrame = VanLiveVisualState.frame,
@@ -111,8 +111,6 @@ object VanPresence {
             else -> frame.copy(urgency = maxOf(frame.urgency, cue.urgency))
         }
 
-        // OFFLINE is an execution-path truth and forces the pose; DEGRADED only owns the semantic
-        // field/chrome, so local LISTENING/SPEAKING/THINKING remains visible.
         if (cue.health == VanHealthState.OFFLINE) {
             frame = frame.copy(
                 activity = VanDurableState.OFFLINE,
@@ -125,24 +123,8 @@ object VanPresence {
         return frame.toVisualState()
     }
 
-    /** Compatibility overload for legacy tests/callers that only have a flattened visual state. */
-    fun visualState(cue: Cue, base: VanVisualState): VanVisualState {
-        val frame = VanPresenceFrame(
-            activity = base.durableState,
-            speech = when {
-                base.speaking -> VanSpeechState.SPEAKING
-                base.listening -> VanSpeechState.LISTENING
-                else -> VanSpeechState.QUIET
-            },
-            attentionX = base.attentionX,
-            attentionY = base.attentionY,
-            mouthOpen = base.mouthOpen,
-            viseme = base.viseme,
-            urgency = base.urgency,
-            actionCode = base.actionCode,
-        )
-        return visualState(cue, frame)
-    }
+    fun visualState(cue: Cue, base: VanVisualState): VanVisualState =
+        visualState(cue, frameFromVisual(base))
 
     fun meshCue(mode: DegradedMode): String {
         val google = mode.subsystems.firstOrNull { it.id == GOOGLE }
@@ -153,6 +135,21 @@ object VanPresence {
             SubsystemStatus.WONT_DO -> "Google mesh disabled"
         }
     }
+
+    private fun frameFromVisual(base: VanVisualState): VanPresenceFrame = VanPresenceFrame(
+        activity = base.durableState,
+        speech = when {
+            base.speaking -> VanSpeechState.SPEAKING
+            base.listening -> VanSpeechState.LISTENING
+            else -> VanSpeechState.QUIET
+        },
+        attentionX = base.attentionX,
+        attentionY = base.attentionY,
+        mouthOpen = base.mouthOpen,
+        viseme = base.viseme,
+        urgency = base.urgency,
+        actionCode = base.actionCode,
+    )
 
     private fun nominal(state: VanDurableState, detail: String) = Cue(
         durableState = state,
