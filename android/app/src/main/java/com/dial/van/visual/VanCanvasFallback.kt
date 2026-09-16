@@ -48,12 +48,6 @@ import kotlin.math.PI
 import kotlin.math.min
 import kotlin.math.sin
 
-/**
- * Entry point for every Van appearance.
- *
- * Resolves the renderer once per composition target and degrades to the interim Canvas
- * character whenever Rive cannot be trusted to paint a truthful Van.
- */
 @Composable
 fun VanAvatar(
     state: VanVisualState,
@@ -90,14 +84,7 @@ fun VanAvatar(
     }
 }
 
-/**
- * Owner-supplied bitmap pose.
- *
- * Per §1 the character is the solid anchor, so the bitmap remains opaque and restrained. Unlike
- * the old static fallback, the pose receives tiny state-aware whole-character motion so VAN never
- * freezes while the living field moves around him. The motion is intentionally much smaller than
- * the aura motion; it must read as breathing/attention, not as a floating sticker effect.
- */
+/** Owner-art fallback stays opaque but receives tiny state-aware micro-motion. */
 @Composable
 fun VanOwnerArtAvatar(state: VanVisualState, modifier: Modifier = Modifier) {
     val palette = VanStatusPalette.forState(state.durableState)
@@ -130,8 +117,8 @@ fun VanOwnerArtAvatar(state: VanVisualState, modifier: Modifier = Modifier) {
 }
 
 /**
- * Van in his interaction shell, composed in the order fixed by §10:
- * aura bloom → filaments → character → orb, with the glass supplied by the caller underneath.
+ * Complete VAN embodiment. Character pose follows local activity; Zone B follows that same local
+ * activity; Zone C independently follows [VanVisualState.resolvedSemanticState].
  */
 @Composable
 fun VanEmbodiment(
@@ -140,16 +127,17 @@ fun VanEmbodiment(
     presentation: VanPresentation = VanPresentation.COMPACT,
     budget: VanEffectBudget = VanEffectBudget.FULL,
     onDecision: (VanRenderDecision) -> Unit = {},
-    /** Body size relative to the aura canvas. Rest uses hit/avatar so Zone C has air. */
     characterFraction: Float = 1f,
 ) {
-    val spec = VanAuraSpecs.forState(state.resolvedSemanticState, budget)
+    val activitySpec = VanAuraSpecs.forState(state.durableState, budget)
+    val semanticSpec = VanAuraSpecs.forState(state.resolvedSemanticState, budget)
     val phase = vanIdlePhase(state.durableState, !budget.allowMotion)
     val body = characterFraction.coerceIn(0.40f, 1f)
 
     Box(modifier = modifier, contentAlignment = Alignment.Center) {
         VanAuraLayer(
-            spec = spec,
+            spec = activitySpec,
+            semanticSpec = semanticSpec,
             phase = phase,
             budget = budget,
             characterScale = body,
@@ -164,7 +152,6 @@ fun VanEmbodiment(
     }
 }
 
-/** Resolves §11's effect budget from live device signals. */
 @Composable
 fun rememberVanEffectBudget(): VanEffectBudget {
     val context = LocalContext.current
