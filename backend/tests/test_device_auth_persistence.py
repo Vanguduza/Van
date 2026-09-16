@@ -61,6 +61,12 @@ async def test_revoked_device_is_not_rehydrated(tmp_path):
     first = AuthService(store, key)
     await first.enroll("device-1", "test-material", "PEM")
     await first.revoke("device-1")
+    grant = await store.fetchone(
+        "SELECT revoked_at_unix FROM capability_grants WHERE device_id = ?",
+        ("device-1",),
+    )
+    assert grant is not None
+    assert grant["revoked_at_unix"] is not None
 
     restarted = AuthService(store, key)
     assert await restarted.load_persisted_secrets() == 0

@@ -105,10 +105,16 @@ class AuthService:
         row = await self.store.fetchone("SELECT device_id FROM devices WHERE device_id = ?", (device_id,))
         if row is None:
             raise AuthError("unknown_device", "Device not found")
-        await self.store.execute(
-            "UPDATE devices SET revoked_at_unix = ? WHERE device_id = ?",
-            (now, device_id),
-        )
+        async with self.store.connection() as db:
+            await db.execute(
+                "UPDATE capability_grants SET revoked_at_unix = ? WHERE device_id = ? AND revoked_at_unix IS NULL",
+                (now, device_id),
+            )
+            await db.execute(
+                "UPDATE devices SET revoked_at_unix = ? WHERE device_id = ?",
+                (now, device_id),
+            )
+            await db.commit()
         self._device_secrets.pop(device_id, None)
 
     async def require_device(self, device_id: str) -> DeviceRecord:
