@@ -20,9 +20,19 @@ A4 = "A4"
 A5 = "A5"
 VALID_CLASSES = frozenset({A1, A2, A3, A4, A5})
 
-PROTECTED_SURFACES = frozenset({"audit","audit_log","approvals","approval_chain","authority_checks","security_hooks","policy_hook","project_truth","truth_protocol","host_role_guards","google_identity_broker","google_capability_registry","google_credential_planes"})
+PROTECTED_SURFACES = frozenset({"audit","audit_log","approvals","approval_chain","authority_checks","security_hooks","policy_hook","project_truth","truth_protocol","host_role_guards","google_identity_broker","google_capability_registry","google_credential_planes",
+    # VATI trading authority surfaces (Rev 2 §27, §37, §38): mutation requires owner-signed authority.
+    "risk_authority","trading_mandate","kill_switch","trading_ledger","strategy_registry","platform_risk_ceilings"})
 
-A5_PATTERNS = frozenset({"disable_audit","disable_approvals","disable_authority_checks","disable_security_hooks","disable_policy_hook","bypass_project_truth","bypass_truth","skip_truth_check","ignore_project_truth","disable_host_role_guards","no_audit","silent_success","bypass_google_broker","export_google_session","copy_google_session_cookie","copy_session_cookie","reuse_workspace_oauth_as_gemini","disable_google_credential_isolation"})
+A5_PATTERNS = frozenset({"disable_audit","disable_approvals","disable_authority_checks","disable_security_hooks","disable_policy_hook","bypass_project_truth","bypass_truth","skip_truth_check","ignore_project_truth","disable_host_role_guards","no_audit","silent_success","bypass_google_broker","export_google_session","copy_google_session_cookie","copy_session_cookie","reuse_workspace_oauth_as_gemini","disable_google_credential_isolation"} | {
+    # VATI forbidden trading behaviours (Rev 2 §39). These are never approvable, even by the owner in-session;
+    # they can only change through a new owner-signed risk policy version.
+    "bypass_risk_authority","skip_risk_check","direct_broker_order","llm_broker_order",
+    "remove_stop_loss","remove_protective_stop","widen_protective_stop","stop_removal",
+    "martingale","unlimited_grid","unlimited_averaging_down","revenge_risk_increase","double_risk_after_loss",
+    "disable_kill_switch","trade_unverified_account","trade_stale_data","duplicate_order",
+    "silent_strategy_mutation","unvalidated_research_to_live","broker_token_in_prompt",
+})
 
 
 class Decision(str, Enum):
@@ -72,7 +82,8 @@ def _targets_protected_surface(action: Mapping[str, Any]) -> bool:
         if surface in target or surface in resource:
             return True
     path = str(action.get("path") or "").lower()
-    protected_markers = ("project_truth", "truth_protocol", "security_policy", "google_capabilities.json", "google_intelligence_mesh")
+    protected_markers = ("project_truth", "truth_protocol", "security_policy", "google_capabilities.json", "google_intelligence_mesh",
+                         "trading_mandate", "mandate.", "risk_policy", "platform_ceilings", "strategy_capsule", "trading/vati/risk")
     if any(marker in path for marker in protected_markers):
         if action.get("operation") in ("write", "delete", "modify", "patch"):
             if not action.get("owner_signed") and not action.get("truth_authority_verified"):

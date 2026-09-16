@@ -25,6 +25,7 @@ authority:
   project_registry: registries/projects.json
   google_capability_registry: registries/google_capabilities.json
   google_architecture: docs/GOOGLE_INTELLIGENCE_MESH.md
+  trading_architecture: docs/VAN_ADAPTIVE_TRADING_INTELLIGENCE_TECHNICAL_BLUEPRINT_REV2.md
 
 policy:
   hook_module: policy/van_policy_hook.py
@@ -34,6 +35,8 @@ policy:
   require_approval_a4: true
   protect_audit_truth: true
   protect_google_identity_broker: true
+  protect_trading_risk_authority: true
+  deny_model_broker_orders: true
 
 skills:
   root: skills
@@ -51,6 +54,7 @@ skills:
     - notification-triage
     - infrastructure-diagnostics
     - hermes-administration
+    - trading-intelligence
 
 bot:
   chat_spec: bot/BOT_CHAT.md

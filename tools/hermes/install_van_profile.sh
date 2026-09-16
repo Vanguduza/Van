@@ -58,6 +58,7 @@ verify_source_layout() {
   local skills=(
     owner-briefing google-workspace project-steering research decision-support
     document-work notification-triage infrastructure-diagnostics hermes-administration
+    trading-intelligence
   )
   for s in "${skills[@]}"; do
     if [[ ! -f "${SOURCE_ROOT}/skills/${s}/SKILL.md" ]]; then

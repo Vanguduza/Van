@@ -23,13 +23,14 @@ REQUIRED_FILES = [
     HERMES_ROOT / "providers" / "gemini.md",
     REPO_ROOT / "registries" / "google_capabilities.json",
     REPO_ROOT / "docs" / "GOOGLE_INTELLIGENCE_MESH.md",
+    REPO_ROOT / "docs" / "VAN_ADAPTIVE_TRADING_INTELLIGENCE_TECHNICAL_BLUEPRINT_REV2.md",
 ]
 
 SKILL_NAMES = [
     "owner-briefing", "google-workspace", "google-intelligence", "gemini-notebook",
     "google-design", "google-development", "project-steering", "research",
     "decision-support", "document-work", "notification-triage",
-    "infrastructure-diagnostics", "hermes-administration",
+    "infrastructure-diagnostics", "hermes-administration", "trading-intelligence",
 ]
 
 AUTHORITY_ORDER_MARKERS = [
@@ -106,3 +107,13 @@ def test_google_capability_registry_is_versioned_and_hermes_owned():
 def test_install_scripts_exist():
     assert (REPO_ROOT / "tools" / "hermes" / "install_van_profile.sh").is_file()
     assert (REPO_ROOT / "tools" / "hermes" / "doctor_van_profile.sh").is_file()
+
+
+def test_trading_authority_declared_in_soul_and_config():
+    soul = (PROFILE_ROOT / "SOUL.md").read_text(encoding="utf-8")
+    assert "Trading authority" in soul
+    assert "never sizes, sends, modifies or cancels a broker" in soul
+    config = (PROFILE_ROOT / "config.yaml").read_text(encoding="utf-8")
+    assert "protect_trading_risk_authority: true" in config
+    assert "deny_model_broker_orders: true" in config
+    assert "- trading-intelligence" in config

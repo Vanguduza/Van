@@ -36,9 +36,13 @@ The owner's canonical Google account is the identity/entitlement root for Google
 
 Forbidden A5 patterns include exporting/copying Google sessions or cookies, reusing Workspace OAuth as a Gemini runtime credential, bypassing the Google identity broker, or disabling credential isolation.
 
+## Trading authority (VATI)
+
+Owner mandates, platform risk ceilings, the Risk Authority, kill switch, strategy registry and trading ledger are protected surfaces; writes require owner-signed authority. Forbidden A5 patterns include a model sending a broker order, bypassing the Risk Authority, removing or widening a protective stop, martingale/unlimited grid, revenge sizing, trading stale data or an unverified account, and placing a broker token in a prompt. Broker accounts appear only as aliases. See `docs/VAN_ADAPTIVE_TRADING_INTELLIGENCE_TECHNICAL_BLUEPRINT_REV2.md` §37–§39, §43.
+
 ## Secrets
 
-Never log or prompt-inject access/refresh tokens, API keys/client secrets, OTPs/passwords/private keys, full auth headers, service-account private keys, browser cookies/session tokens, or `VAN_INTERNAL_CONTROL_TOKEN`.
+Never log or prompt-inject access/refresh tokens, API keys/client secrets, OTPs/passwords/private keys, full auth headers, service-account private keys, browser cookies/session tokens, MT5 logins/passwords, Deriv API tokens, or `VAN_INTERNAL_CONTROL_TOKEN`.
 
 Workspace refresh tokens are encrypted at rest. Live Workspace calls exchange refresh tokens for short-lived access tokens inside the gateway. Neither token is forwarded to Hermes prompts.
 

@@ -1,6 +1,6 @@
 # VAN Implementation Ledger
 
-**Updated:** 2026-09-15
+**Updated:** 2026-09-16
 **Version:** 0.5.0-dev  
 **Repository:** `Vanguduza/Van`
 
@@ -24,9 +24,12 @@
 - **Policy hardening:** Google broker/registry protected; session-cookie export, credential-plane collapse and broker bypass are prohibited patterns.
 - Comprehensive canonical specification: `docs/GOOGLE_INTELLIGENCE_MESH.md`.
 - Device/CI helpers: `tools/certification/device_cert_probe.py`; `tools/ci/install_github_workflow.py`; Windows `tools/bootstrap_backend.ps1`, `tools/run_gateway.ps1`, `tools/sync_project_truth_live.ps1`.
+- **VATI Phase 0 — Canon & Risk Boundary:** `docs/VAN_ADAPTIVE_TRADING_INTELLIGENCE_TECHNICAL_BLUEPRINT_REV2.md` (expert review of Rev 1 + Rev 2 canon; Rev 1 archived as provenance); `trading/vati/risk` deterministic Risk Authority (mandate load with platform ceilings and hard-forbidden behaviours, [0,1]-clamped multipliers, venue round-down sizing, stake sizing for fixed-payout contracts, portfolio heat, currency-leg netting, drawdown governor, latching kill switch, sealed hashed decisions); seven JSON Schema contracts; 110 tests including seeded property fuzz with induced-failure evidence; `trading-intelligence` Hermes skill; policy hook now denies trading A5 patterns and protects trading authority surfaces.
 - Fail-closed hardening: unsigned release refused; `/health` `ok` tracks Hermes; Project Truth PUT requires internal token; Google mesh defaults unverified until evidence; Rive load failures fall back to Canvas.
 
 ## EXTERNALLY BLOCKED / REQUIRES LIVE CERTIFICATION
+
+- VATI Rev 2 is a Development Authority Candidate until owner acceptance (A4). Phases 1–15 (data foundation, VTIL, NautilusTrader backtesting, MT5/Deriv demo adapters, regime/horizon/meta-labeling, NFP engine, shadow and live) are not implemented; no execution adapter exists yet by design (Phase 0 gate).
 
 - Google credential planes are authenticated on Hermes and imported into Van as `CONFIGURED` (not `READY` without canary receipts).
 - Antigravity live generation remains `CAPACITY_LIMITED` (Jules fallback). Other Google planes are not failed by Antigravity quota.
@@ -34,6 +37,9 @@
 - Live Hermes install is certified on `dial-hermes-control` (2026-09-15). Local Project Truth mounts for van/dial/dde/gtr/goat/aeci are resolved on this workstation. Physical Samsung certification, `.riv` authoring, production signing, and GitHub workflow-scope install remain external gates.
 
 ## SUPERSEDED / FORBIDDEN
+
+- VATI Rev 1 blueprint as active intent (retained as provenance under `docs/archive/`).
+- Any model or research output that sends, sizes, modifies or cancels a broker order; multipliers above 1; rounding a lot size up to the venue minimum; a mandate that omits a hard-forbidden behaviour.
 
 - Embedded/on-device second VAN agent loop.
 - Consumer Gemini web scraping as a model credential.

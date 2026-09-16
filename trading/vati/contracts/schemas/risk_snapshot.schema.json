@@ -1,0 +1,51 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://van.dial/vati/risk_snapshot.schema.json",
+  "title": "RiskSnapshot",
+  "description": "Everything the Risk Authority consults, captured atomically at decision time and hashed into the RiskDecision (Rev 2 §27). Any unprovable field is supplied at its fail-closed value.",
+  "type": "object",
+  "additionalProperties": false,
+  "required": ["now_unix", "account_alias", "account_verified", "equity", "balance", "peak_equity", "day_start_equity", "week_start_equity", "consecutive_losses", "open_positions", "symbol_contract", "quote_age_ms", "max_quote_age_ms", "broker_connected", "reconciliation_ok", "clock_sync_ok", "risk_store_ok", "market_integrity", "tier1_event_blackout_active", "kill_switch_triggers"],
+  "properties": {
+    "now_unix": {"type": "integer"},
+    "account_alias": {"type": "string"},
+    "account_verified": {"type": "boolean"},
+    "equity": {"type": "string"},
+    "balance": {"type": "string"},
+    "peak_equity": {"type": "string"},
+    "day_start_equity": {"type": "string"},
+    "week_start_equity": {"type": "string"},
+    "consecutive_losses": {"type": "integer", "minimum": 0},
+    "open_positions": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "required": ["symbol", "direction", "lots", "stop_distance", "value_per_price_unit_per_lot", "base_currency", "quote_currency", "has_broker_side_stop", "loss_model"],
+        "properties": {
+          "symbol": {"type": "string"},
+          "direction": {"type": "string", "enum": ["LONG", "SHORT"]},
+          "lots": {"type": "string"},
+          "stop_distance": {"type": "string"},
+          "value_per_price_unit_per_lot": {"type": "string"},
+          "base_currency": {"type": "string"},
+          "quote_currency": {"type": "string"},
+          "strategy_id": {"type": "string"},
+          "has_broker_side_stop": {"type": "boolean"},
+          "loss_model": {"type": "string", "enum": ["STOP_DISTANCE", "FULL_STAKE"]},
+          "stake": {"type": "string"},
+          "broker_position_id": {"type": "string"}
+        }
+      }
+    },
+    "symbol_contract": {"$ref": "symbol_contract.schema.json"},
+    "quote_age_ms": {"type": "integer"},
+    "max_quote_age_ms": {"type": "integer", "minimum": 1},
+    "broker_connected": {"type": "boolean"},
+    "reconciliation_ok": {"type": "boolean"},
+    "clock_sync_ok": {"type": "boolean"},
+    "risk_store_ok": {"type": "boolean"},
+    "market_integrity": {"type": "string", "enum": ["NORMAL", "ELEVATED", "ABNORMAL", "HALTED"]},
+    "tier1_event_blackout_active": {"type": "boolean"},
+    "kill_switch_triggers": {"type": "array", "items": {"type": "string"}}
+  }
+}

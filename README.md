@@ -50,6 +50,7 @@ Canonical specification: `docs/GOOGLE_INTELLIGENCE_MESH.md`.
 | `registries/` | Projects and Google capability catalogs |
 | `tests/` | Cross-cutting contract and acceptance tests |
 | `tools/` | Bootstrap, Google setup/certification, release and certification scripts |
+| `trading/` | VAN Adaptive Trading Intelligence (VATI): deterministic Risk Authority, contracts and tests — see `docs/VAN_ADAPTIVE_TRADING_INTELLIGENCE_TECHNICAL_BLUEPRINT_REV2.md` |
 
 ## Quick start
 
@@ -83,6 +84,7 @@ cd ../android
 4. Visual identity is locked under `visual-authority/`.
 5. OAuth/API/service/session credentials never enter LLM prompts.
 6. `CONFIGURED` is not `READY`; live Google claims require evidence.
+7. No model sends a broker order. Trading size comes only from the deterministic Risk Authority under an owner-signed mandate; `NO_TRADE` is a valid outcome.
 
 ## Version
 
