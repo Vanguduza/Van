@@ -3,7 +3,6 @@ package com.dial.van.gateway
 import android.content.Context
 import androidx.security.crypto.EncryptedSharedPreferences
 import androidx.security.crypto.MasterKey
-import com.dial.van.visual.VanDurableState
 import com.dial.van.visual.VanLiveVisualState
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.withContext
@@ -98,51 +97,40 @@ class VanGatewayClient(context: Context) {
         if (projectId != null) body.put("project_id", projectId)
         if (approvalToken != null) body.put("approval_token", approvalToken)
 
-        // This state represents the real local hand-off operation. It is not a claim that the
-        // delegated Hermes run has completed; the gateway only returns run acceptance here.
-        VanLiveVisualState.transition(VanDurableState.DELEGATING)
+        VanLiveVisualState.dispatchStarted()
         try {
             val response = postJson("/v1/commands", body, signed = false)
             publishCommandVisualStatus(response)
             response
         } catch (exc: Throwable) {
-            VanLiveVisualState.transition(VanDurableState.WARNING, urgency = 0.35f)
+            VanLiveVisualState.warning(urgency = 0.35f)
             VanLiveVisualState.settleToIdle(delayMs = 1_500L, allowCritical = true)
             throw exc
         }
     }
 
-    /**
-     * Map gateway protocol truth to visible presence without inventing task completion.
-     * `accepted` only means Hermes accepted the run, so VAN briefly acknowledges the hand-off and
-     * returns to ambient presence; a future run-status stream can own long-running WORKING/SUCCESS.
-     */
+    /** Map protocol truth to presence without inventing task completion. */
     private fun publishCommandVisualStatus(response: JSONObject) {
         when (response.optString("status")) {
-            "approval_required" -> VanLiveVisualState.transition(
-                state = VanDurableState.WAITING_FOR_OWNER,
-                urgency = 0.45f,
-            )
+            "approval_required" -> VanLiveVisualState.waitingForOwner()
 
+            // Accepted/in_flight means Hermes owns the work. This is not SUCCESS; the owner-turn
+            // handoff is complete, so it may settle after a brief WORKING acknowledgement.
             "accepted", "in_flight" -> {
-                VanLiveVisualState.transition(VanDurableState.DELEGATING)
+                VanLiveVisualState.dispatchAccepted()
                 VanLiveVisualState.settleToIdle(delayMs = 900L)
             }
 
-            "degraded" -> VanLiveVisualState.transition(
-                state = VanDurableState.DEGRADED,
-                urgency = 0.35f,
-            )
+            // Command-scoped degradation is a visible warning. Persistent subsystem degradation
+            // is independently sourced from DegradedModeStore and cannot be hidden by this settle.
+            "degraded" -> {
+                VanLiveVisualState.warning(urgency = 0.35f)
+                VanLiveVisualState.settleToIdle(delayMs = 1_500L, allowCritical = true)
+            }
 
             "denied", "expired", "conflict", "rejected", "rejected_untrusted" -> {
-                VanLiveVisualState.transition(
-                    state = VanDurableState.WARNING,
-                    urgency = 0.40f,
-                )
-                VanLiveVisualState.settleToIdle(
-                    delayMs = 1_800L,
-                    allowCritical = true,
-                )
+                VanLiveVisualState.warning(urgency = 0.40f)
+                VanLiveVisualState.settleToIdle(delayMs = 1_800L, allowCritical = true)
             }
 
             else -> VanLiveVisualState.settleToIdle(delayMs = 700L)
@@ -168,9 +156,7 @@ class VanGatewayClient(context: Context) {
         val code = conn.responseCode
         val stream = if (code in 200..299) conn.inputStream else conn.errorStream
         val text = stream?.bufferedReader()?.readText() ?: "{}"
-        if (code !in 200..299) {
-            throw GatewayHttpException(code, text)
-        }
+        if (code !in 200..299) throw GatewayHttpException(code, text)
         return JSONObject(text)
     }
 
