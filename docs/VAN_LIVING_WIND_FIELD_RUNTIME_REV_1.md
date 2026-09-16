@@ -30,7 +30,13 @@ health   = DEGRADED     # Google mesh not yet verified
 
 The character therefore listens while Zone C/chrome still shows degraded truth. Uplink OFFLINE remains stronger and forces an offline pose. `VanVisualState.semanticState` carries outer-field truth separately from `durableState`, which continues to drive the character/Rive pose contract.
 
-## 3. Owner-turn lifecycle
+## 3. Observable subsystem truth
+
+`DegradedMode` remains a pure renderer-neutral data model. Android observation lives in a separate `DegradedModeStore`, backed by `StateFlow<DegradedMode>`.
+
+The floating overlay and Command Centre both collect the same health stream and both read the same application-scoped `VanLiveVisualState.frame`. A gateway/Google health update therefore recomposes both surfaces immediately; neither relies on a coincidental voice animation or a one-time snapshot to discover changed subsystem truth.
+
+## 4. Owner-turn lifecycle
 
 Speech capture ending is no longer treated as owner-turn completion.
 
@@ -45,7 +51,7 @@ approval_required         -> WAITING_FOR_OWNER
 
 Callback ordering can therefore vary without erasing THINKING. `speechFrame()` updates articulation but does not replace health or authority truth, so TTS cannot hide WAITING_FOR_OWNER, ERROR or URGENT.
 
-## 4. Three-zone field
+## 5. Three-zone field
 
 - **Zone A — identity presence:** restrained cyan bloom and shallow ground crescent.
 - **Zone B — interaction field:** detached windy ribbons, ion fragments and orb-link energy.
@@ -53,7 +59,7 @@ Callback ordering can therefore vary without erasing THINKING. `speechFrame()` u
 
 Full rings and concentric orbit geometry are forbidden. Zone B/C paths are clipped away from a body-safe ellipse.
 
-## 5. Shared renderer-neutral geometry
+## 6. Shared renderer-neutral geometry
 
 `VanFieldGeometryEngine` is the canonical Zone B/C geometry source. It has no Compose, Android or AWT dependency and outputs strokes/dots from:
 
@@ -68,7 +74,7 @@ Both renderers consume it:
 
 This removes the previous dual-painter drift. Owner preview boards generated after Rev 2.3 now represent the same Zone B/C geometry that ships on device.
 
-## 6. Wind motion
+## 7. Wind motion
 
 `VanWindFieldMotion` produces a deterministic, phase-seamless motion frame. Each ribbon combines multiple temporal harmonics:
 
@@ -80,7 +86,7 @@ w(u,t) = A · [ sin(2π(2u − 2t + s))
 
 The field frame also supplies bounded breathing, prevailing wind, meander, turbulence, pulse energy, particle advection and budget-driven field scale.
 
-## 7. State-specific semantic topology
+## 8. State-specific semantic topology
 
 Zone C no longer maps every state onto the same wind axis. Each authored envelope segment rotates and shapes a local flow direction from its `startDeg`, `sweepDeg` and `node` properties. This preserves topology distinction in geometry as well as colour.
 
@@ -97,11 +103,11 @@ Expected readings include:
 | URGENT | compressed directional red flow |
 | SUCCESS | green release/expansion flow |
 
-## 8. Character motion
+## 9. Character motion
 
 The procedural Canvas rig retains body/head bob, blink, gaze, orb drift, speech articulation and finite actions. Owner bitmap poses receive bounded `VanCharacterMotion` micro-motion. Reduced-motion freezes autonomous motion. The authored Rive asset remains external/not READY unless repository evidence changes that status.
 
-## 9. Truth composition
+## 10. Truth composition
 
 `VanPresence` is a pure resolver and remains fail-closed:
 
@@ -110,9 +116,9 @@ The procedural Canvas rig retains body/head bob, blink, gaze, orb drift, speech 
 - owner-decision/error authority -> authority semantic/pose state;
 - speech remains an orthogonal articulation channel.
 
-The floating overlay and Command Centre both observe the same application-scoped `VanLiveVisualState.frame`, preventing surface-local state forks.
+The floating overlay and Command Centre both consume the same application-scoped presence and subsystem-health sources, preventing surface-local state forks.
 
-## 10. Performance and accessibility
+## 11. Performance and accessibility
 
 `VanEffectBudget` remains authoritative:
 
@@ -124,7 +130,7 @@ The floating overlay and Command Centre both observe the same application-scoped
 
 Critical semantic information is preserved before decorative effects.
 
-## 11. Acceptance requirements
+## 12. Acceptance requirements
 
 The implementation is mergeable only when all are true:
 
@@ -139,11 +145,12 @@ The implementation is mergeable only when all are true:
 9. Compose and Java2D evidence use `VanFieldGeometryEngine`;
 10. reduced-motion produces stable geometry;
 11. gateway `accepted` never displays SUCCESS;
-12. Android and visual-evidence Gradle gates pass.
+12. overlay and Command Centre react to health changes from `DegradedModeStore.state`;
+13. Android and visual-evidence Gradle gates pass.
 
-## 12. CI / evidence gates
+## 13. CI / evidence gates
 
-`.github/workflows/van-ci.yml` runs:
+`.github/workflows/van-ci.yml` runs on pull requests and `main`, with obsolete runs cancelled by concurrency control:
 
 ```text
 pytest backend
@@ -157,9 +164,11 @@ pytest tests/contracts
 
 Generated preview evidence is uploaded as the `van-visual-evidence` workflow artifact. PR promotion must use those results, not descriptive claims.
 
-## 13. Key files
+## 14. Key files
 
 - `visual-authority/van-visual-authority-v2.yaml` — canonical Rev 2.3 authority
+- `android/app/src/main/java/com/dial/van/degraded/DegradedMode.kt`
+- `android/app/src/main/java/com/dial/van/degraded/DegradedModeStore.kt`
 - `android/app/src/main/java/com/dial/van/visual/VanPresenceFrame.kt`
 - `android/app/src/main/java/com/dial/van/visual/VanLiveVisualState.kt`
 - `android/app/src/main/java/com/dial/van/visual/VanPresence.kt`
@@ -172,6 +181,6 @@ Generated preview evidence is uploaded as the `van-visual-evidence` workflow art
 - `android/app/src/main/java/com/dial/van/overlay/FloatingOverlayService.kt`
 - `android/app/src/main/java/com/dial/van/command/CommandCentreActivity.kt`
 
-## 14. Renderer truth
+## 15. Renderer truth
 
 The authored `van.riv` remains external/not READY. Renderer selection stays fail-closed: usable Rive artboard -> complete owner art -> procedural Canvas fallback. The living field is rendered independently behind whichever character renderer is active.
