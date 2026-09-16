@@ -28,6 +28,7 @@ import androidx.compose.material3.TopAppBarDefaults
 import androidx.compose.material3.darkColorScheme
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
+import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
@@ -42,6 +43,7 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.fragment.app.FragmentActivity
 import com.dial.van.VanApplication
+import com.dial.van.degraded.DegradedMode
 import com.dial.van.degraded.RestoreAction
 import com.dial.van.degraded.SubsystemStatus
 import com.dial.van.overlay.FloatingOverlayService
@@ -143,11 +145,10 @@ private fun CommandCentreScreen(
         }
     }
 
-    // Same application-scoped snapshot state as the floating overlay. No surface-local fork.
     val live = VanLiveVisualState.frame
-    val degraded = app.degradedModeStore.snapshot()
+    val degraded by app.degradedModeStore.state.collectAsState()
     val cue = VanPresence.cue(degraded, live = live)
-    val sections = commandSections(app, meshSummary, cue)
+    val sections = commandSections(app, meshSummary, cue, degraded)
     val budget = rememberVanEffectBudget()
     val panelGlass = VanGlassTokens.forState(
         state = cue.durableState,
@@ -166,7 +167,6 @@ private fun CommandCentreScreen(
     ) {
         item {
             VanHeroPanel(
-                app = app,
                 glass = panelGlass,
                 budget = budget,
                 cue = cue,
@@ -224,7 +224,6 @@ private fun CommandCentreScreen(
 
 @Composable
 private fun VanHeroPanel(
-    app: VanApplication,
     glass: com.dial.van.visual.VanGlassStyle,
     budget: com.dial.van.visual.VanEffectBudget,
     cue: VanPresence.Cue,
@@ -273,9 +272,13 @@ private data class CommandSection(
     val alert: Boolean = false,
 )
 
-private fun commandSections(app: VanApplication, meshSummary: String, cue: VanPresence.Cue): List<CommandSection> {
+private fun commandSections(
+    app: VanApplication,
+    meshSummary: String,
+    cue: VanPresence.Cue,
+    degraded: DegradedMode,
+): List<CommandSection> {
     val queueSize = app.commandQueue.size()
-    val degraded = app.degradedModeStore.snapshot()
     val attentionItems = buildList {
         if (degraded.active) {
             add(degraded.reason)
