@@ -39,7 +39,15 @@ object VanLiveVisualState {
     fun dispatchStarted() = mutate { VanPresenceReducer.dispatchStarted(it) }
 
     /** Gateway acceptance means delegated/in-flight, never SUCCESS. */
-    fun dispatchAccepted() = transition(VanDurableState.WORKING)
+    fun dispatchAccepted() = mutate {
+        it.copy(
+            activity = VanDurableState.WORKING,
+            turn = VanTurnPhase.IDLE,
+            speech = VanSpeechState.QUIET,
+            authority = VanAuthorityState.NONE,
+            urgency = 0f,
+        )
+    }
 
     fun waitingForOwner() = mutate { VanPresenceReducer.authority(it, VanAuthorityState.WAITING_FOR_OWNER) }
 
@@ -102,6 +110,11 @@ object VanLiveVisualState {
         }
     }
 
+    /**
+     * Settles only after the owner turn has actually ended. allowCritical is reserved for local,
+     * time-bounded indications (for example SpeechRecognizer failure), and clears that transient
+     * authority before idling; subsystem health truth is held separately by [VanPresence].
+     */
     fun settleToIdle(
         delayMs: Long = IDLE_SETTLE_MS,
         allowCritical: Boolean = false,
@@ -112,7 +125,12 @@ object VanLiveVisualState {
             if (frame.turn != VanTurnPhase.IDLE) return@postDelayed
             if (!allowCritical && frame.authority != VanAuthorityState.NONE) return@postDelayed
             stateStartedAtMs = SystemClock.uptimeMillis()
-            frame = VanPresenceReducer.idle(frame)
+            val cleared = if (allowCritical) {
+                VanPresenceReducer.authority(frame, VanAuthorityState.NONE)
+            } else {
+                frame
+            }
+            frame = VanPresenceReducer.idle(cleared)
         }, delayMs.coerceAtLeast(0L))
     }
 
@@ -124,7 +142,6 @@ object VanLiveVisualState {
 
     fun clearAction() = action(null)
 
-    /** Test/debug hook; production callers should transition rather than reset. */
     internal fun resetForTest() = onMain {
         generation += 1L
         stateStartedAtMs = 0L
