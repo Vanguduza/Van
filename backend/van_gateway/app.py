@@ -3,7 +3,7 @@ from __future__ import annotations
 from contextlib import asynccontextmanager
 from pathlib import Path
 
-from fastapi import FastAPI, Header, HTTPException
+from fastapi import FastAPI, Header, HTTPException, Request as FastRequest
 from pydantic import BaseModel, Field
 
 from van_gateway.attention.engine import AttentionEngine
@@ -28,6 +28,7 @@ from van_gateway.reminders.service import ReminderService
 from van_gateway.reminders.timeparse import TimeParseError, parse_due_expression
 from van_gateway.storage.db import Store
 from van_gateway.trading import TradingControlError, TradingService
+from van_gateway.trading.accounts import ACTIONS as ACCOUNT_ACTIONS, AccountOnboarding, CommanderAccountControl, LocalAccountControl, OAuthPending, canonical_action, redact as redact_account_args
 
 
 class EnrollBody(BaseModel):
@@ -78,6 +79,15 @@ class DecisionResolveBody(BaseModel):
     approved: bool
 
 
+class AccountActionRequest(BaseModel):
+    """Device-signed owner action on trading accounts (A4 on the device: biometric before signing)."""
+    device_id: str
+    issued_at_unix: int
+    signature: str
+    action: str
+    args: dict = Field(default_factory=dict)
+
+
 class OwnerHaltRequest(BaseModel):
     """A4: an owner halt is owner-signed; the gateway only records it in the VATI ledger."""
     owner_signature_ref: str = Field(min_length=1)
@@ -108,6 +118,9 @@ def create_app() -> FastAPI:
     reminders = ReminderService(store)
     decisions = DecisionService(store, attention)
     trading = TradingService(settings.vati_ledger_path, accounts_registry=settings.vati_accounts_registry, lake_root=settings.vati_lake_root, reporting_currency=settings.vati_reporting_currency)
+    account_control = CommanderAccountControl(settings.van_commander_url, settings.van_commander_token_file, settings.van_commander_ca_file) if settings.van_commander_url else LocalAccountControl(settings.vati_accounts_registry, settings.vati_secrets_dir)
+    oauth_pending = OAuthPending(store, settings.google_token_fernet_key)
+    onboarding = AccountOnboarding(account_control, oauth_pending, settings.van_public_base_url, settings.vati_deriv_app_id)
 
     google_transport = None
     google_oauth = None
@@ -142,6 +155,7 @@ def create_app() -> FastAPI:
     @asynccontextmanager
     async def lifespan(_app: FastAPI):
         await store.migrate()
+        await oauth_pending.migrate()
         yield
 
     app = FastAPI(title="VAN Gateway", version="0.5.0-dev", lifespan=lifespan)
@@ -156,6 +170,7 @@ def create_app() -> FastAPI:
     app.state.projects = projects
     app.state.reminders = reminders
     app.state.trading = trading
+    app.state.onboarding = onboarding
 
     def require_internal_control(x_van_internal_token: str | None) -> None:
         try:
@@ -453,6 +468,37 @@ def create_app() -> FastAPI:
             return trading.bars(symbol, timeframe, limit=limit, end_ms=end_ms)
         except ValueError as exc:
             raise HTTPException(status_code=422, detail=str(exc))
+
+    @app.post("/v1/trading/accounts/action")
+    async def trading_account_action(req: AccountActionRequest):
+        """Typed account onboarding from the Van app: upsert, credentials, verify, remove, Deriv/cTrader flows, MT5-EA key. Secrets are forwarded to the trading VM and never stored here."""
+        if req.action not in ACCOUNT_ACTIONS:
+            raise HTTPException(status_code=404, detail="unknown account action")
+        try:
+            await auth.require_device(req.device_id)
+            auth.verify_signature(req.device_id, canonical_action(req.device_id, req.issued_at_unix, req.action, req.args), req.signature)
+        except AuthError as exc:
+            await audit.record(result="denied", device_id=req.device_id, capability=f"trading.account.{req.action}", failure_reason=exc.code)
+            raise HTTPException(status_code=403, detail=exc.message)
+        import time as _time
+        if abs(int(_time.time()) - req.issued_at_unix) > 300:
+            raise HTTPException(status_code=403, detail="stale owner action; sign again")
+        try:
+            out = await onboarding.run(req.action, req.args)
+        except HTTPException as exc:
+            await audit.record(result="refused", device_id=req.device_id, capability=f"trading.account.{req.action}", failure_reason=str(exc.detail)[:200], before=redact_account_args(req.args))
+            raise
+        await audit.record(result="ok", device_id=req.device_id, capability=f"trading.account.{req.action}", before=redact_account_args(req.args), after={k: v for k, v in out.items() if k in ("account", "alias", "state", "ready", "stored_keys", "removed", "ok")})
+        return out
+
+    @app.get("/v1/trading/oauth/{broker}/callback")
+    async def trading_oauth_callback(broker: str, request: FastRequest):
+        from fastapi.responses import HTMLResponse
+        try:
+            res = await onboarding.oauth_callback(broker, dict(request.query_params))
+        except HTTPException as exc:
+            return HTMLResponse(f"<h2>Van: linking failed</h2><p>{exc.detail}</p>", status_code=exc.status_code)
+        return HTMLResponse(f"<h2>Van: {res['broker']} linked</h2><p>Return to the Van app to choose the account. You can close this page.</p>")
 
     @app.get("/v1/trading/tickets")
     async def trading_tickets(status: str | None = None):

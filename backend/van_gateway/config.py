@@ -18,6 +18,12 @@ class Settings(BaseSettings):
     vati_accounts_registry: str = "data/vati_accounts.json"  # non-secret account registry (aliases, broker kind, safety identity)
     vati_lake_root: str = "data/vati_lake"  # bar lake for charts
     vati_reporting_currency: str = "USD"
+    vati_secrets_dir: str = "data/vati_secrets"  # LocalAccountControl only (gateway and trading on one host)
+    van_commander_url: str = ""  # https://10.0.1.233:9133 → CommanderAccountControl; empty = local control
+    van_commander_token_file: str = ""
+    van_commander_ca_file: str = ""
+    van_public_base_url: str = "http://127.0.0.1:8787"  # OAuth callbacks are built from this
+    vati_deriv_app_id: str = "1089"
     owner_intent_max_age_seconds: int = 24 * 60 * 60
     attention_budget_per_hour: int = 12
 

@@ -13,7 +13,7 @@ from httpx import ASGITransport, AsyncClient
 from van_gateway.app import create_app
 from van_gateway.config import get_settings
 import sys as _sys, pathlib as _pl
-_sys.path[:0] = [str(_pl.Path(__file__).resolve().parents[2] / "trading" / "tests")]
+_sys.path[:0] = [str(_pl.Path(__file__).resolve().parents[2] / "trading" / "tests"), str(_pl.Path(__file__).resolve().parents[2] / "trading")]
 from van_gateway.trading.service import _import_vati
 
 EventKind, make_event, Ledger = _import_vati()   # resolves <repo>/trading without a pytest path entry
@@ -167,3 +167,68 @@ async def test_command_center_read_models_without_and_with_data(client, tmp_path
     assert acc[0]["label"] == "Paper Lab" and "credential" not in json.dumps(acc).lower().replace("credential_ref", "")
     b = (await ac.get("/v1/trading/bars?symbol=eurusd&timeframe=H1&limit=20")).json()
     assert b["count"] == 20 and b["provenance"] == ["SYNTHETIC"] and b["lake_available"] and set(b["bars"][0]) == {"t", "o", "h", "l", "c", "v"}
+
+
+def _sign_action(secret: str, device_id: str, issued: int, action: str, args: dict) -> str:
+    import hashlib, hmac
+    from van_gateway.trading.accounts import canonical_action
+    return hmac.new(secret.encode(), canonical_action(device_id, issued, action, args).encode(), hashlib.sha256).hexdigest()
+
+
+@pytest.mark.asyncio
+async def test_account_onboarding_is_device_signed_and_forwards_without_storing_secrets(client, tmp_path, monkeypatch):
+    import time as _time
+    ac, app = client
+    # enrol a device and point the local control at temp registry/secrets
+    r = await ac.post("/v1/devices/enroll", json={"device_id": "dev1", "device_secret": "s3cret-device", "public_key_pem": "x", "label": "test"})
+    assert r.status_code == 200, r.text
+    from van_gateway.trading.accounts import LocalAccountControl
+    from test_commander_accounts import FakeDeriv
+    deriv = FakeDeriv()
+    app.state.onboarding.control = LocalAccountControl(str(tmp_path / "accounts.json"), str(tmp_path / "secrets"), deriv_connector=deriv.connector)
+    app.state.trading.accounts_registry = str(tmp_path / "accounts.json")
+    now = int(_time.time())
+    def act(action, args, device="dev1", secret="s3cret-device", issued=None):
+        issued = issued or now
+        return ac.post("/v1/trading/accounts/action", json={"device_id": device, "issued_at_unix": issued, "signature": _sign_action(secret, device, issued, action, args), "action": action, "args": args})
+    assert (await act("account_upsert", {"alias": "paper_lab", "broker": "PAPER"}, secret="wrong")).status_code == 403
+    assert (await act("account_upsert", {"alias": "paper_lab", "broker": "PAPER"}, issued=now - 3600)).status_code == 403
+    assert (await act("shell", {})).status_code == 404
+    r = await act("account_upsert", {"alias": "paper_lab", "broker": "PAPER", "label": "Paper Lab"})
+    assert r.status_code == 200 and r.json()["account"]["safety_identity"] == "PAPER"
+    # tampering with args after signing is refused (signature binds the exact bytes)
+    body = {"device_id": "dev1", "issued_at_unix": now, "signature": _sign_action("s3cret-device", "dev1", now, "account_upsert", {"alias": "x_one", "broker": "PAPER"}), "action": "account_upsert", "args": {"alias": "x_two", "broker": "PAPER"}}
+    assert (await ac.post("/v1/trading/accounts/action", json=body)).status_code == 403
+    # Deriv demo creation end to end through the gateway
+    assert (await act("deriv_verify_email", {"email": "owner@example.com"})).json()["sent"] is True
+    r = await act("deriv_create_demo", {"alias": "deriv_demo", "verification_code": "ABC123", "client_password": "Pa55word!", "residence": "zw"})
+    assert r.status_code == 200 and r.json()["client_id"] == "VRTC900" and "Pa55word" not in r.text and "virtualtoken" not in r.text
+    assert "a1-virtualtoken" in (tmp_path / "secrets" / "deriv_demo.env").read_text()
+    accts = (await ac.get("/v1/trading/accounts")).json()["accounts"]
+    assert {a["alias"] for a in accts} == {"deriv_demo", "paper_lab"} and "virtualtoken" not in json.dumps(accts)
+    # audit never carries the password or token
+    rows = await app.state.store.fetchall("SELECT before_json, after_json, capability FROM audit WHERE capability LIKE 'trading.account.%'")
+    blob = json.dumps([tuple(r) for r in rows])
+    assert "Pa55word" not in blob and "virtualtoken" not in blob and "trading.account.deriv_create_demo" in blob and "[REDACTED]" in blob
+    # OAuth: start → callback → pending → link, tokens only ever in the encrypted pending row and the VM secrets
+    st = (await act("oauth_start", {"broker": "deriv"})).json()
+    assert st["url"].startswith("https://oauth.deriv.com/oauth2/authorize?app_id=1089") and st["callback"].endswith("/v1/trading/oauth/deriv/callback")
+    assert (await act("oauth_pending", {"state": st["state"]})).json() == {"ready": False}
+    cb = await ac.get(f"/v1/trading/oauth/deriv/callback?state={st['state']}&acct1=VRTC900&token1=a1-linked&cur1=USD&acct2=CR777&token2=a1-real&cur2=USD")
+    assert cb.status_code == 200 and "linked" in cb.text
+    pend = (await act("oauth_pending", {"state": st["state"]})).json()
+    assert pend["ready"] and pend["accounts"] == [{"loginid": "VRTC900", "currency": "USD", "demo": True}, {"loginid": "CR777", "currency": "USD", "demo": False}] and "a1-" not in json.dumps(pend)
+    row = await app.state.store.fetchone("SELECT payload_enc FROM trading_oauth_pending WHERE state = ?", (st["state"],))
+    assert "a1-linked" not in row["payload_enc"]                       # encrypted at rest
+    r = await act("deriv_oauth_link", {"state": st["state"], "loginid": "CR777", "alias": "deriv_real"})
+    assert r.status_code == 200 and r.json()["account"]["safety_identity"] == "READ ONLY"
+    assert "DERIV_API_TOKEN=a1-real" in (tmp_path / "secrets" / "deriv_real.env").read_text()
+    assert (await act("oauth_pending", {"state": st["state"]})).json()["expired"] is True   # consumed
+    assert (await ac.get("/v1/trading/oauth/deriv/callback?state=nope&acct1=X&token1=Y")).status_code == 400
+    # cTrader start needs the owner's application credentials and builds the authorize URL with our callback
+    ct = (await act("oauth_start", {"broker": "ctrader", "client_id": "cid", "client_secret": "csec"})).json()
+    assert "openapi.ctrader.com/apps/auth?client_id=cid" in ct["url"] and "state=" in ct["url"]
+    assert (await act("oauth_start", {"broker": "ctrader"})).status_code == 422
+    # MT5-EA key issue returns the key once to the app, stores it on the VM
+    k = (await act("mt5_ea_issue_key", {"alias": "mt5_ea", "login": "1", "server": "Demo"})).json()
+    assert len(k["signing_key"]) == 64 and (await act("account_remove", {"alias": "mt5_ea"})).json()["removed"]
