@@ -43,6 +43,7 @@ Validated 2026-09-15 in a clean repository environment after installing the decl
 | Consumer capability configured != live-certified READY | PASS |
 | Google session export / broker bypass policy denial | PASS |
 | Hermes remains sole agent runtime | PASS |
+| Stitch live generation | PASS — authenticated `generate_screen_from_text` returned screen ID + HTML + image; token-free receipt recorded and VAN broker state is `READY` |
 
 ## Live VAN gateway pairing certification — 2026-09-16
 

@@ -19,6 +19,7 @@
 - **Google OAuth correctness:** live Workspace transport exchanges encrypted refresh tokens for short-lived access tokens before Google API requests.
 - **Google Account Sovereignty:** `owner_google_account` remains VAN's canonical/default Google identity with separate Workspace OAuth, Gemini runtime, Cloud/service and consumer-session credential planes. Explicit delegated identities are bounded to named capabilities and cannot inherit owner authority or credentials.
 - **Google Intelligence Mesh:** versioned capability registry covering Gemini, Gemini Live, Deep Research, Gemini Notebook (personal + Enterprise), Mixboard, Stitch, Antigravity, Jules, Workspace API/Studio, Nano Banana, Veo, Flow, AI Studio and ADK/A2A.
+- **Stitch live generation certification:** authenticated Google Stitch MCP generation is live-qualified and recorded `READY` in VAN with token-free hashes for the generated screen, HTML and image artifacts; DIAL visual acceptance/orchestrated-use remain independent acceptance gates.
 - **Deterministic Google router:** action-class, approval, grant and Project Truth gates; registry-order deterministic selection; explicit fallback; persisted input hash and job state.
 - **Google readiness model:** READY / CONFIGURED / UNVERIFIED / AUTH_REQUIRED / DEGRADED / RATE_LIMITED / CAPACITY_LIMITED / POLICY_BLOCKED / UNSUPPORTED / UNAVAILABLE.
 - **Antigravity capacity scoping:** live generation `CAPACITY_LIMITED` records `ANTIGRAVITY_CAPACITY_LIMITED` and falls back to Jules when configured; does not fail Workspace/Gemini/Jules planes.

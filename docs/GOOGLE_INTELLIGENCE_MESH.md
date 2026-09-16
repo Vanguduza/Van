@@ -243,6 +243,8 @@ Project Truth + Visual Authority
 Mixboard explores; Stitch converges; Nano Banana creates/edit visual assets. None
 may invent product requirements or override Visual Authority.
 
+**Live certification — 2026-09-16:** Stitch generation is `READY` in VAN. The authenticated official MCP route (`@google/stitch-sdk` 0.3.5 → `https://stitch.googleapis.com/mcp`) passed a real `generate_screen_from_text` canary and returned a screen plus HTML and image artifacts. Token-free evidence is stored at `artifacts/google/stitch_live_attestation.json`. This certifies provider generation only; DIAL visual-functional-responsive acceptance and orchestrated-use evidence remain separate gates.
+
 ### Antigravity + Jules
 
 Antigravity is the primary Google complex-development worker. Jules is preferred

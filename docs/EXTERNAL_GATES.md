@@ -6,6 +6,8 @@ Resolved 2026-09-15: the live Hermes `van` profile is installed and certified on
 
 Resolved 2026-09-16: permanent Workspace Desktop OAuth consent is complete, the refresh credential is encrypted in the VAN gateway vault, and live Gmail, Calendar, Drive, People/Contacts and Tasks metadata canaries all returned HTTP 200. `workspace_api` is `READY`. Cloud/Enterprise-only capabilities remain separate.
 
+Resolved 2026-09-16: Stitch live generation is certified independently of Workspace OAuth. The authenticated Google Stitch MCP route returned a real generated screen with screen ID, HTML and image artifacts; VAN records this capability `READY` via a token-free receipt. Broader DIAL visual-acceptance and orchestrated-use proofs remain separate from VAN generation readiness.
+
 Resolved 2026-09-16: the loopback VAN gateway is restart-persistent and the schema-4 owner pairing boundary is live-certified. Pairing tickets are hash-only and single-use; normal client APIs require the outer ingress bearer plus a revocable per-device token; commands additionally require the encrypted per-device HMAC. Both client credentials and HMAC verification survive restart, while device revocation atomically revokes grants and remains denied after a second restart. Token-free evidence is recorded at `artifacts/runtime/van_pairing_v4_live_attestation.json`.
 
 Resolved 2026-09-15: the delegated `antigravity_worker_account` is authenticated in a separate isolated runtime home. Live model discovery and a Gemini 3.8 Flash generation canary passed; no canonical Google/API credential inheritance is permitted. Token-free evidence is recorded at `artifacts/google/antigravity_worker_live_attestation.json`. Antigravity is no longer an external authentication/generation gate.
@@ -21,7 +23,8 @@ Resolved 2026-09-15 (workstation): local Project Truth mounts for `van`, `dial`,
 | Deep Research | Hermes Gemini runtime + quota canary | deterministic route; CONFIGURED on Hermes auth |
 | Gemini Notebook personal | owner Google session on Hermes | consumer capability CONFIGURED via attestation |
 | Gemini Notebook Enterprise | eligible Cloud/Enterprise setup | still EXTERNAL (cloud plane) |
-| Mixboard / Stitch / Flow / AI Studio / Workspace Studio | owner Google session on Hermes | consumer capabilities CONFIGURED via attestation |
+| Stitch | owner Google design credential plane | READY — authenticated live `generate_screen_from_text` canary passed; token-free receipt: `artifacts/google/stitch_live_attestation.json` |
+| Mixboard / Flow / AI Studio / Workspace Studio | owner Google session on Hermes | consumer capabilities CONFIGURED via attestation; per-capability live canary still required |
 | Jules | owner Google sign-in on Hermes | CONFIGURED via attestation; READY needs live worker receipt |
 | Nano Banana / Veo | Hermes Gemini runtime + quota canary | CONFIGURED via attestation |
 | Google ADK/A2A | owner-administered Cloud/runtime | still EXTERNAL (cloud plane) |
