@@ -80,7 +80,7 @@ class DecisionResolveBody(BaseModel):
 def create_app() -> FastAPI:
     settings = get_settings()
     store = Store(settings.database_path)
-    auth = AuthService(store)
+    auth = AuthService(store, settings.device_secret_fernet_key)
     idempotency = IdempotencyService(store)
     hermes = HermesBridge(settings.hermes_base_url, settings.hermes_bearer_token, settings.hermes_profile)
     project_registry_path = str(Path(__file__).resolve().parents[2] / "registries" / "projects.json")
@@ -126,6 +126,7 @@ def create_app() -> FastAPI:
     @asynccontextmanager
     async def lifespan(_app: FastAPI):
         await store.migrate()
+        await auth.load_persisted_secrets()
         yield
 
     app = FastAPI(title="VAN Gateway", version="0.5.0-dev", lifespan=lifespan)

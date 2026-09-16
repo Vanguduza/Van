@@ -15,6 +15,7 @@ def _env(tmp_path, monkeypatch):
     monkeypatch.setenv("VAN_DATABASE_PATH", str(tmp_path / "extra.sqlite3"))
     monkeypatch.setenv("VAN_HERMES_BASE_URL", "http://hermes.test")
     monkeypatch.setenv("VAN_GOOGLE_TOKEN_FERNET_KEY", Fernet.generate_key().decode())
+    monkeypatch.setenv("VAN_DEVICE_SECRET_FERNET_KEY", Fernet.generate_key().decode())
     monkeypatch.setenv("VAN_INTERNAL_CONTROL_TOKEN", "test-internal-token")
     get_settings.cache_clear()
     yield

@@ -22,6 +22,22 @@ mkdir -p "$STATE_ROOT" "$CONFIG_ROOT" "$HOME/.config/systemd/user"
 chmod 700 "$STATE_ROOT" "$CONFIG_ROOT"
 chmod 600 "$GOOGLE_ENV" "$GATEWAY_ENV"
 
+# Device HMAC credentials must survive gateway restarts without being stored in plaintext.
+# Generate the dedicated Fernet key once, keep it owner-readable only, and never print it.
+if ! grep -Eq '^VAN_DEVICE_SECRET_FERNET_KEY=.+$' "$GATEWAY_ENV"; then
+  DEVICE_KEY="$(python3 - <<'KEYPY'
+import base64, secrets
+print(base64.urlsafe_b64encode(secrets.token_bytes(32)).decode('ascii'))
+KEYPY
+)"
+  TMP_ENV="$(mktemp "$CONFIG_ROOT/gateway.env.XXXXXX")"
+  grep -Ev '^VAN_DEVICE_SECRET_FERNET_KEY=' "$GATEWAY_ENV" > "$TMP_ENV" || true
+  printf 'VAN_DEVICE_SECRET_FERNET_KEY=%s\n' "$DEVICE_KEY" >> "$TMP_ENV"
+  install -m 0600 "$TMP_ENV" "$GATEWAY_ENV"
+  rm -f "$TMP_ENV"
+  unset DEVICE_KEY
+fi
+
 STAGE="$(mktemp -d "$STATE_ROOT/runtime.stage.XXXXXX")"
 trap 'rm -rf "$STAGE"' EXIT
 mkdir -p "$STAGE/backend"
