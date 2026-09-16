@@ -19,12 +19,13 @@ from fastapi import FastAPI, HTTPException, Request as FastRequest
 from fastapi.responses import JSONResponse
 from pydantic import BaseModel, Field
 
+from commander.accounts import ACCOUNT_COMMANDS, ACCOUNT_TOOL_SCHEMAS, AccountControlSettings, build_account_handlers, redact_args
 from commander.auth import NonceCache, verify_request
 
 REDACT = re.compile(r"(?i)(password|passwd|token|api[_-]?key|secret|bearer|signing[_-]?key)(\s*[:=]\s*)\S+")
 UNIT_RE = re.compile(r"^[A-Za-z0-9@._-]+$")
 DEFAULT_UNITS = ("vati-session@*.service", "vati-commander.service", "vati-vekl.service", "vati-supabase.service", "vati-mt5-pull.service", "caddy.service")
-COMMANDS = ("status", "ledger_status", "services", "restart_service", "tail_log", "run_backtest", "vekl_resolve", "halt", "doctor", "accounts")
+COMMANDS = ("status", "ledger_status", "services", "restart_service", "tail_log", "run_backtest", "vekl_resolve", "halt", "doctor", "accounts") + ACCOUNT_COMMANDS
 Runner = Callable[[list[str], int], tuple[int, str, str]]
 
 
@@ -49,6 +50,8 @@ class CommanderSettings:
     vekl_url: str = os.environ.get("VAN_VEKL_URL", "http://127.0.0.1:9134")
     vekl_token: str = os.environ.get("VAN_VEKL_TOKEN", "")
     accounts_registry: str = os.environ.get("VAN_ACCOUNTS_REGISTRY", "/opt/van-trading/config/accounts.json")
+    secrets_dir: str = os.environ.get("VAN_SECRETS", "/opt/van-trading/secrets")
+    account_control: Optional[AccountControlSettings] = None   # injected for tests; else derived
     units: tuple[str, ...] = tuple(filter(None, os.environ.get("VAN_COMMANDER_UNITS", ",".join(DEFAULT_UNITS)).split(",")))
     backtest_timeout_s: int = int(os.environ.get("VAN_COMMANDER_BACKTEST_TIMEOUT", "600"))
     max_log_lines: int = 400
@@ -93,6 +96,7 @@ TOOL_SCHEMAS = {
     "halt": {"description": "Owner-signed halt (A4): appends KILL_SWITCH OWNER_HALT to the ledger; sessions stop new orders. Requires owner_signature_ref.", "properties": {"owner_signature_ref": {"type": "string"}, "reason": {"type": "string"}}, "required": ["owner_signature_ref"]},
     "doctor": {"description": "Host diagnostics: runtimes, disk, ledger reachability, VEKL, heartbeat ages, secret file modes.", "properties": {}},
     "accounts": {"description": "Public view of the account registry (aliases, broker kind, safety identity). Never credentials.", "properties": {}},
+    **ACCOUNT_TOOL_SCHEMAS,
 }
 
 
@@ -107,7 +111,7 @@ def create_app(settings: Optional[CommanderSettings] = None) -> FastAPI:
         try:
             audit_path.parent.mkdir(parents=True, exist_ok=True)
             with audit_path.open("a") as f:
-                f.write(json.dumps({"ts": int(time.time()), "cmd": cmd, "by": requested_by, "args": {k: v for k, v in args.items() if k != "owner_signature_ref"}, "result": result[:200]}) + "\n")
+                f.write(json.dumps({"ts": int(time.time()), "cmd": cmd, "by": requested_by, "args": redact_args({k: v for k, v in args.items() if k != "owner_signature_ref"}), "result": result[:200]}) + "\n")
         except OSError:
             pass
 
@@ -254,7 +258,8 @@ def create_app(settings: Optional[CommanderSettings] = None) -> FastAPI:
         return {"accounts": AccountRegistry(p).public(), "registry": str(p)}
 
     handlers = {"status": cmd_status, "ledger_status": cmd_ledger_status, "services": cmd_services, "restart_service": cmd_restart, "tail_log": cmd_tail, "run_backtest": cmd_backtest,
-                "vekl_resolve": cmd_vekl, "halt": cmd_halt, "doctor": cmd_doctor, "accounts": cmd_accounts}
+                "vekl_resolve": cmd_vekl, "halt": cmd_halt, "doctor": cmd_doctor, "accounts": cmd_accounts,
+                **build_account_handlers(st.account_control or AccountControlSettings(registry_path=st.accounts_registry, secrets_dir=st.secrets_dir))}
     assert set(handlers) == set(COMMANDS) == set(TOOL_SCHEMAS)
 
     # ------------------------------------------------------------ routes
