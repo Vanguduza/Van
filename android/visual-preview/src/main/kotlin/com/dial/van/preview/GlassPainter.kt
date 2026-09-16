@@ -27,8 +27,8 @@ import kotlin.math.sin
  * Java2D painter for DIAL Glass and VAN's living electrical field.
  *
  * Zone B/C geometry is produced by [VanFieldGeometryEngine], the exact same pure-Kotlin geometry
- * engine used by the shipping Compose overlay. Preview boards are therefore evidence for the
- * topology the app actually ships rather than an independently maintained approximation.
+ * engine used by the shipping Compose overlay. [spec] owns local activity/Zone B while
+ * [semanticSpec] independently owns Zone C, so evidence can certify orthogonal runtime states.
  */
 object GlassPainter {
 
@@ -211,7 +211,7 @@ object GlassPainter {
         }
     }
 
-    /** Canonical living aura: Zone A local bloom + shared Zone B/C flow geometry. */
+    /** Canonical living aura: Zone A/B activity + independently truthful Zone C semantics. */
     fun drawAura(
         g: Graphics2D,
         spec: VanAuraSpec,
@@ -220,11 +220,12 @@ object GlassPainter {
         radius: Float,
         budget: VanEffectBudget = VanEffectBudget.FULL,
         phase: Float = 0.18f,
+        semanticSpec: VanAuraSpec = spec,
     ) {
-        if (radius <= 1f || spec.intensity <= 0.01f) return
+        if (radius <= 1f || (spec.intensity <= 0.01f && semanticSpec.intensity <= 0.01f)) return
         val bodyEdge = radius * 2f
         val cyan = VanGlassTokens.ACCENT_CYAN
-        val semantic = spec.semanticColor ?: cyan
+        val semantic = semanticSpec.semanticColor ?: cyan
         val motion = VanWindFieldMotion.sample(spec, phase, budget)
 
         drawZoneA(g, spec, cx, cy, bodyEdge, cyan, motion.phase, motion.breathing)
@@ -236,6 +237,7 @@ object GlassPainter {
             bodyEdge = bodyEdge,
             centerX = cx,
             centerY = cy,
+            semanticSpec = semanticSpec,
         )
         geometry.strokes.forEach { stroke ->
             val color = if (stroke.ink == VanFieldInk.IDENTITY) cyan else semantic
@@ -320,8 +322,9 @@ object GlassPainter {
         height: Float,
         budget: VanEffectBudget = VanEffectBudget.FULL,
         phase: Float = 0.18f,
+        semanticSpec: VanAuraSpec = spec,
     ) {
-        val cyan = spec.alertAccent ?: VanGlassTokens.ACCENT_CYAN
+        val cyan = semanticSpec.alertAccent ?: spec.alertAccent ?: VanGlassTokens.ACCENT_CYAN
         val crescent = Path2D.Float()
         crescent.moveTo(left + width * 0.08f, top + height * 0.12f)
         crescent.quadTo(left + width * 0.95f, top + height * 0.08f, left + width, top + height * 0.42f)
@@ -338,6 +341,7 @@ object GlassPainter {
             height * 0.42f,
             budget,
             phase,
+            semanticSpec,
         )
         g.clip = previous
         g.color = argb(cyan, 0.22f)
