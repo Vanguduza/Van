@@ -80,7 +80,10 @@ class VanApplication : Application(), VoiceInputCallback, TtsOutputCallback {
             state = VanDurableState.WARNING,
             urgency = 0.25f,
         )
-        VanLiveVisualState.settleToIdle(delayMs = 1_200L)
+        VanLiveVisualState.settleToIdle(
+            delayMs = 1_200L,
+            allowCritical = true,
+        )
     }
 
     override fun onListeningChanged(listening: Boolean) {
