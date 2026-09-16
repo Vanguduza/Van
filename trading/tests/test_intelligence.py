@@ -20,6 +20,18 @@ def trending(n=120, start=1.10, drift=0.0006):
     return [start + drift * i for i in range(n)]
 
 
+def noisy_trend(n=120, start=1.10, drift=0.0006, amp=0.0018):
+    """Uptrend with deterministic sawtooth noise so realised vol is realistic."""
+    return [start + drift * i + amp * ((i % 6) - 2.5) / 2.5 for i in range(n)]
+
+
+def pullback_fixture(bars=5, step=0.0015):
+    closes = noisy_trend()
+    for _ in range(bars):
+        closes.append(closes[-1] - step)
+    return closes
+
+
 def ranging(n=120, start=1.10):
     return [start + (0.0004 if i % 2 else -0.0004) for i in range(n)]
 

@@ -6,7 +6,7 @@ from pathlib import Path
 import pytest
 
 from conftest import mandate_dict, snapshot
-from test_intelligence import mk_bars, trending, ranging
+from test_intelligence import mk_bars, noisy_trend, pullback_fixture, ranging, trending
 from vati.arbiter import HorizonArbiter, MetaLabel, MetaLabeler, OpportunityEngine, StrategyArbiter
 from vati.intelligence import DEFAULT_EVENT_MATRIX, EventMatrix, RegimeEngine, Tier1Event, build_market_state
 from vati.market_data import FX_CALENDAR
@@ -62,8 +62,7 @@ def test_trend_pullback_fires_on_pullback_only():
     ctx = StrategyContext(round_trip_cost_pct=Decimal("0.0003"))
     sig_at_high = strat.evaluate(st, ctx)  # price above EMA in an uptrend: no pullback → None
     assert sig_at_high is None
-    pulled = closes + [closes[-1] - 0.005]  # dip into the EMA20 band
-    st2 = state_for(pulled)
+    st2 = state_for(pullback_fixture())
     sig = strat.evaluate(st2, ctx)
     assert sig is not None and sig.direction is Direction.LONG and sig.stop < sig.entry < sig.targets[0] and sig.expected_gross_move_pct > 0
 
@@ -111,8 +110,8 @@ def test_horizon_arbiter_cost_multiples():
 
 
 def test_meta_labeler_rules():
-    st = state_for(trending(120))
-    sig = FxTrendPullback().evaluate(state_for(trending(120) + [trending(120)[-1] - 0.005]), StrategyContext(Decimal("0.0003")))
+    st = state_for(pullback_fixture())
+    sig = FxTrendPullback().evaluate(st, StrategyContext(Decimal("0.0003")))
     m = MetaLabeler()
     v = m.score(st, sig, Decimal("5"))
     assert v.label in (MetaLabel.TRADE, MetaLabel.REDUCE_SIZE) and all(x <= 1 for x in (v.confidence_multiplier, v.volatility_multiplier, v.liquidity_multiplier, v.event_risk_multiplier, v.regime_multiplier))
@@ -133,8 +132,7 @@ def test_opportunity_engine_end_to_end_with_risk_authority(eurusd):
     impl = {sid: STRATEGY_IMPLEMENTATIONS[sid.rsplit("-", 1)[0]](strategy_id=sid) for sid in ("FX-TREND-PULLBACK-01", "FX-LONDON-BREAKOUT-01")}
     m = demo_mandate()
     eng = OpportunityEngine(reg, impl, m)
-    closes = trending(120) + [trending(120)[-1] - 0.005]
-    st = state_for(closes)
+    st = state_for(pullback_fixture())
     oa = eng.assess(st, StrategyContext(Decimal("0.0003")), regime_label=st.regime.trend.value, account_alias="fx_primary", venue="mt5", idempotency_seed="session-1")
     assert oa.intent is not None and oa.decision in ("TRADE", "REDUCE_SIZE") and oa.assessment_hash
     it = oa.intent
