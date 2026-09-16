@@ -6,7 +6,6 @@ import com.dial.van.gateway.QueueReplayer
 import com.dial.van.gateway.VanGatewayClient
 import com.dial.van.notification.NotificationPolicyStore
 import com.dial.van.queue.EncryptedCommandQueue
-import com.dial.van.visual.VanDurableState
 import com.dial.van.visual.VanLiveVisualState
 import com.dial.van.voice.SpeechSyncFrame
 import com.dial.van.voice.TtsOutputCallback
@@ -50,60 +49,38 @@ class VanApplication : Application(), VoiceInputCallback, TtsOutputCallback {
         voiceSession = VoiceSessionCoordinator(voiceInput, ttsOutput)
         gatewayClient = VanGatewayClient(this)
         queueReplayer = QueueReplayer(commandQueue, gatewayClient, degradedModeStore, appScope)
-        // Attempt reconnect replay; fails closed into degraded state if gateway down.
         queueReplayer.replayAsync()
     }
 
     override fun onPartial(text: String) {
-        if (text.isNotBlank()) {
-            VanLiveVisualState.transition(
-                state = VanDurableState.LISTENING,
-                listening = true,
-            )
-        }
+        if (text.isNotBlank()) VanLiveVisualState.listeningStarted()
     }
 
     override fun onFinal(text: String) {
-        if (text.isBlank()) {
-            VanLiveVisualState.settleToIdle()
-        } else {
-            // Recognition has ended but the owner turn is not resolved yet. THINKING gives the
-            // hand-off to Hermes a distinct visual beat instead of snapping straight to idle.
-            VanLiveVisualState.transition(VanDurableState.THINKING)
-        }
+        // Final recognition explicitly owns the THINKING transition. Microphone end is a separate
+        // event and can no longer erase this owner-turn phase.
+        VanLiveVisualState.finalTranscript(hasText = text.isNotBlank())
     }
 
     override fun onError(code: Int) {
-        // A recognizer failure is visible but does not masquerade as a system-wide outage;
-        // degraded subsystem truth still has precedence in VanPresence.
-        VanLiveVisualState.transition(
-            state = VanDurableState.WARNING,
-            urgency = 0.25f,
-        )
-        VanLiveVisualState.settleToIdle(
-            delayMs = 1_200L,
-            allowCritical = true,
-        )
+        VanLiveVisualState.warning(urgency = 0.25f)
+        VanLiveVisualState.settleToIdle(delayMs = 1_200L, allowCritical = true)
     }
 
     override fun onListeningChanged(listening: Boolean) {
         if (listening) {
-            VanLiveVisualState.transition(
-                state = VanDurableState.LISTENING,
-                listening = true,
-            )
+            VanLiveVisualState.listeningStarted()
         } else {
-            VanLiveVisualState.settleToIdle()
+            // Capture ended; the turn may still be THINKING/DISPATCHING.
+            VanLiveVisualState.listeningEnded()
         }
     }
 
     override fun onSpeakingChanged(speaking: Boolean) {
         if (speaking) {
-            VanLiveVisualState.transition(
-                state = VanDurableState.SPEAKING,
-                speaking = true,
-            )
+            VanLiveVisualState.speakingStarted()
         } else {
+            VanLiveVisualState.speakingEnded()
             VanLiveVisualState.settleToIdle()
         }
     }
@@ -116,6 +93,7 @@ class VanApplication : Application(), VoiceInputCallback, TtsOutputCallback {
     }
 
     override fun onUtteranceDone(utteranceId: String) {
+        VanLiveVisualState.speakingEnded()
         VanLiveVisualState.settleToIdle()
     }
 
