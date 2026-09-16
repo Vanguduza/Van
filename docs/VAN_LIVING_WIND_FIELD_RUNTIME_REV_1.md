@@ -33,7 +33,7 @@ w(u,t) = A · [ sin(2π(2u − 2t + s))
              + 0.14 sin(2π(5u − t + 0.47s)) ]
 ```
 
-A lower-amplitude curl term bends the longitudinal direction. Because every temporal term uses integer cycles, phase `0` and `1` are identical: the Compose infinite transition can wrap without a visible seam.
+A lower-amplitude curl term bends the longitudinal direction. Because every temporal term uses integer cycles, phase `0` and phase `1` are identical: the Compose infinite transition can wrap without a visible seam.
 
 The field frame also supplies:
 
@@ -62,9 +62,20 @@ The existing `VanAuraSpecs.forState()` remains the authority for state meaning. 
 | SUCCESS | green semantic outer flow; calm positive field rather than an alert flash |
 | OFFLINE / SLEEPING | very low energy; readable field remains |
 
-## 5. Live visual-state arbiter
+## 5. Lifelike character motion
 
-`VanLiveVisualState` is the runtime bridge between real activity and visual state. It is Compose snapshot state, so existing overlay/Command Centre calls recompose when live state changes; no polling loop is added.
+The field is not the only moving layer.
+
+- The procedural Canvas rig already animates body bob, head bob, blink, orb drift, gaze, mouth/visemes and finite actions.
+- Owner bitmap poses now pass through `VanCharacterMotion`, which applies tiny state-aware bob, lateral drift, sway and breathing scale. This prevents the owner-art fallback from looking like a frozen sticker inside a moving field.
+- Reduced-motion removes autonomous owner-art motion while preserving a tiny explicit attention offset.
+- The future authored Rive artboard remains responsible for its internal articulated animation and must consume the same `VanVisualState` contract rather than creating a second state model.
+
+Whole-character motion is deliberately small. VAN remains the stable visual anchor while the field carries most semantic energy.
+
+## 6. Live visual-state arbiter
+
+`VanLiveVisualState` is the Android runtime bridge between real activity and visual state. It is Compose snapshot state. `FloatingOverlayService` reads it during composition, so live state changes recompose the full floating shell without polling.
 
 It provides:
 
@@ -75,11 +86,11 @@ It provides:
 - finite action code support;
 - speech frame updates for mouth opening and visemes.
 
-`VanPresence` remains the fail-closed authority. OFFLINE/DEGRADED subsystem truth always overrides optimistic live state. When system truth is nominal, the live state is allowed to drive both overlay chrome and embodiment.
+`VanPresence` remains a pure fail-closed mapper because the JVM visual-preview module compiles the same source. `FloatingOverlayService` explicitly supplies the live state to it. OFFLINE/DEGRADED subsystem truth always overrides optimistic live activity. When system truth is nominal, live state drives character, aura, caption, glass style and semantic accent together.
 
-## 6. Voice wiring
+## 7. Voice and command lifecycle wiring
 
-`VanApplication` now forwards actual voice callbacks into the live visual state:
+`VanApplication` forwards actual voice callbacks into the live visual state:
 
 ```text
 recognizer ready/partial  -> LISTENING
@@ -89,9 +100,20 @@ TTS completion            -> eased IDLE
 recognizer failure        -> transient WARNING, then eased IDLE
 ```
 
-The existing Canvas rig continues to animate body bob, head bob, blink, orb drift, gaze, mouth and finite actions from the same `VanVisualState`. A future authored `van.riv` consumes the same contract inputs.
+`VanGatewayClient.dispatchCommand()` also publishes truthful local lifecycle cues:
 
-## 7. Power, thermal and accessibility behaviour
+```text
+starting hand-off          -> DELEGATING
+approval_required          -> WAITING_FOR_OWNER
+accepted / in_flight       -> brief DELEGATING acknowledgement, then ambient
+protocol reject/conflict   -> transient WARNING
+transport exception        -> transient WARNING
+backend degraded           -> DEGRADED
+```
+
+`accepted` is intentionally **not** mapped to SUCCESS. The gateway response only proves that Hermes accepted the run. A future run-status stream must own long-running WORKING/SUCCESS completion states.
+
+## 8. Power, thermal and accessibility behaviour
 
 The field obeys `VanEffectBudget` rather than running a second independent performance policy:
 
@@ -103,7 +125,7 @@ The field obeys `VanEffectBudget` rather than running a second independent perfo
 
 `budget.bloomScale` now affects the actual field footprint. State meaning and critical semantic colour are never removed to save effects.
 
-## 8. Acceptance requirements
+## 9. Acceptance requirements
 
 The implementation is acceptable only when all of the following hold:
 
@@ -112,28 +134,42 @@ The implementation is acceptable only when all of the following hold:
 3. Phase 0 and phase 1 produce the same motion frame, so infinite animation has no restart jump.
 4. WORKING has greater wind strength, turbulence and wave amplitude than IDLE.
 5. LOW/STATIC reduce footprint/effects before removing semantic information.
-6. Reduced motion freezes motion while retaining a composed readable field.
+6. Reduced motion freezes autonomous motion while retaining a composed readable field.
 7. Broken gateway/Hermes truth still forces OFFLINE regardless of optimistic live activity.
 8. Live voice events cause visible LISTENING/THINKING/SPEAKING transitions without overlay polling.
-9. The field remains compact enough for the floating overlay and must not expand into the large cinematic poster-scale aura.
+9. Owner bitmap poses remain subtly alive without competing with aura motion.
+10. Gateway acceptance never falsely displays SUCCESS.
+11. The field remains compact enough for the floating overlay and must not expand into the large cinematic poster-scale aura.
 
-## 9. Files
+## 10. Files
 
 Runtime implementation:
 
 - `android/app/src/main/java/com/dial/van/visual/VanWindFieldMotion.kt`
 - `android/app/src/main/java/com/dial/van/visual/VanAura.kt`
+- `android/app/src/main/java/com/dial/van/visual/VanCharacterMotion.kt`
 - `android/app/src/main/java/com/dial/van/visual/VanLiveVisualState.kt`
 - `android/app/src/main/java/com/dial/van/visual/VanPresence.kt`
+- `android/app/src/main/java/com/dial/van/visual/VanCanvasFallback.kt`
+- `android/app/src/main/java/com/dial/van/visual/VanLivingFieldPreviews.kt`
+- `android/app/src/main/java/com/dial/van/overlay/FloatingOverlayService.kt`
+- `android/app/src/main/java/com/dial/van/gateway/VanGatewayClient.kt`
 - `android/app/src/main/java/com/dial/van/VanApplication.kt`
 
 Tests:
 
 - `android/app/src/test/java/com/dial/van/visual/VanWindFieldMotionTest.kt`
+- `android/app/src/test/java/com/dial/van/visual/VanCharacterMotionTest.kt`
 - `android/app/src/test/java/com/dial/van/visual/VanPresenceTest.kt`
 
-## 10. Renderer truth
+## 11. Preview truth
+
+`VanLivingFieldPreviews.kt` provides Android Studio previews of the actual shipping Compose aura renderer for IDLE, WORKING, WARNING and REDUCED_MOTION.
+
+The existing JVM `visual-preview` Java2D aura painter is a separate certification surface and still uses the older Rev 2.2 geometry. It must not be cited as pixel evidence for this new runtime field until that painter is migrated to the same directional-flow algorithm. This limitation is explicit rather than silently claiming the old sheets represent the new runtime.
+
+## 12. Renderer truth
 
 The authored `van.riv` remains external unless repository evidence changes that status. The renderer selection remains fail-closed: valid Rive artboard -> complete owner art -> procedural Canvas fallback. This revision does not claim Rive READY.
 
-The live windy field itself is drawn by Compose behind whichever character renderer is selected, so the field does not depend on the authored Rive asset being present. Character-level micro-motion is richest in the Canvas rig today; the future Rive artboard should implement the same durable-state, attention, speech and finite-action contract rather than introducing a second state model.
+The live windy field itself is drawn by Compose behind whichever character renderer is selected, so the field does not depend on the authored Rive asset being present. Character-level motion is richest in the Canvas rig today; owner art now has bounded micro-motion; the future Rive artboard should implement the same durable-state, attention, speech and finite-action contract.
