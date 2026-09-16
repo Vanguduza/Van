@@ -23,7 +23,11 @@ class VanPreviewRenderTest {
             VanPreviewSheets.floatingOverlaySheet(),
             VanPreviewSheets.stateSheet(),
             VanPreviewSheets.stateSheet(reducedMotion = true),
+            VanPreviewSheets.stateSheet(budget = com.dial.van.visual.VanEffectBudget.LOW),
+            VanPreviewSheets.stateSheet(budget = com.dial.van.visual.VanEffectBudget.STATIC),
+            VanPreviewSheets.actionSheet(),
             VanPreviewSheets.commandCentreSheet(),
+            VanPreviewSheets.glassTokenSheet(),
         ).forEach { sheet ->
             assertTrue("sheet too small: ${sheet.width}x${sheet.height}", sheet.width > 600 && sheet.height > 400)
             assertTrue("sheet rendered blank", nonBackgroundRatio(sheet) > 0.02)

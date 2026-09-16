@@ -1,106 +1,250 @@
 package com.dial.van.visual
 
 /**
- * Blue electrical aura specification.
+ * Living refractive aura specification.
  *
- * Source of truth: `docs/VAN_GLASSMORPHIC_FLOATING_ASSISTANT_DESIGN.md` §2 and §7.
+ * Source of truth: `docs/VAN_VISUAL_PRODUCTION_SYSTEM_REV_2_1_MASTER_BLUEPRINT.md`.
  *
- * §2 places the aura *between* Van and the glass shell, and forbids it from obscuring his
- * face or outfit. §7 sets the layer stack and the per-state intensity envelope reproduced in
- * [forState]. The aura reads as intelligent energy, never a superhero lightning effect.
+ * The aura is a deformable field that lives around VAN — core radiance, outer field,
+ * filaments, and broken orbital arcs. A full circular ring is forbidden. The field sits
+ * between VAN and any glass that later condenses from it, and never covers his face.
  */
 data class VanAuraSpec(
-    /** §7 aura intensity, 0..1. */
+    /** Field intensity, 0..1. */
     val intensity: Float,
-    /** §7 arc activity, 0..1 — drives filament count and lifetime. */
+    /** Arc / filament activity, 0..1 — drives filament count and broken-arc energy. */
     val arcActivity: Float,
-    /** §7 layer 4 — micro-spark frequency, 0..1. */
+    /** Micro-spark frequency, 0..1. */
     val sparkRate: Float,
-    /** §7 layer 5 — soft elliptical cyan illumination under the body. */
+    /** Soft illumination under the body; rendered as a crescent, never a plate. */
     val groundGlow: Float,
-    /** §7 layer 6 — occasional energy bridge between Van and his orb. */
+    /** Occasional energy bridge toward the orb companion. */
     val orbLink: Float,
-    /** §6 secondary accent for warning/approval; null keeps the aura purely cyan. */
+    /** Secondary accent for warning/approval; null keeps the field purely cyan. */
     val alertAccent: Int?,
+    /** Filament count in the 2–5 band (0 when the field is fully quiet). */
+    val filamentCount: Int = 0,
+    /** Horizontal stretch so the outer field cannot read as a circle. */
+    val fieldAsymmetry: Float = 0.18f,
+    /** Radial wobble that deforms the outer field away from an ellipse. */
+    val deformation: Float = 0.16f,
 ) {
-    /** §2 hard ceiling: the aura must never obscure facial features or outfit details. */
+    /** Hard ceiling: the aura must never obscure facial features or outfit details. */
     val faceSafe: Boolean get() = intensity <= MAX_INTENSITY
 
     companion object {
-        /** §7's highest band is Working at 60–75%. */
+        /** Highest working band stays below a wash that would hide the visor. */
         const val MAX_INTENSITY = 0.75f
+
+        /** Each broken orbital arc is a fragment, never a ring. */
+        const val MAX_ARC_SWEEP_DEG = 110f
+
+        /** Combined sweep of every visible arc. */
+        const val MAX_TOTAL_ARC_DEG = 220f
     }
 }
 
 object VanAuraSpecs {
 
     /**
-     * §7 state intensity guidance, implemented as the midpoint of each documented band:
+     * Per-state field envelope.
      *
-     * | State | Aura intensity | Arc activity |
-     * |---|---:|---:|
-     * | Idle | 20–30% | Minimal |
-     * | Listening | 45–60% | Moderate |
-     * | Thinking | 35–50% | Low / concentrated |
-     * | Working | 60–75% | Moderate-high |
-     * | Success | 35% | Brief |
-     * | Warning | 40% + alert accent | Low |
-     * | Approval | 30% | Minimal |
-     * | Offline | 10–15% | None |
+     * Idle stays quiet; listening and working raise filament and arc energy; offline and
+     * sleeping keep a recognisable still field at very low intensity.
      */
     fun forState(state: VanDurableState, budget: VanEffectBudget = VanEffectBudget.FULL): VanAuraSpec {
         val base = when (state) {
             VanDurableState.IDLE,
-            VanDurableState.ATTENTIVE,
             VanDurableState.CONNECTING,
-            -> VanAuraSpec(0.25f, 0.05f, 0.05f, 0.20f, 0.10f, null)
+            -> VanAuraSpec(
+                intensity = 0.25f,
+                arcActivity = 0.08f,
+                sparkRate = 0.04f,
+                groundGlow = 0.18f,
+                orbLink = 0.10f,
+                alertAccent = null,
+                filamentCount = 2,
+                fieldAsymmetry = 0.28f,
+                deformation = 0.22f,
+            )
 
-            VanDurableState.LISTENING -> VanAuraSpec(0.52f, 0.50f, 0.18f, 0.30f, 0.55f, null)
+            VanDurableState.ATTENTIVE -> VanAuraSpec(
+                intensity = 0.32f,
+                arcActivity = 0.18f,
+                sparkRate = 0.08f,
+                groundGlow = 0.20f,
+                orbLink = 0.16f,
+                alertAccent = null,
+                filamentCount = 3,
+                fieldAsymmetry = 0.22f,
+                deformation = 0.16f,
+            )
+
+            VanDurableState.LISTENING -> VanAuraSpec(
+                intensity = 0.52f,
+                arcActivity = 0.50f,
+                sparkRate = 0.18f,
+                groundGlow = 0.28f,
+                orbLink = 0.50f,
+                alertAccent = null,
+                filamentCount = 4,
+                fieldAsymmetry = 0.24f,
+                deformation = 0.20f,
+            )
 
             VanDurableState.THINKING,
             VanDurableState.SEARCHING,
             VanDurableState.DELEGATING,
-            -> VanAuraSpec(0.42f, 0.20f, 0.12f, 0.22f, 0.25f, null)
+            -> VanAuraSpec(
+                intensity = 0.42f,
+                arcActivity = 0.28f,
+                sparkRate = 0.12f,
+                groundGlow = 0.20f,
+                orbLink = 0.22f,
+                alertAccent = null,
+                filamentCount = 3,
+                fieldAsymmetry = 0.18f,
+                deformation = 0.18f,
+            )
 
-            VanDurableState.WORKING -> VanAuraSpec(0.68f, 0.70f, 0.30f, 0.34f, 0.65f, null)
+            VanDurableState.WORKING -> VanAuraSpec(
+                intensity = 0.68f,
+                arcActivity = 0.70f,
+                sparkRate = 0.30f,
+                groundGlow = 0.30f,
+                orbLink = 0.60f,
+                alertAccent = null,
+                filamentCount = 5,
+                fieldAsymmetry = 0.26f,
+                deformation = 0.22f,
+            )
 
-            VanDurableState.SPEAKING -> VanAuraSpec(0.45f, 0.25f, 0.10f, 0.26f, 0.30f, null)
+            VanDurableState.SPEAKING -> VanAuraSpec(
+                intensity = 0.45f,
+                arcActivity = 0.30f,
+                sparkRate = 0.10f,
+                groundGlow = 0.24f,
+                orbLink = 0.28f,
+                alertAccent = null,
+                filamentCount = 3,
+                fieldAsymmetry = 0.20f,
+                deformation = 0.16f,
+            )
 
-            // §6 SUCCESS — cyan returns toward baseline, green is a brief secondary highlight.
-            VanDurableState.SUCCESS ->
-                VanAuraSpec(0.35f, 0.15f, 0.10f, 0.24f, 0.15f, VanGlassTokens.ACCENT_GREEN)
+            VanDurableState.SUCCESS -> VanAuraSpec(
+                intensity = 0.35f,
+                arcActivity = 0.18f,
+                sparkRate = 0.10f,
+                groundGlow = 0.22f,
+                orbLink = 0.14f,
+                alertAccent = VanGlassTokens.ACCENT_GREEN,
+                filamentCount = 3,
+                fieldAsymmetry = 0.18f,
+                deformation = 0.14f,
+            )
 
-            // §6 WARNING — partial amber/red accenting, Van's identity stays cyan.
-            VanDurableState.WARNING ->
-                VanAuraSpec(0.40f, 0.15f, 0.08f, 0.22f, 0.12f, VanGlassTokens.ACCENT_AMBER)
+            VanDurableState.WARNING -> VanAuraSpec(
+                intensity = 0.40f,
+                arcActivity = 0.20f,
+                sparkRate = 0.08f,
+                groundGlow = 0.20f,
+                orbLink = 0.12f,
+                alertAccent = VanGlassTokens.ACCENT_AMBER,
+                filamentCount = 3,
+                fieldAsymmetry = 0.22f,
+                deformation = 0.16f,
+            )
 
-            VanDurableState.ERROR ->
-                VanAuraSpec(0.40f, 0.15f, 0.08f, 0.22f, 0.12f, VanGlassTokens.ACCENT_RED)
+            VanDurableState.ERROR -> VanAuraSpec(
+                intensity = 0.40f,
+                arcActivity = 0.22f,
+                sparkRate = 0.08f,
+                groundGlow = 0.20f,
+                orbLink = 0.12f,
+                alertAccent = VanGlassTokens.ACCENT_RED,
+                filamentCount = 3,
+                fieldAsymmetry = 0.22f,
+                deformation = 0.17f,
+            )
 
-            // §6 APPROVAL REQUIRED — aura restrained so the controls stay dominant.
-            VanDurableState.WAITING_FOR_OWNER ->
-                VanAuraSpec(0.30f, 0.05f, 0.04f, 0.18f, 0.08f, VanGlassTokens.ACCENT_AMBER)
+            VanDurableState.WAITING_FOR_OWNER -> VanAuraSpec(
+                intensity = 0.30f,
+                arcActivity = 0.08f,
+                sparkRate = 0.04f,
+                groundGlow = 0.16f,
+                orbLink = 0.08f,
+                alertAccent = VanGlassTokens.ACCENT_AMBER,
+                filamentCount = 2,
+                fieldAsymmetry = 0.16f,
+                deformation = 0.12f,
+            )
 
-            VanDurableState.URGENT ->
-                VanAuraSpec(0.30f, 0.05f, 0.04f, 0.18f, 0.08f, VanGlassTokens.ACCENT_RED)
+            VanDurableState.URGENT -> VanAuraSpec(
+                intensity = 0.34f,
+                arcActivity = 0.12f,
+                sparkRate = 0.06f,
+                groundGlow = 0.16f,
+                orbLink = 0.08f,
+                alertAccent = VanGlassTokens.ACCENT_RED,
+                filamentCount = 2,
+                fieldAsymmetry = 0.18f,
+                deformation = 0.14f,
+            )
 
-            VanDurableState.WAITING -> VanAuraSpec(0.28f, 0.08f, 0.05f, 0.20f, 0.10f, null)
+            VanDurableState.WAITING -> VanAuraSpec(
+                intensity = 0.28f,
+                arcActivity = 0.12f,
+                sparkRate = 0.05f,
+                groundGlow = 0.18f,
+                orbLink = 0.10f,
+                alertAccent = null,
+                filamentCount = 2,
+                fieldAsymmetry = 0.18f,
+                deformation = 0.14f,
+            )
 
-            // §6 OFFLINE / DEGRADED — aura dims, orb dims, but Van stays recognisable.
             VanDurableState.OFFLINE,
             VanDurableState.SLEEPING,
-            -> VanAuraSpec(0.12f, 0f, 0f, 0.08f, 0f, null)
+            -> VanAuraSpec(
+                intensity = 0.12f,
+                arcActivity = 0f,
+                sparkRate = 0f,
+                groundGlow = 0.08f,
+                orbLink = 0f,
+                alertAccent = null,
+                filamentCount = 0,
+                fieldAsymmetry = 0.14f,
+                deformation = 0.10f,
+            )
 
-            VanDurableState.DEGRADED ->
-                VanAuraSpec(0.15f, 0f, 0f, 0.10f, 0f, VanGlassTokens.ACCENT_AMBER)
+            VanDurableState.DEGRADED -> VanAuraSpec(
+                intensity = 0.16f,
+                arcActivity = 0.04f,
+                sparkRate = 0f,
+                groundGlow = 0.10f,
+                orbLink = 0f,
+                alertAccent = VanGlassTokens.ACCENT_AMBER,
+                filamentCount = 2,
+                fieldAsymmetry = 0.16f,
+                deformation = 0.12f,
+            )
         }
 
-        // §11 fallback ladder trims decoration without touching intensity's state meaning.
+        val filaments = if (base.filamentCount <= 0) {
+            0
+        } else {
+            (base.filamentCount * budget.filamentScale).toInt().coerceAtLeast(
+                if (budget.filamentScale > 0f) 1 else 0,
+            ).coerceAtMost(5)
+        }
+
         return base.copy(
             intensity = (base.intensity * budget.glowScale).coerceAtMost(VanAuraSpec.MAX_INTENSITY),
             arcActivity = base.arcActivity * budget.filamentScale,
             sparkRate = base.sparkRate * budget.filamentScale,
             orbLink = base.orbLink * budget.filamentScale,
+            filamentCount = filaments,
+            deformation = base.deformation * if (budget.allowMotion) 1f else 0.85f,
         )
     }
 }

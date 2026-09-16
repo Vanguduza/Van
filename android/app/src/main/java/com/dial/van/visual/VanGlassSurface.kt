@@ -9,22 +9,24 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.draw.drawBehind
 import androidx.compose.ui.draw.shadow
+import androidx.compose.ui.geometry.CornerRadius
 import androidx.compose.ui.geometry.Offset
+import androidx.compose.ui.geometry.Size
 import androidx.compose.ui.graphics.Brush
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.graphics.StrokeCap
 import androidx.compose.ui.graphics.drawscope.Stroke
 import androidx.compose.ui.unit.dp
+import kotlin.math.min
 
 /**
- * DIAL glass surface.
+ * Optical glass surface.
  *
- * Implements the Compose contract sketched in
- * `docs/VAN_GLASSMORPHIC_FLOATING_ASSISTANT_DESIGN.md` §9, styled by [VanGlassTokens].
+ * Rev 2.1 layers: absorptive tint, shaping gradient, grain, inner highlight, structural edge,
+ * selective specular, aura contamination. A uniform glowing outline is forbidden.
  *
- * Live *backdrop* blur is a window-level capability, not a composable one: for the floating
- * overlay it is requested via `WindowManager.LayoutParams.blurBehindRadius` in
- * `FloatingOverlayService`. When that is unavailable this surface applies §10's fallback —
- * a more heavily pre-tinted navy fill that preserves border, radius, depth and glow.
+ * Live backdrop blur is a window-level capability requested by `FloatingOverlayService`.
+ * When unavailable this surface keeps shaping, grain and specular on a heavier pre-tint.
  */
 @Composable
 fun VanGlassSurface(
@@ -41,53 +43,107 @@ fun VanGlassSurface(
             .shadow(style.elevationDp.dp, shape, clip = false)
             .clip(shape)
             .drawBehind {
-                // 3. Tinted glass surface.
-                drawRect(color = tint.copy(alpha = style.backgroundAlpha))
+                val radius = CornerRadius(style.cornerRadiusDp.dp.toPx())
+                drawRoundRect(color = tint.copy(alpha = style.backgroundAlpha), cornerRadius = radius)
 
-                // 4. Glass border and inner highlight — restrained top-left sheen (§3).
+                drawRoundRect(
+                    brush = Brush.verticalGradient(
+                        colors = listOf(
+                            Color.White.copy(alpha = 0.06f * (style.innerHighlightAlpha / 0.11f).coerceIn(0.4f, 1.4f)),
+                            Color.Transparent,
+                            Color.Black.copy(alpha = 0.12f),
+                        ),
+                    ),
+                    cornerRadius = radius,
+                )
+
+                if (style.grainAlpha > 0f) {
+                    val step = (size.minDimension / 28f).coerceAtLeast(3f)
+                    var gy = step
+                    var row = 0
+                    while (gy < size.height) {
+                        var gx = step * (0.4f + (row % 3) * 0.2f)
+                        while (gx < size.width) {
+                            val jitter = ((gx.toInt() * 13 + gy.toInt() * 7) % 5) - 2f
+                            drawCircle(
+                                color = Color.White.copy(alpha = style.grainAlpha),
+                                radius = 0.6f,
+                                center = Offset(gx + jitter, gy),
+                            )
+                            gx += step
+                        }
+                        gy += step
+                        row++
+                    }
+                }
+
                 if (style.innerHighlightAlpha > 0f) {
-                    drawRect(
+                    drawRoundRect(
                         brush = Brush.linearGradient(
                             colors = listOf(
                                 Color.White.copy(alpha = style.innerHighlightAlpha),
                                 Color.Transparent,
                             ),
                             start = Offset.Zero,
-                            end = Offset(size.width * 0.75f, size.height * 0.75f),
+                            end = Offset(size.width * 0.55f, size.height * 0.42f),
                         ),
+                        cornerRadius = radius,
                     )
                 }
 
-                // Active glow: cyan only, and only around the interactive edge (§3).
-                if (style.activeGlowAlpha > 0f) {
-                    val inset = size.minDimension * 0.012f
+                if (style.contaminationAlpha > 0f) {
                     drawRoundRect(
-                        color = edge.copy(alpha = style.activeGlowAlpha),
-                        topLeft = Offset(inset, inset),
-                        size = androidx.compose.ui.geometry.Size(
-                            size.width - inset * 2f,
-                            size.height - inset * 2f,
+                        brush = Brush.radialGradient(
+                            colors = listOf(
+                                edge.copy(alpha = style.contaminationAlpha),
+                                Color.Transparent,
+                            ),
+                            center = Offset(size.width * 0.12f, size.height * 0.45f),
+                            radius = size.maxDimension * 0.55f,
                         ),
-                        cornerRadius = androidx.compose.ui.geometry.CornerRadius(
-                            style.cornerRadiusDp.dp.toPx(),
-                        ),
-                        style = Stroke(width = style.borderWidthDp.dp.toPx() * 2.5f),
+                        cornerRadius = radius,
                     )
                 }
 
-                drawRoundRect(
-                    color = edge.copy(alpha = style.borderAlpha),
-                    cornerRadius = androidx.compose.ui.geometry.CornerRadius(
-                        style.cornerRadiusDp.dp.toPx(),
-                    ),
-                    style = Stroke(width = style.borderWidthDp.dp.toPx()),
-                )
+                val structural = style.structuralEdgeAlpha
+                if (structural > 0f) {
+                    drawRoundRect(
+                        color = edge.copy(alpha = structural),
+                        cornerRadius = radius,
+                        style = Stroke(width = style.borderWidthDp.dp.toPx()),
+                    )
+                }
+
+                val specular = style.specularAlpha
+                if (specular > 0f) {
+                    val inset = min(size.minDimension * 0.04f, 8f)
+                    drawArc(
+                        color = Color.White.copy(alpha = specular),
+                        startAngle = 200f,
+                        sweepAngle = 78f,
+                        useCenter = false,
+                        topLeft = Offset(inset, inset),
+                        size = Size(size.width - inset * 2f, size.height - inset * 2f),
+                        style = Stroke(width = style.borderWidthDp.dp.toPx() * 1.6f, cap = StrokeCap.Round),
+                    )
+                    if (style.activeGlowAlpha > 0f) {
+                        drawArc(
+                            color = edge.copy(alpha = style.activeGlowAlpha),
+                            startAngle = 208f,
+                            sweepAngle = 52f,
+                            useCenter = false,
+                            topLeft = Offset(inset, inset),
+                            size = Size(size.width - inset * 2f, size.height - inset * 2f),
+                            style = Stroke(width = style.borderWidthDp.dp.toPx() * 2.2f, cap = StrokeCap.Round),
+                        )
+                    }
+                }
             },
         content = content,
     )
 }
 
-/** Full-bleed glass used as a Command Centre backdrop (§14 top-level material language). */
+/** Full-bleed glass used as a Command Centre backdrop. */
 @Composable
 fun VanGlassBackdrop(style: VanGlassStyle, modifier: Modifier = Modifier) {
     Box(

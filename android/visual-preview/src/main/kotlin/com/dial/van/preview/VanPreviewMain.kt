@@ -1,5 +1,6 @@
 package com.dial.van.preview
 
+import com.dial.van.visual.VanEffectBudget
 import java.io.File
 import javax.imageio.ImageIO
 
@@ -18,6 +19,9 @@ fun main(args: Array<String>) {
         "van_floating_overlay_preview.png" to VanPreviewSheets.floatingOverlaySheet(),
         "van_state_matrix.png" to VanPreviewSheets.stateSheet(),
         "van_state_matrix_reduced_motion.png" to VanPreviewSheets.stateSheet(reducedMotion = true),
+        "van_state_matrix_low.png" to VanPreviewSheets.stateSheet(budget = VanEffectBudget.LOW),
+        "van_state_matrix_static.png" to VanPreviewSheets.stateSheet(budget = VanEffectBudget.STATIC),
+        "van_action_board.png" to VanPreviewSheets.actionSheet(),
         "van_command_centre.png" to VanPreviewSheets.commandCentreSheet(),
         "van_glass_tokens.png" to VanPreviewSheets.glassTokenSheet(),
     )

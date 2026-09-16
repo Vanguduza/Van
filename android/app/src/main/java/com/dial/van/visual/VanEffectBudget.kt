@@ -3,39 +3,44 @@ package com.dial.van.visual
 /**
  * Battery, thermal and reduced-motion fallback ladder.
  *
- * Source of truth: `docs/VAN_GLASSMORPHIC_FLOATING_ASSISTANT_DESIGN.md` §10–§12.
+ * Source of truth: `docs/VAN_VISUAL_PRODUCTION_SYSTEM_REV_2_1_MASTER_BLUEPRINT.md`.
  *
- * §11 fixes the order in which decoration is surrendered: filament frequency, then bloom
- * radius, then animated refraction, then live blur, keeping a static cyan rim glow — and
- * critical state indicators are never removed. §16 adds the hard rule that no state may rely
- * on colour alone, so nothing in this ladder is allowed to drop a state's shape or copy.
+ * Decoration is surrendered in a fixed order: filament frequency, bloom radius, animated
+ * refraction, then live blur. Reduced motion is a designed still field, not the STATIC floor.
+ * Critical state indicators are never removed, and no state may rely on colour alone.
  */
 enum class VanEffectBudget(
-    /** §11 step 1 — filament frequency. */
+    /** Filament / broken-arc energy. */
     val filamentScale: Float,
-    /** §11 step 2 — bloom radius. */
+    /** Outer-field radius. */
     val bloomScale: Float,
-    /** §11 step 3 — animated refraction across the glass. */
+    /** Animated refraction across the glass. */
     val allowRefraction: Boolean,
-    /** §11 step 4 — live backdrop blur. */
+    /** Live backdrop blur. */
     val allowLiveBlur: Boolean,
-    /** §12 — motion at all; false keeps a static glow. */
+    /** Motion at all; false holds a designed still pose and still field. */
     val allowMotion: Boolean,
     val glowScale: Float,
 ) {
     FULL(1.0f, 1.0f, true, true, true, 1.0f),
 
     /** Mild constraint: fewer filaments, everything else intact. */
-    REDUCED(0.45f, 0.85f, true, true, true, 0.9f),
+    REDUCED(0.55f, 0.85f, true, true, true, 0.9f),
 
-    /** Heavier constraint: no refraction, tighter bloom, blur dropped. */
-    LOW(0.15f, 0.6f, false, false, true, 0.75f),
+    /**
+     * Accessibility still mode: motion stops, but the field, filaments and glass layers remain
+     * as a composed still — not an impoverished STATIC leftover.
+     */
+    REDUCED_MOTION(0.70f, 0.78f, false, true, false, 0.88f),
 
-    /** §11 floor — static cyan rim glow only, state indicators still fully present. */
-    STATIC(0f, 0.5f, false, false, false, 0.65f),
+    /** Heavier constraint: no refraction, tighter field, blur dropped. */
+    LOW(0.40f, 0.65f, false, false, true, 0.80f),
+
+    /** Thermal / severe floor — still field and one filament, state still fully readable. */
+    STATIC(0.35f, 0.55f, false, false, false, 0.70f),
     ;
 
-    /** §11: "Never remove critical state indicators." */
+    /** Never remove critical state indicators. */
     val keepsStateIndicators: Boolean get() = true
 }
 
@@ -62,8 +67,7 @@ object VanEffectPolicy {
     const val THERMAL_MODERATE = 2
 
     fun resolve(conditions: VanEffectConditions): VanEffectBudget = when {
-        // §12 reduced motion is the strongest signal: motion stops entirely.
-        conditions.reducedMotion -> VanEffectBudget.STATIC
+        conditions.reducedMotion -> VanEffectBudget.REDUCED_MOTION
         conditions.thermalStatus >= THERMAL_SEVERE -> VanEffectBudget.STATIC
         conditions.batterySaver -> VanEffectBudget.LOW
         conditions.thermalStatus >= THERMAL_MODERATE -> VanEffectBudget.LOW

@@ -1,11 +1,13 @@
 package com.dial.van.preview
 
 import com.dial.van.degraded.DegradedMode
+import com.dial.van.overlay.OverlayTheme
 import com.dial.van.visual.VanAuraSpec
 import com.dial.van.visual.VanAuraSpecs
 import com.dial.van.visual.VanCaptions
 import com.dial.van.visual.VanDurableState
 import com.dial.van.visual.VanEffectBudget
+import com.dial.van.visual.VanFiniteAction
 import com.dial.van.visual.VanGlassStyle
 import com.dial.van.visual.VanGlassTokens
 import com.dial.van.visual.VanPresence
@@ -33,7 +35,7 @@ import java.awt.image.BufferedImage
  * character bitmaps, [VanScene] when owner art is absent, and [VanStatusPalette]/[VanPresence]
  * for wording. Nothing here is hand-tuned for the screenshot.
  *
- * Section references are to `docs/VAN_GLASSMORPHIC_FLOATING_ASSISTANT_DESIGN.md`.
+ * Section references are to `docs/VAN_VISUAL_PRODUCTION_SYSTEM_REV_2_1_MASTER_BLUEPRINT.md`.
  */
 object VanPreviewSheets {
 
@@ -50,11 +52,12 @@ object VanPreviewSheets {
     private const val SCREEN_W_DP = 392
     private const val SCREEN_H_DP = 812
 
-    // §5 recommended geometry, mirrored from FloatingOverlayService's companion constants.
-    private const val CHARACTER_DP = 112
+    // Overlay geometry mirrored from OverlayTheme / FloatingOverlayService.
+    private const val CHARACTER_DP = OverlayTheme.RESTING_AVATAR_DP
     private const val SHELL_WIDTH_DP = 132
     private const val CAPSULE_HEIGHT_DP = 62
-    private const val EXPANDED_WIDTH_DP = 236
+    private const val EXPANDED_WIDTH_DP = OverlayTheme.EXPANDED_WIDTH_DP
+    private const val OVERLAP_DP = OverlayTheme.VAN_GLASS_OVERLAP_DP
 
     /** Deterministic mid-cycle phase so regenerated previews stay comparable. */
     private const val PHASE = 0.18f
@@ -84,10 +87,8 @@ object VanPreviewSheets {
     // ------------------------------------------------------------------ floating overlay
 
     /**
-     * Van floating over a host app in the four shell modes the owner will actually meet.
-     *
-     * Each phone renders real backdrop blur under the glass (§10 step 2) by blurring the mock
-     * app pixels, which is what `blurBehindRadius` does on Android 12+.
+     * Van floating over a host app: frameless rest, condensed compact glass, expanded working
+     * surface, and an intentional crescent dock.
      */
     fun floatingOverlaySheet(): BufferedImage {
         val phoneW = dp(SCREEN_W_DP)
@@ -106,12 +107,12 @@ object VanPreviewSheets {
 
         g.color = Color(TEXT, true)
         g.font = font(44, bold = true)
-        g.drawString("VAN — glassmorphic floating assistant", margin, 92)
+        g.drawString("VAN — living aura that condenses into glass", margin, 92)
         g.font = font(20)
         g.color = Color(TEXT_DIM, true)
         listOf(
-            "DIAL Glass shell rendered from the shipping VanGlassTokens; blue electrical aura from VanAuraSpecs; character from the owner art pack.",
-            "Van is the solid anchor and breaks the glass edge (§1, §4). Backdrop blur under each panel is real, matching blurBehindRadius on Android 12+.",
+            "Rest is frameless VAN + refractive field. Glass forms only when interaction is needed, overlapping VAN by ${OVERLAP_DP}dp.",
+            "Aura from VanAuraSpecs (no ring). Optical glass from VanGlassTokens (no stroked card). Character from the owner art pack.",
             "The authored van.riv artboard remains EXTERNAL — no state below claims Rive READY.",
         ).forEachIndexed { i, line ->
             g.drawString(line, margin, 134 + i * 30)
@@ -120,19 +121,26 @@ object VanPreviewSheets {
         val liveTruth = DegradedMode.healthy()
         val liveCue = VanPresence.cue(liveTruth)
 
-        // 1 — compact capsule, idle.
-        drawPhone(g, image, margin, phoneY, phoneW, phoneH, "Compact — Van breaks the glass") { gg, x, y, pw, ph ->
-            drawCompactShell(
+        drawPhone(g, image, margin, phoneY, phoneW, phoneH, "Resting — VAN + aura only") { gg, x, y, pw, ph ->
+            drawRestingShell(
                 gg,
-                image,
-                x + pw - dp(14) - dp(SHELL_WIDTH_DP),
+                x + pw - dp(18) - dp(CHARACTER_DP),
                 y + (ph * 0.34f).toInt(),
                 VanDurableState.IDLE,
             )
         }
 
-        // 2 — expanded card with the action rail, working.
-        drawPhone(g, image, margin + phoneW + gap, phoneY, phoneW, phoneH, "Expanded — Working + rail") { gg, x, y, pw, ph ->
+        drawPhone(g, image, margin + phoneW + gap, phoneY, phoneW, phoneH, "Compact — glass condenses from VAN") { gg, x, y, pw, ph ->
+            drawCompactShell(
+                gg,
+                image,
+                x + pw - dp(14) - dp(SHELL_WIDTH_DP),
+                y + (ph * 0.34f).toInt(),
+                VanDurableState.LISTENING,
+            )
+        }
+
+        drawPhone(g, image, margin + (phoneW + gap) * 2, phoneY, phoneW, phoneH, "Expanded — working surface from VAN") { gg, x, y, pw, ph ->
             drawExpandedShell(
                 gg,
                 image,
@@ -144,29 +152,15 @@ object VanPreviewSheets {
             )
         }
 
-        // 3 — approval required: §6 says the glass goes solid and controls stay tappable.
-        drawPhone(g, image, margin + (phoneW + gap) * 2, phoneY, phoneW, phoneH, "Approval required — solid glass") { gg, x, y, pw, ph ->
-            drawExpandedShell(
-                gg,
-                image,
-                x + pw - dp(12) - dp(EXPANDED_WIDTH_DP) - dp(56),
-                y + (ph * 0.32f).toInt(),
-                VanDurableState.WAITING_FOR_OWNER,
-                "Needs approval",
-                "A4 action — biometric required",
-            )
-        }
-
-        // 4 — docked, on live degraded truth.
-        drawPhone(g, image, margin + (phoneW + gap) * 3, phoneY, phoneW, phoneH, "Docked — degraded, glass collapsed") { gg, x, y, pw, ph ->
+        drawPhone(g, image, margin + (phoneW + gap) * 3, phoneY, phoneW, phoneH, "Docked — crescent edge slice") { gg, x, y, pw, ph ->
             drawDockedShell(gg, x + pw, y + (ph * 0.34f).toInt(), liveCue.durableState)
         }
 
         g.color = Color(TEXT_DIM, true)
         g.font = font(18)
         g.drawString(
-            "Docked (§13): the glass controls collapse and a cyan presence line remains, so Van is never silently gone. " +
-                "Degraded truth is live and fail-closed — the Google mesh stays unverified until the gateway reports evidence.",
+            "Dock is an 88dp hit / 76dp character edge slice with a crescent field — not a cyan bar, not accidental clipping. " +
+                "Degraded truth stays fail-closed until the gateway reports evidence.",
             margin,
             h - 44,
         )
@@ -177,24 +171,14 @@ object VanPreviewSheets {
 
     // ------------------------------------------------------------------ state matrix
 
-    /** §6 + §7: every state, its aura band and its glass treatment, side by side. */
-    fun stateSheet(reducedMotion: Boolean = false): BufferedImage {
-        val states = listOf(
-            VanDurableState.IDLE,
-            VanDurableState.LISTENING,
-            VanDurableState.THINKING,
-            VanDurableState.SEARCHING,
-            VanDurableState.WORKING,
-            VanDurableState.SPEAKING,
-            VanDurableState.SUCCESS,
-            VanDurableState.WAITING_FOR_OWNER,
-            VanDurableState.WARNING,
-            VanDurableState.URGENT,
-            VanDurableState.DEGRADED,
-            VanDurableState.OFFLINE,
-        )
+    /** All 18 durable states: frameless VAN + field, named in words as well as accent. */
+    fun stateSheet(reducedMotion: Boolean = false): BufferedImage = stateSheet(
+        budget = if (reducedMotion) VanEffectBudget.REDUCED_MOTION else VanEffectBudget.FULL,
+        reducedMotion = reducedMotion,
+    )
 
-        val budget = if (reducedMotion) VanEffectBudget.STATIC else VanEffectBudget.FULL
+    fun stateSheet(budget: VanEffectBudget, reducedMotion: Boolean = !budget.allowMotion): BufferedImage {
+        val states = VanDurableState.entries
         val cols = 6
         val rows = (states.size + cols - 1) / cols
         val cellW = 270
@@ -212,24 +196,31 @@ object VanPreviewSheets {
 
         g.color = Color(TEXT, true)
         g.font = font(40, bold = true)
-        g.drawString(
-            if (reducedMotion) "VAN state matrix — reduced motion (§12)" else "VAN state matrix — aura + glass per state (§6, §7)",
-            padX,
-            84,
-        )
+        val title = when {
+            reducedMotion -> "VAN state matrix — reduced motion (designed stillness)"
+            budget == VanEffectBudget.LOW -> "VAN state matrix — LOW effect budget"
+            budget == VanEffectBudget.STATIC -> "VAN state matrix — STATIC effect budget"
+            else -> "VAN state matrix — 18 durable states"
+        }
+        g.drawString(title, padX, 84)
         g.font = font(19)
         g.color = Color(TEXT_DIM, true)
         g.drawString(
-            if (reducedMotion) {
-                "Reduced motion resolves to the STATIC effect budget: no idle pulse, no animated refraction, filaments replaced by a still glow — every state still fully readable."
-            } else {
-                "Aura intensity and arc activity are read from VanAuraSpecs; glass opacity, edge accent and solidity from VanGlassTokens. Each caption is the shipped state copy."
+            when {
+                reducedMotion ->
+                    "Reduced motion holds a composed still field: filaments and broken arcs remain, pulse stops. Not the STATIC thermal floor."
+                budget == VanEffectBudget.LOW ->
+                    "LOW surrenders refraction and live blur; the deformable field and state copy stay fully readable."
+                budget == VanEffectBudget.STATIC ->
+                    "STATIC is the thermal floor: still field, one filament, state indicators never removed."
+                else ->
+                    "Frameless presence — no enclosing glass card. Aura intensity from VanAuraSpecs; each caption is shipped state copy."
             },
             padX,
             124,
         )
         g.drawString(
-            "No state relies on colour alone (§16): each cell carries an accent, a distinct glass treatment and words.",
+            "No state relies on colour alone: each cell carries a distinct field, a named caption, and the visor/orb treatment.",
             padX,
             154,
         )
@@ -242,42 +233,107 @@ object VanPreviewSheets {
             val spec = VanAuraSpecs.forState(state, budget)
             val style = glass(state, budget = budget)
 
-            drawGlassAvatarTile(
+            drawPresenceTile(
                 g = g,
-                canvas = image,
                 x = x + 24,
                 y = y,
                 size = cellW - 48,
                 state = state,
-                style = style,
                 spec = spec,
                 budget = budget,
                 reducedMotion = reducedMotion,
+                condenseGlass = style.requiresSolidControls,
+                style = style,
             )
 
             val palette = VanStatusPalette.forState(state)
             val cx = x + cellW / 2
             g.font = font(20, bold = true)
             g.color = Color(palette.accent, true)
-            centerString(g, palette.label, cx, y + cellH - 34)
-            g.font = font(14)
-            g.color = Color(TEXT_DIM, true)
-            centerString(g, state.name, cx, y + cellH - 12)
+            centerString(g, state.name.lowercase().replace('_', ' '), cx, y + cellH - 28)
             g.font = font(13)
-            g.color = Color(0xFF6F7C8B.toInt(), true)
+            g.color = Color(TEXT_DIM, true)
+            centerString(g, clip(VanCaptions.forState(state), 28), cx, y + cellH - 8)
             centerString(
                 g,
-                "aura ${(spec.intensity * 100).toInt()}%  ·  arcs ${(spec.arcActivity * 100).toInt()}%  ·  glass ${(style.backgroundAlpha * 100).toInt()}%",
+                "field ${(spec.intensity * 100).toInt()}%  ·  filaments ${spec.filamentCount}  ·  glass ${(style.backgroundAlpha * 100).toInt()}%",
                 cx,
-                y + cellH + 10,
+                y + cellH + 14,
             )
             if (style.requiresSolidControls) {
                 g.color = Color(palette.accent, true)
                 g.font = font(12, bold = true)
-                centerString(g, "SOLID CONTROLS", cx, y + cellH + 30)
+                centerString(g, "SOLID CONTROLS", cx, y + cellH + 32)
             }
         }
 
+        g.dispose()
+        return image
+    }
+
+    /**
+     * 14 finite actions from the Rive contract. Poses stay identity-locked; the action name
+     * is the evidence that the contract is complete. Authored action artboards remain EXTERNAL.
+     */
+    fun actionSheet(): BufferedImage {
+        val actions = VanFiniteAction.entries
+        val cols = 7
+        val rows = (actions.size + cols - 1) / cols
+        val cellW = 220
+        val cellH = 260
+        val padX = 56
+        val headerH = 150
+        val w = padX * 2 + cellW * cols
+        val h = headerH + rows * (cellH + 48) + 48
+        val image = BufferedImage(w, h, BufferedImage.TYPE_INT_ARGB)
+        val g = image.createGraphics()
+        AwtVanRenderer.prepare(g)
+        g.paint = GradientPaint(0f, 0f, Color(0xFF080C13.toInt()), 0f, h.toFloat(), Color(0xFF05080D.toInt()))
+        g.fillRect(0, 0, w, h)
+        g.color = Color(TEXT, true)
+        g.font = font(36, bold = true)
+        g.drawString("VAN finite actions — contract board", padX, 74)
+        g.font = font(18)
+        g.color = Color(TEXT_DIM, true)
+        g.drawString(
+            "Codes 1–14 from RiveContract. OPEN_PANEL / CLOSE_PANEL / PRESENT_CARD condense glass; others remain frameless. .riv action artboards are EXTERNAL.",
+            padX,
+            110,
+        )
+        actions.forEachIndexed { index, action ->
+            val col = index % cols
+            val row = index / cols
+            val x = padX + col * cellW
+            val y = headerH + row * (cellH + 48)
+            val condenses = action == VanFiniteAction.OPEN_PANEL ||
+                action == VanFiniteAction.PRESENT_CARD ||
+                action == VanFiniteAction.CLOSE_PANEL
+            val state = when (action) {
+                VanFiniteAction.CELEBRATE -> VanDurableState.SUCCESS
+                VanFiniteAction.CAUTION -> VanDurableState.WARNING
+                VanFiniteAction.CONFIRM -> VanDurableState.WAITING_FOR_OWNER
+                else -> VanDurableState.IDLE
+            }
+            val spec = VanAuraSpecs.forState(state)
+            drawPresenceTile(
+                g = g,
+                x = x + 16,
+                y = y,
+                size = cellW - 32,
+                state = state,
+                spec = spec,
+                budget = VanEffectBudget.FULL,
+                reducedMotion = false,
+                condenseGlass = condenses,
+                style = glass(state),
+            )
+            g.color = Color(VanGlassTokens.EDGE_CYAN, true)
+            g.font = font(16, bold = true)
+            centerString(g, action.name.lowercase().replace('_', ' '), x + cellW / 2, y + cellH - 8)
+            g.color = Color(TEXT_DIM, true)
+            g.font = font(13)
+            centerString(g, "code ${action.code}", x + cellW / 2, y + cellH + 14)
+        }
         g.dispose()
         return image
     }
@@ -318,7 +374,7 @@ object VanPreviewSheets {
         g.font = font(17)
         g.color = Color(TEXT_DIM, true)
         g.drawString(
-            "Panels are more opaque than the floating shell (§14). Van stays present without dominating operational content.",
+            "Hero VAN, then state/mission, attention, decisions, tasks, projects, connections. Approvals are solid, never glass.",
             margin,
             104,
         )
@@ -372,13 +428,15 @@ object VanPreviewSheets {
         g.drawString(VanPresence.meshCue(DegradedMode.healthy()), textX, 310)
 
         // Structured section panels.
+        val live = DegradedMode.healthy()
+        val attentionBody = if (live.active) live.reason else "Nothing waiting on you"
         val sections = listOf(
-            Triple("Attention", "Items needing owner focus", false),
-            Triple("Decisions", "Open decisions awaiting input", false),
-            Triple("Projects", "Active project registry mirror", false),
-            Triple("Tasks", "Queued commands awaiting dispatch", false),
-            Triple("Connections", "Hermes profile: van · gateway health", false),
-            Triple("Degraded status", "Google mesh unverified — awaiting gateway evidence", true),
+            Triple("State / Mission", VanCaptions.forState(cue.durableState), false),
+            Triple("Attention", attentionBody, live.active),
+            Triple("Decisions", "No pending decisions", false),
+            Triple("Tasks", "0 queued commands", false),
+            Triple("Projects", "Synced from registries/projects.json", false),
+            Triple("Connections", "Hermes profile: van · " + VanPresence.meshCue(live), false),
         )
         val colW = (w - margin * 2 - 24) / 2
         var top = 130 + heroH + 26
@@ -403,13 +461,9 @@ object VanPreviewSheets {
             g.color = Color(TEXT, true)
             g.font = font(20, bold = true)
             g.drawString(title, px + 22, py + 40)
-            g.color = if (alert) Color(VanGlassTokens.ACCENT_AMBER, true) else Color(TEXT_DIM, true)
+            g.color = if (alert) Color(VanGlassTokens.ACCENT_AMBER, true) else Color(0xFFD5DEE8.toInt(), true)
             g.font = font(14)
-            g.drawString(clip(summary, 46), px + 22, py + 68)
-            g.color = Color(0xFFD5DEE8.toInt(), true)
-            g.font = font(14)
-            g.drawString("• structured card content", px + 22, py + 100)
-            g.drawString("• deterministic, readable, no colour-only state", px + 22, py + 124)
+            g.drawString(clip(summary, 52), px + 22, py + 78)
         }
         top += 3 * 172 + 8
 
@@ -460,7 +514,7 @@ object VanPreviewSheets {
     fun glassTokenSheet(): BufferedImage {
         val w = 1180
         // Tall enough to clear the five-line budget captions under the §11 ladder tiles.
-        val h = 980
+        val h = 1100
         val image = BufferedImage(w, h, BufferedImage.TYPE_INT_ARGB)
         val g = image.createGraphics()
         AwtVanRenderer.prepare(g)
@@ -483,12 +537,12 @@ object VanPreviewSheets {
         listOf(
             "backgroundAlpha" to VanGlassTokens.BACKGROUND_ALPHA.toString(),
             "blur" to "${VanGlassTokens.BLUR_DP.toInt()}dp",
-            "borderWidth" to "${VanGlassTokens.BORDER_WIDTH_DP.toInt()}dp",
-            "borderAlpha" to VanGlassTokens.BORDER_ALPHA.toString(),
-            "cornerRadius" to "${VanGlassTokens.CORNER_RADIUS_DP.toInt()}dp",
-            "innerHighlightAlpha" to VanGlassTokens.INNER_HIGHLIGHT_ALPHA.toString(),
+            "structuralEdge" to VanGlassTokens.STRUCTURAL_EDGE_ALPHA.toString(),
+            "specular" to VanGlassTokens.SPECULAR_ALPHA.toString(),
+            "grain" to VanGlassTokens.GRAIN_ALPHA.toString(),
+            "contamination" to VanGlassTokens.CONTAMINATION_ALPHA.toString(),
+            "innerHighlight" to VanGlassTokens.INNER_HIGHLIGHT_ALPHA.toString(),
             "shadowElevation" to "${VanGlassTokens.SHADOW_ELEVATION_DP.toInt()}dp",
-            "activeGlowAlpha" to VanGlassTokens.ACTIVE_GLOW_ALPHA.toString(),
         ).forEachIndexed { i, (key, value) ->
             g.color = Color(TEXT_DIM, true)
             g.drawString(key, margin, 200 + i * 28)
@@ -520,8 +574,8 @@ object VanPreviewSheets {
             g.color = Color(TEXT_DIM, true)
             g.font = font(14)
             g.drawString("bg ${(style.backgroundAlpha * 100).toInt()}%", swatchX + i * 224 + 18, 276)
-            g.drawString("edge ${(style.borderAlpha * 100).toInt()}%", swatchX + i * 224 + 18, 300)
-            g.drawString("glow ${(style.activeGlowAlpha * 100).toInt()}%", swatchX + i * 224 + 18, 324)
+            g.drawString("edge ${(style.structuralEdgeAlpha * 100).toInt()}%", swatchX + i * 224 + 18, 300)
+            g.drawString("specular ${(style.specularAlpha * 100).toInt()}%", swatchX + i * 224 + 18, 324)
             if (style.requiresSolidControls) {
                 g.color = Color(style.borderColor, true)
                 g.font = font(13, bold = true)
@@ -536,27 +590,27 @@ object VanPreviewSheets {
         g.font = font(15)
         g.color = Color(TEXT_DIM, true)
         g.drawString(
-            "Decoration is surrendered in a fixed order — filaments, bloom, refraction, live blur — and a static cyan rim always survives.",
+            "Decoration is surrendered in a fixed order — filaments, bloom, refraction, live blur. Reduced motion is designed stillness, not STATIC.",
             margin,
             508,
         )
 
         VanEffectBudget.entries.forEachIndexed { i, budget ->
-            val x = margin + i * 272
+            val x = margin + i * 220
             val y = 540
-            val size = 200
+            val size = 168
             val spec = VanAuraSpecs.forState(VanDurableState.WORKING, budget)
-            drawGlassAvatarTile(
+            drawPresenceTile(
                 g = g,
-                canvas = image,
                 x = x,
                 y = y,
                 size = size,
                 state = VanDurableState.WORKING,
-                style = glass(VanDurableState.WORKING, budget = budget, liveBlur = budget.allowLiveBlur),
                 spec = spec,
                 budget = budget,
                 reducedMotion = !budget.allowMotion,
+                condenseGlass = false,
+                style = glass(VanDurableState.WORKING, budget = budget, liveBlur = budget.allowLiveBlur),
             )
             g.color = Color(VanGlassTokens.EDGE_CYAN, true)
             g.font = font(18, bold = true)
@@ -588,9 +642,39 @@ object VanPreviewSheets {
 
     // ------------------------------------------------------------------ shell composition
 
+    /** Frameless rest: VAN and the living field, no glass. */
+    private fun drawRestingShell(
+        g: Graphics2D,
+        x: Int,
+        y: Int,
+        state: VanDurableState,
+        budget: VanEffectBudget = VanEffectBudget.FULL,
+    ) {
+        val spec = VanAuraSpecs.forState(state, budget)
+        val charSize = dp(CHARACTER_DP)
+        GlassPainter.drawAura(
+            g,
+            spec,
+            (x + charSize / 2).toFloat(),
+            y + charSize * 0.48f,
+            charSize * 0.42f,
+            budget,
+            PHASE,
+        )
+        drawCharacter(
+            g,
+            state,
+            x.toFloat(),
+            y.toFloat(),
+            charSize.toFloat(),
+            charSize.toFloat(),
+            VanPresentation.COMPACT,
+            !budget.allowMotion,
+        )
+    }
+
     /**
-     * §4/§5 compact composition: a glass capsule carrying status and quick actions, with Van and
-     * his aura overlapping — and breaking — the capsule's top edge.
+     * Compact interaction: glass condenses from the aura. VAN overlaps the panel.
      */
     private fun drawCompactShell(
         g: Graphics2D,
@@ -607,7 +691,7 @@ object VanPreviewSheets {
         val capsuleH = dp(CAPSULE_HEIGHT_DP)
         val charSize = dp(CHARACTER_DP)
         // Van's boots break the capsule's top edge; the copy below stays clear of the overlap.
-        val capsuleY = y + charSize - dp(10)
+        val capsuleY = y + charSize - dp(OVERLAP_DP)
 
         val capsule = RoundRectangle2D.Float(
             x.toFloat(),
@@ -776,8 +860,8 @@ object VanPreviewSheets {
     }
 
     /**
-     * §13 Dock: the glass controls collapse entirely, Van tucks partly past the screen edge and
-     * his aura compresses with him, leaving a cyan presence line so he is never silently gone.
+     * Intentional edge dock: 88dp hit, 76dp character as a crescent/edge slice.
+     * Face and visor stay on-screen; the field compresses into a crescent, not a cyan bar.
      */
     private fun drawDockedShell(
         g: Graphics2D,
@@ -785,70 +869,80 @@ object VanPreviewSheets {
         y: Int,
         state: VanDurableState,
     ) {
-        val palette = VanStatusPalette.forState(state)
         val spec = VanAuraSpecs.forState(state)
-        val charSize = dp(CHARACTER_DP)
-        // Roughly 40% of the character tucks past the edge.
-        val charX = screenRight - (charSize * 0.60f).toInt()
+        val hit = dp(OverlayTheme.DOCK_HIT_DP)
+        val charSize = dp(OverlayTheme.DOCK_CHARACTER_DP)
+        val sliceW = dp(52)
+        val boxX = screenRight - sliceW
+        val boxY = y + (dp(CHARACTER_DP) - hit) / 2
 
+        val previous = g.clip
+        val crescent = java.awt.geom.RoundRectangle2D.Float(
+            boxX.toFloat(),
+            boxY.toFloat(),
+            sliceW.toFloat(),
+            hit.toFloat(),
+            sliceW * 0.9f,
+            sliceW * 0.9f,
+        )
+        g.clip = crescent
         GlassPainter.drawAura(
             g,
             spec,
-            (charX + charSize / 2).toFloat(),
-            y + charSize * 0.48f,
-            charSize * 0.34f,
+            boxX + charSize * 0.28f,
+            boxY + hit * 0.48f,
+            charSize * 0.42f,
             phase = PHASE,
         )
         drawCharacter(
             g,
             state,
-            charX.toFloat(),
-            y.toFloat(),
+            (boxX - dp(18)).toFloat(),
+            (boxY + (hit - charSize) / 2).toFloat(),
             charSize.toFloat(),
             charSize.toFloat(),
             VanPresentation.COMPACT,
         )
-
-        val w = dpf(4)
-        val h = dpf(64)
-        val lineY = y + charSize * 0.28f
-        g.color = GlassPainter.argb(palette.accent, 0.26f)
-        g.fill(RoundRectangle2D.Float(screenRight - w * 3.4f, lineY - h * 0.12f, w * 3.4f, h * 1.24f, w, w))
-        g.color = Color(palette.accent, true)
-        g.fill(RoundRectangle2D.Float(screenRight - w * 1.6f, lineY, w, h, w / 2f, w / 2f))
+        g.clip = previous
     }
 
-    /** A single glass tile with aura and character — the unit used by the matrix sheets. */
-    private fun drawGlassAvatarTile(
+    /** Frameless VAN + field. Approval-class states optionally condense a small glass chip. */
+    private fun drawPresenceTile(
         g: Graphics2D,
-        canvas: BufferedImage,
         x: Int,
         y: Int,
         size: Int,
         state: VanDurableState,
-        style: VanGlassStyle,
         spec: VanAuraSpec,
         budget: VanEffectBudget,
         reducedMotion: Boolean,
+        condenseGlass: Boolean,
+        style: VanGlassStyle,
     ) {
-        val corner = size * VanGlassTokens.CORNER_RADIUS_DP / (CHARACTER_DP * 0.9f)
-        val shape = RoundRectangle2D.Float(x.toFloat(), y.toFloat(), size.toFloat(), size.toFloat(), corner, corner)
-        GlassPainter.dropShadow(g, shape, style, DENSITY)
-        if (style.blurDp > 0f) {
-            GlassPainter.blurBehind(g, canvas, shape, (style.blurDp * DENSITY).toInt())
+        if (condenseGlass) {
+            val chipH = size * 0.28f
+            val chipY = y + size - chipH * 0.55f
+            val chip = RoundRectangle2D.Float(
+                x + size * 0.08f,
+                chipY,
+                size * 0.84f,
+                chipH,
+                size * 0.12f,
+                size * 0.12f,
+            )
+            GlassPainter.dropShadow(g, chip, style, DENSITY)
+            GlassPainter.fillGlass(g, style, chip, DENSITY)
         }
-        GlassPainter.fillGlass(g, style, shape, DENSITY)
-
         GlassPainter.drawAura(
             g,
             spec,
             x + size / 2f,
-            y + size * 0.5f,
-            size * 0.36f,
+            y + size * 0.48f,
+            size * 0.38f,
             budget,
             PHASE,
         )
-        val inset = size * 0.07f
+        val inset = size * 0.06f
         drawCharacter(
             g,
             state,
@@ -859,10 +953,6 @@ object VanPreviewSheets {
             VanPresentation.COMPACT,
             reducedMotion,
         )
-
-        val pipR = size * 0.05f
-        g.color = Color(VanStatusPalette.forState(state).accent, true)
-        g.fill(Ellipse2D.Float(x + size - pipR * 3f, y + pipR * 1.2f, pipR * 2f, pipR * 2f))
     }
 
     /**

@@ -43,6 +43,7 @@ import androidx.compose.ui.unit.sp
 import androidx.fragment.app.FragmentActivity
 import com.dial.van.VanApplication
 import com.dial.van.degraded.RestoreAction
+import com.dial.van.degraded.SubsystemStatus
 import com.dial.van.overlay.FloatingOverlayService
 import com.dial.van.queue.CommandKind
 import com.dial.van.queue.CommandSensitivity
@@ -127,7 +128,7 @@ private fun CommandCentreScreen(
     val gate = remember(activity) { BiometricGate(activity) }
     var meshSummary by remember { mutableStateOf("Google mesh: awaiting gateway evidence") }
     var statusMessage by remember { mutableStateOf("") }
-    var sections by remember { mutableStateOf(commandSections(app, meshSummary)) }
+    var sections by remember { mutableStateOf(commandSections(app, meshSummary, VanPresence.cue(app.degradedModeStore.snapshot()))) }
 
     LaunchedEffect(Unit) {
         try {
@@ -148,7 +149,7 @@ private fun CommandCentreScreen(
             app.degradedModeStore.markBroken("gateway", "health unreachable: ${exc.message}", RestoreAction.RETRY_CONNECTION)
             meshSummary = "Google mesh: gateway unreachable"
         }
-        sections = commandSections(app, meshSummary)
+        sections = commandSections(app, meshSummary, VanPresence.cue(app.degradedModeStore.snapshot()))
     }
 
     val degraded = app.degradedModeStore.snapshot()
@@ -280,28 +281,41 @@ private data class CommandSection(
     val alert: Boolean = false,
 )
 
-private fun commandSections(app: VanApplication, meshSummary: String): List<CommandSection> {
+private fun commandSections(app: VanApplication, meshSummary: String, cue: VanPresence.Cue): List<CommandSection> {
     val queueSize = app.commandQueue.size()
     val degraded = app.degradedModeStore.snapshot()
+    val attentionItems = buildList {
+        if (degraded.active) {
+            add(degraded.reason)
+            degraded.subsystems.filter { it.status != SubsystemStatus.WORKING }.forEach { sub ->
+                add("${sub.label}: ${sub.status} — ${sub.detail}")
+            }
+        } else {
+            add("No attention items")
+        }
+    }
     return listOf(
-        CommandSection("attention", "Attention", "Items needing owner focus", listOf("Review pending attention queue")),
-        CommandSection("decisions", "Decisions", "Open decisions awaiting input", listOf("No pending decisions")),
-        CommandSection("projects", "Projects", "Active project registry mirror", listOf("Synced from registries/projects.json")),
-        CommandSection("tasks", "Tasks", "Actionable tasks", listOf("$queueSize queued commands")),
-        CommandSection("reminders", "Reminders / Follow-ups", "Time-bound follow-ups", listOf("None due")),
-        CommandSection("memory", "Memory", "Owner memory context (untrusted labels)", listOf("Local context only")),
-        CommandSection("audit", "Audit", "Recent capability grants & actions", listOf("Audit trail via Hermes")),
-        CommandSection("connections", "Connections", "Device + Hermes connectivity", listOf("Hermes profile: van", meshSummary)),
-        CommandSection("hermes", "Hermes", "Agent execution uplink (no embedded loop)", listOf("Dispatch-only — Hermes owns execution")),
         CommandSection(
-            "degraded",
-            "Degraded status",
-            if (degraded.active) degraded.reason else "All subsystems nominal",
-            degraded.subsystems.map { sub ->
-                "${sub.label}: ${sub.status} — ${sub.detail}" +
-                    if (sub.restoreAction != RestoreAction.NONE) " [${sub.restoreAction}]" else ""
-            },
+            "mission",
+            "State / Mission",
+            cue.headline,
+            listOf(VanCaptions.forState(cue.durableState), cue.detail),
+        ),
+        CommandSection(
+            "attention",
+            "Attention",
+            if (degraded.active) "Owner focus required" else "Nothing waiting on you",
+            attentionItems,
             alert = degraded.active,
+        ),
+        CommandSection("decisions", "Decisions", "Open decisions awaiting input", listOf("No pending decisions")),
+        CommandSection("tasks", "Tasks", "Actionable work", listOf("$queueSize queued commands")),
+        CommandSection("projects", "Projects", "Mounted Project Truth registries", listOf("Synced from registries/projects.json")),
+        CommandSection(
+            "connections",
+            "Connections",
+            "Device + Hermes uplink",
+            listOf("Hermes profile: van", meshSummary),
         ),
     )
 }

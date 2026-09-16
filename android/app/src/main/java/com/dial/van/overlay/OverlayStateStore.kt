@@ -5,13 +5,16 @@ import android.content.SharedPreferences
 import androidx.core.content.edit
 
 enum class OverlayMode {
-    /** Glass capsule with status and 1–3 quick actions; Van breaks the capsule edge (§4, §5). */
+    /** Frameless rest: VAN and his living aura only. No glass until interaction. */
+    RESTING,
+
+    /** Glass condenses from the aura; VAN overlaps the panel; 1–3 quick actions. */
     COMPACT,
 
-    /** Full glass card with status, mesh cue and the action rail. */
+    /** Working surface: glass grown from VAN, status, mesh cue and the action rail. */
     EXPANDED,
 
-    /** Tucked to a screen edge: glass controls collapse to a cyan presence line (§13 Dock). */
+    /** Intentional edge dock: crescent aura, face/visor preserved, 88dp hit target. */
     DOCKED,
 }
 
@@ -48,8 +51,8 @@ class OverlayStateStore(context: Context) {
     fun load(defaultX: Int, defaultY: Int): OverlayPersistedState = OverlayPersistedState(
         x = prefs.getInt(KEY_X, defaultX),
         y = prefs.getInt(KEY_Y, defaultY),
-        mode = runCatching { OverlayMode.valueOf(prefs.getString(KEY_MODE, OverlayMode.COMPACT.name)!!) }
-            .getOrDefault(OverlayMode.COMPACT),
+        mode = runCatching { OverlayMode.valueOf(prefs.getString(KEY_MODE, OverlayMode.RESTING.name)!!) }
+            .getOrDefault(OverlayMode.RESTING),
         dock = runCatching { DockEdge.valueOf(prefs.getString(KEY_DOCK, DockEdge.NONE.name)!!) }
             .getOrDefault(DockEdge.NONE),
         serviceRunning = prefs.getBoolean(KEY_RUNNING, false),

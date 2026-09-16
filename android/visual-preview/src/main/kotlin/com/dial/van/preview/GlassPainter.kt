@@ -12,6 +12,7 @@ import java.awt.Rectangle
 import java.awt.Shape
 import java.awt.geom.Arc2D
 import java.awt.geom.Ellipse2D
+import java.awt.geom.Path2D
 import java.awt.geom.Point2D
 import java.awt.geom.RoundRectangle2D
 import java.awt.image.BufferedImage
@@ -103,46 +104,102 @@ object GlassPainter {
     }
 
     /**
-     * Paints the glass surface itself: §3 tinted charcoal/navy fill, restrained top-left sheen,
-     * cyan active glow on the interactive edge, and the 1dp low-opacity border.
+     * Optical glass: tint, shaping gradient, grain, inner highlight, contamination,
+     * faint structural edge, selective specular. No uniform glowing perimeter.
      */
     fun fillGlass(g: Graphics2D, style: VanGlassStyle, shape: RoundRectangle2D.Float, density: Float) {
         g.color = argb(VanGlassTokens.TINT_NAVY, style.backgroundAlpha)
         g.fill(shape)
 
+        val previousClip = g.clip
+        g.clip(shape)
+
+        g.paint = java.awt.GradientPaint(
+            shape.x,
+            shape.y,
+            argb(0xFFFFFFFF.toInt(), 0.06f * (style.innerHighlightAlpha / 0.11f).coerceIn(0.4f, 1.4f)),
+            shape.x,
+            shape.y + shape.height,
+            argb(0xFF000000.toInt(), 0.12f),
+        )
+        g.fill(shape)
+
+        if (style.grainAlpha > 0f) {
+            val step = max(shape.width, shape.height) / 28f
+            var row = 0
+            var gy = shape.y + step
+            while (gy < shape.y + shape.height) {
+                var gx = shape.x + step * (0.4f + (row % 3) * 0.2f)
+                while (gx < shape.x + shape.width) {
+                    val jitter = ((gx.toInt() * 13 + gy.toInt() * 7) % 5) - 2f
+                    g.color = argb(0xFFFFFFFF.toInt(), style.grainAlpha)
+                    g.fill(Ellipse2D.Float(gx + jitter, gy, 1.1f, 1.1f))
+                    gx += step
+                }
+                gy += step
+                row++
+            }
+        }
+
         if (style.innerHighlightAlpha > 0f) {
-            val previousClip = g.clip
-            g.clip(shape)
             g.paint = java.awt.GradientPaint(
                 shape.x,
                 shape.y,
-                argb(0xFFFFFFFF.toInt(), style.innerHighlightAlpha * 1.6f),
-                shape.x + shape.width * 0.7f,
-                shape.y + shape.height * 0.7f,
+                argb(0xFFFFFFFF.toInt(), style.innerHighlightAlpha * 1.4f),
+                shape.x + shape.width * 0.55f,
+                shape.y + shape.height * 0.42f,
                 Color(255, 255, 255, 0),
             )
             g.fill(shape)
-            g.clip = previousClip
         }
 
-        if (style.activeGlowAlpha > 0f) {
-            g.color = argb(style.borderColor, style.activeGlowAlpha)
-            g.stroke = BasicStroke(max(style.borderWidthDp * density * 2.5f, 2f))
-            g.draw(
-                RoundRectangle2D.Float(
-                    shape.x + 1f,
-                    shape.y + 1f,
-                    shape.width - 2f,
-                    shape.height - 2f,
-                    shape.arcwidth,
-                    shape.archeight,
-                ),
+        if (style.contaminationAlpha > 0f) {
+            radial(
+                g,
+                shape.x + shape.width * 0.12f,
+                shape.y + shape.height * 0.45f,
+                max(shape.width, shape.height) * 0.55f,
+                argb(style.borderColor, style.contaminationAlpha),
             )
         }
 
-        g.color = argb(style.borderColor, style.borderAlpha)
-        g.stroke = BasicStroke(max(style.borderWidthDp * density, 1.2f))
-        g.draw(shape)
+        g.clip = previousClip
+
+        val structural = style.structuralEdgeAlpha
+        if (structural > 0f) {
+            g.color = argb(style.borderColor, structural)
+            g.stroke = BasicStroke(max(style.borderWidthDp * density, 1f))
+            g.draw(shape)
+        }
+
+        val specular = style.specularAlpha
+        if (specular > 0f) {
+            val inset = 3f * density
+            val arcBox = RoundRectangle2D.Float(
+                shape.x + inset,
+                shape.y + inset,
+                shape.width - inset * 2f,
+                shape.height - inset * 2f,
+                shape.arcwidth,
+                shape.archeight,
+            )
+            g.color = argb(0xFFFFFFFF.toInt(), specular)
+            g.stroke = BasicStroke(
+                max(style.borderWidthDp * density * 1.6f, 1.4f),
+                BasicStroke.CAP_ROUND,
+                BasicStroke.JOIN_ROUND,
+            )
+            g.draw(Arc2D.Float(arcBox.x, arcBox.y, arcBox.width, arcBox.height, 110f, 78f, Arc2D.OPEN))
+            if (style.activeGlowAlpha > 0f) {
+                g.color = argb(style.borderColor, style.activeGlowAlpha)
+                g.stroke = BasicStroke(
+                    max(style.borderWidthDp * density * 2.0f, 1.6f),
+                    BasicStroke.CAP_ROUND,
+                    BasicStroke.JOIN_ROUND,
+                )
+                g.draw(Arc2D.Float(arcBox.x, arcBox.y, arcBox.width, arcBox.height, 118f, 52f, Arc2D.OPEN))
+            }
+        }
     }
 
     /** Shallow, soft, spatial shadow (§3). */
@@ -165,8 +222,8 @@ object GlassPainter {
     }
 
     /**
-     * The §7 aura stack, in order: secondary bloom, core rim glow, ground glow, filaments,
-     * micro-sparks, orb link, then the §6 alert accent ring when a state carries one.
+     * Living refractive field: deformable outer field, core radiance, crescent ground,
+     * filaments, broken orbital arcs. A full ring is forbidden.
      *
      * [phase] is fixed by the caller so regenerated previews stay comparable.
      */
@@ -181,60 +238,102 @@ object GlassPainter {
     ) {
         if (spec.intensity <= 0.01f || radius <= 1f) return
         val cyan = VanGlassTokens.ACCENT_CYAN
-        val breath = if (budget.allowMotion) 0.85f + 0.15f * sin(phase * 2f * PI.toFloat()) else 0.92f
+        val fieldColor = spec.alertAccent ?: cyan
+        val breath = if (budget.allowMotion) 0.94f + 0.06f * sin(phase * 2f * PI.toFloat()) else 1f
+        val rx = radius * (1.18f + 0.16f * spec.intensity) * (1f + spec.fieldAsymmetry * 0.35f) * budget.bloomScale * breath
+        val ry = radius * (1.28f + 0.10f * spec.intensity) * budget.bloomScale * breath
 
-        // Layer 2 — secondary bloom. §7 wants low opacity but real spatial separation, so the
-        // floor keeps a dim state readable as a glow rather than as nothing at all.
-        radial(
-            g,
-            cx,
-            cy,
-            radius * (1.34f + 0.26f * spec.intensity) * budget.bloomScale * breath,
-            argb(cyan, (0.16f + 0.44f * spec.intensity).coerceAtMost(0.52f)),
-        )
+        fillDeformableField(g, cx, cy, rx, ry, spec, argb(fieldColor, 0.07f + 0.12f * spec.intensity), innerPass = false)
+        fillDeformableField(g, cx, cy, rx * 0.58f, ry * 0.52f, spec, argb(fieldColor, 0.10f + 0.18f * spec.intensity), innerPass = true)
 
-        // Layer 1 — core rim glow hugging the silhouette.
-        rim(g, cx, cy, radius * 1.06f * breath, argb(cyan, (0.20f + 0.62f * spec.intensity).coerceAtMost(0.72f)))
-
-        // Layer 5 — ground/hover glow: a soft elliptical cyan illumination under the body.
         if (spec.groundGlow > 0.01f) {
-            val gw = radius * 1.6f
-            val previous = g.transform
-            g.translate(cx.toDouble(), (cy + radius * 1.02f).toDouble())
-            g.scale(1.0, 0.22)
-            radial(g, 0f, 0f, gw / 2f, argb(cyan, 0.42f * spec.groundGlow))
-            g.transform = previous
+            val crescent = Path2D.Float()
+            val gy = cy + radius * 1.05f
+            val gw = radius * 1.15f
+            crescent.moveTo(cx - gw, gy)
+            crescent.quadTo(cx.toDouble(), (gy + radius * 0.22f).toDouble(), (cx + gw).toDouble(), gy.toDouble())
+            crescent.quadTo(cx.toDouble(), (gy - radius * 0.08f).toDouble(), (cx - gw).toDouble(), gy.toDouble())
+            crescent.closePath()
+            val previous = g.clip
+            g.clip(crescent)
+            radial(g, cx, gy, gw, argb(fieldColor, 0.32f * spec.groundGlow))
+            g.clip = previous
         }
 
-        // Layer 3 — electrical filaments: sparse, short-lived, state-driven.
-        if (spec.arcActivity > 0.02f) {
-            val arcs = (1 + (spec.arcActivity * 4f).toInt()).coerceAtMost(5)
-            val r = radius * 1.06f
-            repeat(arcs) { index ->
-                val seed = index * 0.37f
-                val life = (phase + seed) % 1f
-                val visible = if (budget.allowMotion) life < 0.45f else index == 0
+        if (spec.filamentCount > 0 && spec.arcActivity > 0.01f) {
+            val count = spec.filamentCount.coerceIn(1, 5)
+            g.stroke = BasicStroke(max(radius * 0.062f, 2.0f), BasicStroke.CAP_ROUND, BasicStroke.JOIN_ROUND)
+            repeat(count) { index ->
+                val seed = index * 1.17f + spec.intensity
+                val life = (phase + seed * 0.13f) % 1f
+                val visible = if (budget.allowMotion) life < 0.72f else true
                 if (!visible) return@repeat
-                val fade = if (budget.allowMotion) sin((life / 0.45f) * PI.toFloat()) else 0.7f
-                val start = (seed * 360f + if (budget.allowMotion) phase * 220f else 0f) % 360f
-                val sweep = 22f + 16f * spec.arcActivity
-                g.color = argb(spec.alertAccent ?: cyan, 0.55f * spec.arcActivity * fade)
-                g.stroke = BasicStroke(max(radius * 0.030f, 1.5f), BasicStroke.CAP_ROUND, BasicStroke.JOIN_ROUND)
-                g.draw(Arc2D.Float(cx - r, cy - r, r * 2f, r * 2f, -start, -sweep, Arc2D.OPEN))
+                val fade = if (budget.allowMotion) {
+                    sin((life / 0.72f) * PI.toFloat()).coerceAtLeast(0.35f)
+                } else {
+                    0.82f
+                }
+                val start = 0.55f + index * 0.9f
+                val inner = radius * 0.72f
+                val outer = radius * (1.28f + 0.22f * ((seed * 3f) % 1f))
+                val path = Path2D.Float()
+                path.moveTo(cx + cos(start) * inner, cy + sin(start) * inner)
+                val bend = start + 0.55f + 0.25f * sin(seed)
+                path.quadTo(
+                    cx + cos(bend) * (inner + outer) * 0.48f,
+                    cy + sin(bend) * (inner + outer) * 0.42f,
+                    cx + cos(start + 0.35f) * outer,
+                    cy + sin(start + 0.22f) * outer,
+                )
+                g.color = argb(fieldColor, (0.42f + 0.40f * spec.arcActivity).coerceIn(0.42f, 0.88f) * fade)
+                g.draw(path)
             }
         }
 
-        // Layer 4 — micro-sparks.
+        if (spec.arcActivity > 0.02f) {
+            val arcs = (1 + (spec.arcActivity * 3f).toInt()).coerceAtMost(3)
+            var remaining = VanAuraSpec.MAX_TOTAL_ARC_DEG
+            val ovalRx = radius * 1.12f
+            val ovalRy = radius * 1.28f
+            g.stroke = BasicStroke(max(radius * 0.048f, 1.8f), BasicStroke.CAP_ROUND, BasicStroke.JOIN_ROUND)
+            repeat(arcs) { index ->
+                if (remaining <= 18f) return@repeat
+                val seed = index * 0.41f
+                val life = (phase * 0.6f + seed) % 1f
+                val visible = if (budget.allowMotion) life < 0.62f else true
+                if (!visible) return@repeat
+                val fade = if (budget.allowMotion) sin((life / 0.62f) * PI.toFloat()).coerceAtLeast(0.4f) else 0.78f
+                val sweep = (56f + 36f * spec.arcActivity - index * 12f)
+                    .coerceAtMost(VanAuraSpec.MAX_ARC_SWEEP_DEG)
+                    .coerceAtMost(remaining)
+                remaining -= sweep
+                val start = (index * 118f + 18f + if (budget.allowMotion) phase * 40f else 0f) % 360f
+                val inset = index * radius * 0.05f
+                g.color = argb(fieldColor, (0.38f + 0.32f * spec.arcActivity).coerceIn(0.38f, 0.78f) * fade)
+                g.draw(
+                    Arc2D.Float(
+                        cx - ovalRx + inset,
+                        cy - ovalRy - inset * 0.4f,
+                        (ovalRx - inset) * 2f,
+                        (ovalRy - inset) * 2f,
+                        -start,
+                        -sweep,
+                        Arc2D.OPEN,
+                    ),
+                )
+            }
+        }
+
         if (spec.sparkRate > 0.02f && budget.allowMotion) {
-            val sparks = (spec.sparkRate * 6f).toInt().coerceIn(1, 5)
+            val sparks = (spec.sparkRate * 5f).toInt().coerceIn(1, 4)
             repeat(sparks) { index ->
                 val seed = index * 0.611f
                 val life = (phase * 1.7f + seed) % 1f
                 if (life > 0.22f) return@repeat
                 val angle = (seed * 2f * PI.toFloat() * 3.1f) % (2f * PI.toFloat())
-                val distance = radius * (1.0f + 0.15f * ((seed * 7f) % 1f))
-                val sr = max(radius * 0.026f, 1.2f)
-                g.color = argb(cyan, 0.85f * (1f - life / 0.22f))
+                val distance = radius * (1.0f + 0.18f * ((seed * 7f) % 1f))
+                val sr = max(radius * 0.022f, 1.1f)
+                g.color = argb(fieldColor, 0.70f * (1f - life / 0.22f))
                 g.fill(
                     Ellipse2D.Float(
                         cx + cos(angle) * distance - sr,
@@ -246,26 +345,55 @@ object GlassPainter {
             }
         }
 
-        // Layer 6 — orb link.
         if (spec.orbLink > 0.05f) {
             val alpha = if (budget.allowMotion) {
-                0.30f + 0.35f * (0.5f + 0.5f * sin(phase * 4f * PI.toFloat()))
+                0.28f + 0.22f * (0.5f + 0.5f * sin(phase * 4f * PI.toFloat()))
             } else {
-                0.35f
+                0.32f
             }
-            val r = radius
-            g.color = argb(cyan, alpha * spec.orbLink)
-            g.stroke = BasicStroke(max(radius * 0.040f, 1.5f), BasicStroke.CAP_ROUND, BasicStroke.JOIN_ROUND)
-            g.draw(Arc2D.Float(cx - r, cy - r, r * 2f, r * 2f, 58f, -44f, Arc2D.OPEN))
+            val path = Path2D.Float()
+            path.moveTo(cx + radius * 0.28f, cy - radius * 0.08f)
+            path.quadTo(
+                cx + radius * 0.70f,
+                cy - radius * 0.42f,
+                cx + radius * 0.92f,
+                cy - radius * 0.22f,
+            )
+            g.color = argb(fieldColor, alpha * spec.orbLink)
+            g.stroke = BasicStroke(max(radius * 0.036f, 1.4f), BasicStroke.CAP_ROUND, BasicStroke.JOIN_ROUND)
+            g.draw(path)
         }
+    }
 
-        // §6 alert accent — additive to cyan, never a replacement for it.
-        spec.alertAccent?.let { accent ->
-            val r = radius * 1.16f
-            g.color = argb(accent, 0.30f)
-            g.stroke = BasicStroke(max(radius * 0.026f, 1.2f))
-            g.draw(Ellipse2D.Float(cx - r, cy - r, r * 2f, r * 2f))
+    private fun fillDeformableField(
+        g: Graphics2D,
+        cx: Float,
+        cy: Float,
+        rx: Float,
+        ry: Float,
+        spec: VanAuraSpec,
+        inner: Color,
+        innerPass: Boolean,
+    ) {
+        if (rx <= 1f || ry <= 1f) return
+        val path = Path2D.Float()
+        val n = 14
+        for (i in 0..n) {
+            val t = i.toFloat() / n
+            val ang = t * 2f * PI.toFloat()
+            val wobble = 1f +
+                spec.deformation * sin(ang * 3f + spec.intensity * 5f + if (innerPass) 0.8f else 0f) +
+                spec.fieldAsymmetry * 0.35f * cos(ang * 2f + 0.6f) +
+                0.06f * sin(ang * 5f + spec.arcActivity)
+            val x = cx + cos(ang) * rx * wobble
+            val y = cy + sin(ang) * ry * wobble
+            if (i == 0) path.moveTo(x, y) else path.lineTo(x, y)
         }
+        path.closePath()
+        val previous = g.clip
+        g.clip(path)
+        radial(g, cx, cy, max(rx, ry), inner)
+        g.clip = previous
     }
 
     // Gradient stops always fade to the *same* hue at zero alpha. Fading to transparent black
@@ -277,17 +405,6 @@ object GlassPainter {
             r,
             floatArrayOf(0f, 0.5f, 1f),
             arrayOf(inner, fade(inner, 0.42f), fade(inner, 0f)),
-        )
-        g.fill(Ellipse2D.Float(cx - r, cy - r, r * 2f, r * 2f))
-    }
-
-    private fun rim(g: Graphics2D, cx: Float, cy: Float, r: Float, edge: Color) {
-        if (r <= 1f) return
-        g.paint = RadialGradientPaint(
-            Point2D.Float(cx, cy),
-            r,
-            floatArrayOf(0f, 0.58f, 0.86f, 1f),
-            arrayOf(fade(edge, 0f), fade(edge, 0.22f), edge, fade(edge, 0.30f)),
         )
         g.fill(Ellipse2D.Float(cx - r, cy - r, r * 2f, r * 2f))
     }
