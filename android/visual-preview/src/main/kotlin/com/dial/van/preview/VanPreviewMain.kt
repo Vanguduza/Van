@@ -24,6 +24,7 @@ fun main(args: Array<String>) {
         "van_action_board.png" to VanPreviewSheets.actionSheet(),
         "van_command_centre.png" to VanPreviewSheets.commandCentreSheet(),
         "van_glass_tokens.png" to VanPreviewSheets.glassTokenSheet(),
+        "van_aura_topology.png" to VanPreviewSheets.auraTopologySheet(),
     )
 
     println(

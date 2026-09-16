@@ -128,9 +128,12 @@ fun VanEmbodiment(
     presentation: VanPresentation = VanPresentation.COMPACT,
     budget: VanEffectBudget = VanEffectBudget.FULL,
     onDecision: (VanRenderDecision) -> Unit = {},
+    /** Body size relative to the aura canvas. Rest uses hit/avatar so Zone C has air. */
+    characterFraction: Float = 1f,
 ) {
     val spec = VanAuraSpecs.forState(state.durableState, budget)
     val phase = vanIdlePhase(state.durableState, !budget.allowMotion)
+    val body = characterFraction.coerceIn(0.40f, 1f)
 
     Box(modifier = modifier, contentAlignment = Alignment.Center) {
         // 5 & 6. Aura bloom and electrical filaments, behind Van and in front of the glass.
@@ -138,12 +141,13 @@ fun VanEmbodiment(
             spec = spec,
             phase = phase,
             budget = budget,
+            characterScale = body,
             modifier = Modifier.matchParentSize(),
         )
         // 7 & 8. Van and his orb — the art poses already carry the orb.
         VanAvatar(
             state = state,
-            modifier = Modifier.fillMaxSize(),
+            modifier = Modifier.fillMaxSize(body),
             presentation = presentation,
             onDecision = onDecision,
         )

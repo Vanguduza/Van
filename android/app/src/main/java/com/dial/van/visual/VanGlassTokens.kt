@@ -62,6 +62,9 @@ object VanGlassTokens {
     const val ACCENT_AMBER = 0xFFFFB300.toInt()
     const val ACCENT_RED = 0xFFEF4444.toInt()
     const val ACCENT_GREEN = 0xFF22C55E.toInt()
+    const val ACCENT_VIOLET = 0xFF8B5CF6.toInt()
+    const val ACCENT_GOLD = 0xFFEAB308.toInt()
+    const val ACCENT_TEAL = 0xFF14B8A6.toInt()
 
     const val MIN_COMPACT_ALPHA = 0.50f
     const val MAX_COMPACT_ALPHA = 0.72f

@@ -17,10 +17,11 @@ import kotlin.math.cos
 import kotlin.math.sin
 
 /**
- * Living refractive aura.
+ * Three-zone living refractive aura (Rev 2.2).
  *
- * Rev 2.1: a deformable field around VAN — not a cyan circle, not a ring, not a plate.
- * Layers: core radiance, outer field, filaments, broken orbital arcs, caustics, ground crescent.
+ * Zone A — inner presence, identity cyan, body-adjacent.
+ * Zone B — mid interaction, filaments and working arcs.
+ * Zone C — outer semantic envelope, sparse broken orbit, semantic colour only.
  */
 @Composable
 fun VanAuraLayer(
@@ -28,66 +29,87 @@ fun VanAuraLayer(
     phase: Float,
     budget: VanEffectBudget,
     modifier: Modifier = Modifier,
+    /** Fraction of the canvas occupied by VAN's body. <1 leaves air for Zone C. */
+    characterScale: Float = 1f,
 ) {
-    Canvas(modifier = modifier) { drawVanAura(spec, phase, budget) }
+    Canvas(modifier = modifier) { drawVanAura(spec, phase, budget, characterScale) }
 }
 
-/** Nothing decorative is drawn inside this fraction of the box — face/outfit protection. */
+/** Nothing decorative is drawn inside this fraction of the body box — face/outfit protection. */
 const val FACE_SAFE_RADIUS = 0.34f
 
-fun DrawScope.drawVanAura(spec: VanAuraSpec, phase: Float, budget: VanEffectBudget) {
-    if (spec.intensity <= 0.01f) return
-
+fun DrawScope.drawVanAura(
+    spec: VanAuraSpec,
+    phase: Float,
+    budget: VanEffectBudget,
+    characterScale: Float = 1f,
+) {
     val w = size.width
     val h = size.height
     val minEdge = minOf(w, h)
     if (minEdge <= 0f) return
 
+    val bodyEdge = minEdge * characterScale.coerceIn(0.40f, 1f)
     val center = Offset(w / 2f, h * 0.48f)
     val cyan = Color(VanGlassTokens.ACCENT_CYAN)
-    val accent = spec.alertAccent?.let { Color(it) }
-    val field = accent?.copy(alpha = 1f)?.let { mix(cyan, it, 0.28f) } ?: cyan
     val tau = (2f * PI).toFloat()
+    val midRadius = bodyEdge * 0.44f * VanAuraSpec.MID_RADIUS_SCALE
 
-    if (spec.intensity > 0.32f) {
-        drawCircle(
-            brush = Brush.radialGradient(
-                colors = listOf(field.copy(alpha = 0.07f * spec.intensity), Color.Transparent),
-                center = Offset(center.x - minEdge * 0.10f, center.y + minEdge * 0.04f),
-                radius = minEdge * 0.28f,
-            ),
-            radius = minEdge * 0.28f,
-            center = Offset(center.x - minEdge * 0.10f, center.y + minEdge * 0.04f),
-        )
-        drawCircle(
-            brush = Brush.radialGradient(
-                colors = listOf(field.copy(alpha = 0.05f * spec.intensity), Color.Transparent),
-                center = Offset(center.x + minEdge * 0.14f, center.y - minEdge * 0.06f),
-                radius = minEdge * 0.22f,
-            ),
-            radius = minEdge * 0.22f,
-            center = Offset(center.x + minEdge * 0.14f, center.y - minEdge * 0.06f),
-        )
-    }
+    drawZoneA(spec, center, bodyEdge, cyan)
+    drawZoneB(spec, phase, budget, center, bodyEdge, midRadius, cyan, tau)
+    drawZoneC(spec, budget, center, midRadius)
+}
 
+private fun DrawScope.drawZoneA(spec: VanAuraSpec, center: Offset, minEdge: Float, cyan: Color) {
+    val alpha = (0.12f + 0.08f * spec.intensity).coerceIn(0.08f, 0.20f)
+    val r = minEdge * 0.22f * VanAuraSpec.INNER_RADIUS_SCALE
+    drawCircle(
+        brush = Brush.radialGradient(
+            colors = listOf(cyan.copy(alpha = alpha * 0.85f), Color.Transparent),
+            center = Offset(center.x - minEdge * 0.06f, center.y + minEdge * 0.02f),
+            radius = r,
+        ),
+        radius = r,
+        center = Offset(center.x - minEdge * 0.06f, center.y + minEdge * 0.02f),
+    )
+    drawCircle(
+        brush = Brush.radialGradient(
+            colors = listOf(cyan.copy(alpha = alpha * 0.55f), Color.Transparent),
+            center = Offset(center.x + minEdge * 0.08f, center.y - minEdge * 0.04f),
+            radius = r * 0.72f,
+        ),
+        radius = r * 0.72f,
+        center = Offset(center.x + minEdge * 0.08f, center.y - minEdge * 0.04f),
+    )
     if (spec.groundGlow > 0.01f) {
         val crescent = Path()
-        val gy = h * 0.90f
-        val gw = minEdge * 0.48f
+        val gy = center.y + minEdge * 0.42f
+        val gw = minEdge * 0.36f
         crescent.moveTo(center.x - gw, gy)
-        crescent.quadraticBezierTo(center.x, gy + minEdge * 0.10f, center.x + gw, gy)
-        crescent.quadraticBezierTo(center.x, gy - minEdge * 0.04f, center.x - gw, gy)
+        crescent.quadraticBezierTo(center.x, gy + minEdge * 0.08f, center.x + gw, gy)
+        crescent.quadraticBezierTo(center.x, gy - minEdge * 0.03f, center.x - gw, gy)
         crescent.close()
         drawPath(
             path = crescent,
             brush = Brush.radialGradient(
-                colors = listOf(field.copy(alpha = 0.28f * spec.groundGlow), Color.Transparent),
+                colors = listOf(cyan.copy(alpha = 0.22f * spec.groundGlow), Color.Transparent),
                 center = Offset(center.x, gy),
                 radius = gw,
             ),
         )
     }
+}
 
+private fun DrawScope.drawZoneB(
+    spec: VanAuraSpec,
+    phase: Float,
+    budget: VanEffectBudget,
+    center: Offset,
+    minEdge: Float,
+    midRadius: Float,
+    cyan: Color,
+    tau: Float,
+) {
     if (spec.filamentCount > 0 && spec.arcActivity > 0.01f) {
         val count = spec.filamentCount.coerceIn(1, 5)
         repeat(count) { index ->
@@ -102,11 +124,9 @@ fun DrawScope.drawVanAura(spec: VanAuraSpec, phase: Float, budget: VanEffectBudg
             }
             val start = (0.55f + index * 0.9f) % tau
             val inner = minEdge * FACE_SAFE_RADIUS * 1.05f
-            val outer = minEdge * (0.48f + 0.08f * ((seed * 3f) % 1f))
+            val outer = midRadius * (0.92f + 0.08f * ((seed * 3f) % 1f))
             val path = Path()
-            val x0 = center.x + cos(start) * inner
-            val y0 = center.y + sin(start) * inner
-            path.moveTo(x0, y0)
+            path.moveTo(center.x + cos(start) * inner, center.y + sin(start) * inner)
             val bend = start + 0.55f + 0.25f * sin(seed)
             path.quadraticBezierTo(
                 center.x + cos(bend) * (inner + outer) * 0.48f,
@@ -116,9 +136,9 @@ fun DrawScope.drawVanAura(spec: VanAuraSpec, phase: Float, budget: VanEffectBudg
             )
             drawPath(
                 path = path,
-                color = field.copy(alpha = (0.42f + 0.40f * spec.arcActivity).coerceIn(0.42f, 0.88f) * fade),
+                color = cyan.copy(alpha = (0.42f + 0.40f * spec.arcActivity).coerceIn(0.42f, 0.88f) * fade),
                 style = Stroke(
-                    width = minEdge * 0.018f,
+                    width = minEdge * 0.016f,
                     cap = StrokeCap.Round,
                     join = StrokeJoin.Round,
                 ),
@@ -129,13 +149,13 @@ fun DrawScope.drawVanAura(spec: VanAuraSpec, phase: Float, budget: VanEffectBudg
     if (spec.arcActivity > 0.02f) {
         val arcs = (1 + (spec.arcActivity * 3f).toInt()).coerceAtMost(3)
         var remaining = VanAuraSpec.MAX_TOTAL_ARC_DEG
-        val ovalRx = minEdge * 0.44f
-        val ovalRy = minEdge * 0.50f
+        val ovalRx = midRadius
+        val ovalRy = midRadius * (0.82f + spec.fieldAsymmetry)
         repeat(arcs) { index ->
             if (remaining <= 18f) return@repeat
             val seed = index * 0.41f
             val life = (phase * 0.6f + seed) % 1f
-            val visible = if (budget.allowMotion) life < 0.62f else index == 0 || !budget.allowMotion
+            val visible = if (budget.allowMotion) life < 0.62f else true
             if (!visible && budget.allowMotion) return@repeat
             val fade = if (budget.allowMotion) sin((life / 0.62f) * PI.toFloat()).coerceAtLeast(0.3f) else 0.7f
             val sweep = (48f + 38f * spec.arcActivity - index * 12f)
@@ -143,15 +163,15 @@ fun DrawScope.drawVanAura(spec: VanAuraSpec, phase: Float, budget: VanEffectBudg
                 .coerceAtMost(remaining)
             remaining -= sweep
             val start = (index * 118f + 18f + if (budget.allowMotion) phase * 40f else 0f) % 360f
-            val inset = index * minEdge * 0.018f
+            val inset = index * minEdge * 0.014f
             drawArc(
-                color = field.copy(alpha = (0.38f + 0.32f * spec.arcActivity).coerceIn(0.38f, 0.78f) * fade),
+                color = cyan.copy(alpha = (0.34f + 0.28f * spec.arcActivity).coerceIn(0.34f, 0.70f) * fade),
                 startAngle = start,
                 sweepAngle = sweep,
                 useCenter = false,
                 topLeft = Offset(center.x - ovalRx + inset, center.y - ovalRy - inset * 0.4f),
                 size = Size((ovalRx - inset) * 2f, (ovalRy - inset) * 2f),
-                style = Stroke(width = minEdge * 0.011f, cap = StrokeCap.Round),
+                style = Stroke(width = minEdge * 0.010f, cap = StrokeCap.Round),
             )
         }
     }
@@ -163,14 +183,11 @@ fun DrawScope.drawVanAura(spec: VanAuraSpec, phase: Float, budget: VanEffectBudg
             val life = ((phase * 1.7f + seed) % 1f)
             if (life > 0.22f) return@repeat
             val angle = (seed * tau * 3.1f) % tau
-            val distance = minEdge * (0.40f + 0.08f * ((seed * 7f) % 1f))
+            val distance = midRadius * (0.78f + 0.08f * ((seed * 7f) % 1f))
             drawCircle(
-                color = field.copy(alpha = 0.70f * (1f - life / 0.22f)),
+                color = cyan.copy(alpha = 0.70f * (1f - life / 0.22f)),
                 radius = minEdge * 0.008f,
-                center = Offset(
-                    center.x + cos(angle) * distance,
-                    center.y + sin(angle) * distance,
-                ),
+                center = Offset(center.x + cos(angle) * distance, center.y + sin(angle) * distance),
             )
         }
     }
@@ -191,15 +208,41 @@ fun DrawScope.drawVanAura(spec: VanAuraSpec, phase: Float, budget: VanEffectBudg
         )
         drawPath(
             path = path,
-            color = field.copy(alpha = linkAlpha * spec.orbLink),
+            color = cyan.copy(alpha = linkAlpha * spec.orbLink),
             style = Stroke(width = minEdge * 0.014f, cap = StrokeCap.Round),
         )
     }
 }
 
-private fun mix(a: Color, b: Color, t: Float): Color = Color(
-    red = a.red + (b.red - a.red) * t,
-    green = a.green + (b.green - a.green) * t,
-    blue = a.blue + (b.blue - a.blue) * t,
-    alpha = 1f,
-)
+private fun DrawScope.drawZoneC(spec: VanAuraSpec, budget: VanEffectBudget, center: Offset, midRadius: Float) {
+    val segments = spec.segmentsForBudget(budget)
+    if (segments.isEmpty()) return
+    val scale = spec.envelopeRadiusScale.coerceIn(VanAuraSpec.MIN_ENVELOPE_SCALE, VanAuraSpec.MAX_ENVELOPE_SCALE)
+    val rx = midRadius * scale * (1.05f + spec.fieldAsymmetry * 0.35f)
+    val ry = midRadius * scale * 0.86f
+    val ink = Color(spec.semanticColor ?: VanGlassTokens.ACCENT_CYAN)
+    val alpha = spec.envelopeAlpha.coerceIn(0.05f, 0.22f)
+    val stroke = (midRadius * 0.055f).coerceAtLeast(1.6f)
+    segments.forEach { segment ->
+        drawArc(
+            color = ink.copy(alpha = alpha),
+            startAngle = segment.startDeg,
+            sweepAngle = segment.sweepDeg.coerceAtMost(VanAuraSpec.MAX_ARC_SWEEP_DEG),
+            useCenter = false,
+            topLeft = Offset(center.x - rx, center.y - ry),
+            size = Size(rx * 2f, ry * 2f),
+            style = Stroke(width = stroke, cap = StrokeCap.Round),
+        )
+        if (segment.node || spec.envelopeSegments.size == 1) {
+            val rad = Math.toRadians(segment.startDeg.toDouble())
+            drawCircle(
+                color = ink.copy(alpha = (alpha + 0.12f).coerceAtMost(0.32f)),
+                radius = stroke * 0.85f,
+                center = Offset(
+                    center.x + cos(rad).toFloat() * rx,
+                    center.y + sin(rad).toFloat() * ry,
+                ),
+            )
+        }
+    }
+}

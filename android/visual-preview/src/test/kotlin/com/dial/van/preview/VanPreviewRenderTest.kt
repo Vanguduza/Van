@@ -28,6 +28,7 @@ class VanPreviewRenderTest {
             VanPreviewSheets.actionSheet(),
             VanPreviewSheets.commandCentreSheet(),
             VanPreviewSheets.glassTokenSheet(),
+            VanPreviewSheets.auraTopologySheet(),
         ).forEach { sheet ->
             assertTrue("sheet too small: ${sheet.width}x${sheet.height}", sheet.width > 600 && sheet.height > 400)
             assertTrue("sheet rendered blank", nonBackgroundRatio(sheet) > 0.02)

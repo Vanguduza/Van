@@ -124,8 +124,8 @@ object VanPreviewSheets {
         drawPhone(g, image, margin, phoneY, phoneW, phoneH, "Resting — VAN + aura only") { gg, x, y, pw, ph ->
             drawRestingShell(
                 gg,
-                x + pw - dp(18) - dp(CHARACTER_DP),
-                y + (ph * 0.34f).toInt(),
+                x + pw - dp(18) - dp(OverlayTheme.RESTING_HIT_DP),
+                y + (ph * 0.32f).toInt(),
                 VanDurableState.IDLE,
             )
         }
@@ -181,10 +181,10 @@ object VanPreviewSheets {
         val states = VanDurableState.entries
         val cols = 6
         val rows = (states.size + cols - 1) / cols
-        val cellW = 270
-        val cellH = 300
-        val padX = 64
-        val headerH = 180
+        val cellW = 340
+        val cellH = 400
+        val padX = 56
+        val headerH = 190
         val w = padX * 2 + cellW * cols
         val h = headerH + rows * (cellH + 66) + 56
 
@@ -208,19 +208,19 @@ object VanPreviewSheets {
         g.drawString(
             when {
                 reducedMotion ->
-                    "Reduced motion holds a composed still field: filaments and broken arcs remain, pulse stops. Not the STATIC thermal floor."
+                    "Reduced motion holds Zone C still: outer semantic fragments remain, pulse stops. Not the STATIC thermal floor."
                 budget == VanEffectBudget.LOW ->
-                    "LOW surrenders refraction and live blur; the deformable field and state copy stay fully readable."
+                    "LOW keeps at least one Zone C fragment. Filaments and live blur drop; identity/semantic separation stays."
                 budget == VanEffectBudget.STATIC ->
-                    "STATIC is the thermal floor: still field, one filament, state indicators never removed."
+                    "STATIC keeps inner presence plus one or more semantic envelope fragments. State remains readable."
                 else ->
-                    "Frameless presence — no enclosing glass card. Aura intensity from VanAuraSpecs; each caption is shipped state copy."
+                    "Three-zone aura: inner identity, mid interaction, outer semantic envelope. Zone C carries state colour, not the body."
             },
             padX,
             124,
         )
         g.drawString(
-            "No state relies on colour alone: each cell carries a distinct field, a named caption, and the visor/orb treatment.",
+            "Each cell has a unique Zone C topology. Warning/error/urgent/approval live in the outer envelope, not as body recolour.",
             padX,
             154,
         )
@@ -256,7 +256,7 @@ object VanPreviewSheets {
             centerString(g, clip(VanCaptions.forState(state), 28), cx, y + cellH - 8)
             centerString(
                 g,
-                "field ${(spec.intensity * 100).toInt()}%  ·  filaments ${spec.filamentCount}  ·  glass ${(style.backgroundAlpha * 100).toInt()}%",
+                "field ${(spec.intensity * 100).toInt()}%  ·  Zone C ${spec.segmentsForBudget(budget).size}  ·  scale ${"%.2f".format(spec.envelopeRadiusScale)}",
                 cx,
                 y + cellH + 14,
             )
@@ -531,7 +531,7 @@ object VanPreviewSheets {
         g.drawString("DIAL Glass tokens & effect ladder", margin, 74)
         g.font = font(17)
         g.color = Color(TEXT_DIM, true)
-        g.drawString("Values read directly from VanGlassTokens, VanAuraSpecs and VanEffectBudget — not transcribed.", margin, 104)
+        g.drawString("Values read directly from VanGlassTokens, VanAuraSpecs and VanEffectBudget — not transcribed. Pair with the aura topology board for Zone C.", margin, 104)
 
         // §8 tokens.
         g.color = Color(TEXT, true)
@@ -644,9 +644,124 @@ object VanPreviewSheets {
         return image
     }
 
+    /**
+     * Rev 2.2 authority board: Zone A / B / C labelled, budget ladder, semantic and trade-ready examples.
+     */
+    fun auraTopologySheet(): BufferedImage {
+        val w = 1680
+        val h = 1180
+        val image = BufferedImage(w, h, BufferedImage.TYPE_INT_ARGB)
+        val g = image.createGraphics()
+        AwtVanRenderer.prepare(g)
+        g.paint = GradientPaint(0f, 0f, Color(0xFF080C13.toInt()), 0f, h.toFloat(), Color(0xFF05080D.toInt()))
+        g.fillRect(0, 0, w, h)
+
+        val margin = 56
+        g.color = Color(TEXT, true)
+        g.font = font(36, bold = true)
+        g.drawString("VAN aura topology & semantic ladder", margin, 70)
+        g.font = font(17)
+        g.color = Color(TEXT_DIM, true)
+        g.drawString(
+            "Zone A identity cyan stays on the body. Zone B carries activity. Zone C is the outer semantic envelope — sparse, broken, never a ring.",
+            margin,
+            104,
+        )
+
+        val heroX = margin
+        val heroY = 140
+        val heroSize = 420
+        val working = VanAuraSpecs.forState(VanDurableState.WORKING)
+        GlassPainter.drawAura(g, working, heroX + heroSize / 2f, heroY + heroSize * 0.48f, heroSize * 0.28f, VanEffectBudget.FULL, PHASE)
+        drawCharacter(
+            g,
+            VanDurableState.WORKING,
+            heroX + heroSize * 0.22f,
+            heroY + heroSize * 0.18f,
+            heroSize * 0.56f,
+            heroSize * 0.56f,
+            VanPresentation.COMPACT,
+        )
+        g.color = Color(VanGlassTokens.ACCENT_CYAN, true)
+        g.font = font(16, bold = true)
+        g.drawString("A  inner presence", heroX + 24, heroY + 36)
+        g.drawString("B  mid interaction", heroX + 24, heroY + 62)
+        g.color = Color(VanGlassTokens.ACCENT_AMBER, true)
+        g.drawString("C  outer semantic envelope", heroX + 24, heroY + 88)
+        g.color = Color(TEXT_DIM, true)
+        g.font = font(14)
+        g.drawString("Working · Zone C at ${"%.2f".format(working.envelopeRadiusScale)}× mid radius", heroX + 24, heroY + heroSize - 12)
+
+        val budgets = listOf(
+            VanEffectBudget.FULL to "FULL",
+            VanEffectBudget.REDUCED to "REDUCED",
+            VanEffectBudget.REDUCED_MOTION to "REDUCED_MOTION",
+            VanEffectBudget.LOW to "LOW",
+            VanEffectBudget.STATIC to "STATIC",
+        )
+        budgets.forEachIndexed { i, (budget, label) ->
+            val x = heroX + heroSize + 48 + i * 210
+            val spec = VanAuraSpecs.forState(VanDurableState.WARNING, budget)
+            GlassPainter.drawAura(g, spec, x + 90f, 280f, 62f, budget, PHASE)
+            drawCharacter(g, VanDurableState.WARNING, x + 30f, 190f, 120f, 120f, VanPresentation.COMPACT, !budget.allowMotion)
+            g.color = Color(TEXT, true)
+            g.font = font(16, bold = true)
+            centerString(g, label, x + 90, 430)
+            g.color = Color(TEXT_DIM, true)
+            g.font = font(13)
+            centerString(g, "C×${spec.segmentsForBudget(budget).size}", x + 90, 452)
+        }
+
+        g.color = Color(TEXT, true)
+        g.font = font(20, bold = true)
+        g.drawString("Semantic examples — colour lives in Zone C", margin, 520)
+        val semanticStates = listOf(
+            VanDurableState.WAITING_FOR_OWNER,
+            VanDurableState.WARNING,
+            VanDurableState.ERROR,
+            VanDurableState.URGENT,
+            VanDurableState.SUCCESS,
+        )
+        semanticStates.forEachIndexed { i, state ->
+            val x = margin + i * 310
+            val spec = VanAuraSpecs.forState(state)
+            GlassPainter.drawAura(g, spec, x + 120f, 690f, 78f, VanEffectBudget.FULL, PHASE)
+            drawCharacter(g, state, x + 40f, 560f, 160f, 160f, VanPresentation.COMPACT)
+            g.color = Color(spec.semanticColor ?: VanGlassTokens.ACCENT_CYAN, true)
+            g.font = font(15, bold = true)
+            centerString(g, state.name.lowercase().replace('_', ' '), x + 120, 790)
+        }
+
+        g.color = Color(TEXT, true)
+        g.font = font(20, bold = true)
+        g.drawString("Trade-state capability — architecture reserved in Zone C, not a live trading product", margin, 840)
+        val trades = listOf(
+            "watching" to "watching",
+            "setup" to "setup forming",
+            "entry" to "entry",
+            "in_trade" to "in trade",
+            "profit" to "profit",
+            "risk" to "risk rising",
+            "stop" to "stop / invalid",
+            "urgent" to "intervention",
+        )
+        trades.forEachIndexed { i, (kind, label) ->
+            val x = margin + i * 196
+            val spec = VanAuraSpecs.tradePreview(kind)
+            GlassPainter.drawAura(g, spec, x + 80f, 1000f, 54f, VanEffectBudget.FULL, PHASE)
+            drawCharacter(g, VanDurableState.IDLE, x + 20f, 900f, 120f, 120f, VanPresentation.COMPACT)
+            g.color = Color(spec.semanticColor ?: VanGlassTokens.ACCENT_CYAN, true)
+            g.font = font(13, bold = true)
+            centerString(g, label, x + 80, 1128)
+        }
+
+        g.dispose()
+        return image
+    }
+
     // ------------------------------------------------------------------ shell composition
 
-    /** Frameless rest: VAN and the living field, no glass. */
+    /** Frameless rest: VAN and the living field, no glass. Zone C is sized to the hit, not the body. */
     private fun drawRestingShell(
         g: Graphics2D,
         x: Int,
@@ -655,21 +770,24 @@ object VanPreviewSheets {
         budget: VanEffectBudget = VanEffectBudget.FULL,
     ) {
         val spec = VanAuraSpecs.forState(state, budget)
+        val hit = dp(OverlayTheme.RESTING_HIT_DP)
         val charSize = dp(CHARACTER_DP)
+        val charX = x + (hit - charSize) / 2f
+        val charY = y + (hit - charSize) / 2f
         GlassPainter.drawAura(
             g,
             spec,
-            (x + charSize / 2).toFloat(),
-            y + charSize * 0.48f,
-            charSize * 0.42f,
+            x + hit / 2f,
+            y + hit * 0.48f,
+            charSize * 0.50f,
             budget,
             PHASE,
         )
         drawCharacter(
             g,
             state,
-            x.toFloat(),
-            y.toFloat(),
+            charX,
+            charY,
             charSize.toFloat(),
             charSize.toFloat(),
             VanPresentation.COMPACT,
@@ -744,7 +862,7 @@ object VanPreviewSheets {
             spec,
             charX + charSize * 0.48f,
             y + charSize * 0.48f,
-            charSize * 0.40f,
+            charSize * 0.48f,
             budget,
             PHASE,
         )
@@ -841,7 +959,7 @@ object VanPreviewSheets {
             spec,
             (charX + charSize / 2).toFloat(),
             (y + charSize * 0.48f),
-            charSize * 0.40f,
+            charSize * 0.48f,
             phase = PHASE,
         )
         drawCharacter(
@@ -905,15 +1023,15 @@ object VanPreviewSheets {
         style: VanGlassStyle,
     ) {
         if (condenseGlass) {
-            val chipH = size * 0.28f
-            val chipY = y + size - chipH * 0.55f
+            val chipH = size * 0.16f
+            val chipY = y + size - chipH * 0.42f
             val chip = RoundRectangle2D.Float(
-                x + size * 0.08f,
+                x + size * 0.18f,
                 chipY,
-                size * 0.84f,
+                size * 0.64f,
                 chipH,
-                size * 0.12f,
-                size * 0.12f,
+                size * 0.10f,
+                size * 0.10f,
             )
             GlassPainter.dropShadow(g, chip, style, DENSITY)
             GlassPainter.fillGlass(g, style, chip, DENSITY)
@@ -923,11 +1041,11 @@ object VanPreviewSheets {
             spec,
             x + size / 2f,
             y + size * 0.48f,
-            size * 0.38f,
+            size * 0.34f,
             budget,
             PHASE,
         )
-        val inset = size * 0.06f
+        val inset = size * 0.18f
         drawCharacter(
             g,
             state,

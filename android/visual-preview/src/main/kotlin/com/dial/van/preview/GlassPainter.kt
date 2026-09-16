@@ -222,10 +222,8 @@ object GlassPainter {
     }
 
     /**
-     * Living refractive field: deformable outer field, core radiance, crescent ground,
-     * filaments, broken orbital arcs. A full ring is forbidden.
-     *
-     * [phase] is fixed by the caller so regenerated previews stay comparable.
+     * Three-zone aura (Rev 2.2): inner identity, mid interaction, outer semantic envelope.
+     * A full ring is forbidden. Semantic colour lives only in Zone C.
      */
     fun drawAura(
         g: Graphics2D,
@@ -236,48 +234,49 @@ object GlassPainter {
         budget: VanEffectBudget = VanEffectBudget.FULL,
         phase: Float = 0.18f,
     ) {
-        if (spec.intensity <= 0.01f || radius <= 1f) return
+        if (radius <= 1f) return
         val cyan = VanGlassTokens.ACCENT_CYAN
-        val fieldColor = spec.alertAccent ?: cyan
-        val breath = if (budget.allowMotion) 0.94f + 0.06f * sin(phase * 2f * PI.toFloat()) else 1f
-        val rx = radius * (1.05f + 0.10f * spec.intensity) * budget.bloomScale * breath
-        val ry = radius * (0.82f + 0.08f * spec.intensity) * budget.bloomScale * breath
+        val midRadius = radius * VanAuraSpec.MID_RADIUS_SCALE
 
-        // Offset lobes only when the field is energetic enough not to read as a plate (Gate A).
-        if (spec.intensity > 0.32f) {
-            radial(
-                g,
-                cx - rx * 0.22f,
-                cy + ry * 0.06f,
-                rx * 0.55f,
-                argb(fieldColor, 0.05f + 0.08f * spec.intensity),
-            )
-            radial(
-                g,
-                cx + rx * 0.28f,
-                cy - ry * 0.10f,
-                rx * 0.42f,
-                argb(fieldColor, 0.04f + 0.06f * spec.intensity),
-            )
-        }
+        drawZoneA(g, spec, cx, cy, radius, cyan)
+        drawZoneB(g, spec, cx, cy, radius, midRadius, cyan, budget, phase)
+        drawZoneC(g, spec, cx, cy, midRadius, budget)
+    }
 
+    private fun drawZoneA(g: Graphics2D, spec: VanAuraSpec, cx: Float, cy: Float, radius: Float, cyan: Int) {
+        val alpha = (0.12f + 0.08f * spec.intensity).coerceIn(0.08f, 0.20f)
+        val r = radius * 0.52f * VanAuraSpec.INNER_RADIUS_SCALE
+        radial(g, cx - radius * 0.10f, cy + radius * 0.04f, r, argb(cyan, alpha * 0.85f))
+        radial(g, cx + radius * 0.14f, cy - radius * 0.08f, r * 0.72f, argb(cyan, alpha * 0.55f))
         if (spec.groundGlow > 0.01f) {
             val crescent = Path2D.Float()
-            val gy = cy + radius * 1.05f
-            val gw = radius * 1.15f
+            val gy = cy + radius * 0.95f
+            val gw = radius * 0.85f
             crescent.moveTo(cx - gw, gy)
-            crescent.quadTo(cx.toDouble(), (gy + radius * 0.22f).toDouble(), (cx + gw).toDouble(), gy.toDouble())
-            crescent.quadTo(cx.toDouble(), (gy - radius * 0.08f).toDouble(), (cx - gw).toDouble(), gy.toDouble())
+            crescent.quadTo(cx.toDouble(), (gy + radius * 0.16f).toDouble(), (cx + gw).toDouble(), gy.toDouble())
+            crescent.quadTo(cx.toDouble(), (gy - radius * 0.06f).toDouble(), (cx - gw).toDouble(), gy.toDouble())
             crescent.closePath()
             val previous = g.clip
             g.clip(crescent)
-            radial(g, cx, gy, gw, argb(fieldColor, 0.32f * spec.groundGlow))
+            radial(g, cx, gy, gw, argb(cyan, 0.28f * spec.groundGlow))
             g.clip = previous
         }
+    }
 
+    private fun drawZoneB(
+        g: Graphics2D,
+        spec: VanAuraSpec,
+        cx: Float,
+        cy: Float,
+        radius: Float,
+        midRadius: Float,
+        cyan: Int,
+        budget: VanEffectBudget,
+        phase: Float,
+    ) {
         if (spec.filamentCount > 0 && spec.arcActivity > 0.01f) {
             val count = spec.filamentCount.coerceIn(1, 5)
-            g.stroke = BasicStroke(max(radius * 0.062f, 2.0f), BasicStroke.CAP_ROUND, BasicStroke.JOIN_ROUND)
+            g.stroke = BasicStroke(max(radius * 0.050f, 1.8f), BasicStroke.CAP_ROUND, BasicStroke.JOIN_ROUND)
             repeat(count) { index ->
                 val seed = index * 1.17f + spec.intensity
                 val life = (phase + seed * 0.13f) % 1f
@@ -289,8 +288,8 @@ object GlassPainter {
                     0.82f
                 }
                 val start = 0.55f + index * 0.9f
-                val inner = radius * 0.72f
-                val outer = radius * (1.28f + 0.22f * ((seed * 3f) % 1f))
+                val inner = radius * 0.62f
+                val outer = midRadius * (0.95f + 0.12f * ((seed * 3f) % 1f))
                 val path = Path2D.Float()
                 path.moveTo(cx + cos(start) * inner, cy + sin(start) * inner)
                 val bend = start + 0.55f + 0.25f * sin(seed)
@@ -300,7 +299,7 @@ object GlassPainter {
                     cx + cos(start + 0.35f) * outer,
                     cy + sin(start + 0.22f) * outer,
                 )
-                g.color = argb(fieldColor, (0.42f + 0.40f * spec.arcActivity).coerceIn(0.42f, 0.88f) * fade)
+                g.color = argb(cyan, (0.42f + 0.40f * spec.arcActivity).coerceIn(0.42f, 0.88f) * fade)
                 g.draw(path)
             }
         }
@@ -308,9 +307,9 @@ object GlassPainter {
         if (spec.arcActivity > 0.02f) {
             val arcs = (1 + (spec.arcActivity * 3f).toInt()).coerceAtMost(3)
             var remaining = VanAuraSpec.MAX_TOTAL_ARC_DEG
-            val ovalRx = radius * 1.12f
-            val ovalRy = radius * 1.28f
-            g.stroke = BasicStroke(max(radius * 0.048f, 1.8f), BasicStroke.CAP_ROUND, BasicStroke.JOIN_ROUND)
+            val ovalRx = midRadius
+            val ovalRy = midRadius * (0.82f + spec.fieldAsymmetry)
+            g.stroke = BasicStroke(max(radius * 0.038f, 1.5f), BasicStroke.CAP_ROUND, BasicStroke.JOIN_ROUND)
             repeat(arcs) { index ->
                 if (remaining <= 18f) return@repeat
                 val seed = index * 0.41f
@@ -323,8 +322,8 @@ object GlassPainter {
                     .coerceAtMost(remaining)
                 remaining -= sweep
                 val start = (index * 118f + 18f + if (budget.allowMotion) phase * 40f else 0f) % 360f
-                val inset = index * radius * 0.05f
-                g.color = argb(fieldColor, (0.38f + 0.32f * spec.arcActivity).coerceIn(0.38f, 0.78f) * fade)
+                val inset = index * radius * 0.04f
+                g.color = argb(cyan, (0.32f + 0.28f * spec.arcActivity).coerceIn(0.32f, 0.68f) * fade)
                 g.draw(
                     Arc2D.Float(
                         cx - ovalRx + inset,
@@ -346,17 +345,10 @@ object GlassPainter {
                 val life = (phase * 1.7f + seed) % 1f
                 if (life > 0.22f) return@repeat
                 val angle = (seed * 2f * PI.toFloat() * 3.1f) % (2f * PI.toFloat())
-                val distance = radius * (1.0f + 0.18f * ((seed * 7f) % 1f))
-                val sr = max(radius * 0.022f, 1.1f)
-                g.color = argb(fieldColor, 0.70f * (1f - life / 0.22f))
-                g.fill(
-                    Ellipse2D.Float(
-                        cx + cos(angle) * distance - sr,
-                        cy + sin(angle) * distance - sr,
-                        sr * 2f,
-                        sr * 2f,
-                    ),
-                )
+                val distance = midRadius * (0.82f + 0.12f * ((seed * 7f) % 1f))
+                val sr = max(radius * 0.018f, 1.1f)
+                g.color = argb(cyan, 0.70f * (1f - life / 0.22f))
+                g.fill(Ellipse2D.Float(cx + cos(angle) * distance - sr, cy + sin(angle) * distance - sr, sr * 2f, sr * 2f))
             }
         }
 
@@ -368,15 +360,51 @@ object GlassPainter {
             }
             val path = Path2D.Float()
             path.moveTo(cx + radius * 0.28f, cy - radius * 0.08f)
-            path.quadTo(
-                cx + radius * 0.70f,
-                cy - radius * 0.42f,
-                cx + radius * 0.92f,
-                cy - radius * 0.22f,
-            )
-            g.color = argb(fieldColor, alpha * spec.orbLink)
-            g.stroke = BasicStroke(max(radius * 0.036f, 1.4f), BasicStroke.CAP_ROUND, BasicStroke.JOIN_ROUND)
+            path.quadTo(cx + radius * 0.70f, cy - radius * 0.42f, cx + radius * 0.92f, cy - radius * 0.22f)
+            g.color = argb(cyan, alpha * spec.orbLink)
+            g.stroke = BasicStroke(max(radius * 0.032f, 1.3f), BasicStroke.CAP_ROUND, BasicStroke.JOIN_ROUND)
             g.draw(path)
+        }
+    }
+
+    private fun drawZoneC(
+        g: Graphics2D,
+        spec: VanAuraSpec,
+        cx: Float,
+        cy: Float,
+        midRadius: Float,
+        budget: VanEffectBudget,
+    ) {
+        val segments = spec.segmentsForBudget(budget)
+        if (segments.isEmpty()) return
+        val scale = spec.envelopeRadiusScale.coerceIn(VanAuraSpec.MIN_ENVELOPE_SCALE, VanAuraSpec.MAX_ENVELOPE_SCALE)
+        val rx = midRadius * scale * (1.05f + spec.fieldAsymmetry * 0.35f)
+        val ry = midRadius * scale * 0.86f
+        val color = spec.semanticColor ?: VanGlassTokens.ACCENT_CYAN
+        val alpha = spec.envelopeAlpha.coerceIn(0.05f, 0.22f)
+        val stroke = max(midRadius * 0.048f, 1.8f)
+        g.stroke = BasicStroke(stroke, BasicStroke.CAP_ROUND, BasicStroke.JOIN_ROUND)
+        segments.forEach { segment ->
+            g.color = argb(color, alpha)
+            g.draw(
+                Arc2D.Float(
+                    cx - rx,
+                    cy - ry,
+                    rx * 2f,
+                    ry * 2f,
+                    -segment.startDeg,
+                    -segment.sweepDeg.coerceAtMost(VanAuraSpec.MAX_ARC_SWEEP_DEG),
+                    Arc2D.OPEN,
+                ),
+            )
+            if (segment.node || spec.envelopeSegments.size == 1) {
+                val rad = Math.toRadians(segment.startDeg.toDouble())
+                val nr = max(stroke * 0.9f, 2.0f)
+                val nx = cx + cos(rad).toFloat() * rx
+                val ny = cy + sin(rad).toFloat() * ry
+                g.color = argb(color, (alpha + 0.12f).coerceAtMost(0.32f))
+                g.fill(Ellipse2D.Float(nx - nr, ny - nr, nr * 2f, nr * 2f))
+            }
         }
     }
 

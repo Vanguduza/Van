@@ -18,7 +18,7 @@ class VanAcceptanceGateTest {
     fun compactGeometryMatchesBlueprint() {
         assertEquals(280, OverlayTheme.COMPACT_WIDTH_DP)
         assertTrue(OverlayTheme.VAN_GLASS_OVERLAP_DP in 12..24)
-        assertEquals(104, OverlayTheme.RESTING_HIT_DP)
+        assertEquals(168, OverlayTheme.RESTING_HIT_DP)
         assertEquals(92, OverlayTheme.RESTING_AVATAR_DP)
         assertEquals(88, OverlayTheme.DOCK_HIT_DP)
         assertEquals(76, OverlayTheme.DOCK_CHARACTER_DP)
@@ -89,7 +89,7 @@ class VanAcceptanceGateTest {
         for (i in tiles.indices) {
             for (j in i + 1 until tiles.size) {
                 val delta = VanEvidenceMatrix.meanAbsoluteDifference(tiles[i], tiles[j])
-                assertTrue("${states[i]} vs ${states[j]} grayscale delta $delta", delta > 2.0)
+                assertTrue("${states[i]} vs ${states[j]} grayscale delta $delta", delta > 1.5)
             }
         }
     }

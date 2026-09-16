@@ -1,14 +1,28 @@
-aura_v2:
-  revision: "2.1"
-  thesis: "VAN is a solid expressive character surrounded by a living refractive field. When interface space is needed, that field condenses into glass."
+aura_v2_2:
+  revision: "2.2"
+  thesis: "VAN is a solid expressive character surrounded by a three-zone field: inner identity, mid interaction, outer semantic envelope."
   full_ring_forbidden: true
   max_single_arc_degrees: 110
   max_total_arc_degrees: 220
-  filaments:
-    min_count: 2
-    max_count: 5
+  inner_presence:
+    radius_scale: 1.00
+    colour_mode: dial_identity
+  mid_interaction:
+    radius_scale: 1.12
+    filament_count_full: [2, 5]
+    colour_mode: activity_weighted_identity
+  outer_semantic:
+    radius_scale_min: 1.35
+    radius_scale_max: 1.70
+    segment_count_full: [1, 4]
+    max_total_coverage_degrees: 180
+    full_ring_forbidden: true
+    allow_local_nodes: true
+    colour_mode: semantic
+    minimum_gap_from_mid_field_dp: 8
+    preserved_on: [FULL, REDUCED, REDUCED_MOTION, LOW, STATIC]
   overlay:
-    resting_hit_dp: 104
+    resting_hit_dp: 168
     resting_avatar_dp: 92
     compact_width_dp: 280
     van_glass_overlap_dp: 20

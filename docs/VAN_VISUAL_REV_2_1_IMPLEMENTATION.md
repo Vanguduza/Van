@@ -1,10 +1,10 @@
 # VAN Visual Rev 2.1 — Implementation notes
 
-Authority: `docs/VAN_VISUAL_PRODUCTION_SYSTEM_REV_2_1_MASTER_BLUEPRINT.md` and `docs/CURSOR_PROMPT_VAN_VISUAL_CORRECTIONS_REV_2_1.md`. Token file: `visual-authority/van-visual-authority-v2.yaml`.
+Authority: `docs/VAN_VISUAL_PRODUCTION_SYSTEM_REV_2_1_MASTER_BLUEPRINT.md`, `docs/VAN_VISUAL_PRODUCTION_SYSTEM_REV_2_2_ADDENDUM_AURA_SEMANTIC_ENVELOPE.md`, and `docs/CURSOR_PATCH_PROMPT_VAN_AURA_SEMANTIC_ENVELOPE.md`. Token file: `visual-authority/van-visual-authority-v2.yaml` (revision 2.2).
 
 ## Thesis shipped
 
-VAN is a solid expressive character surrounded by a living refractive field. When interface space is needed, that field condenses into glass.
+VAN is a solid expressive character surrounded by a three-zone field. Zone A is identity cyan on the body. Zone B is mid interaction. Zone C is the outer semantic envelope. When interface space is needed, the field condenses into glass.
 
 ## What changed
 
@@ -12,7 +12,7 @@ VAN is a solid expressive character surrounded by a living refractive field. Whe
 |---|---|---|
 | Aura | Radial ellipse + accent ring | Offset-lobe field, filaments 2–5, broken arcs (max 110° / 220° total). Full ring forbidden. |
 | Glass | Fill + uniform glow stroke | Tint, shaping gradient, grain, inner highlight, faint structural edge, selective specular, aura contamination |
-| Overlay rest | Permanent compact capsule | `OverlayMode.RESTING` — frameless VAN + aura, 104dp hit / 92dp character |
+| Overlay rest | Permanent compact capsule | `OverlayMode.RESTING` — frameless VAN + aura, 168dp hit / 92dp character so Zone C has air |
 | Compact / expanded | Card beside VAN | 280dp glass condenses under VAN with 20dp overlap; Ask / Projects / Tasks / Decisions; no rail |
 | Dock | 5dp cyan bar | 88dp hit / 76dp character crescent edge slice, face/visor on-screen |
 | Command Centre | Generic placeholder cards | Hero → state/mission → attention → decisions → tasks → projects → connections → solid A4 |
@@ -51,6 +51,7 @@ Written by `:visual-preview:renderVanPreviews` into `artifacts/release/preview/`
 - `van_action_board.png`
 - `van_command_centre.png`
 - `van_glass_tokens.png`
+- `van_aura_topology.png`
 - `rev21/` named shots, `grayscale-state-clarity.png`, `busy-backdrop-resilience.png`, `manifest.json`
 
 ## Residual gaps (EXTERNAL)

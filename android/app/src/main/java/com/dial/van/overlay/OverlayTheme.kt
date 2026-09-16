@@ -17,8 +17,11 @@ object OverlayTheme {
     const val EXPANDED_AVATAR_DP: Int = 64
     const val COMPACT_PADDING_DP: Int = 4
 
-    /** Resting hit target and character visual height (§11.1). */
-    const val RESTING_HIT_DP: Int = 104
+    /**
+     * Resting hit target and character visual height.
+     * Hit must clear Zone C at 1.70× mid radius around a 92dp body (~168dp).
+     */
+    const val RESTING_HIT_DP: Int = 168
     const val RESTING_AVATAR_DP: Int = 92
 
     /** Compact actions panel (§11.3). */
