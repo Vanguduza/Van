@@ -8,7 +8,7 @@ plugins {
  * The Android module cannot host this: AGP compiles against `android.jar` as the platform, so
  * `java.awt` is unavailable there. Rather than duplicating the character geometry, this module
  * compiles the *same* pure-Kotlin source files out of `app/src/main/java` and rasterizes them
- * with Java2D. Any drift in `VanScene` shows up in the previews immediately.
+ * with Java2D. Any drift in `VanScene` or the living-field geometry shows up in previews.
  */
 private val sharedVisualSources = listOf(
     "visual/VanDrawOp.kt",
@@ -16,11 +16,13 @@ private val sharedVisualSources = listOf(
     "visual/VanStatusPalette.kt",
     "visual/VanVisualRuntime.kt",
     "visual/VanPresence.kt",
+    "visual/VanPresenceFrame.kt",
     "visual/RiveContract.kt",
-    // DIAL Glass / aura design system — the preview must render the shipped tokens, not a copy.
     "visual/VanGlassTokens.kt",
     "visual/VanAuraSpec.kt",
     "visual/VanEffectBudget.kt",
+    "visual/VanWindFieldMotion.kt",
+    "visual/VanFieldGeometry.kt",
     "visual/VanArtPose.kt",
     "degraded/DegradedMode.kt",
     "overlay/OverlayTheme.kt",
@@ -53,7 +55,6 @@ tasks.register<JavaExec>("renderVanPreviews") {
     description = "Renders the owner-facing Van character previews into artifacts/release/preview."
     mainClass.set("com.dial.van.preview.VanPreviewMainKt")
     classpath = sourceSets["main"].runtimeClasspath
-    // Headless so the same command works over SSH and in CI.
     systemProperty("java.awt.headless", "true")
 }
 
