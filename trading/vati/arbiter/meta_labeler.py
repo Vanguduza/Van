@@ -15,7 +15,8 @@ from enum import Enum
 from vati.intelligence.events import EventWindowState
 from vati.intelligence.market_state import MarketState
 from vati.intelligence.regimes import TransitionPhase, VolRegime
-from vati.strategies.base import Signal
+from vati.strategies.base import Signal, StrategyContext
+from vati.zse.currency import CurrencyRegime
 
 ONE, ZERO = Decimal(1), Decimal(0)
 
@@ -46,20 +47,32 @@ class MetaLabeler:
         self.capsule_health = capsule_health or {}
         self.t2 = t2_assessment or {}
 
-    def score(self, state: MarketState, signal: Signal, cost_multiple: Decimal) -> MetaVerdict:
+    def score(self, state: MarketState, signal: Signal, cost_multiple: Decimal, ctx: StrategyContext | None = None) -> MetaVerdict:
         reasons: list[str] = []
         f, r = state.features, state.regime
-        regime_m = r.risk_multiplier()
-        vol_m = ONE
-        if r.vol is VolRegime.HIGH:
-            vol_m = Decimal("0.7")
-        elif r.vol is VolRegime.EXTREME:
-            vol_m = Decimal("0.25")
-        liq_m = ONE
-        if f.spread_percentile > Decimal("0.8"):
-            liq_m = Decimal("0.5"); reasons.append("spread in top quintile")
-        elif f.spread_percentile > Decimal("0.6"):
-            liq_m = Decimal("0.75")
+        if ctx is not None and ctx.zse is not None:
+            # Illiquid end-of-day equity: FX microstructure penalties do not apply.
+            # Liquidity from thin-trading days; regime from the ZiG premium regime.
+            z = ctx.zse
+            vol_m = ONE
+            liq_m = Decimal(z.trading_days_of_20) / Decimal(20)
+            if liq_m < Decimal("0.5"):
+                reasons.append(f"thin counter: traded {z.trading_days_of_20}/20 sessions")
+            regime_m = {CurrencyRegime.ANCHORED: ONE, CurrencyRegime.ELEVATED: Decimal("0.8"), CurrencyRegime.STRESSED: Decimal("0.5"), CurrencyRegime.DISORDERLY: ZERO}[z.currency_regime]
+            if regime_m == ZERO:
+                return MetaVerdict(MetaLabel.SKIP, ZERO, vol_m, liq_m, ONE, regime_m, tuple(reasons + ["currency regime DISORDERLY"]))
+        else:
+            regime_m = r.risk_multiplier()
+            vol_m = ONE
+            if r.vol is VolRegime.HIGH:
+                vol_m = Decimal("0.7")
+            elif r.vol is VolRegime.EXTREME:
+                vol_m = Decimal("0.25")
+            liq_m = ONE
+            if f.spread_percentile > Decimal("0.8"):
+                liq_m = Decimal("0.5"); reasons.append("spread in top quintile")
+            elif f.spread_percentile > Decimal("0.6"):
+                liq_m = Decimal("0.75")
         ev_m = ONE
         if state.event_window is EventWindowState.QUIET:
             ev_m = Decimal("0.5"); reasons.append("quiet window after Tier-1 release")
@@ -79,7 +92,7 @@ class MetaLabeler:
             return MetaVerdict(MetaLabel.WAIT, ZERO, vol_m, liq_m, ev_m, regime_m, tuple(reasons + [f"model disagreement {dis} > 0.6"]), model_disagreement=dis)
         if dis > Decimal("0.35"):
             conf_m = min(conf_m, Decimal("0.5")); reasons.append(f"model disagreement {dis}")
-        if r.phase is TransitionPhase.TRANSITION:
+        if r.phase is TransitionPhase.TRANSITION and not (ctx is not None and ctx.zse is not None):
             return MetaVerdict(MetaLabel.WAIT, ZERO, vol_m, liq_m, ev_m, regime_m, tuple(reasons + ["regime in TRANSITION"]), model_disagreement=dis)
         if cost_multiple < Decimal("2"):
             return MetaVerdict(MetaLabel.SKIP, ZERO, vol_m, liq_m, ev_m, regime_m, tuple(reasons + [f"edge {cost_multiple:.2f}× cost"]), model_disagreement=dis)

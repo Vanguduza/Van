@@ -71,10 +71,13 @@ def zscore(values: Sequence[Decimal], period: int) -> Optional[Decimal]:
 
 
 def percentile_rank(values: Sequence[Decimal], x: Decimal) -> Decimal:
+    """Mid-rank percentile: strictly-below plus half of ties, so a constant
+    series ranks 0.5 rather than 1.0."""
     if not values:
         return Decimal("0.5")
-    below = sum(1 for v in values if v <= x)
-    return Decimal(below) / Decimal(len(values))
+    below = sum(1 for v in values if v < x)
+    ties = sum(1 for v in values if v == x)
+    return (Decimal(below) + Decimal(ties) / Decimal(2)) / Decimal(len(values))
 
 
 @dataclass(frozen=True)

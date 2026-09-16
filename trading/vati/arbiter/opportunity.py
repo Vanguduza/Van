@@ -56,7 +56,7 @@ class OpportunityEngine:
             row.update({"signal": sig.rationale, "horizon": hv.horizon, "cost_multiple": str(hv.cost_multiple)})
             if hv.horizon is None:
                 row["reasons"] = [hv.reason]; cands.append(row); continue
-            mv = self.m.score(state, sig, hv.cost_multiple)
+            mv = self.m.score(state, sig, hv.cost_multiple, ctx)
             row.update({"label": mv.label.value, "meta_reasons": list(mv.reasons)})
             cands.append(row)
             if mv.label in (MetaLabel.TRADE, MetaLabel.REDUCE_SIZE):
