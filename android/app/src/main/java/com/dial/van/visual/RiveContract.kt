@@ -93,7 +93,14 @@ object RiveBindingContract {
 }
 
 data class VanVisualState(
+    /** Character pose/activity state sent to Rive. */
     val durableState: VanDurableState = VanDurableState.IDLE,
+    /**
+     * Optional outer-field semantic truth. This is intentionally renderer-only and is not sent to
+     * the current Rive contract. It lets VAN listen/speak while an independent health condition
+     * such as Google-unverified remains visibly DEGRADED in Zone C.
+     */
+    val semanticState: VanDurableState? = null,
     val speaking: Boolean = false,
     val listening: Boolean = false,
     val attentionX: Float = 0f,
@@ -103,6 +110,8 @@ data class VanVisualState(
     val viseme: Int = 0,
     val actionCode: Int = 0,
 ) {
+    val resolvedSemanticState: VanDurableState get() = semanticState ?: durableState
+
     fun toRiveInputs(): Map<VanInput, Any> = mapOf(
         VanInput.STATE to durableState.code,
         VanInput.SPEAKING to speaking,
