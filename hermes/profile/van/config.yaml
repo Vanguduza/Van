@@ -93,6 +93,27 @@ google_runtime:
 mcp:
   readme: mcp/README.md
 
+# Subordinate MCP servers Hermes may spawn. The trading commander is a typed
+# command surface on van-trading-core (never a shell); the block is spliced into
+# ~/.hermes/config.yaml by deploy/van-trading-core/hermes/register-commander-mcp.sh.
+mcp_servers:
+  van_trading_commander:
+    command: node
+    args: ["trading/commander/mcp_stdio.mjs"]
+    cwd: "<van-repo-root>"
+    env:
+      VAN_COMMANDER_URL: "https://10.0.1.233:9133"
+      VAN_COMMANDER_TOKEN_FILE: "~/.van/commander.token"
+    enabled: true
+    connect_timeout: 20
+    timeout: 120
+    supports_parallel_tool_calls: false
+    tools:
+      include: [status, ledger_status, services, restart_service, tail_log, run_backtest, vekl_resolve, halt, doctor, accounts]
+      resources: false
+      prompts: false
+    authority: SUBORDINATE_CAPABILITY_NOT_AUTHORITY
+
 registered_projects:
   - van
   - dial

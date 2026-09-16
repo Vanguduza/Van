@@ -10,6 +10,14 @@ Hermes profile **`van`** is the sole agent runtime. Credentials are brokered thr
 | `filesystem` (scoped) | Registered project files | Path allowlist + Project Truth + grants |
 | `git` (scoped) | SHA/evidence/diff/write | Read default; writes require grant |
 
+## Trading (van-trading-core)
+
+| Server | Purpose | Credential model |
+|---|---|---|
+| `van_trading_commander` | Hermes subordinate on the trading VM: status, ledger, services, bounded log tail, bounded backtest, trading-VEKL resolve, owner-signed halt, doctor, accounts | HMAC-signed requests with a 0600 token file; no shell, no file writes, no order path |
+
+The commander reaches the dedicated trading VEKL (`trading/vekl`, loopback :9134 on the VM) and the VATI ledger. It cannot place, size, modify or cancel an order; halting is the only trading effect and it needs an owner signature reference (A4). Registration is spliced into `~/.hermes/config.yaml` by `deploy/van-trading-core/hermes/register-commander-mcp.sh`.
+
 ## Google Workspace — gateway mediated
 
 | Capability | Purpose | Gate |

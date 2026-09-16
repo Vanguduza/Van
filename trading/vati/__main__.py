@@ -5,6 +5,10 @@
   python -m vati ledger-status --ledger vati.sqlite
   python -m vati stack-lock
   python -m vati zse-facts
+  python -m vati accounts list|add|remove|verify --registry accounts.json [...]
+  python -m vati lake import-csv|list|dukascopy --root lake ...
+  python -m vati calendar --file calendar.json
+  python -m vati serve --config service.json [--once]
 
 CSV bars: symbol,start_ms,end_ms,open,high,low,close,volume,ticks,avg_spread
 session.json: SessionConfig fields + contract dict + mandate dict + capsule ids."""
@@ -95,6 +99,67 @@ def cmd_zse_facts(a: argparse.Namespace) -> int:
     return 0
 
 
+def cmd_accounts(a: argparse.Namespace) -> int:
+    from vati.accounts import Account, AccountRegistry, CredentialRef
+    reg = AccountRegistry(a.registry)
+    if a.op == "list":
+        print(json.dumps(reg.public(), indent=2)); return 0
+    if a.op == "remove":
+        reg.remove(a.alias); print(f"removed {a.alias}"); return 0
+    if a.op == "add":
+        acc = Account(alias=a.alias, broker=a.broker, mode=a.mode, currency=a.currency, label=a.label or a.alias, server=a.server or "", login=a.login or "", bridge_url=a.bridge_url or "",
+                      credential_ref=CredentialRef(env_var=a.env_var, secrets_file=a.secrets_file), demo=not a.live, mandate_ref=a.mandate_ref or "")
+        reg.add(acc); print(json.dumps(acc.public(), indent=2)); return 0
+    if a.op == "verify":
+        acc = reg.get(a.alias)
+        try:
+            secrets = reg.credentials(a.alias)
+            keys = sorted(secrets)
+        except Exception as exc:  # noqa: BLE001
+            print(json.dumps({"alias": a.alias, "credentials": "MISSING", "reason": str(exc)})); return 1
+        print(json.dumps({"alias": a.alias, "safety_identity": acc.safety_identity, "credentials": "PRESENT", "keys": keys}))   # key names only, never values
+        return 0
+    return 2
+
+
+def cmd_lake(a: argparse.Namespace) -> int:
+    from vati.market_data.feeds import BarLake, bars_from_csv
+    lake = BarLake(a.root)
+    if a.op == "list":
+        print(json.dumps({sym: {tf: [s.__dict__ for s in lake.manifest(sym, tf)] for tf in tfs} for sym, tfs in lake.symbols().items()}, indent=2)); return 0
+    if a.op == "import-csv":
+        s = lake.write(bars_from_csv(a.file), symbol=a.symbol, timeframe=a.timeframe, source=f"csv:{Path(a.file).name}", provenance=a.provenance)
+        print(json.dumps(s.__dict__, indent=2)); return 0
+    if a.op == "dukascopy":
+        from datetime import datetime, timezone
+        from vati.market_data.feeds import DukascopyDownloader
+        from vati.market_data.feeds.lake import TIMEFRAMES_MS
+        dl = DukascopyDownloader()
+        start = datetime.fromisoformat(a.start).replace(tzinfo=timezone.utc); end = datetime.fromisoformat(a.end).replace(tzinfo=timezone.utc)
+        bars = dl.bars(a.symbol, start, end, interval_ms=TIMEFRAMES_MS[a.timeframe])
+        if not bars:
+            print("no bars downloaded"); return 1
+        s = lake.write(bars, symbol=a.symbol, timeframe=a.timeframe, source="dukascopy", provenance="HISTORICAL_VENDOR")
+        print(json.dumps({**s.__dict__, "hours_fetched": len(dl.fetched)}, indent=2)); return 0
+    return 2
+
+
+def cmd_calendar(a: argparse.Namespace) -> int:
+    import time as _t
+    from vati.intelligence.calendar_feed import calendar_report, load_calendar
+    print(json.dumps(calendar_report(load_calendar(a.file), now_ms=int(_t.time() * 1000)), indent=2)); return 0
+
+
+def cmd_serve(a: argparse.Namespace) -> int:
+    from vati.app.service import ServiceConfig, SessionService, lake_bar_source
+    from vati.market_data.feeds import BarLake
+    cfg = ServiceConfig.load(a.config)
+    svc = SessionService(cfg, lake_bar_source(BarLake(cfg.lake_root), cfg.symbol, cfg.timeframe)).build()
+    if a.once:
+        svc.start(); print(json.dumps({"decision": svc.step_once(), "cycles": svc.cycles})); return 0
+    return svc.run_forever()
+
+
 def main(argv=None) -> int:
     p = argparse.ArgumentParser(prog="vati")
     sub = p.add_subparsers(dest="cmd", required=True)
@@ -103,6 +168,14 @@ def main(argv=None) -> int:
     s = sub.add_parser("ledger-status"); s.add_argument("--ledger", required=True); s.set_defaults(fn=cmd_status)
     sub.add_parser("stack-lock").set_defaults(fn=cmd_stack_lock)
     sub.add_parser("zse-facts").set_defaults(fn=cmd_zse_facts)
+    ac = sub.add_parser("accounts"); ac.add_argument("op", choices=["list", "add", "remove", "verify"]); ac.add_argument("--registry", default="accounts.json"); ac.add_argument("--alias")
+    ac.add_argument("--broker", choices=["MT5", "DERIV", "PAPER", "ZSE_OWNER_TICKET"]); ac.add_argument("--mode", default="DEMO_TRADER"); ac.add_argument("--currency", default="USD"); ac.add_argument("--label")
+    ac.add_argument("--server"); ac.add_argument("--login"); ac.add_argument("--bridge-url", dest="bridge_url"); ac.add_argument("--env-var", dest="env_var"); ac.add_argument("--secrets-file", dest="secrets_file")
+    ac.add_argument("--live", action="store_true"); ac.add_argument("--mandate-ref", dest="mandate_ref"); ac.set_defaults(fn=cmd_accounts)
+    lk = sub.add_parser("lake"); lk.add_argument("op", choices=["list", "import-csv", "dukascopy"]); lk.add_argument("--root", default="lake"); lk.add_argument("--symbol"); lk.add_argument("--timeframe", default="H1")
+    lk.add_argument("--file"); lk.add_argument("--provenance", default="HISTORICAL_VENDOR"); lk.add_argument("--start"); lk.add_argument("--end"); lk.set_defaults(fn=cmd_lake)
+    cal = sub.add_parser("calendar"); cal.add_argument("--file", required=True); cal.set_defaults(fn=cmd_calendar)
+    sv = sub.add_parser("serve"); sv.add_argument("--config", required=True); sv.add_argument("--once", action="store_true"); sv.set_defaults(fn=cmd_serve)
     a = p.parse_args(argv)
     return a.fn(a)
 

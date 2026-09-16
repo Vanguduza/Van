@@ -32,6 +32,8 @@ class EventKind(str, Enum):
     CAPSULE_STATE = "CAPSULE_STATE"
     OWNER_TICKET = "OWNER_TICKET"
     SESSION = "SESSION"
+    ACCOUNT_SNAPSHOT = "ACCOUNT_SNAPSHOT"   # equity/balance/margin as the venue reported them (portfolio truth for the owner surface)
+    MARKET_DATA_HEALTH = "MARKET_DATA_HEALTH"
 
 
 @dataclass(frozen=True)
