@@ -62,6 +62,7 @@ import com.dial.van.visual.VanCaptions
 import com.dial.van.visual.VanEmbodiment
 import com.dial.van.visual.VanGlassSurface
 import com.dial.van.visual.VanGlassTokens
+import com.dial.van.visual.VanLiveVisualState
 import com.dial.van.visual.VanPresence
 import com.dial.van.visual.VanPresentation
 import com.dial.van.visual.VanStatusPalette
@@ -183,8 +184,11 @@ class FloatingOverlayService : Service(), LifecycleOwner, SavedStateRegistryOwne
     private fun OverlayContent() {
         val app = application as VanApplication
         val degraded = app.degradedModeStore.snapshot()
-        val cue = VanPresence.cue(degraded)
-        val visualState = VanPresence.visualState(cue)
+        // Snapshot-backed live state is read in this composition so voice/task changes recompose
+        // the complete shell: aura, character, caption, glass style and semantic accent stay in sync.
+        val liveState = VanLiveVisualState.current
+        val cue = VanPresence.cue(degraded, live = liveState)
+        val visualState = VanPresence.visualState(cue, liveState)
         val palette = VanStatusPalette.forState(cue.durableState)
         val budget = rememberVanEffectBudget()
         val glass = VanGlassTokens.forState(
