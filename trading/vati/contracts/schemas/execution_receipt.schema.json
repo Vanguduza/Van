@@ -2,32 +2,130 @@
   "$schema": "https://json-schema.org/draft/2020-12/schema",
   "$id": "https://van.dial/vati/execution_receipt.schema.json",
   "title": "ExecutionReceipt",
-  "description": "Venue truth for one order lifecycle (Rev 2 §41). Feeds reconciliation, TCA and the TradeExperienceArtifact. Times are kept as three separate clocks (Rev 2 §4.3).",
+  "description": "Venue truth for one order lifecycle (Rev 2 \u00a741). Feeds reconciliation, TCA and the TradeExperienceArtifact. Times are kept as three separate clocks (Rev 2 \u00a74.3).",
   "type": "object",
   "additionalProperties": false,
-  "required": ["trade_intent_id", "decision_hash", "venue", "status", "filled_qty", "average_fill", "decision_price", "arrival_price", "submitted_price", "protective_stop_confirmed", "broker_time_unix_ms", "received_time_unix_ms", "receipt_hash"],
+  "required": [
+    "trade_intent_id",
+    "decision_hash",
+    "venue",
+    "status",
+    "filled_qty",
+    "average_fill",
+    "decision_price",
+    "arrival_price",
+    "submitted_price",
+    "protective_stop_confirmed",
+    "broker_time_unix_ms",
+    "received_time_unix_ms",
+    "receipt_hash"
+  ],
   "properties": {
-    "trade_intent_id": {"type": "string"},
-    "decision_hash": {"type": "string", "description": "Must equal the RiskDecision.decision_hash the router acted on."},
-    "venue": {"type": "string", "enum": ["mt5", "deriv", "ctrader"]},
-    "broker_order_id": {"type": "string"},
-    "broker_position_id": {"type": "string"},
-    "broker_deal_ids": {"type": "array", "items": {"type": "string"}},
-    "status": {"type": "string", "enum": ["ACCEPTED", "PARTIAL", "FILLED", "REJECTED", "CANCELLED", "EXPIRED", "UNKNOWN"]},
-    "reject_reason": {"type": "string"},
-    "filled_qty": {"type": "string"},
-    "average_fill": {"type": ["string", "null"]},
-    "decision_price": {"type": "string"},
-    "arrival_price": {"type": "string"},
-    "submitted_price": {"type": "string"},
-    "spread_at_submit": {"type": "string"},
-    "slippage": {"type": "string"},
-    "delay_ms": {"type": "integer"},
-    "fees": {"type": "string"},
-    "protective_stop_confirmed": {"type": "boolean", "description": "False means the position is unprotected: the router must flatten immediately and trip STOP_REJECTED."},
-    "protective_stop_price": {"type": ["string", "null"]},
-    "broker_time_unix_ms": {"type": "integer"},
-    "received_time_unix_ms": {"type": "integer"},
-    "receipt_hash": {"type": "string", "pattern": "^[a-f0-9]{64}$"}
+    "trade_intent_id": {
+      "type": "string"
+    },
+    "decision_hash": {
+      "type": "string",
+      "description": "Must equal the RiskDecision.decision_hash the router acted on."
+    },
+    "venue": {
+      "type": "string",
+      "enum": [
+        "mt5",
+        "deriv",
+        "ctrader",
+        "zse",
+        "vfex"
+      ]
+    },
+    "broker_order_id": {
+      "type": "string"
+    },
+    "broker_position_id": {
+      "type": "string"
+    },
+    "broker_deal_ids": {
+      "type": "array",
+      "items": {
+        "type": "string"
+      }
+    },
+    "status": {
+      "type": "string",
+      "enum": [
+        "ACCEPTED",
+        "PARTIAL",
+        "FILLED",
+        "REJECTED",
+        "CANCELLED",
+        "EXPIRED",
+        "UNKNOWN",
+        "OWNER_EXECUTED",
+        "BROKER_CONFIRMED"
+      ]
+    },
+    "reject_reason": {
+      "type": "string"
+    },
+    "filled_qty": {
+      "type": "string"
+    },
+    "average_fill": {
+      "type": [
+        "string",
+        "null"
+      ]
+    },
+    "decision_price": {
+      "type": "string"
+    },
+    "arrival_price": {
+      "type": "string"
+    },
+    "submitted_price": {
+      "type": "string"
+    },
+    "spread_at_submit": {
+      "type": "string"
+    },
+    "slippage": {
+      "type": "string"
+    },
+    "delay_ms": {
+      "type": "integer"
+    },
+    "fees": {
+      "type": "string"
+    },
+    "protective_stop_confirmed": {
+      "type": "boolean",
+      "description": "False means the position is unprotected: the router must flatten immediately and trip STOP_REJECTED."
+    },
+    "protective_stop_price": {
+      "type": [
+        "string",
+        "null"
+      ]
+    },
+    "broker_time_unix_ms": {
+      "type": "integer"
+    },
+    "received_time_unix_ms": {
+      "type": "integer"
+    },
+    "receipt_hash": {
+      "type": "string",
+      "pattern": "^[a-f0-9]{64}$"
+    },
+    "execution_channel": {
+      "type": "string",
+      "enum": [
+        "ADAPTER",
+        "OWNER_TICKET",
+        "BROKER_INSTRUCTION",
+        "DMA"
+      ],
+      "description": "ZSE/VFEX: OWNER_TICKET (owner enters the ticket on ZSE Direct/C-Trade), BROKER_INSTRUCTION (owner-approved instruction to a licensed stockbroker), DMA (institutional FIX via broker OMS)."
+    }
   }
 }

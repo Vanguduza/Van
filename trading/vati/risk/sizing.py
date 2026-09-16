@@ -172,3 +172,53 @@ def size_stake_contract(
     if stake > risk_capital:
         raise SizingRejected("RISK_EXCEEDS_ALLOWED", f"{stake} > {risk_capital}")
     return SizingResult(stake, stake, stake / equity, raw_stake, product, LossModel.FULL_STAKE)
+
+
+def size_illiquid_equity(
+    *,
+    equity: Decimal,
+    allowed_risk_pct: Decimal,
+    entry: Decimal,
+    stop: Decimal,
+    contract: SymbolContract,
+    multipliers: Multipliers,
+) -> SizingResult:
+    """Size a long position on an order-driven exchange without stop orders.
+
+    Per-share maximum loss = entry × (stop_fraction + liquidity_haircut).
+    Shares are rounded DOWN to the board lot and capped at
+    max_adv_participation × adv_20d (also rounded down to the board lot).
+    Below one board lot, or ADV unknown, is NO_TRADE.
+    """
+    if contract.loss_model is not LossModel.ILLIQUID_EQUITY:
+        raise SizingRejected("LOSS_MODEL_MISMATCH", "contract is not an illiquid-equity contract")
+    if equity <= ZERO:
+        raise SizingRejected("EQUITY_NON_POSITIVE", f"equity={equity}")
+    if allowed_risk_pct <= ZERO:
+        raise SizingRejected("RISK_NON_POSITIVE", f"allowed_risk_pct={allowed_risk_pct}")
+    if entry <= ZERO or not stop < entry:
+        raise SizingRejected("STOP_WRONG_SIDE", "illiquid equity is long-only; stop must be below entry")
+    if contract.board_lot <= ZERO:
+        raise SizingRejected("VENUE_STEP_INVALID", "board_lot must be > 0")
+    if contract.adv_20d <= ZERO:
+        raise SizingRejected("ADV_UNKNOWN", "average daily volume unknown; cannot bound participation")
+    if contract.liquidity_haircut < ZERO or contract.max_adv_participation <= ZERO:
+        raise SizingRejected("VENUE_VALUE_INVALID", "haircut/participation invalid")
+
+    stop_fraction = (entry - stop) / entry
+    if stop_fraction < contract.min_stop_distance / entry if contract.min_stop_distance > ZERO else False:
+        raise SizingRejected("STOP_TOO_TIGHT", "stop inside venue minimum")
+    per_share_risk = entry * (stop_fraction + contract.liquidity_haircut)
+    risk_capital = equity * allowed_risk_pct
+    raw_shares = risk_capital / per_share_risk
+    product = multipliers.product()
+    shares = _round_down(raw_shares * product, contract.board_lot)
+    adv_cap = _round_down(contract.adv_20d * contract.max_adv_participation, contract.board_lot)
+    if shares > adv_cap:
+        shares = adv_cap
+    if shares < contract.board_lot or shares <= ZERO:
+        raise SizingRejected("SIZE_BELOW_VENUE_MIN", f"{shares} shares < one board lot ({contract.board_lot}) or ADV cap {adv_cap}")
+    risk_amount = shares * per_share_risk
+    if risk_amount > risk_capital:
+        raise SizingRejected("RISK_EXCEEDS_ALLOWED", f"{risk_amount} > {risk_capital}")
+    return SizingResult(shares, risk_amount, risk_amount / equity, raw_shares, product, LossModel.ILLIQUID_EQUITY)

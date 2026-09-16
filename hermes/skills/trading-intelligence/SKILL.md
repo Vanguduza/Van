@@ -84,6 +84,24 @@ What would change it: ...
 Activation: vtil-act-...   Data freshness: all < 2s
 ```
 
+## Zimbabwe Stock Exchange / VFEX (VATI-ZSE)
+
+- The ZSE is thin, order-driven, long-only, has no retail API and (by current
+  design assumption) no venue stop orders. Horizons are SWING/POSITION only;
+  every ticket uses the `ILLIQUID_EQUITY` loss model (stop + liquidity haircut,
+  board-lot rounding, ADV participation cap) and must clear the round-trip cost
+  (about 7% for a short hold on ZSE; lower on VFEX and for holds ≥ 270 days).
+- Always report a ZSE position in USD at BOTH the official and parallel ZiG rate
+  and name the currency regime (ANCHORED / ELEVATED / STRESSED / DISORDERLY).
+  DISORDERLY means no new ZSE risk.
+- Execution is by owner ticket (ZSE Direct / C-Trade) or an owner-approved
+  instruction to a licensed stockbroker (A4 each). Hermes prepares the ticket
+  after Risk Authority approval; it never operates the apps and never emails a
+  broker on its own.
+- Facts in `trading/vati/zse/market.py` marked CONFLICTING or UNVERIFIED
+  (session times, foreign-ownership limits, CGWT rate, stop-order support)
+  must be confirmed with the broker at onboarding before a live ZSE mandate.
+
 ## Trade review
 
 After every closed trade classify GOOD WIN / GOOD LOSS / BAD WIN / BAD LOSS /

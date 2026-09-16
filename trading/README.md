@@ -1,6 +1,6 @@
 # VAN Adaptive Trading Intelligence (VATI) — `trading/`
 
-Canonical authority: `docs/VAN_ADAPTIVE_TRADING_INTELLIGENCE_TECHNICAL_BLUEPRINT_REV2.md`.
+Canonical authority: `docs/VAN_ADAPTIVE_TRADING_INTELLIGENCE_TECHNICAL_BLUEPRINT_REV2.md` (core) and `docs/VAN_ADAPTIVE_TRADING_INTELLIGENCE_TECHNICAL_BLUEPRINT_REV3.md` (research-grounded decisions and the ZSE module).
 
 This tree holds VATI code. Phase 0 (Canon & Risk Boundary) is delivered here;
 later phases add packages under the layout in Rev 2 §49.
@@ -12,6 +12,7 @@ later phases add packages under the layout in Rev 2 §49.
 | `examples/` | 0 | Example mandate (unsigned placeholder signature; not a live mandate). |
 | `tests/` | 0 | Unit tests, fail-closed path tests and seeded property fuzz (P1–P8). |
 | `architecture/stack_lock.json` | 0 (Rev 2.1) | Machine-checked tool-per-layer lock with adoption phase, latency tier, licence class and observed version. |
+| `vati/zse/` | ZSE-F001 (seed now) | Zimbabwe Stock Exchange / VFEX module: market facts with verification state, cost schedule, ZiG currency regime, liquidity model (Rev 3 Part D). |
 | `vtil/` | 2 (seed now) | VTIL registry in DIAL VEKL schema plus the probe that runs DIAL's unmodified resolver against it. |
 
 ## Invariants the code enforces

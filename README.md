@@ -50,7 +50,7 @@ Canonical specification: `docs/GOOGLE_INTELLIGENCE_MESH.md`.
 | `registries/` | Projects and Google capability catalogs |
 | `tests/` | Cross-cutting contract and acceptance tests |
 | `tools/` | Bootstrap, Google setup/certification, release and certification scripts |
-| `trading/` | VAN Adaptive Trading Intelligence (VATI): deterministic Risk Authority, contracts and tests — see `docs/VAN_ADAPTIVE_TRADING_INTELLIGENCE_TECHNICAL_BLUEPRINT_REV2.md` |
+| `trading/` | VAN Adaptive Trading Intelligence (VATI): deterministic Risk Authority, contracts and tests — see `docs/VAN_ADAPTIVE_TRADING_INTELLIGENCE_TECHNICAL_BLUEPRINT_REV2.md` and `..._REV3.md` (incl. Zimbabwe Stock Exchange module) |
 
 ## Quick start
 

@@ -27,7 +27,7 @@ from vati.risk.contracts import (
 from vati.risk.governor import drawdown_verdict
 from vati.risk.heat import currency_leg_exposure, open_stop_risk
 from vati.risk.mandate import AuthorizationMode, PlatformCeilings, TradingMandate
-from vati.risk.sizing import Multipliers, SizingRejected, size_stake_contract, size_stop_contract
+from vati.risk.sizing import Multipliers, SizingRejected, size_illiquid_equity, size_stake_contract, size_stop_contract
 
 ZERO = Decimal("0")
 ONE = Decimal("1")
@@ -252,9 +252,27 @@ class RiskAuthority:
         if dd.tier_index >= 0:
             constraints.append(f"DRAWDOWN_TIER_{dd.tier_index}")
 
+        # 10b. Edge must clear round-trip cost (Rev 3: cost is the first edge)
+        if intent.expected_gross_move_pct is not None and contract.round_trip_cost_pct > ZERO:
+            if intent.expected_gross_move_pct < contract.round_trip_cost_pct * Decimal("2"):
+                return rej("EDGE_BELOW_COST", f"expected move {intent.expected_gross_move_pct} < 2 × round-trip cost {contract.round_trip_cost_pct}")
+
         # 11. Sizing
         try:
-            if contract.loss_model is LossModel.FULL_STAKE:
+            if contract.loss_model is LossModel.ILLIQUID_EQUITY:
+                if intent.stop is None:
+                    return rej("STOP_REQUIRED", "illiquid equity requires a software stop level")
+                if intent.direction is not Direction.LONG:
+                    return rej("SYMBOL_TRADE_MODE", "illiquid equity is long-only (no short selling on ZSE/VFEX)")
+                sized = size_illiquid_equity(
+                    equity=snapshot.equity,
+                    allowed_risk_pct=allowed_risk,
+                    entry=intent.entry,
+                    stop=intent.stop,
+                    contract=contract,
+                    multipliers=mult,
+                )
+            elif contract.loss_model is LossModel.FULL_STAKE:
                 sized = size_stake_contract(
                     equity=snapshot.equity,
                     allowed_risk_pct=allowed_risk,
@@ -281,6 +299,10 @@ class RiskAuthority:
         if contract.loss_model is LossModel.FULL_STAKE:
             new_pos = OpenPosition(symbol, intent.direction, ZERO, ZERO, ZERO, contract.base_currency,
                                    contract.quote_currency, intent.strategy_id, True, LossModel.FULL_STAKE, sized.size)
+        elif contract.loss_model is LossModel.ILLIQUID_EQUITY:
+            new_pos = OpenPosition(symbol, intent.direction, sized.size, intent.entry - intent.stop,  # type: ignore[operator]
+                                   Decimal("1"), contract.base_currency, contract.quote_currency, intent.strategy_id,
+                                   False, LossModel.ILLIQUID_EQUITY, ZERO, intent.entry * contract.liquidity_haircut)
         else:
             new_pos = OpenPosition(symbol, intent.direction, sized.size, abs(intent.entry - intent.stop),  # type: ignore[arg-type]
                                    contract.value_per_price_unit_per_lot, contract.base_currency,

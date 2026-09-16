@@ -437,5 +437,239 @@
       "PROMOTE_STRATEGY"
     ],
     "selection_purpose": "COMMUNITY_NFP_SIGNAL"
+  },
+  {
+    "resource_id": "ref.zse.trading-procedures",
+    "name": "ZSE Trading Procedures and Investors Guide (sessions, order validity, board lots, fees)",
+    "source_id": "official.zse",
+    "resource_class": "OFFICIAL_DOC",
+    "authority": "ENGINEERING_GUIDANCE_ONLY",
+    "status": "REFERENCE_APPROVED",
+    "activation_mode": "REFERENCE_ONLY",
+    "locator": "https://www.zse.co.zw/wp-content/uploads/2019/03/ZSE-Trading-Procedures.pdf",
+    "task_classes": [
+      "ZSE_MARKET_RULES",
+      "ZSE_EXECUTION"
+    ],
+    "technologies": [],
+    "keywords": [
+      "zse",
+      "trading procedures",
+      "board lot",
+      "day order",
+      "gtc",
+      "pre-open",
+      "continuous trading",
+      "circuit breaker"
+    ],
+    "forbidden_effects": [
+      "PLACE_ORDER"
+    ],
+    "selection_purpose": "ZSE_RULEBOOK"
+  },
+  {
+    "resource_id": "ref.zse.currency-rebasing-2024",
+    "name": "ZSE ZiG trading and settlement adjustments (April 2024)",
+    "source_id": "official.zse",
+    "resource_class": "OFFICIAL_DOC",
+    "authority": "ENGINEERING_GUIDANCE_ONLY",
+    "status": "REFERENCE_APPROVED",
+    "activation_mode": "REFERENCE_ONLY",
+    "locator": "https://www.zse.co.zw/wp-content/uploads/2024/04/Public-Notice-Trading-adjustments-on-ZSE-April-2024.pdf",
+    "task_classes": [
+      "ZSE_MARKET_DATA",
+      "ZIG_CURRENCY_REGIME"
+    ],
+    "technologies": [],
+    "keywords": [
+      "zig",
+      "rebase",
+      "2498.7242",
+      "conversion",
+      "zwl"
+    ],
+    "forbidden_effects": [
+      "PLACE_ORDER"
+    ],
+    "selection_purpose": "ZSE_CURRENCY_HISTORY"
+  },
+  {
+    "resource_id": "ref.vfex.investor-faq",
+    "name": "VFEX FAQs and incentives (USD settlement, CGWT exemption, 5% dividend WHT)",
+    "source_id": "official.vfex",
+    "resource_class": "OFFICIAL_DOC",
+    "authority": "ENGINEERING_GUIDANCE_ONLY",
+    "status": "REFERENCE_APPROVED",
+    "activation_mode": "REFERENCE_ONLY",
+    "locator": "https://www.vfex.exchange/faqs-2/",
+    "task_classes": [
+      "VFEX_MARKET",
+      "ZSE_MARKET_RULES"
+    ],
+    "technologies": [],
+    "keywords": [
+      "vfex",
+      "victoria falls",
+      "usd",
+      "offshore settlement",
+      "incentive"
+    ],
+    "forbidden_effects": [
+      "PLACE_ORDER"
+    ],
+    "selection_purpose": "VFEX_RULEBOOK"
+  },
+  {
+    "resource_id": "ref.seczim.securities-dealers",
+    "name": "SECZ licensed securities dealers and regulatory rules",
+    "source_id": "official.seczim",
+    "resource_class": "OFFICIAL_DOC",
+    "authority": "ENGINEERING_GUIDANCE_ONLY",
+    "status": "REFERENCE_APPROVED",
+    "activation_mode": "REFERENCE_ONLY",
+    "locator": "https://seczim.co.zw/securities-dealers/",
+    "task_classes": [
+      "ZSE_COMPLIANCE",
+      "ZSE_EXECUTION"
+    ],
+    "technologies": [],
+    "keywords": [
+      "secz",
+      "stockbroker",
+      "securities dealer",
+      "insider trading",
+      "securities act"
+    ],
+    "forbidden_effects": [
+      "PLACE_ORDER"
+    ],
+    "selection_purpose": "ZSE_REGULATORY"
+  },
+  {
+    "resource_id": "ref.rbz.exchange-control",
+    "name": "RBZ foreign investment and exchange control framework",
+    "source_id": "official.rbz",
+    "resource_class": "OFFICIAL_DOC",
+    "authority": "ENGINEERING_GUIDANCE_ONLY",
+    "status": "REFERENCE_APPROVED",
+    "activation_mode": "REFERENCE_ONLY",
+    "locator": "https://www.rbz.co.zw/index.php/regulation-supervision/capital-flows-management/foreign-investment-trade-framework",
+    "task_classes": [
+      "ZSE_COMPLIANCE",
+      "ZIG_CURRENCY_REGIME"
+    ],
+    "technologies": [],
+    "keywords": [
+      "exchange control",
+      "repatriation",
+      "foreign ownership",
+      "interbank rate",
+      "rbz"
+    ],
+    "forbidden_effects": [
+      "PLACE_ORDER"
+    ],
+    "selection_purpose": "ZIM_EXCHANGE_CONTROL"
+  },
+  {
+    "resource_id": "ref.zimstat.cpi",
+    "name": "ZIMSTAT CPI and inflation releases",
+    "source_id": "official.zimstat",
+    "resource_class": "OFFICIAL_DOC",
+    "authority": "ENGINEERING_GUIDANCE_ONLY",
+    "status": "REFERENCE_APPROVED",
+    "activation_mode": "REFERENCE_ONLY",
+    "locator": "https://zimstat.co.zw/",
+    "task_classes": [
+      "ZIM_MACRO"
+    ],
+    "technologies": [],
+    "keywords": [
+      "zimstat",
+      "inflation",
+      "cpi",
+      "zig inflation"
+    ],
+    "forbidden_effects": [
+      "PLACE_ORDER"
+    ],
+    "selection_purpose": "ZIM_INFLATION_DATA"
+  },
+  {
+    "resource_id": "ref.data.zse-daily-pricesheets-archive",
+    "name": "ZSE daily price-sheet archive 2020-01-11 \u2192 2025-06-16 (CC0, 63 counters, OHLC/volume)",
+    "source_id": "vendor.african_markets_data",
+    "resource_class": "REPOSITORY",
+    "authority": "ENGINEERING_GUIDANCE_ONLY",
+    "status": "REFERENCE_APPROVED",
+    "activation_mode": "REFERENCE_ONLY",
+    "locator": "https://github.com/bevennyamande/Zimbabwe-Stock-Exchange-Daily-Pricesheets",
+    "task_classes": [
+      "ZSE_MARKET_DATA"
+    ],
+    "technologies": [],
+    "keywords": [
+      "price sheet",
+      "historical",
+      "csv",
+      "zse dataset"
+    ],
+    "forbidden_effects": [
+      "PLACE_ORDER"
+    ],
+    "selection_purpose": "ZSE_HISTORY_SEED"
+  },
+  {
+    "resource_id": "ref.data.african-markets-apis",
+    "name": "Mansa / mystocks.africa / africanfinancials market-data APIs and documents",
+    "source_id": "vendor.african_markets_data",
+    "resource_class": "OFFICIAL_DOC",
+    "authority": "ENGINEERING_GUIDANCE_ONLY",
+    "status": "REFERENCE_APPROVED",
+    "activation_mode": "REFERENCE_ONLY",
+    "locator": "https://mystocks.africa/african-stock-market-api",
+    "task_classes": [
+      "ZSE_MARKET_DATA",
+      "ZSE_FUNDAMENTALS"
+    ],
+    "technologies": [],
+    "keywords": [
+      "api",
+      "market data",
+      "africanfinancials",
+      "mansa",
+      "fundamentals",
+      "annual report"
+    ],
+    "forbidden_effects": [
+      "PLACE_ORDER"
+    ],
+    "selection_purpose": "ZSE_LIVE_DATA_VENDOR"
+  },
+  {
+    "resource_id": "community.zim.parallel-rate-trackers",
+    "name": "Parallel-rate trackers and market commentary (discovery only)",
+    "source_id": "community.zim_market_commentary",
+    "resource_class": "FORUM_QA",
+    "authority": "COMMUNITY_SIGNAL_ONLY",
+    "status": "DISCOVERY_APPROVED",
+    "activation_mode": "DISCOVERY_ONLY",
+    "locator": "vtil://community/zim-parallel-rate",
+    "task_classes": [
+      "ZIG_CURRENCY_REGIME"
+    ],
+    "technologies": [],
+    "keywords": [
+      "parallel rate",
+      "premium",
+      "zig",
+      "black market rate"
+    ],
+    "forbidden_effects": [
+      "PLACE_ORDER",
+      "CHANGE_MANDATE",
+      "PROMOTE_STRATEGY"
+    ],
+    "selection_purpose": "COMMUNITY_ZIG_SIGNAL"
   }
 ]

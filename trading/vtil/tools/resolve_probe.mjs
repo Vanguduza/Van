@@ -50,6 +50,10 @@ const GOLDEN = [
     affected_paths: ['trading/vati/intelligence/regimes/gold.py'],
     must_include: ['ref.fomc.statements', 'ref.cftc.cot', 'ref.cme.cvol', 'ref.cboe.vix-term-structure', 'ref.wgc.gold-demand'],
     must_exclude: ['ref.deriv.api', 'ref.metaquotes.mt5-python'] },
+  { case_id: 'VT-005', instruction: 'Study Delta Corporation on the Zimbabwe Stock Exchange: ZiG parallel premium regime, board lot sizing, T+3 settlement, transaction costs and exchange control for a swing position.',
+    affected_paths: ['trading/vati/zse/market.py'],
+    must_include: ['van.trading.rules.rev2-canon', 'ref.zse.trading-procedures', 'ref.rbz.exchange-control', 'ref.zse.currency-rebasing-2024'],
+    must_exclude: ['ref.metaquotes.mt5-python', 'ref.deriv.api', 'ref.bls.employment-situation'] },
 ];
 
 async function main() {

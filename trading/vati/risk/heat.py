@@ -26,6 +26,11 @@ def position_risk(position: OpenPosition) -> Decimal:
     """
     if position.loss_model is LossModel.FULL_STAKE:
         return position.stake
+    if position.loss_model is LossModel.ILLIQUID_EQUITY:
+        # No venue stop exists; the software stop plus the haircut IS the protection.
+        if position.stop_distance <= ZERO or position.liquidity_haircut_per_unit < ZERO:
+            return Decimal("Infinity")
+        return position.lots * (position.stop_distance + position.liquidity_haircut_per_unit) * position.value_per_price_unit_per_lot
     if not position.has_broker_side_stop:
         return Decimal("Infinity")
     return position.lots * position.stop_distance * position.value_per_price_unit_per_lot

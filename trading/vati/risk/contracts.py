@@ -23,6 +23,11 @@ class LossModel(str, Enum):
 
     STOP_DISTANCE = "STOP_DISTANCE"
     FULL_STAKE = "FULL_STAKE"
+    # ILLIQUID_EQUITY — order-driven exchange with no broker-side stop orders
+    # (Zimbabwe Stock Exchange / VFEX). Exit is software-managed; maximum loss is
+    # stop fraction PLUS a liquidity haircut for gap-through and impact, sized in
+    # board lots and capped by average daily volume participation (Rev 3 Part D).
+    ILLIQUID_EQUITY = "ILLIQUID_EQUITY"
 
 
 class StrategyState(str, Enum):
@@ -84,6 +89,12 @@ class SymbolContract:
     loss_model: LossModel = LossModel.STOP_DISTANCE
     max_stake: Optional[Decimal] = None  # FULL_STAKE contracts only
     is_synthetic: bool = False
+    # ILLIQUID_EQUITY only
+    board_lot: Decimal = Decimal("1")
+    adv_20d: Decimal = Decimal("0")  # average daily volume, shares, trailing 20 sessions
+    max_adv_participation: Decimal = Decimal("0.10")  # fraction of ADV one order may take
+    liquidity_haircut: Decimal = Decimal("0")  # fraction of price added to the stop as gap/impact loss
+    round_trip_cost_pct: Decimal = Decimal("0")  # all-in buy+sell cost as fraction of notional
 
     @property
     def value_per_price_unit_per_lot(self) -> Decimal:
@@ -112,6 +123,7 @@ class OpenPosition:
     has_broker_side_stop: bool = True
     loss_model: LossModel = LossModel.STOP_DISTANCE
     stake: Decimal = Decimal("0")
+    liquidity_haircut_per_unit: Decimal = Decimal("0")  # ILLIQUID_EQUITY: price × haircut, per share
 
 
 @dataclass(frozen=True)
@@ -134,6 +146,7 @@ class TradeIntent:
     is_event_certified: bool = False
     holds_over_weekend: bool = False
     stake: Optional[Decimal] = None  # FULL_STAKE contracts
+    expected_gross_move_pct: Optional[Decimal] = None  # optional: strategy's expected favourable move as fraction of entry
     # Bounded multipliers proposed by upstream intelligence; the authority clamps them.
     regime_multiplier: Decimal = Decimal("1")
     confidence_multiplier: Decimal = Decimal("1")

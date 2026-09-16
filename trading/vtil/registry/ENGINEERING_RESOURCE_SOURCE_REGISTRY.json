@@ -1,16 +1,531 @@
 [
-  {"source_id": "van.trading", "name": "VAN trading policy (Rev 2 canon, mandate, risk authority)", "trust_tier": "T0_VAN_TRADING_POLICY", "source_kind": "PROJECT_LOCAL", "domains": [], "repositories": ["Vanguduza/Van"], "retrieval_adapters": ["LOCAL_FILE"], "resource_classes": ["RULESET", "OFFICIAL_DOC"], "task_classes": ["*"], "sensitive_data_allowed": false, "executable_content_allowed": false, "freshness_ttl_hours": 0},
-  {"source_id": "official.bls", "name": "U.S. Bureau of Labor Statistics", "trust_tier": "T1_OFFICIAL", "source_kind": "STATISTICAL_AGENCY", "domains": ["bls.gov"], "repositories": [], "retrieval_adapters": ["HTTPS_READ_ONLY"], "resource_classes": ["OFFICIAL_DOC"], "task_classes": ["NFP_EVENT_TRADING", "MACRO_POINT_IN_TIME", "LABOUR_DATA"], "sensitive_data_allowed": false, "executable_content_allowed": false, "freshness_ttl_hours": 24},
-  {"source_id": "official.federalreserve", "name": "Federal Reserve Board and FOMC", "trust_tier": "T1_OFFICIAL", "source_kind": "CENTRAL_BANK", "domains": ["federalreserve.gov"], "repositories": [], "retrieval_adapters": ["HTTPS_READ_ONLY"], "resource_classes": ["OFFICIAL_DOC"], "task_classes": ["RATES_POLICY", "CENTRAL_BANK_LANGUAGE", "FOMC_EVENT_TRADING"], "sensitive_data_allowed": false, "executable_content_allowed": false, "freshness_ttl_hours": 24},
-  {"source_id": "official.fred_alfred", "name": "FRED / ALFRED (St. Louis Fed) vintages", "trust_tier": "T1_OFFICIAL", "source_kind": "STATISTICAL_DATABASE", "domains": ["fred.stlouisfed.org", "alfred.stlouisfed.org"], "repositories": [], "retrieval_adapters": ["HTTPS_READ_ONLY"], "resource_classes": ["OFFICIAL_DOC"], "task_classes": ["MACRO_POINT_IN_TIME", "RATES_POLICY", "BACKTEST_VALIDATION"], "sensitive_data_allowed": false, "executable_content_allowed": false, "freshness_ttl_hours": 24},
-  {"source_id": "official.cftc", "name": "CFTC Commitments of Traders", "trust_tier": "T1_OFFICIAL", "source_kind": "REGULATOR", "domains": ["cftc.gov"], "repositories": [], "retrieval_adapters": ["HTTPS_READ_ONLY"], "resource_classes": ["OFFICIAL_DOC"], "task_classes": ["POSITIONING_COT"], "sensitive_data_allowed": false, "executable_content_allowed": false, "freshness_ttl_hours": 168},
-  {"source_id": "official.cmegroup", "name": "CME Group (futures specs, CVOL, FedWatch)", "trust_tier": "T1_OFFICIAL", "source_kind": "EXCHANGE", "domains": ["cmegroup.com"], "repositories": [], "retrieval_adapters": ["HTTPS_READ_ONLY"], "resource_classes": ["OFFICIAL_DOC"], "task_classes": ["FUTURES_ORDERFLOW_REFERENCE", "IMPLIED_VOLATILITY", "RATES_POLICY", "GOLD_MACRO"], "sensitive_data_allowed": false, "executable_content_allowed": false, "freshness_ttl_hours": 24},
-  {"source_id": "official.cboe", "name": "Cboe (VIX family, term structure)", "trust_tier": "T1_OFFICIAL", "source_kind": "EXCHANGE", "domains": ["cboe.com"], "repositories": [], "retrieval_adapters": ["HTTPS_READ_ONLY"], "resource_classes": ["OFFICIAL_DOC"], "task_classes": ["IMPLIED_VOLATILITY", "INDEX_VOLATILITY_REGIME"], "sensitive_data_allowed": false, "executable_content_allowed": false, "freshness_ttl_hours": 24},
-  {"source_id": "official.worldgoldcouncil", "name": "World Gold Council", "trust_tier": "T1_OFFICIAL", "source_kind": "INDUSTRY_BODY", "domains": ["gold.org"], "repositories": [], "retrieval_adapters": ["HTTPS_READ_ONLY"], "resource_classes": ["OFFICIAL_DOC"], "task_classes": ["GOLD_MACRO"], "sensitive_data_allowed": false, "executable_content_allowed": false, "freshness_ttl_hours": 168},
-  {"source_id": "official.metaquotes", "name": "MetaQuotes MQL5 / MetaTrader 5 Python integration docs", "trust_tier": "T1_OFFICIAL", "source_kind": "OFFICIAL_DOCS_REPO", "domains": ["mql5.com", "metatrader5.com"], "repositories": [], "retrieval_adapters": ["HTTPS_READ_ONLY"], "resource_classes": ["OFFICIAL_DOC", "PACKAGE_REGISTRY"], "task_classes": ["MT5_EXECUTION", "SYMBOL_CONTRACT_SYNC", "RECONCILIATION"], "sensitive_data_allowed": false, "executable_content_allowed": false, "freshness_ttl_hours": 168},
-  {"source_id": "official.deriv", "name": "Deriv developer documentation and API", "trust_tier": "T1_OFFICIAL", "source_kind": "OFFICIAL_DOCS_REPO", "domains": ["developers.deriv.com", "api.deriv.com", "deriv.com"], "repositories": ["deriv-com/deriv-api"], "retrieval_adapters": ["HTTPS_READ_ONLY", "GITHUB_PUBLIC"], "resource_classes": ["OFFICIAL_DOC", "REPOSITORY"], "task_classes": ["DERIV_EXECUTION", "DERIV_SYNTHETIC", "RECONCILIATION"], "sensitive_data_allowed": false, "executable_content_allowed": false, "freshness_ttl_hours": 168},
-  {"source_id": "official.nautilustrader", "name": "NautilusTrader documentation and repository", "trust_tier": "T1_OFFICIAL", "source_kind": "OFFICIAL_DOCS_REPO", "domains": ["nautilustrader.io", "github.com"], "repositories": ["nautechsystems/nautilus_trader"], "retrieval_adapters": ["HTTPS_READ_ONLY", "GITHUB_PUBLIC"], "resource_classes": ["OFFICIAL_DOC", "REPOSITORY", "RELEASE_NOTES", "ISSUE_DISCUSSION"], "task_classes": ["TRADING_KERNEL", "BACKTEST_VALIDATION", "VENUE_ADAPTER", "MT5_EXECUTION", "DERIV_EXECUTION"], "sensitive_data_allowed": false, "executable_content_allowed": false, "freshness_ttl_hours": 168},
-  {"source_id": "official.quantconnect_lean", "name": "QuantConnect LEAN repository and docs", "trust_tier": "T1_OFFICIAL", "source_kind": "OFFICIAL_DOCS_REPO", "domains": ["quantconnect.com", "github.com"], "repositories": ["QuantConnect/Lean"], "retrieval_adapters": ["HTTPS_READ_ONLY", "GITHUB_PUBLIC"], "resource_classes": ["OFFICIAL_DOC", "REPOSITORY"], "task_classes": ["BACKTEST_VALIDATION", "INDEPENDENT_REPRODUCTION"], "sensitive_data_allowed": false, "executable_content_allowed": false, "freshness_ttl_hours": 168},
-  {"source_id": "official.databento", "name": "Databento documentation", "trust_tier": "T1_OFFICIAL", "source_kind": "OFFICIAL_DOCS_REPO", "domains": ["databento.com"], "repositories": ["databento/databento-python"], "retrieval_adapters": ["HTTPS_READ_ONLY", "GITHUB_PUBLIC"], "resource_classes": ["OFFICIAL_DOC", "REPOSITORY"], "task_classes": ["FUTURES_ORDERFLOW_REFERENCE", "MARKET_DATA_REFERENCE"], "sensitive_data_allowed": false, "executable_content_allowed": false, "freshness_ttl_hours": 168},
-  {"source_id": "community.retail_fx_forums", "name": "Retail FX forums and social commentary", "trust_tier": "T4_COMMUNITY_SIGNAL", "source_kind": "FORUM", "domains": [], "repositories": [], "retrieval_adapters": ["HTTPS_READ_ONLY"], "resource_classes": ["FORUM_QA"], "task_classes": ["NFP_EVENT_TRADING", "DERIV_SYNTHETIC"], "sensitive_data_allowed": false, "executable_content_allowed": false, "freshness_ttl_hours": 24}
+  {
+    "source_id": "van.trading",
+    "name": "VAN trading policy (Rev 2 canon, mandate, risk authority)",
+    "trust_tier": "T0_VAN_TRADING_POLICY",
+    "source_kind": "PROJECT_LOCAL",
+    "domains": [],
+    "repositories": [
+      "Vanguduza/Van"
+    ],
+    "retrieval_adapters": [
+      "LOCAL_FILE"
+    ],
+    "resource_classes": [
+      "RULESET",
+      "OFFICIAL_DOC"
+    ],
+    "task_classes": [
+      "*"
+    ],
+    "sensitive_data_allowed": false,
+    "executable_content_allowed": false,
+    "freshness_ttl_hours": 0
+  },
+  {
+    "source_id": "official.bls",
+    "name": "U.S. Bureau of Labor Statistics",
+    "trust_tier": "T1_OFFICIAL",
+    "source_kind": "STATISTICAL_AGENCY",
+    "domains": [
+      "bls.gov"
+    ],
+    "repositories": [],
+    "retrieval_adapters": [
+      "HTTPS_READ_ONLY"
+    ],
+    "resource_classes": [
+      "OFFICIAL_DOC"
+    ],
+    "task_classes": [
+      "NFP_EVENT_TRADING",
+      "MACRO_POINT_IN_TIME",
+      "LABOUR_DATA"
+    ],
+    "sensitive_data_allowed": false,
+    "executable_content_allowed": false,
+    "freshness_ttl_hours": 24
+  },
+  {
+    "source_id": "official.federalreserve",
+    "name": "Federal Reserve Board and FOMC",
+    "trust_tier": "T1_OFFICIAL",
+    "source_kind": "CENTRAL_BANK",
+    "domains": [
+      "federalreserve.gov"
+    ],
+    "repositories": [],
+    "retrieval_adapters": [
+      "HTTPS_READ_ONLY"
+    ],
+    "resource_classes": [
+      "OFFICIAL_DOC"
+    ],
+    "task_classes": [
+      "RATES_POLICY",
+      "CENTRAL_BANK_LANGUAGE",
+      "FOMC_EVENT_TRADING"
+    ],
+    "sensitive_data_allowed": false,
+    "executable_content_allowed": false,
+    "freshness_ttl_hours": 24
+  },
+  {
+    "source_id": "official.fred_alfred",
+    "name": "FRED / ALFRED (St. Louis Fed) vintages",
+    "trust_tier": "T1_OFFICIAL",
+    "source_kind": "STATISTICAL_DATABASE",
+    "domains": [
+      "fred.stlouisfed.org",
+      "alfred.stlouisfed.org"
+    ],
+    "repositories": [],
+    "retrieval_adapters": [
+      "HTTPS_READ_ONLY"
+    ],
+    "resource_classes": [
+      "OFFICIAL_DOC"
+    ],
+    "task_classes": [
+      "MACRO_POINT_IN_TIME",
+      "RATES_POLICY",
+      "BACKTEST_VALIDATION"
+    ],
+    "sensitive_data_allowed": false,
+    "executable_content_allowed": false,
+    "freshness_ttl_hours": 24
+  },
+  {
+    "source_id": "official.cftc",
+    "name": "CFTC Commitments of Traders",
+    "trust_tier": "T1_OFFICIAL",
+    "source_kind": "REGULATOR",
+    "domains": [
+      "cftc.gov"
+    ],
+    "repositories": [],
+    "retrieval_adapters": [
+      "HTTPS_READ_ONLY"
+    ],
+    "resource_classes": [
+      "OFFICIAL_DOC"
+    ],
+    "task_classes": [
+      "POSITIONING_COT"
+    ],
+    "sensitive_data_allowed": false,
+    "executable_content_allowed": false,
+    "freshness_ttl_hours": 168
+  },
+  {
+    "source_id": "official.cmegroup",
+    "name": "CME Group (futures specs, CVOL, FedWatch)",
+    "trust_tier": "T1_OFFICIAL",
+    "source_kind": "EXCHANGE",
+    "domains": [
+      "cmegroup.com"
+    ],
+    "repositories": [],
+    "retrieval_adapters": [
+      "HTTPS_READ_ONLY"
+    ],
+    "resource_classes": [
+      "OFFICIAL_DOC"
+    ],
+    "task_classes": [
+      "FUTURES_ORDERFLOW_REFERENCE",
+      "IMPLIED_VOLATILITY",
+      "RATES_POLICY",
+      "GOLD_MACRO"
+    ],
+    "sensitive_data_allowed": false,
+    "executable_content_allowed": false,
+    "freshness_ttl_hours": 24
+  },
+  {
+    "source_id": "official.cboe",
+    "name": "Cboe (VIX family, term structure)",
+    "trust_tier": "T1_OFFICIAL",
+    "source_kind": "EXCHANGE",
+    "domains": [
+      "cboe.com"
+    ],
+    "repositories": [],
+    "retrieval_adapters": [
+      "HTTPS_READ_ONLY"
+    ],
+    "resource_classes": [
+      "OFFICIAL_DOC"
+    ],
+    "task_classes": [
+      "IMPLIED_VOLATILITY",
+      "INDEX_VOLATILITY_REGIME"
+    ],
+    "sensitive_data_allowed": false,
+    "executable_content_allowed": false,
+    "freshness_ttl_hours": 24
+  },
+  {
+    "source_id": "official.worldgoldcouncil",
+    "name": "World Gold Council",
+    "trust_tier": "T1_OFFICIAL",
+    "source_kind": "INDUSTRY_BODY",
+    "domains": [
+      "gold.org"
+    ],
+    "repositories": [],
+    "retrieval_adapters": [
+      "HTTPS_READ_ONLY"
+    ],
+    "resource_classes": [
+      "OFFICIAL_DOC"
+    ],
+    "task_classes": [
+      "GOLD_MACRO"
+    ],
+    "sensitive_data_allowed": false,
+    "executable_content_allowed": false,
+    "freshness_ttl_hours": 168
+  },
+  {
+    "source_id": "official.metaquotes",
+    "name": "MetaQuotes MQL5 / MetaTrader 5 Python integration docs",
+    "trust_tier": "T1_OFFICIAL",
+    "source_kind": "OFFICIAL_DOCS_REPO",
+    "domains": [
+      "mql5.com",
+      "metatrader5.com"
+    ],
+    "repositories": [],
+    "retrieval_adapters": [
+      "HTTPS_READ_ONLY"
+    ],
+    "resource_classes": [
+      "OFFICIAL_DOC",
+      "PACKAGE_REGISTRY"
+    ],
+    "task_classes": [
+      "MT5_EXECUTION",
+      "SYMBOL_CONTRACT_SYNC",
+      "RECONCILIATION"
+    ],
+    "sensitive_data_allowed": false,
+    "executable_content_allowed": false,
+    "freshness_ttl_hours": 168
+  },
+  {
+    "source_id": "official.deriv",
+    "name": "Deriv developer documentation and API",
+    "trust_tier": "T1_OFFICIAL",
+    "source_kind": "OFFICIAL_DOCS_REPO",
+    "domains": [
+      "developers.deriv.com",
+      "api.deriv.com",
+      "deriv.com"
+    ],
+    "repositories": [
+      "deriv-com/deriv-api"
+    ],
+    "retrieval_adapters": [
+      "HTTPS_READ_ONLY",
+      "GITHUB_PUBLIC"
+    ],
+    "resource_classes": [
+      "OFFICIAL_DOC",
+      "REPOSITORY"
+    ],
+    "task_classes": [
+      "DERIV_EXECUTION",
+      "DERIV_SYNTHETIC",
+      "RECONCILIATION"
+    ],
+    "sensitive_data_allowed": false,
+    "executable_content_allowed": false,
+    "freshness_ttl_hours": 168
+  },
+  {
+    "source_id": "official.nautilustrader",
+    "name": "NautilusTrader documentation and repository",
+    "trust_tier": "T1_OFFICIAL",
+    "source_kind": "OFFICIAL_DOCS_REPO",
+    "domains": [
+      "nautilustrader.io",
+      "github.com"
+    ],
+    "repositories": [
+      "nautechsystems/nautilus_trader"
+    ],
+    "retrieval_adapters": [
+      "HTTPS_READ_ONLY",
+      "GITHUB_PUBLIC"
+    ],
+    "resource_classes": [
+      "OFFICIAL_DOC",
+      "REPOSITORY",
+      "RELEASE_NOTES",
+      "ISSUE_DISCUSSION"
+    ],
+    "task_classes": [
+      "TRADING_KERNEL",
+      "BACKTEST_VALIDATION",
+      "VENUE_ADAPTER",
+      "MT5_EXECUTION",
+      "DERIV_EXECUTION"
+    ],
+    "sensitive_data_allowed": false,
+    "executable_content_allowed": false,
+    "freshness_ttl_hours": 168
+  },
+  {
+    "source_id": "official.quantconnect_lean",
+    "name": "QuantConnect LEAN repository and docs",
+    "trust_tier": "T1_OFFICIAL",
+    "source_kind": "OFFICIAL_DOCS_REPO",
+    "domains": [
+      "quantconnect.com",
+      "github.com"
+    ],
+    "repositories": [
+      "QuantConnect/Lean"
+    ],
+    "retrieval_adapters": [
+      "HTTPS_READ_ONLY",
+      "GITHUB_PUBLIC"
+    ],
+    "resource_classes": [
+      "OFFICIAL_DOC",
+      "REPOSITORY"
+    ],
+    "task_classes": [
+      "BACKTEST_VALIDATION",
+      "INDEPENDENT_REPRODUCTION"
+    ],
+    "sensitive_data_allowed": false,
+    "executable_content_allowed": false,
+    "freshness_ttl_hours": 168
+  },
+  {
+    "source_id": "official.databento",
+    "name": "Databento documentation",
+    "trust_tier": "T1_OFFICIAL",
+    "source_kind": "OFFICIAL_DOCS_REPO",
+    "domains": [
+      "databento.com"
+    ],
+    "repositories": [
+      "databento/databento-python"
+    ],
+    "retrieval_adapters": [
+      "HTTPS_READ_ONLY",
+      "GITHUB_PUBLIC"
+    ],
+    "resource_classes": [
+      "OFFICIAL_DOC",
+      "REPOSITORY"
+    ],
+    "task_classes": [
+      "FUTURES_ORDERFLOW_REFERENCE",
+      "MARKET_DATA_REFERENCE"
+    ],
+    "sensitive_data_allowed": false,
+    "executable_content_allowed": false,
+    "freshness_ttl_hours": 168
+  },
+  {
+    "source_id": "community.retail_fx_forums",
+    "name": "Retail FX forums and social commentary",
+    "trust_tier": "T4_COMMUNITY_SIGNAL",
+    "source_kind": "FORUM",
+    "domains": [],
+    "repositories": [],
+    "retrieval_adapters": [
+      "HTTPS_READ_ONLY"
+    ],
+    "resource_classes": [
+      "FORUM_QA"
+    ],
+    "task_classes": [
+      "NFP_EVENT_TRADING",
+      "DERIV_SYNTHETIC"
+    ],
+    "sensitive_data_allowed": false,
+    "executable_content_allowed": false,
+    "freshness_ttl_hours": 24
+  },
+  {
+    "source_id": "official.zse",
+    "name": "Zimbabwe Stock Exchange (rules, procedures, price sheets, notices)",
+    "trust_tier": "T1_OFFICIAL",
+    "source_kind": "EXCHANGE",
+    "domains": [
+      "zse.co.zw",
+      "zsedirect.co.zw"
+    ],
+    "repositories": [],
+    "retrieval_adapters": [
+      "HTTPS_READ_ONLY"
+    ],
+    "resource_classes": [
+      "OFFICIAL_DOC"
+    ],
+    "task_classes": [
+      "ZSE_MARKET_RULES",
+      "ZSE_MARKET_DATA",
+      "ZSE_EXECUTION",
+      "ZSE_CORPORATE_ACTIONS"
+    ],
+    "sensitive_data_allowed": false,
+    "executable_content_allowed": false,
+    "freshness_ttl_hours": 24
+  },
+  {
+    "source_id": "official.vfex",
+    "name": "Victoria Falls Stock Exchange",
+    "trust_tier": "T1_OFFICIAL",
+    "source_kind": "EXCHANGE",
+    "domains": [
+      "vfex.exchange"
+    ],
+    "repositories": [],
+    "retrieval_adapters": [
+      "HTTPS_READ_ONLY"
+    ],
+    "resource_classes": [
+      "OFFICIAL_DOC"
+    ],
+    "task_classes": [
+      "ZSE_MARKET_RULES",
+      "VFEX_MARKET",
+      "ZSE_MARKET_DATA"
+    ],
+    "sensitive_data_allowed": false,
+    "executable_content_allowed": false,
+    "freshness_ttl_hours": 24
+  },
+  {
+    "source_id": "official.seczim",
+    "name": "Securities and Exchange Commission of Zimbabwe",
+    "trust_tier": "T1_OFFICIAL",
+    "source_kind": "REGULATOR",
+    "domains": [
+      "seczim.co.zw"
+    ],
+    "repositories": [],
+    "retrieval_adapters": [
+      "HTTPS_READ_ONLY"
+    ],
+    "resource_classes": [
+      "OFFICIAL_DOC"
+    ],
+    "task_classes": [
+      "ZSE_MARKET_RULES",
+      "ZSE_COMPLIANCE"
+    ],
+    "sensitive_data_allowed": false,
+    "executable_content_allowed": false,
+    "freshness_ttl_hours": 168
+  },
+  {
+    "source_id": "official.rbz",
+    "name": "Reserve Bank of Zimbabwe (exchange control, interbank ZiG rate, MPS)",
+    "trust_tier": "T1_OFFICIAL",
+    "source_kind": "CENTRAL_BANK",
+    "domains": [
+      "rbz.co.zw"
+    ],
+    "repositories": [],
+    "retrieval_adapters": [
+      "HTTPS_READ_ONLY"
+    ],
+    "resource_classes": [
+      "OFFICIAL_DOC"
+    ],
+    "task_classes": [
+      "ZIG_CURRENCY_REGIME",
+      "ZSE_COMPLIANCE",
+      "ZIM_MACRO"
+    ],
+    "sensitive_data_allowed": false,
+    "executable_content_allowed": false,
+    "freshness_ttl_hours": 24
+  },
+  {
+    "source_id": "official.zimstat",
+    "name": "Zimbabwe National Statistics Agency (CPI, ZiG/USD inflation)",
+    "trust_tier": "T1_OFFICIAL",
+    "source_kind": "STATISTICAL_AGENCY",
+    "domains": [
+      "zimstat.co.zw"
+    ],
+    "repositories": [],
+    "retrieval_adapters": [
+      "HTTPS_READ_ONLY"
+    ],
+    "resource_classes": [
+      "OFFICIAL_DOC"
+    ],
+    "task_classes": [
+      "ZIM_MACRO",
+      "ZIG_CURRENCY_REGIME"
+    ],
+    "sensitive_data_allowed": false,
+    "executable_content_allowed": false,
+    "freshness_ttl_hours": 168
+  },
+  {
+    "source_id": "vendor.african_markets_data",
+    "name": "African market-data aggregators (africanfinancials, Mansa/mystocks.africa APIs, MMC/EFE price sheets)",
+    "trust_tier": "T2_MAINTAINER_COMMUNITY",
+    "source_kind": "DATA_VENDOR",
+    "domains": [
+      "africanfinancials.com",
+      "mystocks.africa",
+      "mansamarkets.com",
+      "mmccapitalzim.com",
+      "efesecurities.com"
+    ],
+    "repositories": [
+      "bevennyamande/Zimbabwe-Stock-Exchange-Daily-Pricesheets"
+    ],
+    "retrieval_adapters": [
+      "HTTPS_READ_ONLY",
+      "GITHUB_PUBLIC"
+    ],
+    "resource_classes": [
+      "OFFICIAL_DOC",
+      "REPOSITORY"
+    ],
+    "task_classes": [
+      "ZSE_MARKET_DATA",
+      "ZSE_FUNDAMENTALS"
+    ],
+    "sensitive_data_allowed": false,
+    "executable_content_allowed": false,
+    "freshness_ttl_hours": 24
+  },
+  {
+    "source_id": "community.zim_market_commentary",
+    "name": "Zimbabwean market commentary and parallel-rate trackers (Equity Axis, ZimRate, press)",
+    "trust_tier": "T4_COMMUNITY_SIGNAL",
+    "source_kind": "PRESS_FORUM",
+    "domains": [
+      "equityaxis.net",
+      "zimrate.statotec.com",
+      "techzim.co.zw"
+    ],
+    "repositories": [],
+    "retrieval_adapters": [
+      "HTTPS_READ_ONLY"
+    ],
+    "resource_classes": [
+      "FORUM_QA"
+    ],
+    "task_classes": [
+      "ZIG_CURRENCY_REGIME",
+      "ZSE_MARKET_DATA"
+    ],
+    "sensitive_data_allowed": false,
+    "executable_content_allowed": false,
+    "freshness_ttl_hours": 24
+  }
 ]

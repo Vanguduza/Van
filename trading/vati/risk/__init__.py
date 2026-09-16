@@ -29,6 +29,7 @@ from vati.risk.sizing import (
     SizingRejected,
     SizingResult,
     clamp_multiplier,
+    size_illiquid_equity,
     size_stake_contract,
     size_stop_contract,
 )
@@ -65,6 +66,7 @@ __all__ = [
     "drawdown_verdict",
     "open_stop_risk",
     "position_risk",
+    "size_illiquid_equity",
     "size_stake_contract",
     "size_stop_contract",
 ]

@@ -2,42 +2,196 @@
   "$schema": "https://json-schema.org/draft/2020-12/schema",
   "$id": "https://van.dial/vati/trade_intent.schema.json",
   "title": "TradeIntent",
-  "description": "A proposal from the Opportunity Engine to the Risk Authority (Rev 2 §41). It carries no authority of its own; the Risk Authority may approve, reduce or reject it. It never reaches an execution adapter directly.",
+  "description": "A proposal from the Opportunity Engine to the Risk Authority (Rev 2 \u00a741). It carries no authority of its own; the Risk Authority may approve, reduce or reject it. It never reaches an execution adapter directly.",
   "type": "object",
   "additionalProperties": false,
-  "required": ["trade_intent_id", "idempotency_key", "account_alias", "venue", "symbol", "direction", "strategy_id", "strategy_version", "strategy_state", "entry_type", "entry", "requested_risk_pct", "expires_at_unix", "decision_hash", "market_snapshot_hash", "thesis_hash", "owner_authority", "activation_id"],
+  "required": [
+    "trade_intent_id",
+    "idempotency_key",
+    "account_alias",
+    "venue",
+    "symbol",
+    "direction",
+    "strategy_id",
+    "strategy_version",
+    "strategy_state",
+    "entry_type",
+    "entry",
+    "requested_risk_pct",
+    "expires_at_unix",
+    "decision_hash",
+    "market_snapshot_hash",
+    "thesis_hash",
+    "owner_authority",
+    "activation_id"
+  ],
   "properties": {
-    "trade_intent_id": {"type": "string", "format": "uuid"},
-    "idempotency_key": {"type": "string", "minLength": 16},
-    "account_alias": {"type": "string"},
-    "venue": {"type": "string", "enum": ["mt5", "deriv", "ctrader"]},
-    "symbol": {"type": "string"},
-    "direction": {"type": "string", "enum": ["LONG", "SHORT"]},
-    "strategy_id": {"type": "string"},
-    "strategy_version": {"type": "string"},
-    "strategy_state": {"type": "string", "enum": ["RESEARCH", "BACKTEST", "VALIDATION", "DEMO", "SHADOW", "LIMITED_LIVE", "CERTIFIED_LIVE", "DEGRADED", "SUSPENDED", "RETIRED"]},
-    "horizon": {"type": "string", "enum": ["MICRO", "SCALP", "INTRADAY", "SESSION", "OVERNIGHT", "SWING", "POSITION"]},
-    "entry_type": {"type": "string", "enum": ["MARKET", "LIMIT", "STOP", "STOP_LIMIT", "PASSIVE_LIMIT", "SLICED", "CONTRACT_BUY"]},
-    "entry": {"type": "string"},
-    "stop": {"type": ["string", "null"], "description": "Required for STOP_DISTANCE contracts; null only for FULL_STAKE contracts."},
-    "targets": {"type": "array", "items": {"type": "string"}},
-    "stake": {"type": ["string", "null"], "description": "FULL_STAKE contracts only."},
-    "requested_risk_pct": {"type": "string"},
-    "max_slippage": {"type": "string"},
-    "expires_at_unix": {"type": "integer"},
-    "is_event_certified": {"type": "boolean", "default": false},
-    "holds_over_weekend": {"type": "boolean", "default": false},
-    "regime_multiplier": {"$ref": "#/$defs/mult"},
-    "confidence_multiplier": {"$ref": "#/$defs/mult"},
-    "volatility_multiplier": {"$ref": "#/$defs/mult"},
-    "liquidity_multiplier": {"$ref": "#/$defs/mult"},
-    "event_risk_multiplier": {"$ref": "#/$defs/mult"},
-    "correlation_multiplier": {"$ref": "#/$defs/mult"},
-    "decision_hash": {"type": "string"},
-    "market_snapshot_hash": {"type": "string"},
-    "thesis_hash": {"type": "string"},
-    "activation_id": {"type": "string", "description": "VTIL Trading Knowledge Activation Manifest ID that informed this intent (Rev 2 §6.6)."},
-    "owner_authority": {"type": "string", "enum": ["MANDATE"], "description": "Only a mandate authorises an intent; a model opinion is not an authority value."}
+    "trade_intent_id": {
+      "type": "string",
+      "format": "uuid"
+    },
+    "idempotency_key": {
+      "type": "string",
+      "minLength": 16
+    },
+    "account_alias": {
+      "type": "string"
+    },
+    "venue": {
+      "type": "string",
+      "enum": [
+        "mt5",
+        "deriv",
+        "ctrader",
+        "zse",
+        "vfex"
+      ]
+    },
+    "symbol": {
+      "type": "string"
+    },
+    "direction": {
+      "type": "string",
+      "enum": [
+        "LONG",
+        "SHORT"
+      ]
+    },
+    "strategy_id": {
+      "type": "string"
+    },
+    "strategy_version": {
+      "type": "string"
+    },
+    "strategy_state": {
+      "type": "string",
+      "enum": [
+        "RESEARCH",
+        "BACKTEST",
+        "VALIDATION",
+        "DEMO",
+        "SHADOW",
+        "LIMITED_LIVE",
+        "CERTIFIED_LIVE",
+        "DEGRADED",
+        "SUSPENDED",
+        "RETIRED"
+      ]
+    },
+    "horizon": {
+      "type": "string",
+      "enum": [
+        "MICRO",
+        "SCALP",
+        "INTRADAY",
+        "SESSION",
+        "OVERNIGHT",
+        "SWING",
+        "POSITION"
+      ]
+    },
+    "entry_type": {
+      "type": "string",
+      "enum": [
+        "MARKET",
+        "LIMIT",
+        "STOP",
+        "STOP_LIMIT",
+        "PASSIVE_LIMIT",
+        "SLICED",
+        "CONTRACT_BUY"
+      ]
+    },
+    "entry": {
+      "type": "string"
+    },
+    "stop": {
+      "type": [
+        "string",
+        "null"
+      ],
+      "description": "Required for STOP_DISTANCE contracts; null only for FULL_STAKE contracts."
+    },
+    "targets": {
+      "type": "array",
+      "items": {
+        "type": "string"
+      }
+    },
+    "stake": {
+      "type": [
+        "string",
+        "null"
+      ],
+      "description": "FULL_STAKE contracts only."
+    },
+    "requested_risk_pct": {
+      "type": "string"
+    },
+    "max_slippage": {
+      "type": "string"
+    },
+    "expires_at_unix": {
+      "type": "integer"
+    },
+    "is_event_certified": {
+      "type": "boolean",
+      "default": false
+    },
+    "holds_over_weekend": {
+      "type": "boolean",
+      "default": false
+    },
+    "regime_multiplier": {
+      "$ref": "#/$defs/mult"
+    },
+    "confidence_multiplier": {
+      "$ref": "#/$defs/mult"
+    },
+    "volatility_multiplier": {
+      "$ref": "#/$defs/mult"
+    },
+    "liquidity_multiplier": {
+      "$ref": "#/$defs/mult"
+    },
+    "event_risk_multiplier": {
+      "$ref": "#/$defs/mult"
+    },
+    "correlation_multiplier": {
+      "$ref": "#/$defs/mult"
+    },
+    "decision_hash": {
+      "type": "string"
+    },
+    "market_snapshot_hash": {
+      "type": "string"
+    },
+    "thesis_hash": {
+      "type": "string"
+    },
+    "activation_id": {
+      "type": "string",
+      "description": "VTIL Trading Knowledge Activation Manifest ID that informed this intent (Rev 2 \u00a76.6)."
+    },
+    "owner_authority": {
+      "type": "string",
+      "enum": [
+        "MANDATE"
+      ],
+      "description": "Only a mandate authorises an intent; a model opinion is not an authority value."
+    },
+    "expected_gross_move_pct": {
+      "type": [
+        "string",
+        "null"
+      ],
+      "description": "Strategy's expected favourable move as a fraction of entry; when present with a costed contract the Risk Authority rejects if below 2 \u00d7 round-trip cost (EDGE_BELOW_COST)."
+    }
   },
-  "$defs": {"mult": {"type": "string", "description": "Proposed multiplier; the Risk Authority clamps into [0,1]. Values above 1 are ignored, never applied."}}
+  "$defs": {
+    "mult": {
+      "type": "string",
+      "description": "Proposed multiplier; the Risk Authority clamps into [0,1]. Values above 1 are ignored, never applied."
+    }
+  }
 }

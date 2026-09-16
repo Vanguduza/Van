@@ -1,6 +1,6 @@
 {
   "$schema_note": "VATI Industry Integration Architecture stack lock (Rev 2.1 Part E). One canonical choice per layer; overlaps are rejected by trading/tests/test_stack_lock.py. Versions are observations at lock time and are NOT pins: exact pins happen at adoption through the donor gate with Context7/official release facts.",
-  "revision": "2.1.0",
+  "revision": "3.0.0",
   "locked_at": "2026-09-16",
   "observation_sources": {
     "pypi_json": "https://pypi.org/pypi/<package>/json read 2026-09-16",
@@ -15,28 +15,395 @@
     "licence class COPYLEFT_NETWORK and SOURCE_AVAILABLE require an explicit owner-signed adoption decision"
   ],
   "layers": [
-    {"layer": "trading_kernel", "canonical": "NautilusTrader", "package": "nautilus_trader", "role": "only live/backtest strategy runtime and order/position domain", "adoption_phase": 3, "executes_live_orders": true, "latency_tier": "T0", "licence": "LGPL-3.0-or-later", "licence_class": "COPYLEFT_WEAK", "observed_version": "1.231.0", "observed_requires_python": ">=3.12,<3.15", "pin_status": "UNPINNED_VERIFY_AT_ADOPTION", "verified_capabilities": ["BinaryOption", "Cfd", "CurrencyPair", "FuturesContract", "OptionContract", "RiskEngine", "ParquetDataCatalog", "adapters/databento", "adapters/sandbox", "adapters/_template", "backtest/node", "live/node", "execution/algorithm"], "gaps": ["no MT5 adapter", "no Deriv adapter", "no cTrader adapter"], "rejected_alternatives": ["backtrader", "vectorbt as production", "freqtrade", "LEAN as production kernel"]},
-    {"layer": "independent_validation_oracle", "canonical": "QuantConnect LEAN", "package": "lean (docker)", "role": "independent reproduction of Tier-A capsules before CERTIFIED_LIVE; never a live account controller", "adoption_phase": 11, "executes_live_orders": false, "latency_tier": "T3", "licence": "Apache-2.0", "licence_class": "PERMISSIVE", "observed_version": null, "pin_status": "UNPINNED_VERIFY_AT_ADOPTION", "constraints": ["validation_only", "agreement metric defined in Rev 2.1 §E.6"], "rejected_alternatives": ["second Nautilus configuration as 'independent' check"]},
-    {"layer": "mt5_execution", "canonical": "VAN MT5 adapter (Nautilus ExecutionClient + DataClient) over mTLS bridge to Windows worker", "package": "MetaTrader5", "role": "MT5 venue adapter", "adoption_phase": 5, "executes_live_orders": true, "latency_tier": "T0", "licence": "MIT", "licence_class": "PERMISSIVE", "observed_version": "5.0.6180", "observed_platform": "win_amd64 wheels only", "pin_status": "UNPINNED_VERIFY_AT_ADOPTION", "constraints": ["Windows worker isolated", "orders carry sealed decision hash", "protective stop atomic or flatten"]},
-    {"layer": "deriv_execution", "canonical": "VAN Deriv adapter (Nautilus ExecutionClient + DataClient; BinaryOption/Cfd instruments)", "package": "deriv-api (verify) / native websocket", "role": "Deriv venue adapter as a first-class Nautilus venue", "adoption_phase": 6, "executes_live_orders": true, "latency_tier": "T0", "licence": null, "licence_class": "VERIFY_AT_ADOPTION", "observed_version": null, "pin_status": "UNPINNED_VERIFY_AT_ADOPTION", "constraints": ["FULL_STAKE loss model", "synthetic isolation"]},
-    {"layer": "futures_options_reference_data", "canonical": "Databento (+ direct CME/Cboe where justified)", "package": "databento", "role": "ES/NQ/GC/SI reference ticks, depth, definitions; cross-feed divergence reference", "adoption_phase": 10, "executes_live_orders": false, "latency_tier": "T1", "licence": "Apache-2.0", "licence_class": "PERMISSIVE", "observed_version": "0.86.0", "pin_status": "UNPINNED_VERIFY_AT_ADOPTION", "constraints": ["paid subscription; entitlement is an external gate", "Nautilus in-tree adapter used"]},
-    {"layer": "implied_volatility", "canonical": "CME CVOL + Cboe VIX family term structure", "package": null, "role": "forward-looking volatility/skew state for regime and event premium", "adoption_phase": 10, "executes_live_orders": false, "latency_tier": "T1", "licence": "vendor terms", "licence_class": "VENDOR_TERMS", "observed_version": null, "pin_status": "UNPINNED_VERIFY_AT_ADOPTION", "constraints": ["entitlement is an external gate", "ATR/realised vol remain fallback features, not the primary vol state"]},
-    {"layer": "research_data_facade", "canonical": "OpenBB", "package": "openbb", "role": "normalisation facade for slow/medium-frequency providers; never market-data truth; never in the latency path", "adoption_phase": 11, "executes_live_orders": false, "latency_tier": "T3", "licence": "AGPL-3.0-only", "licence_class": "COPYLEFT_NETWORK", "observed_version": "4.7.2", "pin_status": "UNPINNED_VERIFY_AT_ADOPTION", "constraints": ["research process only", "owner-signed adoption decision required for AGPL"]},
-    {"layer": "ai_quant_research", "canonical": "Microsoft Qlib", "package": "pyqlib", "role": "alpha/model/ensemble research; terminates at the model boundary (MLflow)", "adoption_phase": 11, "executes_live_orders": false, "latency_tier": "T3", "licence": "MIT", "licence_class": "PERMISSIVE", "observed_version": "0.9.7", "pin_status": "UNPINNED_VERIFY_AT_ADOPTION", "constraints": ["Qlib execution layer never used", "FX/futures data handlers are VAN-written"]},
-    {"layer": "hyperparameter_search", "canonical": "Optuna", "package": "optuna", "role": "research-only optimisation; output is a candidate", "adoption_phase": 11, "executes_live_orders": false, "latency_tier": "T3", "licence": "MIT", "licence_class": "PERMISSIVE", "observed_version": "5.0.0", "pin_status": "UNPINNED_VERIFY_AT_ADOPTION"},
-    {"layer": "feature_store", "canonical": "Feast", "package": "feast", "role": "single feature definitions for offline training and online serving (training/serving skew)", "adoption_phase": 8, "executes_live_orders": false, "latency_tier": "T1", "licence": "Apache-2.0", "licence_class": "PERMISSIVE", "observed_version": "0.66.0", "pin_status": "UNPINNED_VERIFY_AT_ADOPTION", "constraints": ["online store read is T1, never T0"]},
-    {"layer": "model_registry", "canonical": "MLflow", "package": "mlflow", "role": "model/experiment lineage, versions, aliases, stage, rollback", "adoption_phase": 8, "executes_live_orders": false, "latency_tier": "T3", "licence": "Apache-2.0", "licence_class": "PERMISSIVE", "observed_version": "3.16.0", "pin_status": "UNPINNED_VERIFY_AT_ADOPTION", "constraints": ["a model alias is not a promotion; StrategyCapsule signature is"]},
-    {"layer": "event_backbone", "canonical": "Redpanda (Kafka API)", "package": "redpanda", "role": "canonical event stream between ingestion, state/feature engines and consumers; replay source for non-T0 consumers", "adoption_phase": 12, "executes_live_orders": false, "latency_tier": "T1", "licence": "BSL-1.1 (converts to Apache-2.0 per release schedule)", "licence_class": "SOURCE_AVAILABLE", "observed_version": null, "pin_status": "UNPINNED_VERIFY_AT_ADOPTION", "constraints": ["never inside the tick-to-order path", "M1 uses the Nautilus message bus + event ledger with the same event contracts; Redpanda is introduced at M2 without contract change", "owner-signed adoption decision required for BSL"]},
-    {"layer": "hot_market_timeseries", "canonical": "QuestDB", "package": "questdb", "role": "live ticks/quotes/executions/TCA, fast windows", "adoption_phase": 12, "executes_live_orders": false, "latency_tier": "T1", "licence": "Apache-2.0", "licence_class": "PERMISSIVE", "observed_version": null, "pin_status": "UNPINNED_VERIFY_AT_ADOPTION", "constraints": ["never transactional authority"]},
-    {"layer": "historical_lake", "canonical": "Parquet on object storage (Nautilus ParquetDataCatalog for kernel-consumable data + normalised research Parquet)", "package": "pyarrow", "role": "immutable versioned historical truth", "adoption_phase": 1, "executes_live_orders": false, "latency_tier": "T3", "licence": "Apache-2.0", "licence_class": "PERMISSIVE", "observed_version": null, "pin_status": "UNPINNED_VERIFY_AT_ADOPTION"},
-    {"layer": "research_timeseries_accelerator", "canonical": "ArcticDB (optional)", "package": "arcticdb", "role": "bitemporal/versioned DataFrames for reproducing historical feature states", "adoption_phase": 11, "optional": true, "executes_live_orders": false, "latency_tier": "T3", "licence": "BSL-1.1 (converts to Apache-2.0 per release schedule)", "licence_class": "SOURCE_AVAILABLE", "observed_version": "6.26.0", "pin_status": "UNPINNED_VERIFY_AT_ADOPTION", "constraints": ["owner-signed adoption decision required for BSL"]},
-    {"layer": "transactional_authority_store", "canonical": "PostgreSQL", "package": "postgresql", "role": "accounts (aliases), mandates, strategy registry, risk decisions, order intents, receipts, reconciliation, immutable references", "adoption_phase": 4, "executes_live_orders": false, "latency_tier": "T1", "licence": "PostgreSQL License", "licence_class": "PERMISSIVE", "observed_version": null, "pin_status": "UNPINNED_VERIFY_AT_ADOPTION", "constraints": ["separate database from any DIAL business/finance database; VATI is not a DIAL money authority", "Phase 0-3 may use the Van gateway SQLite store with the same schemas"]},
-    {"layer": "durable_workflows", "canonical": "Temporal", "package": "temporalio", "role": "research certification, promotion, broker recovery, long-running jobs", "adoption_phase": 11, "executes_live_orders": false, "latency_tier": "T3", "licence": "MIT", "licence_class": "PERMISSIVE", "observed_version": null, "pin_status": "UNPINNED_VERIFY_AT_ADOPTION", "constraints": ["never inside the tick-to-order path"]},
-    {"layer": "trading_knowledge_layer", "canonical": "VTIL on borrowed DIAL VEKL infrastructure", "package": "dial-new agent-system VEKL resolver (vendored, pinned commit)", "role": "research provenance, market memory, analogues, anti-patterns, strategy lineage, activation manifests", "adoption_phase": 2, "executes_live_orders": false, "latency_tier": "T2", "licence": "owner-internal", "licence_class": "INTERNAL", "observed_version": null, "pin_status": "PIN_TO_DIAL_COMMIT_AT_ADOPTION", "constraints": ["separate registry namespace from DIAL engineering VEKL", "may be forked into a dedicated VEKL instance if trading output/performance evidence justifies it"]},
-    {"layer": "google_research_mesh", "canonical": "Gemini / Deep Research / NotebookLM via VAN gateway planner", "package": "registries/google_capabilities.json", "role": "multimodal analysis and deep asynchronous research", "adoption_phase": 7, "executes_live_orders": false, "latency_tier": "T2", "licence": "vendor terms", "licence_class": "VENDOR_TERMS", "observed_version": null, "pin_status": "N/A"},
-    {"layer": "observability", "canonical": "OpenTelemetry + Prometheus + Grafana", "package": "opentelemetry-sdk", "role": "trace market event → feature → signal → risk → order → fill → P&L", "adoption_phase": 1, "executes_live_orders": false, "latency_tier": "T1", "licence": "Apache-2.0 / AGPL-3.0 (Grafana)", "licence_class": "MIXED_REVIEW", "observed_version": null, "pin_status": "UNPINNED_VERIFY_AT_ADOPTION", "constraints": ["Grafana is AGPL; used as an unmodified operator tool, not linked into VATI"]}
+    {
+      "layer": "trading_kernel",
+      "canonical": "NautilusTrader",
+      "package": "nautilus_trader",
+      "role": "only live/backtest strategy runtime and order/position domain",
+      "adoption_phase": 3,
+      "executes_live_orders": true,
+      "latency_tier": "T0",
+      "licence": "LGPL-3.0-or-later",
+      "licence_class": "COPYLEFT_WEAK",
+      "observed_version": "1.231.0",
+      "observed_requires_python": ">=3.12,<3.15",
+      "pin_status": "UNPINNED_VERIFY_AT_ADOPTION",
+      "verified_capabilities": [
+        "BinaryOption",
+        "Cfd",
+        "CurrencyPair",
+        "FuturesContract",
+        "OptionContract",
+        "RiskEngine",
+        "ParquetDataCatalog",
+        "adapters/databento",
+        "adapters/sandbox",
+        "adapters/_template",
+        "backtest/node",
+        "live/node",
+        "execution/algorithm"
+      ],
+      "gaps": [
+        "no MT5 adapter",
+        "no Deriv adapter",
+        "no cTrader adapter"
+      ],
+      "rejected_alternatives": [
+        "backtrader",
+        "vectorbt as production",
+        "freqtrade",
+        "LEAN as production kernel"
+      ]
+    },
+    {
+      "layer": "independent_validation_oracle",
+      "canonical": "QuantConnect LEAN",
+      "package": "lean (docker)",
+      "role": "independent reproduction of Tier-A capsules before CERTIFIED_LIVE; never a live account controller",
+      "adoption_phase": 11,
+      "executes_live_orders": false,
+      "latency_tier": "T3",
+      "licence": "Apache-2.0",
+      "licence_class": "PERMISSIVE",
+      "observed_version": null,
+      "pin_status": "UNPINNED_VERIFY_AT_ADOPTION",
+      "constraints": [
+        "validation_only",
+        "agreement metric defined in Rev 2.1 \u00a7E.6"
+      ],
+      "rejected_alternatives": [
+        "second Nautilus configuration as 'independent' check"
+      ]
+    },
+    {
+      "layer": "mt5_execution",
+      "canonical": "VAN MT5 adapter (Nautilus ExecutionClient + DataClient) over mTLS bridge to Windows worker",
+      "package": "MetaTrader5",
+      "role": "MT5 venue adapter",
+      "adoption_phase": 5,
+      "executes_live_orders": true,
+      "latency_tier": "T0",
+      "licence": "MIT",
+      "licence_class": "PERMISSIVE",
+      "observed_version": "5.0.6180",
+      "observed_platform": "win_amd64 wheels only",
+      "pin_status": "UNPINNED_VERIFY_AT_ADOPTION",
+      "constraints": [
+        "Windows worker isolated",
+        "orders carry sealed decision hash",
+        "protective stop atomic or flatten"
+      ]
+    },
+    {
+      "layer": "deriv_execution",
+      "canonical": "VAN Deriv adapter (Nautilus ExecutionClient + DataClient; BinaryOption/Cfd instruments)",
+      "package": "deriv-api (verify) / native websocket",
+      "role": "Deriv venue adapter as a first-class Nautilus venue",
+      "adoption_phase": 6,
+      "executes_live_orders": true,
+      "latency_tier": "T0",
+      "licence": null,
+      "licence_class": "VERIFY_AT_ADOPTION",
+      "observed_version": null,
+      "pin_status": "UNPINNED_VERIFY_AT_ADOPTION",
+      "constraints": [
+        "FULL_STAKE loss model",
+        "synthetic isolation"
+      ]
+    },
+    {
+      "layer": "futures_options_reference_data",
+      "canonical": "Databento (+ direct CME/Cboe where justified)",
+      "package": "databento",
+      "role": "ES/NQ/GC/SI reference ticks, depth, definitions; cross-feed divergence reference",
+      "adoption_phase": 10,
+      "executes_live_orders": false,
+      "latency_tier": "T1",
+      "licence": "Apache-2.0",
+      "licence_class": "PERMISSIVE",
+      "observed_version": "0.86.0",
+      "pin_status": "UNPINNED_VERIFY_AT_ADOPTION",
+      "constraints": [
+        "paid subscription; entitlement is an external gate",
+        "Nautilus in-tree adapter used"
+      ]
+    },
+    {
+      "layer": "implied_volatility",
+      "canonical": "CME CVOL + Cboe VIX family term structure",
+      "package": null,
+      "role": "forward-looking volatility/skew state for regime and event premium",
+      "adoption_phase": 10,
+      "executes_live_orders": false,
+      "latency_tier": "T1",
+      "licence": "vendor terms",
+      "licence_class": "VENDOR_TERMS",
+      "observed_version": null,
+      "pin_status": "UNPINNED_VERIFY_AT_ADOPTION",
+      "constraints": [
+        "entitlement is an external gate",
+        "ATR/realised vol remain fallback features, not the primary vol state"
+      ]
+    },
+    {
+      "layer": "research_data_facade",
+      "canonical": "OpenBB",
+      "package": "openbb",
+      "role": "normalisation facade for slow/medium-frequency providers; never market-data truth; never in the latency path",
+      "adoption_phase": 11,
+      "executes_live_orders": false,
+      "latency_tier": "T3",
+      "licence": "AGPL-3.0-only",
+      "licence_class": "COPYLEFT_NETWORK",
+      "observed_version": "4.7.2",
+      "pin_status": "UNPINNED_VERIFY_AT_ADOPTION",
+      "constraints": [
+        "research process only",
+        "owner-signed adoption decision required for AGPL"
+      ]
+    },
+    {
+      "layer": "ai_quant_research",
+      "canonical": "Microsoft Qlib",
+      "package": "pyqlib",
+      "role": "alpha/model/ensemble research; terminates at the model boundary (MLflow)",
+      "adoption_phase": 11,
+      "executes_live_orders": false,
+      "latency_tier": "T3",
+      "licence": "MIT",
+      "licence_class": "PERMISSIVE",
+      "observed_version": "0.9.7",
+      "pin_status": "UNPINNED_VERIFY_AT_ADOPTION",
+      "constraints": [
+        "Qlib execution layer never used",
+        "FX/futures data handlers are VAN-written"
+      ]
+    },
+    {
+      "layer": "hyperparameter_search",
+      "canonical": "Optuna",
+      "package": "optuna",
+      "role": "research-only optimisation; output is a candidate",
+      "adoption_phase": 11,
+      "executes_live_orders": false,
+      "latency_tier": "T3",
+      "licence": "MIT",
+      "licence_class": "PERMISSIVE",
+      "observed_version": "5.0.0",
+      "pin_status": "UNPINNED_VERIFY_AT_ADOPTION"
+    },
+    {
+      "layer": "feature_store",
+      "canonical": "Feast",
+      "package": "feast",
+      "role": "single feature definitions for offline training and online serving (training/serving skew)",
+      "adoption_phase": 8,
+      "executes_live_orders": false,
+      "latency_tier": "T1",
+      "licence": "Apache-2.0",
+      "licence_class": "PERMISSIVE",
+      "observed_version": "0.66.0",
+      "pin_status": "UNPINNED_VERIFY_AT_ADOPTION",
+      "constraints": [
+        "online store read is T1, never T0"
+      ]
+    },
+    {
+      "layer": "model_registry",
+      "canonical": "MLflow",
+      "package": "mlflow",
+      "role": "model/experiment lineage, versions, aliases, stage, rollback",
+      "adoption_phase": 8,
+      "executes_live_orders": false,
+      "latency_tier": "T3",
+      "licence": "Apache-2.0",
+      "licence_class": "PERMISSIVE",
+      "observed_version": "3.16.0",
+      "pin_status": "UNPINNED_VERIFY_AT_ADOPTION",
+      "constraints": [
+        "a model alias is not a promotion; StrategyCapsule signature is"
+      ]
+    },
+    {
+      "layer": "event_backbone",
+      "canonical": "Redpanda (Kafka API)",
+      "package": "redpanda",
+      "role": "canonical event stream between ingestion, state/feature engines and consumers; replay source for non-T0 consumers",
+      "adoption_phase": 12,
+      "executes_live_orders": false,
+      "latency_tier": "T1",
+      "licence": "BSL-1.1 (converts to Apache-2.0 per release schedule)",
+      "licence_class": "SOURCE_AVAILABLE",
+      "observed_version": null,
+      "pin_status": "UNPINNED_VERIFY_AT_ADOPTION",
+      "constraints": [
+        "never inside the tick-to-order path",
+        "M1 uses the Nautilus message bus + event ledger with the same event contracts; Redpanda is introduced at M2 without contract change",
+        "owner-signed adoption decision required for BSL"
+      ]
+    },
+    {
+      "layer": "hot_market_timeseries",
+      "canonical": "QuestDB",
+      "package": "questdb",
+      "role": "live ticks/quotes/executions/TCA, fast windows",
+      "adoption_phase": 12,
+      "executes_live_orders": false,
+      "latency_tier": "T1",
+      "licence": "Apache-2.0",
+      "licence_class": "PERMISSIVE",
+      "observed_version": null,
+      "pin_status": "UNPINNED_VERIFY_AT_ADOPTION",
+      "constraints": [
+        "never transactional authority"
+      ]
+    },
+    {
+      "layer": "historical_lake",
+      "canonical": "Parquet on object storage (Nautilus ParquetDataCatalog for kernel-consumable data + normalised research Parquet)",
+      "package": "pyarrow",
+      "role": "immutable versioned historical truth",
+      "adoption_phase": 1,
+      "executes_live_orders": false,
+      "latency_tier": "T3",
+      "licence": "Apache-2.0",
+      "licence_class": "PERMISSIVE",
+      "observed_version": null,
+      "pin_status": "UNPINNED_VERIFY_AT_ADOPTION"
+    },
+    {
+      "layer": "research_timeseries_accelerator",
+      "canonical": "ArcticDB (optional)",
+      "package": "arcticdb",
+      "role": "bitemporal/versioned DataFrames for reproducing historical feature states",
+      "adoption_phase": 11,
+      "optional": true,
+      "executes_live_orders": false,
+      "latency_tier": "T3",
+      "licence": "BSL-1.1 (converts to Apache-2.0 per release schedule)",
+      "licence_class": "SOURCE_AVAILABLE",
+      "observed_version": "6.26.0",
+      "pin_status": "UNPINNED_VERIFY_AT_ADOPTION",
+      "constraints": [
+        "owner-signed adoption decision required for BSL"
+      ]
+    },
+    {
+      "layer": "transactional_authority_store",
+      "canonical": "PostgreSQL",
+      "package": "postgresql",
+      "role": "accounts (aliases), mandates, strategy registry, risk decisions, order intents, receipts, reconciliation, immutable references",
+      "adoption_phase": 4,
+      "executes_live_orders": false,
+      "latency_tier": "T1",
+      "licence": "PostgreSQL License",
+      "licence_class": "PERMISSIVE",
+      "observed_version": null,
+      "pin_status": "UNPINNED_VERIFY_AT_ADOPTION",
+      "constraints": [
+        "separate database from any DIAL business/finance database; VATI is not a DIAL money authority",
+        "Phase 0-3 may use the Van gateway SQLite store with the same schemas"
+      ]
+    },
+    {
+      "layer": "durable_workflows",
+      "canonical": "Temporal",
+      "package": "temporalio",
+      "role": "research certification, promotion, broker recovery, long-running jobs",
+      "adoption_phase": 11,
+      "executes_live_orders": false,
+      "latency_tier": "T3",
+      "licence": "MIT",
+      "licence_class": "PERMISSIVE",
+      "observed_version": null,
+      "pin_status": "UNPINNED_VERIFY_AT_ADOPTION",
+      "constraints": [
+        "never inside the tick-to-order path"
+      ]
+    },
+    {
+      "layer": "trading_knowledge_layer",
+      "canonical": "VTIL on borrowed DIAL VEKL infrastructure",
+      "package": "dial-new agent-system VEKL resolver (vendored, pinned commit)",
+      "role": "research provenance, market memory, analogues, anti-patterns, strategy lineage, activation manifests",
+      "adoption_phase": 2,
+      "executes_live_orders": false,
+      "latency_tier": "T2",
+      "licence": "owner-internal",
+      "licence_class": "INTERNAL",
+      "observed_version": null,
+      "pin_status": "PIN_TO_DIAL_COMMIT_AT_ADOPTION",
+      "constraints": [
+        "separate registry namespace from DIAL engineering VEKL",
+        "may be forked into a dedicated VEKL instance if trading output/performance evidence justifies it"
+      ]
+    },
+    {
+      "layer": "google_research_mesh",
+      "canonical": "Gemini / Deep Research / NotebookLM via VAN gateway planner",
+      "package": "registries/google_capabilities.json",
+      "role": "multimodal analysis and deep asynchronous research",
+      "adoption_phase": 7,
+      "executes_live_orders": false,
+      "latency_tier": "T2",
+      "licence": "vendor terms",
+      "licence_class": "VENDOR_TERMS",
+      "observed_version": null,
+      "pin_status": "N/A"
+    },
+    {
+      "layer": "observability",
+      "canonical": "OpenTelemetry + Prometheus + Grafana",
+      "package": "opentelemetry-sdk",
+      "role": "trace market event \u2192 feature \u2192 signal \u2192 risk \u2192 order \u2192 fill \u2192 P&L",
+      "adoption_phase": 1,
+      "executes_live_orders": false,
+      "latency_tier": "T1",
+      "licence": "Apache-2.0 / AGPL-3.0 (Grafana)",
+      "licence_class": "MIXED_REVIEW",
+      "observed_version": null,
+      "pin_status": "UNPINNED_VERIFY_AT_ADOPTION",
+      "constraints": [
+        "Grafana is AGPL; used as an unmodified operator tool, not linked into VATI"
+      ]
+    },
+    {
+      "layer": "zse_market_data",
+      "canonical": "Broker/ZSE price sheets (T1) + Mansa/mystocks.africa API + africanfinancials documents (T2); CC0 2020\u20132025 archive as history seed",
+      "package": "vati.zse",
+      "role": "daily OHLC/volume, indices, corporate documents for ZSE/VFEX; end-of-day cadence",
+      "adoption_phase": 1,
+      "executes_live_orders": false,
+      "latency_tier": "T3",
+      "licence": "vendor terms / CC0 archive",
+      "licence_class": "VENDOR_TERMS",
+      "observed_version": null,
+      "pin_status": "UNPINNED_VERIFY_AT_ADOPTION",
+      "constraints": [
+        "no real-time feed exists for retail; intraday ZSE strategies are ineligible",
+        "kwayisi/afx pages are display-only; scraping ZSE Direct/C-Trade is forbidden"
+      ]
+    },
+    {
+      "layer": "zse_execution",
+      "canonical": "Owner-ticket and broker-instruction channels (A4 per instruction) with reconciliation from CSD holdings and contract notes; DMA/FIX via a broker's Capizar OMS only as a Phase-later institutional option",
+      "package": "vati.zse",
+      "role": "ZSE/VFEX order execution without a retail API",
+      "adoption_phase": 4,
+      "executes_live_orders": false,
+      "latency_tier": "T3",
+      "licence": "n/a",
+      "licence_class": "INTERNAL",
+      "observed_version": null,
+      "pin_status": "N/A",
+      "constraints": [
+        "VAN never automates the ZSE Direct or C-Trade apps",
+        "every ticket is Risk-Authority approved before the owner sees it",
+        "ILLIQUID_EQUITY loss model; software stops with liquidity haircut"
+      ]
+    }
   ],
-  "single_order_sender": "vati-execution-router (Nautilus ExecutionEngine → VAN RiskGate → venue ExecutionClient)",
+  "single_order_sender": "vati-execution-router (Nautilus ExecutionEngine \u2192 VAN RiskGate \u2192 venue ExecutionClient)",
   "single_sizer": "trading/vati/risk RiskAuthority",
   "single_transactional_authority": "PostgreSQL (SQLite in Phases 0-3)"
 }
