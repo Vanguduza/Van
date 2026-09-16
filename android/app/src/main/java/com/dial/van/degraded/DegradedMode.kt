@@ -1,8 +1,10 @@
 package com.dial.van.degraded
 
-/**
- * Tracks subsystem health when Van cannot reach Hermes or local deps fail.
- */
+import kotlinx.coroutines.flow.MutableStateFlow
+import kotlinx.coroutines.flow.StateFlow
+import kotlinx.coroutines.flow.asStateFlow
+import kotlinx.coroutines.flow.update
+
 enum class SubsystemStatus {
     WORKING,
     BROKEN,
@@ -55,7 +57,6 @@ data class DegradedMode(
             DegradedSubsystem("notifications", "Notification listener", SubsystemStatus.WORKING, "Context ingestion with redaction"),
             DegradedSubsystem("voice", "Voice I/O", SubsystemStatus.WORKING, "Speech input and TTS output"),
             DegradedSubsystem("biometric", "Biometric gate", SubsystemStatus.WORKING, "A4 approval gate"),
-            // Fail closed: Google stays unverified until /health google_mesh evidence arrives.
             DegradedSubsystem(
                 "google",
                 "Google mesh",
@@ -67,14 +68,17 @@ data class DegradedMode(
     }
 }
 
+/** Observable subsystem truth shared by every VAN surface. */
 class DegradedModeStore {
-    @Volatile
-    private var current: DegradedMode = DegradedMode.healthy()
+    private val _state = MutableStateFlow(DegradedMode.healthy())
+    val state: StateFlow<DegradedMode> = _state.asStateFlow()
 
-    fun snapshot(): DegradedMode = current
+    fun snapshot(): DegradedMode = _state.value
 
     fun update(transform: (DegradedMode) -> DegradedMode) {
-        current = transform(current).copy(updatedAtEpochMs = System.currentTimeMillis())
+        _state.update { current ->
+            transform(current).copy(updatedAtEpochMs = System.currentTimeMillis())
+        }
     }
 
     fun applyGoogleMesh(configuredCapabilities: Int, totalCapabilities: Int, principalRegistered: Boolean) {
