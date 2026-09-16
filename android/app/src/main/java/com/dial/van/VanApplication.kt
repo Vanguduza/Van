@@ -12,6 +12,7 @@ import com.dial.van.visual.VanLiveVisualState
 import com.dial.van.voice.SpeechSyncFrame
 import com.dial.van.voice.TtsOutputCallback
 import com.dial.van.voice.TtsOutputManager
+import com.dial.van.voice.VanVoiceUiStore
 import com.dial.van.voice.VoiceInputCallback
 import com.dial.van.voice.VoiceInputManager
 import com.dial.van.voice.VoiceSessionCoordinator
@@ -35,6 +36,8 @@ class VanApplication : Application(), VoiceInputCallback, TtsOutputCallback {
         private set
     lateinit var voiceSession: VoiceSessionCoordinator
         private set
+    lateinit var voiceUi: VanVoiceUiStore
+        private set
     lateinit var gatewayClient: VanGatewayClient
         private set
     lateinit var commandController: VanCommandController
@@ -48,6 +51,7 @@ class VanApplication : Application(), VoiceInputCallback, TtsOutputCallback {
         commandQueue = EncryptedCommandQueue(this)
         notificationPolicyStore = NotificationPolicyStore(this)
         degradedModeStore = DegradedModeStore()
+        voiceUi = VanVoiceUiStore()
         voiceInput = VoiceInputManager(this, this)
         ttsOutput = TtsOutputManager(this, this)
         voiceSession = VoiceSessionCoordinator(voiceInput, ttsOutput)
@@ -58,11 +62,13 @@ class VanApplication : Application(), VoiceInputCallback, TtsOutputCallback {
     }
 
     override fun onPartial(text: String) {
+        voiceUi.partial(text)
         if (text.isNotBlank()) VanLiveVisualState.listeningStarted()
     }
 
     override fun onFinal(text: String) {
         val hasText = text.isNotBlank()
+        voiceUi.final(text)
         // Final recognition owns THINKING. The same transcript then enters the exact command path
         // used by typed chat; voice is not a visual-only state transition or parallel authority path.
         VanLiveVisualState.finalTranscript(hasText = hasText)
@@ -75,11 +81,13 @@ class VanApplication : Application(), VoiceInputCallback, TtsOutputCallback {
     }
 
     override fun onError(code: Int) {
+        voiceUi.error(code)
         VanLiveVisualState.warning(urgency = 0.25f)
         VanLiveVisualState.settleToIdle(delayMs = 1_200L, allowCritical = true)
     }
 
     override fun onListeningChanged(listening: Boolean) {
+        voiceUi.listening(listening)
         if (listening) {
             VanLiveVisualState.listeningStarted()
         } else {
