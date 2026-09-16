@@ -33,6 +33,7 @@ object VanPresence {
         listening: Boolean = false,
         speaking: Boolean = false,
         awaitingOwner: Boolean = false,
+        live: VanVisualState = VanLiveVisualState.current,
     ): Cue {
         val broken = mode.subsystems.filter { it.status == SubsystemStatus.BROKEN }
         val brokenLabels = broken.map { it.label }
@@ -68,6 +69,10 @@ object VanPresence {
 
             listening -> nominal(VanDurableState.LISTENING, "Listening for you")
             speaking -> nominal(VanDurableState.SPEAKING, "Speaking")
+            live.durableState != VanDurableState.IDLE -> nominal(
+                live.durableState,
+                VanCaptions.forState(live.durableState),
+            )
             else -> nominal(VanDurableState.IDLE, mode.reason)
         }
     }
