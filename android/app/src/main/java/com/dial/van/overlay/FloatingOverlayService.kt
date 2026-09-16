@@ -279,6 +279,7 @@ class FloatingOverlayService : Service(), LifecycleOwner, SavedStateRegistryOwne
         }
     }
 
+    @OptIn(ExperimentalFoundationApi::class)
     @Composable
     private fun CompactWorkboard(
         app: VanApplication,
@@ -541,6 +542,7 @@ class FloatingOverlayService : Service(), LifecycleOwner, SavedStateRegistryOwne
         }
     }
 
+    @OptIn(ExperimentalFoundationApi::class)
     @Composable
     private fun ContextAction(title: String, detail: String, onClick: () -> Unit) {
         Box(
@@ -558,6 +560,7 @@ class FloatingOverlayService : Service(), LifecycleOwner, SavedStateRegistryOwne
         }
     }
 
+    @OptIn(ExperimentalFoundationApi::class)
     @Composable
     private fun WorkChip(label: String, accent: Int, onClick: () -> Unit) {
         Box(
@@ -573,6 +576,7 @@ class FloatingOverlayService : Service(), LifecycleOwner, SavedStateRegistryOwne
         }
     }
 
+    @OptIn(ExperimentalFoundationApi::class)
     @Composable
     private fun QuickControls(modifier: Modifier = Modifier) {
         VanGlassSurface(
@@ -652,11 +656,11 @@ class FloatingOverlayService : Service(), LifecycleOwner, SavedStateRegistryOwne
     }
 
     private fun onVanTap() {
-        setUiState(VanOverlayReducer.onVanTapped(uiState))
+        updateUiState(VanOverlayReducer.onVanTapped(uiState))
     }
 
     private fun showQuickControls() {
-        setUiState(VanOverlayReducer.showQuickControls(uiState))
+        updateUiState(VanOverlayReducer.showQuickControls(uiState))
     }
 
     private fun openChat(expanded: Boolean) {
@@ -678,18 +682,18 @@ class FloatingOverlayService : Service(), LifecycleOwner, SavedStateRegistryOwne
         when (label) {
             "Chat" -> openChat(expanded = true)
             "Voice" -> beginVoice(app)
-            "Minimize" -> setUiState(VanOverlayReducer.minimize(uiState))
+            "Minimize" -> updateUiState(VanOverlayReducer.minimize(uiState))
             "Command Centre" -> openCommandCentre()
-            "Dock" -> setUiState(VanOverlayReducer.dock(uiState))
+            "Dock" -> updateUiState(VanOverlayReducer.dock(uiState))
             "Close" -> stopSelf()
         }
     }
 
     private fun setPresentation(presentation: VanOverlayPresentation) {
-        setUiState(uiState.copy(presentation = presentation, quickControls = VanQuickControlsState.HIDDEN))
+        updateUiState(uiState.copy(presentation = presentation, quickControls = VanQuickControlsState.HIDDEN))
     }
 
-    private fun setUiState(next: VanOverlayUiState) {
+    private fun updateUiState(next: VanOverlayUiState) {
         uiState = next
         if (::layoutParams.isInitialized && ::overlayView.isInitialized) {
             updateWindowFlags()
@@ -698,7 +702,7 @@ class FloatingOverlayService : Service(), LifecycleOwner, SavedStateRegistryOwne
     }
 
     private fun beginDrag() {
-        setUiState(
+        updateUiState(
             uiState.copy(
                 dragging = true,
                 dismissTargetVisible = true,
@@ -763,7 +767,7 @@ class FloatingOverlayService : Service(), LifecycleOwner, SavedStateRegistryOwne
             metrics.heightPixels,
         )
         windowManager.updateViewLayout(overlayView, layoutParams)
-        setUiState(
+        updateUiState(
             uiState.copy(
                 xPx = snapped.first,
                 yPx = snapped.second,
@@ -776,7 +780,7 @@ class FloatingOverlayService : Service(), LifecycleOwner, SavedStateRegistryOwne
 
     private fun cancelDrag() {
         hideDismissTarget()
-        setUiState(uiState.copy(dragging = false, dismissTargetVisible = false, dismissTargetArmed = false))
+        updateUiState(uiState.copy(dragging = false, dismissTargetVisible = false, dismissTargetArmed = false))
     }
 
     private fun isInsideDismissTarget(x: Int, y: Int, avatarSize: Int): Boolean {
