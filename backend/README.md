@@ -37,6 +37,8 @@ See `../docs/GOOGLE_INTELLIGENCE_MESH.md`.
 | `VAN_HERMES_BASE_URL` | Hermes gateway |
 | `VAN_HERMES_BEARER_TOKEN` | Hermes API token |
 | `VAN_INTERNAL_CONTROL_TOKEN` | Shared secret for privileged Hermes→gateway Google job/evidence APIs; never prompt-visible |
+| `VAN_INGRESS_TOKEN` | Owner-device bearer required on externally reachable gateway routes; stored encrypted on Android |
+| `VAN_DEVICE_SECRET_FERNET_KEY` | Dedicated Fernet key for restart-durable encrypted device HMAC secrets |
 | `VAN_GOOGLE_TOKEN_FERNET_KEY` | Fernet key for encrypted Workspace OAuth refresh tokens |
 | `VAN_GOOGLE_OAUTH_CLIENT_ID` | OAuth client ID used to exchange refresh tokens for access tokens |
 | `VAN_GOOGLE_OAUTH_CLIENT_SECRET` | OAuth client secret; never enters prompts |

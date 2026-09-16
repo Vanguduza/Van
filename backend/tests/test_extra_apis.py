@@ -16,6 +16,7 @@ def _env(tmp_path, monkeypatch):
     monkeypatch.setenv("VAN_HERMES_BASE_URL", "http://hermes.test")
     monkeypatch.setenv("VAN_GOOGLE_TOKEN_FERNET_KEY", Fernet.generate_key().decode())
     monkeypatch.setenv("VAN_DEVICE_SECRET_FERNET_KEY", Fernet.generate_key().decode())
+    monkeypatch.setenv("VAN_INGRESS_TOKEN", "test-ingress-token-0123456789abcdef")
     monkeypatch.setenv("VAN_INTERNAL_CONTROL_TOKEN", "test-internal-token")
     get_settings.cache_clear()
     yield
@@ -35,7 +36,7 @@ async def client(monkeypatch):
     monkeypatch.setattr(app.state.orchestrator.hermes, "health", ok)
     monkeypatch.setattr(app.state.orchestrator.hermes, "create_run", run)
     transport = ASGITransport(app=app)
-    async with AsyncClient(transport=transport, base_url="http://test") as ac:
+    async with AsyncClient(transport=transport, base_url="http://test", headers={"X-Van-Ingress-Token": "test-ingress-token-0123456789abcdef"}) as ac:
         async with app.router.lifespan_context(app):
             yield ac, app
 
@@ -158,3 +159,20 @@ async def test_migration_idempotent(tmp_path, monkeypatch):
     await store.migrate()
     row = await store.fetchone("SELECT COUNT(*) AS c FROM schema_migrations")
     assert int(row["c"]) >= 1
+
+
+@pytest.mark.asyncio
+async def test_internal_control_token_is_not_general_ingress(client):
+    _ac, app = client
+    transport = ASGITransport(app=app)
+    headers = {"X-Van-Internal-Token": "test-internal-token"}
+    async with AsyncClient(transport=transport, base_url="http://test", headers=headers) as internal:
+        put = await internal.put(
+            "/v1/projects/dde/truth",
+            json={"truth": {"project": "dde"}, "truth_sha": "abc", "repo_sha": "def"},
+        )
+        assert put.status_code == 200
+
+        general = await internal.get("/v1/projects")
+        assert general.status_code == 401
+        assert general.json()["detail"] == "ingress_auth_failed"

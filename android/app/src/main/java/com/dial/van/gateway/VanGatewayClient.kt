@@ -12,6 +12,8 @@ import org.json.JSONObject
 import java.net.HttpURLConnection
 import java.net.URL
 import java.net.URLEncoder
+import java.security.SecureRandom
+import android.util.Base64
 import java.nio.charset.StandardCharsets
 import javax.crypto.Mac
 import javax.crypto.spec.SecretKeySpec
@@ -74,7 +76,30 @@ class VanGatewayClient(context: Context) {
         get() = prefs.getString(KEY_SECRET, null)
         set(value) = prefs.edit().putString(KEY_SECRET, value).apply()
 
+    private var ingressToken: String?
+        get() = prefs.getString(KEY_INGRESS_TOKEN, null)
+        set(value) = prefs.edit().putString(KEY_INGRESS_TOKEN, value).apply()
+
+    fun hasIngressToken(): Boolean = !ingressToken.isNullOrBlank()
+
+    fun configureIngress(baseUrl: String, token: String) {
+        val normalizedToken = token.trim()
+        require(normalizedToken.length >= MIN_INGRESS_TOKEN_CHARS) { "ingress_token_too_short" }
+        val normalizedUrl = normalizeGatewayBaseUrl(baseUrl)
+        prefs.edit()
+            .putString(KEY_BASE, normalizedUrl)
+            .putString(KEY_INGRESS_TOKEN, normalizedToken)
+            .apply()
+    }
+
     fun isEnrolled(): Boolean = !deviceId.isNullOrBlank() && !deviceSecret.isNullOrBlank()
+
+    suspend fun enrollThisDevice(label: String = "android"): JSONObject {
+        val bytes = ByteArray(32).also { SecureRandom().nextBytes(it) }
+        val secret = Base64.encodeToString(bytes, Base64.URL_SAFE or Base64.NO_WRAP or Base64.NO_PADDING)
+        val id = "android-${java.util.UUID.randomUUID()}"
+        return enroll(id, secret, label)
+    }
 
     suspend fun enroll(deviceId: String, deviceSecret: String, label: String = "android"): JSONObject =
         withContext(Dispatchers.IO) {
@@ -212,6 +237,7 @@ class VanGatewayClient(context: Context) {
         val conn = (URL("$baseUrl$path").openConnection() as HttpURLConnection).apply {
             requestMethod = "POST"
             setRequestProperty("Content-Type", "application/json")
+            applyIngressAuth(this)
             doOutput = true
             connectTimeout = 15_000
             readTimeout = 60_000
@@ -226,9 +252,15 @@ class VanGatewayClient(context: Context) {
 
     private fun getJson(path: String): JSONObject = JSONObject(rawGet(path))
 
+    private fun applyIngressAuth(conn: HttpURLConnection) {
+        val token = ingressToken?.takeIf { it.isNotBlank() } ?: error("ingress_token_unconfigured")
+        conn.setRequestProperty("X-Van-Ingress-Token", token)
+    }
+
     private fun rawGet(path: String): String {
         val conn = (URL("$baseUrl$path").openConnection() as HttpURLConnection).apply {
             requestMethod = "GET"
+            applyIngressAuth(this)
             connectTimeout = 15_000
             readTimeout = 30_000
         }
@@ -248,6 +280,8 @@ class VanGatewayClient(context: Context) {
         private const val KEY_BASE = "base_url"
         private const val KEY_DEVICE = "device_id"
         private const val KEY_SECRET = "device_secret"
+        private const val KEY_INGRESS_TOKEN = "ingress_token"
+        private const val MIN_INGRESS_TOKEN_CHARS = 32
     }
 }
 

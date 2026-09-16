@@ -23,6 +23,7 @@ def _clear_settings_cache(tmp_path, monkeypatch):
     monkeypatch.setenv("VAN_HERMES_BASE_URL", "http://hermes.test")
     monkeypatch.setenv("VAN_GOOGLE_TOKEN_FERNET_KEY", Fernet.generate_key().decode())
     monkeypatch.setenv("VAN_DEVICE_SECRET_FERNET_KEY", Fernet.generate_key().decode())
+    monkeypatch.setenv("VAN_INGRESS_TOKEN", "test-ingress-token-0123456789abcdef")
     get_settings.cache_clear()
     yield
     get_settings.cache_clear()
@@ -42,7 +43,7 @@ async def client(monkeypatch):
     monkeypatch.setattr(app.state.orchestrator.hermes, "create_run", fake_create_run)
 
     transport = ASGITransport(app=app)
-    async with AsyncClient(transport=transport, base_url="http://test") as ac:
+    async with AsyncClient(transport=transport, base_url="http://test", headers={"X-Van-Ingress-Token": "test-ingress-token-0123456789abcdef"}) as ac:
         # trigger lifespan
         async with app.router.lifespan_context(app):
             yield ac, app
@@ -316,3 +317,25 @@ async def test_health_exposes_workspace_ready_truth(client):
     assert mesh["workspace_api_state"] == "READY"
     assert mesh["workspace_api_ready"] is True
     assert mesh["ready_capabilities"] >= 1
+
+
+@pytest.mark.asyncio
+async def test_ingress_bearer_required_for_external_surface(client):
+    _ac, app = client
+    transport = ASGITransport(app=app)
+    async with AsyncClient(transport=transport, base_url="http://test") as unauthenticated:
+        denied = await unauthenticated.get("/health")
+        assert denied.status_code == 401
+        assert denied.json()["detail"] == "ingress_auth_failed"
+
+        wrong = await unauthenticated.get(
+            "/health",
+            headers={"X-Van-Ingress-Token": "wrong-token-that-is-definitely-not-valid"},
+        )
+        assert wrong.status_code == 401
+
+        allowed = await unauthenticated.get(
+            "/health",
+            headers={"X-Van-Ingress-Token": "test-ingress-token-0123456789abcdef"},
+        )
+        assert allowed.status_code == 200

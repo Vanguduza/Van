@@ -1,9 +1,11 @@
 from __future__ import annotations
 
 from contextlib import asynccontextmanager
+import hmac
 from pathlib import Path
 
-from fastapi import FastAPI, Header, HTTPException
+from fastapi import FastAPI, Header, HTTPException, Request
+from fastapi.responses import JSONResponse
 from pydantic import BaseModel, Field
 
 from van_gateway.attention.engine import AttentionEngine
@@ -140,6 +142,39 @@ def create_app() -> FastAPI:
     app.state.decisions = decisions
     app.state.projects = projects
     app.state.reminders = reminders
+
+    def internal_control_route(method: str, path: str) -> bool:
+        if method == "PUT" and path.startswith("/v1/projects/") and path.endswith("/truth"):
+            return True
+        if path in {
+            "/v1/google/test-transport",
+            "/v1/google/gmail/search",
+            "/v1/google/gmail/send",
+            "/v1/google/connect",
+            "/v1/google/revoke",
+            "/v1/google/jobs/plan",
+        }:
+            return True
+        return path.startswith("/v1/google/jobs/")
+
+    @app.middleware("http")
+    async def require_ingress_auth(request: Request, call_next):
+        configured = settings.ingress_token.strip()
+        presented = request.headers.get("X-Van-Ingress-Token", "")
+        if configured and presented and hmac.compare_digest(configured, presented):
+            return await call_next(request)
+
+        # Hermes internal control retains its independent machine credential on
+        # privileged control routes; it does not become a general client bearer.
+        if internal_control_route(request.method, request.url.path):
+            expected_internal = settings.internal_control_token.strip()
+            presented_internal = request.headers.get("X-Van-Internal-Token", "")
+            if expected_internal and presented_internal and hmac.compare_digest(expected_internal, presented_internal):
+                return await call_next(request)
+
+        if not configured:
+            return JSONResponse(status_code=503, content={"detail": "ingress_auth_unconfigured"})
+        return JSONResponse(status_code=401, content={"detail": "ingress_auth_failed"})
 
     def require_internal_control(x_van_internal_token: str | None) -> None:
         try:

@@ -25,6 +25,7 @@ def _env(tmp_path, monkeypatch):
     monkeypatch.setenv("VAN_HERMES_BASE_URL", "http://hermes.test")
     monkeypatch.setenv("VAN_GOOGLE_TOKEN_FERNET_KEY", Fernet.generate_key().decode())
     monkeypatch.setenv("VAN_DEVICE_SECRET_FERNET_KEY", Fernet.generate_key().decode())
+    monkeypatch.setenv("VAN_INGRESS_TOKEN", "test-ingress-token-0123456789abcdef")
     get_settings.cache_clear()
     yield
     get_settings.cache_clear()
@@ -43,7 +44,7 @@ async def client(monkeypatch):
     monkeypatch.setattr(app.state.orchestrator.hermes, "health", fake_health)
     monkeypatch.setattr(app.state.orchestrator.hermes, "create_run", fake_run)
     transport = ASGITransport(app=app)
-    async with AsyncClient(transport=transport, base_url="http://test") as ac:
+    async with AsyncClient(transport=transport, base_url="http://test", headers={"X-Van-Ingress-Token": "test-ingress-token-0123456789abcdef"}) as ac:
         async with app.router.lifespan_context(app):
             yield ac, app
 

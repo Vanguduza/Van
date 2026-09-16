@@ -14,6 +14,7 @@ class Settings(BaseSettings):
     hermes_profile: str = "van"
     hermes_bearer_token: str = ""
     internal_control_token: str = ""  # Hermes→gateway privileged Google job API
+    ingress_token: str = ""  # Owner-device bearer gate for externally reachable HTTP routes
     device_secret_fernet_key: str = ""  # Android HMAC secrets encrypted at rest
     owner_intent_max_age_seconds: int = 24 * 60 * 60
     attention_budget_per_hour: int = 12

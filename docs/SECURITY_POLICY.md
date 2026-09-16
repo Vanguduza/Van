@@ -4,8 +4,9 @@ Status: CANONICAL
 
 ## Owner device authentication
 
-- One-time enrollment of owner device with signed device identity.
-- Revocation invalidates outstanding grants for that device.
+- External gateway HTTP routes require the high-entropy owner ingress bearer in `X-Van-Ingress-Token`; a tunnel hostname alone grants no authority.
+- One-time enrollment creates a per-device HMAC secret, encrypted at rest with a dedicated Fernet key and rehydrated only inside the gateway process.
+- Revocation removes the usable secret from memory and prevents restart rehydration.
 - Owner-directed mutations are signed, timestamped, replay-protected and idempotent.
 
 ## Hermes execution boundary
@@ -38,7 +39,7 @@ Forbidden A5 patterns include exporting/copying Google sessions or cookies, reus
 
 ## Secrets
 
-Never log or prompt-inject access/refresh tokens, API keys/client secrets, OTPs/passwords/private keys, full auth headers, service-account private keys, browser cookies/session tokens, or `VAN_INTERNAL_CONTROL_TOKEN`.
+Never log or prompt-inject access/refresh tokens, API keys/client secrets, OTPs/passwords/private keys, full auth headers, service-account private keys, browser cookies/session tokens, `VAN_INTERNAL_CONTROL_TOKEN`, `VAN_INGRESS_TOKEN`, device HMAC secrets, or Fernet keys.
 
 Workspace refresh tokens are encrypted at rest. Live Workspace calls exchange refresh tokens for short-lived access tokens inside the gateway. Neither token is forwarded to Hermes prompts.
 

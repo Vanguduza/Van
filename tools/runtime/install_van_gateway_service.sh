@@ -38,6 +38,22 @@ KEYPY
   unset DEVICE_KEY
 fi
 
+# Public tunnel access is gated again at the VAN application boundary.
+# Generate the owner ingress bearer once and keep it out of logs/process args.
+if ! grep -Eq '^VAN_INGRESS_TOKEN=.{32,}$' "$GATEWAY_ENV"; then
+  INGRESS_TOKEN="$(python3 - <<'INGRESSPY'
+import secrets
+print(secrets.token_urlsafe(48))
+INGRESSPY
+)"
+  TMP_ENV="$(mktemp "$CONFIG_ROOT/gateway.env.XXXXXX")"
+  grep -Ev '^VAN_INGRESS_TOKEN=' "$GATEWAY_ENV" > "$TMP_ENV" || true
+  printf 'VAN_INGRESS_TOKEN=%s\n' "$INGRESS_TOKEN" >> "$TMP_ENV"
+  install -m 0600 "$TMP_ENV" "$GATEWAY_ENV"
+  rm -f "$TMP_ENV"
+  unset INGRESS_TOKEN
+fi
+
 STAGE="$(mktemp -d "$STATE_ROOT/runtime.stage.XXXXXX")"
 trap 'rm -rf "$STAGE"' EXIT
 mkdir -p "$STAGE/backend"
@@ -59,13 +75,29 @@ trap - EXIT
 
 install -m 0644 "$UNIT_SRC" "$UNIT_DST"
 systemctl --user daemon-reload
-systemctl --user enable --now van-gateway.service
+systemctl --user enable van-gateway.service >/dev/null
+systemctl --user restart van-gateway.service
 
 for _ in {1..20}; do
-  if "$VENV/bin/python" - <<'HEALTH'
+  if VAN_GATEWAY_ENV="$GATEWAY_ENV" "$VENV/bin/python" - <<'HEALTH'
+import os
 import urllib.request
+from pathlib import Path
+
+env_path = Path(os.environ["VAN_GATEWAY_ENV"])
+token = ""
+for line in env_path.read_text(encoding="utf-8").splitlines():
+    if line.startswith("VAN_INGRESS_TOKEN="):
+        token = line.split("=", 1)[1].strip()
+        break
+if not token:
+    raise SystemExit(1)
+request = urllib.request.Request(
+    "http://127.0.0.1:8787/health",
+    headers={"X-Van-Ingress-Token": token},
+)
 try:
-    with urllib.request.urlopen("http://127.0.0.1:8787/health", timeout=2) as r:
+    with urllib.request.urlopen(request, timeout=2) as r:
         raise SystemExit(0 if r.status == 200 else 1)
 except Exception:
     raise SystemExit(1)
