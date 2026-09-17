@@ -148,9 +148,8 @@ async def test_a4_requires_approval(client):
     ac, app = client
     await _pair_for_test(ac, app, "dev-4", "s4")
     issued = int(time.time())
-    text = "delete production"
-    canonical = AuthService.canonical_command("c5", "idem-a4", "dev-4", issued, text, "A4", "dde")
-    # Cache project truth so we get past truth gate only after approval check — approval checked first
+    text = "halt autonomous trading"
+    canonical = AuthService.canonical_command("c5", "idem-a4", "dev-4", issued, text, "A1", None)
     req = {
         "command_id": "c5",
         "idempotency_key": "idem-a4",
@@ -158,12 +157,15 @@ async def test_a4_requires_approval(client):
         "issued_at_unix": issued,
         "signature": app.state.auth.sign("dev-4", canonical),
         "text": text,
-        "action_class": "A4",
-        "project_id": "dde",
+        "action_class": "A1",
     }
     body = (await ac.post("/v1/commands", json=req)).json()
     assert body["status"] == "approval_required"
     assert body["requires_approval"] is True
+    assert body["effective_action_class"] == "A4"
+    assert body["resolved_action_id"] == "trading.halt"
+    assert body["no_stale_replay"] is True
+    assert body["max_age_seconds"] == 5
 
 
 @pytest.mark.asyncio
