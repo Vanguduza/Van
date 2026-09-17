@@ -138,12 +138,12 @@ async def test_a3_mutation_for_unknown_project_is_degraded(client, monkeypatch):
 
 
 @pytest.mark.asyncio
-async def test_a4_with_approval_still_requires_project_truth(client):
+async def test_legacy_a4_approval_token_does_not_bypass_crypto_proof(client):
     ac, app = client
     await _enroll(ac, app, "dev-iso-2", "s2")
     issued = int(time.time())
-    text = "wipe staging"
-    canonical = AuthService.canonical_command("c-iso-a4", "k-iso-a4", "dev-iso-2", issued, text, "A4", "gtr")
+    text = "halt autonomous trading"
+    canonical = AuthService.canonical_command("c-iso-a4", "k-iso-a4", "dev-iso-2", issued, text, "A1", "gtr")
     req = {
         "command_id": "c-iso-a4",
         "idempotency_key": "k-iso-a4",
@@ -151,13 +151,15 @@ async def test_a4_with_approval_still_requires_project_truth(client):
         "issued_at_unix": issued,
         "signature": app.state.auth.sign("dev-iso-2", canonical),
         "text": text,
-        "action_class": "A4",
+        "action_class": "A1",
         "project_id": "gtr",
         "approval_token": "owner-approved",
     }
     body = (await ac.post("/v1/commands", json=req)).json()
-    assert body["status"] == "degraded"
-    assert "STALE_PROJECT_TRUTH" in body["degraded"]
+    assert body["status"] == "approval_required"
+    assert body["requires_approval"] is True
+    assert body["resolved_action_id"] == "trading.halt"
+    assert body["effective_action_class"] == "A4"
 
 
 @pytest.mark.asyncio
