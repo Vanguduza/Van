@@ -13,8 +13,11 @@ import androidx.compose.animation.core.rememberInfiniteTransition
 import androidx.compose.animation.core.tween
 import androidx.compose.foundation.Canvas
 import androidx.compose.foundation.Image
+import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.fillMaxSize
+import androidx.compose.foundation.layout.offset
+import androidx.compose.foundation.layout.size
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
@@ -32,26 +35,19 @@ import androidx.compose.ui.graphics.ColorMatrix
 import androidx.compose.ui.graphics.Path
 import androidx.compose.ui.graphics.drawscope.DrawScope
 import androidx.compose.ui.graphics.drawscope.Stroke
+import androidx.compose.ui.graphics.graphicsLayer
 import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.semantics.contentDescription
 import androidx.compose.ui.semantics.semantics
 import androidx.compose.ui.tooling.preview.Preview
-import androidx.compose.foundation.background
-import androidx.compose.foundation.layout.size
 import androidx.compose.ui.unit.dp
 import java.io.IOException
 import kotlin.math.PI
 import kotlin.math.min
 import kotlin.math.sin
 
-/**
- * Entry point for every Van appearance.
- *
- * Resolves the renderer once per composition target and degrades to the interim Canvas
- * character whenever Rive cannot be trusted to paint a truthful Van.
- */
 @Composable
 fun VanAvatar(
     state: VanVisualState,
@@ -88,18 +84,15 @@ fun VanAvatar(
     }
 }
 
-/**
- * Owner-supplied bitmap pose.
- *
- * Per §1 the character is the solid anchor, so the bitmap is drawn opaque — the only
- * modulation permitted is §6's truthful muting for OFFLINE and DEGRADED, applied with the same
- * [VanStatusPalette] desaturation and dim values the Canvas character uses.
- */
+/** Owner-art fallback stays opaque but receives tiny state-aware micro-motion. */
 @Composable
 fun VanOwnerArtAvatar(state: VanVisualState, modifier: Modifier = Modifier) {
     val palette = VanStatusPalette.forState(state.durableState)
     val resId = VanStateArt.drawableFor(state.durableState) ?: return
     val description = vanContentDescription(state)
+    val reducedMotion = rememberReducedMotion()
+    val phase = vanIdlePhase(state.durableState, reducedMotion)
+    val motion = VanCharacterMotion.sample(state, phase, reducedMotion)
 
     val filter = if (palette.desaturation > 0.01f) {
         ColorFilter.colorMatrix(ColorMatrix().apply { setToSaturation(1f - palette.desaturation) })
@@ -110,7 +103,13 @@ fun VanOwnerArtAvatar(state: VanVisualState, modifier: Modifier = Modifier) {
     Image(
         painter = painterResource(id = resId),
         contentDescription = description,
-        modifier = modifier,
+        modifier = modifier
+            .offset(x = motion.offsetXDp.dp, y = motion.offsetYDp.dp)
+            .graphicsLayer {
+                rotationZ = motion.rotationDeg
+                scaleX = motion.scale
+                scaleY = motion.scale
+            },
         contentScale = ContentScale.Fit,
         alpha = palette.dim,
         colorFilter = filter,
@@ -118,8 +117,8 @@ fun VanOwnerArtAvatar(state: VanVisualState, modifier: Modifier = Modifier) {
 }
 
 /**
- * Van in his interaction shell, composed in the order fixed by §10:
- * aura bloom → filaments → character → orb, with the glass supplied by the caller underneath.
+ * Complete VAN embodiment. Character pose follows local activity; Zone B follows that same local
+ * activity; Zone C independently follows [VanVisualState.resolvedSemanticState].
  */
 @Composable
 fun VanEmbodiment(
@@ -128,23 +127,22 @@ fun VanEmbodiment(
     presentation: VanPresentation = VanPresentation.COMPACT,
     budget: VanEffectBudget = VanEffectBudget.FULL,
     onDecision: (VanRenderDecision) -> Unit = {},
-    /** Body size relative to the aura canvas. Rest uses hit/avatar so Zone C has air. */
     characterFraction: Float = 1f,
 ) {
-    val spec = VanAuraSpecs.forState(state.durableState, budget)
+    val activitySpec = VanAuraSpecs.forState(state.durableState, budget)
+    val semanticSpec = VanAuraSpecs.forState(state.resolvedSemanticState, budget)
     val phase = vanIdlePhase(state.durableState, !budget.allowMotion)
     val body = characterFraction.coerceIn(0.40f, 1f)
 
     Box(modifier = modifier, contentAlignment = Alignment.Center) {
-        // 5 & 6. Aura bloom and electrical filaments, behind Van and in front of the glass.
         VanAuraLayer(
-            spec = spec,
+            spec = activitySpec,
+            semanticSpec = semanticSpec,
             phase = phase,
             budget = budget,
             characterScale = body,
             modifier = Modifier.matchParentSize(),
         )
-        // 7 & 8. Van and his orb — the art poses already carry the orb.
         VanAvatar(
             state = state,
             modifier = Modifier.fillMaxSize(body),
@@ -154,7 +152,6 @@ fun VanEmbodiment(
     }
 }
 
-/** Resolves §11's effect budget from live device signals. */
 @Composable
 fun rememberVanEffectBudget(): VanEffectBudget {
     val context = LocalContext.current
@@ -213,10 +210,6 @@ private fun riveRuntimeAvailable(): Boolean = try {
     false
 }
 
-/**
- * True when the owner has turned system animations off. Van then holds a still, readable
- * pose instead of breathing, spinning or blinking.
- */
 @Composable
 fun rememberReducedMotion(): Boolean {
     val context = LocalContext.current
@@ -231,11 +224,6 @@ fun rememberReducedMotion(): Boolean {
     }
 }
 
-/**
- * The interim character. Every element traces to the locked identity, and the status layer
- * stays inside the acceptance matrix bounds: bounded motion, restrained glow, and truthful
- * muting when offline or degraded.
- */
 @Composable
 fun VanCanvasAvatar(
     state: VanVisualState,
@@ -258,7 +246,6 @@ fun VanCanvasAvatar(
     }
 }
 
-/** Idle clock. Alert states tick faster but never leave the bounded-motion range. */
 @Composable
 private fun vanIdlePhase(state: VanDurableState, reducedMotion: Boolean): Float {
     if (reducedMotion) return NEUTRAL_PHASE
@@ -291,7 +278,6 @@ private fun vanIdlePhase(state: VanDurableState, reducedMotion: Boolean): Float 
     return value
 }
 
-/** One unhurried blink at the end of each idle cycle. */
 private fun blinkFor(phase: Float): Float {
     val start = 0.93f
     if (phase < start) return 0f
@@ -304,7 +290,6 @@ internal fun vanContentDescription(state: VanVisualState): String {
     return "Van assistant, $label"
 }
 
-/** Paints a [VanScene] program, fitted and centred so proportions never stretch. */
 fun DrawScope.drawVanScene(ops: List<VanDrawOp>) {
     val s = min(size.width, size.height)
     if (s <= 0f) return

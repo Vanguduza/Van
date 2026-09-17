@@ -1,0 +1,16 @@
+{
+  "schema_version": 1,
+  "certification": "VAN_GEMINI_RUNTIME_LIVE_CANARY",
+  "observed_at": "2026-09-17T04:06:03.269793+00:00",
+  "provider": "gemini",
+  "model_requested": "gemini-2.5-flash",
+  "runtime": "Hermes profile van",
+  "expected_response": "VAN_GEMINI_CANARY_OK",
+  "inference_completed": false,
+  "state": "AUTH_REQUIRED",
+  "failure_class": "credential_unavailable",
+  "failure_detail": "Hermes reported no usable credentials for provider gemini; GOOGLE_API_KEY or GEMINI_API_KEY required.",
+  "workspace_oauth_reused": false,
+  "stitch_access_token_reused": false,
+  "contains_secrets": false
+}

@@ -8,7 +8,7 @@ from typing import Any, AsyncIterator
 
 import aiosqlite
 
-SCHEMA_VERSION = 2
+SCHEMA_VERSION = 4
 
 MIGRATIONS: dict[int, str] = {
     1: """
@@ -186,6 +186,27 @@ MIGRATIONS: dict[int, str] = {
 
     CREATE INDEX IF NOT EXISTS idx_google_artifacts_job
       ON google_artifacts(job_id, created_at_unix);
+    """,
+    3: """
+    ALTER TABLE devices ADD COLUMN encrypted_secret TEXT;
+    """,
+    4: """
+    ALTER TABLE devices ADD COLUMN access_token_hash TEXT;
+
+    CREATE UNIQUE INDEX IF NOT EXISTS idx_devices_access_token_hash
+      ON devices(access_token_hash)
+      WHERE access_token_hash IS NOT NULL;
+
+    CREATE TABLE IF NOT EXISTS pairing_tickets (
+      ticket_hash TEXT PRIMARY KEY,
+      label TEXT,
+      expires_at_unix INTEGER NOT NULL,
+      used_at_unix INTEGER,
+      created_at_unix INTEGER NOT NULL
+    );
+
+    CREATE INDEX IF NOT EXISTS idx_pairing_tickets_expiry
+      ON pairing_tickets(expires_at_unix, used_at_unix);
     """,
 }
 

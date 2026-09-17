@@ -1,7 +1,8 @@
 #!/usr/bin/env python3
-"""Copy tools/ci/github-actions-ci.yml into .github/workflows/ci.yml when allowed.
+"""Install the canonical VAN workflow at .github/workflows/van-ci.yml.
 
-Fails closed if the credential lacks workflow scope (GitHub rejects the push).
+The source template is kept byte-for-byte aligned with the live workflow. The tool is idempotent
+and fails closed if the credential lacks workflow scope when --commit-push is requested.
 """
 
 from __future__ import annotations
@@ -14,12 +15,12 @@ from pathlib import Path
 
 ROOT = Path(__file__).resolve().parents[2]
 SRC = ROOT / "tools" / "ci" / "github-actions-ci.yml"
-DST = ROOT / ".github" / "workflows" / "ci.yml"
+DST = ROOT / ".github" / "workflows" / "van-ci.yml"
 
 
 def main() -> int:
     parser = argparse.ArgumentParser()
-    parser.add_argument("--apply", action="store_true", help="Copy workflow into .github/workflows/")
+    parser.add_argument("--apply", action="store_true", help="Install the canonical van-ci workflow")
     parser.add_argument("--commit-push", action="store_true", help="Commit and push after apply (requires workflow scope)")
     args = parser.parse_args()
 
@@ -28,20 +29,24 @@ def main() -> int:
         return 2
 
     if not args.apply:
-        print(f"READY_TO_APPLY source={SRC} dest={DST}")
+        status = "ALREADY_CURRENT" if DST.exists() and DST.read_bytes() == SRC.read_bytes() else "READY_TO_APPLY"
+        print(f"{status} source={SRC} dest={DST}")
         print("Run with --apply (and optionally --commit-push) using a token with workflow scope.")
         return 0
 
     DST.parent.mkdir(parents=True, exist_ok=True)
-    shutil.copy2(SRC, DST)
-    print(f"APPLIED {DST}")
+    if DST.exists() and DST.read_bytes() == SRC.read_bytes():
+        print(f"ALREADY_CURRENT {DST}")
+    else:
+        shutil.copy2(SRC, DST)
+        print(f"APPLIED {DST}")
 
     if not args.commit_push:
         return 0
 
     subprocess.check_call(["git", "add", str(DST.relative_to(ROOT))], cwd=ROOT)
     commit = subprocess.run(
-        ["git", "commit", "-m", "Install canonical GitHub Actions workflow path"],
+        ["git", "commit", "-m", "Install canonical VAN GitHub Actions workflow"],
         cwd=ROOT,
         capture_output=True,
         text=True,

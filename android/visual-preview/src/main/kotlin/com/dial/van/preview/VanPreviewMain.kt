@@ -8,12 +8,19 @@ import javax.imageio.ImageIO
  * Writes the owner-facing preview sheets.
  *
  * Run with `./gradlew :visual-preview:renderVanPreviews` from `android/`.
+ *
+ * The output directory is rebuilt from scratch on every run. This prevents historical evidence
+ * directories (for example Rev 2.1) from being uploaded beside current Rev 2.3 evidence and being
+ * mistaken for part of the active visual authority.
  */
 fun main(args: Array<String>) {
     val outputDir = args.firstOrNull()
         ?.let(::File)
         ?: File(AwtVanRenderer.repoRoot(), "artifacts/release/preview")
-    outputDir.mkdirs()
+    if (outputDir.exists() && !outputDir.deleteRecursively()) {
+        error("Unable to clean stale preview evidence at ${outputDir.absolutePath}")
+    }
+    check(outputDir.mkdirs()) { "Unable to create preview output directory ${outputDir.absolutePath}" }
 
     val sheets = listOf(
         "van_floating_overlay_preview.png" to VanPreviewSheets.floatingOverlaySheet(),
@@ -25,6 +32,7 @@ fun main(args: Array<String>) {
         "van_command_centre.png" to VanPreviewSheets.commandCentreSheet(),
         "van_glass_tokens.png" to VanPreviewSheets.glassTokenSheet(),
         "van_aura_topology.png" to VanPreviewSheets.auraTopologySheet(),
+        "van_orthogonal_presence.png" to VanEvidenceMatrix.orthogonalPresenceBoard(),
     )
 
     println(
@@ -41,5 +49,9 @@ fun main(args: Array<String>) {
         println("wrote ${file.absolutePath} (${image.width}x${image.height}, ${file.length()} bytes)")
     }
     VanEvidenceMatrix.writeAll(outputDir)
-    println("wrote named Rev 2.1 evidence matrix under ${File(outputDir, "rev21").absolutePath}")
+    VanCommandCentreEvidence.reconcile(outputDir)
+    println(
+        "wrote named Rev ${VanEvidenceMatrix.AUTHORITY_REVISION} evidence matrix under " +
+            File(outputDir, VanEvidenceMatrix.EVIDENCE_DIR).absolutePath,
+    )
 }

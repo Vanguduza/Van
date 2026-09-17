@@ -20,13 +20,11 @@ import androidx.compose.ui.unit.dp
 import kotlin.math.min
 
 /**
- * Optical glass surface.
+ * Optical glass used only for VAN's interface surfaces.
  *
- * Rev 2.1 layers: absorptive tint, shaping gradient, grain, inner highlight, structural edge,
- * selective specular, aura contamination. A uniform glowing outline is forbidden.
- *
- * Live backdrop blur is a window-level capability requested by `FloatingOverlayService`.
- * When unavailable this surface keeps shaping, grain and specular on a heavier pre-tint.
+ * Rev 3 keeps a deep absorber for readability, then introduces a baby-cyan optical body,
+ * local specular/refraction and fine grain. The character renderer is deliberately not nested
+ * inside this material by the floating surface composition.
  */
 @Composable
 fun VanGlassSurface(
@@ -35,7 +33,9 @@ fun VanGlassSurface(
     content: @Composable BoxScope.() -> Unit,
 ) {
     val shape = RoundedCornerShape(style.cornerRadiusDp.dp)
-    val tint = Color(VanGlassTokens.TINT_NAVY)
+    val absorber = Color(VanGlassTokens.TINT_NAVY)
+    val babyCyan = Color(VanGlassTokens.BABY_CYAN)
+    val iceCyan = Color(VanGlassTokens.ICE_CYAN)
     val edge = Color(style.borderColor)
 
     Box(
@@ -44,12 +44,32 @@ fun VanGlassSurface(
             .clip(shape)
             .drawBehind {
                 val radius = CornerRadius(style.cornerRadiusDp.dp.toPx())
-                drawRoundRect(color = tint.copy(alpha = style.backgroundAlpha), cornerRadius = radius)
 
+                // Readability absorber. This belongs to the board, never to VAN's body.
+                drawRoundRect(
+                    color = absorber.copy(alpha = style.backgroundAlpha),
+                    cornerRadius = radius,
+                )
+
+                // Baby-cyan optical body. Concentrated on the character-facing/top-left side.
+                drawRoundRect(
+                    brush = Brush.linearGradient(
+                        colors = listOf(
+                            babyCyan.copy(alpha = style.cyanTintAlpha),
+                            Color(VanGlassTokens.STRUCTURAL_CYAN).copy(alpha = style.cyanTintAlpha * 0.52f),
+                            Color.Transparent,
+                        ),
+                        start = Offset.Zero,
+                        end = Offset(size.width * 0.92f, size.height * 0.82f),
+                    ),
+                    cornerRadius = radius,
+                )
+
+                // Optical shaping rather than a uniform glowing border.
                 drawRoundRect(
                     brush = Brush.verticalGradient(
                         colors = listOf(
-                            Color.White.copy(alpha = 0.06f * (style.innerHighlightAlpha / 0.11f).coerceIn(0.4f, 1.4f)),
+                            iceCyan.copy(alpha = 0.055f + style.innerHighlightAlpha * 0.32f),
                             Color.Transparent,
                             Color.Black.copy(alpha = 0.12f),
                         ),
@@ -81,7 +101,7 @@ fun VanGlassSurface(
                     drawRoundRect(
                         brush = Brush.linearGradient(
                             colors = listOf(
-                                Color.White.copy(alpha = style.innerHighlightAlpha),
+                                iceCyan.copy(alpha = style.innerHighlightAlpha),
                                 Color.Transparent,
                             ),
                             start = Offset.Zero,
@@ -105,26 +125,31 @@ fun VanGlassSurface(
                     )
                 }
 
-                val structural = style.structuralEdgeAlpha
-                if (structural > 0f) {
+                if (style.structuralEdgeAlpha > 0f) {
                     drawRoundRect(
-                        color = edge.copy(alpha = structural),
+                        color = edge.copy(alpha = style.structuralEdgeAlpha),
                         cornerRadius = radius,
                         style = Stroke(width = style.borderWidthDp.dp.toPx()),
                     )
                 }
 
-                val specular = style.specularAlpha
-                if (specular > 0f) {
+                if (style.specularAlpha > 0f) {
                     val inset = min(size.minDimension * 0.04f, 8f)
+                    val arcSize = Size(
+                        (size.width - inset * 2f).coerceAtLeast(1f),
+                        (size.height - inset * 2f).coerceAtLeast(1f),
+                    )
                     drawArc(
-                        color = Color.White.copy(alpha = specular),
+                        color = iceCyan.copy(alpha = style.specularAlpha),
                         startAngle = 200f,
                         sweepAngle = 78f,
                         useCenter = false,
                         topLeft = Offset(inset, inset),
-                        size = Size(size.width - inset * 2f, size.height - inset * 2f),
-                        style = Stroke(width = style.borderWidthDp.dp.toPx() * 1.6f, cap = StrokeCap.Round),
+                        size = arcSize,
+                        style = Stroke(
+                            width = style.borderWidthDp.dp.toPx() * 1.6f,
+                            cap = StrokeCap.Round,
+                        ),
                     )
                     if (style.activeGlowAlpha > 0f) {
                         drawArc(
@@ -133,8 +158,11 @@ fun VanGlassSurface(
                             sweepAngle = 52f,
                             useCenter = false,
                             topLeft = Offset(inset, inset),
-                            size = Size(size.width - inset * 2f, size.height - inset * 2f),
-                            style = Stroke(width = style.borderWidthDp.dp.toPx() * 2.2f, cap = StrokeCap.Round),
+                            size = arcSize,
+                            style = Stroke(
+                                width = style.borderWidthDp.dp.toPx() * 2.2f,
+                                cap = StrokeCap.Round,
+                            ),
                         )
                     }
                 }
@@ -143,14 +171,15 @@ fun VanGlassSurface(
     )
 }
 
-/** Full-bleed glass used as a Command Centre backdrop. */
+/** Full-bleed Command Centre optical backing. */
 @Composable
 fun VanGlassBackdrop(style: VanGlassStyle, modifier: Modifier = Modifier) {
     Box(
         modifier = modifier
             .fillMaxSize()
             .drawBehind {
-                drawRect(Color(VanGlassTokens.TINT_NAVY).copy(alpha = style.backgroundAlpha))
+                drawRect(Color(VanGlassTokens.TINT_DEEP).copy(alpha = style.backgroundAlpha))
+                drawRect(Color(VanGlassTokens.BABY_CYAN).copy(alpha = style.cyanTintAlpha * 0.35f))
             },
     )
 }

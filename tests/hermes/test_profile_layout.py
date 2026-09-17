@@ -4,6 +4,8 @@ from __future__ import annotations
 
 from pathlib import Path
 import json
+import os
+import subprocess
 
 REPO_ROOT = Path(__file__).resolve().parents[2]
 HERMES_ROOT = REPO_ROOT / "hermes"
@@ -103,6 +105,96 @@ def test_google_capability_registry_is_versioned_and_hermes_owned():
         assert required in ids
 
 
+def test_antigravity_uses_isolated_delegated_google_identity():
+    registry = json.loads((REPO_ROOT / "registries" / "google_capabilities.json").read_text(encoding="utf-8"))
+    policy = registry["identity_policy"]
+    assert policy["canonical_identity"] == "owner_google_account"
+    delegated = policy["delegated_identities"]["antigravity_worker_account"]
+    assert delegated["allowed_capabilities"] == ["antigravity"]
+    assert delegated["owner_authority"] is False
+    assert delegated["workspace_access"] is False
+    by_id = {item["id"]: item for item in registry["capabilities"]}
+    assert by_id["antigravity"]["identity_alias"] == "antigravity_worker_account"
+    assert all(item["identity_alias"] == "owner_google_account" for cid, item in by_id.items() if cid != "antigravity")
+    wrapper = PROFILE_ROOT / "bin" / "antigravity-worker"
+    text = wrapper.read_text(encoding="utf-8")
+    assert wrapper.is_file()
+    assert "VAN_ANTIGRAVITY_HOME" in text
+    assert "export HOME" in text
+
+
+def test_antigravity_wrapper_uses_only_worker_home(tmp_path):
+    fake_bin = tmp_path / "bin"
+    fake_bin.mkdir()
+    fake = fake_bin / "antigravity"
+    fake.write_text('#!/usr/bin/env bash\nprintf "%s" "$HOME"\n', encoding="utf-8")
+    fake.chmod(0o755)
+    worker_home = tmp_path / "worker-home"
+    env = os.environ.copy()
+    env["PATH"] = f"{fake_bin}:{env.get('PATH', '')}"
+    env["HOME"] = str(tmp_path / "canonical-home")
+    env["VAN_ANTIGRAVITY_HOME"] = str(worker_home)
+    wrapper = PROFILE_ROOT / "bin" / "antigravity-worker"
+    result = subprocess.run([str(wrapper), "models"], check=True, text=True, capture_output=True, env=env)
+    assert result.stdout == str(worker_home)
+    assert worker_home.stat().st_mode & 0o777 == 0o700
+
+
+def test_antigravity_wrapper_falls_back_to_host_local_bin(tmp_path):
+    canonical_home = tmp_path / "canonical-home"
+    local_bin = canonical_home / ".local" / "bin"
+    local_bin.mkdir(parents=True)
+    fake = local_bin / "antigravity"
+    fake.write_text('#!/usr/bin/env bash\nprintf "%s" "$HOME"\n', encoding="utf-8")
+    fake.chmod(0o755)
+    worker_home = tmp_path / "worker-home"
+    env = os.environ.copy()
+    env["PATH"] = "/usr/bin:/bin"
+    env["HOME"] = str(canonical_home)
+    env["VAN_ANTIGRAVITY_HOME"] = str(worker_home)
+    wrapper = PROFILE_ROOT / "bin" / "antigravity-worker"
+    result = subprocess.run([str(wrapper), "--version"], check=True, text=True, capture_output=True, env=env)
+    assert result.stdout == str(worker_home)
+
+
+
 def test_install_scripts_exist():
     assert (REPO_ROOT / "tools" / "hermes" / "install_van_profile.sh").is_file()
     assert (REPO_ROOT / "tools" / "hermes" / "doctor_van_profile.sh").is_file()
+
+
+def test_install_profile_preserves_runtime_state_and_secrets(tmp_path):
+    hermes_home = tmp_path / "hermes-home"
+    target = hermes_home / "profiles" / "van"
+    target.mkdir(parents=True)
+    sentinels = {
+        ".env": b"VAN_TEST_SECRET=preserve-me\n",
+        "state.db": b"runtime-db-sentinel",
+        "sessions/keep.json": b"session-sentinel",
+        "memories/keep.md": b"memory-sentinel",
+        "logs/keep.log": b"log-sentinel",
+        "pairing/keep.json": b"pairing-sentinel",
+        "cache/keep.bin": b"cache-sentinel",
+        "skills/software-development/github/scripts/git-credential-token.py": b"runtime-installed-skill",
+    }
+    for rel, payload in sentinels.items():
+        path = target / rel
+        path.parent.mkdir(parents=True, exist_ok=True)
+        path.write_bytes(payload)
+    (target / ".env").chmod(0o600)
+    stale = target / "providers" / "stale-provider.md"
+    stale.parent.mkdir(parents=True, exist_ok=True)
+    stale.write_text("stale", encoding="utf-8")
+
+    env = os.environ.copy()
+    env["HERMES_HOME"] = str(hermes_home)
+    installer = REPO_ROOT / "tools" / "hermes" / "install_van_profile.sh"
+    subprocess.run([str(installer)], check=True, text=True, capture_output=True, env=env)
+    doctor = REPO_ROOT / "tools" / "hermes" / "doctor_van_profile.sh"
+    subprocess.run([str(doctor)], check=True, text=True, capture_output=True, env=env)
+
+    for rel, payload in sentinels.items():
+        assert (target / rel).read_bytes() == payload
+    assert not stale.exists()
+    assert (target / "SOUL.md").read_bytes() == (PROFILE_ROOT / "SOUL.md").read_bytes()
+    assert (target / "providers" / "gemini.md").is_file()

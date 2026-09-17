@@ -9,20 +9,33 @@ import com.dial.van.visual.VanScene
 import com.dial.van.visual.VanSceneFrame
 import com.dial.van.visual.VanVisualState
 import org.junit.Assert.assertEquals
+import org.junit.Assert.assertNotEquals
 import org.junit.Assert.assertTrue
 import org.junit.Test
+import java.io.File
+import java.nio.file.Files
 
 class VanAcceptanceGateTest {
 
     @Test
-    fun compactGeometryMatchesBlueprint() {
-        assertEquals(280, OverlayTheme.COMPACT_WIDTH_DP)
+    fun compactGeometryMatchesRev3Blueprint() {
+        assertEquals(300, OverlayTheme.COMPACT_WIDTH_DP)
+        assertEquals(188, OverlayTheme.COMPACT_HEIGHT_DP)
         assertTrue(OverlayTheme.VAN_GLASS_OVERLAP_DP in 12..24)
-        assertEquals(168, OverlayTheme.RESTING_HIT_DP)
-        assertEquals(92, OverlayTheme.RESTING_AVATAR_DP)
+        assertEquals(184, OverlayTheme.RESTING_HIT_DP)
+        assertEquals(96, OverlayTheme.RESTING_AVATAR_DP)
+        assertEquals(62, OverlayTheme.MINIMIZED_VISUAL_DP)
+        assertTrue(OverlayTheme.MINIMIZED_TOUCH_DP >= 64)
         assertEquals(88, OverlayTheme.DOCK_HIT_DP)
         assertEquals(76, OverlayTheme.DOCK_CHARACTER_DP)
-        assertEquals(listOf("Ask", "Projects", "Tasks", "Decisions"), OverlayTheme.COMPACT_ACTIONS)
+        assertEquals(
+            listOf("Chat", "Voice", "Projects", "Tasks", "Decisions"),
+            OverlayTheme.COMPACT_ACTIONS,
+        )
+        assertEquals(
+            listOf("Chat", "Voice", "Minimize", "Command Centre", "Dock", "Close"),
+            OverlayTheme.QUICK_CONTROLS,
+        )
     }
 
     @Test
@@ -92,5 +105,61 @@ class VanAcceptanceGateTest {
                 assertTrue("${states[i]} vs ${states[j]} grayscale delta $delta", delta > 1.5)
             }
         }
+    }
+
+    @Test
+    fun commandCentreIdleAndDegradedEvidenceCannotCollapseToTheSameImage() {
+        val idle = VanCommandCentreEvidence.render(degraded = false)
+        val degraded = VanCommandCentreEvidence.render(degraded = true)
+        var differingPixels = 0L
+        for (y in 0 until idle.height) {
+            for (x in 0 until idle.width) {
+                if (idle.getRGB(x, y) != degraded.getRGB(x, y)) differingPixels++
+            }
+        }
+        val ratio = differingPixels.toDouble() / (idle.width.toLong() * idle.height.toLong())
+        assertTrue("IDLE and DEGRADED command-centre evidence collapsed (difference ratio $ratio)", ratio > 0.01)
+    }
+
+    @Test
+    fun commandCentreEvidenceReconciliationRefreshesDistinctManifestHashes() {
+        val outputDir = Files.createTempDirectory("van-command-centre-evidence").toFile()
+        try {
+            val revDir = File(outputDir, VanEvidenceMatrix.EVIDENCE_DIR).apply { mkdirs() }
+            File(revDir, "manifest.json").writeText(
+                """
+                {
+                  "shots": [
+                    {"id":"command-centre-idle","state":"IDLE","sha256":"stale","bytes":1},
+                    {"id":"command-centre-degraded","state":"DEGRADED","sha256":"stale","bytes":1}
+                  ]
+                }
+                """.trimIndent(),
+            )
+
+            VanCommandCentreEvidence.reconcile(outputDir)
+
+            val idle = File(revDir, "command-centre-idle.png")
+            val degraded = File(revDir, "command-centre-degraded.png")
+            assertTrue("idle evidence not written", idle.isFile && idle.length() > 0)
+            assertTrue("degraded evidence not written", degraded.isFile && degraded.length() > 0)
+            assertTrue("command-centre evidence files are byte-identical", !idle.readBytes().contentEquals(degraded.readBytes()))
+
+            val manifest = File(revDir, "manifest.json").readText()
+            val idleSha = manifestSha(manifest, "command-centre-idle")
+            val degradedSha = manifestSha(manifest, "command-centre-degraded")
+            assertNotEquals("manifest still records duplicate command-centre hashes", idleSha, degradedSha)
+            assertTrue("idle byte count was not refreshed", manifest.contains("\"bytes\":${idle.length()}"))
+            assertTrue("degraded byte count was not refreshed", manifest.contains("\"bytes\":${degraded.length()}"))
+        } finally {
+            outputDir.deleteRecursively()
+        }
+    }
+
+    private fun manifestSha(manifest: String, id: String): String {
+        val match = Regex("\\\"id\\\":\\\"${Regex.escape(id)}\\\"[^\\n]*?\\\"sha256\\\":\\\"([0-9a-f]{64})\\\"")
+            .find(manifest)
+        checkNotNull(match) { "Manifest does not contain a refreshed SHA for $id" }
+        return match.groupValues[1]
     }
 }

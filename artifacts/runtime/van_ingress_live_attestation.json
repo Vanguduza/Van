@@ -1,0 +1,36 @@
+{
+  "schema_version": 1,
+  "certification": "VAN_OWNER_INGRESS_RESTART_REVOCATION",
+  "certified_at_utc": "2026-09-16T19:36:06.578855+00:00",
+  "certified_commit": "b585195fe6cfab3d02c626c007d623631539f2de",
+  "host": "dial-hermes-control",
+  "evidence_pointer": "live://dial-hermes-control/van-ingress-restart-revocation-canary",
+  "gateway": {
+    "service": "van-gateway.service",
+    "service_active": true,
+    "service_enabled": true,
+    "bind": "127.0.0.1:8787",
+    "ingress_bearer_configured": true,
+    "unauthenticated_health_http_status": 401,
+    "authenticated_health_ok": true
+  },
+  "google": {
+    "workspace_api_state": "READY",
+    "ready_after_first_restart": true,
+    "ready_after_second_restart": true
+  },
+  "device_auth": {
+    "encrypted_secret_at_rest": true,
+    "active_grant_after_enrollment": true,
+    "signed_stale_command_after_restart": "expired",
+    "revoke_http_status": 200,
+    "active_grants_after_revoke": 0,
+    "post_revoke_command_after_second_restart": "denied"
+  },
+  "public_ingress": {
+    "stable_named_tunnel_certified": false,
+    "quick_tunnel_allowed_for_production": false,
+    "remaining_gate": "named Cloudflare Tunnel token and stable HTTPS hostname"
+  },
+  "contains_secrets": false
+}

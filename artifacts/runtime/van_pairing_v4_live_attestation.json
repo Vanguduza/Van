@@ -1,0 +1,45 @@
+{
+  "schema_version": 1,
+  "certification": "VAN_PAIRING_V4_LIVE",
+  "certified_at_utc": "2026-09-16T20:59:05.570669+00:00",
+  "certified_commit": "b075817401fc02ae7ffbaea311f8d9b560c9dea0",
+  "host": "dial-hermes-control",
+  "evidence_pointer": "live://dial-hermes-control/van-pairing-v4-canary",
+  "gateway": {
+    "service_active": true,
+    "schema_version": 4,
+    "bind": "127.0.0.1:8787",
+    "unauthenticated_health_http_status": 401
+  },
+  "pairing": {
+    "ticket_hash_only": true,
+    "single_use": true,
+    "pair_http_status": 200,
+    "device_secret_encrypted": true,
+    "device_access_token_hash_only": true
+  },
+  "authorization": {
+    "outer_bearer_only_http_status": 401,
+    "dual_token_http_status": 200,
+    "signed_stale_command_before_restart": "expired",
+    "dual_token_after_restart_http_status": 200,
+    "signed_stale_command_after_restart": "expired"
+  },
+  "revocation": {
+    "http_status": 200,
+    "active_grants_after_revoke": 0,
+    "post_second_restart_api_http_status": 401,
+    "post_second_restart_command_http_status": 401,
+    "post_second_restart_detail": "device_access_denied"
+  },
+  "google": {
+    "workspace_api_state_before": "READY",
+    "after_first_restart": "READY",
+    "after_second_restart": "READY"
+  },
+  "public_ingress": {
+    "stable_named_tunnel_certified": false,
+    "remaining_gate": "named Cloudflare Tunnel token and stable HTTPS hostname"
+  },
+  "contains_secrets": false
+}

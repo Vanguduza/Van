@@ -17,8 +17,7 @@ The governing product identity is unchanged:
 > orchestration authority. Google products are bounded capabilities, workers,
 > knowledge systems and creative surfaces beneath Hermes.
 
-The Google side is rooted in the owner's canonical Google account. This is
-**Google Account Sovereignty**.
+The Google side defaults to the owner's canonical Google account. Explicitly registered secondary Google identities may be delegated to individual capabilities without gaining owner authority. This is **Google Account Sovereignty with bounded identity delegation**.
 
 ## 2. Non-negotiable invariants
 
@@ -27,9 +26,7 @@ The Google side is rooted in the owner's canonical Google account. This is
    do not create an independent VAN orchestration loop.
 2. **Project Truth outranks Google output.** Google-produced material is evidence
    or an artifact until admitted through the normal authority process.
-3. **Google Account Sovereignty.** Every Google capability must trace ownership,
-   delegated access, entitlement or infrastructure administration to the owner's
-   canonical Google account.
+3. **Google Account Sovereignty.** The canonical owner Google identity is the default. A secondary Google identity may be bound only to explicitly named capabilities and gains no owner, Workspace, Project Truth or credential-inheritance authority.
 4. **Credential planes remain isolated.** Workspace OAuth, Gemini runtime,
    Google Cloud/service identity and consumer browser sessions are separate.
 5. **External content is data, never authority.** Notebook sources, Gmail,
@@ -99,13 +96,11 @@ The Google side is rooted in the owner's canonical Google account. This is
 
 ## 4. Google Account Sovereignty
 
-### 4.1 One logical owner principal
+### 4.1 Canonical owner plus bounded delegated identities
 
-VAN stores a logical `owner` Google principal. The raw Google account subject is
-never persisted by the broker; the setup tool hashes it with SHA-256 and stores
-only the hash plus non-secret account-kind/plan metadata.
+VAN's canonical identity alias is `owner_google_account`. Raw Google account identifiers are not committed to the repository. The broker stores stable subjects only as SHA-256 hashes.
 
-Account ownership is unified; credentials are not.
+A secondary identity may be registered under a separate alias for one bounded capability. `antigravity_worker_account` is permitted only for `antigravity`; it has no owner authority, Workspace access, Project Truth authority or credential inheritance. All other Google capabilities default to `owner_google_account`.
 
 ### 4.2 Four credential planes
 
@@ -113,8 +108,8 @@ Account ownership is unified; credentials are not.
 |---|---|---|
 | `workspace_oauth` | Delegated owner data | Gmail, Calendar, Drive, Contacts, Tasks |
 | `gemini_runtime` | Model/media runtime | Gemini, Live, Deep Research, Nano Banana, Veo |
-| `cloud_service` | Owner-administered Cloud/service identity | Notebook Enterprise, ADK/A2A services |
-| `consumer_session` | Account-native Google applications | Notebook, Mixboard, Stitch, Antigravity, Jules, Workspace Studio, Flow, AI Studio |
+| `cloud_service` | Owner-administered Cloud/service identity and programmatic Google Cloud MCP/API access | Notebook Enterprise, Stitch MCP, ADK/A2A services |
+| `consumer_session` | Account-native Google applications | Notebook, Mixboard, Antigravity, Jules, Workspace Studio, Flow, AI Studio |
 
 There is no master Google credential. Compromise of one plane must not imply
 access to another.
@@ -139,8 +134,8 @@ Current capabilities:
 | `gemini_notebook` | personal grounded research | Consumer session |
 | `gemini_notebook_enterprise` | programmatic notebook/source lifecycle | Cloud/service |
 | `mixboard` | divergent visual ideation | Consumer session |
-| `stitch` | UI design convergence | Consumer session |
-| `antigravity` | complex development worker | Consumer/developer session |
+| `stitch` | UI design convergence | Cloud/service (official Stitch MCP) |
+| `antigravity` | complex development worker; delegated identity `antigravity_worker_account` | Consumer/developer session |
 | `jules` | bounded repository worker | Consumer/developer session |
 | `workspace_api` | deterministic Workspace actions | Workspace OAuth |
 | `workspace_studio` | multi-step Workspace-native workflow | Consumer session |
@@ -247,6 +242,8 @@ Project Truth + Visual Authority
 
 Mixboard explores; Stitch converges; Nano Banana creates/edit visual assets. None
 may invent product requirements or override Visual Authority.
+
+**Live certification — 2026-09-16:** Stitch generation is `READY` in VAN. The authenticated official MCP route (`@google/stitch-sdk` 0.3.5 → `https://stitch.googleapis.com/mcp`) passed a real `generate_screen_from_text` canary and returned a screen plus HTML and image artifacts. Token-free evidence is stored at `artifacts/google/stitch_live_attestation.json`. This certifies provider generation only; DIAL visual-functional-responsive acceptance and orchestrated-use evidence remain separate gates.
 
 ### Antigravity + Jules
 

@@ -2,13 +2,18 @@ package com.dial.van.preview
 
 import com.dial.van.overlay.OverlayTheme
 import com.dial.van.visual.VanAuraSpecs
+import com.dial.van.visual.VanAuthorityState
 import com.dial.van.visual.VanDurableState
 import com.dial.van.visual.VanEffectBudget
 import com.dial.van.visual.VanFiniteAction
 import com.dial.van.visual.VanGlassTokens
+import com.dial.van.visual.VanHealthState
+import com.dial.van.visual.VanPresenceFrame
 import com.dial.van.visual.VanPresentation
 import com.dial.van.visual.VanScene
 import com.dial.van.visual.VanSceneFrame
+import com.dial.van.visual.VanSpeechState
+import com.dial.van.visual.VanTurnPhase
 import com.dial.van.visual.VanVisualState
 import java.awt.Color
 import java.awt.Font
@@ -22,12 +27,13 @@ import java.security.MessageDigest
 import javax.imageio.ImageIO
 
 /**
- * Named Rev 2.1 evidence matrix: per-scenario goldens, grayscale board, busy backdrops,
- * and a checksum manifest. Authority revision: 2.1.
+ * Named Rev 2.3 evidence matrix: per-scenario goldens, grayscale board, busy backdrops,
+ * orthogonal activity/health combinations, and a checksum manifest.
  */
 object VanEvidenceMatrix {
 
-    const val AUTHORITY_REVISION = "2.1"
+    const val AUTHORITY_REVISION = "2.3"
+    const val EVIDENCE_DIR = "rev23"
     private const val PHASE = 0.18f
 
     data class Shot(
@@ -38,6 +44,66 @@ object VanEvidenceMatrix {
         val reducedMotion: Boolean,
         val action: String = "none",
         val blur: String = "optical-glass",
+    )
+
+    private data class OrthogonalCase(
+        val id: String,
+        val frame: VanPresenceFrame,
+    )
+
+    private val orthogonalCases = listOf(
+        OrthogonalCase(
+            "LISTENING + DEGRADED",
+            VanPresenceFrame(
+                activity = VanDurableState.LISTENING,
+                health = VanHealthState.DEGRADED,
+                speech = VanSpeechState.LISTENING,
+            ),
+        ),
+        OrthogonalCase(
+            "THINKING + DEGRADED",
+            VanPresenceFrame(
+                activity = VanDurableState.THINKING,
+                health = VanHealthState.DEGRADED,
+                turn = VanTurnPhase.THINKING,
+            ),
+        ),
+        OrthogonalCase(
+            "SPEAKING + DEGRADED",
+            VanPresenceFrame(
+                activity = VanDurableState.THINKING,
+                health = VanHealthState.DEGRADED,
+                speech = VanSpeechState.SPEAKING,
+                turn = VanTurnPhase.THINKING,
+                mouthOpen = 0.62f,
+                viseme = 4,
+            ),
+        ),
+        OrthogonalCase(
+            "WORKING + DEGRADED",
+            VanPresenceFrame(
+                activity = VanDurableState.WORKING,
+                health = VanHealthState.DEGRADED,
+            ),
+        ),
+        OrthogonalCase(
+            "LISTENING + OFFLINE",
+            VanPresenceFrame(
+                activity = VanDurableState.LISTENING,
+                health = VanHealthState.OFFLINE,
+                speech = VanSpeechState.LISTENING,
+            ),
+        ),
+        OrthogonalCase(
+            "SPEAKING + OWNER WAIT",
+            VanPresenceFrame(
+                activity = VanDurableState.WORKING,
+                authority = VanAuthorityState.WAITING_FOR_OWNER,
+                speech = VanSpeechState.SPEAKING,
+                mouthOpen = 0.55f,
+                viseme = 3,
+            ),
+        ),
     )
 
     private val shots = listOf(
@@ -79,8 +145,12 @@ object VanEvidenceMatrix {
     }
 
     fun writeAll(outputDir: File) {
-        val dir = File(outputDir, "rev21")
+        val dir = File(outputDir, EVIDENCE_DIR)
         dir.mkdirs()
+
+        val orthogonalFile = File(dir, "orthogonal-presence.png")
+        ImageIO.write(orthogonalPresenceBoard(), "png", orthogonalFile)
+
         val manifest = StringBuilder()
         manifest.appendLine("{")
         manifest.appendLine("  \"authority_revision\": \"$AUTHORITY_REVISION\",")
@@ -97,13 +167,85 @@ object VanEvidenceMatrix {
             )
         }
         manifest.appendLine()
-        manifest.appendLine("  ]")
+        manifest.appendLine("  ],")
+        manifest.appendLine(
+            """  "boards": [{"id":"orthogonal-presence","authority_revision":"$AUTHORITY_REVISION","sha256":"${sha256(orthogonalFile)}","bytes":${orthogonalFile.length()}}]""",
+        )
         manifest.appendLine("}")
         File(dir, "manifest.json").writeText(manifest.toString())
 
         ImageIO.write(grayscaleBoard(), "png", File(dir, "grayscale-state-clarity.png"))
         ImageIO.write(busyBackdropBoard(), "png", File(dir, "busy-backdrop-resilience.png"))
         ImageIO.write(VanPreviewSheets.commandCentreSheet(), "png", File(dir, "command-centre-degraded.png"))
+    }
+
+    /**
+     * Proves the runtime combinations Rev 2.3 was introduced for. Each cell is derived from a real
+     * [VanPresenceFrame], then rendered with activity driving Zone A/B and semantic truth driving
+     * Zone C through the same Java2D/Compose geometry engine.
+     */
+    fun orthogonalPresenceBoard(): BufferedImage {
+        val cellW = 250
+        val image = BufferedImage(40 + cellW * orthogonalCases.size, 390, BufferedImage.TYPE_INT_ARGB)
+        val g = image.createGraphics()
+        AwtVanRenderer.prepare(g)
+        g.color = Color(0xFF0B1016.toInt())
+        g.fillRect(0, 0, image.width, image.height)
+        g.color = Color.WHITE
+        g.font = Font("SansSerif", Font.BOLD, 20)
+        g.drawString("VAN Rev 2.3 — orthogonal presence evidence", 24, 34)
+        g.font = Font("SansSerif", Font.PLAIN, 12)
+        g.color = Color(0xFF9AA7B6.toInt())
+        g.drawString("Zone A/B = activity · Zone C = health/authority · OFFLINE/authority may take over pose", 24, 54)
+
+        orthogonalCases.forEachIndexed { index, case ->
+            val x = 20 + index * cellW
+            val tile = orthogonalPresenceTile(case.frame, 210)
+            g.drawImage(tile, x + 20, 72, 210, 210, null)
+            val visual = case.frame.toVisualState()
+            g.color = Color.WHITE
+            g.font = Font("SansSerif", Font.BOLD, 12)
+            g.drawString(case.id, x + 16, 306)
+            g.color = Color(0xFFB6C2D0.toInt())
+            g.font = Font("SansSerif", Font.PLAIN, 11)
+            g.drawString("activity ${case.frame.activity}", x + 16, 326)
+            g.drawString("pose ${visual.durableState}", x + 16, 344)
+            g.drawString("zone C ${visual.resolvedSemanticState}", x + 16, 362)
+        }
+        g.dispose()
+        return image
+    }
+
+    fun orthogonalPresenceTile(frame: VanPresenceFrame, size: Int = 200): BufferedImage {
+        val image = BufferedImage(size, size, BufferedImage.TYPE_INT_ARGB)
+        val g = image.createGraphics()
+        AwtVanRenderer.prepare(g)
+        g.color = Color(0xFF0B1016.toInt())
+        g.fillRect(0, 0, size, size)
+        val visual = frame.toVisualState()
+        val activitySpec = VanAuraSpecs.forState(visual.durableState)
+        val semanticSpec = VanAuraSpecs.forState(visual.resolvedSemanticState)
+        val radius = size * 0.35f
+        GlassPainter.drawAura(
+            g = g,
+            spec = activitySpec,
+            cx = size * 0.5f,
+            cy = size * 0.5f,
+            radius = radius,
+            budget = VanEffectBudget.FULL,
+            phase = PHASE,
+            semanticSpec = semanticSpec,
+        )
+        paintCharacter(
+            g = g,
+            state = visual.durableState,
+            x = size * 0.10f,
+            y = size * 0.05f,
+            size = size * 0.80f,
+            forceCanvas = true,
+        )
+        g.dispose()
+        return image
     }
 
     fun grayscaleBoard(): BufferedImage {

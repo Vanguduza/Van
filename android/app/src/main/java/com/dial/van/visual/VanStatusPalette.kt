@@ -1,34 +1,15 @@
 package com.dial.van.visual
 
-/**
- * Status presentation rules for the interim Canvas character.
- *
- * Identity colours (hair, skin, eyes, visor, jacket) are locked by
- * `docs/VAN_CHARACTER_VISUAL_IDENTITY.md`; only the *status* layer varies, and only within
- * the bounds the acceptance matrix allows: truthful muting when offline or degraded,
- * urgency cues without frantic motion or excessive glow.
- */
+/** Status topology used by the interim Canvas/owner-art renderers. */
 enum class VanRingStyle {
-    /** No status ring — nominal presence. */
     NONE,
-
-    /** Continuous sweeping arc: listening, working, connecting. */
     PROGRESS,
-
-    /** Orbiting dots: thinking, searching, delegating, waiting. */
     DOTS,
-
-    /** Broken arc: something is unavailable and Van says so. */
     DASHED,
-
-    /** Slow breathing ring: attention wanted from the owner. */
     PULSE,
-
-    /** Twin arcs plus caution chevron: warning, error, urgent. */
     DOUBLE,
 }
 
-/** Coarse mood used by the face rig (brows and mouth curve). */
 enum class VanMood {
     CALM,
     ALERT,
@@ -37,12 +18,6 @@ enum class VanMood {
     MUTED,
 }
 
-/**
- * Owner-facing state copy, taken from the captions on the owner design sheet.
- *
- * §16 of the glassmorphic spec forbids any state from relying on colour alone, so every state
- * carries words as well as an accent and a silhouette cue.
- */
 object VanCaptions {
     fun forState(state: VanDurableState): String = when (state) {
         VanDurableState.OFFLINE -> "Offline — I'll catch up."
@@ -66,6 +41,13 @@ object VanCaptions {
     }
 }
 
+/**
+ * Character/status palette.
+ *
+ * `dim` is intentionally locked to 1.0. Owner device verification proved that whole-character
+ * alpha attenuation made VAN read as glass. Degraded/offline truth is now carried by desaturation,
+ * status copy and the semantic aura instead; skin, hair, eyes and jacket remain optically solid.
+ */
 data class VanStatusPalette(
     val accent: Int,
     val ringStyle: VanRingStyle,
@@ -86,170 +68,44 @@ data class VanStatusPalette(
         private const val RED = 0xFFFF5252L
         private const val CRIMSON = 0xFFFF1744L
         private const val GREEN = 0xFF69F0AEL
+        private const val SOLID = 1f
+
+        private fun palette(
+            accent: Long,
+            ring: VanRingStyle,
+            desaturation: Float,
+            glow: Float,
+            mood: VanMood,
+            label: String,
+        ) = VanStatusPalette(
+            accent = VanColors.of(accent),
+            ringStyle = ring,
+            desaturation = desaturation,
+            dim = SOLID,
+            glow = glow,
+            mood = mood,
+            label = label,
+        )
 
         fun forState(state: VanDurableState): VanStatusPalette = when (state) {
-            VanDurableState.OFFLINE -> VanStatusPalette(
-                accent = VanColors.of(SLATE),
-                ringStyle = VanRingStyle.DASHED,
-                desaturation = 0.78f,
-                dim = 0.55f,
-                glow = 0f,
-                mood = VanMood.MUTED,
-                label = "Offline",
-            )
-            VanDurableState.SLEEPING -> VanStatusPalette(
-                accent = VanColors.of(INDIGO),
-                ringStyle = VanRingStyle.NONE,
-                desaturation = 0.45f,
-                dim = 0.70f,
-                glow = 0.1f,
-                mood = VanMood.MUTED,
-                label = "Sleeping",
-            )
-            VanDurableState.CONNECTING -> VanStatusPalette(
-                accent = VanColors.of(CYAN_SOFT),
-                ringStyle = VanRingStyle.PROGRESS,
-                desaturation = 0.25f,
-                dim = 0.85f,
-                glow = 0.25f,
-                mood = VanMood.CALM,
-                label = "Connecting",
-            )
-            VanDurableState.IDLE -> VanStatusPalette(
-                accent = VanColors.of(CYAN),
-                ringStyle = VanRingStyle.NONE,
-                desaturation = 0f,
-                dim = 1f,
-                glow = 0.30f,
-                mood = VanMood.CALM,
-                label = "Ready",
-            )
-            VanDurableState.ATTENTIVE -> VanStatusPalette(
-                accent = VanColors.of(CYAN),
-                ringStyle = VanRingStyle.PULSE,
-                desaturation = 0f,
-                dim = 1f,
-                glow = 0.38f,
-                mood = VanMood.ALERT,
-                label = "Attentive",
-            )
-            VanDurableState.LISTENING -> VanStatusPalette(
-                accent = VanColors.of(CYAN),
-                ringStyle = VanRingStyle.PROGRESS,
-                desaturation = 0f,
-                dim = 1f,
-                glow = 0.42f,
-                mood = VanMood.ALERT,
-                label = "Listening",
-            )
-            VanDurableState.THINKING -> VanStatusPalette(
-                accent = VanColors.of(CYAN),
-                ringStyle = VanRingStyle.DOTS,
-                desaturation = 0f,
-                dim = 1f,
-                glow = 0.32f,
-                mood = VanMood.CALM,
-                label = "Thinking",
-            )
-            VanDurableState.SEARCHING -> VanStatusPalette(
-                accent = VanColors.of(CYAN),
-                ringStyle = VanRingStyle.DOTS,
-                desaturation = 0f,
-                dim = 1f,
-                glow = 0.32f,
-                mood = VanMood.ALERT,
-                label = "Searching",
-            )
-            VanDurableState.WORKING -> VanStatusPalette(
-                accent = VanColors.of(CYAN),
-                ringStyle = VanRingStyle.PROGRESS,
-                desaturation = 0f,
-                dim = 1f,
-                glow = 0.35f,
-                mood = VanMood.CALM,
-                label = "Working",
-            )
-            VanDurableState.DELEGATING -> VanStatusPalette(
-                accent = VanColors.of(CYAN),
-                ringStyle = VanRingStyle.DOTS,
-                desaturation = 0f,
-                dim = 1f,
-                glow = 0.35f,
-                mood = VanMood.CALM,
-                label = "Delegating",
-            )
-            VanDurableState.SPEAKING -> VanStatusPalette(
-                accent = VanColors.of(CYAN),
-                ringStyle = VanRingStyle.NONE,
-                desaturation = 0f,
-                dim = 1f,
-                glow = 0.40f,
-                mood = VanMood.PLEASED,
-                label = "Speaking",
-            )
-            VanDurableState.WAITING -> VanStatusPalette(
-                accent = VanColors.of(AMBER_SOFT),
-                ringStyle = VanRingStyle.DOTS,
-                desaturation = 0.10f,
-                dim = 0.95f,
-                glow = 0.22f,
-                mood = VanMood.CALM,
-                label = "Waiting",
-            )
-            VanDurableState.WAITING_FOR_OWNER -> VanStatusPalette(
-                accent = VanColors.of(AMBER_SOFT),
-                ringStyle = VanRingStyle.PULSE,
-                desaturation = 0.10f,
-                dim = 1f,
-                glow = 0.30f,
-                mood = VanMood.ALERT,
-                label = "Needs you",
-            )
-            VanDurableState.DEGRADED -> VanStatusPalette(
-                accent = VanColors.of(AMBER),
-                ringStyle = VanRingStyle.DASHED,
-                desaturation = 0.45f,
-                dim = 0.85f,
-                glow = 0.15f,
-                mood = VanMood.CONCERNED,
-                label = "Degraded",
-            )
-            VanDurableState.WARNING -> VanStatusPalette(
-                accent = VanColors.of(ORANGE),
-                ringStyle = VanRingStyle.DOUBLE,
-                desaturation = 0.15f,
-                dim = 1f,
-                glow = 0.28f,
-                mood = VanMood.CONCERNED,
-                label = "Warning",
-            )
-            VanDurableState.ERROR -> VanStatusPalette(
-                accent = VanColors.of(RED),
-                ringStyle = VanRingStyle.DOUBLE,
-                desaturation = 0.25f,
-                dim = 1f,
-                glow = 0.28f,
-                mood = VanMood.CONCERNED,
-                label = "Error",
-            )
-            VanDurableState.SUCCESS -> VanStatusPalette(
-                accent = VanColors.of(GREEN),
-                ringStyle = VanRingStyle.PROGRESS,
-                desaturation = 0f,
-                dim = 1f,
-                glow = 0.35f,
-                mood = VanMood.PLEASED,
-                label = "Done",
-            )
-            VanDurableState.URGENT -> VanStatusPalette(
-                accent = VanColors.of(CRIMSON),
-                ringStyle = VanRingStyle.PULSE,
-                desaturation = 0f,
-                dim = 1f,
-                glow = 0.34f,
-                mood = VanMood.ALERT,
-                label = "Urgent",
-            )
+            VanDurableState.OFFLINE -> palette(SLATE, VanRingStyle.DASHED, 0.78f, 0f, VanMood.MUTED, "Offline")
+            VanDurableState.SLEEPING -> palette(INDIGO, VanRingStyle.NONE, 0.45f, 0.10f, VanMood.MUTED, "Sleeping")
+            VanDurableState.CONNECTING -> palette(CYAN_SOFT, VanRingStyle.PROGRESS, 0.25f, 0.25f, VanMood.CALM, "Connecting")
+            VanDurableState.IDLE -> palette(CYAN, VanRingStyle.NONE, 0f, 0.30f, VanMood.CALM, "Ready")
+            VanDurableState.ATTENTIVE -> palette(CYAN, VanRingStyle.PULSE, 0f, 0.38f, VanMood.ALERT, "Attentive")
+            VanDurableState.LISTENING -> palette(CYAN, VanRingStyle.PROGRESS, 0f, 0.42f, VanMood.ALERT, "Listening")
+            VanDurableState.THINKING -> palette(CYAN, VanRingStyle.DOTS, 0f, 0.32f, VanMood.CALM, "Thinking")
+            VanDurableState.SEARCHING -> palette(CYAN, VanRingStyle.DOTS, 0f, 0.32f, VanMood.ALERT, "Searching")
+            VanDurableState.WORKING -> palette(CYAN, VanRingStyle.PROGRESS, 0f, 0.35f, VanMood.CALM, "Working")
+            VanDurableState.DELEGATING -> palette(CYAN, VanRingStyle.DOTS, 0f, 0.35f, VanMood.CALM, "Delegating")
+            VanDurableState.SPEAKING -> palette(CYAN, VanRingStyle.NONE, 0f, 0.40f, VanMood.PLEASED, "Speaking")
+            VanDurableState.WAITING -> palette(AMBER_SOFT, VanRingStyle.DOTS, 0.10f, 0.22f, VanMood.CALM, "Waiting")
+            VanDurableState.WAITING_FOR_OWNER -> palette(AMBER_SOFT, VanRingStyle.PULSE, 0.10f, 0.30f, VanMood.ALERT, "Needs you")
+            VanDurableState.DEGRADED -> palette(AMBER, VanRingStyle.DASHED, 0.45f, 0.15f, VanMood.CONCERNED, "Degraded")
+            VanDurableState.WARNING -> palette(ORANGE, VanRingStyle.DOUBLE, 0.15f, 0.28f, VanMood.CONCERNED, "Warning")
+            VanDurableState.ERROR -> palette(RED, VanRingStyle.DOUBLE, 0.25f, 0.28f, VanMood.CONCERNED, "Error")
+            VanDurableState.SUCCESS -> palette(GREEN, VanRingStyle.PROGRESS, 0f, 0.35f, VanMood.PLEASED, "Done")
+            VanDurableState.URGENT -> palette(CRIMSON, VanRingStyle.PULSE, 0f, 0.34f, VanMood.ALERT, "Urgent")
         }
     }
 }

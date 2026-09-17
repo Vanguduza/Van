@@ -3,6 +3,7 @@ package com.dial.van.command
 import android.os.Bundle
 import androidx.activity.compose.setContent
 import androidx.compose.foundation.background
+import androidx.compose.foundation.horizontalScroll
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
@@ -14,13 +15,16 @@ import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
+import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
+import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material3.Button
 import androidx.compose.material3.ButtonDefaults
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.MaterialTheme
+import androidx.compose.material3.OutlinedTextField
 import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Text
 import androidx.compose.material3.TopAppBar
@@ -28,67 +32,70 @@ import androidx.compose.material3.TopAppBarDefaults
 import androidx.compose.material3.darkColorScheme
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
+import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
+import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Brush
 import androidx.compose.ui.graphics.Color
-import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.text.font.FontWeight
+import androidx.compose.ui.text.input.PasswordVisualTransformation
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.fragment.app.FragmentActivity
 import com.dial.van.VanApplication
-import com.dial.van.degraded.RestoreAction
-import com.dial.van.degraded.SubsystemStatus
+import com.dial.van.control.VanCommandSource
+import com.dial.van.control.VanCommandStatus
+import com.dial.van.control.VanConversationMessage
+import com.dial.van.control.VanMessageRole
 import com.dial.van.overlay.FloatingOverlayService
-import com.dial.van.queue.CommandKind
-import com.dial.van.queue.CommandSensitivity
-import com.dial.van.queue.QueueEnqueueRequest
-import com.dial.van.security.BiometricGate
-import com.dial.van.visual.VanCaptions
-import com.dial.van.visual.VanDurableState
 import com.dial.van.visual.VanEmbodiment
 import com.dial.van.visual.VanGlassSurface
 import com.dial.van.visual.VanGlassTokens
+import com.dial.van.visual.VanLiveVisualState
 import com.dial.van.visual.VanPresence
 import com.dial.van.visual.VanPresentation
-import com.dial.van.visual.VanStatusPalette
 import com.dial.van.visual.rememberVanEffectBudget
-import kotlinx.coroutines.Dispatchers
-import kotlinx.coroutines.withContext
-import kotlinx.serialization.encodeToString
-import kotlinx.serialization.json.Json
-import kotlinx.serialization.json.buildJsonObject
-import kotlinx.serialization.json.put
+import kotlinx.coroutines.launch
+import org.json.JSONArray
+import org.json.JSONObject
 
-/**
- * Command Centre.
- *
- * §14 of `docs/VAN_GLASSMORPHIC_FLOATING_ASSISTANT_DESIGN.md` governs this surface: glass stays
- * the top-level material language, panels are more opaque than the floating compact shell, Van
- * remains present without dominating operational content, and critical actions switch from
- * translucent to solid controls.
- */
+private enum class CommandModule(val id: String, val title: String) {
+    OVERVIEW("overview", "Home"),
+    CHAT("chat", "Chat"),
+    DECISIONS("decisions", "Decisions"),
+    TASKS("tasks", "Tasks"),
+    PROJECTS("projects", "Projects"),
+    ACTIVITY("activity", "Activity"),
+    SYSTEMS("systems", "Systems"),
+    CONNECTIONS("connections", "Connections"),
+    SETTINGS("settings", "Settings"),
+    ;
+
+    companion object {
+        fun fromId(id: String?): CommandModule = entries.firstOrNull { it.id == id } ?: OVERVIEW
+    }
+}
+
 class CommandCentreActivity : FragmentActivity() {
-
     @OptIn(ExperimentalMaterial3Api::class)
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         val app = application as VanApplication
+        val initial = CommandModule.fromId(intent.getStringExtra(EXTRA_MODULE))
 
         setContent {
             MaterialTheme(colorScheme = darkColorScheme(primary = Color(VanGlassTokens.ACCENT_CYAN))) {
                 Box(
                     modifier = Modifier
                         .fillMaxSize()
-                        // §10 step 1: the app background the glass samples against.
                         .background(
                             Brush.verticalGradient(
-                                listOf(Color(0xFF060A14), Color(0xFF0B1424), Color(0xFF04070F)),
+                                listOf(Color(0xFF051018), Color(0xFF071722), Color(0xFF040A10)),
                             ),
                         ),
                 ) {
@@ -104,13 +111,364 @@ class CommandCentreActivity : FragmentActivity() {
                             )
                         },
                     ) { padding ->
-                        CommandCentreScreen(
-                            padding = padding,
-                            app = app,
-                            onA4Approve = { gate, onDone ->
-                                gate.requestA4Approval(onApproved = onDone, onDenied = { })
-                            },
+                        CommandCentreScreen(padding, app, initial)
+                    }
+                }
+            }
+        }
+    }
+
+    companion object {
+        const val EXTRA_MODULE = "module"
+    }
+}
+
+@Composable
+private fun CommandCentreScreen(
+    padding: PaddingValues,
+    app: VanApplication,
+    initial: CommandModule,
+) {
+    var selected by remember { mutableStateOf(initial) }
+    val degraded by app.degradedModeStore.state.collectAsState()
+    val live = VanLiveVisualState.frame
+    val cue = VanPresence.cue(degraded, live = live)
+    val budget = rememberVanEffectBudget()
+    val glass = VanGlassTokens.forState(
+        state = cue.durableState,
+        panel = true,
+        liveBlurAvailable = false,
+        budget = budget,
+    )
+
+    Column(
+        modifier = Modifier
+            .fillMaxSize()
+            .padding(padding),
+    ) {
+        Row(
+            modifier = Modifier
+                .fillMaxWidth()
+                .horizontalScroll(rememberScrollState())
+                .padding(horizontal = 12.dp, vertical = 6.dp),
+            horizontalArrangement = Arrangement.spacedBy(6.dp),
+        ) {
+            CommandModule.entries.forEach { module ->
+                Button(
+                    onClick = { selected = module },
+                    colors = ButtonDefaults.buttonColors(
+                        containerColor = if (selected == module) {
+                            Color(VanGlassTokens.BABY_CYAN).copy(alpha = 0.24f)
+                        } else {
+                            Color(VanGlassTokens.TINT_NAVY).copy(alpha = 0.72f)
+                        },
+                        contentColor = if (selected == module) Color(VanGlassTokens.ICE_CYAN) else Color(0xFFBCD1D8),
+                    ),
+                    shape = RoundedCornerShape(10.dp),
+                    contentPadding = PaddingValues(horizontal = 10.dp, vertical = 4.dp),
+                ) {
+                    Text(module.title, fontSize = 11.sp)
+                }
+            }
+        }
+
+        when (selected) {
+            CommandModule.OVERVIEW -> OverviewModule(app, glass) { selected = it }
+            CommandModule.CHAT -> ChatModule(app, glass)
+            CommandModule.DECISIONS -> DecisionsModule(app, glass)
+            CommandModule.TASKS -> TasksModule(app, glass) { selected = CommandModule.CHAT }
+            CommandModule.PROJECTS -> ProjectsModule(app, glass) { projectId ->
+                app.commandController.selectProject(projectId)
+                selected = CommandModule.CHAT
+            }
+            CommandModule.ACTIVITY -> ActivityModule(app, glass)
+            CommandModule.SYSTEMS -> SystemsModule(app, glass)
+            CommandModule.CONNECTIONS -> ConnectionsModule(app, glass)
+            CommandModule.SETTINGS -> SettingsModule(app, glass)
+        }
+    }
+}
+
+@Composable
+private fun OverviewModule(
+    app: VanApplication,
+    glass: com.dial.van.visual.VanGlassStyle,
+    navigate: (CommandModule) -> Unit,
+) {
+    var health by remember { mutableStateOf<JSONObject?>(null) }
+    var decisions by remember { mutableStateOf<Int?>(null) }
+    var projects by remember { mutableStateOf<Int?>(null) }
+    var error by remember { mutableStateOf<String?>(null) }
+
+    LaunchedEffect(Unit) {
+        runCatching {
+            health = app.gatewayClient.health()
+            decisions = app.gatewayClient.decisions().length()
+            projects = app.gatewayClient.projects().length()
+        }.onFailure { error = it.message ?: "Gateway unavailable" }
+    }
+
+    val degraded by app.degradedModeStore.state.collectAsState()
+    val live = VanLiveVisualState.frame
+    val cue = VanPresence.cue(degraded, live = live)
+    val budget = rememberVanEffectBudget()
+
+    LazyColumn(
+        modifier = Modifier.fillMaxSize().padding(horizontal = 14.dp),
+        verticalArrangement = Arrangement.spacedBy(10.dp),
+        contentPadding = PaddingValues(vertical = 8.dp),
+    ) {
+        item {
+            AdminCard(glass) {
+                Row(verticalAlignment = Alignment.CenterVertically) {
+                    VanEmbodiment(
+                        state = VanPresence.visualState(cue, live),
+                        budget = budget,
+                        presentation = VanPresentation.EXPANDED,
+                        modifier = Modifier.size(116.dp),
+                    )
+                    Column(modifier = Modifier.padding(start = 10.dp)) {
+                        Text("VAN", color = Color.White, fontSize = 21.sp, fontWeight = FontWeight.Bold)
+                        Text(cue.headline, color = Color(VanGlassTokens.ACCENT_CYAN), fontSize = 14.sp)
+                        Text(cue.detail, color = Color(0xFFBCD1D8), fontSize = 11.sp)
+                        Text(
+                            if (health?.optBoolean("ok") == true) "Hermes / gateway reachable" else "Hermes / gateway not confirmed",
+                            color = if (health?.optBoolean("ok") == true) Color(VanGlassTokens.ACCENT_GREEN) else Color(VanGlassTokens.ACCENT_AMBER),
+                            fontSize = 11.sp,
                         )
+                    }
+                }
+            }
+        }
+        if (error != null) item { TruthMessage(error!!, warning = true) }
+        item {
+            AdminActionCard("Chat", "Issue an owner instruction through the signed gateway", glass) { navigate(CommandModule.CHAT) }
+        }
+        item {
+            AdminActionCard(
+                "Decisions",
+                decisions?.let { "$it open decision(s) returned by the gateway" } ?: "Loading authoritative decisions…",
+                glass,
+            ) { navigate(CommandModule.DECISIONS) }
+        }
+        item {
+            AdminActionCard(
+                "Projects",
+                projects?.let { "$it registered project context(s)" } ?: "Loading project registry…",
+                glass,
+            ) { navigate(CommandModule.PROJECTS) }
+        }
+        item {
+            AdminActionCard("Tasks", "Inspect local queued and dispatched owner work", glass) { navigate(CommandModule.TASKS) }
+        }
+        item {
+            AdminActionCard("Systems", "Inspect Hermes, gateway and Google mesh truth", glass) { navigate(CommandModule.SYSTEMS) }
+        }
+    }
+}
+
+@Composable
+private fun ChatModule(app: VanApplication, glass: com.dial.van.visual.VanGlassStyle) {
+    val state by app.commandController.state.collectAsState()
+    var draft by remember { mutableStateOf("") }
+
+    Column(modifier = Modifier.fillMaxSize().padding(horizontal = 14.dp, vertical = 8.dp)) {
+        AdminCard(glass) {
+            Column {
+                Text("Owner chat", color = Color.White, fontSize = 17.sp, fontWeight = FontWeight.Bold)
+                Text(
+                    state.selectedProjectId?.let { "Project context: $it" } ?: "Global owner context",
+                    color = Color(VanGlassTokens.EDGE_CYAN),
+                    fontSize = 11.sp,
+                )
+                Text(
+                    "Typed and voice input share the same signed command controller.",
+                    color = Color(0xFFBCD1D8),
+                    fontSize = 10.sp,
+                )
+            }
+        }
+        Spacer(Modifier.height(8.dp))
+        LazyColumn(
+            modifier = Modifier.weight(1f).fillMaxWidth(),
+            verticalArrangement = Arrangement.spacedBy(7.dp),
+            contentPadding = PaddingValues(vertical = 6.dp),
+        ) {
+            if (state.messages.isEmpty()) {
+                item { TruthMessage("No conversation messages yet.") }
+            }
+            items(state.messages, key = { it.id }) { message ->
+                CommandMessageBubble(message, glass)
+            }
+        }
+        Row(
+            modifier = Modifier.fillMaxWidth(),
+            horizontalArrangement = Arrangement.spacedBy(7.dp),
+            verticalAlignment = Alignment.CenterVertically,
+        ) {
+            OutlinedTextField(
+                value = draft,
+                onValueChange = { draft = it },
+                modifier = Modifier.weight(1f),
+                label = { Text("Owner command") },
+                maxLines = 4,
+            )
+            Column(verticalArrangement = Arrangement.spacedBy(5.dp)) {
+                Button(onClick = {
+                    val text = draft.trim()
+                    if (text.isNotEmpty()) {
+                        app.commandController.submitText(text, VanCommandSource.CHAT)
+                        draft = ""
+                    }
+                }) { Text("Send") }
+                Button(onClick = { app.voiceSession.beginOwnerTurn() }) { Text("Voice") }
+            }
+        }
+        if (state.submitting) {
+            Text("Dispatching through VAN gateway…", color = Color(VanGlassTokens.EDGE_CYAN), fontSize = 10.sp)
+        }
+    }
+}
+
+@Composable
+private fun DecisionsModule(app: VanApplication, glass: com.dial.van.visual.VanGlassStyle) {
+    val scope = rememberCoroutineScope()
+    var records by remember { mutableStateOf<List<JSONObject>?>(null) }
+    var error by remember { mutableStateOf<String?>(null) }
+
+    fun refresh() {
+        scope.launch {
+            runCatching { app.gatewayClient.decisions().objectList() }
+                .onSuccess { records = it; error = null }
+                .onFailure { error = it.message ?: "Unable to load decisions" }
+        }
+    }
+    LaunchedEffect(Unit) { refresh() }
+
+    LazyColumn(
+        modifier = Modifier.fillMaxSize().padding(horizontal = 14.dp),
+        verticalArrangement = Arrangement.spacedBy(10.dp),
+        contentPadding = PaddingValues(vertical = 8.dp),
+    ) {
+        item { SectionHeader("Decisions", "Owner escalations returned by /v1/decisions") }
+        if (records == null && error == null) item { TruthMessage("Loading decisions…") }
+        if (error != null) item { TruthMessage(error!!, warning = true) }
+        if (records?.isEmpty() == true) item { TruthMessage("No open decisions returned by the gateway.") }
+        items(records.orEmpty(), key = { it.optString("id") }) { record ->
+            AdminCard(glass) {
+                Column(verticalArrangement = Arrangement.spacedBy(6.dp)) {
+                    Text(record.optString("title", "Decision"), color = Color.White, fontSize = 15.sp, fontWeight = FontWeight.Bold)
+                    Text(record.optString("body"), color = Color(0xFFD7E7EC), fontSize = 12.sp)
+                    Text(
+                        "Source: ${record.optString("source", "unknown")} • ${record.optString("status", "OPEN")}",
+                        color = Color(0xFFBCD1D8),
+                        fontSize = 10.sp,
+                    )
+                    Row(horizontalArrangement = Arrangement.spacedBy(8.dp)) {
+                        Button(onClick = {
+                            scope.launch {
+                                runCatching { app.gatewayClient.resolveDecision(record.getString("id"), true) }
+                                    .onSuccess { refresh() }
+                                    .onFailure { error = it.message }
+                            }
+                        }) { Text("Approve") }
+                        Button(
+                            onClick = {
+                                scope.launch {
+                                    runCatching { app.gatewayClient.resolveDecision(record.getString("id"), false) }
+                                        .onSuccess { refresh() }
+                                        .onFailure { error = it.message }
+                                }
+                            },
+                            colors = ButtonDefaults.buttonColors(containerColor = Color(0xFF5B2730)),
+                        ) { Text("Reject") }
+                    }
+                }
+            }
+        }
+        item { Button(onClick = { refresh() }) { Text("Refresh") } }
+    }
+}
+
+@Composable
+private fun TasksModule(
+    app: VanApplication,
+    glass: com.dial.van.visual.VanGlassStyle,
+    openChat: () -> Unit,
+) {
+    val conversation by app.commandController.state.collectAsState()
+    val operational = conversation.messages.filter { it.status != null && it.role != VanMessageRole.OWNER }
+    val queueCount = app.commandQueue.size()
+
+    LazyColumn(
+        modifier = Modifier.fillMaxSize().padding(horizontal = 14.dp),
+        verticalArrangement = Arrangement.spacedBy(9.dp),
+        contentPadding = PaddingValues(vertical = 8.dp),
+    ) {
+        item { SectionHeader("Tasks", "Real local queue + owner command lifecycle; no fabricated Hermes progress") }
+        item {
+            AdminCard(glass) {
+                Column {
+                    Text("Encrypted offline queue", color = Color.White, fontWeight = FontWeight.Bold)
+                    Text("$queueCount command(s) currently queued", color = Color(0xFFBCD1D8), fontSize = 12.sp)
+                }
+            }
+        }
+        if (operational.isEmpty()) item { TruthMessage("No dispatched owner work is present in this session.") }
+        items(operational.reversed(), key = { it.id }) { message ->
+            CommandMessageBubble(message, glass)
+        }
+        item { Button(onClick = openChat) { Text("Send instruction") } }
+    }
+}
+
+@Composable
+private fun ProjectsModule(
+    app: VanApplication,
+    glass: com.dial.van.visual.VanGlassStyle,
+    selectForChat: (String) -> Unit,
+) {
+    val scope = rememberCoroutineScope()
+    var projects by remember { mutableStateOf<List<String>?>(null) }
+    var truthSummary by remember { mutableStateOf<Map<String, String>>(emptyMap()) }
+    var error by remember { mutableStateOf<String?>(null) }
+
+    LaunchedEffect(Unit) {
+        runCatching { app.gatewayClient.projects().stringList() }
+            .onSuccess { projects = it }
+            .onFailure { error = it.message ?: "Unable to load project registry" }
+    }
+
+    LazyColumn(
+        modifier = Modifier.fillMaxSize().padding(horizontal = 14.dp),
+        verticalArrangement = Arrangement.spacedBy(9.dp),
+        contentPadding = PaddingValues(vertical = 8.dp),
+    ) {
+        item { SectionHeader("Projects", "Authoritative registry returned by VAN gateway") }
+        if (projects == null && error == null) item { TruthMessage("Loading project registry…") }
+        if (error != null) item { TruthMessage(error!!, warning = true) }
+        if (projects?.isEmpty() == true) item { TruthMessage("Gateway returned no registered projects.") }
+        items(projects.orEmpty(), key = { it }) { projectId ->
+            AdminCard(glass) {
+                Column(verticalArrangement = Arrangement.spacedBy(6.dp)) {
+                    Text(projectId, color = Color.White, fontSize = 15.sp, fontWeight = FontWeight.Bold)
+                    truthSummary[projectId]?.let { Text(it, color = Color(0xFFBCD1D8), fontSize = 10.sp, maxLines = 4) }
+                    Row(horizontalArrangement = Arrangement.spacedBy(7.dp)) {
+                        Button(onClick = { selectForChat(projectId) }) { Text("Select + Chat") }
+                        Button(onClick = {
+                            scope.launch {
+                                runCatching { app.gatewayClient.projectTruth(projectId) }
+                                    .onSuccess { obj ->
+                                        val summary = if (obj.optBoolean("ok")) {
+                                            "Truth ${obj.optString("truth_sha").take(12)} • repo ${obj.optString("repo_sha").take(12)}"
+                                        } else {
+                                            "Truth unavailable: ${obj.optString("error", obj.optString("degraded", "unknown"))}"
+                                        }
+                                        truthSummary = truthSummary + (projectId to summary)
+                                    }
+                                    .onFailure { t -> truthSummary = truthSummary + (projectId to "Truth load failed: ${t.message}") }
+                            }
+                        }) { Text("Truth") }
                     }
                 }
             }
@@ -119,253 +477,288 @@ class CommandCentreActivity : FragmentActivity() {
 }
 
 @Composable
-private fun CommandCentreScreen(
-    padding: PaddingValues,
-    app: VanApplication,
-    onA4Approve: (BiometricGate, () -> Unit) -> Unit,
-) {
-    val activity = LocalContext.current as FragmentActivity
-    val gate = remember(activity) { BiometricGate(activity) }
-    var meshSummary by remember { mutableStateOf("Google mesh: awaiting gateway evidence") }
-    var statusMessage by remember { mutableStateOf("") }
-    var sections by remember { mutableStateOf(commandSections(app, meshSummary, VanPresence.cue(app.degradedModeStore.snapshot()))) }
+private fun ActivityModule(app: VanApplication, glass: com.dial.van.visual.VanGlassStyle) {
+    var events by remember { mutableStateOf<List<JSONObject>?>(null) }
+    var error by remember { mutableStateOf<String?>(null) }
 
     LaunchedEffect(Unit) {
-        try {
-            val health = withContext(Dispatchers.IO) { app.gatewayClient.health() }
-            val mesh = health.optJSONObject("google_mesh")
-            val configured = mesh?.optInt("configured_capabilities") ?: 0
-            val total = mesh?.optInt("total_capabilities") ?: 0
-            val principal = mesh?.optJSONObject("principal")?.optBoolean("registered") == true
-            app.degradedModeStore.applyGoogleMesh(configured, total, principal)
-            if (!health.optBoolean("ok", false)) {
-                app.degradedModeStore.markBroken("hermes", "Hermes offline from /health", RestoreAction.RETRY_CONNECTION)
-            } else {
-                app.degradedModeStore.markWorking("hermes")
-                app.degradedModeStore.markWorking("gateway")
-            }
-            meshSummary = "Google mesh configured=$configured/$total principal=${if (principal) "registered" else "missing"}"
-        } catch (exc: Exception) {
-            app.degradedModeStore.markBroken("gateway", "health unreachable: ${exc.message}", RestoreAction.RETRY_CONNECTION)
-            meshSummary = "Google mesh: gateway unreachable"
+        if (!app.gatewayClient.isEnrolled()) {
+            error = "Device is not enrolled; event replay requires an enrolled device identity."
+        } else {
+            runCatching { app.gatewayClient.events(0).optJSONArray("events")?.objectList().orEmpty() }
+                .onSuccess { events = it }
+                .onFailure { error = it.message ?: "Unable to load activity" }
         }
-        sections = commandSections(app, meshSummary, VanPresence.cue(app.degradedModeStore.snapshot()))
     }
-
-    val degraded = app.degradedModeStore.snapshot()
-    val cue = VanPresence.cue(degraded)
-    val budget = rememberVanEffectBudget()
-    val panelGlass = VanGlassTokens.forState(
-        state = cue.durableState,
-        panel = true,
-        liveBlurAvailable = false,
-        budget = budget,
-    )
 
     LazyColumn(
-        modifier = Modifier
-            .fillMaxSize()
-            .padding(padding)
-            .padding(horizontal = 16.dp),
-        verticalArrangement = Arrangement.spacedBy(12.dp),
-        contentPadding = PaddingValues(vertical = 12.dp),
+        modifier = Modifier.fillMaxSize().padding(horizontal = 14.dp),
+        verticalArrangement = Arrangement.spacedBy(8.dp),
+        contentPadding = PaddingValues(vertical = 8.dp),
     ) {
-        item {
-            VanHeroPanel(
-                app = app,
-                glass = panelGlass,
-                budget = budget,
-                cue = cue,
-                meshCue = VanPresence.meshCue(degraded),
-            )
-        }
-        items(sections) { section ->
-            CommandSectionPanel(section = section, glass = panelGlass)
-        }
-        item {
-            // Non-destructive control: translucent glass is fine here.
-            Button(
-                onClick = { FloatingOverlayService.start(app) },
-                colors = ButtonDefaults.buttonColors(
-                    containerColor = Color(VanGlassTokens.ACCENT_CYAN).copy(alpha = 0.18f),
-                    contentColor = Color(VanGlassTokens.EDGE_CYAN),
-                ),
-                shape = RoundedCornerShape(VanGlassTokens.CORNER_RADIUS_DP.dp),
-                modifier = Modifier.fillMaxWidth(),
-            ) {
-                Text("Start floating Van")
+        item { SectionHeader("Activity", "Gateway event replay") }
+        if (events == null && error == null) item { TruthMessage("Loading activity…") }
+        if (error != null) item { TruthMessage(error!!, warning = true) }
+        if (events?.isEmpty() == true) item { TruthMessage("No gateway events returned.") }
+        items(events.orEmpty(), key = { it.optLong("seq") }) { event ->
+            AdminCard(glass) {
+                Column {
+                    Text(event.optString("event_type", "event"), color = Color.White, fontWeight = FontWeight.Bold)
+                    Text(
+                        event.optJSONObject("payload")?.toString()?.take(360) ?: "No payload",
+                        color = Color(0xFFBCD1D8),
+                        fontSize = 10.sp,
+                    )
+                }
             }
-        }
-        item {
-            // §14: critical actions switch from translucent to solid controls.
-            Button(
-                onClick = {
-                    onA4Approve(gate) {
-                        app.commandQueue.enqueue(
-                            QueueEnqueueRequest(
-                                kind = CommandKind.HERMES_DISPATCH,
-                                payloadJson = Json.encodeToString(
-                                    buildJsonObject { put("action", "owner_approved_a4") },
-                                ),
-                                sensitivity = CommandSensitivity.DESTRUCTIVE,
-                            ),
-                        )
-                        statusMessage = "A4 action queued with biometric approval"
-                    }
-                },
-                colors = ButtonDefaults.buttonColors(
-                    containerColor = Color(VanGlassTokens.ACCENT_AMBER),
-                    contentColor = Color(0xFF10151F),
-                ),
-                shape = RoundedCornerShape(VanGlassTokens.CORNER_RADIUS_DP.dp),
-                modifier = Modifier.fillMaxWidth().height(52.dp),
-            ) {
-                Text("Approve A4 action (biometric)", fontWeight = FontWeight.Bold)
-            }
-        }
-        if (statusMessage.isNotEmpty()) {
-            item { Text(statusMessage, color = Color(0xFFB6C2D0), fontSize = 12.sp) }
         }
     }
 }
 
-/** Hero panel: Van present and expressive, but sized so operational content still leads. */
 @Composable
-private fun VanHeroPanel(
-    app: VanApplication,
-    glass: com.dial.van.visual.VanGlassStyle,
-    budget: com.dial.van.visual.VanEffectBudget,
-    cue: VanPresence.Cue,
-    meshCue: String,
-) {
-    val palette = VanStatusPalette.forState(cue.durableState)
-    VanGlassSurface(style = glass, modifier = Modifier.fillMaxWidth()) {
-        Row(
-            modifier = Modifier.padding(14.dp),
-            verticalAlignment = Alignment.CenterVertically,
-        ) {
-            VanEmbodiment(
-                state = VanPresence.visualState(cue),
-                budget = budget,
-                presentation = VanPresentation.EXPANDED,
-                modifier = Modifier.size(112.dp),
-            )
-            Spacer(modifier = Modifier.size(12.dp))
-            Column {
-                Text("Van", color = Color.White, fontSize = 20.sp, fontWeight = FontWeight.Bold)
-                Text(
-                    text = cue.headline,
-                    color = Color(palette.accent),
-                    fontSize = 14.sp,
-                    fontWeight = FontWeight.SemiBold,
-                )
-                Text(
-                    text = VanCaptions.forState(cue.durableState),
-                    color = Color(0xFFD5DEE8),
-                    fontSize = 12.sp,
-                )
-                Spacer(modifier = Modifier.height(6.dp))
-                Text(text = cue.detail, color = Color(0xFF9AA7B6), fontSize = 11.sp)
-                Text(text = meshCue, color = Color(0xFF8A97A6), fontSize = 11.sp)
+private fun SystemsModule(app: VanApplication, glass: com.dial.van.visual.VanGlassStyle) {
+    val scope = rememberCoroutineScope()
+    var health by remember { mutableStateOf<JSONObject?>(null) }
+    var mesh by remember { mutableStateOf<JSONObject?>(null) }
+    var error by remember { mutableStateOf<String?>(null) }
+
+    fun refresh() {
+        scope.launch {
+            runCatching {
+                health = app.gatewayClient.health()
+                mesh = app.gatewayClient.googleMesh()
+            }.onFailure { error = it.message ?: "System health unavailable" }
+        }
+    }
+    LaunchedEffect(Unit) { refresh() }
+
+    LazyColumn(
+        modifier = Modifier.fillMaxSize().padding(horizontal = 14.dp),
+        verticalArrangement = Arrangement.spacedBy(9.dp),
+        contentPadding = PaddingValues(vertical = 8.dp),
+    ) {
+        item { SectionHeader("Systems / Hermes", "Live gateway health and Google mesh truth") }
+        if (health == null && error == null) item { TruthMessage("Loading system health…") }
+        if (error != null) item { TruthMessage(error!!, warning = true) }
+        health?.let { h ->
+            item {
+                AdminCard(glass) {
+                    Column {
+                        Text("Gateway / Hermes", color = Color.White, fontWeight = FontWeight.Bold)
+                        Text("Overall ok: ${h.optBoolean("ok", false)}", color = Color(0xFFD7E7EC))
+                        Text("Degraded: ${h.optJSONArray("degraded")?.toString() ?: h.opt("degraded")?.toString().orEmpty()}", color = Color(0xFFBCD1D8), fontSize = 10.sp)
+                    }
+                }
+            }
+        }
+        mesh?.let { m ->
+            item {
+                AdminCard(glass) {
+                    Column {
+                        Text("Google mesh", color = Color.White, fontWeight = FontWeight.Bold)
+                        Text("Registry: ${m.optString("registry_version", "unknown")}", color = Color(0xFFD7E7EC), fontSize = 11.sp)
+                        Text("Principal: ${m.optJSONObject("principal")?.toString()?.take(260) ?: "not returned"}", color = Color(0xFFBCD1D8), fontSize = 10.sp)
+                    }
+                }
+            }
+        }
+        item { Button(onClick = { refresh() }) { Text("Refresh systems") } }
+    }
+}
+
+@Composable
+private fun ConnectionsModule(app: VanApplication, glass: com.dial.van.visual.VanGlassStyle) {
+    var endpointDraft by remember { mutableStateOf(app.gatewayClient.baseUrl) }
+    var pairingDraft by remember { mutableStateOf("") }
+    var connectionMessage by remember { mutableStateOf<String?>(null) }
+    var pairingBusy by remember { mutableStateOf(false) }
+    val scope = rememberCoroutineScope()
+
+    LazyColumn(
+        modifier = Modifier.fillMaxSize().padding(horizontal = 14.dp),
+        verticalArrangement = Arrangement.spacedBy(9.dp),
+        contentPadding = PaddingValues(vertical = 8.dp),
+    ) {
+        item { SectionHeader("Connections", "One-time owner pairing; persistent credentials are encrypted and never displayed") }
+        item {
+            AdminCard(glass) {
+                Column(verticalArrangement = Arrangement.spacedBy(8.dp)) {
+                    val paired = app.gatewayClient.isPaired()
+                    Text("VAN gateway", color = Color.White, fontWeight = FontWeight.Bold)
+                    Text(app.gatewayClient.baseUrl, color = Color(0xFFD7E7EC), fontSize = 12.sp)
+                    Text("Paired: $paired", color = Color(0xFFBCD1D8), fontSize = 11.sp)
+                    Text("Device: ${app.gatewayClient.deviceId ?: "not enrolled"}", color = Color(0xFFBCD1D8), fontSize = 11.sp)
+                    if (!paired) {
+                        OutlinedTextField(
+                            value = endpointDraft,
+                            onValueChange = { endpointDraft = it },
+                            label = { Text("HTTPS gateway URL") },
+                            singleLine = true,
+                            modifier = Modifier.fillMaxWidth(),
+                        )
+                        OutlinedTextField(
+                            value = pairingDraft,
+                            onValueChange = { pairingDraft = it },
+                            label = { Text("One-time pairing token") },
+                            visualTransformation = PasswordVisualTransformation(),
+                            singleLine = true,
+                            modifier = Modifier.fillMaxWidth(),
+                        )
+                        Button(
+                            enabled = pairingDraft.trim().length >= 32 && !pairingBusy,
+                            onClick = {
+                                pairingBusy = true
+                                scope.launch {
+                                    connectionMessage = runCatching {
+                                        app.gatewayClient.pairThisDevice(endpointDraft, pairingDraft)
+                                        pairingDraft = ""
+                                        "Device paired securely"
+                                    }.getOrElse {
+                                        "Pairing failed: ${it.message ?: it.javaClass.simpleName}"
+                                    }
+                                    pairingBusy = false
+                                }
+                            },
+                        ) { Text(if (pairingBusy) "Pairing…" else "Pair this device") }
+                    } else {
+                        Text(
+                            "Ingress, revocable device access, and the command HMAC credential are active.",
+                            color = Color(0xFFBCD1D8),
+                            fontSize = 11.sp,
+                        )
+                    }
+                    connectionMessage?.let {
+                        Text(it, color = Color(0xFFBCD1D8), fontSize = 11.sp)
+                    }
+                }
             }
         }
     }
 }
 
-private data class CommandSection(
-    val id: String,
-    val title: String,
-    val summary: String,
-    val items: List<String>,
-    /** Degraded/attention panels get amber emphasis and higher contrast copy (§6, §12). */
-    val alert: Boolean = false,
-)
-
-private fun commandSections(app: VanApplication, meshSummary: String, cue: VanPresence.Cue): List<CommandSection> {
-    val queueSize = app.commandQueue.size()
-    val degraded = app.degradedModeStore.snapshot()
-    val attentionItems = buildList {
-        if (degraded.active) {
-            add(degraded.reason)
-            degraded.subsystems.filter { it.status != SubsystemStatus.WORKING }.forEach { sub ->
-                add("${sub.label}: ${sub.status} — ${sub.detail}")
+@Composable
+private fun SettingsModule(app: VanApplication, glass: com.dial.van.visual.VanGlassStyle) {
+    LazyColumn(
+        modifier = Modifier.fillMaxSize().padding(horizontal = 14.dp),
+        verticalArrangement = Arrangement.spacedBy(9.dp),
+        contentPadding = PaddingValues(vertical = 8.dp),
+    ) {
+        item { SectionHeader("Settings", "Owner-facing runtime controls") }
+        item {
+            AdminCard(glass) {
+                Column(verticalArrangement = Arrangement.spacedBy(8.dp)) {
+                    Text("Floating VAN", color = Color.White, fontWeight = FontWeight.Bold)
+                    Row(horizontalArrangement = Arrangement.spacedBy(8.dp)) {
+                        Button(onClick = { FloatingOverlayService.start(app) }) { Text("Start") }
+                        Button(onClick = { FloatingOverlayService.stop(app) }) { Text("Stop") }
+                    }
+                }
             }
-        } else {
-            add("No attention items")
+        }
+        item {
+            TruthMessage("A4 privileged commands remain fail-closed and require the existing biometric approval path. No secret or approval token is displayed here.")
         }
     }
-    return listOf(
-        CommandSection(
-            "mission",
-            "State / Mission",
-            cue.headline,
-            listOf(VanCaptions.forState(cue.durableState), cue.detail),
-        ),
-        CommandSection(
-            "attention",
-            "Attention",
-            if (degraded.active) "Owner focus required" else "Nothing waiting on you",
-            attentionItems,
-            alert = degraded.active,
-        ),
-        CommandSection("decisions", "Decisions", "Open decisions awaiting input", listOf("No pending decisions")),
-        CommandSection("tasks", "Tasks", "Actionable work", listOf("$queueSize queued commands")),
-        CommandSection(
-            "projects",
-            "Projects",
-            "Mounted Project Truth registries",
-            listOf("van", "dial", "dde", "gtr", "goat", "aeci"),
-        ),
-        CommandSection(
-            "connections",
-            "Connections",
-            "Device + Hermes uplink",
-            listOf("Hermes profile: van", meshSummary),
-        ),
+}
+
+@Composable
+private fun SectionHeader(title: String, detail: String) {
+    Column(modifier = Modifier.padding(vertical = 4.dp)) {
+        Text(title, color = Color.White, fontSize = 19.sp, fontWeight = FontWeight.Bold)
+        Text(detail, color = Color(0xFFBCD1D8), fontSize = 11.sp)
+    }
+}
+
+@Composable
+private fun AdminCard(
+    glass: com.dial.van.visual.VanGlassStyle,
+    content: @Composable () -> Unit,
+) {
+    VanGlassSurface(style = glass, modifier = Modifier.fillMaxWidth()) {
+        Box(modifier = Modifier.padding(14.dp)) { content() }
+    }
+}
+
+@Composable
+private fun AdminActionCard(
+    title: String,
+    detail: String,
+    glass: com.dial.van.visual.VanGlassStyle,
+    onClick: () -> Unit,
+) {
+    AdminCard(glass) {
+        Row(verticalAlignment = Alignment.CenterVertically) {
+            Column(modifier = Modifier.weight(1f)) {
+                Text(title, color = Color.White, fontSize = 15.sp, fontWeight = FontWeight.Bold)
+                Text(detail, color = Color(0xFFBCD1D8), fontSize = 11.sp)
+            }
+            Button(onClick = onClick) { Text("Open") }
+        }
+    }
+}
+
+@Composable
+private fun TruthMessage(text: String, warning: Boolean = false) {
+    Text(
+        text,
+        color = if (warning) Color(VanGlassTokens.ACCENT_AMBER) else Color(0xFFBCD1D8),
+        fontSize = 12.sp,
+        modifier = Modifier.padding(vertical = 8.dp),
     )
 }
 
-/** §14: structured glass cards for project status, commands, approvals and tool output. */
 @Composable
-private fun CommandSectionPanel(
-    section: CommandSection,
+private fun CommandMessageBubble(
+    message: VanConversationMessage,
     glass: com.dial.van.visual.VanGlassStyle,
 ) {
-    val style = if (section.alert) {
-        glass.copy(
-            borderColor = VanGlassTokens.ACCENT_AMBER,
-            borderAlpha = 0.42f,
-            backgroundAlpha = (glass.backgroundAlpha + 0.06f).coerceAtMost(0.97f),
-        )
-    } else {
-        glass
+    val tint = when (message.role) {
+        VanMessageRole.OWNER -> Color(VanGlassTokens.ACCENT_CYAN)
+        VanMessageRole.VAN -> Color(VanGlassTokens.BABY_CYAN)
+        VanMessageRole.SYSTEM -> Color(VanGlassTokens.ACCENT_AMBER)
     }
-    VanGlassSurface(style = style, modifier = Modifier.fillMaxWidth()) {
-        Column(modifier = Modifier.padding(16.dp)) {
+    VanGlassSurface(
+        style = glass.copy(
+            backgroundAlpha = (glass.backgroundAlpha - 0.08f).coerceAtLeast(0.52f),
+            contaminationAlpha = 0.08f,
+        ),
+        modifier = Modifier.fillMaxWidth(),
+    ) {
+        Column(modifier = Modifier.padding(10.dp)) {
             Text(
-                text = section.title,
-                color = Color.White,
-                fontSize = 16.sp,
-                fontWeight = FontWeight.SemiBold,
+                when (message.role) {
+                    VanMessageRole.OWNER -> "You"
+                    VanMessageRole.VAN -> "Van"
+                    VanMessageRole.SYSTEM -> "System"
+                },
+                color = tint,
+                fontSize = 10.sp,
+                fontWeight = FontWeight.Bold,
             )
-            Text(
-                text = section.summary,
-                // §12: text never relies on translucency alone for legibility.
-                color = if (section.alert) Color(VanGlassTokens.ACCENT_AMBER) else Color(0xFF9AA7B6),
-                fontSize = 12.sp,
-                modifier = Modifier.padding(bottom = 8.dp),
-            )
-            section.items.forEach { item ->
-                Text(text = "• $item", color = Color(0xFFD5DEE8), fontSize = 13.sp)
+            Text(message.text, color = Color(0xFFF4FCFF), fontSize = 12.sp)
+            message.status?.let {
+                Text(it.name, color = statusColor(it), fontSize = 9.sp)
             }
         }
     }
 }
 
-/** Kept for reference by tests: the durable state whose panels must be solid. */
-internal val SOLID_CONTROL_STATES = setOf(
-    VanDurableState.WAITING_FOR_OWNER,
-    VanDurableState.URGENT,
-    VanDurableState.WARNING,
-    VanDurableState.ERROR,
-)
+private fun statusColor(status: VanCommandStatus): Color = when (status) {
+    VanCommandStatus.SUCCEEDED -> Color(VanGlassTokens.ACCENT_GREEN)
+    VanCommandStatus.FAILED,
+    VanCommandStatus.CANCELLED,
+    VanCommandStatus.EXPIRED,
+    -> Color(VanGlassTokens.ACCENT_RED)
+    VanCommandStatus.APPROVAL_REQUIRED -> Color(VanGlassTokens.ACCENT_AMBER)
+    else -> Color(VanGlassTokens.EDGE_CYAN)
+}
+
+private fun JSONArray.objectList(): List<JSONObject> = buildList {
+    for (index in 0 until length()) optJSONObject(index)?.let(::add)
+}
+
+private fun JSONArray.stringList(): List<String> = buildList {
+    for (index in 0 until length()) {
+        optString(index).takeIf { it.isNotBlank() }?.let(::add)
+    }
+}

@@ -13,9 +13,9 @@ Android and VAN Gateway do not run a parallel Gemini agent loop.
 
 ## Google Account Sovereignty
 
-All Google capabilities used by VAN must trace ownership, entitlement or
-infrastructure administration to the owner's canonical Google account.
-Credential separation does not imply identity separation.
+The canonical owner Google identity is the default for VAN's Google capability mesh. A secondary Google identity may be delegated to one explicitly named capability without becoming an owner identity. Credential separation and identity delegation are both explicit; neither implies inheritance.
+
+Antigravity is the only currently delegated capability and MUST execute through `antigravity_worker_account` in an isolated runtime home. All other Google capabilities remain bound to `owner_google_account`.
 
 ```text
 Owner Google Account
@@ -36,8 +36,8 @@ session directly. Never substitute an unrelated Google identity.
 |---|---|---|
 | Workspace OAuth | Gmail, Calendar, Drive, Contacts, Tasks | **Never** |
 | Gemini runtime | Gemini, Live, Deep Research, Nano Banana, Veo via Hermes | **Never** |
-| Google Cloud/service identity | Optional Notebook Enterprise / ADK/A2A services | **Never** |
-| Consumer account session | Notebook, Mixboard, Stitch, Antigravity, Jules, Flow, AI Studio | Cookies/tokens are **never** copied into prompts |
+| Google Cloud/service identity | Notebook Enterprise, Stitch MCP, ADK/A2A services | **Never** |
+| Consumer account session | Notebook, Mixboard, Antigravity, Jules, Flow, AI Studio | Cookies/tokens are **never** copied into prompts |
 
 Workspace OAuth MUST NOT be reused as a Gemini runtime credential. Consumer
 browser cookies MUST NOT be exported into Hermes. Store runtime credentials in
@@ -62,11 +62,10 @@ Owner
 - **Gemini Live** — perception/conversation; it does not authorize mutations.
 - **Deep Research** — cited investigator; its output is evidence, not Project Truth.
 - **Nano Banana / Veo** — artifact generators behind Hermes media capabilities.
-- **Notebook / Mixboard / Stitch / Flow / AI Studio** — account-native Google
-  surfaces authenticated with the owner's Google account when no stable public
-  automation API is available.
+- **Stitch** — programmatic UI generation through the Google Stitch MCP using the isolated Cloud/service credential plane.
+- **Notebook / Mixboard / Flow / AI Studio** — account-native Google surfaces authenticated with the owner's Google account when no stable public automation API is available.
 
-Consumer products such as Notebook, Mixboard, Stitch, Antigravity, Jules and Flow
+Consumer products such as Notebook, Mixboard, Antigravity, Jules and Flow
 are described in `docs/GOOGLE_INTELLIGENCE_MESH.md` and the associated skills.
 
 ## Routing policy

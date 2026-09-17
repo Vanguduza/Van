@@ -1,0 +1,195 @@
+package com.dial.van.control
+
+import com.dial.van.gateway.VanGatewayClient
+import com.dial.van.visual.VanLiveVisualState
+import kotlinx.coroutines.CoroutineScope
+import kotlinx.coroutines.flow.MutableStateFlow
+import kotlinx.coroutines.flow.StateFlow
+import kotlinx.coroutines.flow.asStateFlow
+import kotlinx.coroutines.flow.update
+import kotlinx.coroutines.launch
+import java.util.UUID
+
+/** Every owner input surface converges here before crossing the signed gateway boundary. */
+enum class VanCommandSource {
+    CHAT,
+    VOICE,
+    QUICK_ACTION,
+    DECISION,
+    TASK,
+    PROJECT,
+    SYSTEM,
+}
+
+enum class VanMessageRole { OWNER, VAN, SYSTEM }
+
+enum class VanCommandStatus {
+    LOCAL_DRAFT,
+    SUBMITTING,
+    APPROVAL_REQUIRED,
+    ACCEPTED,
+    IN_FLIGHT,
+    SUCCEEDED,
+    FAILED,
+    CANCELLED,
+    EXPIRED,
+}
+
+data class VanConversationMessage(
+    val id: String = UUID.randomUUID().toString(),
+    val role: VanMessageRole,
+    val text: String,
+    val projectId: String? = null,
+    val commandId: String? = null,
+    val status: VanCommandStatus? = null,
+    val createdAtEpochMs: Long = System.currentTimeMillis(),
+)
+
+data class VanConversationState(
+    val messages: List<VanConversationMessage> = emptyList(),
+    val submitting: Boolean = false,
+    val selectedProjectId: String? = null,
+    val lastError: String? = null,
+)
+
+data class VanOwnerCommand(
+    val text: String,
+    val source: VanCommandSource,
+    val projectId: String? = null,
+    val actionClass: String = "A1",
+    val approvalToken: String? = null,
+    val idempotencyKey: String = UUID.randomUUID().toString(),
+)
+
+class VanCommandController(
+    private val gateway: VanGatewayClient,
+    private val scope: CoroutineScope,
+) {
+    private val _state = MutableStateFlow(VanConversationState())
+    val state: StateFlow<VanConversationState> = _state.asStateFlow()
+
+    fun selectProject(projectId: String?) {
+        _state.update { it.copy(selectedProjectId = projectId) }
+    }
+
+    fun submitText(
+        text: String,
+        source: VanCommandSource,
+        projectId: String? = _state.value.selectedProjectId,
+        actionClass: String = "A1",
+        approvalToken: String? = null,
+    ) {
+        val normalized = text.trim()
+        if (normalized.isEmpty()) return
+        submit(
+            VanOwnerCommand(
+                text = normalized,
+                source = source,
+                projectId = projectId,
+                actionClass = actionClass,
+                approvalToken = approvalToken,
+            ),
+        )
+    }
+
+    fun submit(command: VanOwnerCommand) {
+        val normalized = command.text.trim()
+        if (normalized.isEmpty()) return
+
+        val ownerMessage = VanConversationMessage(
+            role = VanMessageRole.OWNER,
+            text = normalized,
+            projectId = command.projectId,
+            status = VanCommandStatus.LOCAL_DRAFT,
+        )
+        _state.update {
+            it.copy(
+                messages = it.messages + ownerMessage,
+                submitting = true,
+                lastError = null,
+            )
+        }
+
+        // Fail closed locally. The Android UI cannot manufacture a privileged approval token.
+        if (command.actionClass.equals("A4", ignoreCase = true) && command.approvalToken.isNullOrBlank()) {
+            VanLiveVisualState.waitingForOwner()
+            _state.update {
+                it.copy(
+                    messages = it.messages + VanConversationMessage(
+                        role = VanMessageRole.SYSTEM,
+                        text = "A4 owner approval is required before this command can be dispatched.",
+                        projectId = command.projectId,
+                        status = VanCommandStatus.APPROVAL_REQUIRED,
+                    ),
+                    submitting = false,
+                )
+            }
+            return
+        }
+
+        scope.launch {
+            try {
+                val response = gateway.dispatchCommand(
+                    text = normalized,
+                    actionClass = command.actionClass,
+                    projectId = command.projectId,
+                    idempotencyKey = command.idempotencyKey,
+                    approvalToken = command.approvalToken,
+                )
+                val wireStatus = response.optString("status").lowercase()
+                val status = when (wireStatus) {
+                    "approval_required" -> VanCommandStatus.APPROVAL_REQUIRED
+                    "accepted" -> VanCommandStatus.ACCEPTED
+                    "in_flight" -> VanCommandStatus.IN_FLIGHT
+                    "succeeded", "success", "completed" -> VanCommandStatus.SUCCEEDED
+                    "cancelled" -> VanCommandStatus.CANCELLED
+                    "expired" -> VanCommandStatus.EXPIRED
+                    "denied", "rejected", "rejected_untrusted", "conflict", "failed", "error" -> VanCommandStatus.FAILED
+                    else -> VanCommandStatus.ACCEPTED
+                }
+
+                // Do not invent completion: accepted/in-flight text explicitly says Hermes owns work.
+                val responseText = when {
+                    response.optString("message").isNotBlank() -> response.optString("message")
+                    response.optString("detail").isNotBlank() -> response.optString("detail")
+                    status == VanCommandStatus.ACCEPTED || status == VanCommandStatus.IN_FLIGHT ->
+                        "Hermes accepted the command. Completion has not been confirmed yet."
+                    status == VanCommandStatus.APPROVAL_REQUIRED ->
+                        "Owner approval is required before execution can continue."
+                    status == VanCommandStatus.SUCCEEDED ->
+                        "The gateway reports this command completed successfully."
+                    status == VanCommandStatus.FAILED ->
+                        "The command was rejected or failed."
+                    else -> "Command status: ${wireStatus.ifBlank { "accepted" }}"
+                }
+
+                _state.update {
+                    it.copy(
+                        messages = it.messages + VanConversationMessage(
+                            role = VanMessageRole.VAN,
+                            text = responseText,
+                            projectId = command.projectId,
+                            commandId = response.optString("command_id").ifBlank { null },
+                            status = status,
+                        ),
+                        submitting = false,
+                    )
+                }
+            } catch (t: Throwable) {
+                val safeMessage = t.message?.take(240) ?: t::class.java.simpleName
+                _state.update {
+                    it.copy(
+                        messages = it.messages + VanConversationMessage(
+                            role = VanMessageRole.SYSTEM,
+                            text = "Command dispatch failed: $safeMessage",
+                            projectId = command.projectId,
+                            status = VanCommandStatus.FAILED,
+                        ),
+                        submitting = false,
+                        lastError = safeMessage,
+                    )
+                }
+            }
+        }
+    }
+}

@@ -30,15 +30,18 @@ async def run(args: argparse.Namespace) -> int:
         cloud_runtime_configured=args.cloud_runtime_configured,
         consumer_connected_capabilities=",".join(args.configured_capability),
     )
-    principal = await broker.register_principal(subject=args.subject, account_kind=args.account_kind, ai_plan=args.ai_plan)
+    principal = await broker.register_principal(subject=args.subject, owner_id=args.identity_alias, account_kind=args.account_kind, ai_plan=args.ai_plan)
 
     for capability_id in args.configured_capability:
-        registry.get(capability_id)
+        descriptor = registry.get(capability_id)
+        if descriptor.identity_alias != args.identity_alias:
+            raise SystemExit(f"capability {capability_id} is bound to {descriptor.identity_alias}, not {args.identity_alias}")
         await broker.record_capability_evidence(
             capability_id,
             state=GoogleCapabilityState.CONFIGURED,
             evidence_pointer=f"setup:configured:{capability_id}",
             metadata={"source": "configure_google_identity.py"},
+            owner_id=args.identity_alias,
         )
 
     for pair in args.verified_capability:
@@ -49,15 +52,18 @@ async def run(args: argparse.Namespace) -> int:
             raise SystemExit(
                 f"READY refused for {capability_id}: evidence must start with live://, hermes://, or receipt://"
             )
-        registry.get(capability_id)
+        descriptor = registry.get(capability_id)
+        if descriptor.identity_alias != args.identity_alias:
+            raise SystemExit(f"capability {capability_id} is bound to {descriptor.identity_alias}, not {args.identity_alias}")
         await broker.record_capability_evidence(
             capability_id,
             state=GoogleCapabilityState.READY,
             evidence_pointer=evidence_pointer,
             metadata={"source": "configure_google_identity.py", "verified": True},
+            owner_id=args.identity_alias,
         )
 
-    print(f"Google principal registered: {principal.status}; plan={principal.ai_plan}")
+    print(f"Google identity registered: alias={args.identity_alias}; status={principal.status}; plan={principal.ai_plan}")
     print("Raw Google subject was hashed and was not persisted.")
     return 0
 
@@ -65,6 +71,7 @@ async def run(args: argparse.Namespace) -> int:
 def parse_args() -> argparse.Namespace:
     parser = argparse.ArgumentParser(description="Register VAN's canonical owner Google principal and explicit capability evidence.")
     parser.add_argument("--subject", required=True, help="Google stable account subject identifier; stored only as SHA-256.")
+    parser.add_argument("--identity-alias", default="owner_google_account", choices=["owner_google_account", "antigravity_worker_account"], help="Logical Google identity binding; raw email is not stored in the repository.")
     parser.add_argument("--account-kind", default="personal", choices=["personal", "workspace", "enterprise"])
     parser.add_argument("--ai-plan", default=os.getenv("VAN_GOOGLE_AI_PLAN", "UNKNOWN"))
     parser.add_argument("--database-path")

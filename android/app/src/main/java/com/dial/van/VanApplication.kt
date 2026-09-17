@@ -1,20 +1,27 @@
 package com.dial.van
 
 import android.app.Application
+import com.dial.van.control.VanCommandController
+import com.dial.van.control.VanCommandSource
 import com.dial.van.degraded.DegradedModeStore
 import com.dial.van.gateway.QueueReplayer
 import com.dial.van.gateway.VanGatewayClient
 import com.dial.van.notification.NotificationPolicyStore
 import com.dial.van.queue.EncryptedCommandQueue
+import com.dial.van.visual.VanLiveVisualState
 import com.dial.van.voice.SpeechSyncFrame
 import com.dial.van.voice.TtsOutputCallback
 import com.dial.van.voice.TtsOutputManager
+import com.dial.van.voice.VanVoiceUiStore
 import com.dial.van.voice.VoiceInputCallback
 import com.dial.van.voice.VoiceInputManager
 import com.dial.van.voice.VoiceSessionCoordinator
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.SupervisorJob
+import kotlinx.coroutines.delay
+import kotlinx.coroutines.isActive
+import kotlinx.coroutines.launch
 
 class VanApplication : Application(), VoiceInputCallback, TtsOutputCallback {
 
@@ -32,7 +39,11 @@ class VanApplication : Application(), VoiceInputCallback, TtsOutputCallback {
         private set
     lateinit var voiceSession: VoiceSessionCoordinator
         private set
+    lateinit var voiceUi: VanVoiceUiStore
+        private set
     lateinit var gatewayClient: VanGatewayClient
+        private set
+    lateinit var commandController: VanCommandController
         private set
     lateinit var queueReplayer: QueueReplayer
         private set
@@ -43,24 +54,128 @@ class VanApplication : Application(), VoiceInputCallback, TtsOutputCallback {
         commandQueue = EncryptedCommandQueue(this)
         notificationPolicyStore = NotificationPolicyStore(this)
         degradedModeStore = DegradedModeStore()
+        voiceUi = VanVoiceUiStore()
         voiceInput = VoiceInputManager(this, this)
         ttsOutput = TtsOutputManager(this, this)
         voiceSession = VoiceSessionCoordinator(voiceInput, ttsOutput)
         gatewayClient = VanGatewayClient(this)
+        commandController = VanCommandController(gatewayClient, appScope)
         queueReplayer = QueueReplayer(commandQueue, gatewayClient, degradedModeStore, appScope)
-        // Attempt reconnect replay; fails closed into degraded state if gateway down.
         queueReplayer.replayAsync()
+        startGatewayHealthMonitor()
     }
 
-    override fun onPartial(text: String) = Unit
-    override fun onFinal(text: String) = Unit
-    override fun onError(code: Int) = Unit
-    override fun onListeningChanged(listening: Boolean) = Unit
-    override fun onSpeakingChanged(speaking: Boolean) = Unit
-    override fun onSpeechFrame(frame: SpeechSyncFrame) = Unit
-    override fun onUtteranceDone(utteranceId: String) = Unit
+    private fun startGatewayHealthMonitor() {
+        appScope.launch {
+            while (isActive) {
+                refreshGatewayHealth()
+                delay(GATEWAY_HEALTH_INTERVAL_MS)
+            }
+        }
+    }
+
+    private suspend fun refreshGatewayHealth() {
+        try {
+            val health = gatewayClient.health()
+            degradedModeStore.markWorking("gateway")
+
+            if (health.optBoolean("ok", false)) {
+                degradedModeStore.markWorking("hermes")
+            } else {
+                val detail = health.optJSONObject("hermes")
+                    ?.optString("degraded")
+                    ?.takeIf { it.isNotBlank() }
+                    ?: "Hermes health check failed"
+                degradedModeStore.markBroken(
+                    "hermes",
+                    detail,
+                    com.dial.van.degraded.RestoreAction.RETRY_CONNECTION,
+                )
+            }
+
+            val mesh = health.optJSONObject("google_mesh")
+            val principalRegistered =
+                mesh?.optJSONObject("principal")?.optBoolean("registered", false) == true
+            degradedModeStore.applyGoogleMesh(
+                configuredCapabilities = mesh?.optInt("configured_capabilities", 0) ?: 0,
+                totalCapabilities = mesh?.optInt("total_capabilities", 0) ?: 0,
+                principalRegistered = principalRegistered,
+                workspaceApiState = mesh?.optString("workspace_api_state")
+                    ?.takeIf { it.isNotBlank() },
+            )
+        } catch (exc: Throwable) {
+            degradedModeStore.markBroken(
+                "gateway",
+                "Gateway health unavailable: ${exc.javaClass.simpleName}",
+                com.dial.van.degraded.RestoreAction.RETRY_CONNECTION,
+            )
+            degradedModeStore.markBroken(
+                "hermes",
+                "Hermes health unavailable through gateway",
+                com.dial.van.degraded.RestoreAction.RETRY_CONNECTION,
+            )
+        }
+    }
+
+    override fun onPartial(text: String) {
+        voiceUi.partial(text)
+        if (text.isNotBlank()) VanLiveVisualState.listeningStarted()
+    }
+
+    override fun onFinal(text: String) {
+        val hasText = text.isNotBlank()
+        voiceUi.final(text)
+        // Final recognition owns THINKING. The same transcript then enters the exact command path
+        // used by typed chat; voice is not a visual-only state transition or parallel authority path.
+        VanLiveVisualState.finalTranscript(hasText = hasText)
+        if (hasText) {
+            commandController.submitText(
+                text = text,
+                source = VanCommandSource.VOICE,
+            )
+        }
+    }
+
+    override fun onError(code: Int) {
+        voiceUi.error(code)
+        VanLiveVisualState.warning(urgency = 0.25f)
+        VanLiveVisualState.settleToIdle(delayMs = 1_200L, allowCritical = true)
+    }
+
+    override fun onListeningChanged(listening: Boolean) {
+        voiceUi.listening(listening)
+        if (listening) {
+            VanLiveVisualState.listeningStarted()
+        } else {
+            // Capture ended; the turn may still be THINKING/DISPATCHING.
+            VanLiveVisualState.listeningEnded()
+        }
+    }
+
+    override fun onSpeakingChanged(speaking: Boolean) {
+        if (speaking) {
+            VanLiveVisualState.speakingStarted()
+        } else {
+            VanLiveVisualState.speakingEnded()
+            VanLiveVisualState.settleToIdle()
+        }
+    }
+
+    override fun onSpeechFrame(frame: SpeechSyncFrame) {
+        VanLiveVisualState.speechFrame(
+            mouthOpen = frame.mouthOpen,
+            viseme = frame.viseme,
+        )
+    }
+
+    override fun onUtteranceDone(utteranceId: String) {
+        VanLiveVisualState.speakingEnded()
+        VanLiveVisualState.settleToIdle()
+    }
 
     companion object {
+        private const val GATEWAY_HEALTH_INTERVAL_MS = 60_000L
+
         lateinit var instance: VanApplication
             private set
     }

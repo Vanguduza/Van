@@ -2,8 +2,11 @@ package com.dial.van.preview
 
 import com.dial.van.visual.VanAuraSpec
 import com.dial.van.visual.VanEffectBudget
+import com.dial.van.visual.VanFieldGeometryEngine
+import com.dial.van.visual.VanFieldInk
 import com.dial.van.visual.VanGlassStyle
 import com.dial.van.visual.VanGlassTokens
+import com.dial.van.visual.VanWindFieldMotion
 import java.awt.BasicStroke
 import java.awt.Color
 import java.awt.Graphics2D
@@ -17,24 +20,18 @@ import java.awt.geom.Point2D
 import java.awt.geom.RoundRectangle2D
 import java.awt.image.BufferedImage
 import kotlin.math.PI
-import kotlin.math.cos
 import kotlin.math.max
 import kotlin.math.sin
 
 /**
- * Java2D painter for the DIAL Glass shell and the blue electrical aura.
+ * Java2D painter for DIAL Glass and VAN's living electrical field.
  *
- * Reads [VanGlassStyle] and [VanAuraSpec] — the same objects the Compose overlay consumes — so
- * these previews cannot show a look the app does not ship. The one thing the preview does that
- * Compose delegates to the window manager is [blurBehind]: it blurs the mock host-app pixels
- * under the glass, which is what `WindowManager.LayoutParams.blurBehindRadius` does on device.
+ * Zone B/C geometry is produced by [VanFieldGeometryEngine], the exact same pure-Kotlin geometry
+ * engine used by the shipping Compose overlay. [spec] owns local activity/Zone B while
+ * [semanticSpec] independently owns Zone C, so evidence can certify orthogonal runtime states.
  */
 object GlassPainter {
 
-    /**
-     * §10 step 2 — backdrop blur sampling, simulated by blurring what is already on the canvas
-     * beneath [shape]. Three box-blur passes approximate a Gaussian closely enough for a still.
-     */
     fun blurBehind(g: Graphics2D, canvas: BufferedImage, shape: Shape, radiusPx: Int) {
         if (radiusPx <= 0) return
         val bounds: Rectangle = shape.bounds
@@ -103,10 +100,6 @@ object GlassPainter {
         return ((a / n) shl 24) or ((r / n) shl 16) or ((g / n) shl 8) or (b / n)
     }
 
-    /**
-     * Optical glass: tint, shaping gradient, grain, inner highlight, contamination,
-     * faint structural edge, selective specular. No uniform glowing perimeter.
-     */
     fun fillGlass(g: Graphics2D, style: VanGlassStyle, shape: RoundRectangle2D.Float, density: Float) {
         g.color = argb(VanGlassTokens.TINT_NAVY, style.backgroundAlpha)
         g.fill(shape)
@@ -165,15 +158,13 @@ object GlassPainter {
 
         g.clip = previousClip
 
-        val structural = style.structuralEdgeAlpha
-        if (structural > 0f) {
-            g.color = argb(style.borderColor, structural)
+        if (style.structuralEdgeAlpha > 0f) {
+            g.color = argb(style.borderColor, style.structuralEdgeAlpha)
             g.stroke = BasicStroke(max(style.borderWidthDp * density, 1f))
             g.draw(shape)
         }
 
-        val specular = style.specularAlpha
-        if (specular > 0f) {
+        if (style.specularAlpha > 0f) {
             val inset = 3f * density
             val arcBox = RoundRectangle2D.Float(
                 shape.x + inset,
@@ -183,7 +174,7 @@ object GlassPainter {
                 shape.arcwidth,
                 shape.archeight,
             )
-            g.color = argb(0xFFFFFFFF.toInt(), specular)
+            g.color = argb(0xFFFFFFFF.toInt(), style.specularAlpha)
             g.stroke = BasicStroke(
                 max(style.borderWidthDp * density * 1.6f, 1.4f),
                 BasicStroke.CAP_ROUND,
@@ -202,7 +193,6 @@ object GlassPainter {
         }
     }
 
-    /** Shallow, soft, spatial shadow (§3). */
     fun dropShadow(g: Graphics2D, shape: RoundRectangle2D.Float, style: VanGlassStyle, density: Float) {
         val spread = style.elevationDp * density
         for (step in 3 downTo 1) {
@@ -221,10 +211,7 @@ object GlassPainter {
         }
     }
 
-    /**
-     * Three-zone aura (Rev 2.2): inner identity, mid interaction, outer semantic envelope.
-     * A full ring is forbidden. Semantic colour lives only in Zone C.
-     */
+    /** Canonical living aura: Zone A/B activity + independently truthful Zone C semantics. */
     fun drawAura(
         g: Graphics2D,
         spec: VanAuraSpec,
@@ -233,182 +220,99 @@ object GlassPainter {
         radius: Float,
         budget: VanEffectBudget = VanEffectBudget.FULL,
         phase: Float = 0.18f,
+        semanticSpec: VanAuraSpec = spec,
     ) {
-        if (radius <= 1f) return
+        if (radius <= 1f || (spec.intensity <= 0.01f && semanticSpec.intensity <= 0.01f)) return
+        val bodyEdge = radius * 2f
         val cyan = VanGlassTokens.ACCENT_CYAN
-        val midRadius = radius * VanAuraSpec.MID_RADIUS_SCALE
+        val semantic = semanticSpec.semanticColor ?: cyan
+        val motion = VanWindFieldMotion.sample(spec, phase, budget)
 
-        drawZoneA(g, spec, cx, cy, radius, cyan)
-        drawZoneB(g, spec, cx, cy, radius, midRadius, cyan, budget, phase)
-        drawZoneC(g, spec, cx, cy, midRadius, budget)
-    }
+        drawZoneA(g, spec, cx, cy, bodyEdge, cyan, motion.phase, motion.breathing)
 
-    private fun drawZoneA(g: Graphics2D, spec: VanAuraSpec, cx: Float, cy: Float, radius: Float, cyan: Int) {
-        val alpha = (0.12f + 0.08f * spec.intensity).coerceIn(0.08f, 0.20f)
-        val r = radius * 0.52f * VanAuraSpec.INNER_RADIUS_SCALE
-        radial(g, cx - radius * 0.10f, cy + radius * 0.04f, r, argb(cyan, alpha * 0.85f))
-        radial(g, cx + radius * 0.14f, cy - radius * 0.08f, r * 0.72f, argb(cyan, alpha * 0.55f))
-        if (spec.groundGlow > 0.01f) {
-            val crescent = Path2D.Float()
-            val gy = cy + radius * 0.95f
-            val gw = radius * 0.85f
-            crescent.moveTo(cx - gw, gy)
-            crescent.quadTo(cx.toDouble(), (gy + radius * 0.16f).toDouble(), (cx + gw).toDouble(), gy.toDouble())
-            crescent.quadTo(cx.toDouble(), (gy - radius * 0.06f).toDouble(), (cx - gw).toDouble(), gy.toDouble())
-            crescent.closePath()
-            val previous = g.clip
-            g.clip(crescent)
-            radial(g, cx, gy, gw, argb(cyan, 0.28f * spec.groundGlow))
-            g.clip = previous
-        }
-    }
-
-    private fun drawZoneB(
-        g: Graphics2D,
-        spec: VanAuraSpec,
-        cx: Float,
-        cy: Float,
-        radius: Float,
-        midRadius: Float,
-        cyan: Int,
-        budget: VanEffectBudget,
-        phase: Float,
-    ) {
-        if (spec.filamentCount > 0 && spec.arcActivity > 0.01f) {
-            val count = spec.filamentCount.coerceIn(1, 5)
-            g.stroke = BasicStroke(max(radius * 0.050f, 1.8f), BasicStroke.CAP_ROUND, BasicStroke.JOIN_ROUND)
-            repeat(count) { index ->
-                val seed = index * 1.17f + spec.intensity
-                val life = (phase + seed * 0.13f) % 1f
-                val visible = if (budget.allowMotion) life < 0.72f else true
-                if (!visible) return@repeat
-                val fade = if (budget.allowMotion) {
-                    sin((life / 0.72f) * PI.toFloat()).coerceAtLeast(0.35f)
-                } else {
-                    0.82f
-                }
-                val start = 0.55f + index * 0.9f
-                val inner = radius * 0.62f
-                val outer = midRadius * (0.95f + 0.12f * ((seed * 3f) % 1f))
-                val path = Path2D.Float()
-                path.moveTo(cx + cos(start) * inner, cy + sin(start) * inner)
-                val bend = start + 0.55f + 0.25f * sin(seed)
-                path.quadTo(
-                    cx + cos(bend) * (inner + outer) * 0.48f,
-                    cy + sin(bend) * (inner + outer) * 0.42f,
-                    cx + cos(start + 0.35f) * outer,
-                    cy + sin(start + 0.22f) * outer,
-                )
-                g.color = argb(cyan, (0.42f + 0.40f * spec.arcActivity).coerceIn(0.42f, 0.88f) * fade)
-                g.draw(path)
+        val geometry = VanFieldGeometryEngine.build(
+            spec = spec,
+            phase = phase,
+            budget = budget,
+            bodyEdge = bodyEdge,
+            centerX = cx,
+            centerY = cy,
+            semanticSpec = semanticSpec,
+        )
+        geometry.strokes.forEach { stroke ->
+            val color = if (stroke.ink == VanFieldInk.IDENTITY) cyan else semantic
+            val path = Path2D.Float()
+            stroke.points.forEachIndexed { index, point ->
+                if (index == 0) path.moveTo(point.x, point.y) else path.lineTo(point.x, point.y)
             }
+            g.stroke = BasicStroke(stroke.glowWidth, BasicStroke.CAP_ROUND, BasicStroke.JOIN_ROUND)
+            g.color = argb(color, stroke.alpha * 0.16f)
+            g.draw(path)
+            g.stroke = BasicStroke(stroke.width, BasicStroke.CAP_ROUND, BasicStroke.JOIN_ROUND)
+            g.color = argb(color, stroke.alpha)
+            g.draw(path)
         }
-
-        if (spec.arcActivity > 0.02f) {
-            val arcs = (1 + (spec.arcActivity * 3f).toInt()).coerceAtMost(3)
-            var remaining = VanAuraSpec.MAX_TOTAL_ARC_DEG
-            val ovalRx = midRadius
-            val ovalRy = midRadius * (0.82f + spec.fieldAsymmetry)
-            g.stroke = BasicStroke(max(radius * 0.038f, 1.5f), BasicStroke.CAP_ROUND, BasicStroke.JOIN_ROUND)
-            repeat(arcs) { index ->
-                if (remaining <= 18f) return@repeat
-                val seed = index * 0.41f
-                val life = (phase * 0.6f + seed) % 1f
-                val visible = if (budget.allowMotion) life < 0.62f else true
-                if (!visible) return@repeat
-                val fade = if (budget.allowMotion) sin((life / 0.62f) * PI.toFloat()).coerceAtLeast(0.4f) else 0.78f
-                val sweep = (56f + 36f * spec.arcActivity - index * 12f)
-                    .coerceAtMost(VanAuraSpec.MAX_ARC_SWEEP_DEG)
-                    .coerceAtMost(remaining)
-                remaining -= sweep
-                val start = (index * 118f + 18f + if (budget.allowMotion) phase * 40f else 0f) % 360f
-                val inset = index * radius * 0.04f
-                g.color = argb(cyan, (0.32f + 0.28f * spec.arcActivity).coerceIn(0.32f, 0.68f) * fade)
-                g.draw(
-                    Arc2D.Float(
-                        cx - ovalRx + inset,
-                        cy - ovalRy - inset * 0.4f,
-                        (ovalRx - inset) * 2f,
-                        (ovalRy - inset) * 2f,
-                        -start,
-                        -sweep,
-                        Arc2D.OPEN,
-                    ),
-                )
-            }
-        }
-
-        if (spec.sparkRate > 0.02f && budget.allowMotion) {
-            val sparks = (spec.sparkRate * 5f).toInt().coerceIn(1, 4)
-            repeat(sparks) { index ->
-                val seed = index * 0.611f
-                val life = (phase * 1.7f + seed) % 1f
-                if (life > 0.22f) return@repeat
-                val angle = (seed * 2f * PI.toFloat() * 3.1f) % (2f * PI.toFloat())
-                val distance = midRadius * (0.82f + 0.12f * ((seed * 7f) % 1f))
-                val sr = max(radius * 0.018f, 1.1f)
-                g.color = argb(cyan, 0.70f * (1f - life / 0.22f))
-                g.fill(Ellipse2D.Float(cx + cos(angle) * distance - sr, cy + sin(angle) * distance - sr, sr * 2f, sr * 2f))
-            }
+        geometry.dots.forEach { dot ->
+            val color = if (dot.ink == VanFieldInk.IDENTITY) cyan else semantic
+            g.color = argb(color, dot.alpha)
+            g.fill(
+                Ellipse2D.Float(
+                    dot.point.x - dot.radius,
+                    dot.point.y - dot.radius,
+                    dot.radius * 2f,
+                    dot.radius * 2f,
+                ),
+            )
         }
 
         if (spec.orbLink > 0.05f) {
-            val alpha = if (budget.allowMotion) {
-                0.28f + 0.22f * (0.5f + 0.5f * sin(phase * 4f * PI.toFloat()))
-            } else {
-                0.32f
-            }
+            val pulse = 0.24f + 0.30f * motion.electricPulse
             val path = Path2D.Float()
-            path.moveTo(cx + radius * 0.28f, cy - radius * 0.08f)
-            path.quadTo(cx + radius * 0.70f, cy - radius * 0.42f, cx + radius * 0.92f, cy - radius * 0.22f)
-            g.color = argb(cyan, alpha * spec.orbLink)
-            g.stroke = BasicStroke(max(radius * 0.032f, 1.3f), BasicStroke.CAP_ROUND, BasicStroke.JOIN_ROUND)
+            path.moveTo(cx + bodyEdge * 0.11f, cy - bodyEdge * 0.04f)
+            path.quadTo(
+                cx + bodyEdge * 0.25f,
+                cy - bodyEdge * 0.17f,
+                cx + bodyEdge * 0.35f,
+                cy - bodyEdge * 0.10f,
+            )
+            g.color = argb(cyan, pulse * spec.orbLink)
+            g.stroke = BasicStroke(max(bodyEdge * 0.011f, 1.1f), BasicStroke.CAP_ROUND, BasicStroke.JOIN_ROUND)
             g.draw(path)
         }
     }
 
-    private fun drawZoneC(
+    private fun drawZoneA(
         g: Graphics2D,
         spec: VanAuraSpec,
         cx: Float,
         cy: Float,
-        midRadius: Float,
-        budget: VanEffectBudget,
+        bodyEdge: Float,
+        cyan: Int,
+        phase: Float,
+        breathing: Float,
     ) {
-        val segments = spec.segmentsForBudget(budget)
-        if (segments.isEmpty()) return
-        val scale = spec.envelopeRadiusScale.coerceIn(VanAuraSpec.MIN_ENVELOPE_SCALE, VanAuraSpec.MAX_ENVELOPE_SCALE)
-        val rx = midRadius * scale * (1.05f + spec.fieldAsymmetry * 0.35f)
-        val ry = midRadius * scale * 0.86f
-        val color = spec.semanticColor ?: VanGlassTokens.ACCENT_CYAN
-        val alpha = spec.envelopeAlpha.coerceIn(0.05f, 0.22f)
-        val stroke = max(midRadius * 0.048f, 1.8f)
-        g.stroke = BasicStroke(stroke, BasicStroke.CAP_ROUND, BasicStroke.JOIN_ROUND)
-        segments.forEach { segment ->
-            g.color = argb(color, alpha)
-            g.draw(
-                Arc2D.Float(
-                    cx - rx,
-                    cy - ry,
-                    rx * 2f,
-                    ry * 2f,
-                    -segment.startDeg,
-                    -segment.sweepDeg.coerceAtMost(VanAuraSpec.MAX_ARC_SWEEP_DEG),
-                    Arc2D.OPEN,
-                ),
-            )
-            if (segment.node || spec.envelopeSegments.size == 1) {
-                val rad = Math.toRadians(segment.startDeg.toDouble())
-                val nr = max(stroke * 0.9f, 2.0f)
-                val nx = cx + cos(rad).toFloat() * rx
-                val ny = cy + sin(rad).toFloat() * ry
-                g.color = argb(color, (alpha + 0.12f).coerceAtMost(0.32f))
-                g.fill(Ellipse2D.Float(nx - nr, ny - nr, nr * 2f, nr * 2f))
-            }
+        val alpha = (0.10f + 0.08f * spec.intensity).coerceIn(0.08f, 0.18f)
+        val r = bodyEdge * 0.20f * VanAuraSpec.INNER_RADIUS_SCALE * breathing
+        val driftX = bodyEdge * 0.025f * sin(2f * PI.toFloat() * phase)
+        val driftY = bodyEdge * 0.018f * sin(4f * PI.toFloat() * phase + 0.9f)
+        radial(g, cx - bodyEdge * 0.05f + driftX, cy + bodyEdge * 0.02f + driftY, r, argb(cyan, alpha * 0.82f))
+        radial(g, cx + bodyEdge * 0.07f - driftX * 0.6f, cy - bodyEdge * 0.04f - driftY, r * 0.70f, argb(cyan, alpha * 0.50f))
+
+        if (spec.groundGlow > 0.01f) {
+            val gy = cy + bodyEdge * 0.41f
+            val gw = bodyEdge * 0.31f
+            val crescent = Path2D.Float()
+            crescent.moveTo(cx - gw, gy)
+            crescent.quadTo(cx.toDouble(), (gy + bodyEdge * 0.060f).toDouble(), (cx + gw).toDouble(), gy.toDouble())
+            crescent.quadTo(cx.toDouble(), (gy - bodyEdge * 0.018f).toDouble(), (cx - gw).toDouble(), gy.toDouble())
+            crescent.closePath()
+            val previous = g.clip
+            g.clip(crescent)
+            radial(g, cx, gy, gw, argb(cyan, 0.18f * spec.groundGlow))
+            g.clip = previous
         }
     }
 
-    /** Edge-dock field: a crescent opening toward the screen, never a clipped disk. */
     fun drawCrescentAura(
         g: Graphics2D,
         spec: VanAuraSpec,
@@ -418,8 +322,9 @@ object GlassPainter {
         height: Float,
         budget: VanEffectBudget = VanEffectBudget.FULL,
         phase: Float = 0.18f,
+        semanticSpec: VanAuraSpec = spec,
     ) {
-        val cyan = spec.alertAccent ?: VanGlassTokens.ACCENT_CYAN
+        val cyan = semanticSpec.alertAccent ?: spec.alertAccent ?: VanGlassTokens.ACCENT_CYAN
         val crescent = Path2D.Float()
         crescent.moveTo(left + width * 0.08f, top + height * 0.12f)
         crescent.quadTo(left + width * 0.95f, top + height * 0.08f, left + width, top + height * 0.42f)
@@ -436,6 +341,7 @@ object GlassPainter {
             height * 0.42f,
             budget,
             phase,
+            semanticSpec,
         )
         g.clip = previous
         g.color = argb(cyan, 0.22f)
@@ -443,8 +349,6 @@ object GlassPainter {
         g.draw(crescent)
     }
 
-    // Gradient stops always fade to the *same* hue at zero alpha. Fading to transparent black
-    // instead would interpolate through grey in sRGB and leave a muddy dark halo around Van.
     private fun radial(g: Graphics2D, cx: Float, cy: Float, r: Float, inner: Color) {
         if (r <= 1f) return
         g.paint = RadialGradientPaint(

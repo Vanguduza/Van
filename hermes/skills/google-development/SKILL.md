@@ -15,7 +15,10 @@ Hermes owns planning, reconciliation, testing and final acceptance.
 ## Antigravity
 
 Use for complex bounded development units requiring code reasoning, terminal,
-browser or multi-file implementation.
+browser or multi-file implementation. Invoke Antigravity only through the installed
+profile wrapper `bin/antigravity-worker`; direct CLI invocation is forbidden for VAN
+work because it could reuse the canonical Google account session. The wrapper gives
+Antigravity a dedicated runtime home and therefore a separate OAuth/session store.
 
 Every A3 task must include target project/repository, Project Truth SHA,
 capability grant ID, allowed paths/task scope, acceptance tests and

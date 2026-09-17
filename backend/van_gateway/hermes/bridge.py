@@ -1,6 +1,7 @@
 from __future__ import annotations
 
 from typing import Any
+from urllib.parse import quote
 
 import httpx
 
@@ -29,11 +30,19 @@ class HermesBridge:
             headers["Authorization"] = f"Bearer {self.bearer_token}"
         return headers
 
+    def _url(self, path: str) -> str:
+        """Route through Hermes' canonical multi-profile API surface."""
+        normalized = "/" + path.lstrip("/")
+        profile = self.profile.strip()
+        if not profile or profile == "default":
+            return f"{self.base_url}{normalized}"
+        return f"{self.base_url}/p/{quote(profile, safe='')}{normalized}"
+
     async def health(self) -> dict[str, Any]:
         client = self._client or httpx.AsyncClient(timeout=5.0)
         owns = self._client is None
         try:
-            resp = await client.get(f"{self.base_url}/health", headers=self._headers())
+            resp = await client.get(self._url("/health"), headers=self._headers())
             if resp.status_code >= 400:
                 return {"ok": False, "degraded": DegradedCode.HERMES_OFFLINE.value, "status_code": resp.status_code}
             data = resp.json()
@@ -55,7 +64,7 @@ class HermesBridge:
             "metadata": metadata or {},
         }
         try:
-            resp = await client.post(f"{self.base_url}/v1/runs", json=payload, headers=self._headers())
+            resp = await client.post(self._url("/v1/runs"), json=payload, headers=self._headers())
             if resp.status_code >= 400:
                 raise HermesBridgeError("hermes_reject", f"Hermes rejected run: HTTP {resp.status_code}")
             return resp.json()
@@ -69,7 +78,7 @@ class HermesBridge:
         client = self._client or httpx.AsyncClient(timeout=10.0)
         owns = self._client is None
         try:
-            resp = await client.get(f"{self.base_url}/v1/capabilities", headers=self._headers())
+            resp = await client.get(self._url("/v1/capabilities"), headers=self._headers())
             if resp.status_code >= 400:
                 raise HermesBridgeError("capabilities_unavailable", f"HTTP {resp.status_code}")
             return resp.json()
@@ -84,7 +93,7 @@ class HermesBridge:
         owns = self._client is None
         try:
             resp = await client.post(
-                f"{self.base_url}/v1/message_agent",
+                self._url("/v1/message_agent"),
                 json={"profile": self.profile, "target": target, "text": text},
                 headers=self._headers(),
             )
@@ -115,7 +124,7 @@ class HermesBridge:
         owns = self._client is None
         try:
             resp = await client.post(
-                f"{self.base_url}/v1/group_rooms",
+                self._url("/v1/group_rooms"),
                 json={
                     "profile": self.profile,
                     "members": members,
