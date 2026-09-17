@@ -82,6 +82,7 @@ class CommandAuthorityService:
         principal_type: PrincipalType,
         requested_by: str,
         snapshot_id: str | None,
+        turn_id: str | None,
         now_unix: int | None = None,
     ) -> tuple[CommandAuthorityRecord, int]:
         record = await self.get(command_id)
@@ -93,6 +94,8 @@ class CommandAuthorityService:
             raise CommandAuthorityError("principal_mismatch")
         if record.requested_by != requested_by:
             raise CommandAuthorityError("requested_by_mismatch")
+        if record.turn_id != turn_id:
+            raise CommandAuthorityError("turn_id_mismatch")
         if not snapshot_id or record.snapshot_id != snapshot_id:
             raise CommandAuthorityError("context_snapshot_mismatch")
         if record.expires_at_unix is not None and now >= record.expires_at_unix:
