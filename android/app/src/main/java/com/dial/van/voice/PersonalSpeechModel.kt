@@ -189,7 +189,9 @@ class PersonalSpeechModel(context: Context) {
         val contextsJson = value.optJSONArray("contexts") ?: JSONArray()
         val contexts = buildSet {
             for (i in 0 until contextsJson.length()) {
-                runCatching { SpeechContext.valueOf(contextsJson.getString(i)) }.getOrNull()?.let(::add)
+                runCatching { SpeechContext.valueOf(contextsJson.getString(i)) }
+                    .getOrNull()
+                    ?.let { add(it) }
             }
         }.ifEmpty { setOf(SpeechContext.GENERAL) }
         return SpeechConfusionEdge(
@@ -226,12 +228,10 @@ class PersonalSpeechModel(context: Context) {
     private fun SpeechLearningTrust.mayTeach(): Boolean = when (this) {
         SpeechLearningTrust.OWNER_CONFIRMED,
         SpeechLearningTrust.PROJECT_TRUTH,
-        SpeechLearningTrust.DETERMINISTIC_STATE,
-        -> true
+        SpeechLearningTrust.DETERMINISTIC_STATE -> true
         SpeechLearningTrust.CONVERSATION,
         SpeechLearningTrust.UNTRUSTED,
-        SpeechLearningTrust.SECRET,
-        -> false
+        SpeechLearningTrust.SECRET -> false
     }
 
     private fun strongerTrust(a: SpeechLearningTrust, b: SpeechLearningTrust): SpeechLearningTrust =
