@@ -26,7 +26,7 @@ class ApprovalChallenge:
 
 
 class OwnerApprovalService:
-    """One-time A4 owner approvals bound to the paired device key.
+    """One-time A4 owner approvals bound to device, intent, command lineage and turn.
 
     The Android device signs ``canonical`` with a biometric-bound Android
     Keystore EC key whose public key was enrolled during secure pairing. A
@@ -58,6 +58,8 @@ class OwnerApprovalService:
         self,
         *,
         device_id: str,
+        source_command_id: str,
+        turn_id: str | None,
         action_id: str,
         text: str,
         project_id: str | None,
@@ -76,9 +78,11 @@ class OwnerApprovalService:
         )
         canonical = "|".join(
             [
-                "van-a4-approval-v1",
+                "van-a4-approval-v2",
                 challenge_id,
                 device_id,
+                source_command_id,
+                turn_id or "",
                 action_id,
                 digest,
                 str(expires),
@@ -87,6 +91,8 @@ class OwnerApprovalService:
         record = {
             "challenge_id": challenge_id,
             "device_id": device_id,
+            "source_command_id": source_command_id,
+            "turn_id": turn_id,
             "action_id": action_id,
             "intent_digest": digest,
             "canonical": canonical,
@@ -107,15 +113,17 @@ class OwnerApprovalService:
         self,
         *,
         challenge_id: str,
+        source_command_id: str,
         signature_b64: str,
         device_id: str,
+        turn_id: str | None,
         action_id: str,
         text: str,
         project_id: str | None,
         now_unix: int | None = None,
     ) -> None:
         now = int(time.time()) if now_unix is None else now_unix
-        if not challenge_id or not signature_b64:
+        if not challenge_id or not source_command_id or not signature_b64:
             raise OwnerApprovalError("approval_proof_missing")
 
         async with self.store.connection() as db:
@@ -139,7 +147,12 @@ class OwnerApprovalService:
                 await db.execute("DELETE FROM runtime_meta WHERE key = ?", (self.PREFIX + challenge_id,))
                 await db.commit()
                 raise OwnerApprovalError("approval_challenge_expired")
-            if record.get("device_id") != device_id or record.get("action_id") != action_id:
+            if (
+                record.get("device_id") != device_id
+                or record.get("action_id") != action_id
+                or record.get("source_command_id") != source_command_id
+                or record.get("turn_id") != turn_id
+            ):
                 await db.rollback()
                 raise OwnerApprovalError("approval_challenge_binding_mismatch")
 
