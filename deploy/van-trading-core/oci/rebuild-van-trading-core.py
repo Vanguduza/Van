@@ -1,4 +1,5 @@
 #!/usr/bin/env python3
+# Rebuilds only tagged VAN trading-core instances; control-plane nodes are protected and never selected.
 import base64, json, os, pathlib, re, shlex, subprocess, sys, tempfile, textwrap, time, urllib.request
 
 OCI='/home/ubuntu/.local/bin/oci'
