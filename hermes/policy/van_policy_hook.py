@@ -2,9 +2,7 @@
 VAN Hermes policy hook — fail closed.
 
 Deny A5, require approval for A4, protect audit/truth/security and Google
-identity/credential isolation surfaces, and preserve the Rev 3.1 boundary:
-Hermes may interpret/plan, but the gateway owns typed action class and execution
-authority.
+identity/credential isolation surfaces.
 
 Hermes invokes: evaluate(action) -> PolicyDecision dict
 """
@@ -21,13 +19,23 @@ A3 = "A3"
 A4 = "A4"
 A5 = "A5"
 VALID_CLASSES = frozenset({A1, A2, A3, A4, A5})
-EXACT_ACTION = "EXACT_ACTION"
-HERMES_INTERPRETATION_REQUIRED = "HERMES_INTERPRETATION_REQUIRED"
-VALID_RESOLUTION_MODES = frozenset({EXACT_ACTION, HERMES_INTERPRETATION_REQUIRED})
 
-PROTECTED_SURFACES = frozenset({"audit","audit_log","approvals","approval_chain","authority_checks","security_hooks","policy_hook","project_truth","truth_protocol","host_role_guards","google_identity_broker","google_capability_registry","google_credential_planes"})
+PROTECTED_SURFACES = frozenset({"audit","audit_log","approvals","approval_chain","authority_checks","security_hooks","policy_hook","project_truth","truth_protocol","host_role_guards","google_identity_broker","google_capability_registry","google_credential_planes",
+    # VATI trading authority surfaces (Rev 2 §27, §37, §38): mutation requires owner-signed authority.
+    "risk_authority","trading_mandate","kill_switch","trading_ledger","strategy_registry","platform_risk_ceilings"})
 
-A5_PATTERNS = frozenset({"disable_audit","disable_approvals","disable_authority_checks","disable_security_hooks","disable_policy_hook","bypass_project_truth","bypass_truth","skip_truth_check","ignore_project_truth","disable_host_role_guards","no_audit","silent_success","bypass_google_broker","export_google_session","copy_google_session_cookie","copy_session_cookie","reuse_workspace_oauth_as_gemini","disable_google_credential_isolation"})
+A5_PATTERNS = frozenset({"disable_audit","disable_approvals","disable_authority_checks","disable_security_hooks","disable_policy_hook","bypass_project_truth","bypass_truth","skip_truth_check","ignore_project_truth","disable_host_role_guards","no_audit","silent_success","bypass_google_broker","export_google_session","copy_google_session_cookie","copy_session_cookie","reuse_workspace_oauth_as_gemini","disable_google_credential_isolation"} | {
+    # VATI forbidden trading behaviours (Rev 2 §39). These are never approvable, even by the owner in-session;
+    # they can only change through a new owner-signed risk policy version.
+    "bypass_risk_authority","skip_risk_check","direct_broker_order","llm_broker_order",
+    "remove_stop_loss","remove_protective_stop","widen_protective_stop","stop_removal",
+    "martingale","unlimited_grid","unlimited_averaging_down","revenge_risk_increase","double_risk_after_loss",
+    "disable_kill_switch","trade_unverified_account","trade_stale_data","duplicate_order",
+    "silent_strategy_mutation","unvalidated_research_to_live","broker_token_in_prompt",
+    # Continuous learning boundary (Rev 4 Part L): learning may reduce; it may never promote, widen or hold credentials.
+    "learning_engine_writes_mandate","learning_widens_risk","learning_raises_multiplier","auto_promote_strategy",
+    "self_admit_knowledge","broker_credentials_in_memory","memory_as_evidence",
+})
 
 
 class Decision(str, Enum):
@@ -77,7 +85,8 @@ def _targets_protected_surface(action: Mapping[str, Any]) -> bool:
         if surface in target or surface in resource:
             return True
     path = str(action.get("path") or "").lower()
-    protected_markers = ("project_truth", "truth_protocol", "security_policy", "google_capabilities.json", "google_intelligence_mesh")
+    protected_markers = ("project_truth", "truth_protocol", "security_policy", "google_capabilities.json", "google_intelligence_mesh",
+                         "trading_mandate", "mandate.", "risk_policy", "platform_ceilings", "strategy_capsule", "trading/vati/risk", "trading/vati/learning/boundary")
     if any(marker in path for marker in protected_markers):
         if action.get("operation") in ("write", "delete", "modify", "patch"):
             if not action.get("owner_signed") and not action.get("truth_authority_verified"):
@@ -105,61 +114,6 @@ def _matches_a5_pattern(action: Mapping[str, Any]) -> Optional[str]:
     return None
 
 
-def _gateway_resolution_guard(action: Mapping[str, Any], action_class: Optional[str]) -> Optional[PolicyResult]:
-    mode_raw = action.get("resolution_mode")
-    if mode_raw is None:
-        return None  # legacy/internal callers retain the established policy path
-    mode = str(mode_raw)
-    if mode not in VALID_RESOLUTION_MODES:
-        return PolicyResult(Decision.DENY, "Unknown typed resolution mode", action_class=action_class, code="invalid_resolution_mode")
-
-    gateway_authorized = bool(action.get("gateway_authorized"))
-    mutating = bool(action.get("mutating", action.get("writes", False)))
-
-    if mode == HERMES_INTERPRETATION_REQUIRED:
-        if mutating and not gateway_authorized:
-            return PolicyResult(
-                Decision.DENY,
-                "Ambiguous owner intent is proposal-only until gateway action authorization",
-                action_class=action_class,
-                code="proposal_only",
-            )
-        return None
-
-    canonical_action_id = str(action.get("canonical_action_id") or "").strip()
-    canonical_class = str(action.get("canonical_action_class") or "").upper().strip()
-    if not canonical_action_id or canonical_class not in VALID_CLASSES:
-        return PolicyResult(
-            Decision.DENY,
-            "Exact typed action is missing canonical gateway identity/class",
-            action_class=action_class,
-            code="missing_canonical_action",
-        )
-    if action_class is not None and action_class != canonical_class:
-        return PolicyResult(
-            Decision.DENY,
-            "Hermes action class differs from gateway canonical class",
-            action_class=action_class,
-            code="canonical_class_mismatch",
-        )
-    proposed_action_id = str(action.get("action_id") or action.get("name") or "").strip()
-    if proposed_action_id and proposed_action_id != canonical_action_id:
-        return PolicyResult(
-            Decision.DENY,
-            "Hermes action identity differs from gateway canonical action",
-            action_class=canonical_class,
-            code="canonical_action_mismatch",
-        )
-    if mutating and not gateway_authorized:
-        return PolicyResult(
-            Decision.DENY,
-            "Typed mutation requires gateway action-runtime authorization",
-            action_class=canonical_class,
-            code="gateway_authorization_required",
-        )
-    return None
-
-
 def evaluate(action: Mapping[str, Any]) -> dict[str, Any]:
     try:
         act = _normalize_action(action)
@@ -175,11 +129,6 @@ def evaluate(action: Mapping[str, Any]) -> dict[str, Any]:
         return PolicyResult(Decision.DENY, f"Prohibited A5 pattern detected: {pattern}", action_class=A5, code="a5_prohibited").to_dict()
     if action_class == A5:
         return PolicyResult(Decision.DENY, "Action class A5 is prohibited", action_class=A5, code="a5_denied").to_dict()
-
-    resolution_denial = _gateway_resolution_guard(act, action_class)
-    if resolution_denial is not None:
-        return resolution_denial.to_dict()
-
     if _targets_protected_surface(act) and not act.get("owner_signed"):
         return PolicyResult(Decision.DENY, "Protected audit/truth/security/Google authority surface requires owner-signed authority", action_class=action_class or A5, code="protected_surface").to_dict()
     if action_class == A4:

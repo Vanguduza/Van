@@ -109,6 +109,13 @@ CATALOG: dict[DegradedCode, DegradedCapability] = {
         will_not_do="Authenticated gateway mutations",
         restore_action="Restore gateway process/network",
     ),
+    DegradedCode.TRADING_LEDGER_UNAVAILABLE: DegradedCapability(
+        code=DegradedCode.TRADING_LEDGER_UNAVAILABLE,
+        broken="VATI trading ledger unreadable or chain verification failed",
+        still_works="Everything outside trading; Hermes trading analysis without live status",
+        will_not_do="Report trading status, list owner tickets, record owner halts or ticket confirmations",
+        restore_action="Restore the ledger file (VAN_VATI_LEDGER_PATH) or run `python -m vati replay-verify`",
+    ),
 }
 
 

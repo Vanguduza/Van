@@ -26,6 +26,7 @@ def _env(tmp_path, monkeypatch):
     monkeypatch.setenv("VAN_GOOGLE_TOKEN_FERNET_KEY", Fernet.generate_key().decode())
     monkeypatch.setenv("VAN_DEVICE_SECRET_FERNET_KEY", Fernet.generate_key().decode())
     monkeypatch.setenv("VAN_INGRESS_TOKEN", "test-ingress-token-0123456789abcdef")
+    monkeypatch.setenv("VAN_INTERNAL_CONTROL_TOKEN", "test-internal-token")
     get_settings.cache_clear()
     yield
     get_settings.cache_clear()
@@ -46,15 +47,25 @@ async def client(monkeypatch):
     transport = ASGITransport(app=app)
     async with AsyncClient(transport=transport, base_url="http://test", headers={"X-Van-Ingress-Token": "test-ingress-token-0123456789abcdef"}) as ac:
         async with app.router.lifespan_context(app):
+            ticket = await app.state.auth.create_pairing_ticket("pytest-client")
+            paired = await app.state.auth.pair_device(
+                ticket.token,
+                "pytest-client",
+                "pytest-client-secret",
+                "PEM",
+                "pytest-client",
+            )
+            ac.headers.update({"X-Van-Device-Token": paired.access_token})
             yield ac, app
 
 
+INTERNAL_HEADERS = {"X-Van-Internal-Token": "test-internal-token"}
+
+
 async def _enroll(ac, app, device_id="dev"):
-    await ac.post(
-        "/v1/devices/enroll",
-        json={"device_id": device_id, "device_secret": "secret", "public_key_pem": "PEM"},
-    )
-    app.state.auth.remember_secret(device_id, "secret")
+    ticket = await app.state.auth.create_pairing_ticket(device_id)
+    paired = await app.state.auth.pair_device(ticket.token, device_id, "secret", "PEM", device_id)
+    ac.headers.update({"X-Van-Device-Token": paired.access_token})
 
 
 async def _cmd(ac, app, *, text, action="A1", project=None, trust="CONVERSATION", approval=None, age=0, key="k"):

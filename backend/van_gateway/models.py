@@ -14,25 +14,6 @@ class ActionClass(str, Enum):
     A5 = "A5"
 
 
-class PrincipalType(str, Enum):
-    OWNER_DEVICE = "OWNER_DEVICE"
-    HERMES_AGENT = "HERMES_AGENT"
-    AUTOMATION = "AUTOMATION"
-    SYSTEM = "SYSTEM"
-    EXTERNAL_UNTRUSTED = "EXTERNAL_UNTRUSTED"
-
-
-class OriginChannel(str, Enum):
-    VOICE = "VOICE"
-    TEXT = "TEXT"
-    UI = "UI"
-    NOTIFICATION_EVENT = "NOTIFICATION_EVENT"
-    SHARE_INTENT = "SHARE_INTENT"
-    AUTOMATION = "AUTOMATION"
-    HERMES_EVENT = "HERMES_EVENT"
-    SYSTEM_EVENT = "SYSTEM_EVENT"
-
-
 class AttentionSeverity(str, Enum):
     INFO = "INFO"
     FOLLOW_UP = "FOLLOW_UP"
@@ -70,11 +51,7 @@ class DegradedCode(str, Enum):
     STORAGE_PROBLEM = "STORAGE_PROBLEM"
     PHONE_OFFLINE = "PHONE_OFFLINE"
     BACKEND_UNAVAILABLE = "BACKEND_UNAVAILABLE"
-    OWNER_CONTEXT_UNAVAILABLE = "OWNER_CONTEXT_UNAVAILABLE"
-    OWNER_CONTEXT_CONFLICTED = "OWNER_CONTEXT_CONFLICTED"
-    RESEARCH_UNAVAILABLE = "RESEARCH_UNAVAILABLE"
-    RESEARCH_EGRESS_DENIED = "RESEARCH_EGRESS_DENIED"
-    DEVICE_OR_GRANT_REVOKED = "DEVICE_OR_GRANT_REVOKED"
+    TRADING_LEDGER_UNAVAILABLE = "TRADING_LEDGER_UNAVAILABLE"
 
 
 class ContentTrust(str, Enum):
@@ -99,17 +76,6 @@ class CommandRequest(BaseModel):
     approval_token: str | None = None
     client_context: dict[str, Any] = Field(default_factory=dict)
     context_trust: ContentTrust = ContentTrust.CONVERSATION
-    signature_version: int = 1
-    turn_id: str | None = None
-    origin_channel: OriginChannel = OriginChannel.UI
-    principal_type: PrincipalType = PrincipalType.OWNER_DEVICE
-    requested_by: str = "owner_device"
-    expires_at_unix: int | None = None
-    nonce: str | None = None
-    context_capsule_revision: int | None = None
-    context_capsule_hash: str | None = None
-    speech_evidence_ref: str | None = None
-    no_stale_replay: bool = False
 
 
 class CommandResult(BaseModel):
@@ -121,8 +87,6 @@ class CommandResult(BaseModel):
     degraded: list[str] = Field(default_factory=list)
     requires_approval: bool = False
     evidence_id: str | None = None
-    execution_id: str | None = None
-    context_snapshot_id: str | None = None
 
 
 class AttentionItem(BaseModel):

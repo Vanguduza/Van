@@ -1,0 +1,22 @@
+{
+  "schema_version": 1,
+  "certification": "VAN_HERMES_PROFILE_LIVE_INSTALL_AND_INFERENCE",
+  "observed_at": "2026-09-17T05:38:50.401673+00:00",
+  "source_commit": "270da5d3a8756a19458307968a9c30e2fe138f1a",
+  "host": "dial-hermes-control",
+  "profile": "van",
+  "installer_preservation_passed": true,
+  "profile_doctor_passed": true,
+  "managed_skills_verified": 13,
+  "root_env_mode": "0600",
+  "runtime_extra_skill_preserved": true,
+  "inference_canary": {
+    "exit_code": 0,
+    "expected_output": "VAN_PROFILE_CANARY_OK",
+    "actual_output": "VAN_PROFILE_CANARY_OK",
+    "provider": "anthropic",
+    "model": "claude-sonnet-5",
+    "api_calls": 1
+  },
+  "contains_secrets": false
+}

@@ -42,6 +42,7 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Brush
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.input.PasswordVisualTransformation
 import androidx.compose.ui.unit.dp
@@ -53,6 +54,7 @@ import com.dial.van.control.VanCommandStatus
 import com.dial.van.control.VanConversationMessage
 import com.dial.van.control.VanMessageRole
 import com.dial.van.overlay.FloatingOverlayService
+import com.dial.van.trading.TradingCommandCentreActivity
 import com.dial.van.visual.VanEmbodiment
 import com.dial.van.visual.VanGlassSurface
 import com.dial.van.visual.VanGlassTokens
@@ -199,6 +201,7 @@ private fun OverviewModule(
     var decisions by remember { mutableStateOf<Int?>(null) }
     var projects by remember { mutableStateOf<Int?>(null) }
     var error by remember { mutableStateOf<String?>(null) }
+    val context = LocalContext.current
 
     LaunchedEffect(Unit) {
         runCatching {
@@ -263,6 +266,11 @@ private fun OverviewModule(
         }
         item {
             AdminActionCard("Systems", "Inspect Hermes, gateway and Google mesh truth", glass) { navigate(CommandModule.SYSTEMS) }
+        }
+        item {
+            AdminActionCard("Trading", "Open the read-first VATI trading command center", glass) {
+                context.startActivity(TradingCommandCentreActivity.intent(context))
+            }
         }
     }
 }
@@ -569,9 +577,9 @@ private fun SystemsModule(app: VanApplication, glass: com.dial.van.visual.VanGla
 @Composable
 private fun ConnectionsModule(app: VanApplication, glass: com.dial.van.visual.VanGlassStyle) {
     var endpointDraft by remember { mutableStateOf(app.gatewayClient.baseUrl) }
-    var ingressDraft by remember { mutableStateOf("") }
+    var pairingDraft by remember { mutableStateOf("") }
     var connectionMessage by remember { mutableStateOf<String?>(null) }
-    var enrollmentBusy by remember { mutableStateOf(false) }
+    var pairingBusy by remember { mutableStateOf(false) }
     val scope = rememberCoroutineScope()
 
     LazyColumn(
@@ -579,61 +587,53 @@ private fun ConnectionsModule(app: VanApplication, glass: com.dial.van.visual.Va
         verticalArrangement = Arrangement.spacedBy(9.dp),
         contentPadding = PaddingValues(vertical = 8.dp),
     ) {
-        item { SectionHeader("Connections", "Owner-only gateway pairing; secrets are encrypted and never displayed") }
+        item { SectionHeader("Connections", "One-time owner pairing; persistent credentials are encrypted and never displayed") }
         item {
             AdminCard(glass) {
                 Column(verticalArrangement = Arrangement.spacedBy(8.dp)) {
+                    val paired = app.gatewayClient.isPaired()
                     Text("VAN gateway", color = Color.White, fontWeight = FontWeight.Bold)
                     Text(app.gatewayClient.baseUrl, color = Color(0xFFD7E7EC), fontSize = 12.sp)
-                    Text(
-                        "Ingress authorization: ${if (app.gatewayClient.hasIngressToken()) "configured" else "missing"}",
-                        color = Color(0xFFBCD1D8),
-                        fontSize = 11.sp,
-                    )
-                    Text("Enrolled: ${app.gatewayClient.isEnrolled()}", color = Color(0xFFBCD1D8), fontSize = 11.sp)
+                    Text("Paired: $paired", color = Color(0xFFBCD1D8), fontSize = 11.sp)
                     Text("Device: ${app.gatewayClient.deviceId ?: "not enrolled"}", color = Color(0xFFBCD1D8), fontSize = 11.sp)
-                    OutlinedTextField(
-                        value = endpointDraft,
-                        onValueChange = { endpointDraft = it },
-                        label = { Text("HTTPS gateway URL") },
-                        singleLine = true,
-                        modifier = Modifier.fillMaxWidth(),
-                    )
-                    OutlinedTextField(
-                        value = ingressDraft,
-                        onValueChange = { ingressDraft = it },
-                        label = { Text("Owner ingress token") },
-                        visualTransformation = PasswordVisualTransformation(),
-                        singleLine = true,
-                        modifier = Modifier.fillMaxWidth(),
-                    )
-                    Button(
-                        onClick = {
-                            connectionMessage = runCatching {
-                                app.gatewayClient.configureIngress(endpointDraft, ingressDraft)
-                                ingressDraft = ""
-                                "Gateway authorization saved"
-                            }.getOrElse {
-                                "Connection configuration rejected: ${it.message ?: it.javaClass.simpleName}"
-                            }
-                        },
-                    ) { Text("Save secure gateway") }
-                    if (!app.gatewayClient.isEnrolled()) {
+                    if (!paired) {
+                        OutlinedTextField(
+                            value = endpointDraft,
+                            onValueChange = { endpointDraft = it },
+                            label = { Text("HTTPS gateway URL") },
+                            singleLine = true,
+                            modifier = Modifier.fillMaxWidth(),
+                        )
+                        OutlinedTextField(
+                            value = pairingDraft,
+                            onValueChange = { pairingDraft = it },
+                            label = { Text("One-time pairing token") },
+                            visualTransformation = PasswordVisualTransformation(),
+                            singleLine = true,
+                            modifier = Modifier.fillMaxWidth(),
+                        )
                         Button(
-                            enabled = app.gatewayClient.hasIngressToken() && !enrollmentBusy,
+                            enabled = pairingDraft.trim().length >= 32 && !pairingBusy,
                             onClick = {
-                                enrollmentBusy = true
+                                pairingBusy = true
                                 scope.launch {
                                     connectionMessage = runCatching {
-                                        app.gatewayClient.enrollThisDevice()
-                                        "Device enrolled"
+                                        app.gatewayClient.pairThisDevice(endpointDraft, pairingDraft)
+                                        pairingDraft = ""
+                                        "Device paired securely"
                                     }.getOrElse {
-                                        "Enrollment failed: ${it.message ?: it.javaClass.simpleName}"
+                                        "Pairing failed: ${it.message ?: it.javaClass.simpleName}"
                                     }
-                                    enrollmentBusy = false
+                                    pairingBusy = false
                                 }
                             },
-                        ) { Text(if (enrollmentBusy) "Enrolling…" else "Enroll this device") }
+                        ) { Text(if (pairingBusy) "Pairing…" else "Pair this device") }
+                    } else {
+                        Text(
+                            "Ingress, revocable device access, and the command HMAC credential are active.",
+                            color = Color(0xFFBCD1D8),
+                            fontSize = 11.sp,
+                        )
                     }
                     connectionMessage?.let {
                         Text(it, color = Color(0xFFBCD1D8), fontSize = 11.sp)

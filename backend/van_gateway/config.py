@@ -13,9 +13,20 @@ class Settings(BaseSettings):
     hermes_base_url: str = "http://127.0.0.1:8642"
     hermes_profile: str = "van"
     hermes_bearer_token: str = ""
-    internal_control_token: str = ""  # Hermes→gateway privileged control API
+    internal_control_token: str = ""  # Hermes→gateway privileged Google job API
     ingress_token: str = ""  # Owner-device bearer gate for externally reachable HTTP routes
     device_secret_fernet_key: str = ""  # Android HMAC secrets encrypted at rest
+    # VATI trading plane. Broker secrets remain on the trading host.
+    vati_ledger_path: str = "data/vati_ledger.sqlite3"
+    vati_accounts_registry: str = "data/vati_accounts.json"
+    vati_lake_root: str = "data/vati_lake"
+    vati_reporting_currency: str = "USD"
+    vati_secrets_dir: str = "data/vati_secrets"
+    van_commander_url: str = ""
+    van_commander_token_file: str = ""
+    van_commander_ca_file: str = ""
+    van_public_base_url: str = "http://127.0.0.1:8787"
+    vati_deriv_app_id: str = "1089"
     owner_intent_max_age_seconds: int = 24 * 60 * 60
     attention_budget_per_hour: int = 12
 
@@ -32,13 +43,6 @@ class Settings(BaseSettings):
     google_gemini_runtime_configured: bool = False
     google_cloud_runtime_configured: bool = False
     google_consumer_connected_capabilities: str = ""
-
-    # Rev 3.1 research capability. The Exa key belongs only to the gateway
-    # credential plane. Egress is fail-closed until explicitly enabled.
-    exa_api_key: str = ""
-    exa_base_url: str = "https://api.exa.ai"
-    exa_egress_enabled: bool = False
-    exa_timeout_seconds: float = 20.0
 
     require_hermes_for_mutations: bool = True
     event_page_size: int = 100

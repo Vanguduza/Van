@@ -161,3 +161,50 @@ def test_antigravity_wrapper_falls_back_to_host_local_bin(tmp_path):
 def test_install_scripts_exist():
     assert (REPO_ROOT / "tools" / "hermes" / "install_van_profile.sh").is_file()
     assert (REPO_ROOT / "tools" / "hermes" / "doctor_van_profile.sh").is_file()
+
+
+def test_install_profile_preserves_runtime_state_and_secrets(tmp_path):
+    hermes_home = tmp_path / "hermes-home"
+    target = hermes_home / "profiles" / "van"
+    target.mkdir(parents=True)
+    sentinels = {
+        ".env": b"VAN_TEST_SECRET=preserve-me\n",
+        "state.db": b"runtime-db-sentinel",
+        "sessions/keep.json": b"session-sentinel",
+        "memories/keep.md": b"memory-sentinel",
+        "logs/keep.log": b"log-sentinel",
+        "pairing/keep.json": b"pairing-sentinel",
+        "cache/keep.bin": b"cache-sentinel",
+        "skills/software-development/github/scripts/git-credential-token.py": b"runtime-installed-skill",
+    }
+    for rel, payload in sentinels.items():
+        path = target / rel
+        path.parent.mkdir(parents=True, exist_ok=True)
+        path.write_bytes(payload)
+    (target / ".env").chmod(0o600)
+    stale = target / "providers" / "stale-provider.md"
+    stale.parent.mkdir(parents=True, exist_ok=True)
+    stale.write_text("stale", encoding="utf-8")
+
+    env = os.environ.copy()
+    env["HERMES_HOME"] = str(hermes_home)
+    installer = REPO_ROOT / "tools" / "hermes" / "install_van_profile.sh"
+    subprocess.run([str(installer)], check=True, text=True, capture_output=True, env=env)
+    doctor = REPO_ROOT / "tools" / "hermes" / "doctor_van_profile.sh"
+    subprocess.run([str(doctor)], check=True, text=True, capture_output=True, env=env)
+
+    for rel, payload in sentinels.items():
+        assert (target / rel).read_bytes() == payload
+    assert not stale.exists()
+    assert (target / "SOUL.md").read_bytes() == (PROFILE_ROOT / "SOUL.md").read_bytes()
+    assert (target / "providers" / "gemini.md").is_file()
+
+
+def test_trading_authority_declared_in_soul_and_config():
+    soul = (PROFILE_ROOT / "SOUL.md").read_text(encoding="utf-8")
+    assert "Trading authority" in soul
+    assert "never sizes, sends, modifies or cancels a broker" in soul
+    config = (PROFILE_ROOT / "config.yaml").read_text(encoding="utf-8")
+    assert "protect_trading_risk_authority: true" in config
+    assert "deny_model_broker_orders: true" in config
+    assert "- trading-intelligence" in config

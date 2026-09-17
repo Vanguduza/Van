@@ -13,11 +13,13 @@
 - Google Workspace token vault: encrypted refresh tokens, narrow scopes, revocation and prompt scrubbing.
 - **Restart-durable device authentication:** per-device HMAC credentials are encrypted at rest with a dedicated Fernet key, rehydrated at gateway startup, and fail closed on key mismatch.
 - **Atomic device revocation:** revoking an owner device marks the device and all outstanding capability grants revoked in one transaction; revoked credentials are never rehydrated.
-- **Owner ingress boundary:** every externally reachable Android-facing gateway route requires `X-Van-Ingress-Token`; Android stores the bearer in encrypted preferences while command authority still requires the independent per-device HMAC.
+- **Three-layer owner gateway boundary:** stable ingress requires `X-Van-Ingress-Token`; normal client APIs additionally require a revocable per-device access token stored only as a hash server-side; command authority additionally requires the independent encrypted per-device HMAC. Pairing is short-lived, single-use, internal-control-issued, and atomic with device/grant creation.
+- **Live schema-4 pairing certification:** token-free canary evidence confirms pairing-ticket single use, hash-only device-token persistence, dual-token restart continuity, HMAC restart continuity, atomic revocation, and post-restart denial while Workspace remains `READY`; see `artifacts/runtime/van_pairing_v4_live_attestation.json`.
 - **Named tunnel production tooling:** `van-cloudflare-tunnel.service` + installer require a token file and stable HTTPS hostname, reject `trycloudflare.com`, and require an authenticated public health canary.
 - **Google OAuth correctness:** live Workspace transport exchanges encrypted refresh tokens for short-lived access tokens before Google API requests.
 - **Google Account Sovereignty:** `owner_google_account` remains VAN's canonical/default Google identity with separate Workspace OAuth, Gemini runtime, Cloud/service and consumer-session credential planes. Explicit delegated identities are bounded to named capabilities and cannot inherit owner authority or credentials.
 - **Google Intelligence Mesh:** versioned capability registry covering Gemini, Gemini Live, Deep Research, Gemini Notebook (personal + Enterprise), Mixboard, Stitch, Antigravity, Jules, Workspace API/Studio, Nano Banana, Veo, Flow, AI Studio and ADK/A2A.
+- **Stitch live generation certification:** authenticated Google Stitch MCP generation is live-qualified and recorded `READY` in VAN with token-free hashes for the generated screen, HTML and image artifacts; DIAL visual acceptance/orchestrated-use remain independent acceptance gates.
 - **Deterministic Google router:** action-class, approval, grant and Project Truth gates; registry-order deterministic selection; explicit fallback; persisted input hash and job state.
 - **Google readiness model:** READY / CONFIGURED / UNVERIFIED / AUTH_REQUIRED / DEGRADED / RATE_LIMITED / CAPACITY_LIMITED / POLICY_BLOCKED / UNSUPPORTED / UNAVAILABLE.
 - **Antigravity capacity scoping:** live generation `CAPACITY_LIMITED` records `ANTIGRAVITY_CAPACITY_LIMITED` and falls back to Jules when configured; does not fail Workspace/Gemini/Jules planes.
@@ -33,10 +35,11 @@
 
 ## EXTERNALLY BLOCKED / REQUIRES LIVE CERTIFICATION
 
-- Google credential planes are authenticated on Hermes and imported into Van as `CONFIGURED` (not `READY` without canary receipts).
+- VATI Rev 5 repository implementation is integrated: trading core, risk authority, execution adapters, commander/VEKL, Android Trading Command Center, signed account onboarding and fail-closed tests are present. Remaining gates are deployment/live-market/device gates: `van-trading-core` bootstrap/qualification, real broker/demo account connection, real market data validation, MT5 EA/terminal attachment where used, independent security review and owner-signed LIMITED_LIVE promotion.
+- Google readiness is credential-plane-specific. Workspace OAuth and Stitch are `READY`; the Gemini runtime plane is authenticated with a dedicated API-restricted key and is currently `CAPACITY_LIMITED` because project prepaid inference credits are depleted. Consumer/Cloud capabilities retain their independently evidenced states.
 - The delegated Antigravity worker is live-certified. Capacity/rate limits, if they recur, remain capability-scoped and may fall back to Jules without degrading other Google planes.
 - Notebook Enterprise / ADK-A2A require eligible owner-administered Google Cloud/Enterprise setup.
-- Live Hermes install is certified on `dial-hermes-control` (2026-09-15). Local Project Truth mounts for van/dial/dde/gtr/goat/aeci are resolved on this workstation. Physical Samsung certification, stable named Cloudflare hostname/token provisioning, `.riv` authoring, production signing, and GitHub workflow-scope install remain external gates.
+- Live Hermes install is certified on `dial-hermes-control` (2026-09-15). Local Project Truth mounts for van/dial/dde/gtr/goat/aeci are resolved on this workstation. Physical Samsung certification, stable named Cloudflare hostname/token provisioning, `.riv` authoring, and production signing remain external gates.
 
 ## SUPERSEDED / FORBIDDEN
 

@@ -1,0 +1,32 @@
+{
+  "schema_version": 1,
+  "certification": "VAN_STITCH_LIVE_GENERATION",
+  "provider": "google-stitch",
+  "capability_id": "stitch",
+  "observed_at": "2026-09-16T21:00:14.096Z",
+  "status": "LIVE_QUALIFIED",
+  "authentication_verified": true,
+  "health_state": "HEALTHY",
+  "tool_allowlist_ok": true,
+  "sdk_package": "@google/stitch-sdk",
+  "sdk_version": "0.3.5",
+  "mcp_url": "https://stitch.googleapis.com/mcp",
+  "live_qualification_passed": true,
+  "project_id_hash": "f04369cfc4b2b4352e35c9c6f8dbfae05b5f33acc531d3940858b652eda65d46",
+  "screen_id_hash": "3af4e31baa58e08e8064e94dbbd3d023006ddb982e8129fb9ae8e5831770275f",
+  "html_sha256": "c0ba0ecbf9e6afc8137cee093d2b500678ed7779ad0a3dfb767bc8426709ef42",
+  "image_sha256": "66b4a893062db3c482e02b5c04b8f37f5429629dc0a98ca022d8ae6b6767f6b7",
+  "candidate_hash": "0eb1c785d080d4c579a81d2ecba45584e3b564002161e8a2c416a7b6506172b5",
+  "provider_evidence_hash": "58239fea8e03d851bfc739059a5f47815ca37177c96078e968b9a758a8c3e918",
+  "outage_fallback_passed": true,
+  "broader_provider_acceptance": {
+    "visual_functional_responsive_acceptance": false,
+    "orchestrated_unit_execution": false
+  },
+  "evidence_pointer": "receipt://dial-control/design-stitch/58239fea8e03d851bfc739059a5f47815ca37177c96078e968b9a758a8c3e918",
+  "contains_secrets": false,
+  "credential_plane": "cloud_service",
+  "public_api": true,
+  "live_broker_state": "READY",
+  "live_broker_credential_plane": "cloud_service"
+}

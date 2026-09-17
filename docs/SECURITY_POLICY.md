@@ -4,9 +4,13 @@ Status: CANONICAL
 
 ## Owner device authentication
 
-- External gateway HTTP routes require the high-entropy owner ingress bearer in `X-Van-Ingress-Token`; a tunnel hostname alone grants no authority.
-- One-time enrollment creates a per-device HMAC secret, encrypted at rest with a dedicated Fernet key and rehydrated only inside the gateway process.
-- Revocation removes the usable secret from memory and prevents restart rehydration.
+- Stable public ingress is an outer transport gate only: normal Android-facing routes require the high-entropy `X-Van-Ingress-Token` **and** a revocable per-device `X-Van-Device-Token`.
+- `/health` is ingress-only for service/tunnel probes. `/v1/devices/pair` is the only unauthenticated client route and accepts only a short-lived, single-use pairing ticket.
+- Pairing tickets are created only by the internal control plane, stored only as SHA-256 hashes, expire in at most one hour, and are atomically consumed with device enrollment.
+- Pairing returns the outer ingress bearer plus a per-device access token exactly once with `Cache-Control: no-store`; Android stores both in encrypted preferences. The gateway stores only the device-token hash.
+- Device command authenticity remains a third independent layer: each paired device has an HMAC secret encrypted at rest with a dedicated Fernet key and rehydrated only inside the gateway process.
+- Direct enrollment, pairing-ticket issuance, and device revocation require `X-Van-Internal-Token`; the ingress bearer or a valid device token cannot create or revoke device authority.
+- Revocation atomically revokes capability grants and makes the per-device access token unusable; the HMAC secret is removed from memory and is never rehydrated after restart.
 - Owner-directed mutations are signed, timestamped, replay-protected and idempotent.
 
 ## Hermes execution boundary
@@ -37,9 +41,13 @@ The owner's canonical Google account is VAN's default Google identity, but crede
 
 Forbidden A5 patterns include exporting/copying Google sessions or cookies, reusing Workspace OAuth as a Gemini runtime credential, bypassing the Google identity broker, or disabling credential isolation.
 
+## Trading authority (VATI)
+
+Owner mandates, platform risk ceilings, the Risk Authority, kill switch, strategy registry and trading ledger are protected surfaces; writes require owner-signed authority. A model may not send broker orders, bypass the Risk Authority, widen protective stops, trade stale data, or place broker credentials in prompts. VAN is never a sender of record: live order submission remains behind the VATI execution-router/single-sender gate. Gateway trading writes require the internal control token plus owner-signature evidence; Android account onboarding additionally binds the paired device access token to the device HMAC signature. Broker credentials live only behind the trading account credential reference on the trading host.
+
 ## Secrets
 
-Never log or prompt-inject access/refresh tokens, API keys/client secrets, OTPs/passwords/private keys, full auth headers, service-account private keys, browser cookies/session tokens, `VAN_INTERNAL_CONTROL_TOKEN`, `VAN_INGRESS_TOKEN`, device HMAC secrets, or Fernet keys.
+Never log or prompt-inject access/refresh tokens, API keys/client secrets, OTPs/passwords/private keys, full auth headers, service-account private keys, browser cookies/session tokens, `VAN_INTERNAL_CONTROL_TOKEN`, `VAN_INGRESS_TOKEN`, device HMAC secrets, Fernet keys, MT5 passwords/signing keys, Deriv API tokens, or cTrader client/access/refresh secrets.
 
 Workspace refresh tokens are encrypted at rest. Live Workspace calls exchange refresh tokens for short-lived access tokens inside the gateway. Neither token is forwarded to Hermes prompts.
 

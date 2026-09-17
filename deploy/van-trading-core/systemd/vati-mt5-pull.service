@@ -1,0 +1,23 @@
+[Unit]
+Description=Van MT5 pull bridge (signed command queue for VanBridgeEA)
+After=network-online.target
+Wants=network-online.target
+
+[Service]
+Type=simple
+User=vati
+Group=vati
+EnvironmentFile=/opt/van-trading/config/van-trading-core.env
+Environment=PYTHONPATH=/opt/van-trading/app/trading
+WorkingDirectory=/opt/van-trading/app
+ExecStart=/opt/van-trading/venv/bin/python -c "import os, uvicorn; from vati.execution.mt5_pull import BridgeQueue, create_pull_app, key_provider_from_registry; uvicorn.run(create_pull_app(BridgeQueue(os.environ['VAN_MT5_PULL_QUEUE']), key_provider_from_registry(os.environ['VAN_ACCOUNTS_REGISTRY'])), host='127.0.0.1', port=int(os.environ.get('VAN_MT5_PULL_PORT', '9443')), log_level='warning')"
+Restart=always
+RestartSec=3
+NoNewPrivileges=true
+ProtectSystem=strict
+ProtectHome=true
+ReadWritePaths=/var/lib/van-trading /var/log/van-trading
+PrivateTmp=true
+
+[Install]
+WantedBy=multi-user.target

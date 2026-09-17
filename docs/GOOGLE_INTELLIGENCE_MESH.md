@@ -108,8 +108,8 @@ A secondary identity may be registered under a separate alias for one bounded ca
 |---|---|---|
 | `workspace_oauth` | Delegated owner data | Gmail, Calendar, Drive, Contacts, Tasks |
 | `gemini_runtime` | Model/media runtime | Gemini, Live, Deep Research, Nano Banana, Veo |
-| `cloud_service` | Owner-administered Cloud/service identity | Notebook Enterprise, ADK/A2A services |
-| `consumer_session` | Account-native Google applications | Notebook, Mixboard, Stitch, Antigravity, Jules, Workspace Studio, Flow, AI Studio |
+| `cloud_service` | Owner-administered Cloud/service identity and programmatic Google Cloud MCP/API access | Notebook Enterprise, Stitch MCP, ADK/A2A services |
+| `consumer_session` | Account-native Google applications | Notebook, Mixboard, Antigravity, Jules, Workspace Studio, Flow, AI Studio |
 
 There is no master Google credential. Compromise of one plane must not imply
 access to another.
@@ -134,7 +134,7 @@ Current capabilities:
 | `gemini_notebook` | personal grounded research | Consumer session |
 | `gemini_notebook_enterprise` | programmatic notebook/source lifecycle | Cloud/service |
 | `mixboard` | divergent visual ideation | Consumer session |
-| `stitch` | UI design convergence | Consumer session |
+| `stitch` | UI design convergence | Cloud/service (official Stitch MCP) |
 | `antigravity` | complex development worker; delegated identity `antigravity_worker_account` | Consumer/developer session |
 | `jules` | bounded repository worker | Consumer/developer session |
 | `workspace_api` | deterministic Workspace actions | Workspace OAuth |
@@ -242,6 +242,8 @@ Project Truth + Visual Authority
 
 Mixboard explores; Stitch converges; Nano Banana creates/edit visual assets. None
 may invent product requirements or override Visual Authority.
+
+**Live certification — 2026-09-16:** Stitch generation is `READY` in VAN. The authenticated official MCP route (`@google/stitch-sdk` 0.3.5 → `https://stitch.googleapis.com/mcp`) passed a real `generate_screen_from_text` canary and returned a screen plus HTML and image artifacts. Token-free evidence is stored at `artifacts/google/stitch_live_attestation.json`. This certifies provider generation only; DIAL visual-functional-responsive acceptance and orchestrated-use evidence remain separate gates.
 
 ### Antigravity + Jules
 

@@ -76,19 +76,33 @@ main() {
 
   # Skills
   local skills=(
-    owner-briefing google-workspace project-steering research decision-support
-    document-work notification-triage infrastructure-diagnostics hermes-administration
+    owner-briefing google-workspace google-intelligence gemini-notebook google-design google-development
+    project-steering research decision-support document-work notification-triage
+    infrastructure-diagnostics hermes-administration trading-intelligence
   )
   for s in "${skills[@]}"; do
     check_file "${TARGET_ROOT}/skills/${s}/SKILL.md" "skill ${s}"
   done
 
-  # Secret leak heuristic (installed tree should not contain env secrets)
-  if find "${TARGET_ROOT}" -type f \( -name '.env' -o -name 'gemini.env' -o -name 'google-oauth-client.json' \) 2>/dev/null | grep -q .; then
-    err "Secret-like files found under profile — remove before production use"
+  # The live profile intentionally owns a root .env credential file. It must
+  # remain private; managed static subtrees must never contain credential files.
+  if [[ -f "${TARGET_ROOT}/.env" ]]; then
+    local env_mode
+    env_mode="$(stat -c '%a' "${TARGET_ROOT}/.env" 2>/dev/null || printf 'unknown')"
+    if [[ "${env_mode}" == "600" ]]; then
+      log "OK  root .env present with mode 600"
+    else
+      err "FAIL  root .env permissions must be 600 (got ${env_mode})"
+      FAIL=1
+    fi
+  else
+    warn "root .env not present; provider credentials may be supplied by another approved secret source"
+  fi
+  if find "${TARGET_ROOT}/bin" "${TARGET_ROOT}/skills" "${TARGET_ROOT}/policy" "${TARGET_ROOT}/bot" "${TARGET_ROOT}/mcp" "${TARGET_ROOT}/providers" -type f \( -name '.env' -o -name 'gemini.env' -o -name 'google-oauth-client.json' \) 2>/dev/null | grep -q .; then
+    err "Secret-like files found inside managed profile content"
     FAIL=1
   else
-    log "OK  no secret filenames in profile tree"
+    log "OK  no credential filenames in managed profile content"
   fi
 
   # Optional: repo layout test hint

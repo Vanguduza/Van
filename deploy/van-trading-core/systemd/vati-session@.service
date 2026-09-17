@@ -1,0 +1,26 @@
+[Unit]
+Description=VATI trading session for account alias %i (one process per account; same DecisionCycle as backtests)
+After=network-online.target vati-supabase.service vati-vekl.service
+Wants=network-online.target
+
+[Service]
+Type=simple
+User=vati
+Group=vati
+EnvironmentFile=/opt/van-trading/config/van-trading-core.env
+Environment=PYTHONPATH=/opt/van-trading/app/trading
+WorkingDirectory=/opt/van-trading/app
+ExecStart=/opt/van-trading/venv/bin/python -m vati serve --config /opt/van-trading/config/sessions/%i.json
+# SIGTERM → graceful: no new orders; venue stops stay; positions are not touched.
+KillSignal=SIGTERM
+TimeoutStopSec=30
+Restart=on-failure
+RestartSec=10
+NoNewPrivileges=true
+ProtectSystem=strict
+ProtectHome=true
+ReadWritePaths=/var/lib/van-trading /var/log/van-trading
+PrivateTmp=true
+
+[Install]
+WantedBy=multi-user.target

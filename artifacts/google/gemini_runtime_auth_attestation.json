@@ -1,0 +1,45 @@
+{
+  "schema_version": 1,
+  "certification": "VAN_GEMINI_RUNTIME_AUTHENTICATION",
+  "observed_at": "2026-09-17T06:04:12.224320+00:00",
+  "credential_plane": "gemini_runtime",
+  "authentication_state": "AUTHENTICATED",
+  "broker_state": "CAPACITY_LIMITED",
+  "credential_env_var": "GEMINI_API_KEY",
+  "credential_value_recorded": false,
+  "credential_store": "~/.hermes/profiles/van/.env",
+  "credential_store_mode": "0600",
+  "api_key_display_name": "van-gemini-runtime",
+  "api_key_active_count": 1,
+  "api_key_service_restrictions": [
+    "generativelanguage.googleapis.com"
+  ],
+  "initial_exposed_key_deleted": true,
+  "hermes_auth_status": "gemini: logged in",
+  "hermes_gateway_restart_passed": true,
+  "model_discovery": {
+    "http_status": 200,
+    "model_count": 50
+  },
+  "representative_models": {
+    "gemini": "models/gemini-3.6-flash",
+    "gemini_live": "models/gemini-3.5-transcribe-live",
+    "deep_research": "models/deep-research-preview-04-2026",
+    "nano_banana": "models/gemini-3.1-flash-image",
+    "veo": "models/veo-3.1-generate-preview"
+  },
+  "inference_canary": {
+    "model": "gemini-3.6-flash",
+    "result": "RESOURCE_EXHAUSTED",
+    "classification": "PREPAID_CREDITS_DEPLETED",
+    "ready": false
+  },
+  "family_states": {
+    "gemini": "CAPACITY_LIMITED",
+    "gemini_live": "CAPACITY_LIMITED",
+    "deep_research": "CAPACITY_LIMITED",
+    "nano_banana": "CAPACITY_LIMITED",
+    "veo": "CAPACITY_LIMITED"
+  },
+  "contains_secrets": false
+}

@@ -11,12 +11,6 @@
     <uses-permission android:name="android.permission.VIBRATE" />
     <uses-permission android:name="android.permission.RECEIVE_BOOT_COMPLETED" />
 
-    <queries>
-        <intent>
-            <action android:name="android.speech.RecognitionService" />
-        </intent>
-    </queries>
-
     <application
         android:name=".VanApplication"
         android:allowBackup="false"
@@ -39,6 +33,12 @@
             android:name=".command.CommandCentreActivity"
             android:exported="true"
             android:launchMode="singleTop"
+            android:theme="@style/Theme.Van" />
+
+        <activity
+            android:name=".trading.TradingCommandCentreActivity"
+            android:exported="false"
+            android:label="Van Trading"
             android:theme="@style/Theme.Van" />
 
         <service
