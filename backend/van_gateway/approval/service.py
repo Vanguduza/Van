@@ -29,9 +29,11 @@ class OwnerApprovalService:
     """One-time A4 owner approvals bound to device, intent, command lineage and turn.
 
     The Android device signs ``canonical`` with a biometric-bound Android
-    Keystore EC key whose public key was enrolled during secure pairing. A
-    challenge is consumed atomically, so it cannot authorize more than one
-    command even if the signed proof is replayed concurrently.
+    Keystore EC key whose public key was enrolled during secure pairing. The
+    canonical challenge contains the originating command ID and turn. The client
+    may echo the source command ID, but that echo is never treated as authority.
+    A challenge is consumed atomically, so it cannot authorize more than one
+    execution even if the proof is replayed concurrently.
     """
 
     PREFIX = "owner_approval:"
@@ -113,7 +115,7 @@ class OwnerApprovalService:
         self,
         *,
         challenge_id: str,
-        source_command_id: str,
+        source_command_id: str | None = None,
         signature_b64: str,
         device_id: str,
         turn_id: str | None,
@@ -123,7 +125,7 @@ class OwnerApprovalService:
         now_unix: int | None = None,
     ) -> None:
         now = int(time.time()) if now_unix is None else now_unix
-        if not challenge_id or not source_command_id or not signature_b64:
+        if not challenge_id or not signature_b64:
             raise OwnerApprovalError("approval_proof_missing")
 
         async with self.store.connection() as db:
@@ -150,8 +152,11 @@ class OwnerApprovalService:
             if (
                 record.get("device_id") != device_id
                 or record.get("action_id") != action_id
-                or record.get("source_command_id") != source_command_id
                 or record.get("turn_id") != turn_id
+                or (
+                    source_command_id is not None
+                    and record.get("source_command_id") != source_command_id
+                )
             ):
                 await db.rollback()
                 raise OwnerApprovalError("approval_challenge_binding_mismatch")
