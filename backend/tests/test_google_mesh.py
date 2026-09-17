@@ -22,7 +22,7 @@ async def test_google_migration_and_principal_hash(tmp_path):
     store = Store(str(tmp_path / "mesh.sqlite3"))
     await store.migrate()
     row = await store.fetchone("SELECT MAX(version) AS version FROM schema_migrations")
-    assert row["version"] == SCHEMA_VERSION == 4
+    assert row["version"] == SCHEMA_VERSION == 5
     broker = GoogleIdentityBroker(store, GoogleCapabilityRegistry(registry_path()), ai_plan="PRO")
     status = await broker.register_principal(subject="owner-google-subject", ai_plan="PRO")
     assert status.registered is True
@@ -204,4 +204,3 @@ async def test_antigravity_capacity_limited_falls_back_to_jules(tmp_path):
     assert "ANTIGRAVITY_CAPACITY_LIMITED" in decision.degraded
     ag = await broker.capability_status("antigravity")
     assert ag.state == GoogleCapabilityState.CAPACITY_LIMITED
-

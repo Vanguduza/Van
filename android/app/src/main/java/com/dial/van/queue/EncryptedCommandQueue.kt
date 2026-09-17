@@ -1,13 +1,13 @@
 package com.dial.van.queue
 
 import android.content.Context
+import android.security.keystore.KeyGenParameterSpec
+import android.security.keystore.KeyProperties
 import android.util.Base64
 import androidx.security.crypto.EncryptedSharedPreferences
 import androidx.security.crypto.MasterKey
 import kotlinx.serialization.encodeToString
 import kotlinx.serialization.json.Json
-import android.security.keystore.KeyGenParameterSpec
-import android.security.keystore.KeyProperties
 import java.security.KeyStore
 import java.util.UUID
 import javax.crypto.Cipher
@@ -18,6 +18,9 @@ import javax.crypto.spec.GCMParameterSpec
 /**
  * Encrypted offline command queue using Android Keystore + AES-GCM payload wrapping.
  * Idempotency keys survive retries; expired sensitive commands are never executed.
+ *
+ * Rev 3.1 invariant: exact A1-A5 policy and replay semantics travel with each queued command.
+ * A5 never executes. NO_STALE_REPLAY commands are never retried after a dispatch attempt.
  */
 class EncryptedCommandQueue(context: Context) {
 
@@ -46,16 +49,24 @@ class EncryptedCommandQueue(context: Context) {
         val now = System.currentTimeMillis()
         val idempotencyKey = request.idempotencyKey ?: UUID.randomUUID().toString()
         val existing = findByIdempotencyKey(idempotencyKey)
-        if (existing != null && !existing.isExpired(now)) {
+        if (existing != null && existing.isReplayEligible(now)) {
             return existing
         }
 
+        val resolvedActionClass = request.actionClass ?: when (request.sensitivity) {
+            CommandSensitivity.NORMAL -> ActionClass.A1
+            CommandSensitivity.ELEVATED -> ActionClass.A3
+            CommandSensitivity.DESTRUCTIVE -> ActionClass.A4
+            CommandSensitivity.SECRET -> ActionClass.A5
+        }
         val command = QueuedCommand(
             id = UUID.randomUUID().toString(),
             idempotencyKey = idempotencyKey,
             kind = request.kind.name,
             payloadJson = request.payloadJson,
             sensitivity = request.sensitivity.name,
+            actionClass = resolvedActionClass.name,
+            replayPolicy = request.replayPolicy.name,
             createdAtEpochMs = now,
             expiresAtEpochMs = now + request.ttlMs,
         )
@@ -67,7 +78,7 @@ class EncryptedCommandQueue(context: Context) {
         purgeExpired(nowMs)
         return listIds()
             .mapNotNull { load(it) }
-            .filter { !it.isExpired(nowMs) }
+            .filter { it.isReplayEligible(nowMs) }
             .sortedBy { it.createdAtEpochMs }
     }
 
@@ -87,25 +98,20 @@ class EncryptedCommandQueue(context: Context) {
         listIds().mapNotNull { load(it) }.firstOrNull { it.idempotencyKey == key }
 
     /**
-     * Returns commands safe to dispatch. SECRET/DESTRUCTIVE past expiry are dropped, never executed.
+     * Returns commands safe to dispatch under the exact Rev 3.1 class/replay contract.
+     * A5 and stale/no-replay commands are removed rather than silently retained.
      */
     fun drainExecutable(nowMs: Long = System.currentTimeMillis()): List<QueuedCommand> {
-        val ready = peekReady(nowMs)
         val executable = mutableListOf<QueuedCommand>()
-        for (cmd in ready) {
-            if (cmd.isExpired(nowMs)) {
-                if (cmd.sensitivityEnum() != CommandSensitivity.NORMAL) {
-                    remove(cmd.id)
-                }
-                continue
-            }
-            if (cmd.sensitivityEnum() == CommandSensitivity.SECRET) {
+        for (id in listIds()) {
+            val cmd = load(id) ?: continue
+            if (!cmd.isReplayEligible(nowMs)) {
                 remove(cmd.id)
                 continue
             }
             executable.add(cmd)
         }
-        return executable
+        return executable.sortedBy { it.createdAtEpochMs }
     }
 
     fun purgeExpired(nowMs: Long = System.currentTimeMillis()) {
@@ -193,8 +199,6 @@ class EncryptedCommandQueue(context: Context) {
         private const val KEYSTORE_ALIAS = "van_queue_aes"
         private const val ANDROID_KEYSTORE = "AndroidKeyStore"
         private const val KEY_ALGORITHM = "AES"
-        private const val BLOCK_MODE = "GCM"
-        private const val PADDING = "NoPadding"
         private const val TRANSFORMATION = "AES/GCM/NoPadding"
         private const val GCM_IV_LENGTH = 12
         private const val GCM_TAG_BITS = 128
