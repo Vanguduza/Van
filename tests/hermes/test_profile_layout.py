@@ -32,6 +32,8 @@ SKILL_NAMES = [
     "google-design", "google-development", "project-steering", "research",
     "decision-support", "document-work", "notification-triage",
     "infrastructure-diagnostics", "hermes-administration",
+    # Rev 1.3 §139 — Automation & Browser Fabric owner-facing skills.
+    "automation-fabric", "browser-intelligence",
 ]
 
 AUTHORITY_ORDER_MARKERS = [
@@ -208,3 +210,24 @@ def test_trading_authority_declared_in_soul_and_config():
     assert "protect_trading_risk_authority: true" in config
     assert "deny_model_broker_orders: true" in config
     assert "- trading-intelligence" in config
+
+
+def test_automation_and_browser_skills_are_registered():
+    """Rev 1.3 §139 — the fabric skills ship in the profile pack."""
+    config = (PROFILE_ROOT / "config.yaml").read_text(encoding="utf-8")
+    assert "- automation-fabric" in config
+    assert "- browser-intelligence" in config
+
+
+def test_browser_skill_declares_the_l3_production_ceiling():
+    """Rev 1.2 review M3 — the ladder cap is stated where Hermes will read it."""
+    skill = (HERMES_ROOT / "skills" / "browser-intelligence" / "SKILL.md").read_text(encoding="utf-8")
+    assert "Production stops at L3" in skill
+    assert "sole agent runtime" in skill
+
+
+def test_automation_skill_forbids_direct_n8n_access():
+    """Rev 1.3 §§14, 38 — Hermes never holds n8n credentials or calls its API."""
+    skill = (HERMES_ROOT / "skills" / "automation-fabric" / "SKILL.md").read_text(encoding="utf-8")
+    assert "never call" in skill.lower() or "Call the n8n management API" in skill
+    assert "is not success" in skill

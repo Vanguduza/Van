@@ -33,6 +33,29 @@
 - Device/CI helpers: `tools/certification/device_cert_probe.py`; `tools/ci/install_github_workflow.py`; Windows `tools/bootstrap_backend.ps1`, `tools/run_gateway.ps1`, `tools/sync_project_truth_live.ps1`.
 - Fail-closed hardening: unsigned release refused; `/health` `ok` tracks Hermes; Project Truth PUT requires internal token; Google mesh defaults unverified until evidence; Rive load failures fall back to Canvas.
 
+## AUTOMATION & BROWSER FABRIC (Rev 1.3) — REPOSITORY-SIDE BUILT, OWNER-GATED
+
+- **Implementation base:** reconciled from `main` plus the certified Rev 3.1 owner-runtime lineage (`87f5a22`) and the in-flight trading-core bootstrap branch. Evidence and ancestry: `docs/project-state/AUTOMATION_BROWSER_FABRIC_PREFLIGHT.md`.
+- **Schema:** migration 6 adds automation capability/artifact/run/event/intent state, `standing_automation_authorities`, `automation_run_nonces` and browser task/evidence/profile tables.
+- **Standing automation authority:** a scheduled or event run derives an ordinary `CommandAuthorityRecord` through the existing `CommandAuthorityService` — no second authorization plane. The originating owner device stays the revocation root, every run seals a fresh `ContextSnapshot`, and trigger, workflow version and parameter surface are digest-bound. A4 can never become standing authority.
+- **Run capability grants:** MAC-bound, run-scoped, durable. Single-use mutation nonces consume via one conditional `UPDATE`, so concurrent redemption yields exactly one winner and a restart cannot resurrect a consumed nonce. n8n never holds a general-purpose VAN token.
+- **Workflow pipeline:** platform-neutral `WorkflowIR`, a static analyser that rejects unsafe graphs before compilation, a deterministic compiler whose semantic digest excludes canvas position, and VAN-owned artifact lineage that never overwrites an admitted row.
+- **Verification:** `engine_success_is_owner_success: false` is enforced — an n8n 200 with an absent postcondition fails the run; an uncorrelated observation is `PARTIAL_SUCCESS`; no declared verifier yields `UNVERIFIABLE`.
+- **Browser Fabric:** Browser Harness (`browser-use/browser-harness`, MIT) as the deterministic actuator and Stagehand (MIT) as the semantic layer, both behind the Browser Gateway. Production autonomy is capped at **L3** (observe → deterministic action); L4/L5 require an owner amendment to the Hermes execution boundary. Session material is `secretref://` only; evidence is digest-only and is refused if secret-shaped.
+- **Health:** `/v1/automation/health` and `/v1/browser/health` (internal control only) report runtime readiness, governance state, lifecycle counts and the T0 isolation invariant, and drive nine new `DegradedCode` members.
+- **Hermes skills:** `automation-fabric` and `browser-intelligence` registered in the `van` profile pack.
+- **Certification:** `tools/certification/certify_automation_runtime.py` and `tools/certification/certify_browser_fabric.py` are the only paths to READY. Both refuse while the feature flags are off and fail without recording evidence when no runtime answers. CI proves this fail-closed behaviour on every run.
+- **Every external switch defaults off:** automation, ingress, egress and browser attachment all ship disabled.
+
+## AUTOMATION & BROWSER FABRIC — PENDING OWNER DECISION
+
+Rev 1.3 §365 makes these owner decisions, not implementation decisions. An implementation agent creates the artifacts and must not mark them signed.
+
+- `docs/decisions/VAN-ADOPT-N8N-001.yaml` — n8n is source-available under the Sustainable Use License (`SOURCE_AVAILABLE`), which stack-lock principle 5 requires an owner-signed adoption decision for. **PENDING.**
+- `docs/decisions/VAN-ADOPT-STAGEHAND-001.yaml` and `docs/decisions/VAN-ADOPT-BROWSER-HARNESS-001.yaml` — both MIT; adoption and the L3 ladder cap still need owner sign-off. **PENDING.**
+- `docs/decisions/VAN-AMEND-SECURITY-POLICY-001.md` — seven proposed authority texts covering the automation boundary, credential isolation, browser session sovereignty, egress, ingress, generated workflows and browser workers. `docs/SECURITY_POLICY.md` is a locked authority and is **unmodified**; a contract test pins its digest. **PENDING.**
+- `trading/architecture/proposed/automation_browser_fabric_layers.json` — three stack-lock layers (`integration_automation` T2, `semantic_browser` T3, `deterministic_browser` T2) held outside the lock until the adoption decision is recorded. They already satisfy every assertion `test_stack_lock.py` applies to admitted layers, so promotion is mechanical.
+
 ## EXTERNALLY BLOCKED / REQUIRES LIVE CERTIFICATION
 
 - VATI Rev 5 repository implementation is integrated: trading core, risk authority, execution adapters, commander/VEKL, Android Trading Command Center, signed account onboarding and fail-closed tests are present. Remaining gates are deployment/live-market/device gates: `van-trading-core` bootstrap/qualification, real broker/demo account connection, real market data validation, MT5 EA/terminal attachment where used, independent security review and owner-signed LIMITED_LIVE promotion.
@@ -49,5 +72,7 @@
 - Copying/exporting Google browser cookies or sessions.
 - Treating `CONFIGURED` as proof of live success.
 - Direct Google project mutation that bypasses Hermes, Project Truth, grants, action classes, audit or evidence.
+
+- Automation & Browser Fabric live gates are all `PENDING_LIVE`: the self-hosted n8n runtime, workflow generation, security audit, backup/restore, webhook ingress, standing automation, Stagehand, Browser Harness, authenticated browser profiles, prompt-injection containment, Trading Core isolation under load, and browser→automation route promotion. Repository-side code exists and fails closed; none of it is READY, and §369 forbids promoting a gate because code exists.
 
 See `docs/EXTERNAL_GATES.md` for exact live gates.
