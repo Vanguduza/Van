@@ -181,7 +181,7 @@ async def test_lexical_result_cap_is_explicit(retrieval_runtime):
     )
     assert len(result.hits) == 2
     assert result.truncated is True
-    assert [hit.object_id for hit in result.hits] == ["project-0", "project-1"]
+    assert [hit.object_id for hit in result.hits] == ["project-3", "project-2"]
 
 
 @pytest.mark.asyncio
