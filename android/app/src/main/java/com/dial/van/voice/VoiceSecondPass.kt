@@ -47,7 +47,7 @@ object VoiceSecondPassPolicy {
 /**
  * Deterministic transcript fusion. A local second pass cannot replace a plausible Android result
  * merely because its text differs. It needs a strong confidence advantage or evidence that its
- * text was already among Android's hypotheses/alternative spans.
+ * text was already represented by Android's hypotheses/alternative spans.
  */
 object SpeechFusionEngine {
     fun fuse(android: VoiceRecognitionResult, local: LocalAsrResult): VoiceRecognitionResult {
@@ -68,7 +68,8 @@ object SpeechFusionEngine {
         val normalizedAndroid = normalize(androidText)
 
         val corroboratedByAndroid = android.hypotheses.any { normalize(it) == normalizedLocal } ||
-            android.alternatives.any { span -> span.alternatives.any { normalize(it) == normalizedLocal } }
+            reconstructedAlternativeTranscripts(androidText, android.alternatives)
+                .any { normalize(it) == normalizedLocal }
         val sameTranscript = normalizedLocal.isNotBlank() && normalizedLocal == normalizedAndroid
         val androidWeak = androidText.isBlank() || (androidConfidence != null && androidConfidence <= ANDROID_WEAK_THRESHOLD)
         val decisiveLocalAdvantage = androidConfidence != null &&
@@ -98,6 +99,31 @@ object SpeechFusionEngine {
                 secondPassText = localText,
                 secondPassConfidence = localConfidence,
             )
+        }
+    }
+
+    /**
+     * Android API 34 alternatives are span-local, not complete transcripts. Reconstruct complete
+     * candidates from the original Android text before using them as corroboration evidence.
+     * Invalid or stale span bounds are ignored rather than guessed.
+     */
+    private fun reconstructedAlternativeTranscripts(
+        androidText: String,
+        spans: List<VoiceAlternativeSpanEvidence>,
+    ): Sequence<String> = spans.asSequence().flatMap { span ->
+        if (span.start < 0 || span.end < span.start || span.end > androidText.length) {
+            emptySequence()
+        } else {
+            span.alternatives.asSequence()
+                .map(String::trim)
+                .filter(String::isNotBlank)
+                .map { alternative ->
+                    buildString(androidText.length - (span.end - span.start) + alternative.length) {
+                        append(androidText, 0, span.start)
+                        append(alternative)
+                        append(androidText, span.end, androidText.length)
+                    }
+                }
         }
     }
 
