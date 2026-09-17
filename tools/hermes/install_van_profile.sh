@@ -57,8 +57,9 @@ verify_source_layout() {
     fi
   done
   local skills=(
-    owner-briefing google-workspace project-steering research decision-support
-    document-work notification-triage infrastructure-diagnostics hermes-administration
+    owner-briefing google-workspace google-intelligence gemini-notebook google-design google-development
+    project-steering research decision-support document-work notification-triage
+    infrastructure-diagnostics hermes-administration
   )
   for s in "${skills[@]}"; do
     if [[ ! -f "${SOURCE_ROOT}/skills/${s}/SKILL.md" ]]; then
@@ -102,8 +103,19 @@ copy_tree() {
   mkdir -p "${TARGET_ROOT}/bin"
   rsync -a --delete "${excludes[@]}" "${SOURCE_ROOT}/profile/van/bin/" "${TARGET_ROOT}/bin/"
 
-  # These subtrees are repository-managed and may be synchronized exactly.
-  for dir in skills policy bot mcp providers; do
+  # Only named VAN skills are repository-managed. Preserve runtime/user-installed
+  # skills that may coexist under the profile skills directory.
+  mkdir -p "${TARGET_ROOT}/skills"
+  local managed_skills=(
+    owner-briefing google-workspace google-intelligence gemini-notebook google-design google-development
+    project-steering research decision-support document-work notification-triage
+    infrastructure-diagnostics hermes-administration
+  )
+  for skill in "${managed_skills[@]}"; do
+    mkdir -p "${TARGET_ROOT}/skills/${skill}"
+    rsync -a --delete "${excludes[@]}" "${SOURCE_ROOT}/skills/${skill}/" "${TARGET_ROOT}/skills/${skill}/"
+  done
+  for dir in policy bot mcp providers; do
     mkdir -p "${TARGET_ROOT}/${dir}"
     rsync -a --delete "${excludes[@]}" "${SOURCE_ROOT}/${dir}/" "${TARGET_ROOT}/${dir}/"
   done

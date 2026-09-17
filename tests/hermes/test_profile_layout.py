@@ -175,11 +175,13 @@ def test_install_profile_preserves_runtime_state_and_secrets(tmp_path):
         "logs/keep.log": b"log-sentinel",
         "pairing/keep.json": b"pairing-sentinel",
         "cache/keep.bin": b"cache-sentinel",
+        "skills/software-development/github/scripts/git-credential-token.py": b"runtime-installed-skill",
     }
     for rel, payload in sentinels.items():
         path = target / rel
         path.parent.mkdir(parents=True, exist_ok=True)
         path.write_bytes(payload)
+    (target / ".env").chmod(0o600)
     stale = target / "providers" / "stale-provider.md"
     stale.parent.mkdir(parents=True, exist_ok=True)
     stale.write_text("stale", encoding="utf-8")
@@ -188,6 +190,8 @@ def test_install_profile_preserves_runtime_state_and_secrets(tmp_path):
     env["HERMES_HOME"] = str(hermes_home)
     installer = REPO_ROOT / "tools" / "hermes" / "install_van_profile.sh"
     subprocess.run([str(installer)], check=True, text=True, capture_output=True, env=env)
+    doctor = REPO_ROOT / "tools" / "hermes" / "doctor_van_profile.sh"
+    subprocess.run([str(doctor)], check=True, text=True, capture_output=True, env=env)
 
     for rel, payload in sentinels.items():
         assert (target / rel).read_bytes() == payload
