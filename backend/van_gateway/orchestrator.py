@@ -5,6 +5,8 @@ from typing import Any
 
 from van_gateway.audit.service import AuditService
 from van_gateway.auth.service import AuthError, AuthService
+from van_gateway.command.authority import CommandAuthorityError, CommandAuthorityRecord, CommandAuthorityService
+from van_gateway.command.resolver import ResolutionMode, TypedCommandResolver
 from van_gateway.context.service import OwnerContextService
 from van_gateway.degraded.registry import DegradedRegistry
 from van_gateway.hermes.bridge import HermesBridge, HermesBridgeError
@@ -42,6 +44,8 @@ class CommandOrchestrator:
         audit: AuditService,
         degraded: DegradedRegistry,
         context: OwnerContextService,
+        authority: CommandAuthorityService,
+        resolver: TypedCommandResolver,
         owner_intent_max_age_seconds: int,
     ) -> None:
         self.auth = auth
@@ -51,6 +55,8 @@ class CommandOrchestrator:
         self.audit = audit
         self.degraded = degraded
         self.context = context
+        self.authority = authority
+        self.resolver = resolver
         self.owner_intent_max_age_seconds = owner_intent_max_age_seconds
 
     @staticmethod
@@ -148,7 +154,11 @@ class CommandOrchestrator:
             await self.idempotency.fail(req.idempotency_key, result.model_dump())
             return result
 
+        resolution = self.resolver.resolve(req.text)
+        effective_action_class = self.resolver.stronger_class(req.action_class, resolution.canonical_action_class)
+        effective_no_stale_replay = req.no_stale_replay or resolution.no_stale_replay
         now = int(time.time())
+
         if req.expires_at_unix is not None and now >= req.expires_at_unix:
             result = CommandResult(
                 status="expired",
@@ -159,18 +169,37 @@ class CommandOrchestrator:
             await self.audit.record(result="expired", command_id=req.command_id, device_id=req.device_id, failure_reason="explicit_expiry")
             await self.idempotency.complete(req.idempotency_key, result.model_dump())
             return result
-        if req.no_stale_replay:
-            if req.expires_at_unix is None or req.expires_at_unix - req.issued_at_unix > 60:
+
+        if effective_no_stale_replay:
+            max_window = min(60, resolution.max_age_seconds or 60)
+            if req.expires_at_unix is None or req.expires_at_unix - req.issued_at_unix > max_window:
                 result = CommandResult(
                     status="denied",
                     command_id=req.command_id,
                     idempotency_key=req.idempotency_key,
-                    message="NO_STALE_REPLAY requires an explicit short expiry",
+                    message=f"NO_STALE_REPLAY requires an explicit expiry within {max_window} seconds",
                 )
-                await self.audit.record(result="denied", command_id=req.command_id, device_id=req.device_id, failure_reason="invalid_no_stale_replay_window")
+                await self.audit.record(
+                    result="denied",
+                    command_id=req.command_id,
+                    device_id=req.device_id,
+                    failure_reason="invalid_no_stale_replay_window",
+                )
                 await self.idempotency.complete(req.idempotency_key, result.model_dump())
                 return result
-        if now - req.issued_at_unix > self.owner_intent_max_age_seconds:
+
+        command_age = max(0, now - req.issued_at_unix)
+        if resolution.max_age_seconds is not None and command_age > resolution.max_age_seconds:
+            result = CommandResult(
+                status="expired",
+                command_id=req.command_id,
+                idempotency_key=req.idempotency_key,
+                message="Typed action intent expired; refusing stale execution",
+            )
+            await self.audit.record(result="expired", command_id=req.command_id, device_id=req.device_id, failure_reason="typed_action_expired")
+            await self.idempotency.complete(req.idempotency_key, result.model_dump())
+            return result
+        if command_age > self.owner_intent_max_age_seconds:
             result = CommandResult(
                 status="expired",
                 command_id=req.command_id,
@@ -181,7 +210,7 @@ class CommandOrchestrator:
             await self.idempotency.complete(req.idempotency_key, result.model_dump())
             return result
 
-        if req.action_class == ActionClass.A5:
+        if effective_action_class == ActionClass.A5:
             result = CommandResult(
                 status="denied",
                 command_id=req.command_id,
@@ -192,7 +221,7 @@ class CommandOrchestrator:
             await self.idempotency.complete(req.idempotency_key, result.model_dump())
             return result
 
-        if req.action_class == ActionClass.A4 and not req.approval_token:
+        if effective_action_class == ActionClass.A4 and not req.approval_token:
             result = CommandResult(
                 status="approval_required",
                 command_id=req.command_id,
@@ -206,7 +235,7 @@ class CommandOrchestrator:
 
         if req.context_trust == ContentTrust.UNTRUSTED:
             lowered = req.text.lower()
-            if any(m in lowered for m in INJECTION_MARKERS):
+            if any(marker in lowered for marker in INJECTION_MARKERS):
                 result = CommandResult(
                     status="rejected_untrusted",
                     command_id=req.command_id,
@@ -217,17 +246,25 @@ class CommandOrchestrator:
                 await self.idempotency.complete(req.idempotency_key, result.model_dump())
                 return result
 
-        before: dict[str, Any] = {}
+        before: dict[str, Any] = {
+            "command_resolution": resolution.model_dump(mode="json"),
+            "signed_action_class": req.action_class.value,
+            "effective_action_class": effective_action_class.value,
+        }
         live_state_refs: list[str] = []
         policy_refs = [
             "security-policy:A1-A5",
-            f"action-class:{req.action_class.value}",
+            f"action-class:signed:{req.action_class.value}",
+            f"action-class:effective:{effective_action_class.value}",
             f"principal:{req.principal_type.value}",
+            f"resolver:{resolution.resolver_version}",
         ]
+        if resolution.rule_id:
+            policy_refs.append(f"resolver-rule:{resolution.rule_id}")
 
         if req.project_id:
             truth = await self.projects.load_truth(req.project_id)
-            if not truth.get("ok") and req.action_class in (ActionClass.A3, ActionClass.A4):
+            if not truth.get("ok") and effective_action_class in (ActionClass.A3, ActionClass.A4):
                 code = truth.get("degraded", DegradedCode.STALE_PROJECT_TRUTH.value)
                 self.degraded.set(DegradedCode(code), True)
                 result = CommandResult(
@@ -243,15 +280,13 @@ class CommandOrchestrator:
                     device_id=req.device_id,
                     project_id=req.project_id,
                     failure_reason="truth_gate",
-                    before=truth,
+                    before={**truth, **before},
                 )
                 await self.idempotency.complete(req.idempotency_key, result.model_dump())
                 return result
             if truth.get("ok"):
                 truth_sha = str(truth.get("truth_sha") or "")
                 repo_sha = str(truth.get("repo_sha") or "")
-                # Preserve the repository's established top-level audit contract while
-                # also adding the richer Rev 3.1 structured project-truth evidence.
                 before["truth_sha"] = truth_sha
                 before["repo_sha"] = repo_sha or None
                 before["project_truth"] = {
@@ -301,6 +336,45 @@ class CommandOrchestrator:
         }
         before["canonical_context"] = canonical_context
 
+        authority_record = CommandAuthorityRecord(
+            command_id=req.command_id,
+            device_id=req.device_id,
+            principal_type=req.principal_type,
+            requested_by=req.requested_by,
+            origin_channel=req.origin_channel,
+            signed_action_class=req.action_class,
+            effective_action_class=effective_action_class,
+            typed_action_id=resolution.action_id if resolution.mode == ResolutionMode.EXACT_ACTION else None,
+            snapshot_id=context_snapshot.snapshot_id,
+            context_digest=context_snapshot.digest,
+            issued_at_unix=req.issued_at_unix,
+            expires_at_unix=req.expires_at_unix,
+            no_stale_replay=effective_no_stale_replay,
+            owner_approved=bool(req.approval_token),
+            turn_id=req.turn_id,
+            sealed_at_unix_ms=int(time.time() * 1000),
+        )
+        try:
+            await self.authority.seal(authority_record)
+        except CommandAuthorityError as exc:
+            result = CommandResult(
+                status="denied",
+                command_id=req.command_id,
+                idempotency_key=req.idempotency_key,
+                message="Signed command authority could not be sealed; command not dispatched",
+                context_snapshot_id=context_snapshot.snapshot_id,
+            )
+            await self.audit.record(
+                result="denied",
+                command_id=req.command_id,
+                device_id=req.device_id,
+                project_id=req.project_id,
+                failure_reason=str(exc),
+                before=before,
+            )
+            await self.idempotency.complete(req.idempotency_key, result.model_dump())
+            return result
+
         health = await self.hermes.health()
         if not health.get("ok"):
             self.degraded.set(DegradedCode.HERMES_OFFLINE, True)
@@ -325,7 +399,8 @@ class CommandOrchestrator:
                     "idempotency_key": req.idempotency_key,
                     "device_id": req.device_id,
                     "project_id": req.project_id,
-                    "action_class": req.action_class.value,
+                    "action_class": effective_action_class.value,
+                    "signed_action_class": req.action_class.value,
                     "context_trust": req.context_trust.value,
                     "signature_version": req.signature_version,
                     "turn_id": req.turn_id,
@@ -337,10 +412,12 @@ class CommandOrchestrator:
                     "context_capsule_revision": req.context_capsule_revision,
                     "context_capsule_hash": req.context_capsule_hash,
                     "speech_evidence_ref": req.speech_evidence_ref,
-                    "no_stale_replay": req.no_stale_replay,
+                    "no_stale_replay": effective_no_stale_replay,
                     "client_context": req.client_context,
                     "client_context_authoritative": False,
                     "canonical_context": canonical_context,
+                    "typed_resolution": resolution.model_dump(mode="json"),
+                    "gateway_action_authority_required": True,
                 },
             )
         except HermesBridgeError as exc:
@@ -362,8 +439,8 @@ class CommandOrchestrator:
             command_id=req.command_id,
             device_id=req.device_id,
             project_id=req.project_id,
-            capability=req.action_class.value,
-            approval=req.approval_token or "not_required",
+            capability=effective_action_class.value,
+            approval="recorded" if req.approval_token else "not_required",
             model_delegate="hermes:van",
             before=before,
             after={
@@ -373,6 +450,8 @@ class CommandOrchestrator:
                 "requested_by": req.requested_by,
                 "turn_id": req.turn_id,
                 "context_snapshot_id": context_snapshot.snapshot_id,
+                "typed_action_id": authority_record.typed_action_id,
+                "effective_action_class": effective_action_class.value,
             },
             evidence_pointer=run.get("id"),
         )
@@ -380,7 +459,7 @@ class CommandOrchestrator:
             status="accepted",
             command_id=req.command_id,
             idempotency_key=req.idempotency_key,
-            message="Accepted and routed to Hermes profile van with canonical owner context",
+            message="Accepted and routed to Hermes profile van with canonical owner context and sealed authority",
             hermes_run_id=run.get("id"),
             evidence_id=evidence_id,
             context_snapshot_id=context_snapshot.snapshot_id,
