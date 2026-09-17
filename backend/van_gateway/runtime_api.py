@@ -19,6 +19,12 @@ from van_gateway.context.models import (
     OwnerFactCandidate,
     SourceTrust,
 )
+from van_gateway.context.retrieval import (
+    ContextLexicalQuery,
+    ContextRetrievalError,
+    ContextRetrievalService,
+    HotContextCapsuleRequest,
+)
 from van_gateway.context.service import ContextAdmissionError, OwnerContextService
 from van_gateway.google.control import GoogleControlAuthError, verify_internal_control
 from van_gateway.models import PrincipalType
@@ -74,6 +80,7 @@ class OwnerRuntimeApi:
         self.store = store
         self.settings = settings
         self.context = OwnerContextService(store)
+        self.retrieval = ContextRetrievalService(store, self.context)
         self.actions = ActionRuntime(store)
         self.authority = CommandAuthorityService(store)
         self.resolver = TypedCommandResolver()
@@ -108,6 +115,13 @@ class OwnerRuntimeApi:
             "hermes_is_sole_agent_runtime": True,
             "hermes_is_truth_authority": False,
             "context_kernel_revision": await self.context.kernel_revision(),
+            "context_retrieval": {
+                "exact": True,
+                "temporal_graph": True,
+                "deterministic_lexical": True,
+                "hot_capsule": True,
+                "semantic_on_critical_path": False,
+            },
             "enabled_actions": int(action_count_row["n"]) if action_count_row is not None else 0,
             "resolver_version": "rev3.1.1",
             "signed_command_authority_required": True,
@@ -150,6 +164,22 @@ class OwnerRuntimeApi:
         async def query_graph(body: ContextGraphQuery, x_van_internal_token: str | None = Header(default=None)):
             self._require_internal(x_van_internal_token)
             return await self.context.traverse_graph(body)
+
+        @router.post("/context/lexical/query")
+        async def query_lexical(body: ContextLexicalQuery, x_van_internal_token: str | None = Header(default=None)):
+            self._require_internal(x_van_internal_token)
+            return await self.retrieval.lexical_query(body)
+
+        @router.post("/context/hot-capsules")
+        async def compile_hot_capsule(
+            body: HotContextCapsuleRequest,
+            x_van_internal_token: str | None = Header(default=None),
+        ):
+            self._require_internal(x_van_internal_token)
+            try:
+                return await self.retrieval.compile_hot_capsule(body)
+            except ContextRetrievalError as exc:
+                raise HTTPException(status_code=409, detail=str(exc)) from exc
 
         @router.post("/context/readiness")
         async def readiness(body: ContextReadinessBody, x_van_internal_token: str | None = Header(default=None)):
