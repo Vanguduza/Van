@@ -22,6 +22,7 @@ import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
 import java.util.Locale
 import java.util.UUID
+import java.util.concurrent.Executors
 import java.util.concurrent.atomic.AtomicBoolean
 
 /** Speech sync clock feeding viseme/RMS/mouth_open into [VanVisualState]. */
@@ -60,9 +61,14 @@ class VoiceInputManager(
     private val callback: VoiceInputCallback,
     val audioArbiter: VoiceAudioArbiter = VoiceAudioArbiter(context.applicationContext),
     private val biasingStringsProvider: () -> List<String> = { emptyList() },
+    private val secondPassCoordinator: VoiceSecondPassCoordinator? = null,
+    private val personalConfusionProvider: (String) -> Boolean = { false },
 ) {
     private val appContext = context.applicationContext
     private val mainHandler = Handler(Looper.getMainLooper())
+    private val secondPassExecutor = Executors.newSingleThreadExecutor { runnable ->
+        Thread(runnable, "van-voice-second-pass").apply { isDaemon = true }
+    }
     private val listening = AtomicBoolean(false)
     private val onDeviceAvailable =
         Build.VERSION.SDK_INT >= Build.VERSION_CODES.S && SpeechRecognizer.isOnDeviceRecognitionAvailable(appContext)
@@ -75,11 +81,14 @@ class VoiceInputManager(
             if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.S && onDeviceAvailable) {
                 SpeechRecognizer.createOnDeviceSpeechRecognizer(appContext)
             } else null
+        VoiceRecognitionBackend.SHERPA_PRIMARY,
+        VoiceRecognitionBackend.FUSED_ANDROID_SHERPA,
         VoiceRecognitionBackend.SHERPA_PRIMARY_REQUIRED,
         VoiceRecognitionBackend.UNAVAILABLE -> null
     }
 
     private var pipeSession: VoiceAudioPipeSession? = null
+    private var turnAudioCapture: VoiceTurnAudioCapture? = null
     private var activeTurnId: String? = null
     private var activeTurnStartedAtMs: Long = 0L
 
@@ -144,7 +153,7 @@ class VoiceInputManager(
             } else emptyList()
 
             val turnId = activeTurnId ?: UUID.randomUUID().toString()
-            val result = VoiceRecognitionResult(
+            val androidResult = VoiceRecognitionResult(
                 turnId = turnId,
                 text = hypotheses.firstOrNull().orEmpty(),
                 hypotheses = hypotheses,
@@ -156,10 +165,28 @@ class VoiceInputManager(
                 startedAtMs = activeTurnStartedAtMs,
                 finalizedAtMs = System.currentTimeMillis(),
             )
+            val capturedPcm = turnAudioCapture?.snapshot().orEmpty()
+            val biasingStrings = if (secondPassCoordinator != null) biasingStringsProvider() else emptyList()
+            val knownConfusion = personalConfusionProvider(androidResult.text)
+            val secondPassDecision = secondPassCoordinator?.shouldRun(androidResult, knownConfusion)
+
             cleanupTurn(preserveCapture = true)
-            listening.set(false)
-            callback.onListeningChanged(false)
-            callback.onFinalResult(result)
+
+            if (secondPassCoordinator != null && secondPassDecision?.run == true && capturedPcm.isNotEmpty()) {
+                secondPassExecutor.execute {
+                    val resolved = runCatching {
+                        secondPassCoordinator.resolve(
+                            android = androidResult,
+                            pcm16 = capturedPcm,
+                            biasingStrings = biasingStrings,
+                            knownPersonalConfusion = knownConfusion,
+                        )
+                    }.getOrDefault(androidResult)
+                    mainHandler.post { finishRecognition(resolved) }
+                }
+            } else {
+                finishRecognition(androidResult)
+            }
         }
 
         override fun onPartialResults(partialResults: Bundle?) {
@@ -200,10 +227,13 @@ class VoiceInputManager(
 
         val callerAudio = if (capability.callerAudioSupported) {
             try {
-                // If wake is already capturing this attaches to the same AudioRecord and obtains
-                // its rolling pre-buffer. VoiceAudioArbiter.start() is idempotent while active.
+                // If wake is already capturing, start() is idempotent and both the turn evidence
+                // buffer and recognizer pipe attach to the same AudioRecord/pre-roll.
+                check(audioArbiter.start()) { "voice_audio_capture_unavailable" }
+                turnAudioCapture = VoiceTurnAudioCapture(audioArbiter)
                 audioArbiter.openRecognitionPipe().also { pipeSession = it }.readFd
             } catch (_: Throwable) {
+                cleanupTurn(preserveCapture = true)
                 callback.onError(ERROR_AUDIO_ARBITER_UNAVAILABLE)
                 return
             }
@@ -223,9 +253,16 @@ class VoiceInputManager(
     /** Reset only recognizer-owned turn resources. Never tears down caller-audio capture. */
     private fun prepareRecognizerForNewTurn() {
         closePipeOnly()
+        closeTurnAudioCapture()
         if (listening.get()) runCatching { recognizer?.cancel() }
         listening.set(false)
         activeTurnId = null
+    }
+
+    private fun finishRecognition(result: VoiceRecognitionResult) {
+        listening.set(false)
+        callback.onListeningChanged(false)
+        callback.onFinalResult(result)
     }
 
     private fun buildRecognitionIntent(audioSource: ParcelFileDescriptor?): Intent =
@@ -270,6 +307,7 @@ class VoiceInputManager(
 
     private fun stopListeningOnMain(notify: Boolean, preserveCapture: Boolean) {
         closePipeOnly()
+        closeTurnAudioCapture()
         runCatching { recognizer?.stopListening() }
         if (capability.callerAudioSupported && !preserveCapture) {
             audioArbiter.stopCapture(clearPreRoll = false)
@@ -284,8 +322,14 @@ class VoiceInputManager(
         pipeSession = null
     }
 
+    private fun closeTurnAudioCapture() {
+        turnAudioCapture?.close()
+        turnAudioCapture = null
+    }
+
     private fun cleanupTurn(preserveCapture: Boolean) {
         closePipeOnly()
+        closeTurnAudioCapture()
         if (capability.callerAudioSupported && !preserveCapture) {
             audioArbiter.stopCapture(clearPreRoll = false)
         }
@@ -297,6 +341,7 @@ class VoiceInputManager(
             stopListeningOnMain(notify = false, preserveCapture = false)
             recognizer?.destroy()
             audioArbiter.close()
+            secondPassExecutor.shutdownNow()
         }
     }
 
