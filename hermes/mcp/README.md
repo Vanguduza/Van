@@ -6,7 +6,7 @@ Hermes profile **`van`** is the sole agent runtime. Credentials are brokered thr
 
 | Server | Purpose | Credential model |
 |---|---|---|
-| `van_owner_runtime` | Deterministic owner-context readiness/graph/snapshot, typed resolution, research routing and action lifecycle verification | Local Hermes internal-control credential; fixed tool allowlist; no generic HTTP; no canonical-memory admission |
+| `van_owner_runtime` | Deterministic owner-context readiness/graph/lexical/hot-capsule/snapshot, typed resolution, research routing and action lifecycle verification | Local Hermes internal-control credential; fixed tool allowlist; no generic HTTP; no canonical-memory admission |
 | `van-gateway` | Owner auth, grants, Google planner, evidence, attention/reminders, health | Device-signed; no secret passthrough |
 | `filesystem` (scoped) | Registered project files | Path allowlist + Project Truth + grants |
 | `git` (scoped) | SHA/evidence/diff/write | Read default; writes require grant |
@@ -27,6 +27,8 @@ Allowed tools are deliberately narrow:
 - `runtime_status`
 - `resolve_command`
 - `context_graph_query`
+- `context_lexical_query`
+- `context_hot_capsule`
 - `context_readiness`
 - `context_snapshot`
 - `research_status`
@@ -38,7 +40,7 @@ Allowed tools are deliberately narrow:
 
 There is **no** generic HTTP/shell tool and no fact/edge canonical-admission tool. Hermes is not a truth authority. Any Hermes-originated memory candidate reaching the internal runtime API is forced to `MODEL_DERIVED + INFERRED`; owner/canonical promotion requires a separate trusted gateway/owner path.
 
-The context graph is a bounded temporal retrieval primitive, not an autonomous GraphRAG loop. Exact facts remain ahead of graph retrieval in the critical path; external research remains an escalation.
+The context graph is a bounded temporal retrieval primitive, not an autonomous GraphRAG loop. Deterministic lexical retrieval runs locally over current owner facts and graph edges without embeddings, model inference or a remote call. Hot-context capsules are revision-sealed, bounded caches of evidence references used to reduce repeated lookup latency; they are invalidated by context revision/expiry and are never a new truth store. Exact facts remain ahead of graph/lexical retrieval in the critical path; external research remains an escalation.
 
 ## Trading (van-trading-core)
 
