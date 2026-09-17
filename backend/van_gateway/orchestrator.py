@@ -250,6 +250,10 @@ class CommandOrchestrator:
             if truth.get("ok"):
                 truth_sha = str(truth.get("truth_sha") or "")
                 repo_sha = str(truth.get("repo_sha") or "")
+                # Preserve the repository's established top-level audit contract while
+                # also adding the richer Rev 3.1 structured project-truth evidence.
+                before["truth_sha"] = truth_sha
+                before["repo_sha"] = repo_sha or None
                 before["project_truth"] = {
                     "project_id": req.project_id,
                     "truth_sha": truth_sha,
