@@ -15,12 +15,15 @@ install -d -o root -g root -m 0700 "$SECRETS"
 install -d -o vati -g vati -m 0750 /var/lib/van-trading/evidence/automation
 install -d -o vati -g vati -m 0750 /var/lib/van-trading/automation/transient
 
+# Local Compose file-secrets are bind mounts and do not remap uid/gid.
+# Keep the parent secret directory root-only (0700), while making only these
+# individually mounted files read-only to their non-root container consumers.
 for f in postgres_admin_password n8n_db_password n8n_encryption_key n8n_runner_auth_token; do
   if [[ ! -s "$SECRETS/$f" ]]; then
     umask 077
     openssl rand -hex 32 > "$SECRETS/$f"
   fi
-  chown root:root "$SECRETS/$f"; chmod 0600 "$SECRETS/$f"
+  chown root:root "$SECRETS/$f"; chmod 0444 "$SECRETS/$f"
 done
 if [[ ! -s "$SECRETS/n8n-owner-password" ]]; then
   umask 077
@@ -54,8 +57,21 @@ docker compose --env-file "$ENVF" config >/dev/null
 docker compose --env-file "$ENVF" pull --quiet
 install -m 0644 "$HERE/../systemd/vati-automation.service" /etc/systemd/system/vati-automation.service
 systemctl daemon-reload
-systemctl enable --now vati-automation.service
-systemctl is-active --quiet vati-automation.service
+systemctl enable vati-automation.service
+started=0
+for attempt in 1 2 3 4; do
+  systemctl reset-failed vati-automation.service >/dev/null 2>&1 || true
+  if systemctl restart vati-automation.service && systemctl is-active --quiet vati-automation.service; then
+    started=1
+    break
+  fi
+  echo "automation fabric start attempt $attempt/4 failed; retrying after bounded delay" >&2
+  sleep 15
+done
+if [[ $started -ne 1 ]]; then
+  journalctl -u vati-automation.service -n 120 --no-pager >&2 || true
+  exit 51
+fi
 "$DEST/qualify-automation-runtime.sh"
 python3 "$DEST/provision-api.py" --base http://127.0.0.1:5678 --secrets-dir "$SECRETS"
 [[ -s "$SECRETS/n8n-hermes-api.key" ]] || { echo 'n8n Hermes API key missing' >&2; exit 52; }
