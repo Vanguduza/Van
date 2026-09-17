@@ -44,7 +44,7 @@ Validated 2026-09-15 in a clean repository environment after installing the decl
 | Google session export / broker bypass policy denial | PASS |
 | Hermes remains sole agent runtime | PASS |
 | Stitch live generation | PASS — authenticated `generate_screen_from_text` returned screen ID + HTML + image; token-free receipt recorded and VAN broker state is `READY` |
-| Gemini runtime credential canary | AUTH_REQUIRED — real Hermes `gemini-2.5-flash` one-shot failed before inference because no usable Gemini API credential exists; token-free receipt: `artifacts/google/gemini_runtime_live_canary.json` |
+| Gemini runtime credential canary | CAPACITY_LIMITED — dedicated restricted key installed; Hermes reports `gemini: logged in`; authenticated model discovery returned HTTP 200 / 50 models; real `gemini-3.6-flash` inference reached Google but returned `RESOURCE_EXHAUSTED` because prepaid credits are depleted. Receipt: `artifacts/google/gemini_runtime_auth_attestation.json` |
 
 ## Live VAN gateway pairing certification — 2026-09-16
 

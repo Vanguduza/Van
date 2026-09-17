@@ -35,7 +35,7 @@
 
 ## EXTERNALLY BLOCKED / REQUIRES LIVE CERTIFICATION
 
-- Google readiness is credential-plane-specific. Workspace OAuth and Stitch are `READY`; the Gemini runtime plane is currently `AUTH_REQUIRED` after a real Hermes canary found no dedicated API key. Consumer/Cloud capabilities retain their independently evidenced states.
+- Google readiness is credential-plane-specific. Workspace OAuth and Stitch are `READY`; the Gemini runtime plane is authenticated with a dedicated API-restricted key and is currently `CAPACITY_LIMITED` because project prepaid inference credits are depleted. Consumer/Cloud capabilities retain their independently evidenced states.
 - The delegated Antigravity worker is live-certified. Capacity/rate limits, if they recur, remain capability-scoped and may fall back to Jules without degrading other Google planes.
 - Notebook Enterprise / ADK-A2A require eligible owner-administered Google Cloud/Enterprise setup.
 - Live Hermes install is certified on `dial-hermes-control` (2026-09-15). Local Project Truth mounts for van/dial/dde/gtr/goat/aeci are resolved on this workstation. Physical Samsung certification, stable named Cloudflare hostname/token provisioning, `.riv` authoring, and production signing remain external gates.

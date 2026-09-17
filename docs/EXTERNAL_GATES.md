@@ -20,15 +20,15 @@ Resolved 2026-09-17: the canonical GitHub Actions workflow is live at `.github/w
 |---|---|---|
 | Canonical owner Google principal | Hermes-authenticated owner Google account | hashed principal registration + Hermes attestation import |
 | Google Workspace OAuth live | permanent Desktop OAuth + owner consent | READY — encrypted refresh credential installed; Gmail/Calendar/Drive/Contacts/Tasks live canaries all HTTP 200 |
-| Gemini runtime | dedicated Google-account-owned API/runtime credential | AUTH_REQUIRED — real Hermes `gemini-2.5-flash` canary found no usable `GOOGLE_API_KEY` / `GEMINI_API_KEY`; receipt: `artifacts/google/gemini_runtime_live_canary.json` |
-| Gemini Live | dedicated Gemini runtime credential + live endpoint canary | AUTH_REQUIRED — shared Gemini runtime credential plane is currently unavailable |
-| Deep Research | dedicated Gemini runtime credential + quota canary | AUTH_REQUIRED — shared Gemini runtime credential plane is currently unavailable |
+| Gemini runtime | dedicated Google-account-owned API/runtime credential + inference credits | CAPACITY_LIMITED — restricted `van-gemini-runtime` key installed; Hermes reports `gemini: logged in`; authenticated model discovery returned HTTP 200 / 50 models; `gemini-3.6-flash` inference returned `RESOURCE_EXHAUSTED` because prepaid credits are depleted. Receipt: `artifacts/google/gemini_runtime_auth_attestation.json` |
+| Gemini Live | authenticated Gemini runtime credential + live endpoint canary | CAPACITY_LIMITED — shared credential is authenticated and a bidi Live model is discoverable; live generation not promoted while project prepaid credits are depleted |
+| Deep Research | authenticated Gemini runtime credential + quota canary | CAPACITY_LIMITED — Deep Research models are visible through authenticated discovery; execution awaits restored project prepaid credits |
 | Gemini Notebook personal | owner Google session on Hermes | consumer capability CONFIGURED via attestation |
 | Gemini Notebook Enterprise | eligible Cloud/Enterprise setup | still EXTERNAL (cloud plane) |
 | Stitch | Google Cloud Stitch MCP credential plane | READY — authenticated live `generate_screen_from_text` canary passed; token-free receipt: `artifacts/google/stitch_live_attestation.json` |
 | Mixboard / Flow / AI Studio / Workspace Studio | owner Google session on Hermes | consumer capabilities CONFIGURED via attestation; per-capability live canary still required |
 | Jules | owner Google sign-in on Hermes | CONFIGURED via attestation; READY needs live worker receipt |
-| Nano Banana / Veo | dedicated Gemini runtime credential + quota canary | AUTH_REQUIRED — shared Gemini runtime credential plane is currently unavailable |
+| Nano Banana / Veo | authenticated Gemini runtime credential + quota canary | CAPACITY_LIMITED — image and Veo models are visible through authenticated discovery; generation awaits restored project prepaid credits |
 | Google ADK/A2A | owner-administered Cloud/runtime | still EXTERNAL (cloud plane) |
 | Android owner gateway authentication | ingress bearer + revocable device token + enrolled device HMAC | LIVE-CERTIFIED on schema 4 — single-use pairing, hash-only device token persistence, restart continuity, atomic revoke, and post-restart denial all passed |
 | Stable public HTTPS ingress | named Cloudflare Tunnel token + stable hostname | EXTERNAL — fail-closed installer/service ready; `trycloudflare.com` is rejected for production |

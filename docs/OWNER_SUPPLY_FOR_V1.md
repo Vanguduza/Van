@@ -6,7 +6,7 @@ VAN remains `0.5.0-dev`. Do **not** tag `v1.0` until every item below is green w
 
 | # | Item | Why it blocks | How to unblock |
 |---|---|---|---|
-| 1 | Dedicated Gemini API/runtime credential | Live Hermes canary failed closed with `AUTH_REQUIRED`; no usable `GOOGLE_API_KEY` / `GEMINI_API_KEY` exists in the VAN profile | Create a Google-account-owned Gemini/AI Studio API key, store it only in the VAN/Hermes secret plane, then rerun the retained live canary and record `READY` evidence |
+| 1 | Gemini API prepaid inference credits | Gemini family is authenticated on its dedicated runtime plane but `CAPACITY_LIMITED`; real `gemini-3.6-flash` inference reached Google and returned `RESOURCE_EXHAUSTED` because prepaid credits are depleted | Add/restore Gemini API prepaid credits for the project, then rerun live per-capability canaries and promote only successful surfaces to `READY` |
 | 2 | Stable named Cloudflare Tunnel token + HTTPS hostname | Physical Android cannot use loopback gateway | Provision a named tunnel mapped to `http://127.0.0.1:8787`; run the fail-closed installer/public health canary |
 | 3 | Physical Samsung device (USB) | No authorized host currently sees an ADB device | Plug in device, run `python tools/certification/device_cert_probe.py --install`, complete `docs/DEVICE_ACCEPTANCE_CHECKLIST.md` |
 | 4 | Artist `.riv` matching `visual-authority/rive_contract.json` **or** explicit Canvas interim accept | No authored VAN `.riv` is present | Deliver `.riv` **or** owner-sign Canvas interim in visual acceptance matrix |
