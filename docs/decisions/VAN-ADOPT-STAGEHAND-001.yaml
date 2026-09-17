@@ -1,0 +1,54 @@
+# Rev 1.3 §§365, 377-379, 418 — Stagehand adoption proposal. NOT owner-signed.
+decision_id: VAN-ADOPT-STAGEHAND-001
+schema_version: 1
+subject: Browserbase Stagehand semantic browser layer (local/CDP mode)
+blueprint_sections: ["4.2", "365", "377", "378", "379", "418"]
+
+licence: MIT
+licence_class: PERMISSIVE
+licence_note: Permissive; no owner-signed licence decision is required by stack-lock principle 5.
+
+intended_use:
+  - local/CDP mode behind the VAN Browser Gateway
+  - semantic observation, typed extraction and bounded interaction
+  - never a trading execution or authority surface
+
+mode_boundary:
+  default_production_mode: local_cdp
+  cloud_browserbase: separate_optional_external_gate_not_requested
+
+technical_boundary:
+  executes_live_orders: false
+  owner_authority: false
+  may_create_van_commands: false
+  may_elevate_action_class: false
+  semantic_output_trust: UNTRUSTED_EXTERNAL
+
+model_provider_policy:
+  # Rev 1.3 §418
+  provider_selection: explicitly_configured_only
+  credential_locus: gateway
+  model_self_selection: forbidden
+  page_content_may_change_model: forbidden
+  unbounded_model_agent_loop: forbidden
+  task_scoped_model_budget_required: true
+
+autonomy_ladder_boundary:
+  # Rev 1.2 review finding M3: L4/L5 are model-driven action selection.
+  # docs/SECURITY_POLICY.md states Hermes profile `van` is the sole agent runtime.
+  production_default_max_tier: L3
+  l4_act_requires: owner_approved_security_policy_amendment
+  l5_bounded_agent_requires: owner_approved_security_policy_amendment
+  rationale: >-
+    L3 is observe -> deterministic action, which keeps action selection deterministic and outside
+    an independent agent loop. L4/L5 place action selection inside the worker and therefore need
+    the Security Policy amendment in VAN-AMEND-SECURITY-POLICY-001 before production activation.
+
+observed_runtime:
+  design_time_observation: "4.1.0"
+  deployment_branch_pin: "4.1.0"
+  pin_status: UNPINNED_VERIFY_AT_ADOPTION
+
+owner_signature_status: PENDING
+owner_signed_at: null
+owner_signature_evidence_ref: null

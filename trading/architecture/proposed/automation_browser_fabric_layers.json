@@ -1,0 +1,81 @@
+{
+  "$schema_note": "Rev 1.3 §4 proposed stack-lock layers for the Automation & Browser Fabric. These are NOT admitted. Rev 1.3 §366: stack-lock mutation is blocked until the repository records the required owner-approved adoption decision. On approval these three objects move verbatim into trading/architecture/stack_lock.json::layers and trading/tests/test_stack_lock.py applies to them unchanged. Validated meanwhile by trading/tests/test_automation_browser_stack_proposal.py.",
+  "proposal_id": "VAN-STACKLOCK-AUTOMATION-BROWSER-001",
+  "proposal_status": "PENDING_OWNER",
+  "target_stack_lock_revision": "5.1.0",
+  "adoption_decision_refs": {
+    "integration_automation": "docs/decisions/VAN-ADOPT-N8N-001.yaml",
+    "semantic_browser": "docs/decisions/VAN-ADOPT-STAGEHAND-001.yaml",
+    "deterministic_browser": "docs/decisions/VAN-ADOPT-BROWSER-HARNESS-001.yaml"
+  },
+  "layers": [
+    {
+      "layer": "integration_automation",
+      "canonical": "n8n self-hosted on VAN Trading Core VM",
+      "package": "n8n (self-hosted container/runtime)",
+      "role": "event ingestion, integration plumbing, reusable automation and asynchronous workflow execution; may service T3 research tasks but is not in T0/T1 trading execution",
+      "adoption_phase": 7,
+      "executes_live_orders": false,
+      "latency_tier": "T2",
+      "licence": "Sustainable Use License",
+      "licence_class": "SOURCE_AVAILABLE",
+      "observed_version": "2.39.7 pinned by deploy/van-trading-core/automation/runtime.env.example; 2.39.6 observed at Rev 1.3 design time; verify current release and tested Trading Core pin at adoption",
+      "pin_status": "UNPINNED_VERIFY_AT_ADOPTION",
+      "constraints": [
+        "never in VATI T0 path",
+        "no live order submission, cancellation or position mutation",
+        "no risk/mandate/owner authority",
+        "no Project Truth authority",
+        "gateway-mediated consequential effects only",
+        "fully self-hosted on VAN Trading Core VM",
+        "owner-signed adoption decision required for Sustainable Use License / SOURCE_AVAILABLE classification",
+        "licence suitability must be re-reviewed if VAN is later offered to external customers or n8n is embedded as a customer-facing workflow service"
+      ],
+      "build_status": "gateway automation fabric implemented fail-closed; runtime readiness requires external-gate evidence"
+    },
+    {
+      "layer": "semantic_browser",
+      "canonical": "Browserbase Stagehand local/CDP mode behind VAN Browser Gateway",
+      "package": "@browserbasehq/stagehand",
+      "role": "semantic browser observation, typed extraction, adaptive interaction and bounded discovery; never trading execution authority",
+      "adoption_phase": 7,
+      "executes_live_orders": false,
+      "latency_tier": "T3",
+      "licence": "MIT",
+      "licence_class": "PERMISSIVE",
+      "observed_version": "4.1.0 pinned by deploy/van-trading-core/browser/package.json",
+      "pin_status": "UNPINNED_VERIFY_AT_ADOPTION",
+      "constraints": [
+        "local/CDP mode is the default VAN production mode",
+        "cloud Browserbase use is a separate optional external gate",
+        "semantic output is UNTRUSTED_EXTERNAL evidence, never owner authority",
+        "Stagehand cannot send, modify or cancel broker orders",
+        "secrets/cookies/session tokens never enter model prompts",
+        "production autonomy ladder capped at L3 until the Hermes execution boundary is amended"
+      ],
+      "build_status": "adapter implemented fail-closed; not yet VAN-certified"
+    },
+    {
+      "layer": "deterministic_browser",
+      "canonical": "browser-use/browser-harness pinned local CDP runtime behind VAN Browser Gateway",
+      "package": "browser-harness",
+      "role": "deterministic local browser actuator and CDP primitive layer",
+      "adoption_phase": 7,
+      "executes_live_orders": false,
+      "latency_tier": "T2",
+      "licence": "MIT",
+      "licence_class": "PERMISSIVE",
+      "observed_version": "0.1.13 observed at Rev 1.3 design time",
+      "pin_status": "UNPINNED_VERIFY_AT_ADOPTION",
+      "constraints": [
+        "no unrestricted MCP exposure to Hermes in production",
+        "runtime helper self-modification disabled in production",
+        "generated helpers are quarantined candidates until independently validated and admitted",
+        "browser cookies/session tokens remain secret references",
+        "no broker order or risk-authority route",
+        "production install uses an exact pin; upstream latest/self-update commands are forbidden in service startup"
+      ],
+      "build_status": "adapter implemented fail-closed; not yet VAN-certified"
+    }
+  ]
+}

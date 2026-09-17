@@ -37,6 +37,33 @@ Resolved 2026-09-17: the canonical GitHub Actions workflow is live at `.github/w
 | Owner visual acceptance | owner review | acceptance matrix |
 | Signed production release | production keystore | Gradle wiring + `android/keystore.properties.example` |
 
+## Automation & Browser Fabric gates
+
+Added for the Automation & Browser Fabric (Rev 1.3 §369). Every row starts `PENDING_LIVE`: repository-side code exists and fails closed, but no live runtime has been certified. Rev 1.3 §369: *no gate may become READY solely because code exists*. The Security Policy amendment (`docs/decisions/VAN-AMEND-SECURITY-POLICY-001.md`) and the adoption decisions in `docs/decisions/VAN-ADOPT-*.yaml` are `PENDING_OWNER`, so production activation is additionally owner-gated (Rev 1.3 §368).
+
+| Gate | Required proof | Repo-side readiness |
+|---|---|---|
+| n8n self-hosted runtime | pinned local instance + PostgreSQL + task runner + restart canary | PENDING_LIVE — compose stack, dedicated `van_n8n` database and bootstrap staged in `deploy/van-trading-core/automation/`; gateway client fails closed; `tools/certification/certify_automation_runtime.py` |
+| n8n workflow generation | novel goal → IR → compile → local create → synthetic execution → HOT reuse | PENDING_LIVE — deterministic IR/compiler/validator/admission implemented and unit-certified; live n8n create/execute unproven |
+| n8n security | clean/accepted security audit + network/filesystem boundary proof | PENDING_LIVE — static analyser, node allowlist and domain/SSRF policy implemented; live `n8n audit` unproven |
+| n8n backup/restore | isolated restore using DB + encryption key + HOT reconciliation | PENDING_LIVE — artifact lineage is VAN-owned and independent of n8n workflow IDs; restore drill unproven |
+| Automation webhook ingress | signed provider webhook + replay rejection + evidence receipt | PENDING_LIVE — `VAN_AUTOMATION_INGRESS_ENABLED` defaults false; dedupe/replay durable and unit-certified |
+| Standing automation | owner-authorized standing intent → event run → derived authority → verified result | PENDING_LIVE — derived-authority path implemented against `CommandAuthorityService` and unit-certified; live owner-signed standing intent unproven |
+| Stagehand local semantic browser | real local CDP attach + observe/extract + evidence pointer | PENDING_LIVE — adapter fails closed; production ladder capped at L3; `tools/certification/certify_browser_fabric.py` |
+| Browser Harness | real pinned harness + deterministic CDP action + evidence pointer | PENDING_LIVE — typed adapter surface implemented; no runtime installed or pinned by digest |
+| Browser authenticated profile | restart persistence without secret leakage + account identity proof | PENDING_LIVE — profile secrets are opaque references by construction; live restart/identity proof unproven |
+| Browser prompt-injection containment | adversarial page cannot escalate authority/exfiltrate secret | PENDING_LIVE — containment implemented and unit-certified against synthetic adversarial content; live page unproven |
+| Trading Core isolation | maximum certified automation/browser load does not violate VATI safety envelope | PENDING_LIVE — resource policy and pressure-tier scheduler implemented; measured load test requires the VM |
+| Browser→automation optimization | discovered stable API shadow-compares successfully before route promotion | PENDING_LIVE — migration metric recorded; promotion path requires live evidence |
+
+### Automation & Browser certification rules
+
+1. `CONFIGURED` is **not** `READY`, and code existing is not `CONFIGURED`.
+2. `READY` additionally requires a persisted canonical evidence pointer, a recorded runtime identity matching the dependency manifest, and `contains_secrets == false`.
+3. Browser cookies/session material never appear in evidence, logs, model prompts or workflow artifacts; presence of a restored session is not proof of readiness.
+4. n8n execution success is never owner success — an independent Gateway verifier decides.
+5. No gate here may be promoted while its owner decision in `docs/decisions/` is `PENDING`.
+
 ## Google certification rules
 
 1. `CONFIGURED` is **not** `READY`.

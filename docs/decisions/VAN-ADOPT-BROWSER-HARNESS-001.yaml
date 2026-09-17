@@ -1,0 +1,51 @@
+# Rev 1.3 §§365, 380-384, 416-417 — Browser Harness adoption proposal. NOT owner-signed.
+decision_id: VAN-ADOPT-BROWSER-HARNESS-001
+schema_version: 1
+subject: browser-use/browser-harness deterministic local CDP actuator
+blueprint_sections: ["4.3", "365", "380", "381", "382", "383", "384", "416", "417"]
+
+upstream_repository: browser-use/browser-harness
+package: browser-harness
+licence: MIT
+licence_class: PERMISSIVE
+
+intended_use:
+  - deterministic local CDP/browser actuator behind the VAN Browser Gateway
+  - typed narrow adapter surface only
+
+technical_boundary:
+  executes_live_orders: false
+  owner_authority: false
+  may_access_owner_signing_secret: false
+  unrestricted_mcp_to_hermes: forbidden
+  raw_cookie_dump: forbidden
+  raw_credential_extraction: forbidden
+  arbitrary_cdp_command: engineering_only_separate_surface
+
+self_modification_policy:
+  # Rev 1.3 §381. Upstream supports an editable agent workspace that can author helpers.
+  production_mode: PRODUCTION_ACTUATOR
+  production_runtime_helper_authoring: forbidden
+  production_admitted_helper_set: read_only
+  discovery_mode: DISCOVERY_QUARANTINE
+  quarantine_helper_execution_under_production_grant: forbidden
+  helper_promotion_requires: independent_validation_and_admission
+
+update_policy:
+  # Rev 1.3 §417
+  latest_tag_install: forbidden
+  upstream_self_update_commands_in_service_startup: forbidden
+  production_install: exact_pinned_version_or_commit_with_locked_dependencies
+
+observed_runtime:
+  design_time_observation: "0.1.13"
+  pin_status: UNPINNED_VERIFY_AT_ADOPTION
+  must_pin:
+    - exact release or commit
+    - dependency lock
+    - runtime Python
+    - cdp-use / fetch-use transitive versions
+
+owner_signature_status: PENDING
+owner_signed_at: null
+owner_signature_evidence_ref: null
