@@ -90,7 +90,9 @@ class ContentTrust(str, Enum):
 
 class OwnerApprovalProof(BaseModel):
     challenge_id: str
-    source_command_id: str
+    # Optional echo only. The authoritative source command ID is embedded server-side
+    # in the signed one-time challenge and is never trusted from the client.
+    source_command_id: str | None = None
     signature_b64: str
     algorithm: str = "ECDSA_P256_SHA256"
 
