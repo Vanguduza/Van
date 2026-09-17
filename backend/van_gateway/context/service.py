@@ -248,6 +248,7 @@ class OwnerContextService:
         requirements: list[ContextRequirement],
         *,
         graph_evidence_refs: list[str] | None = None,
+        lexical_evidence_refs: list[str] | None = None,
         live_state_refs: list[str] | None = None,
         policy_refs: list[str] | None = None,
         now_ms: int | None = None,
@@ -263,12 +264,17 @@ class OwnerContextService:
             "kernel_revision": kernel_revision,
             "fact_ids": fact_ids,
             "graph_evidence_refs": graph_evidence_refs or [],
+            "lexical_evidence_refs": lexical_evidence_refs or [],
             "live_state_refs": live_state_refs or [],
             "policy_refs": policy_refs or [],
             "compiled_at_ms": now_ms,
         }
         digest = self._digest(payload)
         snapshot = ContextSnapshot(snapshot_id=str(uuid.uuid4()), digest=digest, **payload)
+        retrieval_evidence = {
+            "graph": snapshot.graph_evidence_refs,
+            "lexical": snapshot.lexical_evidence_refs,
+        }
         await self.store.execute(
             """
             INSERT INTO context_snapshots(
@@ -278,7 +284,7 @@ class OwnerContextService:
             """,
             (
                 snapshot.snapshot_id, snapshot.command_id, snapshot.kernel_revision,
-                Store.dumps(snapshot.fact_ids), Store.dumps(snapshot.graph_evidence_refs),
+                Store.dumps(snapshot.fact_ids), Store.dumps(retrieval_evidence),
                 Store.dumps(snapshot.live_state_refs), Store.dumps(snapshot.policy_refs),
                 snapshot.compiled_at_ms, snapshot.digest,
             ),
