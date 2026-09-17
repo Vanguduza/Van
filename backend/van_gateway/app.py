@@ -28,6 +28,7 @@ from van_gateway.orchestrator import CommandOrchestrator
 from van_gateway.projects.router import ProjectRouter
 from van_gateway.reminders.service import ReminderService
 from van_gateway.reminders.timeparse import TimeParseError, parse_due_expression
+from van_gateway.runtime_api import OwnerRuntimeApi
 from van_gateway.storage.db import Store
 
 
@@ -94,6 +95,7 @@ def create_app() -> FastAPI:
     briefing = BriefingService(store, attention)
     reminders = ReminderService(store)
     decisions = DecisionService(store, attention)
+    owner_runtime = OwnerRuntimeApi(store, settings)
 
     google_transport = None
     google_oauth = None
@@ -129,6 +131,7 @@ def create_app() -> FastAPI:
     async def lifespan(_app: FastAPI):
         await store.migrate()
         await auth.load_persisted_secrets()
+        await owner_runtime.startup()
         yield
 
     app = FastAPI(title="VAN Gateway", version="0.5.0-dev", lifespan=lifespan)
@@ -139,11 +142,15 @@ def create_app() -> FastAPI:
     app.state.google_broker = google_broker
     app.state.google_router = google_router
     app.state.orchestrator = orchestrator
+    app.state.owner_runtime = owner_runtime
     app.state.decisions = decisions
     app.state.projects = projects
     app.state.reminders = reminders
+    app.include_router(owner_runtime.router)
 
     def internal_control_route(method: str, path: str) -> bool:
+        if path.startswith("/v1/runtime/"):
+            return True
         if method == "PUT" and path.startswith("/v1/projects/") and path.endswith("/truth"):
             return True
         if path in {
@@ -193,6 +200,7 @@ def create_app() -> FastAPI:
             degraded.set(__import__("van_gateway.models", fromlist=["DegradedCode"]).DegradedCode.HERMES_OFFLINE, True)
         gstatus = await google.status()
         mesh = await google_broker.mesh_status(workspace=gstatus)
+        runtime_status = await owner_runtime.status()
         configured = sum(1 for item in mesh["capabilities"] if item["state"] in {"READY", "CONFIGURED"})
         ready = sum(1 for item in mesh["capabilities"] if item["state"] == "READY")
         workspace = next(
@@ -208,6 +216,7 @@ def create_app() -> FastAPI:
             "ok": hermes_ok,
             "service": "van-gateway",
             "hermes": hermes_health,
+            "owner_runtime": runtime_status,
             "google": gstatus.model_dump(),
             "google_mesh": {
                 "principal": mesh["principal"],
@@ -235,7 +244,8 @@ def create_app() -> FastAPI:
             await auth.revoke(device_id)
         except AuthError as exc:
             raise HTTPException(status_code=404, detail=exc.message) from exc
-        return {"revoked": True, "device_id": device_id}
+        revoked_executions = await owner_runtime.actions.revoke_privileged_for_device(f"device:{device_id}")
+        return {"revoked": True, "device_id": device_id, "revoked_privileged_executions": revoked_executions}
 
     @app.post("/v1/commands")
     async def commands(req: CommandRequest):
