@@ -85,6 +85,34 @@ and is visible as two merge commits, so the branch **is** the proposed merge res
 requires CI to certify. It is not a claim that `main` already contains Rev 3.1 — it does not. Merge
 to `main` remains subject to the normal Project Truth process (§429 step 18).
 
+### 1.5 Merge-result certification finding (§410)
+
+§410 requires CI on the **actual proposed merge result**, not on an isolated
+owner-runtime branch. Doing that surfaced one regression that neither lineage shows alone:
+
+```text
+tests/scenarios/test_acceptance_scenarios.py::test_scenario_17_destructive_a4
+  origin/main                          PASS
+  gpt/rev3-1-owner-runtime-20260917    FAIL
+  this reconciled base                 FAIL (inherited)
+```
+
+Rev 3.1 tightened A4: `orchestrator.py` now denies a destructive command that does not
+resolve to an exact typed action, because a biometric approval must bind to an exact
+`action_id` and parameter digest. The free-text scenario `"wipe staging"` therefore returns
+`denied` where main returned `approval_required`.
+
+This is **stricter, not weaker** — the runtime is right and the main-era assertion was stale.
+The scenario has been updated to assert the denial and its reason, and a second case
+(`test_scenario_17b_typed_a4_reaches_owner_approval`) proves a typed A4 action still reaches
+the approval gate. Recorded here because it is a Rev 3.1 lineage behaviour change reconciled
+by this branch, not a Rev 1.3 change.
+
+Full suite on the reconciled base: **580 passed, 2 skipped**.
+`tests/hermes/test_profile_layout.py::test_install_profile_preserves_runtime_state_and_secrets`
+requires `rsync`, which the authoring container lacks; it fails identically before and after
+this branch's changes and passes where `rsync` is present.
+
 ---
 
 ## 2. Work-in-progress reconciliation
