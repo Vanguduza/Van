@@ -11,7 +11,14 @@ from van_gateway.action.service import ActionPolicyError, ActionRuntime
 from van_gateway.command.authority import CommandAuthorityError, CommandAuthorityService
 from van_gateway.command.resolver import TypedCommandResolver
 from van_gateway.config import Settings
-from van_gateway.context.models import ContextEdgeCandidate, ContextGraphQuery, ContextRequirement, OwnerFactCandidate
+from van_gateway.context.models import (
+    ContextEdgeCandidate,
+    ContextGraphQuery,
+    ContextRequirement,
+    EpistemicState,
+    OwnerFactCandidate,
+    SourceTrust,
+)
 from van_gateway.context.service import ContextAdmissionError, OwnerContextService
 from van_gateway.google.control import GoogleControlAuthError, verify_internal_control
 from van_gateway.models import PrincipalType
@@ -45,8 +52,6 @@ class ActionBeginBody(BaseModel):
     idempotency_key: str
     parameters: dict[str, Any] = Field(default_factory=dict)
     snapshot_id: str | None = None
-    # Compatibility fields retained in the wire schema, but ignored for owner
-    # authority. The gateway derives both from the signed command ledger.
     owner_approved: bool = False
     command_age_seconds: int = 0
 
@@ -59,10 +64,10 @@ class ActionSubmittedBody(BaseModel):
 class OwnerRuntimeApi:
     """Deterministic Rev 3.1 services exposed only to Hermes internal control.
 
-    This is deliberately not an agent loop. Hermes profile ``van`` remains the
-    sole planner/reasoner. The gateway owns canonical context, typed fast-path
-    resolution, signed-command authority, action policy, verification ledgers
-    and provider credentials.
+    Hermes profile ``van`` is the sole planner/reasoner, but it is not a truth
+    authority. Runtime memory writes from this surface are forced to
+    MODEL_DERIVED + INFERRED; trusted/canonical admission must occur through a
+    non-model owner/gateway authority path.
     """
 
     def __init__(self, store: Store, settings: Settings) -> None:
@@ -89,6 +94,11 @@ class OwnerRuntimeApi:
             code = 503 if exc.code == "internal_control_token_unconfigured" else 403
             raise HTTPException(status_code=code, detail=exc.code) from exc
 
+    @staticmethod
+    def _require_hermes_memory_candidate(authority: EpistemicState, source_trust: SourceTrust) -> None:
+        if authority != EpistemicState.INFERRED or source_trust != SourceTrust.MODEL_DERIVED:
+            raise HTTPException(status_code=403, detail="hermes_context_admission_must_be_inferred_model_derived")
+
     async def startup(self) -> None:
         await install_builtin_actions(self.actions)
 
@@ -96,6 +106,7 @@ class OwnerRuntimeApi:
         action_count_row = await self.store.fetchone("SELECT COUNT(*) AS n FROM action_definitions WHERE enabled=1")
         return {
             "hermes_is_sole_agent_runtime": True,
+            "hermes_is_truth_authority": False,
             "context_kernel_revision": await self.context.kernel_revision(),
             "enabled_actions": int(action_count_row["n"]) if action_count_row is not None else 0,
             "resolver_version": "rev3.1.1",
@@ -119,6 +130,7 @@ class OwnerRuntimeApi:
         @router.post("/context/facts")
         async def admit_fact(body: OwnerFactCandidate, x_van_internal_token: str | None = Header(default=None)):
             self._require_internal(x_van_internal_token)
+            self._require_hermes_memory_candidate(body.authority, body.source_trust)
             try:
                 return await self.context.admit_fact(body)
             except ContextAdmissionError as exc:
@@ -127,6 +139,7 @@ class OwnerRuntimeApi:
         @router.post("/context/edges")
         async def admit_edge(body: ContextEdgeCandidate, x_van_internal_token: str | None = Header(default=None)):
             self._require_internal(x_van_internal_token)
+            self._require_hermes_memory_candidate(body.authority, body.source_trust)
             try:
                 revision = await self.context.admit_edge(body)
                 return {"edge_id": body.edge_id, "revision": revision}
