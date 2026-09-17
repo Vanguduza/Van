@@ -1,0 +1,24 @@
+[Unit]
+Description=VAN self-hosted automation fabric (n8n + isolated PostgreSQL + task runner)
+After=docker.service network-online.target
+Requires=docker.service
+Wants=network-online.target
+
+[Service]
+Type=oneshot
+RemainAfterExit=yes
+EnvironmentFile=/opt/van-trading/config/automation.env
+WorkingDirectory=/opt/van-trading/automation
+ExecStart=/usr/bin/docker compose --env-file /opt/van-trading/config/automation.env up -d --remove-orphans
+ExecStartPost=/opt/van-trading/automation/qualify-automation-runtime.sh
+ExecStop=/usr/bin/docker compose --env-file /opt/van-trading/config/automation.env down
+TimeoutStartSec=900
+TimeoutStopSec=180
+CPUWeight=25
+IOWeight=25
+MemoryAccounting=true
+CPUAccounting=true
+TasksAccounting=true
+
+[Install]
+WantedBy=multi-user.target

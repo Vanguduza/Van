@@ -1,0 +1,167 @@
+name: van-automation
+
+services:
+  postgres:
+    image: postgres:${POSTGRES_VERSION:?POSTGRES_VERSION required}
+    restart: unless-stopped
+    environment:
+      POSTGRES_USER: postgres
+      POSTGRES_PASSWORD_FILE: /run/secrets/postgres_admin_password
+      PGDATA: /var/lib/postgresql/data/pgdata
+    secrets:
+      - postgres_admin_password
+      - n8n_db_password
+    volumes:
+      - n8n_postgres_data:/var/lib/postgresql/data
+      - ./postgres/init/01-create-n8n-db.sh:/docker-entrypoint-initdb.d/01-create-n8n-db.sh:ro
+    networks:
+      - van_automation_net
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U postgres -d postgres"]
+      interval: 10s
+      timeout: 5s
+      retries: 12
+      start_period: 20s
+    security_opt:
+      - no-new-privileges:true
+    mem_limit: ${N8N_POSTGRES_MEMORY_LIMIT:-1024m}
+    cpus: "${N8N_POSTGRES_CPU_LIMIT:-0.35}"
+    pids_limit: 256
+
+  n8n:
+    image: docker.n8n.io/n8nio/n8n:${N8N_VERSION:?N8N_VERSION required}
+    restart: unless-stopped
+    depends_on:
+      postgres:
+        condition: service_healthy
+    entrypoint: ["/bin/sh", "-c"]
+    command:
+      - |
+        export N8N_RUNNERS_AUTH_TOKEN="$$(cat /run/secrets/n8n_runner_auth_token)"
+        exec /sbin/tini -- /docker-entrypoint.sh
+    environment:
+      DB_TYPE: postgresdb
+      DB_POSTGRESDB_HOST: postgres
+      DB_POSTGRESDB_PORT: "5432"
+      DB_POSTGRESDB_DATABASE: van_n8n
+      DB_POSTGRESDB_USER: van_n8n
+      DB_POSTGRESDB_PASSWORD_FILE: /run/secrets/n8n_db_password
+      N8N_ENCRYPTION_KEY_FILE: /run/secrets/n8n_encryption_key
+      N8N_RUNNERS_MODE: external
+      N8N_RUNNERS_BROKER_LISTEN_ADDRESS: 0.0.0.0
+      N8N_HOST: 127.0.0.1
+      N8N_PORT: "5678"
+      N8N_LISTEN_ADDRESS: 0.0.0.0
+      N8N_PROTOCOL: http
+      N8N_EDITOR_BASE_URL: http://127.0.0.1:5678/
+      WEBHOOK_URL: https://${VAN_PUBLIC_HOST:?VAN_PUBLIC_HOST required}/
+      N8N_ENDPOINT_WEBHOOK: automation-webhook
+      N8N_ENDPOINT_WEBHOOK_TEST: automation-webhook-test
+      N8N_ENDPOINT_WEBHOOK_WAIT: automation-webhook-wait
+      N8N_PROXY_HOPS: "1"
+      GENERIC_TIMEZONE: ${VAN_TIMEZONE:-Africa/Harare}
+      TZ: ${VAN_TIMEZONE:-Africa/Harare}
+      EXECUTIONS_DATA_PRUNE: "true"
+      EXECUTIONS_DATA_MAX_AGE: "168"
+      EXECUTIONS_DATA_PRUNE_MAX_COUNT: "10000"
+      EXECUTIONS_TIMEOUT: "900"
+      EXECUTIONS_TIMEOUT_MAX: "3600"
+      N8N_CONCURRENCY_PRODUCTION_LIMIT: "${N8N_CONCURRENCY_LIMIT:-1}"
+      N8N_LOG_LEVEL: info
+      N8N_LOG_OUTPUT: console
+      N8N_METRICS: "true"
+      N8N_DIAGNOSTICS_ENABLED: "false"
+      N8N_VERSION_NOTIFICATIONS_ENABLED: "false"
+      N8N_TEMPLATES_ENABLED: "false"
+      N8N_PERSONALIZATION_ENABLED: "false"
+      N8N_COMMUNITY_PACKAGES_ENABLED: "false"
+      N8N_UNVERIFIED_PACKAGES_ENABLED: "false"
+      N8N_BLOCK_ENV_ACCESS_IN_NODE: "true"
+      N8N_BLOCK_FILE_ACCESS_TO_N8N_FILES: "true"
+      N8N_RESTRICT_FILE_ACCESS_TO: /files
+      N8N_ENFORCE_SETTINGS_FILE_PERMISSIONS: "true"
+      N8N_GIT_NODE_DISABLE_BARE_REPOS: "true"
+      N8N_GIT_NODE_ENABLE_HOOKS: "false"
+      N8N_SSRF_PROTECTION_ENABLED: "true"
+      N8N_SSRF_BLOCKED_IP_RANGES: default,100.64.0.0/10
+      NODES_EXCLUDE: '["n8n-nodes-base.executeCommand","n8n-nodes-base.readWriteFile"]'
+    secrets:
+      - n8n_db_password
+      - n8n_encryption_key
+      - n8n_runner_auth_token
+    volumes:
+      - n8n_state:/home/node/.n8n
+      - n8n_transient:/files
+    ports:
+      - "127.0.0.1:5678:5678"
+    networks:
+      - van_automation_net
+      - van_automation_egress
+    healthcheck:
+      test: ["CMD-SHELL", "wget -qO- http://127.0.0.1:5678/healthz >/dev/null || exit 1"]
+      interval: 10s
+      timeout: 5s
+      retries: 18
+      start_period: 45s
+    security_opt:
+      - no-new-privileges:true
+    mem_limit: ${N8N_MEMORY_LIMIT:-1536m}
+    cpus: "${N8N_CPU_LIMIT:-0.60}"
+    pids_limit: 256
+
+  n8n-runner:
+    image: n8nio/runners:${N8N_VERSION:?N8N_VERSION required}
+    restart: unless-stopped
+    depends_on:
+      n8n:
+        condition: service_healthy
+    entrypoint: ["/bin/sh", "-c"]
+    command:
+      - |
+        export N8N_RUNNERS_AUTH_TOKEN="$$(cat /run/secrets/n8n_runner_auth_token)"
+        exec tini -- /usr/local/bin/task-runner-launcher javascript python
+    environment:
+      N8N_RUNNERS_TASK_BROKER_URI: http://n8n:5679
+      N8N_RUNNERS_AUTO_SHUTDOWN_TIMEOUT: "15"
+      N8N_RUNNERS_MAX_CONCURRENCY: "${N8N_RUNNER_CONCURRENCY:-1}"
+      N8N_RUNNERS_LAUNCHER_LOG_LEVEL: info
+      NO_COLOR: "1"
+    secrets:
+      - n8n_runner_auth_token
+    networks:
+      - van_automation_net
+    healthcheck:
+      test: ["CMD-SHELL", "kill -0 1"]
+      interval: 15s
+      timeout: 5s
+      retries: 12
+      start_period: 20s
+    security_opt:
+      - no-new-privileges:true
+    mem_limit: ${N8N_RUNNER_MEMORY_LIMIT:-512m}
+    cpus: "${N8N_RUNNER_CPU_LIMIT:-0.25}"
+    pids_limit: 128
+
+networks:
+  van_automation_net:
+    name: van_automation_net
+    internal: true
+  van_automation_egress:
+    name: van_automation_egress
+
+volumes:
+  n8n_postgres_data:
+    name: van_n8n_postgres_data
+  n8n_state:
+    name: van_n8n_state
+  n8n_transient:
+    name: van_n8n_transient
+secrets:
+  postgres_admin_password:
+    file: ${VAN_AUTOMATION_SECRETS_DIR:?VAN_AUTOMATION_SECRETS_DIR required}/postgres_admin_password
+  n8n_db_password:
+    file: ${VAN_AUTOMATION_SECRETS_DIR:?VAN_AUTOMATION_SECRETS_DIR required}/n8n_db_password
+  n8n_encryption_key:
+    file: ${VAN_AUTOMATION_SECRETS_DIR:?VAN_AUTOMATION_SECRETS_DIR required}/n8n_encryption_key
+  n8n_runner_auth_token:
+    file: ${VAN_AUTOMATION_SECRETS_DIR:?VAN_AUTOMATION_SECRETS_DIR required}/n8n_runner_auth_token

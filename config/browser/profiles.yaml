@@ -1,0 +1,18 @@
+schema_version: 1
+profiles:
+  public_research:
+    persistence: ephemeral
+    authentication: none
+    mutation: forbidden
+    download_policy: evidence_scoped
+  authenticated_owner:
+    persistence: managed
+    authentication: external_secret_reference
+    mutation: gateway_authorized_only
+    download_policy: evidence_scoped
+runtime:
+  profile_root: /var/lib/van-trading/browser/profiles
+  download_root: /var/lib/van-trading/browser/downloads
+  session_leases_required: true
+  raw_cookie_export: forbidden
+  raw_credential_export: forbidden
