@@ -2,6 +2,7 @@ from __future__ import annotations
 
 import json
 import time
+from enum import Enum
 from typing import Any
 
 from pydantic import BaseModel
@@ -13,6 +14,17 @@ from van_gateway.storage.db import Store
 
 class CommandAuthorityError(ValueError):
     pass
+
+
+class AuthoritySource(str, Enum):
+    """Where a sealed authority record came from (Rev 1.3 §394).
+
+    ``OWNER_COMMAND`` is the pre-existing behavior and stays the default so
+    records serialized before this field existed still validate.
+    """
+
+    OWNER_COMMAND = "OWNER_COMMAND"
+    STANDING_AUTOMATION = "STANDING_AUTOMATION"
 
 
 class CommandAuthorityRecord(BaseModel):
@@ -32,6 +44,12 @@ class CommandAuthorityRecord(BaseModel):
     owner_approved: bool = False
     turn_id: str | None = None
     sealed_at_unix_ms: int
+    # Rev 1.3 §394 — optional provenance, defaulted so old records remain valid.
+    # ``device_id`` deliberately stays required: it is the standing-automation
+    # revocation root (§392) and must not become nullable to accommodate automation.
+    authority_source: AuthoritySource = AuthoritySource.OWNER_COMMAND
+    source_authority_id: str | None = None
+    source_command_id: str | None = None
 
 
 _RANK = {ActionClass.A1: 1, ActionClass.A2: 2, ActionClass.A3: 3, ActionClass.A4: 4, ActionClass.A5: 5}

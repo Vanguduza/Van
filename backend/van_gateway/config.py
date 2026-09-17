@@ -53,6 +53,32 @@ class Settings(BaseSettings):
     exa_egress_enabled: bool = False
     exa_timeout_seconds: float = 20.0
 
+    # Rev 1.3 Automation & Browser Fabric. Every switch below defaults OFF:
+    # §368 permits repository-side code before the owner security amendment only
+    # when it is fail-closed behind disabled feature gates, and §365 makes n8n
+    # adoption, egress, ingress and browser attachment owner-gated decisions.
+    automation_enabled: bool = False
+    automation_ingress_enabled: bool = False
+    automation_egress_enabled: bool = False
+    automation_n8n_base_url: str = "http://127.0.0.1:5678/api/v1"
+    automation_n8n_api_key: str = ""
+    automation_n8n_expected_version: str = ""
+    automation_grant_signing_key: str = ""  # MACs run capability grants (§160)
+    automation_grant_ttl_seconds: int = 300
+    automation_timeout_seconds: float = 15.0
+    automation_max_concurrency: int = 1  # §13 — start conservative, raise on measurement
+
+    browser_enabled: bool = False
+    browser_harness_base_url: str = "http://127.0.0.1:9141"
+    browser_harness_expected_version: str = ""
+    browser_stagehand_base_url: str = "http://127.0.0.1:9140"
+    browser_stagehand_expected_version: str = ""
+    # §418 — the provider is configured, never chosen by a model or page content.
+    browser_stagehand_model_provider: str = ""
+    browser_stagehand_model_name: str = ""
+    # Rev 1.2 review M3 / §378 — production stops at observe → deterministic action.
+    browser_semantic_max_tier: str = "L3"
+
     require_hermes_for_mutations: bool = True
     event_page_size: int = 100
 
