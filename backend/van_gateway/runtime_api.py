@@ -11,7 +11,7 @@ from van_gateway.action.service import ActionPolicyError, ActionRuntime
 from van_gateway.command.authority import CommandAuthorityError, CommandAuthorityService
 from van_gateway.command.resolver import TypedCommandResolver
 from van_gateway.config import Settings
-from van_gateway.context.models import ContextEdgeCandidate, ContextRequirement, OwnerFactCandidate
+from van_gateway.context.models import ContextEdgeCandidate, ContextGraphQuery, ContextRequirement, OwnerFactCandidate
 from van_gateway.context.service import ContextAdmissionError, OwnerContextService
 from van_gateway.google.control import GoogleControlAuthError, verify_internal_control
 from van_gateway.models import PrincipalType
@@ -133,6 +133,11 @@ class OwnerRuntimeApi:
             except ContextAdmissionError as exc:
                 raise HTTPException(status_code=409, detail=str(exc)) from exc
 
+        @router.post("/context/graph/query")
+        async def query_graph(body: ContextGraphQuery, x_van_internal_token: str | None = Header(default=None)):
+            self._require_internal(x_van_internal_token)
+            return await self.context.traverse_graph(body)
+
         @router.post("/context/readiness")
         async def readiness(body: ContextReadinessBody, x_van_internal_token: str | None = Header(default=None)):
             self._require_internal(x_van_internal_token)
@@ -160,7 +165,7 @@ class OwnerRuntimeApi:
         @router.delete("/context/scope/{scope}")
         async def erase_scope(scope: str, x_van_internal_token: str | None = Header(default=None)):
             self._require_internal(x_van_internal_token)
-            return {"scope": scope, "deleted_facts": await self.context.erase_scope(scope)}
+            return {"scope": scope, "deleted_items": await self.context.erase_scope(scope)}
 
         @router.post("/actions/begin")
         async def begin_action(body: ActionBeginBody, x_van_internal_token: str | None = Header(default=None)):
