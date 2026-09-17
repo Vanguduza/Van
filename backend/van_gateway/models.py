@@ -88,6 +88,12 @@ class ContentTrust(str, Enum):
     UNTRUSTED = "UNTRUSTED"
 
 
+class OwnerApprovalProof(BaseModel):
+    challenge_id: str
+    signature_b64: str
+    algorithm: str = "ECDSA_P256_SHA256"
+
+
 class CommandRequest(BaseModel):
     command_id: str
     idempotency_key: str
@@ -97,7 +103,9 @@ class CommandRequest(BaseModel):
     text: str
     action_class: ActionClass = ActionClass.A1
     project_id: str | None = None
+    # Deprecated compatibility field. A non-empty string confers no authority.
     approval_token: str | None = None
+    approval_proof: OwnerApprovalProof | None = None
     client_context: dict[str, Any] = Field(default_factory=dict)
     context_trust: ContentTrust = ContentTrust.CONVERSATION
     signature_version: int = 1
@@ -121,6 +129,11 @@ class CommandResult(BaseModel):
     hermes_run_id: str | None = None
     degraded: list[str] = Field(default_factory=list)
     requires_approval: bool = False
+    approval_challenge_id: str | None = None
+    approval_challenge: str | None = None
+    approval_expires_at_unix: int | None = None
+    resolved_action_id: str | None = None
+    effective_action_class: ActionClass | None = None
     evidence_id: str | None = None
     execution_id: str | None = None
     context_snapshot_id: str | None = None
