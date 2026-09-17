@@ -108,6 +108,7 @@ class ContextSnapshot(BaseModel):
     kernel_revision: int
     fact_ids: list[str]
     graph_evidence_refs: list[str] = Field(default_factory=list)
+    lexical_evidence_refs: list[str] = Field(default_factory=list)
     live_state_refs: list[str] = Field(default_factory=list)
     policy_refs: list[str] = Field(default_factory=list)
     compiled_at_ms: int
