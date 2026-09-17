@@ -19,6 +19,7 @@ import com.dial.van.voice.VoiceInputCallback
 import com.dial.van.voice.VoiceInputManager
 import com.dial.van.voice.VoiceRecognitionResult
 import com.dial.van.voice.VoiceSessionCoordinator
+import com.dial.van.voice.WakeAcknowledgementManager
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.SupervisorJob
@@ -37,6 +38,8 @@ class VanApplication : Application(), VoiceInputCallback, TtsOutputCallback {
     lateinit var degradedModeStore: DegradedModeStore
         private set
     lateinit var personalSpeechModel: PersonalSpeechModel
+        private set
+    lateinit var wakeAcknowledgement: WakeAcknowledgementManager
         private set
     lateinit var voiceInput: VoiceInputManager
         private set
@@ -60,6 +63,7 @@ class VanApplication : Application(), VoiceInputCallback, TtsOutputCallback {
         notificationPolicyStore = NotificationPolicyStore(this)
         degradedModeStore = DegradedModeStore()
         personalSpeechModel = PersonalSpeechModel(this)
+        wakeAcknowledgement = WakeAcknowledgementManager(this)
         voiceUi = VanVoiceUiStore()
         gatewayClient = VanGatewayClient(this)
         commandController = VanCommandController(gatewayClient, appScope)
