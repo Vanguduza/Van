@@ -190,8 +190,10 @@ async def test_v2_signature_binds_voice_provenance_and_canonical_context(runtime
     assert sealed["kernel_revision"] == row["kernel_revision"]
     assert sealed["policy_refs"] == [
         "security-policy:A1-A5",
-        "action-class:A1",
+        "action-class:signed:A1",
+        "action-class:effective:A1",
         "principal:OWNER_DEVICE",
+        "resolver:rev3.1.1",
     ]
     assert metadata["client_context_authoritative"] is False
     assert metadata["context_capsule_revision"] == 7
