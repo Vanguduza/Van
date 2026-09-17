@@ -32,6 +32,13 @@ async def test_google_migration_and_principal_hash(tmp_path):
     assert len(raw["subject_hash"]) == 64
 
 
+def test_stitch_registry_uses_programmatic_cloud_plane():
+    registry = GoogleCapabilityRegistry(registry_path())
+    stitch = registry.get("stitch")
+    assert stitch.credential_plane.value == "cloud_service"
+    assert stitch.public_api is True
+
+
 @pytest.mark.asyncio
 async def test_consumer_capability_requires_canonical_principal(tmp_path):
     store = Store(str(tmp_path / "mesh.sqlite3")); await store.migrate()
