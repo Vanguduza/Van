@@ -8,7 +8,7 @@ from typing import Any, AsyncIterator
 
 import aiosqlite
 
-SCHEMA_VERSION = 4
+SCHEMA_VERSION = 5
 
 MIGRATIONS: dict[int, str] = {
     1: """
@@ -191,6 +191,39 @@ MIGRATIONS: dict[int, str] = {
     ALTER TABLE devices ADD COLUMN encrypted_secret TEXT;
     """,
     4: """
+    ALTER TABLE devices ADD COLUMN access_token_hash TEXT;
+
+    CREATE UNIQUE INDEX IF NOT EXISTS idx_devices_access_token_hash
+      ON devices(access_token_hash)
+      WHERE access_token_hash IS NOT NULL;
+
+    CREATE TABLE IF NOT EXISTS pairing_tickets (
+      ticket_hash TEXT PRIMARY KEY,
+      label TEXT,
+      expires_at_unix INTEGER NOT NULL,
+      used_at_unix INTEGER,
+      created_at_unix INTEGER NOT NULL
+    );
+
+    CREATE INDEX IF NOT EXISTS idx_pairing_tickets_expiry
+      ON pairing_tickets(expires_at_unix, used_at_unix);
+    """,
+    5: """
+    CREATE UNIQUE INDEX IF NOT EXISTS idx_devices_access_token_hash
+      ON devices(access_token_hash)
+      WHERE access_token_hash IS NOT NULL;
+
+    CREATE TABLE IF NOT EXISTS pairing_tickets (
+      ticket_hash TEXT PRIMARY KEY,
+      label TEXT,
+      expires_at_unix INTEGER NOT NULL,
+      used_at_unix INTEGER,
+      created_at_unix INTEGER NOT NULL
+    );
+
+    CREATE INDEX IF NOT EXISTS idx_pairing_tickets_expiry
+      ON pairing_tickets(expires_at_unix, used_at_unix);
+
     CREATE TABLE IF NOT EXISTS runtime_meta (
       key TEXT PRIMARY KEY,
       value TEXT NOT NULL,
@@ -347,6 +380,21 @@ class Store:
             await db.execute("PRAGMA foreign_keys = ON")
             yield db
 
+    @staticmethod
+    async def _ensure_access_token_column(db: aiosqlite.Connection) -> None:
+        """Converge databases that already recorded either historical v4 migration.
+
+        VATI v4 introduced ``devices.access_token_hash`` and pairing tickets while
+        the parallel Rev 3.1 lineage used v4 for owner-runtime tables.  A database
+        may therefore legitimately report schema version 4 with either shape.
+        Version 5 heals the missing VATI column before creating indexes/tables.
+        """
+        cur = await db.execute("PRAGMA table_info(devices)")
+        columns = {str(row["name"]) for row in await cur.fetchall()}
+        if "access_token_hash" not in columns:
+            await db.execute("ALTER TABLE devices ADD COLUMN access_token_hash TEXT")
+            await db.commit()
+
     async def migrate(self) -> None:
         async with self.connection() as db:
             await db.execute(
@@ -364,6 +412,8 @@ class Store:
             for version in sorted(MIGRATIONS):
                 if version <= current:
                     continue
+                if version == 5:
+                    await self._ensure_access_token_column(db)
                 await db.executescript(MIGRATIONS[version])
                 await db.execute(
                     "INSERT INTO schema_migrations(version, applied_at_unix) VALUES (?, ?)",
