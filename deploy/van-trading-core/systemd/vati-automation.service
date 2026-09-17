@@ -3,6 +3,8 @@ Description=VAN self-hosted automation fabric (n8n + isolated PostgreSQL + task 
 After=docker.service network-online.target
 Requires=docker.service
 Wants=network-online.target
+StartLimitIntervalSec=900
+StartLimitBurst=4
 
 [Service]
 Type=oneshot
@@ -14,6 +16,8 @@ ExecStartPost=/opt/van-trading/automation/qualify-automation-runtime.sh
 ExecStop=/usr/bin/docker compose --env-file /opt/van-trading/config/automation.env down
 TimeoutStartSec=900
 TimeoutStopSec=180
+Restart=on-failure
+RestartSec=15
 CPUWeight=25
 IOWeight=25
 MemoryAccounting=true
