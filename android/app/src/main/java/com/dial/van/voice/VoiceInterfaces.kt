@@ -71,13 +71,12 @@ class VoiceInputManager(
 
     private val recognizer: SpeechRecognizer? = when (capability.backend) {
         VoiceRecognitionBackend.ANDROID_ON_DEVICE_CALLER_AUDIO,
-        VoiceRecognitionBackend.ANDROID_ON_DEVICE_DIRECT_MIC,
-        -> if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.S && onDeviceAvailable) {
-            SpeechRecognizer.createOnDeviceSpeechRecognizer(appContext)
-        } else null
+        VoiceRecognitionBackend.ANDROID_ON_DEVICE_DIRECT_MIC ->
+            if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.S && onDeviceAvailable) {
+                SpeechRecognizer.createOnDeviceSpeechRecognizer(appContext)
+            } else null
         VoiceRecognitionBackend.SHERPA_PRIMARY_REQUIRED,
-        VoiceRecognitionBackend.UNAVAILABLE,
-        -> null
+        VoiceRecognitionBackend.UNAVAILABLE -> null
     }
 
     private var pipeSession: VoiceAudioPipeSession? = null
@@ -95,8 +94,6 @@ class VoiceInputManager(
         override fun onBufferReceived(buffer: ByteArray?) = Unit
 
         override fun onEndOfSpeech() {
-            // Caller-fed sessions terminate when their write side closes. Closing here preserves
-            // the recognizer's endpoint while preventing it from waiting forever on an open pipe.
             closePipeOnly()
             listening.set(false)
             callback.onListeningChanged(false)
@@ -207,8 +204,6 @@ class VoiceInputManager(
                 return
             }
         } else {
-            // API 31-32 cannot consume caller-provided PCM. Yield VAN's AudioRecord before
-            // the Android on-device recognizer opens the microphone so ownership is serialized.
             if (capability.requiresArbiterYield) audioArbiter.yieldToSystemCapture()
             null
         }
