@@ -59,6 +59,10 @@ data class VanOwnerCommand(
     val actionClass: String = "A1",
     val approvalToken: String? = null,
     val idempotencyKey: String = UUID.randomUUID().toString(),
+    val turnId: String? = null,
+    val speechEvidenceRef: String? = null,
+    val expiresAtUnix: Long? = null,
+    val noStaleReplay: Boolean = false,
 )
 
 class VanCommandController(
@@ -78,9 +82,18 @@ class VanCommandController(
         projectId: String? = _state.value.selectedProjectId,
         actionClass: String = "A1",
         approvalToken: String? = null,
+        turnId: String? = null,
+        speechEvidenceRef: String? = null,
+        expiresAtUnix: Long? = null,
+        noStaleReplay: Boolean = false,
     ) {
         val normalized = text.trim()
         if (normalized.isEmpty()) return
+        val idempotencyKey = if (source == VanCommandSource.VOICE && !turnId.isNullOrBlank()) {
+            "voice:$turnId"
+        } else {
+            UUID.randomUUID().toString()
+        }
         submit(
             VanOwnerCommand(
                 text = normalized,
@@ -88,6 +101,11 @@ class VanCommandController(
                 projectId = projectId,
                 actionClass = actionClass,
                 approvalToken = approvalToken,
+                idempotencyKey = idempotencyKey,
+                turnId = turnId,
+                speechEvidenceRef = speechEvidenceRef,
+                expiresAtUnix = expiresAtUnix,
+                noStaleReplay = noStaleReplay,
             ),
         )
     }
@@ -135,20 +153,25 @@ class VanCommandController(
                     projectId = command.projectId,
                     idempotencyKey = command.idempotencyKey,
                     approvalToken = command.approvalToken,
+                    turnId = command.turnId,
+                    originChannel = originChannel(command.source),
+                    expiresAtUnix = command.expiresAtUnix,
+                    noStaleReplay = command.noStaleReplay,
+                    speechEvidenceRef = command.speechEvidenceRef,
                 )
                 val wireStatus = response.optString("status").lowercase()
                 val status = when (wireStatus) {
                     "approval_required" -> VanCommandStatus.APPROVAL_REQUIRED
-                    "accepted" -> VanCommandStatus.ACCEPTED
+                    "accepted", "submitted", "executing", "verifying" -> VanCommandStatus.ACCEPTED
                     "in_flight" -> VanCommandStatus.IN_FLIGHT
-                    "succeeded", "success", "completed" -> VanCommandStatus.SUCCEEDED
+                    "verified_success", "succeeded", "success", "completed" -> VanCommandStatus.SUCCEEDED
                     "cancelled" -> VanCommandStatus.CANCELLED
                     "expired" -> VanCommandStatus.EXPIRED
-                    "denied", "rejected", "rejected_untrusted", "conflict", "failed", "error" -> VanCommandStatus.FAILED
+                    "denied", "rejected", "rejected_untrusted", "conflict", "failed", "error",
+                    "unverifiable", "verification_failed", "partial_success" -> VanCommandStatus.FAILED
                     else -> VanCommandStatus.ACCEPTED
                 }
 
-                // Do not invent completion: accepted/in-flight text explicitly says Hermes owns work.
                 val responseText = when {
                     response.optString("message").isNotBlank() -> response.optString("message")
                     response.optString("detail").isNotBlank() -> response.optString("detail")
@@ -157,9 +180,9 @@ class VanCommandController(
                     status == VanCommandStatus.APPROVAL_REQUIRED ->
                         "Owner approval is required before execution can continue."
                     status == VanCommandStatus.SUCCEEDED ->
-                        "The gateway reports this command completed successfully."
+                        "The requested postcondition has been verified."
                     status == VanCommandStatus.FAILED ->
-                        "The command was rejected or failed."
+                        "The command was rejected, failed, or could not be verified."
                     else -> "Command status: ${wireStatus.ifBlank { "accepted" }}"
                 }
 
@@ -191,5 +214,12 @@ class VanCommandController(
                 }
             }
         }
+    }
+
+    private fun originChannel(source: VanCommandSource): String = when (source) {
+        VanCommandSource.VOICE -> "VOICE"
+        VanCommandSource.CHAT -> "TEXT"
+        VanCommandSource.SYSTEM -> "SYSTEM_EVENT"
+        else -> "UI"
     }
 }
