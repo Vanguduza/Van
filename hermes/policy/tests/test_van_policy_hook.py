@@ -63,6 +63,67 @@ def test_a1_read_allowed():
     assert hook.evaluate({"action_class": "A1", "name": "read_local_state"})["decision"] == "allow"
 
 
+def test_ambiguous_typed_mutation_is_proposal_only():
+    result = hook.evaluate({
+        "action_class": "A3",
+        "name": "some_proposed_write",
+        "mutating": True,
+        "resolution_mode": "HERMES_INTERPRETATION_REQUIRED",
+    })
+    assert result["decision"] == "deny"
+    assert result["code"] == "proposal_only"
+
+
+def test_exact_typed_action_cannot_change_gateway_class():
+    result = hook.evaluate({
+        "action_class": "A1",
+        "action_id": "trading.halt",
+        "canonical_action_id": "trading.halt",
+        "canonical_action_class": "A4",
+        "resolution_mode": "EXACT_ACTION",
+    })
+    assert result["decision"] == "deny"
+    assert result["code"] == "canonical_class_mismatch"
+
+
+def test_exact_typed_action_cannot_change_gateway_action_identity():
+    result = hook.evaluate({
+        "action_class": "A3",
+        "action_id": "different.action",
+        "canonical_action_id": "google.notebook.note.create",
+        "canonical_action_class": "A3",
+        "resolution_mode": "EXACT_ACTION",
+    })
+    assert result["decision"] == "deny"
+    assert result["code"] == "canonical_action_mismatch"
+
+
+def test_typed_mutation_requires_gateway_action_runtime_authorization():
+    result = hook.evaluate({
+        "action_class": "A3",
+        "action_id": "google.notebook.note.create",
+        "canonical_action_id": "google.notebook.note.create",
+        "canonical_action_class": "A3",
+        "resolution_mode": "EXACT_ACTION",
+        "mutating": True,
+    })
+    assert result["decision"] == "deny"
+    assert result["code"] == "gateway_authorization_required"
+
+
+def test_typed_mutation_allowed_after_gateway_authorization():
+    result = hook.evaluate({
+        "action_class": "A3",
+        "action_id": "google.notebook.note.create",
+        "canonical_action_id": "google.notebook.note.create",
+        "canonical_action_class": "A3",
+        "resolution_mode": "EXACT_ACTION",
+        "mutating": True,
+        "gateway_authorized": True,
+    })
+    assert result["decision"] == "allow"
+
+
 def test_register_hook():
     registry: dict = {}
     hook.register_hook(registry)
