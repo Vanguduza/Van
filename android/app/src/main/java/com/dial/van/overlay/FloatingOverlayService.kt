@@ -30,7 +30,7 @@ import androidx.compose.foundation.layout.offset
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
-import androidx.compose.foundation.layout.weight
+import androidx.compose.foundation.layout.ColumnScope
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.shape.CircleShape
@@ -520,7 +520,7 @@ class FloatingOverlayService : Service(), LifecycleOwner, SavedStateRegistryOwne
     }
 
     @Composable
-    private fun TradesWorkboardPanel(app: VanApplication, accent: Int) {
+    private fun ColumnScope.TradesWorkboardPanel(app: VanApplication, accent: Int) {
         var state: TradeBookState by remember { mutableStateOf(TradeBookState.Loading) }
         val view = tradeView
         val refresh = tradeRefreshTick
