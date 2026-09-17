@@ -17,12 +17,12 @@ val escapedVanGatewayBaseUrl = vanGatewayBaseUrl
 
 android {
     namespace = "com.dial.van"
-    compileSdk = 34
+    compileSdk = 36
 
     defaultConfig {
         applicationId = "com.dial.van"
         minSdk = 26
-        targetSdk = 34
+        targetSdk = 36
         versionCode = 5
         versionName = "0.5.0-dev"
         buildConfigField("String", "VAN_GATEWAY_BASE_URL", "\"$escapedVanGatewayBaseUrl\"")
