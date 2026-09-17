@@ -8,7 +8,7 @@ from typing import Any, AsyncIterator
 
 import aiosqlite
 
-SCHEMA_VERSION = 3
+SCHEMA_VERSION = 4
 
 MIGRATIONS: dict[int, str] = {
     1: """
@@ -189,6 +189,148 @@ MIGRATIONS: dict[int, str] = {
     """,
     3: """
     ALTER TABLE devices ADD COLUMN encrypted_secret TEXT;
+    """,
+    4: """
+    CREATE TABLE IF NOT EXISTS runtime_meta (
+      key TEXT PRIMARY KEY,
+      value TEXT NOT NULL,
+      updated_at_unix_ms INTEGER NOT NULL
+    );
+
+    CREATE TABLE IF NOT EXISTS owner_facts (
+      fact_id TEXT PRIMARY KEY,
+      subject TEXT NOT NULL,
+      predicate TEXT NOT NULL,
+      value_json TEXT NOT NULL,
+      authority TEXT NOT NULL,
+      source_trust TEXT NOT NULL,
+      source_ref TEXT NOT NULL,
+      confidence_permille INTEGER NOT NULL CHECK(confidence_permille BETWEEN 0 AND 1000),
+      confidence_profile_version INTEGER NOT NULL,
+      scope TEXT NOT NULL,
+      valid_from_ms INTEGER NOT NULL,
+      valid_until_ms INTEGER,
+      observed_at_ms INTEGER NOT NULL,
+      last_verified_at_ms INTEGER,
+      sensitivity TEXT NOT NULL,
+      revision INTEGER NOT NULL,
+      content_digest TEXT NOT NULL,
+      created_at_unix_ms INTEGER NOT NULL,
+      updated_at_unix_ms INTEGER NOT NULL
+    );
+
+    CREATE INDEX IF NOT EXISTS idx_owner_facts_lookup
+      ON owner_facts(subject, predicate, scope, valid_from_ms, valid_until_ms);
+    CREATE INDEX IF NOT EXISTS idx_owner_facts_revision
+      ON owner_facts(revision);
+
+    CREATE TABLE IF NOT EXISTS owner_context_edges (
+      edge_id TEXT PRIMARY KEY,
+      from_node TEXT NOT NULL,
+      predicate TEXT NOT NULL,
+      to_node TEXT NOT NULL,
+      scope TEXT NOT NULL,
+      authority TEXT NOT NULL,
+      source_trust TEXT NOT NULL,
+      source_ref TEXT NOT NULL,
+      confidence_permille INTEGER NOT NULL CHECK(confidence_permille BETWEEN 0 AND 1000),
+      confidence_profile_version INTEGER NOT NULL,
+      valid_from_ms INTEGER NOT NULL,
+      valid_until_ms INTEGER,
+      observed_at_ms INTEGER NOT NULL,
+      sensitivity TEXT NOT NULL,
+      revision INTEGER NOT NULL
+    );
+
+    CREATE INDEX IF NOT EXISTS idx_owner_edges_from
+      ON owner_context_edges(from_node, predicate, scope, valid_from_ms, valid_until_ms);
+    CREATE INDEX IF NOT EXISTS idx_owner_edges_to
+      ON owner_context_edges(to_node, predicate, scope, valid_from_ms, valid_until_ms);
+
+    CREATE TABLE IF NOT EXISTS context_snapshots (
+      snapshot_id TEXT PRIMARY KEY,
+      command_id TEXT NOT NULL,
+      kernel_revision INTEGER NOT NULL,
+      fact_ids_json TEXT NOT NULL,
+      graph_evidence_refs_json TEXT NOT NULL,
+      live_state_refs_json TEXT NOT NULL,
+      policy_refs_json TEXT NOT NULL,
+      compiled_at_ms INTEGER NOT NULL,
+      digest TEXT NOT NULL
+    );
+
+    CREATE INDEX IF NOT EXISTS idx_context_snapshots_command
+      ON context_snapshots(command_id, compiled_at_ms);
+
+    CREATE TABLE IF NOT EXISTS action_definitions (
+      action_id TEXT PRIMARY KEY,
+      action_class TEXT NOT NULL,
+      mutates_state INTEGER NOT NULL,
+      allowed_principals_json TEXT NOT NULL,
+      verifier_type TEXT NOT NULL,
+      no_stale_replay INTEGER NOT NULL DEFAULT 0,
+      max_age_seconds INTEGER,
+      parameter_schema_json TEXT NOT NULL,
+      enabled INTEGER NOT NULL DEFAULT 1,
+      updated_at_unix_ms INTEGER NOT NULL
+    );
+
+    CREATE TABLE IF NOT EXISTS action_executions (
+      execution_id TEXT PRIMARY KEY,
+      command_id TEXT NOT NULL,
+      turn_id TEXT,
+      action_id TEXT NOT NULL,
+      action_class TEXT NOT NULL,
+      principal_type TEXT NOT NULL,
+      requested_by TEXT NOT NULL,
+      status TEXT NOT NULL,
+      idempotency_key TEXT NOT NULL UNIQUE,
+      snapshot_id TEXT,
+      parameters_digest TEXT NOT NULL,
+      submitted_at_ms INTEGER,
+      verified_at_ms INTEGER,
+      correlation_json TEXT NOT NULL,
+      evidence_pointer TEXT,
+      error_code TEXT,
+      updated_at_unix_ms INTEGER NOT NULL,
+      FOREIGN KEY(action_id) REFERENCES action_definitions(action_id),
+      FOREIGN KEY(snapshot_id) REFERENCES context_snapshots(snapshot_id)
+    );
+
+    CREATE INDEX IF NOT EXISTS idx_action_exec_command
+      ON action_executions(command_id, updated_at_unix_ms);
+
+    CREATE TABLE IF NOT EXISTS action_receipts (
+      receipt_id TEXT PRIMARY KEY,
+      execution_id TEXT NOT NULL,
+      status TEXT NOT NULL,
+      verifier_type TEXT NOT NULL,
+      correlation_json TEXT NOT NULL,
+      observed_postcondition_json TEXT NOT NULL,
+      evidence_pointer TEXT,
+      created_at_unix_ms INTEGER NOT NULL,
+      FOREIGN KEY(execution_id) REFERENCES action_executions(execution_id)
+    );
+
+    CREATE INDEX IF NOT EXISTS idx_action_receipts_execution
+      ON action_receipts(execution_id, created_at_unix_ms);
+
+    CREATE TABLE IF NOT EXISTS research_evidence (
+      evidence_id TEXT PRIMARY KEY,
+      research_id TEXT NOT NULL,
+      query_hash TEXT NOT NULL,
+      source_url TEXT NOT NULL,
+      source_title TEXT,
+      source_domain TEXT,
+      source_trust TEXT NOT NULL,
+      published_at TEXT,
+      retrieved_at_unix_ms INTEGER NOT NULL,
+      content_digest TEXT NOT NULL,
+      evidence_json TEXT NOT NULL
+    );
+
+    CREATE INDEX IF NOT EXISTS idx_research_evidence_research
+      ON research_evidence(research_id, retrieved_at_unix_ms);
     """,
 }
 
