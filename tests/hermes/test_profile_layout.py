@@ -161,3 +161,36 @@ def test_antigravity_wrapper_falls_back_to_host_local_bin(tmp_path):
 def test_install_scripts_exist():
     assert (REPO_ROOT / "tools" / "hermes" / "install_van_profile.sh").is_file()
     assert (REPO_ROOT / "tools" / "hermes" / "doctor_van_profile.sh").is_file()
+
+
+def test_install_profile_preserves_runtime_state_and_secrets(tmp_path):
+    hermes_home = tmp_path / "hermes-home"
+    target = hermes_home / "profiles" / "van"
+    target.mkdir(parents=True)
+    sentinels = {
+        ".env": b"VAN_TEST_SECRET=preserve-me\n",
+        "state.db": b"runtime-db-sentinel",
+        "sessions/keep.json": b"session-sentinel",
+        "memories/keep.md": b"memory-sentinel",
+        "logs/keep.log": b"log-sentinel",
+        "pairing/keep.json": b"pairing-sentinel",
+        "cache/keep.bin": b"cache-sentinel",
+    }
+    for rel, payload in sentinels.items():
+        path = target / rel
+        path.parent.mkdir(parents=True, exist_ok=True)
+        path.write_bytes(payload)
+    stale = target / "providers" / "stale-provider.md"
+    stale.parent.mkdir(parents=True, exist_ok=True)
+    stale.write_text("stale", encoding="utf-8")
+
+    env = os.environ.copy()
+    env["HERMES_HOME"] = str(hermes_home)
+    installer = REPO_ROOT / "tools" / "hermes" / "install_van_profile.sh"
+    subprocess.run([str(installer)], check=True, text=True, capture_output=True, env=env)
+
+    for rel, payload in sentinels.items():
+        assert (target / rel).read_bytes() == payload
+    assert not stale.exists()
+    assert (target / "SOUL.md").read_bytes() == (PROFILE_ROOT / "SOUL.md").read_bytes()
+    assert (target / "providers" / "gemini.md").is_file()

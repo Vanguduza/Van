@@ -92,14 +92,21 @@ copy_tree() {
     excludes+=(--exclude="$pat")
   done
   mkdir -p "${TARGET_ROOT}"
-  rsync -a --delete "${excludes[@]}" \
-    "${SOURCE_ROOT}/profile/van/" "${TARGET_ROOT}/"
-  # Copy top-level pack pieces into profile root layout Hermes expects
-  rsync -a "${excludes[@]}" "${SOURCE_ROOT}/skills/" "${TARGET_ROOT}/skills/"
-  rsync -a "${excludes[@]}" "${SOURCE_ROOT}/policy/" "${TARGET_ROOT}/policy/"
-  rsync -a "${excludes[@]}" "${SOURCE_ROOT}/bot/" "${TARGET_ROOT}/bot/"
-  rsync -a "${excludes[@]}" "${SOURCE_ROOT}/mcp/" "${TARGET_ROOT}/mcp/"
-  rsync -a "${excludes[@]}" "${SOURCE_ROOT}/providers/" "${TARGET_ROOT}/providers/"
+
+  # The profile root is shared with Hermes runtime state (state.db, sessions,
+  # memories, logs, pairing data, caches, platform state and .env). Never use
+  # root-level --delete here. Update only repository-owned static files.
+  for file in SOUL.md AGENTS.md config.yaml; do
+    rsync -a "${excludes[@]}" "${SOURCE_ROOT}/profile/van/${file}" "${TARGET_ROOT}/${file}"
+  done
+  mkdir -p "${TARGET_ROOT}/bin"
+  rsync -a --delete "${excludes[@]}" "${SOURCE_ROOT}/profile/van/bin/" "${TARGET_ROOT}/bin/"
+
+  # These subtrees are repository-managed and may be synchronized exactly.
+  for dir in skills policy bot mcp providers; do
+    mkdir -p "${TARGET_ROOT}/${dir}"
+    rsync -a --delete "${excludes[@]}" "${SOURCE_ROOT}/${dir}/" "${TARGET_ROOT}/${dir}/"
+  done
   cp -f "${SOURCE_ROOT}/VERSION" "${TARGET_ROOT}/VERSION"
 }
 
