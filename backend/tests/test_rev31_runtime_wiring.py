@@ -60,7 +60,7 @@ async def test_runtime_routes_require_hermes_internal_control(runtime_client):
 
     denied = await client.get("/v1/runtime/status")
     assert denied.status_code == 403
-    assert denied.json()["detail"] == "internal_control_auth_failed"
+    assert denied.json()["detail"] == "internal_control_unauthorized"
 
     allowed = await client.get(
         "/v1/runtime/status",
