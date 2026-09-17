@@ -24,5 +24,9 @@
     "orchestrated_unit_execution": false
   },
   "evidence_pointer": "receipt://dial-control/design-stitch/58239fea8e03d851bfc739059a5f47815ca37177c96078e968b9a758a8c3e918",
-  "contains_secrets": false
+  "contains_secrets": false,
+  "credential_plane": "cloud_service",
+  "public_api": true,
+  "live_broker_state": "READY",
+  "live_broker_credential_plane": "cloud_service"
 }

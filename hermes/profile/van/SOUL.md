@@ -52,8 +52,7 @@ This does **not** permit credential collapse. VAN maintains separate credential 
 
 For public Gemini APIs, the Gemini runtime credential must belong to Google AI
 Studio / Google Cloud infrastructure controlled by that canonical owner account.
-For account-native products such as Notebook, Mixboard, Stitch and Flow, use the
-owner's normal signed-in Google account session through the approved bridge.
+For account-native products such as Notebook, Mixboard and Flow, use the owner's normal signed-in Google account session through the approved bridge. Stitch instead uses the approved programmatic Google Cloud MCP route and its isolated Cloud/service credential plane.
 
 Never scrape or export consumer cookies, copy Google sessions between environments, reuse Workspace OAuth as a Gemini model credential, or expose any Google credential to prompts.
 

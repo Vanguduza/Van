@@ -14,19 +14,21 @@ Resolved 2026-09-15: the delegated `antigravity_worker_account` is authenticated
 
 Resolved 2026-09-15 (workstation): local Project Truth mounts for `van`, `dial`, `dde`, `gtr`, `goat`, and `aeci` resolve via `registries/project_mounts.json` + `tools/projects/sync_project_truth.py` offline cache. Gateway live PUT still requires a running gateway.
 
+Resolved 2026-09-17: the canonical GitHub Actions workflow is live at `.github/workflows/van-ci.yml` and repeatedly certifies backend, Android unit/build/lint, shared geometry, visual rendering and artifact upload. Workflow installation/scope is no longer a production gate.
+
 | Gate | Prerequisite | Repo-side readiness |
 |---|---|---|
 | Canonical owner Google principal | Hermes-authenticated owner Google account | hashed principal registration + Hermes attestation import |
 | Google Workspace OAuth live | permanent Desktop OAuth + owner consent | READY — encrypted refresh credential installed; Gmail/Calendar/Drive/Contacts/Tasks live canaries all HTTP 200 |
-| Gemini runtime | authenticated on Hermes | mesh Gemini family CONFIGURED via Hermes attestation; live READY needs per-capability canary receipt |
-| Gemini Live | Hermes runtime + live endpoint canary | deterministic route; CONFIGURED on Hermes auth |
-| Deep Research | Hermes Gemini runtime + quota canary | deterministic route; CONFIGURED on Hermes auth |
+| Gemini runtime | dedicated Google-account-owned API/runtime credential | AUTH_REQUIRED — real Hermes `gemini-2.5-flash` canary found no usable `GOOGLE_API_KEY` / `GEMINI_API_KEY`; receipt: `artifacts/google/gemini_runtime_live_canary.json` |
+| Gemini Live | dedicated Gemini runtime credential + live endpoint canary | AUTH_REQUIRED — shared Gemini runtime credential plane is currently unavailable |
+| Deep Research | dedicated Gemini runtime credential + quota canary | AUTH_REQUIRED — shared Gemini runtime credential plane is currently unavailable |
 | Gemini Notebook personal | owner Google session on Hermes | consumer capability CONFIGURED via attestation |
 | Gemini Notebook Enterprise | eligible Cloud/Enterprise setup | still EXTERNAL (cloud plane) |
-| Stitch | owner Google design credential plane | READY — authenticated live `generate_screen_from_text` canary passed; token-free receipt: `artifacts/google/stitch_live_attestation.json` |
+| Stitch | Google Cloud Stitch MCP credential plane | READY — authenticated live `generate_screen_from_text` canary passed; token-free receipt: `artifacts/google/stitch_live_attestation.json` |
 | Mixboard / Flow / AI Studio / Workspace Studio | owner Google session on Hermes | consumer capabilities CONFIGURED via attestation; per-capability live canary still required |
 | Jules | owner Google sign-in on Hermes | CONFIGURED via attestation; READY needs live worker receipt |
-| Nano Banana / Veo | Hermes Gemini runtime + quota canary | CONFIGURED via attestation |
+| Nano Banana / Veo | dedicated Gemini runtime credential + quota canary | AUTH_REQUIRED — shared Gemini runtime credential plane is currently unavailable |
 | Google ADK/A2A | owner-administered Cloud/runtime | still EXTERNAL (cloud plane) |
 | Android owner gateway authentication | ingress bearer + revocable device token + enrolled device HMAC | LIVE-CERTIFIED on schema 4 — single-use pairing, hash-only device token persistence, restart continuity, atomic revoke, and post-restart denial all passed |
 | Stable public HTTPS ingress | named Cloudflare Tunnel token + stable hostname | EXTERNAL — fail-closed installer/service ready; `trycloudflare.com` is rejected for production |
@@ -34,7 +36,6 @@ Resolved 2026-09-15 (workstation): local Project Truth mounts for `van`, `dial`,
 | Artist `.riv` | Rive editor | contract + Canvas fallback + handoff |
 | Owner visual acceptance | owner review | acceptance matrix |
 | Signed production release | production keystore | Gradle wiring + `android/keystore.properties.example` |
-| GitHub Actions canonical workflow path | credential with workflow scope | `tools/ci/install_github_workflow.py` + YAML in `tools/ci/` |
 
 ## Google certification rules
 

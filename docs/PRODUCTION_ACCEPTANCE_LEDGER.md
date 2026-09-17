@@ -1,7 +1,7 @@
 # Production Acceptance Ledger
 
 **Version under test:** 0.5.0-dev  
-**Date:** 2026-09-16
+**Date:** 2026-09-17
 **Verdict:** NOT v1.0 PRODUCTION ACCEPTED — external gates remain
 
 ## Previously certified repository gates
@@ -23,7 +23,7 @@
 | SBOM / provenance / checksums | PASS at prior HEAD |
 | Project Truth canonical state contract | PASS — canonical state added and guarded for PR-based integration |
 | Backend bootstrap | PASS — repository root resolution and `python3` invocation corrected; bootstrap executed successfully |
-| Complete Python suite at schema-4 pairing closure HEAD | PASS — 97 passed |
+| Complete Python suite at current Google/ingress closure HEAD | PASS — 98 passed |
 
 ## Google Intelligence Mesh repository gates
 
@@ -44,6 +44,7 @@ Validated 2026-09-15 in a clean repository environment after installing the decl
 | Google session export / broker bypass policy denial | PASS |
 | Hermes remains sole agent runtime | PASS |
 | Stitch live generation | PASS — authenticated `generate_screen_from_text` returned screen ID + HTML + image; token-free receipt recorded and VAN broker state is `READY` |
+| Gemini runtime credential canary | AUTH_REQUIRED — real Hermes `gemini-2.5-flash` one-shot failed before inference because no usable Gemini API credential exists; token-free receipt: `artifacts/google/gemini_runtime_live_canary.json` |
 
 ## Live VAN gateway pairing certification — 2026-09-16
 
@@ -65,7 +66,7 @@ Live host: `dial-hermes-control`; certified source: `b075817401fc02ae7ffbaea311f
 
 ## External gates blocking v1.0
 
-See `docs/EXTERNAL_GATES.md`. Canonical Google auth lives on Hermes and is imported into the VAN mesh as `CONFIGURED` evidence unless a capability has its own live canary. The delegated Antigravity worker is live-certified. Remaining blockers include Cloud/Enterprise Google planes, uncertified per-capability Google surfaces, physical Samsung certification, artist `.riv` / owner visual acceptance, production keystore, and GitHub `workflow` scope for `.github/workflows/ci.yml`. Local Project Truth mounts are closed on this workstation.
+See `docs/EXTERNAL_GATES.md`. Canonical Google auth lives on Hermes and is imported into the VAN mesh as `CONFIGURED` evidence unless a capability has its own live canary. The delegated Antigravity worker is live-certified. Remaining blockers include Cloud/Enterprise Google planes, uncertified per-capability Google surfaces, physical Samsung certification, artist `.riv` / owner visual acceptance, production keystore, and stable named Cloudflare ingress. Local Project Truth mounts are closed on this workstation.
 
 ## Tag policy
 
