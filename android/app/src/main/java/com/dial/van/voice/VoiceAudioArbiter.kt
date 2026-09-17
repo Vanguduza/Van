@@ -7,6 +7,8 @@ import android.content.pm.PackageManager
 import android.media.AudioFormat
 import android.media.AudioRecord
 import android.media.MediaRecorder
+import android.media.audiofx.AcousticEchoCanceler
+import android.media.audiofx.NoiseSuppressor
 import android.os.ParcelFileDescriptor
 import androidx.core.content.ContextCompat
 import java.io.Closeable
@@ -39,6 +41,8 @@ class VoiceAudioArbiter(
 
     @Volatile private var captureRunning = false
     @Volatile private var recorder: AudioRecord? = null
+    @Volatile private var echoCanceler: AcousticEchoCanceler? = null
+    @Volatile private var noiseSuppressor: NoiseSuppressor? = null
 
     fun hasRecordPermission(): Boolean =
         ContextCompat.checkSelfPermission(context, Manifest.permission.RECORD_AUDIO) == PackageManager.PERMISSION_GRANTED
@@ -66,11 +70,28 @@ class VoiceAudioArbiter(
                 record.release()
                 return false
             }
+            enableCaptureEffects(record)
             recorder = record
             captureRunning = true
             captureExecutor.execute { captureLoop(record) }
             return true
         }
+    }
+
+    private fun enableCaptureEffects(record: AudioRecord) {
+        echoCanceler = if (AcousticEchoCanceler.isAvailable()) {
+            runCatching { AcousticEchoCanceler.create(record.audioSessionId)?.apply { enabled = true } }.getOrNull()
+        } else null
+        noiseSuppressor = if (NoiseSuppressor.isAvailable()) {
+            runCatching { NoiseSuppressor.create(record.audioSessionId)?.apply { enabled = true } }.getOrNull()
+        } else null
+    }
+
+    private fun releaseCaptureEffects() {
+        runCatching { echoCanceler?.release() }
+        runCatching { noiseSuppressor?.release() }
+        echoCanceler = null
+        noiseSuppressor = null
     }
 
     private fun captureLoop(record: AudioRecord) {
@@ -88,6 +109,7 @@ class VoiceAudioArbiter(
             // Runtime state is surfaced by the consumer; the capture loop itself fails closed.
         } finally {
             runCatching { if (record.recordingState == AudioRecord.RECORDSTATE_RECORDING) record.stop() }
+            releaseCaptureEffects()
             runCatching { record.release() }
             synchronized(lock) {
                 if (recorder === record) recorder = null
@@ -127,10 +149,13 @@ class VoiceAudioArbiter(
     }
 
     fun isCapturing(): Boolean = captureRunning
+    fun echoCancellationActive(): Boolean = echoCanceler?.enabled == true
+    fun noiseSuppressionActive(): Boolean = noiseSuppressor?.enabled == true
 
     override fun close() {
         sinks.clear()
         stopCapture(clearPreRoll = true)
+        releaseCaptureEffects()
         captureExecutor.shutdownNow()
     }
 
