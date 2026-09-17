@@ -40,6 +40,7 @@ class ContextReadinessBody(BaseModel):
 
 class ContextSnapshotBody(ContextReadinessBody):
     graph_evidence_refs: list[str] = Field(default_factory=list)
+    lexical_evidence_refs: list[str] = Field(default_factory=list)
     live_state_refs: list[str] = Field(default_factory=list)
     policy_refs: list[str] = Field(default_factory=list)
 
@@ -194,6 +195,7 @@ class OwnerRuntimeApi:
                     body.command_id,
                     body.requirements,
                     graph_evidence_refs=body.graph_evidence_refs,
+                    lexical_evidence_refs=body.lexical_evidence_refs,
                     live_state_refs=body.live_state_refs,
                     policy_refs=body.policy_refs,
                 )
