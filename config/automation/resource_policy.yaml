@@ -1,0 +1,24 @@
+policy_version: van-automation-resource-policy-1
+pressure:
+  sample_interval_ms: 1000
+  recovery_hysteresis_seconds: 30
+priorities:
+  P0:
+    enabled_in_reduced_mode: true
+  P1:
+    enabled_in_reduced_mode: true
+  P2:
+    enabled_in_reduced_mode: false
+  P3:
+    enabled_in_reduced_mode: false
+resource_authority:
+  canonical_numbers_in_repository: false
+  deployment_evidence_required: true
+  runtime_budget_file: /opt/van-trading/config/automation.env
+n8n:
+  degrade_before_vati: true
+  concurrency_bounded: true
+  memory_max_required: true
+  io_weight_below_vati: true
+runner:
+  stricter_memory_limit_than_n8n_main: true

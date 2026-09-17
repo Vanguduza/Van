@@ -9,3 +9,5 @@ pydantic>=2.7,<3
 pyyaml>=6.0,<7
 # --with-nautilus installs the kernel donor at the Phase 3 gate (manylinux_2_35 aarch64 wheel verified on PyPI)
 # nautilus_trader==1.231.0
+
+temporalio==1.33.0

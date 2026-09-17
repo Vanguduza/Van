@@ -1,0 +1,18 @@
+policy_version: van-automation-domains-1
+default_external_policy: deny_until_admitted
+ssrf:
+  enabled: true
+  blocked_ip_ranges: default,100.64.0.0/10
+internal_services:
+  gateway:
+    access: capability_grant_only
+  vati_database:
+    access: denied
+  broker_execution_adapter:
+    access: denied
+external_domains: {}
+requirements:
+  - domain must be admitted before generated workflow use
+  - HTTP method must be classified by action class
+  - redirects must remain inside admitted domain policy
+  - broker execution destinations are denied regardless of workflow class

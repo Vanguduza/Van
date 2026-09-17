@@ -1,0 +1,23 @@
+{
+  "schema_version": 1,
+  "policy": "deny_by_default",
+  "allowed_official_nodes": [
+    "n8n-nodes-base.if",
+    "n8n-nodes-base.switch",
+    "n8n-nodes-base.merge",
+    "n8n-nodes-base.set",
+    "n8n-nodes-base.wait",
+    "n8n-nodes-base.httpRequest",
+    "n8n-nodes-base.executeWorkflow",
+    "n8n-nodes-base.webhook",
+    "n8n-nodes-base.scheduleTrigger"
+  ],
+  "explicitly_denied_nodes": [
+    "n8n-nodes-base.executeCommand",
+    "n8n-nodes-base.readWriteFile",
+    "n8n-nodes-base.ssh"
+  ],
+  "community_nodes_allowed": false,
+  "generated_code_nodes_allowed": false,
+  "http_request_requires_domain_policy": true
+}

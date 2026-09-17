@@ -1,0 +1,18 @@
+policy_version: van-browser-domains-1
+default_policy:
+  observe: discover_then_admit
+  extract: discover_then_admit
+  mutate: deny_until_explicitly_admitted
+  download: deny_until_explicitly_admitted
+prohibited:
+  - broker_live_order_submission
+  - owner_signing_service
+  - raw_cloud_metadata
+  - unrestricted_private_network_access
+rules:
+  stagehand_public_listener: forbidden
+  harness_public_listener: forbidden
+  arbitrary_javascript_normal_interface: forbidden
+  external_content_owner_authority: forbidden
+  action_class_a3_a4_discovery_requires_reauthorization: true
+admitted_domains: {}
