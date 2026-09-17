@@ -13,7 +13,7 @@ class Settings(BaseSettings):
     hermes_base_url: str = "http://127.0.0.1:8642"
     hermes_profile: str = "van"
     hermes_bearer_token: str = ""
-    internal_control_token: str = ""  # Hermes→gateway privileged Google job API
+    internal_control_token: str = ""  # Hermes→gateway privileged control API
     ingress_token: str = ""  # Owner-device bearer gate for externally reachable HTTP routes
     device_secret_fernet_key: str = ""  # Android HMAC secrets encrypted at rest
     owner_intent_max_age_seconds: int = 24 * 60 * 60
@@ -32,6 +32,13 @@ class Settings(BaseSettings):
     google_gemini_runtime_configured: bool = False
     google_cloud_runtime_configured: bool = False
     google_consumer_connected_capabilities: str = ""
+
+    # Rev 3.1 research capability. The Exa key belongs only to the gateway
+    # credential plane. Egress is fail-closed until explicitly enabled.
+    exa_api_key: str = ""
+    exa_base_url: str = "https://api.exa.ai"
+    exa_egress_enabled: bool = False
+    exa_timeout_seconds: float = 20.0
 
     require_hermes_for_mutations: bool = True
     event_page_size: int = 100
