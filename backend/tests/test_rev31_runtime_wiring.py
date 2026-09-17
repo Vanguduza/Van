@@ -58,13 +58,48 @@ async def runtime_client(monkeypatch):
             yield client, app
 
 
+async def pair_owner_device(
+    client: AsyncClient,
+    *,
+    device_id: str,
+    secret: str,
+    label: str | None = None,
+) -> str:
+    ticket = await client.post(
+        "/v1/devices/pairing-ticket",
+        json={"label": label, "ttl_seconds": 600},
+        headers={"X-Van-Internal-Token": INTERNAL},
+    )
+    assert ticket.status_code == 200
+    paired = await client.post(
+        "/v1/devices/pair",
+        json={
+            "pairing_token": ticket.json()["pairing_token"],
+            "device_id": device_id,
+            "device_secret": secret,
+            "public_key_pem": "PEM",
+            "label": label,
+        },
+    )
+    assert paired.status_code == 200
+    return paired.json()["device_access_token"]
+
+
 @pytest.mark.asyncio
 async def test_runtime_routes_require_hermes_internal_control(runtime_client):
     client, _app = runtime_client
 
-    denied = await client.get("/v1/runtime/status")
-    assert denied.status_code == 403
-    assert denied.json()["detail"] == "internal_control_unauthorized"
+    denied_outer = await client.get("/v1/runtime/status")
+    assert denied_outer.status_code == 401
+    assert denied_outer.json()["detail"] == "device_access_denied"
+
+    token = await pair_owner_device(client, device_id="dev-runtime", secret="runtime-secret")
+    denied_internal = await client.get(
+        "/v1/runtime/status",
+        headers={"X-Van-Device-Token": token},
+    )
+    assert denied_internal.status_code == 403
+    assert denied_internal.json()["detail"] == "internal_control_unauthorized"
 
     allowed = await client.get(
         "/v1/runtime/status",
@@ -82,12 +117,7 @@ async def test_v2_signature_binds_voice_provenance_and_canonical_context(runtime
     client, app = runtime_client
     device_id = "dev-voice"
     secret = "voice-secret"
-    enrolled = await client.post(
-        "/v1/devices/enroll",
-        json={"device_id": device_id, "device_secret": secret, "public_key_pem": "PEM", "label": "S24"},
-    )
-    assert enrolled.status_code == 200
-    app.state.auth.remember_secret(device_id, secret)
+    device_token = await pair_owner_device(client, device_id=device_id, secret=secret, label="S24")
 
     issued = int(time.time())
     expires = issued + 30
@@ -134,7 +164,11 @@ async def test_v2_signature_binds_voice_provenance_and_canonical_context(runtime
         "no_stale_replay": True,
         "context_trust": "CONVERSATION",
     }
-    accepted = await client.post("/v1/commands", json=body)
+    accepted = await client.post(
+        "/v1/commands",
+        json=body,
+        headers={"X-Van-Device-Token": device_token},
+    )
     assert accepted.status_code == 200
     result = accepted.json()
     assert result["status"] == "accepted"
@@ -202,7 +236,11 @@ async def test_v2_signature_binds_voice_provenance_and_canonical_context(runtime
         "nonce": "nonce-2",
         "context_trust": "CONVERSATION",
     }
-    denied = await client.post("/v1/commands", json=tampered)
+    denied = await client.post(
+        "/v1/commands",
+        json=tampered,
+        headers={"X-Van-Device-Token": device_token},
+    )
     assert denied.status_code == 200
     assert denied.json()["status"] == "denied"
     assert "signature" in denied.json()["message"].lower()
@@ -213,11 +251,7 @@ async def test_project_command_snapshot_binds_current_truth_and_repo_head(runtim
     client, app = runtime_client
     device_id = "dev-project"
     secret = "project-secret"
-    assert (await client.post(
-        "/v1/devices/enroll",
-        json={"device_id": device_id, "device_secret": secret, "public_key_pem": "PEM"},
-    )).status_code == 200
-    app.state.auth.remember_secret(device_id, secret)
+    device_token = await pair_owner_device(client, device_id=device_id, secret=secret)
     await app.state.projects.cache_truth(
         "van",
         {"project_id": "van", "status": "active"},
@@ -264,7 +298,11 @@ async def test_project_command_snapshot_binds_current_truth_and_repo_head(runtim
         "nonce": "project-nonce-1",
         "context_trust": "CONVERSATION",
     }
-    response = await client.post("/v1/commands", json=body)
+    response = await client.post(
+        "/v1/commands",
+        json=body,
+        headers={"X-Van-Device-Token": device_token},
+    )
     assert response.status_code == 200
     assert response.json()["status"] == "accepted"
     metadata = app.state.test_hermes_observed["metadata"]
@@ -278,11 +316,7 @@ async def test_context_seal_failure_blocks_hermes_dispatch(runtime_client, monke
     client, app = runtime_client
     device_id = "dev-context-fail"
     secret = "context-secret"
-    assert (await client.post(
-        "/v1/devices/enroll",
-        json={"device_id": device_id, "device_secret": secret, "public_key_pem": "PEM"},
-    )).status_code == 200
-    app.state.auth.remember_secret(device_id, secret)
+    device_token = await pair_owner_device(client, device_id=device_id, secret=secret)
 
     async def fail_compile(*args, **kwargs):
         raise RuntimeError("context-store-unavailable")
@@ -326,7 +360,11 @@ async def test_context_seal_failure_blocks_hermes_dispatch(runtime_client, monke
         "nonce": "context-fail-nonce",
         "context_trust": "CONVERSATION",
     }
-    response = await client.post("/v1/commands", json=body)
+    response = await client.post(
+        "/v1/commands",
+        json=body,
+        headers={"X-Van-Device-Token": device_token},
+    )
     assert response.status_code == 200
     result = response.json()
     assert result["status"] == "degraded"
@@ -339,11 +377,7 @@ async def test_device_revocation_revokes_nonterminal_privileged_execution(runtim
     client, app = runtime_client
     device_id = "dev-revoke"
     secret = "revoke-secret"
-    assert (await client.post(
-        "/v1/devices/enroll",
-        json={"device_id": device_id, "device_secret": secret, "public_key_pem": "PEM"},
-    )).status_code == 200
-    app.state.auth.remember_secret(device_id, secret)
+    await pair_owner_device(client, device_id=device_id, secret=secret)
 
     execution = await app.state.owner_runtime.actions.begin(
         execution_id="exec-revoke",
@@ -359,7 +393,10 @@ async def test_device_revocation_revokes_nonterminal_privileged_execution(runtim
     )
     assert execution.status.value == "AUTHORIZED"
 
-    revoked = await client.post(f"/v1/devices/{device_id}/revoke")
+    revoked = await client.post(
+        f"/v1/devices/{device_id}/revoke",
+        headers={"X-Van-Internal-Token": INTERNAL},
+    )
     assert revoked.status_code == 200
     assert revoked.json()["revoked_privileged_executions"] == 1
 
