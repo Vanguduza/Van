@@ -1,12 +1,13 @@
-# Public TLS front for the MT5 pull bridge (VanBridgeEA needs a publicly trusted certificate).
-# Installed by bootstrap.sh --public-host <dns-name>; Caddy obtains and renews the Let's Encrypt certificate.
 {$VAN_PUBLIC_HOST} {
     encode gzip
     @ea path /ea/v1/* /health
-    handle @ea {
-        reverse_proxy 127.0.0.1:9443
+    handle @ea { reverse_proxy 127.0.0.1:9443 }
+    @automation path /automation-webhook/* /automation-webhook-test/* /automation-webhook-wait/*
+    handle @automation { reverse_proxy 127.0.0.1:5678 }
+    header {
+        Strict-Transport-Security "max-age=31536000; includeSubDomains"
+        X-Content-Type-Options "nosniff"
+        Referrer-Policy "strict-origin-when-cross-origin"
     }
-    handle {
-        respond "not found" 404
-    }
+    handle { respond "not found" 404 }
 }

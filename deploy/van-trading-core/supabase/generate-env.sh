@@ -41,7 +41,9 @@ fd = os.open(out, os.O_WRONLY | os.O_CREAT | os.O_TRUNC, 0o600)
 with os.fdopen(fd, "w", encoding="utf-8") as f:
     f.writelines(lines)
 tpl = os.path.join(os.path.dirname(src), "init", "01_vati_ledger.sql.tpl")
-gen = os.path.join(os.path.dirname(src), "init", "01_vati_ledger.sql")
+target_init = os.path.join(os.path.dirname(out), "init")
+os.makedirs(target_init, mode=0o750, exist_ok=True)
+gen = os.path.join(target_init, "01_vati_ledger.sql")
 fd = os.open(gen, os.O_WRONLY | os.O_CREAT | os.O_TRUNC, 0o600)
 with os.fdopen(fd, "w", encoding="utf-8") as f:
     f.write(open(tpl, encoding="utf-8").read().replace("__VATI_LEDGER_PASSWORD__", values["VATI_LEDGER_PASSWORD"].replace("'", "''")))
