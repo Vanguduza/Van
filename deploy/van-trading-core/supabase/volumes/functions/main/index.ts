@@ -117,15 +117,15 @@ async function isValidJWT(jwt: string): Promise<AuthFailure | null> {
 
 /**
  * Verify JWT token, handling both legacy (HS256) and newer (ES256/RS256) algorithms
- * 
+ *
  * This function automatically detects the algorithm used in the token and applies
  * the appropriate verification method:
  * - HS256: Uses JWT_SECRET (symmetric key)
  * - ES256/RS256: Uses JWKS endpoint (asymmetric public keys)
- * 
+ *
  * This fix ensures compatibility with both legacy tokens and newer asymmetric tokens,
  * resolving the "Key for the ES256 algorithm must be of type CryptoKey" error.
- * 
+ *
  * @param jwt - The JWT token string to verify
  * @returns Authentication failure details, or null when verification succeeds
  */
@@ -203,7 +203,7 @@ Deno.serve(async (req: Request) => {
   const memoryLimitMb = 150
   const workerTimeoutMs = 1 * 60 * 1000
   const noModuleCache = false
-  // Using a common Import Map for all functions 
+  // Using a common Import Map for all functions
   // to use a scope 'deno.json' it must be dinamically resolved base on the 'service_name'
   const importMapPath = `/home/deno/functions/deno.jsonc`
   // SUPABASE_FUNCTION_SLUG is listed after the container env snapshot so
