@@ -5,6 +5,7 @@ import android.util.Base64
 import androidx.security.crypto.EncryptedSharedPreferences
 import androidx.security.crypto.MasterKey
 import com.dial.van.BuildConfig
+import com.dial.van.security.OwnerApprovalKeyManager
 import com.dial.van.visual.VanLiveVisualState
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.withContext
@@ -15,6 +16,7 @@ import java.net.URL
 import java.net.URLEncoder
 import java.nio.charset.StandardCharsets
 import java.security.SecureRandom
+import java.security.Signature
 import java.util.UUID
 import javax.crypto.Mac
 import javax.crypto.spec.SecretKeySpec
@@ -34,6 +36,7 @@ class VanGatewayClient(context: Context) {
         EncryptedSharedPreferences.PrefKeyEncryptionScheme.AES256_SIV,
         EncryptedSharedPreferences.PrefValueEncryptionScheme.AES256_GCM,
     )
+    private val approvalKeys = OwnerApprovalKeyManager()
 
     var baseUrl: String
         get() {
@@ -93,6 +96,8 @@ class VanGatewayClient(context: Context) {
 
     fun isPaired(): Boolean = isEnrolled() && hasIngressToken() && !deviceAccessToken.isNullOrBlank()
 
+    fun newA4ApprovalSignature(): Signature = approvalKeys.newSigningSignature()
+
     suspend fun pairThisDevice(
         gatewayUrl: String,
         pairingToken: String,
@@ -108,7 +113,7 @@ class VanGatewayClient(context: Context) {
             .put("pairing_token", normalizedPairingToken)
             .put("device_id", id)
             .put("device_secret", secret)
-            .put("public_key_pem", "android-device")
+            .put("public_key_pem", approvalKeys.publicKeyPem())
             .put("label", label)
         val response = postJsonAt(normalizedUrl, "/v1/devices/pair", body, useIngress = false)
         val returnedIngress = response.optString("ingress_token").trim()
@@ -211,6 +216,9 @@ class VanGatewayClient(context: Context) {
         projectId: String? = null,
         idempotencyKey: String,
         approvalToken: String? = null,
+        approvalChallengeId: String? = null,
+        approvalSignatureBase64: String? = null,
+        approvalAlgorithm: String = OwnerApprovalKeyManager.PROOF_ALGORITHM,
         issuedAtUnix: Long = System.currentTimeMillis() / 1000L,
         turnId: String? = null,
         originChannel: String = "UI",
@@ -266,6 +274,15 @@ class VanGatewayClient(context: Context) {
             .put("no_stale_replay", noStaleReplay)
         if (projectId != null) body.put("project_id", projectId)
         if (approvalToken != null) body.put("approval_token", approvalToken)
+        if (approvalChallengeId != null && approvalSignatureBase64 != null) {
+            body.put(
+                "approval_proof",
+                JSONObject()
+                    .put("challenge_id", approvalChallengeId)
+                    .put("signature_b64", approvalSignatureBase64)
+                    .put("algorithm", approvalAlgorithm),
+            )
+        }
         if (turnId != null) body.put("turn_id", turnId)
         if (expiresAtUnix != null) body.put("expires_at_unix", expiresAtUnix)
         if (speechEvidenceRef != null) body.put("speech_evidence_ref", speechEvidenceRef)
