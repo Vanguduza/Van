@@ -88,7 +88,6 @@ class AuthService:
             (device_id, public_key_pem, now, label, encrypted_secret),
         )
         self._device_secrets[device_id] = device_secret.encode("utf-8")
-        # Persist a non-reversible verifier for diagnostics/rotation evidence only.
         secret_hash = hashlib.sha256(device_secret.encode("utf-8")).hexdigest()
         await self.store.execute(
             "INSERT INTO capability_grants(grant_id, device_id, capabilities_json, expires_at_unix, task_id, revoked_at_unix, created_at_unix) VALUES (?, ?, ?, ?, NULL, NULL, ?)",
@@ -155,6 +154,7 @@ class AuthService:
         action_class: str,
         project_id: str | None,
     ) -> str:
+        """Legacy v1 canonical form retained only for default-provenance clients."""
         return "|".join(
             [
                 command_id,
@@ -163,6 +163,58 @@ class AuthService:
                 str(issued_at_unix),
                 action_class,
                 project_id or "",
+                text,
+            ]
+        )
+
+    @staticmethod
+    def canonical_command_v2(
+        *,
+        command_id: str,
+        idempotency_key: str,
+        device_id: str,
+        issued_at_unix: int,
+        text: str,
+        action_class: str,
+        project_id: str | None,
+        turn_id: str | None,
+        origin_channel: str,
+        principal_type: str,
+        requested_by: str,
+        expires_at_unix: int | None,
+        nonce: str | None,
+        context_capsule_revision: int | None,
+        context_capsule_hash: str | None,
+        speech_evidence_ref: str | None,
+        no_stale_replay: bool,
+        context_trust: str,
+    ) -> str:
+        """Rev 3.1 authority-bearing canonical form.
+
+        Every field that can change provenance, privilege, replay behavior or
+        context binding is covered by the device HMAC. ``client_context`` is
+        deliberately excluded because it is a non-authoritative hint only.
+        """
+        return "|".join(
+            [
+                "v2",
+                command_id,
+                idempotency_key,
+                device_id,
+                str(issued_at_unix),
+                action_class,
+                project_id or "",
+                turn_id or "",
+                origin_channel,
+                principal_type,
+                requested_by,
+                str(expires_at_unix) if expires_at_unix is not None else "",
+                nonce or "",
+                str(context_capsule_revision) if context_capsule_revision is not None else "",
+                context_capsule_hash or "",
+                speech_evidence_ref or "",
+                "1" if no_stale_replay else "0",
+                context_trust,
                 text,
             ]
         )
