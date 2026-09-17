@@ -2,8 +2,15 @@ package com.dial.van.voice
 
 import android.content.Context
 import android.content.Intent
+import android.media.AudioFormat
+import android.os.Build
 import android.os.Bundle
+import android.os.Handler
+import android.os.Looper
+import android.os.ParcelFileDescriptor
+import android.speech.AlternativeSpans
 import android.speech.RecognitionListener
+import android.speech.RecognitionPart
 import android.speech.RecognizerIntent
 import android.speech.SpeechRecognizer
 import android.speech.tts.TextToSpeech
@@ -14,6 +21,7 @@ import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
 import java.util.Locale
+import java.util.UUID
 import java.util.concurrent.atomic.AtomicBoolean
 
 /** Speech sync clock feeding viseme/RMS/mouth_open into [VanVisualState]. */
@@ -26,7 +34,8 @@ data class SpeechSyncFrame(
 
 interface VoiceInputCallback {
     fun onPartial(text: String)
-    fun onFinal(text: String)
+    fun onFinal(text: String) = Unit
+    fun onFinalResult(result: VoiceRecognitionResult) = onFinal(result.text)
     fun onError(code: Int)
     fun onListeningChanged(listening: Boolean)
 }
@@ -43,18 +52,37 @@ interface BargeInHook {
 }
 
 /**
- * Voice input via SpeechRecognizer. Does not embed an agent loop — transcripts
- * are enqueued for Hermes dispatch upstream.
+ * Rev 3.1 speech edge. Android is not an agent loop: this class only produces a
+ * provenance-rich transcript. It never uses the generic/cloud-capable recognizer.
  */
 class VoiceInputManager(
     context: Context,
     private val callback: VoiceInputCallback,
+    val audioArbiter: VoiceAudioArbiter = VoiceAudioArbiter(context.applicationContext),
+    private val biasingStringsProvider: () -> List<String> = { emptyList() },
 ) {
-    private val recognizer: SpeechRecognizer? =
-        if (SpeechRecognizer.isRecognitionAvailable(context)) SpeechRecognizer.createSpeechRecognizer(context)
-        else null
-
+    private val appContext = context.applicationContext
+    private val mainHandler = Handler(Looper.getMainLooper())
     private val listening = AtomicBoolean(false)
+    private val onDeviceAvailable =
+        Build.VERSION.SDK_INT >= Build.VERSION_CODES.S && SpeechRecognizer.isOnDeviceRecognitionAvailable(appContext)
+    val capability: VoiceRecognitionCapabilityDecision =
+        VoiceRecognitionPolicy.decide(Build.VERSION.SDK_INT, onDeviceAvailable)
+
+    private val recognizer: SpeechRecognizer? = when (capability.backend) {
+        VoiceRecognitionBackend.ANDROID_ON_DEVICE_CALLER_AUDIO,
+        VoiceRecognitionBackend.ANDROID_ON_DEVICE_DIRECT_MIC,
+        -> if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.S && onDeviceAvailable) {
+            SpeechRecognizer.createOnDeviceSpeechRecognizer(appContext)
+        } else null
+        VoiceRecognitionBackend.SHERPA_PRIMARY_REQUIRED,
+        VoiceRecognitionBackend.UNAVAILABLE,
+        -> null
+    }
+
+    private var pipeSession: VoiceAudioPipeSession? = null
+    private var activeTurnId: String? = null
+    private var activeTurnStartedAtMs: Long = 0L
 
     private val listener = object : RecognitionListener {
         override fun onReadyForSpeech(params: Bundle?) {
@@ -65,24 +93,81 @@ class VoiceInputManager(
         override fun onBeginningOfSpeech() = Unit
         override fun onRmsChanged(rmsdB: Float) = Unit
         override fun onBufferReceived(buffer: ByteArray?) = Unit
+
         override fun onEndOfSpeech() {
+            // Caller-fed sessions terminate when their write side closes. Closing here preserves
+            // the recognizer's endpoint while preventing it from waiting forever on an open pipe.
+            closePipeOnly()
             listening.set(false)
             callback.onListeningChanged(false)
         }
 
         override fun onError(error: Int) {
+            cleanupTurnCapture()
             listening.set(false)
             callback.onListeningChanged(false)
             callback.onError(error)
         }
 
         override fun onResults(results: Bundle?) {
-            val text = results?.getStringArrayList(SpeechRecognizer.RESULTS_RECOGNITION)?.firstOrNull().orEmpty()
-            callback.onFinal(text)
+            val hypotheses = results
+                ?.getStringArrayList(SpeechRecognizer.RESULTS_RECOGNITION)
+                ?.filter { it.isNotBlank() }
+                .orEmpty()
+            val confidence = results
+                ?.getFloatArray(SpeechRecognizer.CONFIDENCE_SCORES)
+                ?.toList()
+                .orEmpty()
+            val words = if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.UPSIDE_DOWN_CAKE) {
+                results?.getParcelableArrayList(
+                    SpeechRecognizer.RECOGNITION_PARTS,
+                    RecognitionPart::class.java,
+                ).orEmpty().map { part ->
+                    VoiceWordEvidence(
+                        rawText = part.rawText,
+                        formattedText = part.formattedText,
+                        timestampMs = part.timestampMillis,
+                        confidenceLevel = part.confidenceLevel,
+                    )
+                }
+            } else emptyList()
+            val alternatives = if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.UPSIDE_DOWN_CAKE) {
+                results?.getParcelableArrayList(
+                    SpeechRecognizer.RESULTS_ALTERNATIVES,
+                    AlternativeSpans::class.java,
+                )?.firstOrNull()?.spans.orEmpty().map { span ->
+                    VoiceAlternativeSpanEvidence(
+                        start = span.startPosition,
+                        end = span.endPosition,
+                        alternatives = span.alternatives.toList(),
+                    )
+                }
+            } else emptyList()
+
+            val turnId = activeTurnId ?: UUID.randomUUID().toString()
+            val result = VoiceRecognitionResult(
+                turnId = turnId,
+                text = hypotheses.firstOrNull().orEmpty(),
+                hypotheses = hypotheses,
+                hypothesisConfidence = confidence,
+                words = words,
+                alternatives = alternatives,
+                backend = capability.backend,
+                callerAudioInjected = capability.callerAudioSupported,
+                startedAtMs = activeTurnStartedAtMs,
+                finalizedAtMs = System.currentTimeMillis(),
+            )
+            cleanupTurnCapture()
+            listening.set(false)
+            callback.onListeningChanged(false)
+            callback.onFinalResult(result)
         }
 
         override fun onPartialResults(partialResults: Bundle?) {
-            val text = partialResults?.getStringArrayList(SpeechRecognizer.RESULTS_RECOGNITION)?.firstOrNull().orEmpty()
+            val text = partialResults
+                ?.getStringArrayList(SpeechRecognizer.RESULTS_RECOGNITION)
+                ?.firstOrNull()
+                .orEmpty()
             callback.onPartial(text)
         }
 
@@ -93,31 +178,130 @@ class VoiceInputManager(
         recognizer?.setRecognitionListener(listener)
     }
 
-    fun startListening() {
-        val intent = Intent(RecognizerIntent.ACTION_RECOGNIZE_SPEECH).apply {
-            putExtra(RecognizerIntent.EXTRA_LANGUAGE_MODEL, RecognizerIntent.LANGUAGE_MODEL_FREE_FORM)
-            putExtra(RecognizerIntent.EXTRA_PARTIAL_RESULTS, true)
-            putExtra(RecognizerIntent.EXTRA_MAX_RESULTS, 1)
-        }
-        recognizer?.startListening(intent)
+    fun startListening(turnId: String = UUID.randomUUID().toString()): String {
+        mainHandler.post { startListeningOnMain(turnId) }
+        return turnId
     }
 
+    private fun startListeningOnMain(turnId: String) {
+        stopListeningOnMain(notify = false)
+        activeTurnId = turnId
+        activeTurnStartedAtMs = System.currentTimeMillis()
+
+        val localRecognizer = recognizer
+        if (localRecognizer == null) {
+            callback.onListeningChanged(false)
+            callback.onError(
+                if (capability.backend == VoiceRecognitionBackend.SHERPA_PRIMARY_REQUIRED) {
+                    ERROR_SHERPA_PRIMARY_REQUIRED
+                } else ERROR_LOCAL_ASR_UNAVAILABLE,
+            )
+            return
+        }
+
+        val callerAudio = if (capability.callerAudioSupported) {
+            try {
+                audioArbiter.openRecognitionPipe().also { pipeSession = it }.readFd
+            } catch (_: Throwable) {
+                callback.onError(ERROR_AUDIO_ARBITER_UNAVAILABLE)
+                return
+            }
+        } else {
+            // API 31-32 cannot consume caller-provided PCM. Yield VAN's AudioRecord before
+            // the Android on-device recognizer opens the microphone so ownership is serialized.
+            if (capability.requiresArbiterYield) audioArbiter.yieldToSystemCapture()
+            null
+        }
+
+        val intent = buildRecognitionIntent(callerAudio)
+        runCatching { localRecognizer.startListening(intent) }
+            .onFailure {
+                cleanupTurnCapture()
+                callback.onError(ERROR_LOCAL_ASR_START_FAILED)
+            }
+    }
+
+    private fun buildRecognitionIntent(audioSource: ParcelFileDescriptor?): Intent =
+        Intent(RecognizerIntent.ACTION_RECOGNIZE_SPEECH).apply {
+            putExtra(RecognizerIntent.EXTRA_LANGUAGE_MODEL, RecognizerIntent.LANGUAGE_MODEL_FREE_FORM)
+            putExtra(RecognizerIntent.EXTRA_LANGUAGE, Locale.getDefault().toLanguageTag())
+            putExtra(RecognizerIntent.EXTRA_PARTIAL_RESULTS, true)
+            putExtra(RecognizerIntent.EXTRA_MAX_RESULTS, MAX_HYPOTHESES)
+            putExtra(RecognizerIntent.EXTRA_PREFER_OFFLINE, true)
+
+            if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.TIRAMISU) {
+                val bias = biasingStringsProvider()
+                    .asSequence()
+                    .map { it.trim() }
+                    .filter { it.isNotBlank() && it.length <= MAX_BIAS_STRING_LENGTH }
+                    .distinct()
+                    .take(MAX_BIAS_STRINGS)
+                    .toCollection(ArrayList())
+                if (bias.isNotEmpty()) putStringArrayListExtra(RecognizerIntent.EXTRA_BIASING_STRINGS, bias)
+                putExtra(RecognizerIntent.EXTRA_ENABLE_FORMATTING, RecognizerIntent.FORMATTING_OPTIMIZE_LATENCY)
+                putExtra(RecognizerIntent.EXTRA_HIDE_PARTIAL_TRAILING_PUNCTUATION, true)
+
+                if (audioSource != null) {
+                    putExtra(RecognizerIntent.EXTRA_AUDIO_SOURCE, audioSource)
+                    putExtra(RecognizerIntent.EXTRA_AUDIO_SOURCE_CHANNEL_COUNT, 1)
+                    putExtra(RecognizerIntent.EXTRA_AUDIO_SOURCE_ENCODING, AudioFormat.ENCODING_PCM_16BIT)
+                    putExtra(RecognizerIntent.EXTRA_AUDIO_SOURCE_SAMPLING_RATE, VoiceAudioArbiter.SAMPLE_RATE_HZ)
+                } else {
+                    putExtra(RecognizerIntent.EXTRA_ENABLE_BIASING_DEVICE_CONTEXT, true)
+                }
+            }
+
+            if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.UPSIDE_DOWN_CAKE) {
+                putExtra(RecognizerIntent.EXTRA_REQUEST_WORD_CONFIDENCE, true)
+                putExtra(RecognizerIntent.EXTRA_REQUEST_WORD_TIMING, true)
+            }
+        }
+
     fun stopListening() {
-        recognizer?.stopListening()
+        mainHandler.post { stopListeningOnMain(notify = true) }
+    }
+
+    private fun stopListeningOnMain(notify: Boolean) {
+        closePipeOnly()
+        runCatching { recognizer?.stopListening() }
+        if (capability.callerAudioSupported) audioArbiter.stopCapture(clearPreRoll = false)
         listening.set(false)
-        callback.onListeningChanged(false)
+        if (notify) callback.onListeningChanged(false)
+    }
+
+    private fun closePipeOnly() {
+        pipeSession?.close()
+        pipeSession = null
+    }
+
+    private fun cleanupTurnCapture() {
+        closePipeOnly()
+        if (capability.callerAudioSupported) audioArbiter.stopCapture(clearPreRoll = false)
+        activeTurnId = null
     }
 
     fun destroy() {
-        recognizer?.destroy()
+        mainHandler.post {
+            stopListeningOnMain(notify = false)
+            recognizer?.destroy()
+            audioArbiter.close()
+        }
     }
 
     fun isListening(): Boolean = listening.get()
+
+    companion object {
+        const val ERROR_SHERPA_PRIMARY_REQUIRED = -10_001
+        const val ERROR_LOCAL_ASR_UNAVAILABLE = -10_002
+        const val ERROR_AUDIO_ARBITER_UNAVAILABLE = -10_003
+        const val ERROR_LOCAL_ASR_START_FAILED = -10_004
+        private const val MAX_HYPOTHESES = 5
+        private const val MAX_BIAS_STRINGS = 40
+        private const val MAX_BIAS_STRING_LENGTH = 64
+    }
 }
 
-/**
- * TTS output with barge-in support and speech sync frames for avatar animation.
- */
+/** TTS output with barge-in support and speech sync frames for avatar animation. */
 class TtsOutputManager(
     context: Context,
     private val callback: TtsOutputCallback,
@@ -180,7 +364,11 @@ class TtsOutputManager(
             tts?.stop()
             speaking.set(false)
             callback.onSpeakingChanged(false)
-            _visualState.value = _visualState.value.copy(speaking = false, mouthOpen = 0f, durableState = VanDurableState.LISTENING)
+            _visualState.value = _visualState.value.copy(
+                speaking = false,
+                mouthOpen = 0f,
+                durableState = VanDurableState.LISTENING,
+            )
         }
     }
 
@@ -192,14 +380,14 @@ class TtsOutputManager(
     }
 }
 
-/** Bridges voice I/O barge-in: user speech cancels TTS. */
+/** Bridges voice I/O barge-in: user speech cancels ordinary TTS before recognition. */
 class VoiceSessionCoordinator(
     private val input: VoiceInputManager,
     private val output: TtsOutputManager,
 ) {
-    fun beginOwnerTurn() {
+    fun beginOwnerTurn(turnId: String = UUID.randomUUID().toString()): String {
         if (output.isSpeaking()) output.onBargeInRequested()
-        input.startListening()
+        return input.startListening(turnId)
     }
 
     fun endOwnerTurn() {
