@@ -142,11 +142,22 @@ def firstboot(public_host):
 def launch_instance(comp,ad,sub,image,keys_file,user_data):
     tags={'project':'VAN','role':'TRADING_CORE','environment':'production','managed-by':'oracle-admin','bootstrap':'one-pass-v1'}
     sc={'ocpus':OCPUS,'memoryInGBs':MEMORY_GB}
-    d=oci('compute','instance','launch','--availability-domain',ad,'--compartment-id',comp,'--display-name',TARGET,
+    args=['compute','instance','launch','--availability-domain',ad,'--compartment-id',comp,'--display-name',TARGET,
           '--hostname-label','van-trading-core','--image-id',image,'--shape',SHAPE,'--shape-config',json.dumps(sc),
           '--subnet-id',sub['id'],'--private-ip',PRIVATE_IP,'--assign-public-ip','false','--boot-volume-size-in-gbs',str(BOOT_GB),
-          '--ssh-authorized-keys-file',str(keys_file),'--user-data-file',str(user_data),'--freeform-tags',json.dumps(tags))['data']
-    print('LAUNCHED',d['id'],flush=True); wait_instance(d['id'],'RUNNING',900); return d['id']
+          '--ssh-authorized-keys-file',str(keys_file),'--user-data-file',str(user_data),'--freeform-tags',json.dumps(tags)]
+    last=''
+    for attempt in range(1,9):
+        r=run([OCI,*args,'--auth','instance_principal','--output','json'],check=False,timeout=180)
+        if r.returncode==0:
+            d=json.loads(r.stdout)['data']; print('LAUNCHED',d['id'],flush=True)
+            wait_instance(d['id'],'RUNNING',900); return d['id']
+        last=(r.stderr or r.stdout)[-1600:]
+        transient=any(x in last for x in ('TooManyRequests','"status": 429','Conflict','"status": 409','InternalServerError','ServiceUnavailable','"status": 500','"status": 503'))
+        if not transient: raise RuntimeError(f'instance launch failed permanently on attempt {attempt}: {last}')
+        delay=min(120,10*(2**(attempt-1)))
+        print(f'LAUNCH_RETRY attempt={attempt}/8 delay={delay}s reason=OCI_TRANSIENT',flush=True); time.sleep(delay)
+    raise RuntimeError('instance launch exhausted bounded retries: '+last)
 
 def bind_reserved_ip(comp,iid,reserved_id):
     va=oci('compute','vnic-attachment','list','--compartment-id',comp,'--instance-id',iid)['data']
@@ -256,7 +267,7 @@ def main():
     active,by,sub=get_resources(comp)
     protected={by[n]['id'] for n in ('oracle-admin','dial-hermes-control','vekl-worker')}
     doomed=[x for x in active if x['display-name'].startswith('van-trading-core') and (x.get('freeform-tags') or {}).get('project')=='VAN' and (x.get('freeform-tags') or {}).get('role')=='TRADING_CORE']
-    if not doomed: raise RuntimeError('no tagged VAN trading-core instances found to replace')
+    if not doomed: print('NO_EXISTING_TRADING_CORE: proceeding with clean creation',flush=True)
     if any(x['id'] in protected for x in doomed): raise RuntimeError('protected instance selected for termination')
     print('PROTECTED',[(n,by[n]['id']) for n in ('oracle-admin','dial-hermes-control','vekl-worker')],flush=True)
     print('TERMINATION_CANDIDATES',[(x['display-name'],x['id']) for x in doomed],flush=True)
