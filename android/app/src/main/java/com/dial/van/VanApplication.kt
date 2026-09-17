@@ -15,6 +15,7 @@ import com.dial.van.voice.TtsOutputManager
 import com.dial.van.voice.VanVoiceUiStore
 import com.dial.van.voice.VoiceInputCallback
 import com.dial.van.voice.VoiceInputManager
+import com.dial.van.voice.VoiceRecognitionResult
 import com.dial.van.voice.VoiceSessionCoordinator
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
@@ -122,16 +123,17 @@ class VanApplication : Application(), VoiceInputCallback, TtsOutputCallback {
         if (text.isNotBlank()) VanLiveVisualState.listeningStarted()
     }
 
-    override fun onFinal(text: String) {
+    override fun onFinalResult(result: VoiceRecognitionResult) {
+        val text = result.text
         val hasText = text.isNotBlank()
         voiceUi.final(text)
-        // Final recognition owns THINKING. The same transcript then enters the exact command path
-        // used by typed chat; voice is not a visual-only state transition or parallel authority path.
         VanLiveVisualState.finalTranscript(hasText = hasText)
         if (hasText) {
             commandController.submitText(
                 text = text,
                 source = VanCommandSource.VOICE,
+                turnId = result.turnId,
+                speechEvidenceRef = result.speechEvidenceRef,
             )
         }
     }
@@ -147,7 +149,6 @@ class VanApplication : Application(), VoiceInputCallback, TtsOutputCallback {
         if (listening) {
             VanLiveVisualState.listeningStarted()
         } else {
-            // Capture ended; the turn may still be THINKING/DISPATCHING.
             VanLiveVisualState.listeningEnded()
         }
     }
