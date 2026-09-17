@@ -4,10 +4,15 @@ import argparse
 import asyncio
 import json
 import math
+import sys
 import tempfile
 import time
 from pathlib import Path
 from typing import Awaitable, Callable
+
+BACKEND_ROOT = Path(__file__).resolve().parents[1]
+if str(BACKEND_ROOT) not in sys.path:
+    sys.path.insert(0, str(BACKEND_ROOT))
 
 from van_gateway.context.models import (
     ContextEdgeCandidate,
