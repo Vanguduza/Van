@@ -79,7 +79,13 @@ class N8nManagementClient:
         self._assert_private_host()
 
     def _assert_private_host(self) -> None:
-        """§14 — management API binds to loopback or a dedicated private interface."""
+        """§14 — management API binds to loopback or a dedicated private interface.
+
+        The test is ``is_global`` rather than ``not is_private``: Python treats
+        reserved and documentation ranges (TEST-NET, benchmarking) as "private",
+        which would wave through addresses that are not really a private
+        interface. Refusing anything globally routable is the property §14 wants.
+        """
         if self.allow_non_private_host:
             return
         host = urlparse(self.base_url).hostname or ""
@@ -90,7 +96,7 @@ class N8nManagementClient:
                 address = ipaddress.ip_address(socket.gethostbyname(host))
             except (OSError, ValueError) as exc:
                 raise N8nClientError("AUTOMATION_MANAGEMENT_HOST_UNRESOLVABLE", host) from exc
-        if not (address.is_loopback or address.is_private):
+        if address.is_global:
             raise N8nClientError("AUTOMATION_MANAGEMENT_HOST_NOT_PRIVATE", str(address))
 
     def _client(self) -> httpx.AsyncClient:

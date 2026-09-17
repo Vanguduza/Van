@@ -70,6 +70,24 @@ async def revoke_device(store: Store, device_id: str = DEVICE_ID) -> None:
     )
 
 
+async def seed_snapshot(store: Store, snapshot_id: str, command_id: str) -> str:
+    """``action_executions.snapshot_id`` is a real foreign key into context_snapshots.
+
+    Tests that reach ActionRuntime must therefore seal a snapshot first, exactly
+    as the Rev 3.1 runtime does before authorizing an action.
+    """
+    await store.execute(
+        """
+        INSERT OR IGNORE INTO context_snapshots(
+          snapshot_id, command_id, kernel_revision, fact_ids_json, graph_evidence_refs_json,
+          live_state_refs_json, policy_refs_json, compiled_at_ms, digest
+        ) VALUES (?, ?, 1, '[]', '[]', '[]', '[]', ?, ?)
+        """,
+        (snapshot_id, command_id, int(time.time() * 1000), f"sha256:{snapshot_id}"),
+    )
+    return snapshot_id
+
+
 async def seal_owner_command(
     authority: CommandAuthorityService,
     *,
@@ -242,5 +260,6 @@ __all__ = [
     "sample_capability",
     "sample_ir",
     "seal_owner_command",
+    "seed_snapshot",
     "seed_standing_intent",
 ]

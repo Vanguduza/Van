@@ -47,7 +47,7 @@ class BrowserSessionBroker:
         now_ms: int | None = None,
     ) -> dict[str, Any]:
         """Profiles come from ``config/browser/profiles.yaml``; this records runtime state."""
-        spec = self.policy.policy.check_profile(profile_alias)
+        spec = self.policy.check_profile(profile_alias)
         if secret_ref is not None and not secret_ref.startswith("secretref://"):
             # §407 — the broker stores a reference, never the credential.
             raise BrowserPolicyError("browser_profile_requires_secret_reference")

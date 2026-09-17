@@ -31,11 +31,16 @@ from van_gateway.models import ActionClass
 _RANK = {ActionClass.A1: 1, ActionClass.A2: 2, ActionClass.A3: 3, ActionClass.A4: 4, ActionClass.A5: 5}
 
 #: §§367.3, 407 — patterns that must never survive into evidence or a prompt.
+#: ``_SEP`` tolerates JSON quoting so ``{"authorization": "Bearer x"}`` matches
+#: just as a raw ``Authorization: Bearer x`` header would.
+_SEP = r'["\']?\s*[:=]\s*["\']?'
 _SECRET_PATTERNS = (
-    re.compile(r"(?i)\b(?:set-)?cookie\b\s*[:=]"),
-    re.compile(r"(?i)\bsession(?:id|_id|-token)\b\s*[:=]"),
-    re.compile(r"(?i)\b(?:api[_-]?key|access[_-]?token|refresh[_-]?token|client[_-]?secret|password)\b\s*[:=]\s*\S+"),
-    re.compile(r"(?i)\bauthorization\b\s*[:=]\s*(?:bearer|basic)\s+\S+"),
+    re.compile(rf"(?i)\b(?:set-)?cookie\b{_SEP}"),
+    re.compile(rf"(?i)\bsession(?:id|_id|-token)\b{_SEP}"),
+    re.compile(
+        rf"(?i)\b(?:api[_-]?key|access[_-]?token|refresh[_-]?token|client[_-]?secret|password)\b{_SEP}\S+"
+    ),
+    re.compile(rf"(?i)\bauthorization\b{_SEP}(?:bearer|basic)\s+\S+"),
     re.compile(r"\bsk-[A-Za-z0-9_-]{16,}\b"),
     re.compile(r"(?i)\b\d{6}\b\s*(?:is your|otp|verification code)"),
 )
@@ -72,6 +77,17 @@ class BrowserPolicyEngine:
         if tier.model_selects_actions and self.max_tier.ordinal < 4:
             raise BrowserPolicyError("browser_model_action_selection_requires_owner_amendment")
 
+    # ------------------------------------------------------------- profiles
+
+    def check_profile(self, alias: str) -> dict[str, Any]:
+        """Wrap the shared loader so every refusal from this engine is one type."""
+        try:
+            return self.policy.check_profile(alias)
+        except BrowserPolicyError:
+            raise
+        except PolicyError as exc:
+            raise BrowserPolicyError(str(exc)) from exc
+
     # --------------------------------------------------------------- tasks
 
     def check_task(
@@ -90,11 +106,12 @@ class BrowserPolicyEngine:
             # fresh owner approval bound to the exact action.
             raise BrowserPolicyError(f"browser_action_class_prohibited:{action_class.value}")
 
-        profile = self.policy.check_profile(profile_alias)
-        if mutating:
-            self.policy.check_mutation(profile_alias)
-            if str(profile.get("mutation")) != "gateway_authorized_only":
-                raise BrowserPolicyError(f"browser_profile_mutation_forbidden:{profile_alias}")
+        profile = self.check_profile(profile_alias)
+        if mutating and str(profile.get("mutation")) != "gateway_authorized_only":
+            # config/browser/profiles.yaml admits exactly one mutation posture.
+            # Anything else — including a profile that simply omits the key — is
+            # treated as forbidden rather than as permission by default.
+            raise BrowserPolicyError(f"browser_profile_mutation_forbidden:{profile_alias}")
 
         if not target_domain:
             raise BrowserPolicyError("browser_target_domain_missing")

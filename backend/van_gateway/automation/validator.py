@@ -185,10 +185,19 @@ class WorkflowValidator:
         if len(order) != len(ids):
             errors.append("WORKFLOW_GRAPH_CYCLE")
 
-        if len(ir.steps) > 1:
-            connected = set(order)
-            orphans = sorted(id_set - connected)
-            for orphan in orphans:
+        if len(ir.steps) > 1 and trigger_ids:
+            # An orphan is not "indegree 0" — a trigger has indegree 0 too, and
+            # Kahn's algorithm happily emits both. The real invariant is that every
+            # step must be reachable from a trigger, so walk forward from them.
+            reachable: set[str] = set()
+            frontier_ids = sorted(trigger_ids)
+            while frontier_ids:
+                node = frontier_ids.pop()
+                if node in reachable:
+                    continue
+                reachable.add(node)
+                frontier_ids.extend(adjacency[node])
+            for orphan in sorted(id_set - reachable):
                 errors.append(f"ORPHANED_STEP:{orphan}")
 
         terminals = [step_id for step_id in ids if not adjacency.get(step_id)]
