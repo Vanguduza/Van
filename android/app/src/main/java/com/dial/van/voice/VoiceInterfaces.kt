@@ -94,13 +94,15 @@ class VoiceInputManager(
         override fun onBufferReceived(buffer: ByteArray?) = Unit
 
         override fun onEndOfSpeech() {
+            // Closing caller audio signals EOS to the recognizer but deliberately leaves the
+            // arbiter capture session alive so wake can resume without reopening AudioRecord.
             closePipeOnly()
             listening.set(false)
             callback.onListeningChanged(false)
         }
 
         override fun onError(error: Int) {
-            cleanupTurnCapture()
+            cleanupTurn(preserveCapture = true)
             listening.set(false)
             callback.onListeningChanged(false)
             callback.onError(error)
@@ -154,7 +156,7 @@ class VoiceInputManager(
                 startedAtMs = activeTurnStartedAtMs,
                 finalizedAtMs = System.currentTimeMillis(),
             )
-            cleanupTurnCapture()
+            cleanupTurn(preserveCapture = true)
             listening.set(false)
             callback.onListeningChanged(false)
             callback.onFinalResult(result)
@@ -181,7 +183,7 @@ class VoiceInputManager(
     }
 
     private fun startListeningOnMain(turnId: String) {
-        stopListeningOnMain(notify = false)
+        prepareRecognizerForNewTurn()
         activeTurnId = turnId
         activeTurnStartedAtMs = System.currentTimeMillis()
 
@@ -198,6 +200,8 @@ class VoiceInputManager(
 
         val callerAudio = if (capability.callerAudioSupported) {
             try {
+                // If wake is already capturing this attaches to the same AudioRecord and obtains
+                // its rolling pre-buffer. VoiceAudioArbiter.start() is idempotent while active.
                 audioArbiter.openRecognitionPipe().also { pipeSession = it }.readFd
             } catch (_: Throwable) {
                 callback.onError(ERROR_AUDIO_ARBITER_UNAVAILABLE)
@@ -211,9 +215,17 @@ class VoiceInputManager(
         val intent = buildRecognitionIntent(callerAudio)
         runCatching { localRecognizer.startListening(intent) }
             .onFailure {
-                cleanupTurnCapture()
+                cleanupTurn(preserveCapture = true)
                 callback.onError(ERROR_LOCAL_ASR_START_FAILED)
             }
+    }
+
+    /** Reset only recognizer-owned turn resources. Never tears down caller-audio capture. */
+    private fun prepareRecognizerForNewTurn() {
+        closePipeOnly()
+        if (listening.get()) runCatching { recognizer?.cancel() }
+        listening.set(false)
+        activeTurnId = null
     }
 
     private fun buildRecognitionIntent(audioSource: ParcelFileDescriptor?): Intent =
@@ -252,15 +264,18 @@ class VoiceInputManager(
             }
         }
 
-    fun stopListening() {
-        mainHandler.post { stopListeningOnMain(notify = true) }
+    fun stopListening(preserveCapture: Boolean = false) {
+        mainHandler.post { stopListeningOnMain(notify = true, preserveCapture = preserveCapture) }
     }
 
-    private fun stopListeningOnMain(notify: Boolean) {
+    private fun stopListeningOnMain(notify: Boolean, preserveCapture: Boolean) {
         closePipeOnly()
         runCatching { recognizer?.stopListening() }
-        if (capability.callerAudioSupported) audioArbiter.stopCapture(clearPreRoll = false)
+        if (capability.callerAudioSupported && !preserveCapture) {
+            audioArbiter.stopCapture(clearPreRoll = false)
+        }
         listening.set(false)
+        activeTurnId = null
         if (notify) callback.onListeningChanged(false)
     }
 
@@ -269,15 +284,17 @@ class VoiceInputManager(
         pipeSession = null
     }
 
-    private fun cleanupTurnCapture() {
+    private fun cleanupTurn(preserveCapture: Boolean) {
         closePipeOnly()
-        if (capability.callerAudioSupported) audioArbiter.stopCapture(clearPreRoll = false)
+        if (capability.callerAudioSupported && !preserveCapture) {
+            audioArbiter.stopCapture(clearPreRoll = false)
+        }
         activeTurnId = null
     }
 
     fun destroy() {
         mainHandler.post {
-            stopListeningOnMain(notify = false)
+            stopListeningOnMain(notify = false, preserveCapture = false)
             recognizer?.destroy()
             audioArbiter.close()
         }
@@ -375,7 +392,7 @@ class TtsOutputManager(
     }
 }
 
-/** Bridges voice I/O barge-in: user speech cancels ordinary TTS before recognition. */
+/** Bridges manual voice I/O barge-in. Wake acknowledgement playback is a separate local path. */
 class VoiceSessionCoordinator(
     private val input: VoiceInputManager,
     private val output: TtsOutputManager,
@@ -385,7 +402,7 @@ class VoiceSessionCoordinator(
         return input.startListening(turnId)
     }
 
-    fun endOwnerTurn() {
-        input.stopListening()
+    fun endOwnerTurn(preserveCapture: Boolean = false) {
+        input.stopListening(preserveCapture = preserveCapture)
     }
 }
