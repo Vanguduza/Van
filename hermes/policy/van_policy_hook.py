@@ -2,7 +2,9 @@
 VAN Hermes policy hook — fail closed.
 
 Deny A5, require approval for A4, protect audit/truth/security and Google
-identity/credential isolation surfaces.
+identity/credential isolation surfaces, and preserve the Rev 3.1 boundary:
+Hermes may interpret/plan, but the gateway owns typed action class and execution
+authority.
 
 Hermes invokes: evaluate(action) -> PolicyDecision dict
 """
@@ -19,6 +21,9 @@ A3 = "A3"
 A4 = "A4"
 A5 = "A5"
 VALID_CLASSES = frozenset({A1, A2, A3, A4, A5})
+EXACT_ACTION = "EXACT_ACTION"
+HERMES_INTERPRETATION_REQUIRED = "HERMES_INTERPRETATION_REQUIRED"
+VALID_RESOLUTION_MODES = frozenset({EXACT_ACTION, HERMES_INTERPRETATION_REQUIRED})
 
 PROTECTED_SURFACES = frozenset({"audit","audit_log","approvals","approval_chain","authority_checks","security_hooks","policy_hook","project_truth","truth_protocol","host_role_guards","google_identity_broker","google_capability_registry","google_credential_planes"})
 
@@ -100,6 +105,61 @@ def _matches_a5_pattern(action: Mapping[str, Any]) -> Optional[str]:
     return None
 
 
+def _gateway_resolution_guard(action: Mapping[str, Any], action_class: Optional[str]) -> Optional[PolicyResult]:
+    mode_raw = action.get("resolution_mode")
+    if mode_raw is None:
+        return None  # legacy/internal callers retain the established policy path
+    mode = str(mode_raw)
+    if mode not in VALID_RESOLUTION_MODES:
+        return PolicyResult(Decision.DENY, "Unknown typed resolution mode", action_class=action_class, code="invalid_resolution_mode")
+
+    gateway_authorized = bool(action.get("gateway_authorized"))
+    mutating = bool(action.get("mutating", action.get("writes", False)))
+
+    if mode == HERMES_INTERPRETATION_REQUIRED:
+        if mutating and not gateway_authorized:
+            return PolicyResult(
+                Decision.DENY,
+                "Ambiguous owner intent is proposal-only until gateway action authorization",
+                action_class=action_class,
+                code="proposal_only",
+            )
+        return None
+
+    canonical_action_id = str(action.get("canonical_action_id") or "").strip()
+    canonical_class = str(action.get("canonical_action_class") or "").upper().strip()
+    if not canonical_action_id or canonical_class not in VALID_CLASSES:
+        return PolicyResult(
+            Decision.DENY,
+            "Exact typed action is missing canonical gateway identity/class",
+            action_class=action_class,
+            code="missing_canonical_action",
+        )
+    if action_class is not None and action_class != canonical_class:
+        return PolicyResult(
+            Decision.DENY,
+            "Hermes action class differs from gateway canonical class",
+            action_class=action_class,
+            code="canonical_class_mismatch",
+        )
+    proposed_action_id = str(action.get("action_id") or action.get("name") or "").strip()
+    if proposed_action_id and proposed_action_id != canonical_action_id:
+        return PolicyResult(
+            Decision.DENY,
+            "Hermes action identity differs from gateway canonical action",
+            action_class=canonical_class,
+            code="canonical_action_mismatch",
+        )
+    if mutating and not gateway_authorized:
+        return PolicyResult(
+            Decision.DENY,
+            "Typed mutation requires gateway action-runtime authorization",
+            action_class=canonical_class,
+            code="gateway_authorization_required",
+        )
+    return None
+
+
 def evaluate(action: Mapping[str, Any]) -> dict[str, Any]:
     try:
         act = _normalize_action(action)
@@ -115,6 +175,11 @@ def evaluate(action: Mapping[str, Any]) -> dict[str, Any]:
         return PolicyResult(Decision.DENY, f"Prohibited A5 pattern detected: {pattern}", action_class=A5, code="a5_prohibited").to_dict()
     if action_class == A5:
         return PolicyResult(Decision.DENY, "Action class A5 is prohibited", action_class=A5, code="a5_denied").to_dict()
+
+    resolution_denial = _gateway_resolution_guard(act, action_class)
+    if resolution_denial is not None:
+        return resolution_denial.to_dict()
+
     if _targets_protected_surface(act) and not act.get("owner_signed"):
         return PolicyResult(Decision.DENY, "Protected audit/truth/security/Google authority surface requires owner-signed authority", action_class=action_class or A5, code="protected_surface").to_dict()
     if action_class == A4:
