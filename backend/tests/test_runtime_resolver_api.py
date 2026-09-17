@@ -35,8 +35,11 @@ async def test_resolver_is_internal_only_and_returns_registry_policy():
             base_url="http://test",
             headers={"X-Van-Ingress-Token": INGRESS},
         ) as client:
+            # Public ingress without a paired-device credential is rejected by
+            # the outer device-auth boundary before the internal-only router.
             denied = await client.post("/v1/runtime/resolve", json={"text": "halt autonomous trading"})
-            assert denied.status_code == 403
+            assert denied.status_code == 401
+            assert denied.json()["detail"] == "device_access_denied"
 
             resolved = await client.post(
                 "/v1/runtime/resolve",
