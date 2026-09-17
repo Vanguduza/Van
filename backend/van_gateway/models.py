@@ -134,6 +134,8 @@ class CommandResult(BaseModel):
     approval_expires_at_unix: int | None = None
     resolved_action_id: str | None = None
     effective_action_class: ActionClass | None = None
+    no_stale_replay: bool | None = None
+    max_age_seconds: int | None = None
     evidence_id: str | None = None
     execution_id: str | None = None
     context_snapshot_id: str | None = None
