@@ -8,6 +8,7 @@ from pydantic import BaseModel, Field
 from van_gateway.action.models import VerificationObservation
 from van_gateway.action.registry import install_builtin_actions
 from van_gateway.action.service import ActionPolicyError, ActionRuntime
+from van_gateway.command.authority import CommandAuthorityError, CommandAuthorityService
 from van_gateway.command.resolver import TypedCommandResolver
 from van_gateway.config import Settings
 from van_gateway.context.models import ContextEdgeCandidate, ContextRequirement, OwnerFactCandidate
@@ -44,6 +45,8 @@ class ActionBeginBody(BaseModel):
     idempotency_key: str
     parameters: dict[str, Any] = Field(default_factory=dict)
     snapshot_id: str | None = None
+    # Compatibility fields retained in the wire schema, but ignored for owner
+    # authority. The gateway derives both from the signed command ledger.
     owner_approved: bool = False
     command_age_seconds: int = 0
 
@@ -58,7 +61,8 @@ class OwnerRuntimeApi:
 
     This is deliberately not an agent loop. Hermes profile ``van`` remains the
     sole planner/reasoner. The gateway owns canonical context, typed fast-path
-    resolution, action policy, verification ledgers and provider credentials.
+    resolution, signed-command authority, action policy, verification ledgers
+    and provider credentials.
     """
 
     def __init__(self, store: Store, settings: Settings) -> None:
@@ -66,6 +70,7 @@ class OwnerRuntimeApi:
         self.settings = settings
         self.context = OwnerContextService(store)
         self.actions = ActionRuntime(store)
+        self.authority = CommandAuthorityService(store)
         self.resolver = TypedCommandResolver()
         self.research = ExaResearchService(
             store,
@@ -94,6 +99,7 @@ class OwnerRuntimeApi:
             "context_kernel_revision": await self.context.kernel_revision(),
             "enabled_actions": int(action_count_row["n"]) if action_count_row is not None else 0,
             "resolver_version": "rev3.1.1",
+            "signed_command_authority_required": True,
             "research": await self.research.status(),
         }
 
@@ -160,19 +166,32 @@ class OwnerRuntimeApi:
         async def begin_action(body: ActionBeginBody, x_van_internal_token: str | None = Header(default=None)):
             self._require_internal(x_van_internal_token)
             try:
+                definition = await self.actions.get_definition(body.action_id)
+                if definition is None:
+                    raise ActionPolicyError("unknown_action")
+                authority, command_age = await self.authority.authorize_action(
+                    command_id=body.command_id,
+                    action=definition,
+                    principal_type=body.principal_type,
+                    requested_by=body.requested_by,
+                    snapshot_id=body.snapshot_id,
+                    turn_id=body.turn_id,
+                )
                 return await self.actions.begin(
                     execution_id=body.execution_id,
                     command_id=body.command_id,
-                    turn_id=body.turn_id,
+                    turn_id=authority.turn_id,
                     action_id=body.action_id,
-                    principal_type=body.principal_type,
-                    requested_by=body.requested_by,
+                    principal_type=authority.principal_type,
+                    requested_by=authority.requested_by,
                     idempotency_key=body.idempotency_key,
                     parameters=body.parameters,
-                    snapshot_id=body.snapshot_id,
-                    owner_approved=body.owner_approved,
-                    command_age_seconds=body.command_age_seconds,
+                    snapshot_id=authority.snapshot_id,
+                    owner_approved=authority.owner_approved,
+                    command_age_seconds=command_age,
                 )
+            except CommandAuthorityError as exc:
+                raise HTTPException(status_code=403, detail=str(exc)) from exc
             except ActionPolicyError as exc:
                 code = 403 if str(exc) == "principal_not_allowed" else 409
                 raise HTTPException(status_code=code, detail=str(exc)) from exc
