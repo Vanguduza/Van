@@ -90,6 +90,7 @@ class ContentTrust(str, Enum):
 
 class OwnerApprovalProof(BaseModel):
     challenge_id: str
+    source_command_id: str
     signature_b64: str
     algorithm: str = "ECDSA_P256_SHA256"
 
