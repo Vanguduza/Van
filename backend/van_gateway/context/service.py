@@ -8,10 +8,14 @@ from typing import Any
 
 from van_gateway.context.models import (
     ContextEdgeCandidate,
+    ContextEdgeRecord,
+    ContextGraphQuery,
+    ContextGraphResult,
     ContextReadiness,
     ContextRequirement,
     ContextSnapshot,
     EpistemicState,
+    GraphDirection,
     OwnerFactCandidate,
     OwnerFactRecord,
     ReadinessState,
@@ -53,7 +57,8 @@ class OwnerContextService:
 
     The gateway owns canonical state. This class performs no model inference. It
     stores provenance, preserves contradictions, provides deterministic temporal
-    selection, and compiles immutable context snapshots for downstream planning.
+    selection, bounded graph retrieval, and immutable context snapshots for
+    downstream planning.
     """
 
     def __init__(self, store: Store) -> None:
@@ -285,6 +290,8 @@ class OwnerContextService:
             raise ContextAdmissionError("SECRET content is forbidden from owner-context graph")
         if candidate.source_trust in {SourceTrust.UNTRUSTED_EXTERNAL, SourceTrust.MODEL_DERIVED} and candidate.authority in _HIGH_AUTHORITY:
             raise ContextAdmissionError("untrusted/model-derived edge cannot enter authoritative graph")
+        if candidate.valid_until_ms is not None and candidate.valid_until_ms <= candidate.valid_from_ms:
+            raise ContextAdmissionError("valid_until_ms must be after valid_from_ms")
         revision = await self._bump_revision()
         async with self.store.connection() as db:
             if candidate.supersedes_edge_id:
@@ -320,19 +327,170 @@ class OwnerContextService:
             await db.commit()
         return revision
 
+    @staticmethod
+    def _row_to_edge(row: Any) -> ContextEdgeRecord:
+        return ContextEdgeRecord(
+            edge_id=str(row["edge_id"]),
+            from_node=str(row["from_node"]),
+            predicate=str(row["predicate"]),
+            to_node=str(row["to_node"]),
+            scope=str(row["scope"]),
+            authority=EpistemicState(str(row["authority"])),
+            source_trust=SourceTrust(str(row["source_trust"])),
+            source_ref=str(row["source_ref"]),
+            confidence_permille=int(row["confidence_permille"]),
+            confidence_profile_version=int(row["confidence_profile_version"]),
+            valid_from_ms=int(row["valid_from_ms"]),
+            valid_until_ms=int(row["valid_until_ms"]) if row["valid_until_ms"] is not None else None,
+            observed_at_ms=int(row["observed_at_ms"]),
+            sensitivity=SensitivityClass(str(row["sensitivity"])),
+            revision=int(row["revision"]),
+        )
+
+    async def _current_edges_for_node(
+        self,
+        node: str,
+        query: ContextGraphQuery,
+        *,
+        now_ms: int,
+    ) -> list[ContextEdgeRecord]:
+        clauses = [
+            "scope = ?",
+            "valid_from_ms <= ?",
+            "(valid_until_ms IS NULL OR valid_until_ms > ?)",
+            "sensitivity != 'SECRET'",
+            "confidence_permille >= ?",
+        ]
+        params: list[Any] = [query.scope, now_ms, now_ms, query.min_confidence_permille]
+        if query.direction == GraphDirection.OUT:
+            clauses.append("from_node = ?")
+            params.append(node)
+        elif query.direction == GraphDirection.IN:
+            clauses.append("to_node = ?")
+            params.append(node)
+        else:
+            clauses.append("(from_node = ? OR to_node = ?)")
+            params.extend([node, node])
+        if query.predicates:
+            placeholders = ",".join("?" for _ in query.predicates)
+            clauses.append(f"predicate IN ({placeholders})")
+            params.extend(sorted(set(query.predicates)))
+
+        rows = await self.store.fetchall(
+            "SELECT * FROM owner_context_edges WHERE " + " AND ".join(clauses),
+            tuple(params),
+        )
+        edges = [self._row_to_edge(row) for row in rows]
+        if not query.allow_inferred:
+            edges = [edge for edge in edges if edge.authority != EpistemicState.INFERRED]
+        return sorted(
+            edges,
+            key=lambda edge: (
+                -_AUTHORITY_RANK[edge.authority],
+                -edge.confidence_permille,
+                -edge.revision,
+                edge.edge_id,
+            ),
+        )
+
+    async def traverse_graph(
+        self,
+        query: ContextGraphQuery,
+        *,
+        now_ms: int | None = None,
+    ) -> ContextGraphResult:
+        """Bounded deterministic temporal BFS over the canonical owner-context graph.
+
+        This is a retrieval primitive, not a truth resolver: competing edges are
+        retained in the result. No embedding, model inference or remote call is
+        permitted on this path.
+        """
+
+        now_ms = now_ms if now_ms is not None else int(time.time() * 1000)
+        seed_nodes = list(query.seed_nodes)
+        visited: set[str] = set(seed_nodes)
+        visited_order = list(seed_nodes)
+        frontier = list(seed_nodes)
+        emitted: set[str] = set()
+        result_edges: list[ContextEdgeRecord] = []
+        evidence_refs: list[str] = []
+        truncated = False
+
+        for _depth in range(query.max_depth):
+            layer_by_id: dict[str, ContextEdgeRecord] = {}
+            for node in sorted(frontier):
+                for edge in await self._current_edges_for_node(node, query, now_ms=now_ms):
+                    if edge.edge_id not in emitted:
+                        layer_by_id.setdefault(edge.edge_id, edge)
+
+            ordered = sorted(
+                layer_by_id.values(),
+                key=lambda edge: (
+                    -_AUTHORITY_RANK[edge.authority],
+                    -edge.confidence_permille,
+                    -edge.revision,
+                    edge.edge_id,
+                ),
+            )
+            remaining = query.max_edges - len(result_edges)
+            if len(ordered) > remaining:
+                ordered = ordered[:remaining]
+                truncated = True
+
+            next_nodes: set[str] = set()
+            frontier_set = set(frontier)
+            for edge in ordered:
+                emitted.add(edge.edge_id)
+                result_edges.append(edge)
+                evidence_refs.append(f"context-edge:{edge.edge_id}:r{edge.revision}")
+                if query.direction in {GraphDirection.OUT, GraphDirection.BOTH} and edge.from_node in frontier_set:
+                    if edge.to_node not in visited:
+                        next_nodes.add(edge.to_node)
+                if query.direction in {GraphDirection.IN, GraphDirection.BOTH} and edge.to_node in frontier_set:
+                    if edge.from_node not in visited:
+                        next_nodes.add(edge.from_node)
+
+            for node in sorted(next_nodes):
+                visited.add(node)
+                visited_order.append(node)
+            frontier = sorted(next_nodes)
+            if truncated or not frontier:
+                break
+
+        return ContextGraphResult(
+            scope=query.scope,
+            seed_nodes=seed_nodes,
+            visited_nodes=visited_order,
+            edges=result_edges,
+            evidence_refs=evidence_refs,
+            max_depth=query.max_depth,
+            truncated=truncated,
+            compiled_at_ms=now_ms,
+        )
+
     async def export_scope(self, scope: str) -> dict[str, Any]:
         facts = await self.store.fetchall(
             "SELECT * FROM owner_facts WHERE scope = ? AND sensitivity != 'SECRET' ORDER BY revision",
             (scope,),
         )
-        return {"scope": scope, "facts": [self._row_to_fact(row).model_dump(mode="json") for row in facts]}
+        edges = await self.store.fetchall(
+            "SELECT * FROM owner_context_edges WHERE scope = ? AND sensitivity != 'SECRET' ORDER BY revision",
+            (scope,),
+        )
+        return {
+            "scope": scope,
+            "facts": [self._row_to_fact(row).model_dump(mode="json") for row in facts],
+            "edges": [self._row_to_edge(row).model_dump(mode="json") for row in edges],
+        }
 
     async def erase_scope(self, scope: str) -> int:
         async with self.store.connection() as db:
-            cur = await db.execute("DELETE FROM owner_facts WHERE scope = ?", (scope,))
-            await db.execute("DELETE FROM owner_context_edges WHERE scope = ?", (scope,))
+            facts = await db.execute("DELETE FROM owner_facts WHERE scope = ?", (scope,))
+            edges = await db.execute("DELETE FROM owner_context_edges WHERE scope = ?", (scope,))
             await db.commit()
-            count = int(cur.rowcount if cur.rowcount is not None and cur.rowcount >= 0 else 0)
+            fact_count = int(facts.rowcount if facts.rowcount is not None and facts.rowcount >= 0 else 0)
+            edge_count = int(edges.rowcount if edges.rowcount is not None and edges.rowcount >= 0 else 0)
+            count = fact_count + edge_count
         if count:
             await self._bump_revision()
         return count
