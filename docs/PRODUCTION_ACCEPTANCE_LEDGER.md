@@ -23,7 +23,7 @@
 | SBOM / provenance / checksums | PASS at prior HEAD |
 | Project Truth canonical state contract | PASS — canonical state added and guarded for PR-based integration |
 | Backend bootstrap | PASS — repository root resolution and `python3` invocation corrected; bootstrap executed successfully |
-| Complete Python suite at current Google/ingress closure HEAD | PASS — 98 passed |
+| Complete Python suite at current Google/profile closure HEAD | PASS — 99 passed |
 
 ## Google Intelligence Mesh repository gates
 
@@ -71,6 +71,17 @@ See `docs/EXTERNAL_GATES.md`. Canonical Google auth lives on Hermes and is impor
 ## Tag policy
 
 Do **not** tag `v1.0` until all applicable gates are green. Current version remains `0.5.0-dev`.
+
+## Live VAN profile preservation and inference certification — 2026-09-17
+
+Token-free receipt: `artifacts/runtime/van_profile_live_attestation.json`. Certified installer source: `270da5d3a8756a19458307968a9c30e2fe138f1a`.
+
+| Gate | Status |
+|---|---|
+| Runtime-owned profile state preservation | PASS — `.env`, `state.db`, sessions, memories, logs, pairing, caches, platform/cron/hooks/sandboxes retained identity/hash/count evidence |
+| Runtime-installed extra skill preservation | PASS — `skills/software-development/github/scripts/git-credential-token.py` survived unchanged |
+| Installed profile doctor | PASS — all 13 VAN-managed skills verified; root `.env` mode `0600`; no credential filenames in managed static content |
+| Live VAN primary inference | PASS — exact `VAN_PROFILE_CANARY_OK`; provider `anthropic`; model `claude-sonnet-5`; one API call |
 
 ## Live Hermes certification — 2026-09-15
 
