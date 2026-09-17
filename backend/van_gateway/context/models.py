@@ -43,6 +43,12 @@ class ReadinessState(str, Enum):
     UNKNOWN = "UNKNOWN"
 
 
+class GraphDirection(str, Enum):
+    OUT = "OUT"
+    IN = "IN"
+    BOTH = "BOTH"
+
+
 class OwnerFactCandidate(BaseModel):
     fact_id: str
     subject: str
@@ -131,3 +137,60 @@ class ContextEdgeCandidate(BaseModel):
         if not 0 <= value <= 1000:
             raise ValueError("confidence_permille must be in 0..1000")
         return value
+
+
+class ContextEdgeRecord(ContextEdgeCandidate):
+    revision: int
+
+
+class ContextGraphQuery(BaseModel):
+    seed_nodes: list[str]
+    scope: str = "global"
+    direction: GraphDirection = GraphDirection.BOTH
+    predicates: list[str] = Field(default_factory=list)
+    max_depth: int = 1
+    max_edges: int = 64
+    allow_inferred: bool = False
+    min_confidence_permille: int = 0
+
+    @field_validator("seed_nodes")
+    @classmethod
+    def _seeds_required(cls, value: list[str]) -> list[str]:
+        normalized = sorted({item.strip() for item in value if item.strip()})
+        if not normalized:
+            raise ValueError("seed_nodes must contain at least one node")
+        if len(normalized) > 32:
+            raise ValueError("seed_nodes may contain at most 32 nodes")
+        return normalized
+
+    @field_validator("max_depth")
+    @classmethod
+    def _depth_bound(cls, value: int) -> int:
+        if not 1 <= value <= 3:
+            raise ValueError("max_depth must be in 1..3")
+        return value
+
+    @field_validator("max_edges")
+    @classmethod
+    def _edge_bound(cls, value: int) -> int:
+        if not 1 <= value <= 256:
+            raise ValueError("max_edges must be in 1..256")
+        return value
+
+    @field_validator("min_confidence_permille")
+    @classmethod
+    def _min_confidence_bound(cls, value: int) -> int:
+        if not 0 <= value <= 1000:
+            raise ValueError("min_confidence_permille must be in 0..1000")
+        return value
+
+
+class ContextGraphResult(BaseModel):
+    scope: str
+    seed_nodes: list[str]
+    visited_nodes: list[str]
+    edges: list[ContextEdgeRecord]
+    evidence_refs: list[str]
+    max_depth: int
+    truncated: bool
+    compiled_at_ms: int
