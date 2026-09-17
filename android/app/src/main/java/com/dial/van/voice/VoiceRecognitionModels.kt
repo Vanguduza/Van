@@ -3,6 +3,8 @@ package com.dial.van.voice
 enum class VoiceRecognitionBackend {
     ANDROID_ON_DEVICE_CALLER_AUDIO,
     ANDROID_ON_DEVICE_DIRECT_MIC,
+    SHERPA_PRIMARY,
+    FUSED_ANDROID_SHERPA,
     SHERPA_PRIMARY_REQUIRED,
     UNAVAILABLE,
 }
@@ -83,6 +85,9 @@ data class VoiceRecognitionResult(
     val callerAudioInjected: Boolean,
     val startedAtMs: Long,
     val finalizedAtMs: Long,
+    val secondPassUsed: Boolean = false,
+    val secondPassText: String? = null,
+    val secondPassConfidence: Float? = null,
 ) {
     val speechEvidenceRef: String = "android://voice/$turnId"
 }
