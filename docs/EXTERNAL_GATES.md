@@ -26,6 +26,10 @@ Resolved 2026-09-15 (workstation): local Project Truth mounts for `van`, `dial`,
 | Nano Banana / Veo | Hermes Gemini runtime + quota canary | CONFIGURED via attestation |
 | Google ADK/A2A | owner-administered Cloud/runtime | still EXTERNAL (cloud plane) |
 | Android owner gateway authentication | owner ingress bearer + enrolled device HMAC | LIVE-CERTIFIED — unauthenticated requests rejected; encrypted device credential survived restart; atomic revoke survived second restart |
+| Exa research provider | owner-provisioned Exa API key in gateway secret plane + live canary | repo-side adapter, egress policy, evidence ledger and canary endpoint implemented; `VAN_EXA_EGRESS_ENABLED` remains fail-closed until certified |
+| sherpa-onnx Android runtime | pinned official `v1.13.8` Android AAR/native bundle | integration boundary and wake pipeline implemented; production bundle must match official release SHA-256 `633c24321e06b1fe79feafa03ea16cbc0f8a286641e2da3559bac91bdb13bd96` |
+| Wake KWS model | owner-approved redistributable/local model capable of `Hey Van` | KWS/verifier interfaces, VAD, thresholds and tests implemented; do not ship official sherpa pretrained KWS weights until model licence/redistribution authority is explicitly established |
+| Voice physical certification | Galaxy S24-class device + microphone/TTS/on-device-recognizer runtime | API-tiered on-device STT, single AudioRecord arbiter, 750 ms pre-roll, AEC/noise suppression, signed voice turns and local `hie van` cache implemented; remaining device SLO/certification evidence required |
 | Stable public HTTPS ingress | named Cloudflare Tunnel token + stable hostname | EXTERNAL — fail-closed installer/service ready; `trycloudflare.com` is rejected for production |
 | Physical Samsung device | USB device + permissions | `tools/certification/device_cert_probe.py` + `docs/DEVICE_ACCEPTANCE_CHECKLIST.md` |
 | Artist `.riv` | Rive editor | contract + Canvas fallback + handoff |
@@ -43,9 +47,19 @@ Resolved 2026-09-15 (workstation): local Project Truth mounts for `van`, `dial`,
 6. Missing or unverified capability must return an explicit degraded/auth-required state; never simulate success.
 7. Hermes-hosted authentication is recorded as attestation evidence; it does not copy tokens into Van.
 
+## Rev 3.1 research and voice certification rules
+
+1. Exa credentials live only in the gateway secret plane; Android, Hermes prompts and evidence artifacts never receive the raw key.
+2. Exa is not `READY` until a live canary returns usable sources and a token-free evidence receipt is persisted.
+3. sherpa-onnx source/runtime and wake-model weights are separate supply-chain objects. Runtime checksum verification does not establish model redistribution rights.
+4. A wake model may be used in production only after its licence/redistribution authority is recorded with the model bundle revision and SHA-256 digests.
+5. Wake acceptance must never treat speaker similarity as authentication. A low owner-speaker score cannot veto independently strong phrase evidence.
+6. The exact spoken wake acknowledgement is `hie van`. Certification must measure wake-to-ack latency and command recognition while acknowledgement audio overlaps owner speech.
+7. Physical voice certification records the Android build fingerprint, recognition service identity/version, wake-model revision, sherpa runtime revision, acknowledgement-asset hash and VAN commit SHA.
+
 ## Physical device checklist
 
-Install, overlay, notification listener, mic, TTS, biometric, drag/dock, rotation, process kill, Doze, reboot, offline queue, reconnect, secret notification, barge-in, share-to-VAN routing, Google capability status display, Rive failure → Canvas, reduced motion.
+Install, overlay, notification listener, mic, TTS, biometric, drag/dock, rotation, process kill, Doze, reboot, offline queue, reconnect, secret notification, barge-in, share-to-VAN routing, Google capability status display, Rive failure → Canvas, reduced motion. Rev 3.1 additionally requires continuous capture ownership, telephony/mic-privacy yield, wake false-accept/reject runs, `hie van` overlap/AEC testing, on-device STT verification, word-evidence checks on API 34+, no-stale-replay voice commands, and device-revocation voice disarm.
 
 ## Android production gateway ingress
 
