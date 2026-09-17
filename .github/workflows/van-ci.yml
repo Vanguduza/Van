@@ -27,6 +27,21 @@ jobs:
         run: pytest -q tests/contracts
       - name: Hermes policy tests
         run: pytest -q hermes/policy/tests
+      - name: Context retrieval latency evidence
+        working-directory: backend
+        run: |
+          python tools/benchmark_context_retrieval.py \
+            --facts 320 \
+            --edges 160 \
+            --iterations 50 \
+            --cold-iterations 10 \
+            --output ../artifacts/release/context/context-latency.json
+      - name: Upload context latency evidence
+        uses: actions/upload-artifact@v4
+        with:
+          name: van-context-latency-evidence
+          path: artifacts/release/context/context-latency.json
+          if-no-files-found: error
 
   android-and-visual-evidence:
     runs-on: ubuntu-latest
