@@ -15,6 +15,8 @@ REQUIRED_TOOLS = {
     "runtime_status",
     "resolve_command",
     "context_graph_query",
+    "context_lexical_query",
+    "context_hot_capsule",
     "context_readiness",
     "context_snapshot",
     "research_status",
@@ -32,6 +34,8 @@ def test_owner_runtime_mcp_has_fixed_narrow_surface():
         assert f"name: '{tool}'" in text
     assert "/v1/runtime/context/facts" not in text
     assert "/v1/runtime/context/edges" not in text
+    assert "/v1/runtime/context/lexical/query" in text
+    assert "/v1/runtime/context/hot-capsules" in text
     assert "generic HTTP" in text
     assert "Object.hasOwn(ROUTES, name)" in text
 
@@ -70,3 +74,13 @@ def test_owner_runtime_mcp_tools_list_is_parseable_without_network():
     responses = [json.loads(line) for line in completed.stdout.splitlines() if line.strip()]
     listed = {tool["name"] for tool in responses[1]["result"]["tools"]}
     assert listed == REQUIRED_TOOLS
+
+
+def test_retrieval_tools_remain_read_only_and_bounded():
+    text = SHIM.read_text(encoding="utf-8")
+    assert "No embedding, model inference or remote call is used" in text
+    assert "cache of evidence references, not a truth store" in text
+    assert "maximum: 64" in text
+    assert "maximum: 300000" in text
+    assert "context_lexical_query: { method: 'POST'" in text
+    assert "context_hot_capsule: { method: 'POST'" in text
