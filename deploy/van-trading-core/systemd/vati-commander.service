@@ -1,0 +1,24 @@
+[Unit]
+Description=Van trading commander (Hermes subordinate, typed commands only)
+After=network-online.target vati-vekl.service
+Wants=network-online.target
+
+[Service]
+Type=simple
+User=vati
+Group=vati
+EnvironmentFile=/opt/van-trading/config/van-trading-core.env
+Environment=PYTHONPATH=/opt/van-trading/app/trading
+Environment=VAN_COMMANDER_AUTOCREATE=1
+WorkingDirectory=/opt/van-trading/app
+ExecStart=/opt/van-trading/venv/bin/uvicorn commander.app:app --host ${VAN_COMMANDER_BIND} --port ${VAN_COMMANDER_PORT} --ssl-certfile ${VAN_COMMANDER_TLS_CERT} --ssl-keyfile ${VAN_COMMANDER_TLS_KEY} --log-level warning
+Restart=always
+RestartSec=3
+NoNewPrivileges=true
+ProtectSystem=strict
+ProtectHome=true
+ReadWritePaths=/var/lib/van-trading /var/log/van-trading
+PrivateTmp=true
+# systemctl restart of allowlisted vati-* units is delegated through polkit rule installed by bootstrap
+[Install]
+WantedBy=multi-user.target

@@ -1,0 +1,47 @@
+{
+  "discipline": "FX Intraday/Session \u2192 Swing",
+  "instruments": [
+    "EURUSD",
+    "GBPUSD",
+    "USDJPY"
+  ],
+  "horizons": [
+    "SWING"
+  ],
+  "eligible_regimes": [
+    "BULL",
+    "BEAR"
+  ],
+  "forbidden_regimes": [
+    "TRANSITION",
+    "EXTREME"
+  ],
+  "required_data_granularity": "BARS",
+  "required_features": [
+    "ema_fast",
+    "ema_slow",
+    "atr",
+    "rsi",
+    "swing_low",
+    "swing_high"
+  ],
+  "entry_logic_ref": "vati.strategies.fx_trend_pullback",
+  "invalidation_logic_ref": "regime flips to RANGE or TRANSITION",
+  "stop_model": "min(swing, 2 ATR)",
+  "target_model": "3 ATR",
+  "risk_limits": {
+    "max_risk_per_trade": "0.0050"
+  },
+  "execution_model": "LIMIT at close, protective stop atomic",
+  "event_rules": {
+    "tier1": "no new entries inside blackout/quiet"
+  },
+  "training_period": "2019-01-01/2024-12-31",
+  "validation_period": "2025-01-01/2026-06-30",
+  "cost_model_ref": "vati.market_data.costs.FxCostModel",
+  "state": "DEMO",
+  "evidence_refs": [],
+  "strategy_id": "FX-TREND-PULLBACK-01",
+  "version": "1.0.0",
+  "capsule_hash": "993157bbdf31fec1119cc0fef68936430fc3e032125d983c7f77e18a0c30a877"
+}

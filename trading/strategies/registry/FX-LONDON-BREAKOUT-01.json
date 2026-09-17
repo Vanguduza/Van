@@ -1,0 +1,45 @@
+{
+  "discipline": "FX Session",
+  "instruments": [
+    "EURUSD",
+    "GBPUSD"
+  ],
+  "horizons": [
+    "INTRADAY"
+  ],
+  "eligible_regimes": [
+    "RANGE",
+    "BULL",
+    "BEAR"
+  ],
+  "forbidden_regimes": [
+    "EXTREME"
+  ],
+  "required_data_granularity": "BARS",
+  "required_features": [
+    "range_compression",
+    "spread_percentile",
+    "swing_high",
+    "swing_low",
+    "atr"
+  ],
+  "entry_logic_ref": "vati.strategies.session_breakout",
+  "invalidation_logic_ref": "range low breached",
+  "stop_model": "range low",
+  "target_model": "2 ATR",
+  "risk_limits": {
+    "max_risk_per_trade": "0.0050"
+  },
+  "execution_model": "STOP entry, spread percentile \u2264 0.6",
+  "event_rules": {
+    "tier1": "flat"
+  },
+  "training_period": "2019-01-01/2024-12-31",
+  "validation_period": "2025-01-01/2026-06-30",
+  "cost_model_ref": "vati.market_data.costs.FxCostModel",
+  "state": "DEMO",
+  "evidence_refs": [],
+  "strategy_id": "FX-LONDON-BREAKOUT-01",
+  "version": "1.0.0",
+  "capsule_hash": "4ece772e220d6a8e0713b100858d3bd55f41ea0c8d26da7a283aed39103d1ff4"
+}

@@ -67,3 +67,66 @@ def test_register_hook():
     registry: dict = {}
     hook.register_hook(registry)
     assert registry["van"] is hook.evaluate
+
+
+# --- VATI trading prohibitions (Rev 2 §37–§39) -------------------------------
+
+import pytest
+
+
+@pytest.mark.parametrize(
+    "name",
+    [
+        "bypass_risk_authority", "skip_risk_check", "direct_broker_order", "llm_broker_order",
+        "remove_stop_loss", "widen_protective_stop", "martingale", "unlimited_grid",
+        "revenge_risk_increase", "disable_kill_switch", "trade_unverified_account",
+        "trade_stale_data", "silent_strategy_mutation", "unvalidated_research_to_live", "broker_token_in_prompt",
+        "learning_engine_writes_mandate", "learning_widens_risk", "learning_raises_multiplier", "auto_promote_strategy",
+        "self_admit_knowledge", "broker_credentials_in_memory", "memory_as_evidence",
+    ],
+)
+def test_trading_forbidden_behaviours_are_a5(name):
+    result = hook.evaluate({"action_class": "A3", "name": name, "mutating": True})
+    assert result["decision"] == "deny" and result["code"] == "a5_prohibited", result
+
+
+def test_trading_forbidden_behaviour_is_a5_even_with_owner_approval():
+    result = hook.evaluate({"action_class": "A4", "name": "remove_stop_loss", "owner_approval": True})
+    assert result["decision"] == "deny" and result["code"] == "a5_prohibited"
+
+
+@pytest.mark.parametrize("target", ["risk_authority", "trading_mandate", "kill_switch", "trading_ledger", "strategy_registry", "platform_risk_ceilings"])
+def test_trading_authority_surfaces_require_owner_signature(target):
+    result = hook.evaluate({"action_class": "A3", "target": target, "operation": "write", "mutating": True})
+    assert result["decision"] == "deny" and result["code"] == "protected_surface"
+    signed = hook.evaluate({"action_class": "A4", "target": target, "operation": "write", "mutating": True, "owner_signed": True, "owner_approval": True})
+    assert signed["decision"] == "allow"
+
+
+def test_kill_switch_reset_needs_owner_signature():
+    result = hook.evaluate({"action_class": "A4", "name": "reset_kill_switch", "target": "kill_switch", "mutating": True})
+    assert result["decision"] == "deny" and result["code"] == "protected_surface"
+
+
+def test_mandate_file_write_is_protected_path():
+    result = hook.evaluate({"action_class": "A3", "operation": "write", "path": "trading/mandates/mandate.fx_primary.json", "mutating": True})
+    assert result["decision"] == "deny" and result["code"] == "protected_surface"
+
+
+def test_risk_authority_code_write_requires_truth_verified_owner_signature():
+    result = hook.evaluate({"action_class": "A3", "operation": "patch", "path": "trading/vati/risk/authority.py", "mutating": True})
+    assert result["decision"] == "deny"
+    ok = hook.evaluate({"action_class": "A3", "operation": "patch", "path": "trading/vati/risk/authority.py", "mutating": True, "owner_signed": True, "truth_authority_verified": True})
+    assert ok["decision"] == "allow"
+
+
+def test_ordinary_trade_intent_submission_is_allowed_under_mandate():
+    result = hook.evaluate({"action_class": "A3", "name": "submit_trade_intent", "target": "opportunity_engine", "mutating": True})
+    assert result["decision"] == "allow"
+
+
+def test_learning_boundary_module_is_a_protected_surface():
+    result = hook.evaluate({"action_class": "A3", "operation": "patch", "path": "trading/vati/learning/boundary.py", "mutating": True})
+    assert result["decision"] == "deny" and result["code"] == "protected_surface"
+    ok = hook.evaluate({"action_class": "A3", "operation": "read", "path": "trading/vati/learning/boundary.py"})
+    assert ok["decision"] != "deny"

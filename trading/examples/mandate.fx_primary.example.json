@@ -1,0 +1,64 @@
+{
+  "mandate_id": "mandate-fx-primary-2026-09",
+  "version": "1.0.0",
+  "account_alias": "fx_primary",
+  "venue": "mt5",
+  "mode": "LIMITED_LIVE",
+  "instruments": [
+    "EURUSD",
+    "GBPUSD",
+    "USDJPY",
+    "XAUUSD"
+  ],
+  "allowed_strategies": [
+    "FX-TREND-03",
+    "FX-LONDON-BREAKOUT-04",
+    "GOLD-NY-RECLAIM-04"
+  ],
+  "max_risk_per_trade": "0.0050",
+  "max_open_stop_risk": "0.0150",
+  "max_daily_loss": "0.0200",
+  "max_weekly_drawdown": "0.0400",
+  "max_currency_leg_exposure": "0.0100",
+  "max_consecutive_losses": 4,
+  "max_positions_per_instrument": 1,
+  "max_total_positions": 4,
+  "tier1_event_policy": "strategy_specific",
+  "weekend_hold_allowed": false,
+  "forbidden": [
+    "duplicate_order",
+    "macro_causality_on_synthetics",
+    "martingale",
+    "revenge_risk_increase",
+    "risk_doubling_after_loss",
+    "silent_strategy_mutation",
+    "single_dom_as_total_fx_liquidity",
+    "stop_removal",
+    "stop_widening_on_loss",
+    "trade_stale_data",
+    "trade_unverified_account",
+    "trade_without_broker_side_stop",
+    "unbounded_leverage",
+    "unlimited_averaging_down",
+    "unlimited_grid",
+    "unvalidated_research_to_live"
+  ],
+  "owner_signature_ref": "sig:owner-device:REPLACE_WITH_DEVICE_SIGNATURE_REF",
+  "signed_at_unix": 1789600000,
+  "expires_at_unix": 1792192000,
+  "drawdown_tiers": [
+    {
+      "threshold": "0.02",
+      "multiplier": "0.75"
+    },
+    {
+      "threshold": "0.04",
+      "multiplier": "0.40",
+      "top_tier_only": true
+    },
+    {
+      "threshold": "0.06",
+      "multiplier": "0"
+    }
+  ]
+}

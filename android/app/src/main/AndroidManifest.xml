@@ -35,6 +35,12 @@
             android:launchMode="singleTop"
             android:theme="@style/Theme.Van" />
 
+        <activity
+            android:name=".trading.TradingCommandCentreActivity"
+            android:exported="false"
+            android:label="Van Trading"
+            android:theme="@style/Theme.Van" />
+
         <service
             android:name=".overlay.FloatingOverlayService"
             android:exported="false"

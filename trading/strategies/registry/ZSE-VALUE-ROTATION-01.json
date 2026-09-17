@@ -1,0 +1,50 @@
+{
+  "discipline": "ZSE/VFEX value + currency regime",
+  "instruments": [
+    "DELTA",
+    "CBZ",
+    "FBC",
+    "BAT",
+    "SEEDCO",
+    "INNSCOR",
+    "SIMBISA",
+    "PADENGA"
+  ],
+  "horizons": [
+    "POSITION"
+  ],
+  "eligible_regimes": [
+    "ANCHORED",
+    "ELEVATED",
+    "STRESSED"
+  ],
+  "forbidden_regimes": [
+    "DISORDERLY"
+  ],
+  "required_data_granularity": "BARS",
+  "required_features": [
+    "value_score",
+    "adv_20d",
+    "median_spread_pct",
+    "currency_regime"
+  ],
+  "entry_logic_ref": "vati.strategies.zse_value_rotation",
+  "invalidation_logic_ref": "regime DISORDERLY or value score < 0.5",
+  "stop_model": "software stop 12% + liquidity haircut",
+  "target_model": "value gap",
+  "risk_limits": {
+    "max_risk_per_trade": "0.0050"
+  },
+  "execution_model": "OWNER_TICKET / BROKER_INSTRUCTION, board lots, \u2264 10% ADV",
+  "event_rules": {
+    "results_season": "no entries 2 sessions before results"
+  },
+  "training_period": "2019-01-01/2024-12-31",
+  "validation_period": "2025-01-01/2026-06-30",
+  "cost_model_ref": "vati.zse.costs.ZSE_EQUITY_COSTS",
+  "state": "RESEARCH",
+  "evidence_refs": [],
+  "strategy_id": "ZSE-VALUE-ROTATION-01",
+  "version": "1.0.0",
+  "capsule_hash": "ce51d7de93ba352143642ec526e1ff56c993e435b5aff21c37823424ddf875e5"
+}

@@ -1,0 +1,15 @@
+{
+  "donor": "Vanguduza/dial-new",
+  "donor_commit": "fa7c655f12faf02a2b33cc15799069526bdda3a6",
+  "donor_path": "agent-system/orchestration/",
+  "copied_at_utc": "2026-09-16T10:41:26.740915+00:00",
+  "modification": "NONE \u2014 byte-identical copies; the trading VEKL service wraps them without editing",
+  "authority": "Van trading knowledge layer (owner-directed dedicated VEKL); DIAL remains the authority for DIAL's own VEKL",
+  "files": {
+    "engineering-resource-registry.mjs": "fd89fe548a1e072edb85ce260a7495224304eed1cf592280b7488e3a8b8a5d72",
+    "engineering-resource-resolver.mjs": "6d20c98daf2f3390de99bb6200b4eacf2a8493b7e85992cf80cde7f4a103e36e",
+    "skill-registry.mjs": "0608f6944bac4257318e9060633fd3a4fb2f87199232668520b59129bd5a8da0",
+    "skill-resolver.mjs": "020f0270249d0b8197c9c22817c00743f2aaf2b8af45944c975bee5904b4fdce",
+    "state-store.mjs": "279d16270173447f3c392e39aaf3b18566b266556a1c20742066a11816881931"
+  }
+}

@@ -1,0 +1,21 @@
+[Unit]
+Description=Van dedicated trading VEKL (engineering knowledge resolver, loopback)
+After=network-online.target
+
+[Service]
+Type=simple
+User=vati
+Group=vati
+EnvironmentFile=/opt/van-trading/config/van-trading-core.env
+WorkingDirectory=/opt/van-trading/app
+ExecStart=/bin/sh -c 'VEKL_TOKEN="$(cat ${VEKL_TOKEN_FILE})" exec /usr/bin/node trading/vekl/server.mjs'
+Restart=always
+RestartSec=3
+NoNewPrivileges=true
+ProtectSystem=strict
+ProtectHome=true
+ReadWritePaths=/var/lib/van-trading
+PrivateTmp=true
+
+[Install]
+WantedBy=multi-user.target

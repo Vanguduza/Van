@@ -1,0 +1,167 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://van.dial/vati/trading_mandate.schema.json",
+  "title": "TradingMandate",
+  "description": "Owner-signed, versioned trading capability grant (Rev 2 \u00a738). Top of the trading authority order. Platform ceilings are enforced beneath it by the Risk Authority at load time.",
+  "type": "object",
+  "additionalProperties": false,
+  "required": [
+    "mandate_id",
+    "version",
+    "account_alias",
+    "venue",
+    "mode",
+    "instruments",
+    "allowed_strategies",
+    "max_risk_per_trade",
+    "max_open_stop_risk",
+    "max_daily_loss",
+    "max_weekly_drawdown",
+    "max_currency_leg_exposure",
+    "max_consecutive_losses",
+    "max_positions_per_instrument",
+    "max_total_positions",
+    "tier1_event_policy",
+    "weekend_hold_allowed",
+    "forbidden",
+    "owner_signature_ref",
+    "signed_at_unix",
+    "expires_at_unix"
+  ],
+  "properties": {
+    "mandate_id": {
+      "type": "string",
+      "minLength": 1
+    },
+    "version": {
+      "type": "string",
+      "pattern": "^[0-9]+\\.[0-9]+\\.[0-9]+$"
+    },
+    "account_alias": {
+      "type": "string",
+      "description": "Alias only. Raw broker login/account numbers never appear in mandates, prompts or logs."
+    },
+    "venue": {
+      "type": "string",
+      "enum": [
+        "mt5",
+        "deriv",
+        "ctrader",
+        "zse",
+        "vfex"
+      ]
+    },
+    "mode": {
+      "type": "string",
+      "enum": [
+        "OBSERVE",
+        "ADVISOR",
+        "DEMO_TRADER",
+        "SHADOW_TRADER",
+        "LIMITED_LIVE",
+        "AUTONOMOUS_LIVE",
+        "HALTED"
+      ]
+    },
+    "instruments": {
+      "type": "array",
+      "items": {
+        "type": "string"
+      },
+      "uniqueItems": true
+    },
+    "allowed_strategies": {
+      "type": "array",
+      "items": {
+        "type": "string"
+      },
+      "uniqueItems": true
+    },
+    "max_risk_per_trade": {
+      "$ref": "#/$defs/fraction"
+    },
+    "max_open_stop_risk": {
+      "$ref": "#/$defs/fraction"
+    },
+    "max_daily_loss": {
+      "$ref": "#/$defs/fraction"
+    },
+    "max_weekly_drawdown": {
+      "$ref": "#/$defs/fraction"
+    },
+    "max_currency_leg_exposure": {
+      "$ref": "#/$defs/fraction"
+    },
+    "max_consecutive_losses": {
+      "type": "integer",
+      "minimum": 1
+    },
+    "max_positions_per_instrument": {
+      "type": "integer",
+      "minimum": 1
+    },
+    "max_total_positions": {
+      "type": "integer",
+      "minimum": 1
+    },
+    "tier1_event_policy": {
+      "type": "string",
+      "enum": [
+        "flat",
+        "strategy_specific"
+      ]
+    },
+    "weekend_hold_allowed": {
+      "type": "boolean"
+    },
+    "drawdown_tiers": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "required": [
+          "threshold",
+          "multiplier"
+        ],
+        "additionalProperties": false,
+        "properties": {
+          "threshold": {
+            "$ref": "#/$defs/fraction"
+          },
+          "multiplier": {
+            "type": "string",
+            "pattern": "^(0|0?\\.[0-9]+|1(\\.0+)?)$"
+          },
+          "top_tier_only": {
+            "type": "boolean"
+          }
+        }
+      },
+      "description": "Strictly increasing thresholds; the last tier must have multiplier 0 (suspend)."
+    },
+    "forbidden": {
+      "type": "array",
+      "items": {
+        "type": "string"
+      },
+      "description": "Must be a superset of HARD_FORBIDDEN_BEHAVIOURS."
+    },
+    "owner_signature_ref": {
+      "type": "string",
+      "minLength": 1,
+      "description": "Reference to the device-signed owner approval (A4) that created this mandate version."
+    },
+    "signed_at_unix": {
+      "type": "integer"
+    },
+    "expires_at_unix": {
+      "type": "integer"
+    }
+  },
+  "$defs": {
+    "fraction": {
+      "type": "string",
+      "pattern": "^0\\.[0-9]{1,6}$",
+      "description": "Decimal string in (0,1); strings, never floats."
+    }
+  }
+}

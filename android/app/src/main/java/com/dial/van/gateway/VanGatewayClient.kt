@@ -130,6 +130,34 @@ class VanGatewayClient(context: Context) {
 
     suspend fun briefing(): JSONObject = withContext(Dispatchers.IO) { getJson("/v1/briefing") }
 
+    suspend fun tradingTrades(view: String, limit: Int = 12): String = withContext(Dispatchers.IO) {
+        rawGet("/v1/trading/trades?view=${encodeQuery(view)}&limit=$limit")
+    }
+    suspend fun tradingPortfolio(): String = withContext(Dispatchers.IO) { rawGet("/v1/trading/portfolio") }
+    suspend fun tradingAccounts(): String = withContext(Dispatchers.IO) { rawGet("/v1/trading/accounts") }
+    suspend fun tradingMarketState(symbol: String? = null): String = withContext(Dispatchers.IO) { rawGet("/v1/trading/market-state" + (symbol?.let { "?symbol=${encodeQuery(it)}" } ?: "")) }
+    suspend fun tradingRisk(): String = withContext(Dispatchers.IO) { rawGet("/v1/trading/risk") }
+    suspend fun tradingTradeDetail(tradeIntentId: String): String = withContext(Dispatchers.IO) { rawGet("/v1/trading/trades/${encodeSegment(tradeIntentId)}") }
+    suspend fun tradingBars(symbol: String, timeframe: String = "H1", limit: Int = 300): String = withContext(Dispatchers.IO) { rawGet("/v1/trading/bars?symbol=${encodeQuery(symbol)}&timeframe=${encodeQuery(timeframe)}&limit=$limit") }
+
+    suspend fun tradingAccountAction(action: String, args: kotlinx.serialization.json.JsonObject): Pair<Int, String> = withContext(Dispatchers.IO) {
+        val id = deviceId ?: error("not_enrolled")
+        val secret = deviceSecret ?: error("not_enrolled")
+        val body = com.dial.van.trading.AccountOnboarding.requestBody(secret, id, System.currentTimeMillis() / 1000L, action, args)
+        val conn = (URL("$baseUrl/v1/trading/accounts/action").openConnection() as HttpURLConnection).apply {
+            requestMethod = "POST"
+            setRequestProperty("Content-Type", "application/json")
+            applyIngressAuth(this)
+            doOutput = true
+            connectTimeout = 15_000
+            readTimeout = 90_000
+        }
+        conn.outputStream.use { it.write(body.toString().toByteArray(StandardCharsets.UTF_8)) }
+        val code = conn.responseCode
+        val stream = if (code in 200..299) conn.inputStream else conn.errorStream
+        code to (stream?.bufferedReader()?.readText() ?: "{}")
+    }
+
     suspend fun decisions(): JSONArray = withContext(Dispatchers.IO) {
         JSONArray(rawGet("/v1/decisions"))
     }
