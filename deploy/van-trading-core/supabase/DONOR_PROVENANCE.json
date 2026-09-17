@@ -1,0 +1,26 @@
+{
+  "donor": "supabase/supabase",
+  "donor_path": "docker/docker-compose.yml + docker/.env.example",
+  "donor_ref": "master (raw.githubusercontent.com); commit sha not resolvable from this container (GitHub API 403)",
+  "fetched_at_utc": "2026-09-16T10:46:45.817591+00:00",
+  "licence": "Apache-2.0 (supabase/supabase repository)",
+  "sha256": {
+    "docker-compose.yml": "8ba18fd43e9afba90e8287c8e8afc4bdda1e38d2228e57ff660968bb550da054",
+    "env.example": "d27fb4516702358ac5965fb06d207736abeb3c26c7d949f19b90e88b25e694ef"
+  },
+  "images": [
+    "darthsim/imgproxy:v3.31.4",
+    "envoyproxy/envoy:v1.39.1",
+    "postgrest/postgrest:v14.17",
+    "supabase/edge-runtime:v1.76.2",
+    "supabase/gotrue:v2.196.0",
+    "supabase/postgres-meta:v0.99.0",
+    "supabase/postgres:17.6.1.136",
+    "supabase/realtime:v2.134.10",
+    "supabase/storage-api:v1.74.0",
+    "supabase/studio:2026.09.07-sha-7996410",
+    "supabase/supavisor:2.9.12"
+  ],
+  "modification": "docker-compose.yml unmodified; Van adds docker-compose.override.yml (loopback binding, ledger init SQL, resource limits) and generate-env.sh (real secrets; the example keys are demo keys and must never be deployed)",
+  "adoption_gate": "self-hosted on van-trading-core only; arm64 images verified at bootstrap by `docker compose pull`; exact tags recorded here"
+}

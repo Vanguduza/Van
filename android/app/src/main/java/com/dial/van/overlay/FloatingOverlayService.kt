@@ -40,6 +40,7 @@ import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.OutlinedTextField
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
@@ -72,6 +73,11 @@ import com.dial.van.VanApplication
 import com.dial.van.command.CommandCentreActivity
 import com.dial.van.control.VanCommandSource
 import com.dial.van.control.VanMessageRole
+import com.dial.van.trading.TradingCommandCentreActivity
+import com.dial.van.trading.TradeBookParser
+import com.dial.van.trading.TradeBookState
+import com.dial.van.trading.TradeRow
+import com.dial.van.trading.TradeView
 import com.dial.van.visual.VanEmbodiment
 import com.dial.van.visual.VanGlassSurface
 import com.dial.van.visual.VanGlassTokens
@@ -82,7 +88,7 @@ import com.dial.van.visual.VanVisualState
 import com.dial.van.visual.rememberVanEffectBudget
 import kotlin.math.abs
 
-private enum class VanWorkboardMode { CONTEXT, CHAT, VOICE }
+private enum class VanWorkboardMode { CONTEXT, CHAT, VOICE, TRADES }
 
 /**
  * Floating VAN owner-control surface.
@@ -107,6 +113,8 @@ class FloatingOverlayService : Service(), LifecycleOwner, SavedStateRegistryOwne
     private var blurBehindActive by mutableStateOf(false)
     private var workboardMode by mutableStateOf(VanWorkboardMode.CONTEXT)
     private var chatDraft by mutableStateOf("")
+    private var tradeView by mutableStateOf(TradeView.CURRENT)
+    private var tradeRefreshTick by mutableStateOf(0)
 
     override fun onCreate() {
         super.onCreate()
@@ -391,6 +399,7 @@ class FloatingOverlayService : Service(), LifecycleOwner, SavedStateRegistryOwne
                     Row(horizontalArrangement = Arrangement.spacedBy(5.dp)) {
                         WorkChip("Chat", accent) { openChat(expanded = true) }
                         WorkChip("Voice", accent) { beginVoice(app) }
+                        WorkChip("Trades", accent) { workboardMode = VanWorkboardMode.TRADES }
                         WorkChip("Max", accent) { setPresentation(VanOverlayPresentation.WORKBOARD_MAXIMIZED) }
                     }
                     Spacer(Modifier.height(6.dp))
@@ -408,6 +417,9 @@ class FloatingOverlayService : Service(), LifecycleOwner, SavedStateRegistryOwne
                             }
                             ChatComposer(app, accent, compact = false)
                         }
+                        VanWorkboardMode.TRADES -> {
+                            TradesWorkboardPanel(app = app, accent = accent)
+                        }
                         VanWorkboardMode.CONTEXT -> {
                             Column(
                                 modifier = Modifier
@@ -420,6 +432,9 @@ class FloatingOverlayService : Service(), LifecycleOwner, SavedStateRegistryOwne
                                 ContextAction("Tasks", "Inspect queued and active work") { openCommandCentre("tasks") }
                                 ContextAction("Decisions", "Review owner decisions and approvals") { openCommandCentre("decisions") }
                                 ContextAction("Systems", "Inspect Hermes, gateway and mesh health") { openCommandCentre("systems") }
+                                ContextAction("Trading", "Open VATI portfolio, trades, risk and accounts") {
+                                    startActivity(TradingCommandCentreActivity.intent(this@FloatingOverlayService))
+                                }
                                 ContextAction("Command Centre", "Open the full owner admin surface") { openCommandCentre() }
                             }
                         }
@@ -471,6 +486,9 @@ class FloatingOverlayService : Service(), LifecycleOwner, SavedStateRegistryOwne
                     Row(horizontalArrangement = Arrangement.spacedBy(5.dp)) {
                         WorkChip("Chat", accent) { workboardMode = VanWorkboardMode.CHAT }
                         WorkChip("Voice", accent) { beginVoice(app) }
+                        WorkChip("Trades", accent) {
+                            startActivity(TradingCommandCentreActivity.intent(this@FloatingOverlayService))
+                        }
                         WorkChip("Collapse", accent) { setPresentation(VanOverlayPresentation.WORKBOARD_EXPANDED) }
                         WorkChip("Admin", accent) { openCommandCentre() }
                     }
@@ -496,6 +514,55 @@ class FloatingOverlayService : Service(), LifecycleOwner, SavedStateRegistryOwne
                     .vanGestures(),
                 characterFraction = 0.55f,
             )
+        }
+    }
+
+    @Composable
+    private fun TradesWorkboardPanel(app: VanApplication, accent: Int) {
+        var state: TradeBookState by remember { mutableStateOf(TradeBookState.Loading) }
+        val view = tradeView
+        val refresh = tradeRefreshTick
+        LaunchedEffect(view, refresh) {
+            state = runCatching { app.gatewayClient.tradingTrades(view.query) }.fold(
+                onSuccess = { TradeBookParser.parse(view, it) },
+                onFailure = { TradeBookState.Unavailable(view, "Gateway unreachable: trade ledger not available") },
+            )
+        }
+        Column(modifier = Modifier.fillMaxWidth().weight(1f)) {
+            Row(horizontalArrangement = Arrangement.spacedBy(5.dp), verticalAlignment = Alignment.CenterVertically) {
+                TradeView.entries.forEach { candidate ->
+                    WorkChip(candidate.label, accent) { tradeView = candidate }
+                }
+                WorkChip("Refresh", accent) { tradeRefreshTick += 1 }
+                WorkChip("Open", accent) {
+                    startActivity(TradingCommandCentreActivity.intent(this@FloatingOverlayService, TradingCommandCentreActivity.tradesRoute(view)))
+                }
+            }
+            Spacer(Modifier.height(5.dp))
+            when (val current = state) {
+                TradeBookState.Loading -> Text("Reading the trading ledger…", color = Color(0xFFB6C2D0), fontSize = 10.sp)
+                is TradeBookState.Unavailable -> Text(current.reason, color = Color(0xFFFFB300), fontSize = 10.sp, maxLines = 2)
+                is TradeBookState.Ready -> {
+                    if (!current.ledgerAvailable) {
+                        Text("Trading ledger unavailable on the gateway.", color = Color(0xFFFFB300), fontSize = 10.sp)
+                    } else if (current.rows.isEmpty()) {
+                        Text(view.emptyCopy, color = Color(0xFFB6C2D0), fontSize = 10.sp)
+                    } else {
+                        LazyColumn(modifier = Modifier.weight(1f).fillMaxWidth(), verticalArrangement = Arrangement.spacedBy(3.dp)) {
+                            items(current.rows.take(8)) { row -> TradeWorkboardRow(row, accent) }
+                        }
+                    }
+                }
+            }
+            Text("Read-only preview · confidence is an uncalibrated rule score · Risk Authority owns sizing", color = Color(0xFF7F9099), fontSize = 8.sp, maxLines = 2)
+        }
+    }
+
+    @Composable
+    private fun TradeWorkboardRow(row: TradeRow, accent: Int) {
+        ContextAction(row.headline, "${row.confidence.percentLabel} ${row.confidence.band.label}") {
+            val route = row.tradeIntentId?.let { TradingCommandCentreActivity.tradeRoute(it) } ?: "instrument/${row.symbol}"
+            startActivity(TradingCommandCentreActivity.intent(this@FloatingOverlayService, route))
         }
     }
 

@@ -42,6 +42,7 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Brush
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.input.PasswordVisualTransformation
 import androidx.compose.ui.unit.dp
@@ -53,6 +54,7 @@ import com.dial.van.control.VanCommandStatus
 import com.dial.van.control.VanConversationMessage
 import com.dial.van.control.VanMessageRole
 import com.dial.van.overlay.FloatingOverlayService
+import com.dial.van.trading.TradingCommandCentreActivity
 import com.dial.van.visual.VanEmbodiment
 import com.dial.van.visual.VanGlassSurface
 import com.dial.van.visual.VanGlassTokens
@@ -199,6 +201,7 @@ private fun OverviewModule(
     var decisions by remember { mutableStateOf<Int?>(null) }
     var projects by remember { mutableStateOf<Int?>(null) }
     var error by remember { mutableStateOf<String?>(null) }
+    val context = LocalContext.current
 
     LaunchedEffect(Unit) {
         runCatching {
@@ -263,6 +266,11 @@ private fun OverviewModule(
         }
         item {
             AdminActionCard("Systems", "Inspect Hermes, gateway and Google mesh truth", glass) { navigate(CommandModule.SYSTEMS) }
+        }
+        item {
+            AdminActionCard("Trading", "Open the read-first VATI trading command center", glass) {
+                context.startActivity(TradingCommandCentreActivity.intent(context))
+            }
         }
     }
 }

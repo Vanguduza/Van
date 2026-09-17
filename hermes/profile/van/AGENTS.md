@@ -39,6 +39,7 @@ Before accepting owner-directed work:
 | `notification-triage` | Notification streams → attention items |
 | `infrastructure-diagnostics` | Hermes/gateway/MCP health |
 | `hermes-administration` | Profile install/doctor and policy verification |
+| `trading-intelligence` | VATI market analysis, trade proposals, trade review; never broker execution |
 
 Invoke skills by name from `hermes/skills/<name>/SKILL.md`.
 
@@ -77,6 +78,7 @@ Expected MCP servers: `hermes/mcp/README.md`. Gemini routing and credential boun
 - Exporting/replaying Google browser sessions or cookies.
 - Using Workspace OAuth tokens as Gemini runtime credentials.
 - Direct project integration that bypasses Hermes capability routing.
+- Sending, modifying or cancelling a broker order from a model; bypassing the VATI Risk Authority; removing or widening a protective stop.
 
 ## Install verification
 

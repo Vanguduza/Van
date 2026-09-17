@@ -198,3 +198,13 @@ def test_install_profile_preserves_runtime_state_and_secrets(tmp_path):
     assert not stale.exists()
     assert (target / "SOUL.md").read_bytes() == (PROFILE_ROOT / "SOUL.md").read_bytes()
     assert (target / "providers" / "gemini.md").is_file()
+
+
+def test_trading_authority_declared_in_soul_and_config():
+    soul = (PROFILE_ROOT / "SOUL.md").read_text(encoding="utf-8")
+    assert "Trading authority" in soul
+    assert "never sizes, sends, modifies or cancels a broker" in soul
+    config = (PROFILE_ROOT / "config.yaml").read_text(encoding="utf-8")
+    assert "protect_trading_risk_authority: true" in config
+    assert "deny_model_broker_orders: true" in config
+    assert "- trading-intelligence" in config
