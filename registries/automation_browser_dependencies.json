@@ -1,0 +1,55 @@
+{
+  "$schema_note": "Rev 1.3 §419 dependency manifest for the Automation & Browser Fabric. CI compares runtime evidence against these pins (backend/van_gateway/automation/external_runtime.py reports VERSION_MISMATCH on drift). No entry may be 'latest' (§196, §417). Versions remain UNPINNED_VERIFY_AT_ADOPTION until an adoption gate records a digest.",
+  "manifest_version": 1,
+  "automation_browser_fabric": {
+    "n8n": {
+      "version": "2.39.7",
+      "image_digest": null,
+      "licence": "Sustainable Use License",
+      "licence_class": "SOURCE_AVAILABLE",
+      "adoption_decision_ref": "docs/decisions/VAN-ADOPT-N8N-001.yaml",
+      "pin_status": "UNPINNED_VERIFY_AT_ADOPTION",
+      "source_of_truth": "deploy/van-trading-core/automation/runtime.env.example"
+    },
+    "stagehand": {
+      "version": "4.1.0",
+      "licence": "MIT",
+      "licence_class": "PERMISSIVE",
+      "adoption_decision_ref": "docs/decisions/VAN-ADOPT-STAGEHAND-001.yaml",
+      "pin_status": "UNPINNED_VERIFY_AT_ADOPTION",
+      "source_of_truth": "deploy/van-trading-core/browser/package.json"
+    },
+    "browser_harness": {
+      "version": "0.1.13",
+      "commit": null,
+      "upstream_repository": "browser-use/browser-harness",
+      "licence": "MIT",
+      "licence_class": "PERMISSIVE",
+      "adoption_decision_ref": "docs/decisions/VAN-ADOPT-BROWSER-HARNESS-001.yaml",
+      "pin_status": "UNPINNED_VERIFY_AT_ADOPTION",
+      "production_mode": "PRODUCTION_ACTUATOR",
+      "self_modification": "disabled_quarantined"
+    },
+    "postgres": {
+      "version": "16.10",
+      "licence": "PostgreSQL License",
+      "licence_class": "PERMISSIVE",
+      "pin_status": "UNPINNED_VERIFY_AT_ADOPTION",
+      "source_of_truth": "deploy/van-trading-core/automation/runtime.env.example"
+    },
+    "playwright": {
+      "version": "1.63.0",
+      "licence": "Apache-2.0",
+      "licence_class": "PERMISSIVE",
+      "pin_status": "PINNED",
+      "source_of_truth": "deploy/van-trading-core/browser/package.json"
+    },
+    "node": {
+      "version": ">=22.18.0 <23",
+      "licence": "MIT",
+      "licence_class": "PERMISSIVE",
+      "pin_status": "PINNED",
+      "source_of_truth": "deploy/van-trading-core/browser/package.json"
+    }
+  }
+}
