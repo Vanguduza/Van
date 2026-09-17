@@ -279,6 +279,7 @@ private fun OverviewModule(
 private fun ChatModule(app: VanApplication, glass: com.dial.van.visual.VanGlassStyle) {
     val state by app.commandController.state.collectAsState()
     var draft by remember { mutableStateOf("") }
+    val activity = LocalContext.current as? FragmentActivity
 
     Column(modifier = Modifier.fillMaxSize().padding(horizontal = 14.dp, vertical = 8.dp)) {
         AdminCard(glass) {
@@ -308,6 +309,44 @@ private fun ChatModule(app: VanApplication, glass: com.dial.van.visual.VanGlassS
             items(state.messages, key = { it.id }) { message ->
                 CommandMessageBubble(message, glass)
             }
+        }
+        state.pendingA4Approval?.let { pending ->
+            AdminCard(glass) {
+                Column(verticalArrangement = Arrangement.spacedBy(6.dp)) {
+                    Text(
+                        "Owner approval required",
+                        color = Color(VanGlassTokens.ACCENT_AMBER),
+                        fontSize = 14.sp,
+                        fontWeight = FontWeight.Bold,
+                    )
+                    Text(
+                        pending.resolvedActionId,
+                        color = Color.White,
+                        fontSize = 12.sp,
+                        fontWeight = FontWeight.Bold,
+                    )
+                    Text(
+                        "This action is A4. Approval signs the gateway-issued one-time challenge with the paired device key after BIOMETRIC_STRONG authentication.",
+                        color = Color(0xFFBCD1D8),
+                        fontSize = 10.sp,
+                    )
+                    Button(
+                        enabled = activity != null && !state.submitting,
+                        onClick = { activity?.let { app.commandController.approvePendingA4(it) } },
+                        colors = ButtonDefaults.buttonColors(containerColor = Color(0xFF6D4514)),
+                    ) {
+                        Text("Approve A4 action")
+                    }
+                    if (activity == null) {
+                        Text(
+                            "Biometric approval is unavailable on this surface.",
+                            color = Color(VanGlassTokens.ACCENT_AMBER),
+                            fontSize = 10.sp,
+                        )
+                    }
+                }
+            }
+            Spacer(Modifier.height(8.dp))
         }
         Row(
             modifier = Modifier.fillMaxWidth(),
