@@ -5,6 +5,7 @@ from typing import Any
 
 from van_gateway.audit.service import AuditService
 from van_gateway.auth.service import AuthError, AuthService
+from van_gateway.context.service import OwnerContextService
 from van_gateway.degraded.registry import DegradedRegistry
 from van_gateway.hermes.bridge import HermesBridge, HermesBridgeError
 from van_gateway.idempotency.service import IdempotencyConflict, IdempotencyInFlight, IdempotencyService
@@ -40,6 +41,7 @@ class CommandOrchestrator:
         projects: ProjectRouter,
         audit: AuditService,
         degraded: DegradedRegistry,
+        context: OwnerContextService,
         owner_intent_max_age_seconds: int,
     ) -> None:
         self.auth = auth
@@ -48,6 +50,7 @@ class CommandOrchestrator:
         self.projects = projects
         self.audit = audit
         self.degraded = degraded
+        self.context = context
         self.owner_intent_max_age_seconds = owner_intent_max_age_seconds
 
     @staticmethod
@@ -215,9 +218,16 @@ class CommandOrchestrator:
                 return result
 
         before: dict[str, Any] = {}
-        if req.project_id and req.action_class in (ActionClass.A3, ActionClass.A4):
+        live_state_refs: list[str] = []
+        policy_refs = [
+            "security-policy:A1-A5",
+            f"action-class:{req.action_class.value}",
+            f"principal:{req.principal_type.value}",
+        ]
+
+        if req.project_id:
             truth = await self.projects.load_truth(req.project_id)
-            if not truth.get("ok"):
+            if not truth.get("ok") and req.action_class in (ActionClass.A3, ActionClass.A4):
                 code = truth.get("degraded", DegradedCode.STALE_PROJECT_TRUTH.value)
                 self.degraded.set(DegradedCode(code), True)
                 result = CommandResult(
@@ -237,7 +247,55 @@ class CommandOrchestrator:
                 )
                 await self.idempotency.complete(req.idempotency_key, result.model_dump())
                 return result
-            before = {"truth_sha": truth.get("truth_sha"), "repo_sha": truth.get("repo_sha")}
+            if truth.get("ok"):
+                truth_sha = str(truth.get("truth_sha") or "")
+                repo_sha = str(truth.get("repo_sha") or "")
+                before["project_truth"] = {
+                    "project_id": req.project_id,
+                    "truth_sha": truth_sha,
+                    "repo_sha": repo_sha or None,
+                }
+                live_state_refs.append(f"project-truth:{req.project_id}:{truth_sha}")
+                if repo_sha:
+                    live_state_refs.append(f"repo-head:{req.project_id}:{repo_sha}")
+
+        try:
+            context_snapshot = await self.context.compile_snapshot(
+                req.command_id,
+                [],
+                live_state_refs=live_state_refs,
+                policy_refs=policy_refs,
+            )
+        except Exception as exc:
+            self.degraded.set(DegradedCode.OWNER_CONTEXT_UNAVAILABLE, True)
+            result = CommandResult(
+                status="degraded",
+                command_id=req.command_id,
+                idempotency_key=req.idempotency_key,
+                message="Canonical owner context could not be sealed; command not dispatched",
+                degraded=[DegradedCode.OWNER_CONTEXT_UNAVAILABLE.value],
+            )
+            await self.audit.record(
+                result="degraded",
+                command_id=req.command_id,
+                device_id=req.device_id,
+                project_id=req.project_id,
+                failure_reason=f"context_snapshot:{exc.__class__.__name__}",
+                before=before,
+            )
+            await self.idempotency.complete(req.idempotency_key, result.model_dump())
+            return result
+
+        self.degraded.set(DegradedCode.OWNER_CONTEXT_UNAVAILABLE, False)
+        canonical_context = {
+            "snapshot_id": context_snapshot.snapshot_id,
+            "digest": context_snapshot.digest,
+            "kernel_revision": context_snapshot.kernel_revision,
+            "fact_ids": context_snapshot.fact_ids,
+            "live_state_refs": context_snapshot.live_state_refs,
+            "policy_refs": context_snapshot.policy_refs,
+        }
+        before["canonical_context"] = canonical_context
 
         health = await self.hermes.health()
         if not health.get("ok"):
@@ -248,8 +306,9 @@ class CommandOrchestrator:
                 idempotency_key=req.idempotency_key,
                 message="Hermes offline; command not executed",
                 degraded=[DegradedCode.HERMES_OFFLINE.value],
+                context_snapshot_id=context_snapshot.snapshot_id,
             )
-            await self.audit.record(result="degraded", command_id=req.command_id, device_id=req.device_id, failure_reason="hermes_offline")
+            await self.audit.record(result="degraded", command_id=req.command_id, device_id=req.device_id, failure_reason="hermes_offline", before=before)
             await self.idempotency.complete(req.idempotency_key, result.model_dump())
             return result
         self.degraded.set(DegradedCode.HERMES_OFFLINE, False)
@@ -277,6 +336,7 @@ class CommandOrchestrator:
                     "no_stale_replay": req.no_stale_replay,
                     "client_context": req.client_context,
                     "client_context_authoritative": False,
+                    "canonical_context": canonical_context,
                 },
             )
         except HermesBridgeError as exc:
@@ -287,8 +347,9 @@ class CommandOrchestrator:
                 idempotency_key=req.idempotency_key,
                 message=exc.message,
                 degraded=[DegradedCode.HERMES_OFFLINE.value],
+                context_snapshot_id=context_snapshot.snapshot_id,
             )
-            await self.audit.record(result="degraded", command_id=req.command_id, device_id=req.device_id, failure_reason=exc.code)
+            await self.audit.record(result="degraded", command_id=req.command_id, device_id=req.device_id, failure_reason=exc.code, before=before)
             await self.idempotency.fail(req.idempotency_key, result.model_dump())
             return result
 
@@ -307,6 +368,7 @@ class CommandOrchestrator:
                 "principal_type": req.principal_type.value,
                 "requested_by": req.requested_by,
                 "turn_id": req.turn_id,
+                "context_snapshot_id": context_snapshot.snapshot_id,
             },
             evidence_pointer=run.get("id"),
         )
@@ -314,9 +376,10 @@ class CommandOrchestrator:
             status="accepted",
             command_id=req.command_id,
             idempotency_key=req.idempotency_key,
-            message="Accepted and routed to Hermes profile van",
+            message="Accepted and routed to Hermes profile van with canonical owner context",
             hermes_run_id=run.get("id"),
             evidence_id=evidence_id,
+            context_snapshot_id=context_snapshot.snapshot_id,
         )
         await self.idempotency.complete(req.idempotency_key, result.model_dump())
         return result
