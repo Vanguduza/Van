@@ -3,6 +3,7 @@ from __future__ import annotations
 import time
 from typing import Any
 
+from van_gateway.approval.service import OwnerApprovalError, OwnerApprovalService
 from van_gateway.audit.service import AuditService
 from van_gateway.auth.service import AuthError, AuthService
 from van_gateway.command.authority import CommandAuthorityError, CommandAuthorityRecord, CommandAuthorityService
@@ -57,6 +58,7 @@ class CommandOrchestrator:
         self.context = context
         self.authority = authority
         self.resolver = resolver
+        self.approvals = OwnerApprovalService(auth.store)
         self.owner_intent_max_age_seconds = owner_intent_max_age_seconds
 
     @staticmethod
@@ -170,24 +172,6 @@ class CommandOrchestrator:
             await self.idempotency.complete(req.idempotency_key, result.model_dump())
             return result
 
-        if effective_no_stale_replay:
-            max_window = min(60, resolution.max_age_seconds or 60)
-            if req.expires_at_unix is None or req.expires_at_unix - req.issued_at_unix > max_window:
-                result = CommandResult(
-                    status="denied",
-                    command_id=req.command_id,
-                    idempotency_key=req.idempotency_key,
-                    message=f"NO_STALE_REPLAY requires an explicit expiry within {max_window} seconds",
-                )
-                await self.audit.record(
-                    result="denied",
-                    command_id=req.command_id,
-                    device_id=req.device_id,
-                    failure_reason="invalid_no_stale_replay_window",
-                )
-                await self.idempotency.complete(req.idempotency_key, result.model_dump())
-                return result
-
         command_age = max(0, now - req.issued_at_unix)
         if resolution.max_age_seconds is not None and command_age > resolution.max_age_seconds:
             result = CommandResult(
@@ -221,17 +205,128 @@ class CommandOrchestrator:
             await self.idempotency.complete(req.idempotency_key, result.model_dump())
             return result
 
-        if effective_action_class == ActionClass.A4 and not req.approval_token:
-            result = CommandResult(
-                status="approval_required",
-                command_id=req.command_id,
-                idempotency_key=req.idempotency_key,
-                message="A4 destructive action requires explicit owner approval",
-                requires_approval=True,
-            )
-            await self.audit.record(result="approval_required", command_id=req.command_id, device_id=req.device_id, approval="missing")
-            await self.idempotency.complete(req.idempotency_key, result.model_dump())
-            return result
+        owner_approved = False
+        if effective_action_class == ActionClass.A4:
+            if resolution.mode != ResolutionMode.EXACT_ACTION or not resolution.action_id:
+                result = CommandResult(
+                    status="denied",
+                    command_id=req.command_id,
+                    idempotency_key=req.idempotency_key,
+                    message="A4 requires an exact gateway-resolved action before owner approval",
+                    effective_action_class=effective_action_class,
+                )
+                await self.audit.record(
+                    result="denied",
+                    command_id=req.command_id,
+                    device_id=req.device_id,
+                    approval="not_applicable",
+                    failure_reason="a4_requires_exact_typed_action",
+                )
+                await self.idempotency.complete(req.idempotency_key, result.model_dump())
+                return result
+
+            if req.approval_proof is None:
+                challenge = await self.approvals.issue(
+                    device_id=req.device_id,
+                    action_id=resolution.action_id,
+                    text=req.text,
+                    project_id=req.project_id,
+                )
+                result = CommandResult(
+                    status="approval_required",
+                    command_id=req.command_id,
+                    idempotency_key=req.idempotency_key,
+                    message="A4 requires biometric owner approval bound to the paired device key",
+                    requires_approval=True,
+                    approval_challenge_id=challenge.challenge_id,
+                    approval_challenge=challenge.canonical,
+                    approval_expires_at_unix=challenge.expires_at_unix,
+                    resolved_action_id=resolution.action_id,
+                    effective_action_class=effective_action_class,
+                    no_stale_replay=effective_no_stale_replay,
+                    max_age_seconds=resolution.max_age_seconds,
+                )
+                await self.audit.record(
+                    result="approval_required",
+                    command_id=req.command_id,
+                    device_id=req.device_id,
+                    approval="biometric_challenge_issued",
+                    failure_reason="a4_owner_proof_missing",
+                )
+                await self.idempotency.complete(req.idempotency_key, result.model_dump())
+                return result
+
+            if req.approval_proof.algorithm != OwnerApprovalService.ALGORITHM:
+                result = CommandResult(
+                    status="denied",
+                    command_id=req.command_id,
+                    idempotency_key=req.idempotency_key,
+                    message="Unsupported owner approval proof algorithm",
+                    resolved_action_id=resolution.action_id,
+                    effective_action_class=effective_action_class,
+                )
+                await self.audit.record(
+                    result="denied",
+                    command_id=req.command_id,
+                    device_id=req.device_id,
+                    approval="invalid",
+                    failure_reason="approval_algorithm_unsupported",
+                )
+                await self.idempotency.complete(req.idempotency_key, result.model_dump())
+                return result
+
+            try:
+                await self.approvals.verify_and_consume(
+                    challenge_id=req.approval_proof.challenge_id,
+                    signature_b64=req.approval_proof.signature_b64,
+                    device_id=req.device_id,
+                    action_id=resolution.action_id,
+                    text=req.text,
+                    project_id=req.project_id,
+                )
+            except OwnerApprovalError as exc:
+                result = CommandResult(
+                    status="denied",
+                    command_id=req.command_id,
+                    idempotency_key=req.idempotency_key,
+                    message="A4 owner approval proof is invalid, expired, or already consumed",
+                    resolved_action_id=resolution.action_id,
+                    effective_action_class=effective_action_class,
+                )
+                await self.audit.record(
+                    result="denied",
+                    command_id=req.command_id,
+                    device_id=req.device_id,
+                    approval="invalid",
+                    failure_reason=str(exc),
+                )
+                await self.idempotency.complete(req.idempotency_key, result.model_dump())
+                return result
+            owner_approved = True
+
+        # A4 challenge requests do not execute, so NO_STALE_REPLAY is enforced only
+        # after biometric proof exists and execution may proceed.
+        if effective_no_stale_replay:
+            max_window = min(60, resolution.max_age_seconds or 60)
+            if req.expires_at_unix is None or req.expires_at_unix - req.issued_at_unix > max_window:
+                result = CommandResult(
+                    status="denied",
+                    command_id=req.command_id,
+                    idempotency_key=req.idempotency_key,
+                    message=f"NO_STALE_REPLAY requires an explicit expiry within {max_window} seconds",
+                    resolved_action_id=resolution.action_id,
+                    effective_action_class=effective_action_class,
+                    no_stale_replay=True,
+                    max_age_seconds=resolution.max_age_seconds,
+                )
+                await self.audit.record(
+                    result="denied",
+                    command_id=req.command_id,
+                    device_id=req.device_id,
+                    failure_reason="invalid_no_stale_replay_window",
+                )
+                await self.idempotency.complete(req.idempotency_key, result.model_dump())
+                return result
 
         if req.context_trust == ContentTrust.UNTRUSTED:
             lowered = req.text.lower()
@@ -261,6 +356,8 @@ class CommandOrchestrator:
         ]
         if resolution.rule_id:
             policy_refs.append(f"resolver-rule:{resolution.rule_id}")
+        if owner_approved:
+            policy_refs.append("owner-approval:ECDSA_P256_SHA256")
 
         if req.project_id:
             truth = await self.projects.load_truth(req.project_id)
@@ -350,7 +447,7 @@ class CommandOrchestrator:
             issued_at_unix=req.issued_at_unix,
             expires_at_unix=req.expires_at_unix,
             no_stale_replay=effective_no_stale_replay,
-            owner_approved=bool(req.approval_token),
+            owner_approved=owner_approved,
             turn_id=req.turn_id,
             sealed_at_unix_ms=int(time.time() * 1000),
         )
@@ -418,6 +515,7 @@ class CommandOrchestrator:
                     "canonical_context": canonical_context,
                     "typed_resolution": resolution.model_dump(mode="json"),
                     "gateway_action_authority_required": True,
+                    "owner_approved": owner_approved,
                 },
             )
         except HermesBridgeError as exc:
@@ -440,7 +538,7 @@ class CommandOrchestrator:
             device_id=req.device_id,
             project_id=req.project_id,
             capability=effective_action_class.value,
-            approval="recorded" if req.approval_token else "not_required",
+            approval="biometric_proof_verified" if owner_approved else "not_required",
             model_delegate="hermes:van",
             before=before,
             after={
@@ -452,6 +550,7 @@ class CommandOrchestrator:
                 "context_snapshot_id": context_snapshot.snapshot_id,
                 "typed_action_id": authority_record.typed_action_id,
                 "effective_action_class": effective_action_class.value,
+                "owner_approved": owner_approved,
             },
             evidence_pointer=run.get("id"),
         )
@@ -463,6 +562,10 @@ class CommandOrchestrator:
             hermes_run_id=run.get("id"),
             evidence_id=evidence_id,
             context_snapshot_id=context_snapshot.snapshot_id,
+            resolved_action_id=authority_record.typed_action_id,
+            effective_action_class=effective_action_class,
+            no_stale_replay=effective_no_stale_replay,
+            max_age_seconds=resolution.max_age_seconds,
         )
         await self.idempotency.complete(req.idempotency_key, result.model_dump())
         return result
