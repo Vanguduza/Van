@@ -8,6 +8,7 @@ from pydantic import BaseModel, Field
 from van_gateway.action.models import VerificationObservation
 from van_gateway.action.registry import install_builtin_actions
 from van_gateway.action.service import ActionPolicyError, ActionRuntime
+from van_gateway.command.resolver import TypedCommandResolver
 from van_gateway.config import Settings
 from van_gateway.context.models import ContextEdgeCandidate, ContextRequirement, OwnerFactCandidate
 from van_gateway.context.service import ContextAdmissionError, OwnerContextService
@@ -27,6 +28,10 @@ class ContextSnapshotBody(ContextReadinessBody):
     graph_evidence_refs: list[str] = Field(default_factory=list)
     live_state_refs: list[str] = Field(default_factory=list)
     policy_refs: list[str] = Field(default_factory=list)
+
+
+class CommandResolveBody(BaseModel):
+    text: str
 
 
 class ActionBeginBody(BaseModel):
@@ -52,8 +57,8 @@ class OwnerRuntimeApi:
     """Deterministic Rev 3.1 services exposed only to Hermes internal control.
 
     This is deliberately not an agent loop. Hermes profile ``van`` remains the
-    sole planner/reasoner. The gateway owns canonical context, action policy,
-    verification ledgers and provider credentials.
+    sole planner/reasoner. The gateway owns canonical context, typed fast-path
+    resolution, action policy, verification ledgers and provider credentials.
     """
 
     def __init__(self, store: Store, settings: Settings) -> None:
@@ -61,6 +66,7 @@ class OwnerRuntimeApi:
         self.settings = settings
         self.context = OwnerContextService(store)
         self.actions = ActionRuntime(store)
+        self.resolver = TypedCommandResolver()
         self.research = ExaResearchService(
             store,
             api_key=settings.exa_api_key,
@@ -87,6 +93,7 @@ class OwnerRuntimeApi:
             "hermes_is_sole_agent_runtime": True,
             "context_kernel_revision": await self.context.kernel_revision(),
             "enabled_actions": int(action_count_row["n"]) if action_count_row is not None else 0,
+            "resolver_version": "rev3.1.1",
             "research": await self.research.status(),
         }
 
@@ -97,6 +104,11 @@ class OwnerRuntimeApi:
         async def runtime_status(x_van_internal_token: str | None = Header(default=None)):
             self._require_internal(x_van_internal_token)
             return await self.status()
+
+        @router.post("/resolve")
+        async def resolve_command(body: CommandResolveBody, x_van_internal_token: str | None = Header(default=None)):
+            self._require_internal(x_van_internal_token)
+            return self.resolver.resolve(body.text)
 
         @router.post("/context/facts")
         async def admit_fact(body: OwnerFactCandidate, x_van_internal_token: str | None = Header(default=None)):
