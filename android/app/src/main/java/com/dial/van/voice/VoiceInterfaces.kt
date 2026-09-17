@@ -165,7 +165,7 @@ class VoiceInputManager(
                 startedAtMs = activeTurnStartedAtMs,
                 finalizedAtMs = System.currentTimeMillis(),
             )
-            val capturedPcm = turnAudioCapture?.snapshot().orEmpty()
+            val capturedPcm = turnAudioCapture?.snapshot() ?: ByteArray(0)
             val biasingStrings = if (secondPassCoordinator != null) biasingStringsProvider() else emptyList()
             val knownConfusion = personalConfusionProvider(androidResult.text)
             val secondPassDecision = secondPassCoordinator?.shouldRun(androidResult, knownConfusion)
