@@ -124,6 +124,7 @@ def create_app() -> FastAPI:
         projects=projects,
         audit=audit,
         degraded=degraded,
+        context=owner_runtime.context,
         owner_intent_max_age_seconds=settings.owner_intent_max_age_seconds,
     )
 
