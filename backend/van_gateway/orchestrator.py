@@ -228,6 +228,8 @@ class CommandOrchestrator:
             if req.approval_proof is None:
                 challenge = await self.approvals.issue(
                     device_id=req.device_id,
+                    source_command_id=req.command_id,
+                    turn_id=req.turn_id,
                     action_id=resolution.action_id,
                     text=req.text,
                     project_id=req.project_id,
@@ -278,8 +280,10 @@ class CommandOrchestrator:
             try:
                 await self.approvals.verify_and_consume(
                     challenge_id=req.approval_proof.challenge_id,
+                    source_command_id=req.approval_proof.source_command_id,
                     signature_b64=req.approval_proof.signature_b64,
                     device_id=req.device_id,
+                    turn_id=req.turn_id,
                     action_id=resolution.action_id,
                     text=req.text,
                     project_id=req.project_id,
