@@ -84,3 +84,22 @@ Example path: `C:\Users\Admin\AppData\Local\android-sdk\platform-tools\adb.exe`
 ```bat
 adb install -r app\build\outputs\apk\debug\app-debug.apk
 ```
+
+
+## Trade preview (overlay `TRADES` mode)
+
+The expanded glass rail has a **Trades** action that opens a read-only panel with three on-demand tabs — Past,
+Current, Potential — read from the gateway's `GET /v1/trading/trades?view=`. Each row shows the trade and its
+confidence score/band as the gateway computed it (`trading/TradeBook.kt` parses; `FloatingOverlayService.TradesPanel`
+renders). The client has no call that could place, size, modify or cancel a trade. JVM tests: `TradeBookTest`.
+
+## Trading Command Center (`com.dial.van.trading`)
+
+`TradingCommandCentreActivity` (routes `overview`, `trades/{view}`, `trade/{id}`, `instrument/{symbol}`, `risk`,
+`accounts`) implements the owner's Command Center blueprint on the gateway's `/v1/trading/*` read models. Pure-Kotlin
+models (`TradingModels.kt`), chart geometry (`ChartGeometry.kt`) and the trade-book parser are unit-tested off-device
+(`TradingModelsTest`, `ChartGeometryTest`, `TradeBookTest`); Compose screens live under `trading/ui`. Entry points:
+the Command Centre button and the overlay Trades panel. The app has no order path: nothing on these screens can
+place, size, modify or cancel a trade.
+
+Accounts are onboarded in-app (`trading/ui/AccountOnboardingScreen.kt`, logic in `trading/AccountOnboarding.kt`): Deriv sign-in / token / new demo account, cTrader ID sign-in or tokens, MT5 via Expert Advisor (signing key issued once), Paper. Each change is biometric-gated (A4) and device-signed; the signature scheme is verified against a gateway-computed vector in `AccountOnboardingTest`.

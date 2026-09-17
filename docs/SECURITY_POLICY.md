@@ -41,9 +41,13 @@ The owner's canonical Google account is VAN's default Google identity, but crede
 
 Forbidden A5 patterns include exporting/copying Google sessions or cookies, reusing Workspace OAuth as a Gemini runtime credential, bypassing the Google identity broker, or disabling credential isolation.
 
+## Trading authority (VATI)
+
+Owner mandates, platform risk ceilings, the Risk Authority, kill switch, strategy registry and trading ledger are protected surfaces; writes require owner-signed authority. A model may not send broker orders, bypass the Risk Authority, widen protective stops, trade stale data, or place broker credentials in prompts. VAN is never a sender of record: live order submission remains behind the VATI execution-router/single-sender gate. Gateway trading writes require the internal control token plus owner-signature evidence; Android account onboarding additionally binds the paired device access token to the device HMAC signature. Broker credentials live only behind the trading account credential reference on the trading host.
+
 ## Secrets
 
-Never log or prompt-inject access/refresh tokens, API keys/client secrets, OTPs/passwords/private keys, full auth headers, service-account private keys, browser cookies/session tokens, `VAN_INTERNAL_CONTROL_TOKEN`, `VAN_INGRESS_TOKEN`, device HMAC secrets, or Fernet keys.
+Never log or prompt-inject access/refresh tokens, API keys/client secrets, OTPs/passwords/private keys, full auth headers, service-account private keys, browser cookies/session tokens, `VAN_INTERNAL_CONTROL_TOKEN`, `VAN_INGRESS_TOKEN`, device HMAC secrets, Fernet keys, MT5 passwords/signing keys, Deriv API tokens, or cTrader client/access/refresh secrets.
 
 Workspace refresh tokens are encrypted at rest. Live Workspace calls exchange refresh tokens for short-lived access tokens inside the gateway. Neither token is forwarded to Hermes prompts.
 

@@ -59,7 +59,7 @@ verify_source_layout() {
   local skills=(
     owner-briefing google-workspace google-intelligence gemini-notebook google-design google-development
     project-steering research decision-support document-work notification-triage
-    infrastructure-diagnostics hermes-administration
+    infrastructure-diagnostics hermes-administration trading-intelligence
   )
   for s in "${skills[@]}"; do
     if [[ ! -f "${SOURCE_ROOT}/skills/${s}/SKILL.md" ]]; then
@@ -109,7 +109,7 @@ copy_tree() {
   local managed_skills=(
     owner-briefing google-workspace google-intelligence gemini-notebook google-design google-development
     project-steering research decision-support document-work notification-triage
-    infrastructure-diagnostics hermes-administration
+    infrastructure-diagnostics hermes-administration trading-intelligence
   )
   for skill in "${managed_skills[@]}"; do
     mkdir -p "${TARGET_ROOT}/skills/${skill}"

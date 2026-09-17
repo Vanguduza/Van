@@ -1,0 +1,15 @@
+[Unit]
+Description=Van local Supabase (PostgreSQL authority store + studio, loopback only)
+Requires=docker.service
+After=docker.service network-online.target
+
+[Service]
+Type=oneshot
+RemainAfterExit=true
+WorkingDirectory=/opt/van-trading/supabase
+ExecStart=/usr/bin/docker compose --env-file /opt/van-trading/supabase/.env up -d --remove-orphans
+ExecStop=/usr/bin/docker compose --env-file /opt/van-trading/supabase/.env stop
+TimeoutStartSec=600
+
+[Install]
+WantedBy=multi-user.target

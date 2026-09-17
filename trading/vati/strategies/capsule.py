@@ -1,0 +1,116 @@
+"""StrategyCapsule registry (Rev 2 §21). Capsules are JSON records validated
+against the schema's required set, hashed, and moved between states only by
+explicit calls: promotion needs an approval signature reference (owner A4);
+demotion never does."""
+
+from __future__ import annotations
+
+import json
+from dataclasses import dataclass
+from decimal import Decimal
+from pathlib import Path
+from typing import Any, Iterable, Optional
+
+from vati.contracts import required_keys
+from vati.core.canonical import canonical_hash
+from vati.risk.contracts import StrategyState
+
+PROMOTION_ORDER = [StrategyState.RESEARCH, StrategyState.BACKTEST, StrategyState.VALIDATION, StrategyState.DEMO, StrategyState.SHADOW, StrategyState.LIMITED_LIVE, StrategyState.CERTIFIED_LIVE]
+DEMOTION_TARGETS = {StrategyState.DEGRADED, StrategyState.SUSPENDED, StrategyState.RETIRED, StrategyState.SHADOW}
+
+
+class CapsuleError(ValueError):
+    pass
+
+
+@dataclass(frozen=True)
+class Capsule:
+    data: dict[str, Any]
+
+    @property
+    def strategy_id(self) -> str: return self.data["strategy_id"]
+    @property
+    def version(self) -> str: return self.data["version"]
+    @property
+    def family(self) -> str: return self.data["strategy_id"].rsplit("-", 1)[0]
+    @property
+    def state(self) -> StrategyState: return StrategyState(self.data["state"])
+    @property
+    def instruments(self) -> set[str]: return set(self.data["instruments"])
+    @property
+    def horizons(self) -> set[str]: return set(self.data["horizons"])
+    @property
+    def eligible_regimes(self) -> set[str]: return set(self.data["eligible_regimes"])
+    @property
+    def forbidden_regimes(self) -> set[str]: return set(self.data["forbidden_regimes"])
+    @property
+    def event_certified(self) -> bool: return bool(self.data.get("event_certified", False))
+    @property
+    def synthetic_only(self) -> bool: return bool(self.data.get("synthetic_only", False))
+    @property
+    def granularity(self) -> str: return self.data["required_data_granularity"]
+    @property
+    def capsule_hash(self) -> str: return self.data["capsule_hash"]
+
+    def body_hash(self) -> str:
+        return canonical_hash({k: v for k, v in self.data.items() if k != "capsule_hash"})
+
+
+class CapsuleRegistry:
+    def __init__(self, capsules: Iterable[Capsule] = ()) -> None:
+        self._c: dict[str, Capsule] = {}
+        for c in capsules:
+            self.add(c)
+
+    @classmethod
+    def load_dir(cls, path: str | Path) -> "CapsuleRegistry":
+        reg = cls()
+        for f in sorted(Path(path).glob("*.json")):
+            reg.add(Capsule(json.loads(f.read_text(encoding="utf-8"))))
+        return reg
+
+    def add(self, c: Capsule) -> None:
+        missing = required_keys("strategy_capsule") - set(c.data)
+        if missing:
+            raise CapsuleError(f"{c.data.get('strategy_id')}: missing {sorted(missing)}")
+        if c.data["capsule_hash"] != c.body_hash():
+            raise CapsuleError(f"{c.strategy_id}: capsule_hash mismatch")
+        if c.granularity == "BARS" and ({"SCALP", "MICRO"} & c.horizons):
+            raise CapsuleError(f"{c.strategy_id}: SCALP/MICRO cannot certify on BARS")
+        if "MICRO" in c.horizons:
+            raise CapsuleError(f"{c.strategy_id}: MICRO horizon removed in Rev 3")
+        self._c[c.strategy_id] = c
+
+    def get(self, strategy_id: str) -> Capsule:
+        return self._c[strategy_id]
+
+    def all(self) -> list[Capsule]:
+        return sorted(self._c.values(), key=lambda c: c.strategy_id)
+
+    @staticmethod
+    def seal(data: dict[str, Any]) -> dict[str, Any]:
+        d = {k: v for k, v in data.items() if k != "capsule_hash"}
+        return {**d, "capsule_hash": canonical_hash(d)}
+
+    def promote(self, strategy_id: str, to: StrategyState, *, approval_signature_ref: str, evidence_refs: list[str], approved_at_unix: int) -> Capsule:
+        c = self.get(strategy_id)
+        if to not in PROMOTION_ORDER:
+            raise CapsuleError(f"{to.value} is not a promotion target")
+        if c.state in PROMOTION_ORDER and PROMOTION_ORDER.index(to) != PROMOTION_ORDER.index(c.state) + 1:
+            raise CapsuleError(f"promotion must advance one state: {c.state.value} → {to.value}")
+        if not approval_signature_ref.strip():
+            raise CapsuleError("promotion requires an owner approval signature reference (A4)")
+        if to in (StrategyState.LIMITED_LIVE, StrategyState.CERTIFIED_LIVE) and not evidence_refs:
+            raise CapsuleError("live promotion requires evidence references")
+        new = self.seal({**c.data, "state": to.value, "approval_signature_ref": approval_signature_ref, "evidence_refs": sorted(set(c.data.get("evidence_refs", [])) | set(evidence_refs)),
+                         "approved_at_unix": approved_at_unix, "supersedes": c.capsule_hash})
+        self._c[strategy_id] = Capsule(new)
+        return self._c[strategy_id]
+
+    def demote(self, strategy_id: str, to: StrategyState, *, reason: str) -> Capsule:
+        c = self.get(strategy_id)
+        if to not in DEMOTION_TARGETS:
+            raise CapsuleError(f"{to.value} is not a demotion target")
+        new = self.seal({**c.data, "state": to.value, "demotion_reason": reason, "supersedes": c.capsule_hash})
+        self._c[strategy_id] = Capsule(new)
+        return self._c[strategy_id]

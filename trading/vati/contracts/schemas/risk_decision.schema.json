@@ -1,0 +1,26 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://van.dial/vati/risk_decision.schema.json",
+  "title": "RiskDecision",
+  "description": "Output of the Deterministic Risk Authority (Rev 2 §27, §41). Sealed with a decision hash; the execution router refuses any intent without a matching APPROVED/REDUCED decision.",
+  "type": "object",
+  "additionalProperties": false,
+  "required": ["trade_intent_id", "decision", "reason_code", "reason_detail", "approved_size", "approved_risk_pct", "requested_risk_pct", "portfolio_heat_before", "portfolio_heat_after", "constraints", "risk_policy_version", "mandate_id", "mandate_version", "risk_snapshot_hash", "decision_hash"],
+  "properties": {
+    "trade_intent_id": {"type": "string"},
+    "decision": {"type": "string", "enum": ["APPROVED", "REDUCED", "REJECTED"]},
+    "reason_code": {"type": "string"},
+    "reason_detail": {"type": "string"},
+    "approved_size": {"type": "string"},
+    "approved_risk_pct": {"type": "string"},
+    "requested_risk_pct": {"type": "string"},
+    "portfolio_heat_before": {"type": "string"},
+    "portfolio_heat_after": {"type": "string"},
+    "constraints": {"type": "array", "items": {"type": "string"}},
+    "risk_policy_version": {"type": "string"},
+    "mandate_id": {"type": "string"},
+    "mandate_version": {"type": "string"},
+    "risk_snapshot_hash": {"type": "string", "pattern": "^[a-f0-9]{64}$"},
+    "decision_hash": {"type": "string", "pattern": "^[a-f0-9]{64}$"}
+  }
+}

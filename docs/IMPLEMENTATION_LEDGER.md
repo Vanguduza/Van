@@ -35,6 +35,7 @@
 
 ## EXTERNALLY BLOCKED / REQUIRES LIVE CERTIFICATION
 
+- VATI Rev 5 repository implementation is integrated: trading core, risk authority, execution adapters, commander/VEKL, Android Trading Command Center, signed account onboarding and fail-closed tests are present. Remaining gates are deployment/live-market/device gates: `van-trading-core` bootstrap/qualification, real broker/demo account connection, real market data validation, MT5 EA/terminal attachment where used, independent security review and owner-signed LIMITED_LIVE promotion.
 - Google readiness is credential-plane-specific. Workspace OAuth and Stitch are `READY`; the Gemini runtime plane is authenticated with a dedicated API-restricted key and is currently `CAPACITY_LIMITED` because project prepaid inference credits are depleted. Consumer/Cloud capabilities retain their independently evidenced states.
 - The delegated Antigravity worker is live-certified. Capacity/rate limits, if they recur, remain capability-scoped and may fall back to Jules without degrading other Google planes.
 - Notebook Enterprise / ADK-A2A require eligible owner-administered Google Cloud/Enterprise setup.
