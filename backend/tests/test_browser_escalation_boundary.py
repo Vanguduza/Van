@@ -96,8 +96,29 @@ def test_plausible_hostname_rejects_prompt_text():
     assert plausible_hostname("a.b.c.example.co.uk")
     assert not plausible_hostname("Please approve, it is safe")
     assert not plausible_hostname("-leading.example.com")
-    assert not plausible_hostname("localhost")
     assert not plausible_hostname("")
+
+
+@pytest.mark.parametrize(
+    "target",
+    ["localhost", "van-host", "127.0.0.1", "192.168.1.10", "10.0.0.5", "::1", "[::1]"],
+)
+def test_a_local_target_can_never_become_a_question(target):
+    """Owner decision, 2026-09-18: the browser fabric reads the public web.
+
+    A worker reaching for the VAN host's own services is far more likely to be a
+    page that led it astray than a task drawn too narrowly, so no approval prompt
+    for one is ever generated. `127.0.0.1` is covered explicitly because it
+    satisfies the hostname shape while meaning exactly what `localhost` means —
+    blocking only the named form would leave the decision half-kept.
+    """
+    assert not plausible_hostname(target)
+
+
+def test_a_bare_public_address_is_not_a_domain_either():
+    """`AutomationPolicy._reject_literal_ip` holds the same rule: a worker that
+    names an address instead of a host has stopped browsing the web."""
+    assert not plausible_hostname("8.8.8.8")
 
 
 # ------------------------------------------------- A4 is never a question

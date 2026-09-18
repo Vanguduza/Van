@@ -21,6 +21,7 @@ Every one of the following ends the task rather than escalating it:
 
 from __future__ import annotations
 
+import ipaddress
 import re
 import time
 import uuid
@@ -301,11 +302,35 @@ _NEVER_ON_BROWSER = frozenset({ActionClass.A4, ActionClass.A5})
 #: to look like a hostname before it gets there. Anything else is a worker
 #: handing us free text to display, which is how an approval prompt gets
 #: written by the page instead of by VAN.
+#:
+#: The required dot is load-bearing twice over, and the second reason is easy to
+#: mistake for an oversight: it also excludes single-label hosts, so `localhost`
+#: and bare machine names can never become an escalation. That is deliberate —
+#: owner decision, 2026-09-18. The browser fabric exists to read the public web
+#: on the owner's behalf, and a worker reaching for the VAN host's own services
+#: is far more likely to be a page that led it astray than a task drawn too
+#: narrowly. Admitting a local target is therefore a policy change (an explicit
+#: entry in `config/browser/domains.yaml`), never a loosening of this pattern:
+#: dropping the dot to reach `localhost` would re-open the free-text hole above.
 _HOSTNAME = re.compile(r"^(?=.{1,253}$)(?!-)[A-Za-z0-9-]{1,63}(?<!-)(\.(?!-)[A-Za-z0-9-]{1,63}(?<!-))+$")
 
 
 def plausible_hostname(value: str) -> bool:
-    return bool(_HOSTNAME.match(value.strip()))
+    """Whether a worker-supplied domain may be shown to the owner as a question."""
+    candidate = value.strip()
+    try:
+        ipaddress.ip_address(candidate.strip("[]"))
+    except ValueError:
+        pass
+    else:
+        # A dotted quad satisfies the pattern above while meaning something quite
+        # different from a domain name: `127.0.0.1` reaches exactly where
+        # `localhost` does. `AutomationPolicy._reject_literal_ip` already holds
+        # the house rule — a bare literal IP is never an admitted domain — and it
+        # applies here for the same reason, on the public side too: a worker that
+        # names an address instead of a host has stopped browsing the web.
+        return False
+    return bool(_HOSTNAME.match(candidate))
 
 
 def classify_boundary(
