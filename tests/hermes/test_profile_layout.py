@@ -219,11 +219,28 @@ def test_automation_and_browser_skills_are_registered():
     assert "- browser-intelligence" in config
 
 
-def test_browser_skill_declares_the_l3_production_ceiling():
-    """Rev 1.2 review M3 — the ladder cap is stated where Hermes will read it."""
+def test_browser_skill_declares_the_subagent_bounds():
+    """Owner decision 2026-09-18 — Hermes reads its own manager obligations here.
+
+    The skill must state the four things Hermes has to supply when it opens an
+    autonomous run, because an unbounded assignment is what turns a subagent into
+    an independent agent loop.
+    """
     skill = (HERMES_ROOT / "skills" / "browser-intelligence" / "SKILL.md").read_text(encoding="utf-8")
-    assert "Production stops at L3" in skill
-    assert "sole agent runtime" in skill
+    assert "You are the manager" in skill
+    for bound in ("goal", "domains", "action-class ceiling", "step budget"):
+        assert bound in skill, f"browser skill does not state the {bound} bound"
+    assert "cannot widen them" in skill
+
+
+def test_skills_state_the_payment_prohibition():
+    """Both fabrics must tell Hermes plainly that they never pay."""
+    browser = (HERMES_ROOT / "skills" / "browser-intelligence" / "SKILL.md").read_text(encoding="utf-8")
+    automation = (HERMES_ROOT / "skills" / "automation-fabric" / "SKILL.md").read_text(encoding="utf-8")
+    assert "The browser never pays for anything" in browser
+    assert "No automation ever pays for anything" in automation
+    for skill in (browser, automation):
+        assert "fresh owner biometric" in skill or "fresh owner" in skill
 
 
 def test_automation_skill_forbids_direct_n8n_access():

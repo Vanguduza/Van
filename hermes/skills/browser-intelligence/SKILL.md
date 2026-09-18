@@ -85,9 +85,10 @@ checkout, a payment provider, or a "save my card" flow ends immediately with
 
 If the owner's goal genuinely requires a payment, take it as far as the payment
 step, report exactly what would be paid — payee, amount, currency, reference —
-and hand back. The payment itself is a separate A4 action the owner approves
-with a fresh biometric, entering the instrument themselves. Nothing about the
-card, bank detail or wallet is stored, and there is no "use the saved one".
+and hand back. The payment itself is a separate A4 action requiring
+a fresh owner biometric approval, with the owner entering the instrument
+themselves. Nothing about the card, bank detail or wallet is stored, and there
+is no "use the saved one".
 
 ## Evidence
 
