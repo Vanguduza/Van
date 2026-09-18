@@ -32,6 +32,6 @@ SQL
 [[ "$probe" == "1|1|supabase_auth_admin" ]] || { echo "SUPABASE_DONOR_STATE_INVALID $probe" >&2; exit 1; }
 
 curl -fsS --max-time 5 http://127.0.0.1:8000/auth/v1/health >/dev/null
-curl -fsS --max-time 5 http://127.0.0.1:8000/rest/v1/ >/dev/null
+docker exec supabase-rest postgrest --ready >/dev/null
 
 echo SUPABASE_RUNTIME_GREEN
