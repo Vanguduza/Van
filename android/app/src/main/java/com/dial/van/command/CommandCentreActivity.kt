@@ -297,8 +297,20 @@ private fun OverviewModule(
             AdminActionCard("Tasks", "Inspect local queued and dispatched owner work", glass) { navigate(CommandModule.TASKS) }
         }
         item {
-            AdminActionCard("Browser & Automation", "Inspect browser tasks, sessions, escalation decisions and automation fabric truth", glass) { navigate(CommandModule.BROWSER_AUTOMATION) }
-            AdminActionCard("Systems", "Inspect Hermes, gateway and Google mesh truth", glass) { navigate(CommandModule.SYSTEMS) }
+            AdminActionCard(
+                "Browser & Automation",
+                "Runtime summary, owner escalations, browser tasks, managed sessions and governed policy",
+                glass,
+            ) { navigate(CommandModule.BROWSER_AUTOMATION) }
+        }
+        item {
+            AdminActionCard("Systems", "Hermes, gateway and Google mesh health", glass) { navigate(CommandModule.SYSTEMS) }
+        }
+        item {
+            AdminActionCard("Connections", "Gateway enrollment, device pairing and secure transport state", glass) { navigate(CommandModule.CONNECTIONS) }
+        }
+        item {
+            AdminActionCard("Settings", "Floating VAN and owner-facing runtime controls", glass) { navigate(CommandModule.SETTINGS) }
         }
         item {
             AdminActionCard("Trading", "Open the read-first VATI trading command center", glass) {
