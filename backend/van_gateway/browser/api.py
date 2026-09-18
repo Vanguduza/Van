@@ -10,9 +10,9 @@ than aspirational:
 * the assignment ceiling, the budget and the scope come from the request, but
   every one of them is then enforced by `BrowserSubagentRunner`, not by the
   worker that is being bounded;
-* a run that ends for any reason other than `GOAL_ACHIEVED` is reported with
-  that reason and the task is completed as failed. Nothing retries itself and
-  nothing escalates.
+* a run that discovers a legitimate scope or action-class extension checkpoints
+  into WAITING_FOR_OWNER and creates a canonical owner decision; policy-forbidden
+  paths remain hard stops. Approval never mutates the original assignment in place.
 
 Everything here is internal-control only: Hermes is the only caller.
 """
@@ -27,6 +27,8 @@ from pydantic import BaseModel, Field
 
 from van_gateway.browser.models import (
     AutonomyTier,
+    BrowserBoundaryType,
+    BrowserEscalationStatus,
     BrowserStrategy,
     BrowserTask,
     BrowserTaskStatus,
@@ -40,6 +42,7 @@ from van_gateway.browser.subagent import (
     SubagentWorker,
 )
 from van_gateway.config import Settings
+from van_gateway.decisions.service import DecisionCreate, DecisionService, DecisionStatus
 from van_gateway.google.control import GoogleControlAuthError, verify_internal_control
 from van_gateway.models import ActionClass
 from van_gateway.storage.db import Store
@@ -121,6 +124,7 @@ class BrowserApi:
         *,
         policy: BrowserPolicyEngine | None = None,
         worker: SubagentWorker | None = None,
+        decisions: DecisionService | None = None,
     ) -> None:
         self.store = store
         self.settings = settings
@@ -129,6 +133,7 @@ class BrowserApi:
         self.tasks = BrowserTaskService(store, self.broker, self.policy)
         self.runner = BrowserSubagentRunner(self.policy)
         self.worker = worker
+        self.decisions = decisions
         self.router = APIRouter(prefix="/v1/browser", tags=["browser"])
         self._install_routes()
 
@@ -169,10 +174,178 @@ class BrowserApi:
             completed_at_ms=row["completed_at_ms"],
         )
 
+    async def _create_boundary_escalation(
+        self,
+        *,
+        task: BrowserTask,
+        assignment: SubagentAssignment,
+        result,
+    ) -> dict[str, Any]:
+        if self.decisions is None:
+            await self.tasks.complete(
+                task_id=task.task_id,
+                status=BrowserTaskStatus.BLOCKED_UNSAFE,
+                error_code="BROWSER_DECISION_SERVICE_UNAVAILABLE",
+            )
+            return {"status": BrowserTaskStatus.BLOCKED_UNSAFE.value}
+
+        reason = result.stop_reason.value
+        idem = f"browser-escalation:{task.task_id}:{reason}"
+        existing = await self.store.fetchone(
+            "SELECT escalation_id, decision_id, status FROM browser_escalations WHERE idempotency_key = ?",
+            (idem,),
+        )
+        if existing is not None:
+            await self.store.execute(
+                "UPDATE browser_tasks SET status = ?, error_code = ?, updated_at_ms = ? WHERE task_id = ?",
+                (BrowserTaskStatus.WAITING_FOR_OWNER.value, reason, int(time.time() * 1000), task.task_id),
+            )
+            return {
+                "status": BrowserTaskStatus.WAITING_FOR_OWNER.value,
+                "escalation_id": existing["escalation_id"],
+                "decision_id": existing["decision_id"],
+            }
+
+        boundary_type = BrowserBoundaryType.OWNER_EXTENSION_REQUIRED
+        summary = (
+            "Browser task needs owner-authorized scope extension"
+            if result.stop_reason is SubagentStop.SCOPE_VIOLATION
+            else "Browser task needs a higher action-class authorization"
+        )
+        decision = await self.decisions.escalate(
+            DecisionCreate(
+                title=summary,
+                body=(
+                    f"Task {task.task_id} cannot continue inside its current browser assignment. "
+                    f"Reason: {reason}. {result.detail or ''}".strip()
+                ),
+                source="browser",
+                hermes_ref=assignment.turn_id,
+                blocking=True,
+            )
+        )
+        now = int(time.time() * 1000)
+        escalation_id = f"besc_{task.task_id}_{reason.lower()}"
+        requested_delta = (
+            {"additional_domain_or_route": result.detail}
+            if result.stop_reason is SubagentStop.SCOPE_VIOLATION
+            else {"higher_action_class_required": True, "detail": result.detail}
+        )
+        await self.store.execute(
+            """
+            INSERT INTO browser_escalations(
+              escalation_id, task_id, decision_id, boundary_type, reason_code,
+              summary, why_required, risk_summary, current_scope_json,
+              requested_scope_delta_json, current_action_class, required_action_class,
+              pending_step, evidence_refs_json, session_lease_ref, idempotency_key,
+              status, expires_at_ms, created_at_ms, updated_at_ms
+            ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, NULL, ?, ?, NULL, ?, ?, NULL, ?, ?)
+            """,
+            (
+                escalation_id, task.task_id, decision.id, boundary_type.value, reason,
+                summary, result.detail or reason, "Requires explicit owner authorization before continuation.",
+                Store.dumps({
+                    "allowed_domains": assignment.allowed_domains,
+                    "action_class_ceiling": assignment.action_class_ceiling.value,
+                    "autonomy_tier": assignment.autonomy_tier.value,
+                }),
+                Store.dumps(requested_delta), task.action_class.value,
+                result.steps[-1].action.kind if result.steps else None,
+                Store.dumps([]), idem, BrowserEscalationStatus.OPEN.value, now, now,
+            ),
+        )
+        await self.store.execute(
+            "UPDATE browser_tasks SET status = ?, error_code = ?, completed_at_ms = NULL, updated_at_ms = ? WHERE task_id = ?",
+            (BrowserTaskStatus.WAITING_FOR_OWNER.value, reason, now, task.task_id),
+        )
+        return {
+            "status": BrowserTaskStatus.WAITING_FOR_OWNER.value,
+            "escalation_id": escalation_id,
+            "decision_id": decision.id,
+        }
+
+    async def _sync_waiting_owner_decision(self, task: BrowserTask) -> BrowserTaskStatus:
+        row = await self.store.fetchone(
+            """
+            SELECT e.escalation_id, e.status AS escalation_status, d.status AS decision_status
+            FROM browser_escalations e
+            JOIN decisions d ON d.id = e.decision_id
+            WHERE e.task_id = ?
+            ORDER BY e.created_at_ms DESC
+            LIMIT 1
+            """,
+            (task.task_id,),
+        )
+        if row is None:
+            return task.status
+        decision_status = DecisionStatus(str(row["decision_status"]))
+        now = int(time.time() * 1000)
+        if decision_status is DecisionStatus.APPROVED:
+            await self.store.execute(
+                "UPDATE browser_escalations SET status = ?, updated_at_ms = ? WHERE escalation_id = ?",
+                (BrowserEscalationStatus.APPROVED.value, now, row["escalation_id"]),
+            )
+            await self.store.execute(
+                "UPDATE browser_tasks SET status = ?, error_code = NULL, updated_at_ms = ? WHERE task_id = ?",
+                (BrowserTaskStatus.RESUME_AUTHORIZED.value, now, task.task_id),
+            )
+            return BrowserTaskStatus.RESUME_AUTHORIZED
+        if decision_status is DecisionStatus.REJECTED:
+            await self.store.execute(
+                "UPDATE browser_escalations SET status = ?, updated_at_ms = ? WHERE escalation_id = ?",
+                (BrowserEscalationStatus.REJECTED.value, now, row["escalation_id"]),
+            )
+            await self.store.execute(
+                "UPDATE browser_tasks SET status = ?, completed_at_ms = ?, updated_at_ms = ? WHERE task_id = ?",
+                (BrowserTaskStatus.CANCELLED.value, now, now, task.task_id),
+            )
+            return BrowserTaskStatus.CANCELLED
+        return BrowserTaskStatus.WAITING_FOR_OWNER
+
     # ------------------------------------------------------------- routes
 
     def _install_routes(self) -> None:
         router = self.router
+
+        @router.get("/status")
+        async def browser_status(x_van_internal_token: str | None = Header(default=None)):
+            self._require_internal(x_van_internal_token)
+            rows = await self.store.fetchall(
+                "SELECT status, COUNT(*) AS count FROM browser_tasks GROUP BY status"
+            )
+            counts = {str(r["status"]): int(r["count"]) for r in rows}
+            waiting = await self.store.fetchone(
+                "SELECT COUNT(*) AS count FROM browser_escalations WHERE status = ?",
+                (BrowserEscalationStatus.OPEN.value,),
+            )
+            return {
+                "enabled": self.settings.browser_enabled,
+                "worker_configured": self.worker is not None,
+                "tasks_by_status": counts,
+                "waiting_for_owner": int(waiting["count"]) if waiting else 0,
+            }
+
+        @router.get("/tasks")
+        async def list_tasks(x_van_internal_token: str | None = Header(default=None)):
+            self._require_internal(x_van_internal_token)
+            rows = await self.store.fetchall(
+                "SELECT * FROM browser_tasks ORDER BY updated_at_ms DESC LIMIT 100"
+            )
+            return [dict(r) for r in rows]
+
+        @router.get("/escalations")
+        async def list_escalations(x_van_internal_token: str | None = Header(default=None)):
+            self._require_internal(x_van_internal_token)
+            rows = await self.store.fetchall(
+                """
+                SELECT e.*, d.title AS decision_title, d.status AS decision_status
+                FROM browser_escalations e
+                JOIN decisions d ON d.id = e.decision_id
+                ORDER BY e.updated_at_ms DESC
+                LIMIT 100
+                """
+            )
+            return [dict(r) for r in rows]
 
         @router.post("/profiles")
         async def register_profile(
@@ -300,8 +473,11 @@ class BrowserApi:
                 raise HTTPException(status_code=503, detail="BROWSER_WORKER_UNCONFIGURED")
 
             task = await self._load_task(body.task_id)
-            if task.status is not BrowserTaskStatus.PENDING:
-                raise HTTPException(status_code=409, detail="BROWSER_TASK_NOT_PENDING")
+            status = task.status
+            if status is BrowserTaskStatus.WAITING_FOR_OWNER:
+                status = await self._sync_waiting_owner_decision(task)
+            if status not in (BrowserTaskStatus.PENDING, BrowserTaskStatus.RESUME_AUTHORIZED):
+                raise HTTPException(status_code=409, detail=f"BROWSER_TASK_NOT_RUNNABLE:{status.value}")
 
             assignment = SubagentAssignment(
                 turn_id=body.turn_id, command_id=body.command_id, task_id=body.task_id,
@@ -315,21 +491,28 @@ class BrowserApi:
                 assignment=assignment, worker=self.worker, task=task
             )
 
-            # A stop is terminal. The task is completed either way, so a bounded
-            # run never leaves a PENDING row that something else might resume.
-            await self.tasks.complete(
-                task_id=task.task_id,
-                status=(
-                    BrowserTaskStatus.COMPLETED
-                    if result.stop_reason is SubagentStop.GOAL_ACHIEVED
-                    else BrowserTaskStatus.FAILED
-                ),
-                error_code=(
-                    None if result.stop_reason is SubagentStop.GOAL_ACHIEVED
-                    else result.stop_reason.value
-                ),
-                now_ms=int(time.time() * 1000),
-            )
+            escalation = None
+            if result.stop_reason in (SubagentStop.SCOPE_VIOLATION, SubagentStop.ACTION_CLASS_VIOLATION):
+                escalation = await self._create_boundary_escalation(
+                    task=task, assignment=assignment, result=result
+                )
+            else:
+                terminal_status = BrowserTaskStatus.COMPLETED
+                if result.stop_reason in (SubagentStop.PAYMENT_REFUSED, SubagentStop.INJECTION_REFUSED):
+                    terminal_status = BrowserTaskStatus.BLOCKED_POLICY
+                elif result.stop_reason is SubagentStop.GOAL_DRIFT:
+                    terminal_status = BrowserTaskStatus.BLOCKED_UNSAFE
+                elif result.stop_reason is not SubagentStop.GOAL_ACHIEVED:
+                    terminal_status = BrowserTaskStatus.FAILED
+                await self.tasks.complete(
+                    task_id=task.task_id,
+                    status=terminal_status,
+                    error_code=(
+                        None if result.stop_reason is SubagentStop.GOAL_ACHIEVED
+                        else result.stop_reason.value
+                    ),
+                    now_ms=int(time.time() * 1000),
+                )
             return {
                 "assignment_id": assignment.assignment_id,
                 "task_id": task.task_id,
@@ -340,6 +523,7 @@ class BrowserApi:
                 "steps": [step.model_dump(mode="json") for step in result.steps],
                 "extraction": result.extraction,
                 "detail": result.detail,
+                "escalation": escalation,
                 # Stated so the subordination is observable, not just documented.
                 "assigned_by_turn": assignment.turn_id,
                 "bounds": {
