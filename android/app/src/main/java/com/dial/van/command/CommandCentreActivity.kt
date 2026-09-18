@@ -608,15 +608,17 @@ private fun ActivityModule(app: VanApplication, glass: com.dial.van.visual.VanGl
 }
 
 @Composable
-private fun BrowserAutomationModule(app: VanApplication, glass: com.dial.van.visual.VanGlassStyle) {
+private fun BrowserAutomationModule(
+    app: VanApplication,
+    glass: com.dial.van.visual.VanGlassStyle,
+    navigate: (CommandModule) -> Unit,
+) {
     val scope = rememberCoroutineScope()
     var status by remember { mutableStateOf<JSONObject?>(null) }
     var tasks by remember { mutableStateOf<List<JSONObject>?>(null) }
     var escalations by remember { mutableStateOf<List<JSONObject>?>(null) }
     var policy by remember { mutableStateOf<JSONObject?>(null) }
-    var evidenceByTask by remember { mutableStateOf<Map<String, List<JSONObject>>>(emptyMap()) }
     var error by remember { mutableStateOf<String?>(null) }
-    var resolving by remember { mutableStateOf<String?>(null) }
 
     fun refresh() {
         scope.launch {
@@ -633,13 +635,13 @@ private fun BrowserAutomationModule(app: VanApplication, glass: com.dial.van.vis
 
     LazyColumn(
         modifier = Modifier.fillMaxSize().padding(horizontal = 14.dp),
-        verticalArrangement = Arrangement.spacedBy(9.dp),
+        verticalArrangement = Arrangement.spacedBy(10.dp),
         contentPadding = PaddingValues(vertical = 8.dp),
     ) {
         item {
             SectionHeader(
                 "Browser & Automation",
-                "Live Browser Harness, Stagehand, escalation and automation-fabric truth",
+                "Summary dashboard. Open a card for the full operational page.",
             )
         }
         if (status == null && error == null) item { TruthMessage("Loading browser and automation state…") }
@@ -651,52 +653,92 @@ private fun BrowserAutomationModule(app: VanApplication, glass: com.dial.van.vis
                     Column(verticalArrangement = Arrangement.spacedBy(5.dp)) {
                         Text("Runtime overview", color = Color.White, fontSize = 15.sp, fontWeight = FontWeight.Bold)
                         Text(
-                            "Browser enabled: ${s.optBoolean("enabled")} • worker configured: ${s.optBoolean("worker_configured")}",
+                            "Browser ${if (s.optBoolean("enabled")) "enabled" else "disabled"} • worker ${if (s.optBoolean("worker_configured")) "configured" else "not configured"}",
                             color = Color(0xFFD7E7EC),
                             fontSize = 11.sp,
                         )
                         Text(
-                            "Waiting for owner: ${s.optInt("waiting_for_owner")} • admitted automations: ${s.optInt("admitted_automation_capabilities")}",
+                            "${s.optInt("waiting_for_owner")} waiting for owner • ${s.optInt("admitted_automation_capabilities")} admitted automations",
                             color = Color(VanGlassTokens.EDGE_CYAN),
                             fontSize = 11.sp,
                         )
-                        Text("Browser states: ${s.optJSONObject("tasks_by_status")?.toString() ?: "{}"}", color = Color(0xFFBCD1D8), fontSize = 10.sp)
-                        Text("Automation runs: ${s.optJSONObject("automation_runs_by_status")?.toString() ?: "{}"}", color = Color(0xFFBCD1D8), fontSize = 10.sp)
-                    }
-                }
-            }
-            val profiles = s.optJSONArray("profiles")?.objectList().orEmpty()
-            if (profiles.isNotEmpty()) {
-                item { SectionHeader("Browser sessions / profiles", "Managed aliases only; cookies and credentials are never exposed") }
-                items(profiles, key = { it.optString("profile_alias") }) { profile ->
-                    AdminCard(glass) {
-                        Column(verticalArrangement = Arrangement.spacedBy(4.dp)) {
-                            Text(profile.optString("profile_alias"), color = Color.White, fontWeight = FontWeight.Bold)
-                            Text("${profile.optString("persistence")} • ${profile.optString("authentication")} • ${profile.optString("mutation_policy")}", color = Color(0xFFD7E7EC), fontSize = 11.sp)
-                            Text(if (profile.isNull("lease_holder")) "No active lease" else "Active managed lease", color = Color(0xFFBCD1D8), fontSize = 10.sp)
-                        }
                     }
                 }
             }
         }
 
-        policy?.let { p ->
-            item {
-                SectionHeader("Policy & capabilities", "Read-only authority view; policy changes still require governed VAN actions")
-            }
-            item {
-                AdminCard(glass) {
-                    Column(verticalArrangement = Arrangement.spacedBy(4.dp)) {
-                        Text("Browser policy ${p.optString("policy_version")}", color = Color.White, fontWeight = FontWeight.Bold)
-                        Text("Admitted domains: ${p.optJSONArray("admitted_domains")?.toString() ?: "[]"}", color = Color(0xFFD7E7EC), fontSize = 10.sp)
-                        Text("Max autonomy: ${p.optString("max_autonomy_tier")} • session leases: ${p.optBoolean("session_leases_required")}", color = Color(0xFFBCD1D8), fontSize = 10.sp)
-                        Text("Hard prohibitions: ${p.optJSONArray("hard_prohibitions")?.toString() ?: "[]"}", color = Color(VanGlassTokens.ACCENT_AMBER), fontSize = 10.sp)
-                    }
-                }
-            }
+        item {
+            AdminActionCard(
+                "Owner escalations",
+                escalations?.let { rows ->
+                    val open = rows.count { it.optString("decision_status", it.optString("status")) == "OPEN" }
+                    "$open awaiting owner decision • ${rows.size} returned"
+                } ?: "Loading escalation summary…",
+                glass,
+            ) { navigate(CommandModule.BROWSER_ESCALATIONS) }
         }
+        item {
+            AdminActionCard(
+                "Browser tasks & evidence",
+                tasks?.let { rows ->
+                    val waiting = rows.count { it.optString("status") == "WAITING_FOR_OWNER" }
+                    "${rows.size} active/recent task(s) • $waiting resumably waiting"
+                } ?: "Loading task summary…",
+                glass,
+            ) { navigate(CommandModule.BROWSER_TASKS) }
+        }
+        item {
+            val profiles = status?.optJSONArray("profiles")?.objectList().orEmpty()
+            AdminActionCard(
+                "Sessions & profiles",
+                if (status == null) "Loading managed browser profiles…" else {
+                    val active = profiles.count { !it.isNull("lease_holder") }
+                    "${profiles.size} managed profile(s) • $active active lease(s)"
+                },
+                glass,
+            ) { navigate(CommandModule.BROWSER_SESSIONS) }
+        }
+        item {
+            AdminActionCard(
+                "Policy & capabilities",
+                policy?.let {
+                    "Policy ${it.optString("policy_version", "unknown")} • max autonomy ${it.optString("max_autonomy_tier", "unknown")}"
+                } ?: "Loading authority policy…",
+                glass,
+            ) { navigate(CommandModule.BROWSER_POLICY) }
+        }
+        item { Button(onClick = { refresh() }) { Text("Refresh summary") } }
+    }
+}
 
-        item { SectionHeader("Owner escalations", "Boundary overruns pause safely instead of being killed") }
+@Composable
+private fun BrowserEscalationsPage(
+    app: VanApplication,
+    glass: com.dial.van.visual.VanGlassStyle,
+    back: () -> Unit,
+) {
+    val scope = rememberCoroutineScope()
+    var escalations by remember { mutableStateOf<List<JSONObject>?>(null) }
+    var error by remember { mutableStateOf<String?>(null) }
+    var resolving by remember { mutableStateOf<String?>(null) }
+
+    fun refresh() {
+        scope.launch {
+            runCatching { app.gatewayClient.browserEscalations().objectList() }
+                .onSuccess { escalations = it; error = null }
+                .onFailure { error = it.message ?: "Unable to load browser escalations" }
+        }
+    }
+    LaunchedEffect(Unit) { refresh() }
+
+    LazyColumn(
+        modifier = Modifier.fillMaxSize().padding(horizontal = 14.dp),
+        verticalArrangement = Arrangement.spacedBy(9.dp),
+        contentPadding = PaddingValues(vertical = 8.dp),
+    ) {
+        item { DashboardPageHeader("Owner escalations", "Browser & Automation", back) }
+        if (escalations == null && error == null) item { TruthMessage("Loading owner escalations…") }
+        if (error != null) item { TruthMessage(error!!, warning = true) }
         if (escalations?.isEmpty() == true) item { TruthMessage("No browser escalation is waiting for owner action.") }
         items(escalations.orEmpty(), key = { it.optString("escalation_id") }) { esc ->
             AdminCard(glass) {
@@ -748,14 +790,48 @@ private fun BrowserAutomationModule(app: VanApplication, glass: com.dial.van.vis
                 }
             }
         }
+        item { Button(onClick = { refresh() }) { Text("Refresh escalations") } }
+    }
+}
 
-        item { SectionHeader("Active & recent browser tasks", "Gateway truth; WAITING_FOR_OWNER is resumable and non-terminal") }
+@Composable
+private fun BrowserTasksPage(
+    app: VanApplication,
+    glass: com.dial.van.visual.VanGlassStyle,
+    back: () -> Unit,
+) {
+    val scope = rememberCoroutineScope()
+    var tasks by remember { mutableStateOf<List<JSONObject>?>(null) }
+    var evidenceByTask by remember { mutableStateOf<Map<String, List<JSONObject>>>(emptyMap()) }
+    var error by remember { mutableStateOf<String?>(null) }
+
+    fun refresh() {
+        scope.launch {
+            runCatching { app.gatewayClient.browserTasks().objectList() }
+                .onSuccess { tasks = it; error = null }
+                .onFailure { error = it.message ?: "Unable to load browser tasks" }
+        }
+    }
+    LaunchedEffect(Unit) { refresh() }
+
+    LazyColumn(
+        modifier = Modifier.fillMaxSize().padding(horizontal = 14.dp),
+        verticalArrangement = Arrangement.spacedBy(9.dp),
+        contentPadding = PaddingValues(vertical = 8.dp),
+    ) {
+        item { DashboardPageHeader("Browser tasks & evidence", "Browser & Automation", back) }
+        if (tasks == null && error == null) item { TruthMessage("Loading browser tasks…") }
+        if (error != null) item { TruthMessage(error!!, warning = true) }
         if (tasks?.isEmpty() == true) item { TruthMessage("No browser tasks returned by the gateway.") }
         items(tasks.orEmpty(), key = { it.optString("task_id") }) { task ->
             AdminCard(glass) {
                 Column(verticalArrangement = Arrangement.spacedBy(4.dp)) {
                     Text(task.optString("goal", "Browser task"), color = Color.White, fontWeight = FontWeight.Bold)
-                    Text("${task.optString("status")} • ${task.optString("strategy")} • ${task.optString("autonomy_tier")}", color = if (task.optString("status") == "WAITING_FOR_OWNER") Color(VanGlassTokens.ACCENT_AMBER) else Color(0xFFD7E7EC), fontSize = 11.sp)
+                    Text(
+                        "${task.optString("status")} • ${task.optString("strategy")} • ${task.optString("autonomy_tier")}",
+                        color = if (task.optString("status") == "WAITING_FOR_OWNER") Color(VanGlassTokens.ACCENT_AMBER) else Color(0xFFD7E7EC),
+                        fontSize = 11.sp,
+                    )
                     Text("${task.optString("target_domain")} • ${task.optString("action_class")}", color = Color(0xFFBCD1D8), fontSize = 10.sp)
                     task.optString("error_code").takeIf { it.isNotBlank() }?.let {
                         Text("State reason: $it", color = Color(0xFFBCD1D8), fontSize = 10.sp)
@@ -769,10 +845,10 @@ private fun BrowserAutomationModule(app: VanApplication, glass: com.dial.van.vis
                                     .onFailure { error = it.message }
                             }
                         },
-                    ) { Text("Evidence") }
+                    ) { Text("Open evidence") }
                     evidenceByTask[taskId]?.let { records ->
                         Text("${records.size} evidence receipt(s)", color = Color(VanGlassTokens.EDGE_CYAN), fontSize = 10.sp)
-                        records.takeLast(4).forEach { evidence ->
+                        records.takeLast(8).forEach { evidence ->
                             Text(
                                 "${evidence.optString("kind")} • ${evidence.optString("source_trust")} • ${evidence.optString("injection_assessment")}",
                                 color = Color(0xFFBCD1D8),
@@ -783,7 +859,115 @@ private fun BrowserAutomationModule(app: VanApplication, glass: com.dial.van.vis
                 }
             }
         }
-        item { Button(onClick = { refresh() }) { Text("Refresh browser & automation") } }
+        item { Button(onClick = { refresh() }) { Text("Refresh tasks") } }
+    }
+}
+
+@Composable
+private fun BrowserSessionsPage(
+    app: VanApplication,
+    glass: com.dial.van.visual.VanGlassStyle,
+    back: () -> Unit,
+) {
+    var status by remember { mutableStateOf<JSONObject?>(null) }
+    var error by remember { mutableStateOf<String?>(null) }
+
+    LaunchedEffect(Unit) {
+        runCatching { app.gatewayClient.browserStatus() }
+            .onSuccess { status = it; error = null }
+            .onFailure { error = it.message ?: "Unable to load browser sessions" }
+    }
+
+    LazyColumn(
+        modifier = Modifier.fillMaxSize().padding(horizontal = 14.dp),
+        verticalArrangement = Arrangement.spacedBy(9.dp),
+        contentPadding = PaddingValues(vertical = 8.dp),
+    ) {
+        item { DashboardPageHeader("Sessions & profiles", "Browser & Automation", back) }
+        if (status == null && error == null) item { TruthMessage("Loading managed browser profiles…") }
+        if (error != null) item { TruthMessage(error!!, warning = true) }
+        val profiles = status?.optJSONArray("profiles")?.objectList().orEmpty()
+        if (status != null && profiles.isEmpty()) item { TruthMessage("No managed browser profiles returned.") }
+        items(profiles, key = { it.optString("profile_alias") }) { profile ->
+            AdminCard(glass) {
+                Column(verticalArrangement = Arrangement.spacedBy(4.dp)) {
+                    Text(profile.optString("profile_alias"), color = Color.White, fontWeight = FontWeight.Bold)
+                    Text(
+                        "${profile.optString("persistence")} • ${profile.optString("authentication")} • ${profile.optString("mutation_policy")}",
+                        color = Color(0xFFD7E7EC),
+                        fontSize = 11.sp,
+                    )
+                    Text(
+                        if (profile.isNull("lease_holder")) "No active lease" else "Active managed lease",
+                        color = Color(0xFFBCD1D8),
+                        fontSize = 10.sp,
+                    )
+                }
+            }
+        }
+        item {
+            TruthMessage("Managed aliases only. Raw cookies, credentials and provider tokens are never displayed.")
+        }
+    }
+}
+
+@Composable
+private fun BrowserPolicyPage(
+    app: VanApplication,
+    glass: com.dial.van.visual.VanGlassStyle,
+    back: () -> Unit,
+) {
+    var policy by remember { mutableStateOf<JSONObject?>(null) }
+    var error by remember { mutableStateOf<String?>(null) }
+
+    LaunchedEffect(Unit) {
+        runCatching { app.gatewayClient.browserPolicy() }
+            .onSuccess { policy = it; error = null }
+            .onFailure { error = it.message ?: "Unable to load browser policy" }
+    }
+
+    LazyColumn(
+        modifier = Modifier.fillMaxSize().padding(horizontal = 14.dp),
+        verticalArrangement = Arrangement.spacedBy(9.dp),
+        contentPadding = PaddingValues(vertical = 8.dp),
+    ) {
+        item { DashboardPageHeader("Policy & capabilities", "Browser & Automation", back) }
+        if (policy == null && error == null) item { TruthMessage("Loading browser policy…") }
+        if (error != null) item { TruthMessage(error!!, warning = true) }
+        policy?.let { p ->
+            item {
+                AdminCard(glass) {
+                    Column(verticalArrangement = Arrangement.spacedBy(5.dp)) {
+                        Text("Browser policy ${p.optString("policy_version")}", color = Color.White, fontWeight = FontWeight.Bold)
+                        Text("Max autonomy: ${p.optString("max_autonomy_tier")}", color = Color(0xFFD7E7EC), fontSize = 11.sp)
+                        Text("Session leases required: ${p.optBoolean("session_leases_required")}", color = Color(0xFFBCD1D8), fontSize = 10.sp)
+                        Text("Mutation default deny: ${p.optBoolean("mutation_default_deny")}", color = Color(0xFFBCD1D8), fontSize = 10.sp)
+                        Text("Download default deny: ${p.optBoolean("download_default_deny")}", color = Color(0xFFBCD1D8), fontSize = 10.sp)
+                    }
+                }
+            }
+            item {
+                AdminCard(glass) {
+                    Column(verticalArrangement = Arrangement.spacedBy(5.dp)) {
+                        Text("Admitted domains", color = Color.White, fontWeight = FontWeight.Bold)
+                        p.optJSONArray("admitted_domains")?.stringList().orEmpty().forEach {
+                            Text("• $it", color = Color(0xFFD7E7EC), fontSize = 11.sp)
+                        }
+                    }
+                }
+            }
+            item {
+                AdminCard(glass) {
+                    Column(verticalArrangement = Arrangement.spacedBy(5.dp)) {
+                        Text("Hard prohibitions", color = Color(VanGlassTokens.ACCENT_AMBER), fontWeight = FontWeight.Bold)
+                        p.optJSONArray("hard_prohibitions")?.stringList().orEmpty().forEach {
+                            Text("• $it", color = Color(0xFFD7E7EC), fontSize = 11.sp)
+                        }
+                    }
+                }
+            }
+        }
+        item { TruthMessage("This page is read-only. Policy changes remain governed VAN actions, not local toggles.") }
     }
 }
 
@@ -930,6 +1114,24 @@ private fun SettingsModule(app: VanApplication, glass: com.dial.van.visual.VanGl
         item {
             TruthMessage("A4 privileged commands remain fail-closed and require the existing biometric approval path. No secret or approval token is displayed here.")
         }
+    }
+}
+
+@Composable
+private fun DashboardPageHeader(
+    title: String,
+    parent: String,
+    back: () -> Unit,
+) {
+    Column(verticalArrangement = Arrangement.spacedBy(6.dp), modifier = Modifier.padding(vertical = 4.dp)) {
+        Button(
+            onClick = back,
+            contentPadding = PaddingValues(horizontal = 10.dp, vertical = 4.dp),
+            colors = ButtonDefaults.buttonColors(containerColor = Color(VanGlassTokens.TINT_NAVY).copy(alpha = 0.72f)),
+        ) {
+            Text("← $parent", fontSize = 10.sp)
+        }
+        Text(title, color = Color.White, fontSize = 19.sp, fontWeight = FontWeight.Bold)
     }
 }
 
