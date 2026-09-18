@@ -186,7 +186,15 @@ for u in vati-commander.service vati-vekl.service vati-session@.service vati-mt5
 run install -d -m 0755 /etc/polkit-1/rules.d
 run install -m 0644 "$HERE/systemd/vati-polkit-restart.rules" /etc/polkit-1/rules.d/49-vati-restart.rules
 run systemctl daemon-reload
-if (( ! SKIP_SUPABASE )); then run systemctl enable --now vati-supabase.service; fi
+if (( ! SKIP_SUPABASE )); then
+  run systemctl enable --now vati-supabase.service
+  if (( DRY_RUN )); then
+    plan "reconcile VATI ledger role/schema against persisted Supabase secret"
+  else
+    "$VENV/bin/python" "$HERE/supabase/reconcile_vati_ledger.py"       --env "$BASE/supabase/.env"       --template "$HERE/supabase/init/01_vati_ledger.sql.tpl"
+  fi
+  ok "VATI ledger role/schema reconciled"
+fi
 run systemctl enable --now vati-vekl.service
 run systemctl enable --now vati-commander.service
 run systemctl enable --now vati-mt5-pull.service
