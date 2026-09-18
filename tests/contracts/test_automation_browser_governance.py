@@ -31,35 +31,80 @@ ADOPTION_DECISIONS = (
     "VAN-ADOPT-BROWSER-HARNESS-001.yaml",
 )
 
-#: Digest of `docs/SECURITY_POLICY.md` as this branch found it. The Automation &
-#: Browser Fabric proposes amendments in `docs/decisions/`; it does not apply
-#: them. If this assertion fails, either the owner accepted the amendment (and
-#: this constant should be updated in the same commit that records the
-#: approval), or an agent edited a locked authority on its own initiative.
-SECURITY_POLICY_SHA256 = "cf303cb9aa1cc48432da77bc16cb33f400afcfc8d7f286a148be940cc2331eb5"
+#: Digest of `docs/SECURITY_POLICY.md` after the owner-approved
+#: VAN-AMEND-SECURITY-POLICY-001 amendment of 2026-09-18. If this assertion fails,
+#: either the owner accepted a further amendment (and this constant should be
+#: updated in the same commit that records the approval), or an agent edited a
+#: locked authority on its own initiative.
+SECURITY_POLICY_SHA256 = "bea251efba7e04ac4b813abe29aa44a2a7243c6830b54b252b1ed32e635206e8"
 
 
 def _sha256(path: Path) -> str:
     return hashlib.sha256(path.read_bytes()).hexdigest()
 
 
-def test_all_adoption_decisions_exist_and_are_unsigned():
-    """§365 — an implementation agent creates these; it never signs them."""
+def test_all_adoption_decisions_record_an_owner_decision():
+    """§365 — every decision must carry a signature status and, once signed, provenance.
+
+    An agent may not invent the signature; when it is SIGNED there must be a
+    recorded owner decision saying who decided and on what basis.
+    """
     for name in ADOPTION_DECISIONS:
         path = DECISIONS / name
         assert path.is_file(), f"missing adoption decision: {name}"
         text = path.read_text(encoding="utf-8")
-        assert "owner_signature_status: PENDING" in text, name
-        assert "owner_signed_at: null" in text, name
+        assert "owner_signature_status: SIGNED" in text, name
+        assert "owner_decision_record:" in text, f"{name} is SIGNED without provenance"
+        assert "provenance:" in text, name
+        assert "owner_signature_evidence_ref: evidence://" in text, name
 
 
-def test_security_policy_amendment_is_a_proposal_not_an_edit():
-    """§§367-368 — the amendment package exists and the locked policy is untouched."""
-    amendment = DECISIONS / "VAN-AMEND-SECURITY-POLICY-001.md"
-    assert amendment.is_file()
-    text = amendment.read_text(encoding="utf-8")
-    assert "owner_signature_status: PENDING" in text
-    assert "PENDING_OWNER" in text
+def test_payment_prohibition_is_recorded_in_the_n8n_decision():
+    """The owner's 2026-09-18 constraint: passwords yes, payments never."""
+    text = (DECISIONS / "VAN-ADOPT-N8N-001.yaml").read_text(encoding="utf-8")
+    assert "prohibited_absolutely:" in text
+    assert "payment execution by any automation" in text
+    assert "standing_authority: PROHIBITED" in text
+
+
+def test_browser_subagent_decision_is_recorded():
+    """The owner's 2026-09-18 constraint: autonomous, but managed by Hermes."""
+    text = (DECISIONS / "VAN-ADOPT-STAGEHAND-001.yaml").read_text(encoding="utf-8")
+    assert "HERMES_MANAGED_SUBAGENT" in text
+    assert "production_default_max_tier: L5" in text
+    assert "subagent_invariants:" in text
+
+
+def test_security_policy_amendment_was_applied():
+    """§368 — the amendment is owner-approved and now lives in the locked policy."""
+    amendment = (DECISIONS / "VAN-AMEND-SECURITY-POLICY-001.md").read_text(encoding="utf-8")
+    assert "OWNER_APPROVED" in amendment
+    assert "Owner decision (2026-09-18)" in amendment
+
+    policy = SECURITY_POLICY.read_text(encoding="utf-8")
+    for section in (
+        "## Automation Fabric boundary",
+        "## Payments",
+        "## Credential isolation",
+        "## Browser session sovereignty",
+        "## External egress and webhook ingress",
+    ):
+        assert section in policy, f"amendment section not applied: {section}"
+
+
+def test_policy_states_payments_are_never_automated():
+    policy = SECURITY_POLICY.read_text(encoding="utf-8")
+    assert "prohibited by default and cannot be automated" in policy
+    assert "Payment instruments are **never stored**" in policy
+    assert "A standing authority can never carry it" in policy
+
+
+def test_policy_defines_browser_subagent_without_weakening_sole_runtime():
+    """The sole-agent-runtime sentence must survive the subagent amendment."""
+    policy = SECURITY_POLICY.read_text(encoding="utf-8")
+    assert "Hermes profile `van` is the sole agent runtime." in policy
+    assert "permitted **subagent**" in policy
+    assert "A subagent is not an independent agent loop" in policy
 
 
 def test_locked_security_policy_is_unmodified():
@@ -72,19 +117,38 @@ def test_locked_security_policy_is_unmodified():
     )
 
 
-def test_stack_lock_is_not_mutated_before_owner_decision():
-    """§366 — stack-lock mutation is blocked until the decision is recorded."""
+def test_no_layer_is_admitted_without_a_signed_decision():
+    """§366 — the durable invariant: admission requires a recorded owner decision.
+
+    This is the conditional form of "do not mutate the lock before approval". It
+    held before the 2026-09-18 promotion because nothing was admitted, and it holds
+    after because each admitted layer names a decision that is SIGNED. It fails if
+    anyone admits a layer whose decision is still PENDING.
+    """
+    proposal = json.loads(PROPOSAL.read_text(encoding="utf-8"))
     lock = json.loads(STACK_LOCK.read_text(encoding="utf-8"))
-    admitted = {layer["layer"] for layer in lock["layers"]}
-    proposed = {
-        layer["layer"]
-        for layer in json.loads(PROPOSAL.read_text(encoding="utf-8"))["layers"]
-    }
-    overlap = admitted & proposed
-    assert not overlap, (
-        f"layers {sorted(overlap)} were promoted into stack_lock.json while their adoption "
-        "decision is still PENDING"
-    )
+    admitted = {layer["layer"]: layer for layer in lock["layers"]}
+
+    for name, ref in proposal["adoption_decision_refs"].items():
+        if name not in admitted:
+            continue
+        decision = (ROOT / ref).read_text(encoding="utf-8")
+        assert "owner_signature_status: SIGNED" in decision, (
+            f"{name} is admitted in stack_lock.json but {ref} is not owner-signed"
+        )
+        assert admitted[name].get("adoption_decision_ref") == ref, (
+            f"{name} is admitted without naming its adoption decision"
+        )
+
+
+def test_promotion_preserved_the_trading_invariants():
+    """Admitting three layers must not have widened what may send an order."""
+    lock = json.loads(STACK_LOCK.read_text(encoding="utf-8"))
+    senders = {layer["layer"] for layer in lock["layers"] if layer["executes_live_orders"]}
+    assert senders == {"trading_kernel", "mt5_execution", "deriv_execution", "ctrader_execution"}
+
+    t0 = {layer["layer"] for layer in lock["layers"] if layer["latency_tier"] == "T0"}
+    assert t0 == senders
 
 
 def test_external_gates_record_automation_browser_rows_as_pending():

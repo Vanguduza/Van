@@ -17,7 +17,41 @@ Status: CANONICAL
 
 Hermes profile `van` is the sole agent runtime. Android, the gateway, Gemini Live, Deep Research, Antigravity, Jules, Workspace Studio and other provider surfaces do not form independent VAN agent loops.
 
+Browser workers are the one permitted **subagent** of that runtime. Within a task Hermes has assigned — with an explicit goal, domain scope and step budget — a browser worker may select its own actions. It remains subordinate: it cannot create a VAN command, raise an action class, change its goal, extend its own budget, deadline or scope, or continue after the budget is exhausted. Every step is attributed to the assigning Hermes turn. A subagent is not an independent agent loop, and no other surface gains this status.
+
 Privileged Hermes→gateway Google job planning, job inspection and artifact recording require `VAN_INTERNAL_CONTROL_TOKEN` via `X-Van-Internal-Token`. If the control token is absent, those operations fail closed.
+
+## Automation Fabric boundary
+
+n8n is a subordinate integration and workflow runtime. n8n never becomes an owner principal, Project Truth authority, trading Risk Authority, broker order sender, or Hermes peer agent. Consequential n8n effects require an existing owner command authority, or a standing automation authority derived from an owner-authorized command and enforced by the VAN Gateway.
+
+Generated WorkflowIR and compiled n8n workflows are executable candidates, not authority. Generation cannot create a new privilege, credential, domain allowance, action-class exception, standing grant or Project Truth decision.
+
+Stagehand and Browser Harness are subordinate browser workers. They receive task-scoped grants and may not independently create VAN commands, elevate action classes, access owner signing secrets, or place, modify or cancel broker trades.
+
+## Payments
+
+Payment execution is **prohibited by default and cannot be automated**.
+
+- No automation, schedule, standing intent, workflow, browser task or agent may execute a payment.
+- A payment is **A4** and requires a fresh owner biometric approval bound to the exact payee, amount, currency and reference. A standing authority can never carry it, and a prior approval is never reusable.
+- Payment instruments are **never stored**. Card numbers, CVVs, bank details, wallet credentials and payment-provider tokens must not be written to the n8n credential store, a browser profile, a workflow artifact, VAN evidence, logs or any cache — at any credential class.
+- "Save this payment method", "remember this card" and equivalent flows are forbidden. Instrument details are supplied per payment under owner control and are discarded immediately.
+- A workflow or browser task that declares a payment effect is refused at compile and at dispatch unless it is an A4 action carrying a fresh approval.
+
+## Credential isolation
+
+n8n may hold only explicitly approved integration credentials classified for bounded read/write integration use, including service passwords, after admission. Owner signing keys, device HMAC secrets, VAN internal/root tokens, Project Truth authority credentials, broker execution credentials, VATI authority-store credentials, payment instruments and other root or financial authority secrets are prohibited from the n8n credential store.
+
+## Browser session sovereignty
+
+Browser cookies, localStorage/sessionStorage secrets, CDP bearer material, login sessions, OTPs and browser profile secrets are SECRET. They remain inside the Browser Session Broker / managed browser profile and are referenced by opaque aliases. They may not be copied into Hermes prompts, n8n workflow JSON, Stagehand model prompts, VEKL/VTIL, evidence text, logs or workflow artifacts.
+
+## External egress and webhook ingress
+
+Automation and browser egress is default-off per capability and per domain. Gateway policy must explicitly authorize the domain, credential plane, method/effect class and sensitivity before a request is permitted. External content remains UNTRUSTED_EXTERNAL and cannot increase authority.
+
+External webhooks are untrusted events, never owner commands. Provider signature/HMAC/mTLS/OAuth validation, replay protection and schema validation occur before an event may enter the VAN event fabric.
 
 ## Capability broker
 
@@ -32,7 +66,7 @@ Read grants never imply write. A3/A4 Google jobs require an explicit grant. Proj
 | A1 | Safe read / deterministic local | device auth |
 | A2 | Bounded external read | capability grant |
 | A3 | Bounded write | grant + policy |
-| A4 | Destructive / irreversible / send-as-owner | explicit owner approval |
+| A4 | Destructive / irreversible / send-as-owner / **payment** | explicit owner approval, per occurrence |
 | A5 | Prohibited | always deny |
 
 ## Google Account Sovereignty and credential isolation

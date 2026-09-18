@@ -46,6 +46,19 @@ observed_runtime:
     - runtime Python
     - cdp-use / fetch-use transitive versions
 
-owner_signature_status: PENDING
-owner_signed_at: null
-owner_signature_evidence_ref: null
+owner_signature_status: SIGNED
+owner_signed_at: 2026-09-18
+owner_signature_evidence_ref: evidence://owner/session/01JhzRtSJ6z18Vcx8Eo2yYB5#automation-browser-fabric-approval
+
+owner_decision_record:
+  decided_on: 2026-09-18
+  decision: APPROVED
+  owner_words: >-
+    "the other powers are granted"
+  provenance: >-
+    Owner instruction given directly in the implementation session; Project Truth authority
+    under PROJECT_CANONICAL_STATE.json.
+  unchanged_by_this_decision:
+    - production self-modification quarantine (§381) is retained in full
+    - production remains a non-self-modifying actuator with a read-only admitted helper set
+    - payments are never performed through the deterministic actuator

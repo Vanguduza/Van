@@ -1,6 +1,38 @@
 # VAN-AMEND-SECURITY-POLICY-001 — Automation & Browser Fabric amendment package
 
-**Status:** `PENDING_OWNER`. This is a **proposal**, not an amendment.
+**Status:** `OWNER_APPROVED` and **applied** to `docs/SECURITY_POLICY.md` on 2026-09-18.
+
+## Owner decision (2026-09-18)
+
+The owner approved this package directly in the implementation session, with two
+modifications to what was proposed:
+
+1. **Payments are a new hard prohibition.** In the owner's words: *"making payments is
+   strictly forbidden and can only be done under my strict orders but still without saving
+   my payment options."* This became a new **Payments** section: payment execution can never
+   be automated, is A4 per occurrence, and no payment instrument may be stored anywhere at
+   any credential class. n8n *may* hold ordinary service passwords (C3/C4) after admission —
+   the prohibition is specific to payment instruments and payment execution.
+2. **Browser workers become Hermes subagents.** In the owner's words: *"Web browsing should
+   think for itself during assigned tasks but with hermes as the main brain or manager so in
+   essence it becomes hermes's subagent."* The proposed permanent L3 cap is therefore
+   **superseded**. L4/L5 are permitted inside a Hermes-assigned task with a goal, scope and
+   step budget the worker cannot widen. The *Hermes execution boundary* section was extended
+   to define subagent status explicitly rather than weakened.
+
+**Provenance.** This is an owner instruction given in session, which
+`PROJECT_CANONICAL_STATE.json` treats as Project Truth authority
+(`owner_instruction_is_project_truth_authority: true`). It is **not** a device-signed gateway
+command. A production deployment should additionally capture the owner-signed record through
+the normal signed-ingress path; that is a stronger evidence class, not a different decision.
+
+**Applied sections:** Hermes execution boundary (extended), Automation Fabric boundary (new),
+Payments (new), Credential isolation (new), Browser session sovereignty (new), External egress
+and webhook ingress (new), Action classes (A4 now names payment).
+
+---
+
+## Original proposal, retained for the record
 **Target authority:** `docs/SECURITY_POLICY.md` — a locked authority under
 `PROJECT_CANONICAL_STATE.json → canonical_state.locked_authorities`.
 **Source:** Rev 1.3 §367, activation gate §368.
@@ -134,19 +166,21 @@ worker. This proposal does **not** ask to weaken that sentence. Instead:
 
 ---
 
-## What the owner is being asked to decide
+## What the owner was asked to decide, and what they decided
 
-1. Accept or amend the seven authority texts A1–A7.
-2. Separately decide whether Stagehand L4/L5 is ever permitted in production, or whether VAN caps at
-   L3 permanently.
-3. Accept the three adoption decisions in `docs/decisions/VAN-ADOPT-*.yaml`, of which only n8n
-   requires a licence-class decision (`SOURCE_AVAILABLE`).
+1. **Accept or amend the seven authority texts A1–A7.** → Accepted, with the Payments section added
+   as an eighth boundary at the owner's instruction.
+2. **Decide whether Stagehand L4/L5 is ever permitted in production, or whether VAN caps at L3
+   permanently.** → L4/L5 permitted, as a Hermes-managed subagent. The L3 cap is superseded.
+3. **Accept the three adoption decisions in `docs/decisions/VAN-ADOPT-*.yaml`.** → All three
+   accepted; n8n's `SOURCE_AVAILABLE` licence-class decision is recorded in
+   `VAN-ADOPT-N8N-001.yaml`.
 
-On approval, record through the Project Truth process, then promote the stack-lock layers from
-`trading/architecture/proposed/automation_browser_fabric_layers.json`.
+Recorded, applied to `docs/SECURITY_POLICY.md`, and the stack-lock layers promoted from
+`trading/architecture/proposed/automation_browser_fabric_layers.json` into revision `5.2.0`.
 
 ```yaml
-owner_signature_status: PENDING
-owner_signed_at: null
-owner_signature_evidence_ref: null
+owner_signature_status: SIGNED
+owner_signed_at: 2026-09-18
+owner_signature_evidence_ref: evidence://owner/session/01JhzRtSJ6z18Vcx8Eo2yYB5#automation-browser-fabric-approval
 ```

@@ -21,18 +21,35 @@ PROPOSED = PROPOSAL["layers"]
 BY_NAME = {layer["layer"]: layer for layer in PROPOSED}
 
 
-def test_proposal_is_not_owner_signed():
-    """Rev 1.3 §365: an implementation agent creates the proposal, never signs it."""
-    assert PROPOSAL["proposal_status"] == "PENDING_OWNER"
+def test_promotion_required_a_recorded_owner_decision():
+    """Rev 1.3 §§365-366: promotion is legitimate only behind a signed decision.
+
+    The proposal was promoted on 2026-09-18. This asserts the precondition that
+    made it legal, so a future promotion cannot happen without one.
+    """
+    assert PROPOSAL["proposal_status"] == "PROMOTED"
     for ref in PROPOSAL["adoption_decision_refs"].values():
         decision = (Path(__file__).resolve().parents[2] / ref).read_text(encoding="utf-8")
-        assert "owner_signature_status: PENDING" in decision, ref
+        assert "owner_signature_status: SIGNED" in decision, ref
+        assert "owner_decision_record:" in decision, f"{ref} signed without provenance"
 
 
-def test_proposed_layers_are_not_yet_admitted():
-    """Rev 1.3 §366: stack-lock mutation is blocked until the decision is recorded."""
+def test_promoted_layers_are_now_admitted():
+    """The promotion actually landed, and landed completely."""
     admitted = {layer["layer"] for layer in ADMITTED_LAYERS}
-    assert admitted.isdisjoint(BY_NAME), "proposed layers must not be merged into stack_lock.json yet"
+    missing = sorted(set(BY_NAME) - admitted)
+    assert not missing, f"promoted layers absent from stack_lock.json: {missing}"
+
+
+def test_admitted_copies_match_the_proposal():
+    """Promotion is mechanical: the admitted layer must not drift from what was approved."""
+    admitted = {layer["layer"]: layer for layer in ADMITTED_LAYERS}
+    for name, proposed in BY_NAME.items():
+        live = admitted[name]
+        for field in ("latency_tier", "licence_class", "adoption_phase", "pin_status",
+                      "executes_live_orders"):
+            assert live[field] == proposed[field], f"{name}.{field} drifted during promotion"
+        assert live["adoption_decision_ref"] == PROPOSAL["adoption_decision_refs"][name]
 
 
 def test_proposed_layers_satisfy_admitted_layer_schema():
@@ -91,6 +108,14 @@ def test_no_proposed_layer_becomes_an_order_sender():
     """Admitted senders stay exactly the four certified ones (test_stack_lock.py invariant)."""
     for layer in PROPOSED:
         assert layer["executes_live_orders"] is False, layer["layer"]
+
+
+def test_every_automation_browser_layer_forbids_payments():
+    """Owner constraint, 2026-09-18: payments are never automated on any of these."""
+    admitted = {layer["layer"]: layer for layer in ADMITTED_LAYERS}
+    for name in BY_NAME:
+        constraints = " ".join(admitted[name]["constraints"]).lower()
+        assert "payment" in constraints, f"{name} does not state a payment boundary"
 
 
 def test_proposed_layers_declare_no_authority_over_trading():

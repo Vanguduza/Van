@@ -34,21 +34,42 @@ model_provider_policy:
   task_scoped_model_budget_required: true
 
 autonomy_ladder_boundary:
-  # Rev 1.2 review finding M3: L4/L5 are model-driven action selection.
-  # docs/SECURITY_POLICY.md states Hermes profile `van` is the sole agent runtime.
-  production_default_max_tier: L3
-  l4_act_requires: owner_approved_security_policy_amendment
-  l5_bounded_agent_requires: owner_approved_security_policy_amendment
+  # Owner decision 2026-09-18 supersedes the L3 cap proposed at Rev 1.2 review M3.
+  production_default_max_tier: L5
+  model: HERMES_MANAGED_SUBAGENT
   rationale: >-
-    L3 is observe -> deterministic action, which keeps action selection deterministic and outside
-    an independent agent loop. L4/L5 place action selection inside the worker and therefore need
-    the Security Policy amendment in VAN-AMEND-SECURITY-POLICY-001 before production activation.
+    The owner directed that browsing "think for itself during assigned tasks but with hermes
+    as the main brain or manager so in essence it becomes hermes's subagent". L4/L5 are
+    therefore permitted, but only inside a task Hermes assigned, with a goal, scope and step
+    budget Hermes set. The worker chooses actions within those bounds and cannot widen them,
+    so it stays subordinate rather than becoming an independent VAN agent loop, and the locked
+    Hermes execution boundary is preserved.
+  subagent_invariants:
+    - a task must be assigned by Hermes with an explicit goal, scope and step budget
+    - the worker may not create a VAN command, raise an action class, or change its goal
+    - the worker may not extend its own step budget, deadline or domain scope
+    - every step is attributed to the assigning Hermes turn
+    - exhausting the budget ends the task; it never escalates
+    - A3 mutation inside an autonomous task still requires an admitted domain and profile
+    - A4 remains outside the ladder entirely and needs a fresh owner biometric approval
+    - payments are never performed by an autonomous browser task
 
 observed_runtime:
   design_time_observation: "4.1.0"
   deployment_branch_pin: "4.1.0"
   pin_status: UNPINNED_VERIFY_AT_ADOPTION
 
-owner_signature_status: PENDING
-owner_signed_at: null
-owner_signature_evidence_ref: null
+owner_signature_status: SIGNED
+owner_signed_at: 2026-09-18
+owner_signature_evidence_ref: evidence://owner/session/01JhzRtSJ6z18Vcx8Eo2yYB5#automation-browser-fabric-approval
+
+owner_decision_record:
+  decided_on: 2026-09-18
+  decision: APPROVED_AS_HERMES_SUBAGENT
+  owner_words: >-
+    "Web browsing should think for itself during assigned tasks but with hermes as the main
+    brain or manager so in essence it becomes hermes's subagent."
+  provenance: >-
+    Owner instruction given directly in the implementation session; Project Truth authority
+    under PROJECT_CANONICAL_STATE.json. Not a device-signed gateway command; a production
+    deployment should additionally capture the owner-signed record through signed ingress.

@@ -58,6 +58,34 @@ re_review_triggers:
   - upstream licence terms change
   - an enterprise-licensed feature becomes load-bearing for correctness
 
-owner_signature_status: PENDING
-owner_signed_at: null
-owner_signature_evidence_ref: null
+owner_signature_status: SIGNED
+owner_signed_at: 2026-09-18
+owner_signature_evidence_ref: evidence://owner/session/01JhzRtSJ6z18Vcx8Eo2yYB5#automation-browser-fabric-approval
+
+owner_decision_record:
+  decided_on: 2026-09-18
+  decision: APPROVED_WITH_PAYMENT_PROHIBITION
+  owner_words: >-
+    "Yes n8n is acceptable for use. n8n can hold my passwords but making payments is
+    strictly forbidden and can only be done under my strict orders but still without
+    saving my payment options."
+  provenance: >-
+    Owner instruction given directly in the implementation session. This is Project Truth
+    authority under PROJECT_CANONICAL_STATE.json
+    (owner_instruction_is_project_truth_authority). It is NOT a device-signed gateway
+    command; a production deployment should additionally capture the owner-signed record
+    through the normal signed-ingress path.
+  granted:
+    - n8n may hold C3 sensitive and C4 low-risk integration credentials, including
+      service account passwords, after admission
+  prohibited_absolutely:
+    - payment execution by any automation, schedule, standing intent or workflow
+    - storage of any payment instrument, card number, CVV, bank detail or
+      payment-provider credential in n8n, in a browser profile, in a workflow
+      artifact or in VAN evidence
+    - a saved or reusable payment method of any kind
+  payment_exception:
+    permitted_only_as: A4 under a fresh owner biometric approval bound to the exact
+      payee, amount, currency and reference
+    standing_authority: PROHIBITED
+    instrument_persistence: PROHIBITED (entered per payment, never retained)

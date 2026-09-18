@@ -50,14 +50,19 @@ async def test_automation_health_requires_internal_control(client):
     assert (await ac.get("/v1/browser/health")).status_code in (401, 403)
 
 
-async def test_automation_health_reports_governance_pending(client):
-    """§368 — production activation is blocked while decisions are PENDING."""
+async def test_automation_health_reports_governance_approved(client):
+    """§368 — the owner signed all four decisions on 2026-09-18.
+
+    Governance is now satisfied, so this asserts the *other* half of §368: approval
+    unblocks activation but does not by itself make anything READY. That still needs
+    live canary evidence, which `test_automation_health_does_not_claim_ready` covers.
+    """
     ac, _app = client
     body = (await ac.get("/v1/automation/health", headers=HEADERS)).json()
     assert body["capability"] == "automation_fabric"
-    assert body["governance"]["production_activation_permitted"] is False
-    assert "VAN-ADOPT-N8N-001.yaml" in body["governance"]["owner_decisions_pending"]
-    assert "VAN-AMEND-SECURITY-POLICY-001.md" in body["governance"]["owner_decisions_pending"]
+    assert body["governance"]["owner_decisions_pending"] == []
+    assert body["governance"]["owner_decisions_missing"] == []
+    assert body["governance"]["production_activation_permitted"] is True
 
 
 async def test_automation_health_does_not_claim_ready(client):
@@ -112,8 +117,13 @@ async def test_degraded_registry_reflects_unavailable_fabric(client):
     assert fabric.restore_action
 
 
-def test_governance_state_is_read_not_configured():
-    """§365 — an agent can read signature status; it cannot set it."""
+def test_governance_state_is_read_from_the_decision_files():
+    """§365 — the gateway reads signature status; it never configures it.
+
+    Flipping this to True required editing `docs/decisions/*`, which is why the
+    state is computed from those files rather than from a setting.
+    """
     state = governance_state()
     assert state["owner_decisions_missing"] == []
-    assert state["production_activation_permitted"] is False
+    assert state["owner_decisions_pending"] == []
+    assert state["production_activation_permitted"] is True
