@@ -1,0 +1,12 @@
+android files=138 loc=19180
+backend files=398 loc=40731
+hermes files=32 loc=2306
+trading files=302 loc=17835
+tools files=30 loc=3017
+tests files=18 loc=1064
+config files=7 loc=128
+deploy files=69 loc=6183
+registries files=5 loc=411
+visual-authority files=32 loc=128
+artifacts files=70 loc=871
+docs files=44 loc=14651

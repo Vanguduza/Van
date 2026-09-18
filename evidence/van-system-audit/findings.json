@@ -1,0 +1,1509 @@
+{
+  "schema": "van-system-audit-findings/1",
+  "audit": "VAN Whole-System Implementation Audit and Certification Rev 1",
+  "canonical_report": "docs/VAN_WHOLE_SYSTEM_IMPLEMENTATION_AUDIT_AND_CERTIFICATION_REV_1.md",
+  "repository": "Vanguduza/Van",
+  "branch": "claude/van-system-audit-ysgtcd",
+  "head_sha": "dff38a030367e640c6621ea80dab794b2c5c55b7",
+  "audit_date": "2026-09-18",
+  "declared_version": "0.5.0-dev",
+  "verdict": "NOT_PRODUCTION_CERTIFIED",
+  "overall_production_readiness": 4.2,
+  "maturity_classes": [
+    "ABSENT",
+    "STUB",
+    "SIMULATED",
+    "PARTIAL",
+    "IMPLEMENTED_BUT_ISOLATED",
+    "INTEGRATED",
+    "E2E_VERIFIED",
+    "PRODUCTION_CERTIFIED"
+  ],
+  "counts": {
+    "P0": 15,
+    "P1": 26,
+    "P2": 14
+  },
+  "root_causes": [
+    {
+      "id": "RC1",
+      "title": "The command path has no durable work object",
+      "closes": [
+        "P0-EXEC-001",
+        "P0-EXEC-002",
+        "P0-EXEC-003",
+        "P1-LEARN-001",
+        "P2-OBS-001",
+        "P2-COH-001"
+      ]
+    },
+    {
+      "id": "RC2",
+      "title": "Verification is asserted, not performed",
+      "closes": [
+        "P0-VERIFY-001",
+        "P1-AUTO-001",
+        "P0-TRADE-001"
+      ]
+    },
+    {
+      "id": "RC3",
+      "title": "The context and cognition layer has no producer and no consumer",
+      "closes": [
+        "P0-CTX-001",
+        "P0-CTX-002",
+        "P0-COG-001",
+        "P1-SYM-001",
+        "P2-COG-002"
+      ]
+    },
+    {
+      "id": "RC4",
+      "title": "One credential is the root of all privilege and a model holds it",
+      "closes": [
+        "P0-SEC-001",
+        "P1-HER-005",
+        "P2-SEC-008"
+      ]
+    },
+    {
+      "id": "RC5",
+      "title": "Untrusted content is labelled trusted at the device boundary",
+      "closes": [
+        "P0-SEC-002"
+      ]
+    },
+    {
+      "id": "RC6",
+      "title": "Presentation state has two inputs and evidence uses a different painter",
+      "closes": [
+        "P1-AURA-002",
+        "P1-AURA-003",
+        "P1-VIS-001",
+        "P1-VIS-002",
+        "P2-VIS-003"
+      ]
+    }
+  ],
+  "remediation_waves": [
+    {
+      "wave": 0,
+      "name": "Truth correction",
+      "prerequisites": [],
+      "exit": "No document claims a capability classified ABSENT or STUB"
+    },
+    {
+      "wave": 1,
+      "name": "Containment",
+      "prerequisites": [
+        0
+      ],
+      "exit": "P0-SEC-001, P0-SEC-002, P1-SEC-005, P1-SEC-006, P1-SEC-007 closed"
+    },
+    {
+      "wave": 2,
+      "name": "Work identity",
+      "prerequisites": [
+        0
+      ],
+      "exit": "P0-EXEC-001, P0-EXEC-003, P2-COH-001 closed"
+    },
+    {
+      "wave": 3,
+      "name": "Verified completion",
+      "prerequisites": [
+        2
+      ],
+      "exit": "P0-VERIFY-001, P0-EXEC-002, P1-AUTO-001, P0-TRADE-001 closed"
+    },
+    {
+      "wave": 4,
+      "name": "Trading safety",
+      "prerequisites": [
+        3
+      ],
+      "exit": "P0-TRADE-002..006, P1-TRADE-007, P1-TRADE-008 closed"
+    },
+    {
+      "wave": 5,
+      "name": "Context and cognition",
+      "prerequisites": [
+        2
+      ],
+      "exit": "P0-CTX-001, P0-CTX-002, P1-SYM-001, P2-COG-002, P2-MEM-002 closed"
+    },
+    {
+      "wave": 6,
+      "name": "Semantic state bus",
+      "prerequisites": [
+        2
+      ],
+      "exit": "P1-AURA-002, P1-AURA-003 closed; aura certification runnable"
+    },
+    {
+      "wave": 7,
+      "name": "Execution substrates",
+      "prerequisites": [
+        3,
+        6
+      ],
+      "exit": "P1-BROW-002, P2-BROW-001, P1-DOC-002 closed"
+    },
+    {
+      "wave": 8,
+      "name": "Voice and owner experience",
+      "prerequisites": [
+        2,
+        3,
+        6
+      ],
+      "exit": "P1-VOICE-001, P1-AND-001, P1-AND-002, P2-UX-001 closed"
+    },
+    {
+      "wave": 9,
+      "name": "Evidence, observability and operations",
+      "prerequisites": [
+        6
+      ],
+      "exit": "P1-VIS-001, P1-VIS-002, P2-VIS-003, P2-OBS-001 closed"
+    }
+  ],
+  "certification_gates": [
+    {
+      "id": "G1",
+      "name": "Truth"
+    },
+    {
+      "id": "G2",
+      "name": "Containment"
+    },
+    {
+      "id": "G3",
+      "name": "Work identity"
+    },
+    {
+      "id": "G4",
+      "name": "Verified completion"
+    },
+    {
+      "id": "G5",
+      "name": "Trading safety"
+    },
+    {
+      "id": "G6",
+      "name": "Context"
+    },
+    {
+      "id": "G7",
+      "name": "Aura certification"
+    },
+    {
+      "id": "G8",
+      "name": "Command certification"
+    },
+    {
+      "id": "G9",
+      "name": "Voice"
+    },
+    {
+      "id": "G10",
+      "name": "Security review"
+    },
+    {
+      "id": "G11",
+      "name": "Device acceptance"
+    },
+    {
+      "id": "G12",
+      "name": "Release"
+    }
+  ],
+  "scores": {
+    "product_completeness": 4.1,
+    "architecture": 7.8,
+    "determinism": 8.2,
+    "cross_module_coherence": 5.0,
+    "experience_layer_unity": 3.4,
+    "command_execution": 3.6,
+    "voice": 2.9,
+    "cognitive_architecture": 3.2,
+    "critical_thinking": 2.8,
+    "context_awareness": 3.3,
+    "memory": 5.4,
+    "learning_and_adaptation": 2.6,
+    "hermes_integration": 6.6,
+    "vekl_integration": 3.0,
+    "browser_intelligence": 3.5,
+    "google_ecosystem": 4.4,
+    "trading_architecture": 7.1,
+    "trading_ux": 6.9,
+    "floating_bot": 6.2,
+    "aura_state_visualization": 5.6,
+    "android_ux_ui": 3.8,
+    "security": 5.9,
+    "reliability": 4.6,
+    "observability": 2.4,
+    "test_quality": 4.9,
+    "infrastructure": 4.3,
+    "performance": 3.9,
+    "offline_degraded": 5.7,
+    "overall_production_readiness": 4.2
+  },
+  "test_baseline": {
+    "backend_tests": "624 passed",
+    "cross_cutting": "108 passed, 1 failed (rsync absent in container)",
+    "trading_tests": "251 passed, 2 skipped",
+    "android_jvm": "NOT VERIFIED - Android Gradle Plugin unresolvable in container",
+    "e2e_tests": 0,
+    "instrumentation_tests": 0,
+    "screenshot_regression_tests": 0
+  },
+  "findings": [
+    {
+      "id": "P0-EXEC-001",
+      "severity": "P0",
+      "domain": "command-execution",
+      "title": "An owner command produces no mission, activity or durable work record",
+      "description": "POST /v1/commands authenticates, authorises, audits and dispatches to Hermes, then returns. No Mission is created, no Activity recorded, no capability routed. The system's model of the owner's intent ends at dispatch.",
+      "requirement": "Every owner-visible task becomes one durable mission (UIB s3); surface partial failures, never silent success (PROJECT_TRUTH_PROTOCOL).",
+      "authority": "docs/PROJECT_TRUTH_PROTOCOL.md; UNIFIED_INTELLIGENCE_IMPLEMENTATION_MATRIX.json WS1",
+      "repository_evidence": [
+        "backend/van_gateway/orchestrator.py:79-575 (no mission import)",
+        "backend/van_gateway/mission/api.py:326 (MissionService.create has one internal-token caller)"
+      ],
+      "runtime_evidence": [
+        "evidence/van-system-audit/command-execution/probe_hermes_fake.json: 10 intents accepted, GET /v1/missions -> [], GET /v1/activity -> {missions: []}"
+      ],
+      "affected_components": [
+        "orchestrator",
+        "mission/service",
+        "mission/api",
+        "events/bus",
+        "android VanCommandController"
+      ],
+      "root_cause": "RC1 - the command path has no durable work object",
+      "remediation": "Orchestrator creates a mission per accepted command with a proper authority envelope; pass mission_id in Hermes metadata; wire MissionBinder in app.py; publish mission transitions to the event bus.",
+      "validation_gate": "G3",
+      "current_status": "OPEN"
+    },
+    {
+      "id": "P0-EXEC-002",
+      "severity": "P0",
+      "domain": "command-execution",
+      "title": "No execution result ever returns and silent non-execution is undetectable",
+      "description": "create_run returns a run id that nothing polls; no callback is keyed to hermes_run_id; no deadline exists. If Hermes never calls action_begin the gateway never notices and the owner is never told.",
+      "requirement": "Report the actual execution state, not an optimistic narrative; never claim success without proof.",
+      "authority": "docs/SECURITY_POLICY.md; docs/PROJECT_TRUTH_PROTOCOL.md",
+      "repository_evidence": [
+        "backend/van_gateway/orchestrator.py:560-575",
+        "backend/van_gateway/hermes/bridge.py:58-75 (no retry, no readback)"
+      ],
+      "runtime_evidence": [
+        "probe: terminal owner-visible status is 'accepted' for every intent; GET /v1/commands/{id} -> 404"
+      ],
+      "affected_components": [
+        "orchestrator",
+        "hermes/bridge",
+        "runtime_api actions"
+      ],
+      "root_cause": "RC1 / RC2",
+      "remediation": "Join hermes_run_id to the action callbacks; add a deadline producing a truthful timeout state.",
+      "validation_gate": "G4",
+      "current_status": "OPEN"
+    },
+    {
+      "id": "P0-EXEC-003",
+      "severity": "P0",
+      "domain": "android",
+      "title": "The device can never display a completion; unknown statuses read as ACCEPTED",
+      "description": "recordResponse is the only status writer and runs only on the single synchronous HTTP response. No /v1/commands/{id} client method exists and events(0) results are never joined to messages. Every long command displays ACCEPTED forever, and an unrecognised gateway status falls through to else -> ACCEPTED.",
+      "requirement": "Owner sees an honest lifecycle; never treat accepted or in-flight as success (Rev 3.0 s32).",
+      "authority": "docs/VAN_PRODUCTION_VISUAL_FLOATING_UX_OWNER_ADMIN_REV_3_0.md s32",
+      "repository_evidence": [
+        "android/app/src/main/java/com/dial/van/control/VanCommandController.kt:162,221,248,255"
+      ],
+      "runtime_evidence": [
+        "probe: no route exists that could deliver a completion"
+      ],
+      "affected_components": [
+        "android VanCommandController",
+        "android VanGatewayClient",
+        "gateway events bus"
+      ],
+      "root_cause": "RC1",
+      "remediation": "Consume mission state via the event bus; render MissionRepository.ownerReadableStatus; make an unknown status an explicit UNKNOWN state.",
+      "validation_gate": "G3",
+      "current_status": "OPEN"
+    },
+    {
+      "id": "P0-CTX-001",
+      "severity": "P0",
+      "domain": "context",
+      "title": "The canonical owner context sent to Hermes contains zero owner facts",
+      "description": "The orchestrator seals a context snapshot with an empty requirements list, so readiness is trivially CURRENT and fact_ids is always empty. The metadata key canonical_context carries a snapshot id, digest, Project Truth SHA and policy refs, and no owner facts.",
+      "requirement": "Recall only the right personal and project context (UIB s9).",
+      "authority": "UNIFIED_INTELLIGENCE_IMPLEMENTATION_MATRIX.json WS5",
+      "repository_evidence": [
+        "backend/van_gateway/orchestrator.py:403-407",
+        "backend/van_gateway/context/service.py:239"
+      ],
+      "runtime_evidence": [
+        "probe: fact_ids [] kernel_revision 0 on every command"
+      ],
+      "affected_components": [
+        "orchestrator",
+        "context/service",
+        "context_compiler"
+      ],
+      "root_cause": "RC3",
+      "remediation": "Derive real ContextRequirements from project_id and resolver output before sealing.",
+      "validation_gate": "G6",
+      "current_status": "OPEN"
+    },
+    {
+      "id": "P0-CTX-002",
+      "severity": "P0",
+      "domain": "context",
+      "title": "The only facts production can write are the only facts retrieval excludes",
+      "description": "The sole production write path is gated to authority=INFERRED and source_trust=MODEL_DERIVED, while default readiness, graph and lexical queries exclude INFERRED. The CANONICAL_OWNER, PROJECT_TRUTH and VERIFIED_* tiers are therefore empty in any deployed system.",
+      "requirement": "Context must be authoritative and retrievable; distinguish authoritative from historical.",
+      "authority": "docs/PROJECT_TRUTH_PROTOCOL.md authority order",
+      "repository_evidence": [
+        "backend/van_gateway/runtime_api.py:122-124",
+        "backend/van_gateway/context/service.py:199-200",
+        "backend/van_gateway/context/retrieval.py:222-223,241-242"
+      ],
+      "runtime_evidence": [
+        "probe: an INFERRED fact admitted the only way production allows is MISSING to default readiness and yields 0 default lexical hits"
+      ],
+      "affected_components": [
+        "runtime_api",
+        "context/service",
+        "context/retrieval"
+      ],
+      "root_cause": "RC3",
+      "remediation": "Add an owner-facing fact writer and a Project Truth importer for the authoritative tiers.",
+      "validation_gate": "G6",
+      "current_status": "OPEN"
+    },
+    {
+      "id": "P0-COG-001",
+      "severity": "P0",
+      "domain": "cognition",
+      "title": "The Critical Reasoning Kernel performs no reasoning and the matrix claims it does",
+      "description": "assess() accepts facts, assumptions, alternatives, critic findings, verifier findings and confidence as caller-supplied arguments, applies two shape rules and inserts the row. There is no solver, critic or verifier pass. The matrix records WS9 BUILT with 'solver/critic/verifier separation, unsourced facts refused'.",
+      "requirement": "Genuine structured reasoning architecture, not prompt forwarding (UIB s13).",
+      "authority": "UNIFIED_INTELLIGENCE_IMPLEMENTATION_MATRIX.json:105",
+      "repository_evidence": [
+        "backend/van_gateway/reasoning/kernel.py:192-247",
+        "backend/van_gateway/reasoning/kernel.py:1-24 (docstring claims separate passes)"
+      ],
+      "runtime_evidence": [
+        "evidence/van-system-audit/security/probe_authority_boundaries.out PROBE 2: fabricated 'sourced' fact, zero critic findings, confidence 0.99 -> stored, is_actionable True"
+      ],
+      "affected_components": [
+        "reasoning/kernel",
+        "understanding/api",
+        "hermes mcp shim"
+      ],
+      "root_cause": "RC3",
+      "remediation": "Either implement a real critic pass over supplied evidence and expose a route plus MCP tool, or withdraw the claim from the matrix.",
+      "validation_gate": "G1 or G6",
+      "current_status": "OPEN"
+    },
+    {
+      "id": "P0-VERIFY-001",
+      "severity": "P0",
+      "domain": "verification",
+      "title": "VERIFIED_SUCCESS is reachable on a self-asserted receipt",
+      "description": "A mission with no checkable postcondition is correctly refused, but when the same caller supplies both the success contract and the verification record the mission reaches VERIFIED_SUCCESS. No server-side verifier executes; VerifierRegistry is constructed only in tests.",
+      "requirement": "An engine reporting success is not owner success; never claim success without proof.",
+      "authority": "docs/SECURITY_POLICY.md non-negotiable 8; docs/PROJECT_TRUTH_PROTOCOL.md",
+      "repository_evidence": [
+        "backend/van_gateway/mission/api.py:70-74,345-348",
+        "backend/van_gateway/mission/service.py:209-237",
+        "backend/van_gateway/mission/verifiers.py (no production constructor)"
+      ],
+      "runtime_evidence": [
+        "evidence/van-system-audit/security/probe_mission_verification.py: VERIFIED_SUCCESS granted on verifier_version 'i-say-so/1.0', evidence 'evidence://trust-me'"
+      ],
+      "affected_components": [
+        "mission/service",
+        "mission/api",
+        "mission/verifiers",
+        "automation/dispatch"
+      ],
+      "root_cause": "RC2",
+      "remediation": "MissionService.transition must execute a registered verifier rather than accept a supplied record.",
+      "validation_gate": "G4",
+      "current_status": "OPEN"
+    },
+    {
+      "id": "P0-SEC-001",
+      "severity": "P0",
+      "domain": "security",
+      "title": "One static internal token is gateway root and is provisioned to a model-driven Hermes",
+      "description": "X-Van-Internal-Token alone mints a pairing ticket; /v1/devices/pair then requires no authentication and returns both the ingress bearer and a device access token, yielding owner-device authority. The same token reaches Project Truth injection, device revocation, Google connect/revoke, trading halt, all automation routes, browser mutations and context scope delete. It is read by the Hermes MCP shim from ~/.config/van/gateway.env.",
+      "requirement": "Grants are scoped, time-expiring and auditable; agent self-authorization is forbidden.",
+      "authority": "docs/SECURITY_POLICY.md; PROJECT_CANONICAL_STATE.json agent_self_authorization_forbidden",
+      "repository_evidence": [
+        "backend/van_gateway/app.py:443,453-476,479-483",
+        "backend/van_gateway/app.py:304-357 (internal_control_route surface)",
+        "hermes/mcp/owner_runtime_stdio.mjs:44-45"
+      ],
+      "runtime_evidence": [
+        "evidence/van-system-audit/security/probe_authority_boundaries.out PROBE 1: ticket 200, pair 200 with no auth header, returned ingress_token + device_access_token, owner API 200"
+      ],
+      "affected_components": [
+        "app middleware",
+        "auth/service",
+        "runtime_api",
+        "hermes mcp shim"
+      ],
+      "root_cause": "RC4",
+      "remediation": "Split into scoped, expiring, per-purpose credentials; remove device enrollment from the Hermes-reachable set; add an explicit 403 when the internal check fails instead of falling through.",
+      "validation_gate": "G2",
+      "current_status": "OPEN"
+    },
+    {
+      "id": "P0-SEC-002",
+      "severity": "P0",
+      "domain": "security",
+      "title": "Any application's notification becomes a device-signed owner command labelled trusted",
+      "description": "VanNotificationListenerService enqueues notification title and body as a CONTEXT_INGEST JSON payload carrying untrusted_content true. QueueReplayer drains it and dispatches payload.optString('text', payload.toString()) as an owner command; the payload has no text key so the whole JSON becomes the command text. VanGatewayClient hardcodes contextTrust CONVERSATION for every command, and the gateway injection screen only runs when context_trust is UNTRUSTED.",
+      "requirement": "External content remains UNTRUSTED_EXTERNAL and cannot increase authority; untrusted content is data, never authority.",
+      "authority": "docs/SECURITY_POLICY.md; docs/PROJECT_TRUTH_PROTOCOL.md authority order item 7",
+      "repository_evidence": [
+        "android/app/src/main/java/com/dial/van/gateway/QueueReplayer.kt:33-45",
+        "android/app/src/main/java/com/dial/van/gateway/VanGatewayClient.kt:364",
+        "backend/van_gateway/orchestrator.py:335",
+        "android/app/src/main/java/com/dial/van/notification/VanNotificationListenerService.kt:36-60"
+      ],
+      "runtime_evidence": [
+        "lead verification: grep confirms the hardcoded CONVERSATION trust and the absent text key"
+      ],
+      "affected_components": [
+        "android notification listener",
+        "android QueueReplayer",
+        "android VanGatewayClient",
+        "gateway orchestrator"
+      ],
+      "root_cause": "RC5",
+      "remediation": "Derive context_trust from CommandKind; refuse to dispatch CONTEXT_INGEST as a command; reject UI-channel payloads carrying an untrusted-content marker server-side.",
+      "validation_gate": "G2",
+      "current_status": "OPEN"
+    },
+    {
+      "id": "P0-TRADE-001",
+      "severity": "P0",
+      "domain": "trading",
+      "title": "'Owner-signed' is a non-empty string across every trading authority surface",
+      "description": "Mandate verification is a non-empty check on owner_signature_ref. No signature algorithm, key, authority-record lookup or revocation check exists. The identical pattern repeats for kill-switch clear, owner halt, capsule promotion, the commander halt and gateway trading writes. Only PlatformCeilings bound the result.",
+      "requirement": "Trading size comes only from the deterministic Risk Authority under an owner-signed mandate; no false success.",
+      "authority": "docs/SECURITY_POLICY.md trading authority; docs/VAN_TRADING_SYSTEM_BLUEPRINT_REV4_CONSOLIDATED.md",
+      "repository_evidence": [
+        "trading/vati/risk/mandate.py:156-157",
+        "trading/vati/risk/governor.py:51-53",
+        "trading/vati/app/runner.py:55-57",
+        "trading/vati/strategies/capsule.py:101-102",
+        "trading/commander/app.py:226-228",
+        "backend/van_gateway/trading/service.py:208-212"
+      ],
+      "runtime_evidence": [
+        "artifacts/runtime/van_trading_core_reconciliation_live_attestation.json non_required_amber[0]: no session heartbeats yet because no trading account is enabled"
+      ],
+      "affected_components": [
+        "trading/vati/risk",
+        "trading/vati/app/cycle",
+        "trading/vati/app/service",
+        "backend/van_gateway/trading"
+      ],
+      "root_cause": "RC2 / RC4",
+      "remediation": "Verify the owner signature against a registered key and an authority record; reject unverifiable mandates.",
+      "validation_gate": "G5",
+      "current_status": "OPEN"
+    },
+    {
+      "id": "P0-TRADE-002",
+      "severity": "P0",
+      "domain": "trading",
+      "title": "The live risk snapshot hardcodes three safety flags to healthy",
+      "description": "DecisionCycle.snapshot sets reconciliation_ok True, risk_store_ok True and tier1_event_blackout_active False, so RECONCILIATION_FAILED, RISK_STORE_UNAVAILABLE and EVENT_BLACKOUT can never fire live. market_integrity is never written, so MARKET_INTEGRITY and the elevated half-size rule are dead too.",
+      "requirement": "Trading size comes only from the deterministic Risk Authority under an owner-signed mandate; no false success.",
+      "authority": "docs/SECURITY_POLICY.md trading authority; docs/VAN_TRADING_SYSTEM_BLUEPRINT_REV4_CONSOLIDATED.md",
+      "repository_evidence": [
+        "trading/vati/app/cycle.py:118-119",
+        "trading/vati/app/cycle.py:88",
+        "trading/vati/risk/authority.py:173,177,179,197,240"
+      ],
+      "runtime_evidence": [
+        "artifacts/runtime/van_trading_core_reconciliation_live_attestation.json non_required_amber[0]: no session heartbeats yet because no trading account is enabled"
+      ],
+      "affected_components": [
+        "trading/vati/risk",
+        "trading/vati/app/cycle",
+        "trading/vati/app/service",
+        "backend/van_gateway/trading"
+      ],
+      "root_cause": "RC2 / RC4",
+      "remediation": "Drive all three flags from real state and re-run reconciliation per bar.",
+      "validation_gate": "G5",
+      "current_status": "OPEN"
+    },
+    {
+      "id": "P0-TRADE-003",
+      "severity": "P0",
+      "domain": "trading",
+      "title": "Owner halt is polled, late, and discarded by a session restart",
+      "description": "Gateway and commander only append a KILL_SWITCH event; the session observes it on its next loop up to poll_seconds later. _observe_owner_halt filters events at or after the session start time, so restarting the session discards an active owner halt, and restart_service is an exposed commander command.",
+      "requirement": "Trading size comes only from the deterministic Risk Authority under an owner-signed mandate; no false success.",
+      "authority": "docs/SECURITY_POLICY.md trading authority; docs/VAN_TRADING_SYSTEM_BLUEPRINT_REV4_CONSOLIDATED.md",
+      "repository_evidence": [
+        "trading/vati/app/service.py:60,181,191",
+        "trading/commander/app.py:97,184-190"
+      ],
+      "runtime_evidence": [
+        "artifacts/runtime/van_trading_core_reconciliation_live_attestation.json non_required_amber[0]: no session heartbeats yet because no trading account is enabled"
+      ],
+      "affected_components": [
+        "trading/vati/risk",
+        "trading/vati/app/cycle",
+        "trading/vati/app/service",
+        "backend/van_gateway/trading"
+      ],
+      "root_cause": "RC2 / RC4",
+      "remediation": "Add a synchronous halt channel and persist halt state independently of session start time.",
+      "validation_gate": "G5",
+      "current_status": "OPEN"
+    },
+    {
+      "id": "P0-TRADE-004",
+      "severity": "P0",
+      "domain": "trading",
+      "title": "The gateway reads a local SQLite ledger while the trading VM writes Postgres",
+      "description": "vati_ledger_path defaults to a local sqlite file; TradingService opens Postgres only for a postgres DSN. Nothing in deploy reconciles the two. A stale local file would present old data as current because last_event_ms is not thresholded server-side.",
+      "requirement": "Trading size comes only from the deterministic Risk Authority under an owner-signed mandate; no false success.",
+      "authority": "docs/SECURITY_POLICY.md trading authority; docs/VAN_TRADING_SYSTEM_BLUEPRINT_REV4_CONSOLIDATED.md",
+      "repository_evidence": [
+        "backend/van_gateway/config.py:21",
+        "backend/van_gateway/trading/service.py:60-68"
+      ],
+      "runtime_evidence": [
+        "artifacts/runtime/van_trading_core_reconciliation_live_attestation.json non_required_amber[0]: no session heartbeats yet because no trading account is enabled"
+      ],
+      "affected_components": [
+        "trading/vati/risk",
+        "trading/vati/app/cycle",
+        "trading/vati/app/service",
+        "backend/van_gateway/trading"
+      ],
+      "root_cause": "RC2 / RC4",
+      "remediation": "Point the gateway at the live ledger and threshold staleness server-side.",
+      "validation_gate": "G5",
+      "current_status": "OPEN"
+    },
+    {
+      "id": "P0-TRADE-005",
+      "severity": "P0",
+      "domain": "trading",
+      "title": "The idempotency key is session-scoped so a restart can duplicate an order",
+      "description": "The key derives from session_id which embeds a start timestamp, so a crash and restart on the same bar yields a different key and neither the in-process set nor the ledger-seeded router set blocks the duplicate. Nothing prevents two serve processes for one alias.",
+      "requirement": "Trading size comes only from the deterministic Risk Authority under an owner-signed mandate; no false success.",
+      "authority": "docs/SECURITY_POLICY.md trading authority; docs/VAN_TRADING_SYSTEM_BLUEPRINT_REV4_CONSOLIDATED.md",
+      "repository_evidence": [
+        "trading/vati/arbiter/opportunity.py:83",
+        "trading/vati/app/service.py:137",
+        "trading/vati/execution/router.py:41"
+      ],
+      "runtime_evidence": [
+        "artifacts/runtime/van_trading_core_reconciliation_live_attestation.json non_required_amber[0]: no session heartbeats yet because no trading account is enabled"
+      ],
+      "affected_components": [
+        "trading/vati/risk",
+        "trading/vati/app/cycle",
+        "trading/vati/app/service",
+        "backend/van_gateway/trading"
+      ],
+      "root_cause": "RC2 / RC4",
+      "remediation": "Derive the idempotency key from the decision content and bar identity, not the session id; add a process lock per alias.",
+      "validation_gate": "G5",
+      "current_status": "OPEN"
+    },
+    {
+      "id": "P0-TRADE-006",
+      "severity": "P0",
+      "domain": "trading",
+      "title": "No margin model exists anywhere in the trading stack",
+      "description": "AccountState carries equity and balance only. There is no margin, free margin or margin level field, so the Risk Authority sizes by stop distance with no visibility of broker margin.",
+      "requirement": "Trading size comes only from the deterministic Risk Authority under an owner-signed mandate; no false success.",
+      "authority": "docs/SECURITY_POLICY.md trading authority; docs/VAN_TRADING_SYSTEM_BLUEPRINT_REV4_CONSOLIDATED.md",
+      "repository_evidence": [
+        "trading/vati/execution/base.py:93-101"
+      ],
+      "runtime_evidence": [
+        "artifacts/runtime/van_trading_core_reconciliation_live_attestation.json non_required_amber[0]: no session heartbeats yet because no trading account is enabled"
+      ],
+      "affected_components": [
+        "trading/vati/risk",
+        "trading/vati/app/cycle",
+        "trading/vati/app/service",
+        "backend/van_gateway/trading"
+      ],
+      "root_cause": "RC2 / RC4",
+      "remediation": "Add margin fields to AccountState and a margin gate to the Risk Authority.",
+      "validation_gate": "G5",
+      "current_status": "OPEN"
+    },
+    {
+      "id": "P1-DOC-001",
+      "severity": "P1",
+      "domain": "documentation",
+      "title": "The implementation matrix certifies 33 of 36 workstreams against a blueprint absent from the canonical tree",
+      "description": "The matrix declares blueprint_path docs/VAN_UNIFIED_PERSONAL_INTELLIGENCE_IMPROVEMENT_BLUEPRINT_REV_1.md at sha e09765d. That file exists only on open PR #38.",
+      "requirement": "See the requirements traceability matrix in the canonical report.",
+      "authority": "docs/VAN_WHOLE_SYSTEM_IMPLEMENTATION_AUDIT_AND_CERTIFICATION_REV_1.md s30",
+      "repository_evidence": [
+        "docs/project-state/UNIFIED_INTELLIGENCE_IMPLEMENTATION_MATRIX.json generated_against"
+      ],
+      "runtime_evidence": [],
+      "affected_components": [
+        "documentation"
+      ],
+      "root_cause": "see s32 root-cause map",
+      "remediation": "Merge PR #38 or remove the reference and re-baseline the matrix.",
+      "validation_gate": "G1",
+      "current_status": "OPEN"
+    },
+    {
+      "id": "P1-DOC-002",
+      "severity": "P1",
+      "domain": "documentation",
+      "title": "A pip version assertion is reported as Temporal green in the production acceptance ledger",
+      "description": "qualify.sh prints browser_runtime GREEN with 'Temporal 1.33.0' for a pip version match; the string is echoed into the acceptance ledger. No Temporal client, worker, workflow or service exists anywhere.",
+      "requirement": "See the requirements traceability matrix in the canonical report.",
+      "authority": "docs/VAN_WHOLE_SYSTEM_IMPLEMENTATION_AUDIT_AND_CERTIFICATION_REV_1.md s30",
+      "repository_evidence": [
+        "deploy/van-trading-core/qualify.sh:28",
+        "docs/PRODUCTION_ACCEPTANCE_LEDGER.md:123",
+        "deploy/van-trading-core/browser/bootstrap-browser-runtime.sh:55-58"
+      ],
+      "runtime_evidence": [],
+      "affected_components": [
+        "documentation"
+      ],
+      "root_cause": "see s32 root-cause map",
+      "remediation": "Remove or qualify the Temporal line; make the automation router's TEMPORAL medium an explicit refusal until implemented.",
+      "validation_gate": "G1",
+      "current_status": "OPEN"
+    },
+    {
+      "id": "P1-VOICE-001",
+      "severity": "P1",
+      "domain": "voice",
+      "title": "No wake word, no speech output, no barge-in, no background voice, no mission binding",
+      "description": "WakeWordEngine, WakePhraseVerifier and SpeakerSimilarityScorer are interfaces with no implementations; no KWS dependency or native library ships; the wake pipeline is never constructed; TtsOutputManager.speak and WakeAcknowledgementManager.play have zero call sites; the FGS type is specialUse not microphone.",
+      "requirement": "See the requirements traceability matrix in the canonical report.",
+      "authority": "docs/VAN_WHOLE_SYSTEM_IMPLEMENTATION_AUDIT_AND_CERTIFICATION_REV_1.md s30",
+      "repository_evidence": [
+        "android/.../voice/WakeRuntime.kt:31-44,79,107",
+        "android/.../voice/WakeCoordinator.kt:39,111",
+        "android/.../voice/VoiceInterfaces.kt:414,445-450",
+        "android/.../voice/WakeAcknowledgement.kt:110",
+        "android/app/build.gradle.kts:128-161",
+        "android/app/src/main/AndroidManifest.xml:50-57"
+      ],
+      "runtime_evidence": [],
+      "affected_components": [
+        "voice"
+      ],
+      "root_cause": "see s32 root-cause map",
+      "remediation": "Add a keyword-spotting engine with the 'Hey Van' phrase, a microphone-typed foreground service, acknowledgement playback and TTS invocation bound to verified outcomes.",
+      "validation_gate": "G9",
+      "current_status": "OPEN"
+    },
+    {
+      "id": "P1-AURA-002",
+      "severity": "P1",
+      "domain": "visual",
+      "title": "No monotonic clock and no transition blending; every aura and pose change is a one-frame snap",
+      "description": "Rev 3.0 s22 requires one monotonic clock never restarted and s25 requires 120-420 ms blended transitions. There is no withFrameNanos anywhere; the only driver is rememberInfiniteTransition whose tween duration changes per state, restarting the ramp. No Crossfade, animate*AsState or spring exists in visual or overlay.",
+      "requirement": "See the requirements traceability matrix in the canonical report.",
+      "authority": "docs/VAN_WHOLE_SYSTEM_IMPLEMENTATION_AUDIT_AND_CERTIFICATION_REV_1.md s30",
+      "repository_evidence": [
+        "android/.../visual/VanCanvasFallback.kt:250-279",
+        "android/.../visual/VanAuraSpec.kt:81"
+      ],
+      "runtime_evidence": [],
+      "affected_components": [
+        "visual"
+      ],
+      "root_cause": "see s32 root-cause map",
+      "remediation": "Introduce a monotonic animation clock and blend aura spec and pose changes over 120-420 ms.",
+      "validation_gate": "G7",
+      "current_status": "OPEN"
+    },
+    {
+      "id": "P1-AURA-003",
+      "severity": "P1",
+      "domain": "visual",
+      "title": "Trading state never reaches VAN's semantic or visual state",
+      "description": "The only production writers of visual state are voice recognition and the gateway command envelope. Trading code contains zero references to visual state; the trading screen derives presence from the degraded-code set and caches it on that state. The eight trade aura families exist only as preview specs whose sole caller is the PNG board generator.",
+      "requirement": "See the requirements traceability matrix in the canonical report.",
+      "authority": "docs/VAN_WHOLE_SYSTEM_IMPLEMENTATION_AUDIT_AND_CERTIFICATION_REV_1.md s30",
+      "repository_evidence": [
+        "android/.../trading/TradingCommandCentreActivity.kt:78-81",
+        "android/.../visual/VanAuraSpec.kt:237-299",
+        "android/visual-preview/.../VanPreviewSheets.kt:750"
+      ],
+      "runtime_evidence": [],
+      "affected_components": [
+        "visual"
+      ],
+      "root_cause": "see s32 root-cause map",
+      "remediation": "Publish a classified trade-state event onto a semantic state bus and subscribe the visual runtime to it.",
+      "validation_gate": "G7",
+      "current_status": "OPEN"
+    },
+    {
+      "id": "P1-VIS-001",
+      "severity": "P1",
+      "domain": "visual",
+      "title": "The evidence painter diverges from the shipping painter and omits an entire visual layer",
+      "description": "visual-preview shares the geometry sources but not VanAura.kt; the AWT painter never draws electricalBranches and uses roughly double Zone A alpha, 1.5x radius and different blob placement.",
+      "requirement": "See the requirements traceability matrix in the canonical report.",
+      "authority": "docs/VAN_WHOLE_SYSTEM_IMPLEMENTATION_AUDIT_AND_CERTIFICATION_REV_1.md s30",
+      "repository_evidence": [
+        "android/visual-preview/build.gradle.kts:14-38",
+        "android/visual-preview/src/main/kotlin/.../GlassPainter.kt:215-314",
+        "android/.../visual/VanAura.kt:79-245"
+      ],
+      "runtime_evidence": [],
+      "affected_components": [
+        "visual"
+      ],
+      "root_cause": "see s32 root-cause map",
+      "remediation": "Extract the Compose painter into the shared source set so previews render the shipping pixels.",
+      "validation_gate": "G7",
+      "current_status": "OPEN"
+    },
+    {
+      "id": "P1-VIS-002",
+      "severity": "P1",
+      "domain": "visual",
+      "title": "All committed visual evidence is two authority revisions stale and the required certification board does not exist",
+      "description": "The generator writes rev23 and the authority is at revision 2.3, but only rev21 exists with authority_revision 2.1. The doc's canonical orthogonal-presence board is absent from the tree.",
+      "requirement": "See the requirements traceability matrix in the canonical report.",
+      "authority": "docs/VAN_WHOLE_SYSTEM_IMPLEMENTATION_AUDIT_AND_CERTIFICATION_REV_1.md s30",
+      "repository_evidence": [
+        "android/visual-preview/src/main/kotlin/.../VanEvidenceMatrix.kt:36",
+        "artifacts/release/preview/rev21/manifest.json:2",
+        "docs/VAN_LIVING_WIND_FIELD_RUNTIME_REV_1.md s13"
+      ],
+      "runtime_evidence": [],
+      "affected_components": [
+        "visual"
+      ],
+      "root_cause": "see s32 root-cause map",
+      "remediation": "Regenerate evidence at the current authority revision including the orthogonal presence board.",
+      "validation_gate": "G7",
+      "current_status": "OPEN"
+    },
+    {
+      "id": "P1-AND-001",
+      "severity": "P1",
+      "domain": "android",
+      "title": "Share-to-VAN is a BroadcastReceiver and can never be invoked by the share sheet",
+      "description": "ShareIntentReceiver is declared as a receiver with ACTION_SEND filters and implemented as a BroadcastReceiver. Android resolves share intents against activities only, so the component never appears in the share sheet.",
+      "requirement": "See the requirements traceability matrix in the canonical report.",
+      "authority": "docs/VAN_WHOLE_SYSTEM_IMPLEMENTATION_AUDIT_AND_CERTIFICATION_REV_1.md s30",
+      "repository_evidence": [
+        "android/app/src/main/AndroidManifest.xml:77-105",
+        "android/.../share/ShareIntentReceiver.kt:21"
+      ],
+      "runtime_evidence": [],
+      "affected_components": [
+        "android"
+      ],
+      "root_cause": "see s32 root-cause map",
+      "remediation": "Convert to a transparent Activity that enqueues and finishes.",
+      "validation_gate": "G11",
+      "current_status": "OPEN"
+    },
+    {
+      "id": "P1-AND-002",
+      "severity": "P1",
+      "domain": "android",
+      "title": "Onboarding has no pairing step so first run lands on a fully failing dashboard",
+      "description": "OnboardingActivity covers overlay, notifications, listener, microphone and biometric only. Pairing lives at Home > Connections. Steps also advance on startActivity rather than on an actual grant and nothing re-checks permissions.",
+      "requirement": "See the requirements traceability matrix in the canonical report.",
+      "authority": "docs/VAN_WHOLE_SYSTEM_IMPLEMENTATION_AUDIT_AND_CERTIFICATION_REV_1.md s30",
+      "repository_evidence": [
+        "android/.../onboarding/OnboardingActivity.kt:101-153,106-114,130-133",
+        "android/.../command/CommandCentreActivity.kt:1026-1093"
+      ],
+      "runtime_evidence": [],
+      "affected_components": [
+        "android"
+      ],
+      "root_cause": "see s32 root-cause map",
+      "remediation": "Add pairing as an onboarding step and gate advancement on real grant checks.",
+      "validation_gate": "G11",
+      "current_status": "OPEN"
+    },
+    {
+      "id": "P1-SEC-004",
+      "severity": "P1",
+      "domain": "security",
+      "title": "The weak biometric overload guards trading account and credential changes",
+      "description": "requestA4Approval without a CryptoObject is used for trading account onboarding, while the strong requestA4CommandApproval signs the challenge inside onAuthenticationSucceeded.",
+      "requirement": "See the requirements traceability matrix in the canonical report.",
+      "authority": "docs/VAN_WHOLE_SYSTEM_IMPLEMENTATION_AUDIT_AND_CERTIFICATION_REV_1.md s30",
+      "repository_evidence": [
+        "android/.../security/BiometricGate.kt:22-53,84-107",
+        "android/.../trading/ui/AccountOnboardingScreen.kt:26"
+      ],
+      "runtime_evidence": [],
+      "affected_components": [
+        "security"
+      ],
+      "root_cause": "see s32 root-cause map",
+      "remediation": "Route trading credential changes through the CryptoObject-bound path.",
+      "validation_gate": "G2",
+      "current_status": "OPEN"
+    },
+    {
+      "id": "P1-SEC-005",
+      "severity": "P1",
+      "domain": "security",
+      "title": "The command nonce is never stored or checked and the idempotency claim is not atomic",
+      "description": "canonical_command_v2 covers nonce but no command_nonces table or uniqueness check exists. IdempotencyService.begin does SELECT then INSERT on separate connections with no transaction, while auth/service uses BEGIN IMMEDIATE elsewhere.",
+      "requirement": "See the requirements traceability matrix in the canonical report.",
+      "authority": "docs/VAN_WHOLE_SYSTEM_IMPLEMENTATION_AUDIT_AND_CERTIFICATION_REV_1.md s30",
+      "repository_evidence": [
+        "backend/van_gateway/auth/service.py:299,326,102,138",
+        "backend/van_gateway/idempotency/service.py:36-54,100-110"
+      ],
+      "runtime_evidence": [],
+      "affected_components": [
+        "security"
+      ],
+      "root_cause": "see s32 root-cause map",
+      "remediation": "Add a command nonce store with a uniqueness check and make the idempotency claim atomic.",
+      "validation_gate": "G2",
+      "current_status": "OPEN"
+    },
+    {
+      "id": "P1-SEC-006",
+      "severity": "P1",
+      "domain": "security",
+      "title": "The owner-authority audit log has no hash chain and is not tamper-evident",
+      "description": "AuditService.record is a plain INSERT with a random UUID and no prev_hash, chain hash, signature or sequence, while the VATI trading ledger does have a verifiable chain. The policy hook lists audit as a protected surface.",
+      "requirement": "See the requirements traceability matrix in the canonical report.",
+      "authority": "docs/VAN_WHOLE_SYSTEM_IMPLEMENTATION_AUDIT_AND_CERTIFICATION_REV_1.md s30",
+      "repository_evidence": [
+        "backend/van_gateway/audit/service.py:34-77",
+        "backend/van_gateway/storage/db.py:75-90",
+        "hermes/policy/van_policy_hook.py:23"
+      ],
+      "runtime_evidence": [],
+      "affected_components": [
+        "security"
+      ],
+      "root_cause": "see s32 root-cause map",
+      "remediation": "Add a hash chain and periodic anchoring to the audit table.",
+      "validation_gate": "G2",
+      "current_status": "OPEN"
+    },
+    {
+      "id": "P1-SEC-007",
+      "severity": "P1",
+      "domain": "security",
+      "title": "No rate limiting, lockout or brute-force control on any authentication surface",
+      "description": "There is no failed-attempt counter, backoff or throttle on device pairing, the ingress token, the device token, the A4 approval challenge or the public MT5 HMAC endpoint.",
+      "requirement": "See the requirements traceability matrix in the canonical report.",
+      "authority": "docs/VAN_WHOLE_SYSTEM_IMPLEMENTATION_AUDIT_AND_CERTIFICATION_REV_1.md s30",
+      "repository_evidence": [
+        "backend/van_gateway/app.py:443-476",
+        "deploy/van-trading-core/caddy/Caddyfile:4-7"
+      ],
+      "runtime_evidence": [],
+      "affected_components": [
+        "security"
+      ],
+      "root_cause": "see s32 root-cause map",
+      "remediation": "Add per-surface rate limiting and lockout at the app and edge.",
+      "validation_gate": "G2",
+      "current_status": "OPEN"
+    },
+    {
+      "id": "P1-SYM-001",
+      "severity": "P1",
+      "domain": "symbiosis",
+      "title": "Calibration reports an evidence-derived preference as owner-confirmed",
+      "description": "OwnerCognitiveModel promotes to CONFIRMED after three distinct episode_ref strings, which are never checked against any mission or episode store. RelationshipCalibrationEngine reads state CONFIRMED and names the reason 'owner-confirmed'.",
+      "requirement": "See the requirements traceability matrix in the canonical report.",
+      "authority": "docs/VAN_WHOLE_SYSTEM_IMPLEMENTATION_AUDIT_AND_CERTIFICATION_REV_1.md s30",
+      "repository_evidence": [
+        "backend/van_gateway/understanding/owner_model.py:184-194,268-278",
+        "backend/van_gateway/reasoning/calibration.py:130-133"
+      ],
+      "runtime_evidence": [],
+      "affected_components": [
+        "symbiosis"
+      ],
+      "root_cause": "see s32 root-cause map",
+      "remediation": "Bind episode_ref to real mission or command identifiers; distinguish evidence-derived from owner-confirmed in owner-facing text.",
+      "validation_gate": "G6",
+      "current_status": "OPEN"
+    },
+    {
+      "id": "P1-LEARN-001",
+      "severity": "P1",
+      "domain": "learning",
+      "title": "No production event feeds any learning loop",
+      "description": "StrategyLearning, SymbioticGrowthLedger, AIEvolutionRadar, BenchmarkHarness and DomainTrust have correct invariants and no caller that records a real outcome. VanEval scores are threshold constants over row counts.",
+      "requirement": "See the requirements traceability matrix in the canonical report.",
+      "authority": "docs/VAN_WHOLE_SYSTEM_IMPLEMENTATION_AUDIT_AND_CERTIFICATION_REV_1.md s30",
+      "repository_evidence": [
+        "backend/van_gateway/evolution/radar.py:394-519",
+        "backend/van_gateway/evolution/vaneval.py:184-356",
+        "backend/van_gateway/proactive/autonomy.py:169-326"
+      ],
+      "runtime_evidence": [],
+      "affected_components": [
+        "learning"
+      ],
+      "root_cause": "see s32 root-cause map",
+      "remediation": "Record mission outcomes, verification receipts and owner corrections into the learning stores.",
+      "validation_gate": "G6",
+      "current_status": "OPEN"
+    },
+    {
+      "id": "P1-BROW-002",
+      "severity": "P1",
+      "domain": "browser",
+      "title": "Injection containment can record SUSPECTED but nothing can ever set the value that stops a task",
+      "description": "assess_injection returns SUSPECTED; the only stop is on CONFIRMED_INJECTION, which nothing in the repository ever sets outside a test.",
+      "requirement": "See the requirements traceability matrix in the canonical report.",
+      "authority": "docs/VAN_WHOLE_SYSTEM_IMPLEMENTATION_AUDIT_AND_CERTIFICATION_REV_1.md s30",
+      "repository_evidence": [
+        "backend/van_gateway/browser/policy.py:151-158",
+        "backend/van_gateway/browser/subagent.py:232",
+        "backend/van_gateway/browser/models.py:173"
+      ],
+      "runtime_evidence": [],
+      "affected_components": [
+        "browser"
+      ],
+      "root_cause": "see s32 root-cause map",
+      "remediation": "Make the classifier able to reach CONFIRMED_INJECTION and stop the task; add a live adversarial canary.",
+      "validation_gate": "G2",
+      "current_status": "OPEN"
+    },
+    {
+      "id": "P1-AUTO-001",
+      "severity": "P1",
+      "domain": "automation",
+      "title": "The automation verifier map is empty in production so owner success is unreachable",
+      "description": "AutomationDispatcher is constructed with an empty observer map, so every production run is UNVERIFIABLE and owner_success can never be true. Tests pass only because they inject their own observers.",
+      "requirement": "See the requirements traceability matrix in the canonical report.",
+      "authority": "docs/VAN_WHOLE_SYSTEM_IMPLEMENTATION_AUDIT_AND_CERTIFICATION_REV_1.md s30",
+      "repository_evidence": [
+        "backend/van_gateway/automation/dispatch.py:98",
+        "backend/van_gateway/app.py:160-168",
+        "backend/van_gateway/automation/verifier.py:52-56,142-159"
+      ],
+      "runtime_evidence": [],
+      "affected_components": [
+        "automation"
+      ],
+      "root_cause": "see s32 root-cause map",
+      "remediation": "Supply the real observer map in app.py and unify with VerifierRegistry.",
+      "validation_gate": "G4",
+      "current_status": "OPEN"
+    },
+    {
+      "id": "P1-HER-001",
+      "severity": "P1",
+      "domain": "hermes",
+      "title": "MCP registration installs 11 of 20 tools, omitting the entire knowledge protocol",
+      "description": "The shim exposes 20 tools and the contract test requires 20, but the registration script's include list has 11, omitting vekl_query, obsidian_query, notebook_consumer_ask and knowledge_action_execute which AGENTS.md instructs Hermes to use.",
+      "requirement": "See the requirements traceability matrix in the canonical report.",
+      "authority": "docs/VAN_WHOLE_SYSTEM_IMPLEMENTATION_AUDIT_AND_CERTIFICATION_REV_1.md s30",
+      "repository_evidence": [
+        "hermes/mcp/owner_runtime_stdio.mjs:50-71",
+        "tools/hermes/register_owner_runtime_mcp.sh:48-64",
+        "tests/contracts/test_owner_runtime_mcp_contract.py:58-65"
+      ],
+      "runtime_evidence": [],
+      "affected_components": [
+        "hermes"
+      ],
+      "root_cause": "see s32 root-cause map",
+      "remediation": "Align the include list with the shim and assert it in the contract test.",
+      "validation_gate": "G1",
+      "current_status": "OPEN"
+    },
+    {
+      "id": "P1-HER-002",
+      "severity": "P1",
+      "domain": "hermes",
+      "title": "The policy hook is never registered by any installer and its loading is unattested",
+      "description": "config.yaml declares hook_module and hook_entrypoint; the installer only copies the policy directory and the doctor only checks the file exists. No live artifact attests the hook is loaded.",
+      "requirement": "See the requirements traceability matrix in the canonical report.",
+      "authority": "docs/VAN_WHOLE_SYSTEM_IMPLEMENTATION_AUDIT_AND_CERTIFICATION_REV_1.md s30",
+      "repository_evidence": [
+        "hermes/profile/van/config.yaml:34-43",
+        "tools/hermes/install_van_profile.sh:87-90",
+        "tools/hermes/doctor_van_profile.sh:50-51"
+      ],
+      "runtime_evidence": [],
+      "affected_components": [
+        "hermes"
+      ],
+      "root_cause": "see s32 root-cause map",
+      "remediation": "Register the hook during install and assert it in the doctor and the live attestation.",
+      "validation_gate": "G10",
+      "current_status": "OPEN"
+    },
+    {
+      "id": "P1-HER-003",
+      "severity": "P1",
+      "domain": "hermes",
+      "title": "Two declared skills are never installed and skill counts drift four ways",
+      "description": "automation-fabric and browser-intelligence are declared in config.yaml but not copied by the installer nor checked by the doctor. Config declares 16, installer and doctor manage 14, tests assert 13, the live attestation records 13.",
+      "requirement": "See the requirements traceability matrix in the canonical report.",
+      "authority": "docs/VAN_WHOLE_SYSTEM_IMPLEMENTATION_AUDIT_AND_CERTIFICATION_REV_1.md s30",
+      "repository_evidence": [
+        "hermes/profile/van/config.yaml:45-63",
+        "tools/hermes/install_van_profile.sh:78-82",
+        "tests/hermes/test_profile_layout.py"
+      ],
+      "runtime_evidence": [],
+      "affected_components": [
+        "hermes"
+      ],
+      "root_cause": "see s32 root-cause map",
+      "remediation": "Install all declared skills and assert a single count across config, installer, doctor and tests.",
+      "validation_gate": "G1",
+      "current_status": "OPEN"
+    },
+    {
+      "id": "P1-HER-004",
+      "severity": "P1",
+      "domain": "hermes",
+      "title": "Two snapshot notions exist and only one can authorise an action",
+      "description": "The orchestrator seals a snapshot and binds the authority record to that id, while AGENTS.md tells Hermes to seal its own. authorize_action requires the record's snapshot id, so a Hermes-sealed snapshot can never authorise.",
+      "requirement": "See the requirements traceability matrix in the canonical report.",
+      "authority": "docs/VAN_WHOLE_SYSTEM_IMPLEMENTATION_AUDIT_AND_CERTIFICATION_REV_1.md s30",
+      "repository_evidence": [
+        "backend/van_gateway/orchestrator.py:414-420,451",
+        "backend/van_gateway/command/authority.py:110-111",
+        "hermes/profile/van/AGENTS.md:38"
+      ],
+      "runtime_evidence": [],
+      "affected_components": [
+        "hermes"
+      ],
+      "root_cause": "see s32 root-cause map",
+      "remediation": "Document the binding explicitly and have Hermes echo the run-metadata snapshot id.",
+      "validation_gate": "G1",
+      "current_status": "OPEN"
+    },
+    {
+      "id": "P1-HER-005",
+      "severity": "P1",
+      "domain": "trading",
+      "title": "The commander accepts any non-empty halt signature and trusts client-supplied requested_by",
+      "description": "cmd_halt requires only a non-empty owner_signature_ref, and requested_by is client-supplied while being the gate for agent-hidden credential commands that return a signing key once.",
+      "requirement": "See the requirements traceability matrix in the canonical report.",
+      "authority": "docs/VAN_WHOLE_SYSTEM_IMPLEMENTATION_AUDIT_AND_CERTIFICATION_REV_1.md s30",
+      "repository_evidence": [
+        "trading/commander/app.py:226-228,88-90,295-297",
+        "trading/commander/accounts.py:275"
+      ],
+      "runtime_evidence": [],
+      "affected_components": [
+        "trading"
+      ],
+      "root_cause": "see s32 root-cause map",
+      "remediation": "Verify halt signatures against a gateway authority record and bind requested_by to the authenticated principal.",
+      "validation_gate": "G5",
+      "current_status": "OPEN"
+    },
+    {
+      "id": "P1-GOOG-002",
+      "severity": "P1",
+      "domain": "google",
+      "title": "notebook_id is unconstrained by owner authority",
+      "description": "At action_begin the authority check requires only that the sealed parameters are a subset of the submitted ones, so Hermes chooses which notebook the owner's note lands in. The resolver also casefolds the command text, so the sealed title loses the owner's capitalisation.",
+      "requirement": "See the requirements traceability matrix in the canonical report.",
+      "authority": "docs/VAN_WHOLE_SYSTEM_IMPLEMENTATION_AUDIT_AND_CERTIFICATION_REV_1.md s30",
+      "repository_evidence": [
+        "backend/van_gateway/command/authority.py:127-129",
+        "backend/van_gateway/command/resolver.py:117,128-140"
+      ],
+      "runtime_evidence": [],
+      "affected_components": [
+        "google"
+      ],
+      "root_cause": "see s32 root-cause map",
+      "remediation": "Seal the full parameter set for A3 actions or require a resolved notebook target; stop casefolding extracted values.",
+      "validation_gate": "G4",
+      "current_status": "OPEN"
+    },
+    {
+      "id": "P1-TRADE-007",
+      "severity": "P1",
+      "domain": "trading",
+      "title": "Strategy targets are discarded in the live order path beside dead code",
+      "description": "The cycle throws away the winning signal's target and re-derives one from expected_gross_move_pct, alongside a dead assignment and an empty loop.",
+      "requirement": "See the requirements traceability matrix in the canonical report.",
+      "authority": "docs/VAN_WHOLE_SYSTEM_IMPLEMENTATION_AUDIT_AND_CERTIFICATION_REV_1.md s30",
+      "repository_evidence": [
+        "trading/vati/app/cycle.py:150-157"
+      ],
+      "runtime_evidence": [],
+      "affected_components": [
+        "trading"
+      ],
+      "root_cause": "see s32 root-cause map",
+      "remediation": "Use the winning signal's target and remove the dead code.",
+      "validation_gate": "G5",
+      "current_status": "OPEN"
+    },
+    {
+      "id": "P1-TRADE-008",
+      "severity": "P1",
+      "domain": "trading",
+      "title": "Learning is not wired into the live trading session",
+      "description": "SessionService.build does not pass learning, so capsule-health demotion, broker-liquidity learning and experience artefacts exist only in backtests.",
+      "requirement": "See the requirements traceability matrix in the canonical report.",
+      "authority": "docs/VAN_WHOLE_SYSTEM_IMPLEMENTATION_AUDIT_AND_CERTIFICATION_REV_1.md s30",
+      "repository_evidence": [
+        "trading/vati/app/service.py:143",
+        "trading/vati/backtest/engine.py:59"
+      ],
+      "runtime_evidence": [],
+      "affected_components": [
+        "trading"
+      ],
+      "root_cause": "see s32 root-cause map",
+      "remediation": "Wire the learning hooks into the live session behind the existing reduce-only boundary.",
+      "validation_gate": "G5",
+      "current_status": "OPEN"
+    },
+    {
+      "id": "P1-PERF-002",
+      "severity": "P1",
+      "domain": "performance",
+      "title": "The overlay animates continuously with the screen off",
+      "description": "The custom lifecycle is driven to STARTED and never below while the service lives; there is no ACTION_SCREEN_OFF receiver and no visibility check, so the infinite transition keeps running.",
+      "requirement": "See the requirements traceability matrix in the canonical report.",
+      "authority": "docs/VAN_WHOLE_SYSTEM_IMPLEMENTATION_AUDIT_AND_CERTIFICATION_REV_1.md s30",
+      "repository_evidence": [
+        "android/.../overlay/FloatingOverlayService.kt:156,174"
+      ],
+      "runtime_evidence": [],
+      "affected_components": [
+        "performance"
+      ],
+      "root_cause": "see s32 root-cause map",
+      "remediation": "Drive the lifecycle below STARTED on screen off and when minimized.",
+      "validation_gate": "G7",
+      "current_status": "OPEN"
+    },
+    {
+      "id": "P2-COG-002",
+      "severity": "P2",
+      "domain": "cognition",
+      "title": "Two unreconciled epistemic taxonomies",
+      "description": "EpistemicState with SourceTrust is enforced on admission; SemanticClass with FORBIDDEN_SELF_PROMOTIONS has zero production callers and no table stores a Claim.",
+      "requirement": "See the requirements traceability matrix in the canonical report.",
+      "authority": "docs/VAN_WHOLE_SYSTEM_IMPLEMENTATION_AUDIT_AND_CERTIFICATION_REV_1.md s30",
+      "repository_evidence": [
+        "backend/van_gateway/context/models.py:9-28",
+        "backend/van_gateway/epistemics/models.py:44-201"
+      ],
+      "runtime_evidence": [],
+      "affected_components": [
+        "cognition"
+      ],
+      "root_cause": "see s32 root-cause map",
+      "remediation": "Choose one taxonomy and enforce it at admission.",
+      "validation_gate": "G1",
+      "current_status": "OPEN"
+    },
+    {
+      "id": "P2-MEM-002",
+      "severity": "P2",
+      "domain": "memory",
+      "title": "No owner-facing forget for the owner model, evidence or reasoning ledgers",
+      "description": "Only owner_facts and owner_context_edges have an erase path.",
+      "requirement": "See the requirements traceability matrix in the canonical report.",
+      "authority": "docs/VAN_WHOLE_SYSTEM_IMPLEMENTATION_AUDIT_AND_CERTIFICATION_REV_1.md s30",
+      "repository_evidence": [
+        "backend/van_gateway/context/service.py:495-505"
+      ],
+      "runtime_evidence": [],
+      "affected_components": [
+        "memory"
+      ],
+      "root_cause": "see s32 root-cause map",
+      "remediation": "Add owner-facing deletion for every store that holds owner-derived data.",
+      "validation_gate": "G1",
+      "current_status": "OPEN"
+    },
+    {
+      "id": "P2-UX-001",
+      "severity": "P2",
+      "domain": "ux",
+      "title": "The Command Centre is an engineering console with raw enums and JSON on screen",
+      "description": "Raw enum names are rendered as command status; A4, BIOMETRIC_STRONG, HMAC, reason_code, raw scope JSON, truth_sha and raw payload strings are shown to the owner.",
+      "requirement": "See the requirements traceability matrix in the canonical report.",
+      "authority": "docs/VAN_WHOLE_SYSTEM_IMPLEMENTATION_AUDIT_AND_CERTIFICATION_REV_1.md s30",
+      "repository_evidence": [
+        "android/.../command/CommandCentreActivity.kt:1214,295,749-752,555,600,1005,1081"
+      ],
+      "runtime_evidence": [],
+      "affected_components": [
+        "ux"
+      ],
+      "root_cause": "see s32 root-cause map",
+      "remediation": "Rebuild the Command Centre against the mission read models using MissionRepository.ownerReadableStatus.",
+      "validation_gate": "G1",
+      "current_status": "OPEN"
+    },
+    {
+      "id": "P2-AURA-001",
+      "severity": "P2",
+      "domain": "visual",
+      "title": "The aura body gap is 5.3 dp against a 10-14 dp requirement",
+      "description": "The exclusion profile is a fraction of bodyEdge with no dp anywhere; at the shipping 96 dp floating size the gap is 5.3 dp.",
+      "requirement": "See the requirements traceability matrix in the canonical report.",
+      "authority": "docs/VAN_WHOLE_SYSTEM_IMPLEMENTATION_AUDIT_AND_CERTIFICATION_REV_1.md s30",
+      "repository_evidence": [
+        "android/.../visual/VanBodyExclusionProfile.kt:162",
+        "android/.../overlay/OverlayTheme.kt:13-14"
+      ],
+      "runtime_evidence": [],
+      "affected_components": [
+        "visual"
+      ],
+      "root_cause": "see s32 root-cause map",
+      "remediation": "Express the gap contract in dp and assert it in a test.",
+      "validation_gate": "G1",
+      "current_status": "OPEN"
+    },
+    {
+      "id": "P2-VIS-003",
+      "severity": "P2",
+      "domain": "visual",
+      "title": "The IDLE evidence image is a DEGRADED render duplicated by hash",
+      "description": "command-centre-idle and command-centre-degraded carry identical sha256 and byte counts; the idle file renders a Degraded page.",
+      "requirement": "See the requirements traceability matrix in the canonical report.",
+      "authority": "docs/VAN_WHOLE_SYSTEM_IMPLEMENTATION_AUDIT_AND_CERTIFICATION_REV_1.md s30",
+      "repository_evidence": [
+        "artifacts/release/preview/rev21/manifest.json"
+      ],
+      "runtime_evidence": [],
+      "affected_components": [
+        "visual"
+      ],
+      "root_cause": "see s32 root-cause map",
+      "remediation": "Regenerate both boards and assert distinct hashes in the manifest.",
+      "validation_gate": "G1",
+      "current_status": "OPEN"
+    },
+    {
+      "id": "P2-BROW-001",
+      "severity": "P2",
+      "domain": "browser",
+      "title": "The browser task path never calls an adapter and mission binding is always null",
+      "description": "Neither browser/api.py, service.py nor subagent.py imports adapters; evidence on the task path is caller-supplied and digest-only; app.py passes no binder.",
+      "requirement": "See the requirements traceability matrix in the canonical report.",
+      "authority": "docs/VAN_WHOLE_SYSTEM_IMPLEMENTATION_AUDIT_AND_CERTIFICATION_REV_1.md s30",
+      "repository_evidence": [
+        "backend/van_gateway/browser/api.py:792-828,814-827",
+        "backend/van_gateway/app.py:179"
+      ],
+      "runtime_evidence": [],
+      "affected_components": [
+        "browser"
+      ],
+      "root_cause": "see s32 root-cause map",
+      "remediation": "Wire the adapters and the mission binder into the browser task path.",
+      "validation_gate": "G1",
+      "current_status": "OPEN"
+    },
+    {
+      "id": "P2-GOOG-001",
+      "severity": "P2",
+      "domain": "google",
+      "title": "workspace_studio, which has no implementation, is selectable as a routing fallback",
+      "description": "The Google mesh can select a capability with no gateway code at all as the fallback for workspace_operation.",
+      "requirement": "See the requirements traceability matrix in the canonical report.",
+      "authority": "docs/VAN_WHOLE_SYSTEM_IMPLEMENTATION_AUDIT_AND_CERTIFICATION_REV_1.md s30",
+      "repository_evidence": [
+        "backend/van_gateway/google/mesh.py:304-306"
+      ],
+      "runtime_evidence": [],
+      "affected_components": [
+        "google"
+      ],
+      "root_cause": "see s32 root-cause map",
+      "remediation": "Restrict fallback selection to capabilities with a readiness source and an implementation.",
+      "validation_gate": "G1",
+      "current_status": "OPEN"
+    },
+    {
+      "id": "P2-SEC-008",
+      "severity": "P2",
+      "domain": "security",
+      "title": "Nothing expires: ten-year grants, no rotation, 825-day PKI with no renewal",
+      "description": "Enrollment grants are minted with a ten-year expiry; the ingress token, internal token, device secrets and commander tokens are never rotated; make-bridge-pki returns early if the certificate exists.",
+      "requirement": "See the requirements traceability matrix in the canonical report.",
+      "authority": "docs/VAN_WHOLE_SYSTEM_IMPLEMENTATION_AUDIT_AND_CERTIFICATION_REV_1.md s30",
+      "repository_evidence": [
+        "backend/van_gateway/auth/service.py:167,208",
+        "deploy/van-trading-core/pki/make-bridge-pki.sh:11,19"
+      ],
+      "runtime_evidence": [],
+      "affected_components": [
+        "security"
+      ],
+      "root_cause": "see s32 root-cause map",
+      "remediation": "Add expiry and rotation for every long-lived credential and a PKI renewal path with monitoring.",
+      "validation_gate": "G1",
+      "current_status": "OPEN"
+    },
+    {
+      "id": "P2-SEC-009",
+      "severity": "P2",
+      "domain": "security",
+      "title": "A live to fake Google transport swap route exists on the production app",
+      "description": "POST /v1/google/test-transport replaces the live transport and clears the OAuth client with no undo route; outside pytest it fails closed as an unhandled 500.",
+      "requirement": "See the requirements traceability matrix in the canonical report.",
+      "authority": "docs/VAN_WHOLE_SYSTEM_IMPLEMENTATION_AUDIT_AND_CERTIFICATION_REV_1.md s30",
+      "repository_evidence": [
+        "backend/van_gateway/app.py:598-604",
+        "backend/van_gateway/google/transport.py:124-125"
+      ],
+      "runtime_evidence": [],
+      "affected_components": [
+        "security"
+      ],
+      "root_cause": "see s32 root-cause map",
+      "remediation": "Remove the route from the production application.",
+      "validation_gate": "G1",
+      "current_status": "OPEN"
+    },
+    {
+      "id": "P2-SEC-010",
+      "severity": "P2",
+      "domain": "security",
+      "title": "No speaker verification on voice commands",
+      "description": "Any voice reaching the microphone produces a transcript signed as an owner command; SpeakerSimilarityScorer is an interface with no implementation.",
+      "requirement": "See the requirements traceability matrix in the canonical report.",
+      "authority": "docs/VAN_WHOLE_SYSTEM_IMPLEMENTATION_AUDIT_AND_CERTIFICATION_REV_1.md s30",
+      "repository_evidence": [
+        "android/.../voice/WakeRuntime.kt:41-44"
+      ],
+      "runtime_evidence": [],
+      "affected_components": [
+        "security"
+      ],
+      "root_cause": "see s32 root-cause map",
+      "remediation": "Implement speaker verification and gate command dispatch on it.",
+      "validation_gate": "G1",
+      "current_status": "OPEN"
+    },
+    {
+      "id": "P2-PERF-001",
+      "severity": "P2",
+      "domain": "performance",
+      "title": "Full field geometry is rebuilt every frame with no frame-budget measurement",
+      "description": "The geometry engine allocates fresh lists and rebuilds all 35-point polylines per frame; frameBudgetMissed has no producer and thermal state is sampled once per composition.",
+      "requirement": "See the requirements traceability matrix in the canonical report.",
+      "authority": "docs/VAN_WHOLE_SYSTEM_IMPLEMENTATION_AUDIT_AND_CERTIFICATION_REV_1.md s30",
+      "repository_evidence": [
+        "android/.../visual/VanFieldGeometry.kt:74-76,415-444",
+        "android/.../visual/VanEffectBudget.kt:247",
+        "android/.../visual/VanCanvasFallback.kt:159"
+      ],
+      "runtime_evidence": [],
+      "affected_components": [
+        "performance"
+      ],
+      "root_cause": "see s32 root-cause map",
+      "remediation": "Cache stable topology and update only dynamic coordinates; add frame-time sampling.",
+      "validation_gate": "G1",
+      "current_status": "OPEN"
+    },
+    {
+      "id": "P2-OBS-001",
+      "severity": "P2",
+      "domain": "observability",
+      "title": "No correlation identifier spans command to mission to execution to verification",
+      "description": "Identifiers exist per subsystem but nothing joins a hermes_run_id to a later verification, and mission changes never reach the event bus.",
+      "requirement": "See the requirements traceability matrix in the canonical report.",
+      "authority": "docs/VAN_WHOLE_SYSTEM_IMPLEMENTATION_AUDIT_AND_CERTIFICATION_REV_1.md s30",
+      "repository_evidence": [
+        "backend/van_gateway/orchestrator.py:567",
+        "backend/van_gateway/events/bus.py:14-46"
+      ],
+      "runtime_evidence": [],
+      "affected_components": [
+        "observability"
+      ],
+      "root_cause": "see s32 root-cause map",
+      "remediation": "Introduce a single correlation id propagated across every subsystem and log sink.",
+      "validation_gate": "G1",
+      "current_status": "OPEN"
+    },
+    {
+      "id": "P2-COH-001",
+      "severity": "P2",
+      "domain": "coherence",
+      "title": "Eleven parallel work-status vocabularies with no owner-facing projection",
+      "description": "MissionState, ActivityState, ExecutionStatus, RunStatus, BrowserTaskStatus, DecisionStatus, IdempotencyStatus, AttentionState, KnowledgeOperationStatus, OperationState and the Android command status all describe work in progress.",
+      "requirement": "See the requirements traceability matrix in the canonical report.",
+      "authority": "docs/VAN_WHOLE_SYSTEM_IMPLEMENTATION_AUDIT_AND_CERTIFICATION_REV_1.md s30",
+      "repository_evidence": [
+        "backend/van_gateway/mission/models.py:36-140",
+        "backend/van_gateway/automation/models.py:316",
+        "backend/van_gateway/browser/models.py:73"
+      ],
+      "runtime_evidence": [],
+      "affected_components": [
+        "coherence"
+      ],
+      "root_cause": "see s32 root-cause map",
+      "remediation": "Define one owner-facing work status projection and map every subsystem onto it.",
+      "validation_gate": "G1",
+      "current_status": "OPEN"
+    },
+    {
+      "id": "P2-COH-002",
+      "severity": "P2",
+      "domain": "coherence",
+      "title": "AttentionScorer and VerifierRegistry are 2.0 implementations built beside live 1.0s",
+      "description": "decisions/service uses the older AttentionEngine while AttentionScorer is isolated; AutomationDispatcher uses its own WorkflowVerifier while VerifierRegistry is test-only.",
+      "requirement": "See the requirements traceability matrix in the canonical report.",
+      "authority": "docs/VAN_WHOLE_SYSTEM_IMPLEMENTATION_AUDIT_AND_CERTIFICATION_REV_1.md s30",
+      "repository_evidence": [
+        "backend/van_gateway/decisions/service.py:9,57",
+        "backend/van_gateway/attention/scoring.py",
+        "backend/van_gateway/mission/verifiers.py"
+      ],
+      "runtime_evidence": [],
+      "affected_components": [
+        "coherence"
+      ],
+      "root_cause": "see s32 root-cause map",
+      "remediation": "Migrate to one attention engine and one verification system.",
+      "validation_gate": "G1",
+      "current_status": "OPEN"
+    }
+  ]
+}
