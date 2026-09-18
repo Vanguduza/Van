@@ -91,6 +91,12 @@ jobs:
         run: |
           chmod +x gradlew
           ./gradlew :app:testDebugUnitTest :app:assembleDebug :app:lintDebug
+      - name: Upload canonical owner-debug APK
+        uses: actions/upload-artifact@v4
+        with:
+          name: van-canonical-owner-debug-apk
+          path: android/app/build/outputs/apk/debug/app-debug.apk
+          if-no-files-found: error
       - name: Shared visual geometry tests
         working-directory: android
         run: ./gradlew :visual-preview:test
