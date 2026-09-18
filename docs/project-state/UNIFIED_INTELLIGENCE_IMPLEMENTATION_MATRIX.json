@@ -1,7 +1,7 @@
 {
   "schema": "van-implementation-matrix/1",
   "mission": "VAN Unified Personal Intelligence + Cognitive Symbiosis (Rev 1 / Rev 1.1)",
-  "phase": "PHASE_1_MISSION_CORE_AND_CAPABILITY_REGISTRY",
+  "phase": "PHASE_2_ACTIVITY_EVENT_EVIDENCE_NORMALIZED",
   "generated_against": {
     "main_sha": "f8c3fcc9b4d346c7b59ed128cfdbe63bceab3dc0",
     "blueprint_sha": "e09765d70d6a6a3172141a3dc9710362d2554d26",
@@ -19,11 +19,11 @@
     "finding": "Every gpt/* implementation branch is an ancestor of main. No unique required implementation is stranded on any branch, so \u00a752's post-merge certification already holds for them."
   },
   "counts": {
-    "BUILT": 3,
-    "PARTIAL_ADJACENT": 9,
+    "BUILT": 5,
+    "PARTIAL_BUILT": 1,
+    "PARTIAL_ADJACENT": 7,
     "ABSENT": 19,
     "EXISTS_UPGRADE": 3,
-    "EXISTS_SATISFIED": 1,
     "EXTERNAL_GATED": 1
   },
   "workstreams": [
@@ -40,8 +40,8 @@
     {
       "id": "WS2",
       "name": "Success contracts and verification",
-      "status": "PARTIAL_ADJACENT",
-      "note": "automation/verifier.py implements postcondition verification for workflow runs and action/models.py has VerifierType. Neither is mission-scoped; no success_contract exists.",
+      "status": "PARTIAL_BUILT",
+      "note": "SuccessContract + VerificationRecord are mission-scoped and enforced; per-capability verifier adapters (\u00a76) remain.",
       "prompt_refs": [
         "\u00a76"
       ]
@@ -293,8 +293,8 @@
     {
       "id": "WS30",
       "name": "Unified activity and evidence",
-      "status": "PARTIAL_ADJACENT",
-      "note": "events table + browser_evidence + action_receipts + audit exist per subsystem. Normalized MissionEvent across all of them is absent.",
+      "status": "BUILT",
+      "note": "MissionEvent normalized; browser tasks and automation runs bind to Activities by reference via executor_ref. Backfill is idempotent and reversible. /v1/activity groups by mission; /v1/missions/{id}/evidence gathers receipts.",
       "prompt_refs": [
         "\u00a734"
       ]
@@ -302,8 +302,8 @@
     {
       "id": "WS31",
       "name": "Unified decisions",
-      "status": "EXISTS_SATISFIED",
-      "note": "DecisionService is already the single approval path; browser escalation routes through it and Android resolves through it. \u00a735's 'no duplicated provider-specific approval system' holds.",
+      "status": "BUILT",
+      "note": "DecisionService was already the single approval path; /v1/needs-you now presents waiting missions and open decisions as one surface.",
       "prompt_refs": [
         "\u00a735"
       ]
@@ -358,5 +358,28 @@
     "Two capability registries: resolved by declaration/readiness split rather than merge.",
     "CapabilityRouter name collision: automation's is now AutomationMediumRouter.",
     "knowledge/vekl.py's /v1/missions/{mission_id}/vekl contract now has a Mission entity behind it."
+  ],
+  "api_surface_built": [
+    "GET /v1/missions",
+    "GET /v1/missions/{id}",
+    "GET /v1/missions/{id}/activity",
+    "GET /v1/missions/{id}/evidence",
+    "GET /v1/needs-you",
+    "GET /v1/activity",
+    "GET /v1/capabilities/status",
+    "POST /v1/missions/{id}/cancel",
+    "POST /v1/missions/{id}/message",
+    "POST /v1/missions (internal)",
+    "POST /v1/missions/{id}/transition (internal)",
+    "POST /v1/missions/{id}/activities (internal)",
+    "POST /v1/missions/route (internal)",
+    "POST /v1/missions/{id}/backfill (internal)"
+  ],
+  "red_team_covered": [
+    "\u00a745.6 Android tampers with planning state",
+    "\u00a745.9 broker order bypassing VATI",
+    "\u00a745.11 mission forges verification",
+    "\u00a745.16 mission self-escalates its envelope",
+    "\u00a77 undeclared capability becomes work"
   ]
 }
