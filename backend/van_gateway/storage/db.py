@@ -611,6 +611,38 @@ MIGRATIONS: dict[int, str] = {
       updated_at_ms INTEGER NOT NULL
     );
     """,
+,
+    7: """
+    -- Rev 3.1 browser escalation/resume. DecisionService remains the owner
+    -- authority; this table only binds a browser checkpoint to that decision.
+    CREATE TABLE IF NOT EXISTS browser_escalations (
+      escalation_id TEXT PRIMARY KEY,
+      task_id TEXT NOT NULL,
+      decision_id TEXT NOT NULL UNIQUE,
+      boundary_type TEXT NOT NULL,
+      reason_code TEXT NOT NULL,
+      summary TEXT NOT NULL,
+      why_required TEXT NOT NULL,
+      risk_summary TEXT NOT NULL,
+      current_scope_json TEXT NOT NULL,
+      requested_scope_delta_json TEXT NOT NULL,
+      current_action_class TEXT NOT NULL,
+      required_action_class TEXT,
+      pending_step TEXT,
+      evidence_refs_json TEXT NOT NULL,
+      session_lease_ref TEXT,
+      idempotency_key TEXT NOT NULL UNIQUE,
+      status TEXT NOT NULL,
+      expires_at_ms INTEGER,
+      created_at_ms INTEGER NOT NULL,
+      updated_at_ms INTEGER NOT NULL,
+      FOREIGN KEY(task_id) REFERENCES browser_tasks(task_id),
+      FOREIGN KEY(decision_id) REFERENCES decisions(id)
+    );
+
+    CREATE INDEX IF NOT EXISTS idx_browser_escalations_task
+      ON browser_escalations(task_id, status, created_at_ms);
+    """
 }
 
 
