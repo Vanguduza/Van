@@ -55,3 +55,15 @@
 - Direct Google project mutation that bypasses Hermes, Project Truth, grants, action classes, audit or evidence.
 
 See `docs/EXTERNAL_GATES.md` for exact live gates.
+## AUTOMATION & BROWSER FABRIC (Rev 1.3 × Rev 3.1) — RECONCILED
+
+- **Lineage:** the current reconciliation branch preserves the Rev 3.1 owner/knowledge runtime, the Opus Automation & Browser Fabric, and the latest hardened Trading Core bootstrap lineage. Neither WIP is treated as an alternate architecture.
+- **Schema:** migrations 6–8 provide automation capability/artifact/run/event/standing-authority state, browser task/evidence/profile state, durable browser escalations, and separately auditable owner-approved browser scope authorizations.
+- **Standing automation authority:** scheduled/event runs derive ordinary `CommandAuthorityRecord` instances through the existing `CommandAuthorityService`. The originating owner device remains the revocation root; typed parameter constraints and standing-authority provenance coexist in the same record.
+- **Run capability grants:** mutation grants remain MAC-bound, run-scoped, durable and replay-safe. n8n never becomes a general VAN authority token holder.
+- **Browser Fabric:** Browser Harness is the deterministic actuator and Stagehand the semantic layer behind the Gateway. The owner-approved model permits L4/L5 only as a Hermes-managed subagent with explicit goal, domains, action-class ceiling and bounded step/deadline budget.
+- **Boundary escalation:** legitimate scope/action-class overruns are non-terminal. They transition the task to `WAITING_FOR_OWNER`, persist a checkpoint/escalation, create a canonical `DecisionService` record and attention item, and can resume only after a separate durable scope authorization is derived from that approved decision. Resume assignments exceeding the approved domain or action-class delta are rejected.
+- **Hard stops:** payments and prompt-injection policy violations become `BLOCKED_POLICY`; goal drift/ambiguous unsafe behavior becomes `BLOCKED_UNSAFE`. A hard prohibition is never converted into an owner-override button.
+- **Android owner control:** Command Centre now contains a live **Browser & Automation** module showing runtime/task state, managed browser profiles/session leases, automation counts and boundary escalations. Approve/Reject uses the existing canonical Decisions authority rather than a parallel browser approval plane.
+- **Owner decisions:** n8n, Stagehand and Browser Harness adoption records are `SIGNED`/approved on 2026-09-18 and the Automation & Browser security-policy amendment is `OWNER_APPROVED` and applied. Live runtime readiness remains evidence-gated and disabled by default until certified.
+- **Certification:** `tools/certification/certify_automation_runtime.py` and `tools/certification/certify_browser_fabric.py` remain required for live READY promotion. Repository implementation alone is not readiness.
