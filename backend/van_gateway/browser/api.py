@@ -308,8 +308,7 @@ class BrowserApi:
         router = self.router
 
         @router.get("/status")
-        async def browser_status(x_van_internal_token: str | None = Header(default=None)):
-            self._require_internal(x_van_internal_token)
+        async def browser_status():
             rows = await self.store.fetchall(
                 "SELECT status, COUNT(*) AS count FROM browser_tasks GROUP BY status"
             )
@@ -341,16 +340,14 @@ class BrowserApi:
             }
 
         @router.get("/tasks")
-        async def list_tasks(x_van_internal_token: str | None = Header(default=None)):
-            self._require_internal(x_van_internal_token)
+        async def list_tasks():
             rows = await self.store.fetchall(
                 "SELECT * FROM browser_tasks ORDER BY updated_at_ms DESC LIMIT 100"
             )
             return [dict(r) for r in rows]
 
         @router.get("/escalations")
-        async def list_escalations(x_van_internal_token: str | None = Header(default=None)):
-            self._require_internal(x_van_internal_token)
+        async def list_escalations():
             rows = await self.store.fetchall(
                 """
                 SELECT e.*, d.title AS decision_title, d.status AS decision_status
@@ -426,8 +423,7 @@ class BrowserApi:
             return task.model_dump(mode="json")
 
         @router.get("/tasks/{task_id}")
-        async def get_task(task_id: str, x_van_internal_token: str | None = Header(default=None)):
-            self._require_internal(x_van_internal_token)
+        async def get_task(task_id: str):
             task = await self._load_task(task_id)
             evidence = await self.store.fetchall(
                 "SELECT evidence_id, kind, injection_assessment, created_at_ms "
