@@ -14,8 +14,9 @@ from vati.core.canonical import canonical_hash, canonical_json
 from vati.core.events import Event, EventKind
 from vati.core.ledger import GENESIS, LedgerError, ReplayReport
 
+# The vati schema is provisioned by the privileged deployment reconciler.
+# Runtime deliberately has no CREATE privilege on the database.
 SCHEMA = """
-CREATE SCHEMA IF NOT EXISTS vati;
 CREATE TABLE IF NOT EXISTS vati.events (
   seq BIGSERIAL PRIMARY KEY,
   kind TEXT NOT NULL, producer TEXT NOT NULL, correlation_id TEXT NOT NULL,

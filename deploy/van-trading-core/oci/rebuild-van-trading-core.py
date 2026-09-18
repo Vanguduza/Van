@@ -267,12 +267,25 @@ def main():
     active,by,sub=get_resources(comp)
     protected={by[n]['id'] for n in ('oracle-admin','dial-hermes-control','vekl-worker')}
     doomed=[x for x in active if x['display-name'].startswith('van-trading-core') and (x.get('freeform-tags') or {}).get('project')=='VAN' and (x.get('freeform-tags') or {}).get('role')=='TRADING_CORE']
-    if not doomed: print('NO_EXISTING_TRADING_CORE: proceeding with clean creation',flush=True)
-    if any(x['id'] in protected for x in doomed): raise RuntimeError('protected instance selected for termination')
+    force_recreate='--force-recreate' in sys.argv
+    dry_run='--dry-run' in sys.argv
+    if not doomed:
+        print('NO_EXISTING_TRADING_CORE: proceeding with clean creation',flush=True)
+    if any(x['id'] in protected for x in doomed):
+        raise RuntimeError('protected instance selected for termination')
     print('PROTECTED',[(n,by[n]['id']) for n in ('oracle-admin','dial-hermes-control','vekl-worker')],flush=True)
-    print('TERMINATION_CANDIDATES',[(x['display-name'],x['id']) for x in doomed],flush=True)
-    if '--dry-run' in sys.argv:
-        print('DRY_RUN_GREEN: would harden trading subnet, terminate only candidates above, reserve public IP, launch one replacement and qualify E2E',flush=True); return
+    print('TRADING_CORE_CANDIDATES',[(x['display-name'],x['id']) for x in doomed],flush=True)
+    if doomed and not force_recreate:
+        if len(doomed) != 1:
+            raise RuntimeError('multiple active trading-core instances found; refusing automatic selection or termination')
+        live=doomed[0]
+        print('EXISTING_TRADING_CORE_PROTECTED',live['display-name'],live['id'],flush=True)
+        print('RESUME_EXISTING_REQUIRED: no OCI lifecycle action taken; use --force-recreate only for explicit owner-approved replacement',flush=True)
+        return
+    if dry_run:
+        action='force-recreate the existing trading core' if doomed else 'create a clean trading core'
+        print(f'DRY_RUN_GREEN: would harden trading subnet and {action}; protected control nodes remain untouched',flush=True)
+        return
     apub,hpub=ensure_keys()
     reserved_id,reserved_addr,public_host=ensure_reserved_ip(comp)
     harden_subnet(sub)
