@@ -6,6 +6,10 @@ from pydantic import ValidationError
 
 from van_gateway.action.models import ExecutionStatus, VerificationObservation
 from van_gateway.action.service import ActionPolicyError, ActionRuntime
+from van_gateway.browser.adapters import HttpBrowserHarnessAdapter, StagehandAdapter
+from van_gateway.browser.policy import BrowserPolicyEngine
+from van_gateway.browser.service import BrowserTaskService
+from van_gateway.automation.external_runtime import ExternalRuntimeRegistry
 from van_gateway.config import Settings
 from van_gateway.knowledge.evidence import KnowledgeEvidenceStore
 from van_gateway.knowledge.models import (
@@ -76,12 +80,35 @@ class KnowledgeRuntime:
             upload_root=settings.notebook_enterprise_upload_root,
             max_upload_bytes=settings.notebook_enterprise_max_upload_bytes,
         )
+        browser_registry = ExternalRuntimeRegistry(store)
+        browser_policy = BrowserPolicyEngine()
+        browser_tasks = BrowserTaskService(store, policy=browser_policy)
+        browser_harness = HttpBrowserHarnessAdapter(
+            browser_registry,
+            base_url=settings.browser_harness_base_url,
+            enabled=settings.browser_enabled,
+            expected_version=settings.browser_harness_expected_version or None,
+            timeout_seconds=settings.notebook_consumer_timeout_seconds,
+        )
+        browser_stagehand = StagehandAdapter(
+            browser_registry,
+            base_url=settings.browser_stagehand_base_url,
+            enabled=settings.browser_enabled,
+            expected_version=settings.browser_stagehand_expected_version or None,
+            model_provider=settings.browser_stagehand_model_provider,
+            model_name=settings.browser_stagehand_model_name,
+            max_tier=browser_policy.max_tier,
+            timeout_seconds=settings.notebook_consumer_timeout_seconds,
+        )
         self.notebook_consumer = NotebookConsumerProvider(
             store, self.evidence,
             enabled=settings.notebook_consumer_enabled,
-            profile_dir=settings.notebook_consumer_profile_dir,
+            browser_tasks=browser_tasks,
+            harness=browser_harness,
+            stagehand=browser_stagehand,
+            profile_alias=settings.notebook_consumer_profile_alias,
+            profile_secret_ref=settings.notebook_consumer_profile_secret_ref,
             base_url=settings.notebook_consumer_base_url,
-            headless=settings.notebook_consumer_headless,
             timeout_seconds=settings.notebook_consumer_timeout_seconds,
         )
 
