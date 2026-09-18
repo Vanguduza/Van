@@ -1,7 +1,7 @@
 {
   "schema": "van-implementation-matrix/1",
   "mission": "VAN Unified Personal Intelligence + Cognitive Symbiosis (Rev 1 / Rev 1.1)",
-  "phase": "PHASES_9_12_BACKEND_COMPLETE",
+  "phase": "PHASE_13_ANDROID_DATA_LAYER",
   "generated_against": {
     "main_sha": "f8c3fcc9b4d346c7b59ed128cfdbe63bceab3dc0",
     "blueprint_sha": "e09765d70d6a6a3172141a3dc9710362d2554d26",
@@ -21,7 +21,8 @@
   "counts": {
     "BUILT": 32,
     "ABSENT": 1,
-    "EXISTS_UPGRADE": 2,
+    "EXISTS_UPGRADE": 1,
+    "PARTIAL_BUILT": 1,
     "EXTERNAL_GATED": 1
   },
   "workstreams": [
@@ -281,8 +282,8 @@
     {
       "id": "WS29",
       "name": "Unified Android experience (6 surfaces)",
-      "status": "EXISTS_UPGRADE",
-      "note": "PR #37 already delivered summary-first drill-down. Home/Van/Missions/Needs You/Activity/Understanding as canonical top-level surfaces is the delta.",
+      "status": "PARTIAL_BUILT",
+      "note": "Data layer built: VanGatewayClient extended with the mission, understanding, permission, autonomy, radar and eval reads; MissionModels + MissionRepository provide the six surfaces' read models with owner-readable status strings. NOT COMPILED IN THIS CONTAINER \u2014 the Android Gradle Plugin does not resolve here, so the Kotlin is verified only by CI (:app:testDebugUnitTest). Compose screens themselves remain unwritten.",
       "prompt_refs": [
         "\u00a733",
         "\u00a748"
@@ -396,5 +397,9 @@
     "WS28": "Voice 2.0 \u2014 wake pipeline and signed transcripts exist; mission binding is Kotlin work plus a device gate for the P95 targets.",
     "WS29": "Unified Android experience \u2014 six surfaces consuming the mission/understanding APIs. Kotlin, not yet written.",
     "WS33": "Durable orchestration \u2014 Temporal is stack-locked at adoption phase 11 and not deployed. External gate by your own governance."
+  },
+  "verification_caveats": {
+    "kotlin": "android/ changes are unverified in this container: the Android Gradle Plugin 8.10.1 does not resolve offline or through the proxy. CI runs :app:testDebugUnitTest :app:assembleDebug :app:lintDebug and is the first real check of this code. Do not treat it as tested until CI is green.",
+    "python": "backend, contracts and trading suites all run and pass in this container."
   }
 }
