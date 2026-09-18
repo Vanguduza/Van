@@ -60,6 +60,7 @@ async def test_context_snapshot_seals_graph_and_lexical_evidence_separately(tmp_
     assert stored == {
         "graph": ["context-edge:van-hermes:r2"],
         "lexical": ["context-fact:target-sdk-36:r1"],
+        "knowledge": [],
     }
     assert row["digest"] == snapshot.digest
 

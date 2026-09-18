@@ -19,6 +19,13 @@ REQUIRED_TOOLS = {
     "context_hot_capsule",
     "context_readiness",
     "context_snapshot",
+    "knowledge_status",
+    "vekl_query",
+    "obsidian_query",
+    "notebook_enterprise_recent",
+    "notebook_enterprise_get",
+    "notebook_consumer_ask",
+    "knowledge_action_execute",
     "research_status",
     "research_search",
     "action_begin",
@@ -36,6 +43,14 @@ def test_owner_runtime_mcp_has_fixed_narrow_surface():
     assert "/v1/runtime/context/edges" not in text
     assert "/v1/runtime/context/lexical/query" in text
     assert "/v1/runtime/context/hot-capsules" in text
+    assert "/v1/runtime/knowledge/vekl/query" in text
+    assert "/v1/runtime/knowledge/obsidian/query" in text
+    assert "/v1/runtime/knowledge/notebook/consumer/ask" in text
+    assert "/v1/runtime/knowledge/actions/execute" in text
+    assert "/knowledge/obsidian/index" not in text
+    assert "/knowledge/obsidian/certify" not in text
+    assert "/knowledge/vekl/certify-canary" not in text
+    assert "/knowledge/notebook/consumer/certify" not in text
     assert "generic HTTP" in text
     assert "Object.hasOwn(ROUTES, name)" in text
 
@@ -84,3 +99,12 @@ def test_retrieval_tools_remain_read_only_and_bounded():
     assert "maximum: 300000" in text
     assert "context_lexical_query: { method: 'POST'" in text
     assert "context_hot_capsule: { method: 'POST'" in text
+
+
+def test_knowledge_mutation_tool_is_authorized_execution_only():
+    text = SHIM.read_text(encoding="utf-8")
+    assert "Execute a Notebook mutation only after action_begin has produced an AUTHORIZED execution" in text
+    assert "parameters must exactly match" not in text.lower() or "parameters must exactly match" in text.lower()
+    assert "knowledge_action_execute: { method: 'POST'" in text
+    assert "/knowledge/notebook/enterprise/create" not in text
+    assert "/knowledge/notebook/consumer/note" not in text

@@ -446,6 +446,7 @@ class CommandOrchestrator:
             signed_action_class=req.action_class,
             effective_action_class=effective_action_class,
             typed_action_id=resolution.action_id if resolution.mode == ResolutionMode.EXACT_ACTION else None,
+            typed_parameter_constraints=(resolution.parameters if resolution.mode == ResolutionMode.EXACT_ACTION else {}),
             snapshot_id=context_snapshot.snapshot_id,
             context_digest=context_snapshot.digest,
             issued_at_unix=req.issued_at_unix,

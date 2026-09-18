@@ -88,6 +88,19 @@ class TypedCommandResolver:
         re.compile(r"^(?:create|make) (?:a )?(?:new )?note in (?:notebooklm|notebook lm)(?: (?:named|called))? (?P<title>.+)$"),
     )
 
+    NOTEBOOK_ENTERPRISE_DELETE_PATTERN = re.compile(
+        r"^(?:delete|remove)\s+(?:the\s+)?(?:gemini\s+)?notebook enterprise notebook id\s+"
+        r"(?P<notebook_id>[A-Za-z0-9._:/-]+)$",
+        re.IGNORECASE,
+    )
+    NOTEBOOK_ENTERPRISE_DELETE_SOURCES_PATTERN = re.compile(
+        r"^(?:delete|remove)\s+(?:the\s+)?(?:notebook enterprise\s+)?sources?\s+"
+        r"(?P<source_names>[A-Za-z0-9._:/-]+(?:\s*,\s*[A-Za-z0-9._:/-]+)*)\s+from\s+"
+        r"(?:the\s+)?(?:gemini\s+)?notebook enterprise notebook id\s+"
+        r"(?P<notebook_id>[A-Za-z0-9._:/-]+)$",
+        re.IGNORECASE,
+    )
+
     RESEARCH_PATTERNS = (
         re.compile(r"^research (?P<query>.+)$"),
         re.compile(r"^search the web for (?P<query>.+)$"),
@@ -100,7 +113,8 @@ class TypedCommandResolver:
     )
 
     def resolve(self, text: str) -> CommandResolution:
-        normalized = _normalize(text)
+        raw_compact = re.sub(r"\s+", " ", text.strip())
+        normalized = raw_compact.casefold()
 
         if normalized in self.HALT_TRADING:
             return _from_action(
@@ -123,6 +137,29 @@ class TypedCommandResolver:
                         parameters={"title": title},
                         rule_id="notebooklm.note.create.v1",
                     )
+
+        match = self.NOTEBOOK_ENTERPRISE_DELETE_SOURCES_PATTERN.fullmatch(raw_compact)
+        if match:
+            notebook_id = match.group("notebook_id")
+            source_names = [item.strip() for item in match.group("source_names").split(",") if item.strip()]
+            if source_names:
+                return _from_action(
+                    "google.notebook.enterprise.sources.delete",
+                    text=normalized,
+                    intent_id="NOTEBOOK_ENTERPRISE_DELETE_SOURCES",
+                    parameters={"notebook_id": notebook_id, "source_names": source_names},
+                    rule_id="notebook.enterprise.sources.delete.exact.v1",
+                )
+
+        match = self.NOTEBOOK_ENTERPRISE_DELETE_PATTERN.fullmatch(raw_compact)
+        if match:
+            return _from_action(
+                "google.notebook.enterprise.delete",
+                text=normalized,
+                intent_id="NOTEBOOK_ENTERPRISE_DELETE",
+                parameters={"notebook_id": match.group("notebook_id")},
+                rule_id="notebook.enterprise.delete.exact.v1",
+            )
 
         for pattern in self.RESEARCH_PATTERNS:
             match = pattern.fullmatch(normalized)

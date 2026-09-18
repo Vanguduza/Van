@@ -406,3 +406,48 @@ async def test_device_revocation_revokes_nonterminal_privileged_execution(runtim
     assert after is not None
     assert after.status.value == "REVOKED"
     assert after.error_code == "DEVICE_OR_GRANT_REVOKED"
+
+
+@pytest.mark.asyncio
+async def test_knowledge_runtime_routes_are_internal_only_and_fail_closed_when_unconfigured(runtime_client):
+    client, _app = runtime_client
+    token = await pair_owner_device(client, device_id="dev-knowledge", secret="knowledge-secret")
+
+    denied = await client.get(
+        "/v1/runtime/knowledge/status",
+        headers={"X-Van-Device-Token": token},
+    )
+    assert denied.status_code == 403
+    assert denied.json()["detail"] == "internal_control_unauthorized"
+
+    status = await client.get(
+        "/v1/runtime/knowledge/status",
+        headers={"X-Van-Internal-Token": INTERNAL},
+    )
+    assert status.status_code == 200
+    body = status.json()
+    assert body["canonical_truth_writes_exposed"] is False
+    assert body["secret_content_admitted"] is False
+    states = {item["provider"]: item["state"] for item in body["providers"]}
+    assert states == {
+        "VEKL": "DISABLED",
+        "OBSIDIAN": "DISABLED",
+        "NOTEBOOK_ENTERPRISE": "DISABLED",
+        "NOTEBOOK_CONSUMER": "DISABLED",
+    }
+
+    obsidian = await client.post(
+        "/v1/runtime/knowledge/obsidian/query",
+        json={"query": "VAN architecture"},
+        headers={"X-Van-Internal-Token": INTERNAL},
+    )
+    assert obsidian.status_code == 503
+    assert obsidian.json()["detail"] == "obsidian_disabled"
+
+    no_execution = await client.post(
+        "/v1/runtime/knowledge/actions/execute",
+        json={"execution_id": "missing-exec", "parameters": {}},
+        headers={"X-Van-Internal-Token": INTERNAL},
+    )
+    assert no_execution.status_code == 404
+    assert no_execution.json()["detail"] == "unknown_execution"

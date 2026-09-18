@@ -249,6 +249,7 @@ class OwnerContextService:
         *,
         graph_evidence_refs: list[str] | None = None,
         lexical_evidence_refs: list[str] | None = None,
+        knowledge_evidence_refs: list[str] | None = None,
         live_state_refs: list[str] | None = None,
         policy_refs: list[str] | None = None,
         now_ms: int | None = None,
@@ -265,6 +266,7 @@ class OwnerContextService:
             "fact_ids": fact_ids,
             "graph_evidence_refs": graph_evidence_refs or [],
             "lexical_evidence_refs": lexical_evidence_refs or [],
+            "knowledge_evidence_refs": knowledge_evidence_refs or [],
             "live_state_refs": live_state_refs or [],
             "policy_refs": policy_refs or [],
             "compiled_at_ms": now_ms,
@@ -274,6 +276,7 @@ class OwnerContextService:
         retrieval_evidence = {
             "graph": snapshot.graph_evidence_refs,
             "lexical": snapshot.lexical_evidence_refs,
+            "knowledge": snapshot.knowledge_evidence_refs,
         }
         await self.store.execute(
             """

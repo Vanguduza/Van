@@ -23,8 +23,10 @@ Resolved 2026-09-17: the canonical GitHub Actions workflow is live at `.github/w
 | Gemini runtime | dedicated Google-account-owned API/runtime credential + inference credits | CAPACITY_LIMITED — restricted `van-gemini-runtime` key installed; Hermes reports `gemini: logged in`; authenticated model discovery returned HTTP 200 / 50 models; `gemini-3.6-flash` inference returned `RESOURCE_EXHAUSTED` because prepaid credits are depleted. Receipt: `artifacts/google/gemini_runtime_auth_attestation.json` |
 | Gemini Live | authenticated Gemini runtime credential + live endpoint canary | CAPACITY_LIMITED — shared credential is authenticated and a bidi Live model is discoverable; live generation not promoted while project prepaid credits are depleted |
 | Deep Research | authenticated Gemini runtime credential + quota canary | CAPACITY_LIMITED — Deep Research models are visible through authenticated discovery; execution awaits restored project prepaid credits |
-| Gemini Notebook personal | owner Google session on Hermes | consumer capability CONFIGURED via attestation |
-| Gemini Notebook Enterprise | eligible Cloud/Enterprise setup | still EXTERNAL (cloud plane) |
+| Gemini Notebook personal | owner Google session on Hermes + persistent profile canary | Rev 3.1 consumer bridge implemented with grounded ask/note readback, cookie export prohibited; capability remains CONFIGURED until live profile canary records evidence |
+| Gemini Notebook Enterprise | eligible Cloud/Enterprise setup + service identity/token canary | Rev 3.1 official API lifecycle/readback adapter implemented; still EXTERNAL until Cloud plane is configured and live-certified |
+| VEKL knowledge source | DDE/VEKL mission endpoint + bounded VAN principal/session credential | Rev 3.1 read-only evidence adapter implemented; READY requires a live mission projection canary |
+| Obsidian owner knowledge | owner-selected vault mounted on gateway host | Rev 3.1 bounded incremental index/query implemented with secret exclusion; READY requires live vault index/query certification |
 | Stitch | Google Cloud Stitch MCP credential plane | READY — authenticated live `generate_screen_from_text` canary passed; token-free receipt: `artifacts/google/stitch_live_attestation.json` |
 | Mixboard / Flow / AI Studio / Workspace Studio | owner Google session on Hermes | consumer capabilities CONFIGURED via attestation; per-capability live canary still required |
 | Jules | owner Google sign-in on Hermes | CONFIGURED via attestation; READY needs live worker receipt |

@@ -190,5 +190,5 @@ async def test_scenario_15_secret_notification():
 async def test_scenario_17_destructive_a4(client):
     ac, app = client
     await _enroll(ac, app)
-    body = await _cmd(ac, app, text="wipe staging", key="a4", action="A4", project="dde")
+    body = await _cmd(ac, app, text="halt trading", key="a4", action="A4", project="dde")
     assert body["status"] == "approval_required"

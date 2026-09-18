@@ -27,6 +27,16 @@ from van_gateway.context.retrieval import (
 )
 from van_gateway.context.service import ContextAdmissionError, OwnerContextService
 from van_gateway.google.control import GoogleControlAuthError, verify_internal_control
+from van_gateway.knowledge.models import (
+    NotebookConsumerAskRequest,
+    ObsidianIndexRequest,
+    ObsidianQueryRequest,
+    VeklQueryRequest,
+)
+from van_gateway.knowledge.notebook import NotebookProviderError
+from van_gateway.knowledge.obsidian import ObsidianProviderError
+from van_gateway.knowledge.service import KnowledgeRuntime
+from van_gateway.knowledge.vekl import VeklProviderError
 from van_gateway.models import PrincipalType
 from van_gateway.research.exa import ExaResearchService, ResearchPolicyError
 from van_gateway.research.models import ResearchSearchRequest
@@ -41,6 +51,7 @@ class ContextReadinessBody(BaseModel):
 class ContextSnapshotBody(ContextReadinessBody):
     graph_evidence_refs: list[str] = Field(default_factory=list)
     lexical_evidence_refs: list[str] = Field(default_factory=list)
+    knowledge_evidence_refs: list[str] = Field(default_factory=list)
     live_state_refs: list[str] = Field(default_factory=list)
     policy_refs: list[str] = Field(default_factory=list)
 
@@ -61,6 +72,11 @@ class ActionBeginBody(BaseModel):
     snapshot_id: str | None = None
     owner_approved: bool = False
     command_age_seconds: int = 0
+
+
+class KnowledgeActionExecuteBody(BaseModel):
+    execution_id: str = Field(min_length=1, max_length=256)
+    parameters: dict[str, Any] = Field(default_factory=dict)
 
 
 class ActionSubmittedBody(BaseModel):
@@ -85,6 +101,7 @@ class OwnerRuntimeApi:
         self.actions = ActionRuntime(store)
         self.authority = CommandAuthorityService(store)
         self.resolver = TypedCommandResolver()
+        self.knowledge = KnowledgeRuntime(store, settings)
         self.research = ExaResearchService(
             store,
             api_key=settings.exa_api_key,
@@ -108,6 +125,7 @@ class OwnerRuntimeApi:
             raise HTTPException(status_code=403, detail="hermes_context_admission_must_be_inferred_model_derived")
 
     async def startup(self) -> None:
+        await self.knowledge.startup()
         await install_builtin_actions(self.actions)
 
     async def status(self) -> dict[str, Any]:
@@ -127,6 +145,7 @@ class OwnerRuntimeApi:
             "resolver_version": "rev3.1.1",
             "signed_command_authority_required": True,
             "research": await self.research.status(),
+            "knowledge": await self.knowledge.status(),
         }
 
     def _install_routes(self) -> None:
@@ -196,6 +215,7 @@ class OwnerRuntimeApi:
                     body.requirements,
                     graph_evidence_refs=body.graph_evidence_refs,
                     lexical_evidence_refs=body.lexical_evidence_refs,
+                    knowledge_evidence_refs=body.knowledge_evidence_refs,
                     live_state_refs=body.live_state_refs,
                     policy_refs=body.policy_refs,
                 )
@@ -212,6 +232,103 @@ class OwnerRuntimeApi:
             self._require_internal(x_van_internal_token)
             return {"scope": scope, "deleted_items": await self.context.erase_scope(scope)}
 
+        @router.get("/knowledge/status")
+        async def knowledge_status(x_van_internal_token: str | None = Header(default=None)):
+            self._require_internal(x_van_internal_token)
+            return await self.knowledge.status()
+
+        @router.post("/knowledge/vekl/query")
+        async def knowledge_vekl_query(body: VeklQueryRequest, x_van_internal_token: str | None = Header(default=None)):
+            self._require_internal(x_van_internal_token)
+            try:
+                return await self.knowledge.query_vekl(body)
+            except VeklProviderError as exc:
+                raise HTTPException(status_code=503, detail=str(exc)) from exc
+
+        @router.post("/knowledge/vekl/certify-canary")
+        async def knowledge_vekl_certify(body: VeklQueryRequest, x_van_internal_token: str | None = Header(default=None)):
+            self._require_internal(x_van_internal_token)
+            try:
+                return await self.knowledge.certify_vekl(body)
+            except VeklProviderError as exc:
+                raise HTTPException(status_code=503, detail=str(exc)) from exc
+
+        @router.post("/knowledge/obsidian/query")
+        async def knowledge_obsidian_query(body: ObsidianQueryRequest, x_van_internal_token: str | None = Header(default=None)):
+            self._require_internal(x_van_internal_token)
+            try:
+                return await self.knowledge.query_obsidian(body)
+            except ObsidianProviderError as exc:
+                raise HTTPException(status_code=503, detail=str(exc)) from exc
+
+        @router.post("/knowledge/obsidian/index")
+        async def knowledge_obsidian_index(body: ObsidianIndexRequest, x_van_internal_token: str | None = Header(default=None)):
+            self._require_internal(x_van_internal_token)
+            try:
+                return await self.knowledge.index_obsidian(force=body.force)
+            except ObsidianProviderError as exc:
+                raise HTTPException(status_code=503, detail=str(exc)) from exc
+
+        @router.post("/knowledge/obsidian/certify")
+        async def knowledge_obsidian_certify(x_van_internal_token: str | None = Header(default=None)):
+            self._require_internal(x_van_internal_token)
+            try:
+                return await self.knowledge.certify_obsidian()
+            except ObsidianProviderError as exc:
+                raise HTTPException(status_code=503, detail=str(exc)) from exc
+
+        @router.get("/knowledge/notebook/enterprise/recent")
+        async def knowledge_notebook_recent(page_size: int = 100, x_van_internal_token: str | None = Header(default=None)):
+            self._require_internal(x_van_internal_token)
+            try:
+                return {"notebooks": await self.knowledge.notebook_enterprise_recent(page_size)}
+            except NotebookProviderError as exc:
+                raise HTTPException(status_code=503, detail=str(exc)) from exc
+
+        @router.get("/knowledge/notebook/enterprise/{notebook_id}")
+        async def knowledge_notebook_get(notebook_id: str, x_van_internal_token: str | None = Header(default=None)):
+            self._require_internal(x_van_internal_token)
+            try:
+                return await self.knowledge.notebook_enterprise_get(notebook_id)
+            except NotebookProviderError as exc:
+                code = 404 if str(exc) == "notebook_enterprise_not_found" else 503
+                raise HTTPException(status_code=code, detail=str(exc)) from exc
+
+        @router.post("/knowledge/notebook/enterprise/certify")
+        async def knowledge_notebook_enterprise_certify(x_van_internal_token: str | None = Header(default=None)):
+            self._require_internal(x_van_internal_token)
+            try:
+                return await self.knowledge.certify_notebook_enterprise()
+            except NotebookProviderError as exc:
+                raise HTTPException(status_code=503, detail=str(exc)) from exc
+
+        @router.post("/knowledge/notebook/consumer/ask")
+        async def knowledge_notebook_consumer_ask(body: NotebookConsumerAskRequest, x_van_internal_token: str | None = Header(default=None)):
+            self._require_internal(x_van_internal_token)
+            try:
+                return await self.knowledge.ask_consumer_notebook(body)
+            except NotebookProviderError as exc:
+                raise HTTPException(status_code=503, detail=str(exc)) from exc
+
+        @router.post("/knowledge/notebook/consumer/certify")
+        async def knowledge_notebook_consumer_certify(body: NotebookConsumerAskRequest, x_van_internal_token: str | None = Header(default=None)):
+            self._require_internal(x_van_internal_token)
+            try:
+                return await self.knowledge.certify_consumer_notebook(body)
+            except NotebookProviderError as exc:
+                raise HTTPException(status_code=503, detail=str(exc)) from exc
+
+        @router.post("/knowledge/actions/execute")
+        async def knowledge_action_execute(body: KnowledgeActionExecuteBody, x_van_internal_token: str | None = Header(default=None)):
+            self._require_internal(x_van_internal_token)
+            try:
+                return await self.knowledge.execute_authorized_action(
+                    self.actions, execution_id=body.execution_id, parameters=body.parameters,
+                )
+            except ActionPolicyError as exc:
+                code = 404 if str(exc) == "unknown_execution" else 409
+                raise HTTPException(status_code=code, detail=str(exc)) from exc
+
         @router.post("/actions/begin")
         async def begin_action(body: ActionBeginBody, x_van_internal_token: str | None = Header(default=None)):
             self._require_internal(x_van_internal_token)
@@ -226,6 +343,7 @@ class OwnerRuntimeApi:
                     requested_by=body.requested_by,
                     snapshot_id=body.snapshot_id,
                     turn_id=body.turn_id,
+                    parameters=body.parameters,
                 )
                 return await self.actions.begin(
                     execution_id=body.execution_id,

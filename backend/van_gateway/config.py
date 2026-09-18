@@ -53,6 +53,36 @@ class Settings(BaseSettings):
     exa_egress_enabled: bool = False
     exa_timeout_seconds: float = 20.0
 
+    # Rev 3.1 knowledge-source capability plane. These providers emit evidence
+    # or verified mutation receipts only; none can promote itself to owner truth.
+    vekl_enabled: bool = False
+    vekl_base_url: str = ""
+    vekl_session_id: str = ""
+    vekl_principal_id: str = ""
+    vekl_bearer_token: str = ""
+    vekl_timeout_seconds: float = 8.0
+
+    obsidian_enabled: bool = False
+    obsidian_vault_path: str = ""
+    obsidian_max_file_bytes: int = 2_000_000
+    obsidian_max_files: int = 20_000
+    obsidian_refresh_interval_seconds: int = 30
+
+    notebook_enterprise_enabled: bool = False
+    notebook_enterprise_project_number: str = ""
+    notebook_enterprise_location: str = "global"
+    notebook_enterprise_service_account_file: str = ""
+    notebook_enterprise_access_token_file: str = ""
+    notebook_enterprise_timeout_seconds: float = 20.0
+    notebook_enterprise_upload_root: str = ""
+    notebook_enterprise_max_upload_bytes: int = 100_000_000
+
+    notebook_consumer_enabled: bool = False
+    notebook_consumer_profile_dir: str = ""
+    notebook_consumer_base_url: str = "https://notebooklm.google.com"
+    notebook_consumer_headless: bool = True
+    notebook_consumer_timeout_seconds: float = 20.0
+
     require_hermes_for_mutations: bool = True
     event_page_size: int = 100
 

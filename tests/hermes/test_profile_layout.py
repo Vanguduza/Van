@@ -190,6 +190,17 @@ def test_install_profile_preserves_runtime_state_and_secrets(tmp_path):
     env["HERMES_HOME"] = str(hermes_home)
     installer = REPO_ROOT / "tools" / "hermes" / "install_van_profile.sh"
     subprocess.run([str(installer)], check=True, text=True, capture_output=True, env=env)
+
+    # The doctor intentionally certifies the complete live owner-runtime contract,
+    # not only copied profile files. Supply isolated test equivalents of the MCP
+    # registration and gateway control-credential source rather than weakening it.
+    hermes_config = hermes_home / "config.yaml"
+    hermes_config.write_text("mcp_servers:\n  van_owner_runtime:\n    command: node\n", encoding="utf-8")
+    gateway_env = tmp_path / "gateway.env"
+    gateway_env.write_text("VAN_INTERNAL_CONTROL_TOKEN=test-control-token\n", encoding="utf-8")
+    env["HERMES_CONFIG"] = str(hermes_config)
+    env["VAN_GATEWAY_ENV_FILE"] = str(gateway_env)
+
     doctor = REPO_ROOT / "tools" / "hermes" / "doctor_van_profile.sh"
     subprocess.run([str(doctor)], check=True, text=True, capture_output=True, env=env)
 

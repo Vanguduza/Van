@@ -158,6 +158,40 @@ class ActionRuntime:
             snapshot_id=snapshot_id, parameters_digest=self.digest_parameters(parameters),
         ))
 
+    async def mark_executing(self, execution_id: str) -> ActionExecution:
+        current = await self.get_execution(execution_id)
+        if current is None:
+            raise ActionPolicyError("unknown_execution")
+        if current.terminal:
+            return current
+        if current.status not in {ExecutionStatus.AUTHORIZED, ExecutionStatus.RETRYABLE_FAILURE}:
+            raise ActionPolicyError("execution_not_authorized")
+        now = int(time.time() * 1000)
+        await self.store.execute(
+            "UPDATE action_executions SET status=?, updated_at_unix_ms=? WHERE execution_id=?",
+            (ExecutionStatus.EXECUTING.value, now, execution_id),
+        )
+        result = await self.get_execution(execution_id)
+        assert result is not None
+        return result
+
+    async def mark_verifying(self, execution_id: str) -> ActionExecution:
+        current = await self.get_execution(execution_id)
+        if current is None:
+            raise ActionPolicyError("unknown_execution")
+        if current.terminal:
+            return current
+        if current.status != ExecutionStatus.SUBMITTED:
+            raise ActionPolicyError("execution_not_submitted")
+        now = int(time.time() * 1000)
+        await self.store.execute(
+            "UPDATE action_executions SET status=?, updated_at_unix_ms=? WHERE execution_id=?",
+            (ExecutionStatus.VERIFYING.value, now, execution_id),
+        )
+        result = await self.get_execution(execution_id)
+        assert result is not None
+        return result
+
     async def mark_submitted(self, execution_id: str, *, correlation: dict[str, Any], evidence_pointer: str | None = None) -> ActionExecution:
         current = await self.get_execution(execution_id)
         if current is None:
@@ -214,6 +248,39 @@ class ActionRuntime:
              Store.dumps(receipt.correlation), Store.dumps(receipt.observed_postcondition), receipt.evidence_pointer, receipt.created_at_ms),
         )
         return receipt
+
+    async def fail_execution(
+        self,
+        execution_id: str,
+        *,
+        status: ExecutionStatus,
+        error_code: str,
+        evidence_pointer: str | None = None,
+    ) -> ActionExecution:
+        allowed = {
+            ExecutionStatus.PRECONDITION_FAILED,
+            ExecutionStatus.EXECUTION_FAILED,
+            ExecutionStatus.VERIFICATION_FAILED,
+            ExecutionStatus.RETRYABLE_FAILURE,
+            ExecutionStatus.PARTIAL_SUCCESS,
+            ExecutionStatus.CONTEXT_INSUFFICIENT,
+            ExecutionStatus.CONFLICTED_STATE,
+        }
+        if status not in allowed:
+            raise ActionPolicyError("invalid_failure_status")
+        current = await self.get_execution(execution_id)
+        if current is None:
+            raise ActionPolicyError("unknown_execution")
+        if current.terminal:
+            return current
+        now = int(time.time() * 1000)
+        await self.store.execute(
+            "UPDATE action_executions SET status=?, error_code=?, evidence_pointer=COALESCE(?,evidence_pointer), updated_at_unix_ms=? WHERE execution_id=?",
+            (status.value, error_code, evidence_pointer, now, execution_id),
+        )
+        result = await self.get_execution(execution_id)
+        assert result is not None
+        return result
 
     async def get_execution(self, execution_id: str) -> ActionExecution | None:
         row = await self.store.fetchone("SELECT * FROM action_executions WHERE execution_id = ?", (execution_id,))

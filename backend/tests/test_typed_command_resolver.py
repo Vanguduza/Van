@@ -53,3 +53,28 @@ def test_gateway_only_raises_client_action_class():
     assert stronger(ActionClass.A1, ActionClass.A4) == ActionClass.A4
     assert stronger(ActionClass.A4, ActionClass.A1) == ActionClass.A4
     assert stronger(ActionClass.A2, None) == ActionClass.A2
+
+
+def test_notebook_enterprise_delete_resolves_to_a4_with_target_preserved():
+    resolved = TypedCommandResolver().resolve(
+        "Delete Gemini Notebook Enterprise notebook id Nb-CaseSensitive_123"
+    )
+    assert resolved.mode == ResolutionMode.EXACT_ACTION
+    assert resolved.action_id == "google.notebook.enterprise.delete"
+    assert resolved.canonical_action_class == ActionClass.A4
+    assert resolved.no_stale_replay is True
+    assert resolved.parameters == {"notebook_id": "Nb-CaseSensitive_123"}
+
+
+def test_notebook_enterprise_source_delete_resolves_to_a4_with_all_targets():
+    resolved = TypedCommandResolver().resolve(
+        "Remove sources Src-A, projects/P/locations/L/notebooks/N/sources/Src-B "
+        "from Gemini Notebook Enterprise notebook id Nb-1"
+    )
+    assert resolved.mode == ResolutionMode.EXACT_ACTION
+    assert resolved.action_id == "google.notebook.enterprise.sources.delete"
+    assert resolved.canonical_action_class == ActionClass.A4
+    assert resolved.parameters == {
+        "notebook_id": "Nb-1",
+        "source_names": ["Src-A", "projects/P/locations/L/notebooks/N/sources/Src-B"],
+    }

@@ -34,10 +34,11 @@ Use the owner-runtime tools in this order; do not start with semantic inference:
 3. `context_graph_query` when entity relationships are relevant. Keep depth/edge bounds small and preserve competing edges.
 4. `context_lexical_query` when exact requirements and bounded relationships are insufficient but local owner/project text can resolve the need. This path is deterministic/local and does not use embeddings, an LLM or network retrieval.
 5. `context_hot_capsule` for an active workstream that repeatedly needs the same bounded local evidence. Treat it as a revision-sealed cache of evidence references, never as a truth store; rebuild automatically after context revision or expiry.
-6. `context_snapshot` to seal the fact IDs, graph/lexical evidence references, live-state references and policy references actually used for planning.
-7. External `research_search` only when local context is insufficient or current-world evidence is required.
-8. For mutations, request `action_begin`; never treat a plan or provider acceptance as authorization.
-9. After provider submission, call `action_submitted`, then `action_verify` with observed postconditions. Report success only for gateway-verified completion.
+6. When durable knowledge is required, use `vekl_query` for engineering knowledge, `obsidian_query` for owner-authored durable notes, or `notebook_consumer_ask`/Notebook Enterprise reads for source-grounded research. These return evidence only and may not mint owner truth.
+7. `context_snapshot` to seal the fact IDs, graph/lexical/knowledge evidence references, live-state references and policy references actually used for planning.
+8. External `research_search` only when local and connected knowledge sources are insufficient or current-world evidence is required.
+9. For mutations, request `action_begin`; never treat a plan or provider acceptance as authorization. Notebook writes must then use `knowledge_action_execute` with the same authorized execution ID and exact parameters.
+10. Report success only for the gateway's verified terminal state. `knowledge_action_execute` performs provider submission/readback and action verification; generic actions still use `action_submitted` then `action_verify`.
 
 Graph and lexical results are retrieval evidence, not truth resolution. Hot capsules are latency optimizations over revision-bound evidence, not memory authority. Inferred/model-derived context cannot override owner, locked authority, Project Truth or verified live state. The owner-runtime MCP intentionally exposes no tool that can mint canonical owner memory.
 

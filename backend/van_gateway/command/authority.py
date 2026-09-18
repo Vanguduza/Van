@@ -4,7 +4,7 @@ import json
 import time
 from typing import Any
 
-from pydantic import BaseModel
+from pydantic import BaseModel, Field
 
 from van_gateway.action.models import ActionDefinition
 from van_gateway.models import ActionClass, OriginChannel, PrincipalType
@@ -24,6 +24,7 @@ class CommandAuthorityRecord(BaseModel):
     signed_action_class: ActionClass
     effective_action_class: ActionClass
     typed_action_id: str | None = None
+    typed_parameter_constraints: dict[str, Any] = Field(default_factory=dict)
     snapshot_id: str
     context_digest: str
     issued_at_unix: int
@@ -83,6 +84,7 @@ class CommandAuthorityService:
         requested_by: str,
         snapshot_id: str | None,
         turn_id: str | None,
+        parameters: dict[str, Any] | None = None,
         now_unix: int | None = None,
     ) -> tuple[CommandAuthorityRecord, int]:
         record = await self.get(command_id)
@@ -112,6 +114,10 @@ class CommandAuthorityService:
             raise CommandAuthorityError("action_class_escalation_denied")
         if record.typed_action_id is not None and action.action_id != record.typed_action_id:
             raise CommandAuthorityError("typed_action_mismatch")
+        submitted_parameters = parameters or {}
+        for key, expected in record.typed_parameter_constraints.items():
+            if key not in submitted_parameters or submitted_parameters[key] != expected:
+                raise CommandAuthorityError(f"typed_parameter_mismatch:{key}")
 
         age = max(0, now - record.issued_at_unix)
         return record, age
