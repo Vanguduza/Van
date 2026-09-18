@@ -1,0 +1,54 @@
+{
+  "schema_version": 1,
+  "certification": "VAN_TRADING_CORE_ALL_WIP_RECONCILIATION_AND_LIVE_MAIN_QUALIFICATION",
+  "observed_at_utc": "2026-09-18T06:22:58Z",
+  "repository": "Vanguduza/Van",
+  "certified_commit": "54ee68fe278573e53de97e548b255b2dca7e1d49",
+  "host": "van-trading-core",
+  "deployment_mode": "resume-existing-fast-forward-to-main-and-idempotent-bootstrap",
+  "repository_reconciliation": {
+    "closure_pr_32_merged": true,
+    "caddy_fix_pr_34_merged": true,
+    "superseded_pr_29_closed": true,
+    "historical_wip_code_lineages_contained_by_main": true
+  },
+  "qualification": {
+    "status": "GREEN",
+    "required_failures": 0,
+    "automation_fabric": "AUTOMATION_FABRIC_RUNTIME_GREEN",
+    "supabase_runtime": "SUPABASE_RUNTIME_GREEN",
+    "browser_runtime": "Stagehand 4.1.0 / Playwright 1.63.0 / Temporal 1.33.0",
+    "ledger_backend": "PostgresLedger",
+    "ledger_chain_ok": true,
+    "firewall": "GREEN",
+    "oracle_image_firewall": "ORACLE_IMAGE_FIREWALL_GREEN",
+    "supabase_loopback": "GREEN",
+    "caddy": "active",
+    "public_tls_health": "GREEN"
+  },
+  "services": {
+    "vati_vekl": "active",
+    "vati_commander": "active",
+    "vati_automation": "active",
+    "vati_supabase": "active",
+    "docker": "active",
+    "caddy": "active"
+  },
+  "runtime_components": {
+    "n8n": "2.39.7",
+    "nautilus_trader": "1.231.0",
+    "stagehand": "4.1.0",
+    "playwright": "1.63.0",
+    "temporal": "1.33.0"
+  },
+  "non_required_amber": [
+    "no session heartbeats yet because no trading account is enabled",
+    "MT5 is external to the ARM64 Trading Core and runs on the Windows bridge worker"
+  ],
+  "firstboot_marker": {
+    "present": false,
+    "accepted_as_blocker": false,
+    "reason": "This node was resumed in place and certified through the idempotent production bootstrap. The marker belongs to the fresh OCI rebuild/firstboot wrapper and is not fabricated."
+  },
+  "contains_secrets": false
+}
