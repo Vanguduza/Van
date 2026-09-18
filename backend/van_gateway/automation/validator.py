@@ -169,12 +169,22 @@ class WorkflowValidator:
 
         starts = [step_id for step_id, deg in indegree.items() if deg == 0]
         trigger_ids = {s.step_id for s in ir.steps if s.primitive in TRIGGER_PRIMITIVES}
+
+        # An INVOKE workflow is driven by a Gateway dispatch, so its first step is
+        # the entry point and there is no trigger node. A SCHEDULE/WEBHOOK/EVENT
+        # workflow fires on its own and must carry one, or nothing starts it.
+        trigger_kind = str((ir.trigger or {}).get("kind", "INVOKE")).upper()
+        self_starting = trigger_kind in ("SCHEDULE", "WEBHOOK", "EVENT")
+
         if len(starts) > 1 and len(ir.steps) > 1:
             # Multiple roots are only legitimate when exactly one is a trigger.
             if len(trigger_ids.intersection(starts)) != 1:
                 errors.append("MULTIPLE_UNDEFINED_START_NODES")
-        if len(ir.steps) > 1 and not trigger_ids:
-            errors.append("MISSING_TRIGGER")
+        if self_starting and not trigger_ids:
+            errors.append(f"MISSING_TRIGGER:{trigger_kind}")
+        if not self_starting and trigger_ids:
+            # A trigger node on an invoke-only workflow would fire it twice.
+            errors.append(f"UNEXPECTED_TRIGGER_FOR_INVOKE:{sorted(trigger_ids)[0]}")
 
         # Kahn's algorithm with a sorted frontier: deterministic ordering (§145, §150).
         order: list[str] = []
@@ -191,12 +201,14 @@ class WorkflowValidator:
         if len(order) != len(ids):
             errors.append("WORKFLOW_GRAPH_CYCLE")
 
-        if len(ir.steps) > 1 and trigger_ids:
+        if len(ir.steps) > 1:
             # An orphan is not "indegree 0" — a trigger has indegree 0 too, and
             # Kahn's algorithm happily emits both. The real invariant is that every
-            # step must be reachable from a trigger, so walk forward from them.
+            # step must be reachable from an entry point: the trigger for a
+            # self-starting workflow, or the single declared root for an INVOKE one.
+            roots = sorted(trigger_ids) if trigger_ids else sorted(starts)[:1]
             reachable: set[str] = set()
-            frontier_ids = sorted(trigger_ids)
+            frontier_ids = list(roots)
             while frontier_ids:
                 node = frontier_ids.pop()
                 if node in reachable:
