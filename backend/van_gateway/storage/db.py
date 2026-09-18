@@ -611,7 +611,6 @@ MIGRATIONS: dict[int, str] = {
       updated_at_ms INTEGER NOT NULL
     );
     """,
-,
     7: """
     -- Rev 3.1 browser escalation/resume. DecisionService remains the owner
     -- authority; this table only binds a browser checkpoint to that decision.
