@@ -226,11 +226,12 @@ class BrowserApi:
         )
         now = int(time.time() * 1000)
         escalation_id = f"besc_{task.task_id}_{reason.lower()}"
-        requested_delta = (
-            {"additional_domain_or_route": result.detail}
-            if result.stop_reason is SubagentStop.SCOPE_VIOLATION
-            else {"higher_action_class_required": True, "detail": result.detail}
-        )
+        if result.stop_reason is SubagentStop.SCOPE_VIOLATION:
+            requested_domain = (result.detail or "").removeprefix("domain_outside_assignment:")
+            requested_delta = {"allowed_domain": requested_domain}
+        else:
+            requested_class = (result.detail or "").split(">", 1)[0]
+            requested_delta = {"action_class_ceiling": requested_class}
         await self.store.execute(
             """
             INSERT INTO browser_escalations(
@@ -250,7 +251,7 @@ class BrowserApi:
                     "autonomy_tier": assignment.autonomy_tier.value,
                 }),
                 Store.dumps(requested_delta), task.action_class.value,
-                result.steps[-1].action.kind if result.steps else None,
+                result.steps[-1].kind if result.steps else None,
                 Store.dumps([]), idem, BrowserEscalationStatus.OPEN.value, now, now,
             ),
         )
@@ -267,7 +268,9 @@ class BrowserApi:
     async def _sync_waiting_owner_decision(self, task: BrowserTask) -> BrowserTaskStatus:
         row = await self.store.fetchone(
             """
-            SELECT e.escalation_id, e.status AS escalation_status, d.status AS decision_status
+            SELECT e.escalation_id, e.status AS escalation_status,
+                   e.current_scope_json, e.requested_scope_delta_json,
+                   e.decision_id, d.status AS decision_status
             FROM browser_escalations e
             JOIN decisions d ON d.id = e.decision_id
             WHERE e.task_id = ?
@@ -281,6 +284,27 @@ class BrowserApi:
         decision_status = DecisionStatus(str(row["decision_status"]))
         now = int(time.time() * 1000)
         if decision_status is DecisionStatus.APPROVED:
+            current_scope = __import__("json").loads(str(row["current_scope_json"]))
+            delta = __import__("json").loads(str(row["requested_scope_delta_json"]))
+            approved_domains = list(current_scope.get("allowed_domains", []))
+            if delta.get("allowed_domain") and delta["allowed_domain"] not in approved_domains:
+                approved_domains.append(delta["allowed_domain"])
+            approved_class = delta.get("action_class_ceiling") or current_scope.get("action_class_ceiling")
+            authorization_id = f"bsauth_{row['escalation_id']}"
+            await self.store.execute(
+                """
+                INSERT INTO browser_scope_authorizations(
+                  authorization_id, escalation_id, task_id, decision_id,
+                  approved_domains_json, approved_action_class_ceiling, status,
+                  issued_at_ms, expires_at_ms, consumed_at_ms
+                ) VALUES (?, ?, ?, ?, ?, ?, 'ACTIVE', ?, NULL, NULL)
+                ON CONFLICT(escalation_id) DO NOTHING
+                """,
+                (
+                    authorization_id, row["escalation_id"], task.task_id, row["decision_id"],
+                    Store.dumps(approved_domains), approved_class, now,
+                ),
+            )
             await self.store.execute(
                 "UPDATE browser_escalations SET status = ?, updated_at_ms = ? WHERE escalation_id = ?",
                 (BrowserEscalationStatus.APPROVED.value, now, row["escalation_id"]),
@@ -301,6 +325,38 @@ class BrowserApi:
             )
             return BrowserTaskStatus.CANCELLED
         return BrowserTaskStatus.WAITING_FOR_OWNER
+
+
+    async def _enforce_resume_authorization(
+        self, task: BrowserTask, assignment: SubagentAssignment
+    ) -> None:
+        row = await self.store.fetchone(
+            """
+            SELECT authorization_id, approved_domains_json,
+                   approved_action_class_ceiling, status
+            FROM browser_scope_authorizations
+            WHERE task_id = ? AND status = 'ACTIVE'
+            ORDER BY issued_at_ms DESC
+            LIMIT 1
+            """,
+            (task.task_id,),
+        )
+        if row is None:
+            raise HTTPException(status_code=409, detail="BROWSER_RESUME_AUTHORIZATION_MISSING")
+        approved_domains = set(__import__("json").loads(str(row["approved_domains_json"])))
+        requested_domains = set(assignment.allowed_domains)
+        if not requested_domains.issubset(approved_domains):
+            raise HTTPException(status_code=409, detail="BROWSER_RESUME_SCOPE_EXCEEDS_APPROVAL")
+        approved_class_raw = row["approved_action_class_ceiling"]
+        if approved_class_raw:
+            rank = {ActionClass.A1: 1, ActionClass.A2: 2, ActionClass.A3: 3, ActionClass.A4: 4, ActionClass.A5: 5}
+            approved_class = ActionClass(str(approved_class_raw))
+            if rank[assignment.action_class_ceiling] > rank[approved_class]:
+                raise HTTPException(status_code=409, detail="BROWSER_RESUME_CLASS_EXCEEDS_APPROVAL")
+        await self.store.execute(
+            "UPDATE browser_scope_authorizations SET status = 'CONSUMED', consumed_at_ms = ? WHERE authorization_id = ?",
+            (int(time.time() * 1000), row["authorization_id"]),
+        )
 
     # ------------------------------------------------------------- routes
 
@@ -498,6 +554,8 @@ class BrowserApi:
                 deadline_ms=body.deadline_ms,
                 max_steps_without_progress=body.max_steps_without_progress,
             )
+            if status is BrowserTaskStatus.RESUME_AUTHORIZED:
+                await self._enforce_resume_authorization(task, assignment)
             result = await self.runner.run(
                 assignment=assignment, worker=self.worker, task=task
             )
