@@ -571,6 +571,8 @@ private fun BrowserAutomationModule(app: VanApplication, glass: com.dial.van.vis
     var status by remember { mutableStateOf<JSONObject?>(null) }
     var tasks by remember { mutableStateOf<List<JSONObject>?>(null) }
     var escalations by remember { mutableStateOf<List<JSONObject>?>(null) }
+    var policy by remember { mutableStateOf<JSONObject?>(null) }
+    var evidenceByTask by remember { mutableStateOf<Map<String, List<JSONObject>>>(emptyMap()) }
     var error by remember { mutableStateOf<String?>(null) }
     var resolving by remember { mutableStateOf<String?>(null) }
 
@@ -580,6 +582,7 @@ private fun BrowserAutomationModule(app: VanApplication, glass: com.dial.van.vis
                 status = app.gatewayClient.browserStatus()
                 tasks = app.gatewayClient.browserTasks().objectList()
                 escalations = app.gatewayClient.browserEscalations().objectList()
+                policy = app.gatewayClient.browserPolicy()
                 error = null
             }.onFailure { error = it.message ?: "Browser/automation truth unavailable" }
         }
@@ -606,17 +609,17 @@ private fun BrowserAutomationModule(app: VanApplication, glass: com.dial.van.vis
                     Column(verticalArrangement = Arrangement.spacedBy(5.dp)) {
                         Text("Runtime overview", color = Color.White, fontSize = 15.sp, fontWeight = FontWeight.Bold)
                         Text(
-                            "Browser enabled: \${s.optBoolean("enabled")} • worker configured: \${s.optBoolean("worker_configured")}",
+                            "Browser enabled: ${s.optBoolean("enabled")} • worker configured: ${s.optBoolean("worker_configured")}",
                             color = Color(0xFFD7E7EC),
                             fontSize = 11.sp,
                         )
                         Text(
-                            "Waiting for owner: \${s.optInt("waiting_for_owner")} • admitted automations: \${s.optInt("admitted_automation_capabilities")}",
+                            "Waiting for owner: ${s.optInt("waiting_for_owner")} • admitted automations: ${s.optInt("admitted_automation_capabilities")}",
                             color = Color(VanGlassTokens.EDGE_CYAN),
                             fontSize = 11.sp,
                         )
-                        Text("Browser states: \${s.optJSONObject("tasks_by_status")?.toString() ?: "{}"}", color = Color(0xFFBCD1D8), fontSize = 10.sp)
-                        Text("Automation runs: \${s.optJSONObject("automation_runs_by_status")?.toString() ?: "{}"}", color = Color(0xFFBCD1D8), fontSize = 10.sp)
+                        Text("Browser states: ${s.optJSONObject("tasks_by_status")?.toString() ?: "{}"}", color = Color(0xFFBCD1D8), fontSize = 10.sp)
+                        Text("Automation runs: ${s.optJSONObject("automation_runs_by_status")?.toString() ?: "{}"}", color = Color(0xFFBCD1D8), fontSize = 10.sp)
                     }
                 }
             }
@@ -627,9 +630,25 @@ private fun BrowserAutomationModule(app: VanApplication, glass: com.dial.van.vis
                     AdminCard(glass) {
                         Column(verticalArrangement = Arrangement.spacedBy(4.dp)) {
                             Text(profile.optString("profile_alias"), color = Color.White, fontWeight = FontWeight.Bold)
-                            Text("\${profile.optString("persistence")} • \${profile.optString("authentication")} • \${profile.optString("mutation_policy")}", color = Color(0xFFD7E7EC), fontSize = 11.sp)
+                            Text("${profile.optString("persistence")} • ${profile.optString("authentication")} • ${profile.optString("mutation_policy")}", color = Color(0xFFD7E7EC), fontSize = 11.sp)
                             Text(if (profile.isNull("lease_holder")) "No active lease" else "Active managed lease", color = Color(0xFFBCD1D8), fontSize = 10.sp)
                         }
+                    }
+                }
+            }
+        }
+
+        policy?.let { p ->
+            item {
+                SectionHeader("Policy & capabilities", "Read-only authority view; policy changes still require governed VAN actions")
+            }
+            item {
+                AdminCard(glass) {
+                    Column(verticalArrangement = Arrangement.spacedBy(4.dp)) {
+                        Text("Browser policy ${p.optString("policy_version")}", color = Color.White, fontWeight = FontWeight.Bold)
+                        Text("Admitted domains: ${p.optJSONArray("admitted_domains")?.toString() ?: "[]"}", color = Color(0xFFD7E7EC), fontSize = 10.sp)
+                        Text("Max autonomy: ${p.optString("max_autonomy_tier")} • session leases: ${p.optBoolean("session_leases_required")}", color = Color(0xFFBCD1D8), fontSize = 10.sp)
+                        Text("Hard prohibitions: ${p.optJSONArray("hard_prohibitions")?.toString() ?: "[]"}", color = Color(VanGlassTokens.ACCENT_AMBER), fontSize = 10.sp)
                     }
                 }
             }
@@ -643,10 +662,10 @@ private fun BrowserAutomationModule(app: VanApplication, glass: com.dial.van.vis
                     val decisionId = esc.optString("decision_id")
                     val decisionStatus = esc.optString("decision_status", esc.optString("status"))
                     Text(esc.optString("summary", "Browser boundary escalation"), color = Color.White, fontSize = 15.sp, fontWeight = FontWeight.Bold)
-                    Text("Reason: \${esc.optString("reason_code")} • $decisionStatus", color = Color(VanGlassTokens.ACCENT_AMBER), fontSize = 11.sp)
+                    Text("Reason: ${esc.optString("reason_code")} • $decisionStatus", color = Color(VanGlassTokens.ACCENT_AMBER), fontSize = 11.sp)
                     Text(esc.optString("why_required"), color = Color(0xFFD7E7EC), fontSize = 11.sp)
-                    Text("Current: \${esc.optString("current_scope_json").take(300)}", color = Color(0xFFBCD1D8), fontSize = 10.sp)
-                    Text("Requested extension: \${esc.optString("requested_scope_delta_json").take(300)}", color = Color(0xFFBCD1D8), fontSize = 10.sp)
+                    Text("Current: ${esc.optString("current_scope_json").take(300)}", color = Color(0xFFBCD1D8), fontSize = 10.sp)
+                    Text("Requested extension: ${esc.optString("requested_scope_delta_json").take(300)}", color = Color(0xFFBCD1D8), fontSize = 10.sp)
                     if (decisionStatus == "OPEN" && decisionId.isNotBlank()) {
                         Row(horizontalArrangement = Arrangement.spacedBy(8.dp)) {
                             Button(
@@ -673,6 +692,16 @@ private fun BrowserAutomationModule(app: VanApplication, glass: com.dial.van.vis
                                 colors = ButtonDefaults.buttonColors(containerColor = Color(0xFF5B2730)),
                             ) { Text("Reject") }
                         }
+                        Button(
+                            onClick = {
+                                val taskId = esc.optString("task_id")
+                                val reason = esc.optString("reason_code")
+                                app.commandController.submitText(
+                                    "Replan browser task $taskId without crossing the blocked boundary $reason. Preserve completed evidence and propose the safest authorized alternative.",
+                                    VanCommandSource.CHAT,
+                                )
+                            },
+                        ) { Text("Ask VAN to replan") }
                     }
                 }
             }
@@ -684,10 +713,30 @@ private fun BrowserAutomationModule(app: VanApplication, glass: com.dial.van.vis
             AdminCard(glass) {
                 Column(verticalArrangement = Arrangement.spacedBy(4.dp)) {
                     Text(task.optString("goal", "Browser task"), color = Color.White, fontWeight = FontWeight.Bold)
-                    Text("\${task.optString("status")} • \${task.optString("strategy")} • \${task.optString("autonomy_tier")}", color = if (task.optString("status") == "WAITING_FOR_OWNER") Color(VanGlassTokens.ACCENT_AMBER) else Color(0xFFD7E7EC), fontSize = 11.sp)
-                    Text("\${task.optString("target_domain")} • \${task.optString("action_class")}", color = Color(0xFFBCD1D8), fontSize = 10.sp)
+                    Text("${task.optString("status")} • ${task.optString("strategy")} • ${task.optString("autonomy_tier")}", color = if (task.optString("status") == "WAITING_FOR_OWNER") Color(VanGlassTokens.ACCENT_AMBER) else Color(0xFFD7E7EC), fontSize = 11.sp)
+                    Text("${task.optString("target_domain")} • ${task.optString("action_class")}", color = Color(0xFFBCD1D8), fontSize = 10.sp)
                     task.optString("error_code").takeIf { it.isNotBlank() }?.let {
                         Text("State reason: $it", color = Color(0xFFBCD1D8), fontSize = 10.sp)
+                    }
+                    val taskId = task.optString("task_id")
+                    Button(
+                        onClick = {
+                            scope.launch {
+                                runCatching { app.gatewayClient.browserEvidence(taskId).objectList() }
+                                    .onSuccess { records -> evidenceByTask = evidenceByTask + (taskId to records) }
+                                    .onFailure { error = it.message }
+                            }
+                        },
+                    ) { Text("Evidence") }
+                    evidenceByTask[taskId]?.let { records ->
+                        Text("${records.size} evidence receipt(s)", color = Color(VanGlassTokens.EDGE_CYAN), fontSize = 10.sp)
+                        records.takeLast(4).forEach { evidence ->
+                            Text(
+                                "${evidence.optString("kind")} • ${evidence.optString("source_trust")} • ${evidence.optString("injection_assessment")}",
+                                color = Color(0xFFBCD1D8),
+                                fontSize = 9.sp,
+                            )
+                        }
                     }
                 }
             }
