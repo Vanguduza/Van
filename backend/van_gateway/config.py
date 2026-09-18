@@ -99,7 +99,9 @@ class Settings(BaseSettings):
     notebook_enterprise_max_upload_bytes: int = 100_000_000
 
     notebook_consumer_enabled: bool = False
-    notebook_consumer_profile_dir: str = ""
+    notebook_consumer_profile_dir: str = ""  # legacy; direct Playwright is no longer used
+    notebook_consumer_profile_alias: str = "authenticated_owner"
+    notebook_consumer_profile_secret_ref: str = "secretref://browser/google-primary"
     notebook_consumer_base_url: str = "https://notebooklm.google.com"
     notebook_consumer_headless: bool = True
     notebook_consumer_timeout_seconds: float = 20.0
