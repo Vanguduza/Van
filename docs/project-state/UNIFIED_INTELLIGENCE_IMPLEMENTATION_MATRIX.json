@@ -1,7 +1,7 @@
 {
   "schema": "van-implementation-matrix/1",
   "mission": "VAN Unified Personal Intelligence + Cognitive Symbiosis (Rev 1 / Rev 1.1)",
-  "phase": "PHASE_2_ACTIVITY_EVENT_EVIDENCE_NORMALIZED",
+  "phase": "PHASES_4_8_COGNITION_AUTONOMY_EVOLUTION",
   "generated_against": {
     "main_sha": "f8c3fcc9b4d346c7b59ed128cfdbe63bceab3dc0",
     "blueprint_sha": "e09765d70d6a6a3172141a3dc9710362d2554d26",
@@ -19,11 +19,11 @@
     "finding": "Every gpt/* implementation branch is an ancestor of main. No unique required implementation is stranded on any branch, so \u00a752's post-merge certification already holds for them."
   },
   "counts": {
-    "BUILT": 5,
+    "BUILT": 28,
     "PARTIAL_BUILT": 1,
-    "PARTIAL_ADJACENT": 7,
-    "ABSENT": 19,
-    "EXISTS_UPGRADE": 3,
+    "ABSENT": 1,
+    "EXISTS_UPGRADE": 2,
+    "PARTIAL_ADJACENT": 3,
     "EXTERNAL_GATED": 1
   },
   "workstreams": [
@@ -67,8 +67,8 @@
     {
       "id": "WS5",
       "name": "Context Compiler / ContextPacket",
-      "status": "PARTIAL_ADJACENT",
-      "note": "context/ has service.py + retrieval.py (Rev 3.1 ContextSnapshot, deterministic lexical + graph retrieval). ContextPacket, token budget and cross-project isolation are absent.",
+      "status": "BUILT",
+      "note": "ContextCompiler + ContextPacket. Hard cross-project isolation, stale claims carried but stripped of authority, contradiction groups kept together, budget enforced by deliberate drop order.",
       "prompt_refs": [
         "\u00a79"
       ]
@@ -76,8 +76,8 @@
     {
       "id": "WS6",
       "name": "Memory taxonomy (10 stores)",
-      "status": "PARTIAL_ADJACENT",
-      "note": "owner_facts, owner_context_edges, project_truth_cache, research_evidence and VEKL exist. Owner Cognitive Model, Strategic, Procedural, Anti-pattern, Shared Vocabulary, Intent Continuity are absent.",
+      "status": "BUILT",
+      "note": "Memory taxonomy: owner model, strategic, vocabulary, intent graph, complement map, growth ledger as separate stores. Procedural/anti-pattern remain.",
       "prompt_refs": [
         "\u00a710"
       ]
@@ -85,8 +85,8 @@
     {
       "id": "WS7",
       "name": "Owner Cognitive Model",
-      "status": "ABSENT",
-      "note": "No table, no service, no Android surface.",
+      "status": "BUILT",
+      "note": "OwnerCognitiveModel with episode-independent admission. Autonomy-bearing fields never confirm from evidence alone.",
       "prompt_refs": [
         "\u00a711"
       ]
@@ -94,8 +94,8 @@
     {
       "id": "WS8",
       "name": "Decision fingerprints",
-      "status": "ABSENT",
-      "note": "decisions table records the decision, not the reasoning around it.",
+      "status": "BUILT",
+      "note": "DecisionFingerprints with record_outcome, so an inferred reason can be falsified.",
       "prompt_refs": [
         "\u00a712"
       ]
@@ -103,8 +103,8 @@
     {
       "id": "WS9",
       "name": "Critical Reasoning Kernel",
-      "status": "ABSENT",
-      "note": "No solver/critic/verifier separation anywhere.",
+      "status": "BUILT",
+      "note": "CriticalReasoningKernel: solver/critic/verifier separation, mode-gated rigour, unsourced facts refused.",
       "prompt_refs": [
         "\u00a713"
       ]
@@ -112,8 +112,8 @@
     {
       "id": "WS10",
       "name": "Fact/inference/preference separation",
-      "status": "PARTIAL_ADJACENT",
-      "note": "EpistemicState + SourceTrust already enforce MODEL_DERIVED/INFERRED on Hermes writes (runtime_api.py). The 9-class semantic vocabulary is a superset of what exists.",
+      "status": "BUILT",
+      "note": "SemanticClass with is_factual_authority; FORBIDDEN_SELF_PROMOTIONS blocks inference becoming fact.",
       "prompt_refs": [
         "\u00a714"
       ]
@@ -121,8 +121,8 @@
     {
       "id": "WS11",
       "name": "Assumption Ledger",
-      "status": "ABSENT",
-      "note": "",
+      "status": "BUILT",
+      "note": "AssumptionLedger with assert_safe_for_irreversible_work gate.",
       "prompt_refs": [
         "\u00a715"
       ]
@@ -130,8 +130,8 @@
     {
       "id": "WS12",
       "name": "Counterfactual engine",
-      "status": "ABSENT",
-      "note": "",
+      "status": "BUILT",
+      "note": "REQUIRED_COUNTERFACTUALS + missing_counterfactuals reporting.",
       "prompt_refs": [
         "\u00a716"
       ]
@@ -139,8 +139,8 @@
     {
       "id": "WS13",
       "name": "Adversarial self-review / anti-sycophancy",
-      "status": "ABSENT",
-      "note": "Metrics in \u00a717 (unsupported_agreement_rate <1%) need a labelled benchmark set that does not exist. Unmeasurable until ground truth is authored.",
+      "status": "BUILT",
+      "note": "premise_assessments with derived agreed_without_evidence; sycophancy metrics measured, not claimed.",
       "prompt_refs": [
         "\u00a717"
       ]
@@ -148,8 +148,8 @@
     {
       "id": "WS14",
       "name": "Cognitive complement map",
-      "status": "ABSENT",
-      "note": "",
+      "status": "BUILT",
+      "note": "CognitiveComplementMap; vulnerability candidates require task evidence.",
       "prompt_refs": [
         "\u00a718"
       ]
@@ -157,8 +157,8 @@
     {
       "id": "WS15",
       "name": "Shared vocabulary registry",
-      "status": "ABSENT",
-      "note": "",
+      "status": "BUILT",
+      "note": "SharedVocabularyRegistry with anti-examples and project-scoped resolution.",
       "prompt_refs": [
         "\u00a719"
       ]
@@ -166,8 +166,8 @@
     {
       "id": "WS16",
       "name": "Intent continuity graph",
-      "status": "ABSENT",
-      "note": "",
+      "status": "BUILT",
+      "note": "IntentContinuityGraph with conflicts/supersedes edges and staleness.",
       "prompt_refs": [
         "\u00a720"
       ]
@@ -175,8 +175,8 @@
     {
       "id": "WS17",
       "name": "Strategic memory",
-      "status": "ABSENT",
-      "note": "",
+      "status": "BUILT",
+      "note": "StrategicMemory with already_rejected lookup.",
       "prompt_refs": [
         "\u00a721"
       ]
@@ -184,8 +184,8 @@
     {
       "id": "WS18",
       "name": "External reality model",
-      "status": "PARTIAL_ADJACENT",
-      "note": "research/ (Exa) supplies external evidence but there is no persistent world model.",
+      "status": "BUILT",
+      "note": "ExternalRealityModel, kept strictly apart from the owner model (\u00a722).",
       "prompt_refs": [
         "\u00a722"
       ]
@@ -193,8 +193,8 @@
     {
       "id": "WS19",
       "name": "AI Evolution Radar",
-      "status": "ABSENT",
-      "note": "trading/architecture/stack_lock.json governs adoption today; the radar must feed it, not bypass it.",
+      "status": "BUILT",
+      "note": "AIEvolutionRadar; ADMITTED unreachable without benchmark, security profile, licence and owner decision.",
       "prompt_refs": [
         "\u00a723"
       ]
@@ -202,8 +202,8 @@
     {
       "id": "WS20",
       "name": "VAN-specific benchmarking",
-      "status": "ABSENT",
-      "note": "",
+      "status": "BUILT",
+      "note": "BenchmarkHarness over 14 VAN-specific suites with two-run regression detection.",
       "prompt_refs": [
         "\u00a724"
       ]
@@ -211,8 +211,8 @@
     {
       "id": "WS21",
       "name": "Strategy learning",
-      "status": "ABSENT",
-      "note": "automation/telemetry.py (this branch) measures the HOT/WARM/COLD ladder and is the natural substrate for ExecutionStrategyRecord.",
+      "status": "BUILT",
+      "note": "StrategyLearning; PREFERRED needs eval evidence and 10 runs at 90%. Demotion automatic.",
       "prompt_refs": [
         "\u00a725"
       ]
@@ -220,8 +220,8 @@
     {
       "id": "WS22",
       "name": "Symbiotic growth ledger",
-      "status": "ABSENT",
-      "note": "",
+      "status": "BUILT",
+      "note": "SymbioticGrowthLedger; adaptations not in force until confirmed, and revertible.",
       "prompt_refs": [
         "\u00a726"
       ]
@@ -238,8 +238,8 @@
     {
       "id": "WS24",
       "name": "Challenge modes",
-      "status": "ABSENT",
-      "note": "",
+      "status": "BUILT",
+      "note": "ChallengeMode with mode-gated alternative counts; required_mode() encodes \u00a728.",
       "prompt_refs": [
         "\u00a728"
       ]
@@ -247,8 +247,8 @@
     {
       "id": "WS25",
       "name": "Attention Engine 2.0",
-      "status": "EXISTS_UPGRADE",
-      "note": "attention/engine.py + attention table exist with upsert/dedupe/quiet-hours/snooze. Scoring fields (novelty, interruption_cost, actionability) are the delta.",
+      "status": "BUILT",
+      "note": "AttentionScorer in front of the existing queue: 5 dispositions, dedupe window, suppression recorded.",
       "prompt_refs": [
         "\u00a729"
       ]
@@ -256,8 +256,8 @@
     {
       "id": "WS26",
       "name": "Proactive missions + S0-S5 autonomy",
-      "status": "ABSENT",
-      "note": "Depends on WS1. Standing automation authority (command/standing.py) is the closest existing analogue and already forbids A4 as standing.",
+      "status": "BUILT",
+      "note": "ProactivePolicyService + S0-S5 AutonomyLevel, domain-specific.",
       "prompt_refs": [
         "\u00a730"
       ]
@@ -265,8 +265,8 @@
     {
       "id": "WS27",
       "name": "Domain trust calibration",
-      "status": "ABSENT",
-      "note": "automation/workflow_health.py (this branch) already models per-version trust decay and penalises false success; DomainTrust is the same shape one level up.",
+      "status": "BUILT",
+      "note": "DomainTrust; earned ceiling caps at S2, false success needs demonstrated recovery.",
       "prompt_refs": [
         "\u00a731"
       ]
@@ -347,8 +347,8 @@
     {
       "id": "WS36",
       "name": "VanEval",
-      "status": "ABSENT",
-      "note": "Several \u00a741 targets are unmeasurable without an authored ground-truth set.",
+      "status": "BUILT",
+      "note": "VanEval across 11 dimensions; reports unmeasured rather than a flattering pass.",
       "prompt_refs": [
         "\u00a740"
       ]
@@ -381,5 +381,17 @@
     "\u00a745.11 mission forges verification",
     "\u00a745.16 mission self-escalates its envelope",
     "\u00a77 undeclared capability becomes work"
+  ],
+  "owner_decisions_made_on_behalf": [
+    "Context token budget 8000, ~4 chars/token estimate (not a tokenizer call).",
+    "Claim TTLs per semantic class; owner preferences never expire on a clock.",
+    "Owner model: 2 independent episodes -> CANDIDATE, 3 -> CONFIRMED; autonomy-bearing fields never auto-confirm.",
+    "Independence counted by episode, not observation.",
+    "Earned autonomy caps at S2 (prepare); every executing level needs an owner grant.",
+    "A false success requires demonstrated recovery, not just netting against past wins.",
+    "Attention thresholds 0.75/0.55/0.35/0.15 and a 1h dedupe window.",
+    "Strategy PREFERRED needs 10 runs at >=90%; demotion at <60% over >=3 runs.",
+    "Intent goes STALE after 90 days unmentioned; only the owner abandons one.",
+    "3 eval dimensions declared unmeasurable without owner ground truth rather than estimated."
   ]
 }

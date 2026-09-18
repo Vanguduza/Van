@@ -8,7 +8,7 @@ from typing import Any, AsyncIterator
 
 import aiosqlite
 
-SCHEMA_VERSION = 11
+SCHEMA_VERSION = 15
 
 MIGRATIONS: dict[int, str] = {
     1: """
@@ -907,6 +907,379 @@ MIGRATIONS: dict[int, str] = {
 
     CREATE INDEX IF NOT EXISTS idx_capability_route_decisions_mission
       ON capability_route_decisions(mission_id, decided_at_ms);
+    """,
+    12: """
+    -- Rev 1 §§64-65, 68, 72, 76-78, 87 — the owner-understanding layer.
+
+    -- §64. How the owner works, not who they are. Every field is an assertion
+    -- with a state and evidence, never a settled truth, so it can be corrected.
+    CREATE TABLE IF NOT EXISTS owner_cognitive_model (
+      assertion_id TEXT PRIMARY KEY,
+      owner_principal_id TEXT NOT NULL,
+      field TEXT NOT NULL,
+      value TEXT NOT NULL,
+      state TEXT NOT NULL DEFAULT 'OBSERVED',
+      confidence REAL NOT NULL DEFAULT 0.0,
+      evidence_refs_json TEXT NOT NULL DEFAULT '[]',
+      supporting_episode_refs_json TEXT NOT NULL DEFAULT '[]',
+      project_id TEXT,
+      temporary INTEGER NOT NULL DEFAULT 0,
+      superseded_by TEXT,
+      owner_confirmed_at_ms INTEGER,
+      last_revalidated_at_ms INTEGER,
+      created_at_ms INTEGER NOT NULL,
+      updated_at_ms INTEGER NOT NULL
+    );
+
+    CREATE INDEX IF NOT EXISTS idx_owner_model_field
+      ON owner_cognitive_model(owner_principal_id, field, state);
+
+    -- §65. Why a decision went the way it did, so patterns can be learned and,
+    -- crucially, falsified by later outcomes.
+    CREATE TABLE IF NOT EXISTS decision_fingerprints (
+      decision_id TEXT PRIMARY KEY,
+      mission_id TEXT,
+      context_json TEXT NOT NULL DEFAULT '{}',
+      options_considered_json TEXT NOT NULL DEFAULT '[]',
+      owner_choice TEXT NOT NULL,
+      owner_stated_reason TEXT,
+      inferred_reason TEXT,
+      tradeoffs_json TEXT NOT NULL DEFAULT '[]',
+      evidence_used_json TEXT NOT NULL DEFAULT '[]',
+      rejected_alternatives_json TEXT NOT NULL DEFAULT '[]',
+      outcome TEXT,
+      reassessment TEXT,
+      created_at_ms INTEGER NOT NULL,
+      updated_at_ms INTEGER NOT NULL
+    );
+
+    -- §76. Owner words mapped to operational meaning, with anti-examples so the
+    -- mapping is falsifiable rather than merely plausible.
+    CREATE TABLE IF NOT EXISTS shared_vocabulary (
+      term TEXT NOT NULL,
+      project_id TEXT NOT NULL DEFAULT '',
+      owner_meaning TEXT NOT NULL,
+      system_operationalization TEXT NOT NULL,
+      examples_json TEXT NOT NULL DEFAULT '[]',
+      anti_examples_json TEXT NOT NULL DEFAULT '[]',
+      confidence REAL NOT NULL DEFAULT 0.0,
+      evidence_refs_json TEXT NOT NULL DEFAULT '[]',
+      created_at_ms INTEGER NOT NULL,
+      updated_at_ms INTEGER NOT NULL,
+      PRIMARY KEY (term, project_id)
+    );
+
+    -- §77. Long-lived goals and how they relate, so a newer instruction that
+    -- contradicts an older one is visible rather than silently winning.
+    CREATE TABLE IF NOT EXISTS intent_nodes (
+      intent_id TEXT PRIMARY KEY,
+      owner_goal TEXT NOT NULL,
+      first_observed_ms INTEGER NOT NULL,
+      latest_observed_ms INTEGER NOT NULL,
+      projects_json TEXT NOT NULL DEFAULT '[]',
+      constraints_json TEXT NOT NULL DEFAULT '[]',
+      status TEXT NOT NULL DEFAULT 'ACTIVE',
+      priority INTEGER NOT NULL DEFAULT 50
+    );
+
+    CREATE TABLE IF NOT EXISTS intent_edges (
+      edge_id TEXT PRIMARY KEY,
+      from_intent_id TEXT NOT NULL,
+      to_intent_id TEXT NOT NULL,
+      edge_type TEXT NOT NULL,
+      evidence_ref TEXT,
+      created_at_ms INTEGER NOT NULL,
+      FOREIGN KEY(from_intent_id) REFERENCES intent_nodes(intent_id),
+      FOREIGN KEY(to_intent_id) REFERENCES intent_nodes(intent_id)
+    );
+
+    CREATE INDEX IF NOT EXISTS idx_intent_edges_from
+      ON intent_edges(from_intent_id, edge_type);
+
+    CREATE TABLE IF NOT EXISTS intent_missions (
+      intent_id TEXT NOT NULL,
+      mission_id TEXT NOT NULL,
+      linked_at_ms INTEGER NOT NULL,
+      PRIMARY KEY (intent_id, mission_id)
+    );
+
+    -- §78. Why a project exists and what was already rejected. Scoped, and
+    -- explicitly not a replacement for Project Truth.
+    CREATE TABLE IF NOT EXISTS strategic_memory (
+      entry_id TEXT PRIMARY KEY,
+      project_id TEXT NOT NULL,
+      entry_type TEXT NOT NULL,
+      statement TEXT NOT NULL,
+      rationale TEXT,
+      evidence_refs_json TEXT NOT NULL DEFAULT '[]',
+      superseded_by TEXT,
+      created_at_ms INTEGER NOT NULL,
+      updated_at_ms INTEGER NOT NULL
+    );
+
+    CREATE INDEX IF NOT EXISTS idx_strategic_memory_project
+      ON strategic_memory(project_id, entry_type);
+
+    -- §72. Where VAN compensates rather than imitates. Task observations only.
+    CREATE TABLE IF NOT EXISTS cognitive_complement_map (
+      entry_id TEXT PRIMARY KEY,
+      domain TEXT NOT NULL UNIQUE,
+      owner_strength TEXT,
+      owner_vulnerability_candidate TEXT,
+      van_strength TEXT,
+      preferred_collaboration_pattern TEXT,
+      confidence REAL NOT NULL DEFAULT 0.0,
+      evidence_refs_json TEXT NOT NULL DEFAULT '[]',
+      created_at_ms INTEGER NOT NULL,
+      updated_at_ms INTEGER NOT NULL
+    );
+
+    -- §87. What changed about how VAN works with the owner, and whether the
+    -- owner may reverse it.
+    CREATE TABLE IF NOT EXISTS symbiotic_growth (
+      change_id TEXT PRIMARY KEY,
+      observed_pattern TEXT NOT NULL,
+      previous_behavior TEXT NOT NULL,
+      new_behavior TEXT NOT NULL,
+      reason TEXT NOT NULL,
+      evidence_refs_json TEXT NOT NULL DEFAULT '[]',
+      owner_confirmation_required INTEGER NOT NULL DEFAULT 1,
+      owner_confirmed_at_ms INTEGER,
+      reverted_at_ms INTEGER,
+      reversible INTEGER NOT NULL DEFAULT 1,
+      effective_from_ms INTEGER,
+      created_at_ms INTEGER NOT NULL
+    );
+    """,
+    13: """
+    -- Rev 1 §§66, 68-71, 75, 88 — the critical reasoning layer.
+
+    -- §66. Structured conclusions only. §13 forbids persisting hidden
+    -- chain-of-thought, so there is no column for it: what survives an
+    -- assessment is the facts, assumptions, alternatives and the confidence.
+    CREATE TABLE IF NOT EXISTS reasoning_assessments (
+      assessment_id TEXT PRIMARY KEY,
+      mission_id TEXT,
+      problem_statement TEXT NOT NULL,
+      known_facts_json TEXT NOT NULL DEFAULT '[]',
+      assumptions_json TEXT NOT NULL DEFAULT '[]',
+      uncertainties_json TEXT NOT NULL DEFAULT '[]',
+      contradictions_json TEXT NOT NULL DEFAULT '[]',
+      hypotheses_json TEXT NOT NULL DEFAULT '[]',
+      alternatives_json TEXT NOT NULL DEFAULT '[]',
+      failure_modes_json TEXT NOT NULL DEFAULT '[]',
+      counterfactuals_json TEXT NOT NULL DEFAULT '[]',
+      recommended_next_action TEXT,
+      confidence REAL NOT NULL DEFAULT 0.0,
+      evidence_refs_json TEXT NOT NULL DEFAULT '[]',
+      challenge_mode TEXT NOT NULL DEFAULT 'BALANCED',
+      critic_findings_json TEXT NOT NULL DEFAULT '[]',
+      verifier_findings_json TEXT NOT NULL DEFAULT '[]',
+      created_at_ms INTEGER NOT NULL
+    );
+
+    CREATE INDEX IF NOT EXISTS idx_reasoning_mission
+      ON reasoning_assessments(mission_id, created_at_ms);
+
+    -- §68. Mission-scoped assumptions, and whether anyone checked them.
+    CREATE TABLE IF NOT EXISTS assumption_ledger (
+      assumption_id TEXT PRIMARY KEY,
+      mission_id TEXT NOT NULL,
+      claim TEXT NOT NULL,
+      source TEXT NOT NULL,
+      importance TEXT NOT NULL DEFAULT 'MEDIUM',
+      confidence REAL NOT NULL DEFAULT 0.5,
+      testability TEXT NOT NULL DEFAULT 'UNKNOWN',
+      verification_plan TEXT,
+      status TEXT NOT NULL DEFAULT 'ACTIVE',
+      resolved_evidence_refs_json TEXT NOT NULL DEFAULT '[]',
+      created_at_ms INTEGER NOT NULL,
+      updated_at_ms INTEGER NOT NULL,
+      FOREIGN KEY(mission_id) REFERENCES missions(mission_id)
+    );
+
+    CREATE INDEX IF NOT EXISTS idx_assumption_mission
+      ON assumption_ledger(mission_id, status, importance);
+
+    -- §71. Every time VAN agreed or disagreed with the owner on a factual
+    -- premise, so the anti-sycophancy metrics are measured rather than claimed.
+    CREATE TABLE IF NOT EXISTS premise_assessments (
+      premise_id TEXT PRIMARY KEY,
+      mission_id TEXT,
+      owner_premise TEXT NOT NULL,
+      van_position TEXT NOT NULL,
+      evidence_refs_json TEXT NOT NULL DEFAULT '[]',
+      semantic_class TEXT NOT NULL,
+      corrected INTEGER NOT NULL DEFAULT 0,
+      agreed_without_evidence INTEGER NOT NULL DEFAULT 0,
+      created_at_ms INTEGER NOT NULL
+    );
+
+    CREATE INDEX IF NOT EXISTS idx_premise_created
+      ON premise_assessments(created_at_ms);
+    """,
+    14: """
+    -- Rev 1 §§10, 11, 27, 31 — attention scoring, proactive autonomy, trust.
+
+    -- §10. Candidates are scored and may be suppressed; the existing `attention`
+    -- table stays the owner-visible queue, and this records why something did or
+    -- did not reach it.
+    CREATE TABLE IF NOT EXISTS attention_candidates (
+      candidate_id TEXT PRIMARY KEY,
+      source TEXT NOT NULL,
+      dedupe_key TEXT NOT NULL,
+      importance REAL NOT NULL DEFAULT 0.0,
+      urgency REAL NOT NULL DEFAULT 0.0,
+      actionability REAL NOT NULL DEFAULT 0.0,
+      novelty REAL NOT NULL DEFAULT 0.0,
+      owner_relevance REAL NOT NULL DEFAULT 0.0,
+      confidence REAL NOT NULL DEFAULT 0.0,
+      interruption_cost REAL NOT NULL DEFAULT 0.0,
+      score REAL NOT NULL DEFAULT 0.0,
+      disposition TEXT NOT NULL,
+      reason TEXT,
+      related_mission_id TEXT,
+      summary TEXT NOT NULL DEFAULT '',
+      expiry_ms INTEGER,
+      created_at_ms INTEGER NOT NULL
+    );
+
+    CREATE INDEX IF NOT EXISTS idx_attention_candidates_dedupe
+      ON attention_candidates(dedupe_key, created_at_ms);
+
+    -- §31. Trust is earned from verified outcomes and lost hard on false success.
+    CREATE TABLE IF NOT EXISTS domain_trust (
+      domain TEXT PRIMARY KEY,
+      verified_successes INTEGER NOT NULL DEFAULT 0,
+      meaningful_failures INTEGER NOT NULL DEFAULT 0,
+      false_successes INTEGER NOT NULL DEFAULT 0,
+      owner_overrides INTEGER NOT NULL DEFAULT 0,
+      recovery_successes INTEGER NOT NULL DEFAULT 0,
+      current_autonomy_ceiling TEXT NOT NULL DEFAULT 'S1',
+      owner_granted_ceiling TEXT,
+      updated_at_ms INTEGER NOT NULL
+    );
+
+    -- §11. Proactive missions and the standing policy that allowed them.
+    CREATE TABLE IF NOT EXISTS proactive_policies (
+      policy_id TEXT PRIMARY KEY,
+      domain TEXT NOT NULL,
+      autonomy_level TEXT NOT NULL,
+      mission_class TEXT NOT NULL,
+      owner_granted_at_ms INTEGER,
+      owner_evidence_ref TEXT,
+      enabled INTEGER NOT NULL DEFAULT 1,
+      created_at_ms INTEGER NOT NULL,
+      updated_at_ms INTEGER NOT NULL
+    );
+
+    CREATE INDEX IF NOT EXISTS idx_proactive_policies_domain
+      ON proactive_policies(domain, enabled);
+    """,
+    15: """
+    -- Rev 1 §§79-84, 24-25, 40 — external reality, evolution, benchmarks, eval.
+
+    -- §79. What the evidence says now, kept strictly apart from what the owner
+    -- thinks. §22 makes the separation mandatory to stop personalisation
+    -- becoming an echo chamber.
+    CREATE TABLE IF NOT EXISTS external_reality (
+      observation_id TEXT PRIMARY KEY,
+      subject TEXT NOT NULL,
+      claim TEXT NOT NULL,
+      source_kind TEXT NOT NULL,
+      source_ref TEXT NOT NULL,
+      observed_at_ms INTEGER NOT NULL,
+      confidence REAL NOT NULL DEFAULT 0.5,
+      superseded_by TEXT,
+      contradicts_owner_belief INTEGER NOT NULL DEFAULT 0
+    );
+
+    CREATE INDEX IF NOT EXISTS idx_external_reality_subject
+      ON external_reality(subject, observed_at_ms);
+
+    -- §82. One row per technology VAN knows about, with its pipeline state.
+    CREATE TABLE IF NOT EXISTS technology_capabilities (
+      technology_id TEXT PRIMARY KEY,
+      name TEXT NOT NULL,
+      category TEXT NOT NULL,
+      version TEXT,
+      source TEXT,
+      licence TEXT,
+      security_profile TEXT,
+      strengths_json TEXT NOT NULL DEFAULT '[]',
+      weaknesses_json TEXT NOT NULL DEFAULT '[]',
+      integration_cost TEXT,
+      migration_risk TEXT,
+      owner_value TEXT,
+      pipeline_state TEXT NOT NULL DEFAULT 'DISCOVERED',
+      benchmark_digest TEXT,
+      owner_decision_ref TEXT,
+      last_evaluated_at_ms INTEGER,
+      created_at_ms INTEGER NOT NULL,
+      updated_at_ms INTEGER NOT NULL
+    );
+
+    CREATE INDEX IF NOT EXISTS idx_technology_state
+      ON technology_capabilities(pipeline_state, category);
+
+    -- §83. VAN-specific benchmark results. §24 forbids relying on public
+    -- leaderboards, so a technology's standing here is measured on VAN tasks.
+    CREATE TABLE IF NOT EXISTS benchmark_runs (
+      run_id TEXT PRIMARY KEY,
+      suite TEXT NOT NULL,
+      technology_id TEXT,
+      task_count INTEGER NOT NULL DEFAULT 0,
+      passed INTEGER NOT NULL DEFAULT 0,
+      failed INTEGER NOT NULL DEFAULT 0,
+      median_latency_ms INTEGER,
+      total_cost_micros INTEGER,
+      results_json TEXT NOT NULL DEFAULT '[]',
+      harness_version TEXT NOT NULL,
+      created_at_ms INTEGER NOT NULL
+    );
+
+    CREATE INDEX IF NOT EXISTS idx_benchmark_suite
+      ON benchmark_runs(suite, technology_id, created_at_ms);
+
+    -- §25. Which capability sequences actually work for which mission class.
+    CREATE TABLE IF NOT EXISTS execution_strategies (
+      strategy_id TEXT PRIMARY KEY,
+      mission_class TEXT NOT NULL,
+      capability_sequence_json TEXT NOT NULL DEFAULT '[]',
+      conditions_json TEXT NOT NULL DEFAULT '{}',
+      success_count INTEGER NOT NULL DEFAULT 0,
+      failure_count INTEGER NOT NULL DEFAULT 0,
+      median_latency_ms INTEGER,
+      median_cost_micros INTEGER,
+      verification_quality REAL NOT NULL DEFAULT 0.0,
+      promotion_state TEXT NOT NULL DEFAULT 'EXPERIMENTAL',
+      eval_run_id TEXT,
+      last_evaluated_at_ms INTEGER,
+      created_at_ms INTEGER NOT NULL,
+      updated_at_ms INTEGER NOT NULL
+    );
+
+    CREATE INDEX IF NOT EXISTS idx_strategy_class
+      ON execution_strategies(mission_class, promotion_state);
+
+    -- §40. Versioned eval runs across the >9 dimensions.
+    CREATE TABLE IF NOT EXISTS eval_runs (
+      eval_run_id TEXT PRIMARY KEY,
+      suite TEXT NOT NULL,
+      dimension TEXT NOT NULL,
+      measured INTEGER NOT NULL DEFAULT 0,
+      sample_size INTEGER NOT NULL DEFAULT 0,
+      score REAL,
+      target REAL,
+      meets_target INTEGER,
+      unmeasurable_reason TEXT,
+      details_json TEXT NOT NULL DEFAULT '{}',
+      harness_version TEXT NOT NULL,
+      created_at_ms INTEGER NOT NULL
+    );
+
+    CREATE INDEX IF NOT EXISTS idx_eval_dimension
+      ON eval_runs(dimension, created_at_ms);
     """,
 }
 

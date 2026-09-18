@@ -24,10 +24,11 @@ async def test_google_migration_and_principal_hash(tmp_path):
     row = await store.fetchone("SELECT MAX(version) AS version FROM schema_migrations")
     # 6 adds the Rev 1.3 Automation & Browser Fabric tables; 7-8 add
     # resumable browser escalation and separately auditable owner-approved scope grants;
-    # 9 adds workflow health, repair lineage, dead letters and telemetry
-    # (§§76-78, 101-102, 243-246); 10 adds Mission Core (Rev 1 §§3, 5, 34);
-    # 11 adds the canonical capability registry and route evidence (Rev 1 §§7-8).
-    assert row["version"] == SCHEMA_VERSION == 11
+    # 9 adds workflow health, repair lineage, dead letters and telemetry;
+    # 10 Mission Core; 11 the canonical capability registry; 12 the owner
+    # understanding layer; 13 critical reasoning; 14 autonomy and attention
+    # scoring; 15 external reality, evolution radar, benchmarks and eval.
+    assert row["version"] == SCHEMA_VERSION == 15
     broker = GoogleIdentityBroker(store, GoogleCapabilityRegistry(registry_path()), ai_plan="PRO")
     status = await broker.register_principal(subject="owner-google-subject", ai_plan="PRO")
     assert status.registered is True

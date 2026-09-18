@@ -43,6 +43,7 @@ from van_gateway.capability.readiness import (
 from van_gateway.capability.registry import CapabilityRegistry
 from van_gateway.capability.router import CapabilityRouter
 from van_gateway.mission.api import MissionApi
+from van_gateway.understanding.api import UnderstandingApi
 from van_gateway.mission.service import MissionService
 from van_gateway.command.authority import CommandAuthorityService
 from van_gateway.command.standing import StandingAutomationAuthorityService
@@ -228,6 +229,7 @@ def create_app() -> FastAPI:
         store, settings, missions=missions, registry=capability_registry,
         router=capability_router,
     )
+    understanding_api = UnderstandingApi(store, settings)
     google_router = GoogleCapabilityRouter(store, google_broker)
 
     events = EventBus(store, settings.event_page_size)
@@ -278,6 +280,7 @@ def create_app() -> FastAPI:
     app.state.capability_router = capability_router
     app.state.missions = missions
     app.state.mission_api = mission_api
+    app.state.understanding_api = understanding_api
     app.state.decisions = decisions
     app.state.projects = projects
     app.state.reminders = reminders
@@ -288,6 +291,7 @@ def create_app() -> FastAPI:
     app.include_router(automation.router)
     app.include_router(browser.router)
     app.include_router(mission_api.router)
+    app.include_router(understanding_api.router)
 
     def internal_control_route(method: str, path: str) -> bool:
         if path.startswith("/v1/runtime/"):
@@ -308,6 +312,12 @@ def create_app() -> FastAPI:
             if method == "GET":
                 return False
             return not (path.endswith("/cancel") or path.endswith("/message"))
+        # §§33, 63.6 — the Understanding surface is the owner's. Hermes may
+        # observe; only the owner confirms, corrects, rejects or reverts.
+        if path.startswith("/v1/understanding") or path in (
+            "/v1/technology-radar", "/v1/eval", "/v1/autonomy"
+        ):
+            return path == "/v1/understanding/observe"
         # Owner Android may inspect browser truth through authenticated GETs.
         # Browser mutations/assignments remain Hermes internal-control only.
         if path.startswith("/v1/browser/"):
