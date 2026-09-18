@@ -653,28 +653,39 @@ class NotebookConsumerProvider:
         return self.browser_tasks, self.harness, self.stagehand
 
     async def _open_task(
-        self, *, goal: str, mutating: bool, action_class: ActionClass
+        self,
+        *,
+        goal: str,
+        mutating: bool,
+        action_class: ActionClass,
+        command_id: str | None = None,
+        execution_id: str | None = None,
     ) -> tuple[BrowserTask, PageLease]:
         tasks, _harness, _stagehand = self._require_transport()
-        await tasks.broker.register_profile(
-            profile_alias=self.profile_alias,
-            secret_ref=self.profile_secret_ref or None,
-        )
-        task = await tasks.create_task(
-            profile_alias=self.profile_alias,
-            strategy=BrowserStrategy.STAGEHAND,
-            autonomy_tier=AutonomyTier.L4_STAGEHAND_ACT,
-            action_class=action_class,
-            target_domain=self.DOMAIN,
-            goal=goal,
-            mutating=mutating,
-            inputs={"provider": "notebook_consumer"},
-        )
-        lease = await tasks.broker.acquire_lease(
-            profile_alias=self.profile_alias,
-            task_id=task.task_id,
-            ttl_seconds=max(30, int(self.timeout_seconds * 3)),
-        )
+        try:
+            await tasks.broker.register_profile(
+                profile_alias=self.profile_alias,
+                secret_ref=self.profile_secret_ref or None,
+            )
+            task = await tasks.create_task(
+                profile_alias=self.profile_alias,
+                strategy=BrowserStrategy.STAGEHAND,
+                autonomy_tier=AutonomyTier.L4_STAGEHAND_ACT,
+                action_class=action_class,
+                target_domain=self.DOMAIN,
+                goal=goal,
+                mutating=mutating,
+                command_id=command_id,
+                execution_id=execution_id,
+                inputs={"provider": "notebook_consumer"},
+            )
+            lease = await tasks.broker.acquire_lease(
+                profile_alias=self.profile_alias,
+                task_id=task.task_id,
+                ttl_seconds=max(30, int(self.timeout_seconds * 3)),
+            )
+        except BrowserPolicyError as exc:
+            raise NotebookProviderError(f"notebook_consumer_browser_policy:{exc}") from exc
         return task, lease
 
     async def _close_task(
@@ -743,6 +754,12 @@ class NotebookConsumerProvider:
             answer = str(observation.extraction.get("answer", "")).strip()
             if not answer:
                 raise NotebookProviderError("notebook_consumer_answer_readback_failed")
+            await self.browser_tasks.seal_evidence(
+                task=task,
+                kind="notebook_grounded_answer",
+                url=f"{self.base_url}/notebook/{quote(request.notebook_id)}",
+                extraction={"answer": answer},
+            )
             pointer = f"google://notebook-consumer/{request.notebook_id}/query/{query_id}"
             await self.evidence.persist(
                 provider=KnowledgeProvider.NOTEBOOK_CONSUMER,
@@ -789,7 +806,13 @@ class NotebookConsumerProvider:
         )
         return await self.status()
 
-    async def create_note(self, request: NotebookConsumerNoteCreateRequest) -> NotebookOperationResult:
+    async def create_note(
+        self,
+        request: NotebookConsumerNoteCreateRequest,
+        *,
+        command_id: str | None = None,
+        execution_id: str | None = None,
+    ) -> NotebookOperationResult:
         digest = self.evidence.digest(request.model_dump())
         op = await self.operations.begin(
             KnowledgeProvider.NOTEBOOK_CONSUMER,
@@ -809,6 +832,8 @@ class NotebookConsumerProvider:
             goal=f"Create NotebookLM note {request.title!r} in notebook {request.notebook_id}",
             mutating=True,
             action_class=ActionClass.A3,
+            command_id=command_id,
+            execution_id=execution_id,
         )
         try:
             await self._navigate(task, request.notebook_id)
@@ -916,6 +941,12 @@ class NotebookConsumerProvider:
                 )
                 return result
 
+            await self.browser_tasks.seal_evidence(
+                task=task,
+                kind="notebook_note_readback",
+                url=f"{self.base_url}/notebook/{quote(request.notebook_id)}",
+                extraction={"title": request.title, "visible": True},
+            )
             pointer = f"google://notebook-consumer/{request.notebook_id}/note/{quote(request.title)}"
             evidence_payload = {
                 "notebook_id": request.notebook_id,
