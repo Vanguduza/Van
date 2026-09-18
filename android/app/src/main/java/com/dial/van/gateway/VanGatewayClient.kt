@@ -213,6 +213,14 @@ class VanGatewayClient(context: Context) {
         JSONArray(rawGet("/v1/browser/escalations"))
     }
 
+    suspend fun browserPolicy(): JSONObject = withContext(Dispatchers.IO) {
+        getJson("/v1/browser/policy")
+    }
+
+    suspend fun browserEvidence(taskId: String): JSONArray = withContext(Dispatchers.IO) {
+        JSONArray(rawGet("/v1/browser/tasks/${encodeSegment(taskId)}/evidence"))
+    }
+
     suspend fun events(afterSeq: Long = 0L): JSONObject = withContext(Dispatchers.IO) {
         val id = deviceId ?: error("not_enrolled")
         getJson("/v1/events?device_id=${encodeQuery(id)}&after_seq=$afterSeq")
