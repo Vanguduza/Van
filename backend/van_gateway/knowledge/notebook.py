@@ -17,6 +17,7 @@ from cryptography.hazmat.primitives.asymmetric import padding
 from van_gateway.browser.adapters import BrowserAdapterError, HttpBrowserHarnessAdapter, StagehandAdapter
 from van_gateway.browser.models import AutonomyTier, BrowserStrategy, BrowserTask, BrowserTaskStatus, PageLease
 from van_gateway.browser.service import BrowserTaskService
+from van_gateway.browser.policy import BrowserPolicyError
 from van_gateway.models import ActionClass
 from van_gateway.knowledge.evidence import KnowledgeEvidenceStore
 from van_gateway.knowledge.models import (
