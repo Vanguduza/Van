@@ -21,6 +21,7 @@ Every one of the following ends the task rather than escalating it:
 
 from __future__ import annotations
 
+import re
 import time
 import uuid
 from enum import Enum
@@ -31,6 +32,7 @@ from pydantic import BaseModel, Field
 from van_gateway.automation.canonical import digest
 from van_gateway.automation.payments import PaymentBoundaryError, assert_not_automated_payment
 from van_gateway.browser.models import (
+    BrowserBoundaryType,
     AutonomyTier,
     BrowserObservation,
     BrowserTask,
@@ -290,8 +292,68 @@ class BrowserSubagentRunner:
         )
 
 
+#: §§108, 391 — classes the browser is never an execution surface for. A worker
+#: that proposes one is not asking for a wider assignment; it is asking for a
+#: kind of authority this surface cannot hold at any scope.
+_NEVER_ON_BROWSER = frozenset({ActionClass.A4, ActionClass.A5})
+
+#: A requested domain is rendered to the owner in an approval prompt, so it has
+#: to look like a hostname before it gets there. Anything else is a worker
+#: handing us free text to display, which is how an approval prompt gets
+#: written by the page instead of by VAN.
+_HOSTNAME = re.compile(r"^(?=.{1,253}$)(?!-)[A-Za-z0-9-]{1,63}(?<!-)(\.(?!-)[A-Za-z0-9-]{1,63}(?<!-))+$")
+
+
+def plausible_hostname(value: str) -> bool:
+    return bool(_HOSTNAME.match(value.strip()))
+
+
+def classify_boundary(
+    stop_reason: SubagentStop,
+    *,
+    requested_action_class: ActionClass | None = None,
+    requested_domain: str | None = None,
+) -> BrowserBoundaryType:
+    """Decide what a stop *means* before anyone is asked to act on it.
+
+    This is the gate between "the assignment was drawn slightly too narrow",
+    which is worth the owner's attention, and "the page talked the worker into
+    asking for something else", which is not. The distinction matters because an
+    escalation is an approval prompt, and a prompt that page content can
+    manufacture is an attack surface rather than a safety feature.
+
+    Kept pure and separate from the API so the rule can be tested directly and
+    read without a database in the way.
+    """
+    if stop_reason in (
+        SubagentStop.PAYMENT_REFUSED,
+        SubagentStop.INJECTION_REFUSED,
+    ):
+        # §34 and §387 — asking the owner to approve these is precisely the
+        # outcome the refusal exists to prevent.
+        return BrowserBoundaryType.POLICY_FORBIDDEN
+    if stop_reason is SubagentStop.GOAL_DRIFT:
+        return BrowserBoundaryType.AMBIGUOUS_OR_UNSAFE
+    if stop_reason is SubagentStop.ACTION_CLASS_VIOLATION:
+        if requested_action_class is None:
+            return BrowserBoundaryType.AMBIGUOUS_OR_UNSAFE
+        if requested_action_class in _NEVER_ON_BROWSER:
+            # No owner approval can make the browser an A4 surface, so there is
+            # nothing to ask. A4 needs a fresh approval bound to the exact
+            # action, which is the opposite of widening a standing assignment.
+            return BrowserBoundaryType.POLICY_FORBIDDEN
+        return BrowserBoundaryType.OWNER_EXTENSION_REQUIRED
+    if stop_reason is SubagentStop.SCOPE_VIOLATION:
+        if requested_domain is None or not plausible_hostname(requested_domain):
+            return BrowserBoundaryType.AMBIGUOUS_OR_UNSAFE
+        return BrowserBoundaryType.OWNER_EXTENSION_REQUIRED
+    return BrowserBoundaryType.BOUNDED_SAFE_EXTENSION
+
+
 __all__ = [
     "BrowserSubagentRunner",
+    "classify_boundary",
+    "plausible_hostname",
     "ProposedAction",
     "SubagentAssignment",
     "SubagentResult",
