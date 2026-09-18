@@ -27,3 +27,14 @@ def test_reconcile_requires_canonical_role_statement():
         assert "canonical VATI role statement missing" in str(exc)
     else:
         raise AssertionError("missing canonical role statement must fail closed")
+
+def test_update_core_env_preserves_mode_and_encodes_password(tmp_path):
+    module = load_module()
+    target = tmp_path / "core.env"
+    target.write_text("OTHER=1\nVAN_COMMANDER_LEDGER=old\n")
+    target.chmod(0o640)
+    module.update_core_env(target, "a/b:c@d")
+    text = target.read_text()
+    assert "OTHER=1" in text
+    assert "VAN_COMMANDER_LEDGER=postgres://vati:a%2Fb%3Ac%40d@127.0.0.1:5432/postgres" in text
+    assert (target.stat().st_mode & 0o777) == 0o640
