@@ -39,3 +39,7 @@ def test_update_core_env_preserves_mode_and_encodes_password(tmp_path):
     assert "OTHER=1" in text
     assert "VAN_COMMANDER_LEDGER=postgres://vati:a%2Fb%3Ac%40d@127.0.0.1:5432/postgres" in text
     assert (target.stat().st_mode & 0o777) == 0o640
+
+def test_reconcile_uses_supabase_admin_boundary():
+    module = load_module()
+    assert module.ADMIN_ROLE == "supabase_admin"
