@@ -73,32 +73,39 @@ fun OverviewScreen(env: ScreenEnv, nav: TradingNav, padding: PaddingValues) {
     var portfolio: Loaded<PortfolioSummary> by remember { mutableStateOf(Loaded.Loading) }
     var states: Loaded<List<MarketStateCard>> by remember { mutableStateOf(Loaded.Loading) }
     var scope by remember { mutableStateOf("ALL") }
-    var symbol by remember { mutableStateOf<String?>(null) }
-    var bars: Loaded<BarSeries> by remember { mutableStateOf(Loaded.Loading) }
-    LaunchedEffect(tick) {
-        portfolio = Loaded.Loading; states = Loaded.Loading
-        portfolio = env.repo.portfolio(); states = env.repo.marketStates()
-        val first = (states as? Loaded.Ready)?.value?.firstOrNull()?.symbol ?: (portfolio as? Loaded.Ready)?.value?.openPositions?.firstOrNull()?.symbol
-        if (symbol == null) symbol = first
-    }
-    LaunchedEffect(symbol, tick) { val s = symbol; bars = if (s == null) Loaded.Unavailable("No instrument in the ledger yet") else env.repo.bars(s, "H1", 160) }
 
-    LazyColumn(modifier = Modifier.fillMaxSize().padding(padding).padding(horizontal = 14.dp), verticalArrangement = Arrangement.spacedBy(10.dp), contentPadding = PaddingValues(vertical = 10.dp)) {
+    LaunchedEffect(tick) {
+        portfolio = Loaded.Loading
+        states = Loaded.Loading
+        portfolio = env.repo.portfolio()
+        states = env.repo.marketStates()
+    }
+
+    LazyColumn(
+        modifier = Modifier.fillMaxSize().padding(padding).padding(horizontal = 14.dp),
+        verticalArrangement = Arrangement.spacedBy(10.dp),
+        contentPadding = PaddingValues(vertical = 10.dp),
+    ) {
         item {
             LoadedBox(portfolio) { p ->
                 val scoped = if (scope == "ALL") p.accounts else p.accounts.filter { it.alias == scope }
                 Column {
                     Row(verticalAlignment = Alignment.CenterVertically) {
                         TabRowChips(listOf("ALL") + p.accounts.map { it.alias }, scope) { scope = it }
-                        Spacer(Modifier.weight(1f)); RefreshAction { tick += 1 }
+                        Spacer(Modifier.weight(1f))
+                        RefreshAction { tick += 1 }
                     }
                     Spacer(Modifier.height(6.dp))
                     Row(verticalAlignment = Alignment.CenterVertically, horizontalArrangement = Arrangement.spacedBy(6.dp)) {
-                        Text("Scope: ${if (scope == "ALL") "All accounts" else scoped.firstOrNull()?.label ?: scope}", color = TradingColors.text, fontSize = 12.sp, fontWeight = FontWeight.SemiBold)
+                        Text(
+                            "Scope: ${if (scope == "ALL") "All accounts" else scoped.firstOrNull()?.label ?: scope}",
+                            color = TradingColors.text,
+                            fontSize = 12.sp,
+                            fontWeight = FontWeight.SemiBold,
+                        )
                         scoped.firstOrNull()?.let { if (scope != "ALL") SafetyChip(it.safety) }
                         DataStateChip(if (scope == "ALL") p.overallDataState else scoped.firstOrNull()?.connection ?: DataState.UNKNOWN)
                         if (!p.ledgerAvailable) Chip("LEDGER UNAVAILABLE", DataState.OFFLINE.argb, filled = true)
-                        if (p.killSwitch.isNotEmpty()) Chip("HALTED: ${p.killSwitch.joinToString()}", DataState.OFFLINE.argb, filled = true)
                     }
                     Spacer(Modifier.height(8.dp))
                     val eq = if (scope == "ALL") p.equity else scoped.firstOrNull()?.equity
@@ -113,88 +120,99 @@ fun OverviewScreen(env: ScreenEnv, nav: TradingNav, padding: PaddingValues) {
                     Spacer(Modifier.height(8.dp))
                     Row(horizontalArrangement = Arrangement.spacedBy(8.dp)) {
                         MetricTile("Today P&L", day?.signed ?: "—", Modifier.weight(1f), tint = TradingColors.signed(day?.value))
-                        MetricTile("Risk used (heat)", p.portfolioHeat.label, Modifier.weight(1f), tint = TradingColors.warning)
-                        MetricTile("Drawdown", (if (scope == "ALL") p.accounts.mapNotNull { it.drawdown.fraction }.maxOrNull()?.let { String.format(java.util.Locale.ROOT, "%.2f%%", it * 100) } else scoped.firstOrNull()?.drawdown?.label) ?: "—", Modifier.weight(1f))
+                        MetricTile("Risk used", p.portfolioHeat.label, Modifier.weight(1f), tint = TradingColors.warning)
+                        MetricTile(
+                            "Drawdown",
+                            (if (scope == "ALL") p.accounts.mapNotNull { it.drawdown.fraction }.maxOrNull()?.let {
+                                String.format(java.util.Locale.ROOT, "%.2f%%", it * 100)
+                            } else scoped.firstOrNull()?.drawdown?.label) ?: "—",
+                            Modifier.weight(1f),
+                        )
                     }
-                    if (p.otherCurrencyAccounts.isNotEmpty()) Text("Totals exclude accounts not in ${p.reportingCurrency}: ${p.otherCurrencyAccounts.joinToString()}", color = TradingColors.muted, fontSize = 10.sp, modifier = Modifier.padding(top = 4.dp))
                 }
             }
         }
+
         item {
-            SectionPanel(title = symbol?.let { "$it · H1" } ?: "Chart", glass = env.glass, action = { (states as? Loaded.Ready)?.value?.map { it.symbol }?.takeIf { it.size > 1 }?.let { syms -> TabRowChips(syms, symbol ?: syms.first()) { symbol = it } } }) {
-                LoadedBox(bars) { b ->
-                    Column {
-                        Row(horizontalArrangement = Arrangement.spacedBy(6.dp), verticalAlignment = Alignment.CenterVertically) {
-                            DataStateChip(b.dataState)
-                            if (b.isSimulated) Chip("SIMULATED DATA", DataState.SIMULATED.argb)
-                            Text("${b.bars.size} bars", color = TradingColors.muted, fontSize = 10.sp)
-                            Spacer(Modifier.weight(1f))
-                            symbol?.let { s -> Text("Open instrument →", color = TradingColors.accent, fontSize = 11.sp, modifier = Modifier.clickable { nav.openInstrument(s) }) }
+            LoadedBox(portfolio) { p ->
+                Column(verticalArrangement = Arrangement.spacedBy(8.dp)) {
+                    Row(horizontalArrangement = Arrangement.spacedBy(8.dp)) {
+                        QuickAccess(
+                            "Open positions",
+                            "${p.openPositions.size} current/working",
+                            Modifier.weight(1f),
+                        ) { nav.openTrades(TradeView.CURRENT) }
+                        QuickAccess(
+                            "Potential trades",
+                            "${p.potential.size} candidate setup(s)",
+                            Modifier.weight(1f),
+                        ) { nav.openTrades(TradeView.POTENTIAL) }
+                    }
+                    Row(horizontalArrangement = Arrangement.spacedBy(8.dp)) {
+                        QuickAccess(
+                            "Recent trades",
+                            "${p.recent.size} ledger result(s)",
+                            Modifier.weight(1f),
+                        ) { nav.openTrades(TradeView.PAST) }
+                        QuickAccess(
+                            "Risk Center",
+                            "Exposure, heat & limits",
+                            Modifier.weight(1f),
+                        ) { nav.openRisk() }
+                    }
+                    Row(horizontalArrangement = Arrangement.spacedBy(8.dp)) {
+                        QuickAccess(
+                            "Accounts",
+                            "${p.accounts.size} registered account(s)",
+                            Modifier.weight(1f),
+                        ) { nav.openAccounts() }
+                        val market = (states as? Loaded.Ready)?.value?.firstOrNull()
+                        QuickAccess(
+                            "Market workspace",
+                            market?.let { "${it.symbol} · ${it.trend}/${it.vol}" } ?: "Open instrument analysis",
+                            Modifier.weight(1f),
+                        ) {
+                            market?.symbol?.let(nav.openInstrument)
                         }
-                        TradeChartCanvas(b.bars, digits = TradingFormat.digitsFor(b.symbol), heightDp = 210)
                     }
                 }
             }
         }
+
         item {
-            SectionPanel(title = "Van Market State", glass = env.glass) {
+            SectionPanel(title = "Van market brief", glass = env.glass) {
                 Row(verticalAlignment = Alignment.CenterVertically) {
-                    VanEmbodiment(state = env.vanState, budget = env.budget, presentation = VanPresentation.COMPACT, modifier = Modifier.size(84.dp))
+                    VanEmbodiment(
+                        state = env.vanState,
+                        budget = env.budget,
+                        presentation = VanPresentation.COMPACT,
+                        modifier = Modifier.size(76.dp),
+                    )
                     Spacer(Modifier.width(10.dp))
                     Column(modifier = Modifier.weight(1f)) {
                         Text(env.vanHeadline, color = TradingColors.accent, fontSize = 12.sp, fontWeight = FontWeight.SemiBold)
                         LoadedBox(states, empty = "No market state yet.") { ms ->
-                            if (ms.isEmpty()) EmptyState("No market state in the ledger yet.", "Start a session: vati-session@<alias>.")
-                            ms.take(3).forEach { m ->
-                                Text(m.summary, color = TradingColors.text, fontSize = 11.sp, modifier = Modifier.clickable { nav.openInstrument(m.symbol) })
-                                Row(horizontalArrangement = Arrangement.spacedBy(6.dp)) { DataStateChip(m.dataState); Chip(m.session, 0xFF5C6BC0L); Chip("${m.trend}/${m.vol}", 0xFF00E5FFL); m.lastDecision?.let { Chip(it, 0xFF78909CL) } }
+                            val m = ms.firstOrNull()
+                            if (m == null) {
+                                EmptyState("No market state in the ledger yet.")
+                            } else {
+                                Text(m.summary, color = TradingColors.text, fontSize = 11.sp)
+                                Row(horizontalArrangement = Arrangement.spacedBy(6.dp)) {
+                                    DataStateChip(m.dataState)
+                                    Chip(m.session, 0xFF5C6BC0L)
+                                }
                             }
                         }
+                        Spacer(Modifier.height(5.dp))
+                        Text(
+                            "Ask Van →",
+                            color = TradingColors.accent,
+                            fontSize = 11.sp,
+                            fontWeight = FontWeight.SemiBold,
+                            modifier = Modifier.clickable { nav.openChat() },
+                        )
                     }
                 }
-                Spacer(Modifier.height(6.dp))
-                Text("Ask Van about this →", color = TradingColors.accent, fontSize = 12.sp, fontWeight = FontWeight.SemiBold, modifier = Modifier.clickable { nav.openChat() })
-            }
-        }
-        item {
-            SectionPanel(title = "Open positions", glass = env.glass, action = { Text("View all →", color = TradingColors.accent, fontSize = 11.sp, modifier = Modifier.clickable { nav.openTrades(TradeView.CURRENT) }) }) {
-                LoadedBox(portfolio) { p ->
-                    val rows = p.openPositions
-                    if (rows.isEmpty()) EmptyState("No open or working trades.", "Potential setups and the Risk Center are one tap away.")
-                    Column(verticalArrangement = Arrangement.spacedBy(6.dp)) { rows.take(6).forEach { r -> TradeRowCard(r) { r.tradeIntentId?.let(nav.openTrade) } } }
-                }
-            }
-        }
-        item {
-            SectionPanel(title = "Potential trades", glass = env.glass, action = { Text("View all →", color = TradingColors.accent, fontSize = 11.sp, modifier = Modifier.clickable { nav.openTrades(TradeView.POTENTIAL) }) }) {
-                LoadedBox(portfolio) { p ->
-                    if (p.potential.isEmpty()) EmptyState("No candidate setups in the latest assessment.")
-                    Column(verticalArrangement = Arrangement.spacedBy(6.dp)) { p.potential.take(6).forEach { r -> TradeRowCard(r) { r.tradeIntentId?.let(nav.openTrade) ?: nav.openInstrument(r.symbol) } } }
-                    Text("Score = uncalibrated rule confidence · never a probability of profit · sizes come only from the Risk Authority", color = TradingColors.muted, fontSize = 9.sp, modifier = Modifier.padding(top = 4.dp))
-                }
-            }
-        }
-        item {
-            SectionPanel(title = "Recent trades", glass = env.glass, action = { Text("View all →", color = TradingColors.accent, fontSize = 11.sp, modifier = Modifier.clickable { nav.openTrades(TradeView.PAST) }) }) {
-                LoadedBox(portfolio) { p ->
-                    if (p.recent.isEmpty()) EmptyState("No closed trades in the ledger yet.")
-                    Column(verticalArrangement = Arrangement.spacedBy(6.dp)) { p.recent.forEach { r -> TradeRowCard(r) { r.tradeIntentId?.let(nav.openTrade) } } }
-                }
-            }
-        }
-        item {
-            SectionPanel(title = "Accounts", glass = env.glass, action = { Text("Manage →", color = TradingColors.accent, fontSize = 11.sp, modifier = Modifier.clickable { nav.openAccounts() }) }) {
-                LoadedBox(portfolio) { p ->
-                    if (p.accounts.isEmpty()) EmptyState("No trading accounts registered.", "Add one on van-trading-core: python -m vati accounts add …")
-                    Column(verticalArrangement = Arrangement.spacedBy(6.dp)) { p.accounts.forEach { AccountRow(it, env.now()) } }
-                }
-            }
-        }
-        item {
-            Row(horizontalArrangement = Arrangement.spacedBy(8.dp)) {
-                QuickAccess("Trade Chat", "Ask Van", Modifier.weight(1f)) { nav.openChat() }
-                QuickAccess("Risk Center", "Exposure & limits", Modifier.weight(1f)) { nav.openRisk() }
-                QuickAccess("Trades", "Past · current · potential", Modifier.weight(1f)) { nav.openTrades(TradeView.CURRENT) }
             }
         }
     }
