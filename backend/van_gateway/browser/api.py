@@ -318,11 +318,26 @@ class BrowserApi:
                 "SELECT COUNT(*) AS count FROM browser_escalations WHERE status = ?",
                 (BrowserEscalationStatus.OPEN.value,),
             )
+            automation_rows = await self.store.fetchall(
+                "SELECT status, COUNT(*) AS count FROM automation_runs GROUP BY status"
+            )
+            automation_counts = {str(r["status"]): int(r["count"]) for r in automation_rows}
+            admitted = await self.store.fetchone(
+                "SELECT COUNT(*) AS count FROM automation_capabilities WHERE lifecycle_state = 'ADMITTED'"
+            )
+            profiles = await self.store.fetchall(
+                "SELECT profile_alias, persistence, authentication, mutation_policy, "
+                "lease_holder, lease_expires_at_ms, last_verified_at_ms FROM browser_profiles "
+                "ORDER BY profile_alias"
+            )
             return {
                 "enabled": self.settings.browser_enabled,
                 "worker_configured": self.worker is not None,
                 "tasks_by_status": counts,
                 "waiting_for_owner": int(waiting["count"]) if waiting else 0,
+                "automation_runs_by_status": automation_counts,
+                "admitted_automation_capabilities": int(admitted["count"]) if admitted else 0,
+                "profiles": [dict(r) for r in profiles],
             }
 
         @router.get("/tasks")
