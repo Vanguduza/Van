@@ -212,7 +212,7 @@ if [[ -n "$PUBLIC_HOST" ]]; then
   if ! command -v caddy >/dev/null 2>&1; then
     if (( DRY_RUN )); then plan "install caddy (apt repo dl.cloudsmith.io/public/caddy/stable)"; else
       apt_install debian-keyring debian-archive-keyring apt-transport-https
-      write_keyring 'https://dl.cloudsmith.io/public/caddy/stable/gpg.key' /etc/apt/keyrings/caddy-stable-archive-keyring.gpg
+      write_keyring 'https://dl.cloudsmith.io/public/caddy/stable/gpg.key' /usr/share/keyrings/caddy-stable-archive-keyring.gpg
       curl -fsSL 'https://dl.cloudsmith.io/public/caddy/stable/debian.deb.txt' > /etc/apt/sources.list.d/caddy-stable.list
       apt_update; apt_install caddy
       command -v caddy >/dev/null 2>&1 || die "caddy missing after install"
