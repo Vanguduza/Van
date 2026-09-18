@@ -395,6 +395,51 @@ class BrowserApi:
                 "profiles": [dict(r) for r in profiles],
             }
 
+        @router.get("/policy")
+        async def browser_policy():
+            policy = self.policy.policy
+            return {
+                "policy_version": policy.policy_version,
+                "admitted_domains": sorted(policy.admitted_domains),
+                "profiles": {
+                    alias: {
+                        "persistence": spec.get("persistence"),
+                        "authentication": spec.get("authentication"),
+                        "mutation": spec.get("mutation"),
+                        "download_policy": spec.get("download_policy"),
+                    }
+                    for alias, spec in policy.profiles.items()
+                },
+                "mutation_default_deny": policy.mutate_default_deny,
+                "download_default_deny": policy.download_default_deny,
+                "raw_cookie_export_forbidden": policy.raw_cookie_export_forbidden,
+                "session_leases_required": policy.session_leases_required,
+                "max_autonomy_tier": policy.max_autonomy_tier,
+                "hard_prohibitions": [
+                    "broker_live_order_submission",
+                    "owner_signing_service",
+                    "raw_cookie_export",
+                    "raw_credential_export",
+                    "automated_payment",
+                ],
+            }
+
+        @router.get("/tasks/{task_id}/evidence")
+        async def task_evidence(task_id: str):
+            await self._load_task(task_id)
+            rows = await self.store.fetchall(
+                """
+                SELECT evidence_id, kind, url_digest, dom_digest, screenshot_digest,
+                       extraction_digest, source_trust, injection_assessment,
+                       contains_secrets, created_at_ms, evidence_json
+                FROM browser_evidence
+                WHERE task_id = ?
+                ORDER BY created_at_ms
+                """,
+                (task_id,),
+            )
+            return [dict(r) for r in rows]
+
         @router.get("/tasks")
         async def list_tasks():
             rows = await self.store.fetchall(
