@@ -24,11 +24,11 @@ def build_sql(template, password):
     reconcile = f"""DO $vati_role$
 BEGIN
   IF NOT EXISTS (SELECT 1 FROM pg_roles WHERE rolname = 'vati') THEN
-    CREATE ROLE vati LOGIN NOSUPERUSER NOCREATEDB NOCREATEROLE;
+    CREATE ROLE vati LOGIN;
   END IF;
 END
 $vati_role$;
-ALTER ROLE vati WITH LOGIN PASSWORD '{escaped}' NOSUPERUSER NOCREATEDB NOCREATEROLE;
+ALTER ROLE vati WITH LOGIN PASSWORD '{escaped}';
 """
     return template.replace(ROLE_STMT, reconcile, 1)
 
