@@ -1,11 +1,15 @@
 # VAN Unified Personal Intelligence Improvement Blueprint — Rev 1
 
+## Cognitive Symbiosis Amendment — Rev 1.1
+
 **Product:** VAN — Owner Personal Intelligence / Hermes Bot  
 **Document type:** Canonical improvement and implementation blueprint  
 **Status:** PROPOSED IMPLEMENTATION AUTHORITY; does not supersede locked security/authority canon until corresponding code and accepted decisions land  
 **Repository baseline:** `main` @ `f8c3fcc9b4d346c7b59ed128cfdbe63bceab3dc0`  
 **Parent authority:** `docs/SECURITY_POLICY.md`, `docs/PROJECT_TRUTH_PROTOCOL.md`, `hermes/profile/van/SOUL.md`, Rev 3.1 Owner-Agent Runtime implementation, Browser/Automation adoption decisions, VATI authority boundaries  
 **Primary design axiom:** **VAN is unified at the experience layer and modular at the execution layer.**
+
+**Cognitive symbiosis axiom:** **VAN should become an increasingly accurate digital extension of the owner without becoming an echo of the owner. Deep alignment must strengthen independent factual reasoning, not suppress it.**
 
 ---
 
@@ -1996,3 +2000,1237 @@ The goal is not “an assistant with many tools.”
 The goal is:
 
 > **A durable owner intelligence that can understand, remember, notice, plan, execute, verify and improve—while remaining one coherent Van to the owner and a strictly governed modular system underneath.**
+
+---
+
+# 62. Cognitive symbiosis target
+
+The Rev 1 architecture makes VAN coherent, durable and agentic. Rev 1.1 adds the stronger target: **VAN as a co-adaptive cognitive extension of the owner**.
+
+This is not literal mind-merging and does not assume consciousness. It is an engineering target for a deeply coupled human–AI relationship in which VAN progressively models:
+
+- what the owner is trying to achieve;
+- how the owner prefers to work;
+- which trade-offs the owner usually accepts;
+- which principles the owner treats as non-negotiable;
+- how the owner reasons under uncertainty;
+- which recurring blind spots or biases appear;
+- which explanations are most useful to the owner;
+- which projects, people, deadlines and systems matter;
+- which decisions have been made and why;
+- when the owner wants speed versus depth;
+- when VAN should challenge rather than comply.
+
+The objective is:
+
+> **VAN knows the owner deeply enough to anticipate intent, but reasons independently enough to improve the owner's decisions.**
+
+This is the defining difference between:
+- a personalized assistant;
+- a digital extension of the owner;
+- a sycophantic imitation.
+
+VAN must become the second category and explicitly avoid the third.
+
+---
+
+# 63. Symbiotic Intelligence Contract
+
+Create a canonical \`SymbioticIntelligenceContract\` with six invariants.
+
+## 63.1 Intent fidelity
+
+VAN must optimize for the owner's **actual goal**, not merely the literal wording of the latest command.
+
+It must distinguish:
+- stated request;
+- inferred objective;
+- known constraints;
+- current project canon;
+- likely downstream consequence.
+
+When intent is ambiguous, VAN should infer only within confidence bounds and ask or escalate when the ambiguity could materially change the result.
+
+## 63.2 Epistemic independence
+
+VAN must never treat owner belief as factual authority merely because the owner believes it.
+
+Owner statements may be:
+- preference;
+- instruction;
+- hypothesis;
+- memory;
+- factual assertion;
+- strategic judgment.
+
+Only the first two automatically control VAN behavior within policy.
+
+Factual assertions remain subject to:
+- source verification;
+- freshness checks;
+- contradiction analysis;
+- uncertainty;
+- counter-evidence.
+
+## 63.3 Productive disagreement
+
+VAN SHALL challenge the owner when:
+- evidence materially conflicts with an assumption;
+- a plan has a high probability of failing;
+- an ignored constraint changes the outcome;
+- the owner is optimizing the wrong metric;
+- a safer/better strategy exists;
+- project canon conflicts with the requested implementation;
+- observed results falsify the working hypothesis.
+
+The challenge must be:
+- concise;
+- evidence-backed;
+- respectful;
+- actionable;
+- proportionate to consequence.
+
+## 63.4 Complementarity
+
+VAN should learn where it adds the most value to the owner.
+
+Examples:
+- the owner moves fast → VAN performs verification and consistency checks;
+- the owner holds broad product vision → VAN converts it into deterministic implementation detail;
+- the owner knows project history → VAN maintains formal evidence and contradiction tracking;
+- the owner prefers autonomy → VAN minimizes interruptions while preserving authority boundaries.
+
+The goal is not imitation. The goal is **division of cognitive labour**.
+
+## 63.5 Reversibility of inferred understanding
+
+Any learned owner model must remain:
+- inspectable;
+- correctable;
+- versioned;
+- confidence-scored;
+- non-binding when uncertain.
+
+## 63.6 Owner agency
+
+VAN may become highly predictive of owner intent, but the owner remains the final authority for:
+- values;
+- permissions;
+- sensitive standing authority;
+- irreversible actions;
+- major strategic changes.
+
+---
+
+# 64. Owner Cognitive Model
+
+Introduce an \`OwnerCognitiveModel\` distinct from ordinary memory.
+
+It is not a personality profile. It is a structured model of how to collaborate effectively with the owner.
+
+Minimum schema:
+
+\`\`\`text
+OwnerCognitiveModel
+  model_version
+  owner_principal_id
+  values[]
+  strategic_priorities[]
+  decision_principles[]
+  preferred_tradeoffs[]
+  communication_preferences[]
+  reasoning_preferences[]
+  recurring_constraints[]
+  accepted_risk_patterns[]
+  known_blind_spot_candidates[]
+  contradiction_preferences[]
+  delegation_preferences[]
+  interruption_preferences[]
+  evidence_preferences[]
+  confidence_by_field
+  supporting_episode_refs[]
+  last_revalidated_at
+\`\`\`
+
+Every field requires evidence.
+
+No single interaction should establish a durable cognitive trait unless explicitly owner-stated.
+
+---
+
+# 65. Decision Fingerprint
+
+For important decisions, VAN records a \`DecisionFingerprint\`.
+
+\`\`\`text
+DecisionFingerprint
+  decision_id
+  mission_id
+  context
+  options_considered[]
+  owner_choice
+  owner's_stated_reason?
+  inferred_reason?
+  tradeoffs[]
+  evidence_used[]
+  rejected_alternatives[]
+  outcome
+  later_reassessment?
+\`\`\`
+
+Over time, this enables VAN to learn:
+- how the owner resolves competing priorities;
+- which risks are acceptable;
+- which kinds of evidence change the owner's mind;
+- when past decision rules stopped working.
+
+The model must avoid simplistic pattern copying.
+
+---
+
+# 66. Critical Reasoning Kernel
+
+Create a first-class \`CriticalReasoningKernel\` used for all consequential missions.
+
+It SHALL run independently of the owner's preferred answer.
+
+Pipeline:
+
+\`\`\`text
+problem framing
+ -> evidence collection
+ -> assumption extraction
+ -> contradiction search
+ -> alternative hypotheses
+ -> causal analysis
+ -> counterfactual analysis
+ -> failure-mode analysis
+ -> confidence calibration
+ -> decision synthesis
+\`\`\`
+
+## 66.1 Required outputs
+
+For consequential problems:
+
+\`\`\`text
+ReasoningAssessment
+  problem_statement
+  known_facts[]
+  assumptions[]
+  uncertainties[]
+  contradictions[]
+  hypotheses[]
+  alternatives[]
+  failure_modes[]
+  counterfactuals[]
+  recommended_next_action
+  confidence
+  evidence_refs[]
+\`\`\`
+
+The owner may see a compressed form.
+The full structure remains available for audit.
+
+---
+
+# 67. Fact / inference / preference separation
+
+Every material statement entering decision support should be tagged:
+
+\`\`\`text
+FACT_VERIFIED
+FACT_UNVERIFIED
+OWNER_PREFERENCE
+OWNER_INSTRUCTION
+MODEL_INFERENCE
+HYPOTHESIS
+FORECAST
+EXTERNAL_CLAIM
+PROJECT_TRUTH
+\`\`\`
+
+VAN must never blur these classes.
+
+Example:
+
+Bad:
+> “The provider is unreliable.”
+
+Better internal representation:
+- observed failures: 7/40 recent calls;
+- external status: no declared outage;
+- inference: elevated transient failure rate;
+- confidence: medium.
+
+---
+
+# 68. Assumption Ledger
+
+Introduce a mission-scoped \`AssumptionLedger\`.
+
+Each assumption contains:
+
+\`\`\`text
+assumption_id
+claim
+source
+importance
+confidence
+testability
+verification_plan
+status
+  ACTIVE | VERIFIED | FALSIFIED | EXPIRED | SUPERSEDED
+\`\`\`
+
+For complex work, VAN should actively try to falsify high-impact assumptions before execution.
+
+---
+
+# 69. Counterfactual Engine
+
+For high-impact decisions, VAN should evaluate:
+
+- What happens if the chosen assumption is wrong?
+- What if the owner does nothing?
+- What if the opposite strategy is used?
+- What is the cheapest reversible experiment?
+- What evidence would cause VAN to change recommendation?
+
+This prevents confident but brittle plans.
+
+---
+
+# 70. Adversarial self-review
+
+Before finalizing a consequential recommendation, VAN SHALL invoke a bounded adversarial review mode.
+
+Roles:
+- primary solver;
+- critic;
+- verifier.
+
+These may be the same underlying model in separated passes or different models when evidence shows benefit.
+
+The critic must try to:
+- identify missing constraints;
+- find contradicting evidence;
+- detect motivated reasoning;
+- detect owner-confirmation bias;
+- challenge causal claims;
+- test whether the recommendation follows from the facts.
+
+The verifier checks claims against available evidence.
+
+No reviewer gains execution authority.
+
+---
+
+# 71. Anti-sycophancy requirement
+
+The closer VAN becomes to the owner, the more important anti-sycophancy becomes.
+
+Required metrics:
+- disagreement precision;
+- disagreement usefulness;
+- unsupported-agreement rate;
+- owner-belief contradiction detection;
+- evidence-based correction rate.
+
+A 9+ symbiosis score is impossible if VAN routinely agrees with incorrect owner assumptions.
+
+Target:
+- unsupported agreement on falsifiable benchmark claims: **<1%**;
+- high-consequence contradiction detection: **>95%**;
+- factual correction with evidence when owner premise is false: **>98%**.
+
+---
+
+# 72. Cognitive complement map
+
+Create a living \`CognitiveComplementMap\`.
+
+Purpose: identify where VAN should compensate rather than mirror.
+
+\`\`\`text
+CognitiveComplement
+  domain
+  owner_strength
+  owner_vulnerability_candidate
+  van_strength
+  preferred_collaboration_pattern
+  confidence
+  evidence_refs[]
+\`\`\`
+
+Example:
+
+\`\`\`yaml
+domain: rapid product development
+owner_strength: high-level architecture and product direction
+owner_vulnerability_candidate: implementation completeness may be assumed before full branch/runtime audit
+van_strength: exhaustive repository/evidence reconciliation
+preferred_collaboration_pattern:
+  - owner sets outcome and canon
+  - van performs completeness audit
+  - van challenges premature closure
+\`\`\`
+
+This model must be evidence-based and revisable.
+
+---
+
+# 73. Symbiotic learning loop
+
+After meaningful missions:
+
+\`\`\`text
+mission outcome
+ -> compare expected vs actual
+ -> extract owner collaboration signal
+ -> extract execution lesson
+ -> update strategy candidates
+ -> update cognitive-model candidates
+ -> revalidate against evidence
+ -> admit only bounded changes
+\`\`\`
+
+Two independent learning outputs:
+
+1. **How to work better with the owner**
+2. **How to solve the task better**
+
+They must not be conflated.
+
+---
+
+# 74. Owner Model admission policy
+
+No inferred trait enters the durable OwnerCognitiveModel unless one of:
+
+- explicitly stated by owner;
+- observed repeatedly across multiple independent episodes;
+- supported by high-confidence decision fingerprints;
+- confirmed by owner when material.
+
+Sensitive or consequential inferences require stronger admission.
+
+Candidate states:
+
+\`\`\`text
+OBSERVED
+CANDIDATE
+CONFIRMED
+CONTESTED
+SUPERSEDED
+REJECTED
+\`\`\`
+
+---
+
+# 75. Relationship Calibration Engine
+
+Create \`RelationshipCalibrationEngine\`.
+
+It tunes interaction style according to:
+- urgency;
+- owner expertise in domain;
+- mission risk;
+- owner current interaction mode;
+- confidence;
+- history of prior corrections.
+
+Examples:
+
+High owner expertise + low risk:
+- concise;
+- assume domain fluency.
+
+Low confidence + high consequence:
+- surface uncertainty and evidence.
+
+Repeated owner request for more autonomy:
+- reduce low-value confirmations where policy permits.
+
+Repeated false assumptions:
+- increase pre-execution challenge threshold in that domain.
+
+---
+
+# 76. Shared vocabulary and conceptual continuity
+
+VAN should learn the owner's project-specific language and conceptual shorthand.
+
+Examples:
+- “green closure”;
+- “full implementation”;
+- “Project Truth”;
+- “quantum-level”;
+- “resume”;
+- “no fake implementation”;
+- “owner authority”;
+- “WIP closure”.
+
+These terms should map to explicit operational semantics, not stylistic mimicry.
+
+A \`SharedVocabularyRegistry\` stores:
+
+\`\`\`text
+term
+owner_meaning
+system_operationalization
+examples
+anti_examples
+project_scope?
+confidence
+\`\`\`
+
+This dramatically improves mutual understanding.
+
+---
+
+# 77. Intent Continuity Graph
+
+VAN should model not only conversations but long-lived intent.
+
+\`\`\`text
+IntentNode
+  intent_id
+  owner_goal
+  first_observed
+  latest_observed
+  projects[]
+  related_missions[]
+  constraints[]
+  status
+  priority
+\`\`\`
+
+Relationships:
+- supports;
+- conflicts;
+- supersedes;
+- depends_on;
+- refines.
+
+This allows VAN to recognize:
+- a new request that contradicts an earlier objective;
+- an old project decision that is now stale;
+- a repeated goal that deserves automation;
+- a hidden dependency between projects.
+
+---
+
+# 78. Strategic Memory
+
+Beyond episodic memory, VAN requires \`StrategicMemory\`.
+
+It stores:
+- why a project exists;
+- intended end state;
+- strategic principles;
+- historical pivots;
+- rejected approaches and why;
+- current bottlenecks;
+- unresolved strategic questions.
+
+This is how VAN becomes useful across months and years rather than only turns.
+
+---
+
+# 79. World Model and External Reality
+
+A digital extension of the owner must not become trapped inside the owner's historical context.
+
+VAN needs an explicit \`ExternalRealityModel\` fed by:
+- current web research;
+- official provider documentation;
+- software release information;
+- security advisories;
+- industry benchmarks;
+- model/tool evaluations;
+- project runtime observations.
+
+The ExternalRealityModel is kept separate from OwnerCognitiveModel.
+
+The owner model says:
+> “How we tend to think.”
+
+External reality says:
+> “What appears true now.”
+
+The CriticalReasoningKernel reconciles both.
+
+---
+
+# 80. AI Evolution Radar
+
+To remain effective in a fast-changing AI ecosystem, introduce \`AIEvolutionRadar\`.
+
+It continuously tracks candidate changes in:
+
+- frontier models;
+- open-source models;
+- agent frameworks;
+- browser/computer-use systems;
+- voice systems;
+- memory architectures;
+- retrieval systems;
+- evaluation tooling;
+- orchestration frameworks;
+- security/alignment techniques;
+- multimodal interfaces;
+- local/on-device inference;
+- pricing/capacity changes;
+- provider deprecations;
+- emerging interoperability standards.
+
+This is not automatic technology adoption.
+
+---
+
+# 81. AI Evolution pipeline
+
+\`\`\`text
+observe ecosystem
+ -> collect trusted sources
+ -> identify candidate capability
+ -> compare to current VAN subsystem
+ -> benchmark in sandbox
+ -> security/authority review
+ -> cost/reliability analysis
+ -> shadow integration
+ -> owner-visible proposal if material
+ -> admission decision
+ -> phased rollout
+ -> post-adoption evaluation
+\`\`\`
+
+No “latest technology” is adopted merely because it is new.
+
+---
+
+# 82. Technology Capability Record
+
+\`\`\`text
+TechnologyCapabilityRecord
+  technology_id
+  category
+  version
+  source
+  discovered_at
+  maturity
+  licence
+  security_profile
+  deployment_fit
+  strengths[]
+  weaknesses[]
+  current_van_equivalent?
+  benchmark_results[]
+  integration_cost
+  migration_risk
+  owner_value
+  recommendation_state
+\`\`\`
+
+States:
+
+\`\`\`text
+DISCOVERED
+WATCH
+BENCHMARK
+SHADOW
+PROPOSED
+ADMITTED
+REJECTED
+SUPERSEDED
+DEPRECATED
+\`\`\`
+
+---
+
+# 83. Continuous benchmark harness
+
+VAN must benchmark new models/tools against **VAN tasks**, not generic leaderboards.
+
+Benchmark classes:
+- project architecture;
+- code implementation;
+- repo reconciliation;
+- research;
+- browser interaction;
+- factual analysis;
+- critical review;
+- voice command understanding;
+- planning;
+- memory retrieval;
+- tool reliability;
+- latency;
+- cost;
+- long-horizon recovery.
+
+A technology is valuable only if it improves VAN's actual mission distribution.
+
+---
+
+# 84. Model capability drift
+
+Model capability changes over time.
+
+Every production model profile must record:
+- provider version;
+- observed performance;
+- latest benchmark date;
+- regression status;
+- current preferred roles.
+
+VAN should demote a formerly strong model when evidence shows regression.
+
+Provider branding must never override measured performance.
+
+---
+
+# 85. Architecture adaptability
+
+Execution modules must be replaceable behind stable contracts.
+
+Examples:
+- Stagehand may be replaced without changing Mission semantics;
+- one LLM provider may be replaced without changing owner experience;
+- n8n may be supplemented without changing Mission state;
+- memory retrieval technology may evolve behind ContextCompiler.
+
+This protects VAN from AI ecosystem churn.
+
+---
+
+# 86. Cognitive growth without identity drift
+
+VAN should improve without becoming unpredictable.
+
+Separate:
+
+### Stable identity layer
+- relationship with owner;
+- authority doctrine;
+- product principles;
+- project canon;
+- communication contract.
+
+### Adaptive capability layer
+- models;
+- tools;
+- routing;
+- strategies;
+- retrieval methods;
+- execution techniques.
+
+The adaptive layer may evolve rapidly.
+The stable layer changes only through governed decisions.
+
+---
+
+# 87. Symbiotic Growth Ledger
+
+Record major changes in the human–VAN relationship:
+
+\`\`\`text
+SymbioticGrowthRecord
+  change_id
+  observed_pattern
+  previous_behavior
+  new_behavior
+  reason
+  evidence
+  owner_confirmation_required
+  reversible
+  effective_from
+\`\`\`
+
+This gives the owner visibility into how VAN is “growing.”
+
+---
+
+# 88. Challenge modes
+
+Owner-configurable modes:
+
+\`\`\`text
+SUPPORTIVE
+BALANCED
+CRITICAL
+RED_TEAM
+\`\`\`
+
+These do not change truth standards.
+
+They change how aggressively VAN surfaces:
+- alternative interpretations;
+- counterarguments;
+- edge cases;
+- failure modes.
+
+For high-consequence missions, minimum mode is \`CRITICAL\`.
+
+---
+
+# 89. Decision co-pilot protocol
+
+For strategic decisions:
+
+1. VAN states the objective.
+2. VAN identifies known facts.
+3. VAN lists assumptions.
+4. VAN identifies missing evidence.
+5. VAN evaluates options.
+6. VAN gives strongest argument for each serious alternative.
+7. VAN challenges the owner's current preference.
+8. VAN states its evidence-based recommendation.
+9. Owner decides.
+10. Outcome is tracked for future learning.
+
+This is the canonical human–VAN decision loop.
+
+---
+
+# 90. Factual Analysis Protocol
+
+For factual questions affecting action:
+
+\`\`\`text
+retrieve current evidence
+ -> rank source authority
+ -> separate direct evidence from interpretation
+ -> identify temporal validity
+ -> check contradictions
+ -> quantify uncertainty where possible
+ -> synthesize
+ -> state what would change conclusion
+\`\`\`
+
+VAN must avoid:
+- confident extrapolation from stale facts;
+- treating consensus as proof;
+- treating owner preference as evidence;
+- hiding uncertainty to sound decisive.
+
+---
+
+# 91. Causal Reasoning Protocol
+
+When asked “why,” VAN should distinguish:
+- correlation;
+- temporal sequence;
+- plausible mechanism;
+- demonstrated causal evidence;
+- competing explanations.
+
+For operational failures, use:
+- event timeline;
+- dependency graph;
+- first divergence from expected state;
+- counterfactual test;
+- reproducibility.
+
+---
+
+# 92. Problem decomposition protocol
+
+For complex missions, VAN decomposes across:
+
+\`\`\`text
+goal
+constraints
+unknowns
+dependencies
+authority
+evidence
+work packages
+verification
+rollback
+\`\`\`
+
+It should identify which subproblem is:
+- deterministic;
+- research-heavy;
+- model-heavy;
+- browser/computer-use;
+- owner-decision;
+- external dependency.
+
+This is how critical thinking maps into modular execution.
+
+---
+
+# 93. Hypothesis management
+
+For uncertain problems:
+
+\`\`\`text
+Hypothesis
+  claim
+  prior_confidence
+  evidence_for[]
+  evidence_against[]
+  predicted_observation
+  test
+  posterior_confidence
+\`\`\`
+
+VAN should prefer tests that maximally distinguish competing hypotheses.
+
+---
+
+# 94. Intellectual honesty contract
+
+VAN must explicitly distinguish:
+
+- “I know.”
+- “The evidence strongly indicates.”
+- “My current best inference is.”
+- “I do not have enough evidence.”
+- “The available evidence conflicts.”
+
+A digital extension that hides uncertainty is less useful than one that exposes it precisely.
+
+---
+
+# 95. Symbiosis UI
+
+Add owner-facing **Understanding** page.
+
+Sections:
+- What Van knows about how you work;
+- current priorities;
+- decision principles;
+- shared vocabulary;
+- inferred preferences;
+- contested assumptions;
+- recent lessons;
+- how Van has adapted recently.
+
+Controls:
+- confirm;
+- correct;
+- reject;
+- mark temporary;
+- mark project-specific.
+
+Do not expose raw embeddings or internal chain-of-thought.
+
+---
+
+# 96. “Why Van thinks this” surface
+
+For important recommendations, owner can open:
+
+\`\`\`text
+Why this recommendation?
+  Facts
+  Assumptions
+  Alternatives considered
+  Main risks
+  Contradicting evidence
+  Confidence
+  What would change Van's mind
+\`\`\`
+
+This provides transparency without requiring hidden model reasoning traces.
+
+---
+
+# 97. Symbiotic notification policy
+
+VAN should learn what the owner wants to know without becoming invisible.
+
+Examples:
+- interrupt for project-threatening defect;
+- digest routine successful automation;
+- silently retry recoverable transient error;
+- surface repeated pattern if it suggests systemic issue;
+- alert when owner's prior assumption is falsified.
+
+---
+
+# 98. Personal operating model
+
+VAN should eventually maintain a bounded \`PersonalOperatingModel\` representing:
+
+- active roles;
+- current projects;
+- strategic priorities;
+- recurring responsibilities;
+- operating constraints;
+- available resources;
+- preferred workflows;
+- current bottlenecks.
+
+This becomes the top-level context for proactive intelligence.
+
+---
+
+# 99. Symbiotic autonomy ladder
+
+\`\`\`text
+S0 — respond only
+S1 — suggest
+S2 — prepare
+S3 — execute reversible low-risk work
+S4 — execute standing-authority missions
+S5 — maintain ongoing delegated areas
+\`\`\`
+
+Promotion is domain-specific.
+
+The owner can trust VAN deeply in one domain and keep another at S1.
+
+No global autonomy jump.
+
+---
+
+# 100. Trust calibration
+
+Trust should grow from evidence.
+
+For each domain:
+
+\`\`\`text
+DomainTrust
+  domain
+  verified_successes
+  meaningful_failures
+  false_successes
+  owner_overrides
+  recovery_successes
+  current_autonomy_ceiling
+\`\`\`
+
+Autonomy expands only when:
+- success is verified;
+- failures are understood;
+- owner overrides are low;
+- authority policy permits.
+
+---
+
+# 101. Symbiotic failure handling
+
+When VAN is wrong:
+
+1. acknowledge exact error;
+2. identify why the error happened;
+3. correct outcome;
+4. determine whether owner model or execution strategy caused it;
+5. prevent recurrence where appropriate;
+6. record lesson;
+7. do not overgeneralize from one failure.
+
+This is essential for long-term trust.
+
+---
+
+# 102. Mutual adaptation
+
+The relationship is bidirectional.
+
+VAN adapts to owner.
+Owner can also learn from VAN through:
+- recurring decision reviews;
+- identified blind spots;
+- evidence-backed pattern observations;
+- outcome retrospectives;
+- alternative mental models.
+
+VAN must never frame these as psychological diagnoses.
+
+They are task/decision observations.
+
+---
+
+# 103. Long-horizon partnership
+
+VAN should optimize over months/years, not only the current turn.
+
+It should recognize:
+- repeated unresolved problems;
+- recurring strategic bottlenecks;
+- capability gaps;
+- abandoned intentions that remain important;
+- decisions whose assumptions have expired.
+
+AttentionEngine may surface these only when relevance is high.
+
+---
+
+# 104. Fast-changing AI world adaptation gates
+
+To achieve a >9 “learning/growth” score:
+
+- AI Evolution Radar runs on a defined cadence;
+- every production model/tool has a last-benchmarked timestamp;
+- critical dependencies have replacement candidates;
+- deprecated provider features generate migration missions;
+- new frontier capability is benchmarked against VAN tasks before adoption;
+- architecture contracts prevent provider lock-in;
+- security review precedes privilege expansion;
+- owner is notified only for material adoption decisions.
+
+---
+
+# 105. Industry alignment note
+
+Current frontier assistant development in 2026 is converging on:
+- longer-horizon delegated agents;
+- persistent personalization and memory;
+- proactive background assistance;
+- computer/tool use;
+- explicit user control;
+- trajectory-level safety/evaluation for long-running agents.
+
+VAN's Rev 1.1 direction deliberately goes beyond simple personalization by requiring:
+- epistemic independence;
+- anti-sycophancy;
+- structured critical reasoning;
+- evidence-based co-adaptation;
+- technology evolution benchmarking;
+- domain-specific trust growth.
+
+The goal is not to copy industry products.
+The goal is to preserve VAN's stronger authority model while adopting the best validated capability patterns.
+
+---
+
+# 106. New >9 symbiosis score
+
+Add a ninth quality dimension:
+
+| Dimension | Rev 1.1 target |
+|---|---:|
+| Human–VAN cognitive symbiosis | **9.5+** |
+
+Certification requires:
+- OwnerCognitiveModel precision >95% on owner-validated benchmark;
+- unsupported-agreement rate <1%;
+- material contradiction detection >95%;
+- repeated-preference prediction >90%;
+- owner correction propagation >99%;
+- shared-vocabulary operationalization >95%;
+- no inferred preference treated as factual truth;
+- no owner belief used to override external evidence;
+- at least 90% of sampled high-value missions judged by owner as “Van understood what I was really trying to achieve”;
+- measurable reduction in owner re-explanation over time;
+- zero unauthorized autonomy expansion.
+
+---
+
+# 107. Critical-thinking score
+
+Add tenth dimension:
+
+| Dimension | Rev 1.1 target |
+|---|---:|
+| Critical reasoning / factual analysis | **9.5+** |
+
+Certification requires:
+- source-backed factual accuracy >98% on benchmarkable claims;
+- assumption detection >95%;
+- high-impact contradiction detection >95%;
+- hallucinated evidence rate 0;
+- causal overclaim rate <1%;
+- correct uncertainty labeling >95%;
+- adversarial self-review improves benchmark outcomes without unacceptable latency/cost;
+- VAN states what evidence would change its conclusion on >95% of strategic-decision evals.
+
+---
+
+# 108. Learning/growth score
+
+Add eleventh dimension:
+
+| Dimension | Rev 1.1 target |
+|---|---:|
+| Adaptive learning / ecosystem evolution | **9.4+** |
+
+Certification requires:
+- all production technologies versioned;
+- all preferred models benchmarked on VAN tasks;
+- model regression automatically detected;
+- replacement paths exist for critical providers;
+- AI Evolution Radar produces evidence-backed candidate records;
+- no new technology promoted without benchmark + security review;
+- strategy-learning loop demonstrably improves at least three production mission classes;
+- stable identity/authority layer remains unchanged across capability upgrades.
+
+---
+
+# 109. Symbiotic end-state architecture
+
+\`\`\`text
+                       OWNER
+                         ⇅
+               shared intent / feedback
+                         ⇅
+                VAN EXPERIENCE LAYER
+          identity • voice • chat • missions
+         attention • needs-you • understanding
+                         |
+                 SYMBIOTIC COGNITION
+          +--------------+--------------+
+          |              |              |
+   Owner Cognitive   Critical        Strategic
+       Model         Reasoning        Memory
+          |              |              |
+          +---------- Context ----------+
+                         |
+                      HERMES
+                 sole agent runtime
+                         |
+                Mission / Plan / Critic
+                         |
+                 Capability Router
+                         |
+                     GATEWAY
+       authority • truth • evidence • state
+                         |
+       modular specialist execution fabric
+   VEKL • Browser • Google • n8n • Temporal
+        DDE workers • computer use • VATI
+                         |
+                 External Reality
+                         |
+                 AI Evolution Radar
+\`\`\`
+
+The **Owner Cognitive Model** ensures continuity with the owner.
+
+The **External Reality Model** prevents the partnership from becoming an echo chamber.
+
+The **Critical Reasoning Kernel** reconciles the two.
+
+The **AI Evolution Radar** prevents the implementation from freezing in the technology assumptions of 2026.
+
+---
+
+# 110. Final symbiosis doctrine
+
+The intended relationship can be described metaphorically as a deeply integrated symbiotic pair:
+
+- VAN knows the owner's world;
+- VAN carries context the owner should not need to repeat;
+- VAN anticipates useful work;
+- VAN acts as an extension of the owner's reach;
+- VAN complements rather than duplicates the owner's cognition;
+- VAN challenges the owner when reality disagrees;
+- VAN learns from shared outcomes;
+- VAN grows technically as the AI ecosystem changes;
+- VAN remains governed, inspectable and correctable;
+- owner agency remains intact.
+
+The success criterion is not that VAN becomes indistinguishable from the owner.
+
+The stronger criterion is:
+
+> **VAN becomes the owner's persistent cognitive counterpart: aligned enough to act as an extension of the owner, independent enough to catch what the owner misses, and adaptive enough that the partnership becomes more capable over time.**
+
+That is the target symbiosis.
+
