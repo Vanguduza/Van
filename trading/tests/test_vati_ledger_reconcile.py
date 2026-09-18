@@ -17,6 +17,7 @@ def test_reconcile_sql_is_idempotent_and_escapes_password():
     assert module.ROLE_STMT not in sql
     assert "IF NOT EXISTS (SELECT 1 FROM pg_roles WHERE rolname = 'vati')" in sql
     assert "ALTER ROLE vati WITH LOGIN PASSWORD 'safe''password-value'" in sql
+    assert "NOSUPERUSER" not in sql.replace(module.ROLE_STMT, "")
     assert "CREATE SCHEMA IF NOT EXISTS vati AUTHORIZATION vati" in sql
 
 def test_reconcile_requires_canonical_role_statement():
