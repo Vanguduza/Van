@@ -63,6 +63,9 @@ android {
         }
         debug {
             isMinifyEnabled = false
+            // Owner test builds install alongside any previously signed com.dial.van APK.
+            applicationIdSuffix = ".test"
+            versionNameSuffix = "-owner-test"
         }
     }
 
