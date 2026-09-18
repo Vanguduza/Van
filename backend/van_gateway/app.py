@@ -33,6 +33,7 @@ from van_gateway.automation.dispatch import AutomationDispatcher
 from van_gateway.automation.grants import RunGrantService
 from van_gateway.automation.health import AutomationHealthApi
 from van_gateway.automation.registry import AutomationRegistry, HotWorkflowIndex
+from van_gateway.browser.api import BrowserApi
 from van_gateway.command.authority import CommandAuthorityService
 from van_gateway.command.standing import StandingAutomationAuthorityService
 from van_gateway.runtime_api import OwnerRuntimeApi
@@ -161,6 +162,9 @@ def create_app() -> FastAPI:
         standing=StandingAutomationAuthorityService(store, owner_runtime.authority),
         dispatcher=automation_dispatcher,
     )
+    # No worker is configured: the semantic worker is a separate private service
+    # and the gateway refuses an assignment rather than pretending to run one.
+    browser = BrowserApi(store, settings)
 
     trading = TradingService(
         settings.vati_ledger_path,
@@ -234,6 +238,7 @@ def create_app() -> FastAPI:
     app.state.automation_registry = automation_registry
     app.state.automation_hot_index = automation_hot_index
     app.state.automation_dispatcher = automation_dispatcher
+    app.state.browser = browser
     app.state.decisions = decisions
     app.state.projects = projects
     app.state.reminders = reminders
@@ -242,6 +247,7 @@ def create_app() -> FastAPI:
     app.include_router(owner_runtime.router)
     app.include_router(automation_health.router)
     app.include_router(automation.router)
+    app.include_router(browser.router)
 
     def internal_control_route(method: str, path: str) -> bool:
         if path.startswith("/v1/runtime/"):
@@ -253,7 +259,7 @@ def create_app() -> FastAPI:
         # §§219-222 — the whole automation control surface is Hermes-only. It never
         # accepts owner ingress, so a compromised ingress token cannot compile,
         # admit or publish a capability.
-        if path.startswith("/v1/automation/"):
+        if path.startswith("/v1/automation/") or path.startswith("/v1/browser/"):
             return True
         if method == "PUT" and path.startswith("/v1/projects/") and path.endswith("/truth"):
             return True
