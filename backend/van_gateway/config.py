@@ -53,6 +53,27 @@ class Settings(BaseSettings):
     exa_egress_enabled: bool = False
     exa_timeout_seconds: float = 20.0
 
+    # Rev 1.3 Automation & Browser Fabric. All switches default OFF and
+    # runtime credentials remain in the gateway environment/secret plane.
+    automation_enabled: bool = False
+    automation_ingress_enabled: bool = False
+    automation_egress_enabled: bool = False
+    automation_n8n_base_url: str = "http://127.0.0.1:5678/api/v1"
+    automation_n8n_api_key: str = ""
+    automation_n8n_expected_version: str = ""
+    automation_grant_signing_key: str = ""
+    automation_grant_ttl_seconds: int = 300
+    automation_timeout_seconds: float = 15.0
+    automation_max_concurrency: int = 1
+
+    browser_enabled: bool = False
+    browser_harness_base_url: str = "http://127.0.0.1:9141"
+    browser_harness_expected_version: str = ""
+    browser_stagehand_base_url: str = "http://127.0.0.1:9140"
+    browser_stagehand_expected_version: str = ""
+    browser_stagehand_model_provider: str = ""
+    browser_stagehand_model_name: str = ""
+
     # Rev 3.1 knowledge-source capability plane. These providers emit evidence
     # or verified mutation receipts only; none can promote itself to owner truth.
     vekl_enabled: bool = False
