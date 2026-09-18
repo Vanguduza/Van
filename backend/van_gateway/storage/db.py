@@ -8,7 +8,7 @@ from typing import Any, AsyncIterator
 
 import aiosqlite
 
-SCHEMA_VERSION = 5
+SCHEMA_VERSION = 6
 
 MIGRATIONS: dict[int, str] = {
     1: """
@@ -364,6 +364,252 @@ MIGRATIONS: dict[int, str] = {
 
     CREATE INDEX IF NOT EXISTS idx_research_evidence_research
       ON research_evidence(research_id, retrieved_at_unix_ms);
+    """,
+    6: """
+    -- Rev 1.3 §152/§411 Automation & Browser Fabric.  One semantic migration carrying
+    -- automation capability/artifact/run/event/intent state, the standing-automation
+    -- authority root, durable run-grant nonces, and browser task/evidence/profile state.
+
+    CREATE TABLE IF NOT EXISTS automation_capabilities (
+      capability_id TEXT PRIMARY KEY,
+      semantic_name TEXT NOT NULL,
+      engine TEXT NOT NULL,
+      runtime_workflow_ref TEXT,
+      action_class TEXT NOT NULL,
+      mutates_state INTEGER NOT NULL,
+      input_schema_json TEXT NOT NULL,
+      output_schema_json TEXT NOT NULL,
+      allowed_principals_json TEXT NOT NULL,
+      allowed_origin_channels_json TEXT NOT NULL,
+      latency_class TEXT NOT NULL,
+      duration_class TEXT NOT NULL,
+      required_context_json TEXT NOT NULL,
+      required_credentials_json TEXT NOT NULL,
+      verifier_type TEXT NOT NULL,
+      idempotency_policy TEXT NOT NULL,
+      evidence_policy TEXT NOT NULL,
+      lifecycle_state TEXT NOT NULL,
+      workflow_ir_digest TEXT NOT NULL,
+      policy_version TEXT NOT NULL,
+      compiler_version TEXT NOT NULL,
+      created_at_ms INTEGER NOT NULL,
+      updated_at_ms INTEGER NOT NULL
+    );
+
+    CREATE INDEX IF NOT EXISTS idx_automation_capabilities_state
+      ON automation_capabilities(lifecycle_state, semantic_name);
+
+    CREATE TABLE IF NOT EXISTS automation_artifacts (
+      artifact_id TEXT PRIMARY KEY,
+      capability_id TEXT NOT NULL,
+      version INTEGER NOT NULL,
+      workflow_ir_digest TEXT NOT NULL,
+      compiled_semantic_digest TEXT NOT NULL,
+      compiled_full_digest TEXT NOT NULL,
+      n8n_workflow_id TEXT,
+      compiler_version TEXT NOT NULL,
+      node_catalog_version TEXT NOT NULL,
+      policy_version TEXT NOT NULL,
+      source_refs_json TEXT NOT NULL,
+      validation_report_digest TEXT,
+      lifecycle_state TEXT NOT NULL,
+      created_at_ms INTEGER NOT NULL,
+      validated_at_ms INTEGER,
+      admitted_at_ms INTEGER,
+      UNIQUE(capability_id, version),
+      FOREIGN KEY(capability_id) REFERENCES automation_capabilities(capability_id)
+    );
+
+    CREATE INDEX IF NOT EXISTS idx_automation_artifacts_cap
+      ON automation_artifacts(capability_id, version);
+
+    CREATE TABLE IF NOT EXISTS automation_runs (
+      run_id TEXT PRIMARY KEY,
+      capability_id TEXT NOT NULL,
+      artifact_id TEXT NOT NULL,
+      command_id TEXT,
+      turn_id TEXT,
+      execution_id TEXT,
+      n8n_execution_id TEXT,
+      status TEXT NOT NULL,
+      action_class TEXT NOT NULL,
+      input_digest TEXT NOT NULL,
+      output_digest TEXT,
+      evidence_pointer TEXT,
+      verifier_status TEXT,
+      error_code TEXT,
+      started_at_ms INTEGER NOT NULL,
+      submitted_at_ms INTEGER,
+      verified_at_ms INTEGER,
+      completed_at_ms INTEGER,
+      updated_at_ms INTEGER NOT NULL
+    );
+
+    CREATE INDEX IF NOT EXISTS idx_automation_runs_cap_time
+      ON automation_runs(capability_id, started_at_ms);
+
+    CREATE INDEX IF NOT EXISTS idx_automation_runs_exec
+      ON automation_runs(execution_id);
+
+    CREATE TABLE IF NOT EXISTS automation_external_events (
+      event_id TEXT PRIMARY KEY,
+      source_system TEXT NOT NULL,
+      source_account_alias TEXT,
+      event_type TEXT NOT NULL,
+      observed_at_ms INTEGER,
+      received_at_ms INTEGER NOT NULL,
+      payload_schema_id TEXT NOT NULL,
+      payload_digest TEXT NOT NULL,
+      source_trust TEXT NOT NULL,
+      sensitivity TEXT NOT NULL,
+      dedupe_key TEXT NOT NULL UNIQUE,
+      evidence_pointer TEXT,
+      payload_json TEXT NOT NULL
+    );
+
+    CREATE INDEX IF NOT EXISTS idx_external_events_type_time
+      ON automation_external_events(event_type, received_at_ms);
+
+    CREATE TABLE IF NOT EXISTS automation_standing_intents (
+      intent_id TEXT PRIMARY KEY,
+      owner_goal TEXT NOT NULL,
+      trigger_json TEXT NOT NULL,
+      scope_json TEXT NOT NULL,
+      allowed_effects_json TEXT NOT NULL,
+      expires_at_ms INTEGER,
+      capability_id TEXT NOT NULL,
+      workflow_version INTEGER NOT NULL,
+      action_class TEXT NOT NULL,
+      owner_approval_ref TEXT,
+      enabled INTEGER NOT NULL,
+      created_at_ms INTEGER NOT NULL,
+      updated_at_ms INTEGER NOT NULL
+    );
+
+    CREATE INDEX IF NOT EXISTS idx_standing_intents_cap
+      ON automation_standing_intents(capability_id, enabled);
+
+    -- Rev 1.3 §389.  The owner-authorized root from which a scheduled/event run derives an
+    -- ordinary CommandAuthorityRecord.  source_device_id is the revocation root (§392) and is
+    -- deliberately NOT NULL: §394 forbids making device binding optional for automation.
+    CREATE TABLE IF NOT EXISTS standing_automation_authorities (
+      authority_id TEXT PRIMARY KEY,
+      standing_intent_id TEXT NOT NULL,
+      source_command_id TEXT NOT NULL,
+      source_device_id TEXT NOT NULL,
+      source_turn_id TEXT,
+      source_snapshot_id TEXT NOT NULL,
+      source_context_digest TEXT NOT NULL,
+      principal_type TEXT NOT NULL,
+      requested_by TEXT NOT NULL,
+      capability_id TEXT NOT NULL,
+      artifact_id TEXT NOT NULL,
+      workflow_version INTEGER NOT NULL,
+      action_class_ceiling TEXT NOT NULL,
+      trigger_digest TEXT NOT NULL,
+      parameter_constraints_json TEXT NOT NULL,
+      parameter_constraints_digest TEXT NOT NULL,
+      allowed_effects_json TEXT NOT NULL,
+      allowed_domains_json TEXT NOT NULL,
+      issued_at_ms INTEGER NOT NULL,
+      expires_at_ms INTEGER,
+      revoked_at_ms INTEGER,
+      owner_authority_evidence_ref TEXT NOT NULL,
+      policy_version TEXT NOT NULL,
+      FOREIGN KEY(standing_intent_id) REFERENCES automation_standing_intents(intent_id)
+    );
+
+    CREATE INDEX IF NOT EXISTS idx_standing_authorities_intent
+      ON standing_automation_authorities(standing_intent_id, revoked_at_ms);
+
+    CREATE INDEX IF NOT EXISTS idx_standing_authorities_device
+      ON standing_automation_authorities(source_device_id, revoked_at_ms);
+
+    -- Rev 1.3 §§160-161, 412.  Durable replay protection for run capability grants.
+    -- In-memory-only replay protection is explicitly not acceptable.
+    CREATE TABLE IF NOT EXISTS automation_run_nonces (
+      nonce_hash TEXT PRIMARY KEY,
+      grant_id TEXT NOT NULL,
+      run_id TEXT NOT NULL,
+      command_id TEXT NOT NULL,
+      capability_id TEXT NOT NULL,
+      artifact_id TEXT NOT NULL,
+      artifact_version INTEGER NOT NULL,
+      standing_authority_id TEXT,
+      context_snapshot_id TEXT NOT NULL,
+      input_digest TEXT NOT NULL,
+      action_class_ceiling TEXT NOT NULL,
+      allowed_operations_json TEXT NOT NULL,
+      allowed_domains_json TEXT NOT NULL,
+      grant_kind TEXT NOT NULL,
+      max_uses INTEGER NOT NULL DEFAULT 1,
+      use_count INTEGER NOT NULL DEFAULT 0,
+      status TEXT NOT NULL,
+      issued_at_ms INTEGER NOT NULL,
+      expires_at_ms INTEGER NOT NULL,
+      consumed_at_ms INTEGER,
+      revoked_at_ms INTEGER
+    );
+
+    CREATE INDEX IF NOT EXISTS idx_run_nonces_run
+      ON automation_run_nonces(run_id, status);
+
+    CREATE INDEX IF NOT EXISTS idx_run_nonces_grant
+      ON automation_run_nonces(grant_id);
+
+    CREATE TABLE IF NOT EXISTS browser_tasks (
+      task_id TEXT PRIMARY KEY,
+      command_id TEXT,
+      execution_id TEXT,
+      capability_id TEXT,
+      profile_alias TEXT NOT NULL,
+      strategy TEXT NOT NULL,
+      autonomy_tier TEXT NOT NULL,
+      action_class TEXT NOT NULL,
+      target_domain TEXT NOT NULL,
+      goal TEXT NOT NULL,
+      status TEXT NOT NULL,
+      evidence_pointer TEXT,
+      error_code TEXT,
+      started_at_ms INTEGER NOT NULL,
+      completed_at_ms INTEGER,
+      updated_at_ms INTEGER NOT NULL
+    );
+
+    CREATE INDEX IF NOT EXISTS idx_browser_tasks_status
+      ON browser_tasks(status, started_at_ms);
+
+    CREATE TABLE IF NOT EXISTS browser_evidence (
+      evidence_id TEXT PRIMARY KEY,
+      task_id TEXT NOT NULL,
+      kind TEXT NOT NULL,
+      url_digest TEXT NOT NULL,
+      dom_digest TEXT,
+      screenshot_digest TEXT,
+      extraction_digest TEXT,
+      source_trust TEXT NOT NULL,
+      injection_assessment TEXT NOT NULL,
+      contains_secrets INTEGER NOT NULL DEFAULT 0,
+      created_at_ms INTEGER NOT NULL,
+      evidence_json TEXT NOT NULL,
+      FOREIGN KEY(task_id) REFERENCES browser_tasks(task_id)
+    );
+
+    CREATE INDEX IF NOT EXISTS idx_browser_evidence_task
+      ON browser_evidence(task_id, created_at_ms);
+
+    CREATE TABLE IF NOT EXISTS browser_profiles (
+      profile_alias TEXT PRIMARY KEY,
+      persistence TEXT NOT NULL,
+      authentication TEXT NOT NULL,
+      mutation_policy TEXT NOT NULL,
+      secret_ref TEXT,
+      lease_holder TEXT,
+      lease_expires_at_ms INTEGER,
+      last_verified_at_ms INTEGER,
+      created_at_ms INTEGER NOT NULL,
+      updated_at_ms INTEGER NOT NULL
+    );
     """,
 }
 

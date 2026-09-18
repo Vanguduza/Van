@@ -8,7 +8,7 @@
 #   repo checkout, venv with requirements-vm.txt [+ nautilus_trader at --with-nautilus]
 #   local Supabase (PostgreSQL authority store) with fresh secrets and the VATI ledger schema
 #   systemd: vati-supabase, vati-vekl, vati-commander, vati-session@<alias> (enabled per account)
-#   ufw: deny incoming; 22 and 9133 from the private VCN only
+#   ufw: deny incoming; 22 and 9133 only from oracle-admin + dial-hermes-control /32s
 #
 # MetaTrader 5 CANNOT run on this host: MT5 is a Windows x86-64 program and this VM is ARM64
 # Linux. The MT5 bridge worker runs on a Windows host (windows/mt5_worker) and this VM holds only
@@ -21,14 +21,14 @@ set -euo pipefail
 
 DRY_RUN=0; WITH_NAUTILUS=0; SKIP_SUPABASE=0; SKIP_DOCKER=0; PUBLIC_HOST="${VAN_PUBLIC_HOST:-}"
 REPO_URL="${VAN_REPO_URL:-https://github.com/Vanguduza/Van.git}"
-BRANCH="${VAN_BRANCH:-claude/van-autonomous-trader-r81vyn}"
+BRANCH="${VAN_BRANCH:-main}"
 for a in "$@"; do case "$a" in
   --dry-run) DRY_RUN=1;; --with-nautilus) WITH_NAUTILUS=1;; --skip-supabase) SKIP_SUPABASE=1;; --skip-docker) SKIP_DOCKER=1;;
   --repo-url=*) REPO_URL="${a#*=}";; --branch=*) BRANCH="${a#*=}";; --public-host=*) PUBLIC_HOST="${a#*=}";;
   *) echo "unknown arg $a" >&2; exit 2;; esac; done
 
 BASE=/opt/van-trading; APP=$BASE/app; VENV=$BASE/venv; SECRETS=$BASE/secrets; CONFIG=$BASE/config; DATA=/var/lib/van-trading; LOGS=/var/log/van-trading
-VCN_CIDR="${VAN_VCN_CIDR:-10.0.0.0/16}"; CORE_IP="${VAN_CORE_IP:-10.0.1.233}"
+ADMIN_CIDRS="${VAN_ADMIN_CIDRS:-10.0.0.123/32,10.0.0.184/32}"; CORE_IP="${VAN_CORE_IP:-10.0.1.233}"
 HERE="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
 STEPS=(); ok() { STEPS+=("OK   $1"); echo "[bootstrap] OK   $1"; }; skip() { STEPS+=("SKIP $1"); echo "[bootstrap] SKIP $1"; }; plan() { STEPS+=("PLAN $1"); echo "[bootstrap] PLAN $1"; }
 run() { if (( DRY_RUN )); then plan "$*"; else "$@"; fi; }
@@ -46,31 +46,60 @@ if (( ! MT5_NATIVE )); then echo "[bootstrap] NOTE: $ARCH host — MetaTrader 5 
 
 # ---------------------------------------------------------------- packages
 export DEBIAN_FRONTEND=noninteractive
+export NEEDRESTART_MODE="${NEEDRESTART_MODE:-a}"
+apt_update() {
+  local n
+  for n in $(seq 1 60); do
+    apt-get -o Acquire::Retries=3 update -qq && return 0
+    echo "[bootstrap] apt update retry $n/60" >&2; sleep 5
+  done
+  die "apt update did not succeed within retry window"
+}
+apt_install() {
+  local n
+  for n in $(seq 1 60); do
+    apt-get -o Acquire::Retries=3 install -y -qq --no-install-recommends "$@" >/dev/null && return 0
+    echo "[bootstrap] apt install retry $n/60: $*" >&2; sleep 5
+  done
+  die "apt install did not succeed within retry window: $*"
+}
+write_keyring() {
+  local url="$1" out="$2" tmp
+  tmp="$(mktemp)"; rm -f "$tmp"
+  curl -fsSL "$url" | gpg --batch --yes --dearmor -o "$tmp"
+  install -m 0644 "$tmp" "$out"; rm -f "$tmp"
+}
 if (( ! DRY_RUN )); then
-  apt-get update -qq
-  apt-get install -y -qq --no-install-recommends ca-certificates curl gnupg git jq ufw openssl build-essential python3.12 python3.12-venv python3-pip python3-yaml rsync >/dev/null
+  apt_update
+  apt_install ca-certificates curl gnupg git jq ufw openssl build-essential python3.12 python3.12-venv python3-pip python3-yaml rsync
 fi
-ok "apt base packages (python3.12, venv, yaml, ufw, openssl, jq, git)"
 python3.12 --version >/dev/null 2>&1 || (( DRY_RUN )) || die "python3.12 missing after install"
+for b in curl gpg git jq ufw openssl rsync; do command -v "$b" >/dev/null 2>&1 || (( DRY_RUN )) || die "$b missing after base package install"; done
+ok "apt base packages (python3.12, venv, yaml, ufw, openssl, jq, git)"
 
-if ! command -v node >/dev/null 2>&1 || [[ "$(node -v | cut -c2- | cut -d. -f1)" -lt 20 ]]; then
+if ! command -v node >/dev/null 2>&1 || [[ "$(node -v | cut -c2- | cut -d. -f1)" -ne 22 ]]; then
   if (( DRY_RUN )); then plan "install Node 22 from NodeSource (deb.nodesource.com/node_22.x, key verified via signing key)"; else
     install -m 0755 -d /etc/apt/keyrings
-    curl -fsSL https://deb.nodesource.com/gpgkey/nodesource-repo.gpg.key | gpg --dearmor -o /etc/apt/keyrings/nodesource.gpg
+    write_keyring https://deb.nodesource.com/gpgkey/nodesource-repo.gpg.key /etc/apt/keyrings/nodesource.gpg
     echo "deb [signed-by=/etc/apt/keyrings/nodesource.gpg] https://deb.nodesource.com/node_22.x nodistro main" > /etc/apt/sources.list.d/nodesource.list
-    apt-get update -qq && apt-get install -y -qq nodejs >/dev/null
+    apt_update; apt_install nodejs
   fi
+  command -v node >/dev/null 2>&1 || (( DRY_RUN )) || die "node missing after install"
+  (( DRY_RUN )) || [[ "$(node -v | cut -c2- | cut -d. -f1)" -ge 20 ]] || die "node version too old after install: $(node -v)"
   ok "node 22"
 else skip "node $(node -v) present"; fi
 
 if (( ! SKIP_DOCKER )); then
-  if ! command -v docker >/dev/null 2>&1; then
+  if ! command -v docker >/dev/null 2>&1 || ! docker compose version >/dev/null 2>&1; then
     if (( DRY_RUN )); then plan "install docker-ce + compose plugin from download.docker.com (arm64)"; else
       install -m 0755 -d /etc/apt/keyrings
-      curl -fsSL https://download.docker.com/linux/ubuntu/gpg | gpg --dearmor -o /etc/apt/keyrings/docker.gpg
+      write_keyring https://download.docker.com/linux/ubuntu/gpg /etc/apt/keyrings/docker.gpg
       echo "deb [arch=$(dpkg --print-architecture) signed-by=/etc/apt/keyrings/docker.gpg] https://download.docker.com/linux/ubuntu ${VERSION_CODENAME} stable" > /etc/apt/sources.list.d/docker.list
-      apt-get update -qq && apt-get install -y -qq docker-ce docker-ce-cli containerd.io docker-compose-plugin >/dev/null
+      apt_update; apt_install docker-ce docker-ce-cli containerd.io docker-compose-plugin
+      command -v docker >/dev/null 2>&1 || die "docker missing after install"
+      docker compose version >/dev/null 2>&1 || die "docker compose plugin missing after install"
       systemctl enable --now docker
+      systemctl is-active --quiet docker || die "docker service not active after enable"
     fi
     ok "docker engine + compose plugin"
   else skip "docker present"; fi
@@ -109,11 +138,43 @@ if [[ ! -f "$CONFIG/accounts.json" ]]; then run bash -c "echo '{\"schema_version
 if (( ! SKIP_SUPABASE )); then
   run install -d -o root -g root -m 0750 "$BASE/supabase" "$BASE/supabase/init"
   run rsync -a --chown=root:root "$HERE/supabase/docker-compose.yml" "$HERE/supabase/docker-compose.override.yml" "$HERE/supabase/env.example" "$HERE/supabase/DONOR_PROVENANCE.json" "$BASE/supabase/"
+  [[ -d "$HERE/supabase/volumes" ]] || die "vendored Supabase volumes tree missing"
+  for rel in api/envoy/cds.yaml api/envoy/docker-entrypoint.sh api/envoy/envoy.yaml api/envoy/lds.template.yaml db/_supabase.sql db/jwt.sql db/logs.sql db/pooler.sql db/realtime.sql db/roles.sql db/webhooks.sql pooler/pooler.exs; do
+    [[ -f "$HERE/supabase/volumes/$rel" ]] || die "required Supabase bind source missing: volumes/$rel"
+  done
+  run rsync -a --chown=root:root "$HERE/supabase/volumes/" "$BASE/supabase/volumes/"
   run rsync -a "$HERE/supabase/init/01_vati_ledger.sql.tpl" "$BASE/supabase/init/"
   if [[ ! -f "$BASE/supabase/.env" ]]; then run bash "$HERE/supabase/generate-env.sh" "$BASE/supabase/.env"; ok "supabase secrets generated (0600)"; else skip "supabase .env exists"; fi
   if (( ! DRY_RUN )); then
     PW="$(grep '^VATI_LEDGER_PASSWORD=' "$BASE/supabase/.env" | cut -d= -f2-)"
-    sed -i "s#__VATI_LEDGER_PASSWORD__#${PW}#" "$CONFIG/van-trading-core.env"
+    [[ -n "$PW" ]] || die "VATI_LEDGER_PASSWORD missing from Supabase env"
+    [[ ! -d "$BASE/supabase/init/01_vati_ledger.sql" ]] || die "ledger init path is a directory, not a file"
+    python3 - "$BASE/supabase/.env" "$HERE/supabase/init/01_vati_ledger.sql.tpl" "$BASE/supabase/init/01_vati_ledger.sql" "$CONFIG/van-trading-core.env" <<'PY'
+import os, re, sys
+src_env, tpl_path, sql_path, core_path = sys.argv[1:5]
+vals = {}
+for line in open(src_env, encoding="utf-8"):
+    if "=" in line and not line.lstrip().startswith("#"):
+        k, v = line.rstrip("\n").split("=", 1); vals[k] = v
+pw = vals.get("VATI_LEDGER_PASSWORD", "")
+if not pw: raise SystemExit("VATI_LEDGER_PASSWORD missing")
+sql = open(tpl_path, encoding="utf-8").read().replace("__VATI_LEDGER_PASSWORD__", pw.replace("'", "''"))
+os.makedirs(os.path.dirname(sql_path), mode=0o750, exist_ok=True)
+fd = os.open(sql_path, os.O_WRONLY|os.O_CREAT|os.O_TRUNC, 0o600)
+with os.fdopen(fd, "w", encoding="utf-8") as f: f.write(sql)
+core = open(core_path, encoding="utf-8").read()
+uri = f"postgres://vati:{pw}@127.0.0.1:5432/postgres"
+if re.search(r"^VAN_COMMANDER_LEDGER=.*$", core, re.M):
+    core = re.sub(r"^VAN_COMMANDER_LEDGER=.*$", "VAN_COMMANDER_LEDGER="+uri, core, flags=re.M)
+else:
+    core += "\nVAN_COMMANDER_LEDGER=" + uri + "\n"
+with open(core_path, "w", encoding="utf-8") as f: f.write(core)
+os.chmod(sql_path, 0o600)
+PY
+    chown root:root "$BASE/supabase/init/01_vati_ledger.sql"
+    chmod 0640 "$CONFIG/van-trading-core.env"
+    chown root:vati "$CONFIG/van-trading-core.env"
+    [[ -f "$BASE/supabase/init/01_vati_ledger.sql" ]] || die "ledger init SQL was not materialized"
     (cd "$BASE/supabase" && docker compose --env-file .env pull -q) || die "supabase image pull failed (arm64 images must resolve)"
   else plan "docker compose pull (supabase arm64 images)"; fi
   run install -m 0644 "$HERE/systemd/vati-supabase.service" /etc/systemd/system/vati-supabase.service
@@ -131,31 +192,52 @@ run systemctl enable --now vati-commander.service
 run systemctl enable --now vati-mt5-pull.service
 ok "systemd units installed and enabled (sessions: systemctl enable --now vati-session@<alias> after adding an account)"
 
+# ---------------------------------------------------------------- automation + browser fabric
+if [[ -n "$PUBLIC_HOST" ]]; then
+  if (( DRY_RUN )); then plan "bootstrap self-hosted n8n automation fabric"; else VAN_PUBLIC_HOST="$PUBLIC_HOST" bash "$HERE/automation/bootstrap-automation-fabric.sh"; fi
+  ok "self-hosted n8n automation fabric"
+else
+  (( DRY_RUN )) || die "--public-host is required for the complete production bootstrap"
+fi
+VEKL_WORKER_HOST="${VAN_VEKL_WORKER_HOST:-}"
+if [[ -n "$VEKL_WORKER_HOST" ]]; then
+  if (( DRY_RUN )); then plan "bootstrap Stagehand/Playwright/Temporal runtime for VEKL worker $VEKL_WORKER_HOST"; else VAN_VEKL_WORKER_HOST="$VEKL_WORKER_HOST" bash "$HERE/browser/bootstrap-browser-runtime.sh"; fi
+  ok "browser development runtime foundation"
+else
+  (( DRY_RUN )) || die "VAN_VEKL_WORKER_HOST is required for complete production bootstrap"
+fi
+
 # ---------------------------------------------------------------- public TLS front for the MT5 pull bridge (optional)
 if [[ -n "$PUBLIC_HOST" ]]; then
   if ! command -v caddy >/dev/null 2>&1; then
     if (( DRY_RUN )); then plan "install caddy (apt repo dl.cloudsmith.io/public/caddy/stable)"; else
-      apt-get install -y -qq debian-keyring debian-archive-keyring apt-transport-https >/dev/null
-      curl -fsSL 'https://dl.cloudsmith.io/public/caddy/stable/gpg.key' | gpg --dearmor -o /etc/apt/keyrings/caddy-stable-archive-keyring.gpg
+      apt_install debian-keyring debian-archive-keyring apt-transport-https
+      write_keyring 'https://dl.cloudsmith.io/public/caddy/stable/gpg.key' /etc/apt/keyrings/caddy-stable-archive-keyring.gpg
       curl -fsSL 'https://dl.cloudsmith.io/public/caddy/stable/debian.deb.txt' > /etc/apt/sources.list.d/caddy-stable.list
-      apt-get update -qq && apt-get install -y -qq caddy >/dev/null
+      apt_update; apt_install caddy
+      command -v caddy >/dev/null 2>&1 || die "caddy missing after install"
     fi
   fi
   run install -m 0644 "$HERE/caddy/Caddyfile" /etc/caddy/Caddyfile
   run bash -c "grep -q '^VAN_PUBLIC_HOST=' '$CONFIG/van-trading-core.env' && sed -i 's#^VAN_PUBLIC_HOST=.*#VAN_PUBLIC_HOST=$PUBLIC_HOST#' '$CONFIG/van-trading-core.env' || echo 'VAN_PUBLIC_HOST=$PUBLIC_HOST' >> '$CONFIG/van-trading-core.env'"
   run bash -c "mkdir -p /etc/systemd/system/caddy.service.d && printf '[Service]\nEnvironment=VAN_PUBLIC_HOST=%s\n' '$PUBLIC_HOST' > /etc/systemd/system/caddy.service.d/van.conf"
   run systemctl daemon-reload; run systemctl enable --now caddy
+  (( DRY_RUN )) || systemctl is-active --quiet caddy || die "caddy service not active after enable"
   ok "caddy public TLS front for $PUBLIC_HOST → 127.0.0.1:9443 (Let's Encrypt; ports 80/443 must be open to the internet for ACME + the EA)"
 else skip "public host for the MT5 pull bridge (pass --public-host=<dns> when using VanBridgeEA)"; fi
 
 # ---------------------------------------------------------------- firewall
 if (( ! DRY_RUN )); then
   ufw --force reset >/dev/null; ufw default deny incoming >/dev/null; ufw default allow outgoing >/dev/null
-  ufw allow from "$VCN_CIDR" to any port 22 proto tcp >/dev/null
-  ufw allow from "$VCN_CIDR" to any port 9133 proto tcp >/dev/null
+  IFS=',' read -r -a admin_cidrs <<< "$ADMIN_CIDRS"
+  for cidr in "${admin_cidrs[@]}"; do
+    [[ "$cidr" =~ ^10\.0\.[0-9]+\.[0-9]+/32$ ]] || die "invalid admin CIDR: $cidr"
+    ufw allow from "$cidr" to any port 22 proto tcp >/dev/null
+    ufw allow from "$cidr" to any port 9133 proto tcp >/dev/null
+  done
   if [[ -n "$PUBLIC_HOST" ]]; then ufw allow 80/tcp >/dev/null; ufw allow 443/tcp >/dev/null; fi
   ufw --force enable >/dev/null
-else plan "ufw: deny incoming; allow 22/tcp and 9133/tcp from $VCN_CIDR; 9134 and 5432 stay loopback"; fi
+else plan "ufw: deny incoming; allow 22/tcp and 9133/tcp from $ADMIN_CIDRS; 9134 and 5432 stay loopback"; fi
 ok "firewall"
 
 # ---------------------------------------------------------------- record

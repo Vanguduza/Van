@@ -1,0 +1,22 @@
+policy_version: van-automation-policy-1
+allowed_action_classes: [A1, A2, A3, A4]
+prohibited_effects:
+  - FINANCIAL_EXECUTION
+  - AUTHORITY_WRITE
+  - OWNER_IDENTITY_MUTATION
+cold_auto_admit:
+  A1: true
+  A2: true
+  A3: false
+  A4: false
+community_nodes:
+  allowed: false
+code_nodes:
+  generated_allowed: false
+workflow_limits:
+  max_steps: 40
+  max_branches: 10
+  max_external_domains: 8
+verification:
+  engine_success_is_owner_success: false
+  consequential_effects_require_postcondition_verifier: true

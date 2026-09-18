@@ -116,6 +116,71 @@ CATALOG: dict[DegradedCode, DegradedCapability] = {
         will_not_do="Report trading status, list owner tickets, record owner halts or ticket confirmations",
         restore_action="Restore the ledger file (VAN_VATI_LEDGER_PATH) or run `python -m vati replay-verify`",
     ),
+    # Rev 1.3 §§99-100, 421 — automation/browser failures degrade only their own
+    # surface. VAN reasoning, VATI and the native paths keep working.
+    DegradedCode.AUTOMATION_FABRIC_UNAVAILABLE: DegradedCapability(
+        code=DegradedCode.AUTOMATION_FABRIC_UNAVAILABLE,
+        broken="Self-hosted n8n automation fabric unreachable or not admitted",
+        still_works="VAN reasoning, VATI trading, browser fabric, native integrations",
+        will_not_do="n8n-backed automations, background integration routines, event workflows",
+        restore_action="Start the pinned n8n stack on the Trading Core VM and re-run tools/certification/certify_automation_runtime.py",
+    ),
+    DegradedCode.AUTOMATION_WORKFLOW_DEGRADED: DegradedCapability(
+        code=DegradedCode.AUTOMATION_WORKFLOW_DEGRADED,
+        broken="One or more admitted workflows failed health checks and left HOT",
+        still_works="Other admitted workflows, native and browser execution paths",
+        will_not_do="Route owner requests through the degraded workflow",
+        restore_action="Inspect the workflow run history, repair as a new artifact version and re-admit",
+    ),
+    DegradedCode.AUTOMATION_CREDENTIAL_EXPIRED: DegradedCapability(
+        code=DegradedCode.AUTOMATION_CREDENTIAL_EXPIRED,
+        broken="An integration credential held by the automation fabric is expired or rejected",
+        still_works="Workflows not bound to that credential alias",
+        will_not_do="Execute workflows requiring the expired connector",
+        restore_action="Re-authorize the connector and re-provision the credential alias",
+    ),
+    DegradedCode.AUTOMATION_COMPILER_UNAVAILABLE: DegradedCapability(
+        code=DegradedCode.AUTOMATION_COMPILER_UNAVAILABLE,
+        broken="Workflow compiler or its policy/node catalog cannot load",
+        still_works="Existing HOT workflows already deployed to n8n",
+        will_not_do="Compile, repair or admit new workflow capabilities",
+        restore_action="Restore config/automation/* policy files and verify the node catalog version",
+    ),
+    DegradedCode.AUTOMATION_SECURITY_AUDIT_FAILED: DegradedCapability(
+        code=DegradedCode.AUTOMATION_SECURITY_AUDIT_FAILED,
+        broken="The n8n security audit reported material findings",
+        still_works="Read-only inspection of automation state",
+        will_not_do="Admit new workflows or activate automations until findings are cleared",
+        restore_action="Review AutomationSecurityEvidence, remediate the findings and re-run the audit",
+    ),
+    DegradedCode.AUTOMATION_INGRESS_DISABLED: DegradedCapability(
+        code=DegradedCode.AUTOMATION_INGRESS_DISABLED,
+        broken="External webhook ingress is disabled pending owner security amendment",
+        still_works="Scheduled and owner-triggered automations, all native paths",
+        will_not_do="Accept inbound external events from providers",
+        restore_action="Record owner approval of VAN-AMEND-SECURITY-POLICY-001 and set VAN_AUTOMATION_INGRESS_ENABLED=1",
+    ),
+    DegradedCode.BROWSER_HARNESS_UNAVAILABLE: DegradedCapability(
+        code=DegradedCode.BROWSER_HARNESS_UNAVAILABLE,
+        broken="Deterministic browser actuator (Browser Harness) unreachable or unpinned",
+        still_works="API, n8n and native capability paths; semantic browser if configured",
+        will_not_do="Deterministic browser workflows and browser evidence capture",
+        restore_action="Start the pinned browser-harness runtime and re-run tools/certification/certify_browser_fabric.py",
+    ),
+    DegradedCode.BROWSER_SEMANTIC_UNAVAILABLE: DegradedCapability(
+        code=DegradedCode.BROWSER_SEMANTIC_UNAVAILABLE,
+        broken="Semantic browser (Stagehand) unreachable or model provider unconfigured",
+        still_works="Deterministic Browser Harness workflows, API/n8n/native paths",
+        will_not_do="Semantic observation, typed extraction and workflow discovery",
+        restore_action="Configure the gateway-held model provider and start the pinned Stagehand worker",
+    ),
+    DegradedCode.BROWSER_PROFILE_AUTH_REQUIRED: DegradedCapability(
+        code=DegradedCode.BROWSER_PROFILE_AUTH_REQUIRED,
+        broken="A managed browser profile lost its authenticated session",
+        still_works="Public research profile and every other admitted profile",
+        will_not_do="Authenticated operations against that one service",
+        restore_action="Re-authenticate the profile through the owner browser access path; secrets stay in the session broker",
+    ),
 }
 
 

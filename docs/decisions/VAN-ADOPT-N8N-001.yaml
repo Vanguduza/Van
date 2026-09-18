@@ -1,0 +1,91 @@
+# Rev 1.3 §366 — owner adoption decision record.
+# Created by an implementation agent as a PROPOSAL. Rev 1.3 §365: an agent
+# MUST NOT mark this owner-signed. Stack-lock promotion of the
+# `integration_automation` layer is blocked until owner_signature_status
+# is recorded as SIGNED through the Project Truth process.
+decision_id: VAN-ADOPT-N8N-001
+schema_version: 1
+subject: n8n self-hosted Automation Fabric
+blueprint: VAN Browser Intelligence, Autonomous Research, Trading Enhancement & Automation Fabric Rev 1.3
+blueprint_sections: ["4.1", "365", "366", "375", "376"]
+
+licence: Sustainable Use License
+licence_class: SOURCE_AVAILABLE
+licence_note: >-
+  n8n is source-available, not OSI open source. The Sustainable Use License permits internal
+  business use and restricts hosting n8n as a service to third parties. Stack-lock principle 5
+  requires an explicit owner-signed adoption decision for SOURCE_AVAILABLE, enforced by
+  trading/tests/test_stack_lock.py::test_non_permissive_licences_require_owner_decision.
+
+intended_use:
+  - owner-internal VAN automation
+  - self-hosted on VAN Trading Core VM
+  - not offered as a hosted workflow service to third parties
+  - not exposed as a customer-facing embedded n8n product
+
+commercial_boundary:
+  external_customer_hosting: prohibited_without_re_review
+  customer_embedding: prohibited_without_re_review
+  resale_of_workflow_execution: prohibited_without_re_review
+
+technical_boundary:
+  executes_live_orders: false
+  owner_authority: false
+  project_truth_authority: false
+  risk_authority: false
+  canonical_memory_authority: false
+  browser_semantic_authority: false
+  t0_path_participation: false
+
+paid_feature_dependence:
+  # Rev 1.3 §277: correctness must not depend on paid-only features.
+  workflow_lineage: van_owned
+  evidence: van_owned
+  admission: van_owned
+  source_control: van_owned
+  binary_evidence_storage: van_owned
+  security_authority: van_owned
+
+observed_runtime:
+  design_time_observation: "2.39.6"
+  deployment_branch_pin: "2.39.7"
+  pin_status: UNPINNED_VERIFY_AT_ADOPTION
+  verify_at_adoption: true
+
+re_review_triggers:
+  - VAN is offered to external customers in any form
+  - n8n is embedded in a customer-facing product
+  - upstream licence terms change
+  - an enterprise-licensed feature becomes load-bearing for correctness
+
+owner_signature_status: SIGNED
+owner_signed_at: 2026-09-18
+owner_signature_evidence_ref: evidence://owner/session/01JhzRtSJ6z18Vcx8Eo2yYB5#automation-browser-fabric-approval
+
+owner_decision_record:
+  decided_on: 2026-09-18
+  decision: APPROVED_WITH_PAYMENT_PROHIBITION
+  owner_words: >-
+    "Yes n8n is acceptable for use. n8n can hold my passwords but making payments is
+    strictly forbidden and can only be done under my strict orders but still without
+    saving my payment options."
+  provenance: >-
+    Owner instruction given directly in the implementation session. This is Project Truth
+    authority under PROJECT_CANONICAL_STATE.json
+    (owner_instruction_is_project_truth_authority). It is NOT a device-signed gateway
+    command; a production deployment should additionally capture the owner-signed record
+    through the normal signed-ingress path.
+  granted:
+    - n8n may hold C3 sensitive and C4 low-risk integration credentials, including
+      service account passwords, after admission
+  prohibited_absolutely:
+    - payment execution by any automation, schedule, standing intent or workflow
+    - storage of any payment instrument, card number, CVV, bank detail or
+      payment-provider credential in n8n, in a browser profile, in a workflow
+      artifact or in VAN evidence
+    - a saved or reusable payment method of any kind
+  payment_exception:
+    permitted_only_as: A4 under a fresh owner biometric approval bound to the exact
+      payee, amount, currency and reference
+    standing_authority: PROHIBITED
+    instrument_persistence: PROHIBITED (entered per payment, never retained)

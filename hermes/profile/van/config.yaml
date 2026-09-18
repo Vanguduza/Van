@@ -59,6 +59,8 @@ skills:
     - infrastructure-diagnostics
     - hermes-administration
     - trading-intelligence
+    - automation-fabric
+    - browser-intelligence
 
 bot:
   chat_spec: bot/BOT_CHAT.md
