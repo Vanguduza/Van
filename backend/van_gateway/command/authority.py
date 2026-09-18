@@ -2,6 +2,7 @@ from __future__ import annotations
 
 import json
 import time
+from enum import Enum
 from typing import Any
 
 from pydantic import BaseModel, Field
@@ -13,6 +14,11 @@ from van_gateway.storage.db import Store
 
 class CommandAuthorityError(ValueError):
     pass
+
+
+class AuthoritySource(str, Enum):
+    OWNER_COMMAND = "OWNER_COMMAND"
+    STANDING_AUTOMATION = "STANDING_AUTOMATION"
 
 
 class CommandAuthorityRecord(BaseModel):
@@ -33,6 +39,9 @@ class CommandAuthorityRecord(BaseModel):
     owner_approved: bool = False
     turn_id: str | None = None
     sealed_at_unix_ms: int
+    authority_source: AuthoritySource = AuthoritySource.OWNER_COMMAND
+    source_authority_id: str | None = None
+    source_command_id: str | None = None
 
 
 _RANK = {ActionClass.A1: 1, ActionClass.A2: 2, ActionClass.A3: 3, ActionClass.A4: 4, ActionClass.A5: 5}
