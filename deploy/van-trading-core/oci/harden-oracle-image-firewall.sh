@@ -97,11 +97,11 @@ if [[ -n "$PUBLIC_HOST" ]]; then
   iptables -C INPUT -p tcp -m state --state NEW -m tcp --dport 443 -m comment --comment "VAN_TRADING_MANAGED public-https" -j ACCEPT >/dev/null 2>&1 || die "live public rule missing for 443"
 fi
 
-reject_line="$(iptables -L INPUT --line-numbers -n | awk '$2=="REJECT"{print $1; exit}')"
+rules="$(iptables -S INPUT)"
+reject_line="$(printf '%s\n' "$rules" | awk 'index($0,"-j REJECT --reject-with icmp-host-prohibited"){print NR; exit}')"
 [[ -n "$reject_line" ]] || die "OCI reject rule missing"
 for cidr in "${CIDRS[@]}"; do
-  src="${cidr%/32}"
-  rule_line="$(iptables -L INPUT --line-numbers -n | awk -v s="$src" '$2=="ACCEPT" && $5==s && $9=="dpt:9133"{print $1; exit}')"
+  rule_line="$(printf '%s\n' "$rules" | awk -v s="$cidr" 'index($0,"-s " s " ") && index($0,"--dport 9133") && index($0,"VAN_TRADING_MANAGED commander"){print NR; exit}')"
   [[ -n "$rule_line" && "$rule_line" -lt "$reject_line" ]] || die "Commander rule for $cidr is not before OCI reject"
 done
 
