@@ -74,10 +74,53 @@ class BrowserTaskStatus(str, Enum):
     PENDING = "PENDING"
     LEASED = "LEASED"
     RUNNING = "RUNNING"
+    WAITING_FOR_OWNER = "WAITING_FOR_OWNER"
+    RESUME_AUTHORIZED = "RESUME_AUTHORIZED"
+    VERIFYING = "VERIFYING"
     COMPLETED = "COMPLETED"
     FAILED = "FAILED"
     DENIED = "DENIED"
+    BLOCKED_POLICY = "BLOCKED_POLICY"
+    BLOCKED_UNSAFE = "BLOCKED_UNSAFE"
     CANCELLED = "CANCELLED"
+    EXPIRED = "EXPIRED"
+
+
+class BrowserBoundaryType(str, Enum):
+    BOUNDED_SAFE_EXTENSION = "BOUNDED_SAFE_EXTENSION"
+    OWNER_EXTENSION_REQUIRED = "OWNER_EXTENSION_REQUIRED"
+    POLICY_FORBIDDEN = "POLICY_FORBIDDEN"
+    AMBIGUOUS_OR_UNSAFE = "AMBIGUOUS_OR_UNSAFE"
+
+
+class BrowserEscalationStatus(str, Enum):
+    OPEN = "OPEN"
+    APPROVED = "APPROVED"
+    REJECTED = "REJECTED"
+    EXPIRED = "EXPIRED"
+
+
+class BrowserEscalation(BaseModel):
+    escalation_id: str
+    task_id: str
+    decision_id: str
+    boundary_type: BrowserBoundaryType
+    reason_code: str
+    summary: str
+    why_required: str
+    risk_summary: str = ""
+    current_scope: dict[str, Any] = Field(default_factory=dict)
+    requested_scope_delta: dict[str, Any] = Field(default_factory=dict)
+    current_action_class: ActionClass
+    required_action_class: ActionClass | None = None
+    pending_step: str | None = None
+    evidence_refs: list[str] = Field(default_factory=list)
+    session_lease_ref: str | None = None
+    idempotency_key: str
+    status: BrowserEscalationStatus = BrowserEscalationStatus.OPEN
+    created_at_ms: int
+    updated_at_ms: int
+    expires_at_ms: int | None = None
 
 
 class HarnessMode(str, Enum):
@@ -179,6 +222,9 @@ class BrowserWorkflowCapsule(BaseModel):
 
 __all__ = [
     "AutonomyTier",
+    "BrowserBoundaryType",
+    "BrowserEscalation",
+    "BrowserEscalationStatus",
     "BrowserEvidence",
     "BrowserObservation",
     "BrowserStrategy",
