@@ -164,7 +164,7 @@ def create_app() -> FastAPI:
     )
     # No worker is configured: the semantic worker is a separate private service
     # and the gateway refuses an assignment rather than pretending to run one.
-    browser = BrowserApi(store, settings)
+    browser = BrowserApi(store, settings, decisions=decisions)
 
     trading = TradingService(
         settings.vati_ledger_path,
@@ -259,8 +259,12 @@ def create_app() -> FastAPI:
         # §§219-222 — the whole automation control surface is Hermes-only. It never
         # accepts owner ingress, so a compromised ingress token cannot compile,
         # admit or publish a capability.
-        if path.startswith("/v1/automation/") or path.startswith("/v1/browser/"):
+        if path.startswith("/v1/automation/"):
             return True
+        # Owner Android may inspect browser truth through authenticated GETs.
+        # Browser mutations/assignments remain Hermes internal-control only.
+        if path.startswith("/v1/browser/"):
+            return method != "GET"
         if method == "PUT" and path.startswith("/v1/projects/") and path.endswith("/truth"):
             return True
         if method == "POST" and path in {
