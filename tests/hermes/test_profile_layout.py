@@ -219,3 +219,40 @@ def test_trading_authority_declared_in_soul_and_config():
     assert "protect_trading_risk_authority: true" in config
     assert "deny_model_broker_orders: true" in config
     assert "- trading-intelligence" in config
+
+def test_automation_and_browser_skills_are_registered():
+    """Rev 1.3 §139 — the fabric skills ship in the profile pack."""
+    config = (PROFILE_ROOT / "config.yaml").read_text(encoding="utf-8")
+    assert "- automation-fabric" in config
+    assert "- browser-intelligence" in config
+
+
+def test_browser_skill_declares_the_subagent_bounds():
+    """Owner decision 2026-09-18 — Hermes reads its own manager obligations here.
+
+    The skill must state the four things Hermes has to supply when it opens an
+    autonomous run, because an unbounded assignment is what turns a subagent into
+    an independent agent loop.
+    """
+    skill = (HERMES_ROOT / "skills" / "browser-intelligence" / "SKILL.md").read_text(encoding="utf-8")
+    assert "You are the manager" in skill
+    for bound in ("goal", "domains", "action-class ceiling", "step budget"):
+        assert bound in skill, f"browser skill does not state the {bound} bound"
+    assert "cannot widen them" in skill
+
+
+def test_skills_state_the_payment_prohibition():
+    """Both fabrics must tell Hermes plainly that they never pay."""
+    browser = (HERMES_ROOT / "skills" / "browser-intelligence" / "SKILL.md").read_text(encoding="utf-8")
+    automation = (HERMES_ROOT / "skills" / "automation-fabric" / "SKILL.md").read_text(encoding="utf-8")
+    assert "The browser never pays for anything" in browser
+    assert "No automation ever pays for anything" in automation
+    for skill in (browser, automation):
+        assert "fresh owner biometric" in skill or "fresh owner" in skill
+
+
+def test_automation_skill_forbids_direct_n8n_access():
+    """Rev 1.3 §§14, 38 — Hermes never holds n8n credentials or calls its API."""
+    skill = (HERMES_ROOT / "skills" / "automation-fabric" / "SKILL.md").read_text(encoding="utf-8")
+    assert "never call" in skill.lower() or "Call the n8n management API" in skill
+    assert "is not success" in skill
