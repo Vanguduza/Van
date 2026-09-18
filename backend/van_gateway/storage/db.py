@@ -641,7 +641,29 @@ MIGRATIONS: dict[int, str] = {
 
     CREATE INDEX IF NOT EXISTS idx_browser_escalations_task
       ON browser_escalations(task_id, status, created_at_ms);
+    """,
+    8: """
+    -- Owner-approved browser scope deltas become a separate durable authorization.
+    CREATE TABLE IF NOT EXISTS browser_scope_authorizations (
+      authorization_id TEXT PRIMARY KEY,
+      escalation_id TEXT NOT NULL UNIQUE,
+      task_id TEXT NOT NULL,
+      decision_id TEXT NOT NULL,
+      approved_domains_json TEXT NOT NULL,
+      approved_action_class_ceiling TEXT,
+      status TEXT NOT NULL,
+      issued_at_ms INTEGER NOT NULL,
+      expires_at_ms INTEGER,
+      consumed_at_ms INTEGER,
+      FOREIGN KEY(escalation_id) REFERENCES browser_escalations(escalation_id),
+      FOREIGN KEY(task_id) REFERENCES browser_tasks(task_id),
+      FOREIGN KEY(decision_id) REFERENCES decisions(id)
+    );
+
+    CREATE INDEX IF NOT EXISTS idx_browser_scope_auth_task
+      ON browser_scope_authorizations(task_id, status, issued_at_ms);
     """
+
 }
 
 
