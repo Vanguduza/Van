@@ -1,9 +1,11 @@
 #!/usr/bin/env python3
 import argparse
+import os
 import pathlib
+import re
 import subprocess
 import time
-
+from urllib.parse import quote
 
 ROLE_STMT = "CREATE ROLE vati LOGIN PASSWORD '__VATI_LEDGER_PASSWORD__' NOSUPERUSER NOCREATEDB NOCREATEROLE;"
 
@@ -30,6 +32,27 @@ ALTER ROLE vati WITH LOGIN PASSWORD '{escaped}' NOSUPERUSER NOCREATEDB NOCREATER
 """
     return template.replace(ROLE_STMT, reconcile, 1)
 
+def update_core_env(path, password):
+    p = pathlib.Path(path)
+    current = p.read_text(encoding="utf-8")
+    uri = f"postgres://vati:{quote(password, safe='')}@127.0.0.1:5432/postgres"
+    if re.search(r"^VAN_COMMANDER_LEDGER=.*$", current, re.M):
+        updated = re.sub(r"^VAN_COMMANDER_LEDGER=.*$", "VAN_COMMANDER_LEDGER=" + uri, current, flags=re.M)
+    else:
+        updated = current.rstrip() + "\nVAN_COMMANDER_LEDGER=" + uri + "\n"
+    st = p.stat()
+    tmp = p.with_name(p.name + ".tmp")
+    fd = os.open(tmp, os.O_WRONLY | os.O_CREAT | os.O_TRUNC, st.st_mode & 0o777)
+    with os.fdopen(fd, "w", encoding="utf-8") as handle:
+        handle.write(updated)
+        handle.flush()
+        os.fsync(handle.fileno())
+    try:
+        os.chown(tmp, st.st_uid, st.st_gid)
+    except PermissionError:
+        pass
+    os.replace(tmp, p)
+
 def wait_for_db(container, attempts=60):
     for _ in range(attempts):
         probe = subprocess.run(
@@ -45,6 +68,7 @@ def main():
     parser = argparse.ArgumentParser()
     parser.add_argument("--env", required=True)
     parser.add_argument("--template", required=True)
+    parser.add_argument("--core-env")
     parser.add_argument("--container", default="supabase-db")
     args = parser.parse_args()
 
@@ -74,6 +98,9 @@ def main():
             cur.fetchone()
             cur.execute("SELECT count(*) FROM vati.chain_head")
             cur.fetchone()
+
+    if args.core_env:
+        update_core_env(args.core_env, password)
     print("VATI_LEDGER_RECONCILED_GREEN")
 
 if __name__ == "__main__":
