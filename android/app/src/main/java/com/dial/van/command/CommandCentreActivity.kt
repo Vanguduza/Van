@@ -1,9 +1,9 @@
 package com.dial.van.command
 
 import android.os.Bundle
+import androidx.activity.compose.BackHandler
 import androidx.activity.compose.setContent
 import androidx.compose.foundation.background
-import androidx.compose.foundation.horizontalScroll
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
@@ -18,7 +18,6 @@ import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
-import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material3.Button
 import androidx.compose.material3.ButtonDefaults
@@ -74,6 +73,10 @@ private enum class CommandModule(val id: String, val title: String) {
     PROJECTS("projects", "Projects"),
     ACTIVITY("activity", "Activity"),
     BROWSER_AUTOMATION("browser_automation", "Browser & Automation"),
+    BROWSER_TASKS("browser_tasks", "Browser Tasks"),
+    BROWSER_ESCALATIONS("browser_escalations", "Browser Escalations"),
+    BROWSER_SESSIONS("browser_sessions", "Browser Sessions"),
+    BROWSER_POLICY("browser_policy", "Browser Policy"),
     SYSTEMS("systems", "Systems"),
     CONNECTIONS("connections", "Connections"),
     SETTINGS("settings", "Settings"),
@@ -144,6 +147,28 @@ private fun CommandCentreScreen(
         budget = budget,
     )
 
+    fun navigate(module: CommandModule) {
+        selected = module
+    }
+
+    BackHandler(enabled = selected != CommandModule.OVERVIEW) {
+        selected = when (selected) {
+            CommandModule.BROWSER_TASKS,
+            CommandModule.BROWSER_ESCALATIONS,
+            CommandModule.BROWSER_SESSIONS,
+            CommandModule.BROWSER_POLICY,
+            -> CommandModule.BROWSER_AUTOMATION
+            else -> CommandModule.OVERVIEW
+        }
+    }
+
+    val primaryModules = listOf(
+        CommandModule.OVERVIEW,
+        CommandModule.CHAT,
+        CommandModule.TASKS,
+        CommandModule.ACTIVITY,
+    )
+
     Column(
         modifier = Modifier
             .fillMaxSize()
@@ -152,40 +177,45 @@ private fun CommandCentreScreen(
         Row(
             modifier = Modifier
                 .fillMaxWidth()
-                .horizontalScroll(rememberScrollState())
                 .padding(horizontal = 12.dp, vertical = 6.dp),
             horizontalArrangement = Arrangement.spacedBy(6.dp),
         ) {
-            CommandModule.entries.forEach { module ->
+            primaryModules.forEach { module ->
+                val isSelected = selected == module
                 Button(
-                    onClick = { selected = module },
+                    onClick = { navigate(module) },
+                    modifier = Modifier.weight(1f),
                     colors = ButtonDefaults.buttonColors(
-                        containerColor = if (selected == module) {
+                        containerColor = if (isSelected) {
                             Color(VanGlassTokens.BABY_CYAN).copy(alpha = 0.24f)
                         } else {
                             Color(VanGlassTokens.TINT_NAVY).copy(alpha = 0.72f)
                         },
-                        contentColor = if (selected == module) Color(VanGlassTokens.ICE_CYAN) else Color(0xFFBCD1D8),
+                        contentColor = if (isSelected) Color(VanGlassTokens.ICE_CYAN) else Color(0xFFBCD1D8),
                     ),
                     shape = RoundedCornerShape(10.dp),
-                    contentPadding = PaddingValues(horizontal = 10.dp, vertical = 4.dp),
+                    contentPadding = PaddingValues(horizontal = 5.dp, vertical = 5.dp),
                 ) {
-                    Text(module.title, fontSize = 11.sp)
+                    Text(module.title, fontSize = 10.sp, maxLines = 1)
                 }
             }
         }
 
         when (selected) {
-            CommandModule.OVERVIEW -> OverviewModule(app, glass) { selected = it }
+            CommandModule.OVERVIEW -> OverviewModule(app, glass, ::navigate)
             CommandModule.CHAT -> ChatModule(app, glass)
             CommandModule.DECISIONS -> DecisionsModule(app, glass)
-            CommandModule.TASKS -> TasksModule(app, glass) { selected = CommandModule.CHAT }
+            CommandModule.TASKS -> TasksModule(app, glass) { navigate(CommandModule.CHAT) }
             CommandModule.PROJECTS -> ProjectsModule(app, glass) { projectId ->
                 app.commandController.selectProject(projectId)
-                selected = CommandModule.CHAT
+                navigate(CommandModule.CHAT)
             }
             CommandModule.ACTIVITY -> ActivityModule(app, glass)
-            CommandModule.BROWSER_AUTOMATION -> BrowserAutomationModule(app, glass)
+            CommandModule.BROWSER_AUTOMATION -> BrowserAutomationModule(app, glass, ::navigate)
+            CommandModule.BROWSER_TASKS -> BrowserTasksPage(app, glass) { navigate(CommandModule.BROWSER_AUTOMATION) }
+            CommandModule.BROWSER_ESCALATIONS -> BrowserEscalationsPage(app, glass) { navigate(CommandModule.BROWSER_AUTOMATION) }
+            CommandModule.BROWSER_SESSIONS -> BrowserSessionsPage(app, glass) { navigate(CommandModule.BROWSER_AUTOMATION) }
+            CommandModule.BROWSER_POLICY -> BrowserPolicyPage(app, glass) { navigate(CommandModule.BROWSER_AUTOMATION) }
             CommandModule.SYSTEMS -> SystemsModule(app, glass)
             CommandModule.CONNECTIONS -> ConnectionsModule(app, glass)
             CommandModule.SETTINGS -> SettingsModule(app, glass)
