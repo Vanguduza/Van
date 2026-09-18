@@ -6,7 +6,7 @@
 #   python3.12 + venv (Ubuntu 24.04 ships 3.12)   node 22 (NodeSource)   docker + compose plugin
 #   vati service user, /opt/van-trading layout, secrets (0700), commander + VEKL tokens, bridge PKI
 #   repo checkout, venv with requirements-vm.txt [+ nautilus_trader at --with-nautilus]
-#   local Supabase (PostgreSQL authority store) with fresh secrets and the VATI ledger schema
+#   local Supabase (PostgreSQL authority store) + post-bootstrap VATI ledger reconciliation
 #   systemd: vati-supabase, vati-vekl, vati-commander, vati-session@<alias> (enabled per account)
 #   ufw: deny incoming; 22 and 9133 only from oracle-admin + dial-hermes-control /32s
 #
@@ -148,33 +148,8 @@ if (( ! SKIP_SUPABASE )); then
   if (( ! DRY_RUN )); then
     PW="$(grep '^VATI_LEDGER_PASSWORD=' "$BASE/supabase/.env" | cut -d= -f2-)"
     [[ -n "$PW" ]] || die "VATI_LEDGER_PASSWORD missing from Supabase env"
-    [[ ! -d "$BASE/supabase/init/01_vati_ledger.sql" ]] || die "ledger init path is a directory, not a file"
-    python3 - "$BASE/supabase/.env" "$HERE/supabase/init/01_vati_ledger.sql.tpl" "$BASE/supabase/init/01_vati_ledger.sql" "$CONFIG/van-trading-core.env" <<'PY'
-import os, re, sys
-src_env, tpl_path, sql_path, core_path = sys.argv[1:5]
-vals = {}
-for line in open(src_env, encoding="utf-8"):
-    if "=" in line and not line.lstrip().startswith("#"):
-        k, v = line.rstrip("\n").split("=", 1); vals[k] = v
-pw = vals.get("VATI_LEDGER_PASSWORD", "")
-if not pw: raise SystemExit("VATI_LEDGER_PASSWORD missing")
-sql = open(tpl_path, encoding="utf-8").read().replace("__VATI_LEDGER_PASSWORD__", pw.replace("'", "''"))
-os.makedirs(os.path.dirname(sql_path), mode=0o750, exist_ok=True)
-fd = os.open(sql_path, os.O_WRONLY|os.O_CREAT|os.O_TRUNC, 0o600)
-with os.fdopen(fd, "w", encoding="utf-8") as f: f.write(sql)
-core = open(core_path, encoding="utf-8").read()
-uri = f"postgres://vati:{pw}@127.0.0.1:5432/postgres"
-if re.search(r"^VAN_COMMANDER_LEDGER=.*$", core, re.M):
-    core = re.sub(r"^VAN_COMMANDER_LEDGER=.*$", "VAN_COMMANDER_LEDGER="+uri, core, flags=re.M)
-else:
-    core += "\nVAN_COMMANDER_LEDGER=" + uri + "\n"
-with open(core_path, "w", encoding="utf-8") as f: f.write(core)
-os.chmod(sql_path, 0o600)
-PY
-    chown root:root "$BASE/supabase/init/01_vati_ledger.sql"
     chmod 0640 "$CONFIG/van-trading-core.env"
     chown root:vati "$CONFIG/van-trading-core.env"
-    [[ -f "$BASE/supabase/init/01_vati_ledger.sql" ]] || die "ledger init SQL was not materialized"
     (cd "$BASE/supabase" && docker compose --env-file .env pull -q) || die "supabase image pull failed (arm64 images must resolve)"
   else plan "docker compose pull (supabase arm64 images)"; fi
   run install -m 0644 "$HERE/systemd/vati-supabase.service" /etc/systemd/system/vati-supabase.service
@@ -186,7 +161,20 @@ for u in vati-commander.service vati-vekl.service vati-session@.service vati-mt5
 run install -d -m 0755 /etc/polkit-1/rules.d
 run install -m 0644 "$HERE/systemd/vati-polkit-restart.rules" /etc/polkit-1/rules.d/49-vati-restart.rules
 run systemctl daemon-reload
-if (( ! SKIP_SUPABASE )); then run systemctl enable --now vati-supabase.service; fi
+if (( ! SKIP_SUPABASE )); then
+  run systemctl enable --now vati-supabase.service
+  if (( DRY_RUN )); then
+    plan "reconcile VATI ledger role/schema against persisted Supabase secret"
+  else
+    "$VENV/bin/python" "$HERE/supabase/recover_donor_migrations.py" --container supabase-db
+    systemctl restart vati-supabase.service
+    "$VENV/bin/python" "$HERE/supabase/reconcile_vati_ledger.py" \
+      --env "$BASE/supabase/.env" \
+      --template "$HERE/supabase/init/01_vati_ledger.sql.tpl" \
+      --core-env "$CONFIG/van-trading-core.env"
+  fi
+  ok "VATI ledger role/schema reconciled"
+fi
 run systemctl enable --now vati-vekl.service
 run systemctl enable --now vati-commander.service
 run systemctl enable --now vati-mt5-pull.service
@@ -212,7 +200,7 @@ if [[ -n "$PUBLIC_HOST" ]]; then
   if ! command -v caddy >/dev/null 2>&1; then
     if (( DRY_RUN )); then plan "install caddy (apt repo dl.cloudsmith.io/public/caddy/stable)"; else
       apt_install debian-keyring debian-archive-keyring apt-transport-https
-      write_keyring 'https://dl.cloudsmith.io/public/caddy/stable/gpg.key' /etc/apt/keyrings/caddy-stable-archive-keyring.gpg
+      write_keyring 'https://dl.cloudsmith.io/public/caddy/stable/gpg.key' /usr/share/keyrings/caddy-stable-archive-keyring.gpg
       curl -fsSL 'https://dl.cloudsmith.io/public/caddy/stable/debian.deb.txt' > /etc/apt/sources.list.d/caddy-stable.list
       apt_update; apt_install caddy
       command -v caddy >/dev/null 2>&1 || die "caddy missing after install"
@@ -237,7 +225,8 @@ if (( ! DRY_RUN )); then
   done
   if [[ -n "$PUBLIC_HOST" ]]; then ufw allow 80/tcp >/dev/null; ufw allow 443/tcp >/dev/null; fi
   ufw --force enable >/dev/null
-else plan "ufw: deny incoming; allow 22/tcp and 9133/tcp from $ADMIN_CIDRS; 9134 and 5432 stay loopback"; fi
+  VAN_ADMIN_CIDRS="$ADMIN_CIDRS" VAN_PUBLIC_HOST="$PUBLIC_HOST" bash "$HERE/oci/harden-oracle-image-firewall.sh"
+else plan "ufw + OCI image firewall: allow 22/tcp and 9133/tcp from $ADMIN_CIDRS; public 80/443 only when configured"; fi
 ok "firewall"
 
 # ---------------------------------------------------------------- record

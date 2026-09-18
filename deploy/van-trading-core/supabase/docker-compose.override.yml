@@ -1,6 +1,6 @@
 # Van overrides for the pinned Supabase donor compose.
 # Security: all host-published ports are loopback-only.
-# Authority: VATI ledger schema is injected on first PostgreSQL initialization.
+# Authority: VATI ledger is reconciled only after the donor database bootstrap completes.
 services:
   studio:
     ports: !override
@@ -11,8 +11,6 @@ services:
   db:
     ports: !override
       - "127.0.0.1:5432:5432"
-    volumes:
-      - ./init/01_vati_ledger.sql:/docker-entrypoint-initdb.d/init-scripts/99-vati-ledger.sql:ro
     deploy:
       resources:
         limits:
