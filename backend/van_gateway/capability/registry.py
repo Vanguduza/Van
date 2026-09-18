@@ -40,7 +40,6 @@ from van_gateway.capability.models import (
     RoutingConstraints,
     VerificationStrategy,
 )
-from van_gateway.models import ActionClass
 from van_gateway.storage.db import Store
 
 REPO_ROOT = Path(__file__).resolve().parents[3]

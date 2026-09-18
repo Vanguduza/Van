@@ -400,5 +400,24 @@
   "verification_caveats": {
     "kotlin": "android/ changes are unverified in this container: the Android Gradle Plugin 8.10.1 does not resolve offline or through the proxy. CI runs :app:testDebugUnitTest :app:assembleDebug :app:lintDebug and is the first real check of this code. Do not treat it as tested until CI is green.",
     "python": "backend, contracts and trading suites all run and pass in this container."
+  },
+  "integration_status": {
+    "note": "BUILT means the capability exists and is tested. It does not by itself mean a real execution path calls it. This section tracks that separately, because the distinction is easy to lose and expensive to discover late.",
+    "wired_into_execution": [
+      "MissionBinder \u2014 browser task creation and automation execute bind themselves when a mission_id is supplied; no manual backfill needed.",
+      "CapabilityRegistry \u2014 MissionService.add_activity validates every capability against the mission's own authority envelope.",
+      "AutomationMediumRouter, WorkflowHealthService, TelemetryService, DeadLetterService \u2014 called by AutomationDispatcher on every run.",
+      "DecisionService \u2014 browser escalation raises through it; Android resolves through it."
+    ],
+    "reachable_only_by_api": [
+      "CapabilityRouter (/v1/missions/route)",
+      "OwnerCognitiveModel (/v1/understanding/*)",
+      "AttentionScorer, DomainTrustService, AIEvolutionRadar, VanEval (/v1/eval, /v1/autonomy)"
+    ],
+    "not_yet_called_by_anything": [
+      "ContextCompiler \u2014 Hermes must compile a ContextPacket per turn; that is a Hermes-side change, not a gateway one.",
+      "VerifierRegistry \u2014 AutomationDispatcher still uses its own WorkflowVerifier. Unifying them is a behaviour change to a verified path and deserves its own commit.",
+      "CriticalReasoningKernel, RelationshipCalibrationEngine \u2014 consumed by Hermes, not the gateway."
+    ]
   }
 }

@@ -39,7 +39,7 @@ from van_gateway.mission.models import (
     VerificationRecord,
     VerificationStatus,
 )
-from van_gateway.models import ActionClass, OriginChannel, PrincipalType
+from van_gateway.models import OriginChannel, PrincipalType
 from van_gateway.storage.db import Store
 
 

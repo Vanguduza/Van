@@ -68,6 +68,10 @@ class CreateTaskBody(BaseModel):
     command_id: str | None = None
     execution_id: str | None = None
     capability_id: str | None = None
+    #: §5 — when the work belongs to a Mission, say so here and the task
+    #: binds itself as an Activity. Without this the Missions page shows
+    #: intentions while the real execution sits in browser_tasks.
+    mission_id: str | None = None
     inputs: dict[str, Any] = Field(default_factory=dict)
 
 
@@ -128,10 +132,14 @@ class BrowserApi:
         policy: BrowserPolicyEngine | None = None,
         worker: SubagentWorker | None = None,
         decisions: DecisionService | None = None,
+        binder: Any | None = None,
     ) -> None:
         self.store = store
         self.settings = settings
         self.policy = policy or BrowserPolicyEngine()
+        # Optional so the browser fabric stays testable alone; create_app
+        # always supplies one.
+        self.binder = binder
         self.broker = BrowserSessionBroker(store, self.policy)
         self.tasks = BrowserTaskService(store, self.broker, self.policy)
         self.runner = BrowserSubagentRunner(self.policy)
@@ -798,7 +806,26 @@ class BrowserApi:
                 )
             except BrowserPolicyError as exc:
                 raise HTTPException(status_code=422, detail=str(exc)) from exc
-            return task.model_dump(mode="json")
+
+            # §5 — bind at creation, so a mission's Activity list is the truth
+            # about what ran rather than something reconstructed later. A
+            # binding refusal must not lose the task: the browser task is
+            # already created and valid, so the refusal is reported alongside it.
+            binding: dict[str, Any] | None = None
+            if body.mission_id and self.binder is not None:
+                try:
+                    activity_id = await self.binder.bind_browser_task(
+                        mission_id=body.mission_id, task_id=task.task_id
+                    )
+                    binding = {"mission_id": body.mission_id, "activity_id": activity_id}
+                except Exception as exc:  # noqa: BLE001 - surfaced, never swallowed
+                    binding = {
+                        "mission_id": body.mission_id, "activity_id": None,
+                        "error": type(exc).__name__, "detail": str(exc),
+                    }
+            payload = task.model_dump(mode="json")
+            payload["mission_binding"] = binding
+            return payload
 
         @router.get("/tasks/{task_id}")
         async def get_task(task_id: str):

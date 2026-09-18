@@ -43,6 +43,7 @@ from van_gateway.capability.readiness import (
 from van_gateway.capability.registry import CapabilityRegistry
 from van_gateway.capability.router import CapabilityRouter
 from van_gateway.mission.api import MissionApi
+from van_gateway.mission.binding import MissionBinder
 from van_gateway.understanding.api import UnderstandingApi
 from van_gateway.mission.service import MissionService
 from van_gateway.command.authority import CommandAuthorityService
@@ -229,6 +230,12 @@ def create_app() -> FastAPI:
         store, settings, missions=missions, registry=capability_registry,
         router=capability_router,
     )
+    # §5 — one binder shared by every executor, so browser tasks and
+    # automation runs become Activities as they happen rather than by a
+    # later backfill.
+    mission_binder = MissionBinder(store, missions)
+    browser.binder = mission_binder
+    automation.binder = mission_binder
     understanding_api = UnderstandingApi(store, settings)
     google_router = GoogleCapabilityRouter(store, google_broker)
 
@@ -279,6 +286,7 @@ def create_app() -> FastAPI:
     app.state.capability_registry = capability_registry
     app.state.capability_router = capability_router
     app.state.missions = missions
+    app.state.mission_binder = mission_binder
     app.state.mission_api = mission_api
     app.state.understanding_api = understanding_api
     app.state.decisions = decisions

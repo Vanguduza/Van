@@ -30,13 +30,13 @@ Dropping deliberately means knowing what was dropped.
 from __future__ import annotations
 
 import time
-from dataclasses import dataclass, field
+from dataclasses import dataclass
 from enum import Enum
 from typing import Any
 
 from pydantic import BaseModel, Field
 
-from van_gateway.epistemics.models import Claim, SemanticClass
+from van_gateway.epistemics.models import Claim
 
 #: DECISION (recorded, no owner input): 8000 tokens. Chosen to leave room for a
 #: model's own reasoning inside a typical 32k window while carrying enough

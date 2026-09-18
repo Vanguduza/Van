@@ -57,6 +57,7 @@ def _settings(monkeypatch, tmp_path):
     monkeypatch.setenv("VAN_DEVICE_SECRET_FERNET_KEY", Fernet.generate_key().decode())
     monkeypatch.setenv("VAN_INGRESS_TOKEN", "ingress-token-0123456789abcdef")
     monkeypatch.setenv("VAN_INTERNAL_CONTROL_TOKEN", INTERNAL)
+    monkeypatch.setenv("VAN_BROWSER_ENABLED", "1")
     get_settings.cache_clear()
     yield
     get_settings.cache_clear()
@@ -420,3 +421,102 @@ async def test_red_team_an_owner_message_does_not_move_the_mission(stack):
     )
     assert response.status_code == 200
     assert (await missions.get(mission.mission_id)).state is MissionState.CAPTURED
+
+
+# ------------------------------------------------- execution binds itself
+
+
+async def test_a_mission_scoped_browser_task_binds_itself(tmp_path):
+    """§5 — the gap this closes: before, a browser task only became an Activity
+    if someone ran backfill by hand, so the Missions page showed intentions
+    while the real execution sat in browser_tasks.
+    """
+    from fastapi import FastAPI
+    from httpx import ASGITransport, AsyncClient
+    from van_gateway.browser.api import BrowserApi
+
+    store, missions, registry, _api, _app = await _stack(tmp_path)
+    binder = MissionBinder(store, missions)
+    browser = BrowserApi(store, get_settings(), binder=binder)
+    app = FastAPI()
+    app.include_router(browser.router)
+
+    mission = await _mission(missions)
+    async with AsyncClient(transport=ASGITransport(app=app), base_url="http://t") as ac:
+        await ac.post("/v1/browser/profiles", headers=HEADERS,
+                      json={"profile_alias": "public_research"})
+        response = await ac.post(
+            "/v1/browser/tasks", headers=HEADERS,
+            json={
+                "profile_alias": "public_research", "strategy": "STAGEHAND",
+                "autonomy_tier": "L4_STAGEHAND_ACT", "action_class": "A2",
+                "target_domain": "portal.example.com", "goal": "read the statement",
+                "mission_id": mission.mission_id,
+            },
+        )
+        assert response.status_code == 200, response.text
+        body = response.json()
+        assert body["mission_binding"]["mission_id"] == mission.mission_id
+        assert body["mission_binding"]["activity_id"]
+
+    activities = await missions.activities(mission.mission_id)
+    assert len(activities) == 1
+    assert activities[0].executor == "BROWSER_FABRIC"
+    assert activities[0].executor_ref == body["task_id"]
+
+
+async def test_a_task_without_a_mission_still_works(tmp_path):
+    """Binding is additive: the browser fabric does not require a Mission."""
+    from fastapi import FastAPI
+    from httpx import ASGITransport, AsyncClient
+    from van_gateway.browser.api import BrowserApi
+
+    store, missions, _r, _a, _app = await _stack(tmp_path)
+    browser = BrowserApi(store, get_settings(), binder=MissionBinder(store, missions))
+    app = FastAPI()
+    app.include_router(browser.router)
+    async with AsyncClient(transport=ASGITransport(app=app), base_url="http://t") as ac:
+        await ac.post("/v1/browser/profiles", headers=HEADERS,
+                      json={"profile_alias": "public_research"})
+        response = await ac.post(
+            "/v1/browser/tasks", headers=HEADERS,
+            json={
+                "profile_alias": "public_research", "strategy": "STAGEHAND",
+                "autonomy_tier": "L4_STAGEHAND_ACT", "action_class": "A2",
+                "target_domain": "portal.example.com", "goal": "read",
+            },
+        )
+        assert response.status_code == 200
+        assert response.json()["mission_binding"] is None
+
+
+async def test_a_binding_refusal_never_loses_the_task(tmp_path):
+    """The browser task is already created and valid. A bookkeeping failure
+    must be reported beside it, not raised over the top of it."""
+    from fastapi import FastAPI
+    from httpx import ASGITransport, AsyncClient
+    from van_gateway.browser.api import BrowserApi
+
+    store, missions, _r, _a, _app = await _stack(tmp_path)
+    browser = BrowserApi(store, get_settings(), binder=MissionBinder(store, missions))
+    app = FastAPI()
+    app.include_router(browser.router)
+    async with AsyncClient(transport=ASGITransport(app=app), base_url="http://t") as ac:
+        await ac.post("/v1/browser/profiles", headers=HEADERS,
+                      json={"profile_alias": "public_research"})
+        response = await ac.post(
+            "/v1/browser/tasks", headers=HEADERS,
+            json={
+                "profile_alias": "public_research", "strategy": "STAGEHAND",
+                "autonomy_tier": "L4_STAGEHAND_ACT", "action_class": "A2",
+                "target_domain": "portal.example.com", "goal": "read",
+                "mission_id": "msn_does_not_exist",
+            },
+        )
+        assert response.status_code == 200
+        binding = response.json()["mission_binding"]
+        assert binding["activity_id"] is None
+        assert "MISSION_UNKNOWN" in binding["detail"]
+        # The task itself exists and is usable.
+        task_id = response.json()["task_id"]
+        assert (await ac.get(f"/v1/browser/tasks/{task_id}", headers=HEADERS)).status_code == 200

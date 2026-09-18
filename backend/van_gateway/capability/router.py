@@ -29,7 +29,7 @@ from __future__ import annotations
 
 import time
 import uuid
-from dataclasses import dataclass, field
+from dataclasses import dataclass
 from typing import Any
 
 from van_gateway.capability.models import (
@@ -39,7 +39,6 @@ from van_gateway.capability.models import (
     LatencyClass,
     PrivacyClass,
     Routability,
-    RoutabilityReason,
     RoutingConstraints,
     VerificationStrategy,
 )

@@ -17,7 +17,6 @@ VAN cannot measure and why.
 
 from __future__ import annotations
 
-from typing import Any
 
 from fastapi import APIRouter, Header, HTTPException
 from pydantic import BaseModel, Field

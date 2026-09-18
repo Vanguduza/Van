@@ -24,7 +24,7 @@ from dataclasses import dataclass
 from enum import Enum
 from typing import Any
 
-from pydantic import BaseModel, Field
+from pydantic import BaseModel
 
 from van_gateway.storage.db import Store
 
