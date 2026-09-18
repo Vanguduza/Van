@@ -8,7 +8,7 @@ from typing import Any, AsyncIterator
 
 import aiosqlite
 
-SCHEMA_VERSION = 6
+SCHEMA_VERSION = 8
 
 MIGRATIONS: dict[int, str] = {
     1: """
