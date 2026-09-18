@@ -39,7 +39,7 @@ Resolved 2026-09-17: the canonical GitHub Actions workflow is live at `.github/w
 | Owner visual acceptance | owner review | acceptance matrix |
 | Signed production release | production keystore | Gradle wiring + `android/keystore.properties.example` |
 
-## Automation & Browser Fabric live gates
+## Automation & Browser Fabric gates
 
 Owner adoption is already recorded: n8n, Stagehand and Browser Harness decision records are `SIGNED`/approved on 2026-09-18, and the Automation & Browser security-policy amendment is `OWNER_APPROVED` and applied. Approval authorizes the architecture; it does **not** certify a live runtime.
 
@@ -47,14 +47,16 @@ Owner adoption is already recorded: n8n, Stagehand and Browser Harness decision 
 |---|---|---|
 | n8n self-hosted runtime | pinned local instance + PostgreSQL + task runner + restart canary | PENDING_LIVE — hardened self-hosted deployment/bootstrap exists; gateway remains fail-closed until live certification |
 | n8n workflow generation | novel goal → IR → compile → local create → synthetic execution → HOT reuse | PENDING_LIVE — deterministic compiler/validator/admission and tests exist; live n8n execution proof required |
-| n8n security + backup/restore | security audit, boundary proof and isolated restore with encryption key | PENDING_LIVE — repository controls exist; host audit/restore drill required |
-| Automation webhook/standing authority | signed event + replay rejection + owner-derived authority + verified result | PENDING_LIVE — durable authority/grant path implemented; live signed trigger proof required |
+| n8n security | security audit and trust-boundary proof | PENDING_LIVE — repository controls exist; live host audit required |
+| n8n backup/restore | isolated restore with matching encryption key | PENDING_LIVE — repository tooling exists; restore drill required |
+| Automation webhook ingress | signed event + replay rejection + verified intake | PENDING_LIVE — signed ingress path implemented; live trigger proof required |
+| Standing automation | owner-derived standing authority + bounded run + verified result | PENDING_LIVE — durable authority/grant path implemented; live scheduled/event execution proof required |
 | Browser Harness | pinned private worker + deterministic navigation/action + evidence pointer | PENDING_LIVE — gateway adapter/deployment foundation implemented; live worker canary required |
-| Stagehand semantic browser | private local/CDP worker + observe/extract/act canary under Hermes assignment | PENDING_LIVE — gateway adapter/subagent bounds implemented; live worker/model canary required |
-| Authenticated browser profile | managed owner profile survives restart without secret export and identity is verified | PENDING_LIVE — profile alias/lease/secretref architecture implemented; owner authentication + restart identity proof required |
+| Stagehand local semantic browser | private local/CDP worker + observe/extract/act canary under Hermes assignment | PENDING_LIVE — gateway adapter/subagent bounds implemented; live worker/model canary required |
+| Browser authenticated profile | managed owner profile survives restart without secret export and identity is verified | PENDING_LIVE — profile alias/lease/secretref architecture implemented; owner authentication + restart identity proof required |
 | Browser boundary escalation | live task exceeds scope → WAITING_FOR_OWNER → Android decision → scoped authorization → same task resumes | REPO_COMPLETE / PENDING_LIVE — durable escalation and scoped-resume code/tests implemented; live worker/device proof required |
 | NotebookLM consumer via Browser Fabric | authenticated managed profile + grounded ask + A3 note create/readback | REPO_COMPLETE / PENDING_LIVE — direct runtime Playwright removed; Browser Harness + Stagehand provider path implemented; live profile/runtime canary required |
-| Prompt-injection containment | adversarial live page cannot widen authority or leak secrets | PENDING_LIVE — synthetic policy tests exist; live adversarial canary required |
+| Browser prompt-injection containment | adversarial live page cannot widen authority or leak secrets | PENDING_LIVE — synthetic policy tests exist; live adversarial canary required |
 | Trading Core isolation | maximum certified automation/browser load preserves VATI safety envelope | PENDING_LIVE — measured host load test required |
 | Browser→automation optimization | discovered stable API shadow-compares before route promotion | PENDING_LIVE — promotion architecture exists; live evidence required |
 
