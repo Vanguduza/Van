@@ -225,7 +225,8 @@ if (( ! DRY_RUN )); then
   done
   if [[ -n "$PUBLIC_HOST" ]]; then ufw allow 80/tcp >/dev/null; ufw allow 443/tcp >/dev/null; fi
   ufw --force enable >/dev/null
-else plan "ufw: deny incoming; allow 22/tcp and 9133/tcp from $ADMIN_CIDRS; 9134 and 5432 stay loopback"; fi
+  VAN_ADMIN_CIDRS="$ADMIN_CIDRS" VAN_PUBLIC_HOST="$PUBLIC_HOST" bash "$HERE/oci/harden-oracle-image-firewall.sh"
+else plan "ufw + OCI image firewall: allow 22/tcp and 9133/tcp from $ADMIN_CIDRS; public 80/443 only when configured"; fi
 ok "firewall"
 
 # ---------------------------------------------------------------- record
