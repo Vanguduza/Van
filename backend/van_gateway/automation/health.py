@@ -18,8 +18,11 @@ from fastapi import APIRouter, Header, HTTPException
 
 from van_gateway.automation.external_runtime import ExternalRuntimeRegistry, RuntimeState
 from van_gateway.automation.n8n_client import N8nManagementClient
+from van_gateway.automation.deadletter import DeadLetterService
 from van_gateway.automation.policy import load_automation_policy, load_browser_policy
 from van_gateway.automation.registry import HotWorkflowIndex
+from van_gateway.automation.telemetry import TelemetryService
+from van_gateway.automation.workflow_health import WorkflowHealthService
 from van_gateway.browser.adapters import HttpBrowserHarnessAdapter, StagehandAdapter
 from van_gateway.config import Settings
 from van_gateway.degraded.registry import DegradedRegistry
@@ -77,6 +80,9 @@ class AutomationHealthApi:
         self.degraded = degraded
         self.runtime = ExternalRuntimeRegistry(store)
         self.hot_index = hot_index or HotWorkflowIndex()
+        self.workflow_health = WorkflowHealthService(store)
+        self.dead_letter = DeadLetterService(store)
+        self.telemetry = TelemetryService(store)
         self.n8n = N8nManagementClient(
             self.runtime,
             base_url=settings.automation_n8n_base_url,
@@ -147,12 +153,43 @@ class AutomationHealthApi:
             "max_concurrency": self.settings.automation_max_concurrency,
             "artifacts": counts,
             "hot_index_size": self.hot_index.size,
+            # §§76-77, 246 — the fabric's operating state, not just its config.
+            "workflow_health": await self.workflow_health.counts_by_status(),
+            "workflows_needing_attention": [
+                {
+                    "capability_id": h.capability_id,
+                    "workflow_version": h.workflow_version,
+                    "status": h.status.value,
+                    "consecutive_failures": h.consecutive_failures,
+                    "last_failure_class": (
+                        h.last_failure_class.value if h.last_failure_class else None
+                    ),
+                }
+                for h in await self.workflow_health.needing_attention()
+            ],
+            "open_dead_letters": await self.dead_letter.open_count(),
+            # §102 — the core success metric, reported rather than asserted.
+            "ladder": self._ladder_payload(await self.telemetry.ladder_metrics()),
             # §§68, 421 — stated explicitly so the invariant is observable.
             "t0_isolation": {
                 "in_tick_to_order_path": False,
                 "may_send_live_orders": False,
                 "vati_independent_of_automation": True,
             },
+        }
+
+    @staticmethod
+    def _ladder_payload(metrics: Any) -> dict[str, Any]:
+        return {
+            "window_ms": metrics.window_ms,
+            "generations": metrics.total,
+            "hot_hit_rate": round(metrics.hot_hit_rate, 4),
+            "warm_specialisation_rate": round(metrics.warm_specialisation_rate, 4),
+            "cold_generation_rate": round(metrics.cold_generation_rate, 4),
+            "pattern_reuse_rate": round(metrics.pattern_reuse_rate, 4),
+            "ir_cache_hit_rate": round(metrics.ir_cache_hit_rate, 4),
+            "generation_failures": metrics.generation_failures,
+            "median_first_use_latency_ms": metrics.median_first_use_latency_ms,
         }
 
     async def browser_health(self) -> dict[str, Any]:

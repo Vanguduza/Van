@@ -8,7 +8,7 @@ from typing import Any, AsyncIterator
 
 import aiosqlite
 
-SCHEMA_VERSION = 8
+SCHEMA_VERSION = 16
 
 MIGRATIONS: dict[int, str] = {
     1: """
@@ -662,8 +662,672 @@ MIGRATIONS: dict[int, str] = {
 
     CREATE INDEX IF NOT EXISTS idx_browser_scope_auth_task
       ON browser_scope_authorizations(task_id, status, issued_at_ms);
-    """
+    """,
+    9: """
+    -- Rev 1.3 §§76-78, 101-102, 243-246 — operating a fabric, not just building it.
 
+    -- §76. One row per admitted workflow version. Health is per version because a
+    -- repair produces a new version, and the old version's failures are not the
+    -- new one's record.
+    CREATE TABLE IF NOT EXISTS automation_workflow_health (
+      capability_id TEXT NOT NULL,
+      workflow_version INTEGER NOT NULL,
+      runs INTEGER NOT NULL DEFAULT 0,
+      verified_successes INTEGER NOT NULL DEFAULT 0,
+      failures INTEGER NOT NULL DEFAULT 0,
+      consecutive_failures INTEGER NOT NULL DEFAULT 0,
+      total_duration_ms INTEGER NOT NULL DEFAULT 0,
+      duration_samples_json TEXT NOT NULL DEFAULT '[]',
+      p95_duration_ms INTEGER,
+      repair_count INTEGER NOT NULL DEFAULT 0,
+      last_verified_at_ms INTEGER,
+      last_failure_class TEXT,
+      status TEXT NOT NULL DEFAULT 'GREEN',
+      updated_at_ms INTEGER NOT NULL,
+      PRIMARY KEY (capability_id, workflow_version)
+    );
+
+    CREATE INDEX IF NOT EXISTS idx_automation_health_status
+      ON automation_workflow_health(status, updated_at_ms);
+
+    -- §§78, 243-245. Repair lineage. The admitted workflow is never mutated in
+    -- place, so every repair is a row pointing at the artifact it replaced.
+    CREATE TABLE IF NOT EXISTS automation_repairs (
+      repair_id TEXT PRIMARY KEY,
+      capability_id TEXT NOT NULL,
+      failing_artifact_id TEXT NOT NULL,
+      failing_run_id TEXT,
+      failure_class TEXT NOT NULL,
+      error_code TEXT,
+      decision TEXT NOT NULL,
+      candidate_artifact_id TEXT,
+      superseded_artifact_id TEXT,
+      promoted_at_ms INTEGER,
+      detail_json TEXT NOT NULL DEFAULT '{}',
+      created_at_ms INTEGER NOT NULL
+    );
+
+    CREATE INDEX IF NOT EXISTS idx_automation_repairs_cap
+      ON automation_repairs(capability_id, created_at_ms);
+
+    -- §246. Bounded retry ends somewhere, and that somewhere is a row an owner
+    -- or operator can act on — never an infinite retry.
+    CREATE TABLE IF NOT EXISTS automation_dead_letter (
+      dead_letter_id TEXT PRIMARY KEY,
+      run_id TEXT,
+      event_id TEXT,
+      capability_id TEXT,
+      failure_class TEXT NOT NULL,
+      last_error_code TEXT,
+      attempt_count INTEGER NOT NULL DEFAULT 1,
+      evidence_refs_json TEXT NOT NULL DEFAULT '[]',
+      next_action TEXT NOT NULL,
+      detail_json TEXT NOT NULL DEFAULT '{}',
+      created_at_ms INTEGER NOT NULL,
+      updated_at_ms INTEGER NOT NULL,
+      resolved_at_ms INTEGER,
+      resolution TEXT
+    );
+
+    CREATE INDEX IF NOT EXISTS idx_automation_dead_letter_open
+      ON automation_dead_letter(resolved_at_ms, created_at_ms);
+
+    CREATE UNIQUE INDEX IF NOT EXISTS uq_automation_dead_letter_run
+      ON automation_dead_letter(run_id) WHERE run_id IS NOT NULL;
+
+    -- §101. Per-run timing, so the ladder's claims are measured rather than
+    -- asserted. `cache_state` is what makes the HOT hit rate observable.
+    CREATE TABLE IF NOT EXISTS automation_run_telemetry (
+      run_id TEXT PRIMARY KEY,
+      capability_id TEXT,
+      workflow_version INTEGER,
+      cache_state TEXT NOT NULL,
+      compile_time_ms INTEGER NOT NULL DEFAULT 0,
+      dispatch_time_ms INTEGER NOT NULL DEFAULT 0,
+      execution_time_ms INTEGER NOT NULL DEFAULT 0,
+      external_wait_ms INTEGER NOT NULL DEFAULT 0,
+      verification_time_ms INTEGER NOT NULL DEFAULT 0,
+      retry_count INTEGER NOT NULL DEFAULT 0,
+      failure_count INTEGER NOT NULL DEFAULT 0,
+      recorded_at_ms INTEGER NOT NULL
+    );
+
+    CREATE INDEX IF NOT EXISTS idx_automation_run_telemetry_time
+      ON automation_run_telemetry(recorded_at_ms);
+
+    -- §102. One row per capability-acquisition attempt. The core success metric
+    -- is that the HOT share of these rises over time.
+    CREATE TABLE IF NOT EXISTS automation_generation_telemetry (
+      generation_id TEXT PRIMARY KEY,
+      goal_class TEXT NOT NULL,
+      medium TEXT NOT NULL,
+      outcome TEXT NOT NULL,
+      pattern_reused INTEGER NOT NULL DEFAULT 0,
+      ir_cache_hit INTEGER NOT NULL DEFAULT 0,
+      first_use_latency_ms INTEGER NOT NULL DEFAULT 0,
+      recorded_at_ms INTEGER NOT NULL
+    );
+
+    CREATE INDEX IF NOT EXISTS idx_automation_generation_time
+      ON automation_generation_telemetry(recorded_at_ms);
+    """,
+    10: """
+    -- Rev 1 §§3, 5, 34, 46 — Mission Core. The single owner-visible unit of work.
+
+    -- §3.1. Additive only: no existing subsystem table is altered or dropped, so
+    -- browser tasks, automation runs and Google jobs keep their own state and are
+    -- referenced from mission_activities rather than absorbed into it.
+    CREATE TABLE IF NOT EXISTS missions (
+      mission_id TEXT PRIMARY KEY,
+      owner_principal_id TEXT NOT NULL,
+      project_id TEXT,
+      origin TEXT NOT NULL,
+      origin_channel TEXT NOT NULL,
+      title TEXT NOT NULL,
+      goal TEXT NOT NULL,
+      success_contract_json TEXT NOT NULL DEFAULT '{}',
+      constraints_json TEXT NOT NULL DEFAULT '[]',
+      authority_envelope_json TEXT NOT NULL DEFAULT '{}',
+      sensitivity TEXT NOT NULL DEFAULT 'ROUTINE',
+      context_snapshot_id TEXT,
+      state TEXT NOT NULL DEFAULT 'CAPTURED',
+      priority INTEGER NOT NULL DEFAULT 50,
+      created_at_ms INTEGER NOT NULL,
+      updated_at_ms INTEGER NOT NULL,
+      deadline_ms INTEGER,
+      attention_policy TEXT NOT NULL DEFAULT 'NORMAL',
+      plan_revision INTEGER NOT NULL DEFAULT 0,
+      current_phase TEXT,
+      parent_mission_id TEXT,
+      final_outcome TEXT,
+      verification_state TEXT NOT NULL DEFAULT 'PENDING',
+      verification_record_json TEXT,
+      learning_record_id TEXT,
+      FOREIGN KEY(parent_mission_id) REFERENCES missions(mission_id)
+    );
+
+    CREATE INDEX IF NOT EXISTS idx_missions_state
+      ON missions(state, updated_at_ms);
+    CREATE INDEX IF NOT EXISTS idx_missions_owner_project
+      ON missions(owner_principal_id, project_id, updated_at_ms);
+
+    -- §5. Modular execution under one mission. `executor_ref` points at the
+    -- specialist row (browser_tasks.task_id, automation_runs.run_id, ...) so the
+    -- subsystem stays authoritative for its own execution detail.
+    CREATE TABLE IF NOT EXISTS mission_activities (
+      activity_id TEXT PRIMARY KEY,
+      mission_id TEXT NOT NULL,
+      activity_type TEXT NOT NULL,
+      capability_id TEXT NOT NULL,
+      executor TEXT NOT NULL,
+      executor_ref TEXT,
+      input_contract_json TEXT NOT NULL DEFAULT '{}',
+      authority_ref TEXT,
+      state TEXT NOT NULL DEFAULT 'PENDING',
+      attempt INTEGER NOT NULL DEFAULT 1,
+      started_at_ms INTEGER NOT NULL,
+      ended_at_ms INTEGER,
+      dependency_activity_ids_json TEXT NOT NULL DEFAULT '[]',
+      checkpoint_ref TEXT,
+      error_class TEXT,
+      retry_policy TEXT NOT NULL DEFAULT 'NONE',
+      verification_contract_json TEXT NOT NULL DEFAULT '{}',
+      FOREIGN KEY(mission_id) REFERENCES missions(mission_id)
+    );
+
+    CREATE INDEX IF NOT EXISTS idx_mission_activities_mission
+      ON mission_activities(mission_id, started_at_ms);
+    CREATE INDEX IF NOT EXISTS idx_mission_activities_executor_ref
+      ON mission_activities(executor, executor_ref);
+
+    -- §34. The owner-visible timeline. Raw provider logs stay in their own
+    -- tables and are technical drill-down; this is what the Activity page reads.
+    CREATE TABLE IF NOT EXISTS mission_events (
+      event_id TEXT PRIMARY KEY,
+      mission_id TEXT NOT NULL,
+      activity_id TEXT,
+      event_type TEXT NOT NULL,
+      actor TEXT NOT NULL,
+      occurred_at_ms INTEGER NOT NULL,
+      severity TEXT NOT NULL DEFAULT 'INFO',
+      owner_visibility INTEGER NOT NULL DEFAULT 1,
+      summary TEXT NOT NULL DEFAULT '',
+      evidence_ref TEXT,
+      FOREIGN KEY(mission_id) REFERENCES missions(mission_id)
+    );
+
+    CREATE INDEX IF NOT EXISTS idx_mission_events_mission
+      ON mission_events(mission_id, occurred_at_ms);
+    CREATE INDEX IF NOT EXISTS idx_mission_events_owner_feed
+      ON mission_events(owner_visibility, occurred_at_ms);
+    """,
+    11: """
+    -- Rev 1 §7 — the canonical capability declaration set, materialized.
+
+    -- This table holds DECLARATIONS, never readiness. Readiness stays with the
+    -- subsystem that already owns it (automation_artifacts lifecycle, the Google
+    -- mesh, ExternalRuntimeRegistry evidence) and is reached through
+    -- `readiness_source`. That is what lets this registry be canonical without
+    -- becoming a third copy of state those subsystems already maintain.
+    CREATE TABLE IF NOT EXISTS capability_registry (
+      capability_id TEXT PRIMARY KEY,
+      manifest_version TEXT NOT NULL,
+      manifest_digest TEXT NOT NULL,
+      declaration_json TEXT NOT NULL,
+      capability_class TEXT NOT NULL,
+      authority_class TEXT NOT NULL,
+      readiness_source TEXT NOT NULL,
+      provider TEXT NOT NULL,
+      executor TEXT NOT NULL,
+      created_at_ms INTEGER NOT NULL,
+      updated_at_ms INTEGER NOT NULL,
+      withdrawn_at_ms INTEGER
+    );
+
+    CREATE INDEX IF NOT EXISTS idx_capability_registry_class
+      ON capability_registry(capability_class, withdrawn_at_ms);
+    CREATE INDEX IF NOT EXISTS idx_capability_registry_digest
+      ON capability_registry(manifest_digest);
+
+    -- §8 — the route decision is persisted as evidence: what was considered,
+    -- what was rejected and why. A routing choice nobody can reconstruct is a
+    -- routing choice nobody can audit.
+    CREATE TABLE IF NOT EXISTS capability_route_decisions (
+      decision_id TEXT PRIMARY KEY,
+      mission_id TEXT,
+      goal_class TEXT NOT NULL,
+      selected_capability_id TEXT,
+      candidates_json TEXT NOT NULL DEFAULT '[]',
+      rejected_json TEXT NOT NULL DEFAULT '[]',
+      fallback_chain_json TEXT NOT NULL DEFAULT '[]',
+      routing_policy_version TEXT NOT NULL,
+      manifest_digest TEXT NOT NULL,
+      decided_at_ms INTEGER NOT NULL
+    );
+
+    CREATE INDEX IF NOT EXISTS idx_capability_route_decisions_mission
+      ON capability_route_decisions(mission_id, decided_at_ms);
+    """,
+    12: """
+    -- Rev 1 §§64-65, 68, 72, 76-78, 87 — the owner-understanding layer.
+
+    -- §64. How the owner works, not who they are. Every field is an assertion
+    -- with a state and evidence, never a settled truth, so it can be corrected.
+    CREATE TABLE IF NOT EXISTS owner_cognitive_model (
+      assertion_id TEXT PRIMARY KEY,
+      owner_principal_id TEXT NOT NULL,
+      field TEXT NOT NULL,
+      value TEXT NOT NULL,
+      state TEXT NOT NULL DEFAULT 'OBSERVED',
+      confidence REAL NOT NULL DEFAULT 0.0,
+      evidence_refs_json TEXT NOT NULL DEFAULT '[]',
+      supporting_episode_refs_json TEXT NOT NULL DEFAULT '[]',
+      project_id TEXT,
+      temporary INTEGER NOT NULL DEFAULT 0,
+      superseded_by TEXT,
+      owner_confirmed_at_ms INTEGER,
+      last_revalidated_at_ms INTEGER,
+      created_at_ms INTEGER NOT NULL,
+      updated_at_ms INTEGER NOT NULL
+    );
+
+    CREATE INDEX IF NOT EXISTS idx_owner_model_field
+      ON owner_cognitive_model(owner_principal_id, field, state);
+
+    -- §65. Why a decision went the way it did, so patterns can be learned and,
+    -- crucially, falsified by later outcomes.
+    CREATE TABLE IF NOT EXISTS decision_fingerprints (
+      decision_id TEXT PRIMARY KEY,
+      mission_id TEXT,
+      context_json TEXT NOT NULL DEFAULT '{}',
+      options_considered_json TEXT NOT NULL DEFAULT '[]',
+      owner_choice TEXT NOT NULL,
+      owner_stated_reason TEXT,
+      inferred_reason TEXT,
+      tradeoffs_json TEXT NOT NULL DEFAULT '[]',
+      evidence_used_json TEXT NOT NULL DEFAULT '[]',
+      rejected_alternatives_json TEXT NOT NULL DEFAULT '[]',
+      outcome TEXT,
+      reassessment TEXT,
+      created_at_ms INTEGER NOT NULL,
+      updated_at_ms INTEGER NOT NULL
+    );
+
+    -- §76. Owner words mapped to operational meaning, with anti-examples so the
+    -- mapping is falsifiable rather than merely plausible.
+    CREATE TABLE IF NOT EXISTS shared_vocabulary (
+      term TEXT NOT NULL,
+      project_id TEXT NOT NULL DEFAULT '',
+      owner_meaning TEXT NOT NULL,
+      system_operationalization TEXT NOT NULL,
+      examples_json TEXT NOT NULL DEFAULT '[]',
+      anti_examples_json TEXT NOT NULL DEFAULT '[]',
+      confidence REAL NOT NULL DEFAULT 0.0,
+      evidence_refs_json TEXT NOT NULL DEFAULT '[]',
+      created_at_ms INTEGER NOT NULL,
+      updated_at_ms INTEGER NOT NULL,
+      PRIMARY KEY (term, project_id)
+    );
+
+    -- §77. Long-lived goals and how they relate, so a newer instruction that
+    -- contradicts an older one is visible rather than silently winning.
+    CREATE TABLE IF NOT EXISTS intent_nodes (
+      intent_id TEXT PRIMARY KEY,
+      owner_goal TEXT NOT NULL,
+      first_observed_ms INTEGER NOT NULL,
+      latest_observed_ms INTEGER NOT NULL,
+      projects_json TEXT NOT NULL DEFAULT '[]',
+      constraints_json TEXT NOT NULL DEFAULT '[]',
+      status TEXT NOT NULL DEFAULT 'ACTIVE',
+      priority INTEGER NOT NULL DEFAULT 50
+    );
+
+    CREATE TABLE IF NOT EXISTS intent_edges (
+      edge_id TEXT PRIMARY KEY,
+      from_intent_id TEXT NOT NULL,
+      to_intent_id TEXT NOT NULL,
+      edge_type TEXT NOT NULL,
+      evidence_ref TEXT,
+      created_at_ms INTEGER NOT NULL,
+      FOREIGN KEY(from_intent_id) REFERENCES intent_nodes(intent_id),
+      FOREIGN KEY(to_intent_id) REFERENCES intent_nodes(intent_id)
+    );
+
+    CREATE INDEX IF NOT EXISTS idx_intent_edges_from
+      ON intent_edges(from_intent_id, edge_type);
+
+    CREATE TABLE IF NOT EXISTS intent_missions (
+      intent_id TEXT NOT NULL,
+      mission_id TEXT NOT NULL,
+      linked_at_ms INTEGER NOT NULL,
+      PRIMARY KEY (intent_id, mission_id)
+    );
+
+    -- §78. Why a project exists and what was already rejected. Scoped, and
+    -- explicitly not a replacement for Project Truth.
+    CREATE TABLE IF NOT EXISTS strategic_memory (
+      entry_id TEXT PRIMARY KEY,
+      project_id TEXT NOT NULL,
+      entry_type TEXT NOT NULL,
+      statement TEXT NOT NULL,
+      rationale TEXT,
+      evidence_refs_json TEXT NOT NULL DEFAULT '[]',
+      superseded_by TEXT,
+      created_at_ms INTEGER NOT NULL,
+      updated_at_ms INTEGER NOT NULL
+    );
+
+    CREATE INDEX IF NOT EXISTS idx_strategic_memory_project
+      ON strategic_memory(project_id, entry_type);
+
+    -- §72. Where VAN compensates rather than imitates. Task observations only.
+    CREATE TABLE IF NOT EXISTS cognitive_complement_map (
+      entry_id TEXT PRIMARY KEY,
+      domain TEXT NOT NULL UNIQUE,
+      owner_strength TEXT,
+      owner_vulnerability_candidate TEXT,
+      van_strength TEXT,
+      preferred_collaboration_pattern TEXT,
+      confidence REAL NOT NULL DEFAULT 0.0,
+      evidence_refs_json TEXT NOT NULL DEFAULT '[]',
+      created_at_ms INTEGER NOT NULL,
+      updated_at_ms INTEGER NOT NULL
+    );
+
+    -- §87. What changed about how VAN works with the owner, and whether the
+    -- owner may reverse it.
+    CREATE TABLE IF NOT EXISTS symbiotic_growth (
+      change_id TEXT PRIMARY KEY,
+      observed_pattern TEXT NOT NULL,
+      previous_behavior TEXT NOT NULL,
+      new_behavior TEXT NOT NULL,
+      reason TEXT NOT NULL,
+      evidence_refs_json TEXT NOT NULL DEFAULT '[]',
+      owner_confirmation_required INTEGER NOT NULL DEFAULT 1,
+      owner_confirmed_at_ms INTEGER,
+      reverted_at_ms INTEGER,
+      reversible INTEGER NOT NULL DEFAULT 1,
+      effective_from_ms INTEGER,
+      created_at_ms INTEGER NOT NULL
+    );
+    """,
+    13: """
+    -- Rev 1 §§66, 68-71, 75, 88 — the critical reasoning layer.
+
+    -- §66. Structured conclusions only. §13 forbids persisting hidden
+    -- chain-of-thought, so there is no column for it: what survives an
+    -- assessment is the facts, assumptions, alternatives and the confidence.
+    CREATE TABLE IF NOT EXISTS reasoning_assessments (
+      assessment_id TEXT PRIMARY KEY,
+      mission_id TEXT,
+      problem_statement TEXT NOT NULL,
+      known_facts_json TEXT NOT NULL DEFAULT '[]',
+      assumptions_json TEXT NOT NULL DEFAULT '[]',
+      uncertainties_json TEXT NOT NULL DEFAULT '[]',
+      contradictions_json TEXT NOT NULL DEFAULT '[]',
+      hypotheses_json TEXT NOT NULL DEFAULT '[]',
+      alternatives_json TEXT NOT NULL DEFAULT '[]',
+      failure_modes_json TEXT NOT NULL DEFAULT '[]',
+      counterfactuals_json TEXT NOT NULL DEFAULT '[]',
+      recommended_next_action TEXT,
+      confidence REAL NOT NULL DEFAULT 0.0,
+      evidence_refs_json TEXT NOT NULL DEFAULT '[]',
+      challenge_mode TEXT NOT NULL DEFAULT 'BALANCED',
+      critic_findings_json TEXT NOT NULL DEFAULT '[]',
+      verifier_findings_json TEXT NOT NULL DEFAULT '[]',
+      created_at_ms INTEGER NOT NULL
+    );
+
+    CREATE INDEX IF NOT EXISTS idx_reasoning_mission
+      ON reasoning_assessments(mission_id, created_at_ms);
+
+    -- §68. Mission-scoped assumptions, and whether anyone checked them.
+    CREATE TABLE IF NOT EXISTS assumption_ledger (
+      assumption_id TEXT PRIMARY KEY,
+      mission_id TEXT NOT NULL,
+      claim TEXT NOT NULL,
+      source TEXT NOT NULL,
+      importance TEXT NOT NULL DEFAULT 'MEDIUM',
+      confidence REAL NOT NULL DEFAULT 0.5,
+      testability TEXT NOT NULL DEFAULT 'UNKNOWN',
+      verification_plan TEXT,
+      status TEXT NOT NULL DEFAULT 'ACTIVE',
+      resolved_evidence_refs_json TEXT NOT NULL DEFAULT '[]',
+      created_at_ms INTEGER NOT NULL,
+      updated_at_ms INTEGER NOT NULL,
+      FOREIGN KEY(mission_id) REFERENCES missions(mission_id)
+    );
+
+    CREATE INDEX IF NOT EXISTS idx_assumption_mission
+      ON assumption_ledger(mission_id, status, importance);
+
+    -- §71. Every time VAN agreed or disagreed with the owner on a factual
+    -- premise, so the anti-sycophancy metrics are measured rather than claimed.
+    CREATE TABLE IF NOT EXISTS premise_assessments (
+      premise_id TEXT PRIMARY KEY,
+      mission_id TEXT,
+      owner_premise TEXT NOT NULL,
+      van_position TEXT NOT NULL,
+      evidence_refs_json TEXT NOT NULL DEFAULT '[]',
+      semantic_class TEXT NOT NULL,
+      corrected INTEGER NOT NULL DEFAULT 0,
+      agreed_without_evidence INTEGER NOT NULL DEFAULT 0,
+      created_at_ms INTEGER NOT NULL
+    );
+
+    CREATE INDEX IF NOT EXISTS idx_premise_created
+      ON premise_assessments(created_at_ms);
+    """,
+    14: """
+    -- Rev 1 §§10, 11, 27, 31 — attention scoring, proactive autonomy, trust.
+
+    -- §10. Candidates are scored and may be suppressed; the existing `attention`
+    -- table stays the owner-visible queue, and this records why something did or
+    -- did not reach it.
+    CREATE TABLE IF NOT EXISTS attention_candidates (
+      candidate_id TEXT PRIMARY KEY,
+      source TEXT NOT NULL,
+      dedupe_key TEXT NOT NULL,
+      importance REAL NOT NULL DEFAULT 0.0,
+      urgency REAL NOT NULL DEFAULT 0.0,
+      actionability REAL NOT NULL DEFAULT 0.0,
+      novelty REAL NOT NULL DEFAULT 0.0,
+      owner_relevance REAL NOT NULL DEFAULT 0.0,
+      confidence REAL NOT NULL DEFAULT 0.0,
+      interruption_cost REAL NOT NULL DEFAULT 0.0,
+      score REAL NOT NULL DEFAULT 0.0,
+      disposition TEXT NOT NULL,
+      reason TEXT,
+      related_mission_id TEXT,
+      summary TEXT NOT NULL DEFAULT '',
+      expiry_ms INTEGER,
+      created_at_ms INTEGER NOT NULL
+    );
+
+    CREATE INDEX IF NOT EXISTS idx_attention_candidates_dedupe
+      ON attention_candidates(dedupe_key, created_at_ms);
+
+    -- §31. Trust is earned from verified outcomes and lost hard on false success.
+    CREATE TABLE IF NOT EXISTS domain_trust (
+      domain TEXT PRIMARY KEY,
+      verified_successes INTEGER NOT NULL DEFAULT 0,
+      meaningful_failures INTEGER NOT NULL DEFAULT 0,
+      false_successes INTEGER NOT NULL DEFAULT 0,
+      owner_overrides INTEGER NOT NULL DEFAULT 0,
+      recovery_successes INTEGER NOT NULL DEFAULT 0,
+      current_autonomy_ceiling TEXT NOT NULL DEFAULT 'S1',
+      owner_granted_ceiling TEXT,
+      updated_at_ms INTEGER NOT NULL
+    );
+
+    -- §11. Proactive missions and the standing policy that allowed them.
+    CREATE TABLE IF NOT EXISTS proactive_policies (
+      policy_id TEXT PRIMARY KEY,
+      domain TEXT NOT NULL,
+      autonomy_level TEXT NOT NULL,
+      mission_class TEXT NOT NULL,
+      owner_granted_at_ms INTEGER,
+      owner_evidence_ref TEXT,
+      enabled INTEGER NOT NULL DEFAULT 1,
+      created_at_ms INTEGER NOT NULL,
+      updated_at_ms INTEGER NOT NULL
+    );
+
+    CREATE INDEX IF NOT EXISTS idx_proactive_policies_domain
+      ON proactive_policies(domain, enabled);
+    """,
+    15: """
+    -- Rev 1 §§79-84, 24-25, 40 — external reality, evolution, benchmarks, eval.
+
+    -- §79. What the evidence says now, kept strictly apart from what the owner
+    -- thinks. §22 makes the separation mandatory to stop personalisation
+    -- becoming an echo chamber.
+    CREATE TABLE IF NOT EXISTS external_reality (
+      observation_id TEXT PRIMARY KEY,
+      subject TEXT NOT NULL,
+      claim TEXT NOT NULL,
+      source_kind TEXT NOT NULL,
+      source_ref TEXT NOT NULL,
+      observed_at_ms INTEGER NOT NULL,
+      confidence REAL NOT NULL DEFAULT 0.5,
+      superseded_by TEXT,
+      contradicts_owner_belief INTEGER NOT NULL DEFAULT 0
+    );
+
+    CREATE INDEX IF NOT EXISTS idx_external_reality_subject
+      ON external_reality(subject, observed_at_ms);
+
+    -- §82. One row per technology VAN knows about, with its pipeline state.
+    CREATE TABLE IF NOT EXISTS technology_capabilities (
+      technology_id TEXT PRIMARY KEY,
+      name TEXT NOT NULL,
+      category TEXT NOT NULL,
+      version TEXT,
+      source TEXT,
+      licence TEXT,
+      security_profile TEXT,
+      strengths_json TEXT NOT NULL DEFAULT '[]',
+      weaknesses_json TEXT NOT NULL DEFAULT '[]',
+      integration_cost TEXT,
+      migration_risk TEXT,
+      owner_value TEXT,
+      pipeline_state TEXT NOT NULL DEFAULT 'DISCOVERED',
+      benchmark_digest TEXT,
+      owner_decision_ref TEXT,
+      last_evaluated_at_ms INTEGER,
+      created_at_ms INTEGER NOT NULL,
+      updated_at_ms INTEGER NOT NULL
+    );
+
+    CREATE INDEX IF NOT EXISTS idx_technology_state
+      ON technology_capabilities(pipeline_state, category);
+
+    -- §83. VAN-specific benchmark results. §24 forbids relying on public
+    -- leaderboards, so a technology's standing here is measured on VAN tasks.
+    CREATE TABLE IF NOT EXISTS benchmark_runs (
+      run_id TEXT PRIMARY KEY,
+      suite TEXT NOT NULL,
+      technology_id TEXT,
+      task_count INTEGER NOT NULL DEFAULT 0,
+      passed INTEGER NOT NULL DEFAULT 0,
+      failed INTEGER NOT NULL DEFAULT 0,
+      median_latency_ms INTEGER,
+      total_cost_micros INTEGER,
+      results_json TEXT NOT NULL DEFAULT '[]',
+      harness_version TEXT NOT NULL,
+      created_at_ms INTEGER NOT NULL
+    );
+
+    CREATE INDEX IF NOT EXISTS idx_benchmark_suite
+      ON benchmark_runs(suite, technology_id, created_at_ms);
+
+    -- §25. Which capability sequences actually work for which mission class.
+    CREATE TABLE IF NOT EXISTS execution_strategies (
+      strategy_id TEXT PRIMARY KEY,
+      mission_class TEXT NOT NULL,
+      capability_sequence_json TEXT NOT NULL DEFAULT '[]',
+      conditions_json TEXT NOT NULL DEFAULT '{}',
+      success_count INTEGER NOT NULL DEFAULT 0,
+      failure_count INTEGER NOT NULL DEFAULT 0,
+      median_latency_ms INTEGER,
+      median_cost_micros INTEGER,
+      verification_quality REAL NOT NULL DEFAULT 0.0,
+      promotion_state TEXT NOT NULL DEFAULT 'EXPERIMENTAL',
+      eval_run_id TEXT,
+      last_evaluated_at_ms INTEGER,
+      created_at_ms INTEGER NOT NULL,
+      updated_at_ms INTEGER NOT NULL
+    );
+
+    CREATE INDEX IF NOT EXISTS idx_strategy_class
+      ON execution_strategies(mission_class, promotion_state);
+
+    -- §40. Versioned eval runs across the >9 dimensions.
+    CREATE TABLE IF NOT EXISTS eval_runs (
+      eval_run_id TEXT PRIMARY KEY,
+      suite TEXT NOT NULL,
+      dimension TEXT NOT NULL,
+      measured INTEGER NOT NULL DEFAULT 0,
+      sample_size INTEGER NOT NULL DEFAULT 0,
+      score REAL,
+      target REAL,
+      meets_target INTEGER,
+      unmeasurable_reason TEXT,
+      details_json TEXT NOT NULL DEFAULT '{}',
+      harness_version TEXT NOT NULL,
+      created_at_ms INTEGER NOT NULL
+    );
+
+    CREATE INDEX IF NOT EXISTS idx_eval_dimension
+      ON eval_runs(dimension, created_at_ms);
+    """,
+    16: """
+    -- Rev 1 §§34, 36, 38 — permissions the owner can read, and computer use.
+
+    -- §34/§36. One owner-readable place for every standing grant, with where it
+    -- came from and when it was last used. A grant nobody can see is a grant
+    -- nobody can revoke.
+    CREATE TABLE IF NOT EXISTS permission_grants (
+      grant_id TEXT PRIMARY KEY,
+      permission TEXT NOT NULL,
+      display_name TEXT NOT NULL,
+      scope TEXT NOT NULL DEFAULT '',
+      origin TEXT NOT NULL,
+      origin_evidence_ref TEXT,
+      granted_at_ms INTEGER NOT NULL,
+      expires_at_ms INTEGER,
+      last_used_at_ms INTEGER,
+      use_count INTEGER NOT NULL DEFAULT 0,
+      revoked_at_ms INTEGER,
+      revocation_reason TEXT
+    );
+
+    CREATE INDEX IF NOT EXISTS idx_permission_grants_live
+      ON permission_grants(revoked_at_ms, permission);
+
+    -- §38. The Browser Fabric generalised: a typed operation against any target
+    -- surface, bound to a mission, with its own evidence and verifier.
+    CREATE TABLE IF NOT EXISTS computer_operations (
+      operation_id TEXT PRIMARY KEY,
+      mission_id TEXT,
+      activity_id TEXT,
+      surface TEXT NOT NULL,
+      target_application TEXT NOT NULL,
+      operation_type TEXT NOT NULL,
+      action_class TEXT NOT NULL,
+      scope_json TEXT NOT NULL DEFAULT '{}',
+      checkpoint_ref TEXT,
+      evidence_ref TEXT,
+      verifier_type TEXT NOT NULL DEFAULT 'NONE',
+      state TEXT NOT NULL DEFAULT 'PENDING',
+      error_code TEXT,
+      started_at_ms INTEGER NOT NULL,
+      completed_at_ms INTEGER
+    );
+
+    CREATE INDEX IF NOT EXISTS idx_computer_operations_mission
+      ON computer_operations(mission_id, started_at_ms);
+    """,
 }
 
 

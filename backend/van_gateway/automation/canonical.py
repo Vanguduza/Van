@@ -32,6 +32,9 @@ _PREFIXES = {
     "browser_capsule": "bwf",
     "intent": "intent",
     "proposal": "apro",
+    "repair": "wfrep",
+    "deadletter": "wfdl",
+    "generation": "wfgen",
 }
 
 

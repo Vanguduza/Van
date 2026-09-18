@@ -35,7 +35,7 @@ from van_gateway.automation.models import (
 from van_gateway.automation.payments import PaymentBoundaryError
 from van_gateway.automation.policy import AutomationPolicy, PolicyError, load_automation_policy
 from van_gateway.automation.registry import AutomationRegistry, HotWorkflowIndex, RegistryError
-from van_gateway.automation.router import CapabilityRouter, RouteRequest
+from van_gateway.automation.router import AutomationMediumRouter, RouteRequest
 from van_gateway.automation.templates import TemplateError, TemplateLibrary
 from van_gateway.automation.verifier import PostconditionSpec
 from van_gateway.automation.validator import WorkflowValidator
@@ -108,6 +108,9 @@ class ExecuteBody(BaseModel):
     inputs: dict[str, Any] = Field(default_factory=dict)
     turn_id: str | None = None
     standing_authority_id: str | None = None
+    #: §5 — a mission-scoped run binds itself as an Activity, so the owner's
+    #: Missions page reflects what actually executed.
+    mission_id: str | None = None
 
 
 class PublishHotBody(BaseModel):
@@ -146,6 +149,7 @@ class AutomationApi:
         standing: StandingAutomationAuthorityService,
         policy: AutomationPolicy | None = None,
         dispatcher: AutomationDispatcher | None = None,
+        binder: Any | None = None,
     ) -> None:
         self.store = store
         self.settings = settings
@@ -153,6 +157,7 @@ class AutomationApi:
         self.hot_index = hot_index
         self.standing = standing
         self.dispatcher = dispatcher
+        self.binder = binder
         self.policy = policy or load_automation_policy()
         self.templates = TemplateLibrary()
         self.validator = WorkflowValidator(self.policy)
@@ -160,7 +165,7 @@ class AutomationApi:
         self.planner = ColdGenerationPlanner(
             policy=self.policy, templates=self.templates, validator=self.validator
         )
-        self.router_service = CapabilityRouter(
+        self.router_service = AutomationMediumRouter(
             registry=registry, hot_index=hot_index, templates=self.templates
         )
         self.router = APIRouter(prefix="/v1/automation", tags=["automation"])
@@ -403,8 +408,26 @@ class AutomationApi:
                 raise HTTPException(
                     status_code=status, detail={"error": exc.code, "detail": exc.detail}
                 ) from exc
+            # §5 — bind after dispatch, because the run_id only exists once the
+            # dispatcher has minted it. A binding failure is reported rather than
+            # raised: the run happened, and losing that fact to a bookkeeping
+            # error would be worse than an unbound Activity.
+            binding: dict[str, Any] | None = None
+            if body.mission_id and self.binder is not None:
+                try:
+                    activity_id = await self.binder.bind_automation_run(
+                        mission_id=body.mission_id, run_id=result.run_id
+                    )
+                    binding = {"mission_id": body.mission_id, "activity_id": activity_id}
+                except Exception as exc:  # noqa: BLE001 - surfaced, never swallowed
+                    binding = {
+                        "mission_id": body.mission_id, "activity_id": None,
+                        "error": type(exc).__name__, "detail": str(exc),
+                    }
+
             return {
                 "run_id": result.run_id,
+                "mission_binding": binding,
                 "capability_id": result.capability_id,
                 "artifact_id": result.artifact_id,
                 "status": result.status.value,

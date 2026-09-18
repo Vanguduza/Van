@@ -34,6 +34,18 @@ from van_gateway.automation.grants import RunGrantService
 from van_gateway.automation.health import AutomationHealthApi
 from van_gateway.automation.registry import AutomationRegistry, HotWorkflowIndex
 from van_gateway.browser.api import BrowserApi
+from van_gateway.capability.models import ReadinessSource
+from van_gateway.capability.readiness import (
+    AutomationReadiness,
+    ExternalRuntimeReadiness,
+    GoogleMeshReadiness,
+)
+from van_gateway.capability.registry import CapabilityRegistry
+from van_gateway.capability.router import CapabilityRouter
+from van_gateway.mission.api import MissionApi
+from van_gateway.mission.binding import MissionBinder
+from van_gateway.understanding.api import UnderstandingApi
+from van_gateway.mission.service import MissionService
 from van_gateway.command.authority import CommandAuthorityService
 from van_gateway.command.standing import StandingAutomationAuthorityService
 from van_gateway.runtime_api import OwnerRuntimeApi
@@ -166,6 +178,7 @@ def create_app() -> FastAPI:
     # and the gateway refuses an assignment rather than pretending to run one.
     browser = BrowserApi(store, settings, decisions=decisions)
 
+
     trading = TradingService(
         settings.vati_ledger_path,
         accounts_registry=settings.vati_accounts_registry,
@@ -196,6 +209,34 @@ def create_app() -> FastAPI:
         cloud_runtime_configured=settings.google_cloud_runtime_configured,
         consumer_connected_capabilities=settings.google_consumer_connected_capabilities,
     )
+    # Rev 1 §7 — one canonical declaration set. Readiness is delegated to the
+    # subsystems that already own it, so this registry never becomes a third
+    # copy of automation or Google state.
+    capability_registry = CapabilityRegistry(
+        store,
+        probes={
+            ReadinessSource.AUTOMATION_REGISTRY: AutomationReadiness(
+                store, enabled=settings.automation_enabled
+            ),
+            ReadinessSource.GOOGLE_MESH: GoogleMeshReadiness(google_broker),
+            ReadinessSource.EXTERNAL_RUNTIME: ExternalRuntimeReadiness(
+                automation_health.runtime, enabled=settings.browser_enabled
+            ),
+        },
+    )
+    capability_router = CapabilityRouter(store, capability_registry)
+    missions = MissionService(store, capabilities=capability_registry)
+    mission_api = MissionApi(
+        store, settings, missions=missions, registry=capability_registry,
+        router=capability_router,
+    )
+    # §5 — one binder shared by every executor, so browser tasks and
+    # automation runs become Activities as they happen rather than by a
+    # later backfill.
+    mission_binder = MissionBinder(store, missions)
+    browser.binder = mission_binder
+    automation.binder = mission_binder
+    understanding_api = UnderstandingApi(store, settings)
     google_router = GoogleCapabilityRouter(store, google_broker)
 
     events = EventBus(store, settings.event_page_size)
@@ -222,6 +263,9 @@ def create_app() -> FastAPI:
         # §273 — the HOT index is a cache of durable state, so it is rebuilt on
         # every boot rather than trusted to survive a restart.
         await automation_hot_index.rebuild(store)
+        # §7 — the declaration set is sealed by digest and synced on boot,
+        # so a manifest edit takes effect on restart and is auditable after.
+        await capability_registry.sync()
         yield
 
     app = FastAPI(title="VAN Gateway", version="0.5.0-dev", lifespan=lifespan)
@@ -239,6 +283,12 @@ def create_app() -> FastAPI:
     app.state.automation_hot_index = automation_hot_index
     app.state.automation_dispatcher = automation_dispatcher
     app.state.browser = browser
+    app.state.capability_registry = capability_registry
+    app.state.capability_router = capability_router
+    app.state.missions = missions
+    app.state.mission_binder = mission_binder
+    app.state.mission_api = mission_api
+    app.state.understanding_api = understanding_api
     app.state.decisions = decisions
     app.state.projects = projects
     app.state.reminders = reminders
@@ -248,6 +298,8 @@ def create_app() -> FastAPI:
     app.include_router(automation_health.router)
     app.include_router(automation.router)
     app.include_router(browser.router)
+    app.include_router(mission_api.router)
+    app.include_router(understanding_api.router)
 
     def internal_control_route(method: str, path: str) -> bool:
         if path.startswith("/v1/runtime/"):
@@ -261,6 +313,21 @@ def create_app() -> FastAPI:
         # admit or publish a capability.
         if path.startswith("/v1/automation/"):
             return True
+        # §§2.3, 43 — the mission read model is owner-facing; planning is not.
+        # Cancel and message are the two mutations that are the owner's to make.
+        if path.startswith("/v1/missions") or path in ("/v1/needs-you", "/v1/activity",
+                                                        "/v1/capabilities/status"):
+            if method == "GET":
+                return False
+            return not (path.endswith("/cancel") or path.endswith("/message"))
+        # §§33, 63.6 — the Understanding surface is the owner's. Hermes may
+        # observe; only the owner confirms, corrects, rejects or reverts.
+        if path.startswith("/v1/understanding") or path.startswith("/v1/permissions") or (
+            path in ("/v1/technology-radar", "/v1/eval", "/v1/autonomy")
+        ):
+            # §36 — revoking a permission is emphatically the owner's, so the
+            # only internal-control route on this surface is Hermes observing.
+            return path == "/v1/understanding/observe"
         # Owner Android may inspect browser truth through authenticated GETs.
         # Browser mutations/assignments remain Hermes internal-control only.
         if path.startswith("/v1/browser/"):

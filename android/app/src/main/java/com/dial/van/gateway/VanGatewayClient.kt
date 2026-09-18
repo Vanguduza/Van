@@ -221,6 +221,113 @@ class VanGatewayClient(context: Context) {
         JSONArray(rawGet("/v1/browser/tasks/${encodeSegment(taskId)}/evidence"))
     }
 
+    // ---------------------------------------------------------------- missions
+    //
+    // Rev 1 §§33, 43 — the surfaces Home, Missions, Needs You, Activity and
+    // Understanding read. Every one is a real gateway read; §48 forbids screens
+    // disconnected from live APIs, so there is deliberately no local fixture
+    // behind any of these.
+
+    suspend fun missions(activeOnly: Boolean = false): JSONArray = withContext(Dispatchers.IO) {
+        val suffix = if (activeOnly) "?active=true" else ""
+        JSONArray(rawGet("/v1/missions$suffix"))
+    }
+
+    suspend fun mission(missionId: String): JSONObject = withContext(Dispatchers.IO) {
+        getJson("/v1/missions/${encodeSegment(missionId)}")
+    }
+
+    suspend fun missionActivity(missionId: String): JSONObject = withContext(Dispatchers.IO) {
+        getJson("/v1/missions/${encodeSegment(missionId)}/activity")
+    }
+
+    suspend fun missionEvidence(missionId: String): JSONObject = withContext(Dispatchers.IO) {
+        getJson("/v1/missions/${encodeSegment(missionId)}/evidence")
+    }
+
+    /** §33 — one surface for everything waiting on the owner. */
+    suspend fun needsYou(): JSONObject = withContext(Dispatchers.IO) {
+        getJson("/v1/needs-you")
+    }
+
+    /** §34 — the owner timeline, already grouped by mission by the gateway. */
+    suspend fun activityFeed(): JSONObject = withContext(Dispatchers.IO) {
+        getJson("/v1/activity")
+    }
+
+    suspend fun capabilityStatus(): JSONObject = withContext(Dispatchers.IO) {
+        getJson("/v1/capabilities/status")
+    }
+
+    /** Cancelling your own mission is yours to say (§2.3). */
+    suspend fun cancelMission(missionId: String): JSONObject = withContext(Dispatchers.IO) {
+        postJson("/v1/missions/${encodeSegment(missionId)}/cancel", JSONObject())
+    }
+
+    /**
+     * A note on the record. It does not move the mission by itself — Android is
+     * not a planner (§2.3), so this becomes an event Hermes reads on its turn.
+     */
+    suspend fun messageMission(missionId: String, message: String): JSONObject =
+        withContext(Dispatchers.IO) {
+            postJson(
+                "/v1/missions/${encodeSegment(missionId)}/message",
+                JSONObject().put("message", message),
+            )
+        }
+
+    // ----------------------------------------------------------- understanding
+
+    /** §33 — what VAN believes about how the owner works, and how firmly. */
+    suspend fun understanding(): JSONObject = withContext(Dispatchers.IO) {
+        getJson("/v1/understanding")
+    }
+
+    suspend fun confirmUnderstanding(assertionId: String): JSONObject =
+        withContext(Dispatchers.IO) {
+            postJson("/v1/understanding/${encodeSegment(assertionId)}/confirm", JSONObject())
+        }
+
+    suspend fun correctUnderstanding(assertionId: String, newValue: String): JSONObject =
+        withContext(Dispatchers.IO) {
+            postJson(
+                "/v1/understanding/${encodeSegment(assertionId)}/correct",
+                JSONObject().put("new_value", newValue),
+            )
+        }
+
+    suspend fun rejectUnderstanding(assertionId: String): JSONObject =
+        withContext(Dispatchers.IO) {
+            postJson("/v1/understanding/${encodeSegment(assertionId)}/reject", JSONObject())
+        }
+
+    /** §63.5 — inferred understanding must be reversible, in practice. */
+    suspend fun revertAdaptation(changeId: String): JSONObject = withContext(Dispatchers.IO) {
+        postJson("/v1/understanding/adaptation/${encodeSegment(changeId)}/revert", JSONObject())
+    }
+
+    suspend fun confirmAdaptation(changeId: String): JSONObject = withContext(Dispatchers.IO) {
+        postJson("/v1/understanding/adaptation/${encodeSegment(changeId)}/confirm", JSONObject())
+    }
+
+    /** §36 — every standing grant, where it came from, when it was last used. */
+    suspend fun permissions(): JSONObject = withContext(Dispatchers.IO) {
+        getJson("/v1/permissions")
+    }
+
+    suspend fun revokePermission(grantId: String): JSONObject = withContext(Dispatchers.IO) {
+        postJson("/v1/permissions/${encodeSegment(grantId)}/revoke", JSONObject())
+    }
+
+    suspend fun autonomy(): JSONObject = withContext(Dispatchers.IO) { getJson("/v1/autonomy") }
+
+    suspend fun technologyRadar(): JSONObject = withContext(Dispatchers.IO) {
+        getJson("/v1/technology-radar")
+    }
+
+    /** §41 — the scoreboard, including every dimension VAN cannot yet measure. */
+    suspend fun evalReport(): JSONObject = withContext(Dispatchers.IO) { getJson("/v1/eval") }
+
     suspend fun events(afterSeq: Long = 0L): JSONObject = withContext(Dispatchers.IO) {
         val id = deviceId ?: error("not_enrolled")
         getJson("/v1/events?device_id=${encodeQuery(id)}&after_seq=$afterSeq")
