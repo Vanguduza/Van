@@ -501,6 +501,71 @@ async def test_owner_approval_resumes_same_browser_task(tmp_path):
         assert fetched.json()["task"]["status"] == BrowserTaskStatus.COMPLETED.value
 
 
+
+async def test_owner_approval_cannot_widen_to_unapproved_domain(tmp_path):
+    worker = _ScriptedWorker(
+        [ProposedAction(kind="navigate", domain="approved.example.net", url="https://approved.example.net/")]
+    )
+    ac, _api, store = await _client(tmp_path, worker=worker)
+    async with ac:
+        task = await _make_task(ac)
+        first = await ac.post(
+            "/v1/browser/assignments", headers=HEADERS,
+            json={
+                "task_id": task["task_id"], "turn_id": "turn-1",
+                "command_id": "cmd-owner-1", "goal": "read the statement total",
+                "allowed_domains": [DOMAIN],
+            },
+        )
+        assert first.json()["stop_reason"] == "SCOPE_VIOLATION"
+        row = await store.fetchone(
+            "SELECT decision_id FROM browser_escalations WHERE task_id = ?",
+            (task["task_id"],),
+        )
+        await store.execute("UPDATE decisions SET status = 'APPROVED' WHERE id = ?", (row["decision_id"],))
+        refused = await ac.post(
+            "/v1/browser/assignments", headers=HEADERS,
+            json={
+                "task_id": task["task_id"], "turn_id": "turn-1",
+                "command_id": "cmd-owner-1", "goal": "read the statement total",
+                "allowed_domains": [DOMAIN, "different.example.net"],
+            },
+        )
+        assert refused.status_code == 409
+        assert refused.json()["detail"] == "BROWSER_RESUME_SCOPE_EXCEEDS_APPROVAL"
+
+
+async def test_action_class_approval_cannot_be_exceeded(tmp_path):
+    worker = _ScriptedWorker([ProposedAction(kind="submit", domain=DOMAIN, action_class=ActionClass.A3)])
+    ac, _api, store = await _client(tmp_path, worker=worker)
+    async with ac:
+        task = await _make_task(ac)
+        first = await ac.post(
+            "/v1/browser/assignments", headers=HEADERS,
+            json={
+                "task_id": task["task_id"], "turn_id": "turn-1",
+                "command_id": "cmd-owner-1", "goal": "read the statement total",
+                "allowed_domains": [DOMAIN], "action_class_ceiling": "A2",
+            },
+        )
+        assert first.json()["stop_reason"] == "ACTION_CLASS_VIOLATION"
+        row = await store.fetchone(
+            "SELECT decision_id FROM browser_escalations WHERE task_id = ?",
+            (task["task_id"],),
+        )
+        await store.execute("UPDATE decisions SET status = 'APPROVED' WHERE id = ?", (row["decision_id"],))
+        refused = await ac.post(
+            "/v1/browser/assignments", headers=HEADERS,
+            json={
+                "task_id": task["task_id"], "turn_id": "turn-1",
+                "command_id": "cmd-owner-1", "goal": "read the statement total",
+                "allowed_domains": [DOMAIN], "action_class_ceiling": "A4",
+            },
+        )
+        assert refused.status_code == 409
+        assert refused.json()["detail"] == "BROWSER_RESUME_CLASS_EXCEEDS_APPROVAL"
+
+
 async def test_a_run_cannot_be_started_twice(tmp_path):
     """A completed task is terminal; a second assignment does not resume it."""
     worker = _ScriptedWorker([ProposedAction(kind="done", domain=DOMAIN, done=True)])
