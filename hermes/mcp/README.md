@@ -6,9 +6,41 @@ Hermes profile **`van`** is the sole agent runtime. Credentials are brokered thr
 
 | Server | Purpose | Credential model |
 |---|---|---|
+| `van_owner_runtime` | Deterministic owner-context readiness/graph/lexical/hot-capsule/snapshot, typed resolution, research routing and action lifecycle verification | Local Hermes internal-control credential; fixed tool allowlist; no generic HTTP; no canonical-memory admission |
 | `van-gateway` | Owner auth, grants, Google planner, evidence, attention/reminders, health | Device-signed; no secret passthrough |
 | `filesystem` (scoped) | Registered project files | Path allowlist + Project Truth + grants |
 | `git` (scoped) | SHA/evidence/diff/write | Read default; writes require grant |
+
+### `van_owner_runtime`
+
+The canonical stdio shim is `hermes/mcp/owner_runtime_stdio.mjs`. Register it into the live Hermes config with:
+
+```bash
+./tools/hermes/register_owner_runtime_mcp.sh --dry-run
+./tools/hermes/register_owner_runtime_mcp.sh
+```
+
+The registration script reads no secret into YAML. The shim obtains `VAN_INTERNAL_CONTROL_TOKEN` from the existing local gateway environment (default `~/.config/van/gateway.env`) or an explicitly configured local token file. The token is used only as `X-Van-Internal-Token` and is never emitted as tool output.
+
+Allowed tools are deliberately narrow:
+
+- `runtime_status`
+- `resolve_command`
+- `context_graph_query`
+- `context_lexical_query`
+- `context_hot_capsule`
+- `context_readiness`
+- `context_snapshot`
+- `research_status`
+- `research_search`
+- `action_begin`
+- `action_submitted`
+- `action_verify`
+- `action_get`
+
+There is **no** generic HTTP/shell tool and no fact/edge canonical-admission tool. Hermes is not a truth authority. Any Hermes-originated memory candidate reaching the internal runtime API is forced to `MODEL_DERIVED + INFERRED`; owner/canonical promotion requires a separate trusted gateway/owner path.
+
+The context graph is a bounded temporal retrieval primitive, not an autonomous GraphRAG loop. Deterministic lexical retrieval runs locally over current owner facts and graph edges without embeddings, model inference or a remote call. Hot-context capsules are revision-sealed, bounded caches of evidence references used to reduce repeated lookup latency; they are invalidated by context revision/expiry and are never a new truth store. Exact facts remain ahead of graph/lexical retrieval in the critical path; external research remains an escalation.
 
 ## Trading (van-trading-core)
 
@@ -62,15 +94,18 @@ Gemini is a Hermes provider route, not a second assistant. Antigravity/Jules are
 ## Configuration checklist
 
 1. No committed secrets.
-2. Register the canonical owner Google principal with `tools/google/configure_google_identity.py`.
-3. Configure each credential plane independently.
-4. Use `tools/google/certify_google_mesh.py` to inspect readiness.
-5. `CONFIGURED` means wiring exists; `READY` requires certification evidence.
-6. Missing capability => `DEGRADED`; never simulate results.
-7. Consumer cookies/session tokens may not be exported or injected into prompts.
+2. Install/refresh the VAN profile, then register `van_owner_runtime` into live Hermes configuration.
+3. Verify `runtime_status` before relying on context/action/research tools.
+4. Register the canonical owner Google principal with `tools/google/configure_google_identity.py`.
+5. Configure each credential plane independently.
+6. Use `tools/google/certify_google_mesh.py` to inspect readiness.
+7. `CONFIGURED` means wiring exists; `READY` requires certification evidence.
+8. Missing capability => `DEGRADED`; never simulate results.
+9. Consumer cookies/session tokens may not be exported or injected into prompts.
 
 ## References
 
 - `docs/GOOGLE_INTELLIGENCE_MESH.md`
+- `hermes/profile/van/AGENTS.md`
 - `hermes/profile/van/config.yaml`
 - `hermes/providers/gemini.md`

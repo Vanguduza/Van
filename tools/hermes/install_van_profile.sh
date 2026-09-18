@@ -7,11 +7,9 @@ SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
 REPO_ROOT="$(cd "${SCRIPT_DIR}/../.." && pwd)"
 SOURCE_ROOT="${REPO_ROOT}/hermes"
 
-# Target: $HERMES_HOME/profiles/van or ~/.hermes/profiles/van
 HERMES_BASE="${HERMES_HOME:-${HOME}/.hermes}"
 TARGET_ROOT="${HERMES_BASE}/profiles/${PROFILE_NAME}"
 
-# Never copy these patterns (secret-safe)
 SECRET_PATTERNS=(
   ".env"
   ".env.*"
@@ -27,15 +25,8 @@ SECRET_PATTERNS=(
 
 log() { printf '[install_van_profile] %s\n' "$*"; }
 err() { printf '[install_van_profile] ERROR: %s\n' "$*" >&2; }
-
-die() {
-  err "$1"
-  exit 1
-}
-
-require_cmd() {
-  command -v "$1" >/dev/null 2>&1 || die "Required command not found: $1"
-}
+die() { err "$1"; exit 1; }
+require_cmd() { command -v "$1" >/dev/null 2>&1 || die "Required command not found: $1"; }
 
 verify_source_layout() {
   local missing=0
@@ -48,6 +39,7 @@ verify_source_layout() {
     "${SOURCE_ROOT}/policy/van_policy_hook.py"
     "${SOURCE_ROOT}/bot/BOT_CHAT.md"
     "${SOURCE_ROOT}/mcp/README.md"
+    "${SOURCE_ROOT}/mcp/owner_runtime_stdio.mjs"
     "${SOURCE_ROOT}/providers/gemini.md"
   )
   for f in "${required[@]}"; do
@@ -70,41 +62,18 @@ verify_source_layout() {
   [[ "$missing" -eq 0 ]] || die "Source layout verification failed — aborting install"
 }
 
-should_skip_file() {
-  local base
-  base="$(basename "$1")"
-  case "$base" in
-    .env|.env.*|*.pem|*.p12|*.key|google-oauth-client.json|gemini.env)
-      return 0
-      ;;
-  esac
-  case "$base" in
-    *credentials*|*secret*|*token*)
-      return 0
-      ;;
-  esac
-  return 1
-}
-
 copy_tree() {
   require_cmd rsync
   local excludes=()
-  for pat in "${SECRET_PATTERNS[@]}"; do
-    excludes+=(--exclude="$pat")
-  done
+  for pat in "${SECRET_PATTERNS[@]}"; do excludes+=(--exclude="$pat"); done
   mkdir -p "${TARGET_ROOT}"
 
-  # The profile root is shared with Hermes runtime state (state.db, sessions,
-  # memories, logs, pairing data, caches, platform state and .env). Never use
-  # root-level --delete here. Update only repository-owned static files.
   for file in SOUL.md AGENTS.md config.yaml; do
     rsync -a "${excludes[@]}" "${SOURCE_ROOT}/profile/van/${file}" "${TARGET_ROOT}/${file}"
   done
   mkdir -p "${TARGET_ROOT}/bin"
   rsync -a --delete "${excludes[@]}" "${SOURCE_ROOT}/profile/van/bin/" "${TARGET_ROOT}/bin/"
 
-  # Only named VAN skills are repository-managed. Preserve runtime/user-installed
-  # skills that may coexist under the profile skills directory.
   mkdir -p "${TARGET_ROOT}/skills"
   local managed_skills=(
     owner-briefing google-workspace google-intelligence gemini-notebook google-design google-development
@@ -134,6 +103,7 @@ verify_target_layout() {
     "${TARGET_ROOT}/bot/BOT_CHAT.md"
     "${TARGET_ROOT}/bot/councils.md"
     "${TARGET_ROOT}/mcp/README.md"
+    "${TARGET_ROOT}/mcp/owner_runtime_stdio.mjs"
     "${TARGET_ROOT}/providers/gemini.md"
   )
   for f in "${required[@]}"; do
@@ -150,6 +120,10 @@ verify_target_layout() {
     err "SOUL.md missing Project Truth authority reference"
     missing=1
   fi
+  if ! grep -q 'context_graph_query' "${TARGET_ROOT}/mcp/owner_runtime_stdio.mjs" 2>/dev/null; then
+    err "owner-runtime MCP shim missing canonical context tool surface"
+    missing=1
+  fi
   [[ "$missing" -eq 0 ]] || die "Post-install verification failed — install is incomplete"
 }
 
@@ -159,13 +133,13 @@ main() {
   log "Target: ${TARGET_ROOT}"
 
   [[ -d "${SOURCE_ROOT}" ]] || die "Hermes pack not found at ${SOURCE_ROOT} — run from VAN repo"
-
   verify_source_layout
   mkdir -p "${HERMES_BASE}/profiles"
   copy_tree
   verify_target_layout
 
   log "Install complete: ${TARGET_ROOT}"
+  log "Register owner runtime MCP: ${SCRIPT_DIR}/register_owner_runtime_mcp.sh"
   log "Verify with: ${SCRIPT_DIR}/doctor_van_profile.sh"
 }
 

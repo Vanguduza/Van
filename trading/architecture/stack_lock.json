@@ -1,6 +1,6 @@
 {
   "$schema_note": "VATI Industry Integration Architecture stack lock (Rev 2.1 Part E). One canonical choice per layer; overlaps are rejected by trading/tests/test_stack_lock.py. Versions are observations at lock time and are NOT pins: exact pins happen at adoption through the donor gate with Context7/official release facts.",
-  "revision": "5.1.0",
+  "revision": "5.2.0",
   "locked_at": "2026-09-16",
   "observation_sources": {
     "pypi_json": "https://pypi.org/pypi/<package>/json read 2026-09-16",
@@ -443,12 +443,88 @@
         "OAuth tokens live in the VM secrets dir only",
         "one live account per alias"
       ]
+    },
+    {
+      "layer": "integration_automation",
+      "canonical": "n8n self-hosted on VAN Trading Core VM",
+      "package": "n8n (self-hosted container/runtime)",
+      "role": "event ingestion, integration plumbing, reusable automation and asynchronous workflow execution; may service T3 research tasks but is not in T0/T1 trading execution",
+      "adoption_phase": 7,
+      "executes_live_orders": false,
+      "latency_tier": "T2",
+      "licence": "Sustainable Use License",
+      "licence_class": "SOURCE_AVAILABLE",
+      "observed_version": "2.39.7 pinned by deploy/van-trading-core/automation/runtime.env.example; verify current release and tested Trading Core pin at adoption",
+      "pin_status": "UNPINNED_VERIFY_AT_ADOPTION",
+      "adoption_decision_ref": "docs/decisions/VAN-ADOPT-N8N-001.yaml",
+      "constraints": [
+        "never in VATI T0 path",
+        "no live order submission, cancellation or position mutation",
+        "no risk/mandate/owner authority",
+        "no Project Truth authority",
+        "gateway-mediated consequential effects only",
+        "fully self-hosted on VAN Trading Core VM",
+        "owner-signed adoption decision recorded 2026-09-18 for Sustainable Use License / SOURCE_AVAILABLE classification",
+        "may hold C3/C4 integration credentials after admission; payment instruments are prohibited at every class",
+        "payment execution is prohibited; a payment is A4 under a fresh owner approval and is never automated",
+        "licence suitability must be re-reviewed if VAN is later offered to external customers or n8n is embedded as a customer-facing workflow service"
+      ],
+      "build_status": "gateway automation fabric implemented; runtime readiness requires external-gate evidence"
+    },
+    {
+      "layer": "semantic_browser",
+      "canonical": "Browserbase Stagehand local/CDP mode behind VAN Browser Gateway",
+      "package": "@browserbasehq/stagehand",
+      "role": "semantic browser observation, typed extraction, adaptive interaction and bounded autonomous task execution as a Hermes-managed subagent; never trading execution authority",
+      "adoption_phase": 7,
+      "executes_live_orders": false,
+      "latency_tier": "T3",
+      "licence": "MIT",
+      "licence_class": "PERMISSIVE",
+      "observed_version": "4.1.0 pinned by deploy/van-trading-core/browser/package.json",
+      "pin_status": "UNPINNED_VERIFY_AT_ADOPTION",
+      "adoption_decision_ref": "docs/decisions/VAN-ADOPT-STAGEHAND-001.yaml",
+      "constraints": [
+        "local/CDP mode is the default VAN production mode",
+        "cloud Browserbase use is a separate optional external gate",
+        "semantic output is UNTRUSTED_EXTERNAL evidence, never owner authority",
+        "Stagehand cannot send, modify or cancel broker orders",
+        "secrets/cookies/session tokens never enter model prompts",
+        "autonomy is permitted only inside a Hermes-assigned task with a goal, scope and step budget the worker cannot widen",
+        "payments are never performed by an autonomous browser task"
+      ],
+      "build_status": "adapter and subagent task runner implemented; not yet VAN-certified"
+    },
+    {
+      "layer": "deterministic_browser",
+      "canonical": "browser-use/browser-harness pinned local CDP runtime behind VAN Browser Gateway",
+      "package": "browser-harness",
+      "role": "deterministic local browser actuator and CDP primitive layer",
+      "adoption_phase": 7,
+      "executes_live_orders": false,
+      "latency_tier": "T2",
+      "licence": "MIT",
+      "licence_class": "PERMISSIVE",
+      "observed_version": "0.1.13 observed at Rev 1.3 design time",
+      "pin_status": "UNPINNED_VERIFY_AT_ADOPTION",
+      "adoption_decision_ref": "docs/decisions/VAN-ADOPT-BROWSER-HARNESS-001.yaml",
+      "constraints": [
+        "no unrestricted MCP exposure to Hermes in production",
+        "runtime helper self-modification disabled in production",
+        "generated helpers are quarantined candidates until independently validated and admitted",
+        "browser cookies/session tokens remain secret references",
+        "no broker order or risk-authority route",
+        "production install uses an exact pin; upstream latest/self-update commands are forbidden in service startup",
+        "payments are never performed through the deterministic actuator"
+      ],
+      "build_status": "adapter implemented; not yet VAN-certified"
     }
   ],
   "single_order_sender": "vati-execution-router (Nautilus ExecutionEngine → VAN RiskGate → venue ExecutionClient)",
   "single_sizer": "trading/vati/risk RiskAuthority",
   "single_transactional_authority": "PostgreSQL (SQLite in Phases 0-3)",
   "notes": [
-    "Rev 5 (2026-09-16): deployment package deploy/van-trading-core; MT5 runs on a Windows worker because the ARM64 VM cannot host it"
+    "Rev 5 (2026-09-16): deployment package deploy/van-trading-core; MT5 runs on a Windows worker because the ARM64 VM cannot host it",
+    "5.2.0 (2026-09-18): admits the Automation & Browser Fabric layers under owner adoption decisions recorded the same day. None executes live orders; none is in the T0 path; payments are never automated on any of them."
   ]
 }

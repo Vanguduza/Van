@@ -9,13 +9,17 @@ import com.dial.van.gateway.VanGatewayClient
 import com.dial.van.notification.NotificationPolicyStore
 import com.dial.van.queue.EncryptedCommandQueue
 import com.dial.van.visual.VanLiveVisualState
+import com.dial.van.voice.PersonalSpeechModel
+import com.dial.van.voice.SpeechContext
 import com.dial.van.voice.SpeechSyncFrame
 import com.dial.van.voice.TtsOutputCallback
 import com.dial.van.voice.TtsOutputManager
 import com.dial.van.voice.VanVoiceUiStore
 import com.dial.van.voice.VoiceInputCallback
 import com.dial.van.voice.VoiceInputManager
+import com.dial.van.voice.VoiceRecognitionResult
 import com.dial.van.voice.VoiceSessionCoordinator
+import com.dial.van.voice.WakeAcknowledgementManager
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.SupervisorJob
@@ -32,6 +36,10 @@ class VanApplication : Application(), VoiceInputCallback, TtsOutputCallback {
     lateinit var notificationPolicyStore: NotificationPolicyStore
         private set
     lateinit var degradedModeStore: DegradedModeStore
+        private set
+    lateinit var personalSpeechModel: PersonalSpeechModel
+        private set
+    lateinit var wakeAcknowledgement: WakeAcknowledgementManager
         private set
     lateinit var voiceInput: VoiceInputManager
         private set
@@ -54,15 +62,36 @@ class VanApplication : Application(), VoiceInputCallback, TtsOutputCallback {
         commandQueue = EncryptedCommandQueue(this)
         notificationPolicyStore = NotificationPolicyStore(this)
         degradedModeStore = DegradedModeStore()
+        personalSpeechModel = PersonalSpeechModel(this)
+        wakeAcknowledgement = WakeAcknowledgementManager(this)
         voiceUi = VanVoiceUiStore()
-        voiceInput = VoiceInputManager(this, this)
-        ttsOutput = TtsOutputManager(this, this)
-        voiceSession = VoiceSessionCoordinator(voiceInput, ttsOutput)
         gatewayClient = VanGatewayClient(this)
         commandController = VanCommandController(gatewayClient, appScope)
+        voiceInput = VoiceInputManager(
+            context = this,
+            callback = this,
+            biasingStringsProvider = { personalSpeechModel.biasingStrings(activeSpeechContexts()) },
+        )
+        ttsOutput = TtsOutputManager(this, this)
+        voiceSession = VoiceSessionCoordinator(voiceInput, ttsOutput)
         queueReplayer = QueueReplayer(commandQueue, gatewayClient, degradedModeStore, appScope)
         queueReplayer.replayAsync()
         startGatewayHealthMonitor()
+    }
+
+    private fun activeSpeechContexts(): Set<SpeechContext> {
+        val project = commandController.state.value.selectedProjectId?.lowercase()
+        val projectContext = when (project) {
+            "dde" -> SpeechContext.DDE
+            "dial" -> SpeechContext.DIAL
+            "vati", "trading" -> SpeechContext.VATI_TRADING
+            else -> null
+        }
+        return buildSet {
+            add(SpeechContext.GENERAL)
+            add(SpeechContext.VAN_SYSTEM)
+            projectContext?.let(::add)
+        }
     }
 
     private fun startGatewayHealthMonitor() {
@@ -122,16 +151,17 @@ class VanApplication : Application(), VoiceInputCallback, TtsOutputCallback {
         if (text.isNotBlank()) VanLiveVisualState.listeningStarted()
     }
 
-    override fun onFinal(text: String) {
-        val hasText = text.isNotBlank()
-        voiceUi.final(text)
-        // Final recognition owns THINKING. The same transcript then enters the exact command path
-        // used by typed chat; voice is not a visual-only state transition or parallel authority path.
+    override fun onFinalResult(result: VoiceRecognitionResult) {
+        val corrected = personalSpeechModel.correctionFor(result.text, activeSpeechContexts()) ?: result.text
+        val hasText = corrected.isNotBlank()
+        voiceUi.final(corrected)
         VanLiveVisualState.finalTranscript(hasText = hasText)
         if (hasText) {
             commandController.submitText(
-                text = text,
+                text = corrected,
                 source = VanCommandSource.VOICE,
+                turnId = result.turnId,
+                speechEvidenceRef = result.speechEvidenceRef,
             )
         }
     }
@@ -144,12 +174,7 @@ class VanApplication : Application(), VoiceInputCallback, TtsOutputCallback {
 
     override fun onListeningChanged(listening: Boolean) {
         voiceUi.listening(listening)
-        if (listening) {
-            VanLiveVisualState.listeningStarted()
-        } else {
-            // Capture ended; the turn may still be THINKING/DISPATCHING.
-            VanLiveVisualState.listeningEnded()
-        }
+        if (listening) VanLiveVisualState.listeningStarted() else VanLiveVisualState.listeningEnded()
     }
 
     override fun onSpeakingChanged(speaking: Boolean) {
@@ -162,10 +187,7 @@ class VanApplication : Application(), VoiceInputCallback, TtsOutputCallback {
     }
 
     override fun onSpeechFrame(frame: SpeechSyncFrame) {
-        VanLiveVisualState.speechFrame(
-            mouthOpen = frame.mouthOpen,
-            viseme = frame.viseme,
-        )
+        VanLiveVisualState.speechFrame(mouthOpen = frame.mouthOpen, viseme = frame.viseme)
     }
 
     override fun onUtteranceDone(utteranceId: String) {

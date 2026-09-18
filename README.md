@@ -48,9 +48,11 @@ Canonical specification: `docs/GOOGLE_INTELLIGENCE_MESH.md`.
 | `visual-authority/` | Locked character identity and Rive contract |
 | `docs/` | Canonical product authority |
 | `registries/` | Projects and Google capability catalogs |
+| `config/` | Automation and browser policy: node allowlist, domain/SSRF policy, credential classes, browser profiles |
 | `tests/` | Cross-cutting contract and acceptance tests |
 | `tools/` | Bootstrap, Google setup/certification, release and certification scripts |
 | `trading/` | VAN Adaptive Trading Intelligence (VATI): deterministic Risk Authority, market brain, capsules, execution, shared backtest/live decision cycle, continuous learning, ZSE module, account registry, PostgreSQL ledger, live MT5/Deriv transports, bar lake, session service, dedicated trading VEKL (`trading/vekl`) and the Hermes subordinate commander (`trading/commander`) — see `docs/VAN_TRADING_SYSTEM_BLUEPRINT_REV4_CONSOLIDATED.md` and `docs/VAN_TRADING_PRODUCTION_DEPLOYMENT_BLUEPRINT_REV5.md` |
+| `docs/decisions/` | Owner adoption decisions and locked-authority amendment proposals (an agent creates these; only the owner signs them) |
 | `deploy/van-trading-core/` | Bootstrap, systemd units, Supabase donor, PKI, qualify report, Hermes registration and the Windows MT5 bridge worker for the dedicated trading VM |
 
 ## Quick start
@@ -86,6 +88,7 @@ cd ../android
 5. OAuth/API/service/session credentials never enter LLM prompts.
 6. `CONFIGURED` is not `READY`; live Google claims require evidence.
 7. No model sends a broker order. Trading size comes only from the deterministic Risk Authority under an owner-signed mandate; `NO_TRADE` is a valid outcome.
+8. Automation and browser workers hold no authority. n8n integrates, Browser Harness actuates and Stagehand interprets; owner-triggered work inherits authority from signed ingress, and scheduled work inherits only what an owner-authorized standing intent already granted. An engine reporting success is not owner success.
 
 ## Version
 

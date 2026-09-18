@@ -1,6 +1,8 @@
 package com.dial.van.control
 
+import androidx.fragment.app.FragmentActivity
 import com.dial.van.gateway.VanGatewayClient
+import com.dial.van.security.BiometricGate
 import com.dial.van.visual.VanLiveVisualState
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.flow.MutableStateFlow
@@ -45,20 +47,36 @@ data class VanConversationMessage(
     val createdAtEpochMs: Long = System.currentTimeMillis(),
 )
 
-data class VanConversationState(
-    val messages: List<VanConversationMessage> = emptyList(),
-    val submitting: Boolean = false,
-    val selectedProjectId: String? = null,
-    val lastError: String? = null,
-)
-
 data class VanOwnerCommand(
     val text: String,
     val source: VanCommandSource,
     val projectId: String? = null,
     val actionClass: String = "A1",
+    /** Deprecated compatibility field; it never grants A4 authority. */
     val approvalToken: String? = null,
     val idempotencyKey: String = UUID.randomUUID().toString(),
+    val turnId: String? = null,
+    val speechEvidenceRef: String? = null,
+    val expiresAtUnix: Long? = null,
+    val noStaleReplay: Boolean = false,
+)
+
+data class PendingA4Approval(
+    val command: VanOwnerCommand,
+    val challengeId: String,
+    val challenge: String,
+    val expiresAtUnix: Long,
+    val resolvedActionId: String,
+    val noStaleReplay: Boolean,
+    val maxAgeSeconds: Int?,
+)
+
+data class VanConversationState(
+    val messages: List<VanConversationMessage> = emptyList(),
+    val submitting: Boolean = false,
+    val selectedProjectId: String? = null,
+    val lastError: String? = null,
+    val pendingA4Approval: PendingA4Approval? = null,
 )
 
 class VanCommandController(
@@ -78,9 +96,18 @@ class VanCommandController(
         projectId: String? = _state.value.selectedProjectId,
         actionClass: String = "A1",
         approvalToken: String? = null,
+        turnId: String? = null,
+        speechEvidenceRef: String? = null,
+        expiresAtUnix: Long? = null,
+        noStaleReplay: Boolean = false,
     ) {
         val normalized = text.trim()
         if (normalized.isEmpty()) return
+        val idempotencyKey = if (source == VanCommandSource.VOICE && !turnId.isNullOrBlank()) {
+            "voice:$turnId"
+        } else {
+            UUID.randomUUID().toString()
+        }
         submit(
             VanOwnerCommand(
                 text = normalized,
@@ -88,6 +115,11 @@ class VanCommandController(
                 projectId = projectId,
                 actionClass = actionClass,
                 approvalToken = approvalToken,
+                idempotencyKey = idempotencyKey,
+                turnId = turnId,
+                speechEvidenceRef = speechEvidenceRef,
+                expiresAtUnix = expiresAtUnix,
+                noStaleReplay = noStaleReplay,
             ),
         )
     }
@@ -110,23 +142,9 @@ class VanCommandController(
             )
         }
 
-        // Fail closed locally. The Android UI cannot manufacture a privileged approval token.
-        if (command.actionClass.equals("A4", ignoreCase = true) && command.approvalToken.isNullOrBlank()) {
-            VanLiveVisualState.waitingForOwner()
-            _state.update {
-                it.copy(
-                    messages = it.messages + VanConversationMessage(
-                        role = VanMessageRole.SYSTEM,
-                        text = "A4 owner approval is required before this command can be dispatched.",
-                        projectId = command.projectId,
-                        status = VanCommandStatus.APPROVAL_REQUIRED,
-                    ),
-                    submitting = false,
-                )
-            }
-            return
-        }
-
+        // A4 requests are allowed to reach the gateway only to obtain a one-time
+        // cryptographic challenge. They cannot execute until approvePendingA4()
+        // supplies a biometric-bound signature over that challenge.
         scope.launch {
             try {
                 val response = gateway.dispatchCommand(
@@ -135,61 +153,180 @@ class VanCommandController(
                     projectId = command.projectId,
                     idempotencyKey = command.idempotencyKey,
                     approvalToken = command.approvalToken,
+                    turnId = command.turnId,
+                    originChannel = originChannel(command.source),
+                    expiresAtUnix = command.expiresAtUnix,
+                    noStaleReplay = command.noStaleReplay,
+                    speechEvidenceRef = command.speechEvidenceRef,
                 )
-                val wireStatus = response.optString("status").lowercase()
-                val status = when (wireStatus) {
-                    "approval_required" -> VanCommandStatus.APPROVAL_REQUIRED
-                    "accepted" -> VanCommandStatus.ACCEPTED
-                    "in_flight" -> VanCommandStatus.IN_FLIGHT
-                    "succeeded", "success", "completed" -> VanCommandStatus.SUCCEEDED
-                    "cancelled" -> VanCommandStatus.CANCELLED
-                    "expired" -> VanCommandStatus.EXPIRED
-                    "denied", "rejected", "rejected_untrusted", "conflict", "failed", "error" -> VanCommandStatus.FAILED
-                    else -> VanCommandStatus.ACCEPTED
-                }
-
-                // Do not invent completion: accepted/in-flight text explicitly says Hermes owns work.
-                val responseText = when {
-                    response.optString("message").isNotBlank() -> response.optString("message")
-                    response.optString("detail").isNotBlank() -> response.optString("detail")
-                    status == VanCommandStatus.ACCEPTED || status == VanCommandStatus.IN_FLIGHT ->
-                        "Hermes accepted the command. Completion has not been confirmed yet."
-                    status == VanCommandStatus.APPROVAL_REQUIRED ->
-                        "Owner approval is required before execution can continue."
-                    status == VanCommandStatus.SUCCEEDED ->
-                        "The gateway reports this command completed successfully."
-                    status == VanCommandStatus.FAILED ->
-                        "The command was rejected or failed."
-                    else -> "Command status: ${wireStatus.ifBlank { "accepted" }}"
-                }
-
-                _state.update {
-                    it.copy(
-                        messages = it.messages + VanConversationMessage(
-                            role = VanMessageRole.VAN,
-                            text = responseText,
-                            projectId = command.projectId,
-                            commandId = response.optString("command_id").ifBlank { null },
-                            status = status,
-                        ),
-                        submitting = false,
-                    )
-                }
+                recordResponse(command, response)
             } catch (t: Throwable) {
-                val safeMessage = t.message?.take(240) ?: t::class.java.simpleName
-                _state.update {
-                    it.copy(
-                        messages = it.messages + VanConversationMessage(
-                            role = VanMessageRole.SYSTEM,
-                            text = "Command dispatch failed: $safeMessage",
-                            projectId = command.projectId,
-                            status = VanCommandStatus.FAILED,
-                        ),
-                        submitting = false,
-                        lastError = safeMessage,
-                    )
-                }
+                recordFailure(command, t)
             }
         }
+    }
+
+    fun approvePendingA4(activity: FragmentActivity) {
+        val pending = _state.value.pendingA4Approval ?: return
+        val now = System.currentTimeMillis() / 1000L
+        if (now >= pending.expiresAtUnix) {
+            _state.update {
+                it.copy(
+                    pendingA4Approval = null,
+                    submitting = false,
+                    lastError = "A4 approval challenge expired",
+                    messages = it.messages + VanConversationMessage(
+                        role = VanMessageRole.SYSTEM,
+                        text = "A4 approval challenge expired. Issue the command again.",
+                        projectId = pending.command.projectId,
+                        status = VanCommandStatus.EXPIRED,
+                    ),
+                )
+            }
+            return
+        }
+
+        val gate = BiometricGate(activity)
+        val signingSignature = try {
+            gateway.newA4ApprovalSignature()
+        } catch (t: Throwable) {
+            _state.update { it.copy(lastError = t.message ?: "A4 approval key unavailable") }
+            return
+        }
+
+        gate.requestA4CommandApproval(
+            signature = signingSignature,
+            challenge = pending.challenge,
+            onApproved = { signatureBase64 ->
+                _state.update { it.copy(submitting = true, lastError = null) }
+                scope.launch {
+                    try {
+                        val approvedAt = System.currentTimeMillis() / 1000L
+                        val replayWindow = (pending.maxAgeSeconds ?: 60).coerceIn(1, 60)
+                        val expiresAt = if (pending.noStaleReplay) approvedAt + replayWindow else null
+                        val response = gateway.dispatchCommand(
+                            text = pending.command.text,
+                            actionClass = pending.command.actionClass,
+                            projectId = pending.command.projectId,
+                            idempotencyKey = "a4:${pending.challengeId}:${UUID.randomUUID()}",
+                            approvalChallengeId = pending.challengeId,
+                            approvalSignatureBase64 = signatureBase64,
+                            issuedAtUnix = approvedAt,
+                            turnId = pending.command.turnId,
+                            originChannel = originChannel(pending.command.source),
+                            expiresAtUnix = expiresAt,
+                            noStaleReplay = pending.noStaleReplay,
+                            speechEvidenceRef = pending.command.speechEvidenceRef,
+                        )
+                        recordResponse(pending.command, response)
+                    } catch (t: Throwable) {
+                        recordFailure(pending.command, t)
+                    }
+                }
+            },
+            onDenied = { reason ->
+                _state.update {
+                    it.copy(
+                        submitting = false,
+                        lastError = reason,
+                        messages = it.messages + VanConversationMessage(
+                            role = VanMessageRole.SYSTEM,
+                            text = "A4 approval was not granted: $reason",
+                            projectId = pending.command.projectId,
+                            status = VanCommandStatus.APPROVAL_REQUIRED,
+                        ),
+                    )
+                }
+            },
+        )
+    }
+
+    private fun recordResponse(command: VanOwnerCommand, response: org.json.JSONObject) {
+        val wireStatus = response.optString("status").lowercase()
+        val status = when (wireStatus) {
+            "approval_required" -> VanCommandStatus.APPROVAL_REQUIRED
+            "accepted", "submitted", "executing", "verifying" -> VanCommandStatus.ACCEPTED
+            "in_flight" -> VanCommandStatus.IN_FLIGHT
+            "verified_success", "succeeded", "success", "completed" -> VanCommandStatus.SUCCEEDED
+            "cancelled" -> VanCommandStatus.CANCELLED
+            "expired" -> VanCommandStatus.EXPIRED
+            "denied", "rejected", "rejected_untrusted", "conflict", "failed", "error",
+            "unverifiable", "verification_failed", "partial_success" -> VanCommandStatus.FAILED
+            else -> VanCommandStatus.ACCEPTED
+        }
+
+        val pending = if (status == VanCommandStatus.APPROVAL_REQUIRED) {
+            val challengeId = response.optString("approval_challenge_id")
+            val challenge = response.optString("approval_challenge")
+            val expiresAt = response.optLong("approval_expires_at_unix", 0L)
+            val actionId = response.optString("resolved_action_id")
+            if (challengeId.isNotBlank() && challenge.isNotBlank() && expiresAt > 0L && actionId.isNotBlank()) {
+                PendingA4Approval(
+                    command = command,
+                    challengeId = challengeId,
+                    challenge = challenge,
+                    expiresAtUnix = expiresAt,
+                    resolvedActionId = actionId,
+                    noStaleReplay = response.optBoolean("no_stale_replay", false),
+                    maxAgeSeconds = response.optInt("max_age_seconds", 0).takeIf { it > 0 },
+                )
+            } else {
+                null
+            }
+        } else {
+            null
+        }
+
+        val responseText = when {
+            response.optString("message").isNotBlank() -> response.optString("message")
+            response.optString("detail").isNotBlank() -> response.optString("detail")
+            status == VanCommandStatus.ACCEPTED || status == VanCommandStatus.IN_FLIGHT ->
+                "Hermes accepted the command. Completion has not been confirmed yet."
+            status == VanCommandStatus.APPROVAL_REQUIRED ->
+                "Owner biometric approval is required before execution can continue."
+            status == VanCommandStatus.SUCCEEDED ->
+                "The requested postcondition has been verified."
+            status == VanCommandStatus.FAILED ->
+                "The command was rejected, failed, or could not be verified."
+            else -> "Command status: ${wireStatus.ifBlank { "accepted" }}"
+        }
+
+        _state.update {
+            it.copy(
+                messages = it.messages + VanConversationMessage(
+                    role = VanMessageRole.VAN,
+                    text = responseText,
+                    projectId = command.projectId,
+                    commandId = response.optString("command_id").ifBlank { null },
+                    status = status,
+                ),
+                submitting = false,
+                pendingA4Approval = pending,
+                lastError = if (status == VanCommandStatus.FAILED) responseText else null,
+            )
+        }
+    }
+
+    private fun recordFailure(command: VanOwnerCommand, throwable: Throwable) {
+        val safeMessage = throwable.message?.take(240) ?: throwable::class.java.simpleName
+        _state.update {
+            it.copy(
+                messages = it.messages + VanConversationMessage(
+                    role = VanMessageRole.SYSTEM,
+                    text = "Command dispatch failed: $safeMessage",
+                    projectId = command.projectId,
+                    status = VanCommandStatus.FAILED,
+                ),
+                submitting = false,
+                lastError = safeMessage,
+            )
+        }
+    }
+
+    private fun originChannel(source: VanCommandSource): String = when (source) {
+        VanCommandSource.VOICE -> "VOICE"
+        VanCommandSource.CHAT -> "TEXT"
+        VanCommandSource.SYSTEM -> "SYSTEM_EVENT"
+        else -> "UI"
     }
 }

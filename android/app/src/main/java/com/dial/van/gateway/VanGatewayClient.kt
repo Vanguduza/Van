@@ -1,9 +1,11 @@
 package com.dial.van.gateway
 
 import android.content.Context
+import android.util.Base64
 import androidx.security.crypto.EncryptedSharedPreferences
 import androidx.security.crypto.MasterKey
 import com.dial.van.BuildConfig
+import com.dial.van.security.OwnerApprovalKeyManager
 import com.dial.van.visual.VanLiveVisualState
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.withContext
@@ -12,15 +14,18 @@ import org.json.JSONObject
 import java.net.HttpURLConnection
 import java.net.URL
 import java.net.URLEncoder
-import java.security.SecureRandom
-import android.util.Base64
 import java.nio.charset.StandardCharsets
+import java.security.SecureRandom
+import java.security.Signature
+import java.util.UUID
 import javax.crypto.Mac
 import javax.crypto.spec.SecretKeySpec
 
 /**
- * VAN secure gateway client. Android UI never executes shell/SSH directly; owner commands and
- * authoritative admin reads cross this boundary into the gateway/Hermes control plane.
+ * VAN secure gateway client. Android is a deterministic edge, never an agent runtime.
+ * Owner commands and authoritative reads cross this authenticated boundary into the
+ * gateway/Hermes control plane. Secure pairing/device-access authentication remains
+ * independent from the signed per-command owner-intent envelope.
  */
 class VanGatewayClient(context: Context) {
 
@@ -31,6 +36,7 @@ class VanGatewayClient(context: Context) {
         EncryptedSharedPreferences.PrefKeyEncryptionScheme.AES256_SIV,
         EncryptedSharedPreferences.PrefValueEncryptionScheme.AES256_GCM,
     )
+    private val approvalKeys = OwnerApprovalKeyManager()
 
     var baseUrl: String
         get() {
@@ -90,6 +96,8 @@ class VanGatewayClient(context: Context) {
 
     fun isPaired(): Boolean = isEnrolled() && hasIngressToken() && !deviceAccessToken.isNullOrBlank()
 
+    fun newA4ApprovalSignature(): Signature = approvalKeys.newSigningSignature()
+
     suspend fun pairThisDevice(
         gatewayUrl: String,
         pairingToken: String,
@@ -100,12 +108,12 @@ class VanGatewayClient(context: Context) {
         require(normalizedPairingToken.length >= MIN_PAIRING_TOKEN_CHARS) { "pairing_token_too_short" }
         val bytes = ByteArray(32).also { SecureRandom().nextBytes(it) }
         val secret = Base64.encodeToString(bytes, Base64.URL_SAFE or Base64.NO_WRAP or Base64.NO_PADDING)
-        val id = "android-${java.util.UUID.randomUUID()}"
+        val id = "android-${UUID.randomUUID()}"
         val body = JSONObject()
             .put("pairing_token", normalizedPairingToken)
             .put("device_id", id)
             .put("device_secret", secret)
-            .put("public_key_pem", "android-device")
+            .put("public_key_pem", approvalKeys.publicKeyPem())
             .put("label", label)
         val response = postJsonAt(normalizedUrl, "/v1/devices/pair", body, useIngress = false)
         val returnedIngress = response.optString("ingress_token").trim()
@@ -133,12 +141,24 @@ class VanGatewayClient(context: Context) {
     suspend fun tradingTrades(view: String, limit: Int = 12): String = withContext(Dispatchers.IO) {
         rawGet("/v1/trading/trades?view=${encodeQuery(view)}&limit=$limit")
     }
+
     suspend fun tradingPortfolio(): String = withContext(Dispatchers.IO) { rawGet("/v1/trading/portfolio") }
+
     suspend fun tradingAccounts(): String = withContext(Dispatchers.IO) { rawGet("/v1/trading/accounts") }
-    suspend fun tradingMarketState(symbol: String? = null): String = withContext(Dispatchers.IO) { rawGet("/v1/trading/market-state" + (symbol?.let { "?symbol=${encodeQuery(it)}" } ?: "")) }
+
+    suspend fun tradingMarketState(symbol: String? = null): String = withContext(Dispatchers.IO) {
+        rawGet("/v1/trading/market-state" + (symbol?.let { "?symbol=${encodeQuery(it)}" } ?: ""))
+    }
+
     suspend fun tradingRisk(): String = withContext(Dispatchers.IO) { rawGet("/v1/trading/risk") }
-    suspend fun tradingTradeDetail(tradeIntentId: String): String = withContext(Dispatchers.IO) { rawGet("/v1/trading/trades/${encodeSegment(tradeIntentId)}") }
-    suspend fun tradingBars(symbol: String, timeframe: String = "H1", limit: Int = 300): String = withContext(Dispatchers.IO) { rawGet("/v1/trading/bars?symbol=${encodeQuery(symbol)}&timeframe=${encodeQuery(timeframe)}&limit=$limit") }
+
+    suspend fun tradingTradeDetail(tradeIntentId: String): String = withContext(Dispatchers.IO) {
+        rawGet("/v1/trading/trades/${encodeSegment(tradeIntentId)}")
+    }
+
+    suspend fun tradingBars(symbol: String, timeframe: String = "H1", limit: Int = 300): String = withContext(Dispatchers.IO) {
+        rawGet("/v1/trading/bars?symbol=${encodeQuery(symbol)}&timeframe=${encodeQuery(timeframe)}&limit=$limit")
+    }
 
     suspend fun tradingAccountAction(action: String, args: kotlinx.serialization.json.JsonObject): Pair<Int, String> = withContext(Dispatchers.IO) {
         val id = deviceId ?: error("not_enrolled")
@@ -181,29 +201,79 @@ class VanGatewayClient(context: Context) {
         JSONArray(rawGet("/v1/attention"))
     }
 
+    suspend fun browserStatus(): JSONObject = withContext(Dispatchers.IO) {
+        getJson("/v1/browser/status")
+    }
+
+    suspend fun browserTasks(): JSONArray = withContext(Dispatchers.IO) {
+        JSONArray(rawGet("/v1/browser/tasks"))
+    }
+
+    suspend fun browserEscalations(): JSONArray = withContext(Dispatchers.IO) {
+        JSONArray(rawGet("/v1/browser/escalations"))
+    }
+
+    suspend fun browserPolicy(): JSONObject = withContext(Dispatchers.IO) {
+        getJson("/v1/browser/policy")
+    }
+
+    suspend fun browserEvidence(taskId: String): JSONArray = withContext(Dispatchers.IO) {
+        JSONArray(rawGet("/v1/browser/tasks/${encodeSegment(taskId)}/evidence"))
+    }
+
     suspend fun events(afterSeq: Long = 0L): JSONObject = withContext(Dispatchers.IO) {
         val id = deviceId ?: error("not_enrolled")
         getJson("/v1/events?device_id=${encodeQuery(id)}&after_seq=$afterSeq")
     }
 
+    /**
+     * Rev 3.1 signed owner-intent envelope. Authority-bearing provenance fields are HMAC-covered
+     * by signature v2. Pairing/device-access authentication remains mandatory on the transport.
+     */
     suspend fun dispatchCommand(
         text: String,
         actionClass: String = "A1",
         projectId: String? = null,
         idempotencyKey: String,
         approvalToken: String? = null,
+        approvalChallengeId: String? = null,
+        approvalSignatureBase64: String? = null,
+        approvalAlgorithm: String = OwnerApprovalKeyManager.PROOF_ALGORITHM,
         issuedAtUnix: Long = System.currentTimeMillis() / 1000L,
+        turnId: String? = null,
+        originChannel: String = "UI",
+        expiresAtUnix: Long? = null,
+        noStaleReplay: Boolean = false,
+        speechEvidenceRef: String? = null,
+        contextCapsuleRevision: Int? = null,
+        contextCapsuleHash: String? = null,
     ): JSONObject = withContext(Dispatchers.IO) {
         val id = deviceId ?: error("not_enrolled")
         val secret = deviceSecret ?: error("not_enrolled")
-        val commandId = java.util.UUID.randomUUID().toString()
+        val commandId = UUID.randomUUID().toString()
+        val nonce = UUID.randomUUID().toString()
+        val principalType = "OWNER_DEVICE"
+        val requestedBy = "device:$id"
+        val contextTrust = "CONVERSATION"
         val canonical = listOf(
+            "v2",
             commandId,
             idempotencyKey,
             id,
             issuedAtUnix.toString(),
             actionClass,
             projectId ?: "",
+            turnId ?: "",
+            originChannel,
+            principalType,
+            requestedBy,
+            expiresAtUnix?.toString() ?: "",
+            nonce,
+            contextCapsuleRevision?.toString() ?: "",
+            contextCapsuleHash ?: "",
+            speechEvidenceRef ?: "",
+            if (noStaleReplay) "1" else "0",
+            contextTrust,
             text,
         ).joinToString("|")
         val signature = hmacSha256(secret, canonical)
@@ -213,11 +283,31 @@ class VanGatewayClient(context: Context) {
             .put("device_id", id)
             .put("issued_at_unix", issuedAtUnix)
             .put("signature", signature)
+            .put("signature_version", 2)
             .put("text", text)
             .put("action_class", actionClass)
-            .put("context_trust", "CONVERSATION")
+            .put("context_trust", contextTrust)
+            .put("origin_channel", originChannel)
+            .put("principal_type", principalType)
+            .put("requested_by", requestedBy)
+            .put("nonce", nonce)
+            .put("no_stale_replay", noStaleReplay)
         if (projectId != null) body.put("project_id", projectId)
         if (approvalToken != null) body.put("approval_token", approvalToken)
+        if (approvalChallengeId != null && approvalSignatureBase64 != null) {
+            body.put(
+                "approval_proof",
+                JSONObject()
+                    .put("challenge_id", approvalChallengeId)
+                    .put("signature_b64", approvalSignatureBase64)
+                    .put("algorithm", approvalAlgorithm),
+            )
+        }
+        if (turnId != null) body.put("turn_id", turnId)
+        if (expiresAtUnix != null) body.put("expires_at_unix", expiresAtUnix)
+        if (speechEvidenceRef != null) body.put("speech_evidence_ref", speechEvidenceRef)
+        if (contextCapsuleRevision != null) body.put("context_capsule_revision", contextCapsuleRevision)
+        if (contextCapsuleHash != null) body.put("context_capsule_hash", contextCapsuleHash)
 
         VanLiveVisualState.dispatchStarted()
         try {
@@ -236,13 +326,12 @@ class VanGatewayClient(context: Context) {
         when (response.optString("status")) {
             "approval_required" -> VanLiveVisualState.waitingForOwner()
 
-            "accepted", "in_flight" -> {
+            "accepted", "in_flight", "submitted", "executing", "verifying" -> {
                 VanLiveVisualState.dispatchAccepted()
                 VanLiveVisualState.settleToIdle(delayMs = 900L)
             }
 
-            "succeeded", "success", "completed" -> {
-                // Only an explicit authoritative completion may become success.
+            "VERIFIED_SUCCESS", "verified_success", "succeeded", "success", "completed" -> {
                 VanLiveVisualState.transition(
                     state = com.dial.van.visual.VanDurableState.SUCCESS,
                     urgency = 0f,
@@ -250,7 +339,7 @@ class VanGatewayClient(context: Context) {
                 VanLiveVisualState.settleToIdle(delayMs = 1_200L)
             }
 
-            "degraded" -> {
+            "degraded", "UNVERIFIABLE", "VERIFICATION_FAILED", "PARTIAL_SUCCESS" -> {
                 VanLiveVisualState.warning(urgency = 0.35f)
                 VanLiveVisualState.settleToIdle(delayMs = 1_500L, allowCritical = true)
             }
@@ -291,9 +380,9 @@ class VanGatewayClient(context: Context) {
         conn.outputStream.use { it.write(body.toString().toByteArray(StandardCharsets.UTF_8)) }
         val code = conn.responseCode
         val stream = if (code in 200..299) conn.inputStream else conn.errorStream
-        val text = stream?.bufferedReader()?.readText() ?: "{}"
-        if (code !in 200..299) throw GatewayHttpException(code, text)
-        return JSONObject(text)
+        val responseText = stream?.bufferedReader()?.readText() ?: "{}"
+        if (code !in 200..299) throw GatewayHttpException(code, responseText)
+        return JSONObject(responseText)
     }
 
     private fun getJson(path: String): JSONObject = JSONObject(rawGet(path))
@@ -314,9 +403,9 @@ class VanGatewayClient(context: Context) {
         }
         val code = conn.responseCode
         val stream = if (code in 200..299) conn.inputStream else conn.errorStream
-        val text = stream?.bufferedReader()?.readText() ?: "[]"
-        if (code !in 200..299) throw GatewayHttpException(code, text)
-        return text
+        val responseText = stream?.bufferedReader()?.readText() ?: "[]"
+        if (code !in 200..299) throw GatewayHttpException(code, responseText)
+        return responseText
     }
 
     private fun encodeSegment(value: String): String = URLEncoder.encode(value, StandardCharsets.UTF_8.name())

@@ -188,7 +188,26 @@ async def test_scenario_15_secret_notification():
 
 @pytest.mark.asyncio
 async def test_scenario_17_destructive_a4(client):
+    """A4 needs a *typed* action before the owner can approve it.
+
+    The Rev 3.1 owner runtime tightened this: free text can no longer reach an
+    approval prompt, because a biometric approval must bind to an exact action
+    and parameter digest. Unresolvable destructive text is therefore denied
+    outright, which is stricter than the pre-Rev-3.1 behaviour this scenario
+    originally asserted.
+    """
     ac, app = client
     await _enroll(ac, app)
     body = await _cmd(ac, app, text="wipe staging", key="a4", action="A4", project="dde")
+    assert body["status"] == "denied"
+    assert "exact gateway-resolved action" in body["message"]
+
+
+@pytest.mark.asyncio
+async def test_scenario_17b_typed_a4_reaches_owner_approval(client):
+    """The other arm: a typed A4 action does reach the biometric approval gate."""
+    ac, app = client
+    await _enroll(ac, app)
+    body = await _cmd(ac, app, text="halt trading", key="a4-typed", action="A4")
     assert body["status"] == "approval_required"
+    assert body["effective_action_class"] == "A4"

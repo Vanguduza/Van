@@ -25,6 +25,58 @@ jobs:
         run: pytest -q
       - name: Contract tests
         run: pytest -q tests/contracts
+      - name: Hermes policy tests
+        run: pytest -q hermes/policy/tests
+      - name: Hermes profile layout tests
+        run: pytest -q tests/hermes
+      - name: Trading stack-lock and adoption-proposal tests
+        run: pytest -q trading/tests/test_stack_lock.py trading/tests/test_automation_browser_stack_proposal.py
+      # Rev 1.3 §359 — the Automation & Browser Fabric suites. These certify
+      # repository-side behaviour only; live readiness stays an external gate
+      # (docs/EXTERNAL_GATES.md) and needs the Trading Core VM.
+      - name: Automation and browser fabric tests
+        working-directory: backend
+        run: |
+          pytest -q \
+            tests/test_standing_automation_authority.py \
+            tests/test_automation_run_grants.py \
+            tests/test_automation_security_contracts.py \
+            tests/test_automation_compiler.py \
+            tests/test_automation_dispatch.py \
+            tests/test_automation_health_api.py \
+            tests/test_browser_fabric.py
+      - name: Automation fail-closed proof
+        env:
+          VAN_DATABASE_PATH: /tmp/van-ci-cert.sqlite3
+        run: |
+          # §§365, 369 — with the owner decisions PENDING the fabric must refuse
+          # to certify anything. Exit code 2 is the BLOCKED path; anything else
+          # means a default flipped on.
+          set +e
+          python tools/certification/certify_automation_runtime.py --check readiness
+          automation_status=$?
+          python tools/certification/certify_browser_fabric.py --canary harness
+          browser_status=$?
+          set -e
+          test "$automation_status" -eq 2 || { echo "automation certification did not fail closed"; exit 1; }
+          test "$browser_status" -eq 2 || { echo "browser certification did not fail closed"; exit 1; }
+          test ! -f artifacts/runtime/van_automation_n8n_readiness_attestation.json
+          echo "automation and browser fabric correctly refuse to self-certify"
+      - name: Context retrieval latency evidence
+        working-directory: backend
+        run: |
+          python tools/benchmark_context_retrieval.py \
+            --facts 320 \
+            --edges 160 \
+            --iterations 50 \
+            --cold-iterations 10 \
+            --output ../artifacts/release/context/context-latency.json
+      - name: Upload context latency evidence
+        uses: actions/upload-artifact@v4
+        with:
+          name: van-context-latency-evidence
+          path: artifacts/release/context/context-latency.json
+          if-no-files-found: error
 
   android-and-visual-evidence:
     runs-on: ubuntu-latest

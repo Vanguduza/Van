@@ -28,6 +28,15 @@ from van_gateway.orchestrator import CommandOrchestrator
 from van_gateway.projects.router import ProjectRouter
 from van_gateway.reminders.service import ReminderService
 from van_gateway.reminders.timeparse import TimeParseError, parse_due_expression
+from van_gateway.automation.api import AutomationApi
+from van_gateway.automation.dispatch import AutomationDispatcher
+from van_gateway.automation.grants import RunGrantService
+from van_gateway.automation.health import AutomationHealthApi
+from van_gateway.automation.registry import AutomationRegistry, HotWorkflowIndex
+from van_gateway.browser.api import BrowserApi
+from van_gateway.command.authority import CommandAuthorityService
+from van_gateway.command.standing import StandingAutomationAuthorityService
+from van_gateway.runtime_api import OwnerRuntimeApi
 from van_gateway.storage.db import Store
 from van_gateway.trading import TradingControlError, TradingService
 from van_gateway.trading.accounts import ACTIONS as ACCOUNT_ACTIONS, AccountOnboarding, CommanderAccountControl, LocalAccountControl, OAuthPending, canonical_action, redact as redact_account_args
@@ -97,15 +106,18 @@ class AccountActionRequest(BaseModel):
     action: str
     args: dict = Field(default_factory=dict)
 
+
 class OwnerHaltRequest(BaseModel):
     owner_signature_ref: str = Field(min_length=1)
     reason: str = ""
+
 
 class TicketConfirmRequest(BaseModel):
     owner_signature_ref: str = Field(min_length=1)
     fill_price: str
     filled_qty: str
     contract_note_ref: str = Field(min_length=1)
+
 
 def create_app() -> FastAPI:
     settings = get_settings()
@@ -122,9 +134,49 @@ def create_app() -> FastAPI:
     briefing = BriefingService(store, attention)
     reminders = ReminderService(store)
     decisions = DecisionService(store, attention)
+    owner_runtime = OwnerRuntimeApi(store, settings)
+    automation_registry = AutomationRegistry(store)
+    automation_hot_index = HotWorkflowIndex()
+    # One index, so `/v1/automation/health` reports the index work is routed
+    # through rather than an empty copy of it.
+    automation_health = AutomationHealthApi(
+        store, settings, degraded=degraded, hot_index=automation_hot_index
+    )
+    # The dispatcher shares the owner runtime's ActionRuntime and command
+    # authority: an automation run must meet the same single final authority
+    # check as everything else VAN does, not a second copy of it.
+    automation_dispatcher = AutomationDispatcher(
+        store,
+        actions=owner_runtime.actions,
+        authority=owner_runtime.authority,
+        registry=automation_registry,
+        grants=RunGrantService(store, signing_key=settings.automation_grant_signing_key),
+        client=automation_health.n8n,
+        enabled=settings.automation_enabled,
+    )
+    automation = AutomationApi(
+        store,
+        settings,
+        registry=automation_registry,
+        hot_index=automation_hot_index,
+        standing=StandingAutomationAuthorityService(store, owner_runtime.authority),
+        dispatcher=automation_dispatcher,
+    )
+    # No worker is configured: the semantic worker is a separate private service
+    # and the gateway refuses an assignment rather than pretending to run one.
+    browser = BrowserApi(store, settings, decisions=decisions)
 
-    trading = TradingService(settings.vati_ledger_path, accounts_registry=settings.vati_accounts_registry, lake_root=settings.vati_lake_root, reporting_currency=settings.vati_reporting_currency)
-    account_control = CommanderAccountControl(settings.van_commander_url, settings.van_commander_token_file, settings.van_commander_ca_file) if settings.van_commander_url else LocalAccountControl(settings.vati_accounts_registry, settings.vati_secrets_dir)
+    trading = TradingService(
+        settings.vati_ledger_path,
+        accounts_registry=settings.vati_accounts_registry,
+        lake_root=settings.vati_lake_root,
+        reporting_currency=settings.vati_reporting_currency,
+    )
+    account_control = (
+        CommanderAccountControl(settings.van_commander_url, settings.van_commander_token_file, settings.van_commander_ca_file)
+        if settings.van_commander_url
+        else LocalAccountControl(settings.vati_accounts_registry, settings.vati_secrets_dir)
+    )
     oauth_pending = OAuthPending(store, settings.google_token_fernet_key)
     onboarding = AccountOnboarding(account_control, oauth_pending, settings.van_public_base_url, settings.vati_deriv_app_id)
 
@@ -155,6 +207,9 @@ def create_app() -> FastAPI:
         projects=projects,
         audit=audit,
         degraded=degraded,
+        context=owner_runtime.context,
+        authority=owner_runtime.authority,
+        resolver=owner_runtime.resolver,
         owner_intent_max_age_seconds=settings.owner_intent_max_age_seconds,
     )
 
@@ -163,6 +218,10 @@ def create_app() -> FastAPI:
         await store.migrate()
         await auth.load_persisted_secrets()
         await oauth_pending.migrate()
+        await owner_runtime.startup()
+        # §273 — the HOT index is a cache of durable state, so it is rebuilt on
+        # every boot rather than trusted to survive a restart.
+        await automation_hot_index.rebuild(store)
         yield
 
     app = FastAPI(title="VAN Gateway", version="0.5.0-dev", lifespan=lifespan)
@@ -173,13 +232,39 @@ def create_app() -> FastAPI:
     app.state.google_broker = google_broker
     app.state.google_router = google_router
     app.state.orchestrator = orchestrator
+    app.state.owner_runtime = owner_runtime
+    app.state.automation_health = automation_health
+    app.state.automation = automation
+    app.state.automation_registry = automation_registry
+    app.state.automation_hot_index = automation_hot_index
+    app.state.automation_dispatcher = automation_dispatcher
+    app.state.browser = browser
     app.state.decisions = decisions
     app.state.projects = projects
     app.state.reminders = reminders
     app.state.trading = trading
     app.state.onboarding = onboarding
+    app.include_router(owner_runtime.router)
+    app.include_router(automation_health.router)
+    app.include_router(automation.router)
+    app.include_router(browser.router)
 
     def internal_control_route(method: str, path: str) -> bool:
+        if path.startswith("/v1/runtime/"):
+            return True
+        # Rev 1.3 §219 — automation/browser health is an internal control surface;
+        # it exposes runtime identity and governance state, never an owner route.
+        if path in {"/v1/automation/health", "/v1/browser/health"}:
+            return True
+        # §§219-222 — the whole automation control surface is Hermes-only. It never
+        # accepts owner ingress, so a compromised ingress token cannot compile,
+        # admit or publish a capability.
+        if path.startswith("/v1/automation/"):
+            return True
+        # Owner Android may inspect browser truth through authenticated GETs.
+        # Browser mutations/assignments remain Hermes internal-control only.
+        if path.startswith("/v1/browser/"):
+            return method != "GET"
         if method == "PUT" and path.startswith("/v1/projects/") and path.endswith("/truth"):
             return True
         if method == "POST" and path in {
@@ -253,6 +338,7 @@ def create_app() -> FastAPI:
             degraded.set(__import__("van_gateway.models", fromlist=["DegradedCode"]).DegradedCode.HERMES_OFFLINE, True)
         gstatus = await google.status()
         mesh = await google_broker.mesh_status(workspace=gstatus)
+        runtime_status = await owner_runtime.status()
         configured = sum(1 for item in mesh["capabilities"] if item["state"] in {"READY", "CONFIGURED"})
         ready = sum(1 for item in mesh["capabilities"] if item["state"] == "READY")
         workspace = next(
@@ -268,6 +354,7 @@ def create_app() -> FastAPI:
             "ok": hermes_ok,
             "service": "van-gateway",
             "hermes": hermes_health,
+            "owner_runtime": runtime_status,
             "google": gstatus.model_dump(),
             "google_mesh": {
                 "principal": mesh["principal"],
@@ -322,7 +409,6 @@ def create_app() -> FastAPI:
             headers={"Cache-Control": "no-store"},
         )
 
-
     @app.post("/v1/devices/enroll")
     async def enroll(
         body: EnrollBody,
@@ -345,7 +431,12 @@ def create_app() -> FastAPI:
             await auth.revoke(device_id)
         except AuthError as exc:
             raise HTTPException(status_code=404, detail=exc.message) from exc
-        return {"revoked": True, "device_id": device_id}
+        revoked_executions = await owner_runtime.actions.revoke_privileged_for_device(f"device:{device_id}")
+        return {
+            "revoked": True,
+            "device_id": device_id,
+            "revoked_privileged_executions": revoked_executions,
+        }
 
     @app.post("/v1/commands")
     async def commands(req: CommandRequest, request: Request):
@@ -396,7 +487,14 @@ def create_app() -> FastAPI:
             due = parse_due_expression(body.due_expression)
         except TimeParseError as exc:
             raise HTTPException(status_code=400, detail=str(exc)) from exc
-        return await reminders.create(ReminderCreate(text=body.text, due_at_unix=due, idempotency_key=body.idempotency_key, project_id=body.project_id))
+        return await reminders.create(
+            ReminderCreate(
+                text=body.text,
+                due_at_unix=due,
+                idempotency_key=body.idempotency_key,
+                project_id=body.project_id,
+            )
+        )
 
     @app.post("/v1/decisions/escalate")
     async def escalate_decision(body: DecisionCreate):
@@ -441,12 +539,19 @@ def create_app() -> FastAPI:
     async def gmail_search(q: str, x_van_internal_token: str | None = Header(default=None)):
         require_internal_control(x_van_internal_token)
         try:
-            return {"messages": await google.gmail_search(q), "live": google.transport is not None and not isinstance(google.transport, FakeGoogleTransport)}
+            return {
+                "messages": await google.gmail_search(q),
+                "live": google.transport is not None and not isinstance(google.transport, FakeGoogleTransport),
+            }
         except GoogleAuthError as exc:
             raise HTTPException(status_code=503, detail=str(exc)) from exc
 
     @app.post("/v1/google/gmail/send")
-    async def gmail_send(draft_id: str, approved: bool = False, x_van_internal_token: str | None = Header(default=None)):
+    async def gmail_send(
+        draft_id: str,
+        approved: bool = False,
+        x_van_internal_token: str | None = Header(default=None),
+    ):
         require_internal_control(x_van_internal_token)
         try:
             return await google.gmail_send(draft_id, action_class=ActionClass.A4, approved=approved)
@@ -496,10 +601,24 @@ def create_app() -> FastAPI:
         return job
 
     @app.post("/v1/google/jobs/{job_id}/artifacts")
-    async def record_google_artifact(job_id: str, body: GoogleArtifactBody, x_van_internal_token: str | None = Header(default=None)):
+    async def record_google_artifact(
+        job_id: str,
+        body: GoogleArtifactBody,
+        x_van_internal_token: str | None = Header(default=None),
+    ):
         require_internal_control(x_van_internal_token)
         try:
-            return await google_router.record_artifact(job_id=job_id, source_tool=body.source_tool, output_hash=body.output_hash, project_id=body.project_id, tool_version=body.tool_version, input_hashes=body.input_hashes, trust=body.trust, validation_state=body.validation_state, parent_artifact_ids=body.parent_artifact_ids)
+            return await google_router.record_artifact(
+                job_id=job_id,
+                source_tool=body.source_tool,
+                output_hash=body.output_hash,
+                project_id=body.project_id,
+                tool_version=body.tool_version,
+                input_hashes=body.input_hashes,
+                trust=body.trust,
+                validation_state=body.validation_state,
+                parent_artifact_ids=body.parent_artifact_ids,
+            )
         except KeyError as exc:
             raise HTTPException(status_code=404, detail=str(exc)) from exc
         except ValueError as exc:
@@ -507,7 +626,13 @@ def create_app() -> FastAPI:
 
     @app.post("/v1/attention")
     async def upsert_attention(body: AttentionUpsertBody):
-        item = await attention.upsert(title=body.title, severity=body.severity, source=body.source, dedupe_key=body.dedupe_key, project_id=body.project_id)
+        item = await attention.upsert(
+            title=body.title,
+            severity=body.severity,
+            source=body.source,
+            dedupe_key=body.dedupe_key,
+            project_id=body.project_id,
+        )
         await events.publish("attention.upserted", item.model_dump())
         return item
 
@@ -524,7 +649,15 @@ def create_app() -> FastAPI:
     async def ingest_notification(note: PhoneNotification):
         filtered = notifications.ingest(note)
         if not filtered.suppressed:
-            await attention.upsert(title=filtered.title, severity=__import__("van_gateway.models", fromlist=["AttentionSeverity"]).AttentionSeverity(filtered.classification.value), source=f"notification:{filtered.package}", dedupe_key=f"notif:{filtered.key}", payload={"text": filtered.text, "redacted": filtered.redacted})
+            await attention.upsert(
+                title=filtered.title,
+                severity=__import__("van_gateway.models", fromlist=["AttentionSeverity"]).AttentionSeverity(
+                    filtered.classification.value
+                ),
+                source=f"notification:{filtered.package}",
+                dedupe_key=f"notif:{filtered.key}",
+                payload={"text": filtered.text, "redacted": filtered.redacted},
+            )
         return filtered
 
     @app.get("/v1/degraded")
@@ -548,45 +681,65 @@ def create_app() -> FastAPI:
     # ------------------------------------------------------------ VATI trading
     def _trading_status_payload() -> dict:
         from van_gateway.models import DegradedCode
+
         try:
             status = trading.status()
         except Exception as exc:
             degraded.set(DegradedCode.TRADING_LEDGER_UNAVAILABLE, True)
-            return {"ledger_available": False, "ledger_path": trading.ledger_path, "chain_ok": None, "error": str(exc), "degraded": degraded.codes()}
-        degraded.set(DegradedCode.TRADING_LEDGER_UNAVAILABLE, not (status.get("ledger_available") and status.get("chain_ok")))
+            return {
+                "ledger_available": False,
+                "ledger_path": trading.ledger_path,
+                "chain_ok": None,
+                "error": str(exc),
+                "degraded": degraded.codes(),
+            }
+        degraded.set(
+            DegradedCode.TRADING_LEDGER_UNAVAILABLE,
+            not (status.get("ledger_available") and status.get("chain_ok")),
+        )
         status["degraded"] = degraded.codes()
         return status
 
     @app.get("/v1/trading/status")
-    async def trading_status(): return _trading_status_payload()
+    async def trading_status():
+        return _trading_status_payload()
 
     @app.get("/v1/trading/trades")
     async def trading_trades(view: str = "all", limit: int = 50):
-        try: return trading.trade_book(view=view, limit=limit)
-        except ValueError as exc: raise HTTPException(status_code=422, detail=str(exc)) from exc
+        try:
+            return trading.trade_book(view=view, limit=limit)
+        except ValueError as exc:
+            raise HTTPException(status_code=422, detail=str(exc)) from exc
 
     @app.get("/v1/trading/portfolio")
-    async def trading_portfolio(): return trading.portfolio()
+    async def trading_portfolio():
+        return trading.portfolio()
 
     @app.get("/v1/trading/accounts")
-    async def trading_accounts(): return trading.accounts()
+    async def trading_accounts():
+        return trading.accounts()
 
     @app.get("/v1/trading/market-state")
-    async def trading_market_state(symbol: str | None = None): return trading.market_state(symbol)
+    async def trading_market_state(symbol: str | None = None):
+        return trading.market_state(symbol)
 
     @app.get("/v1/trading/risk")
-    async def trading_risk(): return trading.risk()
+    async def trading_risk():
+        return trading.risk()
 
     @app.get("/v1/trading/trades/{trade_intent_id}")
     async def trading_trade_detail(trade_intent_id: str):
         detail = trading.trade_detail(trade_intent_id)
-        if detail is None: raise HTTPException(status_code=404, detail="unknown trade intent")
+        if detail is None:
+            raise HTTPException(status_code=404, detail="unknown trade intent")
         return detail
 
     @app.get("/v1/trading/bars")
     async def trading_bars(symbol: str, timeframe: str = "H1", limit: int = 300, end_ms: int | None = None):
-        try: return trading.bars(symbol, timeframe, limit=limit, end_ms=end_ms)
-        except ValueError as exc: raise HTTPException(status_code=422, detail=str(exc)) from exc
+        try:
+            return trading.bars(symbol, timeframe, limit=limit, end_ms=end_ms)
+        except ValueError as exc:
+            raise HTTPException(status_code=422, detail=str(exc)) from exc
 
     @app.post("/v1/trading/accounts/action")
     async def trading_account_action(request: Request, req: AccountActionRequest):
@@ -596,50 +749,120 @@ def create_app() -> FastAPI:
             raise HTTPException(status_code=404, detail="unknown account action")
         try:
             await auth.require_device(req.device_id)
-            auth.verify_signature(req.device_id, canonical_action(req.device_id, req.issued_at_unix, req.action, req.args), req.signature)
+            auth.verify_signature(
+                req.device_id,
+                canonical_action(req.device_id, req.issued_at_unix, req.action, req.args),
+                req.signature,
+            )
         except AuthError as exc:
-            await audit.record(result="denied", device_id=req.device_id, capability=f"trading.account.{req.action}", failure_reason=exc.code)
+            await audit.record(
+                result="denied",
+                device_id=req.device_id,
+                capability=f"trading.account.{req.action}",
+                failure_reason=exc.code,
+            )
             raise HTTPException(status_code=403, detail=exc.message) from exc
         import time as _time
+
         if abs(int(_time.time()) - req.issued_at_unix) > 300:
             raise HTTPException(status_code=403, detail="stale owner action; sign again")
         try:
             result = await onboarding.run(req.action, req.args)
         except HTTPException as exc:
-            await audit.record(result="refused", device_id=req.device_id, capability=f"trading.account.{req.action}", failure_reason=str(exc.detail)[:200], before=redact_account_args(req.args))
+            await audit.record(
+                result="refused",
+                device_id=req.device_id,
+                capability=f"trading.account.{req.action}",
+                failure_reason=str(exc.detail)[:200],
+                before=redact_account_args(req.args),
+            )
             raise
-        await audit.record(result="ok", device_id=req.device_id, capability=f"trading.account.{req.action}", before=redact_account_args(req.args), after={k:v for k,v in result.items() if k in ("account","alias","state","ready","stored_keys","removed","ok")})
+        await audit.record(
+            result="ok",
+            device_id=req.device_id,
+            capability=f"trading.account.{req.action}",
+            before=redact_account_args(req.args),
+            after={
+                k: v
+                for k, v in result.items()
+                if k in ("account", "alias", "state", "ready", "stored_keys", "removed", "ok")
+            },
+        )
         return result
 
     @app.get("/v1/trading/oauth/{broker}/callback")
     async def trading_oauth_callback(broker: str, request: Request):
         from fastapi.responses import HTMLResponse
-        try: result = await onboarding.oauth_callback(broker, dict(request.query_params))
+
+        try:
+            result = await onboarding.oauth_callback(broker, dict(request.query_params))
         except HTTPException as exc:
-            return HTMLResponse(f"<h2>Van: linking failed</h2><p>{exc.detail}</p>", status_code=exc.status_code)
-        return HTMLResponse(f"<h2>Van: {result['broker']} linked</h2><p>Return to the Van app to choose the account. You can close this page.</p>")
+            return HTMLResponse(
+                f"<h2>Van: linking failed</h2><p>{exc.detail}</p>",
+                status_code=exc.status_code,
+            )
+        return HTMLResponse(
+            f"<h2>Van: {result['broker']} linked</h2>"
+            "<p>Return to the Van app to choose the account. You can close this page.</p>"
+        )
 
     @app.get("/v1/trading/tickets")
-    async def trading_tickets(status: str | None = None): return {"tickets": trading.tickets(status=status)}
+    async def trading_tickets(status: str | None = None):
+        return {"tickets": trading.tickets(status=status)}
 
     @app.post("/v1/trading/halt")
-    async def trading_halt(req: OwnerHaltRequest, x_van_internal_token: str | None = Header(default=None)):
+    async def trading_halt(
+        req: OwnerHaltRequest,
+        x_van_internal_token: str | None = Header(default=None),
+    ):
         require_internal_control(x_van_internal_token)
-        try: result = trading.halt(owner_signature_ref=req.owner_signature_ref, reason=req.reason)
-        except TradingControlError as exc: raise HTTPException(status_code=403, detail=str(exc)) from exc
-        except FileNotFoundError as exc: raise HTTPException(status_code=503, detail=str(exc)) from exc
-        await audit.record(result="owner_halt_recorded", capability="trading.owner_halt", approval=req.owner_signature_ref, tool="vati_ledger", after={"event_hash":result["event_hash"],"chain_hash":result["chain_hash"]}, evidence_pointer=result["event_hash"])
+        try:
+            result = trading.halt(owner_signature_ref=req.owner_signature_ref, reason=req.reason)
+        except TradingControlError as exc:
+            raise HTTPException(status_code=403, detail=str(exc)) from exc
+        except FileNotFoundError as exc:
+            raise HTTPException(status_code=503, detail=str(exc)) from exc
+        await audit.record(
+            result="owner_halt_recorded",
+            capability="trading.owner_halt",
+            approval=req.owner_signature_ref,
+            tool="vati_ledger",
+            after={"event_hash": result["event_hash"], "chain_hash": result["chain_hash"]},
+            evidence_pointer=result["event_hash"],
+        )
         return result
 
     @app.post("/v1/trading/tickets/{ticket_id}/confirm")
-    async def trading_confirm_ticket(ticket_id: str, req: TicketConfirmRequest, x_van_internal_token: str | None = Header(default=None)):
+    async def trading_confirm_ticket(
+        ticket_id: str,
+        req: TicketConfirmRequest,
+        x_van_internal_token: str | None = Header(default=None),
+    ):
         require_internal_control(x_van_internal_token)
-        try: result = trading.confirm_ticket(ticket_id, owner_signature_ref=req.owner_signature_ref, fill_price=req.fill_price, filled_qty=req.filled_qty, contract_note_ref=req.contract_note_ref)
-        except TradingControlError as exc: raise HTTPException(status_code=409, detail=str(exc)) from exc
-        except KeyError as exc: raise HTTPException(status_code=404, detail=str(exc)) from exc
-        except ValueError as exc: raise HTTPException(status_code=422, detail=str(exc)) from exc
-        except FileNotFoundError as exc: raise HTTPException(status_code=503, detail=str(exc)) from exc
-        await audit.record(result="owner_ticket_confirmed", capability="trading.ticket_confirm", approval=req.owner_signature_ref, tool="vati_ledger", after={"ticket":ticket_id,"event_hash":result["event_hash"]}, evidence_pointer=result["event_hash"])
+        try:
+            result = trading.confirm_ticket(
+                ticket_id,
+                owner_signature_ref=req.owner_signature_ref,
+                fill_price=req.fill_price,
+                filled_qty=req.filled_qty,
+                contract_note_ref=req.contract_note_ref,
+            )
+        except TradingControlError as exc:
+            raise HTTPException(status_code=409, detail=str(exc)) from exc
+        except KeyError as exc:
+            raise HTTPException(status_code=404, detail=str(exc)) from exc
+        except ValueError as exc:
+            raise HTTPException(status_code=422, detail=str(exc)) from exc
+        except FileNotFoundError as exc:
+            raise HTTPException(status_code=503, detail=str(exc)) from exc
+        await audit.record(
+            result="owner_ticket_confirmed",
+            capability="trading.ticket_confirm",
+            approval=req.owner_signature_ref,
+            tool="vati_ledger",
+            after={"ticket": ticket_id, "event_hash": result["event_hash"]},
+            evidence_pointer=result["event_hash"],
+        )
         return result
 
     @app.post("/v1/events/reset")
@@ -648,6 +871,7 @@ def create_app() -> FastAPI:
             raise HTTPException(status_code=403, detail="device_identity_mismatch")
         await events.reset_cursor(device_id)
         from van_gateway.models import DegradedCode
+
         degraded.set(DegradedCode.EVENT_CURSOR_RESET, True)
         return {"reset": True, "device_id": device_id}
 

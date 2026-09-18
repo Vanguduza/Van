@@ -190,6 +190,17 @@ def test_install_profile_preserves_runtime_state_and_secrets(tmp_path):
     env["HERMES_HOME"] = str(hermes_home)
     installer = REPO_ROOT / "tools" / "hermes" / "install_van_profile.sh"
     subprocess.run([str(installer)], check=True, text=True, capture_output=True, env=env)
+
+    # The doctor intentionally certifies the complete live owner-runtime contract,
+    # not only copied profile files. Supply isolated test equivalents of the MCP
+    # registration and gateway control-credential source rather than weakening it.
+    hermes_config = hermes_home / "config.yaml"
+    hermes_config.write_text("mcp_servers:\n  van_owner_runtime:\n    command: node\n", encoding="utf-8")
+    gateway_env = tmp_path / "gateway.env"
+    gateway_env.write_text("VAN_INTERNAL_CONTROL_TOKEN=test-control-token\n", encoding="utf-8")
+    env["HERMES_CONFIG"] = str(hermes_config)
+    env["VAN_GATEWAY_ENV_FILE"] = str(gateway_env)
+
     doctor = REPO_ROOT / "tools" / "hermes" / "doctor_van_profile.sh"
     subprocess.run([str(doctor)], check=True, text=True, capture_output=True, env=env)
 
@@ -208,3 +219,40 @@ def test_trading_authority_declared_in_soul_and_config():
     assert "protect_trading_risk_authority: true" in config
     assert "deny_model_broker_orders: true" in config
     assert "- trading-intelligence" in config
+
+def test_automation_and_browser_skills_are_registered():
+    """Rev 1.3 §139 — the fabric skills ship in the profile pack."""
+    config = (PROFILE_ROOT / "config.yaml").read_text(encoding="utf-8")
+    assert "- automation-fabric" in config
+    assert "- browser-intelligence" in config
+
+
+def test_browser_skill_declares_the_subagent_bounds():
+    """Owner decision 2026-09-18 — Hermes reads its own manager obligations here.
+
+    The skill must state the four things Hermes has to supply when it opens an
+    autonomous run, because an unbounded assignment is what turns a subagent into
+    an independent agent loop.
+    """
+    skill = (HERMES_ROOT / "skills" / "browser-intelligence" / "SKILL.md").read_text(encoding="utf-8")
+    assert "You are the manager" in skill
+    for bound in ("goal", "domains", "action-class ceiling", "step budget"):
+        assert bound in skill, f"browser skill does not state the {bound} bound"
+    assert "cannot widen them" in skill
+
+
+def test_skills_state_the_payment_prohibition():
+    """Both fabrics must tell Hermes plainly that they never pay."""
+    browser = (HERMES_ROOT / "skills" / "browser-intelligence" / "SKILL.md").read_text(encoding="utf-8")
+    automation = (HERMES_ROOT / "skills" / "automation-fabric" / "SKILL.md").read_text(encoding="utf-8")
+    assert "The browser never pays for anything" in browser
+    assert "No automation ever pays for anything" in automation
+    for skill in (browser, automation):
+        assert "fresh owner biometric" in skill or "fresh owner" in skill
+
+
+def test_automation_skill_forbids_direct_n8n_access():
+    """Rev 1.3 §§14, 38 — Hermes never holds n8n credentials or calls its API."""
+    skill = (HERMES_ROOT / "skills" / "automation-fabric" / "SKILL.md").read_text(encoding="utf-8")
+    assert "never call" in skill.lower() or "Call the n8n management API" in skill
+    assert "is not success" in skill

@@ -1,6 +1,6 @@
 # VAN Implementation Ledger
 
-**Updated:** 2026-09-16
+**Updated:** 2026-09-17
 **Version:** 0.5.0-dev  
 **Repository:** `Vanguduza/Van`
 
@@ -26,6 +26,9 @@
 - **Project Truth mounts:** `registries/project_mounts.json` + sync tool prefer per-project `truth_path`; offline cache under `artifacts/project-truth/`.
 - **Google provenance:** persistent jobs and artifact lineage with project, provider, tool version, input/output hashes, validation state and evidence pointer; provider artifacts can never be marked `OWNER_SIGNED`.
 - **Google operator tooling:** hashed owner-principal configuration and certification/status scripts; `tools/google/mark_antigravity_capacity_limited.py`; `tools/google/import_hermes_google_attestation.py` for Hermes-hosted auth evidence.
+- **Rev 3.1 knowledge runtime:** deterministic gateway capability plane for read-only VEKL evidence, indexed Obsidian owner knowledge, Gemini Notebook Enterprise lifecycle operations and personal NotebookLM grounded ask/note creation. All provider evidence is provenance-scoped and cannot self-promote into Owner Facts or Project Truth. Notebook mutations are A3 actions bound to signed command authority, parameter digests, idempotency, provider submission state and postcondition readback before `VERIFIED_SUCCESS`.
+- **Knowledge evidence lineage:** VEKL/Obsidian/Notebook evidence receives stable evidence pointers and is sealed separately as `knowledge_evidence_refs` in immutable context snapshots; Hermes MCP exposes bounded reads and an authorized execution bridge only, not canonical-memory admission or generic provider writes.
+- **Knowledge provider tooling:** `tools/google/bootstrap_notebook_consumer.py` prepares the persistent owner-session profile without cookie export; `tools/google/certify_knowledge_runtime.py` performs provider canaries and records evidence without upgrading `CONFIGURED` to `READY` absent a passing live check.
 - **Hermes Google skills:** google-intelligence, gemini-notebook, google-design, google-development; Google providers remain subordinate to Hermes.
 - **Antigravity delegated identity:** Antigravity alone is bound to `antigravity_worker_account` and executes through an isolated HOME/XDG/OAuth store with inherited Google/API credentials stripped. Live OAuth, 14-model discovery and a Gemini 3.8 Flash canary are certified on `dial-hermes-control` (2026-09-15); token-free evidence is stored in `artifacts/google/antigravity_worker_live_attestation.json`.
 - **Policy hardening:** Google broker/registry protected; session-cookie export, credential-plane collapse and broker bypass are prohibited patterns.
@@ -38,7 +41,8 @@
 - VATI Rev 5 repository implementation is integrated: trading core, risk authority, execution adapters, commander/VEKL, Android Trading Command Center, signed account onboarding and fail-closed tests are present. Remaining gates are deployment/live-market/device gates: `van-trading-core` bootstrap/qualification, real broker/demo account connection, real market data validation, MT5 EA/terminal attachment where used, independent security review and owner-signed LIMITED_LIVE promotion.
 - Google readiness is credential-plane-specific. Workspace OAuth and Stitch are `READY`; the Gemini runtime plane is authenticated with a dedicated API-restricted key and is currently `CAPACITY_LIMITED` because project prepaid inference credits are depleted. Consumer/Cloud capabilities retain their independently evidenced states.
 - The delegated Antigravity worker is live-certified. Capacity/rate limits, if they recur, remain capability-scoped and may fall back to Jules without degrading other Google planes.
-- Notebook Enterprise / ADK-A2A require eligible owner-administered Google Cloud/Enterprise setup.
+- The Rev 3.1 VEKL/Obsidian/Notebook knowledge-runtime code is repository-complete and CI-testable. Live readiness remains provider-specific: VEKL requires the configured DDE/VEKL mission endpoint and credentials; Obsidian requires the owner vault on the runtime host; personal NotebookLM requires an authenticated persistent owner browser profile; Notebook Enterprise requires eligible owner-administered Google Cloud/Enterprise credentials. None is `READY` until its live certification canary records evidence.
+- ADK/A2A still requires eligible owner-administered Google Cloud/Enterprise setup.
 - Live Hermes install is certified on `dial-hermes-control` (2026-09-15). Local Project Truth mounts for van/dial/dde/gtr/goat/aeci are resolved on this workstation. Physical Samsung certification, stable named Cloudflare hostname/token provisioning, `.riv` authoring, and production signing remain external gates.
 
 ## SUPERSEDED / FORBIDDEN
@@ -51,3 +55,15 @@
 - Direct Google project mutation that bypasses Hermes, Project Truth, grants, action classes, audit or evidence.
 
 See `docs/EXTERNAL_GATES.md` for exact live gates.
+## AUTOMATION & BROWSER FABRIC (Rev 1.3 × Rev 3.1) — RECONCILED
+
+- **Lineage:** the current reconciliation branch preserves the Rev 3.1 owner/knowledge runtime, the Opus Automation & Browser Fabric, and the latest hardened Trading Core bootstrap lineage. Neither WIP is treated as an alternate architecture.
+- **Schema:** migrations 6–8 provide automation capability/artifact/run/event/standing-authority state, browser task/evidence/profile state, durable browser escalations, and separately auditable owner-approved browser scope authorizations.
+- **Standing automation authority:** scheduled/event runs derive ordinary `CommandAuthorityRecord` instances through the existing `CommandAuthorityService`. The originating owner device remains the revocation root; typed parameter constraints and standing-authority provenance coexist in the same record.
+- **Run capability grants:** mutation grants remain MAC-bound, run-scoped, durable and replay-safe. n8n never becomes a general VAN authority token holder.
+- **Browser Fabric:** Browser Harness is the deterministic actuator and Stagehand the semantic layer behind the Gateway. The owner-approved model permits L4/L5 only as a Hermes-managed subagent with explicit goal, domains, action-class ceiling and bounded step/deadline budget.
+- **Boundary escalation:** legitimate scope/action-class overruns are non-terminal. They transition the task to `WAITING_FOR_OWNER`, persist a checkpoint/escalation, create a canonical `DecisionService` record and attention item, and can resume only after a separate durable scope authorization is derived from that approved decision. Resume assignments exceeding the approved domain or action-class delta are rejected.
+- **Hard stops:** payments and prompt-injection policy violations become `BLOCKED_POLICY`; goal drift/ambiguous unsafe behavior becomes `BLOCKED_UNSAFE`. A hard prohibition is never converted into an owner-override button.
+- **Android owner control:** Command Centre now contains a live **Browser & Automation** module showing runtime/task state, managed browser profiles/session leases, automation counts and boundary escalations. Approve/Reject uses the existing canonical Decisions authority rather than a parallel browser approval plane.
+- **Owner decisions:** n8n, Stagehand and Browser Harness adoption records are `SIGNED`/approved on 2026-09-18 and the Automation & Browser security-policy amendment is `OWNER_APPROVED` and applied. Live runtime readiness remains evidence-gated and disabled by default until certified.
+- **Certification:** `tools/certification/certify_automation_runtime.py` and `tools/certification/certify_browser_fabric.py` remain required for live READY promotion. Repository implementation alone is not readiness.

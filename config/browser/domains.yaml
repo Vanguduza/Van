@@ -15,4 +15,9 @@ rules:
   arbitrary_javascript_normal_interface: forbidden
   external_content_owner_authority: forbidden
   action_class_a3_a4_discovery_requires_reauthorization: true
-admitted_domains: {}
+admitted_domains:
+  notebooklm.google.com:
+    observe: true
+    extract: true
+    mutate: gateway_authorized_only
+    download: false

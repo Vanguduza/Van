@@ -23,8 +23,10 @@ Resolved 2026-09-17: the canonical GitHub Actions workflow is live at `.github/w
 | Gemini runtime | dedicated Google-account-owned API/runtime credential + inference credits | CAPACITY_LIMITED — restricted `van-gemini-runtime` key installed; Hermes reports `gemini: logged in`; authenticated model discovery returned HTTP 200 / 50 models; `gemini-3.6-flash` inference returned `RESOURCE_EXHAUSTED` because prepaid credits are depleted. Receipt: `artifacts/google/gemini_runtime_auth_attestation.json` |
 | Gemini Live | authenticated Gemini runtime credential + live endpoint canary | CAPACITY_LIMITED — shared credential is authenticated and a bidi Live model is discoverable; live generation not promoted while project prepaid credits are depleted |
 | Deep Research | authenticated Gemini runtime credential + quota canary | CAPACITY_LIMITED — Deep Research models are visible through authenticated discovery; execution awaits restored project prepaid credits |
-| Gemini Notebook personal | owner Google session on Hermes | consumer capability CONFIGURED via attestation |
-| Gemini Notebook Enterprise | eligible Cloud/Enterprise setup | still EXTERNAL (cloud plane) |
+| Gemini Notebook personal | owner Google session in the managed Browser Fabric profile + Harness/Stagehand canary | Rev 3.1 consumer bridge now routes through Browser Harness + Stagehand with grounded ask/note readback and no direct runtime Playwright/cookie export; READY requires live Browser Fabric profile + provider canary evidence |
+| Gemini Notebook Enterprise | eligible Cloud/Enterprise setup + service identity/token canary | Rev 3.1 official API lifecycle/readback adapter implemented; still EXTERNAL until Cloud plane is configured and live-certified |
+| VEKL knowledge source | DDE/VEKL mission endpoint + bounded VAN principal/session credential | Rev 3.1 read-only evidence adapter implemented; READY requires a live mission projection canary |
+| Obsidian owner knowledge | owner-selected vault mounted on gateway host | Rev 3.1 bounded incremental index/query implemented with secret exclusion; READY requires live vault index/query certification |
 | Stitch | Google Cloud Stitch MCP credential plane | READY — authenticated live `generate_screen_from_text` canary passed; token-free receipt: `artifacts/google/stitch_live_attestation.json` |
 | Mixboard / Flow / AI Studio / Workspace Studio | owner Google session on Hermes | consumer capabilities CONFIGURED via attestation; per-capability live canary still required |
 | Jules | owner Google sign-in on Hermes | CONFIGURED via attestation; READY needs live worker receipt |
@@ -36,6 +38,29 @@ Resolved 2026-09-17: the canonical GitHub Actions workflow is live at `.github/w
 | Artist `.riv` | Rive editor | contract + Canvas fallback + handoff |
 | Owner visual acceptance | owner review | acceptance matrix |
 | Signed production release | production keystore | Gradle wiring + `android/keystore.properties.example` |
+
+## Automation & Browser Fabric gates
+
+Owner adoption is already recorded: n8n, Stagehand and Browser Harness decision records are `SIGNED`/approved on 2026-09-18, and the Automation & Browser security-policy amendment is `OWNER_APPROVED` and applied. Approval authorizes the architecture; it does **not** certify a live runtime.
+
+| Gate | Required proof | Repo-side readiness |
+|---|---|---|
+| n8n self-hosted runtime | pinned local instance + PostgreSQL + task runner + restart canary | PENDING_LIVE — hardened self-hosted deployment/bootstrap exists; gateway remains fail-closed until live certification |
+| n8n workflow generation | novel goal → IR → compile → local create → synthetic execution → HOT reuse | PENDING_LIVE — deterministic compiler/validator/admission and tests exist; live n8n execution proof required |
+| n8n security | security audit and trust-boundary proof | PENDING_LIVE — repository controls exist; live host audit required |
+| n8n backup/restore | isolated restore with matching encryption key | PENDING_LIVE — repository tooling exists; restore drill required |
+| Automation webhook ingress | signed event + replay rejection + verified intake | PENDING_LIVE — signed ingress path implemented; live trigger proof required |
+| Standing automation | owner-derived standing authority + bounded run + verified result | PENDING_LIVE — durable authority/grant path implemented; live scheduled/event execution proof required |
+| Browser Harness | pinned private worker + deterministic navigation/action + evidence pointer | PENDING_LIVE — gateway adapter/deployment foundation implemented; live worker canary required |
+| Stagehand local semantic browser | private local/CDP worker + observe/extract/act canary under Hermes assignment | PENDING_LIVE — gateway adapter/subagent bounds implemented; live worker/model canary required |
+| Browser authenticated profile | managed owner profile survives restart without secret export and identity is verified | PENDING_LIVE — profile alias/lease/secretref architecture implemented; owner authentication + restart identity proof required |
+| Browser boundary escalation | live task exceeds scope → WAITING_FOR_OWNER → Android decision → scoped authorization → same task resumes | REPO_COMPLETE / PENDING_LIVE — durable escalation and scoped-resume code/tests implemented; live worker/device proof required |
+| NotebookLM consumer via Browser Fabric | authenticated managed profile + grounded ask + A3 note create/readback | REPO_COMPLETE / PENDING_LIVE — direct runtime Playwright removed; Browser Harness + Stagehand provider path implemented; live profile/runtime canary required |
+| Browser prompt-injection containment | adversarial live page cannot widen authority or leak secrets | PENDING_LIVE — synthetic policy tests exist; live adversarial canary required |
+| Trading Core isolation | maximum certified automation/browser load preserves VATI safety envelope | PENDING_LIVE — measured host load test required |
+| Browser→automation optimization | discovered stable API shadow-compares before route promotion | PENDING_LIVE — promotion architecture exists; live evidence required |
+
+Rules: code or configuration alone never means READY; runtime evidence must be token-free and contain no browser secrets; n8n/Stagehand/Harness success is not owner-visible completion without gateway verification; payment execution remains outside automated browser/automation authority.
 
 ## Google certification rules
 
