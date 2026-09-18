@@ -107,3 +107,24 @@ Live host: `dial-hermes-control`; control path: authorised `oracle-admin` Comman
 | Antigravity capacity fallback contract | PASS | if the delegated route later becomes `CAPACITY_LIMITED`/`RATE_LIMITED`, deterministic routing may fall back to owner-account Jules while preserving identity attribution |
 
 **Live Hermes gate verdict:** COMPLETE. The delegated Antigravity worker is live-certified. Remaining Google capability readiness is evaluated independently per capability and credential plane.
+
+## Live Trading Core WIP reconciliation certification — 2026-09-18
+
+Token-free receipt: `artifacts/runtime/van_trading_core_reconciliation_live_attestation.json`. Certified merged source: `47f213590598c81f83ae8a97f7eff8d93dbf1bfd`.
+
+| Gate | Status |
+|---|---|
+| All known WIP branch lineages reconciled | PASS — every known WIP branch compares as 0 commits ahead of canonical `main` |
+| Remaining implementation PRs | PASS — PR #32 merged; superseded PR #29 closed; no open implementation PRs remain |
+| Live Trading Core source | PASS — host is on branch `main` at exact merged commit `47f213590598c81f83ae8a97f7eff8d93dbf1bfd` |
+| Full Trading Core qualification | PASS — `GREEN`, 0 required failures |
+| n8n automation fabric | PASS — `AUTOMATION_FABRIC_RUNTIME_GREEN` |
+| Supabase authority runtime | PASS — `SUPABASE_RUNTIME_GREEN` after normal post-revision container startup stabilization |
+| Browser runtime | PASS — Stagehand 4.1.0 / Playwright 1.63.0 / Temporal 1.33.0 |
+| VATI ledger | PASS — PostgreSQL backend, chain valid |
+| Network/firewall boundary | PASS — UFW active, Commander 9133 scoped, Oracle image firewall green, Supabase ports loopback-only |
+| Fresh-firstboot marker | NOT APPLICABLE TO THIS DEPLOYMENT — existing production node was resumed in place and fast-forwarded to certified `main`; the fresh-rebuild marker is intentionally not fabricated |
+| Trading sessions | NON-BLOCKING AMBER — no account enabled yet |
+| Native MT5 on Trading Core | NON-BLOCKING AMBER — ARM64 node intentionally uses external Windows MT5 bridge |
+
+**Trading Core reconciliation verdict:** repository lineage and live deployed runtime are aligned and certified on canonical `main`. This does not change unrelated v1.0 external gates elsewhere in VAN.
