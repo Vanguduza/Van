@@ -246,7 +246,7 @@ async def test_authorized_notebook_mutation_reaches_verified_success_and_rejects
     )
     assert execution.status == ExecutionStatus.AUTHORIZED
 
-    async def fake_create(_request):
+    async def fake_create(_request, **_lineage):
         return NotebookOperationResult(
             operation_id="op-note-1", provider=KnowledgeProvider.NOTEBOOK_CONSUMER,
             operation="CREATE_NOTE", status=KnowledgeOperationStatus.VERIFIED_SUCCESS,
