@@ -10,6 +10,8 @@ import pytest
 from van_gateway.action.models import ExecutionStatus
 from van_gateway.action.registry import install_builtin_actions
 from van_gateway.action.service import ActionPolicyError, ActionRuntime
+from van_gateway.browser.models import BrowserObservation
+from van_gateway.browser.service import BrowserTaskService
 from van_gateway.config import Settings
 from van_gateway.context.models import EpistemicState, SourceTrust
 from van_gateway.knowledge.evidence import KnowledgeEvidenceStore
@@ -219,9 +221,9 @@ async def test_notebook_enterprise_sources_support_batch_and_guarded_file_upload
 async def test_consumer_notebook_fails_closed_without_authenticated_browser_profile(tmp_path):
     store, _schema, evidence = await prepared_store(tmp_path)
     provider = NotebookConsumerProvider(
-        store, evidence, enabled=True, profile_dir="", headless=True,
+        store, evidence, enabled=True, profile_alias="authenticated_owner",
     )
-    with pytest.raises(NotebookProviderError, match="profile_unconfigured"):
+    with pytest.raises(NotebookProviderError, match="browser_fabric_unconfigured"):
         await provider.ask(NotebookConsumerAskRequest(notebook_id="nb", question="What changed?"))
     status = await provider.status()
     assert status.state == ProviderState.UNCONFIGURED
@@ -335,41 +337,34 @@ async def test_enterprise_delete_timeout_is_conflicted_and_never_replayed(tmp_pa
 @pytest.mark.asyncio
 async def test_consumer_preexisting_same_title_is_not_claimed_as_van_created(tmp_path):
     store, _schema, evidence = await prepared_store(tmp_path)
-    profile = tmp_path / "profile"
-    profile.mkdir()
 
-    class Locator:
-        def __init__(self, count: int):
-            self._count = count
-        async def count(self):
-            return self._count
+    class Harness:
+        configured = True
+        async def navigate(self, _task, _url):
+            return {"ok": True}
+        async def page_info(self, _task):
+            return {"url": "https://notebooklm.google.com/notebook/nb-owner"}
 
-    class Page:
-        url = "https://notebooklm.google.com/notebook/nb-owner"
-        async def goto(self, *_args, **_kwargs):
-            return None
-        async def wait_for_timeout(self, _ms):
-            return None
-        def get_by_text(self, value, exact=False):
-            # Sign-in regex must not match; the exact owner title already exists.
-            return Locator(1 if exact and value == "Dial Health" else 0)
-
-    class Context:
-        def __init__(self):
-            self.pages = [Page()]
-        async def close(self):
-            return None
-
-    class Playwright:
-        async def stop(self):
-            return None
+    class Stagehand:
+        configured = True
+        async def act(self, _task, _action):
+            return {"ok": True}
+        async def extract(self, task, _instruction, _schema):
+            return BrowserObservation(
+                task_id=task.task_id,
+                extraction={"exact_title_exists": True, "auth_required": False},
+            )
 
     provider = NotebookConsumerProvider(
-        store, evidence, enabled=True, profile_dir=str(profile), headless=True,
+        store,
+        evidence,
+        enabled=True,
+        browser_tasks=BrowserTaskService(store),
+        harness=Harness(),  # type: ignore[arg-type]
+        stagehand=Stagehand(),  # type: ignore[arg-type]
+        profile_alias="authenticated_owner",
+        profile_secret_ref="secretref://browser/google-primary",
     )
-    async def fake_browser():
-        return Playwright(), Context()
-    provider._browser = fake_browser  # type: ignore[method-assign]
 
     result = await provider.create_note(
         __import__('van_gateway.knowledge.models', fromlist=['NotebookConsumerNoteCreateRequest']).NotebookConsumerNoteCreateRequest(
@@ -379,3 +374,4 @@ async def test_consumer_preexisting_same_title_is_not_claimed_as_van_created(tmp
     assert result.status == KnowledgeOperationStatus.VERIFICATION_FAILED
     assert result.error_code == "PREEXISTING_NOTE_AMBIGUOUS"
     assert result.evidence_pointer is None
+
