@@ -22,7 +22,9 @@ from van_gateway.browser.models import (
     InjectionAssessment,
 )
 from van_gateway.browser.subagent import ProposedAction
+from van_gateway.attention.engine import AttentionEngine
 from van_gateway.config import get_settings
+from van_gateway.decisions.service import DecisionService
 from van_gateway.models import ActionClass
 
 INGRESS = "test-ingress-token-0123456789abcdef"
@@ -68,7 +70,8 @@ class _ScriptedWorker:
 
 async def _client(tmp_path, worker=None):
     store = await make_store(tmp_path)
-    api = BrowserApi(store, get_settings(), worker=worker)
+    decisions = DecisionService(store, AttentionEngine(store))
+    api = BrowserApi(store, get_settings(), worker=worker, decisions=decisions)
     app = FastAPI()
     app.include_router(api.router)
     ac = AsyncClient(transport=ASGITransport(app=app), base_url="http://test")
@@ -403,7 +406,7 @@ async def test_a_worker_runs_inside_its_assignment_and_the_task_closes(tmp_path)
     ],
 )
 async def test_a_worker_that_leaves_its_assignment_is_stopped(tmp_path, action, stop_reason):
-    """Every violation ends the task. None of them escalates or asks for more."""
+    """Boundary overruns suspend for owner; unsafe/policy violations still stop."""
     worker = _ScriptedWorker([action])
     ac, _api, _store = await _client(tmp_path, worker=worker)
     async with ac:
@@ -426,8 +429,19 @@ async def test_a_worker_that_leaves_its_assignment_is_stopped(tmp_path, action, 
 
         fetched = await ac.get(f"/v1/browser/tasks/{task['task_id']}", headers=HEADERS)
         task_row = fetched.json()["task"]
-        assert task_row["status"] == BrowserTaskStatus.FAILED.value
+        expected = {
+            "SCOPE_VIOLATION": BrowserTaskStatus.WAITING_FOR_OWNER.value,
+            "ACTION_CLASS_VIOLATION": BrowserTaskStatus.WAITING_FOR_OWNER.value,
+            "GOAL_DRIFT": BrowserTaskStatus.BLOCKED_UNSAFE.value,
+            "PAYMENT_REFUSED": BrowserTaskStatus.BLOCKED_POLICY.value,
+        }[stop_reason]
+        assert task_row["status"] == expected
         assert task_row["error_code"] == stop_reason
+        if stop_reason in {"SCOPE_VIOLATION", "ACTION_CLASS_VIOLATION"}:
+            assert body["escalation"]["status"] == BrowserTaskStatus.WAITING_FOR_OWNER.value
+            escalations = (await ac.get("/v1/browser/escalations", headers=HEADERS)).json()
+            assert len(escalations) == 1
+            assert escalations[0]["decision_status"] == "OPEN"
 
 
 async def test_an_assignment_cannot_carry_an_a4_ceiling(tmp_path):
@@ -451,6 +465,42 @@ async def test_an_assignment_cannot_carry_an_a4_ceiling(tmp_path):
         assert worker.proposed == 0
 
 
+async def test_owner_approval_resumes_same_browser_task(tmp_path):
+    """A scope overrun checkpoints, canonical owner approval unlocks the same task."""
+    worker = _ScriptedWorker(
+        [ProposedAction(kind="navigate", domain="outside.example.net", url="https://outside.example.net/")]
+    )
+    ac, _api, store = await _client(tmp_path, worker=worker)
+    async with ac:
+        task = await _make_task(ac)
+        request = {
+            "task_id": task["task_id"], "turn_id": "turn-1", "command_id": "cmd-owner-1",
+            "goal": "read the statement total", "allowed_domains": [DOMAIN],
+        }
+        first = await ac.post("/v1/browser/assignments", headers=HEADERS, json=request)
+        assert first.status_code == 200
+        assert first.json()["stop_reason"] == "SCOPE_VIOLATION"
+        assert first.json()["escalation"]["status"] == "WAITING_FOR_OWNER"
+
+        escalation = (
+            await store.fetchone(
+                "SELECT decision_id FROM browser_escalations WHERE task_id = ?",
+                (task["task_id"],),
+            )
+        )
+        assert escalation is not None
+        await store.execute(
+            "UPDATE decisions SET status = 'APPROVED' WHERE id = ?",
+            (escalation["decision_id"],),
+        )
+
+        second = await ac.post("/v1/browser/assignments", headers=HEADERS, json=request)
+        assert second.status_code == 200, second.text
+        assert second.json()["stop_reason"] == "GOAL_ACHIEVED"
+        fetched = await ac.get(f"/v1/browser/tasks/{task['task_id']}", headers=HEADERS)
+        assert fetched.json()["task"]["status"] == BrowserTaskStatus.COMPLETED.value
+
+
 async def test_a_run_cannot_be_started_twice(tmp_path):
     """A completed task is terminal; a second assignment does not resume it."""
     worker = _ScriptedWorker([ProposedAction(kind="done", domain=DOMAIN, done=True)])
@@ -465,4 +515,4 @@ async def test_a_run_cannot_be_started_twice(tmp_path):
         assert first.status_code == 200
         second = await ac.post("/v1/browser/assignments", headers=HEADERS, json=body)
         assert second.status_code == 409
-        assert second.json()["detail"] == "BROWSER_TASK_NOT_PENDING"
+        assert second.json()["detail"] == "BROWSER_TASK_NOT_RUNNABLE:COMPLETED"
