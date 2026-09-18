@@ -43,3 +43,7 @@ def test_update_core_env_preserves_mode_and_encodes_password(tmp_path):
 def test_reconcile_uses_supabase_admin_boundary():
     module = load_module()
     assert module.ADMIN_ROLE == "supabase_admin"
+
+def test_runtime_ledger_never_requires_database_create_privilege():
+    from vati.core import ledger_pg
+    assert "CREATE SCHEMA" not in ledger_pg.SCHEMA.upper()
