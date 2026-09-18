@@ -151,8 +151,16 @@ class KnowledgeRuntime:
     async def add_enterprise_sources(self, request: NotebookEnterpriseAddSourcesRequest):
         return await self.notebook_enterprise.add_sources(request)
 
-    async def create_consumer_note(self, request: NotebookConsumerNoteCreateRequest):
-        return await self.notebook_consumer.create_note(request)
+    async def create_consumer_note(
+        self,
+        request: NotebookConsumerNoteCreateRequest,
+        *,
+        command_id: str | None = None,
+        execution_id: str | None = None,
+    ):
+        return await self.notebook_consumer.create_note(
+            request, command_id=command_id, execution_id=execution_id,
+        )
 
 
     async def notebook_enterprise_recent(self, page_size: int = 100):
@@ -212,7 +220,11 @@ class KnowledgeRuntime:
                     body=parameters.get("body", ""),
                     idempotency_key=execution.idempotency_key,
                 )
-                result = await self.create_consumer_note(request)
+                result = await self.create_consumer_note(
+                    request,
+                    command_id=execution.command_id,
+                    execution_id=execution.execution_id,
+                )
             elif execution.action_id == "google.notebook.enterprise.create":
                 request = NotebookEnterpriseCreateRequest(
                     title=parameters["title"], idempotency_key=execution.idempotency_key,
