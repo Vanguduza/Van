@@ -22,8 +22,9 @@ async def test_google_migration_and_principal_hash(tmp_path):
     store = Store(str(tmp_path / "mesh.sqlite3"))
     await store.migrate()
     row = await store.fetchone("SELECT MAX(version) AS version FROM schema_migrations")
-    # 6 adds the Rev 1.3 Automation & Browser Fabric tables (§§152, 411).
-    assert row["version"] == SCHEMA_VERSION == 6
+    # 6 adds the Rev 1.3 Automation & Browser Fabric tables; 7-8 add
+    # resumable browser escalation and separately auditable owner-approved scope grants.
+    assert row["version"] == SCHEMA_VERSION == 8
     broker = GoogleIdentityBroker(store, GoogleCapabilityRegistry(registry_path()), ai_plan="PRO")
     status = await broker.register_principal(subject="owner-google-subject", ai_plan="PRO")
     assert status.registered is True
