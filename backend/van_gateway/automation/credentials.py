@@ -48,13 +48,33 @@ class CredentialAlias:
     admitted: bool = False
 
 
+#: Owner decision 2026-09-18 — alias name fragments that mark a payment
+#: instrument. These are refused at *every* class, including C4, because
+#: `docs/SECURITY_POLICY.md` §Payments says instruments are never stored rather
+#: than stored-under-a-stricter-class.
+_PAYMENT_ALIAS_MARKERS = (
+    "card", "payment", "paypal", "stripe", "adyen", "braintree", "checkout",
+    "wallet", "iban", "bank-account", "bank_account", "payout", "mollie",
+    "razorpay", "paystack", "flutterwave", "gocardless",
+)
+
+
 class CredentialResolver:
     """Resolves IR aliases to n8n credential identifiers under least privilege."""
 
     def __init__(self, aliases: dict[str, CredentialAlias] | None = None) -> None:
         self._aliases = dict(aliases or {})
 
+    @staticmethod
+    def _assert_not_payment_instrument(alias: CredentialAlias) -> None:
+        """No credential class permits a payment instrument in n8n (owner, 2026-09-18)."""
+        lowered = alias.alias.lower()
+        for marker in _PAYMENT_ALIAS_MARKERS:
+            if marker in lowered:
+                raise PolicyError(f"payment_instrument_credential_prohibited:{alias.alias}")
+
     def register(self, alias: CredentialAlias) -> CredentialAlias:
+        self._assert_not_payment_instrument(alias)
         if not alias.admitted and alias.credential_class in (
             CredentialClass.C3_SENSITIVE_INTEGRATION,
             CredentialClass.C4_LOW_RISK_INTEGRATION,

@@ -69,13 +69,17 @@ class BrowserPolicyEngine:
         return TIER_BY_POLICY_NAME.get(self.policy.max_autonomy_tier, AutonomyTier.L3_STAGEHAND_OBSERVE)
 
     def check_tier(self, tier: AutonomyTier) -> None:
-        """§§88, 378 — refuse anything above the admitted ceiling."""
+        """§§88, 378 — refuse anything above the admitted ceiling.
+
+        Since the owner's 2026-09-18 decision the ceiling is L5, so model-driven
+        action selection is permitted. What keeps it subordinate is not the tier
+        but the assignment bounds in `browser/subagent.py`: an autonomous run
+        without an assigned goal, domain scope and step budget cannot start.
+        """
         if tier.ordinal > self.max_tier.ordinal:
             raise BrowserPolicyError(
                 f"browser_autonomy_tier_not_permitted:{tier.value}>{self.max_tier.value}"
             )
-        if tier.model_selects_actions and self.max_tier.ordinal < 4:
-            raise BrowserPolicyError("browser_model_action_selection_requires_owner_amendment")
 
     # ------------------------------------------------------------- profiles
 

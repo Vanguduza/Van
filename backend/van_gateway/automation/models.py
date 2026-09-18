@@ -87,14 +87,37 @@ class WorkflowStepEffect(str, Enum):
     SECURITY = "SECURITY"
     FINANCIAL = "FINANCIAL"
     AUTHORITY = "AUTHORITY"
+    #: Owner decision 2026-09-18. Moving money is its own effect precisely so it
+    #: can never be smuggled in as an ordinary WRITE.
+    PAYMENT = "PAYMENT"
+    #: Persisting a card, bank detail, wallet or payment-provider token. Named so
+    #: the analyser can refuse it outright rather than relying on a credential check.
+    PAYMENT_INSTRUMENT_STORAGE = "PAYMENT_INSTRUMENT_STORAGE"
 
 
-#: §145 / config/automation/policy.yaml `prohibited_effects` — never compilable.
-PROHIBITED_EFFECTS = frozenset({WorkflowStepEffect.FINANCIAL, WorkflowStepEffect.AUTHORITY})
+#: §145 / config/automation/policy.yaml `prohibited_effects`, plus the owner's
+#: 2026-09-18 payment prohibition — never compilable into an automation.
+#: `docs/SECURITY_POLICY.md` §Payments: payment execution cannot be automated, and
+#: a payment instrument is never stored. Both are therefore uncompilable, not
+#: merely ungranted: no admission state and no owner approval makes a *workflow*
+#: able to pay. A payment happens as an A4 native action under a fresh approval.
+PROHIBITED_EFFECTS = frozenset(
+    {
+        WorkflowStepEffect.FINANCIAL,
+        WorkflowStepEffect.AUTHORITY,
+        WorkflowStepEffect.PAYMENT,
+        WorkflowStepEffect.PAYMENT_INSTRUMENT_STORAGE,
+    }
+)
 
 #: Effects that make a step a mutation, so it must declare a postcondition verifier.
 MUTATING_EFFECTS = frozenset(
     {WorkflowStepEffect.WRITE, WorkflowStepEffect.DELETE, WorkflowStepEffect.NOTIFY}
+)
+
+#: Effects that constitute moving money or retaining the means to.
+PAYMENT_EFFECTS = frozenset(
+    {WorkflowStepEffect.PAYMENT, WorkflowStepEffect.PAYMENT_INSTRUMENT_STORAGE}
 )
 
 

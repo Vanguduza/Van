@@ -112,14 +112,25 @@ async def test_task_inputs_may_not_contain_literal_secrets(tmp_path):
         )
 
 
-async def test_l4_task_refused_in_production(tmp_path):
-    """Rev 1.2 review M3 — the ladder cap is enforced at task creation."""
+async def test_l4_task_is_permitted_as_a_subagent(tmp_path):
+    """Owner decision 2026-09-18 — autonomy is allowed, bounded by its assignment.
+
+    Task creation no longer refuses L4; the bounds live in the subagent runner,
+    which is where an unbounded run is actually prevented.
+    """
     store, service = await _service(tmp_path)
-    with pytest.raises(BrowserPolicyError, match="tier_not_permitted"):
+    task = await service.create_task(
+        profile_alias="public_research", strategy=BrowserStrategy.STAGEHAND,
+        autonomy_tier=AutonomyTier.L4_STAGEHAND_ACT, action_class=ActionClass.A2,
+        target_domain="research.example.com", goal="find the report",
+    )
+    assert task.autonomy_tier is AutonomyTier.L4_STAGEHAND_ACT
+    # A4 is still outside the ladder entirely, autonomous or not.
+    with pytest.raises(BrowserPolicyError, match="action_class_prohibited"):
         await service.create_task(
             profile_alias="public_research", strategy=BrowserStrategy.STAGEHAND,
-            autonomy_tier=AutonomyTier.L4_STAGEHAND_ACT, action_class=ActionClass.A2,
-            target_domain="research.example.com", goal="click around",
+            autonomy_tier=AutonomyTier.L4_STAGEHAND_ACT, action_class=ActionClass.A4,
+            target_domain="research.example.com", goal="delete the account",
         )
 
 
@@ -257,7 +268,8 @@ async def test_stagehand_unconfigured_without_model_provider(tmp_path):
     assert status.ready is False
 
 
-async def test_stagehand_act_refused_below_ladder_cap(tmp_path):
+async def test_stagehand_act_refused_above_the_adapter_tier(tmp_path):
+    """An adapter configured below the ladder cap still refuses act/agent."""
     store, service = await _service(tmp_path)
     task = await service.create_task(
         profile_alias="public_research", strategy=BrowserStrategy.STAGEHAND,
@@ -267,11 +279,52 @@ async def test_stagehand_act_refused_below_ladder_cap(tmp_path):
     adapter = StagehandAdapter(
         ExternalRuntimeRegistry(store), base_url="http://127.0.0.1:9140", enabled=True,
         model_provider="anthropic", model_name="claude-sonnet-5",
+        max_tier=AutonomyTier.L3_STAGEHAND_OBSERVE,
     )
-    with pytest.raises(BrowserPolicyError, match="act_requires_owner_amendment"):
+    with pytest.raises(BrowserPolicyError, match="act_not_permitted"):
         await adapter.act(task, {"kind": "click"})
-    with pytest.raises(BrowserPolicyError, match="agent_requires_owner_amendment"):
-        await adapter.agent(task, "do the thing")
+    with pytest.raises(BrowserPolicyError, match="agent_not_permitted"):
+        await adapter.agent(task, "do the thing", max_steps=5,
+                            assignment_id="bsub_1", turn_id="turn-1")
+
+
+async def test_stagehand_agent_requires_a_bounded_budget(tmp_path):
+    """An L5 run without a step budget is an unbounded loop, so it is refused."""
+    store, service = await _service(tmp_path)
+    task = await service.create_task(
+        profile_alias="public_research", strategy=BrowserStrategy.STAGEHAND,
+        autonomy_tier=AutonomyTier.L5_STAGEHAND_AGENT, action_class=ActionClass.A2,
+        target_domain="research.example.com", goal="research",
+    )
+    adapter = StagehandAdapter(
+        ExternalRuntimeRegistry(store), base_url="http://127.0.0.1:9140", enabled=True,
+        model_provider="anthropic", model_name="claude-sonnet-5",
+    )
+    with pytest.raises(BrowserPolicyError, match="bounded_step_budget"):
+        await adapter.agent(task, "research", max_steps=0,
+                            assignment_id="bsub_1", turn_id="turn-1")
+    with pytest.raises(BrowserPolicyError, match="bounded_step_budget"):
+        await adapter.agent(task, "research", max_steps=500,
+                            assignment_id="bsub_1", turn_id="turn-1")
+
+
+async def test_stagehand_agent_refuses_a_payment_goal(tmp_path):
+    """Payments are never autonomous, at any tier."""
+    from van_gateway.automation.payments import PaymentBoundaryError
+
+    store, service = await _service(tmp_path)
+    task = await service.create_task(
+        profile_alias="public_research", strategy=BrowserStrategy.STAGEHAND,
+        autonomy_tier=AutonomyTier.L5_STAGEHAND_AGENT, action_class=ActionClass.A2,
+        target_domain="research.example.com", goal="shop",
+    )
+    adapter = StagehandAdapter(
+        ExternalRuntimeRegistry(store), base_url="http://127.0.0.1:9140", enabled=True,
+        model_provider="anthropic", model_name="claude-sonnet-5",
+    )
+    with pytest.raises(PaymentBoundaryError, match="automated_payment_prohibited"):
+        await adapter.agent(task, "complete the checkout and pay", max_steps=5,
+                            assignment_id="bsub_1", turn_id="turn-1")
 
 
 async def test_stagehand_envelope_pins_provider(tmp_path):

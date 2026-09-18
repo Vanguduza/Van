@@ -91,7 +91,8 @@ async def test_automation_health_states_t0_isolation(client):
 async def test_browser_health_reports_ladder_cap_and_scope(client):
     ac, _app = client
     body = (await ac.get("/v1/browser/health", headers=HEADERS)).json()
-    assert body["max_autonomy_tier"] == "L3"
+    # Owner decision 2026-09-18: autonomy permitted as a Hermes-managed subagent.
+    assert body["max_autonomy_tier"] == "L5"
     assert body["raw_cookie_export_forbidden"] is True
     assert body["harness"]["state"] != "READY"
     assert body["stagehand"]["state"] != "READY"

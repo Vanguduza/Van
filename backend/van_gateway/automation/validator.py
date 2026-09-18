@@ -26,6 +26,11 @@ from van_gateway.automation.models import (
     WorkflowStepEffect,
     strongest_class,
 )
+from van_gateway.automation.payments import (
+    PaymentBoundaryError,
+    assert_no_instrument,
+    assert_not_automated_payment,
+)
 from van_gateway.automation.policy import AutomationPolicy, PolicyError, load_automation_policy
 from van_gateway.models import ActionClass
 
@@ -72,6 +77,7 @@ class WorkflowValidator:
         order, graph_errors = self._check_graph(ir)
         errors.extend(graph_errors)
         errors.extend(self._check_effects(ir))
+        errors.extend(self._check_payment_boundary(ir))
         errors.extend(self._check_domains(ir))
         errors.extend(self._check_credentials(ir))
         errors.extend(self._check_limits(ir))
@@ -232,6 +238,44 @@ class WorkflowValidator:
                 errors.append(f"PROHIBITED_WORKFLOW:{step.step_id}")
             if WorkflowStepEffect.SECURITY in step.effects and step.action_class is ActionClass.A1:
                 errors.append(f"SECURITY_EFFECT_UNDERCLASSED:{step.step_id}")
+        return errors
+
+    def _check_payment_boundary(self, ir: WorkflowIR) -> list[str]:
+        """Owner decision 2026-09-18 — no automation path may move money.
+
+        Checked independently of the declared effect list: a step that omits the
+        PAYMENT effect but POSTs to a payment provider is still a payment.
+        """
+        errors: list[str] = []
+        for step in ir.steps:
+            try:
+                assert_not_automated_payment(
+                    operation=step.operation,
+                    url=str(step.input_bindings.get("url", "")),
+                    domain=step.external_domain or "",
+                    effects=list(step.effects),
+                    context=f"step:{step.step_id}",
+                )
+            except PaymentBoundaryError as exc:
+                errors.append(f"AUTOMATED_PAYMENT_PROHIBITED:{exc}")
+            try:
+                assert_no_instrument(step.input_bindings, context=f"step_inputs:{step.step_id}")
+            except PaymentBoundaryError as exc:
+                errors.append(f"PAYMENT_INSTRUMENT_PROHIBITED:{exc}")
+
+        try:
+            assert_not_automated_payment(goal=ir.semantic_goal, context="workflow_goal")
+        except PaymentBoundaryError as exc:
+            errors.append(f"AUTOMATED_PAYMENT_PROHIBITED:{exc}")
+        for domain in ir.external_domains:
+            try:
+                assert_not_automated_payment(domain=domain, context="declared_domain")
+            except PaymentBoundaryError as exc:
+                errors.append(f"AUTOMATED_PAYMENT_PROHIBITED:{exc}")
+        try:
+            assert_no_instrument(ir.variables, context="workflow_variables")
+        except PaymentBoundaryError as exc:
+            errors.append(f"PAYMENT_INSTRUMENT_PROHIBITED:{exc}")
         return errors
 
     def _check_domains(self, ir: WorkflowIR) -> list[str]:

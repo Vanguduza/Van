@@ -307,14 +307,16 @@ def test_browser_prompt_injection_is_assessed():
     assert assessment.value == "SUSPECTED_INJECTION"
 
 
-def test_production_ladder_capped_at_l3():
-    """Rev 1.2 review M3 — L4/L5 need an owner amendment first."""
+def test_production_ladder_permits_autonomy_as_a_subagent():
+    """Owner decision 2026-09-18 superseded the Rev 1.2 review's L3 cap.
+
+    What keeps autonomy subordinate is no longer the tier but the assignment
+    bounds in `browser/subagent.py` — see `test_browser_subagent.py`.
+    """
     engine = BrowserPolicyEngine()
-    assert engine.max_tier is AutonomyTier.L3_STAGEHAND_OBSERVE
-    engine.check_tier(AutonomyTier.L3_STAGEHAND_OBSERVE)
-    for tier in (AutonomyTier.L4_STAGEHAND_ACT, AutonomyTier.L5_STAGEHAND_AGENT):
-        with pytest.raises(BrowserPolicyError):
-            engine.check_tier(tier)
+    assert engine.max_tier is AutonomyTier.L5_STAGEHAND_AGENT
+    for tier in AutonomyTier:
+        engine.check_tier(tier)
 
 
 def test_browser_never_executes_a4_or_a5():

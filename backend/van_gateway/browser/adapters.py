@@ -20,6 +20,7 @@ from van_gateway.automation.external_runtime import (
     ExternalRuntimeStatus,
     RuntimeState,
 )
+from van_gateway.automation.payments import assert_not_automated_payment
 from van_gateway.browser.models import AutonomyTier, BrowserObservation, BrowserTask
 from van_gateway.browser.policy import BrowserPolicyError
 
@@ -209,7 +210,7 @@ class StagehandAdapter(_PrivateWorkerClient):
         expected_version: str | None = None,
         model_provider: str = "",
         model_name: str = "",
-        max_tier: AutonomyTier = AutonomyTier.L3_STAGEHAND_OBSERVE,
+        max_tier: AutonomyTier = AutonomyTier.L5_STAGEHAND_AGENT,
         timeout_seconds: float = 60.0,
         transport: httpx.AsyncBaseTransport | None = None,
     ) -> None:
@@ -261,16 +262,36 @@ class StagehandAdapter(_PrivateWorkerClient):
         )
 
     async def act(self, task: BrowserTask, action: dict[str, Any]) -> dict[str, Any]:
-        """L4. Refused unless the ladder cap has been raised by owner amendment."""
+        """L4 — one model-selected action, still refused above the ladder cap."""
         if self.max_tier.ordinal < AutonomyTier.L4_STAGEHAND_ACT.ordinal:
-            raise BrowserPolicyError("stagehand_act_requires_owner_amendment")
+            raise BrowserPolicyError("stagehand_act_not_permitted_at_current_tier")
+        assert_not_automated_payment(
+            operation=str(action.get("kind", "")), goal=str(action.get("instruction", "")),
+            url=str(action.get("url", "")), domain=task.target_domain, context="stagehand_act",
+        )
         return await self._call("/act", self._envelope(task, action=action))
 
-    async def agent(self, task: BrowserTask, goal: str) -> dict[str, Any]:
-        """L5. Same gate, and additionally bounded when it is ever enabled."""
+    async def agent(
+        self, task: BrowserTask, goal: str, *, max_steps: int, assignment_id: str, turn_id: str
+    ) -> dict[str, Any]:
+        """L5 — an assigned, bounded run.
+
+        The assignment is mandatory: a bare "go and do this" has no budget and no
+        attribution, which is the difference between a subagent and an independent
+        loop. `BrowserSubagentRunner` is the supported caller.
+        """
         if self.max_tier.ordinal < AutonomyTier.L5_STAGEHAND_AGENT.ordinal:
-            raise BrowserPolicyError("stagehand_agent_requires_owner_amendment")
-        return await self._call("/agent", self._envelope(task, goal=goal, max_steps=12))
+            raise BrowserPolicyError("stagehand_agent_not_permitted_at_current_tier")
+        if max_steps < 1 or max_steps > 50:
+            raise BrowserPolicyError("stagehand_agent_requires_bounded_step_budget")
+        assert_not_automated_payment(goal=goal, domain=task.target_domain, context="stagehand_agent")
+        return await self._call(
+            "/agent",
+            self._envelope(
+                task, goal=goal, max_steps=max_steps,
+                assignment_id=assignment_id, turn_id=turn_id,
+            ),
+        )
 
     async def status(self) -> ExternalRuntimeStatus:  # type: ignore[override]
         return await super().status("BROWSER_SEMANTIC_UNAVAILABLE")

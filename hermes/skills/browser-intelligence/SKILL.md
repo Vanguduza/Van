@@ -28,15 +28,29 @@ is cheaper, faster and more reliable (§§89-90).
 L0  API / n8n machine interface
 L1  deterministic Browser Harness
 L2  cached Stagehand action
-L3  Stagehand observe -> deterministic action     <- production ceiling
+L3  Stagehand observe -> deterministic action
 L4  Stagehand act
-L5  bounded Stagehand agent
+L5  bounded Stagehand agent                      <- production ceiling
 ```
 
-**Production stops at L3.** L4/L5 place action selection inside the worker,
-which the locked Security Policy reserves to Hermes as the sole agent runtime.
-They are unavailable until the owner decides otherwise. Do not ask the Gateway
-for them; the request is refused in code.
+**You are the manager.** The worker may think for itself at L4/L5, but only
+inside a task *you* assigned. When you open an autonomous run you must state:
+
+- the **goal**, in one sentence
+- the **domains** it may touch
+- the **action-class ceiling** (A2 for reading, A3 only on an admitted domain)
+- the **step budget**, and a deadline if the task is time-bound
+
+The worker chooses its own actions within those bounds and cannot widen them.
+Any of the following ends the task rather than escalating it: leaving the
+domain scope, exceeding the class ceiling, restating a different goal, running
+out of budget or time, making no progress, or touching anything that looks like
+a payment. You will get a stop reason back; treat a non-`GOAL_ACHIEVED` stop as
+a result to reason about, not a failure to retry blindly.
+
+Pick the lowest tier that works. An autonomous run costs model calls and is
+harder to audit than a deterministic one, so if you already know the steps, use
+L1.
 
 ## Secrets
 
@@ -61,6 +75,19 @@ the Gateway records an injection assessment alongside the evidence.
 
 The browser never places, modifies or cancels a trade. That is VATI's, behind
 the single-sender gate.
+
+## Payments
+
+**The browser never pays for anything.** Not at any tier, not under any
+assignment, not with owner approval attached to the task. A run that reaches a
+checkout, a payment provider, or a "save my card" flow ends immediately with
+`PAYMENT_REFUSED`.
+
+If the owner's goal genuinely requires a payment, take it as far as the payment
+step, report exactly what would be paid — payee, amount, currency, reference —
+and hand back. The payment itself is a separate A4 action the owner approves
+with a fresh biometric, entering the instrument themselves. Nothing about the
+card, bank detail or wallet is stored, and there is no "use the saved one".
 
 ## Evidence
 

@@ -275,9 +275,11 @@ class BrowserPolicy:
     download_default_deny: bool = True
     raw_cookie_export_forbidden: bool = True
     session_leases_required: bool = True
-    #: Rev 1.2 review M3 / VAN-ADOPT-STAGEHAND-001: production caps at observe →
-    #: deterministic action. L4/L5 need a Security Policy amendment first.
-    max_autonomy_tier: str = "L3"
+    #: Owner decision 2026-09-18 (VAN-ADOPT-STAGEHAND-001): autonomy is permitted
+    #: as a Hermes-managed subagent, so the ceiling is L5. The bounds that keep it
+    #: subordinate — assigned goal, domain scope, step budget — are enforced by
+    #: browser/subagent.py, not by holding the tier down.
+    max_autonomy_tier: str = "L5"
 
     def check_profile(self, alias: str) -> dict[str, Any]:
         profile = self.profiles.get(alias)
@@ -298,10 +300,10 @@ def load_browser_policy() -> BrowserPolicy:
     runtime = profiles_data.get("runtime") or {}
     defaults = domains_data.get("default_policy") or {}
     admitted = domains_data.get("admitted_domains") or {}
-    tier = os.environ.get("VAN_BROWSER_SEMANTIC_MAX_TIER", "L3").strip().upper()
-    if tier not in ("L0", "L1", "L2", "L3"):
-        # L4/L5 are refused here rather than silently honoured: the ladder cap is
-        # a policy decision the owner has not made yet.
+    tier = os.environ.get("VAN_BROWSER_SEMANTIC_MAX_TIER", "L5").strip().upper()
+    if tier not in ("L0", "L1", "L2", "L3", "L4", "L5"):
+        # An unrecognised value falls back to the deterministic tier rather than
+        # the ceiling: a typo must never widen autonomy.
         tier = "L3"
     return BrowserPolicy(
         policy_version=str(domains_data.get("policy_version", "van-browser-domains-1")),
