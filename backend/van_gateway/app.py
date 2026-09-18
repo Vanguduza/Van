@@ -28,7 +28,11 @@ from van_gateway.orchestrator import CommandOrchestrator
 from van_gateway.projects.router import ProjectRouter
 from van_gateway.reminders.service import ReminderService
 from van_gateway.reminders.timeparse import TimeParseError, parse_due_expression
+from van_gateway.automation.api import AutomationApi
 from van_gateway.automation.health import AutomationHealthApi
+from van_gateway.automation.registry import AutomationRegistry, HotWorkflowIndex
+from van_gateway.command.authority import CommandAuthorityService
+from van_gateway.command.standing import StandingAutomationAuthorityService
 from van_gateway.runtime_api import OwnerRuntimeApi
 from van_gateway.storage.db import Store
 from van_gateway.trading import TradingControlError, TradingService
@@ -129,6 +133,17 @@ def create_app() -> FastAPI:
     decisions = DecisionService(store, attention)
     owner_runtime = OwnerRuntimeApi(store, settings)
     automation_health = AutomationHealthApi(store, settings, degraded=degraded)
+    automation_registry = AutomationRegistry(store)
+    automation_hot_index = HotWorkflowIndex()
+    automation = AutomationApi(
+        store,
+        settings,
+        registry=automation_registry,
+        hot_index=automation_hot_index,
+        standing=StandingAutomationAuthorityService(
+            store, CommandAuthorityService(store)
+        ),
+    )
 
     trading = TradingService(
         settings.vati_ledger_path,
@@ -183,6 +198,9 @@ def create_app() -> FastAPI:
         await auth.load_persisted_secrets()
         await oauth_pending.migrate()
         await owner_runtime.startup()
+        # §273 — the HOT index is a cache of durable state, so it is rebuilt on
+        # every boot rather than trusted to survive a restart.
+        await automation_hot_index.rebuild(store)
         yield
 
     app = FastAPI(title="VAN Gateway", version="0.5.0-dev", lifespan=lifespan)
@@ -195,6 +213,9 @@ def create_app() -> FastAPI:
     app.state.orchestrator = orchestrator
     app.state.owner_runtime = owner_runtime
     app.state.automation_health = automation_health
+    app.state.automation = automation
+    app.state.automation_registry = automation_registry
+    app.state.automation_hot_index = automation_hot_index
     app.state.decisions = decisions
     app.state.projects = projects
     app.state.reminders = reminders
@@ -202,6 +223,7 @@ def create_app() -> FastAPI:
     app.state.onboarding = onboarding
     app.include_router(owner_runtime.router)
     app.include_router(automation_health.router)
+    app.include_router(automation.router)
 
     def internal_control_route(method: str, path: str) -> bool:
         if path.startswith("/v1/runtime/"):
@@ -209,6 +231,11 @@ def create_app() -> FastAPI:
         # Rev 1.3 §219 — automation/browser health is an internal control surface;
         # it exposes runtime identity and governance state, never an owner route.
         if path in {"/v1/automation/health", "/v1/browser/health"}:
+            return True
+        # §§219-222 — the whole automation control surface is Hermes-only. It never
+        # accepts owner ingress, so a compromised ingress token cannot compile,
+        # admit or publish a capability.
+        if path.startswith("/v1/automation/"):
             return True
         if method == "PUT" and path.startswith("/v1/projects/") and path.endswith("/truth"):
             return True
