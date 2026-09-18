@@ -7,7 +7,7 @@ import subprocess
 import time
 from urllib.parse import quote
 
-ROLE_STMT = "CREATE ROLE vati LOGIN PASSWORD '__VATI_LEDGER_PASSWORD__' NOSUPERUSER NOCREATEDB NOCREATEROLE;"
+ADMIN_ROLE = "supabase_admin"\nROLE_STMT = "CREATE ROLE vati LOGIN PASSWORD '__VATI_LEDGER_PASSWORD__' NOSUPERUSER NOCREATEDB NOCREATEROLE;"
 
 def load_env(path):
     out = {}
@@ -81,7 +81,7 @@ def main():
     sql = build_sql(template, password)
     wait_for_db(args.container)
     applied = subprocess.run(
-        ["docker", "exec", "-i", args.container, "psql", "-U", "postgres", "-d", "postgres",
+        ["docker", "exec", "-i", args.container, "psql", "-U", ADMIN_ROLE, "-d", "postgres",
          "-v", "ON_ERROR_STOP=1"],
         input=sql, text=True, stdout=subprocess.PIPE, stderr=subprocess.PIPE,
     )
