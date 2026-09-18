@@ -1,7 +1,7 @@
 {
   "schema": "van-implementation-matrix/1",
   "mission": "VAN Unified Personal Intelligence + Cognitive Symbiosis (Rev 1 / Rev 1.1)",
-  "phase": "PHASE_13_ANDROID_DATA_LAYER",
+  "phase": "PHASE_14_BACKEND_COMPLETE_ANDROID_PARTIAL",
   "generated_against": {
     "main_sha": "f8c3fcc9b4d346c7b59ed128cfdbe63bceab3dc0",
     "blueprint_sha": "e09765d70d6a6a3172141a3dc9710362d2554d26",
@@ -19,8 +19,7 @@
     "finding": "Every gpt/* implementation branch is an ancestor of main. No unique required implementation is stranded on any branch, so \u00a752's post-merge certification already holds for them."
   },
   "counts": {
-    "BUILT": 32,
-    "ABSENT": 1,
+    "BUILT": 33,
     "EXISTS_UPGRADE": 1,
     "PARTIAL_BUILT": 1,
     "EXTERNAL_GATED": 1
@@ -228,8 +227,8 @@
     {
       "id": "WS23",
       "name": "Relationship calibration",
-      "status": "ABSENT",
-      "note": "",
+      "status": "BUILT",
+      "note": "RelationshipCalibrationEngine. \u00a727's invariant is structural: the Calibration dataclass has no field that could relax a verification requirement or evidence bar, and a test asserts the field set. Consequence sets a floor the relationship cannot lower; corrections raise the challenge mode rather than softening it.",
       "prompt_refs": [
         "\u00a727"
       ]
