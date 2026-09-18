@@ -8,7 +8,7 @@ from typing import Any, AsyncIterator
 
 import aiosqlite
 
-SCHEMA_VERSION = 9
+SCHEMA_VERSION = 10
 
 MIGRATIONS: dict[int, str] = {
     1: """
@@ -770,6 +770,96 @@ MIGRATIONS: dict[int, str] = {
 
     CREATE INDEX IF NOT EXISTS idx_automation_generation_time
       ON automation_generation_telemetry(recorded_at_ms);
+    """,
+    10: """
+    -- Rev 1 §§3, 5, 34, 46 — Mission Core. The single owner-visible unit of work.
+
+    -- §3.1. Additive only: no existing subsystem table is altered or dropped, so
+    -- browser tasks, automation runs and Google jobs keep their own state and are
+    -- referenced from mission_activities rather than absorbed into it.
+    CREATE TABLE IF NOT EXISTS missions (
+      mission_id TEXT PRIMARY KEY,
+      owner_principal_id TEXT NOT NULL,
+      project_id TEXT,
+      origin TEXT NOT NULL,
+      origin_channel TEXT NOT NULL,
+      title TEXT NOT NULL,
+      goal TEXT NOT NULL,
+      success_contract_json TEXT NOT NULL DEFAULT '{}',
+      constraints_json TEXT NOT NULL DEFAULT '[]',
+      authority_envelope_json TEXT NOT NULL DEFAULT '{}',
+      sensitivity TEXT NOT NULL DEFAULT 'ROUTINE',
+      context_snapshot_id TEXT,
+      state TEXT NOT NULL DEFAULT 'CAPTURED',
+      priority INTEGER NOT NULL DEFAULT 50,
+      created_at_ms INTEGER NOT NULL,
+      updated_at_ms INTEGER NOT NULL,
+      deadline_ms INTEGER,
+      attention_policy TEXT NOT NULL DEFAULT 'NORMAL',
+      plan_revision INTEGER NOT NULL DEFAULT 0,
+      current_phase TEXT,
+      parent_mission_id TEXT,
+      final_outcome TEXT,
+      verification_state TEXT NOT NULL DEFAULT 'PENDING',
+      verification_record_json TEXT,
+      learning_record_id TEXT,
+      FOREIGN KEY(parent_mission_id) REFERENCES missions(mission_id)
+    );
+
+    CREATE INDEX IF NOT EXISTS idx_missions_state
+      ON missions(state, updated_at_ms);
+    CREATE INDEX IF NOT EXISTS idx_missions_owner_project
+      ON missions(owner_principal_id, project_id, updated_at_ms);
+
+    -- §5. Modular execution under one mission. `executor_ref` points at the
+    -- specialist row (browser_tasks.task_id, automation_runs.run_id, ...) so the
+    -- subsystem stays authoritative for its own execution detail.
+    CREATE TABLE IF NOT EXISTS mission_activities (
+      activity_id TEXT PRIMARY KEY,
+      mission_id TEXT NOT NULL,
+      activity_type TEXT NOT NULL,
+      capability_id TEXT NOT NULL,
+      executor TEXT NOT NULL,
+      executor_ref TEXT,
+      input_contract_json TEXT NOT NULL DEFAULT '{}',
+      authority_ref TEXT,
+      state TEXT NOT NULL DEFAULT 'PENDING',
+      attempt INTEGER NOT NULL DEFAULT 1,
+      started_at_ms INTEGER NOT NULL,
+      ended_at_ms INTEGER,
+      dependency_activity_ids_json TEXT NOT NULL DEFAULT '[]',
+      checkpoint_ref TEXT,
+      error_class TEXT,
+      retry_policy TEXT NOT NULL DEFAULT 'NONE',
+      verification_contract_json TEXT NOT NULL DEFAULT '{}',
+      FOREIGN KEY(mission_id) REFERENCES missions(mission_id)
+    );
+
+    CREATE INDEX IF NOT EXISTS idx_mission_activities_mission
+      ON mission_activities(mission_id, started_at_ms);
+    CREATE INDEX IF NOT EXISTS idx_mission_activities_executor_ref
+      ON mission_activities(executor, executor_ref);
+
+    -- §34. The owner-visible timeline. Raw provider logs stay in their own
+    -- tables and are technical drill-down; this is what the Activity page reads.
+    CREATE TABLE IF NOT EXISTS mission_events (
+      event_id TEXT PRIMARY KEY,
+      mission_id TEXT NOT NULL,
+      activity_id TEXT,
+      event_type TEXT NOT NULL,
+      actor TEXT NOT NULL,
+      occurred_at_ms INTEGER NOT NULL,
+      severity TEXT NOT NULL DEFAULT 'INFO',
+      owner_visibility INTEGER NOT NULL DEFAULT 1,
+      summary TEXT NOT NULL DEFAULT '',
+      evidence_ref TEXT,
+      FOREIGN KEY(mission_id) REFERENCES missions(mission_id)
+    );
+
+    CREATE INDEX IF NOT EXISTS idx_mission_events_mission
+      ON mission_events(mission_id, occurred_at_ms);
+    CREATE INDEX IF NOT EXISTS idx_mission_events_owner_feed
+      ON mission_events(owner_visibility, occurred_at_ms);
     """,
 }
 

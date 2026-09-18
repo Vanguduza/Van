@@ -1,0 +1,356 @@
+{
+  "schema": "van-implementation-matrix/1",
+  "mission": "VAN Unified Personal Intelligence + Cognitive Symbiosis (Rev 1 / Rev 1.1)",
+  "phase": "PHASE_0_COMPLETE",
+  "generated_against": {
+    "main_sha": "f8c3fcc9b4d346c7b59ed128cfdbe63bceab3dc0",
+    "blueprint_sha": "e09765d70d6a6a3172141a3dc9710362d2554d26",
+    "blueprint_path": "docs/VAN_UNIFIED_PERSONAL_INTELLIGENCE_IMPROVEMENT_BLUEPRINT_REV_1.md",
+    "blueprint_lines": 3236,
+    "schema_version_on_main": 8
+  },
+  "wip_audit": {
+    "method": "git rev-list --count origin/main..<branch> for every remote branch",
+    "branches_with_unique_commits": {
+      "claude/integration-plan-review-369mxs": 3,
+      "gpt/van-unified-intelligence-improvements-rev1-20260918": 2
+    },
+    "branches_fully_merged": 11,
+    "finding": "Every gpt/* implementation branch is an ancestor of main. No unique required implementation is stranded on any branch, so \u00a752's post-merge certification already holds for them."
+  },
+  "counts": {
+    "ABSENT": 20,
+    "PARTIAL_ADJACENT": 11,
+    "EXISTS_UPGRADE": 3,
+    "EXISTS_SATISFIED": 1,
+    "EXTERNAL_GATED": 1
+  },
+  "workstreams": [
+    {
+      "id": "WS1",
+      "name": "Mission Core (MissionService, state machine)",
+      "status": "ABSENT",
+      "note": "No missions/mission_activities/mission_events tables and no Mission entity. knowledge/vekl.py:71 already declares '/v1/missions/{mission_id}/vekl' as its endpoint contract, so VEKL calls a surface that was never built.",
+      "prompt_refs": [
+        "\u00a75",
+        "WS1"
+      ]
+    },
+    {
+      "id": "WS2",
+      "name": "Success contracts and verification",
+      "status": "PARTIAL_ADJACENT",
+      "note": "automation/verifier.py implements postcondition verification for workflow runs and action/models.py has VerifierType. Neither is mission-scoped; no success_contract exists.",
+      "prompt_refs": [
+        "\u00a76"
+      ]
+    },
+    {
+      "id": "WS3",
+      "name": "Capability Registry (canonical)",
+      "status": "PARTIAL_ADJACENT",
+      "note": "TWO subsystem registries already exist: automation_capabilities (workflow-scoped) and google/mesh.py GoogleCapabilityRegistry. A third canonical registry must subsume them rather than become a third source of truth. This is the largest reconciliation risk.",
+      "prompt_refs": [
+        "\u00a77"
+      ]
+    },
+    {
+      "id": "WS4",
+      "name": "Capability Router / cognitive compression",
+      "status": "PARTIAL_ADJACENT",
+      "note": "automation/router.py CapabilityRouter exists but routes only automation media (NATIVE/N8N_HOT/WARM/COLD/browser). Name collision with the general router is a real hazard.",
+      "prompt_refs": [
+        "\u00a78"
+      ]
+    },
+    {
+      "id": "WS5",
+      "name": "Context Compiler / ContextPacket",
+      "status": "PARTIAL_ADJACENT",
+      "note": "context/ has service.py + retrieval.py (Rev 3.1 ContextSnapshot, deterministic lexical + graph retrieval). ContextPacket, token budget and cross-project isolation are absent.",
+      "prompt_refs": [
+        "\u00a79"
+      ]
+    },
+    {
+      "id": "WS6",
+      "name": "Memory taxonomy (10 stores)",
+      "status": "PARTIAL_ADJACENT",
+      "note": "owner_facts, owner_context_edges, project_truth_cache, research_evidence and VEKL exist. Owner Cognitive Model, Strategic, Procedural, Anti-pattern, Shared Vocabulary, Intent Continuity are absent.",
+      "prompt_refs": [
+        "\u00a710"
+      ]
+    },
+    {
+      "id": "WS7",
+      "name": "Owner Cognitive Model",
+      "status": "ABSENT",
+      "note": "No table, no service, no Android surface.",
+      "prompt_refs": [
+        "\u00a711"
+      ]
+    },
+    {
+      "id": "WS8",
+      "name": "Decision fingerprints",
+      "status": "ABSENT",
+      "note": "decisions table records the decision, not the reasoning around it.",
+      "prompt_refs": [
+        "\u00a712"
+      ]
+    },
+    {
+      "id": "WS9",
+      "name": "Critical Reasoning Kernel",
+      "status": "ABSENT",
+      "note": "No solver/critic/verifier separation anywhere.",
+      "prompt_refs": [
+        "\u00a713"
+      ]
+    },
+    {
+      "id": "WS10",
+      "name": "Fact/inference/preference separation",
+      "status": "PARTIAL_ADJACENT",
+      "note": "EpistemicState + SourceTrust already enforce MODEL_DERIVED/INFERRED on Hermes writes (runtime_api.py). The 9-class semantic vocabulary is a superset of what exists.",
+      "prompt_refs": [
+        "\u00a714"
+      ]
+    },
+    {
+      "id": "WS11",
+      "name": "Assumption Ledger",
+      "status": "ABSENT",
+      "note": "",
+      "prompt_refs": [
+        "\u00a715"
+      ]
+    },
+    {
+      "id": "WS12",
+      "name": "Counterfactual engine",
+      "status": "ABSENT",
+      "note": "",
+      "prompt_refs": [
+        "\u00a716"
+      ]
+    },
+    {
+      "id": "WS13",
+      "name": "Adversarial self-review / anti-sycophancy",
+      "status": "ABSENT",
+      "note": "Metrics in \u00a717 (unsupported_agreement_rate <1%) need a labelled benchmark set that does not exist. Unmeasurable until ground truth is authored.",
+      "prompt_refs": [
+        "\u00a717"
+      ]
+    },
+    {
+      "id": "WS14",
+      "name": "Cognitive complement map",
+      "status": "ABSENT",
+      "note": "",
+      "prompt_refs": [
+        "\u00a718"
+      ]
+    },
+    {
+      "id": "WS15",
+      "name": "Shared vocabulary registry",
+      "status": "ABSENT",
+      "note": "",
+      "prompt_refs": [
+        "\u00a719"
+      ]
+    },
+    {
+      "id": "WS16",
+      "name": "Intent continuity graph",
+      "status": "ABSENT",
+      "note": "",
+      "prompt_refs": [
+        "\u00a720"
+      ]
+    },
+    {
+      "id": "WS17",
+      "name": "Strategic memory",
+      "status": "ABSENT",
+      "note": "",
+      "prompt_refs": [
+        "\u00a721"
+      ]
+    },
+    {
+      "id": "WS18",
+      "name": "External reality model",
+      "status": "PARTIAL_ADJACENT",
+      "note": "research/ (Exa) supplies external evidence but there is no persistent world model.",
+      "prompt_refs": [
+        "\u00a722"
+      ]
+    },
+    {
+      "id": "WS19",
+      "name": "AI Evolution Radar",
+      "status": "ABSENT",
+      "note": "trading/architecture/stack_lock.json governs adoption today; the radar must feed it, not bypass it.",
+      "prompt_refs": [
+        "\u00a723"
+      ]
+    },
+    {
+      "id": "WS20",
+      "name": "VAN-specific benchmarking",
+      "status": "ABSENT",
+      "note": "",
+      "prompt_refs": [
+        "\u00a724"
+      ]
+    },
+    {
+      "id": "WS21",
+      "name": "Strategy learning",
+      "status": "ABSENT",
+      "note": "automation/telemetry.py (this branch) measures the HOT/WARM/COLD ladder and is the natural substrate for ExecutionStrategyRecord.",
+      "prompt_refs": [
+        "\u00a725"
+      ]
+    },
+    {
+      "id": "WS22",
+      "name": "Symbiotic growth ledger",
+      "status": "ABSENT",
+      "note": "",
+      "prompt_refs": [
+        "\u00a726"
+      ]
+    },
+    {
+      "id": "WS23",
+      "name": "Relationship calibration",
+      "status": "ABSENT",
+      "note": "",
+      "prompt_refs": [
+        "\u00a727"
+      ]
+    },
+    {
+      "id": "WS24",
+      "name": "Challenge modes",
+      "status": "ABSENT",
+      "note": "",
+      "prompt_refs": [
+        "\u00a728"
+      ]
+    },
+    {
+      "id": "WS25",
+      "name": "Attention Engine 2.0",
+      "status": "EXISTS_UPGRADE",
+      "note": "attention/engine.py + attention table exist with upsert/dedupe/quiet-hours/snooze. Scoring fields (novelty, interruption_cost, actionability) are the delta.",
+      "prompt_refs": [
+        "\u00a729"
+      ]
+    },
+    {
+      "id": "WS26",
+      "name": "Proactive missions + S0-S5 autonomy",
+      "status": "ABSENT",
+      "note": "Depends on WS1. Standing automation authority (command/standing.py) is the closest existing analogue and already forbids A4 as standing.",
+      "prompt_refs": [
+        "\u00a730"
+      ]
+    },
+    {
+      "id": "WS27",
+      "name": "Domain trust calibration",
+      "status": "ABSENT",
+      "note": "automation/workflow_health.py (this branch) already models per-version trust decay and penalises false success; DomainTrust is the same shape one level up.",
+      "prompt_refs": [
+        "\u00a731"
+      ]
+    },
+    {
+      "id": "WS28",
+      "name": "Voice 2.0",
+      "status": "EXISTS_UPGRADE",
+      "note": "Wake pipeline, 'hie van' pre-rendered ack, PersonalSpeechModel, second-pass ASR fusion and signed transcript provenance all exist. Mission binding is the delta.",
+      "prompt_refs": [
+        "\u00a732"
+      ]
+    },
+    {
+      "id": "WS29",
+      "name": "Unified Android experience (6 surfaces)",
+      "status": "EXISTS_UPGRADE",
+      "note": "PR #37 already delivered summary-first drill-down. Home/Van/Missions/Needs You/Activity/Understanding as canonical top-level surfaces is the delta.",
+      "prompt_refs": [
+        "\u00a733",
+        "\u00a748"
+      ]
+    },
+    {
+      "id": "WS30",
+      "name": "Unified activity and evidence",
+      "status": "PARTIAL_ADJACENT",
+      "note": "events table + browser_evidence + action_receipts + audit exist per subsystem. Normalized MissionEvent across all of them is absent.",
+      "prompt_refs": [
+        "\u00a734"
+      ]
+    },
+    {
+      "id": "WS31",
+      "name": "Unified decisions",
+      "status": "EXISTS_SATISFIED",
+      "note": "DecisionService is already the single approval path; browser escalation routes through it and Android resolves through it. \u00a735's 'no duplicated provider-specific approval system' holds.",
+      "prompt_refs": [
+        "\u00a735"
+      ]
+    },
+    {
+      "id": "WS32",
+      "name": "Privacy / permission registry",
+      "status": "PARTIAL_ADJACENT",
+      "note": "capability_grants + google_connections exist; no owner-readable unified registry with origin/expiry/last-use/revoke.",
+      "prompt_refs": [
+        "\u00a736"
+      ]
+    },
+    {
+      "id": "WS33",
+      "name": "Durable orchestration (Temporal)",
+      "status": "EXTERNAL_GATED",
+      "note": "Temporal is stack-locked at adoption phase 11 and NOT deployed. automation/router.py already routes critical_durable to TEMPORAL with an honest 'not yet built' detail.",
+      "prompt_refs": [
+        "\u00a737"
+      ]
+    },
+    {
+      "id": "WS34",
+      "name": "Computer Interaction Fabric",
+      "status": "PARTIAL_ADJACENT",
+      "note": "Browser Fabric exists with typed ops and the exact 4 boundary-escalation states \u00a738 specifies; owner-approved deltas already create separate durable authorizations (browser_scope_authorizations). Generalising beyond the browser is the delta.",
+      "prompt_refs": [
+        "\u00a738"
+      ]
+    },
+    {
+      "id": "WS35",
+      "name": "Development missions",
+      "status": "PARTIAL_ADJACENT",
+      "note": "Project Truth protocol + CI + acceptance ledgers exist; not modelled as Missions.",
+      "prompt_refs": [
+        "\u00a739"
+      ]
+    },
+    {
+      "id": "WS36",
+      "name": "VanEval",
+      "status": "ABSENT",
+      "note": "Several \u00a741 targets are unmeasurable without an authored ground-truth set.",
+      "prompt_refs": [
+        "\u00a740"
+      ]
+    }
+  ]
+}
