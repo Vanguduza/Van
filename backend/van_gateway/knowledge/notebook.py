@@ -14,6 +14,10 @@ import httpx
 from cryptography.hazmat.primitives import hashes, serialization
 from cryptography.hazmat.primitives.asymmetric import padding
 
+from van_gateway.browser.adapters import BrowserAdapterError, HttpBrowserHarnessAdapter, StagehandAdapter
+from van_gateway.browser.models import AutonomyTier, BrowserStrategy, BrowserTask, BrowserTaskStatus, PageLease
+from van_gateway.browser.service import BrowserTaskService
+from van_gateway.models import ActionClass
 from van_gateway.knowledge.evidence import KnowledgeEvidenceStore
 from van_gateway.knowledge.models import (
     KnowledgeOperationStatus,
@@ -567,101 +571,175 @@ class NotebookEnterpriseProvider:
 
 
 class NotebookConsumerProvider:
-    """Deterministic browser bridge for the owner's personal NotebookLM session.
+    """Personal NotebookLM provider routed through the canonical Browser Fabric.
 
-    No cookies are exported. A persistent Chromium profile is used in place and
-    every mutation is followed by UI readback. DOM changes fail closed.
+    Browser Harness owns deterministic navigation/session control and Stagehand
+    supplies bounded semantic interaction. The provider never launches Chromium,
+    exports cookies, or owns a second browser stack.
     """
 
-    def __init__(self, store: Store, evidence: KnowledgeEvidenceStore, *, enabled: bool,
-                 profile_dir: str, base_url: str = "https://notebooklm.google.com",
-                 headless: bool = True, timeout_seconds: float = 20.0) -> None:
+    DOMAIN = "notebooklm.google.com"
+
+    def __init__(
+        self,
+        store: Store,
+        evidence: KnowledgeEvidenceStore,
+        *,
+        enabled: bool,
+        browser_tasks: BrowserTaskService | None = None,
+        harness: HttpBrowserHarnessAdapter | None = None,
+        stagehand: StagehandAdapter | None = None,
+        profile_alias: str = "authenticated_owner",
+        profile_secret_ref: str = "secretref://browser/google-primary",
+        base_url: str = "https://notebooklm.google.com",
+        timeout_seconds: float = 20.0,
+        **_legacy: Any,
+    ) -> None:
         self.store = store
         self.evidence = evidence
         self.enabled = enabled
-        self.profile_dir = profile_dir.strip()
+        self.browser_tasks = browser_tasks
+        self.harness = harness
+        self.stagehand = stagehand
+        self.profile_alias = profile_alias.strip()
+        self.profile_secret_ref = profile_secret_ref.strip()
         self.base_url = base_url.rstrip("/")
-        self.headless = headless
-        self.timeout_ms = int(timeout_seconds * 1000)
+        self.timeout_seconds = timeout_seconds
         self.operations = NotebookOperationStore(store)
 
     async def status(self) -> ProviderStatus:
         certification = await self.evidence.certification(KnowledgeProvider.NOTEBOOK_CONSUMER)
+        configured = bool(
+            self.profile_alias
+            and self.browser_tasks is not None
+            and self.harness is not None
+            and self.stagehand is not None
+            and self.harness.configured
+            and self.stagehand.configured
+        )
         if not self.enabled:
             state = ProviderState.DISABLED
-        elif not self.profile_dir:
+        elif not configured:
             state = ProviderState.UNCONFIGURED
         elif certification and certification["state"] == ProviderState.READY.value:
             state = ProviderState.READY
         else:
             state = ProviderState.CONFIGURED
         return ProviderStatus(
-            provider=KnowledgeProvider.NOTEBOOK_CONSUMER, state=state,
-            credential_locus="owner-consumer-session-profile",
+            provider=KnowledgeProvider.NOTEBOOK_CONSUMER,
+            state=state,
+            credential_locus="browser-fabric-managed-owner-profile",
             evidence_pointer=certification["evidence_pointer"] if certification else None,
-            details={"cookie_export_allowed": False, "persistent_profile": bool(self.profile_dir),
-                     "readback_required": True, "automatic_owner_truth_promotion": False},
+            details={
+                "cookie_export_allowed": False,
+                "persistent_profile": bool(self.profile_alias),
+                "browser_transport": "BrowserHarness+Stagehand",
+                "direct_playwright": False,
+                "readback_required": True,
+                "automatic_owner_truth_promotion": False,
+            },
         )
 
-    async def _browser(self):
+    def _require_transport(self) -> tuple[BrowserTaskService, HttpBrowserHarnessAdapter, StagehandAdapter]:
         if not self.enabled:
             raise NotebookProviderError("notebook_consumer_disabled")
-        if not self.profile_dir:
+        if not self.profile_alias:
             raise NotebookProviderError("notebook_consumer_profile_unconfigured")
+        if self.browser_tasks is None or self.harness is None or self.stagehand is None:
+            raise NotebookProviderError("notebook_consumer_browser_fabric_unconfigured")
+        if not self.harness.configured or not self.stagehand.configured:
+            raise NotebookProviderError("notebook_consumer_browser_fabric_unconfigured")
+        return self.browser_tasks, self.harness, self.stagehand
+
+    async def _open_task(
+        self, *, goal: str, mutating: bool, action_class: ActionClass
+    ) -> tuple[BrowserTask, PageLease]:
+        tasks, _harness, _stagehand = self._require_transport()
+        await tasks.broker.register_profile(
+            profile_alias=self.profile_alias,
+            secret_ref=self.profile_secret_ref or None,
+        )
+        task = await tasks.create_task(
+            profile_alias=self.profile_alias,
+            strategy=BrowserStrategy.STAGEHAND,
+            autonomy_tier=AutonomyTier.L4_STAGEHAND_ACT,
+            action_class=action_class,
+            target_domain=self.DOMAIN,
+            goal=goal,
+            mutating=mutating,
+            inputs={"provider": "notebook_consumer"},
+        )
+        lease = await tasks.broker.acquire_lease(
+            profile_alias=self.profile_alias,
+            task_id=task.task_id,
+            ttl_seconds=max(30, int(self.timeout_seconds * 3)),
+        )
+        return task, lease
+
+    async def _close_task(
+        self,
+        task: BrowserTask,
+        lease: PageLease,
+        *,
+        status: BrowserTaskStatus,
+        error_code: str | None = None,
+    ) -> None:
+        tasks, _harness, _stagehand = self._require_transport()
         try:
-            from playwright.async_api import async_playwright
-        except ImportError as exc:
-            raise NotebookProviderError("playwright_unavailable") from exc
-        p = await async_playwright().start()
+            await tasks.complete(task_id=task.task_id, status=status, error_code=error_code)
+        finally:
+            await tasks.broker.release_lease(lease)
+
+    async def _navigate(self, task: BrowserTask, notebook_id: str) -> None:
+        _tasks, harness, _stagehand = self._require_transport()
         try:
-            context = await p.chromium.launch_persistent_context(
-                user_data_dir=str(Path(self.profile_dir).expanduser()), headless=self.headless,
+            await harness.navigate(
+                task,
+                f"{self.base_url}/notebook/{quote(notebook_id)}",
             )
-        except Exception as exc:
-            await p.stop()
-            raise NotebookProviderError("notebook_consumer_browser_unavailable") from exc
-        return p, context
+            info = await harness.page_info(task)
+        except BrowserAdapterError as exc:
+            raise NotebookProviderError(f"notebook_consumer_browser_harness:{exc.code}") from exc
+        url = str(info.get("url", ""))
+        if "accounts.google." in url:
+            raise NotebookProviderError("notebook_consumer_session_auth_required")
 
     async def ask(self, request: NotebookConsumerAskRequest) -> NotebookGroundedAnswer:
-        p, context = await self._browser()
-        page = context.pages[0] if context.pages else await context.new_page()
         query_id = str(uuid.uuid4())
+        task, lease = await self._open_task(
+            goal=f"Ask NotebookLM a grounded question in notebook {request.notebook_id}",
+            mutating=False,
+            action_class=ActionClass.A2,
+        )
         try:
-            await page.goto(f"{self.base_url}/notebook/{quote(request.notebook_id)}", wait_until="domcontentloaded", timeout=self.timeout_ms)
-            await page.wait_for_timeout(800)
-            if "accounts.google." in page.url or await page.get_by_text(re.compile(r"^sign in$", re.I)).count():
+            await self._navigate(task, request.notebook_id)
+            _tasks, _harness, stagehand = self._require_transport()
+            try:
+                await stagehand.act(
+                    task,
+                    {
+                        "kind": "notebook_ask",
+                        "instruction": "Ask the notebook this exact question and wait for its grounded answer.",
+                        "question": request.question,
+                    },
+                )
+                observation = await stagehand.extract(
+                    task,
+                    "Read the newest NotebookLM grounded answer. Do not infer missing text.",
+                    {
+                        "type": "object",
+                        "properties": {
+                            "answer": {"type": "string"},
+                            "auth_required": {"type": "boolean"},
+                        },
+                        "required": ["answer"],
+                    },
+                )
+            except (BrowserAdapterError, BrowserPolicyError) as exc:
+                raise NotebookProviderError(f"notebook_consumer_stagehand:{exc}") from exc
+            if observation.extraction.get("auth_required"):
                 raise NotebookProviderError("notebook_consumer_session_auth_required")
-            prompt = page.get_by_role("textbox", name=re.compile(r"ask|question|chat|prompt", re.I))
-            if await prompt.count() == 0:
-                prompt = page.locator('textarea[placeholder*="ask" i], input[placeholder*="ask" i], textarea[placeholder*="question" i]')
-            if await prompt.count() == 0:
-                raise NotebookProviderError("notebook_consumer_prompt_control_not_found")
-            selectors = (
-                '[data-message-author="assistant"]',
-                '[data-testid*="response" i]',
-                '[class*="response-content" i]',
-                '[class*="chat-response" i]',
-            )
-            before: dict[str, int] = {}
-            for selector in selectors:
-                before[selector] = await page.locator(selector).count()
-            await prompt.last.fill(request.question)
-            await prompt.last.press("Enter")
-            deadline = time.monotonic() + (self.timeout_ms / 1000.0)
-            answer = ""
-            while time.monotonic() < deadline:
-                await page.wait_for_timeout(400)
-                for selector in selectors:
-                    nodes = page.locator(selector)
-                    count = await nodes.count()
-                    if count <= before[selector]:
-                        continue
-                    candidate = (await nodes.last.inner_text()).strip()
-                    if candidate and candidate.casefold() != request.question.casefold() and len(candidate) >= 2:
-                        answer = candidate
-                        break
-                if answer:
-                    break
+            answer = str(observation.extraction.get("answer", "")).strip()
             if not answer:
                 raise NotebookProviderError("notebook_consumer_answer_readback_failed")
             pointer = f"google://notebook-consumer/{request.notebook_id}/query/{query_id}"
@@ -674,8 +752,14 @@ class NotebookConsumerProvider:
                 scope=request.scope,
                 content={"notebook_id": request.notebook_id, "question": request.question, "answer": answer},
                 snippet=answer,
-                metadata={"operation": "GROUNDED_ASK", "browser_readback": True},
+                metadata={
+                    "operation": "GROUNDED_ASK",
+                    "browser_readback": True,
+                    "browser_task_id": task.task_id,
+                    "transport": "BrowserHarness+Stagehand",
+                },
             )
+            await self._close_task(task, lease, status=BrowserTaskStatus.COMPLETED)
             return NotebookGroundedAnswer(
                 query_id=query_id,
                 notebook_id=request.notebook_id,
@@ -683,9 +767,11 @@ class NotebookConsumerProvider:
                 answer=answer,
                 evidence_pointer=pointer,
             )
-        finally:
-            await context.close()
-            await p.stop()
+        except Exception as exc:
+            await self._close_task(
+                task, lease, status=BrowserTaskStatus.FAILED, error_code=type(exc).__name__
+            )
+            raise
 
     async def certify(self, request: NotebookConsumerAskRequest) -> ProviderStatus:
         result = await self.ask(request)
@@ -693,90 +779,193 @@ class NotebookConsumerProvider:
             KnowledgeProvider.NOTEBOOK_CONSUMER,
             ProviderState.READY,
             evidence_pointer=result.evidence_pointer,
-            details={"notebook_id": request.notebook_id, "grounded_ask": True, "contains_secrets": False},
+            details={
+                "notebook_id": request.notebook_id,
+                "grounded_ask": True,
+                "contains_secrets": False,
+                "transport": "BrowserHarness+Stagehand",
+            },
         )
         return await self.status()
 
     async def create_note(self, request: NotebookConsumerNoteCreateRequest) -> NotebookOperationResult:
         digest = self.evidence.digest(request.model_dump())
-        op = await self.operations.begin(KnowledgeProvider.NOTEBOOK_CONSUMER, "CREATE_NOTE", request.idempotency_key, digest)
+        op = await self.operations.begin(
+            KnowledgeProvider.NOTEBOOK_CONSUMER,
+            "CREATE_NOTE",
+            request.idempotency_key,
+            digest,
+        )
         if op.status == KnowledgeOperationStatus.VERIFIED_SUCCESS:
             return op
-        if op.status not in {KnowledgeOperationStatus.PREFLIGHT, KnowledgeOperationStatus.RETRYABLE_FAILURE}:
+        if op.status not in {
+            KnowledgeOperationStatus.PREFLIGHT,
+            KnowledgeOperationStatus.RETRYABLE_FAILURE,
+        }:
             return op
-        p, context = await self._browser()
-        page = context.pages[0] if context.pages else await context.new_page()
+
+        task, lease = await self._open_task(
+            goal=f"Create NotebookLM note {request.title!r} in notebook {request.notebook_id}",
+            mutating=True,
+            action_class=ActionClass.A3,
+        )
         try:
-            await page.goto(f"{self.base_url}/notebook/{quote(request.notebook_id)}", wait_until="domcontentloaded", timeout=self.timeout_ms)
-            await page.wait_for_timeout(800)
-            if "accounts.google." in page.url or await page.get_by_text(re.compile(r"^sign in$", re.I)).count():
-                return await self.operations.update(op.operation_id, status=KnowledgeOperationStatus.CONFIGURATION_REQUIRED,
-                                                    error_code="CONSUMER_SESSION_AUTH_REQUIRED")
-            exact = page.get_by_text(request.title, exact=True)
-            if await exact.count() > 0:
-                prior_submission = bool(op.correlation.get("submitted_by_operation"))
-                if not prior_submission:
-                    return await self.operations.update(
-                        op.operation_id, status=KnowledgeOperationStatus.VERIFICATION_FAILED,
+            await self._navigate(task, request.notebook_id)
+            _tasks, _harness, stagehand = self._require_transport()
+            try:
+                before = await stagehand.extract(
+                    task,
+                    "Check whether a note with this exact title already exists.",
+                    {
+                        "type": "object",
+                        "properties": {
+                            "exact_title_exists": {"type": "boolean"},
+                            "auth_required": {"type": "boolean"},
+                        },
+                        "required": ["exact_title_exists"],
+                    },
+                )
+            except (BrowserAdapterError, BrowserPolicyError) as exc:
+                raise NotebookProviderError(f"notebook_consumer_stagehand:{exc}") from exc
+
+            if before.extraction.get("auth_required"):
+                result = await self.operations.update(
+                    op.operation_id,
+                    status=KnowledgeOperationStatus.CONFIGURATION_REQUIRED,
+                    error_code="CONSUMER_SESSION_AUTH_REQUIRED",
+                )
+                await self._close_task(
+                    task, lease, status=BrowserTaskStatus.FAILED,
+                    error_code="CONSUMER_SESSION_AUTH_REQUIRED",
+                )
+                return result
+
+            if bool(before.extraction.get("exact_title_exists")):
+                if not op.correlation.get("submitted_by_operation"):
+                    result = await self.operations.update(
+                        op.operation_id,
+                        status=KnowledgeOperationStatus.VERIFICATION_FAILED,
                         observed={"title": request.title, "preexisting": True},
                         error_code="PREEXISTING_NOTE_AMBIGUOUS",
                     )
+                    await self._close_task(
+                        task, lease, status=BrowserTaskStatus.FAILED,
+                        error_code="PREEXISTING_NOTE_AMBIGUOUS",
+                    )
+                    return result
                 pointer = f"google://notebook-consumer/{request.notebook_id}/note/{quote(request.title)}"
-                return await self.operations.update(op.operation_id, status=KnowledgeOperationStatus.VERIFIED_SUCCESS,
-                                                    resource_id=request.title, correlation=op.correlation,
-                                                    observed={"title": request.title, "readback_after_prior_submission": True}, evidence_pointer=pointer)
-            add = page.get_by_role("button", name=re.compile(r"add note|new note|create note", re.I))
-            if await add.count() == 0:
-                add = page.get_by_text(re.compile(r"^add note$|^new note$", re.I))
-            if await add.count() == 0:
-                return await self.operations.update(op.operation_id, status=KnowledgeOperationStatus.EXECUTION_FAILED,
-                                                    error_code="NOTE_CREATE_CONTROL_NOT_FOUND")
-            await add.first.click()
-            await page.wait_for_timeout(300)
-            title_input = page.get_by_role("textbox", name=re.compile(r"title|note title", re.I))
-            if await title_input.count() == 0:
-                title_input = page.locator('input[placeholder*="title" i], textarea[placeholder*="title" i]')
-            if await title_input.count() == 0:
-                return await self.operations.update(op.operation_id, status=KnowledgeOperationStatus.EXECUTION_FAILED,
-                                                    error_code="NOTE_TITLE_EDITOR_NOT_FOUND")
-            await title_input.last.fill(request.title)
-            if request.body:
-                body_input = page.get_by_role("textbox", name=re.compile(r"note|body|content", re.I))
-                if await body_input.count() > 1:
-                    await body_input.last.fill(request.body)
-                else:
-                    editable = page.locator('[contenteditable="true"]')
-                    if await editable.count():
-                        await editable.last.fill(request.body)
-            save = page.get_by_role("button", name=re.compile(r"save|done|create", re.I))
-            if await save.count():
-                await save.last.click()
-            else:
-                await title_input.last.press("Tab")
-            await self.operations.update(op.operation_id, status=KnowledgeOperationStatus.SUBMITTED,
-                                         correlation={"notebook_id": request.notebook_id, "title": request.title,
-                                                      "submitted_by_operation": True})
+                result = await self.operations.update(
+                    op.operation_id,
+                    status=KnowledgeOperationStatus.VERIFIED_SUCCESS,
+                    resource_id=request.title,
+                    correlation=op.correlation,
+                    observed={"title": request.title, "readback_after_prior_submission": True},
+                    evidence_pointer=pointer,
+                )
+                await self._close_task(task, lease, status=BrowserTaskStatus.COMPLETED)
+                return result
+
             try:
-                await page.get_by_text(request.title, exact=True).first.wait_for(state="visible", timeout=self.timeout_ms)
-            except Exception:
-                return await self.operations.update(op.operation_id, status=KnowledgeOperationStatus.VERIFICATION_FAILED,
-                                                    error_code="NOTE_READBACK_FAILED")
-            pointer = f"google://notebook-consumer/{request.notebook_id}/note/{quote(request.title)}"
-            evidence_payload = {"notebook_id": request.notebook_id, "title": request.title, "url_host": "notebooklm.google.com"}
-            await self.evidence.persist(
-                provider=KnowledgeProvider.NOTEBOOK_CONSUMER, query_id=op.operation_id, source_ref=pointer,
-                title=request.title, source_trust=__import__('van_gateway.context.models', fromlist=['SourceTrust']).SourceTrust.VERIFIED_SYSTEM,
-                scope="google-notebook", content=evidence_payload, snippet=request.title,
-                metadata={"operation": "CREATE_NOTE", "browser_readback": True},
+                await stagehand.act(
+                    task,
+                    {
+                        "kind": "notebook_create_note",
+                        "instruction": "Create a new NotebookLM note with exactly this title and body.",
+                        "title": request.title,
+                        "body": request.body,
+                    },
+                )
+            except (BrowserAdapterError, BrowserPolicyError) as exc:
+                raise NotebookProviderError(f"notebook_consumer_stagehand:{exc}") from exc
+
+            await self.operations.update(
+                op.operation_id,
+                status=KnowledgeOperationStatus.SUBMITTED,
+                correlation={
+                    "notebook_id": request.notebook_id,
+                    "title": request.title,
+                    "submitted_by_operation": True,
+                    "browser_task_id": task.task_id,
+                },
             )
-            return await self.operations.update(op.operation_id, status=KnowledgeOperationStatus.VERIFIED_SUCCESS,
-                                                resource_id=request.title, correlation={"notebook_id": request.notebook_id, "title": request.title},
-                                                observed={"title": request.title, "visible": True}, evidence_pointer=pointer)
+            try:
+                after = await stagehand.extract(
+                    task,
+                    "Verify that a note with this exact title is now visible.",
+                    {
+                        "type": "object",
+                        "properties": {
+                            "exact_title_visible": {"type": "boolean"},
+                            "observed_title": {"type": "string"},
+                        },
+                        "required": ["exact_title_visible"],
+                    },
+                )
+            except (BrowserAdapterError, BrowserPolicyError) as exc:
+                raise NotebookProviderError(f"notebook_consumer_stagehand:{exc}") from exc
+            if not bool(after.extraction.get("exact_title_visible")):
+                result = await self.operations.update(
+                    op.operation_id,
+                    status=KnowledgeOperationStatus.VERIFICATION_FAILED,
+                    error_code="NOTE_READBACK_FAILED",
+                )
+                await self._close_task(
+                    task, lease, status=BrowserTaskStatus.FAILED,
+                    error_code="NOTE_READBACK_FAILED",
+                )
+                return result
+
+            pointer = f"google://notebook-consumer/{request.notebook_id}/note/{quote(request.title)}"
+            evidence_payload = {
+                "notebook_id": request.notebook_id,
+                "title": request.title,
+                "url_host": self.DOMAIN,
+                "browser_task_id": task.task_id,
+            }
+            await self.evidence.persist(
+                provider=KnowledgeProvider.NOTEBOOK_CONSUMER,
+                query_id=op.operation_id,
+                source_ref=pointer,
+                title=request.title,
+                source_trust=__import__('van_gateway.context.models', fromlist=['SourceTrust']).SourceTrust.VERIFIED_SYSTEM,
+                scope="google-notebook",
+                content=evidence_payload,
+                snippet=request.title,
+                metadata={
+                    "operation": "CREATE_NOTE",
+                    "browser_readback": True,
+                    "transport": "BrowserHarness+Stagehand",
+                },
+            )
+            result = await self.operations.update(
+                op.operation_id,
+                status=KnowledgeOperationStatus.VERIFIED_SUCCESS,
+                resource_id=request.title,
+                correlation={
+                    "notebook_id": request.notebook_id,
+                    "title": request.title,
+                    "submitted_by_operation": True,
+                    "browser_task_id": task.task_id,
+                },
+                observed={"title": request.title, "visible": True},
+                evidence_pointer=pointer,
+            )
+            await self._close_task(task, lease, status=BrowserTaskStatus.COMPLETED)
+            return result
         except NotebookProviderError:
+            await self._close_task(
+                task, lease, status=BrowserTaskStatus.FAILED,
+                error_code="NOTEBOOK_PROVIDER_ERROR",
+            )
             raise
         except Exception as exc:
-            return await self.operations.update(op.operation_id, status=KnowledgeOperationStatus.RETRYABLE_FAILURE,
-                                                error_code=type(exc).__name__)
-        finally:
-            await context.close()
-            await p.stop()
+            await self._close_task(
+                task, lease, status=BrowserTaskStatus.FAILED,
+                error_code=type(exc).__name__,
+            )
+            return await self.operations.update(
+                op.operation_id,
+                status=KnowledgeOperationStatus.RETRYABLE_FAILURE,
+                error_code=type(exc).__name__,
+            )
+
