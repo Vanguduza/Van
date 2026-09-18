@@ -1,8 +1,10 @@
 #!/usr/bin/env python3
-"""Bootstrap/verify VAN's personal Gemini Notebook browser credential plane.
+"""One-time owner login bootstrap for VAN's managed NotebookLM browser profile.
 
-The profile stays local on the Hermes/gateway host. This tool never exports or
-prints cookies/tokens. READY still requires a gateway canary after authentication.
+This engineering utility may open Chromium only to establish/verify the owner's
+managed profile. It is NOT the NotebookLM runtime transport: production reads and
+mutations run through Browser Harness + Stagehand. The tool never exports or
+prints cookies/tokens, and READY still requires the gateway Browser Fabric canary.
 """
 from __future__ import annotations
 
@@ -65,7 +67,13 @@ def open_profile(profile: Path, *, login: bool, verify: bool, base_url: str) -> 
 
 def main() -> int:
     ap = argparse.ArgumentParser()
-    ap.add_argument("--profile-dir", default="~/.local/share/van/notebooklm-profile")
+    ap.add_argument(
+        "--profile-dir",
+        default=os.environ.get(
+            "VAN_NOTEBOOK_CONSUMER_PROFILE_DIR",
+            "/var/lib/van-trading/browser/profiles/authenticated_owner",
+        ),
+    )
     ap.add_argument("--base-url", default="https://notebooklm.google.com")
     ap.add_argument("--install-browser", action="store_true")
     ap.add_argument("--login", action="store_true")
@@ -83,6 +91,8 @@ def main() -> int:
     }
     result["profile_dir"] = str(profile)
     result["profile_mode"] = oct(profile.stat().st_mode & 0o777)
+    result["bootstrap_only"] = True
+    result["runtime_transport"] = "BrowserHarness+Stagehand"
     print(json.dumps(result, sort_keys=True))
     return 0
 
