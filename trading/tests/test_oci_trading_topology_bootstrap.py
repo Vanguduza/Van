@@ -27,3 +27,12 @@ def test_rebuild_protects_vekl_worker_and_control_nodes():
     assert "(\'oracle-admin\',\'dial-hermes-control\',\'vekl-worker\')" in text
     assert "VEKL_OCID" in text
     assert "protected instance selected for termination" in text
+
+
+def test_public_caddy_template_uses_valid_multiline_handle_blocks():
+    caddy = (ROOT / "deploy/van-trading-core/caddy/Caddyfile").read_text()
+    assert "handle @ea { reverse_proxy" not in caddy
+    assert "handle @automation { reverse_proxy" not in caddy
+    assert 'handle { respond "not found" 404 }' not in caddy
+    assert "handle @ea {\n        reverse_proxy 127.0.0.1:9443\n    }" in caddy
+    assert "handle @automation {\n        reverse_proxy 127.0.0.1:5678\n    }" in caddy
