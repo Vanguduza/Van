@@ -53,8 +53,12 @@ class MissionError(ValueError):
 
 
 class MissionService:
-    def __init__(self, store: Store) -> None:
+    def __init__(self, store: Store, *, capabilities: Any | None = None) -> None:
         self.store = store
+        # §7 — when a registry is wired, a capability it does not declare cannot
+        # become mission work. Optional so Mission Core stays testable on its
+        # own, but `create_app` always supplies one.
+        self.capabilities = capabilities
 
     # ------------------------------------------------------------- creation
 
@@ -256,6 +260,7 @@ class MissionService:
             raise MissionError("MISSION_UNKNOWN", mission_id)
         if mission.is_terminal:
             raise MissionError("MISSION_TERMINAL", mission.state.value)
+        await self._assert_capability_permitted(mission, capability_id)
 
         activity = Activity(
             activity_id=f"act_{uuid.uuid4().hex}",
@@ -319,6 +324,33 @@ class MissionService:
                 actor=PrincipalType.SYSTEM, summary=error_class or state.value,
                 severity="WARN" if state is ActivityState.FAILED else "INFO",
                 evidence_ref=evidence_ref, now_ms=now,
+            )
+
+    async def _assert_capability_permitted(self, mission: Mission, capability_id: str) -> None:
+        """§7 — "a capability not in the registry must not be routable".
+
+        Enforced here because this is where abstract work becomes real work: an
+        Activity is the record that VAN intends to *do* something. Checking at
+        the router only would leave a hole for anything that creates an Activity
+        directly.
+
+        The mission's own authority envelope is the constraint, so a mission
+        authorized for A2 cannot acquire an A3 capability by asking for it as an
+        activity.
+        """
+        if self.capabilities is None:
+            return
+        from van_gateway.capability.models import RoutingConstraints
+
+        constraints = RoutingConstraints.from_envelope(
+            mission.authority_envelope,
+            owner_present=mission.authority_envelope.requires_owner_presence,
+        )
+        verdict = await self.capabilities.routability(capability_id, constraints=constraints)
+        if not verdict.routable:
+            raise MissionError(
+                f"MISSION_CAPABILITY_NOT_PERMITTED:{verdict.reason.value}",
+                verdict.detail or capability_id,
             )
 
     # ---------------------------------------------------------------- events

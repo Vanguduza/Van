@@ -21,7 +21,7 @@ from van_gateway.automation.deadletter import DeadLetterService, NextAction
 from van_gateway.automation.models import IntentSignature, WorkflowLifecycle
 from van_gateway.automation.registry import AutomationRegistry, HotWorkflowIndex, RegistryError
 from van_gateway.automation.repair import RepairDecision, RepairService, decide
-from van_gateway.automation.router import CapabilityRouter, ExecutionMedium, RouteRequest
+from van_gateway.automation.router import AutomationMediumRouter, ExecutionMedium, RouteRequest
 from van_gateway.automation.telemetry import (
     CacheState,
     GenerationEvent,
@@ -163,7 +163,7 @@ async def test_the_router_stops_sending_work_to_a_degraded_workflow(tmp_path):
     health = WorkflowHealthService(store)
     index = HotWorkflowIndex()
     index.publish(SIGNATURE, CAP, 1, "n8n-wf-1")
-    router = CapabilityRouter(registry=registry, hot_index=index, health=health)
+    router = AutomationMediumRouter(registry=registry, hot_index=index, health=health)
 
     hot = await router.route(RouteRequest(goal="collect statements", signature=SIGNATURE))
     assert hot.medium is ExecutionMedium.N8N_HOT
@@ -196,7 +196,7 @@ async def test_a_degraded_workflow_falls_back_to_warm_when_there_is_no_native(tm
     )
     index = HotWorkflowIndex()
     index.publish(SIGNATURE, CAP, 1, "n8n-wf-1")
-    router = CapabilityRouter(registry=registry, hot_index=index, health=health)
+    router = AutomationMediumRouter(registry=registry, hot_index=index, health=health)
 
     decision = await router.route(RouteRequest(goal="collect statements", signature=SIGNATURE))
     assert decision.medium is ExecutionMedium.N8N_WARM

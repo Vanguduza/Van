@@ -1,7 +1,7 @@
 {
   "schema": "van-implementation-matrix/1",
   "mission": "VAN Unified Personal Intelligence + Cognitive Symbiosis (Rev 1 / Rev 1.1)",
-  "phase": "PHASE_0_COMPLETE",
+  "phase": "PHASE_1_MISSION_CORE_AND_CAPABILITY_REGISTRY",
   "generated_against": {
     "main_sha": "f8c3fcc9b4d346c7b59ed128cfdbe63bceab3dc0",
     "blueprint_sha": "e09765d70d6a6a3172141a3dc9710362d2554d26",
@@ -19,8 +19,9 @@
     "finding": "Every gpt/* implementation branch is an ancestor of main. No unique required implementation is stranded on any branch, so \u00a752's post-merge certification already holds for them."
   },
   "counts": {
-    "ABSENT": 20,
-    "PARTIAL_ADJACENT": 11,
+    "BUILT": 3,
+    "PARTIAL_ADJACENT": 9,
+    "ABSENT": 19,
     "EXISTS_UPGRADE": 3,
     "EXISTS_SATISFIED": 1,
     "EXTERNAL_GATED": 1
@@ -29,8 +30,8 @@
     {
       "id": "WS1",
       "name": "Mission Core (MissionService, state machine)",
-      "status": "ABSENT",
-      "note": "No missions/mission_activities/mission_events tables and no Mission entity. knowledge/vekl.py:71 already declares '/v1/missions/{mission_id}/vekl' as its endpoint contract, so VEKL calls a surface that was never built.",
+      "status": "BUILT",
+      "note": "Mission Core on migration 10: missions/mission_activities/mission_events, deterministic state machine, VERIFIED_SUCCESS unreachable without a verifier receipt. Activities bind to the capability registry.",
       "prompt_refs": [
         "\u00a75",
         "WS1"
@@ -48,8 +49,8 @@
     {
       "id": "WS3",
       "name": "Capability Registry (canonical)",
-      "status": "PARTIAL_ADJACENT",
-      "note": "TWO subsystem registries already exist: automation_capabilities (workflow-scoped) and google/mesh.py GoogleCapabilityRegistry. A third canonical registry must subsume them rather than become a third source of truth. This is the largest reconciliation risk.",
+      "status": "BUILT",
+      "note": "Canonical registry on migration 11 + registries/capabilities.json. Resolved the two-registry problem by splitting declaration from readiness: this registry declares, `readiness_source` delegates to the automation fabric / Google mesh / ExternalRuntimeRegistry that already owned that fact. No third copy of state.",
       "prompt_refs": [
         "\u00a77"
       ]
@@ -57,8 +58,8 @@
     {
       "id": "WS4",
       "name": "Capability Router / cognitive compression",
-      "status": "PARTIAL_ADJACENT",
-      "note": "automation/router.py CapabilityRouter exists but routes only automation media (NATIVE/N8N_HOT/WARM/COLD/browser). Name collision with the general router is a real hazard.",
+      "status": "BUILT",
+      "note": "CapabilityRouter with policy as a hard pre-filter and pure arithmetic over declared facts. Route decisions persisted as evidence. Naming collision resolved: automation's router renamed AutomationMediumRouter (it selects the execution medium, not the capability).",
       "prompt_refs": [
         "\u00a78"
       ]
@@ -352,5 +353,10 @@
         "\u00a740"
       ]
     }
+  ],
+  "resolved_findings": [
+    "Two capability registries: resolved by declaration/readiness split rather than merge.",
+    "CapabilityRouter name collision: automation's is now AutomationMediumRouter.",
+    "knowledge/vekl.py's /v1/missions/{mission_id}/vekl contract now has a Mission entity behind it."
   ]
 }

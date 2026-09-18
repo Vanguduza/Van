@@ -29,7 +29,7 @@ from van_gateway.automation.models import (
 )
 from van_gateway.automation.registry import AutomationRegistry, HotWorkflowIndex
 from van_gateway.automation.router import (
-    CapabilityRouter,
+    AutomationMediumRouter,
     ExecutionMedium,
     RouteReason,
     RouteRequest,
@@ -325,7 +325,7 @@ async def _router(tmp_path, *, hot: bool = False):
         await registry.upsert_capability(sample_capability(lifecycle=WorkflowLifecycle.HOT))
         await registry.record_artifact(sample_artifact(lifecycle=WorkflowLifecycle.ADMITTED))
         index.publish(_signature(), "wfcap_statements", 1, "n8n-1")
-    return CapabilityRouter(registry=registry, hot_index=index), registry, index
+    return AutomationMediumRouter(registry=registry, hot_index=index), registry, index
 
 
 async def test_hot_capability_wins(tmp_path):

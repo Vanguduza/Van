@@ -1,0 +1,282 @@
+{
+  "version": "1.0.0",
+  "principle": "Rev 1 \u00a77 \u2014 a capability not declared here is not routable for production mutation. This file declares WHAT a capability is and what contract it must meet; it never declares whether one is ready right now. Readiness stays with the subsystem that already owns it (readiness_source), so this registry subsumes the automation and Google registries without becoming a third copy of their state.",
+  "readiness_sources": {
+    "STATIC": "Declared-ready. Native gateway reads with no external dependency.",
+    "AUTOMATION_REGISTRY": "automation_capabilities lifecycle \u2014 ready iff an ADMITTED artifact exists.",
+    "GOOGLE_MESH": "GoogleIdentityBroker.capability_status \u2014 ready iff state is READY.",
+    "EXTERNAL_RUNTIME": "ExternalRuntimeRegistry readiness evidence for a private worker.",
+    "NEVER_ROUTABLE": "Declared so the boundary is auditable, and structurally unroutable by the generic fabric. Not an omission \u2014 a decision."
+  },
+  "capabilities": [
+    {
+      "capability_id": "native.owner_context.read",
+      "provider": "van_gateway",
+      "executor": "OWNER_RUNTIME",
+      "capability_class": "NATIVE_READ",
+      "authority_class": "A1",
+      "requires_network": false,
+      "requires_owner_presence": false,
+      "data_domains": [
+        "owner_context"
+      ],
+      "side_effects": [],
+      "idempotency": "IDEMPOTENT",
+      "supports_checkpoint": false,
+      "supports_resume": false,
+      "verification_strategy": "NONE",
+      "latency_class": "INTERACTIVE",
+      "cost_class": "FREE",
+      "privacy_class": "OWNER_PRIVATE",
+      "readiness_source": "STATIC",
+      "fallback_capabilities": []
+    },
+    {
+      "capability_id": "native.project_truth.read",
+      "provider": "van_gateway",
+      "executor": "PROJECT_ROUTER",
+      "capability_class": "NATIVE_READ",
+      "authority_class": "A1",
+      "requires_network": false,
+      "requires_owner_presence": false,
+      "data_domains": [
+        "project_truth"
+      ],
+      "side_effects": [],
+      "idempotency": "IDEMPOTENT",
+      "supports_checkpoint": false,
+      "supports_resume": false,
+      "verification_strategy": "NONE",
+      "latency_class": "INTERACTIVE",
+      "cost_class": "FREE",
+      "privacy_class": "OWNER_PRIVATE",
+      "readiness_source": "STATIC",
+      "fallback_capabilities": []
+    },
+    {
+      "capability_id": "knowledge.vekl.retrieve",
+      "provider": "vekl",
+      "executor": "KNOWLEDGE_RUNTIME",
+      "capability_class": "KNOWLEDGE_RETRIEVAL",
+      "authority_class": "A1",
+      "requires_network": false,
+      "requires_owner_presence": false,
+      "data_domains": [
+        "owner_knowledge",
+        "project_truth"
+      ],
+      "side_effects": [],
+      "idempotency": "IDEMPOTENT",
+      "supports_checkpoint": false,
+      "supports_resume": false,
+      "verification_strategy": "NONE",
+      "latency_class": "INTERACTIVE",
+      "cost_class": "FREE",
+      "privacy_class": "OWNER_PRIVATE",
+      "readiness_source": "STATIC",
+      "fallback_capabilities": [],
+      "no_fallback_reason": "Falling back from owner-private retrieval to a public web search would turn 'what do I know about X' into 'ask a third party about X'. That is a different capability with different disclosure, not a substitute for this one."
+    },
+    {
+      "capability_id": "research.exa.search",
+      "provider": "exa",
+      "executor": "RESEARCH_SERVICE",
+      "capability_class": "WEB_RESEARCH",
+      "authority_class": "A2",
+      "requires_network": true,
+      "requires_owner_presence": false,
+      "data_domains": [
+        "external_web"
+      ],
+      "side_effects": [
+        "NETWORK_READ"
+      ],
+      "idempotency": "IDEMPOTENT",
+      "supports_checkpoint": false,
+      "supports_resume": false,
+      "verification_strategy": "PROVIDER_RECEIPT",
+      "latency_class": "SECONDS",
+      "cost_class": "METERED",
+      "privacy_class": "EXTERNAL_DISCLOSING",
+      "readiness_source": "STATIC",
+      "fallback_capabilities": [
+        "browser.semantic.extract"
+      ]
+    },
+    {
+      "capability_id": "browser.harness.navigate",
+      "provider": "browser_harness",
+      "executor": "BROWSER_FABRIC",
+      "capability_class": "BROWSER_INTERACTION",
+      "authority_class": "A2",
+      "requires_network": true,
+      "requires_owner_presence": false,
+      "data_domains": [
+        "external_web"
+      ],
+      "side_effects": [
+        "NETWORK_READ"
+      ],
+      "idempotency": "IDEMPOTENT",
+      "supports_checkpoint": true,
+      "supports_resume": true,
+      "verification_strategy": "SCREENSHOT",
+      "latency_class": "SECONDS",
+      "cost_class": "CHEAP",
+      "privacy_class": "EXTERNAL_DISCLOSING",
+      "readiness_source": "EXTERNAL_RUNTIME",
+      "health_probe": "browser_harness",
+      "fallback_capabilities": []
+    },
+    {
+      "capability_id": "browser.semantic.extract",
+      "provider": "stagehand",
+      "executor": "BROWSER_FABRIC",
+      "capability_class": "BROWSER_INTERACTION",
+      "authority_class": "A2",
+      "requires_network": true,
+      "requires_owner_presence": false,
+      "data_domains": [
+        "external_web"
+      ],
+      "side_effects": [
+        "NETWORK_READ"
+      ],
+      "idempotency": "IDEMPOTENT",
+      "supports_checkpoint": true,
+      "supports_resume": true,
+      "verification_strategy": "SCREENSHOT",
+      "latency_class": "SECONDS",
+      "cost_class": "METERED",
+      "privacy_class": "EXTERNAL_DISCLOSING",
+      "readiness_source": "EXTERNAL_RUNTIME",
+      "health_probe": "stagehand",
+      "fallback_capabilities": [
+        "browser.harness.navigate"
+      ]
+    },
+    {
+      "capability_id": "automation.workflow.execute",
+      "provider": "n8n",
+      "executor": "AUTOMATION_FABRIC",
+      "capability_class": "AUTOMATION",
+      "authority_class": "A3",
+      "requires_network": true,
+      "requires_owner_presence": false,
+      "data_domains": [
+        "external_integration"
+      ],
+      "side_effects": [
+        "NETWORK_READ",
+        "WRITE"
+      ],
+      "idempotency": "IDEMPOTENT_WITH_KEY",
+      "supports_checkpoint": false,
+      "supports_resume": false,
+      "verification_strategy": "API_READBACK",
+      "latency_class": "SECONDS",
+      "cost_class": "CHEAP",
+      "privacy_class": "EXTERNAL_DISCLOSING",
+      "readiness_source": "AUTOMATION_REGISTRY",
+      "fallback_capabilities": []
+    },
+    {
+      "capability_id": "google.gmail.search",
+      "provider": "google",
+      "executor": "GOOGLE_MESH",
+      "capability_class": "GOOGLE_WORKSPACE",
+      "authority_class": "A2",
+      "requires_network": true,
+      "requires_owner_presence": false,
+      "data_domains": [
+        "owner_mail"
+      ],
+      "side_effects": [
+        "NETWORK_READ"
+      ],
+      "idempotency": "IDEMPOTENT",
+      "supports_checkpoint": false,
+      "supports_resume": false,
+      "verification_strategy": "API_READBACK",
+      "latency_class": "SECONDS",
+      "cost_class": "FREE",
+      "privacy_class": "OWNER_PRIVATE",
+      "readiness_source": "GOOGLE_MESH",
+      "health_probe": "gmail",
+      "fallback_capabilities": []
+    },
+    {
+      "capability_id": "google.gmail.send",
+      "provider": "google",
+      "executor": "GOOGLE_MESH",
+      "capability_class": "GOOGLE_WORKSPACE",
+      "authority_class": "A4",
+      "requires_network": true,
+      "requires_owner_presence": true,
+      "data_domains": [
+        "owner_mail"
+      ],
+      "side_effects": [
+        "SEND_AS_OWNER"
+      ],
+      "idempotency": "NON_IDEMPOTENT",
+      "supports_checkpoint": false,
+      "supports_resume": false,
+      "verification_strategy": "PROVIDER_RECEIPT",
+      "latency_class": "SECONDS",
+      "cost_class": "FREE",
+      "privacy_class": "OWNER_PRIVATE",
+      "readiness_source": "GOOGLE_MESH",
+      "health_probe": "gmail",
+      "fallback_capabilities": []
+    },
+    {
+      "capability_id": "trading.vati.analyse",
+      "provider": "vati",
+      "executor": "TRADING_SERVICE",
+      "capability_class": "TRADING_ANALYSIS",
+      "authority_class": "A1",
+      "requires_network": false,
+      "requires_owner_presence": false,
+      "data_domains": [
+        "trading_ledger"
+      ],
+      "side_effects": [],
+      "idempotency": "IDEMPOTENT",
+      "supports_checkpoint": false,
+      "supports_resume": false,
+      "verification_strategy": "LEDGER_EVENT",
+      "latency_class": "INTERACTIVE",
+      "cost_class": "FREE",
+      "privacy_class": "OWNER_PRIVATE",
+      "readiness_source": "STATIC",
+      "fallback_capabilities": []
+    },
+    {
+      "capability_id": "trading.vati.submit_order",
+      "provider": "vati",
+      "executor": "VATI_EXECUTION",
+      "capability_class": "TRADING_EXECUTION",
+      "authority_class": "A4",
+      "requires_network": true,
+      "requires_owner_presence": true,
+      "data_domains": [
+        "trading_ledger",
+        "broker"
+      ],
+      "side_effects": [
+        "FINANCIAL"
+      ],
+      "idempotency": "NEVER_RETRY",
+      "supports_checkpoint": false,
+      "supports_resume": false,
+      "verification_strategy": "LEDGER_EVENT",
+      "latency_class": "SECONDS",
+      "cost_class": "FREE",
+      "privacy_class": "OWNER_PRIVATE",
+      "readiness_source": "NEVER_ROUTABLE",
+      "never_routable_reason": "\u00a72.4 / \u00a722 \u2014 VATI retains exclusive trading-execution authority. Declared so the boundary is auditable rather than absent, and structurally unroutable so the generic fabric cannot reach it as a side channel.",
+      "fallback_capabilities": []
+    }
+  ]
+}

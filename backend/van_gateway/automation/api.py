@@ -35,7 +35,7 @@ from van_gateway.automation.models import (
 from van_gateway.automation.payments import PaymentBoundaryError
 from van_gateway.automation.policy import AutomationPolicy, PolicyError, load_automation_policy
 from van_gateway.automation.registry import AutomationRegistry, HotWorkflowIndex, RegistryError
-from van_gateway.automation.router import CapabilityRouter, RouteRequest
+from van_gateway.automation.router import AutomationMediumRouter, RouteRequest
 from van_gateway.automation.templates import TemplateError, TemplateLibrary
 from van_gateway.automation.verifier import PostconditionSpec
 from van_gateway.automation.validator import WorkflowValidator
@@ -160,7 +160,7 @@ class AutomationApi:
         self.planner = ColdGenerationPlanner(
             policy=self.policy, templates=self.templates, validator=self.validator
         )
-        self.router_service = CapabilityRouter(
+        self.router_service = AutomationMediumRouter(
             registry=registry, hot_index=hot_index, templates=self.templates
         )
         self.router = APIRouter(prefix="/v1/automation", tags=["automation"])

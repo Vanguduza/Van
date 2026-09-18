@@ -34,6 +34,15 @@ from van_gateway.automation.grants import RunGrantService
 from van_gateway.automation.health import AutomationHealthApi
 from van_gateway.automation.registry import AutomationRegistry, HotWorkflowIndex
 from van_gateway.browser.api import BrowserApi
+from van_gateway.capability.models import ReadinessSource
+from van_gateway.capability.readiness import (
+    AutomationReadiness,
+    ExternalRuntimeReadiness,
+    GoogleMeshReadiness,
+)
+from van_gateway.capability.registry import CapabilityRegistry
+from van_gateway.capability.router import CapabilityRouter
+from van_gateway.mission.service import MissionService
 from van_gateway.command.authority import CommandAuthorityService
 from van_gateway.command.standing import StandingAutomationAuthorityService
 from van_gateway.runtime_api import OwnerRuntimeApi
@@ -166,6 +175,7 @@ def create_app() -> FastAPI:
     # and the gateway refuses an assignment rather than pretending to run one.
     browser = BrowserApi(store, settings, decisions=decisions)
 
+
     trading = TradingService(
         settings.vati_ledger_path,
         accounts_registry=settings.vati_accounts_registry,
@@ -196,6 +206,23 @@ def create_app() -> FastAPI:
         cloud_runtime_configured=settings.google_cloud_runtime_configured,
         consumer_connected_capabilities=settings.google_consumer_connected_capabilities,
     )
+    # Rev 1 §7 — one canonical declaration set. Readiness is delegated to the
+    # subsystems that already own it, so this registry never becomes a third
+    # copy of automation or Google state.
+    capability_registry = CapabilityRegistry(
+        store,
+        probes={
+            ReadinessSource.AUTOMATION_REGISTRY: AutomationReadiness(
+                store, enabled=settings.automation_enabled
+            ),
+            ReadinessSource.GOOGLE_MESH: GoogleMeshReadiness(google_broker),
+            ReadinessSource.EXTERNAL_RUNTIME: ExternalRuntimeReadiness(
+                automation_health.runtime, enabled=settings.browser_enabled
+            ),
+        },
+    )
+    capability_router = CapabilityRouter(store, capability_registry)
+    missions = MissionService(store, capabilities=capability_registry)
     google_router = GoogleCapabilityRouter(store, google_broker)
 
     events = EventBus(store, settings.event_page_size)
@@ -222,6 +249,9 @@ def create_app() -> FastAPI:
         # §273 — the HOT index is a cache of durable state, so it is rebuilt on
         # every boot rather than trusted to survive a restart.
         await automation_hot_index.rebuild(store)
+        # §7 — the declaration set is sealed by digest and synced on boot,
+        # so a manifest edit takes effect on restart and is auditable after.
+        await capability_registry.sync()
         yield
 
     app = FastAPI(title="VAN Gateway", version="0.5.0-dev", lifespan=lifespan)
@@ -239,6 +269,9 @@ def create_app() -> FastAPI:
     app.state.automation_hot_index = automation_hot_index
     app.state.automation_dispatcher = automation_dispatcher
     app.state.browser = browser
+    app.state.capability_registry = capability_registry
+    app.state.capability_router = capability_router
+    app.state.missions = missions
     app.state.decisions = decisions
     app.state.projects = projects
     app.state.reminders = reminders

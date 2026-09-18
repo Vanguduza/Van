@@ -8,7 +8,7 @@ from typing import Any, AsyncIterator
 
 import aiosqlite
 
-SCHEMA_VERSION = 10
+SCHEMA_VERSION = 11
 
 MIGRATIONS: dict[int, str] = {
     1: """
@@ -860,6 +860,53 @@ MIGRATIONS: dict[int, str] = {
       ON mission_events(mission_id, occurred_at_ms);
     CREATE INDEX IF NOT EXISTS idx_mission_events_owner_feed
       ON mission_events(owner_visibility, occurred_at_ms);
+    """,
+    11: """
+    -- Rev 1 §7 — the canonical capability declaration set, materialized.
+
+    -- This table holds DECLARATIONS, never readiness. Readiness stays with the
+    -- subsystem that already owns it (automation_artifacts lifecycle, the Google
+    -- mesh, ExternalRuntimeRegistry evidence) and is reached through
+    -- `readiness_source`. That is what lets this registry be canonical without
+    -- becoming a third copy of state those subsystems already maintain.
+    CREATE TABLE IF NOT EXISTS capability_registry (
+      capability_id TEXT PRIMARY KEY,
+      manifest_version TEXT NOT NULL,
+      manifest_digest TEXT NOT NULL,
+      declaration_json TEXT NOT NULL,
+      capability_class TEXT NOT NULL,
+      authority_class TEXT NOT NULL,
+      readiness_source TEXT NOT NULL,
+      provider TEXT NOT NULL,
+      executor TEXT NOT NULL,
+      created_at_ms INTEGER NOT NULL,
+      updated_at_ms INTEGER NOT NULL,
+      withdrawn_at_ms INTEGER
+    );
+
+    CREATE INDEX IF NOT EXISTS idx_capability_registry_class
+      ON capability_registry(capability_class, withdrawn_at_ms);
+    CREATE INDEX IF NOT EXISTS idx_capability_registry_digest
+      ON capability_registry(manifest_digest);
+
+    -- §8 — the route decision is persisted as evidence: what was considered,
+    -- what was rejected and why. A routing choice nobody can reconstruct is a
+    -- routing choice nobody can audit.
+    CREATE TABLE IF NOT EXISTS capability_route_decisions (
+      decision_id TEXT PRIMARY KEY,
+      mission_id TEXT,
+      goal_class TEXT NOT NULL,
+      selected_capability_id TEXT,
+      candidates_json TEXT NOT NULL DEFAULT '[]',
+      rejected_json TEXT NOT NULL DEFAULT '[]',
+      fallback_chain_json TEXT NOT NULL DEFAULT '[]',
+      routing_policy_version TEXT NOT NULL,
+      manifest_digest TEXT NOT NULL,
+      decided_at_ms INTEGER NOT NULL
+    );
+
+    CREATE INDEX IF NOT EXISTS idx_capability_route_decisions_mission
+      ON capability_route_decisions(mission_id, decided_at_ms);
     """,
 }
 

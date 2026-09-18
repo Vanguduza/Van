@@ -89,8 +89,15 @@ class RouteDecision:
         return self.medium is ExecutionMedium.WORKFLOW_COMPILER
 
 
-class CapabilityRouter:
-    """Deterministic. No model participates in choosing the medium."""
+class AutomationMediumRouter:
+    """Deterministic. No model participates in choosing the medium.
+
+    Named for what it does: given a goal already known to be automation work,
+    it picks the execution *medium* — native, HOT, WARM, COLD, browser or
+    Temporal. It does not choose *which capability* to use; that is
+    `van_gateway.capability.router.CapabilityRouter`, one level up. The two were
+    briefly both called CapabilityRouter, which made a genuine confusion easy.
+    """
 
     def __init__(
         self,
@@ -240,7 +247,7 @@ class CapabilityRouter:
 
 
 __all__ = [
-    "CapabilityRouter",
+    "AutomationMediumRouter",
     "ExecutionMedium",
     "RouteDecision",
     "RouteReason",
