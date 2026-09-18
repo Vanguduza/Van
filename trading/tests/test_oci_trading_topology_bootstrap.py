@@ -6,6 +6,7 @@ HELPER = ROOT / "deploy/van-trading-core/oci/harden-oracle-image-firewall.sh"
 BOOTSTRAP = ROOT / "deploy/van-trading-core/bootstrap.sh"
 QUALIFY = ROOT / "deploy/van-trading-core/qualify.sh"
 REBUILD = ROOT / "deploy/van-trading-core/oci/rebuild-van-trading-core.py"
+CADDY = ROOT / "deploy/van-trading-core/caddy/Caddyfile"
 
 def test_oci_firewall_helper_is_syntax_valid_and_persistent():
     subprocess.run(["bash", "-n", str(HELPER)], check=True)
@@ -27,3 +28,15 @@ def test_rebuild_protects_vekl_worker_and_control_nodes():
     assert "(\'oracle-admin\',\'dial-hermes-control\',\'vekl-worker\')" in text
     assert "VEKL_OCID" in text
     assert "protected instance selected for termination" in text
+
+
+
+def test_caddyfile_uses_valid_multiline_handle_blocks_and_bootstrap_validates_it():
+    text = CADDY.read_text()
+    assert "handle @ea { reverse_proxy" not in text
+    assert "handle @automation { reverse_proxy" not in text
+    assert 'handle { respond "not found" 404 }' not in text
+    assert "handle @ea {\n        reverse_proxy 127.0.0.1:9443\n    }" in text
+    assert "handle @automation {\n        reverse_proxy 127.0.0.1:5678\n    }" in text
+    boot = BOOTSTRAP.read_text()
+    assert "caddy validate --config /etc/caddy/Caddyfile --adapter caddyfile" in boot

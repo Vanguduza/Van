@@ -209,6 +209,11 @@ if [[ -n "$PUBLIC_HOST" ]]; then
   run install -m 0644 "$HERE/caddy/Caddyfile" /etc/caddy/Caddyfile
   run bash -c "grep -q '^VAN_PUBLIC_HOST=' '$CONFIG/van-trading-core.env' && sed -i 's#^VAN_PUBLIC_HOST=.*#VAN_PUBLIC_HOST=$PUBLIC_HOST#' '$CONFIG/van-trading-core.env' || echo 'VAN_PUBLIC_HOST=$PUBLIC_HOST' >> '$CONFIG/van-trading-core.env'"
   run bash -c "mkdir -p /etc/systemd/system/caddy.service.d && printf '[Service]\nEnvironment=VAN_PUBLIC_HOST=%s\n' '$PUBLIC_HOST' > /etc/systemd/system/caddy.service.d/van.conf"
+  if (( DRY_RUN )); then
+    plan "validate /etc/caddy/Caddyfile with VAN_PUBLIC_HOST=$PUBLIC_HOST"
+  else
+    VAN_PUBLIC_HOST="$PUBLIC_HOST" caddy validate --config /etc/caddy/Caddyfile --adapter caddyfile >/dev/null || die "invalid caddy configuration"
+  fi
   run systemctl daemon-reload; run systemctl enable --now caddy
   (( DRY_RUN )) || systemctl is-active --quiet caddy || die "caddy service not active after enable"
   ok "caddy public TLS front for $PUBLIC_HOST → 127.0.0.1:9443 (Let's Encrypt; ports 80/443 must be open to the internet for ACME + the EA)"
