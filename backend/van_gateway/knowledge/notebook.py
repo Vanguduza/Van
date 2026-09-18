@@ -702,6 +702,25 @@ class NotebookConsumerProvider:
         finally:
             await tasks.broker.release_lease(lease)
 
+    async def _seal_browser_evidence(
+        self,
+        *,
+        task: BrowserTask,
+        kind: str,
+        url: str,
+        extraction: dict[str, Any],
+    ) -> None:
+        tasks, _harness, _stagehand = self._require_transport()
+        try:
+            await tasks.seal_evidence(
+                task=task,
+                kind=kind,
+                url=url,
+                extraction=extraction,
+            )
+        except BrowserPolicyError as exc:
+            raise NotebookProviderError(f"notebook_consumer_evidence_policy:{exc}") from exc
+
     async def _navigate(self, task: BrowserTask, notebook_id: str) -> None:
         _tasks, harness, _stagehand = self._require_transport()
         try:
@@ -754,7 +773,7 @@ class NotebookConsumerProvider:
             answer = str(observation.extraction.get("answer", "")).strip()
             if not answer:
                 raise NotebookProviderError("notebook_consumer_answer_readback_failed")
-            await self.browser_tasks.seal_evidence(
+            await self._seal_browser_evidence(
                 task=task,
                 kind="notebook_grounded_answer",
                 url=f"{self.base_url}/notebook/{quote(request.notebook_id)}",
@@ -941,7 +960,7 @@ class NotebookConsumerProvider:
                 )
                 return result
 
-            await self.browser_tasks.seal_evidence(
+            await self._seal_browser_evidence(
                 task=task,
                 kind="notebook_note_readback",
                 url=f"{self.base_url}/notebook/{quote(request.notebook_id)}",
