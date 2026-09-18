@@ -27,6 +27,7 @@ from van_gateway.automation.models import IntentSignature, WorkflowLifecycle
 from van_gateway.automation.payments import PaymentBoundaryError, assert_not_automated_payment
 from van_gateway.automation.registry import AutomationRegistry, HotWorkflowIndex
 from van_gateway.automation.templates import TemplateLibrary
+from van_gateway.automation.workflow_health import HealthStatus, WorkflowHealthService
 from van_gateway.models import ActionClass
 
 
@@ -43,6 +44,7 @@ class ExecutionMedium(str, Enum):
 
 class RouteReason(str, Enum):
     ADMITTED_HOT_CAPABILITY = "ADMITTED_HOT_CAPABILITY"
+    HOT_CAPABILITY_DEGRADED = "HOT_CAPABILITY_DEGRADED"
     NATIVE_CAPABILITY_AVAILABLE = "NATIVE_CAPABILITY_AVAILABLE"
     TEMPLATE_AVAILABLE = "TEMPLATE_AVAILABLE"
     NOVEL_GOAL = "NOVEL_GOAL"
@@ -96,10 +98,12 @@ class CapabilityRouter:
         registry: AutomationRegistry,
         hot_index: HotWorkflowIndex,
         templates: TemplateLibrary | None = None,
+        health: WorkflowHealthService | None = None,
     ) -> None:
         self.registry = registry
         self.hot_index = hot_index
         self.templates = templates or TemplateLibrary()
+        self.health = health
 
     async def route(self, request: RouteRequest) -> RouteDecision:
         # 0. Hard refusals first, so nothing downstream has to re-check them.
@@ -148,11 +152,21 @@ class CapabilityRouter:
                 WorkflowLifecycle.ADMITTED,
                 WorkflowLifecycle.HOT,
             ):
-                return RouteDecision(
-                    medium=ExecutionMedium.N8N_HOT,
-                    reason=RouteReason.ADMITTED_HOT_CAPABILITY,
-                    capability_id=capability_id, workflow_version=version,
-                    workflow_ref=workflow_ref,
+                # §77 — VAN stops routing through a degraded workflow. Withdrawing
+                # here rather than only refusing means the next lookup is a miss,
+                # so one health check does not become a per-request cost.
+                degraded = await self._degraded(capability_id, version)
+                if degraded is None:
+                    return RouteDecision(
+                        medium=ExecutionMedium.N8N_HOT,
+                        reason=RouteReason.ADMITTED_HOT_CAPABILITY,
+                        capability_id=capability_id, workflow_version=version,
+                        workflow_ref=workflow_ref,
+                    )
+                self.hot_index.withdraw(capability_id)
+                return await self._fallback(
+                    request,
+                    detail=f"{capability_id} v{version} is {degraded.value}",
                 )
             # A stale index entry must not route work to a withdrawn capability.
             self.hot_index.withdraw(capability_id)
@@ -186,6 +200,42 @@ class CapabilityRouter:
         # 6. COLD — the only expensive path.
         return RouteDecision(
             medium=ExecutionMedium.WORKFLOW_COMPILER, reason=RouteReason.NOVEL_GOAL,
+        )
+
+    async def _degraded(self, capability_id: str, version: int) -> HealthStatus | None:
+        """Return the non-GREEN status, or None when this version is fine to use."""
+        if self.health is None:
+            return None
+        health = await self.health.get(capability_id, version)
+        if health is None or health.routable:
+            return None
+        return health.status
+
+    async def _fallback(self, request: RouteRequest, *, detail: str) -> RouteDecision:
+        """Where work goes when the HOT capability is no longer trustworthy.
+
+        Native first, because it is authoritative and available now; then the
+        template, because a specialisation of a known shape is still cheaper than
+        generating one. The owner gets an answer either way.
+        """
+        if request.native_capability_id is not None:
+            return RouteDecision(
+                medium=ExecutionMedium.NATIVE,
+                reason=RouteReason.HOT_CAPABILITY_DEGRADED,
+                capability_id=request.native_capability_id,
+                immediate_native_capability_id=request.native_capability_id,
+                detail=detail,
+            )
+        template = self.templates.for_goal_class(request.signature.goal_class)
+        if template is not None:
+            return RouteDecision(
+                medium=ExecutionMedium.N8N_WARM,
+                reason=RouteReason.HOT_CAPABILITY_DEGRADED,
+                template_id=template.template_id, detail=detail,
+            )
+        return RouteDecision(
+            medium=ExecutionMedium.WORKFLOW_COMPILER,
+            reason=RouteReason.HOT_CAPABILITY_DEGRADED, detail=detail,
         )
 
 

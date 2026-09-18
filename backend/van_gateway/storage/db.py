@@ -8,7 +8,7 @@ from typing import Any, AsyncIterator
 
 import aiosqlite
 
-SCHEMA_VERSION = 8
+SCHEMA_VERSION = 9
 
 MIGRATIONS: dict[int, str] = {
     1: """
@@ -662,8 +662,115 @@ MIGRATIONS: dict[int, str] = {
 
     CREATE INDEX IF NOT EXISTS idx_browser_scope_auth_task
       ON browser_scope_authorizations(task_id, status, issued_at_ms);
-    """
+    """,
+    9: """
+    -- Rev 1.3 §§76-78, 101-102, 243-246 — operating a fabric, not just building it.
 
+    -- §76. One row per admitted workflow version. Health is per version because a
+    -- repair produces a new version, and the old version's failures are not the
+    -- new one's record.
+    CREATE TABLE IF NOT EXISTS automation_workflow_health (
+      capability_id TEXT NOT NULL,
+      workflow_version INTEGER NOT NULL,
+      runs INTEGER NOT NULL DEFAULT 0,
+      verified_successes INTEGER NOT NULL DEFAULT 0,
+      failures INTEGER NOT NULL DEFAULT 0,
+      consecutive_failures INTEGER NOT NULL DEFAULT 0,
+      total_duration_ms INTEGER NOT NULL DEFAULT 0,
+      duration_samples_json TEXT NOT NULL DEFAULT '[]',
+      p95_duration_ms INTEGER,
+      repair_count INTEGER NOT NULL DEFAULT 0,
+      last_verified_at_ms INTEGER,
+      last_failure_class TEXT,
+      status TEXT NOT NULL DEFAULT 'GREEN',
+      updated_at_ms INTEGER NOT NULL,
+      PRIMARY KEY (capability_id, workflow_version)
+    );
+
+    CREATE INDEX IF NOT EXISTS idx_automation_health_status
+      ON automation_workflow_health(status, updated_at_ms);
+
+    -- §§78, 243-245. Repair lineage. The admitted workflow is never mutated in
+    -- place, so every repair is a row pointing at the artifact it replaced.
+    CREATE TABLE IF NOT EXISTS automation_repairs (
+      repair_id TEXT PRIMARY KEY,
+      capability_id TEXT NOT NULL,
+      failing_artifact_id TEXT NOT NULL,
+      failing_run_id TEXT,
+      failure_class TEXT NOT NULL,
+      error_code TEXT,
+      decision TEXT NOT NULL,
+      candidate_artifact_id TEXT,
+      superseded_artifact_id TEXT,
+      promoted_at_ms INTEGER,
+      detail_json TEXT NOT NULL DEFAULT '{}',
+      created_at_ms INTEGER NOT NULL
+    );
+
+    CREATE INDEX IF NOT EXISTS idx_automation_repairs_cap
+      ON automation_repairs(capability_id, created_at_ms);
+
+    -- §246. Bounded retry ends somewhere, and that somewhere is a row an owner
+    -- or operator can act on — never an infinite retry.
+    CREATE TABLE IF NOT EXISTS automation_dead_letter (
+      dead_letter_id TEXT PRIMARY KEY,
+      run_id TEXT,
+      event_id TEXT,
+      capability_id TEXT,
+      failure_class TEXT NOT NULL,
+      last_error_code TEXT,
+      attempt_count INTEGER NOT NULL DEFAULT 1,
+      evidence_refs_json TEXT NOT NULL DEFAULT '[]',
+      next_action TEXT NOT NULL,
+      detail_json TEXT NOT NULL DEFAULT '{}',
+      created_at_ms INTEGER NOT NULL,
+      updated_at_ms INTEGER NOT NULL,
+      resolved_at_ms INTEGER,
+      resolution TEXT
+    );
+
+    CREATE INDEX IF NOT EXISTS idx_automation_dead_letter_open
+      ON automation_dead_letter(resolved_at_ms, created_at_ms);
+
+    CREATE UNIQUE INDEX IF NOT EXISTS uq_automation_dead_letter_run
+      ON automation_dead_letter(run_id) WHERE run_id IS NOT NULL;
+
+    -- §101. Per-run timing, so the ladder's claims are measured rather than
+    -- asserted. `cache_state` is what makes the HOT hit rate observable.
+    CREATE TABLE IF NOT EXISTS automation_run_telemetry (
+      run_id TEXT PRIMARY KEY,
+      capability_id TEXT,
+      workflow_version INTEGER,
+      cache_state TEXT NOT NULL,
+      compile_time_ms INTEGER NOT NULL DEFAULT 0,
+      dispatch_time_ms INTEGER NOT NULL DEFAULT 0,
+      execution_time_ms INTEGER NOT NULL DEFAULT 0,
+      external_wait_ms INTEGER NOT NULL DEFAULT 0,
+      verification_time_ms INTEGER NOT NULL DEFAULT 0,
+      retry_count INTEGER NOT NULL DEFAULT 0,
+      failure_count INTEGER NOT NULL DEFAULT 0,
+      recorded_at_ms INTEGER NOT NULL
+    );
+
+    CREATE INDEX IF NOT EXISTS idx_automation_run_telemetry_time
+      ON automation_run_telemetry(recorded_at_ms);
+
+    -- §102. One row per capability-acquisition attempt. The core success metric
+    -- is that the HOT share of these rises over time.
+    CREATE TABLE IF NOT EXISTS automation_generation_telemetry (
+      generation_id TEXT PRIMARY KEY,
+      goal_class TEXT NOT NULL,
+      medium TEXT NOT NULL,
+      outcome TEXT NOT NULL,
+      pattern_reused INTEGER NOT NULL DEFAULT 0,
+      ir_cache_hit INTEGER NOT NULL DEFAULT 0,
+      first_use_latency_ms INTEGER NOT NULL DEFAULT 0,
+      recorded_at_ms INTEGER NOT NULL
+    );
+
+    CREATE INDEX IF NOT EXISTS idx_automation_generation_time
+      ON automation_generation_telemetry(recorded_at_ms);
+    """,
 }
 
 

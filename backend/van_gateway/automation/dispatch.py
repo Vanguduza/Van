@@ -31,7 +31,14 @@ from van_gateway.automation.external_runtime import RuntimeState
 from van_gateway.automation.grants import GrantKind, MintedGrant, RunGrantService
 from van_gateway.automation.models import AutomationWorkflowArtifact, RunStatus, WorkflowLifecycle
 from van_gateway.automation.n8n_client import N8nClientError, N8nManagementClient
+from van_gateway.automation.deadletter import DeadLetterService
 from van_gateway.automation.registry import AutomationRegistry
+from van_gateway.automation.telemetry import CacheState, RunTiming, TelemetryService
+from van_gateway.automation.workflow_health import (
+    FailureClass,
+    HealthStatus,
+    WorkflowHealthService,
+)
 from van_gateway.automation.verifier import (
     PostconditionSpec,
     VerificationOutcome,
@@ -77,6 +84,9 @@ class AutomationDispatcher:
         grants: RunGrantService,
         client: N8nManagementClient,
         verifier: WorkflowVerifier | None = None,
+        health: WorkflowHealthService | None = None,
+        telemetry: TelemetryService | None = None,
+        dead_letter: DeadLetterService | None = None,
         enabled: bool = False,
     ) -> None:
         self.store = store
@@ -86,6 +96,9 @@ class AutomationDispatcher:
         self.grants = grants
         self.client = client
         self.verifier = verifier or WorkflowVerifier()
+        self.health = health or WorkflowHealthService(store)
+        self.telemetry = telemetry or TelemetryService(store)
+        self.dead_letter = dead_letter or DeadLetterService(store)
         self.enabled = enabled
 
     async def dispatch(
@@ -168,12 +181,17 @@ class AutomationDispatcher:
         try:
             engine_result = await self._invoke(artifact, inputs, grant)
         except (N8nClientError, DispatchError) as exc:
-            await self._fail(run_id, getattr(exc, "code", "AUTOMATION_FABRIC_UNAVAILABLE"), now)
+            code = getattr(exc, "code", "AUTOMATION_FABRIC_UNAVAILABLE")
+            await self._fail(run_id, code, now)
             await self.grants.revoke_run(run_id, now_ms=now)
+            await self._record_failure(
+                run_id=run_id, capability_id=capability_id, artifact=artifact,
+                failure_class=classify_failure(code), error_code=code, now=now,
+                started=now,
+            )
             return DispatchResult(
                 run_id=run_id, capability_id=capability_id, artifact_id=artifact.artifact_id,
-                status=RunStatus.FAILED, execution=execution,
-                error_code=getattr(exc, "code", "AUTOMATION_FABRIC_UNAVAILABLE"),
+                status=RunStatus.FAILED, execution=execution, error_code=code,
             )
 
         correlation = {"n8n_execution_id": str(engine_result.get("executionId", ""))}
@@ -210,6 +228,32 @@ class AutomationDispatcher:
         await self._update_run(
             run_id, status=status, now=now, evidence_pointer=receipt.evidence_pointer,
             verifier_status=receipt.status.value,
+        )
+
+        # §§76-77, 101 — the run's outcome is the fabric's health signal, and the
+        # ladder rung it took is what makes the HOT hit rate measurable.
+        completed = int(time.time() * 1000) if now_ms is None else now_ms
+        duration = max(0, completed - now)
+        if status is RunStatus.FAILED:
+            await self._record_failure(
+                run_id=run_id, capability_id=capability_id, artifact=artifact,
+                failure_class=FailureClass.VERIFICATION,
+                error_code=verification.detail or "VERIFICATION_FAILED",
+                now=completed, started=now,
+            )
+        else:
+            await self.health.record_success(
+                capability_id=capability_id, workflow_version=artifact.version,
+                duration_ms=duration,
+                verified=status is RunStatus.VERIFIED_SUCCESS, now_ms=completed,
+            )
+        await self.telemetry.record_run(
+            RunTiming(
+                run_id=run_id, cache_state=CacheState.HOT, capability_id=capability_id,
+                workflow_version=artifact.version, execution_time_ms=duration,
+                failure_count=1 if status is RunStatus.FAILED else 0,
+            ),
+            now_ms=completed,
         )
         return DispatchResult(
             run_id=run_id, capability_id=capability_id, artifact_id=artifact.artifact_id,
@@ -301,6 +345,46 @@ class AutomationDispatcher:
             (status.value, evidence_pointer, verifier_status, n8n_execution_id, now, now, run_id),
         )
 
+    async def _record_failure(
+        self,
+        *,
+        run_id: str,
+        capability_id: str,
+        artifact: AutomationWorkflowArtifact,
+        failure_class: FailureClass,
+        error_code: str,
+        now: int,
+        started: int,
+    ) -> None:
+        """One place where a failed run becomes health, telemetry and — if the
+        workflow has run out of road — a dead letter (§246).
+
+        The dead letter is written only once the workflow is REPAIR_REQUIRED or
+        QUARANTINED. Before that the failure is a health signal; after it, retry
+        has demonstrably stopped helping, and continuing to retry is the exact
+        thing §246 forbids.
+        """
+        health = await self.health.record_failure(
+            capability_id=capability_id, workflow_version=artifact.version,
+            failure_class=failure_class, duration_ms=max(0, now - started), now_ms=now,
+        )
+        await self.telemetry.record_run(
+            RunTiming(
+                run_id=run_id, cache_state=CacheState.HOT, capability_id=capability_id,
+                workflow_version=artifact.version, execution_time_ms=max(0, now - started),
+                failure_count=1,
+            ),
+            now_ms=now,
+        )
+        if health.status in (HealthStatus.REPAIR_REQUIRED, HealthStatus.QUARANTINED):
+            await self.dead_letter.record(
+                run_id=run_id, capability_id=capability_id, failure_class=failure_class,
+                attempt_count=health.consecutive_failures, last_error_code=error_code,
+                evidence_refs=[f"artifact://{artifact.artifact_id}"],
+                detail={"workflow_version": artifact.version, "health": health.status.value},
+                now_ms=now,
+            )
+
     async def _fail(self, run_id: str, error_code: str, now: int) -> None:
         await self.store.execute(
             "UPDATE automation_runs SET status = ?, error_code = ?, completed_at_ms = ?, "
@@ -309,4 +393,30 @@ class AutomationDispatcher:
         )
 
 
-__all__ = ["AutomationDispatcher", "DispatchError", "DispatchResult"]
+#: Error codes the fabric already produces, mapped onto §77's failure classes.
+#: Anything unrecognised is UNKNOWN rather than TRANSIENT: guessing "transient"
+#: would silently exempt a real fault from ever degrading the workflow.
+_FAILURE_CLASSES = {
+    "AUTOMATION_FABRIC_UNAVAILABLE": FailureClass.TRANSIENT,
+    "N8N_TIMEOUT": FailureClass.TRANSIENT,
+    "N8N_UNREACHABLE": FailureClass.TRANSIENT,
+    "N8N_VERSION_MISMATCH": FailureClass.CONNECTOR,
+    "N8N_NOT_READY": FailureClass.CONNECTOR,
+    "CREDENTIAL_UNRESOLVED": FailureClass.CREDENTIAL,
+    "CREDENTIAL_REJECTED": FailureClass.CREDENTIAL,
+    "SCHEMA_MISMATCH": FailureClass.SCHEMA,
+    "GRANT_REPLAYED": FailureClass.SECURITY,
+    "AUTHORITY_DENIED": FailureClass.SECURITY,
+}
+
+
+def classify_failure(error_code: str | None) -> FailureClass:
+    return _FAILURE_CLASSES.get((error_code or "").strip().upper(), FailureClass.UNKNOWN)
+
+
+__all__ = [
+    "AutomationDispatcher",
+    "DispatchError",
+    "DispatchResult",
+    "classify_failure",
+]
