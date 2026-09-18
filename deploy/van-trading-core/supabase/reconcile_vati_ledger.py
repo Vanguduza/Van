@@ -7,7 +7,8 @@ import subprocess
 import time
 from urllib.parse import quote
 
-ADMIN_ROLE = "supabase_admin"\nROLE_STMT = "CREATE ROLE vati LOGIN PASSWORD '__VATI_LEDGER_PASSWORD__' NOSUPERUSER NOCREATEDB NOCREATEROLE;"
+ADMIN_ROLE = "supabase_admin"
+ROLE_STMT = "CREATE ROLE vati LOGIN PASSWORD '__VATI_LEDGER_PASSWORD__' NOSUPERUSER NOCREATEDB NOCREATEROLE;"
 
 def load_env(path):
     out = {}
