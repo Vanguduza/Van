@@ -28,7 +28,8 @@ async def test_google_migration_and_principal_hash(tmp_path):
     # 10 Mission Core; 11 the canonical capability registry; 12 the owner
     # understanding layer; 13 critical reasoning; 14 autonomy and attention
     # scoring; 15 external reality, evolution radar, benchmarks and eval.
-    assert row["version"] == SCHEMA_VERSION == 15
+    # 16 adds the owner permission registry and computer-use operations.
+    assert row["version"] == SCHEMA_VERSION == 16
     broker = GoogleIdentityBroker(store, GoogleCapabilityRegistry(registry_path()), ai_plan="PRO")
     status = await broker.register_principal(subject="owner-google-subject", ai_plan="PRO")
     assert status.registered is True

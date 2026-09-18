@@ -23,6 +23,7 @@ from fastapi import APIRouter, Header, HTTPException
 from pydantic import BaseModel, Field
 
 from van_gateway.attention.scoring import AttentionScorer
+from van_gateway.capability.permissions import PermissionRegistry
 from van_gateway.config import Settings
 from van_gateway.evolution.radar import AIEvolutionRadar
 from van_gateway.evolution.vaneval import VanEval
@@ -71,6 +72,7 @@ class UnderstandingApi:
         self.policies = ProactivePolicyService(store, self.trust)
         self.radar = AIEvolutionRadar(store)
         self.eval = VanEval(store)
+        self.permissions = PermissionRegistry(store)
         self.router = APIRouter(prefix="/v1", tags=["understanding"])
         self._install_routes()
 
@@ -148,6 +150,17 @@ class UnderstandingApi:
                 evidence_refs=body.evidence_refs, project_id=body.project_id,
             )
             return assertion.model_dump(mode="json")
+
+        @router.get("/permissions")
+        async def permissions():
+            """§36 — every standing grant, where it came from, when last used."""
+            return await self.permissions.owner_view()
+
+        @router.post("/permissions/{grant_id}/revoke")
+        async def revoke_permission(grant_id: str):
+            if not await self.permissions.revoke(grant_id):
+                raise HTTPException(status_code=409, detail="PERMISSION_ALREADY_REVOKED")
+            return {"grant_id": grant_id, "revoked": True}
 
         @router.get("/technology-radar")
         async def technology_radar():

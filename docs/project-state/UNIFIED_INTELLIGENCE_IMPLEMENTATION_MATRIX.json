@@ -1,7 +1,7 @@
 {
   "schema": "van-implementation-matrix/1",
   "mission": "VAN Unified Personal Intelligence + Cognitive Symbiosis (Rev 1 / Rev 1.1)",
-  "phase": "PHASES_4_8_COGNITION_AUTONOMY_EVOLUTION",
+  "phase": "PHASES_9_12_BACKEND_COMPLETE",
   "generated_against": {
     "main_sha": "f8c3fcc9b4d346c7b59ed128cfdbe63bceab3dc0",
     "blueprint_sha": "e09765d70d6a6a3172141a3dc9710362d2554d26",
@@ -19,11 +19,9 @@
     "finding": "Every gpt/* implementation branch is an ancestor of main. No unique required implementation is stranded on any branch, so \u00a752's post-merge certification already holds for them."
   },
   "counts": {
-    "BUILT": 28,
-    "PARTIAL_BUILT": 1,
+    "BUILT": 32,
     "ABSENT": 1,
     "EXISTS_UPGRADE": 2,
-    "PARTIAL_ADJACENT": 3,
     "EXTERNAL_GATED": 1
   },
   "workstreams": [
@@ -40,8 +38,8 @@
     {
       "id": "WS2",
       "name": "Success contracts and verification",
-      "status": "PARTIAL_BUILT",
-      "note": "SuccessContract + VerificationRecord are mission-scoped and enforced; per-capability verifier adapters (\u00a76) remain.",
+      "status": "BUILT",
+      "note": "Verifier adapters per capability class (API readback, repository SHA, CI run, ledger event, screenshot). EngineReportVerifier exists solely to make 'the worker said OK' always UNVERIFIABLE.",
       "prompt_refs": [
         "\u00a76"
       ]
@@ -311,8 +309,8 @@
     {
       "id": "WS32",
       "name": "Privacy / permission registry",
-      "status": "PARTIAL_ADJACENT",
-      "note": "capability_grants + google_connections exist; no owner-readable unified registry with origin/expiry/last-use/revoke.",
+      "status": "BUILT",
+      "note": "PermissionRegistry: owner-readable grants with origin, expiry, last use, stale detection and revoke. Credential-shaped material and unlisted permissions are refused.",
       "prompt_refs": [
         "\u00a736"
       ]
@@ -329,8 +327,8 @@
     {
       "id": "WS34",
       "name": "Computer Interaction Fabric",
-      "status": "PARTIAL_ADJACENT",
-      "note": "Browser Fabric exists with typed ops and the exact 4 boundary-escalation states \u00a738 specifies; owner-approved deltas already create separate durable authorizations (browser_scope_authorizations). Generalising beyond the browser is the delta.",
+      "status": "BUILT",
+      "note": "ComputerInteractionFabric: closed set of typed operations (no RUN_ARBITRARY/EXECUTE/EVAL), per-type action ceilings, never A4 on any surface, browser boundary vocabulary reused unchanged.",
       "prompt_refs": [
         "\u00a738"
       ]
@@ -338,8 +336,8 @@
     {
       "id": "WS35",
       "name": "Development missions",
-      "status": "PARTIAL_ADJACENT",
-      "note": "Project Truth protocol + CI + acceptance ledgers exist; not modelled as Missions.",
+      "status": "BUILT",
+      "note": "Development missions served by RepositoryShaVerifier and CiRunVerifier through the same success-contract interface as every other capability class.",
       "prompt_refs": [
         "\u00a739"
       ]
@@ -393,5 +391,10 @@
     "Strategy PREFERRED needs 10 runs at >=90%; demotion at <60% over >=3 runs.",
     "Intent goes STALE after 90 days unmentioned; only the owner abandons one.",
     "3 eval dimensions declared unmeasurable without owner ground truth rather than estimated."
-  ]
+  ],
+  "remaining": {
+    "WS28": "Voice 2.0 \u2014 wake pipeline and signed transcripts exist; mission binding is Kotlin work plus a device gate for the P95 targets.",
+    "WS29": "Unified Android experience \u2014 six surfaces consuming the mission/understanding APIs. Kotlin, not yet written.",
+    "WS33": "Durable orchestration \u2014 Temporal is stack-locked at adoption phase 11 and not deployed. External gate by your own governance."
+  }
 }

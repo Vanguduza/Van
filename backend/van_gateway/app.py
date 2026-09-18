@@ -314,9 +314,11 @@ def create_app() -> FastAPI:
             return not (path.endswith("/cancel") or path.endswith("/message"))
         # §§33, 63.6 — the Understanding surface is the owner's. Hermes may
         # observe; only the owner confirms, corrects, rejects or reverts.
-        if path.startswith("/v1/understanding") or path in (
-            "/v1/technology-radar", "/v1/eval", "/v1/autonomy"
+        if path.startswith("/v1/understanding") or path.startswith("/v1/permissions") or (
+            path in ("/v1/technology-radar", "/v1/eval", "/v1/autonomy")
         ):
+            # §36 — revoking a permission is emphatically the owner's, so the
+            # only internal-control route on this surface is Hermes observing.
             return path == "/v1/understanding/observe"
         # Owner Android may inspect browser truth through authenticated GETs.
         # Browser mutations/assignments remain Hermes internal-control only.

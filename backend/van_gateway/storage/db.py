@@ -8,7 +8,7 @@ from typing import Any, AsyncIterator
 
 import aiosqlite
 
-SCHEMA_VERSION = 15
+SCHEMA_VERSION = 16
 
 MIGRATIONS: dict[int, str] = {
     1: """
@@ -1280,6 +1280,53 @@ MIGRATIONS: dict[int, str] = {
 
     CREATE INDEX IF NOT EXISTS idx_eval_dimension
       ON eval_runs(dimension, created_at_ms);
+    """,
+    16: """
+    -- Rev 1 §§34, 36, 38 — permissions the owner can read, and computer use.
+
+    -- §34/§36. One owner-readable place for every standing grant, with where it
+    -- came from and when it was last used. A grant nobody can see is a grant
+    -- nobody can revoke.
+    CREATE TABLE IF NOT EXISTS permission_grants (
+      grant_id TEXT PRIMARY KEY,
+      permission TEXT NOT NULL,
+      display_name TEXT NOT NULL,
+      scope TEXT NOT NULL DEFAULT '',
+      origin TEXT NOT NULL,
+      origin_evidence_ref TEXT,
+      granted_at_ms INTEGER NOT NULL,
+      expires_at_ms INTEGER,
+      last_used_at_ms INTEGER,
+      use_count INTEGER NOT NULL DEFAULT 0,
+      revoked_at_ms INTEGER,
+      revocation_reason TEXT
+    );
+
+    CREATE INDEX IF NOT EXISTS idx_permission_grants_live
+      ON permission_grants(revoked_at_ms, permission);
+
+    -- §38. The Browser Fabric generalised: a typed operation against any target
+    -- surface, bound to a mission, with its own evidence and verifier.
+    CREATE TABLE IF NOT EXISTS computer_operations (
+      operation_id TEXT PRIMARY KEY,
+      mission_id TEXT,
+      activity_id TEXT,
+      surface TEXT NOT NULL,
+      target_application TEXT NOT NULL,
+      operation_type TEXT NOT NULL,
+      action_class TEXT NOT NULL,
+      scope_json TEXT NOT NULL DEFAULT '{}',
+      checkpoint_ref TEXT,
+      evidence_ref TEXT,
+      verifier_type TEXT NOT NULL DEFAULT 'NONE',
+      state TEXT NOT NULL DEFAULT 'PENDING',
+      error_code TEXT,
+      started_at_ms INTEGER NOT NULL,
+      completed_at_ms INTEGER
+    );
+
+    CREATE INDEX IF NOT EXISTS idx_computer_operations_mission
+      ON computer_operations(mission_id, started_at_ms);
     """,
 }
 
