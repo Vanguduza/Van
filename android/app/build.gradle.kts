@@ -153,4 +153,10 @@ dependencies {
     testImplementation("junit:junit:4.13.2")
     testImplementation("org.jetbrains.kotlin:kotlin-test-junit:1.9.24")
     testImplementation("org.jetbrains.kotlinx:kotlinx-serialization-json:1.6.3")
+    // The mockable android.jar stubs org.json and every call throws
+    // "Method ... not mocked", so any local unit test over a parsed gateway
+    // payload dies on construction. This puts the reference implementation on
+    // the unit-test classpath ahead of the stub; the device still uses
+    // Android's own org.json at runtime.
+    testImplementation("org.json:json:20240303")
 }
