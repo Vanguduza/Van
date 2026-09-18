@@ -1,0 +1,43 @@
+{
+  "schema_version": 1,
+  "certification": "VAN_TRADING_CORE_WIP_RECONCILIATION_AND_LIVE_MAIN_QUALIFICATION",
+  "observed_at_utc": "2026-09-18T06:06:53Z",
+  "repository": "Vanguduza/Van",
+  "certified_commit": "47f213590598c81f83ae8a97f7eff8d93dbf1bfd",
+  "host": "van-trading-core",
+  "deployment_mode": "resume-existing-fast-forward-to-main",
+  "repository_reconciliation": {
+    "all_known_wip_branches_ahead_of_main": 0,
+    "superseded_pr_29_closed": true,
+    "closure_pr_32_merged": true
+  },
+  "qualification": {
+    "status": "GREEN",
+    "required_failures": 0,
+    "automation_fabric": "AUTOMATION_FABRIC_RUNTIME_GREEN",
+    "supabase_runtime": "SUPABASE_RUNTIME_GREEN",
+    "browser_runtime": "Stagehand 4.1.0 / Playwright 1.63.0 / Temporal 1.33.0",
+    "ledger_backend": "PostgresLedger",
+    "ledger_chain_ok": true,
+    "firewall": "GREEN",
+    "oracle_image_firewall": "ORACLE_IMAGE_FIREWALL_GREEN",
+    "supabase_loopback": "GREEN"
+  },
+  "services": {
+    "vati_vekl": "active",
+    "vati_commander": "active",
+    "vati_automation": "active",
+    "vati_supabase": "active",
+    "docker": "active"
+  },
+  "non_required_amber": [
+    "no session heartbeats yet because no trading account is enabled",
+    "MT5 is external to the ARM64 Trading Core and runs on the Windows bridge worker"
+  ],
+  "firstboot_marker": {
+    "present": false,
+    "accepted_as_blocker": false,
+    "reason": "This node was resumed in place and fast-forwarded to canonical main; the marker belongs to the fresh rebuild/firstboot path and is not fabricated."
+  },
+  "contains_secrets": false
+}
