@@ -181,7 +181,7 @@ class KnowledgeRuntime:
     @staticmethod
     def _provider_failure_status(code: str) -> ExecutionStatus:
         lowered = code.casefold()
-        if any(token in lowered for token in ("disabled", "unconfigured", "credential", "auth_required", "authorization_failed", "profile", "playwright_unavailable", "browser_unavailable")):
+        if any(token in lowered for token in ("disabled", "unconfigured", "credential", "auth_required", "authorization_failed", "profile", "browser_policy", "browser_fabric", "browser_unavailable")):
             return ExecutionStatus.PRECONDITION_FAILED
         if any(token in lowered for token in ("timeout", "unavailable", "still_processing", "connect")):
             return ExecutionStatus.RETRYABLE_FAILURE
