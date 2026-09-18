@@ -259,6 +259,30 @@ def test_automation_feature_flags_default_off():
     assert settings.automation_ingress_enabled is False
     assert settings.automation_egress_enabled is False
     assert settings.browser_enabled is False
-    assert settings.browser_semantic_max_tier == "L3"
     assert settings.automation_n8n_api_key == ""
     assert settings.automation_grant_signing_key == ""
+    # The autonomy ceiling deliberately lives in one place only —
+    # ``load_browser_policy()`` — so there is no second knob to drift from it.
+    assert not hasattr(settings, "browser_semantic_max_tier")
+
+
+def test_browser_autonomy_ceiling_never_widens_by_accident(monkeypatch):
+    """§§88, 378 — L5 is the owner's decision; a typo must not be read as consent."""
+    import sys
+
+    sys.path.insert(0, str(ROOT / "backend"))
+    from van_gateway.automation.policy import load_browser_policy, reset_policy_cache
+
+    monkeypatch.delenv("VAN_BROWSER_SEMANTIC_MAX_TIER", raising=False)
+    reset_policy_cache()
+    assert load_browser_policy().max_autonomy_tier == "L5"
+
+    # An unrecognised value falls back to the deterministic tier, not the ceiling.
+    monkeypatch.setenv("VAN_BROWSER_SEMANTIC_MAX_TIER", "L9")
+    reset_policy_cache()
+    assert load_browser_policy().max_autonomy_tier == "L3"
+
+    monkeypatch.setenv("VAN_BROWSER_SEMANTIC_MAX_TIER", "L2")
+    reset_policy_cache()
+    assert load_browser_policy().max_autonomy_tier == "L2"
+    reset_policy_cache()

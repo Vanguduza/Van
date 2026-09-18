@@ -77,7 +77,6 @@ class Settings(BaseSettings):
     browser_stagehand_model_provider: str = ""
     browser_stagehand_model_name: str = ""
     # Rev 1.2 review M3 / §378 — production stops at observe → deterministic action.
-    browser_semantic_max_tier: str = "L3"
 
     require_hermes_for_mutations: bool = True
     event_page_size: int = 100

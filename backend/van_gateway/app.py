@@ -29,6 +29,8 @@ from van_gateway.projects.router import ProjectRouter
 from van_gateway.reminders.service import ReminderService
 from van_gateway.reminders.timeparse import TimeParseError, parse_due_expression
 from van_gateway.automation.api import AutomationApi
+from van_gateway.automation.dispatch import AutomationDispatcher
+from van_gateway.automation.grants import RunGrantService
 from van_gateway.automation.health import AutomationHealthApi
 from van_gateway.automation.registry import AutomationRegistry, HotWorkflowIndex
 from van_gateway.command.authority import CommandAuthorityService
@@ -132,17 +134,32 @@ def create_app() -> FastAPI:
     reminders = ReminderService(store)
     decisions = DecisionService(store, attention)
     owner_runtime = OwnerRuntimeApi(store, settings)
-    automation_health = AutomationHealthApi(store, settings, degraded=degraded)
     automation_registry = AutomationRegistry(store)
     automation_hot_index = HotWorkflowIndex()
+    # One index, so `/v1/automation/health` reports the index work is routed
+    # through rather than an empty copy of it.
+    automation_health = AutomationHealthApi(
+        store, settings, degraded=degraded, hot_index=automation_hot_index
+    )
+    # The dispatcher shares the owner runtime's ActionRuntime and command
+    # authority: an automation run must meet the same single final authority
+    # check as everything else VAN does, not a second copy of it.
+    automation_dispatcher = AutomationDispatcher(
+        store,
+        actions=owner_runtime.actions,
+        authority=owner_runtime.authority,
+        registry=automation_registry,
+        grants=RunGrantService(store, signing_key=settings.automation_grant_signing_key),
+        client=automation_health.n8n,
+        enabled=settings.automation_enabled,
+    )
     automation = AutomationApi(
         store,
         settings,
         registry=automation_registry,
         hot_index=automation_hot_index,
-        standing=StandingAutomationAuthorityService(
-            store, CommandAuthorityService(store)
-        ),
+        standing=StandingAutomationAuthorityService(store, owner_runtime.authority),
+        dispatcher=automation_dispatcher,
     )
 
     trading = TradingService(
@@ -216,6 +233,7 @@ def create_app() -> FastAPI:
     app.state.automation = automation
     app.state.automation_registry = automation_registry
     app.state.automation_hot_index = automation_hot_index
+    app.state.automation_dispatcher = automation_dispatcher
     app.state.decisions = decisions
     app.state.projects = projects
     app.state.reminders = reminders

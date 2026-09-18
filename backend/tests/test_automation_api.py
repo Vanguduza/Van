@@ -110,6 +110,7 @@ async def test_every_automation_route_is_internal_control_only():
                 ("POST", "/v1/automation/route"),
                 ("POST", "/v1/automation/compile"),
                 ("POST", "/v1/automation/admit"),
+                ("POST", "/v1/automation/execute"),
                 ("POST", "/v1/automation/generate"),
                 ("POST", "/v1/automation/hot/publish"),
                 ("POST", "/v1/automation/standing-intents"),
@@ -561,3 +562,224 @@ async def test_standing_intent_without_an_owner_command_is_refused(fabric):
         ("intent-statements",),
     )
     assert int(row["enabled"]) == 0
+
+
+# --------------------------------------------------------------------- execute
+
+
+ACTION_ID = "automation.trading.statement.collect"
+SIGNING_KEY = "api-test-signing-key"
+
+
+def _n8n_transport(engine_success: bool = True):
+    import json
+
+    import httpx
+
+    def handler(request: httpx.Request) -> httpx.Response:
+        if request.url.path.endswith("/settings"):
+            return httpx.Response(200, json={"versionCli": "2.39.7"})
+        if request.url.path.endswith("/run"):
+            body = json.loads(request.content)
+            # §§159-160 — the engine gets a run-scoped grant, never VAN's own token.
+            assert body["capability_grant"]
+            assert "X-Van-Internal-Token" not in request.headers
+            return httpx.Response(
+                200, json={"executionId": "n8n-exec-1", "success": engine_success}
+            )
+        return httpx.Response(404)
+
+    return httpx.MockTransport(handler)
+
+
+class _Observer:
+    def __init__(self, result: dict) -> None:
+        self.result = result
+
+    async def observe(self, spec, context):
+        return self.result
+
+
+@pytest_asyncio.fixture
+async def executable(tmp_path):
+    """The API with a dispatcher behind it, wired exactly as `create_app` does."""
+    from tests.conftest_automation import (
+        make_action_runtime,
+        sample_artifact,
+        sample_capability,
+    )
+    from van_gateway.action.models import ActionDefinition, VerifierType
+    from van_gateway.automation.dispatch import AutomationDispatcher
+    from van_gateway.automation.external_runtime import (
+        ExternalRuntimeRegistry,
+        ReadinessEvidence,
+    )
+    from van_gateway.automation.grants import RunGrantService
+    from van_gateway.automation.n8n_client import N8nManagementClient
+    from van_gateway.automation.verifier import WorkflowVerifier
+    from van_gateway.models import PrincipalType
+
+    store = await make_store(tmp_path)
+    await enroll_device(store)
+    authority = CommandAuthorityService(store)
+    await seed_snapshot(store, "ctx-owner-1", "cmd-owner-1")
+    await seal_owner_command(authority, effective=ActionClass.A3)
+
+    actions = await make_action_runtime(store)
+    await actions.register(
+        ActionDefinition(
+            action_id=ACTION_ID,
+            action_class=ActionClass.A2,
+            mutates_state=False,
+            allowed_principals={
+                PrincipalType.OWNER_DEVICE,
+                PrincipalType.HERMES_AGENT,
+                PrincipalType.AUTOMATION,
+            },
+            verifier_type=VerifierType.READ_BACK,
+        )
+    )
+
+    registry = AutomationRegistry(store)
+    await registry.upsert_capability(sample_capability(action_class=ActionClass.A2))
+    await registry.record_artifact(sample_artifact(lifecycle=WorkflowLifecycle.ADMITTED))
+
+    runtime_registry = ExternalRuntimeRegistry(store)
+    await runtime_registry.record_evidence(
+        ReadinessEvidence(
+            capability="n8n", evidence_pointer="gateway://automation/cert/1",
+            runtime_version="2.39.7",
+        )
+    )
+    dispatcher = AutomationDispatcher(
+        store,
+        actions=actions,
+        authority=authority,
+        registry=registry,
+        grants=RunGrantService(store, signing_key=SIGNING_KEY),
+        client=N8nManagementClient(
+            runtime_registry, base_url="http://127.0.0.1:5678/api/v1", api_key="k",
+            enabled=True, expected_version="2.39.7", transport=_n8n_transport(),
+        ),
+        verifier=WorkflowVerifier(
+            {"READ_BACK": _Observer({"exists": True, "evidence_pointer": "gateway://evidence/1"})}
+        ),
+        enabled=True,
+    )
+    api = AutomationApi(
+        store,
+        get_settings(),
+        registry=registry,
+        hot_index=HotWorkflowIndex(),
+        standing=StandingAutomationAuthorityService(store, authority),
+        policy=policy_with_domains(DOMAIN),
+        dispatcher=dispatcher,
+    )
+    app = FastAPI()
+    app.include_router(api.router)
+    async with AsyncClient(transport=ASGITransport(app=app), base_url="http://test") as ac:
+        yield ac, api, store
+
+
+def _execute_body(**overrides) -> dict:
+    body = {
+        "capability_id": "wfcap_statements",
+        "action_id": ACTION_ID,
+        "command_id": "cmd-owner-1",
+        "snapshot_id": "ctx-owner-1",
+        "requested_by": "dev-owner-1",
+        "principal_type": "OWNER_DEVICE",
+        "inputs": {"broker_alias": "primary"},
+        "turn_id": "turn-1",
+    }
+    body.update(overrides)
+    return body
+
+
+async def test_execute_reports_owner_success_only_when_verified(executable):
+    """§17 — an engine success is not an owner success, and the two are distinct."""
+    ac, _api, _store = executable
+    response = await ac.post("/v1/automation/execute", headers=HEADERS, json=_execute_body())
+    assert response.status_code == 200, response.text
+    body = response.json()
+    assert body["status"] == "VERIFIED_SUCCESS"
+    assert body["owner_success"] is True
+    assert body["verification_outcome"] == "VERIFIED"
+    assert body["evidence_pointer"]
+
+
+async def test_execute_refuses_a_capability_that_was_never_admitted(executable):
+    """§36 — nothing executes before admission, on any path."""
+    from tests.conftest_automation import sample_capability
+
+    ac, api, _store = executable
+    await api.registry.upsert_capability(
+        sample_capability(capability_id="wfcap_proposed", action_class=ActionClass.A2)
+    )
+    response = await ac.post(
+        "/v1/automation/execute", headers=HEADERS,
+        json=_execute_body(capability_id="wfcap_proposed"),
+    )
+    assert response.status_code == 409
+    assert response.json()["detail"]["error"] == "CAPABILITY_NOT_ADMITTED"
+
+
+async def test_execute_refuses_a_capability_that_does_not_exist(executable):
+    ac, _api, _store = executable
+    response = await ac.post(
+        "/v1/automation/execute", headers=HEADERS,
+        json=_execute_body(capability_id="wfcap_never_heard_of"),
+    )
+    assert response.status_code == 404
+    assert response.json()["detail"]["error"] == "CAPABILITY_UNKNOWN"
+
+
+async def test_execute_refuses_an_unknown_action(executable):
+    ac, _api, _store = executable
+    response = await ac.post(
+        "/v1/automation/execute", headers=HEADERS, json=_execute_body(action_id="nope")
+    )
+    assert response.status_code == 404
+    assert response.json()["detail"]["error"] == "UNKNOWN_ACTION"
+
+
+async def test_execute_refuses_without_a_sealed_command_authority(executable):
+    """The endpoint carries no approval of its own, so an unsealed command fails."""
+    ac, _api, _store = executable
+    response = await ac.post(
+        "/v1/automation/execute", headers=HEADERS,
+        json=_execute_body(command_id="cmd-never-sealed"),
+    )
+    assert response.status_code == 403
+    assert response.json()["detail"]["error"] == "AUTHORITY_DENIED"
+
+
+async def test_execute_is_unavailable_without_a_dispatcher(fabric):
+    """An unconfigured dispatcher is a 503, never a silent local execution."""
+    ac, _api, _store, _auth = fabric
+    response = await ac.post("/v1/automation/execute", headers=HEADERS, json=_execute_body())
+    assert response.status_code == 503
+    assert response.json()["detail"] == "AUTOMATION_DISPATCH_UNCONFIGURED"
+
+
+async def test_execute_refuses_a_principal_the_command_was_not_sealed_for(executable):
+    """The stated principal is compared against the sealed record, not trusted."""
+    ac, _api, _store = executable
+    response = await ac.post(
+        "/v1/automation/execute", headers=HEADERS,
+        json=_execute_body(principal_type="HERMES_AGENT"),
+    )
+    assert response.status_code == 403
+    assert response.json()["detail"]["detail"] == "principal_mismatch"
+
+
+def test_a_caller_cannot_state_its_own_postcondition():
+    """§165 — verification strength is a property of the capability, not the run.
+
+    Asserted on the request model rather than on a response, because the point
+    is that there is no field through which a run could ask for a weaker check.
+    """
+    from van_gateway.automation.api import ExecuteBody
+
+    fields = set(ExecuteBody.model_fields)
+    assert not fields & {"postcondition", "verifier_type", "owner_approved", "action_class"}

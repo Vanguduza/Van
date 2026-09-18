@@ -24,6 +24,7 @@ from van_gateway.automation.cold import (
     TemplateBackedProposer,
 )
 from van_gateway.automation.compiler import AutomationCompiler
+from van_gateway.automation.dispatch import AutomationDispatcher, DispatchError
 from van_gateway.automation.models import (
     AutomationWorkflowArtifact,
     IntentSignature,
@@ -36,6 +37,7 @@ from van_gateway.automation.policy import AutomationPolicy, PolicyError, load_au
 from van_gateway.automation.registry import AutomationRegistry, HotWorkflowIndex, RegistryError
 from van_gateway.automation.router import CapabilityRouter, RouteRequest
 from van_gateway.automation.templates import TemplateError, TemplateLibrary
+from van_gateway.automation.verifier import PostconditionSpec
 from van_gateway.automation.validator import WorkflowValidator
 from van_gateway.command.standing import (
     StandingAuthorityError,
@@ -43,7 +45,7 @@ from van_gateway.command.standing import (
 )
 from van_gateway.config import Settings
 from van_gateway.google.control import GoogleControlAuthError, verify_internal_control
-from van_gateway.models import ActionClass
+from van_gateway.models import ActionClass, PrincipalType
 from van_gateway.storage.db import Store
 
 
@@ -86,6 +88,28 @@ class GenerateBody(BaseModel):
     credential_aliases: list[str] = Field(default_factory=list)
 
 
+class ExecuteBody(BaseModel):
+    """§222 — execute an admitted capability under an existing command authority.
+
+    There is no field here for an action class or an approval: both come from
+    the sealed command record, which is why this endpoint cannot be used to
+    escalate one. A standing run passes `standing_authority_id` instead of an
+    owner command of its own.
+    """
+
+    capability_id: str
+    action_id: str
+    command_id: str
+    snapshot_id: str
+    requested_by: str
+    #: Stated, not defaulted: it is compared against the sealed command record,
+    #: and a default that silently mismatched would look like a policy refusal.
+    principal_type: PrincipalType
+    inputs: dict[str, Any] = Field(default_factory=dict)
+    turn_id: str | None = None
+    standing_authority_id: str | None = None
+
+
 class PublishHotBody(BaseModel):
     capability_id: str
     signature: IntentSignature
@@ -121,12 +145,14 @@ class AutomationApi:
         hot_index: HotWorkflowIndex,
         standing: StandingAutomationAuthorityService,
         policy: AutomationPolicy | None = None,
+        dispatcher: AutomationDispatcher | None = None,
     ) -> None:
         self.store = store
         self.settings = settings
         self.registry = registry
         self.hot_index = hot_index
         self.standing = standing
+        self.dispatcher = dispatcher
         self.policy = policy or load_automation_policy()
         self.templates = TemplateLibrary()
         self.validator = WorkflowValidator(self.policy)
@@ -325,6 +351,73 @@ class AutomationApi:
             if result.retrieval is not None:
                 payload["prompt_contract"] = result.retrieval.as_prompt_contract()
             return payload
+
+        @router.post("/execute")
+        async def execute(
+            body: ExecuteBody, x_van_internal_token: str | None = Header(default=None)
+        ):
+            """§222 — run an admitted capability, verified independently (§80).
+
+            Everything that decides whether this is permitted lives behind the
+            dispatcher: the Action Runtime re-derives the canonical rules and the
+            command authority record supplies the class and any owner approval.
+            The endpoint contributes no judgement of its own.
+            """
+            self._require_internal(x_van_internal_token)
+            self._require_enabled()
+            if self.dispatcher is None:
+                raise HTTPException(status_code=503, detail="AUTOMATION_DISPATCH_UNCONFIGURED")
+
+            # §165 — the postcondition comes from what the capability declared at
+            # compile time, never from the caller. A run cannot ask to be verified
+            # more weakly than the workflow it is running.
+            capability = await self.registry.get_capability(body.capability_id)
+            if capability is None:
+                raise HTTPException(
+                    status_code=404,
+                    detail={"error": "CAPABILITY_UNKNOWN", "detail": body.capability_id},
+                )
+            postcondition = (
+                PostconditionSpec(kind=capability.verifier_type)
+                if capability.verifier_type not in ("", "NONE")
+                else None
+            )
+            try:
+                result = await self.dispatcher.dispatch(
+                    capability_id=body.capability_id, action_id=body.action_id,
+                    command_id=body.command_id, principal_type=body.principal_type,
+                    requested_by=body.requested_by, snapshot_id=body.snapshot_id,
+                    inputs=body.inputs, turn_id=body.turn_id,
+                    postcondition=postcondition,
+                    standing_authority_id=body.standing_authority_id,
+                )
+            except DispatchError as exc:
+                status = {
+                    "AUTOMATION_FABRIC_DISABLED": 503,
+                    "AUTOMATION_GRANTS_UNCONFIGURED": 503,
+                    "CAPABILITY_NOT_ADMITTED": 409,
+                    "CAPABILITY_UNKNOWN": 404,
+                    "UNKNOWN_ACTION": 404,
+                    "AUTHORITY_DENIED": 403,
+                }.get(exc.code, 400)
+                raise HTTPException(
+                    status_code=status, detail={"error": exc.code, "detail": exc.detail}
+                ) from exc
+            return {
+                "run_id": result.run_id,
+                "capability_id": result.capability_id,
+                "artifact_id": result.artifact_id,
+                "status": result.status.value,
+                # §17 — engine success is not owner success, so the distinction is
+                # carried in the response rather than collapsed into `status`.
+                "owner_success": result.owner_success,
+                "verification_outcome": (
+                    result.verification_outcome.value if result.verification_outcome else None
+                ),
+                "evidence_pointer": result.evidence_pointer,
+                "error_code": result.error_code,
+                "detail": result.detail,
+            }
 
         @router.post("/hot/publish")
         async def publish_hot(
