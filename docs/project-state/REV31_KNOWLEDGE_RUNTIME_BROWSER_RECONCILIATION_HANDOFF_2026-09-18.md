@@ -6,6 +6,9 @@
 **Certified parent/base:** `87f5a225b12a8c6b5a1dc1758cd6fc8dabb0fd00`  
 **Knowledge-runtime implementation commit:** `5fc4972`  
 **Acceptance-alignment commit:** `714cbf7`  
+**GitHub implementation equivalent:** `e6a50f292bb6ad374c7ce3856b9b3c48a282b786`  
+**GitHub acceptance equivalents:** `c3acc04228cfe54fb46cd0a08a662c774b69455a`, `3d86f2a45586b3ea32fa22a4b4b797147a7e8411`  
+**Note:** the local Oracle checkout could not authenticate for HTTPS push, so the GitHub integration published content-equivalent commits; use the GitHub branch head as reconciliation authority.  
 **Purpose:** freeze and publish the complete Rev 3.1 knowledge-runtime work so it can be reconciled with the parallel Browser Harness / Stagehand integration work. The browser-integration agent owns the final reconciliation and remaining closure after this handoff.
 
 ---
