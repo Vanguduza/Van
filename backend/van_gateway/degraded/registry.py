@@ -167,6 +167,16 @@ CATALOG: dict[DegradedCode, DegradedCapability] = {
         will_not_do="Deterministic browser workflows and browser evidence capture",
         restore_action="Start the pinned browser-harness runtime and re-run tools/certification/certify_browser_fabric.py",
     ),
+    DegradedCode.COMPUTER_USE_NO_SURFACE_WORKER: DegradedCapability(
+        code=DegradedCode.COMPUTER_USE_NO_SURFACE_WORKER,
+        broken="Computer Interaction Fabric has no worker for any surface",
+        still_works="Browser fabric, n8n automation, Google and native capability paths, VATI T0",
+        will_not_do="Desktop, terminal and mobile operations; nothing is queued for later",
+        restore_action=(
+            "Build and register a surface worker, then add its Surface to "
+            "computer_use.fabric.SURFACE_WORKERS"
+        ),
+    ),
     DegradedCode.BROWSER_SEMANTIC_UNAVAILABLE: DegradedCapability(
         code=DegradedCode.BROWSER_SEMANTIC_UNAVAILABLE,
         broken="Semantic browser (Stagehand) unreachable or model provider unconfigured",

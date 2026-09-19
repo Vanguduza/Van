@@ -579,7 +579,11 @@ def create_app() -> FastAPI:
         """
         if path.startswith("/v1/runtime/"):
             return ControlScope.RUNTIME
-        if path in {"/v1/automation/health", "/v1/browser/health"}:
+        # P2-CU-001 adds the computer-use fabric's health on the same terms as the other
+        # two: it reports which surfaces have a worker, which is runtime shape.
+        if path in {
+            "/v1/automation/health", "/v1/browser/health", "/v1/computer-use/health",
+        }:
             return ControlScope.RUNTIME
         # Gate 11. Device telemetry is excluded on purpose: its producer is the
         # owner's paired device, so it authenticates as a device like every other
@@ -629,7 +633,11 @@ def create_app() -> FastAPI:
             return True
         # Rev 1.3 §219 — automation/browser health is an internal control surface;
         # it exposes runtime identity and governance state, never an owner route.
-        if path in {"/v1/automation/health", "/v1/browser/health"}:
+        # P2-CU-001 adds the computer-use fabric on the same terms: it reports which
+        # surfaces have a worker, which is runtime shape, not owner-facing work.
+        if path in {
+            "/v1/automation/health", "/v1/browser/health", "/v1/computer-use/health",
+        }:
             return True
         # Gate 11. The operator surface is internal control; device telemetry is not,
         # for the reason given in control_scope_for.

@@ -22,7 +22,7 @@
   "counts": {
     "P0": 15,
     "P1": 30,
-    "P2": 19,
+    "P2": 20,
     "P3": 25,
     "P4": 7
   },
@@ -4081,6 +4081,51 @@
         "residual": "A free-form command still cannot be verified, and neither can a web search or a context read.",
         "residual_class": "DELIBERATE_SCOPE",
         "residual_reason": "The gateway does not know how to check an arbitrary instruction, and a search and a read leave nothing it can observe independently. Inventing a postcondition for any of them is how a mission ends up 'verified' on nothing, which is the defect P0-VERIFY-001 closed. Each carries its reason on the mission instead."
+      }
+    },
+    {
+      "id": "P2-CU-001",
+      "severity": "P2",
+      "domain": "computer-use",
+      "title": "The Computer Interaction Fabric has no executor, and nothing said so",
+      "description": "computer_use/fabric.py declares twelve typed operations with no RUN_ARBITRARY, real A4/A5 refusals, a per-type action-class ceiling, a mutation-needs-a-verifier rule and a durable computer_operations ledger. No worker exists for BROWSER, DESKTOP, TERMINAL or MOBILE, and ComputerInteractionFabric was constructed only by its own tests. begin() therefore inserted a PENDING row for an operation nobody would perform, and every capability matrix that listed the fabric read it as built because the module compiles and its refusals pass.",
+      "requirement": "docs/VAN_CONSOLIDATED_DEPLOYMENT_READINESS_CLOSURE_BLUEPRINT_REV_1.md",
+      "authority": "VAN Consolidated Deployment-Readiness Closure Blueprint Rev 2",
+      "repository_evidence": [
+        "backend/van_gateway/computer_use/fabric.py:116",
+        "backend/van_gateway/coherence/owner_status.py:195",
+        "backend/van_gateway/storage/db.py:1409"
+      ],
+      "runtime_evidence": [],
+      "affected_components": [
+        "computer_use",
+        "coherence"
+      ],
+      "root_cause": "A boundary written ahead of the thing it bounds, with nothing to mark the gap. That is the right order to build in; what was missing was a way for the system to say so.",
+      "remediation": "Construct the fabric in production, refuse every surface that has no worker before the ledger write, and report which surfaces are staffed on an internal-control health route.",
+      "impact": "A caller could record an operation that would never be performed, and the owner would read a PENDING row as queued work. At the programme level it meant a capability matrix that listed a surface VAN cannot act through.",
+      "validation_gate": "G2",
+      "current_status": "CLOSED",
+      "remediation_gate": "G2",
+      "closure": {
+        "state": "INTEGRATED_AND_EVIDENCED",
+        "summary": "The recorded disposition was delete — the audit's 'delete or fold' and the closure blueprint's owner decision 6, which described the module as a stub. Reading it corrects that description and therefore the decision: the refusals are real, ordered and tested, the ledger is durable, and what is missing is a worker. Deleting a hardened boundary because the thing it bounds is unbuilt gets the order backwards; re-deriving it later under delivery pressure is how a RUN_ARBITRARY appears. Decision 6 in the blueprint is corrected in place, with the deletion instruction kept as the reversal.\n\nSo the module stays and the gap becomes enforced state. SURFACE_WORKERS is empty; begin() raises OPERATION_NO_WORKER_FOR_SURFACE, last among the refusals and before the insert. Last because an absolute prohibition must not read as a configuration gap — 'no worker for DESKTOP' invites someone to start a worker, and an A4 request reported that way would look one worker away from permitted. Before the insert because a PENDING row for work nobody will do is the owner being told it is queued.\n\nComputerInteractionFabric is constructed in create_app for the first time, /v1/computer-use/health reports which surfaces are staffed under the RUNTIME control scope, and COMPUTER_USE_NO_SURFACE_WORKER names what still works. A test asserts that registering a surface is the whole change needed to make the fabric work, so the guard reports a gap rather than hiding rot. Three mutations run, three caught.",
+        "changed": [
+          "backend/van_gateway/computer_use/fabric.py",
+          "backend/van_gateway/automation/health.py",
+          "backend/van_gateway/degraded/registry.py",
+          "backend/van_gateway/models.py",
+          "backend/van_gateway/app.py",
+          "docs/VAN_CONSOLIDATED_DEPLOYMENT_READINESS_CLOSURE_BLUEPRINT_REV_1.md"
+        ],
+        "verified_by": [
+          "backend/tests/test_permissions_computeruse_verifiers.py",
+          "backend/tests/test_automation_health_api.py"
+        ],
+        "runtime_evidence": [],
+        "residual": "VAN still cannot act on a desktop, a terminal or a mobile surface, and the browser surface is served by the browser fabric rather than this one.",
+        "residual_class": "DELIBERATE_SCOPE",
+        "residual_reason": "No surface worker has been built, and building one is a programme decision rather than a closure step. The refusal, the health route and the degraded entry make that state observable instead of implied, which is what the finding was about. Routing browser work through this fabric as well would give the owner two accounts of one task, the coherence defect P2-COH-001 closed."
       }
     }
   ],

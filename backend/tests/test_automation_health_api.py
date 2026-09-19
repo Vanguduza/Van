@@ -130,3 +130,45 @@ def test_governance_state_is_read_from_the_decision_files():
     assert state["owner_decisions_missing"] == []
     assert state["owner_decisions_pending"] == []
     assert state["production_activation_permitted"] is True
+
+
+async def test_computer_use_health_requires_internal_control(client):
+    ac, _app = client
+    assert (await ac.get("/v1/computer-use/health")).status_code in (401, 403)
+
+
+async def test_computer_use_health_reports_no_worker_for_any_surface(client):
+    """P2-CU-001 — the fabric's missing executor, said out loud.
+
+    Every matrix that listed the Computer Interaction Fabric read it as built, because the
+    module compiles and its refusals are real. What it has no worker for is every surface,
+    and until this endpoint existed nothing in the running system said so.
+    """
+    ac, _app = client
+    body = (await ac.get("/v1/computer-use/health", headers=HEADERS)).json()
+    assert body["capability"] == "computer_interaction_fabric"
+    assert body["surfaces"] == {
+        "BROWSER": False, "DESKTOP": False, "TERMINAL": False, "MOBILE": False,
+    }
+    assert body["surfaces_with_a_worker"] == []
+    # §38 — the constraint that is the whole value of the fabric, reported not assumed.
+    assert body["typed_operations_only"] is True
+    assert body["arbitrary_execution_primitive"] is None
+    assert body["max_action_class"] == "A3"
+    # §421 — degradation is scoped. Nothing else stops because this has no worker.
+    assert body["degradation_scope"] == {
+        "browser_fabric_unaffected": True,
+        "native_and_automation_paths_unaffected": True,
+        "vati_t0_unaffected": True,
+    }
+
+
+async def test_computer_use_degradation_names_what_still_works(client):
+    ac, app = client
+    await ac.get("/v1/computer-use/health", headers=HEADERS)
+    snapshot = {entry.code.value: entry for entry in app.state.degraded.snapshot()}
+    entry = snapshot["COMPUTER_USE_NO_SURFACE_WORKER"]
+    assert "VATI" in entry.still_works
+    assert "Browser fabric" in entry.still_works
+    # The restore action has to name the actual change, or it is a shrug in a field.
+    assert "SURFACE_WORKERS" in entry.restore_action
