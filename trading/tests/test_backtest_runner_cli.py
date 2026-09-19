@@ -104,9 +104,19 @@ def test_runner_startup_blocks_on_orphan_and_owner_halt(eurusd):
     assert run.on_bar(bars[:80], now_ms=bars[79].end_ms, last_quote_ms=bars[79].end_ms).decision == "NEW_TRADES_BLOCKED"
     clean = SessionRunner(DecisionCycle(cfg=cfg, adapter=PaperAdapter(venue="paper", account_alias="fx_primary"), ledger=Ledger(), engine=fx_engine(cfg), cost_fn=lambda st: Decimal("0.0003"), calendar=FX_CALENDAR, events=EventMatrix()))
     assert clean.startup(now_ms=1).permit_new_orders and clean.permit_new_orders
-    with pytest.raises(PermissionError):
-        clean.owner_halt(now_ms=2, owner_signature_ref="")
-    clean.owner_halt(now_ms=2, owner_signature_ref="sig:owner")
+    from conftest_owner_authority import OwnerAuthorityHarness
+
+    owner = OwnerAuthorityHarness()
+    clean.authority = owner.verifier
+    # P0-TRADE-001 — both of these used to be accepted; the second was the happy path.
+    for refused in ("", "sig:owner"):
+        with pytest.raises(PermissionError):
+            clean.owner_halt(now_ms=2, owner_signature_ref=refused)
+        assert clean.permit_new_orders, "trading stopped on an unverifiable halt"
+    clean.owner_halt(
+        now_ms=2,
+        owner_signature_ref=owner.token(act="owner-halt", subject=cfg.session_id, issued_at_unix=1),
+    )
     assert clean.on_bar(bars[:80], now_ms=bars[79].end_ms, last_quote_ms=bars[79].end_ms).decision == "NEW_TRADES_BLOCKED"
 
 
@@ -116,10 +126,20 @@ def test_zse_session_produces_owner_ticket():
                               board_lot=Decimal("100"), adv_20d=Decimal("120000"), liquidity_haircut=Decimal("0.03"), round_trip_cost_pct=Decimal("0.044"))
     m = mandate_dict(venue="zse", instruments=["DELTA"], allowed_strategies=["ZSE-VALUE-ROTATION-01"], mode="LIMITED_LIVE", weekend_hold_allowed=True, max_open_stop_risk="0.02", max_risk_per_trade="0.01", account_alias="zse_primary")
     cfg = SessionConfig(symbol="DELTA", base="DELTA", quote="ZiG", venue="zse", account_alias="zse_primary", contract=contract, mandate_dict=m, session_id="zse-1", software_stops=True, time_in_force="GTC30")
-    reg = CapsuleRegistry.load_dir(REG)
-    reg.promote("ZSE-VALUE-ROTATION-01", __import__("vati.risk", fromlist=["StrategyState"]).StrategyState.BACKTEST, approval_signature_ref="sig", evidence_refs=["bt"], approved_at_unix=1)
-    for st in ("VALIDATION", "DEMO", "SHADOW", "LIMITED_LIVE"):
-        reg.promote("ZSE-VALUE-ROTATION-01", __import__("vati.risk", fromlist=["StrategyState"]).StrategyState(st), approval_signature_ref="sig", evidence_refs=["bt", "shadow"], approved_at_unix=1)
+    from conftest_owner_authority import OwnerAuthorityHarness
+
+    owner = OwnerAuthorityHarness()
+    reg = CapsuleRegistry.load_dir(REG, authority=owner.verifier)
+    StrategyState = __import__("vati.risk", fromlist=["StrategyState"]).StrategyState
+    # Each step up the ladder needs its own owner authority, named for the state it grants.
+    for st in ("BACKTEST", "VALIDATION", "DEMO", "SHADOW", "LIMITED_LIVE"):
+        reg.promote(
+            "ZSE-VALUE-ROTATION-01", StrategyState(st),
+            approval_signature_ref=owner.token(
+                act="capsule-promote", subject=f"ZSE-VALUE-ROTATION-01:{st}", issued_at_unix=1
+            ),
+            evidence_refs=["bt", "shadow"], approved_at_unix=1,
+        )
     engine = OpportunityEngine(reg, {"ZSE-VALUE-ROTATION-01": STRATEGY_IMPLEMENTATIONS["ZSE-VALUE-ROTATION"](strategy_id="ZSE-VALUE-ROTATION-01")}, TradingMandate.from_mapping(m))
     snap = ZseSnapshot("DELTA", "ZSE", Decimal("25.00"), Decimal("120000"), 18, Decimal("0.02"), Decimal("0.8"), 40, None, CurrencyRegime.ELEVATED, Decimal("0.044"), Decimal("0.03"))
     adapter = OwnerTicketAdapter(equity=Decimal("1000000"), csd_verified=True)

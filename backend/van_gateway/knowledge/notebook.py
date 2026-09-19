@@ -258,6 +258,21 @@ class NotebookEnterpriseProvider:
     async def get_notebook(self, notebook_id: str) -> dict[str, Any]:
         return await self._request("GET", f"/notebooks/{quote(notebook_id)}")
 
+    async def get_source(self, notebook_id: str, source_name: str) -> dict[str, Any]:
+        """One named source, read back on its own.
+
+        P1-VERIFY-004 — the mission-level contract for a source add or delete was checking
+        that the *notebook* still existed, which a failed source mutation satisfies. The
+        per-source endpoint was already used inside `delete_sources`; it was simply not
+        reachable from the verifier, so the mission had nothing to bind to but the
+        notebook. `source_name` may be a bare id or a fully-qualified resource name; the
+        provider addresses sources by id.
+        """
+        source_id = source_name.rsplit("/", 1)[-1]
+        return await self._request(
+            "GET", f"/notebooks/{quote(notebook_id)}/sources/{quote(source_id)}"
+        )
+
     async def list_recent(self, page_size: int = 100) -> list[dict[str, Any]]:
         size = max(1, min(page_size, 500))
         body = await self._request("GET", f"/notebooks:listRecentlyViewed?pageSize={size}")

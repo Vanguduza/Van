@@ -1,0 +1,418 @@
+#!/usr/bin/env python3
+"""Maturity gate — the control that would have prevented most of the audit's findings.
+
+The whole-system audit found the same defect shape over and over: a component was built,
+never wired to a producer or a consumer, and then described in a canonical document as
+BUILT. Twenty classes in the cognition layer had no production caller at all. The tests
+passed, the code was real, and nobody could tell the difference from the outside.
+
+This gate makes that shape a CI failure rather than a discovery. It enforces, mechanically:
+
+  1. Every finding in the register is assigned to a remediation gate.
+  2. Every non-integrated component carries exactly one disposition.
+  3. A component may only claim the INTEGRATED_AND_EVIDENCED terminal state when it names
+     a producer, a consumer, a production caller, tests and runtime evidence.
+  4. A component claiming DELIBERATELY_REMOVED proves it, per its own removal_assertion:
+     the file is absent, or the named symbols are absent from a file that survives.
+  5. A finding may only be CLOSED when it names the change, the tests that prove it and
+     the evidence, and every cited path exists.
+  6. Bidirectional coverage: no orphan finding, no orphan component.
+  7. Forbidden production routes stay absent.
+
+Run:  python3 tools/ci/maturity_gate.py [--strict]
+
+Exit 0 = gate passes. Exit 1 = a claim is not backed. Exit 2 = the ledgers are unreadable.
+"""
+
+from __future__ import annotations
+
+import argparse
+import json
+import re
+import sys
+from pathlib import Path
+from collections import Counter
+
+ROOT = Path(__file__).resolve().parents[2]
+FINDINGS = ROOT / "evidence" / "van-system-audit" / "findings.json"
+COMPONENTS = ROOT / "evidence" / "van-system-audit" / "component_ledger.json"
+BLUEPRINT = ROOT / "docs" / "VAN_FINISHED_PRODUCT_BLUEPRINT_REV_1.md"
+
+TERMINAL_STATES = {
+    "INTEGRATED_AND_EVIDENCED",
+    "DELIBERATELY_REMOVED_CANON_CORRECTED",
+    "EXTERNALLY_BLOCKED_REPOSITORY_COMPLETE",
+}
+
+#: Required when a component claims it is integrated. These are the maturity invariant's
+#: machine-checkable elements; the human-judged ones (failure semantics, degraded behaviour)
+#: are gate-review questions, not CI assertions.
+INTEGRATION_EVIDENCE_FIELDS = (
+    "producer",
+    "consumer",
+    "production_caller",
+    "tests",
+    "runtime_evidence",
+)
+
+#: Routes that must never exist in the production application. The audit found a live
+#: Google transport could be hot-swapped for a fake on the running app.
+FORBIDDEN_PRODUCTION_ROUTES = (
+    ("/v1/google/test-transport", ROOT / "backend" / "van_gateway" / "app.py"),
+)
+
+
+class Failure(Exception):
+    """A claim that the repository does not back."""
+
+
+def _load(path: Path) -> dict:
+    if not path.is_file():
+        raise Failure(f"ledger missing: {path.relative_to(ROOT)}")
+    try:
+        return json.loads(path.read_text(encoding="utf-8"))
+    except json.JSONDecodeError as exc:
+        raise Failure(f"ledger is not valid JSON: {path.relative_to(ROOT)}: {exc}") from exc
+
+
+def check_findings_assigned(findings: dict) -> list[str]:
+    """Every finding must name the gate that closes it."""
+    problems = []
+    seen_ids = set()
+    for f in findings.get("findings", []):
+        fid = f.get("id")
+        if not fid:
+            problems.append("a finding has no id")
+            continue
+        if fid in seen_ids:
+            problems.append(f"{fid}: duplicate finding id")
+        seen_ids.add(fid)
+        if not f.get("remediation_gate"):
+            problems.append(f"{fid}: no remediation_gate — an unassigned finding is a planning defect")
+        if f.get("current_status") not in {"OPEN", "CLOSED", "IN_PROGRESS", "SUPERSEDED"}:
+            problems.append(f"{fid}: current_status {f.get('current_status')!r} is not a recognised state")
+    return problems
+
+
+#: Required on a finding that claims CLOSED. Without this the register has the same hole
+#: the audit found in the product: a status anybody can assert and nobody can check.
+CLOSURE_FIELDS = ("summary", "changed", "verified_by", "state")
+
+#: The three ways a finding is allowed to end. "CLOSED" on its own is the same collapse the
+#: audit forbids one level down, where a capability may not be called simply "implemented":
+#: a finding whose remediation shipped, one whose subject was deleted and whose canon was
+#: corrected, and one the repository has finished but cannot finish alone are three
+#: different outcomes, and an owner reading the register is entitled to know which.
+TERMINAL_STATES = {
+    "INTEGRATED_AND_EVIDENCED",
+    "DELIBERATELY_REMOVED_CANON_CORRECTED",
+    "EXTERNALLY_BLOCKED_REPOSITORY_COMPLETE",
+}
+
+#: Why a closure still carries a residual. The first four are things this repository cannot
+#: contain — an artefact somebody must train, a system that runs elsewhere, a build this
+#: environment cannot run, a decision only the owner's deployment can make — and each of
+#: them means the finding is blocked rather than integrated. DELIBERATE_SCOPE is different:
+#: the work is complete as designed and the residual states a boundary, so that a later
+#: reader does not mistake a deliberate limit for an unfinished job.
+RESIDUAL_CLASSES = {
+    "EXTERNAL_ARTEFACT",
+    "EXTERNAL_RUNTIME",
+    "ENVIRONMENT_UNVERIFIED",
+    "OWNER_DEPLOYMENT_DECISION",
+    "DELIBERATE_SCOPE",
+}
+
+BLOCKING_RESIDUAL_CLASSES = RESIDUAL_CLASSES - {"DELIBERATE_SCOPE"}
+
+
+def check_closures(findings: dict) -> list[str]:
+    """A CLOSED finding must be backed the same way a component's terminal state is."""
+    problems = []
+    for f in findings.get("findings", []):
+        if f.get("current_status") != "CLOSED":
+            continue
+        fid = f.get("id", "<unnamed>")
+        closure = f.get("closure")
+        if not isinstance(closure, dict):
+            problems.append(
+                f"{fid}: CLOSED with no closure block. A status nobody can check is the "
+                "defect this register exists to catch."
+            )
+            continue
+        missing = [k for k in CLOSURE_FIELDS if not closure.get(k)]
+        if missing:
+            problems.append(f"{fid}: closure names no {', '.join(missing)}")
+        for path in closure.get("changed", []) or []:
+            candidate = str(path).split(":", 1)[0].strip()
+            if candidate and not (ROOT / candidate).exists():
+                problems.append(f"{fid}: closure cites {candidate}, which does not exist")
+        for node in closure.get("verified_by", []) or []:
+            test_file = str(node).split("::", 1)[0].strip()
+            if test_file and not (ROOT / test_file).exists():
+                problems.append(f"{fid}: closure names test file {test_file}, which does not exist")
+        state = closure.get("state")
+        if state and state not in TERMINAL_STATES:
+            problems.append(
+                f"{fid}: closure state {state!r} is not one of {sorted(TERMINAL_STATES)}"
+            )
+        residual = closure.get("residual")
+        residual_class = closure.get("residual_class")
+        if residual and not closure.get("residual_reason"):
+            problems.append(
+                f"{fid}: closure declares a residual without saying why it is out of scope"
+            )
+        if residual and residual_class not in RESIDUAL_CLASSES:
+            problems.append(
+                f"{fid}: closure declares a residual with no residual_class. "
+                "Unfinished work and a deliberate boundary read the same in prose."
+            )
+        if residual_class and not residual:
+            problems.append(f"{fid}: closure names a residual_class with no residual")
+        if residual_class in BLOCKING_RESIDUAL_CLASSES and state != "EXTERNALLY_BLOCKED_REPOSITORY_COMPLETE":
+            problems.append(
+                f"{fid}: residual_class {residual_class} means the repository cannot finish "
+                f"this alone, but the closure state is {state!r}"
+            )
+        if state == "EXTERNALLY_BLOCKED_REPOSITORY_COMPLETE" and not residual:
+            problems.append(
+                f"{fid}: claims to be externally blocked and names nothing it is blocked on"
+            )
+    return problems
+
+
+def check_component_dispositions(components: dict) -> list[str]:
+    """Every component carries one disposition, and any terminal claim is backed."""
+    problems = []
+    valid_dispositions = {"WIRE", "COMPLETE", "REPLACE", "DELETE"}
+    for c in components.get("components", []):
+        name = c.get("component", "<unnamed>")
+        disp = c.get("disposition")
+        if disp not in valid_dispositions:
+            problems.append(f"{name}: disposition {disp!r} is not one of {sorted(valid_dispositions)}")
+
+        terminal = c.get("terminal_state")
+        if terminal is None:
+            continue  # still in flight; that is legitimate until its gate closes
+
+        if terminal not in TERMINAL_STATES:
+            problems.append(f"{name}: terminal_state {terminal!r} is not an allowed terminal state")
+            continue
+
+        if terminal == "INTEGRATED_AND_EVIDENCED":
+            missing = [k for k in INTEGRATION_EVIDENCE_FIELDS if not c.get(k)]
+            if missing:
+                problems.append(
+                    f"{name}: claims INTEGRATED_AND_EVIDENCED but names no {', '.join(missing)}. "
+                    "This is the exact shape the audit found 20 times over."
+                )
+
+        if terminal == "DELIBERATELY_REMOVED_CANON_CORRECTED":
+            problems += _check_removal(c, name)
+    return problems
+
+
+def _check_removal(c: dict, name: str) -> list[str]:
+    """Removal means the code is gone, not merely unreferenced.
+
+    What "gone" means differs per component. Deleting a whole module means the file is
+    absent. Deleting two methods from a module that legitimately survives means those
+    symbols are absent from it. A component declares which via `removal_assertion`:
+
+        {"kind": "file_absent"}                                  (default)
+        {"kind": "symbols_absent", "symbols": ["message_agent"]}
+    """
+    problems = []
+    path = c.get("path", "")
+    assertion = c.get("removal_assertion") or {"kind": "file_absent"}
+    kind = assertion.get("kind")
+
+    if not path or path.startswith("("):
+        return problems  # prose or external path; nothing mechanical to assert
+
+    target = ROOT / path
+
+    if kind == "file_absent":
+        if target.is_file():
+            problems.append(
+                f"{name}: claims DELIBERATELY_REMOVED but {path} still exists. "
+                "Removal means the code is gone, not merely unreferenced."
+            )
+    elif kind == "symbols_absent":
+        symbols = assertion.get("symbols") or []
+        if not symbols:
+            problems.append(f"{name}: removal_assertion symbols_absent names no symbols")
+        elif not target.is_file():
+            problems.append(f"{name}: removal_assertion targets {path}, which does not exist")
+        else:
+            text = target.read_text(encoding="utf-8", errors="replace")
+            still_defined = [
+                sym for sym in symbols
+                if re.search(rf"^\s*(?:async\s+)?def\s+{re.escape(sym)}\b", text, re.M)
+                or re.search(rf"^\s*(?:suspend\s+)?fun\s+{re.escape(sym)}\b", text, re.M)
+            ]
+            if still_defined:
+                problems.append(
+                    f"{name}: claims DELIBERATELY_REMOVED but {path} still defines "
+                    f"{', '.join(still_defined)}."
+                )
+    else:
+        problems.append(f"{name}: removal_assertion kind {kind!r} is not recognised")
+    return problems
+
+
+def check_bidirectional_coverage(findings: dict, components: dict) -> list[str]:
+    """No orphan finding, no orphan component."""
+    problems = []
+    blueprint = BLUEPRINT.read_text(encoding="utf-8") if BLUEPRINT.is_file() else ""
+    if not blueprint:
+        problems.append("canonical blueprint missing; gate assignments cannot be validated")
+        return problems
+
+    gates_in_blueprint = set(re.findall(r"^# GATE (\d+)", blueprint, re.M))
+    for f in findings.get("findings", []):
+        gate = (f.get("remediation_gate") or "").replace("GATE ", "").strip()
+        if gate and gate.isdigit() and gate not in gates_in_blueprint:
+            problems.append(f"{f['id']}: assigned to GATE {gate}, which the blueprint does not define")
+
+    for c in components.get("components", []):
+        gate = (c.get("remediation_gate") or "").replace("GATE ", "").strip()
+        if not gate:
+            problems.append(f"{c.get('component')}: no remediation_gate")
+        elif gate.isdigit() and gate not in gates_in_blueprint:
+            problems.append(f"{c.get('component')}: assigned to GATE {gate}, which the blueprint does not define")
+        if c.get("disposition") == "DELETE" and not c.get("rationale"):
+            problems.append(f"{c.get('component')}: DELETE without a rationale is not a disposition")
+    return problems
+
+
+def check_citations_resolve(findings: dict) -> list[str]:
+    """Every file:line citation must point at a file that exists.
+
+    The register is executed over months. One launcher-icon commit already shifted
+    AndroidManifest.xml by two lines, and the original write-up carried elided
+    `android/.../Foo.kt` paths that no tool could resolve. A citation nobody can follow
+    is not evidence.
+    """
+    problems = []
+    cite = re.compile(r"^([^\s:]+\.(?:py|kt|kts|mjs|sh|json|yaml|yml|md|xml)):(\d+)")
+    for f in findings.get("findings", []):
+        for ev in f.get("repository_evidence", []):
+            m = cite.match(str(ev).strip())
+            if not m:
+                continue
+            path, line = m.group(1), int(m.group(2))
+            target = ROOT / path
+            if not target.is_file():
+                problems.append(f"{f['id']}: cites {path}, which does not exist")
+                continue
+            try:
+                total = len(target.read_text(encoding="utf-8", errors="replace").splitlines())
+            except OSError:
+                continue
+            if line > total:
+                problems.append(f"{f['id']}: cites {path}:{line} but the file has {total} lines")
+    return problems
+
+
+def check_forbidden_routes() -> list[str]:
+    """A forbidden route is a *registration*, not a mention.
+
+    The removal of /v1/google/test-transport left behind a comment saying why it is gone
+    and a test naming the defect it caused. Failing on those would push the next author to
+    delete the explanation rather than the route, so the match is anchored to a FastAPI
+    decorator or an explicit router registration.
+    """
+    problems = []
+    for route, path in FORBIDDEN_PRODUCTION_ROUTES:
+        if not path.is_file():
+            continue
+        text = path.read_text(encoding="utf-8")
+        registration = re.compile(
+            r"(?:@\w+\.(?:get|post|put|patch|delete|head|options|api_route)"
+            r"|\.add_api_route)\s*\(\s*(['\"])"
+            + re.escape(route)
+            + r"\1"
+        )
+        if registration.search(text):
+            try:
+                where = path.relative_to(ROOT)
+            except ValueError:  # a fixture path under a test's tmp dir
+                where = path
+            problems.append(
+                f"forbidden production route {route} registered in {where} "
+                "(closes under blueprint Gate 1; remove before the gate review)"
+            )
+    return problems
+
+
+def main() -> int:
+    parser = argparse.ArgumentParser(description=__doc__)
+    parser.add_argument(
+        "--strict",
+        action="store_true",
+        help="also fail on forbidden production routes that are scheduled for a later gate",
+    )
+    args = parser.parse_args()
+
+    try:
+        findings = _load(FINDINGS)
+        components = _load(COMPONENTS)
+    except Failure as exc:
+        print(f"MATURITY GATE: cannot read ledgers — {exc}", file=sys.stderr)
+        return 2
+
+    blocking: list[str] = []
+    blocking += check_findings_assigned(findings)
+    blocking += check_closures(findings)
+    blocking += check_component_dispositions(components)
+    blocking += check_bidirectional_coverage(findings, components)
+    blocking += check_citations_resolve(findings)
+
+    scheduled = check_forbidden_routes()
+    if args.strict:
+        blocking += scheduled
+
+    n_find = len(findings.get("findings", []))
+    n_comp = len(components.get("components", []))
+    closed = sum(1 for f in findings.get("findings", []) if f.get("current_status") == "CLOSED")
+    terminal = sum(1 for c in components.get("components", []) if c.get("terminal_state"))
+
+    print(f"findings:   {n_find} registered, {closed} closed")
+    # Broken out rather than summed, because "84 closed" is the number that hides the
+    # thing an owner needs: how many of those VAN can finish on its own.
+    states = Counter(
+        f.get("closure", {}).get("state", "(unstated)")
+        for f in findings.get("findings", [])
+        if f.get("current_status") == "CLOSED"
+    )
+    for state in sorted(states):
+        print(f"            {states[state]:>3} {state}")
+    residuals = Counter(
+        f.get("closure", {}).get("residual_class")
+        for f in findings.get("findings", [])
+        if f.get("closure", {}).get("residual")
+    )
+    if residuals:
+        print("residuals:  " + ", ".join(
+            f"{residuals[k]} {k}" for k in sorted(residuals, key=str)
+        ))
+    print(f"components: {n_comp} inventoried, {terminal} at a terminal state")
+
+    if scheduled and not args.strict:
+        print("\nscheduled (not blocking until their gate):")
+        for s in scheduled:
+            print(f"  - {s}")
+
+    if blocking:
+        print(f"\nMATURITY GATE FAILED — {len(blocking)} unbacked claim(s):", file=sys.stderr)
+        for p in blocking:
+            print(f"  - {p}", file=sys.stderr)
+        return 1
+
+    print("\nMATURITY GATE PASSED — every claim in the ledgers is backed.")
+    return 0
+
+
+if __name__ == "__main__":
+    sys.exit(main())

@@ -23,6 +23,7 @@ from van_gateway.evolution.radar import (
     PromotionState,
     RadarError,
     StrategyLearning,
+    StrategyOutcome,
 )
 from van_gateway.evolution.vaneval import (
     UNMEASURABLE_WITHOUT_OWNER_DATA,
@@ -289,12 +290,12 @@ async def test_a_strategy_cannot_be_preferred_on_a_lucky_streak(tmp_path):
     with pytest.raises(RadarError, match="REQUIRES_EVAL"):
         await learning.promote(strategy_id, target=PromotionState.PREFERRED)
     for _ in range(3):
-        await learning.record_outcome(strategy_id, verified_success=True, now_ms=NOW)
+        await learning.record_outcome(strategy_id, outcome=StrategyOutcome.SUCCESS, now_ms=NOW)
     with pytest.raises(RadarError, match="INSUFFICIENT_EVIDENCE"):
         await learning.promote(strategy_id, target=PromotionState.PREFERRED,
                                eval_run_id="eval_1")
     for _ in range(9):
-        await learning.record_outcome(strategy_id, verified_success=True, now_ms=NOW)
+        await learning.record_outcome(strategy_id, outcome=StrategyOutcome.SUCCESS, now_ms=NOW)
     promoted = await learning.promote(strategy_id, target=PromotionState.PREFERRED,
                                       eval_run_id="eval_1")
     assert promoted["promotion_state"] == "PREFERRED"
@@ -307,10 +308,10 @@ async def test_demotion_is_automatic_where_promotion_is_not(tmp_path):
         mission_class="research", capability_sequence=["research.exa.search"], now_ms=NOW
     )
     for _ in range(10):
-        await learning.record_outcome(strategy_id, verified_success=True, now_ms=NOW)
+        await learning.record_outcome(strategy_id, outcome=StrategyOutcome.SUCCESS, now_ms=NOW)
     await learning.promote(strategy_id, target=PromotionState.PREFERRED, eval_run_id="e1")
     for _ in range(20):
-        await learning.record_outcome(strategy_id, verified_success=False, now_ms=NOW)
+        await learning.record_outcome(strategy_id, outcome=StrategyOutcome.FAILURE, now_ms=NOW)
     assert strategy_id in await learning.auto_demote(now_ms=NOW)
 
 

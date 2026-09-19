@@ -26,6 +26,7 @@ from typing import Any
 from fastapi import APIRouter, Header, HTTPException
 from pydantic import BaseModel, Field
 
+from van_gateway.observability import instruments
 from van_gateway.browser.models import (
     AutonomyTier,
     BrowserBoundaryType,
@@ -37,6 +38,7 @@ from van_gateway.browser.models import (
 from van_gateway.browser.policy import BrowserPolicyEngine, BrowserPolicyError
 from van_gateway.browser.service import BrowserSessionBroker, BrowserTaskService
 from van_gateway.automation.canonical import digest
+from van_gateway.browser.worker import BrowserTaskPlan, SemanticWorkerUnavailable
 from van_gateway.browser.subagent import (
     BrowserSubagentRunner,
     classify_boundary,
@@ -119,6 +121,13 @@ class AssignmentBody(BaseModel):
     max_steps: int = Field(default=12, ge=1, le=50)
     deadline_ms: int | None = None
     max_steps_without_progress: int = Field(default=3, ge=1, le=10)
+    #: P2-BROW-001 — what a deterministic assignment is going to do, in order.
+    #:
+    #: The worker walks it and the runner grades each step against the bounds above, so a
+    #: plan cannot widen an assignment: a planned step outside `allowed_domains` or above
+    #: `action_class_ceiling` ends the task exactly as a model-chosen one would. Absent for
+    #: a semantic tier, which selects its own actions and needs a runtime to do it.
+    plan: BrowserTaskPlan | None = None
 
 
 class BrowserApi:
@@ -905,9 +914,25 @@ class BrowserApi:
             )
             if status is BrowserTaskStatus.RESUME_AUTHORIZED:
                 await self._enforce_resume_authorization(task, assignment)
-            result = await self.runner.run(
-                assignment=assignment, worker=self.worker, task=task
-            )
+            # P2-BROW-001 — the worker is bound to *this* task and its plan before it
+            # runs. A long-lived worker mutated per assignment would let two concurrent
+            # assignments overwrite each other's task id, and the adapter is the only part
+            # that is legitimately shared.
+            worker = self.worker
+            binder = getattr(worker, "for_task", None)
+            if binder is not None:
+                worker = binder(task, body.plan)
+            try:
+                result = await self.runner.run(
+                    assignment=assignment, worker=worker, task=task
+                )
+            except SemanticWorkerUnavailable as exc:
+                # An L2+ assignment asked for judgement about a page and no semantic
+                # runtime is configured. Walking the deterministic plan instead would be
+                # answering a different question and reporting success on this one.
+                raise HTTPException(
+                    status_code=503, detail=f"BROWSER_SEMANTIC_RUNTIME_UNAVAILABLE:{exc}"
+                ) from exc
 
             escalation = None
             if result.stop_reason in (SubagentStop.SCOPE_VIOLATION, SubagentStop.ACTION_CLASS_VIOLATION):
@@ -931,6 +956,12 @@ class BrowserApi:
                     ),
                     now_ms=int(time.time() * 1000),
                 )
+                # P3-OBS-002 — "browser task status" is one of Gate 11's named
+                # metrics. Recorded at the one place a task reaches a terminal
+                # status, so a new stop reason is counted without being added here.
+                instruments.record_browser_task(terminal_status)
+            if escalation is not None:
+                instruments.record_browser_task("ESCALATED")
             return {
                 "assignment_id": assignment.assignment_id,
                 "task_id": task.task_id,

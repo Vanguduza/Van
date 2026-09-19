@@ -138,6 +138,18 @@ object VanLiveVisualState {
         it.copy(attentionX = x.coerceIn(-1f, 1f), attentionY = y.coerceIn(-1f, 1f))
     }
 
+    /**
+     * P1-AURA-003 — the trading system's only route into VAN's visual state.
+     *
+     * Called by the trading screen from the same gateway read models it renders from, so the
+     * field and the numbers on screen cannot disagree. Passing null clears it, which is what
+     * leaving the trading surface should do: VAN should not keep showing a trade field
+     * because the owner once looked at a position.
+     */
+    fun tradeSemantic(semantic: VanTradeSemantic?) = mutate {
+        VanPresenceReducer.trade(it, semantic)
+    }
+
     fun action(action: VanFiniteAction?) = mutate { it.copy(actionCode = action?.code ?: 0) }
 
     fun clearAction() = action(null)

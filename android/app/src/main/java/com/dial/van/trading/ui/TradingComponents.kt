@@ -26,6 +26,7 @@ import androidx.compose.ui.unit.sp
 import com.dial.van.trading.ConfidenceBand
 import com.dial.van.trading.DataState
 import com.dial.van.trading.Loaded
+import com.dial.van.trading.TradingFormat
 import com.dial.van.trading.SafetyIdentity
 import com.dial.van.trading.TradeConfidence
 import com.dial.van.trading.TradeRow
@@ -123,7 +124,14 @@ fun EmptyState(text: String, hint: String? = null) {
 fun <T> LoadedBox(state: Loaded<T>, empty: String = "Nothing to show yet.", content: @Composable (T) -> Unit) {
     when (state) {
         Loaded.Loading -> Row(verticalAlignment = Alignment.CenterVertically) { CircularProgressIndicator(modifier = Modifier.height(16.dp).width(16.dp), strokeWidth = 2.dp, color = TradingColors.accent); Spacer(Modifier.width(8.dp)); Text("Reading the ledger…", color = TradingColors.neutral, fontSize = 11.sp) }
-        is Loaded.Unavailable -> Text(state.reason, color = TradingColors.warning, fontSize = 11.sp)
+        // P3-AND-011 — a raw reason string straight from the transport layer. "Unable to
+        // resolve host" is not an empty state and is not an explanation; the owner needs to
+        // know VAN cannot see the ledger, which is different from the ledger being empty.
+        is Loaded.Unavailable -> Text(
+            TradingFormat.unavailableState(state.reason),
+            color = TradingColors.warning,
+            fontSize = 11.sp,
+        )
         is Loaded.Ready -> content(state.value)
     }
 }

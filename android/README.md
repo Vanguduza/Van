@@ -2,7 +2,7 @@
 
 Production-oriented Kotlin Android embodiment for **VAN** — DIAL's owner assistant.
 
-Android provides overlay UI, encrypted offline command queue, notification/share ingress, voice I/O interfaces, and biometric A4 gating. **Hermes profile `van` owns agent execution.** This app does not embed a second agent loop or launch Claude/Codex/Gemini.
+Android provides overlay UI, encrypted offline command queue, notification/share ingress, voice I/O interfaces, biometric A4 gating, the trading command centre, mission read models, the unified owner-command controller and the signed gateway client. **Hermes profile `van` owns agent execution.** This app does not embed a second agent loop or launch Claude/Codex/Gemini.
 
 ## Requirements
 
@@ -10,14 +10,32 @@ Android provides overlay UI, encrypted offline command queue, notification/share
 |---------|-------|
 | `applicationId` | `com.dial.van` |
 | `minSdk` | 26 |
-| `targetSdk` / `compileSdk` | 34 |
+| `targetSdk` / `compileSdk` | 36 |
 | UI | Jetpack Compose |
+
+## Package map
+
+| Package | Role |
+|---|---|
+| `command/` | Command Centre activity and owner surfaces |
+| `control/` | `VanCommandController` — the single owner-command funnel |
+| `gateway/` | Signed gateway client and offline queue replay |
+| `mission/` | Mission read models and owner-readable status |
+| `overlay/` | Floating service, gestures, workboard presentations |
+| `trading/` | Trading command centre, repository and screens |
+| `visual/` | Living field, aura, character motion, renderer ladder |
+| `voice/` | Wake runtime, capture, recognition, speech output |
+| `notification/`, `share/` | Untrusted data ingress |
+| `security/`, `queue/`, `degraded/` | Keystore, encrypted queue, degraded model |
+
+> Accuracy note (2026-09-19): this file previously declared SDK 34 against an actual 36 and omitted the
+> trading, mission, control and gateway packages. Corrected under blueprint Gate 0 (finding P3-DOC-003).
 
 ## Setup
 
 1. Copy `local.properties.example` → `local.properties` and set `sdk.dir`.
 2. JDK 17 (example: `C:\Users\Admin\Documents\dde\.tooling\jdk-17`).
-3. Android SDK with platform 34 and build-tools installed.
+3. Android SDK with platform 36 and build-tools installed.
 
 ## Build
 

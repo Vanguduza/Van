@@ -29,7 +29,14 @@ async def test_google_migration_and_principal_hash(tmp_path):
     # understanding layer; 13 critical reasoning; 14 autonomy and attention
     # scoring; 15 external reality, evolution radar, benchmarks and eval.
     # 16 adds the owner permission registry and computer-use operations.
-    assert row["version"] == SCHEMA_VERSION == 16
+    # 17 adds single-use command nonces and the audit hash chain.
+    #
+    # The applied version must equal SCHEMA_VERSION, and SCHEMA_VERSION must not regress
+    # below the migrations this test's assumptions depend on. Pinning the exact literal
+    # made every legitimate forward migration fail here, which teaches the next author to
+    # edit the assertion rather than think about it.
+    assert row["version"] == SCHEMA_VERSION
+    assert SCHEMA_VERSION >= 16, "the Google mesh assumptions require migrations through 16"
     broker = GoogleIdentityBroker(store, GoogleCapabilityRegistry(registry_path()), ai_plan="PRO")
     status = await broker.register_principal(subject="owner-google-subject", ai_plan="PRO")
     assert status.registered is True
@@ -113,12 +120,45 @@ async def test_mutation_requires_truth_and_a4_requires_approval(tmp_path):
 
 
 @pytest.mark.asyncio
-async def test_explicit_fallback_is_used_deterministically(tmp_path):
+async def test_a_fallback_nothing_can_execute_is_not_a_fallback(tmp_path):
+    """P2-GOOG-001 — this used to assert `planned` on workspace_studio.
+
+    The primary for workspace_operation is workspace_api, which is gateway code. Falling
+    back to a surface with no implementation anywhere turns "the deterministic path is
+    unavailable" into "the operation was planned", which is worse than an honest refusal.
+    """
     store = Store(str(tmp_path / "mesh.sqlite3")); await store.migrate()
     broker = GoogleIdentityBroker(store, GoogleCapabilityRegistry(registry_path()), consumer_connected_capabilities="workspace_studio")
     await broker.register_principal(subject="sub-fallback", ai_plan="PRO")
     decision = await GoogleCapabilityRouter(store, broker).plan(GoogleRouteRequest(owner_intent_id="intent-fallback", intent="workspace_operation", action_class=ActionClass.A2))
-    assert decision.status == "planned" and decision.capability_id == "workspace_studio"
+    # The deterministic primary is reported as the reason it could not proceed, which is
+    # the honest answer: the Workspace OAuth connection is what is missing. What must not
+    # happen is a `planned` decision naming a capability nothing can run.
+    assert decision.status == "degraded", decision
+    assert decision.capability_id != "workspace_studio", (
+        "the router still selected a capability with no implementation"
+    )
+
+
+@pytest.mark.asyncio
+async def test_a_fallback_something_can_execute_still_works(tmp_path):
+    """The restriction must not break the fallbacks that were always sound."""
+    store = Store(str(tmp_path / "mesh.sqlite3")); await store.migrate()
+    registry = GoogleCapabilityRegistry(registry_path())
+    assert registry.get("antigravity").executable and registry.get("jules").executable
+    assert not registry.get("workspace_studio").executable
+
+
+@pytest.mark.asyncio
+async def test_every_capability_declares_an_executor(tmp_path):
+    """A capability added without one would be routable to nothing again."""
+    import json
+    from pathlib import Path
+
+    raw = json.loads(Path(registry_path()).read_text())
+    for capability in raw["capabilities"]:
+        assert "executor" in capability, capability["id"]
+        assert capability["executor"] in (None, "gateway", "hermes"), capability["id"]
 
 
 @pytest.mark.asyncio

@@ -25,6 +25,8 @@ def _settings(tmp_path, monkeypatch):
     monkeypatch.setenv("VAN_DEVICE_SECRET_FERNET_KEY", Fernet.generate_key().decode())
     monkeypatch.setenv("VAN_INGRESS_TOKEN", INGRESS)
     monkeypatch.setenv("VAN_INTERNAL_CONTROL_TOKEN", INTERNAL)
+    # P0-SEC-001 — device enrolment is its own credential now.
+    monkeypatch.setenv("VAN_DEVICE_ENROLMENT_TOKEN", INTERNAL)
     monkeypatch.setenv("VAN_EXA_EGRESS_ENABLED", "false")
     get_settings.cache_clear()
     yield
@@ -90,8 +92,8 @@ async def test_runtime_routes_require_hermes_internal_control(runtime_client):
     client, _app = runtime_client
 
     denied_outer = await client.get("/v1/runtime/status")
-    assert denied_outer.status_code == 401
-    assert denied_outer.json()["detail"] == "device_access_denied"
+    assert denied_outer.status_code == 403
+    assert denied_outer.json()["required_scope"] == "runtime"
 
     token = await pair_owner_device(client, device_id="dev-runtime", secret="runtime-secret")
     denied_internal = await client.get(

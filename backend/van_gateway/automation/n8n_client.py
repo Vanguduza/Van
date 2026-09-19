@@ -14,9 +14,9 @@ The client fails closed in every direction it can:
 
 from __future__ import annotations
 
+import asyncio
 import ipaddress
 import socket
-import time
 from typing import Any
 from urllib.parse import urlparse
 
@@ -55,6 +55,7 @@ class N8nManagementClient:
         timeout_seconds: float = 15.0,
         transport: httpx.AsyncBaseTransport | None = None,
         allow_non_private_host: bool = False,
+        webhook_base_url: str = "",
     ) -> None:
         self.registry = registry
         self.base_url = (base_url or "").rstrip("/")
@@ -64,6 +65,7 @@ class N8nManagementClient:
         self.timeout_seconds = timeout_seconds
         self.transport = transport
         self.allow_non_private_host = allow_non_private_host
+        self.webhook_base_url = (webhook_base_url or "").rstrip("/")
 
     # ---------------------------------------------------------------- policy
 
@@ -125,7 +127,13 @@ class N8nManagementClient:
             except httpx.HTTPError as exc:
                 last = exc
             if attempt + 1 < self.MAX_ATTEMPTS:
-                time.sleep(self.BACKOFF_SECONDS[min(attempt, len(self.BACKOFF_SECONDS) - 1)])
+                # P3-OPS-006: this was `time.sleep`, inside an `async def`, inside the
+                # gateway's single event loop. Every other request the gateway was
+                # serving stopped for the duration — including the owner's — because
+                # one n8n call got a 503. `asyncio.sleep` yields instead of blocking.
+                await asyncio.sleep(
+                    self.BACKOFF_SECONDS[min(attempt, len(self.BACKOFF_SECONDS) - 1)]
+                )
         raise N8nClientError("AUTOMATION_FABRIC_UNAVAILABLE", str(last) if last else None)
 
     # ------------------------------------------------------------ operations
@@ -152,10 +160,68 @@ class N8nManagementClient:
     async def get_execution(self, execution_id: str) -> dict[str, Any]:
         return dict((await self._request("GET", f"/executions/{execution_id}")).json())
 
+    def webhook_url(self, path: str) -> str:
+        """The production webhook URL for a trigger path.
+
+        The management API lives under `/api/v1`; webhooks do not. Deriving one
+        from the other rather than adding a second setting keeps them from drifting
+        apart on a host where only one was updated.
+        """
+        root = self.webhook_base_url or self.base_url.split("/api/v1")[0].rstrip("/")
+        return f"{root}/webhook/{path.lstrip('/')}"
+
+    async def trigger_path(self, workflow_id: str) -> str:
+        """The webhook path n8n will actually listen on for this workflow.
+
+        Read from the deployed workflow rather than from VAN's artifact, because
+        what matters is the path the running n8n has, not the one VAN compiled — a
+        workflow edited in the n8n UI is exactly the case where those differ, and
+        posting to the compiled path would silently do nothing.
+        """
+        workflow = await self.get_workflow(workflow_id)
+        for node in workflow.get("nodes") or []:
+            if str(node.get("type", "")).endswith("n8n-nodes-base.webhook"):
+                path = (node.get("parameters") or {}).get("path")
+                if path:
+                    return str(path)
+        raise N8nClientError("AUTOMATION_WORKFLOW_NOT_INVOCABLE", workflow_id)
+
     async def run_workflow(self, workflow_id: str, envelope: dict[str, Any]) -> dict[str, Any]:
-        """§159 — invoke an admitted workflow with its run envelope and grant."""
-        response = await self._request("POST", f"/workflows/{workflow_id}/run", json=envelope)
-        return dict(response.json())
+        """§159 — invoke an admitted workflow with its run envelope and grant.
+
+        P3-OPS-007: this posted to `POST /workflows/{id}/run`, which does not exist.
+        n8n's public REST API can create, update, activate, deactivate and read a
+        workflow; it cannot execute one. Execution is what the workflow's own
+        trigger is for, and every workflow VAN compiles for dispatch is built on
+        `n8n-nodes-base.webhook` (see `compiler.PRIMITIVE_NODES`). So the real
+        invocation is a POST to that webhook's production URL, carrying the same
+        run envelope and run-scoped grant in the body.
+
+        A workflow with no webhook trigger is refused rather than invoked by some
+        other means: VAN dispatching work it cannot start is the failure this
+        finding is about, and a workflow it cannot address is that failure with a
+        different endpoint.
+        """
+        self._assert_usable()
+        path = await self.trigger_path(workflow_id)
+        url = self.webhook_url(path)
+        async with httpx.AsyncClient(
+            timeout=self.timeout_seconds, transport=self.transport
+        ) as client:
+            response = await client.post(url, json=envelope)
+        if response.status_code == 404:
+            # n8n answers 404 on a webhook whose workflow is not active. That is a
+            # deployment fault with a specific remedy, not a generic request failure.
+            raise N8nClientError("AUTOMATION_WORKFLOW_NOT_ACTIVE", workflow_id)
+        if response.status_code >= 400:
+            raise N8nClientError("AUTOMATION_REQUEST_FAILED", str(response.status_code))
+        try:
+            payload = response.json()
+        except ValueError:
+            # A webhook node configured to return plain text is legitimate; the run
+            # still happened, and the dispatcher's verifier is what judges it.
+            return {"body": response.text}
+        return payload if isinstance(payload, dict) else {"body": payload}
 
     async def runtime_version(self) -> str:
         """Used by the canary; also how §274 drift is detected."""

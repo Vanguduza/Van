@@ -7,6 +7,7 @@ from decimal import Decimal
 
 from vati.risk.contracts import KillSwitchTrigger
 from vati.risk.mandate import DrawdownTier
+from vati.authority import OwnerAuthorityVerifier
 
 ZERO = Decimal("0")
 ONE = Decimal("1")
@@ -48,11 +49,27 @@ class KillSwitch:
         self.active.add(trigger)
         self.history.append((now_unix, "TRIP", trigger))
 
-    def clear(self, trigger: KillSwitchTrigger, now_unix: int, *, owner_signature_ref: str) -> None:
-        if not owner_signature_ref or not owner_signature_ref.strip():
-            raise PermissionError("kill switch clear requires an owner signature reference (A4)")
+    def clear(
+        self,
+        trigger: KillSwitchTrigger,
+        now_unix: int,
+        *,
+        owner_signature_ref: str,
+        authority: OwnerAuthorityVerifier,
+        subject: str,
+    ) -> None:
+        """P0-TRADE-001 — this took any non-empty string and turned the kill switch off.
+
+        The act and the subject are inside the signature, so a token authorising a halt
+        cannot be replayed to clear one, and a token for another session cannot clear this
+        one. The verifier is required rather than defaulted: a caller that has not been
+        given one cannot clear a kill switch, which is the correct failure.
+        """
+        verified = authority.verify(
+            owner_signature_ref, act="kill-switch-clear", subject=subject, now_unix=now_unix
+        )
         self.active.discard(trigger)
-        self.history.append((now_unix, f"CLEAR:{owner_signature_ref}", trigger))
+        self.history.append((now_unix, f"CLEAR:{verified.ref}", trigger))
 
     @property
     def halted(self) -> bool:

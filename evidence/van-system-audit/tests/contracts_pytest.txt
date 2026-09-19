@@ -1,0 +1,15 @@
+                raise
+            except:  # Including KeyboardInterrupt, communicate handled that.
+                process.kill()
+                # We don't call process.wait() as .__exit__ does that for us.
+                raise
+            retcode = process.poll()
+            if check and retcode:
+>               raise CalledProcessError(retcode, process.args,
+                                         output=stdout, stderr=stderr)
+E               subprocess.CalledProcessError: Command '['/home/user/Van/tools/hermes/install_van_profile.sh']' returned non-zero exit status 1.
+
+/usr/lib/python3.11/subprocess.py:571: CalledProcessError
+=========================== short test summary info ============================
+FAILED tests/hermes/test_profile_layout.py::test_install_profile_preserves_runtime_state_and_secrets
+1 failed, 108 passed in 4.24s

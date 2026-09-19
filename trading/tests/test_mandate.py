@@ -15,8 +15,62 @@ def test_valid_mandate_loads(mandate):
 
 
 def test_unsigned_mandate_rejected():
-    with pytest.raises(MandateError, match="unsigned"):
-        TradingMandate.from_mapping(mandate_dict(owner_signature_ref=""))
+    """P0-TRADE-001 — "signed" used to mean "the field is not empty"."""
+    for refused, why in [
+        ("", "an empty field"),
+        ("sig:owner-device:abc123", "the exact string every suite used to pass"),
+        ("van-oa1.not-real.not-real", "something shaped like a token"),
+    ]:
+        with pytest.raises(MandateError, match="not owner-signed"):
+            TradingMandate.from_mapping(mandate_dict(owner_signature_ref=refused)), why
+
+
+def test_a_mandate_signature_does_not_admit_a_later_version():
+    """The version is in the subject, so widening the limits needs a new signature."""
+    from conftest import owner_authority
+
+    base = mandate_dict()
+    tampered = {**base, "version": "1.0.1", "max_risk_per_trade": "0.5000"}
+    with pytest.raises(MandateError, match="not owner-signed"):
+        TradingMandate.from_mapping(tampered)
+
+    # ...and the owner can of course sign the new version.
+    tampered["owner_signature_ref"] = owner_authority().token(
+        act="mandate-admit",
+        subject=f"{tampered['mandate_id']}:{tampered['version']}",
+        issued_at_unix=int(tampered["signed_at_unix"]),
+        lifetime_seconds=int(tampered["expires_at_unix"]) - int(tampered["signed_at_unix"]),
+    )
+    # It is still refused, but now by the risk ceiling rather than by the signature,
+    # which is the point: the two checks are independent.
+    with pytest.raises(MandateError):
+        TradingMandate.from_mapping(tampered)
+
+
+def test_a_mandate_signed_for_another_mandate_is_refused():
+    from conftest import owner_authority
+
+    base = mandate_dict()
+    stolen = {**base, "owner_signature_ref": owner_authority().token(
+        act="mandate-admit", subject="some-other-mandate:1.0.0",
+        issued_at_unix=int(base["signed_at_unix"]),
+        lifetime_seconds=int(base["expires_at_unix"]) - int(base["signed_at_unix"]),
+    )}
+    with pytest.raises(MandateError, match="not owner-signed"):
+        TradingMandate.from_mapping(stolen)
+
+
+def test_a_halt_token_does_not_admit_a_mandate():
+    """Acts are not interchangeable. The old refs were, because they meant nothing."""
+    from conftest import owner_authority
+
+    base = mandate_dict()
+    wrong_act = {**base, "owner_signature_ref": owner_authority().token(
+        act="owner-halt", subject=f"{base['mandate_id']}:{base['version']}",
+        issued_at_unix=int(base["signed_at_unix"]),
+    )}
+    with pytest.raises(MandateError, match="not owner-signed"):
+        TradingMandate.from_mapping(wrong_act)
 
 
 @pytest.mark.parametrize("behaviour", sorted(HARD_FORBIDDEN_BEHAVIOURS))

@@ -40,6 +40,19 @@ OPS = ("ORDER_SEND", "MODIFY_SL", "CLOSE")
 SKEW_S = 60
 STATE_FRESH_MS = 30_000
 
+# P1-SEC-007. /ea/v1/{alias}/poll is the one internet-reachable route in this deployable
+# and it accepted unlimited signature guesses per alias. The counter below is deliberately
+# a local twenty lines rather than an import of van_gateway.auth.throttle: the bridge and
+# the gateway are separate deployables that share no process and no package, and coupling
+# them to share a failure counter would be worse than the duplication.
+#
+# Same posture as the gateway's live-path surfaces: a correct signature always passes, so
+# nobody can take an account's EA offline by hammering its alias. Past the policy, wrong
+# signatures are answered 429 and never reach the queue.
+POLL_MAX_FAILURES = 10
+POLL_WINDOW_S = 300
+POLL_LOCKOUT_S = 300
+
 
 # ------------------------------------------------------------------ shared queue
 class BridgeQueue:
@@ -210,8 +223,39 @@ class Mt5PullAdapter:
 
 
 # ------------------------------------------------------------------ pull server (EA side)
+class PollThrottle:
+    """Per-alias failed-signature counter for the EA poll route."""
+
+    def __init__(self) -> None:
+        self._failures: dict[str, list[float]] = {}
+        self._locked_until: dict[str, float] = {}
+        self._lock = threading.Lock()
+
+    def retry_after(self, alias: str, *, now_s: float) -> int:
+        """Seconds the alias must wait, or 0 if it may attempt now."""
+        with self._lock:
+            until = self._locked_until.get(alias, 0.0)
+        return int(until - now_s) + 1 if until > now_s else 0
+
+    def record_failure(self, alias: str, *, now_s: float) -> None:
+        with self._lock:
+            recent = [f for f in self._failures.get(alias, []) if f > now_s - POLL_WINDOW_S]
+            recent.append(now_s)
+            if len(recent) >= POLL_MAX_FAILURES:
+                self._locked_until[alias] = now_s + POLL_LOCKOUT_S
+                recent = []
+            self._failures[alias] = recent
+
+    def record_success(self, alias: str) -> None:
+        with self._lock:
+            self._failures.pop(alias, None)
+            self._locked_until.pop(alias, None)
+
+
 def create_pull_app(queue: BridgeQueue, key_provider: Callable[[str], Optional[bytes]], *, clock: Callable[[], int] = lambda: int(time.time() * 1000)) -> FastAPI:
     app = FastAPI(title="Van MT5 pull bridge", version="1.0.0")
+    throttle = PollThrottle()
+    app.state.poll_throttle = throttle
 
     @app.get("/health")
     async def health():
@@ -228,10 +272,21 @@ def create_pull_app(queue: BridgeQueue, key_provider: Callable[[str], Optional[b
         h = {k.lower(): v for k, v in request.headers.items()}
         ts, nonce, sig = h.get("x-van-ts", ""), h.get("x-van-nonce", ""), h.get("x-van-signature", "")
         now = clock()
+        now_s = now / 1000
+
+        def refuse(status: int, detail: str) -> HTTPException:
+            """Count the failure; once the alias is locked, say so instead."""
+            throttle.record_failure(alias, now_s=now_s)
+            wait = throttle.retry_after(alias, now_s=now_s)
+            if wait:
+                return HTTPException(429, "too many failed attempts", headers={"Retry-After": str(wait)})
+            return HTTPException(status, detail)
+
         if not (ts.isdigit() and nonce and sig) or abs(now // 1000 - int(ts)) > SKEW_S:
-            raise HTTPException(401, "bad or stale signature headers")
+            raise refuse(401, "bad or stale signature headers")
         if not hmac.compare_digest(sign_poll(key, ts, nonce, alias, body), sig):
-            raise HTTPException(401, "bad signature")
+            raise refuse(401, "bad signature")
+        throttle.record_success(alias)
         if not queue.nonce_fresh(alias, nonce, now_ms=now):
             raise HTTPException(401, "nonce replayed")
         try:

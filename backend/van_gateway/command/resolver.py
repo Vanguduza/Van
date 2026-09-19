@@ -73,6 +73,19 @@ class TypedCommandResolver:
     gateway. Anything ambiguous/composite remains a Hermes interpretation task.
     """
 
+    def __init__(self, default_notebook_id: str = "") -> None:
+        """P1-GOOG-002 — where a note goes is the owner's to decide, not the model's.
+
+        `google.notebook.note.create` requires `notebook_id` and this resolver sealed only
+        `title`, so the parameter was unconstrained at execution and Hermes chose which of
+        the owner's notebooks the note landed in. The authority check now refuses an A3
+        action whose required parameters are not all sealed, so the destination has to come
+        from somewhere the owner controls: either they named it, or they configured a
+        default. Empty means neither, and the command is refused with a reason rather than
+        landing somewhere.
+        """
+        self.default_notebook_id = (default_notebook_id or "").strip()
+
     HALT_TRADING = {
         "halt trading",
         "stop trading",
@@ -83,9 +96,24 @@ class TypedCommandResolver:
         "emergency stop trading",
     }
 
+    #: P4-CMD-001 — matched case-insensitively against the *original* text.
+    #:
+    #: These used to be matched against casefolded text, so the title the owner typed was
+    #: extracted already lowercased and then sealed and created that way at the provider.
+    #: "Note that Dial Health is due" produced a note called "dial health is due". The
+    #: sealed authority record carried the lowercase title too, so the corruption was
+    #: cryptographically bound to the owner's command: nothing downstream could recover it.
     NOTE_PATTERNS = (
-        re.compile(r"^(?:create|make) (?:a )?(?:new )?(?:notebooklm|notebook lm) note(?: (?:named|called))? (?P<title>.+)$"),
-        re.compile(r"^(?:create|make) (?:a )?(?:new )?note in (?:notebooklm|notebook lm)(?: (?:named|called))? (?P<title>.+)$"),
+        re.compile(
+            r"^(?:create|make) (?:a )?(?:new )?(?:notebooklm|notebook lm) note"
+            r"(?: (?:named|called))? (?P<title>.+)$",
+            re.IGNORECASE,
+        ),
+        re.compile(
+            r"^(?:create|make) (?:a )?(?:new )?note in (?:notebooklm|notebook lm)"
+            r"(?: (?:named|called))? (?P<title>.+)$",
+            re.IGNORECASE,
+        ),
     )
 
     NOTEBOOK_ENTERPRISE_DELETE_PATTERN = re.compile(
@@ -101,15 +129,30 @@ class TypedCommandResolver:
         re.IGNORECASE,
     )
 
+    #: "... in my <notebook> notebook" / "... in notebook <id>". Tried before the
+    #: destination-less patterns so naming a notebook wins over the configured default.
+    NOTE_WITH_NOTEBOOK_PATTERNS = (
+        re.compile(
+            r"^(?:create|make) (?:a )?(?:new )?(?:notebooklm|notebook lm) note"
+            r"(?: (?:named|called))? (?P<title>.+?) in notebook (?P<notebook_id>[A-Za-z0-9._:/-]+)$",
+            re.IGNORECASE,
+        ),
+        re.compile(
+            r"^(?:create|make) (?:a )?(?:new )?note in notebook (?P<notebook_id>[A-Za-z0-9._:/-]+)"
+            r"(?: (?:named|called))? (?P<title>.+)$",
+            re.IGNORECASE,
+        ),
+    )
+
     RESEARCH_PATTERNS = (
-        re.compile(r"^research (?P<query>.+)$"),
-        re.compile(r"^search the web for (?P<query>.+)$"),
-        re.compile(r"^look up (?P<query>.+)$"),
+        re.compile(r"^research (?P<query>.+)$", re.IGNORECASE),
+        re.compile(r"^search the web for (?P<query>.+)$", re.IGNORECASE),
+        re.compile(r"^look up (?P<query>.+)$", re.IGNORECASE),
     )
 
     CONTEXT_PATTERNS = (
-        re.compile(r"^what do you know about (?P<topic>.+)\??$"),
-        re.compile(r"^what have i told you about (?P<topic>.+)\??$"),
+        re.compile(r"^what do you know about (?P<topic>.+)\??$", re.IGNORECASE),
+        re.compile(r"^what have i told you about (?P<topic>.+)\??$", re.IGNORECASE),
     )
 
     def resolve(self, text: str) -> CommandResolution:
@@ -125,16 +168,37 @@ class TypedCommandResolver:
                 rule_id="trading.halt.exact.v1",
             )
 
-        for pattern in self.NOTE_PATTERNS:
-            match = pattern.fullmatch(normalized)
+        for pattern in self.NOTE_WITH_NOTEBOOK_PATTERNS:
+            match = pattern.fullmatch(raw_compact)
             if match:
                 title = match.group("title").strip(" \"'")
-                if title:
+                notebook_id = match.group("notebook_id").strip()
+                if title and notebook_id:
                     return _from_action(
                         "google.notebook.note.create",
                         text=normalized,
                         intent_id="NOTEBOOKLM_CREATE_NOTE",
-                        parameters={"title": title},
+                        parameters={"notebook_id": notebook_id, "title": title},
+                        rule_id="notebooklm.note.create.named-notebook.v1",
+                    )
+
+        for pattern in self.NOTE_PATTERNS:
+            match = pattern.fullmatch(raw_compact)
+            if match:
+                title = match.group("title").strip(" \"'")
+                if title:
+                    # The destination is sealed from the owner's configured default. With
+                    # no default the note-create action is resolved *without* it, which the
+                    # authority check refuses rather than letting Hermes choose — a refusal
+                    # the owner can act on beats a note in a notebook they did not pick.
+                    parameters: dict[str, Any] = {"title": title}
+                    if self.default_notebook_id:
+                        parameters["notebook_id"] = self.default_notebook_id
+                    return _from_action(
+                        "google.notebook.note.create",
+                        text=normalized,
+                        intent_id="NOTEBOOKLM_CREATE_NOTE",
+                        parameters=parameters,
                         rule_id="notebooklm.note.create.v1",
                     )
 
@@ -162,7 +226,7 @@ class TypedCommandResolver:
             )
 
         for pattern in self.RESEARCH_PATTERNS:
-            match = pattern.fullmatch(normalized)
+            match = pattern.fullmatch(raw_compact)
             if match and not _has_composite_mutation(normalized):
                 query = match.group("query").strip(" \"'")
                 if query:
@@ -175,7 +239,7 @@ class TypedCommandResolver:
                     )
 
         for pattern in self.CONTEXT_PATTERNS:
-            match = pattern.fullmatch(normalized)
+            match = pattern.fullmatch(raw_compact)
             if match:
                 topic = match.group("topic").rstrip("?").strip()
                 if topic:

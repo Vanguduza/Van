@@ -234,68 +234,20 @@ object VanAuraSpecs {
         )
     }
 
-    /** Topology-board trade examples — architecture capacity, not a live trading product. */
+    /**
+     * Board adapter for the eight trade families.
+     *
+     * P1-AURA-003 — these used to be defined here, as a `when (kind: String)` whose only
+     * caller was the PNG board generator, which is why the audit found the families
+     * existing and unreachable from live state. They now live in [VanTradeSemantics],
+     * classified from real trading signals, and this is a thin string adapter kept for the
+     * board generator so the poster and the running app cannot drift apart.
+     */
     fun tradePreview(kind: String): VanAuraSpec {
-        val idle = forState(VanDurableState.IDLE)
-        return when (kind) {
-            "watching" -> idle.copy(
-                envelopeRadiusScale = 1.46f,
-                envelopeAlpha = 0.14f,
-                semanticColor = VanGlassTokens.ACCENT_TEAL,
-                envelopeSegments = listOf(VanAuraEnvelopeSegment(200f, 58f)),
-            )
-            "setup" -> idle.copy(
-                envelopeRadiusScale = 1.50f,
-                envelopeAlpha = 0.14f,
-                semanticColor = VanGlassTokens.ACCENT_VIOLET,
-                envelopeSegments = listOf(VanAuraEnvelopeSegment(300f, 50f, node = true)),
-            )
-            "entry" -> idle.copy(
-                envelopeRadiusScale = 1.48f,
-                envelopeAlpha = 0.16f,
-                semanticColor = VanGlassTokens.ACCENT_GOLD,
-                envelopeSegments = listOf(VanAuraEnvelopeSegment(-25f, 44f, node = true)),
-            )
-            "in_trade" -> idle.copy(
-                envelopeRadiusScale = 1.58f,
-                envelopeAlpha = 0.16f,
-                semanticColor = VanGlassTokens.ACCENT_CYAN,
-                envelopeSegments = listOf(
-                    VanAuraEnvelopeSegment(15f, 46f),
-                    VanAuraEnvelopeSegment(200f, 36f),
-                ),
-            )
-            "profit" -> idle.copy(
-                envelopeRadiusScale = 1.48f,
-                envelopeAlpha = 0.16f,
-                semanticColor = VanGlassTokens.ACCENT_GREEN,
-                envelopeSegments = listOf(VanAuraEnvelopeSegment(220f, 64f)),
-            )
-            "risk" -> idle.copy(
-                envelopeRadiusScale = 1.52f,
-                envelopeAlpha = 0.16f,
-                semanticColor = VanGlassTokens.ACCENT_AMBER,
-                envelopeSegments = listOf(
-                    VanAuraEnvelopeSegment(-40f, 34f),
-                    VanAuraEnvelopeSegment(150f, 30f),
-                ),
-            )
-            "stop" -> idle.copy(
-                envelopeRadiusScale = 1.50f,
-                envelopeAlpha = 0.17f,
-                semanticColor = VanGlassTokens.ACCENT_RED,
-                envelopeSegments = listOf(VanAuraEnvelopeSegment(10f, 36f), VanAuraEnvelopeSegment(200f, 24f)),
-            )
-            else -> idle.copy(
-                envelopeRadiusScale = 1.45f,
-                envelopeAlpha = 0.16f,
-                semanticColor = VanGlassTokens.ACCENT_RED,
-                envelopeSegments = listOf(
-                    VanAuraEnvelopeSegment(-50f, 30f, node = true),
-                    VanAuraEnvelopeSegment(40f, 30f, node = true),
-                ),
-            )
-        }
+        val semantic = VanTradeSemantic.entries
+            .firstOrNull { it.boardKey.isNotEmpty() && it.boardKey == kind }
+            ?: VanTradeSemantic.HALTED
+        return VanTradeSemantics.auraFor(semantic)
     }
 
     private fun spec(

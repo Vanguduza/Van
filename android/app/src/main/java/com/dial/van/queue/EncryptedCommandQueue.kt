@@ -123,6 +123,18 @@ class EncryptedCommandQueue(context: Context) {
 
     fun size(): Int = listIds().size
 
+    /**
+     * Discard everything waiting.
+     *
+     * The destructive half of `RestoreAction.CLEAR_QUEUE` (P3-AND-005), which until now had
+     * no implementation behind it. Offered to the owner only when the queue has stopped
+     * draining, and the button says what it does: these commands were never sent and will
+     * not be.
+     */
+    fun clear() {
+        for (id in listIds()) remove(id)
+    }
+
     private fun persist(command: QueuedCommand) {
         val plaintext = json.encodeToString(command)
         val encrypted = encrypt(plaintext.toByteArray(Charsets.UTF_8))

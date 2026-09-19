@@ -33,9 +33,12 @@ import javax.imageio.ImageIO
  * that the live Google integration is READY. The degraded image uses the real current fail-closed
  * subsystem truth.
  *
- * Rev 2.3 originally routed both named Command Centre shots through the same default renderer and
- * then overwrote the degraded file a second time. [reconcile] is the final evidence-integrity step:
- * it writes the two truthful scenario renderings and refreshes their manifest checksums/byte counts.
+ * P2-VIS-003 — Rev 2.3 routed both named Command Centre shots through a renderer that took no
+ * arguments, so they produced byte-identical files, and a `reconcile` pass then overwrote the two
+ * PNGs afterwards from here and patched the manifest hashes with a regular expression. That pass
+ * is gone: `VanEvidenceMatrix.renderShot` calls [render] directly, so the right file is written
+ * the first time and there is nothing left to reconcile. A build step whose job is to correct an
+ * earlier build step is a bug with a schedule.
  */
 object VanCommandCentreEvidence {
 
@@ -222,39 +225,6 @@ object VanCommandCentreEvidence {
 
         g.dispose()
         return image
-    }
-
-    fun reconcile(outputDir: File) {
-        val dir = File(outputDir, VanEvidenceMatrix.EVIDENCE_DIR)
-        check(dir.isDirectory) { "Missing ${VanEvidenceMatrix.EVIDENCE_DIR} evidence directory" }
-        val manifestFile = File(dir, "manifest.json")
-        check(manifestFile.isFile) { "Missing Rev ${VanEvidenceMatrix.AUTHORITY_REVISION} manifest" }
-
-        val variants = linkedMapOf(
-            "command-centre-idle" to render(degraded = false),
-            "command-centre-degraded" to render(degraded = true),
-        )
-        val metadata = variants.mapValues { (id, image) ->
-            val file = File(dir, "$id.png")
-            ImageIO.write(image, "png", file)
-            EvidenceFile(file, sha256(file))
-        }
-        check(metadata.getValue("command-centre-idle").sha256 != metadata.getValue("command-centre-degraded").sha256) {
-            "Command Centre IDLE and DEGRADED evidence collapsed to identical output"
-        }
-
-        var manifest = manifestFile.readText()
-        metadata.forEach { (id, evidence) ->
-            val pattern = Regex("(\\\"id\\\":\\\"${Regex.escape(id)}\\\"[^\\n]*?\\\"sha256\\\":\\\")[^\\\"]+(\\\"[^\\n]*?\\\"bytes\\\":)\\d+")
-            var replaced = false
-            manifest = pattern.replace(manifest) { match ->
-                check(!replaced) { "Duplicate manifest entry for $id" }
-                replaced = true
-                "${match.groupValues[1]}${evidence.sha256}${match.groupValues[2]}${evidence.file.length()}"
-            }
-            check(replaced) { "Manifest is missing $id" }
-        }
-        manifestFile.writeText(manifest)
     }
 
     private fun nominalEvidenceMode(): DegradedMode = DegradedMode(

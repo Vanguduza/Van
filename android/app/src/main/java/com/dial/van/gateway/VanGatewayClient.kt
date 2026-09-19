@@ -11,6 +11,7 @@ import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.withContext
 import org.json.JSONArray
 import org.json.JSONObject
+import java.io.IOException
 import java.net.HttpURLConnection
 import java.net.URL
 import java.net.URLEncoder
@@ -28,6 +29,13 @@ import javax.crypto.spec.SecretKeySpec
  * independent from the signed per-command owner-intent envelope.
  */
 class VanGatewayClient(context: Context) {
+
+    /**
+     * P3-AND-001 — stops VAN hammering a gateway that is down, and gives the health screen
+     * a number instead of a guess.
+     */
+    private val breaker = GatewayCircuitBreaker()
+
 
     private val prefs = EncryptedSharedPreferences.create(
         context.applicationContext,
@@ -70,7 +78,11 @@ class VanGatewayClient(context: Context) {
             normalized.startsWith("http://127.0.0.1", ignoreCase = true) ||
                 normalized.startsWith("http://localhost", ignoreCase = true)
             )
-        require(secure || debugLoopback) { "gateway_url_must_use_https" }
+        val buildConfigured = BuildConfig.VAN_GATEWAY_BASE_URL.trim().trimEnd('/')
+        val debugConfigured = BuildConfig.DEBUG &&
+            buildConfigured.isNotBlank() &&
+            normalized.equals(buildConfigured, ignoreCase = true)
+        require(secure || debugLoopback || debugConfigured) { "gateway_url_must_use_https" }
         return normalized
     }
 
@@ -132,6 +144,16 @@ class VanGatewayClient(context: Context) {
         response
     }
 
+    /**
+     * P3-OBS-002 — the six measurements only the device can take.
+     *
+     * Raw body rather than a JSONObject: `DeviceTelemetry.body` builds it, and it is
+     * executed in `android/verification` against the shape the route actually parses.
+     */
+    suspend fun postDeviceTelemetry(body: String): JSONObject = withContext(Dispatchers.IO) {
+        postRawAt(baseUrl, "/v1/observability/device-telemetry", body, useIngress = true)
+    }
+
     suspend fun health(): JSONObject = withContext(Dispatchers.IO) { getJson("/health") }
 
     suspend fun googleMesh(): JSONObject = withContext(Dispatchers.IO) { getJson("/v1/google/mesh") }
@@ -160,10 +182,16 @@ class VanGatewayClient(context: Context) {
         rawGet("/v1/trading/bars?symbol=${encodeQuery(symbol)}&timeframe=${encodeQuery(timeframe)}&limit=$limit")
     }
 
-    suspend fun tradingAccountAction(action: String, args: kotlinx.serialization.json.JsonObject): Pair<Int, String> = withContext(Dispatchers.IO) {
+    suspend fun tradingAccountAction(
+        action: String,
+        args: kotlinx.serialization.json.JsonObject,
+        approvalProof: kotlinx.serialization.json.JsonObject? = null,
+    ): Pair<Int, String> = withContext(Dispatchers.IO) {
         val id = deviceId ?: error("not_enrolled")
         val secret = deviceSecret ?: error("not_enrolled")
-        val body = com.dial.van.trading.AccountOnboarding.requestBody(secret, id, System.currentTimeMillis() / 1000L, action, args)
+        val body = com.dial.van.trading.AccountOnboarding.requestBody(
+            secret, id, System.currentTimeMillis() / 1000L, action, args, approvalProof,
+        )
         val conn = (URL("$baseUrl/v1/trading/accounts/action").openConnection() as HttpURLConnection).apply {
             requestMethod = "POST"
             setRequestProperty("Content-Type", "application/json")
@@ -172,10 +200,43 @@ class VanGatewayClient(context: Context) {
             connectTimeout = 15_000
             readTimeout = 90_000
         }
+        // P0-AND-012 — `requestBody` returns a JsonObject, not a String. This read
+        // `body.toByteArray(...)`, which does not exist on JsonObject, so the
+        // trading account-action path has never compiled.
         conn.outputStream.use { it.write(body.toString().toByteArray(StandardCharsets.UTF_8)) }
         val code = conn.responseCode
         val stream = if (code in 200..299) conn.inputStream else conn.errorStream
         code to (stream?.bufferedReader()?.readText() ?: "{}")
+    }
+
+    /**
+     * The one-time challenge the device signs inside the biometric before a trading
+     * account or credential change (P1-SEC-004).
+     *
+     * The challenge is bound to this device, this action and a digest of these exact
+     * arguments, so an approval for one change cannot be presented for another.
+     */
+    suspend fun tradingAccountChallenge(
+        action: String,
+        args: kotlinx.serialization.json.JsonObject,
+    ): Pair<Int, String> = withContext(Dispatchers.IO) {
+        val id = deviceId ?: error("not_enrolled")
+        val secret = deviceSecret ?: error("not_enrolled")
+        val body = com.dial.van.trading.AccountOnboarding.requestBody(
+            secret, id, System.currentTimeMillis() / 1000L, action, args,
+        )
+        val conn = (URL("$baseUrl/v1/trading/accounts/challenge").openConnection() as HttpURLConnection).apply {
+            requestMethod = "POST"
+            setRequestProperty("Content-Type", "application/json")
+            applyIngressAuth(this)
+            doOutput = true
+            connectTimeout = 15_000
+            readTimeout = 30_000
+        }
+        conn.outputStream.use { it.write(body.toString().toByteArray(StandardCharsets.UTF_8)) }
+        val code = conn.responseCode
+        val stream = if (code in 200..299) conn.inputStream else conn.errorStream
+        code to (stream?.bufferedReader()?.use { it.readText() } ?: "")
     }
 
     suspend fun decisions(): JSONArray = withContext(Dispatchers.IO) {
@@ -354,6 +415,7 @@ class VanGatewayClient(context: Context) {
         speechEvidenceRef: String? = null,
         contextCapsuleRevision: Int? = null,
         contextCapsuleHash: String? = null,
+        declaredTrust: String = TRUST_CONVERSATION,
     ): JSONObject = withContext(Dispatchers.IO) {
         val id = deviceId ?: error("not_enrolled")
         val secret = deviceSecret ?: error("not_enrolled")
@@ -361,7 +423,13 @@ class VanGatewayClient(context: Context) {
         val nonce = UUID.randomUUID().toString()
         val principalType = "OWNER_DEVICE"
         val requestedBy = "device:$id"
-        val contextTrust = "CONVERSATION"
+        // Trust is a property of who authored the text, not of which device sent it.
+        // Hardcoding CONVERSATION here is what allowed any app's notification to reach the
+        // owner-authority path labelled trusted (finding P0-SEC-002). The caller must now
+        // state the provenance, and a third-party channel is pinned UNTRUSTED. The gateway
+        // derives this independently and will not believe an elevated claim, so this is a
+        // correctness fix on the device, not the security boundary itself.
+        val contextTrust = contextTrustFor(originChannel, declaredTrust)
         val canonical = listOf(
             "v2",
             commandId,
@@ -475,7 +543,14 @@ class VanGatewayClient(context: Context) {
         path: String,
         body: JSONObject,
         useIngress: Boolean,
-    ): JSONObject {
+    ): JSONObject = postRawAt(rootUrl, path, body.toString(), useIngress)
+
+    private fun postRawAt(
+        rootUrl: String,
+        path: String,
+        body: String,
+        useIngress: Boolean,
+    ): JSONObject = withRetry {
         val conn = (URL("$rootUrl$path").openConnection() as HttpURLConnection).apply {
             requestMethod = "POST"
             setRequestProperty("Content-Type", "application/json")
@@ -489,7 +564,7 @@ class VanGatewayClient(context: Context) {
         val stream = if (code in 200..299) conn.inputStream else conn.errorStream
         val responseText = stream?.bufferedReader()?.readText() ?: "{}"
         if (code !in 200..299) throw GatewayHttpException(code, responseText)
-        return JSONObject(responseText)
+        JSONObject(responseText)
     }
 
     private fun getJson(path: String): JSONObject = JSONObject(rawGet(path))
@@ -501,7 +576,7 @@ class VanGatewayClient(context: Context) {
         conn.setRequestProperty("X-Van-Device-Token", device)
     }
 
-    private fun rawGet(path: String): String {
+    private fun rawGet(path: String): String = withRetry {
         val conn = (URL("$baseUrl$path").openConnection() as HttpURLConnection).apply {
             requestMethod = "GET"
             applyIngressAuth(this)
@@ -512,8 +587,60 @@ class VanGatewayClient(context: Context) {
         val stream = if (code in 200..299) conn.inputStream else conn.errorStream
         val responseText = stream?.bufferedReader()?.readText() ?: "[]"
         if (code !in 200..299) throw GatewayHttpException(code, responseText)
-        return responseText
+        responseText
     }
+
+    /**
+     * Bounded retry with full jitter, behind a circuit breaker (P3-AND-001).
+     *
+     * There was none of this: a single `HttpURLConnection` per call, so the first request
+     * after a tunnel drop failed, the owner tapped again, that failed, and VAN looked
+     * broken — while a gateway that is briefly unreachable, which is the normal condition
+     * of a self-hosted service on a home connection, was indistinguishable from one that
+     * is down.
+     *
+     * What is and is not retried lives in `GatewayRetryPolicy`, which is pure and executed
+     * in `android/verification`. The rule that matters: a 409 is an answer, and retrying it
+     * is how one owner command becomes two.
+     *
+     * `Thread.sleep` rather than `delay` because every caller already wraps this in
+     * `withContext(Dispatchers.IO)`; making these functions suspend would change forty call
+     * sites to express the same thing.
+     */
+    private fun <T> withRetry(call: () -> T): T {
+        var attempt = 0
+        while (true) {
+            try {
+                val result = call()
+                breaker.recordSuccess()
+                return result
+            } catch (exc: Throwable) {
+                val status = (exc as? GatewayHttpException)?.code
+                val transportFailed = status == null && exc is IOException
+                // Anything that is neither an HTTP answer nor a transport failure is a bug
+                // in this client, and retrying a bug just makes it happen four times.
+                if (!transportFailed && status == null) throw exc
+                breaker.recordFailure()
+                if (GatewayRetryPolicy.verdict(attempt, status, transportFailed) == RetryVerdict.GIVE_UP) {
+                    throw exc
+                }
+                Thread.sleep(GatewayRetryPolicy.delayMillis(attempt))
+                attempt += 1
+            }
+        }
+    }
+
+    /**
+     * Whether a *background* refresh should be attempted now.
+     *
+     * Deliberately advisory. A polling loop should honour it; the owner pressing send
+     * should not be told "no" by a client-side heuristic about a server they can see is up,
+     * which is why `withRetry` does not consult it.
+     */
+    fun backgroundCallsAdvisable(): Boolean = breaker.allow()
+
+    /** For the owner's health surface: consecutive failures the breaker has seen. */
+    fun consecutiveFailures(): Int = breaker.failures()
 
     private fun encodeSegment(value: String): String = URLEncoder.encode(value, StandardCharsets.UTF_8.name())
         .replace("+", "%20")
@@ -529,7 +656,28 @@ class VanGatewayClient(context: Context) {
         private const val MIN_INGRESS_TOKEN_CHARS = 32
         private const val MIN_DEVICE_ACCESS_TOKEN_CHARS = 32
         private const val MIN_PAIRING_TOKEN_CHARS = 32
+
+        const val TRUST_CONVERSATION = "CONVERSATION"
+        const val TRUST_UNTRUSTED = "UNTRUSTED"
+
+        /** Channels whose content is authored by a third party, not by the owner. */
+        private val THIRD_PARTY_CHANNELS = setOf(
+            "NOTIFICATION_EVENT",
+            "SHARE_INTENT",
+            "AUTOMATION",
+            "HERMES_EVENT",
+            "SYSTEM_EVENT",
+        )
+
+        /**
+         * Resolve the trust label to send. A third-party channel is always UNTRUSTED and a
+         * caller cannot raise it. Mirrors the gateway's own derivation so the device and the
+         * server agree; the gateway remains authoritative either way.
+         */
+        fun contextTrustFor(originChannel: String, declaredTrust: String): String =
+            if (originChannel in THIRD_PARTY_CHANNELS) TRUST_UNTRUSTED else declaredTrust
     }
+
 }
 
 class GatewayHttpException(val code: Int, val body: String) : Exception("gateway_http_$code: $body")

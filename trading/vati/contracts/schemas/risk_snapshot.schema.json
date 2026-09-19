@@ -25,7 +25,9 @@
     "risk_store_ok",
     "market_integrity",
     "tier1_event_blackout_active",
-    "kill_switch_triggers"
+    "kill_switch_triggers",
+    "margin_level_pct",
+    "free_margin"
   ],
   "properties": {
     "now_unix": {
@@ -163,6 +165,20 @@
       "items": {
         "type": "string"
       }
+    },
+    "margin_level_pct": {
+      "type": [
+        "string",
+        "null"
+      ],
+      "description": "P0-TRADE-006. equity / used_margin as a percentage, as the venue reports it. null means the venue did not report it, which the Risk Authority treats as unknown rather than healthy; a paper or owner-ticket venue has no margin and legitimately reports null."
+    },
+    "free_margin": {
+      "type": [
+        "string",
+        "null"
+      ],
+      "description": "P0-TRADE-006. Equity not committed to open positions, as the venue reports it."
     }
   }
 }

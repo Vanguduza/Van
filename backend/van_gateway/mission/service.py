@@ -17,10 +17,15 @@ succeeded. There is no argument a caller can make to get past that.
 from __future__ import annotations
 
 import json
+import logging
 import time
 import uuid
 from typing import Any
 
+from van_gateway.mission.verifiers import VerifierRegistry
+from van_gateway.observability import instruments
+from van_gateway.observability.correlation import for_command
+from van_gateway.observability.logging import log_event
 from van_gateway.mission.models import (
     EVENT_FOR_STATE,
     LEGAL_TRANSITIONS,
@@ -52,13 +57,47 @@ class MissionError(ValueError):
         self.detail = detail
 
 
+LOGGER = logging.getLogger("van.mission")
+
+
+def _correlation_for(mission: Mission) -> str | None:
+    """The mission's correlation id, which is its source command's.
+
+    P2-OBS-001 — a mission that was opened by a command shares that command's
+    identity for tracing purposes. A mission with no source command (a Hermes-
+    initiated one, say) has no correlation id rather than a made-up one.
+    """
+    source = getattr(mission.authority_envelope, "source_command_id", None)
+    return for_command(source) if source else None
+
+
 class MissionService:
-    def __init__(self, store: Store, *, capabilities: Any | None = None) -> None:
+    def __init__(
+        self,
+        store: Store,
+        *,
+        capabilities: Any | None = None,
+        bus: Any | None = None,
+        verifiers: Any | None = None,
+        learning: Any | None = None,
+    ) -> None:
         self.store = store
         # §7 — when a registry is wired, a capability it does not declare cannot
         # become mission work. Optional so Mission Core stays testable on its
         # own, but `create_app` always supplies one.
         self.capabilities = capabilities
+        # P0-EXEC-001 — mission_events is the record; the bus is how the device hears
+        # about it. Without this a mission could change state a dozen times and the
+        # phone would learn nothing until it next polled the read model.
+        self.bus = bus
+        # P0-VERIFY-001 — the registry that actually performs verification. Defaulted to
+        # an empty one rather than left None, because an empty registry answers every
+        # strategy with EngineReportVerifier, which is always UNVERIFIABLE. A missing
+        # registry therefore makes VERIFIED_SUCCESS unreachable instead of unguarded.
+        self.verifiers = verifiers if verifiers is not None else VerifierRegistry()
+        # P1-LEARN-001 — the learning stores had no caller that recorded a real outcome.
+        # A mission reaching a terminal state is the outcome; this is where it is written.
+        self.learning = learning
 
     # ------------------------------------------------------------- creation
 
@@ -71,6 +110,7 @@ class MissionService:
         title: str,
         goal: str,
         project_id: str | None = None,
+        mission_class: str = "GENERAL_OWNER_INTENT",
         success_contract: SuccessContract | None = None,
         constraints: list[str] | None = None,
         authority_envelope: AuthorityEnvelope | None = None,
@@ -98,6 +138,7 @@ class MissionService:
             origin_channel=origin_channel,
             title=title.strip() or goal.strip()[:80],
             goal=goal.strip(),
+            mission_class=(mission_class or "GENERAL_OWNER_INTENT").strip() or "GENERAL_OWNER_INTENT",
             success_contract=success_contract or SuccessContract(),
             constraints=list(constraints or []),
             authority_envelope=authority_envelope or AuthorityEnvelope(),
@@ -114,16 +155,16 @@ class MissionService:
             """
             INSERT INTO missions(
               mission_id, owner_principal_id, project_id, origin, origin_channel, title, goal,
-              success_contract_json, constraints_json, authority_envelope_json, sensitivity,
-              context_snapshot_id, state, priority, created_at_ms, updated_at_ms, deadline_ms,
-              attention_policy, plan_revision, current_phase, parent_mission_id, final_outcome,
-              verification_state, verification_record_json, learning_record_id
-            ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, NULL, ?, NULL,
+              mission_class, success_contract_json, constraints_json, authority_envelope_json,
+              sensitivity, context_snapshot_id, state, priority, created_at_ms, updated_at_ms,
+              deadline_ms, attention_policy, plan_revision, current_phase, parent_mission_id,
+              final_outcome, verification_state, verification_record_json, learning_record_id
+            ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, NULL, ?, NULL,
                       ?, NULL, NULL)
             """,
             (
                 mission.mission_id, owner_principal_id, project_id, origin.value,
-                origin_channel.value, mission.title, mission.goal,
+                origin_channel.value, mission.title, mission.goal, mission.mission_class,
                 Store.dumps(mission.success_contract.model_dump(mode="json")),
                 Store.dumps(mission.constraints),
                 Store.dumps(mission.authority_envelope.model_dump(mode="json")),
@@ -132,6 +173,11 @@ class MissionService:
                 mission.verification_state.value,
             ),
         )
+        if self.learning is not None:
+            # P2-MEM-001 — a mission is a stated owner goal and, where it needed the
+            # owner's presence, a decision they could have declined. Both stores existed
+            # with no producer; this is the event they were waiting for.
+            await self.learning.record_mission_opened(mission, now_ms=now)
         await self.record_event(
             mission_id=mission.mission_id,
             event_type=MissionEventType.MISSION_CREATED,
@@ -152,12 +198,24 @@ class MissionService:
         *,
         target: MissionState,
         expected: MissionState | None = None,
-        verification: VerificationRecord | None = None,
         final_outcome: str | None = None,
         actor: PrincipalType = PrincipalType.HERMES_AGENT,
+        summary: str | None = None,
+        evidence_ref: str | None = None,
         now_ms: int | None = None,
     ) -> Mission:
-        """The one gate. Everything about a mission's life passes through here."""
+        """The one gate. Everything about a mission's life passes through here.
+
+        P0-VERIFY-001: this used to take a `verification` record from the caller. The
+        audit's probe drove a mission to VERIFIED_SUCCESS by supplying both the success
+        contract and a receipt reading `verifier_version: "i-say-so/1.0"` with
+        `evidence_refs: ["evidence://trust-me"]`. A receipt the claimant writes is not
+        verification, it is the claim restated.
+
+        There is now no way to hand one in. Reaching a verification outcome runs the
+        adapter the mission's success contract names, against the target system, and the
+        record that adapter returns is the only one that can be stored.
+        """
         now = int(time.time() * 1000) if now_ms is None else now_ms
         mission = await self.get(mission_id)
         if mission is None:
@@ -176,8 +234,18 @@ class MissionService:
             raise MissionError("MISSION_ILLEGAL_TRANSITION", f"{current.value}->{target.value}")
 
         verification_state = mission.verification_state
+        verification: VerificationRecord | None = None
         if target in VERIFICATION_OUTCOMES:
-            verification = self._require_verification(mission, target, verification)
+            # P3-OBS-002 — verifier latency is one of Gate 11's named metrics, and the
+            # verifier is where an external system's slowness turns into an owner
+            # waiting. Timed here rather than inside the adapter so every strategy is
+            # measured, including the ones written later.
+            with instruments.timed() as verifier_ms:
+                verification = await self._perform_verification(mission, target, now_ms=now)
+            instruments.record_verification(
+                mission.success_contract.verifier_class or "NONE",
+                verification.status, verifier_ms[0],
+            )
             verification_state = verification.status
 
         await self.store.execute(
@@ -195,30 +263,134 @@ class MissionService:
         if event_type is not None:
             await self.record_event(
                 mission_id=mission_id, event_type=event_type, actor=actor,
-                summary=final_outcome or target.value,
+                summary=summary or final_outcome or target.value,
                 severity="WARN" if target in (MissionState.FAILED, MissionState.BLOCKED_POLICY,
                                               MissionState.BLOCKED_UNSAFE) else "INFO",
+                # A verification receipt outranks a caller-supplied pointer: the receipt is
+                # what a success claim rests on, and the caller does not get to substitute
+                # its own reference for it.
                 evidence_ref=(verification.evidence_refs[0]
-                              if verification and verification.evidence_refs else None),
+                              if verification and verification.evidence_refs
+                              else evidence_ref),
                 now_ms=now,
             )
         refreshed = await self.get(mission_id)
         assert refreshed is not None
+        if refreshed.is_terminal:
+            # Mission duration is measured from creation to the terminal state, not
+            # from the first transition: the owner's clock starts when they asked.
+            instruments.record_mission_duration(
+                refreshed.state, max(now - refreshed.created_at_ms, 0)
+            )
+            log_event(
+                LOGGER, logging.INFO, "mission finished",
+                mission_id=mission_id, result=refreshed.state.value,
+                correlation_id=_correlation_for(refreshed),
+                detail={
+                    "verification_state": refreshed.verification_state.value,
+                    "duration_ms": max(now - refreshed.created_at_ms, 0),
+                },
+            )
+        if self.learning is not None and refreshed.is_terminal:
+            await self.learning.record_mission_outcome(
+                mission_id=mission_id,
+                state=refreshed.state,
+                goal=refreshed.goal,
+                verification_status=(verification.status.value if verification else None),
+                evidence_refs=(verification.evidence_refs if verification else []),
+            )
+            # P1-LEARN-003 — the same terminal event, read as evidence about the approach
+            # rather than about this one mission.
+            #
+            # P1-LEARN-005 — the state is passed rather than a boolean, and the feed
+            # classifies it. This used to send `state is VERIFIED_SUCCESS`, so every other
+            # terminal state incremented failure_count: a cancellation, a policy refusal
+            # and an UNVERIFIABLE run all read as "this approach does not work", and three
+            # of them would have demoted a strategy that had never once failed.
+            await self.learning.record_strategy_outcome(refreshed, state=refreshed.state)
+            # §12 — how the owner's decision actually turned out, which is the only thing
+            # that can falsify what VAN inferred from it.
+            await self.learning.record_decision_outcome(refreshed, state=refreshed.state)
         return refreshed
 
-    @staticmethod
-    def _require_verification(
-        mission: Mission, target: MissionState, verification: VerificationRecord | None
+    async def set_deadline(self, mission_id: str, deadline_ms: int) -> None:
+        """P0-EXEC-002 — when VAN should stop believing it will hear back."""
+        await self.store.execute(
+            "UPDATE missions SET deadline_ms = ?, updated_at_ms = ? WHERE mission_id = ?",
+            (int(deadline_ms), int(time.time() * 1000), mission_id),
+        )
+
+    async def expire_overdue(self, *, now_ms: int | None = None) -> list[str]:
+        """Move every non-terminal mission past its deadline to EXPIRED.
+
+        P0-EXEC-002: `create_run` returned a run id that nothing polled, no callback was
+        keyed to it, and no deadline existed. A Hermes that accepted a run and never called
+        back left the mission at RUNNING forever, and the owner was told "working on it"
+        indefinitely — silent non-execution, undetectable by anyone including VAN.
+
+        EXPIRED rather than FAILED, deliberately. VAN does not know the work failed; it
+        knows it handed the work over and never heard back, and those are different things
+        to tell an owner and different things to do about it. The owner projection gives
+        EXPIRED its own status, NEVER_HEARD_BACK, which is in the attention set — STOPPED
+        is not, so a vanished command would otherwise still never reach them.
+
+        Returns the missions it expired, so the caller can report a number rather than
+        claiming to have done something.
+        """
+        now = int(time.time() * 1000) if now_ms is None else now_ms
+        terminal = ",".join("?" for _ in TERMINAL_STATES)
+        rows = await self.store.fetchall(
+            f"SELECT mission_id, state FROM missions WHERE deadline_ms IS NOT NULL "
+            f"AND deadline_ms < ? AND state NOT IN ({terminal})",
+            (now, *[state.value for state in TERMINAL_STATES]),
+        )
+        expired: list[str] = []
+        for row in rows:
+            mission_id = str(row["mission_id"])
+            try:
+                await self.transition(
+                    mission_id=mission_id,
+                    target=MissionState.EXPIRED,
+                    actor=PrincipalType.SYSTEM,
+                    summary="VAN handed this over and never heard back before the deadline",
+                    final_outcome="execution deadline passed with no result",
+                    now_ms=now,
+                )
+            except MissionError:
+                # A mission that reached a terminal state between the SELECT and here is
+                # not an error: something else finished it, which is the outcome we wanted.
+                continue
+            expired.append(mission_id)
+        return expired
+
+    async def _perform_verification(
+        self, mission: Mission, target: MissionState, *, now_ms: int
     ) -> VerificationRecord:
         """§§6, 55 — where "the worker said OK" stops being success.
 
-        Three separate refusals, because there are three separate ways a caller
-        could arrive at an unearned VERIFIED_SUCCESS: bringing no receipt,
-        bringing a receipt with nothing behind it, or having written a contract
-        that never asked anything checkable in the first place.
+        The verifier is chosen by the mission's own success contract, not by the caller
+        asking for the transition, and it observes the target system itself. A contract
+        naming no verifier class, or one naming a strategy nothing has registered, gets
+        `EngineReportVerifier`, which is always UNVERIFIABLE — so an unwired capability
+        yields an honest "could not confirm" rather than an unguarded success.
+
+        The refusals below then still apply to the record the adapter produced: a mission
+        whose contract asked nothing checkable cannot be a verified success, and a record
+        without evidence or with unmet postconditions cannot support one.
         """
-        if verification is None:
-            raise MissionError("MISSION_VERIFICATION_REQUIRED", target.value)
+        strategy = mission.success_contract.verifier_class or "NONE"
+        verification = await self.verifiers.verify(
+            strategy=strategy,
+            contract=mission.success_contract,
+            context={
+                "mission_id": mission.mission_id,
+                "project_id": mission.project_id,
+                "goal": mission.goal,
+                "authority_envelope": mission.authority_envelope.model_dump(mode="json"),
+                "requested_target": target.value,
+                "now_ms": now_ms,
+            },
+        )
         if target is MissionState.VERIFIED_SUCCESS:
             if not mission.success_contract.is_checkable:
                 # Nothing was ever claimed, so nothing was confirmed. Finishing
@@ -386,6 +558,23 @@ class MissionService:
                 severity, 1 if owner_visibility else 0, summary, evidence_ref,
             ),
         )
+        if self.bus is not None and owner_visibility:
+            # Only owner-visible events reach the device stream: the bus is the owner's
+            # feed, not an internal trace, and the distinction is already recorded per
+            # event rather than decided here.
+            await self.bus.publish(
+                event_type.value,
+                {
+                    "event_id": event.event_id,
+                    "mission_id": mission_id,
+                    "activity_id": activity_id,
+                    "actor": actor.value,
+                    "severity": severity,
+                    "summary": summary,
+                    "evidence_ref": evidence_ref,
+                    "occurred_at_ms": now,
+                },
+            )
         return event
 
     # --------------------------------------------------------------- reading
@@ -466,6 +655,7 @@ class MissionService:
             origin_channel=OriginChannel(str(row["origin_channel"])),
             title=str(row["title"]),
             goal=str(row["goal"]),
+            mission_class=str(row["mission_class"]),
             success_contract=SuccessContract.model_validate(
                 json.loads(str(row["success_contract_json"]))
             ),

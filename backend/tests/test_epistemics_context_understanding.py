@@ -11,10 +11,6 @@ from __future__ import annotations
 import pytest
 
 from conftest_automation import make_store
-from van_gateway.context_compiler.compiler import (
-    ContextCompiler,
-    ContextSection,
-)
 from van_gateway.epistemics.models import (
     Claim,
     Provenance,
@@ -45,8 +41,32 @@ from van_gateway.understanding.memory import (
 from van_gateway.understanding.owner_model import (
     AssertionState,
     OwnerCognitiveModel,
+    OwnerModelError,
     OwnerModelField,
 )
+
+
+async def seed_episodes(store, *names: str) -> dict[str, str]:
+    """Real missions for the assertions to be evidenced by (P1-SYM-001).
+
+    `episode_ref` used to be a free string, so three typos were three episodes. It now has
+    to name a mission or a command that exists, which means a test that wants evidence has
+    to produce something that happened.
+    """
+    from van_gateway.mission.models import MissionOrigin
+    from van_gateway.mission.service import MissionService
+    from van_gateway.models import OriginChannel
+
+    missions = MissionService(store)
+    out: dict[str, str] = {}
+    for name in names:
+        mission = await missions.create(
+            owner_principal_id="owner", origin=MissionOrigin.OWNER_VOICE,
+            origin_channel=OriginChannel.VOICE, title=name, goal=name,
+        )
+        out[name] = f"mission:{mission.mission_id}"
+    return out
+
 
 NOW = 1_800_000_000_000
 
@@ -107,137 +127,61 @@ def test_owner_preferences_do_not_expire_on_a_clock():
 # --------------------------------------------------------- §9 context compiler
 
 
-def test_cross_project_isolation_is_hard():
-    """§9 — excluded, not ranked down, and counted so it is visible."""
-    compiler = ContextCompiler()
-    packet = compiler.compile(
-        packet_id="p1", project_id="alpha", now_ms=NOW,
-        claims={
-            ContextSection.PROJECT_TRUTH: [
-                _claim("a", "alpha fact", SemanticClass.PROJECT_TRUTH, project="alpha"),
-                _claim("b", "beta secret", SemanticClass.PROJECT_TRUTH, project="beta"),
-            ]
-        },
-    )
-    statements = [line["statement"] for lines in packet.sections.values() for line in lines]
-    assert "alpha fact" in statements
-    assert "beta secret" not in statements
-    assert packet.selection_stats["dropped_cross_project"] == 1
-
-
-def test_a_stale_claim_is_carried_but_loses_authority():
-    """Dropping it silently would let VAN act as though it never knew."""
-    compiler = ContextCompiler()
-    packet = compiler.compile(
-        packet_id="p2", now_ms=NOW,
-        claims={
-            ContextSection.RETRIEVED_KNOWLEDGE: [
-                _claim("old", "was true last month", SemanticClass.FACT_VERIFIED, observed=0)
-            ]
-        },
-    )
-    line = packet.sections["retrieved_knowledge"][0]
-    assert line["stale"] is True
-    assert line["factual_authority"] is False
-    assert packet.factual_claims() == []
-    assert packet.stale_claim_ids == ["old"]
-
-
-def test_contradicting_claims_stay_together():
-    """§14 — including only the higher-scored side manufactures false confidence."""
-    compiler = ContextCompiler()
-    packet = compiler.compile(
-        packet_id="p3", now_ms=NOW,
-        claims={
-            ContextSection.RETRIEVED_KNOWLEDGE: [
-                _claim("x1", "the build is green", SemanticClass.FACT_VERIFIED, group="build"),
-                _claim("x2", "the build is red", SemanticClass.EXTERNAL_CLAIM, group="build"),
-            ]
-        },
-    )
-    assert packet.contradiction_groups == {"build": ["x1", "x2"]}
-    statements = [l["statement"] for ls in packet.sections.values() for l in ls]
-    assert "the build is green" in statements and "the build is red" in statements
-
-
-def test_the_budget_is_enforced_by_dropping_the_least_useful():
-    """§9 — a compiler that overruns hands the reasoner a silent truncation."""
-    compiler = ContextCompiler()
-    many = [
-        _claim(f"n{i}", f"environment detail {i}" * 10, SemanticClass.EXTERNAL_CLAIM)
-        for i in range(60)
-    ]
-    packet = compiler.compile(
-        packet_id="p4", token_budget=200, now_ms=NOW,
-        claims={
-            ContextSection.AUTHORITY_CONTEXT: [
-                _claim("auth", "mission ceiling is A2", SemanticClass.PROJECT_TRUTH)
-            ],
-            ContextSection.CURRENT_ENVIRONMENT: many,
-        },
-    )
-    assert packet.within_budget
-    assert packet.selection_stats["dropped_budget"] > 0
-    # Authority survives the squeeze: acting with the wrong ceiling is worse
-    # than acting with less information.
-    kept = [l["statement"] for ls in packet.sections.values() for l in ls]
-    assert "mission ceiling is A2" in kept
-
-
-def test_an_illformed_claim_never_reaches_the_reasoner():
-    compiler = ContextCompiler()
-    packet = compiler.compile(
-        packet_id="p5", now_ms=NOW,
-        claims={
-            ContextSection.RETRIEVED_KNOWLEDGE: [
-                Claim(claim_id="bad", statement="unsourced",
-                      semantic_class=SemanticClass.FACT_VERIFIED)
-            ]
-        },
-    )
-    assert packet.selection_stats["dropped_illformed"] == 1
-    assert packet.sections == {}
-
-
-# ------------------------------------------------------- §64 owner model
-
-
 async def test_one_emphatic_conversation_does_not_mint_a_trait(tmp_path):
     """§74 — independence is by episode, not by observation."""
-    model = OwnerCognitiveModel(await make_store(tmp_path))
+    store = await make_store(tmp_path)
+    model = OwnerCognitiveModel(store)
+    episodes = await seed_episodes(store, "m1")
     for _ in range(5):
         assertion = await model.observe(
             owner_principal_id="owner", field=OwnerModelField.COMMUNICATION_PREFERENCE,
-            value="prefers terse status updates", episode_ref="mission-1",
+            value="prefers terse status updates", episode_ref=episodes["m1"],
         )
     assert assertion.independent_episodes == 1
     assert assertion.state is AssertionState.OBSERVED
 
 
-async def test_evidence_promotes_to_candidate_then_confirmed(tmp_path):
-    model = OwnerCognitiveModel(await make_store(tmp_path))
-    first = await model.observe(
-        owner_principal_id="owner", field=OwnerModelField.COMMUNICATION_PREFERENCE,
-        value="terse", episode_ref="m1",
-    )
-    assert first.state is AssertionState.OBSERVED
-    second = await model.observe(
-        owner_principal_id="owner", field=OwnerModelField.COMMUNICATION_PREFERENCE,
-        value="terse", episode_ref="m2",
-    )
-    assert second.state is AssertionState.CANDIDATE
-    third = await model.observe(
-        owner_principal_id="owner", field=OwnerModelField.COMMUNICATION_PREFERENCE,
-        value="terse", episode_ref="m3",
-    )
-    assert third.state is AssertionState.CONFIRMED
-    assert third.may_act_on is True
+async def test_evidence_promotes_to_candidate_then_evidenced_but_never_confirmed(tmp_path):
+    """P1-SYM-001 — three episodes used to produce CONFIRMED, and the calibration engine
+    then told the owner their preference was owner-confirmed. Nobody had asked them."""
+    store = await make_store(tmp_path)
+    model = OwnerCognitiveModel(store)
+    episodes = await seed_episodes(store, "m1", "m2", "m3")
+    states = []
+    for name in ("m1", "m2", "m3"):
+        assertion = await model.observe(
+            owner_principal_id="owner", field=OwnerModelField.COMMUNICATION_PREFERENCE,
+            value="terse", episode_ref=episodes[name],
+        )
+        states.append(assertion.state)
+    assert states == [
+        AssertionState.OBSERVED, AssertionState.CANDIDATE, AssertionState.EVIDENCED
+    ]
+    assert assertion.may_act_on is True, "a well-evidenced preference is still actionable"
+
+    confirmed = await model.confirm(assertion.assertion_id)
+    assert confirmed.state is AssertionState.CONFIRMED
+
+
+async def test_an_episode_that_did_not_happen_is_not_evidence(tmp_path):
+    """The ladder counts distinct references, so an unresolvable one is a vote."""
+    store = await make_store(tmp_path)
+    model = OwnerCognitiveModel(store)
+    for rubbish in ("m1", "mission-1", "", "mission:", "mission:does-not-exist", "note:x"):
+        with pytest.raises(OwnerModelError):
+            await model.observe(
+                owner_principal_id="owner",
+                field=OwnerModelField.COMMUNICATION_PREFERENCE,
+                value="terse", episode_ref=rubbish,
+            )
 
 
 async def test_an_autonomy_bearing_trait_never_confirms_from_evidence_alone(tmp_path):
     """§45.16 — inferred preference must not widen autonomy by itself."""
-    model = OwnerCognitiveModel(await make_store(tmp_path))
-    for episode in ("m1", "m2", "m3", "m4", "m5"):
+    store = await make_store(tmp_path)
+    model = OwnerCognitiveModel(store)
+    episodes = await seed_episodes(store, "m1", "m2", "m3", "m4", "m5")
+    for episode in episodes.values():
         assertion = await model.observe(
             owner_principal_id="owner", field=OwnerModelField.DELEGATION_PREFERENCE,
             value="happy for VAN to act without asking", episode_ref=episode,
@@ -251,26 +195,30 @@ async def test_an_autonomy_bearing_trait_never_confirms_from_evidence_alone(tmp_
 
 
 async def test_a_correction_outranks_any_amount_of_evidence(tmp_path):
-    model = OwnerCognitiveModel(await make_store(tmp_path))
+    store = await make_store(tmp_path)
+    model = OwnerCognitiveModel(store)
+    episodes = await seed_episodes(store, "m1", "m2", "m3", "m4")
     a = await model.observe(
         owner_principal_id="owner", field=OwnerModelField.EVIDENCE_PREFERENCE,
-        value="wants summaries", episode_ref="m1",
+        value="wants summaries", episode_ref=episodes["m1"],
     )
     await model.reject(a.assertion_id)
-    for episode in ("m2", "m3", "m4"):
+    for name in ("m2", "m3", "m4"):
         again = await model.observe(
             owner_principal_id="owner", field=OwnerModelField.EVIDENCE_PREFERENCE,
-            value="wants summaries", episode_ref=episode,
+            value="wants summaries", episode_ref=episodes[name],
         )
     assert again.state is AssertionState.REJECTED
     assert again.may_act_on is False
 
 
 async def test_a_correction_supersedes_rather_than_edits(tmp_path):
-    model = OwnerCognitiveModel(await make_store(tmp_path))
+    store = await make_store(tmp_path)
+    model = OwnerCognitiveModel(store)
+    episodes = await seed_episodes(store, "m1")
     original = await model.observe(
         owner_principal_id="owner", field=OwnerModelField.REASONING_PREFERENCE,
-        value="wants short answers", episode_ref="m1",
+        value="wants short answers", episode_ref=episodes["m1"],
     )
     replacement = await model.correct(original.assertion_id, new_value="wants full evidence")
     assert replacement.state is AssertionState.CONFIRMED

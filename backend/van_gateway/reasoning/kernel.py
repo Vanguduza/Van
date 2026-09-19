@@ -34,6 +34,7 @@ from typing import Any
 from pydantic import BaseModel, Field
 
 from van_gateway.epistemics.models import SemanticClass
+from van_gateway.reasoning.critic import critique
 from van_gateway.storage.db import Store
 
 
@@ -205,18 +206,45 @@ class CriticalReasoningKernel:
         recommended_next_action: str | None = None,
         confidence: float = 0.0,
         evidence_refs: list[str] | None = None,
+        #: P0-COG-001 — these are now *additional* findings a caller may contribute, not
+        #: the whole critique. The kernel derives its own and they cannot be suppressed.
         critic_findings: list[CriticFinding] | None = None,
         verifier_findings: list[str] | None = None,
         mission_id: str | None = None,
         now_ms: int | None = None,
     ) -> ReasoningAssessment:
-        """Record an assessment, refusing the ones that do not meet their mode.
+        """Assess, criticise, and refuse the assessments that do not meet their mode.
 
         The refusal matters: an assessment claiming RED_TEAM rigour with one
         alternative considered is worse than no assessment, because it carries
         the authority of a process that did not actually happen.
+
+        P0-COG-001 — this used to take `critic_findings` from the caller and store them,
+        so an assessment with zero findings and 0.99 confidence was recorded as actionable
+        and the matrix described the result as a solver/critic/verifier separation. The
+        critic now runs over what the assessment actually contains. Caller-supplied
+        findings are merged in rather than replaced by, because a caller that noticed
+        something real should be able to say so — but it cannot make the kernel's own
+        findings go away, which is the property that was missing.
         """
         now = int(time.time() * 1000) if now_ms is None else now_ms
+        derived = [
+            CriticFinding(**finding)
+            for finding in critique(
+                problem_statement=problem_statement,
+                known_facts=list(known_facts or []),
+                assumptions=list(assumptions or []),
+                alternatives=list(alternatives or []),
+                contradictions=list(contradictions or []),
+                failure_modes=list(failure_modes or []),
+                evidence_refs=list(evidence_refs or []),
+                recommended_next_action=recommended_next_action,
+                confidence=confidence,
+            )
+        ]
+        # The caller's findings first, so a duplicate kind from the critic is still
+        # recorded: two independent observations of the same flaw is information.
+        merged = list(critic_findings or []) + derived
         assessment = ReasoningAssessment(
             assessment_id=f"ras_{uuid.uuid4().hex}", problem_statement=problem_statement,
             mission_id=mission_id, known_facts=list(known_facts or []),
@@ -226,7 +254,7 @@ class CriticalReasoningKernel:
             counterfactuals=list(counterfactuals or []),
             recommended_next_action=recommended_next_action, confidence=confidence,
             evidence_refs=sorted(set(evidence_refs or [])), challenge_mode=challenge_mode,
-            critic_findings=list(critic_findings or []),
+            critic_findings=merged,
             verifier_findings=list(verifier_findings or []), created_at_ms=now,
         )
         if recommended_next_action and not assessment.meets_mode_requirements:

@@ -8,10 +8,17 @@ that asks for more than the ceiling is rejected at load time, never widened.
 
 from __future__ import annotations
 
+import time
+
 from dataclasses import dataclass, field
 from decimal import Decimal, InvalidOperation
 from enum import Enum
 from typing import Any, Iterable, Mapping
+from vati.authority import (
+    MAX_STANDING_LIFETIME_SECONDS,
+    OwnerAuthorityError,
+    OwnerAuthorityVerifier,
+)
 
 
 class MandateError(ValueError):
@@ -135,6 +142,7 @@ class TradingMandate:
         data: Mapping[str, Any],
         *,
         ceilings: PlatformCeilings = PlatformCeilings(),
+        authority: "OwnerAuthorityVerifier | None" = None,
     ) -> "TradingMandate":
         required = (
             "mandate_id", "version", "account_alias", "venue", "mode", "instruments",
@@ -153,8 +161,25 @@ class TradingMandate:
         except ValueError as exc:
             raise MandateError(f"invalid mode: {data['mode']!r}") from exc
 
-        if not str(data["owner_signature_ref"]).strip():
-            raise MandateError("mandate is unsigned (owner_signature_ref empty)")
+        # P0-TRADE-001 — "signed" meant "the field is not empty", so any mandate was
+        # admissible and only PlatformCeilings bounded what it could then do. The mandate
+        # id and version are the subject, so a signature over version 3 does not admit a
+        # version 4 that widened the risk limits.
+        verifier = authority if authority is not None else OwnerAuthorityVerifier()
+        try:
+            verified = verifier.verify(
+                str(data["owner_signature_ref"]),
+                act="mandate-admit",
+                subject=f"{data['mandate_id']}:{data['version']}",
+                now_unix=int(data.get("signed_at_unix") or time.time()),
+                # A mandate is a standing document, re-read on every process start, so it
+                # is not a one-shot act. Its replay bound is its own expiry plus the
+                # signature covering its version: widening the limits needs a new one.
+                single_use=False,
+                max_lifetime_seconds=MAX_STANDING_LIFETIME_SECONDS,
+            )
+        except OwnerAuthorityError as exc:
+            raise MandateError(f"mandate is not owner-signed: {exc}") from exc
 
         forbidden = frozenset(str(x) for x in _as_iterable(data["forbidden"]))
         absent = HARD_FORBIDDEN_BEHAVIOURS - forbidden
@@ -183,7 +208,7 @@ class TradingMandate:
             tier1_event_policy=str(data["tier1_event_policy"]),
             weekend_hold_allowed=bool(data["weekend_hold_allowed"]),
             forbidden=forbidden,
-            owner_signature_ref=str(data["owner_signature_ref"]),
+            owner_signature_ref=verified.ref,
             signed_at_unix=int(data["signed_at_unix"]),
             expires_at_unix=int(data["expires_at_unix"]),
             drawdown_tiers=tiers,

@@ -62,6 +62,36 @@ class DegradedModeStore {
         }
     }
 
+    /**
+     * Write one subsystem's whole verdict.
+     *
+     * P3-AND-004/005. `markBroken` and `markWorking` between them could not express
+     * WONT_DO, and `markWorking` dropped the detail, so a queue working offline could not
+     * say "3 commands queued, waiting to send" without being called broken. Five subsystems
+     * had no writer at all; this is the one they use.
+     */
+    fun mark(id: String, status: SubsystemStatus, detail: String, restore: RestoreAction) {
+        update { mode ->
+            val subs = mode.subsystems.map { sub ->
+                if (sub.id == id) {
+                    sub.copy(status = status, detail = detail, restoreAction = restore)
+                } else {
+                    sub
+                }
+            }
+            val stillBroken = subs.any { it.status == SubsystemStatus.BROKEN }
+            mode.copy(
+                active = stillBroken,
+                reason = if (stillBroken) {
+                    subs.first { it.status == SubsystemStatus.BROKEN }.detail
+                } else {
+                    "All subsystems nominal"
+                },
+                subsystems = subs,
+            )
+        }
+    }
+
     fun markBroken(id: String, detail: String, restore: RestoreAction) {
         update { mode ->
             val subs = mode.subsystems.map { sub ->

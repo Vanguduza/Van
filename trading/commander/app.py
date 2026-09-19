@@ -20,7 +20,7 @@ from fastapi.responses import JSONResponse
 from pydantic import BaseModel, Field
 
 from commander.accounts import ACCOUNT_COMMANDS, ACCOUNT_TOOL_SCHEMAS, AccountControlSettings, build_account_handlers, redact_args
-from commander.auth import NonceCache, verify_request
+from commander.auth import DEFAULT_PRINCIPAL, NonceCache, verify_request_principal
 
 REDACT = re.compile(r"(?i)(password|passwd|token|api[_-]?key|secret|bearer|signing[_-]?key)(\s*[:=]\s*)\S+")
 UNIT_RE = re.compile(r"^[A-Za-z0-9@._-]+$")
@@ -63,6 +63,43 @@ class CommanderSettings:
     python: str = sys.executable
     runner: Runner = field(default=default_runner)
     token: Optional[str] = None      # injected for tests; otherwise read from token_file
+    #: Per-principal tokens, injected for tests; otherwise read from <token_file>.<principal>.
+    tokens: Optional[dict[str, str]] = None
+    _owner_authority: Any = None     # lazily built OwnerAuthorityVerifier (P0-TRADE-001)
+
+    def load_tokens(self) -> dict[str, str]:
+        """Every credential this commander accepts, by the principal it authenticates.
+
+        P1-HER-005. A single shared token cannot tell Hermes from the owner's app, so
+        `requested_by` was left to the caller and became the gate for the credential
+        commands. Per-principal tokens live beside the main one as
+        `<token_file>.<principal>`; where only the shared token exists, it authenticates
+        DEFAULT_PRINCIPAL and the agent-hidden commands stay reachable by whoever holds
+        it — which is the pre-existing trust boundary, not a new one, and is now at least
+        stated rather than implied.
+        """
+        if self.tokens:
+            return dict(self.tokens)
+        tokens = {DEFAULT_PRINCIPAL: self.load_token()}
+        if self.token:
+            return tokens
+        base = Path(self.token_file)
+        for extra in sorted(base.parent.glob(f"{base.name}.*")):
+            principal = extra.name[len(base.name) + 1:]
+            if not principal or stat.S_IMODE(extra.stat().st_mode) & 0o077:
+                continue
+            value = extra.read_text().strip()
+            if len(value) >= 32:
+                tokens[principal] = value
+        return tokens
+
+    def owner_authority(self):
+        """The verifier for owner-signed acts on this host (P0-TRADE-001)."""
+        from vati.authority import OwnerAuthorityVerifier
+
+        if self._owner_authority is None:
+            self._owner_authority = OwnerAuthorityVerifier()
+        return self._owner_authority
 
     def load_token(self) -> str:
         if self.token:
@@ -86,8 +123,15 @@ def redact(text: str) -> str:
 
 
 class CmdBody(BaseModel):
+    """P1-HER-005 — `requested_by` used to live here and be trusted.
+
+    It is still accepted so an existing client is not broken, but it is now only ever
+    compared with the principal the signature authenticated. A body that disagrees is
+    refused rather than believed.
+    """
+
     args: dict[str, Any] = Field(default_factory=dict)
-    requested_by: str = "hermes"
+    requested_by: str = ""
 
 
 TOOL_SCHEMAS = {
@@ -108,6 +152,9 @@ TOOL_SCHEMAS = {
 def create_app(settings: Optional[CommanderSettings] = None) -> FastAPI:
     st = settings or CommanderSettings()
     app = FastAPI(title="Van Trading Commander", version="1.0.0")
+    # Exposed so a deployment or a test can install the owner authority verifier
+    # this host should trust, the same way the gateway exposes its services.
+    app.state.commander_settings = st
     nonces = NonceCache()
     audit_path = Path(st.log_dir) / "commander-audit.jsonl"
     started = time.time()
@@ -223,9 +270,19 @@ def create_app(settings: Optional[CommanderSettings] = None) -> FastAPI:
             raise HTTPException(502, f"trading VEKL unavailable: {str(exc)[:200]}")
 
     def cmd_halt(a: dict) -> dict:
-        sig = str(a.get("owner_signature_ref", "")).strip()
-        if not sig:
-            raise HTTPException(403, "owner-signed authority (A4) required: owner_signature_ref is empty")
+        # P0-TRADE-001 / P1-HER-005 — this accepted any non-empty string, so "x" halted
+        # trading and, more to the point, so did anything that could reach this route.
+        from vati.authority import OwnerAuthorityError
+
+        try:
+            verified = st.owner_authority().verify(
+                str(a.get("owner_signature_ref", "")),
+                act="owner-halt",
+                subject="van-trading-core",
+            )
+        except OwnerAuthorityError as exc:
+            raise HTTPException(403, f"owner-signed authority (A4) required: {exc}")
+        sig = verified.ref
         from vati.core.events import EventKind, make_event
         led = ledger()
         try:
@@ -274,7 +331,9 @@ def create_app(settings: Optional[CommanderSettings] = None) -> FastAPI:
 
     @app.get("/v1/tools")
     async def tools(request: FastRequest):
-        ok, why = verify_request(st.load_token(), request.headers, "GET", "/v1/tools", b"", nonces=nonces)
+        ok, why, _principal = verify_request_principal(
+            st.load_tokens(), request.headers, "GET", "/v1/tools", b"", nonces=nonces
+        )
         if not ok:
             raise HTTPException(401, why)
         return {"tools": [{"name": n, "description": s["description"], "inputSchema": {"type": "object", "properties": s["properties"], "required": s.get("required", [])}}
@@ -283,7 +342,9 @@ def create_app(settings: Optional[CommanderSettings] = None) -> FastAPI:
     @app.post("/v1/cmd/{name}")
     async def command(name: str, request: FastRequest):
         body = await request.body()
-        ok, why = verify_request(st.load_token(), request.headers, "POST", f"/v1/cmd/{name}", body, nonces=nonces)
+        ok, why, principal = verify_request_principal(
+            st.load_tokens(), request.headers, "POST", f"/v1/cmd/{name}", body, nonces=nonces
+        )
         if not ok:
             raise HTTPException(401, why)
         if name not in handlers:
@@ -292,8 +353,19 @@ def create_app(settings: Optional[CommanderSettings] = None) -> FastAPI:
             parsed = CmdBody.model_validate_json(body or b"{}")
         except Exception as exc:  # noqa: BLE001
             raise HTTPException(422, str(exc)[:200])
-        if name in AGENT_HIDDEN_COMMANDS and parsed.requested_by.lower() in AGENT_REQUESTERS:
-            audit(name, parsed.requested_by, parsed.args, "refused:agent_requester")
+        # P1-HER-005. The principal is whichever configured token signed the request. A
+        # body that claims a different one is a client bug at best and an attempt to reach
+        # the credential commands at worst, so it is refused rather than ignored.
+        if parsed.requested_by and parsed.requested_by.lower() != principal.lower():
+            audit(name, principal, parsed.args, "refused:requested_by_mismatch")
+            raise HTTPException(
+                403,
+                "requested_by does not match the authenticated principal; it is not the "
+                "caller's to declare",
+            )
+        parsed.requested_by = principal
+        if name in AGENT_HIDDEN_COMMANDS and principal.lower() in AGENT_REQUESTERS:
+            audit(name, principal, parsed.args, "refused:agent_requester")
             raise HTTPException(403, "credential-bearing account commands are not available to agents; use the app onboarding path")
         try:
             result = handlers[name](parsed.args)

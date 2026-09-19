@@ -1,0 +1,19 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <!-- Canon: the deep navy field the aura is drawn over. Matches VanPalette.DARK. -->
+    <style name="Theme.Van" parent="android:Theme.DeviceDefault.NoActionBar">
+        <item name="android:statusBarColor">#0A1219</item>
+        <item name="android:navigationBarColor">#0A1219</item>
+        <item name="android:windowBackground">#0A1219</item>
+        <item name="android:windowLightStatusBar">false</item>
+    </style>
+
+    <style name="Theme.Van.Transparent" parent="android:Theme.DeviceDefault.NoActionBar">
+        <item name="android:windowBackground">@android:color/transparent</item>
+        <item name="android:windowIsTranslucent">true</item>
+        <item name="android:windowContentOverlay">@null</item>
+        <item name="android:windowNoTitle">true</item>
+        <item name="android:windowAnimationStyle">@null</item>
+        <item name="android:backgroundDimEnabled">false</item>
+    </style>
+</resources>
