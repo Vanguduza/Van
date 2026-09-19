@@ -676,6 +676,12 @@ replace the one already on it. `tools/ci/restore_debug_keystore.sh` will install
 owner-supplied `VAN_DEBUG_KEYSTORE_BASE64` before the build and validates it against the
 credentials Android's debug config is hardcoded to use.
 
+Run 297 on `23e74ce` is the first to record one: `CN=Android Debug`, SHA-256
+`57200ab86b098d1f60fb2fac381bf6d14acb9116943d13a99017978de04f7c30`. **That is the baseline.**
+The next run printing a different digest demonstrates the per-runner key rather than arguing
+it; the same digest would mean the hypothesis is wrong and the install failure is something
+else. Compare before you theorise.
+
 **Two things are still open, and they are different in kind.** No such secret exists yet, so
 runs still sign per-runner — that is the owner's to supply, because a signing key committed
 here would let anyone with the repository install an upgrade over the owner's VAN and
