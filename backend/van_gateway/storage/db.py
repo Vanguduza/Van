@@ -8,7 +8,7 @@ from typing import Any, AsyncIterator
 
 import aiosqlite
 
-SCHEMA_VERSION = 21
+SCHEMA_VERSION = 22
 
 
 MIGRATION_17 = """
@@ -128,6 +128,18 @@ CREATE INDEX IF NOT EXISTS idx_missions_class ON missions(mission_class, state);
 ALTER TABLE execution_strategies ADD COLUMN max_action_class TEXT NOT NULL DEFAULT 'A1';
 CREATE INDEX IF NOT EXISTS idx_execution_strategies_lookup
   ON execution_strategies(mission_class, promotion_state);
+"""
+
+MIGRATION_22 = """
+-- P0-OPS-011: an IN_FLIGHT idempotency claim had no lease. A gateway that died between
+-- claiming a key and completing it left the row IN_FLIGHT forever, and every later retry
+-- of that command raised "still in flight". The idempotency key is part of the signed
+-- request, so the owner could not work around it by changing it: that command became
+-- permanently unrepeatable, and the only cure was editing the database.
+--
+-- claim_count records how many times a claim has been taken, so a recovered claim is
+-- visible rather than looking like the first attempt.
+ALTER TABLE idempotency ADD COLUMN claim_count INTEGER NOT NULL DEFAULT 1;
 """
 
 MIGRATIONS: dict[int, str] = {
@@ -1453,6 +1465,7 @@ MIGRATIONS: dict[int, str] = {
     19: MIGRATION_19,
     20: MIGRATION_20,
     21: MIGRATION_21,
+    22: MIGRATION_22,
 }
 
 

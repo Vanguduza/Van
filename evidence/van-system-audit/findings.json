@@ -20,7 +20,7 @@
     "PRODUCTION_CERTIFIED"
   ],
   "counts": {
-    "P0": 15,
+    "P0": 16,
     "P1": 32,
     "P2": 22,
     "P3": 27,
@@ -4018,7 +4018,8 @@
       "requirement": "docs/VAN_CONSOLIDATED_DEPLOYMENT_READINESS_CLOSURE_BLUEPRINT_REV_1.md",
       "authority": "VAN Consolidated Deployment-Readiness Closure Blueprint Rev 2",
       "repository_evidence": [
-        "backend/tests/test_command_execution_result.py:1"
+        "backend/tests/test_recovery_matrix.py",
+        "backend/van_gateway/idempotency/service.py"
       ],
       "runtime_evidence": [],
       "affected_components": [
@@ -4028,8 +4029,23 @@
       "remediation": "Build a recovery matrix with a test per cell, and treat an unexercised cell as unshipped.",
       "impact": "The failure modes an owner actually meets are the ones nothing has tried.",
       "validation_gate": "G12",
-      "current_status": "OPEN",
-      "remediation_gate": "G12"
+      "current_status": "CLOSED",
+      "remediation_gate": "G12",
+      "closure": {
+        "state": "EXTERNALLY_BLOCKED_REPOSITORY_COMPLETE",
+        "summary": "backend/tests/test_recovery_matrix.py is the matrix: six cells, 26 tests, each naming what fails and what must be true afterwards. The bar is not 'does not crash' — a recovery that silently repeats a mutation is worse than a refusal.\n\n  1. Gateway restart mid-command. A stale claim is recoverable; a fresh one and one just short of the lease are not; a COMPLETED answer and a CONFLICT are never retaken; age does not make a different request the same request.\n  2. Restart after dispatch, before the receipt. The retry gets the mission already open rather than a second one, which is what makes retaking a claim safe.\n  3. Connectivity lost after a mutation. The deadline sweeper expires the mission, a mission still inside its deadline is left alone, and an expired one cannot become a verified success.\n  4. Duplicate provider callback, terminal and non-terminal, plus a racing writer with a stale expectation.\n  5. Process death while awaiting approval. The challenge lives in the database so a restart does not invalidate the owner's decision; it expires on the clock rather than on a session; an expired one is removed rather than left to be read as valid later; it is consumed once; and a device revoked while the approval was pending cannot approve.\n  6. Trading state changing while an approval is pending. Stated as the boundary it is rather than a gate the gateway does not have: an approval proves the owner asked for this action on this device, and whether the world still permits it is VATI's decision. A gateway that re-evaluated trading state at approval time would be a second risk authority, which is worse than one.\n\nWriting cell 1 found P0-OPS-011, which was not merely untested. Two mutations survived the first run and both named real gaps: a duplicate terminal callback was refused by the transition table whichever guard was removed, so the terminal guard was untested until the test asserted MISSION_TERMINAL rather than any MissionError — an operator reading MISSION_ILLEGAL_TRANSITION would go looking for a state-machine bug instead of seeing that the provider delivered twice; and the non-terminal duplicate case was missing entirely. Both are now cells. Fifteen mutations, fifteen caught.",
+        "changed": [
+          "backend/van_gateway/idempotency/service.py",
+          "backend/van_gateway/storage/db.py"
+        ],
+        "verified_by": [
+          "backend/tests/test_recovery_matrix.py"
+        ],
+        "runtime_evidence": [],
+        "residual": "The matrix covers the cells the gateway can exercise in-process. Android process death is exercised through the server-side property it depends on — that a challenge outlives any session — rather than by killing an app.",
+        "residual_class": "ENVIRONMENT_UNVERIFIED",
+        "residual_reason": "Killing the Android process and resuming is Gate 14 device work, deferred to physical verification. What the repository can settle is the invariant the app relies on, and that is settled here."
+      }
     },
     {
       "id": "P3-DOC-005",
@@ -4406,6 +4422,45 @@
         "residual": null,
         "residual_class": null,
         "residual_reason": null
+      }
+    },
+    {
+      "id": "P0-OPS-011",
+      "severity": "P0",
+      "domain": "operations",
+      "title": "A gateway crash made the crashed command permanently unrepeatable",
+      "description": "IdempotencyService.begin claimed a key by writing an IN_FLIGHT row and nothing ever released it. A gateway that died between the claim and complete() or fail() left the row IN_FLIGHT forever, so every later attempt at that command raised 'still in flight'. The idempotency key is part of the signed request, so the owner could not work around it by changing it: that command was unrepeatable for the life of the database, and the only cure was editing the table by hand.",
+      "requirement": "docs/VAN_CONSOLIDATED_DEPLOYMENT_READINESS_CLOSURE_BLUEPRINT_REV_1.md",
+      "authority": "VAN Consolidated Deployment-Readiness Closure Blueprint Rev 2",
+      "repository_evidence": [
+        "backend/van_gateway/idempotency/service.py",
+        "backend/van_gateway/storage/db.py"
+      ],
+      "runtime_evidence": [],
+      "affected_components": [
+        "idempotency",
+        "ops"
+      ],
+      "root_cause": "A claim with no lease. P1-SEC-005 made the claim atomic, which was the right fix for the race; nothing addressed the holder never coming back.",
+      "remediation": "Give the claim a lease, recover a stale one inside the same transaction as the read, and record that it was recovered.",
+      "impact": "Any crash during command handling permanently burned that command. Found by writing the recovery matrix (P3-OPS-008) rather than by an incident, which is the point of writing one.",
+      "validation_gate": "G11",
+      "current_status": "CLOSED",
+      "remediation_gate": "G11",
+      "closure": {
+        "state": "INTEGRATED_AND_EVIDENCED",
+        "summary": "STALE_CLAIM_SECONDS is fifteen minutes, chosen against the execution deadline rather than against how long a request takes: a command handed to Hermes carries a deadline in minutes, and a claim released before that deadline would let a second attempt run beside the first. The cost of the choice is a retry refused for a while rather than one that duplicates work.\n\nRecovery happens inside the same BEGIN IMMEDIATE as the read, because two retries arriving together must not both conclude the claim is theirs — that is the defect P1-SEC-005 closed, and releasing a claim outside the transaction would reopen it. Only an IN_FLIGHT claim with a matching hash is recoverable: COMPLETED and CONFLICT are answers rather than claims, and a different hash under the same key is the conflict the table exists to detect.\n\nSchema v22 adds claim_count, so a recovered claim is visible rather than looking like a first attempt — a command being retried every fifteen minutes forever would otherwise look normal.\n\nRetaking a claim is not a promise that nothing happened; it is a statement that whoever held it is not coming back. What makes it safe is the layer below: CommandMissionLink.existing_for_command returns the mission already opened for that command rather than opening a second one, and a test drives the crash-and-retake sequence end to end to assert exactly that.",
+        "changed": [
+          "backend/van_gateway/idempotency/service.py",
+          "backend/van_gateway/storage/db.py"
+        ],
+        "verified_by": [
+          "backend/tests/test_recovery_matrix.py"
+        ],
+        "runtime_evidence": [],
+        "residual": "A crash after dispatch but before the mission was opened would be re-executed on recovery, because nothing durable records that the dispatch happened.",
+        "residual_class": "DELIBERATE_SCOPE",
+        "residual_reason": "The window is between the claim and the first durable write, and closing it needs a two-phase record of the dispatch itself. At-least-once with an idempotent mission link is the honest guarantee, and it is better than the alternative the defect produced, which was zero-times-forever."
       }
     }
   ],
