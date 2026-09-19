@@ -39,7 +39,36 @@ sourceSets {
         // in the Compose graph, so it is not standalone. Its one security-relevant rule —
         // which actions need owner approval — is held to the gateway's by
         // backend/tests/test_account_approval_contract.py instead.
-        kotlin.include("com/dial/van/status/**", "com/dial/van/mission/MissionModels.kt")
+        kotlin.include(
+            "com/dial/van/status/**",
+            "com/dial/van/mission/MissionModels.kt",
+            // Gate 6 — the pure half of the visual runtime. These files have no Android and
+            // no Compose imports, which is exactly why the logic that was wrong in them
+            // (a restarting animation clock, an unproduced frame-budget signal, an aura
+            // family unreachable from live state, a body gap expressed as a proportion) can
+            // be executed here rather than only reasoned about.
+            "com/dial/van/visual/RiveContract.kt",
+            "com/dial/van/visual/VanAnimationClock.kt",
+            "com/dial/van/visual/VanAuraPlan.kt",
+            "com/dial/van/visual/VanAuraSpec.kt",
+            "com/dial/van/visual/VanBodyExclusionProfile.kt",
+            "com/dial/van/visual/VanCharacterMotion.kt",
+            "com/dial/van/visual/VanDrawOp.kt",
+            "com/dial/van/visual/VanEffectBudget.kt",
+            "com/dial/van/visual/VanFieldGeometry.kt",
+            "com/dial/van/visual/VanFrameBudget.kt",
+            "com/dial/van/visual/VanGlassTokens.kt",
+            "com/dial/van/visual/VanPresence.kt",
+            "com/dial/van/visual/VanPresenceFrame.kt",
+            "com/dial/van/visual/VanStatusPalette.kt",
+            "com/dial/van/visual/VanTradeSemantic.kt",
+            "com/dial/van/visual/VanVisualRuntime.kt",
+            "com/dial/van/visual/VanWindFieldMotion.kt",
+            "com/dial/van/degraded/DegradedMode.kt",
+            "com/dial/van/overlay/OverlayTheme.kt",
+            "com/dial/van/overlay/OverlayVisibilityPolicy.kt",
+            "com/dial/van/events/EventStream.kt",
+        )
     }
 }
 

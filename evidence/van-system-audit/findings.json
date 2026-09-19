@@ -1036,8 +1036,24 @@
       "root_cause": "see s32 root-cause map",
       "remediation": "Introduce a monotonic animation clock and blend aura spec and pose changes over 120-420 ms.",
       "validation_gate": "G7",
-      "current_status": "OPEN",
-      "remediation_gate": "GATE 6"
+      "current_status": "CLOSED",
+      "remediation_gate": "GATE 6",
+      "closure": {
+        "summary": "One monotonic clock, never restarted, and transitions blended over 120-420 ms. The driver was `rememberInfiniteTransition` with a `durationMillis` chosen per state, and a period change restarts that tween at zero — so the field snapped back to phase 0 at the exact moment VAN was meant to be showing the owner a change, which is the one moment a jump is most visible. `VanAnimationClock` integrates dt/period instead, so a period change alters how fast the phase advances and leaves where it *is* alone. It is driven by `withFrameNanos`, clamps a long pause rather than spinning the phase through hundreds of cycles when the screen comes back on, and refuses to rewind on a non-monotonic timestamp. Both aura fields blend independently, each retargeting from where the blend had actually reached rather than from the previous target — the case that matters, since LISTENING to THINKING to WORKING inside half a second is ordinary and restarting from the old target would put the snap back on the second change.",
+        "changed": [
+          "android/app/src/main/java/com/dial/van/visual/VanAnimationClock.kt",
+          "android/app/src/main/java/com/dial/van/visual/VanCanvasFallback.kt",
+          "android/verification/build.gradle.kts"
+        ],
+        "verified_by": [
+          "android/verification/src/test/kotlin/com/dial/van/visual/VanAnimationClockTest.kt"
+        ],
+        "runtime_evidence": [
+          "evidence/van-system-audit/gate-6/kotlin_verification_tests.txt"
+        ],
+        "residual": "The Compose wiring in VanCanvasFallback.kt is not compiled here; only the clock and blending logic it drives are executed.",
+        "residual_reason": "The Android Gradle Plugin cannot be fetched in this environment (dl.google.com is refused by the proxy), so :app cannot be built. The JVM harness compiles and runs the shipping pure sources, which is where the defect was."
+      }
     },
     {
       "id": "P1-AURA-003",
@@ -1059,8 +1075,27 @@
       "root_cause": "see s32 root-cause map",
       "remediation": "Publish a classified trade-state event onto a semantic state bus and subscribe the visual runtime to it.",
       "validation_gate": "G7",
-      "current_status": "OPEN",
-      "remediation_gate": "GATE 6"
+      "current_status": "CLOSED",
+      "remediation_gate": "GATE 6",
+      "closure": {
+        "summary": "Trading state reaches VAN's semantic and visual state. The eight trade aura families existed as a `when (kind: String)` whose only caller was the PNG board generator, while the live trading screen derived VAN's presence from the degraded-code set — so whether VAN looked calm or alarmed while the owner's money was at risk depended on whether some subsystem was reporting a fault. The families are now a typed enum classified from live signals and published to the same presence runtime voice and the command envelope write to. Three rules hold: an unreadable or stale ledger classifies UNKNOWN rather than FLAT, because absence of evidence must not render as evidence of calm; only states the owner has to act on move VAN's pose, so a position quietly in profit is Zone C news rather than a posture change all day; and the margin threshold equals the trading risk authority's floor, so the owner does not learn about the floor from a refusal they did not see coming. The board generator now reads the same enum, so the poster and the running app cannot drift.",
+        "changed": [
+          "android/app/src/main/java/com/dial/van/visual/VanTradeSemantic.kt",
+          "android/app/src/main/java/com/dial/van/visual/VanPresenceFrame.kt",
+          "android/app/src/main/java/com/dial/van/visual/VanLiveVisualState.kt",
+          "android/app/src/main/java/com/dial/van/visual/VanAuraSpec.kt",
+          "android/app/src/main/java/com/dial/van/trading/TradingModels.kt",
+          "android/app/src/main/java/com/dial/van/trading/TradingCommandCentreActivity.kt"
+        ],
+        "verified_by": [
+          "android/verification/src/test/kotlin/com/dial/van/visual/VanTradeSemanticTest.kt"
+        ],
+        "runtime_evidence": [
+          "evidence/van-system-audit/gate-6/kotlin_verification_tests.txt"
+        ],
+        "residual": "The publishing composable in TradingCommandCentreActivity.kt is not compiled here.",
+        "residual_reason": "It needs the Android toolchain, which this environment cannot fetch. The classifier, the presence reducer and the precedence rules — everything that decides what the owner sees — are executed in the JVM harness."
+      }
     },
     {
       "id": "P1-VIS-001",
@@ -1082,8 +1117,28 @@
       "root_cause": "see s32 root-cause map",
       "remediation": "Extract the Compose painter into the shared source set so previews render the shipping pixels.",
       "validation_gate": "G7",
-      "current_status": "OPEN",
-      "remediation_gate": "GATE 11"
+      "current_status": "CLOSED",
+      "remediation_gate": "GATE 11",
+      "closure": {
+        "summary": "The aura is described once and executed twice. `visual-preview` shared the geometry sources with the app but not `VanAura.kt`, because that file is Compose and the preview renders with Java2D, so the AWT painter reimplemented the aura by hand and the two drifted exactly as reimplemented code does: it never drew electricalBranches at all, used roughly double the Zone A alpha and 1.5x the radius, placed the haze blobs differently, gave ion fragments no bloom, and used different orb-link constants. Every one of those is a number that appeared twice and was changed once. So neither painter owns any of them now: `VanAuraPlanner` computes the aura as typed ops in pixel space and both painters became executors. A painter cannot diverge on a value it does not have. The AWT executor is proved to draw the electrical layer differentially — the same plan with those ops removed produces a different image — rather than by looking for pixels of a particular colour, which would pass on a painter that highlighted something else.",
+        "changed": [
+          "android/app/src/main/java/com/dial/van/visual/VanAuraPlan.kt",
+          "android/app/src/main/java/com/dial/van/visual/VanAura.kt",
+          "android/visual-preview/src/main/kotlin/com/dial/van/preview/GlassPainter.kt",
+          "android/visual-preview/build.gradle.kts",
+          "android/preview-render/settings.gradle.kts"
+        ],
+        "verified_by": [
+          "android/verification/src/test/kotlin/com/dial/van/visual/VanAuraPlanTest.kt",
+          "android/visual-preview/src/test/kotlin/com/dial/van/preview/AuraPlanExecutionTest.kt"
+        ],
+        "runtime_evidence": [
+          "evidence/van-system-audit/gate-6/kotlin_verification_tests.txt",
+          "artifacts/release/preview/rev23/manifest.json"
+        ],
+        "residual": "The Compose executor in VanAura.kt is not compiled here; the AWT executor and the shared plan are.",
+        "residual_reason": "The Android toolchain cannot be fetched in this environment. The plan holds every constant both painters use, so the Compose side has nothing left of its own to get wrong."
+      }
     },
     {
       "id": "P1-VIS-002",
@@ -1094,9 +1149,9 @@
       "requirement": "See the requirements traceability matrix in the canonical report.",
       "authority": "docs/VAN_WHOLE_SYSTEM_IMPLEMENTATION_AUDIT_AND_CERTIFICATION_REV_1.md s30",
       "repository_evidence": [
-        "android/visual-preview/src/main/kotlin/com/dial/van/preview/VanEvidenceMatrix.kt:36",
-        "artifacts/release/preview/rev21/manifest.json:2",
-        "docs/VAN_LIVING_WIND_FIELD_RUNTIME_REV_1.md s13"
+        "android/visual-preview/src/main/kotlin/com/dial/van/preview/VanEvidenceMatrix.kt:35 (AUTHORITY_REVISION/EVIDENCE_DIR say rev23)",
+        "docs/VAN_LIVING_WIND_FIELD_RUNTIME_REV_1.md (s13 requires the orthogonal-presence board)",
+        "artifacts/release/preview/rev21/manifest.json declared authority_revision 2.1 and held no orthogonal-presence board; that tree was replaced by the Gate 6 regeneration and is in git history at 2aa95f5"
       ],
       "runtime_evidence": [],
       "affected_components": [
@@ -1105,8 +1160,25 @@
       "root_cause": "see s32 root-cause map",
       "remediation": "Regenerate evidence at the current authority revision including the orthogonal presence board.",
       "validation_gate": "G7",
-      "current_status": "OPEN",
-      "remediation_gate": "GATE 11"
+      "current_status": "CLOSED",
+      "remediation_gate": "GATE 11",
+      "closure": {
+        "summary": "Visual evidence is regenerated at the current authority revision and the required board exists. The generator declared rev23 and authority 2.3 while only a rev21 tree existed declaring 2.1, and the canonical orthogonal-presence board §13 requires was absent. The underlying reason nobody noticed is that the renderer was unbuildable wherever the Android toolchain was unavailable: `android/settings.gradle` includes `:app`, whose configuration needs the Android Gradle Plugin. `android/preview-render` is a settings file that includes only `:visual-preview` — the same module and the same build script, not a copy — so the evidence can be regenerated anywhere. The committed tree is now rev23 at authority 2.3 with 35 distinct shots and the orthogonal-presence board in the manifest. The stale rev21 tree was removed by the generator's own documented behaviour, which rebuilds its output directory from scratch precisely so a historical revision cannot sit beside the current one and be mistaken for it; it remains in git history.",
+        "changed": [
+          "android/preview-render/settings.gradle.kts",
+          "android/visual-preview/build.gradle.kts",
+          "artifacts/release/preview/rev23/manifest.json"
+        ],
+        "verified_by": [
+          "android/visual-preview/src/test/kotlin/com/dial/van/preview/VanAcceptanceGateTest.kt::theEvidenceMatrixWritesDistinctCommandCentreBoardsWithoutACorrectionPass"
+        ],
+        "runtime_evidence": [
+          "artifacts/release/preview/rev23/manifest.json",
+          "evidence/van-system-audit/gate-6/kotlin_verification_tests.txt"
+        ],
+        "residual": "The images are rendered by the JVM painter, not captured from a device.",
+        "residual_reason": "On-device screenshot evidence is Gate 12 work and needs the Android build. What this closes is the divergence and the staleness: the JVM painter now executes the same plan as the shipping one, and the committed tree is at the current authority revision."
+      }
     },
     {
       "id": "P1-AND-001",
@@ -1753,8 +1825,24 @@
       "root_cause": "see s32 root-cause map",
       "remediation": "Drive the lifecycle below STARTED on screen off and when minimized.",
       "validation_gate": "G7",
-      "current_status": "OPEN",
-      "remediation_gate": "GATE 6"
+      "current_status": "CLOSED",
+      "remediation_gate": "GATE 6",
+      "closure": {
+        "summary": "The overlay stops animating when nothing can see it. Its lifecycle was driven to STARTED when the view was added and never below it while the service lived, and there was no screen-state receiver, so VAN produced frames into a dark display for as long as the service was up. A screen-state receiver now feeds `OverlayVisibilityPolicy`, the frame loop stops when it says so, and the lifecycle drops to CREATED rather than STOPPED so waking the phone does not rebuild the overlay or make it visibly disappear and reappear. Minimized is deliberately *not* a pause: it is a size, and freezing it would freeze a portrait the owner is looking at. A frozen overlay always reports why, because one with no explanation is indistinguishable from a crashed one.",
+        "changed": [
+          "android/app/src/main/java/com/dial/van/overlay/OverlayVisibilityPolicy.kt",
+          "android/app/src/main/java/com/dial/van/overlay/FloatingOverlayService.kt",
+          "android/app/src/main/java/com/dial/van/visual/VanCanvasFallback.kt"
+        ],
+        "verified_by": [
+          "android/verification/src/test/kotlin/com/dial/van/overlay/OverlayVisibilityPolicyTest.kt"
+        ],
+        "runtime_evidence": [
+          "evidence/van-system-audit/gate-6/kotlin_verification_tests.txt"
+        ],
+        "residual": "The receiver registration and lifecycle writes in FloatingOverlayService.kt are not compiled or exercised here.",
+        "residual_reason": "The service needs a WindowManager, a Looper and a real Lifecycle. The decision — which was the part that was wrong — is a pure function of four booleans and every combination of them is tested."
+      }
     },
     {
       "id": "P2-COG-002",
@@ -1866,8 +1954,21 @@
       "root_cause": "see s32 root-cause map",
       "remediation": "Express the gap contract in dp and assert it in a test.",
       "validation_gate": "G1",
-      "current_status": "OPEN",
-      "remediation_gate": "GATE 6"
+      "current_status": "CLOSED",
+      "remediation_gate": "GATE 6",
+      "closure": {
+        "summary": "The air gap is a dp contract. It was `bodyEdge * 0.055`, which at the shipping 96 dp avatar is 5.3 dp against a 10-14 dp requirement — and at the 400 dp evidence board the same fraction gives 22 dp, so one expression was too tight in one place and too loose in another. A gap is a physical distance the eye reads and cannot be a proportion of an arbitrary render size. `gapDp` now returns a value clamped into the 10-14 dp band and the profile converts it to pixels using the body's dp size. A caller that cannot supply a density — the JVM renderer works in raw pixels — gets the legacy fraction and a null dp claim, so 'out of band' stays distinguishable from 'nobody said what a dp is here'.",
+        "changed": [
+          "android/app/src/main/java/com/dial/van/visual/VanBodyExclusionProfile.kt",
+          "android/app/src/main/java/com/dial/van/visual/VanFieldGeometry.kt"
+        ],
+        "verified_by": [
+          "android/verification/src/test/kotlin/com/dial/van/visual/VanAuraGeometryTest.kt"
+        ],
+        "runtime_evidence": [
+          "evidence/van-system-audit/gate-6/kotlin_verification_tests.txt"
+        ]
+      }
     },
     {
       "id": "P2-VIS-003",
@@ -1887,9 +1988,27 @@
       "root_cause": "see s32 root-cause map",
       "remediation": "Regenerate both boards and assert distinct hashes in the manifest.",
       "validation_gate": "G1",
-      "current_status": "OPEN",
+      "current_status": "CLOSED",
       "remediation_gate": "GATE 11",
-      "progress_note": "Manifest annotated with the duplicate-hash defect and the rev21 tree marked stale; the boards themselves are regenerated under Gate 11, so this stays OPEN."
+      "progress_note": "Manifest annotated with the duplicate-hash defect and the rev21 tree marked stale; the boards themselves are regenerated under Gate 11, so this stays OPEN.",
+      "closure": {
+        "summary": "The two Command Centre boards are two different pictures. The root cause turned out to be worse than a shared renderer: `writeAll` wrote `command-centre-degraded.png` a third time, from the default nominal sheet, *after* the manifest had already recorded that file's hash — so the degraded board was overwritten with the idle one and the manifest described a file that no longer existed. A `VanCommandCentreEvidence.reconcile` pass was then bolted on to overwrite both PNGs from a second Command Centre renderer and patch the manifest hashes with a regular expression. All three are gone: there is one Command Centre renderer, `renderShot` asks it for the health each shot claims to show, and every file is written once before its hash is taken. A build step whose job is to correct an earlier build step is a bug with a schedule. The test no longer asserts that the correction worked; it asserts that no two shots in the whole manifest share a hash.",
+        "changed": [
+          "android/visual-preview/src/main/kotlin/com/dial/van/preview/VanEvidenceMatrix.kt",
+          "android/visual-preview/src/main/kotlin/com/dial/van/preview/VanPreviewSheets.kt",
+          "android/visual-preview/src/main/kotlin/com/dial/van/preview/VanCommandCentreEvidence.kt",
+          "android/visual-preview/src/main/kotlin/com/dial/van/preview/VanPreviewMain.kt",
+          "artifacts/release/preview/rev23/manifest.json"
+        ],
+        "verified_by": [
+          "android/visual-preview/src/test/kotlin/com/dial/van/preview/VanAcceptanceGateTest.kt::theEvidenceMatrixWritesDistinctCommandCentreBoardsWithoutACorrectionPass",
+          "android/visual-preview/src/test/kotlin/com/dial/van/preview/VanAcceptanceGateTest.kt::commandCentreIdleAndDegradedEvidenceCannotCollapseToTheSameImage"
+        ],
+        "runtime_evidence": [
+          "artifacts/release/preview/rev23/manifest.json",
+          "evidence/van-system-audit/gate-6/kotlin_verification_tests.txt"
+        ]
+      }
     },
     {
       "id": "P2-BROW-001",
@@ -2063,8 +2182,26 @@
       "root_cause": "see s32 root-cause map",
       "remediation": "Cache stable topology and update only dynamic coordinates; add frame-time sampling.",
       "validation_gate": "G1",
-      "current_status": "OPEN",
-      "remediation_gate": "GATE 6"
+      "current_status": "CLOSED",
+      "remediation_gate": "GATE 6",
+      "closure": {
+        "summary": "The silhouette is built once and the frame budget finally has a producer. `VanBodyExclusionProfile.compact` was called on every frame for a value that depends only on the body's size and position and was identical each time; it is now memoised on a quantised key, so sub-pixel layout wobble does not defeat the cache, and a test asserts one rebuild across 120 frames *and* that the strands still move — caching the wrong thing would freeze the aura. Separately, `VanEffectConditions.frameBudgetMissed` had no producer at all: the ladder knew what to do about a device that could not keep up and nothing ever told it. `VanFrameBudgetSampler` reports on a sustained fraction of a rolling window rather than one slow frame, because a single long frame happens on every device and degrading on it would make VAN flicker between effect budgets, and it recovers with hysteresis so a cooled device gets its field back without oscillating.",
+        "changed": [
+          "android/app/src/main/java/com/dial/van/visual/VanFrameBudget.kt",
+          "android/app/src/main/java/com/dial/van/visual/VanBodyExclusionProfile.kt",
+          "android/app/src/main/java/com/dial/van/visual/VanFieldGeometry.kt",
+          "android/app/src/main/java/com/dial/van/visual/VanCanvasFallback.kt"
+        ],
+        "verified_by": [
+          "android/verification/src/test/kotlin/com/dial/van/visual/VanFrameBudgetTest.kt",
+          "android/verification/src/test/kotlin/com/dial/van/visual/VanAuraGeometryTest.kt"
+        ],
+        "runtime_evidence": [
+          "evidence/van-system-audit/gate-6/kotlin_verification_tests.txt"
+        ],
+        "residual": "The field's per-frame strand coordinates are still recomputed each frame, and no on-device frame-time measurement exists in this environment.",
+        "residual_reason": "The strand coordinates are the animation; caching them would stop the motion, which a test asserts against. Real device frame times arrive through POST /v1/observability/device-telemetry (P3-OBS-002) once the client posts them, and the gateway reports them as unobserved until then rather than inventing values."
+      }
     },
     {
       "id": "P2-OBS-001",
@@ -2616,7 +2753,23 @@
       "remediation": "Replace with the semantic state subscription from Gate 6 and persist the cursor.",
       "validation_gate": "G_SEMANTIC",
       "remediation_gate": "GATE 6",
-      "current_status": "OPEN"
+      "current_status": "CLOSED",
+      "closure": {
+        "summary": "The event stream is streamed. There was a single `events(0)` in the activity feed's initial composition with a literal zero cursor that was never persisted and never polled again, so anything the gateway published afterwards never reached the owner until they left the screen and came back. `EventStream` is a pure state machine that advances and persists the cursor, merges pages by sequence so a restored cursor slightly behind does not produce duplicate rows, refuses to rewind on a low cursor from the gateway, bounds what the client retains, polls again immediately on a truncated page — waiting the idle interval per page would make catching up take pages x interval — and backs off exponentially to a ceiling on failure. A feed that failed is distinguishable from a feed with nothing in it, which is the distinction that was collapsed.",
+        "changed": [
+          "android/app/src/main/java/com/dial/van/events/EventStream.kt",
+          "android/app/src/main/java/com/dial/van/events/PreferencesEventCursorStore.kt",
+          "android/app/src/main/java/com/dial/van/command/CommandCentreActivity.kt"
+        ],
+        "verified_by": [
+          "android/verification/src/test/kotlin/com/dial/van/events/EventStreamTest.kt"
+        ],
+        "runtime_evidence": [
+          "evidence/van-system-audit/gate-6/kotlin_verification_tests.txt"
+        ],
+        "residual": "The SharedPreferences-backed cursor store and the Compose polling loop are not compiled here.",
+        "residual_reason": "Both need the Android toolchain. The paging, cursor and backoff arithmetic — the whole of what was wrong — runs in the JVM harness."
+      }
     },
     {
       "id": "P3-AND-003",
@@ -2931,7 +3084,22 @@
       "remediation": "Consume it in a renderer that has a separable head, or delete it.",
       "validation_gate": "G_SEMANTIC",
       "remediation_gate": "GATE 6",
-      "current_status": "OPEN"
+      "current_status": "CLOSED",
+      "closure": {
+        "summary": "`headCounterDeg` is deleted. It was computed on every frame and consumed by nothing: the only production caller of the motion sampler is the owner-art avatar, which renders a bitmap, and a bitmap has no separable head to counter-rotate. The procedural Canvas character does have one, but it already carries its own head motion inside VanScene (`headBob` and `actionHeadDrop`), so wiring this value there would have created a second parallel source of head motion beside the one that works — the duplication pattern this audit kept finding rather than a fix for it.",
+        "changed": [
+          "android/app/src/main/java/com/dial/van/visual/VanCharacterMotion.kt",
+          "android/app/src/test/java/com/dial/van/visual/VanCharacterMotionTest.kt"
+        ],
+        "verified_by": [
+          "android/verification/src/test/kotlin/com/dial/van/visual/VanAnimationClockTest.kt"
+        ],
+        "runtime_evidence": [
+          "evidence/van-system-audit/gate-6/kotlin_verification_tests.txt"
+        ],
+        "residual": "The deletion is verified by the file compiling in the JVM harness with no reference to the field anywhere in the tree, not by an Android build.",
+        "residual_reason": "The Android toolchain is unavailable here. The symbol's absence is mechanical and is checked by the component ledger's removal assertion."
+      }
     },
     {
       "id": "P4-TRADE-009",

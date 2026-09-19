@@ -5,11 +5,14 @@ import android.app.NotificationChannel
 import android.app.NotificationManager
 import android.app.PendingIntent
 import android.app.Service
+import android.content.BroadcastReceiver
 import android.content.Context
 import android.content.Intent
+import android.content.IntentFilter
 import android.graphics.PixelFormat
 import android.os.Build
 import android.os.IBinder
+import android.os.PowerManager
 import android.view.Gravity
 import android.view.HapticFeedbackConstants
 import android.view.WindowManager
@@ -118,6 +121,46 @@ class FloatingOverlayService : Service(), LifecycleOwner, SavedStateRegistryOwne
     private var tradeView by mutableStateOf(TradeView.CURRENT)
     private var tradeRefreshTick by mutableStateOf(0)
 
+    /**
+     * P1-PERF-002 — the overlay used to animate with the screen off.
+     *
+     * The lifecycle was driven to STARTED when the view was added and never below it while
+     * the service lived, and there was no screen-state receiver, so the infinite transition
+     * kept producing frames into a display nobody was looking at. `visibility` is the
+     * policy's input; `OverlayVisibilityPolicy` decides what it means, and the frame loop in
+     * `VanEmbodiment` stops when it says so.
+     */
+    private var visibility by mutableStateOf(OverlayVisibility())
+
+    private val screenReceiver = object : BroadcastReceiver() {
+        override fun onReceive(context: Context?, intent: Intent?) {
+            when (intent?.action) {
+                Intent.ACTION_SCREEN_ON, Intent.ACTION_USER_PRESENT -> setScreenOn(true)
+                Intent.ACTION_SCREEN_OFF -> setScreenOn(false)
+            }
+        }
+    }
+
+    private fun setScreenOn(on: Boolean) {
+        if (visibility.screenOn == on) return
+        visibility = visibility.copy(screenOn = on)
+        applyVisibilityLifecycle()
+    }
+
+    /**
+     * CREATED rather than STOPPED when paused: the composition is retained, so waking the
+     * phone does not rebuild the whole overlay, but no frame callback runs. The view stays
+     * attached, so the overlay does not visibly disappear and reappear.
+     */
+    private fun applyVisibilityLifecycle() {
+        if (lifecycleRegistry.currentState == Lifecycle.State.DESTROYED) return
+        lifecycleRegistry.currentState = when (OverlayVisibilityPolicy.target(visibility)) {
+            OverlayLifecycleTarget.ANIMATING -> Lifecycle.State.STARTED
+            OverlayLifecycleTarget.PAUSED -> Lifecycle.State.CREATED
+            OverlayLifecycleTarget.DESTROYED -> Lifecycle.State.DESTROYED
+        }
+    }
+
     override fun onCreate() {
         super.onCreate()
         savedStateController.performRestore(null)
@@ -153,7 +196,22 @@ class FloatingOverlayService : Service(), LifecycleOwner, SavedStateRegistryOwne
             setContent { OverlayContent() }
         }
         windowManager.addView(overlayView, layoutParams)
-        lifecycleRegistry.currentState = Lifecycle.State.STARTED
+        // Seed from the real screen state rather than assuming on: a service started while
+        // the phone is locked would otherwise animate immediately.
+        val power = getSystemService(PowerManager::class.java)
+        visibility = visibility.copy(
+            attached = true,
+            screenOn = power?.isInteractive != false,
+        )
+        registerReceiver(
+            screenReceiver,
+            IntentFilter().apply {
+                addAction(Intent.ACTION_SCREEN_ON)
+                addAction(Intent.ACTION_SCREEN_OFF)
+                addAction(Intent.ACTION_USER_PRESENT)
+            },
+        )
+        applyVisibilityLifecycle()
         startForeground(NOTIFICATION_ID, buildNotification())
         stateStore.markRunning(true)
     }
@@ -167,6 +225,8 @@ class FloatingOverlayService : Service(), LifecycleOwner, SavedStateRegistryOwne
     }
 
     override fun onDestroy() {
+        visibility = visibility.copy(destroying = true, attached = false)
+        runCatching { unregisterReceiver(screenReceiver) }
         stateStore.markRunning(false)
         persistState(running = false)
         hideDismissTarget()
@@ -270,6 +330,7 @@ class FloatingOverlayService : Service(), LifecycleOwner, SavedStateRegistryOwne
         ) {
             val budget = rememberVanEffectBudget()
             VanEmbodiment(
+                animate = OverlayVisibilityPolicy.shouldAnimate(visibility),
                 state = visualState,
                 budget = budget,
                 presentation = VanPresentation.COMPACT,
@@ -343,6 +404,7 @@ class FloatingOverlayService : Service(), LifecycleOwner, SavedStateRegistryOwne
             }
 
             VanEmbodiment(
+                animate = OverlayVisibilityPolicy.shouldAnimate(visibility),
                 state = visualState,
                 budget = budget,
                 presentation = VanPresentation.COMPACT,
@@ -445,6 +507,7 @@ class FloatingOverlayService : Service(), LifecycleOwner, SavedStateRegistryOwne
             }
 
             VanEmbodiment(
+                animate = OverlayVisibilityPolicy.shouldAnimate(visibility),
                 state = visualState,
                 budget = budget,
                 presentation = VanPresentation.EXPANDED,
@@ -507,6 +570,7 @@ class FloatingOverlayService : Service(), LifecycleOwner, SavedStateRegistryOwne
                 }
             }
             VanEmbodiment(
+                animate = OverlayVisibilityPolicy.shouldAnimate(visibility),
                 state = visualState,
                 budget = budget,
                 presentation = VanPresentation.EXPANDED,
@@ -712,6 +776,7 @@ class FloatingOverlayService : Service(), LifecycleOwner, SavedStateRegistryOwne
                 drawPath(path, field)
             }
             VanEmbodiment(
+                animate = OverlayVisibilityPolicy.shouldAnimate(visibility),
                 state = visualState,
                 budget = budget,
                 presentation = VanPresentation.COMPACT,

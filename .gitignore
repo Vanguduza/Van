@@ -63,3 +63,7 @@ node_modules/
 # android/verification is a source-only Gradle harness; its build output is not evidence.
 android/verification/.gradle/
 android/verification/build/
+
+# The preview renderer is a settings-only entry point onto :visual-preview; its Gradle
+# working directory is not evidence and must not be committed.
+android/preview-render/.gradle/

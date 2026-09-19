@@ -27,6 +27,15 @@ data class VanPresenceFrame(
     val viseme: Int = 0,
     val urgency: Float = 0f,
     val actionCode: Int = 0,
+    /**
+     * P1-AURA-003 — live trading state, as a semantic fact alongside the others.
+     *
+     * Orthogonal like everything else in this frame: VAN can be listening to the owner while
+     * a position is under risk pressure, and both must be true at once. Null means no trading
+     * state has been published, which is different from [VanTradeSemantic.FLAT] ("nothing is
+     * open") and from [VanTradeSemantic.UNKNOWN] ("I cannot read the ledger").
+     */
+    val trade: VanTradeSemantic? = null,
 ) {
     /** DEGRADED does not suppress local activity; OFFLINE uplink truth does. */
     val poseState: VanDurableState
@@ -54,13 +63,29 @@ data class VanPresenceFrame(
                 VanAuthorityState.WARNING -> VanDurableState.WARNING
                 VanAuthorityState.ERROR -> VanDurableState.ERROR
                 VanAuthorityState.URGENT -> VanDurableState.URGENT
-                VanAuthorityState.NONE -> when (health) {
-                    VanHealthState.DEGRADED -> VanDurableState.DEGRADED
-                    VanHealthState.NOMINAL -> poseState
-                    VanHealthState.OFFLINE -> VanDurableState.OFFLINE
-                }
+                // P1-AURA-003 — a trade state the owner has to act on reaches the outer
+                // field, below explicit authority (an owner approval outranks a market) and
+                // above ordinary health. It never reaches the pose from here: semantic
+                // colour lives in Zone C, not on VAN's body (Rev 2.2).
+                VanAuthorityState.NONE -> tradeSemanticState()
+                    ?: when (health) {
+                        VanHealthState.DEGRADED -> VanDurableState.DEGRADED
+                        VanHealthState.NOMINAL -> poseState
+                        VanHealthState.OFFLINE -> VanDurableState.OFFLINE
+                    }
             }
         }
+
+    private fun tradeSemanticState(): VanDurableState? {
+        val semantic = trade ?: return null
+        // A degraded subsystem still outranks a calm market: the reason VAN cannot be
+        // trusted is more urgent than the fact that nothing is happening.
+        val derived = VanTradeSemantics.durableStateFor(semantic) ?: return null
+        if (health == VanHealthState.DEGRADED && derived == VanDurableState.DEGRADED) {
+            return VanDurableState.DEGRADED
+        }
+        return derived
+    }
 
     fun toVisualState(): VanVisualState = VanVisualState(
         durableState = poseState,
@@ -78,6 +103,16 @@ data class VanPresenceFrame(
 
 /** Pure reducer used by the Android runtime and JVM tests. */
 object VanPresenceReducer {
+    /**
+     * P1-AURA-003 — publish a classified trade state onto the presence frame.
+     *
+     * A reducer rather than a direct `copy` so the one place that decides what a trade state
+     * does to VAN is the same place that decides what voice and health do, and so the JVM
+     * tests exercise the production transition rather than an imitation of it.
+     */
+    fun trade(frame: VanPresenceFrame, semantic: VanTradeSemantic?): VanPresenceFrame =
+        if (frame.trade == semantic) frame else frame.copy(trade = semantic)
+
     fun listeningStarted(frame: VanPresenceFrame): VanPresenceFrame = frame.copy(
         activity = VanDurableState.LISTENING,
         speech = VanSpeechState.LISTENING,

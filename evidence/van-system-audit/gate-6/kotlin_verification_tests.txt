@@ -1,0 +1,121 @@
+# Gate 6 — Kotlin tests executed on the JVM, not asserted about.
+# Above the blank line: android/verification (pure app sources, `gradle test --offline`).
+# Below: android/visual-preview via android/preview-render (`gradle :visual-preview:test`).
+
+EventStreamTest > newest events are kept and the list is bounded() PASSED
+EventStreamTest > a feed that failed is not a feed with nothing in it() PASSED
+EventStreamTest > the cursor advances instead of staying at zero() PASSED
+EventStreamTest > a truncated page catches up immediately() PASSED
+EventStreamTest > a restored cursor resumes instead of replaying everything() PASSED
+EventStreamTest > a cursor is saved so a restart does not replay() PASSED
+EventStreamTest > the cursor never rewinds() PASSED
+EventStreamTest > a success clears the backoff() PASSED
+EventStreamTest > failures back off exponentially and stop at a ceiling() PASSED
+EventStreamTest > an overlapping page does not produce duplicate rows() PASSED
+MissionSummaryTest > aRunningMissionNamesItsPhaseWhenItHasOne() PASSED
+MissionSummaryTest > anUnknownStateIsNotLabelledWithTheRawEnum() PASSED
+MissionSummaryTest > anUnknownGatewayProjectionNameDoesNotCrashOrGuess() PASSED
+MissionSummaryTest > aVerifiedMissionNeedsNoAttentionAndAnUnverifiableOneDoes() PASSED
+MissionSummaryTest > theThreePostExecutionOutcomesRemainThreeDifferentSentences() PASSED
+MissionSummaryTest > anUnknownStateWithNoGatewayProjectionIsUnknown() PASSED
+MissionSummaryTest > anOlderGatewayFallsBackToTheLocalTableNotToUnknown() PASSED
+MissionSummaryTest > aWaitingMissionIsNotCountedAsActive() PASSED
+MissionSummaryTest > theGatewaysProjectionIsPreferredOverTheLocalTable() PASSED
+MissionSummaryTest > everyMissionStateTheGatewayCanSendHasItsOwnSentence() PASSED
+OverlayVisibilityPolicyTest > the screen being off stops the animation() PASSED
+OverlayVisibilityPolicyTest > a frozen overlay always says why() PASSED
+OverlayVisibilityPolicyTest > a detached view does not animate() PASSED
+OverlayVisibilityPolicyTest > minimized is a size, not a pause() PASSED
+OverlayVisibilityPolicyTest > every combination resolves to exactly one target() PASSED
+OverlayVisibilityPolicyTest > destroying wins over everything() PASSED
+OverlayVisibilityPolicyTest > a fully covered overlay does not animate() PASSED
+OverlayVisibilityPolicyTest > a paused overlay is CREATED, not STOPPED or destroyed() PASSED
+OwnerStatusProjectionTest > unknownReachesTheOwnerAndIsNotTreatedAsFinished() PASSED
+OwnerStatusProjectionTest > acceptedIsNotSuccess() PASSED
+OwnerStatusProjectionTest > nothingIsBothWorkingAndFinished() PASSED
+OwnerStatusProjectionTest > everyProjectedValueIsAStatusWithASentence() PASSED
+OwnerStatusProjectionTest > caseAndWhitespaceFromTheWireDoNotProduceUnknown() PASSED
+OwnerStatusProjectionTest > anUnknownGatewayStatusIsUnknownNotWorking() PASSED
+OwnerStatusProjectionTest > theThreePostExecutionOutcomesStayThreeDifferentAnswers() PASSED
+OwnerStatusProjectionTest > everyStatusHasADistinctSentence() PASSED
+OwnerStatusProjectionTest > onlyAVerifiedMissionReadsAsDone() PASSED
+OwnerStatusProjectionTest > aRefusalIsNotAFailure() PASSED
+VanCommandStatusTest > everyOwnerStatusMapsToAMessageStatus() PASSED
+VanCommandStatusTest > onlyAVerifiedOutcomeShowsAsSucceeded() PASSED
+VanCommandStatusTest > anUnknownGatewayStatusShowsAsUnknown() PASSED
+VanCommandStatusTest > aRefusalDoesNotShowAsAFailure() PASSED
+VanCommandStatusTest > acceptedShowsAsAcceptedNotSucceeded() PASSED
+VanCommandStatusTest > theThreePostExecutionOutcomesShowAsThreeDifferentThings() PASSED
+VanAnimationClockTest > a long pause is clamped rather than spun through hundreds of cycles() PASSED
+VanAnimationClockTest > the phase stays inside zero to one however long it runs() PASSED
+VanAnimationClockTest > retargeting mid-blend continues from where the field actually is() PASSED
+VanAnimationClockTest > a blend starts and ends with zero velocity() PASSED
+VanAnimationClockTest > a spec blend moves the continuous fields and does not invent a colour() PASSED
+VanAnimationClockTest > the old driver's failure is what this replaces() PASSED
+VanAnimationClockTest > identical specs are not worth blending() PASSED
+VanAnimationClockTest > a non-monotonic timestamp does not rewind the clock() PASSED
+VanAnimationClockTest > arriving at something urgent is fast and settling down is slow() PASSED
+VanAnimationClockTest > with no blend in flight the transition starts from what is on screen() PASSED
+VanAnimationClockTest > a period change advances the phase differently and never restarts it() PASSED
+VanAnimationClockTest > every blend duration is inside the 120 to 420 ms band() PASSED
+VanAnimationClockTest > the first frame advances nothing() PASSED
+VanAuraGeometryTest > a caller that cannot say what a dp is gets no dp claim() PASSED
+VanAuraGeometryTest > the dp gap actually reaches the geometry() PASSED
+VanAuraGeometryTest > the old proportional gap is the 5 point 3 dp the audit measured() PASSED
+VanAuraGeometryTest > sub-pixel float wobble does not defeat the cache() PASSED
+VanAuraGeometryTest > the field still animates while the silhouette is cached() PASSED
+VanAuraGeometryTest > resizing the body does rebuild it() PASSED
+VanAuraGeometryTest > the gap stays in band at every size VAN is drawn at() PASSED
+VanAuraGeometryTest > at the shipping avatar size the gap is inside the 10 to 14 dp band() PASSED
+VanAuraGeometryTest > the silhouette is built once and reused across frames() PASSED
+VanAuraPlanTest > a still budget still produces a field() PASSED
+VanAuraPlanTest > an electrical branch has a bright core and a field strand does not() PASSED
+VanAuraPlanTest > nothing is planned for a body too small or a field too quiet() PASSED
+VanAuraPlanTest > the orb link is planned only when the spec asks for it() PASSED
+VanAuraPlanTest > the plan carries the electrical layer the evidence painter omitted() PASSED
+VanAuraPlanTest > ion fragments bloom() PASSED
+VanAuraPlanTest > the ground glow is clipped to a crescent, never a plate() PASSED
+VanAuraPlanTest > Zone A blobs are displaced so the haze cannot read as a body outline() PASSED
+VanAuraPlanTest > Zone A carries the shipping alpha, not the evidence painter's doubled one() PASSED
+VanAuraPlanTest > semantic colour reaches Zone C and never the identity haze() PASSED
+VanAuraPlanTest > the plan is deterministic for the same inputs() PASSED
+VanFrameBudgetTest > a device that cools down gets its field back() PASSED
+VanFrameBudgetTest > sustained misses are() PASSED
+VanFrameBudgetTest > one slow frame is not a degraded device() PASSED
+VanFrameBudgetTest > a pause is not a missed frame() PASSED
+VanFrameBudgetTest > the miss ratio and p95 are inspectable() PASSED
+VanFrameBudgetTest > no judgement before there is a window to judge on() PASSED
+VanFrameBudgetTest > the default budget is one 60Hz frame() PASSED
+VanFrameBudgetTest > the signal reaches the effect ladder() PASSED
+VanFrameBudgetTest > it does not oscillate at the threshold() PASSED
+VanTradeSemanticTest > a kill switch is a stop() PASSED
+VanTradeSemanticTest > an owner halt outranks everything() PASSED
+VanTradeSemanticTest > semantic colour never lands on VAN's body() PASSED
+VanTradeSemanticTest > the quiet ladder is watching then setup then entry() PASSED
+VanTradeSemanticTest > a default signal set is UNKNOWN, not FLAT() PASSED
+VanTradeSemanticTest > only the states the owner has to act on move VAN's pose() PASSED
+VanTradeSemanticTest > an owner approval outranks a market() PASSED
+VanTradeSemanticTest > every semantic says something a person would say() PASSED
+VanTradeSemanticTest > the margin threshold matches the risk authority's floor() PASSED
+VanTradeSemanticTest > a calm market does not overwrite a degraded subsystem() PASSED
+VanTradeSemanticTest > clearing the trade state restores ordinary health truth() PASSED
+VanTradeSemanticTest > risk pressure outranks profit on the same position() PASSED
+VanTradeSemanticTest > a published trade state reaches the semantic field() PASSED
+VanTradeSemanticTest > the capability board and the running app draw the same families() PASSED
+VanTradeSemanticTest > every semantic has its own Zone C topology and no two look the same() PASSED
+VanTradeSemanticTest > a ledger VAN cannot read is UNKNOWN and never FLAT() PASSED
+AuraPlanExecutionTest > thePainterHoldsNoAuraConstantsOfItsOwn PASSED
+AuraPlanExecutionTest > electricalBranchesReachTheCanvas PASSED
+AuraPlanExecutionTest > theAuraDrawsNothingWhenThePlanIsEmpty PASSED
+VanAcceptanceGateTest > theEvidenceMatrixWritesDistinctCommandCentreBoardsWithoutACorrectionPass PASSED
+VanAcceptanceGateTest > commandCentreIdleAndDegradedEvidenceCannotCollapseToTheSameImage PASSED
+VanAcceptanceGateTest > fourteenActionsProduceDistinctPoses PASSED
+VanAcceptanceGateTest > compactGeometryMatchesRev3Blueprint PASSED
+VanAcceptanceGateTest > statusMarksNeverUseAFullRing PASSED
+VanAcceptanceGateTest > grayscaleKeepsCriticalStatesDistinct PASSED
+VanPreviewRenderTest > reducedMotionHoldsAStillPose PASSED
+VanPreviewRenderTest > offlineDegradedAndUrgentAreVisuallyDistinct PASSED
+VanPreviewRenderTest > offlineAndDegradedLoseColourWithoutFadingTheCharacter PASSED
+VanPreviewRenderTest > orthogonalListeningAndDegradedEvidenceIsNotAPlainDegradedFrame PASSED
+VanPreviewRenderTest > everySheetRendersAtAReviewableSize PASSED
+VanPreviewRenderTest > compactCharacterFillsTheOverlayBubble PASSED

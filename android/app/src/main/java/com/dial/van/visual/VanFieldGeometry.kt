@@ -62,6 +62,8 @@ object VanFieldGeometryEngine {
         centerX: Float,
         centerY: Float,
         semanticSpec: VanAuraSpec = spec,
+        /** P2-AURA-001 — the body's size in dp, so the air gap can honour its dp contract. */
+        bodyEdgeDp: Float? = null,
     ): VanFieldGeometry {
         if (bodyEdge <= 1f || (spec.intensity <= 0.01f && semanticSpec.intensity <= 0.01f)) {
             return VanFieldGeometry(emptyList(), emptyList())
@@ -69,7 +71,10 @@ object VanFieldGeometryEngine {
 
         val activityMotion = VanWindFieldMotion.sample(spec, phase, budget)
         val semanticMotion = VanWindFieldMotion.sample(semanticSpec, phase, budget)
-        val profile = VanBodyExclusionProfile.compact(bodyEdge, centerX, centerY)
+        // P2-PERF-001 — the silhouette does not change between frames; only the strands do.
+        val profile = VanBodyExclusionProfile.compactCached(
+            bodyEdge, centerX, centerY, bodyEdgeDp = bodyEdgeDp,
+        )
         val midRadius = bodyEdge * 0.60f * VanAuraSpec.MID_RADIUS_SCALE * activityMotion.fieldScale
         val strokes = mutableListOf<VanFieldStroke>()
         val dots = mutableListOf<VanFieldDot>()

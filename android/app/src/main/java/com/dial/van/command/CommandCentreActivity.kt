@@ -49,6 +49,11 @@ import androidx.compose.ui.unit.sp
 import androidx.fragment.app.FragmentActivity
 import com.dial.van.VanApplication
 import com.dial.van.control.VanCommandSource
+import com.dial.van.events.EventPage
+import com.dial.van.events.EventRecord
+import com.dial.van.events.EventStream
+import com.dial.van.events.EventStreamState
+import com.dial.van.events.PreferencesEventCursorStore
 import com.dial.van.status.VanCommandStatus
 import com.dial.van.control.VanConversationMessage
 import com.dial.van.control.VanMessageRole
@@ -61,6 +66,7 @@ import com.dial.van.visual.VanLiveVisualState
 import com.dial.van.visual.VanPresence
 import com.dial.van.visual.VanPresentation
 import com.dial.van.visual.rememberVanEffectBudget
+import kotlinx.coroutines.delay
 import kotlinx.coroutines.launch
 import org.json.JSONArray
 import org.json.JSONObject
@@ -568,18 +574,55 @@ private fun ProjectsModule(
     }
 }
 
+/**
+ * P3-AND-002 — the event stream, actually streamed.
+ *
+ * This was a single `events(0)` in the initial composition with a hardcoded cursor. Anything
+ * the gateway published afterwards never reached the screen. It now restores a persisted
+ * cursor, polls continuously, catches up immediately on a truncated page and backs off on
+ * failure — all decided by [EventStream], which is pure and tested on the JVM.
+ */
 @Composable
 private fun ActivityModule(app: VanApplication, glass: com.dial.van.visual.VanGlassStyle) {
-    var events by remember { mutableStateOf<List<JSONObject>?>(null) }
-    var error by remember { mutableStateOf<String?>(null) }
+    val context = LocalContext.current
+    val cursorStore = remember(context) { PreferencesEventCursorStore(context) }
+    var stream by remember { mutableStateOf(EventStreamState(cursor = cursorStore.load())) }
+    val events = if (stream.loaded) stream.events else null
+    val error = stream.error
+        ?: if (!app.gatewayClient.isEnrolled()) {
+            "Device is not enrolled; event replay requires an enrolled device identity."
+        } else {
+            null
+        }
 
     LaunchedEffect(Unit) {
-        if (!app.gatewayClient.isEnrolled()) {
-            error = "Device is not enrolled; event replay requires an enrolled device identity."
-        } else {
-            runCatching { app.gatewayClient.events(0).optJSONArray("events")?.objectList().orEmpty() }
-                .onSuccess { events = it }
-                .onFailure { error = it.message ?: "Unable to load activity" }
+        if (!app.gatewayClient.isEnrolled()) return@LaunchedEffect
+        while (true) {
+            var truncated = false
+            runCatching { app.gatewayClient.events(stream.cursor) }
+                .onSuccess { body ->
+                    val page = EventPage(
+                        events = body.optJSONArray("events")?.objectList().orEmpty().map {
+                            EventRecord(
+                                seq = it.optLong("seq"),
+                                type = it.optString("event_type", "event"),
+                                payloadJson = it.optJSONObject("payload")?.toString() ?: "",
+                                createdAtUnix = it.optLong("created_at_unix"),
+                            )
+                        },
+                        nextCursor = body.optLong("next_cursor", stream.cursor),
+                        truncated = body.optBoolean("truncated", false),
+                    )
+                    truncated = page.truncated
+                    stream = EventStream.applyPage(stream, page)
+                    cursorStore.save(stream.cursor)
+                }
+                .onFailure { failure ->
+                    stream = EventStream.applyFailure(
+                        stream, failure.message ?: "Unable to load activity",
+                    )
+                }
+            delay(EventStream.nextDelayMillis(stream, truncated))
         }
     }
 
@@ -592,12 +635,12 @@ private fun ActivityModule(app: VanApplication, glass: com.dial.van.visual.VanGl
         if (events == null && error == null) item { TruthMessage("Loading activity…") }
         if (error != null) item { TruthMessage(error!!, warning = true) }
         if (events?.isEmpty() == true) item { TruthMessage("No gateway events returned.") }
-        items(events.orEmpty(), key = { it.optLong("seq") }) { event ->
+        items(events.orEmpty(), key = { it.seq }) { event ->
             AdminCard(glass) {
                 Column {
-                    Text(event.optString("event_type", "event"), color = Color.White, fontWeight = FontWeight.Bold)
+                    Text(event.type, color = Color.White, fontWeight = FontWeight.Bold)
                     Text(
-                        event.optJSONObject("payload")?.toString()?.take(360) ?: "No payload",
+                        event.payloadJson.take(360).ifEmpty { "No payload" },
                         color = Color(0xFFBCD1D8),
                         fontSize = 10.sp,
                     )

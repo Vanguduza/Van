@@ -5,12 +5,6 @@ import android.os.Build
 import android.os.PowerManager
 import android.provider.Settings
 import android.view.WindowManager
-import androidx.compose.animation.core.LinearEasing
-import androidx.compose.animation.core.RepeatMode
-import androidx.compose.animation.core.animateFloat
-import androidx.compose.animation.core.infiniteRepeatable
-import androidx.compose.animation.core.rememberInfiniteTransition
-import androidx.compose.animation.core.tween
 import androidx.compose.foundation.Canvas
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
@@ -24,6 +18,7 @@ import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
+import androidx.compose.runtime.withFrameNanos
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.geometry.CornerRadius
@@ -128,10 +123,20 @@ fun VanEmbodiment(
     budget: VanEffectBudget = VanEffectBudget.FULL,
     onDecision: (VanRenderDecision) -> Unit = {},
     characterFraction: Float = 1f,
+    /**
+     * P1-PERF-002 — false stops the frame loop entirely. The overlay passes
+     * `OverlayVisibilityPolicy.shouldAnimate(...)`, so VAN does not animate a field nobody
+     * can see. Defaulted true so every in-app caller keeps the behaviour it had.
+     */
+    animate: Boolean = true,
 ) {
-    val activitySpec = VanAuraSpecs.forState(state.durableState, budget)
-    val semanticSpec = VanAuraSpecs.forState(state.resolvedSemanticState, budget)
-    val phase = vanIdlePhase(state.durableState, !budget.allowMotion)
+    // P1-AURA-002 — both fields blend over 120-420 ms rather than switching. Zone B follows
+    // local activity and Zone C follows semantic truth, and they change independently, so
+    // each carries its own transition; sharing one would make a health change drag the
+    // activity field with it.
+    val activitySpec = rememberBlendedAura(state.durableState, budget)
+    val semanticSpec = rememberBlendedAura(state.resolvedSemanticState, budget)
+    val phase = vanIdlePhase(state.durableState, !budget.allowMotion, animate = animate)
     val body = characterFraction.coerceIn(0.40f, 1f)
 
     Box(modifier = modifier, contentAlignment = Alignment.Center) {
@@ -150,6 +155,53 @@ fun VanEmbodiment(
             onDecision = onDecision,
         )
     }
+}
+
+/**
+ * The aura for a state, blended in from whatever was on screen (P1-AURA-002).
+ *
+ * The transition is held in `remember`, keyed on nothing, so retargeting mid-blend continues
+ * from where the blend had actually got to rather than from the previous target — which is
+ * the case that matters, since LISTENING to THINKING to WORKING inside half a second is
+ * ordinary, and restarting from the old target would put the snap back on the second change.
+ */
+@Composable
+private fun rememberBlendedAura(
+    state: VanDurableState,
+    budget: VanEffectBudget,
+): VanAuraSpec {
+    val target = VanAuraSpecs.forState(state, budget)
+    var transition by remember { mutableStateOf<VanAuraTransition?>(null) }
+    var previousState by remember { mutableStateOf(state) }
+    var spec by remember { mutableStateOf(target) }
+
+    LaunchedEffect(state, budget) {
+        if (!spec.differsFrom(target)) {
+            spec = target
+            return@LaunchedEffect
+        }
+        val started = withFrameNanos { it }
+        transition = VanAuraTransition.retarget(
+            existing = transition,
+            current = spec,
+            to = target,
+            fromState = previousState,
+            toState = state,
+            nowNanos = started,
+        )
+        previousState = state
+        while (true) {
+            val now = withFrameNanos { it }
+            val active = transition ?: break
+            spec = active.specAt(now)
+            if (active.isComplete(now)) {
+                spec = target
+                transition = null
+                break
+            }
+        }
+    }
+    return spec
 }
 
 @Composable
@@ -246,36 +298,45 @@ fun VanCanvasAvatar(
     }
 }
 
+/**
+ * One monotonic clock, driven by `withFrameNanos`, never restarted (P1-AURA-002).
+ *
+ * This used to be a `rememberInfiniteTransition` whose `durationMillis` was chosen from the
+ * state. Changing state changed the duration, which **restarts the tween from zero** — so
+ * every aura change produced a one-frame snap at exactly the moment VAN was supposed to be
+ * showing the owner a change. [VanAnimationClock] integrates `dt / period` instead, so a
+ * period change alters how fast the phase advances and leaves where it *is* alone.
+ *
+ * The frame loop also feeds [VanFrameBudgetSampler], which is the producer
+ * `VanEffectConditions.frameBudgetMissed` never had (P2-PERF-001), and it stops entirely
+ * when [animate] is false rather than running with the screen off (P1-PERF-002).
+ */
 @Composable
-private fun vanIdlePhase(state: VanDurableState, reducedMotion: Boolean): Float {
+private fun vanIdlePhase(
+    state: VanDurableState,
+    reducedMotion: Boolean,
+    animate: Boolean = true,
+    sampler: VanFrameBudgetSampler? = null,
+): Float {
     if (reducedMotion) return NEUTRAL_PHASE
-    val durationMs = when (state) {
-        VanDurableState.LISTENING,
-        VanDurableState.WORKING,
-        VanDurableState.SEARCHING,
-        VanDurableState.CONNECTING,
-        -> 2000
-        VanDurableState.URGENT,
-        VanDurableState.WARNING,
-        VanDurableState.ERROR,
-        VanDurableState.WAITING_FOR_OWNER,
-        -> 2800
-        VanDurableState.SLEEPING,
-        VanDurableState.OFFLINE,
-        -> 6000
-        else -> 4200
+    // Survives state changes on purpose: the clock is keyed on nothing, so a new state
+    // gives it a new period and not a new clock.
+    val clock = remember { VanAnimationClock() }
+    var phase by remember { mutableStateOf(clock.phase) }
+    val period = VanMotionPeriods.periodMillisFor(state)
+
+    LaunchedEffect(animate, period) {
+        if (!animate) return@LaunchedEffect
+        var previous = 0L
+        while (true) {
+            withFrameNanos { frameNanos ->
+                if (previous != 0L) sampler?.recordNanos(previous, frameNanos)
+                previous = frameNanos
+                phase = clock.advance(frameNanos, period)
+            }
+        }
     }
-    val transition = rememberInfiniteTransition(label = "van-idle")
-    val value by transition.animateFloat(
-        initialValue = 0f,
-        targetValue = 1f,
-        animationSpec = infiniteRepeatable(
-            animation = tween(durationMillis = durationMs, easing = LinearEasing),
-            repeatMode = RepeatMode.Restart,
-        ),
-        label = "van-phase",
-    )
-    return value
+    return phase
 }
 
 private fun blinkFor(phase: Float): Float {

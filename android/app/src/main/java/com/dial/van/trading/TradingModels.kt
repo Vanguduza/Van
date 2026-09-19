@@ -1,5 +1,6 @@
 package com.dial.van.trading
 
+import com.dial.van.visual.VanTradeSignals
 import kotlinx.serialization.json.Json
 import kotlinx.serialization.json.JsonArray
 import kotlinx.serialization.json.JsonElement
@@ -72,6 +73,35 @@ data class PortfolioSummary(
 ) {
     /** Worst account/feed truth wins the headline (blueprint §46). */
     val overallDataState: DataState get() = (dataStates.values + accounts.map { it.connection }).maxByOrNull { it.ordinal } ?: DataState.UNKNOWN
+
+    /**
+     * P1-AURA-003 — the read models the trading screens already render, in the shape VAN's
+     * visual runtime classifies from.
+     *
+     * The mapping is deliberately mechanical. Any judgement about what a trading state
+     * *means* belongs in [VanTradeSemantics.classify], which is pure and tested; a mapper
+     * that made decisions here would be a second, untested classifier living beside the
+     * first, which is the pattern the audit found repeatedly.
+     *
+     * `ledgerStale` reads `overallDataState`: a STALE or UNKNOWN feed means VAN is not
+     * entitled to show a calm field, which is the same rule the gateway applies to the
+     * ledger itself (P0-TRADE-004).
+     */
+    fun toTradeSignals(ownerHaltActive: Boolean = false, riskRefusalsRecent: Int = 0): VanTradeSignals =
+        VanTradeSignals(
+            ledgerAvailable = ledgerAvailable,
+            ledgerStale = overallDataState != DataState.LIVE,
+            ownerHaltActive = ownerHaltActive || killSwitch.any { it.equals("OWNER_HALT", ignoreCase = true) },
+            killSwitchTriggers = killSwitch.filterNot { it.equals("OWNER_HALT", ignoreCase = true) },
+            openPositions = openPositions.size,
+            openTickets = 0,
+            workingOrders = potential.size,
+            watchedInstruments = exposureBySymbol.size,
+            pendingSetups = potential.size,
+            unrealizedPnl = floatingPnl.value,
+            marginLevelPct = null,
+            riskRefusalsRecent = riskRefusalsRecent,
+        )
     companion object {
         fun parse(body: String): PortfolioSummary? {
             val o = parseObject(body) ?: return null
