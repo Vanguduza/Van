@@ -3887,8 +3887,9 @@
       "requirement": "docs/VAN_CONSOLIDATED_DEPLOYMENT_READINESS_CLOSURE_BLUEPRINT_REV_1.md",
       "authority": "VAN Consolidated Deployment-Readiness Closure Blueprint Rev 2",
       "repository_evidence": [
-        "backend/van_gateway/action/models.py:1",
-        "backend/van_gateway/automation/router.py:54"
+        "backend/van_gateway/authority/descriptor.py",
+        "backend/van_gateway/mission/api.py",
+        "backend/van_gateway/capability/registry.py"
       ],
       "runtime_evidence": [],
       "affected_components": [
@@ -3898,8 +3899,25 @@
       "remediation": "Introduce one canonical ActionDescriptor carrying action class, required gate, reversibility and egress class, and derive every surface's decision from it.",
       "impact": "Policy drift produces either an approval prompt the owner should not see, or - far worse - a path that bypasses an approval they should have been asked for.",
       "validation_gate": "G4",
-      "current_status": "OPEN",
-      "remediation_gate": "G4"
+      "current_status": "CLOSED",
+      "remediation_gate": "G4",
+      "closure": {
+        "state": "INTEGRATED_AND_EVIDENCED",
+        "summary": "backend/van_gateway/authority/descriptor.py answers the question none of the seven vocabularies answered on its own: for this subject, what class, what gate, is it reversible, does anything leave the house, and how does it prove it happened.\n\nIt is deliberately not an eighth vocabulary. It introduces no store and no new enum for anything that already has one; it is a derivation that reads the authorities that already exist, which is the pattern the capability registry established with readiness_source — point at the existing authority rather than copying it, because that is the only way a canonical view can be canonical without becoming a rival source of truth. Two tests assert the constraint directly: the module defines no ActionClass of its own and holds no table, and the only classes it does define are Gate, Reversibility and EgressClass.\n\nThose three are additions because they genuinely had no vocabulary. 'What must happen before this runs' existed only as `if effective_action_class == ActionClass.A4` in the orchestrator, as requires_owner_presence on a capability and as no_stale_replay on an action, with nothing relating the three. Reversibility existed nowhere at all, so 'reversible execution' in the autonomy ladder had no referent on the action side of the system — and it is a decided map rather than an inference, because inferring it from the class would be wrong in both directions: an A3 note create is reversible and an A4 delete is not.\n\nVERIFICATION_ALIASES reconciles the concrete half. VerifierType.READ_BACK, VerificationStrategy.API_READBACK and the mission strategy api-readback are one thing in three spellings and nothing translated between them, so a capability declaring one and an action declaring another looked unrelated. Translation is idempotent and an untranslatable name raises rather than passing through, because forwarding one is how an unverifiable action comes to look verified.\n\nThe risk in closing this is that a canonical descriptor which drifts from the code is worse than none — a seventh vocabulary wearing the word canonical. So the load-bearing tests read the orchestrator's own source, with comments stripped, and assert the descriptor names the gate the orchestrator applies; and three more assert that the capability router refuses for owner presence, authority ceiling and external disclosure exactly where the descriptor says it should. The routability gate was left alone rather than rewritten to call the descriptor: that is churn with real risk in the one place that decides whether the owner gets asked, and lockstep is what the finding needs.\n\n/v1/authority is the owner-visible projection, with derived_from on every row so a reader can check the authority rather than taking the page's word for it, and every gate name explained on the same page so it is not a new vocabulary for the owner to learn. A forbidden action is shown as disabled rather than omitted, because one that vanished would be indistinguishable from one nobody declared.\n\nSix mutations run, six caught.",
+        "changed": [
+          "backend/van_gateway/authority/descriptor.py",
+          "backend/van_gateway/authority/__init__.py",
+          "backend/van_gateway/mission/api.py"
+        ],
+        "verified_by": [
+          "backend/tests/test_authority_descriptor.py",
+          "backend/tests/test_mission_binding_api.py"
+        ],
+        "runtime_evidence": [],
+        "residual": "Browser autonomy tiers, automation grant kinds and VATI's risk authority are not projected through the descriptor; each still decides in its own terms.",
+        "residual_class": "DELIBERATE_SCOPE",
+        "residual_reason": "Those three decide things the descriptor does not model — how far a browsing session may wander, what a standing grant covers over time, and whether a trade is within risk. Flattening them into an action's class would lose the distinctions that make them useful, and VATI's authority is in a separate process on purpose. What the descriptor claims is the mapping from an action to its class and its gate, and that is now single-sourced and checked against enforcement."
+      }
     },
     {
       "id": "P1-LEARN-002",

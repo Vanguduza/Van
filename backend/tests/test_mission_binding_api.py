@@ -542,3 +542,51 @@ async def test_a_binding_refusal_never_loses_the_task(tmp_path):
         # The task itself exists and is usable.
         task_id = response.json()["task_id"]
         assert (await ac.get(f"/v1/browser/tasks/{task_id}", headers=HEADERS)).status_code == 200
+
+
+async def test_the_authority_surface_answers_what_van_may_do(stack):
+    """P1-COH-003 — one page for the question seven vocabularies each answered partly.
+
+    The rows are derived from the registries rather than stored, so `derived_from` names
+    the authority each came from and a reader can go and check rather than taking this
+    page's word for it.
+    """
+    ac, _store, _m, registry, _a = stack
+    body = (await ac.get("/v1/authority")).json()
+    assert body["manifest_digest"] == registry.manifest_digest
+    by_subject = {row["subject"]: row for row in body["subjects"]}
+
+    # Both registries are projected through the same descriptor, which is the point.
+    assert {row["derived_from"] for row in body["subjects"]} == {
+        "action.registry", "capability.registry",
+    }
+
+    # An A4 delete: owner in the loop, and not undoable.
+    delete = by_subject["google.notebook.enterprise.delete"]
+    assert delete["action_class"] == "A4"
+    assert delete["gate"] == "OWNER_APPROVAL"
+    assert delete["needs_owner_in_the_loop"] is True
+    assert delete["reversibility"] == "IRREVERSIBLE"
+
+    # An A5: refused whatever anyone signs, and reported as disabled rather than absent —
+    # a forbidden action that simply vanished from the page would be indistinguishable
+    # from one nobody declared.
+    exfiltrate = by_subject["secret.exfiltrate"]
+    assert exfiltrate["gate"] == "FORBIDDEN"
+    assert exfiltrate["enabled"] is False
+
+    # A read: nothing to ask, nothing to undo, nothing leaves.
+    read = by_subject["owner.context.read"]
+    assert read["gate"] == "DEVICE_SIGNATURE"
+    assert read["needs_owner_in_the_loop"] is False
+    assert read["reversibility"] == "READ_ONLY"
+    assert read["egress"] == "NONE"
+
+
+async def test_every_gate_the_authority_surface_uses_is_explained(stack):
+    """A gate name with no explanation is a fifth vocabulary for the owner to learn."""
+    ac, _store, _m, _r, _a = stack
+    body = (await ac.get("/v1/authority")).json()
+    used = {row["gate"] for row in body["subjects"]}
+    assert used <= set(body["gates"])
+    assert all(body["gates"][name].strip() for name in used)

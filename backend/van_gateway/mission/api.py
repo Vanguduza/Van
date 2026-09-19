@@ -26,6 +26,8 @@ from typing import Any
 from fastapi import APIRouter, Header, HTTPException
 from pydantic import BaseModel, ConfigDict, Field
 
+from van_gateway.action.registry import BUILTIN_ACTIONS
+from van_gateway.authority.descriptor import describe_action, describe_capability
 from van_gateway.capability.models import CapabilityClass, RoutingConstraints
 from van_gateway.capability.registry import CapabilityRegistry, CapabilityRegistryError
 from van_gateway.capability.router import CapabilityRouter
@@ -313,6 +315,68 @@ class MissionApi:
                     "detail": verdict.detail,
                 })
             return {"manifest_digest": self.registry.manifest_digest, "capabilities": out}
+
+        @router.get("/authority")
+        async def authority():
+            """P1-COH-003 — one answer to "what may VAN do, and what must happen first".
+
+            Seven vocabularies described that, each locally sensible and none canonical, so
+            the mapping from an action to its class and its gate was re-derived at every
+            boundary and two boundaries could disagree with nothing noticing. A
+            disagreement about what an action may do is a disagreement about whether the
+            owner had to be asked.
+
+            Every row here is *derived* from the registries that already exist rather than
+            read from a store of its own — the same reason the capability registry points
+            at readiness sources instead of copying them. `derived_from` says which
+            authority each row came from, so a reader can go and check rather than taking
+            this page's word for it.
+            """
+            actions = [
+                {
+                    "subject": d.subject_id,
+                    "kind": "action",
+                    "action_class": d.action_class.value,
+                    "gate": d.gate.value,
+                    "needs_owner_in_the_loop": d.needs_owner_in_the_loop,
+                    "reversibility": d.reversibility.value,
+                    "egress": d.egress.value,
+                    "verification": d.verification,
+                    "enabled": d.enabled,
+                    "derived_from": d.derived_from,
+                }
+                for d in (describe_action(a) for a in BUILTIN_ACTIONS)
+            ]
+            capabilities = [
+                {
+                    "subject": d.subject_id,
+                    "kind": "capability",
+                    "action_class": d.action_class.value,
+                    "gate": d.gate.value,
+                    "needs_owner_in_the_loop": d.needs_owner_in_the_loop,
+                    "reversibility": d.reversibility.value,
+                    "egress": d.egress.value,
+                    "verification": d.verification,
+                    "enabled": d.enabled,
+                    "derived_from": d.derived_from,
+                }
+                for d in (
+                    describe_capability(self.registry.require(capability_id))
+                    for capability_id in self.registry.capability_ids
+                )
+            ]
+            return {
+                "subjects": actions + capabilities,
+                "gates": {
+                    "NONE": "nothing; a read with no side effect",
+                    "DEVICE_SIGNATURE": "a command signed by a paired device",
+                    "OWNER_APPROVAL": (
+                        "an owner-signed, single-use approval bound to this exact intent"
+                    ),
+                    "FORBIDDEN": "refused whatever anyone signs",
+                },
+                "manifest_digest": self.registry.manifest_digest,
+            }
 
         # ------------------------------------------------ owner mutations
 
