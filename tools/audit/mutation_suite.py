@@ -422,6 +422,55 @@ ALL = [
     "        if False:",
     "C25 an unusable round trip is reported as an encoder problem"),
  ]),
+ # --- checkpoint 26: the durable logical session ----------------------------------
+ #
+ # Two survived a first pass and both named a gap rather than a redundancy. The session
+ # epoch is checked in two places — resume and the envelope — and only one was driven. The
+ # unknown-kind check has a second refusal further down, and the difference only shows when
+ # the unknown kind carries an idempotency key: refused late, it burns the key the owner's
+ # real command needed.
+ (["tests/test_van_hermes_session.py"], [
+   ("van_gateway/session/service.py",
+    "            if envelope.path_epoch != session.authoritative_path_epoch:",
+    "            if False:",
+    "C26 a frame from a retired path becomes a new command"),
+   ("van_gateway/session/service.py",
+    "        if envelope.session_epoch != session.session_epoch:\n            raise SessionError(REJECT_STALE_SESSION_EPOCH)",
+    "        if False:\n            raise SessionError(REJECT_STALE_SESSION_EPOCH)",
+    "C26 an invalidated session epoch keeps working"),
+   ("van_gateway/session/service.py",
+    "        digest = envelope.digest()\n        if envelope.payload_digest is not None and envelope.payload_digest != digest:",
+    "        digest = envelope.payload_digest or envelope.digest()\n        if False:",
+    "C26 the envelope vouches for its own payload"),
+   ("van_gateway/session/service.py",
+    '        if existing["payload_digest"] != digest:',
+    "        if False:",
+    "C26 a different payload under a known key is executed"),
+   ("van_gateway/session/service.py",
+    "        if len(routes) >= 2:",
+    "        if len(usable) >= 2:",
+    "C26 protocol diversity is reported as route redundancy"),
+   ("van_gateway/session/service.py",
+    '        usable = [p for p in paths if PathHealth(p["health"]).usable]',
+    "        usable = list(paths)",
+    "C26 a failed path counts towards redundancy"),
+   ("van_gateway/session/router.py",
+    "        if envelope.kind not in UPSTREAM_KINDS:",
+    "        if False:",
+    "C26 an unknown kind is routed rather than refused"),
+   ("van_gateway/session/router.py",
+    "        if envelope.expires_at_ms is not None and envelope.expires_at_ms <= now:",
+    "        if False:",
+    "C26 an expired command executes late"),
+   ("van_gateway/session/router.py",
+    "        if admission is CommandAdmission.ALREADY_KNOWN:",
+    "        if False:",
+    "C26 a resubmitted command executes a second time"),
+   ("van_gateway/session/router.py",
+    '        if envelope.kind in {"session.heartbeat", "session.ack"}:',
+    "        if False:",
+    "C26 a heartbeat occupies an idempotency key"),
+ ]),
 ]
 
 APP_KT = "android/app/src/main/java/com/dial/van"

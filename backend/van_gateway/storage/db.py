@@ -8,7 +8,7 @@ from typing import Any, AsyncIterator
 
 import aiosqlite
 
-SCHEMA_VERSION = 27
+SCHEMA_VERSION = 28
 
 
 MIGRATION_17 = """
@@ -506,6 +506,80 @@ CREATE UNIQUE INDEX IF NOT EXISTS idx_events_event_id
   ON events(event_id) WHERE event_id IS NOT NULL;
 CREATE INDEX IF NOT EXISTS idx_events_device_seq ON events(target_device_id, seq);
 CREATE INDEX IF NOT EXISTS idx_events_mission_seq ON events(mission_id, seq);
+"""
+
+
+MIGRATION_28 = """
+-- Rev 1.5 §20 — the durable VAN⇄Hermes logical session.
+--
+-- §0B's invariant is that no feature depends on one physical connection, which only means
+-- anything if the session outlives the process that served it. These tables are what make
+-- "the same session" true after a Gateway restart rather than only after a socket blip.
+
+CREATE TABLE IF NOT EXISTS van_sessions (
+  van_session_id TEXT PRIMARY KEY,
+  session_epoch INTEGER NOT NULL,
+  device_id TEXT NOT NULL,
+  principal_type TEXT NOT NULL,
+  state TEXT NOT NULL,
+  created_at_ms INTEGER NOT NULL,
+  last_resumed_at_ms INTEGER,
+  last_client_event_seq INTEGER NOT NULL DEFAULT 0,
+  last_server_ack_seq INTEGER NOT NULL DEFAULT 0,
+  -- §20.9: exactly one path epoch may produce new upstream owner messages.
+  authoritative_path_epoch INTEGER NOT NULL DEFAULT 0,
+  closed_at_ms INTEGER
+);
+
+CREATE INDEX IF NOT EXISTS idx_van_sessions_device
+  ON van_sessions(device_id, state);
+
+-- §20.6 — the paths a session has actually used, with the route each one traversed.
+--
+-- route_id is stored rather than derived because route diversity is a deployment fact:
+-- two protocols over one ingress share a route, and only the deployment knows that.
+CREATE TABLE IF NOT EXISTS van_session_paths (
+  van_session_id TEXT NOT NULL,
+  path_epoch INTEGER NOT NULL,
+  path_id TEXT NOT NULL,
+  path_class TEXT NOT NULL,
+  route_id TEXT NOT NULL,
+  health TEXT NOT NULL,
+  opened_at_ms INTEGER NOT NULL,
+  last_rx_ms INTEGER,
+  retired_at_ms INTEGER,
+  PRIMARY KEY (van_session_id, path_epoch),
+  FOREIGN KEY (van_session_id) REFERENCES van_sessions(van_session_id)
+);
+
+CREATE INDEX IF NOT EXISTS idx_van_session_paths_route
+  ON van_session_paths(van_session_id, route_id);
+
+-- §20.12 — effectively-once at the application layer, over an at-least-once transport.
+--
+-- The digest is what separates "the client lost the acknowledgement" from "a different
+-- command arrived under a key that has been seen". Storing only the key would make those
+-- two indistinguishable, and the safe answer to the second is to execute nothing.
+CREATE TABLE IF NOT EXISTS van_session_messages (
+  message_id TEXT PRIMARY KEY,
+  van_session_id TEXT NOT NULL,
+  idempotency_key TEXT,
+  command_id TEXT,
+  kind TEXT NOT NULL,
+  payload_digest TEXT NOT NULL,
+  path_epoch INTEGER NOT NULL,
+  admitted_state TEXT NOT NULL,
+  result_json TEXT,
+  created_at_ms INTEGER NOT NULL,
+  FOREIGN KEY (van_session_id) REFERENCES van_sessions(van_session_id)
+);
+
+CREATE UNIQUE INDEX IF NOT EXISTS uq_session_idempotency
+  ON van_session_messages(van_session_id, idempotency_key)
+  WHERE idempotency_key IS NOT NULL;
+
+CREATE INDEX IF NOT EXISTS idx_session_messages_command
+  ON van_session_messages(command_id);
 """
 
 MIGRATIONS: dict[int, str] = {
@@ -1837,6 +1911,7 @@ MIGRATIONS: dict[int, str] = {
     25: MIGRATION_25,
     26: MIGRATION_26,
     27: MIGRATION_27,
+    28: MIGRATION_28,
 }
 
 

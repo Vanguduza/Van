@@ -192,6 +192,20 @@ POLICIES: tuple[TablePolicy, ...] = (
             "exactly what an attacker would want aged out."),
     _p("owner_device_bootstrap_tokens", _EPH, "created_at_ms",
        note="Single-use enrolment tokens, stored as hashes. Short-lived by design."),
+    # ---- the durable VAN-Hermes session (migration 28) ----------------------
+    #
+    # The session is telemetry: an episode of being connected. Its *messages* are not,
+    # because they are what makes a resubmitted command effectively-once — deleting one
+    # while its command is still live would turn a retry into a second execution.
+    _p("van_sessions", _TEL, "created_at_ms",
+       note="A logical session is an episode of connectivity. What it carried lives in "
+            "missions, commands and events, all of which outlive it."),
+    _p("van_session_paths", _CHILD, parent=("van_session_id", "van_sessions")),
+    _p("van_session_messages", _EV, "created_at_ms",
+       note="§20.12's effectively-once record. The digest here is the only thing that can "
+            "tell a lost acknowledgement from a different command under the same key, so "
+            "it is evidence rather than telemetry and outlives the session it belonged to."),
+
     _p("connectivity_config_versions", _OWNER,
        note="ADR-RB-027 — the signed manifests the device will accept. Pruning history "
             "here would remove the ability to roll back to the configuration that worked."),
@@ -389,6 +403,7 @@ _PRIMARY_KEY = {
     "missions": "mission_id",
     "action_executions": "execution_id",
     "browser_interactive_sessions": "session_id",
+    "van_sessions": "van_session_id",
 }
 
 

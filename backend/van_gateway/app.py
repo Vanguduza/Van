@@ -85,6 +85,9 @@ from van_gateway.browser.stream_grants import (
     StreamGrantSigner,
 )
 from van_gateway.browser.worker import AdapterBackedWorker
+from van_gateway.session.api import build_session_router, is_session_owner_route
+from van_gateway.session.router import SessionDelegates, SessionRouter
+from van_gateway.session.service import VanHermesSessionService
 from van_gateway.capability.models import ReadinessSource
 from van_gateway.capability.readiness import (
     AutomationReadiness,
@@ -750,6 +753,40 @@ def create_app() -> FastAPI:
             mission_binder=mission_binder,
             audit=audit,
         ))
+    # Rev 1.5 §20 — the durable logical session. It holds no command authority: the
+    # router delegates to the same POST /v1/commands path the phone has always used, and
+    # §20.2 forbids a second one.
+    van_sessions = VanHermesSessionService(store, events=events)
+
+    async def _submit_command_through_session(payload: dict, device_id: str) -> dict:
+        request = CommandRequest(**{**payload, "device_id": device_id})
+        result = await orchestrator.handle(request)
+        return result if isinstance(result, dict) else result.model_dump(mode="json")
+
+    session_router = SessionRouter(
+        van_sessions, SessionDelegates(submit_command=_submit_command_through_session)
+    )
+
+    async def _resume_snapshot(*, device_id: str, pending_command_ids: list[str]) -> dict:
+        """§20.11 — what the Gateway authoritatively knows about what the client lost."""
+        states: dict[str, str] = {}
+        for command_id in pending_command_ids[:50]:
+            mission = await command_missions.existing_for_command(command_id)
+            states[command_id] = mission.state.value if mission else "UNKNOWN"
+        cursor_row = await store.fetchone(
+            "SELECT last_seq FROM event_cursors WHERE device_id = ?", (device_id,)
+        )
+        return {
+            "command_states": states,
+            "authoritative_event_cursor": int(cursor_row["last_seq"]) if cursor_row else 0,
+        }
+
+    app.include_router(build_session_router(
+        sessions=van_sessions, router=session_router, events=events,
+        resume_snapshot=_resume_snapshot,
+    ))
+    app.state.van_sessions = van_sessions
+    app.state.session_router = session_router
     app.state.interactive_sessions = interactive_sessions
     app.state.browser_control_leases = browser_control_leases
     app.state.browser_stream_grants = browser_stream_grants
@@ -788,6 +825,11 @@ def create_app() -> FastAPI:
             path in ("/v1/technology-radar", "/v1/eval", "/v1/autonomy")
         ):
             return ControlScope.UNDERSTANDING if path == "/v1/understanding/observe" else None
+        if is_session_owner_route(path):
+            # §20 — the logical session carries the owner's own commands, so it
+            # authenticates as the owner's device. Same predicate-with-one-reader shape as
+            # the interactive browser routes below.
+            return None
         if is_interactive_browser_owner_route(path):
             # Rev 1.5 §6.1 — the owner's phone creates, heartbeats and closes its own
             # browser session, so these are device-authenticated rather than Hermes-only.

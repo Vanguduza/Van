@@ -77,9 +77,23 @@ async def _session(tmp_path, **kwargs):
 class TestMigration27:
     @pytest.mark.asyncio
     async def test_the_schema_reaches_the_version_the_code_claims(self, tmp_path):
+        """The rule, not the number.
+
+        This asserted `== 27` and failed the moment migration 28 landed, which is a test
+        pinning a snapshot rather than an invariant: what matters is that a fresh database
+        reaches whatever version the code believes it is at, and that migration 27's tables
+        are among what it got.
+        """
         store = await make_store(tmp_path)
         row = await store.fetchone("SELECT MAX(version) AS v FROM schema_migrations")
-        assert int(row["v"]) == SCHEMA_VERSION == 27
+        assert int(row["v"]) == SCHEMA_VERSION
+        assert SCHEMA_VERSION >= 27, "migration 27 is the Remote Browser floor"
+        tables = {
+            r["name"]
+            for r in await store.fetchall("SELECT name FROM sqlite_master WHERE type='table'")
+        }
+        assert {"browser_interactive_sessions", "browser_control_leases",
+                "browser_stream_grants"} <= tables
 
     @pytest.mark.asyncio
     async def test_the_events_table_is_extended_rather_than_replaced(self, tmp_path):
