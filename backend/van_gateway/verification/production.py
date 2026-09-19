@@ -22,6 +22,7 @@ from typing import Any
 
 from van_gateway.automation.verifier import DocumentUploadObserver, PostconditionSpec, WorkflowVerifier
 from van_gateway.mission.verifiers import (
+    ApiReadbackVerifier,
     LedgerEventVerifier,
     ScreenshotVerifier,
     VerifierRegistry,
@@ -56,29 +57,65 @@ def _browser_observation(store: Store):
     return observe
 
 
+def _trading_halt_observation(trading: Any):
+    async def observe(context: dict[str, Any]) -> dict[str, Any]:
+        return await observations.trading_halt_readback(trading)
+
+    return observe
+
+
+def _notebook_readback_observation(knowledge: Any):
+    async def observe(context: dict[str, Any]) -> dict[str, Any]:
+        postconditions = context.get("postconditions") or {}
+        notebook_id = str(postconditions.get("notebook_id") or "").strip()
+        if not notebook_id:
+            # The contract did not say which notebook to read. Raising rather than
+            # returning {} keeps "nothing to check" from reading as "checked and fine".
+            raise ValueError("success contract names no notebook_id to read back")
+        observed = await observations.notebook_enterprise_readback(knowledge, notebook_id)
+        # The id is the contract's own statement of *where to look*, not a claim about the
+        # world, so echoing it lets `_compare` judge the claim that remains: whether the
+        # notebook is there. Inventing anything else here would be the verifier answering
+        # its own question.
+        return {**observed, "notebook_id": notebook_id}
+
+    return observe
+
+
 #: P2-VERIFY-002 — strategies the codebase implements and this process cannot perform,
 #: with the reason. Each is registered, so a contract naming one gets UNVERIFIABLE *and the
 #: reason*, rather than the record a capability that promised nothing would get.
 #:
-#: These are not aspirational entries. `ApiReadbackVerifier`, `RepositoryShaVerifier` and
-#: `CiRunVerifier` are complete; what is missing is an independent source — a provider the
-#: gateway can ask, a git remote it can read, a CI API it can query — and inventing one is
-#: how a verifier starts certifying its own subject.
+#: These are not aspirational entries. `RepositoryShaVerifier` and `CiRunVerifier` are
+#: complete; what is missing is an independent source — a git remote the gateway can read,
+#: a CI API it can query — and inventing one is how a verifier starts certifying its own
+#: subject. `api-readback` used to sit here for the same reason and no longer does: the
+#: notebook provider is a source the gateway can ask, independent of whoever acted
+#: (P1-VERIFY-003).
 DECLARED_BUT_UNOBSERVABLE_STRATEGIES: dict[str, str] = {
-    "api-readback": "no provider the gateway can read independently of the engine that acted",
     "repository-sha": "no git remote is configured for the gateway to read",
     "ci-run": "no CI API is configured for the gateway to query",
 }
 
 
-def build_mission_registry(*, store: Store, trading: Any) -> VerifierRegistry:
+def build_mission_registry(
+    *, store: Store, trading: Any, knowledge: Any
+) -> VerifierRegistry:
     """The registry MissionService runs when a mission asks for a verification outcome."""
     registry = VerifierRegistry()
     registry.register("ledger-event", LedgerEventVerifier(_ledger_observation(trading)))
+    # §§22, 421 — a halt is a ledger fact like a fill is, written by the trading process
+    # and hash-chained there, so the same adapter reads it. P1-VERIFY-003: `trading.halt`
+    # is the one A4 command an owner issues under time pressure, and until this was
+    # registered the mission for it could only ever end COMPLETED_UNVERIFIED.
+    registry.register("trading-halt", LedgerEventVerifier(_trading_halt_observation(trading)))
     # §34 names stored browser artefacts the weakest admissible evidence and this adapter
     # is typed as such. It is registered because the artefacts are real, not because they
     # are strong.
     registry.register("browser-evidence", ScreenshotVerifier(_browser_observation(store)))
+    # §166 — ask the notebook provider what exists. Independent of the executor: the
+    # knowledge runtime performed the action, and this asks Google what is there now.
+    registry.register("api-readback", ApiReadbackVerifier(_notebook_readback_observation(knowledge)))
     # P2-VERIFY-002 — named, so "I could not check" is distinguishable from "nothing was
     # promised". The adapter classes stay in the tree because the day a remote or a CI API
     # is configured, registering them is a one-line change rather than a rewrite.
@@ -88,7 +125,7 @@ def build_mission_registry(*, store: Store, trading: Any) -> VerifierRegistry:
 
 
 #: Mission verification strategies a success contract may name today.
-WIRED_MISSION_STRATEGIES = ("ledger-event", "browser-evidence")
+WIRED_MISSION_STRATEGIES = ("ledger-event", "trading-halt", "browser-evidence", "api-readback")
 
 
 

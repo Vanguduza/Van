@@ -494,6 +494,10 @@ class CommandOrchestrator:
                 req,
                 effective_action_class=effective_action_class,
                 owner_approved=owner_approved,
+                # P1-VERIFY-003 — the resolution is what says whether VAN understood the
+                # command exactly enough to state a checkable post-state. Passing it here
+                # is what lets an owner command reach VERIFIED_SUCCESS at all.
+                resolution=resolution,
             )
             mission = await self.missions.understood(
                 mission,

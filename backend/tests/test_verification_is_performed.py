@@ -82,6 +82,30 @@ class FakeTrading:
         return self.known.get(trade_intent_id)
 
 
+class FakeKnowledge:
+    """A notebook provider that knows about the notebooks it was given, and no others."""
+
+    class NotFound(RuntimeError):
+        pass
+
+    def __init__(self, known: dict | None = None) -> None:
+        self.known = known or {}
+        self.asked: list[str] = []
+
+    async def notebook_enterprise_get(self, notebook_id: str):
+        self.asked.append(notebook_id)
+        if notebook_id not in self.known:
+            raise self.NotFound("notebook_enterprise_not_found")
+        return self.known[notebook_id]
+
+
+class UnreachableKnowledge:
+    """A provider that cannot be reached, which is not the same as one that says "gone"."""
+
+    async def notebook_enterprise_get(self, notebook_id: str):
+        raise RuntimeError("notebook_enterprise_http_503")
+
+
 async def _mission(svc, contract=CHECKABLE):
     m = await svc.create(
         owner_principal_id="owner",
@@ -131,7 +155,7 @@ class TestTheRegistryIsTheOnlySource:
     async def test_the_stored_receipt_comes_from_the_adapter(self, store):
         trading = FakeTrading({"ti-1": {"status": "FILLED", "filled_qty": "1", "fill_price": "2"}})
         svc = MissionService(
-            store, verifiers=build_mission_registry(store=store, trading=trading)
+            store, verifiers=build_mission_registry(store=store, trading=trading, knowledge=FakeKnowledge())
         )
         mission = await _mission(svc)
         await svc.transition(mission.mission_id, target=MissionState.VERIFIED_SUCCESS)
@@ -145,7 +169,7 @@ class TestTheRegistryIsTheOnlySource:
         """The executor may say it placed the order. The ledger is the authority."""
         trading = FakeTrading({})
         svc = MissionService(
-            store, verifiers=build_mission_registry(store=store, trading=trading)
+            store, verifiers=build_mission_registry(store=store, trading=trading, knowledge=FakeKnowledge())
         )
         mission = await _mission(svc)
         with pytest.raises(MissionError, match="VERIFICATION_INSUFFICIENT"):
@@ -157,7 +181,7 @@ class TestTheRegistryIsTheOnlySource:
                 raise ConnectionError("ledger unavailable")
 
         svc = MissionService(
-            store, verifiers=build_mission_registry(store=store, trading=Broken())
+            store, verifiers=build_mission_registry(store=store, trading=Broken(), knowledge=FakeKnowledge())
         )
         mission = await _mission(svc)
         with pytest.raises(MissionError, match="VERIFICATION_INSUFFICIENT"):
@@ -167,7 +191,7 @@ class TestTheRegistryIsTheOnlySource:
         """'Check the ledger' with nothing to look up must not resolve to 'nothing wrong'."""
         trading = FakeTrading({"ti-1": {"status": "FILLED"}})
         svc = MissionService(
-            store, verifiers=build_mission_registry(store=store, trading=trading)
+            store, verifiers=build_mission_registry(store=store, trading=trading, knowledge=FakeKnowledge())
         )
         mission = await _mission(
             svc,
@@ -182,18 +206,18 @@ class TestTheRegistryIsTheOnlySource:
 class TestUnwiredCapabilitiesFailHonestly:
     async def test_an_unknown_strategy_gets_the_engine_report_fallback(self, store):
         trading = FakeTrading()
-        registry = build_mission_registry(store=store, trading=trading)
+        registry = build_mission_registry(store=store, trading=trading, knowledge=FakeKnowledge())
         assert isinstance(registry.get("something-nobody-wired"), EngineReportVerifier)
 
     async def test_an_unwired_capability_can_still_reach_unverifiable(self, store):
         """The honest terminal has to remain reachable or the mission just hangs."""
         trading = FakeTrading()
         svc = MissionService(
-            store, verifiers=build_mission_registry(store=store, trading=trading)
+            store, verifiers=build_mission_registry(store=store, trading=trading, knowledge=FakeKnowledge())
         )
         mission = await _mission(
             svc,
-            SuccessContract(postconditions={"done": True}, verifier_class="api-readback"),
+            SuccessContract(postconditions={"done": True}, verifier_class="repository-sha"),
         )
         with pytest.raises(MissionError, match="VERIFICATION_INSUFFICIENT"):
             await svc.transition(mission.mission_id, target=MissionState.VERIFIED_SUCCESS)
@@ -205,15 +229,19 @@ class TestUnwiredCapabilitiesFailHonestly:
         # independent readback and got the identical record could not tell "nothing was
         # promised" from "something was promised and could not be done". The version now
         # names the strategy, and the record carries why it could not be observed.
-        assert record.verifier_version == "unobservable/api-readback/1"
+        #
+        # The strategy here was `api-readback` until P1-VERIFY-003 gave it a source. It is
+        # now `repository-sha`, which is still genuinely unobservable: no git remote is
+        # configured for the gateway to read.
+        assert record.verifier_version == "unobservable/repository-sha/1"
         assert record.observed_postconditions["unobservable_reason"] == (
-            DECLARED_BUT_UNOBSERVABLE_STRATEGIES["api-readback"]
+            DECLARED_BUT_UNOBSERVABLE_STRATEGIES["repository-sha"]
         )
 
     async def test_a_capability_that_promised_nothing_is_distinguishable(self, store):
         """The other half of the distinction, which is the point of making it."""
         svc = MissionService(
-            store, verifiers=build_mission_registry(store=store, trading=FakeTrading())
+            store, verifiers=build_mission_registry(store=store, trading=FakeTrading(), knowledge=FakeKnowledge())
         )
         mission = await _mission(
             svc, SuccessContract(postconditions={"done": True}, verifier_class="NONE")
@@ -226,19 +254,24 @@ class TestUnwiredCapabilitiesFailHonestly:
     def test_each_unobservable_strategy_has_an_adapter_waiting_for_its_source(self):
         """P2-VERIFY-002 — the claim that these are one line from working, checked.
 
-        `ApiReadbackVerifier`, `RepositoryShaVerifier` and `CiRunVerifier` are complete and
-        deliberately unconstructed: what they lack is an independent source, and inventing
-        one is how a verifier ends up certifying its own subject. The risk of keeping an
-        unconstructed class is that it rots into a stub nobody notices. This asserts each is
-        still a real `ObservationVerifier` with the version string the strategy will carry,
-        so the day a git remote or a CI API is configured, registration is one line.
+        `RepositoryShaVerifier` and `CiRunVerifier` are complete and deliberately
+        unconstructed: what they lack is an independent source, and inventing one is how a
+        verifier ends up certifying its own subject. The risk of keeping an unconstructed
+        class is that it rots into a stub nobody notices. This asserts each is still a real
+        `ObservationVerifier` with the version string the strategy will carry, so the day a
+        git remote or a CI API is configured, registration is one line.
+
+        `ApiReadbackVerifier` was in this list and is not any more, because P1-VERIFY-003
+        gave it the source it was waiting for — which is what "one line from working" was
+        supposed to mean. `test_a_notebook_readback_is_performed_against_the_provider`
+        below is the same claim for it, now stated against a registry rather than a class.
         """
         adapters = {
-            "api-readback": (ApiReadbackVerifier, "api-readback/1"),
             "repository-sha": (RepositoryShaVerifier, "repository-sha/1"),
             "ci-run": (CiRunVerifier, "ci-run/1"),
         }
         assert set(adapters) == set(DECLARED_BUT_UNOBSERVABLE_STRATEGIES)
+        assert "api-readback" not in DECLARED_BUT_UNOBSERVABLE_STRATEGIES
         for strategy, (cls, version) in adapters.items():
             async def _never_observed(spec, context):  # pragma: no cover - not invoked
                 raise AssertionError("no source is configured for " + strategy)
@@ -249,7 +282,7 @@ class TestUnwiredCapabilitiesFailHonestly:
 
     async def test_every_declared_unobservable_strategy_says_why(self, store):
         """A reason nobody wrote is a reason the owner cannot be given."""
-        registry = build_mission_registry(store=store, trading=FakeTrading())
+        registry = build_mission_registry(store=store, trading=FakeTrading(), knowledge=FakeKnowledge())
         for strategy, reason in DECLARED_BUT_UNOBSERVABLE_STRATEGIES.items():
             adapter = registry.get(strategy)
             assert not isinstance(adapter, EngineReportVerifier), strategy
@@ -257,7 +290,7 @@ class TestUnwiredCapabilitiesFailHonestly:
 
     async def test_the_wired_strategy_list_matches_what_the_registry_actually_holds(self, store):
         """A list that drifts from the registry would misdescribe what can be verified."""
-        registry = build_mission_registry(store=store, trading=FakeTrading())
+        registry = build_mission_registry(store=store, trading=FakeTrading(), knowledge=FakeKnowledge())
         for strategy in WIRED_MISSION_STRATEGIES:
             assert not isinstance(registry.get(strategy), EngineReportVerifier), strategy
 

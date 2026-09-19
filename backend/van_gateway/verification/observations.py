@@ -115,9 +115,83 @@ async def automation_run_state_predicate(store: Store, run_id: str) -> dict[str,
     }
 
 
+async def trading_halt_readback(trading: Any) -> dict[str, Any]:
+    """§§22, 421 — the VATI kill-switch ledger is the authority on whether trading stopped.
+
+    `trading.halt` appends an OWNER_HALT kill-switch event and returns; nothing in that
+    return proves the runner acted on it. This asks the hash-chained ledger what is true
+    now, which is a different process from the one that wrote the event and the only party
+    entitled to say. A ledger that cannot be read, or whose chain does not verify, raises
+    or reports `chain_ok: False` rather than producing a pass.
+    """
+    status = trading.status()
+    if not status.get("ledger_available"):
+        raise ValueError("the VATI ledger is not available to read a halt back from")
+    if status.get("chain_ok") is False:
+        # A broken chain means the ledger cannot speak for anything, including this.
+        raise ValueError("the VATI ledger chain does not verify")
+    if status.get("ledger_stale"):
+        # P0-TRADE-004 — a stale ledger is a copy somebody left behind, and reading a
+        # halt out of it would confirm a stop that may never have reached the runner.
+        raise ValueError(str(status.get("ledger_stale_reason") or "the VATI ledger is stale"))
+    triggers = [str(t) for t in (status.get("kill_switch_triggers") or [])]
+    active = bool(status.get("kill_switch_active"))
+    head = str(status.get("head") or "")
+    return {
+        "kill_switch_active": active,
+        "owner_halt_active": "OWNER_HALT" in triggers,
+        "kill_switch_triggers": sorted(triggers),
+        "evidence_refs": [f"ledger://kill-switch/{head}"] if active and head else [],
+    }
+
+
+async def notebook_enterprise_readback(knowledge: Any, notebook_id: str) -> dict[str, Any]:
+    """§166 — ask the notebook provider what exists, not the executor what it did.
+
+    Used for both directions: a create or a source-add claims the notebook is there, a
+    delete claims it is gone, and one observation answers both because it reports what it
+    found rather than whether it liked it. A provider that cannot be reached raises, which
+    the caller turns into UNVERIFIABLE — never into a pass.
+    """
+    notebook_id = str(notebook_id or "").strip()
+    if not notebook_id:
+        raise ValueError("notebook readback needs a notebook_id to look for")
+    try:
+        found = await knowledge.notebook_enterprise_get(notebook_id)
+    except Exception as exc:  # noqa: BLE001 - "gone" and "unreachable" are different answers
+        if _is_absent(exc):
+            return {
+                "notebook_id": notebook_id,
+                "notebook_exists": False,
+                "evidence_refs": [f"provider-readback://notebook/{notebook_id}#absent"],
+            }
+        raise
+    exists = bool(found)
+    return {
+        "notebook_id": notebook_id,
+        "notebook_exists": exists,
+        "source_count": len(found.get("sources") or []) if isinstance(found, dict) else 0,
+        "evidence_refs": [f"provider-readback://notebook/{notebook_id}"] if exists else [],
+    }
+
+
+#: A provider that answers "no such notebook" has observed a deletion; one that cannot be
+#: reached has observed nothing. Collapsing the two is how a failed delete reads as done.
+#: Deliberately narrow. An unrecognised error raises, which becomes UNVERIFIABLE; a
+#: marker matched too eagerly would read a failed delete as a completed one.
+_ABSENT_MARKERS = ("not_found", "notfound", "404")
+
+
+def _is_absent(exc: Exception) -> bool:
+    text = f"{type(exc).__name__}:{exc}".casefold()
+    return any(marker in text for marker in _ABSENT_MARKERS)
+
+
 __all__ = [
     "automation_run_state_predicate",
     "browser_evidence_readback",
     "google_resource_readback",
+    "notebook_enterprise_readback",
+    "trading_halt_readback",
     "trading_ledger_readback",
 ]

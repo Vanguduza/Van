@@ -45,6 +45,8 @@ from van_gateway.mission.models import (
     Sensitivity,
     SuccessContract,
 )
+from van_gateway.command.resolver import CommandResolution
+from van_gateway.command.success_contracts import contract_for, no_contract_reason
 from van_gateway.mission.service import MissionError, MissionService
 from van_gateway.models import ActionClass, CommandRequest, OriginChannel, PrincipalType
 
@@ -124,6 +126,7 @@ class CommandMissionLink:
         effective_action_class: ActionClass,
         owner_approved: bool,
         constraints: list[str] | None = None,
+        resolution: CommandResolution | None = None,
     ) -> Mission:
         """Open the mission for this command, or return the one already open."""
         existing = await self.existing_for_command(req.command_id)
@@ -145,12 +148,36 @@ class CommandMissionLink:
             # §6 — an empty contract is legal and can never yield VERIFIED_SUCCESS. The
             # gateway does not know how to check an arbitrary instruction, and inventing a
             # postcondition it cannot observe is how a mission ends up "verified" on
-            # nothing. Whoever knows the contract sets it.
-            success_contract=SuccessContract(),
-            constraints=list(constraints or []),
+            # nothing.
+            #
+            # P1-VERIFY-003 — but it *does* know how to check some of them. When the typed
+            # resolver matched an exact action, that action's post-state is declared and,
+            # for the ones with an independent observation, checkable. Leaving the contract
+            # empty there meant no owner command could ever be verified, however exactly
+            # VAN had understood it. `contract_for` emits a contract only where an
+            # observation is registered, and an empty one everywhere else.
+            success_contract=(
+                contract_for(resolution) if resolution is not None else SuccessContract()
+            ),
+            constraints=self._with_unverifiable_note(constraints, resolution),
             authority_envelope=envelope,
             sensitivity=SENSITIVITY_FOR_CLASS.get(effective_action_class, Sensitivity.ROUTINE),
         )
+
+    @staticmethod
+    def _with_unverifiable_note(
+        constraints: list[str] | None, resolution: CommandResolution | None
+    ) -> list[str]:
+        """Carry the reason a mission cannot be verified alongside the mission itself.
+
+        A mission with an empty contract ends COMPLETED_UNVERIFIED, and the owner is
+        entitled to know that this was decided at the outset and why — not to infer it from
+        a status that looks like a failure. The note rides on `constraints` because that is
+        the field the owner projection already surfaces; it is a statement about what VAN
+        can observe, never a licence to skip the check.
+        """
+        note = no_contract_reason(resolution) if resolution is not None else None
+        return list(constraints or []) + ([f"unverifiable: {note}"] if note else [])
 
     async def understood(self, mission: Mission, *, summary: str) -> Mission:
         return await self._advance(mission, MissionState.UNDERSTOOD, summary=summary)
