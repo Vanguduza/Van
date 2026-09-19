@@ -45,6 +45,7 @@ owning_documents:
   - docs/VAN_CONSOLIDATED_DEPLOYMENT_READINESS_CLOSURE_BLUEPRINT_REV_1.md
   - docs/VAN_BROWSER_INTELLIGENCE_AUTOMATION_FABRIC_REV_1_2_EXPERT_REVIEW.md
   - docs/VAN_TRADING_PRODUCTION_DEPLOYMENT_BLUEPRINT_REV5.md
+  - docs/GOOGLE_INTELLIGENCE_MESH.md
 
 invariants:
 
@@ -338,6 +339,18 @@ invariants:
       - backend/tests/test_automation_security_contracts.py
       - backend/tests/test_control_scopes.py
     findings: [P2-SEC-009]
+
+  - subject: google.credential_planes
+    owner: docs/GOOGLE_INTELLIGENCE_MESH.md
+    statement: >-
+      Each Google credential plane is reported separately by the authority that owns it,
+      one plane's failure never changes another's state, and every declared Google
+      capability is attributed to exactly one plane.
+    implemented_by:
+      - backend/van_gateway/google/planes.py
+    tested_by:
+      - backend/tests/test_google_credential_planes.py
+    findings: [P2-GOOG-003]
 
   - subject: automation.computer_use_executor
     owner: docs/VAN_FINISHED_PRODUCT_BLUEPRINT_REV_1.md

@@ -3991,8 +3991,9 @@
       "requirement": "docs/VAN_CONSOLIDATED_DEPLOYMENT_READINESS_CLOSURE_BLUEPRINT_REV_1.md",
       "authority": "VAN Consolidated Deployment-Readiness Closure Blueprint Rev 2",
       "repository_evidence": [
-        "backend/van_gateway/google/mesh.py:1",
-        "backend/van_gateway/google/transport.py:1"
+        "backend/van_gateway/google/planes.py",
+        "backend/van_gateway/app.py",
+        "registries/google_capabilities.json"
       ],
       "runtime_evidence": [],
       "affected_components": [
@@ -4002,8 +4003,24 @@
       "remediation": "Model each plane separately, report per-plane state, and degrade only the capabilities that plane serves.",
       "impact": "One expired plane makes the whole mesh look offline, so the owner re-authenticates everything or gives up on all of it.",
       "validation_gate": "G9",
-      "current_status": "OPEN",
-      "remediation_gate": "G9"
+      "current_status": "CLOSED",
+      "remediation_gate": "G9",
+      "closure": {
+        "state": "EXTERNALLY_BLOCKED_REPOSITORY_COMPLETE",
+        "summary": "SEMANTIC REQUIREMENT: an owner whose Google access has partly lapsed can see which credential lapsed and what that costs them, and a credential that is fine for one plane never vouches for another.\n\nPRODUCTION PATH: GET /v1/google/planes (owner device, like /v1/google/status) -> plane_health -> the authority that already owned each plane: GoogleService.status for the refresh token, NotebookEnterpriseProvider.status for the cloud project credentials, NotebookConsumerProvider.status for the browser profile, and GoogleIdentityBroker.principal_status for the runtime entitlement.\n\nGoogleCredentialPlane already named all four and each had a reporter; nothing composed them, so the health surface answered 'is Google connected' with one boolean derived from the refresh token alone. This module composes and composes only — no plane's state is decided here.\n\nThree things the tests pin, because each is a way this surface could lie. CONFIGURED maps to AUTH_REQUIRED rather than READY: a credential that is present and has never been exercised is precisely the one about to surprise someone. UNCONFIGURED and AUTH_REQUIRED stay distinct, because 'set this up' and 'sign in again' send the owner to different places. And which capability rides on which plane is read from registries/google_capabilities.json rather than kept as a second list, with a test that every declared capability is attributed to exactly one plane — drift there means telling the owner the wrong thing is broken.\n\nThe summary field is named `capabilities_whose_credential_plane_is_ready`, not `capabilities_available`. A working credential is not a working capability: the runtime can still be unreachable, rate limited or uncertified. The payload says so and points at /v1/capabilities/status for the question it cannot answer. That naming was the first thing a counterexample review of the draft changed.\n\nBoth wrong answers are tested directly: a revoked refresh token leaving the other three usable, and a healthy refresh token not vouching for a dead cloud credential or a signed-out profile. The route is exercised through create_app with an enrolled device rather than by calling the composer, and asserts that nothing reports ready in an environment where nothing is configured. Six mutations, six caught.",
+        "changed": [
+          "backend/van_gateway/google/planes.py",
+          "backend/van_gateway/app.py"
+        ],
+        "verified_by": [
+          "backend/tests/test_google_credential_planes.py"
+        ],
+        "runtime_evidence": [],
+        "residual": "A plane's state is as good as the reporter behind it, and two of those report configuration rather than a live probe: the cloud and consumer planes are READY only once a certification has been recorded, and neither is re-probed on read.",
+        "residual_class": "EXTERNAL_RUNTIME",
+        "residual_reason": "A live probe means spending a request against the provider on every health read, and the certification records exist precisely so that is not done casually. The conservative direction is already taken — anything short of a recorded READY reports AUTH_REQUIRED — so the surface understates rather than overstates.",
+        "falsified_by": "A plane reporting READY while its credential is rejected by the provider; or one plane's failure changing another plane's state; or a capability appearing on two planes or on none."
+      }
     },
     {
       "id": "P3-PERF-003",

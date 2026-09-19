@@ -32,6 +32,7 @@ from van_gateway.decisions.service import DecisionCreate, DecisionService
 from van_gateway.degraded.registry import DegradedRegistry
 from van_gateway.events.bus import EventBus
 from van_gateway.google.control import GoogleControlAuthError, verify_internal_control
+from van_gateway.google.planes import plane_health, summarise
 from van_gateway.google.mesh import GoogleCapabilityRegistry, GoogleCapabilityRouter, GoogleIdentityBroker, GoogleRouteRequest
 from van_gateway.google.service import GoogleAuthError, GoogleService, NARROW_SCOPES
 from van_gateway.google.transport import FakeGoogleTransport, GoogleHttpTransport, GoogleOAuthTokenClient
@@ -1290,6 +1291,33 @@ def create_app() -> FastAPI:
     @app.get("/v1/google/status")
     async def google_status():
         return await google.status()
+
+    @app.get("/v1/google/planes")
+    async def google_credential_planes():
+        """P2-GOOG-003 — the four Google credentials, reported one by one.
+
+        `/v1/google/status` answers "is Google connected" with one boolean derived from the
+        owner's refresh token. Four credentials reach Google and they expire
+        independently: the refresh token, the model runtime's entitlement, the cloud
+        project credentials for discoveryengine, and a browser profile the owner signed in
+        with. So an expired cloud credential and a signed-out profile were both invisible
+        there, and a revoked refresh token made the whole of Google look down when the
+        enterprise notebook path was fine.
+
+        §421 requires degradation to be scoped. A reader who cannot see which plane failed
+        cannot know what still works, and the two wrong answers are symmetrical: everything
+        broken because one credential lapsed, or everything fine because the one credential
+        that is checked happens to be good.
+        """
+        knowledge = owner_runtime.knowledge
+        return summarise(
+            await plane_health(
+                google=google,
+                notebook_enterprise=knowledge.notebook_enterprise,
+                notebook_consumer=knowledge.notebook_consumer,
+                broker=google_broker,
+            )
+        )
 
     @app.post("/v1/google/connect")
     async def google_connect(body: GoogleConnectBody, x_van_internal_token: str | None = Header(default=None)):
