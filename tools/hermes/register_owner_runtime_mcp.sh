@@ -46,12 +46,24 @@ spec = {
     "timeout": 120,
     "supports_parallel_tool_calls": False,
     "tools": {
+        # Must stay identical to TOOLS in hermes/mcp/owner_runtime_stdio.mjs.
+        # tests/contracts/test_owner_runtime_mcp_contract.py asserts the two agree;
+        # drift here silently removes capabilities AGENTS.md instructs Hermes to use.
         "include": [
             "runtime_status",
             "resolve_command",
             "context_graph_query",
+            "context_lexical_query",
+            "context_hot_capsule",
             "context_readiness",
             "context_snapshot",
+            "knowledge_status",
+            "vekl_query",
+            "obsidian_query",
+            "notebook_enterprise_recent",
+            "notebook_enterprise_get",
+            "notebook_consumer_ask",
+            "knowledge_action_execute",
             "research_status",
             "research_search",
             "action_begin",

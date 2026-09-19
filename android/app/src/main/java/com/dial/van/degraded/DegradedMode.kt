@@ -52,6 +52,16 @@ data class DegradedMode(
             DegradedSubsystem("queue", "Offline command queue", SubsystemStatus.WORKING, "Encrypted local queue"),
             DegradedSubsystem("notifications", "Notification listener", SubsystemStatus.WORKING, "Context ingestion with redaction"),
             DegradedSubsystem("voice", "Voice I/O", SubsystemStatus.WORKING, "Speech input and TTS output"),
+            // P1-VOICE-001 — the wake word is its own subsystem because it fails on its
+            // own: push-to-talk voice works perfectly while "Hey Van" does nothing, and
+            // reporting them together meant the owner was told voice was fine.
+            DegradedSubsystem(
+                "wake_word",
+                "Wake word",
+                SubsystemStatus.BROKEN,
+                "No wake word model is installed, so VAN does not listen for its name",
+                RestoreAction.OPEN_SETTINGS,
+            ),
             DegradedSubsystem("biometric", "Biometric gate", SubsystemStatus.WORKING, "A4 approval gate"),
             DegradedSubsystem(
                 "google",

@@ -50,6 +50,28 @@ main() {
   check_file "${TARGET_ROOT}/policy/van_policy_hook.py" "policy hook"
   check_file "${TARGET_ROOT}/policy/tests/test_van_policy_hook.py" "policy tests"
 
+  # A present file is not a registered hook. The audit found the hook was copied by
+  # the installer, checked for existence by the doctor, and registered by nothing —
+  # so nothing proved Hermes ever loaded it. Assert declaration and loadability.
+  check_grep "${TARGET_ROOT}/config.yaml" 'hook_module: policy/van_policy_hook.py' "policy hook declared in profile config"
+  check_grep "${TARGET_ROOT}/config.yaml" 'hook_entrypoint: evaluate' "policy hook entrypoint declared"
+  if python3 - "$TARGET_ROOT" <<'PYHOOK' >/dev/null 2>&1; then
+import importlib.util, sys, pathlib
+root = pathlib.Path(sys.argv[1])
+spec = importlib.util.spec_from_file_location("van_policy_hook", root / "policy" / "van_policy_hook.py")
+mod = importlib.util.module_from_spec(spec)
+sys.modules["van_policy_hook"] = mod  # dataclasses resolve types via sys.modules
+spec.loader.exec_module(mod)
+# The entrypoint must exist and must deny A5 outright; a hook that cannot refuse is not a hook.
+verdict = mod.evaluate({"name": "disable_audit", "action_class": "A5", "mutating": True})
+sys.exit(0 if str(verdict.get("decision", "")).upper() in {"DENY", "DENIED", "BLOCK", "BLOCKED"} else 1)
+PYHOOK
+    log "OK  policy hook loads and denies A5"
+  else
+    err "FAIL  policy hook did not load or did not deny A5 — Hermes would run unguarded"
+    FAIL=1
+  fi
+
   check_file "${TARGET_ROOT}/bot/BOT_CHAT.md" "BOT_CHAT.md"
   check_file "${TARGET_ROOT}/bot/message_agent.md" "message_agent.md"
   check_file "${TARGET_ROOT}/bot/councils.md" "councils.md"
@@ -78,6 +100,7 @@ main() {
     owner-briefing google-workspace google-intelligence gemini-notebook google-design google-development
     project-steering research decision-support document-work notification-triage
     infrastructure-diagnostics hermes-administration trading-intelligence
+    automation-fabric browser-intelligence
   )
   for s in "${skills[@]}"; do check_file "${TARGET_ROOT}/skills/${s}/SKILL.md" "skill ${s}"; done
 

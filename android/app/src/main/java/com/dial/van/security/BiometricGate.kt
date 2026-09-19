@@ -19,38 +19,18 @@ class BiometricGate(private val activity: FragmentActivity) {
             BiometricManager.BIOMETRIC_SUCCESS
     }
 
-    fun requestA4Approval(
-        title: String = "Approve sensitive action",
-        subtitle: String = "Owner biometric required for A4 class actions",
-        onApproved: () -> Unit,
-        onDenied: (String) -> Unit,
-    ) {
-        if (!canAuthenticate()) {
-            onDenied("Biometric hardware unavailable")
-            return
-        }
-
-        val executor = ContextCompat.getMainExecutor(activity)
-        val prompt = BiometricPrompt(
-            activity,
-            executor,
-            object : BiometricPrompt.AuthenticationCallback() {
-                override fun onAuthenticationSucceeded(result: BiometricPrompt.AuthenticationResult) {
-                    onApproved()
-                }
-
-                override fun onAuthenticationError(errorCode: Int, errString: CharSequence) {
-                    onDenied(errString.toString())
-                }
-
-                override fun onAuthenticationFailed() {
-                    onDenied("Authentication failed")
-                }
-            },
-        )
-
-        prompt.authenticate(promptInfo(title, subtitle))
-    }
+    /*
+     * `requestA4Approval` used to live here: a BiometricPrompt with no CryptoObject, whose
+     * only output was that the prompt had succeeded. Trading account and credential
+     * changes used it while owner commands used the strong path below, so the weakest
+     * gate in the app guarded the surface that issues broker signing keys (P1-SEC-004).
+     *
+     * It is deleted rather than deprecated. A prompt that returns a boolean produces
+     * nothing the gateway can check, so there is no correct caller for it, and leaving it
+     * available would make the next such surface a one-line mistake. Everything that
+     * needs owner approval now takes a gateway-issued challenge through
+     * requestA4CommandApproval and sends back a signature the gateway verifies.
+     */
 
     /**
      * Authenticate the owner and sign the exact gateway-issued A4 challenge.

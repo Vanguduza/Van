@@ -176,7 +176,13 @@ object VanEvidenceMatrix {
 
         ImageIO.write(grayscaleBoard(), "png", File(dir, "grayscale-state-clarity.png"))
         ImageIO.write(busyBackdropBoard(), "png", File(dir, "busy-backdrop-resilience.png"))
-        ImageIO.write(VanPreviewSheets.commandCentreSheet(), "png", File(dir, "command-centre-degraded.png"))
+        // P2-VIS-003's actual root cause used to be here: a third write of
+        // `command-centre-degraded.png`, using the *default* (nominal) sheet, performed
+        // after the manifest had already recorded that file's hash. So the degraded board
+        // was overwritten with the idle one and the manifest described the file that no
+        // longer existed — and `VanCommandCentreEvidence.reconcile` was then bolted on to
+        // undo it. Both are gone. Every file this writer produces is written once, before
+        // its hash is taken.
     }
 
     /**
@@ -301,7 +307,16 @@ object VanEvidenceMatrix {
 
     private fun renderShot(shot: Shot): BufferedImage {
         if (shot.mode == "GLASS_BENCH") return VanPreviewSheets.glassTokenSheet()
-        if (shot.mode == "COMMAND_CENTRE") return VanPreviewSheets.commandCentreSheet()
+        // P2-VIS-003 — the board is rendered for the health it claims to show, here, once.
+        //
+        // Both shots used to route through a renderer that took no arguments and hardcoded
+        // one health snapshot, producing byte-identical files, and a `reconcile` pass then
+        // overwrote the two PNGs afterwards from a *second* Command Centre renderer and
+        // patched the manifest hashes with a regular expression. Writing the right file the
+        // first time removes both the collapse and the second renderer.
+        if (shot.mode == "COMMAND_CENTRE") {
+            return VanCommandCentreEvidence.render(degraded = shot.state == VanDurableState.DEGRADED)
+        }
         val image = BufferedImage(480, 640, BufferedImage.TYPE_INT_ARGB)
         val g = image.createGraphics()
         AwtVanRenderer.prepare(g)

@@ -22,7 +22,8 @@ from vati.execution.protection import ProtectionManager
 from vati.execution.router import ExecutionRouter, RouterError
 from vati.execution.review import review_trade
 from vati.execution.tca import compute_tca
-from vati.intelligence.events import EventMatrix
+from vati.execution.reconciliation import LedgerPosition, reconcile
+from vati.intelligence.events import EventMatrix, EventWindowState
 from vati.intelligence.market_state import MarketState, build_market_state
 from vati.intelligence.regimes import RegimeEngine
 from vati.learning.hooks import LearningHooks, to_payload
@@ -106,6 +107,57 @@ class DecisionCycle:
                 out.append(OpenPosition(p.symbol, p.direction, p.quantity, abs(p.entry_price - stop_price) if stop_price is not None else ZERO, c.value_per_price_unit_per_lot, c.base_currency, c.quote_currency, "", stop_price is not None))
         return tuple(out)
 
+    def _reconciliation_ok(self, *, account_verified: bool) -> bool:
+        """P0-TRADE-002 — this was hardcoded True, so RECONCILIATION_FAILED could not fire.
+
+        Reconciled per bar against what the venue reports now, not once at startup. The
+        ledger positions come from the entries this cycle actually opened, which is the
+        only set the cycle can speak for; a position the venue holds that this cycle never
+        opened is an orphan, and `reconcile` already treats it as blocking.
+        """
+        ledger_positions = [
+            LedgerPosition(
+                trade_intent_id=iid,
+                symbol=self.cfg.symbol,
+                quantity=entry.get("quantity", ZERO),
+                stop_price=entry.get("stop"),
+                software_stop=bool(self.cfg.software_stops),
+            )
+            for iid, entry in self._entries.items()
+            if entry.get("open", True)
+        ]
+        try:
+            report = reconcile(
+                ledger_positions, self.adapter.positions(), account_verified=account_verified
+            )
+        except Exception:  # noqa: BLE001 — a reconciliation that cannot run has not passed
+            return False
+        return report.permit_new_orders
+
+    def _risk_store_ok(self) -> bool:
+        """P0-TRADE-002 — hardcoded True, so RISK_STORE_UNAVAILABLE could not fire.
+
+        The risk store is the ledger: without it the authority cannot know what is open,
+        what has been lost today, or whether this decision has already been made. A ledger
+        that will not answer is a risk store that is unavailable.
+        """
+        try:
+            return bool(self.ledger.verify_chain()[0])
+        except Exception:  # noqa: BLE001 — an unreadable ledger is not a healthy one
+            return False
+
+    def _tier1_blackout(self, *, now_ms: int) -> bool:
+        """P0-TRADE-002 — hardcoded False, so EVENT_BLACKOUT could not fire.
+
+        The event matrix already computes this and the market state already carries it;
+        nothing joined the two to the snapshot the authority reads.
+        """
+        try:
+            window, _event = self.events.state_at(now_ms, self.cfg.base, self.cfg.quote)
+        except Exception:  # noqa: BLE001 — an event matrix that cannot answer fails closed
+            return True
+        return window in (EventWindowState.PRE_BLACKOUT, EventWindowState.POST_BLACKOUT)
+
     def snapshot(self, *, now_ms: int, quote_age_ms: int) -> RiskSnapshot:
         acct = self.adapter.sync_account()
         if self.peak_equity == ZERO:
@@ -115,8 +167,15 @@ class DecisionCycle:
         return RiskSnapshot(now_unix=now_ms // 1000, account_alias=acct.account_alias, account_verified=acct.verified, equity=acct.equity, balance=acct.balance,
                             peak_equity=self.peak_equity, day_start_equity=self.day_start_equity, week_start_equity=self.week_start_equity, consecutive_losses=self.consecutive_losses,
                             open_positions=self._open_positions(), symbol_contract=self.cfg.contract, quote_age_ms=quote_age_ms, max_quote_age_ms=self.cfg.max_quote_age_ms,
-                            broker_connected=hb.connected, reconciliation_ok=True, clock_sync_ok=abs(hb.server_offset_ms) < 2000, risk_store_ok=True, market_integrity=self.integrity,
-                            tier1_event_blackout_active=False, kill_switch_triggers=frozenset(self.kill.active))
+                            broker_connected=hb.connected,
+                            reconciliation_ok=self._reconciliation_ok(account_verified=acct.verified),
+                            clock_sync_ok=abs(hb.server_offset_ms) < 2000,
+                            risk_store_ok=self._risk_store_ok(),
+                            market_integrity=self.integrity,
+                            tier1_event_blackout_active=self._tier1_blackout(now_ms=now_ms),
+                            margin_level_pct=acct.margin_level_pct,
+                            free_margin=acct.free_margin,
+                            kill_switch_triggers=frozenset(self.kill.active))
 
     def roll_day(self, equity: Decimal, *, new_week: bool = False) -> None:
         self.day_start_equity = equity
@@ -135,7 +194,15 @@ class DecisionCycle:
         ctx = self.ctx_fn(state, cost)
         regime_label = ctx.zse.currency_regime.value if ctx.zse is not None else state.regime.trend.value
         oa = self.engine.assess(state, ctx, regime_label=state.regime.trend.value, currency_regime_label=(ctx.zse.currency_regime.value if ctx.zse is not None else None),
-                                account_alias=cfg.account_alias, venue=cfg.venue, idempotency_seed=f"{cfg.session_id}:{state.as_of_ms}")
+                                account_alias=cfg.account_alias, venue=cfg.venue,
+                                # P0-TRADE-005 — this was f"{cfg.session_id}:{state.as_of_ms}",
+                                # and session_id embeds the process start timestamp. A crash
+                                # and restart on the same bar produced a different key, so
+                                # neither the in-process set nor the ledger-seeded router set
+                                # recognised the duplicate and the order could be placed twice.
+                                # The seed is now the account, the symbol and the bar, all of
+                                # which are the same on both sides of a restart.
+                                idempotency_seed=f"{cfg.account_alias}:{cfg.symbol}:{state.as_of_ms}")
         self._log(EventKind.OPPORTUNITY_ASSESSMENT, {"symbol": cfg.symbol, "decision": oa.decision, "reason": oa.abstain_reason, "candidates": list(oa.candidates), "assessment_hash": oa.assessment_hash}, now_ms=now_ms)
         metrics.inc("vati_cycles_total", symbol=cfg.symbol)
         if oa.intent is None:
@@ -147,12 +214,15 @@ class DecisionCycle:
         metrics.inc("vati_decisions_total", outcome=decision.decision.value)
         if decision.decision is Decision.REJECTED:
             return CycleResult(state.as_of_ms, state.state_hash, f"REJECTED:{decision.reason_code}", decision.reason_detail)
-        sig_targets = ()
-        for c in oa.candidates:
-            pass
-        targets = tuple()
-        # recover targets from the winning signal via the engine's last best (kept simple: 1 target from expected move)
-        if intent.expected_gross_move_pct is not None:
+        # P1-TRADE-007 and P4-TRADE-009 — this used to be an empty assignment, a loop
+        # with a bare `pass`, and a single target re-derived from expected_gross_move_pct,
+        # which discarded whatever exit plan the winning strategy had actually produced.
+        # The assessment now carries the signal's own targets.
+        targets = tuple(oa.targets)
+        if not targets and intent.expected_gross_move_pct is not None:
+            # A strategy that declares an expected move and no explicit target still gets
+            # one, which is the behaviour the old code always applied. It is a fallback
+            # now rather than the rule.
             t = intent.entry * (Decimal(1) + intent.expected_gross_move_pct) if intent.direction is Direction.LONG else intent.entry * (Decimal(1) - intent.expected_gross_move_pct)
             targets = (t,)
         try:

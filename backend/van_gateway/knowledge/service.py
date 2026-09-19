@@ -169,6 +169,10 @@ class KnowledgeRuntime:
     async def notebook_enterprise_get(self, notebook_id: str):
         return await self.notebook_enterprise.get_notebook(notebook_id)
 
+    async def notebook_enterprise_source_get(self, notebook_id: str, source_name: str):
+        """P1-VERIFY-004 — the exact object a source mutation claims to have changed."""
+        return await self.notebook_enterprise.get_source(notebook_id, source_name)
+
     async def certify_notebook_enterprise(self):
         return await self.notebook_enterprise.certify()
 

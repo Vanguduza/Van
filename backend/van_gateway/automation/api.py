@@ -11,10 +11,29 @@ because a second opinion is a second place for the rules to drift.
 
 from __future__ import annotations
 
+import json
 import time
+
 from typing import Any
 
-from fastapi import APIRouter, Header, HTTPException
+from fastapi import APIRouter, Header, HTTPException, Request
+
+from van_gateway.automation.credentials import (
+    CredentialAlias,
+    CredentialClass,
+    CredentialResolver,
+)
+from van_gateway.automation.events import (
+    EventRejected,
+    ExternalEventIngestor,
+    Sensitivity,
+    SourceTrust,
+)
+from van_gateway.automation.repair import (
+    FailureClass,
+    RepairService,
+    decide as repair_decide,
+)
 from pydantic import BaseModel, Field
 
 from van_gateway.automation.canonical import digest, new_id
@@ -47,6 +66,26 @@ from van_gateway.config import Settings
 from van_gateway.google.control import GoogleControlAuthError, verify_internal_control
 from van_gateway.models import ActionClass, PrincipalType
 from van_gateway.storage.db import Store
+
+
+class RepairOpenBody(BaseModel):
+    """P2-DEAD-001 — what a failing capability needs to become a repair candidate."""
+
+    capability_id: str = Field(min_length=1)
+    failing_artifact_id: str = Field(min_length=1)
+    failure_class: FailureClass
+    failing_run_id: str | None = None
+    error_code: str | None = None
+    failing_node: str | None = None
+    attempt: int = 1
+
+
+class CredentialResolveBody(BaseModel):
+    """P2-DEAD-001 — the alias a workflow asks for, and the class it claims."""
+
+    alias: str = Field(min_length=1)
+    credential_class: CredentialClass
+    admitted: bool = False
 
 
 class RouteBody(BaseModel):
@@ -168,6 +207,20 @@ class AutomationApi:
         self.router_service = AutomationMediumRouter(
             registry=registry, hot_index=hot_index, templates=self.templates
         )
+        # P2-DEAD-001 — three complete services that nothing imported. Each enforces a rule
+        # the fabric is documented to enforce, so an unconstructed one is an unenforced rule.
+        #
+        # `events` carries §18: an external event may become evidence and may never become an
+        # owner command. That is the rule, fully implemented, that had no ingress to guard.
+        self.events = ExternalEventIngestor(
+            store, ingress_enabled=settings.automation_ingress_enabled
+        )
+        # `credentials` refuses a payment-instrument credential in any class (owner decision
+        # 2026-09-18). Unconstructed, the refusal never ran.
+        self.credentials = CredentialResolver()
+        # `repair` produces a candidate and never edits a live artifact, so a rollback is
+        # always the previous artifact still sitting there.
+        self.repair = RepairService(store, registry=registry)
         self.router = APIRouter(prefix="/v1/automation", tags=["automation"])
         self._install_routes()
 
@@ -570,6 +623,137 @@ class AutomationApi:
             return {
                 "capability": capability.model_dump(mode="json"),
                 "admitted_artifact": artifact.model_dump(mode="json") if artifact else None,
+            }
+
+        @router.post("/events")
+        async def ingest_external_event(
+            request: Request,
+            x_van_internal_token: str | None = Header(default=None),
+            x_van_event_signature: str | None = Header(default=None),
+            x_van_event_timestamp: str | None = Header(default=None),
+        ):
+            """§§15-18, 208-209 — the one door an external event comes through.
+
+            P2-DEAD-001. `ExternalEventIngestor` implemented dedupe, a bounded replay window,
+            HMAC verification, payload bounds and injection assessment, and no route reached
+            it. The rule it exists to enforce — an external event may become evidence and may
+            never become an owner command — was therefore unenforced at the only place it
+            could be enforced.
+
+            Owner trust is refused here rather than downgraded. An adapter that labels its own
+            event OWNER_VERIFIED is trying to mint authority, and answering it with a quietly
+            corrected trust level teaches it that the label is merely advisory.
+            """
+            self._require_internal(x_van_internal_token)
+            body = await request.body()
+            if len(body) > ExternalEventIngestor.MAX_PAYLOAD_BYTES:
+                raise HTTPException(status_code=413, detail="EVENT_PAYLOAD_TOO_LARGE")
+            try:
+                parsed = json.loads(body or b"{}")
+            except ValueError:
+                raise HTTPException(status_code=400, detail="EVENT_BODY_NOT_JSON") from None
+            if not isinstance(parsed, dict):
+                raise HTTPException(status_code=400, detail="EVENT_BODY_NOT_AN_OBJECT")
+
+            # A signature is verified when one is offered. An unsigned event is accepted only
+            # as the lower trust it actually has; it is never promoted by omission.
+            trust = SourceTrust.PROVIDER_UNSIGNED
+            if x_van_event_signature is not None:
+                secret = self.settings.automation_webhook_secret
+                if not secret:
+                    raise HTTPException(status_code=503, detail="WEBHOOK_SECRET_UNCONFIGURED")
+                try:
+                    ExternalEventIngestor.verify_provider_signature(
+                        secret=secret, body=body, signature=x_van_event_signature,
+                        timestamp_ms=int(x_van_event_timestamp or 0),
+                        now_ms=int(time.time() * 1000),
+                    )
+                except (EventRejected, ValueError) as exc:
+                    raise HTTPException(status_code=403, detail=str(exc)) from exc
+                trust = SourceTrust.PROVIDER_SIGNED
+
+            try:
+                result = await self.events.ingest(
+                    source_system=str(parsed.get("source_system", "")).strip() or "unknown",
+                    event_type=str(parsed.get("event_type", "")).strip() or "unknown",
+                    payload=parsed.get("payload") if isinstance(parsed.get("payload"), dict) else {},
+                    payload_schema_id=str(parsed.get("payload_schema_id", "")).strip() or "unknown",
+                    source_trust=trust,
+                    sensitivity=Sensitivity.INTERNAL,
+                    provider_event_id=parsed.get("provider_event_id"),
+                    source_account_alias=parsed.get("source_account_alias"),
+                    observed_at_ms=parsed.get("observed_at_ms"),
+                    correlation_refs=parsed.get("correlation_refs"),
+                )
+            except EventRejected as exc:
+                raise HTTPException(status_code=422, detail=str(exc)) from exc
+            return {
+                "event_id": result.event.event_id,
+                "created": result.created,
+                "source_trust": result.event.source_trust.value,
+                "injection_assessment": ExternalEventIngestor.assess_injection(
+                    result.event.payload
+                ),
+            }
+
+        @router.post("/credentials/resolve")
+        async def resolve_credential_alias(
+            body: CredentialResolveBody,
+            x_van_internal_token: str | None = Header(default=None),
+        ):
+            """§§45-46 — the alias a workflow may use, and the classes it may not.
+
+            P2-DEAD-001. The rule that no credential class admits a payment instrument was
+            written, tested and never called by anything, so a workflow could name any alias.
+            """
+            self._require_internal(x_van_internal_token)
+            try:
+                alias = self.credentials.register(
+                    CredentialAlias(
+                        alias=body.alias,
+                        credential_class=body.credential_class,
+                        admitted=body.admitted,
+                    )
+                )
+            except PolicyError as exc:
+                raise HTTPException(status_code=422, detail=str(exc)) from exc
+            return {"alias": alias.alias, "credential_class": alias.credential_class.value,
+                    "admitted": alias.admitted}
+
+        @router.post("/repair")
+        async def open_repair(
+            body: RepairOpenBody,
+            x_van_internal_token: str | None = Header(default=None),
+        ):
+            """§§78, 243-245 — a failing workflow becomes a repair candidate, with lineage.
+
+            P2-DEAD-001. `RepairService` was written, tested and imported by nothing, so a
+            failing capability had no path to repair at all.
+
+            A repair never edits a live artifact: it produces a candidate that goes through
+            the ordinary admission path, which is what keeps rollback equal to "the previous
+            artifact, still sitting there".
+            """
+            self._require_internal(x_van_internal_token)
+            self._require_enabled()
+            try:
+                packet = await self.repair.build_packet(
+                    capability_id=body.capability_id,
+                    failing_artifact_id=body.failing_artifact_id,
+                    failure_class=body.failure_class,
+                    failing_run_id=body.failing_run_id,
+                    error_code=body.error_code,
+                    failing_node=body.failing_node,
+                )
+            except RegistryError as exc:
+                raise HTTPException(status_code=404, detail=str(exc)) from exc
+            decision = repair_decide(packet, attempt=body.attempt)
+            return {
+                "capability_id": packet.capability_id,
+                "failing_artifact_id": packet.failing_artifact_id,
+                "failure_class": packet.failure_class.value,
+                "decision": decision.value,
+                "attempt": body.attempt,
             }
 
         @router.get("/templates")

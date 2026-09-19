@@ -209,6 +209,13 @@ class Mission(BaseModel):
     origin_channel: OriginChannel
     title: str
     goal: str
+    #: P1-LEARN-003 — the kind of work this is, which is what a strategy is learned
+    #: *for*. It is the typed resolver's intent id, so it is a name VAN assigned by
+    #: understanding the command, not a label anyone typed. Free-form commands share
+    #: GENERAL_OWNER_INTENT, which is honest: VAN did not establish what kind of work
+    #: they were, and grouping them by something it guessed would make the strategy
+    #: evidence mean less than nothing.
+    mission_class: str = "GENERAL_OWNER_INTENT"
     success_contract: SuccessContract = Field(default_factory=SuccessContract)
     constraints: list[str] = Field(default_factory=list)
     authority_envelope: AuthorityEnvelope = Field(default_factory=AuthorityEnvelope)

@@ -15,11 +15,33 @@ from decimal import Decimal, InvalidOperation
 from pathlib import Path
 from typing import Any, Optional
 
+from van_gateway.observability import instruments
+
 READ_KINDS = ("SESSION", "OPPORTUNITY_ASSESSMENT", "RISK_DECISION", "ORDER_COMMAND", "EXECUTION_RECEIPT", "TRADE_REVIEW", "TRADE_EXPERIENCE_ARTIFACT", "KILL_SWITCH", "OWNER_TICKET", "CAPSULE_STATE")
+
+
+#: P0-TRADE-004. How old the newest ledger event may be before the gateway stops treating
+#: what it reads as current. A live session writes a heartbeat, a market-state event and an
+#: account snapshot on every bar, so minutes of silence means the gateway is not looking at
+#: the ledger the session is writing.
+#:
+#: DECISION (recorded, no owner input): fifteen minutes is generous enough for a session on
+#: a slow timeframe and short enough that a file left over from a previous deployment is
+#: caught the first time anybody asks.
+LEDGER_STALENESS_MS = 15 * 60 * 1000
 
 
 class TradingControlError(PermissionError):
     pass
+
+
+class TradingAuthorityError(TradingControlError):
+    """The owner authority for this act is absent, invalid, expired, reused or misdirected.
+
+    Distinct from its parent so the routes can answer 403 rather than 409: "you are not
+    authorised" and "that ticket is already confirmed" are different things to tell a
+    caller, and the confirm route used to map both to a conflict (P0-TRADE-001).
+    """
 
 
 def _import_vati():
@@ -55,6 +77,11 @@ class TradingService:
     accounts_registry: str = ""
     lake_root: str = ""
     reporting_currency: str = "USD"
+    #: P0-TRADE-001. The verifier for owner-signed trading acts. Left None here and built
+    #: lazily so the dataclass stays importable without the vati package on the path; a
+    #: host with no registered owner key gets a verifier that refuses everything, which is
+    #: the correct default for a process that can halt live trading.
+    owner_authority: Any = None
 
     # ---------------------------------------------------------------- state
     def available(self) -> bool:
@@ -142,16 +169,50 @@ class TradingService:
             for ev in led.iter(EventKind.KILL_SWITCH):
                 last_ms = max(last_ms, ev.event_time_ms)
                 halts.append({"trigger": ev.payload.get("trigger"), "event_time_ms": ev.event_time_ms, "hash": ev.hash, "cleared": bool(ev.payload.get("cleared"))})
+            # P3-OBS-002 — "trade halt latency" is Gate 11's most safety-critical
+            # metric and it is produced in the trading process, which has its own
+            # registry the gateway never sees. It is recoverable here because the
+            # session records OWNER_HALT_OBSERVED with the halt's own event time, so
+            # the two ends of the interval are both in the ledger the gateway reads.
+            halt_latencies: list[int] = []
             for ev in led.iter(EventKind.SESSION):
                 last_ms = max(last_ms, ev.event_time_ms)
+                if ev.payload.get("event") == "OWNER_HALT_OBSERVED":
+                    authored = ev.payload.get("halt_event_time_ms")
+                    if isinstance(authored, int):
+                        latency = max(ev.event_time_ms - authored, 0)
+                        halt_latencies.append(latency)
+                        instruments.record_trade_halt_latency(float(latency))
             tripped = [h for h in halts if not h["cleared"]]
             cleared = {h["trigger"] for h in halts if h["cleared"]}
             active = [h for h in tripped if h["trigger"] not in cleared or h["event_time_ms"] > max((x["event_time_ms"] for x in halts if x["cleared"] and x["trigger"] == h["trigger"]), default=-1)]
             tickets = self._tickets(led, EventKind)
-            return {"ledger_available": True, "ledger_path": self.ledger_path, "head": led.head(), "chain_ok": ok, "events": checked, "counts": counts,
+            # P0-TRADE-004 — last_event_ms was reported and never thresholded, so a stale
+            # local SQLite file presented old data as current. The gateway cannot tell by
+            # looking whether it is reading the live ledger or a copy somebody left behind;
+            # what it can tell is that a live trading session writes constantly, so a
+            # ledger whose newest event is old is not one to answer questions from.
+            now_ms = int(time.time() * 1000)
+            age_ms = max(0, now_ms - last_ms) if last_ms else None
+            stale = age_ms is None or age_ms > LEDGER_STALENESS_MS
+            payload = {"ledger_available": True, "ledger_path": self.ledger_path, "head": led.head(), "chain_ok": ok, "events": checked, "counts": counts,
                     "kill_switch_active": bool(active), "kill_switch_triggers": sorted({h["trigger"] for h in active if h["trigger"]}),
                     "open_tickets": sum(1 for t in tickets if t["status"] == "OPEN"), "last_event_ms": last_ms,
+                    "ledger_age_ms": age_ms, "ledger_stale": stale,
+                    "ledger_staleness_threshold_ms": LEDGER_STALENESS_MS,
+                    "owner_halt_latencies_ms": halt_latencies,
                     "authority": "VATI Risk Authority; Hermes and the gateway never place orders"}
+            if stale:
+                # Said in the payload rather than only in a degraded code, because the
+                # number is what makes it actionable and "no events at all" is a different
+                # situation from "nothing for an hour".
+                payload["ledger_stale_reason"] = (
+                    "no events have ever been written to this ledger"
+                    if not last_ms else
+                    f"newest event is {age_ms // 1000}s old, past the "
+                    f"{LEDGER_STALENESS_MS // 1000}s threshold"
+                )
+            return payload
         finally:
             led.close()
 
@@ -204,16 +265,35 @@ class TradingService:
         return book
 
     # --------------------------------------------------------- owner writes
-    @staticmethod
-    def _require_signature(owner_signature_ref: str) -> str:
-        sig = (owner_signature_ref or "").strip()
-        if not sig:
-            raise TradingControlError("owner-signed authority (A4) is required: owner_signature_ref is empty")
-        return sig
+    def _authority(self):
+        if self.owner_authority is None:
+            from vati.authority import OwnerAuthorityVerifier
+
+            self.owner_authority = OwnerAuthorityVerifier()
+        return self.owner_authority
+
+    def _require_signature(self, owner_signature_ref: str, *, act: str, subject: str) -> str:
+        """P0-TRADE-001 — this asked whether the string was non-empty, and "x" passed.
+
+        The act and the subject are inside the signature, so authority to confirm one
+        ticket is not authority to confirm another, and neither is authority to halt.
+        """
+        from vati.authority import OwnerAuthorityError
+
+        try:
+            return self._authority().verify(
+                owner_signature_ref, act=act, subject=subject
+            ).ref
+        except OwnerAuthorityError as exc:
+            raise TradingAuthorityError(
+                f"owner-signed authority (A4) is required: {exc}"
+            ) from exc
 
     def halt(self, *, owner_signature_ref: str, reason: str, now_ms: Optional[int] = None) -> dict[str, Any]:
         """Append an OWNER_HALT kill-switch event. The runner observes it and stops new orders; open positions stay protected."""
-        sig = self._require_signature(owner_signature_ref)
+        sig = self._require_signature(
+            owner_signature_ref, act="owner-halt", subject="van-trading-core"
+        )
         if not self.available():
             raise FileNotFoundError(f"trading ledger not available at {self.ledger_path}")
         EventKind, make_event, led = self._open()
@@ -221,13 +301,17 @@ class TradingService:
             now = now_ms if now_ms is not None else int(time.time() * 1000)
             ev = make_event(EventKind.KILL_SWITCH, self.producer, {"trigger": "OWNER_HALT", "sig": sig, "reason": (reason or "")[:500], "channel": "gateway"}, event_time_ms=now, received_time_ms=now, correlation_id="owner")
             chain = led.append(ev)
-            return {"halted": True, "trigger": "OWNER_HALT", "event_hash": ev.hash, "chain_hash": chain, "event_time_ms": now}
+            # `sig` is the verified authority's reference, so a caller recording this
+            # does not have to touch the raw token (P0-TRADE-001).
+            return {"halted": True, "trigger": "OWNER_HALT", "sig": sig, "event_hash": ev.hash, "chain_hash": chain, "event_time_ms": now}
         finally:
             led.close()
 
     def confirm_ticket(self, ticket_id: str, *, owner_signature_ref: str, fill_price: str, filled_qty: str, contract_note_ref: str, now_ms: Optional[int] = None) -> dict[str, Any]:
         """Record the owner's broker confirmation for a ZSE OWNER_TICKET. Only an OPEN ticket can be confirmed, once."""
-        sig = self._require_signature(owner_signature_ref)
+        sig = self._require_signature(
+            owner_signature_ref, act="ticket-confirm", subject=str(ticket_id)
+        )
         if not (contract_note_ref or "").strip():
             raise ValueError("a broker contract note reference is required")
         try:

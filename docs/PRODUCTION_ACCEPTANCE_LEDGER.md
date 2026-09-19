@@ -4,6 +4,12 @@
 **Date:** 2026-09-17
 **Verdict:** NOT v1.0 PRODUCTION ACCEPTED — external gates remain
 
+> **Audit correction, 2026-09-19.** `docs/VAN_WHOLE_SYSTEM_IMPLEMENTATION_AUDIT_AND_CERTIFICATION_REV_1.md`
+> established that a passing gate in this ledger attests the *repository-side* control it names and
+> nothing more. Several rows below were read as proving live capability. Where a row records a package
+> version, a configuration state or a fail-closed refusal, it proves exactly that. Closure is tracked in
+> `evidence/van-system-audit/findings.json` against `docs/VAN_FINISHED_PRODUCT_BLUEPRINT_REV_1.md`.
+
 ## Previously certified repository gates
 
 | Gate | Status |
@@ -120,7 +126,7 @@ Token-free receipt: `artifacts/runtime/van_trading_core_reconciliation_live_atte
 | Full Trading Core qualification | PASS — `GREEN`, 0 required failures |
 | n8n automation fabric | PASS — `AUTOMATION_FABRIC_RUNTIME_GREEN`; n8n 2.39.7 + runner/PostgreSQL healthy |
 | Supabase authority runtime | PASS — `SUPABASE_RUNTIME_GREEN`; authority services healthy and loopback-scoped |
-| Browser runtime | PASS — Stagehand 4.1.0 / Playwright 1.63.0 / Temporal 1.33.0 |
+| Browser runtime | PASS (packages only) — Stagehand 4.1.0 / Playwright 1.63.0 installed. **Corrected 2026-09-19:** the previous row also listed "Temporal 1.33.0" as green. That was a `pip` version assertion, not a deployment: no Temporal client, worker, workflow or service exists anywhere in the repository, and `bootstrap-browser-runtime.sh` records the browser service itself as `ENVIRONMENT_PREPARED_NOT_IMPLEMENTED`. See audit finding P1-DOC-002. |
 | VATI ledger | PASS — PostgreSQL backend, chain valid |
 | Nautilus Trader | PASS — 1.231.0 installed through the production bootstrap Phase-3 donor gate |
 | Network/firewall boundary | PASS — UFW active, Commander 9133 scoped, Oracle image firewall green, Supabase ports loopback-only |

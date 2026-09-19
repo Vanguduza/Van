@@ -48,8 +48,9 @@ fun main(args: Array<String>) {
         ImageIO.write(image, "png", file)
         println("wrote ${file.absolutePath} (${image.width}x${image.height}, ${file.length()} bytes)")
     }
+    // The matrix writes the truthful Command Centre boards itself now; the
+    // overwrite-and-patch-the-manifest pass that used to follow is gone (P2-VIS-003).
     VanEvidenceMatrix.writeAll(outputDir)
-    VanCommandCentreEvidence.reconcile(outputDir)
     println(
         "wrote named Rev ${VanEvidenceMatrix.AUTHORITY_REVISION} evidence matrix under " +
             File(outputDir, VanEvidenceMatrix.EVIDENCE_DIR).absolutePath,

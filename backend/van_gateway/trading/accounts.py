@@ -27,6 +27,17 @@ from urllib.request import Request, urlopen
 from fastapi import HTTPException
 
 ACTIONS = ("account_upsert", "account_credentials", "account_remove", "account_verify", "deriv_verify_email", "deriv_create_demo", "deriv_oauth_link", "ctrader_discover", "ctrader_link", "mt5_ea_issue_key", "oauth_start", "oauth_pending")
+#: P1-SEC-004. Actions that only read state; a biometric prompt for these would train the
+#: owner to approve without reading. Everything else changes an account or a credential and
+#: needs a CryptoObject-bound A4 proof, not a prompt that returned a boolean.
+READ_ONLY_ACTIONS = frozenset({"account_verify", "oauth_pending", "ctrader_discover"})
+
+#: The rest, stated as the complement so a new action is guarded by default rather than by
+#: somebody remembering to add it here.
+def requires_owner_approval(action: str) -> bool:
+    return action in ACTIONS and action not in READ_ONLY_ACTIONS
+
+
 SECRET_ARG_KEYS = {"secrets", "client_password", "token", "access_token", "refresh_token", "client_secret", "verification_code", "code"}
 MAX_AGE_S = 300
 PENDING_TTL_S = 900

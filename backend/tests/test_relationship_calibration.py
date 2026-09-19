@@ -22,12 +22,36 @@ from van_gateway.reasoning.kernel import ChallengeMode
 from van_gateway.understanding.owner_model import OwnerCognitiveModel, OwnerModelField
 
 
+async def seed_episodes(store, *names: str) -> dict[str, str]:
+    """Real missions for the assertions to be evidenced by (P1-SYM-001).
+
+    `episode_ref` used to be a free string, so three typos were three episodes. It now has
+    to name a mission or a command that exists, which means a test that wants evidence has
+    to produce something that happened.
+    """
+    from van_gateway.mission.models import MissionOrigin
+    from van_gateway.mission.service import MissionService
+    from van_gateway.models import OriginChannel
+
+    missions = MissionService(store)
+    out: dict[str, str] = {}
+    for name in names:
+        mission = await missions.create(
+            owner_principal_id="owner", origin=MissionOrigin.OWNER_VOICE,
+            origin_channel=OriginChannel.VOICE, title=name, goal=name,
+        )
+        out[name] = f"mission:{mission.mission_id}"
+    return out
+
+
+
 async def _engine_with(tmp_path, field=None, value=None):
     store = await make_store(tmp_path)
     if field is not None:
         model = OwnerCognitiveModel(store)
+        episodes = await seed_episodes(store, "m1")
         assertion = await model.observe(
-            owner_principal_id="owner", field=field, value=value, episode_ref="m1"
+            owner_principal_id="owner", field=field, value=value, episode_ref=episodes["m1"]
         )
         await model.confirm(assertion.assertion_id)
     return RelationshipCalibrationEngine(store)
@@ -86,15 +110,38 @@ async def test_only_confirmed_preferences_change_behaviour(tmp_path):
     """§64 — a CANDIDATE is something VAN noticed, not something it may act on."""
     store = await make_store(tmp_path)
     model = OwnerCognitiveModel(store)
+    episodes = await seed_episodes(store, "m1", "m2", "m3")
     # Two episodes reaches CANDIDATE, which must not calibrate anything.
-    for episode in ("m1", "m2"):
+    for name in ("m1", "m2"):
         await model.observe(
             owner_principal_id="owner", field=OwnerModelField.COMMUNICATION_PREFERENCE,
-            value="terse", episode_ref=episode,
+            value="terse", episode_ref=episodes[name],
         )
     engine = RelationshipCalibrationEngine(store)
     calibration = await engine.calibrate(owner_principal_id="owner")
     assert calibration.verbosity is Verbosity.BALANCED
+
+    # P1-SYM-001 — a third episode reaches EVIDENCED, which does calibrate, and the
+    # reason must not claim the owner said so.
+    await model.observe(
+        owner_principal_id="owner", field=OwnerModelField.COMMUNICATION_PREFERENCE,
+        value="terse", episode_ref=episodes["m3"],
+    )
+    evidenced = await engine.calibrate(owner_principal_id="owner")
+    assert evidenced.verbosity is Verbosity.TERSE
+    reason = next(r for r in evidenced.reasons if "terse" in r)
+    assert "owner-confirmed" not in reason, reason
+    assert "not yet confirmed by you" in reason
+
+
+async def test_an_owner_confirmed_preference_is_named_as_theirs(tmp_path):
+    """The other half: when they did say it, VAN should say so."""
+    engine = await _engine_with(
+        tmp_path, OwnerModelField.COMMUNICATION_PREFERENCE, "terse"
+    )
+    calibration = await engine.calibrate(owner_principal_id="owner")
+    reason = next(r for r in calibration.reasons if "terse" in r)
+    assert "owner-confirmed" in reason, reason
 
 
 async def test_a_confirmed_evidence_preference_leads_with_evidence(tmp_path):

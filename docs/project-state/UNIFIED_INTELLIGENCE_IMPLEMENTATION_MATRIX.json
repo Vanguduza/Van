@@ -5,9 +5,10 @@
   "generated_against": {
     "main_sha": "f8c3fcc9b4d346c7b59ed128cfdbe63bceab3dc0",
     "blueprint_sha": "e09765d70d6a6a3172141a3dc9710362d2554d26",
-    "blueprint_path": "docs/VAN_UNIFIED_PERSONAL_INTELLIGENCE_IMPROVEMENT_BLUEPRINT_REV_1.md",
+    "blueprint_path": "docs/VAN_FINISHED_PRODUCT_BLUEPRINT_REV_1.md",
     "blueprint_lines": 3236,
-    "schema_version_on_main": 8
+    "schema_version_on_main": 8,
+    "blueprint_note": "Corrected 2026-09-19 under blueprint Gate 0. This matrix previously cited docs/VAN_UNIFIED_PERSONAL_INTELLIGENCE_IMPROVEMENT_BLUEPRINT_REV_1.md at sha e09765d, which has never existed on the canonical tree; it lives only on open PR #38. The canonical specification is now the Finished Product Blueprint."
   },
   "wip_audit": {
     "method": "git rev-list --count origin/main..<branch> for every remote branch",
@@ -33,7 +34,10 @@
       "prompt_refs": [
         "\u00a75",
         "WS1"
-      ]
+      ],
+      "audit_class": "IMPLEMENTED_BUT_ISOLATED",
+      "audit_note": "MissionService.create has one production caller: the internal-token POST /v1/missions. The orchestrator never creates a mission. P0-EXEC-001.",
+      "audit_authority": "docs/VAN_WHOLE_SYSTEM_IMPLEMENTATION_AUDIT_AND_CERTIFICATION_REV_1.md"
     },
     {
       "id": "WS2",
@@ -42,7 +46,10 @@
       "note": "Verifier adapters per capability class (API readback, repository SHA, CI run, ledger event, screenshot). EngineReportVerifier exists solely to make 'the worker said OK' always UNVERIFIABLE.",
       "prompt_refs": [
         "\u00a76"
-      ]
+      ],
+      "audit_class": "IMPLEMENTED_BUT_ISOLATED",
+      "audit_note": "VerifierRegistry and every verifier adapter are constructed only in tests. VERIFIED_SUCCESS is reachable on a caller-authored receipt. P0-VERIFY-001.",
+      "audit_authority": "docs/VAN_WHOLE_SYSTEM_IMPLEMENTATION_AUDIT_AND_CERTIFICATION_REV_1.md"
     },
     {
       "id": "WS3",
@@ -60,7 +67,10 @@
       "note": "CapabilityRouter with policy as a hard pre-filter and pure arithmetic over declared facts. Route decisions persisted as evidence. Naming collision resolved: automation's router renamed AutomationMediumRouter (it selects the execution medium, not the capability).",
       "prompt_refs": [
         "\u00a78"
-      ]
+      ],
+      "audit_class": "IMPLEMENTED_BUT_ISOLATED",
+      "audit_note": "CapabilityRouter.route has exactly one production call site: POST /v1/missions/route.",
+      "audit_authority": "docs/VAN_WHOLE_SYSTEM_IMPLEMENTATION_AUDIT_AND_CERTIFICATION_REV_1.md"
     },
     {
       "id": "WS5",
@@ -69,7 +79,10 @@
       "note": "ContextCompiler + ContextPacket. Hard cross-project isolation, stale claims carried but stripped of authority, contradiction groups kept together, budget enforced by deliberate drop order.",
       "prompt_refs": [
         "\u00a79"
-      ]
+      ],
+      "audit_class": "IMPLEMENTED_BUT_ISOLATED",
+      "audit_note": "ContextCompiler has zero callers and the Claim objects it consumes are produced nowhere. Disposition: DELETE after porting three behaviours.",
+      "audit_authority": "docs/VAN_WHOLE_SYSTEM_IMPLEMENTATION_AUDIT_AND_CERTIFICATION_REV_1.md"
     },
     {
       "id": "WS6",
@@ -78,7 +91,10 @@
       "note": "Memory taxonomy: owner model, strategic, vocabulary, intent graph, complement map, growth ledger as separate stores. Procedural/anti-pattern remain.",
       "prompt_refs": [
         "\u00a710"
-      ]
+      ],
+      "audit_class": "PARTIAL",
+      "audit_note": "Seven of the ten memory stores have no production writer.",
+      "audit_authority": "docs/VAN_WHOLE_SYSTEM_IMPLEMENTATION_AUDIT_AND_CERTIFICATION_REV_1.md"
     },
     {
       "id": "WS7",
@@ -87,7 +103,10 @@
       "note": "OwnerCognitiveModel with episode-independent admission. Autonomy-bearing fields never confirm from evidence alone.",
       "prompt_refs": [
         "\u00a711"
-      ]
+      ],
+      "audit_class": "IMPLEMENTED_BUT_ISOLATED",
+      "audit_note": "OwnerCognitiveModel has no production feeder; /v1/understanding/observe has no caller in backend, Hermes pack, tests or Android.",
+      "audit_authority": "docs/VAN_WHOLE_SYSTEM_IMPLEMENTATION_AUDIT_AND_CERTIFICATION_REV_1.md"
     },
     {
       "id": "WS8",
@@ -96,7 +115,10 @@
       "note": "DecisionFingerprints with record_outcome, so an inferred reason can be falsified.",
       "prompt_refs": [
         "\u00a712"
-      ]
+      ],
+      "audit_class": "IMPLEMENTED_BUT_ISOLATED",
+      "audit_note": "DecisionFingerprints has no production constructor.",
+      "audit_authority": "docs/VAN_WHOLE_SYSTEM_IMPLEMENTATION_AUDIT_AND_CERTIFICATION_REV_1.md"
     },
     {
       "id": "WS9",
@@ -105,7 +127,10 @@
       "note": "CriticalReasoningKernel: solver/critic/verifier separation, mode-gated rigour, unsourced facts refused.",
       "prompt_refs": [
         "\u00a713"
-      ]
+      ],
+      "audit_class": "ABSENT_AS_REASONER",
+      "audit_note": "assess() validates the shape of a caller-authored record. A runtime probe stored a fabricated fact with an invented source, zero critic findings and 0.99 confidence as actionable. Solver/critic/verifier are three JSON columns filled by the caller, not three passes. P0-COG-001.",
+      "audit_authority": "docs/VAN_WHOLE_SYSTEM_IMPLEMENTATION_AUDIT_AND_CERTIFICATION_REV_1.md"
     },
     {
       "id": "WS10",
@@ -114,7 +139,10 @@
       "note": "SemanticClass with is_factual_authority; FORBIDDEN_SELF_PROMOTIONS blocks inference becoming fact.",
       "prompt_refs": [
         "\u00a714"
-      ]
+      ],
+      "audit_class": "IMPLEMENTED_BUT_ISOLATED",
+      "audit_note": "FORBIDDEN_SELF_PROMOTIONS and may_promote have no production callers; no table stores a Claim. A second unenforced taxonomy beside the enforced EpistemicState.",
+      "audit_authority": "docs/VAN_WHOLE_SYSTEM_IMPLEMENTATION_AUDIT_AND_CERTIFICATION_REV_1.md"
     },
     {
       "id": "WS11",
@@ -123,7 +151,10 @@
       "note": "AssumptionLedger with assert_safe_for_irreversible_work gate.",
       "prompt_refs": [
         "\u00a715"
-      ]
+      ],
+      "audit_class": "IMPLEMENTED_BUT_ISOLATED",
+      "audit_note": "assert_safe_for_irreversible_work has no caller in action/, mission/, automation/ or browser/.",
+      "audit_authority": "docs/VAN_WHOLE_SYSTEM_IMPLEMENTATION_AUDIT_AND_CERTIFICATION_REV_1.md"
     },
     {
       "id": "WS12",
@@ -132,7 +163,10 @@
       "note": "REQUIRED_COUNTERFACTUALS + missing_counterfactuals reporting.",
       "prompt_refs": [
         "\u00a716"
-      ]
+      ],
+      "audit_class": "IMPLEMENTED_BUT_ISOLATED",
+      "audit_note": "missing_counterfactuals compares question strings; nothing requires a counterfactual before a decision.",
+      "audit_authority": "docs/VAN_WHOLE_SYSTEM_IMPLEMENTATION_AUDIT_AND_CERTIFICATION_REV_1.md"
     },
     {
       "id": "WS13",
@@ -141,7 +175,10 @@
       "note": "premise_assessments with derived agreed_without_evidence; sycophancy metrics measured, not claimed.",
       "prompt_refs": [
         "\u00a717"
-      ]
+      ],
+      "audit_class": "IMPLEMENTED_BUT_ISOLATED",
+      "audit_note": "premise_assessments has no route and no producer. Sycophancy metrics are computed over a ledger nothing writes.",
+      "audit_authority": "docs/VAN_WHOLE_SYSTEM_IMPLEMENTATION_AUDIT_AND_CERTIFICATION_REV_1.md"
     },
     {
       "id": "WS14",
@@ -150,7 +187,10 @@
       "note": "CognitiveComplementMap; vulnerability candidates require task evidence.",
       "prompt_refs": [
         "\u00a718"
-      ]
+      ],
+      "audit_class": "IMPLEMENTED_BUT_ISOLATED",
+      "audit_note": "CognitiveComplementMap is constructed but only read; no writer.",
+      "audit_authority": "docs/VAN_WHOLE_SYSTEM_IMPLEMENTATION_AUDIT_AND_CERTIFICATION_REV_1.md"
     },
     {
       "id": "WS15",
@@ -159,7 +199,10 @@
       "note": "SharedVocabularyRegistry with anti-examples and project-scoped resolution.",
       "prompt_refs": [
         "\u00a719"
-      ]
+      ],
+      "audit_class": "IMPLEMENTED_BUT_ISOLATED",
+      "audit_note": "SharedVocabularyRegistry has no write route.",
+      "audit_authority": "docs/VAN_WHOLE_SYSTEM_IMPLEMENTATION_AUDIT_AND_CERTIFICATION_REV_1.md"
     },
     {
       "id": "WS16",
@@ -168,7 +211,10 @@
       "note": "IntentContinuityGraph with conflicts/supersedes edges and staleness.",
       "prompt_refs": [
         "\u00a720"
-      ]
+      ],
+      "audit_class": "IMPLEMENTED_BUT_ISOLATED",
+      "audit_note": "IntentContinuityGraph has no production constructor.",
+      "audit_authority": "docs/VAN_WHOLE_SYSTEM_IMPLEMENTATION_AUDIT_AND_CERTIFICATION_REV_1.md"
     },
     {
       "id": "WS17",
@@ -177,7 +223,10 @@
       "note": "StrategicMemory with already_rejected lookup.",
       "prompt_refs": [
         "\u00a721"
-      ]
+      ],
+      "audit_class": "IMPLEMENTED_BUT_ISOLATED",
+      "audit_note": "StrategicMemory has no production constructor.",
+      "audit_authority": "docs/VAN_WHOLE_SYSTEM_IMPLEMENTATION_AUDIT_AND_CERTIFICATION_REV_1.md"
     },
     {
       "id": "WS18",
@@ -186,7 +235,10 @@
       "note": "ExternalRealityModel, kept strictly apart from the owner model (\u00a722).",
       "prompt_refs": [
         "\u00a722"
-      ]
+      ],
+      "audit_class": "DELETED_PENDING",
+      "audit_note": "ExternalRealityModel has no production constructor, producer or consumer. Disposition: DELETE.",
+      "audit_authority": "docs/VAN_WHOLE_SYSTEM_IMPLEMENTATION_AUDIT_AND_CERTIFICATION_REV_1.md"
     },
     {
       "id": "WS19",
@@ -195,7 +247,10 @@
       "note": "AIEvolutionRadar; ADMITTED unreachable without benchmark, security profile, licence and owner decision.",
       "prompt_refs": [
         "\u00a723"
-      ]
+      ],
+      "audit_class": "IMPLEMENTED_BUT_ISOLATED",
+      "audit_note": "AIEvolutionRadar is read-only over HTTP; no discover or transition route exists and no scanner feeds it.",
+      "audit_authority": "docs/VAN_WHOLE_SYSTEM_IMPLEMENTATION_AUDIT_AND_CERTIFICATION_REV_1.md"
     },
     {
       "id": "WS20",
@@ -204,7 +259,10 @@
       "note": "BenchmarkHarness over 14 VAN-specific suites with two-run regression detection.",
       "prompt_refs": [
         "\u00a724"
-      ]
+      ],
+      "audit_class": "IMPLEMENTED_BUT_ISOLATED",
+      "audit_note": "BenchmarkHarness has no production constructor; the CI benchmark does not call it.",
+      "audit_authority": "docs/VAN_WHOLE_SYSTEM_IMPLEMENTATION_AUDIT_AND_CERTIFICATION_REV_1.md"
     },
     {
       "id": "WS21",
@@ -213,7 +271,10 @@
       "note": "StrategyLearning; PREFERRED needs eval evidence and 10 runs at 90%. Demotion automatic.",
       "prompt_refs": [
         "\u00a725"
-      ]
+      ],
+      "audit_class": "IMPLEMENTED_BUT_ISOLATED",
+      "audit_note": "StrategyLearning has no production constructor and no executor records an outcome.",
+      "audit_authority": "docs/VAN_WHOLE_SYSTEM_IMPLEMENTATION_AUDIT_AND_CERTIFICATION_REV_1.md"
     },
     {
       "id": "WS22",
@@ -222,7 +283,10 @@
       "note": "SymbioticGrowthLedger; adaptations not in force until confirmed, and revertible.",
       "prompt_refs": [
         "\u00a726"
-      ]
+      ],
+      "audit_class": "IMPLEMENTED_BUT_ISOLATED",
+      "audit_note": "SymbioticGrowthLedger records nothing; no code proposes an adaptation.",
+      "audit_authority": "docs/VAN_WHOLE_SYSTEM_IMPLEMENTATION_AUDIT_AND_CERTIFICATION_REV_1.md"
     },
     {
       "id": "WS23",
@@ -231,7 +295,10 @@
       "note": "RelationshipCalibrationEngine. \u00a727's invariant is structural: the Calibration dataclass has no field that could relax a verification requirement or evidence bar, and a test asserts the field set. Consequence sets a floor the relationship cannot lower; corrections raise the challenge mode rather than softening it.",
       "prompt_refs": [
         "\u00a727"
-      ]
+      ],
+      "audit_class": "IMPLEMENTED_BUT_ISOLATED",
+      "audit_note": "RelationshipCalibrationEngine has no production caller, and it reports evidence-derived state as owner-confirmed. P1-SYM-001.",
+      "audit_authority": "docs/VAN_WHOLE_SYSTEM_IMPLEMENTATION_AUDIT_AND_CERTIFICATION_REV_1.md"
     },
     {
       "id": "WS24",
@@ -249,7 +316,10 @@
       "note": "AttentionScorer in front of the existing queue: 5 dispositions, dedupe window, suppression recorded.",
       "prompt_refs": [
         "\u00a729"
-      ]
+      ],
+      "audit_class": "IMPLEMENTED_BUT_ISOLATED",
+      "audit_note": "AttentionScorer is isolated; decisions/service still uses the older AttentionEngine.",
+      "audit_authority": "docs/VAN_WHOLE_SYSTEM_IMPLEMENTATION_AUDIT_AND_CERTIFICATION_REV_1.md"
     },
     {
       "id": "WS26",
@@ -258,7 +328,10 @@
       "note": "ProactivePolicyService + S0-S5 AutonomyLevel, domain-specific.",
       "prompt_refs": [
         "\u00a730"
-      ]
+      ],
+      "audit_class": "IMPLEMENTED_BUT_ISOLATED",
+      "audit_note": "ProactivePolicyService is read-only; no proactive mission creation path exists to gate.",
+      "audit_authority": "docs/VAN_WHOLE_SYSTEM_IMPLEMENTATION_AUDIT_AND_CERTIFICATION_REV_1.md"
     },
     {
       "id": "WS27",
@@ -267,7 +340,10 @@
       "note": "DomainTrust; earned ceiling caps at S2, false success needs demonstrated recovery.",
       "prompt_refs": [
         "\u00a731"
-      ]
+      ],
+      "audit_class": "IMPLEMENTED_BUT_ISOLATED",
+      "audit_note": "DomainTrustService record/grant/assert_may_run have no callers.",
+      "audit_authority": "docs/VAN_WHOLE_SYSTEM_IMPLEMENTATION_AUDIT_AND_CERTIFICATION_REV_1.md"
     },
     {
       "id": "WS28",
@@ -276,7 +352,10 @@
       "note": "Wake pipeline, 'hie van' pre-rendered ack, PersonalSpeechModel, second-pass ASR fusion and signed transcript provenance all exist. Mission binding is the delta.",
       "prompt_refs": [
         "\u00a732"
-      ]
+      ],
+      "audit_class": "PARTIAL",
+      "audit_note": "No wake-word engine, phrase verifier or local ASR implementation exists; the wake pipeline is never constructed; TTS speak and acknowledgement play have zero call sites. The note 'all exist, mission binding is the delta' materially overstates the state. P1-VOICE-001.",
+      "audit_authority": "docs/VAN_WHOLE_SYSTEM_IMPLEMENTATION_AUDIT_AND_CERTIFICATION_REV_1.md"
     },
     {
       "id": "WS29",
@@ -295,7 +374,10 @@
       "note": "MissionEvent normalized; browser tasks and automation runs bind to Activities by reference via executor_ref. Backfill is idempotent and reversible. /v1/activity groups by mission; /v1/missions/{id}/evidence gathers receipts.",
       "prompt_refs": [
         "\u00a734"
-      ]
+      ],
+      "audit_class": "PARTIAL",
+      "audit_note": "MissionBinder is not passed in app.py, so browser and automation binding is always None.",
+      "audit_authority": "docs/VAN_WHOLE_SYSTEM_IMPLEMENTATION_AUDIT_AND_CERTIFICATION_REV_1.md"
     },
     {
       "id": "WS31",
@@ -313,7 +395,10 @@
       "note": "PermissionRegistry: owner-readable grants with origin, expiry, last use, stale detection and revoke. Credential-shaped material and unlisted permissions are refused.",
       "prompt_refs": [
         "\u00a736"
-      ]
+      ],
+      "audit_class": "IMPLEMENTED_BUT_ISOLATED",
+      "audit_note": "PermissionRegistry is reachable only by API.",
+      "audit_authority": "docs/VAN_WHOLE_SYSTEM_IMPLEMENTATION_AUDIT_AND_CERTIFICATION_REV_1.md"
     },
     {
       "id": "WS33",
@@ -322,7 +407,10 @@
       "note": "Temporal is stack-locked at adoption phase 11 and NOT deployed. automation/router.py already routes critical_durable to TEMPORAL with an honest 'not yet built' detail.",
       "prompt_refs": [
         "\u00a737"
-      ]
+      ],
+      "audit_class": "ABSENT",
+      "audit_note": "No Temporal client, worker, workflow, activity or service exists anywhere. The router names TEMPORAL as a medium with no executor. Blueprint Rev 3 decision D9 makes Temporal optional; disposition is DELETE the routing branch. P1-DOC-002.",
+      "audit_authority": "docs/VAN_WHOLE_SYSTEM_IMPLEMENTATION_AUDIT_AND_CERTIFICATION_REV_1.md"
     },
     {
       "id": "WS34",
@@ -331,7 +419,10 @@
       "note": "ComputerInteractionFabric: closed set of typed operations (no RUN_ARBITRARY/EXECUTE/EVAL), per-type action ceilings, never A4 on any surface, browser boundary vocabulary reused unchanged.",
       "prompt_refs": [
         "\u00a738"
-      ]
+      ],
+      "audit_class": "STUB",
+      "audit_note": "ComputerInteractionFabric declares 12 typed operations and nothing executes them; DESKTOP, TERMINAL and MOBILE have no backing code.",
+      "audit_authority": "docs/VAN_WHOLE_SYSTEM_IMPLEMENTATION_AUDIT_AND_CERTIFICATION_REV_1.md"
     },
     {
       "id": "WS35",
@@ -340,7 +431,10 @@
       "note": "Development missions served by RepositoryShaVerifier and CiRunVerifier through the same success-contract interface as every other capability class.",
       "prompt_refs": [
         "\u00a739"
-      ]
+      ],
+      "audit_class": "IMPLEMENTED_BUT_ISOLATED",
+      "audit_note": "RepositoryShaVerifier and CiRunVerifier are constructed only in tests.",
+      "audit_authority": "docs/VAN_WHOLE_SYSTEM_IMPLEMENTATION_AUDIT_AND_CERTIFICATION_REV_1.md"
     },
     {
       "id": "WS36",
@@ -349,7 +443,10 @@
       "note": "VanEval across 11 dimensions; reports unmeasured rather than a flattering pass.",
       "prompt_refs": [
         "\u00a740"
-      ]
+      ],
+      "audit_class": "IMPLEMENTED_BUT_ISOLATED",
+      "audit_note": "VanEval is an API-reachable scoreboard; its scores are threshold constants applied to row counts.",
+      "audit_authority": "docs/VAN_WHOLE_SYSTEM_IMPLEMENTATION_AUDIT_AND_CERTIFICATION_REV_1.md"
     }
   ],
   "resolved_findings": [
@@ -418,6 +515,15 @@
       "ContextCompiler \u2014 Hermes must compile a ContextPacket per turn; that is a Hermes-side change, not a gateway one.",
       "VerifierRegistry \u2014 AutomationDispatcher still uses its own WorkflowVerifier. Unifying them is a behaviour change to a verified path and deserves its own commit.",
       "CriticalReasoningKernel, RelationshipCalibrationEngine \u2014 consumed by Hermes, not the gateway."
+    ]
+  },
+  "audit_correction": {
+    "applied": "2026-09-19",
+    "authority": "docs/VAN_WHOLE_SYSTEM_IMPLEMENTATION_AUDIT_AND_CERTIFICATION_REV_1.md",
+    "rule": "BUILT in this matrix means the code exists and is tested. It does NOT mean a production path invokes it. The audit classified every workstream against an invoked production path; where the two disagree, the audit classification in audit_class is authoritative and BUILT is retained only as a statement about code existence.",
+    "machine_readable_ledgers": [
+      "evidence/van-system-audit/findings.json",
+      "evidence/van-system-audit/component_ledger.json"
     ]
   }
 }

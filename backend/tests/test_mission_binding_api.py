@@ -45,6 +45,7 @@ from van_gateway.mission.models import (
     VerificationStatus,
 )
 from van_gateway.mission.service import MissionService
+from van_gateway.mission.verifiers import ObservationVerifier, VerifierRegistry
 from van_gateway.models import ActionClass, OriginChannel
 
 INTERNAL = "test-internal-token"
@@ -57,6 +58,8 @@ def _settings(monkeypatch, tmp_path):
     monkeypatch.setenv("VAN_DEVICE_SECRET_FERNET_KEY", Fernet.generate_key().decode())
     monkeypatch.setenv("VAN_INGRESS_TOKEN", "ingress-token-0123456789abcdef")
     monkeypatch.setenv("VAN_INTERNAL_CONTROL_TOKEN", INTERNAL)
+    # P0-SEC-001 — device enrolment is its own credential now.
+    monkeypatch.setenv("VAN_DEVICE_ENROLMENT_TOKEN", INTERNAL)
     monkeypatch.setenv("VAN_BROWSER_ENABLED", "1")
     get_settings.cache_clear()
     yield
@@ -85,7 +88,19 @@ async def _stack(tmp_path, *, automation_enabled=True):
     )
     registry.load()
     await registry.sync()
-    missions = MissionService(store, capabilities=registry)
+    # P0-VERIFY-001 — a registry whose adapter observes a world the test controls. The
+    # adapter still writes the receipt, so a test can stage the world and still cannot
+    # stage the verdict.
+    async def _readback(context):
+        return {"exists": True, "evidence_refs": ["readback://1"]}
+
+    verifiers = VerifierRegistry()
+    verifiers.register(
+        "readback",
+        ObservationVerifier(_readback, verifier_version="readback/1",
+                            evidence_prefix="readback://"),
+    )
+    missions = MissionService(store, capabilities=registry, verifiers=verifiers)
     router = CapabilityRouter(store, registry)
     api = MissionApi(store, get_settings(), missions=missions, registry=registry, router=router)
     app = FastAPI()
@@ -276,13 +291,7 @@ async def test_the_evidence_route_gathers_receipt_and_route_decisions(stack):
     for target in (MissionState.UNDERSTOOD, MissionState.PLANNED, MissionState.AUTHORIZED,
                    MissionState.RUNNING, MissionState.VERIFYING):
         await missions.transition(mission.mission_id, target=target)
-    await missions.transition(
-        mission.mission_id, target=MissionState.VERIFIED_SUCCESS,
-        verification=VerificationRecord(
-            status=VerificationStatus.VERIFIED, evidence_refs=["readback://1"],
-            verifier_version="v1", verified_at_ms=1,
-        ),
-    )
+    await missions.transition(mission.mission_id, target=MissionState.VERIFIED_SUCCESS)
     body = (await ac.get(f"/v1/missions/{mission.mission_id}/evidence")).json()
     assert body["verification"]["status"] == "VERIFIED"
     assert "readback://1" in body["evidence_refs"]
@@ -354,9 +363,22 @@ async def test_red_team_a_mission_cannot_forge_verification(stack):
             },
         },
     )
-    assert forged.status_code == 409
-    assert forged.json()["detail"]["error"] == "MISSION_VERIFICATION_INSUFFICIENT"
+    # P0-VERIFY-001 — the route no longer has a field to put a receipt in, and it rejects
+    # the request rather than ignoring the extra key, so a client still sending one is
+    # told rather than left believing it was honoured.
+    assert forged.status_code == 422, forged.text
     assert (await missions.get(mission.mission_id)).state is MissionState.VERIFYING
+
+    # The same mission does reach success once the registered verifier is the one asked,
+    # which is what makes the refusal above about provenance rather than about strictness.
+    honest = await ac.post(
+        f"/v1/missions/{mission.mission_id}/transition", headers=HEADERS,
+        json={"target": "VERIFIED_SUCCESS"},
+    )
+    assert honest.status_code == 200, honest.text
+    stored = await missions.verification_record(mission.mission_id)
+    assert stored.verifier_version == "readback/1"
+    assert stored.evidence_refs == ["readback://1"]
 
 
 async def test_red_team_a_mission_cannot_reach_vati_execution(stack):
@@ -520,3 +542,51 @@ async def test_a_binding_refusal_never_loses_the_task(tmp_path):
         # The task itself exists and is usable.
         task_id = response.json()["task_id"]
         assert (await ac.get(f"/v1/browser/tasks/{task_id}", headers=HEADERS)).status_code == 200
+
+
+async def test_the_authority_surface_answers_what_van_may_do(stack):
+    """P1-COH-003 — one page for the question seven vocabularies each answered partly.
+
+    The rows are derived from the registries rather than stored, so `derived_from` names
+    the authority each came from and a reader can go and check rather than taking this
+    page's word for it.
+    """
+    ac, _store, _m, registry, _a = stack
+    body = (await ac.get("/v1/authority")).json()
+    assert body["manifest_digest"] == registry.manifest_digest
+    by_subject = {row["subject"]: row for row in body["subjects"]}
+
+    # Both registries are projected through the same descriptor, which is the point.
+    assert {row["derived_from"] for row in body["subjects"]} == {
+        "action.registry", "capability.registry",
+    }
+
+    # An A4 delete: owner in the loop, and not undoable.
+    delete = by_subject["google.notebook.enterprise.delete"]
+    assert delete["action_class"] == "A4"
+    assert delete["gate"] == "OWNER_APPROVAL"
+    assert delete["needs_owner_in_the_loop"] is True
+    assert delete["reversibility"] == "IRREVERSIBLE"
+
+    # An A5: refused whatever anyone signs, and reported as disabled rather than absent —
+    # a forbidden action that simply vanished from the page would be indistinguishable
+    # from one nobody declared.
+    exfiltrate = by_subject["secret.exfiltrate"]
+    assert exfiltrate["gate"] == "FORBIDDEN"
+    assert exfiltrate["enabled"] is False
+
+    # A read: nothing to ask, nothing to undo, nothing leaves.
+    read = by_subject["owner.context.read"]
+    assert read["gate"] == "DEVICE_SIGNATURE"
+    assert read["needs_owner_in_the_loop"] is False
+    assert read["reversibility"] == "READ_ONLY"
+    assert read["egress"] == "NONE"
+
+
+async def test_every_gate_the_authority_surface_uses_is_explained(stack):
+    """A gate name with no explanation is a fifth vocabulary for the owner to learn."""
+    ac, _store, _m, _r, _a = stack
+    body = (await ac.get("/v1/authority")).json()
+    used = {row["gate"] for row in body["subjects"]}
+    assert used <= set(body["gates"])
+    assert all(body["gates"][name].strip() for name in used)

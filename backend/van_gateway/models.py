@@ -3,7 +3,9 @@ from __future__ import annotations
 from enum import Enum
 from typing import Any
 
-from pydantic import BaseModel, Field
+from pydantic import BaseModel, Field, model_validator
+
+from van_gateway.observability.correlation import for_command as correlation_for_command
 
 
 class ActionClass(str, Enum):
@@ -84,6 +86,7 @@ class DegradedCode(str, Enum):
     AUTOMATION_SECURITY_AUDIT_FAILED = "AUTOMATION_SECURITY_AUDIT_FAILED"
     AUTOMATION_INGRESS_DISABLED = "AUTOMATION_INGRESS_DISABLED"
     BROWSER_HARNESS_UNAVAILABLE = "BROWSER_HARNESS_UNAVAILABLE"
+    COMPUTER_USE_NO_SURFACE_WORKER = "COMPUTER_USE_NO_SURFACE_WORKER"
     BROWSER_SEMANTIC_UNAVAILABLE = "BROWSER_SEMANTIC_UNAVAILABLE"
     BROWSER_PROFILE_AUTH_REQUIRED = "BROWSER_PROFILE_AUTH_REQUIRED"
 
@@ -152,6 +155,31 @@ class CommandResult(BaseModel):
     evidence_id: str | None = None
     execution_id: str | None = None
     context_snapshot_id: str | None = None
+    #: P0-EXEC-001 — the durable work record this command opened. Present on every result
+    #: from the point the command is established as owner intent, including the degraded
+    #: ones, so the device can show a mission that was authorised and never started.
+    mission_id: str | None = None
+    #: P2-OBS-001 — the one identifier that joins this command to its mission, its
+    #: Hermes run, its execution and its verification. Derived from `command_id`, so it
+    #: is present on every result including the refusals, and an owner reporting a
+    #: problem can quote it before anything downstream has run at all.
+    correlation_id: str | None = None
+
+    @model_validator(mode="after")
+    def _derive_correlation_id(self) -> "CommandResult":
+        """Fill the correlation id from the command id rather than asking 21 call
+        sites to remember.
+
+        The orchestrator builds a `CommandResult` in twenty-one places — every
+        refusal, every degraded path, the replayed idempotent result. Adding an
+        argument to each would have been twenty-one chances to miss one, and the
+        one that got missed would be a refusal, which is the case an operator most
+        needs to trace. Deriving it here makes "present on every result" a property
+        of the type instead of a convention.
+        """
+        if not self.correlation_id and self.command_id:
+            object.__setattr__(self, "correlation_id", correlation_for_command(self.command_id))
+        return self
 
 
 class AttentionItem(BaseModel):

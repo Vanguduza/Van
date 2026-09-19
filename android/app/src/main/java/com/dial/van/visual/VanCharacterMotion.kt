@@ -11,12 +11,25 @@ import kotlin.math.sin
  * to read on a phone but remain below mascot/bounce territory. Board presentation never enters this
  * model; only presence and time do, so opening a workboard cannot freeze or replace VAN's activity.
  */
+/**
+ * P4-VIS-004 — `headCounterDeg` used to sit here and is gone.
+ *
+ * It was computed on every frame and consumed by nothing. The only production caller of
+ * this sampler is [VanOwnerArtAvatar], which renders an owner-supplied bitmap: a bitmap has
+ * no separable head, so there was nothing to counter-rotate. The procedural Canvas
+ * character *does* have a separable head, but it already carries its own head motion inside
+ * `VanScene` (`headBob` and `actionHeadDrop`), so wiring this value in there would have
+ * created a second, parallel source of head motion beside the one that already works —
+ * which is the duplication pattern this audit kept finding rather than a fix for it.
+ *
+ * So it is deleted. If a renderer with a separable head and no head motion of its own ever
+ * ships, this is a four-line function to write against that renderer's actual rig.
+ */
 data class VanCharacterMotionFrame(
     val offsetXDp: Float,
     val offsetYDp: Float,
     val rotationDeg: Float,
     val scale: Float,
-    val headCounterDeg: Float = 0f,
 )
 
 object VanCharacterMotion {
@@ -60,7 +73,6 @@ object VanCharacterMotion {
             offsetYDp = y,
             rotationDeg = rotation,
             scale = 1f + breath * profile.breathScale,
-            headCounterDeg = -rotation * 0.28f,
         )
     }
 

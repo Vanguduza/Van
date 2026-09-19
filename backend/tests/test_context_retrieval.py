@@ -238,6 +238,8 @@ def api_settings(tmp_path, monkeypatch):
     monkeypatch.setenv("VAN_DEVICE_SECRET_FERNET_KEY", Fernet.generate_key().decode())
     monkeypatch.setenv("VAN_INGRESS_TOKEN", INGRESS)
     monkeypatch.setenv("VAN_INTERNAL_CONTROL_TOKEN", INTERNAL)
+    # P0-SEC-001 — device enrolment is its own credential now.
+    monkeypatch.setenv("VAN_DEVICE_ENROLMENT_TOKEN", INTERNAL)
     monkeypatch.setenv("VAN_EXA_EGRESS_ENABLED", "false")
     get_settings.cache_clear()
     yield
@@ -257,8 +259,11 @@ async def test_retrieval_routes_are_hermes_internal_only(api_settings):
                 "/v1/runtime/context/lexical/query",
                 json={"query": "VAN"},
             )
-            assert denied.status_code == 401
-            assert denied.json()["detail"] == "device_access_denied"
+            # P0-SEC-001 — an owner ingress bearer is authenticated but holds no
+            # privileged scope, and this route is Hermes-only. It used to fall through to
+            # device authentication, which meant an owner device token reached it.
+            assert denied.status_code == 403
+            assert denied.json()["required_scope"] == "runtime"
 
             allowed = await client.post(
                 "/v1/runtime/context/lexical/query",

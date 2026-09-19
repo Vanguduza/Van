@@ -14,6 +14,7 @@ from typing import Any, Iterable, Optional
 from vati.contracts import required_keys
 from vati.core.canonical import canonical_hash
 from vati.risk.contracts import StrategyState
+from vati.authority import OwnerAuthorityError, OwnerAuthorityVerifier
 
 PROMOTION_ORDER = [StrategyState.RESEARCH, StrategyState.BACKTEST, StrategyState.VALIDATION, StrategyState.DEMO, StrategyState.SHADOW, StrategyState.LIMITED_LIVE, StrategyState.CERTIFIED_LIVE]
 DEMOTION_TARGETS = {StrategyState.DEGRADED, StrategyState.SUSPENDED, StrategyState.RETIRED, StrategyState.SHADOW}
@@ -57,14 +58,24 @@ class Capsule:
 
 
 class CapsuleRegistry:
-    def __init__(self, capsules: Iterable[Capsule] = ()) -> None:
+    def __init__(
+        self,
+        capsules: Iterable[Capsule] = (),
+        *,
+        authority: "OwnerAuthorityVerifier | None" = None,
+    ) -> None:
         self._c: dict[str, Capsule] = {}
+        # P0-TRADE-001 — an empty verifier refuses every promotion, which is the right
+        # default for a registry nobody handed the owner's key to.
+        self.authority = authority or OwnerAuthorityVerifier()
         for c in capsules:
             self.add(c)
 
     @classmethod
-    def load_dir(cls, path: str | Path) -> "CapsuleRegistry":
-        reg = cls()
+    def load_dir(
+        cls, path: str | Path, *, authority: "OwnerAuthorityVerifier | None" = None
+    ) -> "CapsuleRegistry":
+        reg = cls(authority=authority)
         for f in sorted(Path(path).glob("*.json")):
             reg.add(Capsule(json.loads(f.read_text(encoding="utf-8"))))
         return reg
@@ -98,8 +109,21 @@ class CapsuleRegistry:
             raise CapsuleError(f"{to.value} is not a promotion target")
         if c.state in PROMOTION_ORDER and PROMOTION_ORDER.index(to) != PROMOTION_ORDER.index(c.state) + 1:
             raise CapsuleError(f"promotion must advance one state: {c.state.value} → {to.value}")
-        if not approval_signature_ref.strip():
-            raise CapsuleError("promotion requires an owner approval signature reference (A4)")
+        # P0-TRADE-001 — promoting a strategy towards live capital took any non-empty
+        # string. The target state is in the subject, so authority to promote to
+        # LIMITED_LIVE is not authority to promote to CERTIFIED_LIVE.
+        try:
+            verified = self.authority.verify(
+                approval_signature_ref,
+                act="capsule-promote",
+                subject=f"{strategy_id}:{to.value}",
+                now_unix=approved_at_unix,
+            )
+        except OwnerAuthorityError as exc:
+            # Kept as a CapsuleError so callers keep one error type for "this promotion
+            # was refused", while the message still says exactly which check failed.
+            raise CapsuleError(f"promotion requires owner approval signature: {exc}") from exc
+        approval_signature_ref = verified.ref
         if to in (StrategyState.LIMITED_LIVE, StrategyState.CERTIFIED_LIVE) and not evidence_refs:
             raise CapsuleError("live promotion requires evidence references")
         new = self.seal({**c.data, "state": to.value, "approval_signature_ref": approval_signature_ref, "evidence_refs": sorted(set(c.data.get("evidence_refs", [])) | set(evidence_refs)),

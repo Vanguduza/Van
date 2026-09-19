@@ -9,6 +9,7 @@ from decimal import Decimal
 from typing import Callable, Iterable, Optional
 
 from vati.app.cycle import CycleResult, DecisionCycle, SessionConfig
+from vati.authority import OwnerAuthorityVerifier
 from vati.core.events import EventKind, make_event
 from vati.execution.reconciliation import LedgerPosition, ReconciliationResult, reconcile
 from vati.market_data.bars import Bar
@@ -23,6 +24,10 @@ class SessionRunner:
     started: bool = False
     permit_new_orders: bool = False
     startup_report: Optional[ReconciliationResult] = None
+    #: P0-TRADE-001. Defaulted to a verifier with no keys, which refuses everything: a
+    #: runner nobody gave the owner's key to cannot be halted by a stranger's string, and
+    #: the owner's genuine halt still works on a host that was set up.
+    authority: OwnerAuthorityVerifier = field(default_factory=OwnerAuthorityVerifier)
 
     def startup(self, *, now_ms: int, ledger_positions: Iterable[LedgerPosition] = ()) -> ReconciliationResult:
         c = self.cycle
@@ -53,8 +58,14 @@ class SessionRunner:
         return self.cycle.step(history, now_ms=now_ms, last_quote_ms=last_quote_ms)
 
     def owner_halt(self, *, now_ms: int, owner_signature_ref: str) -> None:
-        if not owner_signature_ref.strip():
-            raise PermissionError("owner halt requires a signature reference")
+        """P0-TRADE-001 — "owner halt" used to mean "somebody sent a non-empty string"."""
+        verified = self.authority.verify(
+            owner_signature_ref,
+            act="owner-halt",
+            subject=self.cycle.cfg.session_id,
+            now_unix=now_ms // 1000,
+        )
+        owner_signature_ref = verified.ref
         self.cycle.kill.trip(KillSwitchTrigger.OWNER_HALT, now_ms)
         self.permit_new_orders = False
         self.cycle.ledger.append(make_event(EventKind.KILL_SWITCH, "vati-runner", {"trigger": "OWNER_HALT", "sig": owner_signature_ref}, event_time_ms=now_ms, received_time_ms=now_ms, correlation_id=self.cycle.cfg.session_id))

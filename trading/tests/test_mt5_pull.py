@@ -11,7 +11,15 @@ import pytest
 from fastapi.testclient import TestClient
 
 from vati.execution.base import OrderCommand, StopMode, VenueUnavailable
-from vati.execution.mt5_pull import OPS, BridgeQueue, Mt5PullAdapter, create_pull_app, format_commands, sign_poll
+from vati.execution.mt5_pull import (
+    OPS,
+    POLL_MAX_FAILURES,
+    BridgeQueue,
+    Mt5PullAdapter,
+    create_pull_app,
+    format_commands,
+    sign_poll,
+)
 from vati.risk.contracts import Direction, LossModel
 
 D = Decimal
@@ -141,3 +149,60 @@ def test_command_lines_are_parseable_and_never_carry_pipes():
     q = BridgeQueue()
     with pytest.raises(ValueError):
         q.enqueue("a", "SHELL", {}, now_ms=1)
+
+
+def test_signature_guessing_on_the_poll_route_is_throttled(bridge):
+    """P1-SEC-007: the one internet-reachable route here took unlimited signature guesses."""
+    q, client, ea, adapter, clock = bridge
+    codes = [ea.poll(key=b"x" * 32).status_code for _ in range(POLL_MAX_FAILURES + 1)]
+    assert codes[0] == 401, "the first wrong signature is simply refused"
+    assert codes[-1] == 429, f"guessing was never throttled: {codes}"
+
+
+def test_a_throttled_poll_names_the_wait(bridge):
+    q, client, ea, adapter, clock = bridge
+    for _ in range(POLL_MAX_FAILURES + 1):
+        r = ea.poll(key=b"x" * 32)
+    assert r.status_code == 429
+    assert int(r.headers["Retry-After"]) > 0
+
+
+def test_a_correctly_signed_poll_still_works_while_the_alias_is_throttled(bridge):
+    """Nobody may take an account's EA offline by hammering its alias."""
+    q, client, ea, adapter, clock = bridge
+    for _ in range(POLL_MAX_FAILURES + 1):
+        ea.poll(key=b"x" * 32)
+    assert client.app.state.poll_throttle.retry_after("mt5_ea", now_s=clock["ms"] / 1000) > 0
+    assert ea.poll().status_code == 200, "a genuine EA was locked out by an attacker"
+
+
+def test_a_successful_poll_clears_the_counter(bridge):
+    q, client, ea, adapter, clock = bridge
+    for _ in range(POLL_MAX_FAILURES - 1):
+        ea.poll(key=b"x" * 32)
+    assert ea.poll().status_code == 200
+    assert ea.poll(key=b"x" * 32).status_code == 401, "the counter did not reset after a success"
+
+
+def test_one_alias_cannot_throttle_another(bridge, tmp_path):
+    q, client, ea, adapter, clock = bridge
+    app = create_pull_app(
+        q,
+        lambda alias: KEY if alias in {"mt5_ea", "mt5_other"} else None,
+        clock=lambda: clock["ms"],
+    )
+    other = TestClient(app)
+    attacked = EaSimulator(other, "mt5_ea", KEY, lambda: clock["ms"])
+    for _ in range(POLL_MAX_FAILURES + 1):
+        attacked.poll(key=b"x" * 32)
+    assert app.state.poll_throttle.retry_after("mt5_ea", now_s=clock["ms"] / 1000) > 0
+    assert app.state.poll_throttle.retry_after("mt5_other", now_s=clock["ms"] / 1000) == 0
+
+
+def test_a_replayed_nonce_is_not_counted_as_a_credential_guess(bridge):
+    """The signature was genuine, so a replay must not push the real EA toward a lockout."""
+    q, client, ea, adapter, clock = bridge
+    assert ea.poll(nonce="same").status_code == 200
+    for _ in range(POLL_MAX_FAILURES + 2):
+        assert ea.poll(nonce="same").status_code == 401
+    assert client.app.state.poll_throttle.retry_after("mt5_ea", now_s=clock["ms"] / 1000) == 0

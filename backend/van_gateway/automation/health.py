@@ -24,6 +24,7 @@ from van_gateway.automation.registry import HotWorkflowIndex
 from van_gateway.automation.telemetry import TelemetryService
 from van_gateway.automation.workflow_health import WorkflowHealthService
 from van_gateway.browser.adapters import HttpBrowserHarnessAdapter, StagehandAdapter
+from van_gateway.computer_use.fabric import ComputerInteractionFabric
 from van_gateway.config import Settings
 from van_gateway.degraded.registry import DegradedRegistry
 from van_gateway.google.control import GoogleControlAuthError, verify_internal_control
@@ -107,6 +108,11 @@ class AutomationHealthApi:
             model_provider=settings.browser_stagehand_model_provider,
             model_name=settings.browser_stagehand_model_name,
         )
+        # P2-CU-001 — the fabric is constructed in production for the first time. Its
+        # health surface is here rather than in its own module because the three fabrics
+        # degrade on the same terms and an owner asking "what can VAN act through?" should
+        # not have to know they were written separately.
+        self.computer_use = ComputerInteractionFabric(store)
         self.router = APIRouter(prefix="/v1", tags=["automation-browser"])
         self._install_routes()
 
@@ -218,6 +224,33 @@ class AutomationHealthApi:
             },
         }
 
+    async def computer_use_health(self) -> dict[str, Any]:
+        """P2-CU-001 — which surfaces can be acted on, and what happens if one cannot.
+
+        The fabric's boundary is complete and its executor does not exist. Reporting that
+        is the difference between a capability that is honestly unavailable and one a
+        matrix lists as BUILT because the code compiles.
+        """
+        surfaces = self.computer_use.surfaces()
+        available = sorted(name for name, ready in surfaces.items() if ready)
+        self.degraded.set(DegradedCode.COMPUTER_USE_NO_SURFACE_WORKER, not available)
+        return {
+            "capability": "computer_interaction_fabric",
+            "surfaces": surfaces,
+            "surfaces_with_a_worker": available,
+            # A refusal before the ledger write, so an operation nobody can perform never
+            # appears as a PENDING row the owner would read as queued work.
+            "operations_are_recorded_when_refused": False,
+            "typed_operations_only": True,
+            "arbitrary_execution_primitive": None,
+            "max_action_class": "A3",
+            "degradation_scope": {
+                "browser_fabric_unaffected": True,
+                "native_and_automation_paths_unaffected": True,
+                "vati_t0_unaffected": True,
+            },
+        }
+
     def _sync_degraded(self, state: RuntimeState, code: DegradedCode) -> None:
         self.degraded.set(code, state is not RuntimeState.READY)
 
@@ -231,6 +264,11 @@ class AutomationHealthApi:
         async def browser(x_van_internal_token: str | None = Header(default=None)):
             self._require_internal(x_van_internal_token)
             return await self.browser_health()
+
+        @self.router.get("/computer-use/health")
+        async def computer_use(x_van_internal_token: str | None = Header(default=None)):
+            self._require_internal(x_van_internal_token)
+            return await self.computer_use_health()
 
 
 __all__ = ["AutomationHealthApi", "governance_state"]
