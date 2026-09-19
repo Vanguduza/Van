@@ -69,6 +69,7 @@ from van_gateway.automation.grants import RunGrantService
 from van_gateway.automation.health import AutomationHealthApi
 from van_gateway.automation.registry import AutomationRegistry, HotWorkflowIndex
 from van_gateway.browser.api import BrowserApi
+from van_gateway.browser.worker import AdapterBackedWorker
 from van_gateway.capability.models import ReadinessSource
 from van_gateway.capability.readiness import (
     AutomationReadiness,
@@ -295,7 +296,17 @@ def create_app() -> FastAPI:
     )
     # No worker is configured: the semantic worker is a separate private service
     # and the gateway refuses an assignment rather than pretending to run one.
-    browser = BrowserApi(store, settings, decisions=decisions)
+    # P2-BROW-001 — the browser task path reaches a real adapter. `worker` was None, so
+    # POST /v1/browser/assignments answered 503 and the only way a task acquired evidence
+    # was for its caller to hand the evidence in: a page snapshot in the evidence table was
+    # whatever somebody said it was. The adapter is `automation_health`'s, not a second
+    # one, so there is one connection to the browser worker and one readiness verdict about
+    # it — two adapters would mean the health surface could report READY while the task
+    # path talked to something else.
+    browser = BrowserApi(
+        store, settings, decisions=decisions,
+        worker=AdapterBackedWorker(automation_health.harness),
+    )
 
 
     trading = TradingService(

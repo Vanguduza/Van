@@ -68,6 +68,8 @@ sourceSets {
             "com/dial/van/overlay/OverlayTheme.kt",
             "com/dial/van/overlay/OverlayVisibilityPolicy.kt",
             "com/dial/van/events/EventStream.kt",
+            "com/dial/van/voice/SpeakerVerification.kt",
+            "com/dial/van/voice/WakeModelAsset.kt",
         )
     }
 }

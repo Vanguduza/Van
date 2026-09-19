@@ -4,7 +4,10 @@ import androidx.fragment.app.FragmentActivity
 import com.dial.van.gateway.VanGatewayClient
 import com.dial.van.security.BiometricGate
 import com.dial.van.status.OwnerStatusProjection
+import com.dial.van.status.OwnerWorkStatus
 import com.dial.van.status.VanCommandStatus
+import com.dial.van.voice.SpeakerVerificationPolicy
+import com.dial.van.voice.VoiceAuthorityDecision
 import com.dial.van.status.commandStatusFor
 import com.dial.van.visual.VanLiveVisualState
 import kotlinx.coroutines.CoroutineScope
@@ -74,6 +77,14 @@ data class VanConversationState(
 class VanCommandController(
     private val gateway: VanGatewayClient,
     private val scope: CoroutineScope,
+    /**
+     * P1-VOICE-001 — how VAN says an outcome out loud.
+     *
+     * `TtsOutputManager.speak` had zero call sites: VAN could speak and never did. Spoken
+     * only for a command the owner *spoke*, and only when the outcome is worth interrupting
+     * for — reading every status change aloud is how an assistant gets muted.
+     */
+    private val speak: (String) -> Unit = {},
 ) {
     private val _state = MutableStateFlow(VanConversationState())
     val state: StateFlow<VanConversationState> = _state.asStateFlow()
@@ -92,9 +103,36 @@ class VanCommandController(
         speechEvidenceRef: String? = null,
         expiresAtUnix: Long? = null,
         noStaleReplay: Boolean = false,
+        /**
+         * P2-SEC-010 — how sure VAN is that the owner spoke.
+         *
+         * Null for anything that did not come through a microphone. For voice it is the
+         * speaker similarity score, and [SpeakerVerificationPolicy] decides what authority
+         * a spoken command carries on it: any voice reaching the microphone used to produce
+         * a transcript that was signed as an owner command, so a visitor, a television or a
+         * recording had the owner's authority for as long as they were in the room.
+         */
+        speakerScore: Float? = null,
     ) {
         val normalized = text.trim()
         if (normalized.isEmpty()) return
+
+        var effectiveActionClass = actionClass
+        if (source == VanCommandSource.VOICE) {
+            val verdict = SpeakerVerificationPolicy.decide(actionClass, speakerScore)
+            when (verdict.decision) {
+                VoiceAuthorityDecision.REFUSE -> {
+                    refuseSpokenCommand(normalized, verdict.reason)
+                    return
+                }
+                VoiceAuthorityDecision.REQUIRE_OWNER_APPROVAL ->
+                    // Raised to the biometric class rather than refused. The gateway's A4
+                    // path already means "the owner is present and said yes", and that is a
+                    // stronger statement about who is speaking than any similarity score.
+                    effectiveActionClass = "A4"
+                VoiceAuthorityDecision.ALLOW -> Unit
+            }
+        }
         val idempotencyKey = if (source == VanCommandSource.VOICE && !turnId.isNullOrBlank()) {
             "voice:$turnId"
         } else {
@@ -105,7 +143,7 @@ class VanCommandController(
                 text = normalized,
                 source = source,
                 projectId = projectId,
-                actionClass = actionClass,
+                actionClass = effectiveActionClass,
                 approvalToken = approvalToken,
                 idempotencyKey = idempotencyKey,
                 turnId = turnId,
@@ -114,6 +152,34 @@ class VanCommandController(
                 noStaleReplay = noStaleReplay,
             ),
         )
+    }
+
+    /**
+     * P2-SEC-010 — a spoken command VAN will not act on, and the owner is told why.
+     *
+     * Both turns are recorded: what was heard, and that nothing was done about it. A refusal
+     * that leaves no trace is indistinguishable from a command that was never heard, and the
+     * owner needs to be able to tell those apart — particularly when it was in fact them.
+     */
+    private fun refuseSpokenCommand(text: String, reason: String) {
+        _state.update {
+            it.copy(
+                submitting = false,
+                messages = it.messages +
+                    VanConversationMessage(
+                        role = VanMessageRole.OWNER,
+                        text = text,
+                        projectId = it.selectedProjectId,
+                        status = VanCommandStatus.REFUSED,
+                    ) +
+                    VanConversationMessage(
+                        role = VanMessageRole.VAN,
+                        text = reason,
+                        projectId = it.selectedProjectId,
+                        status = VanCommandStatus.REFUSED,
+                    ),
+            )
+        }
     }
 
     fun submit(command: VanOwnerCommand) {
@@ -286,6 +352,22 @@ class VanCommandController(
                 lastError = if (status == VanCommandStatus.FAILED) responseText else null,
             )
         }
+        if (shouldSpeak(command, ownerStatus)) speak(responseText)
+    }
+
+    /**
+     * Whether this outcome is worth saying out loud.
+     *
+     * Spoken only for a command the owner spoke — answering a typed command aloud is
+     * startling — and only when the outcome is one they have to know about: something
+     * finished, something needs them, or something was refused. "Working on it" said aloud
+     * after every command is how an assistant gets muted, and a muted assistant cannot tell
+     * the owner the things that matter.
+     */
+    private fun shouldSpeak(command: VanOwnerCommand, ownerStatus: OwnerWorkStatus): Boolean {
+        if (command.source != VanCommandSource.VOICE) return false
+        return OwnerStatusProjection.isFinished(ownerStatus) ||
+            OwnerStatusProjection.needsOwner(ownerStatus)
     }
 
     private fun recordFailure(command: VanOwnerCommand, throwable: Throwable) {

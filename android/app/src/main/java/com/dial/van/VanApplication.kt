@@ -19,7 +19,10 @@ import com.dial.van.voice.VoiceInputCallback
 import com.dial.van.voice.VoiceInputManager
 import com.dial.van.voice.VoiceRecognitionResult
 import com.dial.van.voice.VoiceSessionCoordinator
+import com.dial.van.voice.VoiceAudioArbiter
 import com.dial.van.voice.WakeAcknowledgementManager
+import com.dial.van.voice.WakeCoordinator
+import com.dial.van.voice.WakeModelLoader
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.SupervisorJob
@@ -49,6 +52,21 @@ class VanApplication : Application(), VoiceInputCallback, TtsOutputCallback {
         private set
     lateinit var voiceUi: VanVoiceUiStore
         private set
+
+    /**
+     * P1-VOICE-001 — the wake path is constructed on boot, whether or not it can run.
+     *
+     * `WakePipeline` was never constructed anywhere in the app, so "Hey Van" did nothing and
+     * nothing said so: `WakeCoordinator.KWS_NOT_READY` existed and was unreachable because
+     * no coordinator existed either. It exists now, it fails closed without a model, and the
+     * reason reaches the owner's degraded-subsystem list instead of being silence.
+     */
+    lateinit var wakeModel: WakeModelLoader
+        private set
+    lateinit var voiceArbiter: VoiceAudioArbiter
+        private set
+    lateinit var wakeCoordinator: WakeCoordinator
+        private set
     lateinit var gatewayClient: VanGatewayClient
         private set
     lateinit var commandController: VanCommandController
@@ -66,17 +84,55 @@ class VanApplication : Application(), VoiceInputCallback, TtsOutputCallback {
         wakeAcknowledgement = WakeAcknowledgementManager(this)
         voiceUi = VanVoiceUiStore()
         gatewayClient = VanGatewayClient(this)
-        commandController = VanCommandController(gatewayClient, appScope)
+        // P1-VOICE-001 — TtsOutputManager.speak finally has a caller. Bound to the
+        // outcome projection, so VAN speaks when work finished or needs the owner and
+        // stays quiet otherwise.
+        ttsOutput = TtsOutputManager(this, this)
+        // P1-VOICE-001 — TtsOutputManager.speak finally has a caller. Bound to the outcome
+        // projection, so VAN speaks when work finished or needs the owner and stays quiet
+        // otherwise.
+        commandController = VanCommandController(
+            gatewayClient, appScope, speak = { text -> ttsOutput.speak(text) },
+        )
         voiceInput = VoiceInputManager(
             context = this,
             callback = this,
             biasingStringsProvider = { personalSpeechModel.biasingStrings(activeSpeechContexts()) },
         )
-        ttsOutput = TtsOutputManager(this, this)
         voiceSession = VoiceSessionCoordinator(voiceInput, ttsOutput)
         queueReplayer = QueueReplayer(commandQueue, gatewayClient, degradedModeStore, appScope)
+        wakeModel = WakeModelLoader(this)
+        voiceArbiter = VoiceAudioArbiter(this)
+        wakeCoordinator = WakeCoordinator(
+            arbiter = voiceArbiter,
+            pipeline = wakeModel.pipelineOrNull(),
+            acknowledgementReady = { wakeAcknowledgement.isReady() },
+            playAcknowledgement = { wakeAcknowledgement.play() },
+            beginRecognition = { turnId -> voiceSession.beginOwnerTurn(turnId) },
+        )
+        publishWakeModelState()
         queueReplayer.replayAsync()
         startGatewayHealthMonitor()
+    }
+
+    /**
+     * Put the wake word's real state in front of the owner.
+     *
+     * The absence of a model is a fact about VAN's capability, not a fact to hide: without
+     * this the owner says "Hey Van" into a phone that was never going to answer and has no
+     * way to find out why.
+     */
+    private fun publishWakeModelState() {
+        val status = wakeModel.status()
+        if (status.ready) {
+            degradedModeStore.markWorking("wake_word")
+        } else {
+            degradedModeStore.markBroken(
+                "wake_word",
+                status.sentence,
+                com.dial.van.degraded.RestoreAction.OPEN_SETTINGS,
+            )
+        }
     }
 
     private fun activeSpeechContexts(): Set<SpeechContext> {

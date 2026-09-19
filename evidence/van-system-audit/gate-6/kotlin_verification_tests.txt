@@ -114,6 +114,22 @@ VanTradeSemanticTest > a published trade state reaches the semantic field() PASS
 VanTradeSemanticTest > the capability board and the running app draw the same families() PASSED
 VanTradeSemanticTest > every semantic has its own Zone C topology and no two look the same() PASSED
 VanTradeSemanticTest > a ledger VAN cannot read is UNKNOWN and never FLAT() PASSED
+SpeakerVerificationTest > an unrecognised action class is gated, not waved through() PASSED
+SpeakerVerificationTest > an uncertain voice asks the owner rather than guessing either way() PASSED
+SpeakerVerificationTest > the action class is matched regardless of how it was written() PASSED
+SpeakerVerificationTest > a read is unaffected by who is speaking() PASSED
+SpeakerVerificationTest > an owner with no voice profile is not locked out of their own assistant() PASSED
+SpeakerVerificationTest > a voice unlike the owner's cannot change anything outside VAN() PASSED
+SpeakerVerificationTest > scores classify at the stated thresholds() PASSED
+SpeakerVerificationTest > every verdict says something a person would say() PASSED
+SpeakerVerificationTest > a recognised voice acts normally() PASSED
+WakeModelAssetTest > a plausible model with no pinned digest is accepted() PASSED
+WakeModelAssetTest > no model at all is absent, and says so() PASSED
+WakeModelAssetTest > a matching digest is accepted whatever its case() PASSED
+WakeModelAssetTest > a placeholder is not a model() PASSED
+WakeModelAssetTest > only READY reports ready() PASSED
+WakeModelAssetTest > a model that is not the one the release pinned is refused() PASSED
+WakeModelAssetTest > every state has a sentence and none of them names an enum or a path() PASSED
 AuraPlanExecutionTest > thePainterHoldsNoAuraConstantsOfItsOwn PASSED
 AuraPlanExecutionTest > electricalBranchesReachTheCanvas PASSED
 AuraPlanExecutionTest > theAuraDrawsNothingWhenThePlanIsEmpty PASSED
