@@ -22,7 +22,7 @@
   "counts": {
     "P0": 15,
     "P1": 32,
-    "P2": 21,
+    "P2": 22,
     "P3": 26,
     "P4": 7
   },
@@ -4309,6 +4309,47 @@
         "residual": "VAN records what the owner decided and how it turned out; it does not infer why, so no inferred pattern exists for an outcome to falsify.",
         "residual_class": "DELIBERATE_SCOPE",
         "residual_reason": "§12 requires an inferred pattern to be falsifiable, and the safe order is falsifiability first. The outcome half is wired and the inference half is not, so the day VAN does infer a reason the machinery that can prove it wrong already runs. The surface reports the absence rather than letting an empty falsified list read as an accurate model."
+      }
+    },
+    {
+      "id": "P2-EVO-001",
+      "severity": "P2",
+      "domain": "evolution",
+      "title": "The external-reality store had no producer and the benchmark harness no corpus",
+      "description": "ExternalRealityModel is '§22's mandatory separation' — what available evidence says, kept apart from what the owner believes, so personalization cannot become an echo chamber. Nothing ever wrote to it, so the separation protected an empty store and contradictions() returned nothing in a way indistinguishable from the world agreeing with the owner. BenchmarkHarness declares fourteen VAN-specific suites and none has a task corpus; because AIEvolutionRadar.transition refuses ADMITTED without a benchmark digest, no technology can be adopted at all, and nothing reported that.",
+      "requirement": "docs/VAN_CONSOLIDATED_DEPLOYMENT_READINESS_CLOSURE_BLUEPRINT_REV_1.md",
+      "authority": "VAN Consolidated Deployment-Readiness Closure Blueprint Rev 2",
+      "repository_evidence": [
+        "backend/van_gateway/evolution/radar.py:45",
+        "backend/van_gateway/evolution/radar.py:305",
+        "backend/van_gateway/research/exa.py:29"
+      ],
+      "runtime_evidence": [],
+      "affected_components": [
+        "evolution",
+        "research"
+      ],
+      "root_cause": "An evidence store with no evidence source, and a benchmark vocabulary mistaken for a benchmark capability.",
+      "remediation": "Record research results as attributed external claims, and report which suites have a corpus alongside what follows from none having one.",
+      "impact": "VAN could not say what the world currently claims about anything, and an operator would have learned that no technology can be admitted by watching an adoption fail.",
+      "validation_gate": "G5",
+      "current_status": "CLOSED",
+      "remediation_gate": "G5",
+      "closure": {
+        "state": "INTEGRATED_AND_EVIDENCED",
+        "summary": "Web research is external evidence with a citable source, which is the one thing ExternalRealityModel refuses to be written without, so ExaResearchService records one observation per result: the subject is the query, the claim is what the page asserts, the source is its URL. A result with no title claims nothing and records nothing. Confidence is 0.0, matching the UNTRUSTED_EXTERNAL trust the evidence row already carries — a friendlier number would make the same source look more credible depending on which table you read.\n\ncontradicts_owner_belief is never set, because nothing compares a result with the owner model. Guessing would put VAN in the position of deciding the owner is wrong on the strength of a headline, which inverts §22: the disagreement is meant to be recorded as a fact about the world and reconciled in the open. /v1/external-reality reports that no comparison is performed, so an empty contradiction list is not read as agreement.\n\nBenchmarkHarness.SUITES_WITH_A_CORPUS is empty and coverage() reports it on /v1/eval, separating 'cannot be run' from 'has not been run' — a reader who cannot tell them apart will read the second as the first — and naming the consequence: no technology can reach ADMITTED, which is §23's intended fail-closed state rather than an outage. Two tests assert the consequence rather than describing it, including that a benchmarked technology still needs the owner, because the two requirements fail separately.",
+        "changed": [
+          "backend/van_gateway/research/exa.py",
+          "backend/van_gateway/evolution/radar.py",
+          "backend/van_gateway/understanding/api.py"
+        ],
+        "verified_by": [
+          "backend/tests/test_external_reality_and_benchmarks.py"
+        ],
+        "runtime_evidence": [],
+        "residual": "No benchmark suite has a task corpus, so no technology can be admitted; and no external observation is compared with the owner model, so none is ever marked as contradicting it.",
+        "residual_class": "DELIBERATE_SCOPE",
+        "residual_reason": "Writing fourteen task corpora is a programme, not a closure step, and the absence produces the correct fail-closed behaviour rather than a wrong one. Contradiction detection needs a comparison VAN does not perform, and a heuristic one would let a search result overrule the owner. Both absences are now reported on the surfaces where their emptiness would otherwise read as a result."
       }
     }
   ],

@@ -27,7 +27,12 @@ from van_gateway.attention.scoring import AttentionScorer
 from van_gateway.learning.feed import LearningFeed
 from van_gateway.capability.permissions import PermissionRegistry
 from van_gateway.config import Settings
-from van_gateway.evolution.radar import AIEvolutionRadar, StrategyLearning
+from van_gateway.evolution.radar import (
+    AIEvolutionRadar,
+    BenchmarkHarness,
+    ExternalRealityModel,
+    StrategyLearning,
+)
 from van_gateway.evolution.vaneval import VanEval
 from van_gateway.google.control import GoogleControlAuthError, verify_internal_control
 from van_gateway.proactive.autonomy import DomainTrustService, ProactivePolicyService
@@ -92,6 +97,11 @@ class UnderstandingApi:
         self.trust = DomainTrustService(store)
         self.policies = ProactivePolicyService(store, self.trust)
         self.radar = AIEvolutionRadar(store)
+        # P2-EVO-001 — §§22, 24, 79. Both had correct invariants and no surface: the
+        # external-reality store had no producer and the benchmark harness no corpus,
+        # and neither absence was reported anywhere.
+        self.reality = ExternalRealityModel(store)
+        self.benchmarks = BenchmarkHarness(store)
         self.eval = VanEval(store)
         self.permissions = PermissionRegistry(store)
         # P2-MEM-001 — §§65, 77, 78. Three stores with no route and no producer. The
@@ -367,12 +377,53 @@ class UnderstandingApi:
                 },
             }
 
+        @router.get("/external-reality")
+        async def external_reality(subject: str | None = None):
+            """§§22, 79 — what available evidence says, kept apart from what you believe.
+
+            §22 calls that separation mandatory, to prevent personalization becoming an
+            echo chamber. P2-EVO-001 — the store had no producer, so the separation was
+            protecting nothing. Every observation here comes from a research result with a
+            citable source; the model refuses to record one without.
+
+            `contradicts_owner_belief` is never set, because nothing compares a search
+            result with the owner model. That is reported rather than left to be inferred:
+            an empty contradiction list from a silent surface reads as the world agreeing
+            with the owner, when it means no comparison was made.
+            """
+            observations = (
+                await self.reality.current(subject) if subject
+                else [
+                    dict(r) for r in await self.store.fetchall(
+                        "SELECT * FROM external_reality WHERE superseded_by IS NULL "
+                        "ORDER BY observed_at_ms DESC LIMIT 200"
+                    )
+                ]
+            )
+            return {
+                "subject": subject,
+                "observations": observations,
+                "contradictions": await self.reality.contradictions(),
+                "contradiction_detection": {
+                    "active": False,
+                    "why": (
+                        "nothing compares an external observation with the owner model, so "
+                        "no observation is marked as contradicting one"
+                    ),
+                },
+            }
+
         @router.get("/eval")
         async def run_eval():
             """§41 — the scoreboard, including everything it cannot score."""
             report = await self.eval.run()
             report["anti_sycophancy"] = await self.kernel.sycophancy_metrics()
             report["attention"] = await self.attention.metrics()
+            # §24 — the benchmark vocabulary exists and no suite has a task corpus, which
+            # is why no technology can reach ADMITTED. Reported here so that fail-closed
+            # state is read from the scoreboard rather than discovered when an adoption is
+            # refused.
+            report["benchmarks"] = await self.benchmarks.coverage()
             return report
 
 

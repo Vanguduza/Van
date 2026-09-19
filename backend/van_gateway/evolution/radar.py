@@ -312,8 +312,43 @@ class BenchmarkHarness:
         "tool_reliability", "cost", "latency",
     )
 
+    #: P2-EVO-001 — the suites that have a task corpus VAN can actually run. Empty, and
+    #: that is the finding made enforceable rather than left implied.
+    #:
+    #: `SUITES` above is the vocabulary §24 asks for; a corpus is a set of tasks with
+    #: expected outcomes, and none has been written. The consequence is not a gap in
+    #: reporting but a real fail-closed property: `AIEvolutionRadar.transition` refuses
+    #: ADMITTED without a benchmark digest, so no technology can be adopted today. That is
+    #: the correct behaviour — §23's whole discipline is do not auto-adopt — and it is
+    #: reported on /v1/eval rather than being something an operator discovers by watching
+    #: an adoption fail.
+    SUITES_WITH_A_CORPUS: frozenset[str] = frozenset()
+
     def __init__(self, store: Store) -> None:
         self.store = store
+
+    async def coverage(self) -> dict[str, Any]:
+        """Which suites have a corpus, and which have ever produced a run.
+
+        The two are separate questions. A suite with no corpus cannot be run at all; a
+        suite with a corpus and no runs has simply not been exercised yet, and a reader
+        who cannot tell them apart will read the second as the first.
+        """
+        rows = await self.store.fetchall(
+            "SELECT suite, COUNT(*) AS n FROM benchmark_runs GROUP BY suite"
+        )
+        runs = {str(r["suite"]): int(r["n"]) for r in rows}
+        return {
+            "suites": sorted(self.SUITES),
+            "suites_with_a_corpus": sorted(self.SUITES_WITH_A_CORPUS),
+            "runs_by_suite": {suite: runs.get(suite, 0) for suite in sorted(self.SUITES)},
+            "harness_version": HARNESS_VERSION,
+            "consequence": (
+                "a technology cannot reach ADMITTED without a benchmark digest, so with no "
+                "corpus nothing can be adopted — which is the intended fail-closed state, "
+                "not an outage"
+            ),
+        }
 
     async def record_run(
         self,
