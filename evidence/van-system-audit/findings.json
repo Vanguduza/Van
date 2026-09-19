@@ -5002,7 +5002,9 @@
         "backend/van_gateway/runtime_api.py",
         "backend/van_gateway/orchestrator.py"
       ],
-      "runtime_evidence": [],
+      "runtime_evidence": [
+        "https://github.com/Vanguduza/Van/actions/runs/35463788324"
+      ],
       "affected_components": [
         "reasoning",
         "authority",
@@ -5027,7 +5029,9 @@
           "backend/tests/test_irreversible_work_waits_on_assumptions.py",
           "backend/tests/test_authority_descriptor.py"
         ],
-        "runtime_evidence": [],
+        "runtime_evidence": [
+          "https://github.com/Vanguduza/Van/actions/runs/35463788324"
+        ],
         "residual": "Nothing records an assumption in this repository. The routes exist and the gate enforces, and both are exercised end to end by tests driving the real ingress, but the reasoning that produces an assumption is a model pass and the gateway performs none.",
         "residual_class": "EXTERNAL_RUNTIME",
         "residual_reason": "Hermes is not in this repository. assess() takes assumptions as an input rather than deriving them, which is the correct division — the gateway owns canonical state and performs no inference. Until Hermes calls these routes the ledger stays empty and the gate passes everything, which is the honest behaviour for a gate with nothing recorded against it, not a gate that is switched off.",
@@ -5046,7 +5050,9 @@
         "backend/van_gateway/context/service.py",
         "backend/van_gateway/epistemics/models.py"
       ],
-      "runtime_evidence": [],
+      "runtime_evidence": [
+        "https://github.com/Vanguduza/Van/actions/runs/35463788324"
+      ],
       "affected_components": [
         "context",
         "epistemics"
@@ -5067,7 +5073,9 @@
         "verified_by": [
           "backend/tests/test_epistemics_context_understanding.py"
         ],
-        "runtime_evidence": [],
+        "runtime_evidence": [
+          "https://github.com/Vanguduza/Van/actions/runs/35463788324"
+        ],
         "residual": null,
         "residual_class": null,
         "residual_reason": null,
@@ -5086,7 +5094,9 @@
         "evidence/van-system-audit/component_ledger.json",
         "tools/ci/ledger_reconcile.py"
       ],
-      "runtime_evidence": [],
+      "runtime_evidence": [
+        "https://github.com/Vanguduza/Van/actions/runs/35463788324"
+      ],
       "affected_components": [
         "operations"
       ],
@@ -5107,7 +5117,9 @@
         "verified_by": [
           "tests/contracts/test_ledger_reconcile.py"
         ],
-        "runtime_evidence": [],
+        "runtime_evidence": [
+          "https://github.com/Vanguduza/Van/actions/runs/35463788324"
+        ],
         "residual": null,
         "residual_class": null,
         "residual_reason": null,
@@ -5126,7 +5138,9 @@
         "backend/van_gateway/app.py",
         "backend/van_gateway/runtime_api.py"
       ],
-      "runtime_evidence": [],
+      "runtime_evidence": [
+        "https://github.com/Vanguduza/Van/actions/runs/35463788324"
+      ],
       "affected_components": [
         "google",
         "reasoning"
@@ -5148,7 +5162,9 @@
           "backend/tests/test_google_capabilities_have_routes.py",
           "backend/tests/test_irreversible_work_waits_on_assumptions.py"
         ],
-        "runtime_evidence": [],
+        "runtime_evidence": [
+          "https://github.com/Vanguduza/Van/actions/runs/35463788324"
+        ],
         "residual": "The routes are reachable and refuse correctly without a credential. That they return the owner's real mail, calendar, Drive, contacts and tasks is unobserved.",
         "residual_class": "EXTERNAL_RUNTIME",
         "residual_reason": "There is no Google credential in this environment and no live transport to exercise. The tests drive every route through create_app and assert the boundary and the failure mode; what the provider returns is the provider's, and asserting it here would mean asserting a fake.",
@@ -5168,7 +5184,9 @@
         "android/app/src/main/java/com/dial/van/command/modules/NotificationPolicyModule.kt",
         "android/app/src/main/java/com/dial/van/command/modules/SpeechModule.kt"
       ],
-      "runtime_evidence": [],
+      "runtime_evidence": [
+        "https://github.com/Vanguduza/Van/actions/runs/35463788324"
+      ],
       "affected_components": [
         "android",
         "notification",
@@ -5183,7 +5201,7 @@
       "remediation_gate": "G10",
       "closure": {
         "state": "EXTERNALLY_BLOCKED_REPOSITORY_COMPLETE",
-        "summary": "Three screens, each wired into CommandModule and rendered by CommandCentreActivity.\n\n**Work** renders the gateway's own status rather than deriving one: MissionSummary.ownerStatus prefers ownerStatusFromGateway and falls back to UNKNOWN, never to a working state, which is what P0-EXEC-003 found painting unverified outcomes in the working colour. It separates waiting from running, because a mission in WAITING_FOR_OWNER is not progressing and listing it among the active ones tells the owner VAN is busy when it is in fact stuck on them. And it states the verification rather than implying it by absence — §6's distinction between done, partly done and finished-but-unconfirmed reaches the screen instead of being flattened into a tick.\n\n**Notifications** lists apps the owner has already decided about rather than every installed package: enumerating those needs QUERY_ALL_PACKAGES, which Play treats as sensitive and VAN does not need. An app reaches the list because a notification from it did, which needed a new `decidedPackages()` on the store — it could be written to and read per package and could not say what it held.\n\n**Speech** passes no trust argument, so recordCorrection's OWNER_CONFIRMED default applies. That is deliberate and is why this is a screen rather than something inferred from a retry: a model that teaches itself from its own second guess learns its own mistakes.\n\nAll three use rememberSaveable for the state a rotation would otherwise lose — the open mission, a half-typed package name, a half-typed correction. Losing that reads as VAN forgetting.\n\nSix mutations, six caught, after three survived a first pass. Those three all had the same cause: the assertions named a function rather than a binding, so `store.setPolicy(` was satisfied by either of two call sites and `rememberSaveable` by any one of four fields. A presence check on a name that appears more than once tests almost nothing.\n\nThree existing contract tests failed when this landed, and all three were right to. They encoded 'MissionRepository is dead' — an allowlist entry, a ledger cross-check and an excludes assertion — and this made it alive. The allowlist entry is gone, which is exactly what `test_every_explained_entry_still_describes_something_real` exists to force; the excludes assertion moved to a synthetic ledger, because pinning a mechanism to a real row meant the test failed when the row was fixed.",
+        "summary": "Three screens, each wired into CommandModule and rendered by CommandCentreActivity.\n\n**Work** renders the gateway's own status rather than deriving one: MissionSummary.ownerStatus prefers ownerStatusFromGateway and falls back to UNKNOWN, never to a working state, which is what P0-EXEC-003 found painting unverified outcomes in the working colour. It separates waiting from running, because a mission in WAITING_FOR_OWNER is not progressing and listing it among the active ones tells the owner VAN is busy when it is in fact stuck on them. And it states the verification rather than implying it by absence — §6's distinction between done, partly done and finished-but-unconfirmed reaches the screen instead of being flattened into a tick.\n\n**Notifications** lists apps the owner has already decided about rather than every installed package: enumerating those needs QUERY_ALL_PACKAGES, which Play treats as sensitive and VAN does not need. An app reaches the list because a notification from it did, which needed a new `decidedPackages()` on the store — it could be written to and read per package and could not say what it held.\n\n**Speech** passes no trust argument, so recordCorrection's OWNER_CONFIRMED default applies. That is deliberate and is why this is a screen rather than something inferred from a retry: a model that teaches itself from its own second guess learns its own mistakes.\n\nAll three use rememberSaveable for the state a rotation would otherwise lose — the open mission, a half-typed package name, a half-typed correction. Losing that reads as VAN forgetting.\n\nSix mutations, six caught, after three survived a first pass. Those three all had the same cause: the assertions named a function rather than a binding, so `store.setPolicy(` was satisfied by either of two call sites and `rememberSaveable` by any one of four fields. A presence check on a name that appears more than once tests almost nothing.\n\nThree existing contract tests failed when this landed, and all three were right to. They encoded 'MissionRepository is dead' — an allowlist entry, a ledger cross-check and an excludes assertion — and this made it alive. The allowlist entry is gone, which is exactly what `test_every_explained_entry_still_describes_something_real` exists to force; the excludes assertion moved to a synthetic ledger, because pinning a mechanism to a real row meant the test failed when the row was fixed.\n\nCONFIRMED by run 35463788324 on bfc9f41: :app:compileDebugKotlin, :app:testDebugUnitTest, :app:assembleDebug and :app:lintDebug all passed with the three screens in the tree. That settles that they compile and that lint has no objection; whether they render and are usable is Gate 14's.",
         "changed": [
           "android/app/src/main/java/com/dial/van/command/modules/MissionsModule.kt",
           "android/app/src/main/java/com/dial/van/command/modules/NotificationPolicyModule.kt",
@@ -5195,11 +5213,59 @@
         "verified_by": [
           "tests/contracts/test_owner_surfaces_are_reachable.py"
         ],
-        "runtime_evidence": [],
+        "runtime_evidence": [
+          "https://github.com/Vanguduza/Van/actions/runs/35463788324"
+        ],
         "residual": "No run has compiled these yet, and no screen has been rendered on a device. The contract tests assert the wiring, not that Compose lays it out.",
         "residual_class": "ENVIRONMENT_UNVERIFIED",
         "residual_reason": "The Android Gradle Plugin cannot be fetched in this container, so Compose cannot be compiled locally at all — CI is the authority, as it has been for every Android claim in this programme. That these screens render correctly, and are usable, is Gate 14's.",
         "falsified_by": ":app:compileDebugKotlin failing on these files; a CommandModule entry with no render branch; or any of the previously-dead calls disappearing from the screen that makes them."
+      }
+    },
+    {
+      "id": "P2-LEDGER-002",
+      "severity": "P2",
+      "domain": "operations",
+      "title": "Every component reconciled to a terminal state, or named as blocked and why",
+      "description": "After P2-LEDGER-001 moved twenty-two components the reconciler proved stale, 43 remained non-terminal. Working them one at a time found that most were not unfinished work at all: they were entries written at Gate 0 whose dispositions had been overtaken, or capabilities whose missing piece is not in this repository and never will be.\n\nSix dispositions were simply wrong by the time they were read. QueueReplayer was PARTIAL pending 'trigger on connectivity and health recovery' and has had all five triggers since P1-AND-014 and P3-AND-006. The five hardcoded-healthy subsystems have had a writer since P3-AND-004. Owner signature verification was STUB, describing code P0-TRADE-001 replaced with a real verifier over a signed subject. FORBIDDEN_SELF_PROMOTIONS was IMPLEMENTED_BUT_ISOLATED and has been enforced on every fact admission since P2-COG-002.\n\nThree were dispositioned DELETE on the belief they were dead. All three are constructed in production: the COLD tier twice in automation/api.py, the computer-use fabric in automation/health.py, and the Temporal routing branch is not absent but explicit — it returns a decision carrying its own reason, that Temporal is stack-locked at adoption phase 11 and a native state machine should be used until it is. Deleting any of them would have removed a refusal along with the capability it refuses.",
+      "requirement": "docs/VAN_CONSOLIDATED_DEPLOYMENT_READINESS_CLOSURE_BLUEPRINT_REV_1.md",
+      "authority": "VAN Consolidated Deployment-Readiness Closure Blueprint Rev 2",
+      "repository_evidence": [
+        "evidence/van-system-audit/component_ledger.json",
+        "tools/ci/maturity_gate.py"
+      ],
+      "runtime_evidence": [
+        "https://github.com/Vanguduza/Van/actions/runs/35463788324"
+      ],
+      "affected_components": [
+        "operations"
+      ],
+      "root_cause": "A register written once and read as current. Rule 31 asks for exactly this sweep and asks for it early; doing it last meant forty-three entries had to be re-derived from source rather than maintained as the work happened.",
+      "remediation": "Adjudicate every entry against the source and record the verdict with its reason.",
+      "impact": "The component ledger is the register that says how much system is left. Read as written it said a third of VAN was unbuilt.",
+      "validation_gate": "G0",
+      "current_status": "CLOSED",
+      "remediation_gate": "G0",
+      "closure": {
+        "state": "INTEGRATED_AND_EVIDENCED",
+        "summary": "142 of 142 components carry a terminal state. Six are INTEGRATED_AND_EVIDENCED with evidence derived from source, three are DELIBERATELY_REMOVED with a removal assertion the gate checks, and twenty-two are EXTERNALLY_BLOCKED_REPOSITORY_COMPLETE, each naming the specific thing that is absent: a keyword-spotting model owner decision 2 declined, an unauthored .riv asset, an n8n harness, a Stagehand runtime, a VEKL endpoint, an Obsidian vault, Exa egress the owner switched off, a live market feed, a Postgres instance, a device that can play a sound or speak.\n\nWriting those reasons is the work, not the classification. 'Externally blocked' with no named artefact is a way of saying 'not done' that sounds finished, and the audit found that phrasing repeatedly.\n\nTwo of my own mechanisms turned out to be wrong while being used.\n\nThe maturity gate's `symbols_absent` assertion matched `def` and `fun` only, so a component asserting a deleted *class* would have passed by never matching anything — a gate agreeing with you because it was looking for the wrong thing. It recognises classes and Kotlin objects now, and a mutation restoring the deleted class is caught.\n\nThree contract tests failed on this change and each was right to. One picks the first component whose file still exists and claims removal, expecting a refusal; it began passing for the wrong reason once components carried `symbols_absent`, because the fixture inherited that assertion and sent the gate to check symbols that were genuinely gone. It clears the assertion now, so it exercises the branch it names. The other two asserted a snapshot — a list of four unchecked entries, and that CALLED_UNTESTED components carry no terminal state — both true while the work was open and both forbidding it from ever closing. They assert the rule instead: no unreachability claim goes unchecked, and nothing claims evidence while no test names it.",
+        "changed": [
+          "evidence/van-system-audit/component_ledger.json",
+          "tools/ci/maturity_gate.py",
+          "tests/contracts/test_maturity_gate.py",
+          "tests/contracts/test_ledger_reconcile.py"
+        ],
+        "verified_by": [
+          "tests/contracts/test_maturity_gate.py",
+          "tests/contracts/test_ledger_reconcile.py"
+        ],
+        "runtime_evidence": [
+          "https://github.com/Vanguduza/Van/actions/runs/35463788324"
+        ],
+        "residual": null,
+        "residual_class": null,
+        "residual_reason": null,
+        "falsified_by": "A component at a terminal state whose maturity class the source contradicts; an EXTERNALLY_BLOCKED component whose rationale names no specific absent artefact; or a DELIBERATELY_REMOVED component whose code is still defined."
       }
     }
   ],

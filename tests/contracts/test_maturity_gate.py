@@ -72,6 +72,14 @@ def test_gate_rejects_removal_claim_while_the_file_still_exists(ledgers_restored
         if c.get("path") and (ROOT / c["path"]).is_file()
     )
     still_present["terminal_state"] = "DELIBERATELY_REMOVED_CANON_CORRECTED"
+    # And clear any inherited assertion, so this exercises the `file_absent` default.
+    #
+    # This test started failing when components began carrying `symbols_absent`: it picks
+    # the first component whose file exists, and that component's own assertion sent the
+    # gate to check symbols — which were genuinely gone, so the gate passed and the test
+    # read it as the gate failing to notice. The gate was right; the fixture had quietly
+    # stopped testing the branch it names.
+    still_present.pop("removal_assertion", None)
     COMPONENTS.write_text(json.dumps(data, indent=2), encoding="utf-8")
 
     result = run_gate()
@@ -85,6 +93,43 @@ def test_gate_rejects_symbol_removal_claim_while_the_symbol_survives(ledgers_res
     target = next(c for c in data["components"] if c["n"] == 63)
     # Claim removal of a symbol the file still defines.
     target["removal_assertion"] = {"kind": "symbols_absent", "symbols": ["health"]}
+    COMPONENTS.write_text(json.dumps(data, indent=2), encoding="utf-8")
+
+    result = run_gate()
+    assert result.returncode == 1
+    assert "still defines" in result.stderr
+
+
+def test_gate_rejects_a_class_removal_claim_while_the_class_survives(ledgers_restored):
+    """A deleted *class* is a removal too, and the gate could not see one.
+
+    `symbols_absent` matched `def` and `fun` only. A component asserting a class was gone
+    passed because the pattern never matched anything — the most useless way for a gate to
+    agree with you, and it went unnoticed because every symbol assertion in the ledger named
+    a function. P1-CTX-004 deleted `Claim` and `Provenance`, which is what needed it.
+    """
+    data = json.loads(COMPONENTS.read_text(encoding="utf-8"))
+    target = next(c for c in data["components"] if c["n"] == 2)
+    # SemanticClass is still defined in that module, and deliberately so.
+    target["removal_assertion"] = {"kind": "symbols_absent", "symbols": ["SemanticClass"]}
+    COMPONENTS.write_text(json.dumps(data, indent=2), encoding="utf-8")
+
+    result = run_gate()
+    assert result.returncode == 1
+    assert "still defines" in result.stderr
+
+
+def test_gate_rejects_a_kotlin_removal_claim_while_the_function_survives(ledgers_restored):
+    """The Kotlin arm of the same check, which no test exercised either.
+
+    Two components assert deleted Kotlin symbols and both are genuinely gone, so the `fun`
+    pattern could have been broken for the whole programme without a single test noticing.
+    A pattern only ever asked about absent things is never asked anything.
+    """
+    data = json.loads(COMPONENTS.read_text(encoding="utf-8"))
+    target = next(c for c in data["components"] if c["n"] == 90)
+    # canAuthenticate is still defined in BiometricGate.kt.
+    target["removal_assertion"] = {"kind": "symbols_absent", "symbols": ["canAuthenticate"]}
     COMPONENTS.write_text(json.dumps(data, indent=2), encoding="utf-8")
 
     result = run_gate()

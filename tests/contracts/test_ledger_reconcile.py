@@ -56,14 +56,14 @@ def test_a_component_claiming_to_be_unreached_names_what_to_look_for_or_says_it_
         and c.get("maturity_class") in module.CLAIMS_UNREACHED
         and not c.get("reachability_symbols")
     ]
-    # These four are dispositioned DELETE or REPLACE and judged by hand; each is named so
-    # the list cannot grow quietly.
-    assert sorted(unchecked) == sorted([
-        "ContextCompiler / ContextPacket",
-        "epistemics SemanticClass / Claim",
-        "FORBIDDEN_SELF_PROMOTIONS / may_promote",
-        "AdmissionOutcome / AdmissionVerdict",
-    ]), f"an unreachability claim went unchecked: {unchecked}"
+    # Empty, and it has been a list of four. Every component is now at a terminal state, so
+    # nothing is claiming to be unreached at all.
+    #
+    # The invariant is asserted rather than the membership: an earlier version named the
+    # four by hand, which was right while they were open and became a test of a snapshot the
+    # moment they closed. What must stay true is that an open unreachability claim is either
+    # machine-checked or explicitly left to a human — never silently unverified.
+    assert unchecked == [], f"an unreachability claim went unchecked: {unchecked}"
 
 
 def test_a_reference_from_dead_code_is_not_integration():
@@ -124,8 +124,20 @@ def test_wired_but_untested_is_its_own_answer():
     wired_untested = [c for c in _components() if c.get("maturity_class") == "CALLED_UNTESTED"]
     assert wired_untested, "the CALLED_UNTESTED distinction disappeared"
     for c in wired_untested:
-        assert not c.get("terminal_state")
-        assert c.get("production_caller")
+        # They now carry a terminal state, and the one they carry is the argument. Each is
+        # called from VanApplication and each needs a device to exercise — an audio
+        # acknowledgement has to be played, a TTS engine has to speak — so the repository
+        # side is complete and what remains is environmental.
+        #
+        # This asserted `not terminal_state` while they were open. That was right then and
+        # would now forbid ever closing them, which is a test holding a snapshot rather than
+        # a rule. What must not happen is either one quietly becoming
+        # INTEGRATED_AND_EVIDENCED, because no test names them.
+        assert c.get("production_caller"), f"{c['component']} claims a caller it does not name"
+        assert c.get("terminal_state") != "INTEGRATED_AND_EVIDENCED", (
+            f"{c['component']} claims evidence while no test names it"
+        )
+        assert not c.get("tests")
 
 
 # --------------------------------------------------------------- the self-test

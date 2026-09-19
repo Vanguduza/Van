@@ -310,6 +310,36 @@ EVT_KT = f"{APP_KT}/events/EventStream.kt"
 #: contract tests that run from the repository root. Kept separate rather than folded into
 #: ALL because both the mutation root and pytest's working directory differ.
 ROOT_LEVEL = [
+ # --- checkpoint 20/21: owner surfaces and the removal assertion ----------------
+ (["tests/contracts/test_owner_surfaces_are_reachable.py"], [
+   ("android/app/src/main/java/com/dial/van/command/CommandCentreActivity.kt",
+    "            CommandModule.MISSIONS -> MissionsModule(app, glass)\n", "",
+    "C20 the work screen has no render branch"),
+   ("android/app/src/main/java/com/dial/van/command/CommandModule.kt",
+    '    MISSIONS("missions", "Work"),\n', "", "C20 the work screen is not navigable"),
+   ("android/app/src/main/java/com/dial/van/command/modules/MissionsModule.kt",
+    "                .onSuccess { snapshot = it; error = null }",
+    "                .onSuccess { error = null }",
+    "C20 the work screen never binds the repository result"),
+   ("android/app/src/main/java/com/dial/van/command/modules/NotificationPolicyModule.kt",
+    "                                    store.setPolicy(entry.key, option)",
+    "                                    reload()", "C20 setting an app policy does nothing"),
+   ("android/app/src/main/java/com/dial/van/command/modules/MissionsModule.kt",
+    "    var expanded by rememberSaveable { mutableStateOf<String?>(null) }",
+    "    var expanded by remember { mutableStateOf<String?>(null) }",
+    "C20 the open mission is lost on rotation"),
+ ]),
+ (["tests/contracts/test_maturity_gate.py"], [
+   ("backend/van_gateway/epistemics/models.py", "class SemanticClass(str, Enum):",
+    "class Claim:\n    pass\n\n\nclass SemanticClass(str, Enum):",
+    "C21 a deleted class comes back and the removal claim stands"),
+   ("tools/ci/maturity_gate.py", "(?:class|object)", "(?:NOTACLASS|NOTANOBJECT)",
+    "C21 the gate stops recognising a deleted class"),
+   ("tools/ci/maturity_gate.py", "(?:suspend\\s+)?fun\\s+", "(?:suspend\\s+)?NOTAFUN\\s+",
+    "C21 the gate stops recognising a deleted Kotlin function"),
+   ("tools/ci/maturity_gate.py", "(?:async\\s+)?def\\s+", "(?:async\\s+)?NOTADEF\\s+",
+    "C21 the gate stops recognising a deleted Python function"),
+ ]),
  # --- checkpoint 19: Google routes and the premise ingress ---------------------
  (["tests/test_google_capabilities_have_routes.py", "tests/test_control_scopes.py"], [
    ("van_gateway/app.py", '    "/v1/google/drive/search",\n    "/v1/google/contacts/resolve",\n', "",

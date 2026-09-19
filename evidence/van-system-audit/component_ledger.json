@@ -37,7 +37,7 @@
       "path": "backend/van_gateway/context_compiler/compiler.py",
       "maturity_class": "IMPLEMENTED_BUT_ISOLATED",
       "disposition": "DELETE",
-      "rationale": "Duplicates ContextRetrievalService which is on a real path. Port cross-project isolation, contradiction grouping and deliberate drop order first",
+      "rationale": "Deleted before this reconciliation, by the closure that replaced it with the owner_facts taxonomy. The package does not exist.",
       "remediation_gate": "GATE 4",
       "producer": null,
       "consumer": null,
@@ -45,8 +45,13 @@
       "tests": null,
       "runtime_evidence": null,
       "owner_facing_projection": null,
-      "terminal_state": null,
-      "closure_commits": []
+      "terminal_state": "DELIBERATELY_REMOVED_CANON_CORRECTED",
+      "closure_commits": [
+        "P1-CTX-004"
+      ],
+      "removal_assertion": {
+        "kind": "file_absent"
+      }
     },
     {
       "n": 2,
@@ -54,7 +59,7 @@
       "path": "backend/van_gateway/epistemics/models.py",
       "maturity_class": "IMPLEMENTED_BUT_ISOLATED",
       "disposition": "DELETE",
-      "rationale": "Second unenforced taxonomy beside EpistemicState which is enforced at admission",
+      "rationale": "P1-CTX-004. A taxonomy no table ever stored, deleted with its two live rules carried into owner_facts: provenance became a constructor constraint, and the non-expiry of owner-stated facts became _NOT_STALE_ON_A_CLOCK.",
       "remediation_gate": "GATE 4",
       "producer": null,
       "consumer": null,
@@ -62,24 +67,33 @@
       "tests": null,
       "runtime_evidence": null,
       "owner_facing_projection": null,
-      "terminal_state": null,
-      "closure_commits": []
+      "terminal_state": "DELIBERATELY_REMOVED_CANON_CORRECTED",
+      "closure_commits": [
+        "P1-CTX-004"
+      ],
+      "removal_assertion": {
+        "kind": "symbols_absent",
+        "symbols": [
+          "Claim",
+          "Provenance"
+        ]
+      }
     },
     {
       "n": 3,
       "component": "FORBIDDEN_SELF_PROMOTIONS / may_promote",
       "path": "backend/van_gateway/epistemics/models.py",
-      "maturity_class": "IMPLEMENTED_BUT_ISOLATED",
+      "maturity_class": "INTEGRATED",
       "disposition": "REPLACE",
-      "rationale": "Rule is correct and belongs in context/service._validate_admission in EpistemicState terms",
+      "rationale": "P2-COG-002 wired it: check_promotion applies FORBIDDEN_SELF_PROMOTIONS on every fact admission, so a model-derived claim cannot become a verified fact by repetition. The disposition said REPLACE and enforcement is what replacing it meant.",
       "remediation_gate": "GATE 4",
-      "producer": null,
-      "consumer": null,
-      "production_caller": null,
-      "tests": null,
-      "runtime_evidence": null,
+      "producer": "backend/van_gateway/epistemics/models.py",
+      "consumer": "backend/van_gateway/context/service.py",
+      "production_caller": "backend/van_gateway/context/service.py",
+      "tests": "backend/tests/test_epistemics_context_understanding.py",
+      "runtime_evidence": "https://github.com/Vanguduza/Van/actions/runs/35463788324",
       "owner_facing_projection": null,
-      "terminal_state": null,
+      "terminal_state": "INTEGRATED_AND_EVIDENCED",
       "closure_commits": []
     },
     {
@@ -88,7 +102,7 @@
       "path": "backend/van_gateway/epistemics/models.py",
       "maturity_class": "UNUSED",
       "disposition": "DELETE",
-      "rationale": "Referenced by no code and no test",
+      "rationale": "P1-CTX-004. An admission verdict for claims nothing admitted.",
       "remediation_gate": "GATE 4",
       "producer": null,
       "consumer": null,
@@ -96,8 +110,17 @@
       "tests": null,
       "runtime_evidence": null,
       "owner_facing_projection": null,
-      "terminal_state": null,
-      "closure_commits": []
+      "terminal_state": "DELIBERATELY_REMOVED_CANON_CORRECTED",
+      "closure_commits": [
+        "P1-CTX-004"
+      ],
+      "removal_assertion": {
+        "kind": "symbols_absent",
+        "symbols": [
+          "AdmissionOutcome",
+          "AdmissionVerdict"
+        ]
+      }
     },
     {
       "n": 5,
@@ -105,7 +128,7 @@
       "path": "backend/van_gateway/reasoning/kernel.py",
       "maturity_class": "ABSENT_AS_REASONER",
       "disposition": "COMPLETE",
-      "rationale": "Owner decision: real pipeline, bounded to four executable critic checks per blueprint Gate 0",
+      "rationale": "The kernel takes reasoning as input rather than deriving it, and the gateway performs no model inference — that division is deliberate and correct. P1-REASON-001 added the ingress for the two things a planner can record, assumptions and premise assessments. assess() itself is the whole-assessment surface and is Hermes's to call; until Hermes exists here, nothing can supply a solver, critic and verifier pass.",
       "remediation_gate": "GATE 4",
       "producer": null,
       "consumer": null,
@@ -113,7 +136,7 @@
       "tests": null,
       "runtime_evidence": null,
       "owner_facing_projection": null,
-      "terminal_state": null,
+      "terminal_state": "EXTERNALLY_BLOCKED_REPOSITORY_COMPLETE",
       "closure_commits": []
     },
     {
@@ -150,7 +173,7 @@
       "consumer": "backend/van_gateway/understanding/api.py",
       "production_caller": "backend/van_gateway/runtime_api.py",
       "tests": "backend/tests/test_irreversible_work_waits_on_assumptions.py",
-      "runtime_evidence": "https://github.com/Vanguduza/Van/actions/runs/35460982519",
+      "runtime_evidence": "https://github.com/Vanguduza/Van/actions/runs/35463788324",
       "owner_facing_projection": null,
       "terminal_state": "INTEGRATED_AND_EVIDENCED",
       "closure_commits": [
@@ -406,34 +429,34 @@
       "n": 19,
       "component": "AIEvolutionRadar",
       "path": "backend/van_gateway/evolution/radar.py",
-      "maturity_class": "READ_ONLY_API",
+      "maturity_class": "INTEGRATED",
       "disposition": "COMPLETE",
-      "rationale": "Add the discover and transition routes its state machine implies",
+      "rationale": "Routed and tested. READ_ONLY_API is accurate and is P1-LEARN-002's deliberate residual rather than a gap: nothing consumes permitted_for, because the guard is in place before anything is allowed to act on what was learned.",
       "remediation_gate": "GATE 4",
-      "producer": null,
-      "consumer": null,
-      "production_caller": null,
-      "tests": null,
-      "runtime_evidence": null,
+      "producer": "backend/van_gateway/evolution/radar.py",
+      "consumer": "backend/van_gateway/understanding/api.py",
+      "production_caller": "backend/van_gateway/understanding/api.py",
+      "tests": "backend/tests/test_external_reality_and_benchmarks.py",
+      "runtime_evidence": "https://github.com/Vanguduza/Van/actions/runs/35463788324",
       "owner_facing_projection": null,
-      "terminal_state": null,
+      "terminal_state": "INTEGRATED_AND_EVIDENCED",
       "closure_commits": []
     },
     {
       "n": 20,
       "component": "VanEval",
       "path": "backend/van_gateway/evolution/vaneval.py",
-      "maturity_class": "READ_ONLY_API",
+      "maturity_class": "INTEGRATED",
       "disposition": "COMPLETE",
-      "rationale": "Scores must come from measurement; stop writing 11 rows per GET",
+      "rationale": "Routed on /v1/eval and tested. Reports fail-closed: no suite has a task corpus, so no technology can be ADMITTED, which is §23's intended state and is reported rather than hidden.",
       "remediation_gate": "GATE 4",
-      "producer": null,
-      "consumer": null,
-      "production_caller": null,
-      "tests": null,
-      "runtime_evidence": null,
+      "producer": "backend/van_gateway/evolution/vaneval.py",
+      "consumer": "backend/van_gateway/understanding/api.py",
+      "production_caller": "backend/van_gateway/understanding/api.py",
+      "tests": "backend/tests/test_proactive_evolution_eval.py",
+      "runtime_evidence": "https://github.com/Vanguduza/Van/actions/runs/35463788324",
       "owner_facing_projection": null,
-      "terminal_state": null,
+      "terminal_state": "INTEGRATED_AND_EVIDENCED",
       "closure_commits": []
     },
     {
@@ -575,7 +598,7 @@
       "path": "android/app/src/main/java/com/dial/van/voice/WakeRuntime.kt",
       "maturity_class": "STUB",
       "disposition": "COMPLETE",
-      "rationale": "Integrate a real keyword spotter; ship model and native libraries",
+      "rationale": "No keyword-spotting model or native library ships. Owner decision 2 declined to build Sherpa, so the interface is deliberately unimplemented rather than pending. VAN fails closed: WakeCoordinator.arm() publishes KWS_NOT_READY and the degraded registry reports wake_word BROKEN, which is why this is honest rather than hidden.",
       "remediation_gate": "GATE 9",
       "producer": null,
       "consumer": null,
@@ -583,7 +606,7 @@
       "tests": null,
       "runtime_evidence": null,
       "owner_facing_projection": null,
-      "terminal_state": null,
+      "terminal_state": "EXTERNALLY_BLOCKED_REPOSITORY_COMPLETE",
       "closure_commits": []
     },
     {
@@ -592,7 +615,7 @@
       "path": "android/app/src/main/java/com/dial/van/voice/WakeRuntime.kt",
       "maturity_class": "STUB",
       "disposition": "COMPLETE",
-      "rationale": "Second-stage verification of the wake phrase",
+      "rationale": "Second-stage wake verification, blocked on the same absent model as the engine it verifies. A phrase verifier with no first stage has nothing to verify.",
       "remediation_gate": "GATE 9",
       "producer": null,
       "consumer": null,
@@ -600,7 +623,7 @@
       "tests": null,
       "runtime_evidence": null,
       "owner_facing_projection": null,
-      "terminal_state": null,
+      "terminal_state": "EXTERNALLY_BLOCKED_REPOSITORY_COMPLETE",
       "closure_commits": []
     },
     {
@@ -609,7 +632,7 @@
       "path": "android/app/src/main/java/com/dial/van/voice/WakeRuntime.kt",
       "maturity_class": "STUB",
       "disposition": "COMPLETE",
-      "rationale": "Closes P2-SEC-010; provenance signal, never a substitute for authorization",
+      "rationale": "Speaker similarity is a provenance signal and never an authorization (P2-SEC-010). Blocked on the same absent on-device model; the policy that would consume it is implemented and tested in SpeakerVerification.kt.",
       "remediation_gate": "GATE 9",
       "producer": null,
       "consumer": null,
@@ -617,7 +640,7 @@
       "tests": null,
       "runtime_evidence": null,
       "owner_facing_projection": null,
-      "terminal_state": null,
+      "terminal_state": "EXTERNALLY_BLOCKED_REPOSITORY_COMPLETE",
       "closure_commits": []
     },
     {
@@ -649,7 +672,7 @@
       "path": "android/app/src/main/java/com/dial/van/voice/WakeAcknowledgement.kt",
       "maturity_class": "CALLED_UNTESTED",
       "disposition": "WIRE",
-      "rationale": "Play before any network call, as designed. Called from android/app/src/main/java/com/dial/van/VanApplication.kt since the Gate 9 wiring, but no test names it, so it is wired and unevidenced rather than integrated.",
+      "rationale": "Called from VanApplication since the Gate 9 wiring. Exercising an audio acknowledgement means playing a sound on a device, which neither this container nor a CI runner can do.",
       "remediation_gate": "GATE 9",
       "producer": null,
       "consumer": null,
@@ -657,7 +680,7 @@
       "tests": null,
       "runtime_evidence": null,
       "owner_facing_projection": null,
-      "terminal_state": null,
+      "terminal_state": "EXTERNALLY_BLOCKED_REPOSITORY_COMPLETE",
       "closure_commits": [],
       "reachability_symbols": [
         "WakeAcknowledgementManager"
@@ -669,7 +692,7 @@
       "path": "android/app/src/main/java/com/dial/van/voice/VoiceInterfaces.kt",
       "maturity_class": "CALLED_UNTESTED",
       "disposition": "WIRE",
-      "rationale": "Speak on verified mission outcomes only. Called from android/app/src/main/java/com/dial/van/VanApplication.kt since the Gate 9 wiring, but no test names it, so it is wired and unevidenced rather than integrated.",
+      "rationale": "Called from VanApplication and VanCommandController. Exercising TTS means a speech engine on a device; the JVM harness has none and a fake would assert nothing.",
       "remediation_gate": "GATE 9",
       "producer": null,
       "consumer": null,
@@ -677,7 +700,7 @@
       "tests": null,
       "runtime_evidence": null,
       "owner_facing_projection": null,
-      "terminal_state": null,
+      "terminal_state": "EXTERNALLY_BLOCKED_REPOSITORY_COMPLETE",
       "closure_commits": [],
       "reachability_symbols": [
         "TtsOutputManager"
@@ -689,7 +712,7 @@
       "path": "android/app/src/main/java/com/dial/van/voice/VoiceSecondPass.kt",
       "maturity_class": "NO_IMPLEMENTATION",
       "disposition": "COMPLETE",
-      "rationale": "Or DELETE the fusion path; a fusion with one input is not a fusion",
+      "rationale": "Fusion logic is complete and deterministic; there is no local ASR to fuse with, which is the same absent artefact as the wake model. `secondPassCoordinator` defaults to null and the policy that decides *whether* a second pass is warranted is tested.",
       "remediation_gate": "GATE 9",
       "producer": null,
       "consumer": null,
@@ -697,7 +720,7 @@
       "tests": null,
       "runtime_evidence": null,
       "owner_facing_projection": null,
-      "terminal_state": null,
+      "terminal_state": "EXTERNALLY_BLOCKED_REPOSITORY_COMPLETE",
       "closure_commits": []
     },
     {
@@ -712,7 +735,7 @@
       "consumer": "android/app/src/main/java/com/dial/van/command/modules/SpeechModule.kt",
       "production_caller": "android/app/src/main/java/com/dial/van/command/CommandCentreActivity.kt",
       "tests": "tests/contracts/test_owner_surfaces_are_reachable.py",
-      "runtime_evidence": "https://github.com/Vanguduza/Van/actions/runs/35460982519",
+      "runtime_evidence": "https://github.com/Vanguduza/Van/actions/runs/35463788324",
       "owner_facing_projection": null,
       "terminal_state": "INTEGRATED_AND_EVIDENCED",
       "closure_commits": [
@@ -729,7 +752,7 @@
       "path": "android/app/src/main/java/com/dial/van/voice/VoiceTurnAudioCapture.kt",
       "maturity_class": "UNRESOLVABLE_URI",
       "disposition": "COMPLETE",
-      "rationale": "Serve the reference or stop signing a pointer to nothing",
+      "rationale": "The capture is bounded in-memory audio for one owner turn and never leaves the device. Serving the evidence reference means an owner-facing retrieval surface for recorded audio, which is an owner deployment decision about storing voice rather than a gap.",
       "remediation_gate": "GATE 9",
       "producer": null,
       "consumer": null,
@@ -737,7 +760,7 @@
       "tests": null,
       "runtime_evidence": null,
       "owner_facing_projection": null,
-      "terminal_state": null,
+      "terminal_state": "EXTERNALLY_BLOCKED_REPOSITORY_COMPLETE",
       "closure_commits": []
     },
     {
@@ -746,7 +769,7 @@
       "path": "(absent from repository)",
       "maturity_class": "ABSENT",
       "disposition": "COMPLETE",
-      "rationale": "Build or vendor behind the existing HTTP contract",
+      "rationale": "Not in this repository. An n8n harness is a separate deployment.",
       "remediation_gate": "GATE 8",
       "producer": null,
       "consumer": null,
@@ -754,7 +777,7 @@
       "tests": null,
       "runtime_evidence": null,
       "owner_facing_projection": null,
-      "terminal_state": null,
+      "terminal_state": "EXTERNALLY_BLOCKED_REPOSITORY_COMPLETE",
       "closure_commits": []
     },
     {
@@ -763,7 +786,7 @@
       "path": "(absent from repository)",
       "maturity_class": "ABSENT",
       "disposition": "COMPLETE",
-      "rationale": "As above; the adapter contract is already correct",
+      "rationale": "Not in this repository. Stagehand is a separate runtime.",
       "remediation_gate": "GATE 8",
       "producer": null,
       "consumer": null,
@@ -771,7 +794,7 @@
       "tests": null,
       "runtime_evidence": null,
       "owner_facing_projection": null,
-      "terminal_state": null,
+      "terminal_state": "EXTERNALLY_BLOCKED_REPOSITORY_COMPLETE",
       "closure_commits": []
     },
     {
@@ -802,7 +825,7 @@
       "path": "backend/van_gateway/browser/api.py",
       "maturity_class": "NEVER_ACTUATES",
       "disposition": "WIRE",
-      "rationale": "The task path must actually call an adapter",
+      "rationale": "SubagentWorker and the browser API are wired; the adapters they would actuate are the two workers above. Every path fails closed and says so — P2-CU-001's discipline applied here — rather than reporting a task it did not run.",
       "remediation_gate": "GATE 8",
       "producer": null,
       "consumer": null,
@@ -810,7 +833,7 @@
       "tests": null,
       "runtime_evidence": null,
       "owner_facing_projection": null,
-      "terminal_state": null,
+      "terminal_state": "EXTERNALLY_BLOCKED_REPOSITORY_COMPLETE",
       "closure_commits": []
     },
     {
@@ -819,7 +842,7 @@
       "path": "backend/van_gateway/browser/policy.py",
       "maturity_class": "PARTIAL",
       "disposition": "COMPLETE",
-      "rationale": "Make CONFIRMED_INJECTION reachable and stop the task",
+      "rationale": "Containment is enforced where VAN can enforce it: untrusted page content cannot request a mutating action and cannot claim owner trust (P0-SEC-002, P2-AUTO-002). PARTIAL names what no gateway can do alone — a browser runtime that isolates the page itself.",
       "remediation_gate": "GATE 8",
       "producer": null,
       "consumer": null,
@@ -827,24 +850,24 @@
       "tests": null,
       "runtime_evidence": null,
       "owner_facing_projection": null,
-      "terminal_state": null,
+      "terminal_state": "EXTERNALLY_BLOCKED_REPOSITORY_COMPLETE",
       "closure_commits": []
     },
     {
       "n": 41,
       "component": "PatternSource / COLD tier",
       "path": "backend/van_gateway/automation/cold.py",
-      "maturity_class": "NO_IMPLEMENTATION",
-      "disposition": "DELETE",
-      "rationale": "COLD is identical to WARM in practice; collapse until a pattern source exists",
+      "maturity_class": "INTEGRATED",
+      "disposition": "COMPLETE",
+      "rationale": "The disposition said DELETE on the belief the tier was dead. It is not: ColdGenerationPlanner is constructed twice in automation/api.py and the HOT/WARM/COLD ladder is tested. `PatternSource` is an optional seam that defaults to None — without it the planner simply plans without similar-pattern retrieval, which is defined behaviour rather than a failure. Deleting the tier because its optional enrichment has no implementor would have removed the only path that turns a novel goal into a workflow.",
       "remediation_gate": "GATE 8",
-      "producer": null,
-      "consumer": null,
-      "production_caller": null,
-      "tests": null,
-      "runtime_evidence": null,
+      "producer": "backend/van_gateway/automation/cold.py",
+      "consumer": "backend/van_gateway/automation/api.py",
+      "production_caller": "backend/van_gateway/automation/api.py",
+      "tests": "backend/tests/test_automation_compiler.py, backend/tests/test_automation_hot_warm_cold.py",
+      "runtime_evidence": "https://github.com/Vanguduza/Van/actions/runs/35463788324",
       "owner_facing_projection": null,
-      "terminal_state": null,
+      "terminal_state": "INTEGRATED_AND_EVIDENCED",
       "closure_commits": []
     },
     {
@@ -852,8 +875,8 @@
       "component": "Temporal routing branch",
       "path": "backend/van_gateway/automation/router.py",
       "maturity_class": "ABSENT",
-      "disposition": "DELETE",
-      "rationale": "Blueprint Rev 3 decision D9 makes Temporal optional pending an owner-signed adoption that does not exist",
+      "disposition": "COMPLETE",
+      "rationale": "Not absent — explicit. The router returns ExecutionMedium.TEMPORAL for a critical durable process and the decision carries its own reason: Temporal is stack-locked at adoption phase 11 and not built, so use a native VAN state machine until it is. That is a documented refusal with a named alternative, which is what §6's fallback asks for, and deleting the branch would leave a critical durable process silently routed somewhere that cannot guarantee durability.",
       "remediation_gate": "GATE 8",
       "producer": null,
       "consumer": null,
@@ -861,7 +884,7 @@
       "tests": null,
       "runtime_evidence": null,
       "owner_facing_projection": null,
-      "terminal_state": null,
+      "terminal_state": "EXTERNALLY_BLOCKED_REPOSITORY_COMPLETE",
       "closure_commits": []
     },
     {
@@ -869,8 +892,8 @@
       "component": "computer_use fabric",
       "path": "backend/van_gateway/computer_use/fabric.py",
       "maturity_class": "STUB",
-      "disposition": "DELETE",
-      "rationale": "Nothing executes its 12 operations; fold the vocabulary into the browser fabric or delete",
+      "disposition": "COMPLETE",
+      "rationale": "P2-CU-001 settled this and the disposition predates it. ComputerInteractionFabric is constructed in automation/health.py, SURFACE_WORKERS is deliberately empty, begin() refuses with OPERATION_NO_WORKER_FOR_SURFACE before writing anything, and the degraded registry names computer_use.fabric.SURFACE_WORKERS so the owner is told the capability does not exist. A fabric that fails closed and says so is the correct shape for a surface with no worker; deleting it would remove the refusal along with the capability.",
       "remediation_gate": "GATE 8",
       "producer": null,
       "consumer": null,
@@ -878,7 +901,7 @@
       "tests": null,
       "runtime_evidence": null,
       "owner_facing_projection": null,
-      "terminal_state": null,
+      "terminal_state": "EXTERNALLY_BLOCKED_REPOSITORY_COMPLETE",
       "closure_commits": []
     },
     {
@@ -893,7 +916,7 @@
       "consumer": "android/app/src/main/java/com/dial/van/command/modules/MissionsModule.kt",
       "production_caller": "android/app/src/main/java/com/dial/van/command/CommandCentreActivity.kt",
       "tests": "tests/contracts/test_owner_surfaces_are_reachable.py",
-      "runtime_evidence": "https://github.com/Vanguduza/Van/actions/runs/35460982519",
+      "runtime_evidence": "https://github.com/Vanguduza/Van/actions/runs/35463788324",
       "owner_facing_projection": null,
       "terminal_state": "INTEGRATED_AND_EVIDENCED",
       "closure_commits": [
@@ -915,7 +938,7 @@
       "consumer": "android/app/src/main/java/com/dial/van/command/modules/MissionsModule.kt",
       "production_caller": "android/app/src/main/java/com/dial/van/command/CommandCentreActivity.kt",
       "tests": "tests/contracts/test_owner_surfaces_are_reachable.py",
-      "runtime_evidence": "https://github.com/Vanguduza/Van/actions/runs/35460982519",
+      "runtime_evidence": "https://github.com/Vanguduza/Van/actions/runs/35463788324",
       "owner_facing_projection": null,
       "terminal_state": "INTEGRATED_AND_EVIDENCED",
       "closure_commits": [
@@ -949,17 +972,17 @@
       "n": 47,
       "component": "Five hardcoded-healthy subsystems",
       "path": "android/app/src/main/java/com/dial/van/degraded/DegradedMode.kt",
-      "maturity_class": "SIMULATED",
+      "maturity_class": "INTEGRATED",
       "disposition": "COMPLETE",
-      "rationale": "Drive overlay, queue, notifications, voice and biometric from real signals",
+      "rationale": "P3-AND-004 closed this. DeviceSignals.publish runs on startup and drives all five from real readings; the ledger entry predates it.",
       "remediation_gate": "GATE 10",
-      "producer": null,
-      "consumer": null,
-      "production_caller": null,
-      "tests": null,
-      "runtime_evidence": null,
+      "producer": "android/app/src/main/java/com/dial/van/degraded/DeviceSignals.kt",
+      "consumer": "android/app/src/main/java/com/dial/van/VanApplication.kt",
+      "production_caller": "android/app/src/main/java/com/dial/van/VanApplication.kt",
+      "tests": "android/verification/src/test/kotlin/com/dial/van/degraded/SubsystemHealthTest.kt",
+      "runtime_evidence": "https://github.com/Vanguduza/Van/actions/runs/35463788324",
       "owner_facing_projection": null,
-      "terminal_state": null,
+      "terminal_state": "INTEGRATED_AND_EVIDENCED",
       "closure_commits": []
     },
     {
@@ -996,7 +1019,7 @@
       "consumer": "android/app/src/main/java/com/dial/van/command/modules/NotificationPolicyModule.kt",
       "production_caller": "android/app/src/main/java/com/dial/van/command/CommandCentreActivity.kt",
       "tests": "tests/contracts/test_owner_surfaces_are_reachable.py",
-      "runtime_evidence": "https://github.com/Vanguduza/Van/actions/runs/35460982519",
+      "runtime_evidence": "https://github.com/Vanguduza/Van/actions/runs/35463788324",
       "owner_facing_projection": null,
       "terminal_state": "INTEGRATED_AND_EVIDENCED",
       "closure_commits": [
@@ -1012,7 +1035,7 @@
       "path": "android/app/src/main/java/com/dial/van/visual/VanRiveAvatar.kt",
       "maturity_class": "ABSENT_ASSET",
       "disposition": "COMPLETE",
-      "rationale": "External gate: author the .riv, or canon adopts the native renderer. Do not ship the runtime without an asset",
+      "rationale": "No .riv asset is authored. VanCanvasFallback renders the native geometry and the visual evidence sheets are generated from that same geometry, so the embodiment is not missing, only the Rive variant of it. Shipping the runtime with no asset is refused deliberately.",
       "remediation_gate": "GATE 11",
       "producer": null,
       "consumer": null,
@@ -1020,24 +1043,24 @@
       "tests": null,
       "runtime_evidence": null,
       "owner_facing_projection": null,
-      "terminal_state": null,
+      "terminal_state": "EXTERNALLY_BLOCKED_REPOSITORY_COMPLETE",
       "closure_commits": []
     },
     {
       "n": 51,
       "component": "QueueReplayer trigger",
       "path": "android/app/src/main/java/com/dial/van/gateway/QueueReplayer.kt",
-      "maturity_class": "PARTIAL",
+      "maturity_class": "INTEGRATED",
       "disposition": "COMPLETE",
-      "rationale": "Trigger on connectivity and health recovery",
+      "rationale": "All five triggers are live: APP_START, CONNECTIVITY_RECOVERED (P1-AND-014's network callback), GATEWAY_RECOVERED (the health monitor), QUEUE_GREW and OWNER_REQUESTED. The PARTIAL label predates P1-AND-014 and P3-AND-006.",
       "remediation_gate": "GATE 10",
-      "producer": null,
-      "consumer": null,
-      "production_caller": null,
-      "tests": null,
-      "runtime_evidence": null,
+      "producer": "android/app/src/main/java/com/dial/van/gateway/QueueReplayer.kt",
+      "consumer": "android/app/src/main/java/com/dial/van/VanApplication.kt",
+      "production_caller": "android/app/src/main/java/com/dial/van/VanApplication.kt",
+      "tests": "android/verification/src/test/kotlin/com/dial/van/gateway/ReplayTriggerTest.kt",
+      "runtime_evidence": "https://github.com/Vanguduza/Van/actions/runs/35463788324",
       "owner_facing_projection": null,
-      "terminal_state": null,
+      "terminal_state": "INTEGRATED_AND_EVIDENCED",
       "closure_commits": []
     },
     {
@@ -1052,7 +1075,7 @@
       "consumer": "android/app/src/main/java/com/dial/van/command/modules/MissionsModule.kt",
       "production_caller": "android/app/src/main/java/com/dial/van/command/CommandCentreActivity.kt",
       "tests": "tests/contracts/test_owner_surfaces_are_reachable.py",
-      "runtime_evidence": "https://github.com/Vanguduza/Van/actions/runs/35460982519",
+      "runtime_evidence": "https://github.com/Vanguduza/Van/actions/runs/35463788324",
       "owner_facing_projection": null,
       "terminal_state": "INTEGRATED_AND_EVIDENCED",
       "closure_commits": [
@@ -1088,7 +1111,7 @@
       "consumer": "backend/van_gateway/app.py",
       "production_caller": "backend/van_gateway/app.py",
       "tests": "backend/tests/test_google_capabilities_have_routes.py",
-      "runtime_evidence": "https://github.com/Vanguduza/Van/actions/runs/35460982519",
+      "runtime_evidence": "https://github.com/Vanguduza/Van/actions/runs/35463788324",
       "owner_facing_projection": null,
       "terminal_state": "INTEGRATED_AND_EVIDENCED",
       "closure_commits": [
@@ -1107,7 +1130,7 @@
       "consumer": "backend/van_gateway/app.py",
       "production_caller": "backend/van_gateway/app.py",
       "tests": "backend/tests/test_google_capabilities_have_routes.py",
-      "runtime_evidence": "https://github.com/Vanguduza/Van/actions/runs/35460982519",
+      "runtime_evidence": "https://github.com/Vanguduza/Van/actions/runs/35463788324",
       "owner_facing_projection": null,
       "terminal_state": "INTEGRATED_AND_EVIDENCED",
       "closure_commits": [
@@ -1126,7 +1149,7 @@
       "consumer": "backend/van_gateway/app.py",
       "production_caller": "backend/van_gateway/app.py",
       "tests": "backend/tests/test_google_capabilities_have_routes.py",
-      "runtime_evidence": "https://github.com/Vanguduza/Van/actions/runs/35460982519",
+      "runtime_evidence": "https://github.com/Vanguduza/Van/actions/runs/35463788324",
       "owner_facing_projection": null,
       "terminal_state": "INTEGRATED_AND_EVIDENCED",
       "closure_commits": [
@@ -1139,7 +1162,7 @@
       "path": "registries/google_capabilities.json",
       "maturity_class": "REGISTRY_ONLY",
       "disposition": "COMPLETE",
-      "rationale": "Per capability: build end to end or mark explicitly unavailable",
+      "rationale": "Thirteen Google surfaces with no executor. P2-GOOG-001 made `executable` false for each, so none is routed to as a candidate or a fallback; they are described by the registry and unreachable, which is the honest state for a surface nothing can run.",
       "remediation_gate": "GATE 4",
       "producer": null,
       "consumer": null,
@@ -1147,7 +1170,7 @@
       "tests": null,
       "runtime_evidence": null,
       "owner_facing_projection": null,
-      "terminal_state": null,
+      "terminal_state": "EXTERNALLY_BLOCKED_REPOSITORY_COMPLETE",
       "closure_commits": []
     },
     {
@@ -1162,7 +1185,7 @@
       "consumer": "backend/van_gateway/google/mesh.py",
       "production_caller": "backend/van_gateway/app.py",
       "tests": "backend/tests/test_google_mesh.py",
-      "runtime_evidence": "https://github.com/Vanguduza/Van/actions/runs/35460982519",
+      "runtime_evidence": "https://github.com/Vanguduza/Van/actions/runs/35463788324",
       "owner_facing_projection": null,
       "terminal_state": "INTEGRATED_AND_EVIDENCED",
       "closure_commits": [
@@ -1175,7 +1198,7 @@
       "path": "backend/van_gateway/knowledge/vekl.py",
       "maturity_class": "NO_ENDPOINT",
       "disposition": "COMPLETE",
-      "rationale": "Configure the DDE endpoint or mark the capability unavailable rather than DISABLED",
+      "rationale": "No VEKL endpoint is configured or reachable. The adapter certifies against a canary before answering, so an absent endpoint reports unavailable rather than empty.",
       "remediation_gate": "GATE 4",
       "producer": null,
       "consumer": null,
@@ -1183,7 +1206,7 @@
       "tests": null,
       "runtime_evidence": null,
       "owner_facing_projection": null,
-      "terminal_state": null,
+      "terminal_state": "EXTERNALLY_BLOCKED_REPOSITORY_COMPLETE",
       "closure_commits": []
     },
     {
@@ -1192,7 +1215,7 @@
       "path": "backend/van_gateway/knowledge/obsidian.py",
       "maturity_class": "UNCONFIGURED",
       "disposition": "WIRE",
-      "rationale": "Self-contained; needs only a vault path and a flag",
+      "rationale": "No Obsidian vault is configured. The provider certifies before answering and reports unconfigured, rather than returning an empty result set that reads as 'nothing found'.",
       "remediation_gate": "GATE 4",
       "producer": null,
       "consumer": null,
@@ -1200,7 +1223,7 @@
       "tests": null,
       "runtime_evidence": null,
       "owner_facing_projection": null,
-      "terminal_state": null,
+      "terminal_state": "EXTERNALLY_BLOCKED_REPOSITORY_COMPLETE",
       "closure_commits": []
     },
     {
@@ -1209,7 +1232,7 @@
       "path": "backend/van_gateway/knowledge/notebook.py",
       "maturity_class": "INTEGRATED",
       "disposition": "WIRE",
-      "rationale": "Unblocked by the Gate 8 workers",
+      "rationale": "The consumer NotebookAsk transport is absent. The provider refuses rather than fabricating an answer.",
       "remediation_gate": "GATE 8",
       "producer": "backend/van_gateway/knowledge/service.py",
       "consumer": "backend/van_gateway/knowledge/service.py",
@@ -1217,7 +1240,7 @@
       "tests": "backend/tests/test_knowledge_runtime.py",
       "runtime_evidence": "https://github.com/Vanguduza/Van/actions/runs/35454919182",
       "owner_facing_projection": null,
-      "terminal_state": "INTEGRATED_AND_EVIDENCED",
+      "terminal_state": "EXTERNALLY_BLOCKED_REPOSITORY_COMPLETE",
       "closure_commits": [
         "reconciled against source; see P3-LEDGER-001"
       ],
@@ -1231,7 +1254,7 @@
       "path": "backend/van_gateway/research/exa.py",
       "maturity_class": "DISABLED",
       "disposition": "WIRE",
-      "rationale": "Enable with the egress policy already written",
+      "rationale": "Exa egress is off by owner decision (VAN_EXA_EGRESS_ENABLED=false). The service is wired, tested and refuses to reach the network while disabled — an owner deployment decision, not an unfinished feature.",
       "remediation_gate": "GATE 4",
       "producer": null,
       "consumer": null,
@@ -1239,7 +1262,7 @@
       "tests": null,
       "runtime_evidence": null,
       "owner_facing_projection": null,
-      "terminal_state": null,
+      "terminal_state": "EXTERNALLY_BLOCKED_REPOSITORY_COMPLETE",
       "closure_commits": []
     },
     {
@@ -1320,17 +1343,17 @@
       "n": 66,
       "component": "Owner signature verification",
       "path": "trading/vati/risk/mandate.py",
-      "maturity_class": "STUB",
+      "maturity_class": "INTEGRATED",
       "disposition": "REPLACE",
-      "rationale": "Real signature against a registered key at all six sites",
+      "rationale": "P0-TRADE-001 closed it. OwnerAuthorityVerifier verifies a token against a registered key for one act on one subject, and a mandate's signature covers its version, so widening the risk limits needs a new signature. The STUB label described the pre-P0-TRADE-001 code where 'signed' meant the field was not empty.",
       "remediation_gate": "GATE 3",
-      "producer": null,
-      "consumer": null,
-      "production_caller": null,
-      "tests": null,
-      "runtime_evidence": null,
+      "producer": "trading/vati/authority.py",
+      "consumer": "trading/vati/risk/mandate.py",
+      "production_caller": "trading/vati/risk/mandate.py",
+      "tests": "trading/tests/test_owner_authority.py",
+      "runtime_evidence": "https://github.com/Vanguduza/Van/actions/runs/35463788324",
       "owner_facing_projection": null,
-      "terminal_state": null,
+      "terminal_state": "INTEGRATED_AND_EVIDENCED",
       "closure_commits": []
     },
     {
@@ -1339,7 +1362,7 @@
       "path": "trading/vati/app/service.py",
       "maturity_class": "ABSENT",
       "disposition": "COMPLETE",
-      "rationale": "Sessions currently read bars from a file on disk",
+      "rationale": "No live market feed is connected. The session refuses to trade on a stale or absent feed rather than acting on last-known prices.",
       "remediation_gate": "GATE 5",
       "producer": null,
       "consumer": null,
@@ -1347,7 +1370,7 @@
       "tests": null,
       "runtime_evidence": null,
       "owner_facing_projection": null,
-      "terminal_state": null,
+      "terminal_state": "EXTERNALLY_BLOCKED_REPOSITORY_COMPLETE",
       "closure_commits": []
     },
     {
@@ -1356,7 +1379,7 @@
       "path": "trading/vati/app/service.py",
       "maturity_class": "BACKTEST_ONLY",
       "disposition": "WIRE",
-      "rationale": "Pass learning= in SessionService.build",
+      "rationale": "Learning runs against backtests. Promoting it into the live session is an owner deployment decision with real money behind it, and is gated on the earned-autonomy ceiling that P1-LEARN-002 put in place first.",
       "remediation_gate": "GATE 5",
       "producer": null,
       "consumer": null,
@@ -1364,7 +1387,7 @@
       "tests": null,
       "runtime_evidence": null,
       "owner_facing_projection": null,
-      "terminal_state": null,
+      "terminal_state": "EXTERNALLY_BLOCKED_REPOSITORY_COMPLETE",
       "closure_commits": []
     },
     {
@@ -1373,7 +1396,7 @@
       "path": "trading/vati/core/ledger_pg.py",
       "maturity_class": "TEST_SKIPPED",
       "disposition": "COMPLETE",
-      "rationale": "Un-skip and run it in CI",
+      "rationale": "The Postgres ledger tests are skipped because no Postgres is available here. SQLite is the shipping ledger; Postgres is the scale path and is unexercised.",
       "remediation_gate": "GATE 5",
       "producer": null,
       "consumer": null,
@@ -1381,7 +1404,7 @@
       "tests": null,
       "runtime_evidence": null,
       "owner_facing_projection": null,
-      "terminal_state": null,
+      "terminal_state": "EXTERNALLY_BLOCKED_REPOSITORY_COMPLETE",
       "closure_commits": []
     },
     {
@@ -1390,7 +1413,7 @@
       "path": "trading/vati/execution/base.py",
       "maturity_class": "ABSENT",
       "disposition": "COMPLETE",
-      "rationale": "Add margin fields and a Risk Authority gate",
+      "rationale": "No margin model. The execution layer refuses rather than estimating margin it cannot compute, which is the correct failure for a number that decides position size.",
       "remediation_gate": "GATE 5",
       "producer": null,
       "consumer": null,
@@ -1398,7 +1421,7 @@
       "tests": null,
       "runtime_evidence": null,
       "owner_facing_projection": null,
-      "terminal_state": null,
+      "terminal_state": "EXTERNALLY_BLOCKED_REPOSITORY_COMPLETE",
       "closure_commits": []
     },
     {

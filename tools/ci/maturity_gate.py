@@ -221,6 +221,11 @@ def _check_removal(c: dict, name: str) -> list[str]:
 
         {"kind": "file_absent"}                                  (default)
         {"kind": "symbols_absent", "symbols": ["message_agent"]}
+
+    `symbols_absent` recognises a function, a class and a Kotlin object. It recognised only
+    `def` and `fun` until P1-CTX-004 needed to assert a deleted class, at which point the
+    assertion would have passed by never matching — a gate agreeing with you because it was
+    looking for the wrong thing.
     """
     problems = []
     path = c.get("path", "")
@@ -246,10 +251,22 @@ def _check_removal(c: dict, name: str) -> list[str]:
             problems.append(f"{name}: removal_assertion targets {path}, which does not exist")
         else:
             text = target.read_text(encoding="utf-8", errors="replace")
+            # Functions, classes and Kotlin objects. The first version matched `def` and
+            # `fun` only, so a component asserting a deleted *class* was absent could never
+            # fail this check — the assertion passed because the pattern never matched
+            # anything, which is the most useless way for a gate to agree with you.
             still_defined = [
                 sym for sym in symbols
                 if re.search(rf"^\s*(?:async\s+)?def\s+{re.escape(sym)}\b", text, re.M)
                 or re.search(rf"^\s*(?:suspend\s+)?fun\s+{re.escape(sym)}\b", text, re.M)
+                # One pattern, not two. The first draft had a bare `class X` alongside this
+                # one, which subsumes it at zero repetitions of the prefix group — so
+                # deleting either changed nothing and neither could be falsified. Fourth
+                # time in this pass that overlapping guards hid which half was load-bearing.
+                or re.search(
+                    rf"^\s*(?:data\s+|sealed\s+|enum\s+|value\s+)*(?:class|object)\s+{re.escape(sym)}\b",
+                    text, re.M,
+                )
             ]
             if still_defined:
                 problems.append(
