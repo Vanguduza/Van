@@ -6,6 +6,8 @@ from __future__ import annotations
 import json
 from decimal import Decimal
 
+from pathlib import Path
+
 import pytest
 from cryptography.fernet import Fernet
 from httpx import ASGITransport, AsyncClient
@@ -19,6 +21,21 @@ from van_gateway.trading.service import _import_vati
 EventKind, make_event, Ledger = _import_vati()   # resolves <repo>/trading without a pytest path entry
 
 HDR = {"x-van-internal-token": "test-internal-token"}
+
+#: P0-TRADE-001 fixtures. The trading suite holds the owner's key because trading writes
+#: now need a signature that is checked; before this, every one of them accepted "owner:sig".
+import sys as _sys
+
+_sys.path.insert(0, str(Path(__file__).resolve().parents[2] / "trading" / "tests"))
+from conftest_owner_authority import OwnerAuthorityHarness  # noqa: E402
+
+OWNER = OwnerAuthorityHarness()
+
+
+def _halt_token():
+    return OWNER.token(act="owner-halt", subject="van-trading-core")
+
+
 
 
 @pytest.fixture(autouse=True)
@@ -54,6 +71,10 @@ async def client(tmp_path):
             paired = await ac.post("/v1/devices/pair", json={"pairing_token": ticket.json()["pairing_token"], "device_id": "test-device", "device_secret": "test-device-secret", "public_key_pem": "test", "label": "test"})
             assert paired.status_code == 200, paired.text
             ac.headers.update({"X-Van-Ingress-Token": paired.json()["ingress_token"], "X-Van-Device-Token": paired.json()["device_access_token"]})
+            # P0-TRADE-001 — trading writes now need a real owner signature, so the
+            # suite holds the owner's key and signs for real. Passing "owner:sig" is the
+            # defect these tests exist to keep closed.
+            app.state.trading.owner_authority = OWNER.verifier
             yield ac, app
 
 
@@ -63,7 +84,11 @@ async def test_status_without_ledger_is_degraded_not_fatal(client):
     r = await ac.get("/v1/trading/status")
     assert r.status_code == 200 and r.json()["ledger_available"] is False and "TRADING_LEDGER_UNAVAILABLE" in r.json()["degraded"]
     assert (await ac.get("/v1/trading/tickets")).json() == {"tickets": []}
-    r = await ac.post("/v1/trading/halt", json={"owner_signature_ref": "owner:sig", "reason": "x"}, headers=HDR)
+    r = await ac.post(
+        "/v1/trading/halt",
+        json={"owner_signature_ref": _halt_token(), "reason": "x"},
+        headers=HDR,
+    )
     assert r.status_code == 503
 
 
@@ -82,35 +107,62 @@ async def test_status_and_tickets_read_from_chained_ledger(client, tmp_path):
 async def test_halt_requires_internal_token_and_owner_signature_and_appends_event(client, tmp_path):
     ac, app = client
     seed_ledger(tmp_path / "vati.sqlite").close()
-    assert (await ac.post("/v1/trading/halt", json={"owner_signature_ref": "owner:sig"})).status_code == 403          # no internal token
+    assert (await ac.post("/v1/trading/halt", json={"owner_signature_ref": _halt_token()})).status_code == 403   # no internal token
     assert (await ac.post("/v1/trading/halt", json={"owner_signature_ref": ""}, headers=HDR)).status_code == 422       # empty signature (schema)
     assert (await ac.post("/v1/trading/halt", json={"owner_signature_ref": "   "}, headers=HDR)).status_code == 403    # blank signature (A4)
-    r = await ac.post("/v1/trading/halt", json={"owner_signature_ref": "owner:sig-7", "reason": "news shock"}, headers=HDR)
+    # P0-TRADE-001 — this exact string used to halt live trading.
+    assert (await ac.post("/v1/trading/halt", json={"owner_signature_ref": "owner:sig-7"}, headers=HDR)).status_code == 403
+    # ...and so did anything, including authority granted for a different act.
+    wrong_act = OWNER.token(act="ticket-confirm", subject="van-trading-core")
+    assert (await ac.post("/v1/trading/halt", json={"owner_signature_ref": wrong_act}, headers=HDR)).status_code == 403
+    halt_token = _halt_token()
+    r = await ac.post("/v1/trading/halt", json={"owner_signature_ref": halt_token, "reason": "news shock"}, headers=HDR)
     assert r.status_code == 200 and r.json()["trigger"] == "OWNER_HALT"
     led = Ledger(tmp_path / "vati.sqlite")
     ok, n = led.verify_chain()
     assert ok and n == 5 and led.head() == r.json()["chain_hash"]
     last = list(led.iter(EventKind.KILL_SWITCH))[-1]
-    assert last.payload == {"trigger": "OWNER_HALT", "sig": "owner:sig-7", "reason": "news shock", "channel": "gateway"} and last.producer == "van-gateway"
+    # The ledger records the verified authority's reference, not the raw token.
+    assert last.payload["trigger"] == "OWNER_HALT" and last.payload["reason"] == "news shock"
+    assert last.payload["channel"] == "gateway" and last.producer == "van-gateway"
+    assert last.payload["sig"].startswith("owner-authority:")
     st = (await ac.get("/v1/trading/status")).json()
     assert st["kill_switch_active"] is True and st["kill_switch_triggers"] == ["OWNER_HALT"]
     rows = await app.state.store.fetchall("SELECT result, capability, approval, evidence_pointer FROM audit ORDER BY created_at_unix DESC LIMIT 1")
-    assert tuple(rows[0]) == ("owner_halt_recorded", "trading.owner_halt", "owner:sig-7", r.json()["event_hash"])
+    assert rows[0]["result"] == "owner_halt_recorded"
+    assert rows[0]["capability"] == "trading.owner_halt"
+    assert str(rows[0]["approval"]).startswith("owner-authority:")
+    assert rows[0]["evidence_pointer"] == r.json()["event_hash"]
+
+    # Single use: the token is in the ledger now, in the clear.
+    assert (await ac.post("/v1/trading/halt", json={"owner_signature_ref": halt_token}, headers=HDR)).status_code == 403
 
 
 @pytest.mark.asyncio
 async def test_ticket_confirmation_is_once_bounded_and_owner_signed(client, tmp_path):
     ac, app = client
     seed_ledger(tmp_path / "vati.sqlite").close()
-    body = {"owner_signature_ref": "owner:sig", "fill_price": "25.10", "filled_qty": "1200", "contract_note_ref": "CN-2026-09-16-001"}
-    assert (await ac.post("/v1/trading/tickets/ZSE-T-1/confirm", json=body)).status_code == 403
-    assert (await ac.post("/v1/trading/tickets/ZSE-T-9/confirm", json=body, headers=HDR)).status_code == 404
-    assert (await ac.post("/v1/trading/tickets/ZSE-T-1/confirm", json={**body, "filled_qty": "1300"}, headers=HDR)).status_code == 422   # more than the ticket
-    assert (await ac.post("/v1/trading/tickets/ZSE-T-1/confirm", json={**body, "fill_price": "abc"}, headers=HDR)).status_code == 422
-    assert (await ac.post("/v1/trading/tickets/ZSE-T-1/confirm", json={**body, "fill_price": "-1"}, headers=HDR)).status_code == 422
-    r = await ac.post("/v1/trading/tickets/ZSE-T-1/confirm", json={**body, "filled_qty": "1100"}, headers=HDR)
+    def body(ticket="ZSE-T-1", **over):
+        base = {
+            "owner_signature_ref": OWNER.token(act="ticket-confirm", subject=ticket),
+            "fill_price": "25.10", "filled_qty": "1200",
+            "contract_note_ref": "CN-2026-09-16-001",
+        }
+        base.update(over)
+        return base
+
+    assert (await ac.post("/v1/trading/tickets/ZSE-T-1/confirm", json=body())).status_code == 403
+    # P0-TRADE-001 — "owner:sig" used to confirm a broker fill.
+    assert (await ac.post("/v1/trading/tickets/ZSE-T-1/confirm", json=body(owner_signature_ref="owner:sig"), headers=HDR)).status_code == 403
+    # Authority to confirm one ticket is not authority to confirm another.
+    assert (await ac.post("/v1/trading/tickets/ZSE-T-1/confirm", json=body(ticket="ZSE-T-9"), headers=HDR)).status_code == 403
+    assert (await ac.post("/v1/trading/tickets/ZSE-T-9/confirm", json=body("ZSE-T-9"), headers=HDR)).status_code == 404
+    assert (await ac.post("/v1/trading/tickets/ZSE-T-1/confirm", json=body(filled_qty="1300"), headers=HDR)).status_code == 422   # more than the ticket
+    assert (await ac.post("/v1/trading/tickets/ZSE-T-1/confirm", json=body(fill_price="abc"), headers=HDR)).status_code == 422
+    assert (await ac.post("/v1/trading/tickets/ZSE-T-1/confirm", json=body(fill_price="-1"), headers=HDR)).status_code == 422
+    r = await ac.post("/v1/trading/tickets/ZSE-T-1/confirm", json=body(filled_qty="1100"), headers=HDR)
     assert r.status_code == 200 and r.json()["status"] == "CONFIRMED"
-    assert (await ac.post("/v1/trading/tickets/ZSE-T-1/confirm", json=body, headers=HDR)).status_code == 409           # once only
+    assert (await ac.post("/v1/trading/tickets/ZSE-T-1/confirm", json=body(), headers=HDR)).status_code == 409           # once only
     tk = (await ac.get("/v1/trading/tickets?status=CONFIRMED")).json()["tickets"]
     assert len(tk) == 1 and tk[0]["filled_qty"] == "1100" and tk[0]["contract_note_ref"] == "CN-2026-09-16-001" and tk[0]["trade_intent_id"] == "intent-1"
     assert (await ac.get("/v1/trading/tickets?status=OPEN")).json()["tickets"] == []
@@ -122,9 +174,12 @@ def test_service_never_exposes_an_order_path():
     """The gateway trading surface has no method that could create, size, modify or cancel an order."""
     from van_gateway.trading import TradingService
     names = {n for n in dir(TradingService) if not n.startswith("_")}
-    assert names == {"available", "status", "tickets", "halt", "confirm_ticket", "trade_book", "portfolio", "accounts", "market_state", "risk", "trade_detail", "bars", "producer", "accounts_registry", "lake_root", "reporting_currency"}
+    assert names == {"available", "status", "tickets", "halt", "confirm_ticket", "trade_book", "portfolio", "accounts", "market_state", "risk", "trade_detail", "bars", "producer", "accounts_registry", "lake_root", "reporting_currency", "owner_authority"}
     for banned in ("order", "submit", "size", "cancel", "modify", "credential", "token"):
         assert not any(banned in n.lower() for n in names), banned
+    # P0-TRADE-001 — the one field added since is the verifier for owner-signed acts, and
+    # it is a checker, not a capability: it cannot cause an order to exist.
+    assert "owner_authority" in names
 
 
 @pytest.mark.asyncio

@@ -614,8 +614,36 @@
       "root_cause": "RC2 / RC4",
       "remediation": "Verify the owner signature against a registered key and an authority record; reject unverifiable mandates.",
       "validation_gate": "G5",
-      "current_status": "OPEN",
-      "remediation_gate": "GATE 3"
+      "current_status": "CLOSED",
+      "remediation_gate": "GATE 3",
+      "closure": {
+        "summary": "vati/authority.py replaces the non-empty-string check on every trading authority surface: mandate admission, kill-switch clear, owner halt, capsule promotion, the commander's halt and the gateway's trading writes. A van-oa1 token is an ECDSA P-256 signature over the act, the subject, the issue and expiry times and a nonce, verified against a key registered on the host. The trading VM and the gateway share the one implementation, because the gateway already imports vati.",
+        "changed": [
+          "trading/vati/authority.py",
+          "trading/vati/risk/mandate.py",
+          "trading/vati/risk/governor.py",
+          "trading/vati/app/runner.py",
+          "trading/vati/strategies/capsule.py",
+          "trading/commander/app.py",
+          "backend/van_gateway/trading/service.py",
+          "backend/van_gateway/app.py",
+          "registries/owner_authority_keys.json"
+        ],
+        "verified_by": [
+          "trading/tests/test_owner_authority.py",
+          "trading/tests/test_mandate.py::test_unsigned_mandate_rejected",
+          "trading/tests/test_mandate.py::test_a_mandate_signature_does_not_admit_a_later_version",
+          "trading/tests/test_heat_governor.py::test_kill_switch_latches_and_requires_owner_to_clear",
+          "trading/tests/test_strategies_arbiter.py::test_capsule_promotion_requires_signature_and_one_step",
+          "trading/tests/test_backtest_runner_cli.py::test_runner_startup_blocks_on_orphan_and_owner_halt",
+          "trading/tests/test_commander.py::test_backtest_paths_are_confined_and_halt_needs_owner_signature",
+          "backend/tests/test_trading_api.py::test_halt_requires_internal_token_and_owner_signature_and_appends_event",
+          "backend/tests/test_trading_api.py::test_ticket_confirmation_is_once_bounded_and_owner_signed"
+        ],
+        "residual": "The shipped registries/owner_authority_keys.json holds no keys, so no owner-signed trading act can be authorised until the owner's public key is enrolled on a host.",
+        "residual_reason": "A committed key would be the public half of a private key nobody holds, which is worse than none: it would make the check look satisfied. An empty registry refuses everything, which is the correct state for a machine the owner has not enrolled on, and a test asserts the shipped file stays empty. Enrolment is a deployment step, not a repository change.",
+        "posture": "Each surface's own test now asserts that the exact string it used to accept is refused: 'sig:owner' for the kill switch and capsule promotion, 'owner:sig-7' for the gateway halt, 'sig:owner-device:abc123' for the mandate. The act and the subject are inside the signature, so authority to confirm one ticket is not authority to confirm another and a halt token cannot promote a strategy. Act tokens are single use and a failed check does not spend one; a mandate is standing, because it is re-read on every process start, and its bound is its own expiry plus the signature covering its version."
+      }
     },
     {
       "id": "P0-TRADE-002",
@@ -1415,8 +1443,24 @@
       "root_cause": "see s32 root-cause map",
       "remediation": "Verify halt signatures against a gateway authority record and bind requested_by to the authenticated principal.",
       "validation_gate": "G5",
-      "current_status": "OPEN",
-      "remediation_gate": "GATE 1"
+      "current_status": "CLOSED",
+      "remediation_gate": "GATE 1",
+      "closure": {
+        "summary": "The commander's halt verifies a real owner authority token for act 'owner-halt' on subject 'van-trading-core'. requested_by is no longer taken from the request body: it is whichever configured per-principal token actually signed the request, and a body claiming a different principal is refused with a 403 rather than believed.",
+        "changed": [
+          "trading/commander/app.py",
+          "trading/commander/auth.py"
+        ],
+        "verified_by": [
+          "trading/tests/test_commander.py::test_requested_by_is_not_the_callers_to_declare",
+          "trading/tests/test_commander.py::test_a_matching_requested_by_is_accepted",
+          "trading/tests/test_commander.py::test_an_unknown_token_authenticates_nobody",
+          "trading/tests/test_commander.py::test_backtest_paths_are_confined_and_halt_needs_owner_signature"
+        ],
+        "residual": "A deployment that configures only the single shared token still authenticates one principal, so the agent-hidden commands remain reachable by whoever holds it.",
+        "residual_reason": "That is the pre-existing trust boundary, not a new one: one credential cannot distinguish two callers. The mechanism to separate them now exists — per-principal tokens beside the main one — and DEFAULT_PRINCIPAL names what the shared token authenticates rather than leaving it implied. Provisioning separate tokens is a deployment step.",
+        "posture": "The decisive test holds the Hermes token and puts 'van-gateway' in the body, which is exactly how the credential commands that return a signing key once were reached. It is refused, the honest Hermes call is refused, and the gateway's own token succeeds."
+      }
     },
     {
       "id": "P1-GOOG-002",

@@ -22,6 +22,15 @@ class TradingControlError(PermissionError):
     pass
 
 
+class TradingAuthorityError(TradingControlError):
+    """The owner authority for this act is absent, invalid, expired, reused or misdirected.
+
+    Distinct from its parent so the routes can answer 403 rather than 409: "you are not
+    authorised" and "that ticket is already confirmed" are different things to tell a
+    caller, and the confirm route used to map both to a conflict (P0-TRADE-001).
+    """
+
+
 def _import_vati():
     try:
         import vati  # noqa: F401
@@ -55,6 +64,11 @@ class TradingService:
     accounts_registry: str = ""
     lake_root: str = ""
     reporting_currency: str = "USD"
+    #: P0-TRADE-001. The verifier for owner-signed trading acts. Left None here and built
+    #: lazily so the dataclass stays importable without the vati package on the path; a
+    #: host with no registered owner key gets a verifier that refuses everything, which is
+    #: the correct default for a process that can halt live trading.
+    owner_authority: Any = None
 
     # ---------------------------------------------------------------- state
     def available(self) -> bool:
@@ -204,16 +218,35 @@ class TradingService:
         return book
 
     # --------------------------------------------------------- owner writes
-    @staticmethod
-    def _require_signature(owner_signature_ref: str) -> str:
-        sig = (owner_signature_ref or "").strip()
-        if not sig:
-            raise TradingControlError("owner-signed authority (A4) is required: owner_signature_ref is empty")
-        return sig
+    def _authority(self):
+        if self.owner_authority is None:
+            from vati.authority import OwnerAuthorityVerifier
+
+            self.owner_authority = OwnerAuthorityVerifier()
+        return self.owner_authority
+
+    def _require_signature(self, owner_signature_ref: str, *, act: str, subject: str) -> str:
+        """P0-TRADE-001 — this asked whether the string was non-empty, and "x" passed.
+
+        The act and the subject are inside the signature, so authority to confirm one
+        ticket is not authority to confirm another, and neither is authority to halt.
+        """
+        from vati.authority import OwnerAuthorityError
+
+        try:
+            return self._authority().verify(
+                owner_signature_ref, act=act, subject=subject
+            ).ref
+        except OwnerAuthorityError as exc:
+            raise TradingAuthorityError(
+                f"owner-signed authority (A4) is required: {exc}"
+            ) from exc
 
     def halt(self, *, owner_signature_ref: str, reason: str, now_ms: Optional[int] = None) -> dict[str, Any]:
         """Append an OWNER_HALT kill-switch event. The runner observes it and stops new orders; open positions stay protected."""
-        sig = self._require_signature(owner_signature_ref)
+        sig = self._require_signature(
+            owner_signature_ref, act="owner-halt", subject="van-trading-core"
+        )
         if not self.available():
             raise FileNotFoundError(f"trading ledger not available at {self.ledger_path}")
         EventKind, make_event, led = self._open()
@@ -221,13 +254,17 @@ class TradingService:
             now = now_ms if now_ms is not None else int(time.time() * 1000)
             ev = make_event(EventKind.KILL_SWITCH, self.producer, {"trigger": "OWNER_HALT", "sig": sig, "reason": (reason or "")[:500], "channel": "gateway"}, event_time_ms=now, received_time_ms=now, correlation_id="owner")
             chain = led.append(ev)
-            return {"halted": True, "trigger": "OWNER_HALT", "event_hash": ev.hash, "chain_hash": chain, "event_time_ms": now}
+            # `sig` is the verified authority's reference, so a caller recording this
+            # does not have to touch the raw token (P0-TRADE-001).
+            return {"halted": True, "trigger": "OWNER_HALT", "sig": sig, "event_hash": ev.hash, "chain_hash": chain, "event_time_ms": now}
         finally:
             led.close()
 
     def confirm_ticket(self, ticket_id: str, *, owner_signature_ref: str, fill_price: str, filled_qty: str, contract_note_ref: str, now_ms: Optional[int] = None) -> dict[str, Any]:
         """Record the owner's broker confirmation for a ZSE OWNER_TICKET. Only an OPEN ticket can be confirmed, once."""
-        sig = self._require_signature(owner_signature_ref)
+        sig = self._require_signature(
+            owner_signature_ref, act="ticket-confirm", subject=str(ticket_id)
+        )
         if not (contract_note_ref or "").strip():
             raise ValueError("a broker contract note reference is required")
         try:

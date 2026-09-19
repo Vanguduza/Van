@@ -4,6 +4,7 @@ from decimal import Decimal
 
 import pytest
 
+from conftest_owner_authority import OWNER_KEY_ID
 from vati.risk import (
     AuthorizationMode,
     Direction,
@@ -18,6 +19,43 @@ from vati.risk import (
 )
 
 NOW = 1_800_000_000
+
+#: P0-TRADE-001. Every suite used to hand the mandate the literal string
+#: "sig:owner-device:abc123" and it was admitted. A mandate is now admitted only against a
+#: registered owner key, so the fixtures hold one and sign for real — the tests exercise
+#: the path a genuine owner does, which is the only way they can prove it works.
+#:
+#: The key is written into a registry file and pointed at by VAN_OWNER_AUTHORITY_KEYS, so
+#: the default verifier every call site constructs picks it up. On a host with no registry
+#: the same default refuses everything, which is the production behaviour.
+_OWNER = None
+
+
+def owner_authority():
+    """The test owner's key, its verifier, and a signer. Created once per session."""
+    global _OWNER
+    if _OWNER is None:
+        from conftest_owner_authority import OwnerAuthorityHarness
+
+        _OWNER = OwnerAuthorityHarness()
+    return _OWNER
+
+
+@pytest.fixture(scope="session", autouse=True)
+def _register_owner_authority_key(tmp_path_factory):
+    import json
+    import os
+
+    owner = owner_authority()
+    path = tmp_path_factory.mktemp("owner-authority") / "owner_authority_keys.json"
+    path.write_text(json.dumps({"keys": {OWNER_KEY_ID: owner.pem}}), encoding="utf-8")
+    previous = os.environ.get("VAN_OWNER_AUTHORITY_KEYS")
+    os.environ["VAN_OWNER_AUTHORITY_KEYS"] = str(path)
+    yield
+    if previous is None:
+        os.environ.pop("VAN_OWNER_AUTHORITY_KEYS", None)
+    else:
+        os.environ["VAN_OWNER_AUTHORITY_KEYS"] = previous
 
 
 def mandate_dict(**overrides):
@@ -40,11 +78,21 @@ def mandate_dict(**overrides):
         "tier1_event_policy": "strategy_specific",
         "weekend_hold_allowed": False,
         "forbidden": sorted(HARD_FORBIDDEN_BEHAVIOURS),
-        "owner_signature_ref": "sig:owner-device:abc123",
         "signed_at_unix": NOW - 3600,
         "expires_at_unix": NOW + 30 * 86400,
     }
     base.update(overrides)
+    # Signed last, over the identity the caller ended up with: a mandate signed for
+    # version 1.0.0 must not admit an override that bumped the version.
+    base.setdefault(
+        "owner_signature_ref",
+        owner_authority().token(
+            act="mandate-admit",
+            subject=f"{base['mandate_id']}:{base['version']}",
+            issued_at_unix=int(base["signed_at_unix"]),
+            lifetime_seconds=int(base["expires_at_unix"]) - int(base["signed_at_unix"]),
+        ),
+    )
     return base
 
 

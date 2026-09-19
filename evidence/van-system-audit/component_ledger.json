@@ -4,17 +4,17 @@
   "canonical_blueprint": "docs/VAN_FINISHED_PRODUCT_BLUEPRINT_REV_1.md",
   "canonical_audit": "docs/VAN_WHOLE_SYSTEM_IMPLEMENTATION_AUDIT_AND_CERTIFICATION_REV_1.md",
   "created": "2026-09-19",
-  "component_count": 85,
+  "component_count": 87,
   "dispositions": {
     "DELETE": 10,
     "REPLACE": 4,
-    "COMPLETE": 33,
+    "COMPLETE": 35,
     "WIRE": 38
   },
   "by_gate": {
     "GATE 4": 29,
     "GATE 2": 10,
-    "GATE 3": 7,
+    "GATE 3": 9,
     "GATE 9": 9,
     "GATE 8": 9,
     "GATE 10": 7,
@@ -1563,6 +1563,47 @@
         "every upsert writes an attention_candidates row with its disposition and reason; a repeat inside the window is digested, quiet hours hold everything but a genuine urgent, and a self-recovered failure is suppressed"
       ],
       "owner_facing_projection": "the attention queue and whether an item interrupts",
+      "terminal_state": "INTEGRATED_AND_EVIDENCED"
+    },
+    {
+      "n": 86,
+      "component": "Owner authority tokens",
+      "path": "trading/vati/authority.py",
+      "maturity_class": "ABSENT",
+      "disposition": "COMPLETE",
+      "rationale": "Every trading authority surface checked whether a string was non-empty; no algorithm, key, authority record, expiry or revocation existed anywhere",
+      "remediation_gate": "GATE 3",
+      "producer": "the owner's device, signing a van-oa1 token",
+      "consumer": "mandate admission, kill-switch clear, owner halt, capsule promotion, ticket confirmation, the commander halt",
+      "production_caller": "trading/vati/risk/mandate.py, risk/governor.py, app/runner.py, strategies/capsule.py, commander/app.py, backend/van_gateway/trading/service.py",
+      "tests": [
+        "trading/tests/test_owner_authority.py",
+        "backend/tests/test_trading_api.py::test_halt_requires_internal_token_and_owner_signature_and_appends_event"
+      ],
+      "runtime_evidence": [
+        "the exact strings each surface used to accept are refused by that surface's own test; a token for one act or subject does not work on another; act tokens are single use"
+      ],
+      "owner_facing_projection": "the authority reference recorded in the ledger and the audit row",
+      "terminal_state": "INTEGRATED_AND_EVIDENCED"
+    },
+    {
+      "n": 87,
+      "component": "Commander principal binding",
+      "path": "trading/commander/auth.py",
+      "maturity_class": "PARTIAL",
+      "disposition": "COMPLETE",
+      "rationale": "requested_by was client-supplied and was the gate for the credential commands that return a signing key once",
+      "remediation_gate": "GATE 3",
+      "producer": "verify_request_principal, which returns the principal whose token signed the request",
+      "consumer": "the /v1/cmd/{name} route's agent-hidden command check",
+      "production_caller": "trading/commander/app.py command()",
+      "tests": [
+        "trading/tests/test_commander.py::test_requested_by_is_not_the_callers_to_declare"
+      ],
+      "runtime_evidence": [
+        "the Hermes token claiming to be van-gateway is refused 403; the gateway's own token succeeds on the same command"
+      ],
+      "owner_facing_projection": null,
       "terminal_state": "INTEGRATED_AND_EVIDENCED"
     }
   ],

@@ -53,7 +53,7 @@ from van_gateway.command.authority import CommandAuthorityService
 from van_gateway.command.standing import StandingAutomationAuthorityService
 from van_gateway.runtime_api import OwnerRuntimeApi
 from van_gateway.storage.db import Store
-from van_gateway.trading import TradingControlError, TradingService
+from van_gateway.trading import TradingAuthorityError, TradingControlError, TradingService
 from van_gateway.trading.accounts import ACTIONS as ACCOUNT_ACTIONS, AccountOnboarding, CommanderAccountControl, LocalAccountControl, OAuthPending, canonical_action, redact as redact_account_args
 
 
@@ -954,7 +954,9 @@ def create_app() -> FastAPI:
         await audit.record(
             result="owner_halt_recorded",
             capability="trading.owner_halt",
-            approval=req.owner_signature_ref,
+            # The verified authority's reference, never the raw token: these rows are
+            # long-lived and the token is a credential (P0-TRADE-001).
+            approval=result["sig"],
             tool="vati_ledger",
             after={"event_hash": result["event_hash"], "chain_hash": result["chain_hash"]},
             evidence_pointer=result["event_hash"],
@@ -976,6 +978,9 @@ def create_app() -> FastAPI:
                 filled_qty=req.filled_qty,
                 contract_note_ref=req.contract_note_ref,
             )
+        except TradingAuthorityError as exc:
+            # Not authorised is a 403; a ticket already confirmed is the 409 below.
+            raise HTTPException(status_code=403, detail=str(exc)) from exc
         except TradingControlError as exc:
             raise HTTPException(status_code=409, detail=str(exc)) from exc
         except KeyError as exc:
