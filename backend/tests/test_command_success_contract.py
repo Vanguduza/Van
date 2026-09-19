@@ -22,7 +22,11 @@ import pytest
 import pytest_asyncio
 
 from van_gateway.command.mission_link import CommandMissionLink
-from van_gateway.command.resolver import ResolutionMode, TypedCommandResolver
+from van_gateway.command.resolver import (
+    CommandResolution,
+    ResolutionMode,
+    TypedCommandResolver,
+)
 from van_gateway.command.success_contracts import (
     NO_CONTRACT_REASONS,
     contract_for,
@@ -70,15 +74,24 @@ class Notebooks:
     class NotFound(RuntimeError):
         pass
 
-    def __init__(self, known=()):
+    def __init__(self, known=(), sources=()):
         self.known = set(known)
+        #: (notebook_id, source_name) pairs the provider would return.
+        self.sources = {tuple(pair) for pair in sources}
         self.asked: list[str] = []
+        self.sources_asked: list[tuple[str, str]] = []
 
     async def notebook_enterprise_get(self, notebook_id: str):
         self.asked.append(notebook_id)
         if notebook_id not in self.known:
             raise self.NotFound("notebook_enterprise_not_found")
         return {"name": notebook_id, "sources": [{"id": "s1"}]}
+
+    async def notebook_enterprise_source_get(self, notebook_id: str, source_name: str):
+        self.sources_asked.append((notebook_id, source_name))
+        if (notebook_id, source_name) not in self.sources:
+            raise self.NotFound("notebook_enterprise_not_found")
+        return {"name": source_name}
 
 
 def _request(text: str, *, action_class=ActionClass.A4) -> CommandRequest:
@@ -309,3 +322,229 @@ class TestAnOwnerCommandCanNowBeVerified:
             store, "halt trading", trading=HaltedLedger(), knowledge=Notebooks(),
         )
         assert not any(c.startswith("unverifiable: ") for c in mission.constraints)
+
+
+@pytest.mark.asyncio
+class TestASourceMutationIsVerifiedAgainstTheSources:
+    """P1-VERIFY-004 — the counterexample that used to pass.
+
+    The first version of this contract system gave `sources.delete` the postcondition
+    `notebook_exists: True`, because the notebook readback was the observation that
+    existed. Deleting a source does not change whether the notebook exists, so a delete
+    that silently failed satisfied the contract and the mission reached VERIFIED_SUCCESS
+    with the source still there. VAN would have told the owner it had removed something it
+    had not touched.
+
+    That is the right architecture producing the wrong answer: the shape of the requirement
+    was satisfied and the meaning was not. A related but weaker condition must never certify
+    the requested effect.
+    """
+
+    async def test_a_delete_is_confirmed_by_the_sources_being_gone(self, store):
+        knowledge = Notebooks(known=("nb-7",), sources=())
+        svc, mission = await _mission_for(
+            store,
+            "delete the sources a.pdf, b.pdf from the notebook enterprise notebook id nb-7",
+            trading=HaltedLedger(), knowledge=knowledge,
+        )
+        assert mission.success_contract.verifier_class == "notebook-source-readback"
+        assert mission.success_contract.postconditions == {
+            "notebook_id": "nb-7",
+            "source_names": ["a.pdf", "b.pdf"],
+            "sources_present": [],
+            "sources_absent": ["a.pdf", "b.pdf"],
+        }
+        done = await svc.transition(mission.mission_id, target=MissionState.VERIFIED_SUCCESS)
+        assert done.state is MissionState.VERIFIED_SUCCESS
+        # Each named source was asked about individually. The notebook was not consulted.
+        assert sorted(knowledge.sources_asked) == [("nb-7", "a.pdf"), ("nb-7", "b.pdf")]
+        assert knowledge.asked == []
+
+    async def test_a_delete_that_did_nothing_cannot_succeed(self, store):
+        """The counterexample itself: the notebook is intact and the sources are still
+        there, which the old contract read as success."""
+        knowledge = Notebooks(known=("nb-7",), sources=(("nb-7", "a.pdf"), ("nb-7", "b.pdf")))
+        svc, mission = await _mission_for(
+            store,
+            "delete the sources a.pdf, b.pdf from the notebook enterprise notebook id nb-7",
+            trading=HaltedLedger(), knowledge=knowledge,
+        )
+        with pytest.raises(MissionError, match="VERIFICATION_INSUFFICIENT"):
+            await svc.transition(mission.mission_id, target=MissionState.VERIFIED_SUCCESS)
+        await svc.transition(mission.mission_id, target=MissionState.UNVERIFIABLE)
+        record = await svc.verification_record(mission.mission_id)
+        assert record.status is VerificationStatus.FAILED
+        assert set(record.missing_postconditions) == {"sources_present", "sources_absent"}
+
+    async def test_a_partial_delete_is_not_a_success(self, store):
+        """One of two removed. Counting would satisfy "some are gone"; naming the exact
+        set does not, which is why the postcondition is the list rather than a number."""
+        knowledge = Notebooks(known=("nb-7",), sources=(("nb-7", "b.pdf"),))
+        svc, mission = await _mission_for(
+            store,
+            "delete the sources a.pdf, b.pdf from the notebook enterprise notebook id nb-7",
+            trading=HaltedLedger(), knowledge=knowledge,
+        )
+        with pytest.raises(MissionError, match="VERIFICATION_INSUFFICIENT"):
+            await svc.transition(mission.mission_id, target=MissionState.VERIFIED_SUCCESS)
+        await svc.transition(mission.mission_id, target=MissionState.UNVERIFIABLE)
+        record = await svc.verification_record(mission.mission_id)
+        assert record.observed_postconditions["sources_present"] == ["b.pdf"]
+        assert record.observed_postconditions["sources_absent"] == ["a.pdf"]
+
+    async def test_a_provider_that_cannot_be_asked_is_not_a_deletion(self, store):
+        class Unreachable:
+            async def notebook_enterprise_source_get(self, notebook_id, source_name):
+                raise RuntimeError("notebook_enterprise_http_503")
+
+        svc, mission = await _mission_for(
+            store,
+            "delete the sources a.pdf from the notebook enterprise notebook id nb-7",
+            trading=HaltedLedger(), knowledge=Unreachable(),
+        )
+        with pytest.raises(MissionError, match="VERIFICATION_INSUFFICIENT"):
+            await svc.transition(mission.mission_id, target=MissionState.VERIFIED_SUCCESS)
+        await svc.transition(mission.mission_id, target=MissionState.UNVERIFIABLE)
+        assert (await svc.verification_record(mission.mission_id)).status is (
+            VerificationStatus.UNVERIFIABLE
+        )
+
+    async def test_the_evidence_cites_the_sources_not_the_notebook(self, store):
+        """An auditor following a `provider-readback://notebook/nb-7` reference on a source
+        deletion would be pointed at the object that was not the subject of the claim."""
+        knowledge = Notebooks(known=("nb-7",), sources=())
+        svc, mission = await _mission_for(
+            store,
+            "delete the sources a.pdf from the notebook enterprise notebook id nb-7",
+            trading=HaltedLedger(), knowledge=knowledge,
+        )
+        await svc.transition(mission.mission_id, target=MissionState.VERIFIED_SUCCESS)
+        record = await svc.verification_record(mission.mission_id)
+        assert record.evidence_refs == [
+            "provider-readback://notebook/nb-7/sources/a.pdf#absent"
+        ]
+
+    def test_no_source_action_is_certified_by_the_notebook_existing(self):
+        """The family, not just the case that was found.
+
+        Whatever else a source contract says, it may not rest on `notebook_exists`: that is
+        a claim about a different object and it is true whether or not the mutation worked.
+        """
+        from van_gateway.command.success_contracts import (
+            _NOTEBOOK_SOURCE_ACTIONS,
+            NOTEBOOK_SOURCE_READBACK,
+        )
+
+        for action_id, must_be_present in _NOTEBOOK_SOURCE_ACTIONS.items():
+            resolution = CommandResolution(
+                mode=ResolutionMode.EXACT_ACTION,
+                normalized_text="x", intent_id="X", action_id=action_id,
+                parameters={"notebook_id": "nb-1", "source_names": ["s-1"]},
+            )
+            contract = contract_for(resolution)
+            assert contract.verifier_class == NOTEBOOK_SOURCE_READBACK, action_id
+            assert "notebook_exists" not in contract.postconditions, action_id
+            assert contract.postconditions["source_names"] == ["s-1"], action_id
+            expected = "sources_present" if must_be_present else "sources_absent"
+            assert contract.postconditions[expected] == ["s-1"], action_id
+
+    def test_a_source_action_naming_nothing_gets_no_contract(self):
+        """Better unverifiable than verified against the wrong object."""
+        from van_gateway.command.success_contracts import no_contract_reason
+
+        resolution = CommandResolution(
+            mode=ResolutionMode.EXACT_ACTION, normalized_text="x", intent_id="X",
+            action_id="google.notebook.enterprise.sources.delete",
+            parameters={"notebook_id": "nb-1"},
+        )
+        assert not contract_for(resolution).is_checkable
+        assert "no specific object" in no_contract_reason(resolution)
+
+
+@pytest.mark.asyncio
+class TestTheSourceVerifierRefusesTheWeakerQuestion:
+    """P1-VERIFY-004 — the hazard that made this defect possible in the first place.
+
+    The notebook readback is always available. That is exactly why a source verifier must
+    never reach for it: a contract that arrives without source names would otherwise be
+    answered by the weaker observation, which is the original bug re-entering through the
+    adapter instead of through the contract.
+
+    `contract_for` will not build such a contract, so this is unreachable from the command
+    path today. It is tested anyway, because "unreachable" is a property of the current
+    caller and the adapter outlives its callers — and a mutation that added the fallback
+    survived the suite until this existed.
+    """
+
+    async def _registry(self, store, knowledge):
+        from van_gateway.verification.production import build_mission_registry
+
+        return build_mission_registry(
+            store=store, trading=HaltedLedger(), knowledge=knowledge,
+        )
+
+    async def test_a_contract_with_no_sources_is_unverifiable_not_answered(self, store):
+        from van_gateway.mission.models import SuccessContract
+
+        knowledge = Notebooks(known=("nb-7",), sources=())
+        registry = await self._registry(store, knowledge)
+        record = await registry.verify(
+            strategy="notebook-source-readback",
+            contract=SuccessContract(
+                postconditions={"notebook_id": "nb-7", "sources_absent": []},
+                verifier_class="notebook-source-readback",
+            ),
+            context={"now_ms": 1},
+        )
+        assert record.status is VerificationStatus.UNVERIFIABLE
+        assert record.evidence_refs == []
+        # And the notebook was never consulted, which is the point: a weaker answer was
+        # available and was not given.
+        assert knowledge.asked == []
+
+    async def test_a_contract_with_no_notebook_is_unverifiable_too(self, store):
+        from van_gateway.mission.models import SuccessContract
+
+        knowledge = Notebooks(known=("nb-7",), sources=())
+        registry = await self._registry(store, knowledge)
+        record = await registry.verify(
+            strategy="notebook-source-readback",
+            contract=SuccessContract(
+                postconditions={"source_names": ["a.pdf"], "sources_absent": ["a.pdf"]},
+                verifier_class="notebook-source-readback",
+            ),
+            context={"now_ms": 1},
+        )
+        assert record.status is VerificationStatus.UNVERIFIABLE
+
+    async def test_the_two_strategies_ask_different_providers_methods(self, store):
+        """They are separate strategies rather than one adapter that chooses, so a
+        contract cannot drift from the notebook question to the source question or back."""
+        from van_gateway.mission.models import SuccessContract
+
+        knowledge = Notebooks(known=("nb-7",), sources=(("nb-7", "a.pdf"),))
+        registry = await self._registry(store, knowledge)
+        await registry.verify(
+            strategy="api-readback",
+            contract=SuccessContract(
+                postconditions={"notebook_id": "nb-7", "notebook_exists": True},
+                verifier_class="api-readback",
+            ),
+            context={"now_ms": 1},
+        )
+        assert knowledge.asked == ["nb-7"]
+        assert knowledge.sources_asked == []
+
+        await registry.verify(
+            strategy="notebook-source-readback",
+            contract=SuccessContract(
+                postconditions={
+                    "notebook_id": "nb-7", "source_names": ["a.pdf"],
+                    "sources_present": ["a.pdf"], "sources_absent": [],
+                },
+                verifier_class="notebook-source-readback",
+            ),
+            context={"now_ms": 1},
+        )
+        assert knowledge.sources_asked == [("nb-7", "a.pdf")]
+        assert knowledge.asked == ["nb-7"]  # unchanged by the source verification

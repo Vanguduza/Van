@@ -428,6 +428,24 @@ class PromotionState(str, Enum):
     FORBIDDEN = "FORBIDDEN"
 
 
+class StrategyOutcome(str, Enum):
+    """What a finished mission says about the approach that ran it.
+
+    P1-LEARN-005 — three values because there are three things a terminal mission can mean,
+    and the boolean this replaced could express two. The distinction that matters most is
+    the third: a run VAN could not verify is not a run that failed, and treating it as one
+    is how a strategy accumulates a demotion record out of VAN's own blind spots.
+    """
+
+    #: The mission reached VERIFIED_SUCCESS: an independent observation confirmed it.
+    SUCCESS = "SUCCESS"
+    #: The work was attempted and did not do what it was supposed to.
+    FAILURE = "FAILURE"
+    #: The run says nothing about the approach — refused, cancelled, expired, or finished
+    #: without anything able to check it.
+    INCONCLUSIVE = "INCONCLUSIVE"
+
+
 class StrategyLearning:
     """§25 — which capability sequences work, promoted only on eval evidence.
 
@@ -512,10 +530,40 @@ class StrategyLearning:
         return strategy_id
 
     async def record_outcome(
-        self, strategy_id: str, *, verified_success: bool, now_ms: int | None = None
+        self,
+        strategy_id: str,
+        *,
+        outcome: StrategyOutcome,
+        now_ms: int | None = None,
     ) -> None:
+        """P1-LEARN-005 — only evidence that says something about the strategy counts.
+
+        This took a boolean, and `False` meant `failure_count + 1`. Every non-verified
+        terminal state therefore punished the strategy: an owner cancelling, a policy
+        refusal, an unsafe refusal, a deadline expiry and an UNVERIFIABLE run all read as
+        "this approach does not work". None of them says that. A policy refusal is a
+        statement about authority, a cancellation is a statement about the owner changing
+        their mind, and UNVERIFIABLE is explicitly a statement that VAN does not know.
+
+        The consequence was not cosmetic. `auto_demote` demotes below a 60% success rate
+        over three runs, so three cancellations would have demoted a strategy that had
+        never once failed — and because promotion needs eval evidence and ten runs while
+        demotion needs neither, that damage is cheap to do and expensive to undo.
+
+        INCONCLUSIVE is recorded and counts toward nothing, which is the honest handling:
+        the run happened, and it tells us nothing.
+        """
         now = int(time.time() * 1000) if now_ms is None else now_ms
-        column = "success_count" if verified_success else "failure_count"
+        if outcome is StrategyOutcome.INCONCLUSIVE:
+            # Touched, not counted. The timestamp moves so a strategy that is being
+            # exercised does not look abandoned, and neither counter changes.
+            await self.store.execute(
+                "UPDATE execution_strategies SET inconclusive_count = inconclusive_count + 1, "
+                "updated_at_ms = ? WHERE strategy_id = ?",
+                (now, strategy_id),
+            )
+            return
+        column = "success_count" if outcome is StrategyOutcome.SUCCESS else "failure_count"
         await self.store.execute(
             f"UPDATE execution_strategies SET {column} = {column} + 1, updated_at_ms = ? "
             "WHERE strategy_id = ?",
@@ -624,6 +672,7 @@ __all__ = [
     "HARNESS_VERSION",
     "AIEvolutionRadar",
     "BenchmarkHarness",
+    "StrategyOutcome",
     "ExternalRealityModel",
     "PipelineState",
     "PromotionState",

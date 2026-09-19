@@ -19,7 +19,12 @@ from __future__ import annotations
 import pytest
 import pytest_asyncio
 
-from van_gateway.evolution.radar import PromotionState, RadarError, StrategyLearning
+from van_gateway.evolution.radar import (
+    PromotionState,
+    RadarError,
+    StrategyLearning,
+    StrategyOutcome,
+)
 from van_gateway.learning.feed import LearningFeed
 from van_gateway.mission.models import (
     AuthorityEnvelope,
@@ -76,7 +81,12 @@ async def _run_mission(
             capability_id=capability_id, executor="HERMES",
             executor_ref=f"ref-{index}",
         )
-    await svc.transition(mission.mission_id, target=MissionState.VERIFYING)
+    # Only the verification outcomes are reachable through VERIFYING; a refusal or a
+    # cancellation leaves from RUNNING. Driving each terminal state by its real path
+    # matters here, because the point of these tests is what the *state machine* produces.
+    if terminal in (MissionState.VERIFIED_SUCCESS, MissionState.PARTIAL_SUCCESS,
+                    MissionState.UNVERIFIABLE, MissionState.FAILED):
+        await svc.transition(mission.mission_id, target=MissionState.VERIFYING)
     return await svc.transition(mission.mission_id, target=terminal)
 
 
@@ -141,7 +151,88 @@ class TestAStrategyIsSomethingVanActuallyDid:
         )
         row = (await store.fetchall("SELECT * FROM execution_strategies"))[0]
         assert int(row["success_count"]) == 0
+
+    async def test_a_mission_that_was_never_verified_is_not_a_failure_either(self, store):
+        """P1-LEARN-005 — and this assertion used to say `failure_count == 1`.
+
+        That is the shape of the defect and the shape of the test that hid it: the
+        implementation collapsed every non-verified terminal state into a failure, and this
+        test pinned the collapse rather than catching it. UNVERIFIABLE means VAN does not
+        know. Recording "does not know" as "does not work" is how a strategy accumulates a
+        demotion record out of VAN's own blind spots.
+        """
+        svc = _svc(store)
+        await _run_mission(
+            svc, mission_class="X", capabilities=["a"], terminal=MissionState.UNVERIFIABLE,
+        )
+        row = (await store.fetchall("SELECT * FROM execution_strategies"))[0]
+        assert int(row["failure_count"]) == 0
+        assert int(row["inconclusive_count"]) == 1
+
+    @pytest.mark.parametrize(
+        "terminal",
+        [
+            MissionState.CANCELLED,
+            MissionState.BLOCKED_POLICY,
+            MissionState.BLOCKED_UNSAFE,
+            MissionState.EXPIRED,
+            MissionState.UNVERIFIABLE,
+            MissionState.PARTIAL_SUCCESS,
+        ],
+    )
+    async def test_no_terminal_state_but_failure_punishes_the_strategy(self, store, terminal):
+        """Every neighbour of the discovered bug, not only the one that was found.
+
+        A policy refusal is a statement about authority. A cancellation is a statement
+        about the owner changing their mind. An expiry is as likely to be the runtime as
+        the approach. None of them is evidence that the strategy does not work, and
+        `auto_demote` fires below a 60% rate over three runs — so three cancellations would
+        have demoted a strategy that had never once failed. Promotion needs eval evidence
+        and ten runs; demotion needs neither, which makes that damage cheap to do and
+        expensive to undo.
+        """
+        svc = _svc(store)
+        await _run_mission(svc, mission_class="X", capabilities=["a"], terminal=terminal)
+        row = (await store.fetchall("SELECT * FROM execution_strategies"))[0]
+        assert int(row["failure_count"]) == 0, terminal
+        assert int(row["success_count"]) == 0, terminal
+        assert int(row["inconclusive_count"]) == 1, terminal
+
+    async def test_a_real_execution_failure_still_counts(self, store):
+        """The other half: FAILED is the one non-success state that is evidence."""
+        svc = _svc(store)
+        await _run_mission(
+            svc, mission_class="X", capabilities=["a"], terminal=MissionState.FAILED,
+        )
+        row = (await store.fetchall("SELECT * FROM execution_strategies"))[0]
         assert int(row["failure_count"]) == 1
+        assert int(row["inconclusive_count"]) == 0
+
+    async def test_cancellations_cannot_demote_a_working_strategy(self, store):
+        """The consequence, driven end to end rather than asserted on a counter."""
+        from van_gateway.evolution.radar import PromotionState, StrategyLearning
+
+        svc = _svc(store)
+        for _ in range(10):
+            await _run_mission(
+                svc, mission_class="X", capabilities=["a"],
+                terminal=MissionState.VERIFIED_SUCCESS,
+            )
+        learning = StrategyLearning(store)
+        strategy_id = str((await store.fetchall("SELECT * FROM execution_strategies"))[0]["strategy_id"])
+        await learning.promote(
+            strategy_id, target=PromotionState.PREFERRED, eval_run_id="eval-1",
+        )
+        for _ in range(10):
+            await _run_mission(
+                svc, mission_class="X", capabilities=["a"], terminal=MissionState.CANCELLED,
+            )
+        assert await learning.auto_demote() == []
+        row = await store.fetchone(
+            "SELECT promotion_state FROM execution_strategies WHERE strategy_id = ?",
+            (strategy_id,),
+        )
+        assert str(row["promotion_state"]) == "PREFERRED"
 
     async def test_a_mission_that_executed_nothing_produces_no_strategy(self, store):
         """The common case today: the gateway delegates and Hermes creates the work.
@@ -197,7 +288,7 @@ class TestLearningCannotWidenAuthority:
         )
         for strategy_id in (wide, narrow):
             for _ in range(10):
-                await learning.record_outcome(strategy_id, verified_success=True)
+                await learning.record_outcome(strategy_id, outcome=StrategyOutcome.SUCCESS)
             await learning.promote(
                 strategy_id, target=PromotionState.PREFERRED, eval_run_id="eval-1",
             )
@@ -216,7 +307,7 @@ class TestLearningCannotWidenAuthority:
             max_action_class=ActionClass.A4,
         )
         for _ in range(10):
-            await learning.record_outcome(wide, verified_success=True)
+            await learning.record_outcome(wide, outcome=StrategyOutcome.SUCCESS)
         await learning.promote(wide, target=PromotionState.PREFERRED, eval_run_id="e")
         offered = await learning.permitted_for("X", envelope_max_action_class=ActionClass.A4)
         assert [r["strategy_id"] for r in offered] == [wide]
@@ -245,10 +336,10 @@ class TestRegressionDemotionRuns:
             mission_class="X", capability_sequence=["a"], max_action_class=ActionClass.A1,
         )
         for _ in range(10):
-            await learning.record_outcome(strategy_id, verified_success=True)
+            await learning.record_outcome(strategy_id, outcome=StrategyOutcome.SUCCESS)
         await learning.promote(strategy_id, target=PromotionState.PREFERRED, eval_run_id="e")
         for _ in range(10):
-            await learning.record_outcome(strategy_id, verified_success=False)
+            await learning.record_outcome(strategy_id, outcome=StrategyOutcome.FAILURE)
 
         assert await learning.auto_demote() == [strategy_id]
         row = await store.fetchone(

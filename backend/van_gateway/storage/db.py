@@ -8,7 +8,7 @@ from typing import Any, AsyncIterator
 
 import aiosqlite
 
-SCHEMA_VERSION = 22
+SCHEMA_VERSION = 24
 
 
 MIGRATION_17 = """
@@ -140,6 +140,36 @@ MIGRATION_22 = """
 -- claim_count records how many times a claim has been taken, so a recovered claim is
 -- visible rather than looking like the first attempt.
 ALTER TABLE idempotency ADD COLUMN claim_count INTEGER NOT NULL DEFAULT 1;
+"""
+
+MIGRATION_23 = """
+-- P1-LEARN-005: strategy outcomes were a boolean, and False meant failure_count + 1. Every
+-- non-verified terminal state therefore punished the strategy — an owner cancelling, a
+-- policy refusal, an unsafe refusal, a deadline expiry and an UNVERIFIABLE run all read as
+-- "this approach does not work", and none of them says that.
+--
+-- The third counter exists so INCONCLUSIVE is recorded rather than discarded: a strategy
+-- that keeps being cancelled is worth seeing, and it is not the same as one that keeps
+-- failing.
+ALTER TABLE execution_strategies ADD COLUMN inconclusive_count INTEGER NOT NULL DEFAULT 0;
+"""
+
+MIGRATION_24 = """
+-- P2-MEM-003: every mission goal was promoted straight into the standing-intent graph, so
+-- "what is on my calendar?" became a long-lived owner objective that stayed ACTIVE until
+-- the ninety-day stale sweep. §77's conflict detection then has transient commands to
+-- contradict genuine long-term goals with, and the owner model fills with noise that looks
+-- like evidence.
+--
+-- A horizon separates what the owner *asked for once* from what they are *trying to do*.
+-- Everything starts EPHEMERAL. Promotion to STANDING requires evidence — repetition, or an
+-- explicit owner statement — and is recorded with what caused it.
+ALTER TABLE intent_nodes ADD COLUMN horizon TEXT NOT NULL DEFAULT 'EPHEMERAL';
+ALTER TABLE intent_nodes ADD COLUMN observation_count INTEGER NOT NULL DEFAULT 1;
+-- Provenance: what promoted this, so a standing intent can be argued with.
+ALTER TABLE intent_nodes ADD COLUMN promoted_reason TEXT;
+ALTER TABLE intent_nodes ADD COLUMN promoted_at_ms INTEGER;
+CREATE INDEX IF NOT EXISTS idx_intent_nodes_horizon ON intent_nodes(horizon, status);
 """
 
 MIGRATIONS: dict[int, str] = {
@@ -1466,6 +1496,8 @@ MIGRATIONS: dict[int, str] = {
     20: MIGRATION_20,
     21: MIGRATION_21,
     22: MIGRATION_22,
+    23: MIGRATION_23,
+    24: MIGRATION_24,
 }
 
 

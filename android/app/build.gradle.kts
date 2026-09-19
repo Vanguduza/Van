@@ -184,14 +184,25 @@ dependencies {
  * where voice capture could never work — and the only signal was an error code at the moment
  * the owner first spoke.
  *
- * This asserts the invariant at build time by reading the policy's own source, so the check
- * cannot drift from the thing it checks: if someone lowers minSdk without shipping Sherpa,
- * or adds an API branch resolving to a runtime that is absent, the build stops.
+ * This asserts the invariant at build time by reading both of the things it checks from
+ * their canonical homes: minSdk from `defaultConfig`, and the on-device floor from the
+ * policy's own source. Neither is mirrored into a constant here, so lowering minSdk without
+ * shipping Sherpa, or adding an API branch that resolves to a runtime this build does not
+ * contain, stops the build rather than the owner.
  */
 val voiceRuntimeGuard = tasks.register("assertVoiceRuntimeIsShippable") {
     val policySource = layout.projectDirectory
         .file("src/main/java/com/dial/van/voice/VoiceRecognitionModels.kt").asFile
-    val minSdkValue = 31
+    // P1-VOICE-003 — read from the configuration this guards rather than mirrored.
+    //
+    // This was `val minSdkValue = 31`, a second constant that drifts silently: lowering
+    // defaultConfig.minSdk back to 26 without touching it left the guard passing while the
+    // build it guards became unshippable. A separate verification test parses the Gradle
+    // declaration and would have caught it, but the assembly guard — the one that stops a
+    // release — would not have. One source of truth, and this is it.
+    val minSdkValue = requireNotNull(android.defaultConfig.minSdk) {
+        "defaultConfig.minSdk is unset, so the voice runtime guard has nothing to check"
+    }
     val hasSherpaRuntime = configurations.findByName("implementation")
         ?.allDependencies
         ?.any { it.name.contains("sherpa", ignoreCase = true) } ?: false

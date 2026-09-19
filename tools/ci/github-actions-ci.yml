@@ -2,7 +2,14 @@ name: van-ci
 
 on:
   push:
-    branches: [main]
+    # P3-OPS-011 — `main` alone meant the branch doing the certifying was never certified.
+    # Every closure in this programme lands on claude/**, no pull request was open, and so
+    # the workflow had zero runs against any of it: the test counts in the commit messages
+    # were developer-local evidence being read as CI. A gate that does not run on the head
+    # being certified is not a gate.
+    branches:
+      - main
+      - 'claude/**'
   pull_request:
 
 concurrency:

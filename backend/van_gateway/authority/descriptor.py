@@ -122,6 +122,9 @@ VERIFICATION_ALIASES: dict[str, str] = {
     "state-predicate": "state-predicate",
     "domain-attestation": "domain-attestation",
     "browser-evidence": "browser-evidence",
+    # P1-VERIFY-004 — a source mutation is read back per source, which is a narrower
+    # question than the notebook readback and is not the same claim.
+    "notebook-source-readback": "notebook-source-readback",
     "ledger-event": "ledger-event",
     "repository-sha": "repository-sha",
     "ci-run": "ci-run",

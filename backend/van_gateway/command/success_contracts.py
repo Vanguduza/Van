@@ -36,6 +36,7 @@ from van_gateway.mission.models import SuccessContract
 #: Strategy names, matching the registrations in `verification.production`.
 TRADING_HALT = "trading-halt"
 NOTEBOOK_READBACK = "api-readback"
+NOTEBOOK_SOURCE_READBACK = "notebook-source-readback"
 
 #: Why an exactly-resolved action still gets no checkable contract. Recorded rather than
 #: implied: "VAN cannot confirm this" is a supported outcome and the owner is entitled to
@@ -51,12 +52,26 @@ NO_CONTRACT_REASONS: dict[str, str] = {
     ),
 }
 
-#: The notebook actions and what each one claims about the notebook afterwards.
+#: Notebook actions whose claim is about the notebook itself.
+#:
+#: Only two belong here. `create` says a notebook exists afterwards and `delete` says it
+#: does not, and for both the notebook *is* the object the owner asked about.
 _NOTEBOOK_ACTIONS: dict[str, bool] = {
     "google.notebook.enterprise.create": True,
-    "google.notebook.enterprise.sources.add": True,
     "google.notebook.enterprise.delete": False,
-    "google.notebook.enterprise.sources.delete": True,
+}
+
+#: Notebook actions whose claim is about named sources, and whether each must be there.
+#:
+#: P1-VERIFY-004 — these were in `_NOTEBOOK_ACTIONS` with the postcondition
+#: `notebook_exists: True`, which is the defect this whole finding family is about wearing
+#: the right architecture. Deleting a source does not change whether the notebook exists,
+#: so a delete that silently failed satisfied the contract and the mission could reach
+#: VERIFIED_SUCCESS with the source still there. A related but weaker condition must never
+#: certify the requested effect.
+_NOTEBOOK_SOURCE_ACTIONS: dict[str, bool] = {
+    "google.notebook.enterprise.sources.add": True,
+    "google.notebook.enterprise.sources.delete": False,
 }
 
 
@@ -80,6 +95,30 @@ def contract_for(resolution: CommandResolution) -> SuccessContract:
         return SuccessContract(
             verifier_class=TRADING_HALT,
             postconditions={"kill_switch_active": True, "owner_halt_active": True},
+            evidence_required=True,
+        )
+
+    if action_id in _NOTEBOOK_SOURCE_ACTIONS:
+        notebook_id = str(resolution.parameters.get("notebook_id") or "").strip()
+        names = sorted(
+            {str(n).strip() for n in (resolution.parameters.get("source_names") or []) if str(n).strip()}
+            | {str(n).strip() for n in (resolution.parameters.get("sources") or []) if str(n).strip()}
+        )
+        if not notebook_id or not names:
+            return SuccessContract()
+        must_be_present = _NOTEBOOK_SOURCE_ACTIONS[action_id]
+        return SuccessContract(
+            verifier_class=NOTEBOOK_SOURCE_READBACK,
+            postconditions={
+                "notebook_id": notebook_id,
+                "source_names": names,
+                # The claim is about these exact sources. An add says all of them are
+                # there afterwards and a delete says none of them is, and each is stated
+                # as the full expected list rather than a count: a count is satisfied by
+                # the right number of the wrong sources.
+                "sources_present": names if must_be_present else [],
+                "sources_absent": [] if must_be_present else names,
+            },
             evidence_required=True,
         )
 
@@ -117,6 +156,11 @@ def no_contract_reason(resolution: CommandResolution) -> str | None:
             "the notebook this action creates has no id until the provider assigns one, "
             "so there is nothing to read back at command time"
         )
+    if resolution.action_id in _NOTEBOOK_SOURCE_ACTIONS:
+        return (
+            "the command named no notebook or no sources, so there is no specific object "
+            "for the gateway to read back"
+        )
     return NO_CONTRACT_REASONS.get(
         resolution.action_id,
         f"no independent observation is registered for {resolution.action_id}",
@@ -125,6 +169,7 @@ def no_contract_reason(resolution: CommandResolution) -> str | None:
 
 __all__ = [
     "NOTEBOOK_READBACK",
+    "NOTEBOOK_SOURCE_READBACK",
     "NO_CONTRACT_REASONS",
     "TRADING_HALT",
     "contract_for",

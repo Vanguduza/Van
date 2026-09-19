@@ -38,6 +38,15 @@ interface VoiceInputCallback {
     fun onFinal(text: String) = Unit
     fun onFinalResult(result: VoiceRecognitionResult) = onFinal(result.text)
     fun onError(code: Int)
+    /**
+     * P1-VOICE-003 — why VAN cannot listen, in words the owner can act on.
+     *
+     * Defaulted so every existing implementation keeps compiling and the ones that care
+     * can override. An error code alone cannot distinguish "your Android is too old" from
+     * "your speech recognizer is disabled", and only the second is something the owner can
+     * fix.
+     */
+    fun onUnavailable(reason: String?) = Unit
     fun onListeningChanged(listening: Boolean)
 }
 
@@ -217,6 +226,11 @@ class VoiceInputManager(
         val localRecognizer = recognizer
         if (localRecognizer == null) {
             callback.onListeningChanged(false)
+            // P1-VOICE-003 — the reason travels with the code. An owner told only
+            // "-10002" learns nothing, and the two situations behind these codes need
+            // different things from them: one is an unsupported Android version, the
+            // other is a recognizer they can install or re-enable.
+            callback.onUnavailable(unavailableReason())
             callback.onError(
                 if (capability.backend == VoiceRecognitionBackend.SHERPA_PRIMARY_REQUIRED) {
                     ERROR_SHERPA_PRIMARY_REQUIRED
@@ -346,6 +360,24 @@ class VoiceInputManager(
     }
 
     fun isListening(): Boolean = listening.get()
+
+    /**
+     * Why VAN cannot listen on this device, or null when it can.
+     *
+     * P1-VOICE-003 — the reason exists so the owner can be told something they can act on.
+     * A field only the tests read is the defect this whole audit is about, so this is the
+     * production consumer: the surface that decides what to show when voice is
+     * unavailable reads it here rather than mapping an error code back to a guess.
+     */
+    fun unavailableReason(): String? =
+        if (recognizer == null) {
+            capability.unavailableReason
+                ?: when (capability.backend) {
+                    VoiceRecognitionBackend.SHERPA_PRIMARY_REQUIRED ->
+                        "this Android version needs a speech runtime VAN does not ship"
+                    else -> "VAN could not start the device's speech recognizer"
+                }
+        } else null
 
     companion object {
         const val ERROR_SHERPA_PRIMARY_REQUIRED = -10_001

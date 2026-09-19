@@ -82,6 +82,24 @@ def _notebook_readback_observation(knowledge: Any):
     return observe
 
 
+def _notebook_source_observation(knowledge: Any):
+    async def observe(context: dict[str, Any]) -> dict[str, Any]:
+        postconditions = context.get("postconditions") or {}
+        notebook_id = str(postconditions.get("notebook_id") or "").strip()
+        names = [str(n) for n in (postconditions.get("source_names") or [])]
+        if not notebook_id or not names:
+            # P1-VERIFY-004 — raising rather than falling back to the notebook readback.
+            # Falling back is exactly how a source mutation came to be certified by the
+            # notebook still existing: the weaker observation was always available, so the
+            # stronger one was never required.
+            raise ValueError(
+                "success contract names no notebook_id and source_names to read back"
+            )
+        return await observations.notebook_source_readback(knowledge, notebook_id, names)
+
+    return observe
+
+
 #: P2-VERIFY-002 — strategies the codebase implements and this process cannot perform,
 #: with the reason. Each is registered, so a contract naming one gets UNVERIFIABLE *and the
 #: reason*, rather than the record a capability that promised nothing would get.
@@ -116,6 +134,13 @@ def build_mission_registry(
     # §166 — ask the notebook provider what exists. Independent of the executor: the
     # knowledge runtime performed the action, and this asks Google what is there now.
     registry.register("api-readback", ApiReadbackVerifier(_notebook_readback_observation(knowledge)))
+    # P1-VERIFY-004 — a separate strategy rather than a branch inside api-readback. A
+    # source mutation and a notebook mutation are different claims about different objects,
+    # and one adapter that chose between them by looking at the contract would let a
+    # contract that named no sources quietly get the weaker check.
+    registry.register(
+        "notebook-source-readback", ApiReadbackVerifier(_notebook_source_observation(knowledge))
+    )
     # P2-VERIFY-002 — named, so "I could not check" is distinguishable from "nothing was
     # promised". The adapter classes stay in the tree because the day a remote or a CI API
     # is configured, registering them is a one-line change rather than a rewrite.
@@ -125,7 +150,10 @@ def build_mission_registry(
 
 
 #: Mission verification strategies a success contract may name today.
-WIRED_MISSION_STRATEGIES = ("ledger-event", "trading-halt", "browser-evidence", "api-readback")
+WIRED_MISSION_STRATEGIES = (
+    "ledger-event", "trading-halt", "browser-evidence", "api-readback",
+    "notebook-source-readback",
+)
 
 
 

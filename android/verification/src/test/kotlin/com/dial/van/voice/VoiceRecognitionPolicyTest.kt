@@ -3,6 +3,7 @@ package com.dial.van.voice
 import java.io.File
 import kotlin.test.Test
 import kotlin.test.assertEquals
+import kotlin.test.assertNotNull
 import kotlin.test.assertFalse
 import kotlin.test.assertTrue
 
@@ -67,8 +68,78 @@ class VoiceRecognitionPolicyTest {
             decision.backend in needsSherpa || decision.backend == VoiceRecognitionBackend.UNAVAILABLE,
             "expected a fail-closed backend, got ${decision.backend}",
         )
-        assertFalse(decision.onDeviceRecognizerRequired && decision.backend in needsSherpa &&
-            decision.callerAudioSupported)
+        assertFalse(decision.callerAudioSupported)
+    }
+
+    @Test
+    fun `a supported device missing its recognizer is not told to install Sherpa`() {
+        // P1-VOICE-003. The policy's own documentation said it distinguished the designed
+        // API 26-30 Sherpa tier from a degraded runtime state, and the code returned
+        // SHERPA_PRIMARY_REQUIRED for both. So a modern phone whose speech service was
+        // disabled was told it needed a runtime VAN deliberately does not ship and never
+        // will (owner decision 2) — an answer the owner can do nothing with.
+        //
+        // The API level never settles this on its own. minSdk 31 makes a recognizer
+        // *possible*; only the runtime probe says whether one is there.
+        for (api in 31..36) {
+            val decision = VoiceRecognitionPolicy.decide(api, onDeviceAvailable = false)
+            assertEquals(
+                VoiceRecognitionBackend.UNAVAILABLE, decision.backend,
+                "API $api with no recognizer should be UNAVAILABLE, not a Sherpa tier",
+            )
+            assertNotNull(
+                decision.unavailableReason,
+                "API $api: an unavailable voice runtime must say why",
+            )
+            assertTrue(
+                decision.unavailableReason!!.contains("recognizer"),
+                "the reason must name the thing the owner can change",
+            )
+        }
+    }
+
+    @Test
+    fun `the unavailable reason reaches a production consumer`() {
+        // P1-VOICE-003 — a field only the tests read is the defect this audit is about, and
+        // adding one while closing that defect would be a poor joke. VoiceInputManager
+        // needs a device to construct, so this asserts against its source that the reason
+        // is surfaced rather than computed and dropped: the callback is told, and the
+        // accessor exists for the surface that decides what to show.
+        val voiceInterfaces = File(
+            "../app/src/main/java/com/dial/van/voice/VoiceInterfaces.kt"
+        ).readText().lines().joinToString("\n") { it.substringBefore("//") }
+        assertTrue(
+            voiceInterfaces.contains("fun unavailableReason()"),
+            "no accessor exposes the reason to an owner surface",
+        )
+        assertTrue(
+            voiceInterfaces.contains("callback.onUnavailable(unavailableReason())"),
+            "the reason is computed and never handed to the callback",
+        )
+        assertTrue(
+            voiceInterfaces.contains("fun onUnavailable(reason: String?)"),
+            "the callback has no way to receive it",
+        )
+    }
+
+    @Test
+    fun `a working backend never carries an unavailable reason`() {
+        // The other half of the distinction. A reason attached to a working backend would
+        // surface a limitation that is not there.
+        for (api in 31..36) {
+            val decision = VoiceRecognitionPolicy.decide(api, onDeviceAvailable = true)
+            assertEquals(null, decision.unavailableReason, "API $api")
+        }
+    }
+
+    @Test
+    fun `supporting an API level is not a claim that voice works on the device`() {
+        // The claim the raise to minSdk 31 does and does not make, stated as a test so it
+        // cannot be read back as "31 means voice works".
+        val supported = VoiceRecognitionPolicy.decide(33, onDeviceAvailable = true)
+        val sameApiNoRecognizer = VoiceRecognitionPolicy.decide(33, onDeviceAvailable = false)
+        assertTrue(supported.backend !in needsSherpa)
+        assertEquals(VoiceRecognitionBackend.UNAVAILABLE, sameApiNoRecognizer.backend)
     }
 
     @Test

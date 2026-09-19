@@ -175,6 +175,54 @@ async def notebook_enterprise_readback(knowledge: Any, notebook_id: str) -> dict
     }
 
 
+async def notebook_source_readback(
+    knowledge: Any, notebook_id: str, source_names: list[str]
+) -> dict[str, Any]:
+    """§166 — the exact sources a mutation claims to have added or removed.
+
+    P1-VERIFY-004. `notebook_enterprise_readback` answers a question about the *notebook*,
+    and a source add or delete that failed leaves the notebook exactly as it was — so a
+    contract binding only `notebook_exists` is satisfied by the failure. This reads each
+    named source back individually, which the provider supports and which the delete path
+    already did internally without the verifier being able to see it.
+
+    Every source is reported in exactly one of `sources_present` or `sources_absent`, and a
+    source the provider could not be asked about raises rather than landing in either: "I
+    could not check" is not "it is gone", and that conflation is the whole defect.
+    """
+    notebook_id = str(notebook_id or "").strip()
+    names = [str(name).strip() for name in (source_names or []) if str(name).strip()]
+    if not notebook_id or not names:
+        raise ValueError("source readback needs a notebook_id and at least one source name")
+
+    present: list[str] = []
+    absent: list[str] = []
+    for name in names:
+        try:
+            await knowledge.notebook_enterprise_source_get(notebook_id, name)
+        except Exception as exc:  # noqa: BLE001 - "gone" and "unreachable" are different
+            if not _is_absent(exc):
+                raise
+            absent.append(name)
+        else:
+            present.append(name)
+
+    return {
+        "notebook_id": notebook_id,
+        "source_names": sorted(names),
+        "sources_present": sorted(present),
+        "sources_absent": sorted(absent),
+        # Evidence cites the sources actually observed, not the notebook. A
+        # `provider-readback://notebook/x` reference on a source mutation would point an
+        # auditor at the object that was not the subject of the claim.
+        "evidence_refs": sorted(
+            f"provider-readback://notebook/{notebook_id}/sources/{name.rsplit('/', 1)[-1]}"
+            f"#{'present' if name in present else 'absent'}"
+            for name in names
+        ),
+    }
+
+
 #: A provider that answers "no such notebook" has observed a deletion; one that cannot be
 #: reached has observed nothing. Collapsing the two is how a failed delete reads as done.
 #: Deliberately narrow. An unrecognised error raises, which becomes UNVERIFIABLE; a
@@ -192,6 +240,7 @@ __all__ = [
     "browser_evidence_readback",
     "google_resource_readback",
     "notebook_enterprise_readback",
+    "notebook_source_readback",
     "trading_halt_readback",
     "trading_ledger_readback",
 ]

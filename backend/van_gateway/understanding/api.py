@@ -165,6 +165,20 @@ class UnderstandingApi:
                 })
             return {
                 "intents": out,
+                # P2-MEM-003 — separated, because they are different things. A standing
+                # goal is what the owner is trying to do; an ephemeral one is a request
+                # they made once. Presenting them in one list made every calendar lookup
+                # look like a long-term commitment, and gave §77's conflict detection
+                # transient commands to contradict genuine goals with.
+                "standing": [
+                    row for row in out if row["horizon"] in ("STANDING", "PROJECT")
+                ],
+                "one_off_requests": [row for row in out if row["horizon"] == "EPHEMERAL"],
+                "promotion_rule": {
+                    "observations_for_standing": self.intents.STANDING_AFTER_OBSERVATIONS,
+                    "owner_declaration_is_sufficient": True,
+                    "van_never_infers_a_standing_goal_from_one_request": True,
+                },
                 "stale_after_days": self.intents.STALE_AFTER_MS // (24 * 60 * 60 * 1000),
                 # STALE is not abandoned, and the surface says so rather than leaving the
                 # word to be read as a verdict.
@@ -360,6 +374,14 @@ class UnderstandingApi:
                     "max_action_class": str(row["max_action_class"]),
                     "runs": runs,
                     "verified_successes": int(row["success_count"]),
+                    "failures": int(row["failure_count"]),
+                    # P1-LEARN-005 — runs that say nothing about the approach: refused,
+                    # cancelled, expired, or finished without anything able to check them.
+                    # Reported rather than hidden, because a strategy that keeps being
+                    # cancelled is worth seeing and is not one that keeps failing. It is
+                    # excluded from `runs` and from `success_rate` on purpose: including it
+                    # either way would make VAN's blind spots look like evidence.
+                    "inconclusive": int(row["inconclusive_count"]),
                     # None, not 0.0: a strategy nothing has exercised has no success rate,
                     # and reporting zero would read as one that keeps failing.
                     "success_rate": (
@@ -374,6 +396,7 @@ class UnderstandingApi:
                     "preferred_min_rate": StrategyLearning.PREFERRED_MIN_RATE,
                     "promotion_requires_eval_evidence": True,
                     "demotion_is_automatic": True,
+                    "inconclusive_runs_count_toward_neither": True,
                 },
             }
 

@@ -25,7 +25,7 @@ from __future__ import annotations
 import time
 from typing import Any
 
-from van_gateway.evolution.radar import StrategyLearning
+from van_gateway.evolution.radar import StrategyLearning, StrategyOutcome
 from van_gateway.mission.models import Mission, MissionState
 from van_gateway.models import ActionClass
 from van_gateway.storage.db import Store
@@ -164,8 +164,35 @@ class LearningFeed:
                 str(row["decision_id"]), outcome=kind, now_ms=now_ms,
             )
 
+    #: P1-LEARN-005 — what each terminal state says about the *approach*, which is a
+    #: different question from what it says about the mission.
+    #:
+    #: Only two states are evidence about a strategy. VERIFIED_SUCCESS means an
+    #: independent observation confirmed the work; FAILED means it was attempted and did
+    #: not do what it was supposed to. Everything else is a statement about authority, the
+    #: owner, or VAN's own blind spots:
+    #:
+    #:   PARTIAL_SUCCESS   some postconditions held and some did not — real information
+    #:                     about the world, but not a clean verdict on the approach
+    #:   UNVERIFIABLE      explicitly "VAN does not know"
+    #:   CANCELLED         the owner changed their mind
+    #:   BLOCKED_POLICY    a statement about authority
+    #:   BLOCKED_UNSAFE    a statement about safety
+    #:   EXPIRED           nothing came back, which is as likely to be the runtime as the
+    #:                     approach
+    STRATEGY_OUTCOME: dict[MissionState, StrategyOutcome] = {
+        MissionState.VERIFIED_SUCCESS: StrategyOutcome.SUCCESS,
+        MissionState.FAILED: StrategyOutcome.FAILURE,
+        MissionState.PARTIAL_SUCCESS: StrategyOutcome.INCONCLUSIVE,
+        MissionState.UNVERIFIABLE: StrategyOutcome.INCONCLUSIVE,
+        MissionState.CANCELLED: StrategyOutcome.INCONCLUSIVE,
+        MissionState.BLOCKED_POLICY: StrategyOutcome.INCONCLUSIVE,
+        MissionState.BLOCKED_UNSAFE: StrategyOutcome.INCONCLUSIVE,
+        MissionState.EXPIRED: StrategyOutcome.INCONCLUSIVE,
+    }
+
     async def record_strategy_outcome(
-        self, mission: Mission, *, verified_success: bool, now_ms: int | None = None
+        self, mission: Mission, *, state: MissionState, now_ms: int | None = None
     ) -> str | None:
         """P1-LEARN-003 — what VAN actually did for this kind of work, and how it went.
 
@@ -179,6 +206,11 @@ class LearningFeed:
         recording an empty sequence would make every free-form command look like the same
         successful strategy.
         """
+        outcome = self.STRATEGY_OUTCOME.get(state)
+        if outcome is None:
+            # Not a terminal state, so there is no outcome to record. Defaulting to any of
+            # the three would be inventing evidence.
+            return None
         rows = await self.store.fetchall(
             "SELECT capability_id FROM mission_activities WHERE mission_id = ? "
             "ORDER BY started_at_ms, activity_id",
@@ -195,9 +227,7 @@ class LearningFeed:
             max_action_class=mission.authority_envelope.max_action_class,
             now_ms=now_ms,
         )
-        await self.strategies.record_outcome(
-            strategy_id, verified_success=verified_success, now_ms=now_ms,
-        )
+        await self.strategies.record_outcome(strategy_id, outcome=outcome, now_ms=now_ms)
         return strategy_id
 
     async def strategies_for(

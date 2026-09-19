@@ -300,14 +300,14 @@ class MissionService:
                 evidence_refs=(verification.evidence_refs if verification else []),
             )
             # P1-LEARN-003 — the same terminal event, read as evidence about the approach
-            # rather than about this one mission. Only VERIFIED_SUCCESS counts as a
-            # success here: a mission that finished without anything checking it says
-            # nothing about whether the approach works, and counting it would let a
-            # strategy accumulate a promotion record out of unverifiable runs.
-            await self.learning.record_strategy_outcome(
-                refreshed,
-                verified_success=refreshed.state is MissionState.VERIFIED_SUCCESS,
-            )
+            # rather than about this one mission.
+            #
+            # P1-LEARN-005 — the state is passed rather than a boolean, and the feed
+            # classifies it. This used to send `state is VERIFIED_SUCCESS`, so every other
+            # terminal state incremented failure_count: a cancellation, a policy refusal
+            # and an UNVERIFIABLE run all read as "this approach does not work", and three
+            # of them would have demoted a strategy that had never once failed.
+            await self.learning.record_strategy_outcome(refreshed, state=refreshed.state)
             # §12 — how the owner's decision actually turned out, which is the only thing
             # that can falsify what VAN inferred from it.
             await self.learning.record_decision_outcome(refreshed, state=refreshed.state)

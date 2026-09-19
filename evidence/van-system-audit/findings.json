@@ -21,9 +21,9 @@
   ],
   "counts": {
     "P0": 16,
-    "P1": 32,
-    "P2": 22,
-    "P3": 27,
+    "P1": 34,
+    "P2": 24,
+    "P3": 28,
     "P4": 7
   },
   "root_causes": [
@@ -3736,7 +3736,7 @@
       "remediation_gate": "G7",
       "closure": {
         "state": "INTEGRATED_AND_EVIDENCED",
-        "summary": "`minSdk` is raised from 26 to 31, and a build guard makes the condition unshippable rather than merely documented.\n\nBelow API 31 there is no `createOnDeviceSpeechRecognizer`, so `VoiceRecognitionPolicy` resolved every such device to `SHERPA_PRIMARY_REQUIRED`, and no Sherpa runtime ships. The APK therefore installed on phones where voice capture could never work, and the only signal was an error code at the moment the owner first spoke. Failing honestly at runtime is not the same as being usable.\n\nThe guard reads the policy's own source for the lowest API level it resolves to an on-device recognizer, compares that to `minSdk`, and fails the build when `minSdk` is lower and no Sherpa dependency is on the classpath. It is attached to every `assemble` and `bundle` task, because a guard nothing depends on never runs. Reading the policy rather than hardcoding 31 is what stops the check drifting from the thing it checks.\n\nThe API<=30 branch is kept, not deleted: the day a Sherpa engine ships, lowering `minSdk` is one line rather than rewriting the policy. A test asserts it still resolves coherently. Two further tests pin claims that would otherwise silently over-promise — caller-supplied audio is only claimed from 33, word-level evidence only from 34.",
+        "summary": "`minSdk` is raised from 26 to 31, and a build guard makes the condition unshippable rather than merely documented.\n\nBelow API 31 there is no `createOnDeviceSpeechRecognizer`, so `VoiceRecognitionPolicy` resolved every such device to `SHERPA_PRIMARY_REQUIRED`, and no Sherpa runtime ships. The APK therefore installed on phones where voice capture could never work, and the only signal was an error code at the moment the owner first spoke. Failing honestly at runtime is not the same as being usable.\n\nThe guard reads the policy's own source for the lowest API level it resolves to an on-device recognizer, compares that to `minSdk`, and fails the build when `minSdk` is lower and no Sherpa dependency is on the classpath. It is attached to every `assemble` and `bundle` task, because a guard nothing depends on never runs. Reading the policy rather than hardcoding 31 is what stops the check drifting from the thing it checks.\n\nThe API<=30 branch is kept, not deleted: the day a Sherpa engine ships, lowering `minSdk` is one line rather than rewriting the policy. A test asserts it still resolves coherently. Two further tests pin claims that would otherwise silently over-promise — caller-supplied audio is only claimed from 33, word-level evidence only from 34.\n\n--- AMENDED after independent review ---\nThis closure was reported complete and was not. The correction is recorded here rather than by editing the original summary, because a register that quietly improves its own history is the thing this programme exists to prevent.\nThe build guard mirrored `minSdk` into its own constant, so lowering `defaultConfig.minSdk` without touching the mirror left the assembly guard passing on an unshippable build — and the commit claimed the guard could not drift. Separately, API 31 is not a promise that a device has a recognizer: with `onDeviceAvailable` false the policy returned SHERPA_PRIMARY_REQUIRED, pointing the owner at a runtime VAN deliberately does not ship. P1-VOICE-003 corrects both.",
         "changed": [
           "android/app/build.gradle.kts",
           "android/app/src/main/java/com/dial/van/voice/VoiceRecognitionModels.kt",
@@ -4131,7 +4131,7 @@
       "remediation_gate": "G3",
       "closure": {
         "state": "INTEGRATED_AND_EVIDENCED",
-        "summary": "`command/success_contracts.py` is the missing joint. `contract_for(resolution)` emits a contract only where an independent observation is registered, and `CommandMissionLink.open` now takes the resolution the orchestrator already held.\n\nTwo strategies gained a real source. `trading-halt` reads the VATI kill-switch ledger — written by the trading process, hash-chained there, and the only party entitled to say whether the runner stopped; the observation refuses a ledger that is stale (P0-TRADE-004) or whose chain does not verify, because either would confirm a stop that may never have reached the runner. `api-readback` reads the notebook provider, which answers 'gone' and 'I could not ask' differently — only the first is a deletion. That moved ApiReadbackVerifier out of DECLARED_BUT_UNOBSERVABLE_STRATEGIES, which is the first time one of P2-VERIFY-002's 'one line from working' claims has actually been collected.\n\nThe contract is deliberately narrow. research.web.search and owner.context.read get no contract, and NO_CONTRACT_REASONS says why for each; the reason rides on the mission's constraints so the owner is told the limitation was decided at the outset rather than inferring it from a status. An enterprise notebook create gets none either: the id does not exist until the provider assigns it, and promising a readback that pointed at nothing would be this same finding one level down.\n\nFive mutations of the invariant were run and all five caught, including the one that reverts the joint itself and the one that cites a genuine-looking ledger:// reference on a mission that failed.",
+        "summary": "`command/success_contracts.py` is the missing joint. `contract_for(resolution)` emits a contract only where an independent observation is registered, and `CommandMissionLink.open` now takes the resolution the orchestrator already held.\n\nTwo strategies gained a real source. `trading-halt` reads the VATI kill-switch ledger — written by the trading process, hash-chained there, and the only party entitled to say whether the runner stopped; the observation refuses a ledger that is stale (P0-TRADE-004) or whose chain does not verify, because either would confirm a stop that may never have reached the runner. `api-readback` reads the notebook provider, which answers 'gone' and 'I could not ask' differently — only the first is a deletion. That moved ApiReadbackVerifier out of DECLARED_BUT_UNOBSERVABLE_STRATEGIES, which is the first time one of P2-VERIFY-002's 'one line from working' claims has actually been collected.\n\nThe contract is deliberately narrow. research.web.search and owner.context.read get no contract, and NO_CONTRACT_REASONS says why for each; the reason rides on the mission's constraints so the owner is told the limitation was decided at the outset rather than inferring it from a status. An enterprise notebook create gets none either: the id does not exist until the provider assigns it, and promising a readback that pointed at nothing would be this same finding one level down.\n\nFive mutations of the invariant were run and all five caught, including the one that reverts the joint itself and the one that cites a genuine-looking ledger:// reference on a mission that failed.\n\n--- AMENDED after independent review ---\nThis closure was reported complete and was not. The correction is recorded here rather than by editing the original summary, because a register that quietly improves its own history is the thing this programme exists to prevent.\nThe architecture was right and one contract was semantically wrong. `google.notebook.enterprise.sources.delete` and `.sources.add` were given the postcondition `notebook_exists: True`, because the notebook readback was the observation that existed. Deleting a source does not change whether the notebook exists, so a delete that silently failed satisfied the contract and the mission could reach VERIFIED_SUCCESS with the source still there — VAN telling the owner it had removed something it had not touched. P1-VERIFY-004 corrects it.",
         "changed": [
           "backend/van_gateway/command/success_contracts.py",
           "backend/van_gateway/command/mission_link.py",
@@ -4222,7 +4222,7 @@
       "remediation_gate": "G5",
       "closure": {
         "state": "EXTERNALLY_BLOCKED_REPOSITORY_COMPLETE",
-        "summary": "Schema v21 adds missions.mission_class, and CommandMissionLink sets it from the resolution's intent id — a name VAN assigned by understanding the command, not a label anyone typed. Free-form commands share GENERAL_OWNER_INTENT, which is honest: VAN did not establish what kind of work they were, and grouping them by a guess would make the evidence worse than absent.\n\nLearningFeed.record_strategy_outcome reads the capability sequence back from the mission's activities, not from its plan — learning from intentions is how a system concludes an approach works when it never ran. Only VERIFIED_SUCCESS counts as a success, so a strategy cannot accumulate a promotion record out of runs nothing checked. A mission with no activities produces nothing, which is the common case today and the right outcome: recording an empty sequence would make every free-form command look like the same successful approach.\n\n/v1/strategies is the owner-visible projection, reporting the promotion rule alongside the rows so the numbers can be read against the bar they must clear, and reporting no success rate at all for a strategy nothing has exercised rather than a zero that would read as repeated failure.",
+        "summary": "Schema v21 adds missions.mission_class, and CommandMissionLink sets it from the resolution's intent id — a name VAN assigned by understanding the command, not a label anyone typed. Free-form commands share GENERAL_OWNER_INTENT, which is honest: VAN did not establish what kind of work they were, and grouping them by a guess would make the evidence worse than absent.\n\nLearningFeed.record_strategy_outcome reads the capability sequence back from the mission's activities, not from its plan — learning from intentions is how a system concludes an approach works when it never ran. Only VERIFIED_SUCCESS counts as a success, so a strategy cannot accumulate a promotion record out of runs nothing checked. A mission with no activities produces nothing, which is the common case today and the right outcome: recording an empty sequence would make every free-form command look like the same successful approach.\n\n/v1/strategies is the owner-visible projection, reporting the promotion rule alongside the rows so the numbers can be read against the bar they must clear, and reporting no success rate at all for a strategy nothing has exercised rather than a zero that would read as repeated failure.\n\n--- AMENDED after independent review ---\nThis closure was reported complete and was not. The correction is recorded here rather than by editing the original summary, because a register that quietly improves its own history is the thing this programme exists to prevent.\nThe comment said only VERIFIED_SUCCESS counts as a success, and the implementation passed a boolean whose False branch incremented `failure_count`. So a cancellation, a policy refusal, an unsafe refusal, an expiry and an UNVERIFIABLE run all recorded as 'this approach does not work'. P1-LEARN-005 corrects it.",
         "changed": [
           "backend/van_gateway/storage/db.py",
           "backend/van_gateway/mission/models.py",
@@ -4345,7 +4345,7 @@
       "remediation_gate": "G5",
       "closure": {
         "state": "INTEGRATED_AND_EVIDENCED",
-        "summary": "LearningFeed is the producer, because the mission path is where the owner's instructions and approvals actually arrive; curating these stores by hand is the design that produced empty stores.\n\nOpening a mission observes its goal as a standing intent and links the mission to it. The node is keyed on the goal text, so asking for the same thing again refreshes an existing intent rather than creating a second one — which is what lets STALE mean 'unmentioned for ninety days' instead of 'recorded once'. understanding.mark_stale_intents sweeps on the retention cadence, and /v1/understanding/intents reports each goal with what it conflicts with, plus the statement that STALE is not abandoned.\n\nA decision fingerprint is recorded only where there was a decision: a mission whose envelope required the owner's presence is one they could have declined and did not. Ordinary use is not a choice, and recording it would bury the decisions that were. The mission's terminal state becomes the decision's outcome.\n\nWhat is deliberately absent is the inference. VAN does not infer why the owner decided anything, so inferred_reason is null and falsified() is empty — and /v1/understanding/decisions says so, because an owner reading 'no falsified patterns' off a silent surface would take it to mean VAN's model of them is accurate, when it means VAN has made no claim. Writing a plausible reason there is exactly §12's warning: a fingerprint store that only accumulates becomes a machine for justifying whatever the owner did last.\n\nStrategicMemory gets owner routes rather than a producer, because the owner is the author of project rationale. Recording something already rejected is answered with the rejection, which is the one place already_rejected can be asked today. §21's separation from Project Truth is stated on the wire so a rationale is not read back as a fact about the code.\n\nSix mutations run, six caught — including inferring a reason the owner never gave, and sweeping the goals just mentioned instead of the forgotten ones.",
+        "summary": "LearningFeed is the producer, because the mission path is where the owner's instructions and approvals actually arrive; curating these stores by hand is the design that produced empty stores.\n\nOpening a mission observes its goal as a standing intent and links the mission to it. The node is keyed on the goal text, so asking for the same thing again refreshes an existing intent rather than creating a second one — which is what lets STALE mean 'unmentioned for ninety days' instead of 'recorded once'. understanding.mark_stale_intents sweeps on the retention cadence, and /v1/understanding/intents reports each goal with what it conflicts with, plus the statement that STALE is not abandoned.\n\nA decision fingerprint is recorded only where there was a decision: a mission whose envelope required the owner's presence is one they could have declined and did not. Ordinary use is not a choice, and recording it would bury the decisions that were. The mission's terminal state becomes the decision's outcome.\n\nWhat is deliberately absent is the inference. VAN does not infer why the owner decided anything, so inferred_reason is null and falsified() is empty — and /v1/understanding/decisions says so, because an owner reading 'no falsified patterns' off a silent surface would take it to mean VAN's model of them is accurate, when it means VAN has made no claim. Writing a plausible reason there is exactly §12's warning: a fingerprint store that only accumulates becomes a machine for justifying whatever the owner did last.\n\nStrategicMemory gets owner routes rather than a producer, because the owner is the author of project rationale. Recording something already rejected is answered with the rejection, which is the one place already_rejected can be asked today. §21's separation from Project Truth is stated on the wire so a rationale is not read back as a fact about the code.\n\nSix mutations run, six caught — including inferring a reason the owner never gave, and sweeping the goals just mentioned instead of the forgotten ones.\n\n--- AMENDED after independent review ---\nThis closure was reported complete and was not. The correction is recorded here rather than by editing the original summary, because a register that quietly improves its own history is the thing this programme exists to prevent.\nEvery mission goal was promoted straight into the standing-intent graph, so a one-off request stayed an ACTIVE long-term objective until the ninety-day sweep — giving §77's conflict detection transient commands to contradict genuine goals with. P2-MEM-003 corrects it.",
         "changed": [
           "backend/van_gateway/learning/feed.py",
           "backend/van_gateway/mission/service.py",
@@ -4479,6 +4479,220 @@
         "residual": "A crash after dispatch but before the mission was opened would be re-executed on recovery, because nothing durable records that the dispatch happened.",
         "residual_class": "DELIBERATE_SCOPE",
         "residual_reason": "The window is between the claim and the first durable write, and closing it needs a two-phase record of the dispatch itself. At-least-once with an idempotent mission link is the honest guarantee, and it is better than the alternative the defect produced, which was zero-times-forever."
+      }
+    },
+    {
+      "requirement": "docs/VAN_CONSOLIDATED_DEPLOYMENT_READINESS_CLOSURE_BLUEPRINT_REV_1.md",
+      "authority": "VAN Consolidated Deployment-Readiness Closure Blueprint Rev 2",
+      "runtime_evidence": [],
+      "current_status": "CLOSED",
+      "id": "P1-VERIFY-004",
+      "severity": "P1",
+      "domain": "verification",
+      "title": "A notebook source mutation was certified by the notebook still existing",
+      "description": "P1-VERIFY-003 gave owner commands success contracts. For google.notebook.enterprise.sources.add and .sources.delete the postcondition was notebook_exists: True, because notebook_enterprise_readback was the observation that existed. Adding or deleting a source does not change whether the notebook exists, so a source mutation that silently failed satisfied the contract and the mission could reach VERIFIED_SUCCESS with the source unchanged. The provider already exposed a per-source endpoint and delete_sources used it internally; it was simply not reachable from the verifier.",
+      "repository_evidence": [
+        "backend/van_gateway/command/success_contracts.py",
+        "backend/van_gateway/verification/observations.py",
+        "backend/van_gateway/knowledge/notebook.py"
+      ],
+      "affected_components": [
+        "verification",
+        "knowledge",
+        "command"
+      ],
+      "root_cause": "The weaker observation was always available, so the stronger one was never required. The shape of the requirement was satisfied and the meaning was not.",
+      "remediation": "Bind the contract to the exact source identifiers and read each one back individually.",
+      "impact": "VAN could tell the owner it had removed a document it had not touched, with a VERIFIED_SUCCESS and a provider-readback evidence reference behind it. That is worse than no verification, because the receipt makes the claim credible.",
+      "validation_gate": "G3",
+      "remediation_gate": "G3",
+      "closure": {
+        "state": "INTEGRATED_AND_EVIDENCED",
+        "summary": "SEMANTIC REQUIREMENT: after 'delete source X from notebook N', X is independently observed to be absent from N. After 'add source X', X is observed present. Neither is satisfied by any fact about N itself.\n\nPRODUCTION PATH: POST /v1/commands -> TypedCommandResolver -> contract_for -> CommandMissionLink.open -> MissionService.transition(VERIFIED_SUCCESS) -> VerifierRegistry['notebook-source-readback'] -> notebook_source_readback -> KnowledgeRuntime.notebook_enterprise_source_get -> the provider's per-source GET.\n\nAUTHORITATIVE POSTCONDITION: the exact source list, stated as `sources_present` and `sources_absent` in full rather than as a count — a count is satisfied by the right number of the wrong sources.\n\n`notebook-source-readback` is a separate registered strategy rather than a branch inside api-readback, and its observer raises when the contract names no sources instead of falling back to the notebook. That fallback is how the defect would re-enter through the adapter after being fixed in the contract, and a mutation adding it survived the suite until a test existed for a path the command layer cannot currently reach.\n\nEvidence references cite the sources, not the notebook: an auditor following `provider-readback://notebook/nb-7` on a source deletion would be pointed at the object that was not the subject of the claim.\n\nNEGATIVE AND ADVERSARIAL TESTS: a delete that did nothing cannot succeed; a partial delete is not a success; an unreachable provider is not a deletion; the evidence names the sources; no source action may rest on notebook_exists, asserted over the whole family rather than the one case found. Six mutations, six caught.",
+        "changed": [
+          "backend/van_gateway/command/success_contracts.py",
+          "backend/van_gateway/verification/observations.py",
+          "backend/van_gateway/verification/production.py",
+          "backend/van_gateway/knowledge/notebook.py",
+          "backend/van_gateway/knowledge/service.py",
+          "backend/van_gateway/authority/descriptor.py"
+        ],
+        "verified_by": [
+          "backend/tests/test_command_success_contract.py"
+        ],
+        "runtime_evidence": [],
+        "residual": "A create action still has no contract, because the provider assigns the identifier after the command is accepted. Post-execution contract enrichment is not built.",
+        "residual_class": "DELIBERATE_SCOPE",
+        "residual_reason": "Binding a created resource's identity back into the mission contract after execution is a real architectural step and is the right next one; it is not a place to guess. Until it exists a create completes unverified and says so, which is the honest state rather than a contract pointed at nothing.",
+        "falsified_by": "A mission reaching VERIFIED_SUCCESS for a source add or delete while the named source is in the opposite state at the provider; or any source contract whose postconditions can be satisfied without reading the sources."
+      }
+    },
+    {
+      "requirement": "docs/VAN_CONSOLIDATED_DEPLOYMENT_READINESS_CLOSURE_BLUEPRINT_REV_1.md",
+      "authority": "VAN Consolidated Deployment-Readiness Closure Blueprint Rev 2",
+      "runtime_evidence": [],
+      "current_status": "CLOSED",
+      "id": "P1-LEARN-005",
+      "severity": "P1",
+      "domain": "learning",
+      "title": "Every non-verified terminal mission was recorded as a strategy failure",
+      "description": "MissionService passed `state is VERIFIED_SUCCESS` as a boolean and StrategyLearning.record_outcome incremented failure_count whenever it was False. So UNVERIFIABLE, CANCELLED, BLOCKED_POLICY, BLOCKED_UNSAFE, EXPIRED and PARTIAL_SUCCESS all recorded as evidence that the approach does not work. A policy refusal is a statement about authority, a cancellation is the owner changing their mind, and UNVERIFIABLE explicitly means VAN does not know. The code comments said as much and the implementation contradicted them.",
+      "repository_evidence": [
+        "backend/van_gateway/evolution/radar.py",
+        "backend/van_gateway/learning/feed.py",
+        "backend/van_gateway/mission/service.py"
+      ],
+      "affected_components": [
+        "learning",
+        "evolution",
+        "mission"
+      ],
+      "root_cause": "A boolean where the domain has three values. UNKNOWN was collapsed into FAILURE because the type had nowhere else to put it.",
+      "remediation": "Classify terminal states into SUCCESS / FAILURE / INCONCLUSIVE and let only the first two move the counters promotion and demotion read.",
+      "impact": "auto_demote fires below a 60% success rate over three runs, so three owner cancellations would have demoted a strategy that had never once failed. Promotion needs eval evidence and ten runs while demotion needs neither, which makes that damage cheap to do and expensive to undo.",
+      "validation_gate": "G5",
+      "remediation_gate": "G5",
+      "closure": {
+        "state": "INTEGRATED_AND_EVIDENCED",
+        "summary": "SEMANTIC REQUIREMENT: only evidence that says something about the quality of an approach may change the record of that approach's quality.\n\nPRODUCTION PATH: MissionService.transition (terminal) -> LearningFeed.record_strategy_outcome(state=...) -> STRATEGY_OUTCOME classification -> StrategyLearning.record_outcome(outcome=...) -> success_count / failure_count / inconclusive_count -> promote / auto_demote / preferred_for -> /v1/strategies.\n\nSchema v23 adds inconclusive_count so an inconclusive run is recorded rather than discarded: a strategy that keeps being cancelled is worth seeing and is not one that keeps failing. It is excluded from `runs` and from `success_rate` on purpose — including it either way would make VAN's blind spots look like evidence.\n\nDOWNSTREAM CONSUMERS AUDITED: promote() and auto_demote() both compute over success + failure and were already correct once the third counter existed; /v1/strategies reports all three and states that inconclusive counts toward neither.\n\nOne of the original tests asserted `failure_count == 1` for an UNVERIFIABLE mission — it pinned the defect rather than catching it. It is replaced, and the replacement is parameterised over every terminal state rather than the one that was found, plus an end-to-end test that ten cancellations cannot demote a strategy with a clean record. Five mutations, five caught.",
+        "changed": [
+          "backend/van_gateway/evolution/radar.py",
+          "backend/van_gateway/learning/feed.py",
+          "backend/van_gateway/mission/service.py",
+          "backend/van_gateway/storage/db.py",
+          "backend/van_gateway/understanding/api.py"
+        ],
+        "verified_by": [
+          "backend/tests/test_learning_records_and_bounds.py"
+        ],
+        "runtime_evidence": [],
+        "residual": "PARTIAL_SUCCESS is classified INCONCLUSIVE, so a strategy that half-works accumulates no verdict either way.",
+        "residual_class": "DELIBERATE_SCOPE",
+        "residual_reason": "A partial success is real information about the world and not a clean verdict on the approach. Splitting it would need per-postcondition attribution — which postcondition failed and whether that step is the strategy's — and guessing is how this finding happened.",
+        "falsified_by": "Any terminal state other than VERIFIED_SUCCESS or FAILED changing success_count or failure_count; or a strategy's promotion state changing on runs that were refused, cancelled, expired or unverifiable."
+      }
+    },
+    {
+      "requirement": "docs/VAN_CONSOLIDATED_DEPLOYMENT_READINESS_CLOSURE_BLUEPRINT_REV_1.md",
+      "authority": "VAN Consolidated Deployment-Readiness Closure Blueprint Rev 2",
+      "runtime_evidence": [],
+      "current_status": "CLOSED",
+      "id": "P1-VOICE-003",
+      "severity": "P2",
+      "domain": "android",
+      "title": "The voice guard mirrored minSdk, and a missing recognizer was reported as a Sherpa tier",
+      "description": "Two defects in the P1-VOICE-002 closure. assertVoiceRuntimeIsShippable read the on-device floor from the policy source but mirrored minSdk into its own constant, so lowering defaultConfig.minSdk without touching the mirror left the assembly guard passing on an unshippable build — while the commit claimed the guard could not drift. And VoiceRecognitionPolicy returned SHERPA_PRIMARY_REQUIRED both for the designed API 26-30 tier and for a supported device with no recognizer installed, although its own documentation said it distinguished them.",
+      "repository_evidence": [
+        "android/app/build.gradle.kts",
+        "android/app/src/main/java/com/dial/van/voice/VoiceRecognitionModels.kt"
+      ],
+      "affected_components": [
+        "android",
+        "voice"
+      ],
+      "root_cause": "A value mirrored instead of derived, and a documented distinction the code did not make.",
+      "remediation": "Read minSdk from defaultConfig, and return an honest unavailable state with a reason where the device has no recognizer.",
+      "impact": "A future minSdk lowering would ship an APK that installs where VAN can never hear, with the guard green. And an owner whose speech service was disabled was told they needed a runtime VAN deliberately does not ship — an answer they can do nothing with.",
+      "validation_gate": "G9",
+      "remediation_gate": "G9",
+      "closure": {
+        "state": "EXTERNALLY_BLOCKED_REPOSITORY_COMPLETE",
+        "summary": "SEMANTIC REQUIREMENT: the build refuses any configuration where a supported device cannot reach a recognition backend that exists, and the runtime tells the owner the truth about their specific device.\n\nThe guard now reads `android.defaultConfig.minSdk` and the policy's own source. Neither value is mirrored, so there is one source of truth for each and no second constant to drift.\n\nThe policy returns UNAVAILABLE with an `unavailableReason` where the API level is supported and no recognizer is installed, and keeps SHERPA_PRIMARY_REQUIRED for the designed sub-31 tier. The reason names the thing the owner can actually change. Supporting an API level is not a claim that voice works on a device, and a test says so directly so the minSdk raise cannot be read back as one.\n\nNEGATIVE TESTS: every API from 31 to 36 without a recognizer must be UNAVAILABLE with a reason; every API with one must carry no reason. 269 Kotlin tests pass.",
+        "changed": [
+          "android/app/build.gradle.kts",
+          "android/app/src/main/java/com/dial/van/voice/VoiceRecognitionModels.kt"
+        ],
+        "verified_by": [
+          "android/verification/src/test/kotlin/com/dial/van/voice/VoiceRecognitionPolicyTest.kt"
+        ],
+        "runtime_evidence": [
+          "evidence/van-system-audit/gate-10/kotlin_verification_tests.txt"
+        ],
+        "residual": "The guard's execution within the real release task graph is asserted by parsing the Gradle file, not by running an assemble: the Android Gradle Plugin cannot be fetched in this environment.",
+        "residual_class": "ENVIRONMENT_UNVERIFIED",
+        "residual_reason": "dl.google.com is blocked by the proxy, so no AGP task graph can be resolved here. Proving the release task actually executes the guard is Gate 1 work and stays open until an Android build runs.",
+        "falsified_by": "An assemble or bundle succeeding with minSdk below the policy's on-device floor and no Sherpa runtime; or a device on a supported API with no recognizer being told it needs Sherpa."
+      }
+    },
+    {
+      "requirement": "docs/VAN_CONSOLIDATED_DEPLOYMENT_READINESS_CLOSURE_BLUEPRINT_REV_1.md",
+      "authority": "VAN Consolidated Deployment-Readiness Closure Blueprint Rev 2",
+      "runtime_evidence": [],
+      "current_status": "CLOSED",
+      "id": "P2-MEM-003",
+      "severity": "P2",
+      "domain": "understanding",
+      "title": "Every command became a standing owner intent",
+      "description": "LearningFeed.record_mission_opened put every mission goal into IntentContinuityGraph with no lifecycle distinction, so a one-off request such as 'what is on my calendar' became an ACTIVE long-term objective until the ninety-day stale sweep. §77's value is surfacing a newer instruction that contradicts an older standing goal; a graph full of transient commands gives that detection things to contradict genuine goals with.",
+      "repository_evidence": [
+        "backend/van_gateway/understanding/memory.py",
+        "backend/van_gateway/learning/feed.py"
+      ],
+      "affected_components": [
+        "understanding",
+        "learning"
+      ],
+      "root_cause": "Mission history and owner intent were the same store with no horizon between them.",
+      "remediation": "Introduce EPHEMERAL / PROJECT / STANDING and require evidence to promote, recording what promoted each.",
+      "impact": "The owner model would fill with noise that looks like evidence, and artificial conflicts between errands and objectives would surface as things for the owner to resolve.",
+      "validation_gate": "G5",
+      "remediation_gate": "G5",
+      "closure": {
+        "state": "INTEGRATED_AND_EVIDENCED",
+        "summary": "SEMANTIC REQUIREMENT: a request VAN was given once is recorded as a request, and becomes an objective only on evidence that it is one.\n\nSchema v24 adds horizon, observation_count, promoted_reason and promoted_at_ms. Everything starts EPHEMERAL — not 'unless it looks important', because VAN cannot tell an objective from an errand by reading one sentence and a rule that tried would promote whichever phrasing it liked.\n\nTwo things promote. The owner declaring it, which needs no corroboration because it is not VAN's inference. Or three separate observations, chosen because two is a coincidence; a goal arriving with a project reaches PROJECT on the second. Every promotion records what caused it, and the two reasons stay distinguishable so VAN's own counting cannot read as something the owner said.\n\nPROVENANCE: the count is of owner-issued commands, and nothing else writes to this graph, so repetition here cannot be VAN agreeing with itself.\n\n/v1/understanding/intents reports standing and one-off requests separately, with the promotion rule, so the two are not one list again at the presentation layer.\n\nThe no-demotion invariant is asserted as a property over every combination rather than as an example: two separate guards enforce it and each is redundant with the other, so a mutation of either survived an example-shaped test. An invariant held by coincidence between two conditions is one refactor from being lost. Five mutations caught; the sixth required removing both guards, which the property test catches.",
+        "changed": [
+          "backend/van_gateway/understanding/memory.py",
+          "backend/van_gateway/understanding/api.py",
+          "backend/van_gateway/storage/db.py"
+        ],
+        "verified_by": [
+          "backend/tests/test_owner_memory_has_a_producer.py"
+        ],
+        "runtime_evidence": [],
+        "residual": "Nothing sets owner_declared_standing yet: there is no owner surface for saying 'this is a standing goal', so promotion happens only by repetition.",
+        "residual_class": "DELIBERATE_SCOPE",
+        "residual_reason": "The parameter exists and is tested so the path is ready, and inventing a phrase detector to populate it would be the inference this finding is about. An owner surface for declaring an objective is product work, not closure work.",
+        "falsified_by": "A goal reaching STANDING from a single observation without an owner declaration; or a standing goal appearing in the same list as a one-off request on the owner surface."
+      }
+    },
+    {
+      "requirement": "docs/VAN_CONSOLIDATED_DEPLOYMENT_READINESS_CLOSURE_BLUEPRINT_REV_1.md",
+      "authority": "VAN Consolidated Deployment-Readiness Closure Blueprint Rev 2",
+      "runtime_evidence": [],
+      "current_status": "CLOSED",
+      "id": "P3-OPS-011",
+      "severity": "P3",
+      "domain": "operations",
+      "title": "CI never ran on the branch doing the certifying",
+      "description": "van-ci triggers on push to main and on pull_request. Every closure in this programme lands on claude/van-system-audit-ysgtcd with no pull request open, so the workflow had zero runs against any of it. The test counts in the commit messages were developer-local evidence, and nothing distinguished them from CI certification.",
+      "repository_evidence": [
+        ".github/workflows/van-ci.yml",
+        "tools/ci/github-actions-ci.yml"
+      ],
+      "affected_components": [
+        "ops",
+        "ci"
+      ],
+      "root_cause": "A trigger scoped to the branch being certified *to*, not the one being certified.",
+      "remediation": "Trigger on claude/** as well as main, and keep the installer template in step.",
+      "impact": "Every gate this programme added — the maturity gate, the authority map, the fail-closed proofs — existed and had never run against the work it was gating.",
+      "validation_gate": "G11",
+      "remediation_gate": "G11",
+      "closure": {
+        "state": "EXTERNALLY_BLOCKED_REPOSITORY_COMPLETE",
+        "summary": "The push trigger now includes claude/**, and the installer template is re-synced so the byte-equality contract test still holds. A gate that does not run on the head being certified is not a gate.\n\nThis is recorded as repository-complete rather than evidenced because the run itself is external: the workflow will fire on the next push to this branch, and until a run exists against a specific commit SHA, every closure in this programme is implementation-complete and CI-uncertified. Those are different states and this register does not merge them.",
+        "changed": [
+          ".github/workflows/van-ci.yml",
+          "tools/ci/github-actions-ci.yml"
+        ],
+        "verified_by": [
+          "tests/contracts/test_ci_workflow_is_what_it_claims.py"
+        ],
+        "runtime_evidence": [],
+        "residual": "No workflow run exists for any commit on this branch yet, so no closure in this programme carries independent CI certification.",
+        "residual_class": "ENVIRONMENT_UNVERIFIED",
+        "residual_reason": "GitHub Actions runs on GitHub. The trigger is fixed here; whether a run happens, and whether it passes, is observable only after the push and is not something this repository can assert about itself.",
+        "falsified_by": "A push to claude/** producing no workflow run, or the installer template drifting from the live workflow again."
       }
     }
   ],
