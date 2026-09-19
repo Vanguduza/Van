@@ -1,0 +1,69 @@
+{
+  "$schema_note": "Rev 1.5 §32 dependency registry for the VAN Remote Browser. No floating versions (§32). A dependency is admissible only when it carries a digest that was computed from the artefact itself, not copied from a document; `pin_status: PINNED_DIGEST_VERIFIED` means the digest in this file was produced by downloading that exact artefact. Entries whose runtime does not exist in this repository stay EXTERNAL and are never counted as installed.",
+  "manifest_version": 1,
+  "verified_at": "2026-09-19",
+  "verified_against": "repo1.maven.org (artefacts downloaded and hashed locally)",
+
+  "android": {
+    "webrtc": {
+      "coordinate": "io.github.webrtc-sdk:android:150.7871.01",
+      "packaging": "aar",
+      "artifact_sha256": "0a1627b1a48c2bc17d9a40d62fc47bd45166f44a311e95917f147c402de379b0",
+      "artifact_bytes": 49147033,
+      "licence": "BSD-3-Clause",
+      "licence_class": "PERMISSIVE",
+      "upstream_repository": "https://github.com/webrtc-sdk/android",
+      "supported_abis": ["arm64-v8a", "armeabi-v7a", "x86", "x86_64"],
+      "production_abi_filter": ["arm64-v8a"],
+      "abi_filter_rationale": "The owner device is an S24 Ultra (arm64). Shipping all four ABIs adds roughly 35 MB to an APK that is already 95 MB, and the three unused ones can never execute on the only handset the production build is bound to (§0D.3).",
+      "pin_status": "PINNED_DIGEST_VERIFIED",
+      "adoption_decision_ref": "docs/decisions/VAN-ADOPT-REMOTE-BROWSER-STREAMING-001.yaml",
+      "source_revision_status": "UNRESOLVED",
+      "source_revision_note": "§32.1 requires the upstream Chromium/WebRTC source revision this build represents. The version string 150.7871.01 indicates the M150 branch, but the exact upstream commit is not recoverable from the artefact metadata and has not been confirmed against the upstream release. Recorded as unresolved rather than guessed.",
+      "runtime_canary_status": "NOT_RUN",
+      "runtime_canary_note": "§32.1 requires a minimal decode/DataChannel canary and H.264 MediaCodec confirmation on the S24. Neither is possible in this container; both are S24 device gates."
+    },
+    "okhttp": {
+      "coordinate": "com.squareup.okhttp3:okhttp:4.12.0",
+      "packaging": "jar",
+      "artifact_sha256": "b1050081b14bb7a3a7e55a4d3ef01b5dcfabc453b4573a4fc019767191d5f4e0",
+      "artifact_bytes": 789531,
+      "licence": "Apache-2.0",
+      "licence_class": "PERMISSIVE",
+      "transitive": {
+        "com.squareup.okio:okio": "3.6.0",
+        "org.jetbrains.kotlin:kotlin-stdlib-jdk8": "1.8.21"
+      },
+      "pin_status": "PINNED_DIGEST_VERIFIED",
+      "adoption_decision_ref": "docs/decisions/VAN-ADOPT-REMOTE-BROWSER-STREAMING-001.yaml",
+      "deviation_from_blueprint": {
+        "blueprint_candidate": "com.squareup.okhttp3:okhttp:5.5.0",
+        "candidate_sha256": "aebaab3fe77633befcf69fd0ee3052083999a7eaa98d6f2f7c4b498e7bdbb732",
+        "rejected_because": "okhttp 5.5.0 depends on kotlin-stdlib 2.1.21 and ships Kotlin 2.1 metadata. This project builds with the Kotlin 1.9.24 plugin (android/build.gradle.kts) and the Compose compiler extension 1.5.14 that pairs with it, so a 2.1-metadata artefact cannot be read by this compiler. Admitting it would have made the Android build fail on first use, which is exactly the class of unverified dependency claim §32 exists to stop.",
+        "revisit_when": "the project's Kotlin toolchain is upgraded to 2.x under its own decision; the 5.x line is then the preferred long-term dependency"
+      }
+    }
+  },
+
+  "stream_host": {
+    "$note": "Nothing in this section is installed anywhere. The Browser Stream Host does not exist yet (RB-002/RB-010); these are the versions the deployment package targets, and each stays EXTERNAL until a real host reports its own runtime identity.",
+    "chromium": {"version": "UNRESOLVED_AT_PROVISIONING", "licence": "BSD-3-Clause", "licence_class": "PERMISSIVE", "pin_status": "EXTERNAL_UNPROVISIONED"},
+    "gstreamer": {"version": "UNRESOLVED_AT_PROVISIONING", "licence": "LGPL-2.1", "licence_class": "WEAK_COPYLEFT", "pin_status": "EXTERNAL_UNPROVISIONED"},
+    "x264": {"version": "UNRESOLVED_AT_PROVISIONING", "licence": "GPL-2.0-or-later", "licence_class": "STRONG_COPYLEFT", "licence_note": "x264 is GPL. It is used as a separate process/plugin on the stream host and is never linked into the Android application or into VAN gateway code. If that separation is ever broken, the encoder choice must be revisited before distribution.", "pin_status": "EXTERNAL_UNPROVISIONED"},
+    "coturn": {"version": "UNRESOLVED_AT_PROVISIONING", "licence": "BSD-3-Clause", "licence_class": "PERMISSIVE", "pin_status": "EXTERNAL_UNPROVISIONED"},
+    "compositor": {"version": "UNRESOLVED_AT_PROVISIONING", "implementation": "headless Wayland (§25.2)", "pin_status": "EXTERNAL_UNPROVISIONED"}
+  },
+
+  "offline_voice": {
+    "$note": "§32.5. Admitted as a target by the offline-voice supersession decision; no model or native library is in this repository, so wake, local ASR and local TTS remain EXTERNALLY_BLOCKED until a signed asset pack exists and WakeModelAsset reports it READY.",
+    "sherpa_onnx": {
+      "version": "UNRESOLVED_AT_ADOPTION",
+      "licence": "Apache-2.0",
+      "licence_class": "PERMISSIVE",
+      "upstream_repository": "https://github.com/k2-fsa/sherpa-onnx",
+      "pin_status": "EXTERNAL_UNADMITTED",
+      "adoption_decision_ref": "docs/decisions/VAN-ADOPT-OFFLINE-VOICE-RUNTIME-001.yaml",
+      "digest_required_before": "any change to WakeWordEngine, WakePhraseVerifier, LocalSecondPassAsr or the TTS backend maturity state"
+    }
+  }
+}

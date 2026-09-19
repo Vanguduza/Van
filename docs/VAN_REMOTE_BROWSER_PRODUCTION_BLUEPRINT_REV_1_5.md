@@ -63,7 +63,7 @@ Rev 1.1 exists because the expert review found five blocking repository-contract
 | S3 — grant-key lifecycle absent | Dedicated P-256 ECDSA gateway→stream-runtime signing key, `kid`, provisioning, verifier-only runtime, rotation overlap and revocation tests. |
 | S4 — cellular data cost omitted | Android metered-network detection, data counter, owner-visible quality policy and default metered cap. |
 | S5 — Android WebRTC/WebSocket dependencies unnamed | WebRTC Android artifact and OkHttp are explicit Phase 0 dependencies with pinned versions/digests. |
-| S6 — Stagehand adoption is still pending | Phase 7 cannot begin until the existing Stagehand adoption decision is owner-approved and live-certified. |
+| S6 — Stagehand adoption is still pending | Phase 7 cannot begin until the existing Stagehand adoption decision is owner-approved and live-certified. **Rev 1.5.1 correction (§0F.2):** the decision is already owner-approved — `docs/decisions/VAN-ADOPT-STAGEHAND-001.yaml` records `owner_signature_status: SIGNED`, `APPROVED_AS_HERMES_SUBAGENT`, 2026-09-18. What remains for Phase 7 is live certification of the runtime, which is an external gate, not another owner signature. |
 | S7 — old viewport input behavior ambiguous | Old/unacknowledged viewport revisions are rejected/withheld. No coordinate transform across Chromium reflow. |
 | S8 — capture mechanism unspecified | Phase 1 must choose and certify display server + capture primitive. Capture latency is measured separately from encode. |
 | S9 — canary pages conflicted with SSRF boundary | Canary origin is a distinct explicitly allowlisted test origin, never localhost/metadata/private-control addresses. |
@@ -179,8 +179,8 @@ WakeWordEngine                 EXTERNALLY_BLOCKED_REPOSITORY_COMPLETE
 WakePhraseVerifier             EXTERNALLY_BLOCKED_REPOSITORY_COMPLETE
 SpeakerSimilarityScorer        EXTERNALLY_BLOCKED_REPOSITORY_COMPLETE
 Wake pipeline/coordinator      INTEGRATED_AND_EVIDENCED
-Wake acknowledgement playback CALLED_UNTESTED / device gate
-TtsOutputManager.speak         CALLED_UNTESTED / device gate
+Wake acknowledgement playback  CALLED_UNTESTED maturity, terminal EXTERNALLY_BLOCKED / device gate
+TtsOutputManager.speak         CALLED_UNTESTED maturity, terminal EXTERNALLY_BLOCKED / device gate
 LocalSecondPassAsr             EXTERNALLY_BLOCKED_REPOSITORY_COMPLETE
 
 Browser Harness worker         EXTERNALLY_BLOCKED_REPOSITORY_COMPLETE
@@ -190,6 +190,15 @@ browser adapter actuation      EXTERNALLY_BLOCKED_REPOSITORY_COMPLETE
 ```
 
 Rev 1.3 does not rewrite those current-state facts.
+
+**Rev 1.5.1 correction (§0F.1).** The two rows above were quoted with `CALLED_UNTESTED` in
+the column the other rows use for a terminal state, and those are two different fields. The
+maturity class is still exactly `CALLED_UNTESTED` — both paths are called from production and
+no test names either — but `P2-LEDGER-002` gave both the terminal state
+`EXTERNALLY_BLOCKED_REPOSITORY_COMPLETE`, blocked on a device that can play a sound or speak.
+Nothing this document asks for changes. What changes is how §40.3 must be read: these are
+terminal rows, not the non-terminal ones its mapping table assumes, and at this baseline the
+component ledger holds no non-terminal rows at all.
 
 Instead, it defines the work and owner decisions required to move those components to stronger maturity states.
 
@@ -403,6 +412,53 @@ Track A does not wait for Tracks B or C to finish.
 
 Final production certification requires all applicable Track A+B+C gates to be green.
 
+
+# 0F. REV 1.5.1 REPOSITORY-LANDING CORRECTION REGISTER
+
+Rev 1.5 landed in the repository at `docs/VAN_REMOTE_BROWSER_PRODUCTION_BLUEPRINT_REV_1_5.md`
+on 2026-09-19, against `main` at `66e4e42` — the merge commit it names as its own baseline.
+
+§42.1 requires the implementation agent to read the live repository before changing code, and
+§49 requires its checklist to be re-run against that repository rather than trusted from this
+page. That was done first. Fifteen of this document's repository claims were checked against
+the source; all fifteen hold, including the schema version, the exact shape of the `events`
+table, the task-shaped `PageLease`, the absent `BrowserTask.mission_id`, the two profile
+aliases and every Android class §2.7 says to reuse.
+
+Four corrections follow from that pass. Each is edited in place per §0E's consolidation rule,
+and recorded here so the edit is visible rather than silent.
+
+| # | Correction | Where |
+|---|---|---|
+| 0F.1 | The §0C.2 ledger quote put `CALLED_UNTESTED` where the surrounding rows carry a terminal state. Both are real and they are different fields: the maturity class is still `CALLED_UNTESTED`, and `P2-LEDGER-002` gave both rows the terminal state `EXTERNALLY_BLOCKED_REPOSITORY_COMPLETE` *inside* the merge this document cites. The first draft of this correction claimed no component is `CALLED_UNTESTED` any more; that was wrong, and a contract test caught it. | §0C.2 |
+| 0F.2 | S6 treats the Stagehand adoption decision as pending. It is owner-approved (`SIGNED`, `APPROVED_AS_HERMES_SUBAGENT`, 2026-09-18). Phase 7's remaining gate is live certification of the runtime, which is external. | §0A/S6 |
+| 0F.3 | The §49 Rev 1.5 checklist ended with "no migration-27 event text remains normative", contradicting §5.6, which makes migration 27 *the* event-store extension. Read with §0C.3 the line is about Rev 1.2's incorrect assumption of migration **17**. | §49 |
+| 0F.4 | Two names §2.7 and §49 list as if they were files are symbols inside other files: `SubsystemHealth` is an object in `degraded/SubsystemSignals.kt`, and `WakeRuntimeController` is a class in `voice/WakeRuntime.kt`. Both exist. Recorded so that a later agent does not conclude they are missing and build a second one — the failure §42.2 forbids. | §2.7, §49 |
+
+## 0F.5 Owner decisions taken by delegation
+
+The owner instructed that this document be implemented to completion and that the agent use
+its own recommendations wherever an owner decision was required. Those decisions are recorded
+as artefacts, not as assumptions inside code:
+
+```text
+docs/decisions/VAN-ADOPT-REMOTE-BROWSER-STREAMING-001.yaml
+docs/decisions/VAN-ADOPT-OFFLINE-VOICE-RUNTIME-001.yaml
+registries/remote_browser_dependencies.json
+```
+
+Each carries `decision_type` honestly. `OWNER_DELEGATED_RECOMMENDATION` is not a countersigned
+owner decision, and every part that needs the owner to provision hardware, supply a model or
+hold a device is listed as an action still outstanding rather than absorbed into a status.
+
+**One dependency deviates from this document and the deviation is deliberate.** §32.2 proposes
+`okhttp:5.5.0`; that artefact carries Kotlin 2.1 metadata and this project compiles with the
+Kotlin 1.9.24 plugin, so admitting it would have broken the Android build the first time it
+was read. `okhttp:4.12.0` is admitted instead, with its digest measured from the artefact.
+§32.2's own rule — that the admitted version is locked only after Gradle and Android
+compatibility verification — is what produced the different answer.
+
+---
 
 # 1. PRODUCT OUTCOME
 
@@ -8584,5 +8640,5 @@ If any box cannot be checked, Rev 1.3 implementation is not aligned with PR #48 
 [ ] RB status → component-ledger mapping enforced by ledger reconciliation
 [ ] no stale token+HMAC-only S24 binding text is implemented
 [ ] no old viewport coordinate-transform rule is implemented
-[ ] no migration-27 event text remains normative
+[ ] no migration-17 event text remains normative   # Rev 1.5.1 (§0F.3): was written "migration-27", which contradicts §5.6
 ```
