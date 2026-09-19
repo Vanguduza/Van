@@ -5073,6 +5073,46 @@
         "residual_reason": null,
         "falsified_by": "A CANONICAL_OWNER or PROJECT_TRUTH fact resolving STALE on `max_age_ms`; an observed fact no longer resolving STALE when it exceeds one; or a fact whose `valid_until_ms` has passed still resolving CURRENT."
       }
+    },
+    {
+      "id": "P2-LEDGER-001",
+      "severity": "P2",
+      "domain": "operations",
+      "title": "The component ledger understated by twenty-two, and nothing could notice",
+      "description": "component_ledger.json records what should exist and work; findings.json records what was wrong. The closure programme worked the second to zero and left the first frozen at Gate 0. By the end it listed 65 of 142 components as unfinished, 35 of them dispositioned WIRE — written, often tested, supposedly reached by nothing.\n\nTwenty-two of those were done. MissionService is constructed in app.py and was recorded IMPLEMENTED_BUT_ISOLATED. VerifierRegistry is built by build_mission_registry and was recorded TEST_ONLY. WakeCoordinator is constructed in VanApplication and was recorded NEVER_CONSTRUCTED. Each was closed by a finding that updated findings.json and not this file.\n\nThe maturity gate could not catch it, and is not at fault. It checks that claims are *backed*: a component asserting INTEGRATED_AND_EVIDENCED must name its producer, consumer, caller, tests and runtime evidence. A component claiming to be unreached asserts nothing, so there is nothing to back. Understating is invisible to a gate built to catch overstating — and I quoted the 65 to the owner as a measure of remaining work before checking any of it.",
+      "requirement": "docs/VAN_CONSOLIDATED_DEPLOYMENT_READINESS_CLOSURE_BLUEPRINT_REV_1.md",
+      "authority": "VAN Consolidated Deployment-Readiness Closure Blueprint Rev 2",
+      "repository_evidence": [
+        "evidence/van-system-audit/component_ledger.json",
+        "tools/ci/ledger_reconcile.py"
+      ],
+      "runtime_evidence": [],
+      "affected_components": [
+        "operations"
+      ],
+      "root_cause": "Two registers on two axes, one of them hand-maintained, and a gate that only looks one way. Nothing made updating the second register a condition of closing a finding.",
+      "remediation": "A checker that asks the source whether each unreachability claim is still true, run in CI, plus the evidence for the components it proves were already integrated.",
+      "impact": "'65 of 142 components unfinished' is the number anyone would quote to decide how much system is left. It was wrong by a third, in the direction that makes the work look bigger than it is — which is the less dangerous direction and still not the truth.",
+      "validation_gate": "G0",
+      "current_status": "CLOSED",
+      "remediation_gate": "G0",
+      "closure": {
+        "state": "INTEGRATED_AND_EVIDENCED",
+        "summary": "tools/ci/ledger_reconcile.py asks the source, for every component that claims nothing reaches it and names the symbols to look for, whether that is still true. It runs in CI beside the maturity gate and covers the direction the gate cannot.\n\nTwenty-two components moved to INTEGRATED_AND_EVIDENCED with evidence derived from the source rather than asserted — consumers and test files found by search, the CI run that executed them as runtime evidence. The gate refused to take them on anything less, which is what it is for.\n\nTwo came out differently and are the more interesting result. WakeAcknowledgementManager.play and TtsOutputManager.speak are called from VanApplication and no test names either. Integrated would have claimed evidence that does not exist; NEVER_CALLED was false. They are CALLED_UNTESTED, which is deliberately not a terminal state.\n\nThe tool's own limits are in it rather than around it. A reference from dead code is not integration: MissionParsing is called by MissionRepository, which nothing constructs, and the first run read that as alive — so a component may exclude files that are themselves unreached, and entry 45 does, which is why the eighteen dead gateway reads stay dead. An entry with no reachability_symbols is reported unverifiable rather than assumed correct, because a conceptual component like 'Compose state restoration' has no symbol to grep for and a confident wrong answer is worse than an acknowledged gap.\n\nSix mutations, six caught, and three of them took three attempts to make fail. The tool's two test-exclusion rules overlap on every file in this repository, so any fixture driven through the search satisfies both and a mutation removing either survived. Splitting the predicate out made them separable; the filename rule turns out to decide only the case of a test_ module at the top of a search root, since any nested one already contains '/test'. A guard that cannot be falsified is a guard nobody knows is broken.\n\n43 components remain non-terminal, and that number is now checked rather than remembered.",
+        "changed": [
+          "tools/ci/ledger_reconcile.py",
+          "evidence/van-system-audit/component_ledger.json",
+          ".github/workflows/van-ci.yml"
+        ],
+        "verified_by": [
+          "tests/contracts/test_ledger_reconcile.py"
+        ],
+        "runtime_evidence": [],
+        "residual": null,
+        "residual_class": null,
+        "residual_reason": null,
+        "falsified_by": "A component whose maturity class asserts it is unreached while a production file outside its own module and outside tests names its declared symbols; or a component at INTEGRATED_AND_EVIDENCED that names no tests."
+      }
     }
   ],
   "register_note": "Extended 2026-09-19 under blueprint Gate 0 / action W0-1. The audit assigned IDs to 55 findings and enumerated further P3/P4 items in prose; those now carry IDs so that 'all closed' is countable. Each finding carries a remediation_gate referencing docs/VAN_FINISHED_PRODUCT_BLUEPRINT_REV_1.md.",

@@ -52,6 +52,13 @@ jobs:
       - name: Kotlin reachability (what nothing in the app reaches)
         run: python tools/audit/kotlin_reachability.py
 
+      # The maturity gate catches a ledger that overstates. This catches one that
+      # understates — a component still recorded as unreached that production now calls.
+      # Understating is invisible to a gate built to stop overstating, and it is how the
+      # component ledger came to list 65 entries as unfinished when 22 of them were done.
+      - name: Ledger reconciliation (does the source still agree?)
+        run: python tools/ci/ledger_reconcile.py
+
       # The maturity gate must fail on the defect shape it exists to prevent.
       # A gate that only ever passes proves nothing.
       - name: Maturity gate self-test

@@ -120,18 +120,23 @@
       "n": 6,
       "component": "assert_safe_for_irreversible_work",
       "path": "backend/van_gateway/reasoning/kernel.py",
-      "maturity_class": "NO_CALLER",
+      "maturity_class": "INTEGRATED",
       "disposition": "WIRE",
       "rationale": "Call from ActionRuntime.begin for A3/A4",
       "remediation_gate": "GATE 4",
-      "producer": null,
-      "consumer": null,
-      "production_caller": null,
-      "tests": null,
-      "runtime_evidence": null,
+      "producer": "backend/van_gateway/runtime_api.py",
+      "consumer": "backend/van_gateway/runtime_api.py",
+      "production_caller": "backend/van_gateway/runtime_api.py",
+      "tests": "backend/tests/test_epistemics_context_understanding.py, backend/tests/test_irreversible_work_waits_on_assumptions.py",
+      "runtime_evidence": "https://github.com/Vanguduza/Van/actions/runs/35454919182",
       "owner_facing_projection": null,
-      "terminal_state": null,
-      "closure_commits": []
+      "terminal_state": "INTEGRATED_AND_EVIDENCED",
+      "closure_commits": [
+        "reconciled against source; see P3-LEDGER-001"
+      ],
+      "reachability_symbols": [
+        "assert_safe_for_irreversible_work"
+      ]
     },
     {
       "n": 7,
@@ -148,194 +153,252 @@
       "runtime_evidence": null,
       "owner_facing_projection": null,
       "terminal_state": null,
-      "closure_commits": []
+      "closure_commits": [],
+      "reachability_symbols": [
+        "assess_premise"
+      ]
     },
     {
       "n": 8,
       "component": "RelationshipCalibrationEngine",
       "path": "backend/van_gateway/reasoning/calibration.py",
-      "maturity_class": "IMPLEMENTED_BUT_ISOLATED",
+      "maturity_class": "INTEGRATED",
       "disposition": "WIRE",
       "rationale": "Consume in the Hermes context packet; fix the owner-confirmed wording",
       "remediation_gate": "GATE 4",
-      "producer": null,
-      "consumer": null,
-      "production_caller": null,
-      "tests": null,
-      "runtime_evidence": null,
+      "producer": "backend/van_gateway/understanding/api.py",
+      "consumer": "backend/van_gateway/understanding/api.py",
+      "production_caller": "backend/van_gateway/understanding/api.py",
+      "tests": "backend/tests/test_relationship_calibration.py",
+      "runtime_evidence": "https://github.com/Vanguduza/Van/actions/runs/35454919182",
       "owner_facing_projection": null,
-      "terminal_state": null,
-      "closure_commits": []
+      "terminal_state": "INTEGRATED_AND_EVIDENCED",
+      "closure_commits": [
+        "reconciled against source; see P3-LEDGER-001"
+      ],
+      "reachability_symbols": [
+        "RelationshipCalibrationEngine"
+      ]
     },
     {
       "n": 9,
       "component": "OwnerCognitiveModel",
       "path": "backend/van_gateway/understanding/owner_model.py",
-      "maturity_class": "IMPLEMENTED_BUT_ISOLATED",
+      "maturity_class": "INTEGRATED",
       "disposition": "WIRE",
       "rationale": "Feed from owner corrections, accepted/rejected recommendations and mission outcomes",
       "remediation_gate": "GATE 4",
-      "producer": null,
-      "consumer": null,
-      "production_caller": null,
-      "tests": null,
-      "runtime_evidence": null,
+      "producer": "backend/van_gateway/reasoning/calibration.py",
+      "consumer": "backend/van_gateway/reasoning/calibration.py, backend/van_gateway/understanding/api.py, backend/van_gateway/understanding/memory.py",
+      "production_caller": "backend/van_gateway/reasoning/calibration.py",
+      "tests": "backend/tests/test_cognition_is_real.py, backend/tests/test_epistemics_context_understanding.py, backend/tests/test_relationship_calibration.py",
+      "runtime_evidence": "https://github.com/Vanguduza/Van/actions/runs/35454919182",
       "owner_facing_projection": null,
-      "terminal_state": null,
-      "closure_commits": []
+      "terminal_state": "INTEGRATED_AND_EVIDENCED",
+      "closure_commits": [
+        "reconciled against source; see P3-LEDGER-001"
+      ],
+      "reachability_symbols": [
+        "OwnerCognitiveModel"
+      ]
     },
     {
       "n": 10,
       "component": "SharedVocabularyRegistry",
       "path": "backend/van_gateway/understanding/memory.py",
-      "maturity_class": "READ_ONLY",
+      "maturity_class": "INTEGRATED",
       "disposition": "WIRE",
       "rationale": "Write path from owner corrections",
       "remediation_gate": "GATE 4",
-      "producer": null,
-      "consumer": null,
-      "production_caller": null,
-      "tests": null,
-      "runtime_evidence": null,
+      "producer": "backend/van_gateway/understanding/api.py",
+      "consumer": "backend/van_gateway/understanding/api.py",
+      "production_caller": "backend/van_gateway/understanding/api.py",
+      "tests": "backend/tests/test_epistemics_context_understanding.py",
+      "runtime_evidence": "https://github.com/Vanguduza/Van/actions/runs/35454919182",
       "owner_facing_projection": null,
-      "terminal_state": null,
-      "closure_commits": []
+      "terminal_state": "INTEGRATED_AND_EVIDENCED",
+      "closure_commits": [
+        "reconciled against source; see P3-LEDGER-001"
+      ],
+      "reachability_symbols": [
+        "SharedVocabularyRegistry"
+      ]
     },
     {
       "n": 11,
       "component": "CognitiveComplementMap",
       "path": "backend/van_gateway/understanding/memory.py",
-      "maturity_class": "READ_ONLY",
+      "maturity_class": "INTEGRATED",
       "disposition": "WIRE",
       "rationale": "Populate from verified mission outcomes",
       "remediation_gate": "GATE 4",
-      "producer": null,
-      "consumer": null,
-      "production_caller": null,
-      "tests": null,
-      "runtime_evidence": null,
+      "producer": "backend/van_gateway/understanding/api.py",
+      "consumer": "backend/van_gateway/understanding/api.py",
+      "production_caller": "backend/van_gateway/understanding/api.py",
+      "tests": "backend/tests/test_epistemics_context_understanding.py",
+      "runtime_evidence": "https://github.com/Vanguduza/Van/actions/runs/35454919182",
       "owner_facing_projection": null,
-      "terminal_state": null,
-      "closure_commits": []
+      "terminal_state": "INTEGRATED_AND_EVIDENCED",
+      "closure_commits": [
+        "reconciled against source; see P3-LEDGER-001"
+      ],
+      "reachability_symbols": [
+        "CognitiveComplementMap"
+      ]
     },
     {
       "n": 12,
       "component": "SymbioticGrowthLedger",
       "path": "backend/van_gateway/understanding/memory.py",
-      "maturity_class": "READ_ONLY",
+      "maturity_class": "INTEGRATED",
       "disposition": "WIRE",
       "rationale": "Record adaptations where proposed",
       "remediation_gate": "GATE 4",
-      "producer": null,
-      "consumer": null,
-      "production_caller": null,
-      "tests": null,
-      "runtime_evidence": null,
+      "producer": "backend/van_gateway/learning/feed.py",
+      "consumer": "backend/van_gateway/learning/feed.py, backend/van_gateway/understanding/api.py",
+      "production_caller": "backend/van_gateway/learning/feed.py",
+      "tests": "backend/tests/test_epistemics_context_understanding.py",
+      "runtime_evidence": "https://github.com/Vanguduza/Van/actions/runs/35454919182",
       "owner_facing_projection": null,
-      "terminal_state": null,
-      "closure_commits": []
+      "terminal_state": "INTEGRATED_AND_EVIDENCED",
+      "closure_commits": [
+        "reconciled against source; see P3-LEDGER-001"
+      ],
+      "reachability_symbols": [
+        "SymbioticGrowthLedger"
+      ]
     },
     {
       "n": 13,
       "component": "IntentContinuityGraph",
       "path": "backend/van_gateway/understanding/memory.py",
-      "maturity_class": "NO_CONSTRUCTOR",
+      "maturity_class": "INTEGRATED",
       "disposition": "WIRE",
       "rationale": "Construct in app.py; nodes from missions",
       "remediation_gate": "GATE 4",
-      "producer": null,
-      "consumer": null,
-      "production_caller": null,
-      "tests": null,
-      "runtime_evidence": null,
+      "producer": "backend/van_gateway/learning/feed.py",
+      "consumer": "backend/van_gateway/learning/feed.py, backend/van_gateway/understanding/api.py",
+      "production_caller": "backend/van_gateway/learning/feed.py",
+      "tests": "backend/tests/test_epistemics_context_understanding.py, backend/tests/test_owner_memory_has_a_producer.py",
+      "runtime_evidence": "https://github.com/Vanguduza/Van/actions/runs/35454919182",
       "owner_facing_projection": null,
-      "terminal_state": null,
-      "closure_commits": []
+      "terminal_state": "INTEGRATED_AND_EVIDENCED",
+      "closure_commits": [
+        "reconciled against source; see P3-LEDGER-001"
+      ],
+      "reachability_symbols": [
+        "IntentContinuityGraph"
+      ]
     },
     {
       "n": 14,
       "component": "StrategicMemory",
       "path": "backend/van_gateway/understanding/memory.py",
-      "maturity_class": "NO_CONSTRUCTOR",
+      "maturity_class": "INTEGRATED",
       "disposition": "WIRE",
       "rationale": "Construct; write on rejected recommendations",
       "remediation_gate": "GATE 4",
-      "producer": null,
-      "consumer": null,
-      "production_caller": null,
-      "tests": null,
-      "runtime_evidence": null,
+      "producer": "backend/van_gateway/understanding/api.py",
+      "consumer": "backend/van_gateway/understanding/api.py",
+      "production_caller": "backend/van_gateway/understanding/api.py",
+      "tests": "backend/tests/test_epistemics_context_understanding.py, backend/tests/test_owner_memory_has_a_producer.py",
+      "runtime_evidence": "https://github.com/Vanguduza/Van/actions/runs/35454919182",
       "owner_facing_projection": null,
-      "terminal_state": null,
-      "closure_commits": []
+      "terminal_state": "INTEGRATED_AND_EVIDENCED",
+      "closure_commits": [
+        "reconciled against source; see P3-LEDGER-001"
+      ],
+      "reachability_symbols": [
+        "StrategicMemory"
+      ]
     },
     {
       "n": 15,
       "component": "DecisionFingerprints",
       "path": "backend/van_gateway/understanding/memory.py",
-      "maturity_class": "NO_CONSTRUCTOR",
+      "maturity_class": "INTEGRATED",
       "disposition": "WIRE",
       "rationale": "Construct; record on every decision resolution",
       "remediation_gate": "GATE 4",
-      "producer": null,
-      "consumer": null,
-      "production_caller": null,
-      "tests": null,
-      "runtime_evidence": null,
+      "producer": "backend/van_gateway/learning/feed.py",
+      "consumer": "backend/van_gateway/learning/feed.py, backend/van_gateway/understanding/api.py",
+      "production_caller": "backend/van_gateway/learning/feed.py",
+      "tests": "backend/tests/test_epistemics_context_understanding.py, backend/tests/test_owner_memory_has_a_producer.py",
+      "runtime_evidence": "https://github.com/Vanguduza/Van/actions/runs/35454919182",
       "owner_facing_projection": null,
-      "terminal_state": null,
-      "closure_commits": []
+      "terminal_state": "INTEGRATED_AND_EVIDENCED",
+      "closure_commits": [
+        "reconciled against source; see P3-LEDGER-001"
+      ],
+      "reachability_symbols": [
+        "DecisionFingerprints"
+      ]
     },
     {
       "n": 16,
       "component": "ExternalRealityModel",
       "path": "backend/van_gateway/evolution/radar.py",
-      "maturity_class": "NO_CONSTRUCTOR",
+      "maturity_class": "INTEGRATED",
       "disposition": "DELETE",
       "rationale": "No canonical requirement, no producer, no consumer",
       "remediation_gate": "GATE 4",
-      "producer": null,
-      "consumer": null,
-      "production_caller": null,
-      "tests": null,
-      "runtime_evidence": null,
+      "producer": "backend/van_gateway/research/exa.py",
+      "consumer": "backend/van_gateway/research/exa.py, backend/van_gateway/understanding/api.py",
+      "production_caller": "backend/van_gateway/research/exa.py",
+      "tests": "backend/tests/test_external_reality_and_benchmarks.py, backend/tests/test_proactive_evolution_eval.py",
+      "runtime_evidence": "https://github.com/Vanguduza/Van/actions/runs/35454919182",
       "owner_facing_projection": null,
-      "terminal_state": null,
-      "closure_commits": []
+      "terminal_state": "INTEGRATED_AND_EVIDENCED",
+      "closure_commits": [
+        "reconciled against source; see P3-LEDGER-001"
+      ],
+      "reachability_symbols": [
+        "ExternalRealityModel"
+      ]
     },
     {
       "n": 17,
       "component": "BenchmarkHarness",
       "path": "backend/van_gateway/evolution/radar.py",
-      "maturity_class": "NO_CONSTRUCTOR",
+      "maturity_class": "INTEGRATED",
       "disposition": "WIRE",
       "rationale": "Drive from the existing CI benchmark job",
       "remediation_gate": "GATE 4",
-      "producer": null,
-      "consumer": null,
-      "production_caller": null,
-      "tests": null,
-      "runtime_evidence": null,
+      "producer": "backend/van_gateway/learning/feed.py",
+      "consumer": "backend/van_gateway/learning/feed.py, backend/van_gateway/understanding/api.py",
+      "production_caller": "backend/van_gateway/learning/feed.py",
+      "tests": "backend/tests/test_external_reality_and_benchmarks.py, backend/tests/test_proactive_evolution_eval.py",
+      "runtime_evidence": "https://github.com/Vanguduza/Van/actions/runs/35454919182",
       "owner_facing_projection": null,
-      "terminal_state": null,
-      "closure_commits": []
+      "terminal_state": "INTEGRATED_AND_EVIDENCED",
+      "closure_commits": [
+        "reconciled against source; see P3-LEDGER-001"
+      ],
+      "reachability_symbols": [
+        "BenchmarkHarness"
+      ]
     },
     {
       "n": 18,
       "component": "StrategyLearning",
       "path": "backend/van_gateway/evolution/radar.py",
-      "maturity_class": "NO_CONSTRUCTOR",
+      "maturity_class": "INTEGRATED",
       "disposition": "WIRE",
       "rationale": "Record outcomes from mission verification",
       "remediation_gate": "GATE 4",
-      "producer": null,
-      "consumer": null,
-      "production_caller": null,
-      "tests": null,
-      "runtime_evidence": null,
+      "producer": "backend/van_gateway/app.py",
+      "consumer": "backend/van_gateway/app.py, backend/van_gateway/command/mission_link.py, backend/van_gateway/learning/feed.py",
+      "production_caller": "backend/van_gateway/app.py",
+      "tests": "backend/tests/test_learning_records_and_bounds.py, backend/tests/test_proactive_evolution_eval.py",
+      "runtime_evidence": "https://github.com/Vanguduza/Van/actions/runs/35454919182",
       "owner_facing_projection": null,
-      "terminal_state": null,
-      "closure_commits": []
+      "terminal_state": "INTEGRATED_AND_EVIDENCED",
+      "closure_commits": [
+        "reconciled against source; see P3-LEDGER-001"
+      ],
+      "reachability_symbols": [
+        "StrategyLearning"
+      ]
     },
     {
       "n": 19,
@@ -375,103 +438,134 @@
       "n": 21,
       "component": "ContextRetrievalService",
       "path": "backend/van_gateway/context/retrieval.py",
-      "maturity_class": "API_ONLY",
+      "maturity_class": "INTEGRATED",
       "disposition": "WIRE",
       "rationale": "Put on the command path via derived requirements",
       "remediation_gate": "GATE 4",
-      "producer": null,
-      "consumer": null,
-      "production_caller": null,
-      "tests": null,
-      "runtime_evidence": null,
+      "producer": "backend/van_gateway/runtime_api.py",
+      "consumer": "backend/van_gateway/runtime_api.py",
+      "production_caller": "backend/van_gateway/runtime_api.py",
+      "tests": "backend/tests/test_context_retrieval.py",
+      "runtime_evidence": "https://github.com/Vanguduza/Van/actions/runs/35454919182",
       "owner_facing_projection": null,
-      "terminal_state": null,
-      "closure_commits": []
+      "terminal_state": "INTEGRATED_AND_EVIDENCED",
+      "closure_commits": [
+        "reconciled against source; see P3-LEDGER-001"
+      ],
+      "reachability_symbols": [
+        "ContextRetrievalService"
+      ]
     },
     {
       "n": 22,
       "component": "MissionService",
       "path": "backend/van_gateway/mission/service.py",
-      "maturity_class": "IMPLEMENTED_BUT_ISOLATED",
+      "maturity_class": "INTEGRATED",
       "disposition": "WIRE",
       "rationale": "Orchestrator creates a mission per accepted command",
       "remediation_gate": "GATE 2",
-      "producer": null,
-      "consumer": null,
-      "production_caller": null,
-      "tests": null,
-      "runtime_evidence": null,
+      "producer": "backend/van_gateway/app.py",
+      "consumer": "backend/van_gateway/app.py, backend/van_gateway/command/mission_link.py, backend/van_gateway/command/success_contracts.py",
+      "production_caller": "backend/van_gateway/app.py",
+      "tests": "backend/tests/test_cognition_is_real.py, backend/tests/test_command_success_contract.py, backend/tests/test_epistemics_context_understanding.py",
+      "runtime_evidence": "https://github.com/Vanguduza/Van/actions/runs/35454919182",
       "owner_facing_projection": null,
-      "terminal_state": null,
-      "closure_commits": []
+      "terminal_state": "INTEGRATED_AND_EVIDENCED",
+      "closure_commits": [
+        "reconciled against source; see P3-LEDGER-001"
+      ],
+      "reachability_symbols": [
+        "MissionService"
+      ]
     },
     {
       "n": 23,
       "component": "MissionBinder",
       "path": "backend/van_gateway/mission/binding.py",
-      "maturity_class": "NOT_WIRED",
+      "maturity_class": "INTEGRATED",
       "disposition": "WIRE",
       "rationale": "Pass the binder in app.py; browser and automation bind automatically",
       "remediation_gate": "GATE 2",
-      "producer": null,
-      "consumer": null,
-      "production_caller": null,
-      "tests": null,
-      "runtime_evidence": null,
+      "producer": "backend/van_gateway/app.py",
+      "consumer": "backend/van_gateway/app.py, backend/van_gateway/command/mission_link.py, backend/van_gateway/mission/api.py",
+      "production_caller": "backend/van_gateway/app.py",
+      "tests": "backend/tests/test_mission_binding_api.py",
+      "runtime_evidence": "https://github.com/Vanguduza/Van/actions/runs/35454919182",
       "owner_facing_projection": null,
-      "terminal_state": null,
-      "closure_commits": []
+      "terminal_state": "INTEGRATED_AND_EVIDENCED",
+      "closure_commits": [
+        "reconciled against source; see P3-LEDGER-001"
+      ],
+      "reachability_symbols": [
+        "MissionBinder"
+      ]
     },
     {
       "n": 24,
       "component": "CapabilityRouter",
       "path": "backend/van_gateway/capability/router.py",
-      "maturity_class": "ONE_CALLER",
+      "maturity_class": "INTEGRATED",
       "disposition": "WIRE",
       "rationale": "Route on mission creation, not only via the internal route",
       "remediation_gate": "GATE 2",
-      "producer": null,
-      "consumer": null,
-      "production_caller": null,
-      "tests": null,
-      "runtime_evidence": null,
+      "producer": "backend/van_gateway/app.py",
+      "consumer": "backend/van_gateway/app.py, backend/van_gateway/automation/router.py, backend/van_gateway/mission/api.py",
+      "production_caller": "backend/van_gateway/app.py",
+      "tests": "backend/tests/test_capability_registry.py, backend/tests/test_mission_binding_api.py",
+      "runtime_evidence": "https://github.com/Vanguduza/Van/actions/runs/35454919182",
       "owner_facing_projection": null,
-      "terminal_state": null,
-      "closure_commits": []
+      "terminal_state": "INTEGRATED_AND_EVIDENCED",
+      "closure_commits": [
+        "reconciled against source; see P3-LEDGER-001"
+      ],
+      "reachability_symbols": [
+        "CapabilityRouter"
+      ]
     },
     {
       "n": 25,
       "component": "VerifierRegistry + 5 adapters",
       "path": "backend/van_gateway/mission/verifiers.py",
-      "maturity_class": "TEST_ONLY",
+      "maturity_class": "INTEGRATED",
       "disposition": "WIRE",
       "rationale": "MissionService.transition executes a verifier instead of accepting a record",
       "remediation_gate": "GATE 3",
-      "producer": null,
-      "consumer": null,
-      "production_caller": null,
-      "tests": null,
-      "runtime_evidence": null,
+      "producer": "backend/van_gateway/command/success_contracts.py",
+      "consumer": "backend/van_gateway/command/success_contracts.py, backend/van_gateway/mission/service.py, backend/van_gateway/verification/observations.py",
+      "production_caller": "backend/van_gateway/command/success_contracts.py",
+      "tests": "backend/tests/test_command_success_contract.py, backend/tests/test_mission_binding_api.py, backend/tests/test_mission_core.py",
+      "runtime_evidence": "https://github.com/Vanguduza/Van/actions/runs/35454919182",
       "owner_facing_projection": null,
-      "terminal_state": null,
-      "closure_commits": []
+      "terminal_state": "INTEGRATED_AND_EVIDENCED",
+      "closure_commits": [
+        "reconciled against source; see P3-LEDGER-001"
+      ],
+      "reachability_symbols": [
+        "VerifierRegistry"
+      ]
     },
     {
       "n": 26,
       "component": "PostconditionObserver + 2 observers",
       "path": "backend/van_gateway/automation/verifier.py",
-      "maturity_class": "NO_CALLER",
+      "maturity_class": "INTEGRATED",
       "disposition": "WIRE",
       "rationale": "Supply the real observer map to AutomationDispatcher",
       "remediation_gate": "GATE 3",
-      "producer": null,
-      "consumer": null,
-      "production_caller": null,
-      "tests": null,
-      "runtime_evidence": null,
+      "producer": "backend/van_gateway/automation/dispatch.py",
+      "consumer": "backend/van_gateway/automation/dispatch.py, backend/van_gateway/verification/observations.py, backend/van_gateway/verification/production.py",
+      "production_caller": "backend/van_gateway/automation/dispatch.py",
+      "tests": "backend/tests/test_automation_api.py, backend/tests/test_automation_dispatch.py",
+      "runtime_evidence": "https://github.com/Vanguduza/Van/actions/runs/35454919182",
       "owner_facing_projection": null,
-      "terminal_state": null,
-      "closure_commits": []
+      "terminal_state": "INTEGRATED_AND_EVIDENCED",
+      "closure_commits": [
+        "reconciled against source; see P3-LEDGER-001"
+      ],
+      "reachability_symbols": [
+        "WorkflowVerifier",
+        "DocumentUploadObserver"
+      ]
     },
     {
       "n": 27,
@@ -528,52 +622,64 @@
       "n": 30,
       "component": "WakePipeline / WakeRuntimeController / WakeCoordinator",
       "path": "android/app/src/main/java/com/dial/van/voice/",
-      "maturity_class": "NEVER_CONSTRUCTED",
+      "maturity_class": "INTEGRATED",
       "disposition": "WIRE",
       "rationale": "Construct in VanApplication; arm on a microphone-typed foreground service",
       "remediation_gate": "GATE 9",
-      "producer": null,
-      "consumer": null,
-      "production_caller": null,
-      "tests": null,
-      "runtime_evidence": null,
+      "producer": "android/app/src/main/java/com/dial/van/VanApplication.kt",
+      "consumer": "android/app/src/main/java/com/dial/van/VanApplication.kt, android/app/src/main/java/com/dial/van/voice/WakeCoordinator.kt, android/app/src/main/java/com/dial/van/voice/WakeModelLoader.kt",
+      "production_caller": "android/app/src/main/java/com/dial/van/VanApplication.kt",
+      "tests": "android/verification/src/test/kotlin/com/dial/van/voice/WakeModelAssetTest.kt",
+      "runtime_evidence": "https://github.com/Vanguduza/Van/actions/runs/35454919182",
       "owner_facing_projection": null,
-      "terminal_state": null,
-      "closure_commits": []
+      "terminal_state": "INTEGRATED_AND_EVIDENCED",
+      "closure_commits": [
+        "reconciled against source; see P3-LEDGER-001"
+      ],
+      "reachability_symbols": [
+        "WakeCoordinator",
+        "WakeRuntimeController"
+      ]
     },
     {
       "n": 31,
       "component": "WakeAcknowledgementManager.play",
       "path": "android/app/src/main/java/com/dial/van/voice/WakeAcknowledgement.kt",
-      "maturity_class": "NEVER_CALLED",
+      "maturity_class": "CALLED_UNTESTED",
       "disposition": "WIRE",
-      "rationale": "Play before any network call, as designed",
+      "rationale": "Play before any network call, as designed. Called from android/app/src/main/java/com/dial/van/VanApplication.kt since the Gate 9 wiring, but no test names it, so it is wired and unevidenced rather than integrated.",
       "remediation_gate": "GATE 9",
       "producer": null,
       "consumer": null,
-      "production_caller": null,
+      "production_caller": "android/app/src/main/java/com/dial/van/VanApplication.kt",
       "tests": null,
       "runtime_evidence": null,
       "owner_facing_projection": null,
       "terminal_state": null,
-      "closure_commits": []
+      "closure_commits": [],
+      "reachability_symbols": [
+        "WakeAcknowledgementManager"
+      ]
     },
     {
       "n": 32,
       "component": "TtsOutputManager.speak",
       "path": "android/app/src/main/java/com/dial/van/voice/VoiceInterfaces.kt",
-      "maturity_class": "NEVER_CALLED",
+      "maturity_class": "CALLED_UNTESTED",
       "disposition": "WIRE",
-      "rationale": "Speak on verified mission outcomes only",
+      "rationale": "Speak on verified mission outcomes only. Called from android/app/src/main/java/com/dial/van/VanApplication.kt since the Gate 9 wiring, but no test names it, so it is wired and unevidenced rather than integrated.",
       "remediation_gate": "GATE 9",
       "producer": null,
       "consumer": null,
-      "production_caller": null,
+      "production_caller": "android/app/src/main/java/com/dial/van/VanApplication.kt",
       "tests": null,
       "runtime_evidence": null,
       "owner_facing_projection": null,
       "terminal_state": null,
-      "closure_commits": []
+      "closure_commits": [],
+      "reachability_symbols": [
+        "TtsOutputManager"
+      ]
     },
     {
       "n": 33,
@@ -607,7 +713,11 @@
       "runtime_evidence": null,
       "owner_facing_projection": null,
       "terminal_state": null,
-      "closure_commits": []
+      "closure_commits": [],
+      "reachability_symbols": [
+        "recordCorrection",
+        "pinTerm"
+      ]
     },
     {
       "n": 35,
@@ -664,18 +774,23 @@
       "n": 38,
       "component": "SubagentWorker",
       "path": "backend/van_gateway/browser/subagent.py",
-      "maturity_class": "NO_IMPLEMENTATION",
+      "maturity_class": "INTEGRATED",
       "disposition": "WIRE",
       "rationale": "Bind the subagent state machine to the real worker",
       "remediation_gate": "GATE 8",
-      "producer": null,
-      "consumer": null,
-      "production_caller": null,
-      "tests": null,
-      "runtime_evidence": null,
+      "producer": "backend/van_gateway/browser/api.py",
+      "consumer": "backend/van_gateway/browser/api.py, backend/van_gateway/browser/worker.py",
+      "production_caller": "backend/van_gateway/browser/api.py",
+      "tests": "backend/tests/test_browser_injection_containment.py",
+      "runtime_evidence": "https://github.com/Vanguduza/Van/actions/runs/35454919182",
       "owner_facing_projection": null,
-      "terminal_state": null,
-      "closure_commits": []
+      "terminal_state": "INTEGRATED_AND_EVIDENCED",
+      "closure_commits": [
+        "reconciled against source; see P3-LEDGER-001"
+      ],
+      "reachability_symbols": [
+        "SubagentWorker"
+      ]
     },
     {
       "n": 39,
@@ -777,7 +892,10 @@
       "runtime_evidence": null,
       "owner_facing_projection": null,
       "terminal_state": null,
-      "closure_commits": []
+      "closure_commits": [],
+      "reachability_symbols": [
+        "MissionRepository"
+      ]
     },
     {
       "n": 45,
@@ -785,7 +903,7 @@
       "path": "android/app/src/main/java/com/dial/van/gateway/VanGatewayClient.kt",
       "maturity_class": "UNUSED",
       "disposition": "WIRE",
-      "rationale": "They are the mission, understanding and needs-you reads the new screens require",
+      "rationale": "They are the mission, understanding and needs-you reads the new screens require. Reached only from MissionRepository, which nothing constructs (entry 44), so the whole cluster is dead together and wiring one without the other buys nothing.",
       "remediation_gate": "GATE 2",
       "producer": null,
       "consumer": null,
@@ -794,7 +912,16 @@
       "runtime_evidence": null,
       "owner_facing_projection": null,
       "terminal_state": null,
-      "closure_commits": []
+      "closure_commits": [],
+      "reachability_symbols": [
+        "needsYou",
+        "missionEvidence",
+        "cancelMission",
+        "messageMission"
+      ],
+      "reachability_excludes": [
+        "android/app/src/main/java/com/dial/van/mission/MissionRepository.kt"
+      ]
     },
     {
       "n": 46,
@@ -834,18 +961,23 @@
       "n": 48,
       "component": "RestoreAction values",
       "path": "android/app/src/main/java/com/dial/van/degraded/DegradedMode.kt",
-      "maturity_class": "NEVER_RENDERED",
+      "maturity_class": "INTEGRATED",
       "disposition": "WIRE",
       "rationale": "Render the restore action the degraded contract already carries",
       "remediation_gate": "GATE 10",
-      "producer": null,
-      "consumer": null,
-      "production_caller": null,
-      "tests": null,
-      "runtime_evidence": null,
+      "producer": "android/app/src/main/java/com/dial/van/VanApplication.kt",
+      "consumer": "android/app/src/main/java/com/dial/van/VanApplication.kt, android/app/src/main/java/com/dial/van/command/DegradedPanel.kt, android/app/src/main/java/com/dial/van/degraded/DegradedModeStore.kt",
+      "production_caller": "android/app/src/main/java/com/dial/van/VanApplication.kt",
+      "tests": "android/app/src/test/java/com/dial/van/visual/VanPresenceTest.kt, android/verification/src/test/kotlin/com/dial/van/degraded/SubsystemHealthTest.kt",
+      "runtime_evidence": "https://github.com/Vanguduza/Van/actions/runs/35454919182",
       "owner_facing_projection": null,
-      "terminal_state": null,
-      "closure_commits": []
+      "terminal_state": "INTEGRATED_AND_EVIDENCED",
+      "closure_commits": [
+        "reconciled against source; see P3-LEDGER-001"
+      ],
+      "reachability_symbols": [
+        "RestoreAction"
+      ]
     },
     {
       "n": 49,
@@ -862,7 +994,10 @@
       "runtime_evidence": null,
       "owner_facing_projection": null,
       "terminal_state": null,
-      "closure_commits": []
+      "closure_commits": [],
+      "reachability_symbols": [
+        "setQuietHours"
+      ]
     },
     {
       "n": 50,
@@ -1055,18 +1190,23 @@
       "n": 61,
       "component": "NotebookConsumerProvider",
       "path": "backend/van_gateway/knowledge/notebook.py",
-      "maturity_class": "TRANSPORT_ABSENT",
+      "maturity_class": "INTEGRATED",
       "disposition": "WIRE",
       "rationale": "Unblocked by the Gate 8 workers",
       "remediation_gate": "GATE 8",
-      "producer": null,
-      "consumer": null,
-      "production_caller": null,
-      "tests": null,
-      "runtime_evidence": null,
+      "producer": "backend/van_gateway/knowledge/service.py",
+      "consumer": "backend/van_gateway/knowledge/service.py",
+      "production_caller": "backend/van_gateway/knowledge/service.py",
+      "tests": "backend/tests/test_knowledge_runtime.py",
+      "runtime_evidence": "https://github.com/Vanguduza/Van/actions/runs/35454919182",
       "owner_facing_projection": null,
-      "terminal_state": null,
-      "closure_commits": []
+      "terminal_state": "INTEGRATED_AND_EVIDENCED",
+      "closure_commits": [
+        "reconciled against source; see P3-LEDGER-001"
+      ],
+      "reachability_symbols": [
+        "NotebookConsumerProvider"
+      ]
     },
     {
       "n": 62,
@@ -1552,7 +1692,7 @@
       "path": "backend/van_gateway/attention/engine.py",
       "maturity_class": "IMPLEMENTED_BUT_ISOLATED",
       "disposition": "WIRE",
-      "rationale": "AttentionScorer held \u00a729's five dispositions, deduplication and a recorded reason, and was reached only by the understanding report's metrics while the live engine decided nothing beyond a severity enum",
+      "rationale": "AttentionScorer held §29's five dispositions, deduplication and a recorded reason, and was reached only by the understanding report's metrics while the live engine decided nothing beyond a severity enum",
       "remediation_gate": "GATE 3",
       "producer": "backend/van_gateway/attention/scoring.py AttentionScorer",
       "consumer": "AttentionEngine.upsert and AttentionEngine.interrupts",
@@ -2119,7 +2259,7 @@
       "path": "android/app/src/main/java/com/dial/van/visual/VanAnimationClock.kt",
       "maturity_class": "INTEGRATED",
       "disposition": "COMPLETE",
-      "rationale": "P1-AURA-002. Integrates dt/period so a state change alters how fast the phase advances rather than restarting it; blends over Rev 3.0 \u00a725's 120-420 ms band and retargets from where the blend actually is.",
+      "rationale": "P1-AURA-002. Integrates dt/period so a state change alters how fast the phase advances rather than restarting it; blends over Rev 3.0 §25's 120-420 ms band and retargets from where the blend actually is.",
       "remediation_gate": "GATE 6",
       "producer": "VanCanvasFallback withFrameNanos loop",
       "consumer": "VanAuraLayer, VanAvatar, VanEmbodiment",
@@ -2268,7 +2408,7 @@
       "production_caller": "backend/van_gateway/app.py _expire_overdue_missions",
       "tests": "backend/tests/test_command_execution_result.py",
       "runtime_evidence": "backend/tests/test_command_execution_result.py::test_a_dispatch_that_never_comes_back_stops_reading_as_working",
-      "owner_facing_projection": "NEVER_HEARD_BACK \u2014 'VAN handed this over and never heard back', in the attention queue",
+      "owner_facing_projection": "NEVER_HEARD_BACK — 'VAN handed this over and never heard back', in the attention queue",
       "terminal_state": "INTEGRATED_AND_EVIDENCED",
       "closure_commits": []
     },
@@ -2370,7 +2510,7 @@
       "production_caller": "android/app/src/main/java/com/dial/van/VanApplication.kt publishWakeModelState",
       "tests": "android/verification/src/test/kotlin/com/dial/van/voice/WakeModelAssetTest.kt",
       "runtime_evidence": "evidence/van-system-audit/gate-6/kotlin_verification_tests.txt",
-      "owner_facing_projection": "'I cannot listen for my name yet \u2014 no wake word model is installed', in the degraded list",
+      "owner_facing_projection": "'I cannot listen for my name yet — no wake word model is installed', in the degraded list",
       "terminal_state": "INTEGRATED_AND_EVIDENCED",
       "closure_commits": []
     },

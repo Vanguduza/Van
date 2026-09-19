@@ -310,6 +310,27 @@ EVT_KT = f"{APP_KT}/events/EventStream.kt"
 #: contract tests that run from the repository root. Kept separate rather than folded into
 #: ALL because both the mutation root and pytest's working directory differ.
 ROOT_LEVEL = [
+ # --- checkpoint 18: the ledger reconciler -------------------------------------
+ # Six mutations, and getting three of them to fail took three attempts each. The tool's
+ # two test-exclusion rules overlap on every file in this repository, so any fixture driven
+ # through the search satisfies both and neither can be falsified alone.
+ (["tests/contracts/test_ledger_reconcile.py"], [
+   ("tools/ci/ledger_reconcile.py", '    if "/test" in path:\n        return False\n', "",
+    "C18 a test-path reference counts as a production consumer"),
+   ("tools/ci/ledger_reconcile.py",
+    '    if Path(path).name.startswith("test_"):\n        return False\n', "",
+    "C18 a test_-named file counts as a production consumer"),
+   ("tools/ci/ledger_reconcile.py", "    return path not in set(excludes or [])", "    return True",
+    "C18 a reference from dead code counts as integration"),
+   ("tools/ci/ledger_reconcile.py", "    if contradicted:", "    if False:",
+    "C18 stop failing when the ledger understates"),
+   ("tools/ci/ledger_reconcile.py",
+    "            unverifiable.append(f\"{name} ({c.get('maturity_class')})\")",
+    "            confirmed.append(name)", "C18 an entry with no symbols counts as verified"),
+   ("tools/ci/ledger_reconcile.py",
+    '        if c.get("maturity_class") not in CLAIMS_UNREACHED:', "        if False:",
+    "C18 check classes that assert nothing about reachability"),
+ ]),
  # --- checkpoint 15: the Kotlin reachability scanner ---------------------------
  # A scanner is only as good as what it refuses to count. The first four here are the
  # manifest parse and the three ways a symbol can appear without being a call site; a
