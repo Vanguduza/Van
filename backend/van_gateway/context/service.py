@@ -23,6 +23,7 @@ from van_gateway.context.models import (
     SensitivityClass,
     SourceTrust,
 )
+from van_gateway.epistemics.reconciliation import PromotionRefused, check_promotion
 from van_gateway.storage.db import Store
 
 
@@ -43,6 +44,30 @@ _AUTHORITY_RANK: dict[EpistemicState, int] = {
     EpistemicState.UNKNOWN: -1,
 }
 
+#: Authorities whose facts do not go stale on a clock.
+#:
+#: Staleness asks "should VAN go and look again". That is a sensible question about a fact
+#: VAN observed — a live API reading, an inference, something an external source said — and
+#: an incoherent one about a fact the owner stated, because VAN has no way to look again.
+#: Only the owner can refresh it, and a project's truth file is refreshed by its SHA.
+#:
+#: The practical consequence of getting this wrong is worse than a mislabel. STALE on a
+#: CANONICAL_OWNER fact is a readiness state the system cannot exit: no re-observation can
+#: clear it, so a requirement with a `max_age_ms` over an owner preference is permanently
+#: unsatisfiable and blocks the work that depends on it, forever.
+#:
+#: Owner statements that *are* time-bound carry `valid_until_ms`, which is the owner scoping
+#: their own claim and is honoured by `current_candidates` before any of this is reached.
+#:
+#: The rule itself is not new. It was written down and tested on the `Claim` type that
+#: component ledger entry 2 dispositioned DELETE — a taxonomy nothing stored — where it
+#: enforced nothing. Deleting that code without bringing the rule here would have removed
+#: the only statement of it in the repository.
+_NOT_STALE_ON_A_CLOCK = {
+    EpistemicState.CANONICAL_OWNER,
+    EpistemicState.PROJECT_TRUTH,
+}
+
 _HIGH_AUTHORITY = {
     EpistemicState.CANONICAL_OWNER,
     EpistemicState.PROJECT_TRUTH,
@@ -50,6 +75,22 @@ _HIGH_AUTHORITY = {
     EpistemicState.VERIFIED_HISTORY,
     EpistemicState.CONFIRMED_LEARNED,
 }
+
+
+def _optional_text(row: Any, column: str) -> str | None:
+    """Read a nullable column that a row may not carry at all.
+
+    `export_scope` and the graph queries both SELECT *, but the retrieval paths select
+    explicit column lists, and a Row that was built before this column existed raises on
+    subscript rather than returning None. Treating "absent" and "null" alike is right here:
+    a record with no supersession link and a record from before links were kept are the
+    same claim — nothing says this replaced anything.
+    """
+    try:
+        value = row[column]
+    except (IndexError, KeyError):
+        return None
+    return str(value) if value is not None else None
 
 
 class OwnerContextService:
@@ -122,6 +163,18 @@ class OwnerContextService:
                 prior_authority = EpistemicState(str(prior["authority"]))
                 if _AUTHORITY_RANK[candidate.authority] < _AUTHORITY_RANK[prior_authority]:
                     raise ContextAdmissionError("lower-authority fact cannot supersede higher-authority fact")
+                # P2-COG-002 — the rank check asks whether the new fact outranks the old
+                # one. This asks whether the *kind* of claim changed in a way that needs
+                # authority the new fact does not have, which is what
+                # FORBIDDEN_SELF_PROMOTIONS was written to name and nothing enforced.
+                try:
+                    check_promotion(
+                        prior=prior_authority,
+                        proposed=candidate.authority,
+                        proposed_trust=candidate.source_trust,
+                    )
+                except PromotionRefused as exc:
+                    raise ContextAdmissionError(str(exc)) from exc
                 if prior["valid_until_ms"] is None:
                     await db.execute(
                         "UPDATE owner_facts SET valid_until_ms = ?, updated_at_unix_ms = ? WHERE fact_id = ?",
@@ -134,8 +187,8 @@ class OwnerContextService:
                   fact_id, subject, predicate, value_json, authority, source_trust, source_ref,
                   confidence_permille, confidence_profile_version, scope, valid_from_ms, valid_until_ms,
                   observed_at_ms, last_verified_at_ms, sensitivity, revision, content_digest,
-                  created_at_unix_ms, updated_at_unix_ms
-                ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
+                  supersedes_fact_id, created_at_unix_ms, updated_at_unix_ms
+                ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
                 """,
                 (
                     candidate.fact_id,
@@ -155,15 +208,22 @@ class OwnerContextService:
                     candidate.sensitivity.value,
                     revision,
                     content_digest,
+                    # P2-CTX-003 — the link, not just its effect. Before this the column did
+                    # not exist and the value was used to close the prior record and then
+                    # dropped, so nothing recorded that a correction had happened.
+                    candidate.supersedes_fact_id,
                     int(time.time() * 1000),
                     int(time.time() * 1000),
                 ),
             )
             await db.commit()
-        return OwnerFactRecord(**candidate.model_dump(exclude={"supersedes_fact_id"}), revision=revision, content_digest=content_digest)
+        return OwnerFactRecord(**candidate.model_dump(), revision=revision, content_digest=content_digest)
 
     @staticmethod
-    def _row_to_fact(row: Any) -> OwnerFactRecord:
+    def row_to_fact(row: Any) -> OwnerFactRecord:
+        """An owner_facts row as a record. Public because history and conflict reporting
+        read the same rows and must read them the same way; a second mapper is a second
+        place for the supersession link to go missing."""
         return OwnerFactRecord(
             fact_id=str(row["fact_id"]),
             subject=str(row["subject"]),
@@ -182,6 +242,7 @@ class OwnerContextService:
             sensitivity=SensitivityClass(str(row["sensitivity"])),
             revision=int(row["revision"]),
             content_digest=str(row["content_digest"]),
+            supersedes_fact_id=_optional_text(row, "supersedes_fact_id"),
         )
 
     async def current_candidates(self, requirement: ContextRequirement, now_ms: int | None = None) -> list[OwnerFactRecord]:
@@ -195,7 +256,7 @@ class OwnerContextService:
             """,
             (requirement.subject, requirement.predicate, requirement.scope, now_ms, now_ms),
         )
-        facts = [self._row_to_fact(row) for row in rows]
+        facts = [self.row_to_fact(row) for row in rows]
         if not requirement.allow_inferred:
             facts = [f for f in facts if f.authority != EpistemicState.INFERRED]
         return sorted(
@@ -223,24 +284,43 @@ class OwnerContextService:
 
         selected = top[0]
         verified_at = selected.last_verified_at_ms or selected.observed_at_ms
-        if requirement.max_age_ms is not None and now_ms - verified_at > requirement.max_age_ms:
+        if (
+            requirement.max_age_ms is not None
+            and selected.authority not in _NOT_STALE_ON_A_CLOCK
+            and now_ms - verified_at > requirement.max_age_ms
+        ):
             return RequirementResolution(requirement=requirement, state=ReadinessState.STALE, fact=selected, reason="fact_exceeds_max_age")
         return RequirementResolution(requirement=requirement, state=ReadinessState.CURRENT, fact=selected)
 
-    async def readiness(self, command_id: str, requirements: list[ContextRequirement], now_ms: int | None = None) -> ContextReadiness:
-        resolutions = [await self.resolve_requirement(req, now_ms=now_ms) for req in requirements]
-        states = {item.state for item in resolutions}
+    @staticmethod
+    def _worst(states: set[ReadinessState]) -> ReadinessState:
         if ReadinessState.CONFLICTED in states:
-            overall = ReadinessState.CONFLICTED
-        elif ReadinessState.MISSING in states:
-            overall = ReadinessState.MISSING
-        elif ReadinessState.STALE in states:
-            overall = ReadinessState.STALE
-        elif all(state == ReadinessState.CURRENT for state in states):
-            overall = ReadinessState.CURRENT
-        else:
-            overall = ReadinessState.UNKNOWN
-        return ContextReadiness(command_id=command_id, state=overall, requirements=resolutions)
+            return ReadinessState.CONFLICTED
+        if ReadinessState.MISSING in states:
+            return ReadinessState.MISSING
+        if ReadinessState.STALE in states:
+            return ReadinessState.STALE
+        if not states or all(state == ReadinessState.CURRENT for state in states):
+            return ReadinessState.CURRENT
+        return ReadinessState.UNKNOWN
+
+    async def readiness(self, command_id: str, requirements: list[ContextRequirement], now_ms: int | None = None) -> ContextReadiness:
+        """Two answers, because they are two different questions (P0-CTX-001).
+
+        `state` gates execution and is computed over the blocking requirements only.
+        `advisory_state` says whether VAN knew what it wanted to know, which is what the
+        owner and the evidence trail care about. Collapsing them would force a choice
+        between a readiness signal that is always green because nothing is asked, and one
+        that is always red because everything blocks.
+        """
+        resolutions = [await self.resolve_requirement(req, now_ms=now_ms) for req in requirements]
+        blocking = {r.state for r in resolutions if r.requirement.blocking}
+        return ContextReadiness(
+            command_id=command_id,
+            state=self._worst(blocking),
+            advisory_state=self._worst({r.state for r in resolutions}),
+            requirements=resolutions,
+        )
 
     async def compile_snapshot(
         self,
@@ -264,6 +344,9 @@ class OwnerContextService:
             "command_id": command_id,
             "kernel_revision": kernel_revision,
             "fact_ids": fact_ids,
+            "readiness_state": ready.advisory_state.value,
+            "requirements_asked": len(requirements),
+            "missing_requirements": ready.missing,
             "graph_evidence_refs": graph_evidence_refs or [],
             "lexical_evidence_refs": lexical_evidence_refs or [],
             "knowledge_evidence_refs": knowledge_evidence_refs or [],
@@ -322,22 +405,22 @@ class OwnerContextService:
                 INSERT INTO owner_context_edges(
                   edge_id, from_node, predicate, to_node, authority, source_trust, source_ref,
                   confidence_permille, confidence_profile_version, scope, valid_from_ms, valid_until_ms,
-                  observed_at_ms, sensitivity, revision
-                ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
+                  observed_at_ms, sensitivity, revision, supersedes_edge_id
+                ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
                 """,
                 (
                     candidate.edge_id, candidate.from_node, candidate.predicate, candidate.to_node,
                     candidate.authority.value, candidate.source_trust.value, candidate.source_ref,
                     candidate.confidence_permille, candidate.confidence_profile_version, candidate.scope,
                     candidate.valid_from_ms, candidate.valid_until_ms, candidate.observed_at_ms,
-                    candidate.sensitivity.value, revision,
+                    candidate.sensitivity.value, revision, candidate.supersedes_edge_id,
                 ),
             )
             await db.commit()
         return revision
 
     @staticmethod
-    def _row_to_edge(row: Any) -> ContextEdgeRecord:
+    def row_to_edge(row: Any) -> ContextEdgeRecord:
         return ContextEdgeRecord(
             edge_id=str(row["edge_id"]),
             from_node=str(row["from_node"]),
@@ -354,6 +437,7 @@ class OwnerContextService:
             observed_at_ms=int(row["observed_at_ms"]),
             sensitivity=SensitivityClass(str(row["sensitivity"])),
             revision=int(row["revision"]),
+            supersedes_edge_id=_optional_text(row, "supersedes_edge_id"),
         )
 
     async def _current_edges_for_node(
@@ -389,7 +473,7 @@ class OwnerContextService:
             "SELECT * FROM owner_context_edges WHERE " + " AND ".join(clauses),
             tuple(params),
         )
-        edges = [self._row_to_edge(row) for row in rows]
+        edges = [self.row_to_edge(row) for row in rows]
         if not query.allow_inferred:
             edges = [edge for edge in edges if edge.authority != EpistemicState.INFERRED]
         return sorted(
@@ -488,8 +572,8 @@ class OwnerContextService:
         )
         return {
             "scope": scope,
-            "facts": [self._row_to_fact(row).model_dump(mode="json") for row in facts],
-            "edges": [self._row_to_edge(row).model_dump(mode="json") for row in edges],
+            "facts": [self.row_to_fact(row).model_dump(mode="json") for row in facts],
+            "edges": [self.row_to_edge(row).model_dump(mode="json") for row in edges],
         }
 
     async def erase_scope(self, scope: str) -> int:

@@ -345,176 +345,18 @@ object VanPreviewSheets {
     // ------------------------------------------------------------------ command centre
 
     /** §14: glass as the top-level material language, panels more opaque, solid critical action. */
-    fun commandCentreSheet(): BufferedImage {
-        val w = 1180
-        val h = 1420
-        val image = BufferedImage(w, h, BufferedImage.TYPE_INT_ARGB)
-        val g = image.createGraphics()
-        AwtVanRenderer.prepare(g)
-
-        g.paint = GradientPaint(
-            0f,
-            0f,
-            Color(0xFF060A14.toInt()),
-            0f,
-            h.toFloat(),
-            Color(0xFF04070F.toInt()),
-        )
-        g.fillRect(0, 0, w, h)
-        // Faint field so the glass has something to sample, as it would over a real app.
-        g.color = Color(0x140096FF, true)
-        g.fill(Ellipse2D.Float(-160f, 120f, 900f, 900f))
-        g.color = Color(0x1000E5FF, true)
-        g.fill(Ellipse2D.Float(w - 520f, h - 760f, 820f, 820f))
-
-        val margin = 56
-        val cue = VanPresence.cue(DegradedMode.healthy())
-        val style = glass(cue.durableState, panel = true, liveBlur = false)
-        val palette = VanStatusPalette.forState(cue.durableState)
-
-        g.color = Color(TEXT, true)
-        g.font = font(34, bold = true)
-        g.drawString("Van Command Centre", margin, 74)
-        g.font = font(17)
-        g.color = Color(TEXT_DIM, true)
-        g.drawString(
-            "Hero VAN, then state/mission, attention, decisions, tasks, projects, connections. Approvals are solid, never glass.",
-            margin,
-            104,
-        )
-
-        // Hero panel.
-        val heroH = 240
-        val hero = RoundRectangle2D.Float(
-            margin.toFloat(),
-            130f,
-            (w - margin * 2).toFloat(),
-            heroH.toFloat(),
-            dpf(VanGlassTokens.CORNER_RADIUS_DP.toInt()),
-            dpf(VanGlassTokens.CORNER_RADIUS_DP.toInt()),
-        )
-        GlassPainter.blurBehind(g, image, hero, (VanGlassTokens.BLUR_DP * DENSITY).toInt())
-        GlassPainter.fillGlass(g, style, hero, DENSITY)
-
-        val avatarBox = 186f
-        val spec = VanAuraSpecs.forState(cue.durableState)
-        GlassPainter.drawAura(
-            g,
-            spec,
-            margin + 24 + avatarBox / 2f,
-            130f + heroH / 2f,
-            avatarBox * 0.44f,
-            phase = PHASE,
-        )
-        drawCharacter(
-            g,
-            cue.durableState,
-            margin + 24f,
-            130f + (heroH - avatarBox) / 2f,
-            avatarBox,
-            avatarBox,
-            VanPresentation.COMMAND_CENTRE,
-        )
-
-        val textX = margin + 24 + avatarBox.toInt() + 34
-        g.color = Color(TEXT, true)
-        g.font = font(30, bold = true)
-        g.drawString("Van", textX, 196)
-        g.color = Color(palette.accent, true)
-        g.font = font(19, bold = true)
-        g.drawString(cue.headline, textX, 228)
-        g.color = Color(0xFFD5DEE8.toInt(), true)
-        g.font = font(16)
-        g.drawString(VanCaptions.forState(cue.durableState), textX, 256)
-        g.color = Color(TEXT_DIM, true)
-        g.font = font(14)
-        g.drawString(cue.detail, textX, 286)
-        g.drawString(VanPresence.meshCue(DegradedMode.healthy()), textX, 310)
-
-        // Structured section panels.
-        val live = DegradedMode.healthy()
-        val attentionBody = if (live.active) live.reason else "Nothing waiting on you"
-        val sections = listOf(
-            Triple("State / Mission", VanCaptions.forState(cue.durableState), false),
-            Triple("Attention", attentionBody, live.active),
-            Triple("Decisions", "No pending decisions", false),
-            Triple("Tasks", "0 queued commands", false),
-            Triple("Projects", "van · dial · dde · gtr · goat · aeci", false),
-            Triple("Connections", "Hermes profile: van · " + VanPresence.meshCue(live), false),
-        )
-        val colW = (w - margin * 2 - 24) / 2
-        var top = 130 + heroH + 26
-        sections.forEachIndexed { index, (title, summary, alert) ->
-            val col = index % 2
-            val row = index / 2
-            val px = margin + col * (colW + 24)
-            val py = top + row * 172
-            val panelStyle = if (alert) {
-                style.copy(
-                    borderColor = VanGlassTokens.ACCENT_AMBER,
-                    borderAlpha = 0.42f,
-                    backgroundAlpha = (style.backgroundAlpha + 0.06f).coerceAtMost(0.97f),
-                )
-            } else {
-                style
-            }
-            val shape = RoundRectangle2D.Float(px.toFloat(), py.toFloat(), colW.toFloat(), 148f, 28f, 28f)
-            GlassPainter.blurBehind(g, image, shape, (VanGlassTokens.BLUR_DP * DENSITY).toInt())
-            GlassPainter.fillGlass(g, panelStyle, shape, DENSITY)
-
-            g.color = Color(TEXT, true)
-            g.font = font(20, bold = true)
-            g.drawString(title, px + 22, py + 40)
-            g.color = if (alert) Color(VanGlassTokens.ACCENT_AMBER, true) else Color(0xFFD5DEE8.toInt(), true)
-            g.font = font(14)
-            g.drawString(clip(summary, 52), px + 22, py + 78)
-        }
-        top += 3 * 172 + 8
-
-        // Non-critical control: translucent glass.
-        val soft = RoundRectangle2D.Float(margin.toFloat(), top.toFloat(), (w - margin * 2).toFloat(), 58f, 26f, 26f)
-        g.color = GlassPainter.argb(CYAN, 0.18f)
-        g.fill(soft)
-        g.color = GlassPainter.argb(VanGlassTokens.EDGE_CYAN, 0.35f)
-        g.stroke = BasicStroke(1.4f)
-        g.draw(soft)
-        g.color = Color(VanGlassTokens.EDGE_CYAN, true)
-        g.font = font(18, bold = true)
-        centerString(g, "Start floating Van", w / 2, top + 37)
-
-        // §14 critical action: solid, not translucent.
-        val solid = RoundRectangle2D.Float(margin.toFloat(), (top + 76).toFloat(), (w - margin * 2).toFloat(), 62f, 26f, 26f)
-        g.color = Color(VanGlassTokens.ACCENT_AMBER, true)
-        g.fill(solid)
-        g.color = Color(0xFF10151F.toInt(), true)
-        g.font = font(19, bold = true)
-        centerString(g, "Approve A4 action (biometric)", w / 2, top + 116)
-
-        g.color = Color(TEXT_DIM, true)
-        g.font = font(15)
-        g.drawString(
-            "Critical actions switch from translucent to solid controls (§14) so an approval can never be mis-tapped through glass.",
-            margin,
-            top + 172,
-        )
-        g.color = Color(CYAN, true)
-        g.font = font(15, bold = true)
-        g.drawString(
-            "Character is interim owner art / Canvas — authored .riv and owner visual sign-off remain EXTERNAL.",
-            margin,
-            top + 198,
-        )
-
-        g.dispose()
-        return image
-    }
-
-    // ------------------------------------------------------------------ token reference
-
     /**
-     * Token and fallback reference sheet: the §8 glass tokens, the §7 aura layers and the §11
-     * battery/thermal ladder, rendered from the shipped constants so the numbers can be checked.
+     * P1-VIS-001 / P2-VIS-003 — the Command Centre board, rendered in one place.
+     *
+     * This used to be a second, older implementation of the board that took no arguments
+     * and hardcoded one health snapshot. Both named evidence shots routed through it, so
+     * they produced byte-identical files, and a `reconcile` pass then overwrote them
+     * afterwards from [VanCommandCentreEvidence] — two renderers for one board, with the
+     * second silently correcting the first. It now delegates, so there is one.
      */
+    fun commandCentreSheet(degraded: Boolean = false): BufferedImage =
+        VanCommandCentreEvidence.render(degraded = degraded)
+
     fun glassTokenSheet(): BufferedImage {
         val w = 1180
         // Tall enough to clear the five-line budget captions under the §11 ladder tiles.

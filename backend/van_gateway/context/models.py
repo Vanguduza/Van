@@ -86,6 +86,18 @@ class ContextRequirement(BaseModel):
     scope: str = "global"
     max_age_ms: int | None = None
     allow_inferred: bool = False
+    #: Whether acting without this fact would be *wrong*, as opposed to merely less good.
+    #:
+    #: P0-CTX-001 — the orchestrator asked for nothing, so readiness was trivially CURRENT.
+    #: Asking for everything and blocking on all of it would be the opposite mistake: a
+    #: readiness signal that is always red trains everyone to ignore it. So a requirement
+    #: is always reported, and gates execution only when its absence makes the action
+    #: incorrect rather than imperfect.
+    #:
+    #: Defaulted True so that every caller written before this field existed keeps exactly
+    #: the behaviour it had. Only the orchestrator's derived requirements opt out, and
+    #: they say why where they do.
+    blocking: bool = True
 
 
 class RequirementResolution(BaseModel):
@@ -98,8 +110,21 @@ class RequirementResolution(BaseModel):
 
 class ContextReadiness(BaseModel):
     command_id: str
+    #: Computed over the blocking requirements only. With none declared this is CURRENT,
+    #: which is the honest reading of "nothing had to be known".
     state: ReadinessState
+    #: Computed over every requirement, blocking or not. This is the one that says whether
+    #: VAN actually knew what it wanted to know.
+    advisory_state: ReadinessState = ReadinessState.CURRENT
     requirements: list[RequirementResolution]
+
+    @property
+    def missing(self) -> list[str]:
+        return [
+            f"{r.requirement.subject}.{r.requirement.predicate}"
+            for r in self.requirements
+            if r.state is not ReadinessState.CURRENT
+        ]
 
 
 class ContextSnapshot(BaseModel):
@@ -107,6 +132,11 @@ class ContextSnapshot(BaseModel):
     command_id: str
     kernel_revision: int
     fact_ids: list[str]
+    #: What was asked and how it went, so "VAN knew nothing" is distinguishable from
+    #: "VAN asked nothing" — which it was not before (P0-CTX-001).
+    readiness_state: str = "UNKNOWN"
+    requirements_asked: int = 0
+    missing_requirements: list[str] = Field(default_factory=list)
     graph_evidence_refs: list[str] = Field(default_factory=list)
     lexical_evidence_refs: list[str] = Field(default_factory=list)
     knowledge_evidence_refs: list[str] = Field(default_factory=list)

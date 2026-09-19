@@ -1,0 +1,33 @@
+{
+  "_command": "python3 tools/ops/backup.py drill --database <gateway db>",
+  "_exit_code": 0,
+  "_note": "Real restore drill, run from the repository root against a freshly migrated gateway database plus the repository evidence/ and docs/project-state/ trees. P3-OPS-002.",
+  "audit_chain": {
+    "backup": {
+      "rows": 0,
+      "tip_hash": null,
+      "tip_seq": null
+    },
+    "restored": {
+      "rows": 0,
+      "tip_hash": null,
+      "tip_seq": null
+    }
+  },
+  "differing_tables": [],
+  "ok": true,
+  "restored_to": "/tmp/van-restore-drill-qu5wpgjq/restored/gateway.sqlite3",
+  "rows_compared": 20,
+  "schema_version": {
+    "backup": 20,
+    "restored": 20
+  },
+  "tables_compared": 74,
+  "verification": {
+    "corrupt": [],
+    "created_at_unix": 1789802952,
+    "entries": 37,
+    "missing": [],
+    "ok": true
+  }
+}

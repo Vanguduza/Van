@@ -1,0 +1,13 @@
+{
+  "version": 1,
+  "principle": "P0-TRADE-001. Owner authority is a signature checked against one of these keys, not a non-empty string. An empty registry means no owner-signed act can be authorised on this host, which is the correct state for a machine the owner has not enrolled a key on.",
+  "format": "key_id -> PEM SubjectPublicKeyInfo for an EC P-256 public key",
+  "acts": {
+    "mandate-admit": "subject is <mandate_id>:<version>; standing, not single use",
+    "owner-halt": "subject is the session id, or 'van-trading-core' for the commander and gateway",
+    "kill-switch-clear": "subject is the session id",
+    "capsule-promote": "subject is <strategy_id>:<target_state>",
+    "ticket-confirm": "subject is the ticket id"
+  },
+  "keys": {}
+}

@@ -51,5 +51,21 @@ def test_mandate_fractions_are_decimal_strings_not_floats():
     example = json.loads((SCHEMA_DIR.parent.parent.parent / "examples" / "mandate.fx_primary.example.json").read_text())
     from vati.risk import TradingMandate
 
+    # P0-TRADE-001 — the example ships a placeholder and is refused at load, which is
+    # correct: a committed file cannot carry a live owner signature, and one that appeared
+    # to would be worse than one that does not.
+    from vati.risk.mandate import MandateError
+
+    with pytest.raises(MandateError, match="not owner-signed"):
+        TradingMandate.from_mapping(example)
+
+    from conftest import owner_authority
+
+    example["owner_signature_ref"] = owner_authority().token(
+        act="mandate-admit",
+        subject=f"{example['mandate_id']}:{example['version']}",
+        issued_at_unix=int(example["signed_at_unix"]),
+        lifetime_seconds=int(example["expires_at_unix"]) - int(example["signed_at_unix"]),
+    )
     m = TradingMandate.from_mapping(example)
     assert m.mode.value == "LIMITED_LIVE"

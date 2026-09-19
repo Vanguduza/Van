@@ -16,7 +16,12 @@ class HermesBridgeError(Exception):
 
 
 class HermesBridge:
-    """Talk to Hermes profile `van` only. Never launches models directly."""
+    """Talk to Hermes profile `van` only. Never launches models directly.
+
+    `message_agent` and `create_council` were removed on 2026-09-19 under blueprint Gate 0.
+    Councils and agent messaging are canonical on the Hermes side (`hermes/bot/councils.md`,
+    `hermes/bot/message_agent.md`); this bridge duplicated them and had no caller in the
+    gateway. Do not reintroduce them here without a gateway-side consumer."""
 
     def __init__(self, base_url: str, bearer_token: str, profile: str = "van", client: httpx.AsyncClient | None = None) -> None:
         self.base_url = base_url.rstrip("/")
@@ -88,57 +93,3 @@ class HermesBridge:
             if owns:
                 await client.aclose()
 
-    async def message_agent(self, target: str, text: str) -> dict[str, Any]:
-        client = self._client or httpx.AsyncClient(timeout=30.0)
-        owns = self._client is None
-        try:
-            resp = await client.post(
-                self._url("/v1/message_agent"),
-                json={"profile": self.profile, "target": target, "text": text},
-                headers=self._headers(),
-            )
-            if resp.status_code >= 400:
-                raise HermesBridgeError("message_agent_failed", f"HTTP {resp.status_code}")
-            return resp.json()
-        except httpx.HTTPError as exc:
-            raise HermesBridgeError("hermes_offline", str(exc)) from exc
-        finally:
-            if owns:
-                await client.aclose()
-
-    async def create_council(self, members: list[str], topic: str, *, max_rounds: int = 3) -> dict[str, Any]:
-        if not 2 <= len(members) <= 6:
-            raise HermesBridgeError("invalid_council", "Council requires 2–6 members")
-        caps = await self.capabilities()
-        if not caps.get("group_rooms"):
-            # Fail closed: fall back to direct native bot messaging — no fake council runtime
-            deliveries = []
-            for member in members:
-                deliveries.append(await self.message_agent(member, f"[council-fallback] {topic}"))
-            return {
-                "mode": "direct_message_fallback",
-                "reason": DegradedCode.GROUP_ROOM_UNSUPPORTED.value,
-                "deliveries": deliveries,
-            }
-        client = self._client or httpx.AsyncClient(timeout=60.0)
-        owns = self._client is None
-        try:
-            resp = await client.post(
-                self._url("/v1/group_rooms"),
-                json={
-                    "profile": self.profile,
-                    "members": members,
-                    "topic": topic,
-                    "max_rounds": max_rounds,
-                    "anti_loop": True,
-                },
-                headers=self._headers(),
-            )
-            if resp.status_code >= 400:
-                raise HermesBridgeError("council_failed", f"HTTP {resp.status_code}")
-            return resp.json()
-        except httpx.HTTPError as exc:
-            raise HermesBridgeError("hermes_offline", str(exc)) from exc
-        finally:
-            if owns:
-                await client.aclose()

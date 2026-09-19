@@ -1,13 +1,20 @@
 package com.dial.van
 
 import android.app.Application
+import android.net.ConnectivityManager
+import android.net.Network
+import android.net.NetworkCapabilities
+import android.net.NetworkRequest
 import com.dial.van.control.VanCommandController
 import com.dial.van.control.VanCommandSource
 import com.dial.van.degraded.DegradedModeStore
+import com.dial.van.degraded.DeviceSignals
+import com.dial.van.gateway.ReplayReason
 import com.dial.van.gateway.QueueReplayer
 import com.dial.van.gateway.VanGatewayClient
 import com.dial.van.notification.NotificationPolicyStore
 import com.dial.van.queue.EncryptedCommandQueue
+import com.dial.van.telemetry.DeviceTelemetryReporter
 import com.dial.van.visual.VanLiveVisualState
 import com.dial.van.voice.PersonalSpeechModel
 import com.dial.van.voice.SpeechContext
@@ -19,7 +26,10 @@ import com.dial.van.voice.VoiceInputCallback
 import com.dial.van.voice.VoiceInputManager
 import com.dial.van.voice.VoiceRecognitionResult
 import com.dial.van.voice.VoiceSessionCoordinator
+import com.dial.van.voice.VoiceAudioArbiter
 import com.dial.van.voice.WakeAcknowledgementManager
+import com.dial.van.voice.WakeCoordinator
+import com.dial.van.voice.WakeModelLoader
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.SupervisorJob
@@ -49,11 +59,34 @@ class VanApplication : Application(), VoiceInputCallback, TtsOutputCallback {
         private set
     lateinit var voiceUi: VanVoiceUiStore
         private set
+
+    /**
+     * P1-VOICE-001 — the wake path is constructed on boot, whether or not it can run.
+     *
+     * `WakePipeline` was never constructed anywhere in the app, so "Hey Van" did nothing and
+     * nothing said so: `WakeCoordinator.KWS_NOT_READY` existed and was unreachable because
+     * no coordinator existed either. It exists now, it fails closed without a model, and the
+     * reason reaches the owner's degraded-subsystem list instead of being silence.
+     */
+    lateinit var wakeModel: WakeModelLoader
+        private set
+    lateinit var voiceArbiter: VoiceAudioArbiter
+        private set
+    lateinit var wakeCoordinator: WakeCoordinator
+        private set
     lateinit var gatewayClient: VanGatewayClient
         private set
     lateinit var commandController: VanCommandController
         private set
     lateinit var queueReplayer: QueueReplayer
+        private set
+
+    /**
+     * P3-OBS-002 — the producer for the six device-sourced metrics. The gateway declared
+     * them and the ingest route has existed since Gate 11; nothing on the phone posted to
+     * it, so the scrape reported them as unobserved forever.
+     */
+    lateinit var telemetry: DeviceTelemetryReporter
         private set
 
     override fun onCreate() {
@@ -66,17 +99,114 @@ class VanApplication : Application(), VoiceInputCallback, TtsOutputCallback {
         wakeAcknowledgement = WakeAcknowledgementManager(this)
         voiceUi = VanVoiceUiStore()
         gatewayClient = VanGatewayClient(this)
-        commandController = VanCommandController(gatewayClient, appScope)
+        // P1-VOICE-001 — TtsOutputManager.speak finally has a caller. Bound to the
+        // outcome projection, so VAN speaks when work finished or needs the owner and
+        // stays quiet otherwise.
+        ttsOutput = TtsOutputManager(this, this)
+        // P1-VOICE-001 — TtsOutputManager.speak finally has a caller. Bound to the outcome
+        // projection, so VAN speaks when work finished or needs the owner and stays quiet
+        // otherwise.
+        commandController = VanCommandController(
+            gatewayClient, appScope, speak = { text -> ttsOutput.speak(text) },
+        )
         voiceInput = VoiceInputManager(
             context = this,
             callback = this,
             biasingStringsProvider = { personalSpeechModel.biasingStrings(activeSpeechContexts()) },
         )
-        ttsOutput = TtsOutputManager(this, this)
         voiceSession = VoiceSessionCoordinator(voiceInput, ttsOutput)
         queueReplayer = QueueReplayer(commandQueue, gatewayClient, degradedModeStore, appScope)
-        queueReplayer.replayAsync()
+        telemetry = DeviceTelemetryReporter(this, gatewayClient, appScope)
+        wakeModel = WakeModelLoader(this)
+        voiceArbiter = VoiceAudioArbiter(this)
+        wakeCoordinator = WakeCoordinator(
+            arbiter = voiceArbiter,
+            pipeline = wakeModel.pipelineOrNull(),
+            acknowledgementReady = { wakeAcknowledgement.isReady() },
+            playAcknowledgement = { wakeAcknowledgement.play() },
+            beginRecognition = { turnId -> voiceSession.beginOwnerTurn(turnId) },
+        )
+        publishWakeModelState()
+        // P3-AND-004 — the five subsystems that reported WORKING because nothing wrote
+        // them now have a writer, and it runs before the owner can open a health screen.
+        DeviceSignals.publish(this)
+        queueReplayer.replayAsync(ReplayReason.APP_START)
+        telemetry.start()
+        startConnectivityMonitor()
         startGatewayHealthMonitor()
+    }
+
+    /**
+     * Drain the queue when the network comes back (P3-AND-006).
+     *
+     * A registered callback rather than a poll: the queue should empty when connectivity
+     * returns, not up to a minute later, and the edge detection that stops a Wi-Fi to
+     * mobile handover producing four concurrent replays lives in `ReplayTrigger`.
+     */
+    private fun startConnectivityMonitor() {
+        val manager = getSystemService(ConnectivityManager::class.java) ?: return
+        val request = NetworkRequest.Builder()
+            .addCapability(NetworkCapabilities.NET_CAPABILITY_INTERNET)
+            .addCapability(NetworkCapabilities.NET_CAPABILITY_VALIDATED)
+            .build()
+        val registered = runCatching {
+            manager.registerNetworkCallback(
+                request,
+                object : ConnectivityManager.NetworkCallback() {
+                    override fun onAvailable(network: Network) {
+                        queueReplayer.onNetworkChanged(true)
+                    }
+
+                    override fun onLost(network: Network) {
+                        // Recorded, not acted on: the recovery is the edge back up, and a
+                        // replay attempt with no network is a guaranteed failure that would
+                        // count against the queue's health.
+                        queueReplayer.onNetworkChanged(false)
+                    }
+                },
+            )
+        }
+        // P1-AND-014 — the failure is reported rather than swallowed.
+        //
+        // This was a bare `runCatching { }`, so a missing ACCESS_NETWORK_STATE turned into
+        // silence: the registration threw, nothing observed connectivity, and the queue
+        // simply never drained when the network came back. A feature that quietly does not
+        // exist is worse than one that fails loudly, and the whole point of the degraded
+        // registry is that VAN says which parts of itself are not working.
+        if (registered.isFailure) {
+            degradedModeStore.markBroken(
+                "queue",
+                "VAN cannot watch for the network returning, so queued commands wait for " +
+                    "you to send them rather than going out on their own",
+                com.dial.van.degraded.RestoreAction.RETRY_CONNECTION,
+            )
+        }
+    }
+
+    /** The owner pressing "Try again" on a degraded subsystem (P3-AND-005). */
+    fun requestReplay() = queueReplayer.replayAsync(ReplayReason.OWNER_REQUESTED)
+
+    /** Re-read what the device actually reports. Called when a screen resumes. */
+    fun refreshSubsystemHealth() = DeviceSignals.publish(this)
+
+    /**
+     * Put the wake word's real state in front of the owner.
+     *
+     * The absence of a model is a fact about VAN's capability, not a fact to hide: without
+     * this the owner says "Hey Van" into a phone that was never going to answer and has no
+     * way to find out why.
+     */
+    private fun publishWakeModelState() {
+        val status = wakeModel.status()
+        if (status.ready) {
+            degradedModeStore.markWorking("wake_word")
+        } else {
+            degradedModeStore.markBroken(
+                "wake_word",
+                status.sentence,
+                com.dial.van.degraded.RestoreAction.OPEN_SETTINGS,
+            )
+        }
     }
 
     private fun activeSpeechContexts(): Set<SpeechContext> {
@@ -107,6 +237,10 @@ class VanApplication : Application(), VoiceInputCallback, TtsOutputCallback {
         try {
             val health = gatewayClient.health()
             degradedModeStore.markWorking("gateway")
+            // P3-AND-006 — the gateway coming back is the other recovery edge. A phone with
+            // a working network and an unreachable gateway is the normal condition of a
+            // self-hosted service on a home connection.
+            queueReplayer.onGatewayReachable(true)
 
             if (health.optBoolean("ok", false)) {
                 degradedModeStore.markWorking("hermes")
@@ -133,6 +267,7 @@ class VanApplication : Application(), VoiceInputCallback, TtsOutputCallback {
                     ?.takeIf { it.isNotBlank() },
             )
         } catch (exc: Throwable) {
+            queueReplayer.onGatewayReachable(false)
             degradedModeStore.markBroken(
                 "gateway",
                 "Gateway health unavailable: ${exc.javaClass.simpleName}",

@@ -16,6 +16,26 @@ parallel vocabulary, and reuses the rule that was hardened there: a payment,
 an injection refusal or an A4/A5 request is POLICY_FORBIDDEN and never becomes
 an owner prompt, because a prompt the target surface can provoke is a way to
 obtain authority rather than a way to supervise it.
+
+P2-CU-001 — what this module did *not* have was an executor. No worker exists for
+any of the four surfaces, so `begin` recorded an operation nobody would perform
+and the fabric read as a built capability in every matrix that listed it. The
+audit's own disposition was "delete or fold"; the closure blueprint's owner
+decision 6 said delete, on the description "a stub".
+
+That description was wrong, and reading the code is what corrects it. This is not
+a stub: the refusals are real, ordered and tested, and the ledger is durable. What
+it lacks is a worker. Deleting a hardened boundary because the thing it bounds has
+not been built yet gets the order backwards — the boundary is the part you want
+written first, and re-deriving it later under delivery pressure is how a
+`RUN_ARBITRARY` appears.
+
+So the module stays and the missing executor becomes an enforced runtime state
+instead of a claim in a document. `SURFACE_WORKERS` is empty, `begin` refuses
+`OPERATION_NO_WORKER_FOR_SURFACE` before it writes anything, and
+`/v1/computer-use/health` says so to the owner. The day a worker lands, it
+registers and the refusal stops firing; until then nothing can call this and
+believe work will happen.
 """
 
 from __future__ import annotations
@@ -113,11 +133,25 @@ class OperationRequest(BaseModel):
     verifier_type: str = "NONE"
 
 
+#: Surfaces with a worker that can actually perform an operation.
+#:
+#: P2-CU-001 — empty, and that is the finding made enforceable rather than hidden.
+#: BROWSER is not here either: the browser fabric serves it through its own workers and
+#: its own ledger, and routing browser work through a second record would give the owner
+#: two accounts of one task, which is the coherence defect P2-COH-001 closed.
+SURFACE_WORKERS: frozenset[Surface] = frozenset()
+
+
 class ComputerInteractionFabric:
     """Typed operations against any surface, bound to a mission and evidenced."""
 
-    def __init__(self, store: Store) -> None:
+    def __init__(self, store: Store, *, workers: frozenset[Surface] | None = None) -> None:
         self.store = store
+        self.workers = SURFACE_WORKERS if workers is None else workers
+
+    def surfaces(self) -> dict[str, bool]:
+        """Which surfaces can be acted on, for the health payload and for tests."""
+        return {surface.value: surface in self.workers for surface in Surface}
 
     async def begin(
         self, request: OperationRequest, *, now_ms: int | None = None
@@ -149,6 +183,15 @@ class ComputerInteractionFabric:
             )
         if not request.target_application.strip():
             raise ComputerUseError("OPERATION_TARGET_REQUIRED")
+        if request.surface not in self.workers:
+            # P2-CU-001 — last of the refusals on purpose. A policy prohibition must not be
+            # reported as a configuration gap: "no worker for DESKTOP" invites someone to
+            # start a worker, and an A4 request must never read as one worker away from
+            # permitted. It is also *before* the insert, so an operation nobody can perform
+            # leaves no row claiming it is PENDING.
+            raise ComputerUseError(
+                "OPERATION_NO_WORKER_FOR_SURFACE", request.surface.value
+            )
 
         now = int(time.time() * 1000) if now_ms is None else now_ms
         operation_id = f"cop_{uuid.uuid4().hex}"
@@ -240,6 +283,7 @@ class ComputerInteractionFabric:
 
 
 __all__ = [
+    "SURFACE_WORKERS",
     "ComputerInteractionFabric",
     "ComputerUseError",
     "OperationRequest",

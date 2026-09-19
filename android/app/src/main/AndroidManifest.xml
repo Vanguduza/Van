@@ -3,11 +3,25 @@
 
     <uses-permission android:name="android.permission.FOREGROUND_SERVICE" />
     <uses-permission android:name="android.permission.FOREGROUND_SERVICE_SPECIAL_USE" />
+    <!--
+      P1-VOICE-001 — the wake listener holds the microphone, so its foreground service is
+      typed `microphone`, not `specialUse`. The overlay's service stays `specialUse` because
+      it draws; they are two services because they are two jobs, and typing a microphone
+      service as special-use is how an app loses microphone access on Android 14 while
+      believing it has it.
+    -->
+    <uses-permission android:name="android.permission.FOREGROUND_SERVICE_MICROPHONE" />
     <uses-permission android:name="android.permission.POST_NOTIFICATIONS" />
     <uses-permission android:name="android.permission.RECORD_AUDIO" />
     <uses-permission android:name="android.permission.USE_BIOMETRIC" />
     <uses-permission android:name="android.permission.SYSTEM_ALERT_WINDOW" />
     <uses-permission android:name="android.permission.INTERNET" />
+    <!-- P1-AND-014: ConnectivityManager.registerNetworkCallback needs this, and the
+         offline queue's replay-on-recovery (P3-AND-006) is built on that callback.
+         Without it the registration throws SecurityException, which the caller was
+         swallowing, so the queue never drained when the network came back and
+         nothing said why. A normal permission: granted at install, never prompted. -->
+    <uses-permission android:name="android.permission.ACCESS_NETWORK_STATE" />
     <uses-permission android:name="android.permission.VIBRATE" />
     <uses-permission android:name="android.permission.RECEIVE_BOOT_COMPLETED" />
 
@@ -58,6 +72,11 @@
         </service>
 
         <service
+            android:name=".voice.WakeListenerService"
+            android:exported="false"
+            android:foregroundServiceType="microphone" />
+
+        <service
             android:name=".notification.VanNotificationListenerService"
             android:exported="true"
             android:permission="android.permission.BIND_NOTIFICATION_LISTENER_SERVICE">
@@ -75,35 +94,36 @@
             </intent-filter>
         </receiver>
 
-        <receiver
-            android:name=".share.ShareIntentReceiver"
-            android:exported="true">
-            <intent-filter>
-                <action android:name="android.intent.action.SEND" />
-                <category android:name="android.intent.category.DEFAULT" />
-                <data android:mimeType="text/plain" />
-            </intent-filter>
+        <!--
+          P1-AND-001 — the share sheet resolves activities, so this is an activity. It was a
+          BroadcastReceiver carrying these same filters, which meant VAN never appeared in
+          the share sheet at all and nothing anywhere reported the absence.
+        -->
+        <activity
+            android:name=".share.ShareIntakeActivity"
+            android:exported="true"
+            android:excludeFromRecents="true"
+            android:noHistory="true"
+            android:label="@string/share_intake_label"
+            android:taskAffinity=""
+            android:theme="@style/Theme.Van.Transparent">
             <intent-filter>
                 <action android:name="android.intent.action.SEND" />
                 <category android:name="android.intent.category.DEFAULT" />
                 <data android:mimeType="text/*" />
-            </intent-filter>
-            <intent-filter>
-                <action android:name="android.intent.action.SEND" />
-                <category android:name="android.intent.category.DEFAULT" />
                 <data android:mimeType="image/*" />
-            </intent-filter>
-            <intent-filter>
-                <action android:name="android.intent.action.SEND" />
-                <category android:name="android.intent.category.DEFAULT" />
                 <data android:mimeType="application/*" />
+                <data android:mimeType="audio/*" />
+                <data android:mimeType="video/*" />
             </intent-filter>
             <intent-filter>
                 <action android:name="android.intent.action.SEND_MULTIPLE" />
                 <category android:name="android.intent.category.DEFAULT" />
                 <data android:mimeType="image/*" />
+                <data android:mimeType="text/*" />
+                <data android:mimeType="application/*" />
             </intent-filter>
-        </receiver>
+        </activity>
 
     </application>
 </manifest>

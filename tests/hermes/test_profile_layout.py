@@ -5,7 +5,20 @@ from __future__ import annotations
 from pathlib import Path
 import json
 import os
+import shutil
 import subprocess
+
+import pytest
+
+#: `install_van_profile.sh` calls `require_cmd rsync` and exits 1 without it. The test below
+#: exercises what the installer preserves — the owner's `.env`, sessions, memories and
+#: pairing state across an upgrade — and there is no way to exercise that without running
+#: the installer. Skipping names what is not being checked here; catching the failure and
+#: passing would claim it was.
+requires_rsync = pytest.mark.skipif(
+    shutil.which("rsync") is None,
+    reason="install_van_profile.sh requires rsync; runtime-state preservation is NOT VERIFIED here",
+)
 
 REPO_ROOT = Path(__file__).resolve().parents[2]
 HERMES_ROOT = REPO_ROOT / "hermes"
@@ -27,11 +40,15 @@ REQUIRED_FILES = [
     REPO_ROOT / "docs" / "GOOGLE_INTELLIGENCE_MESH.md",
 ]
 
+#: Single source of truth is hermes/profile/van/config.yaml. Kept here only so a
+#: reader sees the set; test_skill_lists_agree_across_all_sources parses the config
+#: and asserts the installer, doctor and this list all match it.
 SKILL_NAMES = [
     "owner-briefing", "google-workspace", "google-intelligence", "gemini-notebook",
     "google-design", "google-development", "project-steering", "research",
     "decision-support", "document-work", "notification-triage",
-    "infrastructure-diagnostics", "hermes-administration",
+    "infrastructure-diagnostics", "hermes-administration", "trading-intelligence",
+    "automation-fabric", "browser-intelligence",
 ]
 
 AUTHORITY_ORDER_MARKERS = [
@@ -163,6 +180,7 @@ def test_install_scripts_exist():
     assert (REPO_ROOT / "tools" / "hermes" / "doctor_van_profile.sh").is_file()
 
 
+@requires_rsync
 def test_install_profile_preserves_runtime_state_and_secrets(tmp_path):
     hermes_home = tmp_path / "hermes-home"
     target = hermes_home / "profiles" / "van"
@@ -256,3 +274,40 @@ def test_automation_skill_forbids_direct_n8n_access():
     skill = (HERMES_ROOT / "skills" / "automation-fabric" / "SKILL.md").read_text(encoding="utf-8")
     assert "never call" in skill.lower() or "Call the n8n management API" in skill
     assert "is not success" in skill
+
+
+def test_skill_lists_agree_across_all_sources():
+    """Skill counts had drifted four ways: config 16, installer 14, doctor 14, tests 13.
+
+    automation-fabric and browser-intelligence were declared and never installed, so
+    two skills the profile advertises could not exist on the live Hermes host.
+    """
+    import re
+
+    config = (HERMES_ROOT / "profile" / "van" / "config.yaml").read_text(encoding="utf-8")
+    block = re.search(r"^skills:\n(?:.*\n)*?  names:\n((?:    - .*\n)+)", config, re.M)
+    assert block is not None, "config.yaml has no skills.names block"
+    declared = set(re.findall(r"    - (\S+)", block.group(1)))
+
+    def bash_skill_set(path):
+        text = path.read_text(encoding="utf-8")
+        found = set()
+        for m in re.finditer(r"(?:local )?(?:managed_)?skills=\(\n(.*?)\n  \)", text, re.S):
+            found |= set(re.findall(r"[a-z][a-z-]+", m.group(1)))
+        return found
+
+    installer = bash_skill_set(REPO_ROOT / "tools" / "hermes" / "install_van_profile.sh")
+    doctor = bash_skill_set(REPO_ROOT / "tools" / "hermes" / "doctor_van_profile.sh")
+
+    assert declared == set(SKILL_NAMES), (
+        f"config vs tests: only in config {sorted(declared - set(SKILL_NAMES))}, "
+        f"only in tests {sorted(set(SKILL_NAMES) - declared)}"
+    )
+    assert declared == installer, (
+        f"config vs installer: declared but not installed {sorted(declared - installer)}, "
+        f"installed but not declared {sorted(installer - declared)}"
+    )
+    assert declared == doctor, (
+        f"config vs doctor: declared but unchecked {sorted(declared - doctor)}, "
+        f"checked but not declared {sorted(doctor - declared)}"
+    )

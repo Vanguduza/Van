@@ -34,6 +34,7 @@ from typing import Any
 from pydantic import BaseModel, Field
 
 from van_gateway.epistemics.models import SemanticClass
+from van_gateway.reasoning.critic import critique
 from van_gateway.storage.db import Store
 
 
@@ -95,6 +96,10 @@ class Assumption(BaseModel):
     verification_plan: str | None = None
     status: AssumptionStatus = AssumptionStatus.ACTIVE
     resolved_evidence_refs: list[str] = Field(default_factory=list)
+    #: What replaced this, when it was superseded. Carried so a cleared assumption can be
+    #: read as a correction pointing somewhere rather than as a row that simply stopped
+    #: blocking.
+    superseded_by: str | None = None
 
     @property
     def blocks_irreversible_work(self) -> bool:
@@ -174,6 +179,15 @@ REQUIRED_COUNTERFACTUALS = (
 )
 
 
+def _optional_column(row: Any, column: str) -> str | None:
+    """A nullable column a row may not carry, for queries with explicit column lists."""
+    try:
+        value = row[column]
+    except (IndexError, KeyError):
+        return None
+    return str(value) if value is not None else None
+
+
 class ReasoningError(ValueError):
     def __init__(self, code: str, detail: str | None = None) -> None:
         super().__init__(code if detail is None else f"{code}: {detail}")
@@ -205,18 +219,45 @@ class CriticalReasoningKernel:
         recommended_next_action: str | None = None,
         confidence: float = 0.0,
         evidence_refs: list[str] | None = None,
+        #: P0-COG-001 — these are now *additional* findings a caller may contribute, not
+        #: the whole critique. The kernel derives its own and they cannot be suppressed.
         critic_findings: list[CriticFinding] | None = None,
         verifier_findings: list[str] | None = None,
         mission_id: str | None = None,
         now_ms: int | None = None,
     ) -> ReasoningAssessment:
-        """Record an assessment, refusing the ones that do not meet their mode.
+        """Assess, criticise, and refuse the assessments that do not meet their mode.
 
         The refusal matters: an assessment claiming RED_TEAM rigour with one
         alternative considered is worse than no assessment, because it carries
         the authority of a process that did not actually happen.
+
+        P0-COG-001 — this used to take `critic_findings` from the caller and store them,
+        so an assessment with zero findings and 0.99 confidence was recorded as actionable
+        and the matrix described the result as a solver/critic/verifier separation. The
+        critic now runs over what the assessment actually contains. Caller-supplied
+        findings are merged in rather than replaced by, because a caller that noticed
+        something real should be able to say so — but it cannot make the kernel's own
+        findings go away, which is the property that was missing.
         """
         now = int(time.time() * 1000) if now_ms is None else now_ms
+        derived = [
+            CriticFinding(**finding)
+            for finding in critique(
+                problem_statement=problem_statement,
+                known_facts=list(known_facts or []),
+                assumptions=list(assumptions or []),
+                alternatives=list(alternatives or []),
+                contradictions=list(contradictions or []),
+                failure_modes=list(failure_modes or []),
+                evidence_refs=list(evidence_refs or []),
+                recommended_next_action=recommended_next_action,
+                confidence=confidence,
+            )
+        ]
+        # The caller's findings first, so a duplicate kind from the critic is still
+        # recorded: two independent observations of the same flaw is information.
+        merged = list(critic_findings or []) + derived
         assessment = ReasoningAssessment(
             assessment_id=f"ras_{uuid.uuid4().hex}", problem_statement=problem_statement,
             mission_id=mission_id, known_facts=list(known_facts or []),
@@ -226,7 +267,7 @@ class CriticalReasoningKernel:
             counterfactuals=list(counterfactuals or []),
             recommended_next_action=recommended_next_action, confidence=confidence,
             evidence_refs=sorted(set(evidence_refs or [])), challenge_mode=challenge_mode,
-            critic_findings=list(critic_findings or []),
+            critic_findings=merged,
             verifier_findings=list(verifier_findings or []), created_at_ms=now,
         )
         if recommended_next_action and not assessment.meets_mode_requirements:
@@ -311,23 +352,101 @@ class CriticalReasoningKernel:
         )
         return assumption
 
+    #: Resolutions a caller may assert, and what each one costs to assert.
+    #:
+    #: Every value here clears ACTIVE, and clearing ACTIVE unblocks irreversible work. So
+    #: the question for each is not "is this a legitimate outcome" — they all are — but
+    #: "can the actor the gate restrains reach it by saying so". VERIFIED and FALSIFIED are
+    #: both claims about having checked, and both need evidence. SUPERSEDED needs to name
+    #: the assumption that replaced it, which is the difference between a correction and a
+    #: deletion. EXPIRED is not a claim at all, it is the passage of time, and is the
+    #: kernel's to decide rather than a caller's to assert.
+    CALLER_RESOLVABLE: frozenset[AssumptionStatus] = frozenset(
+        {AssumptionStatus.VERIFIED, AssumptionStatus.FALSIFIED, AssumptionStatus.SUPERSEDED}
+    )
+
     async def resolve_assumption(
         self,
         assumption_id: str,
         *,
         status: AssumptionStatus,
         evidence_refs: list[str] | None = None,
+        superseded_by: str | None = None,
         now_ms: int | None = None,
     ) -> None:
-        if status is AssumptionStatus.VERIFIED and not evidence_refs:
-            # Verifying an assumption without evidence is asserting it again.
-            raise ReasoningError("ASSUMPTION_VERIFICATION_REQUIRES_EVIDENCE", assumption_id)
+        """Clear an assumption, at a price that depends on what is being claimed.
+
+        §15's gate blocks irreversible work while a HIGH or CRITICAL assumption is ACTIVE.
+        Before this, only VERIFIED cost anything: the same caller could record a CRITICAL
+        assumption and mark it SUPERSEDED a moment later with nothing to show, and the gate
+        opened. A check the restrained party can mark passed is not a check — it is
+        P0-VERIFY-001's defect in a different ledger.
+        """
+        if status is AssumptionStatus.ACTIVE:
+            raise ReasoningError("ASSUMPTION_CANNOT_BE_REOPENED", assumption_id)
+        if status not in self.CALLER_RESOLVABLE:
+            # EXPIRED specifically. A caller asserting that time has passed is a caller
+            # deciding when its own deadline was.
+            raise ReasoningError("ASSUMPTION_STATUS_NOT_CALLER_SETTABLE", status.value)
+        if status in (AssumptionStatus.VERIFIED, AssumptionStatus.FALSIFIED) and not evidence_refs:
+            # Verifying an assumption without evidence is asserting it again; falsifying one
+            # without evidence is the same assertion wearing the opposite sign, and it is
+            # the one that unblocks the work.
+            raise ReasoningError("ASSUMPTION_RESOLUTION_REQUIRES_EVIDENCE", assumption_id)
+
+        if status is AssumptionStatus.SUPERSEDED:
+            if not superseded_by:
+                raise ReasoningError("SUPERSEDED_REQUIRES_A_REPLACEMENT", assumption_id)
+            original = await self.store.fetchone(
+                "SELECT mission_id FROM assumption_ledger WHERE assumption_id = ?",
+                (assumption_id,),
+            )
+            if original is None:
+                raise ReasoningError("ASSUMPTION_NOT_FOUND", assumption_id)
+            replacement = await self.store.fetchone(
+                "SELECT mission_id, status FROM assumption_ledger WHERE assumption_id = ?",
+                (superseded_by,),
+            )
+            if replacement is None:
+                raise ReasoningError("REPLACEMENT_ASSUMPTION_NOT_FOUND", superseded_by)
+            # Same mission, or the replacement is an assumption about other work and this is
+            # a deletion with a citation attached.
+            if str(replacement["mission_id"]) != str(original["mission_id"]):
+                raise ReasoningError("REPLACEMENT_BELONGS_TO_ANOTHER_MISSION", superseded_by)
+            if superseded_by == assumption_id:
+                raise ReasoningError("ASSUMPTION_CANNOT_SUPERSEDE_ITSELF", assumption_id)
+
         now = int(time.time() * 1000) if now_ms is None else now_ms
         await self.store.execute(
             "UPDATE assumption_ledger SET status = ?, resolved_evidence_refs_json = ?, "
-            "updated_at_ms = ? WHERE assumption_id = ?",
-            (status.value, Store.dumps(sorted(set(evidence_refs or []))), now, assumption_id),
+            "superseded_by = ?, updated_at_ms = ? WHERE assumption_id = ?",
+            (
+                status.value,
+                Store.dumps(sorted(set(evidence_refs or []))),
+                superseded_by,
+                now,
+                assumption_id,
+            ),
         )
+
+    async def expire_assumptions(self, *, older_than_ms: int, now_ms: int | None = None) -> int:
+        """The one resolution a caller cannot assert, performed by the kernel on the clock.
+
+        Kept deliberately separate from `resolve_assumption` so that expiry is something
+        that happens to an assumption rather than something a caller does to one.
+        """
+        now = int(time.time() * 1000) if now_ms is None else now_ms
+        # Through a connection rather than Store.execute, which returns None: a count taken
+        # from that is always zero, which is a number that reads like a measurement and is
+        # not one. The test that asserts a row was expired is what caught it.
+        async with self.store.connection() as db:
+            cursor = await db.execute(
+                "UPDATE assumption_ledger SET status = ?, updated_at_ms = ? "
+                "WHERE status = 'ACTIVE' AND created_at_ms <= ?",
+                (AssumptionStatus.EXPIRED.value, now, now - older_than_ms),
+            )
+            await db.commit()
+            return int(cursor.rowcount or 0)
 
     async def blocking_assumptions(self, mission_id: str) -> list[Assumption]:
         """§15 — what must be settled before irreversible work proceeds."""
@@ -356,6 +475,7 @@ class CriticalReasoningKernel:
             testability=str(row["testability"]), verification_plan=row["verification_plan"],
             status=AssumptionStatus(str(row["status"])),
             resolved_evidence_refs=json.loads(str(row["resolved_evidence_refs_json"])),
+            superseded_by=_optional_column(row, "superseded_by"),
         )
 
     # ------------------------------------------------------- anti-sycophancy

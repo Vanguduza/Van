@@ -1,0 +1,5 @@
+  origin/claude/integration-plan-review-369mxs
+  origin/claude/van-system-audit-ysgtcd
+  origin/gpt/rev3-1-full-knowledge-runtime-20260917
+  origin/gpt/van-unified-intelligence-improvements-rev1-20260918
+  origin/main

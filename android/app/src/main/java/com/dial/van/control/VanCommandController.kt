@@ -3,6 +3,12 @@ package com.dial.van.control
 import androidx.fragment.app.FragmentActivity
 import com.dial.van.gateway.VanGatewayClient
 import com.dial.van.security.BiometricGate
+import com.dial.van.status.OwnerStatusProjection
+import com.dial.van.status.OwnerWorkStatus
+import com.dial.van.status.VanCommandStatus
+import com.dial.van.voice.SpeakerVerificationPolicy
+import com.dial.van.voice.VoiceAuthorityDecision
+import com.dial.van.status.commandStatusFor
 import com.dial.van.visual.VanLiveVisualState
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.flow.MutableStateFlow
@@ -25,17 +31,6 @@ enum class VanCommandSource {
 
 enum class VanMessageRole { OWNER, VAN, SYSTEM }
 
-enum class VanCommandStatus {
-    LOCAL_DRAFT,
-    SUBMITTING,
-    APPROVAL_REQUIRED,
-    ACCEPTED,
-    IN_FLIGHT,
-    SUCCEEDED,
-    FAILED,
-    CANCELLED,
-    EXPIRED,
-}
 
 data class VanConversationMessage(
     val id: String = UUID.randomUUID().toString(),
@@ -82,6 +77,14 @@ data class VanConversationState(
 class VanCommandController(
     private val gateway: VanGatewayClient,
     private val scope: CoroutineScope,
+    /**
+     * P1-VOICE-001 — how VAN says an outcome out loud.
+     *
+     * `TtsOutputManager.speak` had zero call sites: VAN could speak and never did. Spoken
+     * only for a command the owner *spoke*, and only when the outcome is worth interrupting
+     * for — reading every status change aloud is how an assistant gets muted.
+     */
+    private val speak: (String) -> Unit = {},
 ) {
     private val _state = MutableStateFlow(VanConversationState())
     val state: StateFlow<VanConversationState> = _state.asStateFlow()
@@ -100,9 +103,36 @@ class VanCommandController(
         speechEvidenceRef: String? = null,
         expiresAtUnix: Long? = null,
         noStaleReplay: Boolean = false,
+        /**
+         * P2-SEC-010 — how sure VAN is that the owner spoke.
+         *
+         * Null for anything that did not come through a microphone. For voice it is the
+         * speaker similarity score, and [SpeakerVerificationPolicy] decides what authority
+         * a spoken command carries on it: any voice reaching the microphone used to produce
+         * a transcript that was signed as an owner command, so a visitor, a television or a
+         * recording had the owner's authority for as long as they were in the room.
+         */
+        speakerScore: Float? = null,
     ) {
         val normalized = text.trim()
         if (normalized.isEmpty()) return
+
+        var effectiveActionClass = actionClass
+        if (source == VanCommandSource.VOICE) {
+            val verdict = SpeakerVerificationPolicy.decide(actionClass, speakerScore)
+            when (verdict.decision) {
+                VoiceAuthorityDecision.REFUSE -> {
+                    refuseSpokenCommand(normalized, verdict.reason)
+                    return
+                }
+                VoiceAuthorityDecision.REQUIRE_OWNER_APPROVAL ->
+                    // Raised to the biometric class rather than refused. The gateway's A4
+                    // path already means "the owner is present and said yes", and that is a
+                    // stronger statement about who is speaking than any similarity score.
+                    effectiveActionClass = "A4"
+                VoiceAuthorityDecision.ALLOW -> Unit
+            }
+        }
         val idempotencyKey = if (source == VanCommandSource.VOICE && !turnId.isNullOrBlank()) {
             "voice:$turnId"
         } else {
@@ -113,7 +143,7 @@ class VanCommandController(
                 text = normalized,
                 source = source,
                 projectId = projectId,
-                actionClass = actionClass,
+                actionClass = effectiveActionClass,
                 approvalToken = approvalToken,
                 idempotencyKey = idempotencyKey,
                 turnId = turnId,
@@ -122,6 +152,34 @@ class VanCommandController(
                 noStaleReplay = noStaleReplay,
             ),
         )
+    }
+
+    /**
+     * P2-SEC-010 — a spoken command VAN will not act on, and the owner is told why.
+     *
+     * Both turns are recorded: what was heard, and that nothing was done about it. A refusal
+     * that leaves no trace is indistinguishable from a command that was never heard, and the
+     * owner needs to be able to tell those apart — particularly when it was in fact them.
+     */
+    private fun refuseSpokenCommand(text: String, reason: String) {
+        _state.update {
+            it.copy(
+                submitting = false,
+                messages = it.messages +
+                    VanConversationMessage(
+                        role = VanMessageRole.OWNER,
+                        text = text,
+                        projectId = it.selectedProjectId,
+                        status = VanCommandStatus.REFUSED,
+                    ) +
+                    VanConversationMessage(
+                        role = VanMessageRole.VAN,
+                        text = reason,
+                        projectId = it.selectedProjectId,
+                        status = VanCommandStatus.REFUSED,
+                    ),
+            )
+        }
     }
 
     fun submit(command: VanOwnerCommand) {
@@ -243,17 +301,11 @@ class VanCommandController(
 
     private fun recordResponse(command: VanOwnerCommand, response: org.json.JSONObject) {
         val wireStatus = response.optString("status").lowercase()
-        val status = when (wireStatus) {
-            "approval_required" -> VanCommandStatus.APPROVAL_REQUIRED
-            "accepted", "submitted", "executing", "verifying" -> VanCommandStatus.ACCEPTED
-            "in_flight" -> VanCommandStatus.IN_FLIGHT
-            "verified_success", "succeeded", "success", "completed" -> VanCommandStatus.SUCCEEDED
-            "cancelled" -> VanCommandStatus.CANCELLED
-            "expired" -> VanCommandStatus.EXPIRED
-            "denied", "rejected", "rejected_untrusted", "conflict", "failed", "error",
-            "unverifiable", "verification_failed", "partial_success" -> VanCommandStatus.FAILED
-            else -> VanCommandStatus.ACCEPTED
-        }
+        // P0-EXEC-003. The status is no longer decided here. It goes through the one
+        // projection the gateway also uses, so the device cannot drift into its own
+        // vocabulary, and an unrecognised status becomes UNKNOWN rather than ACCEPTED.
+        val ownerStatus = OwnerStatusProjection.fromCommandResult(wireStatus)
+        val status = commandStatusFor(ownerStatus)
 
         val pending = if (status == VanCommandStatus.APPROVAL_REQUIRED) {
             val challengeId = response.optString("approval_challenge_id")
@@ -280,15 +332,10 @@ class VanCommandController(
         val responseText = when {
             response.optString("message").isNotBlank() -> response.optString("message")
             response.optString("detail").isNotBlank() -> response.optString("detail")
-            status == VanCommandStatus.ACCEPTED || status == VanCommandStatus.IN_FLIGHT ->
-                "Hermes accepted the command. Completion has not been confirmed yet."
-            status == VanCommandStatus.APPROVAL_REQUIRED ->
-                "Owner biometric approval is required before execution can continue."
-            status == VanCommandStatus.SUCCEEDED ->
-                "The requested postcondition has been verified."
-            status == VanCommandStatus.FAILED ->
-                "The command was rejected, failed, or could not be verified."
-            else -> "Command status: ${wireStatus.ifBlank { "accepted" }}"
+            // One sentence per owner status, shared with the gateway. The old fallback
+            // read "Command status: accepted" for a blank status, which invented an
+            // acceptance the gateway never sent.
+            else -> OwnerStatusProjection.sentenceFor(ownerStatus)
         }
 
         _state.update {
@@ -305,6 +352,22 @@ class VanCommandController(
                 lastError = if (status == VanCommandStatus.FAILED) responseText else null,
             )
         }
+        if (shouldSpeak(command, ownerStatus)) speak(responseText)
+    }
+
+    /**
+     * Whether this outcome is worth saying out loud.
+     *
+     * Spoken only for a command the owner spoke — answering a typed command aloud is
+     * startling — and only when the outcome is one they have to know about: something
+     * finished, something needs them, or something was refused. "Working on it" said aloud
+     * after every command is how an assistant gets muted, and a muted assistant cannot tell
+     * the owner the things that matter.
+     */
+    private fun shouldSpeak(command: VanOwnerCommand, ownerStatus: OwnerWorkStatus): Boolean {
+        if (command.source != VanCommandSource.VOICE) return false
+        return OwnerStatusProjection.isFinished(ownerStatus) ||
+            OwnerStatusProjection.needsOwner(ownerStatus)
     }
 
     private fun recordFailure(command: VanOwnerCommand, throwable: Throwable) {

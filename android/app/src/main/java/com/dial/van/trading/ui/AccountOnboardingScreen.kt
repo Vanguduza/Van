@@ -50,9 +50,13 @@ import com.dial.van.trading.AccountOnboarding.Broker
 import com.dial.van.visual.VanGlassTokens
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.launch
+import kotlinx.serialization.json.Json
 import kotlinx.serialization.json.JsonObject
 import kotlinx.serialization.json.JsonPrimitive
 import kotlinx.serialization.json.buildJsonObject
+import kotlinx.serialization.json.contentOrNull
+import kotlinx.serialization.json.jsonObject
+import kotlinx.serialization.json.jsonPrimitive
 import kotlinx.serialization.json.put
 
 /**
@@ -73,16 +77,60 @@ fun AccountOnboardingScreen(env: ScreenEnv, padding: PaddingValues, app: VanAppl
     var busy by remember { mutableStateOf(false) }
 
     fun submit(action: String, args: JsonObject, then: (AccountOnboarding.ActionOutcome) -> Unit = {}) {
-        val run: () -> Unit = {
+        val send: (JsonObject?) -> Unit = { proof ->
             busy = true; status = "Signing and sending…"
             scope.launch {
-                val outcome = runCatching { app.gatewayClient.tradingAccountAction(action, args) }
+                val outcome = runCatching { app.gatewayClient.tradingAccountAction(action, args, proof) }
                     .fold(onSuccess = { (code, body) -> AccountOnboarding.parseOutcome(action, body, code) }, onFailure = { AccountOnboarding.ActionOutcome(false, "Gateway unreachable: ${it.message?.take(80)}") })
                 status = outcome.message; busy = false; then(outcome)
             }
         }
-        // A4: owner biometric before any account or credential change; read-only polls skip the prompt.
-        if (action == "oauth_pending" || action == "account_verify" || gate == null) run() else gate.requestA4Approval(subtitle = "Confirm trading account change", onApproved = run, onDenied = { status = "Biometric denied; nothing was sent." })
+
+        // P1-SEC-004. This used the weak biometric path: a prompt whose only output was
+        // "it succeeded", which the gateway never saw and nothing bound to this action.
+        // A change to an account or a credential now takes a gateway-issued challenge and
+        // signs it with the keystore key inside onAuthenticationSucceeded, so the proof
+        // the gateway verifies could only have been produced by this device, after this
+        // owner authenticated, for these exact arguments.
+        if (!AccountOnboarding.requiresOwnerApproval(action)) { send(null); return }
+        if (gate == null) { status = "Owner approval is unavailable on this screen."; return }
+
+        busy = true; status = "Requesting owner approval…"
+        scope.launch {
+            val challenge = runCatching { app.gatewayClient.tradingAccountChallenge(action, args) }.getOrNull()
+            val parsed = challenge?.takeIf { it.first in 200..299 }
+                ?.let { runCatching { Json.parseToJsonElement(it.second).jsonObject }.getOrNull() }
+            val canonical = parsed?.get("approval_challenge")?.jsonPrimitive?.contentOrNull
+            val challengeId = parsed?.get("approval_challenge_id")?.jsonPrimitive?.contentOrNull
+            if (canonical.isNullOrBlank() || challengeId.isNullOrBlank()) {
+                busy = false
+                status = "Could not obtain an approval challenge; nothing was sent."
+                return@launch
+            }
+            val signature = runCatching { app.gatewayClient.newA4ApprovalSignature() }.getOrNull()
+            if (signature == null) {
+                busy = false
+                status = "Owner approval key unavailable; nothing was sent."
+                return@launch
+            }
+            busy = false
+            gate.requestA4CommandApproval(
+                signature = signature,
+                challenge = canonical,
+                title = "Approve trading account change",
+                subtitle = AccountOnboarding.approvalSubtitle(action),
+                onApproved = { signatureBase64 ->
+                    send(
+                        buildJsonObject {
+                            put("challenge_id", challengeId)
+                            put("signature_b64", signatureBase64)
+                            put("algorithm", "ECDSA_P256_SHA256")
+                        }
+                    )
+                },
+                onDenied = { reason -> status = "Owner approval was not granted: $reason" },
+            )
+        }
     }
 
     LazyColumn(modifier = Modifier.fillMaxSize().padding(padding).padding(horizontal = 14.dp), verticalArrangement = Arrangement.spacedBy(10.dp), contentPadding = PaddingValues(vertical = 10.dp)) {

@@ -146,8 +146,16 @@ async def test_an_operation_cannot_exceed_its_type_ceiling(tmp_path):
 
 
 async def test_a_mutation_needs_a_verifier_up_front_and_evidence_at_the_end(tmp_path):
-    """§34 — on every surface, not just the browser."""
-    fabric = ComputerInteractionFabric(await make_store(tmp_path))
+    """§34 — on every surface, not just the browser.
+
+    P2-CU-001 — the fabric is given a DESKTOP worker here because this test is about the
+    evidence rule, not about which surfaces are staffed. In production `SURFACE_WORKERS` is
+    empty and `begin` refuses before any of this; `TestTheFabricRefusesWhatItCannotPerform`
+    is where that is stated.
+    """
+    fabric = ComputerInteractionFabric(
+        await make_store(tmp_path), workers=frozenset({Surface.DESKTOP}),
+    )
     with pytest.raises(ComputerUseError, match="MUTATION_WITHOUT_VERIFIER"):
         await fabric.begin(OperationRequest(
             mission_id="m1", surface=Surface.DESKTOP, target_application="app",
@@ -259,3 +267,98 @@ async def test_an_unknown_strategy_falls_back_to_the_honest_verifier():
         context={"now_ms": NOW},
     )
     assert record.status is VerificationStatus.UNVERIFIABLE
+
+
+# --------------------------------------------------------------------- P2-CU-001
+
+class TestTheFabricRefusesWhatItCannotPerform:
+    """P2-CU-001 — the boundary is complete and no worker exists for any surface.
+
+    The audit's disposition was "delete or fold", and the closure blueprint's owner
+    decision 6 said delete on the description "a stub". Reading the module corrects that:
+    the refusals are real, ordered and tested, and the ledger is durable. What was missing
+    was an executor, and the defect was that nothing said so — `begin` recorded an
+    operation nobody would perform and every matrix listing the fabric read it as built.
+
+    These tests state the corrected disposition: the module stays, and the missing executor
+    is a refusal at runtime rather than a claim in a document.
+    """
+
+    async def test_every_surface_is_refused_because_none_has_a_worker(self, tmp_path):
+        from van_gateway.computer_use.fabric import SURFACE_WORKERS
+
+        assert SURFACE_WORKERS == frozenset()
+        fabric = ComputerInteractionFabric(await make_store(tmp_path))
+        for surface in Surface:
+            with pytest.raises(ComputerUseError) as exc:
+                await fabric.begin(
+                    OperationRequest(
+                        mission_id="m-1", surface=surface, target_application="anything",
+                        operation_type=OperationType.READ, action_class=ActionClass.A1,
+                    )
+                )
+            assert str(exc.value).startswith("OPERATION_NO_WORKER_FOR_SURFACE"), surface
+
+    async def test_a_refused_operation_leaves_no_row_claiming_it_is_pending(self, tmp_path):
+        """A PENDING row for work nobody will do is the owner being told it is queued."""
+        fabric = ComputerInteractionFabric(await make_store(tmp_path))
+        with pytest.raises(ComputerUseError):
+            await fabric.begin(
+                OperationRequest(
+                    mission_id="m-2", surface=Surface.DESKTOP, target_application="a thing",
+                    operation_type=OperationType.READ, action_class=ActionClass.A1,
+                )
+            )
+        assert await fabric.for_mission("m-2") == []
+
+    async def test_a_prohibited_class_is_refused_as_prohibited_not_as_unconfigured(self, tmp_path):
+        """The ordering that matters most.
+
+        "No worker for DESKTOP" invites someone to start a worker. If an A4 request were
+        reported that way, the absolute prohibition would read as one worker away from
+        permitted — which is how a policy boundary becomes a configuration option.
+        """
+        fabric = ComputerInteractionFabric(await make_store(tmp_path))
+        for action_class in (ActionClass.A4, ActionClass.A5):
+            with pytest.raises(ComputerUseError) as exc:
+                await fabric.begin(
+                    OperationRequest(
+                        mission_id="m-3", surface=Surface.DESKTOP,
+                        target_application="a thing", operation_type=OperationType.CLICK,
+                        action_class=action_class, verifier_type="SCREENSHOT",
+                    )
+                )
+            assert str(exc.value).startswith("OPERATION_ACTION_CLASS_PROHIBITED"), action_class
+
+    async def test_a_worker_makes_the_fabric_work_without_any_other_change(self, tmp_path):
+        """The claim that this is a registration away from working, checked.
+
+        P2-VERIFY-002 taught that an unconstructed class rots into a stub nobody notices.
+        Registering a surface here must be the whole change — if it is not, the guard is
+        hiding rot rather than reporting a gap.
+        """
+        fabric = ComputerInteractionFabric(
+            await make_store(tmp_path), workers=frozenset({Surface.DESKTOP}),
+        )
+        operation_id = await fabric.begin(
+            OperationRequest(
+                mission_id="m-4", surface=Surface.DESKTOP, target_application="a thing",
+                operation_type=OperationType.READ, action_class=ActionClass.A1,
+            )
+        )
+        assert operation_id.startswith("cop_")
+        rows = await fabric.for_mission("m-4")
+        assert [r["state"] for r in rows] == ["PENDING"]
+        # And a surface without a worker is still refused on the same fabric.
+        with pytest.raises(ComputerUseError):
+            await fabric.begin(
+                OperationRequest(
+                    mission_id="m-4", surface=Surface.TERMINAL, target_application="a thing",
+                    operation_type=OperationType.READ, action_class=ActionClass.A1,
+                )
+            )
+
+    async def test_the_surface_report_covers_every_surface(self, tmp_path):
+        surfaces = ComputerInteractionFabric(await make_store(tmp_path)).surfaces()
+        assert set(surfaces) == {s.value for s in Surface}
+        assert not any(surfaces.values())

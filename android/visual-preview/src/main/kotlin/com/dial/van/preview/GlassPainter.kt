@@ -1,11 +1,14 @@
 package com.dial.van.preview
 
+import com.dial.van.visual.VanAuraOp
+import com.dial.van.visual.VanAuraPlanner
 import com.dial.van.visual.VanAuraSpec
 import com.dial.van.visual.VanEffectBudget
 import com.dial.van.visual.VanFieldGeometryEngine
 import com.dial.van.visual.VanFieldInk
 import com.dial.van.visual.VanGlassStyle
 import com.dial.van.visual.VanGlassTokens
+import com.dial.van.visual.VanPathSeg
 import com.dial.van.visual.VanWindFieldMotion
 import java.awt.BasicStroke
 import java.awt.Color
@@ -211,7 +214,18 @@ object GlassPainter {
         }
     }
 
-    /** Canonical living aura: Zone A/B activity + independently truthful Zone C semantics. */
+    /**
+     * P1-VIS-001 — the Java2D executor for the shared aura plan.
+     *
+     * This used to be a hand-written second implementation of `VanAura.kt`, and it had
+     * drifted: it never drew `electricalBranches` at all, used roughly double the Zone A
+     * alpha and 1.5x the radius, placed the haze blobs elsewhere, gave ion fragments no
+     * bloom, and used different orb-link constants. Every committed piece of visual evidence
+     * was therefore a picture of something the app does not look like — which is the worst
+     * possible failure for a renderer whose entire purpose is to produce evidence.
+     *
+     * It now holds no aura constants at all. [VanAuraPlanner.plan] decides; this draws.
+     */
     fun drawAura(
         g: Graphics2D,
         spec: VanAuraSpec,
@@ -222,95 +236,90 @@ object GlassPainter {
         phase: Float = 0.18f,
         semanticSpec: VanAuraSpec = spec,
     ) {
-        if (radius <= 1f || (spec.intensity <= 0.01f && semanticSpec.intensity <= 0.01f)) return
-        val bodyEdge = radius * 2f
-        val cyan = VanGlassTokens.ACCENT_CYAN
-        val semantic = semanticSpec.semanticColor ?: cyan
-        val motion = VanWindFieldMotion.sample(spec, phase, budget)
-
-        drawZoneA(g, spec, cx, cy, bodyEdge, cyan, motion.phase, motion.breathing)
-
-        val geometry = VanFieldGeometryEngine.build(
-            spec = spec,
-            phase = phase,
-            budget = budget,
-            bodyEdge = bodyEdge,
-            centerX = cx,
-            centerY = cy,
-            semanticSpec = semanticSpec,
+        drawAuraOps(
+            g,
+            VanAuraPlanner.plan(
+                spec = spec,
+                semanticSpec = semanticSpec,
+                centerX = cx,
+                centerY = cy,
+                radius = radius,
+                budget = budget,
+                phase = phase,
+            ),
         )
-        geometry.strokes.forEach { stroke ->
-            val color = if (stroke.ink == VanFieldInk.IDENTITY) cyan else semantic
-            val path = Path2D.Float()
-            stroke.points.forEachIndexed { index, point ->
-                if (index == 0) path.moveTo(point.x, point.y) else path.lineTo(point.x, point.y)
-            }
-            g.stroke = BasicStroke(stroke.glowWidth, BasicStroke.CAP_ROUND, BasicStroke.JOIN_ROUND)
-            g.color = argb(color, stroke.alpha * 0.16f)
-            g.draw(path)
-            g.stroke = BasicStroke(stroke.width, BasicStroke.CAP_ROUND, BasicStroke.JOIN_ROUND)
-            g.color = argb(color, stroke.alpha)
-            g.draw(path)
-        }
-        geometry.dots.forEach { dot ->
-            val color = if (dot.ink == VanFieldInk.IDENTITY) cyan else semantic
-            g.color = argb(color, dot.alpha)
-            g.fill(
-                Ellipse2D.Float(
-                    dot.point.x - dot.radius,
-                    dot.point.y - dot.radius,
-                    dot.radius * 2f,
-                    dot.radius * 2f,
-                ),
-            )
-        }
+    }
 
-        if (spec.orbLink > 0.05f) {
-            val pulse = 0.24f + 0.30f * motion.electricPulse
-            val path = Path2D.Float()
-            path.moveTo(cx + bodyEdge * 0.11f, cy - bodyEdge * 0.04f)
-            path.quadTo(
-                cx + bodyEdge * 0.25f,
-                cy - bodyEdge * 0.17f,
-                cx + bodyEdge * 0.35f,
-                cy - bodyEdge * 0.10f,
-            )
-            g.color = argb(cyan, pulse * spec.orbLink)
-            g.stroke = BasicStroke(max(bodyEdge * 0.011f, 1.1f), BasicStroke.CAP_ROUND, BasicStroke.JOIN_ROUND)
-            g.draw(path)
+    fun drawAuraOps(g: Graphics2D, ops: List<VanAuraOp>) {
+        for (op in ops) {
+            when (op) {
+                is VanAuraOp.Radial -> {
+                    if (op.radius <= 0f || op.alpha <= 0.001f) continue
+                    val inner = argb(op.color, op.alpha)
+                    if (op.clip.isEmpty()) {
+                        radial(g, op.cx, op.cy, op.radius, inner)
+                    } else {
+                        val previous = g.clip
+                        g.clip(op.clip.toPath())
+                        radial(g, op.cx, op.cy, op.radius, inner)
+                        g.clip = previous
+                    }
+                }
+                is VanAuraOp.Polyline -> {
+                    if (op.points.size < 2 || op.alpha <= 0.001f) continue
+                    val path = Path2D.Float()
+                    op.points.forEachIndexed { index, point ->
+                        if (index == 0) path.moveTo(point.x, point.y) else path.lineTo(point.x, point.y)
+                    }
+                    g.stroke = BasicStroke(op.glowWidth, BasicStroke.CAP_ROUND, BasicStroke.JOIN_ROUND)
+                    g.color = argb(op.color, minOf(op.alpha * op.glowAlphaScale, op.glowAlphaCeiling))
+                    g.draw(path)
+                    val core = op.whiteCoreWidth
+                    if (core != null) {
+                        g.stroke = BasicStroke(core, BasicStroke.CAP_ROUND, BasicStroke.JOIN_ROUND)
+                        g.color = Color(255, 255, 255, (op.whiteCoreAlpha.coerceIn(0f, 1f) * 255f).toInt())
+                        g.draw(path)
+                    }
+                    g.stroke = BasicStroke(op.width, BasicStroke.CAP_ROUND, BasicStroke.JOIN_ROUND)
+                    g.color = argb(op.color, op.alpha)
+                    g.draw(path)
+                }
+                is VanAuraOp.Dot -> {
+                    if (op.radius <= 0f || op.alpha <= 0.001f) continue
+                    val bloom = op.radius * op.bloomRadiusScale
+                    g.color = argb(op.color, op.alpha * op.bloomAlphaScale)
+                    g.fill(Ellipse2D.Float(op.cx - bloom, op.cy - bloom, bloom * 2f, bloom * 2f))
+                    g.color = argb(op.color, op.alpha)
+                    g.fill(
+                        Ellipse2D.Float(
+                            op.cx - op.radius, op.cy - op.radius, op.radius * 2f, op.radius * 2f,
+                        ),
+                    )
+                }
+                is VanAuraOp.Quad -> {
+                    if (op.alpha <= 0.001f) continue
+                    val path = Path2D.Float()
+                    path.moveTo(op.startX, op.startY)
+                    path.quadTo(op.controlX, op.controlY, op.endX, op.endY)
+                    g.color = argb(op.color, op.alpha)
+                    g.stroke = BasicStroke(op.width, BasicStroke.CAP_ROUND, BasicStroke.JOIN_ROUND)
+                    g.draw(path)
+                }
+            }
         }
     }
 
-    private fun drawZoneA(
-        g: Graphics2D,
-        spec: VanAuraSpec,
-        cx: Float,
-        cy: Float,
-        bodyEdge: Float,
-        cyan: Int,
-        phase: Float,
-        breathing: Float,
-    ) {
-        val alpha = (0.10f + 0.08f * spec.intensity).coerceIn(0.08f, 0.18f)
-        val r = bodyEdge * 0.20f * VanAuraSpec.INNER_RADIUS_SCALE * breathing
-        val driftX = bodyEdge * 0.025f * sin(2f * PI.toFloat() * phase)
-        val driftY = bodyEdge * 0.018f * sin(4f * PI.toFloat() * phase + 0.9f)
-        radial(g, cx - bodyEdge * 0.05f + driftX, cy + bodyEdge * 0.02f + driftY, r, argb(cyan, alpha * 0.82f))
-        radial(g, cx + bodyEdge * 0.07f - driftX * 0.6f, cy - bodyEdge * 0.04f - driftY, r * 0.70f, argb(cyan, alpha * 0.50f))
-
-        if (spec.groundGlow > 0.01f) {
-            val gy = cy + bodyEdge * 0.41f
-            val gw = bodyEdge * 0.31f
-            val crescent = Path2D.Float()
-            crescent.moveTo(cx - gw, gy)
-            crescent.quadTo(cx.toDouble(), (gy + bodyEdge * 0.060f).toDouble(), (cx + gw).toDouble(), gy.toDouble())
-            crescent.quadTo(cx.toDouble(), (gy - bodyEdge * 0.018f).toDouble(), (cx - gw).toDouble(), gy.toDouble())
-            crescent.closePath()
-            val previous = g.clip
-            g.clip(crescent)
-            radial(g, cx, gy, gw, argb(cyan, 0.18f * spec.groundGlow))
-            g.clip = previous
+    private fun List<VanPathSeg>.toPath(): Path2D.Float {
+        val path = Path2D.Float()
+        for (segment in this) {
+            when (segment) {
+                is VanPathSeg.MoveTo -> path.moveTo(segment.x, segment.y)
+                is VanPathSeg.LineTo -> path.lineTo(segment.x, segment.y)
+                is VanPathSeg.QuadTo -> path.quadTo(segment.cx, segment.cy, segment.x, segment.y)
+                VanPathSeg.Close -> path.closePath()
+            }
         }
+        return path
     }
 
     fun drawCrescentAura(

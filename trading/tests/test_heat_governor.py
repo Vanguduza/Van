@@ -56,11 +56,36 @@ def test_drawdown_tiers():
 
 
 def test_kill_switch_latches_and_requires_owner_to_clear():
+    """P0-TRADE-001 — this used to pass with owner_signature_ref="sig:owner"."""
+    from conftest_owner_authority import OwnerAuthorityHarness
+
+    owner = OwnerAuthorityHarness()
     ks = KillSwitch()
     assert not ks.halted
     ks.trip(KillSwitchTrigger.STALE_DATA, 1)
     assert ks.halted
-    with pytest.raises(PermissionError):
-        ks.clear(KillSwitchTrigger.STALE_DATA, 2, owner_signature_ref="")
-    ks.clear(KillSwitchTrigger.STALE_DATA, 2, owner_signature_ref="sig:owner")
+
+    for rejected, why in [
+        ("", "nothing at all"),
+        ("sig:owner", "a string that looks like a reference"),
+        (owner.token(act="owner-halt", subject="s-1", issued_at_unix=1), "authority for a different act"),
+        (owner.token(act="kill-switch-clear", subject="s-2", issued_at_unix=1), "authority for another session"),
+        (owner.stranger_token(act="kill-switch-clear", subject="s-1", issued_at_unix=1), "a key this host does not trust"),
+    ]:
+        with pytest.raises(PermissionError):
+            ks.clear(KillSwitchTrigger.STALE_DATA, 2, owner_signature_ref=rejected,
+                     authority=owner.verifier, subject="s-1")
+        assert ks.halted, f"the kill switch cleared on {why}"
+
+    good = owner.token(act="kill-switch-clear", subject="s-1", issued_at_unix=1)
+    ks.clear(KillSwitchTrigger.STALE_DATA, 2, owner_signature_ref=good,
+             authority=owner.verifier, subject="s-1")
     assert not ks.halted and len(ks.history) == 2
+    assert "owner-authority:" in ks.history[-1][1]
+
+    # Single use: the token is in the history now, in the clear.
+    ks.trip(KillSwitchTrigger.STALE_DATA, 3)
+    with pytest.raises(PermissionError):
+        ks.clear(KillSwitchTrigger.STALE_DATA, 4, owner_signature_ref=good,
+                 authority=owner.verifier, subject="s-1")
+    assert ks.halted

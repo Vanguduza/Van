@@ -2,7 +2,14 @@ name: van-ci
 
 on:
   push:
-    branches: [main]
+    # P3-OPS-011 — `main` alone meant the branch doing the certifying was never certified.
+    # Every closure in this programme lands on claude/**, no pull request was open, and so
+    # the workflow had zero runs against any of it: the test counts in the commit messages
+    # were developer-local evidence being read as CI. A gate that does not run on the head
+    # being certified is not a gate.
+    branches:
+      - main
+      - 'claude/**'
   pull_request:
 
 concurrency:
@@ -20,11 +27,98 @@ jobs:
       - name: Install backend dependencies
         working-directory: backend
         run: pip install -r requirements.txt
+      # Layer A — static truth and policy. This runs FIRST and blocks the rest.
+      # The audit's core defect was capabilities described as BUILT that no production
+      # path invoked. This gate makes that a CI failure rather than a later discovery.
+      - name: Maturity gate (truth and policy)
+        run: python tools/ci/maturity_gate.py
+
+      # P3-DOC-005 — thirty-one canonical documents and nothing saying which one is
+      # authoritative for a given rule, so two could each be locally correct and jointly
+      # contradictory. This fails on a subject claimed by two documents, on an invariant
+      # with no implementation or test, and on one resting on a finding still open.
+      - name: Authority map (which document owns which invariant)
+        run: python tools/ci/authority_map.py
+
       - name: Backend tests
         working-directory: backend
         run: pytest -q
       - name: Contract tests
         run: pytest -q tests/contracts
+
+      # Protocol rule 31, Android half. A compiler finds code that does not build; this
+      # finds code that builds, is tested, and nothing reaches — the class P0-AND-012 lived
+      # beside. It runs here rather than in the Android job because it needs no toolchain.
+      - name: Kotlin reachability (what nothing in the app reaches)
+        run: python tools/audit/kotlin_reachability.py
+
+      # The maturity gate catches a ledger that overstates. This catches one that
+      # understates — a component still recorded as unreached that production now calls.
+      # Understating is invisible to a gate built to stop overstating, and it is how the
+      # component ledger came to list 65 entries as unfinished when 22 of them were done.
+      - name: Ledger reconciliation (does the source still agree?)
+        run: python tools/ci/ledger_reconcile.py
+
+      # The maturity gate must fail on the defect shape it exists to prevent.
+      # A gate that only ever passes proves nothing.
+      - name: Maturity gate self-test
+        run: pytest -q tests/contracts/test_maturity_gate.py
+      # Likewise: the authority-map gate must reject a subject owned twice, a citation
+      # that points at nothing, and a map written ahead of the work.
+      - name: Authority map self-test
+        run: pytest -q tests/contracts/test_authority_map.py
+      - name: Hermes policy tests
+        run: pytest -q hermes/policy/tests
+      - name: Hermes profile layout tests
+        run: pytest -q tests/hermes
+      - name: Trading stack-lock and adoption-proposal tests
+        run: pytest -q trading/tests/test_stack_lock.py trading/tests/test_automation_browser_stack_proposal.py
+      # Rev 1.3 §359 — the Automation & Browser Fabric suites. These certify
+      # repository-side behaviour only; live readiness stays an external gate
+      # (docs/EXTERNAL_GATES.md) and needs the Trading Core VM.
+      - name: Automation and browser fabric tests
+        working-directory: backend
+        run: |
+          pytest -q \
+            tests/test_standing_automation_authority.py \
+            tests/test_automation_run_grants.py \
+            tests/test_automation_security_contracts.py \
+            tests/test_automation_compiler.py \
+            tests/test_automation_dispatch.py \
+            tests/test_automation_health_api.py \
+            tests/test_browser_fabric.py
+      - name: Automation fail-closed proof
+        env:
+          VAN_DATABASE_PATH: /tmp/van-ci-cert.sqlite3
+        run: |
+          # §§365, 369 — with the owner decisions PENDING the fabric must refuse
+          # to certify anything. Exit code 2 is the BLOCKED path; anything else
+          # means a default flipped on.
+          set +e
+          python tools/certification/certify_automation_runtime.py --check readiness
+          automation_status=$?
+          python tools/certification/certify_browser_fabric.py --canary harness
+          browser_status=$?
+          set -e
+          test "$automation_status" -eq 2 || { echo "automation certification did not fail closed"; exit 1; }
+          test "$browser_status" -eq 2 || { echo "browser certification did not fail closed"; exit 1; }
+          test ! -f artifacts/runtime/van_automation_n8n_readiness_attestation.json
+          echo "automation and browser fabric correctly refuse to self-certify"
+      - name: Context retrieval latency evidence
+        working-directory: backend
+        run: |
+          python tools/benchmark_context_retrieval.py \
+            --facts 320 \
+            --edges 160 \
+            --iterations 50 \
+            --cold-iterations 10 \
+            --output ../artifacts/release/context/context-latency.json
+      - name: Upload context latency evidence
+        uses: actions/upload-artifact@v4
+        with:
+          name: van-context-latency-evidence
+          path: artifacts/release/context/context-latency.json
+          if-no-files-found: error
 
   android-and-visual-evidence:
     runs-on: ubuntu-latest
@@ -34,11 +128,44 @@ jobs:
         with:
           distribution: temurin
           java-version: "17"
+      # Runs before the Android build because it needs no Android toolchain: it compiles
+      # the app's own pure decision files (the owner status projection and the mission read
+      # models) on the JVM and executes their tests. When the Android Gradle Plugin cannot
+      # be fetched, this is the part of the app that is still verified rather than assumed.
+      - name: Pure Kotlin logic (owner status projection, mission read models)
+        working-directory: android/verification
+        run: gradle test --console=plain
+      # P2-AND-016 — the debug keystore is generated per machine, so before this every run
+      # signed with a different key: no CI build could upgrade another, and an existing VAN
+      # install refused the next one on a signature mismatch. With the secret set, every run
+      # produces an upgradable APK; without it, the step says so instead of leaving the two
+      # cases looking identical. It never invents a key — see the script.
+      - name: Debug signing key, when the owner has supplied one
+        env:
+          VAN_DEBUG_KEYSTORE_BASE64: ${{ secrets.VAN_DEBUG_KEYSTORE_BASE64 }}
+        run: bash tools/ci/restore_debug_keystore.sh
       - name: Android unit tests, build and lint
         working-directory: android
         run: |
           chmod +x gradlew
           ./gradlew :app:testDebugUnitTest :app:assembleDebug :app:lintDebug
+      # What actually signed it. Without this the run says the build is green and nothing
+      # says whether the APK it published can upgrade the one before it.
+      - name: Debug APK signing identity
+        run: bash tools/ci/record_apk_signing_identity.sh android/app/build/outputs/apk/debug
+      # assembleDebug already produced this; without the upload it dies with the runner.
+      # Gate 14 is the owner installing VAN on their own device, and until an APK leaves
+      # CI there is nothing to install — the build being green is not the same as the
+      # build being obtainable. if-no-files-found: error so a run that quietly stops
+      # producing an APK fails here rather than publishing an empty artefact.
+      - name: Upload debug APK
+        uses: actions/upload-artifact@v4
+        with:
+          name: van-debug-apk
+          path: |
+            android/app/build/outputs/apk/debug/*.apk
+            android/app/build/outputs/apk/debug/signing-identity.txt
+          if-no-files-found: error
       - name: Shared visual geometry tests
         working-directory: android
         run: ./gradlew :visual-preview:test

@@ -1,0 +1,62 @@
+/usr/local/lib/python3.11/dist-packages/fastapi/testclient.py:1: StarletteDeprecationWarning: Using `httpx` with `starlette.testclient` is deprecated; install `httpx2` instead.
+  from starlette.testclient import TestClient as TestClient  # noqa
+ROUTE_COUNT 53
+GET /health
+GET /v1/attention
+GET /v1/briefing
+GET /v1/decisions
+GET /v1/degraded
+GET /v1/events
+GET /v1/google/capabilities
+GET /v1/google/gmail/search
+GET /v1/google/jobs/{job_id}
+GET /v1/google/mesh
+GET /v1/google/status
+GET /v1/projects
+GET /v1/projects/{project_id}/truth
+GET /v1/reminders
+GET /v1/trading/accounts
+GET /v1/trading/bars
+GET /v1/trading/market-state
+GET /v1/trading/oauth/{broker}/callback
+GET /v1/trading/portfolio
+GET /v1/trading/risk
+GET /v1/trading/status
+GET /v1/trading/tickets
+GET /v1/trading/trades
+GET /v1/trading/trades/{trade_intent_id}
+HEAD /docs
+HEAD /docs/oauth2-redirect
+HEAD /openapi.json
+HEAD /redoc
+POST /v1/attention
+POST /v1/attention/{item_id}/ack
+POST /v1/commands
+POST /v1/decisions/escalate
+POST /v1/decisions/{decision_id}/resolve
+POST /v1/devices/enroll
+POST /v1/devices/pair
+POST /v1/devices/pairing-ticket
+POST /v1/devices/{device_id}/revoke
+POST /v1/events/reset
+POST /v1/google/connect
+POST /v1/google/gmail/send
+POST /v1/google/jobs/plan
+POST /v1/google/jobs/{job_id}/artifacts
+POST /v1/google/revoke
+POST /v1/google/test-transport
+POST /v1/notifications/ingest
+POST /v1/reminders
+POST /v1/reminders/parse
+POST /v1/reminders/{reminder_id}/cancel
+POST /v1/reminders/{reminder_id}/resolve
+POST /v1/trading/accounts/action
+POST /v1/trading/halt
+POST /v1/trading/tickets/{ticket_id}/confirm
+PUT /v1/projects/{project_id}/truth
+GET /health -> 503 {"detail":"ingress_auth_unconfigured"}
+GET /v1/status -> 503 {"detail":"ingress_auth_unconfigured"}
+GET /v1/missions -> 503 {"detail":"ingress_auth_unconfigured"}
+GET /v1/needs-you -> 503 {"detail":"ingress_auth_unconfigured"}
+GET /v1/capabilities/status -> 503 {"detail":"ingress_auth_unconfigured"}
+GET /v1/trading/accounts -> 503 {"detail":"ingress_auth_unconfigured"}

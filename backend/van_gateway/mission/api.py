@@ -24,11 +24,14 @@ from __future__ import annotations
 from typing import Any
 
 from fastapi import APIRouter, Header, HTTPException
-from pydantic import BaseModel, Field
+from pydantic import BaseModel, ConfigDict, Field
 
+from van_gateway.action.registry import BUILTIN_ACTIONS
+from van_gateway.authority.descriptor import describe_action, describe_capability
 from van_gateway.capability.models import CapabilityClass, RoutingConstraints
 from van_gateway.capability.registry import CapabilityRegistry, CapabilityRegistryError
 from van_gateway.capability.router import CapabilityRouter
+from van_gateway.coherence import owner_status
 from van_gateway.config import Settings
 from van_gateway.google.control import GoogleControlAuthError, verify_internal_control
 from van_gateway.mission.binding import MissionBinder
@@ -68,9 +71,24 @@ class CreateMissionBody(BaseModel):
 
 
 class TransitionBody(BaseModel):
+    """P0-VERIFY-001 — there is deliberately no `verification` field.
+
+    It used to accept a VerificationRecord from the caller, and the audit drove a mission
+    to VERIFIED_SUCCESS through this route with `verifier_version: "i-say-so/1.0"` and
+    `evidence_refs: ["evidence://trust-me"]`. A receipt written by whoever is claiming the
+    outcome is the claim restated, not evidence for it. The gateway now runs the verifier
+    the mission's own success contract names, and the record it produces is the only one
+    that can be stored, so there is nothing useful a caller could put here.
+
+    Pydantic is configured to reject unknown fields on this body rather than ignore them,
+    so an old client still sending `verification` gets a 422 and learns the rule instead of
+    believing it was honoured.
+    """
+
+    model_config = ConfigDict(extra="forbid")
+
     target: MissionState
     expected: MissionState | None = None
-    verification: VerificationRecord | None = None
     final_outcome: str | None = None
 
 
@@ -137,12 +155,22 @@ class MissionApi:
 
     async def _mission_summary(self, mission) -> dict[str, Any]:
         """What Home and Missions need, without the owner opening a log."""
+        # P2-COH-001 — one projection, computed here rather than re-derived by each
+        # surface. `needs_owner` below and `owner_attention` here are deliberately
+        # different questions: needs_owner means the mission is blocked on an owner
+        # decision, owner_attention means it should surface in the queue at all, which a
+        # failed or unverifiable mission also should without blocking on anything.
+        projected = owner_status.describe("mission", mission.state)
         return {
             "mission_id": mission.mission_id,
             "title": mission.title,
             "goal": mission.goal,
             "project_id": mission.project_id,
             "state": mission.state.value,
+            "owner_status": projected["owner_status"],
+            "owner_sentence": projected["owner_sentence"],
+            "owner_attention": projected["needs_owner"],
+            "finished": projected["finished"],
             "current_phase": mission.current_phase,
             "verification_state": mission.verification_state.value,
             "needs_owner": mission.needs_owner,
@@ -247,7 +275,13 @@ class MissionApi:
                     mission_id,
                     {
                         "mission_id": mission_id, "title": row["mission_title"],
-                        "state": row["mission_state"], "events": [],
+                        "state": row["mission_state"],
+                        # The feed is read by the device, which must not have to know the
+                        # mission vocabulary to render a line (P2-COH-001, P0-EXEC-003).
+                        **owner_status.describe(
+                            "mission", MissionState(str(row["mission_state"]))
+                        ),
+                        "events": [],
                     },
                 )
                 bucket["events"].append({
@@ -281,6 +315,68 @@ class MissionApi:
                     "detail": verdict.detail,
                 })
             return {"manifest_digest": self.registry.manifest_digest, "capabilities": out}
+
+        @router.get("/authority")
+        async def authority():
+            """P1-COH-003 — one answer to "what may VAN do, and what must happen first".
+
+            Seven vocabularies described that, each locally sensible and none canonical, so
+            the mapping from an action to its class and its gate was re-derived at every
+            boundary and two boundaries could disagree with nothing noticing. A
+            disagreement about what an action may do is a disagreement about whether the
+            owner had to be asked.
+
+            Every row here is *derived* from the registries that already exist rather than
+            read from a store of its own — the same reason the capability registry points
+            at readiness sources instead of copying them. `derived_from` says which
+            authority each row came from, so a reader can go and check rather than taking
+            this page's word for it.
+            """
+            actions = [
+                {
+                    "subject": d.subject_id,
+                    "kind": "action",
+                    "action_class": d.action_class.value,
+                    "gate": d.gate.value,
+                    "needs_owner_in_the_loop": d.needs_owner_in_the_loop,
+                    "reversibility": d.reversibility.value,
+                    "egress": d.egress.value,
+                    "verification": d.verification,
+                    "enabled": d.enabled,
+                    "derived_from": d.derived_from,
+                }
+                for d in (describe_action(a) for a in BUILTIN_ACTIONS)
+            ]
+            capabilities = [
+                {
+                    "subject": d.subject_id,
+                    "kind": "capability",
+                    "action_class": d.action_class.value,
+                    "gate": d.gate.value,
+                    "needs_owner_in_the_loop": d.needs_owner_in_the_loop,
+                    "reversibility": d.reversibility.value,
+                    "egress": d.egress.value,
+                    "verification": d.verification,
+                    "enabled": d.enabled,
+                    "derived_from": d.derived_from,
+                }
+                for d in (
+                    describe_capability(self.registry.require(capability_id))
+                    for capability_id in self.registry.capability_ids
+                )
+            ]
+            return {
+                "subjects": actions + capabilities,
+                "gates": {
+                    "NONE": "nothing; a read with no side effect",
+                    "DEVICE_SIGNATURE": "a command signed by a paired device",
+                    "OWNER_APPROVAL": (
+                        "an owner-signed, single-use approval bound to this exact intent"
+                    ),
+                    "FORBIDDEN": "refused whatever anyone signs",
+                },
+                "manifest_digest": self.registry.manifest_digest,
+            }
 
         # ------------------------------------------------ owner mutations
 
@@ -344,7 +440,7 @@ class MissionApi:
             try:
                 mission = await self.missions.transition(
                     mission_id, target=body.target, expected=body.expected,
-                    verification=body.verification, final_outcome=body.final_outcome,
+                    final_outcome=body.final_outcome,
                 )
             except MissionError as exc:
                 raise self._translate(exc) from exc

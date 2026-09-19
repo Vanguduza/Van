@@ -2,6 +2,7 @@ from __future__ import annotations
 
 import json
 import os
+import re
 from pathlib import Path
 import shutil
 import subprocess
@@ -53,6 +54,32 @@ def test_owner_runtime_mcp_has_fixed_narrow_surface():
     assert "/knowledge/notebook/consumer/certify" not in text
     assert "generic HTTP" in text
     assert "Object.hasOwn(ROUTES, name)" in text
+
+
+def test_registration_include_list_matches_the_shim_exactly():
+    """The drift this catches silently removed nine tools from the live Hermes.
+
+    The shim declared 20 tools and the installer registered 11, omitting the whole
+    knowledge protocol that AGENTS.md instructs Hermes to use. The previous contract
+    test only checked that tool NAMES appeared somewhere in the script text, which the
+    drifted version still satisfied. Compare the parsed include list instead.
+    """
+    shim_tools = set(re.findall(r"\{ name: '([a-z_]+)'", SHIM.read_text(encoding="utf-8")))
+    register_text = REGISTER.read_text(encoding="utf-8")
+    include_block = re.search(r'"include": \[(.*?)\]', register_text, re.S)
+    assert include_block is not None, "registration script has no tools.include list"
+    registered = set(re.findall(r'"([a-z_]+)"', include_block.group(1)))
+
+    assert shim_tools == REQUIRED_TOOLS, (
+        f"shim tool surface changed; update REQUIRED_TOOLS deliberately. "
+        f"only in shim: {sorted(shim_tools - REQUIRED_TOOLS)}, "
+        f"only in contract: {sorted(REQUIRED_TOOLS - shim_tools)}"
+    )
+    assert registered == shim_tools, (
+        f"registration drifted from the shim. "
+        f"declared but not registered: {sorted(shim_tools - registered)}, "
+        f"registered but not declared: {sorted(registered - shim_tools)}"
+    )
 
 
 def test_owner_runtime_registration_is_secret_safe_and_scoped():
