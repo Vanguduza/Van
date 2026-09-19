@@ -189,3 +189,63 @@ async def test_the_drill_fails_when_the_restore_does_not_match(tmp_path, monkeyp
     report = drill(database_path=store.path, workspace=str(tmp_path / "drill"))
     assert report["ok"] is False
     assert "missions" in report["differing_tables"]
+
+
+@pytest.mark.asyncio
+async def test_the_scheduler_runs_the_drill(monkeypatch, tmp_path):
+    """P3-OPS-009 — the drill was complete and nothing called it.
+
+    Owner decision 10 in the closure blueprint took "local only, with the drill enabled"
+    as the default, and only the backup half had a scheduled job. A backup nobody has
+    restored is a hypothesis; the night it matters is the wrong time to test it.
+    """
+    from cryptography.fernet import Fernet
+
+    from van_gateway.config import get_settings
+
+    monkeypatch.setenv("VAN_DATABASE_PATH", str(tmp_path / "drill.sqlite3"))
+    monkeypatch.setenv("VAN_DEVICE_SECRET_FERNET_KEY", Fernet.generate_key().decode())
+    monkeypatch.setenv("VAN_INGRESS_TOKEN", "drill-ingress-token-0123456789")
+    monkeypatch.setenv("VAN_BACKUP_DIR", str(tmp_path / "backups"))
+    get_settings.cache_clear()
+    try:
+        from van_gateway.app import create_app
+
+        app = create_app()
+        assert "ops.backup_drill" in app.state.scheduler.jobs
+        # Taking a backup is off by default and proving one restores is not: they are
+        # different decisions, and conflating them is how "backups are configured" came
+        # to mean "backups were written".
+        assert "ops.backup" not in app.state.scheduler.jobs
+    finally:
+        get_settings.cache_clear()
+
+
+@pytest.mark.asyncio
+async def test_the_drill_job_cleans_up_after_itself(monkeypatch, tmp_path):
+    """The scratch restore is a second full database.
+
+    Leaving it behind doubles the disk the deployment needs, and anyone who found it
+    would reasonably read it as a backup.
+    """
+    from cryptography.fernet import Fernet
+
+    from van_gateway.config import get_settings
+
+    backups = tmp_path / "backups"
+    monkeypatch.setenv("VAN_DATABASE_PATH", str(tmp_path / "drill2.sqlite3"))
+    monkeypatch.setenv("VAN_DEVICE_SECRET_FERNET_KEY", Fernet.generate_key().decode())
+    monkeypatch.setenv("VAN_INGRESS_TOKEN", "drill-ingress-token-0123456789")
+    monkeypatch.setenv("VAN_BACKUP_DIR", str(backups))
+    get_settings.cache_clear()
+    try:
+        from van_gateway.app import create_app
+
+        app = create_app()
+        await app.state.store.migrate()
+        result = await app.state.scheduler.jobs["ops.backup_drill"].run()
+        assert result["ok"] is True
+        assert result["tables_compared"] > 0
+        assert not (backups / "drill").exists()
+    finally:
+        get_settings.cache_clear()

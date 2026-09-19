@@ -32,6 +32,8 @@ from typing import Any
 
 from pydantic import BaseModel, Field
 
+from van_gateway.capability.models import CLASS_RANK
+from van_gateway.models import ActionClass
 from van_gateway.storage.db import Store
 
 HARNESS_VERSION = "van-eval-harness-1"
@@ -416,6 +418,7 @@ class StrategyLearning:
         mission_class: str,
         capability_sequence: list[str],
         conditions: dict[str, Any] | None = None,
+        max_action_class: ActionClass = ActionClass.A1,
         now_ms: int | None = None,
     ) -> str:
         now = int(time.time() * 1000) if now_ms is None else now_ms
@@ -426,14 +429,51 @@ class StrategyLearning:
               strategy_id, mission_class, capability_sequence_json, conditions_json,
               success_count, failure_count, median_latency_ms, median_cost_micros,
               verification_quality, promotion_state, eval_run_id, last_evaluated_at_ms,
-              created_at_ms, updated_at_ms
-            ) VALUES (?, ?, ?, ?, 0, 0, NULL, NULL, 0.0, 'EXPERIMENTAL', NULL, NULL, ?, ?)
+              created_at_ms, updated_at_ms, max_action_class
+            ) VALUES (?, ?, ?, ?, 0, 0, NULL, NULL, 0.0, 'EXPERIMENTAL', NULL, NULL, ?, ?, ?)
             """,
             (
                 strategy_id, mission_class, Store.dumps(capability_sequence),
-                Store.dumps(conditions or {}), now, now,
+                Store.dumps(conditions or {}), now, now, max_action_class.value,
             ),
         )
+        return strategy_id
+
+    async def find_or_register(
+        self,
+        *,
+        mission_class: str,
+        capability_sequence: list[str],
+        max_action_class: ActionClass = ActionClass.A1,
+        now_ms: int | None = None,
+    ) -> str:
+        """The strategy for this exact sequence in this class, creating it if new.
+
+        P1-LEARN-003 — a strategy is a thing VAN *did*, so it comes into existence by
+        having been done. `capability_sequence_json` is written through `Store.dumps`,
+        which is deterministic, so the same sequence matches itself exactly rather than
+        through a fuzzy comparison that would merge two different plans.
+        """
+        encoded = Store.dumps(capability_sequence)
+        row = await self.store.fetchone(
+            "SELECT strategy_id, max_action_class FROM execution_strategies "
+            "WHERE mission_class = ? AND capability_sequence_json = ?",
+            (mission_class, encoded),
+        )
+        if row is None:
+            return await self.register(
+                mission_class=mission_class, capability_sequence=capability_sequence,
+                max_action_class=max_action_class, now_ms=now_ms,
+            )
+        strategy_id = str(row["strategy_id"])
+        # The ceiling records what this sequence has actually been run under, so it rises
+        # to meet a real run and never beyond one. It is not a grant: `permitted_for`
+        # compares it with the asking mission's envelope and refuses the wider strategy.
+        if CLASS_RANK[ActionClass(str(row["max_action_class"]))] < CLASS_RANK[max_action_class]:
+            await self.store.execute(
+                "UPDATE execution_strategies SET max_action_class = ? WHERE strategy_id = ?",
+                (max_action_class.value, strategy_id),
+            )
         return strategy_id
 
     async def record_outcome(
@@ -511,12 +551,38 @@ class StrategyLearning:
         return demoted
 
     async def preferred_for(self, mission_class: str) -> list[dict[str, Any]]:
+        """Every PREFERRED strategy for this class, regardless of what it needs.
+
+        This is the *reporting* view — what VAN has learned — and it is deliberately not
+        the one anything acts on. `permitted_for` is that one.
+        """
         rows = await self.store.fetchall(
             "SELECT * FROM execution_strategies WHERE mission_class = ? "
             "AND promotion_state = 'PREFERRED' ORDER BY updated_at_ms DESC",
             (mission_class,),
         )
         return [dict(r) for r in rows]
+
+    async def permitted_for(
+        self, mission_class: str, *, envelope_max_action_class: ActionClass
+    ) -> list[dict[str, Any]]:
+        """P1-LEARN-002 — what a mission with *this* envelope may be offered.
+
+        §27 forbids uncontrolled self-modification, and the quiet way to breach it is not
+        to write new code: it is for a sequence proven under an A4 mission to be offered
+        back as the preferred approach to a mission the owner capped at A2. Nobody widened
+        anything; authority would simply have been acquired by accumulation.
+
+        So the ceiling a strategy was exercised under is compared with the envelope of the
+        mission asking, and a strategy that needs more is not offered. It is not demoted
+        or hidden — it is still PREFERRED and still visible in `preferred_for` — it is just
+        not an answer to this question.
+        """
+        ceiling = CLASS_RANK[envelope_max_action_class]
+        return [
+            row for row in await self.preferred_for(mission_class)
+            if CLASS_RANK[ActionClass(str(row["max_action_class"]))] <= ceiling
+        ]
 
 
 __all__ = [

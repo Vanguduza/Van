@@ -160,6 +160,18 @@ class Settings(BaseSettings):
     #: scheduler that writes backups to the same disk as the database is not a backup.
     backup_enabled: bool = False
     backup_interval_seconds: int = 86_400
+    #: P3-OPS-009 — whether the scheduler proves a backup can be restored, rather than
+    #: only that it was written. Owner decision 10 in the closure blueprint took "local
+    #: only, with the drill enabled" as the default, and the drill was the half that had
+    #: no caller: `ops.backup.drill` was complete and referenced by its own tests alone.
+    #: On by default because a backup nobody has restored is a hypothesis, and this is
+    #: the cheapest way to stop holding one. It restores into a scratch directory and
+    #: never touches the live database.
+    backup_drill_enabled: bool = True
+    #: Weekly. The drill copies the whole database, so it is a heavier job than the
+    #: backup; a week is often enough to catch a format or permission change before the
+    #: night it matters.
+    backup_drill_interval_seconds: int = 604_800
 
 
 @lru_cache

@@ -2,6 +2,7 @@ from __future__ import annotations
 
 from contextlib import asynccontextmanager
 import hmac
+import shutil
 import time
 from typing import Any
 from pathlib import Path
@@ -54,7 +55,7 @@ from van_gateway.observability.trace import CommandTracer
 from van_gateway.coherence import owner_status
 from van_gateway.coherence import wire_status
 from van_gateway.ops import health as ops_health
-from van_gateway.ops.backup import create_backup
+from van_gateway.ops.backup import create_backup, drill as backup_drill
 from van_gateway.ops.pki import scan as pki_scan
 from van_gateway.ops.retention import RetentionService
 from van_gateway.ops.scheduler import OpsScheduler, ScheduledJob
@@ -485,6 +486,62 @@ def create_app() -> FastAPI:
         )
         return {"destination": str(destination), "entries": len(manifest.entries)}
 
+    async def _demote_regressions() -> dict:
+        """§41 — a strategy that stopped working loses its promotion, without being asked.
+
+        `StrategyLearning.auto_demote` was written, tested and never called. Promotion
+        needs eval evidence and an owner-visible decision; demotion needs neither, because
+        the asymmetry is the safety property: it is always safe to trust something less.
+        """
+        demoted = await learning.strategies.auto_demote()
+        for strategy_id in demoted:
+            await events.publish("strategy.demoted", {"strategy_id": strategy_id})
+        return {"demoted": len(demoted)}
+
+    async def _run_backup_drill() -> dict:
+        """P3-OPS-009 — prove the backup restores, not only that it was written.
+
+        Owner decision 10 said "local only, with the drill enabled", and the drill was
+        the half with no caller: `ops.backup.drill` was complete and referenced only by
+        its own tests. A backup nobody has restored is a hypothesis, and the night it
+        matters is the wrong time to test it.
+
+        The drill restores into a scratch directory under the backup root and compares
+        row counts, schema version and the audit chain head with the manifest. It never
+        touches the live database. A failure raises an attention item rather than only
+        logging, because "the backup does not restore" is a thing the owner has to act
+        on before the next one is taken.
+        """
+        workspace = Path(settings.backup_dir) / "drill"
+        if workspace.exists():
+            shutil.rmtree(workspace, ignore_errors=True)
+        report = backup_drill(
+            database_path=settings.database_path,
+            workspace=workspace,
+            project_state_dir=str(Path(__file__).resolve().parents[2] / "docs" / "project-state"),
+        )
+        app.state.ops_backup_drill = report
+        if not report["ok"]:
+            await attention.upsert(
+                title="A backup could not be restored",
+                severity=AttentionSeverity.BLOCKER,
+                source="ops",
+                dedupe_key="backup-drill-failed",
+                payload={
+                    "differing_tables": report["differing_tables"],
+                    "schema_version": report["schema_version"],
+                    "verification_ok": report["verification"]["ok"],
+                },
+            )
+        # The scratch copy is a full second database; leaving it behind would double the
+        # disk the deployment needs and would be read as a backup by anyone who found it.
+        shutil.rmtree(workspace, ignore_errors=True)
+        return {
+            "ok": report["ok"],
+            "tables_compared": report["tables_compared"],
+            "rows_compared": report["rows_compared"],
+        }
+
     def _scheduler_jobs() -> tuple[ScheduledJob, ...]:
         jobs = [
             ScheduledJob("reminders.fire_due", settings.reminder_sweep_seconds, _sweep_reminders),
@@ -498,6 +555,17 @@ def create_app() -> FastAPI:
             jobs.append(ScheduledJob("ops.pki_scan", settings.pki_scan_interval_seconds, _scan_pki))
         if settings.backup_enabled and settings.backup_dir:
             jobs.append(ScheduledJob("ops.backup", settings.backup_interval_seconds, _take_backup))
+        if settings.backup_drill_enabled and settings.backup_dir:
+            jobs.append(ScheduledJob(
+                "ops.backup_drill", settings.backup_drill_interval_seconds, _run_backup_drill,
+            ))
+        # P1-LEARN-004 — §41 asks for regression auto-demotion and the method had no
+        # caller, so a strategy that stopped working kept its promotion for as long as the
+        # process ran. Demotion is automatic where promotion is not, deliberately: removing
+        # trust from something that stopped working needs no ceremony, granting it does.
+        jobs.append(ScheduledJob(
+            "learning.auto_demote", settings.retention_interval_seconds, _demote_regressions,
+        ))
         return tuple(jobs)
 
     scheduler = OpsScheduler(store, _scheduler_jobs())
@@ -540,6 +608,10 @@ def create_app() -> FastAPI:
     app.state.owner_memory = owner_memory
     app.state.learning = learning
     app.state.degraded = degraded
+    # Exposed like `degraded`: which jobs a build actually installs is a property of
+    # the running app, and a job list that exists only inside a closure is how
+    # `learning.auto_demote` went uncalled for as long as it did.
+    app.state.scheduler = scheduler
     app.state.google = google
     app.state.google_broker = google_broker
     app.state.google_router = google_router

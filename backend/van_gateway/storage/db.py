@@ -8,7 +8,7 @@ from typing import Any, AsyncIterator
 
 import aiosqlite
 
-SCHEMA_VERSION = 20
+SCHEMA_VERSION = 21
 
 
 MIGRATION_17 = """
@@ -108,6 +108,27 @@ CREATE INDEX IF NOT EXISTS idx_scheduler_runs_job
   ON scheduler_runs(job_name, run_at_unix DESC);
 """
 
+
+MIGRATION_21 = """
+-- P1-LEARN-003: `StrategyLearning` keys everything on `mission_class` and no mission
+-- carried one, so §25's "which capability sequences work" and §41's "measurable strategy
+-- improvement in >= 3 production mission classes" were both unanswerable: the store had
+-- the right invariants, a promotion gate that refused without eval evidence, and no way
+-- for a row to ever exist. The class is the typed resolver's intent, which the command
+-- path already computes and then discarded.
+ALTER TABLE missions ADD COLUMN mission_class TEXT NOT NULL DEFAULT 'GENERAL_OWNER_INTENT';
+CREATE INDEX IF NOT EXISTS idx_missions_class ON missions(mission_class, state);
+
+-- P1-LEARN-002: nothing prevented learning from widening authority. A strategy is a
+-- capability sequence, and a sequence exercised under an A4 envelope offered back to a
+-- mission capped at A2 would be exactly that: authority acquired by accumulation rather
+-- than by an owner decision. The ceiling a strategy was actually exercised under is
+-- recorded here so it can be compared with the asking mission's envelope, and it only
+-- ever rises to what has genuinely been run.
+ALTER TABLE execution_strategies ADD COLUMN max_action_class TEXT NOT NULL DEFAULT 'A1';
+CREATE INDEX IF NOT EXISTS idx_execution_strategies_lookup
+  ON execution_strategies(mission_class, promotion_state);
+"""
 
 MIGRATIONS: dict[int, str] = {
     1: """
@@ -1431,6 +1452,7 @@ MIGRATIONS: dict[int, str] = {
     18: MIGRATION_18,
     19: MIGRATION_19,
     20: MIGRATION_20,
+    21: MIGRATION_21,
 }
 
 

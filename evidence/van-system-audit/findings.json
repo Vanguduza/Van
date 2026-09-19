@@ -21,9 +21,9 @@
   ],
   "counts": {
     "P0": 15,
-    "P1": 30,
+    "P1": 32,
     "P2": 20,
-    "P3": 25,
+    "P3": 26,
     "P4": 7
   },
   "root_causes": [
@@ -3910,8 +3910,9 @@
       "requirement": "docs/VAN_CONSOLIDATED_DEPLOYMENT_READINESS_CLOSURE_BLUEPRINT_REV_1.md",
       "authority": "VAN Consolidated Deployment-Readiness Closure Blueprint Rev 2",
       "repository_evidence": [
-        "backend/van_gateway/learning/feed.py:1",
-        "backend/van_gateway/evolution/radar.py:394"
+        "backend/van_gateway/evolution/radar.py:394",
+        "backend/van_gateway/learning/feed.py:45",
+        "backend/van_gateway/proactive/autonomy.py:121"
       ],
       "runtime_evidence": [],
       "affected_components": [
@@ -3921,8 +3922,24 @@
       "remediation": "State the invariant, give it a guard that refuses any authority mutation originating from a learning path, and test that a high-success history cannot lower a required gate.",
       "impact": "An operation that always required confirmation could become automatic because it usually succeeded. The owner would never be told the rule changed.",
       "validation_gate": "G4",
-      "current_status": "OPEN",
-      "remediation_gate": "G4"
+      "current_status": "CLOSED",
+      "remediation_gate": "G4",
+      "closure": {
+        "state": "INTEGRATED_AND_EVIDENCED",
+        "summary": "The finding has two halves and they needed different answers.\n\nThe concrete one first. A strategy is an ordered capability sequence, and once P1-LEARN-003 made the store fill, a sequence proven under an A4 mission and promoted to PREFERRED would have been offered back as the preferred approach to any mission of that class, including one the owner authorised only to A2. Nobody widens anything explicitly; authority is acquired by the ordinary operation of getting better at things. execution_strategies.max_action_class now records the ceiling a sequence has actually been run under — it rises only to meet a real run — and permitted_for compares it with the asking mission's envelope. The wider strategy is not demoted or hidden: it stays PREFERRED and stays visible on /v1/strategies, because concealing it would make the learning surface lie about what VAN knows. It is simply not an answer to a question asked under a narrower envelope, and both halves of that distinction are tested.\n\nThe general one second, which is what the finding actually asked for: state the invariant and give it a test. The mapping from an action to its authority class to the gate it must pass is policy data, so no module under learning/ or evolution/ may write action_definitions, permission_grants, capability_registry, capability_grants, standing_automation_authorities, automation_capabilities, domain_trust or proactive_policies. A structural test asserts it, and a second test asserts every named table still exists — a list naming a table that was renamed away would pass while guarding nothing.\n\ndomain_trust is the one authority-adjacent store learning legitimately moves, and it was already safe: §31's earned ceiling caps at MAX_EARNED_LEVEL, below every level that acts without asking, so history cannot mint standing authority. That is now asserted rather than read, including that the cap is not itself the top level.\n\nFour mutations run, four caught: offering every strategy regardless of envelope; never raising the recorded ceiling; a learning module writing domain_trust; and raising the earned-autonomy cap to the top level.",
+        "changed": [
+          "backend/van_gateway/storage/db.py",
+          "backend/van_gateway/evolution/radar.py",
+          "backend/van_gateway/learning/feed.py"
+        ],
+        "verified_by": [
+          "backend/tests/test_learning_records_and_bounds.py"
+        ],
+        "runtime_evidence": [],
+        "residual": "Nothing yet consumes permitted_for to change how a mission is executed.",
+        "residual_class": "DELIBERATE_SCOPE",
+        "residual_reason": "Learning records and reports; it does not steer. Wiring the router to prefer a learned sequence is a separate decision with its own evidence bar, and the guard is deliberately in place before anything can act on it rather than after."
+      }
     },
     {
       "id": "P2-CTX-003",
@@ -4126,6 +4143,129 @@
         "residual": "VAN still cannot act on a desktop, a terminal or a mobile surface, and the browser surface is served by the browser fabric rather than this one.",
         "residual_class": "DELIBERATE_SCOPE",
         "residual_reason": "No surface worker has been built, and building one is a programme decision rather than a closure step. The refusal, the health route and the degraded entry make that state observable instead of implied, which is what the finding was about. Routing browser work through this fabric as well would give the owner two accounts of one task, the coherence defect P2-COH-001 closed."
+      }
+    },
+    {
+      "requirement": "docs/VAN_CONSOLIDATED_DEPLOYMENT_READINESS_CLOSURE_BLUEPRINT_REV_1.md",
+      "authority": "VAN Consolidated Deployment-Readiness Closure Blueprint Rev 2",
+      "runtime_evidence": [],
+      "current_status": "CLOSED",
+      "id": "P1-LEARN-003",
+      "severity": "P1",
+      "domain": "learning",
+      "title": "No mission carried a mission class, so StrategyLearning could never hold a row",
+      "description": "Every method on StrategyLearning keys on mission_class — register, preferred_for, the promotion gate, and §41's 'measurable strategy improvement in >= 3 production mission classes'. The missions table had no such column and the Mission model had no such field. P1-LEARN-001 gave the learning stores a feed and this one still could not fill, because the key it needs did not exist anywhere in the system. The class VAN already establishes is the typed resolver's intent id, which the command path computed and discarded.",
+      "repository_evidence": [
+        "backend/van_gateway/evolution/radar.py:394",
+        "backend/van_gateway/command/resolver.py:23",
+        "backend/van_gateway/learning/feed.py:45"
+      ],
+      "affected_components": [
+        "learning",
+        "evolution",
+        "mission"
+      ],
+      "root_cause": "A store keyed on a concept the rest of the system never named.",
+      "remediation": "Carry the resolver's intent on the mission, and record the capability sequence a terminal mission actually executed as a strategy outcome for that class.",
+      "impact": "§25 and §41 were both unanswerable. VAN could not say which approach works for any kind of work, and the eval scoreboard had nothing to score.",
+      "validation_gate": "G5",
+      "remediation_gate": "G5",
+      "closure": {
+        "state": "EXTERNALLY_BLOCKED_REPOSITORY_COMPLETE",
+        "summary": "Schema v21 adds missions.mission_class, and CommandMissionLink sets it from the resolution's intent id — a name VAN assigned by understanding the command, not a label anyone typed. Free-form commands share GENERAL_OWNER_INTENT, which is honest: VAN did not establish what kind of work they were, and grouping them by a guess would make the evidence worse than absent.\n\nLearningFeed.record_strategy_outcome reads the capability sequence back from the mission's activities, not from its plan — learning from intentions is how a system concludes an approach works when it never ran. Only VERIFIED_SUCCESS counts as a success, so a strategy cannot accumulate a promotion record out of runs nothing checked. A mission with no activities produces nothing, which is the common case today and the right outcome: recording an empty sequence would make every free-form command look like the same successful approach.\n\n/v1/strategies is the owner-visible projection, reporting the promotion rule alongside the rows so the numbers can be read against the bar they must clear, and reporting no success rate at all for a strategy nothing has exercised rather than a zero that would read as repeated failure.",
+        "changed": [
+          "backend/van_gateway/storage/db.py",
+          "backend/van_gateway/mission/models.py",
+          "backend/van_gateway/mission/service.py",
+          "backend/van_gateway/command/mission_link.py",
+          "backend/van_gateway/learning/feed.py",
+          "backend/van_gateway/evolution/radar.py",
+          "backend/van_gateway/understanding/api.py"
+        ],
+        "verified_by": [
+          "backend/tests/test_learning_records_and_bounds.py"
+        ],
+        "runtime_evidence": [],
+        "residual": "Strategies accumulate only for missions that produced gateway activities. Hermes performs most work without creating any, so today most missions record nothing.",
+        "residual_class": "EXTERNAL_RUNTIME",
+        "residual_reason": "The gateway learns from what it can see. Hermes creating specialist work that MissionBinder binds is what produces activities, and where that does not happen there is genuinely no observed sequence. Inventing one from the plan would be the defect this finding is about."
+      }
+    },
+    {
+      "requirement": "docs/VAN_CONSOLIDATED_DEPLOYMENT_READINESS_CLOSURE_BLUEPRINT_REV_1.md",
+      "authority": "VAN Consolidated Deployment-Readiness Closure Blueprint Rev 2",
+      "runtime_evidence": [],
+      "current_status": "CLOSED",
+      "id": "P1-LEARN-004",
+      "severity": "P1",
+      "domain": "learning",
+      "title": "Regression auto-demotion had no caller",
+      "description": "§41 asks for regression auto-demotion and StrategyLearning.auto_demote implements it correctly, demoting any ADMITTED or PREFERRED strategy below a 60% success rate over at least three runs. Nothing in the gateway called it, so a strategy that stopped working kept its promotion indefinitely.",
+      "repository_evidence": [
+        "backend/van_gateway/evolution/radar.py:487",
+        "backend/van_gateway/app.py:545"
+      ],
+      "affected_components": [
+        "learning",
+        "evolution",
+        "ops"
+      ],
+      "root_cause": "A sweep with no scheduled job — the same shape as P3-OPS-004.",
+      "remediation": "Add a scheduled job and publish the demotions as events.",
+      "impact": "The asymmetry §41 depends on — promotion is hard, demotion is automatic — held only on the promotion side.",
+      "validation_gate": "G5",
+      "remediation_gate": "G5",
+      "closure": {
+        "state": "INTEGRATED_AND_EVIDENCED",
+        "summary": "learning.auto_demote runs on the retention cadence and publishes strategy.demoted for each one, so a demotion is observable rather than a silent column change. The asymmetry is the safety property and is stated where the job is registered: removing trust from something that stopped working needs no ceremony, granting it does.\n\napp.state.scheduler now exposes the installed jobs, because a job list that exists only inside a closure is how this went uncalled for as long as it did. The test asserts the caller, which is what the finding was about.",
+        "changed": [
+          "backend/van_gateway/app.py"
+        ],
+        "verified_by": [
+          "backend/tests/test_learning_records_and_bounds.py"
+        ],
+        "runtime_evidence": [],
+        "residual": null,
+        "residual_class": null,
+        "residual_reason": null
+      }
+    },
+    {
+      "requirement": "docs/VAN_CONSOLIDATED_DEPLOYMENT_READINESS_CLOSURE_BLUEPRINT_REV_1.md",
+      "authority": "VAN Consolidated Deployment-Readiness Closure Blueprint Rev 2",
+      "runtime_evidence": [],
+      "current_status": "CLOSED",
+      "id": "P3-OPS-009",
+      "severity": "P3",
+      "domain": "operations",
+      "title": "The backup drill was written and never run",
+      "description": "ops.backup.drill takes a backup, restores it into a scratch location and compares row counts, schema version and the audit-chain head with the manifest. It was complete and referenced only by its own tests. Owner decision 10 in the closure blueprint took 'local only, with the drill enabled' as the default, and only the backup half had a scheduled job.",
+      "repository_evidence": [
+        "backend/van_gateway/ops/backup.py:317",
+        "backend/van_gateway/app.py:545"
+      ],
+      "affected_components": [
+        "ops"
+      ],
+      "root_cause": "The proving half of a two-part guarantee had no caller.",
+      "remediation": "Schedule the drill, raise attention on failure, and clean up the scratch copy.",
+      "impact": "A backup nobody has restored is a hypothesis. A format, permission or schema change would have been discovered on the night it mattered.",
+      "validation_gate": "G11",
+      "remediation_gate": "G11",
+      "closure": {
+        "state": "EXTERNALLY_BLOCKED_REPOSITORY_COMPLETE",
+        "summary": "ops.backup_drill runs weekly wherever a backup directory is configured, on by default and independently of backup_enabled: taking a backup and proving one restores are different decisions, and conflating them is how 'backups are configured' comes to mean 'backups were written'. A failure raises a BLOCKER attention item rather than only logging, because the owner has to act before the next backup is taken. The scratch restore is removed afterwards — it is a second full database, and anyone who found it would reasonably read it as a backup.",
+        "changed": [
+          "backend/van_gateway/app.py",
+          "backend/van_gateway/config.py"
+        ],
+        "verified_by": [
+          "backend/tests/test_ops_backup.py"
+        ],
+        "runtime_evidence": [],
+        "residual": "The drill proves the backup restores; it does not prove one exists anywhere but this disk.",
+        "residual_class": "OWNER_DEPLOYMENT_DECISION",
+        "residual_reason": "Owner decision 10: a backup on the same disk is not a backup, and the repository must not pick the owner's offsite target. tools/ops/backup.py already takes one."
       }
     }
   ],

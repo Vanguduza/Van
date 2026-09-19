@@ -145,6 +145,11 @@ class CommandMissionLink:
             title=title_for(req.text),
             goal=req.text,
             project_id=req.project_id,
+            # P1-LEARN-003 — the kind of work, which is what a strategy is learned *for*.
+            # The resolver already established it; until now the command path computed it
+            # and threw it away, so `StrategyLearning` keyed everything on a value no
+            # mission carried and could not accumulate a single row.
+            mission_class=(resolution.intent_id if resolution is not None else "GENERAL_OWNER_INTENT"),
             # §6 — an empty contract is legal and can never yield VERIFIED_SUCCESS. The
             # gateway does not know how to check an arbitrary instruction, and inventing a
             # postcondition it cannot observe is how a mission ends up "verified" on

@@ -17,6 +17,8 @@ VAN cannot measure and why.
 
 from __future__ import annotations
 
+import json
+
 
 from fastapi import APIRouter, Header, HTTPException
 from pydantic import BaseModel, Field
@@ -25,7 +27,7 @@ from van_gateway.attention.scoring import AttentionScorer
 from van_gateway.learning.feed import LearningFeed
 from van_gateway.capability.permissions import PermissionRegistry
 from van_gateway.config import Settings
-from van_gateway.evolution.radar import AIEvolutionRadar
+from van_gateway.evolution.radar import AIEvolutionRadar, StrategyLearning
 from van_gateway.evolution.vaneval import VanEval
 from van_gateway.google.control import GoogleControlAuthError, verify_internal_control
 from van_gateway.proactive.autonomy import DomainTrustService, ProactivePolicyService
@@ -197,6 +199,51 @@ class UnderstandingApi:
                     "suspended_for_false_success": trust.has_unrecovered_false_success,
                 })
             return {"domains": domains, "policies": await self.policies.policies()}
+
+        @router.get("/strategies")
+        async def strategies():
+            """§25 / §41 — what VAN has learned about how to do each kind of work.
+
+            P1-LEARN-003 — every row here comes from a mission that actually ran: the
+            capability sequence is read back from its activities, and only a
+            VERIFIED_SUCCESS counts as a success. A strategy with no runs is not shown as
+            an approach VAN prefers, because it is not one.
+
+            `max_action_class` is the ceiling the sequence was exercised under, and
+            P1-LEARN-002 is why it is on the wire: a strategy is only ever offered to a
+            mission whose envelope already reaches that far, so nothing here can widen
+            what VAN is permitted to do.
+            """
+            rows = await self.store.fetchall(
+                "SELECT * FROM execution_strategies ORDER BY mission_class, updated_at_ms DESC"
+            )
+            out = []
+            for row in rows:
+                runs = int(row["success_count"]) + int(row["failure_count"])
+                out.append({
+                    "strategy_id": str(row["strategy_id"]),
+                    "mission_class": str(row["mission_class"]),
+                    "capability_sequence": json.loads(str(row["capability_sequence_json"])),
+                    "promotion_state": str(row["promotion_state"]),
+                    "max_action_class": str(row["max_action_class"]),
+                    "runs": runs,
+                    "verified_successes": int(row["success_count"]),
+                    # None, not 0.0: a strategy nothing has exercised has no success rate,
+                    # and reporting zero would read as one that keeps failing.
+                    "success_rate": (
+                        round(int(row["success_count"]) / runs, 3) if runs else None
+                    ),
+                    "eval_run_id": row["eval_run_id"],
+                })
+            return {
+                "strategies": out,
+                "promotion_rule": {
+                    "preferred_min_runs": StrategyLearning.PREFERRED_MIN_RUNS,
+                    "preferred_min_rate": StrategyLearning.PREFERRED_MIN_RATE,
+                    "promotion_requires_eval_evidence": True,
+                    "demotion_is_automatic": True,
+                },
+            }
 
         @router.get("/eval")
         async def run_eval():

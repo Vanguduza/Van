@@ -110,6 +110,7 @@ class MissionService:
         title: str,
         goal: str,
         project_id: str | None = None,
+        mission_class: str = "GENERAL_OWNER_INTENT",
         success_contract: SuccessContract | None = None,
         constraints: list[str] | None = None,
         authority_envelope: AuthorityEnvelope | None = None,
@@ -137,6 +138,7 @@ class MissionService:
             origin_channel=origin_channel,
             title=title.strip() or goal.strip()[:80],
             goal=goal.strip(),
+            mission_class=(mission_class or "GENERAL_OWNER_INTENT").strip() or "GENERAL_OWNER_INTENT",
             success_contract=success_contract or SuccessContract(),
             constraints=list(constraints or []),
             authority_envelope=authority_envelope or AuthorityEnvelope(),
@@ -153,16 +155,16 @@ class MissionService:
             """
             INSERT INTO missions(
               mission_id, owner_principal_id, project_id, origin, origin_channel, title, goal,
-              success_contract_json, constraints_json, authority_envelope_json, sensitivity,
-              context_snapshot_id, state, priority, created_at_ms, updated_at_ms, deadline_ms,
-              attention_policy, plan_revision, current_phase, parent_mission_id, final_outcome,
-              verification_state, verification_record_json, learning_record_id
-            ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, NULL, ?, NULL,
+              mission_class, success_contract_json, constraints_json, authority_envelope_json,
+              sensitivity, context_snapshot_id, state, priority, created_at_ms, updated_at_ms,
+              deadline_ms, attention_policy, plan_revision, current_phase, parent_mission_id,
+              final_outcome, verification_state, verification_record_json, learning_record_id
+            ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, NULL, ?, NULL,
                       ?, NULL, NULL)
             """,
             (
                 mission.mission_id, owner_principal_id, project_id, origin.value,
-                origin_channel.value, mission.title, mission.goal,
+                origin_channel.value, mission.title, mission.goal, mission.mission_class,
                 Store.dumps(mission.success_contract.model_dump(mode="json")),
                 Store.dumps(mission.constraints),
                 Store.dumps(mission.authority_envelope.model_dump(mode="json")),
@@ -291,6 +293,15 @@ class MissionService:
                 goal=refreshed.goal,
                 verification_status=(verification.status.value if verification else None),
                 evidence_refs=(verification.evidence_refs if verification else []),
+            )
+            # P1-LEARN-003 — the same terminal event, read as evidence about the approach
+            # rather than about this one mission. Only VERIFIED_SUCCESS counts as a
+            # success here: a mission that finished without anything checking it says
+            # nothing about whether the approach works, and counting it would let a
+            # strategy accumulate a promotion record out of unverifiable runs.
+            await self.learning.record_strategy_outcome(
+                refreshed,
+                verified_success=refreshed.state is MissionState.VERIFIED_SUCCESS,
             )
         return refreshed
 
@@ -636,6 +647,7 @@ class MissionService:
             origin_channel=OriginChannel(str(row["origin_channel"])),
             title=str(row["title"]),
             goal=str(row["goal"]),
+            mission_class=str(row["mission_class"]),
             success_contract=SuccessContract.model_validate(
                 json.loads(str(row["success_contract_json"]))
             ),

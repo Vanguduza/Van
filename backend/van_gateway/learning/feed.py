@@ -25,7 +25,9 @@ from __future__ import annotations
 import time
 from typing import Any
 
-from van_gateway.mission.models import MissionState
+from van_gateway.evolution.radar import StrategyLearning
+from van_gateway.mission.models import Mission, MissionState
+from van_gateway.models import ActionClass
 from van_gateway.storage.db import Store
 from van_gateway.understanding.memory import SymbioticGrowthLedger
 
@@ -48,6 +50,7 @@ class LearningFeed:
     def __init__(self, store: Store) -> None:
         self.store = store
         self.growth = SymbioticGrowthLedger(store)
+        self.strategies = StrategyLearning(store)
 
     async def record_mission_outcome(
         self,
@@ -83,6 +86,50 @@ class LearningFeed:
             ),
         )
         return outcome_id
+
+    async def record_strategy_outcome(
+        self, mission: Mission, *, verified_success: bool, now_ms: int | None = None
+    ) -> str | None:
+        """P1-LEARN-003 — what VAN actually did for this kind of work, and how it went.
+
+        A strategy is the ordered capability sequence the mission really executed, read
+        back from its activities rather than from a plan. That distinction is the whole
+        point: a plan is what VAN intended, and learning from intentions is how a system
+        concludes that an approach works when it never ran.
+
+        A mission with no activities produces nothing. That is the common case today —
+        the gateway delegates to Hermes and Hermes creates the specialist work — and
+        recording an empty sequence would make every free-form command look like the same
+        successful strategy.
+        """
+        rows = await self.store.fetchall(
+            "SELECT capability_id FROM mission_activities WHERE mission_id = ? "
+            "ORDER BY started_at_ms, activity_id",
+            (mission.mission_id,),
+        )
+        sequence = [str(r["capability_id"]) for r in rows]
+        if not sequence:
+            return None
+        strategy_id = await self.strategies.find_or_register(
+            mission_class=mission.mission_class,
+            capability_sequence=sequence,
+            # P1-LEARN-002 — the envelope this sequence was actually exercised under, so
+            # a strategy can never be offered to a mission the owner authorised for less.
+            max_action_class=mission.authority_envelope.max_action_class,
+            now_ms=now_ms,
+        )
+        await self.strategies.record_outcome(
+            strategy_id, verified_success=verified_success, now_ms=now_ms,
+        )
+        return strategy_id
+
+    async def strategies_for(
+        self, mission_class: str, *, envelope_max_action_class: ActionClass
+    ) -> list[dict[str, Any]]:
+        """What VAN has learned that this mission's authority actually permits."""
+        return await self.strategies.permitted_for(
+            mission_class, envelope_max_action_class=envelope_max_action_class,
+        )
 
     async def record_owner_correction(
         self,
