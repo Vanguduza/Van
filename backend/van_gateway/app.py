@@ -11,6 +11,7 @@ from pydantic import BaseModel, Field
 from van_gateway.attention.engine import AttentionEngine
 from van_gateway.audit.service import AuditService
 from van_gateway.auth.service import AuthError, AuthService
+from van_gateway.auth.throttle import GLOBAL_SUBJECT, AuthThrottle, Throttled
 from van_gateway.briefing.service import BriefingService
 from van_gateway.config import get_settings
 from van_gateway.decisions.service import DecisionCreate, DecisionService
@@ -135,6 +136,7 @@ def create_app() -> FastAPI:
     settings = get_settings()
     store = Store(settings.database_path)
     auth = AuthService(store, settings.device_secret_fernet_key)
+    throttle = AuthThrottle()
     idempotency = IdempotencyService(store)
     hermes = HermesBridge(settings.hermes_base_url, settings.hermes_bearer_token, settings.hermes_profile)
     project_registry_path = str(Path(__file__).resolve().parents[2] / "registries" / "projects.json")
@@ -252,6 +254,7 @@ def create_app() -> FastAPI:
         authority=owner_runtime.authority,
         resolver=owner_runtime.resolver,
         owner_intent_max_age_seconds=settings.owner_intent_max_age_seconds,
+        throttle=throttle,
     )
 
     @asynccontextmanager
@@ -271,6 +274,7 @@ def create_app() -> FastAPI:
     app = FastAPI(title="VAN Gateway", version="0.5.0-dev", lifespan=lifespan)
     app.state.store = store
     app.state.auth = auth
+    app.state.auth_throttle = throttle
     app.state.degraded = degraded
     app.state.google = google
     app.state.google_broker = google_broker
@@ -345,8 +349,10 @@ def create_app() -> FastAPI:
             return True
         if method == "POST" and path.startswith("/v1/trading/tickets/") and path.endswith("/confirm"):
             return True
+        # The test-transport route that used to sit at the head of this set is gone
+        # (P2-SEC-009); leaving its name in the allow-list would be dead policy for a
+        # route that no longer exists.
         if path in {
-            "/v1/google/test-transport",
             "/v1/google/gmail/search",
             "/v1/google/gmail/send",
             "/v1/google/connect",
@@ -355,6 +361,14 @@ def create_app() -> FastAPI:
         }:
             return True
         return path.startswith("/v1/google/jobs/")
+
+    def throttled_response(detail: str, locked: Throttled) -> JSONResponse:
+        """429 with the one header a client can actually act on."""
+        return JSONResponse(
+            status_code=429,
+            content={"detail": detail, "retry_after_seconds": locked.retry_after_seconds},
+            headers={"Retry-After": str(locked.retry_after_seconds)},
+        )
 
     @app.middleware("http")
     async def require_ingress_auth(request: Request, call_next):
@@ -375,7 +389,15 @@ def create_app() -> FastAPI:
         if not configured:
             return JSONResponse(status_code=503, content={"detail": "ingress_auth_unconfigured"})
         if not presented or not hmac.compare_digest(configured, presented):
+            # P1-SEC-007, soft posture: the credential was already judged wrong, so counting
+            # this failure can never keep a correct token out. Past the policy, further wrong
+            # tokens are answered flat and the device lookup below is never reached.
+            try:
+                throttle.fail("ingress_token", GLOBAL_SUBJECT)
+            except Throttled as locked:
+                return throttled_response("ingress_auth_throttled", locked)
             return JSONResponse(status_code=401, content={"detail": "ingress_auth_failed"})
+        throttle.record_success("ingress_token", GLOBAL_SUBJECT)
 
         # Health is the only ingress-only route, used by local/tunnel probes.
         if request.method == "GET" and request.url.path == "/health":
@@ -384,7 +406,12 @@ def create_app() -> FastAPI:
         try:
             device = await auth.require_access_token(request.headers.get("X-Van-Device-Token", ""))
         except AuthError:
+            try:
+                throttle.fail("device_token", GLOBAL_SUBJECT)
+            except Throttled as locked:
+                return throttled_response("device_access_throttled", locked)
             return JSONResponse(status_code=401, content={"detail": "device_access_denied"})
+        throttle.record_success("device_token", GLOBAL_SUBJECT)
         request.state.van_device_id = device.device_id
         return await call_next(request)
 
@@ -455,6 +482,18 @@ def create_app() -> FastAPI:
         ingress_token = settings.ingress_token.strip()
         if not ingress_token:
             raise HTTPException(status_code=503, detail="ingress_auth_unconfigured")
+        # P1-SEC-007, hard posture. This is the only unauthenticated route in the gateway
+        # and the only credential that mints owner-device authority, so the lockout is
+        # checked before the ticket is looked at. See van_gateway/auth/throttle.py for why
+        # this surface, and only this surface, accepts the availability cost.
+        try:
+            throttle.check("pairing", GLOBAL_SUBJECT)
+        except Throttled as locked:
+            raise HTTPException(
+                status_code=429,
+                detail="pairing_throttled",
+                headers={"Retry-After": str(locked.retry_after_seconds)},
+            ) from locked
         try:
             result = await auth.pair_device(
                 body.pairing_token,
@@ -464,8 +503,13 @@ def create_app() -> FastAPI:
                 body.label,
             )
         except AuthError as exc:
+            # `already_enrolled` and `device_revoked` mean the ticket was genuine, so they
+            # are a client mistake, not a guess, and must not count toward the lockout.
+            if exc.code not in {"already_enrolled", "device_revoked"}:
+                throttle.record_failure("pairing", GLOBAL_SUBJECT)
             code = 409 if exc.code in {"already_enrolled", "device_revoked"} else 400
             raise HTTPException(status_code=code, detail=exc.message) from exc
+        throttle.record_success("pairing", GLOBAL_SUBJECT)
         return JSONResponse(
             {
                 "device_id": result.device.device_id,
@@ -595,13 +639,11 @@ def create_app() -> FastAPI:
         await projects.cache_truth(project_id, body.truth, body.truth_sha, body.repo_sha)
         return await projects.load_truth(project_id)
 
-    @app.post("/v1/google/test-transport")
-    async def enable_fake_google_transport(x_van_internal_token: str | None = Header(default=None)):
-        require_internal_control(x_van_internal_token)
-        google.transport = FakeGoogleTransport()
-        google.oauth = None
-        return {"transport": "fake", "live": False}
-
+    # There is deliberately no route that swaps the live Google transport for a fake.
+    # /v1/google/test-transport used to do exactly that on the running production app, with
+    # no undo route (finding P2-SEC-009). Tests install a fake transport directly on
+    # app.state.google, which is where that capability belongs. tools/ci/maturity_gate.py
+    # fails CI if the route reappears.
     @app.get("/v1/google/gmail/search")
     async def gmail_search(q: str, x_van_internal_token: str | None = Header(default=None)):
         require_internal_control(x_van_internal_token)

@@ -135,3 +135,94 @@ def test_every_inventoried_component_carries_one_disposition():
     ]
     assert not bad, f"components without a valid disposition: {bad}"
     assert len(data["components"]) == data["component_count"]
+
+
+def test_gate_rejects_a_closed_finding_with_no_closure_block(ledgers_restored):
+    """A status anybody can assert and nobody can check is the defect, restated."""
+    data = json.loads(FINDINGS.read_text(encoding="utf-8"))
+    target = next(f for f in data["findings"] if f.get("current_status") != "CLOSED")
+    target["current_status"] = "CLOSED"
+    FINDINGS.write_text(json.dumps(data, indent=2), encoding="utf-8")
+
+    result = run_gate()
+    assert result.returncode == 1
+    assert target["id"] in result.stderr
+    assert "no closure block" in result.stderr
+
+
+def test_gate_rejects_a_closure_that_names_no_tests(ledgers_restored):
+    data = json.loads(FINDINGS.read_text(encoding="utf-8"))
+    target = next(f for f in data["findings"] if f.get("current_status") == "CLOSED")
+    target["closure"]["verified_by"] = []
+    FINDINGS.write_text(json.dumps(data, indent=2), encoding="utf-8")
+
+    result = run_gate()
+    assert result.returncode == 1
+    assert "verified_by" in result.stderr
+
+
+def test_gate_rejects_a_closure_citing_a_file_that_does_not_exist(ledgers_restored):
+    """A closure that points at nothing is worse than an open finding."""
+    data = json.loads(FINDINGS.read_text(encoding="utf-8"))
+    target = next(f for f in data["findings"] if f.get("current_status") == "CLOSED")
+    target["closure"]["changed"] = ["backend/van_gateway/imaginary_module.py"]
+    FINDINGS.write_text(json.dumps(data, indent=2), encoding="utf-8")
+
+    result = run_gate()
+    assert result.returncode == 1
+    assert "imaginary_module.py" in result.stderr
+
+
+def test_gate_rejects_an_unexplained_residual(ledgers_restored):
+    """Naming what is left undone is only honest if it says why."""
+    data = json.loads(FINDINGS.read_text(encoding="utf-8"))
+    target = next(f for f in data["findings"] if f.get("current_status") == "CLOSED")
+    target["closure"]["residual"] = "the edge is not done"
+    target["closure"].pop("residual_reason", None)
+    FINDINGS.write_text(json.dumps(data, indent=2), encoding="utf-8")
+
+    result = run_gate()
+    assert result.returncode == 1
+    assert "residual" in result.stderr
+
+
+def test_gate_rejects_a_forbidden_route_registration(tmp_path, monkeypatch):
+    """The route itself must fail, and a comment about it must not."""
+    import importlib.util
+
+    spec = importlib.util.spec_from_file_location("maturity_gate_probe", GATE)
+    module = importlib.util.module_from_spec(spec)
+    sys.modules["maturity_gate_probe"] = module
+    spec.loader.exec_module(module)
+
+    app_file = tmp_path / "app.py"
+    monkeypatch.setattr(
+        module, "FORBIDDEN_PRODUCTION_ROUTES", (("/v1/google/test-transport", app_file),)
+    )
+
+    app_file.write_text(
+        '    # /v1/google/test-transport was deleted under P2-SEC-009 and must not return.\n',
+        encoding="utf-8",
+    )
+    assert module.check_forbidden_routes() == [], (
+        "an explanation of why a route is gone must not be mistaken for the route"
+    )
+
+    app_file.write_text(
+        '    @app.post("/v1/google/test-transport")\n    async def swap(): ...\n',
+        encoding="utf-8",
+    )
+    problems = module.check_forbidden_routes()
+    assert problems and "test-transport" in problems[0]
+
+
+def test_the_real_application_does_not_register_the_deleted_route():
+    """Asserted against the production file, not a fixture."""
+    import importlib.util
+
+    spec = importlib.util.spec_from_file_location("maturity_gate_real", GATE)
+    module = importlib.util.module_from_spec(spec)
+    sys.modules["maturity_gate_real"] = module
+    spec.loader.exec_module(module)
+
+    assert module.check_forbidden_routes() == []

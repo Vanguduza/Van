@@ -14,8 +14,10 @@ This gate makes that shape a CI failure rather than a discovery. It enforces, me
      a producer, a consumer, a production caller, tests and runtime evidence.
   4. A component claiming DELIBERATELY_REMOVED proves it, per its own removal_assertion:
      the file is absent, or the named symbols are absent from a file that survives.
-  5. Bidirectional coverage: no orphan finding, no orphan component.
-  6. Forbidden production routes stay absent.
+  5. A finding may only be CLOSED when it names the change, the tests that prove it and
+     the evidence, and every cited path exists.
+  6. Bidirectional coverage: no orphan finding, no orphan component.
+  7. Forbidden production routes stay absent.
 
 Run:  python3 tools/ci/maturity_gate.py [--strict]
 
@@ -88,6 +90,43 @@ def check_findings_assigned(findings: dict) -> list[str]:
             problems.append(f"{fid}: no remediation_gate — an unassigned finding is a planning defect")
         if f.get("current_status") not in {"OPEN", "CLOSED", "IN_PROGRESS", "SUPERSEDED"}:
             problems.append(f"{fid}: current_status {f.get('current_status')!r} is not a recognised state")
+    return problems
+
+
+#: Required on a finding that claims CLOSED. Without this the register has the same hole
+#: the audit found in the product: a status anybody can assert and nobody can check.
+CLOSURE_FIELDS = ("summary", "changed", "verified_by")
+
+
+def check_closures(findings: dict) -> list[str]:
+    """A CLOSED finding must be backed the same way a component's terminal state is."""
+    problems = []
+    for f in findings.get("findings", []):
+        if f.get("current_status") != "CLOSED":
+            continue
+        fid = f.get("id", "<unnamed>")
+        closure = f.get("closure")
+        if not isinstance(closure, dict):
+            problems.append(
+                f"{fid}: CLOSED with no closure block. A status nobody can check is the "
+                "defect this register exists to catch."
+            )
+            continue
+        missing = [k for k in CLOSURE_FIELDS if not closure.get(k)]
+        if missing:
+            problems.append(f"{fid}: closure names no {', '.join(missing)}")
+        for path in closure.get("changed", []) or []:
+            candidate = str(path).split(":", 1)[0].strip()
+            if candidate and not (ROOT / candidate).exists():
+                problems.append(f"{fid}: closure cites {candidate}, which does not exist")
+        for node in closure.get("verified_by", []) or []:
+            test_file = str(node).split("::", 1)[0].strip()
+            if test_file and not (ROOT / test_file).exists():
+                problems.append(f"{fid}: closure names test file {test_file}, which does not exist")
+        if closure.get("residual") and not closure.get("residual_reason"):
+            problems.append(
+                f"{fid}: closure declares a residual without saying why it is out of scope"
+            )
     return problems
 
 
@@ -226,11 +265,31 @@ def check_citations_resolve(findings: dict) -> list[str]:
 
 
 def check_forbidden_routes() -> list[str]:
+    """A forbidden route is a *registration*, not a mention.
+
+    The removal of /v1/google/test-transport left behind a comment saying why it is gone
+    and a test naming the defect it caused. Failing on those would push the next author to
+    delete the explanation rather than the route, so the match is anchored to a FastAPI
+    decorator or an explicit router registration.
+    """
     problems = []
     for route, path in FORBIDDEN_PRODUCTION_ROUTES:
-        if path.is_file() and route in path.read_text(encoding="utf-8"):
+        if not path.is_file():
+            continue
+        text = path.read_text(encoding="utf-8")
+        registration = re.compile(
+            r"(?:@\w+\.(?:get|post|put|patch|delete|head|options|api_route)"
+            r"|\.add_api_route)\s*\(\s*(['\"])"
+            + re.escape(route)
+            + r"\1"
+        )
+        if registration.search(text):
+            try:
+                where = path.relative_to(ROOT)
+            except ValueError:  # a fixture path under a test's tmp dir
+                where = path
             problems.append(
-                f"forbidden production route {route} present in {path.relative_to(ROOT)} "
+                f"forbidden production route {route} registered in {where} "
                 "(closes under blueprint Gate 1; remove before the gate review)"
             )
     return problems
@@ -254,6 +313,7 @@ def main() -> int:
 
     blocking: list[str] = []
     blocking += check_findings_assigned(findings)
+    blocking += check_closures(findings)
     blocking += check_component_dispositions(components)
     blocking += check_bidirectional_coverage(findings, components)
     blocking += check_citations_resolve(findings)

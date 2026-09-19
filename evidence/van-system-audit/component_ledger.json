@@ -4,11 +4,11 @@
   "canonical_blueprint": "docs/VAN_FINISHED_PRODUCT_BLUEPRINT_REV_1.md",
   "canonical_audit": "docs/VAN_WHOLE_SYSTEM_IMPLEMENTATION_AUDIT_AND_CERTIFICATION_REV_1.md",
   "created": "2026-09-19",
-  "component_count": 70,
+  "component_count": 76,
   "dispositions": {
-    "DELETE": 9,
+    "DELETE": 10,
     "REPLACE": 4,
-    "COMPLETE": 22,
+    "COMPLETE": 27,
     "WIRE": 35
   },
   "by_gate": {
@@ -20,7 +20,8 @@
     "GATE 10": 7,
     "GATE 11": 1,
     "GATE 0": 3,
-    "GATE 5": 4
+    "GATE 5": 4,
+    "GATE 1": 6
   },
   "terminal_states_allowed": [
     "INTEGRATED_AND_EVIDENCED",
@@ -1241,6 +1242,141 @@
       "owner_facing_projection": null,
       "terminal_state": null,
       "closure_commits": []
+    },
+    {
+      "n": 71,
+      "component": "Ingress trust derivation",
+      "path": "backend/van_gateway/command/ingress_trust.py",
+      "maturity_class": "ABSENT",
+      "disposition": "COMPLETE",
+      "rationale": "The gateway had no server-side notion of content trust; it believed whatever the client declared, and the Android client declared CONVERSATION on every request",
+      "remediation_gate": "GATE 1",
+      "producer": "backend/van_gateway/command/ingress_trust.py derive_effective_trust",
+      "consumer": "backend/van_gateway/orchestrator.py injection screen and action-class gate",
+      "production_caller": "CommandOrchestrator.handle on every POST /v1/commands",
+      "tests": [
+        "backend/tests/test_ingress_trust_boundary.py::TestTrustDerivation",
+        "backend/tests/test_ingress_trust_boundary.py::TestGatewayEnforcement"
+      ],
+      "runtime_evidence": [
+        "the exact notification envelope from the audit probe now returns status rejected_untrusted at POST /v1/commands, and a genuine owner command still returns accepted"
+      ],
+      "owner_facing_projection": "the downgrade reason is carried into the audit record, so the owner can see why an input was refused",
+      "terminal_state": "INTEGRATED_AND_EVIDENCED"
+    },
+    {
+      "n": 72,
+      "component": "Command nonce consumption",
+      "path": "backend/van_gateway/command/nonce.py",
+      "maturity_class": "SIMULATED",
+      "disposition": "COMPLETE",
+      "rationale": "canonical_command_v2 signed the nonce and the orchestrator passed it through, but nothing ever stored or checked it, so replay was defended only by time windows",
+      "remediation_gate": "GATE 1",
+      "producer": "the signing device, via the nonce field covered by canonical_command_v2",
+      "consumer": "backend/van_gateway/command/nonce.py CommandNonceService.consume",
+      "production_caller": "CommandOrchestrator.handle, after signature verification and before anything observable happens",
+      "tests": [
+        "backend/tests/test_replay_and_audit_chain.py::TestNonceReplay"
+      ],
+      "runtime_evidence": [
+        "eight concurrent presentations of one nonce yield exactly one acceptance; the refusal names the command that first consumed it"
+      ],
+      "owner_facing_projection": null,
+      "terminal_state": "INTEGRATED_AND_EVIDENCED"
+    },
+    {
+      "n": 73,
+      "component": "Hash-chained owner-authority audit",
+      "path": "backend/van_gateway/audit/service.py",
+      "maturity_class": "PARTIAL",
+      "disposition": "COMPLETE",
+      "rationale": "The audit log was a flat table with a random UUID and no ordering, so rows could be altered, deleted or inserted undetectably",
+      "remediation_gate": "GATE 1",
+      "producer": "AuditService.record, called on every accept, deny and expiry in the command path",
+      "consumer": "AuditService.verify_chain",
+      "production_caller": "CommandOrchestrator.handle on every command outcome",
+      "tests": [
+        "backend/tests/test_replay_and_audit_chain.py::TestAuditChain"
+      ],
+      "runtime_evidence": [
+        "altering, deleting or rewriting a row makes verify_chain report ok false and name the earliest broken row; ten concurrent writers do not fork the chain"
+      ],
+      "owner_facing_projection": "verify_chain gives the owner a single answer to whether the record has been touched",
+      "terminal_state": "INTEGRATED_AND_EVIDENCED"
+    },
+    {
+      "n": 74,
+      "component": "Authentication throttle",
+      "path": "backend/van_gateway/auth/throttle.py",
+      "maturity_class": "ABSENT",
+      "disposition": "COMPLETE",
+      "rationale": "No failed-attempt counter, backoff or lockout existed on any authentication surface",
+      "remediation_gate": "GATE 1",
+      "producer": "backend/van_gateway/auth/throttle.py AuthThrottle",
+      "consumer": "the ingress and device-token middleware, POST /v1/devices/pair, and the signature and A4 approval paths in the orchestrator",
+      "production_caller": "backend/van_gateway/app.py require_ingress_auth and pair_device; backend/van_gateway/orchestrator.py handle",
+      "tests": [
+        "backend/tests/test_auth_throttle.py::TestThrottlePrimitive",
+        "backend/tests/test_auth_throttle.py::TestGatewayEnforcement",
+        "backend/tests/test_auth_throttle.py::TestCommandSignatureThrottle",
+        "backend/tests/test_auth_throttle.py::TestApprovalChallengeThrottle"
+      ],
+      "runtime_evidence": [
+        "past the per-surface policy the gateway answers 429 with Retry-After on every named surface, and a correct credential still succeeds on every soft-posture surface while the counter is locked"
+      ],
+      "owner_facing_projection": "Retry-After tells a client exactly when to come back",
+      "terminal_state": "INTEGRATED_AND_EVIDENCED"
+    },
+    {
+      "n": 75,
+      "component": "MT5 EA poll throttle",
+      "path": "trading/vati/execution/mt5_pull.py",
+      "maturity_class": "ABSENT",
+      "disposition": "COMPLETE",
+      "rationale": "The only internet-reachable route in the trading deployable accepted unlimited HMAC signature guesses per alias",
+      "remediation_gate": "GATE 1",
+      "producer": "trading/vati/execution/mt5_pull.py PollThrottle",
+      "consumer": "the /ea/v1/{alias}/poll handler in create_pull_app",
+      "production_caller": "create_pull_app poll, on every EA poll",
+      "tests": [
+        "trading/tests/test_mt5_pull.py::test_signature_guessing_on_the_poll_route_is_throttled",
+        "trading/tests/test_mt5_pull.py::test_a_correctly_signed_poll_still_works_while_the_alias_is_throttled",
+        "trading/tests/test_mt5_pull.py::test_one_alias_cannot_throttle_another",
+        "trading/tests/test_mt5_pull.py::test_a_replayed_nonce_is_not_counted_as_a_credential_guess"
+      ],
+      "runtime_evidence": [
+        "eleven wrong signatures for one alias end in 429 with Retry-After; a genuine EA polling the same alias still gets 200, and a second alias is unaffected"
+      ],
+      "owner_facing_projection": null,
+      "terminal_state": "INTEGRATED_AND_EVIDENCED"
+    },
+    {
+      "n": 76,
+      "component": "/v1/google/test-transport route",
+      "path": "backend/van_gateway/app.py",
+      "maturity_class": "PRODUCTION_TEST_SEAM",
+      "disposition": "DELETE",
+      "rationale": "A production route that swapped the live Google transport for a fake on the running application, with no undo route. Tests install a fake on app.state.google directly, which is where that capability belongs.",
+      "remediation_gate": "GATE 1",
+      "producer": null,
+      "consumer": null,
+      "production_caller": null,
+      "tests": [
+        "tests/contracts/test_maturity_gate.py::test_gate_rejects_a_forbidden_route_registration",
+        "tests/contracts/test_maturity_gate.py::test_the_real_application_does_not_register_the_deleted_route"
+      ],
+      "runtime_evidence": [
+        "tools/ci/maturity_gate.py fails CI if the route is registered again; it is anchored to a route decorator so the comment recording the removal does not trip it"
+      ],
+      "owner_facing_projection": null,
+      "terminal_state": "DELIBERATELY_REMOVED_CANON_CORRECTED",
+      "removal_assertion": {
+        "kind": "symbols_absent",
+        "symbols": [
+          "test_transport",
+          "set_test_transport"
+        ]
+      }
     }
   ],
   "gate_0_status": {

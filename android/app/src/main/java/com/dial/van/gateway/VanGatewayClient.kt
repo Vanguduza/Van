@@ -354,6 +354,7 @@ class VanGatewayClient(context: Context) {
         speechEvidenceRef: String? = null,
         contextCapsuleRevision: Int? = null,
         contextCapsuleHash: String? = null,
+        declaredTrust: String = TRUST_CONVERSATION,
     ): JSONObject = withContext(Dispatchers.IO) {
         val id = deviceId ?: error("not_enrolled")
         val secret = deviceSecret ?: error("not_enrolled")
@@ -361,7 +362,13 @@ class VanGatewayClient(context: Context) {
         val nonce = UUID.randomUUID().toString()
         val principalType = "OWNER_DEVICE"
         val requestedBy = "device:$id"
-        val contextTrust = "CONVERSATION"
+        // Trust is a property of who authored the text, not of which device sent it.
+        // Hardcoding CONVERSATION here is what allowed any app's notification to reach the
+        // owner-authority path labelled trusted (finding P0-SEC-002). The caller must now
+        // state the provenance, and a third-party channel is pinned UNTRUSTED. The gateway
+        // derives this independently and will not believe an elevated claim, so this is a
+        // correctness fix on the device, not the security boundary itself.
+        val contextTrust = contextTrustFor(originChannel, declaredTrust)
         val canonical = listOf(
             "v2",
             commandId,
@@ -530,6 +537,29 @@ class VanGatewayClient(context: Context) {
         private const val MIN_DEVICE_ACCESS_TOKEN_CHARS = 32
         private const val MIN_PAIRING_TOKEN_CHARS = 32
     }
+
+    companion object {
+        const val TRUST_CONVERSATION = "CONVERSATION"
+        const val TRUST_UNTRUSTED = "UNTRUSTED"
+
+        /** Channels whose content is authored by a third party, not by the owner. */
+        private val THIRD_PARTY_CHANNELS = setOf(
+            "NOTIFICATION_EVENT",
+            "SHARE_INTENT",
+            "AUTOMATION",
+            "HERMES_EVENT",
+            "SYSTEM_EVENT",
+        )
+
+        /**
+         * Resolve the trust label to send. A third-party channel is always UNTRUSTED and a
+         * caller cannot raise it. Mirrors the gateway's own derivation so the device and the
+         * server agree; the gateway remains authoritative either way.
+         */
+        fun contextTrustFor(originChannel: String, declaredTrust: String): String =
+            if (originChannel in THIRD_PARTY_CHANNELS) TRUST_UNTRUSTED else declaredTrust
+    }
+
 }
 
 class GatewayHttpException(val code: Int, val body: String) : Exception("gateway_http_$code: $body")

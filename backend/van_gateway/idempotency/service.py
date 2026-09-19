@@ -41,17 +41,38 @@ class IdempotencyService:
         Raises in-flight if ambiguous reuse while running.
         """
         req_hash = self.request_hash(payload)
-        row = await self.store.fetchone(
-            "SELECT idempotency_key, request_hash, status, response_json FROM idempotency WHERE idempotency_key = ?",
-            (key,),
-        )
         now = int(time.time())
-        if row is None:
-            await self.store.execute(
-                "INSERT INTO idempotency(idempotency_key, request_hash, status, response_json, created_at_unix, updated_at_unix) VALUES (?, ?, ?, NULL, ?, ?)",
-                (key, req_hash, IdempotencyStatus.IN_FLIGHT.value, now, now),
-            )
-            return None
+
+        # The claim must be atomic. The previous implementation did a SELECT on one
+        # connection and an INSERT on another with no transaction, so two concurrent
+        # identical signed commands could both observe no row and both proceed to execute
+        # (finding P1-SEC-005). auth/service.py already used BEGIN IMMEDIATE for exactly
+        # this reason; the pattern was known and simply not applied here.
+        async with self.store.connection() as db:
+            await db.execute("BEGIN IMMEDIATE")
+            try:
+                cur = await db.execute(
+                    "SELECT idempotency_key, request_hash, status, response_json "
+                    "FROM idempotency WHERE idempotency_key = ?",
+                    (key,),
+                )
+                row = await cur.fetchone()
+                if row is None:
+                    await db.execute(
+                        "INSERT INTO idempotency(idempotency_key, request_hash, status, "
+                        "response_json, created_at_unix, updated_at_unix) "
+                        "VALUES (?, ?, ?, NULL, ?, ?)",
+                        (key, req_hash, IdempotencyStatus.IN_FLIGHT.value, now, now),
+                    )
+                    await db.commit()
+                    return None
+                # Materialise before the transaction closes.
+                row = dict(row)
+            except BaseException:
+                await db.rollback()
+                raise
+            await db.commit()
+
         if row["request_hash"] != req_hash:
             await self.store.execute(
                 "UPDATE idempotency SET status = ?, updated_at_unix = ? WHERE idempotency_key = ?",

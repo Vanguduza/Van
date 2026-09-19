@@ -501,8 +501,27 @@
       "root_cause": "RC5",
       "remediation": "Derive context_trust from CommandKind; refuse to dispatch CONTEXT_INGEST as a command; reject UI-channel payloads carrying an untrusted-content marker server-side.",
       "validation_gate": "G2",
-      "current_status": "OPEN",
-      "remediation_gate": "GATE 1"
+      "current_status": "CLOSED",
+      "remediation_gate": "GATE 1",
+      "closure": {
+        "summary": "Content trust is now derived server-side from the origin channel and the payload shape, never taken from the client, and untrusted content can no longer request a mutating action. The device-side replayer no longer turns a captured notification envelope into command text.",
+        "changed": [
+          "backend/van_gateway/command/ingress_trust.py",
+          "backend/van_gateway/orchestrator.py",
+          "android/app/src/main/java/com/dial/van/gateway/VanGatewayClient.kt",
+          "android/app/src/main/java/com/dial/van/gateway/QueueReplayer.kt"
+        ],
+        "verified_by": [
+          "backend/tests/test_ingress_trust_boundary.py::TestTrustDerivation",
+          "backend/tests/test_ingress_trust_boundary.py::TestGatewayEnforcement::test_notification_payload_is_refused_as_a_command",
+          "backend/tests/test_ingress_trust_boundary.py::TestGatewayEnforcement::test_untrusted_content_cannot_request_a_mutating_action",
+          "backend/tests/test_ingress_trust_boundary.py::TestGatewayEnforcement::test_a_genuine_owner_command_still_works",
+          "android/app/src/test/java/com/dial/van/gateway/ReplayDispatchPolicyTest.kt"
+        ],
+        "residual": "The Kotlin tests are written but not executed in this container, which has no Android Gradle Plugin.",
+        "residual_reason": "Device-side assertion is defence in depth; the boundary is enforced independently at the gateway, where it is executed. The Kotlin suite runs in the Android CI job.",
+        "posture": "The gateway holds the boundary even when the device is wrong, which is the only place it can hold, since the device is the thing that was wrong."
+      }
     },
     {
       "id": "P0-TRADE-001",
@@ -696,7 +715,17 @@
         "docs/project-state/UNIFIED_INTELLIGENCE_IMPLEMENTATION_MATRIX.json generated_against.blueprint_path"
       ],
       "closure_commit": "0889d88f3074",
-      "closed_at": "2026-09-19"
+      "closed_at": "2026-09-19",
+      "closure": {
+        "summary": "Every one of the 32 workstreams in the implementation matrix now carries an audit_class and an audit_note giving the state the repository actually supports, so the matrix no longer certifies against a blueprint the canonical tree does not contain.",
+        "changed": [
+          "docs/project-state/UNIFIED_INTELLIGENCE_IMPLEMENTATION_MATRIX.json"
+        ],
+        "verified_by": [
+          "tools/ci/maturity_gate.py"
+        ],
+        "posture": "The matrix was re-baselined against observed repository state rather than against the absent blueprint; the audit classes are the ones defined in the canonical audit, so a reader can tell BUILT from INTEGRATED."
+      }
     },
     {
       "id": "P1-DOC-002",
@@ -725,7 +754,18 @@
         "docs/PRODUCTION_ACCEPTANCE_LEDGER.md browser runtime row"
       ],
       "closure_commit": "0889d88f3074",
-      "closed_at": "2026-09-19"
+      "closed_at": "2026-09-19",
+      "closure": {
+        "summary": "The production acceptance ledger's Temporal row is corrected: a pip version assertion is recorded as what it is, not as a green Temporal capability. Blueprint decision D9 makes Temporal optional, adopted only on measured need with an owner-signed decision.",
+        "changed": [
+          "docs/PRODUCTION_ACCEPTANCE_LEDGER.md",
+          "docs/VAN_FINISHED_PRODUCT_BLUEPRINT_REV_1.md"
+        ],
+        "verified_by": [
+          "tools/ci/maturity_gate.py"
+        ],
+        "posture": "NOT VERIFIED, recorded as such, rather than promoted to complete on the strength of an import succeeding."
+      }
     },
     {
       "id": "P1-VOICE-001",
@@ -929,8 +969,22 @@
       "root_cause": "see s32 root-cause map",
       "remediation": "Add a command nonce store with a uniqueness check and make the idempotency claim atomic.",
       "validation_gate": "G2",
-      "current_status": "OPEN",
-      "remediation_gate": "GATE 1"
+      "current_status": "CLOSED",
+      "remediation_gate": "GATE 1",
+      "closure": {
+        "summary": "Command nonces are consumed once under BEGIN IMMEDIATE, so a captured signed command can no longer be replayed inside its validity window with a fresh idempotency key. The idempotency claim is now a single atomic transaction rather than a SELECT and an INSERT on two connections.",
+        "changed": [
+          "backend/van_gateway/command/nonce.py",
+          "backend/van_gateway/idempotency/service.py",
+          "backend/van_gateway/orchestrator.py",
+          "backend/van_gateway/storage/db.py"
+        ],
+        "verified_by": [
+          "backend/tests/test_replay_and_audit_chain.py::TestNonceReplay",
+          "backend/tests/test_replay_and_audit_chain.py::TestIdempotencyAtomicity::test_concurrent_identical_claims_produce_one_winner"
+        ],
+        "posture": "The UNIQUE (device_id, nonce) primary key settles the race in SQLite, not in a read-then-write both callers could win. Retention exceeds the widest replay window the orchestrator accepts, so pruning cannot re-open the hole."
+      }
     },
     {
       "id": "P1-SEC-006",
@@ -952,8 +1006,19 @@
       "root_cause": "see s32 root-cause map",
       "remediation": "Add a hash chain and periodic anchoring to the audit table.",
       "validation_gate": "G2",
-      "current_status": "OPEN",
-      "remediation_gate": "GATE 1"
+      "current_status": "CLOSED",
+      "remediation_gate": "GATE 1",
+      "closure": {
+        "summary": "The owner-authority audit log is a hash chain: prev_hash is inside each entry digest, entries carry a monotonic chain_seq, and verify_chain() names the earliest broken row. Altering, deleting or inserting a row is now detectable and the break propagates forward.",
+        "changed": [
+          "backend/van_gateway/audit/service.py",
+          "backend/van_gateway/storage/db.py"
+        ],
+        "verified_by": [
+          "backend/tests/test_replay_and_audit_chain.py::TestAuditChain"
+        ],
+        "posture": "Tamper-evidence, not tamper-proofing: an attacker with write access can still destroy the table, but can no longer rewrite history and have it verify."
+      }
     },
     {
       "id": "P1-SEC-007",
@@ -974,8 +1039,30 @@
       "root_cause": "see s32 root-cause map",
       "remediation": "Add per-surface rate limiting and lockout at the app and edge.",
       "validation_gate": "G2",
-      "current_status": "OPEN",
-      "remediation_gate": "GATE 1"
+      "current_status": "CLOSED",
+      "remediation_gate": "GATE 1",
+      "closure": {
+        "summary": "Every authentication surface now carries a failed-attempt counter with a per-surface policy and lockout: device pairing, the ingress token, the device token, command signature verification, the A4 approval challenge, and the MT5 EA poll route. Two postures are used deliberately — a hard lockout on pairing, and a soft throttle everywhere on the owner's live path so a correct credential always passes and an attacker cannot silence the assistant.",
+        "changed": [
+          "backend/van_gateway/auth/throttle.py",
+          "backend/van_gateway/app.py",
+          "backend/van_gateway/orchestrator.py",
+          "trading/vati/execution/mt5_pull.py",
+          "deploy/van-trading-core/caddy/Caddyfile"
+        ],
+        "verified_by": [
+          "backend/tests/test_auth_throttle.py::TestThrottlePrimitive",
+          "backend/tests/test_auth_throttle.py::TestGatewayEnforcement",
+          "backend/tests/test_auth_throttle.py::TestCommandSignatureThrottle",
+          "backend/tests/test_auth_throttle.py::TestApprovalChallengeThrottle",
+          "trading/tests/test_mt5_pull.py::test_signature_guessing_on_the_poll_route_is_throttled",
+          "trading/tests/test_mt5_pull.py::test_a_correctly_signed_poll_still_works_while_the_alias_is_throttled",
+          "trading/tests/test_mt5_pull.py::test_one_alias_cannot_throttle_another"
+        ],
+        "residual": "Edge-layer volumetric rate limiting in Caddy is not implemented.",
+        "residual_reason": "bootstrap.sh installs the stock apt Caddy build, which has no rate_limit module; a rate_limit directive would fail `caddy validate` and abort the deployment. The edge also cannot tell a wrong signature from a right one, so the throttle belongs in the application, where it now is. The Caddyfile records this decision in place. The application-layer half of the remediation is complete; the deployment-layer half is explicitly NOT VERIFIED and NOT claimed.",
+        "posture": "Failures are counted, successes are not, and the counter is keyed by the thing being attacked rather than by the caller, who controls their own address."
+      }
     },
     {
       "id": "P1-SYM-001",
@@ -1096,7 +1183,18 @@
         "tests/contracts/test_owner_runtime_mcp_contract.py"
       ],
       "closure_commit": "0889d88f3074",
-      "closed_at": "2026-09-19"
+      "closed_at": "2026-09-19",
+      "closure": {
+        "summary": "The MCP registration include list carries all 20 tools the shim exposes, and a contract test parses both sources and asserts set equality, so the two cannot drift again.",
+        "changed": [
+          "tools/hermes/register_owner_runtime_mcp.sh",
+          "tests/contracts/test_owner_runtime_mcp_contract.py"
+        ],
+        "verified_by": [
+          "tests/contracts/test_owner_runtime_mcp_contract.py::test_registration_include_list_matches_the_shim_exactly"
+        ],
+        "posture": "The test compares the two artefacts to each other rather than to a hardcoded number, so adding a tool to the shim without registering it fails CI."
+      }
     },
     {
       "id": "P1-HER-002",
@@ -1125,7 +1223,18 @@
         "tools/hermes/doctor_van_profile.sh policy hook load and deny probe"
       ],
       "closure_commit": "0889d88f3074",
-      "closed_at": "2026-09-19"
+      "closed_at": "2026-09-19",
+      "closure": {
+        "summary": "The installer registers the policy hook, and the doctor loads it and probes an A5 denial in-process, so the hook's presence and its effect are both attested rather than assumed.",
+        "changed": [
+          "tools/hermes/install_van_profile.sh",
+          "tools/hermes/doctor_van_profile.sh"
+        ],
+        "verified_by": [
+          "tests/hermes/test_profile_layout.py"
+        ],
+        "posture": "The doctor asserts behaviour (an A5 action is denied), not merely that a file exists. Loading needs sys.modules registration before exec_module or the hook's dataclasses cannot resolve their own types — the probe does that."
+      }
     },
     {
       "id": "P1-HER-003",
@@ -1156,7 +1265,19 @@
         "tests/hermes/test_profile_layout.py"
       ],
       "closure_commit": "0889d88f3074",
-      "closed_at": "2026-09-19"
+      "closed_at": "2026-09-19",
+      "closure": {
+        "summary": "All 16 declared skills are installed, and a single test asserts the count agrees across the profile config, the installer, the doctor and the test constant, so the four sources cannot drift apart again.",
+        "changed": [
+          "tools/hermes/install_van_profile.sh",
+          "tools/hermes/doctor_van_profile.sh",
+          "tests/hermes/test_profile_layout.py"
+        ],
+        "verified_by": [
+          "tests/hermes/test_profile_layout.py::test_skill_lists_agree_across_all_sources"
+        ],
+        "posture": "The test derives each list from its own source and compares them, so a skill added in one place and forgotten in another fails CI."
+      }
     },
     {
       "id": "P1-HER-004",
@@ -1185,7 +1306,18 @@
         "hermes/profile/van/AGENTS.md owner-context protocol step 9"
       ],
       "closure_commit": "0889d88f3074",
-      "closed_at": "2026-09-19"
+      "closed_at": "2026-09-19",
+      "closure": {
+        "summary": "hermes/profile/van/AGENTS.md step 9 now states explicitly which of the two snapshot notions authorises an action, so the ambiguity that let an unauthorised snapshot appear authoritative is resolved in the canonical instruction the runtime reads.",
+        "changed": [
+          "hermes/profile/van/AGENTS.md"
+        ],
+        "verified_by": [
+          "tests/hermes/test_profile_layout.py"
+        ],
+        "residual": "Hermes echoing the run-metadata snapshot id back to the gateway is not implemented.",
+        "residual_reason": "Hermes is an external runtime that is not in this repository, so the echo cannot be implemented or exercised here. The documented binding is the repository-complete half; the echo is recorded as EXTERNALLY_BLOCKED and is NOT claimed as verified."
+      }
     },
     {
       "id": "P1-HER-005",
@@ -1487,9 +1619,22 @@
       "root_cause": "see s32 root-cause map",
       "remediation": "Remove the route from the production application.",
       "validation_gate": "G1",
-      "current_status": "OPEN",
+      "current_status": "CLOSED",
       "remediation_gate": "GATE 1",
-      "progress_note": "tools/ci/maturity_gate.py now reports the forbidden /v1/google/test-transport route as scheduled. Removal is Gate 1 work; this stays OPEN."
+      "progress_note": "tools/ci/maturity_gate.py now reports the forbidden /v1/google/test-transport route as scheduled. Removal is Gate 1 work; this stays OPEN.",
+      "closure": {
+        "summary": "The /v1/google/test-transport route, which allowed the live Google transport of a running production app to be hot-swapped for a fake, is deleted. The maturity gate asserts it stays deleted.",
+        "changed": [
+          "backend/van_gateway/app.py",
+          "tools/ci/maturity_gate.py",
+          "backend/tests/test_extra_apis.py"
+        ],
+        "verified_by": [
+          "tests/contracts/test_maturity_gate.py",
+          "backend/tests/test_extra_apis.py"
+        ],
+        "posture": "Tests that needed a fake transport now install it on app.state directly, so the test seam no longer has to exist as a production route."
+      }
     },
     {
       "id": "P2-SEC-010",
@@ -2080,7 +2225,17 @@
         "android/README.md"
       ],
       "closure_commit": "0889d88f3074",
-      "closed_at": "2026-09-19"
+      "closed_at": "2026-09-19",
+      "closure": {
+        "summary": "android/README.md is corrected: SDK 34 becomes SDK 36 to match the build files, and a package map is added so a reader can find the modules the README names.",
+        "changed": [
+          "android/README.md"
+        ],
+        "verified_by": [
+          "tools/ci/maturity_gate.py"
+        ],
+        "posture": "Corrected against the build files themselves rather than against memory of them."
+      }
     },
     {
       "id": "P4-CMD-001",
@@ -2245,7 +2400,7 @@
       "P3-DOC-003"
     ],
     "remaining_in_gate_0": [
-      "P4-DOC-004 (PairDeviceBody duplicated documentation \u2014 cosmetic, not yet applied)"
+      "P4-DOC-004 (PairDeviceBody duplicated documentation — cosmetic, not yet applied)"
     ],
     "note": "Gate 0 closed the truth-correction and registration-drift findings and installed the maturity gate. Findings are marked CLOSED only where a test or an executable check now enforces the fix."
   }

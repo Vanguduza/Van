@@ -1,6 +1,14 @@
 {$VAN_PUBLIC_HOST} {
     encode gzip
 
+    # P1-SEC-007. Failed-attempt throttling for this route lives in the application
+    # (vati/execution/mt5_pull.py, PollThrottle), not here, and that is deliberate: the
+    # edge cannot tell a wrong signature from a right one, so an edge limit would either
+    # be too loose to bound guessing or would throttle a legitimate EA polling at 1 Hz.
+    # Volumetric protection at this layer needs a Caddy built with the rate_limit module
+    # (github.com/mholt/caddy-ratelimit); bootstrap.sh installs the stock apt build, so a
+    # rate_limit directive here would fail `caddy validate` and abort the deployment. That
+    # remains an open deployment-layer item and is not claimed as done.
     @ea path /ea/v1/* /health
     handle @ea {
         reverse_proxy 127.0.0.1:9443

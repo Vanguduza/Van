@@ -29,7 +29,14 @@ async def test_google_migration_and_principal_hash(tmp_path):
     # understanding layer; 13 critical reasoning; 14 autonomy and attention
     # scoring; 15 external reality, evolution radar, benchmarks and eval.
     # 16 adds the owner permission registry and computer-use operations.
-    assert row["version"] == SCHEMA_VERSION == 16
+    # 17 adds single-use command nonces and the audit hash chain.
+    #
+    # The applied version must equal SCHEMA_VERSION, and SCHEMA_VERSION must not regress
+    # below the migrations this test's assumptions depend on. Pinning the exact literal
+    # made every legitimate forward migration fail here, which teaches the next author to
+    # edit the assertion rather than think about it.
+    assert row["version"] == SCHEMA_VERSION
+    assert SCHEMA_VERSION >= 16, "the Google mesh assumptions require migrations through 16"
     broker = GoogleIdentityBroker(store, GoogleCapabilityRegistry(registry_path()), ai_plan="PRO")
     status = await broker.register_principal(subject="owner-google-subject", ai_plan="PRO")
     assert status.registered is True

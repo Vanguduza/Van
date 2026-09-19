@@ -8,7 +8,31 @@ from typing import Any, AsyncIterator
 
 import aiosqlite
 
-SCHEMA_VERSION = 16
+SCHEMA_VERSION = 17
+
+
+MIGRATION_17 = """
+-- P1-SEC-005: the command nonce was covered by the v2 signature and then never stored,
+-- so a captured command could be replayed inside its validity window. A UNIQUE nonce per
+-- device makes the second presentation fail at the database rather than at nobody.
+CREATE TABLE IF NOT EXISTS command_nonces (
+  device_id TEXT NOT NULL,
+  nonce TEXT NOT NULL,
+  command_id TEXT NOT NULL,
+  consumed_at_unix INTEGER NOT NULL,
+  PRIMARY KEY (device_id, nonce)
+);
+CREATE INDEX IF NOT EXISTS idx_command_nonces_consumed
+  ON command_nonces(consumed_at_unix);
+
+-- P1-SEC-006: the owner-authority audit log was a flat table with a random UUID and no
+-- ordering, so rows could be inserted, altered or deleted undetectably. The VATI trading
+-- ledger already had a verifiable chain; the authority log did not.
+ALTER TABLE audit ADD COLUMN chain_seq INTEGER;
+ALTER TABLE audit ADD COLUMN prev_hash TEXT;
+ALTER TABLE audit ADD COLUMN entry_hash TEXT;
+CREATE UNIQUE INDEX IF NOT EXISTS idx_audit_chain_seq ON audit(chain_seq);
+"""
 
 MIGRATIONS: dict[int, str] = {
     1: """
@@ -1328,6 +1352,7 @@ MIGRATIONS: dict[int, str] = {
     CREATE INDEX IF NOT EXISTS idx_computer_operations_mission
       ON computer_operations(mission_id, started_at_ms);
     """,
+    17: MIGRATION_17,
 }
 
 
@@ -1341,6 +1366,13 @@ class Store:
         async with aiosqlite.connect(self.path) as db:
             db.row_factory = aiosqlite.Row
             await db.execute("PRAGMA foreign_keys = ON")
+            # A fresh connection per query with journal_mode=delete and no busy timeout is
+            # why two concurrent identical signed commands could both pass the idempotency
+            # SELECT (finding P1-SEC-005). WAL lets readers and one writer coexist; the
+            # busy timeout makes a contended write wait rather than raise immediately.
+            await db.execute("PRAGMA journal_mode = WAL")
+            await db.execute("PRAGMA busy_timeout = 5000")
+            await db.execute("PRAGMA synchronous = NORMAL")
             yield db
 
     @staticmethod
