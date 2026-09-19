@@ -1,6 +1,6 @@
 # VAN closure programme — handoff
 
-**Branch:** `claude/van-system-audit-ysgtcd` · **HEAD at writing:** `e64379e` · **Date:** 2026-09-19
+**Branch:** `claude/van-system-audit-ysgtcd` · **HEAD at writing:** `85cc5e6` · **Date:** 2026-09-19
 
 This document exists so the next agent can pick the work up cold. It is written to be
 argued with. Where it says "do X", X is what the evidence available at the time supported;
@@ -11,7 +11,7 @@ the programme has already paid for, and reversing it needs a reason in writing.
 
 ## 1. Read this first
 
-VAN is a personal intelligence system: a FastAPI gateway (`backend/van_gateway/`, 165
+VAN is a personal intelligence system: a FastAPI gateway (`backend/van_gateway/`, 166
 modules), an Android app (`android/app/`, Kotlin/Compose), a trading system (`trading/`,
 VATI), and an external agent runtime (Hermes) that **is not in this repository**.
 
@@ -23,36 +23,32 @@ tests passed, the code was real, and nothing could tell the difference from outs
 This programme closes those findings and, more importantly, installs machinery that makes
 the shape a CI failure rather than a discovery.
 
-**State:** 114 findings registered, **114 closed, none open**. 1184 backend tests, 108
-contract tests, 296 Kotlin tests. Schema v25. 166 gateway modules, all reachable from an
-entry point. CI green on both jobs since run 277; the debug APK has been published since
-run 279.
+**State:** 120 findings registered, **120 closed**. 142 components inventoried, **142 at a
+terminal state**. 1221 backend tests, 141 contract tests, 296 Kotlin tests. Schema v26. CI
+green on both jobs; the debug APK publishes on every run.
 
-**None open does not mean done, and the finding count is the misleading number.** Read
-this paragraph before you read anything else in this document.
+**Both registers are at zero. That is not the same as VAN being finished, and the difference
+is the whole of what is left.** Read this table before quoting either number.
 
-There are **two** registers, on two different axes, and the closure programme drove one of
-them to zero:
-
-| register | what it tracks | state |
+| terminal state | components | what it means |
 |---|---|---|
-| `evidence/van-system-audit/findings.json` | **defects** — things that were wrong | 114 of 114 closed |
-| `evidence/van-system-audit/component_ledger.json` | **components** — things that should exist and work | **77 of 142 at a terminal state; 65 are not** |
+| `INTEGRATED_AND_EVIDENCED` | 111 | wired, tested, and a CI run executed the tests |
+| `EXTERNALLY_BLOCKED_REPOSITORY_COMPLETE` | 24 | the repository side is done; something outside it is absent |
+| `DELIBERATELY_REMOVED_CANON_CORRECTED` | 7 | the code is gone and the gate checks it is gone |
 
-Of those 65, **35 are dispositioned `WIRE`** — written, often correct, often tested, and
-reached by no production path. 8 are `DELETE`, 2 are `REPLACE`, 20 are `COMPLETE` but
-unevidenced. The maturity gate passes because the ledger claims nothing it cannot back; it
-is honest about being unfinished. But "114 findings, 114 closed" describes a defect register
-that has been worked to zero, **not a system that is finished**, and anyone who quotes the
-first number without the second is doing the thing this programme exists to stop.
+The middle row is where VAN actually stands. Each of those entries names the specific thing
+that is missing — a keyword-spotting model owner decision 2 declined, an unauthored `.riv`
+asset, an n8n harness, a Stagehand runtime, a VEKL endpoint, an Obsidian vault, Exa egress
+the owner switched off, a live market feed, a Postgres instance, a device that can play a
+sound or speak, and above all **Hermes**, which is what drives a mission to `VERIFYING` and
+is not in this repository. Read the `rationale` on each; "externally blocked" without a
+named artefact is a way of saying "not done" that sounds finished.
 
-The residuals are the third axis: 30 `DELIBERATE_SCOPE`, 15 `ENVIRONMENT_UNVERIFIED` waiting
-on a physical device, 17 `EXTERNAL_RUNTIME` waiting on Hermes, 9 `OWNER_DEPLOYMENT_DECISION`,
-3 `EXTERNAL_ARTEFACT`.
+The residual classes are the third axis and the honest measure of what is untrue:
+30 `DELIBERATE_SCOPE`, 16 `ENVIRONMENT_UNVERIFIED` waiting on a physical device,
+19 `EXTERNAL_RUNTIME` waiting on Hermes, 9 `OWNER_DEPLOYMENT_DECISION`, 3 `EXTERNAL_ARTEFACT`.
 
-Run the census in the resume block below rather than trusting these figures; they were true
-when written. And read §7.6 — reconciling the repository independently of `findings.json` is
-unfinished, and could move any of these numbers in either direction.
+Run the census in the resume block rather than trusting these figures.
 
 ### Resume in ten minutes
 
@@ -89,7 +85,8 @@ print("\nresiduals — what is still untrue about closed findings:")
 for cls, ids in sorted(by_class.items()):
     print(f"  {cls:26} {len(ids):3}  {', '.join(ids[:4])}")
 
-# The register that is NOT at zero. This is the one that says how much system is left.
+# The component register. It is also at zero, so the useful reading is no longer "how many
+# are left" but "how many are terminal on the strength of something outside this repository".
 ledger = json.load(open("evidence/van-system-audit/component_ledger.json"))
 comps = ledger["components"] if isinstance(ledger, dict) else ledger
 unfinished = [c for c in comps if not c.get("terminal_state")]
@@ -97,14 +94,25 @@ print(f"\ncomponents: {len(comps)} inventoried, {len(comps) - len(unfinished)} t
       f"{len(unfinished)} NOT")
 for disp, n in sorted(collections.Counter(c.get("disposition") for c in unfinished).items()):
     print(f"  {str(disp):10} {n:3}")
-print("\n  WIRE means: written, often tested, reached by nothing. That is the work.")
+for state, n in sorted(collections.Counter(c.get("terminal_state") for c in comps).items()):
+    print(f"  {str(state):42} {n:3}")
+
+# The row that matters. Every one of these names an artefact that is not here.
+blocked = [c for c in comps
+           if c.get("terminal_state") == "EXTERNALLY_BLOCKED_REPOSITORY_COMPLETE"]
+print(f"\n  {len(blocked)} components are complete in the repository and blocked outside it.")
+print("  Read the rationale on each. 'Externally blocked' with no named artefact is a way")
+print("  of saying 'not done' that sounds finished.")
 EOF
 ```
 
-**Check CI before anything else.** Run 277 on `e64379e` came back fully green — both jobs,
-every step, the first time in this programme. Do not take that on trust: read the newest run
-at `https://github.com/Vanguduza/Van/actions` and fix what it says before anything else.
-Nothing may be recorded as evidenced while CI is red.
+**Check CI before anything else.** The last run this document saw finish green was 295 on
+`85cc5e6`, both jobs and every step, with `van-debug-apk` uploaded. Do not take that on trust, and do not take it as
+covering the commit you are standing on: read the newest run at
+`https://github.com/Vanguduza/Van/actions` and fix what it says before anything else.
+CI is the only authority for anything Android — the Android Gradle Plugin cannot be fetched
+in this container (§4), so a local pass says nothing about the app. Nothing may be recorded
+as evidenced while CI is red.
 
 ---
 
@@ -224,7 +232,9 @@ that SHA; residual limitations; and **`falsified_by`** — what would show the c
 
 ## 3. The machinery
 
-Four tools. Learn these before writing code; they are how the programme keeps itself honest.
+Six tools. Learn these before writing code; they are how the programme keeps itself honest.
+Four of them run in CI on every push: the maturity gate, the authority map, the ledger
+reconciler and the Kotlin reachability scanner.
 
 ### `tools/ci/maturity_gate.py`
 
@@ -247,7 +257,7 @@ gate that only ever passes proves nothing.
 
 ### `tools/ci/authority_map.py` + `docs/project-state/AUTHORITY_MAP.yaml`
 
-37 invariants across 12 domains, each bound to exactly one owning document. A machine
+41 invariants across 15 subject areas, each bound to exactly one owning document. A machine
 cannot detect that two prose documents contradict each other; it *can* detect two claiming
 authority over the same subject, which is the condition that lets a contradiction survive.
 
@@ -296,10 +306,35 @@ AST scanners. `reachability.py` distinguishes `NO_REFERENCE` from `TEST_ONLY` fo
 module-level symbols; `entrypoint_reach.py` computes the import closure from `app.py`,
 `orchestrator.py`, `runtime_api.py`.
 
-Current: 165/165 modules reachable, zero dead modules, zero `NO_REFERENCE` symbols, 6
-`TEST_ONLY` — and each of those six is *correctly* test-only (see §6.6).
+Current: 166/166 modules reachable, zero dead modules, zero `NO_REFERENCE` symbols, 6
+`TEST_ONLY` — and each of those six is *correctly* test-only (see §6.7).
 
 **Candidates, not verdicts.** Dynamic dispatch is invisible to static analysis.
+
+### `tools/ci/ledger_reconcile.py`
+
+The maturity gate catches over-claiming. This catches the opposite, which is what the
+register actually did: twenty-two components recorded as unreached had acquired a producer
+in the course of closing some other finding, and nothing made updating the second register
+a condition of closing anything in the first.
+
+For every component that claims nothing reaches it and names `reachability_symbols`, it
+asks the source whether that is still true. Two limits are inside the tool rather than
+around it. A reference from dead code is not integration, so an entry may name
+`reachability_excludes`; and an entry with no symbol to search for is reported
+`CLAIMS_UNREACHED`-unverifiable rather than assumed correct.
+
+**It must not shell out to anything.** The first version used ripgrep, which this container
+has and the GitHub runner does not, so it passed here for four commits and died in CI.
+`tests/contracts/` refuses `subprocess` in any `tools/ci` gate for that reason.
+
+### `tools/audit/kotlin_reachability.py`
+
+Protocol rule 31's Android half. Kotlin has no import closure to walk, so this reads the
+manifest for declared components — scoped to `<activity|service|receiver|provider|application>`,
+because reading every `android:name` picks up permissions — and follows construction from
+there. `_strip_noise` removes comments and string literals first: a class name inside a log
+message is not a caller.
 
 ---
 
@@ -469,7 +504,7 @@ accurate.
 
 ## 6. What was done
 
-44 commits. Grouped by what changed, not chronologically.
+57 commits at `85cc5e6`. Grouped by what changed, not chronologically.
 
 ### 6.1 The verification spine (the most important work)
 
@@ -541,176 +576,130 @@ deliberately unwired), `CiRunVerifier` and `RepositoryShaVerifier` (complete ada
 on a source that does not exist here), `is_correlation_id` (validator). **Do not "wire" these
 to make a number look better.**
 
+### 6.8 The last block — the shapes the machinery could not see
+
+The final thirteen commits are worth reading separately, because each found a defect that
+every gate then in place agreed was fine.
+
+- **P2-OPS-013** — CI assembled a debug APK and threw it away at the end of the job. Every
+  Android claim in this programme rested on a run whose only durable output was a log line.
+  The workflow uploads the APK now, with `if-no-files-found: error`, so a build that quietly
+  stops producing one fails rather than publishing nothing.
+- **P2-CTX-003** — `FORGETTABLE` decided what could be deleted and the export path walked a
+  second list. VAN could therefore forget a category it would never have shown the owner.
+  `ContextLifecycle` iterates the one set. The first test I wrote for this derived the
+  expected answer from the same constant and compared it back; it is deleted, because a
+  tautology in a test file reads exactly like coverage.
+- **P1-CTX-004** — an owner preference could be ruled stale by a clock. `CANONICAL_OWNER`
+  and `PROJECT_TRUTH` are excluded from `max_age_ms` now: the owner saying a thing once does
+  not expire because a timer ran out, and the rule had passed its own tests while enforcing
+  nothing.
+- **P3-PERF-003** — five subsystems each had a budget and nothing owned the sum.
+  `VanResourceEnvelope` takes the max of the five pressure contributions and the weaker of
+  ladder and ceiling, and `NEVER_SHED` keeps the wake word, owner commands and degraded
+  reporting outside the shedding ladder: a system that sheds its own ability to say it is
+  degraded fails silently by construction.
+- **P1-REASON-001** — §15's assumption gate had no producer, no consumer and no door. It is
+  the clearest instance of the defect shape the whole audit is about: real code, real tests,
+  unreachable from outside. It now has ingress routes, and `/actions/begin` refuses
+  irreversible work on unsettled assumptions — with `UNDECLARED` treated as gated, because
+  "nobody said" is not "nobody minds".
+- **P2-GOOG-004** — six Google capabilities implemented end to end and reachable from no
+  route, while the mesh advertised them. The route list was also held twice, and an unscoped
+  route falls through to device authentication: adding six paths to one copy and not the
+  other would have been a hole rather than an inconsistency. One `frozenset`, two readers.
+- **P2-AND-015** — three owner surfaces existed as data layers with no screen. The
+  notification one mattered most: the listener service read a policy on every arriving
+  notification while nothing could ever write one, so VAN held one of Android's most
+  invasive grants with its controls present only as functions.
+- **P2-LEDGER-001/002** — I told the owner 65 of 142 components were unfinished without
+  checking, and twenty-two were done. The maturity gate could not have caught it and is not
+  at fault: it checks that claims are *backed*, and a component claiming to be unreached
+  asserts nothing. `tools/ci/ledger_reconcile.py` covers the other direction, and its own
+  first version shelled out to ripgrep, which the runner does not have.
+
+**What these have in common is worth more than any of them individually:** every one was a
+claim that was true of the code and false of the system. That is the only defect class this
+programme has found, in every layer it has looked at.
+
 ---
 
 ## 7. What remains
 
-Ordered by what I would do next. Reorder if you have reason.
+Both registers are at zero, so what follows is not a list of open findings. It is what would
+make VAN work, in the order I would do it.
 
-### 7.0 — Keep CI green (blocking)
+### 7.1 — Hermes (the one that matters)
 
-**Done, and it is the load-bearing fact of everything below.** Run 277 (`35451735330`) on
-`e64379e` was the first fully green run on this branch. Run 279 (`35452683328`) published
-`van-debug-apk`, 30,821,691 bytes — the first installable artefact the programme has
-produced, and what unblocks Gate 14 from being attemptable at all.
+**No owner command can complete in this repository.** `MissionState.VERIFYING` has exactly
+one caller and it is a test. In production there are four transition sites: owner
+`CANCELLED`, the deadline sweeper's `EXPIRED`, the command ladder up to `RUNNING`, and an
+internal-control route that accepts any target — which is the Hermes callback. So a command
+goes `RUNNING` → nothing → `EXPIRED`.
 
-CI is now a *working* authority rather than an aspiration, so an Android claim can be
-evidenced instead of recorded as externally blocked. It also means a red Android job from
-here is a regression you introduced, not the pre-existing condition it was for most of this
-programme. **Read the newest run before anything else, every time.** Nothing may be recorded
-as evidenced while CI is red.
+The design is right: the gateway must not verify its own execution, which is what
+`P0-VERIFY-001` closed. But the verification spine, the success contracts, the independent
+readbacks and the assumption gate all sit behind a state nothing enters.
 
-### 7.1 — `P2-CTX-003`: Owner Context Graph lifecycle governance — **CLOSED**
+**Everything Hermes needs is now routed.** `/v1/runtime/actions/begin`,
+`/v1/runtime/reasoning/assumptions`, `/v1/runtime/reasoning/premises`, the mission transition
+route, the context admission routes. `P1-REASON-001` added the last of them. A Hermes that
+calls these gets a working system; nothing else in this repository is between here and that.
 
-Closed in `e15b5ca`. What it turned out to be, since the finding's wording understated it:
+### 7.2 — Gate 14, on the owner's device
 
-- **Export.** `forget.py` cleared thirteen stores; the only export covered two, behind the
-  internal-control runtime API, by scope. VAN could destroy on request material the owner
-  had never been permitted to read. `ContextLifecycle.export` iterates `FORGETTABLE` itself
-  rather than keeping a second list.
-- **Correction.** `supersedes_fact_id` and `supersedes_edge_id` were in the models, read by
-  `admit_fact`/`admit_edge`, used to close the prior validity window, and then **discarded** —
-  neither table had the column. Migration 25 adds them.
-- **Conflicts.** `resolve_requirement` always detected them; nothing enumerated them.
-  `conflicts()` delegates detection to `resolve_requirement` rather than reimplementing it,
-  and resolves each identity twice (blocking / inferred-only) mirroring `ContextReadiness`.
+16 `ENVIRONMENT_UNVERIFIED` residuals wait on it. The APK publishes on every CI run as
+`van-debug-apk`. The first install has been attempted once and failed — see §7.3.
 
-**Residual (`DELIBERATE_SCOPE`):** erasure is still all-or-nothing per store. A true
-single-row delete would have to decide what happens to the snapshots citing it and the
-supersession chain running through it. If you pick this up, that is the question to answer
-first — not the delete itself.
+What it settles, in order of value: that the app installs and runs at all; that the three new
+owner surfaces render; that the offline queue replays when connectivity returns
+(`P1-AND-014`); that the runtime envelope's thresholds are right rather than reasoned
+(`P3-PERF-003`).
 
-### 7.2 — `P3-PERF-003`: whole-runtime resource envelope — **CLOSED**
+### 7.3 — The install failure, undiagnosed
 
-Closed in `4649413`. `android/app/src/main/java/com/dial/van/runtime/VanResourceEnvelope.kt`,
-pure and in the harness include list; `DeviceRuntimeReadings.kt` is the Android half and is
-not.
+A sideload attempt returned a bare "App not installed". Android parsed the manifest — the
+dialog showed VAN's label and icon — so the package is well-formed and installation was
+refused after parsing. The manifest has no `sharedUserId`, no custom permissions and no
+`uses-feature`, so it is not a parse-level conflict.
 
-The finding was generous: only the visual layer had a budget at all. Battery *level* was an
-input to nothing, so a phone at four percent with power-save off rendered the full field.
+**The most likely cause, unverified:** the debug keystore is generated fresh on each CI
+runner, so every run's APK is signed with a different key. Two consequences — an APK cannot
+upgrade over one from a previous run, and any prior VAN install blocks this one on signature
+mismatch. `adb install` prints the actual `INSTALL_FAILED_*` code; that is the next step, and
+pinning a stable debug keystore in CI is the likely fix.
 
-**The two rules worth not breaking.** `NEVER_SHED` — wake word, owner command, degraded
-reporting — is full at every pressure including `SURVIVAL`; an envelope that throttles the
-wake word is worse than no envelope. And the envelope may only ever *lower* a subsystem's
-own budget: `effectBudget` takes the weaker of the ladder's answer and the ceiling.
+### 7.4 — What the absent artefacts would unlock
 
-**Residual (`ENVIRONMENT_UNVERIFIED`):** the thresholds are reasoned, not tuned. Tune them
-on the device at Gate 14; do not tune them here and call it evidence.
+The 24 `EXTERNALLY_BLOCKED` components are not evenly weighted:
 
-### 7.3 — Post-execution verification binding (the biggest architectural item)
+- **An on-device keyword-spotting model** turns the wake word on. Four components. Owner
+  decision 2 declined Sherpa, so this is a decision to revisit, not a task to schedule.
+- **A `.riv` asset** switches the embodiment from the native renderer to Rive.
+- **An n8n harness and a Stagehand runtime** give the browser fabric something to actuate.
+- **A live market feed and a margin model** are what VATI needs before it trades anything.
 
-Currently every verifier target is decided at command ingress. A create whose ID the
-provider assigns is therefore **permanently unverifiable** — recorded as a `DELIBERATE_SCOPE`
-residual on `P1-VERIFY-004`, and it should not stay one.
+### 7.5 — Ingress-driven tests (protocol rule 19)
 
-**The shape:**
-1. Execution returns the created identity into the mission/activity record. The knowledge
-   runtime already does this internally — `NotebookEnterpriseProvider.create_notebook`
-   returns a `NotebookOperationResult` with `resource_id` and `correlation`. The identity
-   exists; nothing carries it back to the mission.
-2. `MissionService` gains a way to **enrich** a success contract after execution — not
-   replace it. Enrichment must be append-only and must not be able to weaken an existing
-   postcondition, or you have built a way for the executor to choose its own test.
-3. The verifier then reads that exact object back.
+`P1-REASON-001` added the first: `/v1/runtime/actions/begin` had no test at all before it.
+That is the execution ingress Hermes uses. The same is true of most runtime routes — they are
+tested by calling their services, not by driving the route.
 
-**Where:** `backend/van_gateway/command/success_contracts.py`,
-`backend/van_gateway/mission/service.py`, `backend/van_gateway/mission/models.py` (the
-contract is a pydantic model on the mission row — enrichment needs a migration or a
-structured update), `backend/van_gateway/knowledge/service.py::execute_authorized_action`.
+### 7.6 — Keep the machinery honest
 
-**The counterexample that must fail:** an executor that reports a created ID which does not
-exist, and a contract enriched from it that then "verifies" against the executor's own
-claim. The enrichment must bind an identity the executor *asserts*, and the verification
-must still be an independent readback of that identity. If the readback can be satisfied by
-anything the executor controls, you have re-created the defect `P0-VERIFY-001` closed.
+Four gates now run in CI: the maturity gate, the authority map, the ledger reconciler and the
+Kotlin reachability scanner. **Three of them were wrong while in use and each was caught by
+mutating it, not by review.** The gate's `symbols_absent` matched `def` and `fun` only, so a
+deleted class assertion passed by never matching. The reconciler shelled out to ripgrep,
+which the runner does not have. The Kotlin scanner read every `android:name` in the manifest,
+including permissions.
 
-**Also in scope:** `research.web.search` and `owner.context.read` currently get no contract
-with recorded reasons. Post-execution binding does not help them (a search leaves nothing
-independently readable). Leave them, and leave the reasons.
+**The recurring lesson, four times in one pass:** overlapping guards hide which half is
+load-bearing. A mutation that removes one and changes nothing is not reassurance — it means
+neither guard is falsifiable, and neither is tested. When that happens, mutate both together
+or split the predicate so they can be told apart.
 
-### 7.4 — Ingress-driven reachability tests (protocol rule 19)
-
-Almost every test in this programme instantiates services directly. That is exactly the
-blind spot that let `P0-AND-012` live.
-
-**Build:** a test module that drives representative owner commands through `POST /v1/commands`
-on the real app — signed, enrolled device, real orchestrator — and asserts the whole chain:
-mission created with the right class and contract, activities bound, verification performed,
-attention raised where expected, learning recorded, owner projection correct.
-
-**Candidate commands:** `halt trading` (A4, verifiable), `delete the sources X from the
-notebook enterprise notebook id N` (A4, source-exact), `research X` (A2, deliberately
-unverifiable — assert the reason reaches the mission), a free-form instruction (Hermes path).
-
-**Prior art:** `backend/tests/test_command_creates_mission.py` and
-`test_command_execution_result.py` do some of this. Read them; extend rather than duplicate.
-
-**Expect to find defects here.** This is the least-tested surface in the system.
-
-### 7.5 — Subsystem join tests (protocol rule 20)
-
-The joins, in rough order of risk:
-
-| Join | Why it is risky |
-|---|---|
-| mission → Hermes → activity | Hermes is not in the repo; `MissionBinder` binds what it creates, and most missions produce no activities at all (`P1-LEARN-003` residual) |
-| activity → verifier → mission outcome | the chain works; whether it is *driven* end to end is untested |
-| outcome → learning → future routing | nothing consumes `permitted_for` yet (`P1-LEARN-002` residual) |
-| notification → attention | `P0-SEC-002` closed the laundering; the positive path is thinner |
-| Android → gateway | `VanGatewayClient` is not in the verification harness (needs `android.content.Context`); CI compiles it but nothing exercises it against a real gateway |
-| Google → readback | `READ_BACK` covers Gmail and Drive only (`P1-AUTO-001` residual) |
-
-### 7.6 — Repository-wide reconciliation (protocol rule 31)
-
-**Do this earlier than last.** The two most serious defects found on the final day
-(`P0-AND-012`, `P3-OPS-012`) were in neither the register nor the plan. They came from
-turning on a gate.
-
-Sweep for: dead modules, unused production symbols, empty adapters, unconsumed fields,
-capabilities with no executor, verifier types with no independent observer, owner-facing
-screens without live producers, stores without producers or consumers, scheduler jobs with
-no effect, runtime declarations without live qualification, and documents claiming maturity
-beyond runtime evidence.
-
-`tools/audit/reachability.py` and `entrypoint_reach.py` cover the Python side.
-`tools/audit/kotlin_reachability.py` now covers the Android side; it runs in CI and
-`tests/contracts/test_kotlin_reachability.py` fails on any unreferenced or test-only Kotlin
-file that is not on an allowlist carrying a reason.
-
-It found one on its first run, which is the argument for doing this sweep early rather than
-last: `MissionRepository`, 371 lines whose own docstring says it is "the only place the
-surfaces get data", constructed by nothing. The six owner mission surfaces it exists for are
-not rendered — the command centre modules call `VanGatewayClient` directly. The component
-ledger already had it right (#44, `NEVER_CONSTRUCTED`, `WIRE`), so the scanner agreed with
-the ledger rather than contradicting it, which is the reassuring half.
-
-**The real lesson is the one in §1:** the finding register is at zero and the component
-ledger has 65 entries that are not. The sweep rule 31 asks for is largely a matter of
-working that ledger, component by component, and the scanners are how you check the claim
-afterwards rather than how you find the list.
-
-**Still missing:** nothing sweeps for owner-facing screens with no live producer, scheduler
-jobs with no effect, or capabilities with no executor. Those are three of the eleven classes
-rule 31 names and the ledger records them by hand.
-
-### 7.7 — Gate 1 complete; Gate 14 is now the frontier
-
-Gate 1 is done. CI compiles, tests, assembles and lints the app, and publishes the APK as
-`van-debug-apk` with `if-no-files-found: error` (`P2-OPS-013`). Artefacts are retained 90
-days, so a stale link is a re-run rather than a problem.
-
-**Gate 14 (physical S24) is the single largest block of remaining work**, and it stays
-deferred only until the owner says otherwise — the standing instruction was *leave physical
-verification for last*, and everything before it is now finished. Fifteen
-`ENVIRONMENT_UNVERIFIED` residuals are waiting on it. Do not start it without the owner:
-it needs their device and their decision.
-
-What it would settle, in rough order of value: that the APK installs and runs at all; that
-the offline queue replays when connectivity returns (`P1-AND-014`); that the wake word works
-in the room the owner is actually in; and that the runtime envelope's thresholds are the
-right numbers rather than reasonable guesses (`P3-PERF-003`).
-
-### 7.8 — Deferred product work recorded as residuals
+### 7.7 — Deferred product work recorded as residuals
 
 Not defects; deliberate scope. Read `falsified_by` on each before touching it.
 
@@ -752,6 +741,21 @@ Recorded because each cost real time and each is easy to repeat.
    contamination failure.
 8. **I reported local test counts as though they were certification** for a configuration CI
    does not run.
+9. **I quoted a number to the owner that I had not checked.** "65 of 142 components
+   unfinished" was a count of a register nobody had reconciled; twenty-two of those were
+   done. Reading a register is not the same as verifying it, and the difference showed up
+   as a false statement to the person who asked.
+10. **I wrote a test that derived its expectation from the thing it was testing.** The
+    export assertion built the expected set out of `FORGETTABLE` and compared it back. It
+    passed unconditionally and looked exactly like coverage. Both the constant and the test
+    are gone.
+11. **A fixture made two orderings coincide.** The supersession-history test admitted facts
+    newest-first, so `ORDER BY rowid` produced the right answer for the wrong reason. Any
+    test of an ordering needs input whose order matches neither the storage order nor the
+    expected one.
+12. **A gate assumed its own environment.** `ledger_reconcile.py` shelled out to ripgrep and
+    passed here, every time, for four commits. Only CI knew. The second time this programme
+    was caught assuming the container it runs in is the machine that matters.
 
 ---
 
@@ -761,6 +765,12 @@ Recorded because each cost real time and each is easy to repeat.
 backend/van_gateway/
   app.py                        create_app; routes; middleware; scheduler jobs
   orchestrator.py               the command path — gates, resolution, dispatch
+  runtime_api.py                OwnerRuntimeApi — the runtime's ingress, incl. §15
+  reasoning/kernel.py           assumptions, premises; only VERIFIED/FALSIFIED/SUPERSEDED
+                                are caller-resolvable
+  context/
+    service.py                  facts, edges, supersession; resolve_requirement
+    lifecycle.py                export / history / conflicts — one FORGETTABLE set
   command/
     resolver.py                 TypedCommandResolver → CommandResolution
     success_contracts.py        ← contract_for(): the verification joint
@@ -777,17 +787,24 @@ backend/van_gateway/
   understanding/                owner model, memory, api
   google/planes.py              credential planes
   computer_use/fabric.py        typed operations; SURFACE_WORKERS is empty
-  storage/db.py                 SCHEMA_VERSION = 24; MIGRATIONS
+  storage/db.py                 SCHEMA_VERSION = 26; MIGRATIONS
 
 tools/ci/maturity_gate.py       the truth gate
 tools/ci/authority_map.py       invariant ownership
 tools/audit/mutation.py         the mutation harness
 tools/audit/mutation_suite.py   every mutation this programme relied on
 tools/audit/reachability.py     TEST_ONLY vs NO_REFERENCE
+tools/ci/ledger_reconcile.py    the other direction: components claiming to be unreached
+tools/audit/kotlin_reachability.py  the same question for Kotlin, from the manifest
+
+android/app/src/main/java/com/dial/van/
+  runtime/VanResourceEnvelope.kt  one owner for the resource sum; NEVER_SHED
+  command/modules/                MissionsModule, NotificationPolicyModule, SpeechModule
+android/verification/             the pure-Kotlin harness (AGP is unreachable here — §4)
 
 docs/project-state/AUTHORITY_MAP.yaml
 docs/VAN_CONSOLIDATED_DEPLOYMENT_READINESS_CLOSURE_BLUEPRINT_REV_1.md   (Rev 2 content)
-evidence/van-system-audit/findings.json        114 findings, closure records
+evidence/van-system-audit/findings.json        120 findings, closure records
 evidence/van-system-audit/component_ledger.json
 ```
 
