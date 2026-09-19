@@ -1,4 +1,4 @@
-# VAN trading intelligence and profitability — enhancement proposal Rev 1.1
+# VAN trading intelligence and profitability — enhancement proposal Rev 1.2
 
 **Status:** Proposal. **Not an authority document.** It amends nothing. Every item that changes live risk
 requires an owner-signed decision artifact under `PROJECT_CANONICAL_STATE.json → policy.agent_self_authorization_forbidden`.
@@ -6,7 +6,12 @@ requires an owner-signed decision artifact under `PROJECT_CANONICAL_STATE.json �
 **Authorities consulted:** `docs/VAN_TRADING_SYSTEM_BLUEPRINT_REV4_CONSOLIDATED.md`,
 `docs/VAN_TRADING_PRODUCTION_DEPLOYMENT_BLUEPRINT_REV5.md`, `trading/architecture/stack_lock.json`.
 **Authored:** 2026-09-19, from a repository review plus two rounds of owner refinement.
-**Rev 1.1 adds:** §4 Market-State and Feature Intelligence Expansion (MS-1…MS-9), the Portfolio Opportunity
+**Rev 1.2 amends:** P7 to the `AccountDecisionCoordinator` architecture (option (c)), adds the sequential
+shared-heat procedure and `AllocationEpisode` evidence. The implementation specification derived from this
+document is `docs/VAN_DETERMINISTIC_TRADING_SYSTEM_ENHANCEMENT_MODULE_REV_1.md`; this document remains
+non-authoritative rationale and evidence.
+
+**Rev 1.1 added:** §4 Market-State and Feature Intelligence Expansion (MS-1…MS-9), the Portfolio Opportunity
 Allocator (F10, P7), the Strategy Coverage Map (P8), the Feature Drift Monitor (P9), capital-efficiency
 intelligence (P10), and a revised priority sequence with three integrity prerequisites ahead of certification.
 
@@ -350,17 +355,91 @@ stability, and capital holding time (P10).
 **It selects which candidates proceed. It never enlarges any candidate's risk.** Every runtime multiplier
 still `<= 1`; the allocator's only power is to say *not this one, that one*.
 
-Per **F10** this needs a place to stand. Two options, to be decided deliberately:
+Per **F10** this needs a place to stand. Two earlier options — a multi-symbol `DecisionCycle` (a) and a
+cross-session coordinator (b) — are **superseded**. `DecisionCycle` carries too much symbol-specific state to
+become an N-symbol state machine safely: `RegimeEngine`, symbol contract state, `ProtectionManager`
+bookkeeping, TCA learning, `_entries` tracking and symbol-scoped idempotency seeds
+(`f"{account_alias}:{symbol}:{as_of_ms}"`). Widening it would multiply every one of those into a collection
+and put the shared heat budget inside a loop that also owns per-symbol execution state.
+
+The canonical architecture is **(c) `AccountDecisionCoordinator`** — one authoritative process per account
+alias, preserving the existing `process_lock` guarantee:
 
 ```text
-(a) multi-symbol DecisionCycle     one session evaluates N instruments per pass
-(b) cross-session coordinator      sessions publish candidates; one allocator arbitrates heat
+AccountDecisionCoordinator            one authoritative process per account alias
+    ├── InstrumentEvaluator[EURUSD]
+    ├── InstrumentEvaluator[GBPUSD]
+    ├── InstrumentEvaluator[XAUUSD]
+    ├── CandidatePool
+    ├── PortfolioDependencyEngine
+    ├── OpportunityPortfolioAllocator
+    ├── RiskAuthority
+    ├── ExecutionRouter
+    └── AccountRuntimeLease
 ```
 
-(a) is simpler and keeps the process lock's one-session-per-alias guarantee intact. (b) preserves per-symbol
-process isolation but introduces a new consistency problem — two sessions must not both believe they won the
-same heat. Given that `_open_positions()` already reads the whole account book, (a) is likely the smaller
-change and the safer one.
+`InstrumentEvaluator` keeps everything today's `DecisionCycle` owns per symbol — regime, contract, protection,
+TCA, idempotency — and stops one step earlier. It emits a `CandidateOpportunity`, not a `TradeIntent`:
+
+```text
+N InstrumentEvaluators → CandidatePool → AccountDecisionCoordinator
+    → OpportunityPortfolioAllocator → TradeIntent → Risk Authority
+```
+
+**`CandidateOpportunity` is deliberately weaker than `TradeIntent`.** It carries no approved size, no control
+over protection, and no path to `ExecutionRouter`. Only the coordinator, after allocation, mints a
+`TradeIntent` — so the router's input contract is unchanged and nothing upstream of the Risk Authority gains
+reach it did not have.
+
+#### Shared-heat procedure
+
+The allocator must not approve several candidates against one stale portfolio snapshot, and it must not become
+a shadow Risk Authority by pre-deciding what will fit. Heat is therefore consumed **strictly sequentially**,
+with portfolio truth refreshed between candidates:
+
+```text
+rank fresh candidates
+    ↓
+candidate #1
+    ↓
+fresh portfolio snapshot
+    ↓
+Risk Authority
+    ↓
+execute / reject
+    ↓
+refresh portfolio truth
+    ↓
+candidate #2
+```
+
+The ranking is computed once per pass; the *admission* is re-evaluated per candidate against live state. A
+candidate that ranked second may be rejected outright once the first one's risk is in the book — which is the
+correct outcome, and is the Risk Authority's decision, not the allocator's.
+
+#### Allocation evidence
+
+Selection policy is itself a hypothesis and must be falsifiable. Every pass records:
+
+```text
+AllocationEpisode {
+    selected_candidate
+    rejected_candidates
+    portfolio_snapshot_hash
+    ranking_features
+    selection_reason
+    realised_selected_outcome
+    counterfactual_rejected_outcomes
+}
+```
+
+This lets VAN discover whether its capital-selection policy is actually superior — for example, that it
+repeatedly took +0.3R setups while rejecting +1.8R alternatives — **without changing the allocator live**. The
+rejected candidates' outcomes are scored on the same bounded, hindsight-guarded basis as `missed.py`, over the
+setup's own horizon window, and carry `SIMULATED` weight.
+
+A new allocation policy is a research candidate like any other: offline walk-forward, DSR and PBO before it
+replaces the incumbent.
 
 ### P8 — Strategy Coverage Map
 
