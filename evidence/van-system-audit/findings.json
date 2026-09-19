@@ -3767,9 +3767,9 @@
       "requirement": "docs/VAN_CONSOLIDATED_DEPLOYMENT_READINESS_CLOSURE_BLUEPRINT_REV_1.md",
       "authority": "VAN Consolidated Deployment-Readiness Closure Blueprint Rev 2",
       "repository_evidence": [
-        "backend/van_gateway/automation/verifier.py:142",
-        "backend/van_gateway/automation/verifier.py:152",
-        "backend/van_gateway/mission/verifiers.py:138"
+        "backend/van_gateway/mission/verifiers.py:203",
+        "backend/van_gateway/verification/production.py:58",
+        "backend/van_gateway/automation/verifier.py:142"
       ],
       "runtime_evidence": [],
       "affected_components": [
@@ -3779,8 +3779,26 @@
       "remediation": "Register every observer and verifier with its registry at construction, and assert the registry is non-empty for each declared postcondition kind.",
       "impact": "An action whose postcondition nothing observes can only ever reach UNVERIFIABLE, so VAN cannot tell the owner whether it worked.",
       "validation_gate": "G2",
-      "current_status": "OPEN",
-      "remediation_gate": "G2"
+      "current_status": "CLOSED",
+      "remediation_gate": "G2",
+      "closure": {
+        "state": "EXTERNALLY_BLOCKED_REPOSITORY_COMPLETE",
+        "summary": "The defect was not that the classes were unregistered. `EngineReportVerifier` is honest \u2014 it returns UNVERIFIABLE whatever the engine claimed \u2014 but it is the adapter for a capability that promised no verification, and an unknown strategy fell through to it. A capability that explicitly asked for an independent api-readback therefore received a record identical to one that promised nothing, so the owner could not tell 'nothing was promised' from 'something was promised and could not be done'.\n\n`DECLARED_BUT_UNOBSERVABLE_STRATEGIES` names api-readback, repository-sha and ci-run with the reason each cannot be observed here, and each is registered to an `UnobservableStrategyVerifier` that carries the reason into the record. Both halves of the distinction are tested, because a distinction only one side of which is tested is half a distinction.\n\n`DocumentUploadObserver` is registered against the provider readback, which is the same observation asked a narrower question. `NotificationObserver` is deleted: its rule \u2014 a notification is verified by provider receipt, not by send returning 200 \u2014 is already enforced by RECEIPT being declared unobservable, and a wrapper around a lookup that cannot exist suggests the observation is available.",
+        "changed": [
+          "backend/van_gateway/mission/verifiers.py",
+          "backend/van_gateway/verification/production.py",
+          "backend/van_gateway/automation/verifier.py"
+        ],
+        "verified_by": [
+          "backend/tests/test_verification_is_performed.py"
+        ],
+        "runtime_evidence": [
+          "evidence/van-system-audit/gate-10/kotlin_verification_tests.txt"
+        ],
+        "residual": "api-readback, repository-sha and ci-run have no independent observation source in this process, so no mission can reach VERIFIED through them.",
+        "residual_class": "EXTERNAL_RUNTIME",
+        "residual_reason": "Each needs a system the gateway can ask independently of the engine that acted: a provider API, a git remote, a CI API. Supplying a fake one would make the verifier certify its own subject, which is the defect P0-VERIFY-001 closed. The adapters are complete and a test asserts they still carry the version strings their strategies will use, so registration is one line once a source is configured."
+      }
     },
     {
       "id": "P2-DEAD-001",
@@ -3791,9 +3809,11 @@
       "requirement": "docs/VAN_CONSOLIDATED_DEPLOYMENT_READINESS_CLOSURE_BLUEPRINT_REV_1.md",
       "authority": "VAN Consolidated Deployment-Readiness Closure Blueprint Rev 2",
       "repository_evidence": [
-        "backend/van_gateway/context_compiler/compiler.py:144",
+        "backend/van_gateway/automation/events.py:83",
+        "backend/van_gateway/automation/credentials.py:62",
+        "backend/van_gateway/automation/repair.py:131",
         "backend/van_gateway/reasoning/calibration.py:88",
-        "backend/van_gateway/automation/repair.py:131"
+        "tools/audit/entrypoint_reach.py:1"
       ],
       "runtime_evidence": [],
       "affected_components": [
@@ -3803,8 +3823,26 @@
       "remediation": "Wire each module to a production entry point or delete it with its tests and its documentation. Blueprint owner decisions 4, 5 and 6 give the per-module default.",
       "impact": "Code that cannot run still has to be read, reviewed and maintained, and it makes the system look larger than it is.",
       "validation_gate": "G2",
-      "current_status": "OPEN",
-      "remediation_gate": "G2"
+      "current_status": "CLOSED",
+      "remediation_gate": "G2",
+      "closure": {
+        "state": "INTEGRATED_AND_EVIDENCED",
+        "summary": "161 modules, 161 reachable from an owner-facing entry point, zero never imported. It was 157 of 163.\n\nFour of the six were not dead code but live rules with no enforcement point, which is the worse condition because the rule reads as enforced. `automation/events` is the one that matters: `ExternalEventIngestor` implements HMAC verification, a bounded replay window, provider-preferred dedupe, payload bounds and injection assessment, and nothing imported it \u2014 so the rule that an external event may become evidence and may never become an owner command had no door to guard. `POST /v1/automation/events` is that door. Trust is derived from the signature and never read from the body, so an adapter labelling its own event OWNER_VERIFIED is refused rather than quietly corrected, and a bad signature is a 403 rather than a downgrade to unsigned, because accepting it as merely unsigned would make the signature advisory.\n\n`automation/credentials` refuses a payment-instrument credential in every class; unconstructed, the refusal never ran. `automation/repair` produces a candidate and never edits a live artifact, which is what keeps rollback equal to the previous artifact still sitting there. `reasoning/calibration` decides how VAN says a thing and how hard it pushes, never what it will call true; every answer previously came out at one register.\n\n`context_compiler` is deleted with its five tests: it duplicated `ContextRetrievalService`, which is on a live path, and two context compilers is how two answers to the same question appear. `tools/audit/entrypoint_reach.py` keeps the measurement repeatable.",
+        "changed": [
+          "backend/van_gateway/automation/api.py",
+          "backend/van_gateway/config.py",
+          "backend/van_gateway/understanding/api.py",
+          "tools/audit/entrypoint_reach.py",
+          "tools/audit/reachability.py",
+          "backend/tests/test_epistemics_context_understanding.py"
+        ],
+        "verified_by": [
+          "backend/tests/test_automation_event_ingress.py"
+        ],
+        "runtime_evidence": [
+          "evidence/van-system-audit/gate-10/kotlin_verification_tests.txt"
+        ]
+      }
     },
     {
       "id": "P1-COH-003",

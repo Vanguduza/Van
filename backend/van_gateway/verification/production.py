@@ -20,11 +20,12 @@ from __future__ import annotations
 
 from typing import Any
 
-from van_gateway.automation.verifier import PostconditionSpec, WorkflowVerifier
+from van_gateway.automation.verifier import DocumentUploadObserver, PostconditionSpec, WorkflowVerifier
 from van_gateway.mission.verifiers import (
     LedgerEventVerifier,
     ScreenshotVerifier,
     VerifierRegistry,
+    UnobservableStrategyVerifier,
 )
 from van_gateway.storage.db import Store
 from van_gateway.verification import observations
@@ -55,6 +56,21 @@ def _browser_observation(store: Store):
     return observe
 
 
+#: P2-VERIFY-002 — strategies the codebase implements and this process cannot perform,
+#: with the reason. Each is registered, so a contract naming one gets UNVERIFIABLE *and the
+#: reason*, rather than the record a capability that promised nothing would get.
+#:
+#: These are not aspirational entries. `ApiReadbackVerifier`, `RepositoryShaVerifier` and
+#: `CiRunVerifier` are complete; what is missing is an independent source — a provider the
+#: gateway can ask, a git remote it can read, a CI API it can query — and inventing one is
+#: how a verifier starts certifying its own subject.
+DECLARED_BUT_UNOBSERVABLE_STRATEGIES: dict[str, str] = {
+    "api-readback": "no provider the gateway can read independently of the engine that acted",
+    "repository-sha": "no git remote is configured for the gateway to read",
+    "ci-run": "no CI API is configured for the gateway to query",
+}
+
+
 def build_mission_registry(*, store: Store, trading: Any) -> VerifierRegistry:
     """The registry MissionService runs when a mission asks for a verification outcome."""
     registry = VerifierRegistry()
@@ -63,11 +79,17 @@ def build_mission_registry(*, store: Store, trading: Any) -> VerifierRegistry:
     # is typed as such. It is registered because the artefacts are real, not because they
     # are strong.
     registry.register("browser-evidence", ScreenshotVerifier(_browser_observation(store)))
+    # P2-VERIFY-002 — named, so "I could not check" is distinguishable from "nothing was
+    # promised". The adapter classes stay in the tree because the day a remote or a CI API
+    # is configured, registering them is a one-line change rather than a rewrite.
+    for strategy, reason in DECLARED_BUT_UNOBSERVABLE_STRATEGIES.items():
+        registry.register(strategy, UnobservableStrategyVerifier(strategy, reason))
     return registry
 
 
 #: Mission verification strategies a success contract may name today.
 WIRED_MISSION_STRATEGIES = ("ledger-event", "browser-evidence")
+
 
 
 # -------------------------------------------------------------------- automation
@@ -104,12 +126,17 @@ def build_automation_verifier(*, store: Store, google: Any) -> WorkflowVerifier:
         observers={
             "READ_BACK": _GoogleReadBackObserver(google),
             "STATE_PREDICATE": _RunStatePredicateObserver(store),
+            # §166 — a document is verified by existing with the expected digest, which is
+            # the provider readback asked a narrower question. P2-VERIFY-002: the observer
+            # was written and registered nowhere, so a capability declaring DOCUMENT_UPLOAD
+            # fell through to UNVERIFIABLE while the means to observe it sat in the tree.
+            "DOCUMENT_UPLOAD": DocumentUploadObserver(_GoogleReadBackObserver(google).observe),
         }
     )
 
 
 #: Postcondition kinds an automation capability may declare and have observed today.
-WIRED_POSTCONDITION_KINDS = ("READ_BACK", "STATE_PREDICATE")
+WIRED_POSTCONDITION_KINDS = ("READ_BACK", "STATE_PREDICATE", "DOCUMENT_UPLOAD")
 
 #: Declared on purpose: kinds with no independent source in this process. A capability
 #: naming one of these is UNVERIFIABLE, which is reported to the owner rather than hidden.
@@ -119,6 +146,7 @@ UNOBSERVABLE_POSTCONDITION_KINDS = {
 }
 
 __all__ = [
+    "DECLARED_BUT_UNOBSERVABLE_STRATEGIES",
     "UNOBSERVABLE_POSTCONDITION_KINDS",
     "WIRED_MISSION_STRATEGIES",
     "WIRED_POSTCONDITION_KINDS",

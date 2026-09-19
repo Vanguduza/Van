@@ -28,6 +28,7 @@ from van_gateway.mission.models import (
 from van_gateway.action.models import VerifierType
 from van_gateway.automation.verifier import PostconditionSpec, VerificationOutcome
 from van_gateway.verification.production import (
+    DECLARED_BUT_UNOBSERVABLE_STRATEGIES,
     UNOBSERVABLE_POSTCONDITION_KINDS,
     WIRED_MISSION_STRATEGIES,
     WIRED_POSTCONDITION_KINDS,
@@ -35,7 +36,14 @@ from van_gateway.verification.production import (
     build_mission_registry,
 )
 from van_gateway.mission.service import MissionError, MissionService
-from van_gateway.mission.verifiers import EngineReportVerifier, VerifierRegistry
+from van_gateway.mission.verifiers import (
+    ApiReadbackVerifier,
+    CiRunVerifier,
+    EngineReportVerifier,
+    ObservationVerifier,
+    RepositoryShaVerifier,
+    VerifierRegistry,
+)
 from van_gateway.models import OriginChannel
 from van_gateway.storage.db import Store
 
@@ -191,9 +199,61 @@ class TestUnwiredCapabilitiesFailHonestly:
             await svc.transition(mission.mission_id, target=MissionState.VERIFIED_SUCCESS)
         done = await svc.transition(mission.mission_id, target=MissionState.UNVERIFIABLE)
         assert done.state is MissionState.UNVERIFIABLE
-        assert (await svc.verification_record(mission.mission_id)).verifier_version == (
-            "engine-report/1"
+        record = await svc.verification_record(mission.mission_id)
+        # P2-VERIFY-002 — this used to read `engine-report/1`, the adapter for a capability
+        # that promised no verification at all. A capability that explicitly asked for an
+        # independent readback and got the identical record could not tell "nothing was
+        # promised" from "something was promised and could not be done". The version now
+        # names the strategy, and the record carries why it could not be observed.
+        assert record.verifier_version == "unobservable/api-readback/1"
+        assert record.observed_postconditions["unobservable_reason"] == (
+            DECLARED_BUT_UNOBSERVABLE_STRATEGIES["api-readback"]
         )
+
+    async def test_a_capability_that_promised_nothing_is_distinguishable(self, store):
+        """The other half of the distinction, which is the point of making it."""
+        svc = MissionService(
+            store, verifiers=build_mission_registry(store=store, trading=FakeTrading())
+        )
+        mission = await _mission(
+            svc, SuccessContract(postconditions={"done": True}, verifier_class="NONE")
+        )
+        await svc.transition(mission.mission_id, target=MissionState.UNVERIFIABLE)
+        record = await svc.verification_record(mission.mission_id)
+        assert record.verifier_version == "engine-report/1"
+        assert "unobservable_reason" not in record.observed_postconditions
+
+    def test_each_unobservable_strategy_has_an_adapter_waiting_for_its_source(self):
+        """P2-VERIFY-002 — the claim that these are one line from working, checked.
+
+        `ApiReadbackVerifier`, `RepositoryShaVerifier` and `CiRunVerifier` are complete and
+        deliberately unconstructed: what they lack is an independent source, and inventing
+        one is how a verifier ends up certifying its own subject. The risk of keeping an
+        unconstructed class is that it rots into a stub nobody notices. This asserts each is
+        still a real `ObservationVerifier` with the version string the strategy will carry,
+        so the day a git remote or a CI API is configured, registration is one line.
+        """
+        adapters = {
+            "api-readback": (ApiReadbackVerifier, "api-readback/1"),
+            "repository-sha": (RepositoryShaVerifier, "repository-sha/1"),
+            "ci-run": (CiRunVerifier, "ci-run/1"),
+        }
+        assert set(adapters) == set(DECLARED_BUT_UNOBSERVABLE_STRATEGIES)
+        for strategy, (cls, version) in adapters.items():
+            async def _never_observed(spec, context):  # pragma: no cover - not invoked
+                raise AssertionError("no source is configured for " + strategy)
+
+            built = cls(_never_observed)
+            assert isinstance(built, ObservationVerifier), strategy
+            assert built.verifier_version == version, strategy
+
+    async def test_every_declared_unobservable_strategy_says_why(self, store):
+        """A reason nobody wrote is a reason the owner cannot be given."""
+        registry = build_mission_registry(store=store, trading=FakeTrading())
+        for strategy, reason in DECLARED_BUT_UNOBSERVABLE_STRATEGIES.items():
+            adapter = registry.get(strategy)
+            assert not isinstance(adapter, EngineReportVerifier), strategy
+            assert reason and len(reason) > 20, strategy
 
     async def test_the_wired_strategy_list_matches_what_the_registry_actually_holds(self, store):
         """A list that drifts from the registry would misdescribe what can be verified."""

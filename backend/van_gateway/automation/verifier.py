@@ -149,19 +149,16 @@ class DocumentUploadObserver:
         return await self._lookup(spec, context)
 
 
-class NotificationObserver:
-    """§167 — a notification is verified by provider receipt, not by send returning 200."""
-
-    def __init__(self, lookup: Any) -> None:
-        self._lookup = lookup
-
-    async def observe(self, spec: PostconditionSpec, context: dict[str, Any]) -> dict[str, Any]:
-        return await self._lookup(spec, context)
+# §167 — "a notification is verified by provider receipt, not by send returning 200" —
+# is enforced in `verification.production.UNOBSERVABLE_POSTCONDITION_KINDS`, which declares
+# RECEIPT unobservable because no receipt store exists that the gateway can read
+# independently of the engine that sent the notification. `NotificationObserver` was a
+# wrapper around a lookup that cannot exist, referenced by nothing (P2-VERIFY-002). Keeping
+# it would suggest the observation is available; the rule survives where it is enforced.
 
 
 __all__ = [
     "DocumentUploadObserver",
-    "NotificationObserver",
     "PostconditionObserver",
     "PostconditionSpec",
     "VerificationOutcome",

@@ -200,6 +200,33 @@ class EngineReportVerifier:
         )
 
 
+class UnobservableStrategyVerifier:
+    """A strategy that exists, is named by a contract, and has no independent source here.
+
+    P2-VERIFY-002. `EngineReportVerifier` was already honest — it returns UNVERIFIABLE
+    whatever the engine said — but it is the adapter for a capability that declared *no*
+    verification. A capability that explicitly asked for `api-readback` and silently received
+    the same record cannot tell the difference between "nothing was promised" and "an
+    independent check was promised and could not be performed".
+
+    The reason travels with the record, so the owner is told which of the two happened.
+    """
+
+    def __init__(self, strategy: str, reason: str) -> None:
+        self.strategy = strategy
+        self.reason = reason
+        self.verifier_version = f"unobservable/{strategy}/1"
+
+    async def verify(
+        self, contract: SuccessContract, context: dict[str, Any]
+    ) -> VerificationRecord:
+        return _record(
+            status=VerificationStatus.UNVERIFIABLE, version=self.verifier_version,
+            observed={"strategy": self.strategy, "unobservable_reason": self.reason},
+            missing=list(contract.postconditions), now_ms=context.get("now_ms"),
+        )
+
+
 class VerifierRegistry:
     """Maps a capability's declared verification strategy to an adapter."""
 
@@ -227,6 +254,7 @@ __all__ = [
     "ObservationVerifier",
     "RepositoryShaVerifier",
     "ScreenshotVerifier",
+    "UnobservableStrategyVerifier",
     "Verifier",
     "VerifierRegistry",
 ]
