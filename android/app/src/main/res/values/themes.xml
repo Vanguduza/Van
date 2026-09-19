@@ -1,8 +1,33 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
-    <style name="Theme.Van" parent="android:Theme.Material.NoActionBar">
-        <item name="android:statusBarColor">#111820</item>
-        <item name="android:navigationBarColor">#111820</item>
-        <item name="android:windowBackground">#111820</item>
+    <!--
+      P3-AND-008 — the parent was `android:Theme.Material.NoActionBar`, deprecated since the
+      platform moved on from Material 1, and the window colours were hardcoded to the dark
+      field. The parent is now `DeviceDefault`, the current platform theme, and the day/night
+      split is done with the `night` resource qualifier rather than with `DayNight` —
+      `Theme.DeviceDefault.DayNight` arrived in API 29 and this app supports API 26. The
+      window behind Compose now matches what Compose is about to draw, instead of flashing
+      navy under a light app on every launch.
+
+      These values are the light ones; `values-night/themes.xml` carries the dark ones. They
+      are duplicated from `VanPalette` because a window theme is resolved by the platform
+      before any Kotlin runs — `VanPaletteTest.the window theme agrees with the palette`
+      parses this file and fails if the two drift.
+    -->
+    <style name="Theme.Van" parent="android:Theme.DeviceDefault.Light.NoActionBar">
+        <item name="android:statusBarColor">#F4F8FA</item>
+        <item name="android:navigationBarColor">#F4F8FA</item>
+        <item name="android:windowBackground">#F4F8FA</item>
+        <item name="android:windowLightStatusBar">true</item>
+    </style>
+
+    <!-- The share intake has no UI of its own: it is a component the owner passes through. -->
+    <style name="Theme.Van.Transparent" parent="android:Theme.DeviceDefault.Light.NoActionBar">
+        <item name="android:windowBackground">@android:color/transparent</item>
+        <item name="android:windowIsTranslucent">true</item>
+        <item name="android:windowContentOverlay">@null</item>
+        <item name="android:windowNoTitle">true</item>
+        <item name="android:windowAnimationStyle">@null</item>
+        <item name="android:backgroundDimEnabled">false</item>
     </style>
 </resources>

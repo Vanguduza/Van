@@ -3,6 +3,7 @@ from __future__ import annotations
 import time
 from typing import Any
 
+from van_gateway.observability import instruments
 from van_gateway.storage.db import Store
 
 
@@ -21,6 +22,10 @@ class EventBus:
             return int(cur.lastrowid)
 
     async def replay(self, device_id: str, after_seq: int) -> dict[str, Any]:
+        # P3-OBS-002 — event-bus lag is Gate 11's name for the thing an owner
+        # experiences as "VAN already did it but my phone still says pending".
+        # Measured where it is actually observable: the gap between an event being
+        # written and the device fetching it. Recorded below, once the rows are read.
         rows = await self.store.fetchall(
             "SELECT seq, event_type, payload_json, created_at_unix FROM events WHERE seq > ? ORDER BY seq ASC LIMIT ?",
             (after_seq, self.page_size),
@@ -36,6 +41,11 @@ class EventBus:
         ]
         last = events[-1]["seq"] if events else after_seq
         now = int(time.time())
+        for event in events:
+            instruments.record_event_lag(
+                event["event_type"], max(now - event["created_at_unix"], 0) * 1000.0
+            )
+        instruments.set_queue_depth("event_backlog", 0 if not events else len(events))
         await self.store.execute(
             """
             INSERT INTO event_cursors(device_id, last_seq, updated_at_unix) VALUES (?, ?, ?)

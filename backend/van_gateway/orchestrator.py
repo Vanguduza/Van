@@ -1,17 +1,25 @@
 from __future__ import annotations
 
+import logging
 import time
 from typing import Any
 
 from van_gateway.approval.service import OwnerApprovalError, OwnerApprovalService
 from van_gateway.audit.service import AuditService
 from van_gateway.auth.service import AuthError, AuthService
+from van_gateway.auth.throttle import AuthThrottle, Throttled
 from van_gateway.command.authority import CommandAuthorityError, CommandAuthorityRecord, CommandAuthorityService
+from van_gateway.command import context_requirements
+from van_gateway.command.ingress_trust import derive_effective_trust
+from van_gateway.command.mission_link import CommandMissionLink
+from van_gateway.command.nonce import CommandNonceService, NonceReplay
 from van_gateway.command.resolver import ResolutionMode, TypedCommandResolver
 from van_gateway.context.service import OwnerContextService
 from van_gateway.degraded.registry import DegradedRegistry
 from van_gateway.hermes.bridge import HermesBridge, HermesBridgeError
 from van_gateway.idempotency.service import IdempotencyConflict, IdempotencyInFlight, IdempotencyService
+from van_gateway.observability import instruments
+from van_gateway.observability.logging import log_event
 from van_gateway.models import (
     ActionClass,
     CommandRequest,
@@ -22,6 +30,23 @@ from van_gateway.models import (
     PrincipalType,
 )
 from van_gateway.projects.router import ProjectRouter
+
+LOGGER = logging.getLogger("van.command")
+
+
+#: A4 approval failures that only a forger produces. An expired challenge, a missing proof
+#: or a revoked device are legitimate states the owner's own client reaches, so they must
+#: never contribute to the brute-force lockout (P1-SEC-007).
+FORGERY_SHAPED_APPROVAL_ERRORS = frozenset(
+    {
+        "approval_signature_invalid",
+        "approval_challenge_binding_mismatch",
+        "approval_intent_mismatch",
+        "approval_challenge_unknown_or_consumed",
+        "approval_challenge_corrupt",
+        "approval_public_key_wrong_type",
+    }
+)
 
 
 INJECTION_MARKERS = (
@@ -48,6 +73,8 @@ class CommandOrchestrator:
         authority: CommandAuthorityService,
         resolver: TypedCommandResolver,
         owner_intent_max_age_seconds: int,
+        throttle: AuthThrottle | None = None,
+        missions: CommandMissionLink | None = None,
     ) -> None:
         self.auth = auth
         self.idempotency = idempotency
@@ -59,6 +86,14 @@ class CommandOrchestrator:
         self.authority = authority
         self.resolver = resolver
         self.approvals = OwnerApprovalService(auth.store)
+        self.nonces = CommandNonceService(auth.store)
+        # P1-SEC-007. Defaulted rather than required so a directly constructed
+        # orchestrator in a test still has a real counter, never a None to guard on.
+        self.throttle = throttle or AuthThrottle()
+        # P0-EXEC-001. Optional so an orchestrator constructed directly in a test keeps
+        # working, but create_app always supplies one: without it an accepted command
+        # leaves no durable record of what the owner asked for.
+        self.missions = missions
         self.owner_intent_max_age_seconds = owner_intent_max_age_seconds
 
     @staticmethod
@@ -77,6 +112,19 @@ class CommandOrchestrator:
         )
 
     async def handle(self, req: CommandRequest) -> CommandResult:
+        """Handle the command, then log its outcome exactly once.
+
+        The logging is a wrapper rather than a call at each `return` because
+        `_handle` returns in twenty-one places, most of them refusals. A per-site
+        call would be twenty-one chances to miss one, and the refusals are the
+        lines an operator most needs — "VAN did nothing and said nothing" is the
+        report this gate exists to make impossible.
+        """
+        result = await self._handle(req)
+        self._log_outcome(req, result)
+        return result
+
+    async def _handle(self, req: CommandRequest) -> CommandResult:
         payload = req.model_dump()
         try:
             prior = await self.idempotency.begin(req.idempotency_key, payload)
@@ -146,15 +194,56 @@ class CommandOrchestrator:
                 raise AuthError("unsupported_signature_version", "Unsupported command signature version")
             self.auth.verify_signature(req.device_id, canonical, req.signature)
         except AuthError as exc:
+            # P1-SEC-007, soft posture: the signature has already been judged invalid, so
+            # counting it cannot keep a correctly signed owner command out. Past the policy
+            # the command is refused before resolution, execution or Hermes dispatch.
+            message, reason = exc.message, exc.code
+            try:
+                self.throttle.fail("command_signature", req.device_id)
+            except Throttled as locked:
+                message = (
+                    "Too many invalid signatures from this device; "
+                    f"retry in {locked.retry_after_seconds}s"
+                )
+                reason = f"signature_throttled:{locked.retry_after_seconds}"
             result = CommandResult(
                 status="denied",
                 command_id=req.command_id,
                 idempotency_key=req.idempotency_key,
-                message=exc.message,
+                message=message,
             )
-            await self.audit.record(result="denied", command_id=req.command_id, device_id=req.device_id, failure_reason=exc.code)
+            await self.audit.record(result="denied", command_id=req.command_id, device_id=req.device_id, failure_reason=reason)
             await self.idempotency.fail(req.idempotency_key, result.model_dump())
             return result
+        self.throttle.record_success("command_signature", req.device_id)
+
+
+        # The nonce is covered by the v2 signature and, until now, was never stored — so a
+        # captured command could be replayed inside its validity window with a fresh
+        # idempotency key (finding P1-SEC-005). Consume it after the signature verifies and
+        # before anything observable happens.
+        if req.nonce:
+            try:
+                await self.nonces.consume(
+                    device_id=req.device_id,
+                    nonce=req.nonce,
+                    command_id=req.command_id,
+                )
+            except NonceReplay as replay:
+                result = CommandResult(
+                    status="denied",
+                    command_id=req.command_id,
+                    idempotency_key=req.idempotency_key,
+                    message="Command nonce already used; replay refused",
+                )
+                await self.audit.record(
+                    result="denied",
+                    command_id=req.command_id,
+                    device_id=req.device_id,
+                    failure_reason=f"nonce_replay:{replay.original_command_id}",
+                )
+                await self.idempotency.complete(req.idempotency_key, result.model_dump())
+                return result
 
         resolution = self.resolver.resolve(req.text)
         effective_action_class = self.resolver.stronger_class(req.action_class, resolution.canonical_action_class)
@@ -289,11 +378,25 @@ class CommandOrchestrator:
                     project_id=req.project_id,
                 )
             except OwnerApprovalError as exc:
+                message = "A4 owner approval proof is invalid, expired, or already consumed"
+                reason = str(exc)
+                # P1-SEC-007. An expired challenge or a missing proof is the owner being
+                # slow or a client being wrong, not somebody guessing; only the outcomes
+                # that a forger would produce count toward the lockout.
+                if reason in FORGERY_SHAPED_APPROVAL_ERRORS:
+                    try:
+                        self.throttle.fail("approval_challenge", req.device_id)
+                    except Throttled as locked:
+                        message = (
+                            "Too many invalid approval proofs from this device; "
+                            f"retry in {locked.retry_after_seconds}s"
+                        )
+                        reason = f"approval_throttled:{reason}"
                 result = CommandResult(
                     status="denied",
                     command_id=req.command_id,
                     idempotency_key=req.idempotency_key,
-                    message="A4 owner approval proof is invalid, expired, or already consumed",
+                    message=message,
                     resolved_action_id=resolution.action_id,
                     effective_action_class=effective_action_class,
                 )
@@ -302,10 +405,11 @@ class CommandOrchestrator:
                     command_id=req.command_id,
                     device_id=req.device_id,
                     approval="invalid",
-                    failure_reason=str(exc),
+                    failure_reason=reason,
                 )
                 await self.idempotency.complete(req.idempotency_key, result.model_dump())
                 return result
+            self.throttle.record_success("approval_challenge", req.device_id)
             owner_approved = True
 
         # A4 challenge requests do not execute, so NO_STALE_REPLAY is enforced only
@@ -332,18 +436,77 @@ class CommandOrchestrator:
                 await self.idempotency.complete(req.idempotency_key, result.model_dump())
                 return result
 
-        if req.context_trust == ContentTrust.UNTRUSTED:
+        # Trust is derived here, never taken from the request. A device signature proves
+        # which device sent the envelope, not who authored the text inside it. See
+        # command/ingress_trust.py and audit finding P0-SEC-002.
+        effective_trust, downgrade_reason = derive_effective_trust(
+            origin_channel=req.origin_channel,
+            declared_trust=req.context_trust,
+            text=req.text,
+        )
+        if downgrade_reason is not None:
+            await self.audit.record(
+                result="trust_downgraded",
+                command_id=req.command_id,
+                device_id=req.device_id,
+                failure_reason=downgrade_reason,
+            )
+
+        if effective_trust == ContentTrust.UNTRUSTED:
+            # Untrusted content is data. It may never carry an action class that mutates,
+            # and it may never smuggle an instruction override.
             lowered = req.text.lower()
-            if any(marker in lowered for marker in INJECTION_MARKERS):
+            injection = any(marker in lowered for marker in INJECTION_MARKERS)
+            mutating = req.action_class not in (ActionClass.A1,)
+            if injection or mutating:
+                reason = "injection" if injection else "untrusted_content_cannot_mutate"
                 result = CommandResult(
                     status="rejected_untrusted",
                     command_id=req.command_id,
                     idempotency_key=req.idempotency_key,
-                    message="Untrusted content attempted instruction override; treated as data only and rejected for mutation",
+                    message=(
+                        "Untrusted content attempted instruction override; treated as data only "
+                        "and rejected for mutation"
+                        if injection
+                        else
+                        "Content from a third-party channel is data and cannot request a mutating "
+                        "action; an explicit owner action is required to act on it"
+                    ),
                 )
-                await self.audit.record(result="rejected_untrusted", command_id=req.command_id, device_id=req.device_id, failure_reason="injection")
+                await self.audit.record(
+                    result="rejected_untrusted",
+                    command_id=req.command_id,
+                    device_id=req.device_id,
+                    failure_reason=reason,
+                )
                 await self.idempotency.complete(req.idempotency_key, result.model_dump())
                 return result
+
+        # P0-EXEC-001. This is the first point at which the command is established as
+        # genuine owner intent: authenticated, unexpired, not A5, biometrically approved if
+        # A4, and not third-party content wearing the owner's authority. Everything before
+        # here is a refusal, which the audit log records and which is not owner work. From
+        # here on the owner asked for something, so there is a mission whatever happens
+        # next — including the paths where nothing happens.
+        mission = None
+        if self.missions is not None:
+            mission = await self.missions.open(
+                req,
+                effective_action_class=effective_action_class,
+                owner_approved=owner_approved,
+                # P1-VERIFY-003 — the resolution is what says whether VAN understood the
+                # command exactly enough to state a checkable post-state. Passing it here
+                # is what lets an owner command reach VERIFIED_SUCCESS at all.
+                resolution=resolution,
+            )
+            mission = await self.missions.understood(
+                mission,
+                summary=(
+                    f"{resolution.mode.value}:{resolution.action_id}"
+                    if resolution.mode == ResolutionMode.EXACT_ACTION
+                    else f"free-form:{effective_action_class.value}"
+                ),
+            )
 
         before: dict[str, Any] = {
             "command_resolution": resolution.model_dump(mode="json"),
@@ -368,12 +531,17 @@ class CommandOrchestrator:
             if not truth.get("ok") and effective_action_class in (ActionClass.A3, ActionClass.A4):
                 code = truth.get("degraded", DegradedCode.STALE_PROJECT_TRUTH.value)
                 self.degraded.set(DegradedCode(code), True)
+                if mission is not None:
+                    mission = await self.missions.blocked_by_policy(
+                        mission, reason=f"project_truth_gate:{code}"
+                    )
                 result = CommandResult(
                     status="degraded",
                     command_id=req.command_id,
                     idempotency_key=req.idempotency_key,
                     message="Project Truth missing or stale; refusing mutation",
                     degraded=[code],
+                    mission_id=mission.mission_id if mission else None,
                 )
                 await self.audit.record(
                     result="degraded",
@@ -399,21 +567,34 @@ class CommandOrchestrator:
                 if repo_sha:
                     live_state_refs.append(f"repo-head:{req.project_id}:{repo_sha}")
 
+        # P0-CTX-001 — this passed `[]`, so readiness was trivially CURRENT, fact_ids was
+        # always empty, and the canonical context handed to Hermes carried no owner facts
+        # at all. The kernel was real and was never asked a question.
+        requirements = context_requirements.derive(
+            text=req.text,
+            project_id=req.project_id,
+            action_id=resolution.action_id if resolution.mode == ResolutionMode.EXACT_ACTION else None,
+        )
         try:
             context_snapshot = await self.context.compile_snapshot(
                 req.command_id,
-                [],
+                requirements,
                 live_state_refs=live_state_refs,
                 policy_refs=policy_refs,
             )
         except Exception as exc:
             self.degraded.set(DegradedCode.OWNER_CONTEXT_UNAVAILABLE, True)
+            if mission is not None:
+                await self.missions.note_stall(
+                    mission, reason=f"owner_context_unavailable:{exc.__class__.__name__}"
+                )
             result = CommandResult(
                 status="degraded",
                 command_id=req.command_id,
                 idempotency_key=req.idempotency_key,
                 message="Canonical owner context could not be sealed; command not dispatched",
                 degraded=[DegradedCode.OWNER_CONTEXT_UNAVAILABLE.value],
+                mission_id=mission.mission_id if mission else None,
             )
             await self.audit.record(
                 result="degraded",
@@ -434,8 +615,24 @@ class CommandOrchestrator:
             "fact_ids": context_snapshot.fact_ids,
             "live_state_refs": context_snapshot.live_state_refs,
             "policy_refs": context_snapshot.policy_refs,
+            # What was asked and what was found, so a reader can tell "VAN knew nothing"
+            # from "VAN asked nothing" — which was indistinguishable before.
+            "requirements_asked": len(requirements),
+            "readiness": context_snapshot.readiness_state,
         }
         before["canonical_context"] = canonical_context
+
+        # What will happen is now decided: a typed action with its parameter constraints,
+        # or delegation to the agent runtime under the envelope about to be sealed.
+        if mission is not None:
+            mission = await self.missions.planned(
+                mission,
+                summary=(
+                    f"typed-action:{resolution.action_id}"
+                    if resolution.mode == ResolutionMode.EXACT_ACTION
+                    else "delegate-to-agent-runtime"
+                ),
+            )
 
         authority_record = CommandAuthorityRecord(
             command_id=req.command_id,
@@ -459,12 +656,15 @@ class CommandOrchestrator:
         try:
             await self.authority.seal(authority_record)
         except CommandAuthorityError as exc:
+            if mission is not None:
+                await self.missions.note_stall(mission, reason=f"authority_seal_failed:{exc}")
             result = CommandResult(
                 status="denied",
                 command_id=req.command_id,
                 idempotency_key=req.idempotency_key,
                 message="Signed command authority could not be sealed; command not dispatched",
                 context_snapshot_id=context_snapshot.snapshot_id,
+                mission_id=mission.mission_id if mission else None,
             )
             await self.audit.record(
                 result="denied",
@@ -477,9 +677,16 @@ class CommandOrchestrator:
             await self.idempotency.complete(req.idempotency_key, result.model_dump())
             return result
 
+        if mission is not None:
+            mission = await self.missions.authorized(
+                mission, summary=f"authority-sealed:{effective_action_class.value}"
+            )
+
         health = await self.hermes.health()
         if not health.get("ok"):
             self.degraded.set(DegradedCode.HERMES_OFFLINE, True)
+            if mission is not None:
+                await self.missions.note_stall(mission, reason="hermes_offline")
             result = CommandResult(
                 status="degraded",
                 command_id=req.command_id,
@@ -487,6 +694,7 @@ class CommandOrchestrator:
                 message="Hermes offline; command not executed",
                 degraded=[DegradedCode.HERMES_OFFLINE.value],
                 context_snapshot_id=context_snapshot.snapshot_id,
+                mission_id=mission.mission_id if mission else None,
             )
             await self.audit.record(result="degraded", command_id=req.command_id, device_id=req.device_id, failure_reason="hermes_offline", before=before)
             await self.idempotency.complete(req.idempotency_key, result.model_dump())
@@ -494,37 +702,47 @@ class CommandOrchestrator:
         self.degraded.set(DegradedCode.HERMES_OFFLINE, False)
 
         try:
-            run = await self.hermes.create_run(
-                req.text,
-                metadata={
-                    "command_id": req.command_id,
-                    "idempotency_key": req.idempotency_key,
-                    "device_id": req.device_id,
-                    "project_id": req.project_id,
-                    "action_class": effective_action_class.value,
-                    "signed_action_class": req.action_class.value,
-                    "context_trust": req.context_trust.value,
-                    "signature_version": req.signature_version,
-                    "turn_id": req.turn_id,
-                    "origin_channel": req.origin_channel.value,
-                    "principal_type": req.principal_type.value,
-                    "requested_by": req.requested_by,
-                    "expires_at_unix": req.expires_at_unix,
-                    "nonce": req.nonce,
-                    "context_capsule_revision": req.context_capsule_revision,
-                    "context_capsule_hash": req.context_capsule_hash,
-                    "speech_evidence_ref": req.speech_evidence_ref,
-                    "no_stale_replay": effective_no_stale_replay,
-                    "client_context": req.client_context,
-                    "client_context_authoritative": False,
-                    "canonical_context": canonical_context,
-                    "typed_resolution": resolution.model_dump(mode="json"),
-                    "gateway_action_authority_required": True,
-                    "owner_approved": owner_approved,
-                },
-            )
+            # P3-OBS-002 — Hermes dispatch latency is Gate 11's "Hermes callback
+            # latency" for the synchronous half: how long the owner waits before VAN
+            # can say the work has started at all.
+            with instruments.timed() as dispatch_ms:
+                run = await self.hermes.create_run(
+                    req.text,
+                    metadata={
+                        "command_id": req.command_id,
+                        "idempotency_key": req.idempotency_key,
+                        "device_id": req.device_id,
+                        "project_id": req.project_id,
+                        "action_class": effective_action_class.value,
+                        "signed_action_class": req.action_class.value,
+                        "context_trust": effective_trust.value,
+                        "declared_context_trust": req.context_trust.value,
+                        "signature_version": req.signature_version,
+                        "turn_id": req.turn_id,
+                        "origin_channel": req.origin_channel.value,
+                        "principal_type": req.principal_type.value,
+                        "requested_by": req.requested_by,
+                        "expires_at_unix": req.expires_at_unix,
+                        "nonce": req.nonce,
+                        "context_capsule_revision": req.context_capsule_revision,
+                        "context_capsule_hash": req.context_capsule_hash,
+                        "speech_evidence_ref": req.speech_evidence_ref,
+                        "no_stale_replay": effective_no_stale_replay,
+                        "client_context": req.client_context,
+                        "client_context_authoritative": False,
+                        "canonical_context": canonical_context,
+                        "typed_resolution": resolution.model_dump(mode="json"),
+                        "gateway_action_authority_required": True,
+                        "owner_approved": owner_approved,
+                    },
+                )
+            instruments.record_hermes_callback("accepted", dispatch_ms[0])
         except HermesBridgeError as exc:
+            instruments.record_hermes_callback("failed", dispatch_ms[0])
+            instruments.record_error("HermesBridgeError", exc.code)
             self.degraded.set(DegradedCode.HERMES_OFFLINE, True)
+            if mission is not None:
+                await self.missions.note_stall(mission, reason=f"hermes_dispatch_failed:{exc.code}")
             result = CommandResult(
                 status="degraded",
                 command_id=req.command_id,
@@ -532,6 +750,7 @@ class CommandOrchestrator:
                 message=exc.message,
                 degraded=[DegradedCode.HERMES_OFFLINE.value],
                 context_snapshot_id=context_snapshot.snapshot_id,
+                mission_id=mission.mission_id if mission else None,
             )
             await self.audit.record(result="degraded", command_id=req.command_id, device_id=req.device_id, failure_reason=exc.code, before=before)
             await self.idempotency.fail(req.idempotency_key, result.model_dump())
@@ -559,11 +778,15 @@ class CommandOrchestrator:
             },
             evidence_pointer=run.get("id"),
         )
+        if mission is not None:
+            mission = await self.missions.running(mission, hermes_run_id=run.get("id"))
+
         result = CommandResult(
             status="accepted",
             command_id=req.command_id,
             idempotency_key=req.idempotency_key,
             message="Accepted and routed to Hermes profile van with canonical owner context and sealed authority",
+            mission_id=mission.mission_id if mission else None,
             hermes_run_id=run.get("id"),
             evidence_id=evidence_id,
             context_snapshot_id=context_snapshot.snapshot_id,
@@ -574,3 +797,36 @@ class CommandOrchestrator:
         )
         await self.idempotency.complete(req.idempotency_key, result.model_dump())
         return result
+
+    def _log_outcome(self, req: CommandRequest, result: CommandResult) -> None:
+        """One structured line per command outcome (P3-OBS-001).
+
+        `result.correlation_id` rather than a locally derived one, so the line and
+        the response the device received carry the same identifier by construction:
+        an owner reading a correlation id off their screen finds this line.
+
+        The command text is deliberately not logged. It is the owner's speech, it
+        can contain anything they said, and a log is the one place it would end up
+        in plaintext on disk outside the audit record that is meant to hold it.
+        """
+        log_event(
+            LOGGER,
+            logging.INFO if result.status == "accepted" else logging.WARNING,
+            "command outcome",
+            correlation_id=result.correlation_id,
+            command_id=req.command_id,
+            mission_id=result.mission_id,
+            device_id=req.device_id,
+            action_class=(result.effective_action_class or req.action_class).value,
+            principal=req.principal_type.value,
+            result=result.status,
+            degraded_code=",".join(result.degraded) or None,
+            detail={
+                "origin_channel": req.origin_channel.value,
+                "resolved_action_id": result.resolved_action_id,
+                "hermes_run_id": result.hermes_run_id,
+                "requires_approval": result.requires_approval,
+            },
+        )
+        if result.status not in ("accepted", "in_flight"):
+            instruments.record_error(f"command_{result.status}", result.degraded[0] if result.degraded else "none")

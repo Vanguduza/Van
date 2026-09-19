@@ -32,6 +32,8 @@ from typing import Any
 
 from pydantic import BaseModel, Field
 
+from van_gateway.capability.models import CLASS_RANK
+from van_gateway.models import ActionClass
 from van_gateway.storage.db import Store
 
 HARNESS_VERSION = "van-eval-harness-1"
@@ -310,8 +312,43 @@ class BenchmarkHarness:
         "tool_reliability", "cost", "latency",
     )
 
+    #: P2-EVO-001 — the suites that have a task corpus VAN can actually run. Empty, and
+    #: that is the finding made enforceable rather than left implied.
+    #:
+    #: `SUITES` above is the vocabulary §24 asks for; a corpus is a set of tasks with
+    #: expected outcomes, and none has been written. The consequence is not a gap in
+    #: reporting but a real fail-closed property: `AIEvolutionRadar.transition` refuses
+    #: ADMITTED without a benchmark digest, so no technology can be adopted today. That is
+    #: the correct behaviour — §23's whole discipline is do not auto-adopt — and it is
+    #: reported on /v1/eval rather than being something an operator discovers by watching
+    #: an adoption fail.
+    SUITES_WITH_A_CORPUS: frozenset[str] = frozenset()
+
     def __init__(self, store: Store) -> None:
         self.store = store
+
+    async def coverage(self) -> dict[str, Any]:
+        """Which suites have a corpus, and which have ever produced a run.
+
+        The two are separate questions. A suite with no corpus cannot be run at all; a
+        suite with a corpus and no runs has simply not been exercised yet, and a reader
+        who cannot tell them apart will read the second as the first.
+        """
+        rows = await self.store.fetchall(
+            "SELECT suite, COUNT(*) AS n FROM benchmark_runs GROUP BY suite"
+        )
+        runs = {str(r["suite"]): int(r["n"]) for r in rows}
+        return {
+            "suites": sorted(self.SUITES),
+            "suites_with_a_corpus": sorted(self.SUITES_WITH_A_CORPUS),
+            "runs_by_suite": {suite: runs.get(suite, 0) for suite in sorted(self.SUITES)},
+            "harness_version": HARNESS_VERSION,
+            "consequence": (
+                "a technology cannot reach ADMITTED without a benchmark digest, so with no "
+                "corpus nothing can be adopted — which is the intended fail-closed state, "
+                "not an outage"
+            ),
+        }
 
     async def record_run(
         self,
@@ -391,6 +428,24 @@ class PromotionState(str, Enum):
     FORBIDDEN = "FORBIDDEN"
 
 
+class StrategyOutcome(str, Enum):
+    """What a finished mission says about the approach that ran it.
+
+    P1-LEARN-005 — three values because there are three things a terminal mission can mean,
+    and the boolean this replaced could express two. The distinction that matters most is
+    the third: a run VAN could not verify is not a run that failed, and treating it as one
+    is how a strategy accumulates a demotion record out of VAN's own blind spots.
+    """
+
+    #: The mission reached VERIFIED_SUCCESS: an independent observation confirmed it.
+    SUCCESS = "SUCCESS"
+    #: The work was attempted and did not do what it was supposed to.
+    FAILURE = "FAILURE"
+    #: The run says nothing about the approach — refused, cancelled, expired, or finished
+    #: without anything able to check it.
+    INCONCLUSIVE = "INCONCLUSIVE"
+
+
 class StrategyLearning:
     """§25 — which capability sequences work, promoted only on eval evidence.
 
@@ -416,6 +471,7 @@ class StrategyLearning:
         mission_class: str,
         capability_sequence: list[str],
         conditions: dict[str, Any] | None = None,
+        max_action_class: ActionClass = ActionClass.A1,
         now_ms: int | None = None,
     ) -> str:
         now = int(time.time() * 1000) if now_ms is None else now_ms
@@ -426,21 +482,88 @@ class StrategyLearning:
               strategy_id, mission_class, capability_sequence_json, conditions_json,
               success_count, failure_count, median_latency_ms, median_cost_micros,
               verification_quality, promotion_state, eval_run_id, last_evaluated_at_ms,
-              created_at_ms, updated_at_ms
-            ) VALUES (?, ?, ?, ?, 0, 0, NULL, NULL, 0.0, 'EXPERIMENTAL', NULL, NULL, ?, ?)
+              created_at_ms, updated_at_ms, max_action_class
+            ) VALUES (?, ?, ?, ?, 0, 0, NULL, NULL, 0.0, 'EXPERIMENTAL', NULL, NULL, ?, ?, ?)
             """,
             (
                 strategy_id, mission_class, Store.dumps(capability_sequence),
-                Store.dumps(conditions or {}), now, now,
+                Store.dumps(conditions or {}), now, now, max_action_class.value,
             ),
         )
         return strategy_id
 
+    async def find_or_register(
+        self,
+        *,
+        mission_class: str,
+        capability_sequence: list[str],
+        max_action_class: ActionClass = ActionClass.A1,
+        now_ms: int | None = None,
+    ) -> str:
+        """The strategy for this exact sequence in this class, creating it if new.
+
+        P1-LEARN-003 — a strategy is a thing VAN *did*, so it comes into existence by
+        having been done. `capability_sequence_json` is written through `Store.dumps`,
+        which is deterministic, so the same sequence matches itself exactly rather than
+        through a fuzzy comparison that would merge two different plans.
+        """
+        encoded = Store.dumps(capability_sequence)
+        row = await self.store.fetchone(
+            "SELECT strategy_id, max_action_class FROM execution_strategies "
+            "WHERE mission_class = ? AND capability_sequence_json = ?",
+            (mission_class, encoded),
+        )
+        if row is None:
+            return await self.register(
+                mission_class=mission_class, capability_sequence=capability_sequence,
+                max_action_class=max_action_class, now_ms=now_ms,
+            )
+        strategy_id = str(row["strategy_id"])
+        # The ceiling records what this sequence has actually been run under, so it rises
+        # to meet a real run and never beyond one. It is not a grant: `permitted_for`
+        # compares it with the asking mission's envelope and refuses the wider strategy.
+        if CLASS_RANK[ActionClass(str(row["max_action_class"]))] < CLASS_RANK[max_action_class]:
+            await self.store.execute(
+                "UPDATE execution_strategies SET max_action_class = ? WHERE strategy_id = ?",
+                (max_action_class.value, strategy_id),
+            )
+        return strategy_id
+
     async def record_outcome(
-        self, strategy_id: str, *, verified_success: bool, now_ms: int | None = None
+        self,
+        strategy_id: str,
+        *,
+        outcome: StrategyOutcome,
+        now_ms: int | None = None,
     ) -> None:
+        """P1-LEARN-005 — only evidence that says something about the strategy counts.
+
+        This took a boolean, and `False` meant `failure_count + 1`. Every non-verified
+        terminal state therefore punished the strategy: an owner cancelling, a policy
+        refusal, an unsafe refusal, a deadline expiry and an UNVERIFIABLE run all read as
+        "this approach does not work". None of them says that. A policy refusal is a
+        statement about authority, a cancellation is a statement about the owner changing
+        their mind, and UNVERIFIABLE is explicitly a statement that VAN does not know.
+
+        The consequence was not cosmetic. `auto_demote` demotes below a 60% success rate
+        over three runs, so three cancellations would have demoted a strategy that had
+        never once failed — and because promotion needs eval evidence and ten runs while
+        demotion needs neither, that damage is cheap to do and expensive to undo.
+
+        INCONCLUSIVE is recorded and counts toward nothing, which is the honest handling:
+        the run happened, and it tells us nothing.
+        """
         now = int(time.time() * 1000) if now_ms is None else now_ms
-        column = "success_count" if verified_success else "failure_count"
+        if outcome is StrategyOutcome.INCONCLUSIVE:
+            # Touched, not counted. The timestamp moves so a strategy that is being
+            # exercised does not look abandoned, and neither counter changes.
+            await self.store.execute(
+                "UPDATE execution_strategies SET inconclusive_count = inconclusive_count + 1, "
+                "updated_at_ms = ? WHERE strategy_id = ?",
+                (now, strategy_id),
+            )
+            return
+        column = "success_count" if outcome is StrategyOutcome.SUCCESS else "failure_count"
         await self.store.execute(
             f"UPDATE execution_strategies SET {column} = {column} + 1, updated_at_ms = ? "
             "WHERE strategy_id = ?",
@@ -511,6 +634,11 @@ class StrategyLearning:
         return demoted
 
     async def preferred_for(self, mission_class: str) -> list[dict[str, Any]]:
+        """Every PREFERRED strategy for this class, regardless of what it needs.
+
+        This is the *reporting* view — what VAN has learned — and it is deliberately not
+        the one anything acts on. `permitted_for` is that one.
+        """
         rows = await self.store.fetchall(
             "SELECT * FROM execution_strategies WHERE mission_class = ? "
             "AND promotion_state = 'PREFERRED' ORDER BY updated_at_ms DESC",
@@ -518,11 +646,33 @@ class StrategyLearning:
         )
         return [dict(r) for r in rows]
 
+    async def permitted_for(
+        self, mission_class: str, *, envelope_max_action_class: ActionClass
+    ) -> list[dict[str, Any]]:
+        """P1-LEARN-002 — what a mission with *this* envelope may be offered.
+
+        §27 forbids uncontrolled self-modification, and the quiet way to breach it is not
+        to write new code: it is for a sequence proven under an A4 mission to be offered
+        back as the preferred approach to a mission the owner capped at A2. Nobody widened
+        anything; authority would simply have been acquired by accumulation.
+
+        So the ceiling a strategy was exercised under is compared with the envelope of the
+        mission asking, and a strategy that needs more is not offered. It is not demoted
+        or hidden — it is still PREFERRED and still visible in `preferred_for` — it is just
+        not an answer to this question.
+        """
+        ceiling = CLASS_RANK[envelope_max_action_class]
+        return [
+            row for row in await self.preferred_for(mission_class)
+            if CLASS_RANK[ActionClass(str(row["max_action_class"]))] <= ceiling
+        ]
+
 
 __all__ = [
     "HARNESS_VERSION",
     "AIEvolutionRadar",
     "BenchmarkHarness",
+    "StrategyOutcome",
     "ExternalRealityModel",
     "PipelineState",
     "PromotionState",

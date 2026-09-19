@@ -1,3 +1,7 @@
-from van_gateway.trading.service import TradingControlError, TradingService
+from van_gateway.trading.service import (
+    TradingAuthorityError,
+    TradingControlError,
+    TradingService,
+)
 
-__all__ = ["TradingControlError", "TradingService"]
+__all__ = ["TradingAuthorityError", "TradingControlError", "TradingService"]

@@ -18,6 +18,7 @@ from enum import Enum
 from typing import Any
 
 from van_gateway.automation.canonical import new_id
+from van_gateway.observability import instruments
 from van_gateway.automation.workflow_health import percentile
 from van_gateway.storage.db import Store
 
@@ -153,6 +154,12 @@ class TelemetryService:
                 timing.execution_time_ms, timing.external_wait_ms,
                 timing.verification_time_ms, timing.retry_count, timing.failure_count, now,
             ),
+        )
+        # P3-OBS-002: these counters were computed on request and returned to whoever
+        # asked, which meant nobody. Recorded here as well, so "automation status" —
+        # one of Gate 11's named metrics — leaves the process.
+        instruments.record_automation_run(
+            timing.cache_state, "failed" if timing.failure_count else "ok"
         )
 
     async def record_generation(

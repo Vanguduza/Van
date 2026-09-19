@@ -30,6 +30,16 @@ from vati.risk.mandate import AuthorizationMode, PlatformCeilings, TradingMandat
 from vati.risk.sizing import Multipliers, SizingRejected, size_illiquid_equity, size_stake_contract, size_stop_contract
 
 ZERO = Decimal("0")
+
+#: P0-TRADE-006. Below this the venue itself starts closing positions, so VAN placing a
+#: new one would be adding risk to an account already being liquidated.
+MARGIN_CALL_LEVEL_PCT = Decimal("100")
+
+#: The level at which VAN stops adding risk of its own accord, well above the venue's.
+#: DECISION (recorded, no owner input): 200% is a common broker stop-out buffer and is a
+#: starting point rather than a measured optimum. It is here as a named constant so it can
+#: be argued with, which is what a hardcoded 1000 could never be.
+MARGIN_FLOOR_LEVEL_PCT = Decimal("200")
 ONE = Decimal("1")
 STRATEGY_STATES_FOR_MODE = {
     AuthorizationMode.DEMO_TRADER: frozenset(
@@ -180,6 +190,30 @@ class RiskAuthority:
             return rej("MARKET_INTEGRITY", snapshot.market_integrity.value)
         if not heat_before.is_finite():
             return rej("UNPROTECTED_POSITION", "an open position lacks a broker-side stop; no new risk until restored")
+
+        # 5b. Broker margin (P0-TRADE-006). There was no margin model anywhere in the
+        # stack, so the authority sized by stop distance with no visibility of what the
+        # broker would actually allow — a position correctly sized for risk can still be
+        # refused, or can put the account into a margin call, and VAN could see neither.
+        #
+        # None means the venue did not report it. That is treated as unknown rather than
+        # healthy, and unknown is only acceptable where there is genuinely no margin to
+        # report: a paper account, or a venue VAN does not place orders on.
+        if snapshot.margin_level_pct is not None:
+            if snapshot.margin_level_pct <= MARGIN_CALL_LEVEL_PCT:
+                return rej(
+                    "MARGIN_CALL",
+                    f"margin level {snapshot.margin_level_pct}% at or below "
+                    f"{MARGIN_CALL_LEVEL_PCT}%; the venue is closing positions",
+                )
+            if snapshot.margin_level_pct <= MARGIN_FLOOR_LEVEL_PCT:
+                return rej(
+                    "MARGIN_FLOOR",
+                    f"margin level {snapshot.margin_level_pct}% at or below the "
+                    f"{MARGIN_FLOOR_LEVEL_PCT}% floor; no new risk until it recovers",
+                )
+        if snapshot.free_margin is not None and snapshot.free_margin <= ZERO:
+            return rej("NO_FREE_MARGIN", "the account has no free margin for a new position")
 
         # 6. Instrument / strategy eligibility
         contract = snapshot.symbol_contract

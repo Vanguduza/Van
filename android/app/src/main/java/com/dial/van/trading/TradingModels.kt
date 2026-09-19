@@ -1,5 +1,6 @@
 package com.dial.van.trading
 
+import com.dial.van.visual.VanTradeSignals
 import kotlinx.serialization.json.Json
 import kotlinx.serialization.json.JsonArray
 import kotlinx.serialization.json.JsonElement
@@ -72,6 +73,35 @@ data class PortfolioSummary(
 ) {
     /** Worst account/feed truth wins the headline (blueprint §46). */
     val overallDataState: DataState get() = (dataStates.values + accounts.map { it.connection }).maxByOrNull { it.ordinal } ?: DataState.UNKNOWN
+
+    /**
+     * P1-AURA-003 — the read models the trading screens already render, in the shape VAN's
+     * visual runtime classifies from.
+     *
+     * The mapping is deliberately mechanical. Any judgement about what a trading state
+     * *means* belongs in [VanTradeSemantics.classify], which is pure and tested; a mapper
+     * that made decisions here would be a second, untested classifier living beside the
+     * first, which is the pattern the audit found repeatedly.
+     *
+     * `ledgerStale` reads `overallDataState`: a STALE or UNKNOWN feed means VAN is not
+     * entitled to show a calm field, which is the same rule the gateway applies to the
+     * ledger itself (P0-TRADE-004).
+     */
+    fun toTradeSignals(ownerHaltActive: Boolean = false, riskRefusalsRecent: Int = 0): VanTradeSignals =
+        VanTradeSignals(
+            ledgerAvailable = ledgerAvailable,
+            ledgerStale = overallDataState != DataState.LIVE,
+            ownerHaltActive = ownerHaltActive || killSwitch.any { it.equals("OWNER_HALT", ignoreCase = true) },
+            killSwitchTriggers = killSwitch.filterNot { it.equals("OWNER_HALT", ignoreCase = true) },
+            openPositions = openPositions.size,
+            openTickets = 0,
+            workingOrders = potential.size,
+            watchedInstruments = exposureBySymbol.size,
+            pendingSetups = potential.size,
+            unrealizedPnl = floatingPnl.value,
+            marginLevelPct = null,
+            riskRefusalsRecent = riskRefusalsRecent,
+        )
     companion object {
         fun parse(body: String): PortfolioSummary? {
             val o = parseObject(body) ?: return null
@@ -178,14 +208,4 @@ data class TradeDetail(
             )
         }
     }
-}
-
-object TradingFormat {
-    fun price(v: Double?, digits: Int = 5): String = v?.let { String.format(java.util.Locale.ROOT, "%.${digits}f", it) } ?: "—"
-    fun digitsFor(symbol: String): Int = when { symbol.uppercase().contains("JPY") -> 3; symbol.uppercase().startsWith("XAU") || symbol.uppercase().startsWith("XAG") -> 2; symbol.length <= 5 -> 2; else -> 5 }
-    fun r(v: Double?): String = v?.let { (if (it >= 0) "+" else "") + String.format(java.util.Locale.ROOT, "%.2fR", it) } ?: "—"
-    fun age(nowMs: Long, thenMs: Long?): String { if (thenMs == null || thenMs <= 0) return "never"; val s = (nowMs - thenMs) / 1000; return when { s < 60 -> "${s}s ago"; s < 3600 -> "${s / 60}m ago"; s < 86400 -> "${s / 3600}h ago"; else -> "${s / 86400}d ago" } }
-    fun hash8(h: String?): String = h?.take(8) ?: "—"
-    fun timeHm(ms: Long): String { val t = java.time.Instant.ofEpochMilli(ms).atZone(java.time.ZoneOffset.UTC); return String.format(java.util.Locale.ROOT, "%02d:%02d", t.hour, t.minute) }
-    fun dateShort(ms: Long): String { val t = java.time.Instant.ofEpochMilli(ms).atZone(java.time.ZoneOffset.UTC); return String.format(java.util.Locale.ROOT, "%02d %s", t.dayOfMonth, t.month.name.take(3).lowercase().replaceFirstChar { it.uppercase() }) }
 }

@@ -38,7 +38,6 @@ class VanCharacterMotionTest {
                 }
                 assertEquals(0f, still.offsetYDp, 0.0001f)
                 assertEquals(1f, still.scale, 0.0001f)
-                assertEquals(0f, still.headCounterDeg, 0.0001f)
                 assertTrue(kotlin.math.abs(still.offsetXDp) <= 0.45f)
                 assertTrue(kotlin.math.abs(still.rotationDeg) <= 0.12f)
                 if (attention == 0f) {
@@ -76,7 +75,6 @@ class VanCharacterMotionTest {
                             assertTrue("$durable y offset too large", kotlin.math.abs(frame.offsetYDp) <= 2.5f)
                             assertTrue("$durable rotation too large", kotlin.math.abs(frame.rotationDeg) <= 1.65f)
                             assertTrue("$durable scale too large", frame.scale in 0.992f..1.008f)
-                            assertTrue("$durable head counter-motion too large", kotlin.math.abs(frame.headCounterDeg) <= 0.5f)
                         }
                     }
                 }

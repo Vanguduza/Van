@@ -53,11 +53,36 @@ class _Observer:
         return self.result
 
 
+#: The path the compiled workflow's webhook trigger listens on. The fake below
+#: serves it at `/webhook/<path>`, which is where a real n8n serves it, and serves
+#: the management API under `/api/v1` — the two are different roots, which is the
+#: distinction P3-OPS-007 was about.
+WEBHOOK_PATH = "van/wfcap-statements"
+
+
 def _transport(engine_success: bool = True) -> httpx.MockTransport:
+    """A fake shaped like the real n8n API.
+
+    P3-OPS-007 — this used to answer `POST /workflows/{id}/run`, an endpoint n8n
+    has never had. The fake made the client's fabricated call look correct, which
+    is how the call survived: the only thing that ever exercised it agreed with it.
+    n8n's public API can read and activate a workflow; it cannot execute one, so
+    execution goes to the workflow's own webhook trigger.
+    """
     def handler(request: httpx.Request) -> httpx.Response:
-        if request.url.path.endswith("/settings"):
+        path = request.url.path
+        if path.endswith("/settings"):
             return httpx.Response(200, json={"versionCli": "2.39.7"})
-        if request.url.path.endswith("/run"):
+        if path.startswith("/api/v1/workflows/") and request.method == "GET":
+            return httpx.Response(200, json={
+                "id": path.rsplit("/", 1)[-1],
+                "active": True,
+                "nodes": [
+                    {"name": "When called", "type": "n8n-nodes-base.webhook",
+                     "parameters": {"path": WEBHOOK_PATH, "httpMethod": "POST"}},
+                ],
+            })
+        if path == f"/webhook/{WEBHOOK_PATH}" and request.method == "POST":
             body = json.loads(request.content)
             # §159/§160 — the run envelope must carry a grant, not a VAN token.
             assert body["capability_grant"], "n8n must receive a run-scoped grant"

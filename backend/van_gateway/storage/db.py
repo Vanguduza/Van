@@ -8,7 +8,196 @@ from typing import Any, AsyncIterator
 
 import aiosqlite
 
-SCHEMA_VERSION = 16
+SCHEMA_VERSION = 25
+
+
+MIGRATION_17 = """
+-- P1-SEC-005: the command nonce was covered by the v2 signature and then never stored,
+-- so a captured command could be replayed inside its validity window. A UNIQUE nonce per
+-- device makes the second presentation fail at the database rather than at nobody.
+CREATE TABLE IF NOT EXISTS command_nonces (
+  device_id TEXT NOT NULL,
+  nonce TEXT NOT NULL,
+  command_id TEXT NOT NULL,
+  consumed_at_unix INTEGER NOT NULL,
+  PRIMARY KEY (device_id, nonce)
+);
+CREATE INDEX IF NOT EXISTS idx_command_nonces_consumed
+  ON command_nonces(consumed_at_unix);
+
+-- P1-SEC-006: the owner-authority audit log was a flat table with a random UUID and no
+-- ordering, so rows could be inserted, altered or deleted undetectably. The VATI trading
+-- ledger already had a verifiable chain; the authority log did not.
+ALTER TABLE audit ADD COLUMN chain_seq INTEGER;
+ALTER TABLE audit ADD COLUMN prev_hash TEXT;
+ALTER TABLE audit ADD COLUMN entry_hash TEXT;
+CREATE UNIQUE INDEX IF NOT EXISTS idx_audit_chain_seq ON audit(chain_seq);
+"""
+
+MIGRATION_18 = """
+-- P0-EXEC-001: an accepted owner command produced no durable work record. The orchestrator
+-- now opens exactly one mission per command, and this index is what makes "exactly one"
+-- true under concurrency rather than merely intended: a second create for the same
+-- source command fails at the database.
+CREATE UNIQUE INDEX IF NOT EXISTS idx_missions_source_command
+  ON missions(json_extract(authority_envelope_json, '$.source_command_id'))
+  WHERE json_extract(authority_envelope_json, '$.source_command_id') IS NOT NULL;
+"""
+
+MIGRATION_19 = """
+-- P1-LEARN-001: the learning stores had correct invariants and no caller that recorded a
+-- real outcome, so VanEval scored a system that had done nothing the same as one that had
+-- done everything right. This is the table the production feed writes to.
+CREATE TABLE IF NOT EXISTS learning_outcomes (
+  outcome_id TEXT PRIMARY KEY,
+  mission_id TEXT NOT NULL,
+  outcome_kind TEXT NOT NULL,
+  goal TEXT NOT NULL,
+  verification_status TEXT,
+  evidence_refs_json TEXT NOT NULL DEFAULT '[]',
+  recorded_at_ms INTEGER NOT NULL
+);
+CREATE INDEX IF NOT EXISTS idx_learning_outcomes_kind
+  ON learning_outcomes(outcome_kind, recorded_at_ms);
+CREATE UNIQUE INDEX IF NOT EXISTS idx_learning_outcomes_mission
+  ON learning_outcomes(mission_id);
+"""
+
+MIGRATION_20 = """
+-- P3-OPS-001: the audit log is hash-chained, so it cannot be pruned the way every other
+-- table can. It can be pruned from the *start*, provided the verifier is told where the
+-- surviving chain begins and what hash it must link back to. This table is that record.
+--
+-- The anchor is itself evidence: it says how many rows were removed and what the last
+-- removed row hashed to, so a prune is visible rather than being indistinguishable from
+-- a deletion someone performed by hand.
+CREATE TABLE IF NOT EXISTS audit_chain_anchors (
+  anchor_seq INTEGER PRIMARY KEY,
+  anchor_hash TEXT NOT NULL,
+  pruned_rows INTEGER NOT NULL,
+  created_at_unix INTEGER NOT NULL
+);
+
+-- P3-OPS-005: reminder and attention dedupe lived in a Python dict, so a restart
+-- re-surfaced an item the owner had already dismissed. Suppression is a decision the
+-- owner made; it belongs in the database with everything else they decided.
+CREATE TABLE IF NOT EXISTS notification_suppressions (
+  suppression_key TEXT PRIMARY KEY,
+  channel TEXT NOT NULL,
+  subject_ref TEXT NOT NULL,
+  reason TEXT NOT NULL,
+  suppressed_until_unix INTEGER,
+  created_at_unix INTEGER NOT NULL,
+  updated_at_unix INTEGER NOT NULL
+);
+CREATE INDEX IF NOT EXISTS idx_notification_suppressions_channel
+  ON notification_suppressions(channel, suppressed_until_unix);
+
+-- P3-OPS-004: fire_due had no scheduler, so a reminder that came due was never
+-- dispatched by the system itself. A scheduler needs to know what it already ran, or a
+-- restart re-fires everything that was ever due.
+CREATE TABLE IF NOT EXISTS scheduler_runs (
+  job_name TEXT NOT NULL,
+  run_at_unix INTEGER NOT NULL,
+  finished_at_unix INTEGER,
+  outcome TEXT NOT NULL,
+  detail_json TEXT NOT NULL DEFAULT '{}',
+  PRIMARY KEY (job_name, run_at_unix)
+);
+CREATE INDEX IF NOT EXISTS idx_scheduler_runs_job
+  ON scheduler_runs(job_name, run_at_unix DESC);
+"""
+
+
+MIGRATION_21 = """
+-- P1-LEARN-003: `StrategyLearning` keys everything on `mission_class` and no mission
+-- carried one, so §25's "which capability sequences work" and §41's "measurable strategy
+-- improvement in >= 3 production mission classes" were both unanswerable: the store had
+-- the right invariants, a promotion gate that refused without eval evidence, and no way
+-- for a row to ever exist. The class is the typed resolver's intent, which the command
+-- path already computes and then discarded.
+ALTER TABLE missions ADD COLUMN mission_class TEXT NOT NULL DEFAULT 'GENERAL_OWNER_INTENT';
+CREATE INDEX IF NOT EXISTS idx_missions_class ON missions(mission_class, state);
+
+-- P1-LEARN-002: nothing prevented learning from widening authority. A strategy is a
+-- capability sequence, and a sequence exercised under an A4 envelope offered back to a
+-- mission capped at A2 would be exactly that: authority acquired by accumulation rather
+-- than by an owner decision. The ceiling a strategy was actually exercised under is
+-- recorded here so it can be compared with the asking mission's envelope, and it only
+-- ever rises to what has genuinely been run.
+ALTER TABLE execution_strategies ADD COLUMN max_action_class TEXT NOT NULL DEFAULT 'A1';
+CREATE INDEX IF NOT EXISTS idx_execution_strategies_lookup
+  ON execution_strategies(mission_class, promotion_state);
+"""
+
+MIGRATION_22 = """
+-- P0-OPS-011: an IN_FLIGHT idempotency claim had no lease. A gateway that died between
+-- claiming a key and completing it left the row IN_FLIGHT forever, and every later retry
+-- of that command raised "still in flight". The idempotency key is part of the signed
+-- request, so the owner could not work around it by changing it: that command became
+-- permanently unrepeatable, and the only cure was editing the database.
+--
+-- claim_count records how many times a claim has been taken, so a recovered claim is
+-- visible rather than looking like the first attempt.
+ALTER TABLE idempotency ADD COLUMN claim_count INTEGER NOT NULL DEFAULT 1;
+"""
+
+MIGRATION_23 = """
+-- P1-LEARN-005: strategy outcomes were a boolean, and False meant failure_count + 1. Every
+-- non-verified terminal state therefore punished the strategy — an owner cancelling, a
+-- policy refusal, an unsafe refusal, a deadline expiry and an UNVERIFIABLE run all read as
+-- "this approach does not work", and none of them says that.
+--
+-- The third counter exists so INCONCLUSIVE is recorded rather than discarded: a strategy
+-- that keeps being cancelled is worth seeing, and it is not the same as one that keeps
+-- failing.
+ALTER TABLE execution_strategies ADD COLUMN inconclusive_count INTEGER NOT NULL DEFAULT 0;
+"""
+
+MIGRATION_24 = """
+-- P2-MEM-003: every mission goal was promoted straight into the standing-intent graph, so
+-- "what is on my calendar?" became a long-lived owner objective that stayed ACTIVE until
+-- the ninety-day stale sweep. §77's conflict detection then has transient commands to
+-- contradict genuine long-term goals with, and the owner model fills with noise that looks
+-- like evidence.
+--
+-- A horizon separates what the owner *asked for once* from what they are *trying to do*.
+-- Everything starts EPHEMERAL. Promotion to STANDING requires evidence — repetition, or an
+-- explicit owner statement — and is recorded with what caused it.
+ALTER TABLE intent_nodes ADD COLUMN horizon TEXT NOT NULL DEFAULT 'EPHEMERAL';
+ALTER TABLE intent_nodes ADD COLUMN observation_count INTEGER NOT NULL DEFAULT 1;
+-- Provenance: what promoted this, so a standing intent can be argued with.
+ALTER TABLE intent_nodes ADD COLUMN promoted_reason TEXT;
+ALTER TABLE intent_nodes ADD COLUMN promoted_at_ms INTEGER;
+CREATE INDEX IF NOT EXISTS idx_intent_nodes_horizon ON intent_nodes(horizon, status);
+"""
+
+MIGRATION_25 = """
+-- P2-CTX-003: a correction that superseded without recording what it superseded.
+--
+-- OwnerFactCandidate.supersedes_fact_id and ContextEdgeCandidate.supersedes_edge_id were
+-- read by admit_fact and admit_edge, used to close the prior record's validity window, and
+-- then thrown away: neither INSERT carried the column, because neither table had one. So
+-- the graph kept the *effect* of a correction and lost the *fact* of it.
+--
+-- The consequence is not abstract. Two facts about the same subject and predicate with
+-- adjacent validity windows look exactly the same whether one replaced the other or both
+-- simply expired on their own. The owner asking "why does VAN believe this now, and what
+-- did it believe before?" could not be answered, which is the whole of revision history.
+ALTER TABLE owner_facts ADD COLUMN supersedes_fact_id TEXT;
+ALTER TABLE owner_context_edges ADD COLUMN supersedes_edge_id TEXT;
+
+-- History is walked backwards from the newest record, so the index is on the link column.
+CREATE INDEX IF NOT EXISTS idx_owner_facts_supersedes
+  ON owner_facts(supersedes_fact_id);
+CREATE INDEX IF NOT EXISTS idx_owner_edges_supersedes
+  ON owner_context_edges(supersedes_edge_id);
+
+-- Contradictions are found by grouping on the identity a requirement resolves against.
+-- Without this the conflict scan is a full table sort on every call.
+CREATE INDEX IF NOT EXISTS idx_owner_facts_identity
+  ON owner_facts(subject, predicate, scope, authority);
+"""
 
 MIGRATIONS: dict[int, str] = {
     1: """
@@ -1328,6 +1517,15 @@ MIGRATIONS: dict[int, str] = {
     CREATE INDEX IF NOT EXISTS idx_computer_operations_mission
       ON computer_operations(mission_id, started_at_ms);
     """,
+    17: MIGRATION_17,
+    18: MIGRATION_18,
+    19: MIGRATION_19,
+    20: MIGRATION_20,
+    21: MIGRATION_21,
+    22: MIGRATION_22,
+    23: MIGRATION_23,
+    24: MIGRATION_24,
+    25: MIGRATION_25,
 }
 
 
@@ -1341,6 +1539,13 @@ class Store:
         async with aiosqlite.connect(self.path) as db:
             db.row_factory = aiosqlite.Row
             await db.execute("PRAGMA foreign_keys = ON")
+            # A fresh connection per query with journal_mode=delete and no busy timeout is
+            # why two concurrent identical signed commands could both pass the idempotency
+            # SELECT (finding P1-SEC-005). WAL lets readers and one writer coexist; the
+            # busy timeout makes a contended write wait rather than raise immediately.
+            await db.execute("PRAGMA journal_mode = WAL")
+            await db.execute("PRAGMA busy_timeout = 5000")
+            await db.execute("PRAGMA synchronous = NORMAL")
             yield db
 
     @staticmethod

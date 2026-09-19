@@ -13,9 +13,18 @@ import org.json.JSONObject
  * empty state, because an empty Needs You that actually means "could not ask" is
  * the most dangerous screen in the app.
  *
- * §37's cross-surface continuity is why `home()` issues its reads together: Home
- * has to answer five questions in under five seconds (§35), and five sequential
- * round trips is how that target gets missed.
+ * §37's cross-surface continuity is why `home()` gathers everything Home needs in one
+ * call rather than leaving each screen to ask separately.
+ *
+ * It does **not** issue those reads concurrently, and an earlier version of this comment
+ * said it did. They are five sequential suspend calls, which is exactly the shape §35 warns
+ * about: Home has to answer five questions in under five seconds, and five sequential round
+ * trips is how that target gets missed. The claim was corrected rather than the code,
+ * because nothing constructs this class — the command centre modules call VanGatewayClient
+ * directly, and this is component ledger #44, NEVER_CONSTRUCTED with disposition WIRE.
+ * Whoever wires it owns the §35 target, and should make these reads concurrent as part of
+ * that. Quietly "fixing" the code of a class with no callers would have produced an
+ * unexercised improvement and left the next person believing the latency work was done.
  */
 class MissionRepository(private val client: VanGatewayClient) {
 

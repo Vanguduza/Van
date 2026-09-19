@@ -7,7 +7,11 @@ def test_notebook_note_resolves_to_registered_a3_action():
     assert resolved.mode == ResolutionMode.EXACT_ACTION
     assert resolved.action_id == "google.notebook.note.create"
     assert resolved.canonical_action_class == ActionClass.A3
-    assert resolved.parameters == {"title": "dial health"}
+    # P4-CMD-001 — this used to assert {"title": "dial health"}. The resolver matched
+    # against casefolded text, so the title the owner typed was extracted lowercased and
+    # then *sealed* that way: the corruption was cryptographically bound to their command
+    # and nothing downstream could recover it. The test encoded the defect.
+    assert resolved.parameters == {"title": "Dial Health"}
 
 
 def test_notebook_creation_is_not_confused_with_note_creation():
@@ -39,7 +43,7 @@ def test_context_read_is_a1():
     resolved = TypedCommandResolver().resolve("What do you know about VAN?")
     assert resolved.action_id == "owner.context.read"
     assert resolved.canonical_action_class == ActionClass.A1
-    assert resolved.parameters == {"topic": "van"}
+    assert resolved.parameters == {"topic": "VAN"}  # P4-CMD-001
 
 
 def test_unknown_owner_language_is_not_guessed():

@@ -124,7 +124,7 @@ fun OverviewScreen(env: ScreenEnv, nav: TradingNav, padding: PaddingValues) {
                         MetricTile(
                             "Drawdown",
                             (if (scope == "ALL") p.accounts.mapNotNull { it.drawdown.fraction }.maxOrNull()?.let {
-                                String.format(java.util.Locale.ROOT, "%.2f%%", it * 100)
+                                TradingFormat.percent(it * 100)
                             } else scoped.firstOrNull()?.drawdown?.label) ?: "—",
                             Modifier.weight(1f),
                         )
@@ -194,7 +194,7 @@ fun OverviewScreen(env: ScreenEnv, nav: TradingNav, padding: PaddingValues) {
                         LoadedBox(states, empty = "No market state yet.") { ms ->
                             val m = ms.firstOrNull()
                             if (m == null) {
-                                EmptyState("No market state in the ledger yet.")
+                                EmptyState(TradingFormat.emptyState("bars"))
                             } else {
                                 Text(m.summary, color = TradingColors.text, fontSize = 11.sp)
                                 Row(horizontalArrangement = Arrangement.spacedBy(6.dp)) {
@@ -280,7 +280,7 @@ fun TradeDetailScreen(env: ScreenEnv, nav: TradingNav, padding: PaddingValues, t
                     Text("${d.row.strategyId} · account ${d.accountAlias ?: "?"} · capsule ${d.strategyState ?: "?"} · decided ${d.decidedMs?.let { TradingFormat.dateShort(it) + " " + TradingFormat.timeHm(it) } ?: "—"}", color = TradingColors.muted, fontSize = 10.sp)
                     SectionPanel(title = "Chart · ${d.chartTimeframe ?: "no lake data"}", glass = env.glass) {
                         val levels = listOfNotNull(d.fill?.let { ChartLevel(LevelKind.ENTRY, it, "ENTRY") } ?: d.entry?.let { ChartLevel(LevelKind.ENTRY, it, "ENTRY") }, d.stop?.let { ChartLevel(LevelKind.STOP, it, "STOP") }, d.target?.let { ChartLevel(LevelKind.TARGET, it, "TARGET") }, d.exit?.let { ChartLevel(LevelKind.EXIT, it, "EXIT") })
-                        if (d.chart.isEmpty()) EmptyState("No bars in the lake for this trade window.", "Levels below are from the ledger; import history with `python -m vati lake …` to see the chart.")
+                        if (d.chart.isEmpty()) EmptyState(TradingFormat.emptyState("bars"), "The levels below come from the ledger and are shown whether or not there is a chart.")
                         else TradeChartCanvas(d.chart, levels = levels, markers = d.markers, digits = digits, heightDp = 240)
                     }
                     Row(horizontalArrangement = Arrangement.spacedBy(8.dp)) {
@@ -299,7 +299,7 @@ fun TradeDetailScreen(env: ScreenEnv, nav: TradingNav, padding: PaddingValues, t
                         MetricTile("Outcome", d.outcome ?: d.riskDecision ?: "—", Modifier.weight(1f), sub = d.polarity)
                     }
                     SectionPanel(title = "Timeline", glass = env.glass) {
-                        if (d.timeline.isEmpty()) EmptyState("No events.")
+                        if (d.timeline.isEmpty()) EmptyState("Nothing has happened on this trade yet.")
                         d.timeline.forEach { t ->
                             Row(modifier = Modifier.padding(vertical = 3.dp)) {
                                 Text(TradingFormat.timeHm(t.atMs), color = TradingColors.muted, fontSize = 10.sp, fontFamily = FontFamily.Monospace, modifier = Modifier.width(44.dp))
@@ -362,7 +362,7 @@ fun InstrumentScreen(env: ScreenEnv, nav: TradingNav, padding: PaddingValues, sy
             SectionPanel(title = "Market context", glass = env.glass) {
                 LoadedBox(state) { ms ->
                     val m = ms.firstOrNull()
-                    if (m == null) EmptyState("No market state for $symbol yet.")
+                    if (m == null) EmptyState("No price information for $symbol yet. VAN shows what the trading system has recorded; it does not fetch prices itself.")
                     else Column(verticalArrangement = Arrangement.spacedBy(4.dp)) {
                         Text(m.summary, color = TradingColors.text, fontSize = 12.sp)
                         Row(horizontalArrangement = Arrangement.spacedBy(6.dp)) { DataStateChip(m.dataState); Chip(m.session, 0xFF5C6BC0L); Chip("integrity ${m.integrity}", 0xFF78909CL); Chip("events ${m.eventWindow}", 0xFFFFB300L) }
@@ -381,7 +381,7 @@ fun InstrumentScreen(env: ScreenEnv, nav: TradingNav, padding: PaddingValues, sy
             SectionPanel(title = "Setups & positions on $symbol", glass = env.glass) {
                 LoadedBox(potential) { ps ->
                     val mine = ps.filter { it.symbol == symbol }
-                    if (mine.isEmpty()) EmptyState("No candidate setup on $symbol in the latest assessment.")
+                    if (mine.isEmpty()) EmptyState("No setup on $symbol in the latest look.")
                     Column(verticalArrangement = Arrangement.spacedBy(6.dp)) { mine.forEach { r -> TradeRowCard(r) { r.tradeIntentId?.let(nav.openTrade) } } }
                 }
                 LoadedBox(current) { cs ->
@@ -409,31 +409,31 @@ fun RiskScreen(env: ScreenEnv, nav: TradingNav, padding: PaddingValues) {
                     if (r.killSwitch.isNotEmpty()) Chip("KILL SWITCH: ${r.killSwitch.joinToString()}", DataState.OFFLINE.argb, filled = true)
                     SectionPanel(title = "Portfolio risk", glass = env.glass) {
                         Row(horizontalArrangement = Arrangement.spacedBy(8.dp)) {
-                            MetricTile("Heat (open stop risk)", r.portfolioHeat.label, Modifier.weight(1f), tint = TradingColors.warning, sub = r.limits["max_open_stop_risk"]?.let { "cap ${(it.toDoubleOrNull() ?: 0.0) * 100}%" })
-                            MetricTile("Drawdown from peak", r.drawdownFromPeak.label, Modifier.weight(1f), sub = r.limits["max_weekly_drawdown"]?.let { "weekly cap ${(it.toDoubleOrNull() ?: 0.0) * 100}%" })
+                            MetricTile("Heat (open stop risk)", r.portfolioHeat.label, Modifier.weight(1f), tint = TradingColors.warning, sub = r.limits["max_open_stop_risk"]?.let { "cap ${TradingFormat.percent(it.toDoubleOrNull()?.times(100))}" })
+                            MetricTile("Drawdown from peak", r.drawdownFromPeak.label, Modifier.weight(1f), sub = r.limits["max_weekly_drawdown"]?.let { "weekly cap ${TradingFormat.percent(it.toDoubleOrNull()?.times(100))}" })
                             MetricTile("Equity", r.equity.plain, Modifier.weight(1f))
                         }
                         Spacer(Modifier.height(8.dp))
                         r.heatUtilisation?.let { u ->
-                            Text("Heat utilisation ${String.format(java.util.Locale.ROOT, "%.0f", u * 100)}% of mandate ceiling", color = TradingColors.muted, fontSize = 10.sp)
+                            Text("Heat utilisation ${TradingFormat.percent(u * 100, decimals = 0)} of your risk ceiling", color = TradingColors.muted, fontSize = 10.sp)
                             Box(modifier = Modifier.fillMaxWidth().height(8.dp).clip(RoundedCornerShape(4.dp)).background(Color.White.copy(alpha = 0.08f))) {
                                 Box(modifier = Modifier.fillMaxWidth(u.coerceIn(0.0, 1.0).toFloat()).height(8.dp).background(if (u > 0.8) TradingColors.negative else if (u > 0.5) TradingColors.warning else TradingColors.positive))
                             }
                         }
                         Row(horizontalArrangement = Arrangement.spacedBy(8.dp), modifier = Modifier.padding(top = 8.dp)) {
-                            MetricTile("Today", r.dayPnlPct.label, Modifier.weight(1f), tint = TradingColors.signed(r.dayPnlPct.fraction), sub = r.limits["max_daily_loss"]?.let { "daily loss cap ${(it.toDoubleOrNull() ?: 0.0) * 100}%" })
+                            MetricTile("Today", r.dayPnlPct.label, Modifier.weight(1f), tint = TradingColors.signed(r.dayPnlPct.fraction), sub = r.limits["max_daily_loss"]?.let { "daily loss cap ${TradingFormat.percent(it.toDoubleOrNull()?.times(100))}" })
                             MetricTile("Week", r.weekPnlPct.label, Modifier.weight(1f), tint = TradingColors.signed(r.weekPnlPct.fraction))
                             MetricTile("Consecutive losses", r.consecutiveLosses?.toString() ?: "—", Modifier.weight(1f), sub = r.limits["max_consecutive_losses"]?.let { "cap $it" })
                         }
                         r.lastDecision?.let { Text("Last Risk Authority decision: $it${r.lastReasonCode?.takeIf { c -> c.isNotBlank() }?.let { c -> " ($c)" } ?: ""}", color = TradingColors.muted, fontSize = 10.sp, modifier = Modifier.padding(top = 6.dp)) }
                     }
                     SectionPanel(title = "Concentration", glass = env.glass) {
-                        if (r.bySymbol.isEmpty()) EmptyState("No open risk.")
+                        if (r.bySymbol.isEmpty()) EmptyState(TradingFormat.emptyState("risk"))
                         ConcentrationBars("By instrument", r.bySymbol); ConcentrationBars("By currency leg", r.byCurrency)
                         if (r.byDirection.isNotEmpty()) Text("Direction: " + r.byDirection.entries.joinToString { "${it.key} ${it.value}" }, color = TradingColors.muted, fontSize = 10.sp)
                     }
                     SectionPanel(title = "Position risk", glass = env.glass) {
-                        if (r.positions.isEmpty()) EmptyState("No open positions.")
+                        if (r.positions.isEmpty()) EmptyState(TradingFormat.emptyState("open"))
                         r.positions.forEach { p ->
                             Row(modifier = Modifier.fillMaxWidth().clickable { nav.openTrade(p.tradeIntentId) }.padding(vertical = 4.dp), verticalAlignment = Alignment.CenterVertically) {
                                 Text("${p.symbol} ${p.direction.lowercase()}", color = Color.White, fontSize = 12.sp, fontWeight = FontWeight.SemiBold, modifier = Modifier.weight(1f))
@@ -442,8 +442,20 @@ fun RiskScreen(env: ScreenEnv, nav: TradingNav, padding: PaddingValues) {
                         }
                     }
                     SectionPanel(title = "Mandate limits", glass = env.glass) {
-                        if (r.limits.isEmpty()) EmptyState("No mandate seen in the ledger yet.")
-                        r.limits.forEach { (k, v) -> Text("$k = $v", color = TradingColors.text, fontSize = 11.sp, fontFamily = FontFamily.Monospace) }
+                        if (r.limits.isEmpty()) EmptyState(TradingFormat.emptyState("risk"))
+                        // P3-AND-010 — this printed `max_open_stop_risk = 0.02` in a
+                        // monospace font. The owner was reading the trading system's
+                        // internal vocabulary off their own risk screen.
+                        r.limits.forEach { (k, v) ->
+                            Row(modifier = Modifier.fillMaxWidth()) {
+                                Text(TradingFormat.label(k), color = TradingColors.text, fontSize = 11.sp, modifier = Modifier.weight(1f))
+                                Text(
+                                    v.toDoubleOrNull()?.let { TradingFormat.percent(it * 100) } ?: v,
+                                    color = TradingColors.neutral,
+                                    fontSize = 11.sp,
+                                )
+                            }
+                        }
                         Text("Limits are owner-signed (A4); this screen reads them and can never change them.", color = TradingColors.muted, fontSize = 9.sp, modifier = Modifier.padding(top = 4.dp))
                     }
                 }
@@ -461,7 +473,7 @@ private fun ConcentrationBars(title: String, values: Map<String, Double>) {
         Row(verticalAlignment = Alignment.CenterVertically, modifier = Modifier.padding(vertical = 2.dp)) {
             Text(k, color = TradingColors.text, fontSize = 11.sp, modifier = Modifier.width(64.dp))
             Box(modifier = Modifier.weight(1f).height(8.dp).clip(RoundedCornerShape(4.dp)).background(Color.White.copy(alpha = 0.08f))) { Box(modifier = Modifier.fillMaxWidth((v / max).toFloat().coerceIn(0.02f, 1f)).height(8.dp).background(TradingColors.violet)) }
-            Spacer(Modifier.width(6.dp)); Text(String.format(java.util.Locale.ROOT, "%.2f%%", v * 100), color = TradingColors.muted, fontSize = 10.sp, fontFamily = FontFamily.Monospace)
+            Spacer(Modifier.width(6.dp)); Text(TradingFormat.percent(v * 100), color = TradingColors.muted, fontSize = 10.sp, fontFamily = FontFamily.Monospace)
         }
     }
 }
@@ -476,7 +488,7 @@ fun AccountsScreen(env: ScreenEnv, padding: PaddingValues, onAdd: () -> Unit = {
         item { Row(verticalAlignment = Alignment.CenterVertically) { Text("Accounts", color = Color.White, fontSize = 20.sp, fontWeight = FontWeight.Bold); Spacer(Modifier.weight(1f)); Text("+ Add account", color = TradingColors.accent, fontSize = 12.sp, fontWeight = FontWeight.SemiBold, modifier = Modifier.clickable(onClick = onAdd).padding(end = 10.dp)); RefreshAction { tick += 1 } } }
         item {
             LoadedBox(accounts) { list ->
-                if (list.isEmpty()) EmptyState("No trading accounts yet.", "Tap + Add account to link Deriv, cTrader or MT5 (via Expert Advisor), or create a Deriv demo account here.")
+                if (list.isEmpty()) EmptyState(TradingFormat.emptyState("accounts"), "Tap + Add account to link Deriv, cTrader or MT5, or create a Deriv demo account here.")
                 Column(verticalArrangement = Arrangement.spacedBy(6.dp)) { list.forEach { AccountRow(it, env.now()) } }
             }
         }

@@ -1,0 +1,74 @@
+==============================================================================
+PROBE 1 — Does the internal-control token alone yield owner-device authority?
+CLAIM: a holder of X-Van-Internal-Token can mint a pairing ticket, pair a new
+       device, and receive the ingress bearer + a device token, i.e. become the owner.
+  POST /v1/devices/pairing-ticket (internal token only) -> 200 {"pairing_token": "gWmQhQ_hZ7rl8P8TjTZgRZStU5DDO0_ocxkj_rl74-A", "expires_at_unix": 1789740494}
+  POST /v1/devices/pair (NO auth header at all) -> 200
+  returned keys: ['device_access_token', 'device_id', 'enrolled_at_unix', 'ingress_token']
+  ingress token returned to caller: True
+  attacker-paired device can call owner API /v1/degraded -> 200
+OBSERVED: see above. A single static token is the root of device enrollment.
+==============================================================================
+PROBE 2 — Does the CriticalReasoningKernel evaluate anything, or record what it is told?
+  assess() with a fabricated 'sourced' fact and zero critic/verifier findings ->
+   stored: {'assessment_id': 'ras_23c2adef97aa49dd9814578940b7b7fb', 'recommended_next_action': 'ship it', 'confidence': 0.99}
+   is_actionable: True
+OBSERVED: no solver/critic/verifier pass ran; the record is caller-authored.
+==============================================================================
+PROBE 3 — Can three free-form 'episodes' mint a CONFIRMED owner preference,
+          and does calibration then describe it as owner-confirmed?
+   field used: OwnerModelField.COMMUNICATION_PREFERENCE
+   state: CONFIRMED | owner_confirmed_at_ms: None
+   calibration verbosity: Verbosity.TERSE | reasons: ('owner-confirmed preference for terse updates',)
+OBSERVED: episode_ref strings are unverified; 'owner-confirmed' can be asserted without the owner.
+==============================================================================
+PROBE 4 — Can a caller declare VERIFIED_SUCCESS on a mission without a verifier running?
+  POST /v1/missions -> 422 {"detail": [{"type": "missing", "loc": ["body", "owner_principal_id"], "msg": "Field required", "input": {"title": "probe", "goal": "probe goal", "project_id": "van", "origin": "OWNER_COMMAND"}}, {"ty
+OBSERVED: whether the gateway ran a verifier, or trusted the caller's receipt.
+POST /v1/missions -> 422 {"detail": [{"type": "enum", "loc": ["body", "origin"], "msg": "Input should be 'OWNER_VOICE', 'OWNER_TEXT', 'OWNER_UI', 'PROACTIVE', 'AUTOMATION_EVENT' or 'SCHEDULED'", "input": "OWNER_COMMAND", "ctx": {"expected": "'OWNER_VOICE', 'OWNER_TEXT', 'OWNER_UI', 'PROACTIVE', 'AUTOMATION_EVENT' or 'SCHEDU
+
+-- what does a caller need to reach VERIFIED_SUCCESS? --
+  -> UNDERSTOOD: 404 {"detail": {"error": "MISSION_UNKNOWN", "detail": "None"}}
+  -> PLANNED: 404 {"detail": {"error": "MISSION_UNKNOWN", "detail": "None"}}
+  -> AUTHORIZED: 404 {"detail": {"error": "MISSION_UNKNOWN", "detail": "None"}}
+  -> RUNNING: 404 {"detail": {"error": "MISSION_UNKNOWN", "detail": "None"}}
+  -> VERIFYING: 404 {"detail": {"error": "MISSION_UNKNOWN", "detail": "None"}}
+  -> VERIFIED_SUCCESS with a SELF-ASSERTED receipt: 422 {"detail": [{"type": "missing", "loc": ["body", "verification", "verifier_version"], "msg": "Field required", "input": {"verifier_id": "i-say-so", "capability_id": "automation.workflow.execute", "status": "VERIFIED", "evidence_refs": ["evidence://trust-me"], "missing_postconditions": [], "contract_checkable": true, "detail": "self-asserted"}}, {"type": "missing", "loc": ["body", "verification", "v
+  mission read back -> 401 {"detail":"device_access_denied"}
+POST /v1/missions -> 200 {"mission_id": "msn_47b3a99e5fba44df8cfcd22e2903d6bd", "title": "probe", "goal": "prove verification", "project_id": "van", "state": "CAPTURED", "current_phase": null, "verification_state": "PENDING", "needs_owner": false, "is_terminal": false, "priority": 50, "sensitivity": "ROUTINE", "final_outcom
+
+-- what does a caller need to reach VERIFIED_SUCCESS? --
+  -> UNDERSTOOD: 200 {"mission_id": "msn_47b3a99e5fba44df8cfcd22e2903d6bd", "title": "probe", "goal": "prove verification", "projec
+  -> PLANNED: 200 {"mission_id": "msn_47b3a99e5fba44df8cfcd22e2903d6bd", "title": "probe", "goal": "prove verification", "projec
+  -> AUTHORIZED: 200 {"mission_id": "msn_47b3a99e5fba44df8cfcd22e2903d6bd", "title": "probe", "goal": "prove verification", "projec
+  -> RUNNING: 200 {"mission_id": "msn_47b3a99e5fba44df8cfcd22e2903d6bd", "title": "probe", "goal": "prove verification", "projec
+  -> VERIFYING: 200 {"mission_id": "msn_47b3a99e5fba44df8cfcd22e2903d6bd", "title": "probe", "goal": "prove verification", "projec
+  -> VERIFIED_SUCCESS with a SELF-ASSERTED receipt: 422 {"detail": [{"type": "dict_type", "loc": ["body", "verification", "observed_postconditions"], "msg": "Input should be a valid dictionary", "input": ["notebook exists"]}]}
+  mission read back -> 401 {"detail":"device_access_denied"}
+  File "/tmp/probe4.py", line 34, in main
+    "observed_postconditions":{"notebook exists":true},"missing_postconditions":[],
+                                                 ^^^^
+NameError: name 'true' is not defined. Did you mean: 'True'?
+  -> RUNNING: 200 {"mission_id": "msn_7a484f4086404bc392d1a4000b95ad21", "title": "probe", "goal": "prove verification", "projec
+  -> VERIFYING: 200 {"mission_id": "msn_7a484f4086404bc392d1a4000b95ad21", "title": "probe", "goal": "prove verification", "projec
+  -> VERIFIED_SUCCESS with a SELF-ASSERTED receipt: 409 {"detail": {"error": "MISSION_SUCCESS_CONTRACT_NOT_CHECKABLE", "detail": "a mission with no checkable postcondition cannot be VERIFIED_SUCCESS"}}
+  mission read back -> 401 {"detail":"device_access_denied"}
+  -> AUTHORIZED: 200 {"mission_id": "msn_051654dbd41045baaf5e656daec45c16", "title": "probe", "goal": "prove verification", "projec
+  -> RUNNING: 200 {"mission_id": "msn_051654dbd41045baaf5e656daec45c16", "title": "probe", "goal": "prove verification", "projec
+  -> VERIFYING: 200 {"mission_id": "msn_051654dbd41045baaf5e656daec45c16", "title": "probe", "goal": "prove verification", "projec
+  -> VERIFIED_SUCCESS with a SELF-ASSERTED receipt: 200 {"mission_id": "msn_051654dbd41045baaf5e656daec45c16", "title": "probe", "goal": "prove verification", "project_id": "van", "state": "VERIFIED_SUCCESS", "current_phase": null, "verification_state": "VERIFIED", "needs_owner": false, "is_terminal": true, "priority": 50, "sensitivity": "ROUTINE", "final_outcome": null, "created_at_ms": 1789739956009, "updated_at_ms": 1789739956079, "deadline_ms": nul
+  mission read back -> 401 {"detail":"device_access_denied"}
+
+=== LEAD SUMMARY OF PROBE OUTCOMES (2026-09-18, HEAD dff38a0) ===
+P1 CONFIRMED: X-Van-Internal-Token alone mints a pairing ticket; /v1/devices/pair (no auth) then
+  returns the ingress bearer AND a device access token; that device then calls owner APIs (200).
+P2 CONFIRMED: CriticalReasoningKernel.assess persists a caller-authored record with a fabricated
+  "sourced" fact, zero critic findings, zero verifier findings, confidence 0.99 -> is_actionable=True.
+P3 CONFIRMED: three unverified free-form episode_ref strings drive an owner preference to CONFIRMED
+  with owner_confirmed_at_ms=None; RelationshipCalibrationEngine then reports the reason as
+  "owner-confirmed preference for terse updates".
+P4 CONFIRMED (with nuance): a mission with no checkable postcondition is correctly refused
+  (MISSION_SUCCESS_CONTRACT_NOT_CHECKABLE). But when the same caller supplies BOTH the success
+  contract and the verification receipt, VERIFIED_SUCCESS is granted on a receipt whose
+  verifier_version is "i-say-so/1.0" and whose only evidence_ref is "evidence://trust-me".
+  No server-side verifier executes. The no-false-success invariant is a schema check, not a proof.

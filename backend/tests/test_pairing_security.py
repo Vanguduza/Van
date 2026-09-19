@@ -24,6 +24,8 @@ def _env(tmp_path, monkeypatch):
     monkeypatch.setenv("VAN_DEVICE_SECRET_FERNET_KEY", Fernet.generate_key().decode())
     monkeypatch.setenv("VAN_INGRESS_TOKEN", INGRESS)
     monkeypatch.setenv("VAN_INTERNAL_CONTROL_TOKEN", INTERNAL)
+    # P0-SEC-001 — device enrolment is its own credential now.
+    monkeypatch.setenv("VAN_DEVICE_ENROLMENT_TOKEN", INTERNAL)
     get_settings.cache_clear()
     yield
     get_settings.cache_clear()
@@ -111,8 +113,12 @@ async def test_bearer_cannot_create_or_revoke_device_authority(app_client):
         headers=bearer,
         json=device_payload("direct-1", "secret-direct"),
     )
-    assert direct.status_code == 401
-    assert direct.json()["detail"] == "device_access_denied"
+    # P0-SEC-001 — an owner ingress bearer is authenticated but is not authority for
+    # device enrolment, and the refusal names the scope rather than pretending the caller
+    # is unauthenticated. Before, this route fell through to device authentication.
+    assert direct.status_code == 403
+    assert direct.json()["detail"] == "internal_control_unauthorized"
+    assert direct.json()["required_scope"] == "device_enrolment"
 
     ticket = await issue_ticket(ac)
     paired = await ac.post(
@@ -125,8 +131,8 @@ async def test_bearer_cannot_create_or_revoke_device_authority(app_client):
         "/v1/devices/paired-revoke/revoke",
         headers=bearer,
     )
-    assert denied_revoke.status_code == 401
-    assert denied_revoke.json()["detail"] == "device_access_denied"
+    assert denied_revoke.status_code == 403
+    assert denied_revoke.json()["required_scope"] == "device_enrolment"
 
     allowed_revoke = await ac.post(
         "/v1/devices/paired-revoke/revoke",

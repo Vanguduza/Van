@@ -7,6 +7,7 @@ from httpx import ASGITransport, AsyncClient
 from van_gateway.app import create_app
 from van_gateway.config import get_settings
 from van_gateway.google.service import GoogleService
+from van_gateway.google.transport import FakeGoogleTransport
 from van_gateway.storage.db import Store
 
 
@@ -18,6 +19,8 @@ def _env(tmp_path, monkeypatch):
     monkeypatch.setenv("VAN_DEVICE_SECRET_FERNET_KEY", Fernet.generate_key().decode())
     monkeypatch.setenv("VAN_INGRESS_TOKEN", "test-ingress-token-0123456789abcdef")
     monkeypatch.setenv("VAN_INTERNAL_CONTROL_TOKEN", "test-internal-token")
+    # P0-SEC-001 — device enrolment is its own credential now.
+    monkeypatch.setenv("VAN_DEVICE_ENROLMENT_TOKEN", "test-internal-token")
     get_settings.cache_clear()
     yield
     get_settings.cache_clear()
@@ -138,8 +141,12 @@ async def test_google_fake_transport_and_approval(client):
         },
     )
     assert connected.status_code == 200
-    enabled = await ac.post("/v1/google/test-transport", headers=headers)
-    assert enabled.status_code == 200
+    # Install the fake transport directly. There is deliberately no production route that
+    # does this: /v1/google/test-transport could swap a live transport for a fake on the
+    # running app with no undo (finding P2-SEC-009). The assertion this test exists for —
+    # that A4 send requires explicit approval — is unchanged.
+    _app.state.google.transport = FakeGoogleTransport()
+    _app.state.google.oauth = None
     denied = await ac.post("/v1/google/gmail/send", headers=headers, params={"draft_id": "d1", "approved": False})
     assert denied.status_code == 403
     ok = await ac.post("/v1/google/gmail/send", headers=headers, params={"draft_id": "d1", "approved": True})

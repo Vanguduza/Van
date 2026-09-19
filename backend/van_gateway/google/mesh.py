@@ -112,6 +112,15 @@ class CapabilityDescriptor:
     action_classes: tuple[str, ...]
     identity_alias: str
     notes: str
+    #: P2-GOOG-001 — what would actually run this: "gateway", "hermes", or None for a
+    #: surface nothing in VAN can execute. A capability with no executor is never routed
+    #: to, as a direct candidate or as a fallback. workspace_studio was selectable as the
+    #: fallback for workspace_operation with no implementation anywhere.
+    executor: str | None = None
+
+    @property
+    def executable(self) -> bool:
+        return bool(self.executor)
 
 
 class GoogleCapabilityRegistry:
@@ -134,6 +143,7 @@ class GoogleCapabilityRegistry:
                 action_classes=tuple(item.get("action_classes", ["A1", "A2"])),
                 identity_alias=str(item.get("identity_alias", self.default_identity)),
                 notes=item.get("notes", ""),
+                executor=item.get("executor"),
             )
             if descriptor.identity_alias != self.default_identity:
                 delegated = self.delegated_identities.get(descriptor.identity_alias)
@@ -307,6 +317,23 @@ class GoogleCapabilityRouter:
         skipped: list[GoogleCapabilityStatus] = []
         for descriptor in candidates:
             if request.action_class.value not in descriptor.action_classes:
+                continue
+            # P2-GOOG-001. A capability nothing can execute is not a route, and offering
+            # it as a fallback turns "the preferred surface is unavailable" into "the
+            # operation went somewhere" — which is worse than an honest refusal.
+            if not descriptor.executable:
+                skipped.append(
+                    GoogleCapabilityStatus(
+                        capability_id=descriptor.capability_id,
+                        family=descriptor.family,
+                        display_name=descriptor.display_name,
+                        credential_plane=descriptor.credential_plane,
+                        identity_alias=descriptor.identity_alias,
+                        state=GoogleCapabilityState.UNAVAILABLE,
+                        reason="no_executor_implemented",
+                        public_api=descriptor.public_api,
+                    )
+                )
                 continue
             status = await self.broker.capability_status(descriptor.capability_id, workspace=workspace)
             if status.state not in self.USABLE_STATES:
