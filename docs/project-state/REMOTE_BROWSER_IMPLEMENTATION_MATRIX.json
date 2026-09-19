@@ -519,8 +519,8 @@
       "id": "RB-018",
       "name": "cross-channel gesture state machine",
       "group": "protocol",
-      "status": "NOT_STARTED",
-      "built": false,
+      "status": "BUILT_UNWIRED",
+      "built": true,
       "wired": false,
       "reachable": false,
       "live": false,
@@ -530,12 +530,16 @@
       "certified": false,
       "component_refs": [],
       "ledger_expectation": "NONE",
-      "producer": null,
-      "consumer": null,
+      "producer": "PointerStateMachine",
+      "consumer": "the stream host's CDP input router",
       "authority": "docs/VAN_REMOTE_BROWSER_PRODUCTION_BLUEPRINT_REV_1_5.md \u00a78.4",
       "evidence_refs": [],
-      "tests": [],
-      "external_gates": [],
+      "tests": [
+        "backend/tests/test_browser_input_protocol.py"
+      ],
+      "external_gates": [
+        "a Browser Stream Host running the CDP input router (RB-010/RB-017)"
+      ],
       "transport_independent": false,
       "offline_voice_proven": null
     },
@@ -597,8 +601,8 @@
       "id": "RB-021",
       "name": "coordinate mapping",
       "group": "android",
-      "status": "NOT_STARTED",
-      "built": false,
+      "status": "BUILT_UNWIRED",
+      "built": true,
       "wired": false,
       "reachable": false,
       "live": false,
@@ -608,12 +612,16 @@
       "certified": false,
       "component_refs": [],
       "ledger_expectation": "NONE",
-      "producer": null,
-      "consumer": null,
+      "producer": "input_protocol.to_viewport_pixels",
+      "consumer": "the stream host's CDP input router",
       "authority": "docs/VAN_REMOTE_BROWSER_PRODUCTION_BLUEPRINT_REV_1_5.md \u00a78.6",
       "evidence_refs": [],
-      "tests": [],
-      "external_gates": [],
+      "tests": [
+        "backend/tests/test_browser_input_protocol.py"
+      ],
+      "external_gates": [
+        "a Browser Stream Host running the CDP input router (RB-010/RB-017)"
+      ],
       "transport_independent": false,
       "offline_voice_proven": null
     },
@@ -835,8 +843,8 @@
       "id": "RB-030",
       "name": "metered-network policy/data counter",
       "group": "android",
-      "status": "NOT_STARTED",
-      "built": false,
+      "status": "BUILT_UNWIRED",
+      "built": true,
       "wired": false,
       "reachable": false,
       "live": false,
@@ -846,12 +854,16 @@
       "certified": false,
       "component_refs": [],
       "ledger_expectation": "NONE",
-      "producer": null,
-      "consumer": null,
+      "producer": "BrowserQualityController metered ladder",
+      "consumer": "the Android quality surface",
       "authority": "docs/VAN_REMOTE_BROWSER_PRODUCTION_BLUEPRINT_REV_1_5.md \u00a727",
       "evidence_refs": [],
-      "tests": [],
-      "external_gates": [],
+      "tests": [
+        "backend/tests/test_browser_input_protocol.py"
+      ],
+      "external_gates": [
+        "a Browser Stream Host running the CDP input router (RB-010/RB-017)"
+      ],
       "transport_independent": false,
       "offline_voice_proven": null
     },
@@ -1318,8 +1330,8 @@
       "id": "RB-048",
       "name": "quality adaptation",
       "group": "streamhost",
-      "status": "NOT_STARTED",
-      "built": false,
+      "status": "BUILT_UNWIRED",
+      "built": true,
       "wired": false,
       "reachable": false,
       "live": false,
@@ -1329,12 +1341,16 @@
       "certified": false,
       "component_refs": [],
       "ledger_expectation": "NONE",
-      "producer": null,
-      "consumer": null,
+      "producer": "BrowserQualityController",
+      "consumer": "the stream host's encoder and the Android badge",
       "authority": "docs/VAN_REMOTE_BROWSER_PRODUCTION_BLUEPRINT_REV_1_5.md \u00a727",
       "evidence_refs": [],
-      "tests": [],
-      "external_gates": [],
+      "tests": [
+        "backend/tests/test_browser_input_protocol.py"
+      ],
+      "external_gates": [
+        "a Browser Stream Host running the CDP input router (RB-010/RB-017)"
+      ],
       "transport_independent": false,
       "offline_voice_proven": null
     },
