@@ -1,7 +1,12 @@
-# VAN Consolidated Deployment-Readiness Closure Blueprint — Rev 1
+# VAN Consolidated Deployment-Readiness Closure Blueprint — Rev 2
 
 **Repository:** `Vanguduza/Van`  
 **Implementation baseline:** `claude/van-system-audit-ysgtcd`  
+**Rev 2 changes:** measured the reachability claims rather than estimating them (§3.4), recorded
+the Appendix C run (§5.5), corrected the baseline-freeze procedure (§5.1), replaced the
+pre-created evidence tree with one that grows (Appendix D), added the environment split that
+decides which gates can close in CI at all (§4.1), and supplied a default for every owner
+decision the programme needs (§29).  
 **Purpose:** Consolidate the independent ChatGPT audit, the Opus whole-system audit/remediation work, the Independent Audit Brief, and the canonical VAN product architecture into one engineering authority for taking VAN from its current `0.5.0-dev` state to deployment readiness.
 
 **Primary completion doctrine:**  
@@ -255,11 +260,58 @@ For shipping capabilities, only:
 
 At final deployment readiness, applicable v1 functionality must be `E2E_VERIFIED`.
 
+## 3.4 Measured baseline (Rev 2)
+
+Rev 1 inherited an estimate. These are measurements, taken on the baseline branch with
+`tools/audit/entrypoint_reach.py` and `tools/audit/reachability.py`, and they materially
+change the size of Gate 2.
+
+**Gateway module reachability** — walking the import graph from `app.py`, `orchestrator.py`
+and `runtime_api.py`:
+
+```text
+163 modules total
+157 reachable from an owner-facing entry point
+  6 never imported by anything
+```
+
+The six dead modules are `automation.credentials`, `automation.events`, `automation.repair`,
+`context_compiler`, `context_compiler.compiler`, `reasoning.calibration`.
+
+**Symbol reachability inside reachable modules** — 271 module-level symbols considered, 20
+with no production reference (4 referenced nowhere at all, 16 only by their own tests).
+Trading: 246 symbols, 7 with no production reference.
+
+**Consequence.** The backend is substantially more wired than the component ledger implied.
+The ledger was written at audit time and not updated as gates closed, so it overstated the
+gap: of 65 rows carrying no terminal state, 21 have a production construction site today.
+Gate 2's backend scope is therefore approximately **6 dead modules and 27 unreferenced
+symbols**, not 46 unwired components.
+
+This does not shrink Gate 2 overall. The Android half is unchanged and remains the larger
+risk, because 68% of it has never been compiled and no equivalent measurement is possible
+until Gate 1 closes.
+
 ---
 
 # 4. Programme structure
 
 The programme is organized into 15 gates.
+
+## 4.1 Where each gate can close
+
+This matters more than the gate order, because a gate cannot be closed by an environment that
+cannot execute its evidence. Three environments exist and they are not interchangeable.
+
+| Environment | Can close | Cannot close |
+|---|---|---|
+| **CI / container** (no `dl.google.com`, no live dependencies) | Gates 0, 2, 3, 4, 5, 6, 13 and the code half of 7, 8, 9, 10, 11, 12 | Gate 1, Gate 14 |
+| **Developer machine** (full Android toolchain, emulator) | Gate 1 | Gate 14, live-dependency halves |
+| **Owner's deployment** (S24, Hermes, n8n, Stagehand, broker, Google) | Gate 14 and every live-dependency half | — |
+
+A gate that needs two environments has two exit gates, and the second is not optional. Marking
+such a gate "closed" on the strength of the first is the `EXTERNALLY_BLOCKED_REPOSITORY_COMPLETE`
+state and must be labelled as such, never as done.
 
 ```text
 Gate 0  — Canonical baseline and audit reconciliation
@@ -293,11 +345,30 @@ Create one authoritative implementation baseline and eliminate contradictory aud
 
 ### 5.1 Freeze the closure baseline
 
-Create `release/van-deployment-readiness` from the approved reconciled branch after owner review of the Claude audit branch.
+Create `release/van-deployment-readiness` from the approved reconciled branch after owner
+review of the Claude audit branch.
 
-Record repository, baseline branch, baseline SHA, creation time and owner authority.
+Record repository, baseline branch, baseline SHA, creation time and owner authority in
+`docs/project-state/RELEASE_BASELINE.json`.
 
 No remediation may proceed against `main` while relying on branch-only fixes.
+
+**Rev 2 correction — the plan cannot live on the baseline it freezes.** This document was
+committed directly onto `claude/van-system-audit-ysgtcd`, the branch it designates as the
+implementation baseline. A baseline that moves every time its own governing plan is edited is
+not frozen, and the SHA recorded in `RELEASE_BASELINE.json` would be invalidated by a
+typo fix in this file.
+
+The rule, from Rev 2 onward:
+
+- The baseline SHA is recorded against the **code**, and `RELEASE_BASELINE.json` names the
+  tree hash of the source directories, not the commit. A documentation commit does not
+  invalidate a frozen baseline; a source commit does.
+- Changes to this blueprint are reviewed as changes to a governing authority, not folded in
+  with implementation commits.
+
+`tools/ci/release_baseline.py` computes and verifies the tree hash, so this is checked rather
+than asserted.
 
 ### 5.2 Reconcile audit registers
 
@@ -335,13 +406,36 @@ CI requirements:
 - no two documents claim equal canonical ownership for the same invariant without precedence;
 - SHA-pinned documents are checked byte-for-byte.
 
+### 5.5 Appendix C run — result (Rev 2)
+
+Appendix C's branch-specific checks were executed on the baseline. Nine pass, one fails, two
+are open and known.
+
+| Check | Result |
+|---|---|
+| All remediation commits present and correctly ordered | PASS — 23 commits |
+| Scripted corruption fully reverted | PASS — zero corrupted files |
+| No residual missing delegated-property imports | PASS |
+| No contract test satisfied by a token in a comment | PASS |
+| `MissionBinder` and `CapabilityRouter` genuinely invoked | PASS — `app.py:387`, `app.py:357` |
+| Restored UI actions render through real Compose | PASS — `OverviewModule.kt:161` |
+| Android voice remains local-only | PASS |
+| No generic `createSpeechRecognizer()` | PASS — absent from the whole Android tree |
+| `SHERPA_PRIMARY_REQUIRED` cannot ship without Sherpa | **FAIL** — no dependency, no asset, no build guard |
+| Payment exception wired or deliberately removed | OPEN — see §29 decision 3 |
+| Flagged verifier/observer classes wired or deleted | OPEN — closed by Gate 2 |
+
+The failing check is resolved by §29 decisions 1 and 2, and by a build guard that makes the
+condition unshippable rather than merely documented.
+
 ## Exit gate
 
 - one baseline SHA;
 - one reconciled finding ledger;
 - one component ledger;
 - zero stale duplicate rows;
-- authority map passes CI.
+- authority map passes CI;
+- Appendix C fully green.
 
 ---
 
@@ -1208,6 +1302,27 @@ If a change makes a subsystem individually more capable but makes the whole VAN 
 
 ---
 
+# 29. Owner decisions, and the default taken where none was given
+
+The programme cannot proceed without answers to the following. Each carries the default this
+implementation pass adopted. Every one is reversible, and each names what to change if the
+owner decides otherwise.
+
+| # | Decision | Default taken | Reverse by |
+|---|---|---|---|
+| 1 | Minimum Android API | **Raise `minSdk` 26 → 31.** Below 31 there is no on-device recognizer API, so voice requires a Sherpa runtime that does not exist. Shipping 26 means shipping a VAN that cannot hear on some devices. | Lower `minSdk` and ship a Sherpa model; the policy branch already exists. |
+| 2 | Sherpa ASR | **Do not build it.** Raising `minSdk` removes the only path that requires it. The backend enum value stays, fail-closed, for a future re-lowering. | Add the dependency, the model asset, and a build guard asserting both. |
+| 3 | Payment exception | **Leave unwired, fail closed.** A payment path that has never executed is safer absent than newly written. | Wire `assert_payment_action_is_owner_approved` into an A4 native action path with a binding test. |
+| 4 | Unreachable cognition modules | **Wire, do not delete.** They implement documented product behaviour; deleting them would silently shrink the product. Each gets a production caller and an owner-visible projection. | Delete the module, its tests, its registry entry and the documentation that claims it. |
+| 5 | `context_compiler` | **Delete.** It duplicates `ContextRetrievalService`, which is on a live path. Two context compilers is how two answers to the same question appear. | Keep it and give it the entry point `ContextRetrievalService` has. |
+| 6 | `computer_use` fabric | **Delete.** It is a stub for a capability with no runtime, no route and no owner surface. | Build the runtime first; the fabric is the last piece, not the first. |
+| 7 | Postgres trading ledger | **Keep SQLite as the default, keep the Postgres path test-skipped.** Which ledger a deployment uses is a deployment decision; the gateway already refuses to guess. | Provision Postgres and set the connection; the adapter exists. |
+| 8 | Learning persistence across restart | **Do not persist demotions.** A capsule demoted for one bad session starts each run at its configured size, and the demotion is re-earned. Forgetting is the safe direction. | Persist the episode store and add an owner-visible "why is this strategy small" surface. |
+| 9 | Alert transport | **Compute the condition, do not choose a transport.** The alert rules evaluate and are served; paging is an owner deployment choice. | Configure a transport in the scheduler. |
+| 10 | Backup target | **Local-only by default, with the drill enabled.** A backup on the same disk is not a backup, and the repository must not pick the owner's offsite. | Set an offsite target; `tools/ops/backup.py` already takes one. |
+
+---
+
 # Appendix A — Immediate first execution packet
 
 Before broad feature work resumes, produce:
@@ -1263,7 +1378,16 @@ Before declaring the Claude audit branch canonical, explicitly verify:
 
 ---
 
-# Appendix D — Recommended certification artifact names
+# Appendix D — Certification artifact names
+
+**Rev 2 correction.** Rev 1 proposed creating all fifteen directories up front. Empty evidence
+directories are how a certification programme starts producing paperwork instead of evidence:
+they read as progress, they invite placeholder files, and a reviewer cannot tell an empty gate
+from an unstarted one.
+
+Each directory is created by the gate that fills it, in the commit that closes it, and CI
+fails on a directory that exists without a `gate.json`. The names are fixed in advance so they
+are predictable; the directories are not.
 
 ```text
 artifacts/certification/gate-00-baseline/
