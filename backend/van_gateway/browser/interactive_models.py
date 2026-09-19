@@ -27,6 +27,7 @@ from van_gateway.browser.models import ProfileLeaseHolderKind
 
 __all__ = [
     "ALLOWED_TRANSITIONS",
+    "ALWAYS_REACHABLE",
     "BrowserControlHolder",
     "BrowserControlLease",
     "BrowserDownload",
@@ -116,11 +117,25 @@ ALLOWED_TRANSITIONS: dict[InteractiveSessionState, frozenset[InteractiveSessionS
 }
 
 
+#: Reachable from every non-terminal state, whatever the ladder says.
+#:
+#: FAILED, because something can always go wrong. TERMINATING, because the owner can always
+#: close a browser — including one that never connected, which the first version of this
+#: table forbade: a session stuck in AUTHORIZED because the stream host never answered could
+#: not be closed at all, only abandoned. Calling that outcome FAILED would have been worse
+#: than a wrong state name, since a session the owner deliberately closed is not a failure
+#: and would have shown up on the degraded surface as one.
+ALWAYS_REACHABLE = frozenset({
+    InteractiveSessionState.FAILED,
+    InteractiveSessionState.TERMINATING,
+})
+
+
 def may_transition(current: InteractiveSessionState, target: InteractiveSessionState) -> bool:
-    """§5.2. FAILED is reachable from any non-terminal state; nothing is reachable from a terminal one."""
+    """§5.2. Nothing is reachable from a terminal state, in either direction."""
     if current.is_terminal:
         return False
-    if target is InteractiveSessionState.FAILED:
+    if target in ALWAYS_REACHABLE:
         return True
     return target in ALLOWED_TRANSITIONS[current]
 

@@ -2,6 +2,7 @@ from __future__ import annotations
 
 from contextlib import asynccontextmanager
 import hmac
+import json
 import shutil
 import time
 from typing import Any
@@ -72,6 +73,17 @@ from van_gateway.automation.grants import RunGrantService
 from van_gateway.automation.health import AutomationHealthApi
 from van_gateway.automation.registry import AutomationRegistry, HotWorkflowIndex
 from van_gateway.browser.api import BrowserApi
+from van_gateway.browser.control_lease import ControlLeaseService
+from van_gateway.browser.interactive_api import (
+    build_interactive_router,
+    is_interactive_browser_owner_route,
+)
+from van_gateway.browser.interactive_service import InteractiveSessionService
+from van_gateway.browser.stream_grants import (
+    SigningKey,
+    StreamGrantService,
+    StreamGrantSigner,
+)
 from van_gateway.browser.worker import AdapterBackedWorker
 from van_gateway.capability.models import ReadinessSource
 from van_gateway.capability.readiness import (
@@ -269,6 +281,27 @@ GOOGLE_CONTROL_ROUTES: frozenset[str] = frozenset({
 })
 
 
+def _read_stream_signing_key(path: str) -> str:
+    """Load the grant-signing key from disk (§5.5: it never leaves the Gateway host).
+
+    A missing or unreadable file raises rather than falling back to a generated key. A
+    gateway that quietly generates its own would mint grants the stream host cannot verify,
+    and the failure would appear as "the browser will not connect" on the owner's phone
+    rather than as a misconfiguration here.
+    """
+    return Path(path).read_text(encoding="utf-8")
+
+
+def _parse_ice_servers(raw: str) -> list[dict]:
+    """Deployment configuration. Malformed JSON is empty rather than fatal: no ICE server
+    means direct connectivity only, which is a degraded browser, not a broken gateway."""
+    try:
+        parsed = json.loads(raw or "[]")
+    except json.JSONDecodeError:
+        return []
+    return parsed if isinstance(parsed, list) else []
+
+
 def create_app() -> FastAPI:
     settings = get_settings()
     store = Store(settings.database_path)
@@ -386,6 +419,31 @@ def create_app() -> FastAPI:
     # Constructed before the mission service, which publishes every owner-visible
     # mission event to it (P0-EXEC-001).
     events = EventBus(store, settings.event_page_size)
+    # Rev 1.5 §§5, 6 — the interactive browser session.
+    #
+    # It shares the Browser Fabric's broker and policy engine rather than constructing its
+    # own: ADR-RB-005 says the existing fabric owns browser authority, and two brokers would
+    # mean two answers to "who holds this profile".
+    browser_control_leases = ControlLeaseService(store)
+    interactive_sessions = InteractiveSessionService(
+        store, browser.broker, browser_control_leases, events=events,
+    )
+    # §5.5 — a dedicated ES256 key, separate from owner approval and device enrolment.
+    # Absent configuration means grants cannot be minted, which is the honest state of a
+    # deployment with no stream host: the routes refuse rather than issuing a credential
+    # nothing can verify.
+    browser_stream_grants = (
+        StreamGrantService(
+            store,
+            StreamGrantSigner(SigningKey(
+                kid=settings.browser_stream_signing_kid,
+                private_pem=_read_stream_signing_key(settings.browser_stream_signing_key_file),
+            )),
+        )
+        if settings.browser_stream_signing_key_file
+        else None
+    )
+
     # P0-VERIFY-001 — the registry that performs verification, rather than a receipt
     # the claimant writes. Built before the service because the service fails closed
     # without it.
@@ -682,6 +740,19 @@ def create_app() -> FastAPI:
     app.include_router(automation_health.router)
     app.include_router(automation.router)
     app.include_router(browser.router)
+    if browser_stream_grants is not None:
+        app.include_router(build_interactive_router(
+            sessions=interactive_sessions,
+            control=browser_control_leases,
+            grants=browser_stream_grants,
+            signal_url=settings.browser_stream_signal_url,
+            ice_servers=_parse_ice_servers(settings.browser_stream_ice_servers),
+            mission_binder=mission_binder,
+            audit=audit,
+        ))
+    app.state.interactive_sessions = interactive_sessions
+    app.state.browser_control_leases = browser_control_leases
+    app.state.browser_stream_grants = browser_stream_grants
     app.include_router(mission_api.router)
     app.include_router(understanding_api.router)
 
@@ -717,6 +788,13 @@ def create_app() -> FastAPI:
             path in ("/v1/technology-radar", "/v1/eval", "/v1/autonomy")
         ):
             return ControlScope.UNDERSTANDING if path == "/v1/understanding/observe" else None
+        if is_interactive_browser_owner_route(path):
+            # Rev 1.5 §6.1 — the owner's phone creates, heartbeats and closes its own
+            # browser session, so these are device-authenticated rather than Hermes-only.
+            # One predicate, two readers: a route classified here and not below would fall
+            # through to owner-device authentication on a Hermes surface, which is the hole
+            # P0-SEC-001 closed and P2-GOOG-004 nearly reopened.
+            return None
         if path.startswith("/v1/browser/"):
             return None if method == "GET" else ControlScope.BROWSER
         if method == "PUT" and path.startswith("/v1/projects/") and path.endswith("/truth"):
@@ -737,65 +815,6 @@ def create_app() -> FastAPI:
             return ControlScope.GOOGLE
         return None
 
-    def internal_control_route(method: str, path: str) -> bool:
-        if path.startswith("/v1/runtime/"):
-            return True
-        # Rev 1.3 §219 — automation/browser health is an internal control surface;
-        # it exposes runtime identity and governance state, never an owner route.
-        # P2-CU-001 adds the computer-use fabric on the same terms: it reports which
-        # surfaces have a worker, which is runtime shape, not owner-facing work.
-        if path in {
-            "/v1/automation/health", "/v1/browser/health", "/v1/computer-use/health",
-        }:
-            return True
-        # Gate 11. The operator surface is internal control; device telemetry is not,
-        # for the reason given in control_scope_for.
-        if path.startswith("/v1/observability/") and path != "/v1/observability/device-telemetry":
-            return True
-        # §§219-222 — the whole automation control surface is Hermes-only. It never
-        # accepts owner ingress, so a compromised ingress token cannot compile,
-        # admit or publish a capability.
-        if path.startswith("/v1/automation/"):
-            return True
-        # §§2.3, 43 — the mission read model is owner-facing; planning is not.
-        # Cancel and message are the two mutations that are the owner's to make.
-        if path.startswith("/v1/missions") or path in ("/v1/needs-you", "/v1/activity",
-                                                        "/v1/capabilities/status"):
-            if method == "GET":
-                return False
-            return not (path.endswith("/cancel") or path.endswith("/message"))
-        # §§33, 63.6 — the Understanding surface is the owner's. Hermes may
-        # observe; only the owner confirms, corrects, rejects or reverts.
-        if path.startswith("/v1/understanding") or path.startswith("/v1/permissions") or (
-            path in ("/v1/technology-radar", "/v1/eval", "/v1/autonomy")
-        ):
-            # §36 — revoking a permission is emphatically the owner's, so the
-            # only internal-control route on this surface is Hermes observing.
-            return path == "/v1/understanding/observe"
-        # Owner Android may inspect browser truth through authenticated GETs.
-        # Browser mutations/assignments remain Hermes internal-control only.
-        if path.startswith("/v1/browser/"):
-            return method != "GET"
-        if method == "PUT" and path.startswith("/v1/projects/") and path.endswith("/truth"):
-            return True
-        if method == "POST" and path in {
-            "/v1/devices/enroll",
-            "/v1/devices/pairing-ticket",
-        }:
-            return True
-        if method == "POST" and path.startswith("/v1/devices/") and path.endswith("/revoke"):
-            return True
-        if method == "POST" and path == "/v1/trading/halt":
-            return True
-        if method == "POST" and path.startswith("/v1/trading/tickets/") and path.endswith("/confirm"):
-            return True
-        # The test-transport route that used to sit at the head of this set is gone
-        # (P2-SEC-009); leaving its name in the allow-list would be dead policy for a
-        # route that no longer exists.
-        if path in GOOGLE_CONTROL_ROUTES:
-            return True
-        return path.startswith("/v1/google/jobs/")
-
     def throttled_response(detail: str, locked: Throttled) -> JSONResponse:
         """429 with the one header a client can actually act on."""
         return JSONResponse(
@@ -803,6 +822,18 @@ def create_app() -> FastAPI:
             content={"detail": detail, "retry_after_seconds": locked.retry_after_seconds},
             headers={"Retry-After": str(locked.retry_after_seconds)},
         )
+
+    # `internal_control_route` used to live here: a second copy of the route
+    # classification that once let the internal token bypass the device gate. P0-SEC-001
+    # replaced that mechanism with `control_scope_for` plus scoped credentials, and left
+    # this behind. A repository-wide search finds no caller — not in the middleware, not in
+    # a handler, not in a test — so it has been decided-by-nobody since that closure.
+    #
+    # It was deleted rather than updated when the interactive browser routes were added.
+    # A mutation removing the exemption I had just written into it changed nothing, which
+    # is how it was found: a guard whose removal is undetectable is not protecting
+    # anything. Keeping it would have meant two classifiers to edit and one of them
+    # silently ignored, which is exactly how the Rev 1.3 drift this programme closed began.
 
     @app.middleware("http")
     async def require_ingress_auth(request: Request, call_next):

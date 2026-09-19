@@ -348,6 +348,29 @@ ALL = [
     'last = events[-1]["seq"] if events else max(ceiling, after_seq)',
     "C23 the cursor sticks behind another device\'s rows"),
  ]),
+ # --- checkpoint 24: the owner's browser routes ---------------------------------
+ (["tests/test_interactive_browser_api.py"], [
+   ("van_gateway/app.py",
+    "        if is_interactive_browser_owner_route(path):\n            # Rev 1.5 §6.1",
+    "        if False:\n            # Rev 1.5 §6.1",
+    "C24 the interactive routes fall back to the Hermes-only scope"),
+   ("van_gateway/browser/interactive_api.py",
+    "        if session.owner_device_id != device_id:",
+    "        if False:",
+    "C24 any paired device can drive the owner's browser session"),
+   ("van_gateway/browser/interactive_api.py",
+    '    return path == INTERACTIVE_SESSION_PREFIX or path.startswith(INTERACTIVE_SESSION_PREFIX + "/")',
+    "    return path.startswith(INTERACTIVE_SESSION_PREFIX)",
+    "C24 a look-alike path is treated as the owner's session surface"),
+   ("van_gateway/app.py",
+    "    if browser_stream_grants is not None:\n        app.include_router(build_interactive_router(",
+    "    if True:\n        app.include_router(build_interactive_router(",
+    "C24 the routes mount with no signing key configured"),
+   ("van_gateway/browser/interactive_api.py",
+    '            raise HTTPException(status_code=404, detail="interactive_session_unknown")\n        return session',
+    "            pass\n        return session",
+    "C24 the ownership refusal is reported and then ignored"),
+ ]),
 ]
 
 APP_KT = "android/app/src/main/java/com/dial/van"

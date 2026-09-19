@@ -125,10 +125,10 @@
       "id": "RB-004",
       "name": "schema migration 27",
       "group": "gateway",
-      "status": "NOT_STARTED",
-      "built": false,
-      "wired": false,
-      "reachable": false,
+      "status": "WIRED_UNPROVEN",
+      "built": true,
+      "wired": true,
+      "reachable": true,
       "live": false,
       "verified": false,
       "observed": false,
@@ -136,12 +136,17 @@
       "certified": false,
       "component_refs": [],
       "ledger_expectation": "NONE",
-      "producer": null,
-      "consumer": null,
+      "producer": "backend/van_gateway/storage/db.py MIGRATION_27",
+      "consumer": "every Remote Browser service",
       "authority": "docs/VAN_REMOTE_BROWSER_PRODUCTION_BLUEPRINT_REV_1_5.md \u00a75.6",
       "evidence_refs": [],
-      "tests": [],
-      "external_gates": [],
+      "tests": [
+        "backend/tests/test_interactive_browser_session.py",
+        "backend/tests/test_interactive_browser_api.py"
+      ],
+      "external_gates": [
+        "a Browser Stream Host that can answer the signalling URL (RB-010)"
+      ],
       "transport_independent": true,
       "offline_voice_proven": null
     },
@@ -151,10 +156,10 @@
       "id": "RB-005",
       "name": "renewable profile lease",
       "group": "gateway",
-      "status": "NOT_STARTED",
-      "built": false,
-      "wired": false,
-      "reachable": false,
+      "status": "WIRED_UNPROVEN",
+      "built": true,
+      "wired": true,
+      "reachable": true,
       "live": false,
       "verified": false,
       "observed": false,
@@ -162,12 +167,17 @@
       "certified": false,
       "component_refs": [],
       "ledger_expectation": "NONE",
-      "producer": null,
-      "consumer": null,
+      "producer": "BrowserSessionBroker.acquire_lease",
+      "consumer": "InteractiveSessionService.create/heartbeat",
       "authority": "docs/VAN_REMOTE_BROWSER_PRODUCTION_BLUEPRINT_REV_1_5.md \u00a75.3",
       "evidence_refs": [],
-      "tests": [],
-      "external_gates": [],
+      "tests": [
+        "backend/tests/test_interactive_browser_session.py",
+        "backend/tests/test_interactive_browser_api.py"
+      ],
+      "external_gates": [
+        "a Browser Stream Host that can answer the signalling URL (RB-010)"
+      ],
       "transport_independent": true,
       "offline_voice_proven": null
     },
@@ -177,10 +187,10 @@
       "id": "RB-006",
       "name": "InteractiveBrowserSession",
       "group": "gateway",
-      "status": "NOT_STARTED",
-      "built": false,
-      "wired": false,
-      "reachable": false,
+      "status": "WIRED_UNPROVEN",
+      "built": true,
+      "wired": true,
+      "reachable": true,
       "live": false,
       "verified": false,
       "observed": false,
@@ -188,12 +198,17 @@
       "certified": false,
       "component_refs": [],
       "ledger_expectation": "NONE",
-      "producer": null,
-      "consumer": null,
+      "producer": "InteractiveSessionService.create",
+      "consumer": "POST /v1/browser/interactive-sessions",
       "authority": "docs/VAN_REMOTE_BROWSER_PRODUCTION_BLUEPRINT_REV_1_5.md \u00a75.1",
       "evidence_refs": [],
-      "tests": [],
-      "external_gates": [],
+      "tests": [
+        "backend/tests/test_interactive_browser_session.py",
+        "backend/tests/test_interactive_browser_api.py"
+      ],
+      "external_gates": [
+        "a Browser Stream Host that can answer the signalling URL (RB-010)"
+      ],
       "transport_independent": true,
       "offline_voice_proven": null
     },
@@ -203,10 +218,10 @@
       "id": "RB-007",
       "name": "BrowserControlLease",
       "group": "gateway",
-      "status": "NOT_STARTED",
-      "built": false,
-      "wired": false,
-      "reachable": false,
+      "status": "WIRED_UNPROVEN",
+      "built": true,
+      "wired": true,
+      "reachable": true,
       "live": false,
       "verified": false,
       "observed": false,
@@ -214,12 +229,17 @@
       "certified": false,
       "component_refs": [],
       "ledger_expectation": "NONE",
-      "producer": null,
-      "consumer": null,
+      "producer": "ControlLeaseService.issue",
+      "consumer": "take-control / delegate-control routes",
       "authority": "docs/VAN_REMOTE_BROWSER_PRODUCTION_BLUEPRINT_REV_1_5.md \u00a75.4",
       "evidence_refs": [],
-      "tests": [],
-      "external_gates": [],
+      "tests": [
+        "backend/tests/test_interactive_browser_session.py",
+        "backend/tests/test_interactive_browser_api.py"
+      ],
+      "external_gates": [
+        "a Browser Stream Host that can answer the signalling URL (RB-010)"
+      ],
       "transport_independent": true,
       "offline_voice_proven": null
     },
@@ -229,10 +249,10 @@
       "id": "RB-008",
       "name": "P-256 BrowserStreamGrant + rotation",
       "group": "gateway",
-      "status": "NOT_STARTED",
-      "built": false,
-      "wired": false,
-      "reachable": false,
+      "status": "WIRED_UNPROVEN",
+      "built": true,
+      "wired": true,
+      "reachable": true,
       "live": false,
       "verified": false,
       "observed": false,
@@ -240,12 +260,17 @@
       "certified": false,
       "component_refs": [],
       "ledger_expectation": "NONE",
-      "producer": null,
-      "consumer": null,
+      "producer": "StreamGrantService.mint",
+      "consumer": "POST /v1/browser/interactive-sessions/{id}/stream-grant",
       "authority": "docs/VAN_REMOTE_BROWSER_PRODUCTION_BLUEPRINT_REV_1_5.md \u00a75.5",
       "evidence_refs": [],
-      "tests": [],
-      "external_gates": [],
+      "tests": [
+        "backend/tests/test_interactive_browser_session.py",
+        "backend/tests/test_interactive_browser_api.py"
+      ],
+      "external_gates": [
+        "a Browser Stream Host that can answer the signalling URL (RB-010)"
+      ],
       "transport_independent": true,
       "offline_voice_proven": null
     },
@@ -255,10 +280,10 @@
       "id": "RB-009",
       "name": "Gateway session API",
       "group": "gateway",
-      "status": "NOT_STARTED",
-      "built": false,
-      "wired": false,
-      "reachable": false,
+      "status": "WIRED_UNPROVEN",
+      "built": true,
+      "wired": true,
+      "reachable": true,
       "live": false,
       "verified": false,
       "observed": false,
@@ -266,12 +291,17 @@
       "certified": false,
       "component_refs": [],
       "ledger_expectation": "NONE",
-      "producer": null,
-      "consumer": null,
+      "producer": "build_interactive_router",
+      "consumer": "the owner's device",
       "authority": "docs/VAN_REMOTE_BROWSER_PRODUCTION_BLUEPRINT_REV_1_5.md \u00a734",
       "evidence_refs": [],
-      "tests": [],
-      "external_gates": [],
+      "tests": [
+        "backend/tests/test_interactive_browser_session.py",
+        "backend/tests/test_interactive_browser_api.py"
+      ],
+      "external_gates": [
+        "a Browser Stream Host that can answer the signalling URL (RB-010)"
+      ],
       "transport_independent": true,
       "offline_voice_proven": null
     },
@@ -671,8 +701,8 @@
       "id": "RB-025",
       "name": "orientation/viewport ack",
       "group": "android",
-      "status": "NOT_STARTED",
-      "built": false,
+      "status": "BUILT_UNWIRED",
+      "built": true,
       "wired": false,
       "reachable": false,
       "live": false,
@@ -686,8 +716,12 @@
       "consumer": null,
       "authority": "docs/VAN_REMOTE_BROWSER_PRODUCTION_BLUEPRINT_REV_1_5.md \u00a712",
       "evidence_refs": [],
-      "tests": [],
-      "external_gates": [],
+      "tests": [
+        "backend/tests/test_interactive_browser_api.py"
+      ],
+      "external_gates": [
+        "a Browser Stream Host that can answer the signalling URL (RB-010)"
+      ],
       "transport_independent": false,
       "offline_voice_proven": null
     },
@@ -905,10 +939,10 @@
       "id": "RB-034",
       "name": "realtime event migration/filtering",
       "group": "session",
-      "status": "NOT_STARTED",
-      "built": false,
-      "wired": false,
-      "reachable": false,
+      "status": "WIRED_UNPROVEN",
+      "built": true,
+      "wired": true,
+      "reachable": true,
       "live": false,
       "verified": false,
       "observed": false,
@@ -916,12 +950,17 @@
       "certified": false,
       "component_refs": [],
       "ledger_expectation": "NONE",
-      "producer": null,
-      "consumer": null,
+      "producer": "EventBus.publish(target_device_id=...)",
+      "consumer": "EventBus.replay device filter",
       "authority": "docs/VAN_REMOTE_BROWSER_PRODUCTION_BLUEPRINT_REV_1_5.md \u00a75.6",
       "evidence_refs": [],
-      "tests": [],
-      "external_gates": [],
+      "tests": [
+        "backend/tests/test_interactive_browser_session.py",
+        "backend/tests/test_interactive_browser_api.py"
+      ],
+      "external_gates": [
+        "a Browser Stream Host that can answer the signalling URL (RB-010)"
+      ],
       "transport_independent": true,
       "offline_voice_proven": null
     },
@@ -1196,10 +1235,10 @@
       "id": "RB-045",
       "name": "InteractiveBrowserSession Mission binding",
       "group": "mission",
-      "status": "NOT_STARTED",
-      "built": false,
-      "wired": false,
-      "reachable": false,
+      "status": "WIRED_UNPROVEN",
+      "built": true,
+      "wired": true,
+      "reachable": true,
       "live": false,
       "verified": false,
       "observed": false,
@@ -1207,12 +1246,17 @@
       "certified": false,
       "component_refs": [],
       "ledger_expectation": "NONE",
-      "producer": null,
-      "consumer": null,
+      "producer": "MissionBinder.bind_browser_session",
+      "consumer": "session creation with a mission_id",
       "authority": "docs/VAN_REMOTE_BROWSER_PRODUCTION_BLUEPRINT_REV_1_5.md \u00a723",
       "evidence_refs": [],
-      "tests": [],
-      "external_gates": [],
+      "tests": [
+        "backend/tests/test_interactive_browser_session.py",
+        "backend/tests/test_interactive_browser_api.py"
+      ],
+      "external_gates": [
+        "a Browser Stream Host that can answer the signalling URL (RB-010)"
+      ],
       "transport_independent": false,
       "offline_voice_proven": null
     },
@@ -3140,7 +3184,9 @@
       "tests": [
         "tests/contracts/test_remote_browser_matrix.py"
       ],
-      "external_gates": [],
+      "external_gates": [
+        "a Browser Stream Host that can answer the signalling URL (RB-010)"
+      ],
       "transport_independent": true,
       "offline_voice_proven": null,
       "note": "The bridge reads this matrix and enforces \u00a740.3's status\u2192ledger mapping inside the existing reconciliation gate. It becomes evidenced when CI has executed it."
@@ -3221,7 +3267,9 @@
       "tests": [
         "tests/contracts/test_remote_browser_matrix.py"
       ],
-      "external_gates": [],
+      "external_gates": [
+        "a Browser Stream Host that can answer the signalling URL (RB-010)"
+      ],
       "transport_independent": true,
       "offline_voice_proven": null,
       "note": "A contract test pins the four \u00a70F corrections, so a later edit that reintroduces the stale text fails rather than being argued about."

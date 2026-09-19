@@ -173,6 +173,25 @@ class Settings(BaseSettings):
     #: night it matters.
     backup_drill_interval_seconds: int = 604_800
 
+    # ---- Remote Browser Rev 1.5 -------------------------------------------------
+    #
+    # Empty is the honest default. There is no Browser Stream Host in this deployment
+    # until the owner provisions one (RB-002/RB-010), and a gateway that invents a signal
+    # URL would hand the phone an endpoint that does not answer — §42.5's "integrated
+    # because a dependency exists", one layer down.
+    #: PEM file holding the dedicated ES256 grant-signing private key (§5.5). Empty means
+    #: no grant can be minted, so the interactive routes are not mounted at all.
+    browser_stream_signing_key_file: str = ""
+    #: Mandatory `kid`. Rotation keeps the previous verifier for an overlap window on the
+    #: stream host; the Gateway signs with exactly one.
+    browser_stream_signing_kid: str = "browser-stream-signing-1"
+    #: Where the device performs SDP/ICE signalling. §6.4: never `van-trading-core`, which
+    #: is private and holds the Browser Fabric's authority.
+    browser_stream_signal_url: str = ""
+    #: JSON array of ICE servers, passed through to the device verbatim. Deployment
+    #: configuration, not owner authority.
+    browser_stream_ice_servers: str = "[]"
+
 
 @lru_cache
 def get_settings() -> Settings:
