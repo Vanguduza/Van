@@ -31,6 +31,7 @@ import androidx.compose.material3.Text
 import androidx.compose.material3.TextButton
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.DisposableEffect
+import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
@@ -148,6 +149,8 @@ private fun OnboardingFlow(onComplete: () -> Unit) {
     val app = context.applicationContext as VanApplication
     val scope = rememberCoroutineScope()
     val scroll = rememberScrollState()
+    val bootstrapPairingToken = (context as? OnboardingActivity)?.intent
+        ?.getStringExtra("van.bootstrap_pairing_token").orEmpty()
 
     // P3-AND-007 — survives rotation. Which optional steps the owner chose to pass is a
     // decision they made, and making them make it again is how a flow gets abandoned.
@@ -187,6 +190,32 @@ private fun OnboardingFlow(onComplete: () -> Unit) {
         skipped = skipped.mapNotNull { id -> OnboardingStep.entries.firstOrNull { it.id == id } }.toSet(),
     )
     val view = OnboardingPlan.view(step, grants)
+
+    suspend fun pairOwnerS24() {
+        pairing = true
+        pairingError = null
+        runCatching {
+            app.gatewayClient.pairThisDevice(
+                gatewayUrl = app.gatewayClient.baseUrl,
+                pairingToken = bootstrapPairingToken,
+                label = "owner-s24-ultra",
+            )
+        }.onFailure { pairingError = pairingMessage(it) }
+        pairing = false
+        refresh()
+    }
+
+    // The owner build is preconfigured. The one-time bootstrap token is supplied by the
+    // administrative install path, never typed into the UI and never stored in source.
+    LaunchedEffect(step, bootstrapPairingToken, grants.paired) {
+        if (
+            step == OnboardingStep.PAIRING &&
+            !grants.paired &&
+            bootstrapPairingToken.isNotBlank()
+        ) {
+            pairOwnerS24()
+        }
+    }
 
     Column(
         modifier = Modifier
@@ -254,18 +283,12 @@ private fun OnboardingFlow(onComplete: () -> Unit) {
             },
             content = {
                 if (step == OnboardingStep.PAIRING) {
-                    PairingForm(
+                    SecurePairingStatus(
                         busy = pairing,
                         error = pairingError,
-                        onPair = { url, code ->
-                            pairing = true
-                            pairingError = null
-                            scope.launch {
-                                runCatching { app.gatewayClient.pairThisDevice(url, code) }
-                                    .onFailure { pairingError = pairingMessage(it) }
-                                pairing = false
-                                refresh()
-                            }
+                        bootstrapReady = bootstrapPairingToken.isNotBlank(),
+                        onRetry = {
+                            scope.launch { pairOwnerS24() }
                         },
                     )
                 }
@@ -280,44 +303,30 @@ private fun pairingMessage(error: Throwable): String = when (error.message) {
     "pairing_response_missing_ingress_token",
     "pairing_response_missing_device_access_token",
     -> "The gateway answered but did not send the keys this phone needs. Try generating a new code."
-    else -> "Van could not reach that address. Check it is the gateway's address and that the code has not expired."
+    else -> "Van could not establish the secure owner connection to Hermes. The address is built into this owner APK."
 }
 
 @Composable
-private fun PairingForm(
+private fun SecurePairingStatus(
     busy: Boolean,
     error: String?,
-    onPair: (url: String, code: String) -> Unit,
+    bootstrapReady: Boolean,
+    onRetry: () -> Unit,
 ) {
-    // Saved, so a rotation mid-pairing does not make the owner re-type an address and a
-    // one-time code from another screen.
-    var url by rememberSaveable { mutableStateOf("") }
-    var code by rememberSaveable { mutableStateOf("") }
-
     Column(verticalArrangement = Arrangement.spacedBy(8.dp)) {
-        OutlinedTextField(
-            value = url,
-            onValueChange = { url = it },
-            label = { Text("Gateway address") },
-            placeholder = { Text("https://…") },
-            singleLine = true,
-            modifier = Modifier.fillMaxWidth(),
+        Text(
+            when {
+                busy -> "Connecting this S24 to Hermes…"
+                error != null -> error
+                bootstrapReady -> "Secure owner enrollment is ready. Connecting automatically…"
+                else -> "Waiting for secure owner-device enrollment from the administrative install path."
+            },
+            color = if (error != null) MaterialTheme.colorScheme.error else MaterialTheme.colorScheme.onSurfaceVariant,
         )
-        OutlinedTextField(
-            value = code,
-            onValueChange = { code = it },
-            label = { Text("Pairing code") },
-            singleLine = true,
-            visualTransformation = PasswordVisualTransformation(),
-            modifier = Modifier.fillMaxWidth(),
-        )
-        error?.let { Text(it, color = MaterialTheme.colorScheme.error) }
-        Button(
-            onClick = { onPair(url, code) },
-            enabled = !busy && url.isNotBlank() && code.isNotBlank(),
-            modifier = Modifier.fillMaxWidth(),
-        ) {
-            Text(if (busy) "Pairing…" else "Pair now")
+        if (error != null && bootstrapReady && !busy) {
+            Button(onClick = onRetry, modifier = Modifier.fillMaxWidth()) {
+                Text("Retry secure connection")
+            }
         }
     }
 }
