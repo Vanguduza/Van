@@ -535,8 +535,26 @@
       "root_cause": "RC4",
       "remediation": "Split into scoped, expiring, per-purpose credentials; remove device enrollment from the Hermes-reachable set; add an explicit 403 when the internal check fails instead of falling through.",
       "validation_gate": "G2",
-      "current_status": "OPEN",
-      "remediation_gate": "GATE 1"
+      "current_status": "CLOSED",
+      "remediation_gate": "GATE 1",
+      "closure": {
+        "summary": "Privileged control is scoped rather than root. A route belongs to exactly one control scope and a credential carries a set of them; the legacy internal token keeps every scope except device_enrolment, so it can no longer mint a pairing ticket. Device enrolment, revocation and pairing-ticket issue are their own credential, VAN_DEVICE_ENROLMENT_TOKEN, which the Hermes MCP shim does not read. A failed internal check is terminal: an internal-control route answers 403 naming the scope it needed, instead of falling through to ingress plus device authentication.",
+        "changed": [
+          "backend/van_gateway/auth/control_scopes.py",
+          "backend/van_gateway/app.py",
+          "backend/van_gateway/config.py",
+          "backend/README.md",
+          "docs/SECURITY_POLICY.md"
+        ],
+        "verified_by": [
+          "backend/tests/test_control_scopes.py",
+          "backend/tests/test_pairing_security.py::test_bearer_cannot_create_or_revoke_device_authority",
+          "backend/tests/test_rev31_runtime_wiring.py::test_runtime_routes_require_hermes_internal_control"
+        ],
+        "residual": "POST /v1/devices/pair is still unauthenticated, and an operator may still point VAN_DEVICE_ENROLMENT_TOKEN at the same string as the internal token.",
+        "residual_reason": "The pair route has to be reachable by a device that holds no credential yet — that is what pairing is — and it is bounded by the single-use ticket the enrolment credential mints, which is now out of the agent runtime's reach. The collapsed-token case is a deliberate operator choice rather than a default, and describe() reports device_enrolment_shares_a_token so it is visible rather than silent; a test asserts both readings.",
+        "posture": "The chain the audit walked is cut at its first step, not its last: the internal token can no longer obtain a pairing ticket at all, so the path from a compromised agent runtime to owner-device authority does not start. The fall-through is the other half and had its own defect — a route declared Hermes-only was reachable with an owner device token, which six existing tests had encoded as a 401 from the device-auth boundary. They now assert a 403 that names the scope, which is both the truth and a more useful answer to an operator."
+      }
     },
     {
       "id": "P0-SEC-002",
@@ -1038,8 +1056,26 @@
       "root_cause": "see s32 root-cause map",
       "remediation": "Route trading credential changes through the CryptoObject-bound path.",
       "validation_gate": "G2",
-      "current_status": "OPEN",
-      "remediation_gate": "GATE 1"
+      "current_status": "CLOSED",
+      "remediation_gate": "GATE 1",
+      "closure": {
+        "summary": "BiometricGate.requestA4Approval is deleted. Trading account and credential changes now take a gateway-issued one-time challenge bound to the device, the action and a digest of the exact arguments, sign it with the Keystore key inside onAuthenticationSucceeded, and send a proof the gateway verifies and consumes. The gateway refuses any mutating account action without one.",
+        "changed": [
+          "android/app/src/main/java/com/dial/van/security/BiometricGate.kt",
+          "android/app/src/main/java/com/dial/van/trading/AccountOnboarding.kt",
+          "android/app/src/main/java/com/dial/van/trading/ui/AccountOnboardingScreen.kt",
+          "android/app/src/main/java/com/dial/van/gateway/VanGatewayClient.kt",
+          "backend/van_gateway/app.py",
+          "backend/van_gateway/trading/accounts.py"
+        ],
+        "verified_by": [
+          "backend/tests/test_trading_api.py::test_account_onboarding_is_device_signed_and_forwards_without_storing_secrets",
+          "backend/tests/test_account_approval_contract.py"
+        ],
+        "residual": "The Android half is asserted by parsing its source, not by executing it.",
+        "residual_reason": "AccountOnboardingScreen and BiometricGate depend on Compose and the Android Keystore, so they cannot run in the pure-Kotlin harness the way the status projection does. The enforcement that matters is on the gateway and is executed: a correctly device-signed credential change with no proof is refused there, so the device being wrong is not sufficient.",
+        "posture": "The weak method is deleted rather than deprecated. A prompt whose only output is that it succeeded produces nothing a server can check, so there is no correct caller for it, and leaving it available would make the next such surface a one-line mistake. A test asserts no file in the app calls it. The guarded set is stated as the complement of the read-only actions on both sides, so an action added later is guarded by default, and a contract test keeps the two lists equal."
+      }
     },
     {
       "id": "P1-SEC-005",
@@ -1718,8 +1754,23 @@
       "root_cause": "see s32 root-cause map",
       "remediation": "Add expiry and rotation for every long-lived credential and a PKI renewal path with monitoring.",
       "validation_gate": "G1",
-      "current_status": "OPEN",
-      "remediation_gate": "GATE 1"
+      "current_status": "CLOSED",
+      "remediation_gate": "GATE 1",
+      "closure": {
+        "summary": "Enrolment grants are a year rather than a decade and carry a renewal path with a reportable RENEW_SOON state. Credential age is tracked by fingerprint, so a rotated value restarts its own clock without anybody telling the gateway, and /health reports anything past its policy. make-bridge-pki.sh re-issues a certificate inside its renewal window instead of returning early whenever the file exists, and --check exits non-zero for a monitor.",
+        "changed": [
+          "backend/van_gateway/auth/service.py",
+          "backend/van_gateway/auth/rotation.py",
+          "backend/van_gateway/app.py",
+          "deploy/van-trading-core/pki/make-bridge-pki.sh"
+        ],
+        "verified_by": [
+          "backend/tests/test_credential_expiry_and_rotation.py"
+        ],
+        "residual": "The gateway reports credential age but does not rotate anything itself, and a static token's age is measured from when the gateway first saw it rather than from when it was issued.",
+        "residual_reason": "Rotating the ingress token means updating the gateway, the phone and the tunnel at the same instant; a process doing that unattended would lock the owner out far more reliably than it would stop an attacker. A token in an environment file carries no issue date the gateway can read, so the age is a floor — the report says so in age_basis rather than implying precision it does not have, and a test asserts that wording is there.",
+        "posture": "An expired grant is deliberately not renewable: re-pairing is the path back, and silently reviving one the owner let lapse would make the expiry decorative. The PKI test proves the fix rather than the intent — it builds a PKI, confirms --check is clean, then re-runs with the window widened and asserts the certificate bytes actually changed."
+      }
     },
     {
       "id": "P2-SEC-009",
@@ -2538,7 +2589,17 @@
       "remediation": "Escape the interpolated values or render from a static template.",
       "validation_gate": "G2",
       "remediation_gate": "GATE 1",
-      "current_status": "OPEN"
+      "current_status": "CLOSED",
+      "closure": {
+        "summary": "The trading OAuth callback escapes every interpolated value, and a test asserts that no HTML response in the gateway interpolates anything unescaped.",
+        "changed": [
+          "backend/van_gateway/app.py"
+        ],
+        "verified_by": [
+          "backend/tests/test_oauth_callback_escaping.py"
+        ],
+        "posture": "The finding said it was not exploitable today and it was not: every interpolated value was a constant. But `broker` is a path segment and an HTTPException detail carries a query parameter back, so it was one field away. The test drives both halves with a real payload and also holds the rule for the file rather than for the two call sites, because a rule that only holds where somebody remembered is not a rule."
+      }
     }
   ],
   "register_note": "Extended 2026-09-19 under blueprint Gate 0 / action W0-1. The audit assigned IDs to 55 findings and enumerated further P3/P4 items in prose; those now carry IDs so that 'all closed' is countable. Each finding carries a remediation_gate referencing docs/VAN_FINISHED_PRODUCT_BLUEPRINT_REV_1.md.",

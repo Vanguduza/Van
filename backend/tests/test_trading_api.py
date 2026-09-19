@@ -36,6 +36,32 @@ def _halt_token():
     return OWNER.token(act="owner-halt", subject="van-trading-core")
 
 
+#: P1-SEC-004. Account and credential changes now need a CryptoObject-bound A4 proof, so
+#: the paired test device has a real keystore key rather than the string "test".
+from cryptography.hazmat.primitives import hashes as _hashes, serialization as _ser  # noqa: E402
+from cryptography.hazmat.primitives.asymmetric import ec as _ec  # noqa: E402
+
+DEVICE_KEY = _ec.generate_private_key(_ec.SECP256R1())
+DEVICE_PEM = DEVICE_KEY.public_key().public_bytes(
+    _ser.Encoding.PEM, _ser.PublicFormat.SubjectPublicKeyInfo
+).decode("utf-8")
+
+
+def _approval_proof(challenge_body: dict) -> dict:
+    """What the device produces inside onAuthenticationSucceeded, not before it."""
+    import base64
+
+    signature = DEVICE_KEY.sign(
+        challenge_body["approval_challenge"].encode("utf-8"),
+        _ec.ECDSA(_hashes.SHA256()),
+    )
+    return {
+        "challenge_id": challenge_body["approval_challenge_id"],
+        "signature_b64": base64.b64encode(signature).decode("ascii"),
+        "algorithm": "ECDSA_P256_SHA256",
+    }
+
+
 
 
 @pytest.fixture(autouse=True)
@@ -44,6 +70,8 @@ def _env(tmp_path, monkeypatch):
     monkeypatch.setenv("VAN_HERMES_BASE_URL", "http://hermes.test")
     monkeypatch.setenv("VAN_GOOGLE_TOKEN_FERNET_KEY", Fernet.generate_key().decode())
     monkeypatch.setenv("VAN_INTERNAL_CONTROL_TOKEN", "test-internal-token")
+    # P0-SEC-001 — device enrolment is its own credential now.
+    monkeypatch.setenv("VAN_DEVICE_ENROLMENT_TOKEN", "test-internal-token")
     monkeypatch.setenv("VAN_INGRESS_TOKEN", "test-ingress-token-0123456789abcdef0123456789")
     monkeypatch.setenv("VAN_DEVICE_SECRET_FERNET_KEY", Fernet.generate_key().decode())
     monkeypatch.setenv("VAN_VATI_LEDGER_PATH", str(tmp_path / "vati.sqlite"))
@@ -68,7 +96,7 @@ async def client(tmp_path):
         async with app.router.lifespan_context(app):
             ticket = await ac.post("/v1/devices/pairing-ticket", json={"label": "test", "ttl_seconds": 600}, headers=HDR)
             assert ticket.status_code == 200, ticket.text
-            paired = await ac.post("/v1/devices/pair", json={"pairing_token": ticket.json()["pairing_token"], "device_id": "test-device", "device_secret": "test-device-secret", "public_key_pem": "test", "label": "test"})
+            paired = await ac.post("/v1/devices/pair", json={"pairing_token": ticket.json()["pairing_token"], "device_id": "test-device", "device_secret": "test-device-secret", "public_key_pem": DEVICE_PEM, "label": "test"})
             assert paired.status_code == 200, paired.text
             ac.headers.update({"X-Van-Ingress-Token": paired.json()["ingress_token"], "X-Van-Device-Token": paired.json()["device_access_token"]})
             # P0-TRADE-001 — trading writes now need a real owner signature, so the
@@ -248,12 +276,28 @@ async def test_account_onboarding_is_device_signed_and_forwards_without_storing_
     app.state.onboarding.control = LocalAccountControl(str(tmp_path / "accounts.json"), str(tmp_path / "secrets"), deriv_connector=deriv.connector)
     app.state.trading.accounts_registry = str(tmp_path / "accounts.json")
     now = int(_time.time())
-    def act(action, args, device="test-device", secret="test-device-secret", issued=None):
+    from van_gateway.trading.accounts import requires_owner_approval
+
+    async def act(action, args, device="test-device", secret="test-device-secret", issued=None,
+                  approve=True):
+        """Do what the device does: sign, and for a mutating action, get a challenge and
+        sign it under the biometric before sending (P1-SEC-004)."""
         issued = issued or now
-        return ac.post("/v1/trading/accounts/action", json={"device_id": device, "issued_at_unix": issued, "signature": _sign_action(secret, device, issued, action, args), "action": action, "args": args})
+        body = {"device_id": device, "issued_at_unix": issued,
+                "signature": _sign_action(secret, device, issued, action, args),
+                "action": action, "args": args}
+        if approve and requires_owner_approval(action) and secret == "test-device-secret":
+            challenge = await ac.post("/v1/trading/accounts/challenge", json=body)
+            if challenge.status_code == 200:
+                body["approval_proof"] = _approval_proof(challenge.json())
+        return await ac.post("/v1/trading/accounts/action", json=body)
     assert (await act("account_upsert", {"alias": "paper_lab", "broker": "PAPER"}, secret="wrong")).status_code == 403
     assert (await act("account_upsert", {"alias": "paper_lab", "broker": "PAPER"}, issued=now - 3600)).status_code == 403
     assert (await act("shell", {})).status_code == 404
+    # P1-SEC-004 — a correctly device-signed credential change with no biometric proof is
+    # refused. This is exactly what the weak prompt used to allow through.
+    unapproved = await act("account_upsert", {"alias": "paper_lab", "broker": "PAPER"}, approve=False)
+    assert unapproved.status_code == 403 and "approval proof" in unapproved.json()["detail"]
     r = await act("account_upsert", {"alias": "paper_lab", "broker": "PAPER", "label": "Paper Lab"})
     assert r.status_code == 200 and r.json()["account"]["safety_identity"] == "PAPER"
     # tampering with args after signing is refused (signature binds the exact bytes)

@@ -14,6 +14,15 @@ class Settings(BaseSettings):
     hermes_profile: str = "van"
     hermes_bearer_token: str = ""
     internal_control_token: str = ""  # Hermes→gateway privileged control API
+    #: P0-SEC-001. Per-purpose credentials as `scope,scope:token; scope:token`. The legacy
+    #: token above keeps every scope except device_enrolment, so an existing deployment is
+    #: not broken by this and the one scope that mints owner-device authority has to be
+    #: granted deliberately.
+    internal_control_scoped_tokens: str = ""
+    #: P0-SEC-001. The one credential that can mint owner-device authority, kept out of
+    #: everything the Hermes runtime reads. Empty means device enrolment is unreachable,
+    #: which is inconvenient once and is the right way round.
+    device_enrolment_token: str = ""
     ingress_token: str = ""  # Owner-device bearer gate for externally reachable HTTP routes
     device_secret_fernet_key: str = ""  # Android HMAC secrets encrypted at rest
 

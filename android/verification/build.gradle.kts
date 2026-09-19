@@ -35,6 +35,10 @@ sourceSets {
     named("main") {
         kotlin.setSrcDirs(emptyList<String>())
         kotlin.srcDir("../app/src/main/java")
+        // AccountOnboarding.kt is deliberately absent: it references UI models that pull
+        // in the Compose graph, so it is not standalone. Its one security-relevant rule —
+        // which actions need owner approval — is held to the gateway's by
+        // backend/tests/test_account_approval_contract.py instead.
         kotlin.include("com/dial/van/status/**", "com/dial/van/mission/MissionModels.kt")
     }
 }

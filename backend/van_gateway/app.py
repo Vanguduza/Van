@@ -11,6 +11,9 @@ from pydantic import BaseModel, Field
 from van_gateway.attention.engine import AttentionEngine
 from van_gateway.audit.service import AuditService
 from van_gateway.auth.service import AuthError, AuthService
+from van_gateway.approval.service import OwnerApprovalError, OwnerApprovalService
+from van_gateway.auth.control_scopes import ControlAuthority, ControlScope
+from van_gateway.auth.rotation import CredentialRotation
 from van_gateway.auth.throttle import GLOBAL_SUBJECT, AuthThrottle, Throttled
 from van_gateway.command.mission_link import CommandMissionLink
 from van_gateway.briefing.service import BriefingService
@@ -24,7 +27,13 @@ from van_gateway.google.service import GoogleAuthError, GoogleService, NARROW_SC
 from van_gateway.google.transport import FakeGoogleTransport, GoogleHttpTransport, GoogleOAuthTokenClient
 from van_gateway.hermes.bridge import HermesBridge
 from van_gateway.idempotency.service import IdempotencyService
-from van_gateway.models import ActionClass, AttentionSeverity, CommandRequest, ReminderCreate
+from van_gateway.models import (
+    ActionClass,
+    AttentionSeverity,
+    CommandRequest,
+    OwnerApprovalProof,
+    ReminderCreate,
+)
 from van_gateway.notifications.intelligence import NotificationIntelligence, PhoneNotification
 from van_gateway.orchestrator import CommandOrchestrator
 from van_gateway.projects.router import ProjectRouter
@@ -54,7 +63,7 @@ from van_gateway.command.standing import StandingAutomationAuthorityService
 from van_gateway.runtime_api import OwnerRuntimeApi
 from van_gateway.storage.db import Store
 from van_gateway.trading import TradingAuthorityError, TradingControlError, TradingService
-from van_gateway.trading.accounts import ACTIONS as ACCOUNT_ACTIONS, AccountOnboarding, CommanderAccountControl, LocalAccountControl, OAuthPending, canonical_action, redact as redact_account_args
+from van_gateway.trading.accounts import ACTIONS as ACCOUNT_ACTIONS, AccountOnboarding, CommanderAccountControl, LocalAccountControl, OAuthPending, canonical_action, redact as redact_account_args, requires_owner_approval
 
 
 class EnrollBody(BaseModel):
@@ -120,6 +129,18 @@ class AccountActionRequest(BaseModel):
     signature: str
     action: str
     args: dict = Field(default_factory=dict)
+    #: P1-SEC-004 — required for every action that changes an account or a credential.
+    #: The device signs the gateway's one-time challenge inside the biometric callback
+    #: with a keystore key, so a prompt that merely succeeded is not authority.
+    approval_proof: OwnerApprovalProof | None = None
+
+
+class AccountChallengeRequest(BaseModel):
+    device_id: str
+    issued_at_unix: int
+    signature: str
+    action: str
+    args: dict = Field(default_factory=dict)
 
 
 class OwnerHaltRequest(BaseModel):
@@ -139,6 +160,13 @@ def create_app() -> FastAPI:
     store = Store(settings.database_path)
     auth = AuthService(store, settings.device_secret_fernet_key)
     throttle = AuthThrottle()
+    rotation = CredentialRotation(store)
+    # P0-SEC-001 — scoped privileged credentials, so one token is no longer root.
+    control_authority = ControlAuthority(
+        legacy_token=settings.internal_control_token,
+        scoped=settings.internal_control_scoped_tokens,
+        device_enrolment_token=settings.device_enrolment_token,
+    )
     idempotency = IdempotencyService(store)
     hermes = HermesBridge(settings.hermes_base_url, settings.hermes_bearer_token, settings.hermes_profile)
     project_registry_path = str(Path(__file__).resolve().parents[2] / "registries" / "projects.json")
@@ -294,6 +322,8 @@ def create_app() -> FastAPI:
     app.state.store = store
     app.state.auth = auth
     app.state.auth_throttle = throttle
+    app.state.credential_rotation = rotation
+    app.state.control_authority = control_authority
     app.state.degraded = degraded
     app.state.google = google
     app.state.google_broker = google_broker
@@ -324,6 +354,54 @@ def create_app() -> FastAPI:
     app.include_router(browser.router)
     app.include_router(mission_api.router)
     app.include_router(understanding_api.router)
+
+    def control_scope_for(method: str, path: str) -> ControlScope | None:
+        """Which privileged scope a route belongs to, or None if it is not one.
+
+        P0-SEC-001 — one token reached all of these. Naming the scope per route is what
+        makes "the Hermes runtime may drive automation but may not enrol a device"
+        expressible at all.
+        """
+        if path.startswith("/v1/runtime/"):
+            return ControlScope.RUNTIME
+        if path in {"/v1/automation/health", "/v1/browser/health"}:
+            return ControlScope.RUNTIME
+        if path.startswith("/v1/automation/"):
+            return ControlScope.AUTOMATION
+        if path.startswith("/v1/missions") or path in ("/v1/needs-you", "/v1/activity",
+                                                        "/v1/capabilities/status"):
+            if method == "GET":
+                return None
+            return None if (path.endswith("/cancel") or path.endswith("/message")) else ControlScope.MISSIONS
+        if path.startswith("/v1/understanding") or path.startswith("/v1/permissions") or (
+            path in ("/v1/technology-radar", "/v1/eval", "/v1/autonomy")
+        ):
+            return ControlScope.UNDERSTANDING if path == "/v1/understanding/observe" else None
+        if path.startswith("/v1/browser/"):
+            return None if method == "GET" else ControlScope.BROWSER
+        if method == "PUT" and path.startswith("/v1/projects/") and path.endswith("/truth"):
+            return ControlScope.PROJECTS
+        if method == "POST" and path in {"/v1/devices/enroll", "/v1/devices/pairing-ticket"}:
+            # The scope that can mint owner-device authority, and the reason this module
+            # exists. Not granted to the legacy token.
+            return ControlScope.DEVICE_ENROLMENT
+        if method == "POST" and path.startswith("/v1/devices/") and path.endswith("/revoke"):
+            return ControlScope.DEVICE_ENROLMENT
+        if method == "POST" and path == "/v1/trading/halt":
+            return ControlScope.TRADING
+        if method == "POST" and path.startswith("/v1/trading/tickets/") and path.endswith("/confirm"):
+            return ControlScope.TRADING
+        if path in {
+            "/v1/google/gmail/search",
+            "/v1/google/gmail/send",
+            "/v1/google/connect",
+            "/v1/google/revoke",
+            "/v1/google/jobs/plan",
+        }:
+            return ControlScope.GOOGLE
+        if path.startswith("/v1/google/jobs/"):
+            return ControlScope.GOOGLE
+        return None
 
     def internal_control_route(method: str, path: str) -> bool:
         if path.startswith("/v1/runtime/"):
@@ -398,11 +476,33 @@ def create_app() -> FastAPI:
             return await call_next(request)
 
         # Privileged local Hermes control uses an independent machine credential.
-        if internal_control_route(request.method, request.url.path):
-            expected_internal = settings.internal_control_token.strip()
-            presented_internal = request.headers.get("X-Van-Internal-Token", "")
-            if expected_internal and presented_internal and hmac.compare_digest(expected_internal, presented_internal):
+        scope = control_scope_for(request.method, request.url.path)
+        presented_internal = request.headers.get("X-Van-Internal-Token", "")
+        if scope is not None:
+            if control_authority.permits(presented_internal, scope):
+                request.state.van_control_scope = scope.value
                 return await call_next(request)
+            if not control_authority.configured:
+                return JSONResponse(
+                    status_code=503,
+                    content={"detail": "internal_control_token_unconfigured"},
+                )
+            if presented_internal.strip():
+                # P0-SEC-001. A wrong or under-scoped credential used to fall through to
+                # ingress plus device authentication, so a route declared Hermes-only was
+                # reachable with an owner device token. The check is terminal now, and
+                # names the scope so an operator can tell "wrong credential" from "this
+                # credential does not reach that surface".
+                return JSONResponse(
+                    status_code=403,
+                    content={
+                        "detail": "internal_control_unauthorized",
+                        "required_scope": scope.value,
+                    },
+                )
+            # Nothing was presented at all. The ingress gate below answers first, so an
+            # unauthenticated stranger learns nothing about which routes exist; the scope
+            # check then refuses, still without ever reaching device authentication.
 
         configured = settings.ingress_token.strip()
         presented = request.headers.get("X-Van-Ingress-Token", "")
@@ -423,6 +523,15 @@ def create_app() -> FastAPI:
         if request.method == "GET" and request.url.path == "/health":
             return await call_next(request)
 
+        if scope is not None:
+            # Reached only when no internal credential was presented. An owner device
+            # token is not an answer to a privileged control route, so this is where the
+            # fall-through used to happen and no longer does.
+            return JSONResponse(
+                status_code=403,
+                content={"detail": "internal_control_unauthorized", "required_scope": scope.value},
+            )
+
         try:
             device = await auth.require_access_token(request.headers.get("X-Van-Device-Token", ""))
         except AuthError:
@@ -435,12 +544,23 @@ def create_app() -> FastAPI:
         request.state.van_device_id = device.device_id
         return await call_next(request)
 
-    def require_internal_control(x_van_internal_token: str | None) -> None:
-        try:
-            verify_internal_control(settings.internal_control_token, x_van_internal_token)
-        except GoogleControlAuthError as exc:
-            code = 503 if exc.code == "internal_control_token_unconfigured" else 403
-            raise HTTPException(status_code=code, detail=exc.code) from exc
+    def require_internal_control(
+        x_van_internal_token: str | None,
+        scope: ControlScope | None = None,
+    ) -> None:
+        """Handler-level check, which must agree with the middleware's.
+
+        P0-SEC-001 — this compared against the single internal token, so a route the
+        middleware had already let through on a scoped credential would then be refused
+        here. It now asks the same authority the same question. `scope` defaults to the
+        one the route's path implies, so existing callers keep working.
+        """
+        if not control_authority.configured:
+            raise HTTPException(status_code=503, detail="internal_control_token_unconfigured")
+        if scope is None:
+            scope = ControlScope.RUNTIME
+        if not control_authority.permits(x_van_internal_token, scope):
+            raise HTTPException(status_code=403, detail="internal_control_unauthorized")
 
     @app.get("/health")
     async def health():
@@ -480,6 +600,18 @@ def create_app() -> FastAPI:
                 "hermes_is_sole_agent_runtime": True,
             },
             "degraded": degraded.snapshot(),
+            # P2-SEC-008 — credential age, so a token older than its policy says so
+            # instead of nothing saying anything. Reporting only: rotating the ingress
+            # token unattended would lock the owner out far more reliably than it would
+            # stop anybody.
+            "credentials": await rotation.report(
+                {
+                    "ingress_token": settings.ingress_token,
+                    "internal_control_token": settings.internal_control_token,
+                    "automation_grant_signing_key": settings.automation_grant_signing_key,
+                }
+            ),
+            "enrolment_grants": await auth.expiring_grants(),
         }
 
     @app.post("/v1/devices/pairing-ticket")
@@ -487,7 +619,7 @@ def create_app() -> FastAPI:
         body: PairingTicketCreate,
         x_van_internal_token: str | None = Header(default=None),
     ):
-        require_internal_control(x_van_internal_token)
+        require_internal_control(x_van_internal_token, ControlScope.DEVICE_ENROLMENT)
         ticket = await auth.create_pairing_ticket(body.label, body.ttl_seconds)
         return JSONResponse(
             {
@@ -545,7 +677,7 @@ def create_app() -> FastAPI:
         body: EnrollBody,
         x_van_internal_token: str | None = Header(default=None),
     ):
-        require_internal_control(x_van_internal_token)
+        require_internal_control(x_van_internal_token, ControlScope.DEVICE_ENROLMENT)
         try:
             device = await auth.enroll(body.device_id, body.device_secret, body.public_key_pem, body.label)
         except AuthError as exc:
@@ -557,7 +689,7 @@ def create_app() -> FastAPI:
         device_id: str,
         x_van_internal_token: str | None = Header(default=None),
     ):
-        require_internal_control(x_van_internal_token)
+        require_internal_control(x_van_internal_token, ControlScope.DEVICE_ENROLMENT)
         try:
             await auth.revoke(device_id)
         except AuthError as exc:
@@ -650,7 +782,7 @@ def create_app() -> FastAPI:
         body: ProjectTruthBody,
         x_van_internal_token: str | None = Header(default=None),
     ):
-        require_internal_control(x_van_internal_token)
+        require_internal_control(x_van_internal_token, ControlScope.PROJECTS)
         if project_id not in projects.known_projects():
             raise HTTPException(status_code=404, detail="unknown_project")
         body_project = body.truth.get("project_id") if isinstance(body.truth, dict) else None
@@ -666,7 +798,7 @@ def create_app() -> FastAPI:
     # fails CI if the route reappears.
     @app.get("/v1/google/gmail/search")
     async def gmail_search(q: str, x_van_internal_token: str | None = Header(default=None)):
-        require_internal_control(x_van_internal_token)
+        require_internal_control(x_van_internal_token, ControlScope.GOOGLE)
         try:
             return {
                 "messages": await google.gmail_search(q),
@@ -681,7 +813,7 @@ def create_app() -> FastAPI:
         approved: bool = False,
         x_van_internal_token: str | None = Header(default=None),
     ):
-        require_internal_control(x_van_internal_token)
+        require_internal_control(x_van_internal_token, ControlScope.GOOGLE)
         try:
             return await google.gmail_send(draft_id, action_class=ActionClass.A4, approved=approved)
         except GoogleAuthError as exc:
@@ -694,7 +826,7 @@ def create_app() -> FastAPI:
 
     @app.post("/v1/google/connect")
     async def google_connect(body: GoogleConnectBody, x_van_internal_token: str | None = Header(default=None)):
-        require_internal_control(x_van_internal_token)
+        require_internal_control(x_van_internal_token, ControlScope.GOOGLE)
         try:
             await google.store_refresh_token("owner", body.refresh_token, body.scopes)
         except GoogleAuthError as exc:
@@ -703,7 +835,7 @@ def create_app() -> FastAPI:
 
     @app.post("/v1/google/revoke")
     async def google_revoke(x_van_internal_token: str | None = Header(default=None)):
-        require_internal_control(x_van_internal_token)
+        require_internal_control(x_van_internal_token, ControlScope.GOOGLE)
         await google.revoke()
         return await google.status()
 
@@ -718,12 +850,12 @@ def create_app() -> FastAPI:
 
     @app.post("/v1/google/jobs/plan")
     async def plan_google_job(body: GoogleRouteRequest, x_van_internal_token: str | None = Header(default=None)):
-        require_internal_control(x_van_internal_token)
+        require_internal_control(x_van_internal_token, ControlScope.GOOGLE)
         return await google_router.plan(body, workspace=await google.status())
 
     @app.get("/v1/google/jobs/{job_id}")
     async def get_google_job(job_id: str, x_van_internal_token: str | None = Header(default=None)):
-        require_internal_control(x_van_internal_token)
+        require_internal_control(x_van_internal_token, ControlScope.GOOGLE)
         job = await google_router.job(job_id)
         if job is None:
             raise HTTPException(status_code=404, detail="google_job_not_found")
@@ -735,7 +867,7 @@ def create_app() -> FastAPI:
         body: GoogleArtifactBody,
         x_van_internal_token: str | None = Header(default=None),
     ):
-        require_internal_control(x_van_internal_token)
+        require_internal_control(x_van_internal_token, ControlScope.GOOGLE)
         try:
             return await google_router.record_artifact(
                 job_id=job_id,
@@ -870,8 +1002,9 @@ def create_app() -> FastAPI:
         except ValueError as exc:
             raise HTTPException(status_code=422, detail=str(exc)) from exc
 
-    @app.post("/v1/trading/accounts/action")
-    async def trading_account_action(request: Request, req: AccountActionRequest):
+    async def _authenticate_account_action(request: Request, req) -> None:
+        """Device identity, known action, device signature and freshness. Shared by the
+        challenge route and the action route so they cannot diverge."""
         if getattr(request.state, "van_device_id", None) != req.device_id:
             raise HTTPException(status_code=403, detail="device_identity_mismatch")
         if req.action not in ACCOUNT_ACTIONS:
@@ -895,6 +1028,78 @@ def create_app() -> FastAPI:
 
         if abs(int(_time.time()) - req.issued_at_unix) > 300:
             raise HTTPException(status_code=403, detail="stale owner action; sign again")
+
+    @app.post("/v1/trading/accounts/challenge")
+    async def trading_account_challenge(request: Request, req: AccountChallengeRequest):
+        """P1-SEC-004 — the one-time challenge the device signs inside the biometric.
+
+        The challenge is bound to the device, the action and a digest of the arguments, so
+        an approval for "verify this account" cannot be presented for "issue me a signing
+        key", and approving one set of credentials does not approve a different set.
+        """
+        await _authenticate_account_action(request, req)
+        if not requires_owner_approval(req.action):
+            raise HTTPException(
+                status_code=400,
+                detail="this action is read-only and needs no owner approval",
+            )
+        challenge = await app.state.orchestrator.approvals.issue(
+            device_id=req.device_id,
+            source_command_id=f"account:{req.action}",
+            turn_id=None,
+            action_id=f"trading.account.{req.action}",
+            text=canonical_action(req.device_id, req.issued_at_unix, req.action, req.args),
+            project_id=None,
+        )
+        return {
+            "approval_challenge_id": challenge.challenge_id,
+            "approval_challenge": challenge.canonical,
+            "approval_expires_at_unix": challenge.expires_at_unix,
+            "resolved_action_id": f"trading.account.{req.action}",
+        }
+
+    @app.post("/v1/trading/accounts/action")
+    async def trading_account_action(request: Request, req: AccountActionRequest):
+        await _authenticate_account_action(request, req)
+        # P1-SEC-004. This used to be guarded on the device by a biometric prompt whose
+        # only output was "the prompt succeeded", which the gateway never saw and which
+        # nothing bound to this action. The strong path already existed for A4 commands;
+        # trading credential changes were on the weak one.
+        if requires_owner_approval(req.action):
+            proof = req.approval_proof
+            if proof is None or proof.algorithm != OwnerApprovalService.ALGORITHM:
+                await audit.record(
+                    result="denied",
+                    device_id=req.device_id,
+                    capability=f"trading.account.{req.action}",
+                    failure_reason="approval_proof_missing",
+                )
+                raise HTTPException(
+                    status_code=403,
+                    detail="owner biometric approval proof is required for this action",
+                )
+            try:
+                await app.state.orchestrator.approvals.verify_and_consume(
+                    challenge_id=proof.challenge_id,
+                    source_command_id=f"account:{req.action}",
+                    signature_b64=proof.signature_b64,
+                    device_id=req.device_id,
+                    turn_id=None,
+                    action_id=f"trading.account.{req.action}",
+                    text=canonical_action(
+                        req.device_id, req.issued_at_unix, req.action, req.args
+                    ),
+                    project_id=None,
+                )
+            except OwnerApprovalError as exc:
+                await audit.record(
+                    result="denied",
+                    device_id=req.device_id,
+                    capability=f"trading.account.{req.action}",
+                    approval="invalid",
+                    failure_reason=str(exc),
+                )
+                raise HTTPException(status_code=403, detail=str(exc)) from exc
         try:
             result = await onboarding.run(req.action, req.args)
         except HTTPException as exc:
@@ -921,17 +1126,27 @@ def create_app() -> FastAPI:
 
     @app.get("/v1/trading/oauth/{broker}/callback")
     async def trading_oauth_callback(broker: str, request: Request):
+        """The one HTML response in the gateway, and the only one a stranger can reach.
+
+        P4-SEC-011: this built its markup by interpolation. Every interpolated value was a
+        constant at the time, so it was not exploitable — but `broker` is a path segment
+        and an HTTPException detail can carry a query parameter back, so it was one
+        parameter away from being so. Escaping is cheap and the pattern is what matters:
+        the next person to add a field here should not have to notice this.
+        """
+        import html
+
         from fastapi.responses import HTMLResponse
 
         try:
             result = await onboarding.oauth_callback(broker, dict(request.query_params))
         except HTTPException as exc:
             return HTMLResponse(
-                f"<h2>Van: linking failed</h2><p>{exc.detail}</p>",
+                f"<h2>Van: linking failed</h2><p>{html.escape(str(exc.detail))}</p>",
                 status_code=exc.status_code,
             )
         return HTMLResponse(
-            f"<h2>Van: {result['broker']} linked</h2>"
+            f"<h2>Van: {html.escape(str(result['broker']))} linked</h2>"
             "<p>Return to the Van app to choose the account. You can close this page.</p>"
         )
 
@@ -944,7 +1159,7 @@ def create_app() -> FastAPI:
         req: OwnerHaltRequest,
         x_van_internal_token: str | None = Header(default=None),
     ):
-        require_internal_control(x_van_internal_token)
+        require_internal_control(x_van_internal_token, ControlScope.TRADING)
         try:
             result = trading.halt(owner_signature_ref=req.owner_signature_ref, reason=req.reason)
         except TradingControlError as exc:
@@ -969,7 +1184,7 @@ def create_app() -> FastAPI:
         req: TicketConfirmRequest,
         x_van_internal_token: str | None = Header(default=None),
     ):
-        require_internal_control(x_van_internal_token)
+        require_internal_control(x_van_internal_token, ControlScope.TRADING)
         try:
             result = trading.confirm_ticket(
                 ticket_id,

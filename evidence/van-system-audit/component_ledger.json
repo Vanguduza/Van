@@ -4,11 +4,11 @@
   "canonical_blueprint": "docs/VAN_FINISHED_PRODUCT_BLUEPRINT_REV_1.md",
   "canonical_audit": "docs/VAN_WHOLE_SYSTEM_IMPLEMENTATION_AUDIT_AND_CERTIFICATION_REV_1.md",
   "created": "2026-09-19",
-  "component_count": 87,
+  "component_count": 90,
   "dispositions": {
-    "DELETE": 10,
+    "DELETE": 11,
     "REPLACE": 4,
-    "COMPLETE": 35,
+    "COMPLETE": 37,
     "WIRE": 38
   },
   "by_gate": {
@@ -21,7 +21,7 @@
     "GATE 11": 1,
     "GATE 0": 3,
     "GATE 5": 4,
-    "GATE 1": 6
+    "GATE 1": 9
   },
   "terminal_states_allowed": [
     "INTEGRATED_AND_EVIDENCED",
@@ -1605,6 +1605,73 @@
       ],
       "owner_facing_projection": null,
       "terminal_state": "INTEGRATED_AND_EVIDENCED"
+    },
+    {
+      "n": 88,
+      "component": "Scoped control credentials",
+      "path": "backend/van_gateway/auth/control_scopes.py",
+      "maturity_class": "ABSENT",
+      "disposition": "COMPLETE",
+      "rationale": "One static token was gateway root, reached device enrolment, and was held by a model-driven agent runtime",
+      "remediation_gate": "GATE 1",
+      "producer": "backend/van_gateway/auth/control_scopes.py ControlAuthority",
+      "consumer": "the ingress middleware's scope check and every require_internal_control call site",
+      "production_caller": "backend/van_gateway/app.py require_ingress_auth and require_internal_control",
+      "tests": [
+        "backend/tests/test_control_scopes.py"
+      ],
+      "runtime_evidence": [
+        "the internal token is refused 403 required_scope=device_enrolment on POST /v1/devices/pairing-ticket; the enrolment credential succeeds there and is refused everywhere else; an owner device token no longer reaches a Hermes-only route"
+      ],
+      "owner_facing_projection": "the refusal names the scope that was needed",
+      "terminal_state": "INTEGRATED_AND_EVIDENCED"
+    },
+    {
+      "n": 89,
+      "component": "Credential expiry and rotation reporting",
+      "path": "backend/van_gateway/auth/rotation.py",
+      "maturity_class": "ABSENT",
+      "disposition": "COMPLETE",
+      "rationale": "Ten-year enrolment grants, no rotation of any long-lived credential, and an 825-day PKI whose script returned early if the certificate existed",
+      "remediation_gate": "GATE 1",
+      "producer": "CredentialRotation.observe and AuthService.grant_status",
+      "consumer": "GET /health",
+      "production_caller": "backend/van_gateway/app.py health()",
+      "tests": [
+        "backend/tests/test_credential_expiry_and_rotation.py"
+      ],
+      "runtime_evidence": [
+        "a credential past its policy reports OVERDUE and a changed value restarts the clock; the PKI script re-issues a certificate inside its window and --check exits non-zero"
+      ],
+      "owner_facing_projection": "the credentials and enrolment_grants blocks on /health",
+      "terminal_state": "INTEGRATED_AND_EVIDENCED"
+    },
+    {
+      "n": 90,
+      "component": "Weak biometric approval path",
+      "path": "android/app/src/main/java/com/dial/van/security/BiometricGate.kt",
+      "maturity_class": "PARTIAL",
+      "disposition": "DELETE",
+      "rationale": "requestA4Approval was a BiometricPrompt with no CryptoObject whose only output was that it succeeded, and it guarded the surface that issues broker signing keys while owner commands used the strong path",
+      "remediation_gate": "GATE 1",
+      "producer": null,
+      "consumer": null,
+      "production_caller": null,
+      "tests": [
+        "backend/tests/test_account_approval_contract.py::test_the_weak_biometric_path_is_gone",
+        "backend/tests/test_account_approval_contract.py::test_nothing_in_the_app_calls_the_weak_path"
+      ],
+      "runtime_evidence": [
+        "the gateway refuses a correctly device-signed credential change that carries no verified approval proof"
+      ],
+      "owner_facing_projection": null,
+      "terminal_state": "DELIBERATELY_REMOVED_CANON_CORRECTED",
+      "removal_assertion": {
+        "kind": "symbols_absent",
+        "symbols": [
+          "requestA4Approval"
+        ]
+      }
     }
   ],
   "gate_0_status": {

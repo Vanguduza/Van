@@ -61,6 +61,8 @@ def _settings(monkeypatch, tmp_path):
     monkeypatch.setenv("VAN_DEVICE_SECRET_FERNET_KEY", Fernet.generate_key().decode())
     monkeypatch.setenv("VAN_INGRESS_TOKEN", INGRESS)
     monkeypatch.setenv("VAN_INTERNAL_CONTROL_TOKEN", INTERNAL)
+    # P0-SEC-001 — device enrolment is its own credential now.
+    monkeypatch.setenv("VAN_DEVICE_ENROLMENT_TOKEN", INTERNAL)
     monkeypatch.setenv("VAN_AUTOMATION_ENABLED", "1")
     get_settings.cache_clear()
     yield

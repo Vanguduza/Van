@@ -209,6 +209,8 @@ class TestTheProductionAppBuildsOne:
         monkeypatch.setenv("VAN_HERMES_BASE_URL", "http://hermes.invalid")
         monkeypatch.setenv("VAN_INGRESS_TOKEN", "verify-ingress-token-0123456789")
         monkeypatch.setenv("VAN_INTERNAL_CONTROL_TOKEN", "verify-internal-token")
+        # P0-SEC-001 — device enrolment is its own credential now.
+        monkeypatch.setenv("VAN_DEVICE_ENROLMENT_TOKEN", "verify-internal-token")
         get_settings.cache_clear()
         from van_gateway.app import create_app
 
@@ -232,6 +234,8 @@ class TestAutomationVerificationIsWired:
         monkeypatch.setenv("VAN_HERMES_BASE_URL", "http://hermes.invalid")
         monkeypatch.setenv("VAN_INGRESS_TOKEN", "verify-ingress-token-0123456789")
         monkeypatch.setenv("VAN_INTERNAL_CONTROL_TOKEN", "verify-internal-token")
+        # P0-SEC-001 — device enrolment is its own credential now.
+        monkeypatch.setenv("VAN_DEVICE_ENROLMENT_TOKEN", "verify-internal-token")
         get_settings.cache_clear()
         from van_gateway.app import create_app
 

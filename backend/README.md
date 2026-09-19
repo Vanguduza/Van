@@ -36,7 +36,9 @@ See `../docs/GOOGLE_INTELLIGENCE_MESH.md`.
 | `VAN_DATABASE_PATH` | SQLite path |
 | `VAN_HERMES_BASE_URL` | Hermes gateway |
 | `VAN_HERMES_BEARER_TOKEN` | Hermes API token |
-| `VAN_INTERNAL_CONTROL_TOKEN` | Shared secret for privileged Hermes→gateway Google job/evidence APIs; never prompt-visible |
+| `VAN_INTERNAL_CONTROL_TOKEN` | Privileged Hermes→gateway control credential. Since P0-SEC-001 it carries every control scope **except** `device_enrolment`, so it can no longer mint a pairing ticket. Never prompt-visible |
+| `VAN_INTERNAL_CONTROL_SCOPED_TOKENS` | Optional per-purpose credentials as `scope,scope:token; scope:token`. Scopes: `runtime`, `automation`, `browser`, `google`, `trading`, `projects`, `missions`, `understanding`, `device_enrolment`. Prefer these over one shared token |
+| `VAN_DEVICE_ENROLMENT_TOKEN` | The only credential that can mint a pairing ticket, enrol or revoke a device — that is, the only one that can produce owner-device authority. Deliberately **not** read by the Hermes MCP shim. Empty means device enrolment is unreachable, which is the correct state until an operator sets it |
 | `VAN_INGRESS_TOKEN` | Outer high-entropy ingress bearer. Paired Android stores it encrypted; normal client APIs also require the separately revocable per-device token |
 | `VAN_DEVICE_SECRET_FERNET_KEY` | Dedicated Fernet key for restart-durable encrypted device HMAC secrets |
 | `VAN_GOOGLE_TOKEN_FERNET_KEY` | Fernet key for encrypted Workspace OAuth refresh tokens |

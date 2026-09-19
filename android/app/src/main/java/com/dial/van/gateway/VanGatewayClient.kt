@@ -160,10 +160,16 @@ class VanGatewayClient(context: Context) {
         rawGet("/v1/trading/bars?symbol=${encodeQuery(symbol)}&timeframe=${encodeQuery(timeframe)}&limit=$limit")
     }
 
-    suspend fun tradingAccountAction(action: String, args: kotlinx.serialization.json.JsonObject): Pair<Int, String> = withContext(Dispatchers.IO) {
+    suspend fun tradingAccountAction(
+        action: String,
+        args: kotlinx.serialization.json.JsonObject,
+        approvalProof: kotlinx.serialization.json.JsonObject? = null,
+    ): Pair<Int, String> = withContext(Dispatchers.IO) {
         val id = deviceId ?: error("not_enrolled")
         val secret = deviceSecret ?: error("not_enrolled")
-        val body = com.dial.van.trading.AccountOnboarding.requestBody(secret, id, System.currentTimeMillis() / 1000L, action, args)
+        val body = com.dial.van.trading.AccountOnboarding.requestBody(
+            secret, id, System.currentTimeMillis() / 1000L, action, args, approvalProof,
+        )
         val conn = (URL("$baseUrl/v1/trading/accounts/action").openConnection() as HttpURLConnection).apply {
             requestMethod = "POST"
             setRequestProperty("Content-Type", "application/json")
@@ -176,6 +182,36 @@ class VanGatewayClient(context: Context) {
         val code = conn.responseCode
         val stream = if (code in 200..299) conn.inputStream else conn.errorStream
         code to (stream?.bufferedReader()?.readText() ?: "{}")
+    }
+
+    /**
+     * The one-time challenge the device signs inside the biometric before a trading
+     * account or credential change (P1-SEC-004).
+     *
+     * The challenge is bound to this device, this action and a digest of these exact
+     * arguments, so an approval for one change cannot be presented for another.
+     */
+    suspend fun tradingAccountChallenge(
+        action: String,
+        args: kotlinx.serialization.json.JsonObject,
+    ): Pair<Int, String> = withContext(Dispatchers.IO) {
+        val id = deviceId ?: error("not_enrolled")
+        val secret = deviceSecret ?: error("not_enrolled")
+        val body = com.dial.van.trading.AccountOnboarding.requestBody(
+            secret, id, System.currentTimeMillis() / 1000L, action, args,
+        )
+        val conn = (URL("$baseUrl/v1/trading/accounts/challenge").openConnection() as HttpURLConnection).apply {
+            requestMethod = "POST"
+            setRequestProperty("Content-Type", "application/json")
+            applyIngressAuth(this)
+            doOutput = true
+            connectTimeout = 15_000
+            readTimeout = 30_000
+        }
+        conn.outputStream.use { it.write(body.toString().toByteArray(StandardCharsets.UTF_8)) }
+        val code = conn.responseCode
+        val stream = if (code in 200..299) conn.inputStream else conn.errorStream
+        code to (stream?.bufferedReader()?.use { it.readText() } ?: "")
     }
 
     suspend fun decisions(): JSONArray = withContext(Dispatchers.IO) {
