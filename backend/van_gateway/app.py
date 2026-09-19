@@ -2,11 +2,12 @@ from __future__ import annotations
 
 from contextlib import asynccontextmanager
 import hmac
+import time
 from typing import Any
 from pathlib import Path
 
 from fastapi import FastAPI, Header, HTTPException, Request
-from fastapi.responses import JSONResponse
+from fastapi.responses import JSONResponse, PlainTextResponse
 from pydantic import BaseModel, Field
 
 from van_gateway.attention.engine import AttentionEngine
@@ -43,6 +44,19 @@ from van_gateway.models import (
     ReminderCreate,
 )
 from van_gateway.notifications.intelligence import NotificationIntelligence, PhoneNotification
+from van_gateway.observability import alerts as observability_alerts
+from van_gateway.observability import instruments as observability_instruments
+from van_gateway.observability.correlation import for_command as correlation_for_command
+from van_gateway.observability.logging import configure as configure_logging
+from van_gateway.observability.metrics import REGISTRY as METRICS, render_prometheus
+from van_gateway.observability.middleware import MetricsMiddleware
+from van_gateway.observability.trace import CommandTracer
+from van_gateway.ops import health as ops_health
+from van_gateway.ops.backup import create_backup
+from van_gateway.ops.pki import scan as pki_scan
+from van_gateway.ops.retention import RetentionService
+from van_gateway.ops.scheduler import OpsScheduler, ScheduledJob
+from van_gateway.ops.suppression import SuppressionChannel, SuppressionStore
 from van_gateway.orchestrator import CommandOrchestrator
 from van_gateway.projects.router import ProjectRouter
 from van_gateway.reminders.service import ReminderService
@@ -159,6 +173,24 @@ class OwnerFactBody(BaseModel):
     valid_until_ms: int | None = None
 
 
+class DeviceTelemetrySample(BaseModel):
+    """One device-produced measurement (P3-OBS-002).
+
+    The name must be one the catalogue declares — see
+    `instruments.DEVICE_HISTOGRAMS` and `DEVICE_GAUGES`. An unknown name is
+    refused rather than registered, because a metric that appears at runtime with
+    no declared producer is exactly the drift Gate 11 exists to stop.
+    """
+
+    name: str
+    value: float
+    surface: str | None = None
+
+
+class DeviceTelemetryBody(BaseModel):
+    samples: list[DeviceTelemetrySample] = Field(default_factory=list)
+
+
 class OwnerHaltRequest(BaseModel):
     owner_signature_ref: str = Field(min_length=1)
     reason: str = ""
@@ -183,6 +215,7 @@ def create_app() -> FastAPI:
         legacy_token=settings.internal_control_token,
         scoped=settings.internal_control_scoped_tokens,
         device_enrolment_token=settings.device_enrolment_token,
+        observability_token=settings.observability_token,
     )
     idempotency = IdempotencyService(store)
     hermes = HermesBridge(settings.hermes_base_url, settings.hermes_bearer_token, settings.hermes_profile)
@@ -311,7 +344,11 @@ def create_app() -> FastAPI:
     understanding_api = UnderstandingApi(store, settings)
     google_router = GoogleCapabilityRouter(store, google_broker)
 
-    notifications = NotificationIntelligence()
+    # P3-OPS-005 — dedupe that survives a restart, instead of a set() on the instance.
+    suppressions = SuppressionStore(store)
+    notifications = NotificationIntelligence(suppressions=suppressions)
+    retention = RetentionService(store)
+    tracer = CommandTracer(store)
     orchestrator = CommandOrchestrator(
         auth=auth,
         idempotency=idempotency,
@@ -327,8 +364,77 @@ def create_app() -> FastAPI:
         missions=command_missions,
     )
 
+    # ---------------------------------------------------------- Gate 11: ops jobs
+    async def _sweep_reminders() -> dict:
+        """P3-OPS-004 — fire_due, actually called, and its result actually delivered.
+
+        Firing a reminder and not telling anyone is the same as not firing it, so the
+        job publishes an event the device replays and raises an attention item the
+        owner sees. The attention item is keyed by reminder id, so the same reminder
+        never becomes two things to look at.
+        """
+        fired = await reminders.fire_due()
+        for item in fired:
+            await events.publish("reminder.fired", {
+                "reminder_id": item["id"],
+                "text": item["text"],
+                "due_at_unix": item["due_at_unix"],
+            })
+            await attention.upsert(
+                title=item["text"],
+                severity=AttentionSeverity.FOLLOW_UP,
+                source="reminder",
+                dedupe_key=f"reminder:{item['id']}",
+                payload={"reminder_id": item["id"], "due_at_unix": item["due_at_unix"]},
+            )
+        observability_instruments.set_queue_depth(
+            "reminders_due", len(await reminders.list_open())
+        )
+        return {"fired": len(fired)}
+
+    async def _run_retention() -> dict:
+        results = await retention.prune()
+        audit_prune = await retention.prune_audit_prefix()
+        return {
+            "deleted": sum(result.deleted for result in results),
+            "tables": len(results),
+            "audit_pruned": audit_prune["pruned"],
+        }
+
+    async def _scan_pki() -> dict:
+        report = pki_scan(settings.pki_dir)
+        app.state.ops_pki = report
+        return {"present": report["present"], "days_remaining": report["days_remaining"]}
+
+    async def _take_backup() -> dict:
+        destination = Path(settings.backup_dir) / time.strftime("%Y%m%dT%H%M%SZ", time.gmtime())
+        manifest = create_backup(
+            database_path=settings.database_path,
+            destination=destination,
+            project_state_dir=str(Path(__file__).resolve().parents[2] / "docs" / "project-state"),
+        )
+        return {"destination": str(destination), "entries": len(manifest.entries)}
+
+    def _scheduler_jobs() -> tuple[ScheduledJob, ...]:
+        jobs = [
+            ScheduledJob("reminders.fire_due", settings.reminder_sweep_seconds, _sweep_reminders),
+            ScheduledJob("ops.retention", settings.retention_interval_seconds, _run_retention),
+        ]
+        if settings.pki_dir:
+            jobs.append(ScheduledJob("ops.pki_scan", settings.pki_scan_interval_seconds, _scan_pki))
+        if settings.backup_enabled and settings.backup_dir:
+            jobs.append(ScheduledJob("ops.backup", settings.backup_interval_seconds, _take_backup))
+        return tuple(jobs)
+
+    scheduler = OpsScheduler(store, _scheduler_jobs())
+    started_at = time.monotonic()
+
     @asynccontextmanager
     async def lifespan(_app: FastAPI):
+        # P3-OBS-001 — the gateway emitted no application logs at all. This is the
+        # one place that installs the JSON formatter, so every module's logger
+        # inherits it instead of each one deciding for itself.
+        configure_logging(settings.log_level)
         await store.migrate()
         await auth.load_persisted_secrets()
         await oauth_pending.migrate()
@@ -339,9 +445,17 @@ def create_app() -> FastAPI:
         # §7 — the declaration set is sealed by digest and synced on boot,
         # so a manifest edit takes effect on restart and is auditable after.
         await capability_registry.sync()
-        yield
+        if settings.scheduler_enabled:
+            await scheduler.start()
+        try:
+            yield
+        finally:
+            await scheduler.stop()
 
     app = FastAPI(title="VAN Gateway", version="0.5.0-dev", lifespan=lifespan)
+    # P3-OBS-001/P3-OBS-002 — outermost, so it measures what the client waited
+    # for rather than what the handler took after every other middleware.
+    app.add_middleware(MetricsMiddleware)
     app.state.store = store
     app.state.auth = auth
     app.state.auth_throttle = throttle
@@ -393,6 +507,12 @@ def create_app() -> FastAPI:
             return ControlScope.RUNTIME
         if path in {"/v1/automation/health", "/v1/browser/health"}:
             return ControlScope.RUNTIME
+        # Gate 11. Device telemetry is excluded on purpose: its producer is the
+        # owner's paired device, so it authenticates as a device like every other
+        # device-produced payload, and an operator credential is not required to
+        # report a frame time.
+        if path.startswith("/v1/observability/") and path != "/v1/observability/device-telemetry":
+            return ControlScope.OBSERVABILITY
         if path.startswith("/v1/automation/"):
             return ControlScope.AUTOMATION
         if path.startswith("/v1/missions") or path in ("/v1/needs-you", "/v1/activity",
@@ -436,6 +556,10 @@ def create_app() -> FastAPI:
         # Rev 1.3 §219 — automation/browser health is an internal control surface;
         # it exposes runtime identity and governance state, never an owner route.
         if path in {"/v1/automation/health", "/v1/browser/health"}:
+            return True
+        # Gate 11. The operator surface is internal control; device telemetry is not,
+        # for the reason given in control_scope_for.
+        if path.startswith("/v1/observability/") and path != "/v1/observability/device-telemetry":
             return True
         # §§219-222 — the whole automation control surface is Hermes-only. It never
         # accepts owner ingress, so a compromised ingress token cannot compile,
@@ -1022,7 +1146,9 @@ def create_app() -> FastAPI:
 
     @app.post("/v1/notifications/ingest")
     async def ingest_notification(note: PhoneNotification):
-        filtered = notifications.ingest(note)
+        # P3-OPS-005 — the durable path. `ingest` alone deduped against a set()
+        # that a restart emptied, so a restart re-showed what the owner had seen.
+        filtered = await notifications.ingest_durable(note)
         if not filtered.suppressed:
             await attention.upsert(
                 title=filtered.title,
@@ -1034,6 +1160,79 @@ def create_app() -> FastAPI:
                 payload={"text": filtered.text, "redacted": filtered.redacted},
             )
         return filtered
+
+    # --------------------------------------------------- Gate 11: operator surface
+    @app.post("/v1/observability/device-telemetry")
+    async def ingest_device_telemetry(body: DeviceTelemetryBody):
+        """P3-OBS-002 — aura frame time, wake/ASR/TTS latency and the battery and
+        memory indicators are measured on the device. The gateway cannot produce
+        them and must not invent them, so this is where they arrive.
+
+        Device-authenticated, not operator-authenticated: the producer is the
+        owner's paired device.
+        """
+        accepted, refused = [], []
+        for sample in body.samples[:200]:
+            try:
+                accepted.append(observability_instruments.record_device_sample(
+                    sample.name, sample.value, surface=sample.surface
+                ))
+            except observability_instruments.UnknownDeviceMetric:
+                refused.append(sample.name)
+        return {"accepted": len(accepted), "refused": refused}
+
+    @app.get("/v1/observability/metrics")
+    async def metrics_scrape(x_van_internal_token: str | None = Header(default=None)):
+        require_internal_control(x_van_internal_token, ControlScope.OBSERVABILITY)
+        return PlainTextResponse(
+            render_prometheus(METRICS),
+            media_type="text/plain; version=0.0.4; charset=utf-8",
+        )
+
+    async def _ops_health() -> dict:
+        return await ops_health.collect(
+            scheduler=scheduler,
+            pki_dir=settings.pki_dir or None,
+            backup_root=settings.backup_dir or None,
+        )
+
+    @app.get("/v1/observability/alerts")
+    async def observability_alert_state(x_van_internal_token: str | None = Header(default=None)):
+        require_internal_control(x_van_internal_token, ControlScope.OBSERVABILITY)
+        health = await _ops_health()
+        firing = observability_alerts.evaluate(
+            METRICS,
+            uptime_seconds=time.monotonic() - started_at,
+            ops_facts=ops_health.ops_facts(health),
+        )
+        return {
+            "firing": [alert.as_dict() for alert in firing],
+            "rules_evaluated": len(observability_alerts.RULES),
+            "uptime_seconds": round(time.monotonic() - started_at),
+        }
+
+    @app.get("/v1/observability/health")
+    async def observability_health(x_van_internal_token: str | None = Header(default=None)):
+        require_internal_control(x_van_internal_token, ControlScope.OBSERVABILITY)
+        health = await _ops_health()
+        audit_chain = await audit.verify_chain()
+        return {
+            **health,
+            "audit_chain": audit_chain,
+            "unobserved_metrics": [m.name for m in METRICS.unobserved()],
+            "uptime_seconds": round(time.monotonic() - started_at),
+        }
+
+    @app.get("/v1/observability/trace/{command_id}")
+    async def observability_trace(
+        command_id: str, x_van_internal_token: str | None = Header(default=None)
+    ):
+        """P2-OBS-001 — the join an operator used to do by hand, in one call."""
+        require_internal_control(x_van_internal_token, ControlScope.OBSERVABILITY)
+        trace = await tracer.trace(command_id)
+        if not trace.found:
+            raise HTTPException(status_code=404, detail="no_trace_for_command")
+        return trace.as_dict()
 
     @app.get("/v1/degraded")
     async def get_degraded():

@@ -578,10 +578,24 @@ def _n8n_transport(engine_success: bool = True):
 
     import httpx
 
+    # P3-OPS-007 — shaped like the real n8n: the management API under /api/v1 can
+    # read and activate a workflow, and execution happens through the workflow's own
+    # webhook trigger at /webhook/<path>. The old fake served an invented
+    # `/workflows/{id}/run`, which is why the invented call was never caught.
+    webhook_path = "van/wfcap-statements"
+
     def handler(request: httpx.Request) -> httpx.Response:
-        if request.url.path.endswith("/settings"):
+        path = request.url.path
+        if path.endswith("/settings"):
             return httpx.Response(200, json={"versionCli": "2.39.7"})
-        if request.url.path.endswith("/run"):
+        if path.startswith("/api/v1/workflows/") and request.method == "GET":
+            return httpx.Response(200, json={
+                "id": path.rsplit("/", 1)[-1],
+                "active": True,
+                "nodes": [{"name": "When called", "type": "n8n-nodes-base.webhook",
+                           "parameters": {"path": webhook_path, "httpMethod": "POST"}}],
+            })
+        if path == f"/webhook/{webhook_path}" and request.method == "POST":
             body = json.loads(request.content)
             # §§159-160 — the engine gets a run-scoped grant, never VAN's own token.
             assert body["capability_grant"]

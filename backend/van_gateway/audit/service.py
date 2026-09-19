@@ -134,6 +134,20 @@ class AuditService:
         )
         return hashlib.sha256(payload.encode("utf-8")).hexdigest()
 
+    async def chain_anchor(self) -> dict[str, Any] | None:
+        """The latest retention anchor, if the log has ever been prefix-pruned.
+
+        P3-OPS-001: the audit table could not have a retention policy while
+        `verify_chain` insisted the surviving chain started at sequence 1 from the
+        genesis hash. The anchor records where a prune stopped, so the remaining
+        rows stay verifiable and the prune itself stays visible.
+        """
+        rows = await self.store.fetchall(
+            "SELECT anchor_seq, anchor_hash, pruned_rows, created_at_unix "
+            "FROM audit_chain_anchors ORDER BY anchor_seq DESC LIMIT 1"
+        )
+        return dict(rows[0]) if rows else None
+
     async def verify_chain(self) -> dict[str, Any]:
         """Recompute the chain and report the first row that does not reconcile.
 
@@ -144,15 +158,17 @@ class AuditService:
             "created_at_unix, chain_seq, prev_hash, entry_hash FROM audit "
             "WHERE chain_seq IS NOT NULL ORDER BY chain_seq ASC"
         )
-        expected_prev = GENESIS_HASH
-        expected_seq = 1
+        anchor = await self.chain_anchor()
+        expected_prev = str(anchor["anchor_hash"]) if anchor else GENESIS_HASH
+        expected_seq = (int(anchor["anchor_seq"]) + 1) if anchor else 1
+        first_seq = expected_seq
         for row in rows:
             seq = int(row["chain_seq"])
             if seq != expected_seq:
-                return {"ok": False, "checked": expected_seq - 1, "broken_at": seq,
+                return {"ok": False, "checked": expected_seq - first_seq, "broken_at": seq,
                         "reason": f"sequence gap: expected {expected_seq}, found {seq}"}
             if str(row["prev_hash"]) != expected_prev:
-                return {"ok": False, "checked": expected_seq - 1, "broken_at": seq,
+                return {"ok": False, "checked": expected_seq - first_seq, "broken_at": seq,
                         "reason": "prev_hash does not match the previous entry"}
             recomputed = self.entry_digest(
                 seq=seq,
@@ -167,8 +183,15 @@ class AuditService:
                 created_at_unix=int(row["created_at_unix"]),
             )
             if recomputed != str(row["entry_hash"]):
-                return {"ok": False, "checked": expected_seq - 1, "broken_at": seq,
+                return {"ok": False, "checked": expected_seq - first_seq, "broken_at": seq,
                         "reason": "entry contents do not match its recorded hash"}
             expected_prev = str(row["entry_hash"])
             expected_seq += 1
-        return {"ok": True, "checked": expected_seq - 1, "broken_at": None, "reason": None}
+        return {
+            "ok": True,
+            "checked": expected_seq - first_seq,
+            "broken_at": None,
+            "reason": None,
+            "anchor_seq": int(anchor["anchor_seq"]) if anchor else None,
+            "pruned_rows": int(anchor["pruned_rows"]) if anchor else 0,
+        }

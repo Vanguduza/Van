@@ -50,12 +50,21 @@ class ControlScope(str, Enum):
     UNDERSTANDING = "understanding"
     #: Deliberately separate: this is the scope that can mint owner-device authority.
     DEVICE_ENROLMENT = "device_enrolment"
+    #: Gate 11's operator surface — metrics, alerts, health and the command trace.
+    #: Also deliberately separate: a trace names device ids, command ids and failure
+    #: reasons across the whole system, which is exactly the shape of thing a
+    #: model-driven runtime should not be able to read just because it can drive
+    #: automation. An operator grants it on purpose, like device enrolment.
+    OBSERVABILITY = "observability"
 
 
 #: What the legacy single token is granted when nothing finer is configured. Everything
 #: except device enrolment: an existing deployment keeps working, and the one scope that
 #: turns a control credential into owner authority has to be granted on purpose.
-DEFAULT_SCOPES = frozenset(s for s in ControlScope if s is not ControlScope.DEVICE_ENROLMENT)
+DEFAULT_SCOPES = frozenset(
+    s for s in ControlScope
+    if s not in (ControlScope.DEVICE_ENROLMENT, ControlScope.OBSERVABILITY)
+)
 
 
 @dataclass(frozen=True)
@@ -112,6 +121,7 @@ class ControlAuthority:
         legacy_token: str = "",
         scoped: str = "",
         device_enrolment_token: str = "",
+        observability_token: str = "",
         legacy_scopes: frozenset[ControlScope] = DEFAULT_SCOPES,
     ) -> None:
         self.credentials = parse_scoped_credentials(scoped)
@@ -128,6 +138,14 @@ class ControlAuthority:
                     device_enrolment_token.strip(),
                     frozenset({ControlScope.DEVICE_ENROLMENT}),
                     "device_enrolment",
+                )
+            )
+        if observability_token.strip():
+            self.credentials.append(
+                ControlCredential(
+                    observability_token.strip(),
+                    frozenset({ControlScope.OBSERVABILITY}),
+                    "observability",
                 )
             )
 

@@ -1,5 +1,6 @@
 from __future__ import annotations
 
+import logging
 import time
 from typing import Any
 
@@ -17,6 +18,8 @@ from van_gateway.context.service import OwnerContextService
 from van_gateway.degraded.registry import DegradedRegistry
 from van_gateway.hermes.bridge import HermesBridge, HermesBridgeError
 from van_gateway.idempotency.service import IdempotencyConflict, IdempotencyInFlight, IdempotencyService
+from van_gateway.observability import instruments
+from van_gateway.observability.logging import log_event
 from van_gateway.models import (
     ActionClass,
     CommandRequest,
@@ -27,6 +30,8 @@ from van_gateway.models import (
     PrincipalType,
 )
 from van_gateway.projects.router import ProjectRouter
+
+LOGGER = logging.getLogger("van.command")
 
 
 #: A4 approval failures that only a forger produces. An expired challenge, a missing proof
@@ -107,6 +112,19 @@ class CommandOrchestrator:
         )
 
     async def handle(self, req: CommandRequest) -> CommandResult:
+        """Handle the command, then log its outcome exactly once.
+
+        The logging is a wrapper rather than a call at each `return` because
+        `_handle` returns in twenty-one places, most of them refusals. A per-site
+        call would be twenty-one chances to miss one, and the refusals are the
+        lines an operator most needs — "VAN did nothing and said nothing" is the
+        report this gate exists to make impossible.
+        """
+        result = await self._handle(req)
+        self._log_outcome(req, result)
+        return result
+
+    async def _handle(self, req: CommandRequest) -> CommandResult:
         payload = req.model_dump()
         try:
             prior = await self.idempotency.begin(req.idempotency_key, payload)
@@ -680,37 +698,44 @@ class CommandOrchestrator:
         self.degraded.set(DegradedCode.HERMES_OFFLINE, False)
 
         try:
-            run = await self.hermes.create_run(
-                req.text,
-                metadata={
-                    "command_id": req.command_id,
-                    "idempotency_key": req.idempotency_key,
-                    "device_id": req.device_id,
-                    "project_id": req.project_id,
-                    "action_class": effective_action_class.value,
-                    "signed_action_class": req.action_class.value,
-                    "context_trust": effective_trust.value,
-                    "declared_context_trust": req.context_trust.value,
-                    "signature_version": req.signature_version,
-                    "turn_id": req.turn_id,
-                    "origin_channel": req.origin_channel.value,
-                    "principal_type": req.principal_type.value,
-                    "requested_by": req.requested_by,
-                    "expires_at_unix": req.expires_at_unix,
-                    "nonce": req.nonce,
-                    "context_capsule_revision": req.context_capsule_revision,
-                    "context_capsule_hash": req.context_capsule_hash,
-                    "speech_evidence_ref": req.speech_evidence_ref,
-                    "no_stale_replay": effective_no_stale_replay,
-                    "client_context": req.client_context,
-                    "client_context_authoritative": False,
-                    "canonical_context": canonical_context,
-                    "typed_resolution": resolution.model_dump(mode="json"),
-                    "gateway_action_authority_required": True,
-                    "owner_approved": owner_approved,
-                },
-            )
+            # P3-OBS-002 — Hermes dispatch latency is Gate 11's "Hermes callback
+            # latency" for the synchronous half: how long the owner waits before VAN
+            # can say the work has started at all.
+            with instruments.timed() as dispatch_ms:
+                run = await self.hermes.create_run(
+                    req.text,
+                    metadata={
+                        "command_id": req.command_id,
+                        "idempotency_key": req.idempotency_key,
+                        "device_id": req.device_id,
+                        "project_id": req.project_id,
+                        "action_class": effective_action_class.value,
+                        "signed_action_class": req.action_class.value,
+                        "context_trust": effective_trust.value,
+                        "declared_context_trust": req.context_trust.value,
+                        "signature_version": req.signature_version,
+                        "turn_id": req.turn_id,
+                        "origin_channel": req.origin_channel.value,
+                        "principal_type": req.principal_type.value,
+                        "requested_by": req.requested_by,
+                        "expires_at_unix": req.expires_at_unix,
+                        "nonce": req.nonce,
+                        "context_capsule_revision": req.context_capsule_revision,
+                        "context_capsule_hash": req.context_capsule_hash,
+                        "speech_evidence_ref": req.speech_evidence_ref,
+                        "no_stale_replay": effective_no_stale_replay,
+                        "client_context": req.client_context,
+                        "client_context_authoritative": False,
+                        "canonical_context": canonical_context,
+                        "typed_resolution": resolution.model_dump(mode="json"),
+                        "gateway_action_authority_required": True,
+                        "owner_approved": owner_approved,
+                    },
+                )
+            instruments.record_hermes_callback("accepted", dispatch_ms[0])
         except HermesBridgeError as exc:
+            instruments.record_hermes_callback("failed", dispatch_ms[0])
+            instruments.record_error("HermesBridgeError", exc.code)
             self.degraded.set(DegradedCode.HERMES_OFFLINE, True)
             if mission is not None:
                 await self.missions.note_stall(mission, reason=f"hermes_dispatch_failed:{exc.code}")
@@ -768,3 +793,36 @@ class CommandOrchestrator:
         )
         await self.idempotency.complete(req.idempotency_key, result.model_dump())
         return result
+
+    def _log_outcome(self, req: CommandRequest, result: CommandResult) -> None:
+        """One structured line per command outcome (P3-OBS-001).
+
+        `result.correlation_id` rather than a locally derived one, so the line and
+        the response the device received carry the same identifier by construction:
+        an owner reading a correlation id off their screen finds this line.
+
+        The command text is deliberately not logged. It is the owner's speech, it
+        can contain anything they said, and a log is the one place it would end up
+        in plaintext on disk outside the audit record that is meant to hold it.
+        """
+        log_event(
+            LOGGER,
+            logging.INFO if result.status == "accepted" else logging.WARNING,
+            "command outcome",
+            correlation_id=result.correlation_id,
+            command_id=req.command_id,
+            mission_id=result.mission_id,
+            device_id=req.device_id,
+            action_class=(result.effective_action_class or req.action_class).value,
+            principal=req.principal_type.value,
+            result=result.status,
+            degraded_code=",".join(result.degraded) or None,
+            detail={
+                "origin_channel": req.origin_channel.value,
+                "resolved_action_id": result.resolved_action_id,
+                "hermes_run_id": result.hermes_run_id,
+                "requires_approval": result.requires_approval,
+            },
+        )
+        if result.status not in ("accepted", "in_flight"):
+            instruments.record_error(f"command_{result.status}", result.degraded[0] if result.degraded else "none")

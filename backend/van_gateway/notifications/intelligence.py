@@ -49,15 +49,49 @@ class FilteredNotification(BaseModel):
     payload: dict = Field(default_factory=dict)
 
 
+#: How long a notification key is remembered as already-seen. Long enough that a
+#: phone re-posting the same notification after a reconnect is still a duplicate;
+#: short enough that the table does not become a permanent record of every
+#: notification the owner's phone has ever produced.
+DEDUPE_TTL_SECONDS = 7 * 86_400
+
+
 class NotificationIntelligence:
     """Local-first filtering. Secrets never leave the device unredacted."""
 
-    def __init__(self, quiet_hours: bool = False) -> None:
+    def __init__(self, quiet_hours: bool = False, suppressions=None) -> None:
         self.quiet_hours = quiet_hours
         self._seen: set[str] = set()
+        # P3-OPS-005. Optional so the pure classifier stays constructible without a
+        # database — several tests exercise the redaction rules and nothing else —
+        # but create_app always supplies one, and without it dedupe dies at restart.
+        self.suppressions = suppressions
 
-    def ingest(self, note: PhoneNotification) -> FilteredNotification:
-        if note.key in self._seen:
+    async def ingest_durable(self, note: PhoneNotification) -> FilteredNotification:
+        """`ingest`, with the already-seen check answered from the database.
+
+        P3-OPS-005: the in-memory set said "not seen" for every notification after
+        a restart, so the owner was shown things they had already dismissed. The
+        set is kept as a same-process fast path; the database is what makes the
+        answer survive.
+        """
+        from van_gateway.ops.suppression import SuppressionChannel
+
+        already = note.key in self._seen
+        if not already and self.suppressions is not None:
+            already = await self.suppressions.is_suppressed(
+                SuppressionChannel.NOTIFICATION, note.key
+            ) is not None
+        filtered = self.ingest(note, already_seen=already)
+        if not already and self.suppressions is not None:
+            await self.suppressions.suppress(
+                SuppressionChannel.NOTIFICATION, note.key,
+                reason="already_delivered", ttl_seconds=DEDUPE_TTL_SECONDS,
+            )
+        return filtered
+
+    def ingest(self, note: PhoneNotification, *, already_seen: bool = False) -> FilteredNotification:
+        if already_seen or note.key in self._seen:
             return FilteredNotification(
                 key=note.key,
                 package=note.package,

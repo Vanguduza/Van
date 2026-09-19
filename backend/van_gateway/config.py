@@ -23,6 +23,9 @@ class Settings(BaseSettings):
     #: everything the Hermes runtime reads. Empty means device enrolment is unreachable,
     #: which is inconvenient once and is the right way round.
     device_enrolment_token: str = ""
+    #: Gate 11 operator surface (metrics, alerts, health, command trace).
+    #: Granted on purpose; the legacy internal token does not carry this scope.
+    observability_token: str = ""
     ingress_token: str = ""  # Owner-device bearer gate for externally reachable HTTP routes
     device_secret_fernet_key: str = ""  # Android HMAC secrets encrypted at rest
 
@@ -117,6 +120,34 @@ class Settings(BaseSettings):
 
     require_hermes_for_mutations: bool = True
     event_page_size: int = 100
+
+    # ---- Gate 11: observability and operations -----------------------------
+    #: Log level for the structured JSON logger (P3-OBS-001).
+    log_level: str = "INFO"
+    #: The scheduler that makes due work actually happen (P3-OPS-004). Defaulted on:
+    #: a reminder the owner set is not optional, and the previous state of the world
+    #: — the routine existing with no caller — is what the finding was about.
+    scheduler_enabled: bool = True
+    #: How often due reminders are swept. A minute is the resolution a reminder is
+    #: worth; anything finer is a busy loop against SQLite for no owner-visible gain.
+    reminder_sweep_seconds: int = 60
+    #: How often retention runs (P3-OPS-001). Daily: the horizons are in days, so a
+    #: more frequent sweep deletes the same rows a day earlier at best.
+    retention_interval_seconds: int = 86_400
+    #: How often PKI expiry is re-read (P3-OPS-003). Certificates expire on a scale
+    #: of days; an hour is ample and keeps the alert fresh across a renewal.
+    pki_scan_interval_seconds: int = 3_600
+    #: Where the bridge PKI lives. Empty means this deployment has no trading PKI,
+    #: which is reported as absent rather than as expired.
+    pki_dir: str = ""
+    #: Where backups are written and read from (P3-OPS-002). Empty means backups are
+    #: not configured here, which the health surface distinguishes from stale.
+    backup_dir: str = ""
+    #: Whether the scheduler takes a backup itself. Off by default: on most hosts the
+    #: backup belongs to a system-level job with its own offsite target, and a
+    #: scheduler that writes backups to the same disk as the database is not a backup.
+    backup_enabled: bool = False
+    backup_interval_seconds: int = 86_400
 
 
 @lru_cache

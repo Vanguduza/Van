@@ -79,15 +79,26 @@ class AttentionEngine:
             (dedupe_key,),
         )
         if existing:
+            # P3-OPS-005: this used to write `state` unconditionally, so a source that
+            # re-reported the same condition — which is what a source does after a
+            # restart — silently moved an item the owner had already acknowledged,
+            # snoozed or handled back to OPEN. Only a *re-report* is overridden: a
+            # caller that explicitly resolves the item still resolves it, because
+            # "VAN finished the thing" must be able to close an acknowledged item.
+            previous = AttentionState(existing["state"])
+            effective_state = (
+                previous if state is AttentionState.OPEN and previous is not AttentionState.OPEN
+                else state
+            )
             await self.store.execute(
                 "UPDATE attention SET title = ?, severity = ?, state = ?, updated_at_unix = ?, payload_json = ? WHERE dedupe_key = ?",
-                (title, severity.value, state.value, now, Store.dumps(payload or {}), dedupe_key),
+                (title, severity.value, effective_state.value, now, Store.dumps(payload or {}), dedupe_key),
             )
             return AttentionItem(
                 id=existing["id"],
                 title=title,
                 severity=severity,
-                state=state,
+                state=effective_state,
                 source=source,
                 project_id=project_id or existing["project_id"],
                 created_at_unix=int(existing["created_at_unix"]),

@@ -2085,8 +2085,28 @@
       "root_cause": "see s32 root-cause map",
       "remediation": "Introduce a single correlation id propagated across every subsystem and log sink.",
       "validation_gate": "G1",
-      "current_status": "OPEN",
-      "remediation_gate": "GATE 11"
+      "current_status": "CLOSED",
+      "remediation_gate": "GATE 11",
+      "closure": {
+        "summary": "One correlation id now spans the chain the blueprint names, and the join an operator used to do by hand is a single call. The id is derived from the command id rather than minted as a new random value: a random id has to be carried from the first hop by every subsystem, and propagation is the thing that gets forgotten, whereas a derived id lets a subsystem that forgot still be joined after the fact. It is filled in by a validator on CommandResult rather than at the orchestrator's twenty-one construction sites, so it is present on every result including the refusals — the case an operator most needs. GET /v1/observability/trace/{command_id} performs the six joins across five tables, two of them through JSON, that answering \"what happened to the thing I asked for\" previously required.",
+        "changed": [
+          "backend/van_gateway/observability/correlation.py",
+          "backend/van_gateway/observability/trace.py",
+          "backend/van_gateway/models.py",
+          "backend/van_gateway/mission/service.py",
+          "backend/van_gateway/app.py"
+        ],
+        "verified_by": [
+          "backend/tests/test_observability_routes.py::test_a_command_can_be_traced_end_to_end",
+          "backend/tests/test_observability_routes.py::test_a_refused_command_is_traceable_too",
+          "backend/tests/test_observability_logging.py::test_a_correlation_id_is_derived_from_the_command_and_is_therefore_stable"
+        ],
+        "runtime_evidence": [
+          "evidence/van-system-audit/gate-11/structured_logs.jsonl"
+        ],
+        "residual": "The correlation id reaches Hermes in the run metadata, but the external agent runtime is not in this repository, so whether it echoes the id back on its callback is not verifiable here.",
+        "residual_reason": "Hermes is an external system outside the repository boundary; asserting its behaviour from here would be asserting something unverified."
+      }
     },
     {
       "id": "P2-COH-001",
@@ -2188,7 +2208,26 @@
       "remediation": "Add structured logging with timestamp, service, mission id, command id, correlation id, action class, principal, result, degraded code and error class. Never log secrets.",
       "validation_gate": "G_OPS",
       "remediation_gate": "GATE 11",
-      "current_status": "OPEN"
+      "current_status": "CLOSED",
+      "closure": {
+        "summary": "The gateway emits structured JSON logs with the nine context fields Gate 11 names, always present as keys so an absent field is distinguishable from a logger that does not emit it. Secrets are removed recursively by field name at any depth, because the way secrets reach logs is not that somebody logs a password on purpose but that somebody logs a dict they had not looked inside. Command outcomes are logged by wrapping `handle` rather than by a call at each of its twenty-one returns: most of those returns are refusals, and a refusal nobody logged is the 'VAN did nothing and said nothing' report this gate exists to make impossible. The command text is deliberately not logged.",
+        "changed": [
+          "backend/van_gateway/observability/logging.py",
+          "backend/van_gateway/observability/middleware.py",
+          "backend/van_gateway/orchestrator.py",
+          "backend/van_gateway/mission/service.py",
+          "backend/van_gateway/app.py",
+          "backend/van_gateway/config.py"
+        ],
+        "verified_by": [
+          "backend/tests/test_observability_logging.py::test_every_line_is_one_json_object_with_the_gate_11_fields",
+          "backend/tests/test_observability_logging.py::test_a_secret_is_redacted_however_deeply_it_is_nested",
+          "backend/tests/test_observability_logging.py::test_redaction_matches_by_substring_so_a_new_name_for_a_token_is_still_caught"
+        ],
+        "runtime_evidence": [
+          "evidence/van-system-audit/gate-11/structured_logs.jsonl"
+        ]
+      }
     },
     {
       "id": "P3-OBS-002",
@@ -2210,7 +2249,30 @@
       "remediation": "Export the metric set named in blueprint Gate 11 to a scrape endpoint or push gateway.",
       "validation_gate": "G_OPS",
       "remediation_gate": "GATE 11",
-      "current_status": "OPEN"
+      "current_status": "CLOSED",
+      "closure": {
+        "summary": "All sixteen metrics Gate 11 names are declared in a closed catalogue and exported at GET /v1/observability/metrics in Prometheus text format. The catalogue names a producer for each metric and records whether it is produced by the gateway, the device or the trading process, because declaring sixteen metrics and exporting them all as zero would have closed the finding on paper while leaving the instruments unwired. `van_metric_unobserved` reports the declared metrics that have never received a sample, so a metric at zero because nothing happened is distinguishable from one at zero because nothing writes it. Device-produced metrics — aura frame time, wake/ASR/TTS latency, battery and memory — are ingested through POST /v1/observability/device-telemetry rather than invented, and trade halt latency is recovered from the two ledger events that bracket it. Route labels use the matched route template, not the path, so a mission id cannot become an unbounded set of time series.",
+        "changed": [
+          "backend/van_gateway/observability/metrics.py",
+          "backend/van_gateway/observability/instruments.py",
+          "backend/van_gateway/observability/middleware.py",
+          "backend/van_gateway/automation/telemetry.py",
+          "backend/van_gateway/browser/api.py",
+          "backend/van_gateway/events/bus.py",
+          "backend/van_gateway/trading/service.py",
+          "backend/van_gateway/app.py"
+        ],
+        "verified_by": [
+          "backend/tests/test_observability_metrics.py",
+          "backend/tests/test_observability_routes.py::test_the_scrape_is_prometheus_text_and_names_the_route_template",
+          "backend/tests/test_observability_routes.py::test_device_telemetry_is_device_authenticated_not_operator_authenticated"
+        ],
+        "runtime_evidence": [
+          "evidence/van-system-audit/gate-11/metrics_scrape.txt"
+        ],
+        "residual": "Six device-sourced metrics have no producer until the Android client posts telemetry; the scrape reports them as unobserved rather than as zero.",
+        "residual_reason": "The Android client change belongs to Gate 10; the gateway half is complete and the honest state is reported rather than faked."
+      }
     },
     {
       "id": "P3-OBS-003",
@@ -2231,7 +2293,23 @@
       "remediation": "Define actionable alert thresholds for the critical runtime failures enumerated in Gate 11.",
       "validation_gate": "G_OPS",
       "remediation_gate": "GATE 11",
-      "current_status": "OPEN"
+      "current_status": "CLOSED",
+      "closure": {
+        "summary": "Nine alert rules are defined and evaluated in process against the same registry the scrape renders, and GET /v1/observability/alerts returns the ones firing now. Writing a YAML file for a monitoring system nobody has installed would have closed the finding and left VAN exactly as unalertable as before. Every rule names the operator action, because a threshold with no action is a notification and an operator who cannot act on a page learns to ignore pages. Every ratio rule carries a sample floor so one denied command out of one is not a 100% error rate. INSTRUMENT_SILENT fires on the failure the other rules cannot see: an exporter that has gone blind reports every threshold as healthy.",
+        "changed": [
+          "backend/van_gateway/observability/alerts.py",
+          "backend/van_gateway/app.py"
+        ],
+        "verified_by": [
+          "backend/tests/test_observability_alerts.py",
+          "backend/tests/test_observability_routes.py::test_alerts_and_health_answer_without_reading_sqlite"
+        ],
+        "runtime_evidence": [
+          "evidence/van-system-audit/gate-11/metrics_scrape.txt"
+        ],
+        "residual": "The rules are served on an endpoint; nothing in this repository pages a human, because no notification transport is deployed.",
+        "residual_reason": "Choosing and configuring a paging transport is an owner deployment decision, not a repository one. The actionable condition is now computable and served, which is what was absent."
+      }
     },
     {
       "id": "P3-OPS-001",
@@ -2254,7 +2332,24 @@
       "remediation": "Add a retention policy and a prune job to every unbounded store.",
       "validation_gate": "G_OPS",
       "remediation_gate": "GATE 11",
-      "current_status": "OPEN"
+      "current_status": "CLOSED",
+      "closure": {
+        "summary": "Every table in the schema carries a retention class, and a test reads the live schema and fails if any table is unassigned — the reason one n8n setting was the only retention in the system is that nothing ever compared the policy to the schema. The policy is six classes with stated meanings rather than seventy hand-chosen day counts, so it can be argued with. OWNER_STATE never prunes because the owner's record of their own life is not the system's to expire; deletion there is the owner's, through context/forget.py. The audit log is pruned only as an anchored prefix: a hash chain cannot be cut in the middle or from the end, but it can be cut from the start if the verifier is told where the surviving chain begins and what hash it links back to, so `verify_chain` still reconciles afterwards and the anchor itself records how much was removed.",
+        "changed": [
+          "backend/van_gateway/ops/retention.py",
+          "backend/van_gateway/audit/service.py",
+          "backend/van_gateway/storage/db.py",
+          "backend/van_gateway/app.py"
+        ],
+        "verified_by": [
+          "backend/tests/test_ops_retention.py::test_every_table_in_the_live_schema_has_a_retention_class",
+          "backend/tests/test_ops_retention.py::test_pruning_the_audit_prefix_leaves_a_chain_that_still_verifies",
+          "backend/tests/test_ops_retention.py::test_a_tampered_row_after_an_anchor_is_still_caught",
+          "backend/tests/test_ops_retention.py::test_owner_state_is_never_pruned_however_old_it_is"
+        ],
+        "residual": "n8n's own 168-hour execution retention is unchanged and remains the automation runtime's setting rather than VAN's.",
+        "residual_reason": "It is configuration of an external runtime that already has a bounded policy; duplicating it in VAN would create two sources of truth for the same horizon."
+      }
     },
     {
       "id": "P3-OPS-002",
@@ -2276,7 +2371,27 @@
       "remediation": "Automate backups for databases, configuration, evidence and project state; run an actual restore drill and record it.",
       "validation_gate": "G_OPS",
       "remediation_gate": "GATE 11",
-      "current_status": "OPEN"
+      "current_status": "CLOSED",
+      "closure": {
+        "summary": "Backup, restore and a drill that actually restores. The database is copied with SQLite's own backup API rather than with cp: the gateway runs in WAL mode while serving requests, and copying the file without its -wal sidecar produces something that opens cleanly and is missing the most recent committed transactions — a backup that restores to a plausible past. All four parts Gate 11 names are covered, every artefact is digested, and the manifest is verified before any restore touches a target. A restore refuses to overwrite an existing database unless told to, because replacing live owner state over a mistyped path is worse than the disaster being recovered from. `tools/ops/backup.py drill` takes a backup, restores it to a scratch location and compares schema version, every table's row count and the audit chain tip, exiting non-zero on any difference — the recorded run is a real one against this repository.",
+        "changed": [
+          "backend/van_gateway/ops/backup.py",
+          "tools/ops/backup.py",
+          "backend/van_gateway/config.py",
+          "backend/van_gateway/app.py"
+        ],
+        "verified_by": [
+          "backend/tests/test_ops_backup.py::test_the_drill_restores_a_populated_database",
+          "backend/tests/test_ops_backup.py::test_a_backup_taken_while_the_database_is_being_written_is_consistent",
+          "backend/tests/test_ops_backup.py::test_the_drill_fails_when_the_restore_does_not_match",
+          "backend/tests/test_ops_backup.py::test_a_restore_will_not_silently_replace_live_owner_state"
+        ],
+        "runtime_evidence": [
+          "evidence/van-system-audit/gate-11/restore_drill.json"
+        ],
+        "residual": "The scheduler's own backup job is off by default and no offsite destination is configured.",
+        "residual_reason": "A backup written by the gateway to the same disk as its database is not a backup; choosing an offsite target is an owner deployment decision. The mechanism, its verification and the drill are complete and runnable."
+      }
     },
     {
       "id": "P3-OPS-003",
@@ -2297,7 +2412,25 @@
       "remediation": "Add a renewal path and expiry monitoring for all PKI and long-lived credentials.",
       "validation_gate": "G_OPS",
       "remediation_gate": "GATE 11",
-      "current_status": "OPEN"
+      "current_status": "CLOSED",
+      "closure": {
+        "summary": "Expiry is now a number a monitor can ask for, not only a script it can run. The renewal path landed under P2-SEC-008: make-bridge-pki.sh re-issues anything inside its renewal window instead of returning early because the file exists. This closes the other half: ops/pki.py reads the certificates directly and reports days remaining per certificate and the minimum across them, which the PKI_EXPIRING rule thresholds at thirty days, and the scheduler re-reads it hourly. A missing or unreadable certificate reports as already past due, because it is more urgent than any expiry. A deployment with no trading PKI reports absence rather than expiry: paging an operator about a system they do not run is how alerts get muted.",
+        "changed": [
+          "backend/van_gateway/ops/pki.py",
+          "backend/van_gateway/ops/health.py",
+          "backend/van_gateway/observability/alerts.py",
+          "backend/van_gateway/config.py",
+          "backend/van_gateway/app.py"
+        ],
+        "verified_by": [
+          "backend/tests/test_ops_pki.py::test_days_remaining_is_read_from_the_certificates",
+          "backend/tests/test_ops_pki.py::test_the_soonest_expiry_is_the_one_that_matters",
+          "backend/tests/test_ops_pki.py::test_a_missing_certificate_is_more_urgent_than_any_expiry",
+          "backend/tests/test_ops_pki.py::test_the_pki_number_reaches_the_alert_rules"
+        ],
+        "residual": "The certificates in these tests are generated by the tests; no live trading PKI exists in this environment to read.",
+        "residual_reason": "Reading a real deployment's /opt/van-trading/secrets/pki is an owner-host action. The parser is exercised against real X.509 that the test mints, which is what makes it more than a fixture comparison."
+      }
     },
     {
       "id": "P3-OPS-004",
@@ -2318,7 +2451,22 @@
       "remediation": "Give reminder and attention dispatch a real scheduler with ownership and observability.",
       "validation_gate": "G_OPS",
       "remediation_gate": "GATE 11",
-      "current_status": "OPEN"
+      "current_status": "CLOSED",
+      "closure": {
+        "summary": "`fire_due` has a caller. The scheduler sweeps due reminders every minute, publishes a reminder.fired event the device replays and raises one attention item per reminder — firing a reminder and telling nobody is the same as not firing it. It also runs retention daily and re-reads PKI expiry hourly. It remembers when each job last ran in `scheduler_runs`, so a restart does not re-run everything, which in a restart loop would mean firing the same work forever; a job that has never run is due immediately, so a first boot fires the reminder that came due during installation. A failing job is recorded with its error class and the loop continues: a scheduler that dies on one bad job and one that swallows errors are both failures, and `status()` reports which jobs ran and how they ended.",
+        "changed": [
+          "backend/van_gateway/ops/scheduler.py",
+          "backend/van_gateway/storage/db.py",
+          "backend/van_gateway/config.py",
+          "backend/van_gateway/app.py"
+        ],
+        "verified_by": [
+          "backend/tests/test_ops_scheduler.py::test_a_reminder_that_comes_due_is_fired_by_the_system_itself",
+          "backend/tests/test_ops_scheduler.py::test_a_restart_does_not_re_run_everything",
+          "backend/tests/test_ops_scheduler.py::test_a_failing_job_is_recorded_and_the_loop_survives",
+          "backend/tests/test_ops_scheduler.py::test_status_says_whether_the_scheduler_is_actually_running"
+        ]
+      }
     },
     {
       "id": "P3-OPS-005",
@@ -2341,7 +2489,25 @@
       "remediation": "Persist dedupe and suppression state.",
       "validation_gate": "G_OPS",
       "remediation_gate": "GATE 11",
-      "current_status": "OPEN"
+      "current_status": "CLOSED",
+      "closure": {
+        "summary": "Dedupe and suppression are in the database. `notification_suppressions` records the channel, the subject and how long the suppression lasts — the third of which an in-memory set cannot express at all, since a set entry is forever or gone. A null expiry means the owner said never again and is deliberately distinguishable from a long one. An expired suppression keeps its row, so 'I already told you about this yesterday' stays answerable. The attention engine's `upsert` had a second, non-restart-specific form of the same defect: it wrote the caller's state unconditionally, so any source re-reporting a condition moved an item the owner had acknowledged back to OPEN. A re-report no longer overrides the owner's disposition, while a caller that explicitly resolves an item still can.",
+        "changed": [
+          "backend/van_gateway/ops/suppression.py",
+          "backend/van_gateway/notifications/intelligence.py",
+          "backend/van_gateway/attention/engine.py",
+          "backend/van_gateway/storage/db.py",
+          "backend/van_gateway/app.py"
+        ],
+        "verified_by": [
+          "backend/tests/test_ops_suppression.py::test_a_notification_already_shown_is_not_shown_again_after_a_restart",
+          "backend/tests/test_ops_suppression.py::test_a_permanent_suppression_is_distinguishable_from_a_long_one",
+          "backend/tests/test_ops_suppression.py::test_a_re_reported_condition_does_not_reopen_what_the_owner_dismissed",
+          "backend/tests/test_ops_suppression.py::test_van_can_still_resolve_an_acknowledged_item"
+        ],
+        "residual": "DegradedRegistry._active remains in memory.",
+        "residual_reason": "It is live health state, not a dismissal: a subsystem's degradation should be re-detected on boot rather than remembered from before the restart. Remembering it would report a subsystem as degraded after the fault was fixed."
+      }
     },
     {
       "id": "P3-OPS-006",
@@ -2362,7 +2528,16 @@
       "remediation": "Use awaitable bounded exponential backoff with jitter.",
       "validation_gate": "G_OPS",
       "remediation_gate": "GATE 11",
-      "current_status": "OPEN"
+      "current_status": "CLOSED",
+      "closure": {
+        "summary": "The retry backoff awaits instead of blocking. `time.sleep` inside an `async def` inside the gateway's single event loop meant that one n8n call receiving a 503 stopped every other request the gateway was serving, including the owner's, for the duration of the backoff. The test does not grep for the call: it runs a companion task alongside a failing request and asserts the companion kept running while the retry waited, which is the property that matters and the one a source-text check cannot establish.",
+        "changed": [
+          "backend/van_gateway/automation/n8n_client.py"
+        ],
+        "verified_by": [
+          "backend/tests/test_n8n_invocation.py::test_a_retry_backoff_does_not_block_the_event_loop"
+        ]
+      }
     },
     {
       "id": "P3-OPS-007",
@@ -2383,7 +2558,23 @@
       "remediation": "Replace with a real n8n execution call or remove the method.",
       "validation_gate": "G_SUBSTRATE",
       "remediation_gate": "GATE 8",
-      "current_status": "OPEN"
+      "current_status": "CLOSED",
+      "closure": {
+        "summary": "The invented endpoint is gone and execution goes where n8n actually accepts it. n8n's public REST API can create, update, activate, deactivate and read a workflow; it has never had `POST /workflows/{id}/run`. The only thing that ever exercised that call was a test fake that answered it, which is how it survived: the call and its test agreed with each other and neither agreed with n8n. Every workflow VAN compiles for dispatch is built on a webhook trigger, so invocation now reads the trigger path from the *deployed* workflow — a workflow edited in the n8n UI is exactly the case where VAN's compiled path and the live one differ — and POSTs the same run envelope and run-scoped grant to its production webhook URL. A workflow with no trigger is refused rather than invoked by some other means, and an inactive workflow gets its own error code because that is a deployment fault with a specific remedy.",
+        "changed": [
+          "backend/van_gateway/automation/n8n_client.py",
+          "backend/tests/test_automation_dispatch.py",
+          "backend/tests/test_automation_api.py"
+        ],
+        "verified_by": [
+          "backend/tests/test_n8n_invocation.py::test_invoking_a_workflow_never_touches_a_management_run_endpoint",
+          "backend/tests/test_n8n_invocation.py::test_a_workflow_is_invoked_through_its_own_webhook",
+          "backend/tests/test_n8n_invocation.py::test_a_workflow_with_no_trigger_is_refused_rather_than_invoked",
+          "backend/tests/test_n8n_invocation.py::test_an_inactive_workflow_gets_its_own_error_code"
+        ],
+        "residual": "No live n8n instance exists in this environment, so the call is verified against a fake shaped like the documented n8n API rather than against n8n itself.",
+        "residual_reason": "n8n is an external runtime that is not deployed here. The fake was rewritten to the real API's shape, which is the correction the finding asked for; asserting against a live instance requires the owner's automation host."
+      }
     },
     {
       "id": "P3-AND-001",

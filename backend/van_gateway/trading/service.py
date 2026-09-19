@@ -15,6 +15,8 @@ from decimal import Decimal, InvalidOperation
 from pathlib import Path
 from typing import Any, Optional
 
+from van_gateway.observability import instruments
+
 READ_KINDS = ("SESSION", "OPPORTUNITY_ASSESSMENT", "RISK_DECISION", "ORDER_COMMAND", "EXECUTION_RECEIPT", "TRADE_REVIEW", "TRADE_EXPERIENCE_ARTIFACT", "KILL_SWITCH", "OWNER_TICKET", "CAPSULE_STATE")
 
 
@@ -167,8 +169,20 @@ class TradingService:
             for ev in led.iter(EventKind.KILL_SWITCH):
                 last_ms = max(last_ms, ev.event_time_ms)
                 halts.append({"trigger": ev.payload.get("trigger"), "event_time_ms": ev.event_time_ms, "hash": ev.hash, "cleared": bool(ev.payload.get("cleared"))})
+            # P3-OBS-002 — "trade halt latency" is Gate 11's most safety-critical
+            # metric and it is produced in the trading process, which has its own
+            # registry the gateway never sees. It is recoverable here because the
+            # session records OWNER_HALT_OBSERVED with the halt's own event time, so
+            # the two ends of the interval are both in the ledger the gateway reads.
+            halt_latencies: list[int] = []
             for ev in led.iter(EventKind.SESSION):
                 last_ms = max(last_ms, ev.event_time_ms)
+                if ev.payload.get("event") == "OWNER_HALT_OBSERVED":
+                    authored = ev.payload.get("halt_event_time_ms")
+                    if isinstance(authored, int):
+                        latency = max(ev.event_time_ms - authored, 0)
+                        halt_latencies.append(latency)
+                        instruments.record_trade_halt_latency(float(latency))
             tripped = [h for h in halts if not h["cleared"]]
             cleared = {h["trigger"] for h in halts if h["cleared"]}
             active = [h for h in tripped if h["trigger"] not in cleared or h["event_time_ms"] > max((x["event_time_ms"] for x in halts if x["cleared"] and x["trigger"] == h["trigger"]), default=-1)]
@@ -186,6 +200,7 @@ class TradingService:
                     "open_tickets": sum(1 for t in tickets if t["status"] == "OPEN"), "last_event_ms": last_ms,
                     "ledger_age_ms": age_ms, "ledger_stale": stale,
                     "ledger_staleness_threshold_ms": LEDGER_STALENESS_MS,
+                    "owner_halt_latencies_ms": halt_latencies,
                     "authority": "VATI Risk Authority; Hermes and the gateway never place orders"}
             if stale:
                 # Said in the payload rather than only in a degraded code, because the

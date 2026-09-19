@@ -26,6 +26,7 @@ from typing import Any
 from fastapi import APIRouter, Header, HTTPException
 from pydantic import BaseModel, Field
 
+from van_gateway.observability import instruments
 from van_gateway.browser.models import (
     AutonomyTier,
     BrowserBoundaryType,
@@ -931,6 +932,12 @@ class BrowserApi:
                     ),
                     now_ms=int(time.time() * 1000),
                 )
+                # P3-OBS-002 — "browser task status" is one of Gate 11's named
+                # metrics. Recorded at the one place a task reaches a terminal
+                # status, so a new stop reason is counted without being added here.
+                instruments.record_browser_task(terminal_status)
+            if escalation is not None:
+                instruments.record_browser_task("ESCALATED")
             return {
                 "assignment_id": assignment.assignment_id,
                 "task_id": task.task_id,

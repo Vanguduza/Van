@@ -17,11 +17,15 @@ succeeded. There is no argument a caller can make to get past that.
 from __future__ import annotations
 
 import json
+import logging
 import time
 import uuid
 from typing import Any
 
 from van_gateway.mission.verifiers import VerifierRegistry
+from van_gateway.observability import instruments
+from van_gateway.observability.correlation import for_command
+from van_gateway.observability.logging import log_event
 from van_gateway.mission.models import (
     EVENT_FOR_STATE,
     LEGAL_TRANSITIONS,
@@ -51,6 +55,20 @@ class MissionError(ValueError):
         super().__init__(code if detail is None else f"{code}: {detail}")
         self.code = code
         self.detail = detail
+
+
+LOGGER = logging.getLogger("van.mission")
+
+
+def _correlation_for(mission: Mission) -> str | None:
+    """The mission's correlation id, which is its source command's.
+
+    P2-OBS-001 — a mission that was opened by a command shares that command's
+    identity for tracing purposes. A mission with no source command (a Hermes-
+    initiated one, say) has no correlation id rather than a made-up one.
+    """
+    source = getattr(mission.authority_envelope, "source_command_id", None)
+    return for_command(source) if source else None
 
 
 class MissionService:
@@ -211,7 +229,16 @@ class MissionService:
         verification_state = mission.verification_state
         verification: VerificationRecord | None = None
         if target in VERIFICATION_OUTCOMES:
-            verification = await self._perform_verification(mission, target, now_ms=now)
+            # P3-OBS-002 — verifier latency is one of Gate 11's named metrics, and the
+            # verifier is where an external system's slowness turns into an owner
+            # waiting. Timed here rather than inside the adapter so every strategy is
+            # measured, including the ones written later.
+            with instruments.timed() as verifier_ms:
+                verification = await self._perform_verification(mission, target, now_ms=now)
+            instruments.record_verification(
+                mission.success_contract.verifier_class or "NONE",
+                verification.status, verifier_ms[0],
+            )
             verification_state = verification.status
 
         await self.store.execute(
@@ -242,6 +269,21 @@ class MissionService:
             )
         refreshed = await self.get(mission_id)
         assert refreshed is not None
+        if refreshed.is_terminal:
+            # Mission duration is measured from creation to the terminal state, not
+            # from the first transition: the owner's clock starts when they asked.
+            instruments.record_mission_duration(
+                refreshed.state, max(now - refreshed.created_at_ms, 0)
+            )
+            log_event(
+                LOGGER, logging.INFO, "mission finished",
+                mission_id=mission_id, result=refreshed.state.value,
+                correlation_id=_correlation_for(refreshed),
+                detail={
+                    "verification_state": refreshed.verification_state.value,
+                    "duration_ms": max(now - refreshed.created_at_ms, 0),
+                },
+            )
         if self.learning is not None and refreshed.is_terminal:
             await self.learning.record_mission_outcome(
                 mission_id=mission_id,

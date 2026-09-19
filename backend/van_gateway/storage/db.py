@@ -8,7 +8,7 @@ from typing import Any, AsyncIterator
 
 import aiosqlite
 
-SCHEMA_VERSION = 19
+SCHEMA_VERSION = 20
 
 
 MIGRATION_17 = """
@@ -62,6 +62,52 @@ CREATE INDEX IF NOT EXISTS idx_learning_outcomes_kind
 CREATE UNIQUE INDEX IF NOT EXISTS idx_learning_outcomes_mission
   ON learning_outcomes(mission_id);
 """
+
+MIGRATION_20 = """
+-- P3-OPS-001: the audit log is hash-chained, so it cannot be pruned the way every other
+-- table can. It can be pruned from the *start*, provided the verifier is told where the
+-- surviving chain begins and what hash it must link back to. This table is that record.
+--
+-- The anchor is itself evidence: it says how many rows were removed and what the last
+-- removed row hashed to, so a prune is visible rather than being indistinguishable from
+-- a deletion someone performed by hand.
+CREATE TABLE IF NOT EXISTS audit_chain_anchors (
+  anchor_seq INTEGER PRIMARY KEY,
+  anchor_hash TEXT NOT NULL,
+  pruned_rows INTEGER NOT NULL,
+  created_at_unix INTEGER NOT NULL
+);
+
+-- P3-OPS-005: reminder and attention dedupe lived in a Python dict, so a restart
+-- re-surfaced an item the owner had already dismissed. Suppression is a decision the
+-- owner made; it belongs in the database with everything else they decided.
+CREATE TABLE IF NOT EXISTS notification_suppressions (
+  suppression_key TEXT PRIMARY KEY,
+  channel TEXT NOT NULL,
+  subject_ref TEXT NOT NULL,
+  reason TEXT NOT NULL,
+  suppressed_until_unix INTEGER,
+  created_at_unix INTEGER NOT NULL,
+  updated_at_unix INTEGER NOT NULL
+);
+CREATE INDEX IF NOT EXISTS idx_notification_suppressions_channel
+  ON notification_suppressions(channel, suppressed_until_unix);
+
+-- P3-OPS-004: fire_due had no scheduler, so a reminder that came due was never
+-- dispatched by the system itself. A scheduler needs to know what it already ran, or a
+-- restart re-fires everything that was ever due.
+CREATE TABLE IF NOT EXISTS scheduler_runs (
+  job_name TEXT NOT NULL,
+  run_at_unix INTEGER NOT NULL,
+  finished_at_unix INTEGER,
+  outcome TEXT NOT NULL,
+  detail_json TEXT NOT NULL DEFAULT '{}',
+  PRIMARY KEY (job_name, run_at_unix)
+);
+CREATE INDEX IF NOT EXISTS idx_scheduler_runs_job
+  ON scheduler_runs(job_name, run_at_unix DESC);
+"""
+
 
 MIGRATIONS: dict[int, str] = {
     1: """
@@ -1384,6 +1430,7 @@ MIGRATIONS: dict[int, str] = {
     17: MIGRATION_17,
     18: MIGRATION_18,
     19: MIGRATION_19,
+    20: MIGRATION_20,
 }
 
 
