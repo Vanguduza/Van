@@ -1,4 +1,4 @@
-# Gate 6 — Kotlin tests executed on the JVM, not asserted about.
+# Kotlin tests executed on the JVM, not asserted about.
 # Above the blank line: android/verification (pure app sources, `gradle test --offline`).
 # Below: android/visual-preview via android/preview-render (`gradle :visual-preview:test`).
 
@@ -30,6 +30,16 @@ OverlayVisibilityPolicyTest > every combination resolves to exactly one target()
 OverlayVisibilityPolicyTest > destroying wins over everything() PASSED
 OverlayVisibilityPolicyTest > a fully covered overlay does not animate() PASSED
 OverlayVisibilityPolicyTest > a paused overlay is CREATED, not STOPPED or destroyed() PASSED
+OwnerOverviewTest > blockers sort above information and the order is stable() PASSED
+OwnerOverviewTest > a briefing with nothing to say contributes no line() PASSED
+OwnerOverviewTest > an empty queue and an unreachable gateway never say the same thing() PASSED
+OwnerOverviewTest > a malformed row does not take the whole queue down() PASSED
+OwnerOverviewTest > informational items alone do not read as something waiting() PASSED
+OwnerOverviewTest > blockers are counted and informational items are not() PASSED
+OwnerOverviewTest > an item with no title is labelled rather than shown blank() PASSED
+OwnerOverviewTest > one waiting item reads as one, not as a number() PASSED
+OwnerOverviewTest > the briefing falls back to its summary when it has no headline() PASSED
+OwnerOverviewTest > a failure carries its reason to the owner() PASSED
 OwnerStatusProjectionTest > unknownReachesTheOwnerAndIsNotTreatedAsFinished() PASSED
 OwnerStatusProjectionTest > acceptedIsNotSuccess() PASSED
 OwnerStatusProjectionTest > nothingIsBothWorkingAndFinished() PASSED

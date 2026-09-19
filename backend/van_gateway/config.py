@@ -117,6 +117,10 @@ class Settings(BaseSettings):
     notebook_consumer_base_url: str = "https://notebooklm.google.com"
     notebook_consumer_headless: bool = True
     notebook_consumer_timeout_seconds: float = 20.0
+    #: P1-GOOG-002 — where "make a note" lands when the owner does not name a
+    #: notebook. Empty means no default, and such a command is refused rather
+    #: than letting the agent runtime choose one of the owner's notebooks.
+    notebook_default_id: str = ""
 
     require_hermes_for_mutations: bool = True
     event_page_size: int = 100
@@ -131,6 +135,10 @@ class Settings(BaseSettings):
     #: How often due reminders are swept. A minute is the resolution a reminder is
     #: worth; anything finer is a busy loop against SQLite for no owner-visible gain.
     reminder_sweep_seconds: int = 60
+    #: P0-EXEC-002 — how long VAN waits for a dispatched command before telling the
+    #: owner it never heard back. Zero disables the deadline entirely, which means
+    #: going back to a mission that can sit at RUNNING forever.
+    execution_deadline_seconds: int = 900
     #: How often retention runs (P3-OPS-001). Daily: the horizons are in days, so a
     #: more frequent sweep deletes the same rows a day earlier at best.
     retention_interval_seconds: int = 86_400

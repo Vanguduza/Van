@@ -54,6 +54,7 @@ import com.dial.van.events.EventRecord
 import com.dial.van.events.EventStream
 import com.dial.van.events.EventStreamState
 import com.dial.van.events.PreferencesEventCursorStore
+import com.dial.van.status.OwnerOverview
 import com.dial.van.status.VanCommandStatus
 import com.dial.van.control.VanConversationMessage
 import com.dial.van.control.VanMessageRole
@@ -239,6 +240,12 @@ private fun OverviewModule(
     var decisions by remember { mutableStateOf<Int?>(null) }
     var projects by remember { mutableStateOf<Int?>(null) }
     var error by remember { mutableStateOf<String?>(null) }
+    // P3-AND-003 — attention() and briefing() were declared on the client and called by
+    // nothing: the gateway maintained an attention queue and built a briefing, and the app
+    // had no surface that read either. This is the surface.
+    var overview by remember {
+        mutableStateOf(OwnerOverview.summarize(null, null, error = "not loaded yet"))
+    }
     val context = LocalContext.current
 
     LaunchedEffect(Unit) {
@@ -247,6 +254,16 @@ private fun OverviewModule(
             decisions = app.gatewayClient.decisions().length()
             projects = app.gatewayClient.projects().length()
         }.onFailure { error = it.message ?: "Gateway unavailable" }
+        runCatching {
+            OwnerOverview.summarize(app.gatewayClient.attention(), app.gatewayClient.briefing())
+        }.onSuccess { overview = it }
+            .onFailure {
+                // "Nothing is waiting for you" is a claim about the world and VAN has not
+                // looked, so the failure is reported rather than rendered as calm.
+                overview = OwnerOverview.summarize(
+                    null, null, error = it.message ?: "Gateway unavailable",
+                )
+            }
     }
 
     val degraded by app.degradedModeStore.state.collectAsState()
@@ -259,6 +276,35 @@ private fun OverviewModule(
         verticalArrangement = Arrangement.spacedBy(10.dp),
         contentPadding = PaddingValues(vertical = 8.dp),
     ) {
+        item {
+            AdminCard(glass) {
+                Column {
+                    Text(
+                        overview.headline,
+                        color = if (overview.waitingCount > 0) {
+                            Color(VanGlassTokens.ACCENT_AMBER)
+                        } else {
+                            Color.White
+                        },
+                        fontSize = 15.sp,
+                        fontWeight = FontWeight.Bold,
+                    )
+                    overview.briefingLine?.let { line ->
+                        Text(line, color = Color(0xFFBCD1D8), fontSize = 12.sp)
+                    }
+                    overview.items.take(4).forEach { item ->
+                        Text(
+                            "${if (item.needsOwner) "•" else "·"} ${item.title}",
+                            color = if (item.needsOwner) Color.White else Color(0xFF9AA7B6),
+                            fontSize = 12.sp,
+                        )
+                    }
+                    overview.error?.let { reason ->
+                        Text(reason, color = Color(VanGlassTokens.ACCENT_AMBER), fontSize = 11.sp)
+                    }
+                }
+            }
+        }
         item {
             AdminCard(glass) {
                 Row(verticalAlignment = Alignment.CenterVertically) {

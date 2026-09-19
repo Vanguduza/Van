@@ -100,7 +100,9 @@ class OwnerRuntimeApi:
         self.retrieval = ContextRetrievalService(store, self.context)
         self.actions = ActionRuntime(store)
         self.authority = CommandAuthorityService(store)
-        self.resolver = TypedCommandResolver()
+        self.resolver = TypedCommandResolver(
+            default_notebook_id=getattr(settings, "notebook_default_id", ""),
+        )
         self.knowledge = KnowledgeRuntime(store, settings)
         self.research = ExaResearchService(
             store,

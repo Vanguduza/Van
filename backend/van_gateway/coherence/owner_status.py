@@ -50,6 +50,13 @@ class OwnerWorkStatus(str, Enum):
     COULD_NOT_VERIFY = "COULD_NOT_VERIFY"
     FAILED = "FAILED"
     STOPPED = "STOPPED"
+    #: P0-EXEC-002 — VAN handed the work to something and the deadline passed with no
+    #: result. Deliberately not STOPPED: "stopped before finishing" tells the owner that
+    #: something ended it, and STOPPED is not in NEEDS_OWNER, so a command that simply
+    #: vanished would never reach their attention queue — which is exactly the silent
+    #: non-execution this exists to make visible. Deliberately not FAILED either: VAN does
+    #: not know that it failed. It knows it never heard back.
+    NEVER_HEARD_BACK = "NEVER_HEARD_BACK"
     REFUSED = "REFUSED"
     UNKNOWN = "UNKNOWN"
 
@@ -65,6 +72,7 @@ SENTENCE: dict[OwnerWorkStatus, str] = {
     OwnerWorkStatus.COULD_NOT_VERIFY: "Finished, but VAN could not confirm it worked",
     OwnerWorkStatus.FAILED: "Did not work",
     OwnerWorkStatus.STOPPED: "Stopped before finishing",
+    OwnerWorkStatus.NEVER_HEARD_BACK: "VAN handed this over and never heard back",
     OwnerWorkStatus.REFUSED: "Refused — VAN would not do this",
     OwnerWorkStatus.UNKNOWN: "VAN does not know the state of this",
 }
@@ -75,6 +83,7 @@ NEEDS_OWNER = frozenset({
     OwnerWorkStatus.DONE_WITH_GAPS,
     OwnerWorkStatus.COULD_NOT_VERIFY,
     OwnerWorkStatus.FAILED,
+    OwnerWorkStatus.NEVER_HEARD_BACK,
     OwnerWorkStatus.REFUSED,
     OwnerWorkStatus.UNKNOWN,
 })
@@ -86,6 +95,7 @@ FINISHED = frozenset({
     OwnerWorkStatus.COULD_NOT_VERIFY,
     OwnerWorkStatus.FAILED,
     OwnerWorkStatus.STOPPED,
+    OwnerWorkStatus.NEVER_HEARD_BACK,
     OwnerWorkStatus.REFUSED,
 })
 
@@ -105,7 +115,7 @@ MISSION: dict[MissionState, OwnerWorkStatus] = {
     MissionState.PARTIAL_SUCCESS: _W.DONE_WITH_GAPS,
     MissionState.FAILED: _W.FAILED,
     MissionState.CANCELLED: _W.STOPPED,
-    MissionState.EXPIRED: _W.STOPPED,
+    MissionState.EXPIRED: _W.NEVER_HEARD_BACK,
     MissionState.BLOCKED_POLICY: _W.REFUSED,
     MissionState.BLOCKED_UNSAFE: _W.REFUSED,
     MissionState.UNVERIFIABLE: _W.COULD_NOT_VERIFY,
@@ -146,7 +156,7 @@ EXECUTION: dict[ExecutionStatus, OwnerWorkStatus] = {
     ExecutionStatus.CONFLICTED_STATE: _W.WAITING_ON_YOU,
     ExecutionStatus.RETRYABLE_FAILURE: _W.FAILED,
     ExecutionStatus.DENIED: _W.REFUSED,
-    ExecutionStatus.EXPIRED: _W.STOPPED,
+    ExecutionStatus.EXPIRED: _W.NEVER_HEARD_BACK,
     ExecutionStatus.REVOKED: _W.STOPPED,
 }
 

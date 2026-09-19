@@ -51,6 +51,8 @@ from van_gateway.observability.logging import configure as configure_logging
 from van_gateway.observability.metrics import REGISTRY as METRICS, render_prometheus
 from van_gateway.observability.middleware import MetricsMiddleware
 from van_gateway.observability.trace import CommandTracer
+from van_gateway.coherence import owner_status
+from van_gateway.coherence import wire_status
 from van_gateway.ops import health as ops_health
 from van_gateway.ops.backup import create_backup
 from van_gateway.ops.pki import scan as pki_scan
@@ -89,14 +91,49 @@ from van_gateway.trading.accounts import ACTIONS as ACCOUNT_ACTIONS, AccountOnbo
 
 
 class EnrollBody(BaseModel):
-    device_id: str
-    device_secret: str
-    public_key_pem: str
-    label: str | None = None
+    """The device identity an enrolment establishes.
+
+    P4-DOC-004 — these fields are documented here, once. `PairDeviceBody` inherits them
+    and adds only what pairing adds, rather than restating them: the two descriptions had
+    already drifted apart once, and a field whose meaning is written down twice is a field
+    whose meaning is eventually written down two different ways.
+    """
+
+    device_id: str = Field(
+        description="Stable identifier for this device. Chosen by the enroller, not the device.",
+    )
+    device_secret: str = Field(
+        description=(
+            "Shared HMAC secret for command signing. Stored encrypted; never returned, "
+            "never logged, and never placed in a prompt."
+        ),
+    )
+    public_key_pem: str = Field(
+        description=(
+            "P-256 public key for owner approval proofs (A4). The private half stays in "
+            "the device's hardware keystore and never leaves it."
+        ),
+    )
+    label: str | None = Field(
+        default=None,
+        description="Human-readable name for this device in the owner's device list.",
+    )
 
 
 class PairDeviceBody(EnrollBody):
-    pairing_token: str = Field(min_length=32)
+    """Enrolment plus the ticket that authorises it.
+
+    Pairing is enrolment performed by the owner's own device rather than by an operator, so
+    the only additional field is proof that an operator issued a ticket for it.
+    """
+
+    pairing_token: str = Field(
+        min_length=32,
+        description=(
+            "Single-use ticket from POST /v1/devices/pairing-ticket. Consumed atomically "
+            "with the enrolment, so a replayed pairing cannot mint a second device."
+        ),
+    )
 
 
 class PairingTicketCreate(BaseModel):
@@ -338,7 +375,9 @@ def create_app() -> FastAPI:
     owner_memory = OwnerMemory(store)
     mission_binder = MissionBinder(store, missions)
     # P0-EXEC-001 — the join that makes an accepted command a durable mission.
-    command_missions = CommandMissionLink(missions)
+    command_missions = CommandMissionLink(
+        missions, execution_deadline_seconds=settings.execution_deadline_seconds,
+    )
     browser.binder = mission_binder
     automation.binder = mission_binder
     understanding_api = UnderstandingApi(store, settings)
@@ -392,6 +431,24 @@ def create_app() -> FastAPI:
         )
         return {"fired": len(fired)}
 
+    async def _expire_overdue_missions() -> dict:
+        """P0-EXEC-002 — notice the commands that never came back.
+
+        Swept on the same cadence as reminders because the failure it detects is the same
+        shape: something the owner asked for that the system stopped tracking. Without
+        this the deadline set at RUNNING would be a column nothing reads.
+        """
+        expired = await missions.expire_overdue()
+        for mission_id in expired:
+            await attention.upsert(
+                title="VAN never heard back about this",
+                severity=AttentionSeverity.BLOCKER,
+                source="mission",
+                dedupe_key=f"mission-expired:{mission_id}",
+                payload={"mission_id": mission_id},
+            )
+        return {"expired": len(expired)}
+
     async def _run_retention() -> dict:
         results = await retention.prune()
         audit_prune = await retention.prune_audit_prefix()
@@ -418,6 +475,10 @@ def create_app() -> FastAPI:
     def _scheduler_jobs() -> tuple[ScheduledJob, ...]:
         jobs = [
             ScheduledJob("reminders.fire_due", settings.reminder_sweep_seconds, _sweep_reminders),
+            ScheduledJob(
+                "missions.expire_overdue", settings.reminder_sweep_seconds,
+                _expire_overdue_missions,
+            ),
             ScheduledJob("ops.retention", settings.retention_interval_seconds, _run_retention),
         ]
         if settings.pki_dir:
@@ -857,6 +918,66 @@ def create_app() -> FastAPI:
         if getattr(request.state, "van_device_id", None) != req.device_id:
             raise HTTPException(status_code=403, detail="device_identity_mismatch")
         return await orchestrator.handle(req)
+
+    @app.get("/v1/commands/{command_id}")
+    async def command_status(command_id: str, request: Request):
+        """What happened to a command the owner sent.
+
+        P0-EXEC-002 — this returned 404 for every command. The audit's probe drove ten
+        intents through POST /v1/commands, got `accepted` for all ten, and then had nowhere
+        to ask what became of them; the terminal owner-visible status was "accepted"
+        forever. The device could not show a completion because there was nothing to read.
+
+        Device-authenticated and scoped to the calling device: a command's status names
+        what the owner asked for, and one paired device has no business reading another's.
+        """
+        device_id = getattr(request.state, "van_device_id", None)
+        mission = await command_missions.existing_for_command(command_id)
+        rows = await store.fetchall(
+            "SELECT device_id, result, failure_reason, created_at_unix FROM audit "
+            "WHERE command_id = ? ORDER BY COALESCE(chain_seq, 0) DESC LIMIT 1",
+            (command_id,),
+        )
+        if mission is None and not rows:
+            raise HTTPException(status_code=404, detail="command_unknown")
+        if rows and device_id and rows[0]["device_id"] and rows[0]["device_id"] != device_id:
+            # Not 403: that would confirm the command exists to a device that should not
+            # know it does.
+            raise HTTPException(status_code=404, detail="command_unknown")
+
+        if mission is not None:
+            status = wire_status.from_mission_state(mission.state.value)
+            return {
+                "command_id": command_id,
+                "correlation_id": correlation_for_command(command_id),
+                "mission_id": mission.mission_id,
+                "mission_state": mission.state.value,
+                "owner_status": status.value,
+                "sentence": owner_status.SENTENCE[status],
+                "needs_you": status in owner_status.NEEDS_OWNER,
+                "finished": status in owner_status.FINISHED,
+                "final_outcome": mission.final_outcome,
+                "verification_state": mission.verification_state.value,
+                "deadline_ms": mission.deadline_ms,
+                "updated_at_ms": mission.updated_at_ms,
+            }
+
+        # Refused before a mission was opened: the audit row is the whole story.
+        status = wire_status.from_command_result(str(rows[0]["result"]))
+        return {
+            "command_id": command_id,
+            "correlation_id": correlation_for_command(command_id),
+            "mission_id": None,
+            "mission_state": None,
+            "owner_status": status.value,
+            "sentence": owner_status.SENTENCE[status],
+            "needs_you": status in owner_status.NEEDS_OWNER,
+            "finished": status in owner_status.FINISHED,
+            "final_outcome": rows[0]["failure_reason"],
+            "verification_state": None,
+            "deadline_ms": None,
+            "updated_at_ms": int(rows[0]["created_at_unix"]) * 1000,
+        }
 
     @app.get("/v1/briefing")
     async def get_briefing():

@@ -48,6 +48,9 @@ fun commandStatusFor(owner: OwnerWorkStatus): VanCommandStatus = when (owner) {
     OwnerWorkStatus.COULD_NOT_VERIFY -> VanCommandStatus.COULD_NOT_VERIFY
     OwnerWorkStatus.FAILED -> VanCommandStatus.FAILED
     OwnerWorkStatus.STOPPED -> VanCommandStatus.CANCELLED
+    // P0-EXEC-002 — EXPIRED already existed here and nothing ever produced it, because
+    // nothing ever noticed a dispatch that never came back. It does now.
+    OwnerWorkStatus.NEVER_HEARD_BACK -> VanCommandStatus.EXPIRED
     OwnerWorkStatus.REFUSED -> VanCommandStatus.REFUSED
     OwnerWorkStatus.UNKNOWN -> VanCommandStatus.UNKNOWN
 }

@@ -29,6 +29,17 @@ enum class OwnerWorkStatus {
     COULD_NOT_VERIFY,
     FAILED,
     STOPPED,
+
+    /**
+     * P0-EXEC-002 — VAN handed the work to something and the deadline passed with no
+     * result.
+     *
+     * Deliberately not STOPPED: "stopped before finishing" tells the owner that something
+     * ended it, and STOPPED is not in [OwnerStatusProjection.needsOwner], so a command that
+     * simply vanished would never reach the attention queue. Deliberately not FAILED
+     * either: VAN does not know that it failed. It knows it never heard back.
+     */
+    NEVER_HEARD_BACK,
     REFUSED,
     UNKNOWN,
 }
@@ -45,6 +56,7 @@ object OwnerStatusProjection {
         OwnerWorkStatus.COULD_NOT_VERIFY to "Finished, but VAN could not confirm it worked",
         OwnerWorkStatus.FAILED to "Did not work",
         OwnerWorkStatus.STOPPED to "Stopped before finishing",
+        OwnerWorkStatus.NEVER_HEARD_BACK to "VAN handed this over and never heard back",
         OwnerWorkStatus.REFUSED to "Refused — VAN would not do this",
         OwnerWorkStatus.UNKNOWN to "VAN does not know the state of this",
     )
@@ -55,6 +67,7 @@ object OwnerStatusProjection {
         OwnerWorkStatus.DONE_WITH_GAPS,
         OwnerWorkStatus.COULD_NOT_VERIFY,
         OwnerWorkStatus.FAILED,
+        OwnerWorkStatus.NEVER_HEARD_BACK,
         OwnerWorkStatus.REFUSED,
         OwnerWorkStatus.UNKNOWN,
     )
@@ -66,6 +79,7 @@ object OwnerStatusProjection {
         OwnerWorkStatus.COULD_NOT_VERIFY,
         OwnerWorkStatus.FAILED,
         OwnerWorkStatus.STOPPED,
+        OwnerWorkStatus.NEVER_HEARD_BACK,
         OwnerWorkStatus.REFUSED,
     )
 
@@ -96,7 +110,7 @@ object OwnerStatusProjection {
         "PARTIAL_SUCCESS" to OwnerWorkStatus.DONE_WITH_GAPS,
         "FAILED" to OwnerWorkStatus.FAILED,
         "CANCELLED" to OwnerWorkStatus.STOPPED,
-        "EXPIRED" to OwnerWorkStatus.STOPPED,
+        "EXPIRED" to OwnerWorkStatus.NEVER_HEARD_BACK,
         "BLOCKED_POLICY" to OwnerWorkStatus.REFUSED,
         "BLOCKED_UNSAFE" to OwnerWorkStatus.REFUSED,
         "UNVERIFIABLE" to OwnerWorkStatus.COULD_NOT_VERIFY,

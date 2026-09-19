@@ -333,8 +333,29 @@
       "root_cause": "RC1 / RC2",
       "remediation": "Join hermes_run_id to the action callbacks; add a deadline producing a truthful timeout state.",
       "validation_gate": "G4",
-      "current_status": "OPEN",
-      "remediation_gate": "GATE 3"
+      "current_status": "CLOSED",
+      "remediation_gate": "GATE 3",
+      "closure": {
+        "summary": "A dispatched command now has a deadline, and the owner can ask what became of it. `create_run` returned a run id that nothing polled, no callback was keyed to it, and no deadline existed, so a Hermes that accepted a run and never called back left the mission at RUNNING forever while the owner was told 'working on it' — silent non-execution, undetectable by anyone including VAN. A deadline is set at the moment the work leaves the gateway, because that is the moment VAN stops being able to observe it; a scheduler job sweeps missions past it. The state is EXPIRED, not FAILED: VAN does not know the work failed, it knows it never heard back, and those are different things to tell an owner. That required an eleventh owner status, NEVER_HEARD_BACK, because STOPPED — 'stopped before finishing' — implies something ended it and is not in the attention set, so a vanished command would still never have reached the owner. The cross-language contract test caught the drift the moment the status was added, and the Kotlin side was mirrored. GET /v1/commands/{command_id}, which was a 404 for every command, answers with the owner-visible status and its sentence, scoped to the device that sent it.",
+        "changed": [
+          "backend/van_gateway/command/mission_link.py",
+          "backend/van_gateway/mission/service.py",
+          "backend/van_gateway/coherence/owner_status.py",
+          "backend/van_gateway/app.py",
+          "backend/van_gateway/config.py",
+          "android/app/src/main/java/com/dial/van/status/OwnerWorkStatus.kt",
+          "android/app/src/main/java/com/dial/van/status/VanCommandStatus.kt"
+        ],
+        "verified_by": [
+          "backend/tests/test_command_execution_result.py",
+          "backend/tests/test_owner_status_kotlin_contract.py"
+        ],
+        "runtime_evidence": [
+          "evidence/van-system-audit/gate-6/kotlin_verification_tests.txt"
+        ],
+        "residual": "The deadline is a reporting deadline, not a cancellation: VAN cannot stop an external agent runtime that is still working.",
+        "residual_reason": "Hermes is outside this repository and exposes no cancellation the gateway can call. Claiming to have stopped something VAN cannot stop would be the same class of lie as reporting it accepted forever; the honest statement is that VAN stopped waiting."
+      }
     },
     {
       "id": "P0-EXEC-003",
@@ -1737,8 +1758,22 @@
       "root_cause": "see s32 root-cause map",
       "remediation": "Seal the full parameter set for A3 actions or require a resolved notebook target; stop casefolding extracted values.",
       "validation_gate": "G4",
-      "current_status": "OPEN",
-      "remediation_gate": "GATE 3"
+      "current_status": "CLOSED",
+      "remediation_gate": "GATE 3",
+      "closure": {
+        "summary": "An A3 action's parameters are sealed in full or it is refused. The authority check required the sealed parameters to be a *subset* of the submitted ones, so anything the resolver did not seal was unconstrained: `google.notebook.note.create` is A3 and requires `notebook_id`, the resolver sealed only `title`, and Hermes therefore chose which of the owner's notebooks the note landed in while the sealed record said nothing about it. The owner approved 'make a note called X'; what happened was 'make a note called X somewhere a model picked'. Two rules now apply at A3 and above: every parameter the action requires must be sealed, and no parameter outside the sealed set may be submitted. The second matters most — sealing `notebook_id` alone would stop the notebook being swapped but not stop a `share_with` the owner never saw. A1 reads are deliberately exempt, because refusing their paging and filter arguments would break every read path to fix a mutation problem. The destination now comes from somewhere the owner controls: they name it, or they configure a default, and with neither the command is refused with a reason rather than landing somewhere.",
+        "changed": [
+          "backend/van_gateway/command/authority.py",
+          "backend/van_gateway/command/resolver.py",
+          "backend/van_gateway/config.py",
+          "backend/van_gateway/runtime_api.py"
+        ],
+        "verified_by": [
+          "backend/tests/test_sealed_parameter_completeness.py"
+        ],
+        "residual": "VAN_NOTEBOOK_DEFAULT_ID is empty by default, so an owner who has not set it and does not name a notebook gets a refusal rather than a note.",
+        "residual_reason": "That is the intended fail-closed behaviour and the alternative is the defect. Discovering the owner's notebooks to offer a choice needs a live Google account, which is owner supply."
+      }
     },
     {
       "id": "P1-TRADE-007",
@@ -2790,7 +2825,22 @@
       "remediation": "Wire them into the mission surfaces built in Gate 2, or delete any whose capability was removed.",
       "validation_gate": "G3",
       "remediation_gate": "GATE 2",
-      "current_status": "OPEN"
+      "current_status": "CLOSED",
+      "closure": {
+        "summary": "Two capabilities that existed end to end apart from the last ten lines are wired, and the rest of the list turned out to be already closed. The finding named 18 dead client methods; Gate 2 wired the mission surfaces, Gate 6 wired the event stream, and a re-check against the current tree found four candidates, two of which — `contextTrustFor` and `hasIngressToken` — are called from inside the client itself and were never dead. The two that were are `attention()` and `briefing()`: the gateway maintained an attention queue and built a briefing, and the app had methods to fetch both and no surface that read either. The home screen now shows what is waiting. The summarising lives in `OwnerOverview`, pure and executed on the JVM, because its decisions are worth holding to a test — the governing one being that an empty queue and an unreachable gateway must never produce the same sentence: 'nothing is waiting for you' is a claim about the world and VAN may only make it when it has looked.",
+        "changed": [
+          "android/app/src/main/java/com/dial/van/status/OwnerOverview.kt",
+          "android/app/src/main/java/com/dial/van/command/CommandCentreActivity.kt"
+        ],
+        "verified_by": [
+          "android/verification/src/test/kotlin/com/dial/van/status/OwnerOverviewTest.kt"
+        ],
+        "runtime_evidence": [
+          "evidence/van-system-audit/gate-6/kotlin_verification_tests.txt"
+        ],
+        "residual": "The composable that renders the summary is not compiled here; the summariser it renders is.",
+        "residual_reason": "The Android Gradle Plugin cannot be fetched in this environment. The decisions — what counts as waiting, what to say when nothing does, what to say when VAN could not look — are all in the pure module and all executed."
+      }
     },
     {
       "id": "P3-AND-004",
@@ -3021,7 +3071,19 @@
       "remediation": "Match case-insensitively but extract from the original text.",
       "validation_gate": "G4",
       "remediation_gate": "GATE 3",
-      "current_status": "OPEN"
+      "current_status": "CLOSED",
+      "closure": {
+        "summary": "The resolver matches case-insensitively and extracts from the owner's own text. It used to match against casefolded text and take the parameters from the match, so a title the owner capitalised was extracted lowercased, sealed lowercase into the authority record, and created lowercase at the provider. Because it was sealed, the corruption was cryptographically bound to the command and nothing downstream could recover the original. The two existing tests asserted the lowercased values, so they encoded the defect; they now assert the owner's capitalisation and say why they changed. The normalised text is still casefolded — that is what matching is done against and what the audit record stores — but it is no longer where parameters come from.",
+        "changed": [
+          "backend/van_gateway/command/resolver.py",
+          "backend/tests/test_typed_command_resolver.py"
+        ],
+        "verified_by": [
+          "backend/tests/test_sealed_parameter_completeness.py::test_the_owner_s_capitalisation_survives_into_the_sealed_parameters",
+          "backend/tests/test_sealed_parameter_completeness.py::test_matching_is_still_case_insensitive",
+          "backend/tests/test_sealed_parameter_completeness.py::test_research_and_context_queries_keep_their_case_too"
+        ]
+      }
     },
     {
       "id": "P4-AND-012",
@@ -3151,7 +3213,16 @@
       "remediation": "Document once at the base model.",
       "validation_gate": "G1",
       "remediation_gate": "GATE 0",
-      "current_status": "OPEN"
+      "current_status": "CLOSED",
+      "closure": {
+        "summary": "The device identity fields are documented once, on `EnrollBody`, and `PairDeviceBody` inherits them and documents only what pairing adds. The two descriptions had already drifted apart once, which is what a field whose meaning is written down twice eventually does. The descriptions also now say the things that matter operationally and were nowhere: that the device secret is stored encrypted and never returned, logged or placed in a prompt; that the private half of the approval key never leaves the device's keystore; and that the pairing ticket is consumed atomically so a replayed pairing cannot mint a second device.",
+        "changed": [
+          "backend/van_gateway/app.py"
+        ],
+        "verified_by": [
+          "backend/tests/test_pairing_security.py"
+        ]
+      }
     },
     {
       "id": "P4-SEC-011",

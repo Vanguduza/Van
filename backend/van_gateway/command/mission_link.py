@@ -34,6 +34,8 @@ is whatever the command's class is, which the registry cannot express.
 
 from __future__ import annotations
 
+import time
+
 from van_gateway.mission.models import (
     AuthorityEnvelope,
     Mission,
@@ -71,6 +73,14 @@ SENSITIVITY_FOR_CLASS: dict[ActionClass, Sensitivity] = {
 
 TITLE_MAX = 80
 
+#: P0-EXEC-002 — how long VAN waits for a dispatched command before saying it never heard
+#: back. Fifteen minutes: long enough that a genuine agent run doing real work is not cut
+#: off, short enough that an owner who asked for something at nine is not still being told
+#: "working on it" at lunchtime. It is a *reporting* deadline, not a cancellation: VAN has
+#: no way to stop an external runtime, and pretending otherwise would be the same class of
+#: lie as reporting the command as accepted forever.
+EXECUTION_DEADLINE_SECONDS = 15 * 60
+
 
 def title_for(text: str) -> str:
     """A one-line title the owner will recognise as their own words."""
@@ -83,8 +93,14 @@ def title_for(text: str) -> str:
 class CommandMissionLink:
     """Opens and advances the one mission that belongs to a command."""
 
-    def __init__(self, missions: MissionService) -> None:
+    def __init__(
+        self,
+        missions: MissionService,
+        *,
+        execution_deadline_seconds: int = EXECUTION_DEADLINE_SECONDS,
+    ) -> None:
         self.missions = missions
+        self.execution_deadline_seconds = max(int(execution_deadline_seconds), 0)
 
     async def existing_for_command(self, command_id: str) -> Mission | None:
         """The mission already opened for this command, if there is one.
@@ -146,18 +162,32 @@ class CommandMissionLink:
         return await self._advance(mission, MissionState.AUTHORIZED, summary=summary)
 
     async def running(self, mission: Mission, *, hermes_run_id: str | None) -> Mission:
-        """One event, carrying the run it can be traced to.
+        """One event, carrying the run it can be traced to, and a deadline.
 
         The arrival at RUNNING already announces itself as `mission.started`; recording a
         second event for the same fact would make the owner's timeline say a thing twice.
         The run id rides on that event as its evidence reference instead.
+
+        P0-EXEC-002 — the deadline is set *here*, at the moment VAN hands the work to
+        something outside itself, because that is the moment it stops being able to observe
+        progress. `create_run` returned a run id that nothing polled, no callback was keyed
+        to it, and no deadline existed, so a Hermes that never called back left the mission
+        at RUNNING forever while the owner was told "working on it". The deadline is what
+        makes that condition detectable; `MissionDeadlineSweeper` is what acts on it.
         """
-        return await self._advance(
+        deadline_ms = None
+        if self.execution_deadline_seconds:
+            deadline_ms = int(time.time() * 1000) + self.execution_deadline_seconds * 1000
+        advanced = await self._advance(
             mission,
             MissionState.RUNNING,
             summary="delegated to the Hermes agent runtime",
             evidence_ref=f"hermes-run:{hermes_run_id}" if hermes_run_id else None,
         )
+        if deadline_ms is not None:
+            await self.missions.set_deadline(advanced.mission_id, deadline_ms)
+            advanced = advanced.model_copy(update={"deadline_ms": deadline_ms})
+        return advanced
 
     async def blocked_by_policy(self, mission: Mission, *, reason: str) -> Mission:
         """A refusal the owner must see. BLOCKED_POLICY is terminal, which is correct:

@@ -294,6 +294,56 @@ class MissionService:
             )
         return refreshed
 
+    async def set_deadline(self, mission_id: str, deadline_ms: int) -> None:
+        """P0-EXEC-002 — when VAN should stop believing it will hear back."""
+        await self.store.execute(
+            "UPDATE missions SET deadline_ms = ?, updated_at_ms = ? WHERE mission_id = ?",
+            (int(deadline_ms), int(time.time() * 1000), mission_id),
+        )
+
+    async def expire_overdue(self, *, now_ms: int | None = None) -> list[str]:
+        """Move every non-terminal mission past its deadline to EXPIRED.
+
+        P0-EXEC-002: `create_run` returned a run id that nothing polled, no callback was
+        keyed to it, and no deadline existed. A Hermes that accepted a run and never called
+        back left the mission at RUNNING forever, and the owner was told "working on it"
+        indefinitely — silent non-execution, undetectable by anyone including VAN.
+
+        EXPIRED rather than FAILED, deliberately. VAN does not know the work failed; it
+        knows it handed the work over and never heard back, and those are different things
+        to tell an owner and different things to do about it. The owner projection gives
+        EXPIRED its own status, NEVER_HEARD_BACK, which is in the attention set — STOPPED
+        is not, so a vanished command would otherwise still never reach them.
+
+        Returns the missions it expired, so the caller can report a number rather than
+        claiming to have done something.
+        """
+        now = int(time.time() * 1000) if now_ms is None else now_ms
+        terminal = ",".join("?" for _ in TERMINAL_STATES)
+        rows = await self.store.fetchall(
+            f"SELECT mission_id, state FROM missions WHERE deadline_ms IS NOT NULL "
+            f"AND deadline_ms < ? AND state NOT IN ({terminal})",
+            (now, *[state.value for state in TERMINAL_STATES]),
+        )
+        expired: list[str] = []
+        for row in rows:
+            mission_id = str(row["mission_id"])
+            try:
+                await self.transition(
+                    mission_id=mission_id,
+                    target=MissionState.EXPIRED,
+                    actor=PrincipalType.SYSTEM,
+                    summary="VAN handed this over and never heard back before the deadline",
+                    final_outcome="execution deadline passed with no result",
+                    now_ms=now,
+                )
+            except MissionError:
+                # A mission that reached a terminal state between the SELECT and here is
+                # not an error: something else finished it, which is the outcome we wanted.
+                continue
+            expired.append(mission_id)
+        return expired
+
     async def _perform_verification(
         self, mission: Mission, target: MissionState, *, now_ms: int
     ) -> VerificationRecord:
