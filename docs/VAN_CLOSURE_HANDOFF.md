@@ -28,11 +28,31 @@ contract tests, 296 Kotlin tests. Schema v25. 166 gateway modules, all reachable
 entry point. CI green on both jobs since run 277; the debug APK has been published since
 run 279.
 
-**None open does not mean done.** Thirty residuals are `DELIBERATE_SCOPE`, fifteen are
-`ENVIRONMENT_UNVERIFIED` waiting on a physical device, seventeen are `EXTERNAL_RUNTIME`
-waiting on Hermes. Read §7 before concluding anything from the count, and read §7.6 — the
-register is not the territory, and reconciling the repository against it independently of
-`findings.json` is unfinished work that could still move the count in either direction.
+**None open does not mean done, and the finding count is the misleading number.** Read
+this paragraph before you read anything else in this document.
+
+There are **two** registers, on two different axes, and the closure programme drove one of
+them to zero:
+
+| register | what it tracks | state |
+|---|---|---|
+| `evidence/van-system-audit/findings.json` | **defects** — things that were wrong | 114 of 114 closed |
+| `evidence/van-system-audit/component_ledger.json` | **components** — things that should exist and work | **77 of 142 at a terminal state; 65 are not** |
+
+Of those 65, **35 are dispositioned `WIRE`** — written, often correct, often tested, and
+reached by no production path. 8 are `DELETE`, 2 are `REPLACE`, 20 are `COMPLETE` but
+unevidenced. The maturity gate passes because the ledger claims nothing it cannot back; it
+is honest about being unfinished. But "114 findings, 114 closed" describes a defect register
+that has been worked to zero, **not a system that is finished**, and anyone who quotes the
+first number without the second is doing the thing this programme exists to stop.
+
+The residuals are the third axis: 30 `DELIBERATE_SCOPE`, 15 `ENVIRONMENT_UNVERIFIED` waiting
+on a physical device, 17 `EXTERNAL_RUNTIME` waiting on Hermes, 9 `OWNER_DEPLOYMENT_DECISION`,
+3 `EXTERNAL_ARTEFACT`.
+
+Run the census in the resume block below rather than trusting these figures; they were true
+when written. And read §7.6 — reconciling the repository independently of `findings.json` is
+unfinished, and could move any of these numbers in either direction.
 
 ### Resume in ten minutes
 
@@ -58,14 +78,26 @@ cd ../../backend && python3 ../tools/audit/mutation_suite.py
 python3 - <<'EOF'
 import collections, json
 findings = json.load(open("evidence/van-system-audit/findings.json"))["findings"]
-print("OPEN:", [f["id"] for f in findings if f["current_status"] != "CLOSED"] or "none")
+print("OPEN findings:", [f["id"] for f in findings if f["current_status"] != "CLOSED"] or "none")
+
 by_class = collections.defaultdict(list)
 for f in findings:
     cls = (f.get("closure") or {}).get("residual_class")
     if cls:
         by_class[cls].append(f["id"])
+print("\nresiduals — what is still untrue about closed findings:")
 for cls, ids in sorted(by_class.items()):
-    print(f"{cls:26} {len(ids):3}  {', '.join(ids[:5])}")
+    print(f"  {cls:26} {len(ids):3}  {', '.join(ids[:4])}")
+
+# The register that is NOT at zero. This is the one that says how much system is left.
+ledger = json.load(open("evidence/van-system-audit/component_ledger.json"))
+comps = ledger["components"] if isinstance(ledger, dict) else ledger
+unfinished = [c for c in comps if not c.get("terminal_state")]
+print(f"\ncomponents: {len(comps)} inventoried, {len(comps) - len(unfinished)} terminal, "
+      f"{len(unfinished)} NOT")
+for disp, n in sorted(collections.Counter(c.get("disposition") for c in unfinished).items()):
+    print(f"  {str(disp):10} {n:3}")
+print("\n  WIRE means: written, often tested, reached by nothing. That is the work.")
 EOF
 ```
 
@@ -640,9 +672,26 @@ screens without live producers, stores without producers or consumers, scheduler
 no effect, runtime declarations without live qualification, and documents claiming maturity
 beyond runtime evidence.
 
-`tools/audit/reachability.py` and `entrypoint_reach.py` cover the Python side. **The Kotlin
-side has no equivalent** — an Android reachability scanner would be genuinely valuable and
-does not exist. Consider writing one.
+`tools/audit/reachability.py` and `entrypoint_reach.py` cover the Python side.
+`tools/audit/kotlin_reachability.py` now covers the Android side; it runs in CI and
+`tests/contracts/test_kotlin_reachability.py` fails on any unreferenced or test-only Kotlin
+file that is not on an allowlist carrying a reason.
+
+It found one on its first run, which is the argument for doing this sweep early rather than
+last: `MissionRepository`, 371 lines whose own docstring says it is "the only place the
+surfaces get data", constructed by nothing. The six owner mission surfaces it exists for are
+not rendered — the command centre modules call `VanGatewayClient` directly. The component
+ledger already had it right (#44, `NEVER_CONSTRUCTED`, `WIRE`), so the scanner agreed with
+the ledger rather than contradicting it, which is the reassuring half.
+
+**The real lesson is the one in §1:** the finding register is at zero and the component
+ledger has 65 entries that are not. The sweep rule 31 asks for is largely a matter of
+working that ledger, component by component, and the scanners are how you check the claim
+afterwards rather than how you find the list.
+
+**Still missing:** nothing sweeps for owner-facing screens with no live producer, scheduler
+jobs with no effect, or capabilities with no executor. Those are three of the eleven classes
+rule 31 names and the ledger records them by hand.
 
 ### 7.7 — Gate 1 complete; Gate 14 is now the frontier
 

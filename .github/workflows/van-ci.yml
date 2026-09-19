@@ -46,6 +46,12 @@ jobs:
       - name: Contract tests
         run: pytest -q tests/contracts
 
+      # Protocol rule 31, Android half. A compiler finds code that does not build; this
+      # finds code that builds, is tested, and nothing reaches — the class P0-AND-012 lived
+      # beside. It runs here rather than in the Android job because it needs no toolchain.
+      - name: Kotlin reachability (what nothing in the app reaches)
+        run: python tools/audit/kotlin_reachability.py
+
       # The maturity gate must fail on the defect shape it exists to prevent.
       # A gate that only ever passes proves nothing.
       - name: Maturity gate self-test

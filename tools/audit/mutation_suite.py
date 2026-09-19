@@ -256,6 +256,37 @@ EVT_KT = f"{APP_KT}/events/EventStream.kt"
 #: contract tests that run from the repository root. Kept separate rather than folded into
 #: ALL because both the mutation root and pytest's working directory differ.
 ROOT_LEVEL = [
+ # --- checkpoint 15: the Kotlin reachability scanner ---------------------------
+ # A scanner is only as good as what it refuses to count. The first four here are the
+ # manifest parse and the three ways a symbol can appear without being a call site; a
+ # sweep that counts a KDoc mention makes every well-documented dead class look alive,
+ # which is the confusion this whole programme exists to correct.
+ (["tests/contracts/test_kotlin_reachability.py"], [
+   ("tools/audit/kotlin_reachability.py",
+    'r"<(?:activity|activity-alias|service|receiver|provider|application)\\b[^>]*?"\n    r\'android:name="\\.?([A-Za-z0-9_.]+)"\'',
+    'r\'android:name="\\.?([A-Za-z0-9_.]+)"\'',
+    "C15 the manifest sweep treats permissions as components again"),
+   ("tools/audit/kotlin_reachability.py", '    text = re.sub(r"//[^\\n]*", " ", text)', "    pass",
+    "C15 a symbol named in a line comment counts as a call site"),
+   ("tools/audit/kotlin_reachability.py",
+    '    text = re.sub(r"/\\*.*?\\*/", " ", text, flags=re.DOTALL)', "    pass",
+    "C15 a symbol named in a KDoc counts as a call site"),
+   ("tools/audit/kotlin_reachability.py",
+    """    text = re.sub(r'"(?:[^"\\\\\\n]|\\\\.)*"', ' "" ', text)""", "    pass",
+    "C15 a symbol named in a string counts as a call site"),
+   ("tools/audit/kotlin_reachability.py",
+    '    text = re.sub(r"//[^\\n]*", " ", text)', '    text = re.sub(r".*", " ", text)',
+    "C15 strip everything, so all code looks dead"),
+   ("tools/audit/kotlin_reachability.py",
+    'r"(?:(?:enum|annotation|companion)\\s+)?"', '""',
+    "C15 miss enum and annotation declarations"),
+   ("tools/audit/kotlin_reachability.py",
+    "        if not reached_by and not reached_by_tests:", "        if False:",
+    "C15 stop reporting files nothing references"),
+   ("tools/audit/kotlin_reachability.py",
+    "        elif not reached_by and reached_by_tests:", "        elif False:",
+    "C15 stop reporting test-only symbols"),
+ ]),
  # --- checkpoint 14: the runtime envelope's wiring ----------------------------
  # The envelope's arithmetic is mutated under Gradle (see KOTLIN below). These are the
  # Python half: whether anything in the shipping app actually asks it. A fully tested
