@@ -12,7 +12,8 @@ This gate makes that shape a CI failure rather than a discovery. It enforces, me
   2. Every non-integrated component carries exactly one disposition.
   3. A component may only claim the INTEGRATED_AND_EVIDENCED terminal state when it names
      a producer, a consumer, a production caller, tests and runtime evidence.
-  4. A component claiming DELIBERATELY_REMOVED must no longer exist at its stated path.
+  4. A component claiming DELIBERATELY_REMOVED proves it, per its own removal_assertion:
+     the file is absent, or the named symbols are absent from a file that survives.
   5. Bidirectional coverage: no orphan finding, no orphan component.
   6. Forbidden production routes stay absent.
 
@@ -167,7 +168,6 @@ def _check_removal(c: dict, name: str) -> list[str]:
                 )
     else:
         problems.append(f"{name}: removal_assertion kind {kind!r} is not recognised")
-    return problems
     return problems
 
 
