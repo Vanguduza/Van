@@ -329,6 +329,35 @@ ROOT_LEVEL = [
     "    var expanded by remember { mutableStateOf<String?>(null) }",
     "C20 the open mission is lost on rotation"),
  ]),
+ # --- checkpoint 22: what signed the APK the owner installs --------------------
+ (["tests/contracts/test_debug_signing_identity.py"], [
+   ("tools/ci/restore_debug_keystore.sh",
+    'if ! keytool -list -keystore "$tmp" -storepass android -alias androiddebugkey >/dev/null 2>&1; then',
+    'if false; then',
+    "C22 a keystore Android cannot open is accepted and the build signs with the runner's"),
+   # The first attempt here edited the branch's opening line and survived: the sentence the
+   # test pins is two lines further down, so the mutation changed nothing the test was
+   # about. A mutation that misses is not evidence either way.
+   ("tools/ci/restore_debug_keystore.sh",
+    '  echo "debug-keystore: machine, so its APK cannot upgrade one from any other run, and an"',
+    '  echo "debug-keystore: machine."',
+    "C22 the no-key run stops naming the consequence"),
+   ("tools/ci/restore_debug_keystore.sh",
+    'echo "debug-keystore: set the VAN_DEBUG_KEYSTORE_BASE64 secret to fix that."\n  exit 0',
+    'echo "debug-keystore: set the VAN_DEBUG_KEYSTORE_BASE64 secret to fix that."',
+    "C22 a run with no key falls through into the restore path"),
+   ("tools/ci/record_apk_signing_identity.sh",
+    "if ! grep -q 'SHA-256 digest' \"$out\"; then",
+    "if false; then",
+    "C22 an apksigner that prints no certificate publishes an empty identity"),
+   ("tools/ci/record_apk_signing_identity.sh",
+    'if [ -z "$apk" ]; then',
+    'if false; then',
+    "C22 a build that produced no APK still reports a signature"),
+   (".github/workflows/van-ci.yml",
+    "            android/app/build/outputs/apk/debug/signing-identity.txt\n", "",
+    "C22 the identity stays on the runner"),
+ ]),
  (["tests/contracts/test_maturity_gate.py"], [
    ("backend/van_gateway/epistemics/models.py", "class SemanticClass(str, Enum):",
     "class Claim:\n    pass\n\n\nclass SemanticClass(str, Enum):",

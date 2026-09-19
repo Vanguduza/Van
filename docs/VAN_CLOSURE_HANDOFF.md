@@ -23,8 +23,8 @@ tests passed, the code was real, and nothing could tell the difference from outs
 This programme closes those findings and, more importantly, installs machinery that makes
 the shape a CI failure rather than a discovery.
 
-**State:** 120 findings registered, **120 closed**. 142 components inventoried, **142 at a
-terminal state**. 1221 backend tests, 141 contract tests, 296 Kotlin tests. Schema v26. CI
+**State:** 121 findings registered, **121 closed**. 142 components inventoried, **142 at a
+terminal state**. 1221 backend tests, 153 contract tests, 296 Kotlin tests. Schema v26. CI
 green on both jobs; the debug APK publishes on every run.
 
 **Both registers are at zero. That is not the same as VAN being finished, and the difference
@@ -46,7 +46,7 @@ named artefact is a way of saying "not done" that sounds finished.
 
 The residual classes are the third axis and the honest measure of what is untrue:
 30 `DELIBERATE_SCOPE`, 16 `ENVIRONMENT_UNVERIFIED` waiting on a physical device,
-19 `EXTERNAL_RUNTIME` waiting on Hermes, 9 `OWNER_DEPLOYMENT_DECISION`, 3 `EXTERNAL_ARTEFACT`.
+19 `EXTERNAL_RUNTIME` waiting on Hermes, 10 `OWNER_DEPLOYMENT_DECISION`, 3 `EXTERNAL_ARTEFACT`.
 
 Run the census in the resume block rather than trusting these figures.
 
@@ -649,25 +649,40 @@ calls these gets a working system; nothing else in this repository is between he
 ### 7.2 — Gate 14, on the owner's device
 
 16 `ENVIRONMENT_UNVERIFIED` residuals wait on it. The APK publishes on every CI run as
-`van-debug-apk`. The first install has been attempted once and failed — see §7.3.
+`van-debug-apk`, now with the certificate that signed it. The first install has been
+attempted once and failed — see §7.3.
 
 What it settles, in order of value: that the app installs and runs at all; that the three new
 owner surfaces render; that the offline queue replays when connectivity returns
 (`P1-AND-014`); that the runtime envelope's thresholds are right rather than reasoned
 (`P3-PERF-003`).
 
-### 7.3 — The install failure, undiagnosed
+### 7.3 — The install failure, still undiagnosed, but now diagnosable
 
 A sideload attempt returned a bare "App not installed". Android parsed the manifest — the
 dialog showed VAN's label and icon — so the package is well-formed and installation was
 refused after parsing. The manifest has no `sharedUserId`, no custom permissions and no
 `uses-feature`, so it is not a parse-level conflict.
 
-**The most likely cause, unverified:** the debug keystore is generated fresh on each CI
-runner, so every run's APK is signed with a different key. Two consequences — an APK cannot
-upgrade over one from a previous run, and any prior VAN install blocks this one on signature
-mismatch. `adb install` prints the actual `INSTALL_FAILED_*` code; that is the next step, and
-pinning a stable debug keystore in CI is the likely fix.
+**The leading hypothesis:** the debug keystore is generated per machine, a runner is a fresh
+machine, so every run's APK carried a different key. An APK cannot then upgrade one from a
+previous run, and any prior VAN install refuses this one on a signature mismatch — which
+Android reports with exactly that dialog and no code.
+
+`P2-AND-016` closed the half of this the repository owns. Every run now writes the APK's
+certificate into `signing-identity.txt` inside `van-debug-apk`, so two runs can be compared
+without the phone, and the owner can tell whether the build they are about to install can
+replace the one already on it. `tools/ci/restore_debug_keystore.sh` will install an
+owner-supplied `VAN_DEBUG_KEYSTORE_BASE64` before the build and validates it against the
+credentials Android's debug config is hardcoded to use.
+
+**Two things are still open, and they are different in kind.** No such secret exists yet, so
+runs still sign per-runner — that is the owner's to supply, because a signing key committed
+here would let anyone with the repository install an upgrade over the owner's VAN and
+inherit its data directory. And nobody has read the `INSTALL_FAILED_*` code from `adb
+install`, so the hypothesis remains a hypothesis. **Do not record the install as fixed on
+the strength of the signing work; it explains the symptom and has not been shown to cause
+it.**
 
 ### 7.4 — What the absent artefacts would unlock
 
@@ -796,6 +811,9 @@ tools/audit/mutation_suite.py   every mutation this programme relied on
 tools/audit/reachability.py     TEST_ONLY vs NO_REFERENCE
 tools/ci/ledger_reconcile.py    the other direction: components claiming to be unreached
 tools/audit/kotlin_reachability.py  the same question for Kotlin, from the manifest
+tools/ci/restore_debug_keystore.sh  an owner-supplied debug key, or a log line saying there
+                                is none and what that costs
+tools/ci/record_apk_signing_identity.sh  what actually signed the published APK
 
 android/app/src/main/java/com/dial/van/
   runtime/VanResourceEnvelope.kt  one owner for the resource sum; NEVER_SHED
@@ -804,7 +822,7 @@ android/verification/             the pure-Kotlin harness (AGP is unreachable he
 
 docs/project-state/AUTHORITY_MAP.yaml
 docs/VAN_CONSOLIDATED_DEPLOYMENT_READINESS_CLOSURE_BLUEPRINT_REV_1.md   (Rev 2 content)
-evidence/van-system-audit/findings.json        120 findings, closure records
+evidence/van-system-audit/findings.json        121 findings, closure records
 evidence/van-system-audit/component_ledger.json
 ```
 
