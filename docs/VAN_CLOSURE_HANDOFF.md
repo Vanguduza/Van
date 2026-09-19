@@ -23,9 +23,16 @@ tests passed, the code was real, and nothing could tell the difference from outs
 This programme closes those findings and, more importantly, installs machinery that makes
 the shape a CI failure rather than a discovery.
 
-**State:** 114 findings registered, 112 closed, 2 open. 1168 backend tests, 99 contract
-tests, 270 Kotlin tests. Schema v24. Every gateway module reachable from an entry point.
-CI green on both jobs as of run 277.
+**State:** 114 findings registered, **114 closed, none open**. 1184 backend tests, 108
+contract tests, 296 Kotlin tests. Schema v25. 166 gateway modules, all reachable from an
+entry point. CI green on both jobs since run 277; the debug APK has been published since
+run 279.
+
+**None open does not mean done.** Thirty residuals are `DELIBERATE_SCOPE`, fifteen are
+`ENVIRONMENT_UNVERIFIED` waiting on a physical device, seventeen are `EXTERNAL_RUNTIME`
+waiting on Hermes. Read §7 before concluding anything from the count, and read §7.6 — the
+register is not the territory, and reconciling the repository against it independently of
+`findings.json` is unfinished work that could still move the count in either direction.
 
 ### Resume in ten minutes
 
@@ -42,12 +49,24 @@ cd backend && PYTHONSAFEPATH=1 python3 -m pytest -q
 cd .. && PYTHONSAFEPATH=1 python3 -m pytest -q tests/contracts
 cd android/verification && gradle clean test --console=plain
 
-# What is left
-python3 -c "
-import json; d=json.load(open('evidence/van-system-audit/findings.json'))
-[print(f['id'], f['severity'], f['title']) for f in d['findings'] if f['current_status']!='CLOSED']"
+# The mutation harness, when you have changed behaviour rather than only added to it.
+# It now has a Kotlin arm that drives Gradle, so it takes longer than it used to.
+cd ../../backend && python3 ../tools/audit/mutation_suite.py
 
-# Then read §7 of this document.
+# What is left. No finding is OPEN any more, so the first line prints "none" — which is
+# the point at which the residuals become the work. They are where the untrue things live.
+python3 - <<'EOF'
+import collections, json
+findings = json.load(open("evidence/van-system-audit/findings.json"))["findings"]
+print("OPEN:", [f["id"] for f in findings if f["current_status"] != "CLOSED"] or "none")
+by_class = collections.defaultdict(list)
+for f in findings:
+    cls = (f.get("closure") or {}).get("residual_class")
+    if cls:
+        by_class[cls].append(f["id"])
+for cls, ids in sorted(by_class.items()):
+    print(f"{cls:26} {len(ids):3}  {', '.join(ids[:5])}")
+EOF
 ```
 
 **Check CI before anything else.** Run 277 on `e64379e` came back fully green — both jobs,
@@ -498,68 +517,53 @@ Ordered by what I would do next. Reorder if you have reason.
 
 ### 7.0 — Keep CI green (blocking)
 
-**Done, and it is the load-bearing fact of everything below.** Run 277
-(`35451735330`) on `e64379e` is the first fully green run on this branch: backend and
-`android-and-visual-evidence` both succeeded, every step. The Android job's ladder was
-compile ✅ (run 273) → unit tests ✅ (run 276) → lint ✅ (run 277), each rung a separate
-finding — `P0-AND-012`, `P0-AND-013`, `P1-AND-014`.
+**Done, and it is the load-bearing fact of everything below.** Run 277 (`35451735330`) on
+`e64379e` was the first fully green run on this branch. Run 279 (`35452683328`) published
+`van-debug-apk`, 30,821,691 bytes — the first installable artefact the programme has
+produced, and what unblocks Gate 14 from being attemptable at all.
 
-What this changes: CI is now a *working* authority rather than an aspiration, so an
-Android claim can finally be evidenced instead of recorded as externally blocked. It also
-means a red Android job from here on is a regression you introduced, not the pre-existing
-condition it was for most of this programme.
+CI is now a *working* authority rather than an aspiration, so an Android claim can be
+evidenced instead of recorded as externally blocked. It also means a red Android job from
+here is a regression you introduced, not the pre-existing condition it was for most of this
+programme. **Read the newest run before anything else, every time.** Nothing may be recorded
+as evidenced while CI is red.
 
-**Do this first, every time.** Nothing may be recorded as evidenced while CI is red.
+### 7.1 — `P2-CTX-003`: Owner Context Graph lifecycle governance — **CLOSED**
 
-### 7.1 — `P2-CTX-003`: Owner Context Graph lifecycle governance
+Closed in `e15b5ca`. What it turned out to be, since the finding's wording understated it:
 
-> The graph holds people, devices, accounts, decisions, policies, habits and relationships.
-> Retention exists. Export, correction, erasure, revision history and conflict semantics do
-> not.
+- **Export.** `forget.py` cleared thirteen stores; the only export covered two, behind the
+  internal-control runtime API, by scope. VAN could destroy on request material the owner
+  had never been permitted to read. `ContextLifecycle.export` iterates `FORGETTABLE` itself
+  rather than keeping a second list.
+- **Correction.** `supersedes_fact_id` and `supersedes_edge_id` were in the models, read by
+  `admit_fact`/`admit_edge`, used to close the prior validity window, and then **discarded** —
+  neither table had the column. Migration 25 adds them.
+- **Conflicts.** `resolve_requirement` always detected them; nothing enumerated them.
+  `conflicts()` delegates detection to `resolve_requirement` rather than reimplementing it,
+  and resolves each identity twice (blocking / inferred-only) mirroring `ContextReadiness`.
 
-**Where:** `backend/van_gateway/context/`, `backend/van_gateway/understanding/memory.py`,
-`backend/van_gateway/ops/retention.py`. Owner surfaces in `understanding/api.py`.
+**Residual (`DELIBERATE_SCOPE`):** erasure is still all-or-nothing per store. A true
+single-row delete would have to decide what happens to the snapshots citing it and the
+supersession chain running through it. If you pick this up, that is the question to answer
+first — not the delete itself.
 
-**Prior art to follow:** `P2-MEM-002` closed "no owner-facing forget for the owner model,
-evidence or reasoning ledgers" — read its closure record first; this is the same shape one
-layer out, and its residual (the audit ledger and missions table are deliberately not
-clearable) tells you where the boundary is.
+### 7.2 — `P3-PERF-003`: whole-runtime resource envelope — **CLOSED**
 
-**Execution sketch:**
-- Export: `GET /v1/context/export` producing everything VAN holds about the owner, with
-  provenance per assertion. Owner route, not internal control.
-- Correction: already partly exists via `OwnerCognitiveModel.correct`. Check whether the
-  context *graph* (facts, edges) has the same path; the owner model did.
-- Erasure: a delete that **records that a deletion happened** without keeping what was
-  deleted. The audit chain must stay intact — you cannot erase from a hash chain, so the
-  right move is a tombstone plus an anchor, following `P3-OPS-001`'s prune-anchor pattern.
-- Revision history: `context_snapshots` exists (schema v5). Check whether it is a producer
-  or just a table.
-- Conflict semantics: what happens when two facts contradict. §77's intent conflicts are a
-  model; do not invent a resolver — surface the conflict.
+Closed in `4649413`. `android/app/src/main/java/com/dial/van/runtime/VanResourceEnvelope.kt`,
+pure and in the harness include list; `DeviceRuntimeReadings.kt` is the Android half and is
+not.
 
-**Counterexamples to defeat:** an export that omits inferred assertions (the owner would
-believe VAN knows less than it does); an erasure that leaves the fact reachable through a
-snapshot or an edge; a correction that supersedes without recording what it superseded.
+The finding was generous: only the visual layer had a budget at all. Battery *level* was an
+input to nothing, so a phone at four percent with power-save off rendered the full field.
 
-### 7.2 — `P3-PERF-003`: whole-runtime resource envelope
+**The two rules worth not breaking.** `NEVER_SHED` — wake word, owner command, degraded
+reporting — is full at every pressure including `SURVIVAL`; an envelope that throttles the
+wake word is worse than no envelope. And the envelope may only ever *lower* a subsystem's
+own budget: `effectBudget` takes the weaker of the ladder's answer and the ceiling.
 
-> Always-available voice, the animated embodiment, local indexes, notification processing,
-> context compilation, network connections and trading updates all compete on one phone.
-> Each has its own budget; nothing owns the sum.
-
-**Where:** `android/app/src/main/java/com/dial/van/visual/VanFrameBudget.kt` is the existing
-per-subsystem budget and the finding's cited evidence. `VanEffectBudget.kt` too.
-
-**Execution sketch:** declare one envelope (battery, memory, storage, CPU/GPU, thermal) and
-make each subsystem yield against *it* rather than its own budget. `VanFrameBudget` is pure
-and already in the verification harness include list, so the arbitration logic can be tested
-locally without AGP — **put the decision logic in a pure file and add it to
-`android/verification/build.gradle.kts`.**
-
-**Environmental honesty (protocol rule 9):** you cannot measure thermal or battery here.
-Declare the envelope and the yielding *policy*, test the policy with injected readings, and
-record the measurement itself as `ENVIRONMENT_UNVERIFIED` pending Gate 14.
+**Residual (`ENVIRONMENT_UNVERIFIED`):** the thresholds are reasoned, not tuned. Tune them
+on the device at Gate 14; do not tune them here and call it evidence.
 
 ### 7.3 — Post-execution verification binding (the biggest architectural item)
 
@@ -640,21 +644,22 @@ beyond runtime evidence.
 side has no equivalent** — an Android reachability scanner would be genuinely valuable and
 does not exist. Consider writing one.
 
-### 7.7 — Gate 1 completion and Gate 14
+### 7.7 — Gate 1 complete; Gate 14 is now the frontier
 
-Gate 1 (Android build) was blocked when this programme started and **is no longer** — CI can
-reach `dl.google.com`, and run 277 assembled the app. The APK was then deleted with the
-runner workspace, which is `P2-OPS-013`: the workflow now uploads
-`android/app/build/outputs/apk/debug/*.apk` as `van-debug-apk` with
-`if-no-files-found: error`.
+Gate 1 is done. CI compiles, tests, assembles and lints the app, and publishes the APK as
+`van-debug-apk` with `if-no-files-found: error` (`P2-OPS-013`). Artefacts are retained 90
+days, so a stale link is a re-run rather than a problem.
 
-That closure is **not yet evidenced** — it is `EXTERNAL_ARTEFACT` until a run actually
-publishes the file. Your first job is to check the newest run and, if `van-debug-apk` is
-there and non-empty, record the run and move `P2-OPS-013` to `INTEGRATED_AND_EVIDENCED`.
-If it is not there, the upload step is wrong and the finding is not closed.
+**Gate 14 (physical S24) is the single largest block of remaining work**, and it stays
+deferred only until the owner says otherwise — the standing instruction was *leave physical
+verification for last*, and everything before it is now finished. Fifteen
+`ENVIRONMENT_UNVERIFIED` residuals are waiting on it. Do not start it without the owner:
+it needs their device and their decision.
 
-Gate 14 (physical S24) stays deferred per the owner's standing instruction: *leave physical
-verification for last*. The 14 `ENVIRONMENT_UNVERIFIED` residuals are mostly waiting on it.
+What it would settle, in rough order of value: that the APK installs and runs at all; that
+the offline queue replays when connectivity returns (`P1-AND-014`); that the wake word works
+in the room the owner is actually in; and that the runtime envelope's thresholds are the
+right numbers rather than reasonable guesses (`P3-PERF-003`).
 
 ### 7.8 — Deferred product work recorded as residuals
 
