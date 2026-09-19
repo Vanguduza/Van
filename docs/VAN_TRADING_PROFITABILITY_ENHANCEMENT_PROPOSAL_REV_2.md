@@ -1,11 +1,14 @@
-# VAN trading intelligence and profitability — enhancement proposal Rev 1
+# VAN trading intelligence and profitability — enhancement proposal Rev 2
 
 **Status:** Proposal. **Not an authority document.** It amends nothing. Every item that changes live risk
 requires an owner-signed decision artifact under `PROJECT_CANONICAL_STATE.json → policy.agent_self_authorization_forbidden`.
 **Repository state considered:** `main` @ `66e4e42` (`0.5.0-dev`, `SCHEMA_VERSION = 26`).
 **Authorities consulted:** `docs/VAN_TRADING_SYSTEM_BLUEPRINT_REV4_CONSOLIDATED.md`,
 `docs/VAN_TRADING_PRODUCTION_DEPLOYMENT_BLUEPRINT_REV5.md`, `trading/architecture/stack_lock.json`.
-**Authored:** 2026-09-19, from a repository review plus owner refinement.
+**Authored:** 2026-09-19, from a repository review plus two rounds of owner refinement.
+**Rev 2 adds:** the Indicator Intelligence Layer (F7–F9, P6), the Portfolio Opportunity Allocator (F10, P7),
+the Strategy Coverage Map (P8), the Feature Drift Monitor (P9), capital-efficiency intelligence (P10), and a
+revised priority sequence.
 
 ---
 
@@ -128,6 +131,105 @@ So TCA already changes future behaviour **defensively**. What is missing is the 
 selects between order types, sessions or venues on measured execution quality. `FxCostModel.estimate` models
 `order_passive` as saving half a spread, and `ExecutionRouter.execute` takes `entry_type` as a caller argument
 defaulting to `"LIMIT"` — so the decision exists but is never learned.
+
+
+### F7 — `MarketState` is single-timeframe and does not record which timeframe it is
+
+`build_market_state(*, symbol, base, quote, bars: Sequence[Bar], ...)`
+(`trading/vati/intelligence/market_state.py:49`) takes **one** bar sequence. `MarketState` carries one
+`FeatureVector` and one `RegimeState`, and neither has a `timeframe` field.
+
+Two consequences, the second worse than the first:
+
+1. No strategy can express "H4 structural trend, H1 confirmation, M15 setup, M5 timing". Every question is
+   answered from one sequence.
+2. An M5-built state and an H1-built state for the same symbol at the same instant are **indistinguishable by
+   their recorded fields**, and `state_hash` does not separate them. `missed.py`'s `ex_ante_snapshot_hash` and
+   the ledger's decision record therefore would not identify what VATI actually looked at, the moment two
+   timeframes coexist.
+
+Fix (2) before building (1). It is a field addition to an audit record, not a feature.
+
+The storage tier is already multi-timeframe — `trading/vati/market_data/feeds/lake.py:18`:
+
+```python
+TIMEFRAMES_MS = {"M1": 60_000, "M5": 300_000, "M15": 900_000, "H1": 3_600_000, "H4": 14_400_000, "D1": 86_400_000}
+```
+
+one directory per symbol/timeframe, with slice manifests. Only the state tier is single-sequence, which makes
+multi-timeframe substantially cheaper than it appears.
+
+### F8 — `required_features` is declared by every capsule and read by nothing
+
+Capsule JSON declares `required_features` — for `FX-TREND-PULLBACK-01`:
+`["ema_fast", "ema_slow", "atr", "rsi", "swing_low", "swing_high"]`. **No file under `trading/vati/` reads that
+key.**
+
+Harmless today: there are eleven features and all are computed on every pass. It stops being harmless the
+moment the registry grows — a capsule could declare `adx` and trade silently without it, or with `None`, and
+nothing would notice. A declared-contract check is a **prerequisite** to expanding the feature set, not a
+follow-up to it.
+
+### F9 — The feature vector is compact by design, and two proposed families do not fit VAN's venues
+
+`FeatureVector` (`trading/vati/intelligence/features.py`) supplies `close`, `ema_fast`, `ema_slow`, `atr`,
+`rsi`, `realised_vol`, `vol_percentile`, `spread_percentile`, `trend_slope`, `range_compression`, `swing_high`,
+`swing_low`, `complete`, and already carries `feature_version: "features/1.0.0"` — partial provenance exists.
+
+Around it sits intelligence that is worth more than most chart indicators: CUSUM change-point detection, trend
+and volatility regimes, transition phase, session classification, event windows, market integrity, ZiG currency
+regime, execution-cost state and broker-liquidity state. Indicators are treated as evidence, never as
+buy/sell commands. That framing should survive any expansion unchanged.
+
+Two families from a conventional technical-analysis vocabulary do **not** transfer to VAN's venues:
+
+**Volume.** `Bar.volume` is populated from Dukascopy ask/bid volume and from tick aggregation
+(`trading/vati/market_data/bars.py:63`). FX spot has no consolidated traded volume — there is no central
+exchange. OBV, MFI, Chaikin money flow and volume profile would run on a broker-specific liquidity proxy that
+differs between Dukascopy, MT5 and cTrader for the same instrument at the same instant. `Bar.ticks` is honest
+about what it measures; `Bar.volume` invites a false reading.
+
+The polarity is the reverse of the usual assumption: **ZSE has real traded volume and FX does not**, so the
+volume family is more defensible on the illiquid end-of-day equity book than on liquid FX.
+
+**Microstructure.** There is no depth or order-book data anywhere in `trading/vati/`, and
+`trading/vati/risk/mandate.py:60` already lists in `HARD_FORBIDDEN_BEHAVIOURS`:
+
+```python
+"single_dom_as_total_fx_liquidity",
+"macro_causality_on_synthetics",
+```
+
+Order-flow imbalance, market depth, liquidity sweeps and single-broker fair-value-gap structures are therefore
+not a gap to fill — the mandate has already named the exact fallacy they would invite. Admitting them requires
+a mandate amendment plus a genuine multi-venue data source. `macro_causality_on_synthetics` similarly
+constrains cross-asset confirmation and relative strength across the Deriv synthetic universe.
+
+### F10 — There is no runtime in which two candidates coexist, so portfolio heat is allocated by arrival order
+
+This is the structural version of "no portfolio allocator", and it is sharper than a missing module.
+
+```text
+trading/vati/app/cycle.py:1   "one pass per bar/tick for one instrument"
+SessionConfig.symbol: str      one symbol per session
+process_lock.py:1              "One live session per account alias"
+deploy README                  vati-session@<alias>.service — DecisionCycle per account
+```
+
+One account alias runs one session, which decides one symbol; the advisory `flock` forbids a second session on
+the same alias. Meanwhile the *risk model* is written for a multi-instrument book — `TradingMandate.instruments`
+is a `frozenset`, and `max_open_stop_risk`, `max_total_positions` and `max_currency_leg_exposure` are
+portfolio-wide. `DecisionCycle._open_positions()` reads `adapter.positions()`, i.e. the whole account book, so
+heat is *measured* across instruments.
+
+The result is a **portfolio-wide constraint evaluated at a single-instrument decision point**. Whichever
+session's bar closes first consumes the shared heat budget. A marginal EURUSD setup firing at 09:00:01 takes
+capacity that a materially better GBPUSD setup at 09:00:03 then cannot have. Allocation is arrival-ordered,
+not merit-ordered, and nothing in the system ever compares the two.
+
+The gap is between the risk model's ambition and the runtime's shape. An allocator therefore needs a place to
+stand that does not yet exist: either a multi-symbol `DecisionCycle`, or a cross-session coordination point.
+That is a prerequisite to scope deliberately, not an implementation detail of the allocator itself.
 
 ---
 
@@ -285,6 +387,149 @@ No model emits an arbitrary order. It selects a template, under deterministic ha
 current "passive saves half a spread" approximation with the real trade-off — fill probability against adverse
 selection against non-execution opportunity cost.
 
+
+### P6 — Multi-timeframe Indicator Intelligence Layer
+
+Not "100 indicators voting". A versioned registry of feature *families*, computed across strategy-selected
+timeframes, each admitted on evidence.
+
+```text
+                      RAW MARKET DATA
+        price  ·  volume (venue-gated)  ·  microstructure (mandate-gated)
+                            ▼
+                 TECHNICAL FEATURE REGISTRY
+   TREND            MOMENTUM         VOLATILITY
+   EMA slopes       RSI              ATR
+   ADX/DMI          ROC (multi-h)    Bollinger / Keltner
+   channels         stochastic       realised vol
+
+   STRUCTURE        VOLUME           LIQUIDITY
+   swing hierarchy  VWAP             spread
+   S/R zones        OBV   ─ ZSE      depth ─ FORBIDDEN (F9)
+   breakout state   MFI   ─ first    imbalance ─ FORBIDDEN (F9)
+                            ▼
+                  MULTI-TIMEFRAME FUSION
+                            ▼
+                REGIME-CONDITIONED STATE
+                            ▼
+                    STRATEGY CAPSULES
+```
+
+Every feature carries provenance, extending the existing `feature_version`:
+
+```text
+feature_id · feature_version · timeframe · lookback
+value · normalised_value · percentile · regime · as_of · data_quality
+```
+
+`MultiTimeframeMarketState` over the lake's existing `M1/M5/M15/H1/H4/D1`, with per-capsule timeframe
+selection — e.g. `FX-TREND-PULLBACK-01` reading H4 structure, H1 confirmation, M15 setup, M5 timing, rather
+than asking one sequence every question.
+
+**Redundancy control is the gate that makes expansion safe.** EMA20, EMA21, MACD, PPO and MA slope carry
+substantially the same information; adding them unchecked manufactures confluence. Before admission, a feature
+must show feature correlation, mutual information, **incremental** predictive value, stability by regime and by
+instrument, and out-of-sample contribution.
+
+This is the same discipline as P3: **a new feature needs a certificate the way a capsule does.** Reuse the
+`StrategyValidationCertificate` machinery rather than inventing a second evidence standard.
+
+**Confluence by function, never by tally.** Not `7 bullish vs 3 bearish = BUY`, but:
+
+```text
+Trend       bullish      Structure   resistance overhead
+Momentum    neutral      Liquidity   normal
+Volatility  elevated     Event risk  clear · Execution  normal
+```
+
+The strategy decides which evidence matters. This also gives VAN something to *say*: *"H1 trend remains
+bullish and ADX shows persistence, but M15 momentum has weakened and price is approaching H4 resistance. The
+setup is still eligible; confirmation quality is lower."*
+
+Prerequisites, in order: **F8** (`required_features` contract check), then **F7(2)** (`timeframe` on
+`MarketState`/`FeatureVector`), then the registry. Note that adding a timeframe declaration to the capsule
+schema rehashes every capsule — `capsule_hash` covers the whole document — so plan that migration rather than
+discovering it.
+
+### P7 — `OpportunityPortfolioAllocator`
+
+The highest-value addition in Rev 2. VATI answers *"is this trade individually acceptable?"* well. It should
+also answer:
+
+> Given the other opportunities and the risk already in the book, is this the best use of the next unit of
+> risk capacity?
+
+A deterministic allocator sits **between the Opportunity Engine and the Risk Authority**. It ranks approved
+candidates on lower-bound expectancy (the `edge_floor` of §4), incremental Expected Shortfall (from P2's
+`PortfolioDependencyEngine`), strategy overlap, execution cost and fill probability (from P5), regime
+stability, and capital holding time (P10).
+
+**It selects which candidates proceed. It never enlarges any candidate's risk.** Every runtime multiplier
+still `<= 1`; the allocator's only power is to say *not this one, that one*.
+
+Per **F10** this needs a place to stand. Two options, to be decided deliberately:
+
+```text
+(a) multi-symbol DecisionCycle     one session evaluates N instruments per pass
+(b) cross-session coordinator      sessions publish candidates; one allocator arbitrates heat
+```
+
+(a) is simpler and keeps the process lock's one-session-per-alias guarantee intact. (b) preserves per-symbol
+process isolation but introduces a new consistency problem — two sessions must not both believe they won the
+same heat. Given that `_open_positions()` already reads the whole account book, (a) is likely the smaller
+change and the safer one.
+
+### P8 — Strategy Coverage Map
+
+Six capsules is a good production library, not a strategy universe. Build a `StrategyCoverageMap` across
+asset × horizon × regime × style, and let the gaps drive research.
+
+```text
+covered:    trend pullback · session breakout · event drift · gold positioning
+            ZSE value rotation · ZSE liquidity provision
+uncovered:  range / mean-reversion · volatility expansion and contraction
+            relative-value / pairs · cross-sectional momentum
+            carry / roll · defensive regime strategies
+```
+
+Note the regime consequence: `FX-TREND-PULLBACK-01` declares `forbidden_regimes: [TRANSITION, EXTREME]` and
+`eligible_regimes: [BULL, BEAR]`. **RANGE is uncovered across the FX book** — when the regime engine reports
+RANGE, VATI has no eligible FX capsule at all. That is a measurable idle-capital cost, and the coverage map
+makes it visible instead of implicit.
+
+Missing coverage produces **research candidates only**. Nothing enters live use except through P3's
+certificate and an owner signature.
+
+### P9 — Feature and Edge Drift Monitor
+
+`StrategyHealthTracker` measures realised strategy performance, process correctness, cost ratio and regime
+fit — all at capsule level. Underneath it, nothing asks whether the *features* still carry information.
+
+Track each feature's incremental value by strategy × instrument × timeframe × regime. If RSI or a structure
+feature contributed historically and has become redundant or unstable, flag it for research **before** the
+capsule has lost substantial money. Capsule health is a lagging indicator of feature decay; this is a leading
+one.
+
+Lives in VTIL/shadow research. It proposes; it never mutates a live capsule.
+
+### P10 — Capital-efficiency and opportunity-cost intelligence
+
+Expectancy in R is not enough. Two capsules at +0.3R are not equivalent if one occupies risk for two hours and
+the other for four days.
+
+Measure and record:
+
+```text
+expected_R_per_risk_day · fill probability · financing / rollover cost
+capital occupancy · rejected-alternative opportunity cost
+```
+
+Used by P7's ranking and by the slow Capital Promotion Plane (P1). **Never as an automatic multiplier above
+1** — a capital-efficient strategy earns a larger owner-signed ceiling, not a runtime boost.
+
+This also connects to the funding/rollover item in §4: a swing capsule losing expectancy to triple-rollover
+Wednesdays is a capital-efficiency defect that per-trade R will never surface.
+
 ---
 
 ## 4. Further enhancements
@@ -353,52 +598,72 @@ browser/LLM evidence MAY:  explain · classify · flag contradiction · reduce c
 ## 5. Target architecture
 
 ```text
-MARKET / RESEARCH INTELLIGENCE
-   market data ─── events/macro ─── browser evidence ─── VTIL
+      MARKET DATA  +  EVENTS  +  PRIMARY-SOURCE BROWSER RESEARCH
                             ▼
-                      MARKET STATE
-                ┌───────────┴───────────┐
-        strategy candidates      uncertainty state
-                └───────────┬───────────┘
+                  FEATURE INTELLIGENCE                        (P6)
+     multi-timeframe · structure · trend · momentum · volatility
+        volume (venue-gated) · liquidity · cross-asset
                             ▼
-                   OPPORTUNITY ENGINE
-          regime / cost / execution / correlation
+                      REGIME ENGINE
+                            ▼
+                  STRATEGY COVERAGE MAP                       (P8)
+                            ▼
+                    STRATEGY CAPSULES
+                            ▼
+                   META / COST FILTERS
+                            ▼
+                  CANDIDATE OPPORTUNITIES
+                            ▼
+            PORTFOLIO OPPORTUNITY ALLOCATOR                   (P7)
+     edge-floor · tail-risk · overlap · execution · capital-efficiency
                             ▼
                        TradeIntent
-              ═ DETERMINISTIC RISK AUTHORITY ═
                             ▼
-                    Execution Policy  →  Broker
+           ═══ DETERMINISTIC RISK AUTHORITY ═══
                             ▼
-              TCA ───────────────────── trade outcome
+                 EXECUTION POLICY ENGINE                      (P5)
                             ▼
-                  EXPERIENCE / LEARNING
-                ┌───────────┴───────────┐
-        FAST SAFETY LOOP          SLOW UPSIDE LOOP
-        auto reduce/demote        validation certificate
-                                  capital proposal
-                                        ▼
-                                    OWNER A4
-                                        ▼
-                                new signed mandate
+                         BROKER
+                            ▼
+          TCA  +  OUTCOME  +  MFE/MAE  +  PATH DATA
+                            ▼
+        EXPERIENCE  /  FEATURE-DRIFT LEARNING                 (P9)
+              ↙                            ↘
+     FAST SAFETY LOOP                SLOW UPSIDE LOOP
+     reduce · demote                 validation certificate   (P3)
+     suspend · reject                capital proposal         (P1, P10)
+                                              ▼
+                                         OWNER A4
+                                              ▼
+                                   new signed mandate
 ```
+
+The allocator is the structural addition. Everything left of `TradeIntent` may now compare opportunities;
+everything right of it remains exactly as deterministic as it is today.
 
 ---
 
 ## 6. Priority order
 
-1. **F3 DSR contract normalization** — a documentation fix that today permits a vacuous gate. Do this first;
-   it costs nothing and everything downstream depends on it.
-2. **P3 StrategyValidationCertificate** wired into `CapsuleRegistry.promote` (closes F3's discard and F4's
-   opaque evidence).
-3. **P1 per-capsule owner risk budgets** plus the `CapitalBudgetProposal` plane.
-4. **P2 PortfolioDependencyEngine**, populating the dead `correlation_multiplier`.
-5. **P5 ExecutionPolicyEngine** and **P4 exit-policy research**.
-6. Continuous volatility targeting and portfolio Expected Shortfall.
-7. Calibrated uncertainty (`edge_floor`) and browser-powered evidence intelligence.
+| # | Work | Changes live risk? | New owner authority? |
+|---|---|---|---|
+| 1 | **F3 DSR contract normalization** | no | no |
+| 2 | **P3 `StrategyValidationCertificate`** wired into `CapsuleRegistry.promote` (closes F3's discard, F4's opaque evidence) | no | no |
+| 3 | **F8 + F7(2)** — `required_features` contract check; `timeframe` on `MarketState`/`FeatureVector` | no | no |
+| 4 | **P6 multi-timeframe Indicator Intelligence** over the existing lake timeframes | no | capsule schema rehash |
+| 5 | **P7 `OpportunityPortfolioAllocator`** (+ the F10 runtime decision) | selection only, never size | no |
+| 6 | **P1 per-strategy capital budgets** + `CapitalBudgetProposal` | **yes — raises ceilings** | **yes, A4** |
+| 7 | **P2 `PortfolioDependencyEngine`**, populating the dead `correlation_multiplier` | reduce-only | no |
+| 8 | **P5 `ExecutionPolicyEngine`** and **P4 exit-policy research** | reduce-only / research | template approval |
+| 9 | **P9 feature drift** and **P8 strategy coverage** research | no | no |
+| 10 | Continuous volatility targeting; portfolio Expected Shortfall | reduce-only | no |
+| 11 | **P10 / §4** uncertainty-aware capital promotion; browser-powered evidence | proposal / T2 only | per-capability |
 
-Items 1, 2 and 4 change no live risk and need no new owner authority beyond the existing promotion signature.
-Item 3 is the one that requires a new owner decision artifact, because it is the only one that can raise a
-ceiling.
+Item 1 is first because the `> 0` wording in Rev 2 §551 and Rev 3 D7 can currently make an invalid strategy
+look validated — it is a live gate that certifies noise, and everything downstream inherits it.
+
+Items 1–5 and 7–11 change no ceiling. **Item 6 is the only one requiring a new owner decision artifact,**
+because it is the only one that can raise one.
 
 ---
 
@@ -410,3 +675,10 @@ ceiling.
 - `MetaLabeler` stays `RULES_V0_UNCALIBRATED` until a Brier/ECE gate exists and passes.
 - Browser and LLM evidence never generate orders, never promote a capsule, never bypass the Risk Authority.
 - VATI remains the single execution route. Nothing here creates a second sender.
+- Indicators describe market state. They are evidence, never order authority. No feature, confluence score or
+  timeframe agreement may size, promote or execute anything.
+- The Portfolio Opportunity Allocator selects among candidates. It may reject or defer; it may never increase
+  a candidate's risk, and it sits before the Risk Authority, never in place of it.
+- Volume and microstructure features stay venue-gated. `single_dom_as_total_fx_liquidity` and
+  `macro_causality_on_synthetics` remain hard-forbidden behaviours.
+- Feature-drift and coverage-map findings produce research candidates only. Neither mutates a live capsule.
