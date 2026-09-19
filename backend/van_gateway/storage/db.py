@@ -8,7 +8,7 @@ from typing import Any, AsyncIterator
 
 import aiosqlite
 
-SCHEMA_VERSION = 17
+SCHEMA_VERSION = 18
 
 
 MIGRATION_17 = """
@@ -32,6 +32,16 @@ ALTER TABLE audit ADD COLUMN chain_seq INTEGER;
 ALTER TABLE audit ADD COLUMN prev_hash TEXT;
 ALTER TABLE audit ADD COLUMN entry_hash TEXT;
 CREATE UNIQUE INDEX IF NOT EXISTS idx_audit_chain_seq ON audit(chain_seq);
+"""
+
+MIGRATION_18 = """
+-- P0-EXEC-001: an accepted owner command produced no durable work record. The orchestrator
+-- now opens exactly one mission per command, and this index is what makes "exactly one"
+-- true under concurrency rather than merely intended: a second create for the same
+-- source command fails at the database.
+CREATE UNIQUE INDEX IF NOT EXISTS idx_missions_source_command
+  ON missions(json_extract(authority_envelope_json, '$.source_command_id'))
+  WHERE json_extract(authority_envelope_json, '$.source_command_id') IS NOT NULL;
 """
 
 MIGRATIONS: dict[int, str] = {
@@ -1353,6 +1363,7 @@ MIGRATIONS: dict[int, str] = {
       ON computer_operations(mission_id, started_at_ms);
     """,
     17: MIGRATION_17,
+    18: MIGRATION_18,
 }
 
 

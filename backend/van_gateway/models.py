@@ -152,6 +152,10 @@ class CommandResult(BaseModel):
     evidence_id: str | None = None
     execution_id: str | None = None
     context_snapshot_id: str | None = None
+    #: P0-EXEC-001 — the durable work record this command opened. Present on every result
+    #: from the point the command is established as owner intent, including the degraded
+    #: ones, so the device can show a mission that was authorised and never started.
+    mission_id: str | None = None
 
 
 class AttentionItem(BaseModel):

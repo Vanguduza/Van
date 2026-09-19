@@ -12,6 +12,7 @@ from van_gateway.attention.engine import AttentionEngine
 from van_gateway.audit.service import AuditService
 from van_gateway.auth.service import AuthError, AuthService
 from van_gateway.auth.throttle import GLOBAL_SUBJECT, AuthThrottle, Throttled
+from van_gateway.command.mission_link import CommandMissionLink
 from van_gateway.briefing.service import BriefingService
 from van_gateway.config import get_settings
 from van_gateway.decisions.service import DecisionCreate, DecisionService
@@ -227,7 +228,10 @@ def create_app() -> FastAPI:
         },
     )
     capability_router = CapabilityRouter(store, capability_registry)
-    missions = MissionService(store, capabilities=capability_registry)
+    # Constructed before the mission service, which publishes every owner-visible
+    # mission event to it (P0-EXEC-001).
+    events = EventBus(store, settings.event_page_size)
+    missions = MissionService(store, capabilities=capability_registry, bus=events)
     mission_api = MissionApi(
         store, settings, missions=missions, registry=capability_registry,
         router=capability_router,
@@ -236,12 +240,13 @@ def create_app() -> FastAPI:
     # automation runs become Activities as they happen rather than by a
     # later backfill.
     mission_binder = MissionBinder(store, missions)
+    # P0-EXEC-001 — the join that makes an accepted command a durable mission.
+    command_missions = CommandMissionLink(missions)
     browser.binder = mission_binder
     automation.binder = mission_binder
     understanding_api = UnderstandingApi(store, settings)
     google_router = GoogleCapabilityRouter(store, google_broker)
 
-    events = EventBus(store, settings.event_page_size)
     notifications = NotificationIntelligence()
     orchestrator = CommandOrchestrator(
         auth=auth,
@@ -255,6 +260,7 @@ def create_app() -> FastAPI:
         resolver=owner_runtime.resolver,
         owner_intent_max_age_seconds=settings.owner_intent_max_age_seconds,
         throttle=throttle,
+        missions=command_missions,
     )
 
     @asynccontextmanager
@@ -291,6 +297,7 @@ def create_app() -> FastAPI:
     app.state.capability_router = capability_router
     app.state.missions = missions
     app.state.mission_binder = mission_binder
+    app.state.command_missions = command_missions
     app.state.mission_api = mission_api
     app.state.understanding_api = understanding_api
     app.state.decisions = decisions

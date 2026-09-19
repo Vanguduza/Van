@@ -53,12 +53,22 @@ class MissionError(ValueError):
 
 
 class MissionService:
-    def __init__(self, store: Store, *, capabilities: Any | None = None) -> None:
+    def __init__(
+        self,
+        store: Store,
+        *,
+        capabilities: Any | None = None,
+        bus: Any | None = None,
+    ) -> None:
         self.store = store
         # §7 — when a registry is wired, a capability it does not declare cannot
         # become mission work. Optional so Mission Core stays testable on its
         # own, but `create_app` always supplies one.
         self.capabilities = capabilities
+        # P0-EXEC-001 — mission_events is the record; the bus is how the device hears
+        # about it. Without this a mission could change state a dozen times and the
+        # phone would learn nothing until it next polled the read model.
+        self.bus = bus
 
     # ------------------------------------------------------------- creation
 
@@ -155,6 +165,8 @@ class MissionService:
         verification: VerificationRecord | None = None,
         final_outcome: str | None = None,
         actor: PrincipalType = PrincipalType.HERMES_AGENT,
+        summary: str | None = None,
+        evidence_ref: str | None = None,
         now_ms: int | None = None,
     ) -> Mission:
         """The one gate. Everything about a mission's life passes through here."""
@@ -195,11 +207,15 @@ class MissionService:
         if event_type is not None:
             await self.record_event(
                 mission_id=mission_id, event_type=event_type, actor=actor,
-                summary=final_outcome or target.value,
+                summary=summary or final_outcome or target.value,
                 severity="WARN" if target in (MissionState.FAILED, MissionState.BLOCKED_POLICY,
                                               MissionState.BLOCKED_UNSAFE) else "INFO",
+                # A verification receipt outranks a caller-supplied pointer: the receipt is
+                # what a success claim rests on, and the caller does not get to substitute
+                # its own reference for it.
                 evidence_ref=(verification.evidence_refs[0]
-                              if verification and verification.evidence_refs else None),
+                              if verification and verification.evidence_refs
+                              else evidence_ref),
                 now_ms=now,
             )
         refreshed = await self.get(mission_id)
@@ -386,6 +402,23 @@ class MissionService:
                 severity, 1 if owner_visibility else 0, summary, evidence_ref,
             ),
         )
+        if self.bus is not None and owner_visibility:
+            # Only owner-visible events reach the device stream: the bus is the owner's
+            # feed, not an internal trace, and the distinction is already recorded per
+            # event rather than decided here.
+            await self.bus.publish(
+                event_type.value,
+                {
+                    "event_id": event.event_id,
+                    "mission_id": mission_id,
+                    "activity_id": activity_id,
+                    "actor": actor.value,
+                    "severity": severity,
+                    "summary": summary,
+                    "evidence_ref": evidence_ref,
+                    "occurred_at_ms": now,
+                },
+            )
         return event
 
     # --------------------------------------------------------------- reading

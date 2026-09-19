@@ -4,16 +4,16 @@
   "canonical_blueprint": "docs/VAN_FINISHED_PRODUCT_BLUEPRINT_REV_1.md",
   "canonical_audit": "docs/VAN_WHOLE_SYSTEM_IMPLEMENTATION_AUDIT_AND_CERTIFICATION_REV_1.md",
   "created": "2026-09-19",
-  "component_count": 76,
+  "component_count": 78,
   "dispositions": {
     "DELETE": 10,
     "REPLACE": 4,
-    "COMPLETE": 27,
-    "WIRE": 35
+    "COMPLETE": 28,
+    "WIRE": 36
   },
   "by_gate": {
     "GATE 4": 29,
-    "GATE 2": 5,
+    "GATE 2": 7,
     "GATE 3": 3,
     "GATE 9": 9,
     "GATE 8": 9,
@@ -1377,6 +1377,48 @@
           "set_test_transport"
         ]
       }
+    },
+    {
+      "n": 77,
+      "component": "Command to mission link",
+      "path": "backend/van_gateway/command/mission_link.py",
+      "maturity_class": "ABSENT",
+      "disposition": "COMPLETE",
+      "rationale": "MissionService.create existed and had one internal-token caller; the owner command path never called it, so an accepted command produced no durable work record",
+      "remediation_gate": "GATE 2",
+      "producer": "backend/van_gateway/command/mission_link.py CommandMissionLink",
+      "consumer": "GET /v1/missions, GET /v1/activity, GET /v1/events, and CommandResult.mission_id on the device",
+      "production_caller": "backend/van_gateway/orchestrator.py CommandOrchestrator.handle on every command that passes the policy gates",
+      "tests": [
+        "backend/tests/test_command_creates_mission.py::TestTheAuditProbe",
+        "backend/tests/test_command_creates_mission.py::TestTheLadderIsEarned",
+        "backend/tests/test_command_creates_mission.py::TestExactlyOneMissionPerCommand"
+      ],
+      "runtime_evidence": [
+        "the audit's ten-intent probe now yields ten missions where it yielded zero; removing the wiring fails eleven of twelve assertions"
+      ],
+      "owner_facing_projection": "the mission list, the activity feed, and mission_id on every command result",
+      "terminal_state": "INTEGRATED_AND_EVIDENCED"
+    },
+    {
+      "n": 78,
+      "component": "Mission events on the device event bus",
+      "path": "backend/van_gateway/mission/service.py",
+      "maturity_class": "IMPLEMENTED_BUT_ISOLATED",
+      "disposition": "WIRE",
+      "rationale": "EventBus existed and carried attention and decision events; mission transitions published nothing, so the phone could not learn that a mission had moved",
+      "remediation_gate": "GATE 2",
+      "producer": "MissionService.record_event, reached by every mission transition",
+      "consumer": "GET /v1/events, the device replay stream",
+      "production_caller": "backend/van_gateway/app.py MissionService(store, capabilities=..., bus=events)",
+      "tests": [
+        "backend/tests/test_command_creates_mission.py::TestMissionEventsReachTheDevice"
+      ],
+      "runtime_evidence": [
+        "an accepted command puts mission.created, mission.understood, mission.planned and mission.started on the stream in order, the last carrying its hermes run reference; an event marked not owner-visible does not appear"
+      ],
+      "owner_facing_projection": "the device event stream",
+      "terminal_state": "INTEGRATED_AND_EVIDENCED"
     }
   ],
   "gate_0_status": {

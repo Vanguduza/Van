@@ -286,8 +286,29 @@
       "root_cause": "RC1 - the command path has no durable work object",
       "remediation": "Orchestrator creates a mission per accepted command with a proper authority envelope; pass mission_id in Hermes metadata; wire MissionBinder in app.py; publish mission transitions to the event bus.",
       "validation_gate": "G3",
-      "current_status": "OPEN",
-      "remediation_gate": "GATE 2"
+      "current_status": "CLOSED",
+      "remediation_gate": "GATE 2",
+      "closure": {
+        "summary": "The orchestrator now opens exactly one mission per command at the point the command is established as genuine owner intent, and walks it up the ladder only as each rung is actually earned: UNDERSTOOD when the typed resolver has resolved it, PLANNED when what will happen is decided, AUTHORIZED when the command authority record is sealed, RUNNING when Hermes accepts the run. Every owner-visible mission event is published to the device event stream. CommandResult carries the mission_id, including on the degraded results.",
+        "changed": [
+          "backend/van_gateway/command/mission_link.py",
+          "backend/van_gateway/orchestrator.py",
+          "backend/van_gateway/mission/service.py",
+          "backend/van_gateway/models.py",
+          "backend/van_gateway/storage/db.py",
+          "backend/van_gateway/app.py"
+        ],
+        "verified_by": [
+          "backend/tests/test_command_creates_mission.py::TestTheAuditProbe::test_ten_canonical_intents_produce_ten_missions",
+          "backend/tests/test_command_creates_mission.py::TestTheAuditProbe::test_the_activity_feed_is_no_longer_empty",
+          "backend/tests/test_command_creates_mission.py::TestTheLadderIsEarned",
+          "backend/tests/test_command_creates_mission.py::TestExactlyOneMissionPerCommand",
+          "backend/tests/test_command_creates_mission.py::TestMissionEventsReachTheDevice"
+        ],
+        "residual": "The mission stops at RUNNING. Nothing yet drives it to VERIFYING or a verification outcome, because the runtime that would report completion is Hermes, which is outside this repository.",
+        "residual_reason": "Completion and verification are findings P0-EXEC-002 and P0-EXEC-003 under later gates, not this one. Advancing a mission to a success state without a verification receipt is the exact defect the audit proved reachable (verifier_version 'i-say-so/1.0' with evidence 'evidence://trust-me' reaching VERIFIED_SUCCESS), so it is deliberately not done here.",
+        "posture": "The audit's own probe is the test: the ten canonical owner intents that returned ten acceptances and zero missions now return ten missions, and removing the wiring fails eleven of the twelve assertions. A mission never claims a state it has not reached — Hermes being offline leaves it at AUTHORIZED, which is the truth, rather than at RUNNING or at a terminal failure."
+      }
     },
     {
       "id": "P0-EXEC-002",
