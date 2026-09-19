@@ -21,7 +21,7 @@
   ],
   "counts": {
     "P0": 17,
-    "P1": 34,
+    "P1": 35,
     "P2": 24,
     "P3": 29,
     "P4": 7
@@ -4766,8 +4766,8 @@
       "current_status": "CLOSED",
       "remediation_gate": "G1",
       "closure": {
-        "state": "EXTERNALLY_BLOCKED_REPOSITORY_COMPLETE",
-        "summary": "CommandCentreViewModel is internal, which is the right direction: the navigation surface is app-internal and nothing outside the module has business naming a screen. The trading body is serialised with toString() before it is written, rather than changing what requestBody returns — the JsonObject is what the signing helper produces and what the signature is computed over.\n\nThe guard that matters is CI, which compiles the app and now runs on this branch (P3-OPS-011). tests/contracts/test_android_compiles_at_all.py is the cheaper half: the visibility error is statically checkable, so it is caught before a push rather than three minutes into a runner, and the JsonObject call site is pinned at both ends — the caller and requestBody's return type — so the test cannot end up checking a fiction.\n\nWriting that checker took three attempts and each failure is instructive. Looking only at column zero missed the case entirely, because the exposure is in indented *members*. Tracking the enclosing declaration's visibility fixed that and produced false positives on locals inside a top-level composable. Brace-depth tracking separates a type body from a function body and settles it. A static checker written to catch one known error is worth only as much as its handling of everything it must not flag.\n\nOne test asserts the honest limit: the verification harness does not compile either file and never claimed to, so its passing was never evidence the app builds.",
+        "state": "INTEGRATED_AND_EVIDENCED",
+        "summary": "CommandCentreViewModel is internal, which is the right direction: the navigation surface is app-internal and nothing outside the module has business naming a screen. The trading body is serialised with toString() before it is written, rather than changing what requestBody returns — the JsonObject is what the signing helper produces and what the signature is computed over.\n\nThe guard that matters is CI, which compiles the app and now runs on this branch (P3-OPS-011). tests/contracts/test_android_compiles_at_all.py is the cheaper half: the visibility error is statically checkable, so it is caught before a push rather than three minutes into a runner, and the JsonObject call site is pinned at both ends — the caller and requestBody's return type — so the test cannot end up checking a fiction.\n\nWriting that checker took three attempts and each failure is instructive. Looking only at column zero missed the case entirely, because the exposure is in indented *members*. Tracking the enclosing declaration's visibility fixed that and produced false positives on locals inside a top-level composable. Brace-depth tracking separates a type body from a function body and settles it. A static checker written to catch one known error is worth only as much as its handling of everything it must not flag.\n\nOne test asserts the honest limit: the verification harness does not compile either file and never claimed to, so its passing was never evidence the app builds.\n\nCONFIRMED by run 35449312512 on 05c6514: :app:compileDebugKotlin, :app:compileDebugJavaWithJavac, :app:dexBuilderDebug, :app:mergeProjectDexDebug, :app:validateSigningDebug and :app:stripDebugDebugSymbols all succeeded. The app compiles and dexes. The run still failed, at :app:testDebugUnitTest, which is a different finding (P0-AND-013) and is itself only visible because the compile succeeded.",
         "changed": [
           "android/app/src/main/java/com/dial/van/command/CommandCentreViewModel.kt",
           "android/app/src/main/java/com/dial/van/gateway/VanGatewayClient.kt"
@@ -4775,11 +4775,57 @@
         "verified_by": [
           "tests/contracts/test_android_compiles_at_all.py"
         ],
-        "runtime_evidence": [],
-        "residual": "The fix is unproven until a CI run compiles it. The static checks find the error class that is statically findable; only the compiler can say the app builds.",
+        "runtime_evidence": [
+          "https://github.com/Vanguduza/Van/actions/runs/35449312512"
+        ],
+        "residual": "The app compiles and dexes; no APK has been installed on a device.",
         "residual_class": "ENVIRONMENT_UNVERIFIED",
-        "residual_reason": "The Android Gradle Plugin cannot be fetched here, so this cannot be compiled locally at all. The next CI run on this branch is the evidence, and this closure is not INTEGRATED_AND_EVIDENCED until one passes the Android job.",
+        "residual_reason": "Gate 14 is physical-device work. Compilation is now evidenced by CI; installability and behaviour on an S24 are not, and are deliberately deferred to last.",
         "falsified_by": "The :app:compileDebugKotlin task failing on any subsequent CI run."
+      }
+    },
+    {
+      "id": "P0-AND-013",
+      "severity": "P1",
+      "domain": "android",
+      "title": "Two app-module unit tests asserted behaviour that earlier closures had changed",
+      "description": "The first CI run to compile the app got as far as :app:testDebugUnitTest, where 2 of 135 tests failed. Both pinned behaviour that a previous closure in this programme deliberately changed.\n\nDegradedModeStoreTest.liveWorkspaceReadyClearsInitialGoogleDegraded asserted that a live Google mesh clears degraded mode entirely. P1-VOICE-001 made wake_word its own subsystem, BROKEN until a model is installed, so the banner correctly stays up.\n\nVoiceRecognitionPolicyTest.modernDeviceWithoutOnDeviceRecognizerRequiresLocalFallback asserted SHERPA_PRIMARY_REQUIRED for a supported device with no recognizer. P1-VOICE-003 changed that to UNAVAILABLE with a reason, and updated the verification harness's copy of the test but not the app module's.",
+      "requirement": "docs/VAN_CONSOLIDATED_DEPLOYMENT_READINESS_CLOSURE_BLUEPRINT_REV_1.md",
+      "authority": "VAN Consolidated Deployment-Readiness Closure Blueprint Rev 2",
+      "repository_evidence": [
+        "android/app/src/test/java/com/dial/van/degraded/DegradedModeStoreTest.kt",
+        "android/app/src/test/java/com/dial/van/voice/VoiceRecognitionPolicyTest.kt"
+      ],
+      "runtime_evidence": [
+        "https://github.com/Vanguduza/Van/actions/runs/35449312512"
+      ],
+      "affected_components": [
+        "android",
+        "degraded",
+        "voice"
+      ],
+      "root_cause": "Android tests that no one could run. A closure changed behaviour, the neighbouring app-module test did not, and nothing could report the contradiction because the app did not compile (P0-AND-012) and CI did not run on the branch (P3-OPS-011).",
+      "remediation": "Assert what is now true, and why it is the better thing to assert.",
+      "impact": "Both tests would have failed any Android build for months. More to the point, the verification harness's copies passing was being read as Android coverage while the shipping module's copies disagreed with the code.",
+      "validation_gate": "G1",
+      "current_status": "CLOSED",
+      "remediation_gate": "G1",
+      "closure": {
+        "state": "EXTERNALLY_BLOCKED_REPOSITORY_COMPLETE",
+        "summary": "Both now assert current behaviour, and in both cases the new assertion is worth more than the old one.\n\nThe degraded-mode test pins that recovery is *scoped*: Google going READY clears google and leaves the banner up while wake_word is broken. That is the whole reason subsystems are listed separately instead of reported as one health bit, and it was not asserted anywhere. A second test clears the last broken subsystem so 'stays active' cannot be mistaken for 'can never clear'.\n\nThe voice test pins that a supported device missing its recognizer is UNAVAILABLE with a reason rather than a Sherpa tier, plus that supporting an API level is not a claim voice works — asserted in the shipping module and not only in the harness, which is the drift that produced this finding.",
+        "changed": [
+          "android/app/src/test/java/com/dial/van/degraded/DegradedModeStoreTest.kt",
+          "android/app/src/test/java/com/dial/van/voice/VoiceRecognitionPolicyTest.kt"
+        ],
+        "verified_by": [
+          "android/app/src/test/java/com/dial/van/degraded/DegradedModeStoreTest.kt",
+          "android/app/src/test/java/com/dial/van/voice/VoiceRecognitionPolicyTest.kt"
+        ],
+        "runtime_evidence": [],
+        "residual": "The app module's unit tests cannot be run in this container at all, so these fixes are unproven until CI runs them.",
+        "residual_class": "ENVIRONMENT_UNVERIFIED",
+        "residual_reason": "The Android Gradle Plugin is unreachable here. The verification harness compiles only the pure files and has its own copies of these tests, which is how the drift happened; adding the app's tests to it would create a second pair to drift. CI running :app:testDebugUnitTest is the authority and now runs on this branch.",
+        "falsified_by": ":app:testDebugUnitTest failing on any subsequent CI run."
       }
     }
   ],
