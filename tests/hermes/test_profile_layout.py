@@ -5,7 +5,20 @@ from __future__ import annotations
 from pathlib import Path
 import json
 import os
+import shutil
 import subprocess
+
+import pytest
+
+#: `install_van_profile.sh` calls `require_cmd rsync` and exits 1 without it. The test below
+#: exercises what the installer preserves — the owner's `.env`, sessions, memories and
+#: pairing state across an upgrade — and there is no way to exercise that without running
+#: the installer. Skipping names what is not being checked here; catching the failure and
+#: passing would claim it was.
+requires_rsync = pytest.mark.skipif(
+    shutil.which("rsync") is None,
+    reason="install_van_profile.sh requires rsync; runtime-state preservation is NOT VERIFIED here",
+)
 
 REPO_ROOT = Path(__file__).resolve().parents[2]
 HERMES_ROOT = REPO_ROOT / "hermes"
@@ -167,6 +180,7 @@ def test_install_scripts_exist():
     assert (REPO_ROOT / "tools" / "hermes" / "doctor_van_profile.sh").is_file()
 
 
+@requires_rsync
 def test_install_profile_preserves_runtime_state_and_secrets(tmp_path):
     hermes_home = tmp_path / "hermes-home"
     target = hermes_home / "profiles" / "van"

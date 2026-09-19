@@ -32,8 +32,6 @@ import androidx.compose.ui.unit.sp
 import androidx.fragment.app.FragmentActivity
 import androidx.lifecycle.viewmodel.compose.viewModel
 import com.dial.van.VanApplication
-import com.dial.van.visual.VanGlassTokens
-import com.dial.van.visual.VanLiveVisualState
 import com.dial.van.command.modules.ActivityModule
 import com.dial.van.command.modules.BrowserAutomationModule
 import com.dial.van.command.modules.BrowserEscalationsPage
@@ -48,6 +46,8 @@ import com.dial.van.command.modules.ProjectsModule
 import com.dial.van.command.modules.SettingsModule
 import com.dial.van.command.modules.SystemsModule
 import com.dial.van.command.modules.TasksModule
+import com.dial.van.visual.VanGlassTokens
+import com.dial.van.visual.VanLiveVisualState
 import com.dial.van.visual.VanPresence
 import com.dial.van.visual.VanTheme
 import com.dial.van.visual.rememberVanEffectBudget

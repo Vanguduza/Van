@@ -10,12 +10,12 @@ import com.dial.van.VanApplication
 import com.dial.van.queue.CommandKind
 import com.dial.van.queue.CommandSensitivity
 import com.dial.van.queue.QueueEnqueueRequest
+import java.util.UUID
 import kotlinx.serialization.json.Json
 import kotlinx.serialization.json.JsonArray
 import kotlinx.serialization.json.JsonPrimitive
 import kotlinx.serialization.json.buildJsonObject
 import kotlinx.serialization.json.put
-import java.util.UUID
 
 /**
  * Share-to-VAN ingress.

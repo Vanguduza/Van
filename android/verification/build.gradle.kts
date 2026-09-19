@@ -70,6 +70,7 @@ sourceSets {
             "com/dial/van/overlay/OverlayTheme.kt",
             "com/dial/van/overlay/EdgeDocking.kt",
             "com/dial/van/overlay/OverlayVisibilityPolicy.kt",
+            "com/dial/van/overlay/OverlayDragController.kt",
             "com/dial/van/overlay/VanOverlayController.kt",
             "com/dial/van/overlay/VanOverlayInteraction.kt",
             "com/dial/van/command/CommandModule.kt",

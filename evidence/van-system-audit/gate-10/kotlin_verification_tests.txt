@@ -63,6 +63,14 @@ OnboardingPlanTest > every step has words for the owner and none of them is an e
 OnboardingPlanTest > a permission granted in settings shows up when the owner comes back() PASSED
 OnboardingPlanTest > the whole flow walks in order and ends() PASSED
 OnboardingPlanTest > opening a settings screen is not granting a permission() PASSED
+OverlayDragControllerTest > the haptic fires on arming, once, not on every frame() PASSED
+OverlayDragControllerTest > letting go over the target closes the overlay and renders nothing after() PASSED
+OverlayDragControllerTest > a cancelled drag never leaves the overlay armed to close() PASSED
+OverlayDragControllerTest > a drag moves the window and reports where it ended up() PASSED
+OverlayDragControllerTest > starting a drag puts the dismiss target up and the menu away() PASSED
+OverlayDragControllerTest > letting go anywhere else docks and clears the drag() PASSED
+OverlayDragControllerTest > a drag cannot walk VAN off the screen() PASSED
+OverlayDragControllerTest > the dismiss target is taken down however the drag ends() PASSED
 OverlayVisibilityPolicyTest > the screen being off stops the animation() PASSED
 OverlayVisibilityPolicyTest > a frozen overlay always says why() PASSED
 OverlayVisibilityPolicyTest > a detached view does not animate() PASSED
