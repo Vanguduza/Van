@@ -732,8 +732,22 @@
       "root_cause": "RC2 / RC4",
       "remediation": "Drive all three flags from real state and re-run reconciliation per bar.",
       "validation_gate": "G5",
-      "current_status": "OPEN",
-      "remediation_gate": "GATE 5"
+      "current_status": "CLOSED",
+      "remediation_gate": "GATE 5",
+      "closure": {
+        "summary": "All three flags are derived from real state. reconciliation_ok re-runs reconcile against what the venue reports, per bar. risk_store_ok is the ledger's own chain verification. tier1_event_blackout_active comes from the event matrix that already computed it. The snapshot also carries the venue's margin, which it never had.",
+        "changed": [
+          "trading/vati/app/cycle.py",
+          "trading/vati/risk/contracts.py",
+          "trading/vati/contracts/schemas/risk_snapshot.schema.json"
+        ],
+        "verified_by": [
+          "trading/tests/test_live_risk_is_real.py::TestTheSafetyFlagsAreNotLiterals"
+        ],
+        "residual": "market_integrity is still only ever NORMAL in a live session: nothing writes self.integrity.",
+        "residual_reason": "Setting it would need a market-integrity signal — a venue halt notice, a spread or gap detector — that VAN does not receive. Writing one from a heuristic would be the same defect in a new place. The field and the refusal are correct and wired; what is missing is a source, and that is a data-feed decision rather than a code one.",
+        "posture": "Each derivation fails closed on an exception, because a reconciliation that cannot run has not passed and an event matrix that cannot answer is not evidence of no event. A test asserts the three literals are absent from the file, because the defect was three literals and a comment would not keep them out."
+      }
     },
     {
       "id": "P0-TRADE-003",
@@ -759,8 +773,20 @@
       "root_cause": "RC2 / RC4",
       "remediation": "Add a synchronous halt channel and persist halt state independently of session start time.",
       "validation_gate": "G5",
-      "current_status": "OPEN",
-      "remediation_gate": "GATE 5"
+      "current_status": "CLOSED",
+      "remediation_gate": "GATE 5",
+      "closure": {
+        "summary": "The owner-halt observer no longer filters by session start time. It takes the latest uncleared OWNER_HALT in the ledger, which is a property of the ledger rather than of this process, so a halt survives a restart and only a clear ends it. It is also checked in start(), before the first bar.",
+        "changed": [
+          "trading/vati/app/service.py"
+        ],
+        "verified_by": [
+          "trading/tests/test_live_risk_is_real.py::TestTheOwnerHaltSurvivesARestart"
+        ],
+        "residual": "The halt is still observed on the loop rather than delivered synchronously, so up to poll_seconds can pass between the owner halting and the session stopping.",
+        "residual_reason": "A synchronous channel means the gateway reaching into the trading VM's process, which is a deployment topology change rather than a code one and would add a second path that can fail. The latency is bounded and now the durability is too, which was the part that made a restart undo an owner decision.",
+        "posture": "The observed event records `observed_after_restart`, so an operator can see that a halt written before this process existed is the one being honoured."
+      }
     },
     {
       "id": "P0-TRADE-004",
@@ -786,8 +812,22 @@
       "root_cause": "RC2 / RC4",
       "remediation": "Point the gateway at the live ledger and threshold staleness server-side.",
       "validation_gate": "G5",
-      "current_status": "OPEN",
-      "remediation_gate": "GATE 5"
+      "current_status": "CLOSED",
+      "remediation_gate": "GATE 5",
+      "closure": {
+        "summary": "The gateway thresholds ledger staleness server-side. A ledger whose newest event is older than fifteen minutes reports ledger_stale with the age and the reason, and sets TRADING_LEDGER_UNAVAILABLE, instead of presenting old data as current.",
+        "changed": [
+          "backend/van_gateway/trading/service.py",
+          "backend/van_gateway/app.py"
+        ],
+        "verified_by": [
+          "backend/tests/test_trading_api.py::test_status_and_tickets_read_from_chained_ledger",
+          "backend/tests/test_trading_api.py::test_a_current_ledger_is_not_reported_stale"
+        ],
+        "residual": "The gateway still defaults to a local SQLite path and nothing in deploy reconciles it with the trading VM's Postgres.",
+        "residual_reason": "Which ledger a deployment points at is a deployment decision, and the repository cannot make it. What the repository can do, and now does, is refuse to present a ledger nobody is writing as current — which is the failure mode the split created. The existing test fixture, whose newest event is from 1970, now correctly reports stale, and that is the finding demonstrated rather than described.",
+        "posture": "Thresholded server-side rather than left to each caller, because a client that forgot would present the stale answer as fact and the gateway is the only place that can know."
+      }
     },
     {
       "id": "P0-TRADE-005",
@@ -814,8 +854,23 @@
       "root_cause": "RC2 / RC4",
       "remediation": "Derive the idempotency key from the decision content and bar identity, not the session id; add a process lock per alias.",
       "validation_gate": "G5",
-      "current_status": "OPEN",
-      "remediation_gate": "GATE 5"
+      "current_status": "CLOSED",
+      "remediation_gate": "GATE 5",
+      "closure": {
+        "summary": "The idempotency seed is the account, the symbol and the bar, none of which change across a restart; it was the session id, which embeds the process start timestamp. A per-alias advisory file lock stops two serve processes running one account, which the key fix alone does not address.",
+        "changed": [
+          "trading/vati/app/cycle.py",
+          "trading/vati/app/process_lock.py",
+          "trading/vati/__main__.py"
+        ],
+        "verified_by": [
+          "trading/tests/test_live_risk_is_real.py::TestTheIdempotencyKeySurvivesARestart",
+          "trading/tests/test_live_risk_is_real.py::TestTheProcessLock"
+        ],
+        "residual": "The lock is per-host and advisory.",
+        "residual_reason": "It does not stop a second VM running the same alias, and it binds only processes that ask. Both are acceptable because the thing being prevented is an operator starting serve twice, not an adversary, and the venue-side reconciliation gate remains the check that does not depend on cooperation. Saying so in the module is better than implying a guarantee it does not give.",
+        "posture": "Two failures were conflated in one finding and needed separate answers: a restart duplicating an order is a key-derivation problem, and two processes deciding the same bar is a mutual-exclusion problem. Fixing only the first would have left the second looking fixed."
+      }
     },
     {
       "id": "P0-TRADE-006",
@@ -840,8 +895,24 @@
       "root_cause": "RC2 / RC4",
       "remediation": "Add margin fields to AccountState and a margin gate to the Risk Authority.",
       "validation_gate": "G5",
-      "current_status": "OPEN",
-      "remediation_gate": "GATE 5"
+      "current_status": "CLOSED",
+      "remediation_gate": "GATE 5",
+      "closure": {
+        "summary": "AccountState carries used_margin, free_margin and margin_level_pct; RiskSnapshot carries the two the authority needs; and the authority refuses on MARGIN_CALL, MARGIN_FLOOR and NO_FREE_MARGIN. The schema is updated and the contract test that compares it to the dataclass passes.",
+        "changed": [
+          "trading/vati/execution/base.py",
+          "trading/vati/risk/contracts.py",
+          "trading/vati/risk/authority.py",
+          "trading/vati/contracts/schemas/risk_snapshot.schema.json"
+        ],
+        "verified_by": [
+          "trading/tests/test_live_risk_is_real.py::TestTheMarginGate",
+          "trading/tests/test_contract_schemas.py::test_risk_snapshot_schema_matches_dataclass"
+        ],
+        "residual": "No adapter populates the margin fields yet; every venue reports None.",
+        "residual_reason": "MT5 reports margin over the EA bridge and Deriv over its websocket, and both need the transport change and a live account to verify against. None is handled as unknown rather than healthy, so the gate is inert until a venue speaks rather than wrong. Defaulting to a comfortable number to make it look wired would be the hardcoded-healthy defect this sits beside.",
+        "posture": "The floor is above the venue's call level, so VAN stops adding risk before the broker starts closing positions, and both are named constants with the reasoning attached rather than numbers in a comparison."
+      }
     },
     {
       "id": "P1-DOC-001",
@@ -1615,8 +1686,19 @@
       "root_cause": "see s32 root-cause map",
       "remediation": "Use the winning signal's target and remove the dead code.",
       "validation_gate": "G5",
-      "current_status": "OPEN",
-      "remediation_gate": "GATE 5"
+      "current_status": "CLOSED",
+      "remediation_gate": "GATE 5",
+      "closure": {
+        "summary": "OpportunityAssessment carries the winning signal's own targets and the cycle uses them. Re-deriving one target from expected_gross_move_pct is now the fallback for a strategy that declared no target, which is what the old code always did to every strategy.",
+        "changed": [
+          "trading/vati/arbiter/opportunity.py",
+          "trading/vati/app/cycle.py"
+        ],
+        "verified_by": [
+          "trading/tests/test_live_risk_is_real.py::TestTheStrategysTargetsSurvive"
+        ],
+        "posture": "A strategy with a scaled exit plan had it silently replaced by a single derived price, which is a quieter failure than a crash and harder to notice from the outside."
+      }
     },
     {
       "id": "P1-TRADE-008",
@@ -1637,8 +1719,21 @@
       "root_cause": "see s32 root-cause map",
       "remediation": "Wire the learning hooks into the live session behind the existing reduce-only boundary.",
       "validation_gate": "G5",
-      "current_status": "OPEN",
-      "remediation_gate": "GATE 5"
+      "current_status": "CLOSED",
+      "remediation_gate": "GATE 5",
+      "closure": {
+        "summary": "SessionService.build passes LearningHooks to the cycle, with the environment taken from the mandate's authorization mode so a demo session's experience is never pooled with a live one's.",
+        "changed": [
+          "trading/vati/app/service.py"
+        ],
+        "verified_by": [
+          "trading/tests/test_live_risk_is_real.py",
+          "trading/tests/test_learning.py"
+        ],
+        "residual": "Nothing yet persists the learning hooks' state across a session restart.",
+        "residual_reason": "The episodes and adjustments live in the process. Persisting them means deciding what a restart should remember about a strategy's health, which is a policy question with real consequences — a capsule demoted for one bad session should probably not return to full size on restart, but that is the owner's call and not a default to pick silently.",
+        "posture": "This was safe to wire only because the effects were already bounded: the LearningBoundary permits reduce-only adjustments and a demotion moves a capsule towards SHADOW or DEGRADED, never towards more authority. That boundary is what made it a wiring job rather than a design one."
+      }
     },
     {
       "id": "P1-PERF-002",
@@ -2666,7 +2761,17 @@
       "remediation": "Delete it alongside the strategy-target fix.",
       "validation_gate": "G5",
       "remediation_gate": "GATE 5",
-      "current_status": "OPEN"
+      "current_status": "CLOSED",
+      "closure": {
+        "summary": "The empty assignment and the loop with a bare pass are deleted, alongside the strategy-target fix they sat next to.",
+        "changed": [
+          "trading/vati/app/cycle.py"
+        ],
+        "verified_by": [
+          "trading/tests/test_live_risk_is_real.py::TestTheStrategysTargetsSurvive::test_the_dead_code_is_gone"
+        ],
+        "posture": "Asserted as absent source text rather than by inspection, because dead code in a live order path returns."
+      }
     },
     {
       "id": "P4-DOC-004",

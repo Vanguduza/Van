@@ -18,6 +18,17 @@ from typing import Any, Optional
 READ_KINDS = ("SESSION", "OPPORTUNITY_ASSESSMENT", "RISK_DECISION", "ORDER_COMMAND", "EXECUTION_RECEIPT", "TRADE_REVIEW", "TRADE_EXPERIENCE_ARTIFACT", "KILL_SWITCH", "OWNER_TICKET", "CAPSULE_STATE")
 
 
+#: P0-TRADE-004. How old the newest ledger event may be before the gateway stops treating
+#: what it reads as current. A live session writes a heartbeat, a market-state event and an
+#: account snapshot on every bar, so minutes of silence means the gateway is not looking at
+#: the ledger the session is writing.
+#:
+#: DECISION (recorded, no owner input): fifteen minutes is generous enough for a session on
+#: a slow timeframe and short enough that a file left over from a previous deployment is
+#: caught the first time anybody asks.
+LEDGER_STALENESS_MS = 15 * 60 * 1000
+
+
 class TradingControlError(PermissionError):
     pass
 
@@ -162,10 +173,31 @@ class TradingService:
             cleared = {h["trigger"] for h in halts if h["cleared"]}
             active = [h for h in tripped if h["trigger"] not in cleared or h["event_time_ms"] > max((x["event_time_ms"] for x in halts if x["cleared"] and x["trigger"] == h["trigger"]), default=-1)]
             tickets = self._tickets(led, EventKind)
-            return {"ledger_available": True, "ledger_path": self.ledger_path, "head": led.head(), "chain_ok": ok, "events": checked, "counts": counts,
+            # P0-TRADE-004 — last_event_ms was reported and never thresholded, so a stale
+            # local SQLite file presented old data as current. The gateway cannot tell by
+            # looking whether it is reading the live ledger or a copy somebody left behind;
+            # what it can tell is that a live trading session writes constantly, so a
+            # ledger whose newest event is old is not one to answer questions from.
+            now_ms = int(time.time() * 1000)
+            age_ms = max(0, now_ms - last_ms) if last_ms else None
+            stale = age_ms is None or age_ms > LEDGER_STALENESS_MS
+            payload = {"ledger_available": True, "ledger_path": self.ledger_path, "head": led.head(), "chain_ok": ok, "events": checked, "counts": counts,
                     "kill_switch_active": bool(active), "kill_switch_triggers": sorted({h["trigger"] for h in active if h["trigger"]}),
                     "open_tickets": sum(1 for t in tickets if t["status"] == "OPEN"), "last_event_ms": last_ms,
+                    "ledger_age_ms": age_ms, "ledger_stale": stale,
+                    "ledger_staleness_threshold_ms": LEDGER_STALENESS_MS,
                     "authority": "VATI Risk Authority; Hermes and the gateway never place orders"}
+            if stale:
+                # Said in the payload rather than only in a degraded code, because the
+                # number is what makes it actionable and "no events at all" is a different
+                # situation from "nothing for an hour".
+                payload["ledger_stale_reason"] = (
+                    "no events have ever been written to this ledger"
+                    if not last_ms else
+                    f"newest event is {age_ms // 1000}s old, past the "
+                    f"{LEDGER_STALENESS_MS // 1000}s threshold"
+                )
+            return payload
         finally:
             led.close()
 

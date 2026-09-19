@@ -181,6 +181,11 @@ class RiskSnapshot:
     market_integrity: MarketIntegrityState
     tier1_event_blackout_active: bool
     kill_switch_triggers: frozenset[KillSwitchTrigger] = frozenset()
+    #: P0-TRADE-006 — broker margin, which the authority could not see at all. None means
+    #: the venue did not report it, which the margin gate treats as unknown rather than as
+    #: healthy; a paper or owner-ticket venue has no margin and legitimately reports None.
+    margin_level_pct: Optional[Decimal] = None
+    free_margin: Optional[Decimal] = None
 
     @property
     def data_fresh(self) -> bool:

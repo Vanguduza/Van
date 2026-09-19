@@ -1068,9 +1068,16 @@ def create_app() -> FastAPI:
                 "error": str(exc),
                 "degraded": degraded.codes(),
             }
+        # P0-TRADE-004 — a stale ledger is unavailable for the purpose of answering, even
+        # though the file opens and the chain verifies. Reporting it as available was how
+        # old data came back as current.
         degraded.set(
             DegradedCode.TRADING_LEDGER_UNAVAILABLE,
-            not (status.get("ledger_available") and status.get("chain_ok")),
+            not (
+                status.get("ledger_available")
+                and status.get("chain_ok")
+                and not status.get("ledger_stale", False)
+            ),
         )
         status["degraded"] = degraded.codes()
         return status

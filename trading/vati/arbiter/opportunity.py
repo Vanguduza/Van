@@ -30,6 +30,10 @@ class OpportunityAssessment:
     decision: str                      # TRADE | REDUCE_SIZE | WAIT | SKIP | NO_TRADE
     abstain_reason: str
     intent: Optional[TradeIntent]
+    #: P1-TRADE-007 — the winning signal's own targets. The decision cycle used to throw
+    #: these away and re-derive a single target from expected_gross_move_pct, so a strategy
+    #: with a scaled exit plan had it silently replaced by one price.
+    targets: tuple[Decimal, ...] = ()
     assessment_hash: str = ""
 
 
@@ -88,5 +92,5 @@ class OpportunityEngine:
             regime_multiplier=mv.regime_multiplier, confidence_multiplier=mv.confidence_multiplier, volatility_multiplier=mv.volatility_multiplier,
             liquidity_multiplier=mv.liquidity_multiplier, event_risk_multiplier=mv.event_risk_multiplier,
         )
-        oa = OpportunityAssessment(state.symbol, state.as_of_ms, state.activation_id, state.state_hash, tuple(cands), mv.label.value, "", intent)
+        oa = OpportunityAssessment(state.symbol, state.as_of_ms, state.activation_id, state.state_hash, tuple(cands), mv.label.value, "", intent, targets=tuple(sig.targets))
         return OpportunityAssessment(**{**oa.__dict__, "assessment_hash": canonical_hash({k: (v.__dict__ if k == "intent" else v) for k, v in oa.__dict__.items() if k != "assessment_hash"})})

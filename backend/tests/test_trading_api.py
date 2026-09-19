@@ -126,9 +126,38 @@ async def test_status_and_tickets_read_from_chained_ledger(client, tmp_path):
     seed_ledger(tmp_path / "vati.sqlite").close()
     st = (await ac.get("/v1/trading/status")).json()
     assert st["ledger_available"] and st["chain_ok"] and st["events"] == 4 and st["counts"]["OWNER_TICKET"] == 1 and st["open_tickets"] == 1
-    assert st["kill_switch_active"] is False and st["degraded"] == []           # STALE_DATA was cleared by the owner
+    assert st["kill_switch_active"] is False                                    # STALE_DATA was cleared by the owner
+    # P0-TRADE-004 — this fixture's newest event is at 4_000ms, which is 1970. The gateway
+    # now says so instead of presenting it as current, which is the whole finding: nothing
+    # here can tell by looking whether it is reading the live ledger or a leftover copy.
+    assert st["ledger_stale"] is True
+    assert st["degraded"] == ["TRADING_LEDGER_UNAVAILABLE"]
+    assert "old" in st["ledger_stale_reason"]
     tk = (await ac.get("/v1/trading/tickets")).json()["tickets"]
     assert tk == [{"ticket": "ZSE-T-1", "status": "OPEN", "symbol": "DELTA", "qty": "1200", "issued_ms": 2_000, "trade_intent_id": "intent-1", "ticket_hash": tk[0]["ticket_hash"]}]
+
+
+@pytest.mark.asyncio
+async def test_a_current_ledger_is_not_reported_stale(client, tmp_path):
+    """The threshold must not condemn a ledger a live session is actually writing."""
+    import time as _t
+
+    from vati.core import EventKind, Ledger, make_event
+
+    now = int(_t.time() * 1000)
+    led = Ledger(tmp_path / "vati.sqlite")
+    led.append(make_event(EventKind.SESSION, "vati-runner", {"startup": True},
+                          event_time_ms=now, received_time_ms=now, correlation_id="s1"))
+    led.close()
+
+    st = (await ac_of(client).get("/v1/trading/status")).json()
+    assert st["ledger_available"] and st["ledger_stale"] is False
+    assert st["ledger_age_ms"] < st["ledger_staleness_threshold_ms"]
+    assert st["degraded"] == []
+
+
+def ac_of(client):
+    return client[0]
 
 
 @pytest.mark.asyncio

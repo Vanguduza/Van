@@ -4,12 +4,12 @@
   "canonical_blueprint": "docs/VAN_FINISHED_PRODUCT_BLUEPRINT_REV_1.md",
   "canonical_audit": "docs/VAN_WHOLE_SYSTEM_IMPLEMENTATION_AUDIT_AND_CERTIFICATION_REV_1.md",
   "created": "2026-09-19",
-  "component_count": 97,
+  "component_count": 104,
   "dispositions": {
     "DELETE": 11,
     "REPLACE": 4,
-    "COMPLETE": 43,
-    "WIRE": 39
+    "COMPLETE": 49,
+    "WIRE": 40
   },
   "by_gate": {
     "GATE 4": 36,
@@ -20,7 +20,7 @@
     "GATE 10": 7,
     "GATE 11": 1,
     "GATE 0": 3,
-    "GATE 5": 4,
+    "GATE 5": 11,
     "GATE 1": 9
   },
   "terminal_states_allowed": [
@@ -1814,6 +1814,149 @@
         "a workspace_operation route no longer returns planned on workspace_studio; antigravity to jules still falls back"
       ],
       "owner_facing_projection": "the degraded reason names no_executor_implemented rather than reporting a plan",
+      "terminal_state": "INTEGRATED_AND_EVIDENCED"
+    },
+    {
+      "n": 98,
+      "component": "Live risk snapshot safety flags",
+      "path": "trading/vati/app/cycle.py",
+      "maturity_class": "SIMULATED",
+      "disposition": "COMPLETE",
+      "rationale": "reconciliation_ok, risk_store_ok and tier1_event_blackout_active were literals, so three Risk Authority refusals could never fire live",
+      "remediation_gate": "GATE 5",
+      "producer": "DecisionCycle._reconciliation_ok, _risk_store_ok and _tier1_blackout",
+      "consumer": "RiskAuthority.evaluate_safe on every intent",
+      "production_caller": "DecisionCycle.snapshot, on every bar that produces an intent",
+      "tests": [
+        "trading/tests/test_live_risk_is_real.py::TestTheSafetyFlagsAreNotLiterals"
+      ],
+      "runtime_evidence": [
+        "the three literals are absent from the file and each refusal fires on a snapshot that reports the condition"
+      ],
+      "owner_facing_projection": "the refusal reason the owner sees when a trade is declined",
+      "terminal_state": "INTEGRATED_AND_EVIDENCED"
+    },
+    {
+      "n": 99,
+      "component": "Broker margin model",
+      "path": "trading/vati/risk/authority.py",
+      "maturity_class": "ABSENT",
+      "disposition": "COMPLETE",
+      "rationale": "No margin, free margin or margin level field existed anywhere, so the authority sized by stop distance with no view of what the broker would allow",
+      "remediation_gate": "GATE 5",
+      "producer": "AccountState margin fields, carried into RiskSnapshot",
+      "consumer": "RiskAuthority's MARGIN_CALL, MARGIN_FLOOR and NO_FREE_MARGIN refusals",
+      "production_caller": "DecisionCycle.snapshot passes the venue's margin to the authority",
+      "tests": [
+        "trading/tests/test_live_risk_is_real.py::TestTheMarginGate"
+      ],
+      "runtime_evidence": [
+        "a margin level at or below the call level is refused; an unreported margin is treated as unknown rather than healthy"
+      ],
+      "owner_facing_projection": "the refusal names the margin level and the threshold it failed",
+      "terminal_state": "INTEGRATED_AND_EVIDENCED"
+    },
+    {
+      "n": 100,
+      "component": "Owner halt durability",
+      "path": "trading/vati/app/service.py",
+      "maturity_class": "SIMULATED",
+      "disposition": "COMPLETE",
+      "rationale": "The observer filtered events at or after the session start time, so a restart discarded an active owner halt while restart_service was an exposed commander command",
+      "remediation_gate": "GATE 5",
+      "producer": "the latest uncleared OWNER_HALT in the ledger",
+      "consumer": "SessionService._observe_owner_halt, on start and on every loop",
+      "production_caller": "SessionService.start and step_once",
+      "tests": [
+        "trading/tests/test_live_risk_is_real.py::TestTheOwnerHaltSurvivesARestart"
+      ],
+      "runtime_evidence": [
+        "the start-time filter is absent and the observed event records observed_after_restart"
+      ],
+      "owner_facing_projection": "the session heartbeat's kill_switch list",
+      "terminal_state": "INTEGRATED_AND_EVIDENCED"
+    },
+    {
+      "n": 101,
+      "component": "Restart-safe idempotency and the session lock",
+      "path": "trading/vati/app/process_lock.py",
+      "maturity_class": "SIMULATED",
+      "disposition": "COMPLETE",
+      "rationale": "The idempotency key derived from session_id, which embeds the process start timestamp, and nothing prevented two serve processes for one alias",
+      "remediation_gate": "GATE 5",
+      "producer": "the account/symbol/bar seed, and SessionLock",
+      "consumer": "the opportunity engine's idempotency key, and the serve command",
+      "production_caller": "trading/vati/__main__.py cmd_serve and DecisionCycle.step",
+      "tests": [
+        "trading/tests/test_live_risk_is_real.py::TestTheIdempotencyKeySurvivesARestart",
+        "trading/tests/test_live_risk_is_real.py::TestTheProcessLock"
+      ],
+      "runtime_evidence": [
+        "the same bar yields the same key across two sessions; a second serve for one alias is refused with the holder's pid"
+      ],
+      "owner_facing_projection": "serve exits 2 with session_already_running rather than starting",
+      "terminal_state": "INTEGRATED_AND_EVIDENCED"
+    },
+    {
+      "n": 102,
+      "component": "Ledger staleness threshold",
+      "path": "backend/van_gateway/trading/service.py",
+      "maturity_class": "SIMULATED",
+      "disposition": "COMPLETE",
+      "rationale": "last_event_ms was reported and never thresholded, so a stale local SQLite file presented old data as current while the trading VM wrote Postgres",
+      "remediation_gate": "GATE 5",
+      "producer": "TradingService.status ledger_stale and ledger_age_ms",
+      "consumer": "GET /v1/trading/status and the degraded registry",
+      "production_caller": "backend/van_gateway/app.py _trading_status_payload",
+      "tests": [
+        "backend/tests/test_trading_api.py::test_status_and_tickets_read_from_chained_ledger",
+        "backend/tests/test_trading_api.py::test_a_current_ledger_is_not_reported_stale"
+      ],
+      "runtime_evidence": [
+        "a ledger whose newest event is from 1970 reports stale with the age and sets TRADING_LEDGER_UNAVAILABLE; a ledger written now does not"
+      ],
+      "owner_facing_projection": "the degraded code and the stale reason on the trading status",
+      "terminal_state": "INTEGRATED_AND_EVIDENCED"
+    },
+    {
+      "n": 103,
+      "component": "Live session learning",
+      "path": "trading/vati/app/service.py",
+      "maturity_class": "IMPLEMENTED_BUT_ISOLATED",
+      "disposition": "WIRE",
+      "rationale": "SessionService.build never passed learning, so capsule-health demotion, broker-liquidity learning and experience artefacts existed only in backtests",
+      "remediation_gate": "GATE 5",
+      "producer": "LearningHooks, with the environment taken from the mandate's mode",
+      "consumer": "DecisionCycle._learn on every closed trade",
+      "production_caller": "trading/vati/app/service.py build",
+      "tests": [
+        "trading/tests/test_learning.py",
+        "trading/tests/test_live_risk_is_real.py"
+      ],
+      "runtime_evidence": [
+        "a live session constructs hooks whose environment matches the mandate's authorization mode, so demo and live experience are not pooled"
+      ],
+      "owner_facing_projection": "capsule demotion, which the owner sees as a strategy stepping down",
+      "terminal_state": "INTEGRATED_AND_EVIDENCED"
+    },
+    {
+      "n": 104,
+      "component": "Strategy exit targets in the live path",
+      "path": "trading/vati/arbiter/opportunity.py",
+      "maturity_class": "PARTIAL",
+      "disposition": "COMPLETE",
+      "rationale": "The cycle discarded the winning signal's targets and re-derived one from expected_gross_move_pct, beside a dead assignment and an empty loop",
+      "remediation_gate": "GATE 5",
+      "producer": "OpportunityAssessment.targets, from the winning signal",
+      "consumer": "ExecutionRouter.execute targets",
+      "production_caller": "DecisionCycle.step",
+      "tests": [
+        "trading/tests/test_live_risk_is_real.py::TestTheStrategysTargetsSurvive"
+      ],
+      "runtime_evidence": [
+        "the assessment carries the signal's targets and the cycle uses them; the derived single target is a fallback for a strategy that declared none"
+      ],
+      "owner_facing_projection": "the exit levels on the owner's trade detail view",
       "terminal_state": "INTEGRATED_AND_EVIDENCED"
     }
   ],
