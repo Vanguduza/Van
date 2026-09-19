@@ -31,6 +31,7 @@ from van_gateway.google.control import GoogleControlAuthError, verify_internal_c
 from van_gateway.proactive.autonomy import DomainTrustService, ProactivePolicyService
 from van_gateway.reasoning.kernel import CriticalReasoningKernel
 from van_gateway.storage.db import Store
+from van_gateway.reasoning.calibration import RelationshipCalibrationEngine
 from van_gateway.understanding.memory import (
     CognitiveComplementMap,
     SharedVocabularyRegistry,
@@ -69,6 +70,11 @@ class UnderstandingApi:
         self.complement = CognitiveComplementMap(store)
         self.growth = SymbioticGrowthLedger(store)
         self.kernel = CriticalReasoningKernel(store)
+        # P2-DEAD-001 — §75. The engine decides how VAN says a thing and how hard it pushes,
+        # never what it is willing to call true. It was complete, tested and imported by
+        # nothing, so every answer came out at one fixed register regardless of how
+        # consequential it was or how often VAN had recently been wrong.
+        self.calibration = RelationshipCalibrationEngine(store)
         self.attention = AttentionScorer(store)
         self.trust = DomainTrustService(store)
         self.policies = ProactivePolicyService(store, self.trust)

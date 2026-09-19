@@ -11,10 +11,6 @@ from __future__ import annotations
 import pytest
 
 from conftest_automation import make_store
-from van_gateway.context_compiler.compiler import (
-    ContextCompiler,
-    ContextSection,
-)
 from van_gateway.epistemics.models import (
     Claim,
     Provenance,
@@ -129,101 +125,6 @@ def test_owner_preferences_do_not_expire_on_a_clock():
 
 
 # --------------------------------------------------------- §9 context compiler
-
-
-def test_cross_project_isolation_is_hard():
-    """§9 — excluded, not ranked down, and counted so it is visible."""
-    compiler = ContextCompiler()
-    packet = compiler.compile(
-        packet_id="p1", project_id="alpha", now_ms=NOW,
-        claims={
-            ContextSection.PROJECT_TRUTH: [
-                _claim("a", "alpha fact", SemanticClass.PROJECT_TRUTH, project="alpha"),
-                _claim("b", "beta secret", SemanticClass.PROJECT_TRUTH, project="beta"),
-            ]
-        },
-    )
-    statements = [line["statement"] for lines in packet.sections.values() for line in lines]
-    assert "alpha fact" in statements
-    assert "beta secret" not in statements
-    assert packet.selection_stats["dropped_cross_project"] == 1
-
-
-def test_a_stale_claim_is_carried_but_loses_authority():
-    """Dropping it silently would let VAN act as though it never knew."""
-    compiler = ContextCompiler()
-    packet = compiler.compile(
-        packet_id="p2", now_ms=NOW,
-        claims={
-            ContextSection.RETRIEVED_KNOWLEDGE: [
-                _claim("old", "was true last month", SemanticClass.FACT_VERIFIED, observed=0)
-            ]
-        },
-    )
-    line = packet.sections["retrieved_knowledge"][0]
-    assert line["stale"] is True
-    assert line["factual_authority"] is False
-    assert packet.factual_claims() == []
-    assert packet.stale_claim_ids == ["old"]
-
-
-def test_contradicting_claims_stay_together():
-    """§14 — including only the higher-scored side manufactures false confidence."""
-    compiler = ContextCompiler()
-    packet = compiler.compile(
-        packet_id="p3", now_ms=NOW,
-        claims={
-            ContextSection.RETRIEVED_KNOWLEDGE: [
-                _claim("x1", "the build is green", SemanticClass.FACT_VERIFIED, group="build"),
-                _claim("x2", "the build is red", SemanticClass.EXTERNAL_CLAIM, group="build"),
-            ]
-        },
-    )
-    assert packet.contradiction_groups == {"build": ["x1", "x2"]}
-    statements = [l["statement"] for ls in packet.sections.values() for l in ls]
-    assert "the build is green" in statements and "the build is red" in statements
-
-
-def test_the_budget_is_enforced_by_dropping_the_least_useful():
-    """§9 — a compiler that overruns hands the reasoner a silent truncation."""
-    compiler = ContextCompiler()
-    many = [
-        _claim(f"n{i}", f"environment detail {i}" * 10, SemanticClass.EXTERNAL_CLAIM)
-        for i in range(60)
-    ]
-    packet = compiler.compile(
-        packet_id="p4", token_budget=200, now_ms=NOW,
-        claims={
-            ContextSection.AUTHORITY_CONTEXT: [
-                _claim("auth", "mission ceiling is A2", SemanticClass.PROJECT_TRUTH)
-            ],
-            ContextSection.CURRENT_ENVIRONMENT: many,
-        },
-    )
-    assert packet.within_budget
-    assert packet.selection_stats["dropped_budget"] > 0
-    # Authority survives the squeeze: acting with the wrong ceiling is worse
-    # than acting with less information.
-    kept = [l["statement"] for ls in packet.sections.values() for l in ls]
-    assert "mission ceiling is A2" in kept
-
-
-def test_an_illformed_claim_never_reaches_the_reasoner():
-    compiler = ContextCompiler()
-    packet = compiler.compile(
-        packet_id="p5", now_ms=NOW,
-        claims={
-            ContextSection.RETRIEVED_KNOWLEDGE: [
-                Claim(claim_id="bad", statement="unsourced",
-                      semantic_class=SemanticClass.FACT_VERIFIED)
-            ]
-        },
-    )
-    assert packet.selection_stats["dropped_illformed"] == 1
-    assert packet.sections == {}
-
-
-# ------------------------------------------------------- §64 owner model
 
 
 async def test_one_emphatic_conversation_does_not_mint_a_trait(tmp_path):

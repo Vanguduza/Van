@@ -69,6 +69,10 @@ class Settings(BaseSettings):
     # runtime credentials remain in the gateway environment/secret plane.
     automation_enabled: bool = False
     automation_ingress_enabled: bool = False
+    #: P2-DEAD-001 — HMAC secret for signed provider webhooks. Empty means signed ingress is
+    #: refused rather than accepted unverified: an unauthenticated event ingress is how an
+    #: external system starts writing VAN's evidence store.
+    automation_webhook_secret: str = ""
     automation_egress_enabled: bool = False
     automation_n8n_base_url: str = "http://127.0.0.1:5678/api/v1"
     automation_n8n_api_key: str = ""
