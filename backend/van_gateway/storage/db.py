@@ -8,7 +8,7 @@ from typing import Any, AsyncIterator
 
 import aiosqlite
 
-SCHEMA_VERSION = 24
+SCHEMA_VERSION = 25
 
 
 MIGRATION_17 = """
@@ -170,6 +170,33 @@ ALTER TABLE intent_nodes ADD COLUMN observation_count INTEGER NOT NULL DEFAULT 1
 ALTER TABLE intent_nodes ADD COLUMN promoted_reason TEXT;
 ALTER TABLE intent_nodes ADD COLUMN promoted_at_ms INTEGER;
 CREATE INDEX IF NOT EXISTS idx_intent_nodes_horizon ON intent_nodes(horizon, status);
+"""
+
+MIGRATION_25 = """
+-- P2-CTX-003: a correction that superseded without recording what it superseded.
+--
+-- OwnerFactCandidate.supersedes_fact_id and ContextEdgeCandidate.supersedes_edge_id were
+-- read by admit_fact and admit_edge, used to close the prior record's validity window, and
+-- then thrown away: neither INSERT carried the column, because neither table had one. So
+-- the graph kept the *effect* of a correction and lost the *fact* of it.
+--
+-- The consequence is not abstract. Two facts about the same subject and predicate with
+-- adjacent validity windows look exactly the same whether one replaced the other or both
+-- simply expired on their own. The owner asking "why does VAN believe this now, and what
+-- did it believe before?" could not be answered, which is the whole of revision history.
+ALTER TABLE owner_facts ADD COLUMN supersedes_fact_id TEXT;
+ALTER TABLE owner_context_edges ADD COLUMN supersedes_edge_id TEXT;
+
+-- History is walked backwards from the newest record, so the index is on the link column.
+CREATE INDEX IF NOT EXISTS idx_owner_facts_supersedes
+  ON owner_facts(supersedes_fact_id);
+CREATE INDEX IF NOT EXISTS idx_owner_edges_supersedes
+  ON owner_context_edges(supersedes_edge_id);
+
+-- Contradictions are found by grouping on the identity a requirement resolves against.
+-- Without this the conflict scan is a full table sort on every call.
+CREATE INDEX IF NOT EXISTS idx_owner_facts_identity
+  ON owner_facts(subject, predicate, scope, authority);
 """
 
 MIGRATIONS: dict[int, str] = {
@@ -1498,6 +1525,7 @@ MIGRATIONS: dict[int, str] = {
     22: MIGRATION_22,
     23: MIGRATION_23,
     24: MIGRATION_24,
+    25: MIGRATION_25,
 }
 
 

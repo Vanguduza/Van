@@ -18,6 +18,7 @@ from van_gateway.approval.service import OwnerApprovalError, OwnerApprovalServic
 from van_gateway.auth.control_scopes import ControlAuthority, ControlScope
 from van_gateway.auth.rotation import CredentialRotation
 from van_gateway.context.forget import OwnerMemory
+from van_gateway.context.lifecycle import ContextLifecycle
 from van_gateway.learning.feed import LearningFeed
 from van_gateway.context.authoring import (
     ContextAuthoringError,
@@ -388,6 +389,7 @@ def create_app() -> FastAPI:
     truth_importer = ProjectTruthImporter(owner_runtime.context)
     # P2-MEM-002 — the owner's ability to end what VAN concluded about them.
     owner_memory = OwnerMemory(store)
+    context_lifecycle = ContextLifecycle(store, owner_runtime.context)
     mission_binder = MissionBinder(store, missions)
     # P0-EXEC-001 — the join that makes an accepted command a durable mission.
     command_missions = CommandMissionLink(
@@ -1243,6 +1245,60 @@ def create_app() -> FastAPI:
             after={"removed": result["removed"]},
         )
         return result
+
+    @app.get("/v1/context/export")
+    async def owner_context_export(request: Request):
+        """P2-CTX-003 — everything VAN holds about the owner, not a count of it.
+
+        /v1/context/memory already reported how many rows each store held. That is the
+        wrong half of the answer: the owner could see that VAN had concluded 47 things
+        about how they work and could delete all 47, without ever being allowed to read
+        one. This is an owner route for the same reason the erasure is — the person the
+        data describes does not ask an operator for permission to see it.
+        """
+        device_id = getattr(request.state, "van_device_id", None)
+        if not device_id:
+            raise HTTPException(status_code=403, detail="device_identity_required")
+        exported = await context_lifecycle.export()
+        await audit.record(
+            result="ok", device_id=device_id, capability="context.export",
+            after={
+                store: detail["rows_exported"]
+                for store, detail in exported["stores"].items()
+            },
+        )
+        return exported
+
+    @app.get("/v1/context/history")
+    async def owner_context_history(
+        request: Request, subject: str, predicate: str, scope: str = "global"
+    ):
+        """P2-CTX-003 — what VAN believed before, and what changed its mind.
+
+        Unauditable before migration 25: admit_fact closed the superseded record's validity
+        window and dropped the link, so a correction and two independent expiries left
+        identical rows.
+        """
+        device_id = getattr(request.state, "van_device_id", None)
+        if not device_id:
+            raise HTTPException(status_code=403, detail="device_identity_required")
+        return await context_lifecycle.history(
+            subject=subject, predicate=predicate, scope=scope
+        )
+
+    @app.get("/v1/context/conflicts")
+    async def owner_context_conflicts(request: Request):
+        """P2-CTX-003 — what VAN holds two contradictory answers to.
+
+        resolve_requirement has always detected these, but only for a claim something
+        asked about. A contradiction nothing queries was held silently. VAN reports both
+        sides and does not choose: picking between two things the owner is recorded as
+        having said is not a retrieval decision.
+        """
+        device_id = getattr(request.state, "van_device_id", None)
+        if not device_id:
+            raise HTTPException(status_code=403, detail="device_identity_required")
+        return await context_lifecycle.conflicts()
 
     @app.delete("/v1/context/facts")
     async def forget_owner_fact(

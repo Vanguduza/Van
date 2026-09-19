@@ -3968,19 +3968,41 @@
       "requirement": "docs/VAN_CONSOLIDATED_DEPLOYMENT_READINESS_CLOSURE_BLUEPRINT_REV_1.md",
       "authority": "VAN Consolidated Deployment-Readiness Closure Blueprint Rev 2",
       "repository_evidence": [
-        "backend/van_gateway/understanding/memory.py:1",
-        "backend/van_gateway/ops/retention.py:1"
+        "backend/van_gateway/context/lifecycle.py",
+        "backend/van_gateway/context/service.py",
+        "backend/van_gateway/context/forget.py",
+        "backend/van_gateway/storage/db.py"
       ],
       "runtime_evidence": [],
       "affected_components": [
         "context"
       ],
-      "root_cause": "see the closure blueprint",
-      "remediation": "Add export, correction, erasure and revision history with provenance preserved through each.",
+      "root_cause": "Erasure was built first (P2-MEM-002) and built well, over a list of thirteen stores. Reading was never built to match, because the only export predated that list and was written for an operator inspecting one scope rather than for the owner asking what VAN holds. Revision history failed differently and more quietly: the supersession link was in the model, was read by admit_fact, and had no column to go in, so the code looked complete at every layer except the one that stores things.",
+      "remediation": "An owner export covering every store the erasure clears; persist the supersession link and walk it; enumerate contradictions instead of waiting for something to resolve a requirement over one.",
       "impact": "VAN's most sensitive dataset cannot be inspected, corrected or erased by the person it describes.",
       "validation_gate": "G6",
-      "current_status": "OPEN",
-      "remediation_gate": "G6"
+      "current_status": "CLOSED",
+      "remediation_gate": "G6",
+      "closure": {
+        "state": "INTEGRATED_AND_EVIDENCED",
+        "summary": "Four separate failures, worth separating because they fail differently.\n\n**VAN could forget what it would not show.** context/forget.py names thirteen stores of owner-derived material and clears every one. The only export, OwnerContextService.export_scope, covered two of them, was reachable only through the internal-control runtime API, and took a scope rather than an owner. So the owner could destroy on request material they had never been permitted to read — which is not a privacy control, it is a shredder. ContextLifecycle.export iterates FORGETTABLE itself rather than keeping a second list beside it, and the test compares the export's real output against that list. My first draft of that test compared a constant derived from FORGETTABLE back to FORGETTABLE and passed by construction; it proved nothing and is gone, along with the constant, which no production path read.\n\n**A correction recorded its effect and not itself.** supersedes_fact_id and supersedes_edge_id were in the models, were read by admit_fact and admit_edge, were used to close the prior record's validity window, and were then discarded — neither table had the column. Two facts with adjacent validity windows are indistinguishable from two that expired independently, so 'what did VAN believe before, and what changed its mind' had no answer at all. Migration 25 adds both columns; history() walks the chain and inverts it, because the stored link points backwards and the owner's question runs forwards. A withdrawal and a correction are reported as the different acts they are: both end a fact, only one replaces it, and telling the owner VAN has dropped a belief it still holds in a newer form is its own kind of wrong.\n\n**A contradiction was only visible to whoever tripped over it.** resolve_requirement has always detected two same-authority facts with different content and reported CONFLICTED — for a claim something asked about. Nothing enumerated them, so a contradiction between two things the owner said sat in the graph indefinitely unless some command happened to need that exact subject and predicate. conflicts() enumerates the identities and delegates detection to resolve_requirement rather than reimplementing the rule, which is the point: a second copy would drift, and the owner's conflict list would stop agreeing with the readiness signal that blocks their work. Each identity is resolved twice, mirroring the blocking/advisory split ContextReadiness already makes — a disagreement between two inferences can never block a command, so without the second pass it would be invisible forever.\n\n**Conflicts are surfaced, not resolved.** Choosing between two things the owner is recorded as having said is not a retrieval decision. The report carries both sides with their values, so the owner does not have to issue a request per side to learn what VAN disagrees with itself about, and it ends neither.\n\nTwo smaller decisions. The export carries stored rows rather than a presentation model, because a summary is a place for material to go missing and provenance travels for free when the authority, source_trust and source_ref columns come with the row. And it filters nothing: export_scope carried `sensitivity != 'SECRET'`, which reads as a redaction and is a filter over a provably empty set, since admission refuses SECRET outright for facts and edges alike. Copying that filter would have been harmless today and a silent omission the moment admission changed, so the precondition is asserted by a test instead.\n\nThe routes are the owner's, device-authenticated, and a test asserts the operator token does not reach them — a fix that was also reachable with the machine credential would have moved this finding rather than closed it. The export is audited, because a bulk read of the most sensitive dataset VAN holds should not be the quiet one when the erasure beside it already records.\n\nEleven mutations, eleven caught. One survived first: the ordering test admitted its facts newest-first, so row order and belief order agreed and `ORDER BY rowid` passed it. A fixture that makes two orderings coincide is not testing the ordering.",
+        "changed": [
+          "backend/van_gateway/context/lifecycle.py",
+          "backend/van_gateway/context/service.py",
+          "backend/van_gateway/storage/db.py",
+          "backend/van_gateway/app.py"
+        ],
+        "verified_by": [
+          "backend/tests/test_context_lifecycle_governance.py"
+        ],
+        "runtime_evidence": [
+          "https://github.com/Vanguduza/Van/actions/runs/35452683328"
+        ],
+        "residual": "Retention and erasure now have reading and history beside them, but the erasure itself is still all-or-nothing per store: there is no owner path to erase one fact and keep its neighbours, only to end its validity.",
+        "residual_class": "DELIBERATE_SCOPE",
+        "residual_reason": "Ending a fact's validity is the correct primitive and already exists (authoring.forget); a true single-row delete would have to decide what happens to the snapshots that cite it and to the supersession chain that runs through it, and inventing that answer here would be worse than naming it. The finding asked for export, correction, erasure, revision history and conflict semantics, and all five are present.",
+        "falsified_by": "A store appearing in FORGETTABLE but not in the export; a correction whose supersedes_fact_id is absent from the stored row; two contradictory current facts at the same authority that /v1/context/conflicts does not list; or the conflict report ending either side's validity."
+      }
     },
     {
       "id": "P2-GOOG-003",
@@ -4904,7 +4926,7 @@
         "tools/ci/github-actions-ci.yml"
       ],
       "runtime_evidence": [
-        "https://github.com/Vanguduza/Van/actions/runs/35451735330"
+        "https://github.com/Vanguduza/Van/actions/runs/35452683328"
       ],
       "affected_components": [
         "ci",
@@ -4917,8 +4939,8 @@
       "current_status": "CLOSED",
       "remediation_gate": "G1",
       "closure": {
-        "state": "EXTERNALLY_BLOCKED_REPOSITORY_COMPLETE",
-        "summary": "The workflow now uploads android/app/build/outputs/apk/debug/*.apk as van-debug-apk, with if-no-files-found: error. That setting is the part worth arguing for: an empty artefact named van-debug-apk is worse than no artefact, because the owner downloads it, finds nothing, and cannot tell whether the build stopped producing an APK or the upload points somewhere wrong.\n\ntests/contracts/test_the_apk_leaves_ci.py guards it, and the interesting problem was writing a path assertion that does not merely agree with itself. Asserting that the workflow contains the path I put in the workflow proves nothing. So the path is tied to facts outside my belief: the module segment must be a real directory with a build.gradle.kts, that module must be the one settings.gradle.kts includes as :app — the name in the Gradle invocation CI runs — and it must apply com.android.application, because a library module emits an AAR and the path would be a fiction. A test also asserts no APK is committed anywhere: the repository ignores *.apk, and a checked-in binary would not be evidence that the current tree builds.\n\nBoth workflow copies were changed together; test_ci_workflow_is_what_it_claims.py already fails on drift, since install_github_workflow.py --apply would otherwise delete the step.\n\nSix mutations, six caught, including the two that matter most: pointing the upload at the release variant the build never assembles, and dropping :app:assembleDebug while keeping the upload.",
+        "state": "INTEGRATED_AND_EVIDENCED",
+        "summary": "The workflow now uploads android/app/build/outputs/apk/debug/*.apk as van-debug-apk, with if-no-files-found: error. That setting is the part worth arguing for: an empty artefact named van-debug-apk is worse than no artefact, because the owner downloads it, finds nothing, and cannot tell whether the build stopped producing an APK or the upload points somewhere wrong.\n\ntests/contracts/test_the_apk_leaves_ci.py guards it, and the interesting problem was writing a path assertion that does not merely agree with itself. Asserting that the workflow contains the path I put in the workflow proves nothing. So the path is tied to facts outside my belief: the module segment must be a real directory with a build.gradle.kts, that module must be the one settings.gradle.kts includes as :app — the name in the Gradle invocation CI runs — and it must apply com.android.application, because a library module emits an AAR and the path would be a fiction. A test also asserts no APK is committed anywhere: the repository ignores *.apk, and a checked-in binary would not be evidence that the current tree builds.\n\nBoth workflow copies were changed together; test_ci_workflow_is_what_it_claims.py already fails on drift, since install_github_workflow.py --apply would otherwise delete the step.\n\nSix mutations, six caught, including the two that matter most: pointing the upload at the release variant the build never assembles, and dropping :app:assembleDebug while keeping the upload.\n\nCONFIRMED by run 35452683328 on 62b42b1: van-debug-apk published, 30,821,691 bytes, sha256 80c7d48be8df99273d45a0615a61e61a97d62f1a37a146e75f7e85ed94b723ff, retained until 2026-12-18. Gate 14 now has an artefact to install, which it did not before this commit.",
         "changed": [
           ".github/workflows/van-ci.yml",
           "tools/ci/github-actions-ci.yml"
@@ -4927,10 +4949,12 @@
           "tests/contracts/test_the_apk_leaves_ci.py",
           "tests/contracts/test_ci_workflow_is_what_it_claims.py"
         ],
-        "runtime_evidence": [],
-        "residual": "No run has yet published the artifact. The next CI run on this branch either uploads an APK or fails at the upload step.",
-        "residual_class": "EXTERNAL_ARTEFACT",
-        "residual_reason": "The Android Gradle Plugin cannot be fetched in this container, so assembleDebug cannot be run here and the artifact cannot be produced locally to check. CI is the authority, as it is for everything Android in this programme, and it has not yet run this workflow. Recording this as evidenced before a run published the file would be exactly the reporting-external-actions-complete failure the audit brief forbids.",
+        "runtime_evidence": [
+          "https://github.com/Vanguduza/Van/actions/runs/35452683328"
+        ],
+        "residual": null,
+        "residual_class": null,
+        "residual_reason": null,
         "falsified_by": "The van-debug-apk artifact being absent from, or empty in, a run whose Android job succeeded; or the published APK failing to install on the owner's device, which is Gate 14's claim rather than this one's."
       }
     }
