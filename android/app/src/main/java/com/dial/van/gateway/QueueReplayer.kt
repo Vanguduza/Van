@@ -1,5 +1,6 @@
 package com.dial.van.gateway
 
+import android.os.SystemClock
 import com.dial.van.degraded.DegradedModeStore
 import com.dial.van.degraded.RestoreAction
 import com.dial.van.queue.CommandKind
@@ -22,10 +23,65 @@ class QueueReplayer(
     private val gateway: VanGatewayClient,
     private val degraded: DegradedModeStore,
     private val scope: CoroutineScope,
+    private val clock: () -> Long = SystemClock::elapsedRealtime,
 ) {
-    fun replayAsync() {
+    /**
+     * P3-AND-006 — `replayAsync()` was called exactly once, at application start. A command
+     * the owner issued in a tunnel sat in the queue until they next killed and reopened the
+     * app, which for a resident floating assistant is approximately never.
+     *
+     * The trigger state is guarded because connectivity callbacks arrive on the framework's
+     * thread while a replay is running on an IO dispatcher, and the whole point of the
+     * debounce is that two threads must not both decide to start.
+     */
+    private val lock = Any()
+    private var trigger = ReplayTriggerState()
+    private var failures = 0
+
+    /** Consecutive failed replays, for the owner's health surface (P3-AND-004). */
+    fun consecutiveFailures(): Int = synchronized(lock) { failures }
+
+    /** Called on a connectivity callback. Replays only on the edge into availability. */
+    fun onNetworkChanged(available: Boolean) {
+        val recovered = synchronized(lock) {
+            val edge = ReplayTrigger.networkRecovered(trigger, available)
+            trigger = ReplayTrigger.observedNetwork(trigger, available)
+            edge
+        }
+        if (recovered) replayAsync(ReplayReason.CONNECTIVITY_RECOVERED)
+    }
+
+    /** Called when the gateway health poll changes verdict. */
+    fun onGatewayReachable(reachable: Boolean) {
+        val recovered = synchronized(lock) {
+            val edge = ReplayTrigger.gatewayRecovered(trigger, reachable)
+            trigger = ReplayTrigger.observedGateway(trigger, reachable)
+            edge
+        }
+        if (recovered) replayAsync(ReplayReason.GATEWAY_RECOVERED)
+    }
+
+    fun onQueued() = replayAsync(ReplayReason.QUEUE_GREW)
+
+    fun replayAsync(reason: ReplayReason = ReplayReason.APP_START) {
+        val now = clock()
+        val start = synchronized(lock) {
+            val queued = runCatching { queue.size() }.getOrDefault(0)
+            if (!ReplayTrigger.shouldReplay(trigger, reason, now, queued)) return
+            trigger = ReplayTrigger.started(trigger, now)
+            true
+        }
+        if (!start) return
         scope.launch(Dispatchers.IO) {
-            replayNow()
+            try {
+                replayNow()
+                synchronized(lock) { failures = 0 }
+            } catch (exc: Throwable) {
+                synchronized(lock) { failures += 1 }
+                throw exc
+            } finally {
+                synchronized(lock) { trigger = ReplayTrigger.finished(trigger) }
+            }
         }
     }
 

@@ -88,35 +88,36 @@
             </intent-filter>
         </receiver>
 
-        <receiver
-            android:name=".share.ShareIntentReceiver"
-            android:exported="true">
-            <intent-filter>
-                <action android:name="android.intent.action.SEND" />
-                <category android:name="android.intent.category.DEFAULT" />
-                <data android:mimeType="text/plain" />
-            </intent-filter>
+        <!--
+          P1-AND-001 — the share sheet resolves activities, so this is an activity. It was a
+          BroadcastReceiver carrying these same filters, which meant VAN never appeared in
+          the share sheet at all and nothing anywhere reported the absence.
+        -->
+        <activity
+            android:name=".share.ShareIntakeActivity"
+            android:exported="true"
+            android:excludeFromRecents="true"
+            android:noHistory="true"
+            android:label="@string/share_intake_label"
+            android:taskAffinity=""
+            android:theme="@style/Theme.Van.Transparent">
             <intent-filter>
                 <action android:name="android.intent.action.SEND" />
                 <category android:name="android.intent.category.DEFAULT" />
                 <data android:mimeType="text/*" />
-            </intent-filter>
-            <intent-filter>
-                <action android:name="android.intent.action.SEND" />
-                <category android:name="android.intent.category.DEFAULT" />
                 <data android:mimeType="image/*" />
-            </intent-filter>
-            <intent-filter>
-                <action android:name="android.intent.action.SEND" />
-                <category android:name="android.intent.category.DEFAULT" />
                 <data android:mimeType="application/*" />
+                <data android:mimeType="audio/*" />
+                <data android:mimeType="video/*" />
             </intent-filter>
             <intent-filter>
                 <action android:name="android.intent.action.SEND_MULTIPLE" />
                 <category android:name="android.intent.category.DEFAULT" />
                 <data android:mimeType="image/*" />
+                <data android:mimeType="text/*" />
+                <data android:mimeType="application/*" />
             </intent-filter>
-        </receiver>
+        </activity>
 
     </application>
 </manifest>

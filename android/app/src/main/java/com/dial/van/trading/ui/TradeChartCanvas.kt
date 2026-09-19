@@ -2,11 +2,19 @@ package com.dial.van.trading.ui
 
 import android.graphics.Paint
 import androidx.compose.foundation.Canvas
+import androidx.compose.foundation.gestures.detectTapGestures
+import androidx.compose.foundation.gestures.detectTransformGestures
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
+import androidx.compose.runtime.saveable.rememberSaveable
+import androidx.compose.runtime.setValue
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.input.pointer.pointerInput
+import androidx.compose.ui.platform.LocalDensity
 import androidx.compose.ui.geometry.Offset
 import androidx.compose.ui.geometry.Size
 import androidx.compose.ui.graphics.Color
@@ -20,6 +28,9 @@ import com.dial.van.trading.ChartLayout
 import com.dial.van.trading.ChartLevel
 import com.dial.van.trading.ChartMarker
 import com.dial.van.trading.ChartOp
+import com.dial.van.trading.ChartTextScale
+import com.dial.van.trading.ChartViewport
+import com.dial.van.trading.ChartViewports
 import com.dial.van.trading.TradingFormat
 
 /**
@@ -38,13 +49,78 @@ fun TradeChartCanvas(
     heightDp: Int = 220,
     maxVisible: Int = 120,
 ) {
-    val labelPaint = remember { Paint().apply { color = 0xFF9AA7B6.toInt(); textSize = 26f; isAntiAlias = true } }
-    val levelPaint = remember { Paint().apply { textSize = 24f; isAntiAlias = true } }
-    Canvas(modifier = modifier.fillMaxWidth().height(heightDp.dp)) {
+    // P4-AND-012 — these were `textSize = 26f` and `24f`, raw pixels, so the owner's font
+    // scale did nothing to them. An owner who has enlarged their system font has done so
+    // because they need it, and a chart that ignores that is a chart they cannot read.
+    val density = LocalDensity.current
+    val labelPx = ChartTextScale.pixels(ChartTextScale.AXIS_SP, density.density, density.fontScale)
+    val levelPx = ChartTextScale.pixels(ChartTextScale.LEVEL_SP, density.density, density.fontScale)
+    val crosshairPx = ChartTextScale.pixels(ChartTextScale.CROSSHAIR_SP, density.density, density.fontScale)
+    val labelPaint = remember(labelPx) {
+        Paint().apply { color = 0xFF9AA7B6.toInt(); textSize = labelPx; isAntiAlias = true }
+    }
+    val levelPaint = remember(levelPx) { Paint().apply { textSize = levelPx; isAntiAlias = true } }
+    val crosshairPaint = remember(crosshairPx) {
+        Paint().apply { color = 0xFFE6F6FB.toInt(); textSize = crosshairPx; isAntiAlias = true }
+    }
+
+    // P4-AND-013 — the chart rendered a fixed window of the most recent bars with no
+    // interaction, so an owner looking at a trade could not see what happened before it.
+    // Saved, because rotating the phone mid-inspection and losing your place is the same
+    // defect from the owner's side (P3-AND-007).
+    var offsetFromEnd by rememberSaveable(bars.size) { mutableStateOf(0) }
+    var visibleBars by rememberSaveable { mutableStateOf(maxVisible) }
+    var crosshairAt by remember { mutableStateOf<Offset?>(null) }
+    val viewport = ChartViewports.clamp(ChartViewport(offsetFromEnd, visibleBars), bars.size)
+    val window = ChartViewports.window(viewport, bars.size)
+    val shown = if (bars.isEmpty()) bars else bars.subList(window.first, window.last + 1)
+
+    Canvas(
+        modifier = modifier
+            .fillMaxWidth()
+            .height(heightDp.dp)
+            .pointerInput(bars.size) {
+                detectTransformGestures { _, pan, zoom, _ ->
+                    if (zoom != 1f) {
+                        val next = ChartViewports.zoom(
+                            ChartViewport(offsetFromEnd, visibleBars), zoom, bars.size,
+                        )
+                        offsetFromEnd = next.offsetFromEnd
+                        visibleBars = next.visibleBars
+                    }
+                    if (pan.x != 0f) {
+                        val next = ChartViewports.pan(
+                            ChartViewport(offsetFromEnd, visibleBars), pan.x, size.width.toFloat(), bars.size,
+                        )
+                        offsetFromEnd = next.offsetFromEnd
+                        visibleBars = next.visibleBars
+                    }
+                }
+            }
+            .pointerInput(bars.size) {
+                detectTapGestures(
+                    onPress = { at ->
+                        crosshairAt = at
+                        // Held for as long as the finger is down: a crosshair that stays
+                        // after the owner lifts is a crosshair they have to dismiss.
+                        tryAwaitRelease()
+                        crosshairAt = null
+                    },
+                    onDoubleTap = {
+                        offsetFromEnd = 0
+                        visibleBars = maxVisible
+                    },
+                )
+            },
+    ) {
         val layout = ChartLayout(width = size.width, height = size.height)
-        val scene = ChartGeometry.build(bars, layout, levels, markers, maxVisible)
+        val scene = ChartGeometry.build(shown, layout, levels, markers, visibleBars)
         if (scene.visible == 0) {
-            drawContext.canvas.nativeCanvas.drawText("No bars available", 16f, size.height / 2f, labelPaint)
+            // P3-AND-011 — was "No bars available", which tells the owner nothing about
+            // whose absence this is.
+            drawContext.canvas.nativeCanvas.drawText(
+                "No price history yet", 16f, size.height / 2f, labelPaint,
+            )
             return@Canvas
         }
         val grid = Color(0xFF1B2636)
@@ -86,6 +162,32 @@ fun TradeChartCanvas(
         }
         scene.ops.filterIsInstance<ChartOp.TimeTick>().forEach { t ->
             drawContext.canvas.nativeCanvas.drawText(TradingFormat.dateShort(t.t) + " " + TradingFormat.timeHm(t.t), t.x - 30f, size.height - 4f, labelPaint)
+        }
+
+        crosshairAt?.let { at ->
+            val hit = ChartViewports.crosshair(
+                pointerX = at.x, pointerY = at.y,
+                plotLeft = layout.plotLeft, plotRight = layout.plotRight,
+                plotTop = layout.plotTop, plotBottom = layout.plotBottom,
+                viewport = ChartViewport(0, shown.size), barCount = shown.size,
+                highPrice = scene.priceMax, lowPrice = scene.priceMin,
+            ) ?: return@let
+            val ink = Color(0xFF8FA6B4)
+            drawLine(ink, Offset(hit.x, layout.plotTop), Offset(hit.x, layout.plotBottom), strokeWidth = 1f)
+            drawLine(ink, Offset(layout.plotLeft, hit.y), Offset(layout.plotRight, hit.y), strokeWidth = 1f)
+            val bar = shown.getOrNull(hit.barIndex)
+            val readout = buildString {
+                append(TradingFormat.price(hit.price, digits))
+                bar?.let {
+                    append("  ")
+                    append(TradingFormat.dateShort(it.t))
+                    append(' ')
+                    append(TradingFormat.timeHm(it.t))
+                }
+            }
+            drawContext.canvas.nativeCanvas.drawText(
+                readout, layout.plotLeft + 6f, layout.plotTop + crosshairPx + 2f, crosshairPaint,
+            )
         }
     }
 }

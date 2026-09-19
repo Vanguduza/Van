@@ -209,13 +209,3 @@ data class TradeDetail(
         }
     }
 }
-
-object TradingFormat {
-    fun price(v: Double?, digits: Int = 5): String = v?.let { String.format(java.util.Locale.ROOT, "%.${digits}f", it) } ?: "—"
-    fun digitsFor(symbol: String): Int = when { symbol.uppercase().contains("JPY") -> 3; symbol.uppercase().startsWith("XAU") || symbol.uppercase().startsWith("XAG") -> 2; symbol.length <= 5 -> 2; else -> 5 }
-    fun r(v: Double?): String = v?.let { (if (it >= 0) "+" else "") + String.format(java.util.Locale.ROOT, "%.2fR", it) } ?: "—"
-    fun age(nowMs: Long, thenMs: Long?): String { if (thenMs == null || thenMs <= 0) return "never"; val s = (nowMs - thenMs) / 1000; return when { s < 60 -> "${s}s ago"; s < 3600 -> "${s / 60}m ago"; s < 86400 -> "${s / 3600}h ago"; else -> "${s / 86400}d ago" } }
-    fun hash8(h: String?): String = h?.take(8) ?: "—"
-    fun timeHm(ms: Long): String { val t = java.time.Instant.ofEpochMilli(ms).atZone(java.time.ZoneOffset.UTC); return String.format(java.util.Locale.ROOT, "%02d:%02d", t.hour, t.minute) }
-    fun dateShort(ms: Long): String { val t = java.time.Instant.ofEpochMilli(ms).atZone(java.time.ZoneOffset.UTC); return String.format(java.util.Locale.ROOT, "%02d %s", t.dayOfMonth, t.month.name.take(3).lowercase().replaceFirstChar { it.uppercase() }) }
-}

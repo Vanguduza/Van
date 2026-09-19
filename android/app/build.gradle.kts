@@ -131,6 +131,9 @@ dependencies {
     implementation("androidx.core:core-ktx:1.13.1")
     implementation("androidx.lifecycle:lifecycle-runtime-ktx:2.8.4")
     implementation("androidx.lifecycle:lifecycle-viewmodel-compose:2.8.4")
+    // P3-AND-007 — SavedStateHandle is what carries owner state across process death,
+    // which for a resident assistant is the overnight case, not an edge case.
+    implementation("androidx.lifecycle:lifecycle-viewmodel-savedstate:2.8.4")
     implementation("androidx.lifecycle:lifecycle-service:2.8.4")
     implementation("androidx.activity:activity-compose:1.9.1")
     implementation("androidx.compose.ui:ui")

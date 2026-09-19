@@ -1,0 +1,241 @@
+CommandNavTest > everything else goes back to home, and home leaves() PASSED
+CommandNavTest > a browser page goes back to the browser module, not to home() PASSED
+CommandNavTest > every module has an id nothing else has() PASSED
+CommandNavTest > saved state round-trips through an id, never an ordinal() PASSED
+CommandNavTest > every primary module is reachable and distinct() PASSED
+CommandNavTest > back always terminates() PASSED
+CommandNavTest > an unknown or absent saved module lands on home() PASSED
+SubsystemHealthTest > working offline is not a broken queue() PASSED
+SubsystemHealthTest > a phone that has granted everything reports everything working() PASSED
+SubsystemHealthTest > every restore action renders words a person can read() PASSED
+SubsystemHealthTest > a queue that cannot send is broken and a queue that will not drain is broken() PASSED
+SubsystemHealthTest > an overlay the owner turned off is not a fault() PASSED
+SubsystemHealthTest > no owner-facing detail is written in VAN's own vocabulary() PASSED
+SubsystemHealthTest > each subsystem follows its own signal() PASSED
+SubsystemHealthTest > every broken subsystem carries something the owner can do() PASSED
+SubsystemHealthTest > a phone that has granted nothing does not report five healthy subsystems() PASSED
+EventStreamTest > newest events are kept and the list is bounded() PASSED
+EventStreamTest > a feed that failed is not a feed with nothing in it() PASSED
+EventStreamTest > the cursor advances instead of staying at zero() PASSED
+EventStreamTest > a truncated page catches up immediately() PASSED
+EventStreamTest > a restored cursor resumes instead of replaying everything() PASSED
+EventStreamTest > a cursor is saved so a restart does not replay() PASSED
+EventStreamTest > the cursor never rewinds() PASSED
+EventStreamTest > a success clears the backoff() PASSED
+EventStreamTest > failures back off exponentially and stop at a ceiling() PASSED
+EventStreamTest > an overlapping page does not produce duplicate rows() PASSED
+GatewayRetryTest > every draw falls inside its window() PASSED
+GatewayRetryTest > an answer is not a failure() PASSED
+GatewayRetryTest > the server's own try-later codes are retried() PASSED
+GatewayRetryTest > retries are bounded() PASSED
+GatewayRetryTest > jitter actually decorrelates callers() PASSED
+GatewayRetryTest > the backoff grows and stops growing() PASSED
+GatewayRetryTest > the breaker opens after sustained failure and closes on success() PASSED
+GatewayRetryTest > an intermittent failure does not open the breaker() PASSED
+GatewayRetryTest > a transport failure is retried() PASSED
+GatewayRetryTest > nothing is both an answer and a try-later() PASSED
+GatewayRetryTest > a success is not retried() PASSED
+ReplayTriggerTest > the owner pressing the button is never debounced() PASSED
+ReplayTriggerTest > a replay already running is never started twice() PASSED
+ReplayTriggerTest > only the edge into availability is a recovery() PASSED
+ReplayTriggerTest > the gateway coming back is its own edge() PASSED
+ReplayTriggerTest > a handover burst produces one replay, not four() PASSED
+ReplayTriggerTest > an empty queue is not replayed() PASSED
+ReplayTriggerTest > after the debounce window a genuinely new recovery replays again() PASSED
+ReplayTriggerTest > recovery replays a queue that has something in it() PASSED
+MissionSummaryTest > aRunningMissionNamesItsPhaseWhenItHasOne() PASSED
+MissionSummaryTest > anUnknownStateIsNotLabelledWithTheRawEnum() PASSED
+MissionSummaryTest > anUnknownGatewayProjectionNameDoesNotCrashOrGuess() PASSED
+MissionSummaryTest > aVerifiedMissionNeedsNoAttentionAndAnUnverifiableOneDoes() PASSED
+MissionSummaryTest > theThreePostExecutionOutcomesRemainThreeDifferentSentences() PASSED
+MissionSummaryTest > anUnknownStateWithNoGatewayProjectionIsUnknown() PASSED
+MissionSummaryTest > anOlderGatewayFallsBackToTheLocalTableNotToUnknown() PASSED
+MissionSummaryTest > aWaitingMissionIsNotCountedAsActive() PASSED
+MissionSummaryTest > theGatewaysProjectionIsPreferredOverTheLocalTable() PASSED
+MissionSummaryTest > everyMissionStateTheGatewayCanSendHasItsOwnSentence() PASSED
+OnboardingPlanTest > the optional steps are the two the owner cannot simply grant() PASSED
+OnboardingPlanTest > the pairing screen says what happens if it is not done() PASSED
+OnboardingPlanTest > an unpaired phone can never finish onboarding() PASSED
+OnboardingPlanTest > a required step cannot be skipped by asking to skip it() PASSED
+OnboardingPlanTest > a phone too old to have the permission is not blocked on granting it() PASSED
+OnboardingPlanTest > pairing is the first thing a new owner is asked for() PASSED
+OnboardingPlanTest > every step has words for the owner and none of them is an enum() PASSED
+OnboardingPlanTest > a permission granted in settings shows up when the owner comes back() PASSED
+OnboardingPlanTest > the whole flow walks in order and ends() PASSED
+OnboardingPlanTest > opening a settings screen is not granting a permission() PASSED
+OverlayVisibilityPolicyTest > the screen being off stops the animation() PASSED
+OverlayVisibilityPolicyTest > a frozen overlay always says why() PASSED
+OverlayVisibilityPolicyTest > a detached view does not animate() PASSED
+OverlayVisibilityPolicyTest > minimized is a size, not a pause() PASSED
+OverlayVisibilityPolicyTest > every combination resolves to exactly one target() PASSED
+OverlayVisibilityPolicyTest > destroying wins over everything() PASSED
+OverlayVisibilityPolicyTest > a fully covered overlay does not animate() PASSED
+OverlayVisibilityPolicyTest > a paused overlay is CREATED, not STOPPED or destroyed() PASSED
+VanOverlayControllerTest > a drag that ends in open space docks to nothing() PASSED
+VanOverlayControllerTest > the dismiss target does not arm from across the screen() PASSED
+VanOverlayControllerTest > the dismiss target arms on the avatar's centre, at every size() PASSED
+VanOverlayControllerTest > each presentation is measured by its own touch target() PASSED
+VanOverlayControllerTest > an avatar cannot be dragged off any edge() PASSED
+VanOverlayControllerTest > a screen smaller than the avatar still produces a reachable position() PASSED
+VanOverlayControllerTest > settling never puts the avatar outside the screen() PASSED
+VanOverlayControllerTest > a drag that ends near an edge snaps to it and reports the same edge() PASSED
+ShareIntakeTest > kind follows the mime type and the number of items() PASSED
+ShareIntakeTest > a shared credential is dropped, not queued() PASSED
+ShareIntakeTest > blank text and empty uris do not become empty fields() PASSED
+ShareIntakeTest > no acknowledgement leaks the shared content back() PASSED
+ShareIntakeTest > the owner is told what happened, including when nothing was kept() PASSED
+ShareIntakeTest > a secret in the subject counts as much as one in the body() PASSED
+ShareIntakeTest > ordinary content is kept() PASSED
+OwnerLanguageTest > values that escaped internal layers are caught before the owner reads them() PASSED
+OwnerLanguageTest > an unknown reason code is de-snaked rather than shown raw() PASSED
+OwnerLanguageTest > an unrecognised class is not printed raw() PASSED
+OwnerLanguageTest > a qualified code still finds its sentence() PASSED
+OwnerLanguageTest > nothing at all falls back rather than rendering empty() PASSED
+OwnerLanguageTest > the three outcomes that are not success read as three different things() PASSED
+OwnerLanguageTest > every refusal reason is a sentence the owner can act on() PASSED
+OwnerLanguageTest > an action class is described by what it costs, not by its letter() PASSED
+OwnerLanguageTest > an absent or unreadable scope never renders as raw text() PASSED
+OwnerLanguageTest > a scope is a sentence instead of JSON() PASSED
+OwnerLanguageTest > a digest is a short labelled reference, not a wall of hex() PASSED
+OwnerLanguageTest > no command status is shown to the owner as its own name() PASSED
+OwnerLanguageTest > a scope arriving as JSON is read back as a sentence() PASSED
+OwnerLanguageTest > ordinary English is not mistaken for an internal value() PASSED
+OwnerLanguageTest > Android's own constants are translated() PASSED
+OwnerLanguageTest > only the class that needs approval says so() PASSED
+OwnerLanguageTest > the owner is not told about HMAC() PASSED
+OwnerOverviewTest > blockers sort above information and the order is stable() PASSED
+OwnerOverviewTest > a briefing with nothing to say contributes no line() PASSED
+OwnerOverviewTest > an empty queue and an unreachable gateway never say the same thing() PASSED
+OwnerOverviewTest > a malformed row does not take the whole queue down() PASSED
+OwnerOverviewTest > informational items alone do not read as something waiting() PASSED
+OwnerOverviewTest > blockers are counted and informational items are not() PASSED
+OwnerOverviewTest > an item with no title is labelled rather than shown blank() PASSED
+OwnerOverviewTest > one waiting item reads as one, not as a number() PASSED
+OwnerOverviewTest > the briefing falls back to its summary when it has no headline() PASSED
+OwnerOverviewTest > a failure carries its reason to the owner() PASSED
+OwnerStatusProjectionTest > unknownReachesTheOwnerAndIsNotTreatedAsFinished() PASSED
+OwnerStatusProjectionTest > acceptedIsNotSuccess() PASSED
+OwnerStatusProjectionTest > nothingIsBothWorkingAndFinished() PASSED
+OwnerStatusProjectionTest > everyProjectedValueIsAStatusWithASentence() PASSED
+OwnerStatusProjectionTest > caseAndWhitespaceFromTheWireDoNotProduceUnknown() PASSED
+OwnerStatusProjectionTest > anUnknownGatewayStatusIsUnknownNotWorking() PASSED
+OwnerStatusProjectionTest > theThreePostExecutionOutcomesStayThreeDifferentAnswers() PASSED
+OwnerStatusProjectionTest > everyStatusHasADistinctSentence() PASSED
+OwnerStatusProjectionTest > onlyAVerifiedMissionReadsAsDone() PASSED
+OwnerStatusProjectionTest > aRefusalIsNotAFailure() PASSED
+VanCommandStatusTest > everyOwnerStatusMapsToAMessageStatus() PASSED
+VanCommandStatusTest > onlyAVerifiedOutcomeShowsAsSucceeded() PASSED
+VanCommandStatusTest > anUnknownGatewayStatusShowsAsUnknown() PASSED
+VanCommandStatusTest > aRefusalDoesNotShowAsAFailure() PASSED
+VanCommandStatusTest > acceptedShowsAsAcceptedNotSucceeded() PASSED
+VanCommandStatusTest > theThreePostExecutionOutcomesShowAsThreeDifferentThings() PASSED
+ChartViewportTest > a nonsense density or scale still produces readable text() PASSED
+ChartViewportTest > zooming keeps now on screen() PASSED
+ChartViewportTest > a drag moves the chart with the finger at any zoom() PASSED
+ChartViewportTest > the crosshair reads the price at the pointer, the right way up() PASSED
+ChartViewportTest > zoom is bounded and reversible about the latest bar() PASSED
+ChartViewportTest > a short series is shown whole rather than padded() PASSED
+ChartViewportTest > a pan with no plot to pan over is a no-op() PASSED
+ChartViewportTest > dragging the other way walks forward in time and stops at the latest bar() PASSED
+ChartViewportTest > the window cannot be dragged off either end() PASSED
+ChartViewportTest > the crosshair snaps to a bar the series actually has() PASSED
+ChartViewportTest > the scale is banded so the labels do not eat the candles() PASSED
+ChartViewportTest > a nonsense zoom factor changes nothing() PASSED
+ChartViewportTest > chart text follows the owner's font scale() PASSED
+ChartViewportTest > the default window shows the most recent bars() PASSED
+ChartViewportTest > a pointer outside the plot has nothing under it() PASSED
+ChartViewportTest > an empty series produces an empty window instead of a crash() PASSED
+TradingFormatTest > the float artefact never reaches the owner() PASSED
+TradingFormatTest > a separator never lands inside the decimal() PASSED
+TradingFormatTest > an unknown key reads as awkward English rather than as a field name() PASSED
+TradingFormatTest > no ledger key reaches the owner as a ledger key() PASSED
+TradingFormatTest > a signed number says which way it went() PASSED
+TradingFormatTest > a missing number is a dash, not a zero() PASSED
+TradingFormatTest > a small negative keeps its sign() PASSED
+TradingFormatTest > money is grouped so the eye can count the digits() PASSED
+TradingFormatTest > empty and unavailable are never the same sentence() PASSED
+TradingFormatTest > prices keep their padding because a column has to scan() PASSED
+TradingFormatTest > no empty state tells the owner to open a terminal() PASSED
+VanAnimationClockTest > a long pause is clamped rather than spun through hundreds of cycles() PASSED
+VanAnimationClockTest > the phase stays inside zero to one however long it runs() PASSED
+VanAnimationClockTest > retargeting mid-blend continues from where the field actually is() PASSED
+VanAnimationClockTest > a blend starts and ends with zero velocity() PASSED
+VanAnimationClockTest > a spec blend moves the continuous fields and does not invent a colour() PASSED
+VanAnimationClockTest > the old driver's failure is what this replaces() PASSED
+VanAnimationClockTest > identical specs are not worth blending() PASSED
+VanAnimationClockTest > a non-monotonic timestamp does not rewind the clock() PASSED
+VanAnimationClockTest > arriving at something urgent is fast and settling down is slow() PASSED
+VanAnimationClockTest > with no blend in flight the transition starts from what is on screen() PASSED
+VanAnimationClockTest > a period change advances the phase differently and never restarts it() PASSED
+VanAnimationClockTest > every blend duration is inside the 120 to 420 ms band() PASSED
+VanAnimationClockTest > the first frame advances nothing() PASSED
+VanAuraGeometryTest > a caller that cannot say what a dp is gets no dp claim() PASSED
+VanAuraGeometryTest > the dp gap actually reaches the geometry() PASSED
+VanAuraGeometryTest > the old proportional gap is the 5 point 3 dp the audit measured() PASSED
+VanAuraGeometryTest > sub-pixel float wobble does not defeat the cache() PASSED
+VanAuraGeometryTest > the field still animates while the silhouette is cached() PASSED
+VanAuraGeometryTest > resizing the body does rebuild it() PASSED
+VanAuraGeometryTest > the gap stays in band at every size VAN is drawn at() PASSED
+VanAuraGeometryTest > at the shipping avatar size the gap is inside the 10 to 14 dp band() PASSED
+VanAuraGeometryTest > the silhouette is built once and reused across frames() PASSED
+VanAuraPlanTest > a still budget still produces a field() PASSED
+VanAuraPlanTest > an electrical branch has a bright core and a field strand does not() PASSED
+VanAuraPlanTest > nothing is planned for a body too small or a field too quiet() PASSED
+VanAuraPlanTest > the orb link is planned only when the spec asks for it() PASSED
+VanAuraPlanTest > the plan carries the electrical layer the evidence painter omitted() PASSED
+VanAuraPlanTest > ion fragments bloom() PASSED
+VanAuraPlanTest > the ground glow is clipped to a crescent, never a plate() PASSED
+VanAuraPlanTest > Zone A blobs are displaced so the haze cannot read as a body outline() PASSED
+VanAuraPlanTest > Zone A carries the shipping alpha, not the evidence painter's doubled one() PASSED
+VanAuraPlanTest > semantic colour reaches Zone C and never the identity haze() PASSED
+VanAuraPlanTest > the plan is deterministic for the same inputs() PASSED
+VanFrameBudgetTest > a device that cools down gets its field back() PASSED
+VanFrameBudgetTest > sustained misses are() PASSED
+VanFrameBudgetTest > one slow frame is not a degraded device() PASSED
+VanFrameBudgetTest > a pause is not a missed frame() PASSED
+VanFrameBudgetTest > the miss ratio and p95 are inspectable() PASSED
+VanFrameBudgetTest > no judgement before there is a window to judge on() PASSED
+VanFrameBudgetTest > the default budget is one 60Hz frame() PASSED
+VanFrameBudgetTest > the signal reaches the effect ladder() PASSED
+VanFrameBudgetTest > it does not oscillate at the threshold() PASSED
+VanPaletteTest > scheme selection follows the mode() PASSED
+VanPaletteTest > contrast arithmetic matches the published values() PASSED
+VanPaletteTest > the deprecated parent theme is gone and a night configuration exists() PASSED
+VanPaletteTest > both schemes carry body text at AA() PASSED
+VanPaletteTest > the window theme agrees with the palette() PASSED
+VanPaletteTest > the outline is visible against its surface() PASSED
+VanPaletteTest > the glow cyan is not used as a light-mode primary() PASSED
+VanPaletteTest > the light scheme is not the dark one with the background flipped() PASSED
+VanTradeSemanticTest > a kill switch is a stop() PASSED
+VanTradeSemanticTest > an owner halt outranks everything() PASSED
+VanTradeSemanticTest > semantic colour never lands on VAN's body() PASSED
+VanTradeSemanticTest > the quiet ladder is watching then setup then entry() PASSED
+VanTradeSemanticTest > a default signal set is UNKNOWN, not FLAT() PASSED
+VanTradeSemanticTest > only the states the owner has to act on move VAN's pose() PASSED
+VanTradeSemanticTest > an owner approval outranks a market() PASSED
+VanTradeSemanticTest > every semantic says something a person would say() PASSED
+VanTradeSemanticTest > the margin threshold matches the risk authority's floor() PASSED
+VanTradeSemanticTest > a calm market does not overwrite a degraded subsystem() PASSED
+VanTradeSemanticTest > clearing the trade state restores ordinary health truth() PASSED
+VanTradeSemanticTest > risk pressure outranks profit on the same position() PASSED
+VanTradeSemanticTest > a published trade state reaches the semantic field() PASSED
+VanTradeSemanticTest > the capability board and the running app draw the same families() PASSED
+VanTradeSemanticTest > every semantic has its own Zone C topology and no two look the same() PASSED
+VanTradeSemanticTest > a ledger VAN cannot read is UNKNOWN and never FLAT() PASSED
+SpeakerVerificationTest > an unrecognised action class is gated, not waved through() PASSED
+SpeakerVerificationTest > an uncertain voice asks the owner rather than guessing either way() PASSED
+SpeakerVerificationTest > the action class is matched regardless of how it was written() PASSED
+SpeakerVerificationTest > a read is unaffected by who is speaking() PASSED
+SpeakerVerificationTest > an owner with no voice profile is not locked out of their own assistant() PASSED
+SpeakerVerificationTest > a voice unlike the owner's cannot change anything outside VAN() PASSED
+SpeakerVerificationTest > scores classify at the stated thresholds() PASSED
+SpeakerVerificationTest > every verdict says something a person would say() PASSED
+SpeakerVerificationTest > a recognised voice acts normally() PASSED
+WakeModelAssetTest > a plausible model with no pinned digest is accepted() PASSED
+WakeModelAssetTest > no model at all is absent, and says so() PASSED
+WakeModelAssetTest > a matching digest is accepted whatever its case() PASSED
+WakeModelAssetTest > a placeholder is not a model() PASSED
+WakeModelAssetTest > only READY reports ready() PASSED
+WakeModelAssetTest > a model that is not the one the release pinned is refused() PASSED
+WakeModelAssetTest > every state has a sentence and none of them names an enum or a path() PASSED
+BUILD SUCCESSFUL in 3s

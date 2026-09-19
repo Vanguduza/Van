@@ -11,6 +11,7 @@ import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.withContext
 import org.json.JSONArray
 import org.json.JSONObject
+import java.io.IOException
 import java.net.HttpURLConnection
 import java.net.URL
 import java.net.URLEncoder
@@ -28,6 +29,13 @@ import javax.crypto.spec.SecretKeySpec
  * independent from the signed per-command owner-intent envelope.
  */
 class VanGatewayClient(context: Context) {
+
+    /**
+     * P3-AND-001 — stops VAN hammering a gateway that is down, and gives the health screen
+     * a number instead of a guess.
+     */
+    private val breaker = GatewayCircuitBreaker()
+
 
     private val prefs = EncryptedSharedPreferences.create(
         context.applicationContext,
@@ -518,7 +526,7 @@ class VanGatewayClient(context: Context) {
         path: String,
         body: JSONObject,
         useIngress: Boolean,
-    ): JSONObject {
+    ): JSONObject = withRetry {
         val conn = (URL("$rootUrl$path").openConnection() as HttpURLConnection).apply {
             requestMethod = "POST"
             setRequestProperty("Content-Type", "application/json")
@@ -532,7 +540,7 @@ class VanGatewayClient(context: Context) {
         val stream = if (code in 200..299) conn.inputStream else conn.errorStream
         val responseText = stream?.bufferedReader()?.readText() ?: "{}"
         if (code !in 200..299) throw GatewayHttpException(code, responseText)
-        return JSONObject(responseText)
+        JSONObject(responseText)
     }
 
     private fun getJson(path: String): JSONObject = JSONObject(rawGet(path))
@@ -544,7 +552,7 @@ class VanGatewayClient(context: Context) {
         conn.setRequestProperty("X-Van-Device-Token", device)
     }
 
-    private fun rawGet(path: String): String {
+    private fun rawGet(path: String): String = withRetry {
         val conn = (URL("$baseUrl$path").openConnection() as HttpURLConnection).apply {
             requestMethod = "GET"
             applyIngressAuth(this)
@@ -555,8 +563,60 @@ class VanGatewayClient(context: Context) {
         val stream = if (code in 200..299) conn.inputStream else conn.errorStream
         val responseText = stream?.bufferedReader()?.readText() ?: "[]"
         if (code !in 200..299) throw GatewayHttpException(code, responseText)
-        return responseText
+        responseText
     }
+
+    /**
+     * Bounded retry with full jitter, behind a circuit breaker (P3-AND-001).
+     *
+     * There was none of this: a single `HttpURLConnection` per call, so the first request
+     * after a tunnel drop failed, the owner tapped again, that failed, and VAN looked
+     * broken — while a gateway that is briefly unreachable, which is the normal condition
+     * of a self-hosted service on a home connection, was indistinguishable from one that
+     * is down.
+     *
+     * What is and is not retried lives in `GatewayRetryPolicy`, which is pure and executed
+     * in `android/verification`. The rule that matters: a 409 is an answer, and retrying it
+     * is how one owner command becomes two.
+     *
+     * `Thread.sleep` rather than `delay` because every caller already wraps this in
+     * `withContext(Dispatchers.IO)`; making these functions suspend would change forty call
+     * sites to express the same thing.
+     */
+    private fun <T> withRetry(call: () -> T): T {
+        var attempt = 0
+        while (true) {
+            try {
+                val result = call()
+                breaker.recordSuccess()
+                return result
+            } catch (exc: Throwable) {
+                val status = (exc as? GatewayHttpException)?.code
+                val transportFailed = status == null && exc is IOException
+                // Anything that is neither an HTTP answer nor a transport failure is a bug
+                // in this client, and retrying a bug just makes it happen four times.
+                if (!transportFailed && status == null) throw exc
+                breaker.recordFailure()
+                if (GatewayRetryPolicy.verdict(attempt, status, transportFailed) == RetryVerdict.GIVE_UP) {
+                    throw exc
+                }
+                Thread.sleep(GatewayRetryPolicy.delayMillis(attempt))
+                attempt += 1
+            }
+        }
+    }
+
+    /**
+     * Whether a *background* refresh should be attempted now.
+     *
+     * Deliberately advisory. A polling loop should honour it; the owner pressing send
+     * should not be told "no" by a client-side heuristic about a server they can see is up,
+     * which is why `withRetry` does not consult it.
+     */
+    fun backgroundCallsAdvisable(): Boolean = breaker.allow()
+
+    /** For the owner's health surface: consecutive failures the breaker has seen. */
+    fun consecutiveFailures(): Int = breaker.failures()
 
     private fun encodeSegment(value: String): String = URLEncoder.encode(value, StandardCharsets.UTF_8.name())
         .replace("+", "%20")
@@ -572,9 +632,7 @@ class VanGatewayClient(context: Context) {
         private const val MIN_INGRESS_TOKEN_CHARS = 32
         private const val MIN_DEVICE_ACCESS_TOKEN_CHARS = 32
         private const val MIN_PAIRING_TOKEN_CHARS = 32
-    }
 
-    companion object {
         const val TRUST_CONVERSATION = "CONVERSATION"
         const val TRUST_UNTRUSTED = "UNTRUSTED"
 

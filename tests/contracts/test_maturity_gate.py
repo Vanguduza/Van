@@ -140,8 +140,14 @@ def test_every_inventoried_component_carries_one_disposition():
 def test_gate_rejects_a_closed_finding_with_no_closure_block(ledgers_restored):
     """A status anybody can assert and nobody can check is the defect, restated."""
     data = json.loads(FINDINGS.read_text(encoding="utf-8"))
-    target = next(f for f in data["findings"] if f.get("current_status") != "CLOSED")
+    # Built rather than borrowed from the register. This used to take the first finding
+    # that was still open, which made the test depend on remediation being unfinished: it
+    # stopped being able to run on the day it had the most to prove.
+    target = dict(data["findings"][0])
+    target["id"] = "P0-GATE-SELFTEST"
     target["current_status"] = "CLOSED"
+    target.pop("closure", None)
+    data["findings"].append(target)
     FINDINGS.write_text(json.dumps(data, indent=2), encoding="utf-8")
 
     result = run_gate()

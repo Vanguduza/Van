@@ -1,9 +1,15 @@
 package com.dial.van
 
 import android.app.Application
+import android.net.ConnectivityManager
+import android.net.Network
+import android.net.NetworkCapabilities
+import android.net.NetworkRequest
 import com.dial.van.control.VanCommandController
 import com.dial.van.control.VanCommandSource
 import com.dial.van.degraded.DegradedModeStore
+import com.dial.van.degraded.DeviceSignals
+import com.dial.van.gateway.ReplayReason
 import com.dial.van.gateway.QueueReplayer
 import com.dial.van.gateway.VanGatewayClient
 import com.dial.van.notification.NotificationPolicyStore
@@ -111,9 +117,51 @@ class VanApplication : Application(), VoiceInputCallback, TtsOutputCallback {
             beginRecognition = { turnId -> voiceSession.beginOwnerTurn(turnId) },
         )
         publishWakeModelState()
-        queueReplayer.replayAsync()
+        // P3-AND-004 — the five subsystems that reported WORKING because nothing wrote
+        // them now have a writer, and it runs before the owner can open a health screen.
+        DeviceSignals.publish(this)
+        queueReplayer.replayAsync(ReplayReason.APP_START)
+        startConnectivityMonitor()
         startGatewayHealthMonitor()
     }
+
+    /**
+     * Drain the queue when the network comes back (P3-AND-006).
+     *
+     * A registered callback rather than a poll: the queue should empty when connectivity
+     * returns, not up to a minute later, and the edge detection that stops a Wi-Fi to
+     * mobile handover producing four concurrent replays lives in `ReplayTrigger`.
+     */
+    private fun startConnectivityMonitor() {
+        val manager = getSystemService(ConnectivityManager::class.java) ?: return
+        val request = NetworkRequest.Builder()
+            .addCapability(NetworkCapabilities.NET_CAPABILITY_INTERNET)
+            .addCapability(NetworkCapabilities.NET_CAPABILITY_VALIDATED)
+            .build()
+        runCatching {
+            manager.registerNetworkCallback(
+                request,
+                object : ConnectivityManager.NetworkCallback() {
+                    override fun onAvailable(network: Network) {
+                        queueReplayer.onNetworkChanged(true)
+                    }
+
+                    override fun onLost(network: Network) {
+                        // Recorded, not acted on: the recovery is the edge back up, and a
+                        // replay attempt with no network is a guaranteed failure that would
+                        // count against the queue's health.
+                        queueReplayer.onNetworkChanged(false)
+                    }
+                },
+            )
+        }
+    }
+
+    /** The owner pressing "Try again" on a degraded subsystem (P3-AND-005). */
+    fun requestReplay() = queueReplayer.replayAsync(ReplayReason.OWNER_REQUESTED)
+
+    /** Re-read what the device actually reports. Called when a screen resumes. */
+    fun refreshSubsystemHealth() = DeviceSignals.publish(this)
 
     /**
      * Put the wake word's real state in front of the owner.
@@ -163,6 +211,10 @@ class VanApplication : Application(), VoiceInputCallback, TtsOutputCallback {
         try {
             val health = gatewayClient.health()
             degradedModeStore.markWorking("gateway")
+            // P3-AND-006 — the gateway coming back is the other recovery edge. A phone with
+            // a working network and an unreachable gateway is the normal condition of a
+            // self-hosted service on a home connection.
+            queueReplayer.onGatewayReachable(true)
 
             if (health.optBoolean("ok", false)) {
                 degradedModeStore.markWorking("hermes")
@@ -189,6 +241,7 @@ class VanApplication : Application(), VoiceInputCallback, TtsOutputCallback {
                     ?.takeIf { it.isNotBlank() },
             )
         } catch (exc: Throwable) {
+            queueReplayer.onGatewayReachable(false)
             degradedModeStore.markBroken(
                 "gateway",
                 "Gateway health unavailable: ${exc.javaClass.simpleName}",

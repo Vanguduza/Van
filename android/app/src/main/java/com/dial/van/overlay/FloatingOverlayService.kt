@@ -33,30 +33,20 @@ import androidx.compose.foundation.layout.offset
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
-import androidx.compose.foundation.layout.ColumnScope
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
-import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.material3.MaterialTheme
-import androidx.compose.material3.OutlinedTextField
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
-import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.collectAsState
-import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
-import androidx.compose.runtime.remember
-import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
-import androidx.compose.ui.geometry.Offset
 import androidx.compose.ui.graphics.Color
-import androidx.compose.ui.graphics.StrokeCap
-import androidx.compose.ui.graphics.drawscope.Stroke
 import androidx.compose.ui.input.pointer.pointerInput
 import androidx.compose.ui.platform.ComposeView
 import androidx.compose.ui.semantics.contentDescription
@@ -76,12 +66,7 @@ import androidx.savedstate.setViewTreeSavedStateRegistryOwner
 import com.dial.van.R
 import com.dial.van.VanApplication
 import com.dial.van.command.CommandCentreActivity
-import com.dial.van.control.VanCommandSource
-import com.dial.van.control.VanMessageRole
 import com.dial.van.trading.TradingCommandCentreActivity
-import com.dial.van.trading.TradeBookParser
-import com.dial.van.trading.TradeBookState
-import com.dial.van.trading.TradeRow
 import com.dial.van.trading.TradeView
 import com.dial.van.visual.VanEmbodiment
 import com.dial.van.visual.VanGlassSurface
@@ -91,7 +76,6 @@ import com.dial.van.visual.VanPresence
 import com.dial.van.visual.VanPresentation
 import com.dial.van.visual.VanVisualState
 import com.dial.van.visual.rememberVanEffectBudget
-import kotlin.math.abs
 
 private enum class VanWorkboardMode { CONTEXT, CHAT, VOICE, TRADES }
 
@@ -163,6 +147,7 @@ class FloatingOverlayService : Service(), LifecycleOwner, SavedStateRegistryOwne
 
     override fun onCreate() {
         super.onCreate()
+        running = true
         savedStateController.performRestore(null)
         lifecycleRegistry.currentState = Lifecycle.State.CREATED
         stateStore = OverlayStateStore(this)
@@ -232,6 +217,7 @@ class FloatingOverlayService : Service(), LifecycleOwner, SavedStateRegistryOwne
         hideDismissTarget()
         if (::overlayView.isInitialized) runCatching { windowManager.removeView(overlayView) }
         lifecycleRegistry.currentState = Lifecycle.State.DESTROYED
+        running = false
         super.onDestroy()
     }
 
@@ -387,7 +373,7 @@ class FloatingOverlayService : Service(), LifecycleOwner, SavedStateRegistryOwne
                         Text(latestMessage, color = Color(0xFFF4FCFF), fontSize = 11.sp, maxLines = 2)
                     }
                     if (workboardMode == VanWorkboardMode.CHAT) {
-                        ChatComposer(app, accent, compact = true)
+                        ChatComposer(app, accent, compact = true, draft = chatDraft) { chatDraft = it }
                     } else {
                         Row(horizontalArrangement = Arrangement.spacedBy(5.dp)) {
                             WorkChip("Chat", accent) { openChat(expanded = false) }
@@ -479,10 +465,18 @@ class FloatingOverlayService : Service(), LifecycleOwner, SavedStateRegistryOwne
                                     ConversationBubble(message.role, message.text, accent)
                                 }
                             }
-                            ChatComposer(app, accent, compact = false)
+                            ChatComposer(app, accent, compact = false, draft = chatDraft) { chatDraft = it }
                         }
                         VanWorkboardMode.TRADES -> {
-                            TradesWorkboardPanel(app = app, accent = accent)
+                            TradesWorkboardPanel(
+                                app = app,
+                                accent = accent,
+                                view = tradeView,
+                                refresh = tradeRefreshTick,
+                                onView = { tradeView = it },
+                                onRefresh = { tradeRefreshTick += 1 },
+                                onOpenRoute = ::openTradingRoute,
+                            )
                         }
                         VanWorkboardMode.CONTEXT -> {
                             Column(
@@ -566,7 +560,7 @@ class FloatingOverlayService : Service(), LifecycleOwner, SavedStateRegistryOwne
                             ConversationBubble(message.role, message.text, accent)
                         }
                     }
-                    ChatComposer(app, accent, compact = false)
+                    ChatComposer(app, accent, compact = false, draft = chatDraft) { chatDraft = it }
                 }
             }
             VanEmbodiment(
@@ -580,132 +574,6 @@ class FloatingOverlayService : Service(), LifecycleOwner, SavedStateRegistryOwne
                     .vanGestures(),
                 characterFraction = 0.55f,
             )
-        }
-    }
-
-    @Composable
-    private fun ColumnScope.TradesWorkboardPanel(app: VanApplication, accent: Int) {
-        var state: TradeBookState by remember { mutableStateOf(TradeBookState.Loading) }
-        val view = tradeView
-        val refresh = tradeRefreshTick
-        LaunchedEffect(view, refresh) {
-            state = runCatching { app.gatewayClient.tradingTrades(view.query) }.fold(
-                onSuccess = { TradeBookParser.parse(view, it) },
-                onFailure = { TradeBookState.Unavailable(view, "Gateway unreachable: trade ledger not available") },
-            )
-        }
-        Column(modifier = Modifier.fillMaxWidth().weight(1f)) {
-            Row(horizontalArrangement = Arrangement.spacedBy(5.dp), verticalAlignment = Alignment.CenterVertically) {
-                TradeView.entries.forEach { candidate ->
-                    WorkChip(candidate.label, accent) { tradeView = candidate }
-                }
-                WorkChip("Refresh", accent) { tradeRefreshTick += 1 }
-                WorkChip("Open", accent) {
-                    startActivity(TradingCommandCentreActivity.intent(this@FloatingOverlayService, TradingCommandCentreActivity.tradesRoute(view)))
-                }
-            }
-            Spacer(Modifier.height(5.dp))
-            when (val current = state) {
-                TradeBookState.Loading -> Text("Reading the trading ledger…", color = Color(0xFFB6C2D0), fontSize = 10.sp)
-                is TradeBookState.Unavailable -> Text(current.reason, color = Color(0xFFFFB300), fontSize = 10.sp, maxLines = 2)
-                is TradeBookState.Ready -> {
-                    if (!current.ledgerAvailable) {
-                        Text("Trading ledger unavailable on the gateway.", color = Color(0xFFFFB300), fontSize = 10.sp)
-                    } else if (current.rows.isEmpty()) {
-                        Text(view.emptyCopy, color = Color(0xFFB6C2D0), fontSize = 10.sp)
-                    } else {
-                        LazyColumn(modifier = Modifier.weight(1f).fillMaxWidth(), verticalArrangement = Arrangement.spacedBy(3.dp)) {
-                            items(current.rows.take(8)) { row -> TradeWorkboardRow(row, accent) }
-                        }
-                    }
-                }
-            }
-            Text("Read-only preview · confidence is an uncalibrated rule score · Risk Authority owns sizing", color = Color(0xFF7F9099), fontSize = 8.sp, maxLines = 2)
-        }
-    }
-
-    @Composable
-    private fun TradeWorkboardRow(row: TradeRow, accent: Int) {
-        ContextAction(row.headline, "${row.confidence.percentLabel} ${row.confidence.band.label}") {
-            val route = row.tradeIntentId?.let { TradingCommandCentreActivity.tradeRoute(it) } ?: "instrument/${row.symbol}"
-            startActivity(TradingCommandCentreActivity.intent(this@FloatingOverlayService, route))
-        }
-    }
-
-    @Composable
-    private fun ChatComposer(app: VanApplication, accent: Int, compact: Boolean) {
-        Row(
-            modifier = Modifier.fillMaxWidth(),
-            horizontalArrangement = Arrangement.spacedBy(5.dp),
-            verticalAlignment = Alignment.CenterVertically,
-        ) {
-            OutlinedTextField(
-                value = chatDraft,
-                onValueChange = { chatDraft = it },
-                modifier = Modifier.weight(1f),
-                singleLine = compact,
-                maxLines = if (compact) 1 else 3,
-                label = { Text("Command", fontSize = 10.sp) },
-            )
-            WorkChip("Send", accent) {
-                val text = chatDraft.trim()
-                if (text.isNotEmpty()) {
-                    app.commandController.submitText(text, VanCommandSource.CHAT)
-                    chatDraft = ""
-                }
-            }
-        }
-    }
-
-    @Composable
-    private fun ConversationBubble(role: VanMessageRole, text: String, accent: Int) {
-        val background = when (role) {
-            VanMessageRole.OWNER -> Color(accent).copy(alpha = 0.18f)
-            VanMessageRole.VAN -> Color(0xFFBDEFFF).copy(alpha = 0.11f)
-            VanMessageRole.SYSTEM -> Color(0xFFFFB300).copy(alpha = 0.12f)
-        }
-        Box(
-            modifier = Modifier
-                .fillMaxWidth()
-                .clip(RoundedCornerShape(10.dp))
-                .background(background)
-                .padding(8.dp),
-        ) {
-            Text(text, color = Color(0xFFF4FCFF), fontSize = 11.sp)
-        }
-    }
-
-    @OptIn(ExperimentalFoundationApi::class)
-    @Composable
-    private fun ContextAction(title: String, detail: String, onClick: () -> Unit) {
-        Box(
-            modifier = Modifier
-                .fillMaxWidth()
-                .clip(RoundedCornerShape(10.dp))
-                .background(Color(VanGlassTokens.BABY_CYAN).copy(alpha = 0.08f))
-                .combinedClickable(onClick = onClick)
-                .padding(9.dp),
-        ) {
-            Column {
-                Text(title, color = Color.White, fontWeight = FontWeight.SemiBold, fontSize = 12.sp)
-                Text(detail, color = Color(0xFFB8CBD2), fontSize = 10.sp)
-            }
-        }
-    }
-
-    @OptIn(ExperimentalFoundationApi::class)
-    @Composable
-    private fun WorkChip(label: String, accent: Int, onClick: () -> Unit) {
-        Box(
-            modifier = Modifier
-                .height(30.dp)
-                .clip(RoundedCornerShape(9.dp))
-                .background(Color(accent).copy(alpha = 0.16f))
-                .combinedClickable(onClick = onClick)
-                .padding(horizontal = 7.dp),
-            contentAlignment = Alignment.Center,
-        ) {
-            Text(label, color = Color(0xFFF4FCFF), fontSize = 10.sp, fontWeight = FontWeight.SemiBold)
         }
     }
 
@@ -847,14 +715,13 @@ class FloatingOverlayService : Service(), LifecycleOwner, SavedStateRegistryOwne
     }
 
     private fun dragBy(dx: Int, dy: Int) {
-        val metrics = resources.displayMetrics
-        val minTouch = when (uiState.presentation) {
-            VanOverlayPresentation.MINIMIZED -> dp(OverlayTheme.MINIMIZED_TOUCH_DP)
-            VanOverlayPresentation.DOCKED -> dp(OverlayTheme.DOCK_WIDTH_DP)
-            else -> dp(OverlayTheme.RESTING_HIT_DP)
-        }
-        val nx = (layoutParams.x + dx).coerceIn(0, (metrics.widthPixels - minTouch).coerceAtLeast(0))
-        val ny = (layoutParams.y + dy).coerceIn(0, (metrics.heightPixels - minTouch).coerceAtLeast(0))
+        val screen = screen()
+        val minTouch = VanOverlayController.touchSizeFor(uiState.presentation, ::dp)
+        val placed = VanOverlayController.clamp(
+            layoutParams.x + dx, layoutParams.y + dy, minTouch, screen,
+        )
+        val nx = placed.x
+        val ny = placed.y
         layoutParams.x = nx
         layoutParams.y = ny
         windowManager.updateViewLayout(overlayView, layoutParams)
@@ -878,33 +745,18 @@ class FloatingOverlayService : Service(), LifecycleOwner, SavedStateRegistryOwne
             return
         }
 
-        val metrics = resources.displayMetrics
-        val avatar = when (uiState.presentation) {
-            VanOverlayPresentation.MINIMIZED -> dp(OverlayTheme.MINIMIZED_TOUCH_DP)
-            VanOverlayPresentation.DOCKED -> dp(OverlayTheme.DOCK_WIDTH_DP)
-            else -> dp(OverlayTheme.RESTING_HIT_DP)
-        }
-        val snapped = EdgeDocking.snap(
-            layoutParams.x,
-            layoutParams.y,
-            avatar,
-            metrics.widthPixels,
-            metrics.heightPixels,
+        val avatar = VanOverlayController.touchSizeFor(uiState.presentation, ::dp)
+        val (snapped, edge) = VanOverlayController.settle(
+            layoutParams.x, layoutParams.y, avatar, screen(),
         )
-        layoutParams.x = snapped.first
-        layoutParams.y = snapped.second
-        dockEdge = EdgeDocking.detectEdge(
-            snapped.first,
-            snapped.second,
-            avatar,
-            metrics.widthPixels,
-            metrics.heightPixels,
-        )
+        layoutParams.x = snapped.x
+        layoutParams.y = snapped.y
+        dockEdge = edge
         windowManager.updateViewLayout(overlayView, layoutParams)
         updateUiState(
             uiState.copy(
-                xPx = snapped.first,
-                yPx = snapped.second,
+                xPx = snapped.x,
+                yPx = snapped.y,
                 dragging = false,
                 dismissTargetVisible = false,
                 dismissTargetArmed = false,
@@ -917,15 +769,12 @@ class FloatingOverlayService : Service(), LifecycleOwner, SavedStateRegistryOwne
         updateUiState(uiState.copy(dragging = false, dismissTargetVisible = false, dismissTargetArmed = false))
     }
 
-    private fun isInsideDismissTarget(x: Int, y: Int, avatarSize: Int): Boolean {
-        val metrics = resources.displayMetrics
-        val hit = dp(OverlayTheme.DISMISS_HIT_DP)
-        val bottom = dp(OverlayTheme.DISMISS_BOTTOM_MARGIN_DP)
-        val centerX = x + avatarSize / 2
-        val centerY = y + avatarSize / 2
-        val targetX = metrics.widthPixels / 2
-        val targetY = metrics.heightPixels - bottom - hit / 2
-        return abs(centerX - targetX) <= hit / 2 && abs(centerY - targetY) <= hit / 2
+    private fun isInsideDismissTarget(x: Int, y: Int, avatarSize: Int): Boolean =
+        VanOverlayController.isInsideDismissTarget(x, y, avatarSize, screen(), ::dp)
+
+    /** The one place the service reads the screen out of Android (Rev 3.0 §41). */
+    private fun screen(): OverlayScreen = resources.displayMetrics.let {
+        OverlayScreen(widthPx = it.widthPixels, heightPx = it.heightPixels)
     }
 
     private fun showDismissTarget() {
@@ -963,39 +812,9 @@ class FloatingOverlayService : Service(), LifecycleOwner, SavedStateRegistryOwne
         dismissParams = null
     }
 
-    @Composable
-    private fun DismissTarget(armed: Boolean) {
-        Box(
-            modifier = Modifier.fillMaxSize(),
-            contentAlignment = Alignment.Center,
-        ) {
-            Canvas(
-                modifier = Modifier
-                    .size((if (armed) OverlayTheme.DISMISS_VISUAL_DP + 8 else OverlayTheme.DISMISS_VISUAL_DP).dp)
-                    .clip(CircleShape),
-            ) {
-                drawCircle(
-                    color = if (armed) Color(0xFFEF4444).copy(alpha = 0.92f)
-                    else Color(0xFF101820).copy(alpha = 0.84f),
-                )
-                val inset = size.minDimension * 0.31f
-                val width = (size.minDimension * 0.065f).coerceAtLeast(2f)
-                drawLine(
-                    Color.White,
-                    Offset(inset, inset),
-                    Offset(size.width - inset, size.height - inset),
-                    width,
-                    StrokeCap.Round,
-                )
-                drawLine(
-                    Color.White,
-                    Offset(size.width - inset, inset),
-                    Offset(inset, size.height - inset),
-                    width,
-                    StrokeCap.Round,
-                )
-            }
-        }
+    /** The one place the overlay leaves for the trading surface (Rev 3.0 §41). */
+    private fun openTradingRoute(route: String) {
+        startActivity(TradingCommandCentreActivity.intent(this, route))
     }
 
     private fun openCommandCentre(module: String? = null) {
@@ -1084,6 +903,20 @@ class FloatingOverlayService : Service(), LifecycleOwner, SavedStateRegistryOwne
         const val ACTION_OPEN_COMMAND = "com.dial.van.overlay.OPEN_COMMAND"
         private const val CHANNEL_ID = "van_overlay"
         private const val NOTIFICATION_ID = 1001
+
+        /**
+         * Whether the overlay service is up.
+         *
+         * P3-AND-004 — the health screen had no way to ask, so "the floating assistant is
+         * not running" was a state VAN could be in and never report. Set in `onCreate` and
+         * cleared in `onDestroy` rather than inferred from `ActivityManager`, whose running
+         * services list has returned only this app's own services since Android 8 and is
+         * deprecated besides.
+         */
+        @Volatile
+        private var running: Boolean = false
+
+        fun isRunning(): Boolean = running
 
         fun start(context: Context) {
             context.startForegroundService(Intent(context, FloatingOverlayService::class.java))

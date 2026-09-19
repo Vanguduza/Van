@@ -23,7 +23,6 @@ import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Text
 import androidx.compose.material3.TopAppBar
 import androidx.compose.material3.TopAppBarDefaults
-import androidx.compose.material3.darkColorScheme
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.DisposableEffect
 import androidx.compose.runtime.LaunchedEffect
@@ -57,6 +56,7 @@ import com.dial.van.trading.ui.TradeDetailScreen
 import com.dial.van.trading.ui.TradesScreen
 import com.dial.van.trading.ui.TradingNav
 import com.dial.van.visual.VanGlassTokens
+import com.dial.van.visual.VanTheme
 import com.dial.van.visual.VanPresence
 import com.dial.van.visual.rememberVanEffectBudget
 
@@ -78,7 +78,8 @@ class TradingCommandCentreActivity : FragmentActivity() {
         val app = application as VanApplication
         val startRoute = intent?.getStringExtra(EXTRA_ROUTE) ?: ROUTE_OVERVIEW
         setContent {
-            MaterialTheme(colorScheme = darkColorScheme(primary = Color(VanGlassTokens.ACCENT_CYAN))) {
+            // P3-AND-008 — the third inline `darkColorScheme`. One theme now.
+            VanTheme {
                 val nav = rememberNavController()
                 val degraded = app.degradedModeStore.snapshot()
                 val cue = VanPresence.cue(degraded)
