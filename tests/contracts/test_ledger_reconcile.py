@@ -67,19 +67,39 @@ def test_a_component_claiming_to_be_unreached_names_what_to_look_for_or_says_it_
 
 
 def test_a_reference_from_dead_code_is_not_integration():
-    """The limit that produced a wrong answer on the first run.
+    """The limit that produced a wrong answer on the reconciler's first run.
 
-    `MissionParsing` is called by `MissionRepository`, which nothing constructs. Reading
-    that as integration would report a cluster that is dead together as alive, so a
-    component may exclude files that are themselves unreached — and entry 45 does.
+    `MissionParsing` was called by `MissionRepository`, which nothing constructed, and
+    reading that as integration reported a cluster dead together as alive. The mechanism is
+    `reachability_excludes`.
+
+    This used to assert that entry 45 carried the exclusion. It stopped being true when
+    P2-AND-015 built the screen that constructs `MissionRepository`, so the cluster is alive
+    and the exclusion is gone — correctly. Pinning the mechanism to a ledger row meant the
+    test failed when the row was *fixed*, so it is asserted against a synthetic ledger
+    instead, where it stays meaningful however the real one changes.
     """
-    entry = next(c for c in _components() if c["n"] == 45)
-    assert entry["reachability_excludes"] == [
-        "android/app/src/main/java/com/dial/van/mission/MissionRepository.kt"
-    ]
-    assert not entry.get("terminal_state"), (
-        "the dead gateway reads were marked integrated on the strength of a call from "
-        "code that is itself dead"
+    import importlib.util
+
+    spec = importlib.util.spec_from_file_location("ledger_reconcile", TOOL)
+    module = importlib.util.module_from_spec(spec)
+    spec.loader.exec_module(module)
+
+    # Every production file that names the symbol, derived rather than listed: a hardcoded
+    # list goes stale the first time someone imports MissionService somewhere new, and the
+    # test would then fail for a reason that has nothing to do with excludes.
+    everywhere = module._production_references("MissionService", None)
+    assert everywhere, "the fixture symbol is not referenced anywhere; the test proves nothing"
+
+    result = _run_on({"components": [
+        _entry(component="AliveOnlyViaDeadCode", maturity_class="UNUSED",
+               path="backend/van_gateway/synthetic.py",
+               reachability_symbols=["MissionService"],
+               reachability_excludes=everywhere),
+    ]})
+    assert result.returncode == 0, result.stdout
+    assert "still unreached" in result.stdout, (
+        "every reference was from an excluded file and the component was still called alive"
     )
 
 

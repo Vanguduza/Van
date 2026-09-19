@@ -5154,6 +5154,53 @@
         "residual_reason": "There is no Google credential in this environment and no live transport to exercise. The tests drive every route through create_app and assert the boundary and the failure mode; what the provider returns is the provider's, and asserting it here would mean asserting a fake.",
         "falsified_by": "A Google route outside GOOGLE_CONTROL_ROUTES; rescheduling succeeding without approved=true; or a GoogleService method with no route."
       }
+    },
+    {
+      "id": "P2-AND-015",
+      "severity": "P2",
+      "domain": "android",
+      "title": "Three owner surfaces existed as data layers with no screen",
+      "description": "MissionRepository is 371 lines whose own docstring calls it 'the only place the surfaces get data', and no production file constructed it. Eighteen VanGatewayClient reads — needsYou, missions, missionEvidence, cancelMission, messageMission, the understanding confirm/correct pair, capabilityStatus, evalReport — existed for it and were called by nothing else. The mission surfaces §§33, 35 and 48 describe were rendered nowhere, so the owner could issue a command and had no screen that would ever tell them how it went.\n\nNotificationPolicyStore.setPolicy and setQuietHours had no caller either, which is worse than a missing screen: VanNotificationListenerService reads the policy on every arriving notification and mutes, prioritises or drops accordingly, so the mechanism was live and running while every app stayed NORMAL forever and quiet hours were permanently off. VAN holds a notification-listener grant, among the most invasive Android gives, and the controls that make it tolerable existed only as functions.\n\nPersonalSpeechModel.recordCorrection and pinTerm had no caller. The model is read on every voice turn to prime the recogniser and rewrite the transcript, and nothing could put a word into it, so VAN would mishear the same name every day forever.\n\nCompose state restoration was ABSENT across the app.",
+      "requirement": "docs/VAN_CONSOLIDATED_DEPLOYMENT_READINESS_CLOSURE_BLUEPRINT_REV_1.md",
+      "authority": "VAN Consolidated Deployment-Readiness Closure Blueprint Rev 2",
+      "repository_evidence": [
+        "android/app/src/main/java/com/dial/van/command/modules/MissionsModule.kt",
+        "android/app/src/main/java/com/dial/van/command/modules/NotificationPolicyModule.kt",
+        "android/app/src/main/java/com/dial/van/command/modules/SpeechModule.kt"
+      ],
+      "runtime_evidence": [],
+      "affected_components": [
+        "android",
+        "notification",
+        "voice",
+        "mission"
+      ],
+      "root_cause": "Each layer was built from the data outward and stopped before the screen. The Gate 10 refactor split CommandCentreActivity into modules and carried over the screens that existed; it had no way to notice the three that never did.",
+      "remediation": "Build the screens, and call the functions that were dead.",
+      "impact": "The owner had no view of their own work, no control over a notification listener reading everything on their phone, and no way to teach VAN a word it mishears.",
+      "validation_gate": "G10",
+      "current_status": "CLOSED",
+      "remediation_gate": "G10",
+      "closure": {
+        "state": "EXTERNALLY_BLOCKED_REPOSITORY_COMPLETE",
+        "summary": "Three screens, each wired into CommandModule and rendered by CommandCentreActivity.\n\n**Work** renders the gateway's own status rather than deriving one: MissionSummary.ownerStatus prefers ownerStatusFromGateway and falls back to UNKNOWN, never to a working state, which is what P0-EXEC-003 found painting unverified outcomes in the working colour. It separates waiting from running, because a mission in WAITING_FOR_OWNER is not progressing and listing it among the active ones tells the owner VAN is busy when it is in fact stuck on them. And it states the verification rather than implying it by absence — §6's distinction between done, partly done and finished-but-unconfirmed reaches the screen instead of being flattened into a tick.\n\n**Notifications** lists apps the owner has already decided about rather than every installed package: enumerating those needs QUERY_ALL_PACKAGES, which Play treats as sensitive and VAN does not need. An app reaches the list because a notification from it did, which needed a new `decidedPackages()` on the store — it could be written to and read per package and could not say what it held.\n\n**Speech** passes no trust argument, so recordCorrection's OWNER_CONFIRMED default applies. That is deliberate and is why this is a screen rather than something inferred from a retry: a model that teaches itself from its own second guess learns its own mistakes.\n\nAll three use rememberSaveable for the state a rotation would otherwise lose — the open mission, a half-typed package name, a half-typed correction. Losing that reads as VAN forgetting.\n\nSix mutations, six caught, after three survived a first pass. Those three all had the same cause: the assertions named a function rather than a binding, so `store.setPolicy(` was satisfied by either of two call sites and `rememberSaveable` by any one of four fields. A presence check on a name that appears more than once tests almost nothing.\n\nThree existing contract tests failed when this landed, and all three were right to. They encoded 'MissionRepository is dead' — an allowlist entry, a ledger cross-check and an excludes assertion — and this made it alive. The allowlist entry is gone, which is exactly what `test_every_explained_entry_still_describes_something_real` exists to force; the excludes assertion moved to a synthetic ledger, because pinning a mechanism to a real row meant the test failed when the row was fixed.",
+        "changed": [
+          "android/app/src/main/java/com/dial/van/command/modules/MissionsModule.kt",
+          "android/app/src/main/java/com/dial/van/command/modules/NotificationPolicyModule.kt",
+          "android/app/src/main/java/com/dial/van/command/modules/SpeechModule.kt",
+          "android/app/src/main/java/com/dial/van/command/CommandModule.kt",
+          "android/app/src/main/java/com/dial/van/command/CommandCentreActivity.kt",
+          "android/app/src/main/java/com/dial/van/notification/NotificationPolicy.kt"
+        ],
+        "verified_by": [
+          "tests/contracts/test_owner_surfaces_are_reachable.py"
+        ],
+        "runtime_evidence": [],
+        "residual": "No run has compiled these yet, and no screen has been rendered on a device. The contract tests assert the wiring, not that Compose lays it out.",
+        "residual_class": "ENVIRONMENT_UNVERIFIED",
+        "residual_reason": "The Android Gradle Plugin cannot be fetched in this container, so Compose cannot be compiled locally at all — CI is the authority, as it has been for every Android claim in this programme. That these screens render correctly, and are usable, is Gate 14's.",
+        "falsified_by": ":app:compileDebugKotlin failing on these files; a CommandModule entry with no render branch; or any of the previously-dead calls disappearing from the screen that makes them."
+      }
     }
   ],
   "register_note": "Extended 2026-09-19 under blueprint Gate 0 / action W0-1. The audit assigned IDs to 55 findings and enumerated further P3/P4 items in prose; those now carry IDs so that 'all closed' is countable. Each finding carries a remediation_gate referencing docs/VAN_FINISHED_PRODUCT_BLUEPRINT_REV_1.md.",

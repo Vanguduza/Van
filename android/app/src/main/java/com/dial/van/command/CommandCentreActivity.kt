@@ -41,6 +41,9 @@ import com.dial.van.command.modules.BrowserTasksPage
 import com.dial.van.command.modules.ChatModule
 import com.dial.van.command.modules.ConnectionsModule
 import com.dial.van.command.modules.DecisionsModule
+import com.dial.van.command.modules.MissionsModule
+import com.dial.van.command.modules.NotificationPolicyModule
+import com.dial.van.command.modules.SpeechModule
 import com.dial.van.command.modules.OverviewModule
 import com.dial.van.command.modules.ProjectsModule
 import com.dial.van.command.modules.SettingsModule
@@ -165,6 +168,7 @@ internal fun CommandCentreScreen(
             CommandModule.OVERVIEW -> OverviewModule(app, glass, ::navigate)
             CommandModule.CHAT -> ChatModule(app, glass)
             CommandModule.DECISIONS -> DecisionsModule(app, glass)
+            CommandModule.MISSIONS -> MissionsModule(app, glass)
             CommandModule.TASKS -> TasksModule(app, glass) { navigate(CommandModule.CHAT) }
             CommandModule.PROJECTS -> ProjectsModule(app, glass) { projectId ->
                 app.commandController.selectProject(projectId)
@@ -178,6 +182,8 @@ internal fun CommandCentreScreen(
             CommandModule.BROWSER_POLICY -> BrowserPolicyPage(app, glass) { navigate(CommandModule.BROWSER_AUTOMATION) }
             CommandModule.SYSTEMS -> SystemsModule(app, glass)
             CommandModule.CONNECTIONS -> ConnectionsModule(app, glass)
+            CommandModule.NOTIFICATIONS -> NotificationPolicyModule(app, glass)
+            CommandModule.SPEECH -> SpeechModule(app, glass)
             CommandModule.SETTINGS -> SettingsModule(app, glass)
         }
     }

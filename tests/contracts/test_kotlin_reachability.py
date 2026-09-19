@@ -40,15 +40,13 @@ EXPLAINED_UNREFERENCED: dict[str, str] = {
 
 #: Production symbols reached only from tests. Each is the TEST_ONLY maturity class and must
 #: be tracked as a component with a disposition, not quietly tolerated here.
-EXPLAINED_TEST_ONLY: dict[str, str] = {
-    "android/app/src/main/java/com/dial/van/mission/MissionRepository.kt": (
-        "Component ledger #44: NEVER_CONSTRUCTED, disposition WIRE, remediation GATE 2. The "
-        "six owner mission surfaces it was written for are not rendered; the command centre "
-        "modules call VanGatewayClient directly. Tracked there rather than closed here — "
-        "wiring it is real work with a real owner-facing outcome, and deleting the tracking "
-        "to make a scanner quiet would be the opposite of this programme."
-    ),
-}
+#:
+#: Empty, and it has been non-empty. `MissionRepository` sat here with a paragraph saying
+#: the six owner mission surfaces it was written for were rendered nowhere. P2-AND-015 built
+#: one, and `test_every_explained_entry_still_describes_something_real` failed the moment it
+#: did — which is the whole reason that test exists. An allowlist that outlives what it
+#: excused is how one becomes a blanket.
+EXPLAINED_TEST_ONLY: dict[str, str] = {}
 
 
 @functools.lru_cache(maxsize=1)

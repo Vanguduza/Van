@@ -15,6 +15,9 @@ internal enum class CommandModule(val id: String, val title: String) {
     OVERVIEW("overview", "Home"),
     CHAT("chat", "Chat"),
     DECISIONS("decisions", "Decisions"),
+    // P2-AND-015 — the mission surfaces §§33, 35 and 48 describe, which were
+    // rendered nowhere: MissionRepository was constructed by no production file.
+    MISSIONS("missions", "Work"),
     TASKS("tasks", "Tasks"),
     PROJECTS("projects", "Projects"),
     ACTIVITY("activity", "Activity"),
@@ -25,6 +28,12 @@ internal enum class CommandModule(val id: String, val title: String) {
     BROWSER_POLICY("browser_policy", "Browser Policy"),
     SYSTEMS("systems", "Systems"),
     CONNECTIONS("connections", "Connections"),
+    // P2-AND-017 — setPolicy and setQuietHours had no caller, so VAN held a
+    // notification-listener grant with no owner control over it.
+    NOTIFICATIONS("notifications", "Notifications"),
+    // P2-AND-018 — recordCorrection and pinTerm had no caller, so the personal
+    // speech model was read on every turn and could never learn a word.
+    SPEECH("speech", "Speech"),
     SETTINGS("settings", "Settings"),
     ;
 

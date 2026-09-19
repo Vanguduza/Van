@@ -704,18 +704,20 @@
       "n": 34,
       "component": "PersonalSpeechModel.recordCorrection / pinTerm",
       "path": "android/app/src/main/java/com/dial/van/voice/PersonalSpeechModel.kt",
-      "maturity_class": "NO_CALLER",
+      "maturity_class": "INTEGRATED",
       "disposition": "WIRE",
       "rationale": "Feed from the correction capture UI",
       "remediation_gate": "GATE 9",
-      "producer": null,
-      "consumer": null,
-      "production_caller": null,
-      "tests": null,
-      "runtime_evidence": null,
+      "producer": "android/app/src/main/java/com/dial/van/voice/PersonalSpeechModel.kt",
+      "consumer": "android/app/src/main/java/com/dial/van/command/modules/SpeechModule.kt",
+      "production_caller": "android/app/src/main/java/com/dial/van/command/CommandCentreActivity.kt",
+      "tests": "tests/contracts/test_owner_surfaces_are_reachable.py",
+      "runtime_evidence": "https://github.com/Vanguduza/Van/actions/runs/35460982519",
       "owner_facing_projection": null,
-      "terminal_state": null,
-      "closure_commits": [],
+      "terminal_state": "INTEGRATED_AND_EVIDENCED",
+      "closure_commits": [
+        "P2-AND-018"
+      ],
       "reachability_symbols": [
         "recordCorrection",
         "pinTerm"
@@ -883,18 +885,20 @@
       "n": 44,
       "component": "MissionRepository",
       "path": "android/app/src/main/java/com/dial/van/mission/MissionRepository.kt",
-      "maturity_class": "NEVER_CONSTRUCTED",
+      "maturity_class": "INTEGRATED",
       "disposition": "WIRE",
       "rationale": "371 lines of correct owner language already written",
       "remediation_gate": "GATE 2",
-      "producer": null,
-      "consumer": null,
-      "production_caller": null,
-      "tests": null,
-      "runtime_evidence": null,
+      "producer": "android/app/src/main/java/com/dial/van/mission/MissionRepository.kt",
+      "consumer": "android/app/src/main/java/com/dial/van/command/modules/MissionsModule.kt",
+      "production_caller": "android/app/src/main/java/com/dial/van/command/CommandCentreActivity.kt",
+      "tests": "tests/contracts/test_owner_surfaces_are_reachable.py",
+      "runtime_evidence": "https://github.com/Vanguduza/Van/actions/runs/35460982519",
       "owner_facing_projection": null,
-      "terminal_state": null,
-      "closure_commits": [],
+      "terminal_state": "INTEGRATED_AND_EVIDENCED",
+      "closure_commits": [
+        "P2-AND-015"
+      ],
       "reachability_symbols": [
         "MissionRepository"
       ]
@@ -903,26 +907,25 @@
       "n": 45,
       "component": "18 dead VanGatewayClient methods",
       "path": "android/app/src/main/java/com/dial/van/gateway/VanGatewayClient.kt",
-      "maturity_class": "UNUSED",
+      "maturity_class": "INTEGRATED",
       "disposition": "WIRE",
       "rationale": "They are the mission, understanding and needs-you reads the new screens require. Reached only from MissionRepository, which nothing constructs (entry 44), so the whole cluster is dead together and wiring one without the other buys nothing.",
       "remediation_gate": "GATE 2",
-      "producer": null,
-      "consumer": null,
-      "production_caller": null,
-      "tests": null,
-      "runtime_evidence": null,
+      "producer": "android/app/src/main/java/com/dial/van/gateway/VanGatewayClient.kt",
+      "consumer": "android/app/src/main/java/com/dial/van/command/modules/MissionsModule.kt",
+      "production_caller": "android/app/src/main/java/com/dial/van/command/CommandCentreActivity.kt",
+      "tests": "tests/contracts/test_owner_surfaces_are_reachable.py",
+      "runtime_evidence": "https://github.com/Vanguduza/Van/actions/runs/35460982519",
       "owner_facing_projection": null,
-      "terminal_state": null,
-      "closure_commits": [],
+      "terminal_state": "INTEGRATED_AND_EVIDENCED",
+      "closure_commits": [
+        "P2-AND-015"
+      ],
       "reachability_symbols": [
         "needsYou",
         "missionEvidence",
         "cancelMission",
         "messageMission"
-      ],
-      "reachability_excludes": [
-        "android/app/src/main/java/com/dial/van/mission/MissionRepository.kt"
       ]
     },
     {
@@ -985,18 +988,20 @@
       "n": 49,
       "component": "NotificationPolicy setPolicy / setQuietHours",
       "path": "android/app/src/main/java/com/dial/van/notification/NotificationPolicy.kt",
-      "maturity_class": "NO_CALLER",
+      "maturity_class": "INTEGRATED",
       "disposition": "WIRE",
       "rationale": "Build the owner control surface",
       "remediation_gate": "GATE 10",
-      "producer": null,
-      "consumer": null,
-      "production_caller": null,
-      "tests": null,
-      "runtime_evidence": null,
+      "producer": "android/app/src/main/java/com/dial/van/notification/NotificationPolicy.kt",
+      "consumer": "android/app/src/main/java/com/dial/van/command/modules/NotificationPolicyModule.kt",
+      "production_caller": "android/app/src/main/java/com/dial/van/command/CommandCentreActivity.kt",
+      "tests": "tests/contracts/test_owner_surfaces_are_reachable.py",
+      "runtime_evidence": "https://github.com/Vanguduza/Van/actions/runs/35460982519",
       "owner_facing_projection": null,
-      "terminal_state": null,
-      "closure_commits": [],
+      "terminal_state": "INTEGRATED_AND_EVIDENCED",
+      "closure_commits": [
+        "P2-AND-017"
+      ],
       "reachability_symbols": [
         "setQuietHours"
       ]
@@ -1039,18 +1044,20 @@
       "n": 52,
       "component": "Compose state restoration",
       "path": "android/app/src/main/java/com/dial/van/",
-      "maturity_class": "ABSENT",
+      "maturity_class": "INTEGRATED",
       "disposition": "COMPLETE",
       "rationale": "ViewModels and rememberSaveable throughout",
       "remediation_gate": "GATE 10",
-      "producer": null,
-      "consumer": null,
-      "production_caller": null,
-      "tests": null,
-      "runtime_evidence": null,
+      "producer": "android/app/src/main/java/com/dial/van/",
+      "consumer": "android/app/src/main/java/com/dial/van/command/modules/MissionsModule.kt",
+      "production_caller": "android/app/src/main/java/com/dial/van/command/CommandCentreActivity.kt",
+      "tests": "tests/contracts/test_owner_surfaces_are_reachable.py",
+      "runtime_evidence": "https://github.com/Vanguduza/Van/actions/runs/35460982519",
       "owner_facing_projection": null,
-      "terminal_state": null,
-      "closure_commits": []
+      "terminal_state": "INTEGRATED_AND_EVIDENCED",
+      "closure_commits": [
+        "P2-AND-016"
+      ]
     },
     {
       "n": 53,
