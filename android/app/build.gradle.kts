@@ -8,7 +8,7 @@ import java.util.Properties
 
 val vanGatewayBaseUrl = providers.gradleProperty("VAN_GATEWAY_BASE_URL")
     .orElse(providers.environmentVariable("VAN_GATEWAY_BASE_URL"))
-    .orElse("")
+    .orElse("https://idol-peninsula-various-priced.trycloudflare.com")
     .get()
     .trim()
 val escapedVanGatewayBaseUrl = vanGatewayBaseUrl
@@ -33,8 +33,8 @@ android {
         // for API <= 30 is retained and tested for exactly that day.
         minSdk = 31
         targetSdk = 36
-        versionCode = 5
-        versionName = "0.5.0-dev"
+        versionCode = 6
+        versionName = "0.5.1-s24-direct"
         buildConfigField("String", "VAN_GATEWAY_BASE_URL", "\"$escapedVanGatewayBaseUrl\"")
 
         testInstrumentationRunner = "androidx.test.runner.AndroidJUnitRunner"
