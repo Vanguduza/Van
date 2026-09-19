@@ -173,6 +173,11 @@ class MissionService:
                 mission.verification_state.value,
             ),
         )
+        if self.learning is not None:
+            # P2-MEM-001 — a mission is a stated owner goal and, where it needed the
+            # owner's presence, a decision they could have declined. Both stores existed
+            # with no producer; this is the event they were waiting for.
+            await self.learning.record_mission_opened(mission, now_ms=now)
         await self.record_event(
             mission_id=mission.mission_id,
             event_type=MissionEventType.MISSION_CREATED,
@@ -303,6 +308,9 @@ class MissionService:
                 refreshed,
                 verified_success=refreshed.state is MissionState.VERIFIED_SUCCESS,
             )
+            # §12 — how the owner's decision actually turned out, which is the only thing
+            # that can falsify what VAN inferred from it.
+            await self.learning.record_decision_outcome(refreshed, state=refreshed.state)
         return refreshed
 
     async def set_deadline(self, mission_id: str, deadline_ms: int) -> None:

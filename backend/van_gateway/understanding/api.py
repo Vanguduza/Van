@@ -36,7 +36,11 @@ from van_gateway.storage.db import Store
 from van_gateway.reasoning.calibration import RelationshipCalibrationEngine
 from van_gateway.understanding.memory import (
     CognitiveComplementMap,
+    DecisionFingerprints,
+    IntentContinuityGraph,
     SharedVocabularyRegistry,
+    StrategicEntryType,
+    StrategicMemory,
     SymbioticGrowthLedger,
 )
 from van_gateway.understanding.owner_model import (
@@ -57,6 +61,13 @@ class ObserveBody(BaseModel):
 
 class CorrectBody(BaseModel):
     new_value: str
+
+
+class StrategicMemoryBody(BaseModel):
+    entry_type: StrategicEntryType
+    statement: str
+    rationale: str | None = None
+    evidence_refs: list[str] = Field(default_factory=list)
 
 
 class UnderstandingApi:
@@ -83,6 +94,12 @@ class UnderstandingApi:
         self.radar = AIEvolutionRadar(store)
         self.eval = VanEval(store)
         self.permissions = PermissionRegistry(store)
+        # P2-MEM-001 — §§65, 77, 78. Three stores with no route and no producer. The
+        # producer is `LearningFeed`, on the mission path; these are the surfaces that
+        # make what they hold the owner's to see and, for strategic memory, to write.
+        self.intents = IntentContinuityGraph(store)
+        self.fingerprints = DecisionFingerprints(store)
+        self.strategic = StrategicMemory(store)
         self.router = APIRouter(prefix="/v1", tags=["understanding"])
         self._install_routes()
 
@@ -108,6 +125,111 @@ class UnderstandingApi:
                 "recent_adaptation": await self.growth.effective(),
                 "adaptation_awaiting_you": await self.growth.awaiting_owner(),
             }
+
+        @router.get("/understanding/intents")
+        async def standing_intents():
+            """§77 — the owner's long-lived goals, and what each is in tension with.
+
+            P2-MEM-001 — the graph had no producer, so this was a concept VAN could
+            describe and had never seen an instance of. Every node here came from a
+            mission the owner actually opened.
+            """
+            rows = await self.store.fetchall(
+                "SELECT intent_id FROM intent_nodes ORDER BY latest_observed_ms DESC"
+            )
+            out = []
+            for row in rows:
+                node = await self.intents.get(str(row["intent_id"]))
+                if node is None:
+                    continue
+                conflicts = await self.intents.conflicts_for(node.intent_id)
+                out.append({
+                    **node.model_dump(mode="json"),
+                    # The point of the graph: a newer instruction that contradicts an
+                    # older standing goal is visible rather than silently winning because
+                    # it arrived more recently.
+                    "conflicts_with": [
+                        {"intent_id": c.intent_id, "owner_goal": c.owner_goal}
+                        for c in conflicts
+                    ],
+                })
+            return {
+                "intents": out,
+                "stale_after_days": self.intents.STALE_AFTER_MS // (24 * 60 * 60 * 1000),
+                # STALE is not abandoned, and the surface says so rather than leaving the
+                # word to be read as a verdict.
+                "stale_means": (
+                    "unmentioned for long enough that VAN will ask before assuming it "
+                    "still matters; only you abandon a goal"
+                ),
+            }
+
+        @router.get("/understanding/decisions")
+        async def decision_fingerprints():
+            """§65 — what you decided and how it turned out.
+
+            §12 forbids treating an inferred pattern as an unquestionable rule and
+            requires outcomes to be able to falsify one. VAN does not currently infer why
+            the owner decided anything, so every fingerprint here has a null inferred
+            reason and `falsified` is empty. That is reported explicitly: an owner reading
+            "no falsified patterns" from a silent surface would reasonably take it to mean
+            VAN's model of them is accurate, when it means VAN has not made a claim.
+            """
+            rows = await self.store.fetchall(
+                "SELECT decision_id, mission_id, owner_choice, owner_stated_reason, "
+                "inferred_reason, outcome, created_at_ms FROM decision_fingerprints "
+                "ORDER BY created_at_ms DESC LIMIT 200"
+            )
+            return {
+                "decisions": [dict(r) for r in rows],
+                "falsified": await self.fingerprints.falsified(),
+                "pattern_inference": {
+                    "active": False,
+                    "why": (
+                        "VAN records what you decided and how it turned out. It does not "
+                        "infer why, so there is nothing here for an outcome to falsify."
+                    ),
+                },
+            }
+
+        @router.get("/projects/{project_id}/strategic-memory")
+        async def strategic_memory(project_id: str):
+            """§78 — why this project exists and what was already tried and rejected."""
+            return {
+                "project_id": project_id,
+                "entries": await self.strategic.for_project(project_id),
+                # §21 — kept apart from Project Truth on purpose, and said on the wire so
+                # a rationale is not read back as a fact about the code.
+                "not_project_truth": (
+                    "Project Truth is what the repository is; this is why it became that"
+                ),
+            }
+
+        @router.post("/projects/{project_id}/strategic-memory")
+        async def record_strategic_memory(project_id: str, body: StrategicMemoryBody):
+            """The owner is the author of project rationale, so this is an owner route.
+
+            Recording something already rejected is answered with the rejection rather
+            than a second entry: `already_rejected` is the question worth asking before
+            proposing anything, and the one place it can be asked today is here.
+            """
+            if await self.strategic.already_rejected(project_id, body.statement):
+                raise HTTPException(
+                    status_code=409,
+                    detail={
+                        "code": "STRATEGY_ALREADY_REJECTED",
+                        "project_id": project_id,
+                        "statement": body.statement,
+                    },
+                )
+            entry_id = await self.strategic.record(
+                project_id=project_id,
+                entry_type=body.entry_type,
+                statement=body.statement,
+                rationale=body.rationale,
+                evidence_refs=body.evidence_refs,
+            )
+            return {"entry_id": entry_id, "project_id": project_id}
 
         @router.post("/understanding/{assertion_id}/confirm")
         async def confirm(assertion_id: str):

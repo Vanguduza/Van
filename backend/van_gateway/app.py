@@ -486,6 +486,17 @@ def create_app() -> FastAPI:
         )
         return {"destination": str(destination), "entries": len(manifest.entries)}
 
+    async def _mark_stale_intents() -> dict:
+        """§20 — surface a standing goal nobody has mentioned, rather than acting on it.
+
+        P2-MEM-001 — `mark_stale` had no caller, so an intent observed once stayed ACTIVE
+        forever and "active goal" meant "goal ever stated". STALE is deliberately not
+        abandoned: it means ask before assuming this still matters, and only the owner
+        abandons a goal.
+        """
+        marked = await learning.intents.mark_stale()
+        return {"marked_stale": marked}
+
     async def _demote_regressions() -> dict:
         """§41 — a strategy that stopped working loses its promotion, without being asked.
 
@@ -565,6 +576,10 @@ def create_app() -> FastAPI:
         # trust from something that stopped working needs no ceremony, granting it does.
         jobs.append(ScheduledJob(
             "learning.auto_demote", settings.retention_interval_seconds, _demote_regressions,
+        ))
+        jobs.append(ScheduledJob(
+            "understanding.mark_stale_intents", settings.retention_interval_seconds,
+            _mark_stale_intents,
         ))
         return tuple(jobs)
 

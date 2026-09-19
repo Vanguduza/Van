@@ -29,7 +29,11 @@ from van_gateway.evolution.radar import StrategyLearning
 from van_gateway.mission.models import Mission, MissionState
 from van_gateway.models import ActionClass
 from van_gateway.storage.db import Store
-from van_gateway.understanding.memory import SymbioticGrowthLedger
+from van_gateway.understanding.memory import (
+    DecisionFingerprints,
+    IntentContinuityGraph,
+    SymbioticGrowthLedger,
+)
 
 #: Terminal states worth learning from, and what each one means about the work.
 OUTCOME_KIND: dict[MissionState, str] = {
@@ -51,6 +55,11 @@ class LearningFeed:
         self.store = store
         self.growth = SymbioticGrowthLedger(store)
         self.strategies = StrategyLearning(store)
+        # P2-MEM-001 — §§65, 77. Both stores were complete and neither had a producer, so
+        # the owner's standing goals and their decisions were concepts the system could
+        # describe and had never seen an instance of.
+        self.intents = IntentContinuityGraph(store)
+        self.fingerprints = DecisionFingerprints(store)
 
     async def record_mission_outcome(
         self,
@@ -86,6 +95,74 @@ class LearningFeed:
             ),
         )
         return outcome_id
+
+    async def record_mission_opened(
+        self, mission: Mission, *, now_ms: int | None = None
+    ) -> dict[str, str | None]:
+        """P2-MEM-001 — §§65, 77. What the owner asked for, and what they decided.
+
+        A mission is a stated owner goal, which is what `IntentContinuityGraph` is a graph
+        of. Observing it here means the graph is built from instructions VAN actually
+        received rather than from a separate act of curation nobody performs. The node is
+        keyed on the goal text, so asking for the same thing again refreshes a standing
+        intent instead of creating a second one — which is what makes STALE mean
+        "unmentioned for ninety days" rather than "recorded once".
+
+        A decision fingerprint is recorded only where there was a decision: a mission
+        whose authority envelope required the owner's presence is one they could have
+        declined and did not. A command that needed no approval is not a choice, and
+        recording one would fill §65's store with the owner's ordinary use of VAN.
+        """
+        intent = await self.intents.observe(
+            owner_goal=mission.goal,
+            project_id=mission.project_id,
+            constraints=mission.constraints,
+            now_ms=now_ms,
+        )
+        await self.intents.link_mission(intent.intent_id, mission.mission_id, now_ms=now_ms)
+
+        decision_id = None
+        if mission.authority_envelope.requires_owner_presence:
+            decision_id = await self.fingerprints.record(
+                owner_choice=f"approved: {mission.goal[:200]}",
+                mission_id=mission.mission_id,
+                context={
+                    "mission_class": mission.mission_class,
+                    "action_class": mission.authority_envelope.max_action_class.value,
+                    "origin_channel": mission.origin_channel.value,
+                    "sensitivity": mission.sensitivity.value,
+                },
+                options_considered=["approve", "decline"],
+                # §12 — deliberately absent. VAN does not infer why the owner approved,
+                # and writing a plausible reason here is how a fingerprint store becomes
+                # a machine for justifying whatever the owner did last. `falsified()`
+                # therefore returns nothing, and the understanding surface says that this
+                # is because nothing was inferred rather than because nothing was wrong.
+                inferred_reason=None,
+                now_ms=now_ms,
+            )
+        return {"intent_id": intent.intent_id, "decision_id": decision_id}
+
+    async def record_decision_outcome(
+        self, mission: Mission, *, state: MissionState, now_ms: int | None = None
+    ) -> None:
+        """§12 — the outcome is what lets an inferred reason be wrong.
+
+        Recorded against the mission rather than the fingerprint id so the caller does not
+        have to carry one, and written only where a fingerprint exists: a mission nobody
+        had to approve has no decision to have an outcome.
+        """
+        kind = OUTCOME_KIND.get(state)
+        if kind is None:
+            return
+        rows = await self.store.fetchall(
+            "SELECT decision_id FROM decision_fingerprints WHERE mission_id = ?",
+            (mission.mission_id,),
+        )
+        for row in rows:
+            await self.fingerprints.record_outcome(
+                str(row["decision_id"]), outcome=kind, now_ms=now_ms,
+            )
 
     async def record_strategy_outcome(
         self, mission: Mission, *, verified_success: bool, now_ms: int | None = None

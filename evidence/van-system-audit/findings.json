@@ -22,7 +22,7 @@
   "counts": {
     "P0": 15,
     "P1": 32,
-    "P2": 20,
+    "P2": 21,
     "P3": 26,
     "P4": 7
   },
@@ -4266,6 +4266,49 @@
         "residual": "The drill proves the backup restores; it does not prove one exists anywhere but this disk.",
         "residual_class": "OWNER_DEPLOYMENT_DECISION",
         "residual_reason": "Owner decision 10: a backup on the same disk is not a backup, and the repository must not pick the owner's offsite target. tools/ops/backup.py already takes one."
+      }
+    },
+    {
+      "id": "P2-MEM-001",
+      "severity": "P2",
+      "domain": "understanding",
+      "title": "Three owner-memory stores had no producer and no route",
+      "description": "IntentContinuityGraph (§77), DecisionFingerprints (§65) and StrategicMemory (§78) were complete, correct and referenced only by their own tests. No mission observed a standing goal, no owner approval recorded a decision, no project rationale had anywhere to live, and IntentContinuityGraph.mark_stale had no caller, so an intent observed once would have stayed ACTIVE forever had one ever been observed. Each was a concept VAN could describe and had never seen an instance of.",
+      "requirement": "docs/VAN_CONSOLIDATED_DEPLOYMENT_READINESS_CLOSURE_BLUEPRINT_REV_1.md",
+      "authority": "VAN Consolidated Deployment-Readiness Closure Blueprint Rev 2",
+      "repository_evidence": [
+        "backend/van_gateway/understanding/memory.py:151",
+        "backend/van_gateway/understanding/memory.py:297",
+        "backend/van_gateway/understanding/memory.py:352"
+      ],
+      "runtime_evidence": [],
+      "affected_components": [
+        "understanding",
+        "learning",
+        "mission"
+      ],
+      "root_cause": "Stores designed to be curated, in a system where nobody curates. The events they describe were already arriving on the mission path and nothing connected the two.",
+      "remediation": "Observe the goal and the approval where they actually arrive, sweep stale intents on a schedule, and give each store an owner-visible surface.",
+      "impact": "§77's conflict visibility — a newer instruction contradicting an older standing goal should be seen rather than silently winning — could not fire, because there were no intents. §65's falsifiability could not fire, because there were no decisions.",
+      "validation_gate": "G5",
+      "current_status": "CLOSED",
+      "remediation_gate": "G5",
+      "closure": {
+        "state": "INTEGRATED_AND_EVIDENCED",
+        "summary": "LearningFeed is the producer, because the mission path is where the owner's instructions and approvals actually arrive; curating these stores by hand is the design that produced empty stores.\n\nOpening a mission observes its goal as a standing intent and links the mission to it. The node is keyed on the goal text, so asking for the same thing again refreshes an existing intent rather than creating a second one — which is what lets STALE mean 'unmentioned for ninety days' instead of 'recorded once'. understanding.mark_stale_intents sweeps on the retention cadence, and /v1/understanding/intents reports each goal with what it conflicts with, plus the statement that STALE is not abandoned.\n\nA decision fingerprint is recorded only where there was a decision: a mission whose envelope required the owner's presence is one they could have declined and did not. Ordinary use is not a choice, and recording it would bury the decisions that were. The mission's terminal state becomes the decision's outcome.\n\nWhat is deliberately absent is the inference. VAN does not infer why the owner decided anything, so inferred_reason is null and falsified() is empty — and /v1/understanding/decisions says so, because an owner reading 'no falsified patterns' off a silent surface would take it to mean VAN's model of them is accurate, when it means VAN has made no claim. Writing a plausible reason there is exactly §12's warning: a fingerprint store that only accumulates becomes a machine for justifying whatever the owner did last.\n\nStrategicMemory gets owner routes rather than a producer, because the owner is the author of project rationale. Recording something already rejected is answered with the rejection, which is the one place already_rejected can be asked today. §21's separation from Project Truth is stated on the wire so a rationale is not read back as a fact about the code.\n\nSix mutations run, six caught — including inferring a reason the owner never gave, and sweeping the goals just mentioned instead of the forgotten ones.",
+        "changed": [
+          "backend/van_gateway/learning/feed.py",
+          "backend/van_gateway/mission/service.py",
+          "backend/van_gateway/understanding/api.py",
+          "backend/van_gateway/app.py"
+        ],
+        "verified_by": [
+          "backend/tests/test_owner_memory_has_a_producer.py"
+        ],
+        "runtime_evidence": [],
+        "residual": "VAN records what the owner decided and how it turned out; it does not infer why, so no inferred pattern exists for an outcome to falsify.",
+        "residual_class": "DELIBERATE_SCOPE",
+        "residual_reason": "§12 requires an inferred pattern to be falsifiable, and the safe order is falsifiability first. The outcome half is wired and the inference half is not, so the day VAN does infer a reason the machinery that can prove it wrong already runs. The surface reports the absence rather than letting an empty falsified list read as an accurate model."
       }
     }
   ],
