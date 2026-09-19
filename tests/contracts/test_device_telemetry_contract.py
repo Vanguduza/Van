@@ -13,6 +13,14 @@ them drifting.
 import re
 from pathlib import Path
 
+# P3-OPS-012 — imported as `van_gateway`, not `backend.van_gateway`.
+#
+# `backend/` has no __init__.py, so `backend.van_gateway` resolves only when the repository
+# root happens to be on sys.path. `python -m pytest` puts the working directory there and
+# the bare `pytest` binary does not, so this file passed locally and failed in CI on the
+# first run that ever reached it. pytest.ini already puts `backend` on the path, which is
+# what makes the short form work under either invocation.
+
 ROOT = Path(__file__).resolve().parents[2]
 INSTRUMENTS = ROOT / "backend/van_gateway/observability/instruments.py"
 KOTLIN = ROOT / "android/app/src/main/java/com/dial/van/telemetry/DeviceTelemetry.kt"
@@ -21,7 +29,7 @@ APP_ROUTES = ROOT / "backend/van_gateway/app.py"
 
 
 def gateway_metrics() -> tuple[set[str], set[str]]:
-    from backend.van_gateway.observability import instruments
+    from van_gateway.observability import instruments
 
     return set(instruments.DEVICE_HISTOGRAMS), set(instruments.DEVICE_GAUGES)
 
@@ -44,7 +52,7 @@ def test_the_device_posts_exactly_what_the_gateway_declares():
 
 
 def test_the_only_labelled_metric_is_the_one_the_catalogue_labels():
-    from backend.van_gateway.observability import instruments
+    from van_gateway.observability import instruments
 
     labelled = {
         name for name, (_, labels) in instruments.DEVICE_HISTOGRAMS.items() if labels

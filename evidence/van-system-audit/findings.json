@@ -23,7 +23,7 @@
     "P0": 16,
     "P1": 34,
     "P2": 24,
-    "P3": 28,
+    "P3": 29,
     "P4": 7
   },
   "root_causes": [
@@ -4693,6 +4693,50 @@
         "residual_class": "ENVIRONMENT_UNVERIFIED",
         "residual_reason": "GitHub Actions runs on GitHub. The trigger is fixed here; whether a run happens, and whether it passes, is observable only after the push and is not something this repository can assert about itself.",
         "falsified_by": "A push to claude/** producing no workflow run, or the installer template drifting from the live workflow again."
+      }
+    },
+    {
+      "id": "P3-OPS-012",
+      "severity": "P3",
+      "domain": "operations",
+      "title": "A contract test passed locally and failed in CI on the first run that reached it",
+      "description": "tests/contracts/test_device_telemetry_contract.py imported backend.van_gateway.observability.instruments. backend/ has no __init__.py, so that path resolves only when the repository root is on sys.path. `python -m pytest` puts the working directory there; the bare `pytest` binary, which is what the workflow runs, does not. The test therefore passed under every local invocation used during this programme and failed the moment CI first ran against the branch.",
+      "requirement": "docs/VAN_CONSOLIDATED_DEPLOYMENT_READINESS_CLOSURE_BLUEPRINT_REV_1.md",
+      "authority": "VAN Consolidated Deployment-Readiness Closure Blueprint Rev 2",
+      "repository_evidence": [
+        "tests/contracts/test_device_telemetry_contract.py",
+        "pytest.ini"
+      ],
+      "runtime_evidence": [
+        "https://github.com/Vanguduza/Van/actions/runs/35448802940"
+      ],
+      "affected_components": [
+        "ops",
+        "ci",
+        "observability"
+      ],
+      "root_cause": "An import that depended on the invocation rather than on the configured path, and a local verification habit that never exercised the other invocation.",
+      "remediation": "Import van_gateway directly, which pytest.ini's pythonpath already provides under either invocation.",
+      "impact": "Narrow in itself — one contract file. What it demonstrates is not narrow: local test counts were being reported as evidence for a configuration CI does not run.",
+      "validation_gate": "G11",
+      "current_status": "CLOSED",
+      "remediation_gate": "G11",
+      "closure": {
+        "state": "INTEGRATED_AND_EVIDENCED",
+        "summary": "The import is now `van_gateway.observability`, which pytest.ini's `pythonpath = backend` provides whether or not the repository root is on sys.path. A comment at the top of the file records why the short form is the correct one, so it does not get 'fixed' back.\n\nThe wider correction is to the verification habit rather than the code. Local runs for this programme used `python3 -m pytest`, which puts the working directory on sys.path and is not what the workflow does. `PYTHONSAFEPATH=1 python3 -m pytest` reproduces CI's import shape on the same interpreter, and both suites pass under it: 1153 backend, 83 contract.\n\nThe repository's bare `pytest` is a separate uv-managed install with different packages, so its failures here are a local artefact and not a second defect — worth recording, because mistaking it for one would send the next reader after a bug that is not there.",
+        "changed": [
+          "tests/contracts/test_device_telemetry_contract.py"
+        ],
+        "verified_by": [
+          "tests/contracts/test_device_telemetry_contract.py"
+        ],
+        "runtime_evidence": [
+          "https://github.com/Vanguduza/Van/actions/runs/35448802940"
+        ],
+        "residual": "Nothing enforces that local verification uses CI's import shape; it is a habit, not a gate.",
+        "residual_class": "DELIBERATE_SCOPE",
+        "residual_reason": "The gate that matters already exists and now runs: CI on the branch. A second local-only guard would be one more thing to keep in step with the workflow, which is the class of problem P3-OPS-010 was.",
+        "falsified_by": "Any test that passes under `python -m pytest` and fails under the workflow's invocation."
       }
     }
   ],
