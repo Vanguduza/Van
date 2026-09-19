@@ -149,7 +149,7 @@ class VanApplication : Application(), VoiceInputCallback, TtsOutputCallback {
             .addCapability(NetworkCapabilities.NET_CAPABILITY_INTERNET)
             .addCapability(NetworkCapabilities.NET_CAPABILITY_VALIDATED)
             .build()
-        runCatching {
+        val registered = runCatching {
             manager.registerNetworkCallback(
                 request,
                 object : ConnectivityManager.NetworkCallback() {
@@ -164,6 +164,21 @@ class VanApplication : Application(), VoiceInputCallback, TtsOutputCallback {
                         queueReplayer.onNetworkChanged(false)
                     }
                 },
+            )
+        }
+        // P1-AND-014 — the failure is reported rather than swallowed.
+        //
+        // This was a bare `runCatching { }`, so a missing ACCESS_NETWORK_STATE turned into
+        // silence: the registration threw, nothing observed connectivity, and the queue
+        // simply never drained when the network came back. A feature that quietly does not
+        // exist is worse than one that fails loudly, and the whole point of the degraded
+        // registry is that VAN says which parts of itself are not working.
+        if (registered.isFailure) {
+            degradedModeStore.markBroken(
+                "queue",
+                "VAN cannot watch for the network returning, so queued commands wait for " +
+                    "you to send them rather than going out on their own",
+                com.dial.van.degraded.RestoreAction.RETRY_CONNECTION,
             )
         }
     }

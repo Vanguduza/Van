@@ -21,7 +21,7 @@
   ],
   "counts": {
     "P0": 17,
-    "P1": 35,
+    "P1": 36,
     "P2": 24,
     "P3": 29,
     "P4": 7
@@ -4828,8 +4828,8 @@
       "current_status": "CLOSED",
       "remediation_gate": "G1",
       "closure": {
-        "state": "EXTERNALLY_BLOCKED_REPOSITORY_COMPLETE",
-        "summary": "Both now assert current behaviour, and in both cases the new assertion is worth more than the old one.\n\nThe degraded-mode test pins that recovery is *scoped*: Google going READY clears google and leaves the banner up while wake_word is broken. That is the whole reason subsystems are listed separately instead of reported as one health bit, and it was not asserted anywhere. A second test clears the last broken subsystem so 'stays active' cannot be mistaken for 'can never clear'.\n\nThe voice test pins that a supported device missing its recognizer is UNAVAILABLE with a reason rather than a Sherpa tier, plus that supporting an API level is not a claim voice works — asserted in the shipping module and not only in the harness, which is the drift that produced this finding.",
+        "state": "INTEGRATED_AND_EVIDENCED",
+        "summary": "Both now assert current behaviour, and in both cases the new assertion is worth more than the old one.\n\nThe degraded-mode test pins that recovery is *scoped*: Google going READY clears google and leaves the banner up while wake_word is broken. That is the whole reason subsystems are listed separately instead of reported as one health bit, and it was not asserted anywhere. A second test clears the last broken subsystem so 'stays active' cannot be mistaken for 'can never clear'.\n\nThe voice test pins that a supported device missing its recognizer is UNAVAILABLE with a reason rather than a Sherpa tier, plus that supporting an API level is not a claim voice works — asserted in the shipping module and not only in the harness, which is the drift that produced this finding.\n\nCONFIRMED by run 35449984819 on 6dd1e32: :app:testDebugUnitTest passed and the build proceeded to :app:lintDebug, which is further than any previous run reached.",
         "changed": [
           "android/app/src/test/java/com/dial/van/degraded/DegradedModeStoreTest.kt",
           "android/app/src/test/java/com/dial/van/voice/VoiceRecognitionPolicyTest.kt"
@@ -4838,11 +4838,55 @@
           "android/app/src/test/java/com/dial/van/degraded/DegradedModeStoreTest.kt",
           "android/app/src/test/java/com/dial/van/voice/VoiceRecognitionPolicyTest.kt"
         ],
-        "runtime_evidence": [],
-        "residual": "The app module's unit tests cannot be run in this container at all, so these fixes are unproven until CI runs them.",
-        "residual_class": "ENVIRONMENT_UNVERIFIED",
-        "residual_reason": "The Android Gradle Plugin is unreachable here. The verification harness compiles only the pure files and has its own copies of these tests, which is how the drift happened; adding the app's tests to it would create a second pair to drift. CI running :app:testDebugUnitTest is the authority and now runs on this branch.",
+        "runtime_evidence": [
+          "https://github.com/Vanguduza/Van/actions/runs/35449984819"
+        ],
+        "residual": null,
+        "residual_class": null,
+        "residual_reason": null,
         "falsified_by": ":app:testDebugUnitTest failing on any subsequent CI run."
+      }
+    },
+    {
+      "id": "P1-AND-014",
+      "severity": "P1",
+      "domain": "android",
+      "title": "The offline queue could never see the network return, and said nothing",
+      "description": "VanApplication.startConnectivityMonitor registers a ConnectivityManager network callback, and the manifest did not declare android.permission.ACCESS_NETWORK_STATE. Lint calls this an error because the call throws at runtime. Here it was wrapped in a bare runCatching { }, so it threw nothing anyone would see: the registration failed, nothing observed connectivity, and the offline queue's replay-on-recovery — the whole of P3-AND-006 — never fired. A queued command would sit until the owner sent it by hand, and no surface would say why.",
+      "requirement": "docs/VAN_CONSOLIDATED_DEPLOYMENT_READINESS_CLOSURE_BLUEPRINT_REV_1.md",
+      "authority": "VAN Consolidated Deployment-Readiness Closure Blueprint Rev 2",
+      "repository_evidence": [
+        "android/app/src/main/AndroidManifest.xml",
+        "android/app/src/main/java/com/dial/van/VanApplication.kt"
+      ],
+      "runtime_evidence": [
+        "https://github.com/Vanguduza/Van/actions/runs/35449984819"
+      ],
+      "affected_components": [
+        "android",
+        "queue"
+      ],
+      "root_cause": "A permission-gated API called without its manifest entry, and a catch-all that turned the resulting exception into silence. Either alone would have been survivable; together they made a closed finding untrue without anything reporting it.",
+      "remediation": "Declare the permission, and report a failed registration through the degraded registry instead of discarding it.",
+      "impact": "P3-AND-006 was closed as 'the offline queue replays on connectivity recovery' and the mechanism could not work. The owner would see queued commands that never went out.",
+      "validation_gate": "G1",
+      "current_status": "CLOSED",
+      "remediation_gate": "G1",
+      "closure": {
+        "state": "EXTERNALLY_BLOCKED_REPOSITORY_COMPLETE",
+        "summary": "ACCESS_NETWORK_STATE is declared — a normal permission, granted at install and never prompted, so there is no runtime request to add.\n\nThe second half matters more. The registration result is now bound and a failure marks the queue subsystem BROKEN with a sentence the owner can act on: queued commands wait for them to send rather than going out on their own. The degraded registry exists so VAN says which parts of itself are not working, and a capability that quietly does not exist is worse than one that fails loudly.\n\nThe neighbouring sweep asked the more useful question — not 'what other permission is missing', which lint answers across the whole platform, but 'where else is a failure swallowed into silence'. Eleven discarded-result sites exist and ten are teardown: unregisterReceiver, removeView, updateViewLayout, AudioRecord stop and release. Swallowing there is correct, because nothing useful can be done and a throw during teardown is worse. This was the only one on a *setup* path, where the result decides whether a feature exists at all.\n\ntests/contracts/test_android_permissions_match_the_apis_used.py guards the family rather than the instance: permission-gated APIs the app actually calls, checked against the manifest. One mutation survived the first run — dropping the `val registered =` binding left `registered.isFailure` in the source referring to nothing, which my string assertions accepted and only the compiler would have rejected. A static check that leans on the compiler to make it honest is measuring the wrong thing, so the binding is asserted too. Four mutations, four caught.",
+        "changed": [
+          "android/app/src/main/AndroidManifest.xml",
+          "android/app/src/main/java/com/dial/van/VanApplication.kt"
+        ],
+        "verified_by": [
+          "tests/contracts/test_android_permissions_match_the_apis_used.py"
+        ],
+        "runtime_evidence": [],
+        "residual": "The permission fix is proven only by lint passing; that the queue actually drains when a phone regains connectivity is device behaviour.",
+        "residual_class": "ENVIRONMENT_UNVERIFIED",
+        "residual_reason": "Neither the app nor lint can run in this container. CI's :app:lintDebug is the authority for the permission, and the replay itself is Gate 14 work on a real device with a real network transition.",
+        "falsified_by": ":app:lintDebug reporting MissingPermission again, or a queued command failing to replay on a device after connectivity returns with the queue subsystem reported healthy."
       }
     }
   ],
