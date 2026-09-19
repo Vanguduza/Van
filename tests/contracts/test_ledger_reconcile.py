@@ -235,3 +235,51 @@ def test_what_counts_as_a_production_reference():
 
     assert counts("backend/van_gateway/x.py", "backend/van_gateway/x.py") is False
     assert counts("a/b.py", None, ["a/b.py"]) is False, "a file excluded as dead still counted"
+
+
+def test_the_ci_tools_depend_on_no_binary_the_runner_may_not_have():
+    """The failure that put this branch red, generalised.
+
+    `ledger_reconcile.py` shelled out to ripgrep. It passed here, where ripgrep is
+    installed, and failed on the GitHub runner with FileNotFoundError — a checker built to
+    run in the authority that could not run in the authority. Nothing asserted the tool ran
+    without external binaries, because every test ran where the binary existed.
+
+    `git` is exempt: `install_github_workflow.py` is a developer command that commits and
+    pushes, and a git-less environment is not one where it has anything to do.
+    """
+    import ast
+
+    exempt = {"install_github_workflow.py"}
+    offenders = []
+    for tool in sorted((ROOT / "tools" / "ci").glob("*.py")):
+        if tool.name in exempt:
+            continue
+        tree = ast.parse(tool.read_text(encoding="utf-8"))
+        for node in ast.walk(tree):
+            if isinstance(node, ast.Import) and any(a.name == "subprocess" for a in node.names):
+                offenders.append(tool.name)
+            if isinstance(node, ast.ImportFrom) and node.module == "subprocess":
+                offenders.append(tool.name)
+    assert offenders == [], (
+        f"{offenders} shell out from a CI gate. The runner is not this container: it has no "
+        "ripgrep, and the tool that assumes otherwise fails where it matters most."
+    )
+
+
+def test_the_reconciler_finds_what_it_should_without_ripgrep():
+    """The replacement search, exercised directly.
+
+    Asserting only that the tool exits zero would pass just as well if the walk found
+    nothing at all, which is precisely how a search that silently matches nothing looks
+    from the outside: a clean ledger.
+    """
+    import importlib.util
+
+    spec = importlib.util.spec_from_file_location("ledger_reconcile", TOOL)
+    module = importlib.util.module_from_spec(spec)
+    spec.loader.exec_module(module)
+
+    found = module._production_references("MissionService", None)
+    assert "backend/van_gateway/app.py" in found
+    assert module._production_references("ZzzNotARealSymbolAnywhere", None) == []

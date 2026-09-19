@@ -40,7 +40,6 @@ from __future__ import annotations
 import argparse
 import json
 import re
-import subprocess
 import sys
 from pathlib import Path
 
@@ -49,6 +48,15 @@ DEFAULT_LEDGER = ROOT / "evidence" / "van-system-audit" / "component_ledger.json
 
 #: Where production code lives. A reference from anywhere else is not a production consumer.
 PRODUCTION_ROOTS = ("backend/van_gateway", "android/app/src/main", "trading", "registries")
+
+#: Searched in pure Python rather than by shelling out to ripgrep.
+#:
+#: The first version ran `rg`. It passed here and failed in CI with FileNotFoundError,
+#: because the GitHub runner has no ripgrep — a checker built to run in the authority that
+#: could not run in the authority. Depending on a binary that may not exist is the same
+#: class of assumption as depending on a network the proxy refuses, and this programme has
+#: now been caught by both.
+SEARCHABLE_SUFFIXES = frozenset({".py", ".kt", ".kts", ".json", ".yaml", ".yml", ".xml"})
 
 #: Maturity classes that assert nothing reaches this component. These are the claims this
 #: tool can falsify; the rest (STUB, ABSENT, PARTIAL, SIMULATED) are claims about what the
@@ -103,12 +111,25 @@ def _production_references(
     call each other — which is how `MissionRepository`, constructed by nothing, made the
     gateway reads it wraps look alive.
     """
-    result = subprocess.run(
-        ["rg", "-l", "--no-messages", rf"\b{re.escape(symbol)}\b", *PRODUCTION_ROOTS],
-        cwd=ROOT, capture_output=True, text=True,
-    )
-    files = [f for f in result.stdout.splitlines() if f]
-    return [f for f in files if is_production_file(f, own_path, excludes)]
+    pattern = re.compile(rf"\b{re.escape(symbol)}\b")
+    hits: list[str] = []
+    for root in PRODUCTION_ROOTS:
+        base = ROOT / root
+        if not base.is_dir():
+            continue
+        for path in base.rglob("*"):
+            if not path.is_file() or path.suffix not in SEARCHABLE_SUFFIXES:
+                continue
+            relative = path.relative_to(ROOT).as_posix()
+            if not is_production_file(relative, own_path, excludes):
+                continue
+            try:
+                text = path.read_text(encoding="utf-8", errors="ignore")
+            except OSError:
+                continue
+            if pattern.search(text):
+                hits.append(relative)
+    return sorted(hits)
 
 
 def reconcile(ledger_path: Path | None = None) -> tuple[list[str], list[str], list[str]]:
