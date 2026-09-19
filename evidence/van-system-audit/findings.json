@@ -405,8 +405,24 @@
       "root_cause": "RC3",
       "remediation": "Derive real ContextRequirements from project_id and resolver output before sealing.",
       "validation_gate": "G6",
-      "current_status": "OPEN",
-      "remediation_gate": "GATE 4"
+      "current_status": "CLOSED",
+      "remediation_gate": "GATE 4",
+      "closure": {
+        "summary": "The orchestrator derives real ContextRequirements from the command text, the project and the resolved action before sealing the snapshot, instead of passing an empty list. The snapshot records how many were asked and how readiness came out, so the canonical context handed to Hermes says what VAN knew.",
+        "changed": [
+          "backend/van_gateway/command/context_requirements.py",
+          "backend/van_gateway/orchestrator.py",
+          "backend/van_gateway/context/service.py",
+          "backend/van_gateway/context/models.py"
+        ],
+        "verified_by": [
+          "backend/tests/test_owner_context_is_real.py::TestRequirementsAreDerived",
+          "backend/tests/test_owner_context_is_real.py::TestTheSnapshotCarriesFacts"
+        ],
+        "residual": "Everything derived is advisory rather than blocking.",
+        "residual_reason": "The gates that refuse a command already exist and are stricter — project truth, action class, content trust — and a second gate that disagreed with them would make the system harder to reason about, not safer. A readiness signal that is always red trains everyone to ignore it, which is the mirror image of the defect. The `blocking` field defaults to True so every caller written before it existed keeps its behaviour exactly; only the derived requirements opt out, and they say where and why.",
+        "posture": "The test that matters asserts a fresh system reports MISSING rather than CURRENT. Claiming CURRENT while knowing nothing was the defect, and an advisory requirement that is never reported would be the same defect with more code."
+      }
     },
     {
       "id": "P0-CTX-002",
@@ -432,8 +448,22 @@
       "root_cause": "RC3",
       "remediation": "Add an owner-facing fact writer and a Project Truth importer for the authoritative tiers.",
       "validation_gate": "G6",
-      "current_status": "OPEN",
-      "remediation_gate": "GATE 4"
+      "current_status": "CLOSED",
+      "remediation_gate": "GATE 4",
+      "closure": {
+        "summary": "Two writers for the tiers that had none. OwnerFactAuthor writes CANONICAL_OWNER from a device-signed statement, exposed at POST /v1/context/facts; ProjectTruthImporter writes PROJECT_TRUTH from the SHA-pinned truth document when it is cached, so the facts and the cache cannot disagree about which SHA is current.",
+        "changed": [
+          "backend/van_gateway/context/authoring.py",
+          "backend/van_gateway/app.py"
+        ],
+        "verified_by": [
+          "backend/tests/test_owner_context_is_real.py::TestTheAuthoritativeTiersHaveWriters",
+          "backend/tests/test_owner_context_is_real.py::TestTheSnapshotCarriesFacts::test_an_owner_stated_fact_reaches_the_canonical_context"
+        ],
+        "residual": "The VERIFIED_LIVE_STATE and VERIFIED_HISTORY tiers still have no writer.",
+        "residual_reason": "A verified fact needs a verifier that observed it, and the verifier registry only reaches two systems today (P0-VERIFY-001's residual). Writing those tiers from anything less would be the same defect this closes, one tier down.",
+        "posture": "Each author is bound to one tier rather than taking a tier parameter and trusting the caller, which is the shape the audit found everywhere else. A test asserts the tiers are disjoint per author, and another asserts that what production can now write is exactly what retrieval reads."
+      }
     },
     {
       "id": "P0-COG-001",
@@ -458,8 +488,22 @@
       "root_cause": "RC3",
       "remediation": "Either implement a real critic pass over supplied evidence and expose a route plus MCP tool, or withdraw the claim from the matrix.",
       "validation_gate": "G1 or G6",
-      "current_status": "OPEN",
-      "remediation_gate": "GATE 4"
+      "current_status": "CLOSED",
+      "remediation_gate": "GATE 4",
+      "closure": {
+        "summary": "critic.py is an executable critic pass over what an assessment actually contains, and MissionService... the kernel now derives its own findings and merges caller-supplied ones rather than accepting them as the whole critique. The audit's probe — a fabricated fact with an invented source, zero findings and 0.99 confidence — now yields a HIGH motivated_reasoning finding and is_actionable False.",
+        "changed": [
+          "backend/van_gateway/reasoning/critic.py",
+          "backend/van_gateway/reasoning/kernel.py"
+        ],
+        "verified_by": [
+          "backend/tests/test_cognition_is_real.py::TestTheCriticActuallyRuns",
+          "backend/tests/test_cognition_is_real.py::TestTheKernelCannotBeHandedItsOwnVerdict"
+        ],
+        "residual": "There is no solver and no verifier pass, and the critic checks nothing a language model would be better at.",
+        "residual_reason": "A critic that needs a model call to run is the thing being criticised, and a stub returning 'looks fine' would be exactly the defect this closes. Four checks earn their place because each is computable from the assessment alone and can fail on real input. Whether the reasoning is *good* is a critic model VAN does not have, and the matrix claim about solver/critic/verifier separation should be narrowed to what exists rather than left standing.",
+        "posture": "A critic that always fires is a critic nobody reads, so a well-formed assessment produces no findings and a test asserts it. Each check is paired with the case it must not flag."
+      }
     },
     {
       "id": "P0-VERIFY-001",
@@ -1210,8 +1254,24 @@
       "root_cause": "see s32 root-cause map",
       "remediation": "Bind episode_ref to real mission or command identifiers; distinguish evidence-derived from owner-confirmed in owner-facing text.",
       "validation_gate": "G6",
-      "current_status": "OPEN",
-      "remediation_gate": "GATE 4"
+      "current_status": "CLOSED",
+      "remediation_gate": "GATE 4",
+      "closure": {
+        "summary": "episode_ref must name a mission or a command that exists, so three typos are no longer three episodes. The evidence ladder tops out at a new EVIDENCED state; CONFIRMED is reachable only through the owner's own confirm(). The calibration engine names the provenance it actually has, so a preference VAN inferred is described as observed, not as owner-confirmed.",
+        "changed": [
+          "backend/van_gateway/understanding/owner_model.py",
+          "backend/van_gateway/reasoning/calibration.py"
+        ],
+        "verified_by": [
+          "backend/tests/test_epistemics_context_understanding.py::test_evidence_promotes_to_candidate_then_evidenced_but_never_confirmed",
+          "backend/tests/test_epistemics_context_understanding.py::test_an_episode_that_did_not_happen_is_not_evidence",
+          "backend/tests/test_relationship_calibration.py::test_only_confirmed_preferences_change_behaviour",
+          "backend/tests/test_relationship_calibration.py::test_an_owner_confirmed_preference_is_named_as_theirs"
+        ],
+        "residual": "EVIDENCED is still actionable, so VAN acts on preferences the owner has not confirmed.",
+        "residual_reason": "Refusing to act on a well-evidenced preference would make VAN useless until the owner had answered a questionnaire. What was wrong was not that VAN acted on it, but that it told the owner they had asked for it. The two states are now distinguishable and the owner-facing text says which one it is.",
+        "posture": "Telling the owner they asked for something they never asked for is a small lie that makes every other claim about what VAN knows less believable. Both halves are tested: an evidenced preference must not be described as confirmed, and a confirmed one must be."
+      }
     },
     {
       "id": "P1-LEARN-001",
@@ -1233,8 +1293,25 @@
       "root_cause": "see s32 root-cause map",
       "remediation": "Record mission outcomes, verification receipts and owner corrections into the learning stores.",
       "validation_gate": "G6",
-      "current_status": "OPEN",
-      "remediation_gate": "GATE 4"
+      "current_status": "CLOSED",
+      "remediation_gate": "GATE 4",
+      "closure": {
+        "summary": "LearningFeed records the two events VAN actually has: a mission reaching a terminal state, written by MissionService.transition, and an owner correction, written by OwnerCognitiveModel.correct into the growth ledger. evidence_rate() computes what VanEval wanted and could not — how often a finished mission produced something checkable.",
+        "changed": [
+          "backend/van_gateway/learning/feed.py",
+          "backend/van_gateway/mission/service.py",
+          "backend/van_gateway/understanding/owner_model.py",
+          "backend/van_gateway/understanding/api.py",
+          "backend/van_gateway/storage/db.py",
+          "backend/van_gateway/app.py"
+        ],
+        "verified_by": [
+          "backend/tests/test_cognition_is_real.py::TestOutcomesReachTheLearningStores"
+        ],
+        "residual": "AIEvolutionRadar, BenchmarkHarness and DomainTrust still have no production feed, and VanEval's thresholds are unchanged.",
+        "residual_reason": "Those three need signals VAN does not yet produce — external model releases, a benchmark run, a per-domain outcome history long enough to be a trust score. Feeding them from what exists would mean inventing the signal, which is the defect. What was reachable was the outcome record they all ultimately need, and that now exists and is populated by production.",
+        "posture": "The feed deliberately does not *conclude* anything. Recording that VAN changed its behaviour when it has not would be the same defect one layer up, so the growth ledger is written only where an adaptation genuinely happened — an owner correction that superseded an assertion. A system that has done nothing reports a verified_rate of None rather than 0.0, because zero reads as failure."
+      }
     },
     {
       "id": "P1-BROW-002",
@@ -1603,8 +1680,22 @@
       "root_cause": "see s32 root-cause map",
       "remediation": "Choose one taxonomy and enforce it at admission.",
       "validation_gate": "G1",
-      "current_status": "OPEN",
-      "remediation_gate": "GATE 4"
+      "current_status": "CLOSED",
+      "remediation_gate": "GATE 4",
+      "closure": {
+        "summary": "EpistemicState is the one enforced taxonomy. SemanticClass becomes definitional: reconciliation.py maps every epistemic state onto a semantic class and enforces FORBIDDEN_SELF_PROMOTIONS at owner_facts admission, so a model inference can no longer be superseded into a verified fact. That rule was the only thing the second taxonomy contributed and nothing had ever enforced it.",
+        "changed": [
+          "backend/van_gateway/epistemics/reconciliation.py",
+          "backend/van_gateway/context/service.py"
+        ],
+        "verified_by": [
+          "backend/tests/test_cognition_is_real.py::TestOneTaxonomyIsEnforced",
+          "backend/tests/test_cognition_is_real.py::TestTheRuleIsEnforcedAtAdmission"
+        ],
+        "residual": "SemanticClass, Claim and the rest of the epistemics module still exist as types with no storage.",
+        "residual_reason": "Deleting them would also delete FORBIDDEN_SELF_PROMOTIONS and the class definitions the mapping and the reasoning kernel now depend on. They are definitional rather than aspirational now, which is the difference the finding was about: a reader can tell which vocabulary is enforced, because there is only one, and where the other one's rules ended up.",
+        "posture": "The direction of the merge is the decision: EpistemicState is enforced at the boundary that matters and every fact already carries it, so migrating the other way would mean rewriting the admission gate to enforce something nothing has ever produced. The mapping is total over EpistemicState and a test asserts it, because a state with no class would silently escape the promotion rule."
+      }
     },
     {
       "id": "P2-MEM-002",
@@ -1624,8 +1715,21 @@
       "root_cause": "see s32 root-cause map",
       "remediation": "Add owner-facing deletion for every store that holds owner-derived data.",
       "validation_gate": "G1",
-      "current_status": "OPEN",
-      "remediation_gate": "GATE 4"
+      "current_status": "CLOSED",
+      "remediation_gate": "GATE 4",
+      "closure": {
+        "summary": "OwnerMemory gives the owner an inventory of every store holding owner-derived material and a way to clear all of it or one of it, at GET and DELETE /v1/context/memory. Eleven stores are covered where two were.",
+        "changed": [
+          "backend/van_gateway/context/forget.py",
+          "backend/van_gateway/app.py"
+        ],
+        "verified_by": [
+          "backend/tests/test_cognition_is_real.py::TestTheOwnerCanBeForgotten"
+        ],
+        "residual": "The audit ledger and the missions table are deliberately not clearable.",
+        "residual_reason": "The audit ledger records what VAN did on the owner's authority, not what it concluded about them, and erasing it would destroy the hash-chained evidence trail that makes every other claim checkable — including the claim that the deletion happened. Missions are the owner's own work, and cancellation is the control that belongs there. Both are named in DELIBERATELY_KEPT with the reason and returned with every forget, so the omission is visible rather than silent.",
+        "posture": "Forget means delete, not tombstone: a row kept with a flag is still there, and the flag is one query away from being ignored. Nothing is forgotten by inference — each store is named with the column that scopes it — and the whole operation runs in one transaction, because a partial forget is worse than none when the owner is told it happened."
+      }
     },
     {
       "id": "P2-UX-001",
@@ -1732,8 +1836,23 @@
       "root_cause": "see s32 root-cause map",
       "remediation": "Restrict fallback selection to capabilities with a readiness source and an implementation.",
       "validation_gate": "G1",
-      "current_status": "OPEN",
-      "remediation_gate": "GATE 4"
+      "current_status": "CLOSED",
+      "remediation_gate": "GATE 4",
+      "closure": {
+        "summary": "Every Google capability declares an executor — gateway, hermes, or null for a surface nothing in VAN can run — and the router skips a capability with none, as a direct candidate or as a fallback. workspace_studio, the fallback for workspace_operation whose primary is gateway code, is one of the three with none.",
+        "changed": [
+          "registries/google_capabilities.json",
+          "backend/van_gateway/google/mesh.py"
+        ],
+        "verified_by": [
+          "backend/tests/test_google_mesh.py::test_a_fallback_nothing_can_execute_is_not_a_fallback",
+          "backend/tests/test_google_mesh.py::test_a_fallback_something_can_execute_still_works",
+          "backend/tests/test_google_mesh.py::test_every_capability_declares_an_executor"
+        ],
+        "residual": "The 'hermes' executor is taken from what the registry declares, not from anything this repository can verify.",
+        "residual_reason": "Hermes is an external runtime that is not in this repository, so which workers it actually implements cannot be checked here. What can be checked, and now is, is that a capability declaring no executor at all is never routed to — which is the case the finding names.",
+        "posture": "Offering a capability nothing can execute as a fallback turns 'the preferred surface is unavailable' into 'the operation was planned', which is worse than an honest refusal. The test that changed most is the old one, which asserted `planned` on workspace_studio as correct behaviour."
+      }
     },
     {
       "id": "P2-SEC-008",

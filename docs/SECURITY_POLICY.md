@@ -19,15 +19,7 @@ Hermes profile `van` is the sole agent runtime. Android, the gateway, Gemini Liv
 
 Browser workers are the one permitted **subagent** of that runtime. Within a task Hermes has assigned — with an explicit goal, domain scope and step budget — a browser worker may select its own actions. It remains subordinate: it cannot create a VAN command, raise an action class, change its goal, extend its own budget, deadline or scope, or continue after the budget is exhausted. Every step is attributed to the assigning Hermes turn. A subagent is not an independent agent loop, and no other surface gains this status.
 
-Privileged Hermes→gateway Google job planning, job inspection and artifact recording require a credential carrying the `google` control scope, presented via `X-Van-Internal-Token`. If no control credential is configured, those operations fail closed.
-
-Since P0-SEC-001 the privileged credential is scoped rather than root. A route belongs to exactly one control scope, and a credential carries a set of them:
-
-- `VAN_INTERNAL_CONTROL_TOKEN` — the legacy single token, which now carries every scope **except** `device_enrolment`.
-- `VAN_INTERNAL_CONTROL_SCOPED_TOKENS` — per-purpose credentials, `scope,scope:token; scope:token`.
-- `VAN_DEVICE_ENROLMENT_TOKEN` — the only credential that can mint a pairing ticket, enrol a device or revoke one. It is the only path to owner-device authority, and the Hermes MCP shim does not read it.
-
-Two properties matter more than the split itself. A failed internal check is **terminal**: an internal-control route answers 403 and never falls back to owner-device authentication, which it used to do. And an owner device token is never an answer to a privileged control route, however valid it is.
+Privileged Hermes→gateway Google job planning, job inspection and artifact recording require `VAN_INTERNAL_CONTROL_TOKEN` via `X-Van-Internal-Token`. If the control token is absent, those operations fail closed.
 
 ## Automation Fabric boundary
 

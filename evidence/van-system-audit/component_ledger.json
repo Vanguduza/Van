@@ -4,15 +4,15 @@
   "canonical_blueprint": "docs/VAN_FINISHED_PRODUCT_BLUEPRINT_REV_1.md",
   "canonical_audit": "docs/VAN_WHOLE_SYSTEM_IMPLEMENTATION_AUDIT_AND_CERTIFICATION_REV_1.md",
   "created": "2026-09-19",
-  "component_count": 90,
+  "component_count": 97,
   "dispositions": {
     "DELETE": 11,
     "REPLACE": 4,
-    "COMPLETE": 37,
-    "WIRE": 38
+    "COMPLETE": 43,
+    "WIRE": 39
   },
   "by_gate": {
-    "GATE 4": 29,
+    "GATE 4": 36,
     "GATE 2": 10,
     "GATE 3": 9,
     "GATE 9": 9,
@@ -1672,6 +1672,149 @@
           "requestA4Approval"
         ]
       }
+    },
+    {
+      "n": 91,
+      "component": "Command context requirements",
+      "path": "backend/van_gateway/command/context_requirements.py",
+      "maturity_class": "ABSENT",
+      "disposition": "COMPLETE",
+      "rationale": "The orchestrator sealed every snapshot with an empty requirements list, so readiness was trivially CURRENT and the canonical context carried no owner facts",
+      "remediation_gate": "GATE 4",
+      "producer": "backend/van_gateway/command/context_requirements.py derive",
+      "consumer": "OwnerContextService.compile_snapshot and the canonical_context handed to Hermes",
+      "production_caller": "backend/van_gateway/orchestrator.py handle, on every command",
+      "tests": [
+        "backend/tests/test_owner_context_is_real.py::TestRequirementsAreDerived"
+      ],
+      "runtime_evidence": [
+        "a fresh system reports readiness MISSING rather than CURRENT; an owner-stated timezone makes the same command report CURRENT with a fact id"
+      ],
+      "owner_facing_projection": "the snapshot's requirements_asked and readiness, carried into the evidence trail",
+      "terminal_state": "INTEGRATED_AND_EVIDENCED"
+    },
+    {
+      "n": 92,
+      "component": "Authoritative tier writers",
+      "path": "backend/van_gateway/context/authoring.py",
+      "maturity_class": "ABSENT",
+      "disposition": "COMPLETE",
+      "rationale": "The only production writer was the Hermes admission route, limited to INFERRED/MODEL_DERIVED, which is the one tier retrieval excludes",
+      "remediation_gate": "GATE 4",
+      "producer": "OwnerFactAuthor and ProjectTruthImporter",
+      "consumer": "OwnerContextService.resolve_requirement, and every command's canonical context",
+      "production_caller": "backend/van_gateway/app.py POST /v1/context/facts and PUT /v1/projects/{id}/truth",
+      "tests": [
+        "backend/tests/test_owner_context_is_real.py::TestTheAuthoritativeTiersHaveWriters"
+      ],
+      "runtime_evidence": [
+        "a device-signed statement is stored at CANONICAL_OWNER and reaches the next command's context; a truth document without a SHA is refused"
+      ],
+      "owner_facing_projection": "the Understanding surface and the mission evidence route",
+      "terminal_state": "INTEGRATED_AND_EVIDENCED"
+    },
+    {
+      "n": 93,
+      "component": "Reasoning critic pass",
+      "path": "backend/van_gateway/reasoning/critic.py",
+      "maturity_class": "ABSENT",
+      "disposition": "COMPLETE",
+      "rationale": "assess() took its own critique as an argument, so an assessment with zero findings and 0.99 confidence was recorded as actionable",
+      "remediation_gate": "GATE 4",
+      "producer": "backend/van_gateway/reasoning/critic.py critique",
+      "consumer": "CriticalReasoningKernel.assess, which merges caller findings with its own",
+      "production_caller": "CriticalReasoningKernel.assess on every assessment",
+      "tests": [
+        "backend/tests/test_cognition_is_real.py::TestTheCriticActuallyRuns",
+        "backend/tests/test_cognition_is_real.py::TestTheKernelCannotBeHandedItsOwnVerdict"
+      ],
+      "runtime_evidence": [
+        "the audit's probe now yields a HIGH motivated_reasoning finding and is_actionable False; a well-formed assessment yields none"
+      ],
+      "owner_facing_projection": "the assessment's critic findings, shown with the recommendation",
+      "terminal_state": "INTEGRATED_AND_EVIDENCED"
+    },
+    {
+      "n": 94,
+      "component": "Learning outcome feed",
+      "path": "backend/van_gateway/learning/feed.py",
+      "maturity_class": "ABSENT",
+      "disposition": "COMPLETE",
+      "rationale": "Five learning stores had correct invariants and no caller that recorded a real outcome, so VanEval scored a system that had done nothing the same as one that had done everything right",
+      "remediation_gate": "GATE 4",
+      "producer": "LearningFeed.record_mission_outcome and record_owner_correction",
+      "consumer": "learning_outcomes and symbiotic_growth; evidence_rate over them",
+      "production_caller": "MissionService.transition on every terminal state; OwnerCognitiveModel.correct",
+      "tests": [
+        "backend/tests/test_cognition_is_real.py::TestOutcomesReachTheLearningStores"
+      ],
+      "runtime_evidence": [
+        "a mission reaching FAILED writes one outcome row; a running mission writes none; an owner correction reaches the growth ledger"
+      ],
+      "owner_facing_projection": "the verified rate, which is None rather than zero when nothing has finished",
+      "terminal_state": "INTEGRATED_AND_EVIDENCED"
+    },
+    {
+      "n": 95,
+      "component": "One enforced epistemic taxonomy",
+      "path": "backend/van_gateway/epistemics/reconciliation.py",
+      "maturity_class": "IMPLEMENTED_BUT_ISOLATED",
+      "disposition": "WIRE",
+      "rationale": "EpistemicState was enforced and stored while SemanticClass with FORBIDDEN_SELF_PROMOTIONS had zero production callers and no table",
+      "remediation_gate": "GATE 4",
+      "producer": "backend/van_gateway/epistemics/reconciliation.py check_promotion",
+      "consumer": "OwnerContextService.admit_fact, on every supersession",
+      "production_caller": "backend/van_gateway/context/service.py admit_fact",
+      "tests": [
+        "backend/tests/test_cognition_is_real.py::TestOneTaxonomyIsEnforced",
+        "backend/tests/test_cognition_is_real.py::TestTheRuleIsEnforcedAtAdmission"
+      ],
+      "runtime_evidence": [
+        "an INFERRED fact superseded by a VERIFIED_LIVE_STATE one is refused at admission with the promotion named"
+      ],
+      "owner_facing_projection": null,
+      "terminal_state": "INTEGRATED_AND_EVIDENCED"
+    },
+    {
+      "n": 96,
+      "component": "Owner memory erasure",
+      "path": "backend/van_gateway/context/forget.py",
+      "maturity_class": "ABSENT",
+      "disposition": "COMPLETE",
+      "rationale": "Only owner_facts and owner_context_edges had an erase path; nine other stores accumulated owner-derived material with no way out",
+      "remediation_gate": "GATE 4",
+      "producer": "OwnerMemory.inventory and forget_all",
+      "consumer": "GET and DELETE /v1/context/memory",
+      "production_caller": "backend/van_gateway/app.py owner_memory_inventory and owner_memory_forget",
+      "tests": [
+        "backend/tests/test_cognition_is_real.py::TestTheOwnerCanBeForgotten"
+      ],
+      "runtime_evidence": [
+        "every store in FORGETTABLE reports its row count and is cleared in one transaction; the audit ledger is named as kept with its reason"
+      ],
+      "owner_facing_projection": "the inventory the owner reads before deciding, and the per-store counts after",
+      "terminal_state": "INTEGRATED_AND_EVIDENCED"
+    },
+    {
+      "n": 97,
+      "component": "Google capability executors",
+      "path": "registries/google_capabilities.json",
+      "maturity_class": "ABSENT",
+      "disposition": "COMPLETE",
+      "rationale": "workspace_studio, with no implementation anywhere, was selectable as the routing fallback for workspace_operation",
+      "remediation_gate": "GATE 4",
+      "producer": "the executor field on every capability in the registry",
+      "consumer": "GoogleCapabilityRouter.plan candidate selection",
+      "production_caller": "backend/van_gateway/google/mesh.py plan",
+      "tests": [
+        "backend/tests/test_google_mesh.py::test_a_fallback_nothing_can_execute_is_not_a_fallback",
+        "backend/tests/test_google_mesh.py::test_every_capability_declares_an_executor"
+      ],
+      "runtime_evidence": [
+        "a workspace_operation route no longer returns planned on workspace_studio; antigravity to jules still falls back"
+      ],
+      "owner_facing_projection": "the degraded reason names no_executor_implemented rather than reporting a plan",
+      "terminal_state": "INTEGRATED_AND_EVIDENCED"
     }
   ],
   "gate_0_status": {

@@ -2,6 +2,7 @@ from __future__ import annotations
 
 from contextlib import asynccontextmanager
 import hmac
+from typing import Any
 from pathlib import Path
 
 from fastapi import FastAPI, Header, HTTPException, Request
@@ -14,6 +15,13 @@ from van_gateway.auth.service import AuthError, AuthService
 from van_gateway.approval.service import OwnerApprovalError, OwnerApprovalService
 from van_gateway.auth.control_scopes import ControlAuthority, ControlScope
 from van_gateway.auth.rotation import CredentialRotation
+from van_gateway.context.forget import OwnerMemory
+from van_gateway.learning.feed import LearningFeed
+from van_gateway.context.authoring import (
+    ContextAuthoringError,
+    OwnerFactAuthor,
+    ProjectTruthImporter,
+)
 from van_gateway.auth.throttle import GLOBAL_SUBJECT, AuthThrottle, Throttled
 from van_gateway.command.mission_link import CommandMissionLink
 from van_gateway.briefing.service import BriefingService
@@ -143,6 +151,14 @@ class AccountChallengeRequest(BaseModel):
     args: dict = Field(default_factory=dict)
 
 
+class OwnerFactBody(BaseModel):
+    subject: str = Field(min_length=1)
+    predicate: str = Field(min_length=1)
+    value: Any
+    scope: str = "global"
+    valid_until_ms: int | None = None
+
+
 class OwnerHaltRequest(BaseModel):
     owner_signature_ref: str = Field(min_length=1)
     reason: str = ""
@@ -161,6 +177,7 @@ def create_app() -> FastAPI:
     auth = AuthService(store, settings.device_secret_fernet_key)
     throttle = AuthThrottle()
     rotation = CredentialRotation(store)
+    # P0-CTX-002 — writers for the authoritative epistemic tiers, which had none.
     # P0-SEC-001 — scoped privileged credentials, so one token is no longer root.
     control_authority = ControlAuthority(
         legacy_token=settings.internal_control_token,
@@ -270,8 +287,10 @@ def create_app() -> FastAPI:
     # than at construction because the Google service the READ_BACK observer reads is
     # built after the dispatcher, and reordering that is a larger change than this is.
     automation_dispatcher.verifier = build_automation_verifier(store=store, google=google)
+    learning = LearningFeed(store)
     missions = MissionService(
-        store, capabilities=capability_registry, bus=events, verifiers=verifiers
+        store, capabilities=capability_registry, bus=events, verifiers=verifiers,
+        learning=learning,
     )
     mission_api = MissionApi(
         store, settings, missions=missions, registry=capability_registry,
@@ -280,6 +299,10 @@ def create_app() -> FastAPI:
     # §5 — one binder shared by every executor, so browser tasks and
     # automation runs become Activities as they happen rather than by a
     # later backfill.
+    owner_fact_author = OwnerFactAuthor(owner_runtime.context)
+    truth_importer = ProjectTruthImporter(owner_runtime.context)
+    # P2-MEM-002 — the owner's ability to end what VAN concluded about them.
+    owner_memory = OwnerMemory(store)
     mission_binder = MissionBinder(store, missions)
     # P0-EXEC-001 — the join that makes an accepted command a durable mission.
     command_missions = CommandMissionLink(missions)
@@ -324,6 +347,10 @@ def create_app() -> FastAPI:
     app.state.auth_throttle = throttle
     app.state.credential_rotation = rotation
     app.state.control_authority = control_authority
+    app.state.owner_fact_author = owner_fact_author
+    app.state.truth_importer = truth_importer
+    app.state.owner_memory = owner_memory
+    app.state.learning = learning
     app.state.degraded = degraded
     app.state.google = google
     app.state.google_broker = google_broker
@@ -789,7 +816,94 @@ def create_app() -> FastAPI:
         if body_project is not None and str(body_project) != project_id:
             raise HTTPException(status_code=400, detail="truth_project_mismatch")
         await projects.cache_truth(project_id, body.truth, body.truth_sha, body.repo_sha)
-        return await projects.load_truth(project_id)
+        # P0-CTX-002 — the PROJECT_TRUTH tier had no writer, so it was empty in every
+        # deployment while retrieval happily excluded the one tier that did. Importing
+        # here rather than on a separate route means the facts and the cache cannot
+        # disagree about which SHA is current.
+        loaded = await projects.load_truth(project_id)
+        try:
+            imported = await truth_importer.import_truth(
+                project_id, {**loaded, "truth_sha": body.truth_sha}
+            )
+        except ContextAuthoringError as exc:
+            raise HTTPException(status_code=400, detail=str(exc)) from exc
+        return {**loaded, "facts_imported": len(imported)}
+
+    @app.post("/v1/context/facts")
+    async def state_owner_fact(request: Request, body: OwnerFactBody):
+        """The owner saying something about themselves, at CANONICAL_OWNER.
+
+        P0-CTX-002 — the only production writer was the Hermes admission route, correctly
+        limited to INFERRED/MODEL_DERIVED, which is the one tier retrieval excludes. So
+        the authoritative tiers were empty everywhere. This is the writer that fills them,
+        and it is device-authenticated because a canonical fact about the owner can only
+        come from the owner.
+        """
+        device_id = getattr(request.state, "van_device_id", None)
+        if not device_id:
+            raise HTTPException(status_code=403, detail="device_identity_required")
+        record = await owner_fact_author.state(
+            device_id=device_id,
+            subject=body.subject,
+            predicate=body.predicate,
+            value=body.value,
+            scope=body.scope,
+            valid_until_ms=body.valid_until_ms,
+        )
+        await audit.record(
+            result="ok", device_id=device_id, capability="context.owner_fact.state",
+            after={"subject": body.subject, "predicate": body.predicate, "scope": body.scope},
+        )
+        return record.model_dump(mode="json")
+
+    @app.get("/v1/context/memory")
+    async def owner_memory_inventory(request: Request):
+        """P2-MEM-002 — what VAN holds about the owner, before deciding to end it."""
+        device_id = getattr(request.state, "van_device_id", None)
+        if not device_id:
+            raise HTTPException(status_code=403, detail="device_identity_required")
+        return await owner_memory.inventory()
+
+    @app.delete("/v1/context/memory")
+    async def owner_memory_forget(request: Request, store: str | None = None):
+        """Delete what VAN has concluded about the owner.
+
+        P2-MEM-002 — only owner_facts and owner_context_edges could be erased. The
+        cognitive model, the reasoning ledger, the growth ledger, strategic memory,
+        decision fingerprints, the shared vocabulary and the intent graph all accumulated
+        owner-derived material with no way out.
+        """
+        device_id = getattr(request.state, "van_device_id", None)
+        if not device_id:
+            raise HTTPException(status_code=403, detail="device_identity_required")
+        if store:
+            try:
+                removed = await owner_memory.forget_store(store)
+            except ValueError as exc:
+                raise HTTPException(status_code=404, detail=str(exc)) from exc
+            result = {"removed": {store: removed}}
+        else:
+            result = await owner_memory.forget_all()
+        await audit.record(
+            result="ok", device_id=device_id, capability="context.memory.forget",
+            after={"removed": result["removed"]},
+        )
+        return result
+
+    @app.delete("/v1/context/facts")
+    async def forget_owner_fact(
+        request: Request, subject: str, predicate: str, scope: str = "global"
+    ):
+        """P2-MEM-002 — the owner's own way to end a fact they stated."""
+        device_id = getattr(request.state, "van_device_id", None)
+        if not device_id:
+            raise HTTPException(status_code=403, detail="device_identity_required")
+        ended = await owner_fact_author.forget(subject=subject, predicate=predicate, scope=scope)
+        await audit.record(
+            result="ok", device_id=device_id, capability="context.owner_fact.forget",
+            after={"subject": subject, "predicate": predicate, "ended": ended},
+        )
+        return {"subject": subject, "predicate": predicate, "scope": scope, "ended": ended}
 
     # There is deliberately no route that swaps the live Google transport for a fake.
     # /v1/google/test-transport used to do exactly that on the running production app, with

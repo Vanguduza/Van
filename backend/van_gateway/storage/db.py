@@ -8,7 +8,7 @@ from typing import Any, AsyncIterator
 
 import aiosqlite
 
-SCHEMA_VERSION = 18
+SCHEMA_VERSION = 19
 
 
 MIGRATION_17 = """
@@ -42,6 +42,25 @@ MIGRATION_18 = """
 CREATE UNIQUE INDEX IF NOT EXISTS idx_missions_source_command
   ON missions(json_extract(authority_envelope_json, '$.source_command_id'))
   WHERE json_extract(authority_envelope_json, '$.source_command_id') IS NOT NULL;
+"""
+
+MIGRATION_19 = """
+-- P1-LEARN-001: the learning stores had correct invariants and no caller that recorded a
+-- real outcome, so VanEval scored a system that had done nothing the same as one that had
+-- done everything right. This is the table the production feed writes to.
+CREATE TABLE IF NOT EXISTS learning_outcomes (
+  outcome_id TEXT PRIMARY KEY,
+  mission_id TEXT NOT NULL,
+  outcome_kind TEXT NOT NULL,
+  goal TEXT NOT NULL,
+  verification_status TEXT,
+  evidence_refs_json TEXT NOT NULL DEFAULT '[]',
+  recorded_at_ms INTEGER NOT NULL
+);
+CREATE INDEX IF NOT EXISTS idx_learning_outcomes_kind
+  ON learning_outcomes(outcome_kind, recorded_at_ms);
+CREATE UNIQUE INDEX IF NOT EXISTS idx_learning_outcomes_mission
+  ON learning_outcomes(mission_id);
 """
 
 MIGRATIONS: dict[int, str] = {
@@ -1364,6 +1383,7 @@ MIGRATIONS: dict[int, str] = {
     """,
     17: MIGRATION_17,
     18: MIGRATION_18,
+    19: MIGRATION_19,
 }
 
 

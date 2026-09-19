@@ -23,6 +23,7 @@ from van_gateway.context.models import (
     SensitivityClass,
     SourceTrust,
 )
+from van_gateway.epistemics.reconciliation import PromotionRefused, check_promotion
 from van_gateway.storage.db import Store
 
 
@@ -122,6 +123,18 @@ class OwnerContextService:
                 prior_authority = EpistemicState(str(prior["authority"]))
                 if _AUTHORITY_RANK[candidate.authority] < _AUTHORITY_RANK[prior_authority]:
                     raise ContextAdmissionError("lower-authority fact cannot supersede higher-authority fact")
+                # P2-COG-002 — the rank check asks whether the new fact outranks the old
+                # one. This asks whether the *kind* of claim changed in a way that needs
+                # authority the new fact does not have, which is what
+                # FORBIDDEN_SELF_PROMOTIONS was written to name and nothing enforced.
+                try:
+                    check_promotion(
+                        prior=prior_authority,
+                        proposed=candidate.authority,
+                        proposed_trust=candidate.source_trust,
+                    )
+                except PromotionRefused as exc:
+                    raise ContextAdmissionError(str(exc)) from exc
                 if prior["valid_until_ms"] is None:
                     await db.execute(
                         "UPDATE owner_facts SET valid_until_ms = ?, updated_at_unix_ms = ? WHERE fact_id = ?",
@@ -227,20 +240,35 @@ class OwnerContextService:
             return RequirementResolution(requirement=requirement, state=ReadinessState.STALE, fact=selected, reason="fact_exceeds_max_age")
         return RequirementResolution(requirement=requirement, state=ReadinessState.CURRENT, fact=selected)
 
-    async def readiness(self, command_id: str, requirements: list[ContextRequirement], now_ms: int | None = None) -> ContextReadiness:
-        resolutions = [await self.resolve_requirement(req, now_ms=now_ms) for req in requirements]
-        states = {item.state for item in resolutions}
+    @staticmethod
+    def _worst(states: set[ReadinessState]) -> ReadinessState:
         if ReadinessState.CONFLICTED in states:
-            overall = ReadinessState.CONFLICTED
-        elif ReadinessState.MISSING in states:
-            overall = ReadinessState.MISSING
-        elif ReadinessState.STALE in states:
-            overall = ReadinessState.STALE
-        elif all(state == ReadinessState.CURRENT for state in states):
-            overall = ReadinessState.CURRENT
-        else:
-            overall = ReadinessState.UNKNOWN
-        return ContextReadiness(command_id=command_id, state=overall, requirements=resolutions)
+            return ReadinessState.CONFLICTED
+        if ReadinessState.MISSING in states:
+            return ReadinessState.MISSING
+        if ReadinessState.STALE in states:
+            return ReadinessState.STALE
+        if not states or all(state == ReadinessState.CURRENT for state in states):
+            return ReadinessState.CURRENT
+        return ReadinessState.UNKNOWN
+
+    async def readiness(self, command_id: str, requirements: list[ContextRequirement], now_ms: int | None = None) -> ContextReadiness:
+        """Two answers, because they are two different questions (P0-CTX-001).
+
+        `state` gates execution and is computed over the blocking requirements only.
+        `advisory_state` says whether VAN knew what it wanted to know, which is what the
+        owner and the evidence trail care about. Collapsing them would force a choice
+        between a readiness signal that is always green because nothing is asked, and one
+        that is always red because everything blocks.
+        """
+        resolutions = [await self.resolve_requirement(req, now_ms=now_ms) for req in requirements]
+        blocking = {r.state for r in resolutions if r.requirement.blocking}
+        return ContextReadiness(
+            command_id=command_id,
+            state=self._worst(blocking),
+            advisory_state=self._worst({r.state for r in resolutions}),
+            requirements=resolutions,
+        )
 
     async def compile_snapshot(
         self,
@@ -264,6 +292,9 @@ class OwnerContextService:
             "command_id": command_id,
             "kernel_revision": kernel_revision,
             "fact_ids": fact_ids,
+            "readiness_state": ready.advisory_state.value,
+            "requirements_asked": len(requirements),
+            "missing_requirements": ready.missing,
             "graph_evidence_refs": graph_evidence_refs or [],
             "lexical_evidence_refs": lexical_evidence_refs or [],
             "knowledge_evidence_refs": knowledge_evidence_refs or [],

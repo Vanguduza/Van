@@ -22,6 +22,7 @@ from fastapi import APIRouter, Header, HTTPException
 from pydantic import BaseModel, Field
 
 from van_gateway.attention.scoring import AttentionScorer
+from van_gateway.learning.feed import LearningFeed
 from van_gateway.capability.permissions import PermissionRegistry
 from van_gateway.config import Settings
 from van_gateway.evolution.radar import AIEvolutionRadar
@@ -61,7 +62,9 @@ class UnderstandingApi:
     def __init__(self, store: Store, settings: Settings) -> None:
         self.store = store
         self.settings = settings
-        self.owner_model = OwnerCognitiveModel(store)
+        # P1-LEARN-001 — the owner-facing surface is where corrections arrive, so this is
+        # the instance that has to feed the growth ledger.
+        self.owner_model = OwnerCognitiveModel(store, learning=LearningFeed(store))
         self.vocabulary = SharedVocabularyRegistry(store)
         self.complement = CognitiveComplementMap(store)
         self.growth = SymbioticGrowthLedger(store)

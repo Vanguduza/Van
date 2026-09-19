@@ -61,6 +61,7 @@ class MissionService:
         capabilities: Any | None = None,
         bus: Any | None = None,
         verifiers: Any | None = None,
+        learning: Any | None = None,
     ) -> None:
         self.store = store
         # §7 — when a registry is wired, a capability it does not declare cannot
@@ -76,6 +77,9 @@ class MissionService:
         # strategy with EngineReportVerifier, which is always UNVERIFIABLE. A missing
         # registry therefore makes VERIFIED_SUCCESS unreachable instead of unguarded.
         self.verifiers = verifiers if verifiers is not None else VerifierRegistry()
+        # P1-LEARN-001 — the learning stores had no caller that recorded a real outcome.
+        # A mission reaching a terminal state is the outcome; this is where it is written.
+        self.learning = learning
 
     # ------------------------------------------------------------- creation
 
@@ -238,6 +242,14 @@ class MissionService:
             )
         refreshed = await self.get(mission_id)
         assert refreshed is not None
+        if self.learning is not None and refreshed.is_terminal:
+            await self.learning.record_mission_outcome(
+                mission_id=mission_id,
+                state=refreshed.state,
+                goal=refreshed.goal,
+                verification_status=(verification.status.value if verification else None),
+                evidence_refs=(verification.evidence_refs if verification else []),
+            )
         return refreshed
 
     async def _perform_verification(

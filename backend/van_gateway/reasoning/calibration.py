@@ -30,6 +30,7 @@ from typing import Any
 from van_gateway.reasoning.kernel import ChallengeMode, required_mode
 from van_gateway.storage.db import Store
 from van_gateway.understanding.owner_model import (
+    AssertionState,
     OwnerCognitiveModel,
     OwnerModelField,
 )
@@ -130,17 +131,26 @@ class RelationshipCalibrationEngine:
         if self._prefers(confirmed, OwnerModelField.COMMUNICATION_PREFERENCE, "terse", "brief",
                          "short", "concise"):
             verbosity = Verbosity.TERSE
-            reasons.append("owner-confirmed preference for terse updates")
+            provenance = await self._provenance(
+                owner_principal_id, OwnerModelField.COMMUNICATION_PREFERENCE
+            )
+            reasons.append(f"preference for terse updates ({provenance})")
         elif self._prefers(confirmed, OwnerModelField.REASONING_PREFERENCE, "thorough", "full",
                            "detail", "exhaustive"):
             verbosity = Verbosity.THOROUGH
-            reasons.append("owner-confirmed preference for full reasoning")
+            provenance = await self._provenance(
+                owner_principal_id, OwnerModelField.REASONING_PREFERENCE
+            )
+            reasons.append(f"preference for full reasoning ({provenance})")
 
         presentation = EvidencePresentation.SUMMARY_FIRST
         if self._prefers(confirmed, OwnerModelField.EVIDENCE_PREFERENCE, "evidence", "proof",
                          "receipts", "sources"):
             presentation = EvidencePresentation.EVIDENCE_FIRST
-            reasons.append("owner-confirmed preference for evidence up front")
+            provenance = await self._provenance(
+                owner_principal_id, OwnerModelField.EVIDENCE_PREFERENCE
+            )
+            reasons.append(f"preference for evidence up front ({provenance})")
 
         # §29's thresholds shift with stated interruption tolerance and urgency,
         # within a band — never to zero, which would make VAN silent, and never
@@ -149,7 +159,10 @@ class RelationshipCalibrationEngine:
         if self._prefers(confirmed, OwnerModelField.INTERRUPTION_PREFERENCE, "minimal",
                          "rarely", "quiet", "few"):
             threshold = 0.70
-            reasons.append("owner-confirmed preference for fewer interruptions")
+            provenance = await self._provenance(
+                owner_principal_id, OwnerModelField.INTERRUPTION_PREFERENCE
+            )
+            reasons.append(f"preference for fewer interruptions ({provenance})")
         threshold = max(0.25, min(0.85, threshold - (urgency - 0.5) * 0.2))
 
         # A thorough presentation on an urgent item is a worse answer than a
@@ -166,7 +179,7 @@ class RelationshipCalibrationEngine:
     async def _confirmed_preferences(
         self, owner_principal_id: str
     ) -> dict[OwnerModelField, list[str]]:
-        """Only CONFIRMED assertions, and only interaction fields.
+        """Actionable assertions, and only interaction fields.
 
         §64 — a CANDIDATE is something VAN noticed, not something it may act on.
         Calibrating off unconfirmed guesses is how an assistant starts behaving
@@ -180,6 +193,22 @@ class RelationshipCalibrationEngine:
             if assertions:
                 out[field_name] = [a.value.lower() for a in assertions]
         return out
+
+    async def _provenance(self, owner_principal_id: str, field: OwnerModelField) -> str:
+        """How VAN came to believe this, in the words it will say to the owner.
+
+        P1-SYM-001 — every calibration reason said "owner-confirmed", including the ones
+        VAN had concluded on its own from three episodes. Telling the owner they asked for
+        something they never asked for is a small lie that makes every other claim about
+        what VAN knows less believable.
+        """
+        assertions = await self.owner_model.actionable(owner_principal_id, field=field)
+        states = {a.state for a in assertions}
+        return (
+            "owner-confirmed"
+            if AssertionState.CONFIRMED in states
+            else "observed by VAN, not yet confirmed by you"
+        )
 
     @staticmethod
     def _prefers(

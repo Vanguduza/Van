@@ -8,6 +8,7 @@ from van_gateway.audit.service import AuditService
 from van_gateway.auth.service import AuthError, AuthService
 from van_gateway.auth.throttle import AuthThrottle, Throttled
 from van_gateway.command.authority import CommandAuthorityError, CommandAuthorityRecord, CommandAuthorityService
+from van_gateway.command import context_requirements
 from van_gateway.command.ingress_trust import derive_effective_trust
 from van_gateway.command.mission_link import CommandMissionLink
 from van_gateway.command.nonce import CommandNonceService, NonceReplay
@@ -544,10 +545,18 @@ class CommandOrchestrator:
                 if repo_sha:
                     live_state_refs.append(f"repo-head:{req.project_id}:{repo_sha}")
 
+        # P0-CTX-001 — this passed `[]`, so readiness was trivially CURRENT, fact_ids was
+        # always empty, and the canonical context handed to Hermes carried no owner facts
+        # at all. The kernel was real and was never asked a question.
+        requirements = context_requirements.derive(
+            text=req.text,
+            project_id=req.project_id,
+            action_id=resolution.action_id if resolution.mode == ResolutionMode.EXACT_ACTION else None,
+        )
         try:
             context_snapshot = await self.context.compile_snapshot(
                 req.command_id,
-                [],
+                requirements,
                 live_state_refs=live_state_refs,
                 policy_refs=policy_refs,
             )
@@ -584,6 +593,10 @@ class CommandOrchestrator:
             "fact_ids": context_snapshot.fact_ids,
             "live_state_refs": context_snapshot.live_state_refs,
             "policy_refs": context_snapshot.policy_refs,
+            # What was asked and what was found, so a reader can tell "VAN knew nothing"
+            # from "VAN asked nothing" — which was indistinguishable before.
+            "requirements_asked": len(requirements),
+            "readiness": context_snapshot.readiness_state,
         }
         before["canonical_context"] = canonical_context
 
