@@ -29,6 +29,7 @@ from pydantic import BaseModel, Field
 from van_gateway.capability.models import CapabilityClass, RoutingConstraints
 from van_gateway.capability.registry import CapabilityRegistry, CapabilityRegistryError
 from van_gateway.capability.router import CapabilityRouter
+from van_gateway.coherence import owner_status
 from van_gateway.config import Settings
 from van_gateway.google.control import GoogleControlAuthError, verify_internal_control
 from van_gateway.mission.binding import MissionBinder
@@ -137,12 +138,22 @@ class MissionApi:
 
     async def _mission_summary(self, mission) -> dict[str, Any]:
         """What Home and Missions need, without the owner opening a log."""
+        # P2-COH-001 — one projection, computed here rather than re-derived by each
+        # surface. `needs_owner` below and `owner_attention` here are deliberately
+        # different questions: needs_owner means the mission is blocked on an owner
+        # decision, owner_attention means it should surface in the queue at all, which a
+        # failed or unverifiable mission also should without blocking on anything.
+        projected = owner_status.describe("mission", mission.state)
         return {
             "mission_id": mission.mission_id,
             "title": mission.title,
             "goal": mission.goal,
             "project_id": mission.project_id,
             "state": mission.state.value,
+            "owner_status": projected["owner_status"],
+            "owner_sentence": projected["owner_sentence"],
+            "owner_attention": projected["needs_owner"],
+            "finished": projected["finished"],
             "current_phase": mission.current_phase,
             "verification_state": mission.verification_state.value,
             "needs_owner": mission.needs_owner,
@@ -247,7 +258,13 @@ class MissionApi:
                     mission_id,
                     {
                         "mission_id": mission_id, "title": row["mission_title"],
-                        "state": row["mission_state"], "events": [],
+                        "state": row["mission_state"],
+                        # The feed is read by the device, which must not have to know the
+                        # mission vocabulary to render a line (P2-COH-001, P0-EXEC-003).
+                        **owner_status.describe(
+                            "mission", MissionState(str(row["mission_state"]))
+                        ),
+                        "events": [],
                     },
                 )
                 bucket["events"].append({

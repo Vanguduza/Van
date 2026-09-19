@@ -358,8 +358,29 @@
       "root_cause": "RC1",
       "remediation": "Consume mission state via the event bus; render MissionRepository.ownerReadableStatus; make an unknown status an explicit UNKNOWN state.",
       "validation_gate": "G3",
-      "current_status": "OPEN",
-      "remediation_gate": "GATE 2"
+      "current_status": "CLOSED",
+      "remediation_gate": "GATE 2",
+      "closure": {
+        "summary": "The device no longer decides for itself what a gateway status means. Command results and mission states both go through one projection that the gateway also uses, and an unrecognised status becomes UNKNOWN — shown as 'VAN does not know the state of this' and surfaced for the owner's attention — instead of falling through to ACCEPTED. VanCommandStatus gained PARTIALLY_SUCCEEDED, COULD_NOT_VERIFY, REFUSED and UNKNOWN, so the three post-execution outcomes the controller answered with one word are three different answers. The status colour function and the owner-status mapping are both exhaustive with no else branch, so a new status stops the build rather than silently picking a neighbour's rendering. MissionSummary prefers the gateway's projection, falls back to the local table, and stops leaking the raw state enum to the owner.",
+        "changed": [
+          "android/app/src/main/java/com/dial/van/status/OwnerWorkStatus.kt",
+          "android/app/src/main/java/com/dial/van/status/VanCommandStatus.kt",
+          "android/app/src/main/java/com/dial/van/control/VanCommandController.kt",
+          "android/app/src/main/java/com/dial/van/command/CommandCentreActivity.kt",
+          "android/app/src/main/java/com/dial/van/mission/MissionModels.kt",
+          "android/verification/build.gradle.kts",
+          "backend/van_gateway/coherence/wire_status.py",
+          ".github/workflows/van-ci.yml"
+        ],
+        "verified_by": [
+          "android/verification/src/test/kotlin/com/dial/van/status/OwnerStatusProjectionTest.kt",
+          "android/verification/src/test/kotlin/com/dial/van/mission/MissionSummaryTest.kt",
+          "backend/tests/test_owner_status_kotlin_contract.py"
+        ],
+        "residual": "The device still learns a completion only by reading the mission, not by acting on a mission event as it arrives; nothing polls or streams into the conversation view.",
+        "residual_reason": "The gateway publishes every owner-visible mission event to /v1/events under P0-EXEC-001, and the read models now render them correctly, but the client-side subscription is P3-AND-002 (the event cursor is hardcoded) under Gate 6. The half closed here is the one the finding names — an honest lifecycle with no benign default — and the other half is not claimed.",
+        "posture": "These 26 Kotlin tests are executed, not merely written: android/verification is a Kotlin/JVM harness that compiles the app's own pure decision files from android/app/src/main/java rather than a copy, so no Android toolchain is needed to exercise them. A Python contract test parses the Kotlin tables and fails if they drift from the gateway's, which was confirmed by mutating one entry and watching it fail."
+      }
     },
     {
       "id": "P0-CTX-001",
@@ -1743,8 +1764,27 @@
       "root_cause": "see s32 root-cause map",
       "remediation": "Define one owner-facing work status projection and map every subsystem onto it.",
       "validation_gate": "G1",
-      "current_status": "OPEN",
-      "remediation_gate": "GATE 2"
+      "current_status": "CLOSED",
+      "remediation_gate": "GATE 2",
+      "closure": {
+        "summary": "One owner-facing status vocabulary, and a total mapping onto it from nine of the eleven subsystem vocabularies the audit named. The mapping is driven off the enums themselves in test, so adding a subsystem status without deciding what it means to the owner fails CI. The projection is served on the mission list, the mission detail and the activity feed, and the device consumes it rather than deriving its own.",
+        "changed": [
+          "backend/van_gateway/coherence/owner_status.py",
+          "backend/van_gateway/coherence/wire_status.py",
+          "backend/van_gateway/mission/api.py",
+          "android/app/src/main/java/com/dial/van/status/OwnerWorkStatus.kt",
+          "android/app/src/main/java/com/dial/van/mission/MissionModels.kt"
+        ],
+        "verified_by": [
+          "backend/tests/test_owner_work_status.py",
+          "backend/tests/test_owner_status_kotlin_contract.py",
+          "backend/tests/test_command_creates_mission.py::TestOwnerStatusIsServed",
+          "android/verification/src/test/kotlin/com/dial/van/status/OwnerStatusProjectionTest.kt"
+        ],
+        "residual": "IdempotencyStatus, the eleventh vocabulary, is deliberately not projected.",
+        "residual_reason": "It describes a claim on a request key, not a piece of work: COMPLETED means the gateway finished handling the request, which is equally true when the command was denied. Mapping it would put a reassuring word next to a refusal. The exclusion is recorded in NOT_OWNER_WORK with its reason and asserted by a test, rather than left as a silent omission.",
+        "posture": "The projection keeps apart exactly what the audit proved gets confused: verified, partial and unverifiable stay three answers; only a verified outcome reads as DONE; a refusal is not a failure; a verification failure is not an execution failure; a stale attention item is not 'handled'. Each of those is a test, not a comment."
+      }
     },
     {
       "id": "P2-COH-002",

@@ -59,3 +59,7 @@ artifacts/google/*.sqlite3-*
 
 # Node (tooling)
 node_modules/
+
+# android/verification is a source-only Gradle harness; its build output is not evidence.
+android/verification/.gradle/
+android/verification/build/

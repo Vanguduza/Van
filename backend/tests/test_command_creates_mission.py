@@ -369,3 +369,62 @@ class TestMissionEventsReachTheDevice:
         )
         after = len((await ac.get("/v1/events", params={"device_id": device_id, "after_seq": 0})).json()["events"])
         assert after == before
+
+
+@pytest.mark.asyncio
+class TestOwnerStatusIsServed:
+    """P2-COH-001. A projection nothing serves is the isolation defect, not a fix."""
+
+    async def test_the_mission_list_carries_the_owner_projection(self, client):
+        ac, app = client
+        device_id = await _enrol(ac, app)
+        await ac.post(
+            "/v1/commands", json=_signed(app, device_id, "Van, brief me.", idempotency_key="proj-1")
+        )
+        mission = (await ac.get("/v1/missions")).json()[0]
+        assert mission["owner_status"] == "WORKING"
+        assert mission["owner_sentence"] == "Working on it"
+        assert mission["owner_attention"] is False
+        assert mission["finished"] is False
+
+    async def test_the_activity_feed_carries_it_too(self, client):
+        ac, app = client
+        device_id = await _enrol(ac, app)
+        await ac.post(
+            "/v1/commands", json=_signed(app, device_id, "Van, brief me.", idempotency_key="proj-2")
+        )
+        entry = (await ac.get("/v1/activity")).json()["missions"][0]
+        assert entry["owner_status"] == "WORKING"
+        assert entry["owner_sentence"]
+
+    async def test_a_refused_mission_reads_as_refused_not_as_working(self, client, monkeypatch):
+        ac, app = client
+        device_id = await _enrol(ac, app)
+
+        async def stale_truth(project_id):
+            return {"ok": False, "degraded": "STALE_PROJECT_TRUTH"}
+
+        monkeypatch.setattr(app.state.orchestrator.projects, "load_truth", stale_truth)
+        body = _signed(
+            app, device_id, "Update the deploy config", idempotency_key="proj-3", action_class="A3"
+        )
+        # The signature covers project_id, so it has to be signed in, not bolted on.
+        canonical = AuthService.canonical_command(
+            command_id=body["command_id"],
+            idempotency_key=body["idempotency_key"],
+            device_id=device_id,
+            issued_at_unix=body["issued_at_unix"],
+            text=body["text"],
+            action_class="A3",
+            project_id="van",
+        )
+        body["project_id"] = "van"
+        body["signature"] = app.state.auth.sign(device_id, canonical)
+
+        resp = await ac.post("/v1/commands", json=body)
+        assert resp.json()["status"] == "degraded", resp.text
+
+        mission = (await ac.get(f"/v1/missions/{resp.json()['mission_id']}")).json()
+        assert mission["owner_status"] == "REFUSED"
+        assert mission["owner_attention"] is True
+        assert mission["finished"] is True

@@ -4,16 +4,16 @@
   "canonical_blueprint": "docs/VAN_FINISHED_PRODUCT_BLUEPRINT_REV_1.md",
   "canonical_audit": "docs/VAN_WHOLE_SYSTEM_IMPLEMENTATION_AUDIT_AND_CERTIFICATION_REV_1.md",
   "created": "2026-09-19",
-  "component_count": 78,
+  "component_count": 81,
   "dispositions": {
     "DELETE": 10,
     "REPLACE": 4,
-    "COMPLETE": 28,
+    "COMPLETE": 31,
     "WIRE": 36
   },
   "by_gate": {
     "GATE 4": 29,
-    "GATE 2": 7,
+    "GATE 2": 10,
     "GATE 3": 3,
     "GATE 9": 9,
     "GATE 8": 9,
@@ -1418,6 +1418,70 @@
         "an accepted command puts mission.created, mission.understood, mission.planned and mission.started on the stream in order, the last carrying its hermes run reference; an event marked not owner-visible does not appear"
       ],
       "owner_facing_projection": "the device event stream",
+      "terminal_state": "INTEGRATED_AND_EVIDENCED"
+    },
+    {
+      "n": 79,
+      "component": "Owner work status projection",
+      "path": "backend/van_gateway/coherence/owner_status.py",
+      "maturity_class": "ABSENT",
+      "disposition": "COMPLETE",
+      "rationale": "Eleven vocabularies described work in progress and nothing projected them onto anything the owner could read, so every surface invented its own rendering",
+      "remediation_gate": "GATE 2",
+      "producer": "backend/van_gateway/coherence/owner_status.py and wire_status.py",
+      "consumer": "the mission list, mission detail and activity feed; the Android read models and command controller",
+      "production_caller": "backend/van_gateway/mission/api.py _mission_summary and the activity feed route",
+      "tests": [
+        "backend/tests/test_owner_work_status.py",
+        "backend/tests/test_command_creates_mission.py::TestOwnerStatusIsServed"
+      ],
+      "runtime_evidence": [
+        "GET /v1/missions and GET /v1/activity carry owner_status, owner_sentence, owner_attention and finished; a refused mission reads REFUSED and finished rather than WORKING"
+      ],
+      "owner_facing_projection": "one sentence per status, shared by the gateway and the device",
+      "terminal_state": "INTEGRATED_AND_EVIDENCED"
+    },
+    {
+      "n": 80,
+      "component": "Device status projection and UNKNOWN state",
+      "path": "android/app/src/main/java/com/dial/van/status/OwnerWorkStatus.kt",
+      "maturity_class": "ABSENT",
+      "disposition": "COMPLETE",
+      "rationale": "The controller's status mapping ended in `else -> ACCEPTED`, so every unrecognised gateway status read to the owner as work under way, and three post-execution outcomes were answered with one word",
+      "remediation_gate": "GATE 2",
+      "producer": "android/app/src/main/java/com/dial/van/status/OwnerWorkStatus.kt",
+      "consumer": "VanCommandController.recordResponse, CommandCentreActivity statusColor, MissionSummary",
+      "production_caller": "VanCommandController.recordResponse on every gateway response",
+      "tests": [
+        "android/verification/src/test/kotlin/com/dial/van/status/OwnerStatusProjectionTest.kt",
+        "android/verification/src/test/kotlin/com/dial/van/mission/MissionSummaryTest.kt",
+        "backend/tests/test_owner_status_kotlin_contract.py"
+      ],
+      "runtime_evidence": [
+        "26 Kotlin tests compiled and executed against the app's own source files by android/verification, which needs no Android toolchain; the Python contract test fails when a Kotlin table entry is changed"
+      ],
+      "owner_facing_projection": "the conversation status chip, its colour, and the mission list line",
+      "terminal_state": "INTEGRATED_AND_EVIDENCED"
+    },
+    {
+      "n": 81,
+      "component": "Pure Kotlin verification harness",
+      "path": "android/verification/build.gradle.kts",
+      "maturity_class": "ABSENT",
+      "disposition": "COMPLETE",
+      "rationale": "Android decision logic could not be executed anywhere the Android Gradle Plugin was unavailable, so device-side fixes were written and never run",
+      "remediation_gate": "GATE 2",
+      "producer": "android/verification, a Kotlin/JVM Gradle project",
+      "consumer": "the van-ci android job, as a step before the Android build",
+      "production_caller": ".github/workflows/van-ci.yml step 'Pure Kotlin logic'",
+      "tests": [
+        "android/verification/src/test/kotlin/com/dial/van/status/OwnerStatusProjectionTest.kt",
+        "android/verification/src/test/kotlin/com/dial/van/mission/MissionSummaryTest.kt"
+      ],
+      "runtime_evidence": [
+        "gradle test executes 26 tests against ../app/src/main/java; it compiles the shipping files rather than a copy, so a file that gains an Android import fails this build"
+      ],
+      "owner_facing_projection": null,
       "terminal_state": "INTEGRATED_AND_EVIDENCED"
     }
   ],

@@ -3,6 +3,9 @@ package com.dial.van.control
 import androidx.fragment.app.FragmentActivity
 import com.dial.van.gateway.VanGatewayClient
 import com.dial.van.security.BiometricGate
+import com.dial.van.status.OwnerStatusProjection
+import com.dial.van.status.VanCommandStatus
+import com.dial.van.status.commandStatusFor
 import com.dial.van.visual.VanLiveVisualState
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.flow.MutableStateFlow
@@ -25,17 +28,6 @@ enum class VanCommandSource {
 
 enum class VanMessageRole { OWNER, VAN, SYSTEM }
 
-enum class VanCommandStatus {
-    LOCAL_DRAFT,
-    SUBMITTING,
-    APPROVAL_REQUIRED,
-    ACCEPTED,
-    IN_FLIGHT,
-    SUCCEEDED,
-    FAILED,
-    CANCELLED,
-    EXPIRED,
-}
 
 data class VanConversationMessage(
     val id: String = UUID.randomUUID().toString(),
@@ -243,17 +235,11 @@ class VanCommandController(
 
     private fun recordResponse(command: VanOwnerCommand, response: org.json.JSONObject) {
         val wireStatus = response.optString("status").lowercase()
-        val status = when (wireStatus) {
-            "approval_required" -> VanCommandStatus.APPROVAL_REQUIRED
-            "accepted", "submitted", "executing", "verifying" -> VanCommandStatus.ACCEPTED
-            "in_flight" -> VanCommandStatus.IN_FLIGHT
-            "verified_success", "succeeded", "success", "completed" -> VanCommandStatus.SUCCEEDED
-            "cancelled" -> VanCommandStatus.CANCELLED
-            "expired" -> VanCommandStatus.EXPIRED
-            "denied", "rejected", "rejected_untrusted", "conflict", "failed", "error",
-            "unverifiable", "verification_failed", "partial_success" -> VanCommandStatus.FAILED
-            else -> VanCommandStatus.ACCEPTED
-        }
+        // P0-EXEC-003. The status is no longer decided here. It goes through the one
+        // projection the gateway also uses, so the device cannot drift into its own
+        // vocabulary, and an unrecognised status becomes UNKNOWN rather than ACCEPTED.
+        val ownerStatus = OwnerStatusProjection.fromCommandResult(wireStatus)
+        val status = commandStatusFor(ownerStatus)
 
         val pending = if (status == VanCommandStatus.APPROVAL_REQUIRED) {
             val challengeId = response.optString("approval_challenge_id")
@@ -280,15 +266,10 @@ class VanCommandController(
         val responseText = when {
             response.optString("message").isNotBlank() -> response.optString("message")
             response.optString("detail").isNotBlank() -> response.optString("detail")
-            status == VanCommandStatus.ACCEPTED || status == VanCommandStatus.IN_FLIGHT ->
-                "Hermes accepted the command. Completion has not been confirmed yet."
-            status == VanCommandStatus.APPROVAL_REQUIRED ->
-                "Owner biometric approval is required before execution can continue."
-            status == VanCommandStatus.SUCCEEDED ->
-                "The requested postcondition has been verified."
-            status == VanCommandStatus.FAILED ->
-                "The command was rejected, failed, or could not be verified."
-            else -> "Command status: ${wireStatus.ifBlank { "accepted" }}"
+            // One sentence per owner status, shared with the gateway. The old fallback
+            // read "Command status: accepted" for a blank status, which invented an
+            // acceptance the gateway never sent.
+            else -> OwnerStatusProjection.sentenceFor(ownerStatus)
         }
 
         _state.update {

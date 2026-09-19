@@ -97,6 +97,13 @@ jobs:
         with:
           distribution: temurin
           java-version: "17"
+      # Runs before the Android build because it needs no Android toolchain: it compiles
+      # the app's own pure decision files (the owner status projection and the mission read
+      # models) on the JVM and executes their tests. When the Android Gradle Plugin cannot
+      # be fetched, this is the part of the app that is still verified rather than assumed.
+      - name: Pure Kotlin logic (owner status projection, mission read models)
+        working-directory: android/verification
+        run: gradle test --console=plain
       - name: Android unit tests, build and lint
         working-directory: android
         run: |

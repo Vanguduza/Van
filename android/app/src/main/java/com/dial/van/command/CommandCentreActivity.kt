@@ -49,7 +49,7 @@ import androidx.compose.ui.unit.sp
 import androidx.fragment.app.FragmentActivity
 import com.dial.van.VanApplication
 import com.dial.van.control.VanCommandSource
-import com.dial.van.control.VanCommandStatus
+import com.dial.van.status.VanCommandStatus
 import com.dial.van.control.VanConversationMessage
 import com.dial.van.control.VanMessageRole
 import com.dial.van.overlay.FloatingOverlayService
@@ -1217,14 +1217,29 @@ private fun CommandMessageBubble(
     }
 }
 
+/**
+ * Exhaustive on purpose (P0-EXEC-003). The `else` branch this replaces painted every
+ * status it did not name in the working colour, so an unknown or unverified outcome looked
+ * to the owner exactly like one under way.
+ */
 private fun statusColor(status: VanCommandStatus): Color = when (status) {
     VanCommandStatus.SUCCEEDED -> Color(VanGlassTokens.ACCENT_GREEN)
     VanCommandStatus.FAILED,
     VanCommandStatus.CANCELLED,
     VanCommandStatus.EXPIRED,
+    VanCommandStatus.REFUSED,
     -> Color(VanGlassTokens.ACCENT_RED)
-    VanCommandStatus.APPROVAL_REQUIRED -> Color(VanGlassTokens.ACCENT_AMBER)
-    else -> Color(VanGlassTokens.EDGE_CYAN)
+    // Finished, but not cleanly. Amber is the colour that asks the owner to look.
+    VanCommandStatus.PARTIALLY_SUCCEEDED,
+    VanCommandStatus.COULD_NOT_VERIFY,
+    VanCommandStatus.APPROVAL_REQUIRED,
+    VanCommandStatus.UNKNOWN,
+    -> Color(VanGlassTokens.ACCENT_AMBER)
+    VanCommandStatus.LOCAL_DRAFT,
+    VanCommandStatus.SUBMITTING,
+    VanCommandStatus.ACCEPTED,
+    VanCommandStatus.IN_FLIGHT,
+    -> Color(VanGlassTokens.EDGE_CYAN)
 }
 
 private fun JSONArray.objectList(): List<JSONObject> = buildList {
