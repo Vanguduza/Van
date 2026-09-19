@@ -8,7 +8,7 @@ from typing import Any, AsyncIterator
 
 import aiosqlite
 
-SCHEMA_VERSION = 25
+SCHEMA_VERSION = 26
 
 
 MIGRATION_17 = """
@@ -197,6 +197,24 @@ CREATE INDEX IF NOT EXISTS idx_owner_edges_supersedes
 -- Without this the conflict scan is a full table sort on every call.
 CREATE INDEX IF NOT EXISTS idx_owner_facts_identity
   ON owner_facts(subject, predicate, scope, authority);
+"""
+
+MIGRATION_26 = """
+-- §15's assumption gate could be cleared by the actor it exists to restrain.
+--
+-- `blocking_assumptions` blocks on status ACTIVE, and `resolve_assumption` demanded
+-- evidence for VERIFIED only. FALSIFIED, EXPIRED and SUPERSEDED all leave ACTIVE and all
+-- were settable by assertion, so the caller that recorded a CRITICAL assumption could
+-- supersede it a moment later and proceed. That is P0-VERIFY-001's shape one level up: a
+-- check whose subject is permitted to mark it passed.
+--
+-- SUPERSEDED now has to name what replaced it, which is the difference between a
+-- correction and a deletion, and the replacement is a new blocking assumption unless it is
+-- itself resolved with evidence.
+ALTER TABLE assumption_ledger ADD COLUMN superseded_by TEXT;
+
+CREATE INDEX IF NOT EXISTS idx_assumption_superseded
+  ON assumption_ledger(superseded_by);
 """
 
 MIGRATIONS: dict[int, str] = {
@@ -1526,6 +1544,7 @@ MIGRATIONS: dict[int, str] = {
     23: MIGRATION_23,
     24: MIGRATION_24,
     25: MIGRATION_25,
+    26: MIGRATION_26,
 }
 
 

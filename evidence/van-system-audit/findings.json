@@ -4988,6 +4988,51 @@
         "residual_reason": null,
         "falsified_by": "The van-debug-apk artifact being absent from, or empty in, a run whose Android job succeeded; or the published APK failing to install on the owner's device, which is Gate 14's claim rather than this one's."
       }
+    },
+    {
+      "id": "P1-REASON-001",
+      "severity": "P1",
+      "domain": "reasoning",
+      "title": "§15's gate had no producer, no consumer and no door",
+      "description": "CriticalReasoningKernel.assert_safe_for_irreversible_work implements §15 — irreversible work waits until a mission's HIGH or CRITICAL assumptions are settled. It had no production caller. record_assumption, which is the only way the ledger it reads gets a row, also had no production caller. And there was no runtime route through which Hermes — the only system that does the reasoning an assumption comes from — could have supplied one.\n\nThree absences that each look small and together made the mechanism unreachable. The assumption_ledger table was referenced in production by exactly one thing: the retention sweep that prunes it.\n\nSeparately, resolve_assumption demanded evidence for VERIFIED only. FALSIFIED, EXPIRED and SUPERSEDED all clear ACTIVE and all were settable by assertion, so the actor the gate restrains could record a CRITICAL assumption and clear it a moment later with nothing to show.",
+      "requirement": "docs/VAN_CONSOLIDATED_DEPLOYMENT_READINESS_CLOSURE_BLUEPRINT_REV_1.md",
+      "authority": "VAN Consolidated Deployment-Readiness Closure Blueprint Rev 2",
+      "repository_evidence": [
+        "backend/van_gateway/reasoning/kernel.py",
+        "backend/van_gateway/runtime_api.py",
+        "backend/van_gateway/orchestrator.py"
+      ],
+      "runtime_evidence": [],
+      "affected_components": [
+        "reasoning",
+        "authority",
+        "mission"
+      ],
+      "root_cause": "The kernel was built as a library for a caller that was never written, and the caller could not have been written because the ingress did not exist. Nothing in the repository could notice: the code is correct, tested, and imports cleanly.",
+      "remediation": "Give Hermes the routes, enforce the gate where irreversible work is requested, and make clearing an assumption cost what the claim being made costs.",
+      "impact": "VAN would carry out an irreversible action — deleting an enterprise notebook, deleting sources — while its own planner held an unsettled critical assumption about whether it had the right target. The mechanism designed to stop exactly that could not run.",
+      "validation_gate": "G3",
+      "current_status": "CLOSED",
+      "remediation_gate": "G3",
+      "closure": {
+        "state": "EXTERNALLY_BLOCKED_REPOSITORY_COMPLETE",
+        "summary": "Three things, because wiring the consumer alone would have produced a gate that can never fire — a placeholder wearing a check's clothes.\n\n**The door.** POST /v1/runtime/reasoning/assumptions records one, GET /v1/runtime/reasoning/assumptions/{mission_id} lists what is blocking so a planner can find out before it is refused rather than by being refused, and POST /v1/runtime/reasoning/assumptions/{id}/resolve clears one. Internal-control, because an assumption is a statement about a plan and that is the runtime's to make; it is emphatically not a statement about the owner, which P0-COG-001 keeps on the owner's side.\n\n**The enforcement point.** /v1/runtime/actions/begin, not the orchestrator's authorization path. Assumptions are recorded during planning, which happens after the orchestrator has handed the mission over, so a check at authorize time would always find an empty ledger and always pass — green, and worthless. The descriptor decides what is irreversible, and UNDECLARED is treated as irreversible, matching the descriptor's own stated reasoning. An irreversible action arriving with no mission is refused rather than exempted: that is either a bug or a path around the ledger, and neither is the thing to wave through.\n\n**The price of clearing one.** Falsifying is verifying with the opposite sign and it is the direction that unblocks work, so it needs evidence too. SUPERSEDED must name the replacement, on the same mission, not itself — the difference between a correction and a deletion — and a test asserts that superseding a blocker with another blocker leaves the work blocked, because otherwise 'supersede it with something trivial' is the way through. EXPIRED is not a claim at all but the passage of time, so it is the kernel's to decide on the clock and not a caller's to assert. Migration 26 stores the supersession link.\n\nAlong the way, P1-COH-003's own claim turned out to be false. The authority map states that the descriptor's gate 'is the gate the orchestrator applies', and gate_for had no production caller — the orchestrator branched on `== ActionClass.A4` and `== A5` directly. They agreed, because both derive from the action class, but nothing made them agree. The orchestrator now asks. Worse, the test guarding it asserted that the orchestrator *contains* the hardcoded comparison, so it pinned the duplication as proof of agreement and failed when the duplication was removed. A test that fails when a finding is fixed was testing the finding; it now asserts derivation and that no second copy exists.\n\nTwelve mutations, twelve caught. One of my own defects was caught by a test rather than by review: expire_assumptions took its count from Store.execute, which returns None, so it reported zero rows expired whatever it did.",
+        "changed": [
+          "backend/van_gateway/reasoning/kernel.py",
+          "backend/van_gateway/runtime_api.py",
+          "backend/van_gateway/orchestrator.py",
+          "backend/van_gateway/storage/db.py"
+        ],
+        "verified_by": [
+          "backend/tests/test_irreversible_work_waits_on_assumptions.py",
+          "backend/tests/test_authority_descriptor.py"
+        ],
+        "runtime_evidence": [],
+        "residual": "Nothing records an assumption in this repository. The routes exist and the gate enforces, and both are exercised end to end by tests driving the real ingress, but the reasoning that produces an assumption is a model pass and the gateway performs none.",
+        "residual_class": "EXTERNAL_RUNTIME",
+        "residual_reason": "Hermes is not in this repository. assess() takes assumptions as an input rather than deriving them, which is the correct division — the gateway owns canonical state and performs no inference. Until Hermes calls these routes the ledger stays empty and the gate passes everything, which is the honest behaviour for a gate with nothing recorded against it, not a gate that is switched off.",
+        "falsified_by": "An irreversible action executing through /v1/runtime/actions/begin while its mission holds an ACTIVE HIGH or CRITICAL assumption; resolve_assumption clearing a blocker without evidence or a named replacement; or the orchestrator re-deriving its gate from the action class instead of from gate_for."
+      }
     }
   ],
   "register_note": "Extended 2026-09-19 under blueprint Gate 0 / action W0-1. The audit assigned IDs to 55 findings and enumerated further P3/P4 items in prose; those now carry IDs so that 'all closed' is countable. Each finding carries a remediation_gate referencing docs/VAN_FINISHED_PRODUCT_BLUEPRINT_REV_1.md.",

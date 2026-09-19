@@ -64,17 +64,47 @@ class TestTheDescriptorAgreesWithWhatIsEnforced:
         source = inspect.getsource(orchestrator_module)
         return "\n".join(line.split("#", 1)[0] for line in source.splitlines())
 
-    def test_a5_is_refused_and_the_orchestrator_refuses_it(self):
-        assert gate_for(ActionClass.A5) is Gate.FORBIDDEN
-        source = self._orchestrator_source()
-        assert "effective_action_class == ActionClass.A5" in source
+    def test_the_orchestrator_asks_the_descriptor_instead_of_re_deriving_the_gate(self):
+        """The first version of this test asserted the wrong thing, and it is worth saying
+        how.
 
-    def test_a4_needs_owner_approval_and_the_orchestrator_requires_it(self):
-        assert gate_for(ActionClass.A4) is Gate.OWNER_APPROVAL
+        It checked that the orchestrator source contained
+        `effective_action_class == ActionClass.A4`, and read that as "the descriptor and the
+        orchestrator agree". It is not agreement. It is two independent copies of one rule,
+        and the test pinned the duplication as if it were the proof \u2014 so when the
+        duplication was removed in favour of a single source, the test failed. A test that
+        fails when a finding is fixed was testing the finding.
+
+        The property that matters is derivation: there is one place the gate is decided and
+        the orchestrator reads it.
+        """
         source = self._orchestrator_source()
-        assert "effective_action_class == ActionClass.A4" in source
+        assert "required_gate = gate_for(effective_action_class)" in source
+        assert "if required_gate is Gate.FORBIDDEN:" in source
+        assert "if required_gate is Gate.OWNER_APPROVAL:" in source
+
+    def test_the_rule_is_not_also_written_out_a_second_time(self):
+        """What `gate_for`'s docstring claims \u2014 "expressed once" \u2014 checked.
+
+        A branch keying off the action class directly is how the second copy comes back,
+        and it comes back looking harmless because it agrees on the day it is written.
+        """
+        source = self._orchestrator_source()
+        for second_copy in (
+            "effective_action_class == ActionClass.A4",
+            "effective_action_class == ActionClass.A5",
+            "effective_action_class is ActionClass.A4",
+            "effective_action_class is ActionClass.A5",
+        ):
+            assert second_copy not in source, (
+                f"{second_copy!r} re-derives the gate the descriptor already decides"
+            )
+
+    def test_a5_is_forbidden_and_a4_needs_the_owner(self):
+        assert gate_for(ActionClass.A5) is Gate.FORBIDDEN
+        assert gate_for(ActionClass.A4) is Gate.OWNER_APPROVAL
         # And the approval is verified rather than accepted on presentation.
-        assert "verify_and_consume" in source
+        assert "verify_and_consume" in self._orchestrator_source()
 
     def test_nothing_below_a4_is_described_as_needing_an_approval(self):
         """A descriptor that over-claims is as wrong as one that under-claims: it would

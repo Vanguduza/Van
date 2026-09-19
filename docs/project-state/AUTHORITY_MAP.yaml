@@ -69,13 +69,27 @@ invariants:
     owner: docs/VAN_FINISHED_PRODUCT_BLUEPRINT_REV_1.md
     statement: >-
       One descriptor maps an action to its class, its required gate, its reversibility and
-      its egress, derived from the existing registries rather than stored, and the gate it
-      names is the gate the orchestrator applies.
+      its egress, derived from the existing registries rather than stored, and the
+      orchestrator reads its gate from that descriptor rather than re-deriving it.
     implemented_by:
       - backend/van_gateway/authority/descriptor.py
+      - backend/van_gateway/orchestrator.py
     tested_by:
       - backend/tests/test_authority_descriptor.py
-    findings: [P1-COH-003]
+    findings: [P1-COH-003, P1-REASON-001]
+
+  - subject: reasoning.irreversible_work_gate
+    owner: docs/VAN_CONSOLIDATED_DEPLOYMENT_READINESS_CLOSURE_BLUEPRINT_REV_1.md
+    statement: >-
+      Irreversible work waits until the mission's HIGH and CRITICAL assumptions are settled,
+      and an assumption is cleared only by evidence or by naming the assumption that
+      replaced it; expiry is the kernel's to decide and not a caller's to assert.
+    implemented_by:
+      - backend/van_gateway/reasoning/kernel.py
+      - backend/van_gateway/runtime_api.py
+    tested_by:
+      - backend/tests/test_irreversible_work_waits_on_assumptions.py
+    findings: [P1-REASON-001]
 
   - subject: authority.owner_approval
     owner: docs/SECURITY_POLICY.md

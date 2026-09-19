@@ -6,6 +6,7 @@ from typing import Any
 
 from van_gateway.approval.service import OwnerApprovalError, OwnerApprovalService
 from van_gateway.audit.service import AuditService
+from van_gateway.authority.descriptor import Gate, gate_for
 from van_gateway.auth.service import AuthError, AuthService
 from van_gateway.auth.throttle import AuthThrottle, Throttled
 from van_gateway.command.authority import CommandAuthorityError, CommandAuthorityRecord, CommandAuthorityService
@@ -283,7 +284,15 @@ class CommandOrchestrator:
             await self.idempotency.complete(req.idempotency_key, result.model_dump())
             return result
 
-        if effective_action_class == ActionClass.A5:
+        # P1-COH-003 — the gate comes from the descriptor rather than from a second copy
+        # of the rule here. `gate_for`'s docstring already said "the gate the orchestrator
+        # applies, expressed once", and it was expressed twice: here as `== A5` / `== A4`,
+        # and there as a function nothing called. They agreed, because both derive from the
+        # action class — but nothing made them agree, and the authority map asserted that
+        # they did.
+        required_gate = gate_for(effective_action_class)
+
+        if required_gate is Gate.FORBIDDEN:
             result = CommandResult(
                 status="denied",
                 command_id=req.command_id,
@@ -295,7 +304,7 @@ class CommandOrchestrator:
             return result
 
         owner_approved = False
-        if effective_action_class == ActionClass.A4:
+        if required_gate is Gate.OWNER_APPROVAL:
             if resolution.mode != ResolutionMode.EXACT_ACTION or not resolution.action_id:
                 result = CommandResult(
                     status="denied",
