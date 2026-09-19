@@ -192,6 +192,25 @@ class Settings(BaseSettings):
     #: configuration, not owner authority.
     browser_stream_ice_servers: str = "[]"
 
+    # ---- owner-device binding (§0D.3) -------------------------------------------
+    #
+    #: The package the attestation must name. Fixed by the build, not by deployment.
+    owner_device_package: str = "com.dial.van"
+    #: SHA-256 of the app signing certificate the owner's build is signed with. Empty
+    #: disables enrolment entirely: there is no weaker binding to fall back to, and
+    #: §0E.1 D5 forbids inventing one.
+    owner_device_signing_cert_sha256: str = ""
+    #: Comma-separated Google attestation root fingerprints. Empty means the root is
+    #: recorded but not pinned, which is the honest state until one has been observed from
+    #: the owner's own device (RB-120).
+    owner_device_attestation_roots: str = ""
+
+    # ---- signed connectivity configuration (ADR-RB-024/027) ---------------------
+    #: PEM private key that signs connectivity manifests. Empty means this deployment
+    #: publishes none, and the device keeps whatever it was provisioned with.
+    connectivity_signing_key_file: str = ""
+    connectivity_signing_kid: str = "connectivity-1"
+
 
 @lru_cache
 def get_settings() -> Settings:

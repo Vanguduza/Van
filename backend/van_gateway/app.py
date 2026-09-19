@@ -88,6 +88,9 @@ from van_gateway.browser.worker import AdapterBackedWorker
 from van_gateway.session.api import build_session_router, is_session_owner_route
 from van_gateway.session.router import SessionDelegates, SessionRouter
 from van_gateway.session.service import VanHermesSessionService
+from van_gateway.auth.device_binding import DeviceBindingError, OwnerDeviceBindingService
+from van_gateway.auth.device_proof import AttestationPolicy
+from van_gateway.connectivity.config import ConnectivityConfigService, ConnectivityError
 from van_gateway.capability.models import ReadinessSource
 from van_gateway.capability.readiness import (
     AutomationReadiness,
@@ -282,6 +285,26 @@ GOOGLE_CONTROL_ROUTES: frozenset[str] = frozenset({
     "/v1/google/revoke",
     "/v1/google/jobs/plan",
 })
+
+
+class BootstrapCreateBody(BaseModel):
+    note: str | None = None
+
+class BootstrapChallengeBody(BaseModel):
+    token: str
+
+class BootstrapAttestBody(BaseModel):
+    token: str
+    device_id: str
+    public_key_pem: str
+    #: Base64 of the raw attestation extension octets from the device key's certificate.
+    attestation_extension_b64: str
+    attestation_root_fingerprint: str | None = None
+    os_version: str | None = None
+    os_patch_level: str | None = None
+
+class RebindBody(BaseModel):
+    reason: str
 
 
 def _read_stream_signing_key(path: str) -> str:
@@ -785,6 +808,37 @@ def create_app() -> FastAPI:
         sessions=van_sessions, router=session_router, events=events,
         resume_snapshot=_resume_snapshot,
     ))
+    # Rev 1.5 §§0D.3, 5.7 — the owner-device binding.
+    #
+    # The policy is configuration because the signing certificate differs between a debug
+    # build and the owner's release build, and pinning the debug one would mean the
+    # production APK could never enrol. Absent configuration disables enrolment rather than
+    # weakening it: §0E.1 D5 forbids a downgrade to a weaker binding, and an unconfigured
+    # deployment is exactly where one would be tempting.
+    owner_device_bindings = (
+        OwnerDeviceBindingService(
+            store,
+            AttestationPolicy(
+                expected_package=settings.owner_device_package,
+                expected_signing_cert_sha256=settings.owner_device_signing_cert_sha256,
+                allowed_root_fingerprints=frozenset(
+                    f.strip() for f in settings.owner_device_attestation_roots.split(",") if f.strip()
+                ),
+            ),
+        )
+        if settings.owner_device_signing_cert_sha256
+        else None
+    )
+    connectivity_config = ConnectivityConfigService(
+        store,
+        private_pem=(
+            _read_stream_signing_key(settings.connectivity_signing_key_file)
+            if settings.connectivity_signing_key_file else None
+        ),
+        kid=settings.connectivity_signing_kid,
+    )
+    app.state.owner_device_bindings = owner_device_bindings
+    app.state.connectivity_config = connectivity_config
     app.state.van_sessions = van_sessions
     app.state.session_router = session_router
     app.state.interactive_sessions = interactive_sessions
@@ -841,6 +895,12 @@ def create_app() -> FastAPI:
             return None if method == "GET" else ControlScope.BROWSER
         if method == "PUT" and path.startswith("/v1/projects/") and path.endswith("/truth"):
             return ControlScope.PROJECTS
+        if method == "POST" and path in {
+            "/v1/devices/bootstrap/create", "/v1/devices/rebind",
+        }:
+            # ADR-RB-026 — minting an enrolment credential, and replacing the owner's
+            # device, are the same authority as enrolment itself.
+            return ControlScope.DEVICE_ENROLMENT
         if method == "POST" and path in {"/v1/devices/enroll", "/v1/devices/pairing-ticket"}:
             # The scope that can mint owner-device authority, and the reason this module
             # exists. Not granted to the legacy token.
@@ -880,6 +940,13 @@ def create_app() -> FastAPI:
     @app.middleware("http")
     async def require_ingress_auth(request: Request, call_next):
         if request.method == "POST" and request.url.path == "/v1/devices/pair":
+            return await call_next(request)
+        # ADR-RB-026 — a phone being enrolled has no device token yet, by definition. These
+        # two are protected by the single-use bootstrap token instead, which is the whole
+        # credential: short-lived, hashed at rest, and spent by the enrolment it authorises.
+        if request.method == "POST" and request.url.path in {
+            "/v1/devices/bootstrap/challenge", "/v1/devices/bootstrap/attest",
+        }:
             return await call_next(request)
         if request.method == "GET" and request.url.path.startswith("/v1/trading/oauth/") and request.url.path.endswith("/callback"):
             return await call_next(request)
@@ -1115,6 +1182,113 @@ def create_app() -> FastAPI:
         if getattr(request.state, "van_device_id", None) != req.device_id:
             raise HTTPException(status_code=403, detail="device_identity_mismatch")
         return await orchestrator.handle(req)
+
+    def _require_binding_service() -> OwnerDeviceBindingService:
+        if owner_device_bindings is None:
+            # §0E.1 D5 — no configuration means no enrolment, not a weaker one.
+            raise HTTPException(status_code=503, detail="owner_device_binding_unconfigured")
+        return owner_device_bindings
+
+    @app.post("/v1/devices/bootstrap/create")
+    async def create_bootstrap(body: BootstrapCreateBody):
+        """ADR-RB-026 — the installer's one-time credential, for the deployment pipeline."""
+        token, challenge = await _require_binding_service().create_bootstrap_token(note=body.note)
+        await audit.record(
+            result="ok", capability="device.bootstrap.create", after={"note": body.note}
+        )
+        return {"bootstrap_token": token, "attestation_challenge": challenge}
+
+    @app.post("/v1/devices/bootstrap/challenge")
+    async def bootstrap_challenge(body: BootstrapChallengeBody):
+        """The challenge this enrolment must be attested against."""
+        try:
+            challenge = await _require_binding_service().challenge_for(body.token)
+        except DeviceBindingError as exc:
+            raise HTTPException(status_code=403, detail=exc.reason) from exc
+        return {"attestation_challenge": challenge}
+
+    @app.post("/v1/devices/bootstrap/attest")
+    async def bootstrap_attest(body: BootstrapAttestBody):
+        """Bind the owner's device, or refuse and record why."""
+        import base64
+
+        try:
+            extension = base64.b64decode(body.attestation_extension_b64, validate=True)
+        except Exception as exc:
+            raise HTTPException(status_code=400, detail="attestation_not_base64") from exc
+        try:
+            binding = await _require_binding_service().bind(
+                token=body.token,
+                device_id=body.device_id,
+                public_key_pem=body.public_key_pem,
+                attestation_extension=extension,
+                attestation_root_fingerprint=body.attestation_root_fingerprint,
+                os_version=body.os_version,
+                os_patch_level=body.os_patch_level,
+            )
+        except DeviceBindingError as exc:
+            await audit.record(
+                result="refused", device_id=body.device_id,
+                capability="device.bootstrap.attest", error_class=exc.reason,
+            )
+            raise HTTPException(status_code=403, detail=exc.reason) from exc
+        await audit.record(
+            result="ok", device_id=body.device_id, capability="device.bootstrap.attest",
+            after={"fingerprint": binding.device_key_fingerprint},
+        )
+        return {
+            "binding_id": binding.binding_id,
+            "device_id": binding.device_id,
+            "device_key_fingerprint": binding.device_key_fingerprint,
+            "key_security_level": binding.key_security_level,
+            "verified_boot_state": binding.verified_boot_state,
+        }
+
+    @app.get("/v1/device-binding/status")
+    async def device_binding_status(request: Request):
+        """What this device's binding looks like from the Gateway's side."""
+        device_id = getattr(request.state, "van_device_id", None)
+        if not device_id:
+            raise HTTPException(status_code=403, detail="device_identity_required")
+        if owner_device_bindings is None:
+            return {"configured": False, "bound": False, "reason": "binding_unconfigured"}
+        binding = await owner_device_bindings.for_device(device_id)
+        if binding is None:
+            return {"configured": True, "bound": False}
+        return {
+            "configured": True,
+            "bound": binding.status.value == "ACTIVE",
+            "status": binding.status.value,
+            "device_key_fingerprint": binding.device_key_fingerprint,
+            "key_security_level": binding.key_security_level,
+            "verified_boot_state": binding.verified_boot_state,
+            "bound_at_ms": binding.bound_at_ms,
+            "last_proof_at_ms": binding.last_proof_at_ms,
+        }
+
+    @app.post("/v1/devices/rebind")
+    async def rebind_owner_device(body: RebindBody):
+        """§0D.3's recovery path: revoke the current binding and issue one enrolment token.
+
+        Administrative on purpose. A device that could rebind on its own behalf would be a
+        way to become the owner's phone by asserting that it is.
+        """
+        token, challenge = await _require_binding_service().rebind_token(reason=body.reason)
+        await audit.record(
+            result="ok", capability="device.rebind", after={"reason": body.reason}
+        )
+        return {"bootstrap_token": token, "attestation_challenge": challenge}
+
+    @app.get("/v1/connectivity/manifest")
+    async def connectivity_manifest(request: Request, known_version: int = 0):
+        """ADR-RB-027 — a newer signed manifest when there is one, nothing when there is not."""
+        device_id = getattr(request.state, "van_device_id", None)
+        if not device_id:
+            raise HTTPException(status_code=403, detail="device_identity_required")
+        served = await connectivity_config.serve(known_version=known_version)
+        if served is None:
+            return {"current": True, "manifest": None}
+        return {"current": False, **served}
 
     @app.get("/v1/commands/{command_id}")
     async def command_status(command_id: str, request: Request):
