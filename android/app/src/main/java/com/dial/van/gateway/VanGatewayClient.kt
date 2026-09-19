@@ -78,7 +78,11 @@ class VanGatewayClient(context: Context) {
             normalized.startsWith("http://127.0.0.1", ignoreCase = true) ||
                 normalized.startsWith("http://localhost", ignoreCase = true)
             )
-        require(secure || debugLoopback) { "gateway_url_must_use_https" }
+        val buildConfigured = BuildConfig.VAN_GATEWAY_BASE_URL.trim().trimEnd('/')
+        val debugConfigured = BuildConfig.DEBUG &&
+            buildConfigured.isNotBlank() &&
+            normalized.equals(buildConfigured, ignoreCase = true)
+        require(secure || debugLoopback || debugConfigured) { "gateway_url_must_use_https" }
         return normalized
     }
 
