@@ -44,6 +44,30 @@ _AUTHORITY_RANK: dict[EpistemicState, int] = {
     EpistemicState.UNKNOWN: -1,
 }
 
+#: Authorities whose facts do not go stale on a clock.
+#:
+#: Staleness asks "should VAN go and look again". That is a sensible question about a fact
+#: VAN observed — a live API reading, an inference, something an external source said — and
+#: an incoherent one about a fact the owner stated, because VAN has no way to look again.
+#: Only the owner can refresh it, and a project's truth file is refreshed by its SHA.
+#:
+#: The practical consequence of getting this wrong is worse than a mislabel. STALE on a
+#: CANONICAL_OWNER fact is a readiness state the system cannot exit: no re-observation can
+#: clear it, so a requirement with a `max_age_ms` over an owner preference is permanently
+#: unsatisfiable and blocks the work that depends on it, forever.
+#:
+#: Owner statements that *are* time-bound carry `valid_until_ms`, which is the owner scoping
+#: their own claim and is honoured by `current_candidates` before any of this is reached.
+#:
+#: The rule itself is not new. It was written down and tested on the `Claim` type that
+#: component ledger entry 2 dispositioned DELETE — a taxonomy nothing stored — where it
+#: enforced nothing. Deleting that code without bringing the rule here would have removed
+#: the only statement of it in the repository.
+_NOT_STALE_ON_A_CLOCK = {
+    EpistemicState.CANONICAL_OWNER,
+    EpistemicState.PROJECT_TRUTH,
+}
+
 _HIGH_AUTHORITY = {
     EpistemicState.CANONICAL_OWNER,
     EpistemicState.PROJECT_TRUTH,
@@ -260,7 +284,11 @@ class OwnerContextService:
 
         selected = top[0]
         verified_at = selected.last_verified_at_ms or selected.observed_at_ms
-        if requirement.max_age_ms is not None and now_ms - verified_at > requirement.max_age_ms:
+        if (
+            requirement.max_age_ms is not None
+            and selected.authority not in _NOT_STALE_ON_A_CLOCK
+            and now_ms - verified_at > requirement.max_age_ms
+        ):
             return RequirementResolution(requirement=requirement, state=ReadinessState.STALE, fact=selected, reason="fact_exceeds_max_age")
         return RequirementResolution(requirement=requirement, state=ReadinessState.CURRENT, fact=selected)
 

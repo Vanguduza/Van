@@ -11,12 +11,18 @@ from __future__ import annotations
 import pytest
 
 from conftest_automation import make_store
-from van_gateway.epistemics.models import (
-    Claim,
-    Provenance,
-    SemanticClass,
-    may_promote,
+from pydantic import ValidationError
+
+from van_gateway.context.models import (
+    ContextRequirement,
+    EpistemicState,
+    OwnerFactCandidate,
+    ReadinessState,
+    SourceTrust,
 )
+from van_gateway.context.service import OwnerContextService
+from van_gateway.epistemics.models import SemanticClass, may_promote
+from van_gateway.storage.db import Store
 from van_gateway.reasoning.kernel import (
     REQUIRED_COUNTERFACTUALS,
     AssumptionStatus,
@@ -71,17 +77,6 @@ async def seed_episodes(store, *names: str) -> dict[str, str]:
 NOW = 1_800_000_000_000
 
 
-def _claim(cid, statement, klass, *, project=None, group=None, observed=NOW, conf=0.8):
-    return Claim(
-        claim_id=cid, statement=statement, semantic_class=klass, project_id=project,
-        contradiction_group=group, created_at_ms=observed,
-        provenance=Provenance(
-            source_kind="test", source_ref=f"ref://{cid}", observed_at_ms=observed,
-            confidence=conf, evidence_refs=[f"ev://{cid}"],
-        ),
-    )
-
-
 # -------------------------------------------------------------- §14 epistemics
 
 
@@ -105,23 +100,92 @@ def test_a_model_inference_can_never_promote_itself_to_fact():
     assert may_promote(SemanticClass.FACT_UNVERIFIED, SemanticClass.FACT_VERIFIED) is True
 
 
-def test_a_nonowner_claim_without_provenance_is_illformed():
-    """§41 — provenance on 100% of non-owner facts."""
-    bare = Claim(claim_id="c1", statement="x", semantic_class=SemanticClass.FACT_VERIFIED)
-    assert bare.is_wellformed is False
-    owned = Claim(
-        claim_id="c2", statement="I prefer terse updates",
-        semantic_class=SemanticClass.OWNER_PREFERENCE,
+@pytest.mark.asyncio
+async def test_provenance_is_structural_rather_than_checked(tmp_path):
+    """§41 — provenance on 100% of non-owner facts.
+
+    This used to be asserted on the `Claim` type, where `is_wellformed` reported whether a
+    claim happened to carry provenance. Nothing stored a Claim, so nothing was ever
+    reported on. In the live taxonomy the rule is not a check at all: `source_ref` is NOT
+    NULL on `owner_facts` and required by `OwnerFactCandidate`, so a fact without
+    provenance cannot be constructed, let alone admitted.
+
+    Asserted here because "the rule moved from a check to a constructor constraint" is
+    exactly the kind of claim that should be executed rather than believed.
+    """
+    with pytest.raises(ValidationError):
+        OwnerFactCandidate(
+            fact_id="no-provenance", subject="OWNER", predicate="commute", value="cycles",
+            authority=EpistemicState.CANONICAL_OWNER, source_trust=SourceTrust.OWNER_EXPLICIT,
+            valid_from_ms=NOW, observed_at_ms=NOW,
+        )
+
+
+@pytest.mark.asyncio
+async def test_owner_stated_facts_do_not_expire_on_a_clock(tmp_path):
+    """A preference that "expires" makes VAN forget the owner for no reason.
+
+    The rule was written down and tested on the `Claim` type, which nothing stored, so it
+    enforced nothing: `resolve_requirement` marked a three-year-old owner preference STALE
+    on `max_age_ms` like any other fact. Deleting that dead taxonomy without bringing the
+    rule here would have removed the only statement of it in the repository.
+
+    The consequence is worse than a mislabel. Staleness asks "should VAN look again", and
+    for a fact the owner stated there is nowhere to look — only the owner can refresh it.
+    So STALE on a CANONICAL_OWNER fact is a readiness state the system cannot exit, and the
+    requirement depending on it never becomes satisfiable.
+    """
+    store = Store(str(tmp_path / "staleness.sqlite3"))
+    await store.migrate()
+    context = OwnerContextService(store)
+    long_ago = NOW - 3 * 365 * 24 * 3600 * 1000
+
+    async def _admit(fact_id, authority, trust):
+        await context.admit_fact(OwnerFactCandidate(
+            fact_id=fact_id, subject="OWNER", predicate=fact_id, value="x",
+            authority=authority, source_trust=trust, source_ref=f"ref://{fact_id}",
+            valid_from_ms=long_ago, observed_at_ms=long_ago,
+        ))
+        return await context.resolve_requirement(
+            ContextRequirement(subject="OWNER", predicate=fact_id, max_age_ms=24 * 3600 * 1000),
+            now_ms=NOW,
+        )
+
+    owner = await _admit("update_style", EpistemicState.CANONICAL_OWNER, SourceTrust.OWNER_EXPLICIT)
+    assert owner.state is ReadinessState.CURRENT, "the owner's own statement went stale on a clock"
+
+    observed = await _admit(
+        "api_status", EpistemicState.VERIFIED_LIVE_STATE, SourceTrust.VERIFIED_SYSTEM
     )
-    assert owned.is_wellformed is True
+    assert observed.state is ReadinessState.STALE, (
+        "a fact VAN observed must still go stale; exempting everything would make max_age_ms "
+        "mean nothing"
+    )
+    assert observed.reason == "fact_exceeds_max_age"
 
 
-def test_owner_preferences_do_not_expire_on_a_clock():
-    """A preference that "expires" makes VAN forget the owner for no reason."""
-    ancient = _claim("c3", "terse updates", SemanticClass.OWNER_PREFERENCE, observed=0)
-    assert ancient.staleness_at_ms(NOW) is False
-    stale_fact = _claim("c4", "the API returns 200", SemanticClass.FACT_VERIFIED, observed=0)
-    assert stale_fact.staleness_at_ms(NOW) is True
+@pytest.mark.asyncio
+async def test_an_owner_statement_the_owner_scoped_still_ends(tmp_path):
+    """Non-expiry is not immortality.
+
+    "My flight is at six" is owner-stated and time-bound, and the mechanism for that is
+    `valid_until_ms` — the owner scoping their own claim — which is honoured before
+    staleness is ever considered. Without this the exemption above would mean VAN believes
+    a one-off forever.
+    """
+    store = Store(str(tmp_path / "scoped.sqlite3"))
+    await store.migrate()
+    context = OwnerContextService(store)
+    await context.admit_fact(OwnerFactCandidate(
+        fact_id="flight", subject="OWNER", predicate="flight_time", value="18:00",
+        authority=EpistemicState.CANONICAL_OWNER, source_trust=SourceTrust.OWNER_EXPLICIT,
+        source_ref="owner:said-so", valid_from_ms=NOW - 2000, valid_until_ms=NOW - 1000,
+        observed_at_ms=NOW - 2000,
+    ))
+    resolution = await context.resolve_requirement(
+        ContextRequirement(subject="OWNER", predicate="flight_time"), now_ms=NOW
+    )
+    assert resolution.state is ReadinessState.MISSING
 
 
 # --------------------------------------------------------- §9 context compiler

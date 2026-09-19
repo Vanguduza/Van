@@ -191,6 +191,20 @@ ALL = [
     'if device is None or device["revoked_at_unix"] is not None:', "if device is None:",
     "C11 a revoked device approves an A4 action"),
  ]),
+ # --- checkpoint 17: the rule that lived only in dead code ---------------------
+ (["tests/test_epistemics_context_understanding.py"], [
+   ("van_gateway/context/service.py",
+    "            and selected.authority not in _NOT_STALE_ON_A_CLOCK\n", "",
+    "C17 the owner's own statement goes stale on a clock again"),
+   ("van_gateway/context/service.py",
+    "_NOT_STALE_ON_A_CLOCK = {\n    EpistemicState.CANONICAL_OWNER,\n    EpistemicState.PROJECT_TRUTH,\n}",
+    "_NOT_STALE_ON_A_CLOCK = set(EpistemicState)",
+    "C17 exempt everything, so max_age_ms means nothing"),
+   ("van_gateway/context/service.py",
+    "              AND valid_from_ms <= ?\n              AND (valid_until_ms IS NULL OR valid_until_ms > ?)",
+    "              AND valid_from_ms <= ?\n              AND (1 = 1 OR valid_until_ms > ?)",
+    "C17 an owner statement the owner scoped never ends"),
+ ]),
  # --- checkpoint 16: the assumption gate ---------------------------------------
  (["tests/test_irreversible_work_waits_on_assumptions.py", "tests/test_authority_descriptor.py"], [
    ("van_gateway/runtime_api.py",

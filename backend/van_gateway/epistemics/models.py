@@ -13,18 +13,21 @@ chamber. If "the owner said so" and "the world is measurably like this" are the
 same kind of thing internally, then the more VAN learns about the owner the
 more confidently it repeats the owner's errors back to them.
 
-So a `Claim` is never bare text. It carries its class, its provenance, and what
-would change it — and `SemanticClass.factual_weight` is deliberately not a
-function of how confident anyone is.
+What survives here is the class itself and the rule about promoting between
+classes. An earlier design had a storable `Claim` carrying provenance, staleness
+and an admission verdict; component ledger entries 2 and 4 recorded it as
+`IMPLEMENTED_BUT_ISOLATED` with disposition DELETE, and reconciliation.py states
+the reason plainly — no table ever stored one, and two taxonomies where one is
+live and one is aspirational is worse than either alone. The live taxonomy is
+`owner_facts`, whose `EpistemicState` does the storing. This module keeps the
+part that is enforced: `SemanticClass` as a definitional vocabulary, and
+`FORBIDDEN_SELF_PROMOTIONS`, which `check_promotion` applies on every fact
+admission.
 """
 
 from __future__ import annotations
 
-import time
 from enum import Enum
-from typing import Any
-
-from pydantic import BaseModel, Field
 
 
 class SemanticClass(str, Enum):
@@ -91,92 +94,6 @@ DEFAULT_TTL_MS: dict[SemanticClass, int | None] = {
 }
 
 
-class Provenance(BaseModel):
-    """Where a claim came from, precisely enough to go back and check."""
-
-    source_kind: str
-    source_ref: str
-    observed_at_ms: int
-    evidence_refs: list[str] = Field(default_factory=list)
-    confidence: float = 0.5
-
-    @property
-    def is_citable(self) -> bool:
-        return bool(self.source_ref) and bool(self.source_kind)
-
-
-class Claim(BaseModel):
-    """One decision-support statement, with its class attached for life."""
-
-    claim_id: str
-    statement: str
-    semantic_class: SemanticClass
-    provenance: Provenance | None = None
-    project_id: str | None = None
-    sensitivity: str = "ROUTINE"
-    superseded_by: str | None = None
-    contradiction_group: str | None = None
-    falsifier: str | None = None
-    created_at_ms: int = 0
-
-    @property
-    def is_stale(self) -> bool:
-        return self.staleness_at_ms(int(time.time() * 1000))
-
-    def staleness_at_ms(self, now_ms: int) -> bool:
-        ttl = DEFAULT_TTL_MS.get(self.semantic_class)
-        if ttl is None:
-            return False
-        observed = self.provenance.observed_at_ms if self.provenance else self.created_at_ms
-        return now_ms - observed > ttl
-
-    @property
-    def is_wellformed(self) -> bool:
-        """§41 — provenance on every non-owner claim, without exception.
-
-        Checked as a property rather than a validator so an ill-formed claim can
-        be *represented* (and rejected with a reason) rather than being
-        impossible to construct — a claim that cannot exist cannot be explained
-        to the owner.
-        """
-        if self.superseded_by is not None:
-            return True
-        if self.semantic_class.requires_provenance:
-            return self.provenance is not None and self.provenance.is_citable
-        return True
-
-    def as_context_line(self) -> dict[str, Any]:
-        """What reaches a reasoner: the class travels with the statement.
-
-        §14 — the class must survive into reasoning and UI explanation. Handing a
-        model a bare string would strip exactly the distinction this exists for.
-        """
-        return {
-            "claim_id": self.claim_id,
-            "statement": self.statement,
-            "class": self.semantic_class.value,
-            "factual_authority": self.semantic_class.is_factual_authority,
-            "source": self.provenance.source_ref if self.provenance else None,
-            "confidence": self.provenance.confidence if self.provenance else None,
-            "contradiction_group": self.contradiction_group,
-        }
-
-
-class AdmissionOutcome(str, Enum):
-    ADMITTED = "ADMITTED"
-    QUARANTINED = "QUARANTINED"
-    REJECTED = "REJECTED"
-    DUPLICATE = "DUPLICATE"
-    SUPERSEDES = "SUPERSEDES"
-
-
-class AdmissionVerdict(BaseModel):
-    outcome: AdmissionOutcome
-    reason: str
-    claim_id: str | None = None
-    supersedes_claim_id: str | None = None
-
-
 #: §10 — class transitions a candidate may NOT make on its own.
 #: DECISION (recorded): promotion into factual authority always requires either
 #: a verifier receipt or the owner, never accumulated model confidence. Without
@@ -201,13 +118,4 @@ def may_promote(source: SemanticClass, target: SemanticClass) -> bool:
     return (source, target) not in FORBIDDEN_SELF_PROMOTIONS
 
 
-__all__ = [
-    "DEFAULT_TTL_MS",
-    "FORBIDDEN_SELF_PROMOTIONS",
-    "AdmissionOutcome",
-    "AdmissionVerdict",
-    "Claim",
-    "Provenance",
-    "SemanticClass",
-    "may_promote",
-]
+__all__ = ["FORBIDDEN_SELF_PROMOTIONS", "SemanticClass", "may_promote"]

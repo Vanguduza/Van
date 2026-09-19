@@ -5033,6 +5033,46 @@
         "residual_reason": "Hermes is not in this repository. assess() takes assumptions as an input rather than deriving them, which is the correct division — the gateway owns canonical state and performs no inference. Until Hermes calls these routes the ledger stays empty and the gate passes everything, which is the honest behaviour for a gate with nothing recorded against it, not a gate that is switched off.",
         "falsified_by": "An irreversible action executing through /v1/runtime/actions/begin while its mission holds an ACTIVE HIGH or CRITICAL assumption; resolve_assumption clearing a blocker without evidence or a named replacement; or the orchestrator re-deriving its gate from the action class instead of from gate_for."
       }
+    },
+    {
+      "id": "P1-CTX-004",
+      "severity": "P1",
+      "domain": "context",
+      "title": "The owner's own statements went stale on a clock, into a state nothing could clear",
+      "description": "`resolve_requirement` applied a requirement's `max_age_ms` to every fact regardless of where it came from, so a preference the owner stated three years ago and never changed resolved STALE.\n\nStaleness asks whether VAN should go and look again. That is a sensible question about something VAN observed and an incoherent one about something the owner said, because there is nowhere to look — only the owner can refresh it. So STALE on a CANONICAL_OWNER fact is a readiness state the system cannot exit: no re-observation clears it, and the requirement depending on it is permanently unsatisfiable.\n\nThe rule forbidding this was already written down, and tested, on the `Claim` type in epistemics/models.py — a taxonomy that component ledger entry 2 recorded as IMPLEMENTED_BUT_ISOLATED with disposition DELETE, and which reconciliation.py says plainly no table ever stored. So the rule existed, passed its tests, and enforced nothing. Deleting the dead taxonomy without noticing would have removed the only statement of it in the repository.",
+      "requirement": "docs/VAN_CONSOLIDATED_DEPLOYMENT_READINESS_CLOSURE_BLUEPRINT_REV_1.md",
+      "authority": "VAN Consolidated Deployment-Readiness Closure Blueprint Rev 2",
+      "repository_evidence": [
+        "backend/van_gateway/context/service.py",
+        "backend/van_gateway/epistemics/models.py"
+      ],
+      "runtime_evidence": [],
+      "affected_components": [
+        "context",
+        "epistemics"
+      ],
+      "root_cause": "Two taxonomies for the same idea, one live and one aspirational. The live one (`EpistemicState` on `owner_facts`) had the storage and the traffic; the aspirational one (`SemanticClass` on `Claim`) had the rules and the tests. Each looked complete from inside itself.",
+      "remediation": "Delete the taxonomy nothing stored, and carry its rules into the one that does.",
+      "impact": "A requirement with a max age over an owner preference blocks its command forever. More broadly, VAN forgetting what the owner told it because time passed is the specific failure the epistemic ladder exists to prevent — owner authority does not decay.",
+      "validation_gate": "G6",
+      "current_status": "CLOSED",
+      "remediation_gate": "G6",
+      "closure": {
+        "state": "INTEGRATED_AND_EVIDENCED",
+        "summary": "`_NOT_STALE_ON_A_CLOCK` exempts CANONICAL_OWNER and PROJECT_TRUTH from `max_age_ms`, and only those two: a fact VAN observed must still go stale, or the parameter means nothing and the exemption is a way of never checking anything. Both directions are mutation-tested.\n\nNon-expiry is not immortality, and that distinction is what makes the exemption safe. An owner statement that is genuinely time-bound — 'my flight is at six' — carries `valid_until_ms`, the owner scoping their own claim, and `current_candidates` honours it before staleness is ever reached. A test pins that, because without it the exemption would mean VAN believes a one-off forever, which is the opposite failure and just as bad.\n\nThe dead taxonomy is gone: `Claim`, `Provenance`, `AdmissionOutcome`, `AdmissionVerdict` and `DEFAULT_TTL_MS`, 86 lines, entries 2 and 4 in the component ledger, both dispositioned DELETE. `SemanticClass`, `FORBIDDEN_SELF_PROMOTIONS` and `may_promote` stay, because P2-COG-002 wired them into fact admission and they are enforced on every write.\n\nIts other rule went the same way rather than being dropped. §41's 'provenance on 100% of non-owner facts' was a `is_wellformed` property reporting on claims nobody stored; in the live taxonomy it is not a check at all, because `source_ref` is required by `OwnerFactCandidate` and NOT NULL on the table, so a fact without provenance cannot be constructed. The test now asserts the constructor refuses it — 'the rule moved from a check to a structural constraint' being exactly the sort of claim that should be executed rather than believed.\n\nThree mutations, three caught.",
+        "changed": [
+          "backend/van_gateway/context/service.py",
+          "backend/van_gateway/epistemics/models.py"
+        ],
+        "verified_by": [
+          "backend/tests/test_epistemics_context_understanding.py"
+        ],
+        "runtime_evidence": [],
+        "residual": null,
+        "residual_class": null,
+        "residual_reason": null,
+        "falsified_by": "A CANONICAL_OWNER or PROJECT_TRUTH fact resolving STALE on `max_age_ms`; an observed fact no longer resolving STALE when it exceeds one; or a fact whose `valid_until_ms` has passed still resolving CURRENT."
+      }
     }
   ],
   "register_note": "Extended 2026-09-19 under blueprint Gate 0 / action W0-1. The audit assigned IDs to 55 findings and enumerated further P3/P4 items in prose; those now carry IDs so that 'all closed' is countable. Each finding carries a remediation_gate referencing docs/VAN_FINISHED_PRODUCT_BLUEPRINT_REV_1.md.",
