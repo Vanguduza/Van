@@ -250,6 +250,13 @@ SpeakerVerificationTest > a voice unlike the owner's cannot change anything outs
 SpeakerVerificationTest > scores classify at the stated thresholds() PASSED
 SpeakerVerificationTest > every verdict says something a person would say() PASSED
 SpeakerVerificationTest > a recognised voice acts normally() PASSED
+VoiceRecognitionPolicyTest > word-level evidence is only claimed from the version that emits it() PASSED
+VoiceRecognitionPolicyTest > the retained low-API branch is kept deliberately and still resolves() PASSED
+VoiceRecognitionPolicyTest > caller audio is only claimed where the platform actually supports it() PASSED
+VoiceRecognitionPolicyTest > a device with no on-device recognizer still fails closed rather than going to the cloud() PASSED
+VoiceRecognitionPolicyTest > every supported device can reach a recognition backend that exists() PASSED
+VoiceRecognitionPolicyTest > the build guard is installed and depends on the assemble tasks() PASSED
+VoiceRecognitionPolicyTest > the supported floor is at or above the on-device recognizer floor() PASSED
 WakeModelAssetTest > a plausible model with no pinned digest is accepted() PASSED
 WakeModelAssetTest > no model at all is absent, and says so() PASSED
 WakeModelAssetTest > a matching digest is accepted whatever its case() PASSED
@@ -257,4 +264,4 @@ WakeModelAssetTest > a placeholder is not a model() PASSED
 WakeModelAssetTest > only READY reports ready() PASSED
 WakeModelAssetTest > a model that is not the one the release pinned is refused() PASSED
 WakeModelAssetTest > every state has a sentence and none of them names an enum or a path() PASSED
-BUILD SUCCESSFUL in 3s
+BUILD SUCCESSFUL in 4s

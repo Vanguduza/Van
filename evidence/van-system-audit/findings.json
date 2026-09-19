@@ -3732,8 +3732,26 @@
       "remediation": "Raise minSdk to 31 so every supported device has an on-device recognizer, and add a build guard asserting that no supported API level resolves to a backend without a runtime.",
       "impact": "An owner on a device in the unsupported range says 'Hey Van' and nothing can ever hear them.",
       "validation_gate": "G7",
-      "current_status": "OPEN",
-      "remediation_gate": "G7"
+      "current_status": "CLOSED",
+      "remediation_gate": "G7",
+      "closure": {
+        "state": "INTEGRATED_AND_EVIDENCED",
+        "summary": "`minSdk` is raised from 26 to 31, and a build guard makes the condition unshippable rather than merely documented.\n\nBelow API 31 there is no `createOnDeviceSpeechRecognizer`, so `VoiceRecognitionPolicy` resolved every such device to `SHERPA_PRIMARY_REQUIRED`, and no Sherpa runtime ships. The APK therefore installed on phones where voice capture could never work, and the only signal was an error code at the moment the owner first spoke. Failing honestly at runtime is not the same as being usable.\n\nThe guard reads the policy's own source for the lowest API level it resolves to an on-device recognizer, compares that to `minSdk`, and fails the build when `minSdk` is lower and no Sherpa dependency is on the classpath. It is attached to every `assemble` and `bundle` task, because a guard nothing depends on never runs. Reading the policy rather than hardcoding 31 is what stops the check drifting from the thing it checks.\n\nThe API<=30 branch is kept, not deleted: the day a Sherpa engine ships, lowering `minSdk` is one line rather than rewriting the policy. A test asserts it still resolves coherently. Two further tests pin claims that would otherwise silently over-promise \u2014 caller-supplied audio is only claimed from 33, word-level evidence only from 34.",
+        "changed": [
+          "android/app/build.gradle.kts",
+          "android/app/src/main/java/com/dial/van/voice/VoiceRecognitionModels.kt",
+          "android/verification/build.gradle.kts"
+        ],
+        "verified_by": [
+          "android/verification/src/test/kotlin/com/dial/van/voice/VoiceRecognitionPolicyTest.kt"
+        ],
+        "runtime_evidence": [
+          "evidence/van-system-audit/gate-10/kotlin_verification_tests.txt"
+        ],
+        "residual": "Devices on API 26-30 are no longer supported at all, rather than supported with voice that cannot work.",
+        "residual_class": "DELIBERATE_SCOPE",
+        "residual_reason": "Blueprint owner decision 1. The alternative was shipping a VAN that on some supported devices could never hear its owner. Narrowing the supported range is the honest form of that trade, and it is reversible in one line the day owner decision 2 is revisited and a Sherpa engine and model are supplied."
+      }
     },
     {
       "id": "P2-AUTO-002",
@@ -3755,8 +3773,24 @@
       "remediation": "Owner decision 3 in the blueprint: leave unwired and fail closed. Assert the absence so it cannot be reached by accident, and record it as a deliberate scope boundary.",
       "impact": "A documented capability does not exist. VAN cannot make even an owner-approved payment.",
       "validation_gate": "G2",
-      "current_status": "OPEN",
-      "remediation_gate": "G2"
+      "current_status": "CLOSED",
+      "remediation_gate": "G2",
+      "closure": {
+        "state": "INTEGRATED_AND_EVIDENCED",
+        "summary": "Left unwired and fail-closed, per blueprint owner decision 3, with the absence asserted rather than merely true.\n\nA payment path that has never executed is safer absent than newly written, and the prohibition the exception would be an exception to is live at `automation/router.py:118`. What was missing was any statement of that: the exception was simply uncalled, which is indistinguishable from an oversight.\n\nThree tests now hold it. One fails if any production path gains a caller, and says in its failure message what the author must do instead of quietly wiring it. One asserts the prohibition is still live, because the exception being unwired was only safe while it was. One keeps the exception itself honest while it sleeps \u2014 every binding field required, A4 required, fresh approval required \u2014 so wiring it later is a decision rather than a rewrite.",
+        "changed": [
+          "backend/tests/test_automation_security_contracts.py"
+        ],
+        "verified_by": [
+          "backend/tests/test_automation_security_contracts.py"
+        ],
+        "runtime_evidence": [
+          "evidence/van-system-audit/gate-10/kotlin_verification_tests.txt"
+        ],
+        "residual": "VAN cannot make an owner-approved payment. The documented exception has no path.",
+        "residual_class": "DELIBERATE_SCOPE",
+        "residual_reason": "Owner decision 3. Building a money-moving path that nothing has ever exercised, in a pass whose purpose is to close gaps rather than open capabilities, trades a real risk for a capability nobody asked for yet."
+      }
     },
     {
       "id": "P2-VERIFY-002",

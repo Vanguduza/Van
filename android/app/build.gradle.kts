@@ -21,7 +21,17 @@ android {
 
     defaultConfig {
         applicationId = "com.dial.van"
-        minSdk = 26
+        // P1-VOICE-002 / closure blueprint owner decision 1 — raised from 26.
+        //
+        // Below API 31 there is no `SpeechRecognizer.createOnDeviceSpeechRecognizer`, so
+        // `VoiceRecognitionPolicy` resolves to SHERPA_PRIMARY_REQUIRED, and no Sherpa runtime
+        // ships. Keeping minSdk 26 meant shipping a VAN that on some supported devices could
+        // never hear its owner, and failing honestly at runtime is not the same as being
+        // usable. Owner decision 2 declines to build Sherpa; this is the other half of that.
+        //
+        // Reverse by lowering this and shipping a Sherpa model and engine; the policy branch
+        // for API <= 30 is retained and tested for exactly that day.
+        minSdk = 31
         targetSdk = 36
         versionCode = 5
         versionName = "0.5.0-dev"
@@ -163,3 +173,50 @@ dependencies {
     // Android's own org.json at runtime.
     testImplementation("org.json:json:20240303")
 }
+
+/*
+ * P1-VOICE-002 — a release must not be able to ship a supported API level on which VAN
+ * cannot hear.
+ *
+ * `VoiceRecognitionPolicy` maps an API level to a recognition backend. Two of those backends
+ * need a Sherpa runtime that this build does not contain. Before the raise to minSdk 31 the
+ * policy resolved every device below 31 to one of them, so the APK was installable on phones
+ * where voice capture could never work — and the only signal was an error code at the moment
+ * the owner first spoke.
+ *
+ * This asserts the invariant at build time by reading the policy's own source, so the check
+ * cannot drift from the thing it checks: if someone lowers minSdk without shipping Sherpa,
+ * or adds an API branch resolving to a runtime that is absent, the build stops.
+ */
+val voiceRuntimeGuard = tasks.register("assertVoiceRuntimeIsShippable") {
+    val policySource = layout.projectDirectory
+        .file("src/main/java/com/dial/van/voice/VoiceRecognitionModels.kt").asFile
+    val minSdkValue = 31
+    val hasSherpaRuntime = configurations.findByName("implementation")
+        ?.allDependencies
+        ?.any { it.name.contains("sherpa", ignoreCase = true) } ?: false
+    inputs.file(policySource)
+    inputs.property("minSdk", minSdkValue)
+    inputs.property("hasSherpaRuntime", hasSherpaRuntime)
+    outputs.upToDateWhen { true }
+    doLast {
+        if (hasSherpaRuntime) return@doLast
+        val text = policySource.readText()
+        // The lowest API level the policy resolves to an on-device Android recognizer.
+        val onDeviceFloor = Regex("""apiLevel >= (\d+) && onDeviceAvailable""")
+            .findAll(text).map { it.groupValues[1].toInt() }.minOrNull()
+            ?: error("VoiceRecognitionPolicy no longer declares an on-device branch")
+        if (minSdkValue < onDeviceFloor) {
+            error(
+                "Voice runtime unshippable: minSdk $minSdkValue is below the on-device " +
+                    "recognizer floor of $onDeviceFloor and no Sherpa runtime is on the " +
+                    "classpath. Devices between $minSdkValue and ${onDeviceFloor - 1} would " +
+                    "install VAN and never be able to speak to it. Either raise minSdk to " +
+                    "$onDeviceFloor or add the Sherpa engine and model."
+            )
+        }
+    }
+}
+
+tasks.matching { it.name.startsWith("assemble") || it.name.startsWith("bundle") }
+    .configureEach { dependsOn(voiceRuntimeGuard) }

@@ -84,6 +84,7 @@ sourceSets {
             "com/dial/van/trading/TradingFormat.kt",
             "com/dial/van/trading/ChartViewport.kt",
             "com/dial/van/voice/SpeakerVerification.kt",
+            "com/dial/van/voice/VoiceRecognitionModels.kt",
             "com/dial/van/voice/WakeModelAsset.kt",
         )
     }
