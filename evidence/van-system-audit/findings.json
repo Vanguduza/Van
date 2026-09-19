@@ -5113,6 +5113,47 @@
         "residual_reason": null,
         "falsified_by": "A component whose maturity class asserts it is unreached while a production file outside its own module and outside tests names its declared symbols; or a component at INTEGRATED_AND_EVIDENCED that names no tests."
       }
+    },
+    {
+      "id": "P2-GOOG-004",
+      "severity": "P2",
+      "domain": "google",
+      "title": "Six Google capabilities had a transport, a service method and no way in",
+      "description": "gmail_draft, calendar_agenda, calendar_reschedule, drive_search, contacts_resolve and tasks_list were implemented end to end in google/transport.py and google/service.py, exercised by their own tests, and reachable from no route. The mesh reported them as capabilities. The component ledger carried three separate NO_ROUTE entries against them.\n\nSeparately, §71's assess_premise had the same shape one layer over: a complete implementation, a metric reading from it, and no ingress through which the system that does the reasoning could record a row. sycophancy_metrics reported 'unmeasured', which was the honest answer and still meant nobody could tell whether VAN was agreeing with its owner fluently.",
+      "requirement": "docs/GOOGLE_INTELLIGENCE_MESH.md",
+      "authority": "VAN Consolidated Deployment-Readiness Closure Blueprint Rev 2",
+      "repository_evidence": [
+        "backend/van_gateway/app.py",
+        "backend/van_gateway/runtime_api.py"
+      ],
+      "runtime_evidence": [],
+      "affected_components": [
+        "google",
+        "reasoning"
+      ],
+      "root_cause": "Both layers were built outward from the transport and stopped before the route. Nothing checked that a capability the mesh advertises can actually be invoked, so the gap was invisible from every direction except a reachability sweep.",
+      "remediation": "Route them, at the scope their neighbours already use.",
+      "impact": "A capability whose only caller is its own test is not a capability the owner has. VAN advertised drafting, agenda, rescheduling, Drive search, contact resolution and tasks and could perform none of them.",
+      "validation_gate": "G8",
+      "current_status": "CLOSED",
+      "remediation_gate": "G8",
+      "closure": {
+        "state": "EXTERNALLY_BLOCKED_REPOSITORY_COMPLETE",
+        "summary": "Six routes, each mirroring gmail_search: internal control at the GOOGLE scope, and GoogleAuthError to 503 because an absent credential is VAN being unable rather than the caller being wrong — a distinction the audit repeatedly found collapsed, and one that sends the owner to entirely different places.\n\nThe route list was held twice, in `control_scope_for` and in the guard beside it, and adding six paths to one and not the other would have been a hole rather than an inconsistency: an unscoped route falls through to owner-device authentication, so a paired phone could read the owner's Drive. That is the fall-through P0-SEC-001 closed. There is now one frozenset with two readers.\n\nRescheduling is the only mutating route of the six and is refused without the owner's approval before the transport is consulted — otherwise a missing Google credential would 503 first and hide that the approval was never checked. Drafting deliberately is not gated that way: a draft leaves something the owner can read and discard, and gating it like a send trains them to approve without reading.\n\n§71's ingress went in beside the assumption routes. `agreed_without_evidence` is derived by the kernel and absent from the request body, so a caller cannot mark its own agreement well-founded — tested by sending the flag and asserting it is ignored. Agreeing with an OWNER_PREFERENCE is not counted, because §67 says owner preference is not a claim about the world and counting it would make the rate fire on VAN doing exactly what it should.\n\nSeven mutations, seven caught. One needed the compound form: the tasks route's handler-level guard and its scope-set entry each refuse alone, so neither is falsifiable by itself — the third time in this session that overlapping protection hid which half was load-bearing.",
+        "changed": [
+          "backend/van_gateway/app.py",
+          "backend/van_gateway/runtime_api.py"
+        ],
+        "verified_by": [
+          "backend/tests/test_google_capabilities_have_routes.py",
+          "backend/tests/test_irreversible_work_waits_on_assumptions.py"
+        ],
+        "runtime_evidence": [],
+        "residual": "The routes are reachable and refuse correctly without a credential. That they return the owner's real mail, calendar, Drive, contacts and tasks is unobserved.",
+        "residual_class": "EXTERNAL_RUNTIME",
+        "residual_reason": "There is no Google credential in this environment and no live transport to exercise. The tests drive every route through create_app and assert the boundary and the failure mode; what the provider returns is the provider's, and asserting it here would mean asserting a fake.",
+        "falsified_by": "A Google route outside GOOGLE_CONTROL_ROUTES; rescheduling succeeding without approved=true; or a GoogleService method with no route."
+      }
     }
   ],
   "register_note": "Extended 2026-09-19 under blueprint Gate 0 / action W0-1. The audit assigned IDs to 55 findings and enumerated further P3/P4 items in prose; those now carry IDs so that 'all closed' is countable. Each finding carries a remediation_gate referencing docs/VAN_FINISHED_PRODUCT_BLUEPRINT_REV_1.md.",

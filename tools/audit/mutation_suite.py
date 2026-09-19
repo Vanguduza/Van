@@ -310,6 +310,32 @@ EVT_KT = f"{APP_KT}/events/EventStream.kt"
 #: contract tests that run from the repository root. Kept separate rather than folded into
 #: ALL because both the mutation root and pytest's working directory differ.
 ROOT_LEVEL = [
+ # --- checkpoint 19: Google routes and the premise ingress ---------------------
+ (["tests/test_google_capabilities_have_routes.py", "tests/test_control_scopes.py"], [
+   ("van_gateway/app.py", '    "/v1/google/drive/search",\n    "/v1/google/contacts/resolve",\n', "",
+    "C19 two new routes fall outside the scope set"),
+   ("van_gateway/app.py",
+    "            return await google.calendar_reschedule(event_id, new_start_unix, approved=approved)",
+    "            return await google.calendar_reschedule(event_id, new_start_unix, approved=True)",
+    "C19 rescheduling approves itself"),
+   ([("van_gateway/app.py", '    "/v1/google/tasks",\n', ""),
+     ("van_gateway/app.py",
+      "        require_internal_control(x_van_internal_token, ControlScope.GOOGLE)\n        try:\n            return {\"tasks\": await google.tasks_list()}",
+      "        try:\n            return {\"tasks\": await google.tasks_list()}")],
+    "C19 the owner's tasks reachable with a device token (both guards removed)"),
+ ]),
+ (["tests/test_irreversible_work_waits_on_assumptions.py"], [
+   ("van_gateway/runtime_api.py", '        @router.post("/reasoning/premises")\n',
+    '        @router.post("/reasoning/premises-disabled")\n',
+    "C19 the premise ingress moves and nothing records"),
+   ("van_gateway/reasoning/kernel.py",
+    "            and semantic_class in (SemanticClass.FACT_VERIFIED, SemanticClass.FACT_UNVERIFIED)",
+    "            and True", "C19 agreeing with a preference counts as unsupported agreement"),
+   ("van_gateway/reasoning/kernel.py", "            not corrected\n", "            True\n",
+    "C19 a correction is counted as agreement"),
+   ("van_gateway/reasoning/kernel.py", "            and not refs\n", "            and True\n",
+    "C19 citing evidence no longer makes agreement well-founded"),
+ ]),
  # --- checkpoint 18: the ledger reconciler -------------------------------------
  # Six mutations, and getting three of them to fail took three attempts each. The tool's
  # two test-exclusion rules overlap on every file in this repository, so any fixture driven

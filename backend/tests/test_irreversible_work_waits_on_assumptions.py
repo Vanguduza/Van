@@ -477,3 +477,104 @@ async def test_a_planner_can_read_what_is_blocking_before_being_refused(runtime)
     assert r.status_code == 200
     blocking = r.json()["blocking"]
     assert [b["claim"] for b in blocking] == ["nb-1 is the right notebook"]
+
+
+# ------------------------------------------------- §71, the other half of the kernel
+#
+# `assess_premise` had the same shape as the assumption ledger: a complete implementation,
+# a metric reading from it, and no route through which the system that does the reasoning
+# could put a row in. `sycophancy_metrics` reported `unmeasured`, which was the honest
+# answer and still meant nobody could tell whether VAN was agreeing with its owner
+# fluently — the failure §71 names as what makes personalisation dangerous.
+
+
+@pytest.mark.asyncio
+async def test_a_premise_assessment_can_be_recorded_and_reaches_the_metric(runtime):
+    ac, app = runtime
+    recorded = await ac.post("/v1/runtime/reasoning/premises", json={
+        "owner_premise": "the deploy went out on Friday",
+        "van_position": "agreed",
+        "semantic_class": "FACT_UNVERIFIED",
+    })
+    assert recorded.status_code == 200
+    assert recorded.json()["premise_id"].startswith("prem_")
+
+    metrics = await CriticalReasoningKernel(app.state.store).sycophancy_metrics()
+    assert metrics.get("unsupported_agreement_rate") != "unmeasured", (
+        "the metric still reports unmeasured with a row in the table"
+    )
+
+
+@pytest.mark.asyncio
+async def test_a_caller_cannot_mark_its_own_agreement_well_founded(runtime):
+    """`agreed_without_evidence` is derived, not supplied.
+
+    A caller that could set it would be grading its own homework, and the rate §17 measures
+    would become a self-report. The body has no such field, and agreeing with a factual
+    premise while citing nothing is what gets counted.
+    """
+    ac, app = runtime
+    await ac.post("/v1/runtime/reasoning/premises", json={
+        "owner_premise": "the API returns 200",
+        "van_position": "agreed",
+        "semantic_class": "FACT_VERIFIED",
+        "agreed_without_evidence": False,
+    })
+    row = await app.state.store.fetchone(
+        "SELECT agreed_without_evidence FROM premise_assessments ORDER BY rowid DESC LIMIT 1"
+    )
+    assert int(row["agreed_without_evidence"]) == 1, (
+        "a caller's own claim about its evidence was believed"
+    )
+
+
+@pytest.mark.asyncio
+async def test_citing_evidence_is_what_makes_agreement_well_founded(runtime):
+    """And the other direction, or the flag would be a constant."""
+    ac, app = runtime
+    await ac.post("/v1/runtime/reasoning/premises", json={
+        "owner_premise": "the API returns 200",
+        "van_position": "agreed",
+        "semantic_class": "FACT_VERIFIED",
+        "evidence_refs": ["https://ci.example/run/1"],
+    })
+    row = await app.state.store.fetchone(
+        "SELECT agreed_without_evidence FROM premise_assessments ORDER BY rowid DESC LIMIT 1"
+    )
+    assert int(row["agreed_without_evidence"]) == 0
+
+
+@pytest.mark.asyncio
+async def test_disagreeing_with_the_owner_is_not_counted_as_unsupported_agreement(runtime):
+    """A correction is the behaviour §71 wants, not the behaviour it measures."""
+    ac, app = runtime
+    await ac.post("/v1/runtime/reasoning/premises", json={
+        "owner_premise": "the deploy succeeded",
+        "van_position": "the deploy failed at the migration step",
+        "semantic_class": "FACT_UNVERIFIED",
+        "corrected": True,
+    })
+    row = await app.state.store.fetchone(
+        "SELECT agreed_without_evidence FROM premise_assessments ORDER BY rowid DESC LIMIT 1"
+    )
+    assert int(row["agreed_without_evidence"]) == 0
+
+
+@pytest.mark.asyncio
+async def test_a_preference_is_not_a_factual_premise(runtime):
+    """Agreeing that the owner prefers terse updates is not agreeing about the world.
+
+    §67: owner belief is not factual authority, and owner *preference* is not a claim about
+    reality at all. Counting agreement with one as unsupported would make the rate fire on
+    VAN doing exactly what it should.
+    """
+    ac, app = runtime
+    await ac.post("/v1/runtime/reasoning/premises", json={
+        "owner_premise": "I prefer terse updates",
+        "van_position": "agreed",
+        "semantic_class": "OWNER_PREFERENCE",
+    })
+    row = await app.state.store.fetchone(
+        "SELECT agreed_without_evidence FROM premise_assessments ORDER BY rowid DESC LIMIT 1"
+    )
+    assert int(row["agreed_without_evidence"]) == 0

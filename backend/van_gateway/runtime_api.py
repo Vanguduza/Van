@@ -27,6 +27,7 @@ from van_gateway.context.retrieval import (
 )
 from van_gateway.authority.descriptor import Reversibility, describe_action
 from van_gateway.context.service import ContextAdmissionError, OwnerContextService
+from van_gateway.epistemics.models import SemanticClass
 from van_gateway.reasoning.kernel import (
     AssumptionStatus,
     CriticalReasoningKernel,
@@ -95,6 +96,22 @@ class AssumptionRecordBody(BaseModel):
     confidence: float = Field(default=0.5, ge=0.0, le=1.0)
     testability: str = Field(default="UNKNOWN", max_length=64)
     verification_plan: str | None = Field(default=None, max_length=2000)
+
+
+class PremiseAssessmentBody(BaseModel):
+    """What the owner asserted, what VAN concluded, and what it cited.
+
+    `agreed_without_evidence` is deliberately absent: the kernel derives it, so a caller
+    cannot mark its own agreement well-founded. That derivation is what makes §17's
+    unsupported-agreement rate a measurement rather than a self-report.
+    """
+
+    owner_premise: str = Field(min_length=1, max_length=4000)
+    van_position: str = Field(min_length=1, max_length=4000)
+    semantic_class: SemanticClass
+    evidence_refs: list[str] = Field(default_factory=list)
+    corrected: bool = False
+    mission_id: str | None = Field(default=None, max_length=256)
 
 
 class AssumptionResolveBody(BaseModel):
@@ -471,6 +488,34 @@ class OwnerRuntimeApi:
             except ReasoningError as exc:
                 raise HTTPException(status_code=409, detail=exc.code) from exc
             return {"assumption_id": assumption_id, "status": body.status.value}
+
+        @router.post("/reasoning/premises")
+        async def record_premise_assessment(
+            body: PremiseAssessmentBody,
+            x_van_internal_token: str | None = Header(default=None),
+        ):
+            """§71 — every time VAN agreed or disagreed with a factual premise.
+
+            The producer `sycophancy_metrics` never had. The metric reported
+            `unmeasured` honestly, which was the right answer to give and still meant
+            nobody could tell whether VAN was agreeing with the owner fluently — the
+            specific failure §71 names as what makes personalisation dangerous.
+
+            Nothing here can lower a gate. Recording an agreement only ever adds to the
+            denominator of a rate VAN is judged by, which is why it needs no approval and
+            why a caller cannot supply the flag that makes its own agreement look
+            well-founded.
+            """
+            self._require_internal(x_van_internal_token)
+            premise_id = await self.kernel.assess_premise(
+                owner_premise=body.owner_premise,
+                van_position=body.van_position,
+                semantic_class=body.semantic_class,
+                evidence_refs=body.evidence_refs,
+                corrected=body.corrected,
+                mission_id=body.mission_id,
+            )
+            return {"premise_id": premise_id}
 
         @router.post("/actions/begin")
         async def begin_action(body: ActionBeginBody, x_van_internal_token: str | None = Header(default=None)):

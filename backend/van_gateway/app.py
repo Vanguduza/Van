@@ -244,6 +244,31 @@ class TicketConfirmRequest(BaseModel):
     contract_note_ref: str = Field(min_length=1)
 
 
+#: Google routes that require the internal-control credential at the GOOGLE scope.
+#:
+#: One set with two readers. `control_scope_for` decides what the middleware demands, and
+#: the guard below it decides what the handler-level check expects; they held separate
+#: copies of this list. A route in one and missing from the other is not an inconsistency,
+#: it is a hole — an unscoped route falls through to owner-device authentication, and
+#: reaching the owner's Gmail with a device token is the fall-through P0-SEC-001 closed.
+#:
+#: P2-GOOG-004 added the six in the middle, which had a transport, a service method and no
+#: route at all.
+GOOGLE_CONTROL_ROUTES: frozenset[str] = frozenset({
+    "/v1/google/gmail/search",
+    "/v1/google/gmail/send",
+    "/v1/google/gmail/draft",
+    "/v1/google/calendar/agenda",
+    "/v1/google/calendar/reschedule",
+    "/v1/google/drive/search",
+    "/v1/google/contacts/resolve",
+    "/v1/google/tasks",
+    "/v1/google/connect",
+    "/v1/google/revoke",
+    "/v1/google/jobs/plan",
+})
+
+
 def create_app() -> FastAPI:
     settings = get_settings()
     store = Store(settings.database_path)
@@ -706,13 +731,7 @@ def create_app() -> FastAPI:
             return ControlScope.TRADING
         if method == "POST" and path.startswith("/v1/trading/tickets/") and path.endswith("/confirm"):
             return ControlScope.TRADING
-        if path in {
-            "/v1/google/gmail/search",
-            "/v1/google/gmail/send",
-            "/v1/google/connect",
-            "/v1/google/revoke",
-            "/v1/google/jobs/plan",
-        }:
+        if path in GOOGLE_CONTROL_ROUTES:
             return ControlScope.GOOGLE
         if path.startswith("/v1/google/jobs/"):
             return ControlScope.GOOGLE
@@ -773,13 +792,7 @@ def create_app() -> FastAPI:
         # The test-transport route that used to sit at the head of this set is gone
         # (P2-SEC-009); leaving its name in the allow-list would be dead policy for a
         # route that no longer exists.
-        if path in {
-            "/v1/google/gmail/search",
-            "/v1/google/gmail/send",
-            "/v1/google/connect",
-            "/v1/google/revoke",
-            "/v1/google/jobs/plan",
-        }:
+        if path in GOOGLE_CONTROL_ROUTES:
             return True
         return path.startswith("/v1/google/jobs/")
 
@@ -1343,6 +1356,86 @@ def create_app() -> FastAPI:
         except GoogleAuthError as exc:
             code = 403 if str(exc) == "approval_required" else 503
             raise HTTPException(status_code=code, detail=str(exc)) from exc
+
+    # P2-GOOG-004 — six capabilities with a transport, a service method and no way in.
+    #
+    # gmail_draft, calendar_agenda, calendar_reschedule, drive_search, contacts_resolve and
+    # tasks_list were implemented end to end in google/transport.py and google/service.py
+    # and reachable from nothing. The mesh reported them as capabilities; the component
+    # ledger recorded three entries of NO_ROUTE against them. A capability whose only caller
+    # is its own test is not a capability the owner has.
+    #
+    # Each mirrors gmail_search exactly: internal control at the GOOGLE scope, and
+    # GoogleAuthError to 503 because an absent or expired credential is VAN being unable
+    # rather than the caller being wrong. No new authority is introduced anywhere.
+
+    @app.post("/v1/google/gmail/draft")
+    async def gmail_draft(
+        thread_id: str, body: str, x_van_internal_token: str | None = Header(default=None)
+    ):
+        """A draft is written, not sent, which is why it is not gated like a send.
+
+        gmail_send is A4 and demands an owner approval bound to the command. Drafting
+        leaves something the owner can read and discard; gating it the same way would train
+        them to approve without reading, and the approval that matters is the one on the
+        send.
+        """
+        require_internal_control(x_van_internal_token, ControlScope.GOOGLE)
+        try:
+            return await google.gmail_draft(thread_id, body)
+        except GoogleAuthError as exc:
+            raise HTTPException(status_code=503, detail=str(exc)) from exc
+
+    @app.get("/v1/google/calendar/agenda")
+    async def calendar_agenda(x_van_internal_token: str | None = Header(default=None)):
+        require_internal_control(x_van_internal_token, ControlScope.GOOGLE)
+        try:
+            return {"events": await google.calendar_agenda()}
+        except GoogleAuthError as exc:
+            raise HTTPException(status_code=503, detail=str(exc)) from exc
+
+    @app.post("/v1/google/calendar/reschedule")
+    async def calendar_reschedule(
+        event_id: str,
+        new_start_unix: int,
+        approved: bool = False,
+        x_van_internal_token: str | None = Header(default=None),
+    ):
+        """Moving something in the owner's calendar needs their approval.
+
+        The service already refuses without it. The route passes the flag rather than
+        deciding, so there is one place that says what rescheduling costs.
+        """
+        require_internal_control(x_van_internal_token, ControlScope.GOOGLE)
+        try:
+            return await google.calendar_reschedule(event_id, new_start_unix, approved=approved)
+        except GoogleAuthError as exc:
+            code = 403 if str(exc) == "approval_required" else 503
+            raise HTTPException(status_code=code, detail=str(exc)) from exc
+
+    @app.get("/v1/google/drive/search")
+    async def drive_search(q: str, x_van_internal_token: str | None = Header(default=None)):
+        require_internal_control(x_van_internal_token, ControlScope.GOOGLE)
+        try:
+            return {"files": await google.drive_search(q)}
+        except GoogleAuthError as exc:
+            raise HTTPException(status_code=503, detail=str(exc)) from exc
+
+    @app.get("/v1/google/contacts/resolve")
+    async def contacts_resolve(q: str, x_van_internal_token: str | None = Header(default=None)):
+        require_internal_control(x_van_internal_token, ControlScope.GOOGLE)
+        try:
+            return {"contacts": await google.contacts_resolve(q)}
+        except GoogleAuthError as exc:
+            raise HTTPException(status_code=503, detail=str(exc)) from exc
+
+    @app.get("/v1/google/tasks")
+    async def tasks_list(x_van_internal_token: str | None = Header(default=None)):
+        require_internal_control(x_van_internal_token, ControlScope.GOOGLE)
+        try:
+            return {"tasks": await google.tasks_list()}
+        except GoogleAuthError as exc:
+            raise HTTPException(status_code=503, detail=str(exc)) from exc
 
     @app.get("/v1/google/status")
     async def google_status():

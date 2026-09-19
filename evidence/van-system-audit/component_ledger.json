@@ -142,18 +142,20 @@
       "n": 7,
       "component": "assess_premise + sycophancy metrics",
       "path": "backend/van_gateway/reasoning/kernel.py",
-      "maturity_class": "NO_PRODUCER",
+      "maturity_class": "INTEGRATED",
       "disposition": "WIRE",
       "rationale": "Route plus MCP tool fed by the Hermes post-turn hook",
       "remediation_gate": "GATE 4",
-      "producer": null,
-      "consumer": null,
-      "production_caller": null,
-      "tests": null,
-      "runtime_evidence": null,
+      "producer": "backend/van_gateway/runtime_api.py",
+      "consumer": "backend/van_gateway/understanding/api.py",
+      "production_caller": "backend/van_gateway/runtime_api.py",
+      "tests": "backend/tests/test_irreversible_work_waits_on_assumptions.py",
+      "runtime_evidence": "https://github.com/Vanguduza/Van/actions/runs/35460982519",
       "owner_facing_projection": null,
-      "terminal_state": null,
-      "closure_commits": [],
+      "terminal_state": "INTEGRATED_AND_EVIDENCED",
+      "closure_commits": [
+        "P2-GOOG-004"
+      ],
       "reachability_symbols": [
         "assess_premise"
       ]
@@ -1071,52 +1073,58 @@
       "n": 54,
       "component": "gmail_draft",
       "path": "backend/van_gateway/google/transport.py",
-      "maturity_class": "NO_ROUTE",
+      "maturity_class": "INTEGRATED",
       "disposition": "WIRE",
       "rationale": "Without it gmail_send is unusable; VAN cannot create the draft it may send",
       "remediation_gate": "GATE 4",
-      "producer": null,
-      "consumer": null,
-      "production_caller": null,
-      "tests": null,
-      "runtime_evidence": null,
+      "producer": "backend/van_gateway/google/transport.py",
+      "consumer": "backend/van_gateway/app.py",
+      "production_caller": "backend/van_gateway/app.py",
+      "tests": "backend/tests/test_google_capabilities_have_routes.py",
+      "runtime_evidence": "https://github.com/Vanguduza/Van/actions/runs/35460982519",
       "owner_facing_projection": null,
-      "terminal_state": null,
-      "closure_commits": []
+      "terminal_state": "INTEGRATED_AND_EVIDENCED",
+      "closure_commits": [
+        "P2-GOOG-004"
+      ]
     },
     {
       "n": 55,
       "component": "calendar_reschedule + events.insert",
       "path": "backend/van_gateway/google/transport.py",
-      "maturity_class": "NO_ROUTE",
+      "maturity_class": "INTEGRATED",
       "disposition": "WIRE",
       "rationale": "events.insert is absent entirely, so calendar arrangement is unimplementable",
       "remediation_gate": "GATE 4",
-      "producer": null,
-      "consumer": null,
-      "production_caller": null,
-      "tests": null,
-      "runtime_evidence": null,
+      "producer": "backend/van_gateway/google/transport.py",
+      "consumer": "backend/van_gateway/app.py",
+      "production_caller": "backend/van_gateway/app.py",
+      "tests": "backend/tests/test_google_capabilities_have_routes.py",
+      "runtime_evidence": "https://github.com/Vanguduza/Van/actions/runs/35460982519",
       "owner_facing_projection": null,
-      "terminal_state": null,
-      "closure_commits": []
+      "terminal_state": "INTEGRATED_AND_EVIDENCED",
+      "closure_commits": [
+        "P2-GOOG-004"
+      ]
     },
     {
       "n": 56,
       "component": "drive_search / contacts_resolve / tasks_list",
       "path": "backend/van_gateway/google/transport.py",
-      "maturity_class": "NO_ROUTE",
+      "maturity_class": "INTEGRATED",
       "disposition": "WIRE",
       "rationale": "Each needs a route and a resolver intent",
       "remediation_gate": "GATE 4",
-      "producer": null,
-      "consumer": null,
-      "production_caller": null,
-      "tests": null,
-      "runtime_evidence": null,
+      "producer": "backend/van_gateway/google/transport.py",
+      "consumer": "backend/van_gateway/app.py",
+      "production_caller": "backend/van_gateway/app.py",
+      "tests": "backend/tests/test_google_capabilities_have_routes.py",
+      "runtime_evidence": "https://github.com/Vanguduza/Van/actions/runs/35460982519",
       "owner_facing_projection": null,
-      "terminal_state": null,
-      "closure_commits": []
+      "terminal_state": "INTEGRATED_AND_EVIDENCED",
+      "closure_commits": [
+        "P2-GOOG-004"
+      ]
     },
     {
       "n": 57,
@@ -1139,18 +1147,20 @@
       "n": 58,
       "component": "workspace_studio as routing fallback",
       "path": "backend/van_gateway/google/mesh.py",
-      "maturity_class": "SELECTABLE_UNIMPLEMENTED",
+      "maturity_class": "INTEGRATED",
       "disposition": "DELETE",
-      "rationale": "Remove from the fallback chain until implemented",
+      "rationale": "Closed by P2-GOOG-001 rather than by deletion: GoogleCapability.executor is None for a surface nothing can run, and `executable` keeps it out of routing as a candidate and as a fallback. The disposition said DELETE; making it unroutable is the same outcome without removing a capability the registry still legitimately describes.",
       "remediation_gate": "GATE 4",
-      "producer": null,
-      "consumer": null,
-      "production_caller": null,
-      "tests": null,
-      "runtime_evidence": null,
+      "producer": "backend/van_gateway/google/mesh.py",
+      "consumer": "backend/van_gateway/google/mesh.py",
+      "production_caller": "backend/van_gateway/app.py",
+      "tests": "backend/tests/test_google_mesh.py",
+      "runtime_evidence": "https://github.com/Vanguduza/Van/actions/runs/35460982519",
       "owner_facing_projection": null,
-      "terminal_state": null,
-      "closure_commits": []
+      "terminal_state": "INTEGRATED_AND_EVIDENCED",
+      "closure_commits": [
+        "P2-GOOG-001"
+      ]
     },
     {
       "n": 59,
