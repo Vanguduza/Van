@@ -38,6 +38,8 @@ import androidx.compose.ui.semantics.contentDescription
 import androidx.compose.ui.semantics.semantics
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
+import com.dial.van.runtime.DeviceRuntimeReadings
+import com.dial.van.runtime.VanResourceEnvelope
 import java.io.IOException
 import kotlin.math.PI
 import kotlin.math.min
@@ -222,7 +224,12 @@ fun rememberVanEffectBudget(): VanEffectBudget {
         } else {
             false
         }
-        VanEffectPolicy.resolve(
+        // P3-PERF-003 — resolved through the runtime envelope rather than beside it. The
+        // ladder still decides; the envelope may only make its answer weaker. Before this,
+        // a phone at four percent with power-save switched off rendered the full field,
+        // because battery *level* was not an input to anything.
+        VanResourceEnvelope.effectBudget(
+            DeviceRuntimeReadings.read(context),
             VanEffectConditions(
                 batterySaver = power?.isPowerSaveMode == true,
                 thermalStatus = thermal,

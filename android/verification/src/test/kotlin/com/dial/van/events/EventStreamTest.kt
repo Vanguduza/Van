@@ -1,5 +1,6 @@
 package com.dial.van.events
 
+import com.dial.van.runtime.RuntimePressure
 import kotlin.test.Test
 import kotlin.test.assertEquals
 import kotlin.test.assertFalse
@@ -92,7 +93,11 @@ class EventStreamTest {
         val delays = mutableListOf<Long>()
         repeat(12) {
             state = EventStream.applyFailure(state, "gateway unreachable")
-            delays += EventStream.nextDelayMillis(state, false)
+            // Non-null is the assertion, not a convenience: on a healthy device there is
+            // always a next poll. Only the runtime envelope at SURVIVAL returns null
+            // (P3-PERF-003), and a backoff that silently became "never" would look like a
+            // very patient client and be a dead one.
+            delays += assertNotNull(EventStream.nextDelayMillis(state, false))
         }
         assertEquals(EventStream.MIN_BACKOFF_MS, delays.first())
         assertTrue(delays[1] > delays[0], "the backoff did not grow")
@@ -123,5 +128,76 @@ class EventStreamTest {
         val failed = EventStream.applyFailure(fresh, "gateway unreachable")
         assertFalse(failed.loaded)
         assertEquals("gateway unreachable", failed.error)
+    }
+
+    // ---- P3-PERF-003: the poll rate answers to the whole-runtime envelope ----------
+
+    @Test
+    fun `a constrained device polls the event stream less often`() {
+        val state = EventStream.applyPage(EventStreamState(), page(1, 2))
+        val healthy = assertNotNull(EventStream.nextDelayMillis(state, false, RuntimePressure.NOMINAL))
+        val constrained =
+            assertNotNull(EventStream.nextDelayMillis(state, false, RuntimePressure.CONSTRAINED))
+        val critical =
+            assertNotNull(EventStream.nextDelayMillis(state, false, RuntimePressure.CRITICAL))
+
+        assertEquals(EventStream.IDLE_POLL_MS, healthy)
+        assertTrue(constrained > healthy, "a constrained device polled as fast as a healthy one")
+        assertTrue(critical > constrained, "pressure stopped stretching the cadence")
+    }
+
+    @Test
+    fun `a device with minutes left stops polling rather than polling slowly`() {
+        // Null is the answer, not a very large delay. A caller that received a number would
+        // keep a coroutine alive holding a wake lock's worth of intent for nothing.
+        val state = EventStream.applyPage(EventStreamState(), page(1))
+        assertNull(EventStream.nextDelayMillis(state, false, RuntimePressure.SURVIVAL))
+    }
+
+    @Test
+    fun `catching up is not slowed down`() {
+        // A truncated page means the owner's screen is behind and more is already waiting.
+        // Spacing out catch-up makes the device do the same total work over longer, which is
+        // more battery and not less.
+        val state = EventStream.applyPage(EventStreamState(), page(1, 2, truncated = true))
+        for (pressure in RuntimePressure.entries) {
+            if (!EventStream.pollsAt(pressure)) continue
+            assertEquals(
+                EventStream.CATCH_UP_POLL_MS,
+                EventStream.nextDelayMillis(state, true, pressure),
+                "catch-up was stretched at $pressure",
+            )
+        }
+    }
+
+    @Test
+    fun `catch-up is immediate because the constant is zero, and that is load-bearing`() {
+        // The property above holds by arithmetic rather than by a branch: any cadence scale
+        // multiplied by zero is zero. That makes this constant load-bearing in a way its
+        // name does not advertise, so changing it should mean re-reading the reasoning in
+        // nextDelayMillis rather than discovering later that catch-up got slower under
+        // pressure.
+        assertEquals(0L, EventStream.CATCH_UP_POLL_MS)
+    }
+
+    @Test
+    fun `the envelope never makes a stretched backoff exceed the ceiling`() {
+        // MAX_BACKOFF_MS is what the gateway's operator can reason about. Multiplying a
+        // backoff already at the ceiling would put the client hours away from recovering.
+        var state = EventStreamState()
+        repeat(12) { state = EventStream.applyFailure(state, "down") }
+        val delay = assertNotNull(EventStream.nextDelayMillis(state, false, RuntimePressure.CRITICAL))
+        assertEquals(EventStream.MAX_BACKOFF_MS, delay)
+    }
+
+    @Test
+    fun `the default pressure changes nothing for a caller that has no reading`() {
+        // A caller that silently got a slower stream from a default would be worse than one
+        // that got no envelope at all.
+        val state = EventStream.applyPage(EventStreamState(), page(1))
+        assertEquals(
+            EventStream.nextDelayMillis(state, false),
+            EventStream.nextDelayMillis(state, false, RuntimePressure.NOMINAL),
+        )
     }
 }

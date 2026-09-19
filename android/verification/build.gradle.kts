@@ -65,6 +65,10 @@ sourceSets {
             "com/dial/van/visual/VanTradeSemantic.kt",
             "com/dial/van/visual/VanVisualRuntime.kt",
             "com/dial/van/visual/VanWindFieldMotion.kt",
+            // Gate 12 — P3-PERF-003. The whole-runtime envelope: pure arithmetic over
+            // readings, and the only thing in this repository that can be executed for it.
+            // Whether it keeps a real phone cool is Gate 14's measurement, not this file's.
+            "com/dial/van/runtime/VanResourceEnvelope.kt",
             "com/dial/van/degraded/DegradedMode.kt",
             "com/dial/van/degraded/SubsystemSignals.kt",
             "com/dial/van/overlay/OverlayTheme.kt",

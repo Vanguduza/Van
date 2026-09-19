@@ -248,10 +248,37 @@ ALL = [
  ]),
 ]
 
+APP_KT = "android/app/src/main/java/com/dial/van"
+ENV_KT = f"{APP_KT}/runtime/VanResourceEnvelope.kt"
+EVT_KT = f"{APP_KT}/events/EventStream.kt"
+
 #: Mutations against files outside backend/ — the workflow, the Gradle scripts — checked by
 #: contract tests that run from the repository root. Kept separate rather than folded into
 #: ALL because both the mutation root and pytest's working directory differ.
 ROOT_LEVEL = [
+ # --- checkpoint 14: the runtime envelope's wiring ----------------------------
+ # The envelope's arithmetic is mutated under Gradle (see KOTLIN below). These are the
+ # Python half: whether anything in the shipping app actually asks it. A fully tested
+ # envelope that no production path reaches is the audit's most common defect shape.
+ (["tests/contracts/test_the_runtime_envelope_governs.py"], [
+   (f"{APP_KT}/visual/VanCanvasFallback.kt", "VanResourceEnvelope.effectBudget(",
+    "VanEffectPolicy.resolve(", "C14 the embodiment resolves its own budget again"),
+   (f"{APP_KT}/command/modules/WorkModules.kt",
+    "stream, truncated, DeviceRuntimeReadings.pressure(context),", "stream, truncated,",
+    "C14 the poll loop takes the default pressure"),
+   (f"{APP_KT}/telemetry/DeviceTelemetryReporter.kt",
+    "delay((FLUSH_INTERVAL_MS * allowance.cadenceScale).toLong())", "delay(FLUSH_INTERVAL_MS)",
+    "C14 the flush interval ignores the allowance"),
+   (f"{APP_KT}/command/modules/WorkModules.kt", ") ?: break", ") ?: 0L",
+    "C14 a stop is coerced back into a delay"),
+   (f"{APP_KT}/runtime/VanResourceEnvelope.kt",
+    "        VanSubsystem.WAKE_WORD,\n        VanSubsystem.OWNER_COMMAND,\n        VanSubsystem.DEGRADED_REPORTING,\n",
+    "", "C14 empty the never-shed set"),
+   (f"{APP_KT}/runtime/VanResourceEnvelope.kt", "const val UNKNOWN = -1", "const val UNKNOWN = 0",
+    "C14 an unreadable battery reads as flat"),
+   (f"{APP_KT}/runtime/DeviceRuntimeReadings.kt", "context.filesDir.usableSpace", "0L",
+    "C14 stop reading free storage"),
+ ]),
  # --- checkpoint 12: the APK leaves CI ----------------------------------------
  (["tests/contracts/test_the_apk_leaves_ci.py",
    "tests/contracts/test_ci_workflow_is_what_it_claims.py"], [
@@ -280,6 +307,50 @@ ROOT_LEVEL = [
  ]),
 ]
 
+#: Checkpoint 14, Kotlin half. Run by Gradle in android/verification rather than by pytest,
+#: because that harness is the only thing in this repository that can execute Kotlin at all.
+KOTLIN = [
+ (ENV_KT, "status >= THERMAL_CRITICAL -> RuntimePressure.SURVIVAL",
+  "status >= THERMAL_CRITICAL -> RuntimePressure.NOMINAL",
+  "C14 thermal critical reads as fine"),
+ ([(ENV_KT, '            add("thermal" to thermalPressure(reading.thermalStatus))',
+    '            if (!reading.charging) add("thermal" to thermalPressure(reading.thermalStatus))')],
+  "C14 being on a charger excuses the heat"),
+ (ENV_KT, "        val pressure = contributions.maxOf { it.second }",
+  "        val pressure = contributions.last().second",
+  "C14 pressure is the last input rather than the worst"),
+ # Compound: the never-shed promise is held by a guard clause and by the table it guards,
+ # so neither edit alone changes behaviour. A single-edit mutation surviving for that reason
+ # would say nothing about whether the promise is tested.
+ ([(ENV_KT, "        if (subsystem in NEVER_SHED) return Allowance.FULL",
+    "        if (false) return Allowance.FULL"),
+   (ENV_KT, """            VanSubsystem.WAKE_WORD,
+            VanSubsystem.OWNER_COMMAND,
+            VanSubsystem.DEGRADED_REPORTING,
+            -> Allowance.FULL""",
+    """            VanSubsystem.WAKE_WORD,
+            VanSubsystem.OWNER_COMMAND,
+            VanSubsystem.DEGRADED_REPORTING,
+            -> if (pressure.atLeast(RuntimePressure.CRITICAL)) Allowance.STOPPED else Allowance.FULL""")],
+  "C14 the wake word is shed under pressure"),
+ (ENV_KT, "        VanEffectBudget.REDUCED_MOTION -> 1", "        VanEffectBudget.REDUCED_MOTION -> 3",
+  "C14 reduced motion ranked as rich, so pressure clamps it into a moving budget"),
+ (ENV_KT, "        return if (rank(ladder) <= rank(ceiling)) ladder else ceiling",
+  "        return if (rank(ladder) >= rank(ceiling)) ladder else ceiling",
+  "C14 the envelope raises the embodiment's budget"),
+ (ENV_KT,
+  "                pressure.atLeast(RuntimePressure.CRITICAL) -> Allowance.STOPPED\n                pressure.atLeast(RuntimePressure.CONSTRAINED) -> Allowance(true, 4.0)",
+  "                pressure.atLeast(RuntimePressure.CRITICAL) -> Allowance(false, 4.0)\n                pressure.atLeast(RuntimePressure.CONSTRAINED) -> Allowance(true, 4.0)",
+  "C14 a stopped subsystem keeps a cadence"),
+ (EVT_KT, "    const val CATCH_UP_POLL_MS = 0L", "    const val CATCH_UP_POLL_MS = 500L",
+  "C14 catch-up stops being immediate, so pressure now stretches it"),
+ (EVT_KT, "        return (base * allowance.cadenceScale).toLong().coerceAtMost(MAX_BACKOFF_MS)",
+  "        return (base * allowance.cadenceScale).toLong()",
+  "C14 a stretched backoff exceeds the ceiling"),
+ (EVT_KT, "        if (!allowance.running) return null", "        if (false) return null",
+  "C14 SURVIVAL keeps polling"),
+]
+
 ROOT = pathlib.Path(__file__).resolve().parents[2]
 
 survivors = []
@@ -289,5 +360,11 @@ for tests, mutations in ALL:
 for tests, mutations in ROOT_LEVEL:
     print(f"\n### {tests}")
     survivors += run(mutations, tests, root=ROOT, cwd=ROOT)
+
+print("\n### android/verification (Gradle)")
+survivors += run(
+    KOTLIN, [], root=ROOT, cwd=ROOT / "android" / "verification",
+    command=["gradle", "test", "--console=plain", "--offline", "--rerun-tasks"],
+)
 print("\n================ SURVIVORS ================")
 print("\n".join(survivors) or "none")

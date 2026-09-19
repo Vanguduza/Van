@@ -1,5 +1,9 @@
 package com.dial.van.events
 
+import com.dial.van.runtime.RuntimePressure
+import com.dial.van.runtime.VanResourceEnvelope
+import com.dial.van.runtime.VanSubsystem
+
 /**
  * The event stream's cursor, paging and backoff, as a pure state machine.
  *
@@ -86,19 +90,50 @@ object EventStream {
     )
 
     /**
-     * How long to wait before the next poll.
+     * How long to wait before the next poll, or null when the device cannot afford one.
      *
      * Exponential with a ceiling. No jitter here because there is one client per device; the
      * thundering-herd problem this would solve does not exist, and jitter would make the
      * backoff untestable for no gain.
+     *
+     * P3-PERF-003 — [pressure] is the runtime envelope's verdict and it stretches this
+     * cadence rather than replacing it, because what a healthy device's poll rate should be
+     * is this file's decision and how much of it the phone can afford is not. It defaults to
+     * NOMINAL so a caller that has no reading behaves exactly as it did before the envelope
+     * existed; a caller that silently got a *slower* stream from a default would be worse
+     * than one that got no envelope at all.
+     *
+     * Catch-up is not stretched, and it is worth saying why it needs no branch. A truncated
+     * page means the owner's screen is behind and more is already waiting; spacing that out
+     * makes the device do the same total work over a longer period, which is more battery
+     * and not less. [CATCH_UP_POLL_MS] is zero and any scale multiplied by zero is zero, so
+     * the property holds by arithmetic. An earlier version guarded it with an explicit
+     * branch; a mutation replacing that branch with `if (false)` changed nothing, which is
+     * how a guard tells you it cannot fire. It is gone, and the test asserting the constant
+     * is zero is what makes the reasoning above re-examined if someone changes it.
      */
-    fun nextDelayMillis(state: EventStreamState, lastPageTruncated: Boolean): Long = when {
-        state.consecutiveFailures > 0 -> {
-            val scaled = MIN_BACKOFF_MS shl (state.consecutiveFailures - 1).coerceAtMost(6)
-            scaled.coerceAtMost(MAX_BACKOFF_MS)
+    /** Whether this pressure permits polling at all. Exposed so a caller can ask before it
+     *  builds a request, and so the catch-up test can skip the pressure at which there is
+     *  no poll to be immediate about. */
+    fun pollsAt(pressure: RuntimePressure): Boolean =
+        VanResourceEnvelope.allowance(VanSubsystem.EVENT_STREAM, pressure).running
+
+    fun nextDelayMillis(
+        state: EventStreamState,
+        lastPageTruncated: Boolean,
+        pressure: RuntimePressure = RuntimePressure.NOMINAL,
+    ): Long? {
+        val allowance = VanResourceEnvelope.allowance(VanSubsystem.EVENT_STREAM, pressure)
+        if (!allowance.running) return null
+        val base = when {
+            state.consecutiveFailures > 0 -> {
+                val scaled = MIN_BACKOFF_MS shl (state.consecutiveFailures - 1).coerceAtMost(6)
+                scaled.coerceAtMost(MAX_BACKOFF_MS)
+            }
+            lastPageTruncated -> CATCH_UP_POLL_MS
+            else -> IDLE_POLL_MS
         }
-        lastPageTruncated -> CATCH_UP_POLL_MS
-        else -> IDLE_POLL_MS
+        return (base * allowance.cadenceScale).toLong().coerceAtMost(MAX_BACKOFF_MS)
     }
 }
 

@@ -1,5 +1,6 @@
 package com.dial.van.command.modules
 
+import com.dial.van.runtime.DeviceRuntimeReadings
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.PaddingValues
@@ -178,7 +179,14 @@ internal fun ActivityModule(app: VanApplication, glass: com.dial.van.visual.VanG
                         stream, failure.message ?: "Unable to load activity",
                     )
                 }
-            delay(EventStream.nextDelayMillis(stream, truncated))
+            // P3-PERF-003 — the poll rate answers to the whole-runtime envelope. A null
+            // means the device has minutes left and this stream is not what the owner would
+            // spend them on; the loop ends rather than spinning, and a new composition
+            // restarts it once the phone recovers.
+            val wait = EventStream.nextDelayMillis(
+                stream, truncated, DeviceRuntimeReadings.pressure(context),
+            ) ?: break
+            delay(wait)
         }
     }
 

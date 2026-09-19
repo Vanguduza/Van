@@ -379,6 +379,21 @@ invariants:
       - backend/tests/test_control_scopes.py
     findings: [P0-COG-001, P2-MEM-002]
 
+  - subject: performance.runtime_envelope
+    owner: docs/VAN_CONSOLIDATED_DEPLOYMENT_READINESS_CLOSURE_BLUEPRINT_REV_1.md
+    statement: >-
+      One envelope over battery, charging, power-save, thermal, memory and storage decides
+      what VAN gives up and in what order; hearing the owner, carrying out what they asked
+      and reporting which parts of VAN are unwell are never among them, and the envelope may
+      only lower a subsystem's own budget, never raise it.
+    implemented_by:
+      - android/app/src/main/java/com/dial/van/runtime/VanResourceEnvelope.kt
+      - android/app/src/main/java/com/dial/van/runtime/DeviceRuntimeReadings.kt
+    tested_by:
+      - android/verification/src/test/kotlin/com/dial/van/runtime/VanResourceEnvelopeTest.kt
+      - tests/contracts/test_the_runtime_envelope_governs.py
+    findings: [P3-PERF-003, P2-PERF-001]
+
   - subject: context.owner_lifecycle
     owner: docs/VAN_FINISHED_PRODUCT_BLUEPRINT_REV_1.md
     statement: >-

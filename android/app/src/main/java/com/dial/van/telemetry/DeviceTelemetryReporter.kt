@@ -1,5 +1,8 @@
 package com.dial.van.telemetry
 
+import com.dial.van.runtime.DeviceRuntimeReadings
+import com.dial.van.runtime.VanResourceEnvelope
+import com.dial.van.runtime.VanSubsystem
 import android.content.Context
 import android.os.BatteryManager
 import android.os.Debug
@@ -55,10 +58,32 @@ class DeviceTelemetryReporter(
         synchronized(lock) { buffer.add(sample) }
     }
 
+    /**
+     * The flush loop, paced by the whole-runtime envelope.
+     *
+     * P3-PERF-003 — this used to be a fixed minute whatever the phone was doing. Telemetry
+     * is VAN watching itself: useful, and the first thing an owner would trade for battery,
+     * which is why it is the subsystem that stops earliest. The interval is re-read every
+     * iteration rather than captured once, so a device that cools down speeds back up
+     * without waiting for a restart.
+     */
     fun start() {
         scope.launch(Dispatchers.IO) {
             while (isActive) {
-                delay(FLUSH_INTERVAL_MS)
+                val allowance = VanResourceEnvelope.allowance(
+                    VanSubsystem.TELEMETRY,
+                    DeviceRuntimeReadings.pressure(context),
+                )
+                if (!allowance.running) {
+                    // Not a stop: the loop keeps checking, because the phone will recover and
+                    // a reporter that exits here would stay silent until the app restarted.
+                    // Buffered samples survive; DeviceTelemetryBuffer drops the oldest when
+                    // full, so a long constrained spell costs the stalest frame times rather
+                    // than unbounded memory.
+                    delay(STOPPED_RECHECK_MS)
+                    continue
+                }
+                delay((FLUSH_INTERVAL_MS * allowance.cadenceScale).toLong())
                 runCatching { flush() }
             }
         }
@@ -97,5 +122,8 @@ class DeviceTelemetryReporter(
     private companion object {
         /** Often enough to see a bad minute, rare enough not to be one. */
         const val FLUSH_INTERVAL_MS = 60_000L
+
+        /** How often to ask whether the device has recovered while telemetry is stood down. */
+        const val STOPPED_RECHECK_MS = 120_000L
     }
 }
