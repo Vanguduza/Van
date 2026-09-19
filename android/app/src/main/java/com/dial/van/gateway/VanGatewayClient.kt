@@ -196,7 +196,10 @@ class VanGatewayClient(context: Context) {
             connectTimeout = 15_000
             readTimeout = 90_000
         }
-        conn.outputStream.use { it.write(body.toByteArray(StandardCharsets.UTF_8)) }
+        // P0-AND-012 — `requestBody` returns a JsonObject, not a String. This read
+        // `body.toByteArray(...)`, which does not exist on JsonObject, so the
+        // trading account-action path has never compiled.
+        conn.outputStream.use { it.write(body.toString().toByteArray(StandardCharsets.UTF_8)) }
         val code = conn.responseCode
         val stream = if (code in 200..299) conn.inputStream else conn.errorStream
         code to (stream?.bufferedReader()?.readText() ?: "{}")

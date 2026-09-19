@@ -20,7 +20,7 @@
     "PRODUCTION_CERTIFIED"
   ],
   "counts": {
-    "P0": 16,
+    "P0": 17,
     "P1": 34,
     "P2": 24,
     "P3": 29,
@@ -4737,6 +4737,49 @@
         "residual_class": "DELIBERATE_SCOPE",
         "residual_reason": "The gate that matters already exists and now runs: CI on the branch. A second local-only guard would be one more thing to keep in step with the workflow, which is the class of problem P3-OPS-010 was.",
         "falsified_by": "Any test that passes under `python -m pytest` and fails under the workflow's invocation."
+      }
+    },
+    {
+      "id": "P0-AND-012",
+      "severity": "P0",
+      "domain": "android",
+      "title": "The Android app did not compile",
+      "description": "Four Kotlin compile errors on the branch. CommandCentreViewModel was public and exposed the internal CommandModule in three signatures — a hard Kotlin error — introduced when the Gate 10 refactor split CommandCentreActivity and made CommandModule internal without changing the view model. And VanGatewayClient.tradingAccountAction called toByteArray on the JsonObject that AccountOnboarding.requestBody returns, so the trading account-action path had never compiled either.\n\nNothing in this repository could detect it. The Android Gradle Plugin cannot be fetched in the development container (dl.google.com is refused by the proxy), android/verification compiles only the pure decision files and neither of these qualifies, and CI had never run on this branch because van-ci triggered on main alone. Every claim of Android progress in this programme was made against a tree that did not build.",
+      "requirement": "docs/VAN_CONSOLIDATED_DEPLOYMENT_READINESS_CLOSURE_BLUEPRINT_REV_1.md",
+      "authority": "VAN Consolidated Deployment-Readiness Closure Blueprint Rev 2",
+      "repository_evidence": [
+        "android/app/src/main/java/com/dial/van/command/CommandCentreViewModel.kt",
+        "android/app/src/main/java/com/dial/van/gateway/VanGatewayClient.kt"
+      ],
+      "runtime_evidence": [
+        "https://github.com/Vanguduza/Van/actions/runs/35448802940"
+      ],
+      "affected_components": [
+        "android",
+        "gateway-client",
+        "command-centre"
+      ],
+      "root_cause": "A refactor that changed a type's visibility without its consumers, and a call site that assumed a serialiser returned a String. Both survived because the only thing that can find them is a compiler, and no compiler had seen this code.",
+      "remediation": "Make the view model internal, serialise the body before writing it, and run the Android build in CI on this branch.",
+      "impact": "The app could not be built, so it could not be installed, so no Android finding in this programme had been demonstrated on a device or even in an APK. P3-OPS-011 is why it stayed invisible; this is what it was hiding.",
+      "validation_gate": "G1",
+      "current_status": "CLOSED",
+      "remediation_gate": "G1",
+      "closure": {
+        "state": "EXTERNALLY_BLOCKED_REPOSITORY_COMPLETE",
+        "summary": "CommandCentreViewModel is internal, which is the right direction: the navigation surface is app-internal and nothing outside the module has business naming a screen. The trading body is serialised with toString() before it is written, rather than changing what requestBody returns — the JsonObject is what the signing helper produces and what the signature is computed over.\n\nThe guard that matters is CI, which compiles the app and now runs on this branch (P3-OPS-011). tests/contracts/test_android_compiles_at_all.py is the cheaper half: the visibility error is statically checkable, so it is caught before a push rather than three minutes into a runner, and the JsonObject call site is pinned at both ends — the caller and requestBody's return type — so the test cannot end up checking a fiction.\n\nWriting that checker took three attempts and each failure is instructive. Looking only at column zero missed the case entirely, because the exposure is in indented *members*. Tracking the enclosing declaration's visibility fixed that and produced false positives on locals inside a top-level composable. Brace-depth tracking separates a type body from a function body and settles it. A static checker written to catch one known error is worth only as much as its handling of everything it must not flag.\n\nOne test asserts the honest limit: the verification harness does not compile either file and never claimed to, so its passing was never evidence the app builds.",
+        "changed": [
+          "android/app/src/main/java/com/dial/van/command/CommandCentreViewModel.kt",
+          "android/app/src/main/java/com/dial/van/gateway/VanGatewayClient.kt"
+        ],
+        "verified_by": [
+          "tests/contracts/test_android_compiles_at_all.py"
+        ],
+        "runtime_evidence": [],
+        "residual": "The fix is unproven until a CI run compiles it. The static checks find the error class that is statically findable; only the compiler can say the app builds.",
+        "residual_class": "ENVIRONMENT_UNVERIFIED",
+        "residual_reason": "The Android Gradle Plugin cannot be fetched here, so this cannot be compiled locally at all. The next CI run on this branch is the evidence, and this closure is not INTEGRATED_AND_EVIDENCED until one passes the Android job.",
+        "falsified_by": "The :app:compileDebugKotlin task failing on any subsequent CI run."
       }
     }
   ],

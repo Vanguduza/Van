@@ -17,7 +17,12 @@ import kotlinx.coroutines.flow.asStateFlow
  * The navigation rules themselves are in [CommandNav], which is pure and executed in
  * `android/verification`. This class is the Android plumbing around them and nothing else.
  */
-class CommandCentreViewModel(
+// P0-AND-012 — `internal`, because `CommandModule` is. A public class cannot expose an
+// internal type in its API, and this one did in three places, so the app has not compiled
+// since the Gate 10 split. Widening CommandModule instead would be the wrong direction:
+// the navigation surface is app-internal and nothing outside the module has any business
+// naming a screen.
+internal class CommandCentreViewModel(
     private val state: SavedStateHandle,
 ) : ViewModel() {
 
