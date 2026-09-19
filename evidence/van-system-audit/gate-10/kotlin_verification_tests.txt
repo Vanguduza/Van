@@ -137,6 +137,17 @@ VanCommandStatusTest > anUnknownGatewayStatusShowsAsUnknown() PASSED
 VanCommandStatusTest > aRefusalDoesNotShowAsAFailure() PASSED
 VanCommandStatusTest > acceptedShowsAsAcceptedNotSucceeded() PASSED
 VanCommandStatusTest > theThreePostExecutionOutcomesShowAsThreeDifferentThings() PASSED
+DeviceTelemetryTest > a non-finite value never reaches the wire() PASSED
+DeviceTelemetryTest > every wire name round-trips and none collide() PASSED
+DeviceTelemetryTest > an empty batch still produces valid JSON() PASSED
+DeviceTelemetryTest > a nonsense measurement is never buffered() PASSED
+DeviceTelemetryTest > the buffer is bounded and drops the oldest() PASSED
+DeviceTelemetryTest > a batch never exceeds what the route will read() PASSED
+DeviceTelemetryTest > the body is the shape the route parses() PASSED
+DeviceTelemetryTest > a latency needs two readings that make sense() PASSED
+DeviceTelemetryTest > a surface name cannot break out of the body() PASSED
+DeviceTelemetryTest > only the labelled metric carries a surface() PASSED
+DeviceTelemetryTest > draining removes what it takes() PASSED
 ChartViewportTest > a nonsense density or scale still produces readable text() PASSED
 ChartViewportTest > zooming keeps now on screen() PASSED
 ChartViewportTest > a drag moves the chart with the finger at any zoom() PASSED

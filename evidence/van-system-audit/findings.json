@@ -307,7 +307,9 @@
         ],
         "residual": "The mission stops at RUNNING. Nothing yet drives it to VERIFYING or a verification outcome, because the runtime that would report completion is Hermes, which is outside this repository.",
         "residual_reason": "Completion and verification are findings P0-EXEC-002 and P0-EXEC-003 under later gates, not this one. Advancing a mission to a success state without a verification receipt is the exact defect the audit proved reachable (verifier_version 'i-say-so/1.0' with evidence 'evidence://trust-me' reaching VERIFIED_SUCCESS), so it is deliberately not done here.",
-        "posture": "The audit's own probe is the test: the ten canonical owner intents that returned ten acceptances and zero missions now return ten missions, and removing the wiring fails eleven of the twelve assertions. A mission never claims a state it has not reached \u2014 Hermes being offline leaves it at AUTHORIZED, which is the truth, rather than at RUNNING or at a terminal failure."
+        "posture": "The audit's own probe is the test: the ten canonical owner intents that returned ten acceptances and zero missions now return ten missions, and removing the wiring fails eleven of the twelve assertions. A mission never claims a state it has not reached \u2014 Hermes being offline leaves it at AUTHORIZED, which is the truth, rather than at RUNNING or at a terminal failure.",
+        "residual_class": "DELIBERATE_SCOPE",
+        "state": "INTEGRATED_AND_EVIDENCED"
       }
     },
     {
@@ -354,7 +356,9 @@
           "evidence/van-system-audit/gate-6/kotlin_verification_tests.txt"
         ],
         "residual": "The deadline is a reporting deadline, not a cancellation: VAN cannot stop an external agent runtime that is still working.",
-        "residual_reason": "Hermes is outside this repository and exposes no cancellation the gateway can call. Claiming to have stopped something VAN cannot stop would be the same class of lie as reporting it accepted forever; the honest statement is that VAN stopped waiting."
+        "residual_reason": "Hermes is outside this repository and exposes no cancellation the gateway can call. Claiming to have stopped something VAN cannot stop would be the same class of lie as reporting it accepted forever; the honest statement is that VAN stopped waiting.",
+        "residual_class": "EXTERNAL_RUNTIME",
+        "state": "EXTERNALLY_BLOCKED_REPOSITORY_COMPLETE"
       }
     },
     {
@@ -400,7 +404,9 @@
         ],
         "residual": "The device still learns a completion only by reading the mission, not by acting on a mission event as it arrives; nothing polls or streams into the conversation view.",
         "residual_reason": "The gateway publishes every owner-visible mission event to /v1/events under P0-EXEC-001, and the read models now render them correctly, but the client-side subscription is P3-AND-002 (the event cursor is hardcoded) under Gate 6. The half closed here is the one the finding names \u2014 an honest lifecycle with no benign default \u2014 and the other half is not claimed.",
-        "posture": "These 26 Kotlin tests are executed, not merely written: android/verification is a Kotlin/JVM harness that compiles the app's own pure decision files from android/app/src/main/java rather than a copy, so no Android toolchain is needed to exercise them. A Python contract test parses the Kotlin tables and fails if they drift from the gateway's, which was confirmed by mutating one entry and watching it fail."
+        "posture": "These 26 Kotlin tests are executed, not merely written: android/verification is a Kotlin/JVM harness that compiles the app's own pure decision files from android/app/src/main/java rather than a copy, so no Android toolchain is needed to exercise them. A Python contract test parses the Kotlin tables and fails if they drift from the gateway's, which was confirmed by mutating one entry and watching it fail.",
+        "residual_class": "DELIBERATE_SCOPE",
+        "state": "INTEGRATED_AND_EVIDENCED"
       }
     },
     {
@@ -442,7 +448,9 @@
         ],
         "residual": "Everything derived is advisory rather than blocking.",
         "residual_reason": "The gates that refuse a command already exist and are stricter \u2014 project truth, action class, content trust \u2014 and a second gate that disagreed with them would make the system harder to reason about, not safer. A readiness signal that is always red trains everyone to ignore it, which is the mirror image of the defect. The `blocking` field defaults to True so every caller written before it existed keeps its behaviour exactly; only the derived requirements opt out, and they say where and why.",
-        "posture": "The test that matters asserts a fresh system reports MISSING rather than CURRENT. Claiming CURRENT while knowing nothing was the defect, and an advisory requirement that is never reported would be the same defect with more code."
+        "posture": "The test that matters asserts a fresh system reports MISSING rather than CURRENT. Claiming CURRENT while knowing nothing was the defect, and an advisory requirement that is never reported would be the same defect with more code.",
+        "residual_class": "DELIBERATE_SCOPE",
+        "state": "INTEGRATED_AND_EVIDENCED"
       }
     },
     {
@@ -483,7 +491,9 @@
         ],
         "residual": "The VERIFIED_LIVE_STATE and VERIFIED_HISTORY tiers still have no writer.",
         "residual_reason": "A verified fact needs a verifier that observed it, and the verifier registry only reaches two systems today (P0-VERIFY-001's residual). Writing those tiers from anything less would be the same defect this closes, one tier down.",
-        "posture": "Each author is bound to one tier rather than taking a tier parameter and trusting the caller, which is the shape the audit found everywhere else. A test asserts the tiers are disjoint per author, and another asserts that what production can now write is exactly what retrieval reads."
+        "posture": "Each author is bound to one tier rather than taking a tier parameter and trusting the caller, which is the shape the audit found everywhere else. A test asserts the tiers are disjoint per author, and another asserts that what production can now write is exactly what retrieval reads.",
+        "residual_class": "DELIBERATE_SCOPE",
+        "state": "INTEGRATED_AND_EVIDENCED"
       }
     },
     {
@@ -523,7 +533,9 @@
         ],
         "residual": "There is no solver and no verifier pass, and the critic checks nothing a language model would be better at.",
         "residual_reason": "A critic that needs a model call to run is the thing being criticised, and a stub returning 'looks fine' would be exactly the defect this closes. Four checks earn their place because each is computable from the assessment alone and can fail on real input. Whether the reasoning is *good* is a critic model VAN does not have, and the matrix claim about solver/critic/verifier separation should be narrowed to what exists rather than left standing.",
-        "posture": "A critic that always fires is a critic nobody reads, so a well-formed assessment produces no findings and a test asserts it. Each check is paired with the case it must not flag."
+        "posture": "A critic that always fires is a critic nobody reads, so a well-formed assessment produces no findings and a test asserts it. Each check is paired with the case it must not flag.",
+        "residual_class": "DELIBERATE_SCOPE",
+        "state": "INTEGRATED_AND_EVIDENCED"
       }
     },
     {
@@ -572,7 +584,9 @@
         ],
         "residual": "Only two mission verification strategies have an independent observation: ledger-event and browser-evidence.",
         "residual_reason": "An adapter is registered only where the gateway can observe a system independently of whoever did the work. It has no independent read of a git remote, a CI run or an arbitrary provider resource, so repository-sha, ci-run and api-readback stay unregistered and resolve to EngineReportVerifier, which is always UNVERIFIABLE. That is reported to the owner as 'finished, but VAN could not confirm it worked'. Registering an optimistic adapter to close the gap would be the defect, not the fix.",
-        "posture": "The audit's exact move is now inexpressible: there is no parameter to hand a receipt in, and a test asserts the TypeError. The attacks are rewritten to stage the world rather than the verdict \u2014 an adapter that observes whatever the test wants still writes the receipt itself, so a satisfied contract with nothing citable, a shortfall against a numeric postcondition, and an unreachable target are each refused."
+        "posture": "The audit's exact move is now inexpressible: there is no parameter to hand a receipt in, and a test asserts the TypeError. The attacks are rewritten to stage the world rather than the verdict \u2014 an adapter that observes whatever the test wants still writes the receipt itself, so a satisfied contract with nothing citable, a shortfall against a numeric postcondition, and an unreachable target are each refused.",
+        "residual_class": "EXTERNAL_RUNTIME",
+        "state": "EXTERNALLY_BLOCKED_REPOSITORY_COMPLETE"
       }
     },
     {
@@ -618,7 +632,9 @@
         ],
         "residual": "POST /v1/devices/pair is still unauthenticated, and an operator may still point VAN_DEVICE_ENROLMENT_TOKEN at the same string as the internal token.",
         "residual_reason": "The pair route has to be reachable by a device that holds no credential yet \u2014 that is what pairing is \u2014 and it is bounded by the single-use ticket the enrolment credential mints, which is now out of the agent runtime's reach. The collapsed-token case is a deliberate operator choice rather than a default, and describe() reports device_enrolment_shares_a_token so it is visible rather than silent; a test asserts both readings.",
-        "posture": "The chain the audit walked is cut at its first step, not its last: the internal token can no longer obtain a pairing ticket at all, so the path from a compromised agent runtime to owner-device authority does not start. The fall-through is the other half and had its own defect \u2014 a route declared Hermes-only was reachable with an owner device token, which six existing tests had encoded as a 401 from the device-auth boundary. They now assert a 403 that names the scope, which is both the truth and a more useful answer to an operator."
+        "posture": "The chain the audit walked is cut at its first step, not its last: the internal token can no longer obtain a pairing ticket at all, so the path from a compromised agent runtime to owner-device authority does not start. The fall-through is the other half and had its own defect \u2014 a route declared Hermes-only was reachable with an owner device token, which six existing tests had encoded as a 401 from the device-auth boundary. They now assert a 403 that names the scope, which is both the truth and a more useful answer to an operator.",
+        "residual_class": "DELIBERATE_SCOPE",
+        "state": "INTEGRATED_AND_EVIDENCED"
       }
     },
     {
@@ -666,7 +682,9 @@
         ],
         "residual": "The Kotlin tests are written but not executed in this container, which has no Android Gradle Plugin.",
         "residual_reason": "Device-side assertion is defence in depth; the boundary is enforced independently at the gateway, where it is executed. The Kotlin suite runs in the Android CI job.",
-        "posture": "The gateway holds the boundary even when the device is wrong, which is the only place it can hold, since the device is the thing that was wrong."
+        "posture": "The gateway holds the boundary even when the device is wrong, which is the only place it can hold, since the device is the thing that was wrong.",
+        "residual_class": "ENVIRONMENT_UNVERIFIED",
+        "state": "EXTERNALLY_BLOCKED_REPOSITORY_COMPLETE"
       }
     },
     {
@@ -725,7 +743,9 @@
         ],
         "residual": "The shipped registries/owner_authority_keys.json holds no keys, so no owner-signed trading act can be authorised until the owner's public key is enrolled on a host.",
         "residual_reason": "A committed key would be the public half of a private key nobody holds, which is worse than none: it would make the check look satisfied. An empty registry refuses everything, which is the correct state for a machine the owner has not enrolled on, and a test asserts the shipped file stays empty. Enrolment is a deployment step, not a repository change.",
-        "posture": "Each surface's own test now asserts that the exact string it used to accept is refused: 'sig:owner' for the kill switch and capsule promotion, 'owner:sig-7' for the gateway halt, 'sig:owner-device:abc123' for the mandate. The act and the subject are inside the signature, so authority to confirm one ticket is not authority to confirm another and a halt token cannot promote a strategy. Act tokens are single use and a failed check does not spend one; a mandate is standing, because it is re-read on every process start, and its bound is its own expiry plus the signature covering its version."
+        "posture": "Each surface's own test now asserts that the exact string it used to accept is refused: 'sig:owner' for the kill switch and capsule promotion, 'owner:sig-7' for the gateway halt, 'sig:owner-device:abc123' for the mandate. The act and the subject are inside the signature, so authority to confirm one ticket is not authority to confirm another and a halt token cannot promote a strategy. Act tokens are single use and a failed check does not spend one; a mandate is standing, because it is re-read on every process start, and its bound is its own expiry plus the signature covering its version.",
+        "residual_class": "EXTERNAL_ARTEFACT",
+        "state": "EXTERNALLY_BLOCKED_REPOSITORY_COMPLETE"
       }
     },
     {
@@ -767,7 +787,9 @@
         ],
         "residual": "market_integrity is still only ever NORMAL in a live session: nothing writes self.integrity.",
         "residual_reason": "Setting it would need a market-integrity signal \u2014 a venue halt notice, a spread or gap detector \u2014 that VAN does not receive. Writing one from a heuristic would be the same defect in a new place. The field and the refusal are correct and wired; what is missing is a source, and that is a data-feed decision rather than a code one.",
-        "posture": "Each derivation fails closed on an exception, because a reconciliation that cannot run has not passed and an event matrix that cannot answer is not evidence of no event. A test asserts the three literals are absent from the file, because the defect was three literals and a comment would not keep them out."
+        "posture": "Each derivation fails closed on an exception, because a reconciliation that cannot run has not passed and an event matrix that cannot answer is not evidence of no event. A test asserts the three literals are absent from the file, because the defect was three literals and a comment would not keep them out.",
+        "residual_class": "EXTERNAL_RUNTIME",
+        "state": "EXTERNALLY_BLOCKED_REPOSITORY_COMPLETE"
       }
     },
     {
@@ -806,7 +828,9 @@
         ],
         "residual": "The halt is still observed on the loop rather than delivered synchronously, so up to poll_seconds can pass between the owner halting and the session stopping.",
         "residual_reason": "A synchronous channel means the gateway reaching into the trading VM's process, which is a deployment topology change rather than a code one and would add a second path that can fail. The latency is bounded and now the durability is too, which was the part that made a restart undo an owner decision.",
-        "posture": "The observed event records `observed_after_restart`, so an operator can see that a halt written before this process existed is the one being honoured."
+        "posture": "The observed event records `observed_after_restart`, so an operator can see that a halt written before this process existed is the one being honoured.",
+        "residual_class": "EXTERNAL_RUNTIME",
+        "state": "EXTERNALLY_BLOCKED_REPOSITORY_COMPLETE"
       }
     },
     {
@@ -847,7 +871,9 @@
         ],
         "residual": "The gateway still defaults to a local SQLite path and nothing in deploy reconciles it with the trading VM's Postgres.",
         "residual_reason": "Which ledger a deployment points at is a deployment decision, and the repository cannot make it. What the repository can do, and now does, is refuse to present a ledger nobody is writing as current \u2014 which is the failure mode the split created. The existing test fixture, whose newest event is from 1970, now correctly reports stale, and that is the finding demonstrated rather than described.",
-        "posture": "Thresholded server-side rather than left to each caller, because a client that forgot would present the stale answer as fact and the gateway is the only place that can know."
+        "posture": "Thresholded server-side rather than left to each caller, because a client that forgot would present the stale answer as fact and the gateway is the only place that can know.",
+        "residual_class": "OWNER_DEPLOYMENT_DECISION",
+        "state": "EXTERNALLY_BLOCKED_REPOSITORY_COMPLETE"
       }
     },
     {
@@ -890,7 +916,9 @@
         ],
         "residual": "The lock is per-host and advisory.",
         "residual_reason": "It does not stop a second VM running the same alias, and it binds only processes that ask. Both are acceptable because the thing being prevented is an operator starting serve twice, not an adversary, and the venue-side reconciliation gate remains the check that does not depend on cooperation. Saying so in the module is better than implying a guarantee it does not give.",
-        "posture": "Two failures were conflated in one finding and needed separate answers: a restart duplicating an order is a key-derivation problem, and two processes deciding the same bar is a mutual-exclusion problem. Fixing only the first would have left the second looking fixed."
+        "posture": "Two failures were conflated in one finding and needed separate answers: a restart duplicating an order is a key-derivation problem, and two processes deciding the same bar is a mutual-exclusion problem. Fixing only the first would have left the second looking fixed.",
+        "residual_class": "DELIBERATE_SCOPE",
+        "state": "INTEGRATED_AND_EVIDENCED"
       }
     },
     {
@@ -932,7 +960,9 @@
         ],
         "residual": "No adapter populates the margin fields yet; every venue reports None.",
         "residual_reason": "MT5 reports margin over the EA bridge and Deriv over its websocket, and both need the transport change and a live account to verify against. None is handled as unknown rather than healthy, so the gate is inert until a venue speaks rather than wrong. Defaulting to a comfortable number to make it look wired would be the hardcoded-healthy defect this sits beside.",
-        "posture": "The floor is above the venue's call level, so VAN stops adding risk before the broker starts closing positions, and both are named constants with the reasoning attached rather than numbers in a comparison."
+        "posture": "The floor is above the venue's call level, so VAN stops adding risk before the broker starts closing positions, and both are named constants with the reasoning attached rather than numbers in a comparison.",
+        "residual_class": "EXTERNAL_RUNTIME",
+        "state": "EXTERNALLY_BLOCKED_REPOSITORY_COMPLETE"
       }
     },
     {
@@ -969,7 +999,8 @@
         "verified_by": [
           "tools/ci/maturity_gate.py"
         ],
-        "posture": "The matrix was re-baselined against observed repository state rather than against the absent blueprint; the audit classes are the ones defined in the canonical audit, so a reader can tell BUILT from INTEGRATED."
+        "posture": "The matrix was re-baselined against observed repository state rather than against the absent blueprint; the audit classes are the ones defined in the canonical audit, so a reader can tell BUILT from INTEGRATED.",
+        "state": "DELIBERATELY_REMOVED_CANON_CORRECTED"
       }
     },
     {
@@ -1009,7 +1040,8 @@
         "verified_by": [
           "tools/ci/maturity_gate.py"
         ],
-        "posture": "NOT VERIFIED, recorded as such, rather than promoted to complete on the strength of an import succeeding."
+        "posture": "NOT VERIFIED, recorded as such, rather than promoted to complete on the strength of an import succeeding.",
+        "state": "DELIBERATELY_REMOVED_CANON_CORRECTED"
       }
     },
     {
@@ -1055,7 +1087,9 @@
           "evidence/van-system-audit/gate-6/kotlin_verification_tests.txt"
         ],
         "residual": "No keyword-spotting model ships, so VAN still cannot wake to its name. `WakeModelLoader.pipelineOrNull` returns null and the owner is told.",
-        "residual_reason": "A keyword spotter trained on 'Hey Van' is a trained artefact, not code \u2014 owner supply, like the Rive artboard. Shipping a stub engine that scores zero would make the pipeline constructible and the coordinator arm, and VAN would listen forever and never wake: indistinguishable from the defect except that it would also report itself as working. The repository half is complete; the absence is reported rather than hidden."
+        "residual_reason": "A keyword spotter trained on 'Hey Van' is a trained artefact, not code \u2014 owner supply, like the Rive artboard. Shipping a stub engine that scores zero would make the pipeline constructible and the coordinator arm, and VAN would listen forever and never wake: indistinguishable from the defect except that it would also report itself as working. The repository half is complete; the absence is reported rather than hidden.",
+        "residual_class": "EXTERNAL_ARTEFACT",
+        "state": "EXTERNALLY_BLOCKED_REPOSITORY_COMPLETE"
       }
     },
     {
@@ -1093,7 +1127,9 @@
           "evidence/van-system-audit/gate-6/kotlin_verification_tests.txt"
         ],
         "residual": "The Compose wiring in VanCanvasFallback.kt is not compiled here; only the clock and blending logic it drives are executed.",
-        "residual_reason": "The Android Gradle Plugin cannot be fetched in this environment (dl.google.com is refused by the proxy), so :app cannot be built. The JVM harness compiles and runs the shipping pure sources, which is where the defect was."
+        "residual_reason": "The Android Gradle Plugin cannot be fetched in this environment (dl.google.com is refused by the proxy), so :app cannot be built. The JVM harness compiles and runs the shipping pure sources, which is where the defect was.",
+        "residual_class": "ENVIRONMENT_UNVERIFIED",
+        "state": "EXTERNALLY_BLOCKED_REPOSITORY_COMPLETE"
       }
     },
     {
@@ -1135,7 +1171,9 @@
           "evidence/van-system-audit/gate-6/kotlin_verification_tests.txt"
         ],
         "residual": "The publishing composable in TradingCommandCentreActivity.kt is not compiled here.",
-        "residual_reason": "It needs the Android toolchain, which this environment cannot fetch. The classifier, the presence reducer and the precedence rules \u2014 everything that decides what the owner sees \u2014 are executed in the JVM harness."
+        "residual_reason": "It needs the Android toolchain, which this environment cannot fetch. The classifier, the presence reducer and the precedence rules \u2014 everything that decides what the owner sees \u2014 are executed in the JVM harness.",
+        "residual_class": "ENVIRONMENT_UNVERIFIED",
+        "state": "EXTERNALLY_BLOCKED_REPOSITORY_COMPLETE"
       }
     },
     {
@@ -1178,7 +1216,9 @@
           "artifacts/release/preview/rev23/manifest.json"
         ],
         "residual": "The Compose executor in VanAura.kt is not compiled here; the AWT executor and the shared plan are.",
-        "residual_reason": "The Android toolchain cannot be fetched in this environment. The plan holds every constant both painters use, so the Compose side has nothing left of its own to get wrong."
+        "residual_reason": "The Android toolchain cannot be fetched in this environment. The plan holds every constant both painters use, so the Compose side has nothing left of its own to get wrong.",
+        "residual_class": "ENVIRONMENT_UNVERIFIED",
+        "state": "EXTERNALLY_BLOCKED_REPOSITORY_COMPLETE"
       }
     },
     {
@@ -1218,7 +1258,9 @@
           "evidence/van-system-audit/gate-6/kotlin_verification_tests.txt"
         ],
         "residual": "The images are rendered by the JVM painter, not captured from a device.",
-        "residual_reason": "On-device screenshot evidence is Gate 12 work and needs the Android build. What this closes is the divergence and the staleness: the JVM painter now executes the same plan as the shipping one, and the committed tree is at the current authority revision."
+        "residual_reason": "On-device screenshot evidence is Gate 12 work and needs the Android build. What this closes is the divergence and the staleness: the JVM painter now executes the same plan as the shipping one, and the committed tree is at the current authority revision.",
+        "residual_class": "ENVIRONMENT_UNVERIFIED",
+        "state": "EXTERNALLY_BLOCKED_REPOSITORY_COMPLETE"
       }
     },
     {
@@ -1336,7 +1378,9 @@
         ],
         "residual": "The Android half is asserted by parsing its source, not by executing it.",
         "residual_reason": "AccountOnboardingScreen and BiometricGate depend on Compose and the Android Keystore, so they cannot run in the pure-Kotlin harness the way the status projection does. The enforcement that matters is on the gateway and is executed: a correctly device-signed credential change with no proof is refused there, so the device being wrong is not sufficient.",
-        "posture": "The weak method is deleted rather than deprecated. A prompt whose only output is that it succeeded produces nothing a server can check, so there is no correct caller for it, and leaving it available would make the next such surface a one-line mistake. A test asserts no file in the app calls it. The guarded set is stated as the complement of the read-only actions on both sides, so an action added later is guarded by default, and a contract test keeps the two lists equal."
+        "posture": "The weak method is deleted rather than deprecated. A prompt whose only output is that it succeeded produces nothing a server can check, so there is no correct caller for it, and leaving it available would make the next such surface a one-line mistake. A test asserts no file in the app calls it. The guarded set is stated as the complement of the read-only actions on both sides, so an action added later is guarded by default, and a contract test keeps the two lists equal.",
+        "residual_class": "ENVIRONMENT_UNVERIFIED",
+        "state": "EXTERNALLY_BLOCKED_REPOSITORY_COMPLETE"
       }
     },
     {
@@ -1372,7 +1416,8 @@
           "backend/tests/test_replay_and_audit_chain.py::TestNonceReplay",
           "backend/tests/test_replay_and_audit_chain.py::TestIdempotencyAtomicity::test_concurrent_identical_claims_produce_one_winner"
         ],
-        "posture": "The UNIQUE (device_id, nonce) primary key settles the race in SQLite, not in a read-then-write both callers could win. Retention exceeds the widest replay window the orchestrator accepts, so pruning cannot re-open the hole."
+        "posture": "The UNIQUE (device_id, nonce) primary key settles the race in SQLite, not in a read-then-write both callers could win. Retention exceeds the widest replay window the orchestrator accepts, so pruning cannot re-open the hole.",
+        "state": "INTEGRATED_AND_EVIDENCED"
       }
     },
     {
@@ -1406,7 +1451,8 @@
         "verified_by": [
           "backend/tests/test_replay_and_audit_chain.py::TestAuditChain"
         ],
-        "posture": "Tamper-evidence, not tamper-proofing: an attacker with write access can still destroy the table, but can no longer rewrite history and have it verify."
+        "posture": "Tamper-evidence, not tamper-proofing: an attacker with write access can still destroy the table, but can no longer rewrite history and have it verify.",
+        "state": "INTEGRATED_AND_EVIDENCED"
       }
     },
     {
@@ -1450,7 +1496,9 @@
         ],
         "residual": "Edge-layer volumetric rate limiting in Caddy is not implemented.",
         "residual_reason": "bootstrap.sh installs the stock apt Caddy build, which has no rate_limit module; a rate_limit directive would fail `caddy validate` and abort the deployment. The edge also cannot tell a wrong signature from a right one, so the throttle belongs in the application, where it now is. The Caddyfile records this decision in place. The application-layer half of the remediation is complete; the deployment-layer half is explicitly NOT VERIFIED and NOT claimed.",
-        "posture": "Failures are counted, successes are not, and the counter is keyed by the thing being attacked rather than by the caller, who controls their own address."
+        "posture": "Failures are counted, successes are not, and the counter is keyed by the thing being attacked rather than by the caller, who controls their own address.",
+        "residual_class": "OWNER_DEPLOYMENT_DECISION",
+        "state": "EXTERNALLY_BLOCKED_REPOSITORY_COMPLETE"
       }
     },
     {
@@ -1488,7 +1536,9 @@
         ],
         "residual": "EVIDENCED is still actionable, so VAN acts on preferences the owner has not confirmed.",
         "residual_reason": "Refusing to act on a well-evidenced preference would make VAN useless until the owner had answered a questionnaire. What was wrong was not that VAN acted on it, but that it told the owner they had asked for it. The two states are now distinguishable and the owner-facing text says which one it is.",
-        "posture": "Telling the owner they asked for something they never asked for is a small lie that makes every other claim about what VAN knows less believable. Both halves are tested: an evidenced preference must not be described as confirmed, and a confirmed one must be."
+        "posture": "Telling the owner they asked for something they never asked for is a small lie that makes every other claim about what VAN knows less believable. Both halves are tested: an evidenced preference must not be described as confirmed, and a confirmed one must be.",
+        "residual_class": "DELIBERATE_SCOPE",
+        "state": "INTEGRATED_AND_EVIDENCED"
       }
     },
     {
@@ -1528,7 +1578,9 @@
         ],
         "residual": "AIEvolutionRadar, BenchmarkHarness and DomainTrust still have no production feed, and VanEval's thresholds are unchanged.",
         "residual_reason": "Those three need signals VAN does not yet produce \u2014 external model releases, a benchmark run, a per-domain outcome history long enough to be a trust score. Feeding them from what exists would mean inventing the signal, which is the defect. What was reachable was the outcome record they all ultimately need, and that now exists and is populated by production.",
-        "posture": "The feed deliberately does not *conclude* anything. Recording that VAN changed its behaviour when it has not would be the same defect one layer up, so the growth ledger is written only where an adaptation genuinely happened \u2014 an owner correction that superseded an assertion. A system that has done nothing reports a verified_rate of None rather than 0.0, because zero reads as failure."
+        "posture": "The feed deliberately does not *conclude* anything. Recording that VAN changed its behaviour when it has not would be the same defect one layer up, so the growth ledger is written only where an adaptation genuinely happened \u2014 an owner correction that superseded an assertion. A system that has done nothing reports a verified_rate of None rather than 0.0, because zero reads as failure.",
+        "residual_class": "DELIBERATE_SCOPE",
+        "state": "INTEGRATED_AND_EVIDENCED"
       }
     },
     {
@@ -1567,7 +1619,9 @@
           "backend/tests/test_browser_injection_containment.py::test_a_worker_cannot_clear_a_page_it_does_not_like_the_look_of"
         ],
         "residual": "The classifier is lexical. A page that phrases an injection in words the corpus does not contain is graded SUSPECTED at best.",
-        "residual_reason": "A semantic injection classifier needs a model, which is the Stagehand runtime and is external. What this closes is that the stop existed and was unreachable; a lexical classifier that stops confirmed attacks is strictly better than one that could stop nothing."
+        "residual_reason": "A semantic injection classifier needs a model, which is the Stagehand runtime and is external. What this closes is that the stop existed and was unreachable; a lexical classifier that stops confirmed attacks is strictly better than one that could stop nothing.",
+        "residual_class": "EXTERNAL_RUNTIME",
+        "state": "EXTERNALLY_BLOCKED_REPOSITORY_COMPLETE"
       }
     },
     {
@@ -1604,7 +1658,9 @@
         ],
         "residual": "RECEIPT and DOMAIN_ATTESTATION have no observer, and READ_BACK covers Gmail and Drive only.",
         "residual_reason": "UNOBSERVABLE_POSTCONDITION_KINDS names each one with the reason: there is no provider receipt store the gateway can read independently of the engine, and no attestation authority is wired. A capability declaring one is UNVERIFIABLE and the owner is told so. A test asserts each stays that way.",
-        "posture": "The decisive test is that an engine reporting success with nothing at the provider produces FAILED, with 'despite engine success' in the detail. engine_success_is_owner_success stays false in behaviour, not only in policy.yaml."
+        "posture": "The decisive test is that an engine reporting success with nothing at the provider produces FAILED, with 'despite engine success' in the detail. engine_success_is_owner_success stays false in behaviour, not only in policy.yaml.",
+        "residual_class": "EXTERNAL_RUNTIME",
+        "state": "EXTERNALLY_BLOCKED_REPOSITORY_COMPLETE"
       }
     },
     {
@@ -1645,7 +1701,8 @@
         "verified_by": [
           "tests/contracts/test_owner_runtime_mcp_contract.py::test_registration_include_list_matches_the_shim_exactly"
         ],
-        "posture": "The test compares the two artefacts to each other rather than to a hardcoded number, so adding a tool to the shim without registering it fails CI."
+        "posture": "The test compares the two artefacts to each other rather than to a hardcoded number, so adding a tool to the shim without registering it fails CI.",
+        "state": "INTEGRATED_AND_EVIDENCED"
       }
     },
     {
@@ -1685,7 +1742,8 @@
         "verified_by": [
           "tests/hermes/test_profile_layout.py"
         ],
-        "posture": "The doctor asserts behaviour (an A5 action is denied), not merely that a file exists. Loading needs sys.modules registration before exec_module or the hook's dataclasses cannot resolve their own types \u2014 the probe does that."
+        "posture": "The doctor asserts behaviour (an A5 action is denied), not merely that a file exists. Loading needs sys.modules registration before exec_module or the hook's dataclasses cannot resolve their own types \u2014 the probe does that.",
+        "state": "INTEGRATED_AND_EVIDENCED"
       }
     },
     {
@@ -1728,7 +1786,8 @@
         "verified_by": [
           "tests/hermes/test_profile_layout.py::test_skill_lists_agree_across_all_sources"
         ],
-        "posture": "The test derives each list from its own source and compares them, so a skill added in one place and forgotten in another fails CI."
+        "posture": "The test derives each list from its own source and compares them, so a skill added in one place and forgotten in another fails CI.",
+        "state": "INTEGRATED_AND_EVIDENCED"
       }
     },
     {
@@ -1768,7 +1827,9 @@
           "tests/hermes/test_profile_layout.py"
         ],
         "residual": "Hermes echoing the run-metadata snapshot id back to the gateway is not implemented.",
-        "residual_reason": "Hermes is an external runtime that is not in this repository, so the echo cannot be implemented or exercised here. The documented binding is the repository-complete half; the echo is recorded as EXTERNALLY_BLOCKED and is NOT claimed as verified."
+        "residual_reason": "Hermes is an external runtime that is not in this repository, so the echo cannot be implemented or exercised here. The documented binding is the repository-complete half; the echo is recorded as EXTERNALLY_BLOCKED and is NOT claimed as verified.",
+        "residual_class": "EXTERNAL_RUNTIME",
+        "state": "EXTERNALLY_BLOCKED_REPOSITORY_COMPLETE"
       }
     },
     {
@@ -1806,7 +1867,9 @@
         ],
         "residual": "A deployment that configures only the single shared token still authenticates one principal, so the agent-hidden commands remain reachable by whoever holds it.",
         "residual_reason": "That is the pre-existing trust boundary, not a new one: one credential cannot distinguish two callers. The mechanism to separate them now exists \u2014 per-principal tokens beside the main one \u2014 and DEFAULT_PRINCIPAL names what the shared token authenticates rather than leaving it implied. Provisioning separate tokens is a deployment step.",
-        "posture": "The decisive test holds the Hermes token and puts 'van-gateway' in the body, which is exactly how the credential commands that return a signing key once were reached. It is refused, the honest Hermes call is refused, and the gateway's own token succeeds."
+        "posture": "The decisive test holds the Hermes token and puts 'van-gateway' in the body, which is exactly how the credential commands that return a signing key once were reached. It is refused, the honest Hermes call is refused, and the gateway's own token succeeds.",
+        "residual_class": "EXTERNAL_RUNTIME",
+        "state": "EXTERNALLY_BLOCKED_REPOSITORY_COMPLETE"
       }
     },
     {
@@ -1842,7 +1905,9 @@
           "backend/tests/test_sealed_parameter_completeness.py"
         ],
         "residual": "VAN_NOTEBOOK_DEFAULT_ID is empty by default, so an owner who has not set it and does not name a notebook gets a refusal rather than a note.",
-        "residual_reason": "That is the intended fail-closed behaviour and the alternative is the defect. Discovering the owner's notebooks to offer a choice needs a live Google account, which is owner supply."
+        "residual_reason": "That is the intended fail-closed behaviour and the alternative is the defect. Discovering the owner's notebooks to offer a choice needs a live Google account, which is owner supply.",
+        "residual_class": "OWNER_DEPLOYMENT_DECISION",
+        "state": "EXTERNALLY_BLOCKED_REPOSITORY_COMPLETE"
       }
     },
     {
@@ -1874,7 +1939,8 @@
         "verified_by": [
           "trading/tests/test_live_risk_is_real.py::TestTheStrategysTargetsSurvive"
         ],
-        "posture": "A strategy with a scaled exit plan had it silently replaced by a single derived price, which is a quieter failure than a crash and harder to notice from the outside."
+        "posture": "A strategy with a scaled exit plan had it silently replaced by a single derived price, which is a quieter failure than a crash and harder to notice from the outside.",
+        "state": "INTEGRATED_AND_EVIDENCED"
       }
     },
     {
@@ -1909,7 +1975,9 @@
         ],
         "residual": "Nothing yet persists the learning hooks' state across a session restart.",
         "residual_reason": "The episodes and adjustments live in the process. Persisting them means deciding what a restart should remember about a strategy's health, which is a policy question with real consequences \u2014 a capsule demoted for one bad session should probably not return to full size on restart, but that is the owner's call and not a default to pick silently.",
-        "posture": "This was safe to wire only because the effects were already bounded: the LearningBoundary permits reduce-only adjustments and a demotion moves a capsule towards SHADOW or DEGRADED, never towards more authority. That boundary is what made it a wiring job rather than a design one."
+        "posture": "This was safe to wire only because the effects were already bounded: the LearningBoundary permits reduce-only adjustments and a demotion moves a capsule towards SHADOW or DEGRADED, never towards more authority. That boundary is what made it a wiring job rather than a design one.",
+        "residual_class": "OWNER_DEPLOYMENT_DECISION",
+        "state": "EXTERNALLY_BLOCKED_REPOSITORY_COMPLETE"
       }
     },
     {
@@ -1946,7 +2014,9 @@
           "evidence/van-system-audit/gate-6/kotlin_verification_tests.txt"
         ],
         "residual": "The receiver registration and lifecycle writes in FloatingOverlayService.kt are not compiled or exercised here.",
-        "residual_reason": "The service needs a WindowManager, a Looper and a real Lifecycle. The decision \u2014 which was the part that was wrong \u2014 is a pure function of four booleans and every combination of them is tested."
+        "residual_reason": "The service needs a WindowManager, a Looper and a real Lifecycle. The decision \u2014 which was the part that was wrong \u2014 is a pure function of four booleans and every combination of them is tested.",
+        "residual_class": "ENVIRONMENT_UNVERIFIED",
+        "state": "EXTERNALLY_BLOCKED_REPOSITORY_COMPLETE"
       }
     },
     {
@@ -1982,7 +2052,9 @@
         ],
         "residual": "SemanticClass, Claim and the rest of the epistemics module still exist as types with no storage.",
         "residual_reason": "Deleting them would also delete FORBIDDEN_SELF_PROMOTIONS and the class definitions the mapping and the reasoning kernel now depend on. They are definitional rather than aspirational now, which is the difference the finding was about: a reader can tell which vocabulary is enforced, because there is only one, and where the other one's rules ended up.",
-        "posture": "The direction of the merge is the decision: EpistemicState is enforced at the boundary that matters and every fact already carries it, so migrating the other way would mean rewriting the admission gate to enforce something nothing has ever produced. The mapping is total over EpistemicState and a test asserts it, because a state with no class would silently escape the promotion rule."
+        "posture": "The direction of the merge is the decision: EpistemicState is enforced at the boundary that matters and every fact already carries it, so migrating the other way would mean rewriting the admission gate to enforce something nothing has ever produced. The mapping is total over EpistemicState and a test asserts it, because a state with no class would silently escape the promotion rule.",
+        "residual_class": "DELIBERATE_SCOPE",
+        "state": "INTEGRATED_AND_EVIDENCED"
       }
     },
     {
@@ -2016,7 +2088,9 @@
         ],
         "residual": "The audit ledger and the missions table are deliberately not clearable.",
         "residual_reason": "The audit ledger records what VAN did on the owner's authority, not what it concluded about them, and erasing it would destroy the hash-chained evidence trail that makes every other claim checkable \u2014 including the claim that the deletion happened. Missions are the owner's own work, and cancellation is the control that belongs there. Both are named in DELIBERATELY_KEPT with the reason and returned with every forget, so the omission is visible rather than silent.",
-        "posture": "Forget means delete, not tombstone: a row kept with a flag is still there, and the flag is one query away from being ignored. Nothing is forgotten by inference \u2014 each store is named with the column that scopes it \u2014 and the whole operation runs in one transaction, because a partial forget is worse than none when the owner is told it happened."
+        "posture": "Forget means delete, not tombstone: a row kept with a flag is still there, and the flag is one query away from being ignored. Nothing is forgotten by inference \u2014 each store is named with the column that scopes it \u2014 and the whole operation runs in one transaction, because a partial forget is worse than none when the owner is told it happened.",
+        "residual_class": "DELIBERATE_SCOPE",
+        "state": "INTEGRATED_AND_EVIDENCED"
       }
     },
     {
@@ -2096,7 +2170,8 @@
         ],
         "runtime_evidence": [
           "evidence/van-system-audit/gate-6/kotlin_verification_tests.txt"
-        ]
+        ],
+        "state": "INTEGRATED_AND_EVIDENCED"
       }
     },
     {
@@ -2136,7 +2211,8 @@
         "runtime_evidence": [
           "artifacts/release/preview/rev23/manifest.json",
           "evidence/van-system-audit/gate-6/kotlin_verification_tests.txt"
-        ]
+        ],
+        "state": "INTEGRATED_AND_EVIDENCED"
       }
     },
     {
@@ -2175,7 +2251,9 @@
           "backend/tests/test_browser_injection_containment.py::test_a_semantic_tier_is_refused_rather_than_walked_deterministically"
         ],
         "residual": "No browser worker process runs in this environment, so the adapter is exercised against a fake shaped like the documented worker protocol; semantic tiers still have no implementation.",
-        "residual_reason": "The browser worker and Stagehand are external runtimes the owner deploys. What was absent was the code path between VAN and them, and that now exists, fails closed when they are not there, and is driven end to end in the tests."
+        "residual_reason": "The browser worker and Stagehand are external runtimes the owner deploys. What was absent was the code path between VAN and them, and that now exists, fails closed when they are not there, and is driven end to end in the tests.",
+        "residual_class": "EXTERNAL_RUNTIME",
+        "state": "EXTERNALLY_BLOCKED_REPOSITORY_COMPLETE"
       }
     },
     {
@@ -2211,7 +2289,9 @@
         ],
         "residual": "The 'hermes' executor is taken from what the registry declares, not from anything this repository can verify.",
         "residual_reason": "Hermes is an external runtime that is not in this repository, so which workers it actually implements cannot be checked here. What can be checked, and now is, is that a capability declaring no executor at all is never routed to \u2014 which is the case the finding names.",
-        "posture": "Offering a capability nothing can execute as a fallback turns 'the preferred surface is unavailable' into 'the operation was planned', which is worse than an honest refusal. The test that changed most is the old one, which asserted `planned` on workspace_studio as correct behaviour."
+        "posture": "Offering a capability nothing can execute as a fallback turns 'the preferred surface is unavailable' into 'the operation was planned', which is worse than an honest refusal. The test that changed most is the old one, which asserted `planned` on workspace_studio as correct behaviour.",
+        "residual_class": "EXTERNAL_RUNTIME",
+        "state": "EXTERNALLY_BLOCKED_REPOSITORY_COMPLETE"
       }
     },
     {
@@ -2248,7 +2328,9 @@
         ],
         "residual": "The gateway reports credential age but does not rotate anything itself, and a static token's age is measured from when the gateway first saw it rather than from when it was issued.",
         "residual_reason": "Rotating the ingress token means updating the gateway, the phone and the tunnel at the same instant; a process doing that unattended would lock the owner out far more reliably than it would stop an attacker. A token in an environment file carries no issue date the gateway can read, so the age is a floor \u2014 the report says so in age_basis rather than implying precision it does not have, and a test asserts that wording is there.",
-        "posture": "An expired grant is deliberately not renewable: re-pairing is the path back, and silently reviving one the owner let lapse would make the expiry decorative. The PKI test proves the fix rather than the intent \u2014 it builds a PKI, confirms --check is clean, then re-runs with the window widened and asserts the certificate bytes actually changed."
+        "posture": "An expired grant is deliberately not renewable: re-pairing is the path back, and silently reviving one the owner let lapse would make the expiry decorative. The PKI test proves the fix rather than the intent \u2014 it builds a PKI, confirms --check is clean, then re-runs with the window widened and asserts the certificate bytes actually changed.",
+        "residual_class": "OWNER_DEPLOYMENT_DECISION",
+        "state": "EXTERNALLY_BLOCKED_REPOSITORY_COMPLETE"
       }
     },
     {
@@ -2284,7 +2366,8 @@
           "tests/contracts/test_maturity_gate.py",
           "backend/tests/test_extra_apis.py"
         ],
-        "posture": "Tests that needed a fake transport now install it on app.state directly, so the test seam no longer has to exist as a production route."
+        "posture": "Tests that needed a fake transport now install it on app.state directly, so the test seam no longer has to exist as a production route.",
+        "state": "DELIBERATELY_REMOVED_CANON_CORRECTED"
       }
     },
     {
@@ -2320,7 +2403,9 @@
           "evidence/van-system-audit/gate-6/kotlin_verification_tests.txt"
         ],
         "residual": "No speaker model ships, so every voice command is classified UNAVAILABLE and consequential ones require the biometric approval.",
-        "residual_reason": "A speaker embedding model is a trained artefact and owner supply, like the wake word model. The gate is complete, is on the production submission path, and its behaviour without a model is the deliberate one: escalate rather than allow, and escalate rather than refuse."
+        "residual_reason": "A speaker embedding model is a trained artefact and owner supply, like the wake word model. The gate is complete, is on the production submission path, and its behaviour without a model is the deliberate one: escalate rather than allow, and escalate rather than refuse.",
+        "residual_class": "EXTERNAL_ARTEFACT",
+        "state": "EXTERNALLY_BLOCKED_REPOSITORY_COMPLETE"
       }
     },
     {
@@ -2361,7 +2446,9 @@
           "evidence/van-system-audit/gate-6/kotlin_verification_tests.txt"
         ],
         "residual": "The field's per-frame strand coordinates are still recomputed each frame, and no on-device frame-time measurement exists in this environment.",
-        "residual_reason": "The strand coordinates are the animation; caching them would stop the motion, which a test asserts against. Real device frame times arrive through POST /v1/observability/device-telemetry (P3-OBS-002) once the client posts them, and the gateway reports them as unobserved until then rather than inventing values."
+        "residual_reason": "The strand coordinates are the animation; caching them would stop the motion, which a test asserts against. Real device frame times arrive through POST /v1/observability/device-telemetry (P3-OBS-002) once the client posts them, and the gateway reports them as unobserved until then rather than inventing values.",
+        "residual_class": "DELIBERATE_SCOPE",
+        "state": "INTEGRATED_AND_EVIDENCED"
       }
     },
     {
@@ -2403,7 +2490,9 @@
           "evidence/van-system-audit/gate-11/structured_logs.jsonl"
         ],
         "residual": "The correlation id reaches Hermes in the run metadata, but the external agent runtime is not in this repository, so whether it echoes the id back on its callback is not verifiable here.",
-        "residual_reason": "Hermes is an external system outside the repository boundary; asserting its behaviour from here would be asserting something unverified."
+        "residual_reason": "Hermes is an external system outside the repository boundary; asserting its behaviour from here would be asserting something unverified.",
+        "residual_class": "EXTERNAL_RUNTIME",
+        "state": "EXTERNALLY_BLOCKED_REPOSITORY_COMPLETE"
       }
     },
     {
@@ -2445,7 +2534,9 @@
         ],
         "residual": "IdempotencyStatus, the eleventh vocabulary, is deliberately not projected.",
         "residual_reason": "It describes a claim on a request key, not a piece of work: COMPLETED means the gateway finished handling the request, which is equally true when the command was denied. Mapping it would put a reassuring word next to a refusal. The exclusion is recorded in NOT_OWNER_WORK with its reason and asserted by a test, rather than left as a silent omission.",
-        "posture": "The projection keeps apart exactly what the audit proved gets confused: verified, partial and unverifiable stay three answers; only a verified outcome reads as DONE; a refusal is not a failure; a verification failure is not an execution failure; a stale attention item is not 'handled'. Each of those is a test, not a comment."
+        "posture": "The projection keeps apart exactly what the audit proved gets confused: verified, partial and unverifiable stay three answers; only a verified outcome reads as DONE; a refusal is not a failure; a verification failure is not an execution failure; a stale attention item is not 'handled'. Each of those is a test, not a comment.",
+        "residual_class": "DELIBERATE_SCOPE",
+        "state": "INTEGRATED_AND_EVIDENCED"
       }
     },
     {
@@ -2484,7 +2575,9 @@
         ],
         "residual": "The two verification systems still persist different record shapes, VerificationResult for automation runs and VerificationRecord for missions.",
         "residual_reason": "Each subsystem stores its own and neither shape is wrong; collapsing them would be a large migration for no behavioural gain. What was genuinely duplicated was the observations, and those now exist once, so adding a way to observe the world is one change rather than two.",
-        "posture": "The direction of each merge is the part worth defending, and in both cases it is towards the better implementation rather than the incumbent. The scorer decides and the engine stays the durable queue, because retiring \u00a729's five dispositions, deduplication and recorded reasons in favour of a severity enum would have been a downgrade dressed as consolidation. A severity now maps to written-out dimensions that a test holds monotonic, so the bridge cannot silently invert the enum, and an item written before this was wired still interrupts rather than being silenced by a missing decision."
+        "posture": "The direction of each merge is the part worth defending, and in both cases it is towards the better implementation rather than the incumbent. The scorer decides and the engine stays the durable queue, because retiring \u00a729's five dispositions, deduplication and recorded reasons in favour of a severity enum would have been a downgrade dressed as consolidation. A severity now maps to written-out dimensions that a test holds monotonic, so the bridge cannot silently invert the enum, and an item written before this was wired still interrupts rather than being silenced by a missing decision.",
+        "residual_class": "DELIBERATE_SCOPE",
+        "state": "INTEGRATED_AND_EVIDENCED"
       }
     },
     {
@@ -2524,7 +2617,8 @@
         ],
         "runtime_evidence": [
           "evidence/van-system-audit/gate-11/structured_logs.jsonl"
-        ]
+        ],
+        "state": "INTEGRATED_AND_EVIDENCED"
       }
     },
     {
@@ -2549,27 +2643,33 @@
       "remediation_gate": "GATE 11",
       "current_status": "CLOSED",
       "closure": {
-        "summary": "All sixteen metrics Gate 11 names are declared in a closed catalogue and exported at GET /v1/observability/metrics in Prometheus text format. The catalogue names a producer for each metric and records whether it is produced by the gateway, the device or the trading process, because declaring sixteen metrics and exporting them all as zero would have closed the finding on paper while leaving the instruments unwired. `van_metric_unobserved` reports the declared metrics that have never received a sample, so a metric at zero because nothing happened is distinguishable from one at zero because nothing writes it. Device-produced metrics \u2014 aura frame time, wake/ASR/TTS latency, battery and memory \u2014 are ingested through POST /v1/observability/device-telemetry rather than invented, and trade halt latency is recovered from the two ledger events that bracket it. Route labels use the matched route template, not the path, so a mission id cannot become an unbounded set of time series.",
+        "summary": "All sixteen metrics Gate 11 names are declared in a closed catalogue and exported at GET /v1/observability/metrics in Prometheus text format. The catalogue names a producer for each metric and records whether it is produced by the gateway, the device or the trading process, because declaring sixteen metrics and exporting them all as zero would have closed the finding on paper while leaving the instruments unwired. `van_metric_unobserved` reports the declared metrics that have never received a sample, so a metric at zero because nothing happened is distinguishable from one at zero because nothing writes it. Device-produced metrics \u2014 aura frame time, wake/ASR/TTS latency, battery and memory \u2014 are ingested through POST /v1/observability/device-telemetry rather than invented, and trade halt latency is recovered from the two ledger events that bracket it. Route labels use the matched route template, not the path, so a mission id cannot become an unbounded set of time series.\n\nThe device half is here too. The six metrics the catalogue marks `MetricSource.DEVICE` \u2014 wake, ASR and TTS latency, aura frame time, battery and memory \u2014 had a declaration and an ingest route and no producer, so the scrape reported them as `van_metric_unobserved` forever. `DeviceTelemetryReporter` posts them, bounded and behind the gateway's own circuit breaker, because a phone that cannot reach its gateway should spend its radio on the owner's queued commands rather than on frame times. `DeviceMetric` mirrors the gateway's `DEVICE_HISTOGRAMS` and `DEVICE_GAUGES`, and `tests/contracts/test_device_telemetry_contract.py` parses both and fails on drift \u2014 the route refuses a name it does not know, so a device that invents one has its telemetry counted as refused and silently disappear, which is the state this finding was about.",
         "changed": [
-          "backend/van_gateway/observability/metrics.py",
-          "backend/van_gateway/observability/instruments.py",
-          "backend/van_gateway/observability/middleware.py",
+          "android/app/src/main/java/com/dial/van/VanApplication.kt",
+          "android/app/src/main/java/com/dial/van/gateway/VanGatewayClient.kt",
+          "android/app/src/main/java/com/dial/van/telemetry/DeviceTelemetry.kt",
+          "android/app/src/main/java/com/dial/van/telemetry/DeviceTelemetryReporter.kt",
+          "backend/van_gateway/app.py",
           "backend/van_gateway/automation/telemetry.py",
           "backend/van_gateway/browser/api.py",
           "backend/van_gateway/events/bus.py",
+          "backend/van_gateway/observability/instruments.py",
+          "backend/van_gateway/observability/metrics.py",
+          "backend/van_gateway/observability/middleware.py",
           "backend/van_gateway/trading/service.py",
-          "backend/van_gateway/app.py"
+          "tests/contracts/test_device_telemetry_contract.py"
         ],
         "verified_by": [
+          "android/verification/src/test/kotlin/com/dial/van/telemetry/DeviceTelemetryTest.kt",
           "backend/tests/test_observability_metrics.py",
+          "backend/tests/test_observability_routes.py::test_device_telemetry_is_device_authenticated_not_operator_authenticated",
           "backend/tests/test_observability_routes.py::test_the_scrape_is_prometheus_text_and_names_the_route_template",
-          "backend/tests/test_observability_routes.py::test_device_telemetry_is_device_authenticated_not_operator_authenticated"
+          "tests/contracts/test_device_telemetry_contract.py"
         ],
         "runtime_evidence": [
           "evidence/van-system-audit/gate-11/metrics_scrape.txt"
         ],
-        "residual": "Six device-sourced metrics have no producer until the Android client posts telemetry; the scrape reports them as unobserved rather than as zero.",
-        "residual_reason": "The Android client change belongs to Gate 10; the gateway half is complete and the honest state is reported rather than faked."
+        "state": "INTEGRATED_AND_EVIDENCED"
       }
     },
     {
@@ -2606,7 +2706,9 @@
           "evidence/van-system-audit/gate-11/metrics_scrape.txt"
         ],
         "residual": "The rules are served on an endpoint; nothing in this repository pages a human, because no notification transport is deployed.",
-        "residual_reason": "Choosing and configuring a paging transport is an owner deployment decision, not a repository one. The actionable condition is now computable and served, which is what was absent."
+        "residual_reason": "Choosing and configuring a paging transport is an owner deployment decision, not a repository one. The actionable condition is now computable and served, which is what was absent.",
+        "residual_class": "OWNER_DEPLOYMENT_DECISION",
+        "state": "EXTERNALLY_BLOCKED_REPOSITORY_COMPLETE"
       }
     },
     {
@@ -2646,7 +2748,9 @@
           "backend/tests/test_ops_retention.py::test_owner_state_is_never_pruned_however_old_it_is"
         ],
         "residual": "n8n's own 168-hour execution retention is unchanged and remains the automation runtime's setting rather than VAN's.",
-        "residual_reason": "It is configuration of an external runtime that already has a bounded policy; duplicating it in VAN would create two sources of truth for the same horizon."
+        "residual_reason": "It is configuration of an external runtime that already has a bounded policy; duplicating it in VAN would create two sources of truth for the same horizon.",
+        "residual_class": "EXTERNAL_RUNTIME",
+        "state": "EXTERNALLY_BLOCKED_REPOSITORY_COMPLETE"
       }
     },
     {
@@ -2688,7 +2792,9 @@
           "evidence/van-system-audit/gate-11/restore_drill.json"
         ],
         "residual": "The scheduler's own backup job is off by default and no offsite destination is configured.",
-        "residual_reason": "A backup written by the gateway to the same disk as its database is not a backup; choosing an offsite target is an owner deployment decision. The mechanism, its verification and the drill are complete and runnable."
+        "residual_reason": "A backup written by the gateway to the same disk as its database is not a backup; choosing an offsite target is an owner deployment decision. The mechanism, its verification and the drill are complete and runnable.",
+        "residual_class": "OWNER_DEPLOYMENT_DECISION",
+        "state": "EXTERNALLY_BLOCKED_REPOSITORY_COMPLETE"
       }
     },
     {
@@ -2727,7 +2833,9 @@
           "backend/tests/test_ops_pki.py::test_the_pki_number_reaches_the_alert_rules"
         ],
         "residual": "The certificates in these tests are generated by the tests; no live trading PKI exists in this environment to read.",
-        "residual_reason": "Reading a real deployment's /opt/van-trading/secrets/pki is an owner-host action. The parser is exercised against real X.509 that the test mints, which is what makes it more than a fixture comparison."
+        "residual_reason": "Reading a real deployment's /opt/van-trading/secrets/pki is an owner-host action. The parser is exercised against real X.509 that the test mints, which is what makes it more than a fixture comparison.",
+        "residual_class": "OWNER_DEPLOYMENT_DECISION",
+        "state": "EXTERNALLY_BLOCKED_REPOSITORY_COMPLETE"
       }
     },
     {
@@ -2763,7 +2871,8 @@
           "backend/tests/test_ops_scheduler.py::test_a_restart_does_not_re_run_everything",
           "backend/tests/test_ops_scheduler.py::test_a_failing_job_is_recorded_and_the_loop_survives",
           "backend/tests/test_ops_scheduler.py::test_status_says_whether_the_scheduler_is_actually_running"
-        ]
+        ],
+        "state": "INTEGRATED_AND_EVIDENCED"
       }
     },
     {
@@ -2804,7 +2913,9 @@
           "backend/tests/test_ops_suppression.py::test_van_can_still_resolve_an_acknowledged_item"
         ],
         "residual": "DegradedRegistry._active remains in memory.",
-        "residual_reason": "It is live health state, not a dismissal: a subsystem's degradation should be re-detected on boot rather than remembered from before the restart. Remembering it would report a subsystem as degraded after the fault was fixed."
+        "residual_reason": "It is live health state, not a dismissal: a subsystem's degradation should be re-detected on boot rather than remembered from before the restart. Remembering it would report a subsystem as degraded after the fault was fixed.",
+        "residual_class": "DELIBERATE_SCOPE",
+        "state": "INTEGRATED_AND_EVIDENCED"
       }
     },
     {
@@ -2834,7 +2945,8 @@
         ],
         "verified_by": [
           "backend/tests/test_n8n_invocation.py::test_a_retry_backoff_does_not_block_the_event_loop"
-        ]
+        ],
+        "state": "INTEGRATED_AND_EVIDENCED"
       }
     },
     {
@@ -2871,7 +2983,9 @@
           "backend/tests/test_n8n_invocation.py::test_an_inactive_workflow_gets_its_own_error_code"
         ],
         "residual": "No live n8n instance exists in this environment, so the call is verified against a fake shaped like the documented n8n API rather than against n8n itself.",
-        "residual_reason": "n8n is an external runtime that is not deployed here. The fake was rewritten to the real API's shape, which is the correction the finding asked for; asserting against a live instance requires the owner's automation host."
+        "residual_reason": "n8n is an external runtime that is not deployed here. The fake was rewritten to the real API's shape, which is the correction the finding asked for; asserting against a live instance requires the owner's automation host.",
+        "residual_class": "EXTERNAL_RUNTIME",
+        "state": "EXTERNALLY_BLOCKED_REPOSITORY_COMPLETE"
       }
     },
     {
@@ -2943,7 +3057,9 @@
           "evidence/van-system-audit/gate-6/kotlin_verification_tests.txt"
         ],
         "residual": "The SharedPreferences-backed cursor store and the Compose polling loop are not compiled here.",
-        "residual_reason": "Both need the Android toolchain. The paging, cursor and backoff arithmetic \u2014 the whole of what was wrong \u2014 runs in the JVM harness."
+        "residual_reason": "Both need the Android toolchain. The paging, cursor and backoff arithmetic \u2014 the whole of what was wrong \u2014 runs in the JVM harness.",
+        "residual_class": "ENVIRONMENT_UNVERIFIED",
+        "state": "EXTERNALLY_BLOCKED_REPOSITORY_COMPLETE"
       }
     },
     {
@@ -2979,7 +3095,9 @@
           "evidence/van-system-audit/gate-6/kotlin_verification_tests.txt"
         ],
         "residual": "The composable that renders the summary is not compiled here; the summariser it renders is.",
-        "residual_reason": "The Android Gradle Plugin cannot be fetched in this environment. The decisions \u2014 what counts as waiting, what to say when nothing does, what to say when VAN could not look \u2014 are all in the pure module and all executed."
+        "residual_reason": "The Android Gradle Plugin cannot be fetched in this environment. The decisions \u2014 what counts as waiting, what to say when nothing does, what to say when VAN could not look \u2014 are all in the pure module and all executed.",
+        "residual_class": "ENVIRONMENT_UNVERIFIED",
+        "state": "EXTERNALLY_BLOCKED_REPOSITORY_COMPLETE"
       }
     },
     {
@@ -3352,7 +3470,8 @@
         "verified_by": [
           "tools/ci/maturity_gate.py"
         ],
-        "posture": "Corrected against the build files themselves rather than against memory of them."
+        "posture": "Corrected against the build files themselves rather than against memory of them.",
+        "state": "DELIBERATELY_REMOVED_CANON_CORRECTED"
       }
     },
     {
@@ -3385,7 +3504,8 @@
           "backend/tests/test_sealed_parameter_completeness.py::test_the_owner_s_capitalisation_survives_into_the_sealed_parameters",
           "backend/tests/test_sealed_parameter_completeness.py::test_matching_is_still_case_insensitive",
           "backend/tests/test_sealed_parameter_completeness.py::test_research_and_context_queries_keep_their_case_too"
-        ]
+        ],
+        "state": "INTEGRATED_AND_EVIDENCED"
       }
     },
     {
@@ -3491,7 +3611,9 @@
           "evidence/van-system-audit/gate-6/kotlin_verification_tests.txt"
         ],
         "residual": "The deletion is verified by the file compiling in the JVM harness with no reference to the field anywhere in the tree, not by an Android build.",
-        "residual_reason": "The Android toolchain is unavailable here. The symbol's absence is mechanical and is checked by the component ledger's removal assertion."
+        "residual_reason": "The Android toolchain is unavailable here. The symbol's absence is mechanical and is checked by the component ledger's removal assertion.",
+        "residual_class": "ENVIRONMENT_UNVERIFIED",
+        "state": "EXTERNALLY_BLOCKED_REPOSITORY_COMPLETE"
       }
     },
     {
@@ -3522,7 +3644,8 @@
         "verified_by": [
           "trading/tests/test_live_risk_is_real.py::TestTheStrategysTargetsSurvive::test_the_dead_code_is_gone"
         ],
-        "posture": "Asserted as absent source text rather than by inspection, because dead code in a live order path returns."
+        "posture": "Asserted as absent source text rather than by inspection, because dead code in a live order path returns.",
+        "state": "DELIBERATELY_REMOVED_CANON_CORRECTED"
       }
     },
     {
@@ -3552,7 +3675,8 @@
         ],
         "verified_by": [
           "backend/tests/test_pairing_security.py"
-        ]
+        ],
+        "state": "DELIBERATELY_REMOVED_CANON_CORRECTED"
       }
     },
     {
@@ -3583,7 +3707,8 @@
         "verified_by": [
           "backend/tests/test_oauth_callback_escaping.py"
         ],
-        "posture": "The finding said it was not exploitable today and it was not: every interpolated value was a constant. But `broker` is a path segment and an HTTPException detail carries a query parameter back, so it was one field away. The test drives both halves with a real payload and also holds the rule for the file rather than for the two call sites, because a rule that only holds where somebody remembered is not a rule."
+        "posture": "The finding said it was not exploitable today and it was not: every interpolated value was a constant. But `broker` is a path segment and an HTTPException detail carries a query parameter back, so it was one field away. The test drives both halves with a real payload and also holds the rule for the file rather than for the two call sites, because a rule that only holds where somebody remembered is not a rule.",
+        "state": "INTEGRATED_AND_EVIDENCED"
       }
     }
   ],

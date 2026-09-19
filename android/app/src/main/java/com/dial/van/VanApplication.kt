@@ -14,6 +14,7 @@ import com.dial.van.gateway.QueueReplayer
 import com.dial.van.gateway.VanGatewayClient
 import com.dial.van.notification.NotificationPolicyStore
 import com.dial.van.queue.EncryptedCommandQueue
+import com.dial.van.telemetry.DeviceTelemetryReporter
 import com.dial.van.visual.VanLiveVisualState
 import com.dial.van.voice.PersonalSpeechModel
 import com.dial.van.voice.SpeechContext
@@ -80,6 +81,14 @@ class VanApplication : Application(), VoiceInputCallback, TtsOutputCallback {
     lateinit var queueReplayer: QueueReplayer
         private set
 
+    /**
+     * P3-OBS-002 — the producer for the six device-sourced metrics. The gateway declared
+     * them and the ingest route has existed since Gate 11; nothing on the phone posted to
+     * it, so the scrape reported them as unobserved forever.
+     */
+    lateinit var telemetry: DeviceTelemetryReporter
+        private set
+
     override fun onCreate() {
         super.onCreate()
         instance = this
@@ -107,6 +116,7 @@ class VanApplication : Application(), VoiceInputCallback, TtsOutputCallback {
         )
         voiceSession = VoiceSessionCoordinator(voiceInput, ttsOutput)
         queueReplayer = QueueReplayer(commandQueue, gatewayClient, degradedModeStore, appScope)
+        telemetry = DeviceTelemetryReporter(this, gatewayClient, appScope)
         wakeModel = WakeModelLoader(this)
         voiceArbiter = VoiceAudioArbiter(this)
         wakeCoordinator = WakeCoordinator(
@@ -121,6 +131,7 @@ class VanApplication : Application(), VoiceInputCallback, TtsOutputCallback {
         // them now have a writer, and it runs before the owner can open a health screen.
         DeviceSignals.publish(this)
         queueReplayer.replayAsync(ReplayReason.APP_START)
+        telemetry.start()
         startConnectivityMonitor()
         startGatewayHealthMonitor()
     }

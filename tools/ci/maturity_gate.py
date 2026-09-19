@@ -31,6 +31,7 @@ import json
 import re
 import sys
 from pathlib import Path
+from collections import Counter
 
 ROOT = Path(__file__).resolve().parents[2]
 FINDINGS = ROOT / "evidence" / "van-system-audit" / "findings.json"
@@ -95,7 +96,34 @@ def check_findings_assigned(findings: dict) -> list[str]:
 
 #: Required on a finding that claims CLOSED. Without this the register has the same hole
 #: the audit found in the product: a status anybody can assert and nobody can check.
-CLOSURE_FIELDS = ("summary", "changed", "verified_by")
+CLOSURE_FIELDS = ("summary", "changed", "verified_by", "state")
+
+#: The three ways a finding is allowed to end. "CLOSED" on its own is the same collapse the
+#: audit forbids one level down, where a capability may not be called simply "implemented":
+#: a finding whose remediation shipped, one whose subject was deleted and whose canon was
+#: corrected, and one the repository has finished but cannot finish alone are three
+#: different outcomes, and an owner reading the register is entitled to know which.
+TERMINAL_STATES = {
+    "INTEGRATED_AND_EVIDENCED",
+    "DELIBERATELY_REMOVED_CANON_CORRECTED",
+    "EXTERNALLY_BLOCKED_REPOSITORY_COMPLETE",
+}
+
+#: Why a closure still carries a residual. The first four are things this repository cannot
+#: contain — an artefact somebody must train, a system that runs elsewhere, a build this
+#: environment cannot run, a decision only the owner's deployment can make — and each of
+#: them means the finding is blocked rather than integrated. DELIBERATE_SCOPE is different:
+#: the work is complete as designed and the residual states a boundary, so that a later
+#: reader does not mistake a deliberate limit for an unfinished job.
+RESIDUAL_CLASSES = {
+    "EXTERNAL_ARTEFACT",
+    "EXTERNAL_RUNTIME",
+    "ENVIRONMENT_UNVERIFIED",
+    "OWNER_DEPLOYMENT_DECISION",
+    "DELIBERATE_SCOPE",
+}
+
+BLOCKING_RESIDUAL_CLASSES = RESIDUAL_CLASSES - {"DELIBERATE_SCOPE"}
 
 
 def check_closures(findings: dict) -> list[str]:
@@ -123,9 +151,32 @@ def check_closures(findings: dict) -> list[str]:
             test_file = str(node).split("::", 1)[0].strip()
             if test_file and not (ROOT / test_file).exists():
                 problems.append(f"{fid}: closure names test file {test_file}, which does not exist")
-        if closure.get("residual") and not closure.get("residual_reason"):
+        state = closure.get("state")
+        if state and state not in TERMINAL_STATES:
+            problems.append(
+                f"{fid}: closure state {state!r} is not one of {sorted(TERMINAL_STATES)}"
+            )
+        residual = closure.get("residual")
+        residual_class = closure.get("residual_class")
+        if residual and not closure.get("residual_reason"):
             problems.append(
                 f"{fid}: closure declares a residual without saying why it is out of scope"
+            )
+        if residual and residual_class not in RESIDUAL_CLASSES:
+            problems.append(
+                f"{fid}: closure declares a residual with no residual_class. "
+                "Unfinished work and a deliberate boundary read the same in prose."
+            )
+        if residual_class and not residual:
+            problems.append(f"{fid}: closure names a residual_class with no residual")
+        if residual_class in BLOCKING_RESIDUAL_CLASSES and state != "EXTERNALLY_BLOCKED_REPOSITORY_COMPLETE":
+            problems.append(
+                f"{fid}: residual_class {residual_class} means the repository cannot finish "
+                f"this alone, but the closure state is {state!r}"
+            )
+        if state == "EXTERNALLY_BLOCKED_REPOSITORY_COMPLETE" and not residual:
+            problems.append(
+                f"{fid}: claims to be externally blocked and names nothing it is blocked on"
             )
     return problems
 
@@ -328,6 +379,24 @@ def main() -> int:
     terminal = sum(1 for c in components.get("components", []) if c.get("terminal_state"))
 
     print(f"findings:   {n_find} registered, {closed} closed")
+    # Broken out rather than summed, because "84 closed" is the number that hides the
+    # thing an owner needs: how many of those VAN can finish on its own.
+    states = Counter(
+        f.get("closure", {}).get("state", "(unstated)")
+        for f in findings.get("findings", [])
+        if f.get("current_status") == "CLOSED"
+    )
+    for state in sorted(states):
+        print(f"            {states[state]:>3} {state}")
+    residuals = Counter(
+        f.get("closure", {}).get("residual_class")
+        for f in findings.get("findings", [])
+        if f.get("closure", {}).get("residual")
+    )
+    if residuals:
+        print("residuals:  " + ", ".join(
+            f"{residuals[k]} {k}" for k in sorted(residuals, key=str)
+        ))
     print(f"components: {n_comp} inventoried, {terminal} at a terminal state")
 
     if scheduled and not args.strict:

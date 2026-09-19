@@ -232,3 +232,72 @@ def test_the_real_application_does_not_register_the_deleted_route():
     spec.loader.exec_module(module)
 
     assert module.check_forbidden_routes() == []
+
+
+def test_gate_rejects_a_closure_that_does_not_say_what_kind_of_closed(ledgers_restored):
+    """CLOSED alone is the collapse the audit forbids one level down.
+
+    A finding whose remediation shipped, one whose subject was deleted, and one the
+    repository has finished but cannot finish alone are three different outcomes.
+    """
+    data = json.loads(FINDINGS.read_text(encoding="utf-8"))
+    target = next(f for f in data["findings"] if f.get("current_status") == "CLOSED")
+    target["closure"].pop("state", None)
+    FINDINGS.write_text(json.dumps(data, indent=2), encoding="utf-8")
+
+    result = run_gate()
+    assert result.returncode == 1
+    assert "state" in result.stderr
+
+
+def test_gate_rejects_an_invented_terminal_state(ledgers_restored):
+    data = json.loads(FINDINGS.read_text(encoding="utf-8"))
+    target = next(f for f in data["findings"] if f.get("current_status") == "CLOSED")
+    target["closure"]["state"] = "MOSTLY_DONE"
+    FINDINGS.write_text(json.dumps(data, indent=2), encoding="utf-8")
+
+    result = run_gate()
+    assert result.returncode == 1
+    assert "MOSTLY_DONE" in result.stderr
+
+
+def test_gate_rejects_a_residual_with_no_class(ledgers_restored):
+    """Unfinished work and a deliberate boundary read identically in prose."""
+    data = json.loads(FINDINGS.read_text(encoding="utf-8"))
+    target = next(f for f in data["findings"] if f["closure"].get("residual"))
+    target["closure"].pop("residual_class", None)
+    FINDINGS.write_text(json.dumps(data, indent=2), encoding="utf-8")
+
+    result = run_gate()
+    assert result.returncode == 1
+    assert "residual_class" in result.stderr
+
+
+def test_gate_rejects_a_blocked_residual_reported_as_integrated(ledgers_restored):
+    """The claim that matters: can VAN finish this by itself or not."""
+    data = json.loads(FINDINGS.read_text(encoding="utf-8"))
+    target = next(
+        f for f in data["findings"]
+        if f["closure"].get("residual_class") in {
+            "EXTERNAL_ARTEFACT", "EXTERNAL_RUNTIME",
+            "ENVIRONMENT_UNVERIFIED", "OWNER_DEPLOYMENT_DECISION",
+        }
+    )
+    target["closure"]["state"] = "INTEGRATED_AND_EVIDENCED"
+    FINDINGS.write_text(json.dumps(data, indent=2), encoding="utf-8")
+
+    result = run_gate()
+    assert result.returncode == 1
+    assert target["id"] in result.stderr
+
+
+def test_gate_rejects_claiming_blocked_while_naming_no_blocker(ledgers_restored):
+    data = json.loads(FINDINGS.read_text(encoding="utf-8"))
+    target = next(f for f in data["findings"] if not f["closure"].get("residual"))
+    target["closure"]["state"] = "EXTERNALLY_BLOCKED_REPOSITORY_COMPLETE"
+    FINDINGS.write_text(json.dumps(data, indent=2), encoding="utf-8")
+
+    result = run_gate()
+    assert result.returncode == 1
+    assert target["id"] in result.stderr
+

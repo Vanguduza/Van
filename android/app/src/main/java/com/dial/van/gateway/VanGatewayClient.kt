@@ -140,6 +140,16 @@ class VanGatewayClient(context: Context) {
         response
     }
 
+    /**
+     * P3-OBS-002 — the six measurements only the device can take.
+     *
+     * Raw body rather than a JSONObject: `DeviceTelemetry.body` builds it, and it is
+     * executed in `android/verification` against the shape the route actually parses.
+     */
+    suspend fun postDeviceTelemetry(body: String): JSONObject = withContext(Dispatchers.IO) {
+        postRawAt(baseUrl, "/v1/observability/device-telemetry", body, useIngress = true)
+    }
+
     suspend fun health(): JSONObject = withContext(Dispatchers.IO) { getJson("/health") }
 
     suspend fun googleMesh(): JSONObject = withContext(Dispatchers.IO) { getJson("/v1/google/mesh") }
@@ -186,7 +196,7 @@ class VanGatewayClient(context: Context) {
             connectTimeout = 15_000
             readTimeout = 90_000
         }
-        conn.outputStream.use { it.write(body.toString().toByteArray(StandardCharsets.UTF_8)) }
+        conn.outputStream.use { it.write(body.toByteArray(StandardCharsets.UTF_8)) }
         val code = conn.responseCode
         val stream = if (code in 200..299) conn.inputStream else conn.errorStream
         code to (stream?.bufferedReader()?.readText() ?: "{}")
@@ -525,6 +535,13 @@ class VanGatewayClient(context: Context) {
         rootUrl: String,
         path: String,
         body: JSONObject,
+        useIngress: Boolean,
+    ): JSONObject = postRawAt(rootUrl, path, body.toString(), useIngress)
+
+    private fun postRawAt(
+        rootUrl: String,
+        path: String,
+        body: String,
         useIngress: Boolean,
     ): JSONObject = withRetry {
         val conn = (URL("$rootUrl$path").openConnection() as HttpURLConnection).apply {

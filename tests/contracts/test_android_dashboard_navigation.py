@@ -12,11 +12,30 @@ MODULES = COMMAND_DIR / "modules"
 TRADING = ROOT / "android/app/src/main/java/com/dial/van/trading/ui/TradingScreens.kt"
 
 
+def code_of(path: Path) -> str:
+    """Source with comments removed.
+
+    A commented-out call still contains its own text, so a substring assertion over the raw
+    file would be satisfied by `// AdminActionCard("Settings"` — a card the owner cannot
+    reach, asserted as present.
+    """
+    out, in_block = [], False
+    for line in path.read_text(encoding="utf-8").splitlines():
+        stripped = line.strip()
+        if in_block:
+            in_block = "*/" not in stripped
+            continue
+        if stripped.startswith("/*"):
+            in_block = "*/" not in stripped
+            continue
+        if stripped.startswith("//") or stripped.startswith("*"):
+            continue
+        out.append(line.split("//")[0])
+    return "\n".join(out)
+
+
 def command_surface() -> str:
-    return "\n".join(
-        path.read_text()
-        for path in sorted(COMMAND_DIR.rglob("*.kt"))
-    )
+    return "\n".join(code_of(path) for path in sorted(COMMAND_DIR.rglob("*.kt")))
 
 
 def test_command_centre_uses_compact_primary_tabs_and_dashboard_drilldowns():
@@ -25,10 +44,10 @@ def test_command_centre_uses_compact_primary_tabs_and_dashboard_drilldowns():
     assert "rememberScrollState" not in text
     # The primary tab list moved out of the Activity and into CommandNav, where it is
     # executed by android/verification rather than only inspected here.
-    assert "val PRIMARY: List<CommandModule> = listOf(" in NAV.read_text()
-    assert "CommandNav.PRIMARY.forEach" in SHELL.read_text()
+    assert "val PRIMARY: List<CommandModule> = listOf(" in code_of(NAV)
+    assert "CommandNav.PRIMARY.forEach" in code_of(SHELL)
     for module in ("OVERVIEW", "CHAT", "TASKS", "ACTIVITY"):
-        assert f"CommandModule.{module}" in NAV.read_text()
+        assert f"CommandModule.{module}" in code_of(NAV)
     for detail in (
         "BROWSER_TASKS",
         "BROWSER_ESCALATIONS",
@@ -46,7 +65,7 @@ def test_command_centre_uses_compact_primary_tabs_and_dashboard_drilldowns():
 
 
 def test_browser_hub_is_summary_first_not_full_module_stack():
-    text = (MODULES / "BrowserModules.kt").read_text()
+    text = code_of(MODULES / "BrowserModules.kt")
     start = text.index("fun BrowserAutomationModule(")
     end = text.index("fun BrowserEscalationsPage(", start)
     hub = text[start:end]
