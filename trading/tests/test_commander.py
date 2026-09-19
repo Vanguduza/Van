@@ -8,6 +8,7 @@ from pathlib import Path
 import pytest
 from fastapi.testclient import TestClient
 
+from conftest_owner_authority import OwnerAuthorityHarness
 from commander.accounts import ACCOUNT_COMMANDS
 from commander.app import AGENT_HIDDEN_COMMANDS, COMMANDS, CommanderSettings, create_app, redact
 from commander.auth import HDR_NONCE, HDR_SIG, HDR_TS, NonceCache, sign_headers, verify_request
@@ -54,7 +55,9 @@ def env(tmp_path):
 
 
 def post(client, name, args=None, token=TOKEN, headers=None):
-    body = json.dumps({"args": args or {}, "requested_by": "test"}).encode()
+    # P1-HER-005 — `requested_by` is no longer the caller's to declare, so it is omitted;
+    # the commander fills it from whichever token signed the request.
+    body = json.dumps({"args": args or {}}).encode()
     h = headers or sign_headers(token, "POST", f"/v1/cmd/{name}", body)
     return client.post(f"/v1/cmd/{name}", content=body, headers={**h, "content-type": "application/json"})
 
@@ -102,8 +105,18 @@ def test_backtest_paths_are_confined_and_halt_needs_owner_signature(env):
     assert r["exit_code"] == 0 and r["summary"]["trades"] == 3 and "candidate" in r["authority"]
     assert post(client, "run_backtest", {"config": "../../etc/passwd", "bars": "bt/bars.csv"}).status_code == 403
     assert post(client, "run_backtest", {"config": "bt/missing.json", "bars": "bt/bars.csv"}).status_code == 404
+    # P0-TRADE-001 — "owner:sig-1" used to halt live trading. Both of these are refused.
     assert post(client, "halt", {"owner_signature_ref": ""}).status_code == 403
-    h = post(client, "halt", {"owner_signature_ref": "owner:sig-1", "reason": "manual"}).json()["result"]
+    assert post(client, "halt", {"owner_signature_ref": "owner:sig-1"}).status_code == 403
+    owner = OwnerAuthorityHarness()
+    client.app.state.commander_settings._owner_authority = owner.verifier
+    assert post(client, "halt", {
+        "owner_signature_ref": owner.token(act="kill-switch-clear", subject="van-trading-core")
+    }).status_code == 403, "a token for another act halted trading"
+    h = post(client, "halt", {
+        "owner_signature_ref": owner.token(act="owner-halt", subject="van-trading-core"),
+        "reason": "manual",
+    }).json()["result"]
     led = Ledger(tmp / "l.sqlite")
     ev = list(led.iter(EventKind.KILL_SWITCH))[-1]
     assert h["halted"] and ev.hash == h["event_hash"] and ev.payload["trigger"] == "OWNER_HALT" and ev.producer == "van-commander" and led.verify_chain()[0]
@@ -132,10 +145,48 @@ def test_session_service_observes_commander_halt(tmp_path, eurusd):
     assert svc.step_once() not in (None, "NEW_TRADES_BLOCKED")
     st = CommanderSettings(token=TOKEN, ledger=str(tmp_path / "l.sqlite"), heartbeat_dir=str(tmp_path), log_dir=str(tmp_path / "log"), data_dir=str(tmp_path), runner=FakeRunner())
     client = TestClient(create_app(st))
-    assert post(client, "halt", {"owner_signature_ref": "owner:sig"}).status_code == 200
+    owner = OwnerAuthorityHarness()
+    client.app.state.commander_settings._owner_authority = owner.verifier
+    assert post(client, "halt", {
+        "owner_signature_ref": owner.token(act="owner-halt", subject="van-trading-core")
+    }).status_code == 200
     clock["now"] = bars[102].end_ms + 1
     assert svc.step_once() == "NEW_TRADES_BLOCKED" and not svc.runner.permit_new_orders
     hb = json.loads((tmp_path / "hb.json").read_text()); assert "OWNER_HALT" in hb["kill_switch"]
+
+
+HERMES_TOKEN = "h" * 40
+GATEWAY_TOKEN = "g" * 40
+
+
+@pytest.fixture
+def two_principal_env(tmp_path):
+    """A commander that can actually tell its callers apart (P1-HER-005)."""
+    hb = tmp_path / "hb"; hb.mkdir()
+    led = Ledger(tmp_path / "l.sqlite")
+    led.append(make_event(EventKind.SESSION, "t", {"event": "STARTED"}, event_time_ms=1, received_time_ms=1))
+    led.close()
+    st = CommanderSettings(
+        tokens={"hermes": HERMES_TOKEN, "van-gateway": GATEWAY_TOKEN},
+        ledger=str(tmp_path / "l.sqlite"), heartbeat_dir=str(hb),
+        log_dir=str(tmp_path / "log"), data_dir=str(tmp_path / "data"),
+        vekl_url="http://127.0.0.1:1", runner=FakeRunner(),
+        accounts_registry=str(tmp_path / "accounts.json"),
+        secrets_dir=str(tmp_path / "secrets"),
+    )
+    return TestClient(create_app(st))
+
+
+def _call(client, name, token, args=None, requested_by=None):
+    payload = {"args": args or {}}
+    if requested_by is not None:
+        payload["requested_by"] = requested_by
+    body = json.dumps(payload).encode()
+    return client.post(
+        f"/v1/cmd/{name}", content=body,
+        headers={**sign_headers(token, "POST", f"/v1/cmd/{name}", body),
+                 "content-type": "application/json"},
+    )
 
 
 def test_credential_commands_are_hidden_from_agents_but_open_to_the_gateway(env):
@@ -145,15 +196,41 @@ def test_credential_commands_are_hidden_from_agents_but_open_to_the_gateway(env)
     listed = {t["name"] for t in r.json()["tools"]}
     assert listed.isdisjoint(ACCOUNT_COMMANDS) and "status" in listed and "accounts" in listed
     assert AGENT_HIDDEN_COMMANDS == set(ACCOUNT_COMMANDS)
+
+
+def test_requested_by_is_not_the_callers_to_declare(two_principal_env):
+    """P1-HER-005 — claiming to be somebody else used to be the whole gate.
+
+    The credential commands return a signing key once. A caller holding the Hermes token
+    reached them by putting "van-gateway" in the body.
+    """
+    client = two_principal_env
     args = {"alias": "deriv_demo", "broker": "DERIV", "server": "1089", "label": "Deriv demo"}
-    for who in ("hermes", "Hermes", "sol", "model"):
-        body = json.dumps({"args": args, "requested_by": who}).encode()
-        r = client.post("/v1/cmd/account_upsert", content=body, headers={**sign_headers(TOKEN, "POST", "/v1/cmd/account_upsert", body), "content-type": "application/json"})
-        assert r.status_code == 403, who
-    body = json.dumps({"args": args, "requested_by": "van-gateway"}).encode()
-    r = client.post("/v1/cmd/account_upsert", content=body, headers={**sign_headers(TOKEN, "POST", "/v1/cmd/account_upsert", body), "content-type": "application/json"})
+
+    forged = _call(client, "account_upsert", HERMES_TOKEN, args, requested_by="van-gateway")
+    assert forged.status_code == 403, forged.text
+    assert "authenticated principal" in forged.json()["detail"]
+
+    honest = _call(client, "account_upsert", HERMES_TOKEN, args)
+    assert honest.status_code == 403, "the agent token reached a credential command"
+
+    allowed = _call(client, "account_upsert", GATEWAY_TOKEN, args)
+    assert allowed.status_code == 200, allowed.text
+
+    # A non-credential command stays open to Hermes, on its own token.
+    listed = _call(client, "accounts", HERMES_TOKEN)
+    assert listed.status_code == 200
+    assert listed.json()["result"]["accounts"][0]["alias"] == "deriv_demo"
+
+
+def test_a_matching_requested_by_is_accepted(two_principal_env):
+    """Refusing a client that happens to state the truth would be gratuitous."""
+    client = two_principal_env
+    r = _call(client, "accounts", HERMES_TOKEN, requested_by="hermes")
     assert r.status_code == 200
-    # a non-credential command stays open to Hermes
-    body = json.dumps({"args": {}, "requested_by": "hermes"}).encode()
-    r = client.post("/v1/cmd/accounts", content=body, headers={**sign_headers(TOKEN, "POST", "/v1/cmd/accounts", body), "content-type": "application/json"})
-    assert r.status_code == 200 and r.json()["result"]["accounts"][0]["alias"] == "deriv_demo"
+
+
+def test_an_unknown_token_authenticates_nobody(two_principal_env):
+    client = two_principal_env
+    r = _call(client, "accounts", "z" * 40)
+    assert r.status_code == 401

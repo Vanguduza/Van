@@ -122,44 +122,31 @@ class VanAcceptanceGateTest {
     }
 
     @Test
-    fun commandCentreEvidenceReconciliationRefreshesDistinctManifestHashes() {
-        val outputDir = Files.createTempDirectory("van-command-centre-evidence").toFile()
+    fun theEvidenceMatrixWritesDistinctCommandCentreBoardsWithoutACorrectionPass() {
+        // P2-VIS-003 — this used to assert that a `reconcile` pass fixed up two identical
+        // files after the fact. The matrix now writes the truthful board for each shot, so
+        // what is asserted is that no two shots in the whole manifest share a hash: a
+        // duplicate anywhere means one entry is evidence of something it does not show.
+        val outputDir = Files.createTempDirectory("van-evidence-matrix").toFile()
         try {
-            val revDir = File(outputDir, VanEvidenceMatrix.EVIDENCE_DIR).apply { mkdirs() }
-            File(revDir, "manifest.json").writeText(
-                """
-                {
-                  "shots": [
-                    {"id":"command-centre-idle","state":"IDLE","sha256":"stale","bytes":1},
-                    {"id":"command-centre-degraded","state":"DEGRADED","sha256":"stale","bytes":1}
-                  ]
-                }
-                """.trimIndent(),
+            VanEvidenceMatrix.writeAll(outputDir)
+            val manifest = File(File(outputDir, VanEvidenceMatrix.EVIDENCE_DIR), "manifest.json")
+                .readText()
+            val hashes = Regex("\"sha256\":\"([0-9a-f]+)\"").findAll(manifest)
+                .map { it.groupValues[1] }.toList()
+            assertTrue("no shots in the manifest", hashes.size > 30)
+            assertEquals("two evidence images are byte-identical", hashes.size, hashes.toSet().size)
+
+            val idle = File(File(outputDir, VanEvidenceMatrix.EVIDENCE_DIR), "command-centre-idle.png")
+            val degraded = File(File(outputDir, VanEvidenceMatrix.EVIDENCE_DIR), "command-centre-degraded.png")
+            assertTrue("command-centre-idle.png missing", idle.isFile)
+            assertTrue("command-centre-degraded.png missing", degraded.isFile)
+            assertTrue(
+                "the two Command Centre boards are the same file",
+                !idle.readBytes().contentEquals(degraded.readBytes()),
             )
-
-            VanCommandCentreEvidence.reconcile(outputDir)
-
-            val idle = File(revDir, "command-centre-idle.png")
-            val degraded = File(revDir, "command-centre-degraded.png")
-            assertTrue("idle evidence not written", idle.isFile && idle.length() > 0)
-            assertTrue("degraded evidence not written", degraded.isFile && degraded.length() > 0)
-            assertTrue("command-centre evidence files are byte-identical", !idle.readBytes().contentEquals(degraded.readBytes()))
-
-            val manifest = File(revDir, "manifest.json").readText()
-            val idleSha = manifestSha(manifest, "command-centre-idle")
-            val degradedSha = manifestSha(manifest, "command-centre-degraded")
-            assertNotEquals("manifest still records duplicate command-centre hashes", idleSha, degradedSha)
-            assertTrue("idle byte count was not refreshed", manifest.contains("\"bytes\":${idle.length()}"))
-            assertTrue("degraded byte count was not refreshed", manifest.contains("\"bytes\":${degraded.length()}"))
         } finally {
             outputDir.deleteRecursively()
         }
-    }
-
-    private fun manifestSha(manifest: String, id: String): String {
-        val match = Regex("\\\"id\\\":\\\"${Regex.escape(id)}\\\"[^\\n]*?\\\"sha256\\\":\\\"([0-9a-f]{64})\\\"")
-            .find(manifest)
-        checkNotNull(match) { "Manifest does not contain a refreshed SHA for $id" }
-        return match.groupValues[1]
     }
 }

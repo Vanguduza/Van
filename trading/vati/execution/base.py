@@ -92,6 +92,20 @@ class VenuePosition:
 
 @dataclass(frozen=True)
 class AccountState:
+    """What the venue says about the account.
+
+    P0-TRADE-006 — this carried equity and balance only. There was no margin, no free
+    margin and no margin level anywhere in the stack, so the Risk Authority sized by stop
+    distance with no visibility of what the broker would actually allow. A position sized
+    correctly for risk can still be refused, or can trigger a margin call, and VAN could
+    not see either coming.
+
+    The three margin fields are optional and default to None rather than to a comfortable
+    number. None means "the venue did not tell us", which the margin gate treats as
+    unknown; defaulting to, say, a 1000% margin level would be the hardcoded-healthy
+    defect this sits next to (P0-TRADE-002).
+    """
+
     account_alias: str
     equity: Decimal
     balance: Decimal
@@ -99,6 +113,13 @@ class AccountState:
     verified: bool
     hedging_mode: bool = True
     server_time_unix_ms: int = 0
+    #: Margin currently committed to open positions.
+    used_margin: Optional[Decimal] = None
+    #: Equity not committed: what a new position can draw on.
+    free_margin: Optional[Decimal] = None
+    #: equity / used_margin as a percentage. Below the broker's margin call level,
+    #: positions start being closed by the venue rather than by VAN.
+    margin_level_pct: Optional[Decimal] = None
 
 
 @dataclass(frozen=True)

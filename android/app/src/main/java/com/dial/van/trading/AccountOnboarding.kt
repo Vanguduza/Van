@@ -59,9 +59,51 @@ object AccountOnboarding {
     }
 
     /** Request body for POST /v1/trading/accounts/action. */
-    fun requestBody(deviceSecret: String, deviceId: String, issuedAtUnix: Long, action: String, args: JsonObject): JsonObject {
+    /**
+     * Actions that only read state. Everything else changes an account or a credential and
+     * needs a gateway-issued challenge signed inside the biometric (P1-SEC-004).
+     *
+     * Stated as the read-only set rather than the guarded set, so an action added to
+     * ACTIONS is guarded by default instead of by somebody remembering. The gateway keeps
+     * the same list and refuses independently; this is here so the app does not send a
+     * request it knows will be refused.
+     */
+    val READ_ONLY_ACTIONS = setOf("account_verify", "oauth_pending", "ctrader_discover")
+
+    fun requiresOwnerApproval(action: String): Boolean =
+        action in ACTIONS && action !in READ_ONLY_ACTIONS
+
+    /** What the owner is actually approving, so the prompt is not a generic "confirm". */
+    fun approvalSubtitle(action: String): String = when (action) {
+        "account_upsert" -> "Add or change a trading account"
+        "account_credentials" -> "Store broker credentials for this account"
+        "account_remove" -> "Remove a trading account"
+        "deriv_verify_email" -> "Send a Deriv verification email"
+        "deriv_create_demo" -> "Create a Deriv demo account"
+        "deriv_oauth_link" -> "Link a Deriv account"
+        "ctrader_link" -> "Link a cTrader account"
+        "mt5_ea_issue_key" -> "Issue a new MT5 bridge signing key"
+        "oauth_start" -> "Begin linking a broker account"
+        else -> "Confirm trading account change"
+    }
+
+    fun requestBody(
+        deviceSecret: String,
+        deviceId: String,
+        issuedAtUnix: Long,
+        action: String,
+        args: JsonObject,
+        approvalProof: JsonObject? = null,
+    ): JsonObject {
         require(action in ACTIONS) { "unknown account action $action" }
-        return buildJsonObject { put("device_id", deviceId); put("issued_at_unix", issuedAtUnix); put("signature", sign(deviceSecret, deviceId, issuedAtUnix, action, args)); put("action", action); put("args", args) }
+        return buildJsonObject {
+            put("device_id", deviceId)
+            put("issued_at_unix", issuedAtUnix)
+            put("signature", sign(deviceSecret, deviceId, issuedAtUnix, action, args))
+            put("action", action)
+            put("args", args)
+            if (approvalProof != null) put("approval_proof", approvalProof)
+        }
     }
 
     // ------------------------------------------------------------ forms

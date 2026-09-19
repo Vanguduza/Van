@@ -43,7 +43,7 @@
     "unlimited_grid",
     "unvalidated_research_to_live"
   ],
-  "owner_signature_ref": "sig:owner-device:REPLACE_WITH_DEVICE_SIGNATURE_REF",
+  "owner_signature_ref": "REPLACE_WITH_van-oa1_TOKEN_SIGNED_FOR_mandate-admit:mandate-fx-primary-2026-09:1.0.0",
   "signed_at_unix": 1789600000,
   "expires_at_unix": 1792192000,
   "drawdown_tiers": [
@@ -60,5 +60,6 @@
       "threshold": "0.06",
       "multiplier": "0"
     }
-  ]
+  ],
+  "_owner_signature_note": "P0-TRADE-001: this field is a van-oa1 owner authority token, not a reference string. It must be signed by a key registered in registries/owner_authority_keys.json, for act 'mandate-admit' and subject '<mandate_id>:<version>', with the token's validity matching signed_at_unix..expires_at_unix. A placeholder is refused at load, which is the intended behaviour for an example file."
 }

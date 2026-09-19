@@ -19,9 +19,13 @@ private val sharedVisualSources = listOf(
     "visual/VanPresenceFrame.kt",
     "visual/RiveContract.kt",
     "visual/VanGlassTokens.kt",
+    "visual/VanAuraPlan.kt",
     "visual/VanAuraSpec.kt",
     "visual/VanEffectBudget.kt",
     "visual/VanWindFieldMotion.kt",
+    "visual/VanAnimationClock.kt",
+    "visual/VanFrameBudget.kt",
+    "visual/VanTradeSemantic.kt",
     "visual/VanBodyExclusionProfile.kt",
     "visual/VanFieldGeometry.kt",
     "visual/VanArtPose.kt",
@@ -69,4 +73,5 @@ tasks.register<JavaExec>("extractOwnerArt") {
 
 tasks.named<Test>("test") {
     systemProperty("java.awt.headless", "true")
+    testLogging { events("passed", "failed", "skipped") }
 }

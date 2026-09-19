@@ -18,10 +18,18 @@ import kotlinx.serialization.json.jsonPrimitive
  * no action: nothing on this surface can place, size, modify or cancel a trade, and the
  * confidence score is the uncalibrated display signal the gateway labels it as.
  */
-enum class TradeView(val query: String, val label: String, val emptyCopy: String) {
-    PAST("past", "Past", "No closed trades in the ledger yet."),
-    CURRENT("current", "Current", "No open or working trades."),
-    POTENTIAL("potential", "Potential", "No candidate setups in the latest assessment."),
+enum class TradeView(val query: String, val label: String) {
+    PAST("past", "Past"),
+    CURRENT("current", "Current"),
+    POTENTIAL("potential", "Potential"),
+    ;
+
+    /**
+     * P3-AND-011 — the empty copy lived here as three literals and there were a dozen more
+     * scattered through the screens, one of which told the owner to run `python -m vati
+     * lake`. There is one place now, and it is executed in `android/verification`.
+     */
+    val emptyCopy: String get() = TradingFormat.emptyState(query)
 }
 
 enum class ConfidenceBand(val label: String, val argb: Long) {

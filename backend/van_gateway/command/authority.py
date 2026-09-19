@@ -127,9 +127,50 @@ class CommandAuthorityService:
         for key, expected in record.typed_parameter_constraints.items():
             if key not in submitted_parameters or submitted_parameters[key] != expected:
                 raise CommandAuthorityError(f"typed_parameter_mismatch:{key}")
+        if record.typed_action_id is not None:
+            self._assert_parameters_fully_sealed(action, record, submitted_parameters)
 
         age = max(0, now - record.issued_at_unix)
         return record, age
+
+    @staticmethod
+    def _assert_parameters_fully_sealed(
+        action: ActionDefinition,
+        record: CommandAuthorityRecord,
+        submitted: dict[str, Any],
+    ) -> None:
+        """For a state-changing action, the owner sealed *which* thing, not just what to do.
+
+        P1-GOOG-002 — the check above only required the sealed parameters to be a subset of
+        the submitted ones. `google.notebook.note.create` is A3, requires `notebook_id`, and
+        the resolver sealed only `title`, so `notebook_id` was unconstrained: Hermes chose
+        which of the owner's notebooks the note landed in, and the sealed authority record
+        said nothing about it. The owner approved "make a note called X"; what happened was
+        "make a note called X in a notebook the model picked".
+
+        Two rules, both only for A3 and above — an A1 read may legitimately carry paging or
+        filter arguments nobody sealed, and refusing those would break every read path:
+
+        * every parameter the action *requires* must be sealed;
+        * no parameter outside the sealed set may be submitted.
+
+        The second is the one that matters. Without it, sealing `notebook_id` would stop
+        Hermes overriding the notebook but not stop it adding a `parent_folder` or a
+        `share_with` the owner never saw.
+        """
+        if _RANK[action.action_class] < _RANK[ActionClass.A3]:
+            return
+        required = [str(name) for name in (action.parameter_schema or {}).get("required", [])]
+        unsealed_required = [
+            name for name in required if name not in record.typed_parameter_constraints
+        ]
+        if unsealed_required:
+            raise CommandAuthorityError(
+                f"unsealed_required_parameter:{unsealed_required[0]}"
+            )
+        extra = sorted(set(submitted) - set(record.typed_parameter_constraints))
+        if extra:
+            raise CommandAuthorityError(f"unsealed_parameter:{extra[0]}")
 
     async def export_public(self, command_id: str) -> dict[str, Any] | None:
         record = await self.get(command_id)

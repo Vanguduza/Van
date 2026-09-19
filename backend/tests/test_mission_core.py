@@ -5,6 +5,13 @@ verifier receipts*, so those are written as attacks rather than as happy paths.
 There are three distinct ways to arrive at an unearned VERIFIED_SUCCESS and each
 gets its own test, because closing two of three would look green and mean
 nothing.
+
+Since P0-VERIFY-001 there is a fourth, which the earlier three could not catch: bring a
+receipt that says everything the gate checks for, and write it yourself. The audit did
+exactly that with `verifier_version: "i-say-so/1.0"`. `transition` no longer takes a
+receipt at all — it runs the verifier the mission's own contract names — so these tests
+now set up a registry instead of handing one in, and the attacks below are attempts to
+make that registry lie.
 """
 
 from __future__ import annotations
@@ -25,23 +32,44 @@ from van_gateway.mission.models import (
     VerificationStatus,
 )
 from van_gateway.mission.service import MissionError, MissionService
+from van_gateway.mission.verifiers import ObservationVerifier, VerifierRegistry
 from van_gateway.models import ActionClass, OriginChannel, PrincipalType
 
 CHECKABLE = SuccessContract(
     postconditions={"notebook_exists": True, "minimum_sources": 5},
     verifier_class="notebook.readback",
 )
-GOOD_RECEIPT = VerificationRecord(
-    status=VerificationStatus.VERIFIED,
-    observed_postconditions={"notebook_exists": True, "minimum_sources": 7},
-    evidence_refs=["provider-readback://nb-1"],
-    verifier_version="notebook.readback/1",
-    verified_at_ms=1,
-)
+def _registry(observed: dict | None = None, *, raises: Exception | None = None) -> VerifierRegistry:
+    """A registry whose adapter observes whatever the test wants the world to look like.
+
+    The adapter still does the comparing and still writes the receipt, so a test can make
+    the *world* look any way at all and never make the *verdict* whatever it likes.
+    """
+
+    async def observe(context):
+        if raises is not None:
+            raise raises
+        return dict(observed or {})
+
+    registry = VerifierRegistry()
+    registry.register(
+        "notebook.readback",
+        ObservationVerifier(observe, verifier_version="notebook.readback/1",
+                            evidence_prefix="provider-readback://"),
+    )
+    return registry
 
 
-async def _service(tmp_path) -> MissionService:
-    return MissionService(await make_store(tmp_path))
+#: What a genuine readback of a satisfied contract looks like.
+GOOD_OBSERVATION = {
+    "notebook_exists": True,
+    "minimum_sources": 7,
+    "evidence_refs": ["provider-readback://nb-1"],
+}
+
+
+async def _service(tmp_path, registry: VerifierRegistry | None = None) -> MissionService:
+    return MissionService(await make_store(tmp_path), verifiers=registry)
 
 
 async def _mission(svc: MissionService, **overrides):
@@ -127,45 +155,82 @@ async def test_a_terminal_mission_cannot_be_moved(tmp_path):
 
 
 async def test_success_cannot_be_claimed_without_a_receipt(tmp_path):
-    """Attack 1: just assert it. "The worker returned OK"."""
+    """Attack 1: just assert it. "The worker returned OK".
+
+    With no registry the default is EngineReportVerifier, which is always UNVERIFIABLE,
+    so an unwired capability cannot reach success however loudly its executor claims to.
+    """
     svc = await _service(tmp_path)
     mission = await _drive_to_verifying(svc, await _mission(svc, success_contract=CHECKABLE))
-    with pytest.raises(MissionError, match="VERIFICATION_REQUIRED"):
+    with pytest.raises(MissionError, match="VERIFICATION_INSUFFICIENT"):
         await svc.transition(mission.mission_id, target=MissionState.VERIFIED_SUCCESS)
     assert (await svc.get(mission.mission_id)).state is MissionState.VERIFYING
 
 
 @pytest.mark.parametrize(
-    ("receipt", "why"),
+    ("observed", "why"),
     [
         (
-            VerificationRecord(status=VerificationStatus.VERIFIED, evidence_refs=[],
-                               verifier_version="v1", verified_at_ms=1),
-            "a VERIFIED status with no evidence behind it",
+            {"notebook_exists": True, "minimum_sources": 7},
+            "every postcondition satisfied but nothing citable to point at",
         ),
         (
-            VerificationRecord(status=VerificationStatus.VERIFIED,
-                               evidence_refs=["provider-readback://nb-1"],
-                               missing_postconditions=["minimum_sources"],
-                               verifier_version="v1", verified_at_ms=1),
+            {"notebook_exists": True, "evidence_refs": ["provider-readback://nb-1"]},
             "evidence that does not cover every postcondition",
         ),
         (
-            VerificationRecord(status=VerificationStatus.UNVERIFIABLE,
-                               evidence_refs=["provider-readback://nb-1"],
-                               verifier_version="v1", verified_at_ms=1),
-            "a receipt that does not actually say VERIFIED",
+            {"notebook_exists": True, "minimum_sources": 2,
+             "evidence_refs": ["provider-readback://nb-1"]},
+            "a numeric postcondition the observation falls short of",
+        ),
+        (
+            {"notebook_exists": False, "minimum_sources": 7,
+             "evidence_refs": ["provider-readback://nb-1"]},
+            "the thing that was supposed to exist does not",
         ),
     ],
 )
-async def test_success_cannot_be_claimed_with_a_hollow_receipt(tmp_path, receipt, why):
-    """Attack 2: bring a receipt, but not one that means anything."""
-    svc = await _service(tmp_path)
+async def test_success_cannot_be_claimed_with_a_hollow_receipt(tmp_path, observed, why):
+    """Attack 2: make the observation say something, but not enough."""
+    svc = await _service(tmp_path, _registry(observed))
     mission = await _drive_to_verifying(svc, await _mission(svc, success_contract=CHECKABLE))
     with pytest.raises(MissionError, match="VERIFICATION_INSUFFICIENT"):
+        await svc.transition(mission.mission_id, target=MissionState.VERIFIED_SUCCESS)
+
+
+async def test_an_unreachable_target_is_not_a_pass(tmp_path):
+    """Attack 2b: make the check impossible and hope silence reads as consent."""
+    svc = await _service(tmp_path, _registry(raises=ConnectionError("provider down")))
+    mission = await _drive_to_verifying(svc, await _mission(svc, success_contract=CHECKABLE))
+    with pytest.raises(MissionError, match="VERIFICATION_INSUFFICIENT"):
+        await svc.transition(mission.mission_id, target=MissionState.VERIFIED_SUCCESS)
+
+
+async def test_a_caller_cannot_hand_in_its_own_receipt(tmp_path):
+    """Attack 4, and the one the audit actually used: write the receipt yourself.
+
+    The probe reached VERIFIED_SUCCESS with `verifier_version: "i-say-so/1.0"` and
+    `evidence_refs: ["evidence://trust-me"]`. There is now no parameter to put that in.
+    """
+    svc = await _service(tmp_path, _registry(GOOD_OBSERVATION))
+    mission = await _drive_to_verifying(svc, await _mission(svc, success_contract=CHECKABLE))
+    forged = VerificationRecord(
+        status=VerificationStatus.VERIFIED,
+        observed_postconditions={"notebook_exists": True, "minimum_sources": 99},
+        evidence_refs=["evidence://trust-me"],
+        verifier_version="i-say-so/1.0",
+        verified_at_ms=1,
+    )
+    with pytest.raises(TypeError):
         await svc.transition(
-            mission.mission_id, target=MissionState.VERIFIED_SUCCESS, verification=receipt
+            mission.mission_id, target=MissionState.VERIFIED_SUCCESS, verification=forged
         )
+
+    # And the receipt that does get stored is the adapter's, never the caller's.
+    await svc.transition(mission.mission_id, target=MissionState.VERIFIED_SUCCESS)
+    stored = await svc.verification_record(mission.mission_id)
+    assert stored.verifier_version == "notebook.readback/1"
+    assert stored.evidence_refs == ["provider-readback://nb-1"]
 
 
 async def test_success_cannot_be_claimed_when_nothing_was_ever_checkable(tmp_path):
@@ -174,29 +239,26 @@ async def test_success_cannot_be_claimed_when_nothing_was_ever_checkable(tmp_pat
     A mission with no checkable postcondition has finished, not succeeded — so
     the honest terminal is UNVERIFIABLE, and it is still reachable.
     """
-    svc = await _service(tmp_path)
+    svc = await _service(tmp_path, _registry(GOOD_OBSERVATION))
     mission = await _drive_to_verifying(svc, await _mission(svc))
     with pytest.raises(MissionError, match="SUCCESS_CONTRACT_NOT_CHECKABLE"):
-        await svc.transition(
-            mission.mission_id, target=MissionState.VERIFIED_SUCCESS, verification=GOOD_RECEIPT
-        )
+        await svc.transition(mission.mission_id, target=MissionState.VERIFIED_SUCCESS)
     unverifiable = await svc.transition(
-        mission.mission_id,
-        target=MissionState.UNVERIFIABLE,
-        verification=VerificationRecord(
-            status=VerificationStatus.UNVERIFIABLE, verifier_version="none/1", verified_at_ms=1
-        ),
+        mission.mission_id, target=MissionState.UNVERIFIABLE
     )
     assert unverifiable.state is MissionState.UNVERIFIABLE
+    assert (await svc.verification_record(mission.mission_id)).status is (
+        VerificationStatus.UNVERIFIABLE
+    )
 
 
 async def test_an_earned_success_is_recorded_with_its_evidence(tmp_path):
     """And the receipt is retrievable afterwards, not just consulted once."""
-    svc = await _service(tmp_path)
+    svc = await _service(tmp_path, _registry(GOOD_OBSERVATION))
     mission = await _drive_to_verifying(svc, await _mission(svc, success_contract=CHECKABLE))
     done = await svc.transition(
         mission.mission_id, target=MissionState.VERIFIED_SUCCESS,
-        verification=GOOD_RECEIPT, final_outcome="notebook created with 7 sources",
+        final_outcome="notebook created with 7 sources",
     )
     assert done.state is MissionState.VERIFIED_SUCCESS
     assert done.verification_state is VerificationStatus.VERIFIED

@@ -31,7 +31,9 @@ from vati.intelligence.calendar_feed import build_matrix
 from vati.market_data.bars import Bar
 from vati.market_data.calendars import FX_CALENDAR
 from vati.market_data.feeds.lake import TIMEFRAMES_MS, BarLake
-from vati.risk import TradingMandate
+from vati.learning.episodes import Environment
+from vati.learning.hooks import LearningHooks
+from vati.risk import AuthorizationMode, TradingMandate
 from vati.risk.serde import contract_from_dict
 from vati.strategies import STRATEGY_IMPLEMENTATIONS, CapsuleRegistry
 
@@ -64,6 +66,20 @@ class ServiceConfig:
     def load(cls, path: str | Path) -> "ServiceConfig":
         d = json.loads(Path(path).read_text(encoding="utf-8"))
         return cls(**d)
+
+
+#: P1-TRADE-008 — which learning environment a session's experience belongs to. Taken from
+#: the mandate's authorization mode rather than assumed, so a demo session's episodes are
+#: never pooled with a live one's; the two are not comparable evidence.
+ENVIRONMENT_FOR_MODE: dict[AuthorizationMode, Environment] = {
+    AuthorizationMode.OBSERVE: Environment.SHADOW,
+    AuthorizationMode.ADVISOR: Environment.SHADOW,
+    AuthorizationMode.DEMO_TRADER: Environment.DEMO,
+    AuthorizationMode.SHADOW_TRADER: Environment.SHADOW,
+    AuthorizationMode.LIMITED_LIVE: Environment.LIMITED_LIVE,
+    AuthorizationMode.AUTONOMOUS_LIVE: Environment.LIVE,
+    AuthorizationMode.HALTED: Environment.SHADOW,
+}
 
 
 def build_adapter(account: Account, registry: AccountRegistry, *, equity_hint: Decimal = Decimal("10000")) -> VenueAdapter:
@@ -140,7 +156,21 @@ class SessionService:
         impl = {sid: STRATEGY_IMPLEMENTATIONS[sid.rsplit("-", 1)[0]](strategy_id=sid) for sid in c.capsules}
         engine = OpportunityEngine(reg, impl, mandate)
         cost = Decimal(c.round_trip_cost_pct)
-        cycle = DecisionCycle(cfg=scfg, adapter=self.adapter, ledger=self._ledger, engine=engine, cost_fn=lambda st: cost, calendar=FX_CALENDAR, events=build_matrix(c.calendar_path))
+        # P1-TRADE-008 — `learning` was never passed here, so capsule-health demotion,
+        # broker-liquidity learning and experience artefacts existed only in backtests.
+        # The environment is taken from the mandate's mode rather than assumed, because a
+        # DEMO session's experience must not be pooled with a LIVE one's.
+        #
+        # This is safe to wire because the effects it can have are already bounded: the
+        # LearningBoundary permits reduce-only adjustments, and a demotion moves a capsule
+        # towards SHADOW or DEGRADED, never towards more authority. That boundary is what
+        # made this a wiring job rather than a design one.
+        learning = LearningHooks(
+            environment=ENVIRONMENT_FOR_MODE[mandate.mode],
+            broker=str(getattr(account.broker, "value", account.broker)).lower(),
+        )
+        cycle = DecisionCycle(cfg=scfg, adapter=self.adapter, ledger=self._ledger, engine=engine, cost_fn=lambda st: cost, calendar=FX_CALENDAR, events=build_matrix(c.calendar_path), learning=learning)
+        self.learning = learning
         self.runner = SessionRunner(cycle)
         return self
 
@@ -168,21 +198,52 @@ class SessionService:
         now = self.clock()
         self._started_ms = now
         rep = self.runner.startup(now_ms=now)
+        # P0-TRADE-003 — an owner halt written before this process started used to be
+        # discarded, so a restart undid it. Checked here, before the first bar, so the
+        # session never runs a cycle believing it is permitted when it is not.
+        self._observe_owner_halt(now)
         self._account_snapshot(now)
         self._heartbeat("STARTED", {"reconciliation": rep.counts()})
 
     def _observe_owner_halt(self, now_ms: int) -> None:
-        """An OWNER_HALT written by the gateway or the commander (A4) stops new orders on the next loop."""
+        """An OWNER_HALT written by the gateway or the commander (A4) stops new orders.
+
+        P0-TRADE-003 — this filtered events at or after `self._started_ms`, so restarting
+        the session discarded an active owner halt. `restart_service` is an exposed
+        commander command, which made "halt trading" undoable by the same interface that
+        was meant to enforce it.
+
+        The filter is now the *latest* OWNER_HALT and whether anything cleared it since,
+        which is a property of the ledger rather than of this process. A halt therefore
+        survives a restart, and a clear is what ends it — as it always was for a session
+        that happened to stay up.
+        """
         assert self.runner is not None
         from vati.risk.contracts import KillSwitchTrigger
         if KillSwitchTrigger.OWNER_HALT in self.runner.cycle.kill.active:
             return
+        latest_halt = None
         for ev in self.runner.cycle.ledger.iter(EventKind.KILL_SWITCH):
-            if ev.payload.get("trigger") == "OWNER_HALT" and not ev.payload.get("cleared") and ev.event_time_ms >= self._started_ms and ev.producer != "vati-runner":
-                self.runner.cycle.kill.trip(KillSwitchTrigger.OWNER_HALT, now_ms)
-                self.runner.permit_new_orders = False
-                self.runner.cycle.ledger.append(make_event(EventKind.SESSION, "vati-service", {"event": "OWNER_HALT_OBSERVED", "source_event": ev.hash}, event_time_ms=now_ms, received_time_ms=now_ms, correlation_id=self.runner.cycle.cfg.session_id))
-                return
+            if ev.producer == "vati-runner":
+                continue
+            if ev.payload.get("trigger") != "OWNER_HALT":
+                continue
+            if ev.payload.get("cleared"):
+                latest_halt = None
+                continue
+            latest_halt = ev
+        if latest_halt is None:
+            return
+        self.runner.cycle.kill.trip(KillSwitchTrigger.OWNER_HALT, now_ms)
+        self.runner.permit_new_orders = False
+        self.runner.cycle.ledger.append(make_event(
+            EventKind.SESSION, "vati-service",
+            {"event": "OWNER_HALT_OBSERVED", "source_event": latest_halt.hash,
+             "halt_event_time_ms": latest_halt.event_time_ms,
+             "observed_after_restart": latest_halt.event_time_ms < self._started_ms},
+            event_time_ms=now_ms, received_time_ms=now_ms,
+            correlation_id=self.runner.cycle.cfg.session_id,
+        ))
 
     def step_once(self) -> Optional[str]:
         """One loop iteration; returns the cycle decision when a new bar closed, else None."""

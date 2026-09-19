@@ -11,6 +11,7 @@ import httpx
 
 from van_gateway.context.models import SourceTrust
 from van_gateway.research.models import ResearchEgressClass, ResearchSearchRequest, ResearchSearchResult, ResearchSource
+from van_gateway.evolution.radar import ExternalRealityModel
 from van_gateway.storage.db import Store
 
 
@@ -32,6 +33,12 @@ class ExaResearchService:
     def __init__(self, store: Store, *, api_key: str, base_url: str = "https://api.exa.ai", egress_enabled: bool = False,
                  timeout_seconds: float = 20.0, transport: httpx.AsyncBaseTransport | None = None) -> None:
         self.store = store
+        # P2-EVO-001 — §§22, 79. `ExternalRealityModel` is "what available evidence says
+        # now", kept deliberately apart from the owner model so personalization cannot
+        # become an echo chamber. It had no producer, so the separation protected an empty
+        # store. Web research is literally external evidence with a citable source, which
+        # is the one thing the model refuses to be written without.
+        self.reality = ExternalRealityModel(store)
         self._api_key = api_key.strip()
         self.base_url = base_url.rstrip("/")
         self.egress_enabled = egress_enabled
@@ -112,6 +119,28 @@ class ExaResearchService:
                 content_digest=content_digest,
             )
             sources.append(source)
+            # §79 — a claim attributed to a source, which is what this store holds. The
+            # title is what the page asserts; recording it as VAN's belief would be the
+            # conflation §22 exists to prevent, and recording it with no source is refused
+            # by the model itself.
+            if source.title:
+                await self.reality.observe(
+                    subject=request.query.strip()[:200],
+                    claim=str(source.title)[:500],
+                    source_kind="web_research",
+                    source_ref=source.url,
+                    # SourceTrust.UNTRUSTED_EXTERNAL is what the evidence row records, so
+                    # the confidence carried here says the same thing rather than a
+                    # friendlier number nothing computed.
+                    confidence=0.0,
+                    # Deliberately never set. Nothing compares a search result with the
+                    # owner model, and a guess here would put VAN in the position of
+                    # deciding the owner is wrong on the strength of a headline. The
+                    # external-reality surface reports that no comparison is performed, so
+                    # an empty contradiction list is not read as agreement.
+                    contradicts_owner_belief=False,
+                    now_ms=retrieved_at,
+                )
             await self.store.execute(
                 """
                 INSERT INTO research_evidence(

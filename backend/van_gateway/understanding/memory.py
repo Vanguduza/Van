@@ -137,6 +137,26 @@ class IntentStatus(str, Enum):
     SUPERSEDED = "SUPERSEDED"
 
 
+class IntentHorizon(str, Enum):
+    """How long an intent is expected to matter, which is not how long ago it was said.
+
+    P2-MEM-003 — every mission goal used to become a standing objective, so "what is on my
+    calendar?" sat in the owner's long-term goal graph until the ninety-day stale sweep.
+    §77's whole value is surfacing a newer instruction that contradicts an older standing
+    goal; filling the graph with one-off requests gives it transient commands to contradict
+    genuine goals with, which is worse than having no graph.
+
+    Everything starts EPHEMERAL. Nothing is promoted by the mere fact of having been said.
+    """
+
+    #: Asked for once. Real, recorded, and not a statement about what the owner is doing.
+    EPHEMERAL = "EPHEMERAL"
+    #: Asked for repeatedly, or scoped to a project the owner keeps returning to.
+    PROJECT = "PROJECT"
+    #: A long-lived objective: the owner said so, or asked enough times that it is one.
+    STANDING = "STANDING"
+
+
 class IntentNode(BaseModel):
     intent_id: str
     owner_goal: str
@@ -146,6 +166,12 @@ class IntentNode(BaseModel):
     constraints: list[str] = Field(default_factory=list)
     status: IntentStatus = IntentStatus.ACTIVE
     priority: int = 50
+    horizon: IntentHorizon = IntentHorizon.EPHEMERAL
+    observation_count: int = 1
+    #: What promoted this beyond EPHEMERAL, so a standing intent can be argued with rather
+    #: than only observed. Null while EPHEMERAL.
+    promoted_reason: str | None = None
+    promoted_at_ms: int | None = None
 
 
 class IntentContinuityGraph:
@@ -161,6 +187,15 @@ class IntentContinuityGraph:
     #: owner abandons a goal.
     STALE_AFTER_MS = 90 * 24 * 60 * 60 * 1000
 
+    #: DECISION (recorded): how many separate observations make a request an objective.
+    #:
+    #: P2-MEM-003 — three, chosen because two is a coincidence and a number much higher
+    #: would mean VAN never notices what the owner keeps coming back to. It is deliberately
+    #: not time-weighted: asking three times in a morning and three times over a month are
+    #: both evidence, and guessing which one means more would be inference dressed as a
+    #: rule.
+    STANDING_AFTER_OBSERVATIONS = 3
+
     def __init__(self, store: Store) -> None:
         self.store = store
 
@@ -170,8 +205,20 @@ class IntentContinuityGraph:
         owner_goal: str,
         project_id: str | None = None,
         constraints: list[str] | None = None,
+        owner_declared_standing: bool = False,
         now_ms: int | None = None,
     ) -> IntentNode:
+        """Record that the owner asked for this, and promote it only on evidence.
+
+        P2-MEM-003 — an observation is not a promotion. A new goal is EPHEMERAL, whatever
+        it says: VAN cannot tell an objective from an errand by reading one sentence, and
+        deciding it can is how a calendar lookup becomes a long-term commitment.
+
+        Two things promote. `owner_declared_standing` is the owner saying so, which needs
+        no corroboration and is not VAN's inference. Otherwise it takes
+        `STANDING_AFTER_OBSERVATIONS` separate observations, and a goal that arrives with a
+        project reaches PROJECT on the second. Each promotion records what caused it.
+        """
         now = int(time.time() * 1000) if now_ms is None else now_ms
         normalized = owner_goal.strip()
         row = await self.store.fetchone(
@@ -181,30 +228,92 @@ class IntentContinuityGraph:
             projects = sorted(set(json.loads(str(row["projects_json"]))) | (
                 {project_id} if project_id else set()
             ))
+            seen = int(row["observation_count"]) + 1
+            horizon, reason = self._horizon_for(
+                current=IntentHorizon(str(row["horizon"])),
+                observations=seen,
+                projects=projects,
+                owner_declared_standing=owner_declared_standing,
+            )
+            promoted = horizon is not IntentHorizon(str(row["horizon"]))
             await self.store.execute(
                 "UPDATE intent_nodes SET latest_observed_ms = ?, projects_json = ?, "
+                "observation_count = ?, horizon = ?, "
+                "promoted_reason = COALESCE(?, promoted_reason), "
+                "promoted_at_ms = COALESCE(?, promoted_at_ms), "
                 "status = CASE WHEN status = 'STALE' THEN 'ACTIVE' ELSE status END "
                 "WHERE intent_id = ?",
-                (now, Store.dumps(projects), row["intent_id"]),
+                (
+                    now, Store.dumps(projects), seen, horizon.value,
+                    reason if promoted else None, now if promoted else None,
+                    row["intent_id"],
+                ),
             )
             return await self.get(str(row["intent_id"]))  # type: ignore[return-value]
 
+        # A goal seen for the first time is EPHEMERAL unless the owner said otherwise.
+        # Not "unless it looks important": VAN cannot tell an objective from an errand by
+        # reading one sentence, and a rule that tried would promote whichever phrasing it
+        # happened to like.
+        horizon, reason = self._horizon_for(
+            current=IntentHorizon.EPHEMERAL,
+            observations=1,
+            projects=[project_id] if project_id else [],
+            owner_declared_standing=owner_declared_standing,
+        )
         node = IntentNode(
             intent_id=f"intent_{uuid.uuid4().hex}", owner_goal=normalized,
             first_observed_ms=now, latest_observed_ms=now,
             projects=[project_id] if project_id else [],
             constraints=list(constraints or []),
+            horizon=horizon,
+            observation_count=1,
+            promoted_reason=reason if horizon is not IntentHorizon.EPHEMERAL else None,
+            promoted_at_ms=now if horizon is not IntentHorizon.EPHEMERAL else None,
         )
         await self.store.execute(
             "INSERT INTO intent_nodes(intent_id, owner_goal, first_observed_ms, "
-            "latest_observed_ms, projects_json, constraints_json, status, priority) "
-            "VALUES (?, ?, ?, ?, ?, ?, ?, ?)",
+            "latest_observed_ms, projects_json, constraints_json, status, priority, "
+            "horizon, observation_count, promoted_reason, promoted_at_ms) "
+            "VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)",
             (
                 node.intent_id, node.owner_goal, now, now, Store.dumps(node.projects),
                 Store.dumps(node.constraints), node.status.value, node.priority,
+                node.horizon.value, node.observation_count, node.promoted_reason,
+                node.promoted_at_ms,
             ),
         )
         return node
+
+    def _horizon_for(
+        self,
+        *,
+        current: IntentHorizon,
+        observations: int,
+        projects: list[str],
+        owner_declared_standing: bool,
+    ) -> tuple[IntentHorizon, str | None]:
+        """The horizon and what earned it. Never demotes.
+
+        A goal that was standing does not stop being one because the next mention was
+        casual; only the owner retires an objective, which is the same rule STALE follows.
+        """
+        if owner_declared_standing:
+            return IntentHorizon.STANDING, "the owner stated this is a standing goal"
+        if current is IntentHorizon.STANDING:
+            return current, None
+        if observations >= self.STANDING_AFTER_OBSERVATIONS:
+            return (
+                IntentHorizon.STANDING,
+                f"asked for {observations} times, which is repetition rather than a "
+                f"one-off request",
+            )
+        if projects and observations >= 2 and current is IntentHorizon.EPHEMERAL:
+            return (
+                IntentHorizon.PROJECT,
+                f"asked for {observations} times within {', '.join(sorted(projects))}",
+            )
+        return current, None
 
     async def relate(
         self,
@@ -242,6 +351,10 @@ class IntentContinuityGraph:
             projects=json.loads(str(row["projects_json"])),
             constraints=json.loads(str(row["constraints_json"])),
             status=IntentStatus(str(row["status"])), priority=int(row["priority"]),
+            horizon=IntentHorizon(str(row["horizon"])),
+            observation_count=int(row["observation_count"]),
+            promoted_reason=row["promoted_reason"],
+            promoted_at_ms=row["promoted_at_ms"],
         )
 
     async def conflicts_for(self, intent_id: str) -> list[IntentNode]:

@@ -20,6 +20,8 @@ def _settings(tmp_path, monkeypatch):
     monkeypatch.setenv("VAN_DEVICE_SECRET_FERNET_KEY", Fernet.generate_key().decode())
     monkeypatch.setenv("VAN_INGRESS_TOKEN", INGRESS)
     monkeypatch.setenv("VAN_INTERNAL_CONTROL_TOKEN", INTERNAL)
+    # P0-SEC-001 — device enrolment is its own credential now.
+    monkeypatch.setenv("VAN_DEVICE_ENROLMENT_TOKEN", INTERNAL)
     monkeypatch.setenv("VAN_EXA_EGRESS_ENABLED", "false")
     get_settings.cache_clear()
     yield
@@ -35,11 +37,12 @@ async def test_resolver_is_internal_only_and_returns_registry_policy():
             base_url="http://test",
             headers={"X-Van-Ingress-Token": INGRESS},
         ) as client:
-            # Public ingress without a paired-device credential is rejected by
-            # the outer device-auth boundary before the internal-only router.
+            # P0-SEC-001 — public ingress is refused by the scope check, not by the
+            # device-auth boundary. The old order meant a paired owner device would have
+            # reached this Hermes-only route.
             denied = await client.post("/v1/runtime/resolve", json={"text": "halt autonomous trading"})
-            assert denied.status_code == 401
-            assert denied.json()["detail"] == "device_access_denied"
+            assert denied.status_code == 403
+            assert denied.json()["required_scope"] == "runtime"
 
             resolved = await client.post(
                 "/v1/runtime/resolve",

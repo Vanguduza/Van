@@ -79,10 +79,30 @@ class NotificationPolicyStore(context: Context) {
         recentHashes.entries.removeIf { now - it.value > windowMs * 2 }
     }
 
-    private fun keyPolicy(pkg: String) = "policy_$pkg"
+    /**
+     * Every app the owner has already decided about.
+     *
+     * P2-AND-017 — the store could be written to and read per package, and could not say
+     * what it held, so an owner control surface had nothing to list. Without this the
+     * screen could only offer apps it happened to know about, which is the screen that
+     * makes a setting look absent rather than unset.
+     *
+     * NORMAL is the default, so an entry recorded as NORMAL is still a decision the owner
+     * made and is shown; only the never-touched are absent.
+     */
+    fun decidedPackages(): Map<String, AppNotificationPolicy> =
+        prefs.all.keys
+            .filter { it.startsWith(POLICY_PREFIX) }
+            .associate { key ->
+                val pkg = key.removePrefix(POLICY_PREFIX)
+                pkg to policyFor(pkg)
+            }
+
+    private fun keyPolicy(pkg: String) = "$POLICY_PREFIX$pkg"
 
     companion object {
         private const val PREFS_NAME = "van_notification_policy"
+        private const val POLICY_PREFIX = "policy_"
         private const val KEY_QUIET_ENABLED = "quiet_enabled"
         private const val KEY_QUIET_START = "quiet_start"
         private const val KEY_QUIET_END = "quiet_end"

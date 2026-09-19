@@ -40,6 +40,16 @@ class AuthError(Exception):
         self.message = message
 
 
+#: P2-SEC-008. Enrolment grants were minted with a ten-year expiry, which is a standing
+#: grant with a number attached. A year is long enough that a device the owner uses is
+#: never inconvenienced and short enough that one they forgot about stops working.
+ENROLMENT_GRANT_SECONDS = 365 * 24 * 3600
+
+#: How long before expiry a grant should be renewed. Renewal is the reason an expiry is
+#: safe to set: without one, the only options are ten years or breaking the owner's phone.
+GRANT_RENEWAL_WINDOW_SECONDS = 30 * 24 * 3600
+
+
 class AuthService:
     """Device enrollment + restart-durable HMAC request authentication.
 
@@ -164,7 +174,7 @@ class AuthService:
                     f"enroll-{device_id}",
                     device_id,
                     Store.dumps({"secret_sha256": secret_hash, "capabilities": ["owner"]}),
-                    now + 10 * 365 * 24 * 3600,
+                    now + ENROLMENT_GRANT_SECONDS,
                     now,
                 ),
             )
@@ -205,9 +215,71 @@ class AuthService:
         secret_hash = hashlib.sha256(device_secret.encode("utf-8")).hexdigest()
         await self.store.execute(
             "INSERT INTO capability_grants(grant_id, device_id, capabilities_json, expires_at_unix, task_id, revoked_at_unix, created_at_unix) VALUES (?, ?, ?, ?, NULL, NULL, ?)",
-            (f"enroll-{device_id}", device_id, Store.dumps({"secret_sha256": secret_hash, "capabilities": ["owner"]}), now + 10 * 365 * 24 * 3600, now),
+            (f"enroll-{device_id}", device_id, Store.dumps({"secret_sha256": secret_hash, "capabilities": ["owner"]}), now + ENROLMENT_GRANT_SECONDS, now),
         )
         return DeviceRecord(device_id, public_key_pem, now, None, label)
+
+    async def grant_status(self, device_id: str, *, now: int | None = None) -> dict:
+        """Where this device's enrolment grant stands: valid, due for renewal, or expired.
+
+        P2-SEC-008 — nothing expired and nothing was rotated, so there was nothing to
+        report. An expiry the owner cannot see coming is an outage waiting to happen.
+        """
+        stamp = int(time.time()) if now is None else now
+        row = await self.store.fetchone(
+            "SELECT expires_at_unix, revoked_at_unix, created_at_unix FROM capability_grants "
+            "WHERE grant_id = ?",
+            (f"enroll-{device_id}",),
+        )
+        if row is None:
+            return {"device_id": device_id, "state": "ABSENT", "expires_at_unix": None}
+        if row["revoked_at_unix"] is not None:
+            return {"device_id": device_id, "state": "REVOKED", "expires_at_unix": int(row["expires_at_unix"])}
+        expires = int(row["expires_at_unix"])
+        remaining = expires - stamp
+        if remaining <= 0:
+            state = "EXPIRED"
+        elif remaining <= GRANT_RENEWAL_WINDOW_SECONDS:
+            state = "RENEW_SOON"
+        else:
+            state = "VALID"
+        return {
+            "device_id": device_id,
+            "state": state,
+            "expires_at_unix": expires,
+            "seconds_remaining": max(0, remaining),
+            "renew_within_seconds": GRANT_RENEWAL_WINDOW_SECONDS,
+        }
+
+    async def renew_grant(self, device_id: str, *, now: int | None = None) -> dict:
+        """Extend a live enrolment grant. Refuses a revoked or expired one.
+
+        An expired grant is deliberately not renewable: re-pairing is the path back, and
+        silently reviving a grant the owner let lapse would make the expiry decorative.
+        """
+        stamp = int(time.time()) if now is None else now
+        status = await self.grant_status(device_id, now=stamp)
+        if status["state"] in {"ABSENT", "REVOKED", "EXPIRED"}:
+            raise AuthError(
+                "grant_not_renewable",
+                f"enrolment grant for {device_id} is {status['state']}; pair the device again",
+            )
+        await self.store.execute(
+            "UPDATE capability_grants SET expires_at_unix = ? WHERE grant_id = ? "
+            "AND revoked_at_unix IS NULL",
+            (stamp + ENROLMENT_GRANT_SECONDS, f"enroll-{device_id}"),
+        )
+        return await self.grant_status(device_id, now=stamp)
+
+    async def expiring_grants(self, *, now: int | None = None) -> list[dict]:
+        """Every live grant that is expired or due for renewal, for the degraded surface."""
+        stamp = int(time.time()) if now is None else now
+        rows = await self.store.fetchall(
+            "SELECT grant_id, device_id, expires_at_unix FROM capability_grants "
+            "WHERE revoked_at_unix IS NULL AND expires_at_unix <= ? ORDER BY expires_at_unix",
+            (stamp + GRANT_RENEWAL_WINDOW_SECONDS,),
+        )
+        return [await self.grant_status(str(r["device_id"]), now=stamp) for r in rows]
 
     def remember_secret(self, device_id: str, device_secret: str) -> None:
         """Test/recovery helper; production restart restoration uses encrypted DB state."""

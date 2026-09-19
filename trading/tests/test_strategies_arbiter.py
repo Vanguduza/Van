@@ -44,12 +44,27 @@ def test_capsule_registry_loads_seals_and_gates():
 
 
 def test_capsule_promotion_requires_signature_and_one_step():
-    reg = CapsuleRegistry.load_dir(REG)
+    """P0-TRADE-001 — promoting towards live capital used to accept "sig:owner"."""
+    from conftest_owner_authority import OwnerAuthorityHarness
+
+    owner = OwnerAuthorityHarness()
+    reg = CapsuleRegistry.load_dir(REG, authority=owner.verifier)
     with pytest.raises(CapsuleError, match="signature"):
         reg.promote("FX-TREND-PULLBACK-01", StrategyState.SHADOW, approval_signature_ref="", evidence_refs=[], approved_at_unix=1)
+    with pytest.raises(CapsuleError, match="signature"):
+        reg.promote("FX-TREND-PULLBACK-01", StrategyState.SHADOW, approval_signature_ref="sig:owner", evidence_refs=["bt-1"], approved_at_unix=1)
+    # Authority to promote to SHADOW is not authority to promote to CERTIFIED_LIVE.
     with pytest.raises(CapsuleError, match="one state"):
-        reg.promote("FX-TREND-PULLBACK-01", StrategyState.CERTIFIED_LIVE, approval_signature_ref="sig", evidence_refs=["e"], approved_at_unix=1)
-    c = reg.promote("FX-TREND-PULLBACK-01", StrategyState.SHADOW, approval_signature_ref="sig:owner", evidence_refs=["bt-1"], approved_at_unix=1)
+        reg.promote("FX-TREND-PULLBACK-01", StrategyState.CERTIFIED_LIVE,
+                    approval_signature_ref=owner.token(act="capsule-promote", subject="FX-TREND-PULLBACK-01:CERTIFIED_LIVE", issued_at_unix=1),
+                    evidence_refs=["e"], approved_at_unix=1)
+    with pytest.raises(CapsuleError, match="signature"):
+        reg.promote("FX-TREND-PULLBACK-01", StrategyState.SHADOW,
+                    approval_signature_ref=owner.token(act="capsule-promote", subject="FX-TREND-PULLBACK-01:CERTIFIED_LIVE", issued_at_unix=1),
+                    evidence_refs=["bt-1"], approved_at_unix=1)
+    c = reg.promote("FX-TREND-PULLBACK-01", StrategyState.SHADOW,
+                    approval_signature_ref=owner.token(act="capsule-promote", subject="FX-TREND-PULLBACK-01:SHADOW", issued_at_unix=1),
+                    evidence_refs=["bt-1"], approved_at_unix=1)
     assert c.state is StrategyState.SHADOW and c.data["supersedes"] and c.capsule_hash == c.body_hash()
     d = reg.demote("FX-TREND-PULLBACK-01", StrategyState.DEGRADED, reason="health 0.5")
     assert d.state is StrategyState.DEGRADED

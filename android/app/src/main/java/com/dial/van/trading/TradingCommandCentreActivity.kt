@@ -23,8 +23,9 @@ import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Text
 import androidx.compose.material3.TopAppBar
 import androidx.compose.material3.TopAppBarDefaults
-import androidx.compose.material3.darkColorScheme
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.DisposableEffect
+import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.remember
 import androidx.compose.ui.Modifier
@@ -41,6 +42,10 @@ import androidx.navigation.compose.rememberNavController
 import androidx.navigation.navArgument
 import com.dial.van.VanApplication
 import com.dial.van.command.CommandCentreActivity
+import com.dial.van.visual.VanLiveVisualState
+import com.dial.van.visual.VanTradeSemantic
+import com.dial.van.visual.VanTradeSemantics
+import kotlinx.coroutines.delay
 import com.dial.van.trading.ui.AccountOnboardingScreen
 import com.dial.van.trading.ui.AccountsScreen
 import com.dial.van.trading.ui.InstrumentScreen
@@ -51,6 +56,7 @@ import com.dial.van.trading.ui.TradeDetailScreen
 import com.dial.van.trading.ui.TradesScreen
 import com.dial.van.trading.ui.TradingNav
 import com.dial.van.visual.VanGlassTokens
+import com.dial.van.visual.VanTheme
 import com.dial.van.visual.VanPresence
 import com.dial.van.visual.rememberVanEffectBudget
 
@@ -72,13 +78,19 @@ class TradingCommandCentreActivity : FragmentActivity() {
         val app = application as VanApplication
         val startRoute = intent?.getStringExtra(EXTRA_ROUTE) ?: ROUTE_OVERVIEW
         setContent {
-            MaterialTheme(colorScheme = darkColorScheme(primary = Color(VanGlassTokens.ACCENT_CYAN))) {
+            // P3-AND-008 — the third inline `darkColorScheme`. One theme now.
+            VanTheme {
                 val nav = rememberNavController()
                 val degraded = app.degradedModeStore.snapshot()
                 val cue = VanPresence.cue(degraded)
                 val budget = rememberVanEffectBudget()
                 val glass = VanGlassTokens.forState(state = cue.durableState, panel = true, liveBlurAvailable = false, budget = budget)
                 val env = remember(cue.durableState) { ScreenEnv(TradingRepository(app.gatewayClient), glass, budget, VanPresence.visualState(cue), cue.headline) { System.currentTimeMillis() } }
+                // P1-AURA-003 — the trading system's route into VAN's visual state. It reads
+                // the same portfolio read model the screens render, classifies it through the
+                // pure classifier, and publishes. The `remember(app)` repository is the one the
+                // screens use, so the field and the numbers cannot disagree.
+                PublishTradeSemantic(env.repo)
                 val tnav = TradingNav(
                     openTrade = { nav.navigate("trade/$it") },
                     openInstrument = { nav.navigate("instrument/$it") },
@@ -114,6 +126,31 @@ class TradingCommandCentreActivity : FragmentActivity() {
         }
     }
 
+    /**
+     * Polls the portfolio read model and publishes VAN's trade semantic.
+     *
+     * `DisposableEffect` clears it on the way out: VAN should not keep showing a trade field
+     * because the owner once opened this screen. Failure to load publishes
+     * [VanTradeSemantic.UNKNOWN] rather than nothing — a gateway VAN cannot reach is not a
+     * reason to show a calm field, it is the reason to show that VAN cannot see.
+     */
+    @Composable
+    private fun PublishTradeSemantic(repo: TradingRepository) {
+        DisposableEffect(repo) {
+            onDispose { VanLiveVisualState.tradeSemantic(null) }
+        }
+        LaunchedEffect(repo) {
+            while (true) {
+                val semantic = when (val loaded = repo.portfolio()) {
+                    is Loaded.Ready -> VanTradeSemantics.classify(loaded.value.toTradeSignals())
+                    else -> VanTradeSemantic.UNKNOWN
+                }
+                VanLiveVisualState.tradeSemantic(semantic)
+                delay(TRADE_SEMANTIC_POLL_MS)
+            }
+        }
+    }
+
     @Composable
     private fun TradingBottomBar(nav: NavHostController) {
         val entry by nav.currentBackStackEntryAsState()
@@ -144,6 +181,13 @@ class TradingCommandCentreActivity : FragmentActivity() {
     }
 
     companion object {
+        /**
+         * How often VAN re-reads the portfolio for its visual state. Six seconds: fast
+         * enough that a stop firing reaches the field while the owner is still looking at
+         * the screen, slow enough that it is not a poll loop against the gateway.
+         */
+        const val TRADE_SEMANTIC_POLL_MS = 6_000L
+
         const val EXTRA_ROUTE = "route"
         const val ROUTE_OVERVIEW = "overview"
         const val ROUTE_RISK = "risk"

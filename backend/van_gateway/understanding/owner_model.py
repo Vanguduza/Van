@@ -46,6 +46,11 @@ class AssertionState(str, Enum):
 
     OBSERVED = "OBSERVED"
     CANDIDATE = "CANDIDATE"
+    #: P1-SYM-001 — VAN's own conclusion from repeated evidence. Distinct from CONFIRMED,
+    #: which only the owner produces. The two were the same state, and the calibration
+    #: engine read it and told the owner their preference was "owner-confirmed" when they
+    #: had never been asked.
+    EVIDENCED = "EVIDENCED"
     CONFIRMED = "CONFIRMED"
     CONTESTED = "CONTESTED"
     SUPERSEDED = "SUPERSEDED"
@@ -53,7 +58,19 @@ class AssertionState(str, Enum):
 
     @property
     def is_actionable(self) -> bool:
-        """Whether VAN may act on this rather than merely hold it."""
+        """Whether VAN may act on this rather than merely hold it.
+
+        P1-SYM-001 — EVIDENCED is actionable because refusing to act on a well-evidenced
+        preference would make VAN useless until the owner had answered a questionnaire.
+        What it is not is *confirmed*, and nothing may describe it that way. The two
+        states used to be one, which is how the calibration engine came to tell the owner
+        that a preference VAN had inferred was their own stated choice.
+        """
+        return self in (AssertionState.CONFIRMED, AssertionState.EVIDENCED)
+
+    @property
+    def is_owner_stated(self) -> bool:
+        """Only the owner's own confirmation. The distinction the finding is about."""
         return self is AssertionState.CONFIRMED
 
 
@@ -83,7 +100,11 @@ AUTONOMY_BEARING_FIELDS = frozenset({
 })
 
 EPISODES_FOR_CANDIDATE = 2
-EPISODES_FOR_CONFIRMED = 3
+#: How many distinct, resolvable episodes make VAN's own conclusion. Not the owner's.
+EPISODES_FOR_EVIDENCED = 3
+#: Retained under the old name because it is exported; it is the same threshold, and what
+#: changed is what the threshold produces (P1-SYM-001).
+EPISODES_FOR_CONFIRMED = EPISODES_FOR_EVIDENCED
 
 
 class OwnerAssertion(BaseModel):
@@ -124,11 +145,52 @@ class OwnerModelError(ValueError):
         self.detail = detail
 
 
+#: What an episode reference may name, and the table that has to contain it.
+#:
+#: P1-SYM-001 — `episode_ref` was a free string, and three distinct strings promoted an
+#: assertion. Nothing ever checked that an episode existed, so three typos were evidence.
+EPISODE_SOURCES: dict[str, tuple[str, str]] = {
+    "mission": ("missions", "mission_id"),
+    "command": ("audit", "command_id"),
+}
+
+
 class OwnerCognitiveModel:
     """Holds assertions about how the owner works, and the rules for trusting them."""
 
-    def __init__(self, store: Store) -> None:
+    def __init__(self, store: Store, *, learning: Any | None = None) -> None:
         self.store = store
+        # P1-LEARN-001 — an owner correction is the strongest learning signal there is and
+        # nothing recorded it. Optional so the model stays constructible on its own.
+        self.learning = learning
+
+    async def _require_episode(self, episode_ref: str) -> str:
+        """Refuse an episode reference that does not name something that happened.
+
+        The ladder counts distinct references, so an unresolvable one is not merely
+        untidy: it is a vote. Requiring the prefix as well as the row means a caller
+        cannot satisfy the check by passing a bare id that happens to collide.
+        """
+        ref = (episode_ref or "").strip()
+        kind, separator, identifier = ref.partition(":")
+        if not separator or kind not in EPISODE_SOURCES or not identifier.strip():
+            raise OwnerModelError(
+                "OWNER_MODEL_EPISODE_UNRESOLVABLE",
+                f"{ref!r} does not name an episode; expected one of "
+                f"{sorted(f'{k}:<id>' for k in EPISODE_SOURCES)}",
+            )
+        table, column = EPISODE_SOURCES[kind]
+        row = await self.store.fetchone(
+            f"SELECT 1 AS present FROM {table} WHERE {column} = ? LIMIT 1",  # noqa: S608
+            (identifier.strip(),),
+        )
+        if row is None:
+            raise OwnerModelError(
+                "OWNER_MODEL_EPISODE_UNKNOWN",
+                f"no {kind} {identifier.strip()!r} exists; an assertion cannot be "
+                "evidenced by something that did not happen",
+            )
+        return ref
 
     async def observe(
         self,
@@ -148,6 +210,7 @@ class OwnerCognitiveModel:
         what stops one emphatic conversation minting a confirmed trait.
         """
         now = int(time.time() * 1000) if now_ms is None else now_ms
+        episode_ref = await self._require_episode(episode_ref)
         existing = await self._find(owner_principal_id, field, value, project_id)
 
         if existing is None:
@@ -185,10 +248,16 @@ class OwnerCognitiveModel:
     def _ladder(
         field: OwnerModelField, episodes: int, current: AssertionState
     ) -> AssertionState:
-        """Evidence promotes to CANDIDATE. Only the owner promotes to CONFIRMED
-        for anything that would change VAN's autonomy."""
-        if episodes >= EPISODES_FOR_CONFIRMED and field not in AUTONOMY_BEARING_FIELDS:
-            return AssertionState.CONFIRMED
+        """Evidence promotes to CANDIDATE, then to EVIDENCED. Never to CONFIRMED.
+
+        P1-SYM-001 — three distinct episode references used to produce CONFIRMED for any
+        non-autonomy field, and the calibration engine then described the result to the
+        owner as "owner-confirmed". Nobody had asked them. The top of the evidence ladder
+        is now EVIDENCED, which means exactly what it says, and CONFIRMED is reachable
+        only through `confirm()`.
+        """
+        if episodes >= EPISODES_FOR_EVIDENCED and field not in AUTONOMY_BEARING_FIELDS:
+            return AssertionState.EVIDENCED
         if episodes >= EPISODES_FOR_CANDIDATE:
             return AssertionState.CANDIDATE
         return current
@@ -231,6 +300,16 @@ class OwnerCognitiveModel:
             "state": AssertionState.SUPERSEDED,
             "superseded_by": replacement.assertion_id, "updated_at_ms": now,
         }))
+        if self.learning is not None:
+            # The one adaptation that is honest to record: the owner said something
+            # different, VAN superseded what it believed, and that changes what VAN does.
+            await self.learning.record_owner_correction(
+                assertion_id=replacement.assertion_id,
+                field=assertion.field.value,
+                previous_value=assertion.value,
+                new_value=new_value,
+                now_ms=now,
+            )
         return replacement
 
     async def reject(self, assertion_id: str, *, now_ms: int | None = None) -> OwnerAssertion:
@@ -268,9 +347,14 @@ class OwnerCognitiveModel:
     async def actionable(
         self, owner_principal_id: str, *, field: OwnerModelField | None = None
     ) -> list[OwnerAssertion]:
-        """What VAN may actually act on — CONFIRMED and not superseded."""
+        """What VAN may actually act on — CONFIRMED or EVIDENCED, and not superseded.
+
+        EVIDENCED is included because refusing to act on a well-evidenced preference would
+        make VAN useless until the owner had answered a questionnaire. What changed is
+        that the two are distinguishable, so nothing describes one as the other.
+        """
         sql = ("SELECT * FROM owner_cognitive_model WHERE owner_principal_id = ? "
-               "AND state = 'CONFIRMED' AND superseded_by IS NULL")
+               "AND state IN ('CONFIRMED', 'EVIDENCED') AND superseded_by IS NULL")
         params: list[Any] = [owner_principal_id]
         if field is not None:
             sql += " AND field = ?"
@@ -364,8 +448,10 @@ class OwnerCognitiveModel:
 
 __all__ = [
     "AUTONOMY_BEARING_FIELDS",
+    "EPISODE_SOURCES",
     "EPISODES_FOR_CANDIDATE",
     "EPISODES_FOR_CONFIRMED",
+    "EPISODES_FOR_EVIDENCED",
     "AssertionState",
     "OwnerAssertion",
     "OwnerCognitiveModel",

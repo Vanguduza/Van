@@ -11,8 +11,6 @@ import androidx.compose.ui.graphics.StrokeCap
 import androidx.compose.ui.graphics.StrokeJoin
 import androidx.compose.ui.graphics.drawscope.DrawScope
 import androidx.compose.ui.graphics.drawscope.Stroke
-import kotlin.math.PI
-import kotlin.math.sin
 import kotlin.math.sqrt
 
 /**
@@ -43,204 +41,134 @@ fun VanAuraLayer(
 }
 
 const val FACE_SAFE_RADIUS = 0.34f
-private const val TAU = (2.0 * PI).toFloat()
 
+/**
+ * P1-VIS-001 — the aura is described once and executed twice.
+ *
+ * This function used to hold the shipping aura's numbers, and `GlassPainter.drawAura` in the
+ * JVM evidence renderer held a hand-written second copy of them. They drifted: the evidence
+ * renderer never drew electrical branches at all, used roughly double the Zone A alpha and
+ * 1.5x the radius, placed the haze blobs differently, and gave ion fragments no bloom. Every
+ * piece of committed visual evidence was therefore a picture of something VAN does not look
+ * like.
+ *
+ * So neither painter owns those numbers now. [VanAuraPlanner.plan] produces the ops and this
+ * is the Compose executor for them; `GlassPainter` is the Java2D executor for the same ops.
+ * A painter cannot diverge on a value it does not have.
+ */
 fun DrawScope.drawVanAura(
     spec: VanAuraSpec,
     phase: Float,
     budget: VanEffectBudget,
     characterScale: Float = 1f,
     semanticSpec: VanAuraSpec = spec,
+    bodyEdgeDp: Float? = null,
 ) {
     val minEdge = minOf(size.width, size.height)
-    if (minEdge <= 0f || (spec.intensity <= 0.01f && semanticSpec.intensity <= 0.01f)) return
-
+    if (minEdge <= 0f) return
     val bodyEdge = minEdge * characterScale.coerceIn(0.40f, 1f)
     val center = Offset(size.width / 2f, size.height * 0.48f)
-    val cyan = Color(VanGlassTokens.ACCENT_CYAN)
-    val semantic = Color(semanticSpec.semanticColor ?: VanGlassTokens.ACCENT_CYAN)
-    val motion = VanWindFieldMotion.sample(spec, phase, budget)
-
-    drawZoneA(spec, motion, center, bodyEdge, cyan)
-
-    val geometry = VanFieldGeometryEngine.build(
-        spec = spec,
-        phase = phase,
-        budget = budget,
-        bodyEdge = bodyEdge,
-        centerX = center.x,
-        centerY = center.y,
-        semanticSpec = semanticSpec,
+    drawAuraOps(
+        VanAuraPlanner.plan(
+            spec = spec,
+            semanticSpec = semanticSpec,
+            centerX = center.x,
+            centerY = center.y,
+            radius = bodyEdge / 2f,
+            budget = budget,
+            phase = phase,
+            bodyEdgeDp = bodyEdgeDp,
+        ),
     )
+}
 
-    geometry.strokes.forEach { stroke ->
-        val color = if (stroke.ink == VanFieldInk.IDENTITY) cyan else semantic
-        val path = stroke.toPath()
-        drawPath(
-            path = path,
-            color = color.copy(alpha = (stroke.alpha * 0.20f).coerceAtMost(0.18f)),
-            style = Stroke(
-                width = stroke.glowWidth,
-                cap = StrokeCap.Round,
-                join = StrokeJoin.Round,
-            ),
-        )
-        drawPath(
-            path = path,
-            color = color.copy(alpha = stroke.alpha),
-            style = Stroke(
-                width = stroke.width,
-                cap = StrokeCap.Round,
-                join = StrokeJoin.Round,
-            ),
-        )
-    }
-
-    geometry.electricalBranches.forEach { branch ->
-        val color = if (branch.ink == VanFieldInk.IDENTITY) cyan else semantic
-        drawElectricalPolyline(branch.trunk, color, branch.alpha, branch.width, branch.glowWidth)
-        branch.children.forEach { child ->
-            drawElectricalPolyline(
-                child,
-                color,
-                branch.alpha * 0.82f,
-                branch.width * 0.78f,
-                branch.glowWidth * 0.72f,
-            )
+/** The Compose executor for [VanAuraOp]. Knows how to draw; decides nothing. */
+fun DrawScope.drawAuraOps(ops: List<VanAuraOp>) {
+    for (op in ops) {
+        when (op) {
+            is VanAuraOp.Radial -> drawRadialOp(op)
+            is VanAuraOp.Polyline -> drawPolylineOp(op)
+            is VanAuraOp.Dot -> drawDotOp(op)
+            is VanAuraOp.Quad -> drawQuadOp(op)
         }
-    }
-
-    geometry.dots.forEach { dot ->
-        val color = if (dot.ink == VanFieldInk.IDENTITY) cyan else semantic
-        // Ion fragments receive a small bloom so motion remains legible on bright apps.
-        drawCircle(
-            color = color.copy(alpha = dot.alpha * 0.16f),
-            radius = dot.radius * 2.8f,
-            center = Offset(dot.point.x, dot.point.y),
-        )
-        drawCircle(
-            color = color.copy(alpha = dot.alpha),
-            radius = dot.radius,
-            center = Offset(dot.point.x, dot.point.y),
-        )
-    }
-
-    if (spec.orbLink > 0.05f) {
-        val pulse = 0.18f + 0.34f * motion.electricPulse
-        val path = Path().apply {
-            moveTo(center.x + bodyEdge * 0.18f, center.y - bodyEdge * 0.03f)
-            quadraticBezierTo(
-                center.x + bodyEdge * 0.30f,
-                center.y - bodyEdge * 0.19f,
-                center.x + bodyEdge * 0.39f,
-                center.y - bodyEdge * 0.12f,
-            )
-        }
-        drawPath(
-            path = path,
-            color = cyan.copy(alpha = pulse * spec.orbLink),
-            style = Stroke(width = (bodyEdge * 0.009f).coerceAtLeast(1f), cap = StrokeCap.Round),
-        )
     }
 }
 
-private fun VanFieldStroke.toPath(): Path = Path().apply {
-    points.forEachIndexed { index, point ->
-        if (index == 0) moveTo(point.x, point.y) else lineTo(point.x, point.y)
+private fun DrawScope.drawRadialOp(op: VanAuraOp.Radial) {
+    if (op.radius <= 0f || op.alpha <= 0.001f) return
+    val color = Color(op.color).copy(alpha = op.alpha)
+    val brush = Brush.radialGradient(
+        colors = listOf(color, Color.Transparent),
+        center = Offset(op.cx, op.cy),
+        radius = op.radius,
+    )
+    if (op.clip.isEmpty()) {
+        drawCircle(brush = brush, radius = op.radius, center = Offset(op.cx, op.cy))
+    } else {
+        drawPath(path = op.clip.toComposePath(), brush = brush)
     }
 }
 
-private fun DrawScope.drawElectricalPolyline(
-    points: List<VanFieldPoint>,
-    color: Color,
-    alpha: Float,
-    width: Float,
-    glowWidth: Float,
-) {
-    if (points.size < 2 || alpha <= 0.01f) return
+private fun DrawScope.drawPolylineOp(op: VanAuraOp.Polyline) {
+    if (op.points.size < 2 || op.alpha <= 0.001f) return
     val path = Path().apply {
-        points.forEachIndexed { index, point ->
+        op.points.forEachIndexed { index, point ->
             if (index == 0) moveTo(point.x, point.y) else lineTo(point.x, point.y)
         }
     }
+    val color = Color(op.color)
     drawPath(
         path = path,
-        color = color.copy(alpha = (alpha * 0.20f).coerceAtMost(0.22f)),
-        style = Stroke(glowWidth, cap = StrokeCap.Round, join = StrokeJoin.Round),
+        color = color.copy(alpha = minOf(op.alpha * op.glowAlphaScale, op.glowAlphaCeiling)),
+        style = Stroke(op.glowWidth, cap = StrokeCap.Round, join = StrokeJoin.Round),
     )
+    val core = op.whiteCoreWidth
+    if (core != null) {
+        drawPath(
+            path = path,
+            color = Color.White.copy(alpha = op.whiteCoreAlpha),
+            style = Stroke(core, cap = StrokeCap.Round, join = StrokeJoin.Round),
+        )
+    }
     drawPath(
         path = path,
-        color = Color.White.copy(alpha = (alpha * 0.62f).coerceAtMost(0.82f)),
-        style = Stroke((width * 0.48f).coerceAtLeast(0.55f), cap = StrokeCap.Round, join = StrokeJoin.Round),
-    )
-    drawPath(
-        path = path,
-        color = color.copy(alpha = alpha.coerceAtMost(0.92f)),
-        style = Stroke(width, cap = StrokeCap.Round, join = StrokeJoin.Round),
+        color = color.copy(alpha = op.alpha),
+        style = Stroke(op.width, cap = StrokeCap.Round, join = StrokeJoin.Round),
     )
 }
 
-/**
- * Identity haze only. It must not form a body outline; the visible atmosphere is carried by
- * detached Zone B/C streams. Two displaced low-alpha blobs keep VAN optically tied to his field.
- */
-private fun DrawScope.drawZoneA(
-    spec: VanAuraSpec,
-    motion: VanWindFieldFrame,
-    center: Offset,
-    bodyEdge: Float,
-    cyan: Color,
-) {
-    val alpha = (0.045f + 0.045f * spec.intensity).coerceIn(0.035f, 0.085f)
-    val r = bodyEdge * 0.13f * motion.breathing
-    val driftX = bodyEdge * 0.032f * sin(TAU * motion.phase)
-    val driftY = bodyEdge * 0.022f * sin(TAU * 2f * motion.phase + 0.9f)
-
-    val first = Offset(
-        center.x - bodyEdge * 0.31f + driftX,
-        center.y + bodyEdge * 0.05f + driftY,
-    )
-    val second = Offset(
-        center.x + bodyEdge * 0.34f - driftX * 0.6f,
-        center.y - bodyEdge * 0.09f - driftY,
-    )
-
+private fun DrawScope.drawDotOp(op: VanAuraOp.Dot) {
+    if (op.radius <= 0f || op.alpha <= 0.001f) return
+    val color = Color(op.color)
     drawCircle(
-        brush = Brush.radialGradient(
-            colors = listOf(cyan.copy(alpha = alpha), Color.Transparent),
-            center = first,
-            radius = r,
-        ),
-        radius = r,
-        center = first,
+        color = color.copy(alpha = op.alpha * op.bloomAlphaScale),
+        radius = op.radius * op.bloomRadiusScale,
+        center = Offset(op.cx, op.cy),
     )
-    drawCircle(
-        brush = Brush.radialGradient(
-            colors = listOf(cyan.copy(alpha = alpha * 0.72f), Color.Transparent),
-            center = second,
-            radius = r * 0.78f,
-        ),
-        radius = r * 0.78f,
-        center = second,
-    )
+    drawCircle(color = color.copy(alpha = op.alpha), radius = op.radius, center = Offset(op.cx, op.cy))
+}
 
-    if (spec.groundGlow > 0.01f) {
-        val gy = center.y + bodyEdge * 0.47f
-        val gw = bodyEdge * 0.28f
-        val crescent = Path().apply {
-            moveTo(center.x - gw, gy)
-            quadraticBezierTo(center.x, gy + bodyEdge * 0.045f, center.x + gw, gy)
-            quadraticBezierTo(center.x, gy - bodyEdge * 0.012f, center.x - gw, gy)
-            close()
+private fun DrawScope.drawQuadOp(op: VanAuraOp.Quad) {
+    if (op.alpha <= 0.001f) return
+    val path = Path().apply {
+        moveTo(op.startX, op.startY)
+        quadraticBezierTo(op.controlX, op.controlY, op.endX, op.endY)
+    }
+    drawPath(
+        path = path,
+        color = Color(op.color).copy(alpha = op.alpha),
+        style = Stroke(width = op.width, cap = StrokeCap.Round),
+    )
+}
+
+private fun List<VanPathSeg>.toComposePath(): Path = Path().apply {
+    for (segment in this@toComposePath) {
+        when (segment) {
+            is VanPathSeg.MoveTo -> moveTo(segment.x, segment.y)
+            is VanPathSeg.LineTo -> lineTo(segment.x, segment.y)
+            is VanPathSeg.QuadTo -> quadraticBezierTo(segment.cx, segment.cy, segment.x, segment.y)
+            VanPathSeg.Close -> close()
         }
-        drawPath(
-            path = crescent,
-            brush = Brush.radialGradient(
-                colors = listOf(cyan.copy(alpha = 0.13f * spec.groundGlow), Color.Transparent),
-                center = Offset(center.x, gy),
-                radius = gw,
-            ),
-        )
     }
 }
 

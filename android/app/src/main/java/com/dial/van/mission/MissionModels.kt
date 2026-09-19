@@ -1,5 +1,7 @@
 package com.dial.van.mission
 
+import com.dial.van.status.OwnerStatusProjection
+import com.dial.van.status.OwnerWorkStatus
 import org.json.JSONArray
 import org.json.JSONObject
 
@@ -38,7 +40,29 @@ data class MissionSummary(
     val projectId: String?,
     val finalOutcome: String?,
     val updatedAtMs: Long,
+    /**
+     * The gateway's own projection, when it sent one (P2-COH-001).
+     *
+     * Null means an older gateway that does not send it, not "no status" — [ownerStatus]
+     * falls back to deriving it from the state rather than guessing something benign.
+     */
+    val ownerStatusFromGateway: String? = null,
 ) {
+    /**
+     * The coarse answer: what the owner should do about this, if anything.
+     *
+     * Prefers what the gateway said, because the gateway knows states this build may not.
+     * Falls back to the local table, and only then to UNKNOWN — never to a working state.
+     */
+    val ownerStatus: OwnerWorkStatus
+        get() = ownerStatusFromGateway
+            ?.let { name -> OwnerWorkStatus.entries.firstOrNull { it.name == name } }
+            ?: OwnerStatusProjection.fromMissionState(state)
+
+    /** Whether this belongs in the owner's attention queue rather than in a list. */
+    val needsAttention: Boolean
+        get() = OwnerStatusProjection.needsOwner(ownerStatus)
+
     /**
      * §48 — "mission status understandable without logs". The phrasing is
      * deliberately about the owner's situation, not the state machine's.
@@ -63,7 +87,10 @@ data class MissionSummary(
             "EXPIRED" -> "Expired before it finished"
             "BLOCKED_POLICY" -> "Stopped: not allowed"
             "BLOCKED_UNSAFE" -> "Stopped: looked unsafe"
-            else -> state
+            // A state this build does not know is not a label to show the owner. Leaking
+            // the enum here was the same defect as the controller's `else -> ACCEPTED`:
+            // it made an unknown look like an answer (P0-EXEC-003).
+            else -> OwnerStatusProjection.sentenceFor(OwnerWorkStatus.UNKNOWN)
         }
 
     val isActive: Boolean
@@ -138,6 +165,7 @@ object MissionParsing {
         projectId = json.optStringOrNull("project_id"),
         finalOutcome = json.optStringOrNull("final_outcome"),
         updatedAtMs = json.optLong("updated_at_ms", 0L),
+        ownerStatusFromGateway = json.optStringOrNull("owner_status"),
     )
 
     fun missionSummaries(array: JSONArray): List<MissionSummary> =

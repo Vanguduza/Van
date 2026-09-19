@@ -11,16 +11,18 @@ from __future__ import annotations
 import pytest
 
 from conftest_automation import make_store
-from van_gateway.context_compiler.compiler import (
-    ContextCompiler,
-    ContextSection,
+from pydantic import ValidationError
+
+from van_gateway.context.models import (
+    ContextRequirement,
+    EpistemicState,
+    OwnerFactCandidate,
+    ReadinessState,
+    SourceTrust,
 )
-from van_gateway.epistemics.models import (
-    Claim,
-    Provenance,
-    SemanticClass,
-    may_promote,
-)
+from van_gateway.context.service import OwnerContextService
+from van_gateway.epistemics.models import SemanticClass, may_promote
+from van_gateway.storage.db import Store
 from van_gateway.reasoning.kernel import (
     REQUIRED_COUNTERFACTUALS,
     AssumptionStatus,
@@ -45,21 +47,34 @@ from van_gateway.understanding.memory import (
 from van_gateway.understanding.owner_model import (
     AssertionState,
     OwnerCognitiveModel,
+    OwnerModelError,
     OwnerModelField,
 )
 
+
+async def seed_episodes(store, *names: str) -> dict[str, str]:
+    """Real missions for the assertions to be evidenced by (P1-SYM-001).
+
+    `episode_ref` used to be a free string, so three typos were three episodes. It now has
+    to name a mission or a command that exists, which means a test that wants evidence has
+    to produce something that happened.
+    """
+    from van_gateway.mission.models import MissionOrigin
+    from van_gateway.mission.service import MissionService
+    from van_gateway.models import OriginChannel
+
+    missions = MissionService(store)
+    out: dict[str, str] = {}
+    for name in names:
+        mission = await missions.create(
+            owner_principal_id="owner", origin=MissionOrigin.OWNER_VOICE,
+            origin_channel=OriginChannel.VOICE, title=name, goal=name,
+        )
+        out[name] = f"mission:{mission.mission_id}"
+    return out
+
+
 NOW = 1_800_000_000_000
-
-
-def _claim(cid, statement, klass, *, project=None, group=None, observed=NOW, conf=0.8):
-    return Claim(
-        claim_id=cid, statement=statement, semantic_class=klass, project_id=project,
-        contradiction_group=group, created_at_ms=observed,
-        provenance=Provenance(
-            source_kind="test", source_ref=f"ref://{cid}", observed_at_ms=observed,
-            confidence=conf, evidence_refs=[f"ev://{cid}"],
-        ),
-    )
 
 
 # -------------------------------------------------------------- §14 epistemics
@@ -85,159 +100,152 @@ def test_a_model_inference_can_never_promote_itself_to_fact():
     assert may_promote(SemanticClass.FACT_UNVERIFIED, SemanticClass.FACT_VERIFIED) is True
 
 
-def test_a_nonowner_claim_without_provenance_is_illformed():
-    """§41 — provenance on 100% of non-owner facts."""
-    bare = Claim(claim_id="c1", statement="x", semantic_class=SemanticClass.FACT_VERIFIED)
-    assert bare.is_wellformed is False
-    owned = Claim(
-        claim_id="c2", statement="I prefer terse updates",
-        semantic_class=SemanticClass.OWNER_PREFERENCE,
+@pytest.mark.asyncio
+async def test_provenance_is_structural_rather_than_checked(tmp_path):
+    """§41 — provenance on 100% of non-owner facts.
+
+    This used to be asserted on the `Claim` type, where `is_wellformed` reported whether a
+    claim happened to carry provenance. Nothing stored a Claim, so nothing was ever
+    reported on. In the live taxonomy the rule is not a check at all: `source_ref` is NOT
+    NULL on `owner_facts` and required by `OwnerFactCandidate`, so a fact without
+    provenance cannot be constructed, let alone admitted.
+
+    Asserted here because "the rule moved from a check to a constructor constraint" is
+    exactly the kind of claim that should be executed rather than believed.
+    """
+    with pytest.raises(ValidationError):
+        OwnerFactCandidate(
+            fact_id="no-provenance", subject="OWNER", predicate="commute", value="cycles",
+            authority=EpistemicState.CANONICAL_OWNER, source_trust=SourceTrust.OWNER_EXPLICIT,
+            valid_from_ms=NOW, observed_at_ms=NOW,
+        )
+
+
+@pytest.mark.asyncio
+async def test_owner_stated_facts_do_not_expire_on_a_clock(tmp_path):
+    """A preference that "expires" makes VAN forget the owner for no reason.
+
+    The rule was written down and tested on the `Claim` type, which nothing stored, so it
+    enforced nothing: `resolve_requirement` marked a three-year-old owner preference STALE
+    on `max_age_ms` like any other fact. Deleting that dead taxonomy without bringing the
+    rule here would have removed the only statement of it in the repository.
+
+    The consequence is worse than a mislabel. Staleness asks "should VAN look again", and
+    for a fact the owner stated there is nowhere to look — only the owner can refresh it.
+    So STALE on a CANONICAL_OWNER fact is a readiness state the system cannot exit, and the
+    requirement depending on it never becomes satisfiable.
+    """
+    store = Store(str(tmp_path / "staleness.sqlite3"))
+    await store.migrate()
+    context = OwnerContextService(store)
+    long_ago = NOW - 3 * 365 * 24 * 3600 * 1000
+
+    async def _admit(fact_id, authority, trust):
+        await context.admit_fact(OwnerFactCandidate(
+            fact_id=fact_id, subject="OWNER", predicate=fact_id, value="x",
+            authority=authority, source_trust=trust, source_ref=f"ref://{fact_id}",
+            valid_from_ms=long_ago, observed_at_ms=long_ago,
+        ))
+        return await context.resolve_requirement(
+            ContextRequirement(subject="OWNER", predicate=fact_id, max_age_ms=24 * 3600 * 1000),
+            now_ms=NOW,
+        )
+
+    owner = await _admit("update_style", EpistemicState.CANONICAL_OWNER, SourceTrust.OWNER_EXPLICIT)
+    assert owner.state is ReadinessState.CURRENT, "the owner's own statement went stale on a clock"
+
+    observed = await _admit(
+        "api_status", EpistemicState.VERIFIED_LIVE_STATE, SourceTrust.VERIFIED_SYSTEM
     )
-    assert owned.is_wellformed is True
+    assert observed.state is ReadinessState.STALE, (
+        "a fact VAN observed must still go stale; exempting everything would make max_age_ms "
+        "mean nothing"
+    )
+    assert observed.reason == "fact_exceeds_max_age"
 
 
-def test_owner_preferences_do_not_expire_on_a_clock():
-    """A preference that "expires" makes VAN forget the owner for no reason."""
-    ancient = _claim("c3", "terse updates", SemanticClass.OWNER_PREFERENCE, observed=0)
-    assert ancient.staleness_at_ms(NOW) is False
-    stale_fact = _claim("c4", "the API returns 200", SemanticClass.FACT_VERIFIED, observed=0)
-    assert stale_fact.staleness_at_ms(NOW) is True
+@pytest.mark.asyncio
+async def test_an_owner_statement_the_owner_scoped_still_ends(tmp_path):
+    """Non-expiry is not immortality.
+
+    "My flight is at six" is owner-stated and time-bound, and the mechanism for that is
+    `valid_until_ms` — the owner scoping their own claim — which is honoured before
+    staleness is ever considered. Without this the exemption above would mean VAN believes
+    a one-off forever.
+    """
+    store = Store(str(tmp_path / "scoped.sqlite3"))
+    await store.migrate()
+    context = OwnerContextService(store)
+    await context.admit_fact(OwnerFactCandidate(
+        fact_id="flight", subject="OWNER", predicate="flight_time", value="18:00",
+        authority=EpistemicState.CANONICAL_OWNER, source_trust=SourceTrust.OWNER_EXPLICIT,
+        source_ref="owner:said-so", valid_from_ms=NOW - 2000, valid_until_ms=NOW - 1000,
+        observed_at_ms=NOW - 2000,
+    ))
+    resolution = await context.resolve_requirement(
+        ContextRequirement(subject="OWNER", predicate="flight_time"), now_ms=NOW
+    )
+    assert resolution.state is ReadinessState.MISSING
 
 
 # --------------------------------------------------------- §9 context compiler
 
 
-def test_cross_project_isolation_is_hard():
-    """§9 — excluded, not ranked down, and counted so it is visible."""
-    compiler = ContextCompiler()
-    packet = compiler.compile(
-        packet_id="p1", project_id="alpha", now_ms=NOW,
-        claims={
-            ContextSection.PROJECT_TRUTH: [
-                _claim("a", "alpha fact", SemanticClass.PROJECT_TRUTH, project="alpha"),
-                _claim("b", "beta secret", SemanticClass.PROJECT_TRUTH, project="beta"),
-            ]
-        },
-    )
-    statements = [line["statement"] for lines in packet.sections.values() for line in lines]
-    assert "alpha fact" in statements
-    assert "beta secret" not in statements
-    assert packet.selection_stats["dropped_cross_project"] == 1
-
-
-def test_a_stale_claim_is_carried_but_loses_authority():
-    """Dropping it silently would let VAN act as though it never knew."""
-    compiler = ContextCompiler()
-    packet = compiler.compile(
-        packet_id="p2", now_ms=NOW,
-        claims={
-            ContextSection.RETRIEVED_KNOWLEDGE: [
-                _claim("old", "was true last month", SemanticClass.FACT_VERIFIED, observed=0)
-            ]
-        },
-    )
-    line = packet.sections["retrieved_knowledge"][0]
-    assert line["stale"] is True
-    assert line["factual_authority"] is False
-    assert packet.factual_claims() == []
-    assert packet.stale_claim_ids == ["old"]
-
-
-def test_contradicting_claims_stay_together():
-    """§14 — including only the higher-scored side manufactures false confidence."""
-    compiler = ContextCompiler()
-    packet = compiler.compile(
-        packet_id="p3", now_ms=NOW,
-        claims={
-            ContextSection.RETRIEVED_KNOWLEDGE: [
-                _claim("x1", "the build is green", SemanticClass.FACT_VERIFIED, group="build"),
-                _claim("x2", "the build is red", SemanticClass.EXTERNAL_CLAIM, group="build"),
-            ]
-        },
-    )
-    assert packet.contradiction_groups == {"build": ["x1", "x2"]}
-    statements = [l["statement"] for ls in packet.sections.values() for l in ls]
-    assert "the build is green" in statements and "the build is red" in statements
-
-
-def test_the_budget_is_enforced_by_dropping_the_least_useful():
-    """§9 — a compiler that overruns hands the reasoner a silent truncation."""
-    compiler = ContextCompiler()
-    many = [
-        _claim(f"n{i}", f"environment detail {i}" * 10, SemanticClass.EXTERNAL_CLAIM)
-        for i in range(60)
-    ]
-    packet = compiler.compile(
-        packet_id="p4", token_budget=200, now_ms=NOW,
-        claims={
-            ContextSection.AUTHORITY_CONTEXT: [
-                _claim("auth", "mission ceiling is A2", SemanticClass.PROJECT_TRUTH)
-            ],
-            ContextSection.CURRENT_ENVIRONMENT: many,
-        },
-    )
-    assert packet.within_budget
-    assert packet.selection_stats["dropped_budget"] > 0
-    # Authority survives the squeeze: acting with the wrong ceiling is worse
-    # than acting with less information.
-    kept = [l["statement"] for ls in packet.sections.values() for l in ls]
-    assert "mission ceiling is A2" in kept
-
-
-def test_an_illformed_claim_never_reaches_the_reasoner():
-    compiler = ContextCompiler()
-    packet = compiler.compile(
-        packet_id="p5", now_ms=NOW,
-        claims={
-            ContextSection.RETRIEVED_KNOWLEDGE: [
-                Claim(claim_id="bad", statement="unsourced",
-                      semantic_class=SemanticClass.FACT_VERIFIED)
-            ]
-        },
-    )
-    assert packet.selection_stats["dropped_illformed"] == 1
-    assert packet.sections == {}
-
-
-# ------------------------------------------------------- §64 owner model
-
-
 async def test_one_emphatic_conversation_does_not_mint_a_trait(tmp_path):
     """§74 — independence is by episode, not by observation."""
-    model = OwnerCognitiveModel(await make_store(tmp_path))
+    store = await make_store(tmp_path)
+    model = OwnerCognitiveModel(store)
+    episodes = await seed_episodes(store, "m1")
     for _ in range(5):
         assertion = await model.observe(
             owner_principal_id="owner", field=OwnerModelField.COMMUNICATION_PREFERENCE,
-            value="prefers terse status updates", episode_ref="mission-1",
+            value="prefers terse status updates", episode_ref=episodes["m1"],
         )
     assert assertion.independent_episodes == 1
     assert assertion.state is AssertionState.OBSERVED
 
 
-async def test_evidence_promotes_to_candidate_then_confirmed(tmp_path):
-    model = OwnerCognitiveModel(await make_store(tmp_path))
-    first = await model.observe(
-        owner_principal_id="owner", field=OwnerModelField.COMMUNICATION_PREFERENCE,
-        value="terse", episode_ref="m1",
-    )
-    assert first.state is AssertionState.OBSERVED
-    second = await model.observe(
-        owner_principal_id="owner", field=OwnerModelField.COMMUNICATION_PREFERENCE,
-        value="terse", episode_ref="m2",
-    )
-    assert second.state is AssertionState.CANDIDATE
-    third = await model.observe(
-        owner_principal_id="owner", field=OwnerModelField.COMMUNICATION_PREFERENCE,
-        value="terse", episode_ref="m3",
-    )
-    assert third.state is AssertionState.CONFIRMED
-    assert third.may_act_on is True
+async def test_evidence_promotes_to_candidate_then_evidenced_but_never_confirmed(tmp_path):
+    """P1-SYM-001 — three episodes used to produce CONFIRMED, and the calibration engine
+    then told the owner their preference was owner-confirmed. Nobody had asked them."""
+    store = await make_store(tmp_path)
+    model = OwnerCognitiveModel(store)
+    episodes = await seed_episodes(store, "m1", "m2", "m3")
+    states = []
+    for name in ("m1", "m2", "m3"):
+        assertion = await model.observe(
+            owner_principal_id="owner", field=OwnerModelField.COMMUNICATION_PREFERENCE,
+            value="terse", episode_ref=episodes[name],
+        )
+        states.append(assertion.state)
+    assert states == [
+        AssertionState.OBSERVED, AssertionState.CANDIDATE, AssertionState.EVIDENCED
+    ]
+    assert assertion.may_act_on is True, "a well-evidenced preference is still actionable"
+
+    confirmed = await model.confirm(assertion.assertion_id)
+    assert confirmed.state is AssertionState.CONFIRMED
+
+
+async def test_an_episode_that_did_not_happen_is_not_evidence(tmp_path):
+    """The ladder counts distinct references, so an unresolvable one is a vote."""
+    store = await make_store(tmp_path)
+    model = OwnerCognitiveModel(store)
+    for rubbish in ("m1", "mission-1", "", "mission:", "mission:does-not-exist", "note:x"):
+        with pytest.raises(OwnerModelError):
+            await model.observe(
+                owner_principal_id="owner",
+                field=OwnerModelField.COMMUNICATION_PREFERENCE,
+                value="terse", episode_ref=rubbish,
+            )
 
 
 async def test_an_autonomy_bearing_trait_never_confirms_from_evidence_alone(tmp_path):
     """§45.16 — inferred preference must not widen autonomy by itself."""
-    model = OwnerCognitiveModel(await make_store(tmp_path))
-    for episode in ("m1", "m2", "m3", "m4", "m5"):
+    store = await make_store(tmp_path)
+    model = OwnerCognitiveModel(store)
+    episodes = await seed_episodes(store, "m1", "m2", "m3", "m4", "m5")
+    for episode in episodes.values():
         assertion = await model.observe(
             owner_principal_id="owner", field=OwnerModelField.DELEGATION_PREFERENCE,
             value="happy for VAN to act without asking", episode_ref=episode,
@@ -251,26 +259,30 @@ async def test_an_autonomy_bearing_trait_never_confirms_from_evidence_alone(tmp_
 
 
 async def test_a_correction_outranks_any_amount_of_evidence(tmp_path):
-    model = OwnerCognitiveModel(await make_store(tmp_path))
+    store = await make_store(tmp_path)
+    model = OwnerCognitiveModel(store)
+    episodes = await seed_episodes(store, "m1", "m2", "m3", "m4")
     a = await model.observe(
         owner_principal_id="owner", field=OwnerModelField.EVIDENCE_PREFERENCE,
-        value="wants summaries", episode_ref="m1",
+        value="wants summaries", episode_ref=episodes["m1"],
     )
     await model.reject(a.assertion_id)
-    for episode in ("m2", "m3", "m4"):
+    for name in ("m2", "m3", "m4"):
         again = await model.observe(
             owner_principal_id="owner", field=OwnerModelField.EVIDENCE_PREFERENCE,
-            value="wants summaries", episode_ref=episode,
+            value="wants summaries", episode_ref=episodes[name],
         )
     assert again.state is AssertionState.REJECTED
     assert again.may_act_on is False
 
 
 async def test_a_correction_supersedes_rather_than_edits(tmp_path):
-    model = OwnerCognitiveModel(await make_store(tmp_path))
+    store = await make_store(tmp_path)
+    model = OwnerCognitiveModel(store)
+    episodes = await seed_episodes(store, "m1")
     original = await model.observe(
         owner_principal_id="owner", field=OwnerModelField.REASONING_PREFERENCE,
-        value="wants short answers", episode_ref="m1",
+        value="wants short answers", episode_ref=episodes["m1"],
     )
     replacement = await model.correct(original.assertion_id, new_value="wants full evidence")
     assert replacement.state is AssertionState.CONFIRMED

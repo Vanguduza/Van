@@ -1,0 +1,40 @@
+dff38a0 Unified Personal Intelligence: Mission Core, capability registry, cognition layer (#39)
+5ec35e9 Android unit tests get a real org.json, not the stub that throws
+0249ef0 Execution binds itself to Missions, and an honest integration ledger
+04e24db Relationship calibration: style adapts, truth standards do not
+2b876b5 Android data layer for the six owner surfaces (UNVERIFIED IN CONTAINER)
+9a03a44 Permissions, computer use, verifiers: backend complete at 32/36
+10fcc9c Cognition, autonomy and evolution: 23 workstreams
+20f8e54 Phase 2: bind specialist execution to Missions, and the owner surface
+7f3f73c Canonical capability registry, and resolve the router name collision
+188a1b2 Phase 0 audit and Mission Core
+4635c0b Keep local targets out of reach of browser escalation
+383b1c0 Stop a browser worker from manufacturing its own approval prompt
+7f6578b Add workflow health, repair lineage, dead letters and telemetry
+f8c3fcc Refactor Android dashboards to summary-first drill-down navigation (#37)
+52083c6 tests: guard summary-first Android dashboard navigation
+d9df7c9 android: turn trading home into concise drill-down dashboard
+16ac99f android: split browser automation dashboard into drill-down pages
+3aa6c40 android: expose secondary modules as informative home cards
+ed2ed82 android: replace long module strip with primary dashboard tabs
+a79e2c6 Merge final Trading Core all-WIP live certification (#36)
+efffdab docs: record final Trading Core reconciliation certification
+1a62703 evidence: certify reconciled Trading Core on canonical main
+5248e1a merge: retain prior Trading Core live-cert lineage
+54ee68f Fix Trading Core Caddy bootstrap validation (#34)
+af51fa5 tests: guard valid Caddy topology syntax
+28fa2a8 bootstrap: validate Caddyfile before service restart
+5d18531 fix: use valid multiline Caddy handle blocks
+b6cd685 docs: record Trading Core live reconciliation acceptance
+9827348 evidence: record live Trading Core reconciliation certification
+47f2135 Merge remaining n8n and trading bootstrap WIP (#32)
+9237c88 project-truth: preserve recovered n8n hardening ledger entries
+919eea8 merge: close superseded trading-bootstrap WIP lineage
+d607763 reconcile: complete missed n8n and trading bootstrap WIP
+728f87a Merge Rev 3.1 knowledge, browser and automation reconciliation (#31)
+6b975f6 docs: restore canonical automation browser gate contract labels
+cd6e060 db: advance canonical schema version for browser escalation state
+2ebad7f tests: advance schema contract for browser escalation migrations
+53af0ea knowledge: fail closed on Notebook browser evidence policy
+357f293 tools: align Notebook login bootstrap with managed Browser Fabric profile
+e4a1fda knowledge: map Browser Fabric policy failures to preconditions

@@ -151,13 +151,24 @@ def cmd_calendar(a: argparse.Namespace) -> int:
 
 
 def cmd_serve(a: argparse.Namespace) -> int:
+    from vati.app.process_lock import SessionAlreadyRunning, SessionLock
     from vati.app.service import ServiceConfig, SessionService, lake_bar_source
     from vati.market_data.feeds import BarLake
     cfg = ServiceConfig.load(a.config)
-    svc = SessionService(cfg, lake_bar_source(BarLake(cfg.lake_root), cfg.symbol, cfg.timeframe)).build()
-    if a.once:
-        svc.start(); print(json.dumps({"decision": svc.step_once(), "cycles": svc.cycles})); return 0
-    return svc.run_forever()
+    # P0-TRADE-005 — nothing prevented two serve processes for one alias. Each would hold
+    # its own idempotency set and both would place orders believing they were alone.
+    try:
+        lock = SessionLock(cfg.account_alias).acquire()
+    except SessionAlreadyRunning as exc:
+        print(json.dumps({"error": "session_already_running", "detail": str(exc)}))
+        return 2
+    try:
+        svc = SessionService(cfg, lake_bar_source(BarLake(cfg.lake_root), cfg.symbol, cfg.timeframe)).build()
+        if a.once:
+            svc.start(); print(json.dumps({"decision": svc.step_once(), "cycles": svc.cycles})); return 0
+        return svc.run_forever()
+    finally:
+        lock.release()
 
 
 def main(argv=None) -> int:
