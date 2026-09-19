@@ -26,33 +26,32 @@ import androidx.compose.foundation.verticalScroll
 import androidx.compose.material3.Button
 import androidx.compose.material3.Card
 import androidx.compose.material3.MaterialTheme
-import androidx.compose.material3.OutlinedTextField
 import androidx.compose.material3.Text
 import androidx.compose.material3.TextButton
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.DisposableEffect
+import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableIntStateOf
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
-import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.platform.LocalLifecycleOwner
-import androidx.compose.ui.text.input.PasswordVisualTransformation
 import androidx.compose.ui.unit.dp
 import androidx.core.content.ContextCompat
 import androidx.core.content.edit
 import androidx.fragment.app.FragmentActivity
 import androidx.lifecycle.Lifecycle
 import androidx.lifecycle.LifecycleEventObserver
+import com.dial.van.BuildConfig
 import com.dial.van.VanApplication
 import com.dial.van.command.CommandCentreActivity
 import com.dial.van.notification.VanNotificationListenerService
 import com.dial.van.overlay.FloatingOverlayService
 import com.dial.van.visual.VanTheme
-import kotlinx.coroutines.launch
 
 /**
  * First run.
@@ -146,7 +145,6 @@ private fun notificationListenerEnabled(context: Context): Boolean {
 private fun OnboardingFlow(onComplete: () -> Unit) {
     val context = LocalContext.current
     val app = context.applicationContext as VanApplication
-    val scope = rememberCoroutineScope()
     val scroll = rememberScrollState()
 
     // P3-AND-007 — survives rotation. Which optional steps the owner chose to pass is a
@@ -158,6 +156,7 @@ private fun OnboardingFlow(onComplete: () -> Unit) {
     var grants by remember { mutableStateOf(readGrants(context, app.gatewayClient.isPaired())) }
     var pairingError by remember { mutableStateOf<String?>(null) }
     var pairing by remember { mutableStateOf(false) }
+    var pairingAttempt by remember { mutableIntStateOf(0) }
 
     fun refresh() {
         grants = readGrants(context, app.gatewayClient.isPaired())
@@ -187,6 +186,22 @@ private fun OnboardingFlow(onComplete: () -> Unit) {
         skipped = skipped.mapNotNull { id -> OnboardingStep.entries.firstOrNull { it.id == id } }.toSet(),
     )
     val view = OnboardingPlan.view(step, grants)
+
+    LaunchedEffect(step, grants.paired, pairingAttempt) {
+        if (step == OnboardingStep.PAIRING && !grants.paired && !pairing) {
+            pairing = true
+            pairingError = null
+            runCatching {
+                app.gatewayClient.pairThisDevice(
+                    BuildConfig.VAN_GATEWAY_BASE_URL,
+                    S24_WIREGUARD_BOOTSTRAP,
+                    "owner-s24-ultra",
+                )
+            }.onFailure { pairingError = pairingMessage(it) }
+            pairing = false
+            refresh()
+        }
+    }
 
     Column(
         modifier = Modifier
@@ -224,12 +239,12 @@ private fun OnboardingFlow(onComplete: () -> Unit) {
         StepCard(
             title = view.title,
             body = view.body,
-            button = view.button,
+            button = if (step == OnboardingStep.PAIRING) "Retry connection" else view.button,
             skippable = view.skippable,
             onSkip = { skipped = (skipped + step.id).distinct() },
             onClick = {
                 when (step) {
-                    OnboardingStep.PAIRING -> Unit
+                    OnboardingStep.PAIRING -> if (!pairing) pairingAttempt++
                     OnboardingStep.OVERLAY -> context.startActivity(
                         Intent(
                             Settings.ACTION_MANAGE_OVERLAY_PERMISSION,
@@ -254,20 +269,18 @@ private fun OnboardingFlow(onComplete: () -> Unit) {
             },
             content = {
                 if (step == OnboardingStep.PAIRING) {
-                    PairingForm(
-                        busy = pairing,
-                        error = pairingError,
-                        onPair = { url, code ->
-                            pairing = true
-                            pairingError = null
-                            scope.launch {
-                                runCatching { app.gatewayClient.pairThisDevice(url, code) }
-                                    .onFailure { pairingError = pairingMessage(it) }
-                                pairing = false
-                                refresh()
-                            }
+                    Text(
+                        if (pairing) {
+                            "Connecting this owner S24 to VAN over WireGuard…"
+                        } else {
+                            "This VAN build is preconfigured for the owner S24. No gateway address or pairing code is required."
                         },
+                        color = MaterialTheme.colorScheme.onSurfaceVariant,
                     )
+                    pairingError?.let {
+                        Spacer(modifier = Modifier.height(8.dp))
+                        Text(it, color = MaterialTheme.colorScheme.error)
+                    }
                 }
             },
         )
@@ -280,47 +293,10 @@ private fun pairingMessage(error: Throwable): String = when (error.message) {
     "pairing_response_missing_ingress_token",
     "pairing_response_missing_device_access_token",
     -> "The gateway answered but did not send the keys this phone needs. Try generating a new code."
-    else -> "Van could not reach that address. Check it is the gateway's address and that the code has not expired."
+    else -> "VAN could not connect to the owner S24 WireGuard gateway. Make sure the VANTradingCore tunnel is on, then retry."
 }
 
-@Composable
-private fun PairingForm(
-    busy: Boolean,
-    error: String?,
-    onPair: (url: String, code: String) -> Unit,
-) {
-    // Saved, so a rotation mid-pairing does not make the owner re-type an address and a
-    // one-time code from another screen.
-    var url by rememberSaveable { mutableStateOf("") }
-    var code by rememberSaveable { mutableStateOf("") }
-
-    Column(verticalArrangement = Arrangement.spacedBy(8.dp)) {
-        OutlinedTextField(
-            value = url,
-            onValueChange = { url = it },
-            label = { Text("Gateway address") },
-            placeholder = { Text("https://…") },
-            singleLine = true,
-            modifier = Modifier.fillMaxWidth(),
-        )
-        OutlinedTextField(
-            value = code,
-            onValueChange = { code = it },
-            label = { Text("Pairing code") },
-            singleLine = true,
-            visualTransformation = PasswordVisualTransformation(),
-            modifier = Modifier.fillMaxWidth(),
-        )
-        error?.let { Text(it, color = MaterialTheme.colorScheme.error) }
-        Button(
-            onClick = { onPair(url, code) },
-            enabled = !busy && url.isNotBlank() && code.isNotBlank(),
-            modifier = Modifier.fillMaxWidth(),
-        ) {
-            Text(if (busy) "Pairing…" else "Pair now")
-        }
-    }
-}
+private const val S24_WIREGUARD_BOOTSTRAP = "wireguard-owner-s24-bootstrap"
 
 @Composable
 private fun StepCard(
