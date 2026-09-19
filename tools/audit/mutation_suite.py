@@ -300,6 +300,54 @@ ALL = [
     '            result="ok", device_id=device_id, capability="context.read",',
     "C13 bulk read of the owner graph leaves no matching trace"),
  ]),
+ # --- checkpoint 23: the interactive browser session -----------------------------
+ #
+ # The two control-lease entries are separate on purpose. A first pass tested preemption
+ # only, where the lease id and the generation both change, so deleting either comparison
+ # survived: two guards that always fire together are one guard, and nobody knows which.
+ # The suite drives each in isolation now.
+ (["tests/test_interactive_browser_session.py"], [
+   ("van_gateway/browser/control_lease.py",
+    '        if lease.generation != int(control_generation):\n            raise ControlLeaseError("control_generation_stale")',
+    '        if False:\n            raise ControlLeaseError("control_generation_stale")',
+    "C23 a stale control generation actuates"),
+   ("van_gateway/browser/control_lease.py",
+    '        if lease.control_lease_id != control_lease_id:\n            raise ControlLeaseError("control_lease_superseded")',
+    '        if False:\n            raise ControlLeaseError("control_lease_superseded")',
+    "C23 a fabricated control lease id actuates"),
+   ("van_gateway/browser/control_lease.py",
+    '            generation = int((await cur.fetchone())["g"]) + 1',
+    "            generation = 1",
+    "C23 the control fence never moves"),
+   ("van_gateway/browser/interactive_service.py",
+    '        if session.acked_viewport_revision != session.viewport.revision:\n            raise InteractiveSessionError("interactive_viewport_not_acknowledged")',
+    '        if False:\n            raise InteractiveSessionError("interactive_viewport_not_acknowledged")',
+    "C23 input lands before the device acknowledges the layout"),
+   ("van_gateway/browser/interactive_service.py",
+    "        if int(viewport_revision) != session.viewport.revision:",
+    "        if False:",
+    "C23 a stale viewport revision actuates"),
+   ("van_gateway/browser/service.py",
+    '        if int(row["lease_expires_at_ms"] or 0) <= now:\n            raise BrowserPolicyError("browser_profile_lease_expired")',
+    '        if int(row["lease_expires_at_ms"] or 0) + 30_000 <= now:\n            raise BrowserPolicyError("browser_profile_lease_expired")',
+    "C23 the cleanup grace extends actuation authority"),
+   ("van_gateway/browser/stream_grants.py",
+    '        if header.get("alg") != "ES256":',
+    "        if False:",
+    "C23 the grant verifier accepts the algorithm the token names"),
+   ("van_gateway/browser/stream_grants.py",
+    "                 WHERE nonce = ? AND redeemed_at_ms IS NULL AND revoked_at_ms IS NULL",
+    "                 WHERE nonce = ? AND revoked_at_ms IS NULL",
+    "C23 a stream grant is redeemable twice"),
+   ("van_gateway/events/bus.py",
+    "                   AND (target_device_id IS NULL OR target_device_id = ?)",
+    "                   AND (target_device_id IS NULL OR target_device_id IS NOT NULL OR target_device_id = ?)",
+    "C23 one device\'s events reach another device"),
+   ("van_gateway/events/bus.py",
+    'last = events[-1]["seq"] if truncated else max(ceiling, after_seq)',
+    'last = events[-1]["seq"] if events else max(ceiling, after_seq)',
+    "C23 the cursor sticks behind another device\'s rows"),
+ ]),
 ]
 
 APP_KT = "android/app/src/main/java/com/dial/van"

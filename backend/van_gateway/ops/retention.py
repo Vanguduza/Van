@@ -160,6 +160,41 @@ POLICIES: tuple[TablePolicy, ...] = (
     _p("automation_workflow_health", _TEL, "updated_at_ms"),
     _p("automation_runs", _TEL, "updated_at_ms"),
     _p("browser_tasks", _TEL, "updated_at_ms"),
+
+    # ---- Remote Browser Rev 1.5 (migration 27) ------------------------------
+    #
+    # The session is telemetry and the *binding* is owner state, which is the split that
+    # matters: a browsing session is a thing that happened, and the owner's device identity
+    # is a thing that is true until they say otherwise.
+    _p("browser_interactive_sessions", _TEL, "created_at_ms",
+       note="A session is an episode of browsing. What it produced lives in evidence and "
+            "in the mission it was bound to, both of which outlive it."),
+    _p("browser_control_leases", _CHILD, parent=("session_id", "browser_interactive_sessions"),
+       note="Meaningless without its session: who held the keyboard during an episode "
+            "nobody kept is not a fact anyone can use."),
+    _p("browser_session_targets", _CHILD, parent=("session_id", "browser_interactive_sessions")),
+    _p("browser_session_events", _EV, "occurred_at_ms",
+       note="ADR-RB-008's durable state changes — what VAN would cite if asked why a page "
+            "was open or who took control. Evidence outlives the session it describes."),
+    _p("browser_stream_grants", _EPH, "issued_at_ms",
+       note="Single-use, two-minute credentials. The row exists to make the nonce "
+            "un-replayable, and a week after expiry nothing can replay it."),
+    _p("browser_downloads", _EV, "created_at_ms",
+       note="What the owner actually got out of a session."),
+
+    # ---- owner-device binding (§5.7) ----------------------------------------
+    _p("owner_device_bindings", _OWNER,
+       note="§0D.3 — the cryptographic identity of the owner's handset. A timer must never "
+            "delete the only record of which device is allowed to be VAN; revocation and "
+            "rebinding are explicit, audited acts."),
+    _p("device_attestation_events", _EV, "occurred_at_ms",
+       note="Why a device was accepted or refused. The refusals matter most, and are "
+            "exactly what an attacker would want aged out."),
+    _p("owner_device_bootstrap_tokens", _EPH, "created_at_ms",
+       note="Single-use enrolment tokens, stored as hashes. Short-lived by design."),
+    _p("connectivity_config_versions", _OWNER,
+       note="ADR-RB-027 — the signed manifests the device will accept. Pruning history "
+            "here would remove the ability to roll back to the configuration that worked."),
     _p("capability_route_decisions", _TEL, "decided_at_ms"),
     _p("benchmark_runs", _TEL, "created_at_ms"),
     _p("eval_runs", _TEL, "created_at_ms"),
@@ -346,9 +381,14 @@ class RetentionService:
 
 #: Primary keys for the CHILD orphan sweep. Listed rather than introspected so a
 #: table renamed out from under this module fails loudly instead of matching nothing.
+#: The parent key a CHILD policy joins against. A parent table that is not in this map
+#: raises KeyError during the sweep rather than silently skipping the orphan cleanup — which
+#: is how the first version of the Remote Browser policies was caught: the classes were
+#: assigned, the map was not extended, and the orphan sweep failed on the first run.
 _PRIMARY_KEY = {
     "missions": "mission_id",
     "action_executions": "execution_id",
+    "browser_interactive_sessions": "session_id",
 }
 
 
