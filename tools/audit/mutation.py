@@ -16,7 +16,12 @@ def _purge_bytecode(root: pathlib.Path) -> None:
         shutil.rmtree(cache, ignore_errors=True)
 
 
-def run(mutations, tests, root="."):
+def run(mutations, tests, root=".", cwd=None):
+    """`root` is what the mutation paths are relative to; `cwd` is where pytest runs.
+
+    They differ for mutations outside backend/ — a workflow file or a Gradle script —
+    whose tests still have to be invoked from the directory their conftest expects.
+    """
     root = pathlib.Path(root)
     verdicts = []
     for path, old, new, why in mutations:
@@ -29,7 +34,7 @@ def run(mutations, tests, root="."):
             _purge_bytecode(root)
             result = subprocess.run(
                 [sys.executable, "-m", "pytest", *tests, "-q"],
-                capture_output=True, text=True,
+                capture_output=True, text=True, cwd=cwd,
             )
         finally:
             f.write_text(original)

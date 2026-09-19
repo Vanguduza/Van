@@ -4860,7 +4860,7 @@
         "android/app/src/main/java/com/dial/van/VanApplication.kt"
       ],
       "runtime_evidence": [
-        "https://github.com/Vanguduza/Van/actions/runs/35449984819"
+        "https://github.com/Vanguduza/Van/actions/runs/35451735330"
       ],
       "affected_components": [
         "android",
@@ -4874,7 +4874,7 @@
       "remediation_gate": "G1",
       "closure": {
         "state": "EXTERNALLY_BLOCKED_REPOSITORY_COMPLETE",
-        "summary": "ACCESS_NETWORK_STATE is declared — a normal permission, granted at install and never prompted, so there is no runtime request to add.\n\nThe second half matters more. The registration result is now bound and a failure marks the queue subsystem BROKEN with a sentence the owner can act on: queued commands wait for them to send rather than going out on their own. The degraded registry exists so VAN says which parts of itself are not working, and a capability that quietly does not exist is worse than one that fails loudly.\n\nThe neighbouring sweep asked the more useful question — not 'what other permission is missing', which lint answers across the whole platform, but 'where else is a failure swallowed into silence'. Eleven discarded-result sites exist and ten are teardown: unregisterReceiver, removeView, updateViewLayout, AudioRecord stop and release. Swallowing there is correct, because nothing useful can be done and a throw during teardown is worse. This was the only one on a *setup* path, where the result decides whether a feature exists at all.\n\ntests/contracts/test_android_permissions_match_the_apis_used.py guards the family rather than the instance: permission-gated APIs the app actually calls, checked against the manifest. One mutation survived the first run — dropping the `val registered =` binding left `registered.isFailure` in the source referring to nothing, which my string assertions accepted and only the compiler would have rejected. A static check that leans on the compiler to make it honest is measuring the wrong thing, so the binding is asserted too. Four mutations, four caught.",
+        "summary": "ACCESS_NETWORK_STATE is declared — a normal permission, granted at install and never prompted, so there is no runtime request to add.\n\nThe second half matters more. The registration result is now bound and a failure marks the queue subsystem BROKEN with a sentence the owner can act on: queued commands wait for them to send rather than going out on their own. The degraded registry exists so VAN says which parts of itself are not working, and a capability that quietly does not exist is worse than one that fails loudly.\n\nThe neighbouring sweep asked the more useful question — not 'what other permission is missing', which lint answers across the whole platform, but 'where else is a failure swallowed into silence'. Eleven discarded-result sites exist and ten are teardown: unregisterReceiver, removeView, updateViewLayout, AudioRecord stop and release. Swallowing there is correct, because nothing useful can be done and a throw during teardown is worse. This was the only one on a *setup* path, where the result decides whether a feature exists at all.\n\ntests/contracts/test_android_permissions_match_the_apis_used.py guards the family rather than the instance: permission-gated APIs the app actually calls, checked against the manifest. One mutation survived the first run — dropping the `val registered =` binding left `registered.isFailure` in the source referring to nothing, which my string assertions accepted and only the compiler would have rejected. A static check that leans on the compiler to make it honest is measuring the wrong thing, so the binding is asserted too. Four mutations, four caught.\n\nCONFIRMED in part by run 35451735330 on e64379e, the first fully green run on this branch: :app:lintDebug passed, which is the authority this closure named for the permission. MissingPermission is gone. That settles the manifest half and nothing more — lint reads the manifest against the call sites, it does not observe a phone losing and regaining a network.",
         "changed": [
           "android/app/src/main/AndroidManifest.xml",
           "android/app/src/main/java/com/dial/van/VanApplication.kt"
@@ -4882,11 +4882,56 @@
         "verified_by": [
           "tests/contracts/test_android_permissions_match_the_apis_used.py"
         ],
-        "runtime_evidence": [],
-        "residual": "The permission fix is proven only by lint passing; that the queue actually drains when a phone regains connectivity is device behaviour.",
+        "runtime_evidence": [
+          "https://github.com/Vanguduza/Van/actions/runs/35451735330"
+        ],
+        "residual": "That the queue actually drains when a phone regains connectivity. The permission itself is now proven by lint.",
         "residual_class": "ENVIRONMENT_UNVERIFIED",
-        "residual_reason": "Neither the app nor lint can run in this container. CI's :app:lintDebug is the authority for the permission, and the replay itself is Gate 14 work on a real device with a real network transition.",
+        "residual_reason": "Lint has confirmed the manifest declares what ConnectivityManager.registerNetworkCallback requires (run 35451735330). What remains is a real device making a real network transition with queued commands pending — Gate 14 work, and not something any static check or JVM test can stand in for.",
         "falsified_by": ":app:lintDebug reporting MissingPermission again, or a queued command failing to replay on a device after connectivity returns with the queue subsystem reported healthy."
+      }
+    },
+    {
+      "id": "P2-OPS-013",
+      "severity": "P2",
+      "domain": "operations",
+      "title": "CI assembled an APK and then deleted it",
+      "description": "Run 35451735330 is the first fully green run on this branch: :app:testDebugUnitTest, :app:assembleDebug and :app:lintDebug all passed. assembleDebug writes android/app/build/outputs/apk/debug/app-debug.apk, and the workflow uploaded preview images and a latency JSON but not that. The APK was destroyed with the runner workspace.\n\nSo the only machine in the programme that can build the Android app produced a build nobody could obtain. Gate 14 is the owner installing VAN on their own device; it had nothing to install, and the alternative — the owner reproducing an Android toolchain — is precisely what this repository's development container demonstrably cannot do, since dl.google.com is refused by the proxy (P0-AND-012).",
+      "requirement": "docs/VAN_CONSOLIDATED_DEPLOYMENT_READINESS_CLOSURE_BLUEPRINT_REV_1.md",
+      "authority": "VAN Consolidated Deployment-Readiness Closure Blueprint Rev 2",
+      "repository_evidence": [
+        ".github/workflows/van-ci.yml",
+        "tools/ci/github-actions-ci.yml"
+      ],
+      "runtime_evidence": [
+        "https://github.com/Vanguduza/Van/actions/runs/35451735330"
+      ],
+      "affected_components": [
+        "ci",
+        "android"
+      ],
+      "root_cause": "The Android job was written while it could not get past compilation, so what to do with a successful build was never a live question. It became one the moment the job went green, and nothing was watching for that.",
+      "remediation": "Upload the debug APK as a workflow artifact, with if-no-files-found: error so a run that stops producing one fails rather than publishing an empty artefact.",
+      "impact": "Gate 14 could not begin. Every ENVIRONMENT_UNVERIFIED residual waiting on a physical device was blocked behind an artefact that existed for four minutes and was thrown away.",
+      "validation_gate": "G1",
+      "current_status": "CLOSED",
+      "remediation_gate": "G1",
+      "closure": {
+        "state": "EXTERNALLY_BLOCKED_REPOSITORY_COMPLETE",
+        "summary": "The workflow now uploads android/app/build/outputs/apk/debug/*.apk as van-debug-apk, with if-no-files-found: error. That setting is the part worth arguing for: an empty artefact named van-debug-apk is worse than no artefact, because the owner downloads it, finds nothing, and cannot tell whether the build stopped producing an APK or the upload points somewhere wrong.\n\ntests/contracts/test_the_apk_leaves_ci.py guards it, and the interesting problem was writing a path assertion that does not merely agree with itself. Asserting that the workflow contains the path I put in the workflow proves nothing. So the path is tied to facts outside my belief: the module segment must be a real directory with a build.gradle.kts, that module must be the one settings.gradle.kts includes as :app — the name in the Gradle invocation CI runs — and it must apply com.android.application, because a library module emits an AAR and the path would be a fiction. A test also asserts no APK is committed anywhere: the repository ignores *.apk, and a checked-in binary would not be evidence that the current tree builds.\n\nBoth workflow copies were changed together; test_ci_workflow_is_what_it_claims.py already fails on drift, since install_github_workflow.py --apply would otherwise delete the step.\n\nSix mutations, six caught, including the two that matter most: pointing the upload at the release variant the build never assembles, and dropping :app:assembleDebug while keeping the upload.",
+        "changed": [
+          ".github/workflows/van-ci.yml",
+          "tools/ci/github-actions-ci.yml"
+        ],
+        "verified_by": [
+          "tests/contracts/test_the_apk_leaves_ci.py",
+          "tests/contracts/test_ci_workflow_is_what_it_claims.py"
+        ],
+        "runtime_evidence": [],
+        "residual": "No run has yet published the artifact. The next CI run on this branch either uploads an APK or fails at the upload step.",
+        "residual_class": "EXTERNAL_ARTEFACT",
+        "residual_reason": "The Android Gradle Plugin cannot be fetched in this container, so assembleDebug cannot be run here and the artifact cannot be produced locally to check. CI is the authority, as it is for everything Android in this programme, and it has not yet run this workflow. Recording this as evidenced before a run published the file would be exactly the reporting-external-actions-complete failure the audit brief forbids.",
+        "falsified_by": "The van-debug-apk artifact being absent from, or empty in, a run whose Android job succeeded; or the published APK failing to install on the owner's device, which is Gate 14's claim rather than this one's."
       }
     }
   ],

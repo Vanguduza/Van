@@ -23,8 +23,9 @@ tests passed, the code was real, and nothing could tell the difference from outs
 This programme closes those findings and, more importantly, installs machinery that makes
 the shape a CI failure rather than a discovery.
 
-**State:** 113 findings registered, 111 closed, 2 open. 1168 backend tests, 93 contract
+**State:** 114 findings registered, 112 closed, 2 open. 1168 backend tests, 99 contract
 tests, 270 Kotlin tests. Schema v24. Every gateway module reachable from an entry point.
+CI green on both jobs as of run 277.
 
 ### Resume in ten minutes
 
@@ -49,9 +50,10 @@ import json; d=json.load(open('evidence/van-system-audit/findings.json'))
 # Then read §7 of this document.
 ```
 
-**Check CI before anything else.** Run 277 on `e64379e` was in flight when this was
-written. `https://github.com/Vanguduza/Van/actions` — if the Android job is green, Gate 1's
-build half is complete and you should record it; if not, fix what it says first.
+**Check CI before anything else.** Run 277 on `e64379e` came back fully green — both jobs,
+every step, the first time in this programme. Do not take that on trust: read the newest run
+at `https://github.com/Vanguduza/Van/actions` and fix what it says before anything else.
+Nothing may be recorded as evidenced while CI is red.
 
 ---
 
@@ -494,13 +496,20 @@ to make a number look better.**
 
 Ordered by what I would do next. Reorder if you have reason.
 
-### 7.0 — Get CI green (blocking)
+### 7.0 — Keep CI green (blocking)
 
-Run 277 on `e64379e` was in flight at writing. The backend job has been green since
-`654d937`. The Android job has progressed: compile ✅ → unit tests ✅ → lint (one error,
-fixed in `e64379e`). If lint is now clean the Android job goes green for the first time.
+**Done, and it is the load-bearing fact of everything below.** Run 277
+(`35451735330`) on `e64379e` is the first fully green run on this branch: backend and
+`android-and-visual-evidence` both succeeded, every step. The Android job's ladder was
+compile ✅ (run 273) → unit tests ✅ (run 276) → lint ✅ (run 277), each rung a separate
+finding — `P0-AND-012`, `P0-AND-013`, `P1-AND-014`.
 
-**Do this first.** Nothing else should be recorded as evidenced while CI is red.
+What this changes: CI is now a *working* authority rather than an aspiration, so an
+Android claim can finally be evidenced instead of recorded as externally blocked. It also
+means a red Android job from here on is a regression you introduced, not the pre-existing
+condition it was for most of this programme.
+
+**Do this first, every time.** Nothing may be recorded as evidenced while CI is red.
 
 ### 7.1 — `P2-CTX-003`: Owner Context Graph lifecycle governance
 
@@ -634,9 +643,15 @@ does not exist. Consider writing one.
 ### 7.7 — Gate 1 completion and Gate 14
 
 Gate 1 (Android build) was blocked when this programme started and **is no longer** — CI can
-reach `dl.google.com`. Once the Android job is green, `:app:assembleDebug` has produced an
-APK on a runner. Consider uploading it as a workflow artifact so there is a downloadable
-build.
+reach `dl.google.com`, and run 277 assembled the app. The APK was then deleted with the
+runner workspace, which is `P2-OPS-013`: the workflow now uploads
+`android/app/build/outputs/apk/debug/*.apk` as `van-debug-apk` with
+`if-no-files-found: error`.
+
+That closure is **not yet evidenced** — it is `EXTERNAL_ARTEFACT` until a run actually
+publishes the file. Your first job is to check the newest run and, if `van-debug-apk` is
+there and non-empty, record the run and move `P2-OPS-013` to `INTEGRATED_AND_EVIDENCED`.
+If it is not there, the upload step is wrong and the finding is not closed.
 
 Gate 14 (physical S24) stays deferred per the owner's standing instruction: *leave physical
 verification for last*. The 14 `ENVIRONMENT_UNVERIFIED` residuals are mostly waiting on it.
@@ -718,7 +733,7 @@ tools/audit/reachability.py     TEST_ONLY vs NO_REFERENCE
 
 docs/project-state/AUTHORITY_MAP.yaml
 docs/VAN_CONSOLIDATED_DEPLOYMENT_READINESS_CLOSURE_BLUEPRINT_REV_1.md   (Rev 2 content)
-evidence/van-system-audit/findings.json        113 findings, closure records
+evidence/van-system-audit/findings.json        114 findings, closure records
 evidence/van-system-audit/component_ledger.json
 ```
 

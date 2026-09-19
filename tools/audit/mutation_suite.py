@@ -209,9 +209,46 @@ ALL = [
  ]),
 ]
 
+#: Mutations against files outside backend/ — the workflow, the Gradle scripts — checked by
+#: contract tests that run from the repository root. Kept separate rather than folded into
+#: ALL because both the mutation root and pytest's working directory differ.
+ROOT_LEVEL = [
+ # --- checkpoint 12: the APK leaves CI ----------------------------------------
+ (["tests/contracts/test_the_apk_leaves_ci.py",
+   "tests/contracts/test_ci_workflow_is_what_it_claims.py"], [
+   (".github/workflows/van-ci.yml",
+    """      - name: Upload debug APK
+        uses: actions/upload-artifact@v4
+        with:
+          name: van-debug-apk
+          path: android/app/build/outputs/apk/debug/*.apk
+          if-no-files-found: error
+""", "", "C12 drop the APK upload entirely"),
+   (".github/workflows/van-ci.yml", "if-no-files-found: error\n      - name: Shared visual",
+    "if-no-files-found: warn\n      - name: Shared visual",
+    "C12 publish an empty artefact instead of failing"),
+   (".github/workflows/van-ci.yml", "path: android/app/build/outputs/apk/debug/*.apk",
+    "path: android/app/build/outputs/apk/release/*.apk",
+    "C12 point the upload at a variant the build never assembles"),
+   (".github/workflows/van-ci.yml",
+    "./gradlew :app:testDebugUnitTest :app:assembleDebug :app:lintDebug",
+    "./gradlew :app:testDebugUnitTest :app:lintDebug",
+    "C12 stop assembling the APK but keep uploading it"),
+   ("android/settings.gradle.kts", 'include(":app")', 'include(":application")',
+    "C12 rename the module out from under the artifact path"),
+   ("android/app/build.gradle.kts", 'id("com.android.application")',
+    'id("com.android.library")', "C12 a module that emits an AAR, not an APK"),
+ ]),
+]
+
+ROOT = pathlib.Path(__file__).resolve().parents[2]
+
 survivors = []
 for tests, mutations in ALL:
     print(f"\n### {tests}")
     survivors += run(mutations, tests)
+for tests, mutations in ROOT_LEVEL:
+    print(f"\n### {tests}")
+    survivors += run(mutations, tests, root=ROOT, cwd=ROOT)
 print("\n================ SURVIVORS ================")
 print("\n".join(survivors) or "none")

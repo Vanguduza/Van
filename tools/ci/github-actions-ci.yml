@@ -127,6 +127,17 @@ jobs:
         run: |
           chmod +x gradlew
           ./gradlew :app:testDebugUnitTest :app:assembleDebug :app:lintDebug
+      # assembleDebug already produced this; without the upload it dies with the runner.
+      # Gate 14 is the owner installing VAN on their own device, and until an APK leaves
+      # CI there is nothing to install — the build being green is not the same as the
+      # build being obtainable. if-no-files-found: error so a run that quietly stops
+      # producing an APK fails here rather than publishing an empty artefact.
+      - name: Upload debug APK
+        uses: actions/upload-artifact@v4
+        with:
+          name: van-debug-apk
+          path: android/app/build/outputs/apk/debug/*.apk
+          if-no-files-found: error
       - name: Shared visual geometry tests
         working-directory: android
         run: ./gradlew :visual-preview:test
