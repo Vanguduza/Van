@@ -1,4 +1,4 @@
-# VAN trading intelligence and profitability — enhancement proposal Rev 2
+# VAN trading intelligence and profitability — enhancement proposal Rev 1.1
 
 **Status:** Proposal. **Not an authority document.** It amends nothing. Every item that changes live risk
 requires an owner-signed decision artifact under `PROJECT_CANONICAL_STATE.json → policy.agent_self_authorization_forbidden`.
@@ -6,9 +6,20 @@ requires an owner-signed decision artifact under `PROJECT_CANONICAL_STATE.json �
 **Authorities consulted:** `docs/VAN_TRADING_SYSTEM_BLUEPRINT_REV4_CONSOLIDATED.md`,
 `docs/VAN_TRADING_PRODUCTION_DEPLOYMENT_BLUEPRINT_REV5.md`, `trading/architecture/stack_lock.json`.
 **Authored:** 2026-09-19, from a repository review plus two rounds of owner refinement.
-**Rev 2 adds:** the Indicator Intelligence Layer (F7–F9, P6), the Portfolio Opportunity Allocator (F10, P7),
-the Strategy Coverage Map (P8), the Feature Drift Monitor (P9), capital-efficiency intelligence (P10), and a
-revised priority sequence.
+**Rev 1.1 adds:** §4 Market-State and Feature Intelligence Expansion (MS-1…MS-9), the Portfolio Opportunity
+Allocator (F10, P7), the Strategy Coverage Map (P8), the Feature Drift Monitor (P9), capital-efficiency
+intelligence (P10), and a revised priority sequence with three integrity prerequisites ahead of certification.
+
+The market-state and feature work is **not** a separate initiative. It strengthens the same architecture from
+the data end, and keeping it in one document makes the dependency chain explicit:
+
+```text
+market data → feature provenance / required_features enforcement → multi-timeframe market state
+  → feature expansion + redundancy gate → strategy signals → StrategyValidationCertificate
+  → Portfolio Opportunity Allocator → Risk Authority
+```
+
+MS-numbering is used inside §4 so the feature items do not collide with the existing P-series.
 
 ---
 
@@ -133,77 +144,8 @@ selects between order types, sessions or venues on measured execution quality. `
 defaulting to `"LIMIT"` — so the decision exists but is never learned.
 
 
-### F7 — `MarketState` is single-timeframe and does not record which timeframe it is
-
-`build_market_state(*, symbol, base, quote, bars: Sequence[Bar], ...)`
-(`trading/vati/intelligence/market_state.py:49`) takes **one** bar sequence. `MarketState` carries one
-`FeatureVector` and one `RegimeState`, and neither has a `timeframe` field.
-
-Two consequences, the second worse than the first:
-
-1. No strategy can express "H4 structural trend, H1 confirmation, M15 setup, M5 timing". Every question is
-   answered from one sequence.
-2. An M5-built state and an H1-built state for the same symbol at the same instant are **indistinguishable by
-   their recorded fields**, and `state_hash` does not separate them. `missed.py`'s `ex_ante_snapshot_hash` and
-   the ledger's decision record therefore would not identify what VATI actually looked at, the moment two
-   timeframes coexist.
-
-Fix (2) before building (1). It is a field addition to an audit record, not a feature.
-
-The storage tier is already multi-timeframe — `trading/vati/market_data/feeds/lake.py:18`:
-
-```python
-TIMEFRAMES_MS = {"M1": 60_000, "M5": 300_000, "M15": 900_000, "H1": 3_600_000, "H4": 14_400_000, "D1": 86_400_000}
-```
-
-one directory per symbol/timeframe, with slice manifests. Only the state tier is single-sequence, which makes
-multi-timeframe substantially cheaper than it appears.
-
-### F8 — `required_features` is declared by every capsule and read by nothing
-
-Capsule JSON declares `required_features` — for `FX-TREND-PULLBACK-01`:
-`["ema_fast", "ema_slow", "atr", "rsi", "swing_low", "swing_high"]`. **No file under `trading/vati/` reads that
-key.**
-
-Harmless today: there are eleven features and all are computed on every pass. It stops being harmless the
-moment the registry grows — a capsule could declare `adx` and trade silently without it, or with `None`, and
-nothing would notice. A declared-contract check is a **prerequisite** to expanding the feature set, not a
-follow-up to it.
-
-### F9 — The feature vector is compact by design, and two proposed families do not fit VAN's venues
-
-`FeatureVector` (`trading/vati/intelligence/features.py`) supplies `close`, `ema_fast`, `ema_slow`, `atr`,
-`rsi`, `realised_vol`, `vol_percentile`, `spread_percentile`, `trend_slope`, `range_compression`, `swing_high`,
-`swing_low`, `complete`, and already carries `feature_version: "features/1.0.0"` — partial provenance exists.
-
-Around it sits intelligence that is worth more than most chart indicators: CUSUM change-point detection, trend
-and volatility regimes, transition phase, session classification, event windows, market integrity, ZiG currency
-regime, execution-cost state and broker-liquidity state. Indicators are treated as evidence, never as
-buy/sell commands. That framing should survive any expansion unchanged.
-
-Two families from a conventional technical-analysis vocabulary do **not** transfer to VAN's venues:
-
-**Volume.** `Bar.volume` is populated from Dukascopy ask/bid volume and from tick aggregation
-(`trading/vati/market_data/bars.py:63`). FX spot has no consolidated traded volume — there is no central
-exchange. OBV, MFI, Chaikin money flow and volume profile would run on a broker-specific liquidity proxy that
-differs between Dukascopy, MT5 and cTrader for the same instrument at the same instant. `Bar.ticks` is honest
-about what it measures; `Bar.volume` invites a false reading.
-
-The polarity is the reverse of the usual assumption: **ZSE has real traded volume and FX does not**, so the
-volume family is more defensible on the illiquid end-of-day equity book than on liquid FX.
-
-**Microstructure.** There is no depth or order-book data anywhere in `trading/vati/`, and
-`trading/vati/risk/mandate.py:60` already lists in `HARD_FORBIDDEN_BEHAVIOURS`:
-
-```python
-"single_dom_as_total_fx_liquidity",
-"macro_causality_on_synthetics",
-```
-
-Order-flow imbalance, market depth, liquidity sweeps and single-broker fair-value-gap structures are therefore
-not a gap to fill — the mandate has already named the exact fallacy they would invite. Admitting them requires
-a mandate amendment plus a genuine multi-venue data source. `macro_causality_on_synthetics` similarly
-constrains cross-asset confirmation and relative strength across the Deriv synthetic universe.
+*(F7, F8 and F9 concern market-state and feature representation; they are stated in §4, where the
+work that closes them lives.)*
 
 ### F10 — There is no runtime in which two candidates coexist, so portfolio heat is allocated by arrival order
 
@@ -388,68 +330,9 @@ current "passive saves half a spread" approximation with the real trade-off — 
 selection against non-execution opportunity cost.
 
 
-### P6 — Multi-timeframe Indicator Intelligence Layer
+### P6 — *(superseded)*
 
-Not "100 indicators voting". A versioned registry of feature *families*, computed across strategy-selected
-timeframes, each admitted on evidence.
-
-```text
-                      RAW MARKET DATA
-        price  ·  volume (venue-gated)  ·  microstructure (mandate-gated)
-                            ▼
-                 TECHNICAL FEATURE REGISTRY
-   TREND            MOMENTUM         VOLATILITY
-   EMA slopes       RSI              ATR
-   ADX/DMI          ROC (multi-h)    Bollinger / Keltner
-   channels         stochastic       realised vol
-
-   STRUCTURE        VOLUME           LIQUIDITY
-   swing hierarchy  VWAP             spread
-   S/R zones        OBV   ─ ZSE      depth ─ FORBIDDEN (F9)
-   breakout state   MFI   ─ first    imbalance ─ FORBIDDEN (F9)
-                            ▼
-                  MULTI-TIMEFRAME FUSION
-                            ▼
-                REGIME-CONDITIONED STATE
-                            ▼
-                    STRATEGY CAPSULES
-```
-
-Every feature carries provenance, extending the existing `feature_version`:
-
-```text
-feature_id · feature_version · timeframe · lookback
-value · normalised_value · percentile · regime · as_of · data_quality
-```
-
-`MultiTimeframeMarketState` over the lake's existing `M1/M5/M15/H1/H4/D1`, with per-capsule timeframe
-selection — e.g. `FX-TREND-PULLBACK-01` reading H4 structure, H1 confirmation, M15 setup, M5 timing, rather
-than asking one sequence every question.
-
-**Redundancy control is the gate that makes expansion safe.** EMA20, EMA21, MACD, PPO and MA slope carry
-substantially the same information; adding them unchecked manufactures confluence. Before admission, a feature
-must show feature correlation, mutual information, **incremental** predictive value, stability by regime and by
-instrument, and out-of-sample contribution.
-
-This is the same discipline as P3: **a new feature needs a certificate the way a capsule does.** Reuse the
-`StrategyValidationCertificate` machinery rather than inventing a second evidence standard.
-
-**Confluence by function, never by tally.** Not `7 bullish vs 3 bearish = BUY`, but:
-
-```text
-Trend       bullish      Structure   resistance overhead
-Momentum    neutral      Liquidity   normal
-Volatility  elevated     Event risk  clear · Execution  normal
-```
-
-The strategy decides which evidence matters. This also gives VAN something to *say*: *"H1 trend remains
-bullish and ADX shows persistence, but M15 momentum has weakened and price is approaching H4 resistance. The
-setup is still eligible; confirmation quality is lower."*
-
-Prerequisites, in order: **F8** (`required_features` contract check), then **F7(2)** (`timeframe` on
-`MarketState`/`FeatureVector`), then the registry. Note that adding a timeframe declaration to the capsule
-schema rehashes every capsule — `capsule_hash` covers the whole document — so plan that migration rather than
-discovering it.
+The Indicator Intelligence Layer is specified in §4 as MS-1…MS-9.
 
 ### P7 — `OpportunityPortfolioAllocator`
 
@@ -532,7 +415,238 @@ Wednesdays is a capital-efficiency defect that per-trade R will never surface.
 
 ---
 
-## 4. Further enhancements
+## 4. Market-State and Feature Intelligence Expansion
+
+This section closes F7, F8 and F9 and specifies the feature work. It is ordered as a dependency chain: nothing
+below MS-3 is safe to build before MS-1 and MS-2 are closed, because a validation certificate must not certify
+a strategy against an ambiguous market-state representation or a silently missing feature dependency.
+
+### MS-1 (F7) — Timeframe is absent from `FeatureVector` and `MarketState`
+
+`build_market_state(*, symbol, base, quote, bars: Sequence[Bar], ...)`
+(`trading/vati/intelligence/market_state.py:49`) takes **one** bar sequence. `MarketState` carries one
+`FeatureVector` and one `RegimeState`, and neither has a `timeframe` field.
+
+Two consequences, the second worse than the first:
+
+1. No strategy can express "H4 structural trend, H1 confirmation, M15 setup, M5 timing". Every question is
+   answered from one sequence.
+2. An M5-built state and an H1-built state for the same symbol at the same instant are **indistinguishable by
+   their recorded fields**, and `state_hash` does not separate them. `missed.py`'s `ex_ante_snapshot_hash` and
+   the ledger's decision record therefore would not identify what VATI actually looked at, the moment two
+   timeframes coexist.
+
+Fix (2) before building (1). It is a field addition to an audit record, not a feature.
+
+The storage tier is already multi-timeframe — `trading/vati/market_data/feeds/lake.py:18`:
+
+```python
+TIMEFRAMES_MS = {"M1": 60_000, "M5": 300_000, "M15": 900_000, "H1": 3_600_000, "H4": 14_400_000, "D1": 86_400_000}
+```
+
+one directory per symbol/timeframe, with slice manifests. Only the state tier is single-sequence, which makes
+multi-timeframe substantially cheaper than it appears.
+
+**Treat this as an audit/provenance defect, not a feature request.** Add `timeframe` to `FeatureVector` and
+`MarketState`, and include it in canonical serialization and `state_hash`, **before** multi-timeframe state
+exists. Retrofitting it afterwards means every state recorded in between is unattributable.
+
+### MS-2 (F8) — `required_features` is declarative but unenforced
+
+Capsule JSON declares `required_features` — for `FX-TREND-PULLBACK-01`:
+`["ema_fast", "ema_slow", "atr", "rsi", "swing_low", "swing_high"]`. **No file under `trading/vati/` reads that
+key.**
+
+Harmless today: there are eleven features and all are computed on every pass. It stops being harmless the
+moment the registry grows — a capsule could declare `adx` and trade silently without it, or with `None`, and
+nothing would notice. A declared-contract check is a **prerequisite** to expanding the feature set, not a
+follow-up to it.
+
+**Make it fail closed.** Capsule admission and per-pass evaluation must refuse when a declared feature is:
+
+```text
+missing from the registry · unavailable for this venue class
+stale beyond its freshness contract · incompatible with the capsule's timeframe
+None when the capsule declares it required
+```
+
+A capsule that cannot obtain a feature it declared does not trade on the remainder. It abstains, with a reason
+code, exactly as it does for any other eligibility failure.
+
+### MS-3 — `MultiTimeframeMarketState`
+
+Reuse the lake's existing `M1/M5/M15/H1/H4/D1`. **Do not duplicate bar storage.** The storage tier is already
+multi-timeframe with slice manifests; only the state tier is single-sequence.
+
+Give capsules an explicit timeframe contract:
+
+```text
+structural_timeframe:  H4
+regime_timeframe:      H1
+setup_timeframe:       M15
+execution_timeframe:   M5
+```
+
+so a strategy stops asking one sequence every question. `FX-TREND-PULLBACK-01` reads structure from H4,
+confirms regime on H1, forms the pullback on M15 and times entry on M5.
+
+#### Capsule schema migration
+
+Adding a timeframe contract changes `capsule_hash`, which covers the whole capsule document. That must be an
+explicit, provenanced migration — not a silent rehash — so VAN can distinguish schema evolution from strategy
+mutation. `silent_strategy_mutation` is a hard-forbidden behaviour, and an unexplained hash change is
+indistinguishable from one.
+
+Each migrated capsule records:
+
+```text
+old_capsule_hash
+new_capsule_hash
+migration_reason        = MTF_SCHEMA_ADOPTION
+strategy_logic_changed  = false
+owner_authority_changed = false
+migrated_at_unix
+```
+
+A migration asserting `strategy_logic_changed = false` must be mechanically verifiable — the entry, stop,
+target and eligibility logic references are byte-identical to the parent. If they are not, it is a strategy
+revision and takes the normal owner-signed promotion path instead.
+
+### MS-4 — Venue-aware Feature Registry
+
+Every feature declares its own applicability, so a feature cannot be silently computed where its inputs do not
+mean what the name implies:
+
+```text
+feature_id · feature_version
+venue_classes            FX_SPOT · CFD · SYNTHETIC · ZSE_EQUITY · VFEX
+required_inputs          ohlc · ticks · volume · spread · depth
+timeframe_constraints    minimum bar count, permitted timeframes
+source_semantics         e.g. "tick count, not traded volume"
+provenance_version
+```
+
+`source_semantics` is the field that matters. It is what stops `volume` silently meaning centralized traded
+volume on an FX pair where no such quantity exists.
+
+Per-value provenance travels with the computed feature, extending the existing `feature_version`:
+
+```text
+feature_id · feature_version · timeframe · lookback
+value · normalised_value · percentile · regime · as_of · data_quality
+```
+
+### MS-5 — `FeatureValidationCertificate`
+
+A feature must prove **incremental** value against the existing feature set — not merely standalone
+correlation with returns. Standalone correlation is how a registry acquires five colinear trend measures and
+manufactures confluence.
+
+```text
+feature_id · feature_version
+baseline_feature_set          what it is being added to
+incremental_dsr               DSR of baseline+feature vs baseline alone
+incremental_pbo
+walk_forward_delta
+regime_stability              contribution by regime
+instrument_stability          contribution by instrument
+redundancy_metrics            correlation, mutual information vs baseline
+leakage_result                the same one-switch decision-time test
+validation_hash
+```
+
+Only a validated feature may enter a production capsule's `required_features`. This is the same evidence
+standard as P3's `StrategyValidationCertificate`, deliberately reusing that machinery rather than inventing a
+second one — and it inherits F3's corrected `dsr_probability >= 0.95` contract.
+
+### MS-6 — Functional Confluence Engine
+
+Aggregate evidence **by function**, never by tally:
+
+```text
+TREND        MOMENTUM      VOLATILITY    STRUCTURE
+LIQUIDITY    EVENT         EXECUTION     CROSS_ASSET
+```
+
+`7 bullish indicators vs 3 bearish = BUY` is forbidden. It destroys the information that makes confluence
+useful — *which kind* of evidence agrees — and it double-counts colinear features by construction.
+
+The strategy decides which functional axes matter to it. The engine only reports state per axis. This is also
+what lets VAN speak usefully: *"H1 trend remains bullish and ADX shows persistence, but M15 momentum has
+weakened and price is approaching H4 resistance. The setup is still eligible; confirmation quality is lower."*
+
+### MS-7 — Controlled feature expansion, first tranche
+
+```text
+ADX / DMI
+Donchian  OR  Keltner
+MACD      OR  PPO
+multi-horizon ROC
+```
+
+**Do not add both members of a highly redundant pair without evidence.** MACD and PPO are the same construction
+under different normalisation; Donchian and Keltner both answer "where is price within its recent envelope".
+Each candidate passes MS-5 before admission, and a second member of a pair must show incremental value *over
+the first*, not over the baseline without either.
+
+### MS-8 — Venue-gated volume intelligence
+
+```text
+ZSE / VFEX   real traded volume exists and is meaningful
+             → OBV, MFI, money-flow and volume-profile features permitted
+               where provenance is sound
+
+FX spot      no consolidated traded volume exists
+             → Bar.ticks and broker volume are ACTIVITY PROXIES,
+               labelled as such in source_semantics
+             → no feature may present them as traded volume
+```
+
+The polarity is the reverse of the usual assumption: the volume family is more defensible on the illiquid
+end-of-day equity book than on liquid FX.
+
+### MS-9 (F9) — Hard exclusion: microstructure pseudo-intelligence
+
+`FeatureVector` (`trading/vati/intelligence/features.py`) supplies `close`, `ema_fast`, `ema_slow`, `atr`,
+`rsi`, `realised_vol`, `vol_percentile`, `spread_percentile`, `trend_slope`, `range_compression`, `swing_high`,
+`swing_low`, `complete`, and already carries `feature_version: "features/1.0.0"` — partial provenance exists.
+
+Around it sits intelligence that is worth more than most chart indicators: CUSUM change-point detection, trend
+and volatility regimes, transition phase, session classification, event windows, market integrity, ZiG currency
+regime, execution-cost state and broker-liquidity state. Indicators are treated as evidence, never as
+buy/sell commands. That framing should survive any expansion unchanged.
+
+Two families from a conventional technical-analysis vocabulary do **not** transfer to VAN's venues:
+
+**Volume.** `Bar.volume` is populated from Dukascopy ask/bid volume and from tick aggregation
+(`trading/vati/market_data/bars.py:63`). FX spot has no consolidated traded volume — there is no central
+exchange. OBV, MFI, Chaikin money flow and volume profile would run on a broker-specific liquidity proxy that
+differs between Dukascopy, MT5 and cTrader for the same instrument at the same instant. `Bar.ticks` is honest
+about what it measures; `Bar.volume` invites a false reading.
+
+The polarity is the reverse of the usual assumption: **ZSE has real traded volume and FX does not**, so the
+volume family is more defensible on the illiquid end-of-day equity book than on liquid FX.
+
+**Microstructure.** There is no depth or order-book data anywhere in `trading/vati/`, and
+`trading/vati/risk/mandate.py:60` already lists in `HARD_FORBIDDEN_BEHAVIOURS`:
+
+```python
+"single_dom_as_total_fx_liquidity",
+"macro_causality_on_synthetics",
+```
+
+Order-flow imbalance, market depth, liquidity sweeps and single-broker fair-value-gap structures are therefore
+not a gap to fill — the mandate has already named the exact fallacy they would invite. Admitting them requires
+a mandate amendment plus a genuine multi-venue data source. `macro_causality_on_synthetics` similarly
+constrains cross-asset confirmation and relative strength across the Deriv synthetic universe.
+
+Depth and order-flow features remain **outside scope** until there is genuine multi-venue data *and* an
+explicit mandate amendment. Neither condition holds today, and the prohibition is deliberate rather than an
+oversight.
+
+---
+
+## 5. Further enhancements
 
 | Enhancement | Why | Authority behaviour |
 |---|---|---|
@@ -595,14 +709,14 @@ browser/LLM evidence MAY:  explain · classify · flag contradiction · reduce c
 
 ---
 
-## 5. Target architecture
+## 6. Target architecture
 
 ```text
       MARKET DATA  +  EVENTS  +  PRIMARY-SOURCE BROWSER RESEARCH
                             ▼
-                  FEATURE INTELLIGENCE                        (P6)
+                  FEATURE INTELLIGENCE                       (§4 MS)
      multi-timeframe · structure · trend · momentum · volatility
-        volume (venue-gated) · liquidity · cross-asset
+        volume (venue-gated MS-8) · liquidity · cross-asset
                             ▼
                       REGIME ENGINE
                             ▼
@@ -643,31 +757,43 @@ everything right of it remains exactly as deterministic as it is today.
 
 ---
 
-## 6. Priority order
+## 7. Priority order
+
+Three cheap integrity fixes come before anything certifies anything. A validation certificate must not certify
+a strategy against an ambiguous market-state representation or a silently missing feature dependency — so the
+prerequisites are numbered 0A–0C rather than folded into the main sequence.
 
 | # | Work | Changes live risk? | New owner authority? |
 |---|---|---|---|
-| 1 | **F3 DSR contract normalization** | no | no |
-| 2 | **P3 `StrategyValidationCertificate`** wired into `CapsuleRegistry.promote` (closes F3's discard, F4's opaque evidence) | no | no |
-| 3 | **F8 + F7(2)** — `required_features` contract check; `timeframe` on `MarketState`/`FeatureVector` | no | no |
-| 4 | **P6 multi-timeframe Indicator Intelligence** over the existing lake timeframes | no | capsule schema rehash |
-| 5 | **P7 `OpportunityPortfolioAllocator`** (+ the F10 runtime decision) | selection only, never size | no |
-| 6 | **P1 per-strategy capital budgets** + `CapitalBudgetProposal` | **yes — raises ceilings** | **yes, A4** |
-| 7 | **P2 `PortfolioDependencyEngine`**, populating the dead `correlation_multiplier` | reduce-only | no |
-| 8 | **P5 `ExecutionPolicyEngine`** and **P4 exit-policy research** | reduce-only / research | template approval |
-| 9 | **P9 feature drift** and **P8 strategy coverage** research | no | no |
+| **0A** | **F3** — correct the DSR gate to `dsr_probability >= 0.95` in Rev 2 §551 and Rev 3 D7 | no | no |
+| **0B** | **MS-2** — enforce `required_features`, fail closed | no | no |
+| **0C** | **MS-1** — `timeframe` on `FeatureVector`/`MarketState`, in canonical serialization and `state_hash` | no | no |
+| 1 | **MS-3** `MultiTimeframeMarketState` over the existing lake, with the provenanced capsule migration | no | capsule rehash, provenanced |
+| 2 | **P3** `StrategyValidationCertificate` wired into `CapsuleRegistry.promote` (closes F3's discard, F4's opaque evidence) | no | no |
+| 3 | **MS-4/MS-5** venue-aware registry + `FeatureValidationCertificate`, then **MS-7** first tranche | no | no |
+| 4 | **MS-6** functional confluence engine | no | no |
+| 5 | **P7** `OpportunityPortfolioAllocator` (+ the F10 runtime decision) | selection only, never size | no |
+| 6 | **P1** per-strategy capital budgets + `CapitalBudgetProposal` | **yes — raises ceilings** | **yes, A4** |
+| 7 | **P2** `PortfolioDependencyEngine`, populating the dead `correlation_multiplier` | reduce-only | no |
+| 8 | **P5** `ExecutionPolicyEngine` and **P4** exit-policy research | reduce-only / research | template approval |
+| 9 | **MS-8** venue-gated volume (ZSE first); **P9** feature drift; **P8** strategy coverage | no | no |
 | 10 | Continuous volatility targeting; portfolio Expected Shortfall | reduce-only | no |
-| 11 | **P10 / §4** uncertainty-aware capital promotion; browser-powered evidence | proposal / T2 only | per-capability |
+| 11 | **P10** / §5 uncertainty-aware capital promotion; browser-powered evidence | proposal / T2 only | per-capability |
+| — | **MS-9** microstructure | out of scope | mandate amendment + multi-venue data |
 
-Item 1 is first because the `> 0` wording in Rev 2 §551 and Rev 3 D7 can currently make an invalid strategy
-look validated — it is a live gate that certifies noise, and everything downstream inherits it.
+0A is first because the `> 0` wording can currently make an invalid strategy look validated — it is a live
+gate that certifies noise, and every certificate built on it inherits the defect.
 
-Items 1–5 and 7–11 change no ceiling. **Item 6 is the only one requiring a new owner decision artifact,**
+0B and 0C are each a few hours of work and neither adds a feature. Both become materially harder after the
+thing they protect exists: retrofitting `timeframe` once two timeframes coexist leaves every state recorded in
+between unattributable.
+
+Everything except item 6 changes no ceiling. **Item 6 is the only one requiring a new owner decision artifact,**
 because it is the only one that can raise one.
 
 ---
 
-## 7. What must not change
+## 8. What must not change
 
 - `clamp_multiplier` stays `[0,1]`. No runtime multiplier may exceed 1, ever.
 - Automatic learning reduces, demotes, suspends, tightens or proposes. It never raises a ceiling.
@@ -677,6 +803,11 @@ because it is the only one that can raise one.
 - VATI remains the single execution route. Nothing here creates a second sender.
 - Indicators describe market state. They are evidence, never order authority. No feature, confluence score or
   timeframe agreement may size, promote or execute anything.
+- A capsule that cannot obtain a feature it declared abstains with a reason code. It never trades on the
+  remainder.
+- Confluence is reported by function. A bullish-versus-bearish tally is forbidden.
+- A capsule hash change carries a migration record. An unexplained rehash is indistinguishable from
+  `silent_strategy_mutation`, which is hard-forbidden.
 - The Portfolio Opportunity Allocator selects among candidates. It may reject or defer; it may never increase
   a candidate's risk, and it sits before the Risk Authority, never in place of it.
 - Volume and microstructure features stay venue-gated. `single_dom_as_total_fx_liquidity` and
