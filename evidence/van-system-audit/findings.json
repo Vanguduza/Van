@@ -23,7 +23,7 @@
     "P0": 15,
     "P1": 32,
     "P2": 22,
-    "P3": 26,
+    "P3": 27,
     "P4": 7
   },
   "root_causes": [
@@ -4040,8 +4040,8 @@
       "requirement": "docs/VAN_CONSOLIDATED_DEPLOYMENT_READINESS_CLOSURE_BLUEPRINT_REV_1.md",
       "authority": "VAN Consolidated Deployment-Readiness Closure Blueprint Rev 2",
       "repository_evidence": [
-        "docs/SECURITY_POLICY.md:1",
-        "docs/PROJECT_TRUTH_PROTOCOL.md:1"
+        "docs/project-state/AUTHORITY_MAP.yaml",
+        "tools/ci/authority_map.py"
       ],
       "runtime_evidence": [],
       "affected_components": [
@@ -4051,8 +4051,24 @@
       "remediation": "Create docs/project-state/AUTHORITY_MAP.yaml binding each invariant to one owning document, its implementation and its test, and fail CI on an unowned or doubly-owned invariant.",
       "impact": "A contradiction between authorities is resolved by whoever read one of them last.",
       "validation_gate": "G0",
-      "current_status": "OPEN",
-      "remediation_gate": "G0"
+      "current_status": "CLOSED",
+      "remediation_gate": "G0",
+      "closure": {
+        "state": "INTEGRATED_AND_EVIDENCED",
+        "summary": "docs/project-state/AUTHORITY_MAP.yaml binds 36 invariants across 11 domains to the six documents that own them, and tools/ci/authority_map.py enforces the binding.\n\nThe design turns on what a machine can actually check. It cannot tell that two prose documents contradict each other. It can tell that two of them claim authority over the same subject, which is the condition under which a contradiction survives — and which is the shape the audit found, a document describing a capability as BUILT living next to one describing the gap because neither owned the claim. So each invariant names a dotted subject, exactly one owner decides it, and a second claim on the same subject fails CI. The same rule restated under a second subject fails too, because one rule owned twice under two names is the same failure in a disguise.\n\nThe weaker failure — a map that is decorative — is closed by the rest of the gate: every owner, implementation and test path must exist, every invariant must name at least one of each, and every finding it cites must be in the register and closed. That last check is the one that stops the map being written ahead of the work, which is the failure mode the whole audit is about, one level up.\n\nNine tests inject each defect and assert the gate rejects it, including the gate's own entry: governance.invariant_ownership is owned by the closure blueprint, implemented by the gate and tested by its own test file. docs/SECURITY_POLICY.md owns six invariants and is not edited — naming an owner is a statement about where authority lives, not a change to it.\n\nOne mutation survived the first run and named a real gap: the gate checked that an owner exists, not which documents may own. 'A path under docs/' was the whole check, so a derived document could acquire authority by being cited — which is how docs/IMPLEMENTATION_LEDGER.md came to certify 33 of 36 workstreams against a blueprint it does not own (P1-DOC-001). The map now declares `owning_documents` and the gate refuses an owner outside it, and refuses a declared document that does not exist so the list cannot be padded to make a citation pass. Five mutations, five caught.",
+        "changed": [
+          "docs/project-state/AUTHORITY_MAP.yaml",
+          "tools/ci/authority_map.py",
+          "tools/ci/github-actions-ci.yml"
+        ],
+        "verified_by": [
+          "tests/contracts/test_authority_map.py"
+        ],
+        "runtime_evidence": [],
+        "residual": "The map covers the invariants this programme established and can point at a test. Rules in the canonical documents that nothing enforces are not listed.",
+        "residual_class": "DELIBERATE_SCOPE",
+        "residual_reason": "An invariant with no test is a claim, and a map that held claims would reintroduce the problem it exists to solve: a reader would not be able to tell an enforced rule from a stated intention. Adding an entry is the same work as enforcing the rule, which is the right cost."
+      }
     },
     {
       "id": "P1-VERIFY-003",
@@ -4350,6 +4366,46 @@
         "residual": "No benchmark suite has a task corpus, so no technology can be admitted; and no external observation is compared with the owner model, so none is ever marked as contradicting it.",
         "residual_class": "DELIBERATE_SCOPE",
         "residual_reason": "Writing fourteen task corpora is a programme, not a closure step, and the absence produces the correct fail-closed behaviour rather than a wrong one. Contradiction detection needs a comparison VAN does not perform, and a heuristic one would let a search result overrule the owner. Both absences are now reported on the surfaces where their emptiness would otherwise read as a result."
+      }
+    },
+    {
+      "id": "P3-OPS-010",
+      "severity": "P3",
+      "domain": "operations",
+      "title": "The workflow installer would have deleted most of CI",
+      "description": "tools/ci/install_github_workflow.py copies tools/ci/github-actions-ci.yml over .github/workflows/van-ci.yml on --apply, and its docstring states the template is 'kept byte-for-byte aligned with the live workflow'. Nothing enforced that. The template had drifted seventy lines behind and was missing the maturity gate, the maturity-gate self-test, the Hermes and trading policy suites, the automation and browser fail-closed proofs, the context-latency evidence step and the pure-Kotlin verification run. Running the installer would have removed all of it, including the gate that exists to stop a capability being described as BUILT with no production path.",
+      "requirement": "docs/VAN_CONSOLIDATED_DEPLOYMENT_READINESS_CLOSURE_BLUEPRINT_REV_1.md",
+      "authority": "VAN Consolidated Deployment-Readiness Closure Blueprint Rev 2",
+      "repository_evidence": [
+        "tools/ci/install_github_workflow.py",
+        "tools/ci/github-actions-ci.yml",
+        ".github/workflows/van-ci.yml"
+      ],
+      "runtime_evidence": [],
+      "affected_components": [
+        "ops",
+        "ci"
+      ],
+      "root_cause": "A claim in a docstring with nothing checking it — the audit's own defect shape, applied to the tooling that was supposed to catch it.",
+      "remediation": "Re-sync the template from the live workflow and assert byte equality, plus the survival of each load-bearing step, in a contract test.",
+      "impact": "One run of a tool documented as idempotent would have silently disarmed CI, and the next build would have gone green with nothing checking the ledgers.",
+      "validation_gate": "G11",
+      "current_status": "CLOSED",
+      "remediation_gate": "G11",
+      "closure": {
+        "state": "INTEGRATED_AND_EVIDENCED",
+        "summary": "The template is re-synced from the live workflow and both now also run the authority-map gate and its self-test. tests/contracts/test_ci_workflow_is_what_it_claims.py asserts the byte equality the installer's docstring already claimed, and separately asserts that each load-bearing step survives an install — named individually rather than counted, so a renamed step is noticed rather than absorbed by a total that still adds up.\n\nTwo further checks: the maturity gate must run before the test steps it guards, because a truth gate that runs after the suite reports failures in an order that invites reading the test summary and concluding the system is fine; and the installer must still name the two paths these tests check, so moving its source or destination cannot leave the tests checking nothing.",
+        "changed": [
+          "tools/ci/github-actions-ci.yml",
+          ".github/workflows/van-ci.yml"
+        ],
+        "verified_by": [
+          "tests/contracts/test_ci_workflow_is_what_it_claims.py"
+        ],
+        "runtime_evidence": [],
+        "residual": null,
+        "residual_class": null,
+        "residual_reason": null
       }
     }
   ],

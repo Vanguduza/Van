@@ -1,0 +1,517 @@
+# P3-DOC-005 — which document owns which invariant.
+#
+# Thirty-one canonical documents, around 13,700 lines. Nothing said which one is
+# authoritative for a given rule, so two could each be locally correct and jointly
+# contradictory, and a reader had no way to know which to believe. That is not a
+# documentation tidiness problem: the audit's own findings include cases where a document
+# described a capability as BUILT while another described the gap, and both survived
+# because neither owned the claim.
+#
+# A machine cannot detect a contradiction between two prose documents. What it can detect
+# is two documents both claiming authority over the same subject, which is the condition
+# that lets a contradiction persist. So every invariant here names:
+#
+#   subject         a dotted path. Exactly one document owns each subject; a second claim
+#                   on the same subject is a CI failure.
+#   owner           the document that decides this. Its word is final, and any other
+#                   document describing it is a restatement that may be wrong.
+#   statement       the invariant in one sentence, in the present tense, falsifiable.
+#   implemented_by  where the rule is enforced in code, not where it is mentioned.
+#   tested_by       the test that fails if the rule stops holding.
+#   findings        the audit findings that established or restored it.
+#
+# The rule for adding an entry is the rule the whole closure pass runs on: an invariant
+# with no test is a claim, and this file does not hold claims. tools/ci/authority_map.py
+# refuses an entry whose owner, implementation or test does not exist, refuses a subject
+# owned twice, and refuses a finding id the register does not contain.
+#
+# docs/SECURITY_POLICY.md is pinned by SHA-256 and is not edited by this programme. It
+# appears here as an owner, which is a statement about where authority lives, not a change
+# to it.
+
+version: 1
+generated_for: "VAN Consolidated Deployment-Readiness Closure Blueprint Rev 2"
+
+# The documents permitted to own an invariant, declared rather than inferred from whatever
+# happens to appear below. Without this, "the owner is a file under docs/" is the whole
+# check, and a derived document could acquire authority by being cited — which is how
+# docs/IMPLEMENTATION_LEDGER.md came to certify 33 of 36 workstreams against a blueprint
+# it does not own (P1-DOC-001). A ledger records what was done; it does not decide what
+# must be true. Adding a document here is a deliberate act.
+owning_documents:
+  - docs/SECURITY_POLICY.md
+  - docs/PROJECT_TRUTH_PROTOCOL.md
+  - docs/VAN_FINISHED_PRODUCT_BLUEPRINT_REV_1.md
+  - docs/VAN_CONSOLIDATED_DEPLOYMENT_READINESS_CLOSURE_BLUEPRINT_REV_1.md
+  - docs/VAN_BROWSER_INTELLIGENCE_AUTOMATION_FABRIC_REV_1_2_EXPERT_REVIEW.md
+  - docs/VAN_TRADING_PRODUCTION_DEPLOYMENT_BLUEPRINT_REV5.md
+
+invariants:
+
+  # ----------------------------------------------------------------- authority
+
+  - subject: authority.action_class
+    owner: docs/SECURITY_POLICY.md
+    statement: >-
+      An action's class A1-A5 decides what gate it must pass, and the effective class is
+      the stronger of what the client signed and what the resolver established.
+    implemented_by:
+      - backend/van_gateway/command/resolver.py
+      - backend/van_gateway/action/registry.py
+    tested_by:
+      - backend/tests/test_typed_command_resolver.py
+      - backend/tests/test_command_authority_constraints.py
+    findings: [P0-SEC-001, P1-VERIFY-003]
+
+  - subject: authority.owner_approval
+    owner: docs/SECURITY_POLICY.md
+    statement: >-
+      An A4 action requires a signed owner approval bound to that command, and a non-empty
+      approval token confers no authority by itself.
+    implemented_by:
+      - backend/van_gateway/approval/service.py
+    tested_by:
+      - backend/tests/test_a4_owner_approval.py
+    findings: [P0-SEC-001]
+
+  - subject: authority.internal_control_scopes
+    owner: docs/SECURITY_POLICY.md
+    statement: >-
+      A privileged control route names the scope it requires, and a credential without that
+      scope is refused rather than falling through to owner-device authentication.
+    implemented_by:
+      - backend/van_gateway/app.py
+    tested_by:
+      - backend/tests/test_control_scopes.py
+    findings: [P0-SEC-001]
+
+  - subject: authority.learning_cannot_widen
+    owner: docs/VAN_FINISHED_PRODUCT_BLUEPRINT_REV_1.md
+    statement: >-
+      The mapping from an action to its authority class to its required gate is policy
+      data; no learning path may write it, and a learned strategy is never offered to a
+      mission whose envelope does not already reach the ceiling it was exercised under.
+    implemented_by:
+      - backend/van_gateway/evolution/radar.py
+      - backend/van_gateway/learning/feed.py
+    tested_by:
+      - backend/tests/test_learning_records_and_bounds.py
+    findings: [P1-LEARN-002]
+
+  - subject: authority.earned_autonomy_ceiling
+    owner: docs/VAN_FINISHED_PRODUCT_BLUEPRINT_REV_1.md
+    statement: >-
+      History can never mint standing authority: the earned autonomy ceiling caps below
+      every level that acts without asking, and demonstrated unreliability suspends an
+      owner grant until the domain recovers.
+    implemented_by:
+      - backend/van_gateway/proactive/autonomy.py
+    tested_by:
+      - backend/tests/test_proactive_evolution_eval.py
+      - backend/tests/test_learning_records_and_bounds.py
+    findings: [P1-LEARN-002]
+
+  # --------------------------------------------------------------- trust boundary
+
+  - subject: trust.external_event_is_not_a_command
+    owner: docs/SECURITY_POLICY.md
+    statement: >-
+      Content arriving from a third-party channel is data. It cannot request a mutating
+      action, cannot claim owner trust, and a bad signature is a refusal rather than a
+      downgrade to a lower trust level.
+    implemented_by:
+      - backend/van_gateway/automation/events.py
+      - backend/van_gateway/command/ingress_trust.py
+    tested_by:
+      - backend/tests/test_automation_event_ingress.py
+      - backend/tests/test_ingress_trust_boundary.py
+    findings: [P0-SEC-002, P2-AUTO-002]
+
+  - subject: trust.replay_and_nonce
+    owner: docs/SECURITY_POLICY.md
+    statement: >-
+      A signed command is accepted once; a replayed nonce, an expired command, or a
+      concurrent duplicate of the same idempotency key is refused.
+    implemented_by:
+      - backend/van_gateway/command/nonce.py
+    tested_by:
+      - backend/tests/test_replay_and_audit_chain.py
+    findings: [P1-SEC-005]
+
+  - subject: trust.audit_chain
+    owner: docs/SECURITY_POLICY.md
+    statement: >-
+      The audit log is hash-chained, and a prune from the start records an anchor naming
+      how many rows were removed and what the last removed row hashed to.
+    implemented_by:
+      - backend/van_gateway/audit/service.py
+      - backend/van_gateway/ops/retention.py
+    tested_by:
+      - backend/tests/test_replay_and_audit_chain.py
+    findings: [P1-SEC-006, P3-OPS-001]
+
+  - subject: trust.payment_instruments
+    owner: docs/SECURITY_POLICY.md
+    statement: >-
+      No automation path can reach a payment instrument. The credential resolver refuses
+      payment scopes and no route, model or resolver path exists that would supply one.
+    implemented_by:
+      - backend/van_gateway/automation/credentials.py
+      - backend/van_gateway/automation/payments.py
+    tested_by:
+      - backend/tests/test_automation_security_contracts.py
+      - backend/tests/test_payment_boundary.py
+    findings: [P2-AUTO-002]
+
+  - subject: trust.browser_escalation
+    owner: docs/VAN_BROWSER_INTELLIGENCE_AUTOMATION_FABRIC_REV_1_2_EXPERT_REVIEW.md
+    statement: >-
+      A payment, an injection refusal or an A4/A5 request on a browsing surface is
+      POLICY_FORBIDDEN and never becomes an owner prompt, because a prompt the target
+      surface can provoke is a way to obtain authority rather than to supervise it.
+    implemented_by:
+      - backend/van_gateway/browser/models.py
+      - backend/van_gateway/computer_use/fabric.py
+    tested_by:
+      - backend/tests/test_browser_escalation_boundary.py
+      - backend/tests/test_permissions_computeruse_verifiers.py
+    findings: [P2-CU-001]
+
+  # ---------------------------------------------------------------- verification
+
+  - subject: verification.no_success_without_evidence
+    owner: docs/VAN_FINISHED_PRODUCT_BLUEPRINT_REV_1.md
+    statement: >-
+      VERIFIED_SUCCESS is unreachable without a verification record produced by a
+      registered verifier that observed the target system, with at least one evidence
+      reference and no unmet postcondition. There is no parameter to hand a receipt in.
+    implemented_by:
+      - backend/van_gateway/mission/service.py
+      - backend/van_gateway/verification/production.py
+    tested_by:
+      - backend/tests/test_verification_is_performed.py
+    findings: [P0-VERIFY-001]
+
+  - subject: verification.independent_observation
+    owner: docs/VAN_FINISHED_PRODUCT_BLUEPRINT_REV_1.md
+    statement: >-
+      An observation must reach a system independent of whoever did the work. Asking the
+      engine that acted is forwarding a claim, and a strategy with no independent source
+      resolves to UNVERIFIABLE carrying the reason it could not be observed.
+    implemented_by:
+      - backend/van_gateway/verification/observations.py
+      - backend/van_gateway/mission/verifiers.py
+    tested_by:
+      - backend/tests/test_verification_is_performed.py
+    findings: [P2-VERIFY-002]
+
+  - subject: verification.owner_command_success_contract
+    owner: docs/VAN_FINISHED_PRODUCT_BLUEPRINT_REV_1.md
+    statement: >-
+      An exactly-resolved owner command carries a success contract naming a strategy the
+      registry holds; where no independent observation exists the contract is empty and the
+      mission records why it cannot be verified.
+    implemented_by:
+      - backend/van_gateway/command/success_contracts.py
+      - backend/van_gateway/command/mission_link.py
+    tested_by:
+      - backend/tests/test_command_success_contract.py
+    findings: [P1-VERIFY-003]
+
+  # -------------------------------------------------------------------- mission
+
+  - subject: mission.one_per_command
+    owner: docs/VAN_FINISHED_PRODUCT_BLUEPRINT_REV_1.md
+    statement: >-
+      Every command established as genuine owner intent opens exactly one mission, and a
+      command that reaches the orchestrator twice returns the mission already open.
+    implemented_by:
+      - backend/van_gateway/command/mission_link.py
+      - backend/van_gateway/orchestrator.py
+    tested_by:
+      - backend/tests/test_command_creates_mission.py
+    findings: [P0-EXEC-001]
+
+  - subject: mission.state_ladder
+    owner: docs/VAN_FINISHED_PRODUCT_BLUEPRINT_REV_1.md
+    statement: >-
+      Mission states advance only along legal transitions, a state is entered only once the
+      corresponding work has happened, and the only road to a success outcome runs through
+      VERIFYING.
+    implemented_by:
+      - backend/van_gateway/mission/models.py
+      - backend/van_gateway/mission/service.py
+    tested_by:
+      - backend/tests/test_mission_core.py
+    findings: [P0-EXEC-001]
+
+  - subject: mission.deadline
+    owner: docs/VAN_FINISHED_PRODUCT_BLUEPRINT_REV_1.md
+    statement: >-
+      A mission handed to something outside VAN carries a deadline, and a sweeper expires
+      the ones nothing came back for rather than leaving the owner told "working on it".
+    implemented_by:
+      - backend/van_gateway/mission/service.py
+      - backend/van_gateway/app.py
+    tested_by:
+      - backend/tests/test_mission_core.py
+    findings: [P0-EXEC-002]
+
+  - subject: mission.owner_status_projection
+    owner: docs/VAN_FINISHED_PRODUCT_BLUEPRINT_REV_1.md
+    statement: >-
+      Every executor's state projects to one owner-facing work status, so the owner is
+      never shown two accounts of one task.
+    implemented_by:
+      - backend/van_gateway/coherence/owner_status.py
+    tested_by:
+      - backend/tests/test_owner_work_status.py
+      - backend/tests/test_owner_status_kotlin_contract.py
+    findings: [P0-EXEC-003, P2-COH-001]
+
+  # ------------------------------------------------------------------- trading
+
+  - subject: trading.t0_isolation
+    owner: docs/VAN_TRADING_PRODUCTION_DEPLOYMENT_BLUEPRINT_REV5.md
+    statement: >-
+      VATI's tick-to-order path is independent of the automation and browser fabrics;
+      neither the gateway nor Hermes ever places an order.
+    implemented_by:
+      - backend/van_gateway/trading/service.py
+      - backend/van_gateway/automation/health.py
+    tested_by:
+      - backend/tests/test_trading_api.py
+      - backend/tests/test_automation_health_api.py
+    findings: [P0-TRADE-001]
+
+  - subject: trading.ledger_authority
+    owner: docs/VAN_TRADING_PRODUCTION_DEPLOYMENT_BLUEPRINT_REV5.md
+    statement: >-
+      The hash-chained VATI ledger is the authority on whether a trade happened and whether
+      trading is halted; a ledger that is stale or whose chain does not verify answers
+      nothing rather than answering optimistically.
+    implemented_by:
+      - backend/van_gateway/trading/service.py
+      - backend/van_gateway/verification/observations.py
+    tested_by:
+      - backend/tests/test_trading_api.py
+      - backend/tests/test_command_success_contract.py
+    findings: [P0-TRADE-004, P1-VERIFY-003]
+
+  # ----------------------------------------------------------------- automation
+
+  - subject: automation.engine_success_is_not_owner_success
+    owner: docs/VAN_BROWSER_INTELLIGENCE_AUTOMATION_FABRIC_REV_1_2_EXPERT_REVIEW.md
+    statement: >-
+      An engine reporting success is not owner success. An automation run's postcondition
+      is observed independently or the run is UNVERIFIABLE.
+    implemented_by:
+      - backend/van_gateway/automation/verifier.py
+      - backend/van_gateway/verification/production.py
+    tested_by:
+      - backend/tests/test_verification_is_performed.py
+      - backend/tests/test_automation_dispatch.py
+    findings: [P1-AUTO-001]
+
+  - subject: automation.community_nodes
+    owner: docs/VAN_BROWSER_INTELLIGENCE_AUTOMATION_FABRIC_REV_1_2_EXPERT_REVIEW.md
+    statement: >-
+      The node catalog denies community nodes, and the automation control surface never
+      accepts owner ingress.
+    implemented_by:
+      - backend/van_gateway/automation/policy.py
+      - backend/van_gateway/app.py
+    tested_by:
+      - backend/tests/test_automation_security_contracts.py
+      - backend/tests/test_control_scopes.py
+    findings: [P2-SEC-009]
+
+  - subject: automation.computer_use_executor
+    owner: docs/VAN_FINISHED_PRODUCT_BLUEPRINT_REV_1.md
+    statement: >-
+      The Computer Interaction Fabric offers typed operations only, with no arbitrary
+      execution primitive, and refuses any surface that has no worker before recording
+      anything.
+    implemented_by:
+      - backend/van_gateway/computer_use/fabric.py
+    tested_by:
+      - backend/tests/test_permissions_computeruse_verifiers.py
+    findings: [P2-CU-001]
+
+  # ------------------------------------------------------------- owner model
+
+  - subject: understanding.owner_agency
+    owner: docs/VAN_FINISHED_PRODUCT_BLUEPRINT_REV_1.md
+    statement: >-
+      Only the owner confirms, corrects, rejects or scopes what VAN believes about them.
+      Hermes may observe; every other mutation on the Understanding surface is the owner's.
+    implemented_by:
+      - backend/van_gateway/understanding/api.py
+      - backend/van_gateway/understanding/owner_model.py
+    tested_by:
+      - backend/tests/test_cognition_is_real.py
+      - backend/tests/test_control_scopes.py
+    findings: [P0-COG-001, P2-MEM-002]
+
+  - subject: understanding.external_reality_separation
+    owner: docs/VAN_FINISHED_PRODUCT_BLUEPRINT_REV_1.md
+    statement: >-
+      What the evidence says is stored apart from what the owner believes, every external
+      observation cites a source, and VAN does not decide the owner is contradicted.
+    implemented_by:
+      - backend/van_gateway/evolution/radar.py
+      - backend/van_gateway/research/exa.py
+    tested_by:
+      - backend/tests/test_external_reality_and_benchmarks.py
+    findings: [P2-EVO-001]
+
+  - subject: understanding.decision_falsifiability
+    owner: docs/VAN_FINISHED_PRODUCT_BLUEPRINT_REV_1.md
+    statement: >-
+      An inferred pattern about how the owner decides must be falsifiable by outcome; VAN
+      records what was decided and how it turned out and infers no reason, and the surface
+      reports that rather than letting an empty falsified list read as an accurate model.
+    implemented_by:
+      - backend/van_gateway/understanding/memory.py
+      - backend/van_gateway/learning/feed.py
+    tested_by:
+      - backend/tests/test_owner_memory_has_a_producer.py
+    findings: [P2-MEM-001]
+
+  - subject: understanding.standing_intent
+    owner: docs/VAN_FINISHED_PRODUCT_BLUEPRINT_REV_1.md
+    statement: >-
+      A standing owner goal that a newer instruction contradicts is surfaced rather than
+      silently superseded, and a goal unmentioned for long enough is marked stale rather
+      than abandoned.
+    implemented_by:
+      - backend/van_gateway/understanding/memory.py
+    tested_by:
+      - backend/tests/test_owner_memory_has_a_producer.py
+    findings: [P2-MEM-001]
+
+  - subject: understanding.project_truth_separation
+    owner: docs/PROJECT_TRUTH_PROTOCOL.md
+    statement: >-
+      Project Truth is what the repository is; strategic memory is why it became that. A
+      rationale is never cited as a fact about the code.
+    implemented_by:
+      - backend/van_gateway/understanding/memory.py
+    tested_by:
+      - backend/tests/test_owner_memory_has_a_producer.py
+    findings: [P2-MEM-001]
+
+  # ------------------------------------------------------------------ evolution
+
+  - subject: evolution.no_auto_adoption
+    owner: docs/VAN_FINISHED_PRODUCT_BLUEPRINT_REV_1.md
+    statement: >-
+      A technology reaches ADMITTED only with a VAN-specific benchmark, a security profile,
+      a licence and an owner decision reference; the radar never adopts on its own.
+    implemented_by:
+      - backend/van_gateway/evolution/radar.py
+    tested_by:
+      - backend/tests/test_external_reality_and_benchmarks.py
+      - backend/tests/test_proactive_evolution_eval.py
+    findings: [P2-EVO-001]
+
+  - subject: evolution.strategy_promotion
+    owner: docs/VAN_FINISHED_PRODUCT_BLUEPRINT_REV_1.md
+    statement: >-
+      A strategy is promoted only on eval evidence over a sample that means something, and
+      demoted automatically on regression; only a verified mission counts as a success.
+    implemented_by:
+      - backend/van_gateway/evolution/radar.py
+      - backend/van_gateway/learning/feed.py
+    tested_by:
+      - backend/tests/test_learning_records_and_bounds.py
+    findings: [P1-LEARN-003, P1-LEARN-004]
+
+  # ------------------------------------------------------------------ operations
+
+  - subject: ops.degradation_is_scoped
+    owner: docs/VAN_FINISHED_PRODUCT_BLUEPRINT_REV_1.md
+    statement: >-
+      A degraded capability names what broke, what still works, what VAN will not do and
+      how to restore it; one fabric being unavailable never stops the others.
+    implemented_by:
+      - backend/van_gateway/degraded/registry.py
+    tested_by:
+      - backend/tests/test_automation_health_api.py
+    findings: [P2-CU-001]
+
+  - subject: ops.backup_restores
+    owner: docs/VAN_FINISHED_PRODUCT_BLUEPRINT_REV_1.md
+    statement: >-
+      A backup is proven by restoring it and comparing row counts, schema version and the
+      audit-chain head with its manifest; a failure raises attention rather than a log line.
+    implemented_by:
+      - backend/van_gateway/ops/backup.py
+      - backend/van_gateway/app.py
+    tested_by:
+      - backend/tests/test_ops_backup.py
+    findings: [P3-OPS-002, P3-OPS-009]
+
+  - subject: ops.correlation_id
+    owner: docs/VAN_FINISHED_PRODUCT_BLUEPRINT_REV_1.md
+    statement: >-
+      One correlation id derived from the command joins it to its mission, its run, its
+      execution and its verification, and is present on every result including the refusals.
+    implemented_by:
+      - backend/van_gateway/observability/correlation.py
+      - backend/van_gateway/models.py
+    tested_by:
+      - backend/tests/test_observability_logging.py
+    findings: [P2-OBS-001]
+
+  # -------------------------------------------------------------------- android
+
+  - subject: android.voice_runtime_is_shippable
+    owner: docs/VAN_FINISHED_PRODUCT_BLUEPRINT_REV_1.md
+    statement: >-
+      Every API level the app supports resolves to a voice backend that exists on the
+      device, and a build whose minSdk falls below the on-device floor with no bundled
+      runtime fails rather than shipping.
+    implemented_by:
+      - android/app/build.gradle.kts
+      - android/app/src/main/java/com/dial/van/voice/VoiceRecognitionModels.kt
+    tested_by:
+      - android/verification/src/test/kotlin/com/dial/van/voice/VoiceRecognitionPolicyTest.kt
+    findings: [P1-VOICE-002]
+
+  - subject: android.gateway_resilience
+    owner: docs/VAN_FINISHED_PRODUCT_BLUEPRINT_REV_1.md
+    statement: >-
+      A transport failure is retried with bounded, jittered backoff behind a circuit
+      breaker; an answer from the server, including a refusal, is never retried.
+    implemented_by:
+      - android/app/src/main/java/com/dial/van/gateway/GatewayRetry.kt
+    tested_by:
+      - android/verification/src/test/kotlin/com/dial/van/gateway/GatewayRetryTest.kt
+    findings: [P3-AND-001]
+
+  # ------------------------------------------------------------------ governance
+
+  - subject: governance.maturity_claims
+    owner: docs/VAN_CONSOLIDATED_DEPLOYMENT_READINESS_CLOSURE_BLUEPRINT_REV_1.md
+    statement: >-
+      A component may claim INTEGRATED_AND_EVIDENCED only when it names a producer, a
+      consumer, a production caller, tests and runtime evidence, and a closed finding must
+      name the change, the tests that prove it and the evidence, with every cited path
+      present.
+    implemented_by:
+      - tools/ci/maturity_gate.py
+    tested_by:
+      - tests/contracts/test_maturity_gate.py
+    findings: [P1-DOC-001, P1-DOC-002]
+
+  - subject: governance.invariant_ownership
+    owner: docs/VAN_CONSOLIDATED_DEPLOYMENT_READINESS_CLOSURE_BLUEPRINT_REV_1.md
+    statement: >-
+      Exactly one document owns each invariant subject, and every invariant names an
+      implementation and a test that exist.
+    implemented_by:
+      - tools/ci/authority_map.py
+    tested_by:
+      - tests/contracts/test_authority_map.py
+    findings: [P3-DOC-005]
