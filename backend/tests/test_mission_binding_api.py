@@ -45,6 +45,7 @@ from van_gateway.mission.models import (
     VerificationStatus,
 )
 from van_gateway.mission.service import MissionService
+from van_gateway.mission.verifiers import ObservationVerifier, VerifierRegistry
 from van_gateway.models import ActionClass, OriginChannel
 
 INTERNAL = "test-internal-token"
@@ -85,7 +86,19 @@ async def _stack(tmp_path, *, automation_enabled=True):
     )
     registry.load()
     await registry.sync()
-    missions = MissionService(store, capabilities=registry)
+    # P0-VERIFY-001 — a registry whose adapter observes a world the test controls. The
+    # adapter still writes the receipt, so a test can stage the world and still cannot
+    # stage the verdict.
+    async def _readback(context):
+        return {"exists": True, "evidence_refs": ["readback://1"]}
+
+    verifiers = VerifierRegistry()
+    verifiers.register(
+        "readback",
+        ObservationVerifier(_readback, verifier_version="readback/1",
+                            evidence_prefix="readback://"),
+    )
+    missions = MissionService(store, capabilities=registry, verifiers=verifiers)
     router = CapabilityRouter(store, registry)
     api = MissionApi(store, get_settings(), missions=missions, registry=registry, router=router)
     app = FastAPI()
@@ -276,13 +289,7 @@ async def test_the_evidence_route_gathers_receipt_and_route_decisions(stack):
     for target in (MissionState.UNDERSTOOD, MissionState.PLANNED, MissionState.AUTHORIZED,
                    MissionState.RUNNING, MissionState.VERIFYING):
         await missions.transition(mission.mission_id, target=target)
-    await missions.transition(
-        mission.mission_id, target=MissionState.VERIFIED_SUCCESS,
-        verification=VerificationRecord(
-            status=VerificationStatus.VERIFIED, evidence_refs=["readback://1"],
-            verifier_version="v1", verified_at_ms=1,
-        ),
-    )
+    await missions.transition(mission.mission_id, target=MissionState.VERIFIED_SUCCESS)
     body = (await ac.get(f"/v1/missions/{mission.mission_id}/evidence")).json()
     assert body["verification"]["status"] == "VERIFIED"
     assert "readback://1" in body["evidence_refs"]
@@ -354,9 +361,22 @@ async def test_red_team_a_mission_cannot_forge_verification(stack):
             },
         },
     )
-    assert forged.status_code == 409
-    assert forged.json()["detail"]["error"] == "MISSION_VERIFICATION_INSUFFICIENT"
+    # P0-VERIFY-001 — the route no longer has a field to put a receipt in, and it rejects
+    # the request rather than ignoring the extra key, so a client still sending one is
+    # told rather than left believing it was honoured.
+    assert forged.status_code == 422, forged.text
     assert (await missions.get(mission.mission_id)).state is MissionState.VERIFYING
+
+    # The same mission does reach success once the registered verifier is the one asked,
+    # which is what makes the refusal above about provenance rather than about strictness.
+    honest = await ac.post(
+        f"/v1/missions/{mission.mission_id}/transition", headers=HEADERS,
+        json={"target": "VERIFIED_SUCCESS"},
+    )
+    assert honest.status_code == 200, honest.text
+    stored = await missions.verification_record(mission.mission_id)
+    assert stored.verifier_version == "readback/1"
+    assert stored.evidence_refs == ["readback://1"]
 
 
 async def test_red_team_a_mission_cannot_reach_vati_execution(stack):

@@ -24,7 +24,7 @@ from __future__ import annotations
 from typing import Any
 
 from fastapi import APIRouter, Header, HTTPException
-from pydantic import BaseModel, Field
+from pydantic import BaseModel, ConfigDict, Field
 
 from van_gateway.capability.models import CapabilityClass, RoutingConstraints
 from van_gateway.capability.registry import CapabilityRegistry, CapabilityRegistryError
@@ -69,9 +69,24 @@ class CreateMissionBody(BaseModel):
 
 
 class TransitionBody(BaseModel):
+    """P0-VERIFY-001 — there is deliberately no `verification` field.
+
+    It used to accept a VerificationRecord from the caller, and the audit drove a mission
+    to VERIFIED_SUCCESS through this route with `verifier_version: "i-say-so/1.0"` and
+    `evidence_refs: ["evidence://trust-me"]`. A receipt written by whoever is claiming the
+    outcome is the claim restated, not evidence for it. The gateway now runs the verifier
+    the mission's own success contract names, and the record it produces is the only one
+    that can be stored, so there is nothing useful a caller could put here.
+
+    Pydantic is configured to reject unknown fields on this body rather than ignore them,
+    so an old client still sending `verification` gets a 422 and learns the rule instead of
+    believing it was honoured.
+    """
+
+    model_config = ConfigDict(extra="forbid")
+
     target: MissionState
     expected: MissionState | None = None
-    verification: VerificationRecord | None = None
     final_outcome: str | None = None
 
 
@@ -361,7 +376,7 @@ class MissionApi:
             try:
                 mission = await self.missions.transition(
                     mission_id, target=body.target, expected=body.expected,
-                    verification=body.verification, final_outcome=body.final_outcome,
+                    final_outcome=body.final_outcome,
                 )
             except MissionError as exc:
                 raise self._translate(exc) from exc

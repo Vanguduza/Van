@@ -4,17 +4,17 @@
   "canonical_blueprint": "docs/VAN_FINISHED_PRODUCT_BLUEPRINT_REV_1.md",
   "canonical_audit": "docs/VAN_WHOLE_SYSTEM_IMPLEMENTATION_AUDIT_AND_CERTIFICATION_REV_1.md",
   "created": "2026-09-19",
-  "component_count": 81,
+  "component_count": 85,
   "dispositions": {
     "DELETE": 10,
     "REPLACE": 4,
-    "COMPLETE": 31,
-    "WIRE": 36
+    "COMPLETE": 33,
+    "WIRE": 38
   },
   "by_gate": {
     "GATE 4": 29,
     "GATE 2": 10,
-    "GATE 3": 3,
+    "GATE 3": 7,
     "GATE 9": 9,
     "GATE 8": 9,
     "GATE 10": 7,
@@ -1482,6 +1482,87 @@
         "gradle test executes 26 tests against ../app/src/main/java; it compiles the shipping files rather than a copy, so a file that gains an Android import fails this build"
       ],
       "owner_facing_projection": null,
+      "terminal_state": "INTEGRATED_AND_EVIDENCED"
+    },
+    {
+      "n": 82,
+      "component": "Production verifier registry",
+      "path": "backend/van_gateway/verification/production.py",
+      "maturity_class": "IMPLEMENTED_BUT_ISOLATED",
+      "disposition": "WIRE",
+      "rationale": "VerifierRegistry and its adapters were complete and constructed only in tests, so transition accepted whatever receipt its caller supplied",
+      "remediation_gate": "GATE 3",
+      "producer": "backend/van_gateway/verification/production.py build_mission_registry",
+      "consumer": "MissionService._perform_verification on every verification outcome",
+      "production_caller": "backend/van_gateway/app.py create_app",
+      "tests": [
+        "backend/tests/test_verification_is_performed.py::TestTheRegistryIsTheOnlySource",
+        "backend/tests/test_verification_is_performed.py::TestTheProductionAppBuildsOne"
+      ],
+      "runtime_evidence": [
+        "the stored receipt carries the adapter's verifier_version and the ledger is genuinely read; a trade the ledger does not know is refused, as is an unreachable ledger"
+      ],
+      "owner_facing_projection": "the mission's verification state and evidence route",
+      "terminal_state": "INTEGRATED_AND_EVIDENCED"
+    },
+    {
+      "n": 83,
+      "component": "Automation postcondition observers",
+      "path": "backend/van_gateway/verification/production.py",
+      "maturity_class": "STUB",
+      "disposition": "COMPLETE",
+      "rationale": "AutomationDispatcher was constructed with an empty observer map, so every production run was UNVERIFIABLE and owner_success could never be true",
+      "remediation_gate": "GATE 3",
+      "producer": "build_automation_verifier",
+      "consumer": "AutomationDispatcher.dispatch",
+      "production_caller": "backend/van_gateway/app.py, automation_dispatcher.verifier",
+      "tests": [
+        "backend/tests/test_verification_is_performed.py::TestAutomationVerificationIsWired"
+      ],
+      "runtime_evidence": [
+        "an engine reporting success with nothing at the provider yields FAILED with 'despite engine success'; an unreachable provider yields UNVERIFIABLE"
+      ],
+      "owner_facing_projection": "owner_success on an automation run",
+      "terminal_state": "INTEGRATED_AND_EVIDENCED"
+    },
+    {
+      "n": 84,
+      "component": "Shared independent observations",
+      "path": "backend/van_gateway/verification/observations.py",
+      "maturity_class": "ABSENT",
+      "disposition": "COMPLETE",
+      "rationale": "Two verification systems each had their own idea of what VAN could observe",
+      "remediation_gate": "GATE 3",
+      "producer": "backend/van_gateway/verification/observations.py",
+      "consumer": "both build_mission_registry and build_automation_verifier",
+      "production_caller": "backend/van_gateway/verification/production.py",
+      "tests": [
+        "backend/tests/test_verification_is_performed.py::TestAutomationVerificationIsWired::test_both_systems_are_built_from_the_same_observations"
+      ],
+      "runtime_evidence": [
+        "a test asserts production.py uses every observation the shared module defines, so one cannot become available to only one system"
+      ],
+      "owner_facing_projection": null,
+      "terminal_state": "INTEGRATED_AND_EVIDENCED"
+    },
+    {
+      "n": 85,
+      "component": "AttentionScorer on the live path",
+      "path": "backend/van_gateway/attention/engine.py",
+      "maturity_class": "IMPLEMENTED_BUT_ISOLATED",
+      "disposition": "WIRE",
+      "rationale": "AttentionScorer held §29's five dispositions, deduplication and a recorded reason, and was reached only by the understanding report's metrics while the live engine decided nothing beyond a severity enum",
+      "remediation_gate": "GATE 3",
+      "producer": "backend/van_gateway/attention/scoring.py AttentionScorer",
+      "consumer": "AttentionEngine.upsert and AttentionEngine.interrupts",
+      "production_caller": "every caller of AttentionEngine.upsert, including decisions/service",
+      "tests": [
+        "backend/tests/test_attention_is_one_engine.py"
+      ],
+      "runtime_evidence": [
+        "every upsert writes an attention_candidates row with its disposition and reason; a repeat inside the window is digested, quiet hours hold everything but a genuine urgent, and a self-recovered failure is suppressed"
+      ],
+      "owner_facing_projection": "the attention queue and whether an item interrupts",
       "terminal_state": "INTEGRATED_AND_EVIDENCED"
     }
   ],

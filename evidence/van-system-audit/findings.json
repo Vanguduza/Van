@@ -486,8 +486,29 @@
       "root_cause": "RC2",
       "remediation": "MissionService.transition must execute a registered verifier rather than accept a supplied record.",
       "validation_gate": "G4",
-      "current_status": "OPEN",
-      "remediation_gate": "GATE 3"
+      "current_status": "CLOSED",
+      "remediation_gate": "GATE 3",
+      "closure": {
+        "summary": "MissionService.transition no longer takes a verification record. It runs the adapter the mission's own success contract names, against the target system, and the record that adapter returns is the only one that can be stored. The transition route rejects a body carrying `verification` rather than ignoring it. create_app now builds a VerifierRegistry, which previously existed only in tests.",
+        "changed": [
+          "backend/van_gateway/mission/service.py",
+          "backend/van_gateway/mission/api.py",
+          "backend/van_gateway/mission/verifiers.py",
+          "backend/van_gateway/verification/production.py",
+          "backend/van_gateway/verification/observations.py",
+          "backend/van_gateway/app.py"
+        ],
+        "verified_by": [
+          "backend/tests/test_verification_is_performed.py::TestTheAuditProbe",
+          "backend/tests/test_verification_is_performed.py::TestTheRegistryIsTheOnlySource",
+          "backend/tests/test_verification_is_performed.py::TestUnwiredCapabilitiesFailHonestly",
+          "backend/tests/test_mission_core.py",
+          "backend/tests/test_mission_binding_api.py::test_red_team_a_mission_cannot_forge_verification"
+        ],
+        "residual": "Only two mission verification strategies have an independent observation: ledger-event and browser-evidence.",
+        "residual_reason": "An adapter is registered only where the gateway can observe a system independently of whoever did the work. It has no independent read of a git remote, a CI run or an arbitrary provider resource, so repository-sha, ci-run and api-readback stay unregistered and resolve to EngineReportVerifier, which is always UNVERIFIABLE. That is reported to the owner as 'finished, but VAN could not confirm it worked'. Registering an optimistic adapter to close the gap would be the defect, not the fix.",
+        "posture": "The audit's exact move is now inexpressible: there is no parameter to hand a receipt in, and a test asserts the TypeError. The attacks are rewritten to stage the world rather than the verdict — an adapter that observes whatever the test wants still writes the receipt itself, so a satisfied contract with nothing citable, a shortfall against a numeric postcondition, and an unreachable target are each refused."
+      }
     },
     {
       "id": "P0-SEC-001",
@@ -1194,8 +1215,22 @@
       "root_cause": "see s32 root-cause map",
       "remediation": "Supply the real observer map in app.py and unify with VerifierRegistry.",
       "validation_gate": "G4",
-      "current_status": "OPEN",
-      "remediation_gate": "GATE 3"
+      "current_status": "CLOSED",
+      "remediation_gate": "GATE 3",
+      "closure": {
+        "summary": "AutomationDispatcher is built with a real observer map: READ_BACK reads the resource back from Google, and STATE_PREDICATE reads the gateway's own durable run row. Both are independent of n8n, so owner_success is reachable on evidence rather than unreachable by construction.",
+        "changed": [
+          "backend/van_gateway/verification/production.py",
+          "backend/van_gateway/verification/observations.py",
+          "backend/van_gateway/app.py"
+        ],
+        "verified_by": [
+          "backend/tests/test_verification_is_performed.py::TestAutomationVerificationIsWired"
+        ],
+        "residual": "RECEIPT and DOMAIN_ATTESTATION have no observer, and READ_BACK covers Gmail and Drive only.",
+        "residual_reason": "UNOBSERVABLE_POSTCONDITION_KINDS names each one with the reason: there is no provider receipt store the gateway can read independently of the engine, and no attestation authority is wired. A capability declaring one is UNVERIFIABLE and the owner is told so. A test asserts each stays that way.",
+        "posture": "The decisive test is that an engine reporting success with nothing at the provider produces FAILED, with 'despite engine success' in the detail. engine_success_is_owner_success stays false in behaviour, not only in policy.yaml."
+      }
     },
     {
       "id": "P1-HER-001",
@@ -1806,8 +1841,24 @@
       "root_cause": "see s32 root-cause map",
       "remediation": "Migrate to one attention engine and one verification system.",
       "validation_gate": "G1",
-      "current_status": "OPEN",
-      "remediation_gate": "GATE 3"
+      "current_status": "CLOSED",
+      "remediation_gate": "GATE 3",
+      "closure": {
+        "summary": "Two 2.0 implementations were sitting beside live 1.0s. Verification: verification/observations.py is now the single answer to 'what can VAN independently observe?', and both VerifierRegistry and WorkflowVerifier are built from it in verification/production.py. Attention: AttentionScorer is now on the live path — every AttentionEngine.upsert is scored, and the disposition, score and reason are stored with the item — rather than being reachable only from the understanding report's metrics.",
+        "changed": [
+          "backend/van_gateway/verification/observations.py",
+          "backend/van_gateway/verification/production.py",
+          "backend/van_gateway/attention/engine.py",
+          "backend/van_gateway/app.py"
+        ],
+        "verified_by": [
+          "backend/tests/test_verification_is_performed.py::TestAutomationVerificationIsWired::test_both_systems_are_built_from_the_same_observations",
+          "backend/tests/test_attention_is_one_engine.py"
+        ],
+        "residual": "The two verification systems still persist different record shapes, VerificationResult for automation runs and VerificationRecord for missions.",
+        "residual_reason": "Each subsystem stores its own and neither shape is wrong; collapsing them would be a large migration for no behavioural gain. What was genuinely duplicated was the observations, and those now exist once, so adding a way to observe the world is one change rather than two.",
+        "posture": "The direction of each merge is the part worth defending, and in both cases it is towards the better implementation rather than the incumbent. The scorer decides and the engine stays the durable queue, because retiring §29's five dispositions, deduplication and recorded reasons in favour of a severity enum would have been a downgrade dressed as consolidation. A severity now maps to written-out dimensions that a test holds monotonic, so the bridge cannot silently invert the enum, and an item written before this was wired still interrupts rather than being silenced by a missing decision."
+      }
     },
     {
       "id": "P3-OBS-001",

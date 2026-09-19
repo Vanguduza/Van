@@ -21,6 +21,7 @@ import time
 import uuid
 from typing import Any
 
+from van_gateway.mission.verifiers import VerifierRegistry
 from van_gateway.mission.models import (
     EVENT_FOR_STATE,
     LEGAL_TRANSITIONS,
@@ -59,6 +60,7 @@ class MissionService:
         *,
         capabilities: Any | None = None,
         bus: Any | None = None,
+        verifiers: Any | None = None,
     ) -> None:
         self.store = store
         # §7 — when a registry is wired, a capability it does not declare cannot
@@ -69,6 +71,11 @@ class MissionService:
         # about it. Without this a mission could change state a dozen times and the
         # phone would learn nothing until it next polled the read model.
         self.bus = bus
+        # P0-VERIFY-001 — the registry that actually performs verification. Defaulted to
+        # an empty one rather than left None, because an empty registry answers every
+        # strategy with EngineReportVerifier, which is always UNVERIFIABLE. A missing
+        # registry therefore makes VERIFIED_SUCCESS unreachable instead of unguarded.
+        self.verifiers = verifiers if verifiers is not None else VerifierRegistry()
 
     # ------------------------------------------------------------- creation
 
@@ -162,14 +169,24 @@ class MissionService:
         *,
         target: MissionState,
         expected: MissionState | None = None,
-        verification: VerificationRecord | None = None,
         final_outcome: str | None = None,
         actor: PrincipalType = PrincipalType.HERMES_AGENT,
         summary: str | None = None,
         evidence_ref: str | None = None,
         now_ms: int | None = None,
     ) -> Mission:
-        """The one gate. Everything about a mission's life passes through here."""
+        """The one gate. Everything about a mission's life passes through here.
+
+        P0-VERIFY-001: this used to take a `verification` record from the caller. The
+        audit's probe drove a mission to VERIFIED_SUCCESS by supplying both the success
+        contract and a receipt reading `verifier_version: "i-say-so/1.0"` with
+        `evidence_refs: ["evidence://trust-me"]`. A receipt the claimant writes is not
+        verification, it is the claim restated.
+
+        There is now no way to hand one in. Reaching a verification outcome runs the
+        adapter the mission's success contract names, against the target system, and the
+        record that adapter returns is the only one that can be stored.
+        """
         now = int(time.time() * 1000) if now_ms is None else now_ms
         mission = await self.get(mission_id)
         if mission is None:
@@ -188,8 +205,9 @@ class MissionService:
             raise MissionError("MISSION_ILLEGAL_TRANSITION", f"{current.value}->{target.value}")
 
         verification_state = mission.verification_state
+        verification: VerificationRecord | None = None
         if target in VERIFICATION_OUTCOMES:
-            verification = self._require_verification(mission, target, verification)
+            verification = await self._perform_verification(mission, target, now_ms=now)
             verification_state = verification.status
 
         await self.store.execute(
@@ -222,19 +240,34 @@ class MissionService:
         assert refreshed is not None
         return refreshed
 
-    @staticmethod
-    def _require_verification(
-        mission: Mission, target: MissionState, verification: VerificationRecord | None
+    async def _perform_verification(
+        self, mission: Mission, target: MissionState, *, now_ms: int
     ) -> VerificationRecord:
         """§§6, 55 — where "the worker said OK" stops being success.
 
-        Three separate refusals, because there are three separate ways a caller
-        could arrive at an unearned VERIFIED_SUCCESS: bringing no receipt,
-        bringing a receipt with nothing behind it, or having written a contract
-        that never asked anything checkable in the first place.
+        The verifier is chosen by the mission's own success contract, not by the caller
+        asking for the transition, and it observes the target system itself. A contract
+        naming no verifier class, or one naming a strategy nothing has registered, gets
+        `EngineReportVerifier`, which is always UNVERIFIABLE — so an unwired capability
+        yields an honest "could not confirm" rather than an unguarded success.
+
+        The refusals below then still apply to the record the adapter produced: a mission
+        whose contract asked nothing checkable cannot be a verified success, and a record
+        without evidence or with unmet postconditions cannot support one.
         """
-        if verification is None:
-            raise MissionError("MISSION_VERIFICATION_REQUIRED", target.value)
+        strategy = mission.success_contract.verifier_class or "NONE"
+        verification = await self.verifiers.verify(
+            strategy=strategy,
+            contract=mission.success_contract,
+            context={
+                "mission_id": mission.mission_id,
+                "project_id": mission.project_id,
+                "goal": mission.goal,
+                "authority_envelope": mission.authority_envelope.model_dump(mode="json"),
+                "requested_target": target.value,
+                "now_ms": now_ms,
+            },
+        )
         if target is MissionState.VERIFIED_SUCCESS:
             if not mission.success_contract.is_checkable:
                 # Nothing was ever claimed, so nothing was confirmed. Finishing

@@ -103,8 +103,12 @@ class ObservationVerifier:
                 status=VerificationStatus.UNVERIFIABLE, version=self.verifier_version,
                 now_ms=context.get("now_ms"),
             )
+        # The observation needs to know what it is looking for, and the contract is the
+        # only place that says. Passing it here rather than making every adapter reach for
+        # it keeps the contract the single source of the claim being checked.
+        observation_context = {**context, "postconditions": dict(contract.postconditions)}
         try:
-            observed = await self._observe(context)
+            observed = await self._observe(observation_context)
         except Exception as exc:  # noqa: BLE001 - an unreachable target is not a pass
             return _record(
                 status=VerificationStatus.UNVERIFIABLE, version=self.verifier_version,

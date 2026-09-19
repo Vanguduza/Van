@@ -47,6 +47,7 @@ from van_gateway.capability.router import CapabilityRouter
 from van_gateway.mission.api import MissionApi
 from van_gateway.mission.binding import MissionBinder
 from van_gateway.understanding.api import UnderstandingApi
+from van_gateway.verification.production import build_automation_verifier, build_mission_registry
 from van_gateway.mission.service import MissionService
 from van_gateway.command.authority import CommandAuthorityService
 from van_gateway.command.standing import StandingAutomationAuthorityService
@@ -231,7 +232,19 @@ def create_app() -> FastAPI:
     # Constructed before the mission service, which publishes every owner-visible
     # mission event to it (P0-EXEC-001).
     events = EventBus(store, settings.event_page_size)
-    missions = MissionService(store, capabilities=capability_registry, bus=events)
+    # P0-VERIFY-001 — the registry that performs verification, rather than a receipt
+    # the claimant writes. Built before the service because the service fails closed
+    # without it.
+    verifiers = build_mission_registry(store=store, trading=trading)
+    # P1-AUTO-001 — the dispatcher was constructed with an empty observer map, so every
+    # production run came back UNVERIFIABLE and owner_success could never be true; the
+    # tests passed only because they injected their own observers. Assigned here rather
+    # than at construction because the Google service the READ_BACK observer reads is
+    # built after the dispatcher, and reordering that is a larger change than this is.
+    automation_dispatcher.verifier = build_automation_verifier(store=store, google=google)
+    missions = MissionService(
+        store, capabilities=capability_registry, bus=events, verifiers=verifiers
+    )
     mission_api = MissionApi(
         store, settings, missions=missions, registry=capability_registry,
         router=capability_router,
