@@ -1,0 +1,27 @@
+name: owner-s24-direct-apk
+
+on:
+  push:
+    branches:
+      - build/s24-direct-hermes-20260919
+
+jobs:
+  build-owner-apk:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-java@v4
+        with:
+          distribution: temurin
+          java-version: "17"
+      - name: Build owner S24 debug APK
+        working-directory: android
+        run: |
+          chmod +x gradlew
+          ./gradlew :app:assembleDebug
+      - name: Upload owner S24 APK
+        uses: actions/upload-artifact@v4
+        with:
+          name: van-owner-s24-direct-hermes-apk
+          path: android/app/build/outputs/apk/debug/*.apk
+          if-no-files-found: error
