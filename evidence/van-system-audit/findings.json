@@ -22,7 +22,9 @@
   "counts": {
     "P0": 15,
     "P1": 26,
-    "P2": 14
+    "P2": 14,
+    "P3": 22,
+    "P4": 7
   },
   "root_causes": [
     {
@@ -284,7 +286,8 @@
       "root_cause": "RC1 - the command path has no durable work object",
       "remediation": "Orchestrator creates a mission per accepted command with a proper authority envelope; pass mission_id in Hermes metadata; wire MissionBinder in app.py; publish mission transitions to the event bus.",
       "validation_gate": "G3",
-      "current_status": "OPEN"
+      "current_status": "OPEN",
+      "remediation_gate": "GATE 2"
     },
     {
       "id": "P0-EXEC-002",
@@ -309,7 +312,8 @@
       "root_cause": "RC1 / RC2",
       "remediation": "Join hermes_run_id to the action callbacks; add a deadline producing a truthful timeout state.",
       "validation_gate": "G4",
-      "current_status": "OPEN"
+      "current_status": "OPEN",
+      "remediation_gate": "GATE 3"
     },
     {
       "id": "P0-EXEC-003",
@@ -333,7 +337,8 @@
       "root_cause": "RC1",
       "remediation": "Consume mission state via the event bus; render MissionRepository.ownerReadableStatus; make an unknown status an explicit UNKNOWN state.",
       "validation_gate": "G3",
-      "current_status": "OPEN"
+      "current_status": "OPEN",
+      "remediation_gate": "GATE 2"
     },
     {
       "id": "P0-CTX-001",
@@ -358,7 +363,8 @@
       "root_cause": "RC3",
       "remediation": "Derive real ContextRequirements from project_id and resolver output before sealing.",
       "validation_gate": "G6",
-      "current_status": "OPEN"
+      "current_status": "OPEN",
+      "remediation_gate": "GATE 4"
     },
     {
       "id": "P0-CTX-002",
@@ -384,7 +390,8 @@
       "root_cause": "RC3",
       "remediation": "Add an owner-facing fact writer and a Project Truth importer for the authoritative tiers.",
       "validation_gate": "G6",
-      "current_status": "OPEN"
+      "current_status": "OPEN",
+      "remediation_gate": "GATE 4"
     },
     {
       "id": "P0-COG-001",
@@ -409,7 +416,8 @@
       "root_cause": "RC3",
       "remediation": "Either implement a real critic pass over supplied evidence and expose a route plus MCP tool, or withdraw the claim from the matrix.",
       "validation_gate": "G1 or G6",
-      "current_status": "OPEN"
+      "current_status": "OPEN",
+      "remediation_gate": "GATE 4"
     },
     {
       "id": "P0-VERIFY-001",
@@ -436,7 +444,8 @@
       "root_cause": "RC2",
       "remediation": "MissionService.transition must execute a registered verifier rather than accept a supplied record.",
       "validation_gate": "G4",
-      "current_status": "OPEN"
+      "current_status": "OPEN",
+      "remediation_gate": "GATE 3"
     },
     {
       "id": "P0-SEC-001",
@@ -463,7 +472,8 @@
       "root_cause": "RC4",
       "remediation": "Split into scoped, expiring, per-purpose credentials; remove device enrollment from the Hermes-reachable set; add an explicit 403 when the internal check fails instead of falling through.",
       "validation_gate": "G2",
-      "current_status": "OPEN"
+      "current_status": "OPEN",
+      "remediation_gate": "GATE 1"
     },
     {
       "id": "P0-SEC-002",
@@ -491,7 +501,8 @@
       "root_cause": "RC5",
       "remediation": "Derive context_trust from CommandKind; refuse to dispatch CONTEXT_INGEST as a command; reject UI-channel payloads carrying an untrusted-content marker server-side.",
       "validation_gate": "G2",
-      "current_status": "OPEN"
+      "current_status": "OPEN",
+      "remediation_gate": "GATE 1"
     },
     {
       "id": "P0-TRADE-001",
@@ -521,7 +532,8 @@
       "root_cause": "RC2 / RC4",
       "remediation": "Verify the owner signature against a registered key and an authority record; reject unverifiable mandates.",
       "validation_gate": "G5",
-      "current_status": "OPEN"
+      "current_status": "OPEN",
+      "remediation_gate": "GATE 3"
     },
     {
       "id": "P0-TRADE-002",
@@ -548,7 +560,8 @@
       "root_cause": "RC2 / RC4",
       "remediation": "Drive all three flags from real state and re-run reconciliation per bar.",
       "validation_gate": "G5",
-      "current_status": "OPEN"
+      "current_status": "OPEN",
+      "remediation_gate": "GATE 5"
     },
     {
       "id": "P0-TRADE-003",
@@ -574,7 +587,8 @@
       "root_cause": "RC2 / RC4",
       "remediation": "Add a synchronous halt channel and persist halt state independently of session start time.",
       "validation_gate": "G5",
-      "current_status": "OPEN"
+      "current_status": "OPEN",
+      "remediation_gate": "GATE 5"
     },
     {
       "id": "P0-TRADE-004",
@@ -600,7 +614,8 @@
       "root_cause": "RC2 / RC4",
       "remediation": "Point the gateway at the live ledger and threshold staleness server-side.",
       "validation_gate": "G5",
-      "current_status": "OPEN"
+      "current_status": "OPEN",
+      "remediation_gate": "GATE 5"
     },
     {
       "id": "P0-TRADE-005",
@@ -627,7 +642,8 @@
       "root_cause": "RC2 / RC4",
       "remediation": "Derive the idempotency key from the decision content and bar identity, not the session id; add a process lock per alias.",
       "validation_gate": "G5",
-      "current_status": "OPEN"
+      "current_status": "OPEN",
+      "remediation_gate": "GATE 5"
     },
     {
       "id": "P0-TRADE-006",
@@ -652,7 +668,8 @@
       "root_cause": "RC2 / RC4",
       "remediation": "Add margin fields to AccountState and a margin gate to the Risk Authority.",
       "validation_gate": "G5",
-      "current_status": "OPEN"
+      "current_status": "OPEN",
+      "remediation_gate": "GATE 5"
     },
     {
       "id": "P1-DOC-001",
@@ -672,7 +689,14 @@
       "root_cause": "see s32 root-cause map",
       "remediation": "Merge PR #38 or remove the reference and re-baseline the matrix.",
       "validation_gate": "G1",
-      "current_status": "OPEN"
+      "current_status": "CLOSED",
+      "remediation_gate": "GATE 0",
+      "closure_note": "Matrix generated_against now cites docs/VAN_FINISHED_PRODUCT_BLUEPRINT_REV_1.md, which exists on the canonical tree, and records why the previous reference was invalid.",
+      "closure_evidence": [
+        "docs/project-state/UNIFIED_INTELLIGENCE_IMPLEMENTATION_MATRIX.json generated_against.blueprint_path"
+      ],
+      "closure_commit": "0889d88f3074",
+      "closed_at": "2026-09-19"
     },
     {
       "id": "P1-DOC-002",
@@ -694,7 +718,14 @@
       "root_cause": "see s32 root-cause map",
       "remediation": "Remove or qualify the Temporal line; make the automation router's TEMPORAL medium an explicit refusal until implemented.",
       "validation_gate": "G1",
-      "current_status": "OPEN"
+      "current_status": "CLOSED",
+      "remediation_gate": "GATE 0",
+      "closure_note": "Acceptance ledger row corrected: the Temporal entry is marked as a pip version assertion, not a deployment, and cites this finding.",
+      "closure_evidence": [
+        "docs/PRODUCTION_ACCEPTANCE_LEDGER.md browser runtime row"
+      ],
+      "closure_commit": "0889d88f3074",
+      "closed_at": "2026-09-19"
     },
     {
       "id": "P1-VOICE-001",
@@ -705,10 +736,10 @@
       "requirement": "See the requirements traceability matrix in the canonical report.",
       "authority": "docs/VAN_WHOLE_SYSTEM_IMPLEMENTATION_AUDIT_AND_CERTIFICATION_REV_1.md s30",
       "repository_evidence": [
-        "android/.../voice/WakeRuntime.kt:31-44,79,107",
-        "android/.../voice/WakeCoordinator.kt:39,111",
-        "android/.../voice/VoiceInterfaces.kt:414,445-450",
-        "android/.../voice/WakeAcknowledgement.kt:110",
+        "android/app/src/main/java/com/dial/van/voice/WakeRuntime.kt:31-44,79,107",
+        "android/app/src/main/java/com/dial/van/voice/WakeCoordinator.kt:39,111",
+        "android/app/src/main/java/com/dial/van/voice/VoiceInterfaces.kt:414,445-450",
+        "android/app/src/main/java/com/dial/van/voice/WakeAcknowledgement.kt:110",
         "android/app/build.gradle.kts:128-161",
         "android/app/src/main/AndroidManifest.xml:50-57"
       ],
@@ -719,7 +750,8 @@
       "root_cause": "see s32 root-cause map",
       "remediation": "Add a keyword-spotting engine with the 'Hey Van' phrase, a microphone-typed foreground service, acknowledgement playback and TTS invocation bound to verified outcomes.",
       "validation_gate": "G9",
-      "current_status": "OPEN"
+      "current_status": "OPEN",
+      "remediation_gate": "GATE 9"
     },
     {
       "id": "P1-AURA-002",
@@ -730,8 +762,8 @@
       "requirement": "See the requirements traceability matrix in the canonical report.",
       "authority": "docs/VAN_WHOLE_SYSTEM_IMPLEMENTATION_AUDIT_AND_CERTIFICATION_REV_1.md s30",
       "repository_evidence": [
-        "android/.../visual/VanCanvasFallback.kt:250-279",
-        "android/.../visual/VanAuraSpec.kt:81"
+        "android/app/src/main/java/com/dial/van/visual/VanCanvasFallback.kt:250-279",
+        "android/app/src/main/java/com/dial/van/visual/VanAuraSpec.kt:81"
       ],
       "runtime_evidence": [],
       "affected_components": [
@@ -740,7 +772,8 @@
       "root_cause": "see s32 root-cause map",
       "remediation": "Introduce a monotonic animation clock and blend aura spec and pose changes over 120-420 ms.",
       "validation_gate": "G7",
-      "current_status": "OPEN"
+      "current_status": "OPEN",
+      "remediation_gate": "GATE 6"
     },
     {
       "id": "P1-AURA-003",
@@ -751,9 +784,9 @@
       "requirement": "See the requirements traceability matrix in the canonical report.",
       "authority": "docs/VAN_WHOLE_SYSTEM_IMPLEMENTATION_AUDIT_AND_CERTIFICATION_REV_1.md s30",
       "repository_evidence": [
-        "android/.../trading/TradingCommandCentreActivity.kt:78-81",
-        "android/.../visual/VanAuraSpec.kt:237-299",
-        "android/visual-preview/.../VanPreviewSheets.kt:750"
+        "android/app/src/main/java/com/dial/van/trading/TradingCommandCentreActivity.kt:78-81",
+        "android/app/src/main/java/com/dial/van/visual/VanAuraSpec.kt:237-299",
+        "android/visual-preview/src/main/kotlin/com/dial/van/preview/VanPreviewSheets.kt:750"
       ],
       "runtime_evidence": [],
       "affected_components": [
@@ -762,7 +795,8 @@
       "root_cause": "see s32 root-cause map",
       "remediation": "Publish a classified trade-state event onto a semantic state bus and subscribe the visual runtime to it.",
       "validation_gate": "G7",
-      "current_status": "OPEN"
+      "current_status": "OPEN",
+      "remediation_gate": "GATE 6"
     },
     {
       "id": "P1-VIS-001",
@@ -774,8 +808,8 @@
       "authority": "docs/VAN_WHOLE_SYSTEM_IMPLEMENTATION_AUDIT_AND_CERTIFICATION_REV_1.md s30",
       "repository_evidence": [
         "android/visual-preview/build.gradle.kts:14-38",
-        "android/visual-preview/src/main/kotlin/.../GlassPainter.kt:215-314",
-        "android/.../visual/VanAura.kt:79-245"
+        "android/visual-preview/src/main/kotlin/com/dial/van/preview/GlassPainter.kt:215-314",
+        "android/app/src/main/java/com/dial/van/visual/VanAura.kt:79-245"
       ],
       "runtime_evidence": [],
       "affected_components": [
@@ -784,7 +818,8 @@
       "root_cause": "see s32 root-cause map",
       "remediation": "Extract the Compose painter into the shared source set so previews render the shipping pixels.",
       "validation_gate": "G7",
-      "current_status": "OPEN"
+      "current_status": "OPEN",
+      "remediation_gate": "GATE 11"
     },
     {
       "id": "P1-VIS-002",
@@ -795,7 +830,7 @@
       "requirement": "See the requirements traceability matrix in the canonical report.",
       "authority": "docs/VAN_WHOLE_SYSTEM_IMPLEMENTATION_AUDIT_AND_CERTIFICATION_REV_1.md s30",
       "repository_evidence": [
-        "android/visual-preview/src/main/kotlin/.../VanEvidenceMatrix.kt:36",
+        "android/visual-preview/src/main/kotlin/com/dial/van/preview/VanEvidenceMatrix.kt:36",
         "artifacts/release/preview/rev21/manifest.json:2",
         "docs/VAN_LIVING_WIND_FIELD_RUNTIME_REV_1.md s13"
       ],
@@ -806,7 +841,8 @@
       "root_cause": "see s32 root-cause map",
       "remediation": "Regenerate evidence at the current authority revision including the orthogonal presence board.",
       "validation_gate": "G7",
-      "current_status": "OPEN"
+      "current_status": "OPEN",
+      "remediation_gate": "GATE 11"
     },
     {
       "id": "P1-AND-001",
@@ -818,7 +854,7 @@
       "authority": "docs/VAN_WHOLE_SYSTEM_IMPLEMENTATION_AUDIT_AND_CERTIFICATION_REV_1.md s30",
       "repository_evidence": [
         "android/app/src/main/AndroidManifest.xml:77-105",
-        "android/.../share/ShareIntentReceiver.kt:21"
+        "android/app/src/main/java/com/dial/van/share/ShareIntentReceiver.kt:21"
       ],
       "runtime_evidence": [],
       "affected_components": [
@@ -827,7 +863,8 @@
       "root_cause": "see s32 root-cause map",
       "remediation": "Convert to a transparent Activity that enqueues and finishes.",
       "validation_gate": "G11",
-      "current_status": "OPEN"
+      "current_status": "OPEN",
+      "remediation_gate": "GATE 10"
     },
     {
       "id": "P1-AND-002",
@@ -838,8 +875,8 @@
       "requirement": "See the requirements traceability matrix in the canonical report.",
       "authority": "docs/VAN_WHOLE_SYSTEM_IMPLEMENTATION_AUDIT_AND_CERTIFICATION_REV_1.md s30",
       "repository_evidence": [
-        "android/.../onboarding/OnboardingActivity.kt:101-153,106-114,130-133",
-        "android/.../command/CommandCentreActivity.kt:1026-1093"
+        "android/app/src/main/java/com/dial/van/onboarding/OnboardingActivity.kt:101-153,106-114,130-133",
+        "android/app/src/main/java/com/dial/van/command/CommandCentreActivity.kt:1026-1093"
       ],
       "runtime_evidence": [],
       "affected_components": [
@@ -848,7 +885,8 @@
       "root_cause": "see s32 root-cause map",
       "remediation": "Add pairing as an onboarding step and gate advancement on real grant checks.",
       "validation_gate": "G11",
-      "current_status": "OPEN"
+      "current_status": "OPEN",
+      "remediation_gate": "GATE 10"
     },
     {
       "id": "P1-SEC-004",
@@ -859,8 +897,8 @@
       "requirement": "See the requirements traceability matrix in the canonical report.",
       "authority": "docs/VAN_WHOLE_SYSTEM_IMPLEMENTATION_AUDIT_AND_CERTIFICATION_REV_1.md s30",
       "repository_evidence": [
-        "android/.../security/BiometricGate.kt:22-53,84-107",
-        "android/.../trading/ui/AccountOnboardingScreen.kt:26"
+        "android/app/src/main/java/com/dial/van/security/BiometricGate.kt:22-53,84-107",
+        "android/app/src/main/java/com/dial/van/trading/ui/AccountOnboardingScreen.kt:26"
       ],
       "runtime_evidence": [],
       "affected_components": [
@@ -869,7 +907,8 @@
       "root_cause": "see s32 root-cause map",
       "remediation": "Route trading credential changes through the CryptoObject-bound path.",
       "validation_gate": "G2",
-      "current_status": "OPEN"
+      "current_status": "OPEN",
+      "remediation_gate": "GATE 1"
     },
     {
       "id": "P1-SEC-005",
@@ -890,7 +929,8 @@
       "root_cause": "see s32 root-cause map",
       "remediation": "Add a command nonce store with a uniqueness check and make the idempotency claim atomic.",
       "validation_gate": "G2",
-      "current_status": "OPEN"
+      "current_status": "OPEN",
+      "remediation_gate": "GATE 1"
     },
     {
       "id": "P1-SEC-006",
@@ -912,7 +952,8 @@
       "root_cause": "see s32 root-cause map",
       "remediation": "Add a hash chain and periodic anchoring to the audit table.",
       "validation_gate": "G2",
-      "current_status": "OPEN"
+      "current_status": "OPEN",
+      "remediation_gate": "GATE 1"
     },
     {
       "id": "P1-SEC-007",
@@ -933,7 +974,8 @@
       "root_cause": "see s32 root-cause map",
       "remediation": "Add per-surface rate limiting and lockout at the app and edge.",
       "validation_gate": "G2",
-      "current_status": "OPEN"
+      "current_status": "OPEN",
+      "remediation_gate": "GATE 1"
     },
     {
       "id": "P1-SYM-001",
@@ -954,7 +996,8 @@
       "root_cause": "see s32 root-cause map",
       "remediation": "Bind episode_ref to real mission or command identifiers; distinguish evidence-derived from owner-confirmed in owner-facing text.",
       "validation_gate": "G6",
-      "current_status": "OPEN"
+      "current_status": "OPEN",
+      "remediation_gate": "GATE 4"
     },
     {
       "id": "P1-LEARN-001",
@@ -976,7 +1019,8 @@
       "root_cause": "see s32 root-cause map",
       "remediation": "Record mission outcomes, verification receipts and owner corrections into the learning stores.",
       "validation_gate": "G6",
-      "current_status": "OPEN"
+      "current_status": "OPEN",
+      "remediation_gate": "GATE 4"
     },
     {
       "id": "P1-BROW-002",
@@ -998,7 +1042,8 @@
       "root_cause": "see s32 root-cause map",
       "remediation": "Make the classifier able to reach CONFIRMED_INJECTION and stop the task; add a live adversarial canary.",
       "validation_gate": "G2",
-      "current_status": "OPEN"
+      "current_status": "OPEN",
+      "remediation_gate": "GATE 8"
     },
     {
       "id": "P1-AUTO-001",
@@ -1020,7 +1065,8 @@
       "root_cause": "see s32 root-cause map",
       "remediation": "Supply the real observer map in app.py and unify with VerifierRegistry.",
       "validation_gate": "G4",
-      "current_status": "OPEN"
+      "current_status": "OPEN",
+      "remediation_gate": "GATE 3"
     },
     {
       "id": "P1-HER-001",
@@ -1042,7 +1088,15 @@
       "root_cause": "see s32 root-cause map",
       "remediation": "Align the include list with the shim and assert it in the contract test.",
       "validation_gate": "G1",
-      "current_status": "OPEN"
+      "current_status": "CLOSED",
+      "remediation_gate": "GATE 0",
+      "closure_note": "Registration include list aligned 11 -> 20 tools; tests/contracts/test_owner_runtime_mcp_contract.py::test_registration_include_list_matches_the_shim_exactly now parses both and asserts set equality, so the drift cannot recur silently.",
+      "closure_evidence": [
+        "tools/hermes/register_owner_runtime_mcp.sh tools.include",
+        "tests/contracts/test_owner_runtime_mcp_contract.py"
+      ],
+      "closure_commit": "0889d88f3074",
+      "closed_at": "2026-09-19"
     },
     {
       "id": "P1-HER-002",
@@ -1064,7 +1118,14 @@
       "root_cause": "see s32 root-cause map",
       "remediation": "Register the hook during install and assert it in the doctor and the live attestation.",
       "validation_gate": "G10",
-      "current_status": "OPEN"
+      "current_status": "CLOSED",
+      "remediation_gate": "GATE 0",
+      "closure_note": "Doctor now loads the hook and asserts it denies an A5 action, rather than checking the file exists. Declaration of hook_module and hook_entrypoint is also asserted.",
+      "closure_evidence": [
+        "tools/hermes/doctor_van_profile.sh policy hook load and deny probe"
+      ],
+      "closure_commit": "0889d88f3074",
+      "closed_at": "2026-09-19"
     },
     {
       "id": "P1-HER-003",
@@ -1086,7 +1147,16 @@
       "root_cause": "see s32 root-cause map",
       "remediation": "Install all declared skills and assert a single count across config, installer, doctor and tests.",
       "validation_gate": "G1",
-      "current_status": "OPEN"
+      "current_status": "CLOSED",
+      "remediation_gate": "GATE 0",
+      "closure_note": "automation-fabric and browser-intelligence added to installer and doctor; tests/hermes/test_profile_layout.py::test_skill_lists_agree_across_all_sources parses config.yaml and asserts config, installer, doctor and tests all name the same 16 skills.",
+      "closure_evidence": [
+        "tools/hermes/install_van_profile.sh",
+        "tools/hermes/doctor_van_profile.sh",
+        "tests/hermes/test_profile_layout.py"
+      ],
+      "closure_commit": "0889d88f3074",
+      "closed_at": "2026-09-19"
     },
     {
       "id": "P1-HER-004",
@@ -1108,7 +1178,14 @@
       "root_cause": "see s32 root-cause map",
       "remediation": "Document the binding explicitly and have Hermes echo the run-metadata snapshot id.",
       "validation_gate": "G1",
-      "current_status": "OPEN"
+      "current_status": "CLOSED",
+      "remediation_gate": "GATE 0",
+      "closure_note": "AGENTS.md step 9 now states which snapshot authorizes: the gateway-sealed canonical_context.snapshot_id from run metadata, not the agent's own context_snapshot result.",
+      "closure_evidence": [
+        "hermes/profile/van/AGENTS.md owner-context protocol step 9"
+      ],
+      "closure_commit": "0889d88f3074",
+      "closed_at": "2026-09-19"
     },
     {
       "id": "P1-HER-005",
@@ -1129,7 +1206,8 @@
       "root_cause": "see s32 root-cause map",
       "remediation": "Verify halt signatures against a gateway authority record and bind requested_by to the authenticated principal.",
       "validation_gate": "G5",
-      "current_status": "OPEN"
+      "current_status": "OPEN",
+      "remediation_gate": "GATE 1"
     },
     {
       "id": "P1-GOOG-002",
@@ -1150,7 +1228,8 @@
       "root_cause": "see s32 root-cause map",
       "remediation": "Seal the full parameter set for A3 actions or require a resolved notebook target; stop casefolding extracted values.",
       "validation_gate": "G4",
-      "current_status": "OPEN"
+      "current_status": "OPEN",
+      "remediation_gate": "GATE 3"
     },
     {
       "id": "P1-TRADE-007",
@@ -1170,7 +1249,8 @@
       "root_cause": "see s32 root-cause map",
       "remediation": "Use the winning signal's target and remove the dead code.",
       "validation_gate": "G5",
-      "current_status": "OPEN"
+      "current_status": "OPEN",
+      "remediation_gate": "GATE 5"
     },
     {
       "id": "P1-TRADE-008",
@@ -1191,7 +1271,8 @@
       "root_cause": "see s32 root-cause map",
       "remediation": "Wire the learning hooks into the live session behind the existing reduce-only boundary.",
       "validation_gate": "G5",
-      "current_status": "OPEN"
+      "current_status": "OPEN",
+      "remediation_gate": "GATE 5"
     },
     {
       "id": "P1-PERF-002",
@@ -1202,7 +1283,7 @@
       "requirement": "See the requirements traceability matrix in the canonical report.",
       "authority": "docs/VAN_WHOLE_SYSTEM_IMPLEMENTATION_AUDIT_AND_CERTIFICATION_REV_1.md s30",
       "repository_evidence": [
-        "android/.../overlay/FloatingOverlayService.kt:156,174"
+        "android/app/src/main/java/com/dial/van/overlay/FloatingOverlayService.kt:156,174"
       ],
       "runtime_evidence": [],
       "affected_components": [
@@ -1211,7 +1292,8 @@
       "root_cause": "see s32 root-cause map",
       "remediation": "Drive the lifecycle below STARTED on screen off and when minimized.",
       "validation_gate": "G7",
-      "current_status": "OPEN"
+      "current_status": "OPEN",
+      "remediation_gate": "GATE 6"
     },
     {
       "id": "P2-COG-002",
@@ -1232,7 +1314,8 @@
       "root_cause": "see s32 root-cause map",
       "remediation": "Choose one taxonomy and enforce it at admission.",
       "validation_gate": "G1",
-      "current_status": "OPEN"
+      "current_status": "OPEN",
+      "remediation_gate": "GATE 4"
     },
     {
       "id": "P2-MEM-002",
@@ -1252,7 +1335,8 @@
       "root_cause": "see s32 root-cause map",
       "remediation": "Add owner-facing deletion for every store that holds owner-derived data.",
       "validation_gate": "G1",
-      "current_status": "OPEN"
+      "current_status": "OPEN",
+      "remediation_gate": "GATE 4"
     },
     {
       "id": "P2-UX-001",
@@ -1263,7 +1347,7 @@
       "requirement": "See the requirements traceability matrix in the canonical report.",
       "authority": "docs/VAN_WHOLE_SYSTEM_IMPLEMENTATION_AUDIT_AND_CERTIFICATION_REV_1.md s30",
       "repository_evidence": [
-        "android/.../command/CommandCentreActivity.kt:1214,295,749-752,555,600,1005,1081"
+        "android/app/src/main/java/com/dial/van/command/CommandCentreActivity.kt:1214,295,749-752,555,600,1005,1081"
       ],
       "runtime_evidence": [],
       "affected_components": [
@@ -1272,7 +1356,8 @@
       "root_cause": "see s32 root-cause map",
       "remediation": "Rebuild the Command Centre against the mission read models using MissionRepository.ownerReadableStatus.",
       "validation_gate": "G1",
-      "current_status": "OPEN"
+      "current_status": "OPEN",
+      "remediation_gate": "GATE 10"
     },
     {
       "id": "P2-AURA-001",
@@ -1283,8 +1368,8 @@
       "requirement": "See the requirements traceability matrix in the canonical report.",
       "authority": "docs/VAN_WHOLE_SYSTEM_IMPLEMENTATION_AUDIT_AND_CERTIFICATION_REV_1.md s30",
       "repository_evidence": [
-        "android/.../visual/VanBodyExclusionProfile.kt:162",
-        "android/.../overlay/OverlayTheme.kt:13-14"
+        "android/app/src/main/java/com/dial/van/visual/VanBodyExclusionProfile.kt:64",
+        "android/app/src/main/java/com/dial/van/overlay/OverlayTheme.kt:13-14"
       ],
       "runtime_evidence": [],
       "affected_components": [
@@ -1293,7 +1378,8 @@
       "root_cause": "see s32 root-cause map",
       "remediation": "Express the gap contract in dp and assert it in a test.",
       "validation_gate": "G1",
-      "current_status": "OPEN"
+      "current_status": "OPEN",
+      "remediation_gate": "GATE 6"
     },
     {
       "id": "P2-VIS-003",
@@ -1313,7 +1399,9 @@
       "root_cause": "see s32 root-cause map",
       "remediation": "Regenerate both boards and assert distinct hashes in the manifest.",
       "validation_gate": "G1",
-      "current_status": "OPEN"
+      "current_status": "OPEN",
+      "remediation_gate": "GATE 11",
+      "progress_note": "Manifest annotated with the duplicate-hash defect and the rev21 tree marked stale; the boards themselves are regenerated under Gate 11, so this stays OPEN."
     },
     {
       "id": "P2-BROW-001",
@@ -1334,7 +1422,8 @@
       "root_cause": "see s32 root-cause map",
       "remediation": "Wire the adapters and the mission binder into the browser task path.",
       "validation_gate": "G1",
-      "current_status": "OPEN"
+      "current_status": "OPEN",
+      "remediation_gate": "GATE 8"
     },
     {
       "id": "P2-GOOG-001",
@@ -1354,7 +1443,8 @@
       "root_cause": "see s32 root-cause map",
       "remediation": "Restrict fallback selection to capabilities with a readiness source and an implementation.",
       "validation_gate": "G1",
-      "current_status": "OPEN"
+      "current_status": "OPEN",
+      "remediation_gate": "GATE 4"
     },
     {
       "id": "P2-SEC-008",
@@ -1375,7 +1465,8 @@
       "root_cause": "see s32 root-cause map",
       "remediation": "Add expiry and rotation for every long-lived credential and a PKI renewal path with monitoring.",
       "validation_gate": "G1",
-      "current_status": "OPEN"
+      "current_status": "OPEN",
+      "remediation_gate": "GATE 1"
     },
     {
       "id": "P2-SEC-009",
@@ -1396,7 +1487,9 @@
       "root_cause": "see s32 root-cause map",
       "remediation": "Remove the route from the production application.",
       "validation_gate": "G1",
-      "current_status": "OPEN"
+      "current_status": "OPEN",
+      "remediation_gate": "GATE 1",
+      "progress_note": "tools/ci/maturity_gate.py now reports the forbidden /v1/google/test-transport route as scheduled. Removal is Gate 1 work; this stays OPEN."
     },
     {
       "id": "P2-SEC-010",
@@ -1407,7 +1500,7 @@
       "requirement": "See the requirements traceability matrix in the canonical report.",
       "authority": "docs/VAN_WHOLE_SYSTEM_IMPLEMENTATION_AUDIT_AND_CERTIFICATION_REV_1.md s30",
       "repository_evidence": [
-        "android/.../voice/WakeRuntime.kt:41-44"
+        "android/app/src/main/java/com/dial/van/voice/WakeRuntime.kt:41-44"
       ],
       "runtime_evidence": [],
       "affected_components": [
@@ -1416,7 +1509,8 @@
       "root_cause": "see s32 root-cause map",
       "remediation": "Implement speaker verification and gate command dispatch on it.",
       "validation_gate": "G1",
-      "current_status": "OPEN"
+      "current_status": "OPEN",
+      "remediation_gate": "GATE 9"
     },
     {
       "id": "P2-PERF-001",
@@ -1427,9 +1521,9 @@
       "requirement": "See the requirements traceability matrix in the canonical report.",
       "authority": "docs/VAN_WHOLE_SYSTEM_IMPLEMENTATION_AUDIT_AND_CERTIFICATION_REV_1.md s30",
       "repository_evidence": [
-        "android/.../visual/VanFieldGeometry.kt:74-76,415-444",
-        "android/.../visual/VanEffectBudget.kt:247",
-        "android/.../visual/VanCanvasFallback.kt:159"
+        "android/app/src/main/java/com/dial/van/visual/VanFieldGeometry.kt:74-76,415-444",
+        "android/app/src/main/java/com/dial/van/visual/VanEffectBudget.kt:58",
+        "android/app/src/main/java/com/dial/van/visual/VanCanvasFallback.kt:159"
       ],
       "runtime_evidence": [],
       "affected_components": [
@@ -1438,7 +1532,8 @@
       "root_cause": "see s32 root-cause map",
       "remediation": "Cache stable topology and update only dynamic coordinates; add frame-time sampling.",
       "validation_gate": "G1",
-      "current_status": "OPEN"
+      "current_status": "OPEN",
+      "remediation_gate": "GATE 6"
     },
     {
       "id": "P2-OBS-001",
@@ -1459,7 +1554,8 @@
       "root_cause": "see s32 root-cause map",
       "remediation": "Introduce a single correlation id propagated across every subsystem and log sink.",
       "validation_gate": "G1",
-      "current_status": "OPEN"
+      "current_status": "OPEN",
+      "remediation_gate": "GATE 11"
     },
     {
       "id": "P2-COH-001",
@@ -1481,7 +1577,8 @@
       "root_cause": "see s32 root-cause map",
       "remediation": "Define one owner-facing work status projection and map every subsystem onto it.",
       "validation_gate": "G1",
-      "current_status": "OPEN"
+      "current_status": "OPEN",
+      "remediation_gate": "GATE 2"
     },
     {
       "id": "P2-COH-002",
@@ -1503,7 +1600,653 @@
       "root_cause": "see s32 root-cause map",
       "remediation": "Migrate to one attention engine and one verification system.",
       "validation_gate": "G1",
+      "current_status": "OPEN",
+      "remediation_gate": "GATE 3"
+    },
+    {
+      "id": "P3-OBS-001",
+      "severity": "P3",
+      "domain": "observability",
+      "title": "No application logging anywhere in the gateway",
+      "description": "The gateway emits no structured logs. The audit table is the only trace and it is shallow. A developer cannot reconstruct a request without reading SQLite directly.",
+      "requirement": "See the requirements traceability matrix in the canonical report.",
+      "authority": "docs/VAN_WHOLE_SYSTEM_IMPLEMENTATION_AUDIT_AND_CERTIFICATION_REV_1.md s31",
+      "repository_evidence": [
+        "backend/van_gateway/ (no logging configuration or logger usage on request paths)"
+      ],
+      "runtime_evidence": [],
+      "affected_components": [
+        "observability"
+      ],
+      "root_cause": "see s32 root-cause map",
+      "remediation": "Add structured logging with timestamp, service, mission id, command id, correlation id, action class, principal, result, degraded code and error class. Never log secrets.",
+      "validation_gate": "G_OPS",
+      "remediation_gate": "GATE 11",
+      "current_status": "OPEN"
+    },
+    {
+      "id": "P3-OBS-002",
+      "severity": "P3",
+      "domain": "observability",
+      "title": "Metrics are collected in-process and exported nowhere",
+      "description": "Automation telemetry and trading observability compute metrics that no endpoint or exporter publishes.",
+      "requirement": "See the requirements traceability matrix in the canonical report.",
+      "authority": "docs/VAN_WHOLE_SYSTEM_IMPLEMENTATION_AUDIT_AND_CERTIFICATION_REV_1.md s31",
+      "repository_evidence": [
+        "backend/van_gateway/automation/telemetry.py",
+        "trading/vati/observability/"
+      ],
+      "runtime_evidence": [],
+      "affected_components": [
+        "observability"
+      ],
+      "root_cause": "see s32 root-cause map",
+      "remediation": "Export the metric set named in blueprint Gate 11 to a scrape endpoint or push gateway.",
+      "validation_gate": "G_OPS",
+      "remediation_gate": "GATE 11",
+      "current_status": "OPEN"
+    },
+    {
+      "id": "P3-OBS-003",
+      "severity": "P3",
+      "domain": "observability",
+      "title": "No alerting thresholds exist for any runtime failure",
+      "description": "Nothing defines what constitutes an actionable production failure, so no operator is ever paged.",
+      "requirement": "See the requirements traceability matrix in the canonical report.",
+      "authority": "docs/VAN_WHOLE_SYSTEM_IMPLEMENTATION_AUDIT_AND_CERTIFICATION_REV_1.md s31",
+      "repository_evidence": [
+        "deploy/ (no alerting configuration)"
+      ],
+      "runtime_evidence": [],
+      "affected_components": [
+        "observability"
+      ],
+      "root_cause": "see s32 root-cause map",
+      "remediation": "Define actionable alert thresholds for the critical runtime failures enumerated in Gate 11.",
+      "validation_gate": "G_OPS",
+      "remediation_gate": "GATE 11",
+      "current_status": "OPEN"
+    },
+    {
+      "id": "P3-OPS-001",
+      "severity": "P3",
+      "domain": "infrastructure",
+      "title": "No retention policy on any table",
+      "description": "A repo-wide search for retention, prune, vacuum, purge or logrotate finds one setting in the whole system: n8n's own 168-hour execution retention. The audit table, event table, knowledge_evidence, research_evidence, eval_runs and context_snapshots grow forever in the SQLite file that serves live requests.",
+      "requirement": "See the requirements traceability matrix in the canonical report.",
+      "authority": "docs/VAN_WHOLE_SYSTEM_IMPLEMENTATION_AUDIT_AND_CERTIFICATION_REV_1.md s31",
+      "repository_evidence": [
+        "backend/van_gateway/storage/db.py",
+        "deploy/van-trading-core/automation/docker-compose.yml"
+      ],
+      "runtime_evidence": [],
+      "affected_components": [
+        "storage",
+        "observability"
+      ],
+      "root_cause": "see s32 root-cause map",
+      "remediation": "Add a retention policy and a prune job to every unbounded store.",
+      "validation_gate": "G_OPS",
+      "remediation_gate": "GATE 11",
+      "current_status": "OPEN"
+    },
+    {
+      "id": "P3-OPS-002",
+      "severity": "P3",
+      "domain": "infrastructure",
+      "title": "No backup, no restore path and no restore drill",
+      "description": "No Postgres dump, no SQLite backup, no volume snapshot and no snapshot policy exists anywhere in deploy, tools or systemd. Loss of the gateway host is loss of all owner state and the entire audit history.",
+      "requirement": "See the requirements traceability matrix in the canonical report.",
+      "authority": "docs/VAN_WHOLE_SYSTEM_IMPLEMENTATION_AUDIT_AND_CERTIFICATION_REV_1.md s31",
+      "repository_evidence": [
+        "deploy/",
+        "tools/"
+      ],
+      "runtime_evidence": [],
+      "affected_components": [
+        "infrastructure"
+      ],
+      "root_cause": "see s32 root-cause map",
+      "remediation": "Automate backups for databases, configuration, evidence and project state; run an actual restore drill and record it.",
+      "validation_gate": "G_OPS",
+      "remediation_gate": "GATE 11",
+      "current_status": "OPEN"
+    },
+    {
+      "id": "P3-OPS-003",
+      "severity": "P3",
+      "domain": "infrastructure",
+      "title": "Bridge PKI expires silently with no renewal path",
+      "description": "make-bridge-pki.sh uses 825 days and its issue() returns early when the certificate already exists, so re-running bootstrap never renews. No expiry monitoring exists. At day 825 commander mTLS and the MT5 worker link both break without warning.",
+      "requirement": "See the requirements traceability matrix in the canonical report.",
+      "authority": "docs/VAN_WHOLE_SYSTEM_IMPLEMENTATION_AUDIT_AND_CERTIFICATION_REV_1.md s31",
+      "repository_evidence": [
+        "deploy/van-trading-core/pki/make-bridge-pki.sh"
+      ],
+      "runtime_evidence": [],
+      "affected_components": [
+        "infrastructure"
+      ],
+      "root_cause": "see s32 root-cause map",
+      "remediation": "Add a renewal path and expiry monitoring for all PKI and long-lived credentials.",
+      "validation_gate": "G_OPS",
+      "remediation_gate": "GATE 11",
+      "current_status": "OPEN"
+    },
+    {
+      "id": "P3-OPS-004",
+      "severity": "P3",
+      "domain": "infrastructure",
+      "title": "fire_due has no scheduler",
+      "description": "The reminder firing routine exists and nothing calls it on a schedule, so due reminders are never dispatched by the system itself.",
+      "requirement": "See the requirements traceability matrix in the canonical report.",
+      "authority": "docs/VAN_WHOLE_SYSTEM_IMPLEMENTATION_AUDIT_AND_CERTIFICATION_REV_1.md s31",
+      "repository_evidence": [
+        "backend/van_gateway/reminders/service.py (fire_due)"
+      ],
+      "runtime_evidence": [],
+      "affected_components": [
+        "reminders"
+      ],
+      "root_cause": "see s32 root-cause map",
+      "remediation": "Give reminder and attention dispatch a real scheduler with ownership and observability.",
+      "validation_gate": "G_OPS",
+      "remediation_gate": "GATE 11",
+      "current_status": "OPEN"
+    },
+    {
+      "id": "P3-OPS-005",
+      "severity": "P3",
+      "domain": "infrastructure",
+      "title": "Reminder and attention dedupe are in-memory only",
+      "description": "Deduplication state is lost on restart, so a restart can re-surface an already dismissed item.",
+      "requirement": "See the requirements traceability matrix in the canonical report.",
+      "authority": "docs/VAN_WHOLE_SYSTEM_IMPLEMENTATION_AUDIT_AND_CERTIFICATION_REV_1.md s31",
+      "repository_evidence": [
+        "backend/van_gateway/notifications/intelligence.py",
+        "backend/van_gateway/degraded/registry.py"
+      ],
+      "runtime_evidence": [],
+      "affected_components": [
+        "reminders",
+        "notifications"
+      ],
+      "root_cause": "see s32 root-cause map",
+      "remediation": "Persist dedupe and suppression state.",
+      "validation_gate": "G_OPS",
+      "remediation_gate": "GATE 11",
+      "current_status": "OPEN"
+    },
+    {
+      "id": "P3-OPS-006",
+      "severity": "P3",
+      "domain": "automation",
+      "title": "Blocking sleep inside an async retry loop",
+      "description": "The n8n client calls a blocking sleep on an async path, stalling the event loop for the duration of every retry.",
+      "requirement": "See the requirements traceability matrix in the canonical report.",
+      "authority": "docs/VAN_WHOLE_SYSTEM_IMPLEMENTATION_AUDIT_AND_CERTIFICATION_REV_1.md s31",
+      "repository_evidence": [
+        "backend/van_gateway/automation/n8n_client.py (retry loop)"
+      ],
+      "runtime_evidence": [],
+      "affected_components": [
+        "automation"
+      ],
+      "root_cause": "see s32 root-cause map",
+      "remediation": "Use awaitable bounded exponential backoff with jitter.",
+      "validation_gate": "G_OPS",
+      "remediation_gate": "GATE 11",
+      "current_status": "OPEN"
+    },
+    {
+      "id": "P3-OPS-007",
+      "severity": "P3",
+      "domain": "automation",
+      "title": "n8n client calls an endpoint that is not a real n8n API",
+      "description": "POST /workflows/{id}/run has no counterpart in the n8n API or anywhere in the repository.",
+      "requirement": "See the requirements traceability matrix in the canonical report.",
+      "authority": "docs/VAN_WHOLE_SYSTEM_IMPLEMENTATION_AUDIT_AND_CERTIFICATION_REV_1.md s31",
+      "repository_evidence": [
+        "backend/van_gateway/automation/n8n_client.py"
+      ],
+      "runtime_evidence": [],
+      "affected_components": [
+        "automation"
+      ],
+      "root_cause": "see s32 root-cause map",
+      "remediation": "Replace with a real n8n execution call or remove the method.",
+      "validation_gate": "G_SUBSTRATE",
+      "remediation_gate": "GATE 8",
+      "current_status": "OPEN"
+    },
+    {
+      "id": "P3-AND-001",
+      "severity": "P3",
+      "domain": "android",
+      "title": "No retry or backoff anywhere in the Android client",
+      "description": "VanGatewayClient uses raw HttpURLConnection with no retry, no backoff and no circuit breaker.",
+      "requirement": "See the requirements traceability matrix in the canonical report.",
+      "authority": "docs/VAN_WHOLE_SYSTEM_IMPLEMENTATION_AUDIT_AND_CERTIFICATION_REV_1.md s31",
+      "repository_evidence": [
+        "android/app/src/main/java/com/dial/van/gateway/VanGatewayClient.kt"
+      ],
+      "runtime_evidence": [],
+      "affected_components": [
+        "android"
+      ],
+      "root_cause": "see s32 root-cause map",
+      "remediation": "Add bounded exponential backoff with jitter and a circuit breaker.",
+      "validation_gate": "G_ANDROID",
+      "remediation_gate": "GATE 10",
+      "current_status": "OPEN"
+    },
+    {
+      "id": "P3-AND-002",
+      "severity": "P3",
+      "domain": "android",
+      "title": "/v1/events is polled once with a hardcoded cursor",
+      "description": "There is a single events(0) call in the activity feed's initial composition; the cursor is hardcoded to zero and never persisted, so the event stream is effectively unused.",
+      "requirement": "See the requirements traceability matrix in the canonical report.",
+      "authority": "docs/VAN_WHOLE_SYSTEM_IMPLEMENTATION_AUDIT_AND_CERTIFICATION_REV_1.md s31",
+      "repository_evidence": [
+        "android/app/src/main/java/com/dial/van/command/CommandCentreActivity.kt (ActivityModule)"
+      ],
+      "runtime_evidence": [],
+      "affected_components": [
+        "android"
+      ],
+      "root_cause": "see s32 root-cause map",
+      "remediation": "Replace with the semantic state subscription from Gate 6 and persist the cursor.",
+      "validation_gate": "G_SEMANTIC",
+      "remediation_gate": "GATE 6",
+      "current_status": "OPEN"
+    },
+    {
+      "id": "P3-AND-003",
+      "severity": "P3",
+      "domain": "android",
+      "title": "18 declared gateway client methods are never called",
+      "description": "All four mission methods, needsYou, activityFeed, the six understanding methods, permissions, autonomy, technology radar, eval report, briefing and attention are dead code.",
+      "requirement": "See the requirements traceability matrix in the canonical report.",
+      "authority": "docs/VAN_WHOLE_SYSTEM_IMPLEMENTATION_AUDIT_AND_CERTIFICATION_REV_1.md s31",
+      "repository_evidence": [
+        "android/app/src/main/java/com/dial/van/gateway/VanGatewayClient.kt"
+      ],
+      "runtime_evidence": [],
+      "affected_components": [
+        "android"
+      ],
+      "root_cause": "see s32 root-cause map",
+      "remediation": "Wire them into the mission surfaces built in Gate 2, or delete any whose capability was removed.",
+      "validation_gate": "G3",
+      "remediation_gate": "GATE 2",
+      "current_status": "OPEN"
+    },
+    {
+      "id": "P3-AND-004",
+      "severity": "P3",
+      "domain": "android",
+      "title": "Five degraded subsystems are hardcoded healthy",
+      "description": "Overlay, queue, notifications, voice and biometric are declared in the degraded model and never written, so they always report WORKING regardless of reality.",
+      "requirement": "See the requirements traceability matrix in the canonical report.",
+      "authority": "docs/VAN_WHOLE_SYSTEM_IMPLEMENTATION_AUDIT_AND_CERTIFICATION_REV_1.md s31",
+      "repository_evidence": [
+        "android/app/src/main/java/com/dial/van/degraded/DegradedMode.kt",
+        "android/app/src/main/java/com/dial/van/VanApplication.kt"
+      ],
+      "runtime_evidence": [],
+      "affected_components": [
+        "android"
+      ],
+      "root_cause": "see s32 root-cause map",
+      "remediation": "Drive all five from real signals.",
+      "validation_gate": "G_ANDROID",
+      "remediation_gate": "GATE 10",
+      "current_status": "OPEN"
+    },
+    {
+      "id": "P3-AND-005",
+      "severity": "P3",
+      "domain": "android",
+      "title": "All seven RestoreAction values are defined and never rendered",
+      "description": "The degraded contract carries an actionable restore instruction that no screen shows the owner.",
+      "requirement": "See the requirements traceability matrix in the canonical report.",
+      "authority": "docs/VAN_WHOLE_SYSTEM_IMPLEMENTATION_AUDIT_AND_CERTIFICATION_REV_1.md s31",
+      "repository_evidence": [
+        "android/app/src/main/java/com/dial/van/degraded/DegradedMode.kt"
+      ],
+      "runtime_evidence": [],
+      "affected_components": [
+        "android"
+      ],
+      "root_cause": "see s32 root-cause map",
+      "remediation": "Render the restore action wherever degraded state is shown.",
+      "validation_gate": "G_ANDROID",
+      "remediation_gate": "GATE 10",
+      "current_status": "OPEN"
+    },
+    {
+      "id": "P3-AND-006",
+      "severity": "P3",
+      "domain": "android",
+      "title": "Offline queue never replays on connectivity recovery",
+      "description": "replayAsync is called exactly once at application start, with no connectivity or health trigger.",
+      "requirement": "See the requirements traceability matrix in the canonical report.",
+      "authority": "docs/VAN_WHOLE_SYSTEM_IMPLEMENTATION_AUDIT_AND_CERTIFICATION_REV_1.md s31",
+      "repository_evidence": [
+        "android/app/src/main/java/com/dial/van/VanApplication.kt",
+        "android/app/src/main/java/com/dial/van/gateway/QueueReplayer.kt"
+      ],
+      "runtime_evidence": [],
+      "affected_components": [
+        "android"
+      ],
+      "root_cause": "see s32 root-cause map",
+      "remediation": "Trigger replay on connectivity and gateway health recovery, with duplicate suppression.",
+      "validation_gate": "G_ANDROID",
+      "remediation_gate": "GATE 10",
+      "current_status": "OPEN"
+    },
+    {
+      "id": "P3-AND-007",
+      "severity": "P3",
+      "domain": "android",
+      "title": "No state restoration anywhere",
+      "description": "A repo-wide search for rememberSaveable, onSaveInstanceState, ViewModel and configChanges over the main source set and manifest returns zero hits. Rotation destroys the selected module, the chat draft, every module's fetched data and the onboarding position.",
+      "requirement": "See the requirements traceability matrix in the canonical report.",
+      "authority": "docs/VAN_WHOLE_SYSTEM_IMPLEMENTATION_AUDIT_AND_CERTIFICATION_REV_1.md s31",
+      "repository_evidence": [
+        "android/app/src/main/java/com/dial/van/ (no ViewModel or rememberSaveable usage)"
+      ],
+      "runtime_evidence": [],
+      "affected_components": [
+        "android"
+      ],
+      "root_cause": "see s32 root-cause map",
+      "remediation": "Introduce ViewModels and rememberSaveable throughout.",
+      "validation_gate": "G_ANDROID",
+      "remediation_gate": "GATE 10",
+      "current_status": "OPEN"
+    },
+    {
+      "id": "P3-AND-008",
+      "severity": "P3",
+      "domain": "android",
+      "title": "No light theme and a deprecated parent theme",
+      "description": "darkColorScheme is hardcoded in all three activities, there is no isSystemInDarkTheme branch and no values-night; Theme.Van extends a deprecated platform parent.",
+      "requirement": "See the requirements traceability matrix in the canonical report.",
+      "authority": "docs/VAN_WHOLE_SYSTEM_IMPLEMENTATION_AUDIT_AND_CERTIFICATION_REV_1.md s31",
+      "repository_evidence": [
+        "android/app/src/main/res/values/themes.xml",
+        "android/app/src/main/java/com/dial/van/ (activity themes)"
+      ],
+      "runtime_evidence": [],
+      "affected_components": [
+        "android"
+      ],
+      "root_cause": "see s32 root-cause map",
+      "remediation": "Support a coherent light mode unless canon explicitly elects dark-only, and update the parent theme.",
+      "validation_gate": "G_ANDROID",
+      "remediation_gate": "GATE 10",
+      "current_status": "OPEN"
+    },
+    {
+      "id": "P3-AND-009",
+      "severity": "P3",
+      "domain": "android",
+      "title": "Two god files carry the app's owner surfaces",
+      "description": "CommandCentreActivity is 1238 lines with 13 module composables, no ViewModel, no NavHost and no repository; FloatingOverlayService is 1031 lines holding windows, gestures, chat draft, trade view and every composable.",
+      "requirement": "See the requirements traceability matrix in the canonical report.",
+      "authority": "docs/VAN_WHOLE_SYSTEM_IMPLEMENTATION_AUDIT_AND_CERTIFICATION_REV_1.md s31",
+      "repository_evidence": [
+        "android/app/src/main/java/com/dial/van/command/CommandCentreActivity.kt",
+        "android/app/src/main/java/com/dial/van/overlay/FloatingOverlayService.kt"
+      ],
+      "runtime_evidence": [],
+      "affected_components": [
+        "android"
+      ],
+      "root_cause": "see s32 root-cause map",
+      "remediation": "Split per blueprint Gate 10 and Rev 3.0 s41.",
+      "validation_gate": "G_ANDROID",
+      "remediation_gate": "GATE 10",
+      "current_status": "OPEN"
+    },
+    {
+      "id": "P3-AND-010",
+      "severity": "P3",
+      "domain": "android",
+      "title": "Trading UI shows unformatted floats and raw ledger keys",
+      "description": "Risk caps render as values like 'cap 2.0000000000000004%', and raw ledger keys such as max_open_stop_risk are shown to the owner.",
+      "requirement": "See the requirements traceability matrix in the canonical report.",
+      "authority": "docs/VAN_WHOLE_SYSTEM_IMPLEMENTATION_AUDIT_AND_CERTIFICATION_REV_1.md s31",
+      "repository_evidence": [
+        "android/app/src/main/java/com/dial/van/trading/ui/TradingScreens.kt"
+      ],
+      "runtime_evidence": [],
+      "affected_components": [
+        "android"
+      ],
+      "root_cause": "see s32 root-cause map",
+      "remediation": "Format numbers for display and map ledger keys to owner language.",
+      "validation_gate": "G_ANDROID",
+      "remediation_gate": "GATE 10",
+      "current_status": "OPEN"
+    },
+    {
+      "id": "P3-AND-011",
+      "severity": "P3",
+      "domain": "android",
+      "title": "Trading empty state instructs the owner to run a Python module",
+      "description": "The empty state tells the owner to run a python -m vati lake command.",
+      "requirement": "See the requirements traceability matrix in the canonical report.",
+      "authority": "docs/VAN_WHOLE_SYSTEM_IMPLEMENTATION_AUDIT_AND_CERTIFICATION_REV_1.md s31",
+      "repository_evidence": [
+        "android/app/src/main/java/com/dial/van/trading/ui/TradingScreens.kt"
+      ],
+      "runtime_evidence": [],
+      "affected_components": [
+        "android"
+      ],
+      "root_cause": "see s32 root-cause map",
+      "remediation": "Replace with an owner-meaningful empty state.",
+      "validation_gate": "G_ANDROID",
+      "remediation_gate": "GATE 10",
+      "current_status": "OPEN"
+    },
+    {
+      "id": "P3-DOC-003",
+      "severity": "P3",
+      "domain": "documentation",
+      "title": "android/README.md is stale",
+      "description": "It claims targetSdk and compileSdk 34 against an actual 36, and omits the trading, mission, control and gateway packages.",
+      "requirement": "See the requirements traceability matrix in the canonical report.",
+      "authority": "docs/VAN_WHOLE_SYSTEM_IMPLEMENTATION_AUDIT_AND_CERTIFICATION_REV_1.md s31",
+      "repository_evidence": [
+        "android/README.md",
+        "android/app/build.gradle.kts"
+      ],
+      "runtime_evidence": [],
+      "affected_components": [
+        "documentation"
+      ],
+      "root_cause": "see s32 root-cause map",
+      "remediation": "Correct the README and add it to the Gate 0 truth sweep.",
+      "validation_gate": "G1",
+      "remediation_gate": "GATE 0",
+      "current_status": "CLOSED",
+      "closure_note": "README corrected to SDK 36 and given a package map covering trading, mission, control and gateway.",
+      "closure_evidence": [
+        "android/README.md"
+      ],
+      "closure_commit": "0889d88f3074",
+      "closed_at": "2026-09-19"
+    },
+    {
+      "id": "P4-CMD-001",
+      "severity": "P4",
+      "domain": "command-execution",
+      "title": "The resolver casefolds command text so sealed titles lose owner capitalisation",
+      "description": "Extracted parameters are taken from casefolded text, so a title the owner capitalised is sealed lowercase and created lowercase at the provider.",
+      "requirement": "See the requirements traceability matrix in the canonical report.",
+      "authority": "docs/VAN_WHOLE_SYSTEM_IMPLEMENTATION_AUDIT_AND_CERTIFICATION_REV_1.md s31",
+      "repository_evidence": [
+        "backend/van_gateway/command/resolver.py"
+      ],
+      "runtime_evidence": [],
+      "affected_components": [
+        "command"
+      ],
+      "root_cause": "see s32 root-cause map",
+      "remediation": "Match case-insensitively but extract from the original text.",
+      "validation_gate": "G4",
+      "remediation_gate": "GATE 3",
+      "current_status": "OPEN"
+    },
+    {
+      "id": "P4-AND-012",
+      "severity": "P4",
+      "domain": "android",
+      "title": "Chart text is sized in raw pixels",
+      "description": "TradeChartCanvas sets textSize in pixels rather than scaled units, so it ignores the owner's font scale.",
+      "requirement": "See the requirements traceability matrix in the canonical report.",
+      "authority": "docs/VAN_WHOLE_SYSTEM_IMPLEMENTATION_AUDIT_AND_CERTIFICATION_REV_1.md s31",
+      "repository_evidence": [
+        "android/app/src/main/java/com/dial/van/trading/ui/TradeChartCanvas.kt"
+      ],
+      "runtime_evidence": [],
+      "affected_components": [
+        "android"
+      ],
+      "root_cause": "see s32 root-cause map",
+      "remediation": "Use scaled text units and respect font scale.",
+      "validation_gate": "G_ANDROID",
+      "remediation_gate": "GATE 10",
+      "current_status": "OPEN"
+    },
+    {
+      "id": "P4-AND-013",
+      "severity": "P4",
+      "domain": "android",
+      "title": "Charts have no pan, zoom or crosshair",
+      "description": "The candlestick canvas renders a fixed window with no interaction.",
+      "requirement": "See the requirements traceability matrix in the canonical report.",
+      "authority": "docs/VAN_WHOLE_SYSTEM_IMPLEMENTATION_AUDIT_AND_CERTIFICATION_REV_1.md s31",
+      "repository_evidence": [
+        "android/app/src/main/java/com/dial/van/trading/ui/TradeChartCanvas.kt"
+      ],
+      "runtime_evidence": [],
+      "affected_components": [
+        "android"
+      ],
+      "root_cause": "see s32 root-cause map",
+      "remediation": "Add pan, zoom and a crosshair readout.",
+      "validation_gate": "G_ANDROID",
+      "remediation_gate": "GATE 10",
+      "current_status": "OPEN"
+    },
+    {
+      "id": "P4-VIS-004",
+      "severity": "P4",
+      "domain": "visual",
+      "title": "headCounterDeg is computed every frame and never consumed",
+      "description": "The character motion sampler computes a head counter-rotation that the shipping owner-art renderer cannot use, because a bitmap has no separable head.",
+      "requirement": "See the requirements traceability matrix in the canonical report.",
+      "authority": "docs/VAN_WHOLE_SYSTEM_IMPLEMENTATION_AUDIT_AND_CERTIFICATION_REV_1.md s31",
+      "repository_evidence": [
+        "android/app/src/main/java/com/dial/van/visual/VanCharacterMotion.kt"
+      ],
+      "runtime_evidence": [],
+      "affected_components": [
+        "visual"
+      ],
+      "root_cause": "see s32 root-cause map",
+      "remediation": "Consume it in a renderer that has a separable head, or delete it.",
+      "validation_gate": "G_SEMANTIC",
+      "remediation_gate": "GATE 6",
+      "current_status": "OPEN"
+    },
+    {
+      "id": "P4-TRADE-009",
+      "severity": "P4",
+      "domain": "trading",
+      "title": "Dead code sits in the live order path",
+      "description": "The decision cycle contains an empty assignment and a loop with a bare pass immediately before target derivation.",
+      "requirement": "See the requirements traceability matrix in the canonical report.",
+      "authority": "docs/VAN_WHOLE_SYSTEM_IMPLEMENTATION_AUDIT_AND_CERTIFICATION_REV_1.md s31",
+      "repository_evidence": [
+        "trading/vati/app/cycle.py"
+      ],
+      "runtime_evidence": [],
+      "affected_components": [
+        "trading"
+      ],
+      "root_cause": "see s32 root-cause map",
+      "remediation": "Delete it alongside the strategy-target fix.",
+      "validation_gate": "G5",
+      "remediation_gate": "GATE 5",
+      "current_status": "OPEN"
+    },
+    {
+      "id": "P4-DOC-004",
+      "severity": "P4",
+      "domain": "documentation",
+      "title": "PairDeviceBody duplicates EnrollBody documentation",
+      "description": "The pairing body inherits the enrollment body and repeats its field documentation, which has already drifted once.",
+      "requirement": "See the requirements traceability matrix in the canonical report.",
+      "authority": "docs/VAN_WHOLE_SYSTEM_IMPLEMENTATION_AUDIT_AND_CERTIFICATION_REV_1.md s31",
+      "repository_evidence": [
+        "backend/van_gateway/app.py"
+      ],
+      "runtime_evidence": [],
+      "affected_components": [
+        "documentation"
+      ],
+      "root_cause": "see s32 root-cause map",
+      "remediation": "Document once at the base model.",
+      "validation_gate": "G1",
+      "remediation_gate": "GATE 0",
+      "current_status": "OPEN"
+    },
+    {
+      "id": "P4-SEC-011",
+      "severity": "P4",
+      "domain": "security",
+      "title": "Unescaped interpolation in the trading OAuth callback",
+      "description": "The callback builds an HTML response by interpolation. Today every interpolated value is a constant, so it is not currently exploitable, but the pattern is one parameter away from being so.",
+      "requirement": "See the requirements traceability matrix in the canonical report.",
+      "authority": "docs/VAN_WHOLE_SYSTEM_IMPLEMENTATION_AUDIT_AND_CERTIFICATION_REV_1.md s31",
+      "repository_evidence": [
+        "backend/van_gateway/app.py (trading oauth callback)"
+      ],
+      "runtime_evidence": [],
+      "affected_components": [
+        "security"
+      ],
+      "root_cause": "see s32 root-cause map",
+      "remediation": "Escape the interpolated values or render from a static template.",
+      "validation_gate": "G2",
+      "remediation_gate": "GATE 1",
       "current_status": "OPEN"
     }
-  ]
+  ],
+  "register_note": "Extended 2026-09-19 under blueprint Gate 0 / action W0-1. The audit assigned IDs to 55 findings and enumerated further P3/P4 items in prose; those now carry IDs so that 'all closed' is countable. Each finding carries a remediation_gate referencing docs/VAN_FINISHED_PRODUCT_BLUEPRINT_REV_1.md.",
+  "citation_note": "Citations re-resolved against HEAD on 2026-09-19 under blueprint Gate 0. 25 elided 'android/.../Foo.kt' paths were expanded to real paths, and two line numbers that exceeded their file length were corrected (VanBodyExclusionProfile.kt 162->64, VanEffectBudget.kt 247->58). The substance of both findings was unchanged; only the anchors were wrong. tools/ci/maturity_gate.py now fails CI on any citation that does not resolve.",
+  "gate_0_status": {
+    "executed": "2026-09-19",
+    "commit": "0889d88f3074",
+    "closed": [
+      "P1-DOC-001",
+      "P1-DOC-002",
+      "P1-HER-001",
+      "P1-HER-002",
+      "P1-HER-003",
+      "P1-HER-004",
+      "P3-DOC-003"
+    ],
+    "remaining_in_gate_0": [
+      "P4-DOC-004 (PairDeviceBody duplicated documentation \u2014 cosmetic, not yet applied)"
+    ],
+    "note": "Gate 0 closed the truth-correction and registration-drift findings and installed the maturity gate. Findings are marked CLOSED only where a test or an executable check now enforces the fix."
+  }
 }

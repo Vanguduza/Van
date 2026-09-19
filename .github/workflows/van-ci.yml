@@ -20,11 +20,22 @@ jobs:
       - name: Install backend dependencies
         working-directory: backend
         run: pip install -r requirements.txt
+      # Layer A — static truth and policy. This runs FIRST and blocks the rest.
+      # The audit's core defect was capabilities described as BUILT that no production
+      # path invoked. This gate makes that a CI failure rather than a later discovery.
+      - name: Maturity gate (truth and policy)
+        run: python tools/ci/maturity_gate.py
+
       - name: Backend tests
         working-directory: backend
         run: pytest -q
       - name: Contract tests
         run: pytest -q tests/contracts
+
+      # The maturity gate must fail on the defect shape it exists to prevent.
+      # A gate that only ever passes proves nothing.
+      - name: Maturity gate self-test
+        run: pytest -q tests/contracts/test_maturity_gate.py
       - name: Hermes policy tests
         run: pytest -q hermes/policy/tests
       - name: Hermes profile layout tests

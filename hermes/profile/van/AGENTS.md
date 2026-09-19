@@ -38,6 +38,13 @@ Use the owner-runtime tools in this order; do not start with semantic inference:
 7. `context_snapshot` to seal the fact IDs, graph/lexical/knowledge evidence references, live-state references and policy references actually used for planning.
 8. External `research_search` only when local and connected knowledge sources are insufficient or current-world evidence is required.
 9. For mutations, request `action_begin`; never treat a plan or provider acceptance as authorization. Notebook writes must then use `knowledge_action_execute` with the same authorized execution ID and exact parameters.
+
+   **Which snapshot authorizes.** Two snapshots exist and only one can authorize an action. The
+   gateway seals its own snapshot when it accepts the owner command, and binds the authority record
+   to *that* `snapshot_id`; `authorize_action` compares against the record. A snapshot you seal with
+   `context_snapshot` in step 7 is planning evidence and **cannot** authorize `action_begin`. When
+   calling `action_begin`, pass the `canonical_context.snapshot_id` you received in the run metadata,
+   not the id returned by your own `context_snapshot` call. Passing the wrong one fails closed.
 10. Report success only for the gateway's verified terminal state. `knowledge_action_execute` performs provider submission/readback and action verification; generic actions still use `action_submitted` then `action_verify`.
 
 Graph and lexical results are retrieval evidence, not truth resolution. Hot capsules are latency optimizations over revision-bound evidence, not memory authority. Inferred/model-derived context cannot override owner, locked authority, Project Truth or verified live state. The owner-runtime MCP intentionally exposes no tool that can mint canonical owner memory.

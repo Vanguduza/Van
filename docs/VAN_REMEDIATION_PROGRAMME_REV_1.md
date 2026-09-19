@@ -175,7 +175,12 @@ Every non-INTEGRATED component found by the audit, with its verdict and the wave
 | 69 | Postgres ledger | Test skipped | **COMPLETE** | Un-skip and run it in CI | 4 |
 | 70 | Margin model | ABSENT | **COMPLETE** | Add margin fields and a Risk Authority gate | 4 |
 
-**Totals: 70 components — 33 WIRE, 19 COMPLETE, 4 REPLACE, 14 DELETE.**
+**Totals: 70 components — 35 WIRE, 22 COMPLETE, 4 REPLACE, 9 DELETE.**
+
+These counts are derived from `evidence/van-system-audit/component_ledger.json`, which is the
+machine-readable authority. An earlier draft of this section stated 14 DELETE; that over-counted by
+treating four conditional dispositions ("complete or delete") as deletions. The ledger and the
+maturity CI are authoritative over this prose.
 
 ---
 
