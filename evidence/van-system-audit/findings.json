@@ -3710,6 +3710,260 @@
         "posture": "The finding said it was not exploitable today and it was not: every interpolated value was a constant. But `broker` is a path segment and an HTTPException detail carries a query parameter back, so it was one field away. The test drives both halves with a real payload and also holds the rule for the file rather than for the two call sites, because a rule that only holds where somebody remembered is not a rule.",
         "state": "INTEGRATED_AND_EVIDENCED"
       }
+    },
+    {
+      "id": "P1-VOICE-002",
+      "severity": "P1",
+      "domain": "voice",
+      "title": "SHERPA_PRIMARY_REQUIRED can ship with no Sherpa runtime",
+      "description": "VoiceRecognitionPolicy returns SHERPA_PRIMARY_REQUIRED for API <= 30 and for any device without Google's on-device recognizer. No Sherpa dependency, no model asset and no build guard exist, so a release can ship in which voice capture is impossible on part of the supported API range. The failure is honest at runtime (ERROR_SHERPA_PRIMARY_REQUIRED) but nothing prevents the build.",
+      "requirement": "docs/VAN_CONSOLIDATED_DEPLOYMENT_READINESS_CLOSURE_BLUEPRINT_REV_1.md",
+      "authority": "VAN Consolidated Deployment-Readiness Closure Blueprint Rev 2",
+      "repository_evidence": [
+        "android/app/src/main/java/com/dial/van/voice/VoiceRecognitionModels.kt:47",
+        "android/app/src/main/java/com/dial/van/voice/VoiceInterfaces.kt:222",
+        "android/app/build.gradle.kts:24"
+      ],
+      "runtime_evidence": [],
+      "affected_components": [
+        "voice"
+      ],
+      "root_cause": "see the closure blueprint",
+      "remediation": "Raise minSdk to 31 so every supported device has an on-device recognizer, and add a build guard asserting that no supported API level resolves to a backend without a runtime.",
+      "impact": "An owner on a device in the unsupported range says 'Hey Van' and nothing can ever hear them.",
+      "validation_gate": "G7",
+      "current_status": "OPEN",
+      "remediation_gate": "G7"
+    },
+    {
+      "id": "P2-AUTO-002",
+      "severity": "P2",
+      "domain": "automation",
+      "title": "The payment exception path exists and has no production caller",
+      "description": "assert_payment_action_is_owner_approved implements the documented narrow exception - a payment as an A4 native action with a binding naming payee, amount, currency and reference - and nothing calls it. The prohibition (assert_not_automated_payment) IS live at automation/router.py:118, so VAN fails closed.",
+      "requirement": "docs/VAN_CONSOLIDATED_DEPLOYMENT_READINESS_CLOSURE_BLUEPRINT_REV_1.md",
+      "authority": "VAN Consolidated Deployment-Readiness Closure Blueprint Rev 2",
+      "repository_evidence": [
+        "backend/van_gateway/automation/payments.py:205",
+        "backend/van_gateway/automation/router.py:118"
+      ],
+      "runtime_evidence": [],
+      "affected_components": [
+        "automation"
+      ],
+      "root_cause": "see the closure blueprint",
+      "remediation": "Owner decision 3 in the blueprint: leave unwired and fail closed. Assert the absence so it cannot be reached by accident, and record it as a deliberate scope boundary.",
+      "impact": "A documented capability does not exist. VAN cannot make even an owner-approved payment.",
+      "validation_gate": "G2",
+      "current_status": "OPEN",
+      "remediation_gate": "G2"
+    },
+    {
+      "id": "P2-VERIFY-002",
+      "severity": "P2",
+      "domain": "verification",
+      "title": "Six verifier and observer classes have no production reference",
+      "description": "DocumentUploadObserver and NotificationObserver are referenced nowhere at all. CiRunVerifier, RepositoryShaVerifier and ApiReadbackVerifier are referenced only by their own tests. The verifier registry that would use them is constructed, so the effect is that postconditions VAN documents as observable have no observer.",
+      "requirement": "docs/VAN_CONSOLIDATED_DEPLOYMENT_READINESS_CLOSURE_BLUEPRINT_REV_1.md",
+      "authority": "VAN Consolidated Deployment-Readiness Closure Blueprint Rev 2",
+      "repository_evidence": [
+        "backend/van_gateway/automation/verifier.py:142",
+        "backend/van_gateway/automation/verifier.py:152",
+        "backend/van_gateway/mission/verifiers.py:138"
+      ],
+      "runtime_evidence": [],
+      "affected_components": [
+        "verification"
+      ],
+      "root_cause": "see the closure blueprint",
+      "remediation": "Register every observer and verifier with its registry at construction, and assert the registry is non-empty for each declared postcondition kind.",
+      "impact": "An action whose postcondition nothing observes can only ever reach UNVERIFIABLE, so VAN cannot tell the owner whether it worked.",
+      "validation_gate": "G2",
+      "current_status": "OPEN",
+      "remediation_gate": "G2"
+    },
+    {
+      "id": "P2-DEAD-001",
+      "severity": "P2",
+      "domain": "architecture",
+      "title": "Six gateway modules are never imported by anything",
+      "description": "Walking the import graph from app.py, orchestrator.py and runtime_api.py reaches 157 of 163 modules. automation.credentials, automation.events, automation.repair, context_compiler, context_compiler.compiler and reasoning.calibration are never imported.",
+      "requirement": "docs/VAN_CONSOLIDATED_DEPLOYMENT_READINESS_CLOSURE_BLUEPRINT_REV_1.md",
+      "authority": "VAN Consolidated Deployment-Readiness Closure Blueprint Rev 2",
+      "repository_evidence": [
+        "backend/van_gateway/context_compiler/compiler.py:144",
+        "backend/van_gateway/reasoning/calibration.py:88",
+        "backend/van_gateway/automation/repair.py:131"
+      ],
+      "runtime_evidence": [],
+      "affected_components": [
+        "architecture"
+      ],
+      "root_cause": "see the closure blueprint",
+      "remediation": "Wire each module to a production entry point or delete it with its tests and its documentation. Blueprint owner decisions 4, 5 and 6 give the per-module default.",
+      "impact": "Code that cannot run still has to be read, reviewed and maintained, and it makes the system look larger than it is.",
+      "validation_gate": "G2",
+      "current_status": "OPEN",
+      "remediation_gate": "G2"
+    },
+    {
+      "id": "P1-COH-003",
+      "severity": "P1",
+      "domain": "coherence",
+      "title": "Authority is described by seven different vocabularies with no canonical descriptor",
+      "description": "Gateway sensitivity, biometric classes, Hermes execution policy, browser scope, automation grants, VATI authority and cognition autonomy each describe what an action is allowed to do in their own terms. No single descriptor maps an action to its authority class and required gate, so the mapping is re-derived at each boundary.",
+      "requirement": "docs/VAN_CONSOLIDATED_DEPLOYMENT_READINESS_CLOSURE_BLUEPRINT_REV_1.md",
+      "authority": "VAN Consolidated Deployment-Readiness Closure Blueprint Rev 2",
+      "repository_evidence": [
+        "backend/van_gateway/action/models.py:1",
+        "backend/van_gateway/automation/router.py:54"
+      ],
+      "runtime_evidence": [],
+      "affected_components": [
+        "coherence"
+      ],
+      "root_cause": "see the closure blueprint",
+      "remediation": "Introduce one canonical ActionDescriptor carrying action class, required gate, reversibility and egress class, and derive every surface's decision from it.",
+      "impact": "Policy drift produces either an approval prompt the owner should not see, or - far worse - a path that bypasses an approval they should have been asked for.",
+      "validation_gate": "G4",
+      "current_status": "OPEN",
+      "remediation_gate": "G4"
+    },
+    {
+      "id": "P1-LEARN-002",
+      "severity": "P1",
+      "domain": "learning",
+      "title": "Nothing prevents learning from widening authority",
+      "description": "Outcome learning adjusts ranking, confidence and strategy sizing. No invariant states that the mapping from action to authority class to required gate is policy data rather than a learned parameter, and no test asserts it.",
+      "requirement": "docs/VAN_CONSOLIDATED_DEPLOYMENT_READINESS_CLOSURE_BLUEPRINT_REV_1.md",
+      "authority": "VAN Consolidated Deployment-Readiness Closure Blueprint Rev 2",
+      "repository_evidence": [
+        "backend/van_gateway/learning/feed.py:1",
+        "backend/van_gateway/evolution/radar.py:394"
+      ],
+      "runtime_evidence": [],
+      "affected_components": [
+        "learning"
+      ],
+      "root_cause": "see the closure blueprint",
+      "remediation": "State the invariant, give it a guard that refuses any authority mutation originating from a learning path, and test that a high-success history cannot lower a required gate.",
+      "impact": "An operation that always required confirmation could become automatic because it usually succeeded. The owner would never be told the rule changed.",
+      "validation_gate": "G4",
+      "current_status": "OPEN",
+      "remediation_gate": "G4"
+    },
+    {
+      "id": "P2-CTX-003",
+      "severity": "P2",
+      "domain": "context",
+      "title": "The Owner Context Graph has no lifecycle governance",
+      "description": "The graph holds people, devices, accounts, decisions, policies, habits and relationships. Retention exists. Export, correction, erasure, revision history and conflict semantics do not.",
+      "requirement": "docs/VAN_CONSOLIDATED_DEPLOYMENT_READINESS_CLOSURE_BLUEPRINT_REV_1.md",
+      "authority": "VAN Consolidated Deployment-Readiness Closure Blueprint Rev 2",
+      "repository_evidence": [
+        "backend/van_gateway/understanding/memory.py:1",
+        "backend/van_gateway/ops/retention.py:1"
+      ],
+      "runtime_evidence": [],
+      "affected_components": [
+        "context"
+      ],
+      "root_cause": "see the closure blueprint",
+      "remediation": "Add export, correction, erasure and revision history with provenance preserved through each.",
+      "impact": "VAN's most sensitive dataset cannot be inspected, corrected or erased by the person it describes.",
+      "validation_gate": "G6",
+      "current_status": "OPEN",
+      "remediation_gate": "G6"
+    },
+    {
+      "id": "P2-GOOG-003",
+      "severity": "P2",
+      "domain": "google",
+      "title": "Google credential planes are treated as one credential",
+      "description": "Refresh-token capability, browser-session capability such as consumer NotebookLM, cloud-project credentials and delegated worker identities expire independently. The health surface reports one Google state.",
+      "requirement": "docs/VAN_CONSOLIDATED_DEPLOYMENT_READINESS_CLOSURE_BLUEPRINT_REV_1.md",
+      "authority": "VAN Consolidated Deployment-Readiness Closure Blueprint Rev 2",
+      "repository_evidence": [
+        "backend/van_gateway/google/mesh.py:1",
+        "backend/van_gateway/google/transport.py:1"
+      ],
+      "runtime_evidence": [],
+      "affected_components": [
+        "google"
+      ],
+      "root_cause": "see the closure blueprint",
+      "remediation": "Model each plane separately, report per-plane state, and degrade only the capabilities that plane serves.",
+      "impact": "One expired plane makes the whole mesh look offline, so the owner re-authenticates everything or gives up on all of it.",
+      "validation_gate": "G9",
+      "current_status": "OPEN",
+      "remediation_gate": "G9"
+    },
+    {
+      "id": "P3-PERF-003",
+      "severity": "P3",
+      "domain": "performance",
+      "title": "No whole-runtime resource envelope exists",
+      "description": "Always-available voice, the animated embodiment, local indexes, notification processing, context compilation, network connections and trading updates all compete on one phone. Each has its own budget; nothing owns the sum.",
+      "requirement": "docs/VAN_CONSOLIDATED_DEPLOYMENT_READINESS_CLOSURE_BLUEPRINT_REV_1.md",
+      "authority": "VAN Consolidated Deployment-Readiness Closure Blueprint Rev 2",
+      "repository_evidence": [
+        "android/app/src/main/java/com/dial/van/visual/VanFrameBudget.kt:24"
+      ],
+      "runtime_evidence": [],
+      "affected_components": [
+        "performance"
+      ],
+      "root_cause": "see the closure blueprint",
+      "remediation": "Declare one runtime envelope for battery, memory, storage, CPU/GPU and thermal, and make each subsystem yield against it rather than against its own budget.",
+      "impact": "VAN is individually well-behaved and collectively a battery and thermal problem.",
+      "validation_gate": "G12",
+      "current_status": "OPEN",
+      "remediation_gate": "G12"
+    },
+    {
+      "id": "P3-OPS-008",
+      "severity": "P3",
+      "domain": "operations",
+      "title": "No recovery matrix exists for partial-failure paths",
+      "description": "Tests are overwhelmingly happy-path. Gateway restart mid-command, Android process death while awaiting approval, duplicate provider callbacks, connectivity loss after a mutation but before the receipt, and trading state changing while approval is pending are unexercised.",
+      "requirement": "docs/VAN_CONSOLIDATED_DEPLOYMENT_READINESS_CLOSURE_BLUEPRINT_REV_1.md",
+      "authority": "VAN Consolidated Deployment-Readiness Closure Blueprint Rev 2",
+      "repository_evidence": [
+        "backend/tests/test_command_execution_result.py:1"
+      ],
+      "runtime_evidence": [],
+      "affected_components": [
+        "operations"
+      ],
+      "root_cause": "see the closure blueprint",
+      "remediation": "Build a recovery matrix with a test per cell, and treat an unexercised cell as unshipped.",
+      "impact": "The failure modes an owner actually meets are the ones nothing has tried.",
+      "validation_gate": "G12",
+      "current_status": "OPEN",
+      "remediation_gate": "G12"
+    },
+    {
+      "id": "P3-DOC-005",
+      "severity": "P3",
+      "domain": "documentation",
+      "title": "No machine-checkable map of which document owns which invariant",
+      "description": "Thirty-one canonical documents, ~13,700 lines. Nothing states which document is authoritative for a given invariant, so two can be locally correct and jointly contradictory.",
+      "requirement": "docs/VAN_CONSOLIDATED_DEPLOYMENT_READINESS_CLOSURE_BLUEPRINT_REV_1.md",
+      "authority": "VAN Consolidated Deployment-Readiness Closure Blueprint Rev 2",
+      "repository_evidence": [
+        "docs/SECURITY_POLICY.md:1",
+        "docs/PROJECT_TRUTH_PROTOCOL.md:1"
+      ],
+      "runtime_evidence": [],
+      "affected_components": [
+        "documentation"
+      ],
+      "root_cause": "see the closure blueprint",
+      "remediation": "Create docs/project-state/AUTHORITY_MAP.yaml binding each invariant to one owning document, its implementation and its test, and fail CI on an unowned or doubly-owned invariant.",
+      "impact": "A contradiction between authorities is resolved by whoever read one of them last.",
+      "validation_gate": "G0",
+      "current_status": "OPEN",
+      "remediation_gate": "G0"
     }
   ],
   "register_note": "Extended 2026-09-19 under blueprint Gate 0 / action W0-1. The audit assigned IDs to 55 findings and enumerated further P3/P4 items in prose; those now carry IDs so that 'all closed' is countable. Each finding carries a remediation_gate referencing docs/VAN_FINISHED_PRODUCT_BLUEPRINT_REV_1.md.",
