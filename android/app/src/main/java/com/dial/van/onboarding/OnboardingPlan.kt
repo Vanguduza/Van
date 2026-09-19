@@ -110,10 +110,10 @@ object OnboardingPlan {
     fun view(step: OnboardingStep, grants: OnboardingGrants): OnboardingStepView = when (step) {
         OnboardingStep.PAIRING -> OnboardingStepView(
             step,
-            "Pair this phone with your gateway",
-            "Until this is done VAN cannot reach anything: every screen will show an error. " +
-                "You will need the pairing code from the machine running the gateway.",
-            "Pair now",
+            "Connect this owner S24",
+            "This build already knows the Hermes endpoint. VAN establishes the secure owner-device " +
+                "connection automatically; no gateway address or pairing code is entered here.",
+            "Connecting…",
             satisfied(step, grants), skippable = false,
         )
         OnboardingStep.OVERLAY -> OnboardingStepView(
@@ -157,7 +157,7 @@ object OnboardingPlan {
         OnboardingStep.DONE -> OnboardingStepView(
             step,
             "You're set",
-            "VAN is paired and can reach your gateway.",
+            "VAN is securely enrolled and connected directly to Hermes.",
             "Enter Command Centre",
             satisfied = true, skippable = false,
         )
