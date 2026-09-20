@@ -15,6 +15,7 @@ from vati.arbiter.meta_labeler import MetaLabel, MetaLabeler, MetaVerdict
 from vati.arbiter.strategy_arbiter import StrategyArbiter
 from vati.core.canonical import canonical_hash
 from vati.intelligence.market_state import MarketState
+from vati.intelligence.feature_registry import venue_class_for
 from vati.risk.contracts import TradeIntent
 from vati.risk.mandate import TradingMandate
 from vati.strategies.base import Signal, Strategy, StrategyContext
@@ -69,8 +70,13 @@ class OpportunityEngine:
         now = state.as_of_ms if now_ms is None else now_ms
         out: list[CandidateOpportunity] = []
         for cap in self.registry.all():
-            elig = self.s.evaluate(cap, state, self.mandate, regime_label=regime_label,
-                                   currency_regime_label=currency_regime_label, context=ctx)
+            elig = self.s.evaluate(
+                cap, state, self.mandate, regime_label=regime_label,
+                currency_regime_label=currency_regime_label,
+                venue_class=venue_class_for(venue, state.symbol),
+                history_bars=getattr(state.features, "history_bars", None),
+                context=ctx,
+            )
             if not elig.eligible:
                 continue
             strat = self.impl.get(cap.strategy_id)
@@ -123,7 +129,13 @@ class OpportunityEngine:
         cands: list[dict] = []
         best: Optional[tuple[Decimal, Signal, Capsule, MetaVerdict, str]] = None
         for cap in self.registry.all():
-            elig = self.s.evaluate(cap, state, self.mandate, regime_label=regime_label, currency_regime_label=currency_regime_label, context=ctx)
+            elig = self.s.evaluate(
+                cap, state, self.mandate, regime_label=regime_label,
+                currency_regime_label=currency_regime_label,
+                venue_class=venue_class_for(venue, state.symbol),
+                history_bars=getattr(state.features, "history_bars", None),
+                context=ctx,
+            )
             row = {"strategy_id": cap.strategy_id, "eligible": elig.eligible, "reasons": list(elig.reasons)}
             if not elig.eligible:
                 cands.append(row); continue
