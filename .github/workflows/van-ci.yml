@@ -46,6 +46,13 @@ jobs:
       - name: Contract tests
         run: pytest -q tests/contracts
 
+      # Rev 1.5 §13.2 — the Browser Control Agent. It lives outside backend/ because it
+      # runs on the Browser Stream Host rather than on the Gateway, so neither of the two
+      # suites above reaches it. Its authority checks are pure and executed here; the CDP
+      # transport behind them needs a Chromium and is RB-010/RB-117, a host gate.
+      - name: Browser Control Agent and stream-host logic
+        run: pytest -q services
+
       # Protocol rule 31, Android half. A compiler finds code that does not build; this
       # finds code that builds, is tested, and nothing reaches — the class P0-AND-012 lived
       # beside. It runs here rather than in the Android job because it needs no toolchain.
@@ -58,6 +65,25 @@ jobs:
       # component ledger came to list 65 entries as unfinished when 22 of them were done.
       - name: Ledger reconciliation (does the source still agree?)
         run: python tools/ci/ledger_reconcile.py
+
+      # Rev 1.5 §38 / RB-052 — the red-team register. §38 says every finding is PASS,
+      # FAIL, BLOCKED_EXTERNAL or NOT_APPLICABLE_WITH_REASON and never `assumed`, and a
+      # register of sixty-six statuses is the natural place for an unchecked claim to
+      # live. This refuses one: every PASS must cite a runnable pytest node id or a
+      # Kotlin test that exists.
+      - name: Red-team register (§38)
+        run: python tools/ci/red_team_register.py
+      # And the checker itself must reject a register that has quietly gone wrong.
+      - name: Red-team register self-test
+        run: pytest -q tests/contracts/test_red_team_register.py
+
+      # Rev 1.5 §43 / RB-058 — the production acceptance register. The verdict is
+      # recomputed from the rows rather than read, so the ledger cannot say accepted
+      # while one of its own hundred and four requirements says otherwise.
+      - name: Production acceptance (§43)
+        run: python tools/ci/production_acceptance.py
+      - name: Production acceptance self-test
+        run: pytest -q tests/contracts/test_production_acceptance.py
 
       # The maturity gate must fail on the defect shape it exists to prevent.
       # A gate that only ever passes proves nothing.
