@@ -497,6 +497,8 @@ class AccountCoordinatorService:
         }
 
         for tid, payload in issued.items():
+            if tid in self.adapter.tickets:
+                continue
             iid = str(
                 payload.get("trade_intent_id")
                 or payload.get("correlation_id")
