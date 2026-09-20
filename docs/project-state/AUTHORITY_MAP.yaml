@@ -611,12 +611,20 @@ invariants:
   - subject: trading.strategy_validation_binding
     owner: docs/VAN_TRADING_PRODUCTION_DEPLOYMENT_BLUEPRINT_REV5.md
     statement: >-
-      Certificate-gated strategy promotion requires owner authority bound to the exact validation certificate hash, and production code cannot manufacture a synthetic passing certificate.
+      Certificate-gated strategy promotion requires current owner-device A4 approval and owner authority bound to the exact validation certificate hash; the gateway can reach only the agent-hidden private commander promotion command, the durable VATI capsule-state event is authoritative across crashes/restarts, and production code cannot manufacture a synthetic passing certificate.
     implemented_by:
+      - backend/van_gateway/app.py
+      - backend/van_gateway/trading/strategies.py
+      - trading/commander/app.py
+      - trading/commander/strategies.py
       - trading/vati/strategies/capsule.py
       - trading/vati/validation/certificates.py
+      - trading/vati/learning/replay.py
     tested_by:
+      - backend/tests/test_trading_api.py
       - trading/tests/test_validation_certificates.py
+      - trading/tests/test_capsule_promotion_workflow.py
+      - trading/tests/test_commander.py
 
   - subject: trading.feature_admission
     owner: docs/VAN_TRADING_PRODUCTION_DEPLOYMENT_BLUEPRINT_REV5.md
