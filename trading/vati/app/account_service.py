@@ -16,7 +16,7 @@ import json
 import os
 import signal
 import time
-from dataclasses import dataclass
+from dataclasses import asdict, dataclass
 from decimal import Decimal
 from pathlib import Path
 from typing import Optional
@@ -459,6 +459,181 @@ class AccountCoordinatorService:
             latest = None if event.payload.get("cleared") else event
         if latest is not None:
             self.kill.trip(KillSwitchTrigger.OWNER_HALT, now_ms)
+
+    def _owner_ticket_projection(self):
+        """Durable owner-ticket definitions, confirmations and applied receipts."""
+        if self.account is None or self.account.broker != BrokerKind.ZSE_OWNER_TICKET:
+            return None
+        from vati.execution.zse_ticket import OwnerTicket, OwnerTicketAdapter
+        if not isinstance(self.adapter, OwnerTicketAdapter):
+            return None
+
+        commands: dict[str, dict] = {}
+        for event in self._ledger.iter(EventKind.ORDER_COMMAND):
+            iid = str(event.payload.get("trade_intent_id") or "")
+            if iid:
+                commands[iid] = dict(event.payload)
+
+        issued: dict[str, dict] = {}
+        confirmations: dict[str, tuple[dict, int]] = {}
+        for event in self._ledger.iter(EventKind.OWNER_TICKET):
+            tid = str(event.payload.get("ticket") or "")
+            if not tid:
+                continue
+            if event.payload.get("action") == "CONFIRMED":
+                confirmations[tid] = (dict(event.payload), event.event_time_ms)
+                continue
+            payload = dict(event.payload)
+            payload["correlation_id"] = event.correlation_id
+            payload["issued_ms"] = event.event_time_ms
+            issued[tid] = payload
+
+        applied = {
+            str(event.payload.get("broker_order_id") or "")
+            for event in self._ledger.iter(EventKind.EXECUTION_RECEIPT)
+            if event.payload.get("execution_channel") == "OWNER_TICKET"
+            and event.payload.get("status") in ("OWNER_EXECUTED", "BROKER_CONFIRMED")
+            and event.payload.get("broker_order_id")
+        }
+
+        for tid, payload in issued.items():
+            iid = str(
+                payload.get("trade_intent_id")
+                or payload.get("correlation_id")
+                or ""
+            )
+            command = commands.get(iid, {})
+            side = str(payload.get("side") or "BUY").upper()
+            raw_qty = payload.get("qty")
+            if raw_qty is None:
+                raw_qty = command.get("quantity")
+            if raw_qty is None:
+                continue
+            raw_limit = payload.get("limit_price")
+            if raw_limit is None:
+                raw_limit = command.get("entry_price", "0")
+            raw_stop = payload.get("software_stop")
+            if raw_stop is None:
+                raw_stop = command.get("protective_stop")
+            ticket = OwnerTicket(
+                ticket_id=tid,
+                trade_intent_id=iid,
+                decision_hash=str(command.get("decision_hash") or ""),
+                exchange=self.adapter.venue.upper(),
+                symbol=str(payload.get("symbol") or command.get("symbol") or ""),
+                side=side,
+                quantity_shares=Decimal(str(raw_qty)),
+                limit_price=Decimal(str(raw_limit or "0")),
+                time_in_force=str(command.get("time_in_force") or "DAY"),
+                software_stop=(
+                    Decimal(str(raw_stop)) if raw_stop is not None else None
+                ),
+                instructions=(
+                    "Restored owner BUY ticket from VATI ledger."
+                    if side == "BUY"
+                    else "Restored owner SELL ticket from VATI ledger."
+                ),
+                source_position_id=str(payload.get("position_id") or ""),
+            )
+            self.adapter.restore_ticket(ticket)
+
+        return commands, issued, confirmations, applied
+
+    def _sync_owner_ticket_buys(self, now_ms: int) -> tuple[str, ...]:
+        projection = self._owner_ticket_projection()
+        if projection is None:
+            return ()
+        commands, issued, confirmations, applied = projection
+        unresolved: list[str] = []
+        assert self.lifecycle is not None
+        for tid, (confirmation, event_time_ms) in sorted(
+            confirmations.items(), key=lambda item: item[1][1]
+        ):
+            ticket = self.adapter.tickets.get(tid)
+            if ticket is None or ticket.side != "BUY":
+                continue
+            if tid in self.adapter._confirmed_tickets:
+                continue
+            command = commands.get(ticket.trade_intent_id)
+            if command is None:
+                unresolved.append(tid)
+                continue
+            try:
+                receipt = self.adapter.confirm(
+                    tid,
+                    fill_price=Decimal(str(confirmation["fill_price"])),
+                    filled_qty=Decimal(str(confirmation["filled_qty"])),
+                    contract_note_ref=str(confirmation["contract_note_ref"]),
+                    now_ms=event_time_ms,
+                )
+            except Exception:
+                unresolved.append(tid)
+                continue
+            if tid not in applied:
+                self._ledger.append(make_event(
+                    EventKind.EXECUTION_RECEIPT,
+                    "vati-account-service",
+                    {
+                        k: (v.value if hasattr(v, "value") else v)
+                        for k, v in asdict(receipt).items()
+                    },
+                    event_time_ms=event_time_ms,
+                    received_time_ms=now_ms,
+                    correlation_id=receipt.trade_intent_id,
+                ))
+                self.lifecycle.adopt_owner_buy_confirmation(
+                    receipt, order_payload=command)
+        return tuple(sorted(unresolved))
+
+    def _sync_owner_ticket_sells(self, now_ms: int) -> tuple[str, ...]:
+        projection = self._owner_ticket_projection()
+        if projection is None:
+            return ()
+        _commands, issued, confirmations, applied = projection
+        unresolved: list[str] = []
+        assert self.lifecycle is not None
+        for tid, (confirmation, event_time_ms) in sorted(
+            confirmations.items(), key=lambda item: item[1][1]
+        ):
+            ticket = self.adapter.tickets.get(tid)
+            if ticket is None or ticket.side != "SELL":
+                continue
+            if tid in self.adapter._confirmed_tickets:
+                continue
+            try:
+                receipt = self.adapter.confirm(
+                    tid,
+                    fill_price=Decimal(str(confirmation["fill_price"])),
+                    filled_qty=Decimal(str(confirmation["filled_qty"])),
+                    contract_note_ref=str(confirmation["contract_note_ref"]),
+                    now_ms=event_time_ms,
+                )
+            except Exception:
+                unresolved.append(tid)
+                continue
+            newly_applied = tid not in applied
+            if newly_applied:
+                self._ledger.append(make_event(
+                    EventKind.EXECUTION_RECEIPT,
+                    "vati-account-service",
+                    {
+                        k: (v.value if hasattr(v, "value") else v)
+                        for k, v in asdict(receipt).items()
+                    },
+                    event_time_ms=event_time_ms,
+                    received_time_ms=now_ms,
+                    correlation_id=receipt.trade_intent_id,
+                ))
+            self.lifecycle.adopt_owner_sell_confirmation(
+                receipt,
+                exit_reason=str(
+                    issued.get(tid, {}).get("exit_reason")
+                    or "OWNER_CONFIRMED_SELL"
+                ),
+                now_ms=event_time_ms,
+                emit_review=newly_applied,
+            )
+        return tuple(sorted(unresolved))
 
     def _account_snapshot(self, now_ms: int) -> None:
         assert self.adapter is not None
