@@ -302,8 +302,12 @@ strategy-promotion artifacts already required by this blueprint.
 9. **Restart lifecycle reconstruction law.** Restart never treats venue attribution alone as sufficient trading
    truth. An open venue position is reconstructed only when its trade_intent_id joins to the durable VATI
    ORDER_COMMAND that created it. Protection is rebuilt from the original command and may use a venue or durable
-   current stop only when that stop is equal to or tighter than the original protection. Any unjoinable position,
-   missing protection fact or widened stop remains unresolved and blocks new risk through reconciliation.
+   current stop only when that stop is equal to or tighter than the original protection. When a non-owner broker
+   fill has a valid durable EXECUTION_RECEIPT but the process died before TCA was appended, restart deterministically
+   reconstructs the missing TCA_RECORD from the command, sealed receipt and symbol contract exactly once and restores
+   its cost ratio into lifecycle state. It does not invent or replay session/event-window learning context that was
+   not durably recorded. Any unjoinable position, missing protection fact or widened stop remains unresolved and
+   blocks new risk through reconciliation.
 
 10. **Owner-ticket downstream-evidence law.** A signed owner ticket confirmation is consumed into runtime position
     truth before new risk is admitted. EXECUTION_RECEIPT durability and downstream lifecycle evidence are separate
