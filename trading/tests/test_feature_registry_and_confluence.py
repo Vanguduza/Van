@@ -120,6 +120,8 @@ def test_feature_certificate_is_the_only_path_to_production_admission():
         incremental_dsr_probability=0.98,
         incremental_pbo_probability=0.04,
         walk_forward_delta=0.05,
+        data_manifest_hash="manifest:adx",
+        evidence_refs=("artifact:adx-validation",),
         regime_stability={"BULL": 0.1, "BEAR": 0.05},
         leakage_result=GREEN,
     ).sealed()
