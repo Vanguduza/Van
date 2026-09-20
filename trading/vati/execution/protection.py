@@ -99,6 +99,9 @@ class ProtectionManager:
     def is_close_pending(self, position_id: str) -> bool:
         return self.rules[position_id].pending_close
 
+    def mark_close_pending(self, position_id: str) -> None:
+        self.rules[position_id].pending_close = True
+
     def tighten(self, position_id: str, new_stop: Decimal) -> None:
         r = self.rules[position_id]
         if (r.direction is Direction.LONG and new_stop < r.stop) or (r.direction is Direction.SHORT and new_stop > r.stop):
