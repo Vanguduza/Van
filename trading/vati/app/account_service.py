@@ -725,7 +725,14 @@ class AccountCoordinatorService:
         if not hb.connected:
             self.kill.trip(KillSwitchTrigger.VENUE_DISCONNECT, now)
 
-        restored, unresolved = self.lifecycle.recover_from_venue()
+        unresolved_buy_tickets = self._sync_owner_ticket_buys(now)
+        restored, unresolved_positions = self.lifecycle.recover_from_venue()
+        unresolved_sell_tickets = self._sync_owner_ticket_sells(now)
+        unresolved = tuple(sorted(set(
+            unresolved_positions
+            + unresolved_buy_tickets
+            + unresolved_sell_tickets
+        )))
         report = reconcile(
             self._ledger_positions(), self.adapter.positions(),
             account_verified=acct.verified,
@@ -771,6 +778,22 @@ class AccountCoordinatorService:
         assert self.coordinator is not None and self.lifecycle is not None
         now = self.clock()
         self._observe_owner_halt(now)
+        owner_ticket_unresolved = tuple(sorted(set(
+            self._sync_owner_ticket_buys(now)
+            + self._sync_owner_ticket_sells(now)
+        )))
+        if owner_ticket_unresolved:
+            self.kill.trip(KillSwitchTrigger.RECONCILIATION_FAILURE, now)
+            self._ledger.append(make_event(
+                EventKind.RECONCILIATION_RESULT, "vati-account-service",
+                {
+                    "permit_new_orders": False,
+                    "unresolved_owner_tickets": list(owner_ticket_unresolved),
+                    "kill": sorted(t.value for t in self.kill.active),
+                },
+                event_time_ms=now, received_time_ms=now,
+                correlation_id=self.cfg.account_alias,
+            ))
         observed_bars = {}
         advanced_bars = {}
         for symbol, source in self.bar_sources.items():
