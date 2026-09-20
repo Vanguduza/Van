@@ -35,6 +35,11 @@ from vati.arbiter.intent_factory import IntentFactory
 from vati.app.instrument_evaluator import InstrumentEvaluator
 from vati.core.canonical import canonical_hash
 from vati.market_data.bars import Bar
+from vati.observability import metrics
+from vati.observability.enhancement_metrics import (
+    ALLOCATION_EPOCHS, ALLOCATOR_DEFERRED, ALLOCATOR_REJECTED, ALLOCATOR_SELECTED,
+    CANDIDATES_ACTIVE, CANDIDATE_EXPIRATIONS, LEASE_OUTCOMES,
+)
 
 
 class Allocator(Protocol):
@@ -168,6 +173,7 @@ class AccountDecisionCoordinator:
         if self.lease is not None:
             result: LeaseResult = self.lease.renew(now_ms=now_ms)
             lease_outcome = result.outcome.value
+            metrics.inc(LEASE_OUTCOMES, account_alias=self.cfg.account_alias, outcome=lease_outcome)
             if not result.permits_orders:
                 # Fail closed. STORE_UNREACHABLE and REFUSED_HELD_BY_OTHER both
                 # stop here, and the pass records which one it was.
@@ -189,13 +195,17 @@ class AccountDecisionCoordinator:
                 admitted.append(c.candidate_id)
 
         expired = self.pool.expire_stale(now_ms=now_ms)
+        if expired:
+            metrics.inc(CANDIDATE_EXPIRATIONS, value=float(len(expired)), account_alias=self.cfg.account_alias)
 
         # 2. rank once, over the candidates that are fresh right now.
         active = self.pool.active(now_ms=now_ms)
+        metrics.set(CANDIDATES_ACTIVE, float(len(active)), account_alias=self.cfg.account_alias)
         decisions = list(self.allocator.rank(active, now_ms=now_ms))
         ranking = tuple(d.candidate_id for d in decisions)
         epoch_id = canonical_hash({"alias": self.cfg.account_alias, "as_of": now_ms,
                                    "candidates": list(ranking)})[:24]
+        metrics.inc(ALLOCATION_EPOCHS, account_alias=self.cfg.account_alias)
 
         by_id = {c.candidate_id: c for c in active}
         outcomes: list[AdmissionOutcome] = []
@@ -211,12 +221,14 @@ class AccountDecisionCoordinator:
                                reason="pass intent budget reached", now_ms=now_ms)
                 outcomes.append(AdmissionOutcome(cand.candidate_id, cand.symbol, d.rank, "DEFERRED",
                                                  "pass intent budget reached"))
+                metrics.inc(ALLOCATOR_DEFERRED, account_alias=self.cfg.account_alias, symbol=cand.symbol)
                 continue
             if getattr(d, "decision", "SELECTED") != "SELECTED":
                 self.pool.mark(cand.candidate_id, CandidateState.NOT_SELECTED,
                                reason=getattr(d, "reason", "not selected"), now_ms=now_ms)
                 outcomes.append(AdmissionOutcome(cand.candidate_id, cand.symbol, d.rank,
                                                  "NOT_SELECTED", getattr(d, "reason", "")))
+                metrics.inc(ALLOCATOR_REJECTED, account_alias=self.cfg.account_alias, symbol=cand.symbol)
                 continue
             # Freshly re-read: the previous candidate may have changed the book.
             snapshot = self._snapshot(cand)
@@ -264,6 +276,7 @@ class AccountDecisionCoordinator:
                                reason=str(approved), now_ms=now_ms)
                 outcomes.append(AdmissionOutcome(cand.candidate_id, cand.symbol, d.rank,
                                                  str(approved), "", snap_hash, decision))
+                metrics.inc(ALLOCATOR_SELECTED, account_alias=self.cfg.account_alias, symbol=cand.symbol)
                 admitted_count += 1
             else:
                 # The Risk Authority's refusal, not the allocator's.
