@@ -13,6 +13,7 @@ from typing import Any, Iterable, Optional
 
 from vati.contracts import required_keys
 from vati.core.canonical import canonical_hash
+from vati.validation.certificates import StrategyValidationCertificate, evaluate_strategy_certificate
 from vati.risk.contracts import StrategyState
 from vati.authority import OwnerAuthorityError, OwnerAuthorityVerifier
 
@@ -103,7 +104,15 @@ class CapsuleRegistry:
         d = {k: v for k, v in data.items() if k != "capsule_hash"}
         return {**d, "capsule_hash": canonical_hash(d)}
 
-    def promote(self, strategy_id: str, to: StrategyState, *, approval_signature_ref: str, evidence_refs: list[str], approved_at_unix: int) -> Capsule:
+    #: TRD-ENH-021. States at or past which a semantic certificate is required.
+    #: Below DEMO a capsule is research; from DEMO on it is being trusted.
+    CERTIFICATE_REQUIRED_FROM = (
+        StrategyState.DEMO, StrategyState.SHADOW,
+        StrategyState.LIMITED_LIVE, StrategyState.CERTIFIED_LIVE,
+    )
+
+    def promote(self, strategy_id: str, to: StrategyState, *, approval_signature_ref: str, evidence_refs: list[str], approved_at_unix: int,
+                certificate: "StrategyValidationCertificate | None" = None) -> Capsule:
         c = self.get(strategy_id)
         if to not in PROMOTION_ORDER:
             raise CapsuleError(f"{to.value} is not a promotion target")
@@ -126,8 +135,31 @@ class CapsuleRegistry:
         approval_signature_ref = verified.ref
         if to in (StrategyState.LIMITED_LIVE, StrategyState.CERTIFIED_LIVE) and not evidence_refs:
             raise CapsuleError("live promotion requires evidence references")
+        # TRD-ENH-021/022 — evidence_refs are opaque strings, so they prove that
+        # someone signed, never what was proven. From DEMO onwards the promotion
+        # carries a sealed certificate whose content is checked, and the owner's
+        # signature binds that certificate's hash rather than a free-text list.
+        certificate_hash = ""
+        if to in self.CERTIFICATE_REQUIRED_FROM:
+            if certificate is None:
+                raise CapsuleError(
+                    f"promotion to {to.value} requires a StrategyValidationCertificate; "
+                    "opaque evidence references are not semantic evidence"
+                )
+            if certificate.strategy_id != strategy_id:
+                raise CapsuleError(
+                    f"certificate is for {certificate.strategy_id}, not {strategy_id}")
+            if certificate.capsule_hash and certificate.capsule_hash != c.capsule_hash:
+                raise CapsuleError(
+                    "certificate was computed against a different capsule revision "
+                    f"({certificate.capsule_hash[:12]} != {c.capsule_hash[:12]})")
+            passed, reasons = evaluate_strategy_certificate(certificate)
+            if not passed:
+                raise CapsuleError("certificate does not meet validation policy: " + ",".join(reasons))
+            certificate_hash = certificate.validation_hash
         new = self.seal({**c.data, "state": to.value, "approval_signature_ref": approval_signature_ref, "evidence_refs": sorted(set(c.data.get("evidence_refs", [])) | set(evidence_refs)),
-                         "approved_at_unix": approved_at_unix, "supersedes": c.capsule_hash})
+                         "approved_at_unix": approved_at_unix, "supersedes": c.capsule_hash,
+                         **({"validation_hash": certificate_hash} if certificate_hash else {})})
         self._c[strategy_id] = Capsule(new)
         return self._c[strategy_id]
 
