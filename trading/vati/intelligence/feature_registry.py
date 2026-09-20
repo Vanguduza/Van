@@ -176,7 +176,60 @@ def default_registry() -> FeatureRegistry:
     return r
 
 
+def research_tranche() -> tuple[FeatureDefinition, ...]:
+    """First research tranche (§7.3). Certificate-required, unlike the founding set.
+
+    Note what is *not* here. MACD is absent because PPO is the same construction
+    and the redundant-pair rule admits one; Keltner is absent because Donchian
+    is the less colinear of the pair against `atr` and `range_compression`.
+    Admitting the second member later requires it to beat the first, not the
+    baseline containing neither.
+    """
+    price = frozenset(VENUE_CLASSES)
+    intraday = frozenset({"M5", "M15", "H1", "H4", "D1"})
+    return (
+        FeatureDefinition("adx", "1.0.0", "TREND", ("ohlc",), price, intraday, 30,
+                          "PRICE_OHLC", "vati.intelligence.features.adx"),
+        FeatureDefinition("plus_di", "1.0.0", "TREND", ("ohlc",), price, intraday, 15,
+                          "PRICE_OHLC", "vati.intelligence.features.dmi"),
+        FeatureDefinition("minus_di", "1.0.0", "TREND", ("ohlc",), price, intraday, 15,
+                          "PRICE_OHLC", "vati.intelligence.features.dmi"),
+        FeatureDefinition("donchian_position", "1.0.0", "STRUCTURE", ("ohlc",), price, intraday, 20,
+                          "PRICE_OHLC", "vati.intelligence.features.donchian"),
+        FeatureDefinition("ppo", "1.0.0", "MOMENTUM", ("ohlc",), price, intraday, 26,
+                          "PRICE_OHLC", "vati.intelligence.features.ppo"),
+        FeatureDefinition("roc_5", "1.0.0", "MOMENTUM", ("ohlc",), price, intraday, 6,
+                          "PRICE_OHLC", "vati.intelligence.features.roc"),
+        FeatureDefinition("roc_20", "1.0.0", "MOMENTUM", ("ohlc",), price, intraday, 21,
+                          "PRICE_OHLC", "vati.intelligence.features.roc"),
+        FeatureDefinition("roc_60", "1.0.0", "MOMENTUM", ("ohlc",), price, intraday, 61,
+                          "PRICE_OHLC", "vati.intelligence.features.roc"),
+    )
+
+
+#: Venue-gated volume (§7.4/7.5, TRD-ENH-019). Two families, deliberately
+#: different: real traded volume exists on ZSE/VFEX and does not exist on FX.
+def volume_tranche() -> tuple[FeatureDefinition, ...]:
+    zse = frozenset({"ZSE_EQUITY", "VFEX"})
+    fx = frozenset({"FX_SPOT", "CFD", "SYNTHETIC"})
+    return (
+        # ZSE: real exchange volume, so a money-flow family is meaningful.
+        FeatureDefinition("obv", "1.0.0", "VOLUME_ACTIVITY", ("ohlc", "volume"), zse,
+                          frozenset({"D1"}), 20, "EXCHANGE_TRADED_VOLUME",
+                          "vati.intelligence.features"),
+        FeatureDefinition("money_flow_index", "1.0.0", "VOLUME_ACTIVITY", ("ohlc", "volume"), zse,
+                          frozenset({"D1"}), 15, "EXCHANGE_TRADED_VOLUME",
+                          "vati.intelligence.features"),
+        # FX: tick count is an activity proxy and says so. The registry refuses
+        # any attempt to label it traded volume.
+        FeatureDefinition("tick_activity_percentile", "1.0.0", "VOLUME_ACTIVITY", ("ticks",), fx,
+                          frozenset({"M5", "M15", "H1", "H4", "D1"}), 20,
+                          "BROKER_TICK_ACTIVITY", "vati.intelligence.features"),
+    )
+
+
 __all__ = [
     "FAMILIES", "SOURCE_SEMANTICS", "VENUE_CLASSES",
     "FeatureDefinition", "FeatureRegistry", "FeatureRegistryError", "default_registry",
+    "research_tranche", "volume_tranche",
 ]
