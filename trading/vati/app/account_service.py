@@ -43,7 +43,7 @@ from vati.intelligence.market_state import build_market_state
 from vati.intelligence.mtf import TimeframeContract, build_multi_timeframe_state
 from vati.intelligence.regimes import RegimeEngine
 from vati.market_data.calendars import FX_CALENDAR
-from vati.market_data.feeds.lake import BarLake
+from vati.market_data.feeds.lake import TIMEFRAMES_MS, BarLake
 from vati.observability import metrics
 from vati.learning.hooks import LearningHooks
 from vati.observability.enhancement_metrics import (
@@ -460,6 +460,64 @@ class AccountCoordinatorService:
         if latest is not None:
             self.kill.trip(KillSwitchTrigger.OWNER_HALT, now_ms)
 
+    def _account_snapshot(self, now_ms: int) -> None:
+        assert self.adapter is not None
+        acct = self.adapter.sync_account()
+        hb = self.adapter.heartbeat(now_ms=now_ms)
+        self._ledger.append(make_event(
+            EventKind.ACCOUNT_SNAPSHOT, "vati-account-service",
+            {
+                "account_alias": acct.account_alias,
+                "equity": str(acct.equity),
+                "balance": str(acct.balance),
+                "currency": acct.currency,
+                "verified": acct.verified,
+                "connected": hb.connected,
+                "server_offset_ms": hb.server_offset_ms,
+                "open_positions": len(self.adapter.positions()),
+                "peak_equity": str(self.peak_equity),
+                "day_start_equity": str(self.day_start_equity),
+                "week_start_equity": str(self.week_start_equity),
+                "kill_switch": sorted(t.value for t in self.kill.active),
+                "mode": self.mandate.mode.value if self.mandate else "UNKNOWN",
+            },
+            event_time_ms=now_ms, received_time_ms=now_ms,
+            correlation_id=self.cfg.account_alias,
+        ))
+
+    def _log_allocation_pass(self, result, now_ms: int) -> None:
+        assert self.coordinator is not None
+        for candidate_id in result.candidates_admitted:
+            row = self.coordinator.pool.row(candidate_id)
+            if row is None:
+                continue
+            candidate = row.candidate
+            self._ledger.append(make_event(
+                EventKind.CANDIDATE_OPPORTUNITY, "vati-account-service",
+                candidate.as_dict() | {"candidate_hash": candidate.candidate_hash},
+                event_time_ms=now_ms, received_time_ms=now_ms,
+                decision_time_ms=now_ms, correlation_id=candidate_id,
+            ))
+        for candidate_id in result.expired:
+            self._ledger.append(make_event(
+                EventKind.CANDIDATE_EXPIRED, "vati-account-service",
+                {"candidate_id": candidate_id, "allocation_epoch_id": result.allocation_epoch_id},
+                event_time_ms=now_ms, received_time_ms=now_ms,
+                decision_time_ms=now_ms, correlation_id=candidate_id,
+            ))
+        self._ledger.append(make_event(
+            EventKind.ALLOCATION_EPOCH, "vati-account-service",
+            result.as_dict() | {"pass_hash": result.pass_hash},
+            event_time_ms=now_ms, received_time_ms=now_ms,
+            decision_time_ms=now_ms, correlation_id=result.allocation_epoch_id,
+        ))
+        for outcome in result.outcomes:
+            self._ledger.append(make_event(
+                EventKind.ALLOCATION_DECISION, "vati-account-service",
+                outcome.as_dict() | {"allocation_epoch_id": result.allocation_epoch_id},
+                event_time_ms=now_ms, received_time_ms=now_ms,
+                decision_time_ms=now_ms, correlation_id=outcome.candidate_id,
+            ))
     def _heartbeat(self, status: str, extra: Optional[dict] = None) -> None:
         payload = {
             "account_alias": self.cfg.account_alias, "symbols": sorted(self.specs),
