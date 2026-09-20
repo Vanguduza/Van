@@ -25,6 +25,7 @@ from vati.accounts import AccountRegistry, BrokerKind
 from vati.app.account_coordinator import AccountDecisionCoordinator, CoordinatorConfig
 from vati.app.account_lease import AccountRuntimeLease, PostgresLeaseStore
 from vati.app.instrument_evaluator import InstrumentEvaluator, InstrumentEvaluatorConfig
+from vati.app.trade_lifecycle import AccountTradeLifecycle
 from vati.arbiter import OpportunityEngine
 from vati.arbiter.candidate import CandidateOpportunity
 from vati.arbiter.portfolio_allocator import OpportunityPortfolioAllocator
@@ -44,6 +45,7 @@ from vati.intelligence.regimes import RegimeEngine
 from vati.market_data.calendars import FX_CALENDAR
 from vati.market_data.feeds.lake import BarLake
 from vati.observability import metrics
+from vati.learning.hooks import LearningHooks
 from vati.observability.enhancement_metrics import (
     CORRELATION_MULTIPLIER, EXECUTION_FILL_PROBABILITY, EXECUTION_POLICY_SELECTED,
     PORTFOLIO_INCREMENTAL_ES,
@@ -56,7 +58,7 @@ from vati.risk.serde import contract_from_dict, intent_to_dict, snapshot_to_dict
 from vati.strategies import STRATEGY_IMPLEMENTATIONS, CapsuleRegistry
 from vati.strategies.base import StrategyContext
 
-from vati.app.service import ROOT, build_adapter
+from vati.app.service import ENVIRONMENT_FOR_MODE, ROOT, build_adapter
 
 
 @dataclass(frozen=True)
@@ -105,6 +107,8 @@ class AccountCoordinatorService:
         self.mandate: Optional[TradingMandate] = None
         self.authority: Optional[RiskAuthority] = None
         self.router: Optional[ExecutionRouter] = None
+        self.learning: Optional[LearningHooks] = None
+        self.lifecycle: Optional[AccountTradeLifecycle] = None
         self.account = None
         self.specs: dict[str, LiveInstrumentSpec] = {}
         self.contracts = {}
@@ -248,6 +252,25 @@ class AccountCoordinatorService:
                 return [bar for bar in bars if bar.end_ms <= now_ms][-400:]
             self.bar_sources[spec.symbol] = source
 
+        self.learning = LearningHooks(
+            environment=ENVIRONMENT_FOR_MODE[mandate.mode],
+            broker=str(getattr(account.broker, "value", account.broker)).lower(),
+        )
+        self.lifecycle = AccountTradeLifecycle(
+            ledger=self._ledger,
+            adapter=self.adapter,
+            router=self.router,
+            protection=self.protection,
+            contracts=self.contracts,
+            engines_by_symbol={
+                symbol: evaluator.engine for symbol, evaluator in self.evaluators.items()
+            },
+            learning=self.learning,
+        )
+        # One account-scoped lifecycle owns entry truth for reconciliation,
+        # TCA, protection, trade review and reduce-only learning.
+        self._entries = self.lifecycle.entries
+
         self.coordinator = AccountDecisionCoordinator(
             CoordinatorConfig(account_alias=account.alias, max_new_intents_per_pass=1),
             evaluators=evaluators,
@@ -324,7 +347,10 @@ class AccountCoordinatorService:
             account_verified=acct.verified, equity=acct.equity, balance=acct.balance,
             peak_equity=self.peak_equity, day_start_equity=self.day_start_equity,
             week_start_equity=self.week_start_equity,
-            consecutive_losses=self.consecutive_losses,
+            consecutive_losses=(
+                self.lifecycle.consecutive_losses
+                if self.lifecycle is not None else self.consecutive_losses
+            ),
             open_positions=self._open_positions(), symbol_contract=contract,
             quote_age_ms=quote_age, max_quote_age_ms=self.cfg.max_quote_age_ms,
             broker_connected=hb.connected, reconciliation_ok=report.permit_new_orders,
@@ -412,10 +438,14 @@ class AccountCoordinatorService:
             stop_mode=StopMode.SOFTWARE if software else StopMode.VENUE,
             targets=targets, time_in_force=self.specs[candidate.symbol.upper()].time_in_force,
             lease_epoch=lease_epoch, execution_policy_decision=policy_decision)
-        if receipt.status in ("FILLED", "PARTIAL", "ACCEPTED", "OWNER_EXECUTED"):
-            self._entries[intent.trade_intent_id] = {
-                "symbol": candidate.symbol, "quantity": receipt.filled_qty,
-                "stop": intent.stop, "software_stop": software, "open": True}
+        assert self.lifecycle is not None
+        self.lifecycle.record_entry(
+            intent=intent,
+            receipt=receipt,
+            state=state,
+            modelled_cost_pct=self.specs[candidate.symbol.upper()].round_trip_cost_pct,
+            software_stop=software,
+        )
         return receipt
 
     def _observe_owner_halt(self, now_ms: int) -> None:
@@ -476,6 +506,12 @@ class AccountCoordinatorService:
         if not advanced_bars:
             self._heartbeat("WAITING_FOR_BAR")
             return None
+
+        # Match the proven SessionRunner ordering: protection/exits are
+        # processed first so closed risk is removed before fresh admissions.
+        assert self.lifecycle is not None
+        for symbol, bars in advanced_bars.items():
+            self.lifecycle.mark_bar(symbol, bars[-1], now_ms=now)
 
         # Only symbols with a newly closed bar produce a new market-state/candidate.
         # Existing fresh candidates from other symbols remain in CandidatePool.
