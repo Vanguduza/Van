@@ -93,6 +93,12 @@ class ProtectionManager:
     def stop_of(self, position_id: str) -> Decimal:
         return self.rules[position_id].stop
 
+    def is_software(self, position_id: str) -> bool:
+        return self.rules[position_id].software_stop
+
+    def is_close_pending(self, position_id: str) -> bool:
+        return self.rules[position_id].pending_close
+
     def tighten(self, position_id: str, new_stop: Decimal) -> None:
         r = self.rules[position_id]
         if (r.direction is Direction.LONG and new_stop < r.stop) or (r.direction is Direction.SHORT and new_stop > r.stop):
