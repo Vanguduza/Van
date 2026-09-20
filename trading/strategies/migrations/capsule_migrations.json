@@ -1,0 +1,86 @@
+[
+  {
+    "changed_fields": [
+      "capsule_hash",
+      "timeframe_contract"
+    ],
+    "migrated_at_unix": 1789875660,
+    "migration_reason": "MTF_SCHEMA_ADOPTION",
+    "new_capsule_hash": "bd94f7bcf0f840edd15d9d86430359ef2a587b71360252b47db9637a7bffe794",
+    "old_capsule_hash": "ae36b55b207e4851faa293fa385ffc1d4dedeb67585354f85c8f718ed04fdfcc",
+    "owner_authority_changed": false,
+    "record_hash": "aa655c75c4e11b96cc3d6db6184b5cb5927371ffe6e2952e370c5ac8c01a1898",
+    "strategy_id": "FX-EVENT-DRIFT-01",
+    "strategy_logic_changed": false
+  },
+  {
+    "changed_fields": [
+      "capsule_hash",
+      "timeframe_contract"
+    ],
+    "migrated_at_unix": 1789875660,
+    "migration_reason": "MTF_SCHEMA_ADOPTION",
+    "new_capsule_hash": "38a0cda9597aa199701222ec47d52da3d85d281af823ed6ae36498795aff5773",
+    "old_capsule_hash": "4ece772e220d6a8e0713b100858d3bd55f41ea0c8d26da7a283aed39103d1ff4",
+    "owner_authority_changed": false,
+    "record_hash": "3107ff9dbf35412993713fd4e5f570ce51ed7254679f068a63663516e696ee81",
+    "strategy_id": "FX-LONDON-BREAKOUT-01",
+    "strategy_logic_changed": false
+  },
+  {
+    "changed_fields": [
+      "capsule_hash",
+      "timeframe_contract"
+    ],
+    "migrated_at_unix": 1789875660,
+    "migration_reason": "MTF_SCHEMA_ADOPTION",
+    "new_capsule_hash": "ddc311ce2f81c6e340ee8713a23c66f9b09c9ef6bbfc788b535c5e9156a7c8c6",
+    "old_capsule_hash": "993157bbdf31fec1119cc0fef68936430fc3e032125d983c7f77e18a0c30a877",
+    "owner_authority_changed": false,
+    "record_hash": "a9b0d45a6807a6914928a032202c92dd16218a0eec6f7f6cce2803d59db3719c",
+    "strategy_id": "FX-TREND-PULLBACK-01",
+    "strategy_logic_changed": false
+  },
+  {
+    "changed_fields": [
+      "capsule_hash",
+      "timeframe_contract"
+    ],
+    "migrated_at_unix": 1789875660,
+    "migration_reason": "MTF_SCHEMA_ADOPTION",
+    "new_capsule_hash": "86722bfbf8e2656ab4fedc654e9c2ca6cc8a8db79bec09a965d9f81560bf4434",
+    "old_capsule_hash": "13aa29bac3ce9cb1f5ad9e71f2ddaeab41ba58c6739a2d021a134d60abb94611",
+    "owner_authority_changed": false,
+    "record_hash": "d969cd5430f85fa6f99c77cabf5393e15b640226a43693d331a9b4c7185d46ed",
+    "strategy_id": "GOLD-TREND-POSITION-01",
+    "strategy_logic_changed": false
+  },
+  {
+    "changed_fields": [
+      "capsule_hash",
+      "timeframe_contract"
+    ],
+    "migrated_at_unix": 1789875660,
+    "migration_reason": "MTF_SCHEMA_ADOPTION",
+    "new_capsule_hash": "2032b50566f293a69a9cbcde322858e316c1881b4f727a7581c7bf9baf12bc38",
+    "old_capsule_hash": "3ea8988376cbe79b76986c9d991cd3fe4a859a61a4f2dc659ed21e15b4dd2166",
+    "owner_authority_changed": false,
+    "record_hash": "bb44b1b5e18f9ee5b7fc86001d78336baff5884bcd82aa2745120958a6e957ad",
+    "strategy_id": "ZSE-LIQUIDITY-PROVISION-01",
+    "strategy_logic_changed": false
+  },
+  {
+    "changed_fields": [
+      "capsule_hash",
+      "timeframe_contract"
+    ],
+    "migrated_at_unix": 1789875660,
+    "migration_reason": "MTF_SCHEMA_ADOPTION",
+    "new_capsule_hash": "558942129ac1c53dc43cdd3899360405aed3cdd5af52fe53050192c0a596eb6b",
+    "old_capsule_hash": "ce51d7de93ba352143642ec526e1ff56c993e435b5aff21c37823424ddf875e5",
+    "owner_authority_changed": false,
+    "record_hash": "aae9593640b0633f887506beeb28ef9da9342ed98309b8b77db37629260ff684",
+    "strategy_id": "ZSE-VALUE-ROTATION-01",
+    "strategy_logic_changed": false
+  }
+]
