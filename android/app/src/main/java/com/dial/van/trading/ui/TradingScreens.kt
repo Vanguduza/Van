@@ -57,7 +57,7 @@ import com.dial.van.visual.VanPresentation
 import com.dial.van.visual.VanVisualState
 
 /** Navigation callbacks the screens need; the activity binds them to NavController routes. */
-class TradingNav(val openTrade: (String) -> Unit, val openInstrument: (String) -> Unit, val openTrades: (TradeView) -> Unit, val openRisk: () -> Unit, val openAccounts: () -> Unit, val openStrategies: () -> Unit, val openChat: () -> Unit)
+class TradingNav(val openTrade: (String) -> Unit, val openInstrument: (String) -> Unit, val openTrades: (TradeView) -> Unit, val openRisk: () -> Unit, val openAccounts: () -> Unit, val openStrategies: () -> Unit, val openCognition: () -> Unit, val openChat: () -> Unit)
 
 class ScreenEnv(val repo: TradingRepository, val glass: VanGlassStyle, val budget: VanEffectBudget, val vanState: VanVisualState, val vanHeadline: String, val now: () -> Long)
 
@@ -172,6 +172,11 @@ fun OverviewScreen(env: ScreenEnv, nav: TradingNav, padding: PaddingValues) {
                             Modifier.weight(1f),
                         ) { nav.openStrategies() }
                     }
+                    QuickAccess(
+                        "Cognition & research",
+                        "Fable shadow reasoning, model evidence & evolution",
+                        Modifier.fillMaxWidth(),
+                    ) { nav.openCognition() }
                     val market = (states as? Loaded.Ready)?.value?.firstOrNull()
                     QuickAccess(
                         "Market workspace",
