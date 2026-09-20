@@ -98,6 +98,34 @@ def test_renewal_after_takeover_is_refused():
     assert a.renew(now_ms=9_500).outcome is LeaseOutcome.REFUSED_HELD_BY_OTHER
 
 
+def test_submission_fence_rechecks_shared_store_after_takeover():
+    """The old holder's cached epoch is not sufficient once another host owns the row."""
+    store = InMemoryLeaseStore()
+    a = AccountRuntimeLease(store, account_alias=ALIAS, instance_id="vm-a", ttl_ms=1_000)
+    b = AccountRuntimeLease(store, account_alias=ALIAS, instance_id="vm-b", ttl_ms=10_000)
+    assert a.acquire(now_ms=0).permits_orders
+    stale = a.epoch
+    assert b.acquire(now_ms=2_000).permits_orders
+    # Deliberately do not renew/clear A: this is the stale-process counterexample.
+    assert not a.fence(stale, now_ms=2_001, min_validity_ms=0)
+
+
+def test_submission_fence_fails_closed_when_store_is_lost():
+    store = InMemoryLeaseStore()
+    a = AccountRuntimeLease(store, account_alias=ALIAS, instance_id="vm-a", ttl_ms=10_000)
+    assert a.acquire(now_ms=0).permits_orders
+    store.reachable = False
+    assert not a.fence(a.epoch, now_ms=1_000, min_validity_ms=0)
+
+
+def test_submission_fence_requires_a_validity_margin():
+    store = InMemoryLeaseStore()
+    a = AccountRuntimeLease(store, account_alias=ALIAS, instance_id="vm-a", ttl_ms=5_000)
+    assert a.acquire(now_ms=0).permits_orders
+    assert a.fence(a.epoch, now_ms=1_000, min_validity_ms=2_000)
+    assert not a.fence(a.epoch, now_ms=3_500, min_validity_ms=2_000)
+
+
 # ---------------------------------------------------------------- pool
 
 def test_two_symbols_coexist_in_one_pool():
