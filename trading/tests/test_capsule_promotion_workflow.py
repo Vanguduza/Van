@@ -9,13 +9,17 @@ from pathlib import Path
 from types import SimpleNamespace
 
 from fastapi.testclient import TestClient
+from cryptography.hazmat.primitives import serialization
+from cryptography.hazmat.primitives.asymmetric import ec
 
 from conftest import passing_certificate
 from conftest_owner_authority import OWNER_KEY_ID, OwnerAuthorityHarness
 from commander.app import CommanderSettings, create_app
+from commander.strategies import owner_authority_key_id
 from commander.auth import sign_headers
 from vati.authority import OwnerAuthorityVerifier
 from vati.core import EventKind, Ledger
+from vati.core.events import make_event
 from vati.learning import Environment, LearningHooks
 from vati.learning.replay import restore_learning_runtime
 from vati.risk.contracts import StrategyState
@@ -71,6 +75,125 @@ def _fixture(tmp_path):
         _owner_authority=owner.verifier,
     )
     return capsules, ledger_path, owner, current.data, args, TestClient(create_app(settings))
+
+
+def _device_key():
+    private = ec.generate_private_key(ec.SECP256R1())
+    pem = private.public_key().public_bytes(
+        serialization.Encoding.PEM,
+        serialization.PublicFormat.SubjectPublicKeyInfo,
+    ).decode("utf-8")
+    return private, pem
+
+
+def test_owner_authority_enrollment_is_hidden_idempotent_and_refuses_takeover(tmp_path):
+    capsules, ledger_path, owner, _original, _args, _client = _fixture(tmp_path)
+    key_registry = tmp_path / "owner-authority.json"
+    settings = CommanderSettings(
+        tokens={"hermes": HERMES_TOKEN, "van-gateway": GATEWAY_TOKEN},
+        ledger=str(ledger_path),
+        heartbeat_dir=str(tmp_path / "hb-enroll"),
+        log_dir=str(tmp_path / "log-enroll"),
+        data_dir=str(tmp_path / "data-enroll"),
+        capsule_dir=str(capsules),
+        owner_authority_keys=str(key_registry),
+        _owner_authority=OwnerAuthorityVerifier({}),
+    )
+    client = TestClient(create_app(settings))
+    _, pem = _device_key()
+    key_id = owner_authority_key_id(pem)
+    args = {"device_id": "owner-s24", "key_id": key_id, "public_key_pem": pem}
+
+    tools = client.get(
+        "/v1/tools",
+        headers=sign_headers(HERMES_TOKEN, "GET", "/v1/tools", b""),
+    )
+    names = {x["name"] for x in tools.json()["tools"]}
+    assert "owner_authority_enroll" not in names
+    assert "capsule_promotion_candidates" not in names
+    assert _call(client, "owner_authority_enroll", HERMES_TOKEN, args).status_code == 403
+
+    first = _call(client, "owner_authority_enroll", GATEWAY_TOKEN, args)
+    assert first.status_code == 200, first.text
+    assert first.json()["result"]["key_id"] == key_id
+    assert key_registry.stat().st_mode & 0o777 == 0o600
+    stored = json.loads(key_registry.read_text())
+    assert list(stored["keys"]) == [key_id]
+    assert key_id in settings.owner_authority().keys
+
+    again = _call(client, "owner_authority_enroll", GATEWAY_TOKEN, args)
+    assert again.status_code == 200
+
+    _, other_pem = _device_key()
+    takeover = _call(
+        client,
+        "owner_authority_enroll",
+        GATEWAY_TOKEN,
+        {
+            "device_id": "other-device",
+            "key_id": owner_authority_key_id(other_pem),
+            "public_key_pem": other_pem,
+        },
+    )
+    assert takeover.status_code == 409
+    assert list(json.loads(key_registry.read_text())["keys"]) == [key_id]
+
+    wrong_id = _call(
+        client,
+        "owner_authority_enroll",
+        GATEWAY_TOKEN,
+        {"device_id": "owner-s24", "key_id": "device-wrong", "public_key_pem": pem},
+    )
+    assert wrong_id.status_code == 422
+
+
+def test_promotion_candidates_are_ledgered_passing_and_current_lineage_only(tmp_path):
+    capsules, ledger_path, owner, original, args, _client = _fixture(tmp_path)
+    cert_payload = dict(args["certificate"])
+    ledger = Ledger(ledger_path)
+    ledger.append(make_event(
+        EventKind.STRATEGY_VALIDATION_CERTIFICATE,
+        "test-validation",
+        cert_payload,
+        event_time_ms=1_000,
+        received_time_ms=1_000,
+        correlation_id=args["strategy_id"],
+    ))
+    ledger.close()
+
+    settings = CommanderSettings(
+        tokens={"hermes": HERMES_TOKEN, "van-gateway": GATEWAY_TOKEN},
+        ledger=str(ledger_path),
+        heartbeat_dir=str(tmp_path / "hb-candidates"),
+        log_dir=str(tmp_path / "log-candidates"),
+        data_dir=str(tmp_path / "data-candidates"),
+        capsule_dir=str(capsules),
+        _owner_authority=owner.verifier,
+    )
+    client = TestClient(create_app(settings))
+    response = _call(client, "capsule_promotion_candidates", GATEWAY_TOKEN, {})
+    assert response.status_code == 200, response.text
+    rows = response.json()["result"]["candidates"]
+    assert len(rows) == 1
+    assert rows[0]["strategy_id"] == args["strategy_id"]
+    assert rows[0]["current_state"] == "DEMO"
+    assert rows[0]["target_state"] == "SHADOW"
+    assert rows[0]["validation_hash"] == cert_payload["validation_hash"]
+
+    # Change only the projected capsule lineage. A certificate for the old
+    # parent can no longer appear as promotable.
+    current = CapsuleRegistry.load_dir(capsules).get(args["strategy_id"])
+    changed = CapsuleRegistry.seal({
+        **current.data,
+        "version": current.version + "-new-lineage",
+        "supersedes": current.capsule_hash,
+    })
+    (capsules / f"{args['strategy_id']}.json").write_text(
+        json.dumps(changed, indent=2) + "\n"
+    )
+    stale = _call(client, "capsule_promotion_candidates", GATEWAY_TOKEN, {})
+    assert stale.status_code == 200
+    assert stale.json()["result"]["candidates"] == []
 
 
 def test_capsule_promotion_is_hidden_from_agents_and_committed_by_gateway(tmp_path):
