@@ -26,5 +26,4 @@ class TradingRepository(private val client: VanGatewayClient) {
 
     suspend fun promotionCandidates(): Loaded<List<StrategyPromotionCandidate>> =
         load(StrategyPromotionCandidate::parseAll) { client.tradingPromotionCandidates() }
-    suspend fun promotionCandidates(): Loaded<List<StrategyPromotionCandidate>> = load(StrategyPromotionCandidate::parseAll) { client.tradingPromotionCandidates() }
 }
