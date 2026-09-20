@@ -300,3 +300,20 @@ def test_there_is_no_switch_feed_response():
     from vati.research import market_data_disagreement as m
     assert not hasattr(m, "SWITCH_FEED")
     assert set(m.__all__) & {CONTINUE, WAIT, REDUCE, HALT}
+
+
+def test_slow_research_plane_is_reachable_through_vati_cli(tmp_path, capsys):
+    import argparse
+    import json
+    from vati.__main__ import cmd_research
+
+    spec = tmp_path / "research.json"
+    spec.write_text(json.dumps({
+        "operation": "coverage",
+        "capsule_dir": REG,
+    }))
+    assert cmd_research(argparse.Namespace(spec=str(spec), ledger=None)) == 0
+    payload = json.loads(capsys.readouterr().out)
+    assert payload["operation"] == "coverage"
+    assert payload["map_hash"]
+    assert payload["gap_count"] > 0
