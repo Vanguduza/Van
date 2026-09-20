@@ -656,7 +656,7 @@ invariants:
   - subject: trading.mtf_adoption_boundary
     owner: docs/VAN_TRADING_PRODUCTION_DEPLOYMENT_BLUEPRINT_REV5.md
     statement: >-
-      Multi-timeframe state is assembled as shadow evidence without look-ahead, and it cannot alter live strategy decisions until an owner-signed strategy revision adopts the role contract.
+      Multi-timeframe state is assembled without look-ahead and is a required causal evidence envelope; missing required timeframes may block new risk, but MTF values cannot change a strategy's entry, stop, target or eligibility logic until a separately validated strategy revision adopts the role contract.
     implemented_by:
       - trading/vati/intelligence/mtf.py
       - trading/vati/app/account_service.py
