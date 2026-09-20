@@ -148,6 +148,22 @@ def check_no_trading_table_in_gateway_schema() -> list[str]:
             "these belong on the VATI transactional authority store"] if hits else []
 
 
+def _has_fastapi_route(tree: ast.Module, *, method: str, route: str) -> bool:
+    """Return True only for an exact @app.<method>(route) decorator."""
+    for node in ast.walk(tree):
+        if not isinstance(node, (ast.FunctionDef, ast.AsyncFunctionDef)):
+            continue
+        for dec in node.decorator_list:
+            if not isinstance(dec, ast.Call) or not isinstance(dec.func, ast.Attribute):
+                continue
+            if dec.func.attr.lower() != method.lower() or not dec.args:
+                continue
+            first = dec.args[0]
+            if isinstance(first, ast.Constant) and first.value == route:
+                return True
+    return False
+
+
 def check_required_production_joins() -> list[str]:
     """Joins whose absence recreates the PR #49 audit findings."""
     failures: list[str] = []
@@ -190,10 +206,25 @@ def check_required_production_joins() -> list[str]:
         failures.append(
             "account-lease-live-join: production account service references an in-memory lease")
 
-    commander = (ROOT / "commander" / "app.py").read_text()
-    commander_strategy = (ROOT / "commander" / "strategies.py").read_text()
-    gateway = (ROOT.parent / "backend" / "van_gateway" / "app.py").read_text()
-    capsule = (ROOT / "vati" / "strategies" / "capsule.py").read_text()
+    commander_path = ROOT / "commander" / "app.py"
+    commander_strategy_path = ROOT / "commander" / "strategies.py"
+    gateway_path = ROOT.parent / "backend" / "van_gateway" / "app.py"
+    capsule_path = ROOT / "vati" / "strategies" / "capsule.py"
+    required_paths = (
+        commander_path, commander_strategy_path, gateway_path, capsule_path,
+    )
+    missing = [p.as_posix() for p in required_paths if not p.is_file()]
+    if missing:
+        failures.append(
+            "strategy-promotion-live-join: repository-spanning guard is missing "
+            + ", ".join(missing)
+        )
+        return failures
+
+    commander = commander_path.read_text()
+    commander_strategy = commander_strategy_path.read_text()
+    gateway_tree = ast.parse(gateway_path.read_text())
+    capsule = capsule_path.read_text()
     if "capsule_promote" not in commander_strategy:
         failures.append(
             "strategy-promotion-live-join: private commander promotion command is absent")
@@ -207,9 +238,11 @@ def check_required_production_joins() -> list[str]:
     if "AGENT_HIDDEN_COMMANDS" not in commander or "PROMOTION_COMMANDS" not in commander:
         failures.append(
             "strategy-promotion-agent-boundary: promotion is not attached to the hidden command set")
-    if "/v1/trading/strategies/promote" not in gateway:
+    if not _has_fastapi_route(
+        gateway_tree, method="post", route="/v1/trading/strategies/promote"
+    ):
         failures.append(
-            "strategy-promotion-live-join: gateway owner promotion route is absent")
+            "strategy-promotion-live-join: exact gateway owner promotion POST route is absent")
     if "CapsuleRegistry" not in commander_strategy or ".promote(" not in commander_strategy:
         failures.append(
             "strategy-promotion-live-join: commander no longer reaches CapsuleRegistry.promote")
