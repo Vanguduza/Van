@@ -54,6 +54,11 @@ AUDIT_ONLY_LABELS = frozenset({
     "device.bootstrap.create",
     "device.provisioning.issue",
     "device.rebind",
+    # Strategy promotion is an A4 owner workflow handled by the dedicated
+    # StrategyPromotionGateway / approval path. It is recorded as an audit action id,
+    # not exposed to the generic capability router; declaring it routable here would
+    # create a second mutation path around the trading authority boundary.
+    "trading.strategy.promote",
     "trading.owner_halt",
     "trading.ticket_confirm",
 })
