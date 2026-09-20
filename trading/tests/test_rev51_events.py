@@ -368,3 +368,86 @@ def test_an_episode_digest_is_stable():
     _, a = _episode()
     _, b = _episode()
     assert a[0].digest == b[0].digest
+
+
+
+# --------------------------------------------------------- G7b runtime join
+def test_event_runtime_consumes_calendar_ledger_and_closes_multi_symbol_episodes():
+    from vati.events.runtime import EventResearchRuntime
+
+    led = Ledger(":memory:")
+    recorder = CalendarRecorder(ledger=led)
+    sched = scheduled_from_row({
+        "name": "NFP", "release": str(RELEASE_MS),
+        "currencies": "USD", "forecast": "160000",
+    })
+    recorder.schedule(sched)
+    for i, src in enumerate(("a", "b")):
+        recorder.observe(ReleaseObservation(
+            sched.event_key, src, D("100000"),
+            RELEASE_MS + 1000 + i, RELEASE_MS))
+
+    runtime = EventResearchRuntime(
+        _registry(), ledger=led,
+        horizons_ms=(60_000,),
+        baseline_lag_ms=5_000,
+        horizon_lag_ms=5_000,
+    )
+    runtime.on_mark(
+        symbol="EURUSD", mark=D("1.10"),
+        observed_ms=RELEASE_MS + 2_000, typical_range=D("0.01"))
+    runtime.on_mark(
+        symbol="XAUUSD", mark=D("2000"),
+        observed_ms=RELEASE_MS + 2_000, typical_range=D("10"))
+    closed = []
+    closed += runtime.on_mark(
+        symbol="EURUSD", mark=D("1.095"),
+        observed_ms=RELEASE_MS + 60_000, typical_range=D("0.01"))
+    closed += runtime.on_mark(
+        symbol="XAUUSD", mark=D("1990"),
+        observed_ms=RELEASE_MS + 60_000, typical_range=D("10"))
+
+    assert {e.symbol for e in closed} == {"EURUSD", "XAUUSD"}
+    assert led.count(EventKind.EVENT_RELEASE) >= 1
+    assert led.count(EventKind.EVENT_REACTION) >= 1
+    assert led.count(EventKind.MACRO_EVENT_EPISODE) == 2
+
+
+def test_event_runtime_does_not_backfill_a_late_mark_into_an_earlier_horizon():
+    from vati.events.runtime import EventResearchRuntime
+
+    led = Ledger(":memory:")
+    recorder = CalendarRecorder(ledger=led)
+    sched = scheduled_from_row({
+        "name": "NFP", "release": str(RELEASE_MS),
+        "currencies": "USD", "forecast": "160000",
+    })
+    recorder.schedule(sched)
+    for src in ("a", "b"):
+        recorder.observe(ReleaseObservation(
+            sched.event_key, src, D("100000"), RELEASE_MS, RELEASE_MS))
+
+    runtime = EventResearchRuntime(
+        _registry(), ledger=led,
+        horizons_ms=(60_000,),
+        baseline_lag_ms=5_000,
+        horizon_lag_ms=1_000,
+    )
+    runtime.on_mark(
+        symbol="EURUSD", mark=D("1.10"),
+        observed_ms=RELEASE_MS, typical_range=D("0.01"))
+    eps = runtime.on_mark(
+        symbol="EURUSD", mark=D("1.00"),
+        observed_ms=RELEASE_MS + 120_000, typical_range=D("0.01"))
+    assert len(eps) == 1
+    assert eps[0].reactions[0].missing
+    assert eps[0].reactions[0].mark is None
+
+
+def test_account_service_declares_event_runtime_hook():
+    from pathlib import Path
+    source = (
+        Path(__file__).resolve().parents[1] / "vati" / "app" / "account_service.py"
+    ).read_text(encoding="utf-8")
+    assert "EventResearchRuntime(" in source
+    assert "self.event_research.on_mark(" in source

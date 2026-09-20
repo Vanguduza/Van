@@ -42,6 +42,8 @@ from vati.execution.route_registry import RouteRegistry
 from vati.execution.router import ExecutionRouter, RouterError
 from vati.execution.style_selector import ExecutionStyleSelector, LiquidityView
 from vati.intelligence.calendar_feed import build_matrix
+from vati.events.registry import EventRegistry
+from vati.events.runtime import EventResearchRuntime, infer_instrument_exposure
 from vati.intelligence.events import EventWindowState
 from vati.intelligence.market_state import build_market_state
 from vati.intelligence.mtf import TimeframeContract, build_multi_timeframe_state
@@ -117,6 +119,7 @@ class AccountCoordinatorService:
         self.style_selector: Optional[ExecutionStyleSelector] = None
         self.learning: Optional[LearningHooks] = None
         self.cognition: Optional[ShadowCognitionRuntime] = None
+        self.event_research: Optional[EventResearchRuntime] = None
         self.lifecycle: Optional[AccountTradeLifecycle] = None
         self.account = None
         self.specs: dict[str, LiveInstrumentSpec] = {}
@@ -282,6 +285,18 @@ class AccountCoordinatorService:
             now_ms=self.clock(),
             source="account_service_build",
         )
+        exposures = [
+            infer_instrument_exposure(
+                symbol=spec.symbol,
+                venue=account.router_venue,
+                base=spec.base,
+                quote=spec.quote,
+                is_synthetic=self.contracts[spec.symbol].is_synthetic,
+            )
+            for spec in self.specs.values()
+        ]
+        self.event_research = EventResearchRuntime(
+            EventRegistry(instruments=exposures), ledger=self._ledger)
 
         self.learning = LearningHooks(
             environment=ENVIRONMENT_FOR_MODE[mandate.mode],
@@ -909,6 +924,17 @@ class AccountCoordinatorService:
             for index, bar in enumerate(new_bars):
                 mark_time = now if index == len(new_bars) - 1 else bar.end_ms
                 self.lifecycle.mark_bar(symbol, bar, now_ms=mark_time)
+                if self.event_research is not None:
+                    typical_range = max(
+                        bar.high - bar.low,
+                        self.contracts[symbol].tick_size,
+                    )
+                    self.event_research.on_mark(
+                        symbol=symbol,
+                        mark=bar.close,
+                        observed_ms=bar.end_ms,
+                        typical_range=typical_range,
+                    )
 
         result = self.coordinator.step(now_ms=now, bars_by_symbol=advanced_bars)
         self.mtf_shadow = {

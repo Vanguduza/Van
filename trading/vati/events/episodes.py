@@ -225,18 +225,28 @@ class EpisodeProducer:
         sample quietly excluding the releases where the venue went quiet.
         """
         out: list[MacroEventEpisode] = []
-        by_key: dict[str, ReactionTrack] = {}
+        by_key: dict[str, list[ReactionTrack]] = {}
         for t in tracks:
-            by_key.setdefault(t.event_key, t)
+            by_key.setdefault(t.event_key, []).append(t)
+        closed_keys: set[str] = set()
         for event_key in sorted(self._open):
             release, _ = self._open[event_key]
-            track = by_key.get(event_key)
-            last_horizon = max(track.horizons_ms) if track is not None else 0
+            event_tracks = sorted(by_key.get(event_key, ()), key=lambda t: t.symbol)
+            last_horizon = max(
+                (max(t.horizons_ms) for t in event_tracks),
+                default=0,
+            )
             if now_ms < release.released_ms + last_horizon:
                 continue
-            out.append(self.close(event_key=event_key, track=track, now_ms=now_ms))
-        for ep in out:
-            self._open.pop(ep.event_key, None)
+            if event_tracks:
+                for track in event_tracks:
+                    out.append(self.close(
+                        event_key=event_key, track=track, now_ms=now_ms))
+            else:
+                out.append(self.close(event_key=event_key, track=None, now_ms=now_ms))
+            closed_keys.add(event_key)
+        for event_key in closed_keys:
+            self._open.pop(event_key, None)
         return out
 
     def episodes(self, *, state: Optional[EpisodeState] = None) -> list[MacroEventEpisode]:
