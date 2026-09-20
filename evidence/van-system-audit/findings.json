@@ -21,7 +21,7 @@
   ],
   "counts": {
     "P0": 27,
-    "P1": 48,
+    "P1": 49,
     "P2": 38,
     "P3": 29,
     "P4": 7
@@ -6421,10 +6421,11 @@
       "validation_gate": "G2",
       "closure": {
         "state": "EXTERNALLY_BLOCKED_REPOSITORY_COMPLETE",
-        "summary": "The claim is corrected, not the code. RB-035, RB-061, RB-062, RB-064, RB-068, RB-069 and RB-071 now read BUILT_UNWIRED and name the one cause. A contract test asserts the agreement between the matrix and whether anything calls `start()`, and fails if a new public method on the session gains no caller.",
+        "summary": "The claim is corrected, not the code. RB-035, RB-061, RB-062, RB-064, RB-068, RB-069 and RB-071 now read BUILT_UNWIRED and name the one cause. A contract test asserts the agreement between the matrix and whether anything calls `start()`, and fails if a new public method on the session gains no caller.\n\n**Repaired at C16b.** `VanApplication.startVanSession()` calls `start()` when the device is enrolled, so the socket opens, the outbox is restored and the resume runs. RB-035, RB-061, RB-064, RB-068, RB-069 and RB-071 return to WIRED_UNPROVEN; RB-062 does not, because the device still has no second transport.",
         "changed": [
           "docs/project-state/REMOTE_BROWSER_IMPLEMENTATION_MATRIX.json",
-          "tests/contracts/test_session_is_driven.py"
+          "tests/contracts/test_session_is_driven.py",
+          "android/app/src/main/java/com/dial/van/VanApplication.kt"
         ],
         "verified_by": [
           "tests/contracts/test_session_is_driven.py"
@@ -6501,16 +6502,63 @@
       "validation_gate": "G2",
       "closure": {
         "state": "EXTERNALLY_BLOCKED_REPOSITORY_COMPLETE",
-        "summary": "§43 row 63 is corrected from REPOSITORY_PROVEN to BLOCKED_EXTERNAL with the reason stated: the decisions are proven and the path that would reach them is not wired. The repair is code in `VanApplication` and `VanCommandController`, neither of which any test here can execute.",
+        "summary": "§43 row 63 is corrected from REPOSITORY_PROVEN to BLOCKED_EXTERNAL with the reason stated: the decisions are proven and the path that would reach them is not wired. The repair is code in `VanApplication` and `VanCommandController`, neither of which any test here can execute.\n\n**Repaired at C16b.** `recordFailure` now asks `OfflineSubmission` what may happen to the command and hands a storable one to §20.14's outbox. Two things had to change underneath it: `submit` refused outright when there was no session id — which is exactly what offline means, so storage was available only when it was not needed — and an envelope stored before a session exists now carries a named placeholder that `flushOutbox` rebinds to the live session, keeping its message id and idempotency key.",
         "changed": [
           "evidence/van-system-audit/production_acceptance.json",
-          "docs/project-state/REMOTE_BROWSER_IMPLEMENTATION_MATRIX.json"
+          "docs/project-state/REMOTE_BROWSER_IMPLEMENTATION_MATRIX.json",
+          "android/app/src/main/java/com/dial/van/session/OfflineSubmission.kt",
+          "android/app/src/main/java/com/dial/van/control/VanCommandController.kt",
+          "android/app/src/main/java/com/dial/van/session/SessionEnvelope.kt",
+          "android/app/src/main/java/com/dial/van/session/VanHermesSessionManager.kt"
         ],
         "verified_by": [
-          "tests/contracts/test_session_is_driven.py"
+          "tests/contracts/test_session_is_driven.py",
+          "android/verification/src/test/kotlin/com/dial/van/session/OfflineSubmissionTest.kt",
+          "android/verification/src/test/kotlin/com/dial/van/session/SessionOutboxDurabilityTest.kt"
         ],
         "counterexample": "Every test of the outbox passes and the owner still loses the command, which is why the check that matters is the one asking whether anything calls `submit` rather than whether `submit` is correct.",
         "residual": "The repair itself. `VanCommandController` and `VanApplication` are Android and are compiled by CI only; whether a command survives a real tunnel is Gate 14's to observe.",
+        "residual_reason": "The AGP is unreachable in the audit container.",
+        "residual_class": "ENVIRONMENT_UNVERIFIED",
+        "posture": "fail-closed"
+      }
+    },
+    {
+      "id": "P1-SESS-012",
+      "severity": "P1",
+      "domain": "session",
+      "title": "A command held for the owner's confirmation cannot be released by the owner",
+      "description": "§20.14 classifies a command whose meaning depends on the moment — \"read that back to me\", \"cancel it\" — as REQUIRE_RECONFIRM_ON_RECONNECT. `DurableOutbox.flush` returns `NeedsReconfirmation` for one and `flushOutbox` correctly holds it rather than sending it on the owner's behalf. `VanHermesSessionManager.reconfirm(messageId)` is the only thing that releases it, and nothing calls it.\n\nSo after C16b such a command is stored, held, and stuck: correct in every respect except that the question §20.15 says to ask is asked by nothing. `awaitingReconfirmation()` and `queuedForOwner()` — the two readers a screen would use — also have no callers.",
+      "requirement": "docs/VAN_REMOTE_BROWSER_PRODUCTION_BLUEPRINT_REV_1_5.md §20.15",
+      "authority": "VAN Remote Browser Production Blueprint Rev 1.5",
+      "repository_evidence": [
+        "android/app/src/main/java/com/dial/van/session/VanHermesSessionManager.kt",
+        "android/app/src/main/java/com/dial/van/session/OfflineSubmission.kt"
+      ],
+      "runtime_evidence": [],
+      "affected_components": [
+        "android",
+        "session"
+      ],
+      "root_cause": "The storing half and the asking half are in different layers, and only the storing half had a caller. The same shape as P0-SESS-009 one level down, found by asking the same question of the entry points rather than of the files.",
+      "remediation": "Recorded rather than papered over, and the owner-facing sentence is corrected to match: a held command is now described as \"Saved, and held. This one won't be sent without you\" rather than promising a question nothing asks. RB-069 names the gap as a gate, and `tests/contracts/test_session_is_driven.py` fails if that row stops naming it while `reconfirm` still has no caller.",
+      "current_status": "CLOSED",
+      "remediation_gate": "RB C16",
+      "validation_gate": "G2",
+      "closure": {
+        "state": "EXTERNALLY_BLOCKED_REPOSITORY_COMPLETE",
+        "summary": "The behaviour is correct — the command is stored and is not sent without the owner — and the release mechanism is a Compose surface that does not exist. What is closed is the claim: nothing tells the owner they will be asked, and the row says why.",
+        "changed": [
+          "android/app/src/main/java/com/dial/van/session/OfflineSubmission.kt",
+          "docs/project-state/REMOTE_BROWSER_IMPLEMENTATION_MATRIX.json",
+          "tests/contracts/test_session_is_driven.py"
+        ],
+        "verified_by": [
+          "android/verification/src/test/kotlin/com/dial/van/session/OfflineSubmissionTest.kt",
+          "tests/contracts/test_session_is_driven.py"
+        ],
+        "counterexample": "Telling the owner \"I'll check with you before I send it\" makes the product read as complete and leaves them waiting for a prompt that never comes — worse than saying nothing. `a held command is not promised a question that nothing asks` fails on that wording.",
+        "residual": "The owner-facing screen that lists held work and answers the question. Compose, and not executable in this repository.",
         "residual_reason": "The AGP is unreachable in the audit container.",
         "residual_class": "ENVIRONMENT_UNVERIFIED",
         "posture": "fail-closed"

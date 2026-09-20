@@ -89,6 +89,38 @@ object SessionEnvelope {
      */
     fun readdress(envelope: JSONObject, pathEpoch: Int): JSONObject =
         JSONObject(envelope.toString()).put("path_epoch", pathEpoch)
+
+    /**
+     * The id a command stored before any session existed is addressed to.
+     *
+     * §20.14's whole case is a command issued with no network, and with no network there
+     * is no `van_session_id` to build an envelope with — `/v1/session/open` is an HTTP
+     * call. Refusing to store it, which is what `submit` did, means the owner loses the
+     * instruction they gave in a tunnel: the exact failure the outbox exists to prevent.
+     *
+     * So it is stored addressed to nothing in particular and [rebind] stamps the real
+     * session onto it when one exists. The placeholder is a constant rather than an empty
+     * string so that a value which reached the wire by mistake is recognisable in a
+     * Gateway log rather than looking like a field somebody forgot to set.
+     */
+    const val UNBOUND_SESSION_ID: String = "unbound"
+
+    /**
+     * Address a stored envelope to the session that now exists, keeping its identity.
+     *
+     * The mirror of [readdress], and separate from it for the same reason the path epoch
+     * is: `message_id`, `idempotency_key` and `payload_digest` are untouched, so a Gateway
+     * that has somehow seen this command already recognises it rather than running it
+     * twice. What changes is where it is addressed, never what it says.
+     */
+    fun rebind(envelope: JSONObject, vanSessionId: String, sessionEpoch: Int): JSONObject =
+        JSONObject(envelope.toString())
+            .put("van_session_id", vanSessionId)
+            .put("session_epoch", sessionEpoch)
+
+    /** True for an envelope stored before there was a session to address it to. */
+    fun isUnbound(envelope: JSONObject): Boolean =
+        envelope.optString("van_session_id") == UNBOUND_SESSION_ID
 }
 
 /**

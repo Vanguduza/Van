@@ -1,8 +1,10 @@
 package com.dial.van.control
 
 import androidx.fragment.app.FragmentActivity
+import com.dial.van.gateway.GatewayHttpException
 import com.dial.van.gateway.VanGatewayClient
 import com.dial.van.security.BiometricGate
+import com.dial.van.session.OfflineSubmission
 import com.dial.van.status.OwnerStatusProjection
 import com.dial.van.status.OwnerWorkStatus
 import com.dial.van.status.VanCommandStatus
@@ -88,6 +90,20 @@ class VanCommandController(
 ) {
     private val _state = MutableStateFlow(VanConversationState())
     val state: StateFlow<VanConversationState> = _state.asStateFlow()
+
+    /**
+     * §20.14 — where a command goes when it could not be sent.
+     *
+     * A property assigned after construction rather than a constructor parameter, because
+     * `VanApplication` builds this controller before it builds the session and the
+     * session needs the same gateway client. A lambda rather than the session type, so
+     * this class keeps knowing nothing about transports.
+     *
+     * Null means there is no outbox, and [recordFailure] says so rather than pretending:
+     * a build with nothing behind this must not tell the owner their work was saved.
+     * It returns whether the command was actually stored.
+     */
+    var storeForLater: ((VanOwnerCommand, requiresLiveOwnerContext: Boolean) -> Boolean)? = null
 
     fun selectProject(projectId: String?) {
         _state.update { it.copy(selectedProjectId = projectId) }
@@ -370,18 +386,71 @@ class VanCommandController(
             OwnerStatusProjection.needsOwner(ownerStatus)
     }
 
+    /**
+     * §20.14 — the command did not go out, so it is held or the owner is told it did not.
+     *
+     * This used to append "Command dispatch failed" and stop. Nothing stored the command
+     * and nothing retried it, so an instruction given in a tunnel was gone — the exact
+     * failure §20.14 exists to prevent, reached by the one path nobody had connected to
+     * the outbox (P0-SESS-011).
+     *
+     * The decision is [OfflineSubmission]'s, not this method's. Whether a refusal may be
+     * replayed later and whether an A4 may be stored at all are the two rules worth
+     * getting right, and they belong somewhere a test can execute them.
+     */
     private fun recordFailure(command: VanOwnerCommand, throwable: Throwable) {
         val safeMessage = throwable.message?.take(240) ?: throwable::class.java.simpleName
+        // An HTTP status came back, so the command arrived and was answered. A timeout or
+        // a dropped connection did not, and only that may be held.
+        val gatewayAnswered = throwable is GatewayHttpException
+        val verdict = OfflineSubmission.decide(
+            actionClass = command.actionClass,
+            requiresLiveOwnerContext = command.noStaleReplay,
+            gatewayAnswered = gatewayAnswered,
+            failureSummary = safeMessage,
+        )
+        val stored = when (verdict) {
+            is OfflineSubmission.Verdict.Store ->
+                storeForLater?.invoke(command, verdict.needsReconfirm) == true
+            is OfflineSubmission.Verdict.Drop -> false
+        }
+        // Said rather than assumed. A build with no outbox behind `storeForLater`, or a
+        // store that refused, must not leave the owner told their work was saved.
+        val text = if (stored) verdict.ownerMessage else when (verdict) {
+            is OfflineSubmission.Verdict.Drop -> verdict.ownerMessage
+            is OfflineSubmission.Verdict.Store -> "Not sent, and not saved: $safeMessage"
+        }
         _state.update {
             it.copy(
                 messages = it.messages + VanConversationMessage(
                     role = VanMessageRole.SYSTEM,
-                    text = "Command dispatch failed: $safeMessage",
+                    text = text,
                     projectId = command.projectId,
-                    status = VanCommandStatus.FAILED,
+                    status = if (stored) VanCommandStatus.QUEUED else VanCommandStatus.FAILED,
                 ),
                 submitting = false,
-                lastError = safeMessage,
+                lastError = if (stored) null else safeMessage,
+            )
+        }
+    }
+
+    /**
+     * §20.15 — work the outbox will not send, surfaced where the owner is already looking.
+     *
+     * Called by the session when a stored command expires or the session it belonged to
+     * is replaced. Without a caller for this, "the owner is told" is an intention.
+     */
+    fun reportUndelivered(reasons: List<Pair<String, String>>) {
+        if (reasons.isEmpty()) return
+        _state.update { current ->
+            current.copy(
+                messages = current.messages + reasons.map { (_, line) ->
+                    VanConversationMessage(
+                        role = VanMessageRole.SYSTEM,
+                        text = line,
+                        status = VanCommandStatus.FAILED,
+                    )
+                },
             )
         }
     }

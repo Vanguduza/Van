@@ -7,6 +7,7 @@ import android.net.NetworkCapabilities
 import android.net.NetworkRequest
 import com.dial.van.control.VanCommandController
 import com.dial.van.control.VanCommandSource
+import com.dial.van.control.VanOwnerCommand
 import com.dial.van.degraded.DegradedModeStore
 import com.dial.van.degraded.DeviceSignals
 import com.dial.van.gateway.ReplayReason
@@ -45,6 +46,7 @@ import kotlinx.coroutines.SupervisorJob
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.isActive
 import kotlinx.coroutines.launch
+import org.json.JSONObject
 
 class VanApplication : Application(), VoiceInputCallback, TtsOutputCallback {
 
@@ -237,6 +239,10 @@ class VanApplication : Application(), VoiceInputCallback, TtsOutputCallback {
             // exists, not beside it. Without this the queue survives the process and the
             // policy governing whether a command may be silently replayed does not.
             store = EncryptedSessionOutboxStore(commandQueue),
+            // §20.15 — a command the outbox gives up on reaches the owner's conversation,
+            // which is the surface they are already looking at. Without a reader here the
+            // work is dropped in silence, which is the half of the failure that is worse.
+            onUndelivered = { commandController.reportUndelivered(it) },
         )
         voiceEdge = VoiceEdge(this, ttsOutput, appScope)
         voiceEdge.loadAssets()
@@ -255,6 +261,7 @@ class VanApplication : Application(), VoiceInputCallback, TtsOutputCallback {
         DeviceSignals.publish(this)
         queueReplayer.replayAsync(ReplayReason.APP_START)
         telemetry.start()
+        startVanSession()
         // §20.9 — the standby policy has to be told what the phone can afford before it
         // decides anything. Without this first call it runs on its constructor defaults
         // (a full battery on an unmetered link), which is the one combination that says
@@ -264,6 +271,59 @@ class VanApplication : Application(), VoiceInputCallback, TtsOutputCallback {
         startConnectivityMonitor()
         startGatewayHealthMonitor()
         startSignedConnectivityRefresh()
+    }
+
+    /**
+     * Rev 1.5 §20 — open the durable session, and give a failed command somewhere to go.
+     *
+     * This call did not exist. `VanHermesSessionManager` was constructed here and fed two
+     * inputs, and `start()` had no caller anywhere in the app — so no socket opened, no
+     * resume ran, the outbox was never restored, and `submit` was never reached. Two
+     * checkpoints hardened an outbox that nothing put anything in (P0-SESS-009).
+     *
+     * Not enrolled means not started, rather than started and failing: opening a session
+     * needs a device token, and a provisioning build that has not been given one should
+     * wait quietly rather than retry a call that cannot succeed. `startGatewayHealthMonitor`
+     * already re-checks enrolment, and a later `start()` is a resume rather than a new
+     * session, which is §20.3's whole point.
+     */
+    private fun startVanSession() {
+        commandController.storeForLater = ::storeCommandForLater
+        appScope.launch {
+            if (!gatewayClient.isEnrolled()) return@launch
+            runCatching { vanSession.start() }
+        }
+    }
+
+    /**
+     * §20.14 — hold a command that could not be sent, and say whether it was held.
+     *
+     * Returns false rather than throwing when the session refuses it, because the caller
+     * has to tell the owner the truth either way and "saved" is the one sentence that
+     * must not be said on a guess. `submit` refuses an A4 or A5 on its own — the
+     * classification is `DurableOutbox.admit`'s — so this cannot be the place that
+     * smuggles one in.
+     */
+    private fun storeCommandForLater(
+        command: VanOwnerCommand,
+        requiresLiveOwnerContext: Boolean,
+    ): Boolean {
+        val payload = JSONObject()
+            .put("text", command.text)
+            .put("action_class", command.actionClass)
+            .put("idempotency_key", command.idempotencyKey)
+        command.projectId?.let { payload.put("project_id", it) }
+        command.turnId?.let { payload.put("turn_id", it) }
+        val outcome = runCatching {
+            vanSession.submit(
+                kind = "command.submit",
+                payload = payload,
+                actionClass = command.actionClass,
+                requiresLiveOwnerContext = requiresLiveOwnerContext,
+            )
+        }.getOrNull() ?: return false
+        return outcome is VanHermesSessionManager.SubmissionOutcome.Queued ||
+            outcome is VanHermesSessionManager.SubmissionOutcome.QueuedNeedsReconfirm
     }
 
     /**

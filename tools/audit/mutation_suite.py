@@ -1105,6 +1105,38 @@ ROOT_LEVEL = [
 #: Checkpoint 14, Kotlin half. Run by Gradle in android/verification rather than by pytest,
 #: because that harness is the only thing in this repository that can execute Kotlin at all.
 KOTLIN = [
+ # --- checkpoint 37: the command that could not be sent, and where it goes -----------
+ (f"{APP_KT}/session/OfflineSubmission.kt",
+  "        if (gatewayAnswered) {",
+  "        if (false) {",
+  "C37 a command the Gateway refused is stored and replayed hours later"),
+ (f"{APP_KT}/session/OfflineSubmission.kt",
+  "            CommandStorability.NEVER_STORE -> Verdict.Drop(",
+  "            CommandStorability.NEVER_STORE -> Verdict.Store(\n"
+  "                \"Saved \u2014 I'll send this when you're back online.\",\n"
+  "                needsReconfirm = false,\n"
+  "            ).let { it } ?: Verdict.Drop(",
+  "C37 an irreversible command is queued for a silent replay when the network returns"),
+ (f"{APP_KT}/session/OfflineSubmission.kt",
+  "                \"Saved, and held. This one won't be sent without you.\",",
+  "                \"Saved. You're offline, so I'll check with you before I send it.\",",
+  "C37 the owner waits for a question nothing asks"),
+ (f"{APP_KT}/session/OfflineSubmission.kt",
+  "                \"Not sent \u2014 this one needs you online. Nothing was changed.\",",
+  "                \"Saved \u2014 I'll send this when you're back online.\",",
+  "C37 an A4 that will never be sent is described as queued"),
+ (f"{APP_KT}/session/SessionEnvelope.kt",
+  "        JSONObject(envelope.toString())\n"
+  "            .put(\"van_session_id\", vanSessionId)\n"
+  "            .put(\"session_epoch\", sessionEpoch)",
+  "        envelope\n"
+  "            .put(\"van_session_id\", vanSessionId)\n"
+  "            .put(\"session_epoch\", sessionEpoch)",
+  "C37 a rebind edits the stored record, so a failed send corrupts what is on disk"),
+ (f"{APP_KT}/session/SessionEnvelope.kt",
+  "        envelope.optString(\"van_session_id\") == UNBOUND_SESSION_ID",
+  "        false",
+  "C37 a command stored offline is sent addressed to a session that does not exist"),
  # --- checkpoint 36: the write that must be one write, and the identity to match by --
  (f"{APP_KT}/session/EncryptedSessionOutboxStore.kt",
   "        records.upsert(OutboxPersistence.toCommand(entry, envelopeJson))",

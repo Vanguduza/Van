@@ -380,3 +380,70 @@ class SessionOutboxDurabilityTest {
         )
     }
 }
+
+/**
+ * Rev 1.5 §20.14 — the command given with no network at all.
+ *
+ * The case the outbox exists for, and the one it could not handle. `submit` refused
+ * outright when `vanSessionId` was null — and opening a session is an HTTP call, so a
+ * phone in a tunnel never has one. Storage was therefore available exactly when it was
+ * not needed (P0-SESS-011).
+ */
+class UnboundEnvelopeTest {
+
+    private fun envelope(sessionId: String) = org.json.JSONObject(
+        """{"message_id":"msg_1","van_session_id":"$sessionId","session_epoch":0,""" +
+            """"path_epoch":0,"idempotency_key":"idem_1","payload_digest":"d"}""",
+    )
+
+    @Test
+    fun `an envelope stored with no session is recognisable as unbound`() {
+        assertTrue(SessionEnvelope.isUnbound(envelope(SessionEnvelope.UNBOUND_SESSION_ID)))
+        assertTrue(!SessionEnvelope.isUnbound(envelope("van_sess_9")))
+    }
+
+    @Test
+    fun `rebinding addresses it to the live session and changes nothing else`() {
+        // The identity is what stops one instruction becoming two. A rebind that minted a
+        // new message id or idempotency key would do exactly that, on the reconnect — the
+        // moment the owner is most likely to be watching.
+        val stored = envelope(SessionEnvelope.UNBOUND_SESSION_ID)
+        val bound = SessionEnvelope.rebind(stored, "van_sess_9", 4)
+        assertEquals("van_sess_9", bound.getString("van_session_id"))
+        assertEquals(4, bound.getInt("session_epoch"))
+        assertEquals("msg_1", bound.getString("message_id"))
+        assertEquals("idem_1", bound.getString("idempotency_key"))
+        assertEquals("d", bound.getString("payload_digest"))
+    }
+
+    @Test
+    fun `rebinding does not mutate the stored envelope`() {
+        // The stored bytes are the record. If a rebind edited them in place, a failed send
+        // would leave the outbox holding a command addressed to a session that did not
+        // accept it, and the next attempt would carry the wrong id.
+        val stored = envelope(SessionEnvelope.UNBOUND_SESSION_ID)
+        SessionEnvelope.rebind(stored, "van_sess_9", 4)
+        assertTrue(SessionEnvelope.isUnbound(stored), "the rebind edited the stored record")
+    }
+
+    @Test
+    fun `an already-bound envelope is left alone`() {
+        val stored = envelope("van_sess_original")
+        assertTrue(!SessionEnvelope.isUnbound(stored))
+    }
+
+    @Test
+    fun `rebinding then readdressing is the full journey of a stored command`() {
+        // Stored offline, bound to the session that exists on reconnect, addressed to the
+        // path the Gateway granted. Three separate facts, applied in that order, none of
+        // which touches what the command says.
+        val stored = envelope(SessionEnvelope.UNBOUND_SESSION_ID)
+        val sent = SessionEnvelope.readdress(
+            SessionEnvelope.rebind(stored, "van_sess_9", 2), 7,
+        )
+        assertEquals("van_sess_9", sent.getString("van_session_id"))
+        assertEquals(2, sent.getInt("session_epoch"))
+        assertEquals(7, sent.getInt("path_epoch"))
+        assertEquals("msg_1", sent.getString("message_id"))
+    }
+}

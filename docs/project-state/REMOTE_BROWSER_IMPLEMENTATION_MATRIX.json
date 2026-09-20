@@ -1088,10 +1088,10 @@
       "id": "RB-035",
       "name": "realtime WebSocket client",
       "group": "session",
-      "status": "BUILT_UNWIRED",
+      "status": "WIRED_UNPROVEN",
       "built": true,
-      "wired": false,
-      "reachable": false,
+      "wired": true,
+      "reachable": true,
       "live": false,
       "verified": false,
       "observed": false,
@@ -1107,12 +1107,11 @@
         "backend/tests/test_van_hermes_session.py"
       ],
       "external_gates": [
-        "the device half of \u00a720 is never started: `VanApplication` constructs `VanHermesSessionManager` and calls only `setInteractionActive` and `setStandbyConditions`. `start()` has no caller anywhere in the app, so no socket is opened, no outbox is restored, no resume happens, and `submit` is never reached. The owner's commands go out over `VanCommandController` -> `POST /v1/commands`, and events arrive by HTTP polling on the Work screen",
         "the Android build is compiled only in CI; the AGP is unreachable in the audit container"
       ],
       "transport_independent": true,
       "offline_voice_proven": null,
-      "note": "**Corrected.** This read WIRED_UNPROVEN and its own producer field said `VanHermesSessionManager.start` \u2014 a method with no caller. The app has no realtime socket: the Work screen polls `GET /v1/events` on a timer inside a `LaunchedEffect`, so the stream also stops when that screen is not composed.\n\nokhttp WebSocket against the gateway's full-duplex session endpoint, with the session opened over HTTP first so a reconnect is a resume rather than a new session. The supervisor decides what a failure means; this file only carries bytes. Not executed: no gate in this repository runs an Android WebSocket."
+      "note": "**Wired at C16b.** `VanApplication.startVanSession()` calls `start()` when the device is enrolled, so this now runs. `WIRED_UNPROVEN` rather than more: it is compiled by CI and executed by nothing here, and whether it behaves on a real phone and a real network is Gate 14's.\n\n**Corrected.** This read WIRED_UNPROVEN and its own producer field said `VanHermesSessionManager.start` \u2014 a method with no caller. The app has no realtime socket: the Work screen polls `GET /v1/events` on a timer inside a `LaunchedEffect`, so the stream also stops when that screen is not composed.\n\nokhttp WebSocket against the gateway's full-duplex session endpoint, with the session opened over HTTP first so a reconnect is a resume rather than a new session. The supervisor decides what a failure means; this file only carries bytes. Not executed: no gate in this repository runs an Android WebSocket."
     },
     {
       "schema": "van-implementation-matrix/1",
@@ -1897,10 +1896,10 @@
       "id": "RB-061",
       "name": "WSS primary transport",
       "group": "session",
-      "status": "BUILT_UNWIRED",
+      "status": "WIRED_UNPROVEN",
       "built": true,
-      "wired": false,
-      "reachable": false,
+      "wired": true,
+      "reachable": true,
       "live": false,
       "verified": false,
       "observed": false,
@@ -1916,12 +1915,11 @@
         "backend/tests/test_van_hermes_session.py"
       ],
       "external_gates": [
-        "the device half of \u00a720 is never started: `VanApplication` constructs `VanHermesSessionManager` and calls only `setInteractionActive` and `setStandbyConditions`. `start()` has no caller anywhere in the app, so no socket is opened, no outbox is restored, no resume happens, and `submit` is never reached. The owner's commands go out over `VanCommandController` -> `POST /v1/commands`, and events arrive by HTTP polling on the Work screen",
         "an Android WebSocket client (RB-035), which needs the admitted OkHttp dependency"
       ],
       "transport_independent": true,
       "offline_voice_proven": null,
-      "note": "**Corrected.** The Gateway's `/v1/session/ws` route is mounted and route-tested; the consumer this row names \u2014 the Android session layer \u2014 never connects to it. A row is wired when the producer reaches the consumer, and this one does not."
+      "note": "**Wired at C16b.** `VanApplication.startVanSession()` calls `start()` when the device is enrolled, so this now runs. `WIRED_UNPROVEN` rather than more: it is compiled by CI and executed by nothing here, and whether it behaves on a real phone and a real network is Gate 14's.\n\n**Corrected.** The Gateway's `/v1/session/ws` route is mounted and route-tested; the consumer this row names \u2014 the Android session layer \u2014 never connects to it. A row is wired when the producer reaches the consumer, and this one does not."
     },
     {
       "schema": "van-implementation-matrix/1",
@@ -1948,7 +1946,7 @@
         "backend/tests/test_van_hermes_session.py"
       ],
       "external_gates": [
-        "the device half of \u00a720 is never started: `VanApplication` constructs `VanHermesSessionManager` and calls only `setInteractionActive` and `setStandbyConditions`. `start()` has no caller anywhere in the app, so no socket is opened, no outbox is restored, no resume happens, and `submit` is never reached. The owner's commands go out over `VanCommandController` -> `POST /v1/commands`, and events arrive by HTTP polling on the Work screen",
+        "the device has no second transport; \u00a720.1's `transport/` directory was never created, so the supervisor can name a failover target that nothing can open: `VanApplication` constructs `VanHermesSessionManager` and calls only `setInteractionActive` and `setStandbyConditions`. `start()` has no caller anywhere in the app, so no socket is opened, no outbox is restored, no resume happens, and `submit` is never reached. The owner's commands go out over `VanCommandController` -> `POST /v1/commands`, and events arrive by HTTP polling on the Work screen",
         "an Android streaming client (RB-035)"
       ],
       "transport_independent": true,
@@ -1991,10 +1989,10 @@
       "id": "RB-064",
       "name": "TransportSupervisor health scoring",
       "group": "session",
-      "status": "BUILT_UNWIRED",
+      "status": "WIRED_UNPROVEN",
       "built": true,
-      "wired": false,
-      "reachable": false,
+      "wired": true,
+      "reachable": true,
       "live": false,
       "verified": false,
       "observed": false,
@@ -2010,12 +2008,11 @@
         "android/verification/src/test/kotlin/com/dial/van/session/TransportSupervisorTest.kt"
       ],
       "external_gates": [
-        "the device half of \u00a720 is never started: `VanApplication` constructs `VanHermesSessionManager` and calls only `setInteractionActive` and `setStandbyConditions`. `start()` has no caller anywhere in the app, so no socket is opened, no outbox is restored, no resume happens, and `submit` is never reached. The owner's commands go out over `VanCommandController` -> `POST /v1/commands`, and events arrive by HTTP polling on the Work screen",
         "the Android build is compiled only in CI; the AGP is unreachable in the audit container"
       ],
       "transport_independent": true,
       "offline_voice_proven": null,
-      "note": "**Corrected.** `TransportSupervisor` is executed in the harness and its scoring is proven. The consumer this row names is `VanHermesSessionManager`'s WebSocket callbacks, which never fire, so nothing in the running app ever observes a path.\n\nHealth scoring is pure and executed: a failed write outranks every timing signal, the idle cadence does not call a backgrounded path suspect for being quiet, and a failover prefers a different route to the one that just broke. Wired into the session manager's callbacks. Not live \u2014 no gate here runs it against a network."
+      "note": "**Wired at C16b.** `VanApplication.startVanSession()` calls `start()` when the device is enrolled, so this now runs. `WIRED_UNPROVEN` rather than more: it is compiled by CI and executed by nothing here, and whether it behaves on a real phone and a real network is Gate 14's.\n\n**Corrected.** `TransportSupervisor` is executed in the harness and its scoring is proven. The consumer this row names is `VanHermesSessionManager`'s WebSocket callbacks, which never fire, so nothing in the running app ever observes a path.\n\nHealth scoring is pure and executed: a failed write outranks every timing signal, the idle cadence does not call a backgrounded path suspect for being quiet, and a failover prefers a different route to the one that just broke. Wired into the session manager's callbacks. Not live \u2014 no gate here runs it against a network."
     },
     {
       "schema": "van-implementation-matrix/1",
@@ -2121,10 +2118,10 @@
       "id": "RB-068",
       "name": "command ACK-unknown reconciliation",
       "group": "session",
-      "status": "BUILT_UNWIRED",
+      "status": "WIRED_UNPROVEN",
       "built": true,
-      "wired": false,
-      "reachable": false,
+      "wired": true,
+      "reachable": true,
       "live": false,
       "verified": false,
       "observed": false,
@@ -2143,13 +2140,12 @@
         "android/verification/src/test/kotlin/com/dial/van/session/SessionOutboxDurabilityTest.kt"
       ],
       "external_gates": [
-        "the device half of \u00a720 is never started: `VanApplication` constructs `VanHermesSessionManager` and calls only `setInteractionActive` and `setStandbyConditions`. `start()` has no caller anywhere in the app, so no socket is opened, no outbox is restored, no resume happens, and `submit` is never reached. The owner's commands go out over `VanCommandController` -> `POST /v1/commands`, and events arrive by HTTP polling on the Work screen",
         "a real path failure on real hardware: the case that matters is a partial answer, and no commit can produce one",
         "the Android build is compiled only in CI; the AGP is unreachable in the audit container"
       ],
       "transport_independent": true,
       "offline_voice_proven": null,
-      "note": "**Corrected at C16, one commit after C15 strengthened it.** The Gateway's half is live and route-tested and the device's decisions are executed in the harness \u2014 but `adoptCursor` is reached only from `resume()`, `resume()` only from the socket's `onOpen`, and the socket is only opened by `start()`. A reconciliation that cannot run is not wired, however correct it is.\n\n**Corrected after review.** The Gateway's half was right and the reconciliation was not, in two directions that cancelled out. The phone sent `inFlight.keys` \u2014 *message* ids \u2014 as `pending_command_ids`, the Gateway resolved each as a *command* id against the mission table, so every answer was `UNKNOWN`; and the phone then removed every key it had asked about, the unknowns included. `UNKNOWN` is the one answer that means resend, so every reconnect silently discarded every unacknowledged owner command. Nothing was resent because nothing was recognised, and nothing looked wrong because nothing was left behind. P0-SESS-005.\n\n`SessionReconciliation` now produces the identity asked about and matches the answer by the same function, `submit` puts the command id on the envelope where the Gateway records it, and `_resume_snapshot` answers from \u00a720.12's admission table \u2014 scoped to the asking session \u2014 when no mission exists. Restored outbox entries are reconciled alongside the in-flight ones, which is what stops a kill between the socket write and the durable `forget` delivering the owner's command twice."
+      "note": "**Wired at C16b.** `VanApplication.startVanSession()` calls `start()` when the device is enrolled, so this now runs. `WIRED_UNPROVEN` rather than more: it is compiled by CI and executed by nothing here, and whether it behaves on a real phone and a real network is Gate 14's.\n\n**Corrected at C16, one commit after C15 strengthened it.** The Gateway's half is live and route-tested and the device's decisions are executed in the harness \u2014 but `adoptCursor` is reached only from `resume()`, `resume()` only from the socket's `onOpen`, and the socket is only opened by `start()`. A reconciliation that cannot run is not wired, however correct it is.\n\n**Corrected after review.** The Gateway's half was right and the reconciliation was not, in two directions that cancelled out. The phone sent `inFlight.keys` \u2014 *message* ids \u2014 as `pending_command_ids`, the Gateway resolved each as a *command* id against the mission table, so every answer was `UNKNOWN`; and the phone then removed every key it had asked about, the unknowns included. `UNKNOWN` is the one answer that means resend, so every reconnect silently discarded every unacknowledged owner command. Nothing was resent because nothing was recognised, and nothing looked wrong because nothing was left behind. P0-SESS-005.\n\n`SessionReconciliation` now produces the identity asked about and matches the answer by the same function, `submit` puts the command id on the envelope where the Gateway records it, and `_resume_snapshot` answers from \u00a720.12's admission table \u2014 scoped to the asking session \u2014 when no mission exists. Restored outbox entries are reconciled alongside the in-flight ones, which is what stops a kill between the socket write and the durable `forget` delivering the owner's command twice."
     },
     {
       "schema": "van-implementation-matrix/1",
@@ -2157,10 +2153,10 @@
       "id": "RB-069",
       "name": "encrypted durable outbox extension",
       "group": "session",
-      "status": "BUILT_UNWIRED",
+      "status": "WIRED_UNPROVEN",
       "built": true,
-      "wired": false,
-      "reachable": false,
+      "wired": true,
+      "reachable": true,
       "live": false,
       "verified": false,
       "observed": false,
@@ -2179,13 +2175,13 @@
         "android/verification/src/test/kotlin/com/dial/van/session/SessionOutboxDurabilityTest.kt"
       ],
       "external_gates": [
-        "the device half of \u00a720 is never started: `VanApplication` constructs `VanHermesSessionManager` and calls only `setInteractionActive` and `setStandbyConditions`. `start()` has no caller anywhere in the app, so no socket is opened, no outbox is restored, no resume happens, and `submit` is never reached. The owner's commands go out over `VanCommandController` -> `POST /v1/commands`, and events arrive by HTTP polling on the Work screen",
         "the Android build is compiled only in CI; the AGP is unreachable in the audit container",
-        "`EncryptedCommandQueue` itself \u2014 the Keystore, the AES-GCM wrapping and the disk \u2014 which no test here can execute; the decisions either side of it are executed through `SessionOutboxStore`"
+        "`EncryptedCommandQueue` itself \u2014 the Keystore, the AES-GCM wrapping and the disk \u2014 which no test here can execute; the decisions either side of it are executed through `SessionOutboxStore`",
+        "\u00a720.15's reconfirmation surface: `VanHermesSessionManager.reconfirm` still has no caller, so a command classified REQUIRE_RECONFIRM_ON_RECONNECT is stored, held, and cannot be released by the owner (P1-SESS-012)"
       ],
       "transport_independent": true,
       "offline_voice_proven": null,
-      "note": "**Corrected at C16.** Two checkpoints made this outbox durable and then atomic, and neither noticed that nothing puts anything in it: `submit` has no caller, and `restoreOutbox` is reached only from `start()`. The app's store-and-forward is the pre-\u00a720 path \u2014 `EncryptedCommandQueue` drained by `QueueReplayer` \u2014 which is live. \u00a720.14's policy metadata rides on that queue's record correctly and is written by nobody.\n\n\u00a72.7 forbids a parallel replacement for `EncryptedCommandQueue`, so this is not one: \u00a720.14's metadata rides on that queue's own record.\n\n**Corrected after review.** The first version held those records in an in-memory `ArrayDeque` and never touched the queue at all \u2014 durable in name, and a process death lost the reconfirmation, expiry, attempt count and path while the command could survive. P0-SESS-003. One record and one write now, persisted before it is queued and forgotten only after the send returns.\n\nWriting the restart tests found two more: the mapping silently dropped `commandId`, which is what \u00a720.12 matches a restored command by, and a session envelope in the shared queue was dispatchable by the replayer \u2014 P0-SEC-002's shape, now a named refusal rather than a reliance on `commandTextOrNull` returning null.\n\n**Corrected again at C15, after external review.** The adapter was `queue.remove(messageId)` then `queue.enqueue(...)` \u2014 and the review was right that a kill between them loses the command. Attacking it found the seam was worse than reported. `enqueue` mints its own row id, so the record was never keyed by the message id: that `remove` matched nothing and neither did `forget`, which means every delivered command stayed on disk and was re-sent after each restart. `enqueue` also de-duplicates on the idempotency key and returns the existing row, so a reconfirmation \u2014 the owner's \"yes\" \u2014 was discarded. And `EncryptedCommandQueue`'s own `persist` and `remove` were each two editors with asynchronous `apply()`: three non-atomic writes, not one.\n\n`OutboxRecordStore.upsert` is now the operation, the adapter depends on that interface rather than on the queue, and the whole adapter is executed in the harness against a store that can be killed between operations. The restore reader was also `peekReady`, which drops a `NO_STALE_REPLAY` record once attempted \u2014 exactly the class a restore exists to recover (P1-SESS-007)."
+      "note": "**Wired at C16b, and one half of it deliberately is not.** `VanCommandController` now hands a command whose dispatch failed to \u00a720.14's outbox instead of dropping it, `start()` restores the outbox, and the owner sees `QUEUED` in the conversation and a line when something is given up on. A command needing the owner's yes is stored and held correctly and there is nothing that can ask them \u2014 recorded as P1-SESS-012 rather than closed by wording.\n\n**Corrected at C16.** Two checkpoints made this outbox durable and then atomic, and neither noticed that nothing puts anything in it: `submit` has no caller, and `restoreOutbox` is reached only from `start()`. The app's store-and-forward is the pre-\u00a720 path \u2014 `EncryptedCommandQueue` drained by `QueueReplayer` \u2014 which is live. \u00a720.14's policy metadata rides on that queue's record correctly and is written by nobody.\n\n\u00a72.7 forbids a parallel replacement for `EncryptedCommandQueue`, so this is not one: \u00a720.14's metadata rides on that queue's own record.\n\n**Corrected after review.** The first version held those records in an in-memory `ArrayDeque` and never touched the queue at all \u2014 durable in name, and a process death lost the reconfirmation, expiry, attempt count and path while the command could survive. P0-SESS-003. One record and one write now, persisted before it is queued and forgotten only after the send returns.\n\nWriting the restart tests found two more: the mapping silently dropped `commandId`, which is what \u00a720.12 matches a restored command by, and a session envelope in the shared queue was dispatchable by the replayer \u2014 P0-SEC-002's shape, now a named refusal rather than a reliance on `commandTextOrNull` returning null.\n\n**Corrected again at C15, after external review.** The adapter was `queue.remove(messageId)` then `queue.enqueue(...)` \u2014 and the review was right that a kill between them loses the command. Attacking it found the seam was worse than reported. `enqueue` mints its own row id, so the record was never keyed by the message id: that `remove` matched nothing and neither did `forget`, which means every delivered command stayed on disk and was re-sent after each restart. `enqueue` also de-duplicates on the idempotency key and returns the existing row, so a reconfirmation \u2014 the owner's \"yes\" \u2014 was discarded. And `EncryptedCommandQueue`'s own `persist` and `remove` were each two editors with asynchronous `apply()`: three non-atomic writes, not one.\n\n`OutboxRecordStore.upsert` is now the operation, the adapter depends on that interface rather than on the queue, and the whole adapter is executed in the harness against a store that can be killed between operations. The restore reader was also `peekReady`, which drops a `NO_STALE_REPLAY` record once attempted \u2014 exactly the class a restore exists to recover (P1-SESS-007)."
     },
     {
       "schema": "van-implementation-matrix/1",
@@ -2225,10 +2221,10 @@
       "id": "RB-071",
       "name": "session failover telemetry",
       "group": "session",
-      "status": "BUILT_UNWIRED",
+      "status": "WIRED_UNPROVEN",
       "built": true,
-      "wired": false,
-      "reachable": false,
+      "wired": true,
+      "reachable": true,
       "live": false,
       "verified": false,
       "observed": false,
@@ -2245,13 +2241,12 @@
         "backend/tests/test_session_transport_api.py"
       ],
       "external_gates": [
-        "the device half of \u00a720 is never started: `VanApplication` constructs `VanHermesSessionManager` and calls only `setInteractionActive` and `setStandbyConditions`. `start()` has no caller anywhere in the app, so no socket is opened, no outbox is restored, no resume happens, and `submit` is never reached. The owner's commands go out over `VanCommandController` -> `POST /v1/commands`, and events arrive by HTTP polling on the Work screen",
         "a paired owner device posting telemetry; the series are honestly unobserved until one does, and the deepest outbox is the one that has not been reported",
         "the Android build is compiled only in CI; the AGP is unreachable in the audit container"
       ],
       "transport_independent": true,
       "offline_voice_proven": null,
-      "note": "**Corrected at C16.** The device half of the split this row describes cannot emit: `SessionTelemetry` is fed from the session's failover and outbox, and neither runs. The Gateway's failover counter is live and is incremented by the resume route.\n\nSplit by who can measure what, which is the only honest way to split it. The Gateway learns a failover happened when the resume arrives \u2014 after the gap the owner experienced \u2014 so it counts that one happened and whether the route changed, and nothing else. The duration and the outbox depth are the device's: the queue is on the phone and the interruption started before the Gateway heard anything.\n\n`route_changed` is the label that matters. Failing over to another carrier on the road that just broke is the most common way a failover changes nothing, and a counter that could not distinguish it would report recovery for a session that is still down."
+      "note": "**Wired at C16b.** `VanApplication.startVanSession()` calls `start()` when the device is enrolled, so this now runs. `WIRED_UNPROVEN` rather than more: it is compiled by CI and executed by nothing here, and whether it behaves on a real phone and a real network is Gate 14's.\n\n**Corrected at C16.** The device half of the split this row describes cannot emit: `SessionTelemetry` is fed from the session's failover and outbox, and neither runs. The Gateway's failover counter is live and is incremented by the resume route.\n\nSplit by who can measure what, which is the only honest way to split it. The Gateway learns a failover happened when the resume arrives \u2014 after the gap the owner experienced \u2014 so it counts that one happened and whether the route changed, and nothing else. The duration and the outbox depth are the device's: the queue is on the phone and the interruption started before the Gateway heard anything.\n\n`route_changed` is the label that matters. Failing over to another carrier on the road that just broke is the most common way a failover changes nothing, and a counter that could not distinguish it would report recovery for a session that is still down."
     },
     {
       "schema": "van-implementation-matrix/1",

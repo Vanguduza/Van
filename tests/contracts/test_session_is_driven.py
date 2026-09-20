@@ -111,18 +111,24 @@ def test_every_uncalled_entry_point_is_accounted_for():
     assert not stale, f"these no longer exist on the session: {sorted(stale)}"
 
 
-def test_the_owner_facing_surface_is_named_as_unread():
-    """§20.15's owner surface exists and nothing reads it.
+def test_a_stored_command_the_owner_must_confirm_can_be_released():
+    """§20.15 — storing a command that needs the owner's yes is half of the rule.
 
-    `queuedForOwner`, `awaitingReconfirmation` and `undeliveredSinceLastRead` are what
-    make "your work is queued", "I need to ask you again" and "this did not happen" true
-    statements rather than intentions. No screen calls any of them.
+    `DurableOutbox` classifies "read that back to me" and "cancel it" as
+    `REQUIRE_RECONFIRM_ON_RECONNECT`, `flushOutbox` correctly holds one rather than
+    sending it, and `reconfirm(messageId)` is the only thing that releases it. Nothing
+    calls `reconfirm`, so such a command is stored, held, and stuck.
+
+    Written as the rule rather than as the gap, so the day something calls it the test
+    keeps holding the row to the truth instead of needing to be deleted. Until then
+    RB-069 must name it, because a row that claims otherwise is claiming the owner can
+    answer a question nothing asks.
     """
-    called = _called_entry_points()
-    surface = {"queuedForOwner", "awaitingReconfirmation", "undeliveredSinceLastRead"}
-    read = surface & called
+    releasable = "reconfirm" in _called_entry_points()
     row = _rows()["RB-069"]
-    if not read:
-        assert "BUILT_UNWIRED" == row["status"], (
-            "the outbox claims to be wired while nothing can show the owner what is in it"
+    if not releasable:
+        gates = " ".join(row.get("external_gates", []))
+        assert "reconfirm" in gates, (
+            "a command needing the owner's confirmation is stored and cannot be released, "
+            "and RB-069 does not say so"
         )

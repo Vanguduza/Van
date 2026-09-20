@@ -34,9 +34,9 @@ not mean anyone has watched it work on a phone.
 
 | Register | Contents | Checker |
 |---|---|---|
-| `evidence/van-system-audit/findings.json` | 149 findings, all closed: 76 `INTEGRATED_AND_EVIDENCED`, 67 `EXTERNALLY_BLOCKED_REPOSITORY_COMPLETE`, 6 `DELIBERATELY_REMOVED_CANON_CORRECTED` | `tools/ci/maturity_gate.py` — refuses a closure state that claims more than its residual class allows |
+| `evidence/van-system-audit/findings.json` | 150 findings, all closed: 76 `INTEGRATED_AND_EVIDENCED`, 68 `EXTERNALLY_BLOCKED_REPOSITORY_COMPLETE`, 6 `DELIBERATELY_REMOVED_CANON_CORRECTED` | `tools/ci/maturity_gate.py` — refuses a closure state that claims more than its residual class allows |
 | `evidence/van-system-audit/component_ledger.json` | 180 components, all at a terminal state: 113 integrated, 60 externally blocked, 7 deliberately removed | `tools/ci/maturity_gate.py`, `tools/ci/ledger_reconcile.py` — the first refuses a ledger that overstates, the second one that understates |
-| `docs/project-state/REMOTE_BROWSER_IMPLEMENTATION_MATRIX.json` | 122 rows: 81 `WIRED_UNPROVEN`, 21 `NOT_STARTED`, 15 `BUILT_UNWIRED`, 3 `BLOCKED`, 2 `VERIFIED_UNCERTIFIED` | `tools/ci/ledger_reconcile.py` — refuses a row whose booleans contradict its status, and an empty `external_gates` |
+| `docs/project-state/REMOTE_BROWSER_IMPLEMENTATION_MATRIX.json` | 122 rows: 87 `WIRED_UNPROVEN`, 21 `NOT_STARTED`, 9 `BUILT_UNWIRED`, 3 `BLOCKED`, 2 `VERIFIED_UNCERTIFIED` | `tools/ci/ledger_reconcile.py` — refuses a row whose booleans contradict its status, and an empty `external_gates` |
 | `evidence/van-system-audit/red_team_register.json` | §38's 70 scenarios: 61 `PASS`, 9 `BLOCKED_EXTERNAL`, **0 assumed** | `tools/ci/red_team_register.py` — every `PASS` must cite a runnable pytest node id |
 | `evidence/van-system-audit/production_acceptance.json` | §43's 104 requirements: 59 proven, 38 blocked external, 7 owner deployment | `tools/ci/production_acceptance.py` — recomputes the verdict from the rows |
 | `docs/project-state/AUTHORITY_MAP.yaml` | every invariant, owned once | `tools/ci/authority_map.py` |
@@ -61,7 +61,7 @@ Every one needs something no commit can supply, and each row says which:
   RB-078 bundled TTS) — owner decision 2, with minSdk raised to 31 so the platform
   recogniser is always present, which is the other half of that decision.
 
-## The 15 `BUILT_UNWIRED` rows, and why that is the honest status
+## The 9 `BUILT_UNWIRED` rows, and why that is the honest status
 
 RB-010 (stream-host provisioning), RB-116 (Trading Core → Stream Host mTLS), RB-118
 (profile storage) are built and have nothing to be wired to. RB-072, RB-074, RB-076,
@@ -74,13 +74,18 @@ second authenticated socket it governs is not. `VanHermesSessionManager` holds o
 `WebSocket`, so a `StandbyDecision` of `WARM_STANDBY` says what the phone can afford and
 not that a spare path is open. Three tests now fail if the source implies otherwise.
 
-Seven more were moved here at C16, and they share one cause: **the §20 device session is
+Seven were moved here at C16a and six went back at C16b, once the cause was repaired
+rather than only recorded. It was: **the §20 device session is
 constructed and never started.** `VanApplication` builds `VanHermesSessionManager`, calls
 `setInteractionActive` and `setStandbyConditions`, and stops. `start()` has no caller
 anywhere in the app — four references to the field in the whole source tree. So no socket
 opens, nothing resumes, nothing is restored, and `submit` is never reached. RB-035,
 RB-061, RB-062, RB-064, RB-068, RB-069 and RB-071 all described things downstream of that
 call, and all seven read `WIRED_UNPROVEN`.
+
+RB-062 is the one that stayed. §20.1 lists a `session/transport/` directory that was never
+created, so `DEFAULT_PATHS` declares a `fallback-http2` path that nothing can open and the
+supervisor can name a failover target the manager cannot reach.
 
 Two checkpoints made the session outbox durable and then atomic without either noticing
 that nothing puts anything in it. `tools/audit/kotlin_reachability.py` did not catch it

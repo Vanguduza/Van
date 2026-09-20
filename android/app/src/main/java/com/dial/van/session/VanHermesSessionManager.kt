@@ -59,6 +59,19 @@ class VanHermesSessionManager(
      * change a single decision below. Nothing in this class reads it back.
      */
     private val telemetry: SessionTelemetry? = null,
+    /**
+     * §20.15 — what to do when a stored command will not be sent after all.
+     *
+     * A callback rather than a list the caller has to remember to drain. `expired` and
+     * `abandoned` accumulated correctly for two checkpoints and nothing read either, so
+     * "the owner is told" was a property of a method nobody called. Push makes the
+     * absence of a reader visible at construction instead.
+     *
+     * Called with `(messageId, ownerReadableLine)`, already in the owner's words, because
+     * three callers inventing their own phrasing for "this did not happen" is how a
+     * product stops sounding like one thing.
+     */
+    private val onUndelivered: (List<Pair<String, String>>) -> Unit = {},
 ) {
 
     data class State(
@@ -157,8 +170,15 @@ class VanHermesSessionManager(
         actionClass: String,
         requiresLiveOwnerContext: Boolean = false,
     ): SubmissionOutcome {
-        val sessionId = _state.value.vanSessionId
-            ?: return SubmissionOutcome.Refused("session_not_established")
+        // §20.14 — storable with no session, because that is what offline means.
+        //
+        // This used to refuse outright when `vanSessionId` was null, which made the outbox
+        // useless in the one case it exists for: opening a session is an HTTP call, so a
+        // phone with no network has no session id to address an envelope with. The command
+        // is stored addressed to nothing and `flushOutbox` rebinds it to the session that
+        // exists by then. A live socket is still required to *send*, which is the branch
+        // below; only storage tolerates the placeholder.
+        val sessionId = _state.value.vanSessionId ?: SessionEnvelope.UNBOUND_SESSION_ID
         val messageId = "msg_${UUID.randomUUID()}"
         // §20.12 — lifted out of the payload and onto the envelope.
         //
@@ -531,7 +551,9 @@ class VanHermesSessionManager(
                 // next `start()` restored them and flushed them into the new session —
                 // the decision made here reversed by a restart, which is the failure mode
                 // that arrived with durability and was invisible without it.
-                abandoned += DurableOutbox.abandonAll(outbox.map { it.entry }, store)
+                val dropped = DurableOutbox.abandonAll(outbox.map { it.entry }, store)
+                abandoned += dropped
+                tell(dropped, System.currentTimeMillis())
                 outbox.clear()
                 inFlight.clear()
                 publishOutboxDepth()
@@ -667,6 +689,12 @@ class VanHermesSessionManager(
 
     private fun flushOutbox() {
         val live = socket ?: return
+        // A socket implies a session, because the socket is opened against one. Guarded
+        // anyway and guarded *here*, so the rebind below cannot be the thing that decides
+        // to stop mid-flush — an early return inside the loop would append what was held
+        // after what had not been reached yet, and the owner's instructions would go out
+        // in an order they did not give them in.
+        val liveSessionId = _state.value.vanSessionId ?: return
         val epoch = _state.value.pathEpoch
         val now = System.currentTimeMillis()
         val held = ArrayDeque<QueuedMessage>()
@@ -683,6 +711,7 @@ class VanHermesSessionManager(
                     // not happen rather than asked about something they have forgotten.
                     expired += queued.entry
                     store?.forget(queued.entry.messageId)
+                    tell(listOf(queued.entry), now)
                 }
                 is FlushVerdict.NeedsReconfirmation, is FlushVerdict.Refused -> {
                     // Kept in place. Something the owner has to be asked about is not
@@ -691,7 +720,19 @@ class VanHermesSessionManager(
                     held.addLast(queued)
                 }
                 is FlushVerdict.Send -> {
-                    val readdressed = SessionEnvelope.readdress(queued.envelope, epoch)
+                    // Addressed to this session first, then to this path. A command stored
+                    // while offline carries the unbound placeholder, and sending that would
+                    // be refused by the Gateway as an unknown session — the owner's command
+                    // lost at the moment the network came back, which is the worst possible
+                    // time for it.
+                    val bound = if (SessionEnvelope.isUnbound(queued.envelope)) {
+                        SessionEnvelope.rebind(
+                            queued.envelope, liveSessionId, _state.value.sessionEpoch,
+                        )
+                    } else {
+                        queued.envelope
+                    }
+                    val readdressed = SessionEnvelope.readdress(bound, epoch)
                     if (live.send(readdressed.toString())) {
                         inFlight[readdressed.getString("message_id")] = readdressed
                         // After the write, never before. Forgetting first would lose the
@@ -735,6 +776,20 @@ class VanHermesSessionManager(
         val taken = expired.toList()
         expired.clear()
         return taken
+    }
+
+    /**
+     * Say it, in the owner's words, once per command.
+     *
+     * `ownerReadableState` is §20.15's single vocabulary for this, chosen there rather
+     * than here so that the sentence an owner reads does not depend on which of the two
+     * reasons produced it.
+     */
+    private fun tell(entries: List<OutboxEntry>, nowMs: Long) {
+        if (entries.isEmpty()) return
+        onUndelivered(
+            entries.map { it.messageId to DurableOutbox.ownerReadableState(it, nowMs) },
+        )
     }
 
     /** Everything that will not be sent, whatever the reason, taken once. */

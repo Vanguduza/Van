@@ -142,6 +142,9 @@ sourceSets {
             // claim about a file nothing runs.
             "com/dial/van/session/EncryptedSessionOutboxStore.kt",
             "com/dial/van/session/SessionReconciliation.kt",
+            // The decision a catch block used to make silently: whether a command
+            // whose dispatch failed may be held, and what the owner is told.
+            "com/dial/van/session/OfflineSubmission.kt",
             // The canonical queue's record. Android owns the encryption and the disk;
             // this file is the shape those bytes take, and §20.14's metadata rides on it.
             "com/dial/van/queue/CommandQueueModels.kt",
