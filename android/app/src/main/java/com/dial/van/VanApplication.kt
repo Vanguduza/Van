@@ -14,6 +14,7 @@ import com.dial.van.gateway.QueueReplayer
 import com.dial.van.connectivity.ConnectivityRegistry
 import com.dial.van.gateway.VanGatewayClient
 import com.dial.van.session.VanHermesSessionManager
+import com.dial.van.voice.VoiceEdge
 import com.dial.van.notification.NotificationPolicyStore
 import com.dial.van.queue.EncryptedCommandQueue
 import com.dial.van.telemetry.DeviceTelemetryReporter
@@ -107,6 +108,15 @@ class VanApplication : Application(), VoiceInputCallback, TtsOutputCallback {
      * the owner rotates the phone.
      */
     lateinit var vanSession: VanHermesSessionManager
+
+    /**
+     * Rev 1.5 §21 — the local voice edge: what VAN can hear and say with no network.
+     *
+     * Application-scoped because the answer to "can I hear you" must be the same on every
+     * screen, and because the asset classification is read once at start rather than each
+     * time something asks.
+     */
+    lateinit var voiceEdge: VoiceEdge
         private set
 
     override fun onCreate() {
@@ -139,6 +149,8 @@ class VanApplication : Application(), VoiceInputCallback, TtsOutputCallback {
         telemetry = DeviceTelemetryReporter(this, gatewayClient, appScope)
         connectivity = ConnectivityRegistry(this)
         vanSession = VanHermesSessionManager(gatewayClient, appScope)
+        voiceEdge = VoiceEdge(this, ttsOutput, appScope)
+        voiceEdge.loadAssets()
         wakeModel = WakeModelLoader(this)
         voiceArbiter = VoiceAudioArbiter(this)
         wakeCoordinator = WakeCoordinator(

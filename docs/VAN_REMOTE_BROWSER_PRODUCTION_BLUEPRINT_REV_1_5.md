@@ -449,14 +449,21 @@ three of the four were green in every test that existed at the time.
 | 0F.6d | The device's `SessionEnvelope` wrote `direction: "DEVICE_TO_GATEWAY"`, which reads better than the gateway's `UPSTREAM` and is rejected by the envelope validator. Every message would have failed at the door. | A contract test comparing the device's constants with the gateway's `Direction` enum, written because 0F.6c had just shown that field *names* matching is not the same as field *values* matching. | `session/SessionEnvelope.kt`; the check is `test_the_device_uses_the_gateways_spelling_of_direction`. |
 | 0F.6e | The proof middleware read the request body and then hand-rolled a replay by reassigning `request._receive`, with a comment asserting that without it every proved route would parse an empty body. The comment was wrong. Starlette's `BaseHTTPMiddleware` already wraps the request in a `_CachedRequest` whose documented behaviour is exactly that, so the replay was a second mechanism for one job and the one I wrote was the one nothing exercised. | A mutation deleting the replay line: the suite stayed green. | The replay was removed rather than the mutation weakened; the assertion that a proved POST returns the field it sent is kept as the regression test for a Starlette that stops caching. |
 | 0F.6f | A refusal test asserted `status_code in {401, 403}`, which passed with the ownership check deleted — the proof names its own device, so the request was refused anyway, as `device_not_bound`. Two different facts collapsed into one loose assertion. | A mutation removing `if binding.device_id != device_id`: it survived. | The test now pins `403 device_not_owner_device`. Both refusals are correct and only one of them is true. |
+| 0F.6g | The Android speech queue had two guards covering one case: a duplicate `segmentId` and an index at or below what the owner had heard. Every test exercised both at once, so a mutation of the index check survived. It is not redundant — it is the only thing that catches a *renumbered* stream, where the Gateway re-segments an answer and produces a new id for text already spoken — but nothing had separated them. Eighth occurrence of overlapping guards in this programme. | A mutation deleting the index check: green. | An isolating test offering a new id at a spoken index, plus a cross-stream guard, because two answers in one queue were comparing their indexes as if they were one sequence. |
+| 0F.6h | `SpeechStreamService.open` is idempotent on `response_id`, and the test for it asserted the stream id and segment count — both of which are derived from the response id and therefore identical with the guard removed. The property it actually protects is the cursor: a second `open` forgets what the device reported it heard, so the resume replays audio the owner already heard. | A mutation removing the idempotency check: green. | The test now reports a cursor, re-opens, and asserts the cursor survived. |
+| 0F.6i | Two more of the same shape in one checkpoint. An abbreviation test used a sentence whose halves were short enough for the fragment packing to rejoin them, so it passed with the abbreviation handling deleted; and `_split_long` had an early return for a sentence with no clause boundary that the loop below already handled identically. | Mutations of both: green. | The test uses halves long enough to survive packing; the dead branch was removed rather than the mutation weakened. |
 
 Two lessons generalise. The first is why the vectors file exists rather than a
 source-to-source comparison: **two implementations that are each correctly tested against
 themselves prove nothing about each other.** Three of the first four are that failure.
 
-The second is why 0F.6e and 0F.6f are here at all: **a suite that stays green when a guard
-is deleted is describing the guard, not testing it.** Both were found by mutation, after the
-tests for them had been written and had passed, and neither was visible any other way.
+The second is why 0F.6e through 0F.6i are here at all: **a suite that stays green when a
+guard is deleted is describing the guard, not testing it.** All five were found by mutation,
+after the tests for them had been written and had passed, and none was visible any other
+way. Three of them are the same shape — two guards covering one case, so neither is
+falsifiable on its own — which this programme has now hit eight times. The fix is never to
+weaken the mutation: it is an isolating test, or the discovery that one of the two guards
+was dead and should go.
 
 ## 0F.5 Owner decisions taken by delegation
 

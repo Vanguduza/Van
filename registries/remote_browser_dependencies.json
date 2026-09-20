@@ -105,15 +105,43 @@
     }
   },
   "offline_voice": {
-    "$note": "§32.5. Admitted as a target by the offline-voice supersession decision; no model or native library is in this repository, so wake, local ASR and local TTS remain EXTERNALLY_BLOCKED until a signed asset pack exists and WakeModelAsset reports it READY.",
+    "$note": "Rev 1.5 §§21.3, 32.5. Nothing in this section is installed. VAN-ADOPT-OFFLINE-VOICE-RUNTIME-001 admits sherpa-onnx as the runtime and is explicit that the repository builds the loader, the manifest, the fail-closed readiness classification and the routing, and cannot author a model. So these entries record what would have to be pinned, and stay EXTERNAL until an artefact exists to measure. §32.8 forbids moving a ledger row on the strength of an adapter existing.",
     "sherpa_onnx": {
-      "version": "UNRESOLVED_AT_ADOPTION",
+      "coordinate": "UNRESOLVED_AT_ADOPTION",
       "licence": "Apache-2.0",
       "licence_class": "PERMISSIVE",
       "upstream_repository": "https://github.com/k2-fsa/sherpa-onnx",
-      "pin_status": "EXTERNAL_UNADMITTED",
+      "pin_status": "EXTERNAL_UNPROVISIONED",
       "adoption_decision_ref": "docs/decisions/VAN-ADOPT-OFFLINE-VOICE-RUNTIME-001.yaml",
-      "digest_required_before": "any change to WakeWordEngine, WakePhraseVerifier, LocalSecondPassAsr or the TTS backend maturity state"
+      "must_pin_before_use": [
+        "sherpa-onnx version",
+        "Android native binaries and their ABIs",
+        "SHA-256 of each artefact, measured rather than quoted",
+        "upstream source revision",
+        "ASR model ids and hashes",
+        "VAD model id and hash",
+        "TTS model id and hash",
+        "vocabulary/lexicon revision"
+      ],
+      "why_not_pinned_here": "§21.3 forbids 'latest' in production, and a digest can only be recorded by downloading the artefact. The owner has not supplied a model bundle, and a pinned native library with no model is a dependency that cannot do anything."
+    },
+    "voice_models": {
+      "wake": {
+        "pin_status": "EXTERNAL_UNPROVISIONED"
+      },
+      "vad": {
+        "pin_status": "EXTERNAL_UNPROVISIONED"
+      },
+      "asr": {
+        "pin_status": "EXTERNAL_UNPROVISIONED"
+      },
+      "tts": {
+        "pin_status": "EXTERNAL_UNPROVISIONED"
+      },
+      "critical_phrases": {
+        "pin_status": "EXTERNAL_UNPROVISIONED"
+      },
+      "$note": "§21.19 requires the TTS model to be chosen by measurement on the owner's S24 — size, cold init, first-audio latency, real-time factor, peak memory, thermal effect, and pronunciation on VAN's own vocabulary — not by reputation. None of those measurements exists, so no model is named here."
     }
   }
 }

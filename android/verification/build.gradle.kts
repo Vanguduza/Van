@@ -90,6 +90,19 @@ sourceSets {
             "com/dial/van/voice/SpeakerVerification.kt",
             "com/dial/van/voice/VoiceRecognitionModels.kt",
             "com/dial/van/voice/WakeModelAsset.kt",
+            // Rev 1.5 §21 — the offline voice edge's decisions. Every case that matters
+            // here is one that cannot be produced on demand: a bundle with a TTS voice and
+            // no ASR model, an answer that arrives at 3am, a reconnect halfway through a
+            // sentence, VAN hearing its own voice and interrupting itself.
+            "com/dial/van/voice/VoiceAssetManifest.kt",
+            "com/dial/van/voice/VoiceTurn.kt",
+            "com/dial/van/voice/SpeechQueue.kt",
+            "com/dial/van/voice/LocalTtsRouter.kt",
+            "com/dial/van/voice/VoiceAudioPolicy.kt",
+            // Written before this checkpoint and never executed: it is pure, it decides
+            // what VAN believes the owner said, and nothing ran it. That combination is
+            // the shape this programme keeps finding.
+            "com/dial/van/voice/VoiceSecondPass.kt",
             // Rev 1.5 — the Remote Browser's pure half. Every interesting case in these
             // files is a failure that cannot be produced on demand against a real network
             // or a real phone: a reordered gesture, a manifest replayed at a device that

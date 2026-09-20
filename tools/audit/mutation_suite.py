@@ -518,6 +518,44 @@ ALL = [
     "        if False:",
     "C27 the gateway republishes an older manifest version"),
  ]),
+ # --- checkpoint 30: the offline voice edge -----------------------------------
+ (["tests/test_voice_speech_stream.py"], [
+   ("van_gateway/voice/speech_stream.py",
+    "        return [s for s in stream.segments if s.segment_index > stream.last_spoken_segment]",
+    "        return [s for s in stream.segments if s.segment_index > stream.last_received_segment]",
+    "C30 resume from what arrived, putting a hole in the middle of the answer"),
+   ("van_gateway/voice/speech_stream.py",
+    "        stream.last_spoken_segment = max(stream.last_spoken_segment, last_spoken_segment)",
+    "        stream.last_spoken_segment = last_spoken_segment",
+    "C30 a device that restarted its queue makes VAN repeat a sentence"),
+   ("van_gateway/voice/speech_stream.py",
+    "        existing = self._by_response.get(response_id)\n        if existing is not None:\n            return self._streams[existing]",
+    "        existing = None",
+    "C30 two streams for one answer, so de-duplication by segment id stops working"),
+   ("van_gateway/voice/speech_stream.py",
+    "            if s.device_id == device_id and not s.complete and not s.interrupted",
+    "            if s.device_id == device_id",
+    "C30 a barged-in answer is resumed, finishing a sentence the owner cut off"),
+   ("van_gateway/voice/speech_stream.py",
+    "        return self.final_index >= 0 and self.last_spoken_segment >= self.final_index",
+    "        return self.final_index >= 0 and self.last_received_segment >= self.final_index",
+    "C30 delivered counts as heard"),
+   ("van_gateway/voice/segmentation.py",
+    "        if merged and merged[-1].split()[-1].lower() in _ABBREVIATIONS:",
+    "        if False:",
+    "C30 a pause lands in the middle of 'approx. 40 percent'"),
+   # The mutation that used to sit here deleted an early return for a sentence with no
+   # clause boundary and changed nothing: the packing loop below already emits exactly
+   # that. The dead branch was removed rather than the mutation weakened.
+   ("van_gateway/voice/segmentation.py",
+    "        if current and len(candidate) > MAX_CHARS:",
+    "        if False:",
+    "C30 a long sentence is never actually split"),
+   ("van_gateway/voice/segmentation.py",
+    "                final=offset == len(pieces) - 1,",
+    "                final=True,",
+    "C30 every segment claims to be the end of the answer"),
+ ]),
  # --- checkpoint 28: the device proof is actually required ---------------------
  #
  # Every one of these leaves the unit tests in test_owner_device_binding.py green.
@@ -890,6 +928,72 @@ KOTLIN = [
   "C14 a stretched backoff exceeds the ceiling"),
  (EVT_KT, "        if (!allowance.running) return null", "        if (false) return null",
   "C14 SURVIVAL keeps polling"),
+ # Rev 1.5 §21 — the offline voice edge. Each of these is a failure nobody can stage on a
+ # phone: an answer at 3am, a reconnect mid-sentence, VAN interrupting itself.
+ (f"{APP_KT}/voice/SpeechQueue.kt",
+  "        if (segment.segmentIndex <= lastSpokenIndex) return false",
+  "        if (false) return false",
+  "C30 a segment the owner already heard is re-queued and spoken again"),
+ (f"{APP_KT}/voice/SpeechQueue.kt",
+  "        if (segments.containsKey(segment.segmentId)) return false",
+  "        if (false) return false",
+  "C30 a duplicate after a failover is spoken twice"),
+ (f"{APP_KT}/voice/SpeechQueue.kt",
+  "    val resumeFromSegment: Int get() = lastSpokenSegment + 1",
+  "    val resumeFromSegment: Int get() = lastReceivedSegment + 1",
+  "C30 the device asks to resume past audio it never played"),
+ (f"{APP_KT}/voice/SpeechQueue.kt",
+  "        segments.values.any { it.final && it.state == SpeechSegmentState.SPOKEN }",
+  "        segments.values.any { it.final }",
+  "C30 an answer counts as finished because its last segment arrived"),
+ (f"{APP_KT}/voice/VoiceTurn.kt",
+  '        if (APPROVAL_VERBS.any { text.startsWith(it) || text.contains(" $it ") }) {',
+  "        if (false) {",
+  "C30 an irreversible request is classified as ordinary work and queued"),
+ (f"{APP_KT}/voice/VoiceTurn.kt",
+  '        if (actionClass == "A4" || actionClass == "A5") return CommandRouting.OWNER_APPROVAL_REQUIRED',
+  "        if (false) return CommandRouting.OWNER_APPROVAL_REQUIRED",
+  "C30 the phrasing outranks what the Gateway knows the command does"),
+ (f"{APP_KT}/voice/VoiceTurn.kt",
+  "        return CommandRouting.REMOTE_OPTIONAL\n    }",
+  "        return CommandRouting.LOCAL_EXECUTABLE\n    }",
+  "C30 an unrecognised request is assumed to be answerable on the phone"),
+ (f"{APP_KT}/voice/VoiceTurn.kt",
+  "        routing == CommandRouting.REMOTE_REQUIRED || routing == CommandRouting.REMOTE_OPTIONAL",
+  "        true",
+  "C30 approval-bearing work is queued and performed an hour later"),
+ (f"{APP_KT}/voice/LocalTtsRouter.kt",
+  "        if (android?.installed == true && !android.offlineDataVerified) {",
+  "        if (false) {",
+  "C30 an engine whose offline data vanished fails silently instead of saying so"),
+ (f"{APP_KT}/voice/VoiceAudioPolicy.kt",
+  "    ): Boolean = vadSaysSpeech && rms >= thresholdRms && !withinPlaybackEchoWindow",
+  "    ): Boolean = vadSaysSpeech && rms >= thresholdRms",
+  "C30 VAN hears its own speaker and interrupts itself"),
+ (f"{APP_KT}/voice/VoiceAudioPolicy.kt",
+  "        callInProgress -> DuckingAction.YIELD",
+  "        callInProgress -> DuckingAction.DUCK_OTHER_AUDIO",
+  "C30 VAN ducks a phone call to read out a search result"),
+ (f"{APP_KT}/voice/VoiceAudioPolicy.kt",
+  "        browserAudioPlaying -> DuckingAction.PAUSE_OTHER_AUDIO",
+  "        browserAudioPlaying -> DuckingAction.DUCK_OTHER_AUDIO",
+  "C30 VAN speaks under a video voiceover and is unintelligible"),
+ (f"{APP_KT}/voice/VoiceAudioPolicy.kt",
+  "    fun mayPersist(diagnosticEvidenceModeEnabled: Boolean): Boolean = diagnosticEvidenceModeEnabled",
+  "    fun mayPersist(diagnosticEvidenceModeEnabled: Boolean): Boolean = true",
+  "C30 a rolling recording of the owner's room is written to disk"),
+ (f"{APP_KT}/voice/VoiceAssetManifest.kt",
+  "            if (!sha.equals(entry.sha256, ignoreCase = true)) {",
+  "            if (false) {",
+  "C30 a substituted model decides what VAN hears"),
+ (f"{APP_KT}/voice/SpeechQueue.kt",
+  "        if (ownerStillInVoiceContext && elapsed <= SAME_CONTEXT_WINDOW_MS) {",
+  "        if (ownerStillInVoiceContext) {",
+  "C30 an answer from hours ago speaks the moment the owner opens VAN"),
+ (f"{APP_KT}/voice/SpeechQueue.kt",
+  "        if (screenInteractive) return DelayedAnswerAction.SHOW_WITHOUT_SPEAKING",
+  "        if (screenInteractive) return DelayedAnswerAction.SPEAK_NOW",
+  "C30 VAN starts talking because the owner happens to be holding the phone"),
 ]
 
 ROOT = pathlib.Path(__file__).resolve().parents[2]
@@ -923,10 +1027,15 @@ def main(selector: str | None = None) -> int:
         print(f"\n### {tests}", flush=True)
         survivors += run(mutations, tests, **options)
 
-    if not selector or any(selector in mutation[-1] for mutation in KOTLIN):
+    # Filtered, not merely gated. A first version checked whether *any* Kotlin mutation
+    # matched the selector and then ran the whole list, so asking for one checkpoint ran
+    # every Kotlin mutation in the suite — minutes of Gradle for a check that should take
+    # seconds, and a working tree mutated far outside what was being examined.
+    kotlin = [m for m in KOTLIN if not selector or selector in m[-1]]
+    if kotlin:
         print("\n### android/verification (Gradle)", flush=True)
         survivors += run(
-            KOTLIN, [], root=ROOT, cwd=ROOT / "android" / "verification",
+            kotlin, [], root=ROOT, cwd=ROOT / "android" / "verification",
             command=["gradle", "test", "--console=plain", "--offline", "--rerun-tasks"],
         )
     print("\n================ SURVIVORS ================")

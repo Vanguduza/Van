@@ -175,6 +175,10 @@ def build_session_router(
             ),
             command_states=snapshot.get("command_states"),
             authoritative_event_cursor=snapshot.get("authoritative_event_cursor"),
+            # §21.16 — the spoken cursor. Without this the resume tells the client where
+            # its *commands* got to and says nothing about where its answer got to, so a
+            # reconnect mid-sentence has nothing to resume speech from.
+            response_state=snapshot.get("response_state"),
         )
         if not result.accepted:
             # A refused resume is a 409 rather than a 401: the credential was fine, the

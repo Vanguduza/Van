@@ -88,6 +88,7 @@ from van_gateway.browser.stream_grants import (
 )
 from van_gateway.browser.worker import AdapterBackedWorker
 from van_gateway.session.api import build_session_router, is_session_owner_route
+from van_gateway.voice.speech_stream import SpeechStreamService
 from van_gateway.session.router import SessionDelegates, SessionRouter
 from van_gateway.session.service import VanHermesSessionService
 from van_gateway.auth.device_binding import DeviceBindingError, OwnerDeviceBindingService
@@ -792,6 +793,12 @@ def create_app() -> FastAPI:
         van_sessions, SessionDelegates(submit_command=_submit_command_through_session)
     )
 
+    # Rev 1.5 §21.16 — the spoken half of an answer, so a reconnect does not start it
+    # again from the beginning. Held in memory deliberately: a restart loses the text of an
+    # answer in flight, while the command that produced it and its result are both durable.
+    speech_streams = SpeechStreamService()
+    app.state.speech_streams = speech_streams
+
     async def _resume_snapshot(*, device_id: str, pending_command_ids: list[str]) -> dict:
         """§20.11 — what the Gateway authoritatively knows about what the client lost."""
         states: dict[str, str] = {}
@@ -804,6 +811,9 @@ def create_app() -> FastAPI:
         return {
             "command_states": states,
             "authoritative_event_cursor": int(cursor_row["last_seq"]) if cursor_row else 0,
+            # §21.16 — where the owner actually got to in the spoken answer. Absent when
+            # there is nothing in flight, which is the ordinary case.
+            "response_state": speech_streams.response_state(device_id),
         }
 
     app.include_router(build_session_router(

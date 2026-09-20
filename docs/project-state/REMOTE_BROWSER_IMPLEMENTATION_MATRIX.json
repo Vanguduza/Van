@@ -1068,10 +1068,10 @@
       "id": "RB-036",
       "name": "voice BrowserContextRef",
       "group": "voice",
-      "status": "NOT_STARTED",
-      "built": false,
-      "wired": false,
-      "reachable": false,
+      "status": "WIRED_UNPROVEN",
+      "built": true,
+      "wired": true,
+      "reachable": true,
       "live": false,
       "verified": false,
       "observed": false,
@@ -1079,14 +1079,19 @@
       "certified": false,
       "component_refs": [],
       "ledger_expectation": "NONE",
-      "producer": null,
-      "consumer": null,
+      "producer": "VoiceTurn identity and OfflineCommandClassifier",
+      "consumer": "the session manager's submit path",
       "authority": "docs/VAN_REMOTE_BROWSER_PRODUCTION_BLUEPRINT_REV_1_5.md \u00a721",
       "evidence_refs": [],
-      "tests": [],
-      "external_gates": [],
+      "tests": [
+        "android/verification/src/test/kotlin/com/dial/van/voice/OfflineVoiceTest.kt"
+      ],
+      "external_gates": [
+        "the Android build is compiled only in CI; the AGP is unreachable in the audit container"
+      ],
       "transport_independent": false,
-      "offline_voice_proven": false
+      "offline_voice_proven": false,
+      "note": "\u00a7\u00a721.11, 21.12. A failover keeps the same turn id and command id \u2014 minting new ones is how one spoken instruction becomes two executions the owner never sees coming. The classifier is deterministic routing and never answers anything; its one rule that must not be wrong is that irreversible work is never classified as ordinary and queued, because a queue flushing an hour later would perform it. The Gateway's action class outranks the phrasing, since it knows what the command does and a phrase match is a guess about that."
     },
     {
       "schema": "van-implementation-matrix/1",
@@ -1094,10 +1099,10 @@
       "id": "RB-037",
       "name": "local TTS result integration",
       "group": "voice",
-      "status": "NOT_STARTED",
-      "built": false,
-      "wired": false,
-      "reachable": false,
+      "status": "WIRED_UNPROVEN",
+      "built": true,
+      "wired": true,
+      "reachable": true,
       "live": false,
       "verified": false,
       "observed": false,
@@ -1105,14 +1110,19 @@
       "certified": false,
       "component_refs": [],
       "ledger_expectation": "NONE",
-      "producer": null,
-      "consumer": null,
+      "producer": "SpeechQueue state machine",
+      "consumer": "TtsOutputManager, through the router",
       "authority": "docs/VAN_REMOTE_BROWSER_PRODUCTION_BLUEPRINT_REV_1_5.md \u00a721",
       "evidence_refs": [],
-      "tests": [],
-      "external_gates": [],
+      "tests": [
+        "android/verification/src/test/kotlin/com/dial/van/voice/OfflineVoiceTest.kt"
+      ],
+      "external_gates": [
+        "the Android build is compiled only in CI; the AGP is unreachable in the audit container"
+      ],
       "transport_independent": false,
-      "offline_voice_proven": false
+      "offline_voice_proven": false,
+      "note": "\u00a721.15's seven states, with the distinction \u00a721.26 insists on: RESPONSE_RECEIVED is not proof the owner heard anything, and only TTS_COMPLETED means they heard the whole answer. A barge-in is explicitly not a delivered answer."
     },
     {
       "schema": "van-implementation-matrix/1",
@@ -1120,10 +1130,10 @@
       "id": "RB-038",
       "name": "barge-in",
       "group": "voice",
-      "status": "NOT_STARTED",
-      "built": false,
-      "wired": false,
-      "reachable": false,
+      "status": "WIRED_UNPROVEN",
+      "built": true,
+      "wired": true,
+      "reachable": true,
       "live": false,
       "verified": false,
       "observed": false,
@@ -1131,14 +1141,20 @@
       "certified": false,
       "component_refs": [],
       "ledger_expectation": "NONE",
-      "producer": null,
-      "consumer": null,
+      "producer": "BargeInPolicy.sequence and SpeechQueue.bargeIn",
+      "consumer": "the voice state machine",
       "authority": "docs/VAN_REMOTE_BROWSER_PRODUCTION_BLUEPRINT_REV_1_5.md \u00a721",
       "evidence_refs": [],
-      "tests": [],
-      "external_gates": [],
+      "tests": [
+        "android/verification/src/test/kotlin/com/dial/van/voice/OfflineVoiceTest.kt",
+        "android/verification/src/test/kotlin/com/dial/van/voice/VoiceAudioTest.kt"
+      ],
+      "external_gates": [
+        "the Android build is compiled only in CI; the AGP is unreachable in the audit container"
+      ],
       "transport_independent": false,
-      "offline_voice_proven": false
+      "offline_voice_proven": false,
+      "note": "Interrupted segments are marked rather than deleted: 'VAN was cut off' and 'VAN had nothing to say' are different facts and the turn's record needs both."
     },
     {
       "schema": "van-implementation-matrix/1",
@@ -2074,8 +2090,8 @@
       "id": "RB-072",
       "name": "offline voice asset manifest",
       "group": "voice",
-      "status": "NOT_STARTED",
-      "built": false,
+      "status": "BUILT_UNWIRED",
+      "built": true,
       "wired": false,
       "reachable": false,
       "live": false,
@@ -2085,14 +2101,20 @@
       "certified": false,
       "component_refs": [],
       "ledger_expectation": "NONE",
-      "producer": null,
-      "consumer": null,
+      "producer": "VoiceAssetManifest",
+      "consumer": "the owner surface's per-capability readiness",
       "authority": "docs/VAN_REMOTE_BROWSER_PRODUCTION_BLUEPRINT_REV_1_5.md \u00a732.5",
       "evidence_refs": [],
-      "tests": [],
-      "external_gates": [],
+      "tests": [
+        "android/verification/src/test/kotlin/com/dial/van/voice/OfflineVoiceTest.kt"
+      ],
+      "external_gates": [
+        "a signed voice asset pack the owner supplies; no model exists (RB-073/RB-078)",
+        "the Android build is compiled only in CI; the AGP is unreachable in the audit container"
+      ],
       "transport_independent": false,
-      "offline_voice_proven": false
+      "offline_voice_proven": false,
+      "note": "\u00a721.4's manifest, with the property that matters: the five capabilities fail independently. A bundle with a working voice and no ASR model is a VAN that can speak and cannot hear, and 'voice is unavailable' is the wrong sentence for it. Every unavailable state names its consequence before its cause \u2014 a first version said only 'part of my voice is missing from this install', which tells someone whose VAN has stopped understanding them that something is broken and leaves them to work out what. Unwired because no bundle exists: today every capability reports NOT_DECLARED, which is the honest state and reads as 'not installed' rather than as an error."
     },
     {
       "schema": "van-implementation-matrix/1",
@@ -2116,9 +2138,13 @@
       "authority": "docs/VAN_REMOTE_BROWSER_PRODUCTION_BLUEPRINT_REV_1_5.md \u00a732.5",
       "evidence_refs": [],
       "tests": [],
-      "external_gates": [],
+      "external_gates": [
+        "a signed voice asset pack the owner supplies; no model exists (RB-073/RB-078)",
+        "an owner S24 running it (RB-085)"
+      ],
       "transport_independent": false,
-      "offline_voice_proven": false
+      "offline_voice_proven": false,
+      "note": "Blocked on an artefact this repository cannot author: sherpa-onnx native library. VAN-ADOPT-OFFLINE-VOICE-RUNTIME-001 admits the runtime and says so directly \u2014 the repository builds the loader, the manifest, the fail-closed classification and the routing, and all four now exist. The registry records what must be pinned before use and pins nothing, because a digest can only be recorded by measuring an artefact and there is none."
     },
     {
       "schema": "van-implementation-matrix/1",
@@ -2126,8 +2152,8 @@
       "id": "RB-074",
       "name": "local VAD",
       "group": "voice",
-      "status": "NOT_STARTED",
-      "built": false,
+      "status": "BUILT_UNWIRED",
+      "built": true,
       "wired": false,
       "reachable": false,
       "live": false,
@@ -2137,14 +2163,20 @@
       "certified": false,
       "component_refs": [],
       "ledger_expectation": "NONE",
-      "producer": null,
-      "consumer": null,
+      "producer": "PreRollPolicy and the VAD contribution budget",
+      "consumer": "VoiceAudioArbiter's consumers",
       "authority": "docs/VAN_REMOTE_BROWSER_PRODUCTION_BLUEPRINT_REV_1_5.md \u00a721",
       "evidence_refs": [],
-      "tests": [],
-      "external_gates": [],
+      "tests": [
+        "android/verification/src/test/kotlin/com/dial/van/voice/VoiceAudioTest.kt"
+      ],
+      "external_gates": [
+        "a signed voice asset pack the owner supplies; no model exists (RB-073/RB-078)",
+        "the Android build is compiled only in CI; the AGP is unreachable in the audit container"
+      ],
       "transport_independent": false,
-      "offline_voice_proven": false
+      "offline_voice_proven": false,
+      "note": "The pre-roll is sized and bounded: without it the wake detector fires, the turn opens, and the first syllable after the wake word is already gone. It is memory-bounded and never written to disk outside an explicit diagnostic mode, because it is a rolling recording of whatever is happening near the phone. The VAD engine itself is a model nobody has supplied."
     },
     {
       "schema": "van-implementation-matrix/1",
@@ -2168,9 +2200,13 @@
       "authority": "docs/VAN_REMOTE_BROWSER_PRODUCTION_BLUEPRINT_REV_1_5.md \u00a721",
       "evidence_refs": [],
       "tests": [],
-      "external_gates": [],
+      "external_gates": [
+        "a signed voice asset pack the owner supplies; no model exists (RB-073/RB-078)",
+        "an owner S24 running it (RB-085)"
+      ],
       "transport_independent": false,
-      "offline_voice_proven": false
+      "offline_voice_proven": false,
+      "note": "Blocked on an artefact this repository cannot author: a local ASR model. VAN-ADOPT-OFFLINE-VOICE-RUNTIME-001 admits the runtime and says so directly \u2014 the repository builds the loader, the manifest, the fail-closed classification and the routing, and all four now exist. The registry records what must be pinned before use and pins nothing, because a digest can only be recorded by measuring an artefact and there is none."
     },
     {
       "schema": "van-implementation-matrix/1",
@@ -2178,8 +2214,8 @@
       "id": "RB-076",
       "name": "transcript fusion/context bias",
       "group": "voice",
-      "status": "NOT_STARTED",
-      "built": false,
+      "status": "BUILT_UNWIRED",
+      "built": true,
       "wired": false,
       "reachable": false,
       "live": false,
@@ -2189,14 +2225,20 @@
       "certified": false,
       "component_refs": [],
       "ledger_expectation": "NONE",
-      "producer": null,
-      "consumer": null,
+      "producer": "VoiceSecondPassPolicy and SpeechFusionEngine",
+      "consumer": "VoiceInputManager, through an optional VoiceSecondPassCoordinator",
       "authority": "docs/VAN_REMOTE_BROWSER_PRODUCTION_BLUEPRINT_REV_1_5.md \u00a721",
       "evidence_refs": [],
-      "tests": [],
-      "external_gates": [],
+      "tests": [
+        "android/verification/src/test/kotlin/com/dial/van/voice/SecondPassFusionTest.kt"
+      ],
+      "external_gates": [
+        "a local ASR runtime to be the second pass (RB-073/RB-075)",
+        "the Android build is compiled only in CI; the AGP is unreachable in the audit container"
+      ],
       "transport_independent": false,
-      "offline_voice_proven": false
+      "offline_voice_proven": false,
+      "note": "Corrected from NOT_STARTED: the policy and the fusion engine were written before this programme and were never executed by anything. They are in the JVM harness now, and running them found a reporting defect \u2014 two readings differing only in trailing punctuation counted as a disagreement, so the fusion recorded FUSED_ANDROID_SHERPA and a second-pass transcript for a sentence both recognisers had heard identically. The text was right either way; the evidence was not, and evidence is what this path is for. \u00a721.10's rule holds: a local transcript does not win by disagreeing \u2014 it must be corroborated, decisively more confident, or answering where Android had nothing. Unwired because `VoiceSecondPassCoordinator` is an optional constructor argument that nothing supplies, and it cannot be supplied until a `LocalSecondPassAsr` runtime exists."
     },
     {
       "schema": "van-implementation-matrix/1",
@@ -2204,10 +2246,10 @@
       "id": "RB-077",
       "name": "LocalTtsRouter",
       "group": "voice",
-      "status": "NOT_STARTED",
-      "built": false,
-      "wired": false,
-      "reachable": false,
+      "status": "WIRED_UNPROVEN",
+      "built": true,
+      "wired": true,
+      "reachable": true,
       "live": false,
       "verified": false,
       "observed": false,
@@ -2215,14 +2257,20 @@
       "certified": false,
       "component_refs": [],
       "ledger_expectation": "NONE",
-      "producer": null,
-      "consumer": null,
+      "producer": "LocalTtsRouter.select",
+      "consumer": "the speech queue, which asks it per segment",
       "authority": "docs/VAN_REMOTE_BROWSER_PRODUCTION_BLUEPRINT_REV_1_5.md \u00a721",
       "evidence_refs": [],
-      "tests": [],
-      "external_gates": [],
+      "tests": [
+        "android/verification/src/test/kotlin/com/dial/van/voice/VoiceAudioTest.kt"
+      ],
+      "external_gates": [
+        "a signed voice asset pack the owner supplies; no model exists (RB-073/RB-078)",
+        "the Android build is compiled only in CI; the AGP is unreachable in the audit container"
+      ],
       "transport_independent": false,
-      "offline_voice_proven": false
+      "offline_voice_proven": false,
+      "note": "\u00a721.18's order \u2014 bundled model, then Android with its offline data verified, then the phrase bank \u2014 and the case that order exists for: an Android engine whose offline voice data an OS update removed reports itself installed and then needs a network. That is named as its own refusal with a sentence the owner can read, rather than becoming silence at the moment VAN tries to answer."
     },
     {
       "schema": "van-implementation-matrix/1",
@@ -2246,9 +2294,13 @@
       "authority": "docs/VAN_REMOTE_BROWSER_PRODUCTION_BLUEPRINT_REV_1_5.md \u00a732.5",
       "evidence_refs": [],
       "tests": [],
-      "external_gates": [],
+      "external_gates": [
+        "a signed voice asset pack the owner supplies; no model exists (RB-073/RB-078)",
+        "an owner S24 running it (RB-085)"
+      ],
       "transport_independent": false,
-      "offline_voice_proven": false
+      "offline_voice_proven": false,
+      "note": "Blocked on an artefact this repository cannot author: a bundled TTS voice model. VAN-ADOPT-OFFLINE-VOICE-RUNTIME-001 admits the runtime and says so directly \u2014 the repository builds the loader, the manifest, the fail-closed classification and the routing, and all four now exist. The registry records what must be pinned before use and pins nothing, because a digest can only be recorded by measuring an artefact and there is none."
     },
     {
       "schema": "van-implementation-matrix/1",
@@ -2256,8 +2308,8 @@
       "id": "RB-079",
       "name": "critical phrase bank",
       "group": "voice",
-      "status": "NOT_STARTED",
-      "built": false,
+      "status": "BUILT_UNWIRED",
+      "built": true,
       "wired": false,
       "reachable": false,
       "live": false,
@@ -2267,14 +2319,20 @@
       "certified": false,
       "component_refs": [],
       "ledger_expectation": "NONE",
-      "producer": null,
-      "consumer": null,
+      "producer": "LocalTtsRouter.CRITICAL_PHRASES",
+      "consumer": "the wake path and the failure notices",
       "authority": "docs/VAN_REMOTE_BROWSER_PRODUCTION_BLUEPRINT_REV_1_5.md \u00a721",
       "evidence_refs": [],
-      "tests": [],
-      "external_gates": [],
+      "tests": [
+        "android/verification/src/test/kotlin/com/dial/van/voice/VoiceAudioTest.kt"
+      ],
+      "external_gates": [
+        "a signed voice asset pack the owner supplies; no model exists (RB-073/RB-078)",
+        "the Android build is compiled only in CI; the AGP is unreachable in the audit container"
+      ],
       "transport_independent": false,
-      "offline_voice_proven": false
+      "offline_voice_proven": false,
+      "note": "\u00a721.5 \u2014 the wake acknowledgement must not wait for a synthesiser to initialise, so the phrases are pre-rendered. The routing and the phrase list exist; the rendered audio is part of the asset pack nobody has supplied, and `wakeAcknowledgementAvailable` lets the wake path find that out before the wake word rather than after it."
     },
     {
       "schema": "van-implementation-matrix/1",
@@ -2282,10 +2340,10 @@
       "id": "RB-080",
       "name": "semantic speech segmentation",
       "group": "voice",
-      "status": "NOT_STARTED",
-      "built": false,
-      "wired": false,
-      "reachable": false,
+      "status": "WIRED_UNPROVEN",
+      "built": true,
+      "wired": true,
+      "reachable": true,
       "live": false,
       "verified": false,
       "observed": false,
@@ -2293,14 +2351,17 @@
       "certified": false,
       "component_refs": [],
       "ledger_expectation": "NONE",
-      "producer": null,
-      "consumer": null,
+      "producer": "van_gateway.voice.segmentation",
+      "consumer": "the speech stream served to the device",
       "authority": "docs/VAN_REMOTE_BROWSER_PRODUCTION_BLUEPRINT_REV_1_5.md \u00a721",
       "evidence_refs": [],
-      "tests": [],
+      "tests": [
+        "backend/tests/test_voice_speech_stream.py"
+      ],
       "external_gates": [],
       "transport_independent": false,
-      "offline_voice_proven": false
+      "offline_voice_proven": false,
+      "note": "\u00a721.14's rule is the whole module: clause, sentence or short paragraph, never arbitrary token chunks. A segment ending mid-sentence means a failover leaves the owner with half a clause and no way to tell. Abbreviations are not sentence ends, a sentence over the ceiling is cut at a clause rather than a character count, and one with no clause boundary goes whole \u2014 a long pause beats a severed word."
     },
     {
       "schema": "van-implementation-matrix/1",
@@ -2308,10 +2369,10 @@
       "id": "RB-081",
       "name": "spoken-segment cursor/dedupe",
       "group": "voice",
-      "status": "NOT_STARTED",
-      "built": false,
-      "wired": false,
-      "reachable": false,
+      "status": "WIRED_UNPROVEN",
+      "built": true,
+      "wired": true,
+      "reachable": true,
       "live": false,
       "verified": false,
       "observed": false,
@@ -2319,14 +2380,18 @@
       "certified": false,
       "component_refs": [],
       "ledger_expectation": "NONE",
-      "producer": null,
-      "consumer": null,
+      "producer": "SpeechStreamService cursors and SpeechQueue",
+      "consumer": "session resume, via response_state",
       "authority": "docs/VAN_REMOTE_BROWSER_PRODUCTION_BLUEPRINT_REV_1_5.md \u00a721",
       "evidence_refs": [],
-      "tests": [],
+      "tests": [
+        "android/verification/src/test/kotlin/com/dial/van/voice/OfflineVoiceTest.kt",
+        "backend/tests/test_voice_speech_stream.py"
+      ],
       "external_gates": [],
       "transport_independent": false,
-      "offline_voice_proven": false
+      "offline_voice_proven": false,
+      "note": "Two cursors, not one, and the difference is the point: `last_received` is what reached the phone, `last_spoken` is what came out of the speaker. Resuming from the first puts a hole in the middle of the answer that nobody can see. Both halves are implemented \u2014 the Gateway serves from the spoken cursor and the device de-duplicates by segment id \u2014 and the resume route now carries `response_state`, which it previously accepted and never populated."
     },
     {
       "schema": "van-implementation-matrix/1",
@@ -2334,10 +2399,10 @@
       "id": "RB-082",
       "name": "audio focus/browser ducking",
       "group": "voice",
-      "status": "NOT_STARTED",
-      "built": false,
-      "wired": false,
-      "reachable": false,
+      "status": "WIRED_UNPROVEN",
+      "built": true,
+      "wired": true,
+      "reachable": true,
       "live": false,
       "verified": false,
       "observed": false,
@@ -2345,14 +2410,19 @@
       "certified": false,
       "component_refs": [],
       "ledger_expectation": "NONE",
-      "producer": null,
-      "consumer": null,
+      "producer": "AudioFocusPolicy.decide",
+      "consumer": "the browser surface and the TTS player",
       "authority": "docs/VAN_REMOTE_BROWSER_PRODUCTION_BLUEPRINT_REV_1_5.md \u00a721",
       "evidence_refs": [],
-      "tests": [],
-      "external_gates": [],
+      "tests": [
+        "android/verification/src/test/kotlin/com/dial/van/voice/VoiceAudioTest.kt"
+      ],
+      "external_gates": [
+        "the Android build is compiled only in CI; the AGP is unreachable in the audit container"
+      ],
       "transport_independent": false,
-      "offline_voice_proven": false
+      "offline_voice_proven": false,
+      "note": "\u00a721.22. The one that must not be wrong is the call: an incoming call takes the audio and VAN waits, because a website's video and a phone call are not the same claim on the owner's attention. A page playing video is paused rather than ducked, since ducked speech under a voiceover is still unintelligible. Only what VAN paused is resumed."
     },
     {
       "schema": "van-implementation-matrix/1",
@@ -2360,10 +2430,10 @@
       "id": "RB-083",
       "name": "local barge-in",
       "group": "voice",
-      "status": "NOT_STARTED",
-      "built": false,
-      "wired": false,
-      "reachable": false,
+      "status": "WIRED_UNPROVEN",
+      "built": true,
+      "wired": true,
+      "reachable": true,
       "live": false,
       "verified": false,
       "observed": false,
@@ -2371,14 +2441,19 @@
       "certified": false,
       "component_refs": [],
       "ledger_expectation": "NONE",
-      "producer": null,
-      "consumer": null,
+      "producer": "BargeInPolicy",
+      "consumer": "the speech queue and the ASR turn",
       "authority": "docs/VAN_REMOTE_BROWSER_PRODUCTION_BLUEPRINT_REV_1_5.md \u00a721",
       "evidence_refs": [],
-      "tests": [],
-      "external_gates": [],
+      "tests": [
+        "android/verification/src/test/kotlin/com/dial/van/voice/VoiceAudioTest.kt"
+      ],
+      "external_gates": [
+        "the Android build is compiled only in CI; the AGP is unreachable in the audit container"
+      ],
       "transport_independent": false,
-      "offline_voice_proven": false
+      "offline_voice_proven": false,
+      "note": "Entirely local, and the ordering is the guarantee: playback stops before anything is sent anywhere. Hermes does not acknowledge first, or barge-in would be as slow as the network. The echo guard is what stops VAN interrupting itself on its own speaker \u2014 without it every answer cuts itself off after the first loud syllable \u2014 and a non-interruptible segment (a read-back before an irreversible action) is not cut."
     },
     {
       "schema": "van-implementation-matrix/1",
@@ -2386,10 +2461,10 @@
       "id": "RB-084",
       "name": "delayed-answer speech policy",
       "group": "voice",
-      "status": "NOT_STARTED",
-      "built": false,
-      "wired": false,
-      "reachable": false,
+      "status": "WIRED_UNPROVEN",
+      "built": true,
+      "wired": true,
+      "reachable": true,
       "live": false,
       "verified": false,
       "observed": false,
@@ -2397,14 +2472,19 @@
       "certified": false,
       "component_refs": [],
       "ledger_expectation": "NONE",
-      "producer": null,
-      "consumer": null,
+      "producer": "DelayedAnswerPolicy.decide",
+      "consumer": "the speech queue when a queued answer completes",
       "authority": "docs/VAN_REMOTE_BROWSER_PRODUCTION_BLUEPRINT_REV_1_5.md \u00a721",
       "evidence_refs": [],
-      "tests": [],
-      "external_gates": [],
+      "tests": [
+        "android/verification/src/test/kotlin/com/dial/van/voice/OfflineVoiceTest.kt"
+      ],
+      "external_gates": [
+        "the Android build is compiled only in CI; the AGP is unreachable in the audit container"
+      ],
       "transport_independent": false,
-      "offline_voice_proven": false
+      "offline_voice_proven": false,
+      "note": "\u00a721.25, as the failure it actually is: the owner asked while Hermes was unreachable, put the phone down, and at 3am VAN starts talking. Speech resumes only inside the two-minute window where 'you asked me that just now' is still true; holding the phone gets it on screen without taking the audio; otherwise it becomes a Needs You item."
     },
     {
       "schema": "van-implementation-matrix/1",
