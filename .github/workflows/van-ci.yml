@@ -46,6 +46,13 @@ jobs:
       - name: Contract tests
         run: pytest -q tests/contracts
 
+      # Rev 1.5 §13.2 — the Browser Control Agent. It lives outside backend/ because it
+      # runs on the Browser Stream Host rather than on the Gateway, so neither of the two
+      # suites above reaches it. Its authority checks are pure and executed here; the CDP
+      # transport behind them needs a Chromium and is RB-010/RB-117, a host gate.
+      - name: Browser Control Agent and stream-host logic
+        run: pytest -q services
+
       # Protocol rule 31, Android half. A compiler finds code that does not build; this
       # finds code that builds, is tested, and nothing reaches — the class P0-AND-012 lived
       # beside. It runs here rather than in the Android job because it needs no toolchain.

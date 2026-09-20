@@ -1,0 +1,33 @@
+# Rev 1.5 §13.2 — the only cross-host bridge to Chromium.
+#
+# Bound to the private VCN address, never to the public interface and never to 0.0.0.0.
+# `BindsTo` on Chromium rather than `After`: an agent that is up while the browser is down
+# accepts calls it cannot serve, and the caller reads that as the task failing rather than
+# as the host being unavailable.
+[Unit]
+Description=VAN Browser Control Agent (private mTLS, loopback CDP)
+After=van-browser-chromium.service
+BindsTo=van-browser-chromium.service
+
+[Service]
+Type=simple
+User=van-control
+Group=van-control
+EnvironmentFile=/etc/van-browser-stream/runtime.env
+ExecStart=/opt/van-browser-stream/venv/bin/python -m services.browser_control_agent.server
+WorkingDirectory=/opt/van-browser-stream/src
+Restart=on-failure
+RestartSec=5
+
+NoNewPrivileges=true
+PrivateTmp=true
+ProtectSystem=strict
+ProtectHome=true
+ReadOnlyPaths=/opt/van-browser-stream
+# The agent needs the PKI and nothing else it can write to.
+ReadWritePaths=/var/log/van-browser-stream
+# It does not need the profile volume: it talks to Chromium, not to Chromium's files.
+InaccessiblePaths=-/var/lib/van-browser-profiles
+
+[Install]
+WantedBy=multi-user.target

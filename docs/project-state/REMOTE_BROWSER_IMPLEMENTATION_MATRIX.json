@@ -311,8 +311,8 @@
       "id": "RB-010",
       "name": "dual-homed stream-host provisioning",
       "group": "streamhost",
-      "status": "NOT_STARTED",
-      "built": false,
+      "status": "BUILT_UNWIRED",
+      "built": true,
       "wired": false,
       "reachable": false,
       "live": false,
@@ -322,14 +322,19 @@
       "certified": false,
       "component_refs": [],
       "ledger_expectation": "NONE",
-      "producer": null,
-      "consumer": null,
+      "producer": "deploy/van-browser-stream \u2014 README, bootstrap.sh, qualify.sh, units, PKI",
+      "consumer": "an owner who provisions the host",
       "authority": "docs/VAN_REMOTE_BROWSER_PRODUCTION_BLUEPRINT_REV_1_5.md \u00a713.1",
       "evidence_refs": [],
-      "tests": [],
-      "external_gates": [],
+      "tests": [
+        "services/browser_control_agent/tests/test_stream_host_package.py"
+      ],
+      "external_gates": [
+        "a provisioned dual-homed Browser Stream Host (RB-002/RB-010)"
+      ],
       "transport_independent": false,
-      "offline_voice_proven": null
+      "offline_voice_proven": null,
+      "note": "The package exists and nothing in it has ever been run. bootstrap.sh refuses rather than guesses on the four settings whose wrong default looks like it worked \u2014 a wildcard bind, a plain directory for the profile volume, a self-signed public certificate, and no grant-verification key \u2014 and it does not install a browser, because the Chromium version is a provisioning decision with a digest. qualify.sh is the gate, not bootstrap.sh, and it reports UNKNOWN rather than GREEN for anything it could not test; UNKNOWN fails the script."
     },
     {
       "schema": "van-implementation-matrix/1",
@@ -493,10 +498,10 @@
       "id": "RB-017",
       "name": "CDP input router",
       "group": "streamhost",
-      "status": "NOT_STARTED",
-      "built": false,
-      "wired": false,
-      "reachable": false,
+      "status": "WIRED_UNPROVEN",
+      "built": true,
+      "wired": true,
+      "reachable": true,
       "live": false,
       "verified": false,
       "observed": false,
@@ -504,14 +509,19 @@
       "certified": false,
       "component_refs": [],
       "ledger_expectation": "NONE",
-      "producer": null,
-      "consumer": null,
+      "producer": "services/browser_stream_host/input_router.CdpInputRouter",
+      "consumer": "Chromium's Input domain over loopback CDP",
       "authority": "docs/VAN_REMOTE_BROWSER_PRODUCTION_BLUEPRINT_REV_1_5.md \u00a713.2",
       "evidence_refs": [],
-      "tests": [],
-      "external_gates": [],
+      "tests": [
+        "services/browser_stream_host/tests/test_input_router.py"
+      ],
+      "external_gates": [
+        "a provisioned dual-homed Browser Stream Host (RB-002/RB-010)"
+      ],
       "transport_independent": false,
-      "offline_voice_proven": null
+      "offline_voice_proven": null,
+      "note": "The mapping from an admitted input packet to a CDP call, which is the last step before the owner's tap becomes a click and the place a wrong answer is invisible. Two refusals rather than transforms: a packet whose viewport revision is not the one being rendered, in either direction, and one whose control generation has been superseded. The details that look like plumbing are tested because they are not \u2014 a press moves first (or a hover-dependent page is clicked in the wrong place), a drag reports the button held (or it ends halfway through), a cancel releases (or the page keeps a press the finger has left), text is inserted rather than typed (or an IME's word arrives as nonsense), and a scroll detent is a proportion of the viewport rather than a pixel count. Nine mutations, nine caught. Not live: there is no Chromium."
     },
     {
       "schema": "van-implementation-matrix/1",
@@ -519,10 +529,10 @@
       "id": "RB-018",
       "name": "cross-channel gesture state machine",
       "group": "protocol",
-      "status": "BUILT_UNWIRED",
+      "status": "WIRED_UNPROVEN",
       "built": true,
-      "wired": false,
-      "reachable": false,
+      "wired": true,
+      "reachable": true,
       "live": false,
       "verified": false,
       "observed": false,
@@ -531,17 +541,20 @@
       "component_refs": [],
       "ledger_expectation": "NONE",
       "producer": "PointerStateMachine",
-      "consumer": "the stream host's CDP input router",
+      "consumer": "CdpInputRouter, which is now the thing downstream of it",
       "authority": "docs/VAN_REMOTE_BROWSER_PRODUCTION_BLUEPRINT_REV_1_5.md \u00a78.4",
       "evidence_refs": [],
       "tests": [
-        "backend/tests/test_browser_input_protocol.py"
+        "backend/tests/test_browser_input_protocol.py",
+        "services/browser_stream_host/tests/test_input_router.py"
       ],
       "external_gates": [
-        "a Browser Stream Host running the CDP input router (RB-010/RB-017)"
+        "a Browser Stream Host running the CDP input router (RB-010/RB-017)",
+        "a provisioned dual-homed Browser Stream Host (RB-002/RB-010)"
       ],
       "transport_independent": false,
-      "offline_voice_proven": null
+      "offline_voice_proven": null,
+      "note": "The gesture machine had no consumer, which is why it was BUILT_UNWIRED: it ordered and de-duplicated packets and handed them to nothing. The input router is that consumer. Still not live \u2014 the pair runs on a host that does not exist \u2014 but the seam between them is now a real one rather than a gap."
     },
     {
       "schema": "van-implementation-matrix/1",
@@ -1407,10 +1420,10 @@
       "id": "RB-049",
       "name": "SSRF/DNS-rebinding isolation",
       "group": "security",
-      "status": "NOT_STARTED",
-      "built": false,
-      "wired": false,
-      "reachable": false,
+      "status": "WIRED_UNPROVEN",
+      "built": true,
+      "wired": true,
+      "reachable": true,
       "live": false,
       "verified": false,
       "observed": false,
@@ -1418,14 +1431,20 @@
       "certified": false,
       "component_refs": [],
       "ledger_expectation": "NONE",
-      "producer": null,
-      "consumer": null,
+      "producer": "the navigate handler's scheme allowlist",
+      "consumer": "Page.navigate on the Stream Host",
       "authority": "docs/VAN_REMOTE_BROWSER_PRODUCTION_BLUEPRINT_REV_1_5.md \u00a731",
       "evidence_refs": [],
-      "tests": [],
-      "external_gates": [],
+      "tests": [
+        "services/browser_control_agent/tests/test_control_authority.py"
+      ],
+      "external_gates": [
+        "a provisioned dual-homed Browser Stream Host (RB-002/RB-010)",
+        "an adversarial live page (RB-052)"
+      ],
       "transport_independent": false,
-      "offline_voice_proven": null
+      "offline_voice_proven": null,
+      "note": "Partial and named as such. What is closed: `file://`, `chrome://` and `javascript:` are refused at the last point before the browser, and the test asserts Page.navigate was never sent \u2014 not merely that an exception was raised. What is not: DNS rebinding against an http(s) URL that resolves to a private address is not addressed here at all, and belongs with the Browser Fabric's domain policy rather than with this agent. Recorded rather than implied."
     },
     {
       "schema": "van-implementation-matrix/1",
@@ -1433,10 +1452,10 @@
       "id": "RB-050",
       "name": "profile secret isolation",
       "group": "security",
-      "status": "NOT_STARTED",
-      "built": false,
-      "wired": false,
-      "reachable": false,
+      "status": "WIRED_UNPROVEN",
+      "built": true,
+      "wired": true,
+      "reachable": true,
       "live": false,
       "verified": false,
       "observed": false,
@@ -1444,14 +1463,21 @@
       "certified": false,
       "component_refs": [],
       "ledger_expectation": "NONE",
-      "producer": null,
-      "consumer": null,
+      "producer": "the control agent's operation allowlist and the Chromium unit's confinement",
+      "consumer": "Trading Core, which never receives profile bytes",
       "authority": "docs/VAN_REMOTE_BROWSER_PRODUCTION_BLUEPRINT_REV_1_5.md \u00a731",
       "evidence_refs": [],
-      "tests": [],
-      "external_gates": [],
+      "tests": [
+        "services/browser_control_agent/tests/test_control_authority.py",
+        "services/browser_control_agent/tests/test_stream_host_package.py"
+      ],
+      "external_gates": [
+        "a provisioned dual-homed Browser Stream Host (RB-002/RB-010)",
+        "a real profile holding real owner credentials"
+      ],
       "transport_independent": false,
-      "offline_voice_proven": null
+      "offline_voice_proven": null,
+      "note": "Three separate refusals, each tested: the agent has no operation that returns a cookie or a file; a download is reported and never carried, because a file the agent could return is a file the private VCN carries out of the profile; and the agent's systemd unit marks the profile volume InaccessiblePaths, so the bridge cannot read the profile even without touching a page. Unproven against a real profile, which is RB-118's gate."
     },
     {
       "schema": "van-implementation-matrix/1",
@@ -3219,10 +3245,10 @@
       "id": "RB-115",
       "name": "Browser Control Agent private VCN RPC",
       "group": "streamhost",
-      "status": "NOT_STARTED",
-      "built": false,
-      "wired": false,
-      "reachable": false,
+      "status": "WIRED_UNPROVEN",
+      "built": true,
+      "wired": true,
+      "reachable": true,
       "live": false,
       "verified": false,
       "observed": false,
@@ -3230,14 +3256,19 @@
       "certified": false,
       "component_refs": [],
       "ledger_expectation": "NONE",
-      "producer": null,
-      "consumer": null,
+      "producer": "services/browser_control_agent \u2014 ControlAuthority and BrowserControlAgent",
+      "consumer": "Stagehand and Browser Harness on Trading Core, over mTLS",
       "authority": "docs/VAN_REMOTE_BROWSER_PRODUCTION_BLUEPRINT_REV_1_5.md \u00a713.2",
       "evidence_refs": [],
-      "tests": [],
-      "external_gates": [],
+      "tests": [
+        "services/browser_control_agent/tests/test_control_authority.py"
+      ],
+      "external_gates": [
+        "a provisioned dual-homed Browser Stream Host (RB-002/RB-010)"
+      ],
       "transport_independent": false,
-      "offline_voice_proven": null
+      "offline_voice_proven": null,
+      "note": "The narrow contract exists and its six checks are executed: caller identity, session, lease, generation, scope, step budget. The ordering is a tested property rather than a comment \u2014 a refused call leaves the CDP double untouched. The generation check is the one worth naming: a preempted lease keeps the id it was issued with, so an agent that checked the id alone would keep typing into a page the owner has taken back. Not live: there is no host and no Chromium."
     },
     {
       "schema": "van-implementation-matrix/1",
@@ -3245,8 +3276,8 @@
       "id": "RB-116",
       "name": "Trading Core \u2192 Stream Host mTLS control path",
       "group": "streamhost",
-      "status": "NOT_STARTED",
-      "built": false,
+      "status": "BUILT_UNWIRED",
+      "built": true,
       "wired": false,
       "reachable": false,
       "live": false,
@@ -3256,14 +3287,21 @@
       "certified": false,
       "component_refs": [],
       "ledger_expectation": "NONE",
-      "producer": null,
-      "consumer": null,
+      "producer": "deploy/van-browser-stream/pki/make-stream-pki.sh and server.build_ssl_context",
+      "consumer": "the Trading Core services holding the issued client certificates",
       "authority": "docs/VAN_REMOTE_BROWSER_PRODUCTION_BLUEPRINT_REV_1_5.md \u00a713.1",
       "evidence_refs": [],
-      "tests": [],
-      "external_gates": [],
+      "tests": [
+        "services/browser_control_agent/tests/test_stream_host_package.py"
+      ],
+      "external_gates": [
+        "a private VCN between Trading Core and the Stream Host",
+        "a provisioned dual-homed Browser Stream Host (RB-002/RB-010)",
+        "client certificates distributed to the calling services"
+      ],
       "transport_independent": false,
-      "offline_voice_proven": null
+      "offline_voice_proven": null,
+      "note": "The PKI script and the server context exist. The context requires a client certificate and trusts only the private control CA \u2014 never the system store, which is the failure the foreign-certificate check in qualify.sh is written for: that test certificate carries a *correct* common name and must be rejected on its chain, because a name is not a credential. Unwired: no VCN, no certificates issued, no listener started."
     },
     {
       "schema": "van-implementation-matrix/1",
@@ -3271,10 +3309,10 @@
       "id": "RB-117",
       "name": "raw CDP loopback/public-exposure proof",
       "group": "security",
-      "status": "NOT_STARTED",
-      "built": false,
-      "wired": false,
-      "reachable": false,
+      "status": "WIRED_UNPROVEN",
+      "built": true,
+      "wired": true,
+      "reachable": true,
       "live": false,
       "verified": false,
       "observed": false,
@@ -3282,14 +3320,20 @@
       "certified": false,
       "component_refs": [],
       "ledger_expectation": "NONE",
-      "producer": null,
-      "consumer": null,
+      "producer": "qualify.sh's cdp_not_public check and LoopbackCdp's constructor",
+      "consumer": "the Stream Host qualification report",
       "authority": "docs/VAN_REMOTE_BROWSER_PRODUCTION_BLUEPRINT_REV_1_5.md \u00a713.2",
       "evidence_refs": [],
-      "tests": [],
-      "external_gates": [],
+      "tests": [
+        "services/browser_control_agent/tests/test_stream_host_package.py"
+      ],
+      "external_gates": [
+        "a provisioned dual-homed Browser Stream Host (RB-002/RB-010)",
+        "qualify.sh returning GREEN on a real host"
+      ],
       "transport_independent": false,
-      "offline_voice_proven": null
+      "offline_voice_proven": null,
+      "note": "Two halves, one of them done. The repository half: the Chromium unit pins --remote-debugging-address=127.0.0.1 (not redundant \u2014 Chromium has defaulted to all interfaces when given only a port), and the CDP client refuses any endpoint that is not a loopback literal, including `localhost`, which resolves at connect time on a machine this process does not control. The runtime half is qualify.sh connecting to the debugging port on every global address, and it needs a host. It also checks the debugger is listening on loopback at all, because otherwise the exposure check passes on a machine where nothing is running."
     },
     {
       "schema": "van-implementation-matrix/1",
@@ -3297,8 +3341,8 @@
       "id": "RB-118",
       "name": "stream-host profile storage implementation",
       "group": "streamhost",
-      "status": "NOT_STARTED",
-      "built": false,
+      "status": "BUILT_UNWIRED",
+      "built": true,
       "wired": false,
       "reachable": false,
       "live": false,
@@ -3308,14 +3352,20 @@
       "certified": false,
       "component_refs": [],
       "ledger_expectation": "NONE",
-      "producer": null,
-      "consumer": null,
+      "producer": "bootstrap.sh's profile volume step (\u00a713.5 option A)",
+      "consumer": "the Chromium unit's --user-data-dir",
       "authority": "docs/VAN_REMOTE_BROWSER_PRODUCTION_BLUEPRINT_REV_1_5.md \u00a725.2",
       "evidence_refs": [],
-      "tests": [],
-      "external_gates": [],
+      "tests": [
+        "services/browser_control_agent/tests/test_stream_host_package.py"
+      ],
+      "external_gates": [
+        "a provisioned dual-homed Browser Stream Host (RB-002/RB-010)",
+        "an encrypted block device attached to the Stream Host"
+      ],
       "transport_independent": false,
-      "offline_voice_proven": null
+      "offline_voice_proven": null,
+      "note": "Option A is chosen and recorded with its reasoning: Chromium executes on the Stream Host so the profile bytes must be there, while profile *authority* stays on Trading Core. Option B puts the owner's authenticated cookies on a wire between two hosts and makes lease enforcement the only thing preventing two Chromiums writing one profile. bootstrap.sh refuses to run without a block device rather than falling back to a plain directory, and qualify.sh reports RED for a mount that is not dm-crypt."
     },
     {
       "schema": "van-implementation-matrix/1",

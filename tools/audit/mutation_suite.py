@@ -555,6 +555,103 @@ ALL = [
  ]),
 ]
 
+SERVICES = "services/browser_control_agent"
+AGENT_TESTS = ["services"]
+HOST = "services/browser_stream_host"
+
+#: Checkpoint 29 — the Browser Control Agent. These run from the repository root rather
+#: than from backend/, because the agent is not part of the Gateway: it runs on the Browser
+#: Stream Host, and the whole point of §13.2 is that those are different machines with
+#: different authority.
+CONTROL_AGENT = [
+ (f"{SERVICES}/authority.py",
+  "        if operation.actuates:",
+  "        if False:",
+  "C29 a lease is never checked, so a preempted agent keeps typing"),
+ (f"{SERVICES}/authority.py",
+  "        if lease.generation != lease_generation:",
+  "        if False:",
+  "C29 the owner takes control back and the agent does not notice"),
+ (f"{SERVICES}/authority.py",
+  "        if lease.holder != caller.common_name:",
+  "        if False:",
+  "C29 one service may use another's lease"),
+ (f"{SERVICES}/authority.py",
+  "        if task.scope not in caller.scopes:",
+  "        if False:",
+  "C29 mTLS says who, and then nothing says what"),
+ (f"{SERVICES}/authority.py",
+  "        if operation not in SCOPE_ALLOWS[task.scope]:",
+  "        if False:",
+  "C29 an observe-only task may actuate"),
+ (f"{SERVICES}/authority.py",
+  "        if task.steps_remaining == 0:",
+  "        if False:",
+  "C29 a task that has gone wrong runs forever"),
+ (f"{SERVICES}/authority.py",
+  "        task.steps_used += 1",
+  "        pass",
+  "C29 the budget is never spent, which is the same as not having one"),
+ (f"{SERVICES}/agent.py",
+  "    if not (url.startswith(\"https://\") or url.startswith(\"http://\")):",
+  "    if False:",
+  "C29 file:/// reads the host's disk into a page the owner is watching"),
+ (f"{SERVICES}/cdp.py",
+  "        if not address.is_loopback:",
+  "        if False:",
+  "C29 the CDP client may be pointed at another host's browser"),
+ (f"{SERVICES}/cdp.py",
+  "            raise CdpUnavailable(\"cdp_endpoint_must_be_a_loopback_literal\") from exc",
+  "            return",
+  "C29 a hostname is accepted, and resolves on a machine we do not control"),
+ (f"{SERVICES}/server.py",
+  "    if address in {\"\", \"0.0.0.0\", \"::\", \"*\"}:",
+  "    if False:",
+  "C29 the only bridge to Chromium binds to the internet"),
+ (f"{SERVICES}/server.py",
+  "    if not parsed.is_private:",
+  "    if False:",
+  "C29 the control agent binds to a public address"),
+ (f"{SERVICES}/server.py",
+  "    context.verify_mode = ssl.CERT_REQUIRED",
+  "    context.verify_mode = ssl.CERT_OPTIONAL",
+  "C29 a caller with no client certificate completes the handshake"),
+ # RB-017. The last step before a tap becomes a click, where a wrong answer is a
+ # well-formed packet landing somewhere the owner did not touch.
+ (f"{HOST}/input_router.py",
+  "        if packet.authority.viewport_revision != self.viewport.revision:",
+  "        if False:",
+  "C29 a packet built against the previous layout is transformed rather than refused"),
+ (f"{HOST}/input_router.py",
+  "        if packet.authority.control_generation != self.control_generation:",
+  "        if False:",
+  "C29 a preempted agent's input still reaches the page"),
+ (f"{HOST}/input_router.py",
+  '        return [self._pointer(packet, "mouseMoved"), self._pointer(packet, "mousePressed")]',
+  '        return [self._pointer(packet, "mousePressed")]',
+  "C29 a press without a move, so a hover-dependent page is clicked in the wrong place"),
+ (f"{HOST}/input_router.py",
+  '                "buttons": 0 if event_type == "mouseReleased" else 1,',
+  '                "buttons": 0,',
+  "C29 a drag reports no button held, and ends halfway through"),
+ (f"{HOST}/input_router.py",
+  '        return [self._pointer(packet, "mouseReleased")]\n\n    def _scroll',
+  '        return []\n\n    def _scroll',
+  "C29 a cancel is dropped, leaving the page holding a press"),
+ (f"{HOST}/input_router.py",
+  '            params["text"] = packet.text',
+  '            pass',
+  "C29 a printable key fires an event and types nothing"),
+ (f"{HOST}/input_router.py",
+  '    return (detents / 120.0) * (extent * 0.2)',
+  '    return float(detents)',
+  "C29 a scroll is a fixed pixel count, whatever the viewport is"),
+ (f"{HOST}/input_router.py",
+  '        handler = _ROUTES.get(packet.kind)',
+  '        handler = _ROUTES.get(packet.kind, CdpInputRouter._move)',
+  "C29 an unmapped kind is silently treated as a pointer move"),
+]
+
 APP_KT = "android/app/src/main/java/com/dial/van"
 ENV_KT = f"{APP_KT}/runtime/VanResourceEnvelope.kt"
 EVT_KT = f"{APP_KT}/events/EventStream.kt"
@@ -811,6 +908,10 @@ def groups(selector: str | None = None):
             continue
         yield tests, mutations, {}
     for tests, mutations in ROOT_LEVEL:
+        if selector and not any(selector in mutation[-1] for mutation in mutations):
+            continue
+        yield tests, mutations, {"root": ROOT, "cwd": ROOT}
+    for tests, mutations in ((AGENT_TESTS, CONTROL_AGENT),):
         if selector and not any(selector in mutation[-1] for mutation in mutations):
             continue
         yield tests, mutations, {"root": ROOT, "cwd": ROOT}
