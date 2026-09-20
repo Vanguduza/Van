@@ -95,8 +95,9 @@ class InstrumentEvaluator:
                     MTF_MISSING_TIMEFRAME,
                     symbol=self.cfg.symbol, timeframe=tf,
                 )
-            self.last_candidates = ()
-            return ()
+            if self.cfg.timeframe in mtf.missing_timeframes:
+                self.last_candidates = ()
+                return ()
         # MTF_SCHEMA_ADOPTION was recorded as strategy_logic_changed=false, so
         # existing strategy formulas still evaluate on the configured primary
         # timeframe. The complete MTF state is now a required causal envelope;
@@ -124,6 +125,7 @@ class InstrumentEvaluator:
             venue=self.cfg.venue,
             mtf_state_hash=(mtf.mtf_state_hash if mtf is not None else mtf_state_hash) or state.state_hash,
             source_state_hashes=source_hashes or (state.state_hash,),
+            mtf_state=mtf,
             now_ms=now_ms,
         )
         self.last_candidates = cands
