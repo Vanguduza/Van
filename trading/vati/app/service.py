@@ -50,6 +50,9 @@ class ServiceConfig:
     contract: dict
     mandate: dict
     capsules: list[str]
+    #: Additional instruments activate the account-level coordinator runtime.
+    #: Each mapping may override symbol/base/quote/timeframe/contract/capsules/cost.
+    instruments: list[dict] = field(default_factory=list)
     round_trip_cost_pct: str = "0.0003"
     registry_path: str = "accounts.json"
     ledger: str = "vati.sqlite"
