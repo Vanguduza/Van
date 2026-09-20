@@ -263,6 +263,36 @@ def test_event_kind_source_has_no_duplicate_enum_member_names():
     assert len(names) == len(set(names))
 
 
+def test_promotion_join_guardrail_fails_when_gateway_route_is_removed(tmp_path):
+    import pathlib
+    import shutil
+
+    # The guard reads both trading/ and its sibling backend/. Reproduce that
+    # repository shape and delete only the live promotion route string.
+    shutil.copytree(
+        pathlib.Path("trading"), tmp_path / "trading",
+        ignore=shutil.ignore_patterns("__pycache__", "*.pyc"),
+    )
+    shutil.copytree(
+        pathlib.Path("backend"), tmp_path / "backend",
+        ignore=shutil.ignore_patterns("__pycache__", "*.pyc"),
+    )
+    gateway = tmp_path / "backend" / "van_gateway" / "app.py"
+    text = gateway.read_text()
+    mutated = text.replace(
+        '@app.post("/v1/trading/strategies/promote")',
+        '@app.post("/v1/trading/strategies/promote-removed")',
+    )
+    assert mutated != text, "promotion route mutation target moved"
+    gateway.write_text(mutated)
+
+    r = subprocess.run(
+        [sys.executable, str(tmp_path / "trading" / "tools" / "check_enhancement_architecture.py")],
+        cwd=tmp_path, capture_output=True, text=True,
+    )
+    assert r.returncode == 1
+    assert "strategy-promotion-live-join" in r.stderr
+
 def test_certificate_producer_guardrail_fails_on_direct_production_construction(tmp_path):
     import pathlib
     import shutil
