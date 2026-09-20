@@ -48,6 +48,7 @@ import com.dial.van.visual.VanTradeSemantics
 import kotlinx.coroutines.delay
 import com.dial.van.trading.ui.AccountOnboardingScreen
 import com.dial.van.trading.ui.AccountsScreen
+import com.dial.van.trading.ui.CognitionScreen
 import com.dial.van.trading.ui.InstrumentScreen
 import com.dial.van.trading.ui.OverviewScreen
 import com.dial.van.trading.ui.RiskScreen
@@ -99,6 +100,7 @@ class TradingCommandCentreActivity : FragmentActivity() {
                     openRisk = { nav.navigate(ROUTE_RISK) },
                     openAccounts = { nav.navigate(ROUTE_ACCOUNTS) },
                     openStrategies = { nav.navigate(ROUTE_STRATEGIES) },
+                    openCognition = { nav.navigate(ROUTE_COGNITION) },
                     openChat = { startActivity(Intent(this@TradingCommandCentreActivity, CommandCentreActivity::class.java)) },
                 )
                 Box(modifier = Modifier.fillMaxSize().background(Brush.verticalGradient(listOf(Color(0xFF060A14), Color(0xFF0B1424), Color(0xFF04070F))))) {
@@ -117,6 +119,7 @@ class TradingCommandCentreActivity : FragmentActivity() {
                             composable(ROUTE_RISK) { RiskScreen(env, tnav, padding) }
                             composable(ROUTE_ACCOUNTS) { AccountsScreen(env, padding, onAdd = { nav.navigate(ROUTE_ACCOUNT_ADD) }) }
                             composable(ROUTE_STRATEGIES) { StrategiesScreen(env, padding, app) }
+                            composable(ROUTE_COGNITION) { CognitionScreen(env, padding) }
                             composable(ROUTE_ACCOUNT_ADD) { AccountOnboardingScreen(env, padding, app) { nav.popBackStack() } }
                         }
                         // Deep links from the overlay / Command Centre land on the requested object once the graph exists.
@@ -196,6 +199,7 @@ class TradingCommandCentreActivity : FragmentActivity() {
         const val ROUTE_RISK = "risk"
         const val ROUTE_ACCOUNTS = "accounts"
         const val ROUTE_STRATEGIES = "strategies"
+        const val ROUTE_COGNITION = "cognition"
         const val ROUTE_ACCOUNT_ADD = "accounts/add"
 
         fun intent(context: Context, route: String = ROUTE_OVERVIEW): Intent =
