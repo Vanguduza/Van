@@ -306,8 +306,13 @@ strategy-promotion artifacts already required by this blueprint.
    fill has a valid durable EXECUTION_RECEIPT but the process died before TCA was appended, restart deterministically
    reconstructs the missing TCA_RECORD from the command, sealed receipt and symbol contract exactly once and restores
    its cost ratio into lifecycle state. It does not invent or replay session/event-window learning context that was
-   not durably recorded. Any unjoinable position, missing protection fact or widened stop remains unresolved and
-   blocks new risk through reconciliation.
+   not durably recorded. Where the original learning environment, broker, symbol, session and event-window context
+   are durable, restart replays those facts before the next decision and rebuilds only reduce-only broker-liquidity
+   and capsule-health state. TRADE_EXPERIENCE_ARTIFACT remains the durable source for strategy-health environment
+   weighting; durable AUTOMATIC_DEMOTION_ONLY capsule-state events restore the exact demoted capsule state when
+   available. Replay may reduce, suspend or demote; it may never promote a capsule or raise a multiplier above 1.
+   Any unjoinable position, missing protection fact or widened stop remains unresolved and blocks new risk through
+   reconciliation.
 
 10. **Owner-ticket downstream-evidence law.** A signed owner ticket confirmation is consumed into runtime position
     truth before new risk is admitted. EXECUTION_RECEIPT durability and downstream lifecycle evidence are separate
