@@ -68,6 +68,32 @@ class AccountTradeLifecycle:
             if iid:
                 commands[iid] = (dict(event.payload), event.event_time_ms)
 
+        latest_stops: dict[str, Decimal] = {}
+        for event in self.ledger.iter(EventKind.EXECUTION_RECEIPT):
+            iid = str(event.payload.get("trade_intent_id", ""))
+            raw_stop = event.payload.get("protective_stop_price")
+            if iid and raw_stop is not None:
+                latest_stops[iid] = Decimal(str(raw_stop))
+
+        tickets: dict[str, dict] = {}
+        for event in self.ledger.iter(EventKind.OWNER_TICKET):
+            ticket_id = str(event.payload.get("ticket") or "")
+            if not ticket_id:
+                continue
+            if event.payload.get("action") == "CONFIRMED":
+                tickets.setdefault(ticket_id, {})["confirmed"] = True
+                continue
+            tickets[ticket_id] = {
+                **dict(event.payload),
+                "confirmed": False,
+                "correlation_id": event.correlation_id,
+            }
+        pending_sell_by_intent = {
+            str(t.get("trade_intent_id") or t.get("correlation_id") or ""): t
+            for t in tickets.values()
+            if t.get("side") == "SELL" and not t.get("confirmed")
+        }
+
         restored: list[str] = []
         unresolved: list[str] = []
         for position in self.adapter.positions():
@@ -89,7 +115,11 @@ class AccountTradeLifecycle:
                 if raw_initial_stop is not None else None
             )
             software_stop = str(payload.get("stop_mode", "")) == "SOFTWARE"
-            current_stop = position.stop_price or initial_stop
+            current_stop = (
+                position.stop_price
+                or latest_stops.get(iid)
+                or initial_stop
+            )
             targets = tuple(
                 Decimal(str(v)) for v in (payload.get("targets") or ())
             )
@@ -115,6 +145,8 @@ class AccountTradeLifecycle:
                 except Exception:
                     unresolved.append(iid)
                     continue
+                if iid in pending_sell_by_intent:
+                    self.protection.mark_close_pending(position.position_id)
 
             self.entries[iid] = {
                 "symbol": symbol,
