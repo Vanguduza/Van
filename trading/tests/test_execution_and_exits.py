@@ -39,6 +39,7 @@ from vati.learning.exit_research import (
     PostEntryPath,
 )
 from vati.market_data.bars import Bar
+from vati.execution.router import RouterError, resolve_execution_policy
 from vati.risk.contracts import Direction
 
 BUCKET = ExecutionBucket("deriv", "fx", "EURUSD", "LONDON", "NORMAL", "NONE", "LONG")
@@ -143,6 +144,30 @@ def test_engine_cannot_create_a_trade():
     """It decides how, never whether."""
     for name in ("approve", "size", "create_intent", "submit", "execute"):
         assert not hasattr(ExecutionPolicyEngine, name)
+
+
+def test_router_consumes_the_sealed_execution_policy_decision():
+    d = ExecutionPolicyEngine().select(candidate_id="c", bucket=BUCKET)
+    entry_type, max_slippage = resolve_execution_policy(
+        d, entry_type="MARKET", max_slippage=Decimal("9"))
+    t = template(d.template_id)
+    assert entry_type == d.entry_type
+    assert max_slippage == t.max_slippage
+
+
+def test_router_refuses_do_not_execute_policy():
+    d = ExecutionPolicyEngine().select(
+        candidate_id="c", bucket=BUCKET, event_state="PRE_BLACKOUT")
+    with pytest.raises(RouterError, match="execution policy refused"):
+        resolve_execution_policy(d, entry_type="LIMIT", max_slippage=None)
+
+
+def test_router_refuses_a_tampered_execution_policy_decision():
+    import dataclasses
+    d = ExecutionPolicyEngine().select(candidate_id="c", bucket=BUCKET)
+    tampered = dataclasses.replace(d, template_id=MARKET_WITH_SLIPPAGE_CAP)
+    with pytest.raises(RouterError, match="seal"):
+        resolve_execution_policy(tampered, entry_type="LIMIT", max_slippage=None)
 
 
 def test_engine_does_not_import_the_router():
