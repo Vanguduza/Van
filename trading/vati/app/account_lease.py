@@ -103,6 +103,93 @@ class InMemoryLeaseStore:
         return True
 
 
+class PostgresLeaseStore:
+    """Transactional lease store on the VATI PostgreSQL authority database.
+
+    The table is provisioned by vati.core.ledger_pg.SCHEMA. Each compare-and-set
+    locks the account row in a database transaction, so two processes on
+    different hosts arbitrate against the same truth rather than process memory.
+    """
+
+    def __init__(self, dsn: str, *, connect=None) -> None:
+        try:
+            if connect is None:
+                import psycopg
+                connect = psycopg.connect
+            self._conn = connect(dsn)
+            self._conn.autocommit = False
+        except Exception as exc:  # noqa: BLE001
+            raise LeaseStoreUnavailable(str(exc)) from exc
+
+    @staticmethod
+    def _from_row(row) -> Optional[AccountLease]:
+        if row is None:
+            return None
+        return AccountLease(
+            account_alias=str(row[0]), holder_instance_id=str(row[1]),
+            lease_epoch=int(row[2]), acquired_at_ms=int(row[3]),
+            heartbeat_at_ms=int(row[4]), expires_at_ms=int(row[5]),
+            software_version=str(row[6] or ""), git_sha=str(row[7] or ""),
+        )
+
+    def read(self, account_alias: str) -> Optional[AccountLease]:
+        try:
+            with self._conn.cursor() as cur:
+                cur.execute(
+                    "SELECT account_alias, holder_instance_id, lease_epoch, acquired_at_ms, "
+                    "heartbeat_at_ms, expires_at_ms, software_version, git_sha "
+                    "FROM vati.account_runtime_leases WHERE account_alias = %s",
+                    (account_alias,),
+                )
+                row = cur.fetchone()
+            self._conn.rollback()
+            return self._from_row(row)
+        except Exception as exc:  # noqa: BLE001
+            self._conn.rollback()
+            raise LeaseStoreUnavailable(str(exc)) from exc
+
+    def write_if(self, expected: Optional[AccountLease], new: AccountLease) -> bool:
+        try:
+            with self._conn.cursor() as cur:
+                cur.execute(
+                    "SELECT account_alias, holder_instance_id, lease_epoch, acquired_at_ms, "
+                    "heartbeat_at_ms, expires_at_ms, software_version, git_sha "
+                    "FROM vati.account_runtime_leases WHERE account_alias = %s FOR UPDATE",
+                    (new.account_alias,),
+                )
+                current = self._from_row(cur.fetchone())
+                if current != expected:
+                    self._conn.rollback()
+                    return False
+                if current is None:
+                    cur.execute(
+                        "INSERT INTO vati.account_runtime_leases("
+                        "account_alias, holder_instance_id, lease_epoch, acquired_at_ms, "
+                        "heartbeat_at_ms, expires_at_ms, software_version, git_sha"
+                        ") VALUES (%s,%s,%s,%s,%s,%s,%s,%s)",
+                        (new.account_alias, new.holder_instance_id, new.lease_epoch,
+                         new.acquired_at_ms, new.heartbeat_at_ms, new.expires_at_ms,
+                         new.software_version, new.git_sha),
+                    )
+                else:
+                    cur.execute(
+                        "UPDATE vati.account_runtime_leases SET holder_instance_id=%s, "
+                        "lease_epoch=%s, acquired_at_ms=%s, heartbeat_at_ms=%s, expires_at_ms=%s, "
+                        "software_version=%s, git_sha=%s WHERE account_alias=%s",
+                        (new.holder_instance_id, new.lease_epoch, new.acquired_at_ms,
+                         new.heartbeat_at_ms, new.expires_at_ms, new.software_version,
+                         new.git_sha, new.account_alias),
+                    )
+            self._conn.commit()
+            return True
+        except Exception as exc:  # noqa: BLE001
+            self._conn.rollback()
+            raise LeaseStoreUnavailable(str(exc)) from exc
+
+    def close(self) -> None:
+        self._conn.close()
+
+
 class AccountRuntimeLease:
     """Acquire, renew and fence one account alias across hosts."""
 
@@ -217,6 +304,6 @@ class AccountRuntimeLease:
 
 __all__ = [
     "PERMITS_ORDERS",
-    "AccountLease", "AccountRuntimeLease", "InMemoryLeaseStore",
+    "AccountLease", "AccountRuntimeLease", "InMemoryLeaseStore", "PostgresLeaseStore",
     "LeaseOutcome", "LeaseResult", "LeaseStore", "LeaseStoreUnavailable",
 ]
