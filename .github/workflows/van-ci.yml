@@ -77,6 +77,14 @@ jobs:
       - name: Red-team register self-test
         run: pytest -q tests/contracts/test_red_team_register.py
 
+      # Rev 1.5 §43 / RB-058 — the production acceptance register. The verdict is
+      # recomputed from the rows rather than read, so the ledger cannot say accepted
+      # while one of its own hundred and four requirements says otherwise.
+      - name: Production acceptance (§43)
+        run: python tools/ci/production_acceptance.py
+      - name: Production acceptance self-test
+        run: pytest -q tests/contracts/test_production_acceptance.py
+
       # The maturity gate must fail on the defect shape it exists to prevent.
       # A gate that only ever passes proves nothing.
       - name: Maturity gate self-test

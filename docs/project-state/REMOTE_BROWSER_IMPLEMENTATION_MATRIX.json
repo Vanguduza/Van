@@ -93,10 +93,10 @@
       "id": "RB-003",
       "name": "dependency admission",
       "group": "phase0",
-      "status": "BUILT_UNWIRED",
+      "status": "WIRED_UNPROVEN",
       "built": true,
-      "wired": false,
-      "reachable": false,
+      "wired": true,
+      "reachable": true,
       "live": false,
       "verified": false,
       "observed": false,
@@ -104,22 +104,23 @@
       "certified": false,
       "component_refs": [],
       "ledger_expectation": "NONE",
-      "producer": null,
-      "consumer": null,
+      "producer": "registries/remote_browser_dependencies.json",
+      "consumer": "android/app/build.gradle.kts, checked by CI",
       "authority": "docs/VAN_REMOTE_BROWSER_PRODUCTION_BLUEPRINT_REV_1_5.md \u00a732",
       "evidence_refs": [
         "registries/remote_browser_dependencies.json"
       ],
-      "tests": [],
+      "tests": [
+        "tests/contracts/test_remote_browser_dependencies.py"
+      ],
       "external_gates": [
-        "webrtc-sdk upstream source revision unresolved (\u00a732.1)",
-        "S24 H.264 MediaCodec + DataChannel canary",
-        "sherpa-onnx release and voice models absent",
-        "stream-host runtime identities unprovisioned"
+        "webrtc-sdk's upstream source revision, which its publisher does not state (\u00a732.1); the artefact is admitted by measured digest and that is a weaker claim than a reviewed source",
+        "an S24 H.264 MediaCodec and DataChannel canary, which needs the handset",
+        "sherpa-onnx and the voice models, which owner decision 2 declined"
       ],
       "transport_independent": false,
       "offline_voice_proven": null,
-      "note": "Android WebRTC and OkHttp digests were measured from the artefacts, not copied. OkHttp deviates from \u00a732.2's candidate: 5.5.0 carries Kotlin 2.1 metadata and this project compiles with Kotlin 1.9.24, so 4.12.0 is admitted instead."
+      "note": "\u00a732's admission record, and the row was understated: the decision is made, written down and checked on every CI run.\n\nSeven tests read the registry against the build, and the one that carries the most weight is not the digest check \u2014 it is that a version bump in `build.gradle.kts` leaves the registry describing an artefact nobody is shipping, so the recorded digest would certify a file that is not in the APK. Nothing re-downloads: that happens when a dependency is admitted, and treating a test run as a supply-chain check would be \u00a742.5's failure one layer down.\n\nWhat remains external is stated rather than rounded away: `webrtc-sdk` is admitted by a digest measured from the published artefact, and its upstream source revision is not something the publisher states."
     },
     {
       "schema": "van-implementation-matrix/1",
@@ -1773,10 +1774,10 @@
       "id": "RB-057",
       "name": "external gate update",
       "group": "certification",
-      "status": "NOT_STARTED",
-      "built": false,
-      "wired": false,
-      "reachable": false,
+      "status": "WIRED_UNPROVEN",
+      "built": true,
+      "wired": true,
+      "reachable": true,
       "live": false,
       "verified": false,
       "observed": false,
@@ -1784,16 +1785,19 @@
       "certified": false,
       "component_refs": [],
       "ledger_expectation": "NONE",
-      "producer": null,
-      "consumer": null,
+      "producer": "docs/EXTERNAL_GATES.md",
+      "consumer": "the owner, deciding what to provision next",
       "authority": "docs/VAN_REMOTE_BROWSER_PRODUCTION_BLUEPRINT_REV_1_5.md \u00a743",
       "evidence_refs": [],
-      "tests": [],
+      "tests": [
+        "tests/contracts/test_production_acceptance.py"
+      ],
       "external_gates": [
-        "nothing external: this is not built, and a commit to this repository is what it needs"
+        "the gates themselves; this row is the record of what they are, and a record cannot close a gate it describes"
       ],
       "transport_independent": false,
-      "offline_voice_proven": null
+      "offline_voice_proven": null,
+      "note": "\u00a743's \"external gates updated\". Four Remote Browser rows were added or corrected in this pass: owner-S24 provisioning, the release build's binding, the \u00a738 red-team matrix and the \u00a743 acceptance register.\n\nThe correction worth naming is RB-121's. Its old row said the device \"applies no manifest at all and keeps what it was provisioned with\" if no key is compiled in, which was true and read as tolerable. It is not: with \u00a70D.2's forms removed there is nothing else to provision it with, so the release build now refuses to be produced without an anchor rather than shipping one that waits forever."
     },
     {
       "schema": "van-implementation-matrix/1",
@@ -1801,10 +1805,10 @@
       "id": "RB-058",
       "name": "production acceptance closure",
       "group": "certification",
-      "status": "NOT_STARTED",
-      "built": false,
-      "wired": false,
-      "reachable": false,
+      "status": "WIRED_UNPROVEN",
+      "built": true,
+      "wired": true,
+      "reachable": true,
       "live": false,
       "verified": false,
       "observed": false,
@@ -1812,16 +1816,19 @@
       "certified": false,
       "component_refs": [],
       "ledger_expectation": "NONE",
-      "producer": null,
-      "consumer": null,
+      "producer": "evidence/van-system-audit/production_acceptance.json",
+      "consumer": "tools/ci/production_acceptance.py, in CI, and docs/PRODUCTION_ACCEPTANCE_LEDGER.md",
       "authority": "docs/VAN_REMOTE_BROWSER_PRODUCTION_BLUEPRINT_REV_1_5.md \u00a743",
       "evidence_refs": [],
-      "tests": [],
+      "tests": [
+        "tests/contracts/test_production_acceptance.py"
+      ],
       "external_gates": [
-        "nothing external: this is not built, and a commit to this repository is what it needs"
+        "forty-four of \u00a743's hundred and four requirements, which need a Browser Stream Host, a carrier, the owner's handset or something the owner provisions; the register names which for each"
       ],
       "transport_independent": false,
-      "offline_voice_proven": null
+      "offline_voice_proven": null,
+      "note": "\u00a743's hundred and four requirements, each with a status: 60 REPOSITORY_PROVEN, 37 BLOCKED_EXTERNAL, 7 OWNER_DEPLOYMENT_DECISION.\n\nThe verdict is recomputed from the rows rather than written, and the checker fails if the stored one disagrees. That is the point of building it as a program: a verdict a person writes at the top of a ledger is written once and never re-derived, and this one cannot go stale.\n\nREPOSITORY_COMPLETE_PENDING_EXTERNAL is the honest answer and it is not a near miss. Nothing in the Runtime, Performance or Stream/control groups can be proven here at all, because none of it exists to be proven against \u2014 and `REPOSITORY_PROVEN` is defined in the register itself as weaker than certification, so the sixty do not round up either."
     },
     {
       "schema": "van-implementation-matrix/1",

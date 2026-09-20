@@ -4,11 +4,11 @@
   "canonical_blueprint": "docs/VAN_FINISHED_PRODUCT_BLUEPRINT_REV_1.md",
   "canonical_audit": "docs/VAN_WHOLE_SYSTEM_IMPLEMENTATION_AUDIT_AND_CERTIFICATION_REV_1.md",
   "created": "2026-09-19",
-  "component_count": 172,
+  "component_count": 174,
   "dispositions": {
     "DELETE": 11,
     "REPLACE": 4,
-    "COMPLETE": 67,
+    "COMPLETE": 69,
     "WIRE": 52
   },
   "by_gate": {
@@ -3299,6 +3299,40 @@
       "runtime_evidence": null,
       "owner_facing_projection": null,
       "remediation_gate": "RB C12",
+      "terminal_state": "EXTERNALLY_BLOCKED_REPOSITORY_COMPLETE",
+      "closure_commits": []
+    },
+    {
+      "n": 173,
+      "component": "The §43 production acceptance register",
+      "path": "evidence/van-system-audit/production_acceptance.json",
+      "maturity_class": "ABSENT",
+      "disposition": "COMPLETE",
+      "rationale": "P1-DOC-007 / RB-058. §43's hundred and four requirements had no status against any of them, and the ledger carried a verdict written once and never re-derived.",
+      "producer": "evidence/van-system-audit/production_acceptance.json",
+      "consumer": "tools/ci/production_acceptance.py, in CI, and docs/PRODUCTION_ACCEPTANCE_LEDGER.md",
+      "production_caller": ".github/workflows/van-ci.yml",
+      "tests": "tests/contracts/test_production_acceptance.py",
+      "runtime_evidence": null,
+      "owner_facing_projection": "the verdict, recomputed rather than asserted",
+      "remediation_gate": "RB C13",
+      "terminal_state": "EXTERNALLY_BLOCKED_REPOSITORY_COMPLETE",
+      "closure_commits": []
+    },
+    {
+      "n": 174,
+      "component": "The Remote Browser closure record",
+      "path": "docs/project-state/REMOTE_BROWSER_CLOSURE_RECORD.md",
+      "maturity_class": "ABSENT",
+      "disposition": "COMPLETE",
+      "rationale": "RB-058's other half: what the programme finished, what it did not, and how to tell without taking anyone's word for it. A document that states counts is a document whose counts go stale, so its numbers are read back out of the registers by a contract test.",
+      "producer": "docs/project-state/REMOTE_BROWSER_CLOSURE_RECORD.md",
+      "consumer": "the owner, deciding what to provision next",
+      "production_caller": "tests/contracts/test_closure_record_is_current.py",
+      "tests": "tests/contracts/test_closure_record_is_current.py",
+      "runtime_evidence": null,
+      "owner_facing_projection": "the four next steps, none of which is a repository change",
+      "remediation_gate": "RB C13",
       "terminal_state": "EXTERNALLY_BLOCKED_REPOSITORY_COMPLETE",
       "closure_commits": []
     }

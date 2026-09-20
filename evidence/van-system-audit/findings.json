@@ -21,8 +21,8 @@
   ],
   "counts": {
     "P0": 21,
-    "P1": 42,
-    "P2": 29,
+    "P1": 43,
+    "P2": 30,
     "P3": 29,
     "P4": 7
   },
@@ -5965,6 +5965,90 @@
         "residual": "A PASS means the repository can demonstrate the refusal, not that a live Remote Browser was attacked and survived. Nine scenarios need a Stream Host, a carrier or a handset and say so.",
         "residual_reason": "Deliberate, and stated in the register itself. NOT VERIFIED is not NOT IMPLEMENTED and neither is substituted for the other.",
         "residual_class": "DELIBERATE_SCOPE",
+        "posture": "fail-closed"
+      }
+    },
+    {
+      "id": "P1-DOC-007",
+      "severity": "P1",
+      "domain": "documentation",
+      "title": "§43's hundred and four acceptance requirements had no register, and a ledger verdict nobody recomputes",
+      "description": "§43 says Remote Browser Rev 1.5 is production complete only when one hundred and four specific things are true, and then lists them by category. Nothing recorded a status against any of them.\n\n`docs/PRODUCTION_ACCEPTANCE_LEDGER.md` existed and carried a verdict at the top — written once, by a person, in September, and never re-derived since. That is the shape of claim this entire programme was commissioned to find: true when written, unchallenged afterwards, and indistinguishable from a claim nobody made.\n\nThe specific risk with an acceptance ledger is worse than with most documents, because the thing at the top is a *verdict*. A reader acts on it.",
+      "requirement": "docs/VAN_REMOTE_BROWSER_PRODUCTION_BLUEPRINT_REV_1_5.md §43",
+      "authority": "VAN Remote Browser Production Blueprint Rev 1.5",
+      "repository_evidence": [
+        "evidence/van-system-audit/production_acceptance.json",
+        "tools/ci/production_acceptance.py",
+        "docs/PRODUCTION_ACCEPTANCE_LEDGER.md"
+      ],
+      "runtime_evidence": [],
+      "affected_components": [
+        "documentation",
+        "ci"
+      ],
+      "root_cause": "A verdict is written at the top of a document and everything below it is the evidence. Nothing reads upward.",
+      "remediation": "Make the register data and the verdict a computation. Read §43 out of the blueprint so a requirement cannot go missing, require a proven row to cite evidence that can be re-run, require every other row to name what is missing, and recompute the verdict from the rows — failing if the stored one disagrees.",
+      "impact": "Documentary and load-bearing: `PRODUCTION_ACCEPTED` is the sentence that would authorise shipping, and nothing stopped it from being true-looking while forty-four requirements were unmet.",
+      "validation_gate": "G0",
+      "current_status": "CLOSED",
+      "remediation_gate": "RB C13",
+      "closure": {
+        "state": "INTEGRATED_AND_EVIDENCED",
+        "summary": "104 requirements, parsed from §43 rather than copied: 60 REPOSITORY_PROVEN, 37 BLOCKED_EXTERNAL, 7 OWNER_DEPLOYMENT_DECISION, verdict REPOSITORY_COMPLETE_PENDING_EXTERNAL.\n\nThe verdict is recomputed by `tools/ci/production_acceptance.py` and the checker fails if the stored one disagrees, which is what makes this a program rather than a document. `REPOSITORY_PROVEN` is defined in the register itself as weaker than certification, and a test asserts that definition still says so — because \"proven\" reads like \"certified\" to anyone who did not write it.\n\nFifteen contract tests, and the ones that matter are the negative ones: a verdict that went accepted, a dropped requirement, an invented one, and evidence renamed out from under a proven row.",
+        "changed": [
+          "evidence/van-system-audit/production_acceptance.json",
+          "tools/ci/production_acceptance.py",
+          "docs/PRODUCTION_ACCEPTANCE_LEDGER.md",
+          ".github/workflows/van-ci.yml"
+        ],
+        "verified_by": [
+          "tests/contracts/test_production_acceptance.py"
+        ],
+        "counterexample": "A checker that always reported PENDING would pass every test that asserts the verdict is not accepted, and would be unable to ever say otherwise. `test_accepted_is_reachable_when_every_row_is_settled` settles every row and requires the checker to accept — so the verdict is withheld by the rows and not by the checker.",
+        "residual": "Sixty rows are REPOSITORY_PROVEN, which is the strongest thing a repository can say and is weaker than certification. Forty-four are not proven at all.",
+        "residual_reason": "Stated in the register, in the ledger and in the closure record, in those words. The programme's distinction: NOT VERIFIED is not NOT IMPLEMENTED, and neither is substituted for the other.",
+        "residual_class": "DELIBERATE_SCOPE",
+        "posture": "fail-closed"
+      }
+    },
+    {
+      "id": "P2-LEDGER-003",
+      "severity": "P2",
+      "domain": "ledger",
+      "title": "The dependency admission row read BUILT_UNWIRED while CI had been checking it on every run",
+      "description": "RB-003 recorded `BUILT_UNWIRED` with no producer, no consumer and no tests. `registries/remote_browser_dependencies.json` records a digest measured for each admitted artefact, `tests/contracts/test_remote_browser_dependencies.py` compares it against what `build.gradle.kts` actually declares, and that has run on every CI job since it was written.\n\nUnderstating is the failure the ledger reconciler exists for, and it is invisible to a gate built to stop overstating. The row's own `external_gates` were correct — the webrtc-sdk upstream revision genuinely is unresolved — and the status was drawn from the gates rather than from the work.",
+      "requirement": "docs/VAN_REMOTE_BROWSER_PRODUCTION_BLUEPRINT_REV_1_5.md §32, §42.5",
+      "authority": "VAN Remote Browser Production Blueprint Rev 1.5",
+      "repository_evidence": [
+        "docs/project-state/REMOTE_BROWSER_IMPLEMENTATION_MATRIX.json",
+        "registries/remote_browser_dependencies.json",
+        "tests/contracts/test_remote_browser_dependencies.py"
+      ],
+      "runtime_evidence": [],
+      "affected_components": [
+        "ledger",
+        "ci"
+      ],
+      "root_cause": "A status set from what is still blocked rather than from what is done. An unresolved external gate on a row does not make the repository's half unbuilt.",
+      "remediation": "Move it to WIRED_UNPROVEN, name the producer, the consumer and the seven tests, and keep the three genuinely external gates stated rather than rounded away.",
+      "impact": "A reader planning the remaining work would have counted the admission record as outstanding and rebuilt something that exists.",
+      "validation_gate": "G0",
+      "current_status": "CLOSED",
+      "remediation_gate": "RB C13",
+      "closure": {
+        "state": "EXTERNALLY_BLOCKED_REPOSITORY_COMPLETE",
+        "summary": "WIRED_UNPROVEN, with the seven tests named. The note keeps the distinction the row lost: `webrtc-sdk` is admitted by a digest measured from the published artefact, and its upstream source revision is not something the publisher states — a weaker claim than a reviewed source, and said rather than implied.",
+        "changed": [
+          "docs/project-state/REMOTE_BROWSER_IMPLEMENTATION_MATRIX.json"
+        ],
+        "verified_by": [
+          "tests/contracts/test_remote_browser_dependencies.py",
+          "tools/ci/ledger_reconcile.py"
+        ],
+        "counterexample": "Calling it WIRED because the tests exist would ignore that nothing re-downloads: the test compares a recorded digest against a declared coordinate, and treating a test run as a supply-chain check would be §42.5's failure one layer down. The row says so.",
+        "residual": "The upstream source revision of `webrtc-sdk`, the S24 MediaCodec canary, and the Sherpa runtime owner decision 2 declined.",
+        "residual_reason": "None is a repository change.",
+        "residual_class": "EXTERNAL_ARTEFACT",
         "posture": "fail-closed"
       }
     }

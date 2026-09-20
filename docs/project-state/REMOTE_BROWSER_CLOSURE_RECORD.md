@@ -1,0 +1,127 @@
+# Remote Browser Rev 1.5 — closure record
+
+**Date:** 2026-09-20
+**Branch:** `claude/van-system-audit-ysgtcd`
+**Authority:** `docs/VAN_REMOTE_BROWSER_PRODUCTION_BLUEPRINT_REV_1_5.md`
+**Verdict:** `REPOSITORY_COMPLETE_PENDING_EXTERNAL`
+
+This is the record of what the Remote Browser programme finished, what it did not, and how
+to tell those apart without taking anyone's word for it. Every number below is produced by
+a checker in CI rather than written here, and each one names the checker.
+
+## The verdict, stated once and not softened
+
+The Remote Browser is **not production accepted** and cannot be from a repository. §43
+names one hundred and four requirements; sixty are proven here and forty-four are not.
+The forty-four are not a backlog. Thirty-seven need a Browser Stream Host, a carrier
+handover or the owner's S24 Ultra, and seven need the owner to provision or accept
+something — a keystore, a voice asset pack, a second ingress, a look at a screen.
+
+Nothing in §43's **Runtime**, **Performance** or **Stream/control topology** groups is
+proven, because none of it exists here to be proven against. Not one frame has been drawn
+anywhere. No TLS handshake has happened in either direction. No latency has been measured.
+
+`REPOSITORY_PROVEN` is the strongest thing this repository can say and it is weaker than
+certification: it means the code demonstrates the behaviour and names what does. It does
+not mean anyone has watched it work on a phone.
+
+## The registers, and what each refuses
+
+| Register | Contents | Checker |
+|---|---|---|
+| `evidence/van-system-audit/findings.json` | 138 findings, all closed: 74 `INTEGRATED_AND_EVIDENCED`, 58 `EXTERNALLY_BLOCKED_REPOSITORY_COMPLETE`, 6 `DELIBERATELY_REMOVED_CANON_CORRECTED` | `tools/ci/maturity_gate.py` — refuses a closure state that claims more than its residual class allows |
+| `evidence/van-system-audit/component_ledger.json` | 174 components, all at a terminal state: 111 integrated, 56 externally blocked, 7 deliberately removed | `tools/ci/maturity_gate.py`, `tools/ci/ledger_reconcile.py` — the first refuses a ledger that overstates, the second one that understates |
+| `docs/project-state/REMOTE_BROWSER_IMPLEMENTATION_MATRIX.json` | 122 rows: 89 `WIRED_UNPROVEN`, 21 `NOT_STARTED`, 7 `BUILT_UNWIRED`, 3 `BLOCKED`, 2 `VERIFIED_UNCERTIFIED` | `tools/ci/ledger_reconcile.py` — refuses a row whose booleans contradict its status, and an empty `external_gates` |
+| `evidence/van-system-audit/red_team_register.json` | §38's 66 scenarios: 57 `PASS`, 9 `BLOCKED_EXTERNAL`, **0 assumed** | `tools/ci/red_team_register.py` — every `PASS` must cite a runnable pytest node id |
+| `evidence/van-system-audit/production_acceptance.json` | §43's 104 requirements: 60 proven, 37 blocked external, 7 owner deployment | `tools/ci/production_acceptance.py` — recomputes the verdict from the rows |
+| `docs/project-state/AUTHORITY_MAP.yaml` | every invariant, owned once | `tools/ci/authority_map.py` |
+
+Six registers, six checkers, all six in `.github/workflows/van-ci.yml`, and each with a
+self-test — because a gate that only ever passes proves nothing.
+
+## What the twenty-one `NOT_STARTED` rows are
+
+Every one needs something no commit can supply, and each row says which:
+
+- **the Browser Stream Host itself** (RB-011 display, RB-012 capture, RB-013 H.264 encode,
+  RB-014 Opus, RB-015 ICE/STUN, RB-016 TURN, RB-033 Chromium crash recovery) — §13 makes
+  the host a separately deployed component and RB-002 is an owner decision that has not
+  been taken;
+- **canaries against real hardware** (RB-053 latency, RB-054 S24 device, RB-055 production
+  stream-host, RB-056 soak, RB-085 offline voice S24, RB-086 voice-through-failover,
+  RB-092 split-screen, RB-093 Samsung pop-up, RB-112 second-device refusal, RB-114
+  zero-configuration acceptance, RB-120 S24 attestation preflight) — a canary is a
+  measurement, and there is nothing to measure;
+- **a local ASR/TTS runtime the owner declined** (RB-073 Sherpa-ONNX, RB-075 ASR fallback,
+  RB-078 bundled TTS) — owner decision 2, with minSdk raised to 31 so the platform
+  recogniser is always present, which is the other half of that decision.
+
+## The seven `BUILT_UNWIRED` rows, and why that is the honest status
+
+RB-010 (stream-host provisioning), RB-116 (Trading Core → Stream Host mTLS), RB-118
+(profile storage) are built and have nothing to be wired to. RB-072, RB-074, RB-076,
+RB-079 are the offline voice decisions: implemented, executed in the JVM harness, and
+waiting on a voice asset pack that does not exist.
+
+`BUILT_UNWIRED` is the status §42.5 exists to make sayable. None of these seven is hidden:
+the reconciler refuses a row whose booleans contradict its status, and §43's "implementation
+matrix contains no hidden `BUILT_UNWIRED` item" is satisfied by all seven declaring it.
+
+## The three `BLOCKED` rows
+
+RB-002 (owner streaming-host decision), RB-040 and RB-041 (Stagehand live gate and
+same-session attach). The first is a decision; the other two wait on it.
+
+## What this pass found that reading would not have
+
+Four defects in this final stretch had one property in common: every component involved was
+correct, and the system was broken anyway.
+
+**P0-SESS-001.** `POST /v1/session/resume` grants a new path epoch on every accepted
+resume. `accept_upstream` fences any envelope that does not carry it. The phone kept the
+epoch `/open` gave it. Since the device resumes on `onOpen`, **every owner message over
+the durable session was refused from the first healthy connect** — socket open, status
+screen green, nothing logged that looks like a fault. Found by probing the running service,
+not by reading either half, and the session's only tests drove the service directly, where
+the client's arithmetic does not exist.
+
+**P0-SEC-013.** Two screens asked the owner to type a Gateway address and a pairing code —
+the first and fifth entries on §0D.2's list of fields a production build must never expose.
+A complete compromise of the assistant was one convincing message away, on either of two
+screens.
+
+**P2-AND-018.** A second parser for the build-time trust anchor nearly shipped in the fix
+for the above. It read a `kid=PEM` string as JSON, would have reported every correctly
+configured release APK as having no anchor, and the only symptom would have been a phone
+sitting on "waiting for the installer" forever — with every test green.
+
+**P1-OBS-005.** §27's quality controller was correct, unit-tested and had no caller. The
+rule that VAN must not silently consume hours of the owner's mobile data was enforced by a
+class with no instances.
+
+## The lesson this pass added to the programme's list
+
+A mutation survived its first run: a rate limiter that recorded refused packets. The test
+that should have caught it sent ten thousand refusals at a single timestamp — which
+recovers under either implementation, because one timestamp ages out in one step. The test
+exercised exactly the right line and asserted something true either way.
+
+What separates them is a flood spread over time that then stops: the correct code admits
+the owner's very next packet and the broken one never admits another, because each refusal
+extends the window that caused it. **A test can be about the right thing, run the right
+code, and still assert the wrong consequence.**
+
+## What to do next, in order
+
+1. **RB-002** — decide whether to provision a Browser Stream Host. Twenty of the
+   twenty-one `NOT_STARTED` rows and most of §43's blocked requirements are downstream of
+   this one decision.
+2. **A production keystore and a connectivity signing key.** Without both, `assembleRelease`
+   refuses to produce an APK at all — deliberately, since a release with no trust anchor
+   installs and waits forever.
+3. **Run `tools/provisioning/provision_owner_device.py` against the owner's S24.** It has
+   never been run against a device, and RB-114's acceptance canary is exactly that.
+4. **The device canaries**, once there is something to run them against.
+
+Nothing on that list is a repository change, and that is the closure claim: the
+repository's half is finished, and the registers name every place it stops.
