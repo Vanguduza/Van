@@ -187,6 +187,22 @@ def build_strategy_handlers(settings: StrategyPromotionSettings):
                 if not ok:
                     raise HTTPException(503, "VATI ledger chain verification failed")
 
+                subject = f"{strategy_id}:{target.value}:{cert.validation_hash}"
+                try:
+                    verified = settings.owner_authority.verify(
+                        token,
+                        act="capsule-promote",
+                        subject=subject,
+                        now_unix=approved_at,
+                        single_use=False,
+                    )
+                except OwnerAuthorityError as exc:
+                    raise HTTPException(
+                        403, f"owner-signed promotion authority required: {exc}") from exc
+                if _authority_ref_already_used(ledger, verified.ref):
+                    raise HTTPException(
+                        409, "owner promotion authority has already been consumed")
+
                 registry = CapsuleRegistry.load_dir(capsule_dir)
                 # The ledger is the capsule-state authority across a crash between
                 # event commit and file projection. Reconstruct it before evaluating
@@ -204,22 +220,6 @@ def build_strategy_handlers(settings: StrategyPromotionSettings):
                         409,
                         "certificate capsule hash does not match the current strategy revision",
                     )
-
-                subject = f"{strategy_id}:{target.value}:{cert.validation_hash}"
-                try:
-                    verified = settings.owner_authority.verify(
-                        token,
-                        act="capsule-promote",
-                        subject=subject,
-                        now_unix=approved_at,
-                        single_use=False,
-                    )
-                except OwnerAuthorityError as exc:
-                    raise HTTPException(
-                        403, f"owner-signed promotion authority required: {exc}") from exc
-                if _authority_ref_already_used(ledger, verified.ref):
-                    raise HTTPException(
-                        409, "owner promotion authority has already been consumed")
 
                 registry.authority = _PreverifiedAuthority(
                     verified, act="capsule-promote", subject=subject)
