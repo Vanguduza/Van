@@ -1773,17 +1773,20 @@
       "path": "trading/vati/authority.py",
       "maturity_class": "ABSENT",
       "disposition": "COMPLETE",
-      "rationale": "Every trading authority surface checked whether a string was non-empty; no algorithm, key, authority record, expiry or revocation existed anywhere",
+      "rationale": "Trading owner-authority surfaces verify cryptographic tokens against registered keys, exact act/subject, expiry and revocation instead of accepting non-empty strings. Long-lived services consume nonces in-process; the new capsule-promotion workflow additionally makes replay durable across commander restart by recording the verified authority reference in the VATI CAPSULE_STATE ledger and refusing reuse before mutation.",
       "remediation_gate": "GATE 3",
       "producer": "the owner's device, signing a van-oa1 token",
-      "consumer": "mandate admission, kill-switch clear, owner halt, capsule promotion, ticket confirmation, the commander halt",
-      "production_caller": "trading/vati/risk/mandate.py, risk/governor.py, app/runner.py, strategies/capsule.py, commander/app.py, backend/van_gateway/trading/service.py",
+      "consumer": "mandate admission, kill-switch clear, owner halt, gateway ticket confirmation, and the owner-only certificate-bound capsule promotion path",
+      "production_caller": "trading/vati/risk/mandate.py, risk/governor.py, app/runner.py, trading/commander/strategies.py, commander/app.py, backend/van_gateway/trading/service.py, backend/van_gateway/app.py",
       "tests": [
         "trading/tests/test_owner_authority.py",
-        "backend/tests/test_trading_api.py::test_halt_requires_internal_token_and_owner_signature_and_appends_event"
+        "trading/tests/test_capsule_promotion_workflow.py",
+        "backend/tests/test_trading_api.py::test_halt_requires_internal_token_and_owner_signature_and_appends_event",
+        "backend/tests/test_trading_api.py::test_strategy_promotion_requires_exact_device_signature_and_a4_proof"
       ],
       "runtime_evidence": [
-        "the exact strings each surface used to accept are refused by that surface's own test; a token for one act or subject does not work on another; act tokens are single use"
+        "owner-authority tests refuse empty/forged/misdirected/expired/reused authority within a service lifetime",
+        "capsule-promotion restart test constructs a fresh commander/verifier and proves the same verified owner-authority reference is still refused from the durable VATI ledger"
       ],
       "owner_facing_projection": "the authority reference recorded in the ledger and the audit row",
       "terminal_state": "INTEGRATED_AND_EVIDENCED"
