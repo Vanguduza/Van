@@ -34,6 +34,7 @@ class LearningReplayReport:
     capsule_multipliers: int
     broker_multipliers: int
     demotions_restored: int
+    owner_promotions_restored: int = 0
 
 
 def _engines_for_strategy(engines_by_symbol: Mapping[str, object], strategy_id: str):
@@ -45,50 +46,115 @@ def _engines_for_strategy(engines_by_symbol: Mapping[str, object], strategy_id: 
         yield engine
 
 
-def _restore_exact_capsule_events(ledger, engines_by_symbol: Mapping[str, object]) -> int:
-    """Replay durable learning demotions; full capsule payload wins when present."""
-    restored = 0
+def _restore_capsule_state_events(
+    ledger, engines_by_symbol: Mapping[str, object]
+) -> tuple[int, int]:
+    """Replay durable capsule-state events only along the current hash lineage.
+
+    This handles both reduce-only automatic demotions and owner-signed promotions.
+    A repository file may already contain a later projection than an older ledger
+    event, so an event whose supersedes hash is not the currently loaded capsule
+    is stale for this runtime and must never overwrite the newer revision.
+    """
+    demotions = 0
+    promotions = 0
     for event in ledger.iter(EventKind.CAPSULE_STATE):
         p = event.payload
-        if p.get("authority") != "AUTOMATIC_DEMOTION_ONLY":
+        authority = str(p.get("authority") or "")
+        by = str(p.get("by") or "")
+        if authority == "AUTOMATIC_DEMOTION_ONLY":
+            if by != "vati-learning":
+                continue
+            kind = "demotion"
+        elif authority == "OWNER_SIGNED_PROMOTION":
+            if by != "owner":
+                continue
+            kind = "promotion"
+        else:
             continue
-        if p.get("by") != "vati-learning":
-            continue
+
         strategy_id = str(p.get("strategy_id") or "")
-        if not strategy_id:
-            continue
         target_raw = str(p.get("to") or "")
+        if not strategy_id or not target_raw:
+            continue
         try:
             target = StrategyState(target_raw)
         except ValueError:
             continue
-        if target not in (
-            StrategyState.DEGRADED, StrategyState.SHADOW, StrategyState.SUSPENDED
-        ):
-            continue
+
         exact = p.get("capsule")
         for engine in _engines_for_strategy(engines_by_symbol, strategy_id):
             current = engine.registry.get(strategy_id)
+
             if isinstance(exact, dict):
                 try:
                     candidate = Capsule(dict(exact))
-                    if candidate.capsule_hash != str(p.get("capsule_hash") or candidate.capsule_hash):
+                    if candidate.capsule_hash != str(
+                        p.get("capsule_hash") or candidate.capsule_hash
+                    ):
                         continue
+                    if candidate.state is not target:
+                        continue
+                    if current.capsule_hash == candidate.capsule_hash:
+                        continue
+                    supersedes = str(
+                        candidate.data.get("supersedes")
+                        or p.get("supersedes")
+                        or ""
+                    )
+                    if supersedes != current.capsule_hash:
+                        # Event belongs to an older/different lineage. Never
+                        # roll a newer projected capsule backward.
+                        continue
+
+                    if kind == "promotion":
+                        owner_ref = str(p.get("owner_authority_ref") or "")
+                        if not owner_ref.startswith("owner-authority:"):
+                            continue
+                        if candidate.data.get("approval_signature_ref") != owner_ref:
+                            continue
+                        if str(candidate.data.get("validation_hash") or "") != str(
+                            p.get("validation_hash") or ""
+                        ):
+                            continue
+                    elif target not in (
+                        StrategyState.DEGRADED,
+                        StrategyState.SHADOW,
+                        StrategyState.SUSPENDED,
+                    ):
+                        continue
+
                     engine.registry.add(candidate)
-                    restored += 1
+                    if kind == "promotion":
+                        promotions += 1
+                    else:
+                        demotions += 1
                     continue
                 except Exception:
-                    # Never promote malformed durable state into runtime truth.
-                    pass
+                    # Malformed durable state is not promoted into runtime truth.
+                    continue
+
+            # Older automatic-demotion events did not carry the full capsule.
+            # They remain replayable only from the exact parent hash.
+            if kind != "demotion":
+                continue
+            if target not in (
+                StrategyState.DEGRADED,
+                StrategyState.SHADOW,
+                StrategyState.SUSPENDED,
+            ):
+                continue
+            if str(p.get("supersedes") or "") != current.capsule_hash:
+                continue
             if current.state in ACTIVE_STATES and current.state is not target:
                 engine.registry.demote(
                     strategy_id,
                     target,
                     reason=f"replayed durable automatic demotion {event.hash}",
                 )
-                restored += 1
-    return restored
+                demotions += 1
 
+    return demotions, promotions
 
 def restore_learning_runtime(ledger, learning, engines_by_symbol: Mapping[str, object]) -> LearningReplayReport:
     """Rebuild reduce-only learning inputs before a restarted runtime can decide."""
@@ -195,13 +261,16 @@ def restore_learning_runtime(ledger, learning, engines_by_symbol: Mapping[str, o
             engine.m.broker_liquidity[symbol] = effective
             broker_multipliers += 1
 
-    exact_demotions = _restore_exact_capsule_events(ledger, engines_by_symbol)
+    exact_demotions, owner_promotions = _restore_capsule_state_events(
+        ledger, engines_by_symbol
+    )
     return LearningReplayReport(
         tca_observations=tca_n,
         health_observations=health_n,
         capsule_multipliers=capsule_multipliers,
         broker_multipliers=broker_multipliers,
         demotions_restored=exact_demotions,
+        owner_promotions_restored=owner_promotions,
     )
 
 
