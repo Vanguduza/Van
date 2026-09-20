@@ -6,9 +6,16 @@ import androidx.security.crypto.EncryptedSharedPreferences
 import androidx.security.crypto.MasterKey
 import com.dial.van.BuildConfig
 import com.dial.van.security.OwnerApprovalKeyManager
+import com.dial.van.security.OwnerAuthorityToken
+import com.dial.van.trading.AccountOnboarding
 import com.dial.van.visual.VanLiveVisualState
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.withContext
+import kotlinx.serialization.json.JsonArray
+import kotlinx.serialization.json.JsonObject
+import kotlinx.serialization.json.JsonPrimitive
+import kotlinx.serialization.json.buildJsonObject
+import kotlinx.serialization.json.put
 import org.json.JSONArray
 import org.json.JSONObject
 import java.io.IOException
@@ -106,6 +113,22 @@ class VanGatewayClient(context: Context) {
 
     fun newA4ApprovalSignature(): Signature = approvalKeys.newSigningSignature()
 
+    fun prepareTradingPromotionAuthority(
+        strategyId: String,
+        targetState: String,
+        validationHash: String,
+        issuedAtUnix: Long = System.currentTimeMillis() / 1000L,
+    ): OwnerAuthorityToken.Prepared {
+        require(strategyId.isNotBlank() && targetState.isNotBlank() && validationHash.isNotBlank()) {
+            "promotion_authority_subject_incomplete"
+        }
+        return approvalKeys.prepareOwnerAuthority(
+            act = "capsule-promote",
+            subject = "$strategyId:$targetState:$validationHash",
+            issuedAtUnix = issuedAtUnix,
+        )
+    }
+
     suspend fun pairThisDevice(
         gatewayUrl: String,
         pairingToken: String,
@@ -176,6 +199,102 @@ class VanGatewayClient(context: Context) {
 
     suspend fun tradingBars(symbol: String, timeframe: String = "H1", limit: Int = 300): String = withContext(Dispatchers.IO) {
         rawGet("/v1/trading/bars?symbol=${encodeQuery(symbol)}&timeframe=${encodeQuery(timeframe)}&limit=$limit")
+    }
+
+    suspend fun tradingPromotionCandidates(): String = withContext(Dispatchers.IO) {
+        rawGet("/v1/trading/strategies/promotion-candidates")
+    }
+
+    private fun tradingPromotionBody(
+        strategyId: String,
+        targetState: String,
+        ownerSignatureRef: String,
+        certificate: JsonObject,
+        evidenceRefs: List<String>,
+        issuedAtUnix: Long,
+        approvalProof: JsonObject? = null,
+    ): JsonObject {
+        val id = deviceId ?: error("not_enrolled")
+        val secret = deviceSecret ?: error("not_enrolled")
+        val authorityBody = buildJsonObject {
+            put("strategy_id", strategyId)
+            put("target_state", targetState)
+            put("owner_signature_ref", ownerSignatureRef)
+            put("certificate", certificate)
+            put("evidence_refs", JsonArray(evidenceRefs.map(::JsonPrimitive)))
+        }
+        val digest = AccountOnboarding.sha256Hex(
+            AccountOnboarding.canonicalJson(authorityBody).toByteArray(StandardCharsets.UTF_8)
+        )
+        val canonical = listOf(
+            "trading-strategy-promotion",
+            id,
+            issuedAtUnix.toString(),
+            digest,
+        ).joinToString("|")
+        return buildJsonObject {
+            put("device_id", id)
+            put("issued_at_unix", issuedAtUnix)
+            put("signature", hmacSha256(secret, canonical))
+            put("strategy_id", strategyId)
+            put("target_state", targetState)
+            put("owner_signature_ref", ownerSignatureRef)
+            put("certificate", certificate)
+            put("evidence_refs", JsonArray(evidenceRefs.map(::JsonPrimitive)))
+            if (approvalProof != null) put("approval_proof", approvalProof)
+        }
+    }
+
+    suspend fun tradingPromotionChallenge(
+        strategyId: String,
+        targetState: String,
+        ownerSignatureRef: String,
+        certificate: JsonObject,
+        evidenceRefs: List<String>,
+        issuedAtUnix: Long = System.currentTimeMillis() / 1000L,
+    ): Pair<Int, String> = withContext(Dispatchers.IO) {
+        tradingPromotionPost(
+            "/v1/trading/strategies/promotion-challenge",
+            tradingPromotionBody(
+                strategyId, targetState, ownerSignatureRef,
+                certificate, evidenceRefs, issuedAtUnix,
+            ),
+        )
+    }
+
+    suspend fun tradingPromoteStrategy(
+        strategyId: String,
+        targetState: String,
+        ownerSignatureRef: String,
+        certificate: JsonObject,
+        evidenceRefs: List<String>,
+        approvalProof: JsonObject,
+        issuedAtUnix: Long = System.currentTimeMillis() / 1000L,
+    ): Pair<Int, String> = withContext(Dispatchers.IO) {
+        tradingPromotionPost(
+            "/v1/trading/strategies/promote",
+            tradingPromotionBody(
+                strategyId, targetState, ownerSignatureRef,
+                certificate, evidenceRefs, issuedAtUnix, approvalProof,
+            ),
+        )
+    }
+
+    private fun tradingPromotionPost(path: String, body: JsonObject): Pair<Int, String> {
+        val conn = (URL("$baseUrl$path").openConnection() as HttpURLConnection).apply {
+            requestMethod = "POST"
+            setRequestProperty("Content-Type", "application/json")
+            applyIngressAuth(this)
+            doOutput = true
+            connectTimeout = 15_000
+            readTimeout = 60_000
+        }
+        conn.outputStream.use {
+            it.write(body.toString().toByteArray(StandardCharsets.UTF_8))
+        }
+        val code = conn.responseCode
+        val stream = if (code in 200..299) conn.inputStream else conn.errorStream
+        return code to (stream?.bufferedReader()?.use { it.readText() } ?: "{}")
     }
 
     suspend fun tradingAccountAction(
