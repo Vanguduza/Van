@@ -244,3 +244,20 @@ def test_vati_serve_reaches_account_coordinator_for_multi_instrument_config(monk
     assert rc == 0
     assert calls == ["constructed", "built", "started", "stepped"]
     assert '"cycles": 1' in capsys.readouterr().out
+
+
+def test_event_kind_source_has_no_duplicate_enum_member_names():
+    import ast
+    import pathlib
+
+    tree = ast.parse(pathlib.Path("trading/vati/core/events.py").read_text())
+    event_kind = next(
+        n for n in tree.body
+        if isinstance(n, ast.ClassDef) and n.name == "EventKind"
+    )
+    names = [
+        target.id
+        for stmt in event_kind.body if isinstance(stmt, ast.Assign)
+        for target in stmt.targets if isinstance(target, ast.Name)
+    ]
+    assert len(names) == len(set(names))
