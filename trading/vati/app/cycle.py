@@ -239,7 +239,17 @@ class DecisionCycle:
             self._entries[intent.trade_intent_id] = {"entry": rec.average_fill or intent.entry, "stop": intent.stop, "direction": intent.direction, "strategy_id": intent.strategy_id, "cost_pct": cost, "decision_price": intent.entry}
             if rec.average_fill is not None and rec.filled_qty > ZERO:
                 tca = compute_tca(rec, direction=intent.direction, qty=rec.filled_qty, value_per_unit=cfg.contract.value_per_price_unit_per_lot if cfg.contract.loss_model is LossModel.STOP_DISTANCE else Decimal(1), modelled_cost_pct=cost)
-                self._log(EventKind.TCA_RECORD, tca.as_dict(), now_ms=now_ms, corr=intent.trade_intent_id)
+                tca_payload = tca.as_dict()
+                if self.learning is not None:
+                    tca_payload |= {
+                        "learning_environment": self.learning.environment.value,
+                        "broker": self.learning.broker,
+                        "symbol": cfg.symbol,
+                        "session": state.session.value,
+                        "event_window": state.event_window.value,
+                        "rejected": False,
+                    }
+                self._log(EventKind.TCA_RECORD, tca_payload, now_ms=now_ms, corr=intent.trade_intent_id)
                 self._entries[intent.trade_intent_id]["cost_ratio"] = tca.cost_ratio
                 if self.learning is not None:
                     self.learning.on_tca(symbol=cfg.symbol, session=state.session.value, event_window=state.event_window.value, cost_ratio=tca.cost_ratio, slippage=tca.slippage)
@@ -296,5 +306,5 @@ class DecisionCycle:
                 new = self.engine.registry.demote(rv.strategy_id, target, reason=f"learning health {adj.multiplier}: {'; '.join(self.learning.health.verdict(rv.strategy_id).reasons)}")
                 self.learning.demotions.append((rv.strategy_id, target.value))
                 self._log(EventKind.CAPSULE_STATE, {"strategy_id": rv.strategy_id, "from": cap.state.value, "to": target.value, "capsule_hash": new.capsule_hash, "supersedes": cap.capsule_hash,
-                                                    "by": "vati-learning", "authority": "AUTOMATIC_DEMOTION_ONLY"}, now_ms=now_ms, corr=intent_id)
+                                                    "capsule": new.data, "by": "vati-learning", "authority": "AUTOMATIC_DEMOTION_ONLY"}, now_ms=now_ms, corr=intent_id)
                 metrics.inc("vati_capsule_demotions_total", strategy=rv.strategy_id, to=target.value)
