@@ -193,6 +193,32 @@ def check_required_production_joins() -> list[str]:
     return failures
 
 
+def check_certificate_producer_boundary() -> list[str]:
+    """Only the certificate module and canonical builder may instantiate certs."""
+    allowed = {
+        "vati/validation/certificates.py",
+        "vati/validation/builder.py",
+    }
+    constructors = {"StrategyValidationCertificate", "FeatureValidationCertificate"}
+    failures: list[str] = []
+    for path in (ROOT / "vati").rglob("*.py"):
+        rel = path.relative_to(ROOT).as_posix()
+        if rel in allowed:
+            continue
+        try:
+            tree = ast.parse(path.read_text())
+        except SyntaxError:
+            continue
+        for call in (n for n in ast.walk(tree) if isinstance(n, ast.Call)):
+            name = call.func.id if isinstance(call.func, ast.Name) else (
+                call.func.attr if isinstance(call.func, ast.Attribute) else "")
+            if name in constructors:
+                failures.append(
+                    f"certificate-producer-boundary: {rel} constructs {name} directly — "
+                    "use vati.validation.builder so statistics and provenance are derived")
+    return failures
+
+
 def main() -> int:
     failures: list[str] = []
     for rule in RULES:
@@ -202,13 +228,14 @@ def main() -> int:
     failures.extend(check_allocator_v0_ignores_confidence())
     failures.extend(check_no_trading_table_in_gateway_schema())
     failures.extend(check_required_production_joins())
+    failures.extend(check_certificate_producer_boundary())
 
     if failures:
         print("Architecture guardrails FAILED:\n", file=sys.stderr)
         for f in failures:
             print(f"  - {f}", file=sys.stderr)
         return 1
-    print(f"Architecture guardrails OK ({len(RULES)} rules + confidence + store placement + production joins)")
+    print(f"Architecture guardrails OK ({len(RULES)} rules + confidence + store placement + production joins + certificate producer)")
     return 0
 
 
