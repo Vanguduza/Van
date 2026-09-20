@@ -59,6 +59,8 @@ class StrategyValidationCertificate:
     strategy_version: str
     capsule_hash: str
     data_manifest_hash: str
+    #: Immutable validation outputs/manifests that produced the statistics.
+    evidence_refs: tuple[str, ...]
     feature_set_version: str
     cost_model_revision: str
     stats: ValidationStatistics
@@ -79,6 +81,7 @@ class StrategyValidationCertificate:
     def as_dict(self) -> dict:
         d = {k: v for k, v in self.__dict__.items() if k not in ("stats", "validation_hash")}
         d["stats"] = self.stats.as_dict()
+        d["evidence_refs"] = list(self.evidence_refs)
         d["feature_certificate_refs"] = list(self.feature_certificate_refs)
         d["regime_breakdown"] = dict(self.regime_breakdown)
         d["cpcv_configuration"] = dict(self.cpcv_configuration)
@@ -116,6 +119,8 @@ def evaluate_strategy_certificate(
             reasons.append(f"{name}:{value}")
     if not cert.data_manifest_hash:
         reasons.append("no_data_manifest")
+    if not cert.evidence_refs or any(not str(ref).strip() for ref in cert.evidence_refs):
+        reasons.append("no_validation_evidence_refs")
     return (not reasons), tuple(reasons)
 
 
@@ -209,40 +214,3 @@ __all__ = [
     "FeatureValidationCertificate", "StrategyValidationCertificate",
     "classify_feature_certificate", "evaluate_strategy_certificate",
 ]
-
-
-def passing_certificate(
-    *,
-    strategy_id: str,
-    strategy_version: str = "1.0.0",
-    capsule_hash: str = "",
-    data_manifest_hash: str = "manifest:test",
-    feature_set_version: str = "features/1.0.0",
-    cost_model_revision: str = "costs/1.0.0",
-) -> StrategyValidationCertificate:
-    """A certificate that meets the policy. Test and tooling helper.
-
-    It exists so callers construct valid evidence the same way rather than each
-    inventing a shape; it does not weaken the gate, because the gate re-checks
-    every field and the seal.
-    """
-    return StrategyValidationCertificate(
-        certificate_id=f"svc_{strategy_id}",
-        strategy_id=strategy_id,
-        strategy_version=strategy_version,
-        capsule_hash=capsule_hash,
-        data_manifest_hash=data_manifest_hash,
-        feature_set_version=feature_set_version,
-        cost_model_revision=cost_model_revision,
-        stats=ValidationStatistics(
-            observed_sharpe=0.6, dsr_probability=0.99, pbo_probability=0.05,
-            n_trials=1, n_observations=250, walk_forward_windows=5,
-        ),
-        expectancy_R=0.35, expectancy_lower_bound_R=0.22,
-        profit_factor=1.6, max_drawdown=0.08,
-        cost_stress_2x=GREEN, latency_slippage_stress=GREEN,
-        parameter_perturbation_stability=GREEN, leakage_switch_result=GREEN,
-    ).sealed()
-
-
-__all__.append("passing_certificate")
