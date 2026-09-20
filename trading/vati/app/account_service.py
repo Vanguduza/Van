@@ -189,9 +189,19 @@ class AccountCoordinatorService:
                 for sid in spec.capsules
             }
             engine = OpportunityEngine(capsule_registry, implementations, mandate)
-            regime = RegimeEngine()
+            primary_regime = RegimeEngine()
+            required_timeframes = {spec.timeframe}
+            for capsule in chosen_capsules:
+                contract = TimeframeContract.from_capsule(capsule.data)
+                if contract is not None:
+                    required_timeframes.update(contract.required_timeframes)
+            required_timeframes = tuple(sorted(
+                required_timeframes,
+                key=lambda tf: ("D1", "H4", "H1", "M15", "M5", "M1").index(tf),
+            ))
+            mtf_regimes = {tf: RegimeEngine() for tf in required_timeframes}
 
-            def state_fn(bars, now_ms, *, _spec=spec, _regime=regime):
+            def state_fn(bars, now_ms, *, _spec=spec, _regime=primary_regime):
                 if not bars:
                     raise RuntimeError(f"{_spec.symbol}: no bars")
                 return build_market_state(
@@ -200,6 +210,27 @@ class AccountCoordinatorService:
                     integrity=MarketIntegrityState.NORMAL, now_ms=now_ms,
                     last_quote_ms=bars[-1].end_ms, activation_id=c.activation_id,
                     timeframe=_spec.timeframe,
+                )
+
+            def mtf_state_fn(now_ms, *, _spec=spec, _required=required_timeframes, _regimes=mtf_regimes):
+                def bars_for(tf):
+                    bars, _manifest = lake.read(_spec.symbol, tf, end_ms=now_ms + 1)
+                    return bars[-400:]
+
+                def state_builder(*, bars, timeframe, now_ms):
+                    return build_market_state(
+                        symbol=_spec.symbol, base=_spec.base, quote=_spec.quote, bars=bars,
+                        regime_engine=_regimes[timeframe], calendar=FX_CALENDAR, events=events,
+                        integrity=MarketIntegrityState.NORMAL, now_ms=now_ms,
+                        last_quote_ms=bars[-1].end_ms, activation_id=c.activation_id,
+                        timeframe=timeframe,
+                    )
+
+                return build_multi_timeframe_state(
+                    symbol=_spec.symbol, as_of_ms=now_ms,
+                    required_timeframes=_required,
+                    bars_for=bars_for, state_builder=state_builder,
+                    minimum_bars=2,
                 )
 
             evaluator = InstrumentEvaluator(
@@ -211,6 +242,7 @@ class AccountCoordinatorService:
                 engine=engine,
                 state_fn=state_fn,
                 ctx_fn=lambda _state, _cost=spec.round_trip_cost_pct: StrategyContext(round_trip_cost_pct=_cost),
+                mtf_state_fn=mtf_state_fn,
             )
             evaluators.append(evaluator)
             self.evaluators[spec.symbol] = evaluator
