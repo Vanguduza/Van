@@ -1903,6 +1903,19 @@ def create_app() -> FastAPI:
         if abs(int(_time.time()) - req.issued_at_unix) > 300:
             raise HTTPException(status_code=403, detail="stale owner action; sign again")
 
+    @app.get("/v1/trading/strategies/promotion-candidates")
+    async def trading_strategy_promotion_candidates(request: Request):
+        """Owner-device read of sealed validation evidence eligible for promotion."""
+        device_id = getattr(request.state, "van_device_id", None)
+        if not device_id:
+            raise HTTPException(status_code=403, detail="owner_device_required")
+        try:
+            await auth.require_device(device_id)
+            result = app.state.strategy_promotions.candidates()
+        except AuthError as exc:
+            raise HTTPException(status_code=403, detail=exc.message) from exc
+        return result
+
     @app.post("/v1/trading/strategies/promotion-challenge")
     async def trading_strategy_promotion_challenge(
         request: Request, req: StrategyPromotionChallengeRequest
@@ -1970,7 +1983,25 @@ def create_app() -> FastAPI:
             )
             raise HTTPException(status_code=403, detail=str(exc)) from exc
 
+        device_row = await store.fetchone(
+            "SELECT public_key_pem, revoked_at_unix FROM devices WHERE device_id = ?",
+            (req.device_id,),
+        )
+        if (
+            device_row is None
+            or device_row["revoked_at_unix"] is not None
+            or not str(device_row["public_key_pem"] or "").strip()
+        ):
+            raise HTTPException(
+                status_code=403,
+                detail="paired owner approval key is unavailable or revoked",
+            )
+
         try:
+            enrollment = app.state.strategy_promotions.ensure_owner_authority(
+                device_id=req.device_id,
+                public_key_pem=str(device_row["public_key_pem"]),
+            )
             result = app.state.strategy_promotions.promote(
                 strategy_id=req.strategy_id,
                 target_state=req.target_state,
@@ -2005,11 +2036,14 @@ def create_app() -> FastAPI:
                 "validation_hash": req.certificate.get("validation_hash"),
             },
             after={
-                k: result.get(k)
-                for k in (
-                    "strategy_id", "from", "to", "capsule_hash",
-                    "validation_hash", "event_hash", "registry_projection",
-                )
+                **{
+                    k: result.get(k)
+                    for k in (
+                        "strategy_id", "from", "to", "capsule_hash",
+                        "validation_hash", "event_hash", "registry_projection",
+                    )
+                },
+                "owner_key_id": enrollment.get("key_id"),
             },
             evidence_pointer=result.get("event_hash"),
         )
