@@ -400,22 +400,29 @@ class AccountRuntimeLease:
             # not a fencing store. Never degrade to a timestamp-only hint.
             yield False
             return
+        cm = guard(self.account_alias)
         try:
-            with guard(self.account_alias) as current:
-                now = self._now(now_ms)
-                valid = bool(
-                    current is not None
-                    and current.holder_instance_id == self.instance_id
-                    and current.lease_epoch == epoch
-                    and current.live_at(now)
-                )
-                if not valid:
-                    self._held = None
-                else:
-                    self._held = current
-                yield valid
+            current = cm.__enter__()
         except LeaseStoreUnavailable:
             yield False
+            return
+        try:
+            now = self._now(now_ms)
+            valid = bool(
+                current is not None
+                and current.holder_instance_id == self.instance_id
+                and current.lease_epoch == epoch
+                and current.live_at(now)
+            )
+            if not valid:
+                self._held = None
+            else:
+                self._held = current
+            yield valid
+        finally:
+            # The store guard owns lock release. Do not catch exceptions from
+            # the guarded router body here; they must propagate unchanged.
+            cm.__exit__(None, None, None)
 
     def release(self, *, now_ms: Optional[int] = None) -> None:
         if self._held is None:
