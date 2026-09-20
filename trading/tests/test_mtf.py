@@ -15,6 +15,7 @@ from vati.intelligence.mtf import (
     closed_bars_at,
 )
 from vati.market_data.bars import Bar
+from vati.app.instrument_evaluator import InstrumentEvaluator, InstrumentEvaluatorConfig
 
 
 def _bars(symbol: str, step_ms: int, n: int, start: int = 0) -> list[Bar]:
@@ -151,3 +152,27 @@ def test_lake_timeframes_and_mtf_order_agree():
     """The MTF layer must not invent a timeframe the lake cannot store."""
     from vati.market_data.feeds.lake import TIMEFRAMES_MS
     assert set(TIMEFRAME_ORDER) == set(TIMEFRAMES_MS)
+
+
+def test_instrument_evaluator_abstains_when_required_mtf_is_incomplete():
+    class _Engine:
+        def assess_candidates(self, *args, **kwargs):
+            raise AssertionError("strategy engine must not run on incomplete MTF")
+
+    incomplete = MultiTimeframeMarketState(
+        symbol="EURUSD", as_of_ms=1_000, constituent_states={},
+        required_timeframes=("H4", "H1", "M15", "M5"),
+        missing_timeframes=("H4",),
+    ).sealed()
+    evaluator = InstrumentEvaluator(
+        InstrumentEvaluatorConfig(
+            symbol="EURUSD", base="EUR", quote="USD", venue="deriv",
+            account_alias="a", timeframe="M5"),
+        engine=_Engine(),
+        state_fn=lambda bars, now_ms: (_ for _ in ()).throw(
+            AssertionError("single-timeframe fallback must not run")),
+        ctx_fn=lambda state: None,
+        mtf_state_fn=lambda now_ms: incomplete,
+    )
+    assert evaluator.evaluate([object()], now_ms=1_000) == ()
+    assert evaluator.last_mtf_state.missing_timeframes == ("H4",)
