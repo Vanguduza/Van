@@ -108,8 +108,10 @@ class AccountDecisionCoordinator:
         risk_fn: Optional[Callable[[object, object], object]] = None,
         #: Sends an approved intent. Returns a receipt or raises.
         execute_fn: Optional[Callable[[object, object], object]] = None,
-        #: Per-strategy budget lookup (Phase 11); falls back to the mandate.
-        risk_pct_fn: Callable[[CandidateOpportunity], Decimal] = lambda c: Decimal("0.005"),
+        #: Per-strategy budget lookup (TRD-ENH-060). Pass a TradingMandate as
+        #: `mandate` and this resolves each candidate's own signed ceiling.
+        risk_pct_fn: Optional[Callable[[CandidateOpportunity], Decimal]] = None,
+        mandate=None,
     ) -> None:
         self.cfg = cfg
         self.evaluators = {e.symbol: e for e in evaluators}
@@ -120,8 +122,19 @@ class AccountDecisionCoordinator:
         self.snapshot_fn = snapshot_fn
         self.risk_fn = risk_fn
         self.execute_fn = execute_fn
-        self.risk_pct_fn = risk_pct_fn
+        self.mandate = mandate
+        self.risk_pct_fn = risk_pct_fn or self._mandate_risk_pct
         self.snapshot_calls = 0
+
+    def _mandate_risk_pct(self, candidate: CandidateOpportunity) -> Decimal:
+        """A strategy's own owner-signed budget, or the mandate ceiling.
+
+        `risk_budget_for` already takes the minimum against
+        `max_risk_per_trade`, so a budget can only ever narrow.
+        """
+        if self.mandate is None:
+            return Decimal("0.005")
+        return self.mandate.risk_budget_for(candidate.strategy_id)
 
     # -- helpers -----------------------------------------------------------
 

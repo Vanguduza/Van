@@ -25,6 +25,7 @@ from vati.arbiter.candidate import CandidateOpportunity
 from vati.core.canonical import canonical_hash
 
 ALLOCATION_POLICY_V0 = "allocator/0.1.0-deterministic"
+ALLOCATION_POLICY_V1 = "allocator/1.0.0-evidence-weighted"
 
 #: Inputs V0 is permitted to read. Asserted by contract test, because the
 #: exclusion is the point rather than an implementation detail.
@@ -149,8 +150,43 @@ class OpportunityPortfolioAllocator:
         return tuple(out)
 
 
+class AllocatorV1(OpportunityPortfolioAllocator):
+    """V0 plus the evidence that had to be built first (TRD-ENH-066).
+
+    Adds edge floor, capital efficiency and execution quality — each of which
+    now exists and is validated. Confidence is *still* excluded: §28's
+    calibration gate has not been passed, and until it is, an uncalibrated
+    probability must not decide which trade happens.
+    """
+
+    def _utility(self, c: CandidateOpportunity, *, now_ms: int):
+        base, components, correlation = super()._utility(c, now_ms=now_ms)
+
+        # A candidate with no edge floor is not penalised into oblivion; it is
+        # simply not credited for evidence it does not have.
+        edge = c.edge_floor_R if c.edge_floor_R is not None else Decimal("0")
+        efficiency = c.expected_R_per_risk_day if c.expected_R_per_risk_day is not None else Decimal("0")
+        execution = c.execution_quality if c.execution_quality is not None else Decimal("1")
+        stability = c.regime_stability if c.regime_stability is not None else Decimal("1")
+
+        # Only a *positive* edge floor adds anything: a wide interval around a
+        # good-looking mean is not evidence (see capital_promotion.edge_floor_R).
+        edge_term = Decimal("1") + max(Decimal("0"), edge)
+        efficiency_term = Decimal("1") + max(Decimal("0"), efficiency)
+
+        utility = (base * edge_term * efficiency_term
+                   * max(Decimal("0"), min(Decimal("1"), execution))
+                   * max(Decimal("0"), min(Decimal("1"), stability))).quantize(Decimal("0.000001"))
+        components = dict(components) | {
+            "edge_floor_R": str(edge), "expected_R_per_risk_day": str(efficiency),
+            "execution_quality": str(execution), "regime_stability": str(stability),
+        }
+        return utility, components, correlation
+
+
 __all__ = [
-    "ALLOCATION_POLICY_V0", "NOT_SELECTED", "SELECTED",
+    "ALLOCATION_POLICY_V0", "ALLOCATION_POLICY_V1", "NOT_SELECTED", "SELECTED",
+    "AllocatorV1",
     "V0_FORBIDDEN_INPUTS", "V0_RANKING_INPUTS",
     "AllocationDecision", "AllocationEpoch", "OpportunityPortfolioAllocator",
 ]

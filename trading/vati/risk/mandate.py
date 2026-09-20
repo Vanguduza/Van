@@ -135,6 +135,23 @@ class TradingMandate:
     signed_at_unix: int
     expires_at_unix: int
     drawdown_tiers: tuple[DrawdownTier, ...] = DEFAULT_DRAWDOWN_TIERS
+    #: TRD-ENH-060 — per-strategy live ceilings. Absent means "use
+    #: max_risk_per_trade", so an unamended mandate behaves exactly as before.
+    #: Only an owner-signed new mandate version can change a value here: this
+    #: is the single place in the system where a ceiling can rise.
+    strategy_risk_budgets: Mapping[str, Decimal] = field(default_factory=dict)
+
+    def risk_budget_for(self, strategy_id: str) -> Decimal:
+        """The live base risk for one strategy.
+
+        Always the *minimum* of the per-strategy budget and the mandate
+        ceiling, so a budget can only ever narrow what the mandate already
+        allowed — never widen it.
+        """
+        budget = self.strategy_risk_budgets.get(strategy_id)
+        if budget is None:
+            return self.max_risk_per_trade
+        return min(budget, self.max_risk_per_trade)
 
     @classmethod
     def from_mapping(
@@ -212,9 +229,25 @@ class TradingMandate:
             signed_at_unix=int(data["signed_at_unix"]),
             expires_at_unix=int(data["expires_at_unix"]),
             drawdown_tiers=tiers,
+            strategy_risk_budgets=_parse_budgets(data.get("strategy_risk_budgets")),
         )
         m.validate(ceilings)
         return m
+
+    def _validate_budgets(self, ceilings: PlatformCeilings) -> None:
+        for sid, budget in sorted(self.strategy_risk_budgets.items()):
+            if budget <= 0:
+                raise MandateError(f"strategy_risk_budget for {sid} must be > 0")
+            if budget > self.max_risk_per_trade:
+                raise MandateError(
+                    f"strategy_risk_budget for {sid} ({budget}) exceeds "
+                    f"max_risk_per_trade ({self.max_risk_per_trade})")
+            if budget > ceilings.max_risk_per_trade:
+                raise MandateError(
+                    f"strategy_risk_budget for {sid} ({budget}) exceeds the platform ceiling "
+                    f"({ceilings.max_risk_per_trade})")
+            if sid not in self.allowed_strategies:
+                raise MandateError(f"strategy_risk_budget for {sid}, which is not in allowed_strategies")
 
     def validate(self, ceilings: PlatformCeilings) -> None:
         if self.tier1_event_policy not in ("flat", "strategy_specific"):
@@ -232,6 +265,7 @@ class TradingMandate:
             ("max_weekly_drawdown", self.max_weekly_drawdown, ceilings.max_weekly_drawdown),
             ("max_currency_leg_exposure", self.max_currency_leg_exposure, ceilings.max_currency_leg_exposure),
         )
+        self._validate_budgets(ceilings)
         for name, value, ceiling in checks:
             if value > ceiling:
                 raise MandateError(f"{name}={value} exceeds platform ceiling {ceiling} ({ceilings.policy_version})")
@@ -259,6 +293,15 @@ def _as_iterable(value: Any) -> Iterable[Any]:
     if isinstance(value, (str, bytes)):
         raise MandateError("expected a list, got a string")
     return list(value)
+
+
+def _parse_budgets(raw: Any) -> dict[str, Decimal]:
+    """Budgets arrive as strings in the signed mandate document."""
+    if raw is None:
+        return {}
+    if not isinstance(raw, Mapping):
+        raise MandateError("strategy_risk_budgets must be a mapping")
+    return {str(k): _fraction(v, f"strategy_risk_budgets[{k}]") for k, v in raw.items()}
 
 
 def _parse_tiers(raw: Any) -> tuple[DrawdownTier, ...]:
