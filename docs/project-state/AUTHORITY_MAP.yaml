@@ -611,8 +611,15 @@ invariants:
   - subject: trading.strategy_validation_binding
     owner: docs/VAN_TRADING_PRODUCTION_DEPLOYMENT_BLUEPRINT_REV5.md
     statement: >-
-      Certificate-gated strategy promotion requires current owner-device A4 approval and owner authority bound to the exact validation certificate hash; the gateway can reach only the agent-hidden private commander promotion command, the durable VATI capsule-state event is authoritative across crashes/restarts, and production code cannot manufacture a synthetic passing certificate.
+      Certificate-gated strategy promotion requires current owner-device A4 approval and owner authority bound to the exact validation certificate hash; the Android owner surface authors both hardware-key proofs, the gateway can reach only the agent-hidden private commander promotion command, the durable VATI capsule-state event is authoritative across crashes/restarts, owner-visible completion requires authoritative read-back beyond transport success, and production code cannot manufacture a synthetic passing certificate.
     implemented_by:
+      - android/app/src/main/java/com/dial/van/security/OwnerApprovalKeyManager.kt
+      - android/app/src/main/java/com/dial/van/security/OwnerAuthorityToken.kt
+      - android/app/src/main/java/com/dial/van/gateway/VanGatewayClient.kt
+      - android/app/src/main/java/com/dial/van/trading/TradingModels.kt
+      - android/app/src/main/java/com/dial/van/trading/TradingRepository.kt
+      - android/app/src/main/java/com/dial/van/trading/StrategyPromotionVerification.kt
+      - android/app/src/main/java/com/dial/van/trading/ui/StrategiesScreen.kt
       - backend/van_gateway/app.py
       - backend/van_gateway/trading/strategies.py
       - trading/commander/app.py
@@ -621,6 +628,8 @@ invariants:
       - trading/vati/validation/certificates.py
       - trading/vati/learning/replay.py
     tested_by:
+      - android/app/src/test/java/com/dial/van/security/OwnerAuthorityTokenTest.kt
+      - android/app/src/test/java/com/dial/van/trading/StrategyPromotionVerificationTest.kt
       - backend/tests/test_trading_api.py
       - trading/tests/test_validation_certificates.py
       - trading/tests/test_capsule_promotion_workflow.py
