@@ -90,8 +90,39 @@ async def _resume(ac, enrolled, opened, *, path_id="primary-wss",
     )
 
 
-def _envelope(opened, path_epoch, message_id="msg_1"):
-    return {
+async def _mission(ac, title="a mission the owner can talk to"):
+    """A real mission, made through the internal control route the Gateway already has."""
+    created = await ac.post(
+        "/v1/missions",
+        json={
+            "owner_principal_id": "device:owner-phone", "origin": "OWNER_UI",
+            "origin_channel": "UI", "title": title, "goal": title,
+        },
+        headers={"X-Van-Internal-Token": INTERNAL},
+    )
+    assert created.status_code in (200, 201), created.text
+    return created.json()["mission_id"]
+
+
+async def _resume_asking(ac, enrolled, opened, pending_command_ids):
+    """A resume that actually asks something, which the shared helper never does."""
+    return await ac.post(
+        f"{SESSION}/resume",
+        json={
+            "van_session_id": opened["van_session_id"],
+            "session_epoch": opened["session_epoch"],
+            "last_event_seq": 0,
+            "pending_command_ids": list(pending_command_ids),
+            "path_id": "primary-wss",
+            "route_id": "primary-ingress",
+            "path_class": "A_REALTIME",
+        },
+        headers=_headers(enrolled),
+    )
+
+
+def _envelope(opened, path_epoch, message_id="msg_1", **over):
+    body = {
         "message_id": message_id,
         "van_session_id": opened["van_session_id"],
         "session_epoch": opened["session_epoch"],
@@ -99,6 +130,8 @@ def _envelope(opened, path_epoch, message_id="msg_1"):
         "kind": "session.heartbeat",
         "payload": {},
     }
+    body.update(over)
+    return body
 
 
 @pytest.mark.asyncio
@@ -242,3 +275,222 @@ class TestTheFailoverCounterSaysWhatTheGatewayCanSee:
         # test would make this pass whatever the route recorded, including nothing.
         assert refused.json()["detail"] == REJECT_STALE_SESSION_EPOCH
         assert self._samples(REJECT_STALE_SESSION_EPOCH, "false") == before + 1
+
+
+@pytest.mark.asyncio
+class TestWhatAResumeSaysAboutWhatTheClientLost:
+    """§20.12 — the answer a reconnecting phone reconciles against.
+
+    This existed and answered nothing. `_resume_snapshot` resolved each id against the
+    *mission* table only, and the phone sent the ids it actually had — message ids — so
+    every lookup missed and every answer was `UNKNOWN`. The phone then dropped everything
+    it had asked about, unknowns included, which meant a resume silently discarded every
+    unacknowledged owner command. Both halves were wrong and they cancelled out, so no
+    test could see either.
+
+    These are written from the phone's question: *I am holding this; do you have it?*
+    """
+
+    async def test_a_message_the_gateway_admitted_is_not_reported_unknown(self, client):
+        """The one that was false. The Gateway holds the envelope and said it did not."""
+        ac, app = client
+        enrolled = await _device(app)
+        opened = await _open(ac, enrolled)
+        mission_id = await _mission(ac)
+        granted = (await _resume(ac, enrolled, opened)).json()["new_path_epoch"]
+        # Not a heartbeat: §20.12's admission table deliberately does not record
+        # liveness, and a test written on a heartbeat would be asking the Gateway about
+        # something it is right to have no memory of.
+        accepted = await ac.post(
+            f"{SESSION}/messages",
+            json=_envelope(
+                opened, granted, message_id="msg_held", kind="mission.message",
+                idempotency_key="idem_held", command_id="cmd_held",
+                payload={"mission_id": mission_id, "text": "any progress?"},
+            ),
+            headers=_headers(enrolled),
+        )
+        assert accepted.status_code == 200, accepted.text
+
+        answered = await ac.post(
+            f"{SESSION}/resume",
+            json={
+                "van_session_id": opened["van_session_id"],
+                "session_epoch": opened["session_epoch"],
+                "last_event_seq": 0,
+                "pending_command_ids": ["msg_held"],
+                "path_id": "primary-wss",
+                "route_id": "primary-ingress",
+                "path_class": "A_REALTIME",
+            },
+            headers=_headers(enrolled),
+        )
+        assert answered.status_code == 200, answered.text
+        states = answered.json()["command_states"]
+        assert states["msg_held"] != "UNKNOWN", (
+            "the Gateway holds this message and told the phone to send it again"
+        )
+
+    async def test_a_message_the_gateway_has_never_seen_is_reported_unknown(self, client):
+        """The other half, and the one that must stay true.
+
+        A snapshot that answered something for everything would pass the test above and
+        lose the owner's command instead — the phone would settle work that never arrived.
+        """
+        ac, app = client
+        enrolled = await _device(app)
+        opened = await _open(ac, enrolled)
+        answered = await _resume_asking(ac, enrolled, opened, ["msg_never_sent"])
+        assert answered.json()["command_states"]["msg_never_sent"] == "UNKNOWN"
+
+    async def test_the_answer_is_scoped_to_the_session_that_asked(self, client):
+        """A message held under another session is not this session's to settle.
+
+        Two sessions on one device is the ordinary case after a replacement, and an
+        answer that ignored the session id would tell the new one it already holds work
+        that belongs to the session the owner's commands were abandoned with.
+        """
+        ac, app = client
+        enrolled = await _device(app)
+        first = await _open(ac, enrolled)
+        mission_id = await _mission(ac)
+        granted = (await _resume(ac, enrolled, first)).json()["new_path_epoch"]
+        await ac.post(
+            f"{SESSION}/messages",
+            json=_envelope(
+                first, granted, message_id="msg_elsewhere", kind="mission.message",
+                idempotency_key="idem_elsewhere",
+                payload={"mission_id": mission_id, "text": "any progress?"},
+            ),
+            headers=_headers(enrolled),
+        )
+
+        second = await _open(ac, enrolled)
+        answered = await _resume_asking(ac, enrolled, second, ["msg_elsewhere"])
+        assert answered.json()["command_states"]["msg_elsewhere"] == "UNKNOWN"
+
+    async def test_every_id_asked_about_is_answered(self, client):
+        """Silence and `UNKNOWN` mean the same thing to the phone, so say it.
+
+        An omitted key is indistinguishable from a truncated answer, and a client that
+        had to infer the difference would be guessing about whether the owner's command
+        was received.
+        """
+        ac, app = client
+        enrolled = await _device(app)
+        opened = await _open(ac, enrolled)
+        asked = ["msg_a", "msg_b", "msg_c"]
+        answered = await _resume_asking(ac, enrolled, opened, asked)
+        assert sorted(answered.json()["command_states"]) == sorted(asked)
+
+
+@pytest.mark.asyncio
+class TestTheSessionCarriesEveryKindItClaimsTo:
+    """§20.2 — a kind the router admits is a kind something can actually carry out.
+
+    Three of the four delegates were never wired, and the failure was worse than a missing
+    feature. The router recorded the envelope in §20.12's admission table *before*
+    discovering it had nobody to hand it to, so "cancel it" sent over the durable session
+    was written down, refused — and every retry of the same idempotency key came back
+    ALREADY_KNOWN with a null result, which reads as success. Acknowledged, never
+    performed, and impossible to send again.
+    """
+
+    async def test_the_owner_can_cancel_a_mission_over_the_session(self, client):
+        ac, app = client
+        enrolled = await _device(app)
+        opened = await _open(ac, enrolled)
+        mission_id = await _mission(ac, "a mission the owner changes their mind about")
+        granted = (await _resume(ac, enrolled, opened)).json()["new_path_epoch"]
+
+        cancelled = await ac.post(
+            f"{SESSION}/messages",
+            json=_envelope(
+                opened, granted, message_id="msg_cancel", kind="mission.cancel",
+                idempotency_key="idem_cancel", payload={"mission_id": mission_id},
+            ),
+            headers=_headers(enrolled),
+        )
+        assert cancelled.status_code == 200, cancelled.text
+        state = await ac.get(f"/v1/missions/{mission_id}", headers=_headers(enrolled))
+        assert state.json()["state"] == "CANCELLED", (
+            "the session acknowledged a cancellation it never performed"
+        )
+
+    async def test_a_refused_message_does_not_take_its_idempotency_key_with_it(self, client):
+        """The corrected resend has to work.
+
+        A refusal that left the row behind made the key permanently taken, so the owner
+        fixing the mission id and sending again was told ALREADY_KNOWN — with no result,
+        which the client reads as done.
+        """
+        ac, app = client
+        enrolled = await _device(app)
+        opened = await _open(ac, enrolled)
+        granted = (await _resume(ac, enrolled, opened)).json()["new_path_epoch"]
+
+        refused = await ac.post(
+            f"{SESSION}/messages",
+            json=_envelope(
+                opened, granted, message_id="msg_wrong", kind="mission.cancel",
+                idempotency_key="idem_retry", payload={"mission_id": "m_does_not_exist"},
+            ),
+            headers=_headers(enrolled),
+        )
+        assert refused.status_code == 400, refused.text
+
+        mission_id = await _mission(ac, "the one they actually meant")
+        corrected = await ac.post(
+            f"{SESSION}/messages",
+            json=_envelope(
+                opened, granted, message_id="msg_right", kind="mission.cancel",
+                idempotency_key="idem_retry", payload={"mission_id": mission_id},
+            ),
+            headers=_headers(enrolled),
+        )
+        assert corrected.status_code == 200, corrected.text
+        state = await ac.get(f"/v1/missions/{mission_id}", headers=_headers(enrolled))
+        assert state.json()["state"] == "CANCELLED"
+
+    async def test_a_refused_message_is_not_left_in_the_admission_table(self, client):
+        """And therefore is not reported to a resume as something the Gateway holds.
+
+        The two halves of this checkpoint meeting: a row with no result would make the
+        resume answer "I have this" about a command that was never carried out, and the
+        phone would settle it and never send it again.
+        """
+        ac, app = client
+        enrolled = await _device(app)
+        opened = await _open(ac, enrolled)
+        granted = (await _resume(ac, enrolled, opened)).json()["new_path_epoch"]
+        await ac.post(
+            f"{SESSION}/messages",
+            json=_envelope(
+                opened, granted, message_id="msg_dropped", kind="mission.cancel",
+                idempotency_key="idem_dropped", payload={"mission_id": "m_nope"},
+            ),
+            headers=_headers(enrolled),
+        )
+        answered = await _resume_asking(ac, enrolled, opened, ["msg_dropped"])
+        assert answered.json()["command_states"]["msg_dropped"] == "UNKNOWN"
+
+    async def test_a_malformed_command_is_refused_rather_than_raised(self, client):
+        """A 500 is "try again"; this payload will never succeed.
+
+        Reported as a server failure, the phone's retry policy resends the same malformed
+        command indefinitely.
+        """
+        ac, app = client
+        enrolled = await _device(app)
+        opened = await _open(ac, enrolled)
+        granted = (await _resume(ac, enrolled, opened)).json()["new_path_epoch"]
+        answered = await ac.post(
+            f"{SESSION}/messages",
+            json=_envelope(
+                opened, granted, message_id="msg_bad", kind="command.submit",
+                idempotency_key="idem_bad", payload={"text": "no signature, no id"},
+            ),
+            headers=_headers(enrolled),
+        )
+        assert answered.status_code == 400, answered.text
+        assert answered.json()["detail"] == "command_payload_invalid"

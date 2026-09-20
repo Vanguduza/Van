@@ -8,6 +8,43 @@ from mutation import run
 #:
 #:     python3 ../tools/audit/mutation_suite.py
 ALL = [
+ # --- checkpoint 36: every kind the session claims to carry, and the key it burns ---
+ # Both files: the route-level ones drive the wiring, and the ordering rule is only
+ # observable at the service level, where a router can be built with a kind unwired.
+ # With all four delegates present in production the order of those two lines changes
+ # nothing anybody can see, and an unobservable rule is one a later change removes.
+ (["tests/test_session_transport_api.py", "tests/test_van_hermes_session.py"], [
+   ("van_gateway/app.py",
+    "            cancel_mission=_cancel_mission_through_session,\n", "",
+    "C36 the owner cancels a mission over the session and nothing happens"),
+   ("van_gateway/session/service.py",
+    '            "DELETE FROM van_session_messages WHERE message_id = ?",',
+    '            "SELECT 1 WHERE ? IS NULL",',
+    "C36 a refused message keeps its idempotency key and the corrected resend is refused"),
+   ("van_gateway/session/router.py",
+    "        delegate = self._delegate_for(envelope.kind)\n"
+    "        if delegate is None:\n"
+    "            return RoutedResult(False, envelope.kind, refusal=REJECT_UNKNOWN_KIND)\n"
+    "\n"
+    "        admission, existing = await self.sessions.admit(envelope, now_ms=now)",
+    "        admission, existing = await self.sessions.admit(envelope, now_ms=now)\n"
+    "        delegate = self._delegate_for(envelope.kind)\n"
+    "        if delegate is None:\n"
+    "            return RoutedResult(False, envelope.kind, refusal=REJECT_UNKNOWN_KIND)",
+    "C36 an envelope nobody can carry out is written into the admission table first"),
+   ("van_gateway/app.py",
+    '            states[identity] = row["admitted_state"] if row is not None else "UNKNOWN"',
+    '            states[identity] = "UNKNOWN"',
+    "C36 the Gateway holds the message and tells the phone to send it again"),
+   ("van_gateway/app.py",
+    "                 WHERE van_session_id = ? AND (command_id = ? OR message_id = ?)",
+    "                 WHERE ? IS NOT NULL AND (command_id = ? OR message_id = ?)",
+    "C36 a new session is told it already holds the abandoned one's work"),
+   ("van_gateway/app.py",
+    '            raise SessionDelegateError("command_payload_invalid") from exc',
+    "            raise",
+    "C36 a malformed command reads as a server fault and is retried forever"),
+ ]),
  # --- checkpoint 5: the mission success contract ------------------------------
  (["tests/test_command_success_contract.py", "tests/test_verification_is_performed.py"], [
    ("van_gateway/command/success_contracts.py",
@@ -1068,6 +1105,32 @@ ROOT_LEVEL = [
 #: Checkpoint 14, Kotlin half. Run by Gradle in android/verification rather than by pytest,
 #: because that harness is the only thing in this repository that can execute Kotlin at all.
 KOTLIN = [
+ # --- checkpoint 36: the write that must be one write, and the identity to match by --
+ (f"{APP_KT}/session/EncryptedSessionOutboxStore.kt",
+  "        records.upsert(OutboxPersistence.toCommand(entry, envelopeJson))",
+  "        records.remove(entry.messageId)\n"
+  "        records.upsert(OutboxPersistence.toCommand(entry, envelopeJson))",
+  "C36 a kill between the two halves of a persist loses the owner's command"),
+ (f"{APP_KT}/session/EncryptedSessionOutboxStore.kt",
+  "        records.remove(messageId)",
+  "        Unit",
+  "C36 a delivered command is never forgotten, and is re-sent after every restart"),
+ (f"{APP_KT}/session/EncryptedSessionOutboxStore.kt",
+  "        records.recordsOfKind(OutboxPersistence.SESSION_KIND)",
+  "        records.recordsOfKind(\"COMMAND\")",
+  "C36 a restart finds an empty outbox and the owner's queued work is gone"),
+ (f"{APP_KT}/session/SessionReconciliation.kt",
+  "        if (state == null || state == UNKNOWN) Verdict.RESEND else Verdict.SETTLE",
+  "        if (state == null) Verdict.RESEND else Verdict.SETTLE",
+  "C36 a command the Gateway has never heard of is treated as delivered"),
+ (f"{APP_KT}/session/SessionReconciliation.kt",
+  "        if (state == null || state == UNKNOWN) Verdict.RESEND else Verdict.SETTLE",
+  "        Verdict.RESEND",
+  "C36 a command the Gateway is already running is sent a second time"),
+ (f"{APP_KT}/session/SessionReconciliation.kt",
+  "        commandId?.takeIf { it.isNotBlank() && it != messageId } ?: messageId",
+  "        messageId",
+  "C36 the phone asks by one identity and the Gateway answers about another"),
  # --- checkpoint 35: the outbox that has to survive the process dying ---------------
  (f"{APP_KT}/session/OutboxPersistence.kt",
   "            commandId = command.sessionCommandId ?: messageId,",

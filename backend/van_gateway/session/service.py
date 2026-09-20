@@ -283,6 +283,19 @@ class VanHermesSessionService:
         result = existing["result_json"]
         return CommandAdmission.ALREADY_KNOWN, (json.loads(result) if result else None)
 
+    async def forget_message(self, envelope: SessionEnvelope) -> None:
+        """Un-record a message that was admitted and then not carried out.
+
+        The admission table's promise is "ask again and you get the same answer". A row
+        with no result promises that about nothing, so it has to go — otherwise the
+        idempotency key stays taken and the owner's resend is answered with a success
+        that never happened.
+        """
+        await self.store.execute(
+            "DELETE FROM van_session_messages WHERE message_id = ?",
+            (envelope.message_id,),
+        )
+
     async def record_result(
         self, envelope: SessionEnvelope, result: dict, *, now_ms: int | None = None
     ) -> None:

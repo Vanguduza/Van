@@ -589,9 +589,11 @@
       "status": "REPOSITORY_PROVEN",
       "evidence": [
         "backend/tests/test_van_hermes_session.py",
-        "android/verification/src/test/kotlin/com/dial/van/session/SessionEnvelopeTest.kt"
+        "backend/tests/test_session_transport_api.py",
+        "android/verification/src/test/kotlin/com/dial/van/session/SessionReconciliationTest.kt",
+        "android/verification/src/test/kotlin/com/dial/van/session/SessionOutboxDurabilityTest.kt"
       ],
-      "note": ""
+      "note": "This row was REPOSITORY_PROVEN and the requirement was false, which is the single most useful thing in this register. Its evidence proved the Gateway's admission and the envelope's identity — both correct — and nothing proved the phone's half. The phone asked by message id, the Gateway answered by command id, so every answer was `UNKNOWN`; and the phone then dropped every key it had asked about, unknowns included. Every reconnect silently discarded every unacknowledged owner command (P0-SESS-005).\n\nThe green came from evidence that was about the right section and the wrong side of it. What is now cited executes both sides: the Gateway's answer for a message it admitted without opening a mission, scoped to the asking session, and the phone's plan — resend on absent or `UNKNOWN`, settle on anything else — including a restored outbox entry killed between the socket write and the durable `forget`."
     },
     {
       "n": 59,
@@ -644,9 +646,10 @@
       "evidence": [
         "android/verification/src/test/kotlin/com/dial/van/session/DurableOutboxTest.kt",
         "android/verification/src/test/kotlin/com/dial/van/session/OutboxPersistenceTest.kt",
-        "android/verification/src/test/kotlin/com/dial/van/session/RestartSeamTest.kt"
+        "android/verification/src/test/kotlin/com/dial/van/session/RestartSeamTest.kt",
+        "android/verification/src/test/kotlin/com/dial/van/session/SessionOutboxDurabilityTest.kt"
       ],
-      "note": "Stronger than when this row was first written, and it had to be. The policy was proven and its records lived in RAM, so a process death — which Android does routinely — lost the reconfirmation and the expiry while the command could survive. §20.14's metadata now rides on the canonical queue's own record, one write, and the restart seam is executed end to end: queued command, process death, recovery, epoch adoption, reconfirm/expiry decision, exactly-once send."
+      "note": "Stronger than when this row was first written, and it had to be. The policy was proven and its records lived in RAM, so a process death — which Android does routinely — lost the reconfirmation and the expiry while the command could survive. §20.14's metadata now rides on the canonical queue's own record, one write, and the restart seam is executed end to end: queued command, process death, recovery, epoch adoption, reconfirm/expiry decision, exactly-once send.\n\nStronger again at C15. The seam it rested on — `EncryptedSessionOutboxStore` — could not be executed at all, so every test above it ran against a fake that implemented the interface as intended. The shipped adapter did `remove()` then `enqueue()`: a kill between them lost the command, the row was never keyed by the message id so `forget` matched nothing, and `enqueue`'s idempotency de-duplication discarded the owner's reconfirmation. The adapter now depends on `OutboxRecordStore` and is itself executed, against a store that can be killed between operations."
     },
     {
       "n": 64,

@@ -174,7 +174,11 @@ def build_session_router(
         snapshot = {}
         if resume_snapshot is not None:
             snapshot = await resume_snapshot(
-                device_id=device_id, pending_command_ids=body.pending_command_ids
+                device_id=device_id,
+                # §20.12 — the admission table is per session, so the answer has to be
+                # too. Without this the Gateway could only answer from the mission table.
+                van_session_id=body.van_session_id,
+                pending_command_ids=body.pending_command_ids,
             )
         result = await sessions.resume(
             ResumeRequest(

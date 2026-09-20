@@ -617,6 +617,45 @@
         "android/verification/src/test/kotlin/com/dial/van/voice/VoiceAudioTest.kt"
       ],
       "note": "VAN pauses page audio rather than ducking under it: speaking under a video voiceover is unintelligible, which is the same as not answering."
+    },
+    {
+      "scenario": "a reconnect silently discards the owner's unacknowledged command",
+      "status": "PASS",
+      "evidence": [
+        "android/verification/src/test/kotlin/com/dial/van/session/SessionReconciliationTest.kt::a command the Gateway has never heard of is sent again",
+        "backend/tests/test_session_transport_api.py::TestWhatAResumeSaysAboutWhatTheClientLost::test_a_message_the_gateway_has_never_seen_is_reported_unknown"
+      ],
+      "note": "This was the live behaviour, not a hypothetical. The phone asked by message id, the Gateway answered by command id, so every answer was `UNKNOWN` — and the phone then dropped every key it had asked about. `UNKNOWN` is the one answer that means resend. Both halves now come from one function, and silence is treated the same as `UNKNOWN` so the Gateway's fifty-id cap cannot lose the fifty-first command.",
+      "n": 67
+    },
+    {
+      "scenario": "a kill between the socket write and the durable forget delivers a command twice",
+      "status": "PASS",
+      "evidence": [
+        "android/verification/src/test/kotlin/com/dial/van/session/SessionOutboxDurabilityTest.kt::a command killed between the send and the forget is not delivered twice"
+      ],
+      "note": "The attempt counter is stamped on failure, not on send, so the restored record carries no hint that it ever left. The Gateway is the only thing that knows, and the resume asks it about the restored outbox in full rather than only the entries with an attempt recorded — which would have missed precisely this kill.",
+      "n": 68
+    },
+    {
+      "scenario": "an owner instruction is acknowledged, never performed, and cannot be resent",
+      "status": "PASS",
+      "evidence": [
+        "backend/tests/test_van_hermes_session.py::TestSessionRouter::test_a_kind_with_no_delegate_is_not_written_into_the_admission_table",
+        "backend/tests/test_session_transport_api.py::TestTheSessionCarriesEveryKindItClaimsTo::test_a_refused_message_does_not_take_its_idempotency_key_with_it"
+      ],
+      "note": "§20.12's table answers a resubmission with what happened the first time. A row with no result promises that about nothing, so a refused message that kept its key was answered ALREADY_KNOWN with a null result on every retry — which reads as success. The delegate is now resolved before admission, and a refusal or an unexpected failure un-records the message.",
+      "n": 69
+    },
+    {
+      "scenario": "a process death restores work into a session the owner's commands were abandoned with",
+      "status": "PASS",
+      "evidence": [
+        "android/verification/src/test/kotlin/com/dial/van/session/SessionOutboxDurabilityTest.kt::a replaced session drops its work from the disk and tells the owner",
+        "backend/tests/test_session_transport_api.py::TestWhatAResumeSaysAboutWhatTheClientLost::test_the_answer_is_scoped_to_the_session_that_asked"
+      ],
+      "note": "Two doors into the same room. `SESSION_REPLACED` cleared the in-memory outbox and left the records on disk, so the next start flushed them into the new session; and a resume answer that ignored the session id would tell the new session it already holds the old one's work. Both are closed, and the dropped commands are now reported to the owner rather than vanishing.",
+      "n": 70
     }
   ]
 }

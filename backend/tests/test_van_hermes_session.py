@@ -33,6 +33,7 @@ from van_gateway.session.router import (
     REJECT_EXPIRED,
     REJECT_UNKNOWN_KIND,
     RoutedResult,
+    SessionDelegateError,
     SessionDelegates,
     SessionRouter,
 )
@@ -410,6 +411,93 @@ class TestSessionRouter:
         routed = await router.route(_envelope(session, epoch, idempotency_key="k1"))
         assert routed.accepted
         assert submitted == [({"text": "what is on my calendar"}, DEVICE)]
+
+    async def test_a_kind_with_no_delegate_is_not_written_into_the_admission_table(
+        self, tmp_path
+    ):
+        """§20.12 — nothing is recorded that the Gateway cannot carry out.
+
+        This is the ordering, tested with the condition that makes it observable: a kind
+        the router knows and nothing is wired to answer. The delegate used to be resolved
+        *after* admission, so such an envelope was recorded as ADMITTED and then refused —
+        and its idempotency key was taken, with a null result. The phone's retry, which is
+        the right thing for it to do, came back ALREADY_KNOWN, which reads as success. The
+        owner's instruction was acknowledged, never performed, and unrepeatable.
+
+        Every kind is wired in production today, which is exactly why this test builds a
+        router that is missing one: with all four present the ordering is unobservable,
+        and an unobservable rule is one a later change silently removes.
+        """
+        service, router = await self._router(tmp_path)
+        session, epoch = await service.open(device_id=DEVICE, path=_path(), now_ms=1_000)
+        refused = await router.route(
+            _envelope(
+                session, epoch, kind="mission.cancel", idempotency_key="k_orphan",
+                payload={"mission_id": "m_1"},
+            )
+        )
+        assert not refused.accepted
+        assert refused.refusal == "session_kind_unknown"
+
+        row = await service.store.fetchone(
+            "SELECT message_id FROM van_session_messages WHERE idempotency_key = ?",
+            ("k_orphan",),
+        )
+        assert row is None, (
+            "a message nobody could carry out took the idempotency key with it"
+        )
+
+    async def test_a_delegate_refusal_releases_the_key_for_the_corrected_resend(
+        self, tmp_path
+    ):
+        """The same rule for a delegate that ran and said no.
+
+        A refusal is the final answer for *this* payload, not for the key. Leaving the row
+        behind answers the owner's corrected resend — a fixed mission id, the field that
+        was missing — with ALREADY_KNOWN and a null result.
+        """
+        service, _ = await _service(tmp_path)
+
+        async def refuse(payload, device_id):
+            raise SessionDelegateError("mission_unknown")
+
+        router = SessionRouter(
+            service, SessionDelegates(submit_command=refuse),
+        )
+        session, epoch = await service.open(device_id=DEVICE, path=_path(), now_ms=1_000)
+        refused = await router.route(_envelope(session, epoch, idempotency_key="k_refused"))
+        assert not refused.accepted
+        assert refused.refusal == "mission_unknown"
+        row = await service.store.fetchone(
+            "SELECT message_id FROM van_session_messages WHERE idempotency_key = ?",
+            ("k_refused",),
+        )
+        assert row is None
+
+    async def test_an_unexpected_failure_also_releases_the_key_and_is_not_a_refusal(
+        self, tmp_path
+    ):
+        """A bug is not an answer.
+
+        It must not be reported as a refusal — the phone would stop retrying something
+        that will work on the next attempt — and it must not keep the key, because a
+        transient failure that burned one would turn a recoverable error into a command
+        that can never be sent again.
+        """
+        service, _ = await _service(tmp_path)
+
+        async def explode(payload, device_id):
+            raise RuntimeError("a bug")
+
+        router = SessionRouter(service, SessionDelegates(submit_command=explode))
+        session, epoch = await service.open(device_id=DEVICE, path=_path(), now_ms=1_000)
+        with pytest.raises(RuntimeError):
+            await router.route(_envelope(session, epoch, idempotency_key="k_bug"))
+        row = await service.store.fetchone(
+            "SELECT message_id FROM van_session_messages WHERE idempotency_key = ?",
+            ("k_bug",),
+        )
+        assert row is None
 
     async def test_a_resubmission_does_not_execute_twice(self, tmp_path):
         submitted: list = []

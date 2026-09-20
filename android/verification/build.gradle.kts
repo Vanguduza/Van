@@ -135,6 +135,13 @@ sourceSets {
             "com/dial/van/session/DurableOutbox.kt",
             "com/dial/van/session/OutboxPersistence.kt",
             "com/dial/van/session/SessionOutboxStore.kt",
+            // The production adapter itself, not a re-implementation of it. It depends on
+            // `OutboxRecordStore` rather than on the encrypted queue, so the thing CI
+            // compiles and the thing these tests execute are the same file — which is the
+            // only arrangement in which "one atomic write" is a property rather than a
+            // claim about a file nothing runs.
+            "com/dial/van/session/EncryptedSessionOutboxStore.kt",
+            "com/dial/van/session/SessionReconciliation.kt",
             // The canonical queue's record. Android owns the encryption and the disk;
             // this file is the shape those bytes take, and §20.14's metadata rides on it.
             "com/dial/van/queue/CommandQueueModels.kt",

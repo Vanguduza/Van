@@ -12,7 +12,7 @@ from pathlib import Path
 
 from fastapi import FastAPI, Header, HTTPException, Request
 from fastapi.responses import JSONResponse, PlainTextResponse
-from pydantic import BaseModel, Field
+from pydantic import BaseModel, Field, ValidationError
 
 from van_gateway.attention.engine import AttentionEngine
 from van_gateway.audit.service import AuditService
@@ -47,6 +47,7 @@ from van_gateway.models import (
     AttentionSeverity,
     CommandRequest,
     OwnerApprovalProof,
+    PrincipalType,
     ReminderCreate,
 )
 from van_gateway.notifications.intelligence import NotificationIntelligence, PhoneNotification
@@ -97,7 +98,11 @@ from van_gateway.browser.stream_grants import (
 from van_gateway.browser.worker import AdapterBackedWorker
 from van_gateway.session.api import build_session_router, is_session_owner_route
 from van_gateway.voice.speech_stream import SpeechStreamService
-from van_gateway.session.router import SessionDelegates, SessionRouter
+from van_gateway.session.router import (
+    SessionDelegateError,
+    SessionDelegates,
+    SessionRouter,
+)
 from van_gateway.session.service import VanHermesSessionService
 from van_gateway.auth.device_binding import DeviceBindingError, OwnerDeviceBindingService
 from van_gateway.auth.device_proof import AttestationPolicy
@@ -111,6 +116,8 @@ from van_gateway.capability.readiness import (
 from van_gateway.capability.registry import CapabilityRegistry
 from van_gateway.capability.router import CapabilityRouter
 from van_gateway.mission.api import MissionApi
+from van_gateway.mission.models import MissionEventType, MissionState
+from van_gateway.mission.service import MissionError
 from van_gateway.mission.binding import MissionBinder
 from van_gateway.understanding.api import UnderstandingApi
 from van_gateway.verification.production import build_automation_verifier, build_mission_registry
@@ -842,12 +849,83 @@ def create_app() -> FastAPI:
     van_sessions = VanHermesSessionService(store, events=events)
 
     async def _submit_command_through_session(payload: dict, device_id: str) -> dict:
-        request = CommandRequest(**{**payload, "device_id": device_id})
+        try:
+            request = CommandRequest(**{**payload, "device_id": device_id})
+        except ValidationError as exc:
+            # A malformed command is the phone's mistake, not the Gateway's fault: it is
+            # refused rather than raised. Left as an exception it became a 500, which the
+            # client's retry policy treats as "try again" — and the same malformed payload
+            # would be retried forever.
+            raise SessionDelegateError("command_payload_invalid") from exc
         result = await orchestrator.handle(request)
         return result if isinstance(result, dict) else result.model_dump(mode="json")
 
+    async def _answer_decision_through_session(payload: dict, device_id: str) -> dict:
+        """§20.2 — the owner's answer, delivered to the authority that already owns it."""
+        decision_id = str(payload.get("decision_id") or "")
+        if not decision_id:
+            raise SessionDelegateError("decision_id_required")
+        if "approved" not in payload:
+            # Not defaulted. An absent answer is not a "no", and guessing either way
+            # decides something on the owner's behalf that they did not say.
+            raise SessionDelegateError("approved_required")
+        try:
+            record = await decisions.resolve(
+                decision_id, approved=bool(payload["approved"])
+            )
+        except KeyError as exc:
+            raise SessionDelegateError("decision_not_found") from exc
+        return record.model_dump(mode="json")
+
+    async def _cancel_mission_through_session(payload: dict, device_id: str) -> dict:
+        """Stopping your own mission is yours to say — over this carrier too."""
+        mission_id = str(payload.get("mission_id") or "")
+        if not mission_id:
+            raise SessionDelegateError("mission_id_required")
+        try:
+            mission = await missions.transition(
+                mission_id,
+                target=MissionState.CANCELLED,
+                actor=PrincipalType.OWNER_DEVICE,
+                final_outcome="cancelled by owner",
+            )
+        except MissionError as exc:
+            raise SessionDelegateError(str(exc)) from exc
+        return {"mission_id": mission.mission_id, "state": mission.state.value}
+
+    async def _message_mission_through_session(payload: dict, device_id: str) -> dict:
+        """§2.3 — a note on the record. It does not move the mission by itself."""
+        mission_id = str(payload.get("mission_id") or "")
+        text = str(payload.get("text") or payload.get("message") or "")
+        if not mission_id or not text:
+            raise SessionDelegateError("mission_id_and_text_required")
+        if await missions.get(mission_id) is None:
+            raise SessionDelegateError("mission_unknown")
+        event = await missions.record_event(
+            mission_id=mission_id,
+            event_type=MissionEventType.MISSION_CREATED,
+            actor=PrincipalType.OWNER_DEVICE,
+            summary=text[:500],
+            severity="INFO",
+        )
+        return {"event_id": event.event_id, "recorded": True}
+
+    # Rev 1.5 §20.2 — all four kinds the router knows, delegated to the authorities that
+    # already exist.
+    #
+    # Three of these were left unwired, and the effect was not a missing feature. The
+    # router admitted the envelope into §20.12's table *before* discovering it had nobody
+    # to hand it to, so "cancel this mission" sent over the durable session was recorded,
+    # refused, and — because its idempotency key was now taken — answered ALREADY_KNOWN
+    # on every retry. Acknowledged, never performed, and unrepeatable.
     session_router = SessionRouter(
-        van_sessions, SessionDelegates(submit_command=_submit_command_through_session)
+        van_sessions,
+        SessionDelegates(
+            submit_command=_submit_command_through_session,
+            answer_decision=_answer_decision_through_session,
+            cancel_mission=_cancel_mission_through_session,
+            message_mission=_message_mission_through_session,
+        ),
     )
 
     # Rev 1.5 §21.16 — the spoken half of an answer, so a reconnect does not start it
@@ -856,12 +934,45 @@ def create_app() -> FastAPI:
     speech_streams = SpeechStreamService()
     app.state.speech_streams = speech_streams
 
-    async def _resume_snapshot(*, device_id: str, pending_command_ids: list[str]) -> dict:
-        """§20.11 — what the Gateway authoritatively knows about what the client lost."""
+    async def _resume_snapshot(
+        *, device_id: str, van_session_id: str, pending_command_ids: list[str]
+    ) -> dict:
+        """§20.11 — what the Gateway authoritatively knows about what the client lost.
+
+        Answered from two places, because the Gateway knows a thing in two ways and the
+        client cannot tell which applies. A mission is the richer answer and is preferred.
+        Failing that, `van_session_messages` is the §20.12 admission table — the record
+        that makes a resubmission safe — and a row in it means the Gateway holds this
+        message whether or not anything downstream opened a mission for it.
+
+        Consulting only the mission table made every answer for an admitted-but-missionless
+        message `UNKNOWN`, which the client correctly reads as *resend*. The command was
+        not lost, but it was re-sent on every single resume for the life of the session,
+        because nothing the client could ever receive would settle it.
+
+        `UNKNOWN` is emitted rather than the key omitted: the client treats both as
+        resend, and sending it makes "I looked and I do not have this" a statement the
+        client can be tested against rather than an absence it has to infer.
+        """
         states: dict[str, str] = {}
-        for command_id in pending_command_ids[:50]:
-            mission = await command_missions.existing_for_command(command_id)
-            states[command_id] = mission.state.value if mission else "UNKNOWN"
+        for identity in pending_command_ids[:50]:
+            mission = await command_missions.existing_for_command(identity)
+            if mission is not None:
+                states[identity] = mission.state.value
+                continue
+            # The client asks by command id when it has one and by message id otherwise,
+            # and a resubmitted envelope carries both. Matching either is what lets one
+            # question be answered without the two sides agreeing in advance which
+            # identity a given command happens to have.
+            row = await store.fetchone(
+                """
+                SELECT admitted_state FROM van_session_messages
+                 WHERE van_session_id = ? AND (command_id = ? OR message_id = ?)
+                 LIMIT 1
+                """,
+                (van_session_id, identity, identity),
+            )
+            states[identity] = row["admitted_state"] if row is not None else "UNKNOWN"
         cursor_row = await store.fetchone(
             "SELECT last_seq FROM event_cursors WHERE device_id = ?", (device_id,)
         )

@@ -40,6 +40,19 @@ UPSTREAM_KINDS = frozenset({
 })
 
 
+class SessionDelegateError(Exception):
+    """A delegate refusing the payload, rather than failing.
+
+    Distinct from an unexpected exception because the two need the same repair and for
+    opposite reasons: a refusal is the final answer for this payload and a failure is not,
+    but both must release the idempotency key. See [SessionRouter.route].
+    """
+
+    def __init__(self, reason: str) -> None:
+        super().__init__(reason)
+        self.reason = reason
+
+
 @dataclass
 class SessionDelegates:
     """The authorities the router calls. Each is the existing production path.
@@ -92,6 +105,20 @@ class SessionRouter:
             # under an idempotency key would occupy one for no reason.
             return RoutedResult(True, envelope.kind, result={"ok": True})
 
+        # Resolved *before* admission, and that order is the fix rather than a tidy-up.
+        #
+        # It used to be checked after, and the consequence was silent and permanent: an
+        # envelope whose kind had no wired delegate was recorded in `van_session_messages`
+        # as ADMITTED and then refused. Its idempotency key was now taken, so the phone's
+        # retry — the correct thing for it to do — came back ALREADY_KNOWN with a null
+        # result, which reads as success. The owner's "yes, cancel it" was acknowledged,
+        # never performed, and could not be sent again for the life of the session.
+        #
+        # Nothing may be written down that this Gateway cannot carry out.
+        delegate = self._delegate_for(envelope.kind)
+        if delegate is None:
+            return RoutedResult(False, envelope.kind, refusal=REJECT_UNKNOWN_KIND)
+
         admission, existing = await self.sessions.admit(envelope, now_ms=now)
         if admission is CommandAdmission.CONFLICT:
             return RoutedResult(
@@ -103,10 +130,25 @@ class SessionRouter:
             # idempotency key exists to prevent.
             return RoutedResult(True, envelope.kind, result=existing, admission=admission)
 
-        delegate = self._delegate_for(envelope.kind)
-        if delegate is None:
-            return RoutedResult(False, envelope.kind, refusal=REJECT_UNKNOWN_KIND)
-        result = await delegate(envelope.payload, session.device_id)
+        try:
+            result = await delegate(envelope.payload, session.device_id)
+        except SessionDelegateError as exc:
+            # The message is un-recorded, so the key is free again.
+            #
+            # §20.12's table answers a resubmission with what happened the first time, and
+            # what happened here is nothing. Leaving the row means the owner's corrected
+            # resend — a fixed mission id, the field that was missing — is answered
+            # ALREADY_KNOWN with a null result, which the client reads as done. The record
+            # exists to make a retry safe, not to make a refusal permanent.
+            await self.sessions.forget_message(envelope)
+            return RoutedResult(False, envelope.kind, refusal=exc.reason)
+        except Exception:
+            # A bug or a transient failure. The phone's retry is the right response to
+            # both, and a burned key would turn something recoverable into a command that
+            # can never be sent again. Re-raised: this is not a refusal and must not be
+            # reported as one.
+            await self.sessions.forget_message(envelope)
+            raise
         await self.sessions.record_result(envelope, result, now_ms=now)
         return RoutedResult(True, envelope.kind, result=result, admission=admission)
 

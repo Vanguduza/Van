@@ -148,6 +148,27 @@ object DurableOutbox {
     fun attempted(entry: OutboxEntry, pathId: String): OutboxEntry =
         entry.copy(attemptCount = entry.attemptCount + 1, lastAttemptPath = pathId)
 
+    /**
+     * §20.9 — the session these were addressed to is gone, so none of them will be sent.
+     *
+     * Both halves in one place, because doing one without the other is the defect this
+     * exists to prevent. `SESSION_REPLACED` used to call `outbox.clear()` and nothing
+     * else: correct while the outbox lived in RAM, and wrong the moment it gained a disk,
+     * because the very next start restored those records and flushed them into the new
+     * session — the decision reversed by a restart. The commands were also dropped
+     * without the owner being told anything at all.
+     *
+     * Returns what the owner has to be told about. A caller that ignores the return value
+     * has dropped the owner's work silently, which is the other half of the same failure.
+     */
+    fun abandonAll(
+        entries: List<OutboxEntry>,
+        store: SessionOutboxStore?,
+    ): List<OutboxEntry> {
+        for (entry in entries) store?.forget(entry.messageId)
+        return entries.toList()
+    }
+
     /** §20.15 — what the owner's screen shows, by what the queue may do with each item. */
     fun depthsByStorability(entries: List<OutboxEntry>): Map<CommandStorability, Int> =
         entries.groupingBy { it.storability }.eachCount()

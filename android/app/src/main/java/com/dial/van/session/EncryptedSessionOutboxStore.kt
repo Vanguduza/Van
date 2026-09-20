@@ -1,54 +1,69 @@
 package com.dial.van.session
 
-import com.dial.van.queue.CommandKind
-import com.dial.van.queue.EncryptedCommandQueue
-import com.dial.van.queue.QueueEnqueueRequest
+import com.dial.van.queue.OutboxRecordStore
 
 /**
  * Rev 1.5 §§2.7, 20.14 — the session outbox, stored in the queue that already exists.
  *
- * The whole of the Android binding, kept this thin on purpose. Every decision it could have
- * made lives in [OutboxPersistence], which is pure and executed in the harness; what is left
- * here is `EncryptedCommandQueue`'s API, which needs a Keystore and a disk and therefore
- * cannot be executed anywhere in this repository. CI compiles it; nothing runs it.
+ * §2.7 forbids a parallel replacement for `EncryptedCommandQueue`, so this is an adapter
+ * rather than a store: the envelope's bytes and §20.14's policy metadata are one record
+ * and **one write**, so a process death cannot leave a command whose payload survived and
+ * whose expiry, attempt count or reconfirmation did not.
  *
- * §2.7 forbids a parallel replacement for that queue, so this is an adapter rather than a
- * store. The practical consequence is the one that matters: the envelope's bytes and
- * §20.14's policy metadata are one record and one write, so a process death cannot leave a
- * command whose payload survived and whose expiry, attempt count or reconfirmation did not.
+ * It depends on [OutboxRecordStore] rather than on the concrete queue, and that is what
+ * makes it executable. The production implementation needs a Keystore and a disk and can
+ * be compiled in this repository and run nowhere; three methods can be faked in a dozen
+ * lines, so the decisions below — that a persist is one mutating call, that removal
+ * happens only after an acknowledged send — are executed in the harness rather than read.
+ *
+ * ## What the previous version actually did
+ *
+ * Worth recording, because every one of these was invisible and all its tests passed.
+ *
+ *  * It wrote by `remove(messageId)` then `enqueue(...)`. Two persistent operations, so a
+ *    kill between them lost the owner's command outright — the defect a durable outbox
+ *    exists to prevent, arriving by a different door.
+ *  * `enqueue` mints a **fresh** row id. The row was therefore never keyed by the message
+ *    id, so that `remove(messageId)` matched nothing, and neither did [forget]. A
+ *    delivered command stayed on disk and was restored and re-sent after every restart.
+ *  * `enqueue` also de-duplicates on the idempotency key and returns the existing row
+ *    unchanged. A reconfirmation — the same command with the owner's "yes" now attached —
+ *    was therefore silently discarded, and the owner was asked again after the next
+ *    restart.
+ *
+ * All three are the same mistake: an *insert* API used where the outbox needs an
+ * *upsert keyed on the message id*. [OutboxRecordStore.upsert] is that operation.
  */
 class EncryptedSessionOutboxStore(
-    private val queue: EncryptedCommandQueue,
+    private val records: OutboxRecordStore,
 ) : SessionOutboxStore {
 
+    /**
+     * One call, and the record's id is the message id.
+     *
+     * Both halves matter. One call means a process death leaves the old record or the new
+     * one and never neither; the message id as the key means a second persist of the same
+     * command replaces the first rather than adding a row a restore would have to choose
+     * between — and means [forget] can find it.
+     */
     override fun persist(entry: OutboxEntry, envelopeJson: String) {
-        // Remove-then-enqueue rather than an in-place update, because the queue has no
-        // update: the id is the message id, so this replaces the record rather than
-        // leaving two for a restore to choose between.
-        queue.remove(entry.messageId)
-        queue.enqueue(
-            QueueEnqueueRequest(
-                kind = CommandKind.SESSION_ENVELOPE,
-                payloadJson = envelopeJson,
-                sensitivity = OutboxPersistence.sensitivityFor(entry.actionClass),
-                actionClass = runCatching {
-                    com.dial.van.queue.ActionClass.valueOf(entry.actionClass)
-                }.getOrNull(),
-                replayPolicy = OutboxPersistence.replayPolicyFor(entry),
-                idempotencyKey = entry.idempotencyKey,
-                ttlMs = (entry.expiresAtMs - entry.createdAtMs).coerceAtLeast(1L),
-            ),
-        )
+        records.upsert(OutboxPersistence.toCommand(entry, envelopeJson))
     }
 
+    /**
+     * Everything still queued, oldest first.
+     *
+     * A row that does not map back is skipped rather than guessed at: [OutboxPersistence]
+     * returns null for a record that was not written by this path, and inventing the
+     * missing policy is how a stored approval becomes a silent replay.
+     */
     override fun restore(): List<Pair<OutboxEntry, String>> =
-        queue.peekReady()
+        records.recordsOfKind(OutboxPersistence.SESSION_KIND)
             .mapNotNull { command ->
                 OutboxPersistence.toEntry(command)?.let { it to command.payloadJson }
             }
-            .sortedBy { (entry, _) -> entry.createdAtMs }
 
     override fun forget(messageId: String) {
-        queue.remove(messageId)
+        records.remove(messageId)
     }
 }

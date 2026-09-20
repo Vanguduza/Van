@@ -20,9 +20,9 @@
     "PRODUCTION_CERTIFIED"
   ],
   "counts": {
-    "P0": 22,
-    "P1": 43,
-    "P2": 32,
+    "P0": 25,
+    "P1": 47,
+    "P2": 38,
     "P3": 29,
     "P4": 7
   },
@@ -6184,6 +6184,212 @@
         "residual_class": "ENVIRONMENT_UNVERIFIED",
         "posture": "fail-closed"
       }
+    },
+    {
+      "id": "P0-SESS-004",
+      "severity": "P0",
+      "domain": "session",
+      "title": "The session outbox used an insert API where it needed an upsert, three ways",
+      "description": "`EncryptedSessionOutboxStore.persist` was `queue.remove(entry.messageId)` followed by `queue.enqueue(...)`. Three separate failures came out of that one choice, and no test in the repository could see any of them because the tests exercised a nine-line fake while the adapter itself was unexecutable — it took `EncryptedCommandQueue`, which needs a Keystore and a disk.\n\n1. Two persistent operations. A process death between them lost the owner's command outright, which is the exact failure a durable outbox exists to prevent.\n2. `enqueue` mints a fresh row id, so the record was never keyed by the message id. The `remove` matched nothing and neither did `forget`: a delivered command stayed on disk and was restored and re-sent after every restart.\n3. `enqueue` de-duplicates on the idempotency key and returns the existing row unchanged, so a reconfirmation — the owner's \"yes\", already stamped on the entry — was silently discarded, and the owner was asked the same question again after the next process death.\n\nRaised by external review, which identified the first and asked for an atomic upsert. The second and third were found while fixing it.",
+      "requirement": "docs/VAN_REMOTE_BROWSER_PRODUCTION_BLUEPRINT_REV_1_5.md §§2.7, 20.14",
+      "authority": "VAN Remote Browser Production Blueprint Rev 1.5",
+      "repository_evidence": [
+        "android/app/src/main/java/com/dial/van/session/EncryptedSessionOutboxStore.kt",
+        "android/app/src/main/java/com/dial/van/queue/EncryptedCommandQueue.kt",
+        "android/app/src/main/java/com/dial/van/queue/CommandQueueModels.kt"
+      ],
+      "runtime_evidence": [],
+      "affected_components": [
+        "android",
+        "session",
+        "queue"
+      ],
+      "root_cause": "The adapter was written against whatever API the queue happened to expose. `enqueue` is an insert — it mints an id and de-duplicates — and the outbox needs replacement keyed on the message id. Nothing forced the difference into view because the adapter could not be executed.",
+      "remediation": "`OutboxRecordStore` — upsert, remove, recordsOfKind — added to the pure queue model, with `EncryptedCommandQueue` implementing it and the adapter depending on it. One `upsert` per persist, the record keyed on the message id, and the whole adapter now executed in `android/verification` against a store that can be killed between operations.",
+      "current_status": "CLOSED",
+      "remediation_gate": "RB C15",
+      "validation_gate": "G2",
+      "closure": {
+        "state": "EXTERNALLY_BLOCKED_REPOSITORY_COMPLETE",
+        "summary": "`persist` is one `records.upsert(...)`. `EncryptedCommandQueue.persist` and `remove` were each two SharedPreferences editors with asynchronous `apply()` — three non-atomic writes in total, not the one the review named — and are now a single editor with `commit()`, so the blob and the index move together and the caller is not told the command is queued before it is on disk.",
+        "changed": [
+          "android/app/src/main/java/com/dial/van/session/EncryptedSessionOutboxStore.kt",
+          "android/app/src/main/java/com/dial/van/queue/EncryptedCommandQueue.kt",
+          "android/app/src/main/java/com/dial/van/queue/CommandQueueModels.kt",
+          "android/verification/build.gradle.kts"
+        ],
+        "verified_by": [
+          "android/verification/src/test/kotlin/com/dial/van/session/SessionOutboxDurabilityTest.kt"
+        ],
+        "counterexample": "A fault-injection sweep that finds nothing passes. `the previous two-step persist does lose the command, which is why the sweep exists` keeps the old adapter executable and asserts it still fails, and the sweep's bound is asserted to exceed the number of operations a persist actually performs — so neither the sweep nor its range can go quiet.",
+        "residual": "Part of the remediation is in `EncryptedCommandQueue`, which needs a Keystore and a disk and is therefore compiled by CI and executed nowhere here: the single-editor `commit()` that makes the blob and the index move together is read, not run. What is executed is the adapter — one mutating call per persist, keyed on the message id, and no kill point within a persist that loses a command.",
+        "residual_reason": "The AGP is unreachable in the audit container.",
+        "residual_class": "ENVIRONMENT_UNVERIFIED",
+        "posture": "fail-closed"
+      }
+    },
+    {
+      "id": "P0-SESS-005",
+      "severity": "P0",
+      "domain": "session",
+      "title": "A resume asked by message id, was answered by command id, and dropped every unknown",
+      "description": "§20.12's reconciliation was three lines: send `inFlight.keys` as `pending_command_ids`, then `states.keys().forEach { inFlight.remove(it) }`.\n\nTwo independent defects that cancelled each other out. The phone sent *message* ids and the Gateway resolved each one as a *command* id against the mission table, so every answer came back `UNKNOWN`. The phone then removed every key it had asked about, the `UNKNOWN`s included — and `UNKNOWN` is the Gateway saying it has never heard of this, which is the one answer that means resend.\n\nThe effect: every reconnect silently discarded every unacknowledged owner command. Nothing was resent because nothing was recognised, and nothing looked wrong because nothing was left behind. Restored outbox entries were not reconciled at all, so a process death between the socket write and the durable `forget` delivered the owner's command a second time.",
+      "requirement": "docs/VAN_REMOTE_BROWSER_PRODUCTION_BLUEPRINT_REV_1_5.md §§20.11, 20.12",
+      "authority": "VAN Remote Browser Production Blueprint Rev 1.5",
+      "repository_evidence": [
+        "android/app/src/main/java/com/dial/van/session/VanHermesSessionManager.kt",
+        "backend/van_gateway/app.py",
+        "backend/van_gateway/session/api.py"
+      ],
+      "runtime_evidence": [],
+      "affected_components": [
+        "android",
+        "session",
+        "gateway"
+      ],
+      "root_cause": "A command id and a message id are different identities on the same envelope, and the question and the answer were produced in different files. Neither side was checkable against the other, because the one case that distinguishes them — a partial answer — is not produced by a healthy network.",
+      "remediation": "`SessionReconciliation` — pure — produces the identity asked about and matches the answer by the same function, and returns a plan of resend and settle. `submit` now puts the command id on the envelope, where the Gateway records it. `_resume_snapshot` answers from §20.12's admission table when there is no mission, scoped to the asking session, and answers `UNKNOWN` explicitly rather than omitting the key. Restored outbox entries are reconciled with the in-flight ones and durably forgotten when the Gateway holds them.",
+      "current_status": "CLOSED",
+      "remediation_gate": "RB C15",
+      "validation_gate": "G2",
+      "closure": {
+        "state": "EXTERNALLY_BLOCKED_REPOSITORY_COMPLETE",
+        "summary": "One function produces the question and matches the answer, so asking by one identity and settling by another is no longer expressible. Absent and `UNKNOWN` both mean resend; anything else settles, which now includes a message the Gateway admitted without opening a mission for it.",
+        "changed": [
+          "android/app/src/main/java/com/dial/van/session/SessionReconciliation.kt",
+          "android/app/src/main/java/com/dial/van/session/VanHermesSessionManager.kt",
+          "backend/van_gateway/app.py",
+          "backend/van_gateway/session/api.py"
+        ],
+        "verified_by": [
+          "android/verification/src/test/kotlin/com/dial/van/session/SessionReconciliationTest.kt",
+          "android/verification/src/test/kotlin/com/dial/van/session/SessionOutboxDurabilityTest.kt",
+          "backend/tests/test_session_transport_api.py"
+        ],
+        "counterexample": "A Gateway that answered something for every id would pass the \"is not reported unknown\" test and lose the owner's command instead — the phone would settle work that never arrived. `a message the gateway has never seen is reported unknown` and `the answer is scoped to the session that asked` are what separate the two.",
+        "residual": "The Gateway's half and the reconciliation decisions are executed. The wiring in `VanHermesSessionManager` — which identities are collected, what a settle does to the queue and the store — needs OkHttp, is not in the JVM harness, and is compiled by CI only. That half is a read of the source.",
+        "residual_reason": "The AGP is unreachable in the audit container.",
+        "residual_class": "ENVIRONMENT_UNVERIFIED",
+        "posture": "fail-closed"
+      }
+    },
+    {
+      "id": "P0-SESS-006",
+      "severity": "P0",
+      "domain": "session",
+      "title": "Three of the four session kinds had no delegate, and the refusal burned the key",
+      "description": "`SessionRouter` knows four upstream kinds. `app.py` wired one. `decision.answer`, `mission.cancel` and `mission.message` sent over the durable session were refused `session_kind_unknown`.\n\nWorse than a missing feature, because the router admitted the envelope into §20.12's table *before* discovering it had nobody to hand it to. The idempotency key was now taken with a null result, so the phone's retry — the correct response to a refusal it cannot interpret — came back `ALREADY_KNOWN` with no result, which reads as success. The owner's \"cancel it\" was acknowledged, never performed, and could not be sent again for the life of the session.\n\nFound while writing a route-level test for §20.12's resume answer: the test needed a kind the Gateway would record, and `mission.message` returned 400.",
+      "requirement": "docs/VAN_REMOTE_BROWSER_PRODUCTION_BLUEPRINT_REV_1_5.md §§20.2, 20.12",
+      "authority": "VAN Remote Browser Production Blueprint Rev 1.5",
+      "repository_evidence": [
+        "backend/van_gateway/session/router.py",
+        "backend/van_gateway/session/service.py",
+        "backend/van_gateway/app.py"
+      ],
+      "runtime_evidence": [],
+      "affected_components": [
+        "gateway",
+        "session",
+        "mission"
+      ],
+      "root_cause": "`SessionDelegates` made three of the four optional, so an unwired authority was a default rather than a build failure — and the admission table was written before the router knew whether it could carry the message.",
+      "remediation": "The delegate is resolved before admission, so nothing is written down that cannot be carried out. A delegate refusal un-records the message, releasing the key so the owner's corrected resend is admitted; an unexpected exception does the same and is re-raised. All four delegates are wired to the authorities that already exist — `DecisionService.resolve`, `MissionService.transition`, `MissionService.record_event` — and a malformed command payload is now a refusal rather than a 500, because a 500 means \"try again\" and this payload never will succeed.",
+      "current_status": "CLOSED",
+      "remediation_gate": "RB C15",
+      "validation_gate": "G2",
+      "closure": {
+        "state": "INTEGRATED_AND_EVIDENCED",
+        "summary": "§20.2 is delegation to an existing authority, and all four kinds now delegate. No envelope enters the admission table before the Gateway knows it can carry it, and no refusal leaves a row behind.",
+        "changed": [
+          "backend/van_gateway/session/router.py",
+          "backend/van_gateway/session/service.py",
+          "backend/van_gateway/app.py"
+        ],
+        "verified_by": [
+          "backend/tests/test_session_transport_api.py"
+        ],
+        "counterexample": "Wiring the delegates without moving the admission would pass `the owner can cancel a mission over the session` and leave the key burned for every payload a delegate refuses. `a refused message does not take its idempotency key with it` fails under exactly that fix, and `a refused message is not left in the admission table` ties it back to the resume answer: a row with no result would tell a reconnecting phone the Gateway holds a command it never performed.",
+        "residual": "",
+        "residual_class": "",
+        "posture": "fail-closed"
+      }
+    },
+    {
+      "id": "P1-SESS-007",
+      "severity": "P1",
+      "domain": "session",
+      "title": "A restore read the queue through a filter that drops the commands it exists to recover",
+      "description": "`EncryptedSessionOutboxStore.restore` read `queue.peekReady()`, which filters on `isReplayEligible` — and that drops a `NO_STALE_REPLAY` command once `attemptCount > 0`. That is precisely the §20.14 class a restore exists for: a command that was tried, was not acknowledged, and must be put back to the owner rather than sent on their behalf.\n\nSo a restart silently discarded the commands the owner most needed to be asked about, with every test of the mapping still green, because the mapping was never the broken half.",
+      "requirement": "docs/VAN_REMOTE_BROWSER_PRODUCTION_BLUEPRINT_REV_1_5.md §§20.14, 20.15",
+      "authority": "VAN Remote Browser Production Blueprint Rev 1.5",
+      "repository_evidence": [
+        "android/app/src/main/java/com/dial/van/queue/EncryptedCommandQueue.kt",
+        "android/app/src/main/java/com/dial/van/session/EncryptedSessionOutboxStore.kt"
+      ],
+      "runtime_evidence": [],
+      "affected_components": [
+        "android",
+        "session",
+        "queue"
+      ],
+      "root_cause": "`peekReady` is the dispatcher's reader and answers \"what may be sent now\". A restore asks \"what is still held\", and the two differ in exactly the class that needs the owner. Reusing the nearest reader took the wrong question's answer.",
+      "remediation": "`recordsOfKind` reads the index directly and filters only on expiry, because a window that closed while the process was dead has closed. What may be sent is the outbox's decision, made after the restore, not the queue's.",
+      "current_status": "CLOSED",
+      "remediation_gate": "RB C15",
+      "validation_gate": "G2",
+      "closure": {
+        "state": "EXTERNALLY_BLOCKED_REPOSITORY_COMPLETE",
+        "summary": "The restore reader and the dispatch reader are different functions with different filters, and the difference is documented at the one that was wrong.",
+        "changed": [
+          "android/app/src/main/java/com/dial/van/queue/EncryptedCommandQueue.kt"
+        ],
+        "verified_by": [
+          "android/verification/src/test/kotlin/com/dial/van/session/SessionOutboxDurabilityTest.kt"
+        ],
+        "counterexample": "A test that persisted an un-attempted reconfirm-needed entry passes under both readers. `a command awaiting the owner is restored rather than filtered away` stamps the attempt first, which is the only state the two readers disagree about.",
+        "residual": "`recordsOfKind` itself lives in `EncryptedCommandQueue` and cannot be executed here. The test exercises the adapter over a store that honours the documented contract, which proves the adapter does not re-filter and does not prove the real method reads the index rather than `peekReady`. That is a source read and CI's compile.",
+        "residual_reason": "The AGP is unreachable in the audit container.",
+        "residual_class": "ENVIRONMENT_UNVERIFIED",
+        "posture": "fail-closed"
+      }
+    },
+    {
+      "id": "P1-SESS-008",
+      "severity": "P1",
+      "domain": "session",
+      "title": "A session replacement cleared the outbox in memory and left it on disk",
+      "description": "`ResumeOutcome.SESSION_REPLACED` calls `outbox.clear()`, with a comment stating the reason: work addressed to a session that no longer exists is not the same work, and replaying it into a new one is how a cancelled instruction gets performed.\n\nThe durable store was not cleared. So the very next `start()` restored those records and flushed them into the new session — the decision made here reversed by a restart. The commands were also dropped without the owner being told anything.\n\nThis defect arrived *with* durability: it was correct while the outbox was in memory, and C14 made the memory the wrong half to clear without revisiting this branch.",
+      "requirement": "docs/VAN_REMOTE_BROWSER_PRODUCTION_BLUEPRINT_REV_1_5.md §§20.9, 20.14",
+      "authority": "VAN Remote Browser Production Blueprint Rev 1.5",
+      "repository_evidence": [
+        "android/app/src/main/java/com/dial/van/session/VanHermesSessionManager.kt"
+      ],
+      "runtime_evidence": [],
+      "affected_components": [
+        "android",
+        "session"
+      ],
+      "root_cause": "Adding a second place where state lives without auditing every place the first one is cleared. The recurring shape: two stores, one of them load-bearing, and the code that predates the second one still only knows about the first.",
+      "remediation": "The branch forgets each entry durably as well as in memory, and records it in `abandoned` so `undeliveredSinceLastRead` tells the owner it did not happen — kept separate from `expired` because \"the time ran out\" and \"the conversation ended\" are different things to say.",
+      "current_status": "CLOSED",
+      "remediation_gate": "RB C15",
+      "validation_gate": "G2",
+      "closure": {
+        "state": "EXTERNALLY_BLOCKED_REPOSITORY_COMPLETE",
+        "summary": "The decision is `DurableOutbox.abandonAll`, which forgets each record durably and returns what the owner must be told — so doing one without the other is not expressible at the call site. `undeliveredSinceLastRead` carries it to the owner, kept separate from `expired` because \"the time ran out\" and \"the conversation ended\" are different things to say.",
+        "changed": [
+          "android/app/src/main/java/com/dial/van/session/DurableOutbox.kt",
+          "android/app/src/main/java/com/dial/van/session/VanHermesSessionManager.kt"
+        ],
+        "verified_by": [
+          "android/verification/src/test/kotlin/com/dial/van/session/SessionOutboxDurabilityTest.kt"
+        ],
+        "counterexample": "Clearing the store and discarding the return value passes any test that checks the queue is empty, and loses the owner's work silently. The test asserts both the empty restore and the returned list, so neither half alone is enough.",
+        "residual": "The branch that calls it is in `VanHermesSessionManager`, which needs OkHttp and is compiled by CI only. What is executed is that the call clears the store and names every dropped command; that `SESSION_REPLACED` reaches it is a source read.",
+        "residual_reason": "The AGP is unreachable in the audit container and the class cannot be added to the pure harness without pulling OkHttp into it.",
+        "residual_class": "ENVIRONMENT_UNVERIFIED",
+        "posture": "fail-closed"
+      }
     }
   ],
   "register_note": "Extended 2026-09-19 under blueprint Gate 0 / action W0-1. The audit assigned IDs to 55 findings and enumerated further P3/P4 items in prose; those now carry IDs so that 'all closed' is countable. Each finding carries a remediation_gate referencing docs/VAN_FINISHED_PRODUCT_BLUEPRINT_REV_1.md.",
@@ -6204,5 +6410,6 @@
       "P4-DOC-004 (PairDeviceBody duplicated documentation — cosmetic, not yet applied)"
     ],
     "note": "Gate 0 closed the truth-correction and registration-drift findings and installed the maturity gate. Findings are marked CLOSED only where a test or an executable check now enforces the fix."
-  }
+  },
+  "counts_note": "Recomputed from `findings` rather than written. It had drifted: the stored tally summed to 133 against 141 findings, because it was the count at the original audit and every later wave added rows without touching it. A register whose header disagrees with its body is the thing this programme exists to find, so the numbers are now derived on each update and the jump at RB C15 is part stale base, part the five findings that checkpoint added."
 }

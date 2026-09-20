@@ -147,6 +147,31 @@ data class QueuedCommand(
  */
 const val COMMAND_QUEUE_DEFAULT_TTL_MS: Long = 24L * 60 * 60 * 1000
 
+/**
+ * Rev 1.5 §20.14 — the three queue operations the session outbox needs.
+ *
+ * Narrow on purpose, and it is what makes the adapter above it executable. The real
+ * implementation is `EncryptedCommandQueue`, which needs a Keystore and a disk and can
+ * therefore be compiled here and run nowhere. An interface this small is faked in a dozen
+ * lines, so `EncryptedSessionOutboxStore`'s own logic — that a persist is *one* mutating
+ * call, that removal happens only after an acknowledged send — becomes a thing tests
+ * execute rather than a thing a reviewer reads.
+ *
+ * [upsert] must be atomic. That is the whole requirement: a process death may leave the
+ * old record or the new one, and may not leave neither.
+ */
+interface OutboxRecordStore {
+
+    /** Write or replace, keyed on [QueuedCommand.id], in one atomic operation. */
+    fun upsert(command: QueuedCommand)
+
+    /** Forget one, atomically. */
+    fun remove(id: String)
+
+    /** Every non-expired record of this kind, oldest first. */
+    fun recordsOfKind(kind: String): List<QueuedCommand>
+}
+
 data class QueueEnqueueRequest(
     val kind: CommandKind,
     val payloadJson: String,

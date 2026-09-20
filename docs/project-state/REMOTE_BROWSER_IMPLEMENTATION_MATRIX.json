@@ -2126,18 +2126,23 @@
       "certified": false,
       "component_refs": [],
       "ledger_expectation": "NONE",
-      "producer": "VanHermesSessionService.admit",
-      "consumer": "SessionRouter.route",
+      "producer": "SessionReconciliation (device) and _resume_snapshot (gateway)",
+      "consumer": "VanHermesSessionManager.resume/adoptCursor, VanHermesSessionService.admit",
       "authority": "docs/VAN_REMOTE_BROWSER_PRODUCTION_BLUEPRINT_REV_1_5.md \u00a7ADR-RB-011",
       "evidence_refs": [],
       "tests": [
-        "backend/tests/test_van_hermes_session.py"
+        "backend/tests/test_van_hermes_session.py",
+        "backend/tests/test_session_transport_api.py",
+        "android/verification/src/test/kotlin/com/dial/van/session/SessionReconciliationTest.kt",
+        "android/verification/src/test/kotlin/com/dial/van/session/SessionOutboxDurabilityTest.kt"
       ],
       "external_gates": [
-        "nothing external: this needs a run against real hardware, which no commit can supply"
+        "a real path failure on real hardware: the case that matters is a partial answer, and no commit can produce one",
+        "the Android build is compiled only in CI; the AGP is unreachable in the audit container"
       ],
       "transport_independent": true,
-      "offline_voice_proven": null
+      "offline_voice_proven": null,
+      "note": "**Corrected after review.** The Gateway's half was right and the reconciliation was not, in two directions that cancelled out. The phone sent `inFlight.keys` \u2014 *message* ids \u2014 as `pending_command_ids`, the Gateway resolved each as a *command* id against the mission table, so every answer was `UNKNOWN`; and the phone then removed every key it had asked about, the unknowns included. `UNKNOWN` is the one answer that means resend, so every reconnect silently discarded every unacknowledged owner command. Nothing was resent because nothing was recognised, and nothing looked wrong because nothing was left behind. P0-SESS-005.\n\n`SessionReconciliation` now produces the identity asked about and matches the answer by the same function, `submit` puts the command id on the envelope where the Gateway records it, and `_resume_snapshot` answers from \u00a720.12's admission table \u2014 scoped to the asking session \u2014 when no mission exists. Restored outbox entries are reconciled alongside the in-flight ones, which is what stops a kill between the socket write and the durable `forget` delivering the owner's command twice."
     },
     {
       "schema": "van-implementation-matrix/1",
@@ -2156,14 +2161,15 @@
       "certified": false,
       "component_refs": [],
       "ledger_expectation": "NONE",
-      "producer": "DurableOutbox",
+      "producer": "DurableOutbox and EncryptedSessionOutboxStore over OutboxRecordStore",
       "consumer": "VanHermesSessionManager.submit, flushOutbox and reconfirm",
       "authority": "docs/VAN_REMOTE_BROWSER_PRODUCTION_BLUEPRINT_REV_1_5.md \u00a72.7",
       "evidence_refs": [],
       "tests": [
         "android/verification/src/test/kotlin/com/dial/van/session/DurableOutboxTest.kt",
         "android/verification/src/test/kotlin/com/dial/van/session/OutboxPersistenceTest.kt",
-        "android/verification/src/test/kotlin/com/dial/van/session/RestartSeamTest.kt"
+        "android/verification/src/test/kotlin/com/dial/van/session/RestartSeamTest.kt",
+        "android/verification/src/test/kotlin/com/dial/van/session/SessionOutboxDurabilityTest.kt"
       ],
       "external_gates": [
         "the Android build is compiled only in CI; the AGP is unreachable in the audit container",
@@ -2171,7 +2177,7 @@
       ],
       "transport_independent": true,
       "offline_voice_proven": null,
-      "note": "\u00a72.7 forbids a parallel replacement for `EncryptedCommandQueue`, so this is not one: \u00a720.14's metadata rides on that queue's own record.\n\n**Corrected after review.** The first version held those records in an in-memory `ArrayDeque` and never touched the queue at all \u2014 durable in name, and a process death lost the reconfirmation, expiry, attempt count and path while the command could survive. P0-SESS-003. One record and one write now, persisted before it is queued and forgotten only after the send returns.\n\nWriting the restart tests found two more: the mapping silently dropped `commandId`, which is what \u00a720.12 matches a restored command by, and a session envelope in the shared queue was dispatchable by the replayer \u2014 P0-SEC-002's shape, now a named refusal rather than a reliance on `commandTextOrNull` returning null."
+      "note": "\u00a72.7 forbids a parallel replacement for `EncryptedCommandQueue`, so this is not one: \u00a720.14's metadata rides on that queue's own record.\n\n**Corrected after review.** The first version held those records in an in-memory `ArrayDeque` and never touched the queue at all \u2014 durable in name, and a process death lost the reconfirmation, expiry, attempt count and path while the command could survive. P0-SESS-003. One record and one write now, persisted before it is queued and forgotten only after the send returns.\n\nWriting the restart tests found two more: the mapping silently dropped `commandId`, which is what \u00a720.12 matches a restored command by, and a session envelope in the shared queue was dispatchable by the replayer \u2014 P0-SEC-002's shape, now a named refusal rather than a reliance on `commandTextOrNull` returning null.\n\n**Corrected again at C15, after external review.** The adapter was `queue.remove(messageId)` then `queue.enqueue(...)` \u2014 and the review was right that a kill between them loses the command. Attacking it found the seam was worse than reported. `enqueue` mints its own row id, so the record was never keyed by the message id: that `remove` matched nothing and neither did `forget`, which means every delivered command stayed on disk and was re-sent after each restart. `enqueue` also de-duplicates on the idempotency key and returns the existing row, so a reconfirmation \u2014 the owner's \"yes\" \u2014 was discarded. And `EncryptedCommandQueue`'s own `persist` and `remove` were each two editors with asynchronous `apply()`: three non-atomic writes, not one.\n\n`OutboxRecordStore.upsert` is now the operation, the adapter depends on that interface rather than on the queue, and the whole adapter is executed in the harness against a store that can be killed between operations. The restore reader was also `peekReady`, which drops a `NO_STALE_REPLAY` record once attempted \u2014 exactly the class a restore exists to recover (P1-SESS-007)."
     },
     {
       "schema": "van-implementation-matrix/1",

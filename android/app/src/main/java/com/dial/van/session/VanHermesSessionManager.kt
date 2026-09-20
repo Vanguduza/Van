@@ -159,8 +159,16 @@ class VanHermesSessionManager(
     ): SubmissionOutcome {
         val sessionId = _state.value.vanSessionId
             ?: return SubmissionOutcome.Refused("session_not_established")
+        val messageId = "msg_${UUID.randomUUID()}"
+        // §20.12 — lifted out of the payload and onto the envelope.
+        //
+        // The Gateway stores `van_session_messages.command_id` from the envelope field,
+        // and answers a resume by that identity. Leaving the command id buried in the
+        // payload meant the column was always null, so the Gateway could not recognise a
+        // resubmitted command as one it already held however the phone asked.
+        val commandId = payload.optString("command_id").takeIf { it.isNotBlank() }
         val envelope = SessionEnvelope.build(
-            messageId = "msg_${UUID.randomUUID()}",
+            messageId = messageId,
             vanSessionId = sessionId,
             sessionEpoch = _state.value.sessionEpoch,
             pathEpoch = _state.value.pathEpoch,
@@ -170,6 +178,7 @@ class VanHermesSessionManager(
             payload = payload,
             // Minted once, here, and carried through every retry and failover below.
             idempotencyKey = "idem_${UUID.randomUUID()}",
+            commandId = commandId,
         )
 
         val live = socket
@@ -182,8 +191,8 @@ class VanHermesSessionManager(
         // never be kept. There is no branch here that could store an A4: the only way to
         // keep one would be to not call this.
         val entry = DurableOutbox.admit(
-            messageId = envelope.getString("message_id"),
-            commandId = payload.optString("command_id", envelope.getString("message_id")),
+            messageId = messageId,
+            commandId = commandId ?: messageId,
             idempotencyKey = envelope.optString("idempotency_key", ""),
             turnId = payload.optString("turn_id", ""),
             actionClass = actionClass,
@@ -462,7 +471,9 @@ class VanHermesSessionManager(
                 vanSessionId = sessionId,
                 sessionEpoch = local.sessionEpoch,
                 lastEventSeq = lastEventSeq,
-                pendingCommandIds = inFlight.keys.toList(),
+                pendingCommandIds = pendingIdentities().map {
+                    SessionReconciliation.identityOf(it.messageId, it.commandId)
+                },
                 pathId = PRIMARY_PATH_ID,
                 routeId = "primary-ingress",
             )
@@ -514,8 +525,16 @@ class VanHermesSessionManager(
                 // Deliberately not flushed: work addressed to a session that no longer
                 // exists is not the same work, and replaying it silently into a new one is
                 // how an owner's cancelled instruction gets performed.
+                //
+                // Dropped from the disk as well as from memory, and the owner is told.
+                // Clearing only the in-memory queue left the records on disk, so the very
+                // next `start()` restored them and flushed them into the new session —
+                // the decision made here reversed by a restart, which is the failure mode
+                // that arrived with durability and was invisible without it.
+                abandoned += DurableOutbox.abandonAll(outbox.map { it.entry }, store)
                 outbox.clear()
                 inFlight.clear()
+                publishOutboxDepth()
             }
             ResumeOutcome.REFUSED -> {
                 failover?.abandon()
@@ -565,13 +584,61 @@ class VanHermesSessionManager(
         }
     }
 
+    /**
+     * §20.12 — everything this side is still holding, in the order it was issued.
+     *
+     * In-flight first, because those were sent on a live socket and are the most likely to
+     * be at the Gateway already; then the restored outbox.
+     *
+     * The outbox is included **in full** rather than filtered to entries with an attempt
+     * recorded, and that is the point rather than laziness. `flushOutbox` writes to the
+     * socket and only then calls `store.forget`; a process death between those two lines
+     * leaves a record on disk that the Gateway already has, with `attemptCount` still
+     * zero — because the attempt counter is stamped on *failure*, not on send. Asking
+     * about only the attempted ones would therefore miss precisely the kill this
+     * reconciliation exists for, and that command would be delivered twice.
+     */
+    private fun pendingIdentities(): List<SessionReconciliation.Pending> {
+        val pending = mutableListOf<SessionReconciliation.Pending>()
+        for ((messageId, envelope) in inFlight) {
+            pending += SessionReconciliation.Pending(
+                messageId = messageId,
+                commandId = envelope.optString("command_id").takeIf { it.isNotBlank() },
+            )
+        }
+        for (queued in outbox) {
+            pending += SessionReconciliation.Pending(
+                messageId = queued.entry.messageId,
+                commandId = queued.entry.commandId,
+            )
+        }
+        return pending
+    }
+
     private fun adoptCursor(resume: JSONObject) {
         lastEventSeq = resume.optLong("replay_from_seq", lastEventSeq)
-        val states = resume.optJSONObject("command_states") ?: return
-        // A command the Gateway already knows about is not resent, whatever the outbox
-        // thinks: §20.12's whole purpose is that a lost acknowledgement is not a lost
-        // command.
-        states.keys().forEach { messageId -> inFlight.remove(messageId) }
+        val answers = resume.optJSONObject("command_states") ?: return
+        val states = buildMap<String, String> {
+            answers.keys().forEach { key -> put(key, answers.optString(key)) }
+        }
+        // §20.12 — a lost acknowledgement is not a lost command, and a command the
+        // Gateway already holds is not sent twice. Both halves, from one plan, so that
+        // the identity the question was asked by is the identity the answer is matched
+        // by. Anything the Gateway did not recognise stays exactly where it is and goes
+        // again under its own message id and idempotency key.
+        val settled = SessionReconciliation.plan(pendingIdentities(), states).settle.toSet()
+        if (settled.isEmpty()) return
+        inFlight.keys.removeAll(settled)
+        // Removed from the queue *and* from the disk. Leaving the record behind is the
+        // restart loop: restored on the next start, flushed again, and the owner's one
+        // instruction performed once more after every process death.
+        val kept = outbox.filterNot { it.entry.messageId in settled }
+        for (queued in outbox) {
+            if (queued.entry.messageId in settled) store?.forget(queued.entry.messageId)
+        }
+        outbox.clear()
+        outbox.addAll(kept)
+        publishOutboxDepth()
     }
 
     /**
@@ -653,9 +720,28 @@ class VanHermesSessionManager(
     /** §20.14 — commands whose window closed while there was no path. */
     private val expired = mutableListOf<OutboxEntry>()
 
+    /**
+     * §20.9 — commands dropped because the session they were addressed to is gone.
+     *
+     * Kept apart from [expired] because the two are different things to say. One is "the
+     * time you gave it ran out"; the other is "the conversation this belonged to ended".
+     * Both are read through [undeliveredSinceLastRead], because what the owner needs is
+     * the single fact that it did not happen — and a command dropped without anyone being
+     * told is the failure this list exists to prevent.
+     */
+    private val abandoned = mutableListOf<OutboxEntry>()
+
     fun expiredSinceLastRead(): List<OutboxEntry> {
         val taken = expired.toList()
         expired.clear()
+        return taken
+    }
+
+    /** Everything that will not be sent, whatever the reason, taken once. */
+    fun undeliveredSinceLastRead(): List<OutboxEntry> {
+        val taken = expired + abandoned
+        expired.clear()
+        abandoned.clear()
         return taken
     }
 
