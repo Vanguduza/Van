@@ -68,7 +68,7 @@ def test_guardrail_script_actually_fails_when_violated(tmp_path, monkeypatch):
 def test_capsule_migration_is_settled():
     r = subprocess.run([sys.executable, MIGRATE, "--check"], capture_output=True, text=True)
     assert r.returncode == 0
-    assert "already migrated" in r.stdout
+    assert "migration provenance reconciled" in r.stdout
 
 
 def test_every_capsule_has_a_timeframe_contract():
@@ -80,6 +80,30 @@ def test_every_capsule_has_a_timeframe_contract():
         c = TimeframeContract.from_capsule(doc)
         assert c is not None, path
         assert c.required_timeframes, path
+
+
+def test_migration_check_rejects_post_migration_capsule_drift(tmp_path):
+    import json
+    import pathlib
+    import shutil
+    from vati.core.canonical import canonical_hash
+
+    src = pathlib.Path("trading")
+    dst = tmp_path / "trading"
+    shutil.copytree(src, dst, ignore=shutil.ignore_patterns("__pycache__", "*.pyc"))
+    cap = dst / "strategies" / "registry" / "FX-TREND-PULLBACK-01.json"
+    doc = json.loads(cap.read_text())
+    doc["timeframe_contract"]["execution"] = "M15"
+    body = {k: v for k, v in doc.items() if k != "capsule_hash"}
+    doc["capsule_hash"] = canonical_hash(body)
+    cap.write_text(json.dumps(doc, indent=2, sort_keys=True) + "\n")
+
+    r = subprocess.run(
+        [sys.executable, str(dst / "tools" / "migrate_capsule_timeframes.py"), "--check"],
+        cwd=tmp_path, capture_output=True, text=True,
+    )
+    assert r.returncode == 1
+    assert "migration provenance" in r.stderr or "timeframe_contract drifted" in r.stderr
 
 
 def test_every_migration_record_asserts_unchanged_logic():
