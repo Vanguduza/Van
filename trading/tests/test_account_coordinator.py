@@ -88,8 +88,10 @@ def test_epoch_fence_rejects_a_stale_epoch():
     AccountRuntimeLease(store, account_alias=ALIAS, instance_id="vm-b", ttl_ms=1_000).acquire(now_ms=5_000)
     a._held = None
     a.acquire(now_ms=6_000)
-    assert not a.fence(stale), "an old epoch must not pass the fence"
-    assert a.fence(a.epoch)
+    assert not a.fence(
+        stale, now_ms=6_000, min_validity_ms=0
+    ), "an old epoch must not pass the fence"
+    assert a.fence(a.epoch, now_ms=6_000, min_validity_ms=0)
 
 
 def test_renewal_after_takeover_is_refused():
