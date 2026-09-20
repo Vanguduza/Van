@@ -22,7 +22,7 @@
   "counts": {
     "P0": 21,
     "P1": 43,
-    "P2": 30,
+    "P2": 31,
     "P3": 29,
     "P4": 7
   },
@@ -6049,6 +6049,46 @@
         "residual": "The upstream source revision of `webrtc-sdk`, the S24 MediaCodec canary, and the Sherpa runtime owner decision 2 declined.",
         "residual_reason": "None is a repository change.",
         "residual_class": "EXTERNAL_ARTEFACT",
+        "posture": "fail-closed"
+      }
+    },
+    {
+      "id": "P2-DOC-008",
+      "severity": "P2",
+      "domain": "documentation",
+      "title": "Three vocabularies spell capability ids the same way and nothing said which was which",
+      "description": "`registries/capabilities.json` declares ids the router may route to. `audit.record(capability=...)` takes a label describing what happened. `CAPABILITY = \"stagehand\"` in the browser adapters names which runtime handled something. All three are written as lowercase identifiers in a field called `capability`, and nothing anywhere distinguished them.\n\nThe resemblance is actively misleading rather than merely untidy. Sweeping the Gateway for `capability=\"...\"` returns fourteen strings the registry does not declare, which is exactly what P0's defect looked like — a capability the Mission binder needed and nobody had declared, making every Mission-bound browser session a 500. Acting on that reading and declaring the fourteen would turn descriptions of past events into routable capabilities nothing implements: the same defect facing the other way.\n\nFound by making that mistake during this pass's final wiring sweep.",
+      "requirement": "docs/VAN_REMOTE_BROWSER_PRODUCTION_BLUEPRINT_REV_1_5.md §42.5",
+      "authority": "VAN Remote Browser Production Blueprint Rev 1.5",
+      "repository_evidence": [
+        "registries/capabilities.json",
+        "backend/van_gateway/mission/binding.py",
+        "backend/van_gateway/browser/adapters.py"
+      ],
+      "runtime_evidence": [],
+      "affected_components": [
+        "documentation",
+        "gateway"
+      ],
+      "root_cause": "One field name for three vocabularies. The only thing separating them in source is whether the value contains a dot, and that was nowhere written down.",
+      "remediation": "Write the three down and check them: every dotted capability id the router can be asked for must be declared; the audit labels that are not are named so adding one is deliberate; the runtime names are pinned by the property that separates them.",
+      "impact": "Documentary, and the harm would have been a well-intentioned change: the fourteen audit labels look precisely like the P0 that was just closed, and declaring them would have made fourteen unimplemented capabilities routable.",
+      "validation_gate": "G0",
+      "current_status": "CLOSED",
+      "remediation_gate": "RB C13",
+      "closure": {
+        "state": "INTEGRATED_AND_EVIDENCED",
+        "summary": "Five tests. The one that carries the P0's rule forward scans for the constants that hold a capability id rather than only the call sites — because the id that caused the P0 is written as `INTERACTIVE_BROWSER_CAPABILITY` in `mission/binding.py`, and a check matching only `.require(\"...\")` found nothing at all and passed. That is the vacuous-test shape this programme keeps finding, caught here in its own guard.",
+        "changed": [
+          "tests/contracts/test_capability_namespaces_are_distinct.py"
+        ],
+        "verified_by": [
+          "tests/contracts/test_capability_namespaces_are_distinct.py"
+        ],
+        "counterexample": "A check that asserted only `asked <= declared` passes when `asked` is empty, which it was on the first run. `assert asked` is what turns a vacuous pass into a failure, and the third vocabulary is pinned separately so an adapter name gaining a dot fails there first, with a message that says why.",
+        "residual": "The discriminator is a dot in a string, held by a test rather than by a type.",
+        "residual_reason": "Three separate types across a registry file, an audit column and an adapter constant is a larger change than the defect warrants, and the test states the rule where somebody sweeping for `capability=` will find it.",
+        "residual_class": "DELIBERATE_SCOPE",
         "posture": "fail-closed"
       }
     }
