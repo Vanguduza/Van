@@ -2934,17 +2934,26 @@
       "path": "trading/vati/validation/certificates.py",
       "maturity_class": "INTEGRATED",
       "disposition": "COMPLETE",
-      "rationale": "The canonical builder derives DSR/PBO/performance from raw observations, binds data/evidence provenance, and is CLI-reachable; CI forbids direct production certificate construction and promotion binds the exact validation_hash.",
+      "rationale": "The canonical builder derives DSR/PBO/performance from raw observations and binds immutable data/evidence provenance. A real owner-only production join now consumes the certificate: the device/A4-gated gateway forwards to an agent-hidden private commander command, which verifies the certificate-bound owner authority, writes the authoritative CAPSULE_STATE event, and atomically projects the registry. Restart replay is hash-lineage aware.",
       "remediation_gate": "TRADING-ENH",
       "producer": "vati.validation.builder.build_strategy_validation_certificate via TradingResearchWorkflow",
-      "consumer": "CapsuleRegistry.promote",
-      "production_caller": "python -m vati research --spec <strategy_certificate> -> owner capsule-promotion workflow",
-      "tests": "trading/tests/test_validation_certificates.py",
-      "runtime_evidence": ".github/workflows/van-ci.yml::Trading enhancement tests -> test_validation_certificates.py + test_research_and_drift.py",
-      "owner_facing_projection": null,
+      "consumer": "CapsuleRegistry.promote via the owner-only strategy promotion workflow",
+      "production_caller": "POST /v1/trading/strategies/promote -> StrategyPromotionGateway -> private commander capsule_promote -> CapsuleRegistry.promote",
+      "tests": [
+        "trading/tests/test_validation_certificates.py",
+        "trading/tests/test_capsule_promotion_workflow.py",
+        "backend/tests/test_trading_api.py",
+        "trading/tests/test_commander.py"
+      ],
+      "runtime_evidence": [
+        ".github/workflows/van-ci.yml::Trading enhancement tests exercise certificate production, commander promotion, durable replay and agent isolation",
+        ".github/workflows/van-ci.yml::Backend tests exercise the device-signature + CryptoObject A4 gateway join"
+      ],
+      "owner_facing_projection": "Server-side promotion result includes state transition, validation hash, event hash and restart requirement. No Android promotion UI or van-oa1 key-generation surface is claimed by this component.",
       "terminal_state": "INTEGRATED_AND_EVIDENCED",
       "closure_commits": [
-        "TRADING-ENH"
+        "TRADING-ENH",
+        "PR49-ANTI-GAP-PROMOTION"
       ]
     },
     {
