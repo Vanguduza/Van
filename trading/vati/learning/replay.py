@@ -156,6 +156,12 @@ def _restore_capsule_state_events(
 
     return demotions, promotions
 
+def restore_capsule_state_runtime(
+    ledger, engines_by_symbol: Mapping[str, object]
+) -> tuple[int, int]:
+    """Restore only durable capsule state, for authority paths that need current lineage."""
+    return _restore_capsule_state_events(ledger, engines_by_symbol)
+
 def restore_learning_runtime(ledger, learning, engines_by_symbol: Mapping[str, object]) -> LearningReplayReport:
     """Rebuild reduce-only learning inputs before a restarted runtime can decide."""
     tca_n = 0
@@ -274,4 +280,8 @@ def restore_learning_runtime(ledger, learning, engines_by_symbol: Mapping[str, o
     )
 
 
-__all__ = ["LearningReplayReport", "restore_learning_runtime"]
+__all__ = [
+    "LearningReplayReport",
+    "restore_capsule_state_runtime",
+    "restore_learning_runtime",
+]
