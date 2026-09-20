@@ -537,29 +537,63 @@ class AccountCoordinatorService:
 
     def start(self) -> None:
         assert self.lease is not None and self.adapter is not None
-        result = self.lease.acquire(now_ms=self.clock())
+        assert self.lifecycle is not None
+        now = self.clock()
+        result = self.lease.acquire(now_ms=now)
         if not result.permits_orders:
             raise RuntimeError(f"account runtime lease refused: {result.outcome.value}")
+
         acct = self.adapter.sync_account()
-        assert self.lifecycle is not None
+        hb = self.adapter.heartbeat(now_ms=now)
+        if not acct.verified:
+            self.kill.trip(KillSwitchTrigger.UNAUTHORIZED_ACCOUNT, now)
+        if not hb.connected:
+            self.kill.trip(KillSwitchTrigger.VENUE_DISCONNECT, now)
+
         restored, unresolved = self.lifecycle.recover_from_venue()
         report = reconcile(
             self._ledger_positions(), self.adapter.positions(),
             account_verified=acct.verified,
         )
         if unresolved or not report.permit_new_orders:
-            self.kill.trip(KillSwitchTrigger.RECONCILIATION_FAILURE, self.clock())
+            self.kill.trip(KillSwitchTrigger.RECONCILIATION_FAILURE, now)
         self.peak_equity = self.day_start_equity = self.week_start_equity = acct.equity
-        self._observe_owner_halt(self.clock())
+        self._observe_owner_halt(now)
+
+        self._ledger.append(make_event(
+            EventKind.RECONCILIATION_RESULT, "vati-account-service",
+            {
+                "counts": report.counts(),
+                "permit_new_orders": report.permit_new_orders,
+                "account_verified": acct.verified,
+                "connected": hb.connected,
+                "restored_intents": list(restored),
+                "unresolved_positions": list(unresolved),
+                "kill": sorted(t.value for t in self.kill.active),
+            },
+            event_time_ms=now, received_time_ms=now,
+            correlation_id=self.cfg.account_alias,
+        ))
+        self._ledger.append(make_event(
+            EventKind.SESSION, "vati-account-service",
+            {
+                "event": "STARTED",
+                "permit_new_orders": report.permit_new_orders and not self.kill.halted,
+                "mode": self.mandate.mode.value if self.mandate else "UNKNOWN",
+                "lease_epoch": self.lease.epoch,
+            },
+            event_time_ms=now, received_time_ms=now,
+            correlation_id=self.cfg.account_alias,
+        ))
+        self._account_snapshot(now)
         self._heartbeat("STARTED", {
             "lease_outcome": result.outcome.value,
             "recovered_trade_intents": list(restored),
             "unresolved_positions": list(unresolved),
             "reconciliation": report.counts(),
         })
-
     def step_once(self):
-        assert self.coordinator is not None
+        assert self.coordinator is not None and self.lifecycle is not None
         now = self.clock()
         self._observe_owner_halt(now)
         observed_bars = {}
@@ -567,10 +601,29 @@ class AccountCoordinatorService:
         for symbol, source in self.bar_sources.items():
             bars = source(now)
             if not bars:
+                self._ledger.append(make_event(
+                    EventKind.MARKET_DATA_HEALTH, "vati-account-service",
+                    {"symbol": symbol, "state": "NO_DATA"},
+                    event_time_ms=now, received_time_ms=now, correlation_id=symbol,
+                ))
                 continue
             observed_bars[symbol] = bars
-            if bars[-1].end_ms > self.last_bar_end_ms.get(symbol, 0):
+            last = bars[-1]
+            tf_ms = TIMEFRAMES_MS.get(self.specs[symbol].timeframe, 3_600_000)
+            age = max(0, now - last.end_ms)
+            data_state = (
+                "LIVE" if age <= 2 * tf_ms
+                else "DELAYED" if age <= 6 * tf_ms
+                else "STALE"
+            )
+            self._ledger.append(make_event(
+                EventKind.MARKET_DATA_HEALTH, "vati-account-service",
+                {"symbol": symbol, "state": data_state, "bar_age_ms": age, "bars": len(bars)},
+                event_time_ms=now, received_time_ms=now, correlation_id=symbol,
+            ))
+            if last.end_ms > self.last_bar_end_ms.get(symbol, 0):
                 advanced_bars[symbol] = bars
+
         if not observed_bars:
             self._heartbeat("NO_DATA")
             return None
@@ -578,30 +631,36 @@ class AccountCoordinatorService:
             self._heartbeat("WAITING_FOR_BAR")
             return None
 
-        # Match the proven SessionRunner ordering: protection/exits are
-        # processed first so closed risk is removed before fresh admissions.
-        assert self.lifecycle is not None
-        for symbol, bars in advanced_bars.items():
-            self.lifecycle.mark_bar(symbol, bars[-1], now_ms=now)
+        # Exit/protection processing precedes candidate admission, matching
+        # SessionRunner. On startup only the latest closed bar is applied to
+        # current positions; later gaps replay every newly closed bar in order.
+        for symbol, bars in sorted(advanced_bars.items()):
+            prior_end = self.last_bar_end_ms.get(symbol, 0)
+            new_bars = [bar for bar in bars if bar.end_ms > prior_end]
+            if prior_end == 0 and new_bars:
+                new_bars = new_bars[-1:]
+            for index, bar in enumerate(new_bars):
+                mark_time = now if index == len(new_bars) - 1 else bar.end_ms
+                self.lifecycle.mark_bar(symbol, bar, now_ms=mark_time)
 
-        # Only symbols with a newly closed bar produce a new market-state/candidate.
-        # Existing fresh candidates from other symbols remain in CandidatePool.
         result = self.coordinator.step(now_ms=now, bars_by_symbol=advanced_bars)
         self.mtf_shadow = {
             symbol: evaluator.last_mtf_state
             for symbol, evaluator in self.evaluators.items()
             if evaluator.last_mtf_state is not None
         }
+        self._log_allocation_pass(result, now)
         for symbol, bars in advanced_bars.items():
             self.last_bar_end_ms[symbol] = max(
                 self.last_bar_end_ms.get(symbol, 0), bars[-1].end_ms)
         self.cycles += 1
+        self._account_snapshot(now)
         self._heartbeat("RUNNING", {
             "allocation_epoch_id": result.allocation_epoch_id,
             "ranking": list(result.ranking),
-            "outcomes": [o.as_dict() for o in result.outcomes]})
+            "outcomes": [o.as_dict() for o in result.outcomes],
+        })
         return result
-
     def run_forever(self) -> int:
         def stop(*_args):
             self.stop_requested = True
@@ -613,7 +672,14 @@ class AccountCoordinatorService:
                 try:
                     self.step_once()
                 except Exception as exc:
-                    self.kill.trip(KillSwitchTrigger.RECONCILIATION_FAILURE, self.clock())
+                    now = self.clock()
+                    self.kill.trip(KillSwitchTrigger.RECONCILIATION_FAILURE, now)
+                    self._ledger.append(make_event(
+                        EventKind.SESSION, "vati-account-service",
+                        {"event": "LOOP_FAULT", "error": str(exc)[:300]},
+                        event_time_ms=now, received_time_ms=now,
+                        correlation_id=self.cfg.account_alias,
+                    ))
                     self._heartbeat("FAULT", {"error": str(exc)[:200]})
                 time.sleep(self.cfg.poll_seconds)
         finally:
@@ -621,6 +687,13 @@ class AccountCoordinatorService:
                 self.lease.release(now_ms=self.clock())
             if self._lease_store is not None:
                 self._lease_store.close()
+        now = self.clock()
+        self._ledger.append(make_event(
+            EventKind.SESSION, "vati-account-service",
+            {"event": "STOPPED", "open_positions": len(self.adapter.positions()) if self.adapter else 0},
+            event_time_ms=now, received_time_ms=now,
+            correlation_id=self.cfg.account_alias,
+        ))
         self._heartbeat("STOPPED")
         return 0
 
