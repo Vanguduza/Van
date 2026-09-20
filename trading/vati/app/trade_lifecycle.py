@@ -345,8 +345,18 @@ class AccountTradeLifecycle:
             value_per_unit=Decimal("1"),
             modelled_cost_pct=modelled_cost,
         )
+        owner_tca_payload = tca.as_dict()
+        if self.learning is not None:
+            owner_tca_payload |= {
+                "learning_environment": self.learning.environment.value,
+                "broker": self.learning.broker,
+                "symbol": symbol,
+                "session": "OWNER_TICKET",
+                "event_window": "QUIET",
+                "rejected": False,
+            }
         self._log(
-            EventKind.TCA_RECORD, tca.as_dict(),
+            EventKind.TCA_RECORD, owner_tca_payload,
             now_ms=receipt.received_time_unix_ms,
             corr=receipt.trade_intent_id,
         )
@@ -444,8 +454,18 @@ class AccountTradeLifecycle:
             value_per_unit=value_per_unit,
             modelled_cost_pct=modelled_cost_pct,
         )
+        tca_payload = tca.as_dict()
+        if self.learning is not None:
+            tca_payload |= {
+                "learning_environment": self.learning.environment.value,
+                "broker": self.learning.broker,
+                "symbol": intent.symbol,
+                "session": state.session.value,
+                "event_window": state.event_window.value,
+                "rejected": False,
+            }
         self._log(
-            EventKind.TCA_RECORD, tca.as_dict(),
+            EventKind.TCA_RECORD, tca_payload,
             now_ms=receipt.received_time_unix_ms,
             corr=intent.trade_intent_id,
         )
@@ -638,6 +658,7 @@ class AccountTradeLifecycle:
                         "to": target.value,
                         "capsule_hash": new.capsule_hash,
                         "supersedes": capsule.capsule_hash,
+                        "capsule": new.data,
                         "by": "vati-learning",
                         "authority": "AUTOMATIC_DEMOTION_ONLY",
                     },
