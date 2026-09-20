@@ -65,7 +65,7 @@ class CommanderSettings:
     capsule_dir: str = os.environ.get("VAN_CAPSULE_DIR", "")
     owner_authority_keys: str = os.environ.get(
         "VAN_OWNER_AUTHORITY_KEYS",
-        "/opt/van-trading/config/owner_authority_keys.json",
+        "/var/lib/van-trading/owner_authority_keys.json",
     )
     account_control: Optional[AccountControlSettings] = None   # injected for tests; else derived
     units: tuple[str, ...] = tuple(filter(None, os.environ.get("VAN_COMMANDER_UNITS", ",".join(DEFAULT_UNITS)).split(",")))
