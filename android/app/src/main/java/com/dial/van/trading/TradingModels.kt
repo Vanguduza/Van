@@ -263,3 +263,93 @@ data class TradeDetail(
         }
     }
 }
+
+
+data class CognitionModelRow(
+    val modelId: String,
+    val assessments: Int,
+    val verdict: String?,
+    val confidence: Double?,
+    val qualified: Boolean?,
+    val sampleSufficient: Boolean?,
+)
+
+data class ResearchMissionRow(
+    val missionId: String,
+    val state: String,
+    val hypothesis: String,
+)
+
+data class ImprovementProposalRow(
+    val proposalId: String,
+    val title: String,
+    val liveAffecting: Boolean,
+    val admission: String?,
+)
+
+data class CognitionSnapshot(
+    val ledgerAvailable: Boolean,
+    val cognitionMode: String,
+    val liveAdvisory: String,
+    val liveStatus: String,
+    val modelHierarchy: List<String>,
+    val summary: Map<String, Int>,
+    val models: List<CognitionModelRow>,
+    val missions: List<ResearchMissionRow>,
+    val proposals: List<ImprovementProposalRow>,
+    val rejectionCategories: Map<String, Int>,
+    val expansionModes: Map<String, Int>,
+) {
+    companion object {
+        fun parse(body: String): CognitionSnapshot? {
+            val root = parseObject(body) ?: return null
+            val authority = root.obj("authority") ?: return null
+            val summary = root.obj("summary")?.entries?.mapNotNull { (k, v) ->
+                (v as? JsonPrimitive)?.content?.toIntOrNull()?.let { k to it }
+            }?.toMap() ?: emptyMap()
+            val models = root.arr("models").map { row ->
+                val perf = row.obj("performance")
+                CognitionModelRow(
+                    modelId = row.str("model_id") ?: "unknown",
+                    assessments = row.long("assessments")?.toInt() ?: 0,
+                    verdict = row.obj("latest")?.str("verdict"),
+                    confidence = row.obj("latest")?.num("confidence"),
+                    qualified = perf?.bool("qualified"),
+                    sampleSufficient = perf?.bool("sample_sufficient"),
+                )
+            }
+            val missions = root.obj("research")?.arr("missions")?.map { row ->
+                ResearchMissionRow(
+                    missionId = row.str("mission_id") ?: "?",
+                    state = row.str("state") ?: "UNKNOWN",
+                    hypothesis = row.str("hypothesis") ?: "",
+                )
+            } ?: emptyList()
+            val proposals = root.obj("evolution")?.arr("proposals")?.map { row ->
+                ImprovementProposalRow(
+                    proposalId = row.str("proposal_id") ?: "?",
+                    title = row.str("title") ?: "Untitled proposal",
+                    liveAffecting = row.bool("live_affecting") ?: false,
+                    admission = row.obj("admission")?.str("decision"),
+                )
+            } ?: emptyList()
+            fun intMap(parent: JsonObject?, key: String): Map<String, Int> =
+                parent?.obj(key)?.entries?.mapNotNull { (k, v) ->
+                    (v as? JsonPrimitive)?.content?.toIntOrNull()?.let { k to it }
+                }?.toMap() ?: emptyMap()
+            return CognitionSnapshot(
+                ledgerAvailable = root.bool("ledger_available") ?: false,
+                cognitionMode = authority.str("cognition_mode") ?: "UNKNOWN",
+                liveAdvisory = authority.str("live_advisory") ?: "UNKNOWN",
+                liveStatus = authority.str("live_status") ?: "UNKNOWN",
+                modelHierarchy = authority.strList("model_hierarchy"),
+                summary = summary,
+                models = models,
+                missions = missions,
+                proposals = proposals,
+                rejectionCategories = intMap(root.obj("rejections"), "by_category"),
+                expansionModes = intMap(root.obj("expansion"), "mode_counts"),
+            )
+        }
+    }
+}
