@@ -1377,52 +1377,73 @@
       "n": 68,
       "component": "Learning in the live session",
       "path": "trading/vati/app/service.py",
-      "maturity_class": "BACKTEST_ONLY",
+      "maturity_class": "INTEGRATED",
       "disposition": "WIRE",
-      "rationale": "Learning runs against backtests. Promoting it into the live session is an owner deployment decision with real money behind it, and is gated on the earned-autonomy ceiling that P1-LEARN-002 put in place first.",
+      "rationale": "Learning is wired into both shipping trading runtimes. SessionService constructs LearningHooks from the mandate environment and DecisionCycle applies only LearningBoundary-checked reduce-only effects; AccountCoordinatorService also owns account-scoped TCA/review learning through AccountTradeLifecycle. Real-money widening or promotion is still impossible from learning.",
       "remediation_gate": "GATE 5",
-      "producer": null,
-      "consumer": null,
-      "production_caller": null,
-      "tests": null,
-      "runtime_evidence": null,
-      "owner_facing_projection": null,
-      "terminal_state": "EXTERNALLY_BLOCKED_REPOSITORY_COMPLETE",
-      "closure_commits": []
+      "producer": "LearningHooks with environment derived from TradingMandate.mode",
+      "consumer": "DecisionCycle._learn and AccountTradeLifecycle._learn",
+      "production_caller": "SessionService.build / AccountCoordinatorService.build",
+      "tests": [
+        "trading/tests/test_learning.py",
+        "trading/tests/test_live_risk_is_real.py",
+        "trading/tests/test_account_trade_lifecycle.py"
+      ],
+      "runtime_evidence": [
+        ".github/workflows/van-ci.yml::Trading enhancement tests exercise learning boundaries and live-runtime wiring"
+      ],
+      "owner_facing_projection": "capsule/broker degradation and automatic demotion are projected as reduced authority, never promotion",
+      "terminal_state": "INTEGRATED_AND_EVIDENCED",
+      "closure_commits": [
+        "P1-TRADE-008",
+        "TRADING-ENH"
+      ]
     },
     {
       "n": 69,
       "component": "Postgres ledger",
       "path": "trading/vati/core/ledger_pg.py",
-      "maturity_class": "TEST_SKIPPED",
+      "maturity_class": "INTEGRATED",
       "disposition": "COMPLETE",
-      "rationale": "The Postgres ledger tests are skipped because no Postgres is available here. SQLite is the shipping ledger; Postgres is the scale path and is unexercised.",
+      "rationale": "PostgresLedger is no longer merely a future scale path: multi-instrument AccountCoordinatorService refuses non-PostgreSQL authority storage and opens the VATI ledger through the PostgreSQL implementation. Repository bootstrap/reconciliation and shared-ledger joins are implemented, but the real van-trading-core PostgreSQL runtime still requires qualification.",
       "remediation_gate": "GATE 5",
-      "producer": null,
-      "consumer": null,
-      "production_caller": null,
-      "tests": null,
+      "producer": "PostgresLedger.append / deploy/van-trading-core/supabase/reconcile_vati_ledger.py",
+      "consumer": "AccountCoordinatorService, gateway/commander VATI ledger readers, AccountRuntimeLease authority joins",
+      "production_caller": "AccountCoordinatorService.build -> open_ledger(c.ledger)",
+      "tests": [
+        "trading/tests/test_vati_ledger_reconcile.py",
+        "trading/tests/test_account_coordinator.py"
+      ],
       "runtime_evidence": null,
-      "owner_facing_projection": null,
+      "owner_facing_projection": "shared ledger status/reconciliation evidence; no green runtime claim until the Trading Core database is exercised",
       "terminal_state": "EXTERNALLY_BLOCKED_REPOSITORY_COMPLETE",
-      "closure_commits": []
+      "closure_commits": [
+        "TRADING-ENH"
+      ],
+      "external_blocker": "EXTERNAL_RUNTIME: repository code requires the shared PostgreSQL authority store for multi-instrument trading, but no reachable van-trading-core PostgreSQL runtime is available here for destructive/restart/failover qualification"
     },
     {
       "n": 70,
       "component": "Margin model",
       "path": "trading/vati/execution/base.py",
-      "maturity_class": "ABSENT",
+      "maturity_class": "INTEGRATED",
       "disposition": "COMPLETE",
-      "rationale": "No margin model. The execution layer refuses rather than estimating margin it cannot compute, which is the correct failure for a number that decides position size.",
+      "rationale": "Broker margin is represented explicitly in AccountState and RiskSnapshot. DecisionCycle and AccountCoordinatorService forward venue-reported free margin and margin level to RiskAuthority, which refuses margin-call, margin-floor and no-free-margin states. Unknown margin remains unknown rather than being defaulted healthy.",
       "remediation_gate": "GATE 5",
-      "producer": null,
-      "consumer": null,
-      "production_caller": null,
-      "tests": null,
-      "runtime_evidence": null,
-      "owner_facing_projection": null,
-      "terminal_state": "EXTERNALLY_BLOCKED_REPOSITORY_COMPLETE",
-      "closure_commits": []
+      "producer": "VenueAdapter.sync_account -> AccountState.used_margin/free_margin/margin_level_pct",
+      "consumer": "RiskAuthority margin gates through RiskSnapshot",
+      "production_caller": "DecisionCycle.snapshot and AccountCoordinatorService._snapshot_for",
+      "tests": [
+        "trading/tests/test_live_risk_is_real.py::TestTheMarginGate"
+      ],
+      "runtime_evidence": [
+        ".github/workflows/van-ci.yml::backend/trading tests exercise margin-call, margin-floor, no-free-margin and unknown-margin cases"
+      ],
+      "owner_facing_projection": "RiskAuthority refusal reason names the margin condition that blocked new risk",
+      "terminal_state": "INTEGRATED_AND_EVIDENCED",
+      "closure_commits": [
+        "P0-TRADE-006"
+      ]
     },
     {
       "n": 71,
