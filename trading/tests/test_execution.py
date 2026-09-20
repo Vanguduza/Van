@@ -206,6 +206,17 @@ def test_reconciliation_classes_and_gate():
     assert ReconciliationClass.STOP_MISSING.value in nostop.counts() and not nostop.permit_new_orders
 
 
+    attributed_but_unrecovered = reconcile(
+        [],
+        [VenuePosition(
+            "existing", "EURUSD", Direction.LONG, Decimal("0.2"),
+            Decimal("1.1"), Decimal("1.09"), "known-intent")],
+        account_verified=True,
+    )
+    assert attributed_but_unrecovered.counts()[ReconciliationClass.ORPHAN_VENUE_POSITION.value] == 1
+    assert not attributed_but_unrecovered.permit_new_orders
+
+
 def test_tca_and_review_and_admission():
     from vati.execution import ExecutionReceipt
     rec = ExecutionReceipt("ti", "h", "paper", "FILLED", Decimal("0.18"), Decimal("1.10017"), Decimal("1.10010"), Decimal("1.10012"), Decimal("1.10010"), True, NOW, NOW, spread_at_submit=Decimal("0.00010"), fees=Decimal("1.08")).sealed()
