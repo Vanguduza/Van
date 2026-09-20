@@ -88,10 +88,18 @@ class AccountTradeLifecycle:
                 "confirmed": False,
                 "correlation_id": event.correlation_id,
             }
+        applied_owner_tickets = {
+            str(event.payload.get("broker_order_id") or "")
+            for event in self.ledger.iter(EventKind.EXECUTION_RECEIPT)
+            if event.payload.get("execution_channel") == "OWNER_TICKET"
+            and event.payload.get("status") in ("OWNER_EXECUTED", "BROKER_CONFIRMED")
+            and event.payload.get("broker_order_id")
+        }
         pending_sell_by_intent = {
             str(t.get("trade_intent_id") or t.get("correlation_id") or ""): t
-            for t in tickets.values()
-            if t.get("side") == "SELL" and not t.get("confirmed")
+            for ticket_id, t in tickets.items()
+            if t.get("side") == "SELL"
+            and ticket_id not in applied_owner_tickets
         }
 
         restored: list[str] = []
