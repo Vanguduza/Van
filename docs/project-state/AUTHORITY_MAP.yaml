@@ -584,3 +584,92 @@ invariants:
     tested_by:
       - tests/contracts/test_authority_map.py
     findings: [P3-DOC-005]
+
+
+  - subject: trading.account_allocation_authority
+    owner: docs/VAN_TRADING_PRODUCTION_DEPLOYMENT_BLUEPRINT_REV5.md
+    statement: >-
+      Multi-instrument sessions have exactly one account-level coordinator that orders candidate admission and re-reads portfolio truth before each Risk Authority decision.
+    implemented_by:
+      - trading/vati/app/account_service.py
+      - trading/vati/app/account_coordinator.py
+    tested_by:
+      - trading/tests/test_account_coordinator.py
+
+  - subject: trading.risk_ceiling_precedence
+    owner: docs/VAN_TRADING_PRODUCTION_DEPLOYMENT_BLUEPRINT_REV5.md
+    statement: >-
+      A candidate converted to a trade intent cannot request risk above its capsule ceiling or the strategy budget permitted by the signed mandate.
+    implemented_by:
+      - trading/vati/app/account_coordinator.py
+      - trading/vati/arbiter/candidate.py
+      - trading/vati/arbiter/opportunity.py
+    tested_by:
+      - trading/tests/test_account_coordinator.py
+      - trading/tests/test_capital_promotion.py
+
+  - subject: trading.strategy_validation_binding
+    owner: docs/VAN_TRADING_PRODUCTION_DEPLOYMENT_BLUEPRINT_REV5.md
+    statement: >-
+      Certificate-gated strategy promotion requires owner authority bound to the exact validation certificate hash, and production code cannot manufacture a synthetic passing certificate.
+    implemented_by:
+      - trading/vati/strategies/capsule.py
+      - trading/vati/validation/certificates.py
+    tested_by:
+      - trading/tests/test_validation_certificates.py
+
+  - subject: trading.feature_admission
+    owner: docs/VAN_TRADING_PRODUCTION_DEPLOYMENT_BLUEPRINT_REV5.md
+    statement: >-
+      A certificate-required feature is unavailable to production capsule evaluation until the feature registry admits a sealed production-passing certificate for that exact feature version.
+    implemented_by:
+      - trading/vati/intelligence/feature_registry.py
+      - trading/vati/intelligence/feature_contract.py
+      - trading/vati/arbiter/opportunity.py
+    tested_by:
+      - trading/tests/test_feature_registry_and_confluence.py
+      - trading/tests/test_feature_contract.py
+
+  - subject: trading.execution_policy_boundary
+    owner: docs/VAN_TRADING_PRODUCTION_DEPLOYMENT_BLUEPRINT_REV5.md
+    statement: >-
+      Execution policy may choose only how an already-approved trade is attempted, and the router verifies the sealed choice and its hard template bounds immediately before submission.
+    implemented_by:
+      - trading/vati/execution/policy.py
+      - trading/vati/execution/router.py
+      - trading/vati/execution/policy_templates.py
+    tested_by:
+      - trading/tests/test_execution_and_exits.py
+
+  - subject: trading.account_runtime_fence
+    owner: docs/VAN_TRADING_PRODUCTION_DEPLOYMENT_BLUEPRINT_REV5.md
+    statement: >-
+      Multi-instrument order submission is fenced by the current epoch of a transactional PostgreSQL account lease, and a missing or stale epoch is refused at the router boundary.
+    implemented_by:
+      - trading/vati/app/account_lease.py
+      - trading/vati/app/account_service.py
+      - trading/vati/execution/router.py
+    tested_by:
+      - trading/tests/test_account_coordinator.py
+      - trading/tests/test_execution_and_exits.py
+
+  - subject: trading.mtf_adoption_boundary
+    owner: docs/VAN_TRADING_PRODUCTION_DEPLOYMENT_BLUEPRINT_REV5.md
+    statement: >-
+      Multi-timeframe state is assembled as shadow evidence without look-ahead, and it cannot alter live strategy decisions until an owner-signed strategy revision adopts the role contract.
+    implemented_by:
+      - trading/vati/intelligence/mtf.py
+      - trading/vati/app/account_service.py
+      - trading/tools/migrate_capsule_timeframes.py
+    tested_by:
+      - trading/tests/test_mtf.py
+      - trading/tests/test_enhancement_closure.py
+
+  - subject: trading.candidate_replay
+    owner: docs/VAN_TRADING_PRODUCTION_DEPLOYMENT_BLUEPRINT_REV5.md
+    statement: >-
+      Re-admitting the same deterministic candidate id and hash preserves its lifecycle state, so a terminal candidate cannot become active again through polling or restart replay.
+    implemented_by:
+      - trading/vati/app/candidate_pool.py
+    tested_by:
+      - trading/tests/test_account_coordinator.py
