@@ -18,11 +18,13 @@ from vati.app.trade_lifecycle import AccountTradeLifecycle
 from vati.core.events import EventKind, make_event
 from vati.core.ledger import Ledger
 from vati.execution.base import ExecutionReceipt, OrderCommand, StopMode
+from vati.execution.zse_ticket import OwnerTicketAdapter
 from vati.execution.paper import PaperAdapter
 from vati.execution.protection import ProtectionError, ProtectionManager
 from vati.execution.reconciliation import LedgerPosition, reconcile
 from vati.execution.router import ExecutionRouter
 from vati.market_data.bars import Bar
+from vati.accounts import BrokerKind
 from vati.risk import KillSwitch
 from vati.risk.contracts import Direction, LossModel, StrategyState, SymbolContract, TradeIntent
 
@@ -261,3 +263,171 @@ def test_account_service_replays_only_newly_closed_bars_and_only_advanced_symbol
         ("EURUSD", 180_000), ("EURUSD", 240_000)
     ]
     assert calls[-1][1] == ("EURUSD",)
+
+
+
+def _zse_contract():
+    return SymbolContract(
+        symbol="DELTA", venue="zse",
+        base_currency="DELTA", quote_currency="ZiG", account_currency="ZiG",
+        contract_size=Decimal("1"), tick_size=Decimal("0.01"),
+        tick_value=Decimal("0.01"),
+        volume_min=Decimal("100"), volume_step=Decimal("100"),
+        volume_max=Decimal("10000000"), min_stop_distance=Decimal("0"),
+        trade_mode="LONG_ONLY", loss_model=LossModel.ILLIQUID_EQUITY,
+        board_lot=Decimal("100"), adv_20d=Decimal("120000"),
+        liquidity_haircut=Decimal("0.03"),
+        round_trip_cost_pct=Decimal("0.0714"),
+    )
+
+
+def _zse_command(iid="zse-1"):
+    return OrderCommand(
+        trade_intent_id=iid,
+        decision_hash="e" * 64,
+        idempotency_key="idem-" + iid,
+        account_alias="zse_primary",
+        venue="zse",
+        symbol="DELTA",
+        direction=Direction.LONG,
+        entry_type="LIMIT",
+        quantity=Decimal("1500"),
+        entry_price=Decimal("25.00"),
+        protective_stop=Decimal("22.50"),
+        stop_mode=StopMode.SOFTWARE,
+        loss_model=LossModel.ILLIQUID_EQUITY,
+        targets=(Decimal("30.00"),),
+        time_in_force="GTC30",
+        strategy_id="ZSE-VALUE-01",
+        strategy_version="1.0.0",
+    ).sealed()
+
+
+def _zse_lifecycle(ledger, adapter):
+    protection = ProtectionManager()
+    router = ExecutionRouter(
+        ledger=ledger, adapters={"zse": adapter},
+        kill_switch=KillSwitch(), protection=protection)
+    return AccountTradeLifecycle(
+        ledger=ledger, adapter=adapter, router=router,
+        protection=protection, contracts={"DELTA": _zse_contract()},
+        engines_by_symbol={},
+        modelled_costs={"DELTA": Decimal("0.0714")},
+    )
+
+
+def _append_owner_ticket_event(ledger, payload, corr, now):
+    ledger.append(make_event(
+        EventKind.OWNER_TICKET, "test",
+        payload, event_time_ms=now, received_time_ms=now,
+        correlation_id=corr,
+    ))
+
+
+def test_signed_owner_ticket_confirmations_become_runtime_truth_once_and_replay_cleanly(tmp_path):
+    ledger = Ledger(":memory:")
+    cmd = _zse_command()
+    _append_command(ledger, cmd, now=1_000)
+    _append_owner_ticket_event(
+        ledger,
+        {
+            "ticket": "T1-ENTRY",
+            "symbol": "DELTA", "qty": "1500", "side": "BUY",
+            "trade_intent_id": cmd.trade_intent_id,
+            "limit_price": "25.00", "software_stop": "22.50",
+        },
+        cmd.trade_intent_id, 1_100,
+    )
+    _append_owner_ticket_event(
+        ledger,
+        {
+            "ticket": "T1-ENTRY", "action": "CONFIRMED",
+            "fill_price": "24.90", "filled_qty": "1500",
+            "contract_note_ref": "CN-BUY",
+        },
+        cmd.trade_intent_id, 1_200,
+    )
+
+    adapter = OwnerTicketAdapter(
+        account_alias="zse_primary", equity=Decimal("1000000"),
+        csd_verified=True)
+    lifecycle = _zse_lifecycle(ledger, adapter)
+    service = AccountCoordinatorService(
+        SimpleNamespace(
+            account_alias="zse_primary",
+            heartbeat_path=str(tmp_path / "hb.json")))
+    service.account = SimpleNamespace(broker=BrokerKind.ZSE_OWNER_TICKET)
+    service.adapter = adapter
+    service._ledger = ledger
+    service.lifecycle = lifecycle
+
+    assert service._sync_owner_ticket_buys(1_300) == ()
+    assert len(adapter.positions()) == 1
+    position = adapter.positions()[0]
+    assert lifecycle.entries[cmd.trade_intent_id]["open"]
+    assert lifecycle.protection.stop_of(position.position_id) == Decimal("22.50")
+    assert ledger.count(EventKind.EXECUTION_RECEIPT) == 1
+    assert ledger.count(EventKind.TCA_RECORD) == 1
+
+    # Create the durable exit ticket exactly as Router.apply_exits does.
+    close_receipt = adapter.close(
+        position.position_id, None, now_ms=2_000, reason="SOFTWARE_STOP")
+    sell_ticket = adapter.tickets[close_receipt.broker_order_id]
+    lifecycle.protection.mark_close_pending(position.position_id)
+    _append_owner_ticket_event(
+        ledger,
+        {
+            "ticket": sell_ticket.ticket_id,
+            "symbol": "DELTA", "qty": str(sell_ticket.quantity_shares),
+            "side": "SELL", "position_id": position.position_id,
+            "trade_intent_id": cmd.trade_intent_id,
+            "exit_reason": "SOFTWARE_STOP", "limit_price": "0",
+        },
+        cmd.trade_intent_id, 2_000,
+    )
+    _append_owner_ticket_event(
+        ledger,
+        {
+            "ticket": sell_ticket.ticket_id, "action": "CONFIRMED",
+            "fill_price": "22.30", "filled_qty": "1500",
+            "contract_note_ref": "CN-SELL",
+        },
+        cmd.trade_intent_id, 2_100,
+    )
+
+    assert service._sync_owner_ticket_sells(2_200) == ()
+    assert adapter.positions() == []
+    assert cmd.trade_intent_id not in lifecycle.entries
+    assert position.position_id not in lifecycle.protection.rules
+    assert ledger.count(EventKind.EXECUTION_RECEIPT) == 2
+    assert ledger.count(EventKind.TRADE_REVIEW) == 1
+
+    # Re-running the consumer in the same process is exactly-once.
+    service._sync_owner_ticket_buys(2_300)
+    service._sync_owner_ticket_sells(2_300)
+    assert ledger.count(EventKind.EXECUTION_RECEIPT) == 2
+    assert ledger.count(EventKind.TRADE_REVIEW) == 1
+
+    # A fresh process reconstructs current projected holdings from the same
+    # ledger but emits no duplicate receipt or review.
+    adapter2 = OwnerTicketAdapter(
+        account_alias="zse_primary", equity=Decimal("1000000"),
+        csd_verified=True)
+    lifecycle2 = _zse_lifecycle(ledger, adapter2)
+    service2 = AccountCoordinatorService(
+        SimpleNamespace(
+            account_alias="zse_primary",
+            heartbeat_path=str(tmp_path / "hb2.json")))
+    service2.account = SimpleNamespace(broker=BrokerKind.ZSE_OWNER_TICKET)
+    service2.adapter = adapter2
+    service2._ledger = ledger
+    service2.lifecycle = lifecycle2
+
+    assert service2._sync_owner_ticket_buys(3_000) == ()
+    restored, unresolved = lifecycle2.recover_from_venue()
+    assert restored == (cmd.trade_intent_id,) and unresolved == ()
+    assert service2._sync_owner_ticket_sells(3_000) == ()
+    assert adapter2.positions() == []
+    assert lifecycle2.entries == {}
+    assert ledger.count(EventKind.EXECUTION_RECEIPT) == 2
+    assert ledger.count(EventKind.TRADE_REVIEW) == 1
