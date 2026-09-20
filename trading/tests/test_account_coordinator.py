@@ -106,6 +106,16 @@ def test_two_symbols_coexist_in_one_pool():
     assert p.symbols(now_ms=1_000) == ("EURUSD", "GBPUSD")
 
 
+def test_replaying_the_same_candidate_cannot_reactivate_a_terminal_row():
+    p = CandidatePool(account_alias=ALIAS)
+    original = cand("same", "EURUSD")
+    p.admit(original, now_ms=1_000)
+    p.mark("same", CandidateState.SELECTED, reason="filled", now_ms=1_001)
+    replay = p.admit(original, now_ms=2_000)
+    assert replay.state is CandidateState.SELECTED
+    assert p.active(now_ms=2_000) == ()
+
+
 def test_newer_candidate_for_the_same_setup_supersedes_the_older():
     p = CandidatePool(account_alias=ALIAS)
     p.admit(cand("a", "EURUSD", gen=1_000), now_ms=1_000)
@@ -195,7 +205,7 @@ class _Book:
         self.executions = []
         self.risk_correlations = []
 
-    def snapshot(self):
+    def snapshot(self, candidate=None):
         self.reads += 1
         return {"open": self.open, "capacity": self.capacity}
 
@@ -205,7 +215,7 @@ class _Book:
             return _Decision("REJECTED", "PORTFOLIO_HEAT_EXCEEDED")
         return _Decision("APPROVED")
 
-    def execute(self, intent, decision, targets, lease_epoch):
+    def execute(self, candidate, intent, decision, targets, lease_epoch):
         self.open += 1
         self.executions.append((intent, decision, targets, lease_epoch))
         return {"filled": True}
