@@ -37,6 +37,7 @@ import com.dial.van.security.BiometricGate
 import com.dial.van.security.OwnerApprovalKeyManager
 import com.dial.van.trading.Loaded
 import com.dial.van.trading.StrategyPromotionCandidate
+import com.dial.van.trading.StrategyPromotionVerification
 import kotlinx.coroutines.launch
 import kotlinx.serialization.json.Json
 import kotlinx.serialization.json.buildJsonObject
@@ -195,20 +196,7 @@ fun StrategiesScreen(
                                 // authority changed. Pin the response to the exact candidate and
                                 // require a ledger event before asking the authoritative candidate
                                 // read model whether the old parent certificate disappeared.
-                                val promoted = body?.get("promoted")?.jsonPrimitive?.contentOrNull == "true"
-                                val responseStrategy = body?.get("strategy_id")?.jsonPrimitive?.contentOrNull
-                                val responseTarget = body?.get("to")?.jsonPrimitive?.contentOrNull
-                                val responseValidation = body?.get("validation_hash")?.jsonPrimitive?.contentOrNull
-                                val responseCapsule = body?.get("capsule_hash")?.jsonPrimitive?.contentOrNull
-                                val eventHash = body?.get("event_hash")?.jsonPrimitive?.contentOrNull
-                                val responseBound = promoted &&
-                                    responseStrategy == candidate.strategyId &&
-                                    responseTarget == candidate.targetState &&
-                                    responseValidation == candidate.validationHash &&
-                                    !responseCapsule.isNullOrBlank() &&
-                                    responseCapsule != candidate.capsuleHash &&
-                                    !eventHash.isNullOrBlank()
-                                if (!responseBound) {
+                                if (!StrategyPromotionVerification.receiptMatches(candidate, body)) {
                                     busyStrategy = null
                                     status = "Gateway returned success without a complete, candidate-bound ledger receipt; VAN is not claiming promotion."
                                     return@launch
@@ -218,11 +206,10 @@ fun StrategiesScreen(
                                 when (val refreshed = env.repo.promotionCandidates()) {
                                     is Loaded.Ready -> {
                                         candidates = refreshed
-                                        val staleParentStillOffered = refreshed.value.any {
-                                            it.strategyId == candidate.strategyId &&
-                                                it.validationHash == candidate.validationHash &&
-                                                it.capsuleHash == candidate.capsuleHash
-                                        }
+                                        val staleParentStillOffered =
+                                            StrategyPromotionVerification.oldParentStillOffered(
+                                                candidate, refreshed.value
+                                            )
                                         busyStrategy = null
                                         if (staleParentStillOffered) {
                                             status = "Promotion receipt exists, but the old certificate is still offered by authoritative read-back. VAN is not claiming completion."
