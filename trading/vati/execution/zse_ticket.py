@@ -68,6 +68,10 @@ class OwnerTicketAdapter:
         if existing is not None and existing.ticket_hash != ticket.ticket_hash:
             raise ValueError(f"ticket {ticket.ticket_id} reconstruction mismatch")
         self.tickets[ticket.ticket_id] = ticket
+        if ticket.ticket_id.startswith("T"):
+            head = ticket.ticket_id[1:].split("-", 1)[0]
+            if head.isdigit():
+                self._seq = max(self._seq, int(head))
         return ticket
 
     def sync_account(self) -> AccountState:
