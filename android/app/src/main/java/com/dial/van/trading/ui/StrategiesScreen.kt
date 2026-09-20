@@ -183,20 +183,69 @@ fun StrategiesScreen(
                                 val body = runCatching {
                                     Json.parseToJsonElement(finalReply.second).jsonObject
                                 }.getOrNull()
-                                busyStrategy = null
-                                if (finalReply.first in 200..299) {
-                                    val restart = body?.get("requires_session_restart")
-                                        ?.jsonPrimitive?.contentOrNull == "true"
-                                    status = if (restart) {
-                                        "Promotion recorded and ledgered. Trading session restart is required before the new strategy state can be active."
-                                    } else {
-                                        "Promotion recorded and ledgered. Refreshing strategy authority."
-                                    }
-                                    tick += 1
-                                } else {
+                                if (finalReply.first !in 200..299) {
+                                    busyStrategy = null
                                     status = body?.get("detail")?.jsonPrimitive?.contentOrNull
                                         ?.let { "Promotion refused: " + it }
                                         ?: "Promotion refused by the trading authority."
+                                    return@launch
+                                }
+
+                                // A 2xx transport answer is not enough to tell the owner that
+                                // authority changed. Pin the response to the exact candidate and
+                                // require a ledger event before asking the authoritative candidate
+                                // read model whether the old parent certificate disappeared.
+                                val promoted = body?.get("promoted")?.jsonPrimitive?.contentOrNull == "true"
+                                val responseStrategy = body?.get("strategy_id")?.jsonPrimitive?.contentOrNull
+                                val responseTarget = body?.get("to")?.jsonPrimitive?.contentOrNull
+                                val responseValidation = body?.get("validation_hash")?.jsonPrimitive?.contentOrNull
+                                val responseCapsule = body?.get("capsule_hash")?.jsonPrimitive?.contentOrNull
+                                val eventHash = body?.get("event_hash")?.jsonPrimitive?.contentOrNull
+                                val responseBound = promoted &&
+                                    responseStrategy == candidate.strategyId &&
+                                    responseTarget == candidate.targetState &&
+                                    responseValidation == candidate.validationHash &&
+                                    !responseCapsule.isNullOrBlank() &&
+                                    responseCapsule != candidate.capsuleHash &&
+                                    !eventHash.isNullOrBlank()
+                                if (!responseBound) {
+                                    busyStrategy = null
+                                    status = "Gateway returned success without a complete, candidate-bound ledger receipt; VAN is not claiming promotion."
+                                    return@launch
+                                }
+
+                                status = "Promotion receipt received. Verifying authoritative strategy read-back…"
+                                when (val refreshed = env.repo.promotionCandidates()) {
+                                    is Loaded.Ready -> {
+                                        candidates = refreshed
+                                        val staleParentStillOffered = refreshed.value.any {
+                                            it.strategyId == candidate.strategyId &&
+                                                it.validationHash == candidate.validationHash &&
+                                                it.capsuleHash == candidate.capsuleHash
+                                        }
+                                        busyStrategy = null
+                                        if (staleParentStillOffered) {
+                                            status = "Promotion receipt exists, but the old certificate is still offered by authoritative read-back. VAN is not claiming completion."
+                                        } else {
+                                            val restart = body.get("requires_session_restart")
+                                                ?.jsonPrimitive?.contentOrNull == "true"
+                                            status = if (restart) {
+                                                "Promotion verified in the ledger and read-back. Trading session restart is required before the new strategy state can be active."
+                                            } else {
+                                                "Promotion verified in the ledger and authoritative strategy read-back."
+                                            }
+                                        }
+                                    }
+                                    is Loaded.Unavailable -> {
+                                        busyStrategy = null
+                                        candidates = refreshed
+                                        status = "Promotion receipt exists, but strategy read-back is unavailable. VAN is not claiming completion."
+                                    }
+                                    Loaded.Loading -> {
+                                        busyStrategy = null
+                                        candidates = refreshed
+                                        status = "Promotion receipt exists, but strategy read-back is incomplete. VAN is not claiming completion."
+                                    }
                                 }
                             }
                         },
