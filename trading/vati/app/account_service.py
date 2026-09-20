@@ -415,7 +415,7 @@ class AccountCoordinatorService:
             open_positions=self._dependency_positions(snapshot), now_ms=self.clock(),
             portfolio_snapshot_hash=canonical_hash(snapshot_to_dict(snapshot)))
         metrics.set(
-            PORTFOLIO_INCREMENTAL_ES, float(dep.incremental_expected_shortfall),
+            PORTFOLIO_INCREMENTAL_ES, float(dep.incremental_es),
             account_alias=self.account.alias, symbol=candidate.symbol)
         metrics.set(
             CORRELATION_MULTIPLIER, float(dep.correlation_multiplier),
