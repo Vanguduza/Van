@@ -8,6 +8,7 @@ from dataclasses import dataclass, field
 from decimal import Decimal
 from typing import Optional
 
+from vati.arbiter.candidate import CandidateOpportunity, make_candidate_id
 from vati.arbiter.confidence import confidence_score
 from vati.arbiter.horizon import HorizonArbiter
 from vati.arbiter.meta_labeler import MetaLabel, MetaLabeler, MetaVerdict
@@ -37,10 +38,83 @@ class OpportunityAssessment:
     assessment_hash: str = ""
 
 
+#: TRD-ENH-033 — how long a candidate stays eligible to become an intent.
+#: A stale candidate must expire rather than execute against moved prices.
+CANDIDATE_TTL_MS: dict[str, int] = {
+    "SCALP": 2 * 60_000,
+    "INTRADAY": 15 * 60_000,
+    "SESSION": 60 * 60_000,
+    "OVERNIGHT": 4 * 3_600_000,
+    "SWING": 12 * 3_600_000,
+    "POSITION": 24 * 3_600_000,
+}
+DEFAULT_CANDIDATE_TTL_MS = 15 * 60_000
+
+
 class OpportunityEngine:
     def __init__(self, registry: CapsuleRegistry, implementations: dict[str, Strategy], mandate: TradingMandate, *, labeler: MetaLabeler | None = None) -> None:
         self.registry, self.impl, self.mandate = registry, implementations, mandate
         self.h, self.s, self.m = HorizonArbiter(), StrategyArbiter(), labeler or MetaLabeler()
+
+    def assess_candidates(self, state: MarketState, ctx: StrategyContext, *, regime_label: str,
+                          currency_regime_label: str | None = None, account_alias: str, venue: str,
+                          mtf_state_hash: str = "", now_ms: int | None = None) -> tuple[CandidateOpportunity, ...]:
+        """Every tradable opportunity for this symbol, as candidates.
+
+        TRD-ENH-031. This is `assess` stopping one step earlier: same arbiters,
+        same meta-labeller, same eligibility — but it emits candidates rather
+        than a single `TradeIntent`, because the choice between symbols has not
+        been made yet and this layer is not the one that makes it.
+        """
+        now = state.as_of_ms if now_ms is None else now_ms
+        out: list[CandidateOpportunity] = []
+        for cap in self.registry.all():
+            elig = self.s.evaluate(cap, state, self.mandate, regime_label=regime_label,
+                                   currency_regime_label=currency_regime_label, context=ctx)
+            if not elig.eligible:
+                continue
+            strat = self.impl.get(cap.strategy_id)
+            if strat is None:
+                continue
+            sig = strat.evaluate(state, ctx)
+            if sig is None:
+                continue
+            hv = self.h.decide(sig.horizon, sig.expected_gross_move_pct, ctx.round_trip_cost_pct, state.quote_age_ms)
+            if hv.horizon is None:
+                continue
+            mv = self.m.score(state, sig, hv.cost_multiple, ctx)
+            if mv.label not in (MetaLabel.TRADE, MetaLabel.REDUCE_SIZE):
+                continue
+            mults = {
+                "regime_multiplier": str(mv.regime_multiplier), "volatility_multiplier": str(mv.volatility_multiplier),
+                "liquidity_multiplier": str(mv.liquidity_multiplier), "event_risk_multiplier": str(mv.event_risk_multiplier),
+                "confidence_multiplier": str(mv.confidence_multiplier),
+            }
+            conf = confidence_score(mults, capsule_health=self.m.capsule_health.get(cap.strategy_id))
+            ttl = CANDIDATE_TTL_MS.get(hv.horizon, DEFAULT_CANDIDATE_TTL_MS)
+            out.append(CandidateOpportunity(
+                candidate_id=make_candidate_id(account_alias=account_alias, symbol=state.symbol,
+                                               strategy_id=cap.strategy_id, state_hash=state.state_hash,
+                                               as_of_ms=state.as_of_ms),
+                account_alias=account_alias, venue=venue, symbol=state.symbol,
+                strategy_id=cap.strategy_id, strategy_version=cap.version,
+                capsule_hash=cap.capsule_hash, strategy_state=cap.state.value,
+                generated_at_ms=now, valid_from_ms=now, valid_until_ms=now + ttl,
+                mtf_state_hash=mtf_state_hash or state.state_hash,
+                source_state_hashes=(state.state_hash,),
+                feature_contract_hash=elig.feature_contract.verdict_hash if elig.feature_contract else "",
+                direction=sig.direction, entry=sig.entry, stop=sig.stop,
+                targets=tuple(sig.targets), horizon=hv.horizon,
+                expected_gross_move_pct=sig.expected_gross_move_pct,
+                cost_multiple=hv.cost_multiple, confidence_score=conf.score,
+                regime_multiplier=mv.regime_multiplier, confidence_multiplier=mv.confidence_multiplier,
+                volatility_multiplier=mv.volatility_multiplier, liquidity_multiplier=mv.liquidity_multiplier,
+                event_risk_multiplier=mv.event_risk_multiplier,
+                holds_over_weekend=sig.holds_over_weekend,
+                is_event_certified=cap.event_certified, meta_label=mv.label.value,
+                evidence_refs=tuple(mv.reasons),
+            ).sealed())
+        return tuple(out)
 
     def assess(self, state: MarketState, ctx: StrategyContext, *, regime_label: str, currency_regime_label: str | None = None,
                account_alias: str, venue: str, idempotency_seed: str) -> OpportunityAssessment:
