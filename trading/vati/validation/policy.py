@@ -1,10 +1,11 @@
 """Validation thresholds as one object (blueprint Rev 1.1 §5.1, P0-A).
 
-`deflated_sharpe()` returns a *probability* — `_norm_cdf(z)` — which is strictly
-positive for every finite `z`. So the gate `deflated Sharpe > 0` that Rev 2 §551
-and Rev 3 D7 wrote passes every strategy that reaches the function at all,
-including one with a negative observed Sharpe. It is not a loose gate; it is a
-vacuous one.
+`deflated_sharpe()` returns a *probability* — `_norm_cdf(z)`. A gate of
+`deflated Sharpe > 0` therefore accepts vanishingly small probabilities across
+most practical inputs (and can even admit a negative observed Sharpe); only
+extreme tails that numerically underflow/saturate to exactly zero are refused.
+The defect is semantic: a probability must be compared with the validation
+policy threshold, not merely with zero.
 
 The fix is not a better literal. It is a named field whose units are obvious
 (`dsr_probability`, not `deflated Sharpe`) and one object that owns the numbers,
