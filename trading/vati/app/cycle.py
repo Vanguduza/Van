@@ -19,6 +19,9 @@ from vati.core.events import EventKind, make_event
 from vati.core.ledger import Ledger
 from vati.execution.base import StopMode, VenueAdapter
 from vati.execution.protection import ProtectionManager
+from vati.execution.pretrade import MarketReference, PreTradeControls
+from vati.execution.route_registry import RouteRegistry
+from vati.execution.style_selector import ExecutionStyleSelector, LiquidityView
 from vati.execution.router import ExecutionRouter, RouterError
 from vati.execution.review import review_trade
 from vati.execution.tca import compute_tca
@@ -82,7 +85,21 @@ class DecisionCycle:
         self.mandate = TradingMandate.from_mapping(cfg.mandate_dict)
         self.authority = RiskAuthority(self.mandate)
         self.protection = ProtectionManager()
-        self.router = ExecutionRouter(ledger=ledger, adapters={cfg.venue: adapter}, kill_switch=self.kill, protection=self.protection)
+        self.routes = RouteRegistry(ledger=ledger)
+        self.routes.refresh(
+            account_alias=cfg.account_alias,
+            adapter_id=cfg.venue,
+            contracts={cfg.symbol.upper(): cfg.contract},
+            now_ms=0,
+            source="decision_cycle_init",
+        )
+        self.pretrade = PreTradeControls(routes=self.routes, ledger=ledger)
+        self.style_selector = ExecutionStyleSelector(ledger=ledger)
+        self.router = ExecutionRouter(
+            ledger=ledger, adapters={cfg.venue: adapter}, kill_switch=self.kill,
+            protection=self.protection, route_registry=self.routes,
+            pretrade_controls=self.pretrade, style_selector=self.style_selector,
+            enforce_rev51_controls=True)
         self.admission = admission or AdmissionLedger()
         self.ctx_fn = ctx_fn or (lambda st, cost: StrategyContext(round_trip_cost_pct=cost))
         self.peak_equity = ZERO
@@ -230,8 +247,24 @@ class DecisionCycle:
             t = intent.entry * (Decimal(1) + intent.expected_gross_move_pct) if intent.direction is Direction.LONG else intent.entry * (Decimal(1) - intent.expected_gross_move_pct)
             targets = (t,)
         try:
-            rec = self.router.execute(intent, decision, self.mandate, now_ms=now_ms, stop_mode=StopMode.SOFTWARE if cfg.software_stops else StopMode.VENUE, targets=targets,
-                                      time_in_force=cfg.time_in_force, entry_type="LIMIT")
+            # Refresh route truth at the decision instant so the registry cannot
+            # age out while the session continues to run.
+            self.routes.refresh(
+                account_alias=cfg.account_alias, adapter_id=cfg.venue,
+                contracts={cfg.symbol.upper(): cfg.contract}, now_ms=now_ms,
+                source="decision_cycle",
+            )
+            rec = self.router.execute(
+                intent, decision, self.mandate, now_ms=now_ms,
+                stop_mode=StopMode.SOFTWARE if cfg.software_stops else StopMode.VENUE,
+                targets=targets, time_in_force=cfg.time_in_force, entry_type="LIMIT",
+                market_reference=MarketReference(
+                    last_price=state.features.close,
+                    mark_age_ms=state.quote_age_ms,
+                    max_mark_age_ms=cfg.max_quote_age_ms,
+                ),
+                liquidity=LiquidityView(),
+            )
         except RouterError as exc:
             self._log(EventKind.SESSION, {"router_refused": str(exc)}, now_ms=now_ms, corr=intent.trade_intent_id)
             return CycleResult(state.as_of_ms, state.state_hash, "ROUTER_REFUSED", str(exc), decision.approved_size)

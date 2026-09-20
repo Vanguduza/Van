@@ -36,7 +36,10 @@ from vati.execution.base import StopMode, VenueAdapter
 from vati.execution.policy import ExecutionBucket, ExecutionPolicyEngine
 from vati.execution.protection import ProtectionManager
 from vati.execution.reconciliation import LedgerPosition, reconcile
+from vati.execution.pretrade import MarketReference, PreTradeControls
+from vati.execution.route_registry import RouteRegistry
 from vati.execution.router import ExecutionRouter, RouterError
+from vati.execution.style_selector import ExecutionStyleSelector, LiquidityView
 from vati.intelligence.calendar_feed import build_matrix
 from vati.intelligence.events import EventWindowState
 from vati.intelligence.market_state import build_market_state
@@ -108,6 +111,9 @@ class AccountCoordinatorService:
         self.mandate: Optional[TradingMandate] = None
         self.authority: Optional[RiskAuthority] = None
         self.router: Optional[ExecutionRouter] = None
+        self.routes: Optional[RouteRegistry] = None
+        self.pretrade: Optional[PreTradeControls] = None
+        self.style_selector: Optional[ExecutionStyleSelector] = None
         self.learning: Optional[LearningHooks] = None
         self.lifecycle: Optional[AccountTradeLifecycle] = None
         self.account = None
@@ -166,6 +172,9 @@ class AccountCoordinatorService:
             software_version="vati-account-coordinator/1",
             git_sha=os.environ.get("VAN_GIT_SHA", ""),
         )
+        self.routes = RouteRegistry(ledger=self._ledger)
+        self.pretrade = PreTradeControls(routes=self.routes, ledger=self._ledger)
+        self.style_selector = ExecutionStyleSelector(ledger=self._ledger)
         self.router = ExecutionRouter(
             ledger=self._ledger,
             adapters={account.router_venue: self.adapter},
@@ -175,6 +184,10 @@ class AccountCoordinatorService:
                 epoch, now_ms=self.clock(), min_validity_ms=2_000),
             lease_submission_guard=lambda epoch: self.lease.submission_guard(
                 epoch, now_ms=self.clock()),
+            route_registry=self.routes,
+            pretrade_controls=self.pretrade,
+            style_selector=self.style_selector,
+            enforce_rev51_controls=True,
         )
 
         capsule_root = c.capsule_dir or ROOT / "strategies" / "registry"
@@ -254,6 +267,15 @@ class AccountCoordinatorService:
                 bars, _manifest = lake.read(_spec.symbol, _spec.timeframe, end_ms=now_ms + 1)
                 return [bar for bar in bars if bar.end_ms <= now_ms][-400:]
             self.bar_sources[spec.symbol] = source
+
+        assert self.routes is not None
+        self.routes.refresh(
+            account_alias=account.alias,
+            adapter_id=str(getattr(account.broker, "value", account.broker)).lower(),
+            contracts=self.contracts,
+            now_ms=self.clock(),
+            source="account_service_build",
+        )
 
         self.learning = LearningHooks(
             environment=ENVIRONMENT_FOR_MODE[mandate.mode],
@@ -451,7 +473,17 @@ class AccountCoordinatorService:
             intent, decision, self.mandate, now_ms=self.clock(),
             stop_mode=StopMode.SOFTWARE if software else StopMode.VENUE,
             targets=targets, time_in_force=self.specs[candidate.symbol.upper()].time_in_force,
-            lease_epoch=lease_epoch, execution_policy_decision=policy_decision)
+            lease_epoch=lease_epoch, execution_policy_decision=policy_decision,
+            market_reference=MarketReference(
+                last_price=state.features.close,
+                mark_age_ms=state.quote_age_ms,
+                max_mark_age_ms=self.cfg.max_quote_age_ms,
+            ),
+            # No venue depth is exposed by the current adapter contract. Passing
+            # an explicit unknown view makes the selector choose one bounded order
+            # rather than pretending depth exists.
+            liquidity=LiquidityView(),
+        )
         assert self.lifecycle is not None
         self.lifecycle.record_entry(
             intent=intent,
