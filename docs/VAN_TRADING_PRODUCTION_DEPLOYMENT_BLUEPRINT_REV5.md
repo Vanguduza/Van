@@ -268,7 +268,15 @@ strategy-promotion artifacts already required by this blueprint.
 3. **Evidence-bound strategy promotion.** For certificate-gated promotion states, the owner authority statement
    binds strategy_id, target state and the exact StrategyValidationCertificate.validation_hash. A token for one
    certificate cannot authorize another certificate. A strategy certificate must name immutable evidence refs and
-   a data-manifest hash; production code provides no synthetic factory for a passing certificate.
+   a data-manifest hash; production code provides no synthetic factory for a passing certificate. The production
+   server join is owner device -> exact device-signed request -> one-time CryptoObject A4 approval -> private
+   gateway-to-commander channel -> agent-hidden capsule_promote -> CapsuleRegistry.promote. Hermes/model principals
+   cannot list or invoke that command. The commander independently verifies the sealed certificate and its
+   certificate-bound owner authority, rejects durable owner-authority replay across commander restart, writes the
+   authoritative CAPSULE_STATE event before projecting the strategy JSON, and evaluates every later promotion
+   against capsule state reconstructed from that ledger. A crash between event commit and file projection therefore
+   cannot lose the authorized promotion or allow a second token to fork the stale parent. Android UI/key-generation
+   for authoring a promotion is not claimed by this server-side join and must not be inferred from it.
 
 4. **Certificate-backed feature admission.** A FeatureDefinition being registered does not make it production
    admissible. A certificate-required feature is unavailable to a capsule until FeatureRegistry re-evaluates a
@@ -309,10 +317,13 @@ strategy-promotion artifacts already required by this blueprint.
    not durably recorded. Where the original learning environment, broker, symbol, session and event-window context
    are durable, restart replays those facts before the next decision and rebuilds only reduce-only broker-liquidity
    and capsule-health state. TRADE_EXPERIENCE_ARTIFACT remains the durable source for strategy-health environment
-   weighting; durable AUTOMATIC_DEMOTION_ONLY capsule-state events restore the exact demoted capsule state when
-   available. Replay may reduce, suspend or demote; it may never promote a capsule or raise a multiplier above 1.
-   Any unjoinable position, missing protection fact or widened stop remains unresolved and blocks new risk through
-   reconciliation.
+   weighting. Capsule-state replay is hash-lineage aware: durable AUTOMATIC_DEMOTION_ONLY events reconstruct exact
+   demotions, while a durable OWNER_SIGNED_PROMOTION may reconstruct only the exact already-authorized promoted
+   capsule whose supersedes hash matches current lineage. Restart may never originate a promotion, invent owner
+   authority, or raise a learning multiplier above 1; it may only restore authority that was already durably
+   committed. An older demotion/promotion event whose parent no longer matches cannot roll a newer registry
+   projection backward. Any unjoinable position, missing protection fact or widened stop remains unresolved and
+   blocks new risk through reconciliation.
 
 10. **Owner-ticket downstream-evidence law.** A signed owner ticket confirmation is consumed into runtime position
     truth before new risk is admitted. EXECUTION_RECEIPT durability and downstream lifecycle evidence are separate
