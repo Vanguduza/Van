@@ -317,3 +317,42 @@ def test_slow_research_plane_is_reachable_through_vati_cli(tmp_path, capsys):
     assert payload["operation"] == "coverage"
     assert payload["map_hash"]
     assert payload["gap_count"] > 0
+
+
+def test_research_cli_builds_strategy_certificate_from_raw_validation_data(tmp_path, capsys):
+    import argparse
+    import json
+    from vati.__main__ import cmd_research
+
+    spec = tmp_path / "strategy-cert.json"
+    spec.write_text(json.dumps({
+        "operation": "strategy_certificate",
+        "validation": {
+            "strategy_id": "S", "strategy_version": "1.0", "capsule_hash": "cap",
+            "data_manifest_hash": "manifest:1", "evidence_refs": ["wf:1", "cpcv:1"],
+            "feature_set_version": "features/1", "cost_model_revision": "cost/1",
+            "pnls": [10, -4, 12, 8, -3, 9, 7, -2],
+            "r_multiples": [1, -0.4, 1.2, 0.8, -0.3, 0.9, 0.7, -0.2],
+            "start_equity": 1000,
+            "trial_returns_matrix": [
+                [0.2,-0.1,0.3,0.1,-0.05,0.2,0.15,-0.02],
+                [0.1,-0.2,0.25,0.05,-0.1,0.1,0.12,-0.08],
+                [0.05,-0.1,0.1,0.02,-0.03,0.08,0.07,-0.04],
+                [0.15,-0.05,0.2,0.08,-0.02,0.14,0.11,-0.01]
+            ],
+            "walk_forward_windows": 4,
+            "cost_stress_2x": "GREEN",
+            "latency_slippage_stress": "GREEN",
+            "parameter_perturbation_stability": "GREEN",
+            "leakage_switch_result": "GREEN"
+        }
+    }))
+    assert cmd_research(argparse.Namespace(spec=str(spec), ledger=None)) == 0
+    payload = json.loads(capsys.readouterr().out)
+    assert payload["operation"] == "strategy_certificate"
+    cert = payload["certificate"]
+    assert cert["validation_hash"]
+    assert cert["data_manifest_hash"] == "manifest:1"
+    assert cert["evidence_refs"] == ["wf:1", "cpcv:1"]
+    assert 0 <= cert["stats"]["dsr_probability"] <= 1
+    assert 0 <= cert["stats"]["pbo_probability"] <= 1
