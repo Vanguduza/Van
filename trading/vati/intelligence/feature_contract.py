@@ -17,6 +17,7 @@ from dataclasses import dataclass, field
 from typing import Any, Mapping, Optional, Sequence
 
 from vati.core.canonical import canonical_hash
+from vati.intelligence.feature_registry import FeatureRegistry, default_registry
 
 #: The reason code a capsule abstains under. One code, so the owner surface and
 #: the ledger agree on what happened.
@@ -34,6 +35,8 @@ class FeatureContractVerdict:
     bad_provenance: tuple[str, ...] = ()
     invalid_timeframe: tuple[str, ...] = ()
     degraded: tuple[str, ...] = ()
+    unregistered: tuple[str, ...] = ()
+    not_production_admitted: tuple[str, ...] = ()
     reasons: tuple[str, ...] = ()
     verdict_hash: str = ""
 
@@ -43,6 +46,8 @@ class FeatureContractVerdict:
             "stale": list(self.stale), "unsupported_for_venue": list(self.unsupported_for_venue),
             "insufficient_history": list(self.insufficient_history), "bad_provenance": list(self.bad_provenance),
             "invalid_timeframe": list(self.invalid_timeframe), "degraded": list(self.degraded),
+            "unregistered": list(self.unregistered),
+            "not_production_admitted": list(self.not_production_admitted),
             "reasons": list(self.reasons), "verdict_hash": self.verdict_hash,
         }
 
@@ -80,6 +85,9 @@ class FeatureRequirement:
 class FeatureContractValidator:
     """Deterministic, side-effect free. Every unmet condition is named."""
 
+    def __init__(self, registry: Optional[FeatureRegistry] = None) -> None:
+        self.registry = registry or default_registry()
+
     def validate(
         self,
         *,
@@ -96,9 +104,19 @@ class FeatureContractValidator:
         bad_provenance: list[str] = []
         bad_timeframe: list[str] = []
         degraded: list[str] = []
+        unregistered: list[str] = []
+        not_admitted: list[str] = []
         reasons: list[str] = []
 
         for req in requirements:
+            definition = self.registry.get(req.feature_id)
+            if definition is None:
+                unregistered.append(req.feature_id)
+                reasons.append(f"unregistered:{req.feature_id}")
+                continue
+            if not self.registry.is_production_admitted(req.feature_id):
+                not_admitted.append(req.feature_id)
+                reasons.append(f"not_production_admitted:{req.feature_id}")
             av = available.get(req.feature_id)
             if av is None or not av.present:
                 missing.append(req.feature_id)
@@ -109,6 +127,15 @@ class FeatureContractValidator:
             if av.value_is_none:
                 none_valued.append(req.feature_id)
                 reasons.append(f"none_value:{req.feature_id}")
+            effective_venue = av.venue_class or venue_class
+            if effective_venue is not None and not definition.applies_to(effective_venue):
+                unsupported.append(req.feature_id)
+                reasons.append(f"registry_venue:{req.feature_id}:{effective_venue}")
+            effective_timeframe = req.timeframe or av.timeframe
+            if (effective_timeframe and effective_timeframe != "UNKNOWN"
+                    and effective_timeframe not in definition.allowed_timeframes):
+                bad_timeframe.append(req.feature_id)
+                reasons.append(f"registry_timeframe:{req.feature_id}:{effective_timeframe}")
             if req.timeframe is not None and av.timeframe != req.timeframe:
                 bad_timeframe.append(req.feature_id)
                 reasons.append(f"timeframe:{req.feature_id}:{av.timeframe}!={req.timeframe}")
@@ -117,13 +144,13 @@ class FeatureContractValidator:
                 if age > req.max_age_ms:
                     stale.append(req.feature_id)
                     reasons.append(f"stale:{req.feature_id}:{age}ms>{req.max_age_ms}ms")
-            effective_venue = av.venue_class or venue_class
             if req.venue_classes and effective_venue is not None and effective_venue not in req.venue_classes:
                 unsupported.append(req.feature_id)
                 reasons.append(f"venue:{req.feature_id}:{effective_venue}")
-            if req.minimum_history is not None and av.history_bars is not None and av.history_bars < req.minimum_history:
+            required_history = max(req.minimum_history or 0, definition.minimum_history)
+            if av.history_bars is not None and av.history_bars < required_history:
                 short_history.append(req.feature_id)
-                reasons.append(f"history:{req.feature_id}:{av.history_bars}<{req.minimum_history}")
+                reasons.append(f"history:{req.feature_id}:{av.history_bars}<{required_history}")
             if not av.provenance_ok:
                 bad_provenance.append(req.feature_id)
                 reasons.append(f"provenance:{req.feature_id}")
@@ -136,7 +163,8 @@ class FeatureContractValidator:
             missing=tuple(missing), none_valued=tuple(none_valued), stale=tuple(stale),
             unsupported_for_venue=tuple(unsupported), insufficient_history=tuple(short_history),
             bad_provenance=tuple(bad_provenance), invalid_timeframe=tuple(bad_timeframe),
-            degraded=tuple(degraded), reasons=tuple(reasons),
+            degraded=tuple(degraded), unregistered=tuple(unregistered),
+            not_production_admitted=tuple(not_admitted), reasons=tuple(reasons),
         ).sealed()
 
 
@@ -147,7 +175,7 @@ def availability_from_feature_vector(fv, *, venue_class: Optional[str] = None, h
     means the attribute exists and "value_is_none" means it is None. A registry
     -backed vector supplies richer facts and replaces this.
     """
-    skip = {"symbol", "as_of_ms", "complete", "feature_version", "timeframe"}
+    skip = {"symbol", "as_of_ms", "complete", "history_bars", "feature_version", "timeframe"}
     out: dict[str, FeatureAvailability] = {}
     for name, value in fv.__dict__.items():
         if name in skip:
@@ -155,7 +183,8 @@ def availability_from_feature_vector(fv, *, venue_class: Optional[str] = None, h
         out[name] = FeatureAvailability(
             feature_id=name, present=True, value_is_none=value is None,
             as_of_ms=fv.as_of_ms, timeframe=getattr(fv, "timeframe", "UNKNOWN"),
-            venue_class=venue_class, history_bars=history_bars,
+            venue_class=venue_class,
+            history_bars=history_bars if history_bars is not None else getattr(fv, "history_bars", None),
         )
     return out
 
