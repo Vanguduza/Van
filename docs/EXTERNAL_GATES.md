@@ -83,3 +83,24 @@ Repository and host-side closure require the VAN gateway itself to remain loopba
 The externally reachable API uses layered client authority. `VAN_INGRESS_TOKEN` / `X-Van-Ingress-Token` is the outer transport bearer. Except for ingress-only `/health`, normal Android API calls also require a revocable per-device access token. Device command execution additionally requires the enrolled per-device HMAC secret. New devices can obtain these credentials only through a short-lived single-use pairing ticket issued by the internal control plane. Privileged Hermes control routes retain their separate internal-control credential and that credential is not accepted as a general external bearer.
 
 A volatile `trycloudflare.com` quick tunnel is not production authority. Repo-side named-tunnel tooling is provided by `deploy/systemd/van-cloudflare-tunnel.service` and `tools/runtime/install_van_cloudflare_tunnel.sh`; the installer rejects quick-tunnel hostnames and requires an authenticated public `/health` canary before success. The remaining external routing gate is provisioning a named Cloudflare Tunnel token and stable hostname mapped to `http://127.0.0.1:8787`. This gate does not affect Workspace OAuth durability or live Google READY certification.
+## Remote Browser (Rev 1.5) gates
+
+The Remote Browser's Gateway half is implemented and tested in the repository. Nothing below
+is certified, and three of these are gates no amount of repository work can close.
+
+The distinction this section exists to keep: **the code is written and the outcome is
+unproven** is not the same claim as **the code is absent**, and neither is the same as
+**certified**. The programme's per-row state is in
+`docs/project-state/REMOTE_BROWSER_IMPLEMENTATION_MATRIX.json`; this table is the subset that
+needs something outside the repository.
+
+| Gate | Required proof | Repo-side readiness |
+|---|---|---|
+| Browser Stream Host (RB-002/RB-010) | a provisioned dual-homed host running Chromium, the media pipeline and the signalling endpoint, answering a real SDP offer | EXTERNAL — no host exists. The device negotiates against `browser_stream_signal_url`, which is empty by default; an empty setting means the interactive routes are not mounted at all rather than handing the phone an endpoint that does not answer. |
+| WebRTC media path (RB-019/RB-020/RB-121) | an owner S24 Ultra negotiating H.264 with that host and drawing frames | EXTERNAL + DEVICE — the Android client, both data channels and the renderer are written and reached from the owner surface. Not one frame has been drawn anywhere: WebRTC needs a peer. |
+| Android build of the Remote Browser surface | `:app:assembleDebug` and `:app:lintDebug` green with the WebRTC and okhttp dependencies | CI-ONLY — the Android Gradle Plugin cannot be fetched in the audit container, so CI is the only authority that compiles any of this. The dependency versions are pinned to digests measured from the artefacts and checked against the build by `tests/contracts/test_remote_browser_dependencies.py`. |
+| S24 key attestation (RB-120) | a real S24 Ultra producing an attestation chain the gateway's parser accepts, at StrongBox security level | DEVICE — the parser, the policy and the enforcement are implemented and tested against the structures Android documents, including the high-tag-number DER forms that a naive reader silently never finds. Whether a real handset emits a chain this accepts has never been observed. |
+| Second-device refusal canary (RB-112) | a second phone, with a valid paired device token, refused on an owner mutation | DEVICE — enforced and tested in-process: once any device is bound, every other device is refused. The canary is the same claim against real hardware. |
+| Signed connectivity provisioning (RB-121) | a release build carrying `VAN_CONNECTIVITY_TRUSTED_KEYS` and a gateway publishing a signed manifest | OWNER_DEPLOYMENT — the verifier, the registry and the rotation refusal are implemented and executed in the JVM harness. No build has been provisioned with a key, and with none the device applies no manifest at all and keeps what it was provisioned with. |
+| Route diversity (RB-070) | two independently reachable ingress paths | EXTERNAL — there is one ingress, and both halves say so rather than rounding up: the device declares one `routeId` for both carriers, the supervisor reports `SINGLE_PATH`, and the owner-readable string is "Connected" rather than "Connected, with a spare route". |
+| Interactive profile lease under load (RB-050) | the authenticated owner profile held by an interactive session while Hermes wants it | PENDING_LIVE — the lease, the holder kinds and the 409 are implemented and tested; the contention is real only with a real host. |

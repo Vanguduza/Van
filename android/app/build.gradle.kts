@@ -15,6 +15,25 @@ val escapedVanGatewayBaseUrl = vanGatewayBaseUrl
     .replace("\\", "\\\\")
     .replace("\"", "\\\"")
 
+/*
+ * ADR-RB-027 — the keys this build will accept a signed connectivity manifest from,
+ * as newline-separated `kid=PEM` pairs.
+ *
+ * Compiled in rather than fetched, because a trust anchor delivered over the network is
+ * not a trust anchor. Empty is the honest default and means this build applies no
+ * manifest at all: it keeps the endpoint it was provisioned with rather than accepting
+ * the first one something hands it.
+ */
+val vanConnectivityTrustedKeys = providers.gradleProperty("VAN_CONNECTIVITY_TRUSTED_KEYS")
+    .orElse(providers.environmentVariable("VAN_CONNECTIVITY_TRUSTED_KEYS"))
+    .orElse("")
+    .get()
+    .trim()
+val escapedVanConnectivityTrustedKeys = vanConnectivityTrustedKeys
+    .replace("\\", "\\\\")
+    .replace("\"", "\\\"")
+    .replace("\n", "\\n")
+
 android {
     namespace = "com.dial.van"
     compileSdk = 36
@@ -36,6 +55,23 @@ android {
         versionCode = 5
         versionName = "0.5.0-dev"
         buildConfigField("String", "VAN_GATEWAY_BASE_URL", "\"$escapedVanGatewayBaseUrl\"")
+        buildConfigField(
+            "String",
+            "VAN_CONNECTIVITY_TRUSTED_KEYS",
+            "\"$escapedVanConnectivityTrustedKeys\"",
+        )
+
+        /*
+         * §0D.3 / §32 — one ABI, because there is one device.
+         *
+         * The WebRTC AAR carries four native ABIs and about 35 MB of them can never
+         * execute on the only handset the production build is bound to. This is a size
+         * decision, and it is also a reversible one: the filter is the single place to
+         * change when a second device is admitted under its own decision.
+         */
+        ndk {
+            abiFilters += "arm64-v8a"
+        }
 
         testInstrumentationRunner = "androidx.test.runner.AndroidJUnitRunner"
         vectorDrawables {
@@ -159,6 +195,21 @@ dependencies {
     implementation("org.jetbrains.kotlinx:kotlinx-serialization-json:1.6.3")
 
     implementation("app.rive:rive-android:9.6.5")
+
+    /*
+     * Rev 1.5 §32 — the Remote Browser's two admitted dependencies.
+     *
+     * Both are pinned by exact version and recorded with a digest computed from the
+     * artefact itself in `registries/remote_browser_dependencies.json`; the adoption
+     * decision is `docs/decisions/VAN-ADOPT-REMOTE-BROWSER-STREAMING-001.yaml`.
+     *
+     * okhttp is 4.12.0 rather than the 5.5.0 the blueprint named: 5.x ships Kotlin 2.1
+     * metadata and this project builds with the Kotlin 1.9.24 plugin, so admitting it
+     * would have failed the build on first use. The registry records the rejection and
+     * the condition for revisiting it.
+     */
+    implementation("io.github.webrtc-sdk:android:150.7871.01")
+    implementation("com.squareup.okhttp3:okhttp:4.12.0")
 
     debugImplementation("androidx.compose.ui:ui-tooling")
     debugImplementation("androidx.compose.ui:ui-test-manifest")

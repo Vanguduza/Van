@@ -549,10 +549,10 @@
       "id": "RB-019",
       "name": "native Android WebRTC client",
       "group": "android",
-      "status": "NOT_STARTED",
-      "built": false,
-      "wired": false,
-      "reachable": false,
+      "status": "WIRED_UNPROVEN",
+      "built": true,
+      "wired": true,
+      "reachable": true,
       "live": false,
       "verified": false,
       "observed": false,
@@ -560,14 +560,18 @@
       "certified": false,
       "component_refs": [],
       "ledger_expectation": "NONE",
-      "producer": null,
-      "consumer": null,
+      "producer": "BrowserStreamClient.connect",
+      "consumer": "BrowserSessionController.connectStream, from BrowserActivity",
       "authority": "docs/VAN_REMOTE_BROWSER_PRODUCTION_BLUEPRINT_REV_1_5.md \u00a79",
       "evidence_refs": [],
       "tests": [],
-      "external_gates": [],
+      "external_gates": [
+        "a Browser Stream Host that can answer the signalling URL (RB-010)",
+        "the Android build is compiled only in CI; the AGP is unreachable in the audit container"
+      ],
       "transport_independent": false,
-      "offline_voice_proven": null
+      "offline_voice_proven": null,
+      "note": "The client exists and is reached from the owner surface: Command Centre \u2192 Browser \u2192 Sessions opens BrowserActivity, which builds the peer connection and the two data channels. Nothing here is executed by any gate in this repository. WebRTC needs a peer and the peer is RB-002, which does not exist; the AGP cannot be fetched in the audit container, so CI's :app:assembleDebug is the only thing that even compiles it. Wired, not live, and deliberately not called more than that."
     },
     {
       "schema": "van-implementation-matrix/1",
@@ -575,10 +579,10 @@
       "id": "RB-020",
       "name": "remote viewport renderer",
       "group": "android",
-      "status": "NOT_STARTED",
-      "built": false,
-      "wired": false,
-      "reachable": false,
+      "status": "WIRED_UNPROVEN",
+      "built": true,
+      "wired": true,
+      "reachable": true,
       "live": false,
       "verified": false,
       "observed": false,
@@ -586,14 +590,18 @@
       "certified": false,
       "component_refs": [],
       "ledger_expectation": "NONE",
-      "producer": null,
-      "consumer": null,
+      "producer": "SurfaceViewRenderer attached in BrowserActivity",
+      "consumer": "BrowserSessionController.attachRenderer, fed by the remote VideoTrack",
       "authority": "docs/VAN_REMOTE_BROWSER_PRODUCTION_BLUEPRINT_REV_1_5.md \u00a79",
       "evidence_refs": [],
       "tests": [],
-      "external_gates": [],
+      "external_gates": [
+        "a Browser Stream Host that can answer the signalling URL (RB-010)",
+        "the Android build is compiled only in CI; the AGP is unreachable in the audit container"
+      ],
       "transport_independent": false,
-      "offline_voice_proven": null
+      "offline_voice_proven": null,
+      "note": "The renderer is created, initialised against the EGL context and handed to the controller, which adds it as a sink when the remote track arrives. No frame has ever been drawn: there is no host producing one."
     },
     {
       "schema": "van-implementation-matrix/1",
@@ -601,10 +609,10 @@
       "id": "RB-021",
       "name": "coordinate mapping",
       "group": "android",
-      "status": "BUILT_UNWIRED",
+      "status": "WIRED_UNPROVEN",
       "built": true,
-      "wired": false,
-      "reachable": false,
+      "wired": true,
+      "reachable": true,
       "live": false,
       "verified": false,
       "observed": false,
@@ -612,18 +620,23 @@
       "certified": false,
       "component_refs": [],
       "ledger_expectation": "NONE",
-      "producer": "input_protocol.to_viewport_pixels",
+      "producer": "BrowserInputProtocol.normalize on the device; input_protocol on the gateway",
       "consumer": "the stream host's CDP input router",
       "authority": "docs/VAN_REMOTE_BROWSER_PRODUCTION_BLUEPRINT_REV_1_5.md \u00a78.6",
       "evidence_refs": [],
       "tests": [
-        "backend/tests/test_browser_input_protocol.py"
+        "android/verification/src/test/kotlin/com/dial/van/browser/BrowserInputProtocolTest.kt",
+        "backend/tests/test_browser_input_protocol.py",
+        "tests/contracts/test_browser_input_protocol_matches.py"
       ],
       "external_gates": [
-        "a Browser Stream Host running the CDP input router (RB-010/RB-017)"
+        "a Browser Stream Host running the CDP input router (RB-010/RB-017)",
+        "a Browser Stream Host that can answer the signalling URL (RB-010)",
+        "the Android build is compiled only in CI; the AGP is unreachable in the audit container"
       ],
       "transport_independent": false,
-      "offline_voice_proven": null
+      "offline_voice_proven": null,
+      "note": "Now called: BrowserSessionController.onTouch normalizes against the view and the packet carries the viewport revision the host maps back through. The two implementations of the mapping are compared directly by the cross-language contract test, which is the check that matters here \u2014 a silent divergence puts the owner's tap somewhere they did not touch, and neither build would notice."
     },
     {
       "schema": "van-implementation-matrix/1",
@@ -631,10 +644,10 @@
       "id": "RB-022",
       "name": "touch",
       "group": "android",
-      "status": "NOT_STARTED",
-      "built": false,
-      "wired": false,
-      "reachable": false,
+      "status": "WIRED_UNPROVEN",
+      "built": true,
+      "wired": true,
+      "reachable": true,
       "live": false,
       "verified": false,
       "observed": false,
@@ -642,14 +655,21 @@
       "certified": false,
       "component_refs": [],
       "ledger_expectation": "NONE",
-      "producer": null,
-      "consumer": null,
+      "producer": "BrowserSessionController.onTouch",
+      "consumer": "BrowserStreamClient.send over the two data channels",
       "authority": "docs/VAN_REMOTE_BROWSER_PRODUCTION_BLUEPRINT_REV_1_5.md \u00a711",
       "evidence_refs": [],
-      "tests": [],
-      "external_gates": [],
+      "tests": [
+        "android/verification/src/test/kotlin/com/dial/van/browser/BrowserInputProtocolTest.kt",
+        "tests/contracts/test_browser_input_protocol_matches.py"
+      ],
+      "external_gates": [
+        "a Browser Stream Host that can answer the signalling URL (RB-010)",
+        "the Android build is compiled only in CI; the AGP is unreachable in the audit container"
+      ],
       "transport_independent": false,
-      "offline_voice_proven": null
+      "offline_voice_proven": null,
+      "note": "Down, move, up and cancel are mapped to protocol packets; edges are duplicated onto both channels with one identity so the host can de-duplicate on (gesture_id, edge_id). Multi-pointer moves are sent per pointer. Untested against a host, and the gesture sequencing that can be tested is, in the JVM harness."
     },
     {
       "schema": "van-implementation-matrix/1",
@@ -657,10 +677,10 @@
       "id": "RB-023",
       "name": "scrolling/fling",
       "group": "android",
-      "status": "NOT_STARTED",
-      "built": false,
-      "wired": false,
-      "reachable": false,
+      "status": "WIRED_UNPROVEN",
+      "built": true,
+      "wired": true,
+      "reachable": true,
       "live": false,
       "verified": false,
       "observed": false,
@@ -668,14 +688,21 @@
       "certified": false,
       "component_refs": [],
       "ledger_expectation": "NONE",
-      "producer": null,
-      "consumer": null,
+      "producer": "BrowserSessionController.onScroll",
+      "consumer": "the stream host's CDP input router, on the reliable channel",
       "authority": "docs/VAN_REMOTE_BROWSER_PRODUCTION_BLUEPRINT_REV_1_5.md \u00a711",
       "evidence_refs": [],
-      "tests": [],
-      "external_gates": [],
+      "tests": [
+        "android/verification/src/test/kotlin/com/dial/van/browser/BrowserInputProtocolTest.kt",
+        "tests/contracts/test_browser_input_protocol_matches.py"
+      ],
+      "external_gates": [
+        "a Browser Stream Host that can answer the signalling URL (RB-010)",
+        "the Android build is compiled only in CI; the AGP is unreachable in the audit container"
+      ],
       "transport_independent": false,
-      "offline_voice_proven": null
+      "offline_voice_proven": null,
+      "note": "A wheel, trackpad or S Pen scroll arrives through onGenericMotionEvent, not onTouchEvent; without the override a DeX session or a connected mouse scrolls nothing at all. Finger scrolling is deliberately *not* synthesised here \u2014 raw touch is forwarded and the remote page does its own scrolling and fling, which is the only way the page's own momentum physics are the ones the owner feels. Sent reliably: a dropped scroll is not a stale position the next event corrects, it is a page left in the wrong place. Not executed anywhere."
     },
     {
       "schema": "van-implementation-matrix/1",
@@ -683,10 +710,10 @@
       "id": "RB-024",
       "name": "IME",
       "group": "android",
-      "status": "NOT_STARTED",
-      "built": false,
-      "wired": false,
-      "reachable": false,
+      "status": "WIRED_UNPROVEN",
+      "built": true,
+      "wired": true,
+      "reachable": true,
       "live": false,
       "verified": false,
       "observed": false,
@@ -694,14 +721,21 @@
       "certified": false,
       "component_refs": [],
       "ledger_expectation": "NONE",
-      "producer": null,
-      "consumer": null,
+      "producer": "BrowserSurfaceView's InputConnection",
+      "consumer": "BrowserSessionController.onTextCommit / onComposition / onKey",
       "authority": "docs/VAN_REMOTE_BROWSER_PRODUCTION_BLUEPRINT_REV_1_5.md \u00a710",
       "evidence_refs": [],
-      "tests": [],
-      "external_gates": [],
+      "tests": [
+        "android/verification/src/test/kotlin/com/dial/van/browser/BrowserInputProtocolTest.kt",
+        "tests/contracts/test_browser_input_protocol_matches.py"
+      ],
+      "external_gates": [
+        "a Browser Stream Host that can answer the signalling URL (RB-010)",
+        "the Android build is compiled only in CI; the AGP is unreachable in the audit container"
+      ],
       "transport_independent": false,
-      "offline_voice_proven": null
+      "offline_voice_proven": null,
+      "note": "The surface declares itself a text editor, so the IME opens for the remote page's fields \u2014 a renderer with a touch listener never does, and the symptom is the caret appearing on the far side with no keyboard on the phone. Composition and commit are separate kinds on purpose: an IME that produced one word from five keystrokes did not produce five keys, and replaying it as keys is how non-Latin input arrives as nonsense. Backspace is sent as a key rather than as a surrounding-text edit, because the remote page owns where its caret is. Not executed anywhere: an InputConnection needs an IME."
     },
     {
       "schema": "van-implementation-matrix/1",
@@ -709,10 +743,10 @@
       "id": "RB-025",
       "name": "orientation/viewport ack",
       "group": "android",
-      "status": "BUILT_UNWIRED",
+      "status": "WIRED_UNPROVEN",
       "built": true,
-      "wired": false,
-      "reachable": false,
+      "wired": true,
+      "reachable": true,
       "live": false,
       "verified": false,
       "observed": false,
@@ -720,18 +754,20 @@
       "certified": false,
       "component_refs": [],
       "ledger_expectation": "NONE",
-      "producer": null,
-      "consumer": null,
+      "producer": "BrowserSessionController.acknowledgeViewport",
+      "consumer": "POST /v1/browser/interactive-sessions/{id}/viewport/ack",
       "authority": "docs/VAN_REMOTE_BROWSER_PRODUCTION_BLUEPRINT_REV_1_5.md \u00a712",
       "evidence_refs": [],
       "tests": [
         "backend/tests/test_interactive_browser_api.py"
       ],
       "external_gates": [
-        "a Browser Stream Host that can answer the signalling URL (RB-010)"
+        "a Browser Stream Host that can answer the signalling URL (RB-010)",
+        "the Android build is compiled only in CI; the AGP is unreachable in the audit container"
       ],
       "transport_independent": false,
-      "offline_voice_proven": null
+      "offline_voice_proven": null,
+      "note": "The device acknowledges the revision it is actually drawing before any input is allowed through, and `mayActuate` reads the acknowledgement rather than a cached flag \u2014 so forgetting to acknowledge fails closed. The Activity declares configChanges for orientation so a rotation does not tear down the peer."
     },
     {
       "schema": "van-implementation-matrix/1",
@@ -873,10 +909,10 @@
       "id": "RB-031",
       "name": "reconnect",
       "group": "android",
-      "status": "NOT_STARTED",
-      "built": false,
-      "wired": false,
-      "reachable": false,
+      "status": "WIRED_UNPROVEN",
+      "built": true,
+      "wired": true,
+      "reachable": true,
       "live": false,
       "verified": false,
       "observed": false,
@@ -884,14 +920,20 @@
       "certified": false,
       "component_refs": [],
       "ledger_expectation": "NONE",
-      "producer": null,
-      "consumer": null,
+      "producer": "VanHermesSessionManager.resume via ResumePolicy",
+      "consumer": "POST /v1/session/resume",
       "authority": "docs/VAN_REMOTE_BROWSER_PRODUCTION_BLUEPRINT_REV_1_5.md \u00a729",
       "evidence_refs": [],
-      "tests": [],
-      "external_gates": [],
+      "tests": [
+        "android/verification/src/test/kotlin/com/dial/van/session/SessionEnvelopeTest.kt",
+        "backend/tests/test_van_hermes_session.py"
+      ],
+      "external_gates": [
+        "the Android build is compiled only in CI; the AGP is unreachable in the audit container"
+      ],
       "transport_independent": false,
-      "offline_voice_proven": null
+      "offline_voice_proven": null,
+      "note": "The device's half of \u00a720.9: a reconnect is classified as resumed, resumed under a new epoch, or replaced, and the three are acted on differently. Work addressed to a session that no longer exists is dropped rather than replayed into a new one. The classification is pure and executed in the harness; the socket around it is not executed anywhere."
     },
     {
       "schema": "van-implementation-matrix/1",
@@ -982,10 +1024,10 @@
       "id": "RB-035",
       "name": "realtime WebSocket client",
       "group": "session",
-      "status": "NOT_STARTED",
-      "built": false,
-      "wired": false,
-      "reachable": false,
+      "status": "WIRED_UNPROVEN",
+      "built": true,
+      "wired": true,
+      "reachable": true,
       "live": false,
       "verified": false,
       "observed": false,
@@ -993,14 +1035,19 @@
       "certified": false,
       "component_refs": [],
       "ledger_expectation": "NONE",
-      "producer": null,
-      "consumer": null,
+      "producer": "VanHermesSessionManager.start",
+      "consumer": "the /v1/session/ws endpoint",
       "authority": "docs/VAN_REMOTE_BROWSER_PRODUCTION_BLUEPRINT_REV_1_5.md \u00a720",
       "evidence_refs": [],
-      "tests": [],
-      "external_gates": [],
+      "tests": [
+        "backend/tests/test_van_hermes_session.py"
+      ],
+      "external_gates": [
+        "the Android build is compiled only in CI; the AGP is unreachable in the audit container"
+      ],
       "transport_independent": true,
-      "offline_voice_proven": null
+      "offline_voice_proven": null,
+      "note": "okhttp WebSocket against the gateway's full-duplex session endpoint, with the session opened over HTTP first so a reconnect is a resume rather than a new session. The supervisor decides what a failure means; this file only carries bytes. Not executed: no gate in this repository runs an Android WebSocket."
     },
     {
       "schema": "van-implementation-matrix/1",
@@ -1412,25 +1459,35 @@
       "id": "RB-051",
       "name": "device-only authorization",
       "group": "security",
-      "status": "NOT_STARTED",
-      "built": false,
-      "wired": false,
-      "reachable": false,
-      "live": false,
-      "verified": false,
+      "status": "VERIFIED_UNCERTIFIED",
+      "built": true,
+      "wired": true,
+      "reachable": true,
+      "live": true,
+      "verified": true,
       "observed": false,
       "recoverable": false,
       "certified": false,
       "component_refs": [],
       "ledger_expectation": "NONE",
-      "producer": null,
-      "consumer": null,
+      "producer": "OwnerDeviceIdentity/DeviceProofSigner on the device",
+      "consumer": "the gateway's require_ingress_auth middleware, via enforce_device_proof",
       "authority": "docs/VAN_REMOTE_BROWSER_PRODUCTION_BLUEPRINT_REV_1_5.md \u00a731",
-      "evidence_refs": [],
-      "tests": [],
-      "external_gates": [],
+      "evidence_refs": [
+        "evidence/van-remote-browser/cross_language_vectors.json"
+      ],
+      "tests": [
+        "backend/tests/test_device_proof_enforcement.py",
+        "backend/tests/test_owner_device_binding.py",
+        "tests/contracts/test_cross_language_vectors.py"
+      ],
+      "external_gates": [
+        "a real S24 Ultra emitting an attestation chain this parser accepts (RB-120)",
+        "the Android build is compiled only in CI; the AGP is unreachable in the audit container"
+      ],
       "transport_independent": false,
-      "offline_voice_proven": null
+      "offline_voice_proven": null,
+      "note": "ADR-RB-025 is enforced rather than implemented. `require_proof` existed and nothing called it: a stolen device token reached every owner route while /v1/device-binding/status reported bound. The middleware now refuses a privileged request that is not signed by the bound key, and refuses a *second* paired device outright once any device is bound \u2014 a first version asked for_device(caller), so a phone that had never enrolled skipped the gate entirely. Verified in-process against the assembled app, including the counterexample (no proof header at all). Not certified: the hardware half runs on the owner's phone and RB-120 is a device gate."
     },
     {
       "schema": "van-implementation-matrix/1",
@@ -1766,10 +1823,10 @@
       "id": "RB-064",
       "name": "TransportSupervisor health scoring",
       "group": "session",
-      "status": "NOT_STARTED",
-      "built": false,
-      "wired": false,
-      "reachable": false,
+      "status": "WIRED_UNPROVEN",
+      "built": true,
+      "wired": true,
+      "reachable": true,
       "live": false,
       "verified": false,
       "observed": false,
@@ -1777,14 +1834,19 @@
       "certified": false,
       "component_refs": [],
       "ledger_expectation": "NONE",
-      "producer": null,
-      "consumer": null,
+      "producer": "HeartbeatPolicy.health / TransportSupervisor.observe",
+      "consumer": "VanHermesSessionManager's WebSocket callbacks",
       "authority": "docs/VAN_REMOTE_BROWSER_PRODUCTION_BLUEPRINT_REV_1_5.md \u00a720",
       "evidence_refs": [],
-      "tests": [],
-      "external_gates": [],
+      "tests": [
+        "android/verification/src/test/kotlin/com/dial/van/session/TransportSupervisorTest.kt"
+      ],
+      "external_gates": [
+        "the Android build is compiled only in CI; the AGP is unreachable in the audit container"
+      ],
       "transport_independent": true,
-      "offline_voice_proven": null
+      "offline_voice_proven": null,
+      "note": "Health scoring is pure and executed: a failed write outranks every timing signal, the idle cadence does not call a backgrounded path suspect for being quiet, and a failover prefers a different route to the one that just broke. Wired into the session manager's callbacks. Not live \u2014 no gate here runs it against a network."
     },
     {
       "schema": "van-implementation-matrix/1",
@@ -1944,13 +2006,15 @@
       "authority": "docs/VAN_REMOTE_BROWSER_PRODUCTION_BLUEPRINT_REV_1_5.md \u00a70B",
       "evidence_refs": [],
       "tests": [
+        "android/verification/src/test/kotlin/com/dial/van/session/TransportSupervisorTest.kt",
         "backend/tests/test_van_hermes_session.py"
       ],
       "external_gates": [
         "a second independently reachable ingress (RB-002 deployment decision)"
       ],
       "transport_independent": true,
-      "offline_voice_proven": null
+      "offline_voice_proven": null,
+      "note": "Both halves now refuse to overstate it. The device's DEFAULT_PATHS declare one route_id for both carriers because there is one ingress, so the supervisor reports SINGLE_PATH and the owner-readable string says \"Connected\" rather than \"Connected, with a spare route\". \u00a70B's case is executed in the JVM harness. Certification needs a second independently reachable ingress, which is RB-002."
     },
     {
       "schema": "van-implementation-matrix/1",
@@ -2556,10 +2620,10 @@
       "id": "RB-094",
       "name": "normal browser back/share/find behavior",
       "group": "android",
-      "status": "NOT_STARTED",
-      "built": false,
-      "wired": false,
-      "reachable": false,
+      "status": "WIRED_UNPROVEN",
+      "built": true,
+      "wired": true,
+      "reachable": true,
       "live": false,
       "verified": false,
       "observed": false,
@@ -2567,14 +2631,17 @@
       "certified": false,
       "component_refs": [],
       "ledger_expectation": "NONE",
-      "producer": null,
-      "consumer": null,
+      "producer": "BrowserSurfaceView.onKeyDown",
+      "consumer": "the Activity's default Back handling",
       "authority": "docs/VAN_REMOTE_BROWSER_PRODUCTION_BLUEPRINT_REV_1_5.md \u00a717",
       "evidence_refs": [],
       "tests": [],
-      "external_gates": [],
+      "external_gates": [
+        "the Android build is compiled only in CI; the AGP is unreachable in the audit container"
+      ],
       "transport_independent": false,
-      "offline_voice_proven": null
+      "offline_voice_proven": null,
+      "note": "Back is passed to the Activity rather than sent to the page. A remote browser that swallowed Back would trap the owner inside it, which is the failure \u00a78.7 names; the page's own history is a separate affordance and is not wired to the system key."
     },
     {
       "schema": "van-implementation-matrix/1",
@@ -2751,18 +2818,22 @@
       "certified": false,
       "component_refs": [],
       "ledger_expectation": "NONE",
-      "producer": "verify_manifest",
-      "consumer": "the Android manifest verifier (RB-101 Android half)",
+      "producer": "ConnectivityManifestVerifier.verify on the device",
+      "consumer": "ConnectivityRegistry, called from VanApplication at start",
       "authority": "docs/VAN_REMOTE_BROWSER_PRODUCTION_BLUEPRINT_REV_1_5.md \u00a7ADR-RB-027",
       "evidence_refs": [],
       "tests": [
-        "backend/tests/test_owner_device_binding.py"
+        "android/verification/src/test/kotlin/com/dial/van/connectivity/ConnectivityManifestTest.kt",
+        "backend/tests/test_owner_device_binding.py",
+        "tests/contracts/test_cross_language_vectors.py"
       ],
       "external_gates": [
-        "an Android verifier holding the pinned authority key"
+        "an Android verifier holding the pinned authority key",
+        "the Android build is compiled only in CI; the AGP is unreachable in the audit container"
       ],
       "transport_independent": false,
-      "offline_voice_proven": null
+      "offline_voice_proven": null,
+      "note": "The verifier is pure and every interesting case is executed in the JVM harness: a manifest signed by the wrong key, one older than the device already has, one carrying a credential, one with a character changed after signing. It is now reached from production code \u2014 VanApplication refreshes on start and applies only what verifies \u2014 and the canonicalization it verifies against is compared to the gateway's byte for byte. That comparison found a real defect: this file had its own canonicalizer which did not escape non-ASCII, so a manifest naming an accented profile verified here and nowhere else."
     },
     {
       "schema": "van-implementation-matrix/1",
@@ -2770,10 +2841,10 @@
       "id": "RB-102",
       "name": "immutable production connectivity registry",
       "group": "provisioning",
-      "status": "NOT_STARTED",
-      "built": false,
-      "wired": false,
-      "reachable": false,
+      "status": "WIRED_UNPROVEN",
+      "built": true,
+      "wired": true,
+      "reachable": true,
       "live": false,
       "verified": false,
       "observed": false,
@@ -2781,14 +2852,20 @@
       "certified": false,
       "component_refs": [],
       "ledger_expectation": "NONE",
-      "producer": null,
-      "consumer": null,
+      "producer": "ConnectivityRegistry backed by EncryptedSharedPreferences",
+      "consumer": "VanApplication.startSignedConnectivityRefresh",
       "authority": "docs/VAN_REMOTE_BROWSER_PRODUCTION_BLUEPRINT_REV_1_5.md \u00a70D.2",
       "evidence_refs": [],
-      "tests": [],
-      "external_gates": [],
+      "tests": [
+        "android/verification/src/test/kotlin/com/dial/van/connectivity/ConnectivityManifestTest.kt"
+      ],
+      "external_gates": [
+        "a release build provisioned with VAN_CONNECTIVITY_TRUSTED_KEYS (RB-121)",
+        "the Android build is compiled only in CI; the AGP is unreachable in the audit container"
+      ],
       "transport_independent": false,
-      "offline_voice_proven": null
+      "offline_voice_proven": null,
+      "note": "Endpoints are stored only after they verify, and the stored copy is re-verified on every read rather than trusted for being ours. The trust anchors are compiled in through a buildConfigField, which is the point: an anchor deliverable over the network is not an anchor. Empty is the default and means no manifest is ever applied \u2014 this build has not been provisioned with a key, and RB-121 is where that happens. The owner build still has no field to type an address into (RB-109)."
     },
     {
       "schema": "van-implementation-matrix/1",
@@ -2807,18 +2884,22 @@
       "certified": false,
       "component_refs": [],
       "ledger_expectation": "NONE",
-      "producer": "OwnerDeviceBindingService.bind",
-      "consumer": "POST /v1/devices/bootstrap/attest",
+      "producer": "OwnerDeviceIdentity \u2014 a StrongBox-preferred P-256 key in the Android Keystore",
+      "consumer": "VanGatewayClient.bindThisDevice and every proved request",
       "authority": "docs/VAN_REMOTE_BROWSER_PRODUCTION_BLUEPRINT_REV_1_5.md \u00a7ADR-RB-025",
       "evidence_refs": [],
       "tests": [
+        "backend/tests/test_device_proof_enforcement.py",
         "backend/tests/test_owner_device_binding.py"
       ],
       "external_gates": [
-        "a physical S24 producing an attestation chain this verifier accepts (RB-120)"
+        "a physical S24 producing an attestation chain this verifier accepts (RB-120)",
+        "a real S24 Ultra emitting an attestation chain this parser accepts (RB-120)",
+        "the Android build is compiled only in CI; the AGP is unreachable in the audit container"
       ],
       "transport_independent": false,
-      "offline_voice_proven": null
+      "offline_voice_proven": null,
+      "note": "The device half exists: a non-exportable key, StrongBox first and TEE second with the difference read back out of the attestation rather than inferred from whether generation threw, and no user-authentication requirement because a proof has to work with the screen off or a browser session dies every time the phone is put down. None of it is executed here \u2014 Keystore and StrongBox are device facts \u2014 and RB-120 remains the gate that decides whether it works at all."
     },
     {
       "schema": "van-implementation-matrix/1",
@@ -2895,18 +2976,24 @@
       "certified": false,
       "component_refs": [],
       "ledger_expectation": "NONE",
-      "producer": "verify_request_proof",
-      "consumer": "OwnerDeviceBindingService.require_proof",
+      "producer": "DeviceProofSigner.headers on the device",
+      "consumer": "enforce_device_proof in the gateway middleware",
       "authority": "docs/VAN_REMOTE_BROWSER_PRODUCTION_BLUEPRINT_REV_1_5.md \u00a7ADR-RB-025",
-      "evidence_refs": [],
+      "evidence_refs": [
+        "evidence/van-remote-browser/cross_language_vectors.json"
+      ],
       "tests": [
-        "backend/tests/test_owner_device_binding.py"
+        "backend/tests/test_device_proof_enforcement.py",
+        "backend/tests/test_owner_device_binding.py",
+        "tests/contracts/test_cross_language_vectors.py"
       ],
       "external_gates": [
-        "an Android client that signs requests with the bound key (RB-103 Android half)"
+        "an Android client that signs requests with the bound key (RB-103 Android half)",
+        "the Android build is compiled only in CI; the AGP is unreachable in the audit container"
       ],
       "transport_independent": false,
-      "offline_voice_proven": null
+      "offline_voice_proven": null,
+      "note": "Both ends now exist and the signing input is compared across the two languages against vectors the gateway generated. The device sends r||s rather than DER on purpose: the gateway accepts both, but only the fixed-width spelling is a constant 64 bytes, and a DER signature whose r happens to start with a high bit gains a leading zero \u2014 the kind of difference that works for weeks."
     },
     {
       "schema": "van-implementation-matrix/1",
@@ -2926,15 +3013,19 @@
       "component_refs": [],
       "ledger_expectation": "NONE",
       "producer": "create_bootstrap_token",
-      "consumer": "POST /v1/devices/bootstrap/create",
+      "consumer": "VanGatewayClient.bindThisDevice \u2014 challenge then attest",
       "authority": "docs/VAN_REMOTE_BROWSER_PRODUCTION_BLUEPRINT_REV_1_5.md \u00a7ADR-RB-026",
       "evidence_refs": [],
       "tests": [
+        "backend/tests/test_device_proof_enforcement.py",
         "backend/tests/test_owner_device_binding.py"
       ],
-      "external_gates": [],
+      "external_gates": [
+        "the Android build is compiled only in CI; the AGP is unreachable in the audit container"
+      ],
       "transport_independent": false,
-      "offline_voice_proven": null
+      "offline_voice_proven": null,
+      "note": "The device's two round trips are implemented: the gateway issues a challenge, the Keystore bakes it into the certificate, and the attestation is sent back. Two trips rather than one because a chain captured from another enrolment has to be useless here, which it is only if the challenge is inside it. The enrolment routes are the one thing the proof gate exempts, and a test pins that: a device cannot be asked to prove possession of the key it is creating."
     },
     {
       "schema": "van-implementation-matrix/1",

@@ -518,6 +518,41 @@ ALL = [
     "        if False:",
     "C27 the gateway republishes an older manifest version"),
  ]),
+ # --- checkpoint 28: the device proof is actually required ---------------------
+ #
+ # Every one of these leaves the unit tests in test_owner_device_binding.py green.
+ # That is the point: the verifier was correct and nothing called it, so the only
+ # tests that can see these are the ones that drive the ingress.
+ (["tests/test_device_proof_enforcement.py"], [
+   ("van_gateway/app.py",
+    "        if requires_device_proof(request.method, request.url.path):",
+    "        if False:",
+    "C28 the proof is verified by nobody, as before"),
+   ("van_gateway/app.py",
+    "        if not signature_b64 or not issued_at_raw:",
+    "        if False:",
+    "C28 a missing proof header is treated as a valid proof"),
+   ("van_gateway/app.py",
+    "        binding = await owner_device_bindings.active()",
+    "        binding = await owner_device_bindings.for_device(device_id)",
+    "C28 a second paired device skips the gate by never enrolling"),
+   ("van_gateway/app.py",
+    "        if binding.device_id != device_id:",
+    "        if False:",
+    "C28 any device may present the owner's proof"),
+   ("van_gateway/app.py",
+    "        body = await request.body()",
+    "        body = b\"\"",
+    "C28 the proof covers an empty body rather than this request's"),
+   # A mutation here used to delete a hand-rolled body replay and change nothing,
+   # because Starlette's BaseHTTPMiddleware already caches a body read in dispatch. The
+   # replay was removed rather than the mutation weakened; the one above, which empties
+   # the body the proof is computed over, is what proves the digest is this request's.
+   ("van_gateway/app.py",
+    '        if method not in {"POST", "PUT", "PATCH", "DELETE"}:',
+    "        if False:",
+    "C28 a Keystore signature is demanded on every poll"),
+ ]),
 ]
 
 APP_KT = "android/app/src/main/java/com/dial/van"
@@ -762,18 +797,45 @@ KOTLIN = [
 
 ROOT = pathlib.Path(__file__).resolve().parents[2]
 
-survivors = []
-for tests, mutations in ALL:
-    print(f"\n### {tests}")
-    survivors += run(mutations, tests)
-for tests, mutations in ROOT_LEVEL:
-    print(f"\n### {tests}")
-    survivors += run(mutations, tests, root=ROOT, cwd=ROOT)
 
-print("\n### android/verification (Gradle)")
-survivors += run(
-    KOTLIN, [], root=ROOT, cwd=ROOT / "android" / "verification",
-    command=["gradle", "test", "--console=plain", "--offline", "--rerun-tasks"],
-)
-print("\n================ SURVIVORS ================")
-print("\n".join(survivors) or "none")
+def groups(selector: str | None = None):
+    """The groups to run. `selector` matches the checkpoint tag on a group's mutations.
+
+    Selecting matters more than it looks: the full suite is several hundred subprocess
+    pytest runs, and a run that is interrupted leaves the tree mutated. Being able to say
+    "just the checkpoint I am working on" is the difference between a two-minute check and
+    a thirty-minute one that gets killed.
+    """
+    for tests, mutations in ALL:
+        if selector and not any(selector in mutation[-1] for mutation in mutations):
+            continue
+        yield tests, mutations, {}
+    for tests, mutations in ROOT_LEVEL:
+        if selector and not any(selector in mutation[-1] for mutation in mutations):
+            continue
+        yield tests, mutations, {"root": ROOT, "cwd": ROOT}
+
+
+def main(selector: str | None = None) -> int:
+    survivors = []
+    for tests, mutations, options in groups(selector):
+        print(f"\n### {tests}", flush=True)
+        survivors += run(mutations, tests, **options)
+
+    if not selector or any(selector in mutation[-1] for mutation in KOTLIN):
+        print("\n### android/verification (Gradle)", flush=True)
+        survivors += run(
+            KOTLIN, [], root=ROOT, cwd=ROOT / "android" / "verification",
+            command=["gradle", "test", "--console=plain", "--offline", "--rerun-tasks"],
+        )
+    print("\n================ SURVIVORS ================")
+    print("\n".join(survivors) or "none")
+    return 1 if survivors else 0
+
+
+if __name__ == "__main__":
+    # Guarded, so this file can be imported to select a subset without running all of it.
+    # It was not: `import mutation_suite` executed the entire suite as a side effect, which
+    # is how a run meant to check seven mutations spent twenty minutes on the other three
+    # hundred and was then killed, leaving a source file mutated in the tree.
+    raise SystemExit(main(sys.argv[1] if len(sys.argv) > 1 else None))

@@ -90,6 +90,21 @@ sourceSets {
             "com/dial/van/voice/SpeakerVerification.kt",
             "com/dial/van/voice/VoiceRecognitionModels.kt",
             "com/dial/van/voice/WakeModelAsset.kt",
+            // Rev 1.5 — the Remote Browser's pure half. Every interesting case in these
+            // files is a failure that cannot be produced on demand against a real network
+            // or a real phone: a reordered gesture, a manifest replayed at a device that
+            // has moved on, two carriers that share one road. They have no Android imports
+            // so they can be executed here rather than only reasoned about.
+            "com/dial/van/browser/BrowserInputProtocol.kt",
+            "com/dial/van/browser/BrowserModels.kt",
+            "com/dial/van/connectivity/ConnectivityManifest.kt",
+            "com/dial/van/session/SessionEnvelope.kt",
+            "com/dial/van/session/TransportSupervisor.kt",
+            // The two byte formats the gateway also implements. They are here because the
+            // drift they are exposed to is invisible in a source diff: two canonicalizers
+            // that agree on every ASCII document and disagree on one accented character.
+            "com/dial/van/security/DeviceProofCanonical.kt",
+            "com/dial/van/security/VanCanonicalJson.kt",
         )
     }
 }

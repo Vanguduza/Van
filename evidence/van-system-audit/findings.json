@@ -20,7 +20,7 @@
     "PRODUCTION_CERTIFIED"
   ],
   "counts": {
-    "P0": 17,
+    "P0": 18,
     "P1": 36,
     "P2": 24,
     "P3": 29,
@@ -5314,6 +5314,52 @@
         "residual_class": "OWNER_DEPLOYMENT_DECISION",
         "residual_reason": "Supplying the key is the owner's to do and no one else's: a signing key in the repository is exactly the risk this closure declines to take, so the repository can accept a key, validate it and report it, and cannot have one. Whether a stable key fixes this particular install is Gate 14's to settle, on the device, with the code adb prints.",
         "falsified_by": "Two consecutive runs with the secret set printing different certificate digests; a signing-identity.txt missing from the artefact; a keystore with the wrong alias being accepted; or an APK whose install still fails once its digest matches the installed build's."
+      }
+    },
+    {
+      "id": "P0-SEC-012",
+      "severity": "P0",
+      "domain": "security",
+      "title": "The owner-device binding was verified by nobody, and the status endpoint said it was bound",
+      "description": "ADR-RB-025 requires every privileged owner request to prove possession of the hardware key the device was bound with. `OwnerDeviceBindingService.require_proof` implements that check correctly: it rejects a stale timestamp, a signature over a different body, a signature over a different route, and a revoked binding. It had eleven unit tests, all passing.\n\nNothing called it. A repository-wide search for the symbol found the definition, its tests, and no third occurrence. The ingress middleware authenticated a device token and passed the request straight to the handler, so a copied access token — the exact threat the binding exists for — reached every owner route on any machine.\n\nThe part that makes this a P0 rather than a gap is the reporting. `GET /v1/device-binding/status` answered `bound: true`, `key_security_level: STRONGBOX`, with a fingerprint and a `bound_at_ms`, for a deployment in which the binding had no effect on any request. Every signal an owner or an auditor could read said the control was in force.",
+      "requirement": "docs/VAN_REMOTE_BROWSER_PRODUCTION_BLUEPRINT_REV_1_5.md ADR-RB-025, §0D.3, §31",
+      "authority": "VAN Remote Browser Production Blueprint Rev 1.5",
+      "repository_evidence": [
+        "backend/van_gateway/auth/device_binding.py",
+        "backend/van_gateway/app.py"
+      ],
+      "runtime_evidence": [],
+      "affected_components": [
+        "gateway",
+        "security",
+        "android"
+      ],
+      "root_cause": "The verifier and its call site were written in different checkpoints, and the checkpoint that wrote the verifier had a green suite. No gate in this repository asks whether a security check is reached: the maturity gate asks whether a component names a production caller, and this was a method on a service that has several other callers, so the component read as integrated.",
+      "remediation": "Enforce the proof in the ingress middleware, on the mutating owner surfaces, and test it through the ingress rather than against the verifier.",
+      "impact": "A stolen or copied device access token was sufficient to create browser sessions on the owner's authenticated profile, submit commands over the session surface, and close sessions the owner was using — from any machine, indefinitely, while the device-binding status endpoint reported that a hardware key was required.",
+      "validation_gate": "G14",
+      "current_status": "CLOSED",
+      "remediation_gate": "RB C6",
+      "closure": {
+        "state": "INTEGRATED_AND_EVIDENCED",
+        "summary": "`requires_device_proof` names the surfaces (mutating interactive-browser routes, the session surface, and `POST /v1/commands`) and `enforce_device_proof` holds them to it, both in `van_gateway/app.py` beside the route classifier they have to agree with.\n\nTwo decisions in it are load-bearing and both were wrong first.\n\nThe gate reads `active()`, not `for_device(caller)`. The first version asked whether *the calling device* was bound, so a second paired phone that had never enrolled skipped the check entirely — the proof was mandatory only for the device that had already proved itself. It now refuses any device that is not the bound one, outright, as soon as any binding is active.\n\nThe body is read in the middleware and put back. Starlette's request stream is single-use, so verifying a proof over the body without replacing the receive channel leaves every proved route parsing an empty body — a 422 about a missing field, several layers from the cause. A test asserts the created session's profile alias comes back, which fails if the replay is removed.\n\nReads are deliberately not gated. A Keystore signature on every poll would put a hardware operation in the battery path for no security gain, and a test pins that a session read still works without a proof.\n\nAn unbound device still works on its token alone and `bound: false` says so; `require_device_binding` turns that fallback off for a deployment that has finished enrolling. The downgrade is stated rather than silent, which is the distinction this finding exists over.\n\nSeven mutations. Each of them leaves `test_owner_device_binding.py` green, which is the point: the eleven tests that existed could not see any of this.",
+        "changed": [
+          "backend/van_gateway/app.py",
+          "backend/van_gateway/config.py",
+          "android/app/src/main/java/com/dial/van/security/OwnerDeviceIdentity.kt",
+          "android/app/src/main/java/com/dial/van/security/DeviceProofCanonical.kt",
+          "android/app/src/main/java/com/dial/van/gateway/VanGatewayClient.kt"
+        ],
+        "verified_by": [
+          "backend/tests/test_device_proof_enforcement.py",
+          "tests/contracts/test_cross_language_vectors.py",
+          "tools/audit/mutation_suite.py"
+        ],
+        "runtime_evidence": [],
+        "residual": "This finding's defect is gateway-side — a check that nothing reached — and it is closed here: the gate is enforced in the middleware and proven through the ingress, including the counterexample of a request with no proof header.\n\nThe boundary, stated so it is not mistaken for unfinished work: the device half that produces the proof is not executed anywhere in this repository. Android Keystore, StrongBox and key attestation are device facts, and the Android Gradle Plugin is unreachable in the audit container, so CI's assembleDebug is the only thing that even compiles `OwnerDeviceIdentity`. What can be established here is that both sides build the same bytes, and that is done: the signing input and the fixed-width signature encoding are compared against vectors the gateway generated. Whether a real S24 Ultra emits an attestation chain this parser accepts is RB-120, and the Keystore behaviour is RB-103 — both device gates in the programme matrix, both unrun, neither this finding's to close.",
+        "residual_class": "DELIBERATE_SCOPE",
+        "residual_reason": "The gateway's failure to enforce and the phone's ability to sign are two different claims with two different gates. Folding the device gate into this finding would make a closed defect read as blocked, and leaving it unstated would let a later reader think the hardware half had been proven. It is recorded as a boundary and tracked as RB-103/RB-120.",
+        "falsified_by": "A privileged mutation succeeding from a bound device with no X-Van-Device-Proof header; a second paired device mutating while the owner's phone is bound; a proof captured on one route being accepted on another; or a proved route receiving an empty body."
       }
     }
   ],

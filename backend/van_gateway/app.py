@@ -1,6 +1,8 @@
 from __future__ import annotations
 
 from contextlib import asynccontextmanager
+import base64
+import binascii
 import hmac
 import json
 import shutil
@@ -917,6 +919,106 @@ def create_app() -> FastAPI:
             return ControlScope.GOOGLE
         return None
 
+    def requires_device_proof(method: str, path: str) -> bool:
+        """ADR-RB-025 — which owner requests must prove possession of the bound key.
+
+        Reading a session or a browser tab list is not on this list; *changing* something
+        is. The distinction matters because a proof costs a hardware-key signature on the
+        phone, and demanding one for a polling read would put a Keystore operation in the
+        battery path for no security gain.
+
+        `require_proof` existed in `OwnerDeviceBindingService` before this predicate did,
+        and nothing called it. A binding nobody checks is a fingerprint in a table: a
+        stolen device token would have worked on every route, with or without a bound
+        device, and `/v1/device-binding/status` would still have reported `bound: true`.
+        """
+        if method not in {"POST", "PUT", "PATCH", "DELETE"}:
+            return False
+        if path in {"/v1/devices/bootstrap/challenge", "/v1/devices/bootstrap/attest"}:
+            # The enrolment itself. There is no bound key yet to prove possession of.
+            return False
+        return (
+            is_interactive_browser_owner_route(path)
+            or is_session_owner_route(path)
+            or path == "/v1/commands"
+        )
+
+    async def enforce_device_proof(request: Request, device_id: str) -> JSONResponse | None:
+        """Refuse a privileged request from a bound device that did not sign it.
+
+        Fail-closed where it can be: once a device is bound, a missing or invalid proof is
+        a refusal, and there is no header a caller can omit to get the old behaviour back.
+
+        For an *unbound* device this returns None and the token alone carries the request,
+        because a gateway that already has paired devices would otherwise lock its owner
+        out the moment this shipped. That downgrade is visible rather than silent:
+        `/v1/device-binding/status` reports `bound: false`, and `settings.require_device_
+        binding` turns the fallback off for a deployment that has finished enrolling.
+        """
+        if owner_device_bindings is None:
+            if settings.require_device_binding:
+                return JSONResponse(
+                    status_code=503,
+                    content={"detail": "owner_device_binding_unconfigured"},
+                )
+            return None
+        # Once *any* device is bound, the owner has one device and this is not a question
+        # about the caller: a second paired phone asking to be treated as unbound is the
+        # downgrade §0E.1 D5 forbids. A first version asked `for_device(device_id)`, so a
+        # second paired device skipped the gate entirely by never having enrolled — the
+        # proof was mandatory only for the device that had already proved itself.
+        binding = await owner_device_bindings.active()
+        if binding is None:
+            if settings.require_device_binding:
+                return JSONResponse(status_code=403, content={"detail": "device_not_bound"})
+            return None
+        if binding.device_id != device_id:
+            return JSONResponse(
+                status_code=403, content={"detail": "device_not_owner_device"}
+            )
+
+        signature_b64 = request.headers.get("X-Van-Device-Proof", "")
+        issued_at_raw = request.headers.get("X-Van-Device-Proof-Issued-At", "")
+        if not signature_b64 or not issued_at_raw:
+            return JSONResponse(
+                status_code=401, content={"detail": "device_proof_required"}
+            )
+        try:
+            signature = base64.b64decode(signature_b64, validate=True)
+            issued_at_ms = int(issued_at_raw)
+        except (ValueError, binascii.Error):
+            return JSONResponse(
+                status_code=400, content={"detail": "device_proof_malformed"}
+            )
+
+        # The handler still needs this body after we have read it.
+        #
+        # A first version followed `await request.body()` with a hand-rolled replay that
+        # reassigned `request._receive`. A mutation deleting that replay changed nothing,
+        # which is how it was found to be dead: Starlette's `BaseHTTPMiddleware` already
+        # wraps the request in a `_CachedRequest` whose documented behaviour is that a body
+        # read in `dispatch` is cached and passed downstream. Poking a private attribute to
+        # re-implement that was two mechanisms for one job, and the one I wrote was the
+        # one nothing exercised.
+        #
+        # The dependency is real, so it is tested rather than assumed: a proved POST must
+        # come back with the field it sent, which fails if this ever stops being true.
+        body = await request.body()
+
+        try:
+            await owner_device_bindings.require_proof(
+                device_id=device_id,
+                signature=signature,
+                method=request.method,
+                path=request.url.path,
+                issued_at_ms=issued_at_ms,
+                body=body,
+            )
+        except DeviceBindingError as exc:
+            return JSONResponse(status_code=401, content={"detail": exc.reason})
+        request.state.van_device_proved = True
+        return None
+
     def throttled_response(detail: str, locked: Throttled) -> JSONResponse:
         """429 with the one header a client can actually act on."""
         return JSONResponse(
@@ -1018,6 +1120,10 @@ def create_app() -> FastAPI:
             return JSONResponse(status_code=401, content={"detail": "device_access_denied"})
         throttle.record_success("device_token", GLOBAL_SUBJECT)
         request.state.van_device_id = device.device_id
+        if requires_device_proof(request.method, request.url.path):
+            refusal = await enforce_device_proof(request, device.device_id)
+            if refusal is not None:
+                return refusal
         return await call_next(request)
 
     def require_internal_control(
@@ -1210,8 +1316,6 @@ def create_app() -> FastAPI:
     @app.post("/v1/devices/bootstrap/attest")
     async def bootstrap_attest(body: BootstrapAttestBody):
         """Bind the owner's device, or refuse and record why."""
-        import base64
-
         try:
             extension = base64.b64decode(body.attestation_extension_b64, validate=True)
         except Exception as exc:

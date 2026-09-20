@@ -11,7 +11,9 @@ import com.dial.van.degraded.DegradedModeStore
 import com.dial.van.degraded.DeviceSignals
 import com.dial.van.gateway.ReplayReason
 import com.dial.van.gateway.QueueReplayer
+import com.dial.van.connectivity.ConnectivityRegistry
 import com.dial.van.gateway.VanGatewayClient
+import com.dial.van.session.VanHermesSessionManager
 import com.dial.van.notification.NotificationPolicyStore
 import com.dial.van.queue.EncryptedCommandQueue
 import com.dial.van.telemetry.DeviceTelemetryReporter
@@ -87,6 +89,24 @@ class VanApplication : Application(), VoiceInputCallback, TtsOutputCallback {
      * it, so the scrape reported them as unobserved forever.
      */
     lateinit var telemetry: DeviceTelemetryReporter
+
+    /**
+     * ADR-RB-027 — where VAN connects, from a signed manifest rather than a text field.
+     *
+     * Held on the application because it is read before anything else can talk to the
+     * gateway, and because an endpoint the owner can be talked into typing is a phishing
+     * surface with their whole assistant behind it (§0D.2).
+     */
+    lateinit var connectivity: ConnectivityRegistry
+
+    /**
+     * Rev 1.5 §20 — the durable logical session the owner's conversation binds to.
+     *
+     * Application-scoped because §20.3's whole claim is that the session outlives any one
+     * screen or socket. An instance owned by an Activity would be a session that ends when
+     * the owner rotates the phone.
+     */
+    lateinit var vanSession: VanHermesSessionManager
         private set
 
     override fun onCreate() {
@@ -117,6 +137,8 @@ class VanApplication : Application(), VoiceInputCallback, TtsOutputCallback {
         voiceSession = VoiceSessionCoordinator(voiceInput, ttsOutput)
         queueReplayer = QueueReplayer(commandQueue, gatewayClient, degradedModeStore, appScope)
         telemetry = DeviceTelemetryReporter(this, gatewayClient, appScope)
+        connectivity = ConnectivityRegistry(this)
+        vanSession = VanHermesSessionManager(gatewayClient, appScope)
         wakeModel = WakeModelLoader(this)
         voiceArbiter = VoiceAudioArbiter(this)
         wakeCoordinator = WakeCoordinator(
@@ -134,6 +156,25 @@ class VanApplication : Application(), VoiceInputCallback, TtsOutputCallback {
         telemetry.start()
         startConnectivityMonitor()
         startGatewayHealthMonitor()
+        startSignedConnectivityRefresh()
+    }
+
+    /**
+     * ADR-RB-027 — ask for a newer signed manifest, and apply it only if it verifies.
+     *
+     * Failure here is deliberately quiet in the log and loud in the registry: the device
+     * keeps the endpoints it already had, which is the safe direction. The dangerous
+     * design is the other one, where a refused manifest leaves the device with nothing.
+     */
+    private fun startSignedConnectivityRefresh() {
+        if (!connectivity.configured) return
+        appScope.launch {
+            runCatching {
+                connectivity.refresh { knownVersion ->
+                    gatewayClient.connectivityManifest(knownVersion)
+                }
+            }
+        }
     }
 
     /**

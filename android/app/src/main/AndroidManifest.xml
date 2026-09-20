@@ -56,6 +56,24 @@
             android:launchMode="singleTop"
             android:theme="@style/Theme.Van" />
 
+        <!--
+          Rev 1.5 §7 — the owner holding a browser that runs somewhere else.
+
+          `exported="false"`: nothing outside VAN may open a session on the owner's
+          profile, and an exported activity taking a session id in an extra would be
+          exactly that. `configChanges` for orientation and size because a recreate would
+          tear down the WebRTC peer and the session behind it for what is a resize —
+          §8.6's viewport revision handles the layout change without losing the stream.
+        -->
+        <activity
+            android:name=".browser.BrowserActivity"
+            android:exported="false"
+            android:windowSoftInputMode="adjustResize"
+            android:label="@string/browser_activity_label"
+            android:configChanges="orientation|screenSize|screenLayout|smallestScreenSize|keyboardHidden|density"
+            android:launchMode="singleTop"
+            android:theme="@style/Theme.Van" />
+
         <activity
             android:name=".trading.TradingCommandCentreActivity"
             android:exported="false"

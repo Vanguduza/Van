@@ -204,6 +204,13 @@ class Settings(BaseSettings):
     #: recorded but not pinned, which is the honest state until one has been observed from
     #: the owner's own device (RB-120).
     owner_device_attestation_roots: str = ""
+    #: ADR-RB-025 — whether a privileged owner request from an *unbound* device is
+    #: refused outright. A bound device is always held to its proof; this decides what
+    #: happens before enrolment has run. False keeps an already-paired phone working on
+    #: its device token alone, which is the honest state of a deployment mid-migration;
+    #: True is where a finished deployment ends up, and the transition is the owner's to
+    #: make rather than a default that locks them out on upgrade.
+    require_device_binding: bool = False
 
     # ---- signed connectivity configuration (ADR-RB-024/027) ---------------------
     #: PEM private key that signs connectivity manifests. Empty means this deployment
