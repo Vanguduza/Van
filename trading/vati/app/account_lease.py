@@ -267,9 +267,12 @@ class AccountRuntimeLease:
                                holder_instance_id=current.holder_instance_id if current else "")
         if current.lease_epoch != self._held.lease_epoch:
             # Someone took and released the lease while we slept.
+            stale_epoch = self._held.lease_epoch
             self._held = None
-            return LeaseResult(LeaseOutcome.REFUSED_STALE_EPOCH,
-                               detail=f"epoch {self._held.lease_epoch if self._held else '?'} != {current.lease_epoch}")
+            return LeaseResult(
+                LeaseOutcome.REFUSED_STALE_EPOCH,
+                detail=f"epoch {stale_epoch} != {current.lease_epoch}",
+            )
 
         renewed = AccountLease(**{**current.__dict__, "heartbeat_at_ms": now,
                                   "expires_at_ms": now + self.ttl_ms})
@@ -282,13 +285,45 @@ class AccountRuntimeLease:
         self._held = renewed
         return LeaseResult(LeaseOutcome.RENEWED, lease=renewed)
 
-    def fence(self, epoch: Optional[int]) -> bool:
-        """True when `epoch` is the currently held one.
+    def fence(
+        self,
+        epoch: Optional[int],
+        *,
+        now_ms: Optional[int] = None,
+        min_validity_ms: int = 2_000,
+    ) -> bool:
+        """Re-check shared authority immediately before an order may leave.
 
-        Every order-producing path carries an epoch; the router refuses a stale
-        one. This is what makes the lease a fence rather than a hint.
+        A local epoch comparison is not a fence: after this process misses a
+        renewal and another host takes over, its cached local lease still
+        contains the old epoch. The router therefore asks the shared store
+        again at submission time.
+
+        min_validity_ms creates a bounded hand-off gap: an order is not
+        started when the lease is about to expire and become acquirable by a
+        second host while the first adapter call is still in flight.
+        Store loss fails closed.
         """
-        return self._held is not None and epoch is not None and epoch == self._held.lease_epoch
+        if self._held is None or epoch is None or epoch != self._held.lease_epoch:
+            return False
+        now = self._now(now_ms)
+        try:
+            current = self.store.read(self.account_alias)
+        except LeaseStoreUnavailable:
+            return False
+        if current is None:
+            self._held = None
+            return False
+        if (
+            current.holder_instance_id != self.instance_id
+            or current.lease_epoch != epoch
+        ):
+            self._held = None
+            return False
+        if current.expires_at_ms <= now + max(0, min_validity_ms):
+            return False
+        self._held = current
+        return True
 
     def release(self, *, now_ms: Optional[int] = None) -> None:
         if self._held is None:
