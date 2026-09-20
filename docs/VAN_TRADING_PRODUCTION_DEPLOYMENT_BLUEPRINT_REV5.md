@@ -280,8 +280,10 @@ strategy-promotion artifacts already required by this blueprint.
    selected template's bounded entry type and maximum slippage immediately before order submission.
 
 6. **Cross-host account fence.** Multi-instrument production coordination uses a transactional PostgreSQL
-   account_runtime_leases row. The current lease epoch travels to ExecutionRouter; a router configured with a
-   lease fence refuses a missing or stale epoch before creating an OrderCommand.
+   account_runtime_leases row. The current lease epoch travels to ExecutionRouter. Immediately before an
+   OrderCommand may be submitted, the fence re-reads shared PostgreSQL authority and requires the same holder,
+   the same epoch and a bounded remaining-validity margin. Store loss, takeover, stale epoch or insufficient
+   validity all fail closed; a process-local cached lease is never sufficient authority to submit.
 
 7. **MTF adoption boundary.** The timeframe-contract migration is provenance/schema adoption, not silent strategy
    mutation. The account runtime builds the required multi-timeframe state as shadow evidence from the existing
@@ -292,5 +294,17 @@ strategy-promotion artifacts already required by this blueprint.
    candidate ID and hash preserves its existing lifecycle state; a previously selected/rejected/expired candidate
    cannot become ACTIVE merely because the source bar was evaluated again.
 
-The PR #48 anti-gap rule applies to all eight: a test or helper object is not a production join, and a repository
+9. **Restart lifecycle reconstruction law.** Restart never treats venue attribution alone as sufficient trading
+   truth. An open venue position is reconstructed only when its trade_intent_id joins to the durable VATI
+   ORDER_COMMAND that created it. Protection is rebuilt from the original command and may use a venue or durable
+   current stop only when that stop is equal to or tighter than the original protection. Any unjoinable position,
+   missing protection fact or widened stop remains unresolved and blocks new risk through reconciliation.
+
+10. **Owner-ticket downstream-evidence law.** A signed owner ticket confirmation is consumed into runtime position
+    truth before new risk is admitted. EXECUTION_RECEIPT durability and downstream lifecycle evidence are separate
+    facts: after a crash, an existing receipt must not suppress a missing TCA_RECORD for an owner BUY or a missing
+    TRADE_REVIEW for an owner SELL. Replay reconstructs memory/protection on every restart, repairs missing
+    downstream evidence exactly once, and never duplicates evidence that is already durable.
+
+The PR #48 anti-gap rule applies to all ten: a test or helper object is not a production join, and a repository
 wiring gap may not be labelled an external runtime blocker.
