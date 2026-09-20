@@ -15,6 +15,8 @@ from vati.intelligence.feature_contract import (
 )
 from vati.intelligence.market_state import MarketState
 from vati.risk.contracts import StrategyState
+from vati.observability import metrics
+from vati.observability.enhancement_metrics import FEATURE_CONTRACT_FAILURES
 from vati.risk.mandate import TradingMandate
 from vati.strategies.capsule import Capsule
 
@@ -69,5 +71,6 @@ class StrategyArbiter:
             venue_class=venue_class,
         )
         if not contract.satisfied:
+            metrics.inc(FEATURE_CONTRACT_FAILURES, strategy_id=capsule.strategy_id)
             reasons.append(f"{FEATURE_CONTRACT_UNSATISFIED}:{','.join(contract.reasons)}")
         return EligibilityVerdict(capsule.strategy_id, not reasons, tuple(reasons), contract)
