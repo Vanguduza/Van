@@ -7,9 +7,7 @@ from pathlib import Path
 
 import pytest
 
-from vati.validation.certificates import passing_certificate
-
-from conftest import mandate_dict
+from conftest import mandate_dict, passing_certificate
 from test_intelligence import mk_bars, noisy_trend
 from vati.__main__ import main as cli_main
 from vati.app import DecisionCycle, SessionConfig, SessionRunner
@@ -144,7 +142,13 @@ def test_zse_session_produces_owner_ticket():
         reg.promote(
             "ZSE-VALUE-ROTATION-01", StrategyState(st),
             approval_signature_ref=owner.token(
-                act="capsule-promote", subject=f"ZSE-VALUE-ROTATION-01:{st}", issued_at_unix=1
+                act="capsule-promote",
+                subject=(
+                    f"ZSE-VALUE-ROTATION-01:{st}:{cert.validation_hash}"
+                    if StrategyState(st) in reg.CERTIFICATE_REQUIRED_FROM
+                    else f"ZSE-VALUE-ROTATION-01:{st}"
+                ),
+                issued_at_unix=1,
             ),
             evidence_refs=["bt", "shadow"], approved_at_unix=1, certificate=cert,
         )
