@@ -265,6 +265,9 @@ class AccountCoordinatorService:
             engines_by_symbol={
                 symbol: evaluator.engine for symbol, evaluator in self.evaluators.items()
             },
+            modelled_costs={
+                symbol: spec.round_trip_cost_pct for symbol, spec in self.specs.items()
+            },
             learning=self.learning,
         )
         # One account-scoped lifecycle owns entry truth for reconciliation,
@@ -480,12 +483,22 @@ class AccountCoordinatorService:
         if not result.permits_orders:
             raise RuntimeError(f"account runtime lease refused: {result.outcome.value}")
         acct = self.adapter.sync_account()
-        report = reconcile([], self.adapter.positions(), account_verified=acct.verified)
-        if not report.permit_new_orders:
+        assert self.lifecycle is not None
+        restored, unresolved = self.lifecycle.recover_from_venue()
+        report = reconcile(
+            self._ledger_positions(), self.adapter.positions(),
+            account_verified=acct.verified,
+        )
+        if unresolved or not report.permit_new_orders:
             self.kill.trip(KillSwitchTrigger.RECONCILIATION_FAILURE, self.clock())
         self.peak_equity = self.day_start_equity = self.week_start_equity = acct.equity
         self._observe_owner_halt(self.clock())
-        self._heartbeat("STARTED", {"lease_outcome": result.outcome.value})
+        self._heartbeat("STARTED", {
+            "lease_outcome": result.outcome.value,
+            "recovered_trade_intents": list(restored),
+            "unresolved_positions": list(unresolved),
+            "reconciliation": report.counts(),
+        })
 
     def step_once(self):
         assert self.coordinator is not None
