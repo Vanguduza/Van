@@ -5,6 +5,7 @@ from __future__ import annotations
 import ast
 import inspect
 import textwrap
+import threading
 from dataclasses import dataclass
 from decimal import Decimal
 
@@ -124,6 +125,48 @@ def test_submission_fence_requires_a_validity_margin():
     assert a.acquire(now_ms=0).permits_orders
     assert a.fence(a.epoch, now_ms=1_000, min_validity_ms=2_000)
     assert not a.fence(a.epoch, now_ms=3_500, min_validity_ms=2_000)
+
+
+def test_submission_guard_blocks_takeover_even_after_nominal_ttl():
+    """The row lock, not a guessed network timeout, fences an in-flight submit."""
+    store = InMemoryLeaseStore()
+    a = AccountRuntimeLease(
+        store, account_alias=ALIAS, instance_id="vm-a", ttl_ms=1_000)
+    b = AccountRuntimeLease(
+        store, account_alias=ALIAS, instance_id="vm-b", ttl_ms=1_000)
+    assert a.acquire(now_ms=0).permits_orders
+
+    started = threading.Event()
+    finished = threading.Event()
+    result = {}
+
+    def takeover():
+        started.set()
+        result["lease"] = b.acquire(now_ms=2_000)
+        finished.set()
+
+    with a.submission_guard(a.epoch, now_ms=500) as guarded:
+        assert guarded
+        worker = threading.Thread(target=takeover, daemon=True)
+        worker.start()
+        assert started.wait(1)
+        assert not finished.wait(0.05), (
+            "takeover crossed the submission guard while broker work was in flight")
+
+    assert finished.wait(1)
+    worker.join(timeout=1)
+    assert result["lease"].outcome is LeaseOutcome.GRANTED
+    assert result["lease"].lease.lease_epoch == 2
+
+
+def test_submission_guard_fails_closed_when_store_is_lost():
+    store = InMemoryLeaseStore()
+    lease = AccountRuntimeLease(
+        store, account_alias=ALIAS, instance_id="vm-a", ttl_ms=10_000)
+    assert lease.acquire(now_ms=0).permits_orders
+    store.reachable = False
+    with lease.submission_guard(lease.epoch, now_ms=1_000) as guarded:
+        assert not guarded
 
 
 # ---------------------------------------------------------------- pool
