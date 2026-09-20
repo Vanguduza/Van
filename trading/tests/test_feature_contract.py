@@ -29,8 +29,14 @@ def test_satisfied_contract():
 
 
 def test_missing_feature_is_unsatisfied():
-    v = V.validate(requirements=[FeatureRequirement("adx")], available={}, now_ms=1_000)
-    assert not v.satisfied and v.missing == ("adx",)
+    v = V.validate(requirements=[FeatureRequirement("atr")], available={}, now_ms=1_000)
+    assert not v.satisfied and v.missing == ("atr",)
+
+def test_unregistered_feature_is_distinct_from_missing_data():
+    v = V.validate(requirements=[FeatureRequirement("made_up_feature")], available={}, now_ms=1_000)
+    assert not v.satisfied
+    assert v.unregistered == ("made_up_feature",)
+    assert v.missing == ()
 
 
 def test_present_but_none_is_unsatisfied():
@@ -53,9 +59,9 @@ def test_wrong_timeframe_is_unsatisfied():
 
 
 def test_wrong_venue_class_is_unsatisfied():
-    v = V.validate(requirements=[FeatureRequirement("obv", venue_classes=frozenset({"ZSE_EQUITY"}))],
-                   available={"obv": _av(feature_id="obv", venue_class="FX_SPOT")}, now_ms=1_000)
-    assert not v.satisfied and v.unsupported_for_venue == ("obv",)
+    v = V.validate(requirements=[FeatureRequirement("adv_20d", venue_classes=frozenset({"ZSE_EQUITY"}))],
+                   available={"adv_20d": _av(feature_id="adv_20d", venue_class="FX_SPOT")}, now_ms=1_000)
+    assert not v.satisfied and "adv_20d" in v.unsupported_for_venue
 
 
 def test_insufficient_history_is_unsatisfied():
