@@ -24,6 +24,10 @@ from vati.learning.overlap import OverlapEvidence, StrategyOverlapDetector
 from vati.research.market_data_disagreement import FeedSample, MarketDataDisagreementDetector
 from vati.research.trading_evidence import TradingEvidenceArtifact, TradingEvidenceCollector
 from vati.risk.capital_promotion import CapitalBudgetProposal, evaluate_proposal
+from vati.validation.builder import (
+    build_feature_validation_certificate,
+    build_strategy_validation_certificate,
+)
 
 
 class TradingResearchWorkflow:
@@ -152,6 +156,84 @@ class TradingResearchWorkflow:
         TradingMandate mutation, capsule promotion, or protection mutation.
         """
         op = str(spec.get("operation", "")).strip().lower()
+
+        if op == "strategy_certificate":
+            raw = dict(spec["validation"])
+            cert = build_strategy_validation_certificate(
+                strategy_id=str(raw["strategy_id"]),
+                strategy_version=str(raw["strategy_version"]),
+                capsule_hash=str(raw["capsule_hash"]),
+                data_manifest_hash=str(raw["data_manifest_hash"]),
+                evidence_refs=tuple(raw["evidence_refs"]),
+                feature_set_version=str(raw["feature_set_version"]),
+                cost_model_revision=str(raw["cost_model_revision"]),
+                pnls=tuple(Decimal(str(x)) for x in raw["pnls"]),
+                r_multiples=tuple(Decimal(str(x)) for x in raw["r_multiples"]),
+                start_equity=Decimal(str(raw["start_equity"])),
+                trial_returns_matrix=tuple(tuple(float(x) for x in row)
+                                           for row in raw["trial_returns_matrix"]),
+                walk_forward_windows=int(raw["walk_forward_windows"]),
+                cost_stress_2x=str(raw["cost_stress_2x"]),
+                latency_slippage_stress=str(raw["latency_slippage_stress"]),
+                parameter_perturbation_stability=str(raw["parameter_perturbation_stability"]),
+                leakage_switch_result=str(raw["leakage_switch_result"]),
+                feature_certificate_refs=tuple(raw.get("feature_certificate_refs", ())),
+                regime_breakdown=dict(raw.get("regime_breakdown", {})),
+                cpcv_configuration=dict(raw.get("cpcv_configuration", {})),
+                cpcv_partitions=int(raw.get("cpcv_partitions", 4)),
+            )
+            self._log(
+                EventKind.STRATEGY_VALIDATION_CERTIFICATE,
+                cert.as_dict() | {"validation_hash": cert.validation_hash},
+                correlation_id=cert.strategy_id,
+            )
+            return {
+                "operation": op,
+                "certificate": cert.as_dict() | {"validation_hash": cert.validation_hash},
+            }
+
+        if op == "feature_certificate":
+            raw = dict(spec["validation"])
+            cert = build_feature_validation_certificate(
+                feature_id=str(raw["feature_id"]),
+                feature_version=str(raw["feature_version"]),
+                baseline_feature_set_hash=str(raw["baseline_feature_set_hash"]),
+                candidate_feature_set_hash=str(raw["candidate_feature_set_hash"]),
+                data_manifest_hash=str(raw["data_manifest_hash"]),
+                evidence_refs=tuple(raw["evidence_refs"]),
+                instruments=tuple(raw["instruments"]),
+                regimes=tuple(raw["regimes"]),
+                timeframes=tuple(raw["timeframes"]),
+                baseline_returns=tuple(float(x) for x in raw["baseline_returns"]),
+                candidate_returns=tuple(float(x) for x in raw["candidate_returns"]),
+                trial_delta_matrix=tuple(tuple(float(x) for x in row)
+                                         for row in raw["trial_delta_matrix"]),
+                baseline_feature_series=tuple(
+                    tuple(float(x) for x in row)
+                    for row in raw["baseline_feature_series"]),
+                candidate_feature_series=tuple(float(x) for x in raw["candidate_feature_series"]),
+                walk_forward_baseline=tuple(float(x) for x in raw["walk_forward_baseline"]),
+                walk_forward_candidate=tuple(float(x) for x in raw["walk_forward_candidate"]),
+                regime_stability={str(k): float(v) for k, v in dict(raw["regime_stability"]).items()},
+                instrument_stability={
+                    str(k): float(v) for k, v in dict(raw.get("instrument_stability", {})).items()
+                },
+                leakage_result=str(raw.get("leakage_result", "RED")),
+                mutual_information_delta=(
+                    float(raw["mutual_information_delta"])
+                    if raw.get("mutual_information_delta") is not None else None
+                ),
+                cpcv_partitions=int(raw.get("cpcv_partitions", 4)),
+            )
+            self._log(
+                EventKind.FEATURE_VALIDATION_CERTIFICATE,
+                cert.as_dict() | {"certificate_hash": cert.certificate_hash},
+                correlation_id=cert.feature_id,
+            )
+            return {
+                "operation": op,
+                "certificate": cert.as_dict() | {"certificate_hash": cert.certificate_hash},
+            }
 
         if op == "coverage":
             from vati.strategies import CapsuleRegistry
