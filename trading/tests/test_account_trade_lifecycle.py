@@ -172,6 +172,48 @@ def test_owner_sell_replay_repairs_missing_review_exactly_once_after_receipt_com
     assert ledger.count(EventKind.TRADE_REVIEW) == 1
 
 
+def test_downstream_evidence_lookup_exhausts_transactional_iterator():
+    class TransactionalLedger:
+        def __init__(self):
+            self.cleaned_up = False
+
+        def iter(self, kind=None, correlation_id=None):
+            assert kind is EventKind.TCA_RECORD
+            assert correlation_id == "intent-1"
+            try:
+                yield make_event(
+                    EventKind.TCA_RECORD,
+                    "test",
+                    {"trade_intent_id": "intent-1"},
+                    event_time_ms=1,
+                    received_time_ms=1,
+                    correlation_id="intent-1",
+                )
+                # A second row makes first-row short-circuiting observable.
+                yield make_event(
+                    EventKind.TCA_RECORD,
+                    "test",
+                    {"trade_intent_id": "intent-1", "n": 2},
+                    event_time_ms=2,
+                    received_time_ms=2,
+                    correlation_id="intent-1",
+                )
+            finally:
+                self.cleaned_up = True
+
+    ledger = TransactionalLedger()
+    lifecycle = AccountTradeLifecycle(
+        ledger=ledger,
+        adapter=OwnerTicketAdapter(),
+        router=SimpleNamespace(),
+        protection=ProtectionManager(),
+        contracts={"DELTA": _contract()},
+        engines_by_symbol={},
+    )
+    assert lifecycle._has_event(EventKind.TCA_RECORD, "intent-1")
+    assert ledger.cleaned_up, "evidence lookup must exhaust/close the ledger iterator"
+
+
 def test_restart_protection_restore_cannot_widen_the_original_stop():
     protection = ProtectionManager()
     protection.restore(
