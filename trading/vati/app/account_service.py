@@ -39,6 +39,7 @@ from vati.execution.router import ExecutionRouter, RouterError
 from vati.intelligence.calendar_feed import build_matrix
 from vati.intelligence.events import EventWindowState
 from vati.intelligence.market_state import build_market_state
+from vati.intelligence.mtf import TimeframeContract, build_multi_timeframe_state
 from vati.intelligence.regimes import RegimeEngine
 from vati.market_data.calendars import FX_CALENDAR
 from vati.market_data.feeds.lake import BarLake
@@ -105,6 +106,10 @@ class AccountCoordinatorService:
         self.contracts = {}
         self.evaluators: dict[str, InstrumentEvaluator] = {}
         self.bar_sources = {}
+        self.mtf_bar_sources = {}
+        self.mtf_required: dict[str, tuple[str, ...]] = {}
+        self.mtf_shadow = {}
+        self._events = None
         self._entries: dict[str, dict] = {}
         self.peak_equity = Decimal("0")
         self.day_start_equity = Decimal("0")
@@ -164,12 +169,20 @@ class AccountCoordinatorService:
         capsule_root = c.capsule_dir or ROOT / "strategies" / "registry"
         all_capsules = CapsuleRegistry.load_dir(capsule_root)
         events = build_matrix(c.calendar_path)
+        self._events = events
         lake = BarLake(c.lake_root)
 
         evaluators: list[InstrumentEvaluator] = []
         for spec in self.specs.values():
             self.contracts[spec.symbol] = contract_from_dict({**spec.contract, "venue": account.router_venue})
             chosen_capsules = [all_capsules.get(sid) for sid in spec.capsules]
+            required = set()
+            for capsule in chosen_capsules:
+                contract = TimeframeContract.from_capsule(capsule.data)
+                if contract is not None:
+                    required.update(contract.required_timeframes)
+            self.mtf_required[spec.symbol] = tuple(
+                tf for tf in ("D1", "H4", "H1", "M15", "M5", "M1") if tf in required)
             capsule_registry = CapsuleRegistry(chosen_capsules)
             implementations = {
                 sid: STRATEGY_IMPLEMENTATIONS[sid.rsplit("-", 1)[0]](strategy_id=sid)
@@ -206,6 +219,11 @@ class AccountCoordinatorService:
                 bars, _manifest = lake.read(_spec.symbol, _spec.timeframe, end_ms=now_ms + 1)
                 return [bar for bar in bars if bar.end_ms <= now_ms][-400:]
             self.bar_sources[spec.symbol] = source
+            for tf in self.mtf_required[spec.symbol]:
+                def mtf_source(now_ms, *, _spec=spec, _tf=tf):
+                    bars, _manifest = lake.read(_spec.symbol, _tf, end_ms=now_ms + 1)
+                    return [bar for bar in bars if bar.end_ms <= now_ms][-400:]
+                self.mtf_bar_sources[(spec.symbol, tf)] = mtf_source
 
         self.coordinator = AccountDecisionCoordinator(
             CoordinatorConfig(account_alias=account.alias, max_new_intents_per_pass=1),
@@ -219,6 +237,38 @@ class AccountCoordinatorService:
             mandate=mandate,
         )
         return self
+
+    def _update_mtf_shadow(self, now_ms: int) -> None:
+        """Build MTF evidence without changing the certified live decision path.
+
+        The added timeframe_contract changed capsule schema, not owner-authorized
+        strategy logic. This shadow path proves data availability, as-of discipline
+        and deterministic identity. Actuation stays on the capsule's existing
+        certified implementation until a signed strategy revision adopts MTF roles.
+        """
+        assert self._events is not None
+        for symbol, required in self.mtf_required.items():
+            if not required:
+                continue
+            spec = self.specs[symbol]
+
+            def bars_for(tf, *, _symbol=symbol):
+                return self.mtf_bar_sources[(_symbol, tf)](now_ms)
+
+            def state_builder(*, bars, timeframe, now_ms, _spec=spec):
+                return build_market_state(
+                    symbol=_spec.symbol, base=_spec.base, quote=_spec.quote, bars=bars,
+                    regime_engine=RegimeEngine(), calendar=FX_CALENDAR, events=self._events,
+                    integrity=MarketIntegrityState.NORMAL, now_ms=now_ms,
+                    last_quote_ms=bars[-1].end_ms, activation_id=self.cfg.activation_id,
+                    timeframe=timeframe,
+                )
+
+            self.mtf_shadow[symbol] = build_multi_timeframe_state(
+                symbol=symbol, as_of_ms=now_ms, required_timeframes=required,
+                bars_for=bars_for, state_builder=state_builder,
+                minimum_bars=max(2, self.cfg.warmup_bars),
+            )
 
     def _open_positions(self) -> tuple[OpenPosition, ...]:
         assert self.adapter is not None
@@ -376,6 +426,14 @@ class AccountCoordinatorService:
             "status": status, "cycles": self.cycles,
             "lease_epoch": self.lease.epoch if self.lease else None,
             "kill_switch": sorted(t.value for t in self.kill.active),
+            "mtf_shadow": {
+                symbol: {
+                    "complete": mtf.complete,
+                    "missing": list(mtf.missing_timeframes),
+                    "mtf_state_hash": mtf.mtf_state_hash,
+                }
+                for symbol, mtf in sorted(self.mtf_shadow.items())
+            },
             "updated_ms": self.clock(), "pid": os.getpid(), **(extra or {})}
         Path(self.cfg.heartbeat_path).write_text(json.dumps(payload))
 
@@ -411,6 +469,7 @@ class AccountCoordinatorService:
         if not advanced:
             self._heartbeat("WAITING_FOR_BAR")
             return None
+        self._update_mtf_shadow(now)
         result = self.coordinator.step(now_ms=now, bars_by_symbol=bars_by_symbol)
         for symbol, bars in bars_by_symbol.items():
             self.last_bar_end_ms[symbol] = max(self.last_bar_end_ms.get(symbol, 0), bars[-1].end_ms)
