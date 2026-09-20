@@ -135,6 +135,22 @@ def test_promotion_token_replay_is_refused_after_commander_restart(tmp_path):
     assert "already been consumed" in replay.json()["detail"]
     assert Ledger(ledger_path).count(EventKind.CAPSULE_STATE) == 1
 
+    # A different, otherwise valid authority cannot fork the stale file either:
+    # ledger reconstruction makes SHADOW current before the certificate-parent check.
+    second = dict(args)
+    second["owner_signature_ref"] = owner.token(
+        act="capsule-promote",
+        subject=(
+            "FX-TREND-PULLBACK-01:SHADOW:"
+            + args["certificate"]["validation_hash"]
+        ),
+        issued_at_unix=args["approved_at_unix"],
+    )
+    fork = _call(fresh, "capsule_promote", GATEWAY_TOKEN, second)
+    assert fork.status_code == 409
+    assert "current strategy revision" in fork.json()["detail"]
+    assert Ledger(ledger_path).count(EventKind.CAPSULE_STATE) == 1
+
 
 def test_ledgered_owner_promotion_repairs_missing_registry_projection_on_restart(tmp_path):
     capsules, ledger_path, _owner, original, args, client = _fixture(tmp_path)
