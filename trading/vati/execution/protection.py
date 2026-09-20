@@ -23,6 +23,7 @@ class ExitInstruction:
     action: str           # CLOSE | MODIFY_STOP
     reason: str           # SOFTWARE_STOP | TARGET | TIME_STOP | TRAIL | BREAK_EVEN | STRUCTURE
     price: Optional[Decimal] = None
+    previous_stop: Optional[Decimal] = None
 
 
 @dataclass
@@ -40,6 +41,7 @@ class _Rule:
     mfe: Decimal = ZERO
     mae: Decimal = ZERO
     be_done: bool = False
+    pending_close: bool = False
 
 
 @dataclass
@@ -97,6 +99,38 @@ class ProtectionManager:
             raise ProtectionError("widening a protective stop is forbidden (A5 widen_protective_stop)")
         r.stop = new_stop
 
+    def close_confirmed(self, position_id: str) -> None:
+        self.rules.pop(position_id, None)
+
+    def close_failed(self, position_id: str) -> None:
+        rule = self.rules.get(position_id)
+        if rule is not None:
+            rule.pending_close = False
+
+    def rollback_unconfirmed_tighten(
+        self,
+        position_id: str,
+        *,
+        previous_stop: Decimal,
+        attempted_stop: Decimal,
+    ) -> None:
+        """Restore local truth when the venue rejected a proposed tighter stop.
+
+        This is not a protective-stop widening at the venue: the venue never
+        accepted the attempted stop. It merely rolls the in-memory mirror back
+        to the still-active venue stop.
+        """
+        rule = self.rules.get(position_id)
+        if rule is None:
+            return
+        if rule.stop != attempted_stop:
+            raise ProtectionError("cannot rollback a stop that has changed since submission")
+        rule.stop = previous_stop
+        rule.be_done = (
+            rule.direction is Direction.LONG and previous_stop >= rule.entry
+            or rule.direction is Direction.SHORT and previous_stop <= rule.entry
+        )
+
     def on_mark(self, symbol: str, bid: Decimal, ask: Decimal, *, now_ms: int) -> list[ExitInstruction]:
         out: list[ExitInstruction] = []
         for pid, r in list(self.rules.items()):
@@ -105,23 +139,37 @@ class ProtectionManager:
             px_exit = bid if r.direction is Direction.LONG else ask
             fav = (px_exit - r.entry) if r.direction is Direction.LONG else (r.entry - px_exit)
             r.mfe, r.mae = max(r.mfe, fav), min(r.mae, fav)
-            # software stop / target
+            if r.pending_close:
+                continue
+            # A close request becomes pending. The protection rule is retained
+            # until an actual fill/owner confirmation proves the position closed.
             if (r.direction is Direction.LONG and px_exit <= r.stop) or (r.direction is Direction.SHORT and px_exit >= r.stop):
-                out.append(ExitInstruction(pid, "CLOSE", "SOFTWARE_STOP" if r.software_stop else "STRUCTURE", px_exit)); del self.rules[pid]; continue
+                r.pending_close = True
+                out.append(ExitInstruction(pid, "CLOSE", "SOFTWARE_STOP" if r.software_stop else "STRUCTURE", px_exit))
+                continue
             if r.target is not None and ((r.direction is Direction.LONG and px_exit >= r.target) or (r.direction is Direction.SHORT and px_exit <= r.target)):
-                out.append(ExitInstruction(pid, "CLOSE", "TARGET", px_exit)); del self.rules[pid]; continue
+                r.pending_close = True
+                out.append(ExitInstruction(pid, "CLOSE", "TARGET", px_exit))
+                continue
             if r.time_stop_ms is not None and now_ms >= r.time_stop_ms:
-                out.append(ExitInstruction(pid, "CLOSE", "TIME_STOP", px_exit)); del self.rules[pid]; continue
+                r.pending_close = True
+                out.append(ExitInstruction(pid, "CLOSE", "TIME_STOP", px_exit))
+                continue
             # break-even (only tightens)
             if r.break_even_trigger is not None and not r.be_done and fav >= r.break_even_trigger:
                 new = r.entry
                 if (r.direction is Direction.LONG and new > r.stop) or (r.direction is Direction.SHORT and new < r.stop):
-                    r.stop = new; r.be_done = True; out.append(ExitInstruction(pid, "MODIFY_STOP", "BREAK_EVEN", new))
+                    old = r.stop
+                    r.stop = new
+                    r.be_done = True
+                    out.append(ExitInstruction(pid, "MODIFY_STOP", "BREAK_EVEN", new, old))
             # trailing (only tightens)
             if r.trail_distance is not None and fav > r.trail_distance:
                 new = (px_exit - r.trail_distance) if r.direction is Direction.LONG else (px_exit + r.trail_distance)
                 if (r.direction is Direction.LONG and new > r.stop) or (r.direction is Direction.SHORT and new < r.stop):
-                    r.stop = new; out.append(ExitInstruction(pid, "MODIFY_STOP", "TRAIL", new))
+                    old = r.stop
+                    r.stop = new
+                    out.append(ExitInstruction(pid, "MODIFY_STOP", "TRAIL", new, old))
         return out
 
     def forget(self, position_id: str) -> None:
