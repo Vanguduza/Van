@@ -1,5 +1,4 @@
 """Research qualification and synthesis join (TRD-REV51-121)."""
-
 from __future__ import annotations
 
 from dataclasses import dataclass
@@ -26,14 +25,14 @@ class ClaimStatus(str, Enum):
 class SynthesisedClaim:
     claim: str
     status: ClaimStatus
-    packet_hashes: tuple[str, ...]
+    packet_seals: tuple[str, ...]
     source_ids: tuple[str, ...]
     counterevidence: tuple[str, ...]
 
     def body(self) -> dict[str, Any]:
         return {
             "claim": self.claim, "status": self.status.value,
-            "packet_hashes": list(self.packet_hashes),
+            "packet_seals": list(self.packet_seals),
             "source_ids": list(self.source_ids),
             "counterevidence": list(self.counterevidence),
         }
@@ -43,7 +42,7 @@ class SynthesisedClaim:
 class ResearchSynthesis:
     mission_id: str
     claims: tuple[SynthesisedClaim, ...]
-    packet_hashes: tuple[str, ...]
+    packet_seals: tuple[str, ...]
     created_ms: int
     synthesis_version: str = SYNTHESIS_VERSION
 
@@ -59,7 +58,7 @@ class ResearchSynthesis:
         return {
             "mission_id": self.mission_id,
             "claims": [c.body() for c in self.claims],
-            "packet_hashes": list(self.packet_hashes),
+            "packet_seals": list(self.packet_seals),
             "created_ms": self.created_ms,
             "synthesis_version": self.synthesis_version,
         }
@@ -79,16 +78,16 @@ class ResearchSynthesiser:
         if not mission.seal_ok():
             raise ValueError("mission seal invalid")
         complete = [p for p in packets if p.state is PacketState.COMPLETE and p.seal_ok()]
-        claims = sorted({claim for p in complete for claim in p.claims})
+        statements = sorted({c.statement for p in complete for c in p.claims})
         out: list[SynthesisedClaim] = []
-        for claim in claims:
-            supporting = [p for p in complete if claim in p.claims]
-            counters = [p for p in complete if claim in p.counterevidence]
+        for statement in statements:
+            supporting = [p for p in complete if any(c.statement == statement for c in p.claims)]
+            counters = [p for p in complete if statement in p.counterevidence]
             sources = tuple(sorted({s for p in supporting for s in p.source_ids}))
             counter = tuple(sorted({s for p in counters for s in p.source_ids}))
-            hashes = tuple(sorted(p.packet_hash for p in supporting + counters))
-            timestamps = [t for p in supporting for t in p.retrieval_timestamps_ms]
-            reproducible = bool(supporting) and all(p.reproducibility for p in supporting)
+            seals = tuple(sorted(p.seal for p in supporting + counters))
+            timestamps = [t for p in supporting for t in p.retrieved_ms]
+            reproducible = bool(supporting) and all(bool(p.reproducibility) for p in supporting)
 
             if counters and not supporting:
                 status = ClaimStatus.CONTRADICTED
@@ -102,12 +101,12 @@ class ResearchSynthesiser:
                 status = ClaimStatus.INSUFFICIENT_EVIDENCE
             else:
                 status = ClaimStatus.SUPPORTED
-            out.append(SynthesisedClaim(claim, status, hashes, sources, counter))
+            out.append(SynthesisedClaim(statement, status, seals, sources, counter))
 
         result = ResearchSynthesis(
             mission_id=mission.mission_id,
             claims=tuple(out),
-            packet_hashes=tuple(sorted(p.packet_hash for p in complete)),
+            packet_seals=tuple(sorted(p.seal for p in complete)),
             created_ms=now_ms,
         )
         if self._ledger is not None:

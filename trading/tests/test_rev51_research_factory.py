@@ -1,5 +1,4 @@
 """G12 research-factory integration tests (TRD-REV51-118..122)."""
-
 from __future__ import annotations
 
 import ast
@@ -11,17 +10,15 @@ from vati.cognition.handoff import HandoffRecorder
 from vati.cognition.providers import QuotaScheduler, default_registry
 from vati.core.events import EventKind
 from vati.core.ledger import Ledger
-from vati.research.agents import ResearchAgentFactory, ResearchAgentSpec
+from vati.research.agents import ResearchAgentFactory
 from vati.research.director import FableResearchDirector, ResearchTrigger
-from vati.research.missions import (
-    MissionState, PacketState, ResearchContractError, ResearchMissionStore,
-)
+from vati.research.missions import MissionLedger, MissionState, PacketState, ResearchContractError
 from vati.research.synthesis import ClaimStatus, ResearchSynthesiser
 from vati.research.yield_ledger import ResearchYieldLedger, ResearchYieldRecord
 
 
 def _mission(*, ledger=None, now=1_000):
-    store = ResearchMissionStore(ledger=ledger)
+    store = MissionLedger(ledger=ledger)
     director = FableResearchDirector(store)
     mission = director.open(
         ResearchTrigger(
@@ -44,7 +41,7 @@ def _good(_lease, _mission, _spec):
         "limitations": ["short window"],
         "methods": ["replay"],
         "code_data_artifacts": ["artifact:1"],
-        "reproducibility": ["seed=7"],
+        "reproducibility": {"seed": 7},
     }
 
 
@@ -52,17 +49,17 @@ def test_mission_is_sealed_and_replays_from_the_ledger():
     ledger = Ledger(":memory:")
     store, mission = _mission(ledger=ledger)
     store.transition(mission.mission_id, MissionState.RUNNING, now_ms=1_100)
-    rebuilt = ResearchMissionStore().rebuild(ledger.iter())
-    assert rebuilt.get(mission.mission_id).state is MissionState.RUNNING
-    assert rebuilt.get(mission.mission_id).seal_ok()
+    rebuilt = MissionLedger().rebuild(ledger.iter())
+    assert rebuilt.mission(mission.mission_id).state is MissionState.RUNNING
+    assert rebuilt.mission(mission.mission_id).seal_ok()
 
 
 def test_mission_cannot_relax_the_live_action_prohibitions():
     _store, mission = _mission()
     with pytest.raises(ResearchContractError):
         mission.__class__(**{
-            **mission.__dict__, "mission_hash": "",
-            "prohibited_live_actions": ("ORDER_SEND",),
+            **mission.__dict__, "seal": "",
+            "prohibited_live_actions": ("ORDER",),
         }).sealed()
 
 
@@ -105,7 +102,7 @@ def test_provider_fallback_preserves_the_control_profile():
     assert packet.model_id == "gpt-6-astra"
 
 
-def test_budget_or_deadline_exhaustion_never_becomes_a_hidden_success():
+def test_deadline_exhaustion_never_becomes_a_hidden_success():
     _store, mission = _mission(now=1_000)
     packet = ResearchAgentFactory(QuotaScheduler(default_registry())).run(
         mission, "evidence", invoke=_good, now_ms=mission.deadline_ms)
@@ -133,6 +130,7 @@ def test_unsupported_single_source_claim_is_not_admitted():
     def thin(lease, m, spec):
         out = dict(_good(lease, m, spec))
         out["source_ids"] = ["one"]
+        out["retrieval_timestamps_ms"] = [2_000]
         out["evidence_refs"] = ["one"]
         return out
     p = ResearchAgentFactory(QuotaScheduler(default_registry())).run(
