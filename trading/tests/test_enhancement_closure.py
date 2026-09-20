@@ -195,3 +195,52 @@ def test_confidence_remains_uncalibrated_and_excluded():
     from vati.arbiter.confidence import BASIS
     assert "UNCALIBRATED" in BASIS
     assert "never sizes" in BASIS or "never a size" in BASIS
+
+
+def test_vati_serve_reaches_account_coordinator_for_multi_instrument_config(monkeypatch, capsys):
+    import argparse
+    import types
+    import vati.__main__ as cli
+    import vati.app.account_service as account_service_mod
+    import vati.app.process_lock as process_lock_mod
+    import vati.app.service as service_mod
+
+    cfg = types.SimpleNamespace(
+        account_alias="acct",
+        instruments=[{"symbol": "GBPUSD"}],
+    )
+    monkeypatch.setattr(service_mod.ServiceConfig, "load", lambda _path: cfg)
+
+    class _Lock:
+        def release(self):
+            pass
+
+    class _SessionLock:
+        def __init__(self, alias):
+            assert alias == "acct"
+        def acquire(self):
+            return _Lock()
+
+    monkeypatch.setattr(process_lock_mod, "SessionLock", _SessionLock)
+
+    calls = []
+    class _AccountService:
+        def __init__(self, received):
+            assert received is cfg
+            self.cycles = 0
+            calls.append("constructed")
+        def build(self):
+            calls.append("built")
+            return self
+        def start(self):
+            calls.append("started")
+        def step_once(self):
+            self.cycles = 1
+            calls.append("stepped")
+            return types.SimpleNamespace(outcomes=("ok",))
+
+    monkeypatch.setattr(account_service_mod, "AccountCoordinatorService", _AccountService)
+    rc = cli.cmd_serve(argparse.Namespace(config="ignored.json", once=True))
+    assert rc == 0
+    assert calls == ["constructed", "built", "started", "stepped"]
+    assert '"cycles": 1' in capsys.readouterr().out
