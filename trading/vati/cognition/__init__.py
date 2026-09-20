@@ -30,6 +30,8 @@ from vati.cognition.contracts import (
     normalise,
 )
 
+from vati.cognition.attribution import AttributionEngine, TradeFacts
+from vati.cognition.exam import ExamPaper, run_exam, standard_paper
 from vati.cognition.handoff import ContinuityState, HandoffReason, HandoffRecorder
 from vati.cognition.providers import (
     CONTROL_PROFILE,
@@ -37,10 +39,22 @@ from vati.cognition.providers import (
     QuotaScheduler,
     default_registry,
 )
+from vati.cognition.performance_ledger import CognitivePerformanceLedger, ModelRecord
+from vati.cognition.shadow_book import DeterministicOutcome, ShadowBook, ShadowEntry
 from vati.cognition.world_model import CognitionStore, TradingWorldModel
 
 __all__ = [
     "Analogue",
+    "AttributionEngine",
+    "CognitivePerformanceLedger",
+    "DeterministicOutcome",
+    "ExamPaper",
+    "ModelRecord",
+    "ShadowBook",
+    "ShadowEntry",
+    "TradeFacts",
+    "run_exam",
+    "standard_paper",
     "AnalogueIndex",
     "CONTROL_PROFILE",
     "CognitionStore",
