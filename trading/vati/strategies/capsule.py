@@ -118,27 +118,7 @@ class CapsuleRegistry:
             raise CapsuleError(f"{to.value} is not a promotion target")
         if c.state in PROMOTION_ORDER and PROMOTION_ORDER.index(to) != PROMOTION_ORDER.index(c.state) + 1:
             raise CapsuleError(f"promotion must advance one state: {c.state.value} → {to.value}")
-        # P0-TRADE-001 — promoting a strategy towards live capital took any non-empty
-        # string. The target state is in the subject, so authority to promote to
-        # LIMITED_LIVE is not authority to promote to CERTIFIED_LIVE.
-        try:
-            verified = self.authority.verify(
-                approval_signature_ref,
-                act="capsule-promote",
-                subject=f"{strategy_id}:{to.value}",
-                now_unix=approved_at_unix,
-            )
-        except OwnerAuthorityError as exc:
-            # Kept as a CapsuleError so callers keep one error type for "this promotion
-            # was refused", while the message still says exactly which check failed.
-            raise CapsuleError(f"promotion requires owner approval signature: {exc}") from exc
-        approval_signature_ref = verified.ref
-        if to in (StrategyState.LIMITED_LIVE, StrategyState.CERTIFIED_LIVE) and not evidence_refs:
-            raise CapsuleError("live promotion requires evidence references")
-        # TRD-ENH-021/022 — evidence_refs are opaque strings, so they prove that
-        # someone signed, never what was proven. From DEMO onwards the promotion
-        # carries a sealed certificate whose content is checked, and the owner's
-        # signature binds that certificate's hash rather than a free-text list.
+
         certificate_hash = ""
         if to in self.CERTIFICATE_REQUIRED_FROM:
             if certificate is None:
@@ -147,19 +127,45 @@ class CapsuleRegistry:
                     "opaque evidence references are not semantic evidence"
                 )
             if certificate.strategy_id != strategy_id:
-                raise CapsuleError(
-                    f"certificate is for {certificate.strategy_id}, not {strategy_id}")
+                raise CapsuleError(f"certificate is for {certificate.strategy_id}, not {strategy_id}")
             if certificate.capsule_hash and certificate.capsule_hash != c.capsule_hash:
                 raise CapsuleError(
                     "certificate was computed against a different capsule revision "
-                    f"({certificate.capsule_hash[:12]} != {c.capsule_hash[:12]})")
+                    f"({certificate.capsule_hash[:12]} != {c.capsule_hash[:12]})"
+                )
             passed, reasons = evaluate_strategy_certificate(certificate)
             if not passed:
                 raise CapsuleError("certificate does not meet validation policy: " + ",".join(reasons))
             certificate_hash = certificate.validation_hash
-        new = self.seal({**c.data, "state": to.value, "approval_signature_ref": approval_signature_ref, "evidence_refs": sorted(set(c.data.get("evidence_refs", [])) | set(evidence_refs)),
-                         "approved_at_unix": approved_at_unix, "supersedes": c.capsule_hash,
-                         **({"validation_hash": certificate_hash} if certificate_hash else {})})
+
+        if to in (StrategyState.LIMITED_LIVE, StrategyState.CERTIFIED_LIVE) and not evidence_refs:
+            raise CapsuleError("live promotion requires evidence references")
+
+        # The approval statement includes the semantic evidence identity. A token
+        # for certificate A cannot authorize certificate B.
+        subject = f"{strategy_id}:{to.value}"
+        if certificate_hash:
+            subject += f":{certificate_hash}"
+        try:
+            verified = self.authority.verify(
+                approval_signature_ref,
+                act="capsule-promote",
+                subject=subject,
+                now_unix=approved_at_unix,
+            )
+        except OwnerAuthorityError as exc:
+            raise CapsuleError(f"promotion requires owner approval signature: {exc}") from exc
+        approval_signature_ref = verified.ref
+
+        new = self.seal({
+            **c.data,
+            "state": to.value,
+            "approval_signature_ref": approval_signature_ref,
+            "evidence_refs": sorted(set(c.data.get("evidence_refs", [])) | set(evidence_refs)),
+            "approved_at_unix": approved_at_unix,
+            "supersedes": c.capsule_hash,
+            **({"validation_hash": certificate_hash} if certificate_hash else {}),
+        })
         self._c[strategy_id] = Capsule(new)
         return self._c[strategy_id]
 
