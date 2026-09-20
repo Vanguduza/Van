@@ -1,0 +1,302 @@
+"""Account-scoped post-entry lifecycle for VATI multi-instrument runtimes.
+
+Allocation decides *which* candidate may reach RiskAuthority.  This module owns
+what happens after an approved intent reaches the router: entry accounting, TCA,
+mark-driven protection, trade review, VTIL proposal and reduce-only learning.
+
+It intentionally composes the same primitives used by DecisionCycle rather than
+implementing a second risk or execution policy.
+"""
+
+from __future__ import annotations
+
+from dataclasses import asdict, dataclass, field
+from decimal import Decimal
+from typing import Mapping, Optional, Sequence
+
+from vati.core.events import EventKind, make_event
+from vati.execution.base import ExecutionReceipt, VenueAdapter
+from vati.execution.protection import ProtectionManager
+from vati.execution.review import Outcome, review_trade
+from vati.execution.router import ExecutionRouter
+from vati.execution.tca import compute_tca
+from vati.learning.hooks import LearningHooks, to_payload
+from vati.market_data.bars import Bar
+from vati.observability import metrics
+from vati.risk.contracts import Direction, LossModel, StrategyState, SymbolContract, TradeIntent
+from vati.arbiter.strategy_arbiter import ACTIVE_STATES
+from vati.vtil import AdmissionLedger
+
+ZERO = Decimal("0")
+STRATEGY_LEARNING_OUTCOMES = frozenset({
+    Outcome.GOOD_WIN, Outcome.GOOD_LOSS, Outcome.BAD_WIN, Outcome.BAD_LOSS,
+})
+
+
+@dataclass
+class AccountTradeLifecycle:
+    ledger: object
+    adapter: VenueAdapter
+    router: ExecutionRouter
+    protection: ProtectionManager
+    contracts: Mapping[str, SymbolContract]
+    engines_by_symbol: Mapping[str, object]
+    learning: Optional[LearningHooks] = None
+    admission: AdmissionLedger = field(default_factory=AdmissionLedger)
+    entries: dict[str, dict] = field(default_factory=dict)
+    reviews: list = field(default_factory=list)
+    consecutive_losses: int = 0
+
+    def _log(self, kind: EventKind, payload: dict, *, now_ms: int, corr: str) -> None:
+        self.ledger.append(make_event(
+            kind, "vati-account-lifecycle", payload,
+            event_time_ms=now_ms, received_time_ms=now_ms,
+            correlation_id=corr,
+        ))
+
+    def record_entry(
+        self,
+        *,
+        intent: TradeIntent,
+        receipt: ExecutionReceipt,
+        state,
+        modelled_cost_pct: Decimal,
+        software_stop: bool,
+    ) -> None:
+        """Record the router result and feed filled entries into TCA/learning."""
+        if receipt.status not in ("FILLED", "PARTIAL", "ACCEPTED", "OWNER_EXECUTED"):
+            return
+        filled = receipt.filled_qty > ZERO and receipt.average_fill is not None
+        self.entries[intent.trade_intent_id] = {
+            "symbol": intent.symbol,
+            "entry": receipt.average_fill or intent.entry,
+            "stop": intent.stop,
+            "direction": intent.direction,
+            "strategy_id": intent.strategy_id,
+            "cost_pct": modelled_cost_pct,
+            "decision_price": intent.entry,
+            "quantity": receipt.filled_qty,
+            "software_stop": software_stop,
+            "broker_position_id": receipt.broker_position_id,
+            "open": filled,
+            "pending": not filled,
+        }
+        if not filled:
+            return
+
+        contract = self.contracts[intent.symbol.upper()]
+        value_per_unit = (
+            contract.value_per_price_unit_per_lot
+            if contract.loss_model is LossModel.STOP_DISTANCE
+            else Decimal("1")
+        )
+        tca = compute_tca(
+            receipt,
+            direction=intent.direction,
+            qty=receipt.filled_qty,
+            value_per_unit=value_per_unit,
+            modelled_cost_pct=modelled_cost_pct,
+        )
+        self._log(
+            EventKind.TCA_RECORD, tca.as_dict(),
+            now_ms=receipt.received_time_unix_ms,
+            corr=intent.trade_intent_id,
+        )
+        self.entries[intent.trade_intent_id]["cost_ratio"] = tca.cost_ratio
+        if self.learning is not None:
+            self.learning.on_tca(
+                symbol=intent.symbol,
+                session=state.session.value,
+                event_window=state.event_window.value,
+                cost_ratio=tca.cost_ratio,
+                slippage=tca.slippage,
+            )
+            engine = self.engines_by_symbol.get(intent.symbol.upper())
+            if engine is not None:
+                engine.m.broker_liquidity[intent.symbol] = self.learning.broker_liquidity(
+                    intent.symbol)
+
+    def mark_bar(self, symbol: str, bar: Bar, *, now_ms: int) -> None:
+        """Apply the same deterministic OHLC mark sequence as SessionRunner."""
+        contract = self.contracts[symbol.upper()]
+        half = contract.tick_size
+        for px in (bar.open, bar.low, bar.high, bar.close):
+            self.mark(symbol, px - half, px + half, now_ms=now_ms)
+
+    def mark(self, symbol: str, bid: Decimal, ask: Decimal, *, now_ms: int) -> None:
+        receipts = list(self.router.apply_exits(
+            self.adapter.venue, symbol, bid, ask, now_ms=now_ms))
+        if hasattr(self.adapter, "mark"):
+            receipts += self.adapter.mark(symbol, bid, ask, now_ms=now_ms)  # type: ignore[attr-defined]
+        for receipt in receipts:
+            if (
+                receipt.status == "FILLED"
+                and receipt.trade_intent_id in self.entries
+                and receipt.reject_reason not in ("TRAIL", "BREAK_EVEN")
+            ):
+                self._on_close(
+                    receipt.trade_intent_id,
+                    receipt.average_fill,
+                    receipt.reject_reason,
+                    now_ms,
+                )
+                self.protection.forget(receipt.broker_position_id)
+
+    def _realised_pnl(self, entry: dict, exit_price: Decimal) -> tuple[Decimal, bool]:
+        closed = getattr(self.adapter, "closed", None)
+        if closed:
+            for row in reversed(closed):
+                if row.get("intent") == entry.get("trade_intent_id"):
+                    return Decimal(str(row["pnl"])), True
+
+        symbol = str(entry["symbol"]).upper()
+        contract = self.contracts.get(symbol)
+        qty = Decimal(str(entry.get("quantity", ZERO)))
+        if contract is None or qty <= ZERO:
+            return ZERO, False
+        if contract.loss_model is LossModel.FULL_STAKE:
+            # Fixed-payout products need venue settlement, not a linear price proxy.
+            return ZERO, False
+        sign = Decimal("1") if entry["direction"] is Direction.LONG else Decimal("-1")
+        return (
+            (exit_price - Decimal(str(entry["entry"])))
+            * sign
+            * qty
+            * contract.value_per_price_unit_per_lot,
+            True,
+        )
+
+    def _on_close(
+        self,
+        intent_id: str,
+        exit_price: Optional[Decimal],
+        reason: str,
+        now_ms: int,
+    ) -> None:
+        entry = self.entries.pop(intent_id, None)
+        if entry is None or exit_price is None:
+            return
+        entry["trade_intent_id"] = intent_id
+        pnl, pnl_known = self._realised_pnl(entry, exit_price)
+        if pnl_known:
+            self.consecutive_losses = self.consecutive_losses + 1 if pnl < ZERO else 0
+
+        review = review_trade(
+            trade_intent_id=intent_id,
+            strategy_id=entry["strategy_id"],
+            entry=entry["entry"],
+            exit_price=exit_price,
+            stop=entry["stop"] or entry["entry"],
+            direction_long=entry["direction"] is Direction.LONG,
+            pnl=pnl,
+            thesis_correct=pnl_known and pnl > ZERO,
+            process_ok=True,
+            broker_ok=pnl_known,
+            exit_reason=reason,
+        )
+        self.reviews.append(review)
+        self._log(
+            EventKind.TRADE_REVIEW,
+            {
+                k: (
+                    v.value if hasattr(v, "value")
+                    else str(v) if isinstance(v, Decimal)
+                    else list(v) if isinstance(v, tuple)
+                    else v
+                )
+                for k, v in asdict(review).items()
+            },
+            now_ms=now_ms,
+            corr=intent_id,
+        )
+        self.admission.propose(
+            review.artifact_hash,
+            knowledge_class="TRADE_EXPERIENCE",
+            proposed_by=review.proposed_by,
+            trust_tier="T0_VAN_TRADING_POLICY",
+        )
+        metrics.inc("vati_trades_closed_total", outcome=review.outcome.value)
+
+        if (
+            self.learning is not None
+            and review.outcome in STRATEGY_LEARNING_OUTCOMES
+        ):
+            self._learn(
+                intent_id,
+                review,
+                Decimal(str(entry.get("cost_ratio", "1"))),
+                now_ms,
+            )
+
+    def _learn(self, intent_id: str, review, cost_ratio: Decimal, now_ms: int) -> None:
+        assert self.learning is not None
+        episode, adjustment = self.learning.on_review(
+            self.ledger,
+            trade_intent_id=intent_id,
+            strategy_id=review.strategy_id,
+            r_multiple=review.r_multiple,
+            process_ok=review.process_ok,
+            cost_ratio=cost_ratio,
+        )
+        if episode is not None:
+            self._log(
+                EventKind.TRADE_EXPERIENCE_ARTIFACT,
+                to_payload(episode),
+                now_ms=now_ms,
+                corr=intent_id,
+            )
+            self.admission.propose(
+                episode.artifact_hash,
+                knowledge_class="TRADE_EXPERIENCE",
+                proposed_by="vati-learning",
+                trust_tier="T0_VAN_TRADING_POLICY",
+            )
+        if adjustment is None:
+            return
+
+        # Every per-symbol engine carrying this strategy receives the same
+        # reduce-only health view and automatic demotion.
+        for engine in self.engines_by_symbol.values():
+            try:
+                capsule = engine.registry.get(review.strategy_id)
+            except KeyError:
+                continue
+            engine.m.capsule_health[review.strategy_id] = adjustment.multiplier
+            if not adjustment.demote_to:
+                continue
+            target = (
+                StrategyState.SHADOW
+                if capsule.state in (
+                    StrategyState.LIMITED_LIVE,
+                    StrategyState.CERTIFIED_LIVE,
+                )
+                else StrategyState.DEGRADED
+            )
+            if capsule.state in ACTIVE_STATES and capsule.state is not target:
+                new = engine.registry.demote(
+                    review.strategy_id,
+                    target,
+                    reason=(
+                        f"learning health {adjustment.multiplier}: "
+                        + "; ".join(
+                            self.learning.health.verdict(review.strategy_id).reasons)
+                    ),
+                )
+                self.learning.demotions.append((review.strategy_id, target.value))
+                self._log(
+                    EventKind.CAPSULE_STATE,
+                    {
+                        "strategy_id": review.strategy_id,
+                        "from": capsule.state.value,
+                        "to": target.value,
+                        "capsule_hash": new.capsule_hash,
+                        "supersedes": capsule.capsule_hash,
+                        "by": "vati-learning",
+                        "authority": "AUTOMATIC_DEMOTION_ONLY",
+                    },
+                    now_ms=now_ms,
+                    corr=intent_id,
+                )
+
+
+__all__ = ["AccountTradeLifecycle", "STRATEGY_LEARNING_OUTCOMES"]
