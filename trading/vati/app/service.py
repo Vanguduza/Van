@@ -149,7 +149,7 @@ class SessionService:
         self.adapter = self.adapter or build_adapter(account, registry)
         self._ledger = open_ledger(c.ledger)
         contract = contract_from_dict({**c.contract, "venue": account.router_venue})   # the account decides the venue; a contract copied from another venue must not silently mismatch
-        scfg = SessionConfig(symbol=c.symbol, base=c.base, quote=c.quote, venue=account.router_venue, account_alias=account.alias, contract=contract, mandate_dict=c.mandate,
+        scfg = SessionConfig(symbol=c.symbol, base=c.base, quote=c.quote, venue=account.router_venue, account_alias=account.alias, contract=contract, mandate_dict=c.mandate, timeframe=c.timeframe,
                              warmup_bars=c.warmup_bars, max_quote_age_ms=c.max_quote_age_ms, session_id=f"{account.alias}:{c.symbol}:{int(self.clock())}", activation_id=c.activation_id,
                              software_stops=account.broker == BrokerKind.ZSE_OWNER_TICKET)
         reg = CapsuleRegistry.load_dir(c.capsule_dir or ROOT / "strategies" / "registry")
