@@ -16,6 +16,7 @@ import tempfile
 import time
 from dataclasses import dataclass
 from pathlib import Path
+from types import SimpleNamespace
 from typing import Any, Mapping
 
 from fastapi import HTTPException
@@ -23,6 +24,7 @@ from fastapi import HTTPException
 from vati.authority import OwnerAuthority, OwnerAuthorityError
 from vati.core.events import EventKind, make_event
 from vati.core.ledger_pg import open_ledger
+from vati.learning.replay import restore_capsule_state_runtime
 from vati.risk.contracts import StrategyState
 from vati.strategies import CapsuleRegistry
 from vati.strategies.capsule import CapsuleError
@@ -186,6 +188,13 @@ def build_strategy_handlers(settings: StrategyPromotionSettings):
                     raise HTTPException(503, "VATI ledger chain verification failed")
 
                 registry = CapsuleRegistry.load_dir(capsule_dir)
+                # The ledger is the capsule-state authority across a crash between
+                # event commit and file projection. Reconstruct it before evaluating
+                # another owner request so two valid tokens cannot fork one parent.
+                restore_capsule_state_runtime(
+                    ledger,
+                    {"promotion-authority": SimpleNamespace(registry=registry)},
+                )
                 try:
                     current = registry.get(strategy_id)
                 except KeyError as exc:
