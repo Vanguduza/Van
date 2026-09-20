@@ -3409,16 +3409,18 @@
       "path": "android/app/src/main/java/com/dial/van/session/SessionReconciliation.kt",
       "maturity_class": "ABSENT",
       "disposition": "COMPLETE",
-      "rationale": "§20.12's decision, pure and in one place: the identity a resume asks about, the identity its answer is matched by, and what an `UNKNOWN` means. It was three lines inside a socket callback that asked by message id, were answered by command id, and then dropped every unknown — two defects that cancelled out and silently discarded every unacknowledged owner command on each reconnect. Held short of INTEGRATED_AND_EVIDENCED until a CI run has executed it at a pushed SHA: the ledger's rule is that an integration claim names the run that proved it, and a local pass is not that.",
+      "rationale": "§20.12's decision, pure and in one place: the identity a resume asks about, the identity its answer is matched by, and what an `UNKNOWN` means. It was three lines inside a socket callback that asked by message id, were answered by command id, and then dropped every unknown — two defects that cancelled out and silently discarded every unacknowledged owner command on each reconnect.",
       "producer": "com.dial.van.session.SessionReconciliation",
       "consumer": "VanHermesSessionManager.adoptCursor / resume",
       "production_caller": "android/app/src/main/java/com/dial/van/session/VanHermesSessionManager.kt",
       "tests": "android/verification/src/test/kotlin/com/dial/van/session/SessionReconciliationTest.kt",
-      "runtime_evidence": null,
+      "runtime_evidence": "https://github.com/Vanguduza/Van/actions/runs/35501946537",
       "owner_facing_projection": "A command issued before a failover still happens, and happens once",
       "remediation_gate": "RB C15",
-      "terminal_state": "EXTERNALLY_BLOCKED_REPOSITORY_COMPLETE",
-      "closure_commits": [],
+      "terminal_state": "INTEGRATED_AND_EVIDENCED",
+      "closure_commits": [
+        "1a35fc385f61b03958704ce4b33862a1e68cc724"
+      ],
       "n": 179
     },
     {
@@ -3426,16 +3428,18 @@
       "path": "backend/van_gateway/session/router.py",
       "maturity_class": "PARTIAL",
       "disposition": "COMPLETE",
-      "rationale": "All four upstream kinds now delegate to the authority that already owns them. Three were unwired, and because the router admitted the envelope before resolving the delegate, the refusal burned the idempotency key: the owner's 'cancel it' was recorded, refused, and every retry answered ALREADY_KNOWN with a null result. Held short of INTEGRATED_AND_EVIDENCED until a CI run has executed it at a pushed SHA: the ledger's rule is that an integration claim names the run that proved it, and a local pass is not that.",
+      "rationale": "All four upstream kinds now delegate to the authority that already owns them. Three were unwired, and because the router admitted the envelope before resolving the delegate, the refusal burned the idempotency key: the owner's 'cancel it' was recorded, refused, and every retry answered ALREADY_KNOWN with a null result.",
       "producer": "van_gateway.session.router.SessionRouter",
       "consumer": "POST /v1/session/messages and the session WebSocket",
       "production_caller": "backend/van_gateway/app.py",
       "tests": "backend/tests/test_session_transport_api.py",
-      "runtime_evidence": null,
+      "runtime_evidence": "https://github.com/Vanguduza/Van/actions/runs/35501946537",
       "owner_facing_projection": "Cancelling or answering over the durable session actually happens",
       "remediation_gate": "RB C15",
-      "terminal_state": "EXTERNALLY_BLOCKED_REPOSITORY_COMPLETE",
-      "closure_commits": [],
+      "terminal_state": "INTEGRATED_AND_EVIDENCED",
+      "closure_commits": [
+        "1a35fc385f61b03958704ce4b33862a1e68cc724"
+      ],
       "n": 180
     }
   ],

@@ -6225,7 +6225,8 @@
         "residual": "Part of the remediation is in `EncryptedCommandQueue`, which needs a Keystore and a disk and is therefore compiled by CI and executed nowhere here: the single-editor `commit()` that makes the blob and the index move together is read, not run. What is executed is the adapter — one mutating call per persist, keyed on the message id, and no kill point within a persist that loses a command.",
         "residual_reason": "The AGP is unreachable in the audit container.",
         "residual_class": "ENVIRONMENT_UNVERIFIED",
-        "posture": "fail-closed"
+        "posture": "fail-closed",
+        "ci_run": "https://github.com/Vanguduza/Van/actions/runs/35501946537"
       }
     },
     {
@@ -6270,7 +6271,8 @@
         "residual": "The Gateway's half and the reconciliation decisions are executed. The wiring in `VanHermesSessionManager` — which identities are collected, what a settle does to the queue and the store — needs OkHttp, is not in the JVM harness, and is compiled by CI only. That half is a read of the source.",
         "residual_reason": "The AGP is unreachable in the audit container.",
         "residual_class": "ENVIRONMENT_UNVERIFIED",
-        "posture": "fail-closed"
+        "posture": "fail-closed",
+        "ci_run": "https://github.com/Vanguduza/Van/actions/runs/35501946537"
       }
     },
     {
@@ -6311,7 +6313,8 @@
         "counterexample": "Wiring the delegates without moving the admission would pass `the owner can cancel a mission over the session` and leave the key burned for every payload a delegate refuses. `a refused message does not take its idempotency key with it` fails under exactly that fix, and `a refused message is not left in the admission table` ties it back to the resume answer: a row with no result would tell a reconnecting phone the Gateway holds a command it never performed.",
         "residual": "",
         "residual_class": "",
-        "posture": "fail-closed"
+        "posture": "fail-closed",
+        "ci_run": "https://github.com/Vanguduza/Van/actions/runs/35501946537"
       }
     },
     {
@@ -6350,7 +6353,8 @@
         "residual": "`recordsOfKind` itself lives in `EncryptedCommandQueue` and cannot be executed here. The test exercises the adapter over a store that honours the documented contract, which proves the adapter does not re-filter and does not prove the real method reads the index rather than `peekReady`. That is a source read and CI's compile.",
         "residual_reason": "The AGP is unreachable in the audit container.",
         "residual_class": "ENVIRONMENT_UNVERIFIED",
-        "posture": "fail-closed"
+        "posture": "fail-closed",
+        "ci_run": "https://github.com/Vanguduza/Van/actions/runs/35501946537"
       }
     },
     {
@@ -6388,7 +6392,8 @@
         "residual": "The branch that calls it is in `VanHermesSessionManager`, which needs OkHttp and is compiled by CI only. What is executed is that the call clears the store and names every dropped command; that `SESSION_REPLACED` reaches it is a source read.",
         "residual_reason": "The AGP is unreachable in the audit container and the class cannot be added to the pure harness without pulling OkHttp into it.",
         "residual_class": "ENVIRONMENT_UNVERIFIED",
-        "posture": "fail-closed"
+        "posture": "fail-closed",
+        "ci_run": "https://github.com/Vanguduza/Van/actions/runs/35501946537"
       }
     }
   ],
