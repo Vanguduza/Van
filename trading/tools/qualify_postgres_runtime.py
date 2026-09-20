@@ -61,6 +61,7 @@ def _acquire_worker(
     now_ms: int,
     ttl_ms: int,
     queue,
+    ready=None,
 ) -> None:
     store = PostgresLeaseStore(dsn)
     try:
@@ -70,6 +71,8 @@ def _acquire_worker(
             instance_id=instance,
             ttl_ms=ttl_ms,
         )
+        if ready is not None:
+            ready.set()
         started = time.monotonic()
         result = lease.acquire(now_ms=now_ms)
         queue.put(
@@ -172,6 +175,7 @@ def qualify(dsn: str) -> dict[str, object]:
     )
     assert holder.acquire(now_ms=1_000).outcome is LeaseOutcome.GRANTED
     queue = ctx.Queue()
+    contender_ready = ctx.Event()
     with holder.submission_guard(holder.epoch, now_ms=1_500) as allowed:
         assert allowed
         contender = ctx.Process(
@@ -183,9 +187,11 @@ def qualify(dsn: str) -> dict[str, object]:
                 3_000,
                 5_000,
                 queue,
+                contender_ready,
             ),
         )
         contender.start()
+        assert contender_ready.wait(5), "contender did not reach acquire boundary"
         time.sleep(0.6)
         assert contender.is_alive(), (
             "takeover completed while the submission row lock was held"
@@ -207,6 +213,7 @@ def qualify(dsn: str) -> dict[str, object]:
     assert ready.wait(5), "crash holder never acquired submission guard"
 
     crash_queue = ctx.Queue()
+    crash_contender_ready = ctx.Event()
     crash_contender = ctx.Process(
         target=_acquire_worker,
         args=(
@@ -216,9 +223,11 @@ def qualify(dsn: str) -> dict[str, object]:
             3_000,
             5_000,
             crash_queue,
+            crash_contender_ready,
         ),
     )
     crash_contender.start()
+    assert crash_contender_ready.wait(5), "crash contender did not reach acquire boundary"
     time.sleep(0.6)
     assert crash_contender.is_alive(), (
         "contender did not block while crash holder owned row lock"
