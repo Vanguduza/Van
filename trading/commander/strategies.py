@@ -10,6 +10,7 @@ projection from the durable event.
 
 from __future__ import annotations
 
+import hashlib
 import json
 import os
 import tempfile
@@ -20,6 +21,8 @@ from types import SimpleNamespace
 from typing import Any, Mapping
 
 from fastapi import HTTPException
+from cryptography.hazmat.primitives import serialization
+from cryptography.hazmat.primitives.asymmetric import ec
 
 from vati.authority import OwnerAuthority, OwnerAuthorityError
 from vati.core.events import EventKind, make_event
@@ -27,11 +30,38 @@ from vati.core.ledger_pg import open_ledger
 from vati.learning.replay import restore_capsule_state_runtime
 from vati.risk.contracts import StrategyState
 from vati.strategies import CapsuleRegistry
-from vati.strategies.capsule import CapsuleError
-from vati.validation.certificates import CertificateError, strategy_certificate_from_mapping
+from vati.strategies.capsule import CapsuleError, PROMOTION_ORDER
+from vati.validation.certificates import (
+    CertificateError,
+    evaluate_strategy_certificate,
+    strategy_certificate_from_mapping,
+)
 
-PROMOTION_COMMANDS = ("capsule_promote",)
+PROMOTION_COMMANDS = (
+    "capsule_promotion_candidates",
+    "owner_authority_enroll",
+    "capsule_promote",
+)
 PROMOTION_TOOL_SCHEMAS = {
+    "capsule_promotion_candidates": {
+        "description": (
+            "Owner-app read of strategy promotion candidates derived from durable "
+            "policy-passing validation certificates and current capsule lineage."
+        ),
+        "properties": {},
+    },
+    "owner_authority_enroll": {
+        "description": (
+            "Owner-app bootstrap of the paired device public key into the runtime "
+            "trading owner-authority registry. Hidden from agents/MCP."
+        ),
+        "properties": {
+            "device_id": {"type": "string"},
+            "key_id": {"type": "string"},
+            "public_key_pem": {"type": "string"},
+        },
+        "required": ["device_id", "key_id", "public_key_pem"],
+    },
     "capsule_promote": {
         "description": (
             "Owner-only strategy promotion. Hidden from agents/MCP. Requires a sealed "
@@ -58,6 +88,7 @@ class StrategyPromotionSettings:
     capsule_dir: str
     ledger: str
     owner_authority: Any
+    owner_authority_keys_path: str = ""
 
 
 class _PreverifiedAuthority:
@@ -110,10 +141,165 @@ def _atomic_project(path: Path, payload: dict) -> None:
             pass
 
 
+
+def owner_authority_key_id(public_key_pem: str) -> str:
+    """Deterministic id for the paired owner's EC P-256 public key."""
+    try:
+        public_key = serialization.load_pem_public_key(public_key_pem.encode("utf-8"))
+    except (TypeError, ValueError) as exc:
+        raise ValueError("owner authority public key is not valid PEM") from exc
+    if not isinstance(public_key, ec.EllipticCurvePublicKey):
+        raise ValueError("owner authority public key must be EC")
+    if not isinstance(public_key.curve, ec.SECP256R1):
+        raise ValueError("owner authority public key must use P-256")
+    der = public_key.public_bytes(
+        serialization.Encoding.DER,
+        serialization.PublicFormat.SubjectPublicKeyInfo,
+    )
+    return "device-" + hashlib.sha256(der).hexdigest()[:24]
+
+
+def _write_owner_authority_registry(path: Path, key_id: str, public_key_pem: str) -> None:
+    """Persist one owner public key. Replacement is a separate recovery ceremony."""
+    existing: dict[str, str] = {}
+    if path.is_file():
+        try:
+            raw = json.loads(path.read_text(encoding="utf-8"))
+            keys = raw.get("keys", raw) if isinstance(raw, dict) else {}
+            existing = {
+                str(k): str(v) for k, v in dict(keys).items() if str(v).strip()
+            }
+        except (OSError, ValueError, TypeError) as exc:
+            raise ValueError("owner authority registry is unreadable") from exc
+    others = {k: v for k, v in existing.items() if k != key_id}
+    if others:
+        raise PermissionError(
+            "a different owner authority key is already enrolled; explicit owner-device rebind is required"
+        )
+    if key_id in existing and existing[key_id].strip() != public_key_pem.strip():
+        raise PermissionError("owner authority key id collides with different key material")
+    payload = {
+        "version": 1,
+        "principle": (
+            "Runtime owner authority public keys only. Enrollment is performed through "
+            "the paired owner-device A4 path; private keys never leave Android Keystore."
+        ),
+        "format": "key_id -> PEM SubjectPublicKeyInfo for an EC P-256 public key",
+        "keys": {key_id: public_key_pem.strip() + "\n"},
+    }
+    _atomic_project(path, payload)
+    os.chmod(path, 0o600)
+
+
 def build_strategy_handlers(settings: StrategyPromotionSettings):
     import fcntl
 
     capsule_dir = Path(settings.capsule_dir)
+
+    def candidates(_args: dict) -> dict:
+        capsule_dir.mkdir(parents=True, exist_ok=True)
+        lock_path = capsule_dir / ".promotion.lock"
+        with lock_path.open("a+") as lock_file:
+            fcntl.flock(lock_file.fileno(), fcntl.LOCK_SH)
+            ledger = open_ledger(settings.ledger)
+            try:
+                ok, _ = ledger.verify_chain()
+                if not ok:
+                    raise HTTPException(503, "VATI ledger chain verification failed")
+                registry = CapsuleRegistry.load_dir(capsule_dir)
+                restore_capsule_state_runtime(
+                    ledger,
+                    {"promotion-authority": SimpleNamespace(registry=registry)},
+                )
+                latest: dict[str, tuple[int, Any, dict]] = {}
+                for event in ledger.iter(EventKind.STRATEGY_VALIDATION_CERTIFICATE):
+                    raw = dict(event.payload)
+                    try:
+                        cert = strategy_certificate_from_mapping(raw)
+                    except CertificateError:
+                        continue
+                    passed, reasons = evaluate_strategy_certificate(cert)
+                    if not passed:
+                        continue
+                    try:
+                        current = registry.get(cert.strategy_id)
+                    except KeyError:
+                        continue
+                    if cert.capsule_hash != current.capsule_hash:
+                        continue
+                    if current.state not in PROMOTION_ORDER:
+                        continue
+                    idx = PROMOTION_ORDER.index(current.state)
+                    if idx + 1 >= len(PROMOTION_ORDER):
+                        continue
+                    target = PROMOTION_ORDER[idx + 1]
+                    row = {
+                        "strategy_id": cert.strategy_id,
+                        "current_state": current.state.value,
+                        "target_state": target.value,
+                        "capsule_hash": current.capsule_hash,
+                        "validation_hash": cert.validation_hash,
+                        "certificate_id": cert.certificate_id,
+                        "certificate": cert.as_dict() | {
+                            "validation_hash": cert.validation_hash
+                        },
+                        "evidence_refs": list(cert.evidence_refs),
+                        "data_manifest_hash": cert.data_manifest_hash,
+                        "dsr_probability": cert.stats.dsr_probability,
+                        "pbo_probability": cert.stats.pbo_probability,
+                        "expectancy_R": cert.expectancy_R,
+                        "expectancy_lower_bound_R": cert.expectancy_lower_bound_R,
+                        "profit_factor": cert.profit_factor,
+                        "max_drawdown": cert.max_drawdown,
+                        "certificate_event_hash": event.hash,
+                        "certificate_event_ms": event.event_time_ms,
+                    }
+                    previous = latest.get(cert.strategy_id)
+                    if previous is None or event.event_time_ms >= previous[0]:
+                        latest[cert.strategy_id] = (event.event_time_ms, cert, row)
+                return {
+                    "candidates": [
+                        item[2] for _, item in sorted(latest.items())
+                    ],
+                    "authority": "OWNER_DECISION_REQUIRED",
+                }
+            finally:
+                ledger.close()
+                fcntl.flock(lock_file.fileno(), fcntl.LOCK_UN)
+
+    def enroll_owner_authority(args: dict) -> dict:
+        device_id = str(args.get("device_id") or "").strip()
+        key_id = str(args.get("key_id") or "").strip()
+        public_key_pem = str(args.get("public_key_pem") or "").strip()
+        if not device_id or not key_id or not public_key_pem:
+            raise HTTPException(422, "device_id, key_id and public_key_pem are required")
+        try:
+            derived = owner_authority_key_id(public_key_pem)
+        except ValueError as exc:
+            raise HTTPException(422, str(exc)) from exc
+        if key_id != derived:
+            raise HTTPException(422, "owner authority key_id does not match public key fingerprint")
+        path_raw = settings.owner_authority_keys_path.strip()
+        if not path_raw:
+            raise HTTPException(503, "runtime owner authority registry path is not configured")
+        path = Path(path_raw)
+        try:
+            _write_owner_authority_registry(path, key_id, public_key_pem)
+        except PermissionError as exc:
+            raise HTTPException(409, str(exc)) from exc
+        except ValueError as exc:
+            raise HTTPException(503, str(exc)) from exc
+        # The commander constructed the verifier before first enrollment. Refresh
+        # its public-key view in-process without touching its consumed-token set.
+        settings.owner_authority.keys.clear()
+        settings.owner_authority.keys[key_id] = public_key_pem.strip() + "\n"
+        return {
+            "enrolled": True,
+            "device_id": device_id,
+            "key_id": key_id,
+            "registry": str(path),
+            "active_owner_keys": 1,
+        }
 
     def promote(args: dict) -> dict:
         strategy_id = str(args.get("strategy_id") or "").strip()
@@ -260,7 +446,11 @@ def build_strategy_handlers(settings: StrategyPromotionSettings):
                 ledger.close()
                 fcntl.flock(lock_file.fileno(), fcntl.LOCK_UN)
 
-    return {"capsule_promote": promote}
+    return {
+        "capsule_promotion_candidates": candidates,
+        "owner_authority_enroll": enroll_owner_authority,
+        "capsule_promote": promote,
+    }
 
 
 __all__ = [
@@ -268,4 +458,5 @@ __all__ = [
     "PROMOTION_TOOL_SCHEMAS",
     "StrategyPromotionSettings",
     "build_strategy_handlers",
+    "owner_authority_key_id",
 ]
