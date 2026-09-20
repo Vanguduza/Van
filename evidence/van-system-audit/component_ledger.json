@@ -3092,19 +3092,23 @@
       "path": "trading/vati/app/account_lease.py",
       "maturity_class": "INTEGRATED",
       "disposition": "COMPLETE",
-      "rationale": "Repository implementation uses PostgresLeaseStore with transactional row locking and fences the lease epoch again at ExecutionRouter immediately before submission.",
+      "rationale": "Repository implementation uses PostgresLeaseStore transactional arbitration plus an exclusive submission_guard. ExecutionRouter performs an early shared-store epoch fence and then holds the account_runtime_leases row lock across durable ORDER_COMMAND creation, adapter submission, receipt logging and immediate protection handling, so takeover cannot occur while a broker submission is in flight.",
       "remediation_gate": "TRADING-ENH",
-      "producer": "PostgresLeaseStore + AccountRuntimeLease.acquire/renew",
-      "consumer": "AccountDecisionCoordinator.step / ExecutionRouter lease_fence",
-      "production_caller": "AccountCoordinatorService.start / ExecutionRouter.execute",
-      "tests": "trading/tests/test_account_coordinator.py",
+      "producer": "PostgresLeaseStore + AccountRuntimeLease.acquire/renew/submission_guard",
+      "consumer": "AccountDecisionCoordinator.step / ExecutionRouter lease_fence + lease_submission_guard",
+      "production_caller": "AccountCoordinatorService.start / AccountCoordinatorService router wiring / ExecutionRouter.execute",
+      "tests": [
+        "trading/tests/test_account_coordinator.py",
+        "trading/tests/test_execution.py",
+        "trading/tests/test_execution_and_exits.py"
+      ],
       "runtime_evidence": null,
       "owner_facing_projection": null,
       "terminal_state": "EXTERNALLY_BLOCKED_REPOSITORY_COMPLETE",
       "closure_commits": [
         "TRADING-ENH"
       ],
-      "external_blocker": "EXTERNAL_RUNTIME: no reachable van-trading-core/shared PostgreSQL environment is available here for the required two-process lease-arbitration and stale-epoch router canary"
+      "external_blocker": "EXTERNAL_RUNTIME: repository fencing now covers takeover during an in-flight submission, but no reachable van-trading-core/shared PostgreSQL environment is available here for the required real two-process row-lock/takeover/crash canary"
     },
     {
       "n": 158,
