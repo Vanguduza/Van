@@ -57,7 +57,7 @@ import com.dial.van.visual.VanPresentation
 import com.dial.van.visual.VanVisualState
 
 /** Navigation callbacks the screens need; the activity binds them to NavController routes. */
-class TradingNav(val openTrade: (String) -> Unit, val openInstrument: (String) -> Unit, val openTrades: (TradeView) -> Unit, val openRisk: () -> Unit, val openAccounts: () -> Unit, val openChat: () -> Unit)
+class TradingNav(val openTrade: (String) -> Unit, val openInstrument: (String) -> Unit, val openTrades: (TradeView) -> Unit, val openRisk: () -> Unit, val openAccounts: () -> Unit, val openStrategies: () -> Unit, val openChat: () -> Unit)
 
 class ScreenEnv(val repo: TradingRepository, val glass: VanGlassStyle, val budget: VanEffectBudget, val vanState: VanVisualState, val vanHeadline: String, val now: () -> Long)
 
@@ -166,14 +166,19 @@ fun OverviewScreen(env: ScreenEnv, nav: TradingNav, padding: PaddingValues) {
                             "${p.accounts.size} registered account(s)",
                             Modifier.weight(1f),
                         ) { nav.openAccounts() }
-                        val market = (states as? Loaded.Ready)?.value?.firstOrNull()
                         QuickAccess(
-                            "Market workspace",
-                            market?.let { "${it.symbol} · ${it.trend}/${it.vol}" } ?: "Open instrument analysis",
+                            "Strategies",
+                            "Validated candidates & owner promotion",
                             Modifier.weight(1f),
-                        ) {
-                            market?.symbol?.let(nav.openInstrument)
-                        }
+                        ) { nav.openStrategies() }
+                    }
+                    val market = (states as? Loaded.Ready)?.value?.firstOrNull()
+                    QuickAccess(
+                        "Market workspace",
+                        market?.let { "${it.symbol} · ${it.trend}/${it.vol}" } ?: "Open instrument analysis",
+                        Modifier.fillMaxWidth(),
+                    ) {
+                        market?.symbol?.let(nav.openInstrument)
                     }
                 }
             }

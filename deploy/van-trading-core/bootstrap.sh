@@ -133,6 +133,21 @@ if [[ ! -f "$SECRETS/pki/ca.crt" ]]; then run bash -c "OUT='$SECRETS/pki' CORE_I
 # ---------------------------------------------------------------- config
 if [[ ! -f "$CONFIG/van-trading-core.env" ]]; then run install -o root -g vati -m 0640 "$HERE/env/van-trading-core.env.example" "$CONFIG/van-trading-core.env"; ok "config env"; else skip "config env exists"; fi
 if [[ ! -f "$CONFIG/accounts.json" ]]; then run bash -c "echo '{\"schema_version\": 1, \"accounts\": []}' > '$CONFIG/accounts.json'"; run chown vati:vati "$CONFIG/accounts.json"; run chmod 0640 "$CONFIG/accounts.json"; ok "empty account registry (add accounts with: sudo -u vati $VENV/bin/python -m vati accounts add ...)"; fi
+OWNER_AUTHORITY_REGISTRY="$DATA/owner_authority_keys.json"
+if [[ ! -f "$OWNER_AUTHORITY_REGISTRY" ]]; then
+  run bash -c "umask 077; printf '%s\\n' '{\"version\":1,\"keys\":{}}' > '$OWNER_AUTHORITY_REGISTRY'"
+  run chown vati:vati "$OWNER_AUTHORITY_REGISTRY"
+  run chmod 0600 "$OWNER_AUTHORITY_REGISTRY"
+  ok "empty runtime owner-authority registry (paired S24 enrolls through A4)"
+else
+  if (( ! DRY_RUN )); then
+    chown vati:vati "$OWNER_AUTHORITY_REGISTRY"
+    chmod 0600 "$OWNER_AUTHORITY_REGISTRY"
+    jq -e '(.keys // {}) | type == "object" and (length <= 1)' "$OWNER_AUTHORITY_REGISTRY" >/dev/null \
+      || die "owner authority registry malformed or contains more than one active owner key"
+  fi
+  skip "runtime owner-authority registry already present"
+fi
 
 # ---------------------------------------------------------------- supabase
 if (( ! SKIP_SUPABASE )); then

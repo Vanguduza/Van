@@ -7,7 +7,7 @@ from pathlib import Path
 
 import pytest
 
-from conftest import mandate_dict
+from conftest import mandate_dict, passing_certificate
 from test_intelligence import mk_bars, noisy_trend
 from vati.__main__ import main as cli_main
 from vati.app import DecisionCycle, SessionConfig, SessionRunner
@@ -133,12 +133,24 @@ def test_zse_session_produces_owner_ticket():
     StrategyState = __import__("vati.risk", fromlist=["StrategyState"]).StrategyState
     # Each step up the ladder needs its own owner authority, named for the state it grants.
     for st in ("BACKTEST", "VALIDATION", "DEMO", "SHADOW", "LIMITED_LIVE"):
+        # TRD-ENH-021 — from DEMO onwards the promotion carries sealed semantic
+        # evidence bound to the capsule revision being promoted.
+        cert = passing_certificate(
+            strategy_id="ZSE-VALUE-ROTATION-01",
+            capsule_hash=reg.get("ZSE-VALUE-ROTATION-01").capsule_hash,
+        )
         reg.promote(
             "ZSE-VALUE-ROTATION-01", StrategyState(st),
             approval_signature_ref=owner.token(
-                act="capsule-promote", subject=f"ZSE-VALUE-ROTATION-01:{st}", issued_at_unix=1
+                act="capsule-promote",
+                subject=(
+                    f"ZSE-VALUE-ROTATION-01:{st}:{cert.validation_hash}"
+                    if StrategyState(st) in reg.CERTIFICATE_REQUIRED_FROM
+                    else f"ZSE-VALUE-ROTATION-01:{st}"
+                ),
+                issued_at_unix=1,
             ),
-            evidence_refs=["bt", "shadow"], approved_at_unix=1,
+            evidence_refs=["bt", "shadow"], approved_at_unix=1, certificate=cert,
         )
     engine = OpportunityEngine(reg, {"ZSE-VALUE-ROTATION-01": STRATEGY_IMPLEMENTATIONS["ZSE-VALUE-ROTATION"](strategy_id="ZSE-VALUE-ROTATION-01")}, TradingMandate.from_mapping(m))
     snap = ZseSnapshot("DELTA", "ZSE", Decimal("25.00"), Decimal("120000"), 18, Decimal("0.02"), Decimal("0.8"), 40, None, CurrencyRegime.ELEVATED, Decimal("0.044"), Decimal("0.03"))

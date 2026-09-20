@@ -47,7 +47,7 @@ def load_bars(path: str) -> list[Bar]:
 def build_engine(cfg_json: dict) -> tuple[SessionConfig, OpportunityEngine]:
     contract = contract_from_dict(cfg_json["contract"])
     cfg = SessionConfig(symbol=cfg_json["symbol"], base=cfg_json["base"], quote=cfg_json["quote"], venue=cfg_json["venue"], account_alias=cfg_json["account_alias"], contract=contract,
-                        mandate_dict=cfg_json["mandate"], warmup_bars=int(cfg_json.get("warmup_bars", 60)), session_id=cfg_json.get("session_id", "cli"), activation_id=cfg_json.get("activation_id", "vtil-act-unresolved"))
+                        mandate_dict=cfg_json["mandate"], timeframe=cfg_json.get("timeframe", "UNKNOWN"), warmup_bars=int(cfg_json.get("warmup_bars", 60)), session_id=cfg_json.get("session_id", "cli"), activation_id=cfg_json.get("activation_id", "vtil-act-unresolved"))
     reg = CapsuleRegistry.load_dir(cfg_json.get("capsule_dir", ROOT / "strategies" / "registry"))
     impl = {sid: STRATEGY_IMPLEMENTATIONS[sid.rsplit("-", 1)[0]](strategy_id=sid) for sid in cfg_json["capsules"]}
     return cfg, OpportunityEngine(reg, impl, TradingMandate.from_mapping(cfg_json["mandate"]))
@@ -150,6 +150,17 @@ def cmd_calendar(a: argparse.Namespace) -> int:
     print(json.dumps(calendar_report(load_calendar(a.file), now_ms=int(_t.time() * 1000)), indent=2)); return 0
 
 
+def cmd_research(a: argparse.Namespace) -> int:
+    """Run one non-authoritative trading research operation from JSON."""
+    from vati.core.ledger_pg import open_ledger
+    from vati.research.workflow import TradingResearchWorkflow
+    spec = json.loads(Path(a.spec).read_text())
+    ledger = open_ledger(a.ledger) if a.ledger else None
+    result = TradingResearchWorkflow(ledger=ledger).run_spec(spec)
+    print(json.dumps(result, indent=2, default=str))
+    return 0
+
+
 def cmd_serve(a: argparse.Namespace) -> int:
     from vati.app.process_lock import SessionAlreadyRunning, SessionLock
     from vati.app.service import ServiceConfig, SessionService, lake_bar_source
@@ -163,9 +174,19 @@ def cmd_serve(a: argparse.Namespace) -> int:
         print(json.dumps({"error": "session_already_running", "detail": str(exc)}))
         return 2
     try:
-        svc = SessionService(cfg, lake_bar_source(BarLake(cfg.lake_root), cfg.symbol, cfg.timeframe)).build()
+        if cfg.instruments:
+            from vati.app.account_service import AccountCoordinatorService
+            svc = AccountCoordinatorService(cfg).build()
+        else:
+            svc = SessionService(
+                cfg, lake_bar_source(BarLake(cfg.lake_root), cfg.symbol, cfg.timeframe)
+            ).build()
         if a.once:
-            svc.start(); print(json.dumps({"decision": svc.step_once(), "cycles": svc.cycles})); return 0
+            svc.start()
+            result = svc.step_once()
+            decision = getattr(result, "outcomes", result)
+            print(json.dumps({"decision": str(decision), "cycles": svc.cycles}))
+            return 0
         return svc.run_forever()
     finally:
         lock.release()
@@ -186,6 +207,7 @@ def main(argv=None) -> int:
     lk = sub.add_parser("lake"); lk.add_argument("op", choices=["list", "import-csv", "dukascopy"]); lk.add_argument("--root", default="lake"); lk.add_argument("--symbol"); lk.add_argument("--timeframe", default="H1")
     lk.add_argument("--file"); lk.add_argument("--provenance", default="HISTORICAL_VENDOR"); lk.add_argument("--start"); lk.add_argument("--end"); lk.set_defaults(fn=cmd_lake)
     cal = sub.add_parser("calendar"); cal.add_argument("--file", required=True); cal.set_defaults(fn=cmd_calendar)
+    rs = sub.add_parser("research"); rs.add_argument("--spec", required=True); rs.add_argument("--ledger"); rs.set_defaults(fn=cmd_research)
     sv = sub.add_parser("serve"); sv.add_argument("--config", required=True); sv.add_argument("--once", action="store_true"); sv.set_defaults(fn=cmd_serve)
     a = p.parse_args(argv)
     return a.fn(a)

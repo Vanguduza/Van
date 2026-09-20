@@ -10,6 +10,7 @@ from fastapi.testclient import TestClient
 
 from conftest_owner_authority import OwnerAuthorityHarness
 from commander.accounts import ACCOUNT_COMMANDS
+from commander.strategies import PROMOTION_COMMANDS
 from commander.app import AGENT_HIDDEN_COMMANDS, COMMANDS, CommanderSettings, create_app, redact
 from commander.auth import HDR_NONCE, HDR_SIG, HDR_TS, NonceCache, sign_headers, verify_request
 from vati.core import EventKind, Ledger, make_event
@@ -194,8 +195,8 @@ def test_credential_commands_are_hidden_from_agents_but_open_to_the_gateway(env)
     r = client.get("/v1/tools", headers=sign_headers(TOKEN, "GET", "/v1/tools", b""))
     assert r.status_code == 200
     listed = {t["name"] for t in r.json()["tools"]}
-    assert listed.isdisjoint(ACCOUNT_COMMANDS) and "status" in listed and "accounts" in listed
-    assert AGENT_HIDDEN_COMMANDS == set(ACCOUNT_COMMANDS)
+    assert listed.isdisjoint(ACCOUNT_COMMANDS + PROMOTION_COMMANDS) and "status" in listed and "accounts" in listed
+    assert AGENT_HIDDEN_COMMANDS == set(ACCOUNT_COMMANDS + PROMOTION_COMMANDS)
 
 
 def test_requested_by_is_not_the_callers_to_declare(two_principal_env):

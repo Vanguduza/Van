@@ -51,6 +51,7 @@ import com.dial.van.trading.ui.AccountsScreen
 import com.dial.van.trading.ui.InstrumentScreen
 import com.dial.van.trading.ui.OverviewScreen
 import com.dial.van.trading.ui.RiskScreen
+import com.dial.van.trading.ui.StrategiesScreen
 import com.dial.van.trading.ui.ScreenEnv
 import com.dial.van.trading.ui.TradeDetailScreen
 import com.dial.van.trading.ui.TradesScreen
@@ -97,6 +98,7 @@ class TradingCommandCentreActivity : FragmentActivity() {
                     openTrades = { nav.navigate("trades/${it.name}") },
                     openRisk = { nav.navigate(ROUTE_RISK) },
                     openAccounts = { nav.navigate(ROUTE_ACCOUNTS) },
+                    openStrategies = { nav.navigate(ROUTE_STRATEGIES) },
                     openChat = { startActivity(Intent(this@TradingCommandCentreActivity, CommandCentreActivity::class.java)) },
                 )
                 Box(modifier = Modifier.fillMaxSize().background(Brush.verticalGradient(listOf(Color(0xFF060A14), Color(0xFF0B1424), Color(0xFF04070F))))) {
@@ -114,6 +116,7 @@ class TradingCommandCentreActivity : FragmentActivity() {
                             composable("instrument/{symbol}", arguments = listOf(navArgument("symbol") { type = NavType.StringType })) { entry -> InstrumentScreen(env, tnav, padding, entry.arguments?.getString("symbol") ?: "") }
                             composable(ROUTE_RISK) { RiskScreen(env, tnav, padding) }
                             composable(ROUTE_ACCOUNTS) { AccountsScreen(env, padding, onAdd = { nav.navigate(ROUTE_ACCOUNT_ADD) }) }
+                            composable(ROUTE_STRATEGIES) { StrategiesScreen(env, padding, app) }
                             composable(ROUTE_ACCOUNT_ADD) { AccountOnboardingScreen(env, padding, app) { nav.popBackStack() } }
                         }
                         // Deep links from the overlay / Command Centre land on the requested object once the graph exists.
@@ -192,6 +195,7 @@ class TradingCommandCentreActivity : FragmentActivity() {
         const val ROUTE_OVERVIEW = "overview"
         const val ROUTE_RISK = "risk"
         const val ROUTE_ACCOUNTS = "accounts"
+        const val ROUTE_STRATEGIES = "strategies"
         const val ROUTE_ACCOUNT_ADD = "accounts/add"
 
         fun intent(context: Context, route: String = ROUTE_OVERVIEW): Intent =
