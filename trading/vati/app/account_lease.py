@@ -18,10 +18,12 @@ and would let the `remove lease_epoch fence` mutation survive.
 
 from __future__ import annotations
 
+import threading
 import time
+from contextlib import contextmanager
 from dataclasses import dataclass
 from enum import Enum
-from typing import Optional, Protocol
+from typing import Iterator, Optional, Protocol
 
 
 class LeaseOutcome(str, Enum):
@@ -79,6 +81,10 @@ class LeaseStore(Protocol):
         """Atomic CAS. False when another writer won the race."""
         ...
 
+    def submission_guard(self, account_alias: str):
+        """Hold the account's arbitration row exclusively across one submission."""
+        ...
+
 
 class InMemoryLeaseStore:
     """A single shared store. Reachable by construction, so fencing tests that
@@ -87,20 +93,31 @@ class InMemoryLeaseStore:
     def __init__(self) -> None:
         self._rows: dict[str, AccountLease] = {}
         self.reachable = True
+        self._lock = threading.RLock()
 
     def read(self, account_alias: str) -> Optional[AccountLease]:
-        if not self.reachable:
-            raise LeaseStoreUnavailable(account_alias)
-        return self._rows.get(account_alias)
+        with self._lock:
+            if not self.reachable:
+                raise LeaseStoreUnavailable(account_alias)
+            return self._rows.get(account_alias)
 
     def write_if(self, expected: Optional[AccountLease], new: AccountLease) -> bool:
-        if not self.reachable:
-            raise LeaseStoreUnavailable(new.account_alias)
-        current = self._rows.get(new.account_alias)
-        if current != expected:
-            return False
-        self._rows[new.account_alias] = new
-        return True
+        with self._lock:
+            if not self.reachable:
+                raise LeaseStoreUnavailable(new.account_alias)
+            current = self._rows.get(new.account_alias)
+            if current != expected:
+                return False
+            self._rows[new.account_alias] = new
+            return True
+
+    @contextmanager
+    def submission_guard(self, account_alias: str) -> Iterator[Optional[AccountLease]]:
+        """Test analogue of PostgreSQL SELECT ... FOR UPDATE."""
+        with self._lock:
+            if not self.reachable:
+                raise LeaseStoreUnavailable(account_alias)
+            yield self._rows.get(account_alias)
 
 
 class PostgresLeaseStore:
@@ -185,6 +202,41 @@ class PostgresLeaseStore:
         except Exception as exc:  # noqa: BLE001
             self._conn.rollback()
             raise LeaseStoreUnavailable(str(exc)) from exc
+
+    @contextmanager
+    def submission_guard(self, account_alias: str) -> Iterator[Optional[AccountLease]]:
+        """Lock one account row until the guarded broker submission is settled.
+
+        A lease timestamp alone cannot fence a network call that outlives the
+        remaining TTL. SELECT FOR UPDATE prevents another host's write_if from
+        taking the account lease while this process is between durable
+        ORDER_COMMAND and the end of immediate execution/protection handling.
+        PostgreSQL releases the row lock if this connection dies.
+        """
+        try:
+            cur = self._conn.cursor()
+            cur.execute(
+                "SELECT account_alias, holder_instance_id, lease_epoch, acquired_at_ms, "
+                "heartbeat_at_ms, expires_at_ms, software_version, git_sha "
+                "FROM vati.account_runtime_leases WHERE account_alias = %s FOR UPDATE",
+                (account_alias,),
+            )
+            current = self._from_row(cur.fetchone())
+        except Exception as exc:  # noqa: BLE001
+            try:
+                self._conn.rollback()
+            except Exception:
+                pass
+            raise LeaseStoreUnavailable(str(exc)) from exc
+        try:
+            yield current
+        finally:
+            try:
+                cur.close()
+            finally:
+                # The guard is read-only. Rollback releases the row lock without
+                # mutating the lease that was validated under it.
+                self._conn.rollback()
 
     def close(self) -> None:
         self._conn.close()
@@ -324,6 +376,46 @@ class AccountRuntimeLease:
             return False
         self._held = current
         return True
+
+    @contextmanager
+    def submission_guard(
+        self,
+        epoch: Optional[int],
+        *,
+        now_ms: Optional[int] = None,
+    ) -> Iterator[bool]:
+        """Hold shared account authority across the actual broker submission.
+
+        The ordinary fence is an early refusal. This guard is the final
+        split-brain boundary: it validates holder + epoch + liveness under the
+        store's exclusive arbitration lock and keeps that lock until the router
+        leaves the guarded section.
+        """
+        if self._held is None or epoch is None or epoch != self._held.lease_epoch:
+            yield False
+            return
+        guard = getattr(self.store, "submission_guard", None)
+        if not callable(guard):
+            # A production multi-instrument store without a locking guard is
+            # not a fencing store. Never degrade to a timestamp-only hint.
+            yield False
+            return
+        try:
+            with guard(self.account_alias) as current:
+                now = self._now(now_ms)
+                valid = bool(
+                    current is not None
+                    and current.holder_instance_id == self.instance_id
+                    and current.lease_epoch == epoch
+                    and current.live_at(now)
+                )
+                if not valid:
+                    self._held = None
+                else:
+                    self._held = current
+                yield valid
+        except LeaseStoreUnavailable:
+            yield False
 
     def release(self, *, now_ms: Optional[int] = None) -> None:
         if self._held is None:
