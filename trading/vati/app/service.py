@@ -33,6 +33,7 @@ from vati.market_data.calendars import FX_CALENDAR
 from vati.market_data.feeds.lake import TIMEFRAMES_MS, BarLake
 from vati.learning.episodes import Environment
 from vati.learning.hooks import LearningHooks
+from vati.learning.replay import restore_learning_runtime
 from vati.risk import AuthorizationMode, TradingMandate
 from vati.risk.serde import contract_from_dict
 from vati.strategies import STRATEGY_IMPLEMENTATIONS, CapsuleRegistry
@@ -172,6 +173,8 @@ class SessionService:
             environment=ENVIRONMENT_FOR_MODE[mandate.mode],
             broker=str(getattr(account.broker, "value", account.broker)).lower(),
         )
+        self.learning_replay = restore_learning_runtime(
+            self._ledger, learning, {c.symbol.upper(): engine})
         cycle = DecisionCycle(cfg=scfg, adapter=self.adapter, ledger=self._ledger, engine=engine, cost_fn=lambda st: cost, calendar=FX_CALENDAR, events=build_matrix(c.calendar_path), learning=learning)
         self.learning = learning
         self.runner = SessionRunner(cycle)
