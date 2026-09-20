@@ -469,6 +469,14 @@ class AccountCoordinatorService:
                 account_alias=self.account.alias, symbol=candidate.symbol,
                 template_id=policy_decision.template_id)
         software = self.account.broker == BrokerKind.ZSE_OWNER_TICKET
+        assert self.routes is not None
+        self.routes.refresh(
+            account_alias=self.account.alias,
+            adapter_id=str(getattr(self.account.broker, "value", self.account.broker)).lower(),
+            contracts=self.contracts,
+            now_ms=self.clock(),
+            source="pre_order_refresh",
+        )
         receipt = self.router.execute(
             intent, decision, self.mandate, now_ms=self.clock(),
             stop_mode=StopMode.SOFTWARE if software else StopMode.VENUE,
