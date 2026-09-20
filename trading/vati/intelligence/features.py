@@ -98,6 +98,7 @@ class FeatureVector:
     swing_high: Optional[Decimal]
     swing_low: Optional[Decimal]
     complete: bool
+    history_bars: int = 0
     feature_version: str = "features/1.0.0"
     #: TRD-ENH-004. Without this, an M5 vector and an H1 vector for the same
     #: symbol and instant are indistinguishable by their recorded fields, so the
@@ -132,6 +133,7 @@ def compute_features(bars: Sequence[Bar], *, fast: int = 20, slow: int = 50, atr
         spread_percentile=percentile_rank(spreads, last.avg_spread), trend_slope=slope, range_compression=compression,
         swing_high=max(b.high for b in window) if window else None, swing_low=min(b.low for b in window) if window else None,
         complete=all(x is not None for x in (ef, es, a, rv)),
+        history_bars=len(bars),
         timeframe=timeframe,
     )
 
