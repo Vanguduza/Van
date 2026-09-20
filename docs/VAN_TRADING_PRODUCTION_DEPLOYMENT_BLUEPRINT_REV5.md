@@ -280,10 +280,13 @@ strategy-promotion artifacts already required by this blueprint.
    selected template's bounded entry type and maximum slippage immediately before order submission.
 
 6. **Cross-host account fence.** Multi-instrument production coordination uses a transactional PostgreSQL
-   account_runtime_leases row. The current lease epoch travels to ExecutionRouter. Immediately before an
-   OrderCommand may be submitted, the fence re-reads shared PostgreSQL authority and requires the same holder,
-   the same epoch and a bounded remaining-validity margin. Store loss, takeover, stale epoch or insufficient
-   validity all fail closed; a process-local cached lease is never sufficient authority to submit.
+   account_runtime_leases row. The current lease epoch travels to ExecutionRouter. An early fence re-reads shared
+   authority, but the decisive submission fence is a PostgreSQL SELECT ... FOR UPDATE guard held across durable
+   ORDER_COMMAND creation, the broker adapter call, receipt logging and immediate protection handling. Store loss,
+   takeover or stale epoch fail closed; another host cannot acquire the account while that critical section is in
+   flight, even if the nominal lease TTL expires. If the process dies, PostgreSQL releases the row lock and the
+   successor reconstructs from the durable command/reconciliation path. A process-local cached lease is never
+   sufficient authority to submit.
 
 7. **MTF adoption boundary.** The timeframe-contract migration is provenance/schema adoption, not silent strategy
    mutation. The account runtime builds one required multi-timeframe causal evidence envelope per instrument/pass
