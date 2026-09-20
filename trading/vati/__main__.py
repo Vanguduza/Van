@@ -150,6 +150,17 @@ def cmd_calendar(a: argparse.Namespace) -> int:
     print(json.dumps(calendar_report(load_calendar(a.file), now_ms=int(_t.time() * 1000)), indent=2)); return 0
 
 
+def cmd_research(a: argparse.Namespace) -> int:
+    """Run one non-authoritative trading research operation from JSON."""
+    from vati.core.ledger_pg import open_ledger
+    from vati.research.workflow import TradingResearchWorkflow
+    spec = json.loads(Path(a.spec).read_text())
+    ledger = open_ledger(a.ledger) if a.ledger else None
+    result = TradingResearchWorkflow(ledger=ledger).run_spec(spec)
+    print(json.dumps(result, indent=2, default=str))
+    return 0
+
+
 def cmd_serve(a: argparse.Namespace) -> int:
     from vati.app.process_lock import SessionAlreadyRunning, SessionLock
     from vati.app.service import ServiceConfig, SessionService, lake_bar_source
@@ -196,6 +207,7 @@ def main(argv=None) -> int:
     lk = sub.add_parser("lake"); lk.add_argument("op", choices=["list", "import-csv", "dukascopy"]); lk.add_argument("--root", default="lake"); lk.add_argument("--symbol"); lk.add_argument("--timeframe", default="H1")
     lk.add_argument("--file"); lk.add_argument("--provenance", default="HISTORICAL_VENDOR"); lk.add_argument("--start"); lk.add_argument("--end"); lk.set_defaults(fn=cmd_lake)
     cal = sub.add_parser("calendar"); cal.add_argument("--file", required=True); cal.set_defaults(fn=cmd_calendar)
+    rs = sub.add_parser("research"); rs.add_argument("--spec", required=True); rs.add_argument("--ledger"); rs.set_defaults(fn=cmd_research)
     sv = sub.add_parser("serve"); sv.add_argument("--config", required=True); sv.add_argument("--once", action="store_true"); sv.set_defaults(fn=cmd_serve)
     a = p.parse_args(argv)
     return a.fn(a)
