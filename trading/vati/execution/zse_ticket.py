@@ -29,6 +29,7 @@ class OwnerTicket:
     time_in_force: str
     software_stop: Optional[Decimal]
     instructions: str
+    source_position_id: str = ""
     ticket_hash: str = ""
 
     def render(self) -> str:
@@ -46,6 +47,7 @@ class OwnerTicketAdapter:
     csd_verified: bool = False
     tickets: dict[str, OwnerTicket] = field(default_factory=dict)
     _positions: dict[str, dict] = field(default_factory=dict)
+    _confirmed_tickets: set[str] = field(default_factory=set)
     _seq: int = 0
 
     def sync_account(self) -> AccountState:
@@ -71,14 +73,56 @@ class OwnerTicketAdapter:
 
     def confirm(self, ticket_id: str, *, fill_price: Decimal, filled_qty: Decimal, contract_note_ref: str, now_ms: int) -> ExecutionReceipt:
         t = self.tickets[ticket_id]
-        if filled_qty > t.quantity_shares or fill_price > t.limit_price:
-            raise ValueError("confirmation exceeds ticket quantity or limit price")
+        if ticket_id in self._confirmed_tickets:
+            raise ValueError(f"ticket {ticket_id} is already confirmed")
         if not contract_note_ref.strip():
             raise ValueError("contract note reference required")
-        pid = f"CSD-{ticket_id}"
-        self._positions[pid] = {"symbol": t.symbol, "qty": filled_qty, "entry": fill_price, "intent": t.trade_intent_id}
-        return ExecutionReceipt(t.trade_intent_id, t.decision_hash, self.venue, "OWNER_EXECUTED", filled_qty, fill_price, t.limit_price, t.limit_price, t.limit_price, True, now_ms, now_ms,
-                                "OWNER_TICKET", broker_order_id=ticket_id, broker_position_id=pid, reject_reason=f"contract_note:{contract_note_ref}").sealed()
+        if fill_price <= ZERO or filled_qty <= ZERO:
+            raise ValueError("fill price and quantity must be positive")
+        if filled_qty > t.quantity_shares:
+            raise ValueError("confirmation exceeds ticket quantity")
+        if t.side == "BUY":
+            if t.limit_price > ZERO and fill_price > t.limit_price:
+                raise ValueError("confirmation exceeds ticket quantity or limit price")
+            pid = f"CSD-{ticket_id}"
+            self._positions[pid] = {
+                "symbol": t.symbol, "qty": filled_qty, "entry": fill_price,
+                "intent": t.trade_intent_id,
+            }
+        elif t.side == "SELL":
+            pid = t.source_position_id
+            if not pid:
+                matches = [
+                    position_id for position_id, position in self._positions.items()
+                    if position["symbol"] == t.symbol
+                    and position["intent"] == t.trade_intent_id
+                ]
+                if len(matches) != 1:
+                    raise ValueError("SELL ticket cannot be joined to exactly one open position")
+                pid = matches[0]
+            position = self._positions.get(pid)
+            if position is None:
+                raise ValueError(f"SELL ticket source position {pid!r} is not open")
+            if filled_qty > position["qty"]:
+                raise ValueError("SELL confirmation exceeds open position quantity")
+            if t.limit_price > ZERO and fill_price < t.limit_price:
+                raise ValueError("SELL confirmation is below ticket limit price")
+            remaining = position["qty"] - filled_qty
+            if remaining == ZERO:
+                del self._positions[pid]
+            else:
+                position["qty"] = remaining
+        else:
+            raise ValueError(f"unsupported owner ticket side {t.side!r}")
+
+        self._confirmed_tickets.add(ticket_id)
+        return ExecutionReceipt(
+            t.trade_intent_id, t.decision_hash, self.venue, "OWNER_EXECUTED",
+            filled_qty, fill_price, t.limit_price, t.limit_price, t.limit_price,
+            True, now_ms, now_ms, "OWNER_TICKET",
+            broker_order_id=ticket_id, broker_position_id=pid,
+            reject_reason=f"contract_note:{contract_note_ref}",
+        ).sealed()
 
     def modify_stop(self, position_id: str, new_stop: Decimal, *, now_ms: int) -> ExecutionReceipt:
         p = self._positions[position_id]
@@ -89,5 +133,30 @@ class OwnerTicketAdapter:
         qty = p["qty"] if quantity is None else min(quantity, p["qty"])
         self._seq += 1
         tid = f"T{self._seq}-SELL"
-        self.tickets[tid] = OwnerTicket(tid, p["intent"], "", self.venue.upper(), p["symbol"], "SELL", qty, ZERO, "DAY", None, f"Exit ticket ({reason}). Sell at best available limit.")
-        return ExecutionReceipt(p["intent"], "", self.venue, "ACCEPTED", ZERO, None, p["entry"], p["entry"], p["entry"], True, now_ms, now_ms, "OWNER_TICKET", broker_order_id=tid, broker_position_id=position_id, reject_reason=reason).sealed()
+        ticket = OwnerTicket(
+            ticket_id=tid,
+            trade_intent_id=p["intent"],
+            decision_hash="",
+            exchange=self.venue.upper(),
+            symbol=p["symbol"],
+            side="SELL",
+            quantity_shares=qty,
+            limit_price=ZERO,
+            time_in_force="DAY",
+            software_stop=None,
+            instructions=f"Exit ticket ({reason}). Sell at best available limit.",
+            source_position_id=position_id,
+        )
+        ticket = OwnerTicket(**{
+            **ticket.__dict__,
+            "ticket_hash": canonical_hash({
+                k: v for k, v in ticket.__dict__.items() if k != "ticket_hash"
+            }),
+        })
+        self.tickets[tid] = ticket
+        return ExecutionReceipt(
+            p["intent"], "", self.venue, "ACCEPTED", ZERO, None,
+            p["entry"], p["entry"], p["entry"], True, now_ms, now_ms,
+            "OWNER_TICKET", broker_order_id=tid,
+            broker_position_id=position_id, reject_reason=reason,
+        ).sealed()
