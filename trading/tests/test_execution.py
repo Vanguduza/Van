@@ -7,7 +7,7 @@ import pytest
 from conftest import intent, mandate_dict, snapshot
 from vati.core import EventKind, Ledger
 from vati.execution import (
-    DerivAdapter, ExecutionRouter, Mt5BridgeAdapter, Mt5BridgeClient, Outcome, OwnerTicketAdapter, PaperAdapter, ProtectionError, ProtectionManager,
+    DerivAdapter, ExecutionReceipt, ExecutionRouter, Mt5BridgeAdapter, Mt5BridgeClient, Outcome, OwnerTicketAdapter, PaperAdapter, ProtectionError, ProtectionManager,
     ReconciliationClass, RouterError, StopMode, VenuePosition, VenueUnavailable, compute_tca, map_deriv_contract, reconcile, review_trade,
 )
 from vati.execution.reconciliation import LedgerPosition
@@ -126,6 +126,43 @@ def test_protection_break_even_and_trailing():
     assert "P1" not in pm.rules
     with pytest.raises(ProtectionError):
         pm.register("P2", symbol="X", direction=Direction.LONG, entry=Decimal("1"), stop=Decimal("2"), target=None, opened_ms=0)
+
+
+def test_rejected_venue_stop_tighten_rolls_back_local_truth_and_halts(mandate, eurusd):
+    class RejectModifyPaper(PaperAdapter):
+        def modify_stop(self, position_id, new_stop, *, now_ms):
+            p = self._positions[position_id]
+            return ExecutionReceipt(
+                p["intent"], "", self.venue, "REJECTED", Decimal("0"), None,
+                p["entry"], p["entry"], p["entry"], True, now_ms, now_ms,
+                broker_position_id=position_id,
+                protective_stop_price=p["stop"],
+                reject_reason="injected_stop_modify_reject",
+            ).sealed()
+
+    m = TradingMandate.from_mapping(
+        mandate_dict(venue="paper", mode="DEMO_TRADER"))
+    i, d = approved(
+        m, SymbolContract(**{**eurusd.__dict__, "venue": "paper"}),
+        venue="paper", strategy_state=StrategyState.DEMO)
+    ad = RejectModifyPaper()
+    ks = KillSwitch()
+    r, led = router(ad, ks=ks)
+    rec = r.execute(i, d, m, now_ms=NOW)
+    pid = rec.broker_position_id
+    original_stop = r.protection.stop_of(pid)
+    r.protection.rules[pid].break_even_trigger = Decimal("0.0005")
+
+    out = r.apply_exits(
+        "paper", "EURUSD",
+        i.entry + Decimal("0.0010"), i.entry + Decimal("0.0011"),
+        now_ms=NOW + 1_000,
+    )
+    assert out and out[0].status == "REJECTED"
+    assert r.protection.stop_of(pid) == original_stop
+    assert ad.positions()[0].stop_price == original_stop
+    assert KillSwitchTrigger.STOP_REJECTED in ks.active
+    assert led.count(EventKind.KILL_SWITCH) == 1
 
 
 def test_owner_ticket_channel_for_zse():
