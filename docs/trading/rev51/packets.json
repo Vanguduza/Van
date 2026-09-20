@@ -1,0 +1,759 @@
+{
+  "schema_version": 1,
+  "revision": "5.1",
+  "baseline_commit": "6574671a381d48199593fb054f69e30ee7632c70",
+  "baseline_pr": 49,
+  "cognition_mode": "OFFLINE_EVOLUTION+SHADOW_LIVE",
+  "live_advisory": "DISABLED",
+  "live_status": "NOT_CLAIMED",
+  "model_hierarchy": [
+    "Fable 5.1",
+    "GPT-6 Astra",
+    "Claude Opus 5",
+    "GPT-5.6 Sol"
+  ],
+  "invariants": [
+    "INV-AUTH-001",
+    "INV-EXEC-001",
+    "INV-MODEL-001",
+    "INV-LIVE-001",
+    "INV-RISK-001",
+    "INV-PPC-001",
+    "INV-LEARN-001",
+    "INV-EVID-001",
+    "INV-REPLAY-001",
+    "INV-FAIL-001"
+  ],
+  "gate_order": [
+    "G0",
+    "G0b",
+    "G1",
+    "G2",
+    "G3",
+    "G3b",
+    "G4",
+    "G5",
+    "G5b",
+    "G6",
+    "G7",
+    "G7b",
+    "G8",
+    "G9",
+    "G10",
+    "G11",
+    "G12",
+    "G13",
+    "G14",
+    "G15"
+  ],
+  "structural_gates": {
+    "G0": "Baseline closure. Carried by this registry and tools/verify_build_ready.py; no atomic packet of its own.",
+    "G11": "Expansion shadow activation. The shadow-mode staging of TRD-REV51-110, admitted only on TRD-REV51-109 evidence; no separate module."
+  },
+  "packets": [
+    {
+      "packet_id": "TRD-REV51-090",
+      "du_id": "DU-TRD-090",
+      "title": "Economic Calendar Recorder",
+      "gate": "G0b",
+      "hook": "vati-calendar.service / python -m vati calendar-record",
+      "module": "trading/vati/calendar/recorder.py",
+      "tests": [
+        "trading/tests/test_rev51_calendar.py"
+      ],
+      "invariants": [
+        "INV-REPLAY-001",
+        "INV-FAIL-001"
+      ],
+      "live_affecting": false
+    },
+    {
+      "packet_id": "TRD-REV51-091",
+      "du_id": "DU-TRD-091",
+      "title": "Trading Model Provider Registry & Quota Scheduler",
+      "gate": "G2",
+      "hook": "shadow cognition scheduler and offline research/evolution services",
+      "module": "trading/vati/cognition/providers.py",
+      "tests": [
+        "trading/tests/test_rev51_model_routing.py"
+      ],
+      "invariants": [
+        "INV-MODEL-001",
+        "INV-FAIL-001"
+      ],
+      "live_affecting": false
+    },
+    {
+      "packet_id": "TRD-REV51-092",
+      "du_id": "DU-TRD-092",
+      "title": "TradingWorldModel & Persistent Cognition Store",
+      "gate": "G3",
+      "hook": "cognition projector subscribed to VATI ledger/event stream",
+      "module": "trading/vati/cognition/world_model.py",
+      "tests": [
+        "trading/tests/test_rev51_context_world.py"
+      ],
+      "invariants": [
+        "INV-REPLAY-001"
+      ],
+      "live_affecting": false
+    },
+    {
+      "packet_id": "TRD-REV51-093",
+      "du_id": "DU-TRD-093",
+      "title": "Versioned Trading Context Compiler",
+      "gate": "G3",
+      "hook": "cognitive wake handler before every model invocation",
+      "module": "trading/vati/cognition/context.py",
+      "tests": [
+        "trading/tests/test_rev51_context_world.py"
+      ],
+      "invariants": [
+        "INV-REPLAY-001",
+        "INV-FAIL-001"
+      ],
+      "live_affecting": false
+    },
+    {
+      "packet_id": "TRD-REV51-094",
+      "du_id": "DU-TRD-094",
+      "title": "CognitiveAssessment Contract & Reason Vocabulary",
+      "gate": "G1",
+      "hook": "ModelRouter result normalizer",
+      "module": "trading/vati/cognition/contracts.py",
+      "tests": [
+        "trading/tests/test_rev51_cognition_contracts.py"
+      ],
+      "invariants": [
+        "INV-AUTH-001",
+        "INV-LIVE-001",
+        "INV-LEARN-001"
+      ],
+      "live_affecting": false
+    },
+    {
+      "packet_id": "TRD-REV51-095",
+      "du_id": "DU-TRD-095",
+      "title": "Blind Reviewer & Reviewer Canary",
+      "gate": "G4",
+      "hook": "high-impact offline evaluation pipeline",
+      "module": "trading/vati/cognition/blind_reviewer.py",
+      "tests": [
+        "trading/tests/test_rev51_governance.py"
+      ],
+      "invariants": [
+        "INV-EVID-001"
+      ],
+      "live_affecting": false
+    },
+    {
+      "packet_id": "TRD-REV51-096",
+      "du_id": "DU-TRD-096",
+      "title": "Cognitive Budget & Degradation Ladder",
+      "gate": "G4",
+      "hook": "before every cognition invocation",
+      "module": "trading/vati/cognition/budget.py",
+      "tests": [
+        "trading/tests/test_rev51_governance.py"
+      ],
+      "invariants": [
+        "INV-MODEL-001",
+        "INV-FAIL-001"
+      ],
+      "live_affecting": false
+    },
+    {
+      "packet_id": "TRD-REV51-097",
+      "du_id": "DU-TRD-097",
+      "title": "Deterministic Analogue Retrieval",
+      "gate": "G3",
+      "hook": "context compilation",
+      "module": "trading/vati/cognition/analogues.py",
+      "tests": [
+        "trading/tests/test_rev51_context_world.py"
+      ],
+      "invariants": [
+        "INV-REPLAY-001"
+      ],
+      "live_affecting": false
+    },
+    {
+      "packet_id": "TRD-REV51-098",
+      "du_id": "DU-TRD-098",
+      "title": "Cognitive Action Translator",
+      "gate": "G5",
+      "hook": "post-assessment shadow pipeline",
+      "module": "trading/vati/cognition/translator.py",
+      "tests": [
+        "trading/tests/test_rev51_translator_health.py"
+      ],
+      "invariants": [
+        "INV-AUTH-001",
+        "INV-EXEC-001",
+        "INV-LIVE-001",
+        "INV-RISK-001"
+      ],
+      "live_affecting": false
+    },
+    {
+      "packet_id": "TRD-REV51-099",
+      "du_id": "DU-TRD-099",
+      "title": "TradeHealth Engine",
+      "gate": "G5",
+      "hook": "post-entry lifecycle before scale/new-risk evaluation",
+      "module": "trading/vati/lifecycle/trade_health.py",
+      "tests": [
+        "trading/tests/test_rev51_translator_health.py"
+      ],
+      "invariants": [
+        "INV-RISK-001",
+        "INV-FAIL-001"
+      ],
+      "live_affecting": false
+    },
+    {
+      "packet_id": "TRD-REV51-100",
+      "du_id": "DU-TRD-100",
+      "title": "Deterministic Shadow Book",
+      "gate": "G3b",
+      "hook": "every candidate/open-position decision point eligible for cognition measurement",
+      "module": "trading/vati/cognition/shadow_book.py",
+      "tests": [
+        "trading/tests/test_rev51_measurement.py"
+      ],
+      "invariants": [
+        "INV-LIVE-001",
+        "INV-REPLAY-001"
+      ],
+      "live_affecting": false
+    },
+    {
+      "packet_id": "TRD-REV51-101",
+      "du_id": "DU-TRD-101",
+      "title": "P&L Attribution Engine",
+      "gate": "G3b",
+      "hook": "trade/decision comparison horizon completion",
+      "module": "trading/vati/cognition/attribution.py",
+      "tests": [
+        "trading/tests/test_rev51_measurement.py"
+      ],
+      "invariants": [
+        "INV-EVID-001"
+      ],
+      "live_affecting": false
+    },
+    {
+      "packet_id": "TRD-REV51-102",
+      "du_id": "DU-TRD-102",
+      "title": "VATI Decision Exam",
+      "gate": "G3b",
+      "hook": "CI/release qualification and scheduled cognition evaluation",
+      "module": "trading/vati/cognition/exam.py",
+      "tests": [
+        "trading/tests/test_rev51_measurement.py"
+      ],
+      "invariants": [
+        "INV-EVID-001",
+        "INV-LIVE-001"
+      ],
+      "live_affecting": false
+    },
+    {
+      "packet_id": "TRD-REV51-103",
+      "du_id": "DU-TRD-103",
+      "title": "Cognitive Performance Ledger",
+      "gate": "G3b",
+      "hook": "after outcome/attribution horizon completes",
+      "module": "trading/vati/cognition/performance_ledger.py",
+      "tests": [
+        "trading/tests/test_rev51_measurement.py"
+      ],
+      "invariants": [
+        "INV-EVID-001",
+        "INV-REPLAY-001"
+      ],
+      "live_affecting": false
+    },
+    {
+      "packet_id": "TRD-REV51-104",
+      "du_id": "DU-TRD-104",
+      "title": "Symbol / Route / Quantisation Registry",
+      "gate": "G5b",
+      "hook": "account-service startup and periodic route refresh",
+      "module": "trading/vati/execution/route_registry.py",
+      "tests": [
+        "trading/tests/test_rev51_route_pretrade.py"
+      ],
+      "invariants": [
+        "INV-EXEC-001",
+        "INV-FAIL-001"
+      ],
+      "live_affecting": true
+    },
+    {
+      "packet_id": "TRD-REV51-105",
+      "du_id": "DU-TRD-105",
+      "title": "Pre-Trade Control Layer",
+      "gate": "G5b",
+      "hook": "every order-sending TradeIntent, root or child",
+      "module": "trading/vati/execution/pretrade.py",
+      "tests": [
+        "trading/tests/test_rev51_route_pretrade.py"
+      ],
+      "invariants": [
+        "INV-AUTH-001",
+        "INV-EXEC-001",
+        "INV-RISK-001",
+        "INV-FAIL-001"
+      ],
+      "live_affecting": true
+    },
+    {
+      "packet_id": "TRD-REV51-106",
+      "du_id": "DU-TRD-106",
+      "title": "PositionFamily Model",
+      "gate": "G7",
+      "hook": "AccountTradeLifecycle after every entry/partial/close/reconciliation event",
+      "module": "trading/vati/lifecycle/family.py",
+      "tests": [
+        "trading/tests/test_rev51_preservation.py"
+      ],
+      "invariants": [
+        "INV-REPLAY-001"
+      ],
+      "live_affecting": true
+    },
+    {
+      "packet_id": "TRD-REV51-107",
+      "du_id": "DU-TRD-107",
+      "title": "PositionRiskEnvelope & Released-Risk Haircut",
+      "gate": "G7",
+      "hook": "after every family/stop/mark/reconciliation change and before any scale candidate",
+      "module": "trading/vati/lifecycle/envelope.py",
+      "tests": [
+        "trading/tests/test_rev51_preservation.py"
+      ],
+      "invariants": [
+        "INV-AUTH-001",
+        "INV-RISK-001",
+        "INV-PPC-001"
+      ],
+      "live_affecting": true
+    },
+    {
+      "packet_id": "TRD-REV51-108",
+      "du_id": "DU-TRD-108",
+      "title": "Scale Policy Registry",
+      "gate": "G9",
+      "hook": "runtime scale-policy lookup",
+      "module": "trading/vati/lifecycle/scale_policy.py",
+      "tests": [
+        "trading/tests/test_rev51_expansion.py"
+      ],
+      "invariants": [
+        "INV-RISK-001",
+        "INV-LEARN-001"
+      ],
+      "live_affecting": true
+    },
+    {
+      "packet_id": "TRD-REV51-109",
+      "du_id": "DU-TRD-109",
+      "title": "Expansion Counterfactual Laboratory",
+      "gate": "G10",
+      "hook": "offline research CLI/workflow before G11",
+      "module": "trading/vati/research/expansion_lab.py",
+      "tests": [
+        "trading/tests/test_rev51_expansion.py"
+      ],
+      "invariants": [
+        "INV-EVID-001",
+        "INV-LIVE-001"
+      ],
+      "live_affecting": false
+    },
+    {
+      "packet_id": "TRD-REV51-110",
+      "du_id": "DU-TRD-110",
+      "title": "Profit Expansion Engine",
+      "gate": "G9",
+      "hook": "post-entry lifecycle after urgent preservation actions",
+      "module": "trading/vati/lifecycle/expansion.py",
+      "tests": [
+        "trading/tests/test_rev51_expansion.py"
+      ],
+      "invariants": [
+        "INV-AUTH-001",
+        "INV-RISK-001",
+        "INV-LIVE-001"
+      ],
+      "live_affecting": true
+    },
+    {
+      "packet_id": "TRD-REV51-111",
+      "du_id": "DU-TRD-111",
+      "title": "Loss Containment & Profit Preservation",
+      "gate": "G7",
+      "hook": "post-entry lifecycle before any scale/new-entry action",
+      "module": "trading/vati/lifecycle/preservation.py",
+      "tests": [
+        "trading/tests/test_rev51_preservation.py"
+      ],
+      "invariants": [
+        "INV-RISK-001",
+        "INV-PPC-001",
+        "INV-FAIL-001"
+      ],
+      "live_affecting": true
+    },
+    {
+      "packet_id": "TRD-REV51-112",
+      "du_id": "DU-TRD-112",
+      "title": "Event Release Normaliser",
+      "gate": "G7b",
+      "hook": "calendar recorder event consumer",
+      "module": "trading/vati/events/normaliser.py",
+      "tests": [
+        "trading/tests/test_rev51_events.py"
+      ],
+      "invariants": [
+        "INV-REPLAY-001",
+        "INV-FAIL-001"
+      ],
+      "live_affecting": false
+    },
+    {
+      "packet_id": "TRD-REV51-113",
+      "du_id": "DU-TRD-113",
+      "title": "Event Surprise / Reaction Engine",
+      "gate": "G7b",
+      "hook": "event release processor + scheduled horizon callbacks",
+      "module": "trading/vati/events/reaction.py",
+      "tests": [
+        "trading/tests/test_rev51_events.py"
+      ],
+      "invariants": [
+        "INV-REPLAY-001"
+      ],
+      "live_affecting": false
+    },
+    {
+      "packet_id": "TRD-REV51-114",
+      "du_id": "DU-TRD-114",
+      "title": "MacroEventEpisode Producer",
+      "gate": "G7b",
+      "hook": "event-reaction scheduler when configured horizons finish/expire",
+      "module": "trading/vati/events/episodes.py",
+      "tests": [
+        "trading/tests/test_rev51_events.py"
+      ],
+      "invariants": [
+        "INV-REPLAY-001",
+        "INV-EVID-001"
+      ],
+      "live_affecting": false
+    },
+    {
+      "packet_id": "TRD-REV51-115",
+      "du_id": "DU-TRD-115",
+      "title": "Venue-Generic Event Registry",
+      "gate": "G7b",
+      "hook": "trading service startup / explicit config reload",
+      "module": "trading/vati/events/registry.py",
+      "tests": [
+        "trading/tests/test_rev51_events.py"
+      ],
+      "invariants": [
+        "INV-FAIL-001"
+      ],
+      "live_affecting": false
+    },
+    {
+      "packet_id": "TRD-REV51-116",
+      "du_id": "DU-TRD-116",
+      "title": "Execution Style Selector",
+      "gate": "G6",
+      "hook": "after RiskDecision approval, before ORDER_COMMAND construction",
+      "module": "trading/vati/execution/style_selector.py",
+      "tests": [
+        "trading/tests/test_rev51_execution_conformal.py"
+      ],
+      "invariants": [
+        "INV-AUTH-001",
+        "INV-EXEC-001"
+      ],
+      "live_affecting": true
+    },
+    {
+      "packet_id": "TRD-REV51-117",
+      "du_id": "DU-TRD-117",
+      "title": "Conformal Interval Engine",
+      "gate": "G8",
+      "hook": "RiskAuthority before final sizing/admission for policies requiring conformal evidence",
+      "module": "trading/vati/risk/conformal.py",
+      "tests": [
+        "trading/tests/test_rev51_execution_conformal.py"
+      ],
+      "invariants": [
+        "INV-AUTH-001",
+        "INV-RISK-001",
+        "INV-FAIL-001"
+      ],
+      "live_affecting": true
+    },
+    {
+      "packet_id": "TRD-REV51-118",
+      "du_id": "DU-TRD-118",
+      "title": "ResearchMission / ResearchPacket Contracts",
+      "gate": "G12",
+      "hook": "research mission creation and worker completion",
+      "module": "trading/vati/research/missions.py",
+      "tests": [
+        "trading/tests/test_rev51_research_factory.py"
+      ],
+      "invariants": [
+        "INV-EVID-001",
+        "INV-REPLAY-001"
+      ],
+      "live_affecting": false
+    },
+    {
+      "packet_id": "TRD-REV51-119",
+      "du_id": "DU-TRD-119",
+      "title": "Fable Research Director",
+      "gate": "G12",
+      "hook": "offline evolution scheduler and evidence/anomaly triggers",
+      "module": "trading/vati/research/director.py",
+      "tests": [
+        "trading/tests/test_rev51_research_factory.py"
+      ],
+      "invariants": [
+        "INV-MODEL-001",
+        "INV-LIVE-001"
+      ],
+      "live_affecting": false
+    },
+    {
+      "packet_id": "TRD-REV51-120",
+      "du_id": "DU-TRD-120",
+      "title": "Specialist Research Agent Factory",
+      "gate": "G12",
+      "hook": "mission orchestration loop",
+      "module": "trading/vati/research/agents.py",
+      "tests": [
+        "trading/tests/test_rev51_research_factory.py"
+      ],
+      "invariants": [
+        "INV-MODEL-001",
+        "INV-FAIL-001"
+      ],
+      "live_affecting": false
+    },
+    {
+      "packet_id": "TRD-REV51-121",
+      "du_id": "DU-TRD-121",
+      "title": "Research Qualification & Synthesis Join",
+      "gate": "G12",
+      "hook": "research mission close workflow",
+      "module": "trading/vati/research/synthesis.py",
+      "tests": [
+        "trading/tests/test_rev51_research_factory.py"
+      ],
+      "invariants": [
+        "INV-EVID-001"
+      ],
+      "live_affecting": false
+    },
+    {
+      "packet_id": "TRD-REV51-122",
+      "du_id": "DU-TRD-122",
+      "title": "Research Portfolio Yield Ledger",
+      "gate": "G12",
+      "hook": "scheduled research portfolio evaluation",
+      "module": "trading/vati/research/yield_ledger.py",
+      "tests": [
+        "trading/tests/test_rev51_research_factory.py"
+      ],
+      "invariants": [
+        "INV-EVID-001"
+      ],
+      "live_affecting": false
+    },
+    {
+      "packet_id": "TRD-REV51-123",
+      "du_id": "DU-TRD-123",
+      "title": "Strategy Evolution Archive & Harness",
+      "gate": "G13",
+      "hook": "offline evolution scheduler",
+      "module": "trading/vati/evolution/archive.py",
+      "tests": [
+        "trading/tests/test_rev51_evolution.py"
+      ],
+      "invariants": [
+        "INV-LIVE-001",
+        "INV-EVID-001"
+      ],
+      "live_affecting": false
+    },
+    {
+      "packet_id": "TRD-REV51-124",
+      "du_id": "DU-TRD-124",
+      "title": "System Improvement Proposal Engine",
+      "gate": "G13",
+      "hook": "research synthesis close workflow",
+      "module": "trading/vati/evolution/proposals.py",
+      "tests": [
+        "trading/tests/test_rev51_evolution.py"
+      ],
+      "invariants": [
+        "INV-LEARN-001",
+        "INV-LIVE-001"
+      ],
+      "live_affecting": false
+    },
+    {
+      "packet_id": "TRD-REV51-125",
+      "du_id": "DU-TRD-125",
+      "title": "Proposal Admission Control & Gate Health",
+      "gate": "G13",
+      "hook": "proposal ingestion",
+      "module": "trading/vati/evolution/admission.py",
+      "tests": [
+        "trading/tests/test_rev51_evolution.py"
+      ],
+      "invariants": [
+        "INV-LEARN-001",
+        "INV-EVID-001",
+        "INV-FAIL-001"
+      ],
+      "live_affecting": false
+    },
+    {
+      "packet_id": "TRD-REV51-126",
+      "du_id": "DU-TRD-126",
+      "title": "Evaluator Protected-Path Enforcement",
+      "gate": "G13",
+      "hook": "every model-authored candidate/proposal before scoring/merge",
+      "module": "trading/vati/evolution/protected_paths.py",
+      "tests": [
+        "trading/tests/test_rev51_evolution.py"
+      ],
+      "invariants": [
+        "INV-AUTH-001",
+        "INV-EXEC-001",
+        "INV-RISK-001"
+      ],
+      "live_affecting": false
+    },
+    {
+      "packet_id": "TRD-REV51-127",
+      "du_id": "DU-TRD-127",
+      "title": "Growth Optimality Diagnostic",
+      "gate": "G13",
+      "hook": "offline periodic risk research",
+      "module": "trading/vati/risk/growth.py",
+      "tests": [
+        "trading/tests/test_rev51_evolution.py"
+      ],
+      "invariants": [
+        "INV-RISK-001",
+        "INV-LIVE-001"
+      ],
+      "live_affecting": false
+    },
+    {
+      "packet_id": "TRD-REV51-128",
+      "du_id": "DU-TRD-128",
+      "title": "Rejection Reason Analytics",
+      "gate": "G13",
+      "hook": "read-model refresh / scheduled aggregation",
+      "module": "trading/vati/observability/rejection_analytics.py",
+      "tests": [
+        "trading/tests/test_rev51_evolution.py"
+      ],
+      "invariants": [
+        "INV-EVID-001"
+      ],
+      "live_affecting": false
+    },
+    {
+      "packet_id": "TRD-REV51-129",
+      "du_id": "DU-TRD-129",
+      "title": "Owner Trading Cognition Read Models",
+      "gate": "G14",
+      "hook": "GET trading read endpoints",
+      "module": "trading/vati/readmodels/cognition.py",
+      "tests": [
+        "trading/tests/test_rev51_owner_surfaces.py"
+      ],
+      "invariants": [
+        "INV-EVID-001",
+        "INV-LIVE-001"
+      ],
+      "live_affecting": false
+    },
+    {
+      "packet_id": "TRD-REV51-130",
+      "du_id": "DU-TRD-130",
+      "title": "Trading Command Centre Surfaces",
+      "gate": "G14",
+      "hook": "TradingCommandCentreActivity navigation/cards/tabs",
+      "module": "android/app/src/main/java/com/dial/van/trading/ui/CognitionScreens.kt",
+      "tests": [
+        "android/app/src/test/java/com/dial/van/trading/CognitionSurfacesTest.kt"
+      ],
+      "invariants": [
+        "INV-LIVE-001"
+      ],
+      "live_affecting": false
+    },
+    {
+      "packet_id": "TRD-REV51-131",
+      "du_id": "DU-TRD-131",
+      "title": "Semantic Trading Push / Overlay Integration",
+      "gate": "G14",
+      "hook": "gateway event publication on read-model/trading state transition",
+      "module": "backend/van_gateway/trading/cognition.py",
+      "tests": [
+        "backend/tests/test_trading_cognition_api.py"
+      ],
+      "invariants": [
+        "INV-LIVE-001",
+        "INV-EVID-001"
+      ],
+      "live_affecting": false
+    },
+    {
+      "packet_id": "TRD-REV51-132",
+      "du_id": "DU-TRD-132",
+      "title": "Model Handoff / Continuity State",
+      "gate": "G14",
+      "hook": "every Fable\u2192Astra\u2192Opus\u2192Sol transition",
+      "module": "trading/vati/cognition/handoff.py",
+      "tests": [
+        "trading/tests/test_rev51_model_routing.py"
+      ],
+      "invariants": [
+        "INV-MODEL-001",
+        "INV-REPLAY-001"
+      ],
+      "live_affecting": false
+    },
+    {
+      "packet_id": "TRD-REV51-133",
+      "du_id": "DU-TRD-133",
+      "title": "Rev 5.1 Certification Harness",
+      "gate": "G15",
+      "hook": "PR CI, Trading Core qualification and release promotion",
+      "module": "tools/certification/rev51_harness.py",
+      "tests": [
+        "trading/tests/test_rev51_certification.py"
+      ],
+      "invariants": [
+        "INV-EVID-001",
+        "INV-LIVE-001"
+      ],
+      "live_affecting": false
+    }
+  ]
+}
