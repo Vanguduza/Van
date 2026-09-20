@@ -583,8 +583,8 @@ class AccountCoordinatorService:
                     received_time_ms=now_ms,
                     correlation_id=receipt.trade_intent_id,
                 ))
-                self.lifecycle.adopt_owner_buy_confirmation(
-                    receipt, order_payload=command)
+            self.lifecycle.adopt_owner_buy_confirmation(
+                receipt, order_payload=command)
         return tuple(sorted(unresolved))
 
     def _sync_owner_ticket_sells(self, now_ms: int) -> tuple[str, ...]:
@@ -613,8 +613,7 @@ class AccountCoordinatorService:
             except Exception:
                 unresolved.append(tid)
                 continue
-            newly_applied = tid not in applied
-            if newly_applied:
+            if tid not in applied:
                 self._ledger.append(make_event(
                     EventKind.EXECUTION_RECEIPT,
                     "vati-account-service",
@@ -633,7 +632,6 @@ class AccountCoordinatorService:
                     or "OWNER_CONFIRMED_SELL"
                 ),
                 now_ms=event_time_ms,
-                emit_review=newly_applied,
             )
         return tuple(sorted(unresolved))
 
