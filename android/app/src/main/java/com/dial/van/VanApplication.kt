@@ -12,6 +12,7 @@ import com.dial.van.degraded.DeviceSignals
 import com.dial.van.gateway.ReplayReason
 import com.dial.van.gateway.QueueReplayer
 import com.dial.van.connectivity.ConnectivityRegistry
+import com.dial.van.connectivity.ProvisioningIntake
 import com.dial.van.gateway.VanGatewayClient
 import com.dial.van.session.VanHermesSessionManager
 import com.dial.van.voice.VoiceEdge
@@ -46,7 +47,12 @@ import kotlinx.coroutines.launch
 
 class VanApplication : Application(), VoiceInputCallback, TtsOutputCallback {
 
-    private val appScope = CoroutineScope(SupervisorJob() + Dispatchers.Default)
+    /**
+     * Internal rather than private: `ProvisioningActivity` finishes immediately and needs
+     * a scope that outlives it, because a provisioning run cancelled halfway would leave
+     * this device paired and unbound — §0D.3's failure state exactly.
+     */
+    internal val appScope = CoroutineScope(SupervisorJob() + Dispatchers.Default)
 
     lateinit var commandQueue: EncryptedCommandQueue
         private set
@@ -168,6 +174,9 @@ class VanApplication : Application(), VoiceInputCallback, TtsOutputCallback {
      */
     lateinit var connectivity: ConnectivityRegistry
 
+    /** ADR-RB-026 — the installer's payload intake. Read by the onboarding status. */
+    lateinit var provisioning: ProvisioningIntake
+
     /**
      * Rev 1.5 §20 — the durable logical session the owner's conversation binds to.
      *
@@ -216,6 +225,11 @@ class VanApplication : Application(), VoiceInputCallback, TtsOutputCallback {
         queueReplayer = QueueReplayer(commandQueue, gatewayClient, degradedModeStore, appScope)
         telemetry = DeviceTelemetryReporter(this, gatewayClient, appScope)
         connectivity = ConnectivityRegistry(this)
+        // ADR-RB-026 — the installer's way in, and the only one. Built before the
+        // session so the onboarding screen can say whether this build can ever be
+        // provisioned rather than telling the owner to wait for something that will
+        // never arrive.
+        provisioning = ProvisioningIntake(this)
         vanSession = VanHermesSessionManager(
             gatewayClient, appScope, telemetry = telemetry.session,
         )

@@ -135,6 +135,60 @@ android {
             if (storePath.isNullOrBlank() || !file(storePath).exists()) {
                 throw GradleException("Release signing refused: storeFile missing or not found ($storePath)")
             }
+
+            /*
+             * RB-111 / §0D.3 — a release signed by the debug key is not a bound build.
+             *
+             * §0D.3's binding is "this installed package + this app signing identity +
+             * this hardware Keystore key + this Gateway owner-device slot". Android
+             * generates a debug keystore per machine, so a release signed with one is
+             * signed by whichever machine built it — the identity is not stable, and two
+             * builds of the same application id cannot even replace one another. The
+             * owner's first sideload failed with exactly that dialog (P2-AND-016).
+             *
+             * Checked by name rather than by fingerprint because the fingerprint is not
+             * knowable here: what is knowable is that `androiddebugkey` and
+             * `debug.keystore` are never a production identity.
+             */
+            val alias = (keystoreProperties["keyAlias"] as String?).orEmpty().trim()
+            if (alias.isEmpty() || alias == "androiddebugkey") {
+                throw GradleException(
+                    "Release signing refused: keyAlias is the Android debug alias, which " +
+                        "is generated per machine and cannot be the owner-device binding " +
+                        "identity (Rev 1.5 §0D.3).",
+                )
+            }
+            if (storePath.trim().endsWith("debug.keystore")) {
+                throw GradleException(
+                    "Release signing refused: storeFile is a debug keystore (Rev 1.5 §0D.3).",
+                )
+            }
+
+            /*
+             * RB-121 / §0D.2 — a release build with no trust anchor can never be set up.
+             *
+             * §0D.2 removed every field the owner could type an endpoint into, so the
+             * only way into a production VAN is a signed connectivity manifest or an
+             * ADR-RB-026 provisioning payload — and both are verified against keys
+             * compiled in here. Empty is the honest default for a debug build and is a
+             * dead APK for a release one: it would install, open, and sit on "waiting for
+             * the installer" forever, with nothing anywhere saying why.
+             *
+             * The format is checked, not just the presence. A truncated argument that
+             * carried no PEM would parse to no keys at all, which is the same dead build
+             * with a value that looks configured.
+             */
+            val anchors = vanConnectivityTrustedKeys.split("\n")
+                .map { it.trim() }
+                .filter { it.contains('=') && it.substringAfter('=').contains("BEGIN PUBLIC KEY") }
+            if (anchors.isEmpty()) {
+                throw GradleException(
+                    "Release connectivity configuration refused: " +
+                        "VAN_CONNECTIVITY_TRUSTED_KEYS must carry at least one " +
+                        "`kid=PEM` anchor, or this build can never be provisioned " +
+                        "(Rev 1.5 §0D.2, ADR-RB-026/027).",
+                )
+            }
         }
     }
 

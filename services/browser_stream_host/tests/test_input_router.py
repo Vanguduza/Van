@@ -285,3 +285,62 @@ class TestTheRouterIsNarrow:
                 continue
             for call in router.route(_packet(kind, text="x")):
                 assert call.method.startswith("Input."), call.method
+
+
+class TestTheInputFloodBound:
+    """Rev 1.5 §38 item 12 — the flood where every packet is well-formed.
+
+    Bounded here rather than at the Gateway because the Gateway is not in this path: §8's
+    input travels device → Stream Host, and a bound anywhere else would be counting
+    something it cannot see.
+    """
+
+    def _limited(self, limit: int = 3):
+        from van_gateway.browser.flood_bounds import InputRateLimiter
+
+        return CdpInputRouter(
+            viewport=Viewport(1280, 720, REVISION),
+            control_generation=GENERATION,
+            rate_limiter=InputRateLimiter(limit=limit, window_ms=1_000),
+        )
+
+    def test_a_router_with_no_limiter_translates_everything(self):
+        """Every caller that existed before this bound keeps working unchanged."""
+        router = _router()
+        for _ in range(1_000):
+            assert router.route(_packet(InputKind.POINTER_MOVE))
+
+    def test_packets_past_the_bound_are_refused_by_name(self):
+        from services.browser_stream_host.input_router import REJECT_INPUT_FLOOD
+
+        router = self._limited()
+        for _ in range(3):
+            assert router.route(_packet(InputKind.POINTER_MOVE), now_ms=1_000)
+        with pytest.raises(InputRouterRefused) as caught:
+            router.route(_packet(InputKind.POINTER_MOVE), now_ms=1_000)
+        assert caught.value.reason == REJECT_INPUT_FLOOD
+
+    def test_the_session_recovers_once_the_window_passes(self):
+        router = self._limited()
+        for _ in range(3):
+            router.route(_packet(InputKind.POINTER_MOVE), now_ms=1_000)
+        assert router.route(_packet(InputKind.POINTER_MOVE), now_ms=2_100)
+
+    def test_a_stale_packet_is_reported_as_stale_rather_than_as_a_flood(self):
+        """The ordering that makes the log usable.
+
+        A flood of packets that are *also* preempted should say preempted: that is the
+        fact an agent needs to act on, and a rate refusal would hide it behind a symptom.
+        """
+        router = self._limited(limit=0)
+        with pytest.raises(InputRouterRefused) as caught:
+            router.route(_packet(generation=GENERATION - 1), now_ms=1_000)
+        assert caught.value.reason == REJECT_STALE_GENERATION
+
+    def test_a_navigation_is_still_a_boundary_rather_than_a_flood(self):
+        router = self._limited(limit=0)
+        with pytest.raises(InputRouterRefused) as caught:
+            router.route(
+                _packet(InputKind.NAVIGATE, text="https://example.com/"), now_ms=1_000,
+            )
+        assert caught.value.reason == REJECT_NOT_INPUT

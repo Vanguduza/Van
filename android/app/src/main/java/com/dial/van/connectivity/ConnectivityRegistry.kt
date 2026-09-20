@@ -113,25 +113,9 @@ class ConnectivityRegistry(context: Context) {
         knownVersion = against,
     )
 
-    /**
-     * `kid=PEM` pairs, newline-separated, injected at build time.
-     *
-     * A malformed entry is dropped rather than throwing: one bad line in a build
-     * configuration must not make a shipped app unable to start, and the consequence of
-     * dropping it — that manifests signed by that key are refused as `unknown_kid` — is
-     * the safe direction.
-     */
+    /** One parser, shared with the provisioning intake. See [ConnectivityTrustedKeys]. */
     private fun parseTrustedKeys(): Map<String, String> =
-        BuildConfig.VAN_CONNECTIVITY_TRUSTED_KEYS
-            .split("\n")
-            .mapNotNull { line ->
-                val separator = line.indexOf('=')
-                if (separator <= 0) return@mapNotNull null
-                val kid = line.substring(0, separator).trim()
-                val pem = line.substring(separator + 1).trim().replace("\\n", "\n")
-                if (kid.isEmpty() || !pem.contains("BEGIN PUBLIC KEY")) null else kid to pem
-            }
-            .toMap()
+        ConnectivityTrustedKeys.parse(BuildConfig.VAN_CONNECTIVITY_TRUSTED_KEYS)
 
     private companion object {
         const val KEY_MANIFEST = "manifest_json"

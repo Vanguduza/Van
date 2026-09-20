@@ -121,6 +121,7 @@ sourceSets {
             "com/dial/van/browser/BrowserProcessRecovery.kt",
             "com/dial/van/browser/BrowserModels.kt",
             "com/dial/van/connectivity/ConnectivityManifest.kt",
+            "com/dial/van/connectivity/ProvisioningPayload.kt",
             "com/dial/van/session/SessionEnvelope.kt",
             "com/dial/van/session/TransportSupervisor.kt",
             "com/dial/van/session/WarmStandby.kt",

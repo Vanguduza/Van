@@ -26,6 +26,12 @@ import time
 from dataclasses import dataclass
 from enum import Enum
 
+from van_gateway.browser.flood_bounds import (
+    MAX_CONCURRENT_DOWNLOADS_PER_SESSION,
+    REJECT_DOWNLOAD_FLOOD,
+    REJECT_DOWNLOAD_SESSION_UNKNOWN,
+)
+
 
 class DownloadState(str, Enum):
     CREATED = "CREATED"
@@ -204,15 +210,38 @@ class DownloadBroker:
         that has not been judged yet.
         """
         now = int(time.time() * 1000) if now_ms is None else now_ms
+        # §38 item 18 — a download flood. Counted over the non-terminal states only: a
+        # session that has finished a hundred downloads over an afternoon is an owner
+        # working, and one with sixteen in flight at once is a page.
+        #
+        # Refused at creation rather than throttled, because a queued download is still a
+        # file the Stream Host has been told to fetch; deferring it would move the flood
+        # rather than bound it.
+        in_flight = await self.store.fetchone(
+            "SELECT COUNT(*) AS n FROM browser_downloads WHERE session_id = ? "
+            "AND state IN (?, ?)",
+            (session_id, DownloadState.CREATED.value, DownloadState.IN_PROGRESS.value),
+        )
+        if int(in_flight["n"]) >= MAX_CONCURRENT_DOWNLOADS_PER_SESSION:
+            raise DownloadError(REJECT_DOWNLOAD_FLOOD)
         verdict = classify(suggested_name=suggested_name, declared_mime=declared_mime)
         try:
             await self._insert(download_id, session_id, target_id, verdict, declared_mime,
                                url_digest, now)
         except sqlite3.IntegrityError as exc:
-            # The host retried a report it never got an answer to. Refused rather than
-            # inserted again, and refused with its own reason: the caller can then read
-            # the record's real state instead of being told the download is starting when
-            # it may already have been quarantined.
+            # Two different failures used to arrive here and both were called a duplicate.
+            #
+            # The one this branch was written for is a host retrying a report it never got
+            # an answer to: refused rather than inserted again, and with its own reason, so
+            # the caller can read the record's real state instead of being told the
+            # download is starting when it may already have been quarantined.
+            #
+            # The other is a download for a session that does not exist — the table has a
+            # foreign key to `browser_interactive_sessions`, and SQLite raises the same
+            # exception type for both. Reporting that as "already reported" sends whoever
+            # is reading the log to look for a record that was never created.
+            if "FOREIGN KEY" in str(exc).upper():
+                raise DownloadError(REJECT_DOWNLOAD_SESSION_UNKNOWN) from exc
             raise DownloadError("download_already_reported") from exc
         return verdict
 

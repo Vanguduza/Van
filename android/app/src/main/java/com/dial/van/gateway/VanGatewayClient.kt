@@ -128,6 +128,18 @@ class VanGatewayClient(context: Context) {
         }
     }
 
+    /**
+     * Where VAN connects. Readable everywhere, writable only from provisioning.
+     *
+     * §0D.2 / RB-121 — the setter is private on purpose, and privacy is the enforcement
+     * rather than a convention. A public setter is all a "change server address" screen
+     * needs, and that screen is a phishing surface with the owner's whole assistant behind
+     * it: anyone who persuades them to retype an address owns every command from then on,
+     * and nothing on the phone looks wrong afterwards.
+     *
+     * The only writer is [provisionThisDevice], which takes a payload signed by the pinned
+     * connectivity authority. A release build has no other path to this value.
+     */
     var baseUrl: String
         get() {
             val configured = prefs.getString(KEY_BASE, null)
@@ -141,7 +153,7 @@ class VanGatewayClient(context: Context) {
                 }
             }
         }
-        set(value) = prefs.edit().putString(KEY_BASE, normalizeGatewayBaseUrl(value)).apply()
+        private set(value) = prefs.edit().putString(KEY_BASE, normalizeGatewayBaseUrl(value)).apply()
 
     private fun defaultGatewayBaseUrl(): String {
         val buildConfigured = BuildConfig.VAN_GATEWAY_BASE_URL.trim()
@@ -188,7 +200,35 @@ class VanGatewayClient(context: Context) {
 
     fun newA4ApprovalSignature(): Signature = approvalKeys.newSigningSignature()
 
-    suspend fun pairThisDevice(
+    /**
+     * ADR-RB-026 — the whole of provisioning, from a payload the installer delivered.
+     *
+     * Two steps because they buy two different things, and §0D.3 needs both. Pairing earns
+     * this device its ingress and access tokens; binding attests a hardware-backed Keystore
+     * key so those tokens are worth nothing on any other handset. A device that paired and
+     * did not bind is exactly the failure §0D.3 describes — an APK copied to another phone
+     * that works.
+     *
+     * The order matters and is not arbitrary: `bindThisDevice` signs with the device id
+     * that pairing mints, so binding first would have nothing to bind.
+     */
+    suspend fun provisionThisDevice(
+        payload: com.dial.van.connectivity.ProvisioningPayload,
+        label: String = "android",
+    ): JSONObject = withContext(Dispatchers.IO) {
+        pairThisDevice(payload.gatewayUrl, payload.pairingToken, label)
+        bindThisDevice(payload.bootstrapToken)
+    }
+
+    /**
+     * §0D.2 — private, and this is the enforcement.
+     *
+     * Two screens used to call this with strings the owner had typed: a "Gateway address"
+     * field and a "pairing code" field, which are the first and fifth entries on §0D.2's
+     * list of what a production build must never expose. Making it private means a new
+     * form cannot be added without also removing this comment.
+     */
+    private suspend fun pairThisDevice(
         gatewayUrl: String,
         pairingToken: String,
         label: String = "android",

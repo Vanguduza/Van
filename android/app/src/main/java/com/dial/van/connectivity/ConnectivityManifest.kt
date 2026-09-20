@@ -48,6 +48,40 @@ sealed class ManifestVerdict {
     data class Refused(val reason: String) : ManifestVerdict()
 }
 
+/**
+ * The build-time trust anchor, parsed.
+ *
+ * Extracted because there are now two readers — the connectivity manifest and the
+ * ADR-RB-026 provisioning payload — and the first version of the second one invented its
+ * own format. It parsed the same string as JSON, found nothing, and reported the build as
+ * having no trust anchor: provisioning would have been impossible on a correctly
+ * configured release build, and the only symptom would have been a phone that sat waiting.
+ *
+ * Two parsers for one build-time string is the same class of defect as two copies of a
+ * wire format, and it is harder to see because the string is injected rather than sent.
+ */
+object ConnectivityTrustedKeys {
+
+    /**
+     * `kid=PEM` pairs, newline-separated, injected at build time.
+     *
+     * A malformed entry is dropped rather than throwing: one bad line in a build
+     * configuration must not make a shipped app unable to start, and the consequence of
+     * dropping it — that anything signed by that key is refused as `unknown_kid` — is the
+     * safe direction.
+     */
+    fun parse(raw: String): Map<String, String> =
+        raw.split("\n")
+            .mapNotNull { line ->
+                val separator = line.indexOf('=')
+                if (separator <= 0) return@mapNotNull null
+                val kid = line.substring(0, separator).trim()
+                val pem = line.substring(separator + 1).trim().replace("\\n", "\n")
+                if (kid.isEmpty() || !pem.contains("BEGIN PUBLIC KEY")) null else kid to pem
+            }
+            .toMap()
+}
+
 object ConnectivityManifestVerifier {
 
     /**
@@ -124,6 +158,19 @@ object ConnectivityManifestVerifier {
      * manifest naming a profile with an accent in it verified here and nowhere else.
      */
     internal fun canonical(json: JSONObject): ByteArray = VanCanonicalJson.bytes(json)
+
+    /**
+     * The same signature check, for a caller outside this object.
+     *
+     * `ProvisioningVerifier` uses it deliberately rather than keeping a copy: a second
+     * P-256 verifier is a second place the DER conversion can be subtly wrong, and the
+     * symptom of that is a signature that passes for the wrong reason.
+     */
+    internal fun verifySignatureFor(
+        payload: ByteArray,
+        signatureHex: String,
+        publicKeyPem: String,
+    ): Boolean = verifySignature(payload, signatureHex, publicKeyPem)
 
     private fun verifySignature(
         payload: ByteArray,

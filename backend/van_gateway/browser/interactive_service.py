@@ -24,6 +24,10 @@ from typing import Any
 
 from van_gateway.automation.canonical import digest
 from van_gateway.browser.control_lease import ControlLeaseError, ControlLeaseService
+from van_gateway.browser.flood_bounds import (
+    MAX_OPEN_TABS_PER_SESSION,
+    REJECT_TAB_FLOOD,
+)
 from van_gateway.browser.interactive_models import (
     BrowserControlHolder,
     DURABLE_SESSION_EVENTS,
@@ -394,6 +398,24 @@ class InteractiveSessionService:
         """
         now = int(time.time() * 1000) if now_ms is None else now_ms
         url_digest = digest(url)
+        # §38 item 17 — a tab flood. Checked before the insert and only for a target this
+        # session has not seen: a page navigating in a tab it already owns is ordinary,
+        # and refusing that would break the common case to bound the rare one.
+        #
+        # The new tab is refused rather than an old one closed. Closing loses whatever the
+        # owner had open, which is the harm rather than the defence.
+        known = await self.store.fetchone(
+            "SELECT 1 FROM browser_session_targets WHERE session_id = ? AND target_id = ?",
+            (session_id, target_id),
+        )
+        if known is None:
+            open_tabs = await self.store.fetchone(
+                "SELECT COUNT(*) AS n FROM browser_session_targets "
+                "WHERE session_id = ? AND closed_at_ms IS NULL",
+                (session_id,),
+            )
+            if int(open_tabs["n"]) >= MAX_OPEN_TABS_PER_SESSION:
+                raise InteractiveSessionError(REJECT_TAB_FLOOD)
         await self.store.execute(
             """
             INSERT INTO browser_session_targets(

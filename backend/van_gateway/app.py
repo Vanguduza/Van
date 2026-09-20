@@ -85,6 +85,10 @@ from van_gateway.browser.interactive_api import (
 )
 from van_gateway.browser.interactive_service import InteractiveSessionService
 from van_gateway.browser.quality_api import QualityControllers, build_quality_router
+from van_gateway.connectivity.provisioning import (
+    build_provisioning_payload,
+    sign_provisioning_payload,
+)
 from van_gateway.browser.stream_grants import (
     SigningKey,
     StreamGrantService,
@@ -300,6 +304,19 @@ GOOGLE_CONTROL_ROUTES: frozenset[str] = frozenset({
 
 
 class BootstrapCreateBody(BaseModel):
+    note: str | None = None
+
+
+class ProvisioningPayloadBody(BaseModel):
+    """ADR-RB-026 — what the installer asks for, which is deliberately almost nothing.
+
+    The installer names the Gateway the device should reach, because it is the only party
+    that knows which deployment this is. Everything else — the one-time credential, the
+    attestation challenge, the expiry — is the Gateway's to mint, so that an installer
+    cannot extend a provisioning window or reuse a token by asking for it.
+    """
+
+    gateway_url: str = Field(min_length=1)
     note: str | None = None
 
 class BootstrapChallengeBody(BaseModel):
@@ -949,6 +966,7 @@ def create_app() -> FastAPI:
             return ControlScope.PROJECTS
         if method == "POST" and path in {
             "/v1/devices/bootstrap/create", "/v1/devices/rebind",
+            "/v1/devices/provisioning-payload",
         }:
             # ADR-RB-026 — minting an enrolment credential, and replacing the owner's
             # device, are the same authority as enrolment itself.
@@ -1353,6 +1371,58 @@ def create_app() -> FastAPI:
             result="ok", capability="device.bootstrap.create", after={"note": body.note}
         )
         return {"bootstrap_token": token, "attestation_challenge": challenge}
+
+    @app.post("/v1/devices/provisioning-payload")
+    async def create_provisioning_payload(
+        body: ProvisioningPayloadBody,
+        x_van_internal_token: str | None = Header(default=None),
+    ):
+        """ADR-RB-026 — the installer's one call, and the owner types nothing.
+
+        One call rather than three, because the alternative is an installer that mints a
+        token, reads a challenge and assembles a document itself — and an installer that
+        assembles the document decides its expiry. §0D.2's rule survives only if the
+        short-lived, single-use, signed envelope is built by the party that also enforces
+        those three properties.
+        """
+        require_internal_control(x_van_internal_token, ControlScope.DEVICE_ENROLMENT)
+        if not connectivity_config.private_pem or not connectivity_config.kid:
+            # No signing key means no provisioning, not an unsigned one. A payload the
+            # device cannot verify is a payload it must refuse, and handing the installer
+            # one would make the failure look like the phone's.
+            raise HTTPException(status_code=503, detail="connectivity_signing_unconfigured")
+        token, challenge = await _require_binding_service().create_bootstrap_token(
+            note=body.note
+        )
+        # Both credentials, minted together, because provisioning is one act. A device
+        # that paired but did not bind would hold working tokens and no hardware identity,
+        # which is §0D.3's failure exactly: an APK copied to another handset would work.
+        ticket = await auth.create_pairing_ticket(body.note or "owner-device")
+        active = await connectivity_config.active()
+        try:
+            payload = build_provisioning_payload(
+                gateway_url=body.gateway_url,
+                pairing_token=ticket.token,
+                bootstrap_token=token,
+                attestation_challenge=challenge,
+                manifest_version=active.manifest_version if active else 0,
+            )
+            signature = sign_provisioning_payload(
+                payload, private_pem=connectivity_config.private_pem
+            )
+        except ConnectivityError as exc:
+            raise HTTPException(status_code=400, detail=exc.reason) from exc
+        await audit.record(
+            result="ok", capability="device.provisioning.issue",
+            # The token is not recorded. An audit row that carried it would be a second
+            # copy of the one credential that can bind a new device, in the table a backup
+            # copies — which is the reason `create_bootstrap_token` only stores its hash.
+            after={"provisioning_id": payload["provisioning_id"], "note": body.note},
+        )
+        return JSONResponse(
+            {"payload": payload, "signature": signature, "kid": connectivity_config.kid},
+            headers={"Cache-Control": "no-store"},
+        )
 
     @app.post("/v1/devices/bootstrap/challenge")
     async def bootstrap_challenge(body: BootstrapChallengeBody):

@@ -50,6 +50,29 @@
             </intent-filter>
         </activity>
 
+        <!--
+          Rev 1.5 ADR-RB-026 — the installer's way in, started over ADB and never by the
+          owner.
+
+          `exported="true"` with no intent filter, so it is reachable by an explicit
+          component name and does not appear anywhere. It usually would not be acceptable
+          to export a component that provisions a device; it is here because the entry
+          point holds no authority. The payload must be signed by a key compiled into this
+          build, must not have expired, must not have been used before, and even then only
+          earns two single-use tokens whose value depends on a hardware attestation the
+          caller cannot produce (§0D.3). The signature is the guard; exportedness is only
+          the channel.
+
+          `noHistory` and `excludeFromRecents` because there is no screen and nothing for
+          the owner to return to — §0D.2's point is that they are not part of this.
+        -->
+        <activity
+            android:name=".provisioning.ProvisioningActivity"
+            android:exported="true"
+            android:excludeFromRecents="true"
+            android:noHistory="true"
+            android:theme="@android:style/Theme.NoDisplay" />
+
         <activity
             android:name=".command.CommandCentreActivity"
             android:exported="true"

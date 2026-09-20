@@ -31,9 +31,14 @@ tests to stop them drifting.
 
 from __future__ import annotations
 
+import time
 from dataclasses import dataclass, field
 from typing import Any
 
+from van_gateway.browser.flood_bounds import (
+    REJECT_INPUT_FLOOD,
+    InputRateLimiter,
+)
 from van_gateway.browser.input_protocol import (
     InputKind,
     InputPacket,
@@ -86,9 +91,20 @@ ALT, CONTROL, META, SHIFT = 1, 2, 4, 8
 class CdpInputRouter:
     """RB-017. One per session; holds the viewport the host is actually rendering."""
 
-    def __init__(self, *, viewport: Viewport, control_generation: int) -> None:
+    def __init__(
+        self, *, viewport: Viewport, control_generation: int,
+        rate_limiter: InputRateLimiter | None = None,
+    ) -> None:
         self.viewport = viewport
         self.control_generation = control_generation
+        # §38 item 12 — the input flood, bounded where the packets are translated.
+        #
+        # Here rather than at the Gateway because the Gateway is not in this path: §8's
+        # input travels device → Stream Host, and a bound anywhere else would be counting
+        # something it cannot see. Optional so a caller can share one limiter across the
+        # host's sessions or supply a clock-controlled one in a test; a router with none
+        # translates everything, which is the behaviour every existing caller had.
+        self.rate_limiter = rate_limiter
 
     def adopt_viewport(self, viewport: Viewport, *, control_generation: int | None = None) -> None:
         """A resize the device has acknowledged, and optionally a control handover."""
@@ -96,7 +112,7 @@ class CdpInputRouter:
         if control_generation is not None:
             self.control_generation = control_generation
 
-    def route(self, packet: InputPacket) -> list[CdpCall]:
+    def route(self, packet: InputPacket, *, now_ms: int | None = None) -> list[CdpCall]:
         """Translate, or refuse with a named reason.
 
         Returns a list because one input event is sometimes two CDP calls: a pointer down
@@ -112,6 +128,14 @@ class CdpInputRouter:
         # agent that has just been preempted needs to hear.
         if packet.kind.is_navigation:
             raise InputRouterRefused(REJECT_NOT_INPUT)
+        # Last of the refusals, and deliberately so. A flood of packets that are *also*
+        # stale or preempted should be reported as stale or preempted: those say the
+        # sender has lost authority, which is what whoever reads the log needs to act on,
+        # and a rate refusal would hide it behind a symptom.
+        if self.rate_limiter is not None:
+            when = int(time.time() * 1000) if now_ms is None else now_ms
+            if not self.rate_limiter.admit(packet.authority.session_id, when):
+                raise InputRouterRefused(REJECT_INPUT_FLOOD)
 
         handler = _ROUTES.get(packet.kind)
         if handler is None:

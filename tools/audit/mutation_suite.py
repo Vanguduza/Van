@@ -659,6 +659,59 @@ ALL = [
     "        if row is None:",
     "C31 one session's device deletes another session's download"),
  ]),
+ # --- checkpoint 34: installer-driven provisioning and the three floods -------------
+ (["tests/test_owner_device_provisioning.py", "tests/test_browser_flood_bounds.py"], [
+   ("van_gateway/connectivity/provisioning.py",
+    '        raise ProvisioningError("provisioning_url_must_use_https")',
+    "        pass",
+    "C34 the installer points the owner's phone at a plain-http gateway"),
+   ("van_gateway/connectivity/provisioning.py",
+    "    if now >= expires:",
+    "    if False:",
+    "C34 a payload read out of a log an hour later still provisions the phone"),
+   ("van_gateway/connectivity/provisioning.py",
+    "    leaked = FORBIDDEN_PAYLOAD_FIELDS & set(payload)\n"
+    "    if leaked:\n"
+    '        raise ProvisioningError(f"provisioning_carries_standing_credential:{sorted(leaked)[0]}")\n'
+    "    key = serialization.load_pem_private_key",
+    "    key = serialization.load_pem_private_key",
+    "C34 a standing credential is signed into a payload sent over a channel that logs"),
+   ("van_gateway/connectivity/provisioning.py",
+    '        "expires_at_ms": now + int(ttl_ms),',
+    '        "expires_at_ms": now + 365 * 24 * 60 * 60 * 1000,',
+    "C34 the provisioning window is a year instead of ten minutes"),
+   ("van_gateway/browser/flood_bounds.py",
+    "        if len(window) >= self.limit:\n"
+    "            # Not appended: a refused packet must not push the window forward, or a\n"
+    "            # sustained flood would keep the session refused long after it stopped.\n"
+    "            return False",
+    "        if len(window) >= self.limit:\n"
+    "            window.append(now_ms)\n"
+    "            return False",
+    "C34 a stopped flood keeps the owner's session refused"),
+   ("van_gateway/browser/flood_bounds.py",
+    "        while window and window[0] <= cutoff:",
+    "        while False:",
+    "C34 the input window never slides, so one busy second is permanent"),
+   ("van_gateway/browser/flood_bounds.py",
+    "        window = self._seen.setdefault(session_id, deque())",
+    '        window = self._seen.setdefault("all", deque())',
+    "C34 one session under attack throttles the owner's own"),
+   ("van_gateway/browser/interactive_service.py",
+    "        if known is None:",
+    "        if True:",
+    "C34 a page navigating in a tab it already owns is counted as a new one"),
+   ("van_gateway/browser/downloads.py",
+    '            "SELECT COUNT(*) AS n FROM browser_downloads WHERE session_id = ? "\n'
+    '            "AND state IN (?, ?)",',
+    '            "SELECT COUNT(*) AS n FROM browser_downloads WHERE session_id = ?",',
+    "C34 a session that has ever finished sixteen downloads accepts no more"),
+   ("van_gateway/browser/downloads.py",
+    '            if "FOREIGN KEY" in str(exc).upper():',
+    "            if False:",
+    "C34 a download for a session nobody created reads as already reported"),
+ ]),
+
  # --- checkpoint 33: the link report, the outbox and the epoch the Gateway grants ----
  (["tests/test_browser_quality_api.py", "tests/test_session_transport_api.py",
    "tests/test_observability_metrics.py"], [
@@ -1015,6 +1068,45 @@ ROOT_LEVEL = [
 #: Checkpoint 14, Kotlin half. Run by Gradle in android/verification rather than by pytest,
 #: because that harness is the only thing in this repository that can execute Kotlin at all.
 KOTLIN = [
+ # --- checkpoint 34: the device's half of installer-driven provisioning --------------
+ (f"{APP_KT}/connectivity/ProvisioningPayload.kt",
+  "        if (nowMs >= expiresAtMs) {",
+  "        if (false) {",
+  "C34 the phone accepts a payload that expired an hour ago"),
+ (f"{APP_KT}/connectivity/ProvisioningPayload.kt",
+  "        if (provisioningId in alreadyAccepted) {",
+  "        if (false) {",
+  "C34 a payload replayed from a device log provisions the phone again"),
+ (f"{APP_KT}/connectivity/ProvisioningPayload.kt",
+  "        if (!isAcceptableUrl(gatewayUrl, allowInsecureLoopback)) {",
+  "        if (false) {",
+  "C34 a release build is pointed at a plain-http gateway"),
+ (f"{APP_KT}/connectivity/ProvisioningPayload.kt",
+  "        if (url.startsWith(\"https://\", ignoreCase = true)) return true\n"
+  "        if (!allowInsecureLoopback) return false",
+  "        if (url.startsWith(\"https://\", ignoreCase = true)) return true\n"
+  "        if (false) return false",
+  "C34 every build treats loopback http as acceptable, not only a debug one"),
+ (f"{APP_KT}/connectivity/ProvisioningPayload.kt",
+  "        if (leaked != null) {",
+  "        if (false) {",
+  "C34 a standing credential arrives in a provisioning payload and is kept"),
+ (f"{APP_KT}/connectivity/ProvisioningPayload.kt",
+  "        if (parsed.optInt(\"payload_version\", 0) != PAYLOAD_VERSION) {",
+  "        if (false) {",
+  "C34 a payload from a format nobody has shipped is parsed as this one"),
+ (f"{APP_KT}/connectivity/ProvisioningPayload.kt",
+  "        if (challenge.isEmpty()) {",
+  "        if (false) {",
+  "C34 an enrolment is authorised with nothing to attest it against"),
+ (f"{APP_KT}/connectivity/ConnectivityManifest.kt",
+  "                if (kid.isEmpty() || !pem.contains(\"BEGIN PUBLIC KEY\")) null else kid to pem",
+  "                if (kid.isEmpty()) null else kid to pem",
+  "C34 a truncated build argument becomes a trust anchor nobody can verify against"),
+ (f"{APP_KT}/connectivity/ConnectivityManifest.kt",
+  "                val pem = line.substring(separator + 1).trim().replace(\"\\\\n\", \"\\n\")",
+  "                val pem = line.substring(separator + 1).trim()",
+  "C34 the build-time PEM keeps its escaped newlines and no signature ever verifies"),
  # --- checkpoint 33: the warm standby, the durable outbox and the session's telemetry --
  (f"{APP_KT}/telemetry/SessionTelemetry.kt",
   "        for (name in everSeen.sorted()) {",

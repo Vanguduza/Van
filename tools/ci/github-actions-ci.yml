@@ -66,6 +66,17 @@ jobs:
       - name: Ledger reconciliation (does the source still agree?)
         run: python tools/ci/ledger_reconcile.py
 
+      # Rev 1.5 §38 / RB-052 — the red-team register. §38 says every finding is PASS,
+      # FAIL, BLOCKED_EXTERNAL or NOT_APPLICABLE_WITH_REASON and never `assumed`, and a
+      # register of sixty-six statuses is the natural place for an unchecked claim to
+      # live. This refuses one: every PASS must cite a runnable pytest node id or a
+      # Kotlin test that exists.
+      - name: Red-team register (§38)
+        run: python tools/ci/red_team_register.py
+      # And the checker itself must reject a register that has quietly gone wrong.
+      - name: Red-team register self-test
+        run: pytest -q tests/contracts/test_red_team_register.py
+
       # The maturity gate must fail on the defect shape it exists to prevent.
       # A gate that only ever passes proves nothing.
       - name: Maturity gate self-test

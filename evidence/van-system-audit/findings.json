@@ -20,9 +20,9 @@
     "PRODUCTION_CERTIFIED"
   ],
   "counts": {
-    "P0": 20,
-    "P1": 40,
-    "P2": 27,
+    "P0": 21,
+    "P1": 42,
+    "P2": 29,
     "P3": 29,
     "P4": 7
   },
@@ -5749,6 +5749,223 @@
         "residual_reason": "The Android Gradle Plugin is unreachable in this container, so CI's Android build is the only compiler for the app module. The decision this feeds — `WarmStandbyPolicy.decide` — is pure and is executed.",
         "residual_class": "ENVIRONMENT_UNVERIFIED",
         "posture": "fail-open"
+      }
+    },
+    {
+      "id": "P0-SEC-013",
+      "severity": "P0",
+      "domain": "security",
+      "title": "The owner production build asked for a Gateway address and a pairing code, in two places",
+      "description": "§0D.2 lists eleven fields the owner production build must not ask for or expose. Two of them shipped as text boxes and they shipped twice: \"Gateway address\" and \"Pairing code\" on the onboarding screen, and \"Gateway address\" and \"One-time pairing token\" again on the Connections admin screen.\n\nThe section states the rule and not the reason, so it is worth stating. A box asking the owner to type a server address is a phishing surface with their entire assistant behind it. Anyone who persuades them to retype an address owns every command from that moment — mail, calendar, browser, trading approvals — and nothing on the phone looks wrong afterwards, because from the phone's side a new Gateway is simply the Gateway. A pairing code is worse: it is exactly the kind of string somebody can be talked into reading out over the phone, and it mints owner-device authority.\n\nThe supporting machinery for the correct design was already there and unused. `ConnectivityRegistry` verified signed manifests, `POST /v1/devices/bootstrap/*` existed for hardware-attested binding, and ADR-RB-026 described an installer-driven path. Nothing connected them, so the forms remained the only way in.",
+      "requirement": "docs/VAN_REMOTE_BROWSER_PRODUCTION_BLUEPRINT_REV_1_5.md §0D.2, ADR-RB-026",
+      "authority": "VAN Remote Browser Production Blueprint Rev 1.5",
+      "repository_evidence": [
+        "android/app/src/main/java/com/dial/van/onboarding/OnboardingActivity.kt",
+        "android/app/src/main/java/com/dial/van/command/modules/AdminModules.kt",
+        "android/app/src/main/java/com/dial/van/gateway/VanGatewayClient.kt"
+      ],
+      "runtime_evidence": [],
+      "affected_components": [
+        "android",
+        "gateway",
+        "security"
+      ],
+      "root_cause": "The only path that existed. Pairing had to happen somehow, the installer path was described and not built, and a form is what remains when nothing else is wired.",
+      "remediation": "Build ADR-RB-026's path: one signed, single-use, short-lived provisioning payload minted by the Gateway and delivered by the installer. Remove both forms, make `baseUrl`'s setter and `pairThisDevice` private so a new form cannot be written without changing the client, and guard the shape rather than the wording with a contract test.",
+      "impact": "A complete compromise of the owner's assistant was one convincing message away, and the same message would have worked on either of two screens. The second one — an admin screen the owner reaches deliberately — is the more dangerous, because a person who has navigated there is already in a frame of mind to change a setting.",
+      "validation_gate": "G1",
+      "current_status": "CLOSED",
+      "remediation_gate": "RB C12",
+      "closure": {
+        "state": "EXTERNALLY_BLOCKED_REPOSITORY_COMPLETE",
+        "summary": "Both forms are gone and replaced by read-only status. The onboarding screen now distinguishes two states that are not the same: a build with a trust anchor is waiting for its installer, and a build without one can never be provisioned and says so rather than leaving the owner watching a screen that cannot change.\n\n`VanGatewayClient.baseUrl` has a private setter and `pairThisDevice` is private, so a new form cannot be written without editing the client. `provisionThisDevice` is the only caller and it does both halves of §0D.3 — pair and bind — because a device that paired without binding is an APK that works on another handset.\n\nTen contract tests read the Android sources, and the strong one is not the label check: it refuses any editable field at all on the two screens that carried the problem, because a rebuild without a label would pass a check that looked for wording.",
+        "changed": [
+          "android/app/src/main/java/com/dial/van/onboarding/OnboardingActivity.kt",
+          "android/app/src/main/java/com/dial/van/command/modules/AdminModules.kt",
+          "android/app/src/main/java/com/dial/van/gateway/VanGatewayClient.kt",
+          "android/app/src/main/java/com/dial/van/connectivity/ProvisioningPayload.kt",
+          "android/app/src/main/java/com/dial/van/connectivity/ProvisioningIntake.kt",
+          "android/app/src/main/java/com/dial/van/provisioning/ProvisioningActivity.kt",
+          "backend/van_gateway/connectivity/provisioning.py",
+          "backend/van_gateway/app.py",
+          "tools/provisioning/provision_owner_device.py"
+        ],
+        "verified_by": [
+          "tests/contracts/test_owner_device_provisioning.py",
+          "backend/tests/test_owner_device_provisioning.py",
+          "android/verification/src/test/kotlin/com/dial/van/connectivity/ProvisioningPayloadTest.kt"
+        ],
+        "counterexample": "Removing the labels while leaving the fields passes any test that searches for \"Gateway address\", and leaves the phishing surface exactly where it was. `test_the_two_screens_that_carried_the_forms_have_no_editable_field_at_all` refuses the composable rather than the wording. Making the setter private while leaving a public helper that calls it passes a check on the setter; `test_provisioning_is_the_only_caller_of_pairing` reads every Kotlin file for callers rather than the one.",
+        "residual": "Whether a real S24 Ultra provisions from a real Gateway over ADB has not been run. The payload's construction, its signing, every refusal, and the exact argv the installer builds are tested; the handover itself needs a device.",
+        "residual_reason": "Gate 14's physical verification. No amount of Python here substitutes for an `adb install` against the owner's handset, and saying otherwise would be the substitution this programme refuses.",
+        "residual_class": "ENVIRONMENT_UNVERIFIED",
+        "posture": "fail-closed"
+      }
+    },
+    {
+      "id": "P1-SEC-014",
+      "severity": "P1",
+      "domain": "security",
+      "title": "§38's three floods had no bound: tabs, downloads and input packets were all unlimited",
+      "description": "§38 items 12, 17 and 18 name three attacks in which every individual request is legitimate. A page can open tabs on its own; the Stream Host reports each one. A page can start downloads; Hermes reports each one. The phone sends input packets; the router translates each one. None of the three was counted.\n\nThat is why they had no bound: one more tab, one more download and one more input packet are each exactly what the system is for, and the harm is only in the count. A flood does not steal anything — it makes VAN unusable while looking like use.\n\nFound while building the §38 register, which is the point of building one.",
+      "requirement": "docs/VAN_REMOTE_BROWSER_PRODUCTION_BLUEPRINT_REV_1_5.md §38 items 12, 17, 18",
+      "authority": "VAN Remote Browser Production Blueprint Rev 1.5",
+      "repository_evidence": [
+        "backend/van_gateway/browser/flood_bounds.py",
+        "backend/van_gateway/browser/interactive_service.py",
+        "backend/van_gateway/browser/downloads.py",
+        "services/browser_stream_host/input_router.py"
+      ],
+      "runtime_evidence": [],
+      "affected_components": [
+        "gateway",
+        "browser",
+        "streamhost"
+      ],
+      "root_cause": "Three components, three arrival paths, and no single door to hold. Each one looked like somebody else's to bound.",
+      "remediation": "Bound each where the thing is recorded, because that is the one place that sees all of them: the tab at `record_active_url`, the download at `DownloadBroker.create`, and the packet at the stream host's router. Set each bound well above ordinary use, so the first person it inconveniences does not remove it.",
+      "impact": "A page could fill the session's tab strip, fill a disk with downloads, or saturate the input path. The last is the one that matters most: an input flood degrades the owner's own control at the moment they are trying to stop whatever is happening.",
+      "validation_gate": "G1",
+      "current_status": "CLOSED",
+      "remediation_gate": "RB C12",
+      "closure": {
+        "state": "EXTERNALLY_BLOCKED_REPOSITORY_COMPLETE",
+        "summary": "`flood_bounds.py` carries the three constants, the refusal names and the sliding-window limiter, and each bound is wired into the place the thing is recorded.\n\nThe shapes matter more than the numbers. The new tab is refused rather than an old one closed, because closing loses the owner's work — which is the harm rather than the defence. A refused input packet is not recorded in the window, or a sustained flood would keep the session refused long after it stopped, turning a bound into an outage. And the rate is a sliding window rather than a token bucket, because a bucket permits a long-run rate above the bound if the burst shape is right, which is what a patient attacker would do.\n\nThe input bound is 400 packets a second against a 120 Hz phone's ~240 at its busiest, so the owner's own dragging never reaches it — tested at three seconds of continuous 120 Hz input with an edge on every frame.",
+        "changed": [
+          "backend/van_gateway/browser/flood_bounds.py",
+          "backend/van_gateway/browser/interactive_service.py",
+          "backend/van_gateway/browser/downloads.py",
+          "services/browser_stream_host/input_router.py"
+        ],
+        "verified_by": [
+          "backend/tests/test_browser_flood_bounds.py",
+          "services/browser_stream_host/tests/test_input_router.py"
+        ],
+        "counterexample": "A bound that counted every `record_active_url` rather than every new target passes a limit test and stops a session at the cap from following a link — the browser not working, reported as a security control. `test_navigating_inside_a_tab_that_already_exists_is_never_refused` is what separates them. A rate limiter that recorded refused packets passes every 'the bound fires' test and never recovers; `test_a_refused_packet_does_not_extend_the_refusal` sends ten thousand refusals and requires the session usable one window later.",
+        "residual": "Whether the numbers are right for a real page and a real phone has not been measured. They are set from arithmetic — §8.7's one MOVE per frame, a 120 Hz panel — rather than from observation.",
+        "residual_reason": "Measuring them needs a Browser Stream Host and the owner's handset (RB-010, Gate 14). The bounds are constants in one file for exactly that reason.",
+        "residual_class": "ENVIRONMENT_UNVERIFIED",
+        "posture": "fail-closed"
+      }
+    },
+    {
+      "id": "P2-BROW-003",
+      "severity": "P2",
+      "domain": "browser",
+      "title": "A download for a session that does not exist was reported to the host as already recorded",
+      "description": "`browser_downloads` has a foreign key to `browser_interactive_sessions`, and SQLite raises `IntegrityError` for a foreign-key violation and for a duplicate primary key alike. `DownloadBroker.create` caught the exception and called every instance of it `download_already_reported`.\n\nSo a host reporting a download into a session that was never created — the shape a misrouted or replayed report has — was told its report had already been recorded. Whoever read that went looking for a record that does not exist, and the actual cause, a session id that is wrong, was never mentioned.\n\nFound by a test for the download flood bound, which created downloads against sessions it had not inserted.",
+      "requirement": "docs/VAN_REMOTE_BROWSER_PRODUCTION_BLUEPRINT_REV_1_5.md §18",
+      "authority": "VAN Remote Browser Production Blueprint Rev 1.5",
+      "repository_evidence": [
+        "backend/van_gateway/browser/downloads.py"
+      ],
+      "runtime_evidence": [],
+      "affected_components": [
+        "gateway",
+        "browser"
+      ],
+      "root_cause": "One exception type for two failures, and a handler written for the one that was expected.",
+      "remediation": "Distinguish them and give the foreign-key case its own refusal name, so the host is told the session is unknown rather than that its report is a duplicate.",
+      "impact": "Diagnostic rather than a breach: the wrong answer sent whoever was debugging to the wrong place, and a genuinely misrouted report looked like an idempotent retry succeeding.",
+      "validation_gate": "G8",
+      "current_status": "CLOSED",
+      "remediation_gate": "RB C12",
+      "closure": {
+        "state": "INTEGRATED_AND_EVIDENCED",
+        "summary": "`REJECT_DOWNLOAD_SESSION_UNKNOWN` is its own refusal, and both halves are tested: the orphan report gets the new name, and a genuine duplicate still gets `download_already_reported` — because a fix that renamed both failures would pass a test for either one alone.",
+        "changed": [
+          "backend/van_gateway/browser/downloads.py",
+          "backend/van_gateway/browser/flood_bounds.py"
+        ],
+        "verified_by": [
+          "backend/tests/test_browser_flood_bounds.py"
+        ],
+        "counterexample": "Catching the foreign-key case and reporting it as `download_already_reported` with a better log line passes any test that only checks the orphan path raises. `test_a_genuine_duplicate_is_still_a_duplicate` is the other half.",
+        "residual": "",
+        "residual_reason": "",
+        "residual_class": "",
+        "posture": "fail-closed"
+      }
+    },
+    {
+      "id": "P2-AND-018",
+      "severity": "P2",
+      "domain": "android",
+      "title": "A second parser for the build-time trust anchor would have made every release build unprovisionable",
+      "description": "`VAN_CONNECTIVITY_TRUSTED_KEYS` is injected at build time as newline-separated `kid=PEM` pairs. `ConnectivityRegistry` parses that format. The provisioning intake, written in this checkpoint, parsed the same string as JSON.\n\nIt would have found nothing, reported the build as having no trust anchor, and refused every provisioning payload. A correctly configured release APK would have installed, opened, and sat on \"waiting for the installer\" forever — with every test in the repository green, because nothing executed the parser against the real format.\n\nCaught before it shipped, and recorded because the shape is the point: two parsers for one build-time string is the same class of defect as two copies of a wire format, and it is harder to see because the string is injected rather than sent.",
+      "requirement": "docs/VAN_REMOTE_BROWSER_PRODUCTION_BLUEPRINT_REV_1_5.md ADR-RB-026, ADR-RB-027",
+      "authority": "VAN Remote Browser Production Blueprint Rev 1.5",
+      "repository_evidence": [
+        "android/app/src/main/java/com/dial/van/connectivity/ConnectivityManifest.kt",
+        "android/app/src/main/java/com/dial/van/connectivity/ProvisioningIntake.kt"
+      ],
+      "runtime_evidence": [],
+      "affected_components": [
+        "android"
+      ],
+      "root_cause": "A format known by one reader and guessed by the next. The value is a build argument, so nothing on either side fails visibly when the guess is wrong.",
+      "remediation": "One parser, `ConnectivityTrustedKeys.parse`, in the pure package so it is executed in the harness, with both readers calling it.",
+      "impact": "Would have been total for provisioning and silent: the release build's only way in would have refused everything, and the owner's screen would have said VAN was waiting.",
+      "validation_gate": "G10",
+      "current_status": "CLOSED",
+      "remediation_gate": "RB C12",
+      "closure": {
+        "state": "EXTERNALLY_BLOCKED_REPOSITORY_COMPLETE",
+        "summary": "One parser, five tests, and the one that would have caught the original is not the happy path: `escaped newlines inside a PEM are restored`. The value arrives through a Gradle BuildConfig string where a real newline cannot survive, so a parser that did not restore them would hold a PEM no KeyFactory accepts — and every signature would then be reported as invalid for entirely the wrong reason.",
+        "changed": [
+          "android/app/src/main/java/com/dial/van/connectivity/ConnectivityManifest.kt",
+          "android/app/src/main/java/com/dial/van/connectivity/ConnectivityRegistry.kt",
+          "android/app/src/main/java/com/dial/van/connectivity/ProvisioningIntake.kt"
+        ],
+        "verified_by": [
+          "android/verification/src/test/kotlin/com/dial/van/connectivity/ProvisioningPayloadTest.kt"
+        ],
+        "counterexample": "A parser that accepted `prov-1=hunter2` as an anchor passes every format test and gives the build a key nobody can verify against; `a value that is not a public key is not a trusted key` refuses it, and the Gradle release gate refuses the same shape at build time so the dead APK is never produced.",
+        "residual": "The parser is executed; the build-time injection that feeds it is not. Whether a release build's Gradle argument arrives intact is CI's to show.",
+        "residual_reason": "The Android Gradle Plugin is unreachable in the audit container, so `assembleRelease` runs only in CI.",
+        "residual_class": "ENVIRONMENT_UNVERIFIED",
+        "posture": "fail-closed"
+      }
+    },
+    {
+      "id": "P1-DOC-006",
+      "severity": "P1",
+      "domain": "documentation",
+      "title": "§38's fifty-nine red-team scenarios had no register, and a register alone would have been fifty-nine unchecked claims",
+      "description": "§38 lists fifty release-suite scenarios and sixteen Rev 1.2 continuity attacks, and ends with a rule that is easy to read past: every finding is `PASS`, `FAIL`, `BLOCKED_EXTERNAL` or `NOT_APPLICABLE_WITH_REASON`, and never `assumed`.\n\nNothing recorded any of them. Much of the behaviour was in fact tested — the suites were there — but no artefact said which scenario each test answered, so \"the red team passes\" could only ever have been an assertion.\n\nThe first version of the register proved the second half of the problem. Every PASS named a test that existed; twenty-five of the fifty-one named it in a form that cannot be run, because the test lives inside a class the citation omitted. Every claim was true and a quarter of them were unusable as evidence.",
+      "requirement": "docs/VAN_REMOTE_BROWSER_PRODUCTION_BLUEPRINT_REV_1_5.md §38",
+      "authority": "VAN Remote Browser Production Blueprint Rev 1.5",
+      "repository_evidence": [
+        "evidence/van-system-audit/red_team_register.json",
+        "tools/ci/red_team_register.py"
+      ],
+      "runtime_evidence": [],
+      "affected_components": [
+        "documentation",
+        "ci"
+      ],
+      "root_cause": "A list in a document and tests in a repository, with nothing between them. The mapping existed only in whoever last read both.",
+      "remediation": "A register as data, and a checker that refuses a status which is not backed: every PASS must cite a runnable pytest node id or a Kotlin test that exists, every BLOCKED_EXTERNAL must name what is missing, and `assumed` in any spelling is a failure.",
+      "impact": "Documentary, and it is the class of impact this programme exists to remove: a claim about security that nobody can re-check is indistinguishable from a claim nobody made.",
+      "validation_gate": "G0",
+      "current_status": "CLOSED",
+      "remediation_gate": "RB C12",
+      "closure": {
+        "state": "INTEGRATED_AND_EVIDENCED",
+        "summary": "Sixty-six scenarios: 57 PASS, 9 BLOCKED_EXTERNAL, none assumed. Every PASS cites a runnable node id, and all 197 cited Python tests were executed and pass.\n\nThe checker resolves a Python citation by walking the module's AST for the `Class::test` chain rather than by looking for the name — which is what turned twenty-five true-but-unusable citations into runnable ones. It is in CI, with its own self-test, because a checker that only ever passes proves nothing.",
+        "changed": [
+          "evidence/van-system-audit/red_team_register.json",
+          "tools/ci/red_team_register.py",
+          ".github/workflows/van-ci.yml"
+        ],
+        "verified_by": [
+          "tests/contracts/test_red_team_register.py"
+        ],
+        "counterexample": "A checker that accepted any citation whose file exists passes a register full of renamed tests; `test_a_citation_naming_a_test_that_was_renamed_is_refused` fails it. A register that dropped an inconvenient scenario would shorten quietly; the numbering is contiguous and read out of the blueprint, so a missing item fails by name.",
+        "residual": "A PASS means the repository can demonstrate the refusal, not that a live Remote Browser was attacked and survived. Nine scenarios need a Stream Host, a carrier or a handset and say so.",
+        "residual_reason": "Deliberate, and stated in the register itself. NOT VERIFIED is not NOT IMPLEMENTED and neither is substituted for the other.",
+        "residual_class": "DELIBERATE_SCOPE",
+        "posture": "fail-closed"
       }
     }
   ],

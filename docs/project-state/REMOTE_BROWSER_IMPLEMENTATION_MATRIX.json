@@ -1630,10 +1630,10 @@
       "id": "RB-052",
       "name": "security red-team",
       "group": "security",
-      "status": "NOT_STARTED",
-      "built": false,
-      "wired": false,
-      "reachable": false,
+      "status": "WIRED_UNPROVEN",
+      "built": true,
+      "wired": true,
+      "reachable": true,
       "live": false,
       "verified": false,
       "observed": false,
@@ -1641,16 +1641,19 @@
       "certified": false,
       "component_refs": [],
       "ledger_expectation": "NONE",
-      "producer": null,
-      "consumer": null,
+      "producer": "evidence/van-system-audit/red_team_register.json",
+      "consumer": "tools/ci/red_team_register.py, in CI",
       "authority": "docs/VAN_REMOTE_BROWSER_PRODUCTION_BLUEPRINT_REV_1_5.md \u00a738",
       "evidence_refs": [],
-      "tests": [],
+      "tests": [
+        "tests/contracts/test_red_team_register.py"
+      ],
       "external_gates": [
-        "nothing external: this is not built, and a commit to this repository is what it needs"
+        "nine of the sixty-six scenarios need a Browser Stream Host, a carrier handover or a physical handset, and are recorded BLOCKED_EXTERNAL naming which (RB-010, Gate 14)"
       ],
       "transport_independent": false,
-      "offline_voice_proven": null
+      "offline_voice_proven": null,
+      "note": "\u00a738's sixty-six scenarios, each with a status from \u00a738's own vocabulary: 57 PASS, 9 BLOCKED_EXTERNAL, none `assumed`.\n\nThe register is data and the checker is what makes it evidence. Every PASS must cite a runnable pytest node id \u2014 resolved by walking the module's AST for the `Class::test` chain, not by looking for the name \u2014 and all 197 cited Python tests were executed. The first version of this register cited twenty-five tests that exist and cannot be run, which is what that check now refuses.\n\nA PASS means the repository can demonstrate the refusal, not that a live Remote Browser has been attacked and survived. The register says so in those words."
     },
     {
       "schema": "van-implementation-matrix/1",
@@ -3349,10 +3352,10 @@
       "id": "RB-108",
       "name": "automated ADB owner-S24 provisioning tool",
       "group": "provisioning",
-      "status": "NOT_STARTED",
-      "built": false,
-      "wired": false,
-      "reachable": false,
+      "status": "WIRED_UNPROVEN",
+      "built": true,
+      "wired": true,
+      "reachable": true,
       "live": false,
       "verified": false,
       "observed": false,
@@ -3360,16 +3363,22 @@
       "certified": false,
       "component_refs": [],
       "ledger_expectation": "NONE",
-      "producer": null,
-      "consumer": null,
+      "producer": "tools/provisioning/provision_owner_device.py",
+      "consumer": "POST /v1/devices/provisioning-payload, then ProvisioningActivity over adb",
       "authority": "docs/VAN_REMOTE_BROWSER_PRODUCTION_BLUEPRINT_REV_1_5.md \u00a7ADR-RB-026",
       "evidence_refs": [],
-      "tests": [],
+      "tests": [
+        "tests/contracts/test_owner_device_provisioning.py",
+        "backend/tests/test_owner_device_provisioning.py",
+        "android/verification/src/test/kotlin/com/dial/van/connectivity/ProvisioningPayloadTest.kt"
+      ],
       "external_gates": [
-        "nothing external: this is not built, and a commit to this repository is what it needs"
+        "the owner's S24 Ultra and a live Gateway; this is Gate 14's physical verification and no repository test substitutes for it",
+        "the Android build is compiled only in CI; the AGP is unreachable in the audit container"
       ],
       "transport_independent": false,
-      "offline_voice_proven": null
+      "offline_voice_proven": null,
+      "note": "ADR-RB-026's installer path. One call: the Gateway mints both single-use tokens and the attestation challenge and sets the expiry, so an installer cannot extend a provisioning window or reuse a token by asking for it.\n\nThe payload travels over ADB, through a shell, and can reach a device log. That is acceptable only because three properties hold at once \u2014 it expires in ten minutes, the Gateway consumes the tokens atomically, and it is not sufficient on its own without a hardware attestation (\u00a70D.3). Remove any one and the channel stops being defensible, which is why each has a test that fails if it is relaxed."
     },
     {
       "schema": "van-implementation-matrix/1",
@@ -3377,10 +3386,10 @@
       "id": "RB-109",
       "name": "production manual-config removal",
       "group": "provisioning",
-      "status": "NOT_STARTED",
-      "built": false,
-      "wired": false,
-      "reachable": false,
+      "status": "WIRED_UNPROVEN",
+      "built": true,
+      "wired": true,
+      "reachable": true,
       "live": false,
       "verified": false,
       "observed": false,
@@ -3388,16 +3397,19 @@
       "certified": false,
       "component_refs": [],
       "ledger_expectation": "NONE",
-      "producer": null,
-      "consumer": null,
+      "producer": "ProvisioningStatus and the read-only Connections card",
+      "consumer": "the owner, who is told what is set up rather than asked to set it up",
       "authority": "docs/VAN_REMOTE_BROWSER_PRODUCTION_BLUEPRINT_REV_1_5.md \u00a70D.2",
       "evidence_refs": [],
-      "tests": [],
+      "tests": [
+        "tests/contracts/test_owner_device_provisioning.py"
+      ],
       "external_gates": [
-        "nothing external: this is not built, and a commit to this repository is what it needs"
+        "the Android build is compiled only in CI; the AGP is unreachable in the audit container"
       ],
       "transport_independent": false,
-      "offline_voice_proven": null
+      "offline_voice_proven": null,
+      "note": "P0-SEC-013. \u00a70D.2 lists eleven fields the production build must not expose, and two of them shipped as text boxes on two screens: a Gateway address and a pairing code.\n\nA box asking the owner to type a server address is a phishing surface with their whole assistant behind it \u2014 one convincing message and every command afterwards belongs to somebody else, with nothing on the phone looking wrong. Both forms are gone; `baseUrl`'s setter and `pairThisDevice` are private, so a new form cannot be written without editing the client.\n\nThe guard is on shape, not wording: a rebuild that dropped the labels would pass a text search, so the test refuses any editable field at all on those two screens."
     },
     {
       "schema": "van-implementation-matrix/1",
@@ -3435,10 +3447,10 @@
       "id": "RB-111",
       "name": "stable app-signing/device-binding gate",
       "group": "provisioning",
-      "status": "NOT_STARTED",
-      "built": false,
-      "wired": false,
-      "reachable": false,
+      "status": "WIRED_UNPROVEN",
+      "built": true,
+      "wired": true,
+      "reachable": true,
       "live": false,
       "verified": false,
       "observed": false,
@@ -3446,16 +3458,21 @@
       "certified": false,
       "component_refs": [],
       "ledger_expectation": "NONE",
-      "producer": null,
-      "consumer": null,
+      "producer": "android/app/build.gradle.kts, the release task-graph gate",
+      "consumer": "assembleRelease and bundleRelease",
       "authority": "docs/VAN_REMOTE_BROWSER_PRODUCTION_BLUEPRINT_REV_1_5.md \u00a70D.3",
       "evidence_refs": [],
-      "tests": [],
+      "tests": [
+        "tests/contracts/test_release_build_is_bound.py",
+        "tests/contracts/test_debug_signing_identity.py"
+      ],
       "external_gates": [
-        "nothing external: this is not built, and a commit to this repository is what it needs"
+        "the Android build is compiled only in CI; the AGP is unreachable in the audit container",
+        "a production keystore the owner holds; the gate refuses a release without one and cannot supply it"
       ],
       "transport_independent": false,
-      "offline_voice_proven": null
+      "offline_voice_proven": null,
+      "note": "\u00a70D.3's binding is this package plus this app signing identity plus this hardware Keystore key plus this Gateway owner-device slot. The release gate now refuses the one identity that is never stable: Android generates a debug keystore per machine, so a release signed with one is signed by whichever machine built it \u2014 and two builds of the same application id signed differently cannot replace one another. The owner's first sideload failed with exactly that dialog (P2-AND-016).\n\nChecked by name rather than by fingerprint, because the fingerprint is not knowable at configuration time and `androiddebugkey` is."
     },
     {
       "schema": "van-implementation-matrix/1",
@@ -3738,10 +3755,10 @@
       "id": "RB-121",
       "name": "release-build immutable connectivity validation",
       "group": "provisioning",
-      "status": "NOT_STARTED",
-      "built": false,
-      "wired": false,
-      "reachable": false,
+      "status": "WIRED_UNPROVEN",
+      "built": true,
+      "wired": true,
+      "reachable": true,
       "live": false,
       "verified": false,
       "observed": false,
@@ -3749,16 +3766,19 @@
       "certified": false,
       "component_refs": [],
       "ledger_expectation": "NONE",
-      "producer": null,
-      "consumer": null,
+      "producer": "android/app/build.gradle.kts, the release task-graph gate",
+      "consumer": "assembleRelease and bundleRelease",
       "authority": "docs/VAN_REMOTE_BROWSER_PRODUCTION_BLUEPRINT_REV_1_5.md \u00a739.2",
       "evidence_refs": [],
-      "tests": [],
+      "tests": [
+        "tests/contracts/test_release_build_is_bound.py"
+      ],
       "external_gates": [
-        "nothing external: this is not built, and a commit to this repository is what it needs"
+        "the Android build is compiled only in CI; the AGP is unreachable in the audit container"
       ],
       "transport_independent": false,
-      "offline_voice_proven": null
+      "offline_voice_proven": null,
+      "note": "\u00a70D.2 removed every field the owner could type an endpoint into, so a release build with no connectivity trust anchor can never accept a manifest and can never be provisioned. It would install, open, and sit on \"waiting for the installer\" forever, with nothing anywhere saying why.\n\nThe format is checked and not merely the presence: a truncated build argument that carried no PEM parses to no keys at all, which is the same dead APK with a value that looks configured."
     },
     {
       "schema": "van-implementation-matrix/1",
