@@ -52,6 +52,42 @@ class ProtectionManager:
             raise ProtectionError("stop on wrong side of entry")
         self.rules[position_id] = _Rule(symbol, direction, entry, stop, target, opened_ms, time_stop_ms, break_even_trigger, trail_distance, software_stop)
 
+    def restore(
+        self,
+        position_id: str,
+        *,
+        symbol: str,
+        direction: Direction,
+        entry: Decimal,
+        initial_stop: Decimal,
+        current_stop: Decimal,
+        target: Optional[Decimal],
+        opened_ms: int,
+        time_stop_ms: Optional[int] = None,
+        break_even_trigger: Optional[Decimal] = None,
+        trail_distance: Optional[Decimal] = None,
+        software_stop: bool = False,
+    ) -> None:
+        """Reconstruct a rule after restart without permitting a widened stop.
+
+        The original order command supplies the initial stop. The venue, or
+        persisted software-stop contract, supplies the current stop. Recovery
+        validates the original rule and then applies the current stop through
+        the ordinary tighten-only operation.
+        """
+        self.register(
+            position_id, symbol=symbol, direction=direction, entry=entry,
+            stop=initial_stop, target=target, opened_ms=opened_ms,
+            time_stop_ms=time_stop_ms, break_even_trigger=break_even_trigger,
+            trail_distance=trail_distance, software_stop=software_stop,
+        )
+        self.tighten(position_id, current_stop)
+        rule = self.rules[position_id]
+        rule.be_done = (
+            direction is Direction.LONG and current_stop >= entry
+            or direction is Direction.SHORT and current_stop <= entry
+        )
+
     def stop_of(self, position_id: str) -> Decimal:
         return self.rules[position_id].stop
 
