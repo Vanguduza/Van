@@ -17,6 +17,7 @@ import pytest
 
 from services.browser_stream_host.input_router import (
     PERMITTED_CDP_METHODS,
+    REJECT_NOT_INPUT,
     REJECT_STALE_GENERATION,
     REJECT_STALE_VIEWPORT,
     REJECT_UNMAPPED_KIND,
@@ -218,7 +219,39 @@ class TestTheRouterIsNarrow:
         """A kind with no route is an input the owner can send and the page never sees."""
         router = _router()
         for kind in InputKind:
+            if kind.is_navigation:
+                continue
             assert router.route(_packet(kind, text="x")), kind
+
+    def test_a_navigation_is_refused_as_a_boundary_rather_than_as_a_gap(self):
+        """§17.2 — navigation travels the input path and is not translated here.
+
+        The distinction is the whole reason this has its own reason string. An unmapped
+        kind is a gap in the router; a navigation is a packet that belongs to a different
+        component. Collapsing them into `kind_has_no_mapping` would make the boundary read
+        as an omission, and the next person to see it would close it by adding
+        `Page.navigate` to the table — which is precisely what this router must not emit.
+        """
+        router = _router()
+        for kind in InputKind:
+            if not kind.is_navigation:
+                continue
+            with pytest.raises(InputRouterRefused) as caught:
+                router.route(_packet(kind, text="https://example.com/"))
+            assert caught.value.reason == REJECT_NOT_INPUT, kind
+
+    def test_a_stale_navigation_is_refused_as_stale_first(self):
+        """The more specific truth, and the one a preempted agent needs to hear.
+
+        "You no longer hold the lease" tells the agent to stop. "That is not an input"
+        tells it to send the same thing somewhere else, which is the wrong action when the
+        owner has just taken control.
+        """
+        router = _router()
+        packet = _packet(InputKind.NAVIGATE, text="https://example.com/", generation=99)
+        with pytest.raises(InputRouterRefused) as caught:
+            router.route(packet)
+        assert caught.value.reason == REJECT_STALE_GENERATION
 
     def test_an_unmapped_kind_is_refused_rather_than_ignored(self):
         from services.browser_stream_host import input_router as module
@@ -236,6 +269,8 @@ class TestTheRouterIsNarrow:
         router = _router()
         emitted = set()
         for kind in InputKind:
+            if kind.is_navigation:
+                continue
             emitted.update(call.method for call in router.route(_packet(kind, text="x")))
         assert emitted <= PERMITTED_CDP_METHODS, sorted(emitted - PERMITTED_CDP_METHODS)
 
@@ -244,5 +279,9 @@ class TestTheRouterIsNarrow:
         with no control lease behind it."""
         router = _router()
         for kind in InputKind:
+            if kind.is_navigation:
+                # Refused above, by name. The property here is about what the router
+                # *emits*, and a kind it refuses emits nothing.
+                continue
             for call in router.route(_packet(kind, text="x")):
                 assert call.method.startswith("Input."), call.method

@@ -17,6 +17,8 @@ import com.dial.van.session.VanHermesSessionManager
 import com.dial.van.voice.VoiceEdge
 import com.dial.van.notification.NotificationPolicyStore
 import com.dial.van.queue.EncryptedCommandQueue
+import com.dial.van.browser.BrowserShortcutStore
+import com.dial.van.browser.PersistedBrowserSession
 import com.dial.van.telemetry.DeviceTelemetryReporter
 import com.dial.van.visual.VanLiveVisualState
 import com.dial.van.voice.PersonalSpeechModel
@@ -90,6 +92,70 @@ class VanApplication : Application(), VoiceInputCallback, TtsOutputCallback {
      * it, so the scrape reported them as unobserved forever.
      */
     lateinit var telemetry: DeviceTelemetryReporter
+
+    /**
+     * ADR-RB-023 — the registry a home-screen shortcut resolves through.
+     *
+     * Held on the application rather than on the browser Activity, because the Activity
+     * that resolves a shortcut is a different one from the Activity that creates it, and
+     * a registry owned by either would be gone when the other needed it.
+     */
+    val browserShortcuts = BrowserShortcutStore()
+
+    /**
+     * §5.8 — whether this phone is the owner's bound device.
+     *
+     * A shortcut on a home screen is on a home screen someone else may be holding, so
+     * this is asked every time one resolves rather than cached at startup.
+     */
+    fun deviceIsBound(): Boolean = gatewayClient.isPaired()
+
+    /** Which browser profiles a shortcut may open into. */
+    fun availableBrowserProfiles(): Set<String> = setOf("public_research", "authenticated_owner")
+
+    /**
+     * Rev 1.5 §29.10 step 1 — the browser session record that has to survive a process
+     * death.
+     *
+     * In encrypted preferences, because it names the profile the owner was logged into.
+     * Held on the application rather than in the Activity's saved instance state: a
+     * process death does not save instance state, which is the case this exists for.
+     */
+    fun persistBrowserSession(record: PersistedBrowserSession) {
+        browserSessionStore.edit()
+            .putString(KEY_BROWSER_SESSION_ID, record.sessionId)
+            .putString(KEY_BROWSER_PROFILE, record.profileAlias)
+            .putInt(KEY_BROWSER_VIEWPORT, record.lastViewportRevision)
+            .putLong(KEY_BROWSER_EVENT_CURSOR, record.lastEventCursor)
+            .putInt(KEY_BROWSER_SPOKEN, record.lastSpokenSegment)
+            .putLong(KEY_BROWSER_PERSISTED_AT, record.persistedAtMs)
+            .putString(KEY_BROWSER_OBSERVED, record.lastObservedState)
+            .putInt(KEY_BROWSER_GENERATION, record.lastObservedControlGeneration)
+            .apply()
+    }
+
+    fun restorePersistedBrowserSession(): PersistedBrowserSession? {
+        val sessionId = browserSessionStore.getString(KEY_BROWSER_SESSION_ID, null)
+            ?: return null
+        return PersistedBrowserSession(
+            sessionId = sessionId,
+            profileAlias = browserSessionStore.getString(KEY_BROWSER_PROFILE, "").orEmpty(),
+            lastViewportRevision = browserSessionStore.getInt(KEY_BROWSER_VIEWPORT, 0),
+            lastEventCursor = browserSessionStore.getLong(KEY_BROWSER_EVENT_CURSOR, 0),
+            lastSpokenSegment = browserSessionStore.getInt(KEY_BROWSER_SPOKEN, 0),
+            persistedAtMs = browserSessionStore.getLong(KEY_BROWSER_PERSISTED_AT, 0),
+            lastObservedState = browserSessionStore.getString(KEY_BROWSER_OBSERVED, "").orEmpty(),
+            lastObservedControlGeneration = browserSessionStore.getInt(KEY_BROWSER_GENERATION, 0),
+        )
+    }
+
+    fun clearPersistedBrowserSession() {
+        browserSessionStore.edit().clear().apply()
+    }
+
+    private val browserSessionStore by lazy {
+        getSharedPreferences("van_browser_session", MODE_PRIVATE)
+    }
 
     /**
      * ADR-RB-027 — where VAN connects, from a signed manifest rather than a text field.
@@ -385,6 +451,18 @@ class VanApplication : Application(), VoiceInputCallback, TtsOutputCallback {
 
     companion object {
         private const val GATEWAY_HEALTH_INTERVAL_MS = 60_000L
+
+        // Rev 1.5 §29.10 — the browser session record's keys. Named constants rather
+        // than literals at each call site, because a typo in one of eight strings
+        // produces a record that writes and never reads back.
+        private const val KEY_BROWSER_SESSION_ID = "browser.session_id"
+        private const val KEY_BROWSER_PROFILE = "browser.profile_alias"
+        private const val KEY_BROWSER_VIEWPORT = "browser.viewport_revision"
+        private const val KEY_BROWSER_EVENT_CURSOR = "browser.event_cursor"
+        private const val KEY_BROWSER_SPOKEN = "browser.last_spoken_segment"
+        private const val KEY_BROWSER_PERSISTED_AT = "browser.persisted_at_ms"
+        private const val KEY_BROWSER_OBSERVED = "browser.last_observed_state"
+        private const val KEY_BROWSER_GENERATION = "browser.control_generation"
 
         lateinit var instance: VanApplication
             private set

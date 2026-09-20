@@ -2,6 +2,7 @@ package com.dial.van.browser
 
 import android.view.MotionEvent
 import com.dial.van.gateway.VanGatewayClient
+import com.dial.van.visual.VanDurableState
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Job
 import kotlinx.coroutines.delay
@@ -38,6 +39,22 @@ class BrowserSessionController(
     private val gateway: VanGatewayClient,
     private val stream: BrowserStreamClient,
     private val scope: CoroutineScope,
+    /**
+     * Rev 1.5 §24 — where an arbitrated visual state goes.
+     *
+     * A function rather than a reference to `VanLiveVisualState`, because that object
+     * needs Android and this class is easier to reason about without it. The default does
+     * nothing, so a caller that has no embodiment — a test, a headless path — is not
+     * forced to invent one.
+     */
+    private val visual: (VanDurableState) -> Unit = {},
+    /**
+     * What the embodiment is showing right now.
+     *
+     * Read at the moment of arbitration rather than cached, because the thing this has to
+     * not displace — a trading warning — can arrive between two browser events.
+     */
+    private val visualNow: () -> VanDurableState = { VanDurableState.IDLE },
 ) {
 
     data class State(
@@ -71,8 +88,286 @@ class BrowserSessionController(
     private var heartbeat: Job? = null
     private var renderer: SurfaceViewRenderer? = null
 
+    /** §17.1 — the projection of Chromium's targets. Never a tab this side invented. */
+    private var tabs = TabState()
+
+    /** §12.3 — what reaches the server while the owner drags a window edge. */
+    private var coalescer = ResizeCoalescer()
+
+    /** §12.4 — what is drawn between a revision being sent and its first frame. */
+    private var swap: ViewportSwap? = null
+
+    fun tabState(): TabState = tabs
+
+    /**
+     * §17.1 — one event from the Browser Runtime.
+     *
+     * The projection is replaced wholesale from the reducer rather than mutated in place,
+     * so there is no path where half an event has been applied.
+     */
+    fun onTabEvent(event: TabEvent) {
+        tabs = BrowserTabs.reduce(tabs, event)
+        publishVisualState()
+    }
+
+    /** §17.6 — what the system Back gesture does here. */
+    fun onBackPressed(transientPanelOpen: Boolean, addressBarEditing: Boolean): BackOutcome {
+        val outcome = BrowserBackPolicy.decide(
+            transientPanelOpen = transientPanelOpen,
+            addressBarEditing = addressBarEditing,
+            canGoBack = tabs.active?.canGoBack == true,
+        )
+        if (outcome == BackOutcome.BROWSER_BACK) {
+            sendNavigation(BrowserInputProtocol.Kind.HISTORY_BACK)
+        }
+        return outcome
+    }
+
+    /**
+     * §17.2 — the owner typed something and committed it.
+     *
+     * The classification happens on the phone and the *result* travels, so the host is
+     * told "navigate here" or "search for this" rather than being handed raw text to
+     * guess about. A host that guessed would guess differently from the address bar the
+     * owner is looking at.
+     */
+    fun onOmniboxCommitted(typed: String): OmniboxResolution? {
+        val resolved = BrowserOmnibox.resolve(typed)
+        if (resolved.value.isBlank()) return null
+        val kind = when (resolved.intent) {
+            OmniboxIntent.NAVIGATE -> BrowserInputProtocol.Kind.NAVIGATE
+            OmniboxIntent.SEARCH -> BrowserInputProtocol.Kind.SEARCH
+        }
+        return if (sendNavigation(kind, resolved.value)) resolved else null
+    }
+
+    /**
+     * §19 — the owner picked a file and it passed the admission checks.
+     *
+     * The ticket carries a name, a size and a type. There is no argument for the bytes,
+     * because §19's prohibition — the content is not logged or sent to Hermes — is easier
+     * to keep when there is nowhere here to put it.
+     */
+    fun beginUpload(request: FileChooserRequest, displayName: String, byteSize: Long) {
+        val sessionId = _state.value.snapshot?.sessionId ?: return
+        uploads += UploadTicket(
+            uploadId = "up_${'$'}{System.nanoTime()}",
+            sessionId = sessionId,
+            targetId = request.targetId,
+            displayName = displayName,
+            byteSize = byteSize,
+            declaredMime = "application/octet-stream",
+            createdAtMs = System.currentTimeMillis(),
+            state = UploadState.TRANSFERRING,
+        )
+    }
+
+    fun reportUploadRefused(refusal: UploadRefusal) {
+        _state.value = _state.value.copy(lastError = uploadRefusalText(refusal))
+    }
+
+    /** §19 step 8 — drop the tickets whose ephemeral copies have expired. */
+    fun reapExpiredUploads(nowMs: Long) {
+        uploads = uploads.filterNot { BrowserUploadPolicy.expired(it, nowMs) }
+    }
+
+    fun uploadTickets(): List<UploadTicket> = uploads
+
+    private var uploads: List<UploadTicket> = emptyList()
+
+    private fun uploadRefusalText(refusal: UploadRefusal): String = when (refusal) {
+        UploadRefusal.TYPE_NOT_ACCEPTED -> "That page will not take that kind of file."
+        UploadRefusal.TOO_LARGE -> "That file is too large for VAN to send."
+        UploadRefusal.NAME_UNSAFE -> "VAN could not read that file's name."
+        UploadRefusal.SESSION_STALE -> "That browser session has moved on. Try again."
+        UploadRefusal.OWNER_CANCELLED -> "Upload cancelled."
+    }
+
+    /**
+     * §17.5 — go to an address that came from outside VAN.
+     *
+     * Through the same [sendNavigation] as the address bar, so an external link cannot
+     * reach the page by a route a tap cannot: the control lease and the viewport revision
+     * fence it exactly as they fence a touch.
+     */
+    fun navigateTo(url: String): Boolean =
+        sendNavigation(BrowserInputProtocol.Kind.NAVIGATE, url)
+
+    fun reload() = sendNavigation(BrowserInputProtocol.Kind.RELOAD)
+
+    fun stopLoading() = sendNavigation(BrowserInputProtocol.Kind.STOP_LOADING)
+
+    fun goForward() = sendNavigation(BrowserInputProtocol.Kind.HISTORY_FORWARD)
+
+    /**
+     * §17.2 — navigation on the reliable channel, under the same authority as a tap.
+     *
+     * Through [mayActuate] rather than around it: navigating is an actuation, and an
+     * address bar that worked while an agent held the control lease would be the owner
+     * steering a browser VAN believes it is driving.
+     */
+    private fun sendNavigation(
+        kind: BrowserInputProtocol.Kind,
+        text: String = "",
+    ): Boolean {
+        if (!mayActuate()) return false
+        val authority = authority() ?: return false
+        return stream.send(
+            BrowserInputProtocol.Packet(
+                authority = authority,
+                kind = kind,
+                channel = BrowserInputProtocol.Channel.RELIABLE,
+                reliableSeq = sequencer.nextReliable(),
+                text = text,
+                sentAtMs = System.currentTimeMillis(),
+            ),
+        )
+    }
+
+    /**
+     * §12.3 — the window changed shape.
+     *
+     * The local stage happens in the view: the decoded frame is scaled to the new
+     * rectangle immediately. This is only the remote half, and most callbacks produce
+     * nothing at all, which is the design rather than a failure.
+     */
+    fun onWindowChanged(candidate: ViewportCandidate, nowMs: Long) {
+        val due = coalescer.onWindowChanged(candidate, nowMs) ?: return
+        sendViewport(due)
+    }
+
+    /** The drag ended, or the timer fired. */
+    fun onWindowTick(nowMs: Long, settled: Boolean = false) {
+        val due = if (settled) coalescer.onSettled(nowMs) else coalescer.onTick(nowMs)
+        if (due != null) sendViewport(due)
+    }
+
+    /** §12.4 — a frame arrived carrying the revision it was rendered at. */
+    fun onFrameForRevision(revision: Int) {
+        swap?.onFrame(revision)
+    }
+
+    private fun sendViewport(candidate: ViewportCandidate) {
+        val sessionId = _state.value.snapshot?.sessionId ?: return
+        scope.launch {
+            runCatching {
+                gateway.interactiveBrowserProposeViewport(
+                    sessionId = sessionId,
+                    widthPx = candidate.contentWidthPx,
+                    heightPx = candidate.contentHeightPx,
+                    deviceScaleFactor = candidate.density,
+                )
+            }.onSuccess { revision ->
+                // The revision the Gateway issued, not the one the candidate guessed:
+                // the server owns the sequence, and a phone that numbered its own would
+                // eventually disagree with it.
+                val issued = candidate.copy(revision = revision)
+                val current = swap ?: ViewportSwap(issued).also { swap = it }
+                if (issued.revision > current.live.revision) current.onSent(issued)
+                // §8.6 — acknowledge the size we are drawing, which is what re-opens the
+                // input gate. The frame carrying that revision completes the swap.
+                runCatching {
+                    gateway.interactiveBrowserAckViewport(sessionId, revision)
+                }.onSuccess {
+                    current.onAcked(revision)
+                    _state.value.snapshot?.let { snapshot ->
+                        _state.value = _state.value.copy(
+                            snapshot = snapshot.copy(ackedViewportRevision = revision),
+                        )
+                    }
+                }
+            }.onFailure { failure ->
+                _state.value = _state.value.copy(lastError = readable(failure))
+            }
+        }
+    }
+
+    /** §12.4 — how the held frame is drawn while a revision is in flight. */
+    fun letterbox(frameWidthPx: Int, frameHeightPx: Int): Letterbox? =
+        swap?.letterbox(frameWidthPx, frameHeightPx)
+
+    /**
+     * §24 — what the browser says about how VAN looks, if the arbitration lets it.
+     *
+     * Called from every place the state moves rather than from a timer, so the embodiment
+     * follows the browser rather than sampling it.
+     */
+    private fun publishVisualState() {
+        val snapshot = _state.value.snapshot
+        val proposal = BrowserVisualState.arbitrate(
+            current = visualNow(),
+            snapshot = BrowserVisualSnapshot(
+                connecting = _state.value.link == BrowserStreamClient.Link.CONNECTING,
+                connected = _state.value.link == BrowserStreamClient.Link.LIVE,
+                degraded = _state.value.link == BrowserStreamClient.Link.RECOVERING,
+                ownerBrowsing = snapshot?.controlHolder?.isAgent == false,
+                agentDriving = snapshot?.controlHolder?.isAgent == true,
+                navigating = tabs.active?.loading == true,
+                ownerRequired = snapshot?.ownerReadableState?.contains("need", ignoreCase = true) == true,
+                idle = snapshot == null,
+            ),
+        ) ?: return
+        visual(proposal)
+    }
+
     fun attachRenderer(target: SurfaceViewRenderer) {
         renderer = target
+    }
+
+    /**
+     * §29.10 — what VAN writes down before the process can be killed.
+     *
+     * Called on every state change that matters rather than only on stop: a process death
+     * does not announce itself, and a snapshot taken in `onStop` is missing everything
+     * that happened after the owner last backgrounded the app.
+     */
+    fun persistable(nowMs: Long): PersistedBrowserSession? {
+        val snapshot = _state.value.snapshot ?: return null
+        return PersistedBrowserSession(
+            sessionId = snapshot.sessionId,
+            profileAlias = snapshot.profileAlias,
+            lastViewportRevision = snapshot.viewport.revision,
+            lastEventCursor = lastEventCursor,
+            lastSpokenSegment = lastSpokenSegment,
+            persistedAtMs = nowMs,
+            lastObservedState = snapshot.ownerReadableState,
+            lastObservedControlGeneration = snapshot.controlGeneration,
+        )
+    }
+
+    private var lastEventCursor: Long = 0
+    private var lastSpokenSegment: Int = 0
+
+    /**
+     * §29.10 — come back after a process death.
+     *
+     * The restored record is a *claim*: it supplies the session id to ask about and
+     * nothing the owner is shown. Whether it is true is the Gateway's answer, which is why
+     * the read below is `interactiveBrowserRead` and not a copy of the cached state.
+     */
+    suspend fun resumeAfterProcessDeath(
+        persisted: PersistedBrowserSession?,
+        nowMs: Long,
+    ): RestoredBrowserSession {
+        val restored = BrowserProcessRecovery.restore(persisted, nowMs)
+        val sessionId = restored.sessionId ?: return restored
+        val fresh = runCatching { gateway.interactiveBrowserRead(sessionId) }.getOrNull()
+        val reconciled = BrowserProcessRecovery.reconcile(
+            restored = restored,
+            gatewaySaysResumable = fresh != null && !fresh.state.isTerminal,
+            gatewayState = fresh?.ownerReadableState,
+        )
+        if (BrowserProcessRecovery.mayReconnectMedia(reconciled) && fresh != null) {
+            lastEventCursor = restored.resumeEventCursor
+            lastSpokenSegment = restored.resumeSpeechSegment
+            _state.value = State(snapshot = fresh)
+            publishVisualState()
+            // §29.8 — the media plane reconnects separately, and only now: negotiating
+            // against a grant for a session the Gateway has ended fails in a way that
+            // looks like a network problem and is not.
+            connectStream()
+        }
+        return reconciled
     }
 
     /** §5.1 — open a session, or re-attach to the one the owner already had. */
@@ -99,6 +394,7 @@ class BrowserSessionController(
             return
         }
         _state.value = State(snapshot = snapshot)
+        publishVisualState()
 
         // §8.6 — acknowledge the viewport we are actually drawing before any input is
         // allowed through. The gate below reads this, so forgetting it fails closed.
@@ -129,7 +425,12 @@ class BrowserSessionController(
             stream.connect(
                 grant = grant,
                 onVideo = { track: VideoTrack -> renderer?.let(track::addSink) },
-                onLink = { link -> _state.value = _state.value.copy(link = link) },
+                onLink = { link ->
+                    _state.value = _state.value.copy(link = link)
+                    // §24 — CONNECTING and DEGRADED are the two the owner most needs to
+                    // see, and they only ever come from here.
+                    publishVisualState()
+                },
             )
         }.onFailure { failure ->
             _state.value = _state.value.copy(lastError = readable(failure))
@@ -176,6 +477,7 @@ class BrowserSessionController(
                     // half a drag under the new generation.
                     sequencer.reset()
                     _state.value = _state.value.copy(snapshot = fresh)
+                    publishVisualState()
                 }
         }
     }

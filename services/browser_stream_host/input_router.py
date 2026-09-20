@@ -46,6 +46,17 @@ REJECT_STALE_VIEWPORT = "input_router_stale_viewport_revision"
 REJECT_STALE_GENERATION = "input_router_stale_control_generation"
 REJECT_UNMAPPED_KIND = "input_router_kind_has_no_mapping"
 
+#: Rev 1.5 §17.2 — navigation travels the input path and is not translated here.
+#:
+#: Its own reason rather than REJECT_UNMAPPED_KIND, because the two mean opposite things:
+#: an unmapped kind is a gap and this is a boundary. A navigation packet is fenced by the
+#: same control generation and viewport revision as a tap — that is why it travels the
+#: input path at all — but turning one into `Page.navigate` here would put a second CDP
+#: surface behind a router whose whole claim is that it emits `Input.*` and nothing else.
+#: It is handed to the Browser Control Agent's `navigate` operation instead (§13.2), which
+#: is the component that owns the scheme allowlist and the step budget.
+REJECT_NOT_INPUT = "input_router_navigation_belongs_to_the_control_agent"
+
 
 class InputRouterRefused(Exception):
     def __init__(self, reason: str) -> None:
@@ -96,6 +107,11 @@ class CdpInputRouter:
             raise InputRouterRefused(REJECT_STALE_VIEWPORT)
         if packet.authority.control_generation != self.control_generation:
             raise InputRouterRefused(REJECT_STALE_GENERATION)
+        # Checked after the fencing, not before: a navigation naming a superseded
+        # generation is refused as stale, which is the more specific truth and the one an
+        # agent that has just been preempted needs to hear.
+        if packet.kind.is_navigation:
+            raise InputRouterRefused(REJECT_NOT_INPUT)
 
         handler = _ROUTES.get(packet.kind)
         if handler is None:

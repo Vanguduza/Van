@@ -68,6 +68,37 @@ class InputKind(IntEnum):
     TEXT_COMMIT = 8
     IME_COMPOSITION = 9
 
+    # Rev 1.5 §17.2 — "send a navigation command through RELIABLE_INPUT". Navigation is
+    # an actuation, so it travels on the same fenced path as a tap rather than through a
+    # REST route: a URL bar that could navigate by calling the Gateway would be a way
+    # round the control lease, and §6 keeps the Gateway off the actuation path entirely.
+    #
+    # They carry no coordinates. NAVIGATE and SEARCH carry their subject in `text`; the
+    # history kinds carry nothing at all.
+    NAVIGATE = 10
+    SEARCH = 11
+    HISTORY_BACK = 12
+    HISTORY_FORWARD = 13
+    RELOAD = 14
+    STOP_LOADING = 15
+
+    @property
+    def is_navigation(self) -> bool:
+        """Whether this kind moves the page rather than touching it.
+
+        Separated because the host handles them differently — a navigation is one CDP
+        call, not a gesture — and because the refusals differ: a navigation to a scheme
+        the agent may not open is refused on its content, which no pointer event has.
+        """
+        return self in {
+            InputKind.NAVIGATE,
+            InputKind.SEARCH,
+            InputKind.HISTORY_BACK,
+            InputKind.HISTORY_FORWARD,
+            InputKind.RELOAD,
+            InputKind.STOP_LOADING,
+        }
+
     @property
     def is_edge(self) -> bool:
         """DOWN/UP/CANCEL are duplicated across both channels (§8.3)."""
@@ -92,6 +123,13 @@ REJECT_STALE_EPOCH = "input_gesture_epoch_stale"
 REJECT_ORPHAN_MOVE = "input_move_without_gesture"
 REJECT_DUPLICATE_EDGE = "input_duplicate_edge"
 REJECT_UNKNOWN_GESTURE = "input_unknown_gesture"
+
+#: §17.2 / §9.14 — a navigation whose target VAN will not open.
+#:
+#: Refused here rather than on the host, because this is the last place that can tell the
+#: owner why. A host that refused it would do so as a CDP error the phone cannot explain.
+REJECT_NAVIGATION_SCHEME = "input_navigation_scheme_refused"
+REJECT_NAVIGATION_EMPTY = "input_navigation_empty"
 
 
 class InputProtocolError(Exception):
@@ -223,6 +261,15 @@ def decode(raw: bytes) -> InputPacket:
     if not 0 <= x <= COORDINATE_MAX or not 0 <= y <= COORDINATE_MAX:
         raise InputProtocolError(REJECT_MALFORMED)
 
+    if parsed_kind.is_navigation:
+        # §17.2 — navigation travels on the reliable channel and nowhere else. A
+        # navigate on the fast channel is a navigate that can be dropped, duplicated or
+        # reordered against the tap that followed it, and the owner would end up
+        # interacting with a page they had already left.
+        if parsed_channel is not Channel.RELIABLE:
+            raise InputProtocolError(REJECT_MALFORMED)
+        _check_navigation(parsed_kind, strings[2])
+
     return InputPacket(
         authority=InputAuthority(
             session_id=strings[0],
@@ -246,6 +293,38 @@ def decode(raw: bytes) -> InputPacket:
         text=strings[2],
         sent_at_ms=sent_at_ms,
     )
+
+
+#: §17.2 / §9.14 — the only schemes a navigation packet may carry.
+#:
+#: The same two the omnibox will produce and the same two an external link may use. A
+#: third would have to be a decision, and there is no path here that could make it one
+#: by accident.
+NAVIGABLE_SCHEMES = ("http://", "https://")
+
+
+def _check_navigation(kind: InputKind, text: str) -> None:
+    """Refuse a navigation the Gateway will not carry, with a reason the owner can read.
+
+    Checked here rather than on the host because this is the last place that knows who
+    asked. A host refusing it produces a CDP error the phone cannot explain, and the
+    owner sees a page that did not load for no stated reason.
+    """
+    if kind in {InputKind.NAVIGATE, InputKind.SEARCH}:
+        if not text.strip():
+            raise InputProtocolError(REJECT_NAVIGATION_EMPTY)
+    if kind is InputKind.NAVIGATE:
+        lowered = text.strip().lower()
+        if not lowered.startswith(NAVIGABLE_SCHEMES):
+            # `file://` reads the host's disk into a page the owner is watching and
+            # `javascript:` is arbitrary execution in it. A phone should never send
+            # either; one that does is not a phone this session should obey.
+            raise InputProtocolError(REJECT_NAVIGATION_SCHEME)
+    if kind in {InputKind.HISTORY_BACK, InputKind.HISTORY_FORWARD,
+                InputKind.RELOAD, InputKind.STOP_LOADING} and text:
+        # These carry nothing. Text in one of them is a caller using the field for
+        # something the protocol does not define, which is how a format drifts.
+        raise InputProtocolError(REJECT_MALFORMED)
 
 
 def to_viewport_pixels(x: int, y: int, *, width: int, height: int) -> tuple[int, int]:

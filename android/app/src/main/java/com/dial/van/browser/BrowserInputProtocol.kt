@@ -45,11 +45,39 @@ object BrowserInputProtocol {
         KEY_DOWN(6),
         KEY_UP(7),
         TEXT_COMMIT(8),
-        IME_COMPOSITION(9);
+        IME_COMPOSITION(9),
+
+        // Rev 1.5 §17.2 — "send a navigation command through RELIABLE_INPUT". Navigation
+        // is an actuation, so it travels the same fenced path as a tap rather than
+        // through a REST route: an address bar that could navigate by calling the Gateway
+        // would be a way round the control lease.
+        //
+        // NAVIGATE and SEARCH carry their subject in `text`; the rest carry nothing.
+        NAVIGATE(10),
+        SEARCH(11),
+        HISTORY_BACK(12),
+        HISTORY_FORWARD(13),
+        RELOAD(14),
+        STOP_LOADING(15);
 
         /** §8.3 — edges go on both channels, so the server can de-duplicate them. */
         val isEdge: Boolean
             get() = this == POINTER_DOWN || this == POINTER_UP || this == POINTER_CANCEL
+
+        /** Whether this moves the page rather than touching it. */
+        val isNavigation: Boolean
+            get() = this == NAVIGATE || this == SEARCH || this == HISTORY_BACK ||
+                this == HISTORY_FORWARD || this == RELOAD || this == STOP_LOADING
+
+        /**
+         * Navigation kinds whose subject is the action itself.
+         *
+         * Text in one of these is a caller using a field the protocol does not define for
+         * it, which is how a wire format drifts between two implementations.
+         */
+        val carriesNoText: Boolean
+            get() = this == HISTORY_BACK || this == HISTORY_FORWARD ||
+                this == RELOAD || this == STOP_LOADING
     }
 
     enum class Channel(val wire: Int) {
@@ -103,6 +131,23 @@ object BrowserInputProtocol {
     fun encode(packet: Packet): ByteArray {
         require(packet.x in 0..COORDINATE_MAX && packet.y in 0..COORDINATE_MAX) {
             "coordinates must be normalized before encoding"
+        }
+        if (packet.kind.isNavigation) {
+            // §17.2 — the reliable channel and nothing else. A navigate that can be
+            // dropped or reordered against the tap after it leaves the owner interacting
+            // with a page they had already left.
+            require(packet.channel == Channel.RELIABLE) {
+                "navigation travels on the reliable channel"
+            }
+            require(!packet.kind.carriesNoText || packet.text.isEmpty()) {
+                "this kind carries no text"
+            }
+            if (packet.kind == Kind.NAVIGATE) {
+                val lowered = packet.text.trim().lowercase()
+                require(lowered.startsWith("http://") || lowered.startsWith("https://")) {
+                    "navigation scheme refused"
+                }
+            }
         }
         val session = packet.authority.sessionId.toByteArray(StandardCharsets.UTF_8)
         val lease = packet.authority.controlLeaseId.toByteArray(StandardCharsets.UTF_8)

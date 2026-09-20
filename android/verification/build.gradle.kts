@@ -61,6 +61,7 @@ sourceSets {
             "com/dial/van/visual/VanPalette.kt",
             "com/dial/van/visual/VanPresence.kt",
             "com/dial/van/visual/VanPresenceFrame.kt",
+            "com/dial/van/visual/VanStatePriority.kt",
             "com/dial/van/visual/VanStatusPalette.kt",
             "com/dial/van/visual/VanTradeSemantic.kt",
             "com/dial/van/visual/VanVisualRuntime.kt",
@@ -110,6 +111,13 @@ sourceSets {
             // has moved on, two carriers that share one road. They have no Android imports
             // so they can be executed here rather than only reasoned about.
             "com/dial/van/browser/BrowserInputProtocol.kt",
+            "com/dial/van/browser/BrowserWindow.kt",
+            "com/dial/van/browser/BrowserOmnibox.kt",
+            "com/dial/van/browser/BrowserTabs.kt",
+            "com/dial/van/browser/BrowserShortcuts.kt",
+            "com/dial/van/browser/BrowserVisualState.kt",
+            "com/dial/van/browser/BrowserUpload.kt",
+            "com/dial/van/browser/BrowserProcessRecovery.kt",
             "com/dial/van/browser/BrowserModels.kt",
             "com/dial/van/connectivity/ConnectivityManifest.kt",
             "com/dial/van/session/SessionEnvelope.kt",

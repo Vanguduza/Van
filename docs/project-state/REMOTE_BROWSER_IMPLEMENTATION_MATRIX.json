@@ -788,10 +788,10 @@
       "id": "RB-026",
       "name": "native address/search",
       "group": "android",
-      "status": "NOT_STARTED",
-      "built": false,
-      "wired": false,
-      "reachable": false,
+      "status": "WIRED_UNPROVEN",
+      "built": true,
+      "wired": true,
+      "reachable": true,
       "live": false,
       "verified": false,
       "observed": false,
@@ -799,14 +799,22 @@
       "certified": false,
       "component_refs": [],
       "ledger_expectation": "NONE",
-      "producer": null,
-      "consumer": null,
+      "producer": "com.dial.van.browser.BrowserOmnibox",
+      "consumer": "BrowserActivity's address bar; BrowserSessionController.onOmniboxCommitted",
       "authority": "docs/VAN_REMOTE_BROWSER_PRODUCTION_BLUEPRINT_REV_1_5.md \u00a717",
       "evidence_refs": [],
-      "tests": [],
-      "external_gates": [],
+      "tests": [
+        "android/verification/src/test/kotlin/com/dial/van/browser/BrowserOmniboxTest.kt",
+        "tests/contracts/test_browser_input_protocol_matches.py",
+        "services/browser_stream_host/tests/test_input_router.py"
+      ],
+      "external_gates": [
+        "a Browser Stream Host that answers a real SDP offer (RB-002/RB-010)",
+        "the Android build is compiled only in CI; the AGP is unreachable in the audit container"
+      ],
       "transport_independent": false,
-      "offline_voice_proven": null
+      "offline_voice_proven": null,
+      "note": "\u00a717.2. The classification is local and the *result* travels, so the host is told \"navigate here\" or \"search for this\" rather than handed raw text to guess about \u2014 a host that guessed would guess differently from the bar the owner is looking at. Navigation goes through the input path as \u00a717.2 requires, which needed six new protocol kinds on both sides rather than a REST route: an address bar that could navigate by calling the Gateway would be a way round the control lease. Suggestions are OFF by default and the composable has no path to change it; a URL and anything carrying a credential are never sent even under consent. Adding the kinds to the shared enum immediately broke a downstream invariant, which is the system working: the Stream Host's input router asserts that every kind has a CDP mapping and that it emits `Input.*` and nothing else. Both cannot be true of a navigation, so the router refuses one by its own name \u2014 a boundary, not a gap. Collapsing it into \"kind has no mapping\" would invite the next reader to close it by adding `Page.navigate` to the table, which is the one method that router must never emit; navigation is handed to the Browser Control Agent's `navigate` operation instead, which owns the scheme allowlist and the step budget."
     },
     {
       "schema": "van-implementation-matrix/1",
@@ -814,10 +822,10 @@
       "id": "RB-027",
       "name": "native tabs",
       "group": "android",
-      "status": "NOT_STARTED",
-      "built": false,
-      "wired": false,
-      "reachable": false,
+      "status": "WIRED_UNPROVEN",
+      "built": true,
+      "wired": true,
+      "reachable": true,
       "live": false,
       "verified": false,
       "observed": false,
@@ -825,14 +833,20 @@
       "certified": false,
       "component_refs": [],
       "ledger_expectation": "NONE",
-      "producer": null,
-      "consumer": null,
+      "producer": "com.dial.van.browser.BrowserTabs",
+      "consumer": "BrowserSessionController.onTabEvent; the tab strip",
       "authority": "docs/VAN_REMOTE_BROWSER_PRODUCTION_BLUEPRINT_REV_1_5.md \u00a717",
       "evidence_refs": [],
-      "tests": [],
-      "external_gates": [],
+      "tests": [
+        "android/verification/src/test/kotlin/com/dial/van/browser/BrowserTabsTest.kt"
+      ],
+      "external_gates": [
+        "a Browser Stream Host that answers a real SDP offer (RB-002/RB-010)",
+        "the Android build is compiled only in CI; the AGP is unreachable in the audit container"
+      ],
       "transport_independent": false,
-      "offline_voice_proven": null
+      "offline_voice_proven": null,
+      "note": "\u00a717.1 \u2014 \"Chromium target state is authoritative.\" A reducer over the four events the section names and nothing else: the phone holds a projection and never invents a tab, because a tab this side added optimistically is a tab that cannot be switched to. Every ordering a lossy channel produces is executed \u2014 an update before its create, a close for the active tab, an activation for a target nobody announced. \u00a717.6's Back order is here too, and its last clause is the one that matters: Back does not close the browser while the page has history."
     },
     {
       "schema": "van-implementation-matrix/1",
@@ -872,10 +886,10 @@
       "id": "RB-029",
       "name": "phone upload",
       "group": "android",
-      "status": "NOT_STARTED",
-      "built": false,
-      "wired": false,
-      "reachable": false,
+      "status": "WIRED_UNPROVEN",
+      "built": true,
+      "wired": true,
+      "reachable": true,
       "live": false,
       "verified": false,
       "observed": false,
@@ -883,14 +897,20 @@
       "certified": false,
       "component_refs": [],
       "ledger_expectation": "NONE",
-      "producer": null,
-      "consumer": null,
+      "producer": "com.dial.van.browser.BrowserUploadPolicy",
+      "consumer": "BrowserActivity's document picker; BrowserSessionController.beginUpload",
       "authority": "docs/VAN_REMOTE_BROWSER_PRODUCTION_BLUEPRINT_REV_1_5.md \u00a719",
       "evidence_refs": [],
-      "tests": [],
-      "external_gates": [],
+      "tests": [
+        "android/verification/src/test/kotlin/com/dial/van/browser/BrowserUploadTest.kt"
+      ],
+      "external_gates": [
+        "a Browser Stream Host that answers a real SDP offer (RB-002/RB-010)",
+        "the Android build is compiled only in CI; the AGP is unreachable in the audit container"
+      ],
       "transport_independent": false,
-      "offline_voice_proven": null
+      "offline_voice_proven": null,
+      "note": "\u00a719. The section's last sentence is what shapes the module: the file content is not logged or sent to Hermes unless the owner separately asks. `UploadTicket` has no field a byte could travel in, so the rule holds by construction rather than by everyone remembering, and the loggable fields carry the name's *length* because a filename is content. The accept-type check happens before the transfer, so the owner does not pay for an upload the page then refuses. Step 8's TTL is fifteen minutes unless the owner retains the copy. Not proven: no byte has been transferred, and the transfer endpoint is the Stream Host's."
     },
     {
       "schema": "van-implementation-matrix/1",
@@ -960,10 +980,10 @@
       "id": "RB-032",
       "name": "app process recovery",
       "group": "android",
-      "status": "NOT_STARTED",
-      "built": false,
-      "wired": false,
-      "reachable": false,
+      "status": "WIRED_UNPROVEN",
+      "built": true,
+      "wired": true,
+      "reachable": true,
       "live": false,
       "verified": false,
       "observed": false,
@@ -971,14 +991,20 @@
       "certified": false,
       "component_refs": [],
       "ledger_expectation": "NONE",
-      "producer": null,
-      "consumer": null,
+      "producer": "com.dial.van.browser.BrowserProcessRecovery",
+      "consumer": "VanApplication's persisted record; BrowserSessionController.resumeAfterProcessDeath",
       "authority": "docs/VAN_REMOTE_BROWSER_PRODUCTION_BLUEPRINT_REV_1_5.md \u00a729",
       "evidence_refs": [],
-      "tests": [],
-      "external_gates": [],
+      "tests": [
+        "android/verification/src/test/kotlin/com/dial/van/browser/BrowserProcessRecoveryTest.kt"
+      ],
+      "external_gates": [
+        "a Browser Stream Host that answers a real SDP offer (RB-002/RB-010)",
+        "the Android build is compiled only in CI; the AGP is unreachable in the audit container"
+      ],
       "transport_independent": false,
-      "offline_voice_proven": null
+      "offline_voice_proven": null,
+      "note": "\u00a729.10, and its step 6 is the whole of it: never trust cached completion state over Gateway truth. A process killed while an agent was driving comes back holding a snapshot that says so, and the work may have finished, failed or been taken over. So `restore` returns a *claim* \u2014 there is no argument that produces an owner-visible state from the cache, and `reconcile` cannot see the persisted record at all, because a reconciliation that could see it could prefer it. Media reconnects only after the Gateway confirms: negotiating against a grant for an ended session fails in a way that looks like a network problem and is not."
     },
     {
       "schema": "van-implementation-matrix/1",
@@ -1168,10 +1194,10 @@
       "id": "RB-039",
       "name": "visual-state arbitration",
       "group": "android",
-      "status": "NOT_STARTED",
-      "built": false,
-      "wired": false,
-      "reachable": false,
+      "status": "WIRED_UNPROVEN",
+      "built": true,
+      "wired": true,
+      "reachable": true,
       "live": false,
       "verified": false,
       "observed": false,
@@ -1179,14 +1205,20 @@
       "certified": false,
       "component_refs": [],
       "ledger_expectation": "NONE",
-      "producer": null,
-      "consumer": null,
+      "producer": "com.dial.van.browser.BrowserVisualState",
+      "consumer": "BrowserSessionController.publishVisualState -> VanLiveVisualState",
       "authority": "docs/VAN_REMOTE_BROWSER_PRODUCTION_BLUEPRINT_REV_1_5.md \u00a724",
       "evidence_refs": [],
-      "tests": [],
-      "external_gates": [],
+      "tests": [
+        "android/verification/src/test/kotlin/com/dial/van/browser/BrowserVisualStateTest.kt",
+        "android/verification/src/test/kotlin/com/dial/van/visual/VanStatePriorityTest.kt"
+      ],
+      "external_gates": [
+        "the Android build is compiled only in CI; the AGP is unreachable in the audit container"
+      ],
       "transport_independent": false,
-      "offline_voice_proven": null
+      "offline_voice_proven": null,
+      "note": "\u00a724's two prohibitions, both structural. `propose` has no path to SUCCESS at all \u2014 not a guarded one \u2014 because a page finishing loading is not a task succeeding, and the test asserts it over every combination rather than over one case. And the browser never displaces a state the authority holds: a first version allowed a blocked session's WAITING_FOR_OWNER to replace a softer one, which is wrong, because needing the owner is not the *browser's* claim to make over a halted trade. The priority ladder was private inside `VanLiveVisualState`; it is extracted rather than copied, since two copies of a precedence ordering diverge on the state that matters."
     },
     {
       "schema": "van-implementation-matrix/1",
@@ -2586,10 +2618,10 @@
       "id": "RB-087",
       "name": "BrowserActivity explicit multi-window contract",
       "group": "android",
-      "status": "NOT_STARTED",
-      "built": false,
-      "wired": false,
-      "reachable": false,
+      "status": "WIRED_UNPROVEN",
+      "built": true,
+      "wired": true,
+      "reachable": true,
       "live": false,
       "verified": false,
       "observed": false,
@@ -2597,14 +2629,19 @@
       "certified": false,
       "component_refs": [],
       "ledger_expectation": "NONE",
-      "producer": null,
-      "consumer": null,
+      "producer": "android/app/src/main/AndroidManifest.xml",
+      "consumer": "the OS, which decides whether VAN may be split or popped out",
       "authority": "docs/VAN_REMOTE_BROWSER_PRODUCTION_BLUEPRINT_REV_1_5.md \u00a7ADR-RB-021",
       "evidence_refs": [],
-      "tests": [],
-      "external_gates": [],
+      "tests": [
+        "tests/contracts/test_browser_window_and_entry_contract.py"
+      ],
+      "external_gates": [
+        "the Android build is compiled only in CI; the AGP is unreachable in the audit container"
+      ],
       "transport_independent": false,
-      "offline_voice_proven": null
+      "offline_voice_proven": null,
+      "note": "ADR-RB-021. `resizeableActivity=\"true\"`, no orientation lock, and picture-in-picture explicitly off \u2014 the ADR names PiP as a prohibition precisely because it looks like the same feature as pop-up view and is a different one. Asserted from the manifest XML rather than from Kotlin, because the manifest is not Kotlin and the Android build compiles only in CI."
     },
     {
       "schema": "van-implementation-matrix/1",
@@ -2612,10 +2649,10 @@
       "id": "RB-088",
       "name": "BrowserMediaSessionManager Activity-independent lifetime",
       "group": "android",
-      "status": "NOT_STARTED",
-      "built": false,
-      "wired": false,
-      "reachable": false,
+      "status": "WIRED_UNPROVEN",
+      "built": true,
+      "wired": true,
+      "reachable": true,
       "live": false,
       "verified": false,
       "observed": false,
@@ -2623,14 +2660,20 @@
       "certified": false,
       "component_refs": [],
       "ledger_expectation": "NONE",
-      "producer": null,
-      "consumer": null,
+      "producer": "BrowserProcessRecovery.ACTIVITY_OWNS / OUTLIVES_THE_ACTIVITY; the manifest's configChanges",
+      "consumer": "BrowserActivity, which rebuilds only the renderer attachment",
       "authority": "docs/VAN_REMOTE_BROWSER_PRODUCTION_BLUEPRINT_REV_1_5.md \u00a7ADR-RB-022",
       "evidence_refs": [],
-      "tests": [],
-      "external_gates": [],
+      "tests": [
+        "android/verification/src/test/kotlin/com/dial/van/browser/BrowserProcessRecoveryTest.kt",
+        "tests/contracts/test_browser_window_and_entry_contract.py"
+      ],
+      "external_gates": [
+        "the Android build is compiled only in CI; the AGP is unreachable in the audit container"
+      ],
       "transport_independent": false,
-      "offline_voice_proven": null
+      "offline_voice_proven": null,
+      "note": "ADR-RB-022 \u2014 a resize is not a new session. The Activity declares the configuration changes it handles itself, so a rotation or a split-screen transition does not tear down the peer connection; a browser that restarted navigation on rotation would lose the page the owner was reading because they turned the phone. The two lists are data so the contract is readable rather than implied."
     },
     {
       "schema": "van-implementation-matrix/1",
@@ -2638,10 +2681,10 @@
       "id": "RB-089",
       "name": "responsive compact/medium/expanded browser chrome",
       "group": "android",
-      "status": "NOT_STARTED",
-      "built": false,
-      "wired": false,
-      "reachable": false,
+      "status": "WIRED_UNPROVEN",
+      "built": true,
+      "wired": true,
+      "reachable": true,
       "live": false,
       "verified": false,
       "observed": false,
@@ -2649,14 +2692,19 @@
       "certified": false,
       "component_refs": [],
       "ledger_expectation": "NONE",
-      "producer": null,
-      "consumer": null,
+      "producer": "BrowserWindowClass, asked with the content width after insets",
+      "consumer": "BrowserActivity's chrome and address bar",
       "authority": "docs/VAN_REMOTE_BROWSER_PRODUCTION_BLUEPRINT_REV_1_5.md \u00a70D.1",
       "evidence_refs": [],
-      "tests": [],
-      "external_gates": [],
+      "tests": [
+        "android/verification/src/test/kotlin/com/dial/van/browser/BrowserWindowTest.kt"
+      ],
+      "external_gates": [
+        "the Android build is compiled only in CI; the AGP is unreachable in the audit container"
+      ],
       "transport_independent": false,
-      "offline_voice_proven": null
+      "offline_voice_proven": null,
+      "note": "\u00a70D.1. Android's own window size-class breakpoints, read from the *window* rather than the display: in split-screen a tablet's browser gets a phone's width, and a layout that consulted the display would put a five-item toolbar into a 320dp column. `BrowserWindowClass` already existed, so the viewport candidate asks it rather than carrying a second enum with the same numbers in it."
     },
     {
       "schema": "van-implementation-matrix/1",
@@ -2664,10 +2712,10 @@
       "id": "RB-090",
       "name": "continuous resize coalescer",
       "group": "android",
-      "status": "NOT_STARTED",
-      "built": false,
-      "wired": false,
-      "reachable": false,
+      "status": "WIRED_UNPROVEN",
+      "built": true,
+      "wired": true,
+      "reachable": true,
       "live": false,
       "verified": false,
       "observed": false,
@@ -2675,14 +2723,19 @@
       "certified": false,
       "component_refs": [],
       "ledger_expectation": "NONE",
-      "producer": null,
-      "consumer": null,
+      "producer": "com.dial.van.browser.ResizeCoalescer",
+      "consumer": "BrowserActivity.onConfigurationChanged -> BrowserSessionController.onWindowChanged",
       "authority": "docs/VAN_REMOTE_BROWSER_PRODUCTION_BLUEPRINT_REV_1_5.md \u00a712",
       "evidence_refs": [],
-      "tests": [],
-      "external_gates": [],
+      "tests": [
+        "android/verification/src/test/kotlin/com/dial/van/browser/BrowserWindowTest.kt"
+      ],
+      "external_gates": [
+        "the Android build is compiled only in CI; the AGP is unreachable in the audit container"
+      ],
       "transport_independent": false,
-      "offline_voice_proven": null
+      "offline_voice_proven": null,
+      "note": "\u00a712.3. A consequence worth stating because it looks like a bug: a perfectly smooth drag sends **nothing** remote while the finger is down \u2014 there is never 100ms of stillness, so the local stage carries the drag and one candidate follows when it stops. The 10Hz cap bounds the case that actually produces many messages, a drag with pauses or an inset storm. The settle within 250ms is the clause that is easy to omit and impossible to notice in testing: without it a drag ending inside the debounce leaves Chromium at the second-to-last size for the rest of the session."
     },
     {
       "schema": "van-implementation-matrix/1",
@@ -2690,10 +2743,10 @@
       "id": "RB-091",
       "name": "viewport revision atomic swap",
       "group": "android",
-      "status": "NOT_STARTED",
-      "built": false,
-      "wired": false,
-      "reachable": false,
+      "status": "WIRED_UNPROVEN",
+      "built": true,
+      "wired": true,
+      "reachable": true,
       "live": false,
       "verified": false,
       "observed": false,
@@ -2701,14 +2754,19 @@
       "certified": false,
       "component_refs": [],
       "ledger_expectation": "NONE",
-      "producer": null,
-      "consumer": null,
+      "producer": "com.dial.van.browser.ViewportSwap",
+      "consumer": "BrowserSessionController.sendViewport and onFrameForRevision",
       "authority": "docs/VAN_REMOTE_BROWSER_PRODUCTION_BLUEPRINT_REV_1_5.md \u00a712",
       "evidence_refs": [],
-      "tests": [],
-      "external_gates": [],
+      "tests": [
+        "android/verification/src/test/kotlin/com/dial/van/browser/BrowserWindowTest.kt"
+      ],
+      "external_gates": [
+        "the Android build is compiled only in CI; the AGP is unreachable in the audit container"
+      ],
       "transport_independent": false,
-      "offline_voice_proven": null
+      "offline_voice_proven": null,
+      "note": "\u00a712.2 / \u00a712.4. Three things swap at once when the first frame for a revision arrives \u2014 render transform, touch transform, reported viewport \u2014 because swapping them separately means every tap in the gap lands at the old scale on a page that has already reflowed. Acknowledgement alone does not swap: the server has resized Chromium but the frame in the decoder is still the old size. Input is withheld across the gap rather than transformed, and the held frame is letterboxed rather than stretched, because a page at the wrong aspect ratio is one the owner cannot read and holding it was the point."
     },
     {
       "schema": "van-implementation-matrix/1",
@@ -2797,10 +2855,10 @@
       "id": "RB-095",
       "name": "BrowserShortcutStore",
       "group": "android",
-      "status": "NOT_STARTED",
-      "built": false,
-      "wired": false,
-      "reachable": false,
+      "status": "WIRED_UNPROVEN",
+      "built": true,
+      "wired": true,
+      "reachable": true,
       "live": false,
       "verified": false,
       "observed": false,
@@ -2808,14 +2866,19 @@
       "certified": false,
       "component_refs": [],
       "ledger_expectation": "NONE",
-      "producer": null,
-      "consumer": null,
+      "producer": "com.dial.van.browser.BrowserShortcutStore",
+      "consumer": "BrowserShortcutActivity; VanApplication.browserShortcuts",
       "authority": "docs/VAN_REMOTE_BROWSER_PRODUCTION_BLUEPRINT_REV_1_5.md \u00a75.8",
       "evidence_refs": [],
-      "tests": [],
-      "external_gates": [],
+      "tests": [
+        "android/verification/src/test/kotlin/com/dial/van/browser/BrowserShortcutsTest.kt"
+      ],
+      "external_gates": [
+        "the Android build is compiled only in CI; the AGP is unreachable in the audit container"
+      ],
       "transport_independent": false,
-      "offline_voice_proven": null
+      "offline_voice_proven": null,
+      "note": "\u00a75.8 and ADR-RB-023. A launcher shortcut is a file on a filesystem VAN does not control, so the record stays here and the tile carries an opaque id. `ShortcutLauncherPayload` exists as its own type for that reason: a field added to the record later cannot reach the home screen by being in scope, and a test asserts the payload's field set rather than trusting the call site."
     },
     {
       "schema": "van-implementation-matrix/1",
@@ -2823,10 +2886,10 @@
       "id": "RB-096",
       "name": "pinned generic browser shortcut",
       "group": "android",
-      "status": "NOT_STARTED",
-      "built": false,
-      "wired": false,
-      "reachable": false,
+      "status": "WIRED_UNPROVEN",
+      "built": true,
+      "wired": true,
+      "reachable": true,
       "live": false,
       "verified": false,
       "observed": false,
@@ -2834,14 +2897,19 @@
       "certified": false,
       "component_refs": [],
       "ledger_expectation": "NONE",
-      "producer": null,
-      "consumer": null,
+      "producer": "BrowserShortcutStore.launcherPayload with GENERIC_LABEL",
+      "consumer": "the launcher",
       "authority": "docs/VAN_REMOTE_BROWSER_PRODUCTION_BLUEPRINT_REV_1_5.md \u00a70D.1",
       "evidence_refs": [],
-      "tests": [],
-      "external_gates": [],
+      "tests": [
+        "android/verification/src/test/kotlin/com/dial/van/browser/BrowserShortcutsTest.kt"
+      ],
+      "external_gates": [
+        "the Android build is compiled only in CI; the AGP is unreachable in the audit container"
+      ],
       "transport_independent": false,
-      "offline_voice_proven": null
+      "offline_voice_proven": null,
+      "note": "\u00a70D.1. The generic tile is what an untitled page and every authenticated page get, so the home screen says \"VAN Browser\" rather than naming a bank."
     },
     {
       "schema": "van-implementation-matrix/1",
@@ -2849,10 +2917,10 @@
       "id": "RB-097",
       "name": "pinned saved-page shortcut",
       "group": "android",
-      "status": "NOT_STARTED",
-      "built": false,
-      "wired": false,
-      "reachable": false,
+      "status": "WIRED_UNPROVEN",
+      "built": true,
+      "wired": true,
+      "reachable": true,
       "live": false,
       "verified": false,
       "observed": false,
@@ -2860,14 +2928,19 @@
       "certified": false,
       "component_refs": [],
       "ledger_expectation": "NONE",
-      "producer": null,
-      "consumer": null,
+      "producer": "BrowserShortcutRecord with ShortcutSensitivity",
+      "consumer": "BrowserShortcutActivity, which resolves the id and then authenticates",
       "authority": "docs/VAN_REMOTE_BROWSER_PRODUCTION_BLUEPRINT_REV_1_5.md \u00a70D.1",
       "evidence_refs": [],
-      "tests": [],
-      "external_gates": [],
+      "tests": [
+        "android/verification/src/test/kotlin/com/dial/van/browser/BrowserShortcutsTest.kt"
+      ],
+      "external_gates": [
+        "the Android build is compiled only in CI; the AGP is unreachable in the audit container"
+      ],
       "transport_independent": false,
-      "offline_voice_proven": null
+      "offline_voice_proven": null,
+      "note": "\u00a75.8. An ordinary page's tile carries its own title and favicon; an authenticated one carries neither. A tile reading \"Inbox \u2014 owner@example.com\" tells whoever picks the phone up who owns it and where they bank, before it is unlocked \u2014 and a bank's mark says the same thing its name would, which is why the icon goes too."
     },
     {
       "schema": "van-implementation-matrix/1",
@@ -2875,10 +2948,10 @@
       "id": "RB-098",
       "name": "shortcut revocation/update",
       "group": "android",
-      "status": "NOT_STARTED",
-      "built": false,
-      "wired": false,
-      "reachable": false,
+      "status": "WIRED_UNPROVEN",
+      "built": true,
+      "wired": true,
+      "reachable": true,
       "live": false,
       "verified": false,
       "observed": false,
@@ -2886,14 +2959,19 @@
       "certified": false,
       "component_refs": [],
       "ledger_expectation": "NONE",
-      "producer": null,
-      "consumer": null,
+      "producer": "BrowserShortcutStore.revoke and rename",
+      "consumer": "the owner's shortcut list; BrowserShortcutActivity's refusal",
       "authority": "docs/VAN_REMOTE_BROWSER_PRODUCTION_BLUEPRINT_REV_1_5.md \u00a7ADR-RB-023",
       "evidence_refs": [],
-      "tests": [],
-      "external_gates": [],
+      "tests": [
+        "android/verification/src/test/kotlin/com/dial/van/browser/BrowserShortcutsTest.kt"
+      ],
+      "external_gates": [
+        "the Android build is compiled only in CI; the AGP is unreachable in the audit container"
+      ],
       "transport_independent": false,
-      "offline_voice_proven": null
+      "offline_voice_proven": null,
+      "note": "ADR-RB-023. Revoked rather than deleted: the tile stays on the home screen until the launcher is told and a launcher that is never told is the normal case, so a deleted record would make that tile read as \"VAN is broken\" instead of \"you removed this\". The canonical URL is deliberately not updatable \u2014 the same tile pointing somewhere new is what a malicious page would want."
     },
     {
       "schema": "van-implementation-matrix/1",
@@ -2901,10 +2979,10 @@
       "id": "RB-099",
       "name": "safe Open-with-VAN http/https entry",
       "group": "android",
-      "status": "NOT_STARTED",
-      "built": false,
-      "wired": false,
-      "reachable": false,
+      "status": "WIRED_UNPROVEN",
+      "built": true,
+      "wired": true,
+      "reachable": true,
       "live": false,
       "verified": false,
       "observed": false,
@@ -2912,14 +2990,21 @@
       "certified": false,
       "component_refs": [],
       "ledger_expectation": "NONE",
-      "producer": null,
-      "consumer": null,
+      "producer": "com.dial.van.browser.BrowserExternalLink; BrowserExternalLinkActivity",
+      "consumer": "the Android intent chooser",
       "authority": "docs/VAN_REMOTE_BROWSER_PRODUCTION_BLUEPRINT_REV_1_5.md \u00a70D.1",
       "evidence_refs": [],
-      "tests": [],
-      "external_gates": [],
+      "tests": [
+        "android/verification/src/test/kotlin/com/dial/van/browser/BrowserShortcutsTest.kt",
+        "tests/contracts/test_browser_window_and_entry_contract.py"
+      ],
+      "external_gates": [
+        "a Browser Stream Host that answers a real SDP offer (RB-002/RB-010)",
+        "the Android build is compiled only in CI; the AGP is unreachable in the audit container"
+      ],
       "transport_independent": false,
-      "offline_voice_proven": null
+      "offline_voice_proven": null,
+      "note": "\u00a717.5 \u2014 untrusted navigation input, not an owner command. It opens in the public profile, because a link from a messaging app opening in the browser that holds the owner's logged-in cookies is the whole of the attack, and the profile is fixed rather than a parameter so no caller can choose otherwise. A second scheme anywhere in the address is refused: that redirect is the sending app's, and an https wrapper does not make VAN carry it. Rev 1.5 as issued routes this through a \u00a79.14 the document does not contain, so the rule is stated in full at the implementation rather than by a dangling reference."
     },
     {
       "schema": "van-implementation-matrix/1",

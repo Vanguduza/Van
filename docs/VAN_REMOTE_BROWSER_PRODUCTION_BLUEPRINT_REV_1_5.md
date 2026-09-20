@@ -457,6 +457,10 @@ three of the four were green in every test that existed at the time.
 | 0F.6l | Two of §28.1's four *device* metrics were added to the gateway in a third dict, `DEVICE_COUNTERS`, beside the two the device-telemetry contract test reads. The test whose whole job is to stop the gateway's list and the phone's enum drifting was reading two thirds of the list. | Running it after the catalogue grew, and asking why it still passed. | The contract folds the counters in, and a second test requires every name in the enum to be one `record_device_sample` actually ingests. |
 | 0F.6m | Two mutation survivors in one checkpoint, both tests asserting something true either way. `BrowserStreamTelemetry`'s clock-step test asserted that the backwards frame emits nothing and that the age is measured from it — both hold with the guard removed. What the guard decides is whether the fps window stays anchored in the future, which suppresses every reading until real time catches up and then reports a rate the decoder never achieved. And the drop-count guard was tested with zero, which is equivalent with or without it; its real job is a *negative* count from a cumulative counter differenced across a decoder restart, which subtracts drops that happened. | Mutations of both: green. | Isolating assertions on what each guard actually decides, and the mutation labels corrected to name the real failure. |
 | 0F.6n | Three test failures that looked like an intermittent lease bug in the Gateway: the unwind after a refused Mission binding sometimes left the owner's profile leased, reproducing about once in thirteen runs and never under investigation. It was the mutation harness, running in another shell, editing the source in place — the mutation current at the time was the one that replaces that very unwind with `pass`. | Noticing that the reproduction rate dropped to zero the moment the harness finished, and that the three failures matched two mutation labels exactly. | A warning at the top of `tools/audit/mutation.py`, and the assertion in the test now prints the profile row and every session so the next such failure states its cause instead of requiring one. |
+| 0F.6o | §17.5 sends an external http/https VIEW intent "through §9.14". The document has no §9.14: section 9 stops at 9.5. So the one rule that decides what an app on the owner's phone can make VAN open was a reference to nothing. | Implementing it and looking for the section. | The rule is stated in full at the implementation — untrusted navigation input, not an owner command; the public profile, fixed rather than parameterised; a second scheme anywhere in the address refused — rather than left as a dangling cross-reference. |
+| 0F.6p | `tools/audit/kotlin_reachability.py` stripped comments and then strings, with two regular expressions. A Kotlin *string* containing comment punctuation therefore closed a block comment a KDoc had opened much earlier, and everything between vanished before any reference was counted. The string that did it is `"*/*"`, the MIME wildcard every Android file chooser passes: adding one to `BrowserActivity` made the gate report the renderer it constructs as referenced by nothing. | The gate's own output, on a file that had just been edited. | One left-to-right scanner handling block comments (Kotlin's nest), line comments, raw strings and ordinary strings in one pass; `tests/contracts/test_kotlin_reachability_stripper.py`, including the mirror bug the obvious fix has. |
+| 0F.6q | The cross-language input-protocol contract compared the *intersection* of kind names and asserted there were at least nine. A kind on one side only was never in the intersection, so it was never compared and never missed — §17.2's six navigation kinds went into Python first and the test stayed green with the phone unable to send any of them. | Adding the kinds and asking why nothing failed. | Set equality, the two non-kind names the regex also matches listed explicitly, and the navigation kinds named on their own because equality is satisfied by both sides having none of them. |
+| 0F.6r | Three C32 mutation survivors, all tests that were true either way. The resize coalescer's overdue branch was unreachable — a pending change always post-dates the last send, so the cadence can never be what is holding it. The omnibox's whitespace check looked redundant because every example in its test fell out as a search through some other clause. And the tab reducer's "is this the active tab" check was tested with two tabs, where the neighbour a wrong implementation picks is the active one. | Mutation. | The dead branch removed rather than the mutation weakened; isolating cases for the other two — a query whose last word looks like a host, and four tabs instead of two. |
 
 Two lessons generalise. The first is why the vectors file exists rather than a
 source-to-source comparison: **two implementations that are each correctly tested against
@@ -476,6 +480,13 @@ because two mechanisms covered the case, but because the assertion was about the
 consequence. A test can exercise exactly the right line and still be describing it. The
 mutation is what tells the difference, and when it survives the question to ask is not
 "which other guard covered this" but "what does this guard actually decide".
+
+0F.6p is the one to keep in mind when reading any of the others: **the audit tools are
+code, and they fail the same way the code does.** A gate that reports deadness silently
+over-reporting it is worse than no gate, because the action an over-report invites is
+deleting something that is running. It was found by its own output looking wrong on a file
+that had just been edited — which is only possible because the output names files rather
+than printing a count.
 
 0F.6n is not a defect in the product at all, and it is recorded because it cost more
 than several that were: **a test failing while the mutation harness is running is not
@@ -3045,7 +3056,14 @@ Sharing a page exports only the current safe canonical URL/title through Android
 
 No cookies/profile state/stream tokens leave VAN.
 
-Receiving an external http/https VIEW intent enters through §9.14 and is treated as untrusted navigation input, not an owner command.
+Receiving an external http/https VIEW intent is treated as **untrusted navigation input, not an owner command**:
+
+- it opens the address in a session the owner can see;
+- it opens in the *public* profile, never the authenticated one — a link from a messaging app opening in the browser that holds the owner's logged-in cookies is the whole of the attack;
+- it creates no Mission and carries no authority;
+- only `http` and `https` are accepted, and a second scheme anywhere in the address is refused: that redirect belongs to the sending app, and an https wrapper does not make VAN carry it.
+
+(Rev 1.5 as issued cross-referenced a "§9.14"; the document contains no such section — section 9 ends at 9.5 — so the rule is stated here in full rather than by reference. Recorded as §0F.6o.)
 
 ## 17.6 System back behavior
 

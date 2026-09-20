@@ -21,8 +21,8 @@
   ],
   "counts": {
     "P0": 19,
-    "P1": 37,
-    "P2": 24,
+    "P1": 38,
+    "P2": 25,
     "P3": 29,
     "P4": 7
   },
@@ -5454,6 +5454,82 @@
         "residual": "No production scrape exists, so no alert rule in this repository has ever been evaluated against real data. The rules are exercised only against registries a test constructed. No frame has been decoded on any device either, so the four device metrics have produced no sample anywhere.",
         "residual_reason": "Evaluating a threshold against real traffic needs a deployment producing it, and there is none. This is an unverified environment rather than missing work: the rule, its exemption and both directions of the exemption's boundary are implemented and executed here.",
         "residual_class": "ENVIRONMENT_UNVERIFIED",
+        "posture": "fail-closed"
+      }
+    },
+    {
+      "id": "P1-OPS-013",
+      "severity": "P1",
+      "domain": "operations",
+      "title": "The reachability gate's comment stripper was silently blanking whole files, and reported a live class as dead",
+      "description": "`tools/audit/kotlin_reachability.py` answers the question this whole programme is organised around: what does nothing production reach? Its first step removes comments and string literals, so a symbol named in a KDoc paragraph does not count as a call site — which is the right rule, and the reason the tool is worth having.\n\nIt did that with a sequence of regular expressions, comments first and strings second. A Kotlin *string* containing comment punctuation therefore closed a block comment that a KDoc had opened much earlier in the file, and the entire region between them was replaced with a single space before any reference was counted.\n\nThe string that did it is `\"*/*\"` — the MIME wildcard passed to `ActivityResultContracts.OpenDocument`, which is what every Android file chooser sends. Adding a file-picker call to `BrowserActivity` made the gate report `BrowserSurfaceView`, the renderer the Activity constructs forty lines later, as declared and referenced by nothing.",
+      "requirement": "evidence/van-system-audit/component_ledger.json; the TEST_ONLY and unreferenced maturity classes this tool assigns",
+      "authority": "VAN Remote Browser Production Blueprint Rev 1.5 §0F",
+      "repository_evidence": [
+        "tools/audit/kotlin_reachability.py"
+      ],
+      "runtime_evidence": [],
+      "affected_components": [
+        "audit",
+        "android"
+      ],
+      "root_cause": "Two regular expressions applied in sequence to a language where the two constructs they match can contain each other. Comment-stripping and string-stripping are one problem, not two, and solving them separately means whichever runs first is wrong about the other.",
+      "remediation": "Replace the regex sequence with a single left-to-right scan that handles block comments (including Kotlin's nesting), line comments, raw strings and ordinary strings in one pass, and test it against the shapes that broke it.",
+      "impact": "The gate over-reported deadness, which is the one direction it must not be wrong in: an over-report gets acted on, and the action is deleting something that is running. Every file containing a string with comment punctuation had part of itself excluded from the analysis, so the gate's answers about those files — and about anything only they referenced — were unreliable for as long as the string was there.",
+      "validation_gate": "G0",
+      "current_status": "CLOSED",
+      "remediation_gate": "RB C10",
+      "closure": {
+        "state": "INTEGRATED_AND_EVIDENCED",
+        "summary": "One scanner, one pass. It tracks whether it is inside a block comment, a line comment, a raw string or an ordinary string, and Kotlin's nesting block comments are handled because Kotlin's nest and Java's do not — a stripper that ended at the first `*/` would treat the rest of an outer comment as code and count every symbol named in it as a call site, which is the same defect in the other direction.\n\nThe ordering trap is pinned explicitly: swapping the two regexes so strings go first has the mirror bug, where a comment containing a quote eats the code after it, and there is a test for that shape so the obvious fix cannot be re-applied.\n\nThe regression is asserted against the real file rather than only against a snippet: `BrowserActivity` constructs `BrowserSurfaceView`, and the test requires the stripped text to still contain that reference.",
+        "changed": [
+          "tools/audit/kotlin_reachability.py"
+        ],
+        "verified_by": [
+          "tests/contracts/test_kotlin_reachability_stripper.py"
+        ],
+        "residual": "The sweep remains textual and still over-reports unreachability for Compose call graphs and reflective bindings, which is stated where it prints and is why its output is labelled a worklist rather than a verdict.",
+        "residual_reason": "Resolving Compose and DI properly needs a Kotlin compiler plugin or a full front-end, which is a different tool from a repository sweep. The over-report is deliberate and disclosed at the point of use; what this finding was about is the *silent* failure underneath it.",
+        "residual_class": "DELIBERATE_SCOPE",
+        "posture": "fail-closed"
+      }
+    },
+    {
+      "id": "P2-AND-014",
+      "severity": "P2",
+      "domain": "android",
+      "title": "The cross-language input-protocol contract compared only the kinds both sides already had",
+      "description": "`tests/contracts/test_browser_input_protocol_matches.py` exists because the owner-input wire format has two implementations, in Python and in Kotlin, and a format with two implementations and no shared definition drifts silently — the symptom being taps landing in the wrong place rather than anything that looks like a bug.\n\nIts kind comparison read both files, intersected the names, asserted there were at least nine of them, and compared the values of the shared ones. A kind present on one side and absent on the other was simply not in the intersection, so it was never compared and never missed.\n\nFound while adding §17.2's six navigation kinds. They went into the Python implementation first; the contract test passed with the phone unable to send any of them.",
+      "requirement": "docs/VAN_REMOTE_BROWSER_PRODUCTION_BLUEPRINT_REV_1_5.md §8, §17.2",
+      "authority": "VAN Remote Browser Production Blueprint Rev 1.5",
+      "repository_evidence": [
+        "tests/contracts/test_browser_input_protocol_matches.py"
+      ],
+      "runtime_evidence": [],
+      "affected_components": [
+        "android",
+        "gateway"
+      ],
+      "root_cause": "An intersection where the contract is an equality. The test compared what the two implementations agreed about instead of comparing what each one had.",
+      "remediation": "Assert set equality, list the names the Python regex picks up that are not input kinds rather than filtering them with a cleverer pattern, and name the navigation kinds explicitly so the equality cannot be satisfied by both sides having none of them.",
+      "impact": "A kind added to one implementation alone would ship: the Gateway would accept a discriminator no phone sends, or the phone would send one the Gateway refuses as malformed. The owner would see an address bar that does nothing, with a refusal reason nothing surfaces.",
+      "validation_gate": "G0",
+      "current_status": "CLOSED",
+      "remediation_gate": "RB C10",
+      "closure": {
+        "state": "INTEGRATED_AND_EVIDENCED",
+        "summary": "The comparison is now an equality, with the two non-kind names the regex also matches listed by name so that adding a member to either of those enums is a visible edit rather than a silent exclusion.\n\nThree tests where there was one: the values of shared names still have to agree, neither side may have a name the other lacks, and §17.2's six navigation kinds are named explicitly — because the equality alone is satisfied by both sides having none of them, which is exactly the state this change was made to leave.\n\nTwo more pin the rules that travel with those kinds: both implementations refuse a navigation on the fast channel, and both refuse a scheme neither will open.",
+        "changed": [
+          "tests/contracts/test_browser_input_protocol_matches.py",
+          "backend/van_gateway/browser/input_protocol.py",
+          "android/app/src/main/java/com/dial/van/browser/BrowserInputProtocol.kt"
+        ],
+        "verified_by": [
+          "tests/contracts/test_browser_input_protocol_matches.py"
+        ],
+        "residual": "The two implementations are still separate code. The contract compares constants, refusal rules and header field widths; it does not execute one against the other, because the Kotlin side needs a JVM and the Python side does not run there.",
+        "residual_reason": "A shared generated definition would remove the class of defect entirely and is a larger change than this checkpoint: the format is already shipped and both sides are pinned by the cross-language vectors file for the byte layout. The gap left is a rule stated in two places, which is what these tests read.",
+        "residual_class": "DELIBERATE_SCOPE",
         "posture": "fail-closed"
       }
     }

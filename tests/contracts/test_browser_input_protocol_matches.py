@@ -63,20 +63,75 @@ def test_the_header_is_little_endian_on_both_sides():
     assert "ByteOrder.LITTLE_ENDIAN" in KT.read_text()
 
 
-def test_the_kind_discriminators_match():
-    """Renumbering one side turns a tap into a scroll, which no test on either side sees."""
-    python_kinds = dict(
-        re.findall(r"^    ([A-Z_]+) = (\d+)$", PY.read_text(), re.M)
-    )
+#: Names the Python regex also picks up that are not input kinds. Listed rather than
+#: filtered by a cleverer pattern, so adding a member to one of these enums is a visible
+#: edit here rather than a silent exclusion from the comparison below.
+NOT_AN_INPUT_KIND = {"CLOSED", "OPEN"}
+
+
+def _kind_tables() -> tuple[dict[str, str], dict[str, str]]:
+    python_kinds = {
+        name: value
+        for name, value in re.findall(r"^    ([A-Z_]+) = (\d+)$", PY.read_text(), re.M)
+        if name not in NOT_AN_INPUT_KIND
+    }
     kotlin_kinds = dict(
         re.findall(r"^        ([A-Z_]+)\((\d+)\),?;?$", KT.read_text(), re.M)
     )
-    shared = set(python_kinds) & set(kotlin_kinds)
-    assert len(shared) >= 9, f"expected the nine input kinds, found {sorted(shared)}"
-    for name in sorted(shared):
+    return python_kinds, kotlin_kinds
+
+
+def test_the_kind_discriminators_match():
+    """Renumbering one side turns a tap into a scroll, which no test on either side sees."""
+    python_kinds, kotlin_kinds = _kind_tables()
+    for name in sorted(set(python_kinds) & set(kotlin_kinds)):
         assert python_kinds[name] == kotlin_kinds[name], (
             f"{name} is {python_kinds[name]} in Python and {kotlin_kinds[name]} in Kotlin"
         )
+
+
+def test_neither_side_has_a_kind_the_other_does_not():
+    """The half the intersection above cannot see.
+
+    A first version compared only the shared names and asserted there were at least nine
+    of them, so a kind added to one implementation and not the other passed: the new name
+    was simply not in the intersection. That is precisely the drift this file exists to
+    catch — §17.2's navigation kinds were added to Python first, and nothing would have
+    said the phone could not send one.
+    """
+    python_kinds, kotlin_kinds = _kind_tables()
+    assert set(python_kinds) == set(kotlin_kinds), {
+        "python_only": sorted(set(python_kinds) - set(kotlin_kinds)),
+        "kotlin_only": sorted(set(kotlin_kinds) - set(python_kinds)),
+    }
+
+
+def test_the_navigation_kinds_are_on_both_sides():
+    """§17.2 — navigation is an actuation and travels the input path.
+
+    Named explicitly rather than left to the set comparison, because the set comparison
+    is satisfied by both sides having none of them.
+    """
+    python_kinds, kotlin_kinds = _kind_tables()
+    for name in ("NAVIGATE", "SEARCH", "HISTORY_BACK", "HISTORY_FORWARD", "RELOAD",
+                 "STOP_LOADING"):
+        assert name in python_kinds, name
+        assert name in kotlin_kinds, name
+
+
+def test_both_sides_refuse_a_navigation_on_the_fast_channel():
+    """A navigate that can be dropped or reordered against the tap after it leaves the
+    owner interacting with a page they had already left."""
+    assert "navigation travels on the reliable channel" in KT.read_text()
+    python_text = PY.read_text()
+    assert "if parsed_channel is not Channel.RELIABLE:" in python_text
+
+
+def test_both_sides_refuse_a_navigation_scheme_neither_will_open():
+    """`file://` reads the host's disk into a page the owner is watching."""
+    assert 'NAVIGABLE_SCHEMES = ("http://", "https://")' in PY.read_text()
+    kotlin_text = KT.read_text()
+    assert 'lowered.startsWith("http://") || lowered.startsWith("https://")' in kotlin_text
 
 
 def test_the_channel_discriminators_match():
