@@ -155,6 +155,10 @@ class ExecutionRouter:
                     "qty": str(decision.approved_size),
                     "side": "BUY",
                     "trade_intent_id": intent.trade_intent_id,
+                    "limit_price": str(intent.entry),
+                    "software_stop": (
+                        str(intent.stop) if intent.stop is not None else None
+                    ),
                 },
                 now_ms=now_ms, corr=corr,
             )
@@ -188,6 +192,7 @@ class ExecutionRouter:
                 elif r.status == "ACCEPTED" and r.execution_channel == "OWNER_TICKET":
                     # The position is still open. Keep the rule in pending-close
                     # state and expose the SELL ticket to the gateway/owner.
+                    ticket = getattr(adapter, "tickets", {}).get(r.broker_order_id)
                     self._log(
                         EventKind.OWNER_TICKET,
                         {
@@ -197,6 +202,14 @@ class ExecutionRouter:
                             "position_id": ins.position_id,
                             "trade_intent_id": r.trade_intent_id,
                             "exit_reason": ins.reason,
+                            "qty": (
+                                str(ticket.quantity_shares)
+                                if ticket is not None else None
+                            ),
+                            "limit_price": (
+                                str(ticket.limit_price)
+                                if ticket is not None else None
+                            ),
                         },
                         now_ms=now_ms,
                         corr=r.trade_intent_id or ins.position_id,
