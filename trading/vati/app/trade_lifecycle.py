@@ -55,6 +55,10 @@ class AccountTradeLifecycle:
             correlation_id=corr,
         ))
 
+    def _has_event(self, kind: EventKind, corr: str) -> bool:
+        """True when durable downstream evidence already exists for this intent."""
+        return next(self.ledger.iter(kind, correlation_id=corr), None) is not None
+
     def recover_from_venue(self) -> tuple[tuple[str, ...], tuple[str, ...]]:
         """Rebuild open entry/protection state from venue plus ledger provenance.
 
@@ -182,7 +186,12 @@ class AccountTradeLifecycle:
         *,
         order_payload: Mapping[str, object],
     ) -> None:
-        """Turn a signed owner BUY confirmation into lifecycle position truth."""
+        """Turn a signed owner BUY confirmation into lifecycle position truth.
+
+        Replay is crash-safe: the in-memory position/protection state is always
+        reconstructed, while TCA is appended only when no durable TCA_RECORD
+        exists for the intent.
+        """
         symbol = str(order_payload["symbol"]).upper()
         contract = self.contracts[symbol]
         stop_raw = order_payload.get("protective_stop")
@@ -190,13 +199,14 @@ class AccountTradeLifecycle:
         targets = tuple(
             Decimal(str(v)) for v in (order_payload.get("targets") or ())
         )
-        strategy_id = str(order_payload.get("strategy_id", ""))
+        direction = Direction(str(order_payload.get("direction", "LONG")))
+        entry_price = receipt.average_fill or Decimal(str(order_payload["entry_price"]))
         self.entries[receipt.trade_intent_id] = {
             "symbol": symbol,
-            "entry": receipt.average_fill or Decimal(str(order_payload["entry_price"])),
+            "entry": entry_price,
             "stop": stop,
-            "direction": Direction(str(order_payload.get("direction", "LONG"))),
-            "strategy_id": strategy_id,
+            "direction": direction,
+            "strategy_id": str(order_payload.get("strategy_id", "")),
             "cost_pct": self.modelled_costs.get(symbol, contract.round_trip_cost_pct),
             "decision_price": Decimal(str(order_payload["entry_price"])),
             "quantity": receipt.filled_qty,
@@ -209,28 +219,52 @@ class AccountTradeLifecycle:
             self.protection.register(
                 receipt.broker_position_id,
                 symbol=symbol,
-                direction=Direction(str(order_payload.get("direction", "LONG"))),
-                entry=receipt.average_fill or Decimal(str(order_payload["entry_price"])),
+                direction=direction,
+                entry=entry_price,
                 stop=stop,
                 target=targets[0] if targets else None,
                 opened_ms=receipt.received_time_unix_ms,
                 software_stop=True,
             )
-        if receipt.filled_qty > ZERO and receipt.average_fill is not None:
-            tca = compute_tca(
-                receipt,
-                direction=Direction(str(order_payload.get("direction", "LONG"))),
-                qty=receipt.filled_qty,
-                value_per_unit=Decimal("1"),
-                modelled_cost_pct=self.modelled_costs.get(
-                    symbol, contract.round_trip_cost_pct),
+
+        if (
+            receipt.filled_qty <= ZERO
+            or receipt.average_fill is None
+            or self._has_event(EventKind.TCA_RECORD, receipt.trade_intent_id)
+        ):
+            return
+
+        modelled_cost = self.modelled_costs.get(
+            symbol, contract.round_trip_cost_pct)
+        tca = compute_tca(
+            receipt,
+            direction=direction,
+            qty=receipt.filled_qty,
+            value_per_unit=Decimal("1"),
+            modelled_cost_pct=modelled_cost,
+        )
+        self._log(
+            EventKind.TCA_RECORD, tca.as_dict(),
+            now_ms=receipt.received_time_unix_ms,
+            corr=receipt.trade_intent_id,
+        )
+        self.entries[receipt.trade_intent_id]["cost_ratio"] = tca.cost_ratio
+        if self.learning is not None:
+            state = self.engines_by_symbol.get(symbol)
+            # Owner-ticket confirmation may happen long after the originating
+            # market state. We still feed execution-cost learning because its
+            # inputs are receipt-derived and do not require reconstructing a
+            # stale strategy state.
+            self.learning.on_tca(
+                symbol=symbol,
+                session="OWNER_TICKET",
+                event_window="QUIET",
+                cost_ratio=tca.cost_ratio,
+                slippage=tca.slippage,
             )
-            self._log(
-                EventKind.TCA_RECORD, tca.as_dict(),
-                now_ms=receipt.received_time_unix_ms,
-                corr=receipt.trade_intent_id,
-            )
-            self.entries[receipt.trade_intent_id]["cost_ratio"] = tca.cost_ratio
+            engine = self.engines_by_symbol.get(symbol)
+            if engine is not None:
+                engine.m.broker_liquidity[symbol] = self.learning.broker_liquidity(symbol)
 
     def adopt_owner_sell_confirmation(
         self,
@@ -238,7 +272,6 @@ class AccountTradeLifecycle:
         *,
         exit_reason: str,
         now_ms: int,
-        emit_review: bool = True,
     ) -> None:
         """Apply an owner SELL fill without treating a partial fill as closed."""
         remaining = [
@@ -254,7 +287,7 @@ class AccountTradeLifecycle:
                 self.protection.close_failed(receipt.broker_position_id)
             return
 
-        if emit_review:
+        if not self._has_event(EventKind.TRADE_REVIEW, receipt.trade_intent_id):
             self._on_close(
                 receipt.trade_intent_id,
                 receipt.average_fill,
