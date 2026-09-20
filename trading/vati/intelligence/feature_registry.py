@@ -16,6 +16,12 @@ from __future__ import annotations
 from dataclasses import dataclass, field
 from typing import Mapping, Optional
 
+from vati.validation.certificates import (
+    FEATURE_PRODUCTION_ADMITTED,
+    FeatureValidationCertificate,
+    classify_feature_certificate,
+)
+
 #: Venue classes the registry distinguishes. FX_SPOT and SYNTHETIC have no
 #: consolidated volume; ZSE_EQUITY and VFEX do.
 VENUE_CLASSES = ("FX_SPOT", "CFD", "SYNTHETIC", "ZSE_EQUITY", "VFEX")
@@ -93,6 +99,7 @@ class FeatureDefinition:
 class FeatureRegistry:
     def __init__(self, definitions: Mapping[str, FeatureDefinition] | None = None) -> None:
         self._d: dict[str, FeatureDefinition] = dict(definitions or {})
+        self._admissions: dict[str, str] = {}
 
     def register(self, d: FeatureDefinition) -> None:
         prior = self._d.get(d.feature_id)
@@ -101,6 +108,34 @@ class FeatureRegistry:
                 f"{d.feature_id}: redefined at the same version {d.version}; bump the version"
             )
         self._d[d.feature_id] = d
+
+    def admit(self, d: FeatureDefinition, certificate: FeatureValidationCertificate) -> str:
+        """Admit a certificate-required feature into production dependencies.
+
+        Definition registration alone is not admission. The certificate is
+        reclassified here and its identity is retained so FeatureContractValidator
+        can distinguish a known research feature from a production-admitted one.
+        """
+        if certificate.feature_id != d.feature_id or certificate.feature_version != d.version:
+            raise FeatureRegistryError(
+                f"{d.feature_id}: certificate identity/version does not match definition")
+        status, reasons = classify_feature_certificate(certificate)
+        if status != FEATURE_PRODUCTION_ADMITTED:
+            raise FeatureRegistryError(
+                f"{d.feature_id}: feature certificate not production-admitted: "
+                + ",".join(reasons or (status,)))
+        self.register(d)
+        self._admissions[d.feature_id] = certificate.certificate_hash
+        return certificate.certificate_hash
+
+    def is_production_admitted(self, feature_id: str) -> bool:
+        d = self._d.get(feature_id)
+        if d is None:
+            return False
+        return (not d.certificate_required) or bool(self._admissions.get(feature_id))
+
+    def admission_hash(self, feature_id: str) -> Optional[str]:
+        return self._admissions.get(feature_id)
 
     def get(self, feature_id: str) -> Optional[FeatureDefinition]:
         return self._d.get(feature_id)
@@ -228,8 +263,23 @@ def volume_tranche() -> tuple[FeatureDefinition, ...]:
     )
 
 
+def venue_class_for(venue: str, symbol: str) -> str:
+    """Map the repository's concrete venue/symbol vocabulary to one registry class."""
+    v = str(venue).lower()
+    s = str(symbol).upper()
+    if v == "zse":
+        return "ZSE_EQUITY"
+    if v == "vfex":
+        return "VFEX"
+    if v == "deriv" and (s.startswith("R_") or "BOOM" in s or "CRASH" in s):
+        return "SYNTHETIC"
+    if s.startswith(("XAU", "XAG")):
+        return "CFD"
+    return "FX_SPOT"
+
+
 __all__ = [
     "FAMILIES", "SOURCE_SEMANTICS", "VENUE_CLASSES",
     "FeatureDefinition", "FeatureRegistry", "FeatureRegistryError", "default_registry",
-    "research_tranche", "volume_tranche",
+    "research_tranche", "volume_tranche", "venue_class_for",
 ]
