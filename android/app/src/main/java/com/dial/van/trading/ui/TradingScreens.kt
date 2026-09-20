@@ -180,7 +180,6 @@ fun OverviewScreen(env: ScreenEnv, nav: TradingNav, padding: PaddingValues) {
                     ) {
                         market?.symbol?.let(nav.openInstrument)
                     }
-                    }
                 }
             }
         }
