@@ -326,10 +326,11 @@ class FamilyRegistry:
                       key=lambda f: f.family_id)
 
     def reconcile(self, family_id: str, *, venue_quantity: Decimal,
-                  now_ms: int) -> FamilyState:
+                  now_ms: int, emit: bool = True) -> FamilyState:
         fam = self.get(family_id)
         state = fam.reconcile(venue_quantity=venue_quantity, now_ms=now_ms)
-        self._emit(fam, now_ms)
+        if emit:
+            self._emit(fam, now_ms)
         return state
 
     def __len__(self) -> int:

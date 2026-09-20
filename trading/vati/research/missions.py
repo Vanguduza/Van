@@ -303,6 +303,9 @@ class MissionLedger:
             key=lambda p: (p.agent_role, p.packet_id),
         )
 
+    def missions(self) -> list[ResearchMission]:
+        return [self._missions[k] for k in sorted(self._missions)]
+
     def rebuild(self, events) -> "MissionLedger":
         """Reconstruct the latest mission/packet projection from the VATI ledger."""
         self._missions.clear()

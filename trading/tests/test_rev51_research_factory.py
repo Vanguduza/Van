@@ -175,3 +175,114 @@ def test_research_modules_have_no_order_or_live_config_path():
         text = path.read_text(encoding="utf-8")
         assert "OrderCommand(" not in text
         assert ".submit(" not in text
+
+
+
+# ---------------------------------------------------------- G12/G13 runtime join
+def test_offline_evolution_runtime_blocks_without_fabricating_research():
+    from vati.evolution.runtime import OfflineEvolutionRuntime
+
+    ledger = Ledger(":memory:")
+    store = MissionLedger(ledger=ledger)
+    mission = FableResearchDirector(store).open(
+        ResearchTrigger(
+            "drift-runtime", "is the drift real?",
+            data_domains=("external_web", "repository"),
+            specialist_roles=("evidence", "contradiction"),
+        ),
+        now_ms=1000,
+    )
+    result = OfflineEvolutionRuntime(ledger=ledger).run_mission(
+        mission.mission_id, now_ms=2000)
+    assert result.state == "OPEN"
+    assert result.blocked_reason == "MODEL_INVOKER_UNAVAILABLE"
+    assert ledger.count(EventKind.RESEARCH_PACKET) == 0
+    assert ledger.count(EventKind.RESEARCH_SYNTHESIS) == 0
+
+
+def test_offline_evolution_runtime_executes_required_roles_and_synthesises():
+    from vati.evolution.runtime import OfflineEvolutionRuntime
+
+    ledger = Ledger(":memory:")
+    store = MissionLedger(ledger=ledger)
+    mission = FableResearchDirector(store).open(
+        ResearchTrigger(
+            "drift-runtime", "is the drift real?",
+            data_domains=("external_web", "repository"),
+            specialist_roles=("evidence", "contradiction"),
+        ),
+        now_ms=1000,
+    )
+
+    def invoke(lease, _mission, spec):
+        return {
+            "claims": ["drift is measurable"],
+            "source_ids": [f"official:{spec.role}", f"replica:{spec.role}"],
+            "retrieval_timestamps_ms": [2000, 2001],
+            "evidence_refs": [f"e:{spec.role}:1", f"e:{spec.role}:2"],
+            "counterevidence": [],
+            "limitations": ["shadow evidence still required"],
+            "methods": ["deterministic replay"],
+            "code_data_artifacts": [f"artifact:{spec.role}"],
+            "reproducibility": {"seed": 1},
+        }
+
+    result = OfflineEvolutionRuntime(
+        ledger=ledger, invoke=invoke).run_mission(
+            mission.mission_id, now_ms=2000)
+    assert result.state == "COMPLETE"
+    assert result.packets_complete == 2
+    assert result.packets_failed == 0
+    assert result.synthesis_hash
+    assert ledger.count(EventKind.RESEARCH_SYNTHESIS) == 1
+    assert ledger.count(EventKind.RESEARCH_YIELD) == 1
+
+
+def test_offline_evolution_runtime_does_not_auto_admit_a_proposal_without_gates():
+    from vati.evolution.proposals import ProposalType, SystemImprovementProposal
+    from vati.evolution.runtime import OfflineEvolutionRuntime
+
+    ledger = Ledger(":memory:")
+    store = MissionLedger(ledger=ledger)
+    mission = FableResearchDirector(store).open(
+        ResearchTrigger(
+            "proposal-runtime", "should context retrieval be improved?",
+            data_domains=("external_web", "repository"),
+            specialist_roles=("evidence",),
+        ),
+        now_ms=1000,
+    )
+
+    def invoke(_lease, _mission, _spec):
+        return {
+            "claims": ["context retrieval can be improved"],
+            "source_ids": ["official:a", "official:b"],
+            "retrieval_timestamps_ms": [2000, 2001],
+            "evidence_refs": ["e1", "e2"],
+            "counterevidence": [],
+            "limitations": [],
+            "methods": ["benchmark"],
+            "code_data_artifacts": ["artifact"],
+            "reproducibility": {"benchmark": "v1"},
+        }
+
+    def proposals(synthesis):
+        yield SystemImprovementProposal(
+            proposal_id="p-runtime",
+            proposal_type=ProposalType.CONTEXT_RETRIEVAL,
+            title="Context retrieval candidate",
+            description=synthesis.admitted_claims[0].claim,
+            evidence_refs=synthesis.packet_seals,
+            affected_paths=("trading/vati/cognition/context.py",),
+            live_affecting=False,
+            proposed_by="offline-evolution",
+            created_ms=2000,
+        )
+
+    result = OfflineEvolutionRuntime(
+        ledger=ledger, invoke=invoke, proposal_builder=proposals).run_mission(
+            mission.mission_id, now_ms=2000)
+    assert result.proposal_ids == ("p-runtime",)
+    assert result.admission_states == ()
+    assert ledger.count(EventKind.IMPROVEMENT_PROPOSAL) == 1
+    assert ledger.count(EventKind.PROPOSAL_ADMISSION) == 0

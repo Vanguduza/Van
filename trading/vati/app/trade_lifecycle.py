@@ -312,7 +312,8 @@ class AccountTradeLifecycle:
                         self.families.tighten_stop(
                             family_id, current_stop, now_ms=opened_ms, emit=False)
                 self.families.reconcile(
-                    family_id, venue_quantity=position.quantity, now_ms=opened_ms)
+                    family_id, venue_quantity=position.quantity,
+                    now_ms=opened_ms, emit=False)
 
             cost_ratio = tca_cost_ratios.get(iid)
             if cost_ratio is None and iid in entry_receipts:
