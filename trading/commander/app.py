@@ -63,6 +63,10 @@ class CommanderSettings:
     accounts_registry: str = os.environ.get("VAN_ACCOUNTS_REGISTRY", "/opt/van-trading/config/accounts.json")
     secrets_dir: str = os.environ.get("VAN_SECRETS", "/opt/van-trading/secrets")
     capsule_dir: str = os.environ.get("VAN_CAPSULE_DIR", "")
+    owner_authority_keys: str = os.environ.get(
+        "VAN_OWNER_AUTHORITY_KEYS",
+        "/opt/van-trading/config/owner_authority_keys.json",
+    )
     account_control: Optional[AccountControlSettings] = None   # injected for tests; else derived
     units: tuple[str, ...] = tuple(filter(None, os.environ.get("VAN_COMMANDER_UNITS", ",".join(DEFAULT_UNITS)).split(",")))
     backtest_timeout_s: int = int(os.environ.get("VAN_COMMANDER_BACKTEST_TIMEOUT", "600"))
@@ -102,10 +106,12 @@ class CommanderSettings:
 
     def owner_authority(self):
         """The verifier for owner-signed acts on this host (P0-TRADE-001)."""
-        from vati.authority import OwnerAuthorityVerifier
+        from vati.authority import OwnerAuthorityVerifier, load_owner_keys
 
         if self._owner_authority is None:
-            self._owner_authority = OwnerAuthorityVerifier()
+            self._owner_authority = OwnerAuthorityVerifier(
+                load_owner_keys(self.owner_authority_keys)
+            )
         return self._owner_authority
 
     def load_token(self) -> str:
@@ -335,6 +341,7 @@ def create_app(settings: Optional[CommanderSettings] = None) -> FastAPI:
                     capsule_dir=capsule_dir,
                     ledger=st.ledger,
                     owner_authority=st.owner_authority(),
+                    owner_authority_keys_path=st.owner_authority_keys,
                 ))}
     assert set(handlers) == set(COMMANDS) == set(TOOL_SCHEMAS)
 
