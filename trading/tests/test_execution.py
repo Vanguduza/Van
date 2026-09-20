@@ -117,7 +117,13 @@ def test_protection_break_even_and_trailing():
     assert [x.reason for x in ins] == ["TRAIL"] and pm.stop_of("P1") == Decimal("1.1015")
     assert pm.on_mark("EURUSD", Decimal("1.1020"), Decimal("1.1021"), now_ms=4) == []  # pullback never loosens
     ins = pm.on_mark("EURUSD", Decimal("1.1020"), Decimal("1.1021"), now_ms=10_001)
-    assert ins[0].reason == "TIME_STOP" and "P1" not in pm.rules
+    assert ins[0].reason == "TIME_STOP"
+    assert "P1" in pm.rules and pm.is_close_pending("P1")
+    assert pm.on_mark("EURUSD", Decimal("1.1020"), Decimal("1.1021"), now_ms=10_002) == []
+    pm.close_failed("P1")
+    assert pm.on_mark("EURUSD", Decimal("1.1020"), Decimal("1.1021"), now_ms=10_003)
+    pm.close_confirmed("P1")
+    assert "P1" not in pm.rules
     with pytest.raises(ProtectionError):
         pm.register("P2", symbol="X", direction=Direction.LONG, entry=Decimal("1"), stop=Decimal("2"), target=None, opened_ms=0)
 
@@ -142,6 +148,39 @@ def test_owner_ticket_channel_for_zse():
         ad.confirm(t.ticket_id, fill_price=Decimal("25.50"), filled_qty=Decimal("1500"), contract_note_ref="CN-1", now_ms=NOW)
     conf = ad.confirm(t.ticket_id, fill_price=Decimal("24.90"), filled_qty=Decimal("1500"), contract_note_ref="CN-1", now_ms=NOW + 1000)
     assert conf.status == "OWNER_EXECUTED" and ad.positions()[0].loss_model is LossModel.ILLIQUID_EQUITY
+    with pytest.raises(ValueError, match="already confirmed"):
+        ad.confirm(t.ticket_id, fill_price=Decimal("24.90"), filled_qty=Decimal("1500"), contract_note_ref="CN-1", now_ms=NOW + 1001)
+
+    # A software-stop close is a durable SELL ticket, not an immediate close.
+    pid = ad.positions()[0].position_id
+    r.protection.register(
+        pid, symbol="DELTA", direction=Direction.LONG,
+        entry=Decimal("24.90"), stop=Decimal("22.50"), target=None,
+        opened_ms=NOW + 1000, software_stop=True,
+    )
+    exits = r.apply_exits(
+        "zse", "DELTA", Decimal("22.40"), Decimal("22.41"),
+        now_ms=NOW + 2000,
+    )
+    assert exits[0].status == "ACCEPTED"
+    assert ad.positions() and r.protection.is_close_pending(pid)
+    assert led.count(EventKind.OWNER_TICKET) == 2
+    # Pending-close state suppresses duplicate SELL tickets.
+    assert r.apply_exits(
+        "zse", "DELTA", Decimal("22.30"), Decimal("22.31"),
+        now_ms=NOW + 3000,
+    ) == []
+    sell = [ticket for ticket in ad.tickets.values() if ticket.side == "SELL"][0]
+    sell_fill = ad.confirm(
+        sell.ticket_id, fill_price=Decimal("22.30"),
+        filled_qty=Decimal("1500"), contract_note_ref="CN-SELL",
+        now_ms=NOW + 4000,
+    )
+    assert sell_fill.status == "OWNER_EXECUTED"
+    assert sell_fill.broker_position_id == pid
+    assert ad.positions() == []
+    r.protection.close_confirmed(pid)
+    assert pid not in r.protection.rules
     # a SHORT never becomes a ticket
     bad = ad.submit(__import__("vati.execution", fromlist=["OrderCommand"]).OrderCommand("x", "h", "k", "zse_primary", "zse", "DELTA", Direction.SHORT, "LIMIT", Decimal("100"), Decimal("25"), None, StopMode.SOFTWARE, LossModel.ILLIQUID_EQUITY).sealed(), now_ms=NOW)
     assert bad.status == "REJECTED"
