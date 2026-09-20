@@ -18,8 +18,8 @@ from vati.validation.certificates import (
     FeatureValidationCertificate,
     classify_feature_certificate,
     evaluate_strategy_certificate,
-    passing_certificate,
 )
+from conftest import passing_certificate
 
 REG = "trading/strategies/registry"
 
@@ -70,8 +70,11 @@ def _registry():
     return owner, CapsuleRegistry.load_dir(REG, authority=owner.verifier)
 
 
-def _sig(owner, sid, state):
-    return owner.token(act="capsule-promote", subject=f"{sid}:{state}", issued_at_unix=1)
+def _sig(owner, sid, state, cert=None):
+    subject = f"{sid}:{state}"
+    if cert is not None:
+        subject += f":{cert.validation_hash}"
+    return owner.token(act="capsule-promote", subject=subject, issued_at_unix=1)
 
 
 def test_promotion_to_demo_without_a_certificate_is_refused():
@@ -105,7 +108,7 @@ def test_certificate_for_a_different_capsule_revision_is_refused():
     sid = "FX-TREND-PULLBACK-01"   # already at DEMO in the registry
     stale = passing_certificate(strategy_id=sid, capsule_hash="a" * 64)
     with pytest.raises(CapsuleError, match="different capsule revision"):
-        reg.promote(sid, StrategyState.SHADOW, approval_signature_ref=_sig(owner, sid, "SHADOW"),
+        reg.promote(sid, StrategyState.SHADOW, approval_signature_ref=_sig(owner, sid, "SHADOW", stale),
                     evidence_refs=["e"], approved_at_unix=1, certificate=stale)
 
 
@@ -115,7 +118,7 @@ def test_failing_certificate_is_refused_even_with_a_valid_signature():
     base = passing_certificate(strategy_id=sid, capsule_hash=reg.get(sid).capsule_hash)
     weak = dataclasses.replace(base, leakage_switch_result=RED).sealed()
     with pytest.raises(CapsuleError, match="validation policy"):
-        reg.promote(sid, StrategyState.SHADOW, approval_signature_ref=_sig(owner, sid, "SHADOW"),
+        reg.promote(sid, StrategyState.SHADOW, approval_signature_ref=_sig(owner, sid, "SHADOW", weak),
                     evidence_refs=["e"], approved_at_unix=1, certificate=weak)
 
 
@@ -123,9 +126,23 @@ def test_owner_signature_binds_the_validation_hash():
     owner, reg = _registry()
     sid = "FX-TREND-PULLBACK-01"   # already at DEMO in the registry
     cert = passing_certificate(strategy_id=sid, capsule_hash=reg.get(sid).capsule_hash)
-    c = reg.promote(sid, StrategyState.SHADOW, approval_signature_ref=_sig(owner, sid, "SHADOW"),
+    c = reg.promote(sid, StrategyState.SHADOW, approval_signature_ref=_sig(owner, sid, "SHADOW", cert),
                     evidence_refs=["e"], approved_at_unix=1, certificate=cert)
     assert c.data["validation_hash"] == cert.validation_hash
+
+
+def test_owner_signature_for_certificate_a_cannot_authorize_certificate_b():
+    owner, reg = _registry()
+    sid = "FX-TREND-PULLBACK-01"
+    capsule_hash = reg.get(sid).capsule_hash
+    cert_a = passing_certificate(strategy_id=sid, capsule_hash=capsule_hash,
+                                 evidence_refs=("artifact:A",))
+    cert_b = passing_certificate(strategy_id=sid, capsule_hash=capsule_hash,
+                                 evidence_refs=("artifact:B",))
+    token_for_a = _sig(owner, sid, "SHADOW", cert_a)
+    with pytest.raises(CapsuleError, match="owner approval signature"):
+        reg.promote(sid, StrategyState.SHADOW, approval_signature_ref=token_for_a,
+                    evidence_refs=["artifact:B"], approved_at_unix=1, certificate=cert_b)
 
 
 # --- feature certificate --------------------------------------------------
