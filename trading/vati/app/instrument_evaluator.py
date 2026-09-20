@@ -22,7 +22,11 @@ from typing import Callable, Optional, Sequence
 from vati.arbiter.candidate import CandidateOpportunity
 from vati.arbiter.opportunity import OpportunityEngine
 from vati.intelligence.market_state import MarketState
+from vati.intelligence.confluence import (
+    ConfluenceAxis, ConfluenceEngine, NEUTRAL, OPPOSING, SUPPORTIVE, UNKNOWN,
+)
 from vati.market_data.bars import Bar
+from vati.risk.contracts import Direction
 from vati.strategies.base import StrategyContext
 
 
@@ -60,6 +64,8 @@ class InstrumentEvaluator:
         self.currency_regime_label_fn = currency_regime_label_fn
         self.last_state: Optional[MarketState] = None
         self.last_candidates: tuple[CandidateOpportunity, ...] = ()
+        self.last_confluence: dict[str, object] = {}
+        self._confluence = ConfluenceEngine()
 
     @property
     def symbol(self) -> str:
@@ -90,7 +96,44 @@ class InstrumentEvaluator:
             now_ms=now_ms,
         )
         self.last_candidates = cands
+        self.last_confluence = {
+            candidate.candidate_id: self._candidate_confluence(candidate, state)
+            for candidate in cands
+        }
         return cands
+
+    def _candidate_confluence(self, candidate: CandidateOpportunity, state: MarketState):
+        """Read model only: functional evidence relative to a candidate direction."""
+        f = state.features
+        trend = state.regime.trend.value
+        if trend == "BULL":
+            trend_state = SUPPORTIVE if candidate.direction is Direction.LONG else OPPOSING
+        elif trend == "BEAR":
+            trend_state = SUPPORTIVE if candidate.direction is Direction.SHORT else OPPOSING
+        else:
+            trend_state = NEUTRAL
+
+        momentum_state = UNKNOWN
+        if f.rsi is not None:
+            momentum_state = (
+                SUPPORTIVE if (
+                    candidate.direction is Direction.LONG and f.rsi >= Decimal("50")
+                    or candidate.direction is Direction.SHORT and f.rsi <= Decimal("50")
+                ) else OPPOSING
+            )
+        volatility_state = OPPOSING if state.regime.vol.value == "EXTREME" else NEUTRAL
+        liquidity_state = (
+            OPPOSING if f.spread_percentile >= Decimal("0.90") else SUPPORTIVE
+        )
+        event_state = OPPOSING if state.in_event_window() else NEUTRAL
+        axes = (
+            ConfluenceAxis("trend", trend_state, ("regime.trend",), (), state.timeframe, state.as_of_ms),
+            ConfluenceAxis("momentum", momentum_state, ("features.rsi",) if f.rsi is not None else (), (), state.timeframe, state.as_of_ms),
+            ConfluenceAxis("volatility", volatility_state, ("regime.vol",), (), state.timeframe, state.as_of_ms),
+            ConfluenceAxis("liquidity", liquidity_state, ("features.spread_percentile",), (), state.timeframe, state.as_of_ms),
+            ConfluenceAxis("event", event_state, ("event_window",), (), state.timeframe, state.as_of_ms),
+        )
+        return self._confluence.build(symbol=state.symbol, as_of_ms=state.as_of_ms, axes=axes)
 
 
 __all__ = ["InstrumentEvaluator", "InstrumentEvaluatorConfig"]
