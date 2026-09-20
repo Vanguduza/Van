@@ -66,6 +66,60 @@ data class AccountCard(
     }
 }
 
+data class StrategyPromotionCandidate(
+    val strategyId: String,
+    val currentState: String,
+    val targetState: String,
+    val capsuleHash: String,
+    val validationHash: String,
+    val certificateId: String,
+    val certificate: JsonObject,
+    val evidenceRefs: List<String>,
+    val dataManifestHash: String,
+    val dsrProbability: Double?,
+    val pboProbability: Double?,
+    val expectancyR: Double?,
+    val expectancyLowerBoundR: Double?,
+    val profitFactor: Double?,
+    val maxDrawdown: Double?,
+    val certificateEventHash: String,
+    val certificateEventMs: Long?,
+) {
+    companion object {
+        fun from(o: JsonObject): StrategyPromotionCandidate? {
+            val strategyId = o.str("strategy_id") ?: return null
+            val targetState = o.str("target_state") ?: return null
+            val validationHash = o.str("validation_hash") ?: return null
+            val certificate = o.obj("certificate") ?: return null
+            return StrategyPromotionCandidate(
+                strategyId = strategyId,
+                currentState = o.str("current_state") ?: "UNKNOWN",
+                targetState = targetState,
+                capsuleHash = o.str("capsule_hash") ?: "",
+                validationHash = validationHash,
+                certificateId = o.str("certificate_id") ?: "",
+                certificate = certificate,
+                evidenceRefs = o.strList("evidence_refs"),
+                dataManifestHash = o.str("data_manifest_hash") ?: "",
+                dsrProbability = o.num("dsr_probability"),
+                pboProbability = o.num("pbo_probability"),
+                expectancyR = o.num("expectancy_R"),
+                expectancyLowerBoundR = o.num("expectancy_lower_bound_R"),
+                profitFactor = o.num("profit_factor"),
+                maxDrawdown = o.num("max_drawdown"),
+                certificateEventHash = o.str("certificate_event_hash") ?: "",
+                certificateEventMs = o.long("certificate_event_ms"),
+            )
+        }
+
+        fun parseAll(body: String): List<StrategyPromotionCandidate>? {
+            val root = parseObject(body) ?: return null
+            val raw = root.arr("candidates")
+            return raw.mapNotNull(::from).takeIf { it.size == raw.size }
+        }
+    }
+}
+
 data class PortfolioSummary(
     val ledgerAvailable: Boolean, val reportingCurrency: String, val accounts: List<AccountCard>, val balance: Money, val equity: Money, val floatingPnl: Money, val dayPnl: Money, val weekPnl: Money,
     val otherCurrencyAccounts: List<String>, val portfolioHeat: Pct, val killSwitch: List<String>, val openTrades: Int, val exposureBySymbol: Map<String, Int>,
