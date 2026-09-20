@@ -2798,19 +2798,18 @@
       "path": "trading/vati/validation/policy.py",
       "maturity_class": "INTEGRATED",
       "disposition": "COMPLETE",
-      "rationale": "Built, wired and tested in-repo under the Trading Intelligence & Profitability blueprint Rev 1.1. No live-venue or physical-runtime evidence exists yet, so the terminal state names that residual rather than claiming integration is evidenced.",
+      "rationale": "DSR/PBO semantics are consumed by certificate evaluation and capsule promotion; CI executes the negative/near-zero DSR counterexamples and policy-version checks.",
       "remediation_gate": "TRADING-ENH",
       "producer": "vati.validation.policy.evaluate",
       "consumer": "vati.validation.certificates.evaluate_strategy_certificate",
       "production_caller": "CapsuleRegistry.promote",
       "tests": "trading/tests/test_validation_policy.py",
-      "runtime_evidence": null,
+      "runtime_evidence": ".github/workflows/van-ci.yml::Trading enhancement tests -> trading/tests/test_validation_policy.py",
       "owner_facing_projection": null,
-      "terminal_state": "EXTERNALLY_BLOCKED_REPOSITORY_COMPLETE",
+      "terminal_state": "INTEGRATED_AND_EVIDENCED",
       "closure_commits": [
         "TRADING-ENH"
-      ],
-      "external_blocker": "live venue runtime evidence on van-trading-core"
+      ]
     },
     {
       "n": 144,
@@ -2818,19 +2817,18 @@
       "path": "trading/vati/intelligence/feature_contract.py",
       "maturity_class": "INTEGRATED",
       "disposition": "COMPLETE",
-      "rationale": "Built, wired and tested in-repo under the Trading Intelligence & Profitability blueprint Rev 1.1. No live-venue or physical-runtime evidence exists yet, so the terminal state names that residual rather than claiming integration is evidenced.",
+      "rationale": "Required-feature contracts are enforced by StrategyArbiter on the real OpportunityEngine path, including registry admission, venue, timeframe, history, staleness and provenance failures.",
       "remediation_gate": "TRADING-ENH",
       "producer": "FeatureContractValidator.validate",
       "consumer": "StrategyArbiter.evaluate",
       "production_caller": "OpportunityEngine.assess / assess_candidates",
       "tests": "trading/tests/test_feature_contract.py",
-      "runtime_evidence": null,
+      "runtime_evidence": ".github/workflows/van-ci.yml::Trading enhancement tests -> trading/tests/test_feature_contract.py",
       "owner_facing_projection": null,
-      "terminal_state": "EXTERNALLY_BLOCKED_REPOSITORY_COMPLETE",
+      "terminal_state": "INTEGRATED_AND_EVIDENCED",
       "closure_commits": [
         "TRADING-ENH"
-      ],
-      "external_blocker": "live venue runtime evidence on van-trading-core"
+      ]
     },
     {
       "n": 145,
@@ -2838,19 +2836,18 @@
       "path": "trading/vati/intelligence/features.py",
       "maturity_class": "INTEGRATED",
       "disposition": "COMPLETE",
-      "rationale": "Built, wired and tested in-repo under the Trading Intelligence & Profitability blueprint Rev 1.1. No live-venue or physical-runtime evidence exists yet, so the terminal state names that residual rather than claiming integration is evidenced.",
+      "rationale": "Timeframe is carried into FeatureVector/MarketState identity and live service configuration; M5/H1 identity separation and live serve reachability are executed in CI.",
       "remediation_gate": "TRADING-ENH",
       "producer": "compute_features(timeframe=...)",
       "consumer": "MarketState.state_hash",
       "production_caller": "build_market_state",
       "tests": "trading/tests/test_mtf.py",
-      "runtime_evidence": null,
+      "runtime_evidence": ".github/workflows/van-ci.yml::Trading enhancement tests -> trading/tests/test_mtf.py + test_enhancement_closure.py",
       "owner_facing_projection": null,
-      "terminal_state": "EXTERNALLY_BLOCKED_REPOSITORY_COMPLETE",
+      "terminal_state": "INTEGRATED_AND_EVIDENCED",
       "closure_commits": [
         "TRADING-ENH"
-      ],
-      "external_blocker": "live venue runtime evidence on van-trading-core"
+      ]
     },
     {
       "n": 146,
@@ -2858,19 +2855,18 @@
       "path": "trading/vati/strategies/migration.py",
       "maturity_class": "INTEGRATED",
       "disposition": "COMPLETE",
-      "rationale": "Built, wired and tested in-repo under the Trading Intelligence & Profitability blueprint Rev 1.1. No live-venue or physical-runtime evidence exists yet, so the terminal state names that residual rather than claiming integration is evidenced.",
+      "rationale": "The settled registry is reconciled against migration records on every CI run; post-migration contract drift remains a failing mutation even if the capsule hash is recomputed.",
       "remediation_gate": "TRADING-ENH",
       "producer": "verify_migration",
       "consumer": "trading/tools/migrate_capsule_timeframes.py",
       "production_caller": "CI: capsule timeframe migration is settled",
       "tests": "trading/tests/test_capsule_migration.py",
-      "runtime_evidence": null,
+      "runtime_evidence": ".github/workflows/van-ci.yml::Capsule timeframe migration is settled + trading/tests/test_enhancement_closure.py",
       "owner_facing_projection": null,
-      "terminal_state": "EXTERNALLY_BLOCKED_REPOSITORY_COMPLETE",
+      "terminal_state": "INTEGRATED_AND_EVIDENCED",
       "closure_commits": [
         "TRADING-ENH"
-      ],
-      "external_blocker": "live venue runtime evidence on van-trading-core"
+      ]
     },
     {
       "n": 147,
@@ -2878,7 +2874,7 @@
       "path": "trading/vati/intelligence/mtf.py",
       "maturity_class": "INTEGRATED",
       "disposition": "COMPLETE",
-      "rationale": "Repository join is live in multi-instrument vati serve. MTF completeness may fail closed; MTF values remain non-actuating strategy evidence until a validated capsule revision adopts role-specific semantics. Final Trading Core runtime qualification is still required.",
+      "rationale": "MTF is wired into the live account-service candidate path and fails closed when a required constituent is absent; values remain non-actuating strategy evidence until a separately validated capsule revision adopts role-specific logic.",
       "remediation_gate": "TRADING-ENH",
       "producer": "build_multi_timeframe_state",
       "consumer": "InstrumentEvaluator.evaluate / CandidateOpportunity causal evidence",
@@ -2890,7 +2886,7 @@
       "closure_commits": [
         "TRADING-ENH"
       ],
-      "external_blocker": "live venue runtime evidence on van-trading-core"
+      "external_blocker": "ENVIRONMENT_UNVERIFIED: multi-instrument AccountCoordinatorService has not been qualified on van-trading-core against the real multi-timeframe BarLake and venue runtime"
     },
     {
       "n": 148,
@@ -2898,19 +2894,18 @@
       "path": "trading/vati/intelligence/feature_registry.py",
       "maturity_class": "INTEGRATED",
       "disposition": "COMPLETE",
-      "rationale": "Venue/timeframe/minimum-history semantics and certificate-required admission are enforced on the real opportunity path. Final runtime qualification remains.",
+      "rationale": "FeatureRegistry is an executable admission gate consumed by FeatureContractValidator; certificate-required definitions are not production-admitted merely because they are registered.",
       "remediation_gate": "TRADING-ENH",
       "producer": "default_registry / FeatureRegistry.admit",
       "consumer": "FeatureContractValidator.validate",
       "production_caller": "OpportunityEngine -> StrategyArbiter.evaluate",
       "tests": "trading/tests/test_feature_registry_and_confluence.py",
-      "runtime_evidence": null,
+      "runtime_evidence": ".github/workflows/van-ci.yml::Trading enhancement tests -> test_feature_contract.py + test_feature_registry_and_confluence.py",
       "owner_facing_projection": null,
-      "terminal_state": "EXTERNALLY_BLOCKED_REPOSITORY_COMPLETE",
+      "terminal_state": "INTEGRATED_AND_EVIDENCED",
       "closure_commits": [
         "TRADING-ENH"
-      ],
-      "external_blocker": "live venue runtime evidence on van-trading-core"
+      ]
     },
     {
       "n": 149,
@@ -2918,19 +2913,18 @@
       "path": "trading/vati/validation/certificates.py",
       "maturity_class": "INTEGRATED",
       "disposition": "COMPLETE",
-      "rationale": "The supported producer derives DSR/PBO/performance fields from raw validation observations and binds immutable data/evidence references; direct production certificate construction is CI-forbidden. Promotion re-evaluates the sealed certificate and binds owner authority to its exact validation_hash.",
+      "rationale": "The canonical builder derives DSR/PBO/performance from raw observations, binds data/evidence provenance, and is CLI-reachable; CI forbids direct production certificate construction and promotion binds the exact validation_hash.",
       "remediation_gate": "TRADING-ENH",
       "producer": "vati.validation.builder.build_strategy_validation_certificate via TradingResearchWorkflow",
       "consumer": "CapsuleRegistry.promote",
       "production_caller": "python -m vati research --spec <strategy_certificate> -> owner capsule-promotion workflow",
       "tests": "trading/tests/test_validation_certificates.py",
-      "runtime_evidence": null,
+      "runtime_evidence": ".github/workflows/van-ci.yml::Trading enhancement tests -> test_validation_certificates.py + test_research_and_drift.py",
       "owner_facing_projection": null,
-      "terminal_state": "EXTERNALLY_BLOCKED_REPOSITORY_COMPLETE",
+      "terminal_state": "INTEGRATED_AND_EVIDENCED",
       "closure_commits": [
         "TRADING-ENH"
-      ],
-      "external_blocker": "live venue runtime evidence on van-trading-core"
+      ]
     },
     {
       "n": 150,
@@ -2938,19 +2932,18 @@
       "path": "trading/vati/validation/certificates.py",
       "maturity_class": "INTEGRATED",
       "disposition": "COMPLETE",
-      "rationale": "The supported producer derives incremental DSR/PBO/expectancy and redundancy from validation observations and requires data/evidence provenance. Certificate-required features remain unavailable to production until FeatureRegistry admits the exact feature/version certificate.",
+      "rationale": "The canonical builder derives incremental feature evidence with provenance; FeatureRegistry admits only the exact feature/version certificate after reclassification, and direct production certificate construction is CI-forbidden.",
       "remediation_gate": "TRADING-ENH",
       "producer": "vati.validation.builder.build_feature_validation_certificate via TradingResearchWorkflow",
       "consumer": "FeatureRegistry.admit -> FeatureContractValidator",
       "production_caller": "python -m vati research --spec <feature_certificate> / research feature-admission workflow",
       "tests": "trading/tests/test_validation_certificates.py",
-      "runtime_evidence": null,
+      "runtime_evidence": ".github/workflows/van-ci.yml::Trading enhancement tests -> test_validation_certificates.py + test_feature_registry_and_confluence.py",
       "owner_facing_projection": null,
-      "terminal_state": "EXTERNALLY_BLOCKED_REPOSITORY_COMPLETE",
+      "terminal_state": "INTEGRATED_AND_EVIDENCED",
       "closure_commits": [
         "TRADING-ENH"
-      ],
-      "external_blocker": "live venue runtime evidence on van-trading-core"
+      ]
     },
     {
       "n": 151,
@@ -2958,7 +2951,7 @@
       "path": "trading/vati/intelligence/confluence.py",
       "maturity_class": "INTEGRATED",
       "disposition": "COMPLETE",
-      "rationale": "Functional confluence is produced on the live candidate path as a read model only; it has no sizing or routing authority. Owner-surface projection still requires runtime qualification.",
+      "rationale": "InstrumentEvaluator produces functional confluence for every real candidate and the object has no sizing/routing methods; repository integration is complete but live owner-facing observation is not yet qualified.",
       "remediation_gate": "TRADING-ENH",
       "producer": "ConfluenceEngine.build",
       "consumer": "InstrumentEvaluator.last_confluence / owner-research read model",
@@ -2970,7 +2963,7 @@
       "closure_commits": [
         "TRADING-ENH"
       ],
-      "external_blocker": "live venue runtime evidence on van-trading-core"
+      "external_blocker": "ENVIRONMENT_UNVERIFIED: candidate-relative confluence has not been observed on the real van-trading-core multi-instrument runtime/owner projection"
     },
     {
       "n": 152,
@@ -2978,7 +2971,7 @@
       "path": "trading/vati/arbiter/candidate.py",
       "maturity_class": "INTEGRATED",
       "disposition": "COMPLETE",
-      "rationale": "CandidateOpportunity is produced on the reachable multi-instrument live path and remains weaker than TradeIntent. Final Trading Core runtime evidence remains.",
+      "rationale": "CandidateOpportunity is produced by the reachable account-service path, carries capsule ceiling and MTF causal hashes, and remains structurally weaker than TradeIntent.",
       "remediation_gate": "TRADING-ENH",
       "producer": "OpportunityEngine.assess_candidates",
       "consumer": "CandidatePool.admit",
@@ -2990,7 +2983,7 @@
       "closure_commits": [
         "TRADING-ENH"
       ],
-      "external_blocker": "live venue runtime evidence on van-trading-core"
+      "external_blocker": "ENVIRONMENT_UNVERIFIED: multi-instrument vati serve candidate production has not been exercised on van-trading-core with real feeds"
     },
     {
       "n": 153,
@@ -2998,7 +2991,7 @@
       "path": "trading/vati/arbiter/intent_factory.py",
       "maturity_class": "INTEGRATED",
       "disposition": "COMPLETE",
-      "rationale": "IntentFactory is called only after allocation and immediately before the real RiskAuthority. Capsule ceiling, targets and fresh dependency evidence are preserved. Final runtime qualification remains.",
+      "rationale": "IntentFactory runs only after allocation; fresh dependency, capsule risk ceiling and target precedence are preserved before RiskAuthority.",
       "remediation_gate": "TRADING-ENH",
       "producer": "IntentFactory.from_selected_candidate",
       "consumer": "RiskAuthority.evaluate_safe",
@@ -3010,7 +3003,7 @@
       "closure_commits": [
         "TRADING-ENH"
       ],
-      "external_blocker": "live venue runtime evidence on van-trading-core"
+      "external_blocker": "ENVIRONMENT_UNVERIFIED: selected-candidate -> IntentFactory -> live RiskAuthority join has not been exercised on van-trading-core"
     },
     {
       "n": 154,
@@ -3018,7 +3011,7 @@
       "path": "trading/vati/app/instrument_evaluator.py",
       "maturity_class": "INTEGRATED",
       "disposition": "COMPLETE",
-      "rationale": "Each configured symbol has a real InstrumentEvaluator in the account service. Incomplete required MTF fails closed before strategy evaluation.",
+      "rationale": "AccountCoordinatorService constructs one evaluator per configured symbol; incomplete required MTF abstains before strategy evaluation.",
       "remediation_gate": "TRADING-ENH",
       "producer": "InstrumentEvaluator.evaluate",
       "consumer": "CandidatePool",
@@ -3030,7 +3023,7 @@
       "closure_commits": [
         "TRADING-ENH"
       ],
-      "external_blocker": "live venue runtime evidence on van-trading-core"
+      "external_blocker": "ENVIRONMENT_UNVERIFIED: per-symbol InstrumentEvaluator fan-out has not been qualified on van-trading-core with real multi-symbol BarLake data"
     },
     {
       "n": 155,
@@ -3038,7 +3031,7 @@
       "path": "trading/vati/app/candidate_pool.py",
       "maturity_class": "INTEGRATED",
       "disposition": "COMPLETE",
-      "rationale": "CandidatePool is the real shared account candidate set; identical deterministic candidates preserve terminal lifecycle state across polling/replay.",
+      "rationale": "CandidatePool is the real account candidate set and replaying the same deterministic candidate cannot reactivate a terminal selection.",
       "remediation_gate": "TRADING-ENH",
       "producer": "CandidatePool.admit",
       "consumer": "OpportunityPortfolioAllocator.rank",
@@ -3050,7 +3043,7 @@
       "closure_commits": [
         "TRADING-ENH"
       ],
-      "external_blocker": "live venue runtime evidence on van-trading-core"
+      "external_blocker": "ENVIRONMENT_UNVERIFIED: shared live CandidatePool behavior has not been qualified on van-trading-core"
     },
     {
       "n": 156,
@@ -3058,7 +3051,7 @@
       "path": "trading/vati/app/account_coordinator.py",
       "maturity_class": "INTEGRATED",
       "disposition": "COMPLETE",
-      "rationale": "The coordinator is now a real vati serve entry path for multi-instrument accounts, with sequential fresh snapshots, fail-closed missing authority/execution and router fencing. Final Trading Core runtime qualification remains.",
+      "rationale": "Multi-instrument vati serve reaches AccountDecisionCoordinator with sequential fresh snapshots, fail-closed missing authority/execution, real RiskAuthority and fenced router wiring.",
       "remediation_gate": "TRADING-ENH",
       "producer": "AccountDecisionCoordinator.step",
       "consumer": "RiskAuthority / ExecutionRouter via AccountCoordinatorService",
@@ -3070,7 +3063,7 @@
       "closure_commits": [
         "TRADING-ENH"
       ],
-      "external_blocker": "live venue runtime evidence on van-trading-core"
+      "external_blocker": "ENVIRONMENT_UNVERIFIED: AccountCoordinatorService has not been launched/soaked on van-trading-core against the real account adapter and authority store"
     },
     {
       "n": 157,
@@ -3078,7 +3071,7 @@
       "path": "trading/vati/app/account_lease.py",
       "maturity_class": "INTEGRATED",
       "disposition": "COMPLETE",
-      "rationale": "Cross-host lease arbitration uses the shared PostgreSQL authority store and the lease epoch is fenced again at the final router boundary. Final reachable two-process runtime canary remains.",
+      "rationale": "Repository implementation uses PostgresLeaseStore with transactional row locking and fences the lease epoch again at ExecutionRouter immediately before submission.",
       "remediation_gate": "TRADING-ENH",
       "producer": "PostgresLeaseStore + AccountRuntimeLease.acquire/renew",
       "consumer": "AccountDecisionCoordinator.step / ExecutionRouter lease_fence",
@@ -3090,7 +3083,7 @@
       "closure_commits": [
         "TRADING-ENH"
       ],
-      "external_blocker": "live venue runtime evidence on van-trading-core"
+      "external_blocker": "EXTERNAL_RUNTIME: no reachable van-trading-core/shared PostgreSQL environment is available here for the required two-process lease-arbitration and stale-epoch router canary"
     },
     {
       "n": 158,
@@ -3098,7 +3091,7 @@
       "path": "trading/vati/arbiter/portfolio_allocator.py",
       "maturity_class": "INTEGRATED",
       "disposition": "COMPLETE",
-      "rationale": "Built, wired and tested in-repo under the Trading Intelligence & Profitability blueprint Rev 1.1. No live-venue or physical-runtime evidence exists yet, so the terminal state names that residual rather than claiming integration is evidenced.",
+      "rationale": "Allocator V0/V1 is the live coordinator selector, cannot size/reserve heat, and repository tests prove merit ordering plus fresh post-admission portfolio snapshots.",
       "remediation_gate": "TRADING-ENH",
       "producer": "OpportunityPortfolioAllocator.rank",
       "consumer": "AccountDecisionCoordinator.step",
@@ -3110,7 +3103,7 @@
       "closure_commits": [
         "TRADING-ENH"
       ],
-      "external_blocker": "live venue runtime evidence on van-trading-core"
+      "external_blocker": "ENVIRONMENT_UNVERIFIED: portfolio candidate competition has not been run on the real van-trading-core account runtime"
     },
     {
       "n": 159,
@@ -3118,7 +3111,7 @@
       "path": "trading/vati/risk/dependency.py",
       "maturity_class": "INTEGRATED",
       "disposition": "COMPLETE",
-      "rationale": "Dependency is recomputed against the fresh candidate-specific RiskSnapshot immediately before IntentFactory; stale ranking-time correlation cannot size later candidates.",
+      "rationale": "Dependency is recomputed from each fresh candidate-specific RiskSnapshot immediately before IntentFactory; stale ranking-time correlation cannot size later candidates.",
       "remediation_gate": "TRADING-ENH",
       "producer": "PortfolioDependencyEngine.assess",
       "consumer": "TradeIntent.correlation_multiplier",
@@ -3130,7 +3123,7 @@
       "closure_commits": [
         "TRADING-ENH"
       ],
-      "external_blocker": "live venue runtime evidence on van-trading-core"
+      "external_blocker": "ENVIRONMENT_UNVERIFIED: live portfolio dependency/correlation reduction has not been observed on van-trading-core with real open positions"
     },
     {
       "n": 160,
@@ -3138,19 +3131,18 @@
       "path": "trading/vati/risk/expected_shortfall.py",
       "maturity_class": "INTEGRATED",
       "disposition": "COMPLETE",
-      "rationale": "Built, wired and tested in-repo under the Trading Intelligence & Profitability blueprint Rev 1.1. No live-venue or physical-runtime evidence exists yet, so the terminal state names that residual rather than claiming integration is evidenced.",
+      "rationale": "ExpectedShortfallEngine is deterministic pure risk math consumed by PortfolioDependencyEngine; normal/stressed behavior and incremental ES are executed under CI.",
       "remediation_gate": "TRADING-ENH",
       "producer": "expected_shortfall",
       "consumer": "PortfolioDependencyEngine.assess",
       "production_caller": "PortfolioDependencyEngine.assess",
       "tests": "trading/tests/test_portfolio_dependency.py",
-      "runtime_evidence": null,
+      "runtime_evidence": ".github/workflows/van-ci.yml::Trading enhancement tests -> trading/tests/test_portfolio_dependency.py",
       "owner_facing_projection": null,
-      "terminal_state": "EXTERNALLY_BLOCKED_REPOSITORY_COMPLETE",
+      "terminal_state": "INTEGRATED_AND_EVIDENCED",
       "closure_commits": [
         "TRADING-ENH"
-      ],
-      "external_blocker": "live venue runtime evidence on van-trading-core"
+      ]
     },
     {
       "n": 161,
@@ -3158,19 +3150,18 @@
       "path": "trading/vati/learning/overlap.py",
       "maturity_class": "INTEGRATED",
       "disposition": "COMPLETE",
-      "rationale": "Overlap is a slow-plane research input with reduce-only semantics; the supported research CLI is a real caller and has no execution authority.",
+      "rationale": "Strategy overlap is reachable through the bounded research workflow and has no execution authority; its evidence feeds slow capital/allocation research only.",
       "remediation_gate": "TRADING-ENH",
       "producer": "StrategyOverlapDetector.assess",
       "consumer": "TradingResearchWorkflow / capital-allocation research",
       "production_caller": "python -m vati research --spec <overlap>",
       "tests": "trading/tests/test_portfolio_dependency.py",
-      "runtime_evidence": null,
+      "runtime_evidence": ".github/workflows/van-ci.yml::Trading enhancement tests -> test_portfolio_dependency.py + research CLI tests",
       "owner_facing_projection": null,
-      "terminal_state": "EXTERNALLY_BLOCKED_REPOSITORY_COMPLETE",
+      "terminal_state": "INTEGRATED_AND_EVIDENCED",
       "closure_commits": [
         "TRADING-ENH"
-      ],
-      "external_blocker": "live venue runtime evidence on van-trading-core"
+      ]
     },
     {
       "n": 162,
@@ -3178,19 +3169,18 @@
       "path": "trading/vati/learning/allocation.py",
       "maturity_class": "INTEGRATED",
       "disposition": "COMPLETE",
-      "rationale": "Allocation episodes are reachable through the slow research CLI and explicitly exclude RiskAuthority/router refusals from allocator regret.",
+      "rationale": "AllocationEpisode is a sealed slow-plane learning artifact reachable through vati research; risk/router refusals are excluded from allocator regret by contract.",
       "remediation_gate": "TRADING-ENH",
       "producer": "AllocationEpisode.sealed / TradingResearchWorkflow.record_allocation_episode",
       "consumer": "allocator research",
       "production_caller": "python -m vati research --spec <allocation_episode>",
       "tests": "trading/tests/test_portfolio_dependency.py",
-      "runtime_evidence": null,
+      "runtime_evidence": ".github/workflows/van-ci.yml::Trading enhancement tests -> test_portfolio_dependency.py + research CLI",
       "owner_facing_projection": null,
-      "terminal_state": "EXTERNALLY_BLOCKED_REPOSITORY_COMPLETE",
+      "terminal_state": "INTEGRATED_AND_EVIDENCED",
       "closure_commits": [
         "TRADING-ENH"
-      ],
-      "external_blocker": "live venue runtime evidence on van-trading-core"
+      ]
     },
     {
       "n": 163,
@@ -3198,7 +3188,7 @@
       "path": "trading/vati/execution/policy.py",
       "maturity_class": "INTEGRATED",
       "disposition": "COMPLETE",
-      "rationale": "ExecutionPolicyDecision is now verified at the router boundary and changes bounded entry_type/slippage behavior; DO_NOT_EXECUTE and tampered decisions are refused. Final venue runtime qualification remains.",
+      "rationale": "The router verifies the sealed policy decision, enforces template entry/slippage bounds, refuses DO_NOT_EXECUTE/tampering, and AccountCoordinatorService supplies the decision before submission.",
       "remediation_gate": "TRADING-ENH",
       "producer": "ExecutionPolicyEngine.select",
       "consumer": "ExecutionRouter.resolve_execution_policy",
@@ -3210,7 +3200,7 @@
       "closure_commits": [
         "TRADING-ENH"
       ],
-      "external_blocker": "live venue runtime evidence on van-trading-core"
+      "external_blocker": "ENVIRONMENT_UNVERIFIED: ExecutionPolicyDecision -> ExecutionRouter behavior has not been qualified against a real van-trading-core venue adapter/fill path"
     },
     {
       "n": 164,
@@ -3218,19 +3208,18 @@
       "path": "trading/vati/learning/exit_research.py",
       "maturity_class": "INTEGRATED",
       "disposition": "COMPLETE",
-      "rationale": "ExitPolicyResearchEngine is reachable only through the non-authoritative research workflow and cannot mutate live protection.",
+      "rationale": "ExitPolicyResearchEngine is reachable only from the non-authoritative research plane; registered variants cannot reach ProtectionManager or ExecutionRouter.",
       "remediation_gate": "TRADING-ENH",
       "producer": "ExitPolicyResearchEngine.search",
       "consumer": "capsule revision candidates",
       "production_caller": "python -m vati research --spec <exit_research>",
       "tests": "trading/tests/test_execution_and_exits.py",
-      "runtime_evidence": null,
+      "runtime_evidence": ".github/workflows/van-ci.yml::Trading enhancement tests -> test_execution_and_exits.py + research CLI",
       "owner_facing_projection": null,
-      "terminal_state": "EXTERNALLY_BLOCKED_REPOSITORY_COMPLETE",
+      "terminal_state": "INTEGRATED_AND_EVIDENCED",
       "closure_commits": [
         "TRADING-ENH"
-      ],
-      "external_blocker": "live venue runtime evidence on van-trading-core"
+      ]
     },
     {
       "n": 165,
@@ -3238,7 +3227,7 @@
       "path": "trading/vati/risk/mandate.py",
       "maturity_class": "INTEGRATED",
       "disposition": "COMPLETE",
-      "rationale": "Per-strategy budgets are consumed on the live coordinator path but remain bounded by capsule and mandate ceilings. No budget increase is self-authorizing.",
+      "rationale": "Per-strategy budgets are consumed by the live coordinator and are always bounded by the capsule and mandate ceilings; repository code cannot self-authorize a higher ceiling.",
       "remediation_gate": "TRADING-ENH",
       "producer": "TradingMandate.risk_budget_for",
       "consumer": "AccountDecisionCoordinator._mandate_risk_pct",
@@ -3250,7 +3239,7 @@
       "closure_commits": [
         "TRADING-ENH"
       ],
-      "external_blocker": "live venue runtime evidence on van-trading-core"
+      "external_blocker": "OWNER_DEPLOYMENT_DECISION: no owner A4 mandate amendment has activated a higher per-strategy risk budget in a real account"
     },
     {
       "n": 166,
@@ -3258,19 +3247,18 @@
       "path": "trading/vati/risk/capital_promotion.py",
       "maturity_class": "INTEGRATED",
       "disposition": "COMPLETE",
-      "rationale": "Capital proposals are evaluated and durably loggable through the slow research CLI; they have no mandate-mutation API and require owner authority for any later amendment.",
+      "rationale": "CapitalBudgetProposal is a sealed, bounded proposal reachable through the slow research workflow; it has no API that mutates TradingMandate and any widening remains an owner A4 action.",
       "remediation_gate": "TRADING-ENH",
       "producer": "evaluate_proposal",
       "consumer": "TradingResearchWorkflow / owner review path",
       "production_caller": "python -m vati research --spec <capital_proposal>",
       "tests": "trading/tests/test_capital_promotion.py",
-      "runtime_evidence": null,
+      "runtime_evidence": ".github/workflows/van-ci.yml::Trading enhancement tests -> test_capital_promotion.py + research CLI",
       "owner_facing_projection": null,
-      "terminal_state": "EXTERNALLY_BLOCKED_REPOSITORY_COMPLETE",
+      "terminal_state": "INTEGRATED_AND_EVIDENCED",
       "closure_commits": [
         "TRADING-ENH"
-      ],
-      "external_blocker": "live venue runtime evidence on van-trading-core"
+      ]
     },
     {
       "n": 167,
@@ -3278,19 +3266,18 @@
       "path": "trading/vati/learning/coverage.py",
       "maturity_class": "INTEGRATED",
       "disposition": "COMPLETE",
-      "rationale": "Coverage is derived from the real capsule registry through the supported research CLI; uncovered cells remain research questions, not automatic strategies.",
+      "rationale": "StrategyCoverageMap is built from the real capsule registry through vati research; uncovered RANGE cells are reported as research gaps rather than auto-created strategies.",
       "remediation_gate": "TRADING-ENH",
       "producer": "StrategyCoverageMap.from_capsules",
       "consumer": "TradingResearchWorkflow / research prioritisation",
       "production_caller": "python -m vati research --spec <coverage>",
       "tests": "trading/tests/test_research_and_drift.py",
-      "runtime_evidence": null,
+      "runtime_evidence": ".github/workflows/van-ci.yml::Trading enhancement tests -> test_research_and_drift.py",
       "owner_facing_projection": null,
-      "terminal_state": "EXTERNALLY_BLOCKED_REPOSITORY_COMPLETE",
+      "terminal_state": "INTEGRATED_AND_EVIDENCED",
       "closure_commits": [
         "TRADING-ENH"
-      ],
-      "external_blocker": "live venue runtime evidence on van-trading-core"
+      ]
     },
     {
       "n": 168,
@@ -3298,19 +3285,18 @@
       "path": "trading/vati/learning/drift.py",
       "maturity_class": "INTEGRATED",
       "disposition": "COMPLETE",
-      "rationale": "Feature/edge drift have a real slow-plane caller and cannot mutate live capsules. Automated StrategyHealth ingestion remains a separate future integration.",
+      "rationale": "Feature/edge drift observations are executable through the slow research workflow and cannot mutate capsules or live authority.",
       "remediation_gate": "TRADING-ENH",
       "producer": "FeatureDriftMonitor.observe",
       "consumer": "TradingResearchWorkflow / StrategyHealth research inputs",
       "production_caller": "python -m vati research --spec <feature_drift|edge_drift>",
       "tests": "trading/tests/test_research_and_drift.py",
-      "runtime_evidence": null,
+      "runtime_evidence": ".github/workflows/van-ci.yml::Trading enhancement tests -> test_research_and_drift.py",
       "owner_facing_projection": null,
-      "terminal_state": "EXTERNALLY_BLOCKED_REPOSITORY_COMPLETE",
+      "terminal_state": "INTEGRATED_AND_EVIDENCED",
       "closure_commits": [
         "TRADING-ENH"
-      ],
-      "external_blocker": "live venue runtime evidence on van-trading-core"
+      ]
     },
     {
       "n": 169,
@@ -3318,7 +3304,7 @@
       "path": "trading/vati/research/trading_evidence.py",
       "maturity_class": "INTEGRATED",
       "disposition": "COMPLETE",
-      "rationale": "Evidence admission is reachable and authority-bounded in-repo; actual Stagehand/Browser Harness retrieval remains an external research-runtime dependency.",
+      "rationale": "Trading evidence admission/effect authority is repository-complete and CLI-reachable; actual browser retrieval remains correctly separated and cannot be claimed from synthetic artifacts.",
       "remediation_gate": "TRADING-ENH",
       "producer": "TradingEvidenceCollector.admit",
       "consumer": "TradingResearchWorkflow / VTIL-T2 handoff",
@@ -3330,7 +3316,7 @@
       "closure_commits": [
         "TRADING-ENH"
       ],
-      "external_blocker": "live venue runtime evidence on van-trading-core"
+      "external_blocker": "EXTERNAL_RUNTIME: BrowserApi/Stagehand semantic worker is not configured, so no real external primary-source browser evidence can be harvested on the runtime"
     },
     {
       "n": 170,
@@ -3338,7 +3324,7 @@
       "path": "trading/vati/research/market_data_disagreement.py",
       "maturity_class": "INTEGRATED",
       "disposition": "COMPLETE",
-      "rationale": "Feed disagreement analysis is reachable through the research CLI. A real independent reference feed and live risk halt/reduce projection remain external/integration residuals and are not claimed as live capability.",
+      "rationale": "The disagreement detector is repository-complete and CLI-reachable, but a real independent reference feed and its live degraded-risk projection cannot be proven without that external source.",
       "remediation_gate": "TRADING-ENH",
       "producer": "MarketDataDisagreementDetector.compare",
       "consumer": "TradingResearchWorkflow / degraded-state decision input",
@@ -3350,7 +3336,7 @@
       "closure_commits": [
         "TRADING-ENH"
       ],
-      "external_blocker": "live venue runtime evidence on van-trading-core"
+      "external_blocker": "EXTERNAL_ARTEFACT: no independent live reference market-data feed has been configured/admitted for production disagreement checks"
     },
     {
       "n": 171,
@@ -3358,19 +3344,18 @@
       "path": "trading/tools/check_enhancement_architecture.py",
       "maturity_class": "INTEGRATED",
       "disposition": "COMPLETE",
-      "rationale": "Architecture guardrails are executed by exact-head CI. Terminal evidenced status is contingent on the final head CI passing.",
+      "rationale": "AST guardrails are part of required CI and mutation tests prove allocator-confidence, certificate-producer, migration and production-join violations fail the build.",
       "remediation_gate": "TRADING-ENH",
       "producer": "check_enhancement_architecture.main",
       "consumer": "CI",
       "production_caller": ".github/workflows/van-ci.yml",
       "tests": "trading/tests/test_enhancement_closure.py",
-      "runtime_evidence": null,
+      "runtime_evidence": ".github/workflows/van-ci.yml::Trading enhancement architecture guardrails + trading/tests/test_enhancement_closure.py",
       "owner_facing_projection": null,
-      "terminal_state": "EXTERNALLY_BLOCKED_REPOSITORY_COMPLETE",
+      "terminal_state": "INTEGRATED_AND_EVIDENCED",
       "closure_commits": [
         "TRADING-ENH"
-      ],
-      "external_blocker": "live venue runtime evidence on van-trading-core"
+      ]
     }
   ],
   "gate_0_status": {
