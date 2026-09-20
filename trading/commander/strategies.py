@@ -28,8 +28,7 @@ from vati.learning.replay import restore_capsule_state_runtime
 from vati.risk.contracts import StrategyState
 from vati.strategies import CapsuleRegistry
 from vati.strategies.capsule import CapsuleError
-from vati.validation.certificates import StrategyValidationCertificate
-from vati.validation.policy import ValidationStatistics
+from vati.validation.certificates import CertificateError, strategy_certificate_from_mapping
 
 PROMOTION_COMMANDS = ("capsule_promote",)
 PROMOTION_TOOL_SCHEMAS = {
@@ -73,44 +72,6 @@ class _PreverifiedAuthority:
         if act != self.act or subject != self.subject:
             raise OwnerAuthorityError("preverified authority scope mismatch")
         return self.verified
-
-
-def certificate_from_mapping(raw: Mapping[str, Any]) -> StrategyValidationCertificate:
-    try:
-        stats_raw = dict(raw["stats"])
-        stats = ValidationStatistics(**stats_raw)
-        cert = StrategyValidationCertificate(
-            certificate_id=str(raw["certificate_id"]),
-            strategy_id=str(raw["strategy_id"]),
-            strategy_version=str(raw["strategy_version"]),
-            capsule_hash=str(raw.get("capsule_hash") or ""),
-            data_manifest_hash=str(raw["data_manifest_hash"]),
-            evidence_refs=tuple(str(x) for x in raw.get("evidence_refs", ())),
-            feature_set_version=str(raw["feature_set_version"]),
-            cost_model_revision=str(raw["cost_model_revision"]),
-            stats=stats,
-            expectancy_R=float(raw["expectancy_R"]),
-            expectancy_lower_bound_R=float(raw["expectancy_lower_bound_R"]),
-            profit_factor=float(raw["profit_factor"]),
-            max_drawdown=float(raw["max_drawdown"]),
-            cost_stress_2x=str(raw.get("cost_stress_2x", "RED")),
-            latency_slippage_stress=str(raw.get("latency_slippage_stress", "RED")),
-            parameter_perturbation_stability=str(
-                raw.get("parameter_perturbation_stability", "RED")),
-            leakage_switch_result=str(raw.get("leakage_switch_result", "RED")),
-            feature_certificate_refs=tuple(
-                str(x) for x in raw.get("feature_certificate_refs", ())),
-            regime_breakdown=dict(raw.get("regime_breakdown") or {}),
-            cpcv_configuration=dict(raw.get("cpcv_configuration") or {}),
-            validation_policy_version=str(raw.get(
-                "validation_policy_version", stats.validation_policy_version)),
-            validation_hash=str(raw.get("validation_hash") or ""),
-        )
-    except (KeyError, TypeError, ValueError) as exc:
-        raise HTTPException(422, f"invalid strategy validation certificate: {exc}") from exc
-    if not cert.verify_seal():
-        raise HTTPException(422, "strategy validation certificate seal is invalid")
-    return cert
 
 
 def _authority_ref_already_used(ledger, ref: str) -> bool:
@@ -172,7 +133,10 @@ def build_strategy_handlers(settings: StrategyPromotionSettings):
         cert_raw = args.get("certificate")
         if not isinstance(cert_raw, dict):
             raise HTTPException(422, "certificate must be an object")
-        cert = certificate_from_mapping(cert_raw)
+        try:
+            cert = strategy_certificate_from_mapping(cert_raw)
+        except CertificateError as exc:
+            raise HTTPException(422, str(exc)) from exc
         if cert.strategy_id != strategy_id:
             raise HTTPException(
                 422, f"certificate is for {cert.strategy_id}, not {strategy_id}")
@@ -298,5 +262,4 @@ __all__ = [
     "PROMOTION_TOOL_SCHEMAS",
     "StrategyPromotionSettings",
     "build_strategy_handlers",
-    "certificate_from_mapping",
 ]
