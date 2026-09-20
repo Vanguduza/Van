@@ -134,7 +134,20 @@ async def test_status_and_tickets_read_from_chained_ledger(client, tmp_path):
     assert st["degraded"] == ["TRADING_LEDGER_UNAVAILABLE"]
     assert "old" in st["ledger_stale_reason"]
     tk = (await ac.get("/v1/trading/tickets")).json()["tickets"]
-    assert tk == [{"ticket": "ZSE-T-1", "status": "OPEN", "symbol": "DELTA", "qty": "1200", "issued_ms": 2_000, "trade_intent_id": "intent-1", "ticket_hash": tk[0]["ticket_hash"]}]
+    assert tk == [{
+        "ticket": "ZSE-T-1",
+        "status": "OPEN",
+        "symbol": "DELTA",
+        "qty": "1200",
+        "side": "BUY",
+        "limit_price": None,
+        "software_stop": None,
+        "position_id": None,
+        "exit_reason": None,
+        "issued_ms": 2_000,
+        "trade_intent_id": "intent-1",
+        "ticket_hash": tk[0]["ticket_hash"],
+    }]
 
 
 @pytest.mark.asyncio
