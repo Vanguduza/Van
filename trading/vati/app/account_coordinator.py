@@ -103,12 +103,12 @@ class AccountDecisionCoordinator:
         lease: Optional[AccountRuntimeLease] = None,
         intent_factory: Optional[IntentFactory] = None,
         #: Fresh account/position truth. Called again after every execution.
-        snapshot_fn: Callable[[], object] = lambda: None,
+        snapshot_fn: Callable[[CandidateOpportunity], object] = lambda _candidate: None,
         #: The deterministic sizer. Never bypassed, never pre-empted.
         risk_fn: Optional[Callable[[object, object], object]] = None,
         #: Sends an approved intent. The third argument is the strategy's
         #: explicit target tuple; the fourth is the currently held lease epoch.
-        execute_fn: Optional[Callable[[object, object, tuple[Decimal, ...], Optional[int]], object]] = None,
+        execute_fn: Optional[Callable[[CandidateOpportunity, object, object, tuple[Decimal, ...], Optional[int]], object]] = None,
         #: Recomputed after every fresh portfolio snapshot. Ranking may use a
         #: dependency estimate, but live admission must not reuse one after the
         #: previous candidate changed the book.
@@ -147,10 +147,10 @@ class AccountDecisionCoordinator:
 
     # -- helpers -----------------------------------------------------------
 
-    def _snapshot(self):
-        """Portfolio truth, re-read every time. The count is asserted by test."""
+    def _snapshot(self, candidate: CandidateOpportunity):
+        """Portfolio truth for this candidate, re-read every admission."""
         self.snapshot_calls += 1
-        return self.snapshot_fn()
+        return self.snapshot_fn(candidate)
 
     def _snapshot_hash(self, snapshot) -> str:
         if snapshot is None:
@@ -219,7 +219,7 @@ class AccountDecisionCoordinator:
                                                  "NOT_SELECTED", getattr(d, "reason", "")))
                 continue
             # Freshly re-read: the previous candidate may have changed the book.
-            snapshot = self._snapshot()
+            snapshot = self._snapshot(cand)
             snap_hash = self._snapshot_hash(snapshot)
             if not cand.fresh_at(now_ms):
                 self.pool.mark(cand.candidate_id, CandidateState.EXPIRED,
@@ -259,7 +259,7 @@ class AccountDecisionCoordinator:
                                                      snap_hash, decision))
                     continue
                 lease_epoch = self.lease.epoch if self.lease is not None else None
-                self.execute_fn(intent, decision, tuple(cand.targets), lease_epoch)
+                self.execute_fn(cand, intent, decision, tuple(cand.targets), lease_epoch)
                 self.pool.mark(cand.candidate_id, CandidateState.SELECTED,
                                reason=str(approved), now_ms=now_ms)
                 outcomes.append(AdmissionOutcome(cand.candidate_id, cand.symbol, d.rank,
