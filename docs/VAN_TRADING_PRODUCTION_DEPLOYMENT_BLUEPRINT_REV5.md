@@ -275,8 +275,14 @@ strategy-promotion artifacts already required by this blueprint.
    certificate-bound owner authority, rejects durable owner-authority replay across commander restart, writes the
    authoritative CAPSULE_STATE event before projecting the strategy JSON, and evaluates every later promotion
    against capsule state reconstructed from that ledger. A crash between event commit and file projection therefore
-   cannot lose the authorized promotion or allow a second token to fork the stale parent. Android UI/key-generation
-   for authoring a promotion is not claimed by this server-side join and must not be inferred from it.
+   cannot lose the authorized promotion or allow a second token to fork the stale parent. The owner-visible Android
+   Strategy Governance surface is part of this production join: it reads only current-lineage, policy-passing
+   promotion candidates; uses the same BIOMETRIC_STRONG Android Keystore P-256 key for a short-lived certificate-bound
+   van-oa1 owner grant and the gateway's separate one-time A4 CryptoObject challenge; and may report promotion complete
+   only after the 2xx response is bound to the exact strategy/target/validation hash, carries a durable CAPSULE_STATE
+   event hash and a new capsule hash, and authoritative candidate read-back no longer offers the old parent
+   certificate. Transport success, biometric UI success, or a raw commander receipt alone is not owner-visible
+   completion.
 
 4. **Certificate-backed feature admission.** A FeatureDefinition being registered does not make it production
    admissible. A certificate-required feature is unavailable to a capsule until FeatureRegistry re-evaluates a
