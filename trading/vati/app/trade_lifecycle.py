@@ -41,6 +41,7 @@ class AccountTradeLifecycle:
     protection: ProtectionManager
     contracts: Mapping[str, SymbolContract]
     engines_by_symbol: Mapping[str, object]
+    modelled_costs: Mapping[str, Decimal] = field(default_factory=dict)
     learning: Optional[LearningHooks] = None
     admission: AdmissionLedger = field(default_factory=AdmissionLedger)
     entries: dict[str, dict] = field(default_factory=dict)
@@ -53,6 +54,87 @@ class AccountTradeLifecycle:
             event_time_ms=now_ms, received_time_ms=now_ms,
             correlation_id=corr,
         ))
+
+    def recover_from_venue(self) -> tuple[tuple[str, ...], tuple[str, ...]]:
+        """Rebuild open entry/protection state from venue plus ledger provenance.
+
+        A venue trade_intent_id is not sufficient by itself. Recovery needs
+        the exact ORDER_COMMAND that created it; otherwise the position remains
+        unresolved and reconciliation blocks new risk.
+        """
+        commands: dict[str, tuple[dict, int]] = {}
+        for event in self.ledger.iter(EventKind.ORDER_COMMAND):
+            iid = str(event.payload.get("trade_intent_id", ""))
+            if iid:
+                commands[iid] = (dict(event.payload), event.event_time_ms)
+
+        restored: list[str] = []
+        unresolved: list[str] = []
+        for position in self.adapter.positions():
+            iid = str(position.trade_intent_id or "")
+            joined = commands.get(iid)
+            if not iid or joined is None:
+                unresolved.append(position.position_id)
+                continue
+            payload, opened_ms = joined
+            symbol = position.symbol.upper()
+            contract = self.contracts.get(symbol)
+            if contract is None:
+                unresolved.append(iid)
+                continue
+
+            raw_initial_stop = payload.get("protective_stop")
+            initial_stop = (
+                Decimal(str(raw_initial_stop))
+                if raw_initial_stop is not None else None
+            )
+            software_stop = str(payload.get("stop_mode", "")) == "SOFTWARE"
+            current_stop = position.stop_price or initial_stop
+            targets = tuple(
+                Decimal(str(v)) for v in (payload.get("targets") or ())
+            )
+
+            if position.loss_model in (
+                LossModel.STOP_DISTANCE, LossModel.ILLIQUID_EQUITY
+            ):
+                if initial_stop is None or current_stop is None:
+                    unresolved.append(iid)
+                    continue
+                try:
+                    self.protection.restore(
+                        position.position_id,
+                        symbol=symbol,
+                        direction=position.direction,
+                        entry=position.entry_price,
+                        initial_stop=initial_stop,
+                        current_stop=current_stop,
+                        target=targets[0] if targets else None,
+                        opened_ms=opened_ms,
+                        software_stop=software_stop,
+                    )
+                except Exception:
+                    unresolved.append(iid)
+                    continue
+
+            self.entries[iid] = {
+                "symbol": symbol,
+                "entry": position.entry_price,
+                "stop": current_stop,
+                "direction": position.direction,
+                "strategy_id": str(payload.get("strategy_id", "")),
+                "cost_pct": self.modelled_costs.get(
+                    symbol, contract.round_trip_cost_pct),
+                "decision_price": Decimal(str(
+                    payload.get("entry_price", position.entry_price))),
+                "quantity": position.quantity,
+                "software_stop": software_stop,
+                "broker_position_id": position.position_id,
+                "open": True,
+                "pending": False,
+                "recovered": True,
+            }
+            restored.append(iid)
+        return tuple(sorted(restored)), tuple(sorted(unresolved))
 
     def record_entry(
         self,
