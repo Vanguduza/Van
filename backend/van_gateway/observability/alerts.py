@@ -215,6 +215,13 @@ def _instrument_silent(signals: Signals, rule: AlertRule) -> Alert | None:
     Scoped to `MetricSource.GATEWAY`: a device metric is silent whenever no
     device has posted, which is a normal state for a gateway running with no
     paired device and would make this rule fire forever.
+
+    `silence_is_normal` is the same exemption one step in: the interactive browser
+    instruments are written by the Gateway, so the source is right, but none of them can
+    fire without a Browser Stream Host and a deployment may not have one. Without that
+    filter every gateway without a host would page its operator every fifteen minutes
+    about six instruments, with no action that clears it — and an alert that cannot be
+    cleared is how the ones that matter stop being read.
     """
     from van_gateway.observability.metrics import MetricSource
 
@@ -222,7 +229,7 @@ def _instrument_silent(signals: Signals, rule: AlertRule) -> Alert | None:
         return None
     silent = sorted(
         metric.name for metric in signals.registry.unobserved()
-        if metric.source is MetricSource.GATEWAY
+        if metric.source is MetricSource.GATEWAY and not metric.silence_is_normal
     )
     if not silent:
         return None

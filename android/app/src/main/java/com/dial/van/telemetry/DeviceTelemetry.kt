@@ -1,8 +1,7 @@
 package com.dial.van.telemetry
 
 /**
- * The six measurements only the device can take, and the buffer that gets them to the
- * gateway.
+ * The measurements only the device can take, and the buffer that gets them to the gateway.
  *
  * P3-OBS-002. The gateway's metric catalogue declares `van_wake_latency_ms`,
  * `van_asr_latency_ms`, `van_tts_latency_ms`, `van_aura_frame_time_ms`,
@@ -13,15 +12,22 @@ package com.dial.van.telemetry
  * silence is still silence: an owner whose aura is dropping frames or whose wake word takes
  * two seconds had no way for anyone to know.
  *
- * [DeviceMetric] is closed and its wire names mirror the gateway's `DEVICE_HISTOGRAMS` and
- * `DEVICE_GAUGES` exactly. That is not duplication for its own sake: the route refuses a
- * name it does not know, so a device that invents one is a device whose telemetry silently
- * disappears. `tests/contracts/test_device_telemetry_contract.py` parses this enum and the
- * gateway's catalogue and fails if they drift.
+ * Rev 1.5 §28.1 adds four more, all about the picture on the screen. Only the phone can
+ * measure them: the Gateway is not in the media path by design (§6.4), and the Stream Host
+ * can say what it sent but not what arrived. `browser_last_frame_age_ms` in particular is
+ * the number behind a frozen picture — the failure an owner cannot describe any other way,
+ * because from their side a stalled stream and a slow page look identical.
+ *
+ * [DeviceMetric] is closed and its wire names mirror the gateway's `DEVICE_HISTOGRAMS`,
+ * `DEVICE_GAUGES` and `DEVICE_COUNTERS` exactly. That is not duplication for its own
+ * sake: the route refuses a name it does not know, so a device that invents one is a
+ * device whose telemetry silently disappears.
+ * `tests/contracts/test_device_telemetry_contract.py` parses this enum and the gateway's
+ * catalogue and fails if they drift.
  *
  * Pure Kotlin, executed in `android/verification`.
  */
-enum class DeviceMetric(val wire: String, val surfaced: Boolean = false) {
+enum class DeviceMetric(val wire: String, val dimension: String = "") {
     /** "Hey Van" heard to VAN listening. */
     WAKE_LATENCY_MS("wake_latency_ms"),
 
@@ -32,18 +38,65 @@ enum class DeviceMetric(val wire: String, val surfaced: Boolean = false) {
     TTS_LATENCY_MS("tts_latency_ms"),
 
     /** Per-frame cost of drawing VAN, labelled by which surface drew it. */
-    AURA_FRAME_TIME_MS("aura_frame_time_ms", surfaced = true),
+    AURA_FRAME_TIME_MS("aura_frame_time_ms", dimension = "surface"),
 
     BATTERY_PERCENT("battery_percent"),
     MEMORY_USED_MB("memory_used_mb"),
+
+    /** Frames per second the decoder is actually producing, not what was sent. */
+    BROWSER_DECODE_FPS("browser_decode_fps"),
+
+    /** How old the picture on screen is. A frozen stream is a large number here. */
+    BROWSER_LAST_FRAME_AGE_MS("browser_last_frame_age_ms"),
+
+    /** Accumulates, which is why the gateway holds it as a counter rather than a gauge. */
+    BROWSER_FRAME_DROP_COUNT("browser_frame_drop_count"),
+
+    /** Each transport recovery the owner did not have to ask for. */
+    BROWSER_RECONNECT_COUNT("browser_reconnect_count"),
+
+    /**
+     * §20.16 — the gap the owner actually experienced during a path switch.
+     *
+     * Measured here because the Gateway cannot: it learns a path died when the resume
+     * arrives, which is after the gap is over. What the Gateway counts is that a
+     * failover happened and whether the route changed; how long it took is this.
+     */
+    SESSION_FAILOVER_MS("session_failover_ms"),
+
+    /**
+     * §20.15 — how much is waiting in store-and-forward, by what may be done with it.
+     *
+     * The queue is on the phone, so this is the only place it can be counted. Note what
+     * that means for anyone reading the series: the deepest outbox is the one that has
+     * not been reported, because a phone with no path cannot post telemetry either.
+     */
+    SESSION_OUTBOX_DEPTH("session_outbox_depth", dimension = "storability"),
     ;
+
+    /** Whether this metric's dimension is the aura surface, which has its own wire field. */
+    val surfaced: Boolean
+        get() = dimension == "surface"
 
     companion object {
         fun forWire(wire: String): DeviceMetric? = entries.firstOrNull { it.wire == wire }
     }
 }
 
-data class DeviceSample(val metric: DeviceMetric, val value: Double, val surface: String? = null)
+/**
+ * One measurement.
+ *
+ * `surface` and `dimension` are two slots for one idea, and the split is on the wire
+ * rather than in taste: `surface` is the field shipped devices already post for the aura,
+ * and folding it into a generic name here would have dropped the label from every phone
+ * that had not been updated. A metric declaring any other dimension uses `dimension`.
+ */
+data class DeviceSample(
+    val metric: DeviceMetric,
+    val value: Double,
+    val surface: String? = null,
+    val dimension: String? = null,
+)
 
 /**
  * A bounded buffer of samples waiting to be posted.
@@ -112,7 +165,12 @@ object DeviceTelemetry {
                 ?.takeIf { it.isNotBlank() && sample.metric.surfaced }
                 ?.let { ",\"surface\":${quote(it)}" }
                 .orEmpty()
-            "{\"name\":${quote(sample.metric.wire)},\"value\":${number(sample.value)}$surface}"
+            val dimension = sample.dimension
+                ?.takeIf { it.isNotBlank() && sample.metric.dimension.isNotEmpty() && !sample.metric.surfaced }
+                ?.let { ",\"dimension\":${quote(it)}" }
+                .orEmpty()
+            "{\"name\":${quote(sample.metric.wire)},\"value\":${number(sample.value)}" +
+                "$surface$dimension}"
         }
         return "{\"samples\":[$rows]}"
     }

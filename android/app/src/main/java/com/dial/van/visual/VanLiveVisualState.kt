@@ -186,16 +186,11 @@ object VanLiveVisualState {
         else -> false
     }
 
-    private fun priority(state: VanDurableState): Int = when (state) {
-        VanDurableState.ERROR, VanDurableState.URGENT -> 100
-        VanDurableState.OFFLINE -> 95
-        VanDurableState.DEGRADED, VanDurableState.WARNING -> 90
-        VanDurableState.WAITING_FOR_OWNER -> 80
-        VanDurableState.SPEAKING, VanDurableState.LISTENING -> 70
-        VanDurableState.WORKING, VanDurableState.SEARCHING, VanDurableState.DELEGATING -> 60
-        VanDurableState.THINKING, VanDurableState.CONNECTING, VanDurableState.ATTENTIVE -> 50
-        VanDurableState.SUCCESS -> 45
-        VanDurableState.WAITING -> 30
-        VanDurableState.IDLE, VanDurableState.SLEEPING -> 10
-    }
+    /**
+     * The ladder lives in [VanStatePriority] so the browser arbitration (Rev 1.5 §24) asks
+     * the same question this does. It was private here, which is why §24 would otherwise
+     * have needed a second copy — and two copies of a precedence ordering diverge on the
+     * state that matters.
+     */
+    private fun priority(state: VanDurableState): Int = VanStatePriority.of(state)
 }

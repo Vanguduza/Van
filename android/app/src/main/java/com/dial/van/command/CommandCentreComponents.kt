@@ -157,6 +157,9 @@ internal fun statusColor(status: VanCommandStatus): Color = when (status) {
     VanCommandStatus.SUBMITTING,
     VanCommandStatus.ACCEPTED,
     VanCommandStatus.IN_FLIGHT,
+    // Queued is cyan rather than amber: nothing is wrong and nothing is being asked of
+    // the owner. It is work in hand, waiting on a network rather than on them.
+    VanCommandStatus.QUEUED,
     -> Color(VanGlassTokens.EDGE_CYAN)
 }
 

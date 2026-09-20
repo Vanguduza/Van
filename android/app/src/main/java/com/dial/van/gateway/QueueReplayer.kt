@@ -155,8 +155,20 @@ class QueueReplayer(
  */
 object ReplayDispatchPolicy {
 
-    /** Kinds that are captured data rather than owner intent, and may never be dispatched. */
-    private val NEVER_DISPATCHABLE = setOf(CommandKind.CONTEXT_INGEST.name)
+    /**
+     * Kinds that are not owner intent for *this* path, and may never be dispatched.
+     *
+     * `CONTEXT_INGEST` is captured data. `SESSION_ENVELOPE` is the other reason a kind
+     * lands here: it is genuinely the owner's work, and it is already addressed to the
+     * durable session (§20.14). Replaying it through `POST /v1/commands` would be a
+     * second delivery of one instruction down a path that cannot read its envelope —
+     * the same shape as P0-SEC-002, which is why this is a named refusal rather than a
+     * reliance on `commandTextOrNull` happening to return null.
+     */
+    private val NEVER_DISPATCHABLE = setOf(
+        CommandKind.CONTEXT_INGEST.name,
+        CommandKind.SESSION_ENVELOPE.name,
+    )
 
     /** True only for queue kinds that represent an owner-authored command. */
     fun mayDispatch(kind: String): Boolean = kind !in NEVER_DISPATCHABLE
