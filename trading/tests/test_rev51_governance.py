@@ -261,3 +261,47 @@ def test_budget_decisions_are_ledgered_against_the_context():
     led = Ledger(":memory:")
     _budget(ledger=led).check(now_ms=1, context_hash="ctx-b")
     assert led.count(EventKind.COGNITIVE_BUDGET) == 1
+
+
+
+def test_qualification_runtime_joins_exam_and_blind_review_without_promotion():
+    from vati.cognition.contracts import ModelRole, normalise
+    from vati.cognition.qualification import CognitionQualificationRuntime
+    from vati.core.events import EventKind
+    from vati.core.ledger import Ledger
+
+    ledger = Ledger(":memory:")
+    q = CognitionQualificationRuntime(ledger=ledger)
+
+    def answer(context):
+        situation = str(context.get("situation", ""))
+        if "certified strategy" in situation:
+            return {"verdict": "CONCUR", "risk_multiplier": "1",
+                    "confidence": "0.5", "reason_codes": []}
+        reason = (
+            "EVENT_PROXIMITY" if "FOMC" in situation
+            else "CONTEXT_INCOMPLETE" if "without a risk_state" in situation
+            else "CORRELATION_CROWDED" if "correlated" in situation
+            else "EVIDENCE_THIN"
+        )
+        return {"verdict": "ABSTAIN", "risk_multiplier": "0",
+                "confidence": "0.5", "reason_codes": [reason]}
+
+    result = q.run_baseline_exam(
+        answer, model_id="candidate", now_ms=100)
+    assert result.paper_id == "rev51-baseline"
+    assert ledger.count(EventKind.DECISION_EXAM) == 1
+
+    assessment = normalise(
+        {"verdict": "FLAG", "risk_multiplier": "1", "confidence": "0.4",
+         "reason_codes": ["EVIDENCE_THIN"], "narrative": "thin sample"},
+        model_id="candidate", role=ModelRole.PRIMARY,
+        context_hash="ctx", now_ms=100)
+    review = q.blind_review(
+        assessment, {"sample": 4}, reviewer_id="reviewer",
+        review_fn=lambda _packet: {
+            "verdict": "CONCUR", "reason_codes": [], "note": "checked"},
+        now_ms=101)
+    assert review.reviewer_id == "reviewer"
+    assert ledger.count(EventKind.BLIND_REVIEW) == 1
+    assert not hasattr(result, "promote")

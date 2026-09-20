@@ -169,6 +169,87 @@ def evaluate_repository(root: Path = ROOT) -> dict[str, Any]:
         {"missing": sorted(required_invariants - observed_invariants)},
     )
 
+    account_source = (ROOT / "trading/vati/app/account_service.py").read_text(
+        encoding="utf-8")
+    cognition_source = (ROOT / "trading/vati/cognition/runtime.py").read_text(
+        encoding="utf-8")
+    lifecycle_source = (ROOT / "trading/vati/app/trade_lifecycle.py").read_text(
+        encoding="utf-8")
+    event_source = (ROOT / "trading/vati/events/runtime.py").read_text(
+        encoding="utf-8")
+    evolution_source = (ROOT / "trading/vati/evolution/runtime.py").read_text(
+        encoding="utf-8")
+    cognition_hooks = {
+        "persistent_runtime": "ShadowCognitionRuntime(" in account_source,
+        "post_risk_wake": "self.cognition.wake(" in account_source,
+        "world_projection": "self.world.apply(event)" in cognition_source,
+        "context_compile": "compile_decision_context(" in cognition_source,
+        "result_normalise": "normalise(" in cognition_source,
+        "shadow_translate": "ActionTranslator(mode=Mode.SHADOW" in cognition_source,
+        "shadow_book": "self.shadow.record(" in cognition_source,
+        "performance_after_outcome": "self.performance.compile_all(" in cognition_source,
+        "handoff": "self.handoffs.record(" in cognition_source,
+    }
+    gates["cognition_runtime_hooks"] = _gate(
+        all(cognition_hooks.values()), cognition_hooks)
+
+    lifecycle_hooks = {
+        "family": "FamilyRegistry(" in lifecycle_source,
+        "health": "TradeHealthEngine(" in lifecycle_source,
+        "envelope": "EnvelopeCalculator(" in lifecycle_source,
+        "preservation": "self.preservation.evaluate(" in lifecycle_source,
+        "router_preservation": "self.router.apply_preservation(" in lifecycle_source,
+        "shadow_expansion": "self.expansion.evaluate(" in lifecycle_source,
+        "attribution": "self.attribution.attribute(" in lifecycle_source,
+        "risk_block": "preservation_blocks_new_risk" in account_source,
+    }
+    gates["post_entry_runtime_hooks"] = _gate(
+        all(lifecycle_hooks.values()), lifecycle_hooks)
+
+    event_hooks = {
+        "calendar_consumer": "self._calendar()" in event_source,
+        "normalise": "self.normaliser.normalise(" in event_source,
+        "surprise": "self.reactions.score(" in event_source,
+        "horizon_callback": "self.reactions.record_mark(" in event_source,
+        "episode_close": "self.episodes.close_due(" in event_source,
+        "service_feed": "self.event_research.on_mark(" in account_source,
+    }
+    gates["event_runtime_hooks"] = _gate(
+        all(event_hooks.values()), event_hooks)
+
+    evolution_hooks = {
+        "mission_orchestration": "self.agents.run(" in evolution_source,
+        "synthesis": "self.synthesiser.synthesise(" in evolution_source,
+        "yield": "self.yield_ledger.record(" in evolution_source,
+        "proposal": "self.proposals.propose(" in evolution_source,
+        "admission": "self.admission.assess(" in evolution_source,
+        "growth": "self.growth.evaluate(" in evolution_source,
+        "archive": "self.archive.append(" in evolution_source,
+    }
+    gates["offline_evolution_hooks"] = _gate(
+        all(evolution_hooks.values()), evolution_hooks)
+
+    qualification_path = ROOT / "trading/vati/cognition/qualification.py"
+    qualification_source = (
+        qualification_path.read_text(encoding="utf-8")
+        if qualification_path.is_file() else "")
+    qualification_hooks = {
+        "decision_exam": "run_exam(" in qualification_source,
+        "blind_review": "BlindReviewer(" in qualification_source,
+    }
+    gates["cognition_qualification_hooks"] = _gate(
+        all(qualification_hooks.values()), qualification_hooks)
+
+    owner_files = (
+        ROOT / "trading/vati/readmodels/cognition.py",
+        ROOT / "backend/van_gateway/trading/cognition.py",
+        ROOT / "android/app/src/main/java/com/dial/van/trading/ui/CognitionScreens.kt",
+    )
+    gates["owner_surface_hooks"] = _gate(
+        all(p.is_file() for p in owner_files),
+        [p.relative_to(ROOT).as_posix() for p in owner_files if not p.is_file()],
+    )
+
     repository_ok = all(row["ok"] for row in gates.values())
 
     # External states are intentionally evidence-bound.  The files are *not* generated

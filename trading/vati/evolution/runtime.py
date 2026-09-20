@@ -21,6 +21,7 @@ from vati.research.agents import InvokeResearch, ResearchAgentFactory
 from vati.research.missions import MissionLedger, MissionState, PacketState
 from vati.research.synthesis import ResearchSynthesiser, ResearchSynthesis
 from vati.research.yield_ledger import ResearchYieldLedger, ResearchYieldRecord
+from vati.risk.growth import GrowthOptimalityDiagnostic
 
 ProposalBuilder = Callable[[ResearchSynthesis], Iterable[SystemImprovementProposal]]
 GateProvider = Callable[[SystemImprovementProposal], Optional[Mapping[str, bool]]]
@@ -61,6 +62,7 @@ class OfflineEvolutionRuntime:
         self.proposals = SystemImprovementProposalEngine(ledger=ledger)
         self.admission = ProposalAdmissionControl(ledger=ledger)
         self.archive = EvolutionArchive(ledger=ledger)
+        self.growth = GrowthOptimalityDiagnostic(ledger=ledger)
 
     def refresh(self) -> None:
         self.missions.rebuild(self.ledger.iter())
@@ -181,6 +183,10 @@ class OfflineEvolutionRuntime:
             proposal_ids=tuple(proposal_ids),
             admission_states=tuple(admission_states),
         )
+
+    def run_growth_diagnostic(self, **explicit_inputs):
+        """Run periodic risk research only from explicitly supplied assumptions/data."""
+        return self.growth.evaluate(**explicit_inputs)
 
     def archive_candidate(self, record: EvolutionRecord) -> EvolutionRecord:
         """Archive a separately qualified candidate. Never manufactures one."""

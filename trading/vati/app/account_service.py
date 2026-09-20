@@ -51,6 +51,7 @@ from vati.intelligence.regimes import RegimeEngine
 from vati.market_data.calendars import FX_CALENDAR
 from vati.market_data.feeds.lake import TIMEFRAMES_MS, BarLake
 from vati.observability import metrics
+from vati.observability.rejection_analytics import RejectionAnalyticsEngine
 from vati.learning.hooks import LearningHooks
 from vati.learning.replay import restore_learning_runtime
 from vati.observability.enhancement_metrics import (
@@ -120,6 +121,7 @@ class AccountCoordinatorService:
         self.learning: Optional[LearningHooks] = None
         self.cognition: Optional[ShadowCognitionRuntime] = None
         self.event_research: Optional[EventResearchRuntime] = None
+        self.rejection_analytics: Optional[RejectionAnalyticsEngine] = None
         self.lifecycle: Optional[AccountTradeLifecycle] = None
         self.account = None
         self.specs: dict[str, LiveInstrumentSpec] = {}
@@ -297,6 +299,7 @@ class AccountCoordinatorService:
         ]
         self.event_research = EventResearchRuntime(
             EventRegistry(instruments=exposures), ledger=self._ledger)
+        self.rejection_analytics = RejectionAnalyticsEngine(ledger=self._ledger)
 
         self.learning = LearningHooks(
             environment=ENVIRONMENT_FOR_MODE[mandate.mode],
@@ -948,6 +951,8 @@ class AccountCoordinatorService:
                 self.last_bar_end_ms.get(symbol, 0), bars[-1].end_ms)
         self.cycles += 1
         self._account_snapshot(now)
+        if self.rejection_analytics is not None:
+            self.rejection_analytics.compile_ledger(self._ledger, now_ms=now)
         self._heartbeat("RUNNING", {
             "allocation_epoch_id": result.allocation_epoch_id,
             "ranking": list(result.ranking),

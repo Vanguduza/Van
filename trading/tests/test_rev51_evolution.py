@@ -151,3 +151,26 @@ def test_admission_and_archive_events_are_ledgered():
     assert ledger.count(EventKind.IMPROVEMENT_PROPOSAL) == 1
     assert ledger.count(EventKind.PROPOSAL_ADMISSION) == 1
     assert ledger.count(EventKind.EVOLUTION_CANDIDATE) == 1
+
+
+
+def test_rejection_analytics_can_refresh_from_the_durable_ledger():
+    from vati.core.events import EventKind, make_event
+    from vati.core.ledger import Ledger
+    from vati.observability.rejection_analytics import RejectionAnalyticsEngine
+
+    ledger = Ledger(":memory:")
+    ledger.append(make_event(
+        EventKind.RISK_DECISION, "test",
+        {"decision": {"decision": "REJECTED", "reason_code": "PORTFOLIO_HEAT"}},
+        event_time_ms=1, received_time_ms=1))
+    ledger.append(make_event(
+        EventKind.PRETRADE_CONTROL, "test",
+        {"verdict": "REJECT", "reason_code": "ROUTE_UNRESOLVED"},
+        event_time_ms=2, received_time_ms=2))
+    out = RejectionAnalyticsEngine(ledger=ledger).compile_ledger(
+        ledger, now_ms=3)
+    assert out.total == 2
+    assert dict(out.by_category)["capacity_risk_heat"] == 1
+    assert dict(out.by_category)["route_failure"] == 1
+    assert ledger.count(EventKind.REJECTION_ANALYTICS) == 1

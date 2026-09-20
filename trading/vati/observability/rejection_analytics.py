@@ -65,6 +65,22 @@ class RejectionAnalyticsEngine:
         self._ledger = ledger
         self._producer = producer
 
+    def compile_ledger(self, ledger, *, now_ms: int) -> RejectionAnalytics:
+        """Aggregate durable deterministic refusals from the trading ledger."""
+        reasons: list[str] = []
+        for event in ledger.iter(EventKind.RISK_DECISION):
+            decision = (event.payload or {}).get("decision") or {}
+            if str(decision.get("decision") or "") == "REJECTED":
+                reasons.append(str(decision.get("reason_code") or "RISK_REJECTED"))
+        for event in ledger.iter(EventKind.PRETRADE_CONTROL):
+            payload = event.payload or {}
+            if str(payload.get("verdict") or "") == "REJECT":
+                reasons.append(str(payload.get("reason_code") or "PRETRADE_REJECTED"))
+        for event in ledger.iter(EventKind.SESSION):
+            if (event.payload or {}).get("router_refused"):
+                reasons.append("ROUTER_REFUSED")
+        return self.compile(reasons, now_ms=now_ms)
+
     def compile(self, reasons: Iterable[str], *, now_ms: int) -> RejectionAnalytics:
         reason_counts = Counter(str(r) for r in reasons if str(r))
         category_counts = Counter()
