@@ -119,13 +119,12 @@ def build_strategy_handlers(settings: StrategyPromotionSettings):
         strategy_id = str(args.get("strategy_id") or "").strip()
         target_raw = str(args.get("target_state") or "").strip()
         token = str(args.get("owner_signature_ref") or "").strip()
-        requested_approved_at = int(args.get("approved_at_unix") or 0)
+        # approved_at_unix is presentation metadata from the gateway, not a
+        # trusted clock. Promotion freshness is always evaluated against this
+        # commander's current time; the gateway separately verifies its signed
+        # device-action timestamp.
+        _requested_approved_at = int(args.get("approved_at_unix") or 0)
         now_unix = int(time.time())
-        if requested_approved_at and abs(requested_approved_at - now_unix) > 60:
-            raise HTTPException(
-                422,
-                "approved_at_unix must describe the current owner action (maximum 60s clock skew)",
-            )
         approved_at = now_unix
         evidence_refs = [
             str(x) for x in (args.get("evidence_refs") or ()) if str(x).strip()
