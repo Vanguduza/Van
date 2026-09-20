@@ -644,7 +644,7 @@ invariants:
   - subject: trading.account_runtime_fence
     owner: docs/VAN_TRADING_PRODUCTION_DEPLOYMENT_BLUEPRINT_REV5.md
     statement: >-
-      Multi-instrument order submission is fenced by the current epoch of a transactional PostgreSQL account lease, and a missing or stale epoch is refused at the router boundary.
+      Multi-instrument order submission requires a current transactional PostgreSQL account lease re-read from shared authority immediately before submission; store loss, holder takeover, stale epoch or insufficient remaining validity all refuse new risk at the router boundary.
     implemented_by:
       - trading/vati/app/account_lease.py
       - trading/vati/app/account_service.py
@@ -673,3 +673,28 @@ invariants:
       - trading/vati/app/candidate_pool.py
     tested_by:
       - trading/tests/test_account_coordinator.py
+
+  - subject: trading.restart_lifecycle_reconstruction
+    owner: docs/VAN_TRADING_PRODUCTION_DEPLOYMENT_BLUEPRINT_REV5.md
+    statement: >-
+      After restart, an open venue position is reconstructed only when its trade_intent_id joins to the durable VATI ORDER_COMMAND that created it; restored protection may never be wider than the original command, and unresolved state blocks new risk through reconciliation.
+    implemented_by:
+      - trading/vati/app/trade_lifecycle.py
+      - trading/vati/app/account_service.py
+      - trading/vati/execution/protection.py
+      - trading/vati/execution/reconciliation.py
+    tested_by:
+      - trading/tests/test_account_trade_lifecycle.py
+      - trading/tests/test_execution.py
+
+  - subject: trading.owner_ticket_downstream_evidence
+    owner: docs/VAN_TRADING_PRODUCTION_DEPLOYMENT_BLUEPRINT_REV5.md
+    statement: >-
+      Signed owner-ticket confirmations are consumed into runtime truth before new risk; a durable execution receipt cannot suppress missing TCA or trade-review evidence, and restart replay repairs missing downstream evidence exactly once without duplicating evidence that is already durable.
+    implemented_by:
+      - trading/vati/app/account_service.py
+      - trading/vati/app/trade_lifecycle.py
+      - trading/vati/execution/zse_ticket.py
+    tested_by:
+      - trading/tests/test_account_trade_lifecycle.py
+      - trading/tests/test_execution.py
