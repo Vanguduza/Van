@@ -1,5 +1,6 @@
 from __future__ import annotations
 
+from contextlib import contextmanager
 from decimal import Decimal
 
 import pytest
@@ -28,6 +29,52 @@ def approved(mandate, eurusd, **it):
 def router(adapter, ledger=None, ks=None):
     led = ledger or Ledger()
     return ExecutionRouter(ledger=led, adapters={adapter.venue: adapter}, kill_switch=ks or KillSwitch(), protection=ProtectionManager()), led
+
+
+def test_router_holds_submission_guard_while_adapter_is_called(mandate, eurusd):
+    active = {"guard": False}
+    observed = []
+
+    @contextmanager
+    def submission_guard(epoch):
+        assert epoch == 7
+        active["guard"] = True
+        try:
+            yield True
+        finally:
+            active["guard"] = False
+
+    class ProbePaper(PaperAdapter):
+        def submit(self, cmd, *, now_ms):
+            observed.append((
+                active["guard"],
+                cmd.lease_epoch,
+                cmd.idempotency_key,
+            ))
+            assert active["guard"], "adapter.submit escaped the lease submission guard"
+            return super().submit(cmd, now_ms=now_ms)
+
+    m = TradingMandate.from_mapping(
+        mandate_dict(venue="paper", mode="DEMO_TRADER"))
+    contract = SymbolContract(**{**eurusd.__dict__, "venue": "paper"})
+    i, d = approved(
+        m, contract, venue="paper", strategy_state=StrategyState.DEMO)
+    adapter = ProbePaper()
+    ledger = Ledger()
+    r = ExecutionRouter(
+        ledger=ledger,
+        adapters={"paper": adapter},
+        kill_switch=KillSwitch(),
+        protection=ProtectionManager(),
+        lease_fence=lambda epoch: epoch == 7,
+        lease_submission_guard=submission_guard,
+    )
+    rec = r.execute(i, d, m, now_ms=NOW, lease_epoch=7)
+    assert rec.status == "FILLED"
+    assert observed == [(True, 7, i.idempotency_key)]
+    assert not active["guard"]
+    assert ledger.count(EventKind.ORDER_COMMAND) == 1
+    assert ledger.count(EventKind.EXECUTION_RECEIPT) == 1
 
 
 def test_router_happy_path_paper(mandate, eurusd):
