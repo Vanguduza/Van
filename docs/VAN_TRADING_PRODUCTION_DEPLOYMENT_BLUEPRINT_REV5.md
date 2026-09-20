@@ -137,8 +137,7 @@ append-only at the database, not only by convention.
 
 ## Part F — Session service (NFP/Event Engine, Market Brain, Risk Authority, Router, adapters)
 
-`python -m vati serve --config /opt/van-trading/config/sessions/<alias>.json` runs one `DecisionCycle` per account
-alias: startup reconciliation, then per closed bar: MARKET_STATE → OPPORTUNITY → RISK AUTHORITY → ROUTER → PROTECT
+python -m vati serve --config /opt/van-trading/config/sessions/<alias>.json keeps the proven single-symbol DecisionCycle compatibility path. When the same signed account configuration names additional instruments, vati serve instead constructs one AccountCoordinatorService for the account alias so fresh candidates from all configured symbols compete before Risk Authority admission. The account runtime requires the shared PostgreSQL VATI authority store and a cross-host lease; it never falls back to process-local arbitration. The single-symbol path performs startup reconciliation, then per closed bar: MARKET_STATE → OPPORTUNITY → RISK AUTHORITY → ROUTER → PROTECT
 → RECONCILE → TCA → REVIEW → LEARN, plus `ACCOUNT_SNAPSHOT` and a heartbeat file each loop. The Tier-1 calendar
 (`vati.intelligence.calendar_feed`) loads an owner or vendor file; an event is live-eligible only with two independent
 sources, otherwise the matrix fails closed (whole pre-window is blackout). An `OWNER_HALT` written by the gateway or
@@ -247,3 +246,51 @@ on the success path). Both are fixed here; the tool list Hermes sees is the orig
 6. Android build on a workstation with the SDK; device check of the Trading Command Center and the overlay panel.
 7. Everything Rev 4 Part M already listed: real-data validation, Nautilus donor gate, curriculum, ZSE broker facts,
    independent security review, owner-signed LIMITED_LIVE.
+
+---
+
+## Part L — PR #49 closure authority addendum (owner-directed repository repair, 2026-09-20)
+
+This addendum records the repository-level invariants the owner directed to be repaired during the PR #49 audit.
+It does not mint live trading authority. Runtime authority still comes from the signed mandate and signed
+strategy-promotion artifacts already required by this blueprint.
+
+1. **Account-level allocation authority.** In a multi-instrument session, symbol-local evaluators may only produce
+   CandidateOpportunity objects. Exactly one AccountDecisionCoordinator per account alias selects the order in
+   which candidates reach the Risk Authority. It re-reads a candidate-specific RiskSnapshot before every
+   admission. A missing Risk Authority or execution path is a refusal, never a successful selection.
+
+2. **Risk-ceiling precedence.** Candidate conversion to TradeIntent requests no more than the capsule's admitted
+   risk_limits.max_risk_per_trade and no more than the strategy budget in the signed mandate. Strategy budgets can
+   narrow the existing capsule/mandate law automatically; raising a live ceiling requires a newly signed mandate
+   and can never be applied by CapitalBudgetProposal itself.
+
+3. **Evidence-bound strategy promotion.** For certificate-gated promotion states, the owner authority statement
+   binds strategy_id, target state and the exact StrategyValidationCertificate.validation_hash. A token for one
+   certificate cannot authorize another certificate. A strategy certificate must name immutable evidence refs and
+   a data-manifest hash; production code provides no synthetic factory for a passing certificate.
+
+4. **Certificate-backed feature admission.** A FeatureDefinition being registered does not make it production
+   admissible. A certificate-required feature is unavailable to a capsule until FeatureRegistry re-evaluates a
+   sealed FeatureValidationCertificate and records a PRODUCTION_ADMITTED certificate hash. Per-pass feature
+   contracts also enforce venue class, timeframe and minimum history.
+
+5. **Execution-policy boundary.** ExecutionPolicyEngine decides only how an already-approved trade is attempted.
+   ExecutionRouter independently verifies the sealed policy decision, refuses DO_NOT_EXECUTE, and applies the
+   selected template's bounded entry type and maximum slippage immediately before order submission.
+
+6. **Cross-host account fence.** Multi-instrument production coordination uses a transactional PostgreSQL
+   account_runtime_leases row. The current lease epoch travels to ExecutionRouter; a router configured with a
+   lease fence refuses a missing or stale epoch before creating an OrderCommand.
+
+7. **MTF adoption boundary.** The timeframe-contract migration is provenance/schema adoption, not silent strategy
+   mutation. The account runtime builds the required multi-timeframe state as shadow evidence from the existing
+   BarLake and exposes completeness/hash truth. Those H4/H1/M15/M5 roles cannot alter a live strategy decision until
+   a separately validated and owner-signed capsule revision explicitly adopts the MTF behavior.
+
+8. **Candidate replay law.** Candidate IDs are deterministic across polling/restart. Re-admitting the same
+   candidate ID and hash preserves its existing lifecycle state; a previously selected/rejected/expired candidate
+   cannot become ACTIVE merely because the source bar was evaluated again.
+
+The PR #48 anti-gap rule applies to all eight: a test or helper object is not a production join, and a repository
+wiring gap may not be labelled an external runtime blocker.
