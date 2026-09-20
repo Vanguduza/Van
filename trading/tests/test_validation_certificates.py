@@ -3,6 +3,7 @@
 from __future__ import annotations
 
 import dataclasses
+from decimal import Decimal
 
 import pytest
 
@@ -20,6 +21,10 @@ from vati.validation.certificates import (
     evaluate_strategy_certificate,
 )
 from conftest import passing_certificate
+from vati.validation.builder import (
+    build_feature_validation_certificate,
+    build_strategy_validation_certificate,
+)
 
 REG = "trading/strategies/registry"
 
@@ -154,7 +159,8 @@ def _feature_cert(**kw) -> FeatureValidationCertificate:
         instruments=("EURUSD",), regimes=("BULL", "BEAR"), timeframes=("H1",),
         redundancy_correlation=0.2, incremental_expectancy_delta=0.08,
         incremental_dsr_probability=0.98, incremental_pbo_probability=0.04,
-        walk_forward_delta=0.05, leakage_result=GREEN,
+        walk_forward_delta=0.05, data_manifest_hash="manifest:feature-test",
+        evidence_refs=("artifact:feature-validation",), leakage_result=GREEN,
         regime_stability={"BULL": 0.1, "BEAR": 0.05},
     )
     base.update(kw)
@@ -200,3 +206,64 @@ def test_tampered_feature_certificate_is_rejected():
     cert = dataclasses.replace(_feature_cert(), incremental_expectancy_delta=9.0)
     status, reasons = classify_feature_certificate(cert)
     assert status == FEATURE_REJECTED_UNSTABLE and "certificate_seal_invalid" in reasons
+
+
+def test_strategy_certificate_builder_derives_statistics_and_binds_provenance():
+    pnls = [Decimal(x) for x in ("10", "-4", "12", "8", "-3", "9", "7", "-2")]
+    rs = [Decimal(x) for x in ("1", "-0.4", "1.2", "0.8", "-0.3", "0.9", "0.7", "-0.2")]
+    trials = [
+        [0.2, -0.1, 0.3, 0.1, -0.05, 0.2, 0.15, -0.02],
+        [0.1, -0.2, 0.25, 0.05, -0.1, 0.1, 0.12, -0.08],
+        [0.05, -0.1, 0.1, 0.02, -0.03, 0.08, 0.07, -0.04],
+        [0.15, -0.05, 0.2, 0.08, -0.02, 0.14, 0.11, -0.01],
+    ]
+    cert = build_strategy_validation_certificate(
+        strategy_id="S", strategy_version="1.0", capsule_hash="cap",
+        data_manifest_hash="manifest:1", evidence_refs=("wf:1", "cpcv:1"),
+        feature_set_version="features/1", cost_model_revision="cost/1",
+        pnls=pnls, r_multiples=rs, start_equity=Decimal("1000"),
+        trial_returns_matrix=trials, walk_forward_windows=4,
+        cost_stress_2x=GREEN, latency_slippage_stress=GREEN,
+        parameter_perturbation_stability=GREEN, leakage_switch_result=GREEN,
+    )
+    assert cert.verify_seal()
+    assert cert.evidence_refs == ("wf:1", "cpcv:1")
+    assert 0 <= cert.stats.dsr_probability <= 1
+    assert 0 <= cert.stats.pbo_probability <= 1
+
+
+def test_feature_certificate_builder_computes_incremental_evidence():
+    baseline = [0.01, -0.01, 0.02, 0.0, 0.01, -0.005, 0.015, 0.0]
+    candidate = [0.03, 0.0, 0.04, 0.01, 0.025, 0.0, 0.03, 0.01]
+    trial_deltas = [
+        [0.02, 0.01, 0.02, 0.01, 0.015, 0.005, 0.015, 0.01],
+        [0.01, 0.0, 0.015, 0.0, 0.01, 0.0, 0.01, 0.005],
+        [0.015, 0.005, 0.01, 0.005, 0.01, 0.005, 0.015, 0.005],
+        [0.02, 0.0, 0.02, 0.01, 0.015, 0.0, 0.02, 0.01],
+    ]
+    cert = build_feature_validation_certificate(
+        feature_id="adx", feature_version="1.0.0",
+        baseline_feature_set_hash="base", candidate_feature_set_hash="cand",
+        data_manifest_hash="manifest:f", evidence_refs=("experiment:f",),
+        instruments=("EURUSD",), regimes=("BULL",), timeframes=("H1",),
+        baseline_returns=baseline, candidate_returns=candidate,
+        trial_delta_matrix=trial_deltas,
+        baseline_feature_series=([1,2,3,4,5,6,7,8],),
+        candidate_feature_series=[8,6,7,5,4,3,2,1],
+        walk_forward_baseline=(0.01, 0.02, 0.01),
+        walk_forward_candidate=(0.03, 0.04, 0.025),
+        regime_stability={"BULL": 0.02},
+        leakage_result=GREEN,
+    )
+    assert cert.verify_seal()
+    assert cert.data_manifest_hash == "manifest:f"
+    assert cert.evidence_refs == ("experiment:f",)
+    assert cert.incremental_expectancy_delta > 0
+
+
+def test_feature_certificate_without_provenance_is_rejected():
+    cert = dataclasses.replace(
+        _feature_cert(), data_manifest_hash="", evidence_refs=()).sealed()
+    status, reasons = classify_feature_certificate(cert)
+    assert status == FEATURE_REJECTED_UNSTABLE
+    assert "no_data_manifest" in reasons
