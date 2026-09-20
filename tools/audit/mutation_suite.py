@@ -13,6 +13,24 @@ ALL = [
  # observable at the service level, where a router can be built with a kind unwired.
  # With all four delegates present in production the order of those two lines changes
  # nothing anybody can see, and an unobservable rule is one a later change removes.
+ # --- checkpoint 39: a durable write must not run on the thread that draws ----------
+ (["../tests/contracts/test_encrypted_queue_writes_are_off_the_main_thread.py"], [
+   ("../android/app/src/main/java/com/dial/van/queue/EncryptedCommandQueue.kt",
+    ".commit()", ".apply()",
+    "C39 the outbox says saved before the bytes are down"),
+   ("../android/app/src/main/java/com/dial/van/notification/VanNotificationListenerService.kt",
+    "        app.appScope.launch(Dispatchers.IO) {\n", "",
+    "C39 a burst of notifications writes to an encrypted disk on the thread that draws"),
+   # Kept on the Python side rather than the Kotlin one: `EncryptedCommandQueue` needs a
+   # Keystore and cannot be executed here, so the property is checked by shape. A first
+   # version put this in the Gradle group and it survived — nothing there runs the file.
+   ("../android/app/src/main/java/com/dial/van/queue/EncryptedCommandQueue.kt",
+    "        val editor = indexPrefs.edit()\n"
+    "        for (id in listIds()) editor.remove(blobKey(id))\n"
+    "        editor.putString(KEY_INDEX, \"\").commit()",
+    "        for (id in listIds()) remove(id)",
+    "C39 discarding the queue is one synchronous write per command, from a button"),
+ ]),
  # --- checkpoint 38: two languages, one question about the same bytes ---------------
  (["../tests/contracts/test_stored_command_is_deliverable.py"], [
    ("../android/app/src/main/java/com/dial/van/gateway/VanGatewayClient.kt",
@@ -1117,6 +1135,7 @@ ROOT_LEVEL = [
 #: Checkpoint 14, Kotlin half. Run by Gradle in android/verification rather than by pytest,
 #: because that harness is the only thing in this repository that can execute Kotlin at all.
 KOTLIN = [
+ # --- checkpoint 39: the durable write, and where it runs ---------------------------
  # --- checkpoint 38: the stored command has to be one the Gateway can accept ---------
  (f"{APP_KT}/session/OfflineSubmission.kt",
   "        if (noStaleReplay) {",

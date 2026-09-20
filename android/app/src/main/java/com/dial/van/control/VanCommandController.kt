@@ -13,6 +13,7 @@ import com.dial.van.voice.VoiceAuthorityDecision
 import com.dial.van.status.commandStatusFor
 import com.dial.van.visual.VanLiveVisualState
 import kotlinx.coroutines.CoroutineScope
+import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
@@ -219,7 +220,9 @@ class VanCommandController(
         // A4 requests are allowed to reach the gateway only to obtain a one-time
         // cryptographic challenge. They cannot execute until approvePendingA4()
         // supplies a biometric-bound signature over that challenge.
-        scope.launch {
+        // `Dispatchers.IO` because the failure branch writes to the encrypted outbox with
+        // a synchronous `commit()`, and the scope's default pool is sized for CPU work.
+        scope.launch(Dispatchers.IO) {
             try {
                 val response = gateway.dispatchCommand(
                     text = normalized,

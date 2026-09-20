@@ -21,7 +21,7 @@
   ],
   "counts": {
     "P0": 28,
-    "P1": 49,
+    "P1": 50,
     "P2": 38,
     "P3": 29,
     "P4": 7
@@ -6608,6 +6608,51 @@
         "residual_class": "ENVIRONMENT_UNVERIFIED",
         "posture": "fail-closed"
       }
+    },
+    {
+      "id": "P1-AND-020",
+      "severity": "P1",
+      "domain": "android",
+      "title": "Making the queue durable put a synchronous encrypted write on the main thread",
+      "description": "C15 changed `EncryptedCommandQueue.persist` and `remove` from `apply()` to `commit()` so the outbox's \"saved\" is true when it is said. Correct for the outbox, and it made every mutating call an AES-GCM encryption plus a synchronous file write on the calling thread — including for callers that had always been fine.\n\nThree of them were Android main-thread entry points. `ShareIntakeActivity.onCreate` writes when the owner shares something. `VanNotificationListenerService.onNotificationPosted` writes per notification, so a burst becomes a run of encrypted disk writes on the thread that draws. And `DeviceSignals`' `CLEAR_QUEUE` restore action called `clear()`, which looped `remove` — one synchronous write per queued command, from a button, so the deeper the queue the longer the owner waits.\n\nRaised by external review, which asked where the synchronous write actually runs rather than accepting that durability had improved. The command path itself was never on the main thread: `appScope` is `Dispatchers.Default`. That is not a UI bug but it is the wrong pool for a call that waits on a disk, because `Default` is sized to the CPU count.",
+      "requirement": "docs/VAN_REMOTE_BROWSER_PRODUCTION_BLUEPRINT_REV_1_5.md §§20.14, 28",
+      "authority": "VAN Remote Browser Production Blueprint Rev 1.5",
+      "repository_evidence": [
+        "android/app/src/main/java/com/dial/van/queue/EncryptedCommandQueue.kt",
+        "android/app/src/main/java/com/dial/van/share/ShareIntakeActivity.kt",
+        "android/app/src/main/java/com/dial/van/notification/VanNotificationListenerService.kt",
+        "android/app/src/main/java/com/dial/van/degraded/DeviceSignals.kt"
+      ],
+      "runtime_evidence": [],
+      "affected_components": [
+        "android",
+        "queue"
+      ],
+      "root_cause": "A shared primitive was strengthened for one caller's requirement without auditing the others. The outbox needs to block until the bytes are down; a captured notification does not, and its call site is a main-thread callback.",
+      "remediation": "All three dispatch to `Dispatchers.IO`, and `clear()` is one editor rather than a loop of commits — which also removes the window where a kill leaves a queue that is neither what it was nor empty. The two `appScope` launches that restore or write are moved from the default pool to IO.",
+      "current_status": "CLOSED",
+      "remediation_gate": "RB C17",
+      "validation_gate": "G2",
+      "closure": {
+        "state": "EXTERNALLY_BLOCKED_REPOSITORY_COMPLETE",
+        "summary": "`tests/contracts/test_encrypted_queue_writes_are_off_the_main_thread.py` holds every file that writes to the queue to dispatching it, and pins the two entry points that actually broke by shape — the write must come after the IO launch, not merely in a file that mentions one. The queue's own docstring now states the constraint at the place a caller reads.",
+        "changed": [
+          "android/app/src/main/java/com/dial/van/queue/EncryptedCommandQueue.kt",
+          "android/app/src/main/java/com/dial/van/share/ShareIntakeActivity.kt",
+          "android/app/src/main/java/com/dial/van/notification/VanNotificationListenerService.kt",
+          "android/app/src/main/java/com/dial/van/degraded/DeviceSignals.kt",
+          "android/app/src/main/java/com/dial/van/VanApplication.kt",
+          "android/app/src/main/java/com/dial/van/control/VanCommandController.kt"
+        ],
+        "verified_by": [
+          "tests/contracts/test_encrypted_queue_writes_are_off_the_main_thread.py"
+        ],
+        "counterexample": "A first version of the guard matched any `*queue.` receiver and reported `VoiceAudioArbiter`'s ring of PCM frames, which touches no disk. A check that cries wolf is one somebody switches off, so it is narrowed to the `commandQueue` handle — and it still fails if the share write goes back inline, or if the queue reverts to `apply()` and there is nothing left to protect against.",
+        "residual": "Whether the IO dispatch is enough on a real device under a notification burst is a measurement, not a source property. Nothing here runs an Android main looper; what is checked is that no call site writes on its caller's thread.",
+        "residual_reason": "The AGP is unreachable in the audit container.",
+        "residual_class": "ENVIRONMENT_UNVERIFIED",
+        "posture": "fail-closed"
+      }
     }
   ],
   "register_note": "Extended 2026-09-19 under blueprint Gate 0 / action W0-1. The audit assigned IDs to 55 findings and enumerated further P3/P4 items in prose; those now carry IDs so that 'all closed' is countable. Each finding carries a remediation_gate referencing docs/VAN_FINISHED_PRODUCT_BLUEPRINT_REV_1.md.",
@@ -6629,5 +6674,10 @@
     ],
     "note": "Gate 0 closed the truth-correction and registration-drift findings and installed the maturity gate. Findings are marked CLOSED only where a test or an executable check now enforces the fix."
   },
-  "counts_note": "Recomputed from `findings` rather than written. It had drifted: the stored tally summed to 133 against 141 findings, because it was the count at the original audit and every later wave added rows without touching it. A register whose header disagrees with its body is the thing this programme exists to find, so the numbers are now derived on each update and the jump at RB C15 is part stale base, part the five findings that checkpoint added."
+  "counts_note": "Recomputed from `findings` rather than written. It had drifted: the stored tally summed to 133 against 141 findings, because it was the count at the original audit and every later wave added rows without touching it. A register whose header disagrees with its body is the thing this programme exists to find, so the numbers are now derived on each update and the jump at RB C15 is part stale base, part the five findings that checkpoint added.",
+  "terminal_state_definitions": {
+    "INTEGRATED_AND_EVIDENCED": "The repository's half is integrated and a named CI run executed it. It means repository integration evidenced. It does NOT mean physical or runtime behaviour certified: a CI run compiles the Android sources and executes the pure JVM harness, and proves nothing about process death, socket reconnection, Android Keystore persistence on a real device, or delivery to a real Hermes. Stated here because the phrase reads like certification to anyone who did not write it.",
+    "EXTERNALLY_BLOCKED_REPOSITORY_COMPLETE": "Everything the repository can do is done, and the finding names what it is blocked on in its `residual`, classified by `residual_class`.",
+    "DELIBERATELY_REMOVED_CANON_CORRECTED": "The code is gone and the documents that described it were corrected. Backed by a mechanical removal assertion rather than by an absence of references."
+  }
 }

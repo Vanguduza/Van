@@ -34,10 +34,10 @@ not mean anyone has watched it work on a phone.
 
 | Register | Contents | Checker |
 |---|---|---|
-| `evidence/van-system-audit/findings.json` | 151 findings, all closed: 76 `INTEGRATED_AND_EVIDENCED`, 69 `EXTERNALLY_BLOCKED_REPOSITORY_COMPLETE`, 6 `DELIBERATELY_REMOVED_CANON_CORRECTED` | `tools/ci/maturity_gate.py` — refuses a closure state that claims more than its residual class allows |
+| `evidence/van-system-audit/findings.json` | 152 findings, all closed: 76 `INTEGRATED_AND_EVIDENCED`, 70 `EXTERNALLY_BLOCKED_REPOSITORY_COMPLETE`, 6 `DELIBERATELY_REMOVED_CANON_CORRECTED` | `tools/ci/maturity_gate.py` — refuses a closure state that claims more than its residual class allows |
 | `evidence/van-system-audit/component_ledger.json` | 180 components, all at a terminal state: 113 integrated, 60 externally blocked, 7 deliberately removed | `tools/ci/maturity_gate.py`, `tools/ci/ledger_reconcile.py` — the first refuses a ledger that overstates, the second one that understates |
 | `docs/project-state/REMOTE_BROWSER_IMPLEMENTATION_MATRIX.json` | 122 rows: 87 `WIRED_UNPROVEN`, 21 `NOT_STARTED`, 9 `BUILT_UNWIRED`, 3 `BLOCKED`, 2 `VERIFIED_UNCERTIFIED` | `tools/ci/ledger_reconcile.py` — refuses a row whose booleans contradict its status, and an empty `external_gates` |
-| `evidence/van-system-audit/red_team_register.json` | §38's 70 scenarios: 61 `PASS`, 9 `BLOCKED_EXTERNAL`, **0 assumed** | `tools/ci/red_team_register.py` — every `PASS` must cite a runnable pytest node id |
+| `evidence/van-system-audit/red_team_register.json` | §38's 72 scenarios: 63 `PASS`, 9 `BLOCKED_EXTERNAL`, **0 assumed** | `tools/ci/red_team_register.py` — every `PASS` must cite a runnable pytest node id |
 | `evidence/van-system-audit/production_acceptance.json` | §43's 104 requirements: 59 proven, 38 blocked external, 7 owner deployment | `tools/ci/production_acceptance.py` — recomputes the verdict from the rows |
 | `docs/project-state/AUTHORITY_MAP.yaml` | every invariant, owned once | `tools/ci/authority_map.py` |
 
@@ -230,6 +230,20 @@ the boundary injects the fault in the wrong gap.** The first version of the swee
 passed. The counterexample is kept executable: the previous two-step adapter is still in
 the test file, and a test asserts it still loses the command. If that ever stops
 reproducing, the sweep guarding the new one has gone quiet.
+
+### The lesson C17 added
+
+**Strengthening a shared primitive for one caller changes it for all of them.** The queue
+was moved from `apply()` to `commit()` so the outbox's "saved" is true when it is said.
+That is right, and it turned every write into a synchronous encrypted one — including
+three Android main-thread entry points that had always been fine: a share, each arriving
+notification, and the owner's "discard everything" tap, which looped one committed write
+per queued command.
+
+Review found it by asking where the synchronous write actually *runs*, rather than
+accepting that the durability had improved. The general form is the one this programme
+keeps meeting from a new direction: a change is judged against the caller it was made
+for, and the callers it was not made for are where it lands.
 
 ## What to do next, in order
 

@@ -22,6 +22,23 @@ import javax.crypto.spec.GCMParameterSpec
  * Rev 3.1 invariant: exact A1-A5 policy and replay semantics travel with each queued command.
  * A5 never executes. NO_STALE_REPLAY commands are never retried after a dispatch attempt.
  */
+/**
+ * **Every mutating call on this class blocks until the bytes are on disk.**
+ *
+ * `persist` and `remove` use `commit()` rather than `apply()`, because the session outbox
+ * tells the owner their command is saved and that sentence has to be true before it is
+ * said. The cost is that a write is AES-GCM plus a synchronous file write on whatever
+ * thread called it — so no caller may be on the Android main thread.
+ *
+ * That is not hypothetical. When this changed from `apply()` to `commit()` for the
+ * outbox's sake, two callers that had always been fine — `ShareIntakeActivity.onCreate`
+ * and `VanNotificationListenerService.onNotificationPosted`, both main-thread Android
+ * entry points — silently became main-thread disk writers, with a burst of notifications
+ * producing one encrypted write per notification on the thread that draws. Both now
+ * dispatch to `Dispatchers.IO`, and
+ * `tests/contracts/test_encrypted_queue_writes_are_off_the_main_thread.py` refuses a call
+ * site that is not.
+ */
 class EncryptedCommandQueue(context: Context) : OutboxRecordStore {
 
     private val json = Json { ignoreUnknownKeys = true; encodeDefaults = true }
@@ -179,7 +196,14 @@ class EncryptedCommandQueue(context: Context) : OutboxRecordStore {
      * not be.
      */
     fun clear() {
-        for (id in listIds()) remove(id)
+        // One editor, not one per command. `remove` commits synchronously, so looping it
+        // made the owner's "discard everything" tap N encrypted disk writes in a row —
+        // and the deeper the queue, the longer they wait, which is exactly backwards.
+        // It was also N chances to be killed half way through, leaving a queue that is
+        // neither what it was nor empty.
+        val editor = indexPrefs.edit()
+        for (id in listIds()) editor.remove(blobKey(id))
+        editor.putString(KEY_INDEX, "").commit()
     }
 
     /**

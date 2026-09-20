@@ -656,6 +656,24 @@
       ],
       "note": "Two doors into the same room. `SESSION_REPLACED` cleared the in-memory outbox and left the records on disk, so the next start flushed them into the new session; and a resume answer that ignored the session id would tell the new session it already holds the old one's work. Both are closed, and the dropped commands are now reported to the owner rather than vanishing.",
       "n": 70
+    },
+    {
+      "scenario": "an owner command ends up silently absent after a process death",
+      "status": "PASS",
+      "evidence": [
+        "android/verification/src/test/kotlin/com/dial/van/session/CommandLifecycleKillSweepTest.kt::no kill point leaves a command silently absent"
+      ],
+      "note": "Asked for by external review, and the right shape: each link of the chain had its own test, and the defect C15 found was two correct links cancelling each other out. The sweep kills at every boundary — store, send, acknowledge, reconcile, remove — across whether the Gateway received it and whether the phone learned that it did, and asserts the same thing each time: delivered once, still held, or given up on with the owner told. Never gone with nothing said.",
+      "n": 71
+    },
+    {
+      "scenario": "a durable write blocks the thread the owner is looking at",
+      "status": "PASS",
+      "evidence": [
+        "tests/contracts/test_encrypted_queue_writes_are_off_the_main_thread.py::test_every_file_that_writes_to_the_queue_dispatches_it_off_the_caller"
+      ],
+      "note": "The cost of making the queue durable. `commit()` blocks until the bytes are down, which is right for the outbox and turned three main-thread Android entry points into synchronous encrypted disk writers. Raised by review asking where the write actually runs rather than accepting that durability had improved.",
+      "n": 72
     }
   ]
 }

@@ -288,7 +288,12 @@ class VanApplication : Application(), VoiceInputCallback, TtsOutputCallback {
      */
     private fun startVanSession() {
         commandController.storeForLater = ::storeCommandForLater
-        appScope.launch {
+        // `Dispatchers.IO`, not the scope's default. `start()` restores the outbox, which
+        // reads and decrypts every stored record, and `Dispatchers.Default` is sized to
+        // the CPU count: a blocking read there stalls work that has nothing to do with
+        // this. Not a UI-thread bug — `appScope` has never been the main thread — but the
+        // wrong pool for a call that waits on a disk.
+        appScope.launch(Dispatchers.IO) {
             if (!gatewayClient.isEnrolled()) return@launch
             runCatching { vanSession.start() }
         }
