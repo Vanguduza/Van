@@ -147,7 +147,17 @@ class ExecutionRouter:
                                          target=targets[0] if targets else None, opened_ms=now_ms, software_stop=(cmd.stop_mode is StopMode.SOFTWARE))
             metrics.inc("vati_fills_total", venue=intent.venue)
         elif receipt.status == "ACCEPTED" and receipt.execution_channel == "OWNER_TICKET":
-            self._log(EventKind.OWNER_TICKET, {"ticket": receipt.broker_order_id, "symbol": intent.symbol, "qty": str(decision.approved_size)}, now_ms=now_ms, corr=corr)
+            self._log(
+                EventKind.OWNER_TICKET,
+                {
+                    "ticket": receipt.broker_order_id,
+                    "symbol": intent.symbol,
+                    "qty": str(decision.approved_size),
+                    "side": "BUY",
+                    "trade_intent_id": intent.trade_intent_id,
+                },
+                now_ms=now_ms, corr=corr,
+            )
         elif receipt.status in ("REJECTED", "UNKNOWN"):
             metrics.inc("vati_rejects_total", venue=intent.venue)
         return receipt
@@ -160,7 +170,62 @@ class ExecutionRouter:
                 r = adapter.close(ins.position_id, None, now_ms=now_ms, reason=ins.reason)
             else:
                 r = adapter.modify_stop(ins.position_id, ins.price, now_ms=now_ms)  # type: ignore[arg-type]
-            self._log(EventKind.EXECUTION_RECEIPT, {**{k: (v.value if hasattr(v, "value") else v) for k, v in asdict(r).items()}, "exit_action": ins.action, "exit_reason": ins.reason}, now_ms=now_ms, corr=r.trade_intent_id or ins.position_id)
+
+            self._log(
+                EventKind.EXECUTION_RECEIPT,
+                {
+                    **{k: (v.value if hasattr(v, "value") else v) for k, v in asdict(r).items()},
+                    "exit_action": ins.action,
+                    "exit_reason": ins.reason,
+                },
+                now_ms=now_ms,
+                corr=r.trade_intent_id or ins.position_id,
+            )
+
+            if ins.action == "CLOSE":
+                if r.status in ("FILLED", "OWNER_EXECUTED", "BROKER_CONFIRMED"):
+                    self.protection.close_confirmed(ins.position_id)
+                elif r.status == "ACCEPTED" and r.execution_channel == "OWNER_TICKET":
+                    # The position is still open. Keep the rule in pending-close
+                    # state and expose the SELL ticket to the gateway/owner.
+                    self._log(
+                        EventKind.OWNER_TICKET,
+                        {
+                            "ticket": r.broker_order_id,
+                            "symbol": symbol,
+                            "side": "SELL",
+                            "position_id": ins.position_id,
+                            "trade_intent_id": r.trade_intent_id,
+                            "exit_reason": ins.reason,
+                        },
+                        now_ms=now_ms,
+                        corr=r.trade_intent_id or ins.position_id,
+                    )
+                elif r.status in ("REJECTED", "CANCELLED", "EXPIRED", "UNKNOWN"):
+                    self.protection.close_failed(ins.position_id)
+            else:
+                # on_mark has already tentatively moved the in-memory stop. A
+                # failed venue modification means the venue still owns the old
+                # stop, so rollback local truth and stop new risk.
+                if r.status in ("REJECTED", "CANCELLED", "EXPIRED", "UNKNOWN"):
+                    if ins.previous_stop is not None and ins.price is not None:
+                        self.protection.rollback_unconfirmed_tighten(
+                            ins.position_id,
+                            previous_stop=ins.previous_stop,
+                            attempted_stop=ins.price,
+                        )
+                    if not self.protection.is_software(ins.position_id):
+                        self.kill.trip(KillSwitchTrigger.STOP_REJECTED, now_ms)
+                        self._log(
+                            EventKind.KILL_SWITCH,
+                            {
+                                "trigger": "STOP_REJECTED",
+                                "position": ins.position_id,
+                                "reason": f"{ins.reason}_MODIFY_FAILED",
+                            },
+                            now_ms=now_ms,
+                            corr=r.trade_intent_id or ins.position_id,
+                        )
             out.append(r)
         return out
 
