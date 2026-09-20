@@ -2323,6 +2323,11 @@ def create_app() -> FastAPI:
     async def trading_risk():
         return trading.risk()
 
+    @app.get("/v1/trading/cognition")
+    async def trading_cognition():
+        """Read-only Rev 5.1 cognition/research/evolution projection."""
+        return trading.cognition()
+
     @app.get("/v1/trading/trades/{trade_intent_id}")
     async def trading_trade_detail(trade_intent_id: str):
         detail = trading.trade_detail(trade_intent_id)
