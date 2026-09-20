@@ -50,6 +50,10 @@ def test_guardrail_script_actually_fails_when_violated(tmp_path, monkeypatch):
     src = pathlib.Path("trading")
     dst = tmp_path / "trading"
     shutil.copytree(src, dst, ignore=shutil.ignore_patterns("__pycache__", "*.pyc"))
+    shutil.copytree(
+        pathlib.Path("backend"), tmp_path / "backend",
+        ignore=shutil.ignore_patterns("__pycache__", "*.pyc"),
+    )
 
     alloc = dst / "vati" / "arbiter" / "portfolio_allocator.py"
     text = alloc.read_text()
@@ -300,6 +304,10 @@ def test_certificate_producer_guardrail_fails_on_direct_production_construction(
     src = pathlib.Path("trading")
     dst = tmp_path / "trading"
     shutil.copytree(src, dst, ignore=shutil.ignore_patterns("__pycache__", "*.pyc"))
+    shutil.copytree(
+        pathlib.Path("backend"), tmp_path / "backend",
+        ignore=shutil.ignore_patterns("__pycache__", "*.pyc"),
+    )
     target = dst / "vati" / "learning" / "coverage.py"
     target.write_text(
         target.read_text()
