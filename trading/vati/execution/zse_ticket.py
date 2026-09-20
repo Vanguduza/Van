@@ -50,6 +50,26 @@ class OwnerTicketAdapter:
     _confirmed_tickets: set[str] = field(default_factory=set)
     _seq: int = 0
 
+    def restore_ticket(self, ticket: OwnerTicket) -> OwnerTicket:
+        """Restore a durable ticket definition after process restart.
+
+        This changes no position state and proves no broker execution. A later
+        signed confirmation is still required before confirm() mutates holdings.
+        """
+        if not ticket.ticket_hash:
+            ticket = OwnerTicket(**{
+                **ticket.__dict__,
+                "ticket_hash": canonical_hash({
+                    k: v for k, v in ticket.__dict__.items()
+                    if k != "ticket_hash"
+                }),
+            })
+        existing = self.tickets.get(ticket.ticket_id)
+        if existing is not None and existing.ticket_hash != ticket.ticket_hash:
+            raise ValueError(f"ticket {ticket.ticket_id} reconstruction mismatch")
+        self.tickets[ticket.ticket_id] = ticket
+        return ticket
+
     def sync_account(self) -> AccountState:
         return AccountState(self.account_alias, self.equity, self.equity, self.currency, verified=self.csd_verified, hedging_mode=False)
 
