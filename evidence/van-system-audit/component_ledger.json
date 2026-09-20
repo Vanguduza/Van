@@ -1405,22 +1405,26 @@
       "path": "trading/vati/core/ledger_pg.py",
       "maturity_class": "INTEGRATED",
       "disposition": "COMPLETE",
-      "rationale": "PostgresLedger is no longer merely a future scale path: multi-instrument AccountCoordinatorService refuses non-PostgreSQL authority storage and opens the VATI ledger through the PostgreSQL implementation. Repository bootstrap/reconciliation and shared-ledger joins are implemented, but the real van-trading-core PostgreSQL runtime still requires qualification.",
+      "rationale": "PostgresLedger is the required transactional authority backend for multi-instrument VATI. Repository tests plus a real van-trading-core PostgreSQL 16.10 qualification proved two concurrent ledger writers serialize through one valid hash-chain head.",
       "remediation_gate": "GATE 5",
       "producer": "PostgresLedger.append / deploy/van-trading-core/supabase/reconcile_vati_ledger.py",
       "consumer": "AccountCoordinatorService, gateway/commander VATI ledger readers, AccountRuntimeLease authority joins",
       "production_caller": "AccountCoordinatorService.build -> open_ledger(c.ledger)",
       "tests": [
         "trading/tests/test_vati_ledger_reconcile.py",
-        "trading/tests/test_account_coordinator.py"
+        "trading/tests/test_account_coordinator.py",
+        "trading/tools/qualify_postgres_runtime.py"
       ],
-      "runtime_evidence": null,
-      "owner_facing_projection": "shared ledger status/reconciliation evidence; no green runtime claim until the Trading Core database is exercised",
-      "terminal_state": "EXTERNALLY_BLOCKED_REPOSITORY_COMPLETE",
+      "runtime_evidence": [
+        "evidence/van-system-audit/TRADING_POSTGRES_RUNTIME_QUALIFICATION_20260920.md::Trading Core PostgreSQL 16.10 canary, SHA 5b1fc8689d64f660ec135242995e02f94bd78497",
+        ".github/workflows/van-ci.yml::ledger reconciliation and trading enhancement tests"
+      ],
+      "owner_facing_projection": "shared VATI ledger/reconciliation status; this evidence qualifies the authority primitive, not live venue trading",
+      "terminal_state": "INTEGRATED_AND_EVIDENCED",
       "closure_commits": [
-        "TRADING-ENH"
-      ],
-      "external_blocker": "EXTERNAL_RUNTIME: repository code requires the shared PostgreSQL authority store for multi-instrument trading, but no reachable van-trading-core PostgreSQL runtime is available here for destructive/restart/failover qualification"
+        "TRADING-ENH",
+        "PR49-POSTGRES-RUNTIME-QUALIFICATION"
+      ]
     },
     {
       "n": 70,
@@ -3104,7 +3108,7 @@
       "path": "trading/vati/app/account_lease.py",
       "maturity_class": "INTEGRATED",
       "disposition": "COMPLETE",
-      "rationale": "Repository implementation uses PostgresLeaseStore transactional arbitration plus an exclusive submission_guard. ExecutionRouter performs an early shared-store epoch fence and then holds the account_runtime_leases row lock across durable ORDER_COMMAND creation, adapter submission, receipt logging and immediate protection handling, so takeover cannot occur while a broker submission is in flight.",
+      "rationale": "PostgresLeaseStore transactional arbitration and AccountRuntimeLease submission_guard are both repository-wired and real-runtime qualified. On van-trading-core, two independent OS processes proved row-lock blocking across expired TTL, stale-epoch refusal, epoch-2 takeover only after guard release, and PostgreSQL lock release after holder process termination.",
       "remediation_gate": "TRADING-ENH",
       "producer": "PostgresLeaseStore + AccountRuntimeLease.acquire/renew/submission_guard",
       "consumer": "AccountDecisionCoordinator.step / ExecutionRouter lease_fence + lease_submission_guard",
@@ -3112,15 +3116,19 @@
       "tests": [
         "trading/tests/test_account_coordinator.py",
         "trading/tests/test_execution.py",
-        "trading/tests/test_execution_and_exits.py"
+        "trading/tests/test_execution_and_exits.py",
+        "trading/tools/qualify_postgres_runtime.py"
       ],
-      "runtime_evidence": null,
-      "owner_facing_projection": null,
-      "terminal_state": "EXTERNALLY_BLOCKED_REPOSITORY_COMPLETE",
+      "runtime_evidence": [
+        "evidence/van-system-audit/TRADING_POSTGRES_RUNTIME_QUALIFICATION_20260920.md::two-process row-lock/takeover/crash-release canary on van-trading-core, SHA 5b1fc8689d64f660ec135242995e02f94bd78497",
+        ".github/workflows/van-ci.yml::Trading enhancement tests"
+      ],
+      "owner_facing_projection": "lease refusal remains distinct from authority-store unavailability; this qualification proves fencing, not live venue execution",
+      "terminal_state": "INTEGRATED_AND_EVIDENCED",
       "closure_commits": [
-        "TRADING-ENH"
-      ],
-      "external_blocker": "EXTERNAL_RUNTIME: repository fencing now covers takeover during an in-flight submission, but no reachable van-trading-core/shared PostgreSQL environment is available here for the required real two-process row-lock/takeover/crash canary"
+        "TRADING-ENH",
+        "PR49-POSTGRES-RUNTIME-QUALIFICATION"
+      ]
     },
     {
       "n": 158,
