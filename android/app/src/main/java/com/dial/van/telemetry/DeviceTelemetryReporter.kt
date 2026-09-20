@@ -56,6 +56,13 @@ class DeviceTelemetryReporter(
      */
     val browserStream = BrowserStreamTelemetry()
 
+    /**
+     * §§20.15, 20.16's device half, held for the same reason as [browserStream]: the
+     * logical session outlives any one socket but not the app, and a reporter that asked
+     * a closed session for its outbox depth would post a zero for work still queued.
+     */
+    val session = SessionTelemetry()
+
     /** One decoded frame. Called from the video sink, so it does as little as it can. */
     fun recordBrowserFrame(atMillis: Long = System.currentTimeMillis()) {
         val fps = browserStream.onFrame(atMillis) ?: return
@@ -120,6 +127,7 @@ class DeviceTelemetryReporter(
         if (!gateway.backgroundCallsAdvisable()) return 0
         sampleDeviceIndicators()
         sampleBrowserStream()
+        for (sample in session.drain()) add(sample)
         val batch = synchronized(lock) { buffer.drain() }
         if (batch.isEmpty()) return 0
         gateway.postDeviceTelemetry(DeviceTelemetry.body(batch))

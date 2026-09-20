@@ -17,6 +17,8 @@ import com.dial.van.session.VanHermesSessionManager
 import com.dial.van.voice.VoiceEdge
 import com.dial.van.notification.NotificationPolicyStore
 import com.dial.van.queue.EncryptedCommandQueue
+import com.dial.van.runtime.DeviceRuntimeReadings
+import com.dial.van.runtime.RuntimeReading
 import com.dial.van.browser.BrowserShortcutStore
 import com.dial.van.browser.PersistedBrowserSession
 import com.dial.van.telemetry.DeviceTelemetryReporter
@@ -214,7 +216,9 @@ class VanApplication : Application(), VoiceInputCallback, TtsOutputCallback {
         queueReplayer = QueueReplayer(commandQueue, gatewayClient, degradedModeStore, appScope)
         telemetry = DeviceTelemetryReporter(this, gatewayClient, appScope)
         connectivity = ConnectivityRegistry(this)
-        vanSession = VanHermesSessionManager(gatewayClient, appScope)
+        vanSession = VanHermesSessionManager(
+            gatewayClient, appScope, telemetry = telemetry.session,
+        )
         voiceEdge = VoiceEdge(this, ttsOutput, appScope)
         voiceEdge.loadAssets()
         wakeModel = WakeModelLoader(this)
@@ -232,6 +236,12 @@ class VanApplication : Application(), VoiceInputCallback, TtsOutputCallback {
         DeviceSignals.publish(this)
         queueReplayer.replayAsync(ReplayReason.APP_START)
         telemetry.start()
+        // §20.9 — the standby policy has to be told what the phone can afford before it
+        // decides anything. Without this first call it runs on its constructor defaults
+        // (a full battery on an unmetered link), which is the one combination that says
+        // "hold a spare socket open" for a device nobody has measured.
+        refreshStandbyConditions()
+        startInteractionWatch()
         startConnectivityMonitor()
         startGatewayHealthMonitor()
         startSignedConnectivityRefresh()
@@ -274,6 +284,9 @@ class VanApplication : Application(), VoiceInputCallback, TtsOutputCallback {
                 object : ConnectivityManager.NetworkCallback() {
                     override fun onAvailable(network: Network) {
                         queueReplayer.onNetworkChanged(true)
+                        // A Wi-Fi to mobile handover changes what a warm standby costs,
+                        // and §20.9's answer is different on either side of it.
+                        refreshStandbyConditions()
                     }
 
                     override fun onLost(network: Network) {
@@ -281,6 +294,7 @@ class VanApplication : Application(), VoiceInputCallback, TtsOutputCallback {
                         // replay attempt with no network is a guaranteed failure that would
                         // count against the queue's health.
                         queueReplayer.onNetworkChanged(false)
+                        refreshStandbyConditions()
                     }
                 },
             )
@@ -306,7 +320,60 @@ class VanApplication : Application(), VoiceInputCallback, TtsOutputCallback {
     fun requestReplay() = queueReplayer.replayAsync(ReplayReason.OWNER_REQUESTED)
 
     /** Re-read what the device actually reports. Called when a screen resumes. */
-    fun refreshSubsystemHealth() = DeviceSignals.publish(this)
+    fun refreshSubsystemHealth() {
+        DeviceSignals.publish(this)
+        // The battery moves while a screen is open, and §20.9's threshold is a battery
+        // threshold. Re-read here rather than on a timer of its own: the readings are
+        // binder calls, and a second poller would show up in the first one's numbers.
+        refreshStandbyConditions()
+    }
+
+    /**
+     * Rev 1.5 §§20.8, 20.9 — whether the owner is waiting on VAN right now.
+     *
+     * "Active interaction" is deliberately not "the app is in the foreground". A phone
+     * face-down on a desk with a command in flight is exactly the case a failover has to
+     * be invisible for, and a phone in the owner's hand with nothing outstanding is not
+     * worth a second socket's battery. So the signal is the conversation's own: something
+     * submitted and unanswered, or an A4 the owner is being asked to approve.
+     *
+     * This drives two things at once — the heartbeat cadence and whether a warm standby
+     * is held open — which is why it is one signal rather than two.
+     */
+    private fun startInteractionWatch() {
+        appScope.launch {
+            commandController.state.collect { conversation ->
+                vanSession.setInteractionActive(
+                    conversation.submitting || conversation.pendingA4Approval != null,
+                )
+            }
+        }
+    }
+
+    /**
+     * Rev 1.5 §20.9 — tell the session what the phone can afford.
+     *
+     * One reader, one caller per event that can change the answer. The session manager
+     * deliberately samples nothing itself: a second sampler would be a second answer, and
+     * the two would disagree exactly when the phone was under pressure.
+     */
+    private fun refreshStandbyConditions() {
+        val reading = DeviceRuntimeReadings.read(this)
+        val cost = DeviceRuntimeReadings.networkCost(this)
+        vanSession.setStandbyConditions(
+            // An unreadable battery is not a flat battery. Treating UNKNOWN as zero would
+            // put every device whose OEM does not answer the capacity property into the
+            // "battery is low" branch permanently.
+            batteryPercent = if (reading.batteryPercent == RuntimeReading.UNKNOWN) {
+                100
+            } else {
+                reading.batteryPercent
+            },
+            charging = reading.charging,
+            standbyIsMetered = cost.metered,
+            dataSaverEnabled = cost.dataSaverEnabled,
+        )
+    }
 
     /**
      * Put the wake word's real state in front of the owner.

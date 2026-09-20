@@ -62,6 +62,10 @@ def _row(**overrides) -> dict:
         "certified": False,
         "component_refs": [],
         "ledger_expectation": "NONE",
+        # Every non-CERTIFIED row names one, so the fixture does too. A default of `[]`
+        # would add the same violation to every assertion below and make each of them
+        # pass for a second reason.
+        "external_gates": ["nothing external: a fixture"],
     }
     row.update(overrides)
     return row
@@ -191,6 +195,51 @@ def test_deliberately_removed_may_not_expect_a_live_component(tmp_path):
 
 
 # --------------------------------------------------------------------------- coherence
+
+
+def test_a_row_with_no_external_gates_is_refused(tmp_path):
+    """The column exists to say which rows a commit can still move.
+
+    An empty list could mean "nothing external is blocking this" or "nobody filled this
+    in", and those are the two answers a reader most needs to tell apart. Forty rows
+    carried an empty list, several of them genuinely blocked, so the column could not
+    answer the one question it is for. A row with nothing external now says so in words.
+    """
+    problems = _check(tmp_path, _row(external_gates=[]))
+    assert any("names no external_gates" in p for p in problems)
+
+
+def test_a_certified_row_needs_no_external_gate(tmp_path):
+    """The one status where an empty list is the honest answer: nothing is left."""
+    component = _component_with("INTEGRATED_AND_EVIDENCED")
+    problems = _check(
+        tmp_path,
+        _row(
+            status="CERTIFIED", built=True, wired=True, reachable=True, live=True,
+            verified=True, observed=True, recoverable=True, certified=True,
+            component_refs=[component["n"]],
+            ledger_expectation="INTEGRATED_AND_EVIDENCED",
+            external_gates=[],
+        ),
+    )
+    assert not any("external_gates" in p for p in problems), problems
+
+
+def test_every_row_in_the_repositorys_matrix_names_a_gate_or_says_it_has_none(tmp_path):
+    """Over the real file, so the rule is not only enforceable but enforced.
+
+    Read separately from `test_the_repositorys_matrix_satisfies_its_own_rules` because
+    that one asserts an empty problem list and would pass if this rule were deleted.
+    """
+    doc = json.loads(MATRIX.read_text())
+    unfilled = [
+        r["id"] for r in doc["rows"]
+        if r["status"] != "CERTIFIED" and not r.get("external_gates")
+    ]
+    assert unfilled == [], unfilled
+    # And the two sentences a row with nothing external may use are written down, so
+    # "nothing external" cannot be said forty different ways.
+    assert len(doc["no_external_gate_sentences"]) == 2
 
 
 def test_a_status_that_contradicts_its_own_booleans_is_refused(tmp_path):

@@ -27,7 +27,7 @@ package com.dial.van.telemetry
  *
  * Pure Kotlin, executed in `android/verification`.
  */
-enum class DeviceMetric(val wire: String, val surfaced: Boolean = false) {
+enum class DeviceMetric(val wire: String, val dimension: String = "") {
     /** "Hey Van" heard to VAN listening. */
     WAKE_LATENCY_MS("wake_latency_ms"),
 
@@ -38,7 +38,7 @@ enum class DeviceMetric(val wire: String, val surfaced: Boolean = false) {
     TTS_LATENCY_MS("tts_latency_ms"),
 
     /** Per-frame cost of drawing VAN, labelled by which surface drew it. */
-    AURA_FRAME_TIME_MS("aura_frame_time_ms", surfaced = true),
+    AURA_FRAME_TIME_MS("aura_frame_time_ms", dimension = "surface"),
 
     BATTERY_PERCENT("battery_percent"),
     MEMORY_USED_MB("memory_used_mb"),
@@ -54,14 +54,49 @@ enum class DeviceMetric(val wire: String, val surfaced: Boolean = false) {
 
     /** Each transport recovery the owner did not have to ask for. */
     BROWSER_RECONNECT_COUNT("browser_reconnect_count"),
+
+    /**
+     * §20.16 — the gap the owner actually experienced during a path switch.
+     *
+     * Measured here because the Gateway cannot: it learns a path died when the resume
+     * arrives, which is after the gap is over. What the Gateway counts is that a
+     * failover happened and whether the route changed; how long it took is this.
+     */
+    SESSION_FAILOVER_MS("session_failover_ms"),
+
+    /**
+     * §20.15 — how much is waiting in store-and-forward, by what may be done with it.
+     *
+     * The queue is on the phone, so this is the only place it can be counted. Note what
+     * that means for anyone reading the series: the deepest outbox is the one that has
+     * not been reported, because a phone with no path cannot post telemetry either.
+     */
+    SESSION_OUTBOX_DEPTH("session_outbox_depth", dimension = "storability"),
     ;
+
+    /** Whether this metric's dimension is the aura surface, which has its own wire field. */
+    val surfaced: Boolean
+        get() = dimension == "surface"
 
     companion object {
         fun forWire(wire: String): DeviceMetric? = entries.firstOrNull { it.wire == wire }
     }
 }
 
-data class DeviceSample(val metric: DeviceMetric, val value: Double, val surface: String? = null)
+/**
+ * One measurement.
+ *
+ * `surface` and `dimension` are two slots for one idea, and the split is on the wire
+ * rather than in taste: `surface` is the field shipped devices already post for the aura,
+ * and folding it into a generic name here would have dropped the label from every phone
+ * that had not been updated. A metric declaring any other dimension uses `dimension`.
+ */
+data class DeviceSample(
+    val metric: DeviceMetric,
+    val value: Double,
+    val surface: String? = null,
+    val dimension: String? = null,
+)
 
 /**
  * A bounded buffer of samples waiting to be posted.
@@ -130,7 +165,12 @@ object DeviceTelemetry {
                 ?.takeIf { it.isNotBlank() && sample.metric.surfaced }
                 ?.let { ",\"surface\":${quote(it)}" }
                 .orEmpty()
-            "{\"name\":${quote(sample.metric.wire)},\"value\":${number(sample.value)}$surface}"
+            val dimension = sample.dimension
+                ?.takeIf { it.isNotBlank() && sample.metric.dimension.isNotEmpty() && !sample.metric.surfaced }
+                ?.let { ",\"dimension\":${quote(it)}" }
+                .orEmpty()
+            "{\"name\":${quote(sample.metric.wire)},\"value\":${number(sample.value)}" +
+                "$surface$dimension}"
         }
         return "{\"samples\":[$rows]}"
     }

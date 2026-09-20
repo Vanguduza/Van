@@ -1,6 +1,7 @@
 package com.dial.van.session
 
 import com.dial.van.gateway.VanGatewayClient
+import com.dial.van.telemetry.SessionTelemetry
 import java.util.UUID
 import java.util.concurrent.TimeUnit
 import kotlinx.coroutines.CoroutineScope
@@ -38,6 +39,13 @@ class VanHermesSessionManager(
     private val gateway: VanGatewayClient,
     private val scope: CoroutineScope,
     private val paths: List<TransportPathDescriptor> = DEFAULT_PATHS,
+    /**
+     * §§20.15, 20.16 — where the two numbers only this side can measure are left.
+     *
+     * Optional because the session is usable without telemetry and a null here must not
+     * change a single decision below. Nothing in this class reads it back.
+     */
+    private val telemetry: SessionTelemetry? = null,
 ) {
 
     data class State(
@@ -47,6 +55,13 @@ class VanHermesSessionManager(
         val supervisor: SupervisorState = SupervisorState.STARTING,
         val routeRedundant: Boolean = false,
         val reason: String = "not started",
+        /** §20.9 — which path may carry a new owner message, and which is merely warm. */
+        val authoritativePathId: String = PRIMARY_PATH_ID,
+        val standby: StandbyDecision = StandbyDecision(
+            StandbyRole.COLD, "not started",
+        ),
+        /** §20.15 — how much is waiting, by what may be done with it. */
+        val outboxDepth: Map<CommandStorability, Int> = emptyMap(),
     ) {
         /** §0B — what the owner is told. Never "multipath" for two carriers on one road. */
         val ownerReadableConnection: String
@@ -63,7 +78,17 @@ class VanHermesSessionManager(
     }
 
     private val supervisor = TransportSupervisor(paths)
-    private val outbox = ArrayDeque<JSONObject>()
+
+    /**
+     * §20.14 — the envelope and the metadata that decides what may be done with it.
+     *
+     * Paired rather than merged: the envelope is what goes on the wire and the entry is
+     * what the flush reasons about, and a flush that read the wire format would be
+     * deciding policy from a field an envelope happens to carry.
+     */
+    private data class QueuedMessage(val entry: OutboxEntry, val envelope: JSONObject)
+
+    private val outbox = ArrayDeque<QueuedMessage>()
     private val inFlight = LinkedHashMap<String, JSONObject>()
     private val _state = MutableStateFlow(State())
     val state: StateFlow<State> = _state.asStateFlow()
@@ -71,6 +96,24 @@ class VanHermesSessionManager(
     private var socket: WebSocket? = null
     private var interactionActive: Boolean = false
     private var lastEventSeq: Long = 0
+
+    /**
+     * §20.10 — the switch currently in progress, or null when the path is healthy.
+     *
+     * A field rather than a local because the nine steps span two callbacks: the socket
+     * failure opens it and the resume closes it, and there is no single function in which
+     * a failover happens.
+     */
+    private var failover: FailoverTransaction? = null
+
+    /**
+     * When the primary was first marked suspect, on the monotonic clock.
+     *
+     * Monotonic, because this is a duration: a wall-clock step during a carrier change —
+     * which is when NTP is most likely to correct — would produce a negative failover
+     * time, and a negative sample drags a percentile down silently.
+     */
+    private var suspectAtNanos: Long = 0
 
     private val http = OkHttpClient.Builder()
         .pingInterval(HeartbeatPolicy.ACTIVE_INTERVAL_MS, TimeUnit.MILLISECONDS)
@@ -114,20 +157,46 @@ class VanHermesSessionManager(
             return SubmissionOutcome.Sent(envelope.getString("message_id"))
         }
 
-        val storability = OutboxPolicy.classify(actionClass, requiresLiveOwnerContext)
-        return when (storability) {
-            CommandStorability.NEVER_STORE ->
-                SubmissionOutcome.Refused("offline_and_not_storable")
-            CommandStorability.REQUIRE_RECONFIRM_ON_RECONNECT -> {
-                outbox.addLast(envelope.put("requires_reconfirm", true))
-                SubmissionOutcome.QueuedNeedsReconfirm(envelope.getString("message_id"))
-            }
-            else -> {
-                outbox.addLast(envelope)
-                SubmissionOutcome.Queued(envelope.getString("message_id"))
-            }
+        // §20.14 — classified before storage, and `admit` returns null for what must
+        // never be kept. There is no branch here that could store an A4: the only way to
+        // keep one would be to not call this.
+        val entry = DurableOutbox.admit(
+            messageId = envelope.getString("message_id"),
+            commandId = payload.optString("command_id", envelope.getString("message_id")),
+            idempotencyKey = envelope.optString("idempotency_key", ""),
+            turnId = payload.optString("turn_id", ""),
+            actionClass = actionClass,
+            requiresLiveOwnerContext = requiresLiveOwnerContext,
+            payloadRef = envelope.getString("message_id"),
+            nowMs = System.currentTimeMillis(),
+        ) ?: return SubmissionOutcome.Refused("offline_and_not_storable")
+
+        outbox.addLast(QueuedMessage(entry, envelope))
+        publishOutboxDepth()
+        return if (entry.storability == CommandStorability.REQUIRE_RECONFIRM_ON_RECONNECT) {
+            SubmissionOutcome.QueuedNeedsReconfirm(entry.messageId)
+        } else {
+            SubmissionOutcome.Queued(entry.messageId)
         }
     }
+
+    /**
+     * §20.15 — the owner was asked again and said yes.
+     *
+     * Stamped rather than re-classified, so the record still says what kind of command
+     * this was when someone later asks why it ran.
+     */
+    fun reconfirm(messageId: String, nowMs: Long = System.currentTimeMillis()): Boolean {
+        val index = outbox.indexOfFirst { it.entry.messageId == messageId }
+        if (index < 0) return false
+        val queued = outbox[index]
+        outbox[index] = queued.copy(entry = DurableOutbox.reconfirm(queued.entry, nowMs))
+        return true
+    }
+
+    /** §20.15 — what the owner's screen shows for each queued item. */
+    fun queuedForOwner(nowMs: Long = System.currentTimeMillis()): List<Pair<String, String>> =
+        outbox.map { it.entry.messageId to DurableOutbox.ownerReadableState(it.entry, nowMs) }
 
     sealed class SubmissionOutcome {
         data class Sent(val messageId: String) : SubmissionOutcome()
@@ -141,6 +210,47 @@ class VanHermesSessionManager(
     /** Whether the owner is waiting on something, which sets the heartbeat cadence (§20.8). */
     fun setInteractionActive(active: Boolean) {
         interactionActive = active
+        reconsiderStandby()
+    }
+
+    /**
+     * §20.9 — what the phone can afford, which decides whether a spare path is held open.
+     *
+     * Fed from the resource envelope rather than sampled here: the battery and Data Saver
+     * readings are the runtime's, and a second sampler would be a second answer.
+     */
+    fun setStandbyConditions(
+        batteryPercent: Int,
+        charging: Boolean,
+        standbyIsMetered: Boolean,
+        dataSaverEnabled: Boolean,
+    ) {
+        standbyBattery = batteryPercent
+        standbyCharging = charging
+        standbyMetered = standbyIsMetered
+        standbyDataSaver = dataSaverEnabled
+        reconsiderStandby()
+    }
+
+    private var standbyBattery: Int = 100
+    private var standbyCharging: Boolean = false
+    private var standbyMetered: Boolean = false
+    private var standbyDataSaver: Boolean = false
+
+    private fun reconsiderStandby() {
+        val decision = WarmStandbyPolicy.decide(
+            StandbyConditions(
+                interactionActive = interactionActive,
+                batteryPercent = standbyBattery,
+                charging = standbyCharging,
+                standbyIsMetered = standbyMetered,
+                dataSaverEnabled = standbyDataSaver,
+                // §20.6 — a spare on the same road is not a spare. Asked of the
+                // supervisor rather than assumed, because it is the thing that knows.
+                independentRouteAvailable = paths.map { it.routeId }.toSet().size >= 2,
+            ),
+        )
+        _state.value = _state.value.copy(standby = decision)
     }
 
     /**
@@ -198,15 +308,13 @@ class VanHermesSessionManager(
             observe(connected = false, lastRxAgeMs = Long.MAX_VALUE / 2, writeFailures = 1)
             // The decision of what to do next is the supervisor's, not this callback's.
             val target = supervisor.failoverTarget(PRIMARY_PATH_ID)
+            markSuspect()
             _state.value = _state.value.copy(
                 supervisor = if (target == null) {
                     SupervisorState.OFFLINE_LOCAL
                 } else {
                     supervisor.stateDuringFailover(supervisor.healthOf(PRIMARY_PATH_ID))
                 },
-                // §20.9 — a new carrier is a new path epoch, so the Gateway can fence work
-                // that was in flight on the old one.
-                pathEpoch = _state.value.pathEpoch + 1,
                 reason = t.message ?: "transport_failed",
             )
         }
@@ -234,6 +342,62 @@ class VanHermesSessionManager(
             routeRedundant = verdict.routeRedundant,
             reason = verdict.reason,
         )
+    }
+
+    /**
+     * §20.10 step 1 — the primary is suspect, and the clock starts.
+     *
+     * The local path epoch is deliberately *not* incremented here, and that is a fix
+     * rather than an omission. It used to be: the client bumped its own `pathEpoch` on
+     * every socket failure while the Gateway grants `authoritative_path_epoch + 1` on
+     * each accepted resume. One failure and one resume agree. Two failures before a
+     * resume succeeds do not — the client stamps 3 on every envelope, the Gateway fences
+     * everything that is not 2, and the session is silently, permanently deaf with both
+     * sides believing they are connected. §20.10 says the epoch is *granted*, and
+     * [FailoverTransaction.promote] is where this adopts the grant.
+     */
+    private fun markSuspect() {
+        val open = failover
+        if (open != null && open.phase != FailoverTransaction.Phase.PROMOTED &&
+            open.phase != FailoverTransaction.Phase.ABANDONED
+        ) {
+            // Already mid-switch. Restarting the clock would report the last few seconds
+            // of a thirty-second outage as the owner's interruption.
+            return
+        }
+        failover = FailoverTransaction(
+            currentEpoch = _state.value.pathEpoch,
+            activePathId = _state.value.authoritativePathId,
+        ).also { it.markSuspect() }
+        suspectAtNanos = System.nanoTime()
+    }
+
+    /**
+     * §20.10 steps 6-8 — adopt the epoch the Gateway granted, and say how long it took.
+     *
+     * The duration is reported only on a promotion. A failover that was abandoned did not
+     * end, and recording the time up to the point it was given up on would put the
+     * failures into the same histogram as the successes and make the percentile look
+     * better the worse things got.
+     */
+    private fun completeFailover(grantedPathEpoch: Int, pathId: String) {
+        val open = failover ?: return
+        if (open.phase == FailoverTransaction.Phase.SUSPECT) open.beginResume()
+        if (!open.promote(pathId, grantedPathEpoch)) {
+            // The Gateway re-granted an epoch that does not advance, so the session has
+            // not actually moved. Left un-promoted on purpose: adopting it would leave
+            // the old path believing it is still authoritative.
+            return
+        }
+        _state.value = _state.value.copy(
+            pathEpoch = open.epoch,
+            authoritativePathId = open.authoritativePathId,
+        )
+        if (suspectAtNanos != 0L) {
+            telemetry?.onFailoverCompleted((System.nanoTime() - suspectAtNanos) / 1_000_000L)
+            suspectAtNanos = 0L
+        }
+        failover = null
     }
 
     /**
@@ -265,36 +429,53 @@ class VanHermesSessionManager(
         when (ResumePolicy.classify(local.sessionEpoch, serverEpoch, refusal)) {
             ResumeOutcome.RESUMED -> {
                 response?.let { adoptCursor(it) }
+                adoptGrantedPathEpoch(response)
                 flushOutbox()
             }
             ResumeOutcome.RESUMED_WITH_NEW_EPOCH -> {
                 response?.let { adoptCursor(it) }
                 _state.value = local.copy(sessionEpoch = serverEpoch ?: local.sessionEpoch)
+                adoptGrantedPathEpoch(response)
                 // Everything unacknowledged goes again under the new epoch, as itself.
-                inFlight.values.forEach { outbox.addLast(it) }
-                inFlight.clear()
+                //
+                // Re-sent directly rather than pushed through the outbox, because these
+                // are not the same kind of thing. The outbox holds work *stored across an
+                // outage*, and §20.14 forbids keeping an A4 there. This is work already
+                // sent on a live session whose acknowledgement was lost in the failover —
+                // seconds old, same turn, same idempotency key — and §20.12's
+                // effectively-once admission is exactly what makes re-sending it safe.
+                // Routing it through the outbox would refuse an unacknowledged A4 and the
+                // owner's instruction would vanish at the moment the path recovered.
+                resendInFlight()
                 flushOutbox()
             }
             ResumeOutcome.SESSION_REPLACED -> {
+                failover?.abandon()
                 val fresh = runCatching {
                     gateway.sessionOpen(pathId = PRIMARY_PATH_ID, routeId = "primary-ingress")
                 }.getOrNull() ?: return
                 _state.value = local.copy(
                     vanSessionId = fresh.optString("van_session_id"),
                     sessionEpoch = fresh.optInt("session_epoch", 0),
-                    pathEpoch = 0,
+                    pathEpoch = fresh.optInt("path_epoch", 0),
+                    authoritativePathId = PRIMARY_PATH_ID,
                     reason = "previous session is gone; this is a new one",
                 )
+                failover = null
+                suspectAtNanos = 0L
                 // Deliberately not flushed: work addressed to a session that no longer
                 // exists is not the same work, and replaying it silently into a new one is
                 // how an owner's cancelled instruction gets performed.
                 outbox.clear()
                 inFlight.clear()
             }
-            ResumeOutcome.REFUSED -> _state.value = local.copy(
-                supervisor = SupervisorState.OFFLINE_LOCAL,
-                reason = refusal ?: "resume_refused",
-            )
+            ResumeOutcome.REFUSED -> {
+                failover?.abandon()
+                _state.value = local.copy(
+                    supervisor = SupervisorState.OFFLINE_LOCAL,
+                    reason = refusal ?: "resume_refused",
+                )
+            }
         }
     }
 
@@ -305,6 +486,37 @@ class VanHermesSessionManager(
      * local cursor and trusting it after a failover is how a client ends up quietly
      * skipping the events that were in flight when the path dropped.
      */
+    /**
+     * §20.10 step 6 — the path epoch the Gateway granted, adopted whether or not this was
+     * a failover.
+     *
+     * The "whether or not" is the bug this closes, and it was not a failover bug at all.
+     * `POST /v1/session/resume` grants `authoritative_path_epoch + 1` on *every* accepted
+     * resume, and the phone resumes on `onOpen` — so the very first connect moves the
+     * Gateway's authoritative epoch to 2 while the device is still stamping the 1 it got
+     * from `/open`. `accept_upstream` fences an envelope whose `path_epoch` is not the
+     * authoritative one, so every message the owner sent was refused, on a session both
+     * sides reported as connected, from the first second. Nothing in the client could
+     * see it: the refusal is the Gateway's and the socket stays open.
+     */
+    private fun adoptGrantedPathEpoch(resume: JSONObject?) {
+        // Absent only if the response was not parseable, in which case keeping the old
+        // epoch is the safer of the two wrong answers: it fences this device's own work
+        // rather than letting it race the path that is being replaced.
+        val granted = resume?.optInt("new_path_epoch", -1) ?: -1
+        if (granted < 0) return
+        if (failover != null) {
+            completeFailover(granted, PRIMARY_PATH_ID)
+            return
+        }
+        // An ordinary resume — a first connect, or a reconnect on the same path. There is
+        // no transaction to promote and no interruption to time, but the grant is still
+        // the grant.
+        if (granted > _state.value.pathEpoch) {
+            _state.value = _state.value.copy(pathEpoch = granted)
+        }
+    }
+
     private fun adoptCursor(resume: JSONObject) {
         lastEventSeq = resume.optLong("replay_from_seq", lastEventSeq)
         val states = resume.optJSONObject("command_states") ?: return
@@ -314,26 +526,102 @@ class VanHermesSessionManager(
         states.keys().forEach { messageId -> inFlight.remove(messageId) }
     }
 
-    private fun flushOutbox() {
+    /**
+     * §20.10 step 5 / §20.12 — unacknowledged work, re-addressed to the new path epoch.
+     *
+     * The envelope keeps its `message_id` and `idempotency_key`, so a Gateway that did
+     * receive the first copy recognises this one and does not run it twice.
+     */
+    private fun resendInFlight() {
         val live = socket ?: return
         val epoch = _state.value.pathEpoch
-        while (outbox.isNotEmpty()) {
-            val queued = outbox.first()
-            if (queued.optBoolean("requires_reconfirm", false)) {
-                // Left in place on purpose. Something the owner has to be asked about again
-                // is not something a reconnect may send on their behalf.
-                break
+        val pending = inFlight.values.toList()
+        inFlight.clear()
+        for (envelope in pending) {
+            val readdressed = SessionEnvelope.readdress(envelope, epoch)
+            if (!live.send(readdressed.toString())) {
+                // The new path died during the resume. Keep it in flight rather than
+                // dropping it: the next resume will try again, and losing it here would
+                // lose an owner instruction to a transient socket failure.
+                inFlight[envelope.getString("message_id")] = envelope
+                return
             }
-            val readdressed = SessionEnvelope.readdress(queued, epoch)
-            if (!live.send(readdressed.toString())) break
-            outbox.removeFirst()
             inFlight[readdressed.getString("message_id")] = readdressed
         }
     }
 
+    private fun flushOutbox() {
+        val live = socket ?: return
+        val epoch = _state.value.pathEpoch
+        val now = System.currentTimeMillis()
+        val held = ArrayDeque<QueuedMessage>()
+        var stop = false
+        while (outbox.isNotEmpty()) {
+            val queued = outbox.removeFirst()
+            if (stop) {
+                held.addLast(queued)
+                continue
+            }
+            when (DurableOutbox.flush(queued.entry, now)) {
+                is FlushVerdict.Expired -> {
+                    // Dropped, not held: the window closed and the owner is told it did
+                    // not happen rather than asked about something they have forgotten.
+                    expired += queued.entry
+                }
+                is FlushVerdict.NeedsReconfirmation, is FlushVerdict.Refused -> {
+                    // Kept in place. Something the owner has to be asked about is not
+                    // something a reconnect may send on their behalf — and skipping past
+                    // it rather than stopping means the rest of the queue still moves.
+                    held.addLast(queued)
+                }
+                is FlushVerdict.Send -> {
+                    val readdressed = SessionEnvelope.readdress(queued.envelope, epoch)
+                    if (live.send(readdressed.toString())) {
+                        inFlight[readdressed.getString("message_id")] = readdressed
+                    } else {
+                        // The socket went away mid-flush. Everything after this keeps its
+                        // order, which is why the remainder is moved rather than retried.
+                        held.addLast(
+                            queued.copy(
+                                entry = DurableOutbox.attempted(
+                                    queued.entry, _state.value.authoritativePathId,
+                                ),
+                            ),
+                        )
+                        stop = true
+                    }
+                }
+            }
+        }
+        outbox.addAll(held)
+        publishOutboxDepth()
+    }
+
+    /** §20.14 — commands whose window closed while there was no path. */
+    private val expired = mutableListOf<OutboxEntry>()
+
+    fun expiredSinceLastRead(): List<OutboxEntry> {
+        val taken = expired.toList()
+        expired.clear()
+        return taken
+    }
+
     /** Anything the owner still has to be asked about before it runs. */
-    fun awaitingReconfirmation(): List<JSONObject> =
-        outbox.filter { it.optBoolean("requires_reconfirm", false) }
+    fun awaitingReconfirmation(): List<OutboxEntry> =
+        outbox.map { it.entry }.filter {
+            DurableOutbox.flush(it, System.currentTimeMillis()) is FlushVerdict.NeedsReconfirmation
+        }
+
+    private fun publishOutboxDepth() {
+        val depths = DurableOutbox.depthsByStorability(outbox.map { it.entry })
+        _state.value = _state.value.copy(outboxDepth = depths)
+        // Every class, not only the non-empty ones. A gauge holds its last value, so a
+        // class that emptied and stopped being reported would keep telling an operator
+        // that someone is waiting to be asked about a command that went an hour ago.
+        telemetry?.onOutboxDepth(
+            CommandStorability.entries.associate { it.name to (depths[it] ?: 0) },
+        )
+    }
 
     private fun publish(state: SupervisorState) {
         _state.value = _state.value.copy(supervisor = state)

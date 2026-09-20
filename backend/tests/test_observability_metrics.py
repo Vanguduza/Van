@@ -112,11 +112,7 @@ def test_every_device_metric_can_actually_be_ingested():
     the device can never write — it renders as permanently unobserved, which reads as a
     broken subsystem rather than as a wiring mistake nobody made on purpose.
     """
-    ingestible = (
-        {name for name, _ in instruments.DEVICE_HISTOGRAMS.values()}
-        | set(instruments.DEVICE_GAUGES.values())
-        | set(instruments.DEVICE_COUNTERS.values())
-    )
+    ingestible = instruments.ingestible_metrics()
     declared = {m.name for m in CATALOGUE if m.source is MetricSource.DEVICE}
     assert declared == ingestible, {
         "declared but not ingestible": sorted(declared - ingestible),
@@ -134,11 +130,7 @@ def test_the_gateway_cannot_write_a_stream_host_metric():
     stream_host = {m.name for m in CATALOGUE if m.source is MetricSource.STREAM_HOST}
     assert stream_host, "the Remote Browser's host-side metrics are not declared"
 
-    device_ingest = (
-        {name for name, _ in instruments.DEVICE_HISTOGRAMS.values()}
-        | set(instruments.DEVICE_GAUGES.values())
-        | set(instruments.DEVICE_COUNTERS.values())
-    )
+    device_ingest = instruments.ingestible_metrics()
     assert not (stream_host & device_ingest), "a stream-host metric is writable as device telemetry"
 
     source = inspect.getsource(instruments)
@@ -149,6 +141,51 @@ def test_the_gateway_cannot_write_a_stream_host_metric():
 def test_a_device_metric_name_nobody_declared_is_refused(registry):
     with pytest.raises(instruments.UnknownDeviceMetric):
         instruments.record_device_sample("cpu_temperature_c", 40.0, registry=registry)
+
+
+def test_a_labelled_device_sample_without_its_label_is_refused_not_bucketed(registry):
+    """§20.15 — an outbox depth with no storability is a number with no meaning.
+
+    The tempting alternative is to record it under `unknown`, which puts a queue of
+    approval-bearing commands in the same bucket as a retry queue. An operator reading
+    that series would be told the opposite of what is true, and no error would exist
+    anywhere to lead them back to it.
+    """
+    with pytest.raises(instruments.DeviceDimensionMissing):
+        instruments.record_device_sample("session_outbox_depth", 3.0, registry=registry)
+
+
+def test_a_labelled_device_sample_lands_under_the_label_the_catalogue_declares(registry):
+    instruments.record_device_sample(
+        "session_outbox_depth", 3.0, dimension="REQUIRE_RECONFIRM_ON_RECONNECT",
+        registry=registry,
+    )
+    text = render_prometheus(registry)
+    assert 'storability="REQUIRE_RECONFIRM_ON_RECONNECT"' in text
+    assert "van_session_outbox_depth" in text
+
+
+def test_the_aura_surface_still_comes_from_its_own_field(registry):
+    """The two dimension slots are not interchangeable.
+
+    `surface` is on the wire and shipped devices post it. A refactor that folded it into
+    the generic slot would drop the label from every phone that had not been updated, and
+    the symptom would be one merged series rather than an error.
+    """
+    instruments.record_device_sample(
+        "aura_frame_time_ms", 16.0, surface="overlay", registry=registry,
+    )
+    assert 'surface="overlay"' in render_prometheus(registry)
+
+
+def test_an_unlabelled_device_metric_ignores_a_dimension_it_did_not_declare(registry):
+    """A device sending a label nobody declared does not get a second series for it."""
+    instruments.record_device_sample(
+        "battery_percent", 73.0, dimension="nonsense", registry=registry,
+    )
+    text = render_prometheus(registry)
+    assert "van_device_battery_percent 73" in text
+    assert "nonsense" not in text
 
 
 def test_histogram_buckets_are_cumulative_and_end_at_inf(registry):
@@ -193,38 +230,48 @@ def test_a_non_finite_observation_is_refused(registry):
         )
 
 
-def test_only_the_stream_host_instruments_are_allowed_to_be_silent():
-    """`silence_is_normal` is an exemption from alerting, so it is fenced by a rule.
+def test_every_exempt_instrument_names_a_component_that_is_missing():
+    """`silence_needs` is an exemption from alerting, so it is fenced by a rule.
 
-    The flag exists for one reason: a Gateway-written instrument that cannot fire without
-    a Browser Stream Host, which a deployment may not have. Anything else marked with it
-    is an instrument whose disappearance nobody will be told about — which is exactly the
-    failure `INSTRUMENT_SILENT` was added to catch. So the set is asserted against the
-    property rather than against a list of names, and a new metric joins it only by being
-    produced by the interactive browser surface.
+    The field replaced a boolean, and the reason is that "silence is fine here" was never
+    a fact about the metric: it is a fact about a component the deployment does not have.
+    An operator reading a permanently empty series needs to know which one, and a boolean
+    could not tell them.
+
+    The set of reasons is closed. An open string would let the next metric excuse itself
+    from `INSTRUMENT_SILENT` with a sentence nobody checks, which is how an alert that
+    matters gets quietly switched off.
     """
-    from van_gateway.observability.metrics import CATALOGUE, MetricSource
+    from van_gateway.observability.metrics import CATALOGUE, SILENCE_REASONS, MetricSource
 
-    exempt = {m.name for m in CATALOGUE if m.silence_is_normal}
-    interactive = {
-        m.name for m in CATALOGUE
-        if m.source is MetricSource.GATEWAY
-        and m.produced_by.startswith("van_gateway.observability.instruments.")
-        and any(
-            token in m.produced_by
-            for token in (
-                "browser_sessions_active", "browser_connect", "browser_input_dispatch",
-                "control_preempt", "agent_grant", "record_download",
-            )
-        )
-    }
-    assert exempt == interactive
-    # And nothing outside the Gateway carries it: a DEVICE or STREAM_HOST metric is
-    # already exempt by source, so marking one would hide that the two mechanisms had
-    # drifted apart.
-    assert all(
-        m.source is MetricSource.GATEWAY for m in CATALOGUE if m.silence_is_normal
-    )
+    exempt = [m for m in CATALOGUE if m.silence_is_normal]
+    assert exempt, "the exemption exists and something uses it"
+    for metric in exempt:
+        assert metric.silence_needs in SILENCE_REASONS, (metric.name, metric.silence_needs)
+        # Only a Gateway metric needs the exemption: DEVICE and STREAM_HOST are already
+        # excluded by source, and marking one would mean the two mechanisms had drifted.
+        assert metric.source is MetricSource.GATEWAY, metric.name
+
+
+def test_nothing_the_gateway_produces_alone_is_exempt():
+    """The other direction: an instrument a running gateway must produce cannot excuse
+    itself.
+
+    Asserted by naming the ones that would be most tempting to silence — the request,
+    mission and error instruments are noisy and always populated, and an exemption on any
+    of them would turn the silence rule off for the subsystems it exists to watch.
+    """
+    from van_gateway.observability.metrics import CATALOGUE
+
+    by_name = {m.name: m for m in CATALOGUE}
+    for name in (
+        "van_gateway_request_duration_ms",
+        "van_mission_duration_ms",
+        "van_error_total",
+        "van_verifier_duration_ms",
+        "van_event_bus_lag_ms",
+    ):
+        assert not by_name[name].silence_is_normal, name
 
 
 def test_an_ordinary_gateway_instrument_still_pages_when_it_goes_quiet():

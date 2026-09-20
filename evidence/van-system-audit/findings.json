@@ -20,9 +20,9 @@
     "PRODUCTION_CERTIFIED"
   ],
   "counts": {
-    "P0": 19,
-    "P1": 38,
-    "P2": 25,
+    "P0": 20,
+    "P1": 40,
+    "P2": 27,
     "P3": 29,
     "P4": 7
   },
@@ -5531,6 +5531,224 @@
         "residual_reason": "A shared generated definition would remove the class of defect entirely and is a larger change than this checkpoint: the format is already shipped and both sides are pinned by the cross-language vectors file for the byte layout. The gap left is a rule stated in two places, which is what these tests read.",
         "residual_class": "DELIBERATE_SCOPE",
         "posture": "fail-closed"
+      }
+    },
+    {
+      "id": "P0-SESS-001",
+      "severity": "P0",
+      "domain": "session",
+      "title": "Every envelope the phone sent over the durable session was fenced, from the first connect",
+      "description": "Rev 1.5 §20.10 says the path epoch is *granted* by the Gateway. `POST /v1/session/resume` implements that literally: it sets `authoritative_path_epoch = current + 1` on every accepted resume and returns it as `new_path_epoch`. `VanHermesSessionService.accept_upstream` then refuses any envelope whose `path_epoch` is not the authoritative one, with `session_path_epoch_stale`.\n\n`VanHermesSessionManager` never read `new_path_epoch`. It took the `path_epoch` that `/open` returned and afterwards incremented a counter of its own, once per socket failure.\n\nThe device resumes on `onOpen`, before anything has failed. So on a healthy first connect the Gateway moved to epoch 2 while the phone was still stamping the 1 it had been given, and every owner message from that moment was refused — on a session both sides reported as connected, with the socket open and the status screen showing \"Connected\".\n\nThe local counter was independently wrong in the other direction: it agreed with the Gateway after exactly one failure and one resume, and diverged permanently after two failures before a successful resume, which is what a carrier handover on a moving train looks like.\n\nFound by probing the running service rather than by reading either side: both halves are internally correct, and the defect exists only in the agreement between them.",
+      "requirement": "docs/VAN_REMOTE_BROWSER_PRODUCTION_BLUEPRINT_REV_1_5.md §§20.3, 20.9, 20.10, 20.12",
+      "authority": "VAN Remote Browser Production Blueprint Rev 1.5",
+      "repository_evidence": [
+        "android/app/src/main/java/com/dial/van/session/VanHermesSessionManager.kt",
+        "backend/van_gateway/session/service.py",
+        "backend/van_gateway/session/api.py"
+      ],
+      "runtime_evidence": [],
+      "affected_components": [
+        "android",
+        "gateway",
+        "session"
+      ],
+      "root_cause": "A number that one side grants and the other side computes. Nothing in the repository stated that the resume's answer was authoritative, and the session's only tests drove the service directly — where the client's arithmetic does not exist.",
+      "remediation": "Adopt `new_path_epoch` from the resume response on every outcome that keeps the session, not only inside the failover branch; delete the local increment; pin the agreement at the route with `backend/tests/test_session_transport_api.py` and across the two languages with `tests/contracts/test_session_epoch_contract.py`.",
+      "impact": "The durable logical session — §20's entire subject, and what the Remote Browser, the mission feed and the voice turn all bind to — carried nothing. Every command, heartbeat and cursor acknowledgement the phone sent was refused by the Gateway and silently dropped by the client, which has no branch that surfaces a routing refusal.",
+      "validation_gate": "G2",
+      "current_status": "CLOSED",
+      "remediation_gate": "RB C11",
+      "closure": {
+        "state": "EXTERNALLY_BLOCKED_REPOSITORY_COMPLETE",
+        "summary": "`adoptGrantedPathEpoch` reads the Gateway's grant and is called from both resume outcomes that continue the session. The local increment is gone; the socket failure now opens a `FailoverTransaction` instead, and `promote` refuses an epoch that does not advance, so a Gateway that re-granted the current epoch cannot leave the old path believing it is still authoritative.\n\nEight route-level tests were added where there were none: the grant moves the epoch off `/open`'s, an envelope carrying the old one is fenced by name, an envelope carrying the granted one is admitted, and two resumes without an envelope in between still agree. Six cross-language contract tests pin the phone's half, including the one that would have caught the original shape — that the adopter runs on an ordinary resume and not only on a failover.",
+        "changed": [
+          "android/app/src/main/java/com/dial/van/session/VanHermesSessionManager.kt",
+          "backend/tests/test_session_transport_api.py",
+          "tests/contracts/test_session_epoch_contract.py"
+        ],
+        "verified_by": [
+          "backend/tests/test_session_transport_api.py",
+          "tests/contracts/test_session_epoch_contract.py"
+        ],
+        "counterexample": "An implementation that adopted the grant only inside the failover branch passes every failover test and leaves the bug exactly as it was, because the first resume is not a failover. `test_the_grant_is_adopted_on_an_ordinary_resume_and_not_only_on_a_failover` reads the adopter and fails on it. An implementation that adopted it but kept the local increment passes a single-failure test and diverges on the second; `test_the_phone_does_not_mint_a_path_epoch_of_its_own` refuses the increment by name.",
+        "residual": "The Kotlin half is pinned by reading the source rather than by executing it: `VanHermesSessionManager.kt` imports OkHttp and is not in the `android/verification` harness, so CI's Android build is its only compiler.",
+        "residual_reason": "Putting the manager in the harness means giving the harness OkHttp and a socket fake, which moves the transport into the test rather than the decision out of it. The decisions that can be executed — `ResumePolicy`, `SessionEnvelope`, `FailoverTransaction` — already are.",
+        "residual_class": "ENVIRONMENT_UNVERIFIED",
+        "posture": "fail-closed"
+      }
+    },
+    {
+      "id": "P1-OBS-005",
+      "severity": "P1",
+      "domain": "observability",
+      "title": "§27's quality controller was correct, tested and had no caller",
+      "description": "`backend/van_gateway/browser/quality.py` implements the whole of §§26 and 27: the four-rung ladder, the two SLO profiles, §27.4's asymmetric hysteresis, §27.3's per-session byte accounting, and §26.2's rule that `high_quality_certified` is a property of a verdict rather than a field anyone can set. It has unit tests and they pass.\n\nNothing constructed one. There was no route by which a phone could report a link sample, so the Gateway never chose a rung, the Stream Host was never steered toward a target, and the owner was never shown which regime they were in. §27.2's rule that VAN must not silently consume hours of someone's mobile data was enforced by a class with no instances.\n\nThe declared metric `van_browser_quality_mode` named `record_quality_mode` as its producer, and that function did not exist.",
+      "requirement": "docs/VAN_REMOTE_BROWSER_PRODUCTION_BLUEPRINT_REV_1_5.md §§26.2, 27.1-27.4",
+      "authority": "VAN Remote Browser Production Blueprint Rev 1.5",
+      "repository_evidence": [
+        "backend/van_gateway/browser/quality.py",
+        "backend/van_gateway/browser/quality_api.py",
+        "backend/van_gateway/app.py"
+      ],
+      "runtime_evidence": [],
+      "affected_components": [
+        "gateway",
+        "browser",
+        "observability"
+      ],
+      "root_cause": "The class this programme keeps finding: logic that is right, tested and unreachable. A unit test proves a decision is correct; it cannot prove anyone asks for the decision.",
+      "remediation": "Add `POST /v1/browser/interactive-sessions/{id}/link-report` and `GET .../quality`, hold one controller per session for as long as the session lives, forget it when the session ends, and give `record_quality_mode` its caller.",
+      "impact": "A session on mobile data ran at whatever the encoder defaulted to. The owner had no indication of the regime, no per-session data figure, and no way to opt in to high quality on metered — which is the consent §27.2 requires before spending their allowance.",
+      "validation_gate": "G6",
+      "current_status": "CLOSED",
+      "remediation_gate": "RB C11",
+      "closure": {
+        "state": "EXTERNALLY_BLOCKED_REPOSITORY_COMPLETE",
+        "summary": "`quality_api.py` is the caller. `QualityControllers` holds one controller per session — required rather than tidy, because §27.4's streak is state and a controller built per request would either never upgrade or upgrade on every third sample forever — and the interactive router's new `on_session_ended` hook forgets it when the session terminates, so the next session is not handed the previous owner's data figure.\n\n`LinkReportBody` has no field for the verdict and refuses extras, so a phone that tries to certify its own session gets a 422 rather than having the claim quietly ignored.",
+        "changed": [
+          "backend/van_gateway/browser/quality_api.py",
+          "backend/van_gateway/browser/interactive_api.py",
+          "backend/van_gateway/app.py",
+          "backend/van_gateway/observability/instruments.py",
+          "backend/van_gateway/observability/metrics.py"
+        ],
+        "verified_by": [
+          "backend/tests/test_browser_quality_api.py"
+        ],
+        "counterexample": "A route that built a controller per request returns a correct-looking verdict on every call and never moves the ladder; `test_the_upgrade_streak_survives_across_reports` is the test that separates the two. A body that merely ignored `high_quality_certified` passes a field-list assertion and still lets a caller believe it set one; `test_a_body_claiming_the_certification_is_refused_not_ignored` posts it and requires a 422.",
+        "residual": "The target the Gateway returns is a target. Whether the Browser Stream Host adapts toward it is unobservable here, because there is no host in this repository to adapt.",
+        "residual_reason": "§13 makes the Stream Host an optional, separately deployed component; §6.4 keeps the Gateway out of the media path on purpose. The adaptation is the host's to implement and the owner's to deploy.",
+        "residual_class": "EXTERNAL_RUNTIME",
+        "posture": "fail-closed"
+      }
+    },
+    {
+      "id": "P1-SESS-002",
+      "severity": "P1",
+      "domain": "session",
+      "title": "§20.9's warm standby, §20.14's outbox metadata and §20.10's failover transaction were absent",
+      "description": "§20 describes a session that survives a carrier change. Three of its mechanisms had no implementation at all.\n\n§20.9's warm standby — a second path kept authenticated so that make-before-break is possible — existed as a sentence. So did its asymmetry: a warm path carries heartbeats and cursor reconciliation and **no duplicate command uplink**, which is the rule that stops VAN's own client producing the duplicate §20.12's admission exists to reject.\n\n§20.14 asks the local outbox to carry expiry, an attempt count, the path an attempt was made on, and the difference between a command that may flush silently and one that needs the owner asked again. `OutboxPolicy` classified commands before storage and nothing existed after storage; the sentence \"A4/destructive actions do not silently execute hours later because connectivity returned\" was enforced only at admission.\n\n§20.10 describes a path switch as a nine-step transaction and forbids \"just opening another socket and continuing\" in those words. The client did exactly that.",
+      "requirement": "docs/VAN_REMOTE_BROWSER_PRODUCTION_BLUEPRINT_REV_1_5.md §§20.9, 20.10, 20.14, 20.15",
+      "authority": "VAN Remote Browser Production Blueprint Rev 1.5",
+      "repository_evidence": [
+        "android/app/src/main/java/com/dial/van/session/WarmStandby.kt",
+        "android/app/src/main/java/com/dial/van/session/DurableOutbox.kt",
+        "android/app/src/main/java/com/dial/van/session/VanHermesSessionManager.kt"
+      ],
+      "runtime_evidence": [],
+      "affected_components": [
+        "android",
+        "session"
+      ],
+      "root_cause": "The parts of §20 that only matter during a failure. Nothing in a healthy session exercises them, so their absence produced no symptom until a network did something a test could not.",
+      "remediation": "Implement the three as pure Kotlin so every case can be executed in the JVM harness: `WarmStandbyPolicy` and `FailoverTransaction` in `WarmStandby.kt`, `DurableOutbox` beside the existing `EncryptedCommandQueue` rather than replacing it (§2.7), and wire all three into the session manager.",
+      "impact": "A path switch was a reconnect: the owner lost the turn they were in. A phone with no path either dropped work or would have replayed it hours later, including work the owner had forgotten issuing. Nothing stopped a second connected path sending an owner command twice.",
+      "validation_gate": "G2",
+      "current_status": "CLOSED",
+      "remediation_gate": "RB C11",
+      "closure": {
+        "state": "EXTERNALLY_BLOCKED_REPOSITORY_COMPLETE",
+        "summary": "`WarmStandbyPolicy.decide` answers when a spare is worth holding open and returns the reason in the owner's terms; `mayCarry` makes the upstream asymmetry a closed list rather than a convention. `FailoverTransaction` records the nine steps as a transaction and refuses a promotion to an epoch the Gateway did not advance. `DurableOutbox` adds everything §20.14 asks for after storage, including the distinction between an expired command — dropped, and the owner told it did not happen — and a stale one, which is asked about.\n\nAll three are pure and all three are in `android/verification`: 64 tests across `WarmStandbyTest`, `DurableOutboxTest` and `SessionTelemetryTest`. The session manager holds them, and `VanApplication` feeds the standby policy from the same runtime readings the resource envelope uses rather than sampling a second time.",
+        "changed": [
+          "android/app/src/main/java/com/dial/van/session/WarmStandby.kt",
+          "android/app/src/main/java/com/dial/van/session/DurableOutbox.kt",
+          "android/app/src/main/java/com/dial/van/session/VanHermesSessionManager.kt",
+          "android/app/src/main/java/com/dial/van/VanApplication.kt",
+          "android/verification/build.gradle.kts"
+        ],
+        "verified_by": [
+          "android/verification/src/test/kotlin/com/dial/van/session/WarmStandbyTest.kt",
+          "android/verification/src/test/kotlin/com/dial/van/session/DurableOutboxTest.kt"
+        ],
+        "counterexample": "An outbox that classified on flush rather than on admission passes every flush test and still stores an A4 across an outage; `DurableOutbox.admit` returns null for `NEVER_STORE`, so the only way to keep one is to not call it, and `an irreversible command is never stored at all` asserts the null. A standby policy that returned a boolean rather than a role passes the battery and Data Saver tests and says nothing about what the warm path may send; `mayCarryNewUpstream` and `WARM_UPSTREAM_ALLOWED` are what the mutation suite attacks.",
+        "residual": "The second path itself does not exist. `DEFAULT_PATHS` declares two protocols over one ingress, so `WarmStandbyPolicy` correctly answers COLD for this build: a spare on the same road fails with the first.",
+        "residual_reason": "§0B is explicit that two carriers over one ingress are not redundancy and that the honest status is the unflattering one. A second independent ingress is an owner deployment decision, not a repository change.",
+        "residual_class": "OWNER_DEPLOYMENT_DECISION",
+        "posture": "fail-closed"
+      }
+    },
+    {
+      "id": "P2-OBS-006",
+      "severity": "P2",
+      "domain": "observability",
+      "title": "The device telemetry ingest could carry exactly one label, and it was hard-coded to the aura surface",
+      "description": "`record_device_sample` resolved a single label named `surface`, for `aura_frame_time_ms`. Every other declared device metric was unlabelled, and there was no way to declare one that was not the aura's.\n\nThat is why §20.15's outbox depth had nowhere to go. The store-and-forward queue lives on the phone, so the Gateway cannot count it; the depth only means anything broken down by what the queue is allowed to do with each item — a hundred retryable commands is a network outage and one awaiting reconfirmation is a person waiting to be asked something — and there was no slot for that breakdown.\n\nThe same gap made it tempting to declare the metric as Gateway-produced instead, which would have been a Gateway reporting a number it cannot take.",
+      "requirement": "docs/VAN_REMOTE_BROWSER_PRODUCTION_BLUEPRINT_REV_1_5.md §§20.15, 20.16, 28.1",
+      "authority": "VAN Remote Browser Production Blueprint Rev 1.5",
+      "repository_evidence": [
+        "backend/van_gateway/observability/instruments.py",
+        "backend/van_gateway/app.py",
+        "android/app/src/main/java/com/dial/van/telemetry/DeviceTelemetry.kt"
+      ],
+      "runtime_evidence": [],
+      "affected_components": [
+        "gateway",
+        "android",
+        "observability"
+      ],
+      "root_cause": "A dimension designed for the one metric that needed it. The three device tables also had three different shapes, so a caller asking \"what can a device write\" had to know which of them to read — which is how `DEVICE_COUNTERS` was once added beside two others and missed by the contract test whose job was to catch exactly that.",
+      "remediation": "Give the three tables one declared shape, `DeviceMetric(metric, dimension, dimension_default)`; add a generic `dimension` field to the wire beside `surface` rather than renaming it; refuse a sample for a labelled series that carries no value for the label.",
+      "impact": "Bounded, and the bound is the point: §20.15's depth could not be reported, and any future device metric needing a dimension would have had to reuse `surface` under a name that means something else.",
+      "validation_gate": "G11",
+      "current_status": "CLOSED",
+      "remediation_gate": "RB C11",
+      "closure": {
+        "state": "INTEGRATED_AND_EVIDENCED",
+        "summary": "One shape for the three tables, one helper (`ingestible_metrics`) that answers what a device can write, and a dimension slot that is refused rather than defaulted when the metric declares one and the sample does not carry it.\n\n`surface` is kept as its own wire field rather than folded in, because shipped devices post it: a rename would have dropped the aura label from every phone that had not been updated, and the symptom would have been one merged series rather than an error. The cross-language contract now compares dimension *names* rather than a boolean, so a phone that posted its outbox depth in the surface field fails the contract instead of being silently refused at the route.",
+        "changed": [
+          "backend/van_gateway/observability/instruments.py",
+          "backend/van_gateway/app.py",
+          "android/app/src/main/java/com/dial/van/telemetry/DeviceTelemetry.kt",
+          "tests/contracts/test_device_telemetry_contract.py"
+        ],
+        "verified_by": [
+          "backend/tests/test_observability_metrics.py",
+          "tests/contracts/test_device_telemetry_contract.py"
+        ],
+        "counterexample": "Recording a dimensionless sample under `unknown` passes every ingest test and puts a queue of approval-bearing commands in the same bucket as a retry queue, which is the reading an operator would act on backwards. `test_a_labelled_device_sample_without_its_label_is_refused_not_bucketed` requires the refusal.",
+        "residual": "One dimension per device metric, by construction. A device that could name its own labels could make a series' cardinality a function of what it decided to send.",
+        "residual_reason": "Deliberate. The bound is the defence; a second dimension would be a declared change to this table rather than something a phone can do.",
+        "residual_class": "DELIBERATE_SCOPE",
+        "posture": "fail-closed"
+      }
+    },
+    {
+      "id": "P2-AND-017",
+      "severity": "P2",
+      "domain": "android",
+      "title": "The session's interaction signal had no producer, so the heartbeat was permanently in its idle cadence",
+      "description": "`VanHermesSessionManager.setInteractionActive` decides two things: §20.8's heartbeat cadence, and — once the warm standby existed — whether a spare path is worth holding open. Nothing called it. The field was initialised false and stayed false for the life of the process.\n\nThe effect was invisible in the ordinary case and exactly wrong in the case that matters: the session used its idle heartbeat interval while the owner was sitting watching a command they had just submitted, so a path that died during their turn took the idle detection interval to be noticed.\n\n`TransportSupervisor.observe` takes `interactionActive` as a parameter and the manager passed it through faithfully. Every layer was correct and the value was never true.",
+      "requirement": "docs/VAN_REMOTE_BROWSER_PRODUCTION_BLUEPRINT_REV_1_5.md §§20.8, 20.9",
+      "authority": "VAN Remote Browser Production Blueprint Rev 1.5",
+      "repository_evidence": [
+        "android/app/src/main/java/com/dial/van/session/VanHermesSessionManager.kt",
+        "android/app/src/main/java/com/dial/van/VanApplication.kt"
+      ],
+      "runtime_evidence": [],
+      "affected_components": [
+        "android",
+        "session"
+      ],
+      "root_cause": "A setter with no caller. The parameter threaded correctly through three layers, which is what made it read as wired.",
+      "remediation": "Drive it from the conversation's own state — something submitted and unanswered, or an A4 the owner is being asked to approve — rather than from whether the app is in the foreground.",
+      "impact": "A path failure during the owner's turn was detected on the idle schedule. With the warm standby added, the same false value would have kept the spare path cold at precisely the moment §20.9 wants it warm.",
+      "validation_gate": "G10",
+      "current_status": "CLOSED",
+      "remediation_gate": "RB C11",
+      "closure": {
+        "state": "EXTERNALLY_BLOCKED_REPOSITORY_COMPLETE",
+        "summary": "`VanApplication.startInteractionWatch` collects `VanCommandController.state` and sets the flag from `submitting || pendingA4Approval != null`.\n\nThe signal is deliberately not foreground: a phone face-down on a desk with a command in flight is the case a failover has to be invisible for, and a phone in the owner's hand with nothing outstanding is not worth a second socket's battery. The same call re-evaluates the standby decision, so the two things §20.8 and §20.9 derive from \"active interaction\" come from one signal rather than two.",
+        "changed": [
+          "android/app/src/main/java/com/dial/van/VanApplication.kt"
+        ],
+        "verified_by": [
+          "tests/contracts/test_android_compiles_at_all.py"
+        ],
+        "counterexample": "A caller that set the flag from an Activity lifecycle callback would pass any test that asserts the setter has a caller, and would be false for the backgrounded phone that is exactly the case §20.9 describes. The producer here is the conversation's own unanswered work, which is true in that case.",
+        "residual": "`VanApplication` is Android and cannot be executed in this repository. What is checked is that the call exists and that the file compiles as Kotlin.",
+        "residual_reason": "The Android Gradle Plugin is unreachable in this container, so CI's Android build is the only compiler for the app module. The decision this feeds — `WarmStandbyPolicy.decide` — is pure and is executed.",
+        "residual_class": "ENVIRONMENT_UNVERIFIED",
+        "posture": "fail-open"
       }
     }
   ],

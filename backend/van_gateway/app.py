@@ -84,6 +84,7 @@ from van_gateway.browser.interactive_api import (
     is_interactive_browser_owner_route,
 )
 from van_gateway.browser.interactive_service import InteractiveSessionService
+from van_gateway.browser.quality_api import QualityControllers, build_quality_router
 from van_gateway.browser.stream_grants import (
     SigningKey,
     StreamGrantService,
@@ -250,6 +251,11 @@ class DeviceTelemetrySample(BaseModel):
     name: str
     value: float
     surface: str | None = None
+    #: The one dimension a series other than `aura_frame_time_ms` may carry — the
+    #: storability of a queued command, today. Kept separate from `surface` because
+    #: `surface` is already on the wire and shipped devices post it; renaming it here
+    #: would quietly drop the aura label from every phone that had not been updated.
+    dimension: str | None = None
 
 
 class DeviceTelemetryBody(BaseModel):
@@ -779,6 +785,16 @@ def create_app() -> FastAPI:
         app.state.browser_agent_grants = agent_grants
         downloads_broker = DownloadBroker(store)
         app.state.browser_downloads = downloads_broker
+        # §27 — the link report. `BrowserQualityController` was written, correct and
+        # called by nothing; this is the caller. The phone measures what only it can see,
+        # the Gateway picks the rung, and the target travels back.
+        #
+        # Built before the interactive router because that router is handed its
+        # `forget`: the §27.3 byte accounting and the §27.4 hysteresis are per session,
+        # and a controller that outlived its session would report the previous owner's
+        # data usage to the next one.
+        quality_controllers = QualityControllers()
+        app.state.browser_quality = quality_controllers
         app.include_router(build_interactive_router(
             sessions=interactive_sessions,
             control=browser_control_leases,
@@ -789,6 +805,7 @@ def create_app() -> FastAPI:
             ice_servers=_parse_ice_servers(settings.browser_stream_ice_servers),
             mission_binder=mission_binder,
             audit=audit,
+            on_session_ended=quality_controllers.forget,
         ))
         # §18 — the Hermes-scoped side of the same records. Separate router because
         # it is a different authority, not a different concern: the owner's phone
@@ -797,6 +814,10 @@ def create_app() -> FastAPI:
             broker=downloads_broker,
             sessions=interactive_sessions,
             audit=audit,
+        ))
+        app.include_router(build_quality_router(
+            controllers=quality_controllers,
+            sessions=interactive_sessions,
         ))
     # Rev 1.5 §20 — the durable logical session. It holds no command authority: the
     # router delegates to the same POST /v1/commands path the phone has always used, and
@@ -1961,9 +1982,16 @@ def create_app() -> FastAPI:
         for sample in body.samples[:200]:
             try:
                 accepted.append(observability_instruments.record_device_sample(
-                    sample.name, sample.value, surface=sample.surface
+                    sample.name, sample.value,
+                    surface=sample.surface, dimension=sample.dimension,
                 ))
             except observability_instruments.UnknownDeviceMetric:
+                refused.append(sample.name)
+            except observability_instruments.DeviceDimensionMissing:
+                # Refused rather than recorded under a default. A depth with no
+                # storability would put approval-bearing commands in the same bucket as
+                # a retry queue, and an operator reading that chart would be told the
+                # opposite of what is true.
                 refused.append(sample.name)
         return {"accepted": len(accepted), "refused": refused}
 

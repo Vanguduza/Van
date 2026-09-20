@@ -250,6 +250,22 @@ def check_matrix(matrix_path: Path | None = None, ledger_path: Path | None = Non
         if r.get("certified") and not all(r.get(rung) for rung in PROGRESS_LADDER):
             problems.append(f"{rid}: certified with an incomplete ladder {PROGRESS_LADDER}")
 
+        # §40.5 — the column that says which rows a commit can still move.
+        #
+        # An empty list could mean either "nothing external is blocking this" or "nobody
+        # filled this in", and those are the two answers a reader most needs to tell
+        # apart: the first says the row is waiting on hardware, the second says the row
+        # has never been thought about. Forty rows carried an empty list, including
+        # several that were genuinely blocked, so the column could not be used for the
+        # one question it exists to answer. A row with no external blocker now says so in
+        # words, and the empty list becomes a violation rather than a silence.
+        if status != "CERTIFIED" and not (r.get("external_gates") or []):
+            problems.append(
+                f"{rid}: status {status} names no external_gates. A row with nothing "
+                "external says so in words; an empty list cannot be told from an "
+                "unfilled one."
+            )
+
         refs = r.get("component_refs") or []
         if refs and expectation == "NONE":
             problems.append(

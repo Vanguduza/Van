@@ -130,7 +130,19 @@ def build_interactive_router(
     ice_servers: list[dict[str, Any]],
     mission_binder: Any | None = None,
     audit: Any | None = None,
+    on_session_ended: Any | None = None,
 ) -> APIRouter:
+    """`on_session_ended` is called with a session id once it reaches a terminal state.
+
+    It exists for per-session state that is *not* in the session row — the §27 quality
+    controller, today. That controller holds the hysteresis streak and the §27.3 byte
+    accounting, and leaving it behind would mean the next session on the same id (or a
+    long-lived process accumulating them) reports the previous owner's data usage.
+
+    Deliberately a callback rather than a service reference: this router has no business
+    knowing what quality control is, and a second caller wanting the same hook should not
+    have to add a second parameter.
+    """
     router = APIRouter(prefix=INTERACTIVE_SESSION_PREFIX, tags=["browser-interactive"])
 
     async def _owned(request: Request, session_id: str) -> InteractiveBrowserSession:
@@ -152,6 +164,20 @@ def build_interactive_router(
             raise HTTPException(status_code=404, detail="interactive_session_unknown")
         return session
 
+    def _forget(session_id: str) -> None:
+        """Best-effort by design: per-session cache state is not worth failing a close.
+
+        An owner ending a session and being shown a 500 because a cache eviction raised
+        is the wrong trade — the session really did end, and the stale controller is a
+        leak rather than a correctness failure.
+        """
+        if on_session_ended is None:
+            return
+        try:
+            on_session_ended(session_id)
+        except Exception:  # noqa: BLE001 - see docstring
+            pass
+
     async def _abandon(session: InteractiveBrowserSession) -> None:
         """Unwind a session that was created and must not survive.
 
@@ -168,6 +194,7 @@ def build_interactive_router(
             session_id=session.session_id,
             target=InteractiveSessionState.TERMINATED, reason="mission_binding_refused",
         )
+        _forget(session.session_id)
 
     @router.post("")
     async def create_session(request: Request, body: CreateSessionBody):
@@ -398,6 +425,7 @@ def build_interactive_router(
             session_id=session.session_id,
             target=InteractiveSessionState.TERMINATED, reason="owner_closed",
         )
+        _forget(session.session_id)
         if audit is not None:
             await audit.record(
                 result="ok", device_id=session.owner_device_id,

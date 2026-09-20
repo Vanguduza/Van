@@ -87,6 +87,7 @@ sourceSets {
             "com/dial/van/gateway/ReplayTrigger.kt",
             "com/dial/van/telemetry/DeviceTelemetry.kt",
             "com/dial/van/telemetry/BrowserStreamTelemetry.kt",
+            "com/dial/van/telemetry/SessionTelemetry.kt",
             "com/dial/van/trading/TradingFormat.kt",
             "com/dial/van/trading/ChartViewport.kt",
             "com/dial/van/voice/SpeakerVerification.kt",
@@ -122,6 +123,8 @@ sourceSets {
             "com/dial/van/connectivity/ConnectivityManifest.kt",
             "com/dial/van/session/SessionEnvelope.kt",
             "com/dial/van/session/TransportSupervisor.kt",
+            "com/dial/van/session/WarmStandby.kt",
+            "com/dial/van/session/DurableOutbox.kt",
             // The two byte formats the gateway also implements. They are here because the
             // drift they are exposed to is invisible in a source diff: two canonicalizers
             // that agree on every ASCII document and disagree on one accented character.

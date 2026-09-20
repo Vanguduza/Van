@@ -82,25 +82,42 @@ class Metric:
     unit: str = ""
     buckets: tuple[float, ...] = ()
     labels: tuple[str, ...] = ()
-    #: Whether a correctly-working gateway can produce no sample of this for its entire
-    #: uptime. True for exactly one thing here: an instrument that cannot fire unless a
-    #: Browser Stream Host exists, and the Stream Host is an optional deployment (§13).
+    #: What has to exist before this instrument can produce anything, or "" when a
+    #: running gateway must produce it on its own.
+    #:
+    #: A named component rather than a boolean, because "silence is fine here" is not a
+    #: fact about the metric — it is a fact about a *missing* component, and an operator
+    #: reading a permanently empty series needs to know which one. The boolean this
+    #: replaced said only that nobody would be paged.
     #:
     #: `INSTRUMENT_SILENT` is the rule this feeds, and the distinction is the same one
-    #: `MetricSource.DEVICE` already carries: a gateway with no host produces none of
-    #: these, forever, and an alert nobody can clear is an alert operators learn to
-    #: ignore. It is a separate field rather than another source because the source
-    #: answers "who writes it" — the Gateway does write these — and this answers
-    #: "must something have written it by now".
-    silence_is_normal: bool = False
+    #: `MetricSource.DEVICE` already carries: the Gateway does write these, so the source
+    #: is right; what it cannot do is write them alone.
+    silence_needs: str = ""
+
+    @property
+    def silence_is_normal(self) -> bool:
+        """Whether `INSTRUMENT_SILENT` should skip this metric."""
+        return bool(self.silence_needs)
 
 
 def _m(name, kind, source, help_, produced_by, unit="", buckets=(), labels=(),
-       silence_is_normal=False):
+       silence_needs=""):
     return Metric(
         name=name, kind=kind, source=source, help=help_, produced_by=produced_by,
-        unit=unit, buckets=buckets, labels=labels, silence_is_normal=silence_is_normal,
+        unit=unit, buckets=buckets, labels=labels, silence_needs=silence_needs,
     )
+
+
+#: The components a Gateway instrument may be waiting on, and the only values
+#: `silence_needs` may take.
+#:
+#: Closed on purpose. An open string would let the next metric excuse itself from
+#: `INSTRUMENT_SILENT` with a sentence nobody checks, which is how an alert that matters
+#: gets quietly switched off.
+NEEDS_STREAM_HOST = "a Browser Stream Host (§13)"
+NEEDS_PAIRED_DEVICE = "a paired owner device driving a logical session (§20)"
+SILENCE_REASONS = frozenset({NEEDS_STREAM_HOST, NEEDS_PAIRED_DEVICE})
 
 
 #: Gate 11's metric list, one entry each, in the blueprint's order.
@@ -172,27 +189,57 @@ CATALOGUE: tuple[Metric, ...] = (
     _m("van_browser_session_active", MetricKind.GAUGE, MetricSource.GATEWAY,
        "Interactive browser sessions currently in a non-terminal state.",
        "van_gateway.observability.instruments.set_browser_sessions_active",
-       "sessions", (), (), silence_is_normal=True),
+       "sessions", (), (), silence_needs=NEEDS_STREAM_HOST),
     _m("van_browser_session_connect_ms", MetricKind.HISTOGRAM, MetricSource.GATEWAY,
        "Time from an interactive session being created to its first stream grant.",
        "van_gateway.observability.instruments.record_browser_connect",
-       "milliseconds", LATENCY_BUCKETS_MS, (), silence_is_normal=True),
+       "milliseconds", LATENCY_BUCKETS_MS, (), silence_needs=NEEDS_STREAM_HOST),
     _m("van_browser_input_dispatch_ms", MetricKind.HISTOGRAM, MetricSource.GATEWAY,
        "Time from an input packet being admitted to it being dispatched.",
        "van_gateway.observability.instruments.record_browser_input_dispatch",
-       "milliseconds", FRAME_BUCKETS_MS, (), silence_is_normal=True),
+       "milliseconds", FRAME_BUCKETS_MS, (), silence_needs=NEEDS_STREAM_HOST),
     _m("van_browser_control_preempt_ms", MetricKind.HISTOGRAM, MetricSource.GATEWAY,
        "Time from an owner preemption to the control generation being invalidated.",
        "van_gateway.observability.instruments.record_control_preempt",
-       "milliseconds", FRAME_BUCKETS_MS, (), silence_is_normal=True),
+       "milliseconds", FRAME_BUCKETS_MS, (), silence_needs=NEEDS_STREAM_HOST),
     _m("van_browser_agent_grant_total", MetricKind.COUNTER, MetricSource.GATEWAY,
        "Agent grants by the state they ended in, including preemption by the owner.",
        "van_gateway.observability.instruments.record_agent_grant", "", (), ("state",),
-       silence_is_normal=True),
+       silence_needs=NEEDS_STREAM_HOST),
     _m("van_browser_download_total", MetricKind.COUNTER, MetricSource.GATEWAY,
        "Downloads by the state they reached; QUARANTINED is the one worth watching.",
        "van_gateway.observability.instruments.record_download", "", (), ("state",),
-       silence_is_normal=True),
+       silence_needs=NEEDS_STREAM_HOST),
+
+    # Rev 1.5 §27 — the quality regime a session is actually in, and §20.10's failover.
+    #
+    # The Gateway owns these because it owns the decision: it is handed the phone's link
+    # observation and picks the rung. Declaring the *mode* rather than the raw link
+    # numbers is deliberate — RTT and loss are the device's to report, and a gauge here
+    # carrying them would be the Gateway restating a measurement it did not take.
+    _m("van_browser_quality_mode", MetricKind.COUNTER, MetricSource.GATEWAY,
+       "Quality verdicts by the rung chosen and whether the link was metered.",
+       "van_gateway.observability.instruments.record_quality_mode", "", (),
+       ("mode", "metered"), silence_needs=NEEDS_STREAM_HOST),
+    _m("van_session_failover_total", MetricKind.COUNTER, MetricSource.GATEWAY,
+       "Logical-session path failovers by outcome and by whether the route changed.",
+       "van_gateway.observability.instruments.record_session_failover", "", (),
+       ("outcome", "route_changed"), silence_needs=NEEDS_PAIRED_DEVICE),
+    # These two are the device's measurements, not the Gateway's, and saying so is the
+    # whole point. The Gateway learns that a failover happened when the resume arrives,
+    # which is after the gap the owner experienced; and the store-and-forward queue is on
+    # the phone, so a Gateway gauge of its depth would be a number nobody can take.
+    #
+    # The honest consequence, worth knowing before reading a chart of either: a phone
+    # reports these on its next successful post, so the deepest outbox is the one that
+    # has not been reported yet. A flat zero means no phone has spoken, not that no
+    # phone has work waiting.
+    _m("van_session_failover_ms", MetricKind.HISTOGRAM, MetricSource.DEVICE,
+       "Owner-visible gap from a path being marked suspect to the new path carrying work.",
+       "Android device telemetry", "milliseconds", LATENCY_BUCKETS_MS, ()),
+    _m("van_session_outbox_depth", MetricKind.GAUGE, MetricSource.DEVICE,
+       "Commands held in store-and-forward, by what the outbox is allowed to do with them.",
+       "Android device telemetry", "commands", (), ("storability",)),
 
     _m("van_browser_frame_fps", MetricKind.GAUGE, MetricSource.STREAM_HOST,
        "Frames per second the stream host is producing for the owner's session.",

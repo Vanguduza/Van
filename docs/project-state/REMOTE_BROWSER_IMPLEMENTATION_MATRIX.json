@@ -49,7 +49,9 @@
         "evidence/van-remote-browser/PREFLIGHT_REV_1_5.md"
       ],
       "tests": [],
-      "external_gates": [],
+      "external_gates": [
+        "nothing external: this needs a run against real hardware, which no commit can supply"
+      ],
       "transport_independent": false,
       "offline_voice_proven": null,
       "note": "The \u00a742.1 read and the \u00a749 checklist, executed against main at 66e4e42. Fifteen repository claims checked, fifteen held; four corrections recorded in \u00a70F."
@@ -358,7 +360,9 @@
       "authority": "docs/VAN_REMOTE_BROWSER_PRODUCTION_BLUEPRINT_REV_1_5.md \u00a725.2",
       "evidence_refs": [],
       "tests": [],
-      "external_gates": [],
+      "external_gates": [
+        "nothing external: this is not built, and a commit to this repository is what it needs"
+      ],
       "transport_independent": false,
       "offline_voice_proven": null
     },
@@ -384,7 +388,9 @@
       "authority": "docs/VAN_REMOTE_BROWSER_PRODUCTION_BLUEPRINT_REV_1_5.md \u00a714",
       "evidence_refs": [],
       "tests": [],
-      "external_gates": [],
+      "external_gates": [
+        "nothing external: this is not built, and a commit to this repository is what it needs"
+      ],
       "transport_independent": false,
       "offline_voice_proven": null
     },
@@ -410,7 +416,9 @@
       "authority": "docs/VAN_REMOTE_BROWSER_PRODUCTION_BLUEPRINT_REV_1_5.md \u00a7ADR-RB-003",
       "evidence_refs": [],
       "tests": [],
-      "external_gates": [],
+      "external_gates": [
+        "nothing external: this is not built, and a commit to this repository is what it needs"
+      ],
       "transport_independent": false,
       "offline_voice_proven": null
     },
@@ -436,7 +444,9 @@
       "authority": "docs/VAN_REMOTE_BROWSER_PRODUCTION_BLUEPRINT_REV_1_5.md \u00a77.2",
       "evidence_refs": [],
       "tests": [],
-      "external_gates": [],
+      "external_gates": [
+        "nothing external: this is not built, and a commit to this repository is what it needs"
+      ],
       "transport_independent": false,
       "offline_voice_proven": null
     },
@@ -462,7 +472,9 @@
       "authority": "docs/VAN_REMOTE_BROWSER_PRODUCTION_BLUEPRINT_REV_1_5.md \u00a715",
       "evidence_refs": [],
       "tests": [],
-      "external_gates": [],
+      "external_gates": [
+        "nothing external: this is not built, and a commit to this repository is what it needs"
+      ],
       "transport_independent": false,
       "offline_voice_proven": null
     },
@@ -488,7 +500,9 @@
       "authority": "docs/VAN_REMOTE_BROWSER_PRODUCTION_BLUEPRINT_REV_1_5.md \u00a715",
       "evidence_refs": [],
       "tests": [],
-      "external_gates": [],
+      "external_gates": [
+        "nothing external: this is not built, and a commit to this repository is what it needs"
+      ],
       "transport_independent": false,
       "offline_voice_proven": null
     },
@@ -918,10 +932,10 @@
       "id": "RB-030",
       "name": "metered-network policy/data counter",
       "group": "android",
-      "status": "BUILT_UNWIRED",
+      "status": "WIRED_UNPROVEN",
       "built": true,
-      "wired": false,
-      "reachable": false,
+      "wired": true,
+      "reachable": true,
       "live": false,
       "verified": false,
       "observed": false,
@@ -929,18 +943,20 @@
       "certified": false,
       "component_refs": [],
       "ledger_expectation": "NONE",
-      "producer": "BrowserQualityController metered ladder",
-      "consumer": "the Android quality surface",
+      "producer": "LinkReportBody.metered and the METERED ladder",
+      "consumer": "the link-report response's profile, quality_mode and accounting",
       "authority": "docs/VAN_REMOTE_BROWSER_PRODUCTION_BLUEPRINT_REV_1_5.md \u00a727",
       "evidence_refs": [],
       "tests": [
-        "backend/tests/test_browser_input_protocol.py"
+        "backend/tests/test_browser_quality_api.py"
       ],
       "external_gates": [
-        "a Browser Stream Host running the CDP input router (RB-010/RB-017)"
+        "a Browser Stream Host producing media to account for (RB-010)",
+        "the Android build is compiled only in CI; the AGP is unreachable in the audit container"
       ],
       "transport_independent": false,
-      "offline_voice_proven": null
+      "offline_voice_proven": null,
+      "note": "\u00a727.2 stated in the negative: VAN must not silently consume hours of someone's mobile data. Metered is the default and the owner opts in per session, never as a stored preference \u2014 turning it on for one session on hotel wi-fi must not turn it on for the next one on a train.\n\n\u00a726.2's rule is the one the route is shaped by: a metered session that does not reach the unmetered target has not failed. It is judged against the metered profile, the verdict names which profile it was measured against, and `high_quality_certified` is false under the metered one whatever the numbers say."
     },
     {
       "schema": "van-implementation-matrix/1",
@@ -1028,7 +1044,9 @@
       "authority": "docs/VAN_REMOTE_BROWSER_PRODUCTION_BLUEPRINT_REV_1_5.md \u00a729",
       "evidence_refs": [],
       "tests": [],
-      "external_gates": [],
+      "external_gates": [
+        "nothing external: this is not built, and a commit to this repository is what it needs"
+      ],
       "transport_independent": false,
       "offline_voice_proven": null
     },
@@ -1480,10 +1498,10 @@
       "id": "RB-048",
       "name": "quality adaptation",
       "group": "streamhost",
-      "status": "BUILT_UNWIRED",
+      "status": "WIRED_UNPROVEN",
       "built": true,
-      "wired": false,
-      "reachable": false,
+      "wired": true,
+      "reachable": true,
       "live": false,
       "verified": false,
       "observed": false,
@@ -1491,18 +1509,19 @@
       "certified": false,
       "component_refs": [],
       "ledger_expectation": "NONE",
-      "producer": "BrowserQualityController",
-      "consumer": "the stream host's encoder and the Android badge",
+      "producer": "BrowserQualityController, via POST .../link-report",
+      "consumer": "the response's target, which the Stream Host adapts toward",
       "authority": "docs/VAN_REMOTE_BROWSER_PRODUCTION_BLUEPRINT_REV_1_5.md \u00a727",
       "evidence_refs": [],
       "tests": [
-        "backend/tests/test_browser_input_protocol.py"
+        "backend/tests/test_browser_quality_api.py"
       ],
       "external_gates": [
-        "a Browser Stream Host running the CDP input router (RB-010/RB-017)"
+        "a Browser Stream Host that adapts toward the target; the Gateway returns a target and is deliberately not in the media path (\u00a76.4), so nothing here can observe whether an encoder followed it (RB-010)"
       ],
       "transport_independent": false,
-      "offline_voice_proven": null
+      "offline_voice_proven": null,
+      "note": "The controller was correct, unit-tested and had no caller. This is the caller.\n\nThe target travels back as a target rather than as an instruction: a phone that could command an encoder directly would be a second actuation path with no control lease behind it. What the repository can now prove is that the rung is chosen from the sample, that \u00a727.4's streak survives across requests, and that \u00a726.2's certification cannot be asserted by the caller \u2014 the body has no field for it and refuses extras, so the claim is refused where it is made."
     },
     {
       "schema": "van-implementation-matrix/1",
@@ -1627,7 +1646,9 @@
       "authority": "docs/VAN_REMOTE_BROWSER_PRODUCTION_BLUEPRINT_REV_1_5.md \u00a738",
       "evidence_refs": [],
       "tests": [],
-      "external_gates": [],
+      "external_gates": [
+        "nothing external: this is not built, and a commit to this repository is what it needs"
+      ],
       "transport_independent": false,
       "offline_voice_proven": null
     },
@@ -1653,7 +1674,9 @@
       "authority": "docs/VAN_REMOTE_BROWSER_PRODUCTION_BLUEPRINT_REV_1_5.md \u00a737",
       "evidence_refs": [],
       "tests": [],
-      "external_gates": [],
+      "external_gates": [
+        "nothing external: this is not built, and a commit to this repository is what it needs"
+      ],
       "transport_independent": false,
       "offline_voice_proven": null
     },
@@ -1679,7 +1702,9 @@
       "authority": "docs/VAN_REMOTE_BROWSER_PRODUCTION_BLUEPRINT_REV_1_5.md \u00a737",
       "evidence_refs": [],
       "tests": [],
-      "external_gates": [],
+      "external_gates": [
+        "nothing external: this is not built, and a commit to this repository is what it needs"
+      ],
       "transport_independent": false,
       "offline_voice_proven": null
     },
@@ -1705,7 +1730,9 @@
       "authority": "docs/VAN_REMOTE_BROWSER_PRODUCTION_BLUEPRINT_REV_1_5.md \u00a737",
       "evidence_refs": [],
       "tests": [],
-      "external_gates": [],
+      "external_gates": [
+        "nothing external: this is not built, and a commit to this repository is what it needs"
+      ],
       "transport_independent": false,
       "offline_voice_proven": null
     },
@@ -1731,7 +1758,9 @@
       "authority": "docs/VAN_REMOTE_BROWSER_PRODUCTION_BLUEPRINT_REV_1_5.md \u00a737",
       "evidence_refs": [],
       "tests": [],
-      "external_gates": [],
+      "external_gates": [
+        "nothing external: this is not built, and a commit to this repository is what it needs"
+      ],
       "transport_independent": false,
       "offline_voice_proven": null
     },
@@ -1757,7 +1786,9 @@
       "authority": "docs/VAN_REMOTE_BROWSER_PRODUCTION_BLUEPRINT_REV_1_5.md \u00a743",
       "evidence_refs": [],
       "tests": [],
-      "external_gates": [],
+      "external_gates": [
+        "nothing external: this is not built, and a commit to this repository is what it needs"
+      ],
       "transport_independent": false,
       "offline_voice_proven": null
     },
@@ -1783,7 +1814,9 @@
       "authority": "docs/VAN_REMOTE_BROWSER_PRODUCTION_BLUEPRINT_REV_1_5.md \u00a743",
       "evidence_refs": [],
       "tests": [],
-      "external_gates": [],
+      "external_gates": [
+        "nothing external: this is not built, and a commit to this repository is what it needs"
+      ],
       "transport_independent": false,
       "offline_voice_proven": null
     },
@@ -1811,7 +1844,9 @@
       "tests": [
         "backend/tests/test_van_hermes_session.py"
       ],
-      "external_gates": [],
+      "external_gates": [
+        "nothing external: this needs a run against real hardware, which no commit can supply"
+      ],
       "transport_independent": true,
       "offline_voice_proven": null
     },
@@ -1929,7 +1964,9 @@
       "tests": [
         "backend/tests/test_van_hermes_session.py"
       ],
-      "external_gates": [],
+      "external_gates": [
+        "nothing external: this needs a run against real hardware, which no commit can supply"
+      ],
       "transport_independent": true,
       "offline_voice_proven": null
     },
@@ -1970,10 +2007,10 @@
       "id": "RB-065",
       "name": "warm standby",
       "group": "session",
-      "status": "NOT_STARTED",
-      "built": false,
-      "wired": false,
-      "reachable": false,
+      "status": "WIRED_UNPROVEN",
+      "built": true,
+      "wired": true,
+      "reachable": true,
       "live": false,
       "verified": false,
       "observed": false,
@@ -1981,14 +2018,20 @@
       "certified": false,
       "component_refs": [],
       "ledger_expectation": "NONE",
-      "producer": null,
-      "consumer": null,
+      "producer": "WarmStandbyPolicy.decide",
+      "consumer": "VanHermesSessionManager.reconsiderStandby, fed by VanApplication",
       "authority": "docs/VAN_REMOTE_BROWSER_PRODUCTION_BLUEPRINT_REV_1_5.md \u00a7ADR-RB-012",
       "evidence_refs": [],
-      "tests": [],
-      "external_gates": [],
+      "tests": [
+        "android/verification/src/test/kotlin/com/dial/van/session/WarmStandbyTest.kt"
+      ],
+      "external_gates": [
+        "a second independently reachable ingress; with one ingress the policy correctly answers COLD, so the warm case cannot be reached in this deployment (RB-002)",
+        "the Android build is compiled only in CI; the AGP is unreachable in the audit container"
+      ],
       "transport_independent": true,
-      "offline_voice_proven": null
+      "offline_voice_proven": null,
+      "note": "ADR-RB-012's policy, with the asymmetry that carries the weight: a warm path is connected and authenticated and may not carry a new owner message. A boolean would have said whether a spare was open and nothing about what it may send, which is where the duplicate \u00a720.12 exists to reject would come from \u2014 VAN's own client, before the Gateway ever sees it.\n\nWIRED rather than LIVE on purpose. `DEFAULT_PATHS` declares two protocols over one ingress, so `independentRouteAvailable` is false and every decision in this build is COLD with the reason \"no second route\". That is the honest answer, not a gap: \u00a70B says a spare on the same road fails with the first."
     },
     {
       "schema": "van-implementation-matrix/1",
@@ -2012,11 +2055,16 @@
       "authority": "docs/VAN_REMOTE_BROWSER_PRODUCTION_BLUEPRINT_REV_1_5.md \u00a720",
       "evidence_refs": [],
       "tests": [
-        "backend/tests/test_van_hermes_session.py"
+        "backend/tests/test_session_transport_api.py",
+        "backend/tests/test_van_hermes_session.py",
+        "tests/contracts/test_session_epoch_contract.py"
       ],
-      "external_gates": [],
+      "external_gates": [
+        "the Android app module is compiled only in CI; the session manager imports OkHttp and is not in the pure-Kotlin harness"
+      ],
       "transport_independent": true,
-      "offline_voice_proven": null
+      "offline_voice_proven": null,
+      "note": "P0-SESS-001. Both halves read as wired and the pair did not work. The Gateway grants `authoritative_path_epoch + 1` on every accepted resume and fences any envelope that does not carry it; the phone kept the epoch `/open` gave it and incremented a counter of its own on each socket failure.\n\nThe device resumes on `onOpen`, before anything has failed, so on a healthy first connect every owner message was refused with `session_path_epoch_stale` \u2014 on a session both sides reported as connected. The local counter was wrong in the other direction too: it agreed after one failure and one resume, and diverged permanently after two failures in a row, which is what a carrier handover on a moving train looks like.\n\nFound by probing the running service, not by reading either side. Now pinned at the route and across the two languages, including the case that would have caught the original shape: the grant is adopted on an ordinary resume and not only on a failover."
     },
     {
       "schema": "van-implementation-matrix/1",
@@ -2040,11 +2088,16 @@
       "authority": "docs/VAN_REMOTE_BROWSER_PRODUCTION_BLUEPRINT_REV_1_5.md \u00a720",
       "evidence_refs": [],
       "tests": [
-        "backend/tests/test_van_hermes_session.py"
+        "backend/tests/test_session_transport_api.py",
+        "backend/tests/test_van_hermes_session.py",
+        "tests/contracts/test_session_epoch_contract.py"
       ],
-      "external_gates": [],
+      "external_gates": [
+        "the Android app module is compiled only in CI; the session manager imports OkHttp and is not in the pure-Kotlin harness"
+      ],
       "transport_independent": true,
-      "offline_voice_proven": null
+      "offline_voice_proven": null,
+      "note": "P0-SESS-001. Both halves read as wired and the pair did not work. The Gateway grants `authoritative_path_epoch + 1` on every accepted resume and fences any envelope that does not carry it; the phone kept the epoch `/open` gave it and incremented a counter of its own on each socket failure.\n\nThe device resumes on `onOpen`, before anything has failed, so on a healthy first connect every owner message was refused with `session_path_epoch_stale` \u2014 on a session both sides reported as connected. The local counter was wrong in the other direction too: it agreed after one failure and one resume, and diverged permanently after two failures in a row, which is what a carrier handover on a moving train looks like.\n\nFound by probing the running service, not by reading either side. Now pinned at the route and across the two languages, including the case that would have caught the original shape: the grant is adopted on an ordinary resume and not only on a failover."
     },
     {
       "schema": "van-implementation-matrix/1",
@@ -2070,7 +2123,9 @@
       "tests": [
         "backend/tests/test_van_hermes_session.py"
       ],
-      "external_gates": [],
+      "external_gates": [
+        "nothing external: this needs a run against real hardware, which no commit can supply"
+      ],
       "transport_independent": true,
       "offline_voice_proven": null
     },
@@ -2080,10 +2135,10 @@
       "id": "RB-069",
       "name": "encrypted durable outbox extension",
       "group": "session",
-      "status": "NOT_STARTED",
-      "built": false,
-      "wired": false,
-      "reachable": false,
+      "status": "WIRED_UNPROVEN",
+      "built": true,
+      "wired": true,
+      "reachable": true,
       "live": false,
       "verified": false,
       "observed": false,
@@ -2091,14 +2146,19 @@
       "certified": false,
       "component_refs": [],
       "ledger_expectation": "NONE",
-      "producer": null,
-      "consumer": null,
+      "producer": "DurableOutbox",
+      "consumer": "VanHermesSessionManager.submit, flushOutbox and reconfirm",
       "authority": "docs/VAN_REMOTE_BROWSER_PRODUCTION_BLUEPRINT_REV_1_5.md \u00a72.7",
       "evidence_refs": [],
-      "tests": [],
-      "external_gates": [],
+      "tests": [
+        "android/verification/src/test/kotlin/com/dial/van/session/DurableOutboxTest.kt"
+      ],
+      "external_gates": [
+        "the Android build is compiled only in CI; the AGP is unreachable in the audit container"
+      ],
       "transport_independent": true,
-      "offline_voice_proven": null
+      "offline_voice_proven": null,
+      "note": "\u00a72.7 forbids a parallel replacement for `EncryptedCommandQueue`, so this is not one: the queue still owns the bytes and their encryption, and this owns the question \u00a720.14 asks after storage \u2014 may this still be sent, and does the owner have to be asked again first.\n\nThe sentence it exists for is \u00a720.14's last. `admit` returns null for an A4 or A5, so the only way to store one is to not call it, and there is no argument that overrides the classification. Expiry and staleness are kept apart deliberately: an expired command is dropped and the owner told it did not happen, because \"do you still want the thing you asked for four hours ago\" is a worse question than \"that did not happen\"."
     },
     {
       "schema": "van-implementation-matrix/1",
@@ -2138,10 +2198,10 @@
       "id": "RB-071",
       "name": "session failover telemetry",
       "group": "session",
-      "status": "NOT_STARTED",
-      "built": false,
-      "wired": false,
-      "reachable": false,
+      "status": "WIRED_UNPROVEN",
+      "built": true,
+      "wired": true,
+      "reachable": true,
       "live": false,
       "verified": false,
       "observed": false,
@@ -2149,14 +2209,21 @@
       "certified": false,
       "component_refs": [],
       "ledger_expectation": "NONE",
-      "producer": null,
-      "consumer": null,
+      "producer": "SessionTelemetry (device) and instruments.record_session_failover (gateway)",
+      "consumer": "van_session_failover_ms, van_session_outbox_depth, van_session_failover_total",
       "authority": "docs/VAN_REMOTE_BROWSER_PRODUCTION_BLUEPRINT_REV_1_5.md \u00a728",
       "evidence_refs": [],
-      "tests": [],
-      "external_gates": [],
+      "tests": [
+        "android/verification/src/test/kotlin/com/dial/van/telemetry/SessionTelemetryTest.kt",
+        "backend/tests/test_session_transport_api.py"
+      ],
+      "external_gates": [
+        "a paired owner device posting telemetry; the series are honestly unobserved until one does, and the deepest outbox is the one that has not been reported",
+        "the Android build is compiled only in CI; the AGP is unreachable in the audit container"
+      ],
       "transport_independent": true,
-      "offline_voice_proven": null
+      "offline_voice_proven": null,
+      "note": "Split by who can measure what, which is the only honest way to split it. The Gateway learns a failover happened when the resume arrives \u2014 after the gap the owner experienced \u2014 so it counts that one happened and whether the route changed, and nothing else. The duration and the outbox depth are the device's: the queue is on the phone and the interruption started before the Gateway heard anything.\n\n`route_changed` is the label that matters. Failing over to another carrier on the road that just broke is the most common way a failover changes nothing, and a counter that could not distinguish it would report recovery for a session that is still down."
     },
     {
       "schema": "van-implementation-matrix/1",
@@ -2432,7 +2499,9 @@
       "tests": [
         "backend/tests/test_voice_speech_stream.py"
       ],
-      "external_gates": [],
+      "external_gates": [
+        "nothing external: this needs a run against real hardware, which no commit can supply"
+      ],
       "transport_independent": false,
       "offline_voice_proven": false,
       "note": "\u00a721.14's rule is the whole module: clause, sentence or short paragraph, never arbitrary token chunks. A segment ending mid-sentence means a failover leaves the owner with half a clause and no way to tell. Abbreviations are not sentence ends, a sentence over the ceiling is cut at a clause rather than a character count, and one with no clause boundary goes whole \u2014 a long pause beats a severed word."
@@ -2462,7 +2531,9 @@
         "android/verification/src/test/kotlin/com/dial/van/voice/OfflineVoiceTest.kt",
         "backend/tests/test_voice_speech_stream.py"
       ],
-      "external_gates": [],
+      "external_gates": [
+        "nothing external: this needs a run against real hardware, which no commit can supply"
+      ],
       "transport_independent": false,
       "offline_voice_proven": false,
       "note": "Two cursors, not one, and the difference is the point: `last_received` is what reached the phone, `last_spoken` is what came out of the speaker. Resuming from the first puts a hole in the middle of the answer that nobody can see. Both halves are implemented \u2014 the Gateway serves from the spoken cursor and the device de-duplicates by segment id \u2014 and the resume route now carries `response_state`, which it previously accepted and never populated."
@@ -2582,7 +2653,9 @@
       "authority": "docs/VAN_REMOTE_BROWSER_PRODUCTION_BLUEPRINT_REV_1_5.md \u00a737",
       "evidence_refs": [],
       "tests": [],
-      "external_gates": [],
+      "external_gates": [
+        "nothing external: this is not built, and a commit to this repository is what it needs"
+      ],
       "transport_independent": false,
       "offline_voice_proven": null
     },
@@ -2608,7 +2681,9 @@
       "authority": "docs/VAN_REMOTE_BROWSER_PRODUCTION_BLUEPRINT_REV_1_5.md \u00a737",
       "evidence_refs": [],
       "tests": [],
-      "external_gates": [],
+      "external_gates": [
+        "nothing external: this is not built, and a commit to this repository is what it needs"
+      ],
       "transport_independent": false,
       "offline_voice_proven": null
     },
@@ -2790,7 +2865,9 @@
       "authority": "docs/VAN_REMOTE_BROWSER_PRODUCTION_BLUEPRINT_REV_1_5.md \u00a737",
       "evidence_refs": [],
       "tests": [],
-      "external_gates": [],
+      "external_gates": [
+        "nothing external: this is not built, and a commit to this repository is what it needs"
+      ],
       "transport_independent": false,
       "offline_voice_proven": null
     },
@@ -2816,7 +2893,9 @@
       "authority": "docs/VAN_REMOTE_BROWSER_PRODUCTION_BLUEPRINT_REV_1_5.md \u00a737",
       "evidence_refs": [],
       "tests": [],
-      "external_gates": [],
+      "external_gates": [
+        "nothing external: this is not built, and a commit to this repository is what it needs"
+      ],
       "transport_independent": false,
       "offline_voice_proven": null
     },
@@ -3030,7 +3109,9 @@
       "tests": [
         "backend/tests/test_owner_device_binding.py"
       ],
-      "external_gates": [],
+      "external_gates": [
+        "nothing external: this needs a run against real hardware, which no commit can supply"
+      ],
       "transport_independent": false,
       "offline_voice_proven": null
     },
@@ -3188,7 +3269,9 @@
       "tests": [
         "backend/tests/test_owner_device_binding.py"
       ],
-      "external_gates": [],
+      "external_gates": [
+        "nothing external: this needs a run against real hardware, which no commit can supply"
+      ],
       "transport_independent": false,
       "offline_voice_proven": null
     },
@@ -3282,7 +3365,9 @@
       "authority": "docs/VAN_REMOTE_BROWSER_PRODUCTION_BLUEPRINT_REV_1_5.md \u00a7ADR-RB-026",
       "evidence_refs": [],
       "tests": [],
-      "external_gates": [],
+      "external_gates": [
+        "nothing external: this is not built, and a commit to this repository is what it needs"
+      ],
       "transport_independent": false,
       "offline_voice_proven": null
     },
@@ -3308,7 +3393,9 @@
       "authority": "docs/VAN_REMOTE_BROWSER_PRODUCTION_BLUEPRINT_REV_1_5.md \u00a70D.2",
       "evidence_refs": [],
       "tests": [],
-      "external_gates": [],
+      "external_gates": [
+        "nothing external: this is not built, and a commit to this repository is what it needs"
+      ],
       "transport_independent": false,
       "offline_voice_proven": null
     },
@@ -3336,7 +3423,9 @@
       "tests": [
         "backend/tests/test_owner_device_binding.py"
       ],
-      "external_gates": [],
+      "external_gates": [
+        "nothing external: this needs a run against real hardware, which no commit can supply"
+      ],
       "transport_independent": false,
       "offline_voice_proven": null
     },
@@ -3362,7 +3451,9 @@
       "authority": "docs/VAN_REMOTE_BROWSER_PRODUCTION_BLUEPRINT_REV_1_5.md \u00a70D.3",
       "evidence_refs": [],
       "tests": [],
-      "external_gates": [],
+      "external_gates": [
+        "nothing external: this is not built, and a commit to this repository is what it needs"
+      ],
       "transport_independent": false,
       "offline_voice_proven": null
     },
@@ -3388,7 +3479,9 @@
       "authority": "docs/VAN_REMOTE_BROWSER_PRODUCTION_BLUEPRINT_REV_1_5.md \u00a737",
       "evidence_refs": [],
       "tests": [],
-      "external_gates": [],
+      "external_gates": [
+        "nothing external: this is not built, and a commit to this repository is what it needs"
+      ],
       "transport_independent": false,
       "offline_voice_proven": null
     },
@@ -3416,7 +3509,9 @@
       "tests": [
         "backend/tests/test_owner_device_binding.py"
       ],
-      "external_gates": [],
+      "external_gates": [
+        "nothing external: this needs a run against real hardware, which no commit can supply"
+      ],
       "transport_independent": false,
       "offline_voice_proven": null
     },
@@ -3442,7 +3537,9 @@
       "authority": "docs/VAN_REMOTE_BROWSER_PRODUCTION_BLUEPRINT_REV_1_5.md \u00a737",
       "evidence_refs": [],
       "tests": [],
-      "external_gates": [],
+      "external_gates": [
+        "nothing external: this is not built, and a commit to this repository is what it needs"
+      ],
       "transport_independent": false,
       "offline_voice_proven": null
     },
@@ -3629,7 +3726,9 @@
       "authority": "docs/VAN_REMOTE_BROWSER_PRODUCTION_BLUEPRINT_REV_1_5.md \u00a70E.1 D5",
       "evidence_refs": [],
       "tests": [],
-      "external_gates": [],
+      "external_gates": [
+        "nothing external: this is not built, and a commit to this repository is what it needs"
+      ],
       "transport_independent": false,
       "offline_voice_proven": null
     },
@@ -3655,7 +3754,9 @@
       "authority": "docs/VAN_REMOTE_BROWSER_PRODUCTION_BLUEPRINT_REV_1_5.md \u00a739.2",
       "evidence_refs": [],
       "tests": [],
-      "external_gates": [],
+      "external_gates": [
+        "nothing external: this is not built, and a commit to this repository is what it needs"
+      ],
       "transport_independent": false,
       "offline_voice_proven": null
     },
@@ -3690,5 +3791,10 @@
       "offline_voice_proven": null,
       "note": "A contract test pins the four \u00a70F corrections, so a later edit that reintroduces the stale text fails rather than being argued about."
     }
+  ],
+  "external_gate_rule": "Every row that is not CERTIFIED names at least one entry. A row with no external blocker says so in those words, using one of the two sentences below, because an empty list cannot distinguish 'nothing is blocking this' from 'nobody filled this in' \u2014 and the whole purpose of the column is to say which rows a commit can still move. `tools/ci/ledger_reconcile.py` refuses an empty one.",
+  "no_external_gate_sentences": [
+    "nothing external: this is not built, and a commit to this repository is what it needs",
+    "nothing external: this needs a run against real hardware, which no commit can supply"
   ]
 }

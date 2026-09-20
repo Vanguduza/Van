@@ -22,6 +22,7 @@ from fastapi import APIRouter, HTTPException, Request, WebSocket, WebSocketDisco
 from fastapi.responses import StreamingResponse
 from pydantic import BaseModel, Field
 
+from van_gateway.observability import instruments
 from van_gateway.session.models import (
     Direction,
     PROTOCOL_VERSION,
@@ -151,6 +152,25 @@ def build_session_router(
         device_id = _device(request)
         from van_gateway.session.models import ResumeRequest
 
+        # §20.10 — what the Gateway can honestly say about a path switch, taken *before*
+        # the resume grants a new epoch. Afterwards the old path's row has been
+        # superseded and the route it was on is no longer recoverable from the session.
+        #
+        # This is the Gateway's half of the failover picture and it is deliberately only
+        # the half it can see: whether the session moved, and whether it moved to another
+        # road. How long the owner sat looking at a frozen page is the device's
+        # measurement (`session_failover_ms`), because the Gateway does not learn a path
+        # died until the resume arrives — by which time the gap is already over.
+        previous = await sessions.get(body.van_session_id)
+        previous_route, previous_path = None, None
+        if previous is not None:
+            for live in await sessions.live_paths(body.van_session_id):
+                if live["path_epoch"] == previous.authoritative_path_epoch:
+                    previous_route = live["route_id"]
+                    previous_path = live["path_id"]
+                    break
+        route_changed = previous_route is not None and previous_route != body.route_id
+
         snapshot = {}
         if resume_snapshot is not None:
             snapshot = await resume_snapshot(
@@ -181,10 +201,23 @@ def build_session_router(
             response_state=snapshot.get("response_state"),
         )
         if not result.accepted:
+            # Counted, not just raised. A resume that is refused is the failover that did
+            # not happen, and a counter that only saw the successful ones would report a
+            # perfect record for a session that never came back.
+            instruments.record_session_failover(
+                result.refusal, route_changed=route_changed,
+            )
             # A refused resume is a 409 rather than a 401: the credential was fine, the
             # session's state was not, and the client needs to open a new one rather than
             # re-authenticate.
             raise HTTPException(status_code=409, detail=result.refusal)
+        instruments.record_session_failover(
+            # A client that came back on the same path did not fail over; it reconnected.
+            # Counting the two as one outcome would make an ordinary tunnel look like a
+            # route failure, and the label exists precisely so they can be told apart.
+            "reconnected" if previous_path == body.path_id else "failed_over",
+            route_changed=route_changed,
+        )
         return result.model_dump(mode="json")
 
     @api.get("/status")
