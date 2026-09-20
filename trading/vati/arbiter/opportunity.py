@@ -47,7 +47,7 @@ class OpportunityEngine:
         cands: list[dict] = []
         best: Optional[tuple[Decimal, Signal, Capsule, MetaVerdict, str]] = None
         for cap in self.registry.all():
-            elig = self.s.evaluate(cap, state, self.mandate, regime_label=regime_label, currency_regime_label=currency_regime_label)
+            elig = self.s.evaluate(cap, state, self.mandate, regime_label=regime_label, currency_regime_label=currency_regime_label, context=ctx)
             row = {"strategy_id": cap.strategy_id, "eligible": elig.eligible, "reasons": list(elig.reasons)}
             if not elig.eligible:
                 cands.append(row); continue

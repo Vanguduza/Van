@@ -7,6 +7,7 @@ from dataclasses import dataclass, field
 from decimal import Decimal, getcontext
 from typing import Optional, Sequence
 
+from vati.core.canonical import canonical_hash
 from vati.market_data.bars import Bar
 
 getcontext().prec = 28
@@ -98,12 +99,22 @@ class FeatureVector:
     swing_low: Optional[Decimal]
     complete: bool
     feature_version: str = "features/1.0.0"
+    #: TRD-ENH-004. Without this, an M5 vector and an H1 vector for the same
+    #: symbol and instant are indistinguishable by their recorded fields, so the
+    #: state hash on a decision cannot say what the system actually looked at.
+    #: `UNKNOWN` is the compatibility value for a caller that has not yet been
+    #: given a timeframe; it is a distinct value, never treated as "any".
+    timeframe: str = "UNKNOWN"
 
     def as_dict(self) -> dict:
         return {k: (str(v) if isinstance(v, Decimal) else v) for k, v in self.__dict__.items()}
 
+    def feature_hash(self) -> str:
+        """Identity of this vector, timeframe included (TRD-ENH-004)."""
+        return canonical_hash(self.as_dict())
 
-def compute_features(bars: Sequence[Bar], *, fast: int = 20, slow: int = 50, atr_period: int = 14, vol_period: int = 20, lookback: int = 100) -> FeatureVector:
+
+def compute_features(bars: Sequence[Bar], *, fast: int = 20, slow: int = 50, atr_period: int = 14, vol_period: int = 20, lookback: int = 100, timeframe: str = "UNKNOWN") -> FeatureVector:
     closes = [b.close for b in bars]
     last = bars[-1]
     ef, es, a = ema(closes, fast), ema(closes, slow), atr(bars, atr_period)
@@ -121,4 +132,5 @@ def compute_features(bars: Sequence[Bar], *, fast: int = 20, slow: int = 50, atr
         spread_percentile=percentile_rank(spreads, last.avg_spread), trend_slope=slope, range_compression=compression,
         swing_high=max(b.high for b in window) if window else None, swing_low=min(b.low for b in window) if window else None,
         complete=all(x is not None for x in (ef, es, a, rv)),
+        timeframe=timeframe,
     )

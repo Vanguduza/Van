@@ -80,7 +80,7 @@ Each was confirmed against `main` @ `66e4e42`. Full evidence is in the proposal 
 |---|---|---|
 | F1 | `TradingMandate` has one `max_risk_per_trade`; no per-strategy allocation | Part H |
 | F2 | `TradeIntent.correlation_multiplier` is declared, serialised and consumed, but **never populated** — permanently `1` | Part G |
-| F3 | `deflated_sharpe`/`pbo_cscv` referenced only by tests; docs carry a `> 0` gate against a function returning `_norm_cdf(z)`, which is strictly positive for every finite `z` — **the gate passes everything** | Part D |
+| F3 | `deflated_sharpe`/`pbo_cscv` referenced only by tests; docs carry a `> 0` gate against a function returning `_norm_cdf(z)`, whose `> 0` gate admits a DSR of 7e-6 (essentially certain selection bias) and even a negative observed Sharpe; see proposal F3 for the measured cases | Part D |
 | F4 | `CapsuleRegistry.promote` requires a signature and non-empty `evidence_refs`, but `evidence_refs` is `list[str]` and unvalidated | Part E |
 | F5 | Exit policy fixed at `ProtectionManager.register`; `missed.py` computes MFE/MAE and discards them | Part J |
 | F6 | TCA *does* drive behaviour via `LearningBroker` → `broker_liquidity` → `MetaLabeler`, reduce-only. Missing dimension is order-type/venue **choice** | Part J |
@@ -104,11 +104,14 @@ canonical field:  dsr_probability
 gate:             dsr_probability >= 0.95
 ```
 
+`> 0` rejects only the extremes, where `math.erf` saturates and the CDF underflows to exactly `0.0`. It admits
+a +0.10 Sharpe over 60 observations selected from 500 trials (DSR 7e-6) and a negative observed Sharpe.
+
 Amend `docs/VAN_ADAPTIVE_TRADING_INTELLIGENCE_TECHNICAL_BLUEPRINT_REV2.md:551` and
 `docs/VAN_ADAPTIVE_TRADING_INTELLIGENCE_TECHNICAL_BLUEPRINT_REV3.md:40` from `deflated Sharpe > 0`.
 `trading/vati/learning/curriculum.py:21` already states `DSR > 0.95` and is the correct precedent.
 
-**Test:** a strategy with a negative observed Sharpe must fail the gate. Under the `> 0` wording it passes.
+**Test:** a plausible overfit — small positive Sharpe, short sample, many trials — must fail the gate. Under the `> 0` wording it passes.
 
 ### D2 — Enforce `required_features` (closes F8)
 

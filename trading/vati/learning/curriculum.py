@@ -6,6 +6,13 @@ from __future__ import annotations
 from dataclasses import dataclass
 from decimal import Decimal
 
+from vati.validation.policy import DEFAULT_POLICY
+
+#: S3 — this string used to carry the only correct DSR threshold in the
+#: repository as a literal. It is now rendered from the policy object, so the
+#: two cannot drift; `test_curriculum_renders_active_policy` asserts it.
+_STAGE_1_CRITERIA = f"expectancy >= 0.2R, {DEFAULT_POLICY.describe()} on backtest"
+
 
 @dataclass(frozen=True)
 class CurriculumStage:
@@ -18,7 +25,7 @@ class CurriculumStage:
 
 
 CURRICULUM: tuple[CurriculumStage, ...] = (
-    CurriculumStage(1, "quiet normal sessions", "vol NORMAL/LOW, no Tier-1 events", "expectancy ≥ 0.2R, PBO ≤ 0.10, DSR > 0.95 on backtest", Decimal("100"), "VALIDATION"),
+    CurriculumStage(1, "quiet normal sessions", "vol NORMAL/LOW, no Tier-1 events", _STAGE_1_CRITERIA, Decimal("100"), "VALIDATION"),
     CurriculumStage(2, "standard intraday", "all sessions, NORMAL vol", "cost ratio ≤ 1.2 on demo, no unprotected-position seconds", Decimal("60"), "DEMO"),
     CurriculumStage(3, "high volatility", "vol HIGH", "drawdown within mandate tier 1 on demo", Decimal("40"), "SHADOW"),
     CurriculumStage(4, "Tier-1 events", "NFP/CPI/FOMC windows", "blackout respected 100%; drift entries only", Decimal("12"), "SHADOW"),

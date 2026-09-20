@@ -107,10 +107,22 @@ Worse, the repository carries two incompatible DSR gates:
 | `docs/VAN_ADAPTIVE_TRADING_INTELLIGENCE_TECHNICAL_BLUEPRINT_REV2.md:551` | `deflated Sharpe > 0` |
 | `trading/vati/learning/curriculum.py:21` | `DSR > 0.95` — correct |
 
-`deflated_sharpe` returns `_norm_cdf(z)`, which is strictly positive for every finite `z`. A `> 0` gate is
-therefore **not merely ambiguous — it passes every strategy that reaches the function at all**, including one
-with a negative observed Sharpe. The only input that returns exactly `0.0` is the `n_obs < 3 or n_trials < 1`
-guard. An implementation agent could correctly call the function and implement a gate that certifies noise.
+**Corrected in implementation (Rev 1.2).** An earlier statement of this finding said `_norm_cdf(z)` is
+strictly positive for every finite `z`, so `> 0` passes everything. That is wrong: `math.erf` saturates at
+±1.0 for |x| ≳ 6, so a sufficiently negative `z` underflows to exactly `0.0` and `> 0` does reject extremes.
+
+The gate leaks over the range that actually reaches a promotion request. Measured against the shipped
+function (`trading/tests/test_validation_policy.py`):
+
+| observed Sharpe | n_obs | trials | DSR | `> 0` | `>= 0.95` |
+|---|---|---|---|---|---|
+| +0.10 | 60 | 500 | 0.000007 | **passes** | fails |
+| +0.15 | 60 | 500 | 0.000047 | **passes** | fails |
+| −0.02 | 60 | 100 | 0.000003 | **passes** | fails |
+
+A DSR of 7×10⁻⁶ is the statistic declaring the result essentially certain selection bias. `> 0` admits it, and
+admits a negative observed Sharpe too. Narrower in mechanism than "passes everything", worse in substance: the
+strategies it wrongly admits are exactly the plausible-looking ones a researcher would submit.
 
 **Normalize the contract to an explicit named field — `dsr_probability >= 0.95` — and correct Rev 2 §551 and
 Rev 3 D7.** This is the highest-severity item in this document and it is a documentation fix.
