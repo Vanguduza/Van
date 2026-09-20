@@ -31,7 +31,7 @@ def router(adapter, ledger=None, ks=None):
     return ExecutionRouter(ledger=led, adapters={adapter.venue: adapter}, kill_switch=ks or KillSwitch(), protection=ProtectionManager()), led
 
 
-def test_router_holds_submission_guard_while_adapter_is_called(mandate, eurusd):
+def test_router_holds_submission_guard_through_command_submit_receipt_and_protection(mandate, eurusd):
     active = {"guard": False}
     observed = []
 
@@ -44,13 +44,22 @@ def test_router_holds_submission_guard_while_adapter_is_called(mandate, eurusd):
         finally:
             active["guard"] = False
 
+    class ProbeLedger(Ledger):
+        def append(self, event):
+            if event.kind in (EventKind.ORDER_COMMAND, EventKind.EXECUTION_RECEIPT):
+                observed.append((event.kind.value, active["guard"]))
+                assert active["guard"], f"{event.kind.value} escaped the submission guard"
+            return super().append(event)
+
+    class ProbeProtection(ProtectionManager):
+        def register(self, *args, **kwargs):
+            observed.append(("PROTECTION_REGISTER", active["guard"]))
+            assert active["guard"], "protection registration escaped the submission guard"
+            return super().register(*args, **kwargs)
+
     class ProbePaper(PaperAdapter):
         def submit(self, cmd, *, now_ms):
-            observed.append((
-                active["guard"],
-                cmd.lease_epoch,
-                cmd.idempotency_key,
-            ))
+            observed.append(("ADAPTER_SUBMIT", active["guard"], cmd.lease_epoch))
             assert active["guard"], "adapter.submit escaped the lease submission guard"
             return super().submit(cmd, now_ms=now_ms)
 
@@ -60,19 +69,23 @@ def test_router_holds_submission_guard_while_adapter_is_called(mandate, eurusd):
     i, d = approved(
         m, contract, venue="paper", strategy_state=StrategyState.DEMO)
     adapter = ProbePaper()
-    ledger = Ledger()
+    ledger = ProbeLedger()
+    protection = ProbeProtection()
     r = ExecutionRouter(
         ledger=ledger,
         adapters={"paper": adapter},
         kill_switch=KillSwitch(),
-        protection=ProtectionManager(),
+        protection=protection,
         lease_fence=lambda epoch: epoch == 7,
         lease_submission_guard=submission_guard,
     )
     rec = r.execute(i, d, m, now_ms=NOW, lease_epoch=7)
     assert rec.status == "FILLED"
-    assert observed == [(True, 7, i.idempotency_key)]
     assert not active["guard"]
+    assert ("ORDER_COMMAND", True) in observed
+    assert ("ADAPTER_SUBMIT", True, 7) in observed
+    assert ("EXECUTION_RECEIPT", True) in observed
+    assert ("PROTECTION_REGISTER", True) in observed
     assert ledger.count(EventKind.ORDER_COMMAND) == 1
     assert ledger.count(EventKind.EXECUTION_RECEIPT) == 1
 
