@@ -74,8 +74,11 @@ from van_gateway.automation.dispatch import AutomationDispatcher
 from van_gateway.automation.grants import RunGrantService
 from van_gateway.automation.health import AutomationHealthApi
 from van_gateway.automation.registry import AutomationRegistry, HotWorkflowIndex
+from van_gateway.browser.agent_grant import AgentGrantService
 from van_gateway.browser.api import BrowserApi
 from van_gateway.browser.control_lease import ControlLeaseService
+from van_gateway.browser.downloads import DownloadBroker
+from van_gateway.browser.downloads_api import build_download_report_router
 from van_gateway.browser.interactive_api import (
     build_interactive_router,
     is_interactive_browser_owner_route,
@@ -770,13 +773,29 @@ def create_app() -> FastAPI:
     app.include_router(automation.router)
     app.include_router(browser.router)
     if browser_stream_grants is not None:
+        # Rev 1.5 §§22.2, 22.3 — what Hermes is handed when it drives the owner's
+        # browser, and what is destroyed when the owner takes it back.
+        agent_grants = AgentGrantService()
+        app.state.browser_agent_grants = agent_grants
+        downloads_broker = DownloadBroker(store)
+        app.state.browser_downloads = downloads_broker
         app.include_router(build_interactive_router(
             sessions=interactive_sessions,
             control=browser_control_leases,
             grants=browser_stream_grants,
+            agent_grants=agent_grants,
+            downloads_broker=downloads_broker,
             signal_url=settings.browser_stream_signal_url,
             ice_servers=_parse_ice_servers(settings.browser_stream_ice_servers),
             mission_binder=mission_binder,
+            audit=audit,
+        ))
+        # §18 — the Hermes-scoped side of the same records. Separate router because
+        # it is a different authority, not a different concern: the owner's phone
+        # never saw the download happen.
+        app.include_router(build_download_report_router(
+            broker=downloads_broker,
+            sessions=interactive_sessions,
             audit=audit,
         ))
     # Rev 1.5 §20 — the durable logical session. It holds no command authority: the

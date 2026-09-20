@@ -62,7 +62,10 @@ class BrowserActivity : FragmentActivity() {
 
         controller = BrowserSessionController(
             gateway = app.gatewayClient,
-            stream = BrowserStreamClient(applicationContext, eglBase),
+            // Rev 1.5 §28.1 — the application's reporter, not a new one. Four of the
+            // eleven browser metrics can only be measured where the frames arrive, and a
+            // second reporter would buffer them into a flush loop nobody started.
+            stream = BrowserStreamClient(applicationContext, eglBase, app.telemetry),
             scope = lifecycleScope,
         )
 

@@ -150,6 +150,11 @@ class BrowserSessionController(
             while (isActive) {
                 delay(HEARTBEAT_INTERVAL_MS)
                 val sessionId = _state.value.snapshot?.sessionId ?: return@launch
+                // Rev 1.5 §28.1 — the decoder's dropped-frame total, asked for on the
+                // beat that is already running rather than on a timer of its own. It is
+                // a JNI round trip into the native stack; doing it per frame to measure
+                // dropped frames would be the thing dropping them.
+                stream.pollDecoderStats()
                 runCatching { gateway.interactiveBrowserHeartbeat(sessionId) }
                     .onSuccess { fresh -> _state.value = _state.value.copy(snapshot = fresh) }
                     .onFailure { failure ->

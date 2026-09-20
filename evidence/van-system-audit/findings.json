@@ -20,8 +20,8 @@
     "PRODUCTION_CERTIFIED"
   ],
   "counts": {
-    "P0": 18,
-    "P1": 36,
+    "P0": 19,
+    "P1": 37,
     "P2": 24,
     "P3": 29,
     "P4": 7
@@ -5342,7 +5342,7 @@
       "remediation_gate": "RB C6",
       "closure": {
         "state": "INTEGRATED_AND_EVIDENCED",
-        "summary": "`requires_device_proof` names the surfaces (mutating interactive-browser routes, the session surface, and `POST /v1/commands`) and `enforce_device_proof` holds them to it, both in `van_gateway/app.py` beside the route classifier they have to agree with.\n\nTwo decisions in it are load-bearing and both were wrong first.\n\nThe gate reads `active()`, not `for_device(caller)`. The first version asked whether *the calling device* was bound, so a second paired phone that had never enrolled skipped the check entirely — the proof was mandatory only for the device that had already proved itself. It now refuses any device that is not the bound one, outright, as soon as any binding is active.\n\nThe body is read in the middleware and put back. Starlette's request stream is single-use, so verifying a proof over the body without replacing the receive channel leaves every proved route parsing an empty body — a 422 about a missing field, several layers from the cause. A test asserts the created session's profile alias comes back, which fails if the replay is removed.\n\nReads are deliberately not gated. A Keystore signature on every poll would put a hardware operation in the battery path for no security gain, and a test pins that a session read still works without a proof.\n\nAn unbound device still works on its token alone and `bound: false` says so; `require_device_binding` turns that fallback off for a deployment that has finished enrolling. The downgrade is stated rather than silent, which is the distinction this finding exists over.\n\nSeven mutations. Each of them leaves `test_owner_device_binding.py` green, which is the point: the eleven tests that existed could not see any of this.",
+        "summary": "`requires_device_proof` names the surfaces (mutating interactive-browser routes, the session surface, and `POST /v1/commands`) and `enforce_device_proof` holds them to it, both in `van_gateway/app.py` beside the route classifier they have to agree with.\n\nTwo decisions in it are load-bearing and both were wrong first.\n\nThe gate reads `active()`, not `for_device(caller)`. The first version asked whether *the calling device* was bound, so a second paired phone that had never enrolled skipped the check entirely — the proof was mandatory only for the device that had already proved itself. It now refuses any device that is not the bound one, outright, as soon as any binding is active.\n\nThe body is read in the middleware and the route still sees it. A first version hand-rolled a replay of the receive channel on the assumption that Starlette's request stream is single-use; a mutation deleting that replay changed nothing, because `BaseHTTPMiddleware` wraps the request in a `_CachedRequest` and a body read in `dispatch` is already cached for downstream. The replay was removed rather than the mutation weakened. The regression test stayed: it asserts the created session's profile alias comes back, so a future version that does break the body is caught at the route rather than as a 422 about a missing field several layers from the cause.\n\nReads are deliberately not gated. A Keystore signature on every poll would put a hardware operation in the battery path for no security gain, and a test pins that a session read still works without a proof.\n\nAn unbound device still works on its token alone and `bound: false` says so; `require_device_binding` turns that fallback off for a deployment that has finished enrolling. The downgrade is stated rather than silent, which is the distinction this finding exists over.\n\nSeven mutations. Each of them leaves `test_owner_device_binding.py` green, which is the point: the eleven tests that existed could not see any of this.",
         "changed": [
           "backend/van_gateway/app.py",
           "backend/van_gateway/config.py",
@@ -5360,6 +5360,101 @@
         "residual_class": "DELIBERATE_SCOPE",
         "residual_reason": "The gateway's failure to enforce and the phone's ability to sign are two different claims with two different gates. Folding the device gate into this finding would make a closed defect read as blocked, and leaving it unstated would let a later reader think the hardware half had been proven. It is recorded as a boundary and tracked as RB-103/RB-120.",
         "falsified_by": "A privileged mutation succeeding from a bound device with no X-Van-Device-Proof header; a second paired device mutating while the owner's phone is bound; a proof captured on one route being accepted on another; or a proved route receiving an empty body."
+      }
+    },
+    {
+      "id": "P0-EXEC-004",
+      "severity": "P0",
+      "domain": "execution",
+      "title": "Opening a browser session for a Mission was a 500 on every attempt, because the capability it binds under was declared by nobody",
+      "description": "§23.1 of the Remote Browser blueprint states the flow in the owner's own words: \"Van, search this page and explain it\" creates a Mission through the existing command path, and the interactive browser session attaches to it by reference. `MissionBinder.bind_browser_session` implements that attach, is documented, and has the right shape — it calls `_bind`, which is idempotent and never creates a Mission.\n\nIt binds under the capability id `browser.interactive.session`, a module constant in `van_gateway/mission/binding.py`. No registry declares that id. `registries/capabilities.json` declares eleven capabilities and this is not one of them, so `MissionService.add_activity`'s §7 check — \"a capability not in the registry must not be routable\" — raised `MISSION_CAPABILITY_NOT_PERMITTED:NOT_DECLARED` on every call.\n\nThe route did not catch it. `POST /v1/browser/interactive-sessions` called the binder unguarded whenever the body carried a `mission_id`, so the exception left the handler as an unhandled 500 — after the session row had been created and the owner's authenticated profile leased to it.\n\nTwo things hid this. The binder's own tests construct a `MissionService` with `capabilities=None`, which short-circuits the check and returns before the registry is consulted. And the interactive-session route tests never passed a `mission_id`, because the sessions they create are manual ones. So both halves were green and the path between them had never been executed.",
+      "requirement": "docs/VAN_REMOTE_BROWSER_PRODUCTION_BLUEPRINT_REV_1_5.md §23.1, §23.3; VAN_SYSTEM_TRUTH §7",
+      "authority": "VAN Remote Browser Production Blueprint Rev 1.5",
+      "repository_evidence": [
+        "backend/van_gateway/mission/binding.py",
+        "backend/van_gateway/browser/interactive_api.py",
+        "registries/capabilities.json"
+      ],
+      "runtime_evidence": [],
+      "affected_components": [
+        "gateway",
+        "mission",
+        "browser"
+      ],
+      "root_cause": "A capability id used as a string in one module and declared in a JSON registry in another, with no check that the two agree. The maturity gate asks whether a component has a production caller; `bind_browser_session` has one. The authority map asks whether an invariant is owned and tested; it is. Neither asks whether the constant one of them passes is a value the other will accept, and the unit tests on both sides were configured in a way that never asked either.",
+      "remediation": "Declare `browser.interactive.session` in the capability registry with an honest readiness source, handle the binder's refusal at the route rather than letting it escape as a 500, unwind the session so a refused binding does not strand the owner's profile, and pin the id-to-declaration agreement with a contract test that reads the constant out of the binder's source.",
+      "impact": "Every command-originated browser session — the blueprint's own worked example, and the only way a browser session ever reaches the owner's Missions page — failed with a 500 and left a session holding the authenticated profile lease. The next attempt, including an ordinary manual one, was then refused as \"leased\" with no owner-visible reason. The feature had never worked once.",
+      "validation_gate": "G14",
+      "current_status": "CLOSED",
+      "remediation_gate": "RB C9",
+      "closure": {
+        "state": "EXTERNALLY_BLOCKED_REPOSITORY_COMPLETE",
+        "summary": "Three changes, and the readiness decision in the middle is the one that matters.\n\n`browser.interactive.session` is declared with `readiness_source: EXTERNAL_RUNTIME` and `health_probe: browser_stream_host`, not `STATIC`. STATIC would have made the 500 into a 200 in one line and would have been false: the capability is VAN driving a browser on a Stream Host, and this repository has never seen one. So a fresh deployment still refuses — with `mission_binding_refused:...NO_READINESS_EVIDENCE:browser_stream_host`, which names the missing thing — and the refusal becomes a success only when `tools/certification/certify_browser_stream_host.py` has measured a real host. Recording that a Mission used a remote browser when no remote browser has been proven to exist is exactly the unearned claim this programme exists to prevent.\n\nThe route catches the refusal and unwinds. A 409 alone would still have stranded the profile lease, which is the part the owner would actually have noticed.\n\nThe agreement is pinned rather than assumed: `tests/contracts/test_stream_host_readiness_is_earned.py` parses `INTERACTIVE_BROWSER_CAPABILITY` out of the binder's source and requires the registry to declare it, so renaming one and not the other fails instead of drifting. The same file enumerates every writer of that probe's readiness evidence and asserts the Gateway is not among them.\n\nCounterexample checked: a version that declared the capability STATIC, or that recorded readiness evidence at startup, would pass every test about binding and activities — the session would bind, the Activity would be correct, the Mission count would be right — while VAN reported that a Mission used a browser nothing had ever verified existed. The readiness test and the writer enumeration are what fail on that version.",
+        "changed": [
+          "registries/capabilities.json",
+          "backend/van_gateway/browser/interactive_api.py",
+          "tools/certification/certify_browser_stream_host.py",
+          "services/browser_control_agent/wire.py"
+        ],
+        "verified_by": [
+          "backend/tests/test_browser_mission_binding_regression.py::TestBindingThroughTheRoute",
+          "backend/tests/test_browser_mission_binding_regression.py::TestBindingIsByReference",
+          "backend/tests/test_browser_mission_binding_regression.py::TestManualBrowsingHasNoMission",
+          "backend/tests/test_browser_mission_binding_regression.py::TestCompletionIsNotVerification",
+          "tests/contracts/test_stream_host_readiness_is_earned.py"
+        ],
+        "residual": "No Browser Stream Host exists, so `browser.interactive.session` resolves NOT_READY and a mission-bound interactive session is refused in any real deployment today, with `NO_READINESS_EVIDENCE:browser_stream_host` naming the missing thing. The three canaries in tools/certification/certify_browser_stream_host.py that would clear it have never been run.",
+        "residual_reason": "A digest can only be recorded by measuring an artefact, and the artefact is a host on the Trading Core VM that this repository cannot provision. Declaring the capability ready in order to make the path work would be the fabricated readiness the whole gate exists to prevent: VAN would record that a Mission used a remote browser nothing has ever seen.",
+        "residual_class": "EXTERNAL_RUNTIME",
+        "posture": "fail-closed"
+      }
+    },
+    {
+      "id": "P1-OBS-004",
+      "severity": "P1",
+      "domain": "observability",
+      "title": "Six new gateway instruments would have paged the operator forever with nothing to do about it",
+      "description": "`INSTRUMENT_SILENT` fires when a metric the gateway is supposed to produce has had no sample after fifteen minutes of uptime. It is scoped to `MetricSource.GATEWAY` precisely because a device metric is silent whenever no device has posted, and an alert that cannot be cleared is one operators learn to ignore.\n\nThe six interactive-browser instruments added for §28.1 are written by the Gateway, so the source is correct — and none of them can produce a sample without a Browser Stream Host, which a deployment may simply not have. A gateway with no host would have fired this rule every fifteen minutes, naming six instruments, with no action that resolves it.\n\nFound by a test rather than in production: `test_silence_on_a_device_metric_is_not_a_fault` failed the moment the catalogue grew, which is what that test is for.\n\nA second half, found in the same pass. The catalogue grew a third device dict, `DEVICE_COUNTERS`, beside `DEVICE_HISTOGRAMS` and `DEVICE_GAUGES`. `tests/contracts/test_device_telemetry_contract.py` — the test whose entire job is to stop the gateway's list and the phone's Kotlin enum from drifting — read two of the three. So two of §28.1's four device metrics were declared on the gateway with no phone able to post them and nothing checking, which is the same state P3-OBS-002 was about: a metric the scrape reports as unobserved forever, honestly and uselessly.",
+      "requirement": "docs/VAN_REMOTE_BROWSER_PRODUCTION_BLUEPRINT_REV_1_5.md §28.1",
+      "authority": "VAN Remote Browser Production Blueprint Rev 1.5",
+      "repository_evidence": [
+        "backend/van_gateway/observability/metrics.py",
+        "backend/van_gateway/observability/alerts.py"
+      ],
+      "runtime_evidence": [],
+      "affected_components": [
+        "gateway",
+        "observability"
+      ],
+      "root_cause": "`MetricSource` answers \"who writes this\", and the alert rule needed the answer to a different question: \"must something have written it by now\". For every metric before this checkpoint the two answers coincided.",
+      "remediation": "Add `silence_is_normal` to the metric declaration, filter `INSTRUMENT_SILENT` on it, and fence the exemption with a rule-based test so it cannot be used to quiet an instrument whose silence really is a fault.",
+      "impact": "A permanently-firing warning on any deployment without a Stream Host, which is every deployment today. The cost is not the alert itself but what it does to the ones that matter.",
+      "validation_gate": "G11",
+      "current_status": "CLOSED",
+      "remediation_gate": "RB C9",
+      "closure": {
+        "state": "EXTERNALLY_BLOCKED_REPOSITORY_COMPLETE",
+        "summary": "`silence_is_normal` is a field on `Metric`, set on exactly the six instruments that cannot fire without a Stream Host, and `_instrument_silent` excludes them.\n\nThe exemption is fenced in both directions. One test derives the exempt set from the property — Gateway-sourced, produced by the interactive browser surface — and requires it to equal the set actually marked, so a metric joins by being that kind of metric rather than by someone adding a flag. Another asserts the rule still fires, still names `van_gateway_request_duration_ms`, and names exactly the unobserved GATEWAY metrics that are not exempt: a filter that exempted too much would pass the first test and leave the rule unable to fire at all.\n\nCounterexample checked: marking every GATEWAY metric `silence_is_normal` satisfies \"the rule does not fire on browser metrics\" and would be caught by the second test, which requires the rule to fire on an empty registry.\n\nThe device half: the contract test now folds the counters in, the Kotlin `DeviceMetric` enum carries all four browser names, and `BrowserStreamTelemetry` produces them from the WebRTC video sink. A second test asserts every name in the enum is one `record_device_sample` actually ingests — the set comparison alone would pass for a name sitting in a dict the ingest function never consults, and the phone's telemetry would vanish at the route with the scrape still reporting the metric unobserved.\n\nWriting the arithmetic's tests found a defect in it: a zero-timestamp sentinel meant every frame looked like the first on a monotonic clock starting near zero, so the fps window restarted each frame and no reading was ever emitted. Silent rather than wrong, which is the harder kind to notice on a dashboard.",
+        "changed": [
+          "backend/van_gateway/observability/metrics.py",
+          "backend/van_gateway/observability/alerts.py",
+          "tests/contracts/test_device_telemetry_contract.py",
+          "android/app/src/main/java/com/dial/van/telemetry/DeviceTelemetry.kt",
+          "android/app/src/main/java/com/dial/van/telemetry/BrowserStreamTelemetry.kt",
+          "android/app/src/main/java/com/dial/van/telemetry/DeviceTelemetryReporter.kt",
+          "android/app/src/main/java/com/dial/van/browser/BrowserStreamClient.kt"
+        ],
+        "verified_by": [
+          "backend/tests/test_observability_metrics.py::test_only_the_stream_host_instruments_are_allowed_to_be_silent",
+          "backend/tests/test_observability_metrics.py::test_an_ordinary_gateway_instrument_still_pages_when_it_goes_quiet",
+          "backend/tests/test_observability_alerts.py::test_silence_on_a_device_metric_is_not_a_fault",
+          "tests/contracts/test_device_telemetry_contract.py",
+          "android/verification/src/test/kotlin/com/dial/van/telemetry/BrowserStreamTelemetryTest.kt"
+        ],
+        "residual": "No production scrape exists, so no alert rule in this repository has ever been evaluated against real data. The rules are exercised only against registries a test constructed. No frame has been decoded on any device either, so the four device metrics have produced no sample anywhere.",
+        "residual_reason": "Evaluating a threshold against real traffic needs a deployment producing it, and there is none. This is an unverified environment rather than missing work: the rule, its exemption and both directions of the exemption's boundary are implemented and executed here.",
+        "residual_class": "ENVIRONMENT_UNVERIFIED",
+        "posture": "fail-closed"
       }
     }
   ],

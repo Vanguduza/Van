@@ -14,7 +14,7 @@ import kotlinx.coroutines.isActive
 import kotlinx.coroutines.launch
 
 /**
- * The producer for the six device-sourced metrics (P3-OBS-002).
+ * The producer for every device-sourced metric (P3-OBS-002, Rev 1.5 §28.1).
  *
  * The gateway declared them, the ingest route existed, and nothing on the phone had ever
  * posted to it. This is that nothing, filled in.
@@ -48,6 +48,30 @@ class DeviceTelemetryReporter(
 
     fun recordTts(startNanos: Long, endNanos: Long) =
         addLatency(DeviceMetric.TTS_LATENCY_MS, startNanos, endNanos)
+
+    /**
+     * §28.1's browser half. Held here rather than sampled, because the four numbers come
+     * from a stream that may have closed between one flush and the next, and a reporter
+     * that asked the stream for them would report zeros for a session that ended.
+     */
+    val browserStream = BrowserStreamTelemetry()
+
+    /** One decoded frame. Called from the video sink, so it does as little as it can. */
+    fun recordBrowserFrame(atMillis: Long = System.currentTimeMillis()) {
+        val fps = browserStream.onFrame(atMillis) ?: return
+        lastDecodeFps = fps
+    }
+
+    /** The decoder's cumulative dropped-frame total, as WebRTC reports it. */
+    fun recordBrowserDecoderDrops(cumulative: Long) =
+        browserStream.onDecoderFramesDropped(cumulative)
+
+    fun recordBrowserReconnect() = browserStream.onReconnect()
+
+    fun recordBrowserStreamClosed() = browserStream.onStreamClosed()
+
+    @Volatile
+    private var lastDecodeFps: Double? = null
 
     private fun addLatency(metric: DeviceMetric, startNanos: Long, endNanos: Long) {
         val millis = DeviceTelemetry.latencyMillis(startNanos, endNanos) ?: return
@@ -95,10 +119,20 @@ class DeviceTelemetryReporter(
         // exactly the traffic that should stand down while the gateway is unreachable.
         if (!gateway.backgroundCallsAdvisable()) return 0
         sampleDeviceIndicators()
+        sampleBrowserStream()
         val batch = synchronized(lock) { buffer.drain() }
         if (batch.isEmpty()) return 0
         gateway.postDeviceTelemetry(DeviceTelemetry.body(batch))
         return batch.size
+    }
+
+    private fun sampleBrowserStream() {
+        // Drained, not read: the counters are deltas since the last flush. Posting a
+        // running total would make the gateway's counter re-add every earlier drop, and
+        // a session dropping nothing would still show a rising line.
+        val fps = lastDecodeFps
+        lastDecodeFps = null
+        for (sample in browserStream.drain(System.currentTimeMillis(), fps)) add(sample)
     }
 
     private fun sampleDeviceIndicators() {

@@ -1,8 +1,7 @@
 package com.dial.van.telemetry
 
 /**
- * The six measurements only the device can take, and the buffer that gets them to the
- * gateway.
+ * The measurements only the device can take, and the buffer that gets them to the gateway.
  *
  * P3-OBS-002. The gateway's metric catalogue declares `van_wake_latency_ms`,
  * `van_asr_latency_ms`, `van_tts_latency_ms`, `van_aura_frame_time_ms`,
@@ -13,11 +12,18 @@ package com.dial.van.telemetry
  * silence is still silence: an owner whose aura is dropping frames or whose wake word takes
  * two seconds had no way for anyone to know.
  *
- * [DeviceMetric] is closed and its wire names mirror the gateway's `DEVICE_HISTOGRAMS` and
- * `DEVICE_GAUGES` exactly. That is not duplication for its own sake: the route refuses a
- * name it does not know, so a device that invents one is a device whose telemetry silently
- * disappears. `tests/contracts/test_device_telemetry_contract.py` parses this enum and the
- * gateway's catalogue and fails if they drift.
+ * Rev 1.5 §28.1 adds four more, all about the picture on the screen. Only the phone can
+ * measure them: the Gateway is not in the media path by design (§6.4), and the Stream Host
+ * can say what it sent but not what arrived. `browser_last_frame_age_ms` in particular is
+ * the number behind a frozen picture — the failure an owner cannot describe any other way,
+ * because from their side a stalled stream and a slow page look identical.
+ *
+ * [DeviceMetric] is closed and its wire names mirror the gateway's `DEVICE_HISTOGRAMS`,
+ * `DEVICE_GAUGES` and `DEVICE_COUNTERS` exactly. That is not duplication for its own
+ * sake: the route refuses a name it does not know, so a device that invents one is a
+ * device whose telemetry silently disappears.
+ * `tests/contracts/test_device_telemetry_contract.py` parses this enum and the gateway's
+ * catalogue and fails if they drift.
  *
  * Pure Kotlin, executed in `android/verification`.
  */
@@ -36,6 +42,18 @@ enum class DeviceMetric(val wire: String, val surfaced: Boolean = false) {
 
     BATTERY_PERCENT("battery_percent"),
     MEMORY_USED_MB("memory_used_mb"),
+
+    /** Frames per second the decoder is actually producing, not what was sent. */
+    BROWSER_DECODE_FPS("browser_decode_fps"),
+
+    /** How old the picture on screen is. A frozen stream is a large number here. */
+    BROWSER_LAST_FRAME_AGE_MS("browser_last_frame_age_ms"),
+
+    /** Accumulates, which is why the gateway holds it as a counter rather than a gauge. */
+    BROWSER_FRAME_DROP_COUNT("browser_frame_drop_count"),
+
+    /** Each transport recovery the owner did not have to ask for. */
+    BROWSER_RECONNECT_COUNT("browser_reconnect_count"),
     ;
 
     companion object {

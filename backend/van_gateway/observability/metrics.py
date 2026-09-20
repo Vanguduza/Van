@@ -49,6 +49,12 @@ class MetricSource(str, Enum):
     GATEWAY = "GATEWAY"
     DEVICE = "DEVICE"
     TRADING = "TRADING"
+    #: Rev 1.5 §28.1. The Browser Stream Host measures capture, encode and the WebRTC
+    #: transport, because it is the only process that can see any of them. Declaring them
+    #: with this source rather than GATEWAY is the same distinction this enum exists for,
+    #: one host further out: a gateway reporting zero frames per second would be a gateway
+    #: claiming to have measured something it has no access to.
+    STREAM_HOST = "STREAM_HOST"
 
 
 #: Latency buckets in milliseconds. Chosen so the interesting boundary for each
@@ -76,12 +82,24 @@ class Metric:
     unit: str = ""
     buckets: tuple[float, ...] = ()
     labels: tuple[str, ...] = ()
+    #: Whether a correctly-working gateway can produce no sample of this for its entire
+    #: uptime. True for exactly one thing here: an instrument that cannot fire unless a
+    #: Browser Stream Host exists, and the Stream Host is an optional deployment (§13).
+    #:
+    #: `INSTRUMENT_SILENT` is the rule this feeds, and the distinction is the same one
+    #: `MetricSource.DEVICE` already carries: a gateway with no host produces none of
+    #: these, forever, and an alert nobody can clear is an alert operators learn to
+    #: ignore. It is a separate field rather than another source because the source
+    #: answers "who writes it" — the Gateway does write these — and this answers
+    #: "must something have written it by now".
+    silence_is_normal: bool = False
 
 
-def _m(name, kind, source, help_, produced_by, unit="", buckets=(), labels=()):
+def _m(name, kind, source, help_, produced_by, unit="", buckets=(), labels=(),
+       silence_is_normal=False):
     return Metric(
         name=name, kind=kind, source=source, help=help_, produced_by=produced_by,
-        unit=unit, buckets=buckets, labels=labels,
+        unit=unit, buckets=buckets, labels=labels, silence_is_normal=silence_is_normal,
     )
 
 
@@ -143,6 +161,69 @@ CATALOGUE: tuple[Metric, ...] = (
        "Errors and degraded subsystems, by class and code.",
        "van_gateway.observability.instruments.record_error", "", (),
        ("error_class", "code")),
+
+    # ---- Rev 1.5 §28.1, the Remote Browser -----------------------------------------
+    #
+    # Split by who can actually measure it. The four the Gateway owns are the four it
+    # can see: it holds the session, it mints the grant, it fences the input and it moves
+    # the control generation. Everything about pixels and packets belongs to a host that
+    # does not exist yet, and is declared STREAM_HOST so a scrape that never shows them
+    # reads as "no host" rather than "no traffic".
+    _m("van_browser_session_active", MetricKind.GAUGE, MetricSource.GATEWAY,
+       "Interactive browser sessions currently in a non-terminal state.",
+       "van_gateway.observability.instruments.set_browser_sessions_active",
+       "sessions", (), (), silence_is_normal=True),
+    _m("van_browser_session_connect_ms", MetricKind.HISTOGRAM, MetricSource.GATEWAY,
+       "Time from an interactive session being created to its first stream grant.",
+       "van_gateway.observability.instruments.record_browser_connect",
+       "milliseconds", LATENCY_BUCKETS_MS, (), silence_is_normal=True),
+    _m("van_browser_input_dispatch_ms", MetricKind.HISTOGRAM, MetricSource.GATEWAY,
+       "Time from an input packet being admitted to it being dispatched.",
+       "van_gateway.observability.instruments.record_browser_input_dispatch",
+       "milliseconds", FRAME_BUCKETS_MS, (), silence_is_normal=True),
+    _m("van_browser_control_preempt_ms", MetricKind.HISTOGRAM, MetricSource.GATEWAY,
+       "Time from an owner preemption to the control generation being invalidated.",
+       "van_gateway.observability.instruments.record_control_preempt",
+       "milliseconds", FRAME_BUCKETS_MS, (), silence_is_normal=True),
+    _m("van_browser_agent_grant_total", MetricKind.COUNTER, MetricSource.GATEWAY,
+       "Agent grants by the state they ended in, including preemption by the owner.",
+       "van_gateway.observability.instruments.record_agent_grant", "", (), ("state",),
+       silence_is_normal=True),
+    _m("van_browser_download_total", MetricKind.COUNTER, MetricSource.GATEWAY,
+       "Downloads by the state they reached; QUARANTINED is the one worth watching.",
+       "van_gateway.observability.instruments.record_download", "", (), ("state",),
+       silence_is_normal=True),
+
+    _m("van_browser_frame_fps", MetricKind.GAUGE, MetricSource.STREAM_HOST,
+       "Frames per second the stream host is producing for the owner's session.",
+       "Browser Stream Host telemetry (RB-010, unprovisioned)", "fps", (), ()),
+    _m("van_browser_encode_ms", MetricKind.HISTOGRAM, MetricSource.STREAM_HOST,
+       "Time to encode one frame on the stream host.",
+       "Browser Stream Host telemetry (RB-010, unprovisioned)", "milliseconds",
+       FRAME_BUCKETS_MS, ()),
+    _m("van_browser_webrtc_rtt_ms", MetricKind.HISTOGRAM, MetricSource.STREAM_HOST,
+       "Round-trip time on the media path between the phone and the stream host.",
+       "Browser Stream Host telemetry (RB-010, unprovisioned)", "milliseconds",
+       LATENCY_BUCKETS_MS, ()),
+    _m("van_browser_webrtc_packet_loss", MetricKind.GAUGE, MetricSource.STREAM_HOST,
+       "Fraction of media packets lost, as the stream host observes it.",
+       "Browser Stream Host telemetry (RB-010, unprovisioned)", "ratio", (), ()),
+    _m("van_browser_turn_relay_ratio", MetricKind.GAUGE, MetricSource.STREAM_HOST,
+       "Fraction of sessions relayed through TURN rather than connected directly.",
+       "Browser Stream Host telemetry (RB-010, unprovisioned)", "ratio", (), ()),
+
+    _m("van_browser_decode_fps", MetricKind.GAUGE, MetricSource.DEVICE,
+       "Frames per second the phone is decoding.",
+       "Android device telemetry", "fps", (), ()),
+    _m("van_browser_frame_drop_count", MetricKind.COUNTER, MetricSource.DEVICE,
+       "Frames the phone received and did not render.",
+       "Android device telemetry", "", (), ()),
+    _m("van_browser_reconnect_count", MetricKind.COUNTER, MetricSource.DEVICE,
+       "Times the phone re-established the media path within one session.",
+       "Android device telemetry", "", (), ()),
+    _m("van_browser_last_frame_age_ms", MetricKind.GAUGE, MetricSource.DEVICE,
+       "Age of the newest frame the phone has drawn; the number behind a frozen picture.",
+       "Android device telemetry", "milliseconds", (), ()),
 )
 
 BY_NAME: Mapping[str, Metric] = {metric.name: metric for metric in CATALOGUE}

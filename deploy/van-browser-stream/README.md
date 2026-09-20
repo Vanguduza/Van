@@ -117,6 +117,46 @@ volume with an exclusive lease) puts the owner's authenticated cookies on a wire
 hosts, and the lease enforcement becomes the thing standing between two Chromiums writing
 the same profile. A is fewer moving parts holding the same secret.
 
+## Certifying the host, and what VAN refuses until you do
+
+`qualify.sh` runs on the host and checks it against §13. It is a self-check, and the
+Gateway never sees it.
+
+The Gateway's own position is separate and stricter. `browser.interactive.session` — the
+capability an interactive browser session binds a Mission under — is declared
+`EXTERNAL_RUNTIME` against the probe `browser_stream_host`, so until a canary has measured
+this host from the Gateway's side, **a browser session opened for a Mission is refused**,
+with `NO_READINESS_EVIDENCE:browser_stream_host` naming the missing thing. Manual browsing
+is unaffected; §23.2 says opening a web page is not a unit of agent work, and it needs no
+capability.
+
+That is the designed state rather than a gap. Recording that a Mission used a remote
+browser, when no remote browser has ever been proven to exist, is the kind of unearned
+claim the readiness ladder exists to prevent.
+
+Three canaries clear it, run from the Gateway host against this one:
+
+```
+python tools/certification/certify_browser_stream_host.py --canary mtls   --host 10.0.1.240 ...
+python tools/certification/certify_browser_stream_host.py --canary observe --host 10.0.1.240 ...
+python tools/certification/certify_browser_stream_host.py --canary fence  --host 10.0.1.240 ...
+```
+
+* **mtls** — a client certificate from this PKI completes the handshake, *and* one signed
+  by a foreign CA does not. Both halves, because a listener that accepts is not a listener
+  that refuses, and the second is what §13.3 is about. It needs
+  `pki/make-stream-pki.sh --with-foreign-test-cert` to have been run;
+* **observe** — a read-only call over the wire protocol answers, and a raw CDP method on
+  the same connection is refused. This is the canary that records the readiness evidence,
+  because an open port is not a working control agent;
+* **fence** — a call naming a superseded control generation is refused. The Gateway's own
+  tests prove it *moves* the generation; only this proves the host honours it, and a host
+  that does not is one where "Take over" changes a number in a database while the agent
+  keeps clicking.
+
+Without a live host all three exit non-zero and record nothing, so the gate stays
+`PENDING_LIVE`.
+
 ## What this package does not do
 
 It does not provision the VM, open a firewall, or obtain a TLS certificate for the public

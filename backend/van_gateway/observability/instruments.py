@@ -102,6 +102,48 @@ def record_error(error_class: object, code: object, registry: MetricsRegistry = 
     )
 
 
+# ------------------------------------------------- Rev 1.5 §28.1, the Remote Browser
+#
+# Only the ones the Gateway can actually see. Capture, encode and WebRTC belong to the
+# Stream Host and are declared with `MetricSource.STREAM_HOST`, so a scrape that never
+# shows them reads as "no host" rather than "no traffic" — which is the difference
+# between a system that is idle and one that was never built.
+
+
+def set_browser_sessions_active(count: int, registry: MetricsRegistry = REGISTRY) -> None:
+    registry.set_gauge("van_browser_session_active", max(int(count), 0))
+
+
+def record_browser_connect(duration_ms: float, registry: MetricsRegistry = REGISTRY) -> None:
+    """Session created to first stream grant. Not "time to first frame".
+
+    The Gateway does not see a frame, and naming this metric as if it did would make a
+    green dashboard for a session the owner is staring at a black rectangle in.
+    """
+    registry.observe("van_browser_session_connect_ms", max(duration_ms, 0.0))
+
+
+def record_browser_input_dispatch(duration_ms: float, registry: MetricsRegistry = REGISTRY) -> None:
+    registry.observe("van_browser_input_dispatch_ms", max(duration_ms, 0.0))
+
+
+def record_control_preempt(duration_ms: float, registry: MetricsRegistry = REGISTRY) -> None:
+    """§26 gives owner takeover acknowledgement a 100ms target.
+
+    Worth its own metric rather than a log line: this is the number that says whether
+    "Take over" felt instant, and the owner's judgement of the whole feature rests on it.
+    """
+    registry.observe("van_browser_control_preempt_ms", max(duration_ms, 0.0))
+
+
+def record_agent_grant(state: object, registry: MetricsRegistry = REGISTRY) -> None:
+    registry.increment("van_browser_agent_grant_total", labels={"state": _clean(state)})
+
+
+def record_download(state: object, registry: MetricsRegistry = REGISTRY) -> None:
+    registry.increment("van_browser_download_total", labels={"state": _clean(state)})
+
+
 #: Device-produced metrics, keyed by the name the device posts. Closed on purpose:
 #: a device that posts a name not in here is reporting something nobody declared,
 #: and the ingest route refuses it rather than inventing a series.
@@ -115,6 +157,17 @@ DEVICE_HISTOGRAMS: dict[str, tuple[str, tuple[str, ...]]] = {
 DEVICE_GAUGES: dict[str, str] = {
     "battery_percent": "van_device_battery_percent",
     "memory_used_mb": "van_device_memory_used_mb",
+    # §28.1's Android half. `last_frame_age_ms` is the number behind a frozen picture,
+    # which is the failure §7 names and the one an owner cannot describe any other way.
+    "browser_decode_fps": "van_browser_decode_fps",
+    "browser_last_frame_age_ms": "van_browser_last_frame_age_ms",
+}
+
+#: Device counters. Separate from gauges because a dropped frame accumulates and a decode
+#: rate does not, and rendering one as the other produces a chart that means nothing.
+DEVICE_COUNTERS: dict[str, str] = {
+    "browser_frame_drop_count": "van_browser_frame_drop_count",
+    "browser_reconnect_count": "van_browser_reconnect_count",
 }
 
 
@@ -130,6 +183,10 @@ def record_device_sample(name: str, value: float, *, surface: str | None = None,
         label_values = {"surface": _clean(surface, fallback="overlay")} if labels else None
         registry.observe(metric, max(float(value), 0.0), labels=label_values)
         return metric
+    if name in DEVICE_COUNTERS:
+        metric = DEVICE_COUNTERS[name]
+        registry.increment(metric, value=max(float(value), 0.0))
+        return metric
     if name in DEVICE_GAUGES:
         metric = DEVICE_GAUGES[name]
         registry.set_gauge(metric, float(value))
@@ -138,7 +195,8 @@ def record_device_sample(name: str, value: float, *, surface: str | None = None,
 
 
 __all__ = [
-    "DEVICE_GAUGES", "DEVICE_HISTOGRAMS", "UnknownDeviceMetric", "record_automation_run",
+    "DEVICE_COUNTERS", "DEVICE_GAUGES", "DEVICE_HISTOGRAMS", "UnknownDeviceMetric",
+    "record_automation_run",
     "record_browser_task", "record_device_sample", "record_error", "record_event_lag",
     "record_hermes_callback", "record_mission_duration", "record_request",
     "record_trade_halt_latency", "record_verification", "set_queue_depth", "timed",

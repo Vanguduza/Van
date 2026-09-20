@@ -29,9 +29,21 @@ APP_ROUTES = ROOT / "backend/van_gateway/app.py"
 
 
 def gateway_metrics() -> tuple[set[str], set[str]]:
+    """The histogram names, and every other device name the route will accept.
+
+    Gauges and counters are returned together because this comparison is about *names*
+    and the route takes a name from whichever dict holds it. Reading only two of the
+    three is how two of §28.1's four device metrics reached the gateway with nothing
+    checking that any phone could post them: `DEVICE_COUNTERS` was added beside the two
+    this function already read, and the test whose whole job is to catch that drift did
+    not know the third dict existed.
+    """
     from van_gateway.observability import instruments
 
-    return set(instruments.DEVICE_HISTOGRAMS), set(instruments.DEVICE_GAUGES)
+    return (
+        set(instruments.DEVICE_HISTOGRAMS),
+        set(instruments.DEVICE_GAUGES) | set(instruments.DEVICE_COUNTERS),
+    )
 
 
 def kotlin_metrics() -> dict[str, bool]:
@@ -47,8 +59,32 @@ def kotlin_metrics() -> dict[str, bool]:
 
 
 def test_the_device_posts_exactly_what_the_gateway_declares():
-    histograms, gauges = gateway_metrics()
-    assert kotlin_metrics().keys() == histograms | gauges
+    histograms, gauges_and_counters = gateway_metrics()
+    assert kotlin_metrics().keys() == histograms | gauges_and_counters
+
+
+def test_every_declared_device_metric_is_ingestible_under_its_wire_name():
+    """The name the phone sends has to be one `record_device_sample` accepts.
+
+    The set comparison above proves the two lists agree. This proves the list means what
+    it says: a name present in a dict the ingest function does not consult would pass the
+    comparison and still be refused at the route, and the phone's telemetry would vanish
+    with the scrape still reporting the metric unobserved.
+    """
+    from van_gateway.observability import instruments
+    from van_gateway.observability.metrics import MetricsRegistry
+
+    registry = MetricsRegistry()
+    landed = {
+        wire: instruments.record_device_sample(
+            wire, 1.0, surface="overlay", registry=registry
+        )
+        for wire in kotlin_metrics()
+    }
+    # Every one landed in a catalogue series, and no two landed in the same one: a
+    # duplicated target would mean one phone measurement overwriting another's.
+    assert len(set(landed.values())) == len(landed), landed
+    assert not {m.name for m in registry.unobserved()} & set(landed.values())
 
 
 def test_the_only_labelled_metric_is_the_one_the_catalogue_labels():

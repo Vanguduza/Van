@@ -21,12 +21,20 @@ What these routes do **not** do:
 
 from __future__ import annotations
 
+import time
 from typing import Any
 
 from fastapi import APIRouter, HTTPException, Request
 from pydantic import BaseModel, Field
 
+from van_gateway.browser.agent_grant import AgentGrantService
 from van_gateway.browser.control_lease import ControlLeaseError, ControlLeaseService
+from van_gateway.browser.downloads import (
+    DownloadBroker,
+    DownloadError,
+    DownloadState,
+    owner_actions,
+)
 from van_gateway.browser.interactive_models import (
     BrowserControlHolder,
     InteractiveBrowserSession,
@@ -39,6 +47,7 @@ from van_gateway.browser.interactive_service import (
 )
 from van_gateway.browser.policy import BrowserPolicyError
 from van_gateway.browser.stream_grants import StreamGrantError, StreamGrantService
+from van_gateway.observability import instruments
 
 #: §34 / §6.1. One prefix, read by the router and by the two route classifiers in app.py,
 #: because the alternative is three lists that agree until someone adds a route to two of
@@ -115,6 +124,8 @@ def build_interactive_router(
     sessions: InteractiveSessionService,
     control: ControlLeaseService,
     grants: StreamGrantService,
+    agent_grants: AgentGrantService | None = None,
+    downloads_broker: DownloadBroker | None = None,
     signal_url: str,
     ice_servers: list[dict[str, Any]],
     mission_binder: Any | None = None,
@@ -140,6 +151,23 @@ def build_interactive_router(
             # that it exists.
             raise HTTPException(status_code=404, detail="interactive_session_unknown")
         return session
+
+    async def _abandon(session: InteractiveBrowserSession) -> None:
+        """Unwind a session that was created and must not survive.
+
+        The profile lease is the reason this is not simply "ignore it": a session left in
+        INTERACTIVE holds the owner's authenticated profile, and the next attempt would be
+        refused as leased by a session nobody is using.
+        """
+        await grants.revoke_for_session(session.session_id)
+        await sessions.transition(
+            session_id=session.session_id,
+            target=InteractiveSessionState.TERMINATING, reason="mission_binding_refused",
+        )
+        await sessions.transition(
+            session_id=session.session_id,
+            target=InteractiveSessionState.TERMINATED, reason="mission_binding_refused",
+        )
 
     @router.post("")
     async def create_session(request: Request, body: CreateSessionBody):
@@ -168,11 +196,25 @@ def build_interactive_router(
             raise HTTPException(status_code=status, detail=str(exc)) from exc
 
         if body.mission_id and mission_binder is not None:
-            # ADR-RB-018 — attach to the Mission the command already created. The session
-            # never creates one.
-            await mission_binder.bind_browser_session(
-                mission_id=body.mission_id, session_id=session.session_id
-            )
+            # ADR-RB-018 / §23.1 — attach to the Mission the command already created. The
+            # session never creates one.
+            #
+            # A refused binding ends the session rather than leaving it. Until RB-044 this
+            # call was unguarded and `browser.interactive.session` was named by the binder
+            # and declared by nobody, so every mission-bound session raised
+            # MISSION_CAPABILITY_NOT_PERMITTED out of the route as a 500 — §23.1 had never
+            # once worked. Returning 201 with the session unbound would be the worse fix:
+            # the phone would hold a session it believes is part of a Mission that has no
+            # record of it, and the owner's Missions page would be missing the work.
+            try:
+                await mission_binder.bind_browser_session(
+                    mission_id=body.mission_id, session_id=session.session_id
+                )
+            except Exception as exc:  # MissionError and anything else the binder raises
+                await _abandon(session)
+                raise HTTPException(
+                    status_code=409, detail=f"mission_binding_refused:{exc}"
+                ) from exc
         if audit is not None:
             await audit.record(
                 result="ok", device_id=device_id, capability="browser.interactive.create",
@@ -220,9 +262,22 @@ def build_interactive_router(
     async def take_control(request: Request, session_id: str):
         """ADR-RB-007 — the owner takes control back. Not a request; a fact."""
         session = await _owned(request, session_id)
+        started = time.monotonic()
         lease = await control.owner_preempt(
             session_id=session.session_id, device_id=session.owner_device_id
         )
+        # §22.3, the half that is marked mandatory and that a "Take over" button does not
+        # provide: the agent's *queued* actions are discarded, not merely refused when they
+        # next arrive. An action already accepted and waiting is one the owner has taken
+        # the browser back from, and letting it run because it was queued before the
+        # preemption is the failure the section exists to forbid.
+        discarded: list[str] = []
+        if agent_grants is not None:
+            discarded = agent_grants.owner_preempted(
+                session.session_id, new_generation=lease.generation
+            )
+        instruments.record_control_preempt((time.monotonic() - started) * 1000.0)
+
         if session.state is InteractiveSessionState.AGENT_CONTROLLED:
             await sessions.transition(
                 session_id=session.session_id, target=InteractiveSessionState.INTERACTIVE,
@@ -238,6 +293,9 @@ def build_interactive_router(
             "control_generation": lease.generation,
             "holder": lease.holder.value,
             "expires_at_ms": lease.expires_at_ms,
+            # Named rather than counted. An agent that was about to submit a form and did
+            # not is a fact the owner may need, and "3 actions discarded" is not that fact.
+            "discarded_agent_actions": discarded,
         }
 
     @router.post("/{session_id}/delegate-control")
@@ -355,6 +413,13 @@ def build_interactive_router(
 
     @router.get("/{session_id}/downloads")
     async def downloads(request: Request, session_id: str):
+        """§18.3 — what was downloaded and what the owner may do with each one.
+
+        `actions` is computed here rather than on the phone. A client that derived the
+        offered actions from the state string would have to re-implement §18.2's rule that
+        a quarantined file loses exactly `OPEN_IN_VAN` and `SEND_TO_PHONE` — and a client
+        that got it wrong would put a dangerous file one tap from opening.
+        """
         session = await _owned(request, session_id)
         rows = await sessions.store.fetchall(
             "SELECT download_id, suggested_name, mime_type, byte_size, state, "
@@ -372,6 +437,15 @@ def build_interactive_router(
                     "byte_size": r["byte_size"],
                     "state": r["state"],
                     "failure_reason": r["failure_reason"],
+                    # Stated, not inferred from `failure_reason` being non-empty by a
+                    # client that does not know what that column means.
+                    "dangerous": bool(r["failure_reason"]),
+                    "actions": [
+                        action.value
+                        for action in owner_actions(
+                            DownloadState(r["state"]), dangerous=bool(r["failure_reason"])
+                        )
+                    ],
                     "created_at_ms": int(r["created_at_ms"]),
                     "completed_at_ms": (
                         int(r["completed_at_ms"]) if r["completed_at_ms"] is not None else None
@@ -380,6 +454,40 @@ def build_interactive_router(
                 for r in rows
             ],
         }
+
+    @router.delete("/{session_id}/downloads/{download_id}")
+    async def delete_download(request: Request, session_id: str, download_id: str):
+        """The one owner action the Gateway can carry out on its own.
+
+        Every other action in §18.3 moves the *file*, which is on the Stream Host's
+        quarantine volume and not reachable from here (§6.4 keeps the Gateway out of that
+        path for the same reason it keeps it out of the media one). Deleting is a decision
+        about the record, and the host reaps what the record no longer claims.
+
+        The download is checked against *this* session before anything happens. Without
+        that, a device that owns one session could name a download id belonging to
+        another and delete a file it has no authority over — the session check above
+        would still have passed.
+        """
+        session = await _owned(request, session_id)
+        if downloads_broker is None:
+            raise HTTPException(status_code=503, detail="browser_downloads_unconfigured")
+        row = await sessions.store.fetchone(
+            "SELECT session_id FROM browser_downloads WHERE download_id = ?", (download_id,)
+        )
+        if row is None or row["session_id"] != session.session_id:
+            raise HTTPException(status_code=404, detail="download_unknown")
+        try:
+            await downloads_broker.delete(download_id)
+        except DownloadError as exc:
+            raise HTTPException(status_code=409, detail=exc.reason) from exc
+        if audit is not None:
+            await audit.record(
+                result="ok", device_id=session.owner_device_id,
+                capability="browser.download.delete",
+                after={"download_id": download_id, "session_id": session.session_id},
+            )
+        return {"download_id": download_id, "state": DownloadState.DELETED.value}
 
     @router.get("/{session_id}/events")
     async def session_events(request: Request, session_id: str):

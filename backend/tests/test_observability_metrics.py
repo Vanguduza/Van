@@ -8,6 +8,8 @@ built from a value that grows without bound.
 
 from __future__ import annotations
 
+import inspect
+
 import pytest
 
 from van_gateway.observability import instruments
@@ -27,10 +29,14 @@ def registry() -> MetricsRegistry:
     return MetricsRegistry()
 
 
-def test_every_blueprint_metric_is_declared_with_a_named_producer():
-    """Gate 11 lists sixteen metrics. Declaring them is easy; naming who writes
-    each one is what makes an undeclared silence detectable."""
-    assert len(CATALOGUE) == 16
+def test_every_metric_is_declared_with_a_named_producer():
+    """Declaring a metric is easy; naming who writes it is what makes silence detectable.
+
+    This asserted `len(CATALOGUE) == 16`, which pinned a snapshot rather than a rule and
+    had to be edited every time a metric was legitimately added — the same shape as the
+    `SCHEMA_VERSION == 27` assertion this programme replaced earlier. The rule is below:
+    every metric names a producer, and both blueprint lists are covered.
+    """
     for metric in CATALOGUE:
         assert metric.help.strip(), metric.name
         assert metric.produced_by.strip(), metric.name
@@ -73,14 +79,71 @@ def test_zero_because_nothing_happened_is_distinguishable_from_never_wired(regis
     assert "van_metric_unobserved{metric=\"van_error_total\"" not in text
 
 
-def test_device_produced_metrics_are_marked_as_such():
-    """The gateway cannot measure a frame time and must not pretend to."""
-    device = {m.name for m in CATALOGUE if m.source is MetricSource.DEVICE}
-    assert device == {
-        "van_wake_latency_ms", "van_asr_latency_ms", "van_tts_latency_ms",
-        "van_aura_frame_time_ms", "van_device_battery_percent",
-        "van_device_memory_used_mb",
+def test_both_blueprint_metric_lists_are_covered():
+    """Gate 11's sixteen and Rev 1.5 §28.1's Remote Browser set.
+
+    Named rather than counted, so adding a metric does not require editing a number and
+    removing one that the blueprint requires fails here rather than silently.
+    """
+    names = {metric.name for metric in CATALOGUE}
+    gate_eleven = {
+        "van_gateway_request_duration_ms", "van_mission_duration_ms",
+        "van_verifier_duration_ms", "van_hermes_callback_duration_ms",
+        "van_queue_depth", "van_browser_task_total", "van_automation_run_total",
+        "van_trade_halt_latency_ms", "van_event_bus_lag_ms", "van_wake_latency_ms",
+        "van_asr_latency_ms", "van_tts_latency_ms", "van_aura_frame_time_ms",
+        "van_device_battery_percent", "van_device_memory_used_mb", "van_error_total",
     }
+    remote_browser = {
+        "van_browser_session_active", "van_browser_session_connect_ms",
+        "van_browser_input_dispatch_ms", "van_browser_control_preempt_ms",
+        "van_browser_frame_fps", "van_browser_encode_ms", "van_browser_webrtc_rtt_ms",
+        "van_browser_decode_fps", "van_browser_frame_drop_count",
+        "van_browser_reconnect_count", "van_browser_last_frame_age_ms",
+    }
+    assert gate_eleven <= names, sorted(gate_eleven - names)
+    assert remote_browser <= names, sorted(remote_browser - names)
+
+
+def test_every_device_metric_can_actually_be_ingested():
+    """The rule behind the old exact-set assertion, and a stronger one.
+
+    A metric declared with `MetricSource.DEVICE` that the ingest route refuses is a metric
+    the device can never write — it renders as permanently unobserved, which reads as a
+    broken subsystem rather than as a wiring mistake nobody made on purpose.
+    """
+    ingestible = (
+        {name for name, _ in instruments.DEVICE_HISTOGRAMS.values()}
+        | set(instruments.DEVICE_GAUGES.values())
+        | set(instruments.DEVICE_COUNTERS.values())
+    )
+    declared = {m.name for m in CATALOGUE if m.source is MetricSource.DEVICE}
+    assert declared == ingestible, {
+        "declared but not ingestible": sorted(declared - ingestible),
+        "ingestible but not declared": sorted(ingestible - declared),
+    }
+
+
+def test_the_gateway_cannot_write_a_stream_host_metric():
+    """§28.1 — the gateway does not see a frame and must not be able to report one.
+
+    A scrape that never shows these must read as "there is no stream host", which is true
+    today. If the gateway could write them, a zero would be indistinguishable from a
+    measurement, and RB-010 would look provisioned.
+    """
+    stream_host = {m.name for m in CATALOGUE if m.source is MetricSource.STREAM_HOST}
+    assert stream_host, "the Remote Browser's host-side metrics are not declared"
+
+    device_ingest = (
+        {name for name, _ in instruments.DEVICE_HISTOGRAMS.values()}
+        | set(instruments.DEVICE_GAUGES.values())
+        | set(instruments.DEVICE_COUNTERS.values())
+    )
+    assert not (stream_host & device_ingest), "a stream-host metric is writable as device telemetry"
+
+    source = inspect.getsource(instruments)
+    for name in stream_host:
+        assert name not in source, f"{name} has a gateway-side writer"
 
 
 def test_a_device_metric_name_nobody_declared_is_refused(registry):
@@ -128,3 +191,63 @@ def test_a_non_finite_observation_is_refused(registry):
             "van_gateway_request_duration_ms", float("inf"),
             labels={"route": "/x", "result": "2xx"},
         )
+
+
+def test_only_the_stream_host_instruments_are_allowed_to_be_silent():
+    """`silence_is_normal` is an exemption from alerting, so it is fenced by a rule.
+
+    The flag exists for one reason: a Gateway-written instrument that cannot fire without
+    a Browser Stream Host, which a deployment may not have. Anything else marked with it
+    is an instrument whose disappearance nobody will be told about — which is exactly the
+    failure `INSTRUMENT_SILENT` was added to catch. So the set is asserted against the
+    property rather than against a list of names, and a new metric joins it only by being
+    produced by the interactive browser surface.
+    """
+    from van_gateway.observability.metrics import CATALOGUE, MetricSource
+
+    exempt = {m.name for m in CATALOGUE if m.silence_is_normal}
+    interactive = {
+        m.name for m in CATALOGUE
+        if m.source is MetricSource.GATEWAY
+        and m.produced_by.startswith("van_gateway.observability.instruments.")
+        and any(
+            token in m.produced_by
+            for token in (
+                "browser_sessions_active", "browser_connect", "browser_input_dispatch",
+                "control_preempt", "agent_grant", "record_download",
+            )
+        )
+    }
+    assert exempt == interactive
+    # And nothing outside the Gateway carries it: a DEVICE or STREAM_HOST metric is
+    # already exempt by source, so marking one would hide that the two mechanisms had
+    # drifted apart.
+    assert all(
+        m.source is MetricSource.GATEWAY for m in CATALOGUE if m.silence_is_normal
+    )
+
+
+def test_an_ordinary_gateway_instrument_still_pages_when_it_goes_quiet():
+    """The other half. A filter that exempted too much would pass the test above and
+    leave the rule unable to fire at all."""
+    from van_gateway.observability.alerts import evaluate
+    from van_gateway.observability.metrics import CATALOGUE, MetricsRegistry, MetricSource
+
+    registry = MetricsRegistry()
+    firing = {
+        alert.rule
+        for alert in evaluate(registry=registry, uptime_seconds=5_000, ops_facts={})
+    }
+    assert "INSTRUMENT_SILENT" in firing
+    silent = next(
+        alert for alert in evaluate(registry=registry, uptime_seconds=5_000, ops_facts={})
+        if alert.rule == "INSTRUMENT_SILENT"
+    )
+    named = set(silent.detail["silent"])
+    assert "van_gateway_request_duration_ms" in named
+    assert "van_browser_download_total" not in named
+    # Every unobserved GATEWAY metric that is not exempt, and nothing else.
+    assert named == {
+        m.name for m in CATALOGUE
+        if m.source is MetricSource.GATEWAY and not m.silence_is_normal
+    }

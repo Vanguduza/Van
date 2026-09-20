@@ -840,10 +840,10 @@
       "id": "RB-028",
       "name": "download broker",
       "group": "gateway",
-      "status": "NOT_STARTED",
-      "built": false,
-      "wired": false,
-      "reachable": false,
+      "status": "WIRED_UNPROVEN",
+      "built": true,
+      "wired": true,
+      "reachable": true,
       "live": false,
       "verified": false,
       "observed": false,
@@ -851,14 +851,20 @@
       "certified": false,
       "component_refs": [],
       "ledger_expectation": "NONE",
-      "producer": null,
-      "consumer": null,
+      "producer": "van_gateway.browser.downloads.DownloadBroker",
+      "consumer": "POST /v1/browser/download-reports (Hermes) and the owner's downloads routes",
       "authority": "docs/VAN_REMOTE_BROWSER_PRODUCTION_BLUEPRINT_REV_1_5.md \u00a718",
       "evidence_refs": [],
-      "tests": [],
-      "external_gates": [],
+      "tests": [
+        "backend/tests/test_browser_takeover_and_downloads.py"
+      ],
+      "external_gates": [
+        "a Browser Stream Host that runs the control agent (RB-010/RB-115)",
+        "no file has ever been downloaded; the bytes are on the host's quarantine volume and the Gateway holds only the record"
+      ],
       "transport_independent": true,
-      "offline_voice_proven": null
+      "offline_voice_proven": null,
+      "note": "\u00a718's pipeline exists and both its surfaces are routed. The report surface is Hermes-scoped because the host holds no Gateway credential and the phone never saw the download; the owner surface carries the per-download action list, computed here so a client cannot re-derive \u00a718.2's rule and get it wrong. QUARANTINED has no edge to COMPLETED in the transition table, so no code path that advances state can release a file: releasing is an owner decision and nothing in this checkpoint implements it. Unproven because no file has been fetched."
     },
     {
       "schema": "van-implementation-matrix/1",
@@ -1219,7 +1225,7 @@
       "id": "RB-041",
       "name": "Stagehand same-session attach",
       "group": "takeover",
-      "status": "NOT_STARTED",
+      "status": "BLOCKED",
       "built": false,
       "wired": false,
       "reachable": false,
@@ -1235,9 +1241,12 @@
       "authority": "docs/VAN_REMOTE_BROWSER_PRODUCTION_BLUEPRINT_REV_1_5.md \u00a722",
       "evidence_refs": [],
       "tests": [],
-      "external_gates": [],
+      "external_gates": [
+        "Stagehand attaching to the Stream Host's Chromium over CDP (RB-010/RB-115)"
+      ],
       "transport_independent": false,
-      "offline_voice_proven": null
+      "offline_voice_proven": null,
+      "note": "Stagehand attaching to the same browser session the owner is watching is a Stagehand-side change on the Trading Core VM, against a CDP endpoint that does not exist in this repository. What the repository owes it is the authority model it must obey \u2014 the control lease, the generation fencing and the agent grant \u2014 and those are RB-042/RB-043, closed here. BLOCKED rather than NOT_STARTED because nothing in this repository is left to build for it: it is waiting on a host."
     },
     {
       "schema": "van-implementation-matrix/1",
@@ -1245,10 +1254,10 @@
       "id": "RB-042",
       "name": "control takeover",
       "group": "takeover",
-      "status": "NOT_STARTED",
-      "built": false,
-      "wired": false,
-      "reachable": false,
+      "status": "WIRED_UNPROVEN",
+      "built": true,
+      "wired": true,
+      "reachable": true,
       "live": false,
       "verified": false,
       "observed": false,
@@ -1256,14 +1265,21 @@
       "certified": false,
       "component_refs": [],
       "ledger_expectation": "NONE",
-      "producer": null,
-      "consumer": null,
+      "producer": "ControlLeaseService and POST /v1/browser/interactive-sessions/{id}/take-control",
+      "consumer": "the owner's phone, and the Browser Control Agent's authorize()",
       "authority": "docs/VAN_REMOTE_BROWSER_PRODUCTION_BLUEPRINT_REV_1_5.md \u00a722",
       "evidence_refs": [],
-      "tests": [],
-      "external_gates": [],
+      "tests": [
+        "backend/tests/test_browser_takeover_and_downloads.py",
+        "backend/tests/test_interactive_browser_api.py",
+        "services/browser_control_agent/tests/test_control_authority.py"
+      ],
+      "external_gates": [
+        "a Browser Stream Host that runs the control agent (RB-010/RB-115)"
+      ],
       "transport_independent": false,
-      "offline_voice_proven": null
+      "offline_voice_proven": null,
+      "note": "\u00a722.3's two halves, both present: the server control generation moves, and the queued agent actions are discarded rather than left to be refused one at a time later. The route returns what it discarded, so the Mission record can say what did not happen. The half this repository cannot prove is that the *host* honours a superseded generation; tools/certification/certify_browser_stream_host.py --canary fence is the measurement that would, and it has never been run."
     },
     {
       "schema": "van-implementation-matrix/1",
@@ -1271,10 +1287,10 @@
       "id": "RB-043",
       "name": "owner preemption",
       "group": "takeover",
-      "status": "NOT_STARTED",
-      "built": false,
-      "wired": false,
-      "reachable": false,
+      "status": "WIRED_UNPROVEN",
+      "built": true,
+      "wired": true,
+      "reachable": true,
       "live": false,
       "verified": false,
       "observed": false,
@@ -1282,14 +1298,19 @@
       "certified": false,
       "component_refs": [],
       "ledger_expectation": "NONE",
-      "producer": null,
-      "consumer": null,
+      "producer": "van_gateway.browser.agent_grant.AgentGrantService",
+      "consumer": "the take-control route; the agent grant's scope payload",
       "authority": "docs/VAN_REMOTE_BROWSER_PRODUCTION_BLUEPRINT_REV_1_5.md \u00a7ADR-RB-007",
       "evidence_refs": [],
-      "tests": [],
-      "external_gates": [],
+      "tests": [
+        "backend/tests/test_browser_takeover_and_downloads.py"
+      ],
+      "external_gates": [
+        "a Browser Stream Host that runs the control agent (RB-010/RB-115)"
+      ],
       "transport_independent": false,
-      "offline_voice_proven": null
+      "offline_voice_proven": null,
+      "note": "ADR-RB-007. Preemption reaches active grants on the session whose generation is now stale, and only those: a grant that completed cleanly keeps its record, and a second touch does not move the first preemption's timestamp \u2014 otherwise every measurement of how long the agent kept going after the owner took over reads as zero. The nine-field scope carries no credential, no profile secret and no passthrough."
     },
     {
       "schema": "van-implementation-matrix/1",
@@ -1297,10 +1318,10 @@
       "id": "RB-044",
       "name": "BrowserTask Mission binding regression proof",
       "group": "mission",
-      "status": "NOT_STARTED",
-      "built": false,
-      "wired": false,
-      "reachable": false,
+      "status": "WIRED_UNPROVEN",
+      "built": true,
+      "wired": true,
+      "reachable": true,
       "live": false,
       "verified": false,
       "observed": false,
@@ -1308,14 +1329,20 @@
       "certified": false,
       "component_refs": [],
       "ledger_expectation": "NONE",
-      "producer": null,
-      "consumer": null,
+      "producer": "MissionBinder.bind_browser_session",
+      "consumer": "POST /v1/browser/interactive-sessions with a mission_id",
       "authority": "docs/VAN_REMOTE_BROWSER_PRODUCTION_BLUEPRINT_REV_1_5.md \u00a723",
       "evidence_refs": [],
-      "tests": [],
-      "external_gates": [],
+      "tests": [
+        "backend/tests/test_browser_mission_binding_regression.py",
+        "tests/contracts/test_stream_host_readiness_is_earned.py"
+      ],
+      "external_gates": [
+        "a Browser Stream Host that runs the control agent (RB-010/RB-115)"
+      ],
       "transport_independent": false,
-      "offline_voice_proven": null
+      "offline_voice_proven": null,
+      "note": "This row is why regression proofs are worth writing. \u00a723.1's own worked example \u2014 \"Van, search this page and explain it\" \u2014 had never once worked: `bind_browser_session` named the capability `browser.interactive.session`, no registry declared it, and the route called the binder unguarded, so every mission-bound session raised MISSION_CAPABILITY_NOT_PERMITTED as a 500. The capability is declared now (EXTERNAL_RUNTIME against the `browser_stream_host` probe), the route refuses cleanly and unwinds the session rather than stranding the owner's profile, and the proof covers all three of \u00a723's claims: binding is by reference and adds no Mission, manual browsing has none at all, and a completed browser activity does not verify the Mission."
     },
     {
       "schema": "van-implementation-matrix/1",
@@ -1354,10 +1381,10 @@
       "id": "RB-046",
       "name": "evidence",
       "group": "observability",
-      "status": "NOT_STARTED",
-      "built": false,
-      "wired": false,
-      "reachable": false,
+      "status": "WIRED_UNPROVEN",
+      "built": true,
+      "wired": true,
+      "reachable": true,
       "live": false,
       "verified": false,
       "observed": false,
@@ -1365,14 +1392,19 @@
       "certified": false,
       "component_refs": [],
       "ledger_expectation": "NONE",
-      "producer": null,
-      "consumer": null,
+      "producer": "tools/certification/certify_browser_stream_host.py",
+      "consumer": "ExternalRuntimeRegistry, read by the capability registry's EXTERNAL_RUNTIME probe",
       "authority": "docs/VAN_REMOTE_BROWSER_PRODUCTION_BLUEPRINT_REV_1_5.md \u00a728",
       "evidence_refs": [],
-      "tests": [],
-      "external_gates": [],
+      "tests": [
+        "tests/contracts/test_stream_host_readiness_is_earned.py"
+      ],
+      "external_gates": [
+        "a live Browser Stream Host to run the three canaries against (RB-010/RB-115)"
+      ],
       "transport_independent": false,
-      "offline_voice_proven": null
+      "offline_voice_proven": null,
+      "note": "\u00a728's evidence path for the browser stream, and the thing that makes RB-044's refusal earned rather than decorative: `browser.interactive.session` is not ready until a canary has measured a real host. Three canaries \u2014 the mTLS handshake including the foreign-CA refusal, a read-only call over the wire protocol with a raw-CDP attempt refused on the same connection, and a superseded control generation refused. Readiness evidence is written only by the second, because an open port is not a working control agent. Nothing has been run: no host exists."
     },
     {
       "schema": "van-implementation-matrix/1",
@@ -1380,10 +1412,10 @@
       "id": "RB-047",
       "name": "metrics",
       "group": "observability",
-      "status": "NOT_STARTED",
-      "built": false,
-      "wired": false,
-      "reachable": false,
+      "status": "WIRED_UNPROVEN",
+      "built": true,
+      "wired": true,
+      "reachable": true,
       "live": false,
       "verified": false,
       "observed": false,
@@ -1391,14 +1423,24 @@
       "certified": false,
       "component_refs": [],
       "ledger_expectation": "NONE",
-      "producer": null,
-      "consumer": null,
+      "producer": "van_gateway.observability.instruments; com.dial.van.telemetry.BrowserStreamTelemetry on the device",
+      "consumer": "GET /v1/observability/metrics and the alert rules",
       "authority": "docs/VAN_REMOTE_BROWSER_PRODUCTION_BLUEPRINT_REV_1_5.md \u00a728",
       "evidence_refs": [],
-      "tests": [],
-      "external_gates": [],
+      "tests": [
+        "backend/tests/test_observability_metrics.py",
+        "backend/tests/test_observability_alerts.py",
+        "backend/tests/test_browser_takeover_and_downloads.py",
+        "tests/contracts/test_device_telemetry_contract.py",
+        "android/verification/src/test/kotlin/com/dial/van/telemetry/BrowserStreamTelemetryTest.kt",
+        "android/verification/src/test/kotlin/com/dial/van/telemetry/DeviceTelemetryTest.kt"
+      ],
+      "external_gates": [
+        "the five STREAM_HOST metrics have no producer until a host exists (RB-010)"
+      ],
       "transport_independent": false,
-      "offline_voice_proven": null
+      "offline_voice_proven": null,
+      "note": "\u00a728.1's list, split three ways by who can actually measure each one. The six the Gateway owns are recorded by real call sites and carry `silence_is_normal`, because none of them can fire without a Stream Host and an alert nobody can clear is how the alerts that matter stop being read. The five the host owns are declared STREAM_HOST so a permanently empty scrape reads as \"no host\" rather than \"no traffic\", and a test asserts the Gateway cannot write them. The four the device owns reach the phone: two of them had been added to the Gateway beside a dict the contract test did not read, so nothing checked that any phone could post them. `BrowserStreamTelemetry` and `DecoderStats` are the pure arithmetic behind them, fed from the WebRTC video sink and from a decoder stats poll on the session heartbeat; writing their tests found a real defect, a zero-timestamp sentinel that restarted the fps window on every frame, so the metric would have been silent rather than wrong. Not observed: nothing has scraped this, and no frame has been decoded."
     },
     {
       "schema": "van-implementation-matrix/1",

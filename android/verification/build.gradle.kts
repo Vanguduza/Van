@@ -85,6 +85,7 @@ sourceSets {
             "com/dial/van/gateway/GatewayRetry.kt",
             "com/dial/van/gateway/ReplayTrigger.kt",
             "com/dial/van/telemetry/DeviceTelemetry.kt",
+            "com/dial/van/telemetry/BrowserStreamTelemetry.kt",
             "com/dial/van/trading/TradingFormat.kt",
             "com/dial/van/trading/ChartViewport.kt",
             "com/dial/van/voice/SpeakerVerification.kt",

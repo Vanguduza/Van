@@ -452,18 +452,43 @@ three of the four were green in every test that existed at the time.
 | 0F.6g | The Android speech queue had two guards covering one case: a duplicate `segmentId` and an index at or below what the owner had heard. Every test exercised both at once, so a mutation of the index check survived. It is not redundant — it is the only thing that catches a *renumbered* stream, where the Gateway re-segments an answer and produces a new id for text already spoken — but nothing had separated them. Eighth occurrence of overlapping guards in this programme. | A mutation deleting the index check: green. | An isolating test offering a new id at a spoken index, plus a cross-stream guard, because two answers in one queue were comparing their indexes as if they were one sequence. |
 | 0F.6h | `SpeechStreamService.open` is idempotent on `response_id`, and the test for it asserted the stream id and segment count — both of which are derived from the response id and therefore identical with the guard removed. The property it actually protects is the cursor: a second `open` forgets what the device reported it heard, so the resume replays audio the owner already heard. | A mutation removing the idempotency check: green. | The test now reports a cursor, re-opens, and asserts the cursor survived. |
 | 0F.6i | Two more of the same shape in one checkpoint. An abbreviation test used a sentence whose halves were short enough for the fragment packing to rejoin them, so it passed with the abbreviation handling deleted; and `_split_long` had an early return for a sentence with no clause boundary that the loop below already handled identically. | Mutations of both: green. | The test uses halves long enough to survive packing; the dead branch was removed rather than the mutation weakened. |
+| 0F.6j | `MissionBinder.bind_browser_session` bound under the capability id `browser.interactive.session`, which no registry declared. §7 refuses an undeclared capability, and the route called the binder unguarded, so **every** mission-bound browser session — §23.1's own worked example — was a 500, after the session had leased the owner's authenticated profile. The binder's tests pass `capabilities=None`, which returns before the registry is consulted; the route's tests never pass a `mission_id`. Neither side was wrong; the path between them had never run. | Opening a session with a `mission_id` against the real app, which no test did. | The capability is declared `EXTERNAL_RUNTIME` against `browser_stream_host` rather than `STATIC`, so the refusal is earned rather than removed; the route unwinds the session; `tests/contracts/test_stream_host_readiness_is_earned.py` parses the binder's constant and requires the registry to hold it. |
+| 0F.6k | Six new §28.1 instruments are `MetricSource.GATEWAY` and none of them can fire without a Stream Host, so `INSTRUMENT_SILENT` would have paged every deployment without one every fifteen minutes, forever. | The existing test that a device metric's silence is not a fault: it failed the moment the catalogue grew. | `silence_is_normal` on the declaration, fenced by a test that derives the exempt set from the property and another that requires the rule to still fire. |
+| 0F.6l | Two of §28.1's four *device* metrics were added to the gateway in a third dict, `DEVICE_COUNTERS`, beside the two the device-telemetry contract test reads. The test whose whole job is to stop the gateway's list and the phone's enum drifting was reading two thirds of the list. | Running it after the catalogue grew, and asking why it still passed. | The contract folds the counters in, and a second test requires every name in the enum to be one `record_device_sample` actually ingests. |
+| 0F.6m | Two mutation survivors in one checkpoint, both tests asserting something true either way. `BrowserStreamTelemetry`'s clock-step test asserted that the backwards frame emits nothing and that the age is measured from it — both hold with the guard removed. What the guard decides is whether the fps window stays anchored in the future, which suppresses every reading until real time catches up and then reports a rate the decoder never achieved. And the drop-count guard was tested with zero, which is equivalent with or without it; its real job is a *negative* count from a cumulative counter differenced across a decoder restart, which subtracts drops that happened. | Mutations of both: green. | Isolating assertions on what each guard actually decides, and the mutation labels corrected to name the real failure. |
+| 0F.6n | Three test failures that looked like an intermittent lease bug in the Gateway: the unwind after a refused Mission binding sometimes left the owner's profile leased, reproducing about once in thirteen runs and never under investigation. It was the mutation harness, running in another shell, editing the source in place — the mutation current at the time was the one that replaces that very unwind with `pass`. | Noticing that the reproduction rate dropped to zero the moment the harness finished, and that the three failures matched two mutation labels exactly. | A warning at the top of `tools/audit/mutation.py`, and the assertion in the test now prints the profile row and every session so the next such failure states its cause instead of requiring one. |
 
 Two lessons generalise. The first is why the vectors file exists rather than a
 source-to-source comparison: **two implementations that are each correctly tested against
 themselves prove nothing about each other.** Three of the first four are that failure.
 
-The second is why 0F.6e through 0F.6i are here at all: **a suite that stays green when a
-guard is deleted is describing the guard, not testing it.** All five were found by mutation,
-after the tests for them had been written and had passed, and none was visible any other
-way. Three of them are the same shape — two guards covering one case, so neither is
-falsifiable on its own — which this programme has now hit eight times. The fix is never to
-weaken the mutation: it is an isolating test, or the discovery that one of the two guards
-was dead and should go.
+The second is why 0F.6e through 0F.6i and 0F.6m are here at all: **a suite that stays
+green when a guard is deleted is describing the guard, not testing it.** All of them were
+found by mutation, after the tests for them had been written and had passed, and none was
+visible any other way. Several are the same shape — two guards covering one case, so
+neither is falsifiable on its own — which this programme has now hit nine times. The fix is
+never to weaken the mutation: it is an isolating test, or the discovery that one of the two
+guards was dead and should go.
+
+0F.6m adds a variant worth naming separately, because it is not overlapping guards. Both
+of its tests asserted something that was true with the guard and true without it — not
+because two mechanisms covered the case, but because the assertion was about the wrong
+consequence. A test can exercise exactly the right line and still be describing it. The
+mutation is what tells the difference, and when it survives the question to ask is not
+"which other guard covered this" but "what does this guard actually decide".
+
+0F.6n is not a defect in the product at all, and it is recorded because it cost more
+than several that were: **a test failing while the mutation harness is running is not
+evidence about the product.** The harness edits source in place, so a parallel suite reads
+whichever mutation is current. The rule is now written where the harness is, and the
+assertion that failed prints enough state to say so next time.
+
+A third lesson, from 0F.6j and 0F.6l: **a constant passed between two modules is an
+interface, and nothing was checking either of these.** A capability id named in Python and
+declared in JSON, and a metric name declared in Python and mirrored in Kotlin. Both were
+green on each side. Both were broken across. The fix in each case is a test that reads one
+side's value and requires the other to hold it, rather than two lists a person keeps in
+step.
 
 ## 0F.5 Owner decisions taken by delegation
 

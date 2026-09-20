@@ -1,6 +1,8 @@
 package com.dial.van.browser
 
 import android.content.Context
+import com.dial.van.telemetry.DecoderStats
+import com.dial.van.telemetry.DeviceTelemetryReporter
 import java.net.HttpURLConnection
 import java.net.URL
 import java.nio.ByteBuffer
@@ -55,6 +57,14 @@ import org.webrtc.VideoTrack
 class BrowserStreamClient(
     private val context: Context,
     private val eglBase: EglBase,
+    /**
+     * Rev 1.5 §28.1 — where the four device-side stream measurements go.
+     *
+     * Optional because this class is constructed in places that have no reporter, and a
+     * required dependency would mean either a second constructor or a null check at every
+     * call site. Null means the numbers are not collected, not that they are zero.
+     */
+    private val telemetry: DeviceTelemetryReporter? = null,
 ) {
 
     /** What the surface needs to know, in the owner's terms rather than WebRTC's. */
@@ -125,7 +135,12 @@ class BrowserStreamClient(
             }
 
             override fun onAddTrack(receiver: RtpReceiver, streams: Array<out MediaStream>) {
-                (receiver.track() as? VideoTrack)?.let(onVideo)
+                val track = receiver.track() as? VideoTrack ?: return
+                // §28.1 — the sink is added before the caller's, so a frame is counted
+                // even if the surface it is handed to drops it. What the decoder produced
+                // and what the owner saw are different numbers and this one is the first.
+                telemetry?.let { reporter -> track.addSink { reporter.recordBrowserFrame() } }
+                onVideo(track)
             }
 
             override fun onConnectionChange(state: PeerConnection.PeerConnectionState) {
@@ -183,7 +198,28 @@ class BrowserStreamClient(
         return channel.send(DataChannel.Buffer(ByteBuffer.wrap(bytes), true))
     }
 
+    /**
+     * Ask the peer connection what the decoder has dropped, and hand the total on.
+     *
+     * Polled rather than pushed because WebRTC exposes it only through a stats report,
+     * and asked for on the telemetry flush rather than per frame: this is a JNI round
+     * trip into the native stack, and sixty of them a second to measure jank would be
+     * the jank.
+     *
+     * The report is converted to plain maps before anything decides what to read from it,
+     * so the deciding — which `inbound-rtp` entry is the picture — is in
+     * `DecoderStats.framesDropped` where the harness can execute it.
+     */
+    fun pollDecoderStats() {
+        val reporter = telemetry ?: return
+        peer?.getStats { report ->
+            val entries = report.statsMap.values.map { it.type to it.members }
+            DecoderStats.framesDropped(entries)?.let(reporter::recordBrowserDecoderDrops)
+        }
+    }
+
     fun close() {
+        telemetry?.recordBrowserStreamClosed()
         fast?.close()
         reliable?.close()
         peer?.close()
@@ -198,6 +234,11 @@ class BrowserStreamClient(
 
     private fun transition(next: Link, onLink: (Link) -> Unit) {
         if (link == next) return
+        // A recovery the owner did not ask for, counted as it happens. Counting on
+        // CONNECTED alone would count the first connection as a reconnect; counting on
+        // RECOVERING alone would count a wobble that never came back.
+        if (link == Link.RECOVERING && next == Link.LIVE) telemetry?.recordBrowserReconnect()
+        if (next == Link.CLOSED || next == Link.FAILED) telemetry?.recordBrowserStreamClosed()
         link = next
         onLink(next)
     }

@@ -7,6 +7,12 @@ can report CAUGHT for a mutation that was never applied, or clean for one that w
 
 So the restore writes the original text back (fresh mtime) and every __pycache__ under the
 tree is removed before each run.
+
+**Do not run the test suite in another shell while this is running.** The harness edits
+source files in place, so a parallel pytest reads whichever mutation is current and fails
+in ways that look like a flake in the product. Three such failures cost an afternoon of
+looking for a lease bug that did not exist: the mutation being applied at the time was the
+one that deletes the unwind the failing test asserts.
 """
 import json, os, pathlib, shutil, signal, subprocess, sys
 
