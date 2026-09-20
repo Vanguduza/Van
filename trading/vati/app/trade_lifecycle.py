@@ -64,6 +64,44 @@ class AccountTradeLifecycle:
         """
         return bool(list(self.ledger.iter(kind, correlation_id=corr)))
 
+    @staticmethod
+    def _receipt_from_payload(payload: Mapping[str, object]) -> ExecutionReceipt:
+        """Reconstruct and verify a durable execution receipt for evidence repair."""
+        def dec(name: str, default: str = "0") -> Decimal:
+            raw = payload.get(name, default)
+            return Decimal(str(raw if raw is not None else default))
+
+        raw_fill = payload.get("average_fill")
+        raw_stop = payload.get("protective_stop_price")
+        receipt = ExecutionReceipt(
+            trade_intent_id=str(payload.get("trade_intent_id") or ""),
+            decision_hash=str(payload.get("decision_hash") or ""),
+            venue=str(payload.get("venue") or ""),
+            status=str(payload.get("status") or ""),
+            filled_qty=dec("filled_qty"),
+            average_fill=(Decimal(str(raw_fill)) if raw_fill is not None else None),
+            decision_price=dec("decision_price"),
+            arrival_price=dec("arrival_price"),
+            submitted_price=dec("submitted_price"),
+            protective_stop_confirmed=bool(payload.get("protective_stop_confirmed")),
+            broker_time_unix_ms=int(payload.get("broker_time_unix_ms") or 0),
+            received_time_unix_ms=int(payload.get("received_time_unix_ms") or 0),
+            execution_channel=str(payload.get("execution_channel") or "ADAPTER"),
+            broker_order_id=str(payload.get("broker_order_id") or ""),
+            broker_position_id=str(payload.get("broker_position_id") or ""),
+            reject_reason=str(payload.get("reject_reason") or ""),
+            spread_at_submit=dec("spread_at_submit"),
+            fees=dec("fees"),
+            protective_stop_price=(
+                Decimal(str(raw_stop)) if raw_stop is not None else None),
+            receipt_hash=str(payload.get("receipt_hash") or ""),
+        )
+        expected = receipt.receipt_hash
+        sealed = ExecutionReceipt(**{**receipt.__dict__, "receipt_hash": ""}).sealed()
+        if expected and sealed.receipt_hash != expected:
+            raise ValueError("durable execution receipt hash does not recompute")
+        return receipt if expected else sealed
+
     def recover_from_venue(self) -> tuple[tuple[str, ...], tuple[str, ...]]:
         """Rebuild open entry/protection state from venue plus ledger provenance.
 
@@ -78,11 +116,32 @@ class AccountTradeLifecycle:
                 commands[iid] = (dict(event.payload), event.event_time_ms)
 
         latest_stops: dict[str, Decimal] = {}
+        entry_receipts: dict[str, dict] = {}
         for event in self.ledger.iter(EventKind.EXECUTION_RECEIPT):
             iid = str(event.payload.get("trade_intent_id", ""))
             raw_stop = event.payload.get("protective_stop_price")
             if iid and raw_stop is not None:
                 latest_stops[iid] = Decimal(str(raw_stop))
+            if (
+                iid
+                and event.payload.get("status") in ("FILLED", "PARTIAL")
+                and Decimal(str(event.payload.get("filled_qty") or "0")) > ZERO
+                and event.payload.get("average_fill") is not None
+                and str(event.payload.get("execution_channel") or "ADAPTER")
+                    != "OWNER_TICKET"
+                and event.payload.get("decision_hash")
+                and not event.payload.get("exit_action")
+            ):
+                # Router emits one entry receipt per order submission. Keep the
+                # first durable entry fact; later receipts for the same intent
+                # describe protection/exit lifecycle, not a second entry.
+                entry_receipts.setdefault(iid, dict(event.payload))
+
+        tca_cost_ratios: dict[str, Decimal] = {}
+        for event in self.ledger.iter(EventKind.TCA_RECORD):
+            if event.correlation_id and event.payload.get("cost_ratio") is not None:
+                tca_cost_ratios[event.correlation_id] = Decimal(
+                    str(event.payload["cost_ratio"]))
 
         tickets: dict[str, dict] = {}
         for event in self.ledger.iter(EventKind.OWNER_TICKET):
@@ -182,6 +241,44 @@ class AccountTradeLifecycle:
                 "pending": False,
                 "recovered": True,
             }
+
+            cost_ratio = tca_cost_ratios.get(iid)
+            if cost_ratio is None and iid in entry_receipts:
+                try:
+                    receipt = self._receipt_from_payload(entry_receipts[iid])
+                    modelled_cost = self.modelled_costs.get(
+                        symbol, contract.round_trip_cost_pct)
+                    value_per_unit = (
+                        contract.value_per_price_unit_per_lot
+                        if contract.loss_model is LossModel.STOP_DISTANCE
+                        else Decimal("1")
+                    )
+                    tca = compute_tca(
+                        receipt,
+                        direction=position.direction,
+                        qty=receipt.filled_qty,
+                        value_per_unit=value_per_unit,
+                        modelled_cost_pct=modelled_cost,
+                    )
+                    self._log(
+                        EventKind.TCA_RECORD,
+                        tca.as_dict() | {
+                            "recovered_after_restart": True,
+                            "source_receipt_hash": receipt.receipt_hash,
+                        },
+                        now_ms=receipt.received_time_unix_ms or opened_ms,
+                        corr=iid,
+                    )
+                    cost_ratio = tca.cost_ratio
+                    tca_cost_ratios[iid] = cost_ratio
+                except (ValueError, ArithmeticError):
+                    # Position recovery remains authoritative for safety. A
+                    # malformed receipt cannot be promoted into synthetic TCA;
+                    # absence remains visible and learning is not replayed.
+                    cost_ratio = None
+            if cost_ratio is not None:
+                self.entries[iid]["cost_ratio"] = cost_ratio
+
             restored.append(iid)
         return tuple(sorted(restored)), tuple(sorted(unresolved))
 
