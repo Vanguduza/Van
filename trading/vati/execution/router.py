@@ -8,6 +8,7 @@ STOP_REJECTED. Every step is a ledger event."""
 
 from __future__ import annotations
 
+from contextlib import nullcontext
 from dataclasses import asdict
 from decimal import Decimal
 from typing import Callable, Optional
@@ -59,9 +60,11 @@ def resolve_execution_policy(decision, *, entry_type: str, max_slippage: Optiona
 
 class ExecutionRouter:
     def __init__(self, *, ledger: Ledger, adapters: dict[str, VenueAdapter], kill_switch: KillSwitch, protection: ProtectionManager, producer: str = "vati-execution-router",
-                 lease_fence: Optional[Callable[[Optional[int]], bool]] = None) -> None:
+                 lease_fence: Optional[Callable[[Optional[int]], bool]] = None,
+                 lease_submission_guard: Optional[Callable[[Optional[int]], object]] = None) -> None:
         self.ledger, self.adapters, self.kill, self.protection, self.producer = ledger, adapters, kill_switch, protection, producer
         self.lease_fence = lease_fence
+        self.lease_submission_guard = lease_submission_guard
         self._seen: set[str] = {e.payload["idempotency_key"] for e in ledger.iter(EventKind.ORDER_COMMAND)}
 
     def _log(self, kind: EventKind, payload: dict, *, now_ms: int, corr: str, decision_time: Optional[int] = None) -> None:
@@ -128,43 +131,52 @@ class ExecutionRouter:
             strategy_version=intent.strategy_version,
             lease_epoch=lease_epoch,
         ).sealed()
-        self._seen.add(intent.idempotency_key)
-        self._log(EventKind.ORDER_COMMAND, {**asdict(cmd), "direction": cmd.direction.value, "stop_mode": cmd.stop_mode.value, "loss_model": cmd.loss_model.value}, now_ms=now_ms, corr=corr, decision_time=now_ms)
-        metrics.inc("vati_orders_sent_total", venue=intent.venue)
-        receipt = adapter.submit(cmd, now_ms=now_ms)
-        self._log(EventKind.EXECUTION_RECEIPT, {k: (v.value if hasattr(v, "value") else v) for k, v in asdict(receipt).items()}, now_ms=now_ms, corr=corr)
-        # --- protection ---
-        if receipt.status in ("FILLED", "PARTIAL") and receipt.filled_qty > ZERO:
-            if cmd.stop_mode is StopMode.VENUE and not receipt.protective_stop_confirmed:
-                flat = adapter.close(receipt.broker_position_id, None, now_ms=now_ms, reason="STOP_REJECTED_FLATTEN")
-                self.kill.trip(KillSwitchTrigger.STOP_REJECTED, now_ms)
-                self._log(EventKind.KILL_SWITCH, {"trigger": "STOP_REJECTED", "position": receipt.broker_position_id}, now_ms=now_ms, corr=corr)
-                self._log(EventKind.EXECUTION_RECEIPT, {k: (v.value if hasattr(v, "value") else v) for k, v in asdict(flat).items()}, now_ms=now_ms, corr=corr)
-                metrics.inc("vati_unprotected_flatten_total", venue=intent.venue)
-                raise RouterError("protective stop not confirmed; position flattened and kill switch tripped")
-            if intent.stop is not None:
-                self.protection.register(receipt.broker_position_id, symbol=intent.symbol, direction=intent.direction, entry=receipt.average_fill or intent.entry, stop=intent.stop,
-                                         target=targets[0] if targets else None, opened_ms=now_ms, software_stop=(cmd.stop_mode is StopMode.SOFTWARE))
-            metrics.inc("vati_fills_total", venue=intent.venue)
-        elif receipt.status == "ACCEPTED" and receipt.execution_channel == "OWNER_TICKET":
-            self._log(
-                EventKind.OWNER_TICKET,
-                {
-                    "ticket": receipt.broker_order_id,
-                    "symbol": intent.symbol,
-                    "qty": str(decision.approved_size),
-                    "side": "BUY",
-                    "trade_intent_id": intent.trade_intent_id,
-                    "limit_price": str(intent.entry),
-                    "software_stop": (
-                        str(intent.stop) if intent.stop is not None else None
-                    ),
-                },
-                now_ms=now_ms, corr=corr,
-            )
-        elif receipt.status in ("REJECTED", "UNKNOWN"):
-            metrics.inc("vati_rejects_total", venue=intent.venue)
-        return receipt
+        guard = (
+            self.lease_submission_guard(lease_epoch)
+            if self.lease_submission_guard is not None
+            else nullcontext(True)
+        )
+        with guard as lease_guard_ok:
+            if not lease_guard_ok:
+                raise RouterError(
+                    f"account runtime submission guard refused epoch {lease_epoch!r}")
+            self._seen.add(intent.idempotency_key)
+            self._log(EventKind.ORDER_COMMAND, {**asdict(cmd), "direction": cmd.direction.value, "stop_mode": cmd.stop_mode.value, "loss_model": cmd.loss_model.value}, now_ms=now_ms, corr=corr, decision_time=now_ms)
+            metrics.inc("vati_orders_sent_total", venue=intent.venue)
+            receipt = adapter.submit(cmd, now_ms=now_ms)
+            self._log(EventKind.EXECUTION_RECEIPT, {k: (v.value if hasattr(v, "value") else v) for k, v in asdict(receipt).items()}, now_ms=now_ms, corr=corr)
+            # --- protection ---
+            if receipt.status in ("FILLED", "PARTIAL") and receipt.filled_qty > ZERO:
+                if cmd.stop_mode is StopMode.VENUE and not receipt.protective_stop_confirmed:
+                    flat = adapter.close(receipt.broker_position_id, None, now_ms=now_ms, reason="STOP_REJECTED_FLATTEN")
+                    self.kill.trip(KillSwitchTrigger.STOP_REJECTED, now_ms)
+                    self._log(EventKind.KILL_SWITCH, {"trigger": "STOP_REJECTED", "position": receipt.broker_position_id}, now_ms=now_ms, corr=corr)
+                    self._log(EventKind.EXECUTION_RECEIPT, {k: (v.value if hasattr(v, "value") else v) for k, v in asdict(flat).items()}, now_ms=now_ms, corr=corr)
+                    metrics.inc("vati_unprotected_flatten_total", venue=intent.venue)
+                    raise RouterError("protective stop not confirmed; position flattened and kill switch tripped")
+                if intent.stop is not None:
+                    self.protection.register(receipt.broker_position_id, symbol=intent.symbol, direction=intent.direction, entry=receipt.average_fill or intent.entry, stop=intent.stop,
+                                             target=targets[0] if targets else None, opened_ms=now_ms, software_stop=(cmd.stop_mode is StopMode.SOFTWARE))
+                metrics.inc("vati_fills_total", venue=intent.venue)
+            elif receipt.status == "ACCEPTED" and receipt.execution_channel == "OWNER_TICKET":
+                self._log(
+                    EventKind.OWNER_TICKET,
+                    {
+                        "ticket": receipt.broker_order_id,
+                        "symbol": intent.symbol,
+                        "qty": str(decision.approved_size),
+                        "side": "BUY",
+                        "trade_intent_id": intent.trade_intent_id,
+                        "limit_price": str(intent.entry),
+                        "software_stop": (
+                            str(intent.stop) if intent.stop is not None else None
+                        ),
+                    },
+                    now_ms=now_ms, corr=corr,
+                )
+            elif receipt.status in ("REJECTED", "UNKNOWN"):
+                metrics.inc("vati_rejects_total", venue=intent.venue)
+            return receipt
 
     def apply_exits(self, venue: str, symbol: str, bid: Decimal, ask: Decimal, *, now_ms: int) -> list[ExecutionReceipt]:
         adapter = self.adapters[venue]
