@@ -152,6 +152,33 @@ def test_promotion_token_replay_is_refused_after_commander_restart(tmp_path):
     assert Ledger(ledger_path).count(EventKind.CAPSULE_STATE) == 1
 
 
+def test_expired_promotion_token_cannot_be_revived_with_old_approval_timestamp(
+    tmp_path, monkeypatch
+):
+    _capsules, ledger_path, _owner, _original, args, client = _fixture(tmp_path)
+    original_approved_at = int(args["approved_at_unix"])
+
+    # The old defect verified token expiry against this caller-supplied timestamp.
+    # Advancing only the commander's trusted clock proves that replaying the old
+    # timestamp cannot make an expired authority current again.
+    monkeypatch.setattr(
+        "commander.strategies.time.time",
+        lambda: original_approved_at + 301,
+    )
+    replay = _call(client, "capsule_promote", GATEWAY_TOKEN, args)
+    assert replay.status_code in (403, 422)
+    assert Ledger(ledger_path).count(EventKind.CAPSULE_STATE) == 0
+
+    # Even when the caller updates the presentation timestamp to "now", the
+    # original owner token itself is expired and must fail cryptographic policy.
+    fresh_args = dict(args)
+    fresh_args["approved_at_unix"] = original_approved_at + 301
+    expired = _call(client, "capsule_promote", GATEWAY_TOKEN, fresh_args)
+    assert expired.status_code == 403
+    assert "expired" in expired.json()["detail"]
+    assert Ledger(ledger_path).count(EventKind.CAPSULE_STATE) == 0
+
+
 def test_ledgered_owner_promotion_repairs_missing_registry_projection_on_restart(tmp_path):
     capsules, ledger_path, _owner, original, args, client = _fixture(tmp_path)
     first = _call(client, "capsule_promote", GATEWAY_TOKEN, args)
