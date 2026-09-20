@@ -59,7 +59,8 @@ class OpportunityEngine:
 
     def assess_candidates(self, state: MarketState, ctx: StrategyContext, *, regime_label: str,
                           currency_regime_label: str | None = None, account_alias: str, venue: str,
-                          mtf_state_hash: str = "", now_ms: int | None = None) -> tuple[CandidateOpportunity, ...]:
+                          mtf_state_hash: str = "", source_state_hashes: tuple[str, ...] = (),
+                          now_ms: int | None = None) -> tuple[CandidateOpportunity, ...]:
         """Every tradable opportunity for this symbol, as candidates.
 
         TRD-ENH-031. This is `assess` stopping one step earlier: same arbiters,
@@ -107,7 +108,7 @@ class OpportunityEngine:
                 capsule_hash=cap.capsule_hash, strategy_state=cap.state.value,
                 generated_at_ms=now, valid_from_ms=now, valid_until_ms=now + ttl,
                 mtf_state_hash=mtf_state_hash or state.state_hash,
-                source_state_hashes=(state.state_hash,),
+                source_state_hashes=source_state_hashes or (state.state_hash,),
                 feature_contract_hash=elig.feature_contract.verdict_hash if elig.feature_contract else "",
                 direction=sig.direction, entry=sig.entry, stop=sig.stop,
                 targets=tuple(sig.targets), horizon=hv.horizon,
