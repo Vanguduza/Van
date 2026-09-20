@@ -18,7 +18,9 @@ from vati.intelligence.feature_registry import (
     FeatureRegistry,
     FeatureRegistryError,
     default_registry,
+    research_tranche,
 )
+from vati.validation.certificates import GREEN, FeatureValidationCertificate
 
 
 # --- registry -------------------------------------------------------------
@@ -74,7 +76,7 @@ def test_redefinition_at_the_same_version_is_refused():
 def test_default_registry_declares_what_compute_features_produces():
     from vati.intelligence.features import FeatureVector
     r = default_registry()
-    skip = {"symbol", "as_of_ms", "complete", "feature_version", "timeframe"}
+    skip = {"symbol", "as_of_ms", "complete", "history_bars", "feature_version", "timeframe"}
     produced = {f for f in FeatureVector.__dataclass_fields__ if f not in skip}
     assert produced <= set(r.ids()), sorted(produced - set(r.ids()))
 
@@ -91,6 +93,39 @@ def test_founding_features_need_no_certificate_but_new_ones_do():
     new = FeatureDefinition("adx", "1.0.0", "TREND", ("ohlc",), frozenset({"FX_SPOT"}),
                             frozenset({"H1"}), 30, "PRICE_OHLC", "r")
     assert new.certificate_required is True
+
+
+def test_research_feature_definition_is_not_production_admission():
+    r = default_registry()
+    adx = next(d for d in research_tranche() if d.feature_id == "adx")
+    r.register(adx)
+    assert r.require("adx") == adx
+    assert not r.is_production_admitted("adx")
+
+
+def test_feature_certificate_is_the_only_path_to_production_admission():
+    r = default_registry()
+    adx = next(d for d in research_tranche() if d.feature_id == "adx")
+    cert = FeatureValidationCertificate(
+        certificate_id="fvc-adx",
+        feature_id="adx",
+        feature_version="1.0.0",
+        baseline_feature_set_hash="baseline",
+        candidate_feature_set_hash="candidate",
+        instruments=("EURUSD", "GBPUSD"),
+        regimes=("BULL", "BEAR"),
+        timeframes=("H1",),
+        redundancy_correlation=0.2,
+        incremental_expectancy_delta=0.08,
+        incremental_dsr_probability=0.98,
+        incremental_pbo_probability=0.04,
+        walk_forward_delta=0.05,
+        regime_stability={"BULL": 0.1, "BEAR": 0.05},
+        leakage_result=GREEN,
+    ).sealed()
+    admission_hash = r.admit(adx, cert)
+    assert admission_hash == cert.certificate_hash
+    assert r.is_production_admitted("adx")
 
 
 # --- confluence -----------------------------------------------------------
