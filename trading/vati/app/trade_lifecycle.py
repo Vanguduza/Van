@@ -21,6 +21,7 @@ from vati.execution.review import Outcome, review_trade
 from vati.execution.router import ExecutionRouter
 from vati.execution.tca import compute_tca
 from vati.learning.hooks import LearningHooks, to_payload
+from vati.cognition.attribution import AttributionEngine, TradeFacts
 from vati.lifecycle.envelope import EnvelopeCalculator
 from vati.lifecycle.expansion import ProfitExpansionEngine
 from vati.lifecycle.family import FamilyMember, FamilyRegistry, MemberRole
@@ -49,6 +50,7 @@ class AccountTradeLifecycle:
     engines_by_symbol: Mapping[str, object]
     modelled_costs: Mapping[str, Decimal] = field(default_factory=dict)
     learning: Optional[LearningHooks] = None
+    cognition: Optional[object] = None
     admission: AdmissionLedger = field(default_factory=AdmissionLedger)
     entries: dict[str, dict] = field(default_factory=dict)
     reviews: list = field(default_factory=list)
@@ -59,6 +61,7 @@ class AccountTradeLifecycle:
     preservation: PreservationEngine = field(init=False)
     expansion: ProfitExpansionEngine = field(init=False)
     scale_policies: ScalePolicyRegistry = field(init=False)
+    attribution: AttributionEngine = field(init=False)
     _family_halts: dict[str, tuple[str, ...]] = field(default_factory=dict)
 
     def __post_init__(self) -> None:
@@ -68,6 +71,7 @@ class AccountTradeLifecycle:
         self.preservation = PreservationEngine(ledger=self.ledger)
         self.expansion = ProfitExpansionEngine(ledger=self.ledger)
         self.scale_policies = ScalePolicyRegistry()
+        self.attribution = AttributionEngine(ledger=self.ledger)
 
     @property
     def preservation_blocks_new_risk(self) -> bool:
@@ -512,6 +516,7 @@ class AccountTradeLifecycle:
             "worst_price": entry_price,
             "protective_stop_confirmed": bool(
                 receipt.protective_stop_confirmed or software_stop),
+            "fees": receipt.fees,
             "family_id": family_id,
         }
         if not filled:
@@ -832,6 +837,49 @@ class AccountTradeLifecycle:
             now_ms=now_ms,
             corr=intent_id,
         )
+
+        shadow_entry = None
+        if self.cognition is not None and hasattr(self.cognition, "resolve_trade"):
+            shadow_entry = self.cognition.resolve_trade(
+                intent_id, actual_r=review.r_multiple, now_ms=now_ms)
+
+        contract = self.contracts.get(str(entry["symbol"]).upper())
+        stop = entry.get("stop")
+        qty = Decimal(str(entry.get("quantity", ZERO)))
+        if (
+            contract is not None
+            and stop is not None
+            and qty > ZERO
+            and contract.loss_model is not LossModel.FULL_STAKE
+        ):
+            risk_distance = abs(
+                Decimal(str(entry["entry"])) - Decimal(str(stop)))
+            value_per_unit = (
+                contract.value_per_price_unit_per_lot
+                if contract.loss_model is LossModel.STOP_DISTANCE
+                else Decimal("1")
+            )
+            money_risk = risk_distance * qty * value_per_unit
+            if money_risk > ZERO:
+                self.attribution.attribute(
+                    TradeFacts(
+                        trade_intent_id=intent_id,
+                        symbol=str(entry["symbol"]),
+                        strategy_id=str(entry["strategy_id"]),
+                        direction=entry["direction"],
+                        quantity=qty,
+                        decision_price=Decimal(str(entry["decision_price"])),
+                        fill_price=Decimal(str(entry["entry"])),
+                        exit_price=exit_price,
+                        money_risk=money_risk,
+                        costs=Decimal(str(entry.get("fees", ZERO))),
+                        opened_ms=int(entry.get("opened_ms") or 0),
+                        closed_ms=now_ms,
+                    ),
+                    shadow_entry=shadow_entry,
+                    now_ms=now_ms,
+                )
+
         self.admission.propose(
             review.artifact_hash,
             knowledge_class="TRADE_EXPERIENCE",

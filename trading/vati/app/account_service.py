@@ -31,6 +31,7 @@ from vati.arbiter.candidate import CandidateOpportunity
 from vati.arbiter.portfolio_allocator import OpportunityPortfolioAllocator
 from vati.core.canonical import canonical_hash
 from vati.core.events import EventKind, make_event
+from vati.cognition.runtime import ShadowCognitionRuntime
 from vati.core.ledger_pg import open_ledger
 from vati.execution.base import StopMode, VenueAdapter
 from vati.execution.policy import ExecutionBucket, ExecutionPolicyEngine
@@ -115,6 +116,7 @@ class AccountCoordinatorService:
         self.pretrade: Optional[PreTradeControls] = None
         self.style_selector: Optional[ExecutionStyleSelector] = None
         self.learning: Optional[LearningHooks] = None
+        self.cognition: Optional[ShadowCognitionRuntime] = None
         self.lifecycle: Optional[AccountTradeLifecycle] = None
         self.account = None
         self.specs: dict[str, LiveInstrumentSpec] = {}
@@ -165,6 +167,10 @@ class AccountCoordinatorService:
         self.adapter = self.adapter or build_adapter(account, registry)
         self._ledger = open_ledger(c.ledger)
         self._lease_store = PostgresLeaseStore(c.ledger)
+        # Persistent first-pass cognition is shadow-only. A provider invoker is
+        # an external runtime dependency; without one this records an explicit
+        # MODEL_UNAVAILABLE abstention and leaves deterministic trading untouched.
+        self.cognition = ShadowCognitionRuntime(ledger=self._ledger)
         self.lease = AccountRuntimeLease(
             self._lease_store,
             account_alias=account.alias,
@@ -302,6 +308,7 @@ class AccountCoordinatorService:
                 symbol: spec.round_trip_cost_pct for symbol, spec in self.specs.items()
             },
             learning=self.learning,
+            cognition=self.cognition,
         )
         # One account-scoped lifecycle owns entry truth for reconciliation,
         # TCA, protection, trade review and reduce-only learning.
@@ -415,6 +422,11 @@ class AccountCoordinatorService:
             event_time_ms=now, received_time_ms=now, decision_time_ms=now,
             correlation_id=intent.trade_intent_id))
         metrics.inc("vati_decisions_total", outcome=decision.decision.value)
+        if self.cognition is not None:
+            # Measurement happens after RiskAuthority has decided. First-pass
+            # cognition cannot alter the decision the caller receives.
+            self.cognition.wake(
+                intent=intent, decision=decision, snapshot=snapshot, now_ms=now)
         return decision
 
     @staticmethod

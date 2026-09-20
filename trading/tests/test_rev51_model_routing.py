@@ -260,3 +260,84 @@ def test_the_chain_for_one_context_is_recoverable_in_order():
     assert [h.reason for h in chain] == [HandoffReason.TIMEOUT, HandoffReason.RESULT_REFUSED]
     assert [h.to_model_id for h in chain] == ["gpt-6-astra", "claude-opus-5"]
     assert rec.summary()["descents"] == 2
+
+
+
+# -------------------------------------------------------- persistent runtime
+def test_shadow_cognition_runtime_records_unavailable_model_without_touching_decision(
+        mandate, eurusd):
+    from conftest import intent, snapshot
+    from vati.cognition.runtime import ShadowCognitionRuntime
+    from vati.core.events import EventKind
+    from vati.core.ledger import Ledger
+    from vati.risk import RiskAuthority
+
+    ledger = Ledger(":memory:")
+    i = intent()
+    snap = snapshot(eurusd)
+    decision = RiskAuthority(mandate).evaluate(i, snap)
+    original = decision.to_dict()
+    runtime = ShadowCognitionRuntime(ledger=ledger)
+    result = runtime.wake(
+        intent=i, decision=decision, snapshot=snap, now_ms=1_800_000_000_000)
+
+    assert decision.to_dict() == original
+    assert result.assessment.reason_codes == ("MODEL_UNAVAILABLE",)
+    assert result.shadow_entry.assessment.seal_ok()
+    assert ledger.count(EventKind.COGNITIVE_CONTEXT) == 1
+    assert ledger.count(EventKind.COGNITIVE_ASSESSMENT) == 1
+    assert ledger.count(EventKind.SHADOW_DECISION) == 1
+
+
+def test_shadow_cognition_runtime_falls_back_without_relaxing_controls(mandate, eurusd):
+    from conftest import intent, snapshot
+    from vati.cognition.runtime import ShadowCognitionRuntime
+    from vati.core.events import EventKind
+    from vati.core.ledger import Ledger
+    from vati.risk import RiskAuthority
+
+    ledger = Ledger(":memory:")
+    seen = []
+
+    def invoke(lease, _context):
+        seen.append((lease.model_id, lease.control_profile))
+        if lease.model_id == "fable-5.1":
+            raise RuntimeError("primary transport unavailable")
+        return {
+            "verdict": "CONCUR",
+            "reason_codes": [],
+            "risk_multiplier": "1",
+            "confidence": "0.6",
+            "horizon_ms": 3600000,
+            "narrative": "fallback agrees",
+        }
+
+    i = intent()
+    snap = snapshot(eurusd)
+    decision = RiskAuthority(mandate).evaluate(i, snap)
+    result = ShadowCognitionRuntime(ledger=ledger, invoker=invoke).wake(
+        intent=i, decision=decision, snapshot=snap, now_ms=1_800_000_000_000)
+
+    assert [m for m, _ in seen] == ["fable-5.1", "gpt-6-astra"]
+    assert len({profile for _, profile in seen}) == 1
+    assert result.assessment.model_id == "gpt-6-astra"
+    assert ledger.count(EventKind.MODEL_HANDOFF) == 1
+
+
+def test_trade_resolution_compiles_model_performance(mandate, eurusd):
+    from conftest import intent, snapshot
+    from vati.cognition.runtime import ShadowCognitionRuntime
+    from vati.core.events import EventKind
+    from vati.core.ledger import Ledger
+    from vati.risk import RiskAuthority
+
+    ledger = Ledger(":memory:")
+    i = intent()
+    snap = snapshot(eurusd)
+    decision = RiskAuthority(mandate).evaluate(i, snap)
+    runtime = ShadowCognitionRuntime(ledger=ledger)
+    runtime.wake(
+        intent=i, decision=decision, snapshot=snap, now_ms=1_800_000_000_000)
+    runtime.resolve_trade(
+        i.trade_intent_id, actual_r=Decimal("1.2"), now_ms=1_800_000_100_000)
+    assert ledger.count(EventKind.COGNITIVE_PERFORMANCE) >= 1
