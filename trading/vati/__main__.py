@@ -47,7 +47,7 @@ def load_bars(path: str) -> list[Bar]:
 def build_engine(cfg_json: dict) -> tuple[SessionConfig, OpportunityEngine]:
     contract = contract_from_dict(cfg_json["contract"])
     cfg = SessionConfig(symbol=cfg_json["symbol"], base=cfg_json["base"], quote=cfg_json["quote"], venue=cfg_json["venue"], account_alias=cfg_json["account_alias"], contract=contract,
-                        mandate_dict=cfg_json["mandate"], warmup_bars=int(cfg_json.get("warmup_bars", 60)), session_id=cfg_json.get("session_id", "cli"), activation_id=cfg_json.get("activation_id", "vtil-act-unresolved"))
+                        mandate_dict=cfg_json["mandate"], timeframe=cfg_json.get("timeframe", "UNKNOWN"), warmup_bars=int(cfg_json.get("warmup_bars", 60)), session_id=cfg_json.get("session_id", "cli"), activation_id=cfg_json.get("activation_id", "vtil-act-unresolved"))
     reg = CapsuleRegistry.load_dir(cfg_json.get("capsule_dir", ROOT / "strategies" / "registry"))
     impl = {sid: STRATEGY_IMPLEMENTATIONS[sid.rsplit("-", 1)[0]](strategy_id=sid) for sid in cfg_json["capsules"]}
     return cfg, OpportunityEngine(reg, impl, TradingMandate.from_mapping(cfg_json["mandate"]))
