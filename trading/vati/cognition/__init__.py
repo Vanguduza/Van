@@ -6,6 +6,19 @@ contract module refuses a model result that even carries order fields, and the
 translator (098) can only reduce what the deterministic path already decided.
 """
 
+from vati.cognition.analogues import (
+    Analogue,
+    AnalogueIndex,
+    Episode,
+    EpisodeFeatures,
+    RetrievalResult,
+)
+from vati.cognition.context import (
+    CompiledContext,
+    ContextCompiler,
+    ContextIncomplete,
+    compile_decision_context,
+)
 from vati.cognition.contracts import (
     CONTRACT_VERSION,
     REASON_VOCABULARY,
@@ -17,7 +30,34 @@ from vati.cognition.contracts import (
     normalise,
 )
 
+from vati.cognition.handoff import ContinuityState, HandoffReason, HandoffRecorder
+from vati.cognition.providers import (
+    CONTROL_PROFILE,
+    ProviderRegistry,
+    QuotaScheduler,
+    default_registry,
+)
+from vati.cognition.world_model import CognitionStore, TradingWorldModel
+
 __all__ = [
+    "Analogue",
+    "AnalogueIndex",
+    "CONTROL_PROFILE",
+    "CognitionStore",
+    "CompiledContext",
+    "ContextCompiler",
+    "ContextIncomplete",
+    "ContinuityState",
+    "Episode",
+    "EpisodeFeatures",
+    "HandoffReason",
+    "HandoffRecorder",
+    "ProviderRegistry",
+    "QuotaScheduler",
+    "RetrievalResult",
+    "TradingWorldModel",
+    "compile_decision_context",
+    "default_registry",
     "CONTRACT_VERSION",
     "REASON_VOCABULARY",
     "AssessmentRejected",
