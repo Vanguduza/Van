@@ -15,6 +15,7 @@ from vati.arbiter.meta_labeler import MetaLabel, MetaLabeler, MetaVerdict
 from vati.arbiter.strategy_arbiter import StrategyArbiter
 from vati.core.canonical import canonical_hash
 from vati.intelligence.market_state import MarketState
+from vati.intelligence.mtf import MultiTimeframeMarketState, TimeframeContract
 from vati.intelligence.feature_registry import venue_class_for
 from vati.risk.contracts import TradeIntent
 from vati.risk.mandate import TradingMandate
@@ -52,6 +53,43 @@ CANDIDATE_TTL_MS: dict[str, int] = {
 DEFAULT_CANDIDATE_TTL_MS = 15 * 60_000
 
 
+def capsule_mtf_evidence(
+    cap,
+    mtf_state: MultiTimeframeMarketState | None,
+    *,
+    fallback_hash: str,
+    fallback_sources: tuple[str, ...],
+) -> tuple[bool, str, tuple[str, ...]]:
+    """Return whether this capsule's own timeframe contract is complete.
+
+    The instrument-level MTF state may be incomplete because another capsule
+    asks for an unrelated timeframe. Only the current capsule's required subset
+    is authority for its abstention.
+    """
+    if mtf_state is None:
+        return True, fallback_hash, fallback_sources
+    contract = TimeframeContract.from_capsule(cap.data)
+    if contract is None:
+        return True, fallback_hash or mtf_state.mtf_state_hash, fallback_sources
+    missing = tuple(
+        tf for tf in contract.required_timeframes
+        if tf not in mtf_state.constituent_states
+    )
+    if missing:
+        return False, "", ()
+    sources = tuple(
+        mtf_state.constituent_states[tf].timeframe_state_hash
+        for tf in contract.required_timeframes
+    )
+    envelope = canonical_hash({
+        "strategy_id": cap.strategy_id,
+        "required_timeframes": list(contract.required_timeframes),
+        "constituents": list(zip(contract.required_timeframes, sources)),
+        "fusion_policy_version": mtf_state.fusion_policy_version,
+    })
+    return True, envelope, sources
+
+
 class OpportunityEngine:
     def __init__(self, registry: CapsuleRegistry, implementations: dict[str, Strategy], mandate: TradingMandate, *, labeler: MetaLabeler | None = None) -> None:
         self.registry, self.impl, self.mandate = registry, implementations, mandate
@@ -60,6 +98,7 @@ class OpportunityEngine:
     def assess_candidates(self, state: MarketState, ctx: StrategyContext, *, regime_label: str,
                           currency_regime_label: str | None = None, account_alias: str, venue: str,
                           mtf_state_hash: str = "", source_state_hashes: tuple[str, ...] = (),
+                          mtf_state: MultiTimeframeMarketState | None = None,
                           now_ms: int | None = None) -> tuple[CandidateOpportunity, ...]:
         """Every tradable opportunity for this symbol, as candidates.
 
@@ -71,6 +110,13 @@ class OpportunityEngine:
         now = state.as_of_ms if now_ms is None else now_ms
         out: list[CandidateOpportunity] = []
         for cap in self.registry.all():
+            mtf_ok, cap_mtf_hash, cap_source_hashes = capsule_mtf_evidence(
+                cap, mtf_state,
+                fallback_hash=mtf_state_hash or state.state_hash,
+                fallback_sources=source_state_hashes or (state.state_hash,),
+            )
+            if not mtf_ok:
+                continue
             elig = self.s.evaluate(
                 cap, state, self.mandate, regime_label=regime_label,
                 currency_regime_label=currency_regime_label,
@@ -107,8 +153,8 @@ class OpportunityEngine:
                 strategy_id=cap.strategy_id, strategy_version=cap.version,
                 capsule_hash=cap.capsule_hash, strategy_state=cap.state.value,
                 generated_at_ms=now, valid_from_ms=now, valid_until_ms=now + ttl,
-                mtf_state_hash=mtf_state_hash or state.state_hash,
-                source_state_hashes=source_state_hashes or (state.state_hash,),
+                mtf_state_hash=cap_mtf_hash,
+                source_state_hashes=cap_source_hashes,
                 feature_contract_hash=elig.feature_contract.verdict_hash if elig.feature_contract else "",
                 direction=sig.direction, entry=sig.entry, stop=sig.stop,
                 targets=tuple(sig.targets), horizon=hv.horizon,
