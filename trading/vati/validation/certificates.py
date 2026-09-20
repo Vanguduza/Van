@@ -139,6 +139,8 @@ class FeatureValidationCertificate:
     incremental_dsr_probability: float
     incremental_pbo_probability: float
     walk_forward_delta: float
+    data_manifest_hash: str = ""
+    evidence_refs: tuple[str, ...] = ()
     mutual_information_delta: Optional[float] = None
     regime_stability: Mapping[str, float] = field(default_factory=dict)
     instrument_stability: Mapping[str, float] = field(default_factory=dict)
@@ -149,7 +151,7 @@ class FeatureValidationCertificate:
 
     def as_dict(self) -> dict:
         d = {k: v for k, v in self.__dict__.items() if k != "certificate_hash"}
-        for key in ("instruments", "regimes", "timeframes"):
+        for key in ("instruments", "regimes", "timeframes", "evidence_refs"):
             d[key] = list(getattr(self, key))
         d["regime_stability"] = dict(self.regime_stability)
         d["instrument_stability"] = dict(self.instrument_stability)
@@ -179,6 +181,10 @@ def classify_feature_certificate(
 
     if not cert.verify_seal():
         return FEATURE_REJECTED_UNSTABLE, ("certificate_seal_invalid",)
+    if not cert.data_manifest_hash:
+        return FEATURE_REJECTED_UNSTABLE, ("no_data_manifest",)
+    if not cert.evidence_refs or any(not str(ref).strip() for ref in cert.evidence_refs):
+        return FEATURE_REJECTED_UNSTABLE, ("no_validation_evidence_refs",)
     if abs(cert.redundancy_correlation) > max_baseline_correlation:
         return FEATURE_REJECTED_REDUNDANT, (
             f"redundancy_correlation:{cert.redundancy_correlation:.3f}>{max_baseline_correlation}",)
