@@ -49,10 +49,24 @@ def test_capsule_promotion_requires_signature_and_one_step():
 
     owner = OwnerAuthorityHarness()
     reg = CapsuleRegistry.load_dir(REG, authority=owner.verifier)
+    signature_gate_cert = passing_certificate(
+        strategy_id="FX-TREND-PULLBACK-01",
+        capsule_hash=reg.get("FX-TREND-PULLBACK-01").capsule_hash,
+    )
+    # Certificate validation now precedes owner-authority validation. Supply
+    # valid semantic evidence here so these assertions isolate the signature gate.
     with pytest.raises(CapsuleError, match="signature"):
-        reg.promote("FX-TREND-PULLBACK-01", StrategyState.SHADOW, approval_signature_ref="", evidence_refs=[], approved_at_unix=1)
+        reg.promote(
+            "FX-TREND-PULLBACK-01", StrategyState.SHADOW,
+            approval_signature_ref="", evidence_refs=["bt-1"],
+            approved_at_unix=1, certificate=signature_gate_cert,
+        )
     with pytest.raises(CapsuleError, match="signature"):
-        reg.promote("FX-TREND-PULLBACK-01", StrategyState.SHADOW, approval_signature_ref="sig:owner", evidence_refs=["bt-1"], approved_at_unix=1)
+        reg.promote(
+            "FX-TREND-PULLBACK-01", StrategyState.SHADOW,
+            approval_signature_ref="sig:owner", evidence_refs=["bt-1"],
+            approved_at_unix=1, certificate=signature_gate_cert,
+        )
     # Authority to promote to SHADOW is not authority to promote to CERTIFIED_LIVE.
     with pytest.raises(CapsuleError, match="one state"):
         reg.promote("FX-TREND-PULLBACK-01", StrategyState.CERTIFIED_LIVE,
