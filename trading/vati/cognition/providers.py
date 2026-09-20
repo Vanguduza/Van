@@ -202,13 +202,20 @@ class QuotaScheduler:
         self._usage[model_id].disabled = disabled
 
     # ---------------------------------------------------------------- acquire
-    def acquire(self, *, now_ms: int) -> Optional[ProviderLease]:
+    def acquire(self, *, now_ms: int, exclude_model_ids: tuple[str, ...] = ()) -> Optional[ProviderLease]:
         """The next usable rung, or None when every rung is unavailable.
+
+        ``exclude_model_ids`` is request-local fallback state. It lets an orchestration
+        layer move to the next provider after one provider fails without mutating the
+        provider's global enabled/disabled state. The registry still owns hierarchy order.
 
         None is an ordinary outcome, not an exception: the caller records an
         abstention and the deterministic path proceeds untouched.
         """
+        excluded = frozenset(exclude_model_ids)
         for attempt, p in enumerate(self.registry.ordered(), start=1):
+            if p.model_id in excluded:
+                continue
             if self.state(p.model_id, now_ms) is not ProviderState.AVAILABLE:
                 continue
             u = self._usage[p.model_id]
