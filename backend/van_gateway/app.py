@@ -92,6 +92,7 @@ from van_gateway.runtime_api import OwnerRuntimeApi
 from van_gateway.storage.db import Store
 from van_gateway.trading import TradingAuthorityError, TradingControlError, TradingService
 from van_gateway.trading.accounts import ACTIONS as ACCOUNT_ACTIONS, AccountOnboarding, CommanderAccountControl, LocalAccountControl, OAuthPending, canonical_action, redact as redact_account_args, requires_owner_approval
+from van_gateway.trading.strategies import StrategyPromotionGateway, canonical_strategy_promotion
 
 
 class EnrollBody(BaseModel):
@@ -204,6 +205,21 @@ class AccountChallengeRequest(BaseModel):
     signature: str
     action: str
     args: dict = Field(default_factory=dict)
+
+
+class StrategyPromotionChallengeRequest(BaseModel):
+    device_id: str
+    issued_at_unix: int
+    signature: str
+    strategy_id: str = Field(min_length=1)
+    target_state: str = Field(min_length=1)
+    owner_signature_ref: str = Field(min_length=1)
+    certificate: dict
+    evidence_refs: list[str] = Field(default_factory=list)
+
+
+class StrategyPromotionRequest(StrategyPromotionChallengeRequest):
+    approval_proof: OwnerApprovalProof | None = None
 
 
 class OwnerFactBody(BaseModel):
@@ -350,6 +366,9 @@ def create_app() -> FastAPI:
     )
     oauth_pending = OAuthPending(store, settings.google_token_fernet_key)
     onboarding = AccountOnboarding(account_control, oauth_pending, settings.van_public_base_url, settings.vati_deriv_app_id)
+    strategy_promotions = StrategyPromotionGateway(
+        account_control if settings.van_commander_url else None
+    )
 
     google_transport = None
     google_oauth = None
@@ -678,6 +697,7 @@ def create_app() -> FastAPI:
     app.state.reminders = reminders
     app.state.trading = trading
     app.state.onboarding = onboarding
+    app.state.strategy_promotions = strategy_promotions
     app.include_router(owner_runtime.router)
     app.include_router(automation_health.router)
     app.include_router(automation.router)
@@ -1847,6 +1867,151 @@ def create_app() -> FastAPI:
                 for k, v in result.items()
                 if k in ("account", "alias", "state", "ready", "stored_keys", "removed", "ok")
             },
+        )
+        return result
+
+    def _strategy_promotion_text(req) -> str:
+        return canonical_strategy_promotion(
+            req.device_id,
+            req.issued_at_unix,
+            strategy_id=req.strategy_id,
+            target_state=req.target_state,
+            owner_signature_ref=req.owner_signature_ref,
+            certificate=req.certificate,
+            evidence_refs=req.evidence_refs,
+        )
+
+    async def _authenticate_strategy_promotion(request: Request, req) -> None:
+        if getattr(request.state, "van_device_id", None) != req.device_id:
+            raise HTTPException(status_code=403, detail="device_identity_mismatch")
+        try:
+            await auth.require_device(req.device_id)
+            auth.verify_signature(
+                req.device_id,
+                _strategy_promotion_text(req),
+                req.signature,
+            )
+        except AuthError as exc:
+            await audit.record(
+                result="denied",
+                device_id=req.device_id,
+                capability="trading.strategy.promote",
+                failure_reason=exc.code,
+            )
+            raise HTTPException(status_code=403, detail=exc.message) from exc
+        import time as _time
+        if abs(int(_time.time()) - req.issued_at_unix) > 300:
+            raise HTTPException(status_code=403, detail="stale owner action; sign again")
+
+    @app.post("/v1/trading/strategies/promotion-challenge")
+    async def trading_strategy_promotion_challenge(
+        request: Request, req: StrategyPromotionChallengeRequest
+    ):
+        """Issue an A4 challenge bound to the exact strategy, target and certificate."""
+        await _authenticate_strategy_promotion(request, req)
+        text = _strategy_promotion_text(req)
+        challenge = await app.state.orchestrator.approvals.issue(
+            device_id=req.device_id,
+            source_command_id="strategy:promote",
+            turn_id=None,
+            action_id="trading.strategy.promote",
+            text=text,
+            project_id=None,
+        )
+        return {
+            "approval_challenge_id": challenge.challenge_id,
+            "approval_challenge": challenge.canonical,
+            "approval_expires_at_unix": challenge.expires_at_unix,
+            "resolved_action_id": "trading.strategy.promote",
+        }
+
+    @app.post("/v1/trading/strategies/promote")
+    async def trading_strategy_promote(
+        request: Request, req: StrategyPromotionRequest
+    ):
+        """Owner-device/A4 gated server-side strategy promotion workflow.
+
+        The gateway does not mutate the capsule. It proves current owner intent and
+        forwards the certificate-bound request to the private commander, which verifies
+        van-oa1 authority and commits the VATI ledger event.
+        """
+        await _authenticate_strategy_promotion(request, req)
+        proof = req.approval_proof
+        if proof is None or proof.algorithm != OwnerApprovalService.ALGORITHM:
+            await audit.record(
+                result="denied",
+                device_id=req.device_id,
+                capability="trading.strategy.promote",
+                failure_reason="approval_proof_missing",
+            )
+            raise HTTPException(
+                status_code=403,
+                detail="owner biometric approval proof is required for strategy promotion",
+            )
+        text = _strategy_promotion_text(req)
+        try:
+            await app.state.orchestrator.approvals.verify_and_consume(
+                challenge_id=proof.challenge_id,
+                source_command_id="strategy:promote",
+                signature_b64=proof.signature_b64,
+                device_id=req.device_id,
+                turn_id=None,
+                action_id="trading.strategy.promote",
+                text=text,
+                project_id=None,
+            )
+        except OwnerApprovalError as exc:
+            await audit.record(
+                result="denied",
+                device_id=req.device_id,
+                capability="trading.strategy.promote",
+                approval="invalid",
+                failure_reason=str(exc),
+            )
+            raise HTTPException(status_code=403, detail=str(exc)) from exc
+
+        try:
+            result = app.state.strategy_promotions.promote(
+                strategy_id=req.strategy_id,
+                target_state=req.target_state,
+                owner_signature_ref=req.owner_signature_ref,
+                certificate=req.certificate,
+                evidence_refs=req.evidence_refs,
+                approved_at_unix=req.issued_at_unix,
+            )
+        except HTTPException as exc:
+            await audit.record(
+                result="refused",
+                device_id=req.device_id,
+                capability="trading.strategy.promote",
+                failure_reason=str(exc.detail)[:200],
+                before={
+                    "strategy_id": req.strategy_id,
+                    "target_state": req.target_state,
+                    "validation_hash": req.certificate.get("validation_hash"),
+                },
+            )
+            raise
+
+        await audit.record(
+            result="strategy_promotion_recorded",
+            device_id=req.device_id,
+            capability="trading.strategy.promote",
+            approval=result.get("owner_authority_ref"),
+            tool="van_trading_commander",
+            before={
+                "strategy_id": req.strategy_id,
+                "target_state": req.target_state,
+                "validation_hash": req.certificate.get("validation_hash"),
+            },
+            after={
+                k: result.get(k)
+                for k in (
+                    "strategy_id", "from", "to", "capsule_hash",
+                    "validation_hash", "event_hash", "registry_projection",
+                )
+            },
+            evidence_pointer=result.get("event_hash"),
         )
         return result
 
