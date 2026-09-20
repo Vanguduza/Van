@@ -18,6 +18,7 @@ from vati.core.canonical import canonical_hash
 from vati.core.events import EventKind, make_event
 from vati.core.ledger import Ledger
 from vati.execution.base import StopMode, VenueAdapter
+from vati.execution.policy import ExecutionBucket, ExecutionPolicyEngine
 from vati.execution.protection import ProtectionManager
 from vati.execution.pretrade import MarketReference, PreTradeControls
 from vati.execution.route_registry import RouteRegistry
@@ -95,6 +96,7 @@ class DecisionCycle:
         )
         self.pretrade = PreTradeControls(routes=self.routes, ledger=ledger)
         self.style_selector = ExecutionStyleSelector(ledger=ledger)
+        self.execution_policy = ExecutionPolicyEngine()
         self.router = ExecutionRouter(
             ledger=ledger, adapters={cfg.venue: adapter}, kill_switch=self.kill,
             protection=self.protection, route_registry=self.routes,
@@ -254,10 +256,25 @@ class DecisionCycle:
                 contracts={cfg.symbol.upper(): cfg.contract}, now_ms=now_ms,
                 source="decision_cycle",
             )
+            execution_bucket = ExecutionBucket(
+                broker=cfg.venue,
+                account_alias=cfg.account_alias,
+                symbol=cfg.symbol,
+                session=state.session.value,
+                volatility_bucket=state.regime.vol.value,
+                event_proximity=state.event_window.value,
+                direction=intent.direction.value,
+            )
+            policy_decision = self.execution_policy.select(
+                candidate_id=intent.trade_intent_id,
+                bucket=execution_bucket,
+                event_state=state.event_window.value,
+            )
             rec = self.router.execute(
                 intent, decision, self.mandate, now_ms=now_ms,
                 stop_mode=StopMode.SOFTWARE if cfg.software_stops else StopMode.VENUE,
                 targets=targets, time_in_force=cfg.time_in_force, entry_type="LIMIT",
+                execution_policy_decision=policy_decision,
                 market_reference=MarketReference(
                     last_price=state.features.close,
                     mark_age_ms=state.quote_age_ms,
