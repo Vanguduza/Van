@@ -197,6 +197,38 @@ def test_adding_an_owner_requires_declaring_it(map_restored):
     assert "owning_documents names missing docs/INVENTED.md" in result.stdout
 
 
+def test_load_bearing_trading_subjects_cannot_disappear():
+    """The authority gate validates entries that exist; this pins required trading laws.
+
+    Without this coverage, deleting a load-bearing trading invariant from the map would
+    make the map smaller and still green. These subjects are the repository-level laws
+    whose absence would reopen the PR #49 production joins.
+    """
+    data = yaml.safe_load(MAP.read_text(encoding="utf-8"))
+    by_subject = {entry["subject"]: entry for entry in data["invariants"]}
+    required = {
+        "trading.account_allocation_authority",
+        "trading.risk_ceiling_precedence",
+        "trading.strategy_validation_binding",
+        "trading.feature_admission",
+        "trading.execution_policy_boundary",
+        "trading.account_runtime_fence",
+        "trading.mtf_adoption_boundary",
+        "trading.candidate_replay",
+        "trading.restart_lifecycle_reconstruction",
+        "trading.owner_ticket_downstream_evidence",
+    }
+    assert required <= set(by_subject), (
+        "load-bearing trading authority subjects disappeared: "
+        + ", ".join(sorted(required - set(by_subject)))
+    )
+    assert all(
+        by_subject[subject]["owner"]
+        == "docs/VAN_TRADING_PRODUCTION_DEPLOYMENT_BLUEPRINT_REV5.md"
+        for subject in required
+    )
+
+
 def test_the_security_policy_is_not_modified_by_owning_invariants():
     """docs/SECURITY_POLICY.md is pinned by SHA-256 and this programme does not edit it.
 
