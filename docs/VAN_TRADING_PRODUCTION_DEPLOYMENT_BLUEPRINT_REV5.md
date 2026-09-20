@@ -286,9 +286,11 @@ strategy-promotion artifacts already required by this blueprint.
    validity all fail closed; a process-local cached lease is never sufficient authority to submit.
 
 7. **MTF adoption boundary.** The timeframe-contract migration is provenance/schema adoption, not silent strategy
-   mutation. The account runtime builds the required multi-timeframe state as shadow evidence from the existing
-   BarLake and exposes completeness/hash truth. Those H4/H1/M15/M5 roles cannot alter a live strategy decision until
-   a separately validated and owner-signed capsule revision explicitly adopts the MTF behavior.
+   mutation. The account runtime builds one required multi-timeframe causal evidence envelope per instrument/pass
+   from the existing BarLake, and completeness is evaluated against the capsule contract that is actually being
+   considered. Existing strategy formulas remain on their configured primary timeframe; H4/H1/M15/M5 role values
+   cannot alter entry, stop, target or eligibility logic until a separately validated and owner-signed capsule
+   revision explicitly adopts that MTF behavior.
 
 8. **Candidate replay law.** Candidate IDs are deterministic across polling/restart. Re-admitting the same
    candidate ID and hash preserves its existing lifecycle state; a previously selected/rejected/expired candidate
