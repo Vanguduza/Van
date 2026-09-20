@@ -172,6 +172,8 @@ class AccountCoordinatorService:
             protection=self.protection,
             lease_fence=lambda epoch: self.lease.fence(
                 epoch, now_ms=self.clock(), min_validity_ms=2_000),
+            lease_submission_guard=lambda epoch: self.lease.submission_guard(
+                epoch, now_ms=self.clock()),
         )
 
         capsule_root = c.capsule_dir or ROOT / "strategies" / "registry"
