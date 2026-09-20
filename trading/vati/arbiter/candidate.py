@@ -62,6 +62,10 @@ class CandidateOpportunity:
 
     expected_gross_move_pct: Optional[Decimal] = None
     cost_multiple: Decimal = Decimal("0")
+    #: Strategy-local ceiling from the signed/admitted capsule. This is evidence
+    #: for IntentFactory; it is not a requested size and cannot reach execution
+    #: without the account coordinator and Risk Authority.
+    capsule_risk_ceiling: Decimal = Decimal("0.005")
     #: Carried for owner display only. Allocator V0 must not rank on it
     #: (blueprint Rev 1.1 §15 [OWNER-DEFAULT]); it is uncalibrated.
     confidence_score: Decimal = Decimal("0")
