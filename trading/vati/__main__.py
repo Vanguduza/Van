@@ -163,9 +163,19 @@ def cmd_serve(a: argparse.Namespace) -> int:
         print(json.dumps({"error": "session_already_running", "detail": str(exc)}))
         return 2
     try:
-        svc = SessionService(cfg, lake_bar_source(BarLake(cfg.lake_root), cfg.symbol, cfg.timeframe)).build()
+        if cfg.instruments:
+            from vati.app.account_service import AccountCoordinatorService
+            svc = AccountCoordinatorService(cfg).build()
+        else:
+            svc = SessionService(
+                cfg, lake_bar_source(BarLake(cfg.lake_root), cfg.symbol, cfg.timeframe)
+            ).build()
         if a.once:
-            svc.start(); print(json.dumps({"decision": svc.step_once(), "cycles": svc.cycles})); return 0
+            svc.start()
+            result = svc.step_once()
+            decision = getattr(result, "outcomes", result)
+            print(json.dumps({"decision": str(decision), "cycles": svc.cycles}))
+            return 0
         return svc.run_forever()
     finally:
         lock.release()
