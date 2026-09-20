@@ -166,7 +166,8 @@ def test_expired_promotion_token_cannot_be_revived_with_old_approval_timestamp(
         lambda: original_approved_at + 301,
     )
     replay = _call(client, "capsule_promote", GATEWAY_TOKEN, args)
-    assert replay.status_code in (403, 422)
+    assert replay.status_code == 403
+    assert "expired" in replay.json()["detail"]
     assert Ledger(ledger_path).count(EventKind.CAPSULE_STATE) == 0
 
     # Even when the caller updates the presentation timestamp to "now", the
