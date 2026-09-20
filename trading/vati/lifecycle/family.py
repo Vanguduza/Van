@@ -269,7 +269,7 @@ class FamilyRegistry:
 
     def open_family(self, *, family_id: str, account_alias: str, symbol: str,
                     direction: Direction, root: FamilyMember,
-                    now_ms: int) -> PositionFamily:
+                    now_ms: int, emit: bool = True) -> PositionFamily:
         if family_id in self._families:
             raise FamilyError(f"{family_id} already exists")
         if root.role is not MemberRole.ROOT:
@@ -280,15 +280,26 @@ class FamilyRegistry:
         self._families[family_id] = fam
         if root.trade_intent_id:
             self._by_intent[root.trade_intent_id] = family_id
-        self._emit(fam, now_ms)
+        if emit:
+            self._emit(fam, now_ms)
         return fam
 
-    def apply(self, family_id: str, member: FamilyMember, *, now_ms: int) -> PositionFamily:
+    def apply(self, family_id: str, member: FamilyMember, *, now_ms: int,
+              emit: bool = True) -> PositionFamily:
         fam = self.get(family_id)
         fam.add(member)
         if member.trade_intent_id:
             self._by_intent[member.trade_intent_id] = family_id
-        self._emit(fam, now_ms)
+        if emit:
+            self._emit(fam, now_ms)
+        return fam
+
+    def tighten_stop(self, family_id: str, stop: Decimal, *, now_ms: int,
+                     emit: bool = True) -> PositionFamily:
+        fam = self.get(family_id)
+        fam.tighten_stop(stop)
+        if emit:
+            self._emit(fam, now_ms)
         return fam
 
     def get(self, family_id: str) -> PositionFamily:

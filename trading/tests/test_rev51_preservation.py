@@ -442,3 +442,36 @@ def test_actions_are_ledgered_but_no_action_is_not():
     eng.evaluate(family=fam, health=_health(has_confirmed_stop=False),
                  envelope=_env(EnvelopeCalculator(), fam), mark=D("1.101"), now_ms=2)
     assert led.count(EventKind.PRESERVATION_ACTION) == 1
+
+
+
+def test_risk_authority_is_the_only_component_that_turns_preservation_into_new_risk_refusal(
+        mandate, eurusd):
+    from conftest import intent, snapshot
+    from vati.risk import Decision, RiskAuthority
+
+    d = RiskAuthority(mandate).evaluate(
+        intent(),
+        snapshot(
+            eurusd,
+            preservation_blocks_new_risk=True,
+            preservation_reason="family:ti-1:HEALTH_IMPAIRED",
+        ),
+    )
+    assert d.decision is Decision.REJECTED
+    assert d.reason_code == "PRESERVATION_BLOCK"
+    assert "HEALTH_IMPAIRED" in d.reason_detail
+
+
+def test_account_lifecycle_wires_family_health_envelope_preservation_and_shadow_expansion():
+    from pathlib import Path
+    source = (
+        Path(__file__).resolve().parents[1] / "vati" / "app" / "trade_lifecycle.py"
+    ).read_text(encoding="utf-8")
+    for marker in (
+        "FamilyRegistry(", "TradeHealthEngine(", "EnvelopeCalculator(",
+        "PreservationEngine(", "ProfitExpansionEngine(",
+        "self.preservation.evaluate(", "self.expansion.evaluate(",
+        "self.router.apply_preservation(",
+    ):
+        assert marker in source

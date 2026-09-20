@@ -159,6 +159,15 @@ class RiskAuthority:
         if snapshot.kill_switch_triggers:
             return rej("KILL_SWITCH", ",".join(sorted(t.value for t in snapshot.kill_switch_triggers)))
 
+        # 1b. Post-entry preservation has precedence over new risk. The
+        # lifecycle may describe why, but only RiskAuthority turns that fact
+        # into a refusal (INV-AUTH-001).
+        if snapshot.preservation_blocks_new_risk:
+            return rej(
+                "PRESERVATION_BLOCK",
+                snapshot.preservation_reason or "open-family preservation blocks new risk",
+            )
+
         # 2. Account identity
         if not snapshot.account_verified:
             return rej("ACCOUNT_UNVERIFIED", "broker account state could not be verified")

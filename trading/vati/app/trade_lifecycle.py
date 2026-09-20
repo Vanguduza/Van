@@ -21,6 +21,12 @@ from vati.execution.review import Outcome, review_trade
 from vati.execution.router import ExecutionRouter
 from vati.execution.tca import compute_tca
 from vati.learning.hooks import LearningHooks, to_payload
+from vati.lifecycle.envelope import EnvelopeCalculator
+from vati.lifecycle.expansion import ProfitExpansionEngine
+from vati.lifecycle.family import FamilyMember, FamilyRegistry, MemberRole
+from vati.lifecycle.preservation import ActionKind, PreservationEngine
+from vati.lifecycle.scale_policy import ScalePolicyRegistry
+from vati.lifecycle.trade_health import PositionHealthInputs, TradeHealthEngine
 from vati.market_data.bars import Bar
 from vati.observability import metrics
 from vati.risk.contracts import Direction, LossModel, StrategyState, SymbolContract, TradeIntent
@@ -47,6 +53,32 @@ class AccountTradeLifecycle:
     entries: dict[str, dict] = field(default_factory=dict)
     reviews: list = field(default_factory=list)
     consecutive_losses: int = 0
+    families: FamilyRegistry = field(init=False)
+    envelope_calculator: EnvelopeCalculator = field(init=False)
+    trade_health: TradeHealthEngine = field(init=False)
+    preservation: PreservationEngine = field(init=False)
+    expansion: ProfitExpansionEngine = field(init=False)
+    scale_policies: ScalePolicyRegistry = field(init=False)
+    _family_halts: dict[str, tuple[str, ...]] = field(default_factory=dict)
+
+    def __post_init__(self) -> None:
+        self.families = FamilyRegistry(ledger=self.ledger)
+        self.envelope_calculator = EnvelopeCalculator(ledger=self.ledger)
+        self.trade_health = TradeHealthEngine(ledger=self.ledger)
+        self.preservation = PreservationEngine(ledger=self.ledger)
+        self.expansion = ProfitExpansionEngine(ledger=self.ledger)
+        self.scale_policies = ScalePolicyRegistry()
+
+    @property
+    def preservation_blocks_new_risk(self) -> bool:
+        return bool(self._family_halts)
+
+    @property
+    def preservation_reason(self) -> str:
+        return "; ".join(
+            f"{family_id}:{','.join(reasons)}"
+            for family_id, reasons in sorted(self._family_halts.items())
+        )
 
     def _log(self, kind: EventKind, payload: dict, *, now_ms: int, corr: str) -> None:
         self.ledger.append(make_event(
@@ -224,6 +256,7 @@ class AccountTradeLifecycle:
                 if iid in pending_sell_by_intent:
                     self.protection.mark_close_pending(position.position_id)
 
+            family_id = f"family:{iid}"
             self.entries[iid] = {
                 "symbol": symbol,
                 "entry": position.entry_price,
@@ -240,7 +273,42 @@ class AccountTradeLifecycle:
                 "open": True,
                 "pending": False,
                 "recovered": True,
+                "opened_ms": opened_ms,
+                "best_price": position.entry_price,
+                "worst_price": position.entry_price,
+                "protective_stop_confirmed": current_stop is not None,
+                "family_id": family_id,
             }
+            if self.families.for_intent(iid) is None:
+                root = FamilyMember(
+                    member_id=f"{iid}:root",
+                    role=MemberRole.ROOT,
+                    quantity=position.quantity,
+                    price=position.entry_price,
+                    occurred_ms=opened_ms,
+                    trade_intent_id=iid,
+                    stop=initial_stop,
+                )
+                family = self.families.open_family(
+                    family_id=family_id,
+                    account_alias=str(payload.get("account_alias") or ""),
+                    symbol=symbol,
+                    direction=position.direction,
+                    root=root,
+                    now_ms=opened_ms,
+                    emit=False,
+                )
+                if current_stop is not None and family.current_stop is not None:
+                    tighter = (
+                        current_stop > family.current_stop
+                        if position.direction is Direction.LONG
+                        else current_stop < family.current_stop
+                    )
+                    if tighter:
+                        self.families.tighten_stop(
+                            family_id, current_stop, now_ms=opened_ms, emit=False)
+                self.families.reconcile(
+                    family_id, venue_quantity=position.quantity, now_ms=opened_ms)
 
             cost_ratio = tca_cost_ratios.get(iid)
             if cost_ratio is None and iid in entry_receipts:
@@ -424,9 +492,11 @@ class AccountTradeLifecycle:
         if receipt.status not in ("FILLED", "PARTIAL", "ACCEPTED", "OWNER_EXECUTED"):
             return
         filled = receipt.filled_qty > ZERO and receipt.average_fill is not None
+        entry_price = receipt.average_fill or intent.entry
+        family_id = f"family:{intent.trade_intent_id}"
         self.entries[intent.trade_intent_id] = {
             "symbol": intent.symbol,
-            "entry": receipt.average_fill or intent.entry,
+            "entry": entry_price,
             "stop": intent.stop,
             "direction": intent.direction,
             "strategy_id": intent.strategy_id,
@@ -437,9 +507,33 @@ class AccountTradeLifecycle:
             "broker_position_id": receipt.broker_position_id,
             "open": filled,
             "pending": not filled,
+            "opened_ms": receipt.received_time_unix_ms,
+            "best_price": entry_price,
+            "worst_price": entry_price,
+            "protective_stop_confirmed": bool(
+                receipt.protective_stop_confirmed or software_stop),
+            "family_id": family_id,
         }
         if not filled:
             return
+
+        if self.families.for_intent(intent.trade_intent_id) is None:
+            self.families.open_family(
+                family_id=family_id,
+                account_alias=intent.account_alias,
+                symbol=intent.symbol,
+                direction=intent.direction,
+                root=FamilyMember(
+                    member_id=f"{intent.trade_intent_id}:root",
+                    role=MemberRole.ROOT,
+                    quantity=receipt.filled_qty,
+                    price=entry_price,
+                    occurred_ms=receipt.received_time_unix_ms,
+                    trade_intent_id=intent.trade_intent_id,
+                    stop=intent.stop,
+                ),
+                now_ms=receipt.received_time_unix_ms,
+            )
 
         contract = self.contracts[intent.symbol.upper()]
         value_per_unit = (
@@ -483,6 +577,152 @@ class AccountTradeLifecycle:
                 engine.m.broker_liquidity[intent.symbol] = self.learning.broker_liquidity(
                     intent.symbol)
 
+    def _supervise_open_families(self, symbol: str, bid: Decimal, ask: Decimal,
+                                 *, now_ms: int) -> None:
+        """Run family -> health -> envelope -> preservation -> expansion in order."""
+        try:
+            equity = self.adapter.sync_account().equity
+        except Exception:
+            equity = ZERO
+
+        for intent_id, row in list(self.entries.items()):
+            if not row.get("open") or str(row.get("symbol", "")).upper() != symbol.upper():
+                continue
+            family = self.families.for_intent(intent_id)
+            if family is None or not family.is_open:
+                continue
+            direction = row["direction"]
+            mark = bid if direction is Direction.LONG else ask
+            row["best_price"] = (
+                max(Decimal(str(row.get("best_price", mark))), mark)
+                if direction is Direction.LONG
+                else min(Decimal(str(row.get("best_price", mark))), mark)
+            )
+            row["worst_price"] = (
+                min(Decimal(str(row.get("worst_price", mark))), mark)
+                if direction is Direction.LONG
+                else max(Decimal(str(row.get("worst_price", mark))), mark)
+            )
+
+            position_id = str(row.get("broker_position_id") or "")
+            rule = self.protection.rules.get(position_id)
+            current_stop = rule.stop if rule is not None else row.get("stop")
+            if current_stop is not None and family.current_stop is not None:
+                current_stop = Decimal(str(current_stop))
+                tighter = (
+                    current_stop > family.current_stop
+                    if direction is Direction.LONG
+                    else current_stop < family.current_stop
+                )
+                if tighter:
+                    self.families.tighten_stop(
+                        family.family_id, current_stop, now_ms=now_ms)
+            if family.original_stop is None:
+                self._family_halts[family.family_id] = ("RISK_UNKNOWN",)
+                continue
+
+            health = self.trade_health.assess(PositionHealthInputs(
+                trade_intent_id=intent_id,
+                symbol=symbol,
+                direction=direction,
+                entry_price=Decimal(str(row["entry"])),
+                current_price=mark,
+                original_stop=family.original_stop,
+                current_stop=(None if current_stop is None else Decimal(str(current_stop))),
+                has_confirmed_stop=bool(
+                    row.get("protective_stop_confirmed")
+                    or (rule is not None and rule.software_stop)),
+                opened_ms=int(row.get("opened_ms") or now_ms),
+                now_ms=now_ms,
+                expected_horizon_ms=int(row.get("expected_horizon_ms") or 0),
+                worst_price=Decimal(str(row["worst_price"])),
+                best_price=Decimal(str(row["best_price"])),
+                mark_age_ms=0,
+                spread=max(ZERO, ask - bid),
+            ))
+            contract = self.contracts[symbol.upper()]
+            value_per_unit = (
+                contract.value_per_price_unit_per_lot
+                if contract.loss_model is LossModel.STOP_DISTANCE else Decimal("1")
+            )
+            envelope = self.envelope_calculator.compute(
+                family, mark=mark, value_per_price_unit=value_per_unit,
+                equity=equity, now_ms=now_ms)
+            action = self.preservation.evaluate(
+                family=family, health=health, envelope=envelope,
+                mark=mark, now_ms=now_ms)
+
+            if action.blocks_new_risk:
+                self._family_halts[family.family_id] = action.reasons or (action.kind.value,)
+            else:
+                self._family_halts.pop(family.family_id, None)
+
+            if position_id and action.kind in (
+                ActionKind.TIGHTEN_STOP, ActionKind.PARTIAL_CLOSE, ActionKind.FULL_CLOSE
+            ):
+                quantity = None
+                if action.kind is ActionKind.PARTIAL_CLOSE:
+                    quantity = family.net_quantity * Decimal(str(action.close_fraction or ZERO))
+                    if quantity <= ZERO:
+                        quantity = None
+                receipt = self.router.apply_preservation(
+                    self.adapter.venue,
+                    position_id=position_id,
+                    trade_intent_id=intent_id,
+                    action=action.kind.value,
+                    now_ms=now_ms,
+                    new_stop=action.new_stop,
+                    quantity=quantity,
+                    reason="REV51_" + (action.reasons[0] if action.reasons else action.kind.value),
+                )
+                if action.kind is ActionKind.TIGHTEN_STOP and action.new_stop is not None:
+                    if receipt is None or receipt.status not in (
+                        "REJECTED", "CANCELLED", "EXPIRED", "UNKNOWN"
+                    ):
+                        self.families.tighten_stop(
+                            family.family_id, action.new_stop, now_ms=now_ms)
+                        row["stop"] = action.new_stop
+                elif receipt is not None and receipt.status in (
+                    "FILLED", "OWNER_EXECUTED", "BROKER_CONFIRMED"
+                ):
+                    if action.kind is ActionKind.PARTIAL_CLOSE:
+                        closed_qty = min(receipt.filled_qty, family.net_quantity)
+                        if closed_qty > ZERO and receipt.average_fill is not None:
+                            self.families.apply(
+                                family.family_id,
+                                FamilyMember(
+                                    member_id=f"{intent_id}:partial:{now_ms}",
+                                    role=MemberRole.PARTIAL_EXIT,
+                                    quantity=closed_qty,
+                                    price=receipt.average_fill,
+                                    occurred_ms=now_ms,
+                                    trade_intent_id=intent_id,
+                                ),
+                                now_ms=now_ms,
+                            )
+                            row["quantity"] = max(
+                                ZERO, Decimal(str(row.get("quantity", ZERO))) - closed_qty)
+                    else:
+                        self._on_close(
+                            intent_id, receipt.average_fill, action.kind.value, now_ms)
+                        continue
+
+            policy = self.scale_policies.policy_for(str(row.get("strategy_id") or ""))
+            root_qty = next(
+                (m.quantity for m in family.members if m.role is MemberRole.ROOT), ZERO)
+            self.expansion.evaluate(
+                family=family,
+                strategy_id=str(row.get("strategy_id") or ""),
+                policy=policy,
+                health=health,
+                envelope=envelope,
+                preservation=action,
+                root_quantity=root_qty,
+                last_scale_ms=None,
+                in_event_window=False,
+                now_ms=now_ms,
+            )
+
     def mark_bar(self, symbol: str, bar: Bar, *, now_ms: int) -> None:
         """Apply the same deterministic OHLC mark sequence as SessionRunner."""
         contract = self.contracts[symbol.upper()]
@@ -491,6 +731,7 @@ class AccountTradeLifecycle:
             self.mark(symbol, px - half, px + half, now_ms=now_ms)
 
     def mark(self, symbol: str, bid: Decimal, ask: Decimal, *, now_ms: int) -> None:
+        self._supervise_open_families(symbol, bid, ask, now_ms=now_ms)
         receipts = list(self.router.apply_exits(
             self.adapter.venue, symbol, bid, ask, now_ms=now_ms))
         if hasattr(self.adapter, "mark"):
@@ -543,6 +784,21 @@ class AccountTradeLifecycle:
         entry = self.entries.pop(intent_id, None)
         if entry is None or exit_price is None:
             return
+        family = self.families.for_intent(intent_id)
+        if family is not None and family.net_quantity > ZERO:
+            self.families.apply(
+                family.family_id,
+                FamilyMember(
+                    member_id=f"{intent_id}:exit:{now_ms}",
+                    role=MemberRole.FULL_EXIT,
+                    quantity=family.net_quantity,
+                    price=exit_price,
+                    occurred_ms=now_ms,
+                    trade_intent_id=intent_id,
+                ),
+                now_ms=now_ms,
+            )
+            self._family_halts.pop(family.family_id, None)
         entry["trade_intent_id"] = intent_id
         pnl, pnl_known = self._realised_pnl(entry, exit_price)
         if pnl_known:

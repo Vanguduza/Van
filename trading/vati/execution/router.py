@@ -258,6 +258,66 @@ class ExecutionRouter:
                 metrics.inc("vati_rejects_total", venue=intent.venue)
             return receipt
 
+    def apply_preservation(self, venue: str, *, position_id: str,
+                           trade_intent_id: str, action: str,
+                           now_ms: int, new_stop: Optional[Decimal] = None,
+                           quantity: Optional[Decimal] = None,
+                           reason: str = "REV51_PRESERVATION") -> Optional[ExecutionReceipt]:
+        """Execute a deterministic preservation action through the router boundary.
+
+        This path cannot add exposure. Software-stop tightening mutates only the
+        local protection rule; venue stops and closes use the same adapter and
+        receipt ledger as every other exit.
+        """
+        adapter = self.adapters[venue]
+        if action == "TIGHTEN_STOP":
+            if new_stop is None:
+                raise RouterError("preservation tighten has no stop")
+            old = self.protection.stop_of(position_id)
+            self.protection.tighten(position_id, new_stop)
+            if self.protection.is_software(position_id):
+                return None
+            try:
+                receipt = adapter.modify_stop(position_id, new_stop, now_ms=now_ms)
+            except Exception:
+                self.protection.rollback_unconfirmed_tighten(
+                    position_id, previous_stop=old, attempted_stop=new_stop)
+                raise
+            self._log(
+                EventKind.EXECUTION_RECEIPT,
+                {**{k: (v.value if hasattr(v, "value") else v)
+                    for k, v in asdict(receipt).items()},
+                 "exit_action": "MODIFY_STOP", "exit_reason": reason},
+                now_ms=now_ms, corr=receipt.trade_intent_id or trade_intent_id,
+            )
+            if receipt.status in ("REJECTED", "CANCELLED", "EXPIRED", "UNKNOWN"):
+                self.protection.rollback_unconfirmed_tighten(
+                    position_id, previous_stop=old, attempted_stop=new_stop)
+                if not self.protection.is_software(position_id):
+                    self.kill.trip(KillSwitchTrigger.STOP_REJECTED, now_ms)
+            return receipt
+
+        if action not in ("PARTIAL_CLOSE", "FULL_CLOSE"):
+            raise RouterError(f"unsupported preservation action {action}")
+        if action == "FULL_CLOSE":
+            self.protection.mark_close_pending(position_id)
+            quantity = None
+        receipt = adapter.close(position_id, quantity, now_ms=now_ms, reason=reason)
+        self._log(
+            EventKind.EXECUTION_RECEIPT,
+            {**{k: (v.value if hasattr(v, "value") else v)
+                for k, v in asdict(receipt).items()},
+             "exit_action": "CLOSE", "exit_reason": reason,
+             "preservation_action": action},
+            now_ms=now_ms, corr=receipt.trade_intent_id or trade_intent_id,
+        )
+        if action == "FULL_CLOSE":
+            if receipt.status in ("FILLED", "OWNER_EXECUTED", "BROKER_CONFIRMED"):
+                self.protection.close_confirmed(position_id)
+            elif receipt.status in ("REJECTED", "CANCELLED", "EXPIRED", "UNKNOWN"):
+                self.protection.close_failed(position_id)
+        return receipt
+
     def apply_exits(self, venue: str, symbol: str, bid: Decimal, ask: Decimal, *, now_ms: int) -> list[ExecutionReceipt]:
         adapter = self.adapters[venue]
         out = []

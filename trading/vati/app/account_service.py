@@ -395,6 +395,12 @@ class AccountCoordinatorService:
             tier1_event_blackout_active=blackout,
             margin_level_pct=acct.margin_level_pct, free_margin=acct.free_margin,
             kill_switch_triggers=frozenset(self.kill.active),
+            preservation_blocks_new_risk=(
+                self.lifecycle.preservation_blocks_new_risk
+                if self.lifecycle is not None else False),
+            preservation_reason=(
+                self.lifecycle.preservation_reason
+                if self.lifecycle is not None else ""),
         )
 
     def _risk(self, intent, snapshot: RiskSnapshot):
