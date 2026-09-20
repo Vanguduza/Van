@@ -190,6 +190,25 @@ def check_required_production_joins() -> list[str]:
         failures.append(
             "account-lease-live-join: production account service references an in-memory lease")
 
+    commander = (ROOT / "commander" / "app.py").read_text()
+    commander_strategy = (ROOT / "commander" / "strategies.py").read_text()
+    gateway = (ROOT.parent / "backend" / "van_gateway" / "app.py").read_text()
+    capsule = (ROOT / "vati" / "strategies" / "capsule.py").read_text()
+    if "capsule_promote" not in commander or "capsule_promote" not in commander_strategy:
+        failures.append(
+            "strategy-promotion-live-join: private commander promotion command is absent")
+    if "AGENT_HIDDEN_COMMANDS" not in commander or "PROMOTION_COMMANDS" not in commander:
+        failures.append(
+            "strategy-promotion-agent-boundary: promotion is not attached to the hidden command set")
+    if "/v1/trading/strategies/promote" not in gateway:
+        failures.append(
+            "strategy-promotion-live-join: gateway owner promotion route is absent")
+    if "CapsuleRegistry" not in commander_strategy or ".promote(" not in commander_strategy:
+        failures.append(
+            "strategy-promotion-live-join: commander no longer reaches CapsuleRegistry.promote")
+    if "def promote(" not in capsule:
+        failures.append(
+            "strategy-promotion-live-join: capsule promotion gate is absent")
     return failures
 
 
