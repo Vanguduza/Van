@@ -677,7 +677,7 @@ invariants:
   - subject: trading.restart_lifecycle_reconstruction
     owner: docs/VAN_TRADING_PRODUCTION_DEPLOYMENT_BLUEPRINT_REV5.md
     statement: >-
-      After restart, an open venue position is reconstructed only when its trade_intent_id joins to the durable VATI ORDER_COMMAND that created it; restored protection may never be wider than the original command, and unresolved state blocks new risk through reconciliation.
+      After restart, an open venue position is reconstructed only when its trade_intent_id joins to the durable VATI ORDER_COMMAND that created it; restored protection may never be wider than the original command, missing non-owner broker TCA is repaired exactly once from a valid sealed fill receipt without inventing learning context, and unresolved state blocks new risk through reconciliation.
     implemented_by:
       - trading/vati/app/trade_lifecycle.py
       - trading/vati/app/account_service.py
