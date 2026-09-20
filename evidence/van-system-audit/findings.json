@@ -20,9 +20,9 @@
     "PRODUCTION_CERTIFIED"
   ],
   "counts": {
-    "P0": 21,
+    "P0": 22,
     "P1": 43,
-    "P2": 31,
+    "P2": 32,
     "P3": 29,
     "P4": 7
   },
@@ -5648,21 +5648,27 @@
       "remediation_gate": "RB C11",
       "closure": {
         "state": "EXTERNALLY_BLOCKED_REPOSITORY_COMPLETE",
-        "summary": "`WarmStandbyPolicy.decide` answers when a spare is worth holding open and returns the reason in the owner's terms; `mayCarry` makes the upstream asymmetry a closed list rather than a convention. `FailoverTransaction` records the nine steps as a transaction and refuses a promotion to an epoch the Gateway did not advance. `DurableOutbox` adds everything §20.14 asks for after storage, including the distinction between an expired command — dropped, and the owner told it did not happen — and a stale one, which is asked about.\n\nAll three are pure and all three are in `android/verification`: 64 tests across `WarmStandbyTest`, `DurableOutboxTest` and `SessionTelemetryTest`. The session manager holds them, and `VanApplication` feeds the standby policy from the same runtime readings the resource envelope uses rather than sampling a second time.",
+        "summary": "`WarmStandbyPolicy.decide` answers when a spare is worth holding open and returns the reason in the owner's terms; `mayCarry` makes the upstream asymmetry a closed list rather than a convention. `FailoverTransaction` records the nine steps and refuses a promotion to an epoch the Gateway did not advance. `DurableOutbox` adds everything §20.14 asks for after storage.\n\n**Corrected after review.** Two claims in the first version of this closure were wider than the code. §20.9's warm standby is *policy only* — the session manager holds one socket, and a `WARM_STANDBY` decision says what the phone can afford, not that a second authenticated transport exists; make-before-break is not built. And the outbox was durable in name: its records lived in an in-memory ArrayDeque, so a process death lost the reconfirmation, expiry, attempt count and path metadata while the command itself could survive in the encrypted queue. That second one is fixed in RB C14 — the policy now rides on the canonical queue's own record, one write, and the restart seam is executed end to end. The first is not fixed, it is narrowed: three tests now fail if the source ever implies a standby transport that nobody has built.",
         "changed": [
           "android/app/src/main/java/com/dial/van/session/WarmStandby.kt",
           "android/app/src/main/java/com/dial/van/session/DurableOutbox.kt",
           "android/app/src/main/java/com/dial/van/session/VanHermesSessionManager.kt",
           "android/app/src/main/java/com/dial/van/VanApplication.kt",
-          "android/verification/build.gradle.kts"
+          "android/verification/build.gradle.kts",
+          "android/app/src/main/java/com/dial/van/session/OutboxPersistence.kt",
+          "android/app/src/main/java/com/dial/van/session/SessionOutboxStore.kt",
+          "android/app/src/main/java/com/dial/van/session/EncryptedSessionOutboxStore.kt",
+          "android/app/src/main/java/com/dial/van/queue/CommandQueueModels.kt"
         ],
         "verified_by": [
           "android/verification/src/test/kotlin/com/dial/van/session/WarmStandbyTest.kt",
-          "android/verification/src/test/kotlin/com/dial/van/session/DurableOutboxTest.kt"
+          "android/verification/src/test/kotlin/com/dial/van/session/DurableOutboxTest.kt",
+          "android/verification/src/test/kotlin/com/dial/van/session/OutboxPersistenceTest.kt",
+          "android/verification/src/test/kotlin/com/dial/van/session/RestartSeamTest.kt"
         ],
-        "counterexample": "An outbox that classified on flush rather than on admission passes every flush test and still stores an A4 across an outage; `DurableOutbox.admit` returns null for `NEVER_STORE`, so the only way to keep one is to not call it, and `an irreversible command is never stored at all` asserts the null. A standby policy that returned a boolean rather than a role passes the battery and Data Saver tests and says nothing about what the warm path may send; `mayCarryNewUpstream` and `WARM_UPSTREAM_ALLOWED` are what the mutation suite attacks.",
-        "residual": "The second path itself does not exist. `DEFAULT_PATHS` declares two protocols over one ingress, so `WarmStandbyPolicy` correctly answers COLD for this build: a spare on the same road fails with the first.",
-        "residual_reason": "§0B is explicit that two carriers over one ingress are not redundancy and that the honest status is the unflattering one. A second independent ingress is an owner deployment decision, not a repository change.",
+        "counterexample": "An outbox that classified on flush rather than admission passes every flush test and still stores an A4 across an outage; `admit` returns null, so the only way to keep one is to not call it. A `DurableOutbox` whose records live in RAM passes every one of its own unit tests — all of them are in-process — and loses the owner's reconfirmation to a kill; `RestartSeamTest` is what separates those, and it found a real one: the first mapping silently dropped `commandId`, which is the identity §20.12 matches a restored command by. A `StandbyDecision` of `WARM_STANDBY` passes every policy test and is not a connection; `WarmStandbyIsPolicyNotTransportTest` fails the moment a second socket appears without the claims being revisited.",
+        "residual": "§20.9's make-before-break is unimplemented. There is one socket; the policy that would govern a second one is written and executed, and the second one is not. Separately, `EncryptedCommandQueue` itself — the Keystore and the disk under the now-durable outbox — cannot be executed in this repository.",
+        "residual_reason": "A second authenticated transport buys nothing in this build: `DEFAULT_PATHS` declares one `routeId` for both carriers, so §0B's answer is that a spare on the same road fails with the first, and the policy correctly returns COLD for every input. Building the socket before a second ingress exists would add a cost and a failure mode with no benefit. The store is Android, so CI compiles it and Gate 14 observes it.",
         "residual_class": "OWNER_DEPLOYMENT_DECISION",
         "posture": "fail-closed"
       }
@@ -6089,6 +6095,93 @@
         "residual": "The discriminator is a dot in a string, held by a test rather than by a type.",
         "residual_reason": "Three separate types across a registry file, an audit column and an adapter constant is a larger change than the defect warrants, and the test states the rule where somebody sweeping for `capability=` will find it.",
         "residual_class": "DELIBERATE_SCOPE",
+        "posture": "fail-closed"
+      }
+    },
+    {
+      "id": "P0-SESS-003",
+      "severity": "P0",
+      "domain": "session",
+      "title": "The durable outbox was durable in name: its policy lived in RAM while the command could survive on disk",
+      "description": "`DurableOutbox` decides whether a stored command may be flushed silently, needs the owner asked again, or has expired. `VanHermesSessionManager` held those decisions in an in-memory `ArrayDeque<QueuedMessage>` and never touched `EncryptedCommandQueue` at all.\n\nThe class's own docstring said §2.7 forbids a parallel queue so \"the queue still owns the bytes and this owns the metadata\". That was the design and it was not the code: nothing wrote the session's bytes to the queue either. The whole outbox was RAM.\n\nAndroid kills backgrounded processes as a matter of routine, so the failure is ordinary rather than exotic. After a kill the reconfirmation the owner gave, the expiry, the attempt count and the path metadata are gone. Worse than losing everything: a command could survive in the pre-existing encrypted queue through another path while the policy governing whether it may be silently replayed did not — leaving the replay decision to be guessed.\n\nFound by external review of checkpoint RB C11.",
+      "requirement": "docs/VAN_REMOTE_BROWSER_PRODUCTION_BLUEPRINT_REV_1_5.md §§2.7, 20.14, 20.15",
+      "authority": "VAN Remote Browser Production Blueprint Rev 1.5",
+      "repository_evidence": [
+        "android/app/src/main/java/com/dial/van/session/VanHermesSessionManager.kt",
+        "android/app/src/main/java/com/dial/van/session/OutboxPersistence.kt",
+        "android/app/src/main/java/com/dial/van/queue/CommandQueueModels.kt"
+      ],
+      "runtime_evidence": [],
+      "affected_components": [
+        "android",
+        "session"
+      ],
+      "root_cause": "Every test of the outbox was in-process, so every one of them passed. A policy object tested in RAM proves the policy and says nothing about whether the policy is still there tomorrow.",
+      "remediation": "Carry §20.14's fields on `QueuedCommand` itself so one record and one write hold both the envelope and its policy, wire the manager to persist at admission and reconfirmation and to forget only after a successful send, and execute the restart seam end to end through a fake store.",
+      "impact": "Store-and-forward did not survive the condition it exists for. A command whose owner had answered a reconfirmation could come back looking as though they had not, or worse, come back looking ordinary and be sent without anyone being asked.",
+      "validation_gate": "G2",
+      "current_status": "CLOSED",
+      "remediation_gate": "RB C14",
+      "closure": {
+        "state": "EXTERNALLY_BLOCKED_REPOSITORY_COMPLETE",
+        "summary": "One record, one write. `QueuedCommand` now carries the storability, the live-owner-context flag, the reconfirmation stamp, the last attempted path, the turn id and the session's own message and command ids; `OutboxPersistence` maps both directions and is pure, so the mapping is executed rather than reasoned about.\n\nThe order is the correctness: persisted before it is queued in memory, and forgotten only after the socket write returns — the other order in either case loses the command to a kill one instruction later.\n\nTwo real defects fell out of writing the tests. The round-trip silently dropped `commandId`, which is the identity §20.12 matches a restored command by, so a restart would have sent it a second time. And a session envelope in the shared queue was *dispatchable by the replayer* — P0-SEC-002's shape — so `SESSION_ENVELOPE` is now its own kind and named in `NEVER_DISPATCHABLE` rather than relying on `commandTextOrNull` happening to return null.",
+        "changed": [
+          "android/app/src/main/java/com/dial/van/session/OutboxPersistence.kt",
+          "android/app/src/main/java/com/dial/van/session/SessionOutboxStore.kt",
+          "android/app/src/main/java/com/dial/van/session/EncryptedSessionOutboxStore.kt",
+          "android/app/src/main/java/com/dial/van/session/VanHermesSessionManager.kt",
+          "android/app/src/main/java/com/dial/van/queue/CommandQueueModels.kt",
+          "android/app/src/main/java/com/dial/van/gateway/QueueReplayer.kt",
+          "android/app/src/main/java/com/dial/van/VanApplication.kt"
+        ],
+        "verified_by": [
+          "android/verification/src/test/kotlin/com/dial/van/session/OutboxPersistenceTest.kt",
+          "android/verification/src/test/kotlin/com/dial/van/session/RestartSeamTest.kt"
+        ],
+        "counterexample": "Persisting the entry beside the queue in a second store passes every round-trip test and reintroduces the defect one layer up: two writes, and a kill between them leaves the bytes and the policy disagreeing. One record is what makes it atomic, and §2.7 required it anyway. Reconstructing a missing `storability` on restore would also pass every happy-path test; `a record with no storability is refused rather than reconstructed` requires the null, because the guess is wrong in both directions — guess SAFE_TO_RETRY and an approval-bearing command replays silently, guess NEVER_STORE and the owner's work vanishes without them being told.",
+        "residual": "`EncryptedCommandQueue` itself is not executed here. The Keystore, the AES-GCM wrapping and the disk are Android; what is executed is every decision either side of them, through `SessionOutboxStore`.",
+        "residual_reason": "The interface is where the line falls on purpose. A fake implements it in nine lines and the restart seam becomes executable; the adapter that binds the real queue is twenty lines that CI compiles and Gate 14 observes.",
+        "residual_class": "ENVIRONMENT_UNVERIFIED",
+        "posture": "fail-closed"
+      }
+    },
+    {
+      "id": "P2-AND-019",
+      "severity": "P2",
+      "domain": "android",
+      "title": "An unreadable battery was read as a full one, authorising optional background spending",
+      "description": "`VanApplication.refreshStandbyConditions` converted `RuntimeReading.UNKNOWN` to 100 before handing the reading to `WarmStandbyPolicy`. That is the one value that authorises holding a second authenticated socket open.\n\nThe instinct was right and applied to the wrong question. `VanResourceEnvelope` treats an unknown reading as contributing no pressure, and that is correct there: the question is whether to take capability *away*, and an OEM that will not answer the capacity property must not leave VAN permanently crippled. A warm standby is not capability — it is cost, a second socket with its own heartbeats — and the same unknown should answer that question the other way.\n\nThe repository already stated the principle three files away: `DeviceRuntimeReadings.networkCost` fails towards restraint because \"an unreadable battery costs VAN capability it probably had; an unreadable data plan would cost the owner money they did not agree to spend\". The standby path then did the opposite with the battery.\n\nRaised by external review, which also connected it to an earlier finding about unavailable runtime readings as a fail-open risk.",
+      "requirement": "docs/VAN_REMOTE_BROWSER_PRODUCTION_BLUEPRINT_REV_1_5.md §20.9",
+      "authority": "VAN Remote Browser Production Blueprint Rev 1.5",
+      "repository_evidence": [
+        "android/app/src/main/java/com/dial/van/VanApplication.kt",
+        "android/app/src/main/java/com/dial/van/session/WarmStandby.kt"
+      ],
+      "runtime_evidence": [],
+      "affected_components": [
+        "android",
+        "session"
+      ],
+      "root_cause": "One sentinel, two questions. Whether to withhold capability and whether to authorise spending both read the battery, and only the first had a stated answer for unknown.",
+      "remediation": "Pass the envelope's own sentinel through rather than inventing a number, and refuse in the policy — where the decision is, and where it can be executed.",
+      "impact": "Bounded today, because this build answers COLD on the route check before the battery is reached. It would not have been bounded the moment a second ingress existed, which is precisely when nobody would be looking at this line.",
+      "validation_gate": "G12",
+      "current_status": "CLOSED",
+      "remediation_gate": "RB C14",
+      "closure": {
+        "state": "EXTERNALLY_BLOCKED_REPOSITORY_COMPLETE",
+        "summary": "`WarmStandbyPolicy` refuses on `UNKNOWN_BATTERY` with a reason the owner can read, and the conversion in `VanApplication` is gone. Charging does not override it: being plugged in says nothing about whether this phone can afford the radio time, and a test asserts that too.\n\nThe sentinel is copied rather than imported, so the pure file stays pure — and a third test pins the copy against `RuntimeReading.UNKNOWN`, because a copied constant with no test is how two packages drift.",
+        "changed": [
+          "android/app/src/main/java/com/dial/van/VanApplication.kt",
+          "android/app/src/main/java/com/dial/van/session/WarmStandby.kt"
+        ],
+        "verified_by": [
+          "android/verification/src/test/kotlin/com/dial/van/session/WarmStandbyTest.kt"
+        ],
+        "counterexample": "Refusing on unknown only when discharging passes the obvious test and restores the hole for a charging phone, which is the common case for a device sitting on a desk overnight. `charging does not buy a spare socket the battery could not be read for` is what separates them.",
+        "residual": "`VanApplication` is Android and cannot be executed here; what is checked is that the conversion is gone and that the policy refuses.",
+        "residual_reason": "The AGP is unreachable in the audit container, so CI compiles the app module.",
+        "residual_class": "ENVIRONMENT_UNVERIFIED",
         "posture": "fail-closed"
       }
     }

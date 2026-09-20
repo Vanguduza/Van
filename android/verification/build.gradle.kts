@@ -17,6 +17,12 @@
  */
 plugins {
     kotlin("jvm") version "2.0.21"
+    // Rev 1.5 §20.14 — `QueuedCommand` is the canonical queue's record and carries the
+    // session outbox's policy metadata. It is pure Kotlin apart from `@Serializable`, and
+    // that annotation is the whole reason this plugin is here: without it the record
+    // cannot be compiled in the harness, and the mapping that has to survive a process
+    // death would be the one thing nothing executes.
+    kotlin("plugin.serialization") version "2.0.21"
 }
 
 repositories {
@@ -28,6 +34,7 @@ dependencies {
     // compile and run here unchanged. It is a stand-in for the platform class, not an
     // extra dependency of the app.
     implementation("org.json:json:20240303")
+    implementation("org.jetbrains.kotlinx:kotlinx-serialization-json:1.7.3")
     testImplementation(kotlin("test"))
 }
 
@@ -126,6 +133,11 @@ sourceSets {
             "com/dial/van/session/TransportSupervisor.kt",
             "com/dial/van/session/WarmStandby.kt",
             "com/dial/van/session/DurableOutbox.kt",
+            "com/dial/van/session/OutboxPersistence.kt",
+            "com/dial/van/session/SessionOutboxStore.kt",
+            // The canonical queue's record. Android owns the encryption and the disk;
+            // this file is the shape those bytes take, and §20.14's metadata rides on it.
+            "com/dial/van/queue/CommandQueueModels.kt",
             // The two byte formats the gateway also implements. They are here because the
             // drift they are exposed to is invisible in a source diff: two canonicalizers
             // that agree on every ASCII document and disagree on one accented character.

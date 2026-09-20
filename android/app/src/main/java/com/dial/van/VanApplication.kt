@@ -14,6 +14,7 @@ import com.dial.van.gateway.QueueReplayer
 import com.dial.van.connectivity.ConnectivityRegistry
 import com.dial.van.connectivity.ProvisioningIntake
 import com.dial.van.gateway.VanGatewayClient
+import com.dial.van.session.EncryptedSessionOutboxStore
 import com.dial.van.session.VanHermesSessionManager
 import com.dial.van.voice.VoiceEdge
 import com.dial.van.notification.NotificationPolicyStore
@@ -232,6 +233,10 @@ class VanApplication : Application(), VoiceInputCallback, TtsOutputCallback {
         provisioning = ProvisioningIntake(this)
         vanSession = VanHermesSessionManager(
             gatewayClient, appScope, telemetry = telemetry.session,
+            // §§2.7, 20.14 — the session outbox is stored in the queue that already
+            // exists, not beside it. Without this the queue survives the process and the
+            // policy governing whether a command may be silently replayed does not.
+            store = EncryptedSessionOutboxStore(commandQueue),
         )
         voiceEdge = VoiceEdge(this, ttsOutput, appScope)
         voiceEdge.loadAssets()
@@ -375,14 +380,20 @@ class VanApplication : Application(), VoiceInputCallback, TtsOutputCallback {
         val reading = DeviceRuntimeReadings.read(this)
         val cost = DeviceRuntimeReadings.networkCost(this)
         vanSession.setStandbyConditions(
-            // An unreadable battery is not a flat battery. Treating UNKNOWN as zero would
-            // put every device whose OEM does not answer the capacity property into the
-            // "battery is low" branch permanently.
-            batteryPercent = if (reading.batteryPercent == RuntimeReading.UNKNOWN) {
-                100
-            } else {
-                reading.batteryPercent
-            },
+            // §20.9 — an unreadable battery does not authorise optional spending.
+            //
+            // This read `UNKNOWN -> 100`, which is the right instinct applied to the
+            // wrong question. `VanResourceEnvelope` treats an unknown reading as
+            // contributing no pressure, and that is correct there: an OEM that will not
+            // answer the capacity property must not leave VAN permanently crippled.
+            // A warm standby is not capability, it is *cost* — a second authenticated
+            // socket with its own heartbeats — and the asymmetry `networkCost` already
+            // states applies: an unreadable battery should cost VAN an optional extra
+            // connection, not cost the owner one they never authorised.
+            //
+            // So unknown is passed through as the envelope's own sentinel, and
+            // `WarmStandbyPolicy` refuses on it rather than this file inventing a number.
+            batteryPercent = reading.batteryPercent,
             charging = reading.charging,
             standbyIsMetered = cost.metered,
             dataSaverEnabled = cost.dataSaverEnabled,

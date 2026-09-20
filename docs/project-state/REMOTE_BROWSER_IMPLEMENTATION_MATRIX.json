@@ -2017,10 +2017,10 @@
       "id": "RB-065",
       "name": "warm standby",
       "group": "session",
-      "status": "WIRED_UNPROVEN",
+      "status": "BUILT_UNWIRED",
       "built": true,
-      "wired": true,
-      "reachable": true,
+      "wired": false,
+      "reachable": false,
       "live": false,
       "verified": false,
       "observed": false,
@@ -2036,12 +2036,12 @@
         "android/verification/src/test/kotlin/com/dial/van/session/WarmStandbyTest.kt"
       ],
       "external_gates": [
-        "a second independently reachable ingress; with one ingress the policy correctly answers COLD, so the warm case cannot be reached in this deployment (RB-002)",
-        "the Android build is compiled only in CI; the AGP is unreachable in the audit container"
+        "a second independently reachable ingress (RB-002); with one, \u00a70B's answer is that a spare on the same road fails with the first, and the policy correctly returns COLD for every input",
+        "the second authenticated socket itself, which is not built: the session manager holds one, so \u00a720.9's make-before-break does not exist"
       ],
       "transport_independent": true,
       "offline_voice_proven": null,
-      "note": "ADR-RB-012's policy, with the asymmetry that carries the weight: a warm path is connected and authenticated and may not carry a new owner message. A boolean would have said whether a spare was open and nothing about what it may send, which is where the duplicate \u00a720.12 exists to reject would come from \u2014 VAN's own client, before the Gateway ever sees it.\n\nWIRED rather than LIVE on purpose. `DEFAULT_PATHS` declares two protocols over one ingress, so `independentRouteAvailable` is false and every decision in this build is COLD with the reason \"no second route\". That is the honest answer, not a gap: \u00a70B says a spare on the same road fails with the first."
+      "note": "**Corrected after review.** This read WIRED_UNPROVEN, which overstated it. The policy is built, executed and correct; the transport it governs does not exist. `VanHermesSessionManager` has a single `WebSocket`, so a `StandbyDecision` of `WARM_STANDBY` says what the phone can afford and not that a spare path is open.\n\nBUILT_UNWIRED is the honest status and \u00a742.5 exists to make it sayable. Three tests now fail if the source implies otherwise: one counts the sockets, one reads the claim boundary out of the policy's own docstring, and one counts the routes.\n\nThe asymmetry that carries the weight is still proven: a warm path may not carry a new owner message, because a client that sent on one would produce the duplicate \u00a720.12 exists to reject before the Gateway ever saw it."
     },
     {
       "schema": "van-implementation-matrix/1",
@@ -2161,14 +2161,17 @@
       "authority": "docs/VAN_REMOTE_BROWSER_PRODUCTION_BLUEPRINT_REV_1_5.md \u00a72.7",
       "evidence_refs": [],
       "tests": [
-        "android/verification/src/test/kotlin/com/dial/van/session/DurableOutboxTest.kt"
+        "android/verification/src/test/kotlin/com/dial/van/session/DurableOutboxTest.kt",
+        "android/verification/src/test/kotlin/com/dial/van/session/OutboxPersistenceTest.kt",
+        "android/verification/src/test/kotlin/com/dial/van/session/RestartSeamTest.kt"
       ],
       "external_gates": [
-        "the Android build is compiled only in CI; the AGP is unreachable in the audit container"
+        "the Android build is compiled only in CI; the AGP is unreachable in the audit container",
+        "`EncryptedCommandQueue` itself \u2014 the Keystore, the AES-GCM wrapping and the disk \u2014 which no test here can execute; the decisions either side of it are executed through `SessionOutboxStore`"
       ],
       "transport_independent": true,
       "offline_voice_proven": null,
-      "note": "\u00a72.7 forbids a parallel replacement for `EncryptedCommandQueue`, so this is not one: the queue still owns the bytes and their encryption, and this owns the question \u00a720.14 asks after storage \u2014 may this still be sent, and does the owner have to be asked again first.\n\nThe sentence it exists for is \u00a720.14's last. `admit` returns null for an A4 or A5, so the only way to store one is to not call it, and there is no argument that overrides the classification. Expiry and staleness are kept apart deliberately: an expired command is dropped and the owner told it did not happen, because \"do you still want the thing you asked for four hours ago\" is a worse question than \"that did not happen\"."
+      "note": "\u00a72.7 forbids a parallel replacement for `EncryptedCommandQueue`, so this is not one: \u00a720.14's metadata rides on that queue's own record.\n\n**Corrected after review.** The first version held those records in an in-memory `ArrayDeque` and never touched the queue at all \u2014 durable in name, and a process death lost the reconfirmation, expiry, attempt count and path while the command could survive. P0-SESS-003. One record and one write now, persisted before it is queued and forgotten only after the send returns.\n\nWriting the restart tests found two more: the mapping silently dropped `commandId`, which is what \u00a720.12 matches a restored command by, and a session envelope in the shared queue was dispatchable by the replayer \u2014 P0-SEC-002's shape, now a named refusal rather than a reliance on `commandTextOrNull` returning null."
     },
     {
       "schema": "van-implementation-matrix/1",

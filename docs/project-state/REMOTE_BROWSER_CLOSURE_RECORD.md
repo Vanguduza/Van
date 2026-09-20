@@ -29,9 +29,9 @@ not mean anyone has watched it work on a phone.
 
 | Register | Contents | Checker |
 |---|---|---|
-| `evidence/van-system-audit/findings.json` | 139 findings, all closed: 75 `INTEGRATED_AND_EVIDENCED`, 58 `EXTERNALLY_BLOCKED_REPOSITORY_COMPLETE`, 6 `DELIBERATELY_REMOVED_CANON_CORRECTED` | `tools/ci/maturity_gate.py` — refuses a closure state that claims more than its residual class allows |
-| `evidence/van-system-audit/component_ledger.json` | 174 components, all at a terminal state: 111 integrated, 56 externally blocked, 7 deliberately removed | `tools/ci/maturity_gate.py`, `tools/ci/ledger_reconcile.py` — the first refuses a ledger that overstates, the second one that understates |
-| `docs/project-state/REMOTE_BROWSER_IMPLEMENTATION_MATRIX.json` | 122 rows: 89 `WIRED_UNPROVEN`, 21 `NOT_STARTED`, 7 `BUILT_UNWIRED`, 3 `BLOCKED`, 2 `VERIFIED_UNCERTIFIED` | `tools/ci/ledger_reconcile.py` — refuses a row whose booleans contradict its status, and an empty `external_gates` |
+| `evidence/van-system-audit/findings.json` | 141 findings, all closed: 75 `INTEGRATED_AND_EVIDENCED`, 60 `EXTERNALLY_BLOCKED_REPOSITORY_COMPLETE`, 6 `DELIBERATELY_REMOVED_CANON_CORRECTED` | `tools/ci/maturity_gate.py` — refuses a closure state that claims more than its residual class allows |
+| `evidence/van-system-audit/component_ledger.json` | 176 components, all at a terminal state: 111 integrated, 58 externally blocked, 7 deliberately removed | `tools/ci/maturity_gate.py`, `tools/ci/ledger_reconcile.py` — the first refuses a ledger that overstates, the second one that understates |
+| `docs/project-state/REMOTE_BROWSER_IMPLEMENTATION_MATRIX.json` | 122 rows: 88 `WIRED_UNPROVEN`, 21 `NOT_STARTED`, 8 `BUILT_UNWIRED`, 3 `BLOCKED`, 2 `VERIFIED_UNCERTIFIED` | `tools/ci/ledger_reconcile.py` — refuses a row whose booleans contradict its status, and an empty `external_gates` |
 | `evidence/van-system-audit/red_team_register.json` | §38's 66 scenarios: 57 `PASS`, 9 `BLOCKED_EXTERNAL`, **0 assumed** | `tools/ci/red_team_register.py` — every `PASS` must cite a runnable pytest node id |
 | `evidence/van-system-audit/production_acceptance.json` | §43's 104 requirements: 60 proven, 37 blocked external, 7 owner deployment | `tools/ci/production_acceptance.py` — recomputes the verdict from the rows |
 | `docs/project-state/AUTHORITY_MAP.yaml` | every invariant, owned once | `tools/ci/authority_map.py` |
@@ -56,16 +56,22 @@ Every one needs something no commit can supply, and each row says which:
   RB-078 bundled TTS) — owner decision 2, with minSdk raised to 31 so the platform
   recogniser is always present, which is the other half of that decision.
 
-## The seven `BUILT_UNWIRED` rows, and why that is the honest status
+## The eight `BUILT_UNWIRED` rows, and why that is the honest status
 
 RB-010 (stream-host provisioning), RB-116 (Trading Core → Stream Host mTLS), RB-118
 (profile storage) are built and have nothing to be wired to. RB-072, RB-074, RB-076,
 RB-079 are the offline voice decisions: implemented, executed in the JVM harness, and
 waiting on a voice asset pack that does not exist.
 
-`BUILT_UNWIRED` is the status §42.5 exists to make sayable. None of these seven is hidden:
+RB-065 (warm standby) is the eighth and it was moved here by review. It had read
+`WIRED_UNPROVEN`, which overstated it: §20.9's policy is built and executed, and the
+second authenticated socket it governs is not. `VanHermesSessionManager` holds one
+`WebSocket`, so a `StandbyDecision` of `WARM_STANDBY` says what the phone can afford and
+not that a spare path is open. Three tests now fail if the source implies otherwise.
+
+`BUILT_UNWIRED` is the status §42.5 exists to make sayable. None of these eight is hidden:
 the reconciler refuses a row whose booleans contradict its status, and §43's "implementation
-matrix contains no hidden `BUILT_UNWIRED` item" is satisfied by all seven declaring it.
+matrix contains no hidden `BUILT_UNWIRED` item" is satisfied by all eight declaring it.
 
 ## The three `BLOCKED` rows
 
@@ -98,6 +104,40 @@ sitting on "waiting for the installer" forever — with every test green.
 **P1-OBS-005.** §27's quality controller was correct, unit-tested and had no caller. The
 rule that VAN must not silently consume hours of the owner's mobile data was enforced by a
 class with no instances.
+
+## What external review found that this pass did not
+
+Three material corrections came from a checkpoint review rather than from the registers,
+and the shape they share is worth more than any of them individually: **each was a claim
+whose supporting tests all passed, because every one of those tests ran in the same
+process the claim was about.**
+
+**The durable outbox was durable in name.** §20.14's policy — reconfirmation, expiry,
+attempt count, the path last attempted — lived in an in-memory `ArrayDeque` in
+`VanHermesSessionManager`, which never touched `EncryptedCommandQueue` at all. Android
+kills backgrounded processes routinely, so after a kill a command could survive in the
+encrypted queue while the policy deciding whether it may be *silently replayed* did not.
+Every outbox test passed because every one of them was in-process. Fixed: the metadata now
+rides on the canonical queue's own record, one write, persisted before it is queued and
+forgotten only after the send returns.
+
+Writing the restart tests found two further defects nobody had raised. The mapping
+silently dropped `commandId`, which is the identity §20.12 matches a restored command by —
+a restart would have sent it twice. And a session envelope sitting in the shared queue was
+*dispatchable by the replayer*, which is P0-SEC-002's exact shape; it is now a named
+refusal rather than a reliance on `commandTextOrNull` happening to return null.
+
+**The warm standby is policy, not a transport.** `StandbyDecision.WARM_STANDBY` says what
+the phone can afford. There is one socket. §20.9's make-before-break is unbuilt, RB-065 is
+`BUILT_UNWIRED` rather than `WIRED_UNPROVEN`, and three tests now fail if the source
+implies otherwise — one counts the sockets, one reads the claim boundary out of the
+policy's own docstring, one counts the routes.
+
+**An unreadable battery authorised optional spending.** `UNKNOWN` was converted to 100
+before the standby decision, which is the one value that buys a second socket. The right
+instinct applied to the wrong question: `VanResourceEnvelope` treats unknown as no pressure
+because there the question is whether to take capability *away*. A spare socket is cost,
+and the repository already stated that asymmetry three files away in `networkCost`.
 
 ## The lesson this pass added to the programme's list
 

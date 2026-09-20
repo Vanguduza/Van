@@ -22,6 +22,18 @@ package com.dial.van.session
  * §20.12's effectively-once admission exists to prevent — from VAN's own client, before
  * the Gateway ever sees it.
  *
+ * **What this is not, stated because the name invites the other reading.** This file
+ * decides *when VAN would hold a warm standby*. It does not open one. `VanHermesSessionManager`
+ * has a single `WebSocket`, and a `StandbyDecision` of `WARM_STANDBY` is a statement about
+ * what the phone can currently afford — not evidence that a second authenticated transport
+ * exists. §20.9's make-before-break needs that second socket, and it is not built.
+ *
+ * The distinction matters twice over. It is the difference between "VAN would like a spare
+ * path" and "VAN has one", which is exactly the kind of claim this programme exists to keep
+ * apart; and in this build the policy answers `COLD` for every input anyway, because
+ * `DEFAULT_PATHS` declares one `routeId` for both carriers and §0B says a spare on the same
+ * road is not a spare.
+ *
  * Pure. The sockets are `VanHermesSessionManager`'s; every decision here is arithmetic
  * over battery, network and interaction state, and every case is one nobody can stage on
  * a real network on demand.
@@ -74,6 +86,16 @@ object WarmStandbyPolicy {
     const val MIN_BATTERY_PERCENT = 20
 
     /**
+     * `RuntimeReading.UNKNOWN`, restated rather than imported.
+     *
+     * This file is pure and `RuntimeReading` is too, but the value is a contract between
+     * two packages and a test pins the two together — importing it would make this file
+     * depend on the runtime package for one integer, and copying it without a test is how
+     * the two drift.
+     */
+    const val UNKNOWN_BATTERY = -1
+
+    /**
      * Charging changes the calculation but not the rule about Data Saver.
      *
      * Data Saver is the owner saying "do less on mobile data", and a warm standby on a
@@ -101,6 +123,18 @@ object WarmStandbyPolicy {
             return StandbyDecision(
                 StandbyRole.COLD,
                 "nothing is happening: the spare path opens when it is needed",
+            )
+        }
+        if (conditions.batteryPercent == UNKNOWN_BATTERY) {
+            // §20.9 — unknown is not full. A spare socket is optional spending, and the
+            // reading that would justify it could not be taken; `VanResourceEnvelope`
+            // treats unknown as no pressure because there the question is whether to take
+            // capability *away*, and refusing to answer must not do that. Here the
+            // question is whether to spend, and the same unknown answers it the other way.
+            return StandbyDecision(
+                StandbyRole.COLD,
+                "VAN cannot read this phone's battery, so it is not holding a spare " +
+                    "connection open",
             )
         }
         if (!conditions.charging && conditions.batteryPercent < MIN_BATTERY_PERCENT) {

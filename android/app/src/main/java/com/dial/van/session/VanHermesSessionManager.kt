@@ -40,6 +40,19 @@ class VanHermesSessionManager(
     private val scope: CoroutineScope,
     private val paths: List<TransportPathDescriptor> = DEFAULT_PATHS,
     /**
+     * §§2.7, 20.14 — where a queued session envelope actually lives.
+     *
+     * Optional so the session still works without it, and the state that leaves is named
+     * rather than hidden: with no store the outbox is in memory and does not survive the
+     * process, which `State.outboxIsDurable` reports. It was in memory *unconditionally*
+     * for a checkpoint, and that is the defect this parameter exists to close.
+     *
+     * The canonical queue rather than one of this class's own: §2.7 forbids a parallel
+     * replacement, and a second store would also mean two writes per command with a
+     * process death possible between them.
+     */
+    private val store: SessionOutboxStore? = null,
+    /**
      * §§20.15, 20.16 — where the two numbers only this side can measure are left.
      *
      * Optional because the session is usable without telemetry and a null here must not
@@ -62,6 +75,14 @@ class VanHermesSessionManager(
         ),
         /** §20.15 — how much is waiting, by what may be done with it. */
         val outboxDepth: Map<CommandStorability, Int> = emptyMap(),
+        /**
+         * §20.14 — whether what is waiting would survive this process being killed.
+         *
+         * Reported rather than assumed, because for one checkpoint it was false and
+         * everything said otherwise. A build with no store still runs; it just cannot
+         * claim store-and-forward, and this is the field that stops it claiming.
+         */
+        val outboxIsDurable: Boolean = false,
     ) {
         /** §0B — what the owner is told. Never "multipath" for two carriers on one road. */
         val ownerReadableConnection: String
@@ -90,7 +111,7 @@ class VanHermesSessionManager(
 
     private val outbox = ArrayDeque<QueuedMessage>()
     private val inFlight = LinkedHashMap<String, JSONObject>()
-    private val _state = MutableStateFlow(State())
+    private val _state = MutableStateFlow(State(outboxIsDurable = store != null))
     val state: StateFlow<State> = _state.asStateFlow()
 
     private var socket: WebSocket? = null
@@ -171,6 +192,9 @@ class VanHermesSessionManager(
             nowMs = System.currentTimeMillis(),
         ) ?: return SubmissionOutcome.Refused("offline_and_not_storable")
 
+        // Written before it is queued in memory, not after. The other order loses the
+        // command to a kill in between, and the whole point of this record is the kill.
+        store?.persist(entry, envelope.toString())
         outbox.addLast(QueuedMessage(entry, envelope))
         publishOutboxDepth()
         return if (entry.storability == CommandStorability.REQUIRE_RECONFIRM_ON_RECONNECT) {
@@ -190,7 +214,12 @@ class VanHermesSessionManager(
         val index = outbox.indexOfFirst { it.entry.messageId == messageId }
         if (index < 0) return false
         val queued = outbox[index]
-        outbox[index] = queued.copy(entry = DurableOutbox.reconfirm(queued.entry, nowMs))
+        val reconfirmed = DurableOutbox.reconfirm(queued.entry, nowMs)
+        // §20.15 — the owner said yes, and that has to outlive the app. A reconfirmation
+        // held only in memory means the owner is asked twice for the same command, which
+        // is the failure mode that trains someone to stop reading the question.
+        store?.persist(reconfirmed, queued.envelope.toString())
+        outbox[index] = queued.copy(entry = reconfirmed)
         return true
     }
 
@@ -261,6 +290,7 @@ class VanHermesSessionManager(
      * the identity already exists and outlives any one carrier (§20.3).
      */
     suspend fun start() {
+        restoreOutbox()
         if (_state.value.vanSessionId == null) {
             val opened = runCatching {
                 gateway.sessionOpen(pathId = PRIMARY_PATH_ID, routeId = "primary-ingress")
@@ -278,6 +308,24 @@ class VanHermesSessionManager(
         val request = Request.Builder().url(gateway.sessionSocketUrl(sessionId)).build()
         socket = http.newWebSocket(request, Listener())
         publish(SupervisorState.PRIMARY_CONNECTING)
+    }
+
+    /**
+     * §20.14 — pick the outbox back up after the process was killed.
+     *
+     * Called from [start] rather than from the constructor: a restore reads the disk, and
+     * a constructor that did disk I/O would do it on whatever thread happened to build
+     * this. Idempotent, because `start` is called again on every reconnect and a second
+     * restore must not duplicate what the first one loaded.
+     */
+    private fun restoreOutbox() {
+        val store = this.store ?: return
+        if (outbox.isNotEmpty()) return
+        for ((entry, envelopeJson) in store.restore()) {
+            val envelope = runCatching { JSONObject(envelopeJson) }.getOrNull() ?: continue
+            outbox.addLast(QueuedMessage(entry, envelope))
+        }
+        publishOutboxDepth()
     }
 
     fun close() {
@@ -567,6 +615,7 @@ class VanHermesSessionManager(
                     // Dropped, not held: the window closed and the owner is told it did
                     // not happen rather than asked about something they have forgotten.
                     expired += queued.entry
+                    store?.forget(queued.entry.messageId)
                 }
                 is FlushVerdict.NeedsReconfirmation, is FlushVerdict.Refused -> {
                     // Kept in place. Something the owner has to be asked about is not
@@ -578,6 +627,10 @@ class VanHermesSessionManager(
                     val readdressed = SessionEnvelope.readdress(queued.envelope, epoch)
                     if (live.send(readdressed.toString())) {
                         inFlight[readdressed.getString("message_id")] = readdressed
+                        // After the write, never before. Forgetting first would lose the
+                        // command to a kill between the two — the same defect as never
+                        // persisting, arriving one instruction later.
+                        store?.forget(queued.entry.messageId)
                     } else {
                         // The socket went away mid-flush. Everything after this keeps its
                         // order, which is why the remainder is moved rather than retried.

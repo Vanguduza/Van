@@ -496,7 +496,7 @@
         ".github/workflows/van-ci.yml",
         "tests/contracts/test_ci_workflow_is_what_it_claims.py"
       ],
-      "note": "The workflow is pinned against its template byte for byte, because drift in that direction silently deletes whatever the template is missing."
+      "note": "What this row proves is that the workflow is pinned against its template byte for byte, because drift in that direction silently deletes whatever the template is missing.\n\nIt is deliberately *not* a claim that a run was green, and a review was right to press on the difference. The run for e13cbf4 in fact failed — Maven Central returned 403 for `kotlin-gradle-plugins-bom-2.0.21.pom` during Gradle configuration, before any test body ran — and the identical Kotlin passed at 05d8844, which is what makes that an infrastructure failure rather than a defect. Per-SHA conclusions belong in the checkpoint record, not in a row that would go stale the moment anything is pushed."
     },
     {
       "n": 50,
@@ -580,7 +580,7 @@
         "android/verification/src/test/kotlin/com/dial/van/session/WarmStandbyTest.kt",
         "backend/tests/test_session_transport_api.py"
       ],
-      "note": ""
+      "note": "The transaction and the epoch adoption are proven: `FailoverTransaction` refuses a promotion to an epoch the Gateway did not advance, and the phone adopts the grant rather than minting one (P0-SESS-001).\n\nWhat is *not* claimed here is §20.9's make-before-break. There is one socket; the warm standby is policy and the second transport is unbuilt, so a failover today is break-before-make on the same path."
     },
     {
       "n": 58,
@@ -642,9 +642,11 @@
       "requirement": "STORE_AND_FORWARD state is proven",
       "status": "REPOSITORY_PROVEN",
       "evidence": [
-        "android/verification/src/test/kotlin/com/dial/van/session/DurableOutboxTest.kt"
+        "android/verification/src/test/kotlin/com/dial/van/session/DurableOutboxTest.kt",
+        "android/verification/src/test/kotlin/com/dial/van/session/OutboxPersistenceTest.kt",
+        "android/verification/src/test/kotlin/com/dial/van/session/RestartSeamTest.kt"
       ],
-      "note": ""
+      "note": "Stronger than when this row was first written, and it had to be. The policy was proven and its records lived in RAM, so a process death — which Android does routinely — lost the reconfirmation and the expiry while the command could survive. §20.14's metadata now rides on the canonical queue's own record, one write, and the restart seam is executed end to end: queued command, process death, recovery, epoch adoption, reconfirm/expiry decision, exactly-once send."
     },
     {
       "n": 64,

@@ -1068,6 +1068,49 @@ ROOT_LEVEL = [
 #: Checkpoint 14, Kotlin half. Run by Gradle in android/verification rather than by pytest,
 #: because that harness is the only thing in this repository that can execute Kotlin at all.
 KOTLIN = [
+ # --- checkpoint 35: the outbox that has to survive the process dying ---------------
+ (f"{APP_KT}/session/OutboxPersistence.kt",
+  "            commandId = command.sessionCommandId ?: messageId,",
+  "            commandId = command.id,",
+  "C35 a restarted command loses the identity the Gateway matches it by, and goes twice"),
+ (f"{APP_KT}/session/OutboxPersistence.kt",
+  "        val storability = command.storability\n"
+  "            ?.let { name -> runCatching { CommandStorability.valueOf(name) }.getOrNull() }\n"
+  "            ?: return null",
+  "        val storability = command.storability\n"
+  "            ?.let { name -> runCatching { CommandStorability.valueOf(name) }.getOrNull() }\n"
+  "            ?: CommandStorability.SAFE_TO_RETRY",
+  "C35 a record with no policy is guessed as retryable, so an approval replays silently"),
+ (f"{APP_KT}/session/OutboxPersistence.kt",
+  "        if (command.kind != SESSION_KIND) return null",
+  "        if (false) return null",
+  "C35 a reminder is read back as session work"),
+ (f"{APP_KT}/session/OutboxPersistence.kt",
+  "        expiresAtEpochMs = entry.expiresAtMs,",
+  "        expiresAtEpochMs = entry.createdAtMs + COMMAND_QUEUE_DEFAULT_TTL_MS,",
+  "C35 the queue's day-long default silently replaces the outbox's four-hour window"),
+ (f"{APP_KT}/session/OutboxPersistence.kt",
+  "        reconfirmedAtEpochMs = entry.reconfirmedAtMs,",
+  "        reconfirmedAtEpochMs = null,",
+  "C35 the owner is asked the same question again after a restart"),
+ (f"{APP_KT}/session/OutboxPersistence.kt",
+  "        if (entry.requiresLiveOwnerContext ||\n"
+  "            entry.storability == CommandStorability.REQUIRE_RECONFIRM_ON_RECONNECT\n"
+  "        ) {",
+  "        if (false) {",
+  "C35 something needing the owner present is stored as freely replayable"),
+ (f"{APP_KT}/session/OutboxPersistence.kt",
+  "        attemptCount = entry.attemptCount,",
+  "        attemptCount = 0,",
+  "C35 three failures on one path read as the first attempt after a restart"),
+ (f"{APP_KT}/session/WarmStandby.kt",
+  "        if (conditions.batteryPercent == UNKNOWN_BATTERY) {",
+  "        if (false) {",
+  "C35 a phone whose battery cannot be read holds a spare socket open"),
+ (f"{APP_KT}/session/WarmStandby.kt",
+  "    const val UNKNOWN_BATTERY = -1",
+  "    const val UNKNOWN_BATTERY = -999",
+  "C35 the unknown sentinel drifts from the one the runtime actually reports"),
  # --- checkpoint 34: the device's half of installer-driven provisioning --------------
  (f"{APP_KT}/connectivity/ProvisioningPayload.kt",
   "        if (nowMs >= expiresAtMs) {",

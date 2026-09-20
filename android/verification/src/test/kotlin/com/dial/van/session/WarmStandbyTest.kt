@@ -194,4 +194,96 @@ class FailoverTransactionTest {
         assertEquals(4, tx.epoch)
         assertFalse(tx.promote("h2", 5), "and cannot be promoted afterwards")
     }
+
+    @Test
+    fun `an unreadable battery does not authorise a spare socket`() {
+        // The review's point, and it is a real asymmetry rather than a nit.
+        // `VanResourceEnvelope` treats an unknown reading as contributing no pressure,
+        // because there the question is whether to take capability away and refusing to
+        // answer must not do that. A warm standby is not capability — it is a second
+        // authenticated socket with its own heartbeats, i.e. cost — and the same unknown
+        // answers that question the other way.
+        //
+        // This read UNKNOWN as 100% for a checkpoint, which is the one value that
+        // authorises the spend.
+        val decision = WarmStandbyPolicy.decide(
+            StandbyConditions(
+                interactionActive = true,
+                batteryPercent = WarmStandbyPolicy.UNKNOWN_BATTERY,
+                charging = false,
+                standbyIsMetered = false,
+                dataSaverEnabled = false,
+                independentRouteAvailable = true,
+            ),
+        )
+        assertEquals(StandbyRole.COLD, decision.role)
+        assertTrue("battery" in decision.reason, decision.reason)
+    }
+
+    @Test
+    fun `charging does not buy a spare socket the battery could not be read for`() {
+        // Charging pays for a low battery, and it cannot pay for a reading nobody took:
+        // "plugged in" says nothing about whether this phone can afford the radio time.
+        assertEquals(
+            StandbyRole.COLD,
+            WarmStandbyPolicy.decide(
+                StandbyConditions(
+                    interactionActive = true,
+                    batteryPercent = WarmStandbyPolicy.UNKNOWN_BATTERY,
+                    charging = true,
+                    standbyIsMetered = false,
+                    dataSaverEnabled = false,
+                    independentRouteAvailable = true,
+                ),
+            ).role,
+        )
+    }
+
+    @Test
+    fun `the unknown sentinel is the one the runtime reading actually uses`() {
+        // Two packages, one integer. Copied rather than imported so this file stays pure,
+        // and pinned here so the copy cannot drift from `RuntimeReading.UNKNOWN`.
+        assertEquals(com.dial.van.runtime.RuntimeReading.UNKNOWN, WarmStandbyPolicy.UNKNOWN_BATTERY)
+    }
+}
+
+/**
+ * §20.9's claim boundary, pinned so the name cannot quietly become the thing.
+ *
+ * A review read `StandbyDecision.WARM_STANDBY` as evidence that VAN holds an independently
+ * routed authenticated spare connection. It is not: it is what the phone can afford. The
+ * transport does not exist, and these tests fail if the source ever suggests otherwise
+ * without someone also building it.
+ */
+class WarmStandbyIsPolicyNotTransportTest {
+
+    private val manager = java.io.File(
+        "../app/src/main/java/com/dial/van/session/VanHermesSessionManager.kt",
+    ).readText()
+
+    @Test
+    fun `the session manager still holds exactly one socket`() {
+        // The moment a second appears this fails, which is the point: whoever adds it has
+        // to come here and say so, and then §20.9 can be claimed.
+        val sockets = Regex("""\bprivate var \w+: WebSocket\?""").findAll(manager).count()
+        assertEquals(1, sockets, "a second socket appeared; §20.9's claims need revisiting")
+    }
+
+    @Test
+    fun `the policy documents that it decides rather than connects`() {
+        val policy = java.io.File(
+            "../app/src/main/java/com/dial/van/session/WarmStandby.kt",
+        ).readText()
+        assertTrue("It does not open one" in policy, "the claim boundary was edited away")
+    }
+
+    @Test
+    fun `this build cannot reach WARM because it has one route`() {
+        // Not a limitation of the policy — the honest answer for one ingress (§0B).
+        val manager = java.io.File(
+            "../app/src/main/java/com/dial/van/session/VanHermesSessionManager.kt",
+        ).readText()
+        val routes = Regex("""routeId = "([^"]+)"""").findAll(manager).map { it.groupValues[1] }.toSet()
+        assertEquals(1, routes.size, "a second route appeared; the standby decision changes")
+    }
 }

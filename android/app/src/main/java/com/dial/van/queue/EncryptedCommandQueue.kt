@@ -205,7 +205,8 @@ class EncryptedCommandQueue(context: Context) {
     }
 
     companion object {
-        const val DEFAULT_TTL_MS = 24L * 60 * 60 * 1000 // 24h
+        /** Kept as the name every caller already uses; the value lives in the pure model file. */
+        const val DEFAULT_TTL_MS = COMMAND_QUEUE_DEFAULT_TTL_MS
         private const val PREFS_INDEX = "van_command_queue_index"
         private const val KEY_INDEX = "index"
         private const val KEYSTORE_ALIAS = "van_queue_aes"
