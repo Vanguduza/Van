@@ -15,8 +15,11 @@ from vati.app.trade_lifecycle import AccountTradeLifecycle
 from vati.core.events import EventKind, make_event
 from vati.core.ledger import Ledger
 from vati.execution.base import ExecutionReceipt
+from vati.execution.paper import PaperAdapter
+from vati.execution.router import ExecutionRouter
 from vati.execution.protection import ProtectionError, ProtectionManager
 from vati.execution.zse_ticket import OwnerTicketAdapter
+from vati.risk import KillSwitch
 from vati.risk.contracts import Direction, LossModel, SymbolContract
 
 
@@ -170,6 +173,151 @@ def test_owner_sell_replay_repairs_missing_review_exactly_once_after_receipt_com
         now_ms=3_001,
     )
     assert ledger.count(EventKind.TRADE_REVIEW) == 1
+
+
+def test_regular_broker_restart_repairs_missing_tca_exactly_once(mandate, eurusd):
+    """Crash after durable fill receipt but before lifecycle.record_entry."""
+    from conftest import intent, mandate_dict, snapshot
+    from vati.risk import RiskAuthority, StrategyState, TradingMandate
+
+    contract = SymbolContract(**{**eurusd.__dict__, "venue": "paper"})
+    live_mandate = TradingMandate.from_mapping(
+        mandate_dict(venue="paper", mode="DEMO_TRADER"))
+    trade_intent = intent(
+        venue="paper",
+        strategy_state=StrategyState.DEMO,
+        trade_intent_id="restart-tca-intent",
+        idempotency_key="restart-tca-key",
+    )
+    decision = RiskAuthority(live_mandate).evaluate(
+        trade_intent, snapshot(contract))
+    assert decision.decision.value in ("APPROVED", "REDUCED")
+
+    ledger = Ledger()
+    adapter = PaperAdapter()
+    router = ExecutionRouter(
+        ledger=ledger,
+        adapters={"paper": adapter},
+        kill_switch=KillSwitch(),
+        protection=ProtectionManager(),
+    )
+    receipt = router.execute(
+        trade_intent,
+        decision,
+        live_mandate,
+        now_ms=10_000,
+        targets=(Decimal("1.10340"),),
+    )
+    assert receipt.status == "FILLED"
+    assert ledger.count(EventKind.ORDER_COMMAND) == 1
+    assert ledger.count(EventKind.EXECUTION_RECEIPT) == 1
+    assert ledger.count(EventKind.TCA_RECORD) == 0
+
+    # New lifecycle/protection objects simulate the process dying before
+    # AccountCoordinatorService could call record_entry().
+    recovered = AccountTradeLifecycle(
+        ledger=ledger,
+        adapter=adapter,
+        router=ExecutionRouter(
+            ledger=ledger,
+            adapters={"paper": adapter},
+            kill_switch=KillSwitch(),
+            protection=ProtectionManager(),
+        ),
+        protection=ProtectionManager(),
+        contracts={"EURUSD": contract},
+        engines_by_symbol={},
+        modelled_costs={"EURUSD": Decimal("0.00015")},
+    )
+    restored, unresolved = recovered.recover_from_venue()
+    assert restored == ("restart-tca-intent",)
+    assert unresolved == ()
+    assert ledger.count(EventKind.TCA_RECORD) == 1
+    tca_event = list(
+        ledger.iter(EventKind.TCA_RECORD, correlation_id="restart-tca-intent"))[0]
+    assert tca_event.payload["recovered_after_restart"] is True
+    assert tca_event.payload["source_receipt_hash"] == receipt.receipt_hash
+    assert Decimal(str(tca_event.payload["cost_ratio"])) == recovered.entries[
+        "restart-tca-intent"]["cost_ratio"]
+
+    # A second process restart reuses durable TCA and cannot append a duplicate.
+    recovered_again = AccountTradeLifecycle(
+        ledger=ledger,
+        adapter=adapter,
+        router=recovered.router,
+        protection=ProtectionManager(),
+        contracts={"EURUSD": contract},
+        engines_by_symbol={},
+        modelled_costs={"EURUSD": Decimal("0.00015")},
+    )
+    restored2, unresolved2 = recovered_again.recover_from_venue()
+    assert restored2 == ("restart-tca-intent",)
+    assert unresolved2 == ()
+    assert ledger.count(EventKind.TCA_RECORD) == 1
+    assert recovered_again.entries["restart-tca-intent"]["cost_ratio"] == (
+        recovered.entries["restart-tca-intent"]["cost_ratio"]
+    )
+
+
+def test_corrupt_durable_fill_receipt_is_not_promoted_into_recovered_tca(mandate, eurusd):
+    """Position safety may recover, but malformed execution evidence teaches nothing."""
+    from conftest import intent, mandate_dict, snapshot
+    from vati.risk import RiskAuthority, StrategyState, TradingMandate
+
+    contract = SymbolContract(**{**eurusd.__dict__, "venue": "paper"})
+    live_mandate = TradingMandate.from_mapping(
+        mandate_dict(venue="paper", mode="DEMO_TRADER"))
+    trade_intent = intent(
+        venue="paper",
+        strategy_state=StrategyState.DEMO,
+        trade_intent_id="bad-receipt-intent",
+        idempotency_key="bad-receipt-key",
+    )
+    decision = RiskAuthority(live_mandate).evaluate(
+        trade_intent, snapshot(contract))
+
+    ledger = Ledger()
+    adapter = PaperAdapter()
+    router = ExecutionRouter(
+        ledger=ledger,
+        adapters={"paper": adapter},
+        kill_switch=KillSwitch(),
+        protection=ProtectionManager(),
+    )
+    router.execute(trade_intent, decision, live_mandate, now_ms=20_000)
+
+    # Append a later entry-looking receipt with a deliberately invalid
+    # receipt_hash. Recovery keeps the first valid router receipt and therefore
+    # still produces one valid TCA; it must never select/promote the corrupt row.
+    original = list(
+        ledger.iter(EventKind.EXECUTION_RECEIPT, correlation_id="bad-receipt-intent"))[0]
+    corrupt = dict(original.payload)
+    corrupt["receipt_hash"] = "0" * 64
+    ledger.append(make_event(
+        EventKind.EXECUTION_RECEIPT,
+        "corrupt-test",
+        corrupt,
+        event_time_ms=20_001,
+        received_time_ms=20_001,
+        correlation_id="bad-receipt-intent",
+    ))
+
+    recovered = AccountTradeLifecycle(
+        ledger=ledger,
+        adapter=adapter,
+        router=router,
+        protection=ProtectionManager(),
+        contracts={"EURUSD": contract},
+        engines_by_symbol={},
+        modelled_costs={"EURUSD": Decimal("0.00015")},
+    )
+    restored, unresolved = recovered.recover_from_venue()
+    assert restored == ("bad-receipt-intent",)
+    assert unresolved == ()
+    assert ledger.count(EventKind.TCA_RECORD) == 1
+    tca = list(
+        ledger.iter(EventKind.TCA_RECORD, correlation_id="bad-receipt-intent"))[0]
+    assert tca.payload["source_receipt_hash"] == original.payload["receipt_hash"]
 
 
 def test_downstream_evidence_lookup_exhausts_transactional_iterator():
