@@ -44,6 +44,10 @@ from vati.intelligence.regimes import RegimeEngine
 from vati.market_data.calendars import FX_CALENDAR
 from vati.market_data.feeds.lake import BarLake
 from vati.observability import metrics
+from vati.observability.enhancement_metrics import (
+    CORRELATION_MULTIPLIER, EXECUTION_FILL_PROBABILITY, EXECUTION_POLICY_SELECTED,
+    PORTFOLIO_INCREMENTAL_ES,
+)
 from vati.risk import KillSwitch, MarketIntegrityState, OpenPosition, RiskAuthority, RiskSnapshot, TradingMandate
 from vati.risk.contracts import Direction, KillSwitchTrigger, LossModel
 from vati.risk.dependency import PortfolioDependencyEngine
@@ -410,6 +414,12 @@ class AccountCoordinatorService:
             direction=1 if candidate.direction is Direction.LONG else -1,
             open_positions=self._dependency_positions(snapshot), now_ms=self.clock(),
             portfolio_snapshot_hash=canonical_hash(snapshot_to_dict(snapshot)))
+        metrics.set(
+            PORTFOLIO_INCREMENTAL_ES, float(dep.incremental_expected_shortfall),
+            account_alias=self.account.alias, symbol=candidate.symbol)
+        metrics.set(
+            CORRELATION_MULTIPLIER, float(dep.correlation_multiplier),
+            account_alias=self.account.alias, symbol=candidate.symbol)
         now = self.clock()
         self._ledger.append(make_event(
             EventKind.PORTFOLIO_DEPENDENCY, "vati-account-coordinator",
@@ -431,6 +441,15 @@ class AccountCoordinatorService:
         policy_decision = self.policy.select(
             candidate_id=candidate.candidate_id, bucket=bucket,
             event_state=state.event_window.value)
+        metrics.inc(
+            EXECUTION_POLICY_SELECTED,
+            account_alias=self.account.alias, symbol=candidate.symbol,
+            template_id=policy_decision.template_id)
+        if policy_decision.estimated_fill_probability is not None:
+            metrics.set(
+                EXECUTION_FILL_PROBABILITY, float(policy_decision.estimated_fill_probability),
+                account_alias=self.account.alias, symbol=candidate.symbol,
+                template_id=policy_decision.template_id)
         software = self.account.broker == BrokerKind.ZSE_OWNER_TICKET
         receipt = self.router.execute(
             intent, decision, self.mandate, now_ms=self.clock(),
