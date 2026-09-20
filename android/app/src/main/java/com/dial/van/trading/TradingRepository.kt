@@ -23,5 +23,8 @@ class TradingRepository(private val client: VanGatewayClient) {
     suspend fun tradeDetail(id: String): Loaded<TradeDetail> = load(TradeDetail::parse) { client.tradingTradeDetail(id) }
     suspend fun bars(symbol: String, timeframe: String, limit: Int = 300): Loaded<BarSeries> = load(BarSeries::parse) { client.tradingBars(symbol, timeframe, limit) }
     suspend fun trades(view: TradeView): Loaded<List<TradeRow>> = load({ b -> (TradeBookParser.parse(view, b) as? TradeBookState.Ready)?.rows }) { client.tradingTrades(view.query, 100) }
+
+    suspend fun promotionCandidates(): Loaded<List<StrategyPromotionCandidate>> =
+        load(StrategyPromotionCandidate::parseAll) { client.tradingPromotionCandidates() }
     suspend fun promotionCandidates(): Loaded<List<StrategyPromotionCandidate>> = load(StrategyPromotionCandidate::parseAll) { client.tradingPromotionCandidates() }
 }
