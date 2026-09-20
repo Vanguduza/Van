@@ -10,7 +10,7 @@ from __future__ import annotations
 
 from dataclasses import asdict
 from decimal import Decimal
-from typing import Optional
+from typing import Callable, Optional
 
 from vati.core.canonical import canonical_hash
 from vati.core.events import EventKind, make_event
@@ -36,17 +36,22 @@ def recompute_decision_hash(d: RiskDecision) -> str:
 
 
 class ExecutionRouter:
-    def __init__(self, *, ledger: Ledger, adapters: dict[str, VenueAdapter], kill_switch: KillSwitch, protection: ProtectionManager, producer: str = "vati-execution-router") -> None:
+    def __init__(self, *, ledger: Ledger, adapters: dict[str, VenueAdapter], kill_switch: KillSwitch, protection: ProtectionManager, producer: str = "vati-execution-router",
+                 lease_fence: Optional[Callable[[Optional[int]], bool]] = None) -> None:
         self.ledger, self.adapters, self.kill, self.protection, self.producer = ledger, adapters, kill_switch, protection, producer
+        self.lease_fence = lease_fence
         self._seen: set[str] = {e.payload["idempotency_key"] for e in ledger.iter(EventKind.ORDER_COMMAND)}
 
     def _log(self, kind: EventKind, payload: dict, *, now_ms: int, corr: str, decision_time: Optional[int] = None) -> None:
         self.ledger.append(make_event(kind, self.producer, payload, event_time_ms=now_ms, received_time_ms=now_ms, decision_time_ms=decision_time, correlation_id=corr))
 
     def execute(self, intent: TradeIntent, decision: RiskDecision, mandate: TradingMandate, *, now_ms: int, stop_mode: StopMode = StopMode.VENUE,
-                targets: tuple[Decimal, ...] = (), time_in_force: str = "DAY", entry_type: str = "LIMIT", max_slippage: Optional[Decimal] = None) -> ExecutionReceipt:
+                targets: tuple[Decimal, ...] = (), time_in_force: str = "DAY", entry_type: str = "LIMIT", max_slippage: Optional[Decimal] = None,
+                lease_epoch: Optional[int] = None) -> ExecutionReceipt:
         corr = intent.trade_intent_id
         # --- gate chain (fail closed, first failure names the reason) ---
+        if self.lease_fence is not None and not self.lease_fence(lease_epoch):
+            raise RouterError(f"account runtime lease fence refused epoch {lease_epoch!r}")
         if self.kill.halted:
             raise RouterError(f"kill switch active: {sorted(t.value for t in self.kill.active)}")
         if decision.trade_intent_id != intent.trade_intent_id:
@@ -72,9 +77,27 @@ class ExecutionRouter:
         loss_model = LossModel.ILLIQUID_EQUITY if intent.venue in ("zse", "vfex") else (LossModel.FULL_STAKE if intent.stake is not None and intent.stop is None else LossModel.STOP_DISTANCE)
         if loss_model is LossModel.STOP_DISTANCE and intent.stop is None:
             raise RouterError("stop-distance order without protective stop")
-        cmd = OrderCommand(intent.trade_intent_id, decision.decision_hash, intent.idempotency_key, intent.account_alias, intent.venue, intent.symbol, intent.direction, entry_type,
-                           decision.approved_size, intent.entry, intent.stop, StopMode.SOFTWARE if loss_model is LossModel.ILLIQUID_EQUITY else stop_mode, loss_model, targets,
-                           time_in_force, max_slippage, None, intent.strategy_id, intent.strategy_version).sealed()
+        cmd = OrderCommand(
+            trade_intent_id=intent.trade_intent_id,
+            decision_hash=decision.decision_hash,
+            idempotency_key=intent.idempotency_key,
+            account_alias=intent.account_alias,
+            venue=intent.venue,
+            symbol=intent.symbol,
+            direction=intent.direction,
+            entry_type=entry_type,
+            quantity=decision.approved_size,
+            entry_price=intent.entry,
+            protective_stop=intent.stop,
+            stop_mode=StopMode.SOFTWARE if loss_model is LossModel.ILLIQUID_EQUITY else stop_mode,
+            loss_model=loss_model,
+            targets=targets,
+            time_in_force=time_in_force,
+            max_slippage=max_slippage,
+            strategy_id=intent.strategy_id,
+            strategy_version=intent.strategy_version,
+            lease_epoch=lease_epoch,
+        ).sealed()
         self._seen.add(intent.idempotency_key)
         self._log(EventKind.ORDER_COMMAND, {**asdict(cmd), "direction": cmd.direction.value, "stop_mode": cmd.stop_mode.value, "loss_model": cmd.loss_model.value}, now_ms=now_ms, corr=corr, decision_time=now_ms)
         metrics.inc("vati_orders_sent_total", venue=intent.venue)
