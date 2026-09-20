@@ -7,15 +7,11 @@ import androidx.security.crypto.MasterKey
 import com.dial.van.BuildConfig
 import com.dial.van.security.OwnerApprovalKeyManager
 import com.dial.van.security.OwnerAuthorityToken
-import com.dial.van.trading.AccountOnboarding
+import com.dial.van.trading.StrategyPromotionProtocol
 import com.dial.van.visual.VanLiveVisualState
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.withContext
-import kotlinx.serialization.json.JsonArray
 import kotlinx.serialization.json.JsonObject
-import kotlinx.serialization.json.JsonPrimitive
-import kotlinx.serialization.json.buildJsonObject
-import kotlinx.serialization.json.put
 import org.json.JSONArray
 import org.json.JSONObject
 import java.io.IOException
@@ -216,33 +212,17 @@ class VanGatewayClient(context: Context) {
     ): JsonObject {
         val id = deviceId ?: error("not_enrolled")
         val secret = deviceSecret ?: error("not_enrolled")
-        val authorityBody = buildJsonObject {
-            put("strategy_id", strategyId)
-            put("target_state", targetState)
-            put("owner_signature_ref", ownerSignatureRef)
-            put("certificate", certificate)
-            put("evidence_refs", JsonArray(evidenceRefs.map(::JsonPrimitive)))
-        }
-        val digest = AccountOnboarding.sha256Hex(
-            AccountOnboarding.canonicalJson(authorityBody).toByteArray(StandardCharsets.UTF_8)
+        return StrategyPromotionProtocol.requestBody(
+            deviceSecret = secret,
+            deviceId = id,
+            issuedAtUnix = issuedAtUnix,
+            strategyId = strategyId,
+            targetState = targetState,
+            ownerSignatureRef = ownerSignatureRef,
+            certificate = certificate,
+            evidenceRefs = evidenceRefs,
+            approvalProof = approvalProof,
         )
-        val canonical = listOf(
-            "trading-strategy-promotion",
-            id,
-            issuedAtUnix.toString(),
-            digest,
-        ).joinToString("|")
-        return buildJsonObject {
-            put("device_id", id)
-            put("issued_at_unix", issuedAtUnix)
-            put("signature", hmacSha256(secret, canonical))
-            put("strategy_id", strategyId)
-            put("target_state", targetState)
-            put("owner_signature_ref", ownerSignatureRef)
-            put("certificate", certificate)
-            put("evidence_refs", JsonArray(evidenceRefs.map(::JsonPrimitive)))
-            if (approvalProof != null) put("approval_proof", approvalProof)
-        }
     }
 
     suspend fun tradingPromotionChallenge(
