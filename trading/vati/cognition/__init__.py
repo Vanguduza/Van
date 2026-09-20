@@ -43,10 +43,13 @@ from vati.cognition.providers import (
 )
 from vati.cognition.performance_ledger import CognitivePerformanceLedger, ModelRecord
 from vati.cognition.shadow_book import DeterministicOutcome, ShadowBook, ShadowEntry
+from vati.cognition.translator import ActionKind, ActionTranslator, Mode
 from vati.cognition.world_model import CognitionStore, TradingWorldModel
 
 __all__ = [
     "Analogue",
+    "ActionKind",
+    "ActionTranslator",
     "AttributionEngine",
     "BlindReviewer",
     "CanaryHealth",
