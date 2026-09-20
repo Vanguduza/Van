@@ -244,7 +244,7 @@ def test_service_never_exposes_an_order_path():
     """The gateway trading surface has no method that could create, size, modify or cancel an order."""
     from van_gateway.trading import TradingService
     names = {n for n in dir(TradingService) if not n.startswith("_")}
-    assert names == {"available", "status", "tickets", "halt", "confirm_ticket", "trade_book", "portfolio", "accounts", "market_state", "risk", "trade_detail", "bars", "producer", "accounts_registry", "lake_root", "reporting_currency", "owner_authority"}
+    assert names == {"available", "status", "tickets", "halt", "confirm_ticket", "trade_book", "portfolio", "accounts", "market_state", "risk", "cognition", "trade_detail", "bars", "producer", "accounts_registry", "lake_root", "reporting_currency", "owner_authority"}
     for banned in ("order", "submit", "size", "cancel", "modify", "credential", "token"):
         assert not any(banned in n.lower() for n in names), banned
     # P0-TRADE-001 — the one field added since is the verifier for owner-signed acts, and
