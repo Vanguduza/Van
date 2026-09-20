@@ -8,6 +8,7 @@
   python -m vati accounts list|add|remove|verify --registry accounts.json [...]
   python -m vati lake import-csv|list|dukascopy --root lake ...
   python -m vati calendar --file calendar.json
+  python -m vati calendar-record --schedule sched.json [--releases obs.json] [--ledger vati.sqlite]
   python -m vati serve --config service.json [--once]
 
 CSV bars: symbol,start_ms,end_ms,open,high,low,close,volume,ticks,avg_spread
@@ -161,6 +162,30 @@ def cmd_research(a: argparse.Namespace) -> int:
     return 0
 
 
+def cmd_calendar_record(a: argparse.Namespace) -> int:
+    """TRD-REV51-090. Record what was scheduled and what actually printed.
+
+    Exit 1 when any release is DISPUTED: two of our sources disagree, so one
+    feed is wrong and the surprise engine must not be handed either value.
+    """
+    import time as _t
+    from vati.calendar import CalendarRecorder, rows_from_file
+    from vati.core.ledger import Ledger
+
+    ledger = Ledger(a.ledger) if a.ledger else None
+    rec = CalendarRecorder(ledger=ledger)
+    rec.ingest_schedule(rows_from_file(a.schedule))
+    if a.releases:
+        rec.ingest_observations(rows_from_file(a.releases, key="releases"))
+    now_ms = int(a.now) if a.now else int(_t.time() * 1000)
+    report = rec.report(now_ms=now_ms)
+    report["records"] = [r.to_dict() for r in rec.records(now_ms=now_ms)]
+    print(json.dumps(report, indent=2))
+    if a.out:
+        Path(a.out).write_text(json.dumps(report, indent=2))
+    return 1 if report["disputed"] else 0
+
+
 def cmd_serve(a: argparse.Namespace) -> int:
     from vati.app.process_lock import SessionAlreadyRunning, SessionLock
     from vati.app.service import ServiceConfig, SessionService, lake_bar_source
@@ -207,6 +232,8 @@ def main(argv=None) -> int:
     lk = sub.add_parser("lake"); lk.add_argument("op", choices=["list", "import-csv", "dukascopy"]); lk.add_argument("--root", default="lake"); lk.add_argument("--symbol"); lk.add_argument("--timeframe", default="H1")
     lk.add_argument("--file"); lk.add_argument("--provenance", default="HISTORICAL_VENDOR"); lk.add_argument("--start"); lk.add_argument("--end"); lk.set_defaults(fn=cmd_lake)
     cal = sub.add_parser("calendar"); cal.add_argument("--file", required=True); cal.set_defaults(fn=cmd_calendar)
+    cr = sub.add_parser("calendar-record"); cr.add_argument("--schedule", required=True); cr.add_argument("--releases"); cr.add_argument("--ledger")
+    cr.add_argument("--out"); cr.add_argument("--now"); cr.set_defaults(fn=cmd_calendar_record)
     rs = sub.add_parser("research"); rs.add_argument("--spec", required=True); rs.add_argument("--ledger"); rs.set_defaults(fn=cmd_research)
     sv = sub.add_parser("serve"); sv.add_argument("--config", required=True); sv.add_argument("--once", action="store_true"); sv.set_defaults(fn=cmd_serve)
     a = p.parse_args(argv)
