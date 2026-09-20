@@ -96,6 +96,48 @@ class StrategyValidationCertificate:
         return bool(self.validation_hash) and self.validation_hash == canonical_hash(self.as_dict())
 
 
+def strategy_certificate_from_mapping(raw: Mapping[str, Any]) -> StrategyValidationCertificate:
+    """Parse a serialized certificate without becoming a second certificate producer.
+
+    The caller supplies every sealed field, including validation_hash. This function
+    never derives validation statistics and refuses a body whose existing seal does not
+    verify. Raw observations still enter only through validation.builder.
+    """
+    try:
+        stats = ValidationStatistics(**dict(raw["stats"]))
+        cert = StrategyValidationCertificate(
+            certificate_id=str(raw["certificate_id"]),
+            strategy_id=str(raw["strategy_id"]),
+            strategy_version=str(raw["strategy_version"]),
+            capsule_hash=str(raw.get("capsule_hash") or ""),
+            data_manifest_hash=str(raw["data_manifest_hash"]),
+            evidence_refs=tuple(str(x) for x in raw.get("evidence_refs", ())),
+            feature_set_version=str(raw["feature_set_version"]),
+            cost_model_revision=str(raw["cost_model_revision"]),
+            stats=stats,
+            expectancy_R=float(raw["expectancy_R"]),
+            expectancy_lower_bound_R=float(raw["expectancy_lower_bound_R"]),
+            profit_factor=float(raw["profit_factor"]),
+            max_drawdown=float(raw["max_drawdown"]),
+            cost_stress_2x=str(raw.get("cost_stress_2x", RED)),
+            latency_slippage_stress=str(raw.get("latency_slippage_stress", RED)),
+            parameter_perturbation_stability=str(
+                raw.get("parameter_perturbation_stability", RED)),
+            leakage_switch_result=str(raw.get("leakage_switch_result", RED)),
+            feature_certificate_refs=tuple(
+                str(x) for x in raw.get("feature_certificate_refs", ())),
+            regime_breakdown=dict(raw.get("regime_breakdown") or {}),
+            cpcv_configuration=dict(raw.get("cpcv_configuration") or {}),
+            validation_policy_version=str(raw.get(
+                "validation_policy_version", stats.validation_policy_version)),
+            validation_hash=str(raw.get("validation_hash") or ""),
+        )
+    except (KeyError, TypeError, ValueError) as exc:
+        raise CertificateError(f"invalid serialized strategy certificate: {exc}") from exc
+    if not cert.verify_seal():
+        raise CertificateError("strategy validation certificate seal is invalid")
+    return cert
+
 def evaluate_strategy_certificate(
     cert: StrategyValidationCertificate,
     *,
@@ -219,4 +261,5 @@ __all__ = [
     "CertificateError",
     "FeatureValidationCertificate", "StrategyValidationCertificate",
     "classify_feature_certificate", "evaluate_strategy_certificate",
+    "strategy_certificate_from_mapping",
 ]
