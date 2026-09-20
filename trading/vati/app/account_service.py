@@ -167,7 +167,8 @@ class AccountCoordinatorService:
             adapters={account.router_venue: self.adapter},
             kill_switch=self.kill,
             protection=self.protection,
-            lease_fence=self.lease.fence,
+            lease_fence=lambda epoch: self.lease.fence(
+                epoch, now_ms=self.clock(), min_validity_ms=2_000),
         )
 
         capsule_root = c.capsule_dir or ROOT / "strategies" / "registry"
