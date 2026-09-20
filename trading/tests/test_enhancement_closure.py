@@ -261,3 +261,25 @@ def test_event_kind_source_has_no_duplicate_enum_member_names():
         for target in stmt.targets if isinstance(target, ast.Name)
     ]
     assert len(names) == len(set(names))
+
+
+def test_certificate_producer_guardrail_fails_on_direct_production_construction(tmp_path):
+    import pathlib
+    import shutil
+
+    src = pathlib.Path("trading")
+    dst = tmp_path / "trading"
+    shutil.copytree(src, dst, ignore=shutil.ignore_patterns("__pycache__", "*.pyc"))
+    target = dst / "vati" / "learning" / "coverage.py"
+    target.write_text(
+        target.read_text()
+        + "\nfrom vati.validation.certificates import StrategyValidationCertificate\n"
+        + "def _bad_certificate_factory():\n"
+        + "    return StrategyValidationCertificate()\n"
+    )
+    r = subprocess.run(
+        [sys.executable, str(dst / "tools" / "check_enhancement_architecture.py")],
+        capture_output=True, text=True,
+    )
+    assert r.returncode == 1
+    assert "certificate-producer-boundary" in r.stderr
