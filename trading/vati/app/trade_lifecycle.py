@@ -56,8 +56,13 @@ class AccountTradeLifecycle:
         ))
 
     def _has_event(self, kind: EventKind, corr: str) -> bool:
-        """True when durable downstream evidence already exists for this intent."""
-        return next(self.ledger.iter(kind, correlation_id=corr), None) is not None
+        """True when durable downstream evidence already exists for this intent.
+
+        Exhaust the iterator instead of taking only its first row. PostgresLedger.iter
+        closes its read transaction with a rollback after iteration; abandoning the
+        generator at the first match would skip that cleanup on the shared authority path.
+        """
+        return bool(list(self.ledger.iter(kind, correlation_id=corr)))
 
     def recover_from_venue(self) -> tuple[tuple[str, ...], tuple[str, ...]]:
         """Rebuild open entry/protection state from venue plus ledger provenance.
