@@ -644,7 +644,7 @@ invariants:
   - subject: trading.account_runtime_fence
     owner: docs/VAN_TRADING_PRODUCTION_DEPLOYMENT_BLUEPRINT_REV5.md
     statement: >-
-      Multi-instrument order submission requires a current transactional PostgreSQL account lease re-read from shared authority immediately before submission; store loss, holder takeover, stale epoch or insufficient remaining validity all refuse new risk at the router boundary.
+      Multi-instrument order submission requires the current PostgreSQL account lease and an exclusive shared-row submission guard held across durable order-command creation, broker submission, receipt logging and immediate protection handling; store loss, holder takeover or stale epoch refuse new risk, and another host cannot take the lease while that critical section is in flight.
     implemented_by:
       - trading/vati/app/account_lease.py
       - trading/vati/app/account_service.py
