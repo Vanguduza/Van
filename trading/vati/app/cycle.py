@@ -49,6 +49,9 @@ class SessionConfig:
     account_alias: str
     contract: SymbolContract
     mandate_dict: dict
+    #: Explicit market-state identity. Production services always set this from
+    #: ServiceConfig; UNKNOWN is retained only for legacy/research callers.
+    timeframe: str = "UNKNOWN"
     warmup_bars: int = 60
     max_quote_age_ms: int = 5000
     targets_from_signal: bool = True
@@ -188,7 +191,8 @@ class DecisionCycle:
         if len(bars) < cfg.warmup_bars:
             return CycleResult(bars[-1].end_ms if bars else now_ms, "", "NO_TRADE", "warmup")
         state = build_market_state(symbol=cfg.symbol, base=cfg.base, quote=cfg.quote, bars=bars, regime_engine=self.regime, calendar=self.calendar, events=self.events,
-                                   integrity=self.integrity, now_ms=now_ms, last_quote_ms=last_quote_ms, activation_id=cfg.activation_id)
+                                   integrity=self.integrity, now_ms=now_ms, last_quote_ms=last_quote_ms, activation_id=cfg.activation_id,
+                                   timeframe=cfg.timeframe)
         cost = self.cost_fn(state)
         self._log(EventKind.MARKET_STATE, {"state": state.as_dict(), "cost_pct": str(cost)}, now_ms=now_ms)
         ctx = self.ctx_fn(state, cost)
