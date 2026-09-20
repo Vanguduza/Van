@@ -62,6 +62,15 @@ class CandidatePool:
         if candidate.account_alias != self.account_alias:
             raise ValueError(
                 f"candidate for {candidate.account_alias} offered to {self.account_alias} pool")
+        existing = self._rows.get(candidate.candidate_id)
+        if existing is not None:
+            if existing.candidate.candidate_hash != candidate.candidate_hash:
+                raise ValueError(
+                    f"candidate id collision for {candidate.candidate_id}: hashes differ")
+            # Same economic decision after a poll/restart replay: preserve the
+            # existing lifecycle state. In particular, SELECTED must never become
+            # ACTIVE again simply because the same bar was evaluated twice.
+            return existing
         # A newer candidate for the same setup replaces the older one rather
         # than competing against it — otherwise one setup gets several votes.
         key = candidate.supersession_key
