@@ -14,10 +14,12 @@ from decimal import Decimal
 from typing import Iterable, Mapping, Optional, Sequence
 
 from vati.core.events import EventKind, make_event
-from vati.learning.allocation import AllocationEpisode
+from vati.learning.allocation import AllocationEpisode, RejectedOutcome
 from vati.learning.coverage import StrategyCoverageMap
 from vati.learning.drift import DriftSegment, EdgeDriftMonitor, FeatureDriftMonitor
 from vati.learning.exit_research import ExitPolicyResearchEngine, PostEntryPath
+from vati.market_data.bars import Bar
+from vati.risk.contracts import Direction
 from vati.learning.overlap import OverlapEvidence, StrategyOverlapDetector
 from vati.research.market_data_disagreement import FeedSample, MarketDataDisagreementDetector
 from vati.research.trading_evidence import TradingEvidenceArtifact, TradingEvidenceCollector
@@ -141,6 +143,148 @@ class TradingResearchWorkflow:
             observation.as_dict() | {"observation_hash": observation.observation_hash},
             correlation_id=symbol)
         return observation
+
+    def run_spec(self, spec: Mapping[str, object]):
+        """Execute one bounded research operation from a machine-readable spec.
+
+        This is the supported runtime entry point for the slow research plane.
+        It intentionally contains no route to RiskAuthority, ExecutionRouter,
+        TradingMandate mutation, capsule promotion, or protection mutation.
+        """
+        op = str(spec.get("operation", "")).strip().lower()
+
+        if op == "coverage":
+            from vati.strategies import CapsuleRegistry
+            capsule_dir = str(spec.get("capsule_dir", "trading/strategies/registry"))
+            result = self.coverage(CapsuleRegistry.load_dir(capsule_dir).all())
+            return {"operation": op, "map_hash": result.map_hash(),
+                    "gap_count": len(result.gaps()),
+                    "cells": [c.as_dict() for c in result.cells()]}
+
+        if op == "overlap":
+            raw = dict(spec["evidence"])
+            verdict = self.assess_overlap(OverlapEvidence(**raw))
+            return {"operation": op, "verdict": verdict.as_dict()}
+
+        if op == "allocation_episode":
+            raw = dict(spec["episode"])
+            rejected = tuple(RejectedOutcome(
+                candidate_id=str(r["candidate_id"]),
+                rejection_reason=str(r["rejection_reason"]),
+                counterfactual_r=(Decimal(str(r["counterfactual_r"]))
+                                  if r.get("counterfactual_r") is not None else None),
+                ex_ante_valid=bool(r.get("ex_ante_valid", True)),
+                horizon_window_ms=int(r.get("horizon_window_ms", 0)),
+            ) for r in raw.get("rejected", ()))
+            episode = AllocationEpisode(
+                allocation_epoch_id=str(raw["allocation_epoch_id"]),
+                account_alias=str(raw["account_alias"]),
+                as_of_ms=int(raw["as_of_ms"]),
+                portfolio_snapshot_hash=str(raw["portfolio_snapshot_hash"]),
+                ranking_policy_version=str(raw["ranking_policy_version"]),
+                selected_candidate_ids=tuple(raw.get("selected_candidate_ids", ())),
+                rejected=rejected,
+                ranking_features=dict(raw.get("ranking_features", {})),
+                realised_selected_outcomes=dict(raw.get("realised_selected_outcomes", {})),
+                environment=str(raw.get("environment", "BACKTEST")),
+                evidence_weight=Decimal(str(raw.get("evidence_weight", "0.2"))),
+            ).sealed()
+            saved = self.record_allocation_episode(episode)
+            return {"operation": op, "episode": saved.as_dict() | {"episode_hash": saved.episode_hash}}
+
+        if op == "feature_drift":
+            raw = dict(spec["observation"])
+            segment = DriftSegment(**dict(raw.pop("segment")))
+            result = self.observe_feature_drift(
+                segment,
+                baseline_values=tuple(float(v) for v in raw.pop("baseline_values")),
+                recent_values=tuple(float(v) for v in raw.pop("recent_values")),
+                baseline_contribution=(Decimal(str(raw.pop("baseline_contribution")))
+                                       if raw.get("baseline_contribution") is not None else None),
+                recent_contribution=(Decimal(str(raw.pop("recent_contribution")))
+                                     if raw.get("recent_contribution") is not None else None),
+                missing=int(raw.pop("missing", 0)),
+                stale=int(raw.pop("stale", 0)),
+            )
+            return {"operation": op, "observation": result.as_dict() | {"observation_hash": result.observation_hash}}
+
+        if op == "edge_drift":
+            raw = dict(spec["observation"])
+            for key in (
+                "baseline_expectancy_R", "recent_expectancy_R",
+                "baseline_edge_floor_R", "recent_edge_floor_R",
+                "cost_adjusted_delta", "hit_rate_delta", "holding_time_delta",
+            ):
+                if key in raw and raw[key] is not None:
+                    raw[key] = Decimal(str(raw[key]))
+            result = self.observe_edge_drift(**raw)
+            return {"operation": op, "observation": result.as_dict() | {"observation_hash": result.observation_hash}}
+
+        if op == "capital_proposal":
+            raw = dict(spec["proposal"])
+            for key in (
+                "current_budget", "proposed_budget", "expectancy_R", "edge_floor_R",
+                "max_drawdown", "tail_risk", "capital_efficiency", "execution_quality",
+            ):
+                raw[key] = Decimal(str(raw[key]))
+            proposal = CapitalBudgetProposal(**raw)
+            if not proposal.proposal_hash:
+                proposal = proposal.sealed()
+            verdict = self.evaluate_capital_proposal(
+                proposal,
+                now_ms=int(spec["now_ms"]),
+                mandate_max_risk_per_trade=Decimal(str(spec["mandate_max_risk_per_trade"])),
+                platform_max_risk_per_trade=Decimal(str(spec["platform_max_risk_per_trade"])),
+            )
+            return {"operation": op, "proposal_hash": proposal.proposal_hash,
+                    "verdict": verdict.as_dict()}
+
+        if op == "trading_evidence":
+            raw = dict(spec["artifact"])
+            artifact = TradingEvidenceArtifact(**raw)
+            admitted = self.admit_evidence(artifact)
+            return {"operation": op, "artifact": admitted.as_dict() | {"artifact_hash": admitted.artifact_hash}}
+
+        if op == "feed_disagreement":
+            def sample(raw):
+                if raw is None:
+                    return None
+                d = dict(raw)
+                return FeedSample(
+                    source=str(d["source"]), bid=Decimal(str(d["bid"])),
+                    ask=Decimal(str(d["ask"])), as_of_ms=int(d["as_of_ms"]))
+            result = self.compare_feeds(
+                symbol=str(spec["symbol"]),
+                execution=sample(spec["execution"]),
+                reference=sample(spec.get("reference")),
+                now_ms=int(spec["now_ms"]),
+            )
+            return {"operation": op, "observation": result.as_dict() | {"observation_hash": result.observation_hash}}
+
+        if op == "exit_research":
+            paths = []
+            for raw in spec.get("paths", ()):
+                d = dict(raw)
+                bars = tuple(Bar(
+                    str(b["symbol"]), int(b["start_ms"]), int(b["end_ms"]),
+                    Decimal(str(b["open"])), Decimal(str(b["high"])),
+                    Decimal(str(b["low"])), Decimal(str(b["close"])),
+                    Decimal(str(b.get("volume", "0"))), int(b.get("ticks", 1)),
+                    Decimal(str(b.get("avg_spread", "0"))),
+                ) for b in d.get("bars", ()))
+                paths.append(PostEntryPath(
+                    episode_id=str(d["episode_id"]), strategy_id=str(d["strategy_id"]),
+                    symbol=str(d["symbol"]), regime=str(d["regime"]), session=str(d["session"]),
+                    direction=Direction(str(d["direction"])), entry=Decimal(str(d["entry"])),
+                    stop=Decimal(str(d["stop"])), bars=bars,
+                    atr_at_entry=(Decimal(str(d["atr_at_entry"]))
+                                  if d.get("atr_at_entry") is not None else None),
+                ))
+            results = self.research_exits(paths, strategy_id=str(spec["strategy_id"]))
+            return {"operation": op,
+                    "candidates": [r.as_dict() | {"candidate_hash": r.candidate_hash} for r in results]}
+
+        raise ValueError(f"unknown trading research operation {op!r}")
 
 
 __all__ = ["TradingResearchWorkflow"]
