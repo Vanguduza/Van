@@ -1135,6 +1135,31 @@ ROOT_LEVEL = [
 #: Checkpoint 14, Kotlin half. Run by Gradle in android/verification rather than by pytest,
 #: because that harness is the only thing in this repository that can execute Kotlin at all.
 KOTLIN = [
+ # --- checkpoint 40: the socket's two shapes, and one history --------------------------
+ (f"{APP_KT}/session/SessionDownstream.kt",
+  '        if (frame.optString("direction") == DIRECTION_DOWNSTREAM && event != null) {',
+  '        if (false) {',
+  "C40 every event arriving on the socket is dropped"),
+ (f"{APP_KT}/session/SessionDownstream.kt",
+  "            if (seq < 0) return Frame.Unrecognised",
+  "            if (false) return Frame.Unrecognised",
+  "C40 an event with no sequence rewinds the stream to the beginning"),
+ (f"{APP_KT}/session/SessionDownstream.kt",
+  '        if (messageId.isNotEmpty() && frame.has("accepted")) {',
+  '        if (false) {',
+  "C40 nothing is ever taken out of flight, so a resume resends everything"),
+ (f"{APP_KT}/session/SessionDownstream.kt",
+  "EventPage(events = listOf(record), nextCursor = seq, truncated = false)",
+  "EventPage(events = listOf(record), nextCursor = 0L, truncated = false)",
+  "C40 the cursor and the record disagree, so the stream skips or repeats"),
+ (f"{APP_KT}/events/VanEventStreamStore.kt",
+  "        cursors.save(next.cursor)",
+  "        cursors.save(page.nextCursor)",
+  "C40 the saved cursor goes backwards and the owner reads a morning twice"),
+ (f"{APP_KT}/events/VanEventStreamStore.kt",
+  "        val next = EventStream.applyPage(_state.value, page)",
+  "        val next = _state.value.copy(events = page.events, cursor = page.nextCursor, loaded = true)",
+  "C40 a socket page replaces the history instead of merging with it"),
  # --- checkpoint 39: the durable write, and where it runs ---------------------------
  # --- checkpoint 38: the stored command has to be one the Gateway can accept ---------
  (f"{APP_KT}/session/OfflineSubmission.kt",

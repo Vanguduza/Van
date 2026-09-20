@@ -34,7 +34,7 @@ not mean anyone has watched it work on a phone.
 
 | Register | Contents | Checker |
 |---|---|---|
-| `evidence/van-system-audit/findings.json` | 152 findings, all closed: 76 `INTEGRATED_AND_EVIDENCED`, 70 `EXTERNALLY_BLOCKED_REPOSITORY_COMPLETE`, 6 `DELIBERATELY_REMOVED_CANON_CORRECTED` | `tools/ci/maturity_gate.py` — refuses a closure state that claims more than its residual class allows |
+| `evidence/van-system-audit/findings.json` | 154 findings, all closed: 76 `INTEGRATED_AND_EVIDENCED`, 72 `EXTERNALLY_BLOCKED_REPOSITORY_COMPLETE`, 6 `DELIBERATELY_REMOVED_CANON_CORRECTED` | `tools/ci/maturity_gate.py` — refuses a closure state that claims more than its residual class allows |
 | `evidence/van-system-audit/component_ledger.json` | 180 components, all at a terminal state: 113 integrated, 60 externally blocked, 7 deliberately removed | `tools/ci/maturity_gate.py`, `tools/ci/ledger_reconcile.py` — the first refuses a ledger that overstates, the second one that understates |
 | `docs/project-state/REMOTE_BROWSER_IMPLEMENTATION_MATRIX.json` | 122 rows: 87 `WIRED_UNPROVEN`, 21 `NOT_STARTED`, 9 `BUILT_UNWIRED`, 3 `BLOCKED`, 2 `VERIFIED_UNCERTIFIED` | `tools/ci/ledger_reconcile.py` — refuses a row whose booleans contradict its status, and an empty `external_gates` |
 | `evidence/van-system-audit/red_team_register.json` | §38's 72 scenarios: 63 `PASS`, 9 `BLOCKED_EXTERNAL`, **0 assumed** | `tools/ci/red_team_register.py` — every `PASS` must cite a runnable pytest node id |
@@ -244,6 +244,26 @@ Review found it by asking where the synchronous write actually *runs*, rather th
 accepting that the durability had improved. The general form is the one this programme
 keeps meeting from a new direction: a change is judged against the caller it was made
 for, and the callers it was not made for are where it lands.
+
+### The third time, and what it says about the method
+
+C18 found the same shape a third time: two halves of a wire format, each internally
+consistent, with nothing that runs both. The client read `seq` from the top of a frame
+where it is nested, and matched an acknowledgement on `"session.ack"` — a string the
+Gateway does not send, because its answer carries the *envelope's* kind.
+
+Three silent consequences: the cursor never advanced, nothing left `inFlight`, and every
+downstream event was parsed into nothing. §20.1's "SHALL feed durable downstream pages
+into `EventStream.applyPage`" was not merely unmet — there was also nowhere to feed,
+because the history lived in a composable's `remember` and an application-scoped socket
+cannot write into one.
+
+**The method that finds these is the same every time.** Not reading the code for
+correctness, but asking whether the thing one side produces is a thing the other side
+consumes — and then pinning the answer in a test that reads *both* sources. Three of those
+tests exist now, for the stored command body, the session socket's frames and the
+offline-intent windows. Each was written after a defect the reviews and the suites had
+both missed.
 
 ## What to do next, in order
 

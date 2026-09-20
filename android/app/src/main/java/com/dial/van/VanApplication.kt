@@ -8,6 +8,8 @@ import android.net.NetworkRequest
 import com.dial.van.control.VanCommandController
 import com.dial.van.control.VanCommandSource
 import com.dial.van.degraded.DegradedModeStore
+import com.dial.van.events.PreferencesEventCursorStore
+import com.dial.van.events.VanEventStreamStore
 import com.dial.van.degraded.DeviceSignals
 import com.dial.van.gateway.ReplayReason
 import com.dial.van.gateway.QueueReplayer
@@ -189,6 +191,18 @@ class VanApplication : Application(), VoiceInputCallback, TtsOutputCallback {
     lateinit var vanSession: VanHermesSessionManager
 
     /**
+     * Rev 1.5 §§5.6, 20.1 — the owner's event history, for the whole app.
+     *
+     * Application-scoped for the same reason the session is: it has to outlive the screen
+     * that happens to be open. It lived in the Work screen's `remember` until C18, so a
+     * mission finishing while the owner was elsewhere produced nothing they could see —
+     * and §20.1's "SHALL feed durable downstream pages into `EventStream.applyPage`" had
+     * nowhere to feed, because an application-scoped socket cannot write into a
+     * composable's local state.
+     */
+    lateinit var eventStream: VanEventStreamStore
+
+    /**
      * Rev 1.5 §21 — the local voice edge: what VAN can hear and say with no network.
      *
      * Application-scoped because the answer to "can I hear you" must be the same on every
@@ -208,6 +222,7 @@ class VanApplication : Application(), VoiceInputCallback, TtsOutputCallback {
         wakeAcknowledgement = WakeAcknowledgementManager(this)
         voiceUi = VanVoiceUiStore()
         gatewayClient = VanGatewayClient(this)
+        eventStream = VanEventStreamStore(PreferencesEventCursorStore(this))
         // P1-VOICE-001 — TtsOutputManager.speak finally has a caller. Bound to the
         // outcome projection, so VAN speaks when work finished or needs the owner and
         // stays quiet otherwise.
@@ -242,6 +257,9 @@ class VanApplication : Application(), VoiceInputCallback, TtsOutputCallback {
             // which is the surface they are already looking at. Without a reader here the
             // work is dropped in silence, which is the half of the failure that is worse.
             onUndelivered = { commandController.reportUndelivered(it) },
+            // §20.1's SHALL. Durable downstream pages go into the reducer the REST floor
+            // already uses, so the owner has one history rather than two that disagree.
+            onDownstreamPage = { eventStream.apply(it) },
         )
         voiceEdge = VoiceEdge(this, ttsOutput, appScope)
         voiceEdge.loadAssets()

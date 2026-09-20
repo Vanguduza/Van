@@ -72,6 +72,17 @@ class VanHermesSessionManager(
      * product stops sounding like one thing.
      */
     private val onUndelivered: (List<Pair<String, String>>) -> Unit = {},
+    /**
+     * §20.1 — where a durable downstream page goes.
+     *
+     * The blueprint says this SHALL be `EventStream.applyPage`, and naming the reducer
+     * rather than owning one is the whole of that sentence: a second event store would
+     * give the owner two histories that disagree about what has happened.
+     *
+     * Defaulted to doing nothing so the session is still constructible without one, and
+     * a build with no reader drops events loudly in review rather than quietly at runtime.
+     */
+    private val onDownstreamPage: (com.dial.van.events.EventPage) -> Unit = {},
 ) {
 
     data class State(
@@ -369,15 +380,37 @@ class VanHermesSessionManager(
             scope.launch(Dispatchers.IO) { resume() }
         }
 
+        /**
+         * §§20.1, 20.4 — the two shapes the Gateway sends, read as it writes them.
+         *
+         * This used to take `seq` from the top of the frame, where there is none, and
+         * switch on `kind` looking for `"session.ack"`, which the Gateway does not send —
+         * its answer carries the *envelope's* kind. So the cursor never advanced, nothing
+         * ever left `inFlight`, and every downstream event was parsed into nothing.
+         *
+         * The reading is [SessionDownstream]'s, which is pure and pinned against the
+         * Gateway's own construction sites by a contract test. What is left here is what
+         * to do about each shape.
+         */
         override fun onMessage(webSocket: WebSocket, text: String) {
             val message = runCatching { JSONObject(text) }.getOrNull() ?: return
             observe(connected = true, lastRxAgeMs = 0, writeFailures = 0)
-            message.optLong("seq", 0).takeIf { it > lastEventSeq }?.let { lastEventSeq = it }
-            when (message.optString("kind")) {
-                "session.ack" -> inFlight.remove(message.optString("message_id"))
-                "session.epoch_changed" -> _state.value = _state.value.copy(
-                    sessionEpoch = message.optInt("session_epoch", _state.value.sessionEpoch),
-                )
+            when (val frame = SessionDownstream.parse(message)) {
+                is SessionDownstream.Frame.Event -> {
+                    // §20.1's SHALL: durable downstream pages go into the existing
+                    // reducer, not into a second one. `applyPage` is seq-keyed, so a
+                    // frame that overlaps what a REST replay already delivered does not
+                    // show the owner the same thing twice.
+                    frame.page.nextCursor.takeIf { it > lastEventSeq }?.let { lastEventSeq = it }
+                    onDownstreamPage(frame.page)
+                }
+                is SessionDownstream.Frame.Acknowledgement -> {
+                    // Accepted or refused, it is answered and no longer in flight. A
+                    // refusal left in flight would be re-sent by the next resume, which
+                    // is sending the Gateway something it has already declined.
+                    inFlight.remove(frame.messageId)
+                }
+                SessionDownstream.Frame.Unrecognised -> Unit
             }
         }
 

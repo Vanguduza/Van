@@ -20,8 +20,8 @@
     "PRODUCTION_CERTIFIED"
   ],
   "counts": {
-    "P0": 28,
-    "P1": 50,
+    "P0": 29,
+    "P1": 51,
     "P2": 38,
     "P3": 29,
     "P4": 7
@@ -6649,6 +6649,89 @@
         ],
         "counterexample": "A first version of the guard matched any `*queue.` receiver and reported `VoiceAudioArbiter`'s ring of PCM frames, which touches no disk. A check that cries wolf is one somebody switches off, so it is narrowed to the `commandQueue` handle — and it still fails if the share write goes back inline, or if the queue reverts to `apply()` and there is nothing left to protect against.",
         "residual": "Whether the IO dispatch is enough on a real device under a notification burst is a measurement, not a source property. Nothing here runs an Android main looper; what is checked is that no call site writes on its caller's thread.",
+        "residual_reason": "The AGP is unreachable in the audit container.",
+        "residual_class": "ENVIRONMENT_UNVERIFIED",
+        "posture": "fail-closed"
+      }
+    },
+    {
+      "id": "P0-SESS-014",
+      "severity": "P0",
+      "domain": "session",
+      "title": "The session socket's two frame shapes were both read wrongly",
+      "description": "The Gateway sends exactly two shapes down `/v1/session/ws`. A downstream event is `{\"direction\": \"DOWNSTREAM\", \"event\": {seq, event_type, payload, created_at_unix}}`. Its answer to something the device sent is `{accepted, message_id, kind, refusal, admission, result}`, where `kind` is the *envelope's* kind.\n\n`onMessage` matched neither. It read `seq` from the top of the frame, where there is none, and switched on `kind` looking for `\"session.ack\"` and `\"session.epoch_changed\"`, which the Gateway never sends — so the comparison was against `\"command.submit\"` and its siblings.\n\nThree silent consequences. The event cursor never advanced from the socket, so a resume asked to replay from zero. Nothing was ever removed from `inFlight`, so every command stayed pending until a resume reconciled it. And §20.1's \"SHALL feed durable downstream pages/events into the existing `EventStream.applyPage`\" was not merely unmet: every event that arrived was parsed into nothing and dropped.",
+      "requirement": "docs/VAN_REMOTE_BROWSER_PRODUCTION_BLUEPRINT_REV_1_5.md §§20.1, 20.4",
+      "authority": "VAN Remote Browser Production Blueprint Rev 1.5",
+      "repository_evidence": [
+        "android/app/src/main/java/com/dial/van/session/VanHermesSessionManager.kt",
+        "backend/van_gateway/session/api.py"
+      ],
+      "runtime_evidence": [],
+      "affected_components": [
+        "android",
+        "session",
+        "events"
+      ],
+      "root_cause": "Two halves of a wire format written in different languages at different times, each internally consistent, with nothing that runs both. The third time this shape has appeared in this programme.",
+      "remediation": "`SessionDownstream` parses the frame, is pure, and is executed against the frames the Gateway actually constructs. `tests/contracts/test_session_socket_frames.py` pins both shapes against the Gateway's own construction sites and fails if the acknowledgement is matched on `kind` again.",
+      "current_status": "CLOSED",
+      "remediation_gate": "RB C18",
+      "validation_gate": "G2",
+      "closure": {
+        "state": "EXTERNALLY_BLOCKED_REPOSITORY_COMPLETE",
+        "summary": "The reading is pure and pinned from both sides; what is left in `onMessage` is what to do about each shape. A refusal now leaves `inFlight` too — it is an answer, and leaving it there would have the next resume send the Gateway something it has already declined.",
+        "changed": [
+          "android/app/src/main/java/com/dial/van/session/SessionDownstream.kt",
+          "android/app/src/main/java/com/dial/van/session/VanHermesSessionManager.kt",
+          "tests/contracts/test_session_socket_frames.py"
+        ],
+        "verified_by": [
+          "android/verification/src/test/kotlin/com/dial/van/session/SessionDownstreamTest.kt",
+          "tests/contracts/test_session_socket_frames.py"
+        ],
+        "counterexample": "A parser tested only against frames written by the same hand proves the two agree with each other rather than with the Gateway. The contract test reads `session/api.py` and `events/bus.py` for the literal field names, and fails if the Gateway changes shape while the device does not.",
+        "residual": "No socket is opened here. That these frames arrive in this form on a real connection is Gate 14's, and `VanHermesSessionManager` is compiled by CI only.",
+        "residual_reason": "The AGP is unreachable in the audit container.",
+        "residual_class": "ENVIRONMENT_UNVERIFIED",
+        "posture": "fail-closed"
+      }
+    },
+    {
+      "id": "P1-AND-021",
+      "severity": "P1",
+      "domain": "android",
+      "title": "The owner's event history existed only while one screen was open",
+      "description": "`EventStreamState` was held in the Work screen's `remember`, fed by an HTTP poll inside a `LaunchedEffect`. So the history existed only while that screen was composed: a mission finishing while the owner was anywhere else produced nothing they could see, and the poll's own `nextDelayMillis` could end the loop entirely under resource pressure.\n\nIt also made §20.1's SHALL unimplementable. An application-scoped socket cannot write into a composable's local state, so there was nowhere for a durable downstream page to go even once the frames were read correctly.",
+      "requirement": "docs/VAN_REMOTE_BROWSER_PRODUCTION_BLUEPRINT_REV_1_5.md §§5.6, 20.1",
+      "authority": "VAN Remote Browser Production Blueprint Rev 1.5",
+      "repository_evidence": [
+        "android/app/src/main/java/com/dial/van/command/modules/WorkModules.kt",
+        "android/app/src/main/java/com/dial/van/events/VanEventStreamStore.kt"
+      ],
+      "runtime_evidence": [],
+      "affected_components": [
+        "android",
+        "events"
+      ],
+      "root_cause": "State scoped to the thing that first needed it rather than to the thing that owns it. The screen was the only reader when it was written, and it stayed the owner when a second carrier arrived.",
+      "remediation": "`VanEventStreamStore` is application-scoped and holds the history; the Work screen collects it and feeds its polled pages back into it. Deliberately not a second reducer — `EventStream` still decides what a page does — so a socket page and a polled page merge seq-keyed and the owner does not read one event twice.",
+      "current_status": "CLOSED",
+      "remediation_gate": "RB C18",
+      "validation_gate": "G2",
+      "closure": {
+        "state": "EXTERNALLY_BLOCKED_REPOSITORY_COMPLETE",
+        "summary": "One history for the app, executed in the harness because the cursor is an interface. The cursor is saved from the merged state rather than from the page, since `applyPage` refuses to rewind and saving the page's own number would ask the Gateway to resend a morning the owner has already seen.",
+        "changed": [
+          "android/app/src/main/java/com/dial/van/events/VanEventStreamStore.kt",
+          "android/app/src/main/java/com/dial/van/command/modules/WorkModules.kt",
+          "android/app/src/main/java/com/dial/van/VanApplication.kt",
+          "android/verification/build.gradle.kts"
+        ],
+        "verified_by": [
+          "android/verification/src/test/kotlin/com/dial/van/events/VanEventStreamStoreTest.kt"
+        ],
+        "counterexample": "Holding the history app-scoped and still saving the page's cursor passes any test that only checks the events merge. `the cursor is saved from the merged state rather than from the page` applies a page whose cursor is lower and asserts the saved one does not move.",
+        "residual": "The Compose side — that the screen collects and renders it — is compiled by CI and executed nowhere here.",
         "residual_reason": "The AGP is unreachable in the audit container.",
         "residual_class": "ENVIRONMENT_UNVERIFIED",
         "posture": "fail-closed"

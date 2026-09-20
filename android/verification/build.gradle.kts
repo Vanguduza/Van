@@ -35,6 +35,11 @@ dependencies {
     // extra dependency of the app.
     implementation("org.json:json:20240303")
     implementation("org.jetbrains.kotlinx:kotlinx-serialization-json:1.7.3")
+    // Pure JVM, and the app's own `StateFlow` type. Added so that state a screen collects
+    // can be held in a file this harness executes rather than in a composable's
+    // `remember` — which is where the event history lived, and why it only existed while
+    // one screen was open.
+    implementation("org.jetbrains.kotlinx:kotlinx-coroutines-core:1.8.1")
     testImplementation(kotlin("test"))
 }
 
@@ -88,6 +93,10 @@ sourceSets {
             "com/dial/van/command/CommandModule.kt",
             "com/dial/van/command/CommandCentreNav.kt",
             "com/dial/van/events/EventStream.kt",
+            // One history for the app, rather than one per screen. Pure because the
+            // cursor is an interface, so the merge of a socket page and a polled one
+            // is executed rather than reasoned about.
+            "com/dial/van/events/VanEventStreamStore.kt",
             "com/dial/van/share/ShareIntake.kt",
             "com/dial/van/onboarding/OnboardingPlan.kt",
             "com/dial/van/gateway/GatewayRetry.kt",
@@ -145,6 +154,10 @@ sourceSets {
             // The decision a catch block used to make silently: whether a command
             // whose dispatch failed may be held, and what the owner is told.
             "com/dial/van/session/OfflineSubmission.kt",
+            // The two shapes the Gateway sends down the session socket. The client
+            // recognised neither, which is invisible in a source diff and in any
+            // test that only runs one side.
+            "com/dial/van/session/SessionDownstream.kt",
             // The canonical queue's record. Android owns the encryption and the disk;
             // this file is the shape those bytes take, and §20.14's metadata rides on it.
             "com/dial/van/queue/CommandQueueModels.kt",
