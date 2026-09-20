@@ -148,6 +148,51 @@ def check_no_trading_table_in_gateway_schema() -> list[str]:
             "these belong on the VATI transactional authority store"] if hits else []
 
 
+def check_required_production_joins() -> list[str]:
+    """Joins whose absence recreates the PR #49 audit findings."""
+    failures: list[str] = []
+
+    main_tree = _tree("vati/__main__.py")
+    names = {n.id for n in ast.walk(main_tree) if isinstance(n, ast.Name)}
+    attrs = {n.attr for n in ast.walk(main_tree) if isinstance(n, ast.Attribute)}
+    if "AccountCoordinatorService" not in names:
+        failures.append(
+            "account-coordinator-live-entry: vati serve does not reference AccountCoordinatorService")
+    if "instruments" not in attrs:
+        failures.append(
+            "account-coordinator-live-entry: vati serve has no multi-instrument activation condition")
+
+    router_tree = _tree("vati/execution/router.py")
+    router_names = {n.id for n in ast.walk(router_tree) if isinstance(n, ast.Name)}
+    router_attrs = {n.attr for n in ast.walk(router_tree) if isinstance(n, ast.Attribute)}
+    if "resolve_execution_policy" not in {n.name for n in ast.walk(router_tree)
+                                          if isinstance(n, ast.FunctionDef)}:
+        failures.append("execution-policy-router-join: router has no policy resolver")
+    if "EXECUTION_POLICY_DECISION" not in router_attrs:
+        failures.append("execution-policy-router-join: policy decision is not ledgered")
+
+    feature_tree = _tree("vati/intelligence/feature_contract.py")
+    imports = _imports(feature_tree)
+    if "vati.intelligence.feature_registry" not in imports:
+        failures.append(
+            "feature-registry-contract-join: FeatureContractValidator no longer imports the registry")
+    feature_attrs = {n.attr for n in ast.walk(feature_tree) if isinstance(n, ast.Attribute)}
+    if "is_production_admitted" not in feature_attrs:
+        failures.append(
+            "feature-registry-contract-join: production admission is not enforced")
+
+    service_tree = _tree("vati/app/account_service.py")
+    service_names = {n.id for n in ast.walk(service_tree) if isinstance(n, ast.Name)}
+    if "PostgresLeaseStore" not in service_names:
+        failures.append(
+            "account-lease-live-join: account service is not bound to the shared PostgreSQL lease")
+    if "InMemoryLeaseStore" in service_names:
+        failures.append(
+            "account-lease-live-join: production account service references an in-memory lease")
+
+    return failures
+
+
 def main() -> int:
     failures: list[str] = []
     for rule in RULES:
@@ -156,13 +201,14 @@ def main() -> int:
         failures.extend(check_rule(rule))
     failures.extend(check_allocator_v0_ignores_confidence())
     failures.extend(check_no_trading_table_in_gateway_schema())
+    failures.extend(check_required_production_joins())
 
     if failures:
         print("Architecture guardrails FAILED:\n", file=sys.stderr)
         for f in failures:
             print(f"  - {f}", file=sys.stderr)
         return 1
-    print(f"Architecture guardrails OK ({len(RULES)} rules + confidence + store placement)")
+    print(f"Architecture guardrails OK ({len(RULES)} rules + confidence + store placement + production joins)")
     return 0
 
 
