@@ -46,6 +46,7 @@ from vati.market_data.calendars import FX_CALENDAR
 from vati.market_data.feeds.lake import TIMEFRAMES_MS, BarLake
 from vati.observability import metrics
 from vati.learning.hooks import LearningHooks
+from vati.learning.replay import restore_learning_runtime
 from vati.observability.enhancement_metrics import (
     CORRELATION_MULTIPLIER, EXECUTION_FILL_PROBABILITY, EXECUTION_POLICY_SELECTED,
     PORTFOLIO_INCREMENTAL_ES,
@@ -257,6 +258,14 @@ class AccountCoordinatorService:
         self.learning = LearningHooks(
             environment=ENVIRONMENT_FOR_MODE[mandate.mode],
             broker=str(getattr(account.broker, "value", account.broker)).lower(),
+        )
+        self.learning_replay = restore_learning_runtime(
+            self._ledger,
+            self.learning,
+            {
+                symbol: evaluator.engine
+                for symbol, evaluator in self.evaluators.items()
+            },
         )
         self.lifecycle = AccountTradeLifecycle(
             ledger=self._ledger,
