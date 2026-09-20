@@ -168,6 +168,96 @@ class AccountTradeLifecycle:
             restored.append(iid)
         return tuple(sorted(restored)), tuple(sorted(unresolved))
 
+    def adopt_owner_buy_confirmation(
+        self,
+        receipt: ExecutionReceipt,
+        *,
+        order_payload: Mapping[str, object],
+    ) -> None:
+        """Turn a signed owner BUY confirmation into lifecycle position truth."""
+        symbol = str(order_payload["symbol"]).upper()
+        contract = self.contracts[symbol]
+        stop_raw = order_payload.get("protective_stop")
+        stop = Decimal(str(stop_raw)) if stop_raw is not None else None
+        targets = tuple(
+            Decimal(str(v)) for v in (order_payload.get("targets") or ())
+        )
+        strategy_id = str(order_payload.get("strategy_id", ""))
+        self.entries[receipt.trade_intent_id] = {
+            "symbol": symbol,
+            "entry": receipt.average_fill or Decimal(str(order_payload["entry_price"])),
+            "stop": stop,
+            "direction": Direction(str(order_payload.get("direction", "LONG"))),
+            "strategy_id": strategy_id,
+            "cost_pct": self.modelled_costs.get(symbol, contract.round_trip_cost_pct),
+            "decision_price": Decimal(str(order_payload["entry_price"])),
+            "quantity": receipt.filled_qty,
+            "software_stop": True,
+            "broker_position_id": receipt.broker_position_id,
+            "open": receipt.filled_qty > ZERO,
+            "pending": False,
+        }
+        if stop is not None and receipt.broker_position_id:
+            self.protection.register(
+                receipt.broker_position_id,
+                symbol=symbol,
+                direction=Direction(str(order_payload.get("direction", "LONG"))),
+                entry=receipt.average_fill or Decimal(str(order_payload["entry_price"])),
+                stop=stop,
+                target=targets[0] if targets else None,
+                opened_ms=receipt.received_time_unix_ms,
+                software_stop=True,
+            )
+        if receipt.filled_qty > ZERO and receipt.average_fill is not None:
+            tca = compute_tca(
+                receipt,
+                direction=Direction(str(order_payload.get("direction", "LONG"))),
+                qty=receipt.filled_qty,
+                value_per_unit=Decimal("1"),
+                modelled_cost_pct=self.modelled_costs.get(
+                    symbol, contract.round_trip_cost_pct),
+            )
+            self._log(
+                EventKind.TCA_RECORD, tca.as_dict(),
+                now_ms=receipt.received_time_unix_ms,
+                corr=receipt.trade_intent_id,
+            )
+            self.entries[receipt.trade_intent_id]["cost_ratio"] = tca.cost_ratio
+
+    def adopt_owner_sell_confirmation(
+        self,
+        receipt: ExecutionReceipt,
+        *,
+        exit_reason: str,
+        now_ms: int,
+        emit_review: bool = True,
+    ) -> None:
+        """Apply an owner SELL fill without treating a partial fill as closed."""
+        remaining = [
+            p for p in self.adapter.positions()
+            if p.trade_intent_id == receipt.trade_intent_id
+        ]
+        if remaining:
+            row = self.entries.get(receipt.trade_intent_id)
+            if row is not None:
+                row["quantity"] = sum((p.quantity for p in remaining), ZERO)
+                row["open"] = True
+            if receipt.broker_position_id:
+                self.protection.close_failed(receipt.broker_position_id)
+            return
+
+        if emit_review:
+            self._on_close(
+                receipt.trade_intent_id,
+                receipt.average_fill,
+                exit_reason,
+                now_ms,
+            )
+        else:
+            self.entries.pop(receipt.trade_intent_id, None)
+        if receipt.broker_position_id:
+            self.protection.close_confirmed(receipt.broker_position_id)
+
     def record_entry(
         self,
         *,
