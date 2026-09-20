@@ -27,6 +27,8 @@ from vati.intelligence.confluence import (
     ConfluenceAxis, ConfluenceEngine, NEUTRAL, OPPOSING, SUPPORTIVE, UNKNOWN,
 )
 from vati.market_data.bars import Bar
+from vati.observability import metrics
+from vati.observability.enhancement_metrics import MTF_MISSING_TIMEFRAME
 from vati.risk.contracts import Direction
 from vati.strategies.base import StrategyContext
 
@@ -87,13 +89,21 @@ class InstrumentEvaluator:
             return ()
         mtf = self.mtf_state_fn(now_ms) if self.mtf_state_fn is not None else None
         self.last_mtf_state = mtf
+        if mtf is not None and not mtf.complete:
+            for tf in mtf.missing_timeframes:
+                metrics.inc(
+                    MTF_MISSING_TIMEFRAME,
+                    symbol=self.cfg.symbol, timeframe=tf,
+                )
+            self.last_candidates = ()
+            return ()
         # MTF_SCHEMA_ADOPTION was recorded as strategy_logic_changed=false, so
-        # existing strategies continue to evaluate on the configured primary
-        # timeframe. The assembled MTF state is causal evidence until a later,
-        # validated strategy revision explicitly consumes role-specific states.
+        # existing strategy formulas still evaluate on the configured primary
+        # timeframe. The complete MTF state is now a required causal envelope;
+        # role-specific strategy logic requires a later validated capsule revision.
         state = (
             mtf.state_for(self.cfg.timeframe)
-            if mtf is not None and mtf.complete and mtf.state_for(self.cfg.timeframe) is not None
+            if mtf is not None and mtf.state_for(self.cfg.timeframe) is not None
             else self.state_fn(bars, now_ms)
         )
         self.last_state = state
