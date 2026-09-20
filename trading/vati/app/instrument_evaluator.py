@@ -22,6 +22,7 @@ from typing import Callable, Optional, Sequence
 from vati.arbiter.candidate import CandidateOpportunity
 from vati.arbiter.opportunity import OpportunityEngine
 from vati.intelligence.market_state import MarketState
+from vati.intelligence.mtf import MultiTimeframeMarketState
 from vati.intelligence.confluence import (
     ConfluenceAxis, ConfluenceEngine, NEUTRAL, OPPOSING, SUPPORTIVE, UNKNOWN,
 )
@@ -55,6 +56,7 @@ class InstrumentEvaluator:
         ctx_fn: Callable[[MarketState], StrategyContext],
         regime_label_fn: Callable[[MarketState], str] = lambda s: s.regime.trend.value,
         currency_regime_label_fn: Optional[Callable[[MarketState], Optional[str]]] = None,
+        mtf_state_fn: Optional[Callable[[int], MultiTimeframeMarketState]] = None,
     ) -> None:
         self.cfg = cfg
         self.engine = engine
@@ -62,7 +64,9 @@ class InstrumentEvaluator:
         self.ctx_fn = ctx_fn
         self.regime_label_fn = regime_label_fn
         self.currency_regime_label_fn = currency_regime_label_fn
+        self.mtf_state_fn = mtf_state_fn
         self.last_state: Optional[MarketState] = None
+        self.last_mtf_state: Optional[MultiTimeframeMarketState] = None
         self.last_candidates: tuple[CandidateOpportunity, ...] = ()
         self.last_confluence: dict[str, object] = {}
         self._confluence = ConfluenceEngine()
@@ -81,18 +85,35 @@ class InstrumentEvaluator:
         if not bars:
             self.last_candidates = ()
             return ()
-        state = self.state_fn(bars, now_ms)
+        mtf = self.mtf_state_fn(now_ms) if self.mtf_state_fn is not None else None
+        self.last_mtf_state = mtf
+        # MTF_SCHEMA_ADOPTION was recorded as strategy_logic_changed=false, so
+        # existing strategies continue to evaluate on the configured primary
+        # timeframe. The assembled MTF state is causal evidence until a later,
+        # validated strategy revision explicitly consumes role-specific states.
+        state = (
+            mtf.state_for(self.cfg.timeframe)
+            if mtf is not None and mtf.complete and mtf.state_for(self.cfg.timeframe) is not None
+            else self.state_fn(bars, now_ms)
+        )
         self.last_state = state
         ctx = self.ctx_fn(state)
         currency_label = (self.currency_regime_label_fn(state)
                           if self.currency_regime_label_fn else None)
+        source_hashes = ()
+        if mtf is not None:
+            source_hashes = tuple(
+                mtf.constituent_states[tf].timeframe_state_hash
+                for tf in mtf.required_timeframes if tf in mtf.constituent_states
+            )
         cands = self.engine.assess_candidates(
             state, ctx,
             regime_label=self.regime_label_fn(state),
             currency_regime_label=currency_label,
             account_alias=self.cfg.account_alias,
             venue=self.cfg.venue,
-            mtf_state_hash=mtf_state_hash or state.state_hash,
+            mtf_state_hash=(mtf.mtf_state_hash if mtf is not None else mtf_state_hash) or state.state_hash,
+            source_state_hashes=source_hashes or (state.state_hash,),
             now_ms=now_ms,
         )
         self.last_candidates = cands
