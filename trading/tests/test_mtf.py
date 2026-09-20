@@ -3,14 +3,18 @@
 from __future__ import annotations
 
 from decimal import Decimal
+from types import SimpleNamespace
 
 import pytest
+
+from vati.arbiter.opportunity import capsule_mtf_evidence
 
 from vati.intelligence.mtf import (
     TIMEFRAME_ORDER,
     MtfError,
     MultiTimeframeMarketState,
     TimeframeContract,
+    TimeframeMarketState,
     build_multi_timeframe_state,
     closed_bars_at,
 )
@@ -154,15 +158,15 @@ def test_lake_timeframes_and_mtf_order_agree():
     assert set(TIMEFRAME_ORDER) == set(TIMEFRAMES_MS)
 
 
-def test_instrument_evaluator_abstains_when_required_mtf_is_incomplete():
+def test_instrument_evaluator_abstains_when_primary_mtf_is_missing():
     class _Engine:
         def assess_candidates(self, *args, **kwargs):
-            raise AssertionError("strategy engine must not run on incomplete MTF")
+            raise AssertionError("strategy engine must not run without primary MTF")
 
     incomplete = MultiTimeframeMarketState(
         symbol="EURUSD", as_of_ms=1_000, constituent_states={},
-        required_timeframes=("H4", "H1", "M15", "M5"),
-        missing_timeframes=("H4",),
+        required_timeframes=("M5",),
+        missing_timeframes=("M5",),
     ).sealed()
     evaluator = InstrumentEvaluator(
         InstrumentEvaluatorConfig(
@@ -175,4 +179,71 @@ def test_instrument_evaluator_abstains_when_required_mtf_is_incomplete():
         mtf_state_fn=lambda now_ms: incomplete,
     )
     assert evaluator.evaluate([object()], now_ms=1_000) == ()
-    assert evaluator.last_mtf_state.missing_timeframes == ("H4",)
+
+
+def test_missing_unrelated_timeframe_does_not_disable_the_instrument():
+    bar = _bars("EURUSD", 300_000, 2)[-1]
+    primary = TimeframeMarketState(
+        symbol="EURUSD", timeframe="M5", as_of_ms=bar.end_ms,
+        state=_FakeState("M5", [bar]), bar_count=1,
+    ).sealed()
+    incomplete = MultiTimeframeMarketState(
+        symbol="EURUSD", as_of_ms=bar.end_ms,
+        constituent_states={"M5": primary},
+        required_timeframes=("H4", "M5"),
+        missing_timeframes=("H4",),
+    ).sealed()
+
+    class _Engine:
+        def __init__(self):
+            self.called = False
+        def assess_candidates(self, *args, **kwargs):
+            self.called = True
+            assert kwargs["mtf_state"] is incomplete
+            return ()
+
+    engine = _Engine()
+    evaluator = InstrumentEvaluator(
+        InstrumentEvaluatorConfig(
+            symbol="EURUSD", base="EUR", quote="USD", venue="deriv",
+            account_alias="a", timeframe="M5"),
+        engine=engine,
+        state_fn=lambda bars, now_ms: (_ for _ in ()).throw(
+            AssertionError("primary state should come from MTF")),
+        ctx_fn=lambda state: None,
+        regime_label_fn=lambda state: "BULL",
+        mtf_state_fn=lambda now_ms: incomplete,
+    )
+    assert evaluator.evaluate([bar], now_ms=bar.end_ms) == ()
+    assert engine.called
+
+
+def test_capsule_mtf_completeness_is_scoped_to_its_own_contract():
+    bar = _bars("EURUSD", 300_000, 2)[-1]
+    primary = TimeframeMarketState(
+        symbol="EURUSD", timeframe="M5", as_of_ms=bar.end_ms,
+        state=_FakeState("M5", [bar]), bar_count=1,
+    ).sealed()
+    mtf = MultiTimeframeMarketState(
+        symbol="EURUSD", as_of_ms=bar.end_ms,
+        constituent_states={"M5": primary},
+        required_timeframes=("H4", "M5"),
+        missing_timeframes=("H4",),
+    ).sealed()
+
+    m5_only = SimpleNamespace(
+        strategy_id="M5-ONLY",
+        data={"timeframe_contract": {"execution": "M5"}},
+    )
+    needs_h4 = SimpleNamespace(
+        strategy_id="NEEDS-H4",
+        data={"timeframe_contract": {"structural": "H4", "execution": "M5"}},
+    )
+
+    ok, envelope, sources = capsule_mtf_evidence(
+        m5_only, mtf, fallback_hash="fallback", fallback_sources=("fallback",))
+    assert ok and envelope and sources == (primary.timeframe_state_hash,)
+
+    ok, envelope, sources = capsule_mtf_evidence(
+        needs_h4, mtf, fallback_hash="fallback", fallback_sources=("fallback",))
+    assert not ok and envelope == "" and sources == ()
