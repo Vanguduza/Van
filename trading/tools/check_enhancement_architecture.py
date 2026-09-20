@@ -194,9 +194,16 @@ def check_required_production_joins() -> list[str]:
     commander_strategy = (ROOT / "commander" / "strategies.py").read_text()
     gateway = (ROOT.parent / "backend" / "van_gateway" / "app.py").read_text()
     capsule = (ROOT / "vati" / "strategies" / "capsule.py").read_text()
-    if "capsule_promote" not in commander or "capsule_promote" not in commander_strategy:
+    if "capsule_promote" not in commander_strategy:
         failures.append(
             "strategy-promotion-live-join: private commander promotion command is absent")
+    if (
+        "PROMOTION_COMMANDS" not in commander
+        or "build_strategy_handlers" not in commander
+        or "**build_strategy_handlers(" not in commander
+    ):
+        failures.append(
+            "strategy-promotion-live-join: commander app does not compose the private promotion handlers")
     if "AGENT_HIDDEN_COMMANDS" not in commander or "PROMOTION_COMMANDS" not in commander:
         failures.append(
             "strategy-promotion-agent-boundary: promotion is not attached to the hidden command set")
