@@ -17,6 +17,7 @@ from vati.core.events import EventKind, make_event
 from vati.core.ledger import Ledger
 from vati.execution.base import ExecutionReceipt, OrderCommand, StopMode, VenueAdapter
 from vati.execution.protection import ProtectionManager
+from vati.execution.policy_templates import DO_NOT_EXECUTE, template as execution_template
 from vati.observability import metrics
 from vati.risk.authority import Decision, RiskDecision
 from vati.risk.contracts import KillSwitchTrigger, LossModel, TradeIntent
@@ -35,6 +36,27 @@ def recompute_decision_hash(d: RiskDecision) -> str:
     return canonical_hash(body)
 
 
+def resolve_execution_policy(decision, *, entry_type: str, max_slippage: Optional[Decimal]):
+    """Validate a sealed ExecutionPolicyDecision and return bounded router inputs."""
+    if decision is None:
+        return entry_type, max_slippage
+    as_dict = getattr(decision, "as_dict", None)
+    decision_hash = getattr(decision, "decision_hash", "")
+    if not callable(as_dict) or not decision_hash or canonical_hash(as_dict()) != decision_hash:
+        raise RouterError("execution policy decision seal is invalid")
+    t = execution_template(getattr(decision, "template_id", ""))
+    if t.template_id == DO_NOT_EXECUTE or not t.allowed_entry_types:
+        raise RouterError(f"execution policy refused order: {t.template_id}")
+    chosen_entry = getattr(decision, "entry_type", None) or t.allowed_entry_types[0]
+    if chosen_entry not in t.allowed_entry_types:
+        raise RouterError(
+            f"execution policy entry type {chosen_entry!r} is outside template {t.template_id}")
+    bounded_slippage = t.max_slippage
+    if max_slippage is not None:
+        bounded_slippage = min(max_slippage, t.max_slippage)
+    return chosen_entry, bounded_slippage
+
+
 class ExecutionRouter:
     def __init__(self, *, ledger: Ledger, adapters: dict[str, VenueAdapter], kill_switch: KillSwitch, protection: ProtectionManager, producer: str = "vati-execution-router",
                  lease_fence: Optional[Callable[[Optional[int]], bool]] = None) -> None:
@@ -47,11 +69,19 @@ class ExecutionRouter:
 
     def execute(self, intent: TradeIntent, decision: RiskDecision, mandate: TradingMandate, *, now_ms: int, stop_mode: StopMode = StopMode.VENUE,
                 targets: tuple[Decimal, ...] = (), time_in_force: str = "DAY", entry_type: str = "LIMIT", max_slippage: Optional[Decimal] = None,
-                lease_epoch: Optional[int] = None) -> ExecutionReceipt:
+                lease_epoch: Optional[int] = None, execution_policy_decision=None) -> ExecutionReceipt:
         corr = intent.trade_intent_id
         # --- gate chain (fail closed, first failure names the reason) ---
         if self.lease_fence is not None and not self.lease_fence(lease_epoch):
             raise RouterError(f"account runtime lease fence refused epoch {lease_epoch!r}")
+        entry_type, max_slippage = resolve_execution_policy(
+            execution_policy_decision, entry_type=entry_type, max_slippage=max_slippage)
+        if execution_policy_decision is not None:
+            self._log(
+                EventKind.EXECUTION_POLICY_DECISION,
+                execution_policy_decision.as_dict() | {"decision_hash": execution_policy_decision.decision_hash},
+                now_ms=now_ms, corr=corr, decision_time=now_ms,
+            )
         if self.kill.halted:
             raise RouterError(f"kill switch active: {sorted(t.value for t in self.kill.active)}")
         if decision.trade_intent_id != intent.trade_intent_id:
@@ -133,3 +163,6 @@ class ExecutionRouter:
             self._log(EventKind.EXECUTION_RECEIPT, {**{k: (v.value if hasattr(v, "value") else v) for k, v in asdict(r).items()}, "exit_action": ins.action, "exit_reason": ins.reason}, now_ms=now_ms, corr=r.trade_intent_id or ins.position_id)
             out.append(r)
         return out
+
+
+__all__ = ["ExecutionRouter", "RouterError", "resolve_execution_policy"]
