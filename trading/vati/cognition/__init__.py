@@ -30,6 +30,8 @@ from vati.cognition.contracts import (
     normalise,
 )
 
+from vati.cognition.blind_reviewer import BlindReviewer, CanaryHealth, ReviewVerdict
+from vati.cognition.budget import CognitiveBudget, Rung
 from vati.cognition.attribution import AttributionEngine, TradeFacts
 from vati.cognition.exam import ExamPaper, run_exam, standard_paper
 from vati.cognition.handoff import ContinuityState, HandoffReason, HandoffRecorder
@@ -46,6 +48,11 @@ from vati.cognition.world_model import CognitionStore, TradingWorldModel
 __all__ = [
     "Analogue",
     "AttributionEngine",
+    "BlindReviewer",
+    "CanaryHealth",
+    "CognitiveBudget",
+    "ReviewVerdict",
+    "Rung",
     "CognitivePerformanceLedger",
     "DeterministicOutcome",
     "ExamPaper",
