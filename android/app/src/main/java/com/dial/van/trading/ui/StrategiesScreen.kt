@@ -10,7 +10,6 @@ import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
-import androidx.compose.foundation.layout.weight
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material3.Button
 import androidx.compose.material3.ButtonDefaults
@@ -214,7 +213,7 @@ fun StrategiesScreen(
                                         if (staleParentStillOffered) {
                                             status = "Promotion receipt exists, but the old certificate is still offered by authoritative read-back. VAN is not claiming completion."
                                         } else {
-                                            val restart = body.get("requires_session_restart")
+                                            val restart = body?.get("requires_session_restart")
                                                 ?.jsonPrimitive?.contentOrNull == "true"
                                             status = if (restart) {
                                                 "Promotion verified in the ledger and read-back. Trading session restart is required before the new strategy state can be active."
