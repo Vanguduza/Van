@@ -17,6 +17,7 @@ from vati.app.account_lease import (
     InMemoryLeaseStore,
     LeaseOutcome,
     LeaseStoreUnavailable,
+    PostgresLeaseStore,
 )
 from vati.app.candidate_pool import CandidatePool, CandidateState
 from vati.app.instrument_evaluator import InstrumentEvaluator, InstrumentEvaluatorConfig
@@ -167,6 +168,53 @@ def test_submission_guard_fails_closed_when_store_is_lost():
     store.reachable = False
     with lease.submission_guard(lease.epoch, now_ms=1_000) as guarded:
         assert not guarded
+
+
+def test_postgres_submission_guard_uses_for_update_until_context_exit():
+    row = (ALIAS, "vm-a", 7, 0, 100, 30_000, "v", "sha")
+
+    class Cursor:
+        def __init__(self, conn):
+            self.conn = conn
+            self.closed = False
+
+        def execute(self, sql, args):
+            self.conn.sql.append((sql, args))
+
+        def fetchone(self):
+            return row
+
+        def close(self):
+            self.closed = True
+            self.conn.cursor_closed += 1
+
+    class Connection:
+        def __init__(self):
+            self.autocommit = True
+            self.sql = []
+            self.rollbacks = 0
+            self.cursor_closed = 0
+
+        def cursor(self):
+            return Cursor(self)
+
+        def rollback(self):
+            self.rollbacks += 1
+
+        def close(self):
+            pass
+
+    conn = Connection()
+    store = PostgresLeaseStore("ignored", connect=lambda _dsn: conn)
+    assert conn.autocommit is False
+
+    with store.submission_guard(ALIAS) as current:
+        assert current.lease_epoch == 7
+        assert conn.rollbacks == 0, "row lock must remain held inside the guard"
+        assert conn.sql and "FOR UPDATE" in conn.sql[-1][0].upper()
+
+    assert conn.rollbacks == 1, "guard exit must release the row lock transaction"
+    assert conn.cursor_closed == 1
 
 
 # ---------------------------------------------------------------- pool
