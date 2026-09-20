@@ -163,6 +163,77 @@ class CoverageReport:
         }
 
 
+
+@dataclass(frozen=True)
+class ConformalAdmissionPolicy:
+    """One strategy's explicit conformal admission requirement.
+
+    This policy can only add a refusal condition.  It carries no sizing value
+    and cannot widen mandate or platform ceilings.
+    """
+
+    strategy_id: str
+    bucket: str
+    worst_tolerable: Decimal
+    required: bool = True
+
+
+class ConformalAdmissionRefused(RuntimeError):
+    def __init__(self, code: str, detail: str) -> None:
+        super().__init__(detail)
+        self.code = code
+        self.detail = detail
+
+
+class ConformalAdmissionGate:
+    """RiskAuthority-side conformal evidence gate (TRD-REV51-117 hook).
+
+    Strategies not explicitly registered here retain their existing deterministic
+    authority path.  A registered strategy must have a point forecast and enough
+    fresh calibration evidence; the interval may only reject, never increase size.
+    """
+
+    def __init__(self, engine: "ConformalEngine",
+                 policies: Mapping[str, ConformalAdmissionPolicy]) -> None:
+        self.engine = engine
+        self._policies = dict(policies)
+
+    def policy_for(self, strategy_id: str) -> Optional[ConformalAdmissionPolicy]:
+        return self._policies.get(strategy_id)
+
+    def check(self, intent, snapshot) -> Optional[ConformalInterval]:
+        policy = self.policy_for(str(intent.strategy_id))
+        if policy is None or not policy.required:
+            return None
+        point = getattr(intent, "expected_gross_move_pct", None)
+        if point is None:
+            raise ConformalAdmissionRefused(
+                "CONFORMAL_POINT_MISSING",
+                f"{intent.strategy_id} requires conformal evidence but has no point forecast",
+            )
+        bucket = policy.bucket.format(
+            strategy_id=intent.strategy_id,
+            symbol=intent.symbol,
+            account_alias=intent.account_alias,
+        )
+        try:
+            interval = self.engine.interval(
+                bucket,
+                point=dec(point),
+                now_ms=int(snapshot.now_unix) * 1000,
+            )
+        except (InsufficientCalibration, CalibrationStale) as exc:
+            raise ConformalAdmissionRefused(
+                "CONFORMAL_EVIDENCE_UNAVAILABLE", str(exc)) from exc
+        if not interval.admits(worst_tolerable=policy.worst_tolerable):
+            raise ConformalAdmissionRefused(
+                "CONFORMAL_WORST_CASE",
+                f"{bucket}: lower bound {interval.lower} is below "
+                f"{policy.worst_tolerable}",
+            )
+        return interval
+
+
 class ConformalEngine:
     """Split-conformal intervals per bucket, with their own coverage record."""
 

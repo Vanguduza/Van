@@ -12,7 +12,7 @@ import json
 from dataclasses import asdict, dataclass, field
 from decimal import Decimal
 from enum import Enum
-from typing import Any
+from typing import Any, Optional
 
 from vati.risk.contracts import (
     Direction,
@@ -24,6 +24,7 @@ from vati.risk.contracts import (
     StrategyState,
     TradeIntent,
 )
+from vati.risk.conformal import ConformalAdmissionGate, ConformalAdmissionRefused
 from vati.risk.governor import drawdown_verdict
 from vati.risk.heat import currency_leg_exposure, open_stop_risk
 from vati.risk.mandate import AuthorizationMode, PlatformCeilings, TradingMandate
@@ -101,10 +102,13 @@ def _canonical_hash(obj: Any) -> str:
 
 
 class RiskAuthority:
-    def __init__(self, mandate: TradingMandate, *, ceilings: PlatformCeilings = PlatformCeilings()) -> None:
+    def __init__(self, mandate: TradingMandate, *,
+                 ceilings: PlatformCeilings = PlatformCeilings(),
+                 conformal_gate: Optional[ConformalAdmissionGate] = None) -> None:
         mandate.validate(ceilings)
         self.mandate = mandate
         self.ceilings = ceilings
+        self.conformal_gate = conformal_gate
         self._seen_keys: set[str] = set()
 
     # ----------------------------------------------------------------- helpers
@@ -290,6 +294,15 @@ class RiskAuthority:
         if intent.expected_gross_move_pct is not None and contract.round_trip_cost_pct > ZERO:
             if intent.expected_gross_move_pct < contract.round_trip_cost_pct * Decimal("2"):
                 return rej("EDGE_BELOW_COST", f"expected move {intent.expected_gross_move_pct} < 2 × round-trip cost {contract.round_trip_cost_pct}")
+
+        # 10c. Optional conformal admission. Only strategies explicitly registered
+        # in the conformal gate are affected. The gate can reject uncertainty; it
+        # cannot size or increase risk (TRD-REV51-117 / INV-AUTH-001).
+        if self.conformal_gate is not None:
+            try:
+                self.conformal_gate.check(intent, snapshot)
+            except ConformalAdmissionRefused as exc:
+                return rej(exc.code, exc.detail)
 
         # 11. Sizing
         try:

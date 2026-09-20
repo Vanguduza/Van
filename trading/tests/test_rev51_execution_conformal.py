@@ -25,12 +25,16 @@ from vati.execution.style_selector import (
     Urgency,
 )
 from vati.risk.conformal import (
+    ConformalAdmissionGate,
+    ConformalAdmissionPolicy,
     ConformalEngine,
     InsufficientCalibration,
     Residual,
     min_calibration_size,
 )
+from vati.risk import Decision, RiskAuthority, TradingMandate
 from vati.risk.contracts import SymbolContract
+from conftest import NOW, intent, mandate_dict, snapshot
 
 D = Decimal
 
@@ -298,3 +302,63 @@ def test_the_same_calibration_gives_the_same_interval():
     a, b = _calibrated(), _calibrated()
     assert (a.interval("eurusd-h1", point=D("7")).digest
             == b.interval("eurusd-h1", point=D("7")).digest)
+
+
+
+# --------------------------------------------------------- 117 authority hook
+def _authority_with_conformal(eurusd, *, worst="0.005", calibrated=True):
+    engine = ConformalEngine()
+    if calibrated:
+        now_ms = NOW * 1000
+        for i in range(12):
+            engine.add_residual(
+                "FX-LONDON-BREAKOUT-04:EURUSD",
+                Residual(D("0.001"), now_ms - i),
+            )
+    gate = ConformalAdmissionGate(
+        engine,
+        {
+            "FX-LONDON-BREAKOUT-04": ConformalAdmissionPolicy(
+                strategy_id="FX-LONDON-BREAKOUT-04",
+                bucket="{strategy_id}:{symbol}",
+                worst_tolerable=D(worst),
+            )
+        },
+    )
+    return RiskAuthority(
+        TradingMandate.from_mapping(mandate_dict()),
+        conformal_gate=gate,
+    )
+
+
+def test_risk_authority_rejects_when_required_conformal_evidence_is_missing(eurusd):
+    authority = _authority_with_conformal(eurusd, calibrated=False)
+    d = authority.evaluate(
+        intent(expected_gross_move_pct=D("0.01")),
+        snapshot(eurusd),
+    )
+    assert d.decision is Decision.REJECTED
+    assert d.reason_code == "CONFORMAL_EVIDENCE_UNAVAILABLE"
+
+
+def test_risk_authority_admits_only_when_worst_conformal_bound_survives(eurusd):
+    authority = _authority_with_conformal(eurusd, worst="0.005")
+    d = authority.evaluate(
+        intent(expected_gross_move_pct=D("0.01")),
+        snapshot(eurusd),
+    )
+    assert d.decision in (Decision.APPROVED, Decision.REDUCED)
+
+
+def test_risk_authority_conformal_gate_can_only_reject_not_increase_size(eurusd):
+    baseline = RiskAuthority(TradingMandate.from_mapping(mandate_dict())).evaluate(
+        intent(expected_gross_move_pct=D("0.01")),
+        snapshot(eurusd),
+    )
+    gated = _authority_with_conformal(eurusd, worst="0.0095").evaluate(
+        intent(expected_gross_move_pct=D("0.01")),
+        snapshot(eurusd),
+    )
+    assert gated.decision is Decision.REJECTED
+    assert gated.reason_code == "CONFORMAL_WORST_CASE"
+    assert gated.approved_size <= baseline.approved_size
