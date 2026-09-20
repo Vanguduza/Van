@@ -20,8 +20,8 @@
     "PRODUCTION_CERTIFIED"
   ],
   "counts": {
-    "P0": 25,
-    "P1": 47,
+    "P0": 27,
+    "P1": 48,
     "P2": 38,
     "P3": 29,
     "P4": 7
@@ -6394,6 +6394,126 @@
         "residual_class": "ENVIRONMENT_UNVERIFIED",
         "posture": "fail-closed",
         "ci_run": "https://github.com/Vanguduza/Van/actions/runs/35501946537"
+      }
+    },
+    {
+      "id": "P0-SESS-009",
+      "severity": "P0",
+      "domain": "session",
+      "title": "The §20 durable session is constructed, fed two inputs, and never started",
+      "description": "`VanApplication.onCreate` builds `VanHermesSessionManager` and calls exactly two of its ten public methods: `setInteractionActive` and `setStandbyConditions`. `start()` has no caller anywhere in the app — four references to the field in the entire source tree, and none of them starts it.\n\nEverything §20 describes on the device follows from `start()`. No socket is opened, so `resume()` never runs and the §20.12 reconciliation never executes; `restoreOutbox()` is reached only from `start()`, so nothing is ever restored; and `submit()` — the only way a command enters the durable outbox — has no caller either. The owner's commands go out through `VanCommandController` to `POST /v1/commands`, and events arrive by HTTP polling inside a `LaunchedEffect` on the Work screen, which also stops when that screen is not composed.\n\nTwo checkpoints made the session outbox durable (C14) and then atomic (C15) without either noticing that nothing puts anything in it. Every test passed because every one of them called the outbox directly.\n\n`tools/audit/kotlin_reachability.py` did not catch it and could not: it asks whether anything *references* a file, and the constructor is a reference.",
+      "requirement": "docs/VAN_REMOTE_BROWSER_PRODUCTION_BLUEPRINT_REV_1_5.md §§20.1, 20.3, 20.14",
+      "authority": "VAN Remote Browser Production Blueprint Rev 1.5",
+      "repository_evidence": [
+        "android/app/src/main/java/com/dial/van/VanApplication.kt",
+        "android/app/src/main/java/com/dial/van/session/VanHermesSessionManager.kt",
+        "android/app/src/main/java/com/dial/van/control/VanCommandController.kt"
+      ],
+      "runtime_evidence": [],
+      "affected_components": [
+        "android",
+        "session"
+      ],
+      "root_cause": "A subsystem was built bottom-up and its top was never attached. Each checkpoint improved a part of it against tests that called that part directly, and the reachability tool answers a weaker question than the one that mattered — whether anything references the file, rather than whether anything drives the object.",
+      "remediation": "Recorded before it is repaired. The seven matrix rows whose named consumer is a device-side §20 entry point are corrected to BUILT_UNWIRED, and `tests/contracts/test_session_is_driven.py` holds the matrix to whether `start()` has a caller — in both directions, so the check does not have to be deleted when the session is wired.",
+      "current_status": "CLOSED",
+      "remediation_gate": "RB C16",
+      "validation_gate": "G2",
+      "closure": {
+        "state": "EXTERNALLY_BLOCKED_REPOSITORY_COMPLETE",
+        "summary": "The claim is corrected, not the code. RB-035, RB-061, RB-062, RB-064, RB-068, RB-069 and RB-071 now read BUILT_UNWIRED and name the one cause. A contract test asserts the agreement between the matrix and whether anything calls `start()`, and fails if a new public method on the session gains no caller.",
+        "changed": [
+          "docs/project-state/REMOTE_BROWSER_IMPLEMENTATION_MATRIX.json",
+          "tests/contracts/test_session_is_driven.py"
+        ],
+        "verified_by": [
+          "tests/contracts/test_session_is_driven.py"
+        ],
+        "counterexample": "A test asserting 'the session is unwired' passes today and has to be deleted the moment it is wired, which turns a correction into a fossil. This asserts the agreement instead: with RB-069 put back to WIRED_UNPROVEN and nothing calling `start()`, two of its four tests fail; wire the session and it stops objecting.",
+        "residual": "Wiring the session is a change to the app's primary command and event transport, and no test in this repository can execute `VanApplication`. What is closed here is the false claim; the wiring itself is RB C16b's, and whether it behaves on a real phone is Gate 14's.",
+        "residual_reason": "The AGP is unreachable in the audit container and `VanApplication` is Android, so CI compiles it and nothing here runs it.",
+        "residual_class": "ENVIRONMENT_UNVERIFIED",
+        "posture": "fail-closed"
+      }
+    },
+    {
+      "id": "P1-SESS-010",
+      "severity": "P1",
+      "domain": "session",
+      "title": "§20.1 states two SHALLs for the device session and neither is implemented",
+      "description": "§20.1 says `VanHermesSessionManager` SHALL feed durable downstream pages and events into the existing `EventStream.applyPage(...)`. It does not: `onMessage` handles `session.ack` and `session.epoch_changed` and drops everything else on the floor. The only caller of `EventStream.applyPage` in the app is the Work screen's HTTP polling loop.\n\n§20.1 also lists a `session/transport/` directory — `HermesTransport`, `TransportHealth`, `WebSocketTransport`, `Http2StreamTransport` — which was never created. `DEFAULT_PATHS` declares a `fallback-http2` path and the manager holds a single `WebSocket?`, so the fallback is a descriptor the supervisor can score and nothing can open. The supervisor's failover target is therefore a path with no transport behind it.",
+      "requirement": "docs/VAN_REMOTE_BROWSER_PRODUCTION_BLUEPRINT_REV_1_5.md §20.1",
+      "authority": "VAN Remote Browser Production Blueprint Rev 1.5",
+      "repository_evidence": [
+        "android/app/src/main/java/com/dial/van/session/VanHermesSessionManager.kt",
+        "android/app/src/main/java/com/dial/van/command/modules/WorkModules.kt"
+      ],
+      "runtime_evidence": [],
+      "affected_components": [
+        "android",
+        "session",
+        "events"
+      ],
+      "root_cause": "The blueprint's file list was read as a suggestion and its two SHALL sentences sit in prose between two code blocks, where nothing checked them. The session was built as one class with a socket in it rather than as a transport abstraction with two implementations, which is why there is no second path to fail over to.",
+      "remediation": "Recorded. RB-062 is corrected to BUILT_UNWIRED with the distinction stated — the Gateway's streaming route exists and the device has no HTTP/2 transport at all — and RB-035's note says what the app actually does for events.",
+      "current_status": "CLOSED",
+      "remediation_gate": "RB C16",
+      "validation_gate": "G2",
+      "closure": {
+        "state": "EXTERNALLY_BLOCKED_REPOSITORY_COMPLETE",
+        "summary": "Both gaps are named in the rows that would otherwise imply they are closed. The failover asymmetry matters most: a supervisor that can name a second path, and a manager that can only open the first, would report a failover target it cannot reach.",
+        "changed": [
+          "docs/project-state/REMOTE_BROWSER_IMPLEMENTATION_MATRIX.json"
+        ],
+        "verified_by": [
+          "tests/contracts/test_session_is_driven.py"
+        ],
+        "counterexample": "Marking RB-062 BUILT_UNWIRED because the Gateway route is untested would be the wrong reason and would be fixed by a Gateway test, leaving the device with no transport. The note states which half is missing.",
+        "residual": "Building `Http2StreamTransport` and routing downstream pages into `EventStream` are implementation, not correction, and neither can be executed here.",
+        "residual_reason": "The AGP is unreachable in the audit container.",
+        "residual_class": "ENVIRONMENT_UNVERIFIED",
+        "posture": "fail-closed"
+      }
+    },
+    {
+      "id": "P0-SESS-011",
+      "severity": "P0",
+      "domain": "session",
+      "title": "An owner command issued with no network is lost, not queued",
+      "description": "`VanCommandController.submit` calls `gateway.dispatchCommand`, which rethrows on a transport failure; `recordFailure` then appends \"Command dispatch failed\" to the conversation and clears the submitting flag. Nothing retries it and nothing stores it.\n\nNeither store-and-forward path catches it. §20.14's durable outbox is unreachable (P0-SESS-009): `VanHermesSessionManager.submit` has no caller. The pre-§20 path — `EncryptedCommandQueue` drained by `QueueReplayer` — is live and working, and is fed by exactly two callers, `VanNotificationListenerService` and `ShareIntakeActivity`. Both are context ingestion. The owner's own commands enter neither.\n\nSo the failure the whole of §20.14 exists to prevent is the one the app has: the owner speaks or types an instruction in a tunnel, sees an error, and the instruction is gone. §43 row 63 recorded STORE_AND_FORWARD as REPOSITORY_PROVEN throughout, and the evidence it cited was real — `DurableOutboxTest`, `OutboxPersistenceTest`, `RestartSeamTest` all pass, and all of them call the outbox directly.",
+      "requirement": "docs/VAN_REMOTE_BROWSER_PRODUCTION_BLUEPRINT_REV_1_5.md §§20.1, 20.14",
+      "authority": "VAN Remote Browser Production Blueprint Rev 1.5",
+      "repository_evidence": [
+        "android/app/src/main/java/com/dial/van/control/VanCommandController.kt",
+        "android/app/src/main/java/com/dial/van/gateway/VanGatewayClient.kt",
+        "android/app/src/main/java/com/dial/van/gateway/QueueReplayer.kt"
+      ],
+      "runtime_evidence": [],
+      "affected_components": [
+        "android",
+        "session",
+        "queue"
+      ],
+      "root_cause": "Two store-and-forward mechanisms, each correct, each with callers that are not the owner's command path. The older queue was built for ingestion and kept its ingestion callers; the newer outbox was built for commands and never acquired one.",
+      "remediation": "Recorded at C16a ahead of the repair, because the §43 row that states the opposite is the one somebody would act on. The fix is RB C16b: start the session and give `VanCommandController` a failure branch that hands the signed command body to §20.14's outbox rather than dropping it.",
+      "current_status": "CLOSED",
+      "remediation_gate": "RB C16",
+      "validation_gate": "G2",
+      "closure": {
+        "state": "EXTERNALLY_BLOCKED_REPOSITORY_COMPLETE",
+        "summary": "§43 row 63 is corrected from REPOSITORY_PROVEN to BLOCKED_EXTERNAL with the reason stated: the decisions are proven and the path that would reach them is not wired. The repair is code in `VanApplication` and `VanCommandController`, neither of which any test here can execute.",
+        "changed": [
+          "evidence/van-system-audit/production_acceptance.json",
+          "docs/project-state/REMOTE_BROWSER_IMPLEMENTATION_MATRIX.json"
+        ],
+        "verified_by": [
+          "tests/contracts/test_session_is_driven.py"
+        ],
+        "counterexample": "Every test of the outbox passes and the owner still loses the command, which is why the check that matters is the one asking whether anything calls `submit` rather than whether `submit` is correct.",
+        "residual": "The repair itself. `VanCommandController` and `VanApplication` are Android and are compiled by CI only; whether a command survives a real tunnel is Gate 14's to observe.",
+        "residual_reason": "The AGP is unreachable in the audit container.",
+        "residual_class": "ENVIRONMENT_UNVERIFIED",
+        "posture": "fail-closed"
       }
     }
   ],

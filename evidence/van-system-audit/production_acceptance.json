@@ -10,7 +10,7 @@
   },
   "verdict_rule": "PRODUCTION_ACCEPTED only when every requirement is REPOSITORY_PROVEN or NOT_APPLICABLE_WITH_REASON. Anything else is REPOSITORY_COMPLETE_PENDING_EXTERNAL, and the checker recomputes it.",
   "verdict": "REPOSITORY_COMPLETE_PENDING_EXTERNAL",
-  "blocked_count": 44,
+  "blocked_count": 45,
   "note": "REPOSITORY_PROVEN is the strongest thing a repository can say and it is weaker than certification. The programme's distinction holds here: NOT VERIFIED is not NOT IMPLEMENTED, and neither is substituted for the other.",
   "requirements": [
     {
@@ -593,7 +593,7 @@
         "android/verification/src/test/kotlin/com/dial/van/session/SessionReconciliationTest.kt",
         "android/verification/src/test/kotlin/com/dial/van/session/SessionOutboxDurabilityTest.kt"
       ],
-      "note": "This row was REPOSITORY_PROVEN and the requirement was false, which is the single most useful thing in this register. Its evidence proved the Gateway's admission and the envelope's identity — both correct — and nothing proved the phone's half. The phone asked by message id, the Gateway answered by command id, so every answer was `UNKNOWN`; and the phone then dropped every key it had asked about, unknowns included. Every reconnect silently discarded every unacknowledged owner command (P0-SESS-005).\n\nThe green came from evidence that was about the right section and the wrong side of it. What is now cited executes both sides: the Gateway's answer for a message it admitted without opening a mission, scoped to the asking session, and the phone's plan — resend on absent or `UNKNOWN`, settle on anything else — including a restored outbox entry killed between the socket write and the durable `forget`."
+      "note": "**Narrowed at C16.** What is proven is the Gateway's half and the device's decisions, which is what REPOSITORY_PROVEN means in this register. The device never performs a resume, because it never opens a session (P0-SESS-009), so no reconciliation runs in the app. The live command path is `POST /v1/commands`, where a lost acknowledgement is answered by the Gateway's idempotency service rather than by §20.12.\n\nThis row was REPOSITORY_PROVEN and the requirement was false, which is the single most useful thing in this register. Its evidence proved the Gateway's admission and the envelope's identity — both correct — and nothing proved the phone's half. The phone asked by message id, the Gateway answered by command id, so every answer was `UNKNOWN`; and the phone then dropped every key it had asked about, unknowns included. Every reconnect silently discarded every unacknowledged owner command (P0-SESS-005).\n\nThe green came from evidence that was about the right section and the wrong side of it. What is now cited executes both sides: the Gateway's answer for a message it admitted without opening a mission, scoped to the asking session, and the phone's plan — resend on absent or `UNKNOWN`, settle on anything else — including a restored outbox entry killed between the socket write and the durable `forget`."
     },
     {
       "n": 59,
@@ -642,14 +642,15 @@
       "n": 63,
       "group": "VAN⇄Hermes continuity",
       "requirement": "STORE_AND_FORWARD state is proven",
-      "status": "REPOSITORY_PROVEN",
+      "status": "BLOCKED_EXTERNAL",
       "evidence": [
         "android/verification/src/test/kotlin/com/dial/van/session/DurableOutboxTest.kt",
         "android/verification/src/test/kotlin/com/dial/van/session/OutboxPersistenceTest.kt",
         "android/verification/src/test/kotlin/com/dial/van/session/RestartSeamTest.kt",
         "android/verification/src/test/kotlin/com/dial/van/session/SessionOutboxDurabilityTest.kt"
       ],
-      "note": "Stronger than when this row was first written, and it had to be. The policy was proven and its records lived in RAM, so a process death — which Android does routinely — lost the reconfirmation and the expiry while the command could survive. §20.14's metadata now rides on the canonical queue's own record, one write, and the restart seam is executed end to end: queued command, process death, recovery, epoch adoption, reconfirm/expiry decision, exactly-once send.\n\nStronger again at C15. The seam it rested on — `EncryptedSessionOutboxStore` — could not be executed at all, so every test above it ran against a fake that implemented the interface as intended. The shipped adapter did `remove()` then `enqueue()`: a kill between them lost the command, the row was never keyed by the message id so `forget` matched nothing, and `enqueue`'s idempotency de-duplication discarded the owner's reconfirmation. The adapter now depends on `OutboxRecordStore` and is itself executed, against a store that can be killed between operations."
+      "note": "**Corrected at C16, and it had read REPOSITORY_PROVEN since it was written.** The evidence below is real and all of it passes; every one of those tests calls the outbox directly. In the running app nothing does. `VanHermesSessionManager.submit` has no caller, `start()` has no caller, and `VanCommandController` drops a command whose dispatch failed instead of storing it — so the owner's instruction in a tunnel is lost, which is the exact outcome §20.14 exists to prevent (P0-SESS-009, P0-SESS-011).\n\nBlocked rather than proven, and the blocker is named: the device-side wiring in `VanApplication` and `VanCommandController`, which is Android and is compiled by CI only. The repository proves the decisions; it cannot prove the owner's command survives, and until C16b it does not.\n\nStronger than when this row was first written, and it had to be. The policy was proven and its records lived in RAM, so a process death — which Android does routinely — lost the reconfirmation and the expiry while the command could survive. §20.14's metadata now rides on the canonical queue's own record, one write, and the restart seam is executed end to end: queued command, process death, recovery, epoch adoption, reconfirm/expiry decision, exactly-once send.\n\nStronger again at C15. The seam it rested on — `EncryptedSessionOutboxStore` — could not be executed at all, so every test above it ran against a fake that implemented the interface as intended. The shipped adapter did `remove()` then `enqueue()`: a kill between them lost the command, the row was never keyed by the message id so `forget` matched nothing, and `enqueue`'s idempotency de-duplication discarded the owner's reconfirmation. The adapter now depends on `OutboxRecordStore` and is itself executed, against a store that can be killed between operations.",
+      "blocked_by": "device-side wiring: VanHermesSessionManager.start() and a submit path into §20.14's outbox, neither executable in this repository"
     },
     {
       "n": 64,

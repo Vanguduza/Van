@@ -12,10 +12,15 @@ a checker in CI rather than written here, and each one names the checker.
 ## The verdict, stated once and not softened
 
 The Remote Browser is **not production accepted** and cannot be from a repository. §43
-names one hundred and four requirements; sixty are proven here and forty-four are not.
-The forty-four are not a backlog. Thirty-seven need a Browser Stream Host, a carrier
-handover or the owner's S24 Ultra, and seven need the owner to provision or accept
-something — a keystore, a voice asset pack, a second ingress, a look at a screen.
+names one hundred and four requirements; fifty-nine are proven here and forty-five are
+not. The forty-five are not all a backlog. Thirty-eight need a Browser Stream Host, a
+carrier handover or the owner's S24 Ultra, and seven need the owner to provision or
+accept something — a keystore, a voice asset pack, a second ingress, a look at a screen.
+
+One of the thirty-eight arrived by subtraction and is the most useful line in this
+document. Row 63, STORE_AND_FORWARD, read `REPOSITORY_PROVEN` from the day it was
+written until C16, on evidence that was real and that all passes. Every one of those
+tests calls the outbox directly, and in the running app nothing does.
 
 Nothing in §43's **Runtime**, **Performance** or **Stream/control topology** groups is
 proven, because none of it exists here to be proven against. Not one frame has been drawn
@@ -29,11 +34,11 @@ not mean anyone has watched it work on a phone.
 
 | Register | Contents | Checker |
 |---|---|---|
-| `evidence/van-system-audit/findings.json` | 146 findings, all closed: 76 `INTEGRATED_AND_EVIDENCED`, 64 `EXTERNALLY_BLOCKED_REPOSITORY_COMPLETE`, 6 `DELIBERATELY_REMOVED_CANON_CORRECTED` | `tools/ci/maturity_gate.py` — refuses a closure state that claims more than its residual class allows |
+| `evidence/van-system-audit/findings.json` | 149 findings, all closed: 76 `INTEGRATED_AND_EVIDENCED`, 67 `EXTERNALLY_BLOCKED_REPOSITORY_COMPLETE`, 6 `DELIBERATELY_REMOVED_CANON_CORRECTED` | `tools/ci/maturity_gate.py` — refuses a closure state that claims more than its residual class allows |
 | `evidence/van-system-audit/component_ledger.json` | 180 components, all at a terminal state: 113 integrated, 60 externally blocked, 7 deliberately removed | `tools/ci/maturity_gate.py`, `tools/ci/ledger_reconcile.py` — the first refuses a ledger that overstates, the second one that understates |
-| `docs/project-state/REMOTE_BROWSER_IMPLEMENTATION_MATRIX.json` | 122 rows: 88 `WIRED_UNPROVEN`, 21 `NOT_STARTED`, 8 `BUILT_UNWIRED`, 3 `BLOCKED`, 2 `VERIFIED_UNCERTIFIED` | `tools/ci/ledger_reconcile.py` — refuses a row whose booleans contradict its status, and an empty `external_gates` |
+| `docs/project-state/REMOTE_BROWSER_IMPLEMENTATION_MATRIX.json` | 122 rows: 81 `WIRED_UNPROVEN`, 21 `NOT_STARTED`, 15 `BUILT_UNWIRED`, 3 `BLOCKED`, 2 `VERIFIED_UNCERTIFIED` | `tools/ci/ledger_reconcile.py` — refuses a row whose booleans contradict its status, and an empty `external_gates` |
 | `evidence/van-system-audit/red_team_register.json` | §38's 70 scenarios: 61 `PASS`, 9 `BLOCKED_EXTERNAL`, **0 assumed** | `tools/ci/red_team_register.py` — every `PASS` must cite a runnable pytest node id |
-| `evidence/van-system-audit/production_acceptance.json` | §43's 104 requirements: 60 proven, 37 blocked external, 7 owner deployment | `tools/ci/production_acceptance.py` — recomputes the verdict from the rows |
+| `evidence/van-system-audit/production_acceptance.json` | §43's 104 requirements: 59 proven, 38 blocked external, 7 owner deployment | `tools/ci/production_acceptance.py` — recomputes the verdict from the rows |
 | `docs/project-state/AUTHORITY_MAP.yaml` | every invariant, owned once | `tools/ci/authority_map.py` |
 
 Six registers, six checkers, all six in `.github/workflows/van-ci.yml`, and each with a
@@ -56,7 +61,7 @@ Every one needs something no commit can supply, and each row says which:
   RB-078 bundled TTS) — owner decision 2, with minSdk raised to 31 so the platform
   recogniser is always present, which is the other half of that decision.
 
-## The eight `BUILT_UNWIRED` rows, and why that is the honest status
+## The 15 `BUILT_UNWIRED` rows, and why that is the honest status
 
 RB-010 (stream-host provisioning), RB-116 (Trading Core → Stream Host mTLS), RB-118
 (profile storage) are built and have nothing to be wired to. RB-072, RB-074, RB-076,
@@ -69,9 +74,24 @@ second authenticated socket it governs is not. `VanHermesSessionManager` holds o
 `WebSocket`, so a `StandbyDecision` of `WARM_STANDBY` says what the phone can afford and
 not that a spare path is open. Three tests now fail if the source implies otherwise.
 
-`BUILT_UNWIRED` is the status §42.5 exists to make sayable. None of these eight is hidden:
+Seven more were moved here at C16, and they share one cause: **the §20 device session is
+constructed and never started.** `VanApplication` builds `VanHermesSessionManager`, calls
+`setInteractionActive` and `setStandbyConditions`, and stops. `start()` has no caller
+anywhere in the app — four references to the field in the whole source tree. So no socket
+opens, nothing resumes, nothing is restored, and `submit` is never reached. RB-035,
+RB-061, RB-062, RB-064, RB-068, RB-069 and RB-071 all described things downstream of that
+call, and all seven read `WIRED_UNPROVEN`.
+
+Two checkpoints made the session outbox durable and then atomic without either noticing
+that nothing puts anything in it. `tools/audit/kotlin_reachability.py` did not catch it
+and could not: it asks whether anything *references* a file, and a constructor is a
+reference. `tests/contracts/test_session_is_driven.py` asks the other question, and holds
+the matrix to the answer in both directions — so it does not have to be deleted when the
+session is finally wired.
+
+`BUILT_UNWIRED` is the status §42.5 exists to make sayable. None of these is hidden:
 the reconciler refuses a row whose booleans contradict its status, and §43's "implementation
-matrix contains no hidden `BUILT_UNWIRED` item" is satisfied by all eight declaring it.
+matrix contains no hidden `BUILT_UNWIRED` item" is satisfied by every one declaring it.
 
 ## The three `BLOCKED` rows
 
