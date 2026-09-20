@@ -67,10 +67,22 @@ object OfflineSubmission {
         requiresLiveOwnerContext: Boolean,
         gatewayAnswered: Boolean,
         failureSummary: String,
+        noStaleReplay: Boolean = false,
     ): Verdict {
         if (gatewayAnswered) {
             // It arrived. Whatever happened next is an answer, not a lost command.
             return Verdict.Drop("Not done: $failureSummary")
+        }
+        if (noStaleReplay) {
+            // Not the same thing as needing the owner present, though they sound alike.
+            // `NO_STALE_REPLAY` is a contract with the Gateway: the command must carry an
+            // explicit expiry inside a sixty-second window, and the orchestrator denies it
+            // otherwise. Storing one in an outbox whose window is four hours guarantees a
+            // denial later — and the owner would have been told it was saved. Dropping it
+            // now, while they are still looking at the screen, is the honest outcome.
+            return Verdict.Drop(
+                "Not sent — this one is only good for a moment, and the moment passed.",
+            )
         }
         return when (OutboxPolicy.classify(actionClass, requiresLiveOwnerContext)) {
             CommandStorability.NEVER_STORE -> Verdict.Drop(

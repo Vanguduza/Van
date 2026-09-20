@@ -13,6 +13,18 @@ ALL = [
  # observable at the service level, where a router can be built with a kind unwired.
  # With all four delegates present in production the order of those two lines changes
  # nothing anybody can see, and an unobservable rule is one a later change removes.
+ # --- checkpoint 38: two languages, one question about the same bytes ---------------
+ (["../tests/contracts/test_stored_command_is_deliverable.py"], [
+   ("../android/app/src/main/java/com/dial/van/gateway/VanGatewayClient.kt",
+    '            .put("signature", signature)\n', "",
+    "C38 the body stored offline is unsigned, and is refused on the flush"),
+   ("../android/app/src/main/java/com/dial/van/gateway/VanGatewayClient.kt",
+    '            .put("command_id", commandId)\n', "",
+    "C38 the stored command has no id for the Gateway to admit it by"),
+   ("../android/app/src/main/java/com/dial/van/control/VanCommandController.kt",
+    "            gateway.buildCommandBody(", "            gateway.buildCommandBodyX(",
+    "C38 the offline path assembles its own payload again"),
+ ]),
  (["tests/test_session_transport_api.py", "tests/test_van_hermes_session.py"], [
    ("van_gateway/app.py",
     "            cancel_mission=_cancel_mission_through_session,\n", "",
@@ -1105,6 +1117,11 @@ ROOT_LEVEL = [
 #: Checkpoint 14, Kotlin half. Run by Gradle in android/verification rather than by pytest,
 #: because that harness is the only thing in this repository that can execute Kotlin at all.
 KOTLIN = [
+ # --- checkpoint 38: the stored command has to be one the Gateway can accept ---------
+ (f"{APP_KT}/session/OfflineSubmission.kt",
+  "        if (noStaleReplay) {",
+  "        if (false) {",
+  "C38 a command good for sixty seconds is saved for four hours and denied later"),
  # --- checkpoint 37: the command that could not be sent, and where it goes -----------
  (f"{APP_KT}/session/OfflineSubmission.kt",
   "        if (gatewayAnswered) {",

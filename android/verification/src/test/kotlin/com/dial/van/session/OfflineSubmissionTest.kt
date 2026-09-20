@@ -19,7 +19,10 @@ class OfflineSubmissionTest {
         requiresLiveOwnerContext: Boolean = false,
         gatewayAnswered: Boolean = false,
         failure: String = "timeout",
-    ) = OfflineSubmission.decide(actionClass, requiresLiveOwnerContext, gatewayAnswered, failure)
+        noStaleReplay: Boolean = false,
+    ) = OfflineSubmission.decide(
+        actionClass, requiresLiveOwnerContext, gatewayAnswered, failure, noStaleReplay,
+    )
 
     @Test
     fun `an ordinary command that never arrived is saved and sent later`() {
@@ -71,6 +74,28 @@ class OfflineSubmissionTest {
     }
 
     @Test
+    fun `a command that is only good for a moment is not stored for four hours`() {
+        // `NO_STALE_REPLAY` is a contract with the Gateway, not a storage preference: the
+        // orchestrator denies such a command unless it carries an explicit expiry inside a
+        // sixty-second window. Storing one in a four-hour outbox guarantees a refusal on
+        // the flush, and the owner would have been told it was saved. They find out at the
+        // moment it fails, which is hours after they could have done anything about it.
+        val verdict = decide(noStaleReplay = true)
+        assertTrue(verdict is OfflineSubmission.Verdict.Drop)
+        assertTrue("the moment passed" in verdict.ownerMessage)
+    }
+
+    @Test
+    fun `a moment-only command is refused before the storage question is asked`() {
+        // Ordering, and it is the whole point. Classified by `OutboxPolicy` first, this is
+        // an ordinary A1 and would be stored.
+        assertEquals(
+            CommandStorability.SAFE_TO_RETRY, OutboxPolicy.classify("A1", false),
+        )
+        assertTrue(decide(noStaleReplay = true) is OfflineSubmission.Verdict.Drop)
+    }
+
+    @Test
     fun `an elevated but reversible command is stored rather than dropped`() {
         // A3 is `STORE_UNTIL_TTL`, not `NEVER_STORE`. Dropping it would be the safe-looking
         // mistake: the owner loses work for no reason, which is the failure that trains
@@ -107,7 +132,8 @@ class OfflineSubmissionTest {
         // One rule, not two that agree today. If `OutboxPolicy` changes its mind about a
         // class, this must follow rather than drift.
         for (actionClass in listOf("A1", "A2", "A3", "A4", "A5")) {
-            val stored = decide(actionClass = actionClass) is OfflineSubmission.Verdict.Store
+            val stored = decide(actionClass = actionClass, noStaleReplay = false) is
+                OfflineSubmission.Verdict.Store
             val storable = OutboxPolicy.classify(actionClass, false) != CommandStorability.NEVER_STORE
             assertEquals(storable, stored, actionClass)
         }

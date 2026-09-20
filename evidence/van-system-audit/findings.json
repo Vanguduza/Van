@@ -20,7 +20,7 @@
     "PRODUCTION_CERTIFIED"
   ],
   "counts": {
-    "P0": 27,
+    "P0": 28,
     "P1": 49,
     "P2": 38,
     "P3": 29,
@@ -6560,6 +6560,51 @@
         "counterexample": "Telling the owner \"I'll check with you before I send it\" makes the product read as complete and leaves them waiting for a prompt that never comes — worse than saying nothing. `a held command is not promised a question that nothing asks` fails on that wording.",
         "residual": "The owner-facing screen that lists held work and answers the question. Compose, and not executable in this repository.",
         "residual_reason": "The AGP is unreachable in the audit container.",
+        "residual_class": "ENVIRONMENT_UNVERIFIED",
+        "posture": "fail-closed"
+      }
+    },
+    {
+      "id": "P0-SESS-013",
+      "severity": "P0",
+      "domain": "session",
+      "title": "The command stored for later was not one the Gateway could accept",
+      "description": "C16b's storage path built the envelope payload by hand: `{text, action_class, idempotency_key}`, plus a project and turn id. The Gateway's `command.submit` delegate turns that payload straight into a `CommandRequest`, which also requires `command_id`, `issued_at_unix` and `signature` — so every stored command would have been refused as `command_payload_invalid` on the flush.\n\nWorse than losing it. The owner is told their work is saved, and it is rejected on their behalf hours later on a reconnect nobody is watching; nothing looks wrong until it is too late to redo. Found by asking the question the previous checkpoint's own lesson names — not whether the code is correct, but whether the thing it produces can actually be used by the thing that receives it.\n\nA second defect came out of the same check. `VanOwnerCommand.noStaleReplay` was passed as `requiresLiveOwnerContext`, and the two are not the same: `NO_STALE_REPLAY` is a contract with the orchestrator requiring an explicit expiry inside sixty seconds, so storing such a command in a four-hour outbox guarantees a denial.",
+      "requirement": "docs/VAN_REMOTE_BROWSER_PRODUCTION_BLUEPRINT_REV_1_5.md §§20.2, 20.14",
+      "authority": "VAN Remote Browser Production Blueprint Rev 1.5",
+      "repository_evidence": [
+        "android/app/src/main/java/com/dial/van/gateway/VanGatewayClient.kt",
+        "android/app/src/main/java/com/dial/van/control/VanCommandController.kt",
+        "backend/van_gateway/models.py"
+      ],
+      "runtime_evidence": [],
+      "affected_components": [
+        "android",
+        "session",
+        "gateway"
+      ],
+      "root_cause": "The two sides of the store-and-forward seam are in different languages, so nothing could compare what one writes against what the other requires. Assembling the payload by hand looked reasonable because the fields it did carry are the ones a person thinks of as 'the command'.",
+      "remediation": "`buildCommandBody` is extracted from `dispatchCommand`, so the offline path stores the same signed body the Gateway would have received. Signed at submission rather than at flush, so `issued_at_unix` is the moment the owner issued it and the Gateway's own stale-intent refusal still means something. `noStaleReplay` is now its own parameter and produces a Drop with an owner-readable reason.",
+      "current_status": "CLOSED",
+      "remediation_gate": "RB C16",
+      "validation_gate": "G2",
+      "closure": {
+        "state": "EXTERNALLY_BLOCKED_REPOSITORY_COMPLETE",
+        "summary": "`tests/contracts/test_stored_command_is_deliverable.py` reads the Kotlin builder's own `body.put` calls and holds them against `CommandRequest`'s required fields — two languages, one question: is the thing written down a thing that can be delivered? It also pins that the offline path uses that builder rather than assembling its own, which is how this happened.",
+        "changed": [
+          "android/app/src/main/java/com/dial/van/gateway/VanGatewayClient.kt",
+          "android/app/src/main/java/com/dial/van/control/VanCommandController.kt",
+          "android/app/src/main/java/com/dial/van/session/OfflineSubmission.kt",
+          "android/app/src/main/java/com/dial/van/VanApplication.kt",
+          "tests/contracts/test_stored_command_is_deliverable.py"
+        ],
+        "verified_by": [
+          "tests/contracts/test_stored_command_is_deliverable.py",
+          "android/verification/src/test/kotlin/com/dial/van/session/OfflineSubmissionTest.kt"
+        ],
+        "counterexample": "Checking only that the required fields are present would pass while the offline path went back to hand-assembly, describing a function nothing on that path calls. Both were reproduced against the fixed tree — a hand-assembled payload and a body with the signature removed each fail one test.",
+        "residual": "That the delegate accepts a real stored body is asserted from the field list, not from a round trip: nothing here can run the Kotlin builder and hand its output to the Python model in one process.",
+        "residual_reason": "The AGP is unreachable in the audit container and the two halves are different languages.",
         "residual_class": "ENVIRONMENT_UNVERIFIED",
         "posture": "fail-closed"
       }

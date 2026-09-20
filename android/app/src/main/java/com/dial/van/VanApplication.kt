@@ -7,7 +7,6 @@ import android.net.NetworkCapabilities
 import android.net.NetworkRequest
 import com.dial.van.control.VanCommandController
 import com.dial.van.control.VanCommandSource
-import com.dial.van.control.VanOwnerCommand
 import com.dial.van.degraded.DegradedModeStore
 import com.dial.van.degraded.DeviceSignals
 import com.dial.van.gateway.ReplayReason
@@ -305,20 +304,17 @@ class VanApplication : Application(), VoiceInputCallback, TtsOutputCallback {
      * smuggles one in.
      */
     private fun storeCommandForLater(
-        command: VanOwnerCommand,
+        body: JSONObject,
         requiresLiveOwnerContext: Boolean,
     ): Boolean {
-        val payload = JSONObject()
-            .put("text", command.text)
-            .put("action_class", command.actionClass)
-            .put("idempotency_key", command.idempotencyKey)
-        command.projectId?.let { payload.put("project_id", it) }
-        command.turnId?.let { payload.put("turn_id", it) }
         val outcome = runCatching {
             vanSession.submit(
                 kind = "command.submit",
-                payload = payload,
-                actionClass = command.actionClass,
+                // The signed body the Gateway would have received, unchanged. Anything
+                // less is refused as `command_payload_invalid` when the outbox flushes,
+                // hours after the owner was told it was saved.
+                payload = body,
+                actionClass = body.optString("action_class", "A1"),
                 requiresLiveOwnerContext = requiresLiveOwnerContext,
             )
         }.getOrNull() ?: return false

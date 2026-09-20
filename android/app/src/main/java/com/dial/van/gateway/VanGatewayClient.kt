@@ -738,7 +738,23 @@ class VanGatewayClient(context: Context) {
      * Rev 3.1 signed owner-intent envelope. Authority-bearing provenance fields are HMAC-covered
      * by signature v2. Pairing/device-access authentication remains mandatory on the transport.
      */
-    suspend fun dispatchCommand(
+    /**
+     * §20.14 — the signed command body, built once and usable twice.
+     *
+     * Extracted from [dispatchCommand] because a command that could not be sent has to be
+     * *stored*, and storing "text plus an action class" stores something the Gateway
+     * cannot accept: `CommandRequest` requires `command_id`, `issued_at_unix` and
+     * `signature`, so a payload without them is refused as `command_payload_invalid` when
+     * the outbox finally flushes it. The owner would be told their work was saved and it
+     * would be rejected on their behalf hours later, which is a worse failure than losing
+     * it outright because nothing looks wrong until it is too late to redo.
+     *
+     * The signature covers `issued_at_unix`, so a stored body carries the moment the
+     * owner issued it rather than the moment it was sent — which is what makes the
+     * Gateway's own `owner_intent_max_age_seconds` the right rule for refusing it, rather
+     * than a re-signing here that would make every stored command look fresh.
+     */
+    fun buildCommandBody(
         text: String,
         actionClass: String = "A1",
         projectId: String? = null,
@@ -756,7 +772,7 @@ class VanGatewayClient(context: Context) {
         contextCapsuleRevision: Int? = null,
         contextCapsuleHash: String? = null,
         declaredTrust: String = TRUST_CONVERSATION,
-    ): JSONObject = withContext(Dispatchers.IO) {
+    ): JSONObject {
         val id = deviceId ?: error("not_enrolled")
         val secret = deviceSecret ?: error("not_enrolled")
         val commandId = UUID.randomUUID().toString()
@@ -824,6 +840,47 @@ class VanGatewayClient(context: Context) {
         if (contextCapsuleRevision != null) body.put("context_capsule_revision", contextCapsuleRevision)
         if (contextCapsuleHash != null) body.put("context_capsule_hash", contextCapsuleHash)
 
+        return body
+    }
+
+    suspend fun dispatchCommand(
+        text: String,
+        actionClass: String = "A1",
+        projectId: String? = null,
+        idempotencyKey: String,
+        approvalToken: String? = null,
+        approvalChallengeId: String? = null,
+        approvalSignatureBase64: String? = null,
+        approvalAlgorithm: String = OwnerApprovalKeyManager.PROOF_ALGORITHM,
+        issuedAtUnix: Long = System.currentTimeMillis() / 1000L,
+        turnId: String? = null,
+        originChannel: String = "UI",
+        expiresAtUnix: Long? = null,
+        noStaleReplay: Boolean = false,
+        speechEvidenceRef: String? = null,
+        contextCapsuleRevision: Int? = null,
+        contextCapsuleHash: String? = null,
+        declaredTrust: String = TRUST_CONVERSATION,
+    ): JSONObject = withContext(Dispatchers.IO) {
+        val body = buildCommandBody(
+            text = text,
+            actionClass = actionClass,
+            projectId = projectId,
+            idempotencyKey = idempotencyKey,
+            approvalToken = approvalToken,
+            approvalChallengeId = approvalChallengeId,
+            approvalSignatureBase64 = approvalSignatureBase64,
+            approvalAlgorithm = approvalAlgorithm,
+            issuedAtUnix = issuedAtUnix,
+            turnId = turnId,
+            originChannel = originChannel,
+            expiresAtUnix = expiresAtUnix,
+            noStaleReplay = noStaleReplay,
+            speechEvidenceRef = speechEvidenceRef,
+            contextCapsuleRevision = contextCapsuleRevision,
+            contextCapsuleHash = contextCapsuleHash,
+            declaredTrust = declaredTrust,
+        )
         VanLiveVisualState.dispatchStarted()
         try {
             val response = postJson("/v1/commands", body)

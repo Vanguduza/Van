@@ -103,7 +103,7 @@ class VanCommandController(
      * a build with nothing behind this must not tell the owner their work was saved.
      * It returns whether the command was actually stored.
      */
-    var storeForLater: ((VanOwnerCommand, requiresLiveOwnerContext: Boolean) -> Boolean)? = null
+    var storeForLater: ((body: org.json.JSONObject, needsReconfirm: Boolean) -> Boolean)? = null
 
     fun selectProject(projectId: String?) {
         _state.update { it.copy(selectedProjectId = projectId) }
@@ -405,13 +405,18 @@ class VanCommandController(
         val gatewayAnswered = throwable is GatewayHttpException
         val verdict = OfflineSubmission.decide(
             actionClass = command.actionClass,
-            requiresLiveOwnerContext = command.noStaleReplay,
+            // No separate signal for this at this call site yet: nothing upstream marks a
+            // command as only meaningful with the owner present. Stated rather than
+            // guessed, because passing `noStaleReplay` here — which was the first version
+            // — conflates a sixty-second Gateway contract with a storage policy, and the
+            // two want opposite answers.
+            requiresLiveOwnerContext = false,
             gatewayAnswered = gatewayAnswered,
             failureSummary = safeMessage,
+            noStaleReplay = command.noStaleReplay,
         )
         val stored = when (verdict) {
-            is OfflineSubmission.Verdict.Store ->
-                storeForLater?.invoke(command, verdict.needsReconfirm) == true
+            is OfflineSubmission.Verdict.Store -> storeSignedBody(command, verdict.needsReconfirm)
             is OfflineSubmission.Verdict.Drop -> false
         }
         // Said rather than assumed. A build with no outbox behind `storeForLater`, or a
@@ -432,6 +437,38 @@ class VanCommandController(
                 lastError = if (stored) null else safeMessage,
             )
         }
+    }
+
+    /**
+     * Build the body the Gateway would have received, and hand *that* to the outbox.
+     *
+     * The first version stored `{text, action_class, idempotency_key}`, which is not a
+     * command: `CommandRequest` requires `command_id`, `issued_at_unix` and `signature`,
+     * so the delegate refuses it as `command_payload_invalid` when the outbox flushes.
+     * The owner would have been told their work was saved and it would have been rejected
+     * on their behalf hours later — nothing looking wrong until it was too late to redo.
+     *
+     * Signed here rather than at flush time so that `issued_at_unix` is the moment the
+     * owner issued it. Re-signing later would make a day-old instruction look fresh and
+     * defeat the Gateway's own stale-intent refusal.
+     */
+    private fun storeSignedBody(command: VanOwnerCommand, needsReconfirm: Boolean): Boolean {
+        val store = storeForLater ?: return false
+        val body = runCatching {
+            gateway.buildCommandBody(
+                text = command.text.trim(),
+                actionClass = command.actionClass,
+                projectId = command.projectId,
+                idempotencyKey = command.idempotencyKey,
+                approvalToken = command.approvalToken,
+                turnId = command.turnId,
+                originChannel = originChannel(command.source),
+                expiresAtUnix = command.expiresAtUnix,
+                noStaleReplay = command.noStaleReplay,
+                speechEvidenceRef = command.speechEvidenceRef,
+            )
+        }.getOrNull() ?: return false
+        return store(body, needsReconfirm)
     }
 
     /**
