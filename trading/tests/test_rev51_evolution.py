@@ -134,8 +134,12 @@ def test_evolution_modules_do_not_import_execution_or_live_authority():
             elif isinstance(node, ast.Import):
                 imports.extend(a.name for a in node.names)
         assert not any(i.startswith(forbidden) for i in imports), (path, imports)
-        source = path.read_text(encoding="utf-8")
-        assert "OrderCommand(" not in source and ".submit(" not in source
+        # Inspect executable syntax, not protection-vocabulary string literals.
+        # protected_paths.py deliberately contains "OrderCommand(" as a marker
+        # used to detect dangerous diffs; that does not make it an order sender.
+        calls = [node.func for node in ast.walk(tree) if isinstance(node, ast.Call)]
+        assert not any(isinstance(fn, ast.Name) and fn.id == "OrderCommand" for fn in calls)
+        assert not any(isinstance(fn, ast.Attribute) and fn.attr == "submit" for fn in calls)
 
 
 def test_admission_and_archive_events_are_ledgered():

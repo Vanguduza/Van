@@ -71,8 +71,29 @@ def test_expansion_projection_never_claims_live_promotion():
 
 
 def test_read_model_has_no_order_or_risk_mutation_imports():
+    import ast
     import inspect
     import vati.readmodels.cognition as module
-    source = inspect.getsource(module)
-    for forbidden in ("RiskAuthority", "ExecutionRouter", "VenueAdapter", "OrderCommand"):
-        assert forbidden not in source
+
+    # Test executable dependencies rather than prose. The module deliberately
+    # documents that these authority classes are absent, and the owner-facing
+    # read model names the canonical execution authority as data.
+    tree = ast.parse(inspect.getsource(module))
+    forbidden_modules = (
+        "vati.risk.authority", "vati.execution.router", "vati.execution.base",
+    )
+    imports = []
+    calls = []
+    for node in ast.walk(tree):
+        if isinstance(node, ast.ImportFrom):
+            imports.append(node.module or "")
+        elif isinstance(node, ast.Import):
+            imports.extend(a.name for a in node.names)
+        elif isinstance(node, ast.Call):
+            calls.append(node.func)
+    assert not any(name.startswith(forbidden_modules) for name in imports)
+    assert not any(
+        isinstance(fn, ast.Name)
+        and fn.id in {"RiskAuthority", "ExecutionRouter", "VenueAdapter", "OrderCommand"}
+        for fn in calls
+    )
