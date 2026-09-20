@@ -30,7 +30,7 @@ ALIAS = "fx_primary"
 
 
 def cand(cid, symbol, *, cost="3", gen=1_000, ttl=60_000, confidence="0.5",
-         regime="1", entry="1.1000") -> CandidateOpportunity:
+         regime="1", entry="1.1000", capsule_risk="0.005") -> CandidateOpportunity:
     return CandidateOpportunity(
         candidate_id=cid, account_alias=ALIAS, venue="deriv", symbol=symbol,
         strategy_id=f"S-{symbol}", strategy_version="1.0.0", capsule_hash="cap",
@@ -38,7 +38,8 @@ def cand(cid, symbol, *, cost="3", gen=1_000, ttl=60_000, confidence="0.5",
         mtf_state_hash=f"mtf-{symbol}", source_state_hashes=("s",), feature_contract_hash="fc",
         direction=Direction.LONG, entry=Decimal(entry), stop=Decimal("1.0950"),
         targets=(Decimal("1.1150"),), horizon="SWING",
-        cost_multiple=Decimal(cost), confidence_score=Decimal(confidence),
+        cost_multiple=Decimal(cost), capsule_risk_ceiling=Decimal(capsule_risk),
+        confidence_score=Decimal(confidence),
         regime_multiplier=Decimal(regime),
     ).sealed()
 
@@ -191,18 +192,22 @@ class _Book:
         self.open = 0
         self.capacity = capacity
         self.reads = 0
+        self.executions = []
+        self.risk_correlations = []
 
     def snapshot(self):
         self.reads += 1
         return {"open": self.open, "capacity": self.capacity}
 
     def risk(self, intent, snapshot):
+        self.risk_correlations.append(intent.correlation_multiplier)
         if snapshot["open"] >= snapshot["capacity"]:
             return _Decision("REJECTED", "PORTFOLIO_HEAT_EXCEEDED")
         return _Decision("APPROVED")
 
-    def execute(self, intent, decision):
+    def execute(self, intent, decision, targets, lease_epoch):
         self.open += 1
+        self.executions.append((intent, decision, targets, lease_epoch))
         return {"filled": True}
 
 
@@ -330,3 +335,89 @@ def test_coordinator_pass_is_hashed_and_replayable():
 def test_instrument_evaluator_cannot_execute():
     for name in ("execute", "send", "route", "size", "approve"):
         assert not hasattr(InstrumentEvaluator, name)
+
+
+def test_capsule_risk_ceiling_survives_the_coordinator_path():
+    class _Mandate:
+        def risk_budget_for(self, strategy_id):
+            return Decimal("0.01")
+
+    book = _Book(capacity=1)
+    c = AccountDecisionCoordinator(
+        CoordinatorConfig(account_alias=ALIAS),
+        evaluators=[_StubEvaluator("EURUSD", (cand("eur", "EURUSD", capsule_risk="0.005"),))],
+        allocator=OpportunityPortfolioAllocator(),
+        snapshot_fn=book.snapshot, risk_fn=book.risk, execute_fn=book.execute,
+        mandate=_Mandate(),
+    )
+    c.step(now_ms=1_000, bars_by_symbol={"EURUSD": [1]})
+    assert book.executions[0][0].requested_risk_pct == Decimal("0.005")
+
+
+def test_strategy_targets_reach_the_execution_join_unchanged():
+    book = _Book(capacity=1)
+    target = Decimal("1.1150")
+    c = _coordinator(book, [_StubEvaluator("EURUSD", (cand("eur", "EURUSD"),))])
+    c.step(now_ms=1_000, bars_by_symbol={"EURUSD": [1]})
+    assert book.executions[0][2] == (target,)
+
+
+def test_dependency_is_recomputed_after_the_first_execution_changes_the_book():
+    class _Dep:
+        def __init__(self, value):
+            self.correlation_multiplier = Decimal(value)
+
+    book = _Book(capacity=5)
+    c = AccountDecisionCoordinator(
+        CoordinatorConfig(account_alias=ALIAS, max_new_intents_per_pass=2),
+        evaluators=[
+            _StubEvaluator("EURUSD", (cand("eur", "EURUSD", cost="9"),)),
+            _StubEvaluator("GBPUSD", (cand("gbp", "GBPUSD", cost="8"),)),
+        ],
+        allocator=OpportunityPortfolioAllocator(),
+        snapshot_fn=book.snapshot, risk_fn=book.risk, execute_fn=book.execute,
+        risk_pct_fn=lambda candidate: Decimal("0.005"),
+        dependency_fn=lambda candidate, snapshot: _Dep("1" if snapshot["open"] == 0 else "0.25"),
+    )
+    c.step(now_ms=1_000, bars_by_symbol={"EURUSD": [1], "GBPUSD": [1]})
+    assert book.risk_correlations == [Decimal("1"), Decimal("0.25")]
+
+
+def test_missing_risk_authority_is_a_refusal_not_a_selection():
+    book = _Book(capacity=1)
+    c = AccountDecisionCoordinator(
+        CoordinatorConfig(account_alias=ALIAS),
+        evaluators=[_StubEvaluator("EURUSD", (cand("eur", "EURUSD"),))],
+        allocator=OpportunityPortfolioAllocator(),
+        snapshot_fn=book.snapshot, risk_fn=None, execute_fn=book.execute,
+        risk_pct_fn=lambda candidate: Decimal("0.005"),
+    )
+    result = c.step(now_ms=1_000, bars_by_symbol={"EURUSD": [1]})
+    assert result.outcomes[0].decision == "RISK_REJECTED"
+    assert result.outcomes[0].reason == "risk_authority_unbound"
+    assert book.open == 0
+
+
+def test_missing_execution_path_is_a_refusal_not_a_success():
+    book = _Book(capacity=1)
+    c = AccountDecisionCoordinator(
+        CoordinatorConfig(account_alias=ALIAS),
+        evaluators=[_StubEvaluator("EURUSD", (cand("eur", "EURUSD"),))],
+        allocator=OpportunityPortfolioAllocator(),
+        snapshot_fn=book.snapshot, risk_fn=book.risk, execute_fn=None,
+        risk_pct_fn=lambda candidate: Decimal("0.005"),
+    )
+    result = c.step(now_ms=1_000, bars_by_symbol={"EURUSD": [1]})
+    assert result.outcomes[0].decision == "EXECUTION_REFUSED"
+    assert result.outcomes[0].reason == "execution_path_unbound"
+    assert book.open == 0
+
+
+def test_lease_epoch_is_passed_to_the_execution_join():
+    store = InMemoryLeaseStore()
+    lease = AccountRuntimeLease(store, account_alias=ALIAS, instance_id="vm-a")
+    assert lease.acquire(now_ms=0).permits_orders
+    book = _Book(capacity=1)
+    c = _coordinator(book, [_StubEvaluator("EURUSD", (cand("eur", "EURUSD"),))], lease=lease)
+    c.step(now_ms=1_000, bars_by_symbol={"EURUSD": [1]})
+    assert book.executions[0][3] == lease.epoch
