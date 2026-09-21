@@ -14,6 +14,7 @@ from fastapi import FastAPI, Header, HTTPException, Request
 from fastapi.responses import JSONResponse, PlainTextResponse
 from pydantic import BaseModel, Field, ValidationError
 
+from van_gateway.action.service import ActionPolicyError
 from van_gateway.attention.engine import AttentionEngine
 from van_gateway.audit.service import AuditService
 from van_gateway.auth.service import AuthError, AuthService
@@ -187,6 +188,11 @@ class GoogleConnectBody(BaseModel):
     scopes: list[str] = Field(default_factory=lambda: list(NARROW_SCOPES))
 
 
+class GoogleAuthorizedActionBody(BaseModel):
+    execution_id: str = Field(min_length=1, max_length=256)
+    parameters: dict[str, Any] = Field(default_factory=dict)
+
+
 class GoogleArtifactBody(BaseModel):
     source_tool: str
     output_hash: str
@@ -313,6 +319,7 @@ class TicketConfirmRequest(BaseModel):
 #: route at all.
 GOOGLE_CONTROL_ROUTES: frozenset[str] = frozenset({
     "/v1/google/gmail/search",
+    "/v1/google/actions/execute",
     "/v1/google/gmail/send",
     "/v1/google/gmail/draft",
     "/v1/google/calendar/agenda",
@@ -1948,18 +1955,47 @@ def create_app() -> FastAPI:
         except GoogleAuthError as exc:
             raise HTTPException(status_code=503, detail=str(exc)) from exc
 
+    async def _execute_google_action(
+        execution_id: str,
+        parameters: dict[str, Any],
+    ):
+        try:
+            return await google.execute_authorized_action(
+                owner_runtime.actions,
+                execution_id=execution_id,
+                parameters=parameters,
+            )
+        except ActionPolicyError as exc:
+            code = 404 if str(exc) == "unknown_execution" else 409
+            raise HTTPException(status_code=code, detail=str(exc)) from exc
+        except GoogleAuthError as exc:
+            raise HTTPException(status_code=503, detail=str(exc)) from exc
+
+    @app.post("/v1/google/actions/execute")
+    async def execute_google_action(
+        body: GoogleAuthorizedActionBody,
+        x_van_internal_token: str | None = Header(default=None),
+    ):
+        """Execute a mutation that Action Runtime already authorized.
+
+        The caller supplies an execution id, not approval. The execution record binds the
+        signed owner command, action class, parameters, principal, freshness and any A4
+        biometric approval. This endpoint cannot manufacture any of them.
+        """
+        require_internal_control(x_van_internal_token, ControlScope.GOOGLE)
+        return await _execute_google_action(body.execution_id, body.parameters)
+
     @app.post("/v1/google/gmail/send")
     async def gmail_send(
+        execution_id: str,
         draft_id: str,
-        approved: bool = False,
         x_van_internal_token: str | None = Header(default=None),
     ):
         require_internal_control(x_van_internal_token, ControlScope.GOOGLE)
-        try:
-            return await google.gmail_send(draft_id, action_class=ActionClass.A4, approved=approved)
-        except GoogleAuthError as exc:
-            code = 403 if str(exc) == "approval_required" else 503
-            raise HTTPException(status_code=code, detail=str(exc)) from exc
+        return await _execute_google_action(
+            execution_id,
+            {"draft_id": draft_id},
+        )
 
     # P2-GOOG-004 — six capabilities with a transport, a service method and no way in.
     #
@@ -1975,20 +2011,17 @@ def create_app() -> FastAPI:
 
     @app.post("/v1/google/gmail/draft")
     async def gmail_draft(
-        thread_id: str, body: str, x_van_internal_token: str | None = Header(default=None)
+        execution_id: str,
+        thread_id: str,
+        body: str,
+        x_van_internal_token: str | None = Header(default=None),
     ):
-        """A draft is written, not sent, which is why it is not gated like a send.
-
-        gmail_send is A4 and demands an owner approval bound to the command. Drafting
-        leaves something the owner can read and discard; gating it the same way would train
-        them to approve without reading, and the approval that matters is the one on the
-        send.
-        """
+        """Create a draft through the same sealed action boundary as every other mutation."""
         require_internal_control(x_van_internal_token, ControlScope.GOOGLE)
-        try:
-            return await google.gmail_draft(thread_id, body)
-        except GoogleAuthError as exc:
-            raise HTTPException(status_code=503, detail=str(exc)) from exc
+        return await _execute_google_action(
+            execution_id,
+            {"thread_id": thread_id, "body": body},
+        )
 
     @app.get("/v1/google/calendar/agenda")
     async def calendar_agenda(x_van_internal_token: str | None = Header(default=None)):
@@ -2000,22 +2033,16 @@ def create_app() -> FastAPI:
 
     @app.post("/v1/google/calendar/reschedule")
     async def calendar_reschedule(
+        execution_id: str,
         event_id: str,
         new_start_unix: int,
-        approved: bool = False,
         x_van_internal_token: str | None = Header(default=None),
     ):
-        """Moving something in the owner's calendar needs their approval.
-
-        The service already refuses without it. The route passes the flag rather than
-        deciding, so there is one place that says what rescheduling costs.
-        """
         require_internal_control(x_van_internal_token, ControlScope.GOOGLE)
-        try:
-            return await google.calendar_reschedule(event_id, new_start_unix, approved=approved)
-        except GoogleAuthError as exc:
-            code = 403 if str(exc) == "approval_required" else 503
-            raise HTTPException(status_code=code, detail=str(exc)) from exc
+        return await _execute_google_action(
+            execution_id,
+            {"event_id": event_id, "new_start_unix": new_start_unix},
+        )
 
     @app.get("/v1/google/drive/search")
     async def drive_search(q: str, x_van_internal_token: str | None = Header(default=None)):
