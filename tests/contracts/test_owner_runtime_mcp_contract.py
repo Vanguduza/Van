@@ -28,6 +28,14 @@ REQUIRED_TOOLS = {
     "notebook_enterprise_get",
     "notebook_consumer_ask",
     "knowledge_action_execute",
+    "google_status",
+    "google_capabilities",
+    "google_gmail_search",
+    "google_calendar_agenda",
+    "google_drive_search",
+    "google_contacts_resolve",
+    "google_tasks_list",
+    "google_job_plan",
     "research_status",
     "research_search",
     "action_begin",
@@ -143,3 +151,23 @@ def test_knowledge_mutation_tool_is_authorized_execution_only():
     assert "knowledge_action_execute: { method: 'POST'" in text
     assert "/knowledge/notebook/enterprise/create" not in text
     assert "/knowledge/notebook/consumer/note" not in text
+
+def test_google_mcp_surface_is_read_or_plan_only():
+    text = SHIM.read_text(encoding="utf-8")
+    for path in (
+        "/v1/google/status",
+        "/v1/google/capabilities",
+        "/v1/google/gmail/search",
+        "/v1/google/calendar/agenda",
+        "/v1/google/drive/search",
+        "/v1/google/contacts/resolve",
+        "/v1/google/tasks",
+        "/v1/google/jobs/plan",
+    ):
+        assert path in text
+    # Mutating Workspace routes must not be raw MCP tools. They have caller-supplied
+    # approval parameters today and therefore need the Action Runtime boundary first.
+    assert "/v1/google/gmail/send" not in text
+    assert "/v1/google/gmail/draft" not in text
+    assert "/v1/google/calendar/reschedule" not in text
+
