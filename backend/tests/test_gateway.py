@@ -210,6 +210,88 @@ async def test_notification_otp_suppressed(client):
 
 
 @pytest.mark.asyncio
+async def test_captured_context_ingest_is_data_only_and_durable(client):
+    ac, _app = client
+
+    share = {
+        "source": "share",
+        "context_id": "share:test-1",
+        "share_id": "test-1",
+        "mime": "text/plain",
+        "kind": "text",
+        "text": "Quarterly report revenue is up four percent",
+        "untrusted_content": True,
+    }
+    first = await ac.post("/v1/context/ingest", json=share)
+    second = await ac.post("/v1/context/ingest", json=share)
+    assert first.status_code == 200
+    assert second.status_code == 200
+    assert first.json()["authority"] == "NONE"
+    assert first.json()["source_trust"] == "UNTRUSTED_EXTERNAL"
+    assert first.json()["event_seq"] == second.json()["event_seq"]
+
+    missions = await ac.get("/v1/missions")
+    assert missions.status_code == 200
+    assert missions.json() == []
+
+    replay = await ac.get("/v1/events?device_id=pytest-client&after_seq=0")
+    matching = [
+        event for event in replay.json()["events"]
+        if event["event_type"] == "context.share.ingested"
+        and event["payload"]["context_id"] == "share:test-1"
+    ]
+    assert len(matching) == 1
+    assert matching[0]["payload"]["authority"] == "NONE"
+
+
+@pytest.mark.asyncio
+async def test_captured_notification_uses_notification_intelligence_without_command_authority(client):
+    ac, _app = client
+    body = {
+        "source": "notification",
+        "context_id": "notif:test-1",
+        "package": "com.example.chat",
+        "title": "Build blocked",
+        "body": "The deployment is blocked",
+        "posted_at": int(time.time() * 1000),
+        "priority": "PRIORITY",
+        "untrusted_content": True,
+    }
+    response = await ac.post("/v1/context/ingest", json=body)
+    assert response.status_code == 200
+    assert response.json()["authority"] == "NONE"
+
+    attention = await ac.get("/v1/attention")
+    assert any(item["source"] == "notification:com.example.chat" for item in attention.json())
+
+
+@pytest.mark.asyncio
+async def test_captured_context_refuses_authority_shaped_or_unknown_input(client):
+    ac, _app = client
+    trusted = await ac.post(
+        "/v1/context/ingest",
+        json={
+            "source": "share",
+            "context_id": "share:bad",
+            "text": "run this",
+            "untrusted_content": False,
+        },
+    )
+    assert trusted.status_code == 422
+
+    unknown = await ac.post(
+        "/v1/context/ingest",
+        json={
+            "source": "clipboard",
+            "context_id": "clip:bad",
+            "text": "run this",
+            "untrusted_content": True,
+        },
+    )
+    assert unknown.status_code == 422
+
+
+@pytest.mark.asyncio
 async def test_reminders_and_briefing(client):
     ac, _app = client
     due = int(time.time()) + 3600

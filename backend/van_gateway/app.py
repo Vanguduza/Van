@@ -50,7 +50,7 @@ from van_gateway.models import (
     PrincipalType,
     ReminderCreate,
 )
-from van_gateway.notifications.intelligence import NotificationIntelligence, PhoneNotification
+from van_gateway.notifications.intelligence import AppPolicy, NotificationIntelligence, PhoneNotification
 from van_gateway.observability import alerts as observability_alerts
 from van_gateway.observability import instruments as observability_instruments
 from van_gateway.observability.correlation import for_command as correlation_for_command
@@ -1140,6 +1140,7 @@ def create_app() -> FastAPI:
             is_interactive_browser_owner_route(path)
             or is_session_owner_route(path)
             or path == "/v1/commands"
+            or path == "/v1/context/ingest"
         )
 
     async def enforce_device_proof(request: Request, device_id: str) -> JSONResponse | None:
@@ -2168,6 +2169,123 @@ def create_app() -> FastAPI:
                 payload={"text": filtered.text, "redacted": filtered.redacted},
             )
         return filtered
+
+    @app.post("/v1/context/ingest")
+    async def ingest_captured_context(body: dict[str, Any], request: Request):
+        """Device-captured data lane. It cannot mint owner authority.
+
+        Notifications and shares originate in other applications. The device may preserve
+        and forward them, but VAN must never turn their text into an OWNER_DEVICE command.
+        The Android queue therefore sends CONTEXT_INGEST records here rather than through
+        /v1/commands. This route is device-authenticated, hardware-proofed when the owner
+        device binding is active, bounded, explicitly UNTRUSTED_EXTERNAL, and produces only
+        evidence/event/attention state.
+
+        SESSION_ENVELOPE never reaches this route; it belongs to the durable session
+        consumer. Keeping those two non-command queue classes separate is also what stops
+        the generic replayer deleting a persisted session command before restore reads it.
+        """
+        device_id = getattr(request.state, "van_device_id", None)
+        if not device_id:
+            raise HTTPException(status_code=403, detail="device_identity_required")
+
+        if body.get("untrusted_content") is not True:
+            raise HTTPException(status_code=422, detail="captured_context_must_be_untrusted")
+
+        source = str(body.get("source") or "").strip().lower()
+        context_id = str(body.get("context_id") or "").strip()
+        if source not in {"notification", "share"}:
+            raise HTTPException(status_code=422, detail="captured_context_source_unsupported")
+        if not context_id or len(context_id) > 256:
+            raise HTTPException(status_code=422, detail="captured_context_id_required")
+
+        encoded = json.dumps(body, sort_keys=True, separators=(",", ":"), ensure_ascii=False)
+        if len(encoded.encode("utf-8")) > 65_536:
+            raise HTTPException(status_code=413, detail="captured_context_too_large")
+
+        event_payload: dict[str, Any]
+        suppressed = False
+        if source == "notification":
+            package = str(body.get("package") or "").strip()
+            if not package:
+                raise HTTPException(status_code=422, detail="notification_package_required")
+            priority = str(body.get("priority") or "NORMAL").strip().upper()
+            posted_at_ms = int(body.get("posted_at") or 0)
+            policy = AppPolicy.PRIORITY if priority == "PRIORITY" else AppPolicy.NORMAL
+            note = PhoneNotification(
+                key=context_id,
+                package=package,
+                title=str(body.get("title") or ""),
+                text=str(body.get("body") or ""),
+                importance=4 if policy is AppPolicy.PRIORITY else 3,
+                posted_at_unix=max(0, posted_at_ms // 1000),
+                policy=policy,
+            )
+            filtered = await notifications.ingest_durable(note)
+            suppressed = filtered.suppressed
+            if not filtered.suppressed:
+                await attention.upsert(
+                    title=filtered.title,
+                    severity=AttentionSeverity(filtered.classification.value),
+                    source=f"notification:{filtered.package}",
+                    dedupe_key=f"notif:{filtered.key}",
+                    payload={"text": filtered.text, "redacted": filtered.redacted},
+                )
+            event_payload = {
+                "context_id": context_id,
+                "source": source,
+                "package": filtered.package,
+                "title": filtered.title,
+                "text": filtered.text,
+                "classification": filtered.classification.value,
+                "suppressed": filtered.suppressed,
+                "redacted": filtered.redacted,
+                "source_trust": "UNTRUSTED_EXTERNAL",
+                "authority": "NONE",
+            }
+        else:
+            # Share content was already secret-filtered on the handset. The gateway still
+            # refuses an empty envelope rather than creating a durable event that carries
+            # nothing and later looks like successful ingestion.
+            text_value = str(body.get("text") or "")
+            subject_value = str(body.get("subject") or "")
+            uris = body.get("uris") if isinstance(body.get("uris"), list) else []
+            if not text_value and not subject_value and not uris:
+                raise HTTPException(status_code=422, detail="share_content_required")
+            event_payload = {
+                "context_id": context_id,
+                "source": source,
+                "share_id": str(body.get("share_id") or ""),
+                "mime": str(body.get("mime") or ""),
+                "kind": str(body.get("kind") or ""),
+                "text": text_value,
+                "subject": subject_value,
+                "uris": [str(item) for item in uris[:32]],
+                "source_trust": "UNTRUSTED_EXTERNAL",
+                "authority": "NONE",
+            }
+
+        event_seq = await events.publish(
+            f"context.{source}.ingested",
+            event_payload,
+            target_device_id=device_id,
+            event_id=f"context:{device_id}:{context_id}",
+        )
+        await audit.record(
+            result="ok",
+            device_id=device_id,
+            capability="context.data.ingest",
+            after={"source": source, "context_id": context_id, "event_seq": event_seq},
+        )
+        return {
+            "accepted": True,
+            "source": source,
+            "context_id": context_id,
+            "event_seq": event_seq,
+            "suppressed": suppressed,
+            "authority": "NONE",
+            "source_trust": "UNTRUSTED_EXTERNAL",
+        }
 
     # --------------------------------------------------- Gate 11: operator surface
     @app.post("/v1/observability/device-telemetry")

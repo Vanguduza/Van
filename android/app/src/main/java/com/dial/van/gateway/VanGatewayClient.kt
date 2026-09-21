@@ -292,6 +292,19 @@ class VanGatewayClient(context: Context) {
         postRawAt(baseUrl, "/v1/observability/device-telemetry", body, useIngress = true)
     }
 
+    /**
+     * Captured notification/share data is not an owner command.
+     *
+     * This is deliberately a separate, device-proofed ingress path. Routing captured data
+     * through dispatchCommand would sign arbitrary third-party text as OWNER_DEVICE;
+     * dropping it in QueueReplayer makes the feature fictional. The gateway stores it as
+     * UNTRUSTED_EXTERNAL/NONE authority and never turns this call into executable intent.
+     */
+    suspend fun ingestCapturedContext(payload: JSONObject): JSONObject =
+        withContext(Dispatchers.IO) {
+            postProved("/v1/context/ingest", payload)
+        }
+
     suspend fun health(): JSONObject = withContext(Dispatchers.IO) { getJson("/health") }
 
     suspend fun googleMesh(): JSONObject = withContext(Dispatchers.IO) { getJson("/v1/google/mesh") }

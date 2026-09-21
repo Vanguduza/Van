@@ -46,6 +46,7 @@ class VanNotificationListenerService : NotificationListenerService() {
 
         val payload = buildJsonObject {
             put("source", "notification")
+            put("context_id", "notif:$hash")
             put("package", packageName)
             put("title", SecretRedactor.redact(title))
             put("body", redacted)

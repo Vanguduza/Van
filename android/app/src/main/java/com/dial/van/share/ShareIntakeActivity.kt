@@ -91,6 +91,7 @@ class ShareIntakeActivity : Activity() {
                     kotlinx.serialization.json.JsonObject.serializer(),
                     buildJsonObject {
                         put("source", "share")
+                        put("context_id", "share:$shareId")
                         put("share_id", shareId)
                         put("mime", payload.mime)
                         put("kind", payload.kind.name.lowercase())
