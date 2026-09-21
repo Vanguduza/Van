@@ -17,7 +17,7 @@
     },
     "reconstruction_rule": "A finding appears here only when current repository evidence supports its state. Newly discovered findings are included even when they may not have been in the original 24."
   },
-  "canonical_branch": "gpt/van-sol-audit-closure-20260921",
+  "canonical_branch": "main",
   "current_head_at_reconstruction": "84549608e0a8e0663cbeb9d525b70478caaa6542",
   "state_vocabulary": {
     "CLOSED": "Repository implementation and regression evidence exist on the closure branch.",
@@ -275,23 +275,30 @@
     {
       "id": "REC-P2-004",
       "severity": "P2",
-      "title": "Google OAuth/provider workflows are not live-certified",
+      "title": "Remaining non-Workspace Google provider capabilities are not all live-certified",
       "status": "EXTERNAL_GATE",
       "disposition": "LIVE_PROVIDER_CERTIFICATION",
       "evidence": [
-        "docs/EXTERNAL_GATES.md"
-      ]
+        "docs/EXTERNAL_GATES.md",
+        "artifacts/google/hermes_live_attestation.json",
+        "artifacts/google/van_gateway.import.json",
+        "docs/PRODUCTION_ACCEPTANCE_LEDGER.md"
+      ],
+      "detail": "Workspace OAuth itself is already live-certified READY: permanent Desktop OAuth consent is installed, the refresh credential is encrypted, and Gmail/Calendar/Drive/Contacts/Tasks canaries returned HTTP 200. This external gate is intentionally narrower: Gemini/consumer/cloud and other provider capabilities retain their own READY, CAPACITY_LIMITED, CONFIGURED or EXTERNAL states and require per-capability live evidence before promotion."
     },
     {
       "id": "REC-P2-005",
       "severity": "P2",
-      "title": "n8n automation fabric is not live-certified",
+      "title": "Current end-to-end automation fabric requires live re-certification after later gateway integration changes",
       "status": "EXTERNAL_GATE",
       "disposition": "LIVE_RUNTIME_CERTIFICATION",
       "evidence": [
         "docs/EXTERNAL_GATES.md",
-        "deploy/van-trading-core/automation/"
-      ]
+        "deploy/van-trading-core/automation/",
+        "artifacts/runtime/van_trading_core_reconciliation_live_attestation.json",
+        "docs/PRODUCTION_ACCEPTANCE_LEDGER.md"
+      ],
+      "detail": "The self-hosted Trading Core n8n runtime was live-certified GREEN on 2026-09-18 with n8n 2.39.7, task runner/PostgreSQL healthy and required_failures=0. Later gateway-side automation routing, execution, standing-authority, health and verification changes landed after that host attestation. The remaining gate is therefore current-head end-to-end live re-qualification, not proof that the n8n runtime never worked."
     },
     {
       "id": "REC-P2-006",
@@ -407,11 +414,19 @@
     "external_gate": 8,
     "superseded": 0,
     "merge_ready": true,
-    "reason": "All reconstructed and newly discovered repository-side findings are closed. External/device/runtime gates remain separate. Full repository CI run 35620770902 passed on implementation head 724025c86a055c38d83785c36427651b0e4a25e1; this commit only reconciles closure metadata."
+    "reason": "All reconstructed and newly discovered repository-side findings are closed. External/device/runtime gates remain separate. Full PR-head CI run 35621632137 passed on 90756a06e5f6a26be2ad11a9a25afa8dcdf76271 before PR #55 merged to canonical main as ae96854b85c1ff1c8bcd483cd90cef270c7cf23b."
   },
-  "last_reconciled_against_head": "724025c86a055c38d83785c36427651b0e4a25e1",
+  "last_reconciled_against_head": "90756a06e5f6a26be2ad11a9a25afa8dcdf76271",
   "last_reconciled_ci": {
-    "run_id": 35620770902,
+    "run_id": 35621632137,
     "conclusion": "success"
+  },
+  "post_merge_reconciliation": {
+    "merged_pr": 55,
+    "merged_at": "2026-09-21T15:59:52Z",
+    "merge_commit": "ae96854b85c1ff1c8bcd483cd90cef270c7cf23b",
+    "certified_pr_head": "90756a06e5f6a26be2ad11a9a25afa8dcdf76271",
+    "certified_ci_run": 35621632137,
+    "certification_scope": "Full PR-head CI was green before merge. Runtime, provider, device and live-environment gates remain independently evidence-gated."
   }
 }
