@@ -319,15 +319,19 @@ val voiceRuntimeGuard = tasks.register("assertVoiceRuntimeIsShippable") {
     val minSdkValue = requireNotNull(android.defaultConfig.minSdk) {
         "defaultConfig.minSdk is unset, so the voice runtime guard has nothing to check"
     }
-    val hasSherpaRuntime = configurations.findByName("implementation")
-        ?.allDependencies
-        ?.any { it.name.contains("sherpa", ignoreCase = true) } ?: false
+    // KWS, speaker verification and second-pass ASR legitimately use sherpa-onnx,
+    // but none of those means a *primary* ASR model is bundled for API < 31. Never infer
+    // primary-recognizer coverage from the library name alone.
+    val sherpaPrimaryAsrBundled = providers.gradleProperty("VAN_SHERPA_PRIMARY_ASR_BUNDLED")
+        .orElse("false")
+        .get()
+        .equals("true", ignoreCase = true)
     inputs.file(policySource)
     inputs.property("minSdk", minSdkValue)
-    inputs.property("hasSherpaRuntime", hasSherpaRuntime)
+    inputs.property("sherpaPrimaryAsrBundled", sherpaPrimaryAsrBundled)
     outputs.upToDateWhen { true }
     doLast {
-        if (hasSherpaRuntime) return@doLast
+        if (sherpaPrimaryAsrBundled) return@doLast
         val text = policySource.readText()
         // The lowest API level the policy resolves to an on-device Android recognizer.
         val onDeviceFloor = Regex("""apiLevel >= (\d+) && onDeviceAvailable""")
@@ -336,10 +340,11 @@ val voiceRuntimeGuard = tasks.register("assertVoiceRuntimeIsShippable") {
         if (minSdkValue < onDeviceFloor) {
             error(
                 "Voice runtime unshippable: minSdk $minSdkValue is below the on-device " +
-                    "recognizer floor of $onDeviceFloor and no Sherpa runtime is on the " +
-                    "classpath. Devices between $minSdkValue and ${onDeviceFloor - 1} would " +
-                    "install VAN and never be able to speak to it. Either raise minSdk to " +
-                    "$onDeviceFloor or add the Sherpa engine and model."
+                    "recognizer floor of $onDeviceFloor and no primary Sherpa ASR bundle " +
+                    "is declared. KWS/second-pass dependencies do not satisfy this gate. " +
+                    "Devices between $minSdkValue and ${onDeviceFloor - 1} would install " +
+                    "VAN and never be able to speak to it. Either raise minSdk to " +
+                    "$onDeviceFloor or ship and declare the primary Sherpa ASR bundle."
             )
         }
     }
