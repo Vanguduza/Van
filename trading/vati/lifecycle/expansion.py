@@ -24,7 +24,7 @@ deciding whether the policy is too tight.
 
 from __future__ import annotations
 
-from dataclasses import dataclass
+from dataclasses import dataclass, replace
 from decimal import Decimal
 from enum import Enum
 from typing import Any, Optional
@@ -53,6 +53,112 @@ class Mode(str, Enum):
 #: INV-LIVE-001. G11 promotes this, on laboratory evidence, as a code change
 #: that appears in a diff rather than as a configuration flag.
 EXPANSION_MODE = Mode.SHADOW
+
+
+class PromotionError(RuntimeError):
+    """G11 live expansion was requested without an admissible evidence record."""
+
+
+@dataclass(frozen=True)
+class ExpansionPromotionRecord:
+    """Machine-readable G11 admission evidence for one strategy/policy pair.
+
+    The record does not make an investment decision and does not size anything.
+    It binds the exact policy/version/hash to the laboratory and shadow evidence
+    that an independent admission process reviewed. LIVE mode is impossible
+    without a sealed ADMITTED record whose gates are all true.
+    """
+
+    promotion_id: str
+    strategy_id: str
+    strategy_version: str
+    policy_id: str
+    policy_version: str
+    policy_hash: str
+    sample_start_ms: int
+    sample_end_ms: int
+    families_considered: int
+    families_scaled: int
+    mean_delta_r: Decimal
+    worst_delta_r: Decimal
+    tail_delta_r: Decimal
+    drawdown_delta_r: Decimal
+    cost_delta_r: Decimal
+    event_regime_coverage: tuple[str, ...]
+    evidence_hash: str
+    authorising_diff_ref: str
+    gate_results: tuple[tuple[str, bool], ...]
+    decision: str
+    created_ms: int
+    record_hash: str = ""
+
+    def body(self) -> dict[str, Any]:
+        return {
+            "promotion_id": self.promotion_id,
+            "strategy_id": self.strategy_id,
+            "strategy_version": self.strategy_version,
+            "policy_id": self.policy_id,
+            "policy_version": self.policy_version,
+            "policy_hash": self.policy_hash,
+            "sample_window_ms": [self.sample_start_ms, self.sample_end_ms],
+            "families_considered": self.families_considered,
+            "families_scaled": self.families_scaled,
+            "mean_delta_r": str(self.mean_delta_r),
+            "worst_delta_r": str(self.worst_delta_r),
+            "tail_delta_r": str(self.tail_delta_r),
+            "drawdown_delta_r": str(self.drawdown_delta_r),
+            "cost_delta_r": str(self.cost_delta_r),
+            "event_regime_coverage": list(self.event_regime_coverage),
+            "evidence_hash": self.evidence_hash,
+            "authorising_diff_ref": self.authorising_diff_ref,
+            "gate_results": {k: v for k, v in self.gate_results},
+            "decision": self.decision,
+            "created_ms": self.created_ms,
+            "record_version": "expansion-promotion/5.1.0",
+        }
+
+    def validate(self) -> None:
+        if not self.promotion_id or not self.strategy_id or not self.strategy_version:
+            raise PromotionError("promotion identity is incomplete")
+        if not self.policy_id or not self.policy_version or not self.policy_hash:
+            raise PromotionError("promotion policy binding is incomplete")
+        if self.sample_start_ms < 0 or self.sample_end_ms <= self.sample_start_ms:
+            raise PromotionError("promotion sample window is invalid")
+        if self.families_considered <= 0:
+            raise PromotionError("promotion has no family evidence")
+        if self.families_scaled < 0 or self.families_scaled > self.families_considered:
+            raise PromotionError("promotion family counts are inconsistent")
+        if not self.event_regime_coverage:
+            raise PromotionError("promotion has no event/regime coverage evidence")
+        if not self.evidence_hash or not self.authorising_diff_ref:
+            raise PromotionError("promotion is missing evidence or authorising diff provenance")
+        if self.decision != "ADMITTED":
+            raise PromotionError(f"promotion decision is {self.decision!r}, not ADMITTED")
+        if not self.gate_results:
+            raise PromotionError("promotion has no independent gate results")
+        failed = sorted(k for k, ok in self.gate_results if not ok)
+        if failed:
+            raise PromotionError("promotion gates failed: " + ",".join(failed))
+
+    def sealed(self) -> "ExpansionPromotionRecord":
+        self.validate()
+        return replace(self, record_hash=canonical_hash(self.body()))
+
+    def seal_ok(self) -> bool:
+        return bool(self.record_hash) and self.record_hash == canonical_hash(self.body())
+
+    def validate_for(self, *, strategy_id: str, policy: ScalePolicy) -> None:
+        self.validate()
+        if not self.seal_ok():
+            raise PromotionError("promotion record seal does not recompute")
+        if self.strategy_id != strategy_id:
+            raise PromotionError(
+                f"promotion belongs to strategy {self.strategy_id}, not {strategy_id}")
+        if self.policy_id != policy.policy_id:
+            raise PromotionError(
+                f"promotion belongs to policy {self.policy_id}, not {policy.policy_id}")
+        if self.policy_hash != policy.digest:
+            raise PromotionError("promotion policy hash does not match the live policy")
 
 
 #: Why a proposal was not made. Closed vocabulary.
@@ -134,9 +240,14 @@ class ExpansionProposal:
 class ProfitExpansionEngine:
     """Decides whether a family has earned a smaller second bite."""
 
-    def __init__(self, *, mode: Mode = EXPANSION_MODE, ledger=None,
-                 producer: str = PRODUCER) -> None:
+    def __init__(self, *, mode: Mode = EXPANSION_MODE,
+                 promotion_record: Optional[ExpansionPromotionRecord] = None,
+                 ledger=None, producer: str = PRODUCER) -> None:
+        if mode is Mode.LIVE and promotion_record is None:
+            raise PromotionError(
+                "G11 LIVE expansion requires a sealed ADMITTED promotion record")
         self.mode = mode
+        self.promotion_record = promotion_record
         self._ledger = ledger
         self._producer = producer
 
@@ -146,6 +257,11 @@ class ProfitExpansionEngine:
                  last_scale_ms: Optional[int], in_event_window: bool,
                  now_ms: int) -> ExpansionProposal:
         reasons: list[str] = []
+
+        if self.mode is Mode.LIVE:
+            assert self.promotion_record is not None
+            self.promotion_record.validate_for(
+                strategy_id=strategy_id, policy=policy)
 
         # Preservation first, always. Weighing a threat and an opportunity in
         # the same pass means sometimes picking the opportunity.

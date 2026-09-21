@@ -144,10 +144,19 @@ def evaluate_repository(root: Path = ROOT) -> dict[str, Any]:
         "live_status": "NOT_CLAIMED",
     }
     observed_truth = {k: registry.get(k) for k in expected_truth}
+    expansion_source = (
+        ROOT / "trading/vati/lifecycle/expansion.py"
+    ).read_text(encoding="utf-8")
+    g11_guard = (
+        "G11 LIVE expansion requires a sealed ADMITTED promotion record"
+        in expansion_source
+        and "self.promotion_record.validate_for(" in expansion_source
+    )
     safety_ok = (
         observed_truth == expected_truth
         and expansion_mode == "Mode.SHADOW"
         and advisory_enabled in ("False", "0")
+        and g11_guard
     )
     gates["first_pass_live_safety"] = _gate(
         safety_ok,
@@ -155,6 +164,7 @@ def evaluate_repository(root: Path = ROOT) -> dict[str, Any]:
             "registry": observed_truth,
             "expansion_mode": expansion_mode,
             "live_advisory_enabled_literal": advisory_enabled,
+            "g11_live_promotion_guard": g11_guard,
         },
     )
 

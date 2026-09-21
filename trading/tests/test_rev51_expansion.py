@@ -12,8 +12,10 @@ from vati.lifecycle.envelope import EnvelopeCalculator
 from vati.lifecycle.expansion import (
     DECLINE_REASONS,
     EXPANSION_MODE,
+    ExpansionPromotionRecord,
     Mode,
     ProfitExpansionEngine,
+    PromotionError,
 )
 from vati.lifecycle.family import FamilyMember, FamilyRegistry, MemberRole
 from vati.lifecycle.preservation import ActionKind, PreservationAction
@@ -128,7 +130,40 @@ def _quiet_preservation():
     return PreservationAction("f1", ActionKind.NONE, PreservationUrgency.ROUTINE, ())
 
 
-def _evaluate(*, policy=CONSERVATIVE, mode=Mode.SHADOW, preservation=None, health=None,
+def _promotion(*, policy=CONSERVATIVE, strategy_id="FX-TREND-03",
+               decision="ADMITTED", failed_gate=False):
+    return ExpansionPromotionRecord(
+        promotion_id="g11-promo-1",
+        strategy_id=strategy_id,
+        strategy_version="1.0.0",
+        policy_id=policy.policy_id,
+        policy_version="scale-policy/5.1.0",
+        policy_hash=policy.digest,
+        sample_start_ms=1_700_000_000_000,
+        sample_end_ms=1_710_000_000_000,
+        families_considered=64,
+        families_scaled=31,
+        mean_delta_r=D("0.18"),
+        worst_delta_r=D("-0.35"),
+        tail_delta_r=D("-0.20"),
+        drawdown_delta_r=D("-0.03"),
+        cost_delta_r=D("-0.01"),
+        event_regime_coverage=("QUIET:NORMAL", "NFP:HIGH_VOL", "TRANSITION"),
+        evidence_hash="e" * 64,
+        authorising_diff_ref="git:rev51-g11-admission",
+        gate_results=(
+            ("sample_sufficiency", not failed_gate),
+            ("tail_survivability", True),
+            ("cost_robustness", True),
+            ("event_regime_coverage", True),
+            ("shadow_replay", True),
+        ),
+        decision=decision,
+        created_ms=1_720_000_000_000,
+    ).sealed()
+
+
+def _evaluate(*, policy=CONSERVATIVE, mode=Mode.SHADOW, promotion=None, preservation=None, health=None,
               family=None, last_scale_ms=None, in_event_window=False, equity="1000000",
               secure_stop=True, ledger=None):
     reg = FamilyRegistry()
@@ -138,7 +173,10 @@ def _evaluate(*, policy=CONSERVATIVE, mode=Mode.SHADOW, preservation=None, healt
     env = EnvelopeCalculator().compute(fam, mark=D("1.1150"),
                                        value_per_price_unit=D("100000"),
                                        equity=D(equity), now_ms=100)
-    return ProfitExpansionEngine(mode=mode, ledger=ledger).evaluate(
+    if mode is Mode.LIVE and promotion is None:
+        promotion = _promotion(policy=policy)
+    return ProfitExpansionEngine(
+        mode=mode, promotion_record=promotion, ledger=ledger).evaluate(
         family=fam, strategy_id="FX-TREND-03", policy=policy,
         health=health or _health(), envelope=env,
         preservation=preservation or _quiet_preservation(),
@@ -243,9 +281,43 @@ def test_every_decline_reason_is_named_and_described():
     assert p.body()["decline_detail"]
 
 
-def test_live_mode_makes_the_proposal_a_candidate():
-    p = _evaluate(mode=Mode.LIVE)
+def test_live_mode_makes_the_proposal_a_candidate_only_with_admitted_evidence():
+    p = _evaluate(mode=Mode.LIVE, promotion=_promotion())
     assert p.is_candidate and not p.would_propose
+
+
+def test_live_mode_cannot_start_without_a_promotion_record():
+    with pytest.raises(PromotionError, match="requires a sealed ADMITTED promotion record"):
+        ProfitExpansionEngine(mode=Mode.LIVE)
+
+
+def test_live_mode_refuses_a_rejected_or_failed_promotion_record():
+    with pytest.raises(PromotionError):
+        _evaluate(mode=Mode.LIVE, promotion=_promotion(decision="REJECTED"))
+    with pytest.raises(PromotionError, match="promotion gates failed"):
+        _evaluate(mode=Mode.LIVE, promotion=_promotion(failed_gate=True))
+
+
+def test_live_mode_refuses_policy_or_strategy_drift_after_admission():
+    other = ScalePolicy(
+        "OTHER", enabled=True, max_scale_ins=1, scale_fractions=(D("0.25"),))
+    with pytest.raises(PromotionError, match="policy"):
+        _evaluate(policy=other, mode=Mode.LIVE, promotion=_promotion())
+    with pytest.raises(PromotionError, match="strategy"):
+        reg = FamilyRegistry()
+        fam = _family(reg)
+        fam.tighten_stop(D("1.1000"))
+        env = EnvelopeCalculator().compute(
+            fam, mark=D("1.1150"), value_per_price_unit=D("100000"),
+            equity=D("1000000"), now_ms=100)
+        ProfitExpansionEngine(
+            mode=Mode.LIVE, promotion_record=_promotion(strategy_id="OTHER")
+        ).evaluate(
+            family=fam, strategy_id="FX-TREND-03", policy=CONSERVATIVE,
+            health=_health(), envelope=env, preservation=_quiet_preservation(),
+            root_quantity=D("1"), last_scale_ms=None,
+            in_event_window=False, now_ms=10_000_000,
+        )
 
 
 def test_proposals_are_ledgered_against_the_family():
