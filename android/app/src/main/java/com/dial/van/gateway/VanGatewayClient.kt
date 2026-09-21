@@ -851,7 +851,8 @@ class VanGatewayClient(context: Context) {
 
     /**
      * Rev 3.1 signed owner-intent envelope. Authority-bearing provenance fields are HMAC-covered
-     * by signature v2. Pairing/device-access authentication remains mandatory on the transport.
+     * by signature v3. v3 extends v2 with fixed-point speaker evidence; pairing/device-access
+     * authentication remains mandatory on the transport.
      */
     /**
      * §20.14 — the signed command body, built once and usable twice.
@@ -884,6 +885,7 @@ class VanGatewayClient(context: Context) {
         expiresAtUnix: Long? = null,
         noStaleReplay: Boolean = false,
         speechEvidenceRef: String? = null,
+        speakerEvidenceMilli: Int? = null,
         contextCapsuleRevision: Int? = null,
         contextCapsuleHash: String? = null,
         declaredTrust: String = TRUST_CONVERSATION,
@@ -901,8 +903,11 @@ class VanGatewayClient(context: Context) {
         // derives this independently and will not believe an elevated claim, so this is a
         // correctness fix on the device, not the security boundary itself.
         val contextTrust = contextTrustFor(originChannel, declaredTrust)
+        require(speakerEvidenceMilli == null || speakerEvidenceMilli in 0..1000) {
+            "speaker_evidence_milli_out_of_range"
+        }
         val canonical = listOf(
-            "v2",
+            "v3",
             commandId,
             idempotencyKey,
             id,
@@ -918,6 +923,7 @@ class VanGatewayClient(context: Context) {
             contextCapsuleRevision?.toString() ?: "",
             contextCapsuleHash ?: "",
             speechEvidenceRef ?: "",
+            speakerEvidenceMilli?.toString() ?: "",
             if (noStaleReplay) "1" else "0",
             contextTrust,
             text,
@@ -929,7 +935,7 @@ class VanGatewayClient(context: Context) {
             .put("device_id", id)
             .put("issued_at_unix", issuedAtUnix)
             .put("signature", signature)
-            .put("signature_version", 2)
+            .put("signature_version", 3)
             .put("text", text)
             .put("action_class", actionClass)
             .put("context_trust", contextTrust)
@@ -952,6 +958,7 @@ class VanGatewayClient(context: Context) {
         if (turnId != null) body.put("turn_id", turnId)
         if (expiresAtUnix != null) body.put("expires_at_unix", expiresAtUnix)
         if (speechEvidenceRef != null) body.put("speech_evidence_ref", speechEvidenceRef)
+        if (speakerEvidenceMilli != null) body.put("speaker_evidence_milli", speakerEvidenceMilli)
         if (contextCapsuleRevision != null) body.put("context_capsule_revision", contextCapsuleRevision)
         if (contextCapsuleHash != null) body.put("context_capsule_hash", contextCapsuleHash)
 
@@ -973,6 +980,7 @@ class VanGatewayClient(context: Context) {
         expiresAtUnix: Long? = null,
         noStaleReplay: Boolean = false,
         speechEvidenceRef: String? = null,
+        speakerEvidenceMilli: Int? = null,
         contextCapsuleRevision: Int? = null,
         contextCapsuleHash: String? = null,
         declaredTrust: String = TRUST_CONVERSATION,
@@ -992,6 +1000,7 @@ class VanGatewayClient(context: Context) {
             expiresAtUnix = expiresAtUnix,
             noStaleReplay = noStaleReplay,
             speechEvidenceRef = speechEvidenceRef,
+            speakerEvidenceMilli = speakerEvidenceMilli,
             contextCapsuleRevision = contextCapsuleRevision,
             contextCapsuleHash = contextCapsuleHash,
             declaredTrust = declaredTrust,
