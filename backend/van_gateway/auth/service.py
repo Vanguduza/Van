@@ -354,6 +354,60 @@ class AuthService:
         )
 
     @staticmethod
+    def canonical_command_v3(
+        *,
+        command_id: str,
+        idempotency_key: str,
+        device_id: str,
+        issued_at_unix: int,
+        text: str,
+        action_class: str,
+        project_id: str | None,
+        turn_id: str | None,
+        origin_channel: str,
+        principal_type: str,
+        requested_by: str,
+        expires_at_unix: int | None,
+        nonce: str | None,
+        context_capsule_revision: int | None,
+        context_capsule_hash: str | None,
+        speech_evidence_ref: str | None,
+        speaker_evidence_milli: int | None,
+        no_stale_replay: bool,
+        context_trust: str,
+    ) -> str:
+        """Voice-aware authority envelope with deterministic fixed-point speaker evidence.
+
+        v2 is retained byte-for-byte for existing clients. v3 adds only the signed
+        speaker-evidence field; omitting it is still meaningful (UNAVAILABLE) and therefore
+        cannot be rewritten in transit into a positive owner-speaker claim.
+        """
+        return "|".join(
+            [
+                "v3",
+                command_id,
+                idempotency_key,
+                device_id,
+                str(issued_at_unix),
+                action_class,
+                project_id or "",
+                turn_id or "",
+                origin_channel,
+                principal_type,
+                requested_by,
+                str(expires_at_unix) if expires_at_unix is not None else "",
+                nonce or "",
+                str(context_capsule_revision) if context_capsule_revision is not None else "",
+                context_capsule_hash or "",
+                speech_evidence_ref or "",
+                str(speaker_evidence_milli) if speaker_evidence_milli is not None else "",
+                "1" if no_stale_replay else "0",
+                context_trust,
+                text,
+            ]
+        )
+
+    @staticmethod
     def canonical_command_v2(
         *,
         command_id: str,
