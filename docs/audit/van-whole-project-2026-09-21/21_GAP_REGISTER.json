@@ -298,7 +298,7 @@
         "artifacts/runtime/van_trading_core_reconciliation_live_attestation.json",
         "docs/PRODUCTION_ACCEPTANCE_LEDGER.md"
       ],
-      "detail": "The self-hosted Trading Core n8n runtime was live-certified GREEN on 2026-09-18 with n8n 2.39.7, task runner/PostgreSQL healthy and required_failures=0. Later gateway-side automation routing, execution, standing-authority, health and verification changes landed after that host attestation. The remaining gate is therefore current-head end-to-end live re-qualification, not proof that the n8n runtime never worked."
+      "detail": "The self-hosted Trading Core n8n runtime was live-certified GREEN on 2026-09-18 with n8n 2.39.7, task runner/PostgreSQL healthy and required_failures=0. Later gateway-side automation routing, execution, standing-authority, health and verification changes landed after that host attestation. The remaining gate is current-head end-to-end live re-qualification, not proof that the n8n runtime never worked. The qualification instrument now additionally requires VAN_EXPECTED_REPOSITORY_SHA and refuses a dirty or different deployed checkout, so the next live evidence can be bound to the exact canonical main commit."
     },
     {
       "id": "REC-P2-006",
