@@ -22,6 +22,16 @@ COMMANDER_HOME="${VAN_DESKTOP_COMMANDER_HOME:-/var/lib/van-commander}"
 if id "$COMMANDER_USER" >/dev/null 2>&1; then
   groups="$(id -nG "$COMMANDER_USER" | tr ' ' '\n')"
   if grep -Eq '^(vati|sudo|docker)[[ -x /usr/local/bin/van-github-recovery ]] && add github_recovery_command GREEN "bounded recovery entrypoint installed" || add github_recovery_command RED "van-github-recovery missing"
+if sudo -n -u "$COMMANDER_USER" sudo -n /usr/local/bin/van-github-recovery probe >/dev/null 2>&1; then
+  add full_desktop_commander_recovery_sudo GREEN "enumerated recovery helper is callable"
+else
+  add full_desktop_commander_recovery_sudo RED "bounded recovery sudo rule missing or unusable"
+fi
+if sudo -n -u "$COMMANDER_USER" sudo -n true >/dev/null 2>&1; then
+  add full_desktop_commander_no_generic_sudo RED "$COMMANDER_USER can invoke generic sudo"
+else
+  add full_desktop_commander_no_generic_sudo GREEN "$COMMANDER_USER has no generic sudo"
+fi
 REVIEW_USER="${VAN_SPMRF_REVIEW_USER:-vanreviewer}"
 REVIEW_HOME="${VAN_SPMRF_REVIEW_HOME:-/var/lib/van-reviewer}"
 if id "$REVIEW_USER" >/dev/null 2>&1; then
