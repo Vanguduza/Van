@@ -85,8 +85,24 @@ class GoogleHttpTransport:
     async def gmail_draft(self, token: str, thread_id: str, body: str) -> dict:
         return await self._request("POST", "https://gmail.googleapis.com/gmail/v1/users/me/drafts", token, json={"message": {"threadId": thread_id, "raw": body}})
 
+    async def gmail_draft_get(self, token: str, draft_id: str) -> dict:
+        return await self._request(
+            "GET",
+            f"https://gmail.googleapis.com/gmail/v1/users/me/drafts/{draft_id}",
+            token,
+            params={"format": "raw", "fields": "id,message(id,threadId,raw,labelIds)"},
+        )
+
     async def gmail_send(self, token: str, draft_id: str) -> dict:
         return await self._request("POST", f"https://gmail.googleapis.com/gmail/v1/users/me/drafts/{draft_id}/send", token, json={})
+
+    async def gmail_message_get(self, token: str, message_id: str) -> dict:
+        return await self._request(
+            "GET",
+            f"https://gmail.googleapis.com/gmail/v1/users/me/messages/{message_id}",
+            token,
+            params={"format": "minimal", "fields": "id,threadId,labelIds"},
+        )
 
     async def calendar_agenda(self, token: str) -> list[dict]:
         data = await self._request("GET", "https://www.googleapis.com/calendar/v3/calendars/primary/events", token, params={"maxResults": 20, "singleEvents": "true", "orderBy": "startTime"})
@@ -95,6 +111,14 @@ class GoogleHttpTransport:
     async def calendar_reschedule(self, token: str, event_id: str, new_start_unix: int) -> dict:
         start = datetime.fromtimestamp(new_start_unix, tz=timezone.utc).isoformat().replace("+00:00", "Z")
         return await self._request("PATCH", f"https://www.googleapis.com/calendar/v3/calendars/primary/events/{event_id}", token, json={"start": {"dateTime": start}})
+
+    async def calendar_event_get(self, token: str, event_id: str) -> dict:
+        return await self._request(
+            "GET",
+            f"https://www.googleapis.com/calendar/v3/calendars/primary/events/{event_id}",
+            token,
+            params={"fields": "id,start,end,updated,status"},
+        )
 
     async def drive_search(self, token: str, query: str) -> list[dict]:
         data = await self._request("GET", "https://www.googleapis.com/drive/v3/files", token, params={"q": query, "pageSize": 25, "fields": "files(id,name,mimeType,modifiedTime)"})
@@ -124,6 +148,9 @@ class FakeGoogleTransport:
         if not os.getenv("PYTEST_CURRENT_TEST") and os.getenv("VAN_ALLOW_FAKE_GOOGLE_TRANSPORT") != "1":
             raise RuntimeError("fake_google_transport_disabled")
         self.calls: list[tuple[str, tuple]] = []
+        self.drafts: dict[str, dict] = {}
+        self.messages: dict[str, dict] = {}
+        self.events: dict[str, dict] = {}
 
     async def gmail_search(self, token: str, query: str) -> list[dict]:
         self.calls.append(("gmail_search", (token[:4], query)))
@@ -131,11 +158,23 @@ class FakeGoogleTransport:
 
     async def gmail_draft(self, token: str, thread_id: str, body: str) -> dict:
         self.calls.append(("gmail_draft", (thread_id,)))
-        return {"id": "d1", "message": {"threadId": thread_id}}
+        result = {"id": "d1", "message": {"id": "md1", "threadId": thread_id, "raw": body}}
+        self.drafts["d1"] = result
+        return result
+
+    async def gmail_draft_get(self, token: str, draft_id: str) -> dict:
+        self.calls.append(("gmail_draft_get", (draft_id,)))
+        return dict(self.drafts.get(draft_id, {"id": draft_id, "message": {}}))
 
     async def gmail_send(self, token: str, draft_id: str) -> dict:
         self.calls.append(("gmail_send", (draft_id,)))
-        return {"id": draft_id, "labelIds": ["SENT"]}
+        result = {"id": draft_id, "labelIds": ["SENT"]}
+        self.messages[draft_id] = result
+        return result
+
+    async def gmail_message_get(self, token: str, message_id: str) -> dict:
+        self.calls.append(("gmail_message_get", (message_id,)))
+        return dict(self.messages.get(message_id, {"id": message_id, "labelIds": []}))
 
     async def calendar_agenda(self, token: str) -> list[dict]:
         self.calls.append(("calendar_agenda", ()))
@@ -143,7 +182,14 @@ class FakeGoogleTransport:
 
     async def calendar_reschedule(self, token: str, event_id: str, new_start_unix: int) -> dict:
         self.calls.append(("calendar_reschedule", (event_id, new_start_unix)))
-        return {"id": event_id, "updated": True}
+        start = datetime.fromtimestamp(new_start_unix, tz=timezone.utc).isoformat().replace("+00:00", "Z")
+        result = {"id": event_id, "updated": True, "start": {"dateTime": start}}
+        self.events[event_id] = result
+        return result
+
+    async def calendar_event_get(self, token: str, event_id: str) -> dict:
+        self.calls.append(("calendar_event_get", (event_id,)))
+        return dict(self.events.get(event_id, {"id": event_id, "start": {}}))
 
     async def drive_search(self, token: str, query: str) -> list[dict]:
         self.calls.append(("drive_search", (query,)))
