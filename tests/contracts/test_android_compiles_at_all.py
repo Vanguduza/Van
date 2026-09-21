@@ -21,9 +21,13 @@ replace the build — a compiler is the only thing that can say the app compiles
 from __future__ import annotations
 
 import re
+import sys
 from pathlib import Path
 
 ROOT = Path(__file__).resolve().parents[2]
+sys.path.insert(0, str(ROOT / "tools" / "audit"))
+
+from kotlin_source import strip_noise  # noqa: E402
 APP = ROOT / "android" / "app" / "src" / "main"
 
 #: Kotlin keywords that may precede a declaration and are not part of its visibility.
@@ -35,8 +39,18 @@ def _kotlin_files() -> list[Path]:
 
 
 def _strip_comments(source: str) -> str:
-    source = re.sub(r"/\*.*?\*/", "", source, flags=re.S)
-    return "\n".join(line.split("//", 1)[0] for line in source.splitlines())
+    """Shared with the reachability gate — see `tools/audit/kotlin_source.py`.
+
+    This file had its own version: block comments by regex, then everything after the
+    first `//` on each line. Both halves are wrong for the same reason the other gate's
+    were. A string containing `//` — a URL, a path, a regex — truncated the line, so a
+    visibility violation written on it would simply not be seen; and a string containing
+    `*/` closed a block comment that had not started there.
+
+    The symptom here is under-reporting rather than over-reporting, which is quieter and
+    no better: the whole point of this file is to catch a compile error before a push.
+    """
+    return strip_noise(source)
 
 
 def _internal_types() -> dict[str, Path]:

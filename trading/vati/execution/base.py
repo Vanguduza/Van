@@ -43,6 +43,9 @@ class OrderCommand:
     expires_at_ms: Optional[int] = None
     strategy_id: str = ""
     strategy_version: str = ""
+    #: Cross-host account runtime fence. None is allowed only on paths whose
+    #: router was not configured with a lease fence.
+    lease_epoch: Optional[int] = None
     command_hash: str = ""
 
     def sealed(self) -> "OrderCommand":

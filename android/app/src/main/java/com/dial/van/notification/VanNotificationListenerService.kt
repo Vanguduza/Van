@@ -6,6 +6,8 @@ import com.dial.van.VanApplication
 import com.dial.van.queue.CommandKind
 import com.dial.van.queue.CommandSensitivity
 import com.dial.van.queue.QueueEnqueueRequest
+import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.launch
 import kotlinx.serialization.encodeToString
 import kotlinx.serialization.json.Json
 import kotlinx.serialization.json.buildJsonObject
@@ -52,14 +54,21 @@ class VanNotificationListenerService : NotificationListenerService() {
             put("untrusted_content", true)
         }
 
-        app.commandQueue.enqueue(
-            QueueEnqueueRequest(
-                kind = CommandKind.CONTEXT_INGEST,
-                payloadJson = json.encodeToString(payload),
-                sensitivity = CommandSensitivity.NORMAL,
-                idempotencyKey = "notif:$hash",
-            ),
-        )
+        // Off the service's main thread, for the reason given in `ShareIntakeActivity`:
+        // the queue's write is synchronous since the outbox needed it to be, and
+        // `onNotificationPosted` is called on the main thread. A phone that receives a
+        // burst of notifications would otherwise do one encrypted disk write per
+        // notification, in a row, on the thread that draws.
+        app.appScope.launch(Dispatchers.IO) {
+            app.commandQueue.enqueue(
+                QueueEnqueueRequest(
+                    kind = CommandKind.CONTEXT_INGEST,
+                    payloadJson = json.encodeToString(payload),
+                    sensitivity = CommandSensitivity.NORMAL,
+                    idempotencyKey = "notif:$hash",
+                ),
+            )
+        }
     }
 
     private fun sha256(input: String): String {

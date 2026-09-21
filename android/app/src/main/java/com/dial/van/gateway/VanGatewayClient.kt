@@ -5,10 +5,18 @@ import android.util.Base64
 import androidx.security.crypto.EncryptedSharedPreferences
 import androidx.security.crypto.MasterKey
 import com.dial.van.BuildConfig
+import com.dial.van.browser.BrowserParsing
+import com.dial.van.browser.BrowserSessionSnapshot
+import com.dial.van.browser.BrowserStreamGrant
+import com.dial.van.security.DeviceProofSigner
+import com.dial.van.security.OwnerDeviceIdentity
 import com.dial.van.security.OwnerApprovalKeyManager
+import com.dial.van.security.OwnerAuthorityToken
+import com.dial.van.trading.StrategyPromotionProtocol
 import com.dial.van.visual.VanLiveVisualState
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.withContext
+import kotlinx.serialization.json.JsonObject
 import org.json.JSONArray
 import org.json.JSONObject
 import java.io.IOException
@@ -46,6 +54,95 @@ class VanGatewayClient(context: Context) {
     )
     private val approvalKeys = OwnerApprovalKeyManager()
 
+    /**
+     * ADR-RB-025 — the hardware key this phone signs privileged requests with.
+     *
+     * Separate from `approvalKeys` on purpose: an approval is a decision and is gated on
+     * the owner's biometric, while a proof is an identity and has to work with the screen
+     * off, or a browser session would die every time the phone was put down.
+     */
+    private val deviceIdentity = OwnerDeviceIdentity()
+    private val proofSigner = DeviceProofSigner(deviceIdentity)
+
+    /** Whether this device has enrolled a hardware identity (§0D.3). */
+    fun hasDeviceIdentity(): Boolean = deviceIdentity.isEnrolled()
+
+    /**
+     * Enrol this phone as the owner's device.
+     *
+     * Two round trips because the challenge has to be inside the certificate: the gateway
+     * issues it, the Keystore bakes it into the attestation, and a chain captured from one
+     * enrolment is then useless for another.
+     */
+    suspend fun bindThisDevice(bootstrapToken: String): JSONObject = withContext(Dispatchers.IO) {
+        val challenge = postRawAt(
+            baseUrl, "/v1/devices/bootstrap/challenge",
+            JSONObject().put("token", bootstrapToken).toString(), useIngress = false,
+        ).getString("attestation_challenge")
+        val material = deviceIdentity.ensureKey(challenge.toByteArray(StandardCharsets.UTF_8))
+        val device = deviceId ?: error("device_not_paired")
+        postRawAt(
+            baseUrl, "/v1/devices/bootstrap/attest",
+            JSONObject()
+                .put("token", bootstrapToken)
+                .put("device_id", device)
+                .put("public_key_pem", material.publicKeyPem)
+                .put("attestation_extension_b64", material.attestationExtensionBase64)
+                .put("attestation_root_fingerprint", material.attestationRootFingerprint)
+                .put("os_version", android.os.Build.VERSION.SDK_INT.toString())
+                .put("os_patch_level", android.os.Build.VERSION.SECURITY_PATCH)
+                .toString(),
+            useIngress = false,
+        )
+    }
+
+    suspend fun deviceBindingStatus(): JSONObject = withContext(Dispatchers.IO) {
+        getJson("/v1/device-binding/status")
+    }
+
+    /**
+     * The headers a privileged request carries, or none when this device has no identity.
+     *
+     * Empty rather than throwing because an unbound device is a supported state: the
+     * gateway answers on the token alone and reports `bound: false`, and the owner surface
+     * says so. Throwing here would make every action fail on a phone that has simply not
+     * enrolled yet, which is not the same problem.
+     */
+    private fun proofHeaders(
+        method: String,
+        path: String,
+        // Named `bodyText` rather than `body` on purpose: a contract test pins the absence
+        // of `body.toByteArray(` because a JsonObject was once passed to it, and a second
+        // legitimate use of that spelling would blunt the guard rather than benefit from it.
+        bodyText: String,
+    ): Map<String, String> {
+        if (!deviceIdentity.isEnrolled()) return emptyMap()
+        val device = deviceId ?: return emptyMap()
+        return try {
+            proofSigner.headers(
+                method = method, path = path, deviceId = device,
+                body = bodyText.toByteArray(StandardCharsets.UTF_8),
+            )
+        } catch (_: OwnerDeviceIdentity.IdentityUnavailable) {
+            // The key is gone (a factory reset restores the app but not the Keystore). The
+            // request will be refused by the gateway and the owner surface will tell the
+            // owner to re-enrol, which is better than a signature over nothing.
+            emptyMap()
+        }
+    }
+
+    /**
+     * Where VAN connects. Readable everywhere, writable only from provisioning.
+     *
+     * §0D.2 / RB-121 — the setter is private on purpose, and privacy is the enforcement
+     * rather than a convention. A public setter is all a "change server address" screen
+     * needs, and that screen is a phishing surface with the owner's whole assistant behind
+     * it: anyone who persuades them to retype an address owns every command from then on,
+     * and nothing on the phone looks wrong afterwards.
+     *
+     * The only writer is [provisionThisDevice], which takes a payload signed by the pinned
+     * connectivity authority. A release build has no other path to this value.
+     */
     var baseUrl: String
         get() {
             val configured = prefs.getString(KEY_BASE, null)
@@ -59,7 +156,7 @@ class VanGatewayClient(context: Context) {
                 }
             }
         }
-        set(value) = prefs.edit().putString(KEY_BASE, normalizeGatewayBaseUrl(value)).apply()
+        private set(value) = prefs.edit().putString(KEY_BASE, normalizeGatewayBaseUrl(value)).apply()
 
     private fun defaultGatewayBaseUrl(): String {
         val buildConfigured = BuildConfig.VAN_GATEWAY_BASE_URL.trim()
@@ -106,7 +203,52 @@ class VanGatewayClient(context: Context) {
 
     fun newA4ApprovalSignature(): Signature = approvalKeys.newSigningSignature()
 
-    suspend fun pairThisDevice(
+    fun prepareTradingPromotionAuthority(
+        strategyId: String,
+        targetState: String,
+        validationHash: String,
+        issuedAtUnix: Long = System.currentTimeMillis() / 1000L,
+    ): OwnerAuthorityToken.Prepared {
+        require(strategyId.isNotBlank() && targetState.isNotBlank() && validationHash.isNotBlank()) {
+            "promotion_authority_subject_incomplete"
+        }
+        return approvalKeys.prepareOwnerAuthority(
+            act = "capsule-promote",
+            subject = "$strategyId:$targetState:$validationHash",
+            issuedAtUnix = issuedAtUnix,
+        )
+    }
+
+
+    /**
+     * ADR-RB-026 — the whole of provisioning, from a payload the installer delivered.
+     *
+     * Two steps because they buy two different things, and §0D.3 needs both. Pairing earns
+     * this device its ingress and access tokens; binding attests a hardware-backed Keystore
+     * key so those tokens are worth nothing on any other handset. A device that paired and
+     * did not bind is exactly the failure §0D.3 describes — an APK copied to another phone
+     * that works.
+     *
+     * The order matters and is not arbitrary: `bindThisDevice` signs with the device id
+     * that pairing mints, so binding first would have nothing to bind.
+     */
+    suspend fun provisionThisDevice(
+        payload: com.dial.van.connectivity.ProvisioningPayload,
+        label: String = "android",
+    ): JSONObject = withContext(Dispatchers.IO) {
+        pairThisDevice(payload.gatewayUrl, payload.pairingToken, label)
+        bindThisDevice(payload.bootstrapToken)
+    }
+
+    /**
+     * §0D.2 — private, and this is the enforcement.
+     *
+     * Two screens used to call this with strings the owner had typed: a "Gateway address"
+     * field and a "pairing code" field, which are the first and fifth entries on §0D.2's
+     * list of what a production build must never expose. Making it private means a new
+     * form cannot be added without also removing this comment.
+     */
+    private suspend fun pairThisDevice(
         gatewayUrl: String,
         pairingToken: String,
         label: String = "android",
@@ -170,12 +312,94 @@ class VanGatewayClient(context: Context) {
 
     suspend fun tradingRisk(): String = withContext(Dispatchers.IO) { rawGet("/v1/trading/risk") }
 
+    suspend fun tradingCognition(): String = withContext(Dispatchers.IO) { rawGet("/v1/trading/cognition") }
+
     suspend fun tradingTradeDetail(tradeIntentId: String): String = withContext(Dispatchers.IO) {
         rawGet("/v1/trading/trades/${encodeSegment(tradeIntentId)}")
     }
 
     suspend fun tradingBars(symbol: String, timeframe: String = "H1", limit: Int = 300): String = withContext(Dispatchers.IO) {
         rawGet("/v1/trading/bars?symbol=${encodeQuery(symbol)}&timeframe=${encodeQuery(timeframe)}&limit=$limit")
+    }
+
+    suspend fun tradingPromotionCandidates(): String = withContext(Dispatchers.IO) {
+        rawGet("/v1/trading/strategies/promotion-candidates")
+    }
+
+    private fun tradingPromotionBody(
+        strategyId: String,
+        targetState: String,
+        ownerSignatureRef: String,
+        certificate: JsonObject,
+        evidenceRefs: List<String>,
+        issuedAtUnix: Long,
+        approvalProof: JsonObject? = null,
+    ): JsonObject {
+        val id = deviceId ?: error("not_enrolled")
+        val secret = deviceSecret ?: error("not_enrolled")
+        return StrategyPromotionProtocol.requestBody(
+            deviceSecret = secret,
+            deviceId = id,
+            issuedAtUnix = issuedAtUnix,
+            strategyId = strategyId,
+            targetState = targetState,
+            ownerSignatureRef = ownerSignatureRef,
+            certificate = certificate,
+            evidenceRefs = evidenceRefs,
+            approvalProof = approvalProof,
+        )
+    }
+
+    suspend fun tradingPromotionChallenge(
+        strategyId: String,
+        targetState: String,
+        ownerSignatureRef: String,
+        certificate: JsonObject,
+        evidenceRefs: List<String>,
+        issuedAtUnix: Long = System.currentTimeMillis() / 1000L,
+    ): Pair<Int, String> = withContext(Dispatchers.IO) {
+        tradingPromotionPost(
+            "/v1/trading/strategies/promotion-challenge",
+            tradingPromotionBody(
+                strategyId, targetState, ownerSignatureRef,
+                certificate, evidenceRefs, issuedAtUnix,
+            ),
+        )
+    }
+
+    suspend fun tradingPromoteStrategy(
+        strategyId: String,
+        targetState: String,
+        ownerSignatureRef: String,
+        certificate: JsonObject,
+        evidenceRefs: List<String>,
+        approvalProof: JsonObject,
+        issuedAtUnix: Long = System.currentTimeMillis() / 1000L,
+    ): Pair<Int, String> = withContext(Dispatchers.IO) {
+        tradingPromotionPost(
+            "/v1/trading/strategies/promote",
+            tradingPromotionBody(
+                strategyId, targetState, ownerSignatureRef,
+                certificate, evidenceRefs, issuedAtUnix, approvalProof,
+            ),
+        )
+    }
+
+    private fun tradingPromotionPost(path: String, body: JsonObject): Pair<Int, String> {
+        val conn = (URL("$baseUrl$path").openConnection() as HttpURLConnection).apply {
+            requestMethod = "POST"
+            setRequestProperty("Content-Type", "application/json")
+            applyIngressAuth(this)
+            doOutput = true
+            connectTimeout = 15_000
+            readTimeout = 60_000
+        }
+        conn.outputStream.use {
+            it.write(body.toString().toByteArray(StandardCharsets.UTF_8))
+        }
+        val code = conn.responseCode
+        val stream = if (code in 200..299) conn.inputStream else conn.errorStream
+        return code to (stream?.bufferedReader()?.use { it.readText() } ?: "{}")
     }
 
     suspend fun tradingAccountAction(
@@ -276,6 +500,228 @@ class VanGatewayClient(context: Context) {
 
     suspend fun browserEvidence(taskId: String): JSONArray = withContext(Dispatchers.IO) {
         JSONArray(rawGet("/v1/browser/tasks/${encodeSegment(taskId)}/evidence"))
+    }
+
+    // ------------------------------------------------- interactive browser (Rev 1.5 §6)
+    //
+    // The owner's phone owns these: it creates the session, heartbeats it, hands control
+    // to Hermes and takes it back. Every mutation carries a device proof (ADR-RB-025).
+    //
+    // Deliberately absent: a "navigate to this URL" call. Navigation is an actuation and
+    // is fenced by the control lease on the stream host, not by an authenticated REST
+    // call — a gateway route that navigated would be a second actuation path with a
+    // different authority, which §6.1 exists to prevent.
+
+    suspend fun interactiveBrowserCreate(
+        profileAlias: String,
+        widthPx: Int,
+        heightPx: Int,
+        deviceScaleFactor: Float,
+        maxFps: Int = 60,
+        missionId: String? = null,
+        idempotencyKey: String? = null,
+    ): BrowserSessionSnapshot = withContext(Dispatchers.IO) {
+        val body = JSONObject()
+            .put("profile_alias", profileAlias)
+            .put(
+                "viewport",
+                JSONObject()
+                    .put("width", widthPx)
+                    .put("height", heightPx)
+                    .put("device_scale_factor", deviceScaleFactor.toDouble()),
+            )
+            .put("media", JSONObject().put("max_fps", maxFps))
+        missionId?.let { body.put("mission_id", it) }
+        idempotencyKey?.let { body.put("idempotency_key", it) }
+        BrowserParsing.session(postProved(INTERACTIVE_SESSIONS, body))
+    }
+
+    suspend fun interactiveBrowserRead(sessionId: String): BrowserSessionSnapshot =
+        withContext(Dispatchers.IO) {
+            BrowserParsing.session(getJson("$INTERACTIVE_SESSIONS/${encodeSegment(sessionId)}"))
+        }
+
+    suspend fun interactiveBrowserStreamGrant(sessionId: String): BrowserStreamGrant =
+        withContext(Dispatchers.IO) {
+            BrowserParsing.streamGrant(
+                postProved(
+                    "$INTERACTIVE_SESSIONS/${encodeSegment(sessionId)}/stream-grant",
+                    JSONObject(),
+                ),
+            )
+        }
+
+    suspend fun interactiveBrowserTakeControl(sessionId: String): JSONObject =
+        withContext(Dispatchers.IO) {
+            postProved(
+                "$INTERACTIVE_SESSIONS/${encodeSegment(sessionId)}/take-control", JSONObject(),
+            )
+        }
+
+    suspend fun interactiveBrowserDelegateControl(
+        sessionId: String,
+        holder: String,
+        issuedFor: String,
+    ): JSONObject = withContext(Dispatchers.IO) {
+        postProved(
+            "$INTERACTIVE_SESSIONS/${encodeSegment(sessionId)}/delegate-control",
+            JSONObject().put("holder", holder).put("issued_for", issuedFor),
+        )
+    }
+
+    suspend fun interactiveBrowserHeartbeat(sessionId: String): BrowserSessionSnapshot =
+        withContext(Dispatchers.IO) {
+            BrowserParsing.session(
+                postProved(
+                    "$INTERACTIVE_SESSIONS/${encodeSegment(sessionId)}/heartbeat", JSONObject(),
+                ),
+            )
+        }
+
+    suspend fun interactiveBrowserProposeViewport(
+        sessionId: String,
+        widthPx: Int,
+        heightPx: Int,
+        deviceScaleFactor: Float,
+    ): Int = withContext(Dispatchers.IO) {
+        postProved(
+            "$INTERACTIVE_SESSIONS/${encodeSegment(sessionId)}/viewport",
+            JSONObject()
+                .put("width", widthPx)
+                .put("height", heightPx)
+                .put("device_scale_factor", deviceScaleFactor.toDouble()),
+        ).getInt("viewport_revision")
+    }
+
+    /**
+     * §8.6 — the device confirms it is drawing the new size.
+     *
+     * Actuation is withheld between the proposal and this call, because a tap mapped
+     * through the old viewport lands somewhere the owner did not touch.
+     */
+    suspend fun interactiveBrowserAckViewport(sessionId: String, revision: Int): JSONObject =
+        withContext(Dispatchers.IO) {
+            postProved(
+                "$INTERACTIVE_SESSIONS/${encodeSegment(sessionId)}/viewport/ack",
+                JSONObject().put("revision", revision),
+            )
+        }
+
+    suspend fun interactiveBrowserSuspend(sessionId: String): BrowserSessionSnapshot =
+        withContext(Dispatchers.IO) {
+            BrowserParsing.session(
+                postProved(
+                    "$INTERACTIVE_SESSIONS/${encodeSegment(sessionId)}/suspend", JSONObject(),
+                ),
+            )
+        }
+
+    suspend fun interactiveBrowserEnd(sessionId: String): BrowserSessionSnapshot =
+        withContext(Dispatchers.IO) {
+            BrowserParsing.session(
+                deleteProved("$INTERACTIVE_SESSIONS/${encodeSegment(sessionId)}"),
+            )
+        }
+
+    suspend fun interactiveBrowserTabs(sessionId: String): JSONArray =
+        withContext(Dispatchers.IO) {
+            getJson("$INTERACTIVE_SESSIONS/${encodeSegment(sessionId)}/tabs")
+                .optJSONArray("tabs") ?: JSONArray()
+        }
+
+    suspend fun interactiveBrowserDownloads(sessionId: String): JSONArray =
+        withContext(Dispatchers.IO) {
+            getJson("$INTERACTIVE_SESSIONS/${encodeSegment(sessionId)}/downloads")
+                .optJSONArray("downloads") ?: JSONArray()
+        }
+
+    suspend fun interactiveBrowserEvents(sessionId: String): JSONArray =
+        withContext(Dispatchers.IO) {
+            getJson("$INTERACTIVE_SESSIONS/${encodeSegment(sessionId)}/events")
+                .optJSONArray("events") ?: JSONArray()
+        }
+
+    // ------------------------------------------------ durable session (Rev 1.5 §20)
+
+    /** This device's id, or empty when it has not paired. Used to address envelopes. */
+    fun deviceIdOrEmpty(): String = deviceId ?: ""
+
+    suspend fun sessionOpen(
+        pathId: String,
+        routeId: String,
+        protocol: String = "WSS",
+        pathClass: String = "A_REALTIME",
+    ): JSONObject = withContext(Dispatchers.IO) {
+        postProved(
+            "$SESSION_PREFIX/open",
+            JSONObject()
+                .put("path_id", pathId)
+                .put("route_id", routeId)
+                .put("protocol", protocol)
+                .put("path_class", pathClass),
+        )
+    }
+
+    /**
+     * §20.10 step 4 — reconcile against the Gateway's own account of this session.
+     *
+     * A refused resume comes back as `{"refusal": ...}` rather than an exception, because
+     * a refusal is an answer: the caller has to open a new session, which is a different
+     * action from retrying. Throwing here would put that decision in a catch block.
+     */
+    suspend fun sessionResume(
+        vanSessionId: String,
+        sessionEpoch: Int,
+        lastEventSeq: Long,
+        pendingCommandIds: List<String>,
+        pathId: String,
+        routeId: String,
+    ): JSONObject = withContext(Dispatchers.IO) {
+        val body = JSONObject()
+            .put("van_session_id", vanSessionId)
+            .put("session_epoch", sessionEpoch)
+            .put("last_event_seq", lastEventSeq)
+            .put("pending_command_ids", JSONArray(pendingCommandIds))
+            .put("path_id", pathId)
+            .put("route_id", routeId)
+            .put("path_class", "A_REALTIME")
+        try {
+            postProved("$SESSION_PREFIX/resume", body)
+        } catch (refused: GatewayHttpException) {
+            if (refused.code != 409 && refused.code != 404) throw refused
+            JSONObject().put(
+                "refusal",
+                runCatching { JSONObject(refused.body).optString("detail") }
+                    .getOrDefault("session_unknown")
+                    .ifBlank { "session_unknown" },
+            )
+        }
+    }
+
+    suspend fun sessionStatus(vanSessionId: String): JSONObject = withContext(Dispatchers.IO) {
+        getJson("$SESSION_PREFIX/status?van_session_id=${encodeQuery(vanSessionId)}")
+    }
+
+    /**
+     * The full-duplex endpoint, with its credentials in the query string.
+     *
+     * Not a stylistic choice: the HTTP middleware does not run for a WebSocket handshake,
+     * so the socket authenticates itself, and the only place a handshake can carry a
+     * credential portably is the URL. It is short-lived and scoped to one device.
+     */
+    fun sessionSocketUrl(vanSessionId: String): String {
+        val root = baseUrl
+            .replaceFirst("https://", "wss://")
+            .replaceFirst("http://", "ws://")
+        val token = deviceAccessToken?.takeIf { it.isNotBlank() } ?: error("device_access_token_unconfigured")
+        return "$root$SESSION_PREFIX/ws?van_session_id=${encodeQuery(vanSessionId)}" +
+            "&device_token=${encodeQuery(token)}"
+    }
+
+    // --------------------------------------------------- signed connectivity (ADR-RB-027)
+
+    suspend fun connectivityManifest(knownVersion: Int): JSONObject = withContext(Dispatchers.IO) {
+        getJson("/v1/connectivity/manifest?known_version=$knownVersion")
     }
 
     // ---------------------------------------------------------------- missions
@@ -394,7 +840,23 @@ class VanGatewayClient(context: Context) {
      * Rev 3.1 signed owner-intent envelope. Authority-bearing provenance fields are HMAC-covered
      * by signature v2. Pairing/device-access authentication remains mandatory on the transport.
      */
-    suspend fun dispatchCommand(
+    /**
+     * §20.14 — the signed command body, built once and usable twice.
+     *
+     * Extracted from [dispatchCommand] because a command that could not be sent has to be
+     * *stored*, and storing "text plus an action class" stores something the Gateway
+     * cannot accept: `CommandRequest` requires `command_id`, `issued_at_unix` and
+     * `signature`, so a payload without them is refused as `command_payload_invalid` when
+     * the outbox finally flushes it. The owner would be told their work was saved and it
+     * would be rejected on their behalf hours later, which is a worse failure than losing
+     * it outright because nothing looks wrong until it is too late to redo.
+     *
+     * The signature covers `issued_at_unix`, so a stored body carries the moment the
+     * owner issued it rather than the moment it was sent — which is what makes the
+     * Gateway's own `owner_intent_max_age_seconds` the right rule for refusing it, rather
+     * than a re-signing here that would make every stored command look fresh.
+     */
+    fun buildCommandBody(
         text: String,
         actionClass: String = "A1",
         projectId: String? = null,
@@ -412,7 +874,7 @@ class VanGatewayClient(context: Context) {
         contextCapsuleRevision: Int? = null,
         contextCapsuleHash: String? = null,
         declaredTrust: String = TRUST_CONVERSATION,
-    ): JSONObject = withContext(Dispatchers.IO) {
+    ): JSONObject {
         val id = deviceId ?: error("not_enrolled")
         val secret = deviceSecret ?: error("not_enrolled")
         val commandId = UUID.randomUUID().toString()
@@ -480,6 +942,47 @@ class VanGatewayClient(context: Context) {
         if (contextCapsuleRevision != null) body.put("context_capsule_revision", contextCapsuleRevision)
         if (contextCapsuleHash != null) body.put("context_capsule_hash", contextCapsuleHash)
 
+        return body
+    }
+
+    suspend fun dispatchCommand(
+        text: String,
+        actionClass: String = "A1",
+        projectId: String? = null,
+        idempotencyKey: String,
+        approvalToken: String? = null,
+        approvalChallengeId: String? = null,
+        approvalSignatureBase64: String? = null,
+        approvalAlgorithm: String = OwnerApprovalKeyManager.PROOF_ALGORITHM,
+        issuedAtUnix: Long = System.currentTimeMillis() / 1000L,
+        turnId: String? = null,
+        originChannel: String = "UI",
+        expiresAtUnix: Long? = null,
+        noStaleReplay: Boolean = false,
+        speechEvidenceRef: String? = null,
+        contextCapsuleRevision: Int? = null,
+        contextCapsuleHash: String? = null,
+        declaredTrust: String = TRUST_CONVERSATION,
+    ): JSONObject = withContext(Dispatchers.IO) {
+        val body = buildCommandBody(
+            text = text,
+            actionClass = actionClass,
+            projectId = projectId,
+            idempotencyKey = idempotencyKey,
+            approvalToken = approvalToken,
+            approvalChallengeId = approvalChallengeId,
+            approvalSignatureBase64 = approvalSignatureBase64,
+            approvalAlgorithm = approvalAlgorithm,
+            issuedAtUnix = issuedAtUnix,
+            turnId = turnId,
+            originChannel = originChannel,
+            expiresAtUnix = expiresAtUnix,
+            noStaleReplay = noStaleReplay,
+            speechEvidenceRef = speechEvidenceRef,
+            contextCapsuleRevision = contextCapsuleRevision,
+            contextCapsuleHash = contextCapsuleHash,
+            declaredTrust = declaredTrust,
+        )
         VanLiveVisualState.dispatchStarted()
         try {
             val response = postJson("/v1/commands", body)
@@ -546,16 +1049,51 @@ class VanGatewayClient(context: Context) {
         path: String,
         body: String,
         useIngress: Boolean,
+        extraHeaders: Map<String, String> = emptyMap(),
     ): JSONObject = withRetry {
         val conn = (URL("$rootUrl$path").openConnection() as HttpURLConnection).apply {
             requestMethod = "POST"
             setRequestProperty("Content-Type", "application/json")
             if (useIngress) applyIngressAuth(this)
+            extraHeaders.forEach { (name, value) -> setRequestProperty(name, value) }
             doOutput = true
             connectTimeout = 15_000
             readTimeout = 60_000
         }
         conn.outputStream.use { it.write(body.toString().toByteArray(StandardCharsets.UTF_8)) }
+        val code = conn.responseCode
+        val stream = if (code in 200..299) conn.inputStream else conn.errorStream
+        val responseText = stream?.bufferedReader()?.readText() ?: "{}"
+        if (code !in 200..299) throw GatewayHttpException(code, responseText)
+        JSONObject(responseText)
+    }
+
+    /**
+     * A POST that proves possession of the bound device key over this exact request.
+     *
+     * The proof is computed from the serialized body, so the body is serialized once and
+     * that same string is sent. Re-serializing between signing and sending is how a
+     * signature ends up covering a document that was never transmitted — a reordered key
+     * is enough.
+     */
+    private fun postProved(path: String, body: JSONObject): JSONObject {
+        val payload = body.toString()
+        return postRawAt(
+            baseUrl, path, payload, useIngress = true,
+            extraHeaders = proofHeaders("POST", path, payload),
+        )
+    }
+
+    private fun deleteProved(path: String): JSONObject = withRetry {
+        val conn = (URL("$baseUrl$path").openConnection() as HttpURLConnection).apply {
+            requestMethod = "DELETE"
+            applyIngressAuth(this)
+            proofHeaders("DELETE", path, "").forEach { (name, value) ->
+                setRequestProperty(name, value)
+            }
+            connectTimeout = 15_000
+            readTimeout = 30_000
+        }
         val code = conn.responseCode
         val stream = if (code in 200..299) conn.inputStream else conn.errorStream
         val responseText = stream?.bufferedReader()?.readText() ?: "{}"
@@ -652,6 +1190,12 @@ class VanGatewayClient(context: Context) {
         private const val MIN_INGRESS_TOKEN_CHARS = 32
         private const val MIN_DEVICE_ACCESS_TOKEN_CHARS = 32
         private const val MIN_PAIRING_TOKEN_CHARS = 32
+
+        /** Rev 1.5 §6.1. One prefix, matching the gateway's own route classifier. */
+        const val INTERACTIVE_SESSIONS = "/v1/browser/interactive-sessions"
+
+        /** Rev 1.5 §20 / §34.1. Matches `van_gateway.session.api.SESSION_PREFIX`. */
+        const val SESSION_PREFIX = "/v1/session"
 
         const val TRUST_CONVERSATION = "CONVERSATION"
         const val TRUST_UNTRUSTED = "UNTRUSTED"

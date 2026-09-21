@@ -29,37 +29,92 @@ APP_ROUTES = ROOT / "backend/van_gateway/app.py"
 
 
 def gateway_metrics() -> tuple[set[str], set[str]]:
+    """The histogram names, and every other device name the route will accept.
+
+    Gauges and counters are returned together because this comparison is about *names*
+    and the route takes a name from whichever dict holds it. Reading only two of the
+    three is how two of §28.1's four device metrics reached the gateway with nothing
+    checking that any phone could post them: `DEVICE_COUNTERS` was added beside the two
+    this function already read, and the test whose whole job is to catch that drift did
+    not know the third dict existed.
+    """
     from van_gateway.observability import instruments
 
-    return set(instruments.DEVICE_HISTOGRAMS), set(instruments.DEVICE_GAUGES)
+    return (
+        set(instruments.DEVICE_HISTOGRAMS),
+        set(instruments.DEVICE_GAUGES) | set(instruments.DEVICE_COUNTERS),
+    )
 
 
-def kotlin_metrics() -> dict[str, bool]:
-    """Wire name -> whether the Kotlin enum says it carries a `surface` label."""
+def kotlin_metrics() -> dict[str, str]:
+    """Wire name -> the dimension the Kotlin enum says it carries, or "" for none.
+
+    The dimension is compared by *name*, not by a boolean. A device that posted its
+    outbox depth in the `surface` field would be posting a label the route resolves for a
+    different metric, and a true/false answer here could not tell the two apart.
+    """
     text = KOTLIN.read_text(encoding="utf-8")
-    body = text[text.index("enum class DeviceMetric") : text.index("companion object")]
+    body = text[text.index("enum class DeviceMetric") : text.index("val surfaced")]
     found = {}
-    for wire, surfaced in re.findall(
-        r'\(\s*"([a-z_]+)"\s*(?:,\s*surfaced\s*=\s*(true|false)\s*)?\)', body
+    for wire, dimension in re.findall(
+        r'\(\s*"([a-z_]+)"\s*(?:,\s*dimension\s*=\s*"([a-z_]+)"\s*)?\)', body
     ):
-        found[wire] = surfaced == "true"
+        found[wire] = dimension
     return found
 
 
 def test_the_device_posts_exactly_what_the_gateway_declares():
-    histograms, gauges = gateway_metrics()
-    assert kotlin_metrics().keys() == histograms | gauges
+    histograms, gauges_and_counters = gateway_metrics()
+    assert kotlin_metrics().keys() == histograms | gauges_and_counters
 
 
-def test_the_only_labelled_metric_is_the_one_the_catalogue_labels():
+def test_every_declared_device_metric_is_ingestible_under_its_wire_name():
+    """The name the phone sends has to be one `record_device_sample` accepts.
+
+    The set comparison above proves the two lists agree. This proves the list means what
+    it says: a name present in a dict the ingest function does not consult would pass the
+    comparison and still be refused at the route, and the phone's telemetry would vanish
+    with the scrape still reporting the metric unobserved.
+    """
+    from van_gateway.observability import instruments
+    from van_gateway.observability.metrics import MetricsRegistry
+
+    registry = MetricsRegistry()
+    landed = {
+        wire: instruments.record_device_sample(
+            wire, 1.0, surface="overlay", dimension="safe_to_retry", registry=registry
+        )
+        for wire in kotlin_metrics()
+    }
+    # Every one landed in a catalogue series, and no two landed in the same one: a
+    # duplicated target would mean one phone measurement overwriting another's.
+    assert len(set(landed.values())) == len(landed), landed
+    assert not {m.name for m in registry.unobserved()} & set(landed.values())
+
+
+def test_each_side_names_the_same_dimension_for_the_same_metric():
+    """Not "both sides label it" — both sides label it *the same thing*.
+
+    The ingest resolves the value from `surface` when the declared dimension is `surface`
+    and from `dimension` otherwise. A phone that disagreed with the catalogue about which
+    field carries the label would post into the one the route does not read, and the
+    sample would be refused with nothing on either side saying why.
+    """
     from van_gateway.observability import instruments
 
-    labelled = {
-        name for name, (_, labels) in instruments.DEVICE_HISTOGRAMS.items() if labels
+    gateway = {
+        name: declared.dimension
+        for table in instruments.DEVICE_TABLES
+        for name, declared in table.items()
     }
-    assert {w for w, s in kotlin_metrics().items() if s} == labelled
-    # An undeclared label is a refused sample, so this is not cosmetic.
-    assert labelled == {"aura_frame_time_ms"}
+    assert kotlin_metrics() == gateway, {
+        "kotlin": kotlin_metrics(), "gateway": gateway,
+    }
+    # The two that carry one, named, so adding a third is a deliberate act.
+    assert {n: d for n, d in gateway.items() if d} == {
+        "aura_frame_time_ms": "surface",
+        "session_outbox_depth": "storability",
+    }
 
 
 def test_the_device_names_are_the_wire_names_not_the_series_names():

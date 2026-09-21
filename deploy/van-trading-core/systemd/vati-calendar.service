@@ -1,0 +1,30 @@
+[Unit]
+Description=Van economic calendar recorder (TRD-REV51-090: what was scheduled, what printed, who disagreed)
+After=network-online.target
+Wants=network-online.target
+
+[Service]
+Type=oneshot
+User=vati
+Group=vati
+EnvironmentFile=/opt/van-trading/config/van-trading-core.env
+Environment=PYTHONPATH=/opt/van-trading/app/trading
+WorkingDirectory=/opt/van-trading/app
+# Exit 1 means two sources disagreed about a release. That is not a transient
+# fault to retry away: one feed is wrong, and the surprise engine must not be
+# handed either value until an owner has looked. The timer keeps running; this
+# run stays red in `systemctl list-units --failed` until the input is fixed.
+ExecStart=/opt/van-trading/venv/bin/python -m vati calendar-record \
+    --schedule ${VAN_CALENDAR_SCHEDULE} \
+    --releases ${VAN_CALENDAR_RELEASES} \
+    --ledger ${VAN_VATI_LEDGER} \
+    --out /var/lib/van-trading/calendar/last-record.json
+Restart=no
+NoNewPrivileges=true
+ProtectSystem=strict
+ProtectHome=true
+ReadWritePaths=/var/lib/van-trading /var/log/van-trading
+PrivateTmp=true
+
+[Install]
+WantedBy=multi-user.target

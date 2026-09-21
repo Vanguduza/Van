@@ -23,6 +23,7 @@ from van_gateway.browser.models import (
     BrowserTaskStatus,
     InjectionAssessment,
     PageLease,
+    ProfileLeaseHolderKind,
 )
 from van_gateway.browser.policy import BrowserPolicyEngine, BrowserPolicyError
 from van_gateway.models import ActionClass
@@ -73,38 +74,150 @@ class BrowserSessionBroker:
         )
         return {"profile_alias": profile_alias, **spec}
 
+    #: Rev 1.5 §5.3's normative timing for an interactive session. Short, because the
+    #: failure it bounds is a phone that went away without saying so: a long lease means the
+    #: profile stays locked to a session nobody is watching.
+    INTERACTIVE_LEASE_SECONDS = 120
+    HEARTBEAT_SECONDS = 20
+    RENEW_WHEN_REMAINING_MS = 80_000
+    #: §5.3 / §0E.1 D7 — cleanup and reconnect only. It never extends actuation authority,
+    #: which stops at the expiry instant.
+    EXPIRY_GRACE_SECONDS = 30
+
     async def acquire_lease(
-        self, *, profile_alias: str, task_id: str, ttl_seconds: int | None = None,
+        self, *, profile_alias: str, task_id: str | None = None,
+        holder_kind: ProfileLeaseHolderKind = ProfileLeaseHolderKind.TASK,
+        holder_id: str | None = None,
+        ttl_seconds: int | None = None,
         now_ms: int | None = None,
     ) -> PageLease:
-        """Exclusive while live. A second task on the same profile is refused, not queued."""
+        """Exclusive while live. A second holder on the same profile is refused, not queued.
+
+        §5.3: a task passes ``task_id`` and gets the historical behaviour. An interactive
+        session passes ``holder_kind=INTERACTIVE_SESSION`` and its session id.
+
+        The generation increments on every successful acquisition, and that is the fence:
+        work still holding the previous one is refused rather than applied to whoever holds
+        the profile now.
+        """
         now = int(time.time() * 1000) if now_ms is None else now_ms
-        ttl = max(30, int(ttl_seconds or self.DEFAULT_LEASE_SECONDS))
+        resolved_holder = holder_id or task_id
+        if not resolved_holder:
+            raise BrowserPolicyError("browser_lease_requires_a_holder")
+        default_ttl = (
+            self.INTERACTIVE_LEASE_SECONDS
+            if holder_kind is ProfileLeaseHolderKind.INTERACTIVE_SESSION
+            else self.DEFAULT_LEASE_SECONDS
+        )
+        ttl = max(30, int(ttl_seconds or default_ttl))
         expires = now + ttl * 1000
         lease_id = f"blease_{uuid.uuid4().hex}"
         async with self.store.connection() as db:
             cur = await db.execute(
                 """
                 UPDATE browser_profiles
-                SET lease_holder = ?, lease_expires_at_ms = ?, updated_at_ms = ?
+                SET lease_holder = ?, lease_expires_at_ms = ?, updated_at_ms = ?,
+                    lease_holder_kind = ?, lease_holder_id = ?, lease_acquired_at_ms = ?,
+                    lease_generation = lease_generation + 1
                 WHERE profile_alias = ?
                   AND (lease_holder IS NULL OR lease_expires_at_ms IS NULL OR lease_expires_at_ms <= ?)
                 """,
-                (lease_id, expires, now, profile_alias, now),
+                (
+                    lease_id, expires, now, holder_kind.value, resolved_holder, now,
+                    profile_alias, now,
+                ),
             )
             await db.commit()
             if cur.rowcount != 1:
                 raise BrowserPolicyError(f"browser_profile_leased:{profile_alias}")
+            cur = await db.execute(
+                "SELECT lease_generation FROM browser_profiles WHERE profile_alias = ?",
+                (profile_alias,),
+            )
+            row = await cur.fetchone()
+            generation = int(row["lease_generation"]) if row else 0
         return PageLease(
-            lease_id=lease_id, profile_alias=profile_alias, task_id=task_id,
-            acquired_at_ms=now, expires_at_ms=expires,
+            lease_id=lease_id, profile_alias=profile_alias,
+            task_id=task_id if holder_kind is ProfileLeaseHolderKind.TASK else None,
+            holder_kind=holder_kind, holder_id=resolved_holder,
+            acquired_at_ms=now, expires_at_ms=expires, generation=generation,
         )
+
+    async def renew_lease(
+        self, *, lease_id: str, holder_id: str, generation: int,
+        ttl_seconds: int | None = None, now_ms: int | None = None,
+    ) -> PageLease:
+        """§5.3 — extend exclusivity, and nothing else.
+
+        Renewal does not increment the generation and confers no new authority: it says the
+        holder is still here. All three of lease id, holder and generation must match, so a
+        stale client cannot keep a profile alive for a session the Gateway has already
+        replaced.
+        """
+        now = int(time.time() * 1000) if now_ms is None else now_ms
+        ttl = max(30, int(ttl_seconds or self.INTERACTIVE_LEASE_SECONDS))
+        expires = now + ttl * 1000
+        async with self.store.connection() as db:
+            cur = await db.execute(
+                """
+                UPDATE browser_profiles
+                SET lease_expires_at_ms = ?, updated_at_ms = ?
+                WHERE lease_holder = ? AND lease_holder_id = ? AND lease_generation = ?
+                  AND lease_expires_at_ms > ?
+                """,
+                (expires, now, lease_id, holder_id, generation, now),
+            )
+            await db.commit()
+            if cur.rowcount != 1:
+                # Either it expired, or it was taken. Both mean the caller must stop
+                # actuating now and reacquire, which is why this is an error rather than a
+                # silent re-acquire: reacquiring here would hand the profile back to a
+                # holder whose lease had already lapsed to someone else.
+                raise BrowserPolicyError("browser_lease_not_renewable")
+            cur = await db.execute(
+                "SELECT profile_alias, lease_holder_kind, lease_acquired_at_ms "
+                "FROM browser_profiles WHERE lease_holder = ?",
+                (lease_id,),
+            )
+            row = await cur.fetchone()
+        kind = ProfileLeaseHolderKind(row["lease_holder_kind"] or ProfileLeaseHolderKind.TASK.value)
+        return PageLease(
+            lease_id=lease_id, profile_alias=row["profile_alias"],
+            task_id=holder_id if kind is ProfileLeaseHolderKind.TASK else None,
+            holder_kind=kind, holder_id=holder_id,
+            acquired_at_ms=int(row["lease_acquired_at_ms"] or now),
+            expires_at_ms=expires, generation=generation,
+        )
+
+    async def assert_lease_active(
+        self, *, lease_id: str, holder_id: str, generation: int, now_ms: int | None = None
+    ) -> None:
+        """Refuse actuation the moment the lease lapses (§5.3, §0E.1 D7).
+
+        The 30-second grace is for cleanup and reconnect. It is deliberately not consulted
+        here: video may stay frozen on screen during that window, and nothing may act.
+        """
+        now = int(time.time() * 1000) if now_ms is None else now_ms
+        row = await self.store.fetchone(
+            "SELECT lease_expires_at_ms, lease_holder_id, lease_generation "
+            "FROM browser_profiles WHERE lease_holder = ?",
+            (lease_id,),
+        )
+        if row is None:
+            raise BrowserPolicyError("browser_lease_unknown")
+        if row["lease_holder_id"] != holder_id:
+            raise BrowserPolicyError("browser_lease_holder_mismatch")
+        if int(row["lease_generation"]) != int(generation):
+            raise BrowserPolicyError("browser_lease_generation_stale")
+        if int(row["lease_expires_at_ms"] or 0) <= now:
+            raise BrowserPolicyError("browser_profile_lease_expired")
 
     async def release_lease(self, lease: PageLease, *, now_ms: int | None = None) -> None:
         now = int(time.time() * 1000) if now_ms is None else now_ms
         await self.store.execute(
             "UPDATE browser_profiles SET lease_holder = NULL, lease_expires_at_ms = NULL, "
-            "updated_at_ms = ? WHERE profile_alias = ? AND lease_holder = ?",
+            "lease_holder_kind = NULL, lease_holder_id = NULL, updated_at_ms = ? "
+            "WHERE profile_alias = ? AND lease_holder = ?",
             (now, lease.profile_alias, lease.lease_id),
         )
 

@@ -1,19 +1,28 @@
 {
+  "capsule_hash": "86722bfbf8e2656ab4fedc654e9c2ca6cc8a8db79bec09a965d9f81560bf4434",
+  "cost_model_ref": "vati.market_data.costs.FxCostModel",
   "discipline": "Gold/Metals Macro",
-  "instruments": [
-    "XAUUSD"
-  ],
-  "horizons": [
-    "POSITION"
-  ],
   "eligible_regimes": [
     "BULL",
     "BEAR"
   ],
+  "entry_logic_ref": "vati.strategies.fx_trend_pullback",
+  "event_rules": {
+    "tier1": "no new entries inside blackout/quiet"
+  },
+  "evidence_refs": [],
+  "execution_model": "LIMIT",
   "forbidden_regimes": [
     "TRANSITION",
     "EXTREME"
   ],
+  "horizons": [
+    "POSITION"
+  ],
+  "instruments": [
+    "XAUUSD"
+  ],
+  "invalidation_logic_ref": "regime flips",
   "required_data_granularity": "BARS",
   "required_features": [
     "ema_fast",
@@ -21,23 +30,20 @@
     "atr",
     "rsi"
   ],
-  "entry_logic_ref": "vati.strategies.fx_trend_pullback",
-  "invalidation_logic_ref": "regime flips",
-  "stop_model": "2 ATR",
-  "target_model": "3 ATR",
   "risk_limits": {
     "max_risk_per_trade": "0.0050"
   },
-  "execution_model": "LIMIT",
-  "event_rules": {
-    "tier1": "no new entries inside blackout/quiet"
+  "state": "RESEARCH",
+  "stop_model": "2 ATR",
+  "strategy_id": "GOLD-TREND-POSITION-01",
+  "target_model": "3 ATR",
+  "timeframe_contract": {
+    "execution": "H1",
+    "regime": "D1",
+    "setup": "H4",
+    "structural": "D1"
   },
   "training_period": "2019-01-01/2024-12-31",
   "validation_period": "2025-01-01/2026-06-30",
-  "cost_model_ref": "vati.market_data.costs.FxCostModel",
-  "state": "RESEARCH",
-  "evidence_refs": [],
-  "strategy_id": "GOLD-TREND-POSITION-01",
-  "version": "1.0.0",
-  "capsule_hash": "13aa29bac3ce9cb1f5ad9e71f2ddaeab41ba58c6739a2d021a134d60abb94611"
+  "version": "1.0.0"
 }

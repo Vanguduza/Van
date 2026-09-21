@@ -8,7 +8,7 @@ from typing import Any, AsyncIterator
 
 import aiosqlite
 
-SCHEMA_VERSION = 26
+SCHEMA_VERSION = 28
 
 
 MIGRATION_17 = """
@@ -215,6 +215,371 @@ ALTER TABLE assumption_ledger ADD COLUMN superseded_by TEXT;
 
 CREATE INDEX IF NOT EXISTS idx_assumption_superseded
   ON assumption_ledger(superseded_by);
+"""
+
+MIGRATION_27 = """
+-- Remote Browser Rev 1.5 §§5.3, 5.6, 5.7 — the interactive browser session, and the
+-- owner-device binding that decides which handset may open one.
+--
+-- Everything here is additive. The existing browser_profiles, browser_tasks and
+-- browser_evidence tables stay exactly where they are and keep their meaning: §5.6 is
+-- explicit that the interactive session extends the Browser Fabric rather than forking a
+-- second one, and a second profile registry is how two answers to "who holds this profile"
+-- would appear.
+
+-- §5.3 — the profile lease becomes renewable and gains a holder kind.
+--
+-- It was task-shaped: one task_id, five minutes, no renewal. An interactive session is held
+-- by a person for as long as they are looking at it, so a non-renewable lease would end the
+-- owner's session mid-scroll. `lease_generation` is the fence: a lease that has been taken
+-- again has a higher generation, so an actuation packet carrying the old one is rejected
+-- rather than applied to whoever holds the profile now.
+ALTER TABLE browser_profiles ADD COLUMN lease_holder_kind TEXT;
+ALTER TABLE browser_profiles ADD COLUMN lease_holder_id TEXT;
+ALTER TABLE browser_profiles ADD COLUMN lease_generation INTEGER NOT NULL DEFAULT 0;
+ALTER TABLE browser_profiles ADD COLUMN lease_acquired_at_ms INTEGER;
+
+-- §5.1 — the session itself.
+CREATE TABLE IF NOT EXISTS browser_interactive_sessions (
+  session_id TEXT PRIMARY KEY,
+  owner_device_id TEXT NOT NULL,
+  profile_alias TEXT NOT NULL,
+  profile_lease_id TEXT,
+  state TEXT NOT NULL,
+
+  active_target_id TEXT,
+  active_url_digest TEXT,
+
+  viewport_width INTEGER NOT NULL,
+  viewport_height INTEGER NOT NULL,
+  device_scale_factor REAL NOT NULL,
+  -- §8.1: actuation carries a viewport revision and a stale one is refused, never
+  -- transformed. The acked revision is what the device has actually rendered.
+  viewport_revision INTEGER NOT NULL DEFAULT 1,
+  acked_viewport_revision INTEGER,
+
+  requested_fps INTEGER NOT NULL,
+  negotiated_codec TEXT,
+  negotiated_transport TEXT,
+
+  control_holder TEXT NOT NULL,
+  control_lease_id TEXT,
+  control_generation INTEGER NOT NULL DEFAULT 0,
+
+  created_at_ms INTEGER NOT NULL,
+  connected_at_ms INTEGER,
+  last_client_seen_at_ms INTEGER,
+  last_profile_lease_renewed_at_ms INTEGER,
+  suspended_at_ms INTEGER,
+  expires_at_ms INTEGER NOT NULL,
+  terminated_at_ms INTEGER,
+  final_reason TEXT,
+
+  -- ADR-RB-018: a session attaches to the Mission its command already created. It never
+  -- creates a second one for the same owner request.
+  mission_id TEXT,
+  originating_command_id TEXT,
+  idempotency_key TEXT
+);
+
+CREATE INDEX IF NOT EXISTS idx_interactive_sessions_device
+  ON browser_interactive_sessions(owner_device_id, state);
+CREATE INDEX IF NOT EXISTS idx_interactive_sessions_profile
+  ON browser_interactive_sessions(profile_alias, state);
+CREATE UNIQUE INDEX IF NOT EXISTS idx_interactive_sessions_idempotency
+  ON browser_interactive_sessions(idempotency_key)
+  WHERE idempotency_key IS NOT NULL;
+
+-- §5.4 — who may actuate, which is a different question from who holds the profile.
+--
+-- The UNIQUE (session_id, generation) is the whole mechanism: a generation is issued once,
+-- so a replayed or late packet naming an earlier one cannot be mistaken for current
+-- authority. Without it "control_generation" would be a number nobody enforces.
+CREATE TABLE IF NOT EXISTS browser_control_leases (
+  control_lease_id TEXT PRIMARY KEY,
+  session_id TEXT NOT NULL,
+  holder TEXT NOT NULL,
+  issued_for TEXT NOT NULL,
+  issued_at_ms INTEGER NOT NULL,
+  expires_at_ms INTEGER NOT NULL,
+  generation INTEGER NOT NULL,
+  revoked_at_ms INTEGER,
+  revoke_reason TEXT,
+  FOREIGN KEY (session_id) REFERENCES browser_interactive_sessions(session_id)
+);
+
+CREATE UNIQUE INDEX IF NOT EXISTS idx_control_lease_generation
+  ON browser_control_leases(session_id, generation);
+CREATE INDEX IF NOT EXISTS idx_control_lease_session
+  ON browser_control_leases(session_id, issued_at_ms);
+
+-- §5.5 — the short-lived grant the stream runtime verifies.
+--
+-- The nonce is UNIQUE because the grant is one-time: redeeming it twice is either a replay
+-- or a second device holding a copy, and both are refusals rather than warnings.
+CREATE TABLE IF NOT EXISTS browser_stream_grants (
+  grant_id TEXT PRIMARY KEY,
+  session_id TEXT NOT NULL,
+  device_id TEXT NOT NULL,
+  kid TEXT NOT NULL,
+  profile_alias TEXT NOT NULL,
+  scope_json TEXT NOT NULL,
+  nonce TEXT NOT NULL,
+  issued_at_ms INTEGER NOT NULL,
+  expires_at_ms INTEGER NOT NULL,
+  redeemed_at_ms INTEGER,
+  revoked_at_ms INTEGER,
+  FOREIGN KEY (session_id) REFERENCES browser_interactive_sessions(session_id)
+);
+
+CREATE UNIQUE INDEX IF NOT EXISTS idx_stream_grant_nonce ON browser_stream_grants(nonce);
+CREATE INDEX IF NOT EXISTS idx_stream_grant_session
+  ON browser_stream_grants(session_id, issued_at_ms);
+
+-- §17 — tabs, as the Gateway knows them. The URL is stored as a digest: §5.1 keeps
+-- active_url_digest rather than the URL for the same reason browser evidence is digest-only.
+CREATE TABLE IF NOT EXISTS browser_session_targets (
+  session_id TEXT NOT NULL,
+  target_id TEXT NOT NULL,
+  title TEXT,
+  url_digest TEXT,
+  opener_target_id TEXT,
+  is_active INTEGER NOT NULL DEFAULT 0,
+  created_at_ms INTEGER NOT NULL,
+  closed_at_ms INTEGER,
+  PRIMARY KEY (session_id, target_id),
+  FOREIGN KEY (session_id) REFERENCES browser_interactive_sessions(session_id)
+);
+
+CREATE INDEX IF NOT EXISTS idx_session_targets_active
+  ON browser_session_targets(session_id, is_active);
+
+-- ADR-RB-008 — durable state changes are persisted; pixels and pointer motion are not.
+CREATE TABLE IF NOT EXISTS browser_session_events (
+  event_id TEXT PRIMARY KEY,
+  session_id TEXT NOT NULL,
+  event_type TEXT NOT NULL,
+  severity TEXT NOT NULL,
+  summary TEXT NOT NULL,
+  payload_json TEXT,
+  evidence_ref TEXT,
+  occurred_at_ms INTEGER NOT NULL,
+  FOREIGN KEY (session_id) REFERENCES browser_interactive_sessions(session_id)
+);
+
+CREATE INDEX IF NOT EXISTS idx_session_events_session
+  ON browser_session_events(session_id, occurred_at_ms);
+
+-- §18 — a download is a durable owner-visible object, not a transient browser state.
+CREATE TABLE IF NOT EXISTS browser_downloads (
+  download_id TEXT PRIMARY KEY,
+  session_id TEXT NOT NULL,
+  target_id TEXT,
+  suggested_name TEXT NOT NULL,
+  mime_type TEXT,
+  byte_size INTEGER,
+  content_sha256 TEXT,
+  url_digest TEXT,
+  state TEXT NOT NULL,
+  failure_reason TEXT,
+  evidence_ref TEXT,
+  created_at_ms INTEGER NOT NULL,
+  completed_at_ms INTEGER,
+  FOREIGN KEY (session_id) REFERENCES browser_interactive_sessions(session_id)
+);
+
+CREATE INDEX IF NOT EXISTS idx_browser_downloads_session
+  ON browser_downloads(session_id, created_at_ms);
+
+-- §5.7 / §0D.3 — one owner device, enforced by the database rather than by a model check.
+--
+-- Build.MODEL comparison would pass on any other S24 Ultra. What cannot be copied is the
+-- private half of a hardware-backed key, so the binding is a public-key fingerprint and the
+-- partial unique index is what makes "exactly one active owner device" true under
+-- concurrency instead of merely intended.
+CREATE TABLE IF NOT EXISTS owner_device_bindings (
+  binding_id TEXT PRIMARY KEY,
+  owner_principal_id TEXT NOT NULL,
+  device_id TEXT NOT NULL UNIQUE,
+  device_key_fingerprint TEXT NOT NULL UNIQUE,
+  public_key_pem TEXT NOT NULL,
+  key_security_level TEXT NOT NULL,
+  app_package_name TEXT NOT NULL,
+  app_signing_cert_sha256 TEXT NOT NULL,
+  attestation_root_fingerprint TEXT,
+  verified_boot_state TEXT,
+  os_version TEXT,
+  os_patch_level TEXT,
+  status TEXT NOT NULL,
+  bound_at_ms INTEGER NOT NULL,
+  last_proof_at_ms INTEGER,
+  revoked_at_ms INTEGER,
+  revoke_reason TEXT
+);
+
+CREATE UNIQUE INDEX IF NOT EXISTS uq_active_owner_device
+  ON owner_device_bindings(owner_principal_id)
+  WHERE status = 'ACTIVE';
+
+CREATE TABLE IF NOT EXISTS device_attestation_events (
+  event_id TEXT PRIMARY KEY,
+  device_id TEXT,
+  challenge TEXT NOT NULL,
+  outcome TEXT NOT NULL,
+  refusal_reason TEXT,
+  key_security_level TEXT,
+  verified_boot_state TEXT,
+  attestation_root_fingerprint TEXT,
+  app_package_name TEXT,
+  app_signing_cert_sha256 TEXT,
+  os_version TEXT,
+  os_patch_level TEXT,
+  detail_json TEXT,
+  occurred_at_ms INTEGER NOT NULL
+);
+
+CREATE INDEX IF NOT EXISTS idx_attestation_events_device
+  ON device_attestation_events(device_id, occurred_at_ms);
+
+-- ADR-RB-026 — enrolment is single-use and short-lived. The token is stored as a hash for
+-- the same reason a password would be: a readable bootstrap token in the database is a
+-- second copy of the only credential that can bind a new device.
+CREATE TABLE IF NOT EXISTS owner_device_bootstrap_tokens (
+  token_id TEXT PRIMARY KEY,
+  token_sha256 TEXT NOT NULL UNIQUE,
+  owner_principal_id TEXT NOT NULL,
+  challenge TEXT NOT NULL,
+  created_at_ms INTEGER NOT NULL,
+  expires_at_ms INTEGER NOT NULL,
+  consumed_at_ms INTEGER,
+  consumed_by_device_id TEXT,
+  revoked_at_ms INTEGER,
+  note TEXT
+);
+
+CREATE INDEX IF NOT EXISTS idx_bootstrap_tokens_expiry
+  ON owner_device_bootstrap_tokens(expires_at_ms);
+
+-- ADR-RB-024/027 — connectivity is signed configuration the device verifies, never a form
+-- the owner fills in. Versions are kept so a rotation can be rolled back to the manifest
+-- that was actually working.
+CREATE TABLE IF NOT EXISTS connectivity_config_versions (
+  version_id TEXT PRIMARY KEY,
+  manifest_sha256 TEXT NOT NULL,
+  manifest_json TEXT NOT NULL,
+  signature TEXT NOT NULL,
+  signing_kid TEXT NOT NULL,
+  status TEXT NOT NULL,
+  issued_at_ms INTEGER NOT NULL,
+  activated_at_ms INTEGER,
+  retired_at_ms INTEGER
+);
+
+CREATE UNIQUE INDEX IF NOT EXISTS uq_connectivity_active
+  ON connectivity_config_versions(status)
+  WHERE status = 'ACTIVE';
+
+-- §5.6 — the events table is extended, not replaced.
+--
+-- Rev 1.2 proposed a second realtime store. The existing table is a live production
+-- contract with an Android reducer and a per-device cursor on the other end of it, so the
+-- realtime envelope is built from additive columns and the globally monotonic `seq` stays
+-- the cursor. Per-device sequences are deliberately NOT introduced: two sequence spaces is
+-- how a replay gap becomes invisible.
+ALTER TABLE events ADD COLUMN event_id TEXT;
+ALTER TABLE events ADD COLUMN target_device_id TEXT;
+ALTER TABLE events ADD COLUMN occurred_at_ms INTEGER;
+ALTER TABLE events ADD COLUMN mission_id TEXT;
+ALTER TABLE events ADD COLUMN command_id TEXT;
+ALTER TABLE events ADD COLUMN correlation_id TEXT;
+
+-- Pre-migration rows get a deterministic identity rather than NULL, so a client that
+-- de-duplicates on event_id does not silently fall back to "everything before this point is
+-- unidentifiable". target_device_id stays NULL, which under the filter below means
+-- broadcast — the semantics those rows already had.
+UPDATE events
+   SET event_id = 'legacy-event:' || seq,
+       occurred_at_ms = created_at_unix * 1000
+ WHERE event_id IS NULL;
+
+CREATE UNIQUE INDEX IF NOT EXISTS idx_events_event_id
+  ON events(event_id) WHERE event_id IS NOT NULL;
+CREATE INDEX IF NOT EXISTS idx_events_device_seq ON events(target_device_id, seq);
+CREATE INDEX IF NOT EXISTS idx_events_mission_seq ON events(mission_id, seq);
+"""
+
+
+MIGRATION_28 = """
+-- Rev 1.5 §20 — the durable VAN⇄Hermes logical session.
+--
+-- §0B's invariant is that no feature depends on one physical connection, which only means
+-- anything if the session outlives the process that served it. These tables are what make
+-- "the same session" true after a Gateway restart rather than only after a socket blip.
+
+CREATE TABLE IF NOT EXISTS van_sessions (
+  van_session_id TEXT PRIMARY KEY,
+  session_epoch INTEGER NOT NULL,
+  device_id TEXT NOT NULL,
+  principal_type TEXT NOT NULL,
+  state TEXT NOT NULL,
+  created_at_ms INTEGER NOT NULL,
+  last_resumed_at_ms INTEGER,
+  last_client_event_seq INTEGER NOT NULL DEFAULT 0,
+  last_server_ack_seq INTEGER NOT NULL DEFAULT 0,
+  -- §20.9: exactly one path epoch may produce new upstream owner messages.
+  authoritative_path_epoch INTEGER NOT NULL DEFAULT 0,
+  closed_at_ms INTEGER
+);
+
+CREATE INDEX IF NOT EXISTS idx_van_sessions_device
+  ON van_sessions(device_id, state);
+
+-- §20.6 — the paths a session has actually used, with the route each one traversed.
+--
+-- route_id is stored rather than derived because route diversity is a deployment fact:
+-- two protocols over one ingress share a route, and only the deployment knows that.
+CREATE TABLE IF NOT EXISTS van_session_paths (
+  van_session_id TEXT NOT NULL,
+  path_epoch INTEGER NOT NULL,
+  path_id TEXT NOT NULL,
+  path_class TEXT NOT NULL,
+  route_id TEXT NOT NULL,
+  health TEXT NOT NULL,
+  opened_at_ms INTEGER NOT NULL,
+  last_rx_ms INTEGER,
+  retired_at_ms INTEGER,
+  PRIMARY KEY (van_session_id, path_epoch),
+  FOREIGN KEY (van_session_id) REFERENCES van_sessions(van_session_id)
+);
+
+CREATE INDEX IF NOT EXISTS idx_van_session_paths_route
+  ON van_session_paths(van_session_id, route_id);
+
+-- §20.12 — effectively-once at the application layer, over an at-least-once transport.
+--
+-- The digest is what separates "the client lost the acknowledgement" from "a different
+-- command arrived under a key that has been seen". Storing only the key would make those
+-- two indistinguishable, and the safe answer to the second is to execute nothing.
+CREATE TABLE IF NOT EXISTS van_session_messages (
+  message_id TEXT PRIMARY KEY,
+  van_session_id TEXT NOT NULL,
+  idempotency_key TEXT,
+  command_id TEXT,
+  kind TEXT NOT NULL,
+  payload_digest TEXT NOT NULL,
+  path_epoch INTEGER NOT NULL,
+  admitted_state TEXT NOT NULL,
+  result_json TEXT,
+  created_at_ms INTEGER NOT NULL,
+  FOREIGN KEY (van_session_id) REFERENCES van_sessions(van_session_id)
+);
+
+CREATE UNIQUE INDEX IF NOT EXISTS uq_session_idempotency
+  ON van_session_messages(van_session_id, idempotency_key)
+  WHERE idempotency_key IS NOT NULL;
+
+CREATE INDEX IF NOT EXISTS idx_session_messages_command
+  ON van_session_messages(command_id);
 """
 
 MIGRATIONS: dict[int, str] = {
@@ -1545,6 +1910,8 @@ MIGRATIONS: dict[int, str] = {
     24: MIGRATION_24,
     25: MIGRATION_25,
     26: MIGRATION_26,
+    27: MIGRATION_27,
+    28: MIGRATION_28,
 }
 
 
