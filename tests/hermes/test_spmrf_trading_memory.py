@@ -64,3 +64,19 @@ def test_review_worker_repo_allowlist_is_bounded():
     assert "https://github.com/Vanguduza/dial-new.git" in worker
     assert "https://github.com/Vanguduza/Van.git" in worker
     assert "repository not allowed for Trading review" in worker
+
+
+def test_spmrf_model_runtime_is_not_the_vm_administrator():
+    installer = read("deploy/van-trading-core/spmrf/install-spmrf-review-worker.sh")
+    client = read("deploy/van-trading-core/spmrf/install-shared-memory-client.sh")
+    worker = read("deploy/van-trading-core/spmrf/van-spmrf-review-worker.mjs")
+    qualifier = read("deploy/van-trading-core/qualify.sh")
+
+    assert 'VAN_SPMRF_REVIEW_USER:-vanreviewer' in installer
+    assert 'VAN_SPMRF_REVIEW_USER:-vanreviewer' in client
+    assert "must not belong to privileged group" in installer
+    assert "must not belong to privileged group" in client
+    assert "spmrf_reviewer_identity" in qualifier
+    assert "spmrf_secret_boundary" in qualifier
+    assert "/home/ubuntu/.local/share/van/spmrf" not in worker
+    assert "/home/ubuntu/.cache/van-spmrf" not in worker
