@@ -96,7 +96,7 @@ from van_gateway.browser.stream_grants import (
     StreamGrantService,
     StreamGrantSigner,
 )
-from van_gateway.browser.worker import AdapterBackedWorker
+from van_gateway.browser.worker import HybridBrowserWorker
 from van_gateway.session.api import build_session_router, is_session_owner_route
 from van_gateway.voice.speech_stream import SpeechStreamService
 from van_gateway.session.router import (
@@ -440,18 +440,16 @@ def create_app() -> FastAPI:
         standing=StandingAutomationAuthorityService(store, owner_runtime.authority),
         dispatcher=automation_dispatcher,
     )
-    # No worker is configured: the semantic worker is a separate private service
-    # and the gateway refuses an assignment rather than pretending to run one.
-    # P2-BROW-001 — the browser task path reaches a real adapter. `worker` was None, so
-    # POST /v1/browser/assignments answered 503 and the only way a task acquired evidence
-    # was for its caller to hand the evidence in: a page snapshot in the evidence table was
-    # whatever somebody said it was. The adapter is `automation_health`'s, not a second
-    # one, so there is one connection to the browser worker and one readiness verdict about
-    # it — two adapters would mean the health surface could report READY while the task
-    # path talked to something else.
+    # P2-BROW-001 — one production browser worker spans the two admitted runtimes.
+    # Deterministic tiers drive Browser Harness. Semantic tiers use Stagehand to propose one
+    # observed action at a time, but BrowserSubagentRunner remains the authority boundary
+    # and Browser Harness independently reads the page after every semantic action.
     browser = BrowserApi(
         store, settings, decisions=decisions,
-        worker=AdapterBackedWorker(automation_health.harness),
+        worker=HybridBrowserWorker(
+            automation_health.harness,
+            automation_health.stagehand,
+        ),
     )
 
 
