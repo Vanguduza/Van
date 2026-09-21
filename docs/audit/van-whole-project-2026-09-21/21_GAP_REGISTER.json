@@ -402,14 +402,14 @@
     }
   ],
   "closure_summary": {
-    "closed": 20,
+    "closed": 21,
     "open": 0,
-    "external_gate": 7,
+    "external_gate": 8,
     "superseded": 0,
     "merge_ready": false,
-    "reason": "All reconstructed and newly discovered repository-side findings are closed. External/device/runtime gates remain separate. This metadata reconciliation commit still requires its own final CI before merge."
+    "reason": "All reconstructed and newly discovered repository-side findings are closed. External/device/runtime gates remain separate. The register-summary consistency guard and this reconciliation commit require a final green CI before merge."
   },
-  "last_reconciled_against_head": "ca7c71c40ae502638981bffeea7ee568841ac47a",
+  "last_reconciled_against_head": "a5c657c3bc9db343cca12bbe171cb3d2c8805a3d",
   "last_reconciled_ci": {
     "run_id": 35613394583,
     "conclusion": "success"
