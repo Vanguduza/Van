@@ -142,6 +142,9 @@ sourceSets {
             "com/dial/van/session/TransportSupervisor.kt",
             "com/dial/van/session/WarmStandby.kt",
             "com/dial/van/session/DurableOutbox.kt",
+            // §20.15 — the exact projection the Tasks screen uses when it asks the owner
+            // whether stale/live-context work may be sent after reconnect.
+            "com/dial/van/session/ReconfirmationSurface.kt",
             "com/dial/van/session/OutboxPersistence.kt",
             "com/dial/van/session/SessionOutboxStore.kt",
             // The production adapter itself, not a re-implementation of it. It depends on

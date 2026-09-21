@@ -254,12 +254,63 @@ class VanHermesSessionManager(
         val index = outbox.indexOfFirst { it.entry.messageId == messageId }
         if (index < 0) return false
         val queued = outbox[index]
-        val reconfirmed = DurableOutbox.reconfirm(queued.entry, nowMs)
+        val reconfirmed = OwnerReconfirmationSurface.reconfirm(queued.entry, nowMs)
+            ?: return false
         // §20.15 — the owner said yes, and that has to outlive the app. A reconfirmation
         // held only in memory means the owner is asked twice for the same command, which
         // is the failure mode that trains someone to stop reading the question.
         store?.persist(reconfirmed, queued.envelope.toString())
         outbox[index] = queued.copy(entry = reconfirmed)
+        return true
+    }
+
+    /**
+     * §20.15 — the actual owner surface, projected from the canonical queue.
+     *
+     * The signed command text is read from the encrypted envelope already in memory; no
+     * second copy is persisted for presentation. Only entries the deterministic outbox
+     * currently classifies as NeedsReconfirmation are returned.
+     */
+    fun pendingOwnerReconfirmations(
+        nowMs: Long = System.currentTimeMillis(),
+    ): List<OwnerReconfirmationRequest> =
+        outbox.mapNotNull { queued ->
+            OwnerReconfirmationSurface.project(queued.entry, queued.envelope, nowMs)
+        }
+
+    /**
+     * Explicit owner confirmation followed by an immediate flush when a live path exists.
+     *
+     * When still offline, the durable confirmation remains stamped on the canonical queue
+     * and the ordinary reconnect flush sends it later. The same message/idempotency
+     * identity is preserved in both cases.
+     */
+    fun reconfirmAndFlush(
+        messageId: String,
+        nowMs: Long = System.currentTimeMillis(),
+    ): Boolean {
+        if (!reconfirm(messageId, nowMs)) return false
+        flushOutbox()
+        return true
+    }
+
+    /**
+     * Explicit owner cancellation of an item that is waiting for reconfirmation.
+     *
+     * This cannot be used as a generic queue-delete API: only an entry that the outbox is
+     * presently holding for the owner's answer may be removed.
+     */
+    fun cancelReconfirmation(
+        messageId: String,
+        nowMs: Long = System.currentTimeMillis(),
+    ): Boolean {
+        val queued = outbox.firstOrNull { it.entry.messageId == messageId } ?: return false
+        if (OwnerReconfirmationSurface.project(queued.entry, queued.envelope, nowMs) == null) {
+            return false
+        }
+        if (!outbox.remove(queued)) return false
+        store?.forget(messageId)
+        publishOutboxDepth()
         return true
     }
 

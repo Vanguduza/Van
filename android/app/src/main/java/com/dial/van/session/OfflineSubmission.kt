@@ -95,7 +95,8 @@ object OfflineSubmission {
                 // Deliberately not "I'll check with you before I send it". §20.14 stores
                 // this class and §20.15 says the owner is asked again before it runs —
                 // and nothing asks yet (P1-SESS-012). The sentence says what is true now:
-                // it is kept, and it will not go out on its own.
+                // it is kept, and it will not go out on its own. The Tasks surface now
+                // renders that queue entry with explicit Confirm and Cancel controls.
                 "Saved, and held. This one won't be sent without you.",
                 needsReconfirm = true,
             )

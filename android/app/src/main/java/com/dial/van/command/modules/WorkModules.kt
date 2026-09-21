@@ -37,8 +37,11 @@ import com.dial.van.control.VanMessageRole
 import com.dial.van.events.EventPage
 import com.dial.van.events.EventRecord
 import com.dial.van.events.EventStream
+import com.dial.van.session.OwnerReconfirmationRequest
+import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.launch
+import kotlinx.coroutines.withContext
 
 /** Tasks, projects and activity. Split out of `CommandCentreActivity` (P3-AND-009). */
 
@@ -49,8 +52,21 @@ internal fun TasksModule(
     openChat: () -> Unit,
 ) {
     val conversation by app.commandController.state.collectAsState()
+    val sessionState by app.vanSession.state.collectAsState()
     val operational = conversation.messages.filter { it.status != null && it.role != VanMessageRole.OWNER }
     val queueCount = app.commandQueue.size()
+    val scope = rememberCoroutineScope()
+    var confirmations by remember { mutableStateOf<List<OwnerReconfirmationRequest>>(emptyList()) }
+    var confirmationNotice by remember { mutableStateOf<String?>(null) }
+
+    fun refreshConfirmations() {
+        confirmations = app.vanSession.pendingOwnerReconfirmations()
+    }
+
+    // A queue-depth change means an item arrived, expired, flushed or was cancelled.
+    // Reconfirmation itself leaves the depth unchanged, so the button handlers refresh
+    // this projection explicitly after the durable write.
+    LaunchedEffect(sessionState.outboxDepth) { refreshConfirmations() }
 
     LazyColumn(
         modifier = Modifier.fillMaxSize().padding(horizontal = 14.dp),
@@ -66,6 +82,60 @@ internal fun TasksModule(
                 }
             }
         }
+        if (confirmations.isNotEmpty()) {
+            item {
+                SectionHeader(
+                    "Waiting for you",
+                    "These were held during an outage and will not run until you confirm them.",
+                )
+            }
+            items(confirmations, key = { "reconfirm:${it.messageId}" }) { request ->
+                AdminCard(glass) {
+                    Column(verticalArrangement = Arrangement.spacedBy(7.dp)) {
+                        Text(request.commandText, color = Color.White, fontWeight = FontWeight.Bold)
+                        Text(
+                            request.ownerReadableState,
+                            color = Color(0xFFFFC86B),
+                            fontSize = 11.sp,
+                        )
+                        Text(
+                            "Action ${request.actionClass} • ${request.commandId.takeLast(8)}",
+                            color = Color(0xFFBCD1D8),
+                            fontSize = 10.sp,
+                        )
+                        Row(horizontalArrangement = Arrangement.spacedBy(8.dp)) {
+                            Button(onClick = {
+                                scope.launch {
+                                    val accepted = withContext(Dispatchers.IO) {
+                                        app.vanSession.reconfirmAndFlush(request.messageId)
+                                    }
+                                    confirmationNotice = if (accepted) {
+                                        "Confirmed. VAN will send it on the current path, or the next one that becomes available."
+                                    } else {
+                                        "That queued command is no longer waiting for confirmation."
+                                    }
+                                    refreshConfirmations()
+                                }
+                            }) { Text("Confirm") }
+                            Button(onClick = {
+                                scope.launch {
+                                    val cancelled = withContext(Dispatchers.IO) {
+                                        app.vanSession.cancelReconfirmation(request.messageId)
+                                    }
+                                    confirmationNotice = if (cancelled) {
+                                        "Cancelled. VAN will not send that queued command."
+                                    } else {
+                                        "That queued command is no longer waiting for confirmation."
+                                    }
+                                    refreshConfirmations()
+                                }
+                            }) { Text("Cancel") }
+                        }
+                    }
+                }
+            }
+        }
+        confirmationNotice?.let { notice -> item { TruthMessage(notice) } }
         if (operational.isEmpty()) item { TruthMessage("No dispatched owner work is present in this session.") }
         items(operational.reversed(), key = { it.id }) { message ->
             CommandMessageBubble(message, glass)
