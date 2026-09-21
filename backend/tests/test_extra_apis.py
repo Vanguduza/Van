@@ -166,7 +166,7 @@ async def test_google_fake_transport_requires_authorized_execution_and_readback(
         requested_by="device:pytest-client",
         idempotency_key="turn-google-send:google.gmail.send",
         parameters=parameters,
-        snapshot_id="snapshot-google-send",
+        snapshot_id=None,
         owner_approved=True,
     )
     assert execution.status is ExecutionStatus.AUTHORIZED
@@ -192,7 +192,7 @@ async def test_google_fake_transport_requires_authorized_execution_and_readback(
         requested_by="device:pytest-client",
         idempotency_key="turn-google-send-blocked:google.gmail.send",
         parameters={"draft_id": "d2"},
-        snapshot_id="snapshot-google-send-blocked",
+        snapshot_id=None,
         owner_approved=False,
     )
     assert blocked.status is ExecutionStatus.AUTHORIZATION_REQUIRED
