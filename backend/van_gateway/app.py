@@ -1147,6 +1147,7 @@ def create_app() -> FastAPI:
             or is_session_owner_route(path)
             or path == "/v1/commands"
             or path == "/v1/context/ingest"
+            or path == "/v1/google/owner-revoke"
         )
 
     async def enforce_device_proof(request: Request, device_id: str) -> JSONResponse | None:
@@ -1942,12 +1943,23 @@ def create_app() -> FastAPI:
     # no undo route (finding P2-SEC-009). Tests install a fake transport directly on
     # app.state.google, which is where that capability belongs. tools/ci/maturity_gate.py
     # fails CI if the route reappears.
+
+    def _scrubbed(payload: Any) -> Any:
+        """GAP-F-020 — `scrub_for_prompt` had no production caller. Every Google read
+        that reaches Hermes passes through here, recursively, so a provider payload
+        can never carry credential-shaped keys into a model-visible tool result."""
+        if isinstance(payload, dict):
+            return {k: _scrubbed(v) for k, v in GoogleService.scrub_for_prompt(payload).items()}
+        if isinstance(payload, list):
+            return [_scrubbed(v) for v in payload]
+        return payload
+
     @app.get("/v1/google/gmail/search")
     async def gmail_search(q: str, x_van_internal_token: str | None = Header(default=None)):
         require_internal_control(x_van_internal_token, ControlScope.GOOGLE)
         try:
             return {
-                "messages": await google.gmail_search(q),
+                "messages": _scrubbed(await google.gmail_search(q)),
                 "live": google.transport is not None and not isinstance(google.transport, FakeGoogleTransport),
             }
         except GoogleAuthError as exc:
@@ -2025,7 +2037,7 @@ def create_app() -> FastAPI:
     async def calendar_agenda(x_van_internal_token: str | None = Header(default=None)):
         require_internal_control(x_van_internal_token, ControlScope.GOOGLE)
         try:
-            return {"events": await google.calendar_agenda()}
+            return {"events": _scrubbed(await google.calendar_agenda())}
         except GoogleAuthError as exc:
             raise HTTPException(status_code=503, detail=str(exc)) from exc
 
@@ -2046,7 +2058,7 @@ def create_app() -> FastAPI:
     async def drive_search(q: str, x_van_internal_token: str | None = Header(default=None)):
         require_internal_control(x_van_internal_token, ControlScope.GOOGLE)
         try:
-            return {"files": await google.drive_search(q)}
+            return {"files": _scrubbed(await google.drive_search(q))}
         except GoogleAuthError as exc:
             raise HTTPException(status_code=503, detail=str(exc)) from exc
 
@@ -2054,7 +2066,7 @@ def create_app() -> FastAPI:
     async def contacts_resolve(q: str, x_van_internal_token: str | None = Header(default=None)):
         require_internal_control(x_van_internal_token, ControlScope.GOOGLE)
         try:
-            return {"contacts": await google.contacts_resolve(q)}
+            return {"contacts": _scrubbed(await google.contacts_resolve(q))}
         except GoogleAuthError as exc:
             raise HTTPException(status_code=503, detail=str(exc)) from exc
 
@@ -2062,7 +2074,7 @@ def create_app() -> FastAPI:
     async def tasks_list(x_van_internal_token: str | None = Header(default=None)):
         require_internal_control(x_van_internal_token, ControlScope.GOOGLE)
         try:
-            return {"tasks": await google.tasks_list()}
+            return {"tasks": _scrubbed(await google.tasks_list())}
         except GoogleAuthError as exc:
             raise HTTPException(status_code=503, detail=str(exc)) from exc
 
@@ -2110,6 +2122,25 @@ def create_app() -> FastAPI:
     async def google_revoke(x_van_internal_token: str | None = Header(default=None)):
         require_internal_control(x_van_internal_token, ControlScope.GOOGLE)
         await google.revoke()
+        return await google.status()
+
+    @app.post("/v1/google/owner-revoke")
+    async def google_owner_revoke(request: Request):
+        """GAP-F-024 — the owner can cut Google from the phone.
+
+        Revocation was reachable only with the internal-control credential (an operator
+        on the host). A compromised token is exactly when the owner is not at the host,
+        so this route is device-authenticated and device-proofed like every other
+        owner mutation. Connect stays on the host: consent needs the OAuth client secret.
+        """
+        device_id = getattr(request.state, "van_device_id", None)
+        if not device_id:
+            raise HTTPException(status_code=403, detail="device_identity_required")
+        await google.revoke()
+        await audit.record(
+            result="ok", device_id=device_id, capability="google.owner_revoke",
+            after={"status": "revoked"},
+        )
         return await google.status()
 
     @app.get("/v1/google/mesh")

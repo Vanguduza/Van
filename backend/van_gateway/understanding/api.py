@@ -23,6 +23,7 @@ import json
 from fastapi import APIRouter, Header, HTTPException
 from pydantic import BaseModel, Field
 
+from van_gateway.auth.control_scopes import ControlScope, require_scoped_internal
 from van_gateway.attention.scoring import AttentionScorer
 from van_gateway.learning.feed import LearningFeed
 from van_gateway.capability.permissions import PermissionRegistry
@@ -34,7 +35,6 @@ from van_gateway.evolution.radar import (
     StrategyLearning,
 )
 from van_gateway.evolution.vaneval import VanEval
-from van_gateway.google.control import GoogleControlAuthError, verify_internal_control
 from van_gateway.proactive.autonomy import DomainTrustService, ProactivePolicyService
 from van_gateway.reasoning.kernel import CriticalReasoningKernel
 from van_gateway.storage.db import Store
@@ -114,11 +114,48 @@ class UnderstandingApi:
         self._install_routes()
 
     def _require_internal(self, token: str | None) -> None:
-        try:
-            verify_internal_control(self.settings.internal_control_token, token)
-        except GoogleControlAuthError as exc:
-            code = 503 if exc.code == "internal_control_token_unconfigured" else 403
-            raise HTTPException(status_code=code, detail=exc.code) from exc
+        # GAP-F-009: scope-aware, same authority as the middleware.
+        require_scoped_internal(self.settings, token, ControlScope.UNDERSTANDING)
+
+    async def _prior_corrections(self) -> int:
+        """GAP-F-008 — how many owner corrections the growth ledger has ever recorded.
+
+        `symbiotic_growth` is not owner-scoped (VAN has one owner), so this is a global
+        count of `record_owner_correction` rows: §71's failure mode is fluent agreement,
+        and being corrected is the signal `RelationshipCalibrationEngine.calibrate` uses
+        to push harder rather than softer.
+        """
+        row = await self.store.fetchone(
+            "SELECT COUNT(*) AS n FROM symbiotic_growth WHERE reason = 'owner correction'",
+            (),
+        )
+        return int(row["n"]) if row is not None else 0
+
+    async def _calibration(
+        self,
+        owner_principal_id: str,
+        *,
+        consequential: bool = False,
+        irreversible: bool = False,
+    ) -> dict:
+        """GAP-F-008 — `RelationshipCalibrationEngine.calibrate` had no caller.
+
+        It is a pure read of already-persisted state (`owner_cognitive_model` for style
+        preferences, `symbiotic_growth` for how often the owner has had to correct VAN),
+        so there is nothing to persist here that the engine's own stores do not already
+        hold — computing it fresh on every read is the read-back, not a cache of one.
+        Called on every owner mutation to the model (confirm/correct/reject, adaptation
+        confirm/revert) and on the `/v1/understanding` read, so a correction visibly
+        changes VAN's calibrated style rather than only sitting in a store nothing acts
+        on.
+        """
+        calibration = await self.calibration.calibrate(
+            owner_principal_id=owner_principal_id,
+            consequential=consequential,
+            irreversible=irreversible,
+            prior_corrections=await self._prior_corrections(),
+        )
+        return calibration.as_dict()
 
     def _install_routes(self) -> None:
         router = self.router
@@ -134,6 +171,9 @@ class UnderstandingApi:
                 "cognitive_complement": await self.complement.all(),
                 "recent_adaptation": await self.growth.effective(),
                 "adaptation_awaiting_you": await self.growth.awaiting_owner(),
+                # GAP-F-008 — the calibration engine had no caller; this is §33's
+                # surface for "how VAN believes it should currently talk to you".
+                "calibration": await self._calibration(owner_principal_id),
             }
 
         @router.get("/understanding/intents")
@@ -261,7 +301,10 @@ class UnderstandingApi:
                 assertion = await self.owner_model.confirm(assertion_id)
             except OwnerModelError as exc:
                 raise HTTPException(status_code=404, detail=exc.code) from exc
-            return assertion.model_dump(mode="json")
+            calibration = await self._calibration(
+                assertion.owner_principal_id, consequential=assertion.is_autonomy_bearing,
+            )
+            return {**assertion.model_dump(mode="json"), "calibration": calibration}
 
         @router.post("/understanding/{assertion_id}/correct")
         async def correct(assertion_id: str, body: CorrectBody):
@@ -271,7 +314,14 @@ class UnderstandingApi:
                 )
             except OwnerModelError as exc:
                 raise HTTPException(status_code=404, detail=exc.code) from exc
-            return assertion.model_dump(mode="json")
+            # GAP-F-008 — a correction is the strongest learning signal there is (§71);
+            # this is where `calibrate()` actually sees it happen, through
+            # `_prior_corrections` reading the growth ledger `owner_model.correct` just
+            # wrote to.
+            calibration = await self._calibration(
+                assertion.owner_principal_id, consequential=assertion.is_autonomy_bearing,
+            )
+            return {**assertion.model_dump(mode="json"), "calibration": calibration}
 
         @router.post("/understanding/{assertion_id}/reject")
         async def reject(assertion_id: str):
@@ -279,12 +329,18 @@ class UnderstandingApi:
                 assertion = await self.owner_model.reject(assertion_id)
             except OwnerModelError as exc:
                 raise HTTPException(status_code=404, detail=exc.code) from exc
-            return assertion.model_dump(mode="json")
+            calibration = await self._calibration(
+                assertion.owner_principal_id, consequential=assertion.is_autonomy_bearing,
+            )
+            return {**assertion.model_dump(mode="json"), "calibration": calibration}
 
         @router.post("/understanding/adaptation/{change_id}/confirm")
         async def confirm_adaptation(change_id: str):
             await self.growth.confirm(change_id)
-            return {"change_id": change_id, "confirmed": True}
+            return {
+                "change_id": change_id, "confirmed": True,
+                "calibration": await self._calibration("owner"),
+            }
 
         @router.post("/understanding/adaptation/{change_id}/revert")
         async def revert_adaptation(change_id: str):
@@ -292,7 +348,10 @@ class UnderstandingApi:
             reverted = await self.growth.revert(change_id)
             if not reverted:
                 raise HTTPException(status_code=409, detail="ADAPTATION_NOT_REVERSIBLE")
-            return {"change_id": change_id, "reverted": True}
+            return {
+                "change_id": change_id, "reverted": True,
+                "calibration": await self._calibration("owner"),
+            }
 
         @router.post("/understanding/observe")
         async def observe(

@@ -16,6 +16,7 @@ from typing import Any
 
 from fastapi import APIRouter, Header, HTTPException
 
+from van_gateway.auth.control_scopes import ControlScope, require_scoped_internal
 from van_gateway.automation.external_runtime import ExternalRuntimeRegistry, RuntimeState
 from van_gateway.automation.n8n_client import N8nManagementClient
 from van_gateway.automation.deadletter import DeadLetterService
@@ -27,7 +28,6 @@ from van_gateway.browser.adapters import HttpBrowserHarnessAdapter, StagehandAda
 from van_gateway.computer_use.fabric import ComputerInteractionFabric
 from van_gateway.config import Settings
 from van_gateway.degraded.registry import DegradedRegistry
-from van_gateway.google.control import GoogleControlAuthError, verify_internal_control
 from van_gateway.models import DegradedCode
 from van_gateway.storage.db import Store
 
@@ -125,11 +125,8 @@ class AutomationHealthApi:
         return str(data["automation_browser_fabric"].get(name, {}).get("version", ""))
 
     def _require_internal(self, token: str | None) -> None:
-        try:
-            verify_internal_control(self.settings.internal_control_token, token)
-        except GoogleControlAuthError as exc:
-            code = 503 if exc.code == "internal_control_token_unconfigured" else 403
-            raise HTTPException(status_code=code, detail=exc.code) from exc
+        # GAP-F-009: scope-aware, same authority as the middleware.
+        require_scoped_internal(self.settings, token, ControlScope.RUNTIME)
 
     async def automation_health(self) -> dict[str, Any]:
         status = await self.n8n.status()

@@ -1,14 +1,18 @@
 from __future__ import annotations
 
+import uuid
 from enum import Enum
 from typing import Any
 
 from fastapi import APIRouter, Header, HTTPException
 from pydantic import BaseModel, Field
 
+from van_gateway.auth.control_scopes import ControlScope, require_scoped_internal
 from van_gateway.action.models import VerificationObservation
 from van_gateway.action.registry import install_builtin_actions
 from van_gateway.action.service import ActionPolicyError, ActionRuntime
+from van_gateway.attention.engine import AttentionEngine
+from van_gateway.briefing.service import BriefingService
 from van_gateway.command.authority import CommandAuthorityError, CommandAuthorityService
 from van_gateway.command.resolver import TypedCommandResolver
 from van_gateway.config import Settings
@@ -35,7 +39,6 @@ from van_gateway.reasoning.kernel import (
     Importance,
     ReasoningError,
 )
-from van_gateway.google.control import GoogleControlAuthError, verify_internal_control
 from van_gateway.knowledge.models import (
     NotebookConsumerAskRequest,
     ObsidianIndexRequest,
@@ -46,11 +49,14 @@ from van_gateway.knowledge.notebook import NotebookProviderError
 from van_gateway.knowledge.obsidian import ObsidianProviderError
 from van_gateway.knowledge.service import KnowledgeRuntime
 from van_gateway.knowledge.vekl import VeklProviderError
-from van_gateway.models import PrincipalType
+from van_gateway.models import PrincipalType, ReminderCreate
 from van_gateway.mission.service import MissionError, MissionService
+from van_gateway.reminders.service import ReminderService
+from van_gateway.reminders.timeparse import TimeParseError, parse_due_expression
 from van_gateway.research.exa import ExaResearchService, ResearchPolicyError
 from van_gateway.research.models import ResearchSearchRequest
 from van_gateway.storage.db import Store
+from van_gateway.trading.service import TradingService
 
 
 class ContextReadinessBody(BaseModel):
@@ -80,7 +86,6 @@ class ActionBeginBody(BaseModel):
     idempotency_key: str
     parameters: dict[str, Any] = Field(default_factory=dict)
     snapshot_id: str | None = None
-    owner_approved: bool = False
     command_age_seconds: int = 0
 
 
@@ -145,6 +150,26 @@ class ActionSubmittedBody(BaseModel):
     evidence_pointer: str | None = None
 
 
+class HermesReminderCreateBody(BaseModel):
+    """What Hermes may ask the gateway to remind the owner about, on the owner's behalf.
+
+    `text` must be the owner's own words, not Hermes's paraphrase (AGENTS.md's run
+    procedure says so explicitly). `mission_id` and `source` are correlation context for
+    the caller, not owner-authored data: `reminders` has no free-form metadata column to
+    hold them (GAP-F-003/006 gave runtime_api.py alone to close, not the reminder schema),
+    so they are echoed back in this route's response rather than persisted, and the
+    persisted row is byte-for-byte what `ReminderService.create` would have written for
+    any other caller. `created_by` in the response is this route's own honest statement of
+    who reached it -- only a RUNTIME-scoped internal-control credential (Hermes) can -- not
+    a claim about storage.
+    """
+
+    text: str = Field(min_length=1, max_length=2000)
+    due_expression: str = Field(min_length=1, max_length=128)
+    mission_id: str | None = Field(default=None, max_length=256)
+    source: str | None = Field(default=None, max_length=128)
+
+
 class OwnerRuntimeApi:
     """Deterministic Rev 3.1 services exposed only to Hermes internal control.
 
@@ -154,9 +179,27 @@ class OwnerRuntimeApi:
     non-model owner/gateway authority path.
     """
 
-    def __init__(self, store: Store, settings: Settings) -> None:
+    def __init__(
+        self,
+        store: Store,
+        settings: Settings,
+        *,
+        trading: TradingService | None = None,
+        reminders: ReminderService | None = None,
+        attention: AttentionEngine | None = None,
+        briefing: BriefingService | None = None,
+    ) -> None:
         self.store = store
         self.settings = settings
+        #: GAP-F-003/006 (RC-A) — read-or-proposal surfaces the Hermes runtime needs to
+        #: observe trading state, create owner reminders on the owner's behalf and read
+        #: the attention/briefing state. Each is optional and additive: `app.py` wires
+        #: whichever read models it already constructs; an unwired one answers 503 rather
+        #: than fabricating a read model or silently degrading it.
+        self.trading = trading
+        self.reminders = reminders
+        self.attention = attention
+        self.briefing = briefing
         self.context = OwnerContextService(store)
         self.retrieval = ContextRetrievalService(store, self.context)
         self.actions = ActionRuntime(store)
@@ -219,11 +262,8 @@ class OwnerRuntimeApi:
             raise HTTPException(status_code=409, detail=exc.code) from exc
 
     def _require_internal(self, token: str | None) -> None:
-        try:
-            verify_internal_control(self.settings.internal_control_token, token)
-        except GoogleControlAuthError as exc:
-            code = 503 if exc.code == "internal_control_token_unconfigured" else 403
-            raise HTTPException(status_code=code, detail=exc.code) from exc
+        # GAP-F-009: scope-aware, same authority as the middleware.
+        require_scoped_internal(self.settings, token, ControlScope.RUNTIME)
 
     @staticmethod
     def _require_hermes_memory_candidate(authority: EpistemicState, source_trust: SourceTrust) -> None:
@@ -261,6 +301,144 @@ class OwnerRuntimeApi:
         async def runtime_status(x_van_internal_token: str | None = Header(default=None)):
             self._require_internal(x_van_internal_token)
             return await self.status()
+
+        # --------------------------------------------------------- §GAP-F-003 trading reads
+        #
+        # Read-only. Hermes can observe the same VATI-ledger read models the owner surface
+        # shows; it is never given the halt, ticket-confirm or account-action routes, which
+        # remain owner-signed (A4) on `/v1/trading/*` and are not mirrored here.
+
+        @router.get("/trading/status")
+        async def runtime_trading_status(x_van_internal_token: str | None = Header(default=None)):
+            self._require_internal(x_van_internal_token)
+            if self.trading is None:
+                raise HTTPException(status_code=503, detail="trading_read_model_unwired")
+            return self.trading.status()
+
+        @router.get("/trading/portfolio")
+        async def runtime_trading_portfolio(x_van_internal_token: str | None = Header(default=None)):
+            self._require_internal(x_van_internal_token)
+            if self.trading is None:
+                raise HTTPException(status_code=503, detail="trading_read_model_unwired")
+            return self.trading.portfolio()
+
+        @router.get("/trading/positions")
+        async def runtime_trading_positions(x_van_internal_token: str | None = Header(default=None)):
+            """Open positions only. `TradingService` has no dedicated "open" trade-book
+            view (`vati.app.tradebook.VIEWS` is past/current/potential/all), so this reads
+            `open_positions` off the same portfolio read model the owner Command Centre
+            uses -- it is the one place that classification already lives."""
+            self._require_internal(x_van_internal_token)
+            if self.trading is None:
+                raise HTTPException(status_code=503, detail="trading_read_model_unwired")
+            portfolio = self.trading.portfolio()
+            return {
+                "ledger_available": portfolio.get("ledger_available"),
+                "open_positions": portfolio.get("open_positions", []),
+            }
+
+        @router.get("/trading/risk")
+        async def runtime_trading_risk(x_van_internal_token: str | None = Header(default=None)):
+            self._require_internal(x_van_internal_token)
+            if self.trading is None:
+                raise HTTPException(status_code=503, detail="trading_read_model_unwired")
+            return self.trading.risk()
+
+        @router.get("/trading/market-state")
+        async def runtime_trading_market_state(
+            symbol: str | None = None, x_van_internal_token: str | None = Header(default=None)
+        ):
+            self._require_internal(x_van_internal_token)
+            if self.trading is None:
+                raise HTTPException(status_code=503, detail="trading_read_model_unwired")
+            return self.trading.market_state(symbol)
+
+        @router.get("/trading/trade/{trade_intent_id}")
+        async def runtime_trading_trade_detail(
+            trade_intent_id: str, x_van_internal_token: str | None = Header(default=None)
+        ):
+            self._require_internal(x_van_internal_token)
+            if self.trading is None:
+                raise HTTPException(status_code=503, detail="trading_read_model_unwired")
+            detail = self.trading.trade_detail(trade_intent_id)
+            if detail is None:
+                raise HTTPException(status_code=404, detail="unknown trade intent")
+            return detail
+
+        # ------------------------------------------------------------- §GAP-F-002 reminders
+        #
+        # Hermes may create a reminder on the owner's behalf; it is a proposal executed
+        # through the same `ReminderService` any other caller uses, not a new mutation
+        # authority. See `HermesReminderCreateBody` for what is and is not persisted.
+
+        @router.post("/reminders")
+        async def runtime_create_reminder(
+            body: HermesReminderCreateBody, x_van_internal_token: str | None = Header(default=None)
+        ):
+            self._require_internal(x_van_internal_token)
+            if self.reminders is None:
+                raise HTTPException(status_code=503, detail="reminders_unwired")
+            try:
+                due_at_unix = parse_due_expression(body.due_expression)
+            except TimeParseError as exc:
+                raise HTTPException(status_code=400, detail=str(exc)) from exc
+            created = await self.reminders.create(
+                ReminderCreate(
+                    text=body.text,
+                    due_at_unix=due_at_unix,
+                    idempotency_key=f"hermes:{uuid.uuid4().hex}",
+                )
+            )
+            return {
+                **created,
+                "created_by": "hermes",
+                "mission_id": body.mission_id,
+                "source": body.source,
+            }
+
+        # ------------------------------------------------------- §GAP-F-003 attention/briefing
+        #
+        # Read-only projections of the same owner-facing state `/v1/attention` and
+        # `/v1/briefing` show; nothing here can acknowledge, snooze or resolve an item.
+
+        @router.get("/attention")
+        async def runtime_attention(x_van_internal_token: str | None = Header(default=None)):
+            self._require_internal(x_van_internal_token)
+            if self.attention is None:
+                raise HTTPException(status_code=503, detail="attention_unwired")
+            items = await self.attention.list_open()
+            return {"items": [item.model_dump(mode="json") for item in items]}
+
+        @router.get("/briefing")
+        async def runtime_briefing(x_van_internal_token: str | None = Header(default=None)):
+            self._require_internal(x_van_internal_token)
+            if self.briefing is None:
+                raise HTTPException(status_code=503, detail="briefing_unwired")
+            briefing = await self.briefing.build()
+            return briefing.model_dump(mode="json")
+
+        # ------------------------------------------------------ §GAP-F-006 automation reads
+        #
+        # `automation/api.py` never grew a GET-by-run-id route: `POST /v1/automation/execute`
+        # returns the full terminal result synchronously and nothing else reads
+        # `automation_runs` over HTTP. Added here, as a direct read of that table, rather
+        # than in `automation/api.py`, which this change does not otherwise touch.
+
+        @router.get("/automation/runs/{run_id}")
+        async def runtime_automation_run_status(
+            run_id: str, x_van_internal_token: str | None = Header(default=None)
+        ):
+            self._require_internal(x_van_internal_token)
+            row = await self.store.fetchone(
+                "SELECT run_id, capability_id, artifact_id, command_id, turn_id, execution_id, "
+                "n8n_execution_id, status, action_class, evidence_pointer, verifier_status, "
+                "error_code, started_at_ms, submitted_at_ms, verified_at_ms, completed_at_ms, "
+                "updated_at_ms FROM automation_runs WHERE run_id = ?",
+                (run_id,),
+            )
+            if row is None:
+                raise HTTPException(status_code=404, detail="unknown_automation_run")
+            return dict(row)
 
         @router.post("/missions/result")
         async def report_mission_result(

@@ -191,6 +191,73 @@ CATALOG: dict[DegradedCode, DegradedCapability] = {
         will_not_do="Authenticated operations against that one service",
         restore_action="Re-authenticate the profile through the owner browser access path; secrets stay in the session broker",
     ),
+
+    # GAP-F-007 — nine codes existed in DegradedCode with no CATALOG entry, so
+    # `snapshot()` raised KeyError and /health answered 500 in exactly the fault it
+    # was meant to report. Every code is catalogued and a test pins exhaustiveness.
+    DegradedCode.GOOGLE_PRINCIPAL_UNVERIFIED: DegradedCapability(
+        code=DegradedCode.GOOGLE_PRINCIPAL_UNVERIFIED,
+        broken="Canonical owner Google principal not registered or unverified",
+        still_works="Non-Google capabilities and deterministic engines",
+        will_not_do="Any Google capability routing",
+        restore_action="Run tools/google/configure_google_identity.py and import the Hermes attestation",
+    ),
+    DegradedCode.GOOGLE_CAPABILITY_UNAVAILABLE: DegradedCapability(
+        code=DegradedCode.GOOGLE_CAPABILITY_UNAVAILABLE,
+        broken="A requested Google capability has no usable provider state",
+        still_works="Other READY Google capabilities and non-Google tools",
+        will_not_do="The specific Google capability until its live canary passes",
+        restore_action="Run tools/google/certify_google_mesh.py and record READY evidence",
+    ),
+    DegradedCode.GOOGLE_OAUTH_CLIENT_UNCONFIGURED: DegradedCapability(
+        code=DegradedCode.GOOGLE_OAUTH_CLIENT_UNCONFIGURED,
+        broken="Workspace OAuth client id/secret missing from the gateway environment",
+        still_works="Everything that does not need Workspace APIs",
+        will_not_do="Gmail/Calendar/Drive/Contacts/Tasks",
+        restore_action="Set VAN_GOOGLE_OAUTH_CLIENT_ID/SECRET and re-run the Workspace authorization tool",
+    ),
+    DegradedCode.GOOGLE_ACCOUNT_ENTITLEMENT_UNVERIFIED: DegradedCapability(
+        code=DegradedCode.GOOGLE_ACCOUNT_ENTITLEMENT_UNVERIFIED,
+        broken="Owner Google account plan/entitlement not verified",
+        still_works="Workspace API reads where OAuth is READY",
+        will_not_do="Entitlement-gated Gemini/consumer capabilities",
+        restore_action="Import a Hermes attestation carrying the account entitlement",
+    ),
+    DegradedCode.OWNER_CONTEXT_UNAVAILABLE: DegradedCapability(
+        code=DegradedCode.OWNER_CONTEXT_UNAVAILABLE,
+        broken="Canonical owner-context kernel could not be read or sealed",
+        still_works="Attention queue, reminders, missions already open",
+        will_not_do="Dispatch new commands (context cannot be sealed)",
+        restore_action="Check gateway storage (SQLite) health and restart the gateway",
+    ),
+    DegradedCode.OWNER_CONTEXT_CONFLICTED: DegradedCapability(
+        code=DegradedCode.OWNER_CONTEXT_CONFLICTED,
+        broken="Owner facts required by a command are in conflict",
+        still_works="Commands whose requirements are not conflicted",
+        will_not_do="Act on the conflicted requirement until the owner resolves it",
+        restore_action="Resolve the conflict from the Memory surface (/v1/context/conflicts)",
+    ),
+    DegradedCode.RESEARCH_UNAVAILABLE: DegradedCapability(
+        code=DegradedCode.RESEARCH_UNAVAILABLE,
+        broken="External research provider (Exa) not configured or unreachable",
+        still_works="Local knowledge, Google reads, deterministic engines",
+        will_not_do="Web research missions",
+        restore_action="Configure VAN_EXA_API_KEY and enable egress, then run the research canary",
+    ),
+    DegradedCode.RESEARCH_EGRESS_DENIED: DegradedCapability(
+        code=DegradedCode.RESEARCH_EGRESS_DENIED,
+        broken="Research egress refused by policy (sensitive class or egress disabled)",
+        still_works="Non-sensitive research where egress is enabled",
+        will_not_do="Sensitive-class egress without owner approval",
+        restore_action="Owner approves sensitive egress for the specific query or enables egress",
+    ),
+    DegradedCode.DEVICE_OR_GRANT_REVOKED: DegradedCapability(
+        code=DegradedCode.DEVICE_OR_GRANT_REVOKED,
+        broken="The owner device or a capability grant was revoked",
+        still_works="Nothing for the revoked device; other paired devices unaffected",
+        will_not_do="Accept commands or actions from the revoked device/grant",
+        restore_action="Re-pair the device through a new pairing ticket",
+    ),
 }
 
 
@@ -205,7 +272,17 @@ class DegradedRegistry:
             self._active.discard(code)
 
     def snapshot(self) -> list[DegradedCapability]:
-        return [CATALOG[c] for c in sorted(self._active, key=lambda x: x.value)]
+        # Unknown codes render as a generic entry rather than crashing /health (GAP-F-007).
+        return [
+            CATALOG.get(
+                c,
+                DegradedCapability(
+                    code=c, broken=f"{c.value} active (uncatalogued)", still_works="Unknown",
+                    will_not_do="Unknown", restore_action="Add this code to degraded/registry.py CATALOG",
+                ),
+            )
+            for c in sorted(self._active, key=lambda x: x.value)
+        ]
 
     def codes(self) -> list[str]:
         return [c.value for c in sorted(self._active, key=lambda x: x.value)]

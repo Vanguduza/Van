@@ -205,3 +205,35 @@ __all__ = [
     "ControlScopeError",
     "parse_scoped_credentials",
 ]
+
+
+def authority_from_settings(settings) -> "ControlAuthority":
+    """The one ControlAuthority every surface must consult.
+
+    GAP-F-009 — six routers compared the presented token against the legacy
+    `internal_control_token` alone, so a deployment that had migrated to scoped
+    credentials (the point of P0-SEC-001) found those surfaces answering 503 even
+    with a correctly scoped token. Building the authority from settings here means
+    a router cannot drift back to a single-string comparison.
+    """
+    return ControlAuthority(
+        legacy_token=getattr(settings, "internal_control_token", "") or "",
+        scoped=getattr(settings, "internal_control_scoped_tokens", "") or "",
+        device_enrolment_token=getattr(settings, "device_enrolment_token", "") or "",
+        observability_token=getattr(settings, "observability_token", "") or "",
+    )
+
+
+def require_scoped_internal(settings, token, scope: "ControlScope") -> None:
+    """Handler-level scoped check that agrees with the middleware (GAP-F-009).
+
+    Raises fastapi.HTTPException 503 when no privileged credential is configured and
+    403 when the presented token does not hold `scope`.
+    """
+    from fastapi import HTTPException
+
+    authority = authority_from_settings(settings)
+    if not authority.configured:
+        raise HTTPException(status_code=503, detail="internal_control_token_unconfigured")
+    if not authority.permits(token, scope):
+        raise HTTPException(status_code=403, detail="internal_control_unauthorized")
