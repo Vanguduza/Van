@@ -8,8 +8,6 @@ import com.dial.van.session.OfflineSubmission
 import com.dial.van.status.OwnerStatusProjection
 import com.dial.van.status.OwnerWorkStatus
 import com.dial.van.status.VanCommandStatus
-import com.dial.van.voice.SpeakerVerificationPolicy
-import com.dial.van.voice.VoiceAuthorityDecision
 import com.dial.van.status.commandStatusFor
 import com.dial.van.visual.VanLiveVisualState
 import kotlinx.coroutines.CoroutineScope
@@ -20,6 +18,7 @@ import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.launch
 import java.util.UUID
+import kotlin.math.roundToInt
 
 /** Every owner input surface converges here before crossing the signed gateway boundary. */
 enum class VanCommandSource {
@@ -55,6 +54,8 @@ data class VanOwnerCommand(
     val idempotencyKey: String = UUID.randomUUID().toString(),
     val turnId: String? = null,
     val speechEvidenceRef: String? = null,
+    /** Signed fixed-point speaker similarity provenance, never authentication. */
+    val speakerEvidenceMilli: Int? = null,
     val expiresAtUnix: Long? = null,
     val noStaleReplay: Boolean = false,
 )
@@ -134,21 +135,18 @@ class VanCommandController(
         val normalized = text.trim()
         if (normalized.isEmpty()) return
 
-        var effectiveActionClass = actionClass
-        if (source == VanCommandSource.VOICE) {
-            val verdict = SpeakerVerificationPolicy.decide(actionClass, speakerScore)
-            when (verdict.decision) {
-                VoiceAuthorityDecision.REFUSE -> {
-                    refuseSpokenCommand(normalized, verdict.reason)
-                    return
-                }
-                VoiceAuthorityDecision.REQUIRE_OWNER_APPROVAL ->
-                    // Raised to the biometric class rather than refused. The gateway's A4
-                    // path already means "the owner is present and said yes", and that is a
-                    // stronger statement about who is speaking than any similarity score.
-                    effectiveActionClass = "A4"
-                VoiceAuthorityDecision.ALLOW -> Unit
-            }
+        // Android does not decide the authority of spoken text. The deterministic gateway
+        // resolver may classify an A1-looking transcript as A3/A4, so deciding here would
+        // enforce the wrong class. The device only measures and signs fixed-point provenance;
+        // the gateway applies SpeakerVerificationPolicy-equivalent thresholds after resolution.
+        val speakerEvidenceMilli = if (source == VanCommandSource.VOICE) {
+            speakerScore
+                ?.takeIf { it.isFinite() }
+                ?.coerceIn(0f, 1f)
+                ?.times(1000f)
+                ?.roundToInt()
+        } else {
+            null
         }
         val idempotencyKey = if (source == VanCommandSource.VOICE && !turnId.isNullOrBlank()) {
             "voice:$turnId"
@@ -160,11 +158,12 @@ class VanCommandController(
                 text = normalized,
                 source = source,
                 projectId = projectId,
-                actionClass = effectiveActionClass,
+                actionClass = actionClass,
                 approvalToken = approvalToken,
                 idempotencyKey = idempotencyKey,
                 turnId = turnId,
                 speechEvidenceRef = speechEvidenceRef,
+                speakerEvidenceMilli = speakerEvidenceMilli,
                 expiresAtUnix = expiresAtUnix,
                 noStaleReplay = noStaleReplay,
             ),
@@ -235,6 +234,7 @@ class VanCommandController(
                     expiresAtUnix = command.expiresAtUnix,
                     noStaleReplay = command.noStaleReplay,
                     speechEvidenceRef = command.speechEvidenceRef,
+                    speakerEvidenceMilli = command.speakerEvidenceMilli,
                 )
                 recordResponse(command, response)
             } catch (t: Throwable) {
@@ -294,6 +294,7 @@ class VanCommandController(
                             expiresAtUnix = expiresAt,
                             noStaleReplay = pending.noStaleReplay,
                             speechEvidenceRef = pending.command.speechEvidenceRef,
+                            speakerEvidenceMilli = pending.command.speakerEvidenceMilli,
                         )
                         recordResponse(pending.command, response)
                     } catch (t: Throwable) {
