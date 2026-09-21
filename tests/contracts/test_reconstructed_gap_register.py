@@ -65,8 +65,10 @@ def test_post_merge_register_points_at_canonical_main_without_overstating_live_g
     assert data["canonical_branch"] == "main"
     assert reconciliation["merged_pr"] == 55
     assert reconciliation["merge_commit"] == "ae96854b85c1ff1c8bcd483cd90cef270c7cf23b"
-    assert reconciliation["certified_pr_head"] == data["last_reconciled_against_head"]
-    assert reconciliation["certified_ci_run"] == data["last_reconciled_ci"]["run_id"]
+    assert data["last_reconciled_against_head"] == reconciliation["merge_commit"]
+    assert reconciliation["certified_pr_head_ci_run"] == 35621632137
+    assert reconciliation["canonical_main_ci_run"] == data["last_reconciled_ci"]["run_id"]
+    assert reconciliation["canonical_main_ci_conclusion"] == "success"
     assert data["last_reconciled_ci"]["conclusion"] == "success"
     assert data["closure_summary"]["merge_ready"] is True
 
