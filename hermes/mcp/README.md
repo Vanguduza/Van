@@ -47,8 +47,13 @@ The context graph is a bounded temporal retrieval primitive, not an autonomous G
 | Server | Purpose | Credential model |
 |---|---|---|
 | `van_trading_commander` | Hermes subordinate on the trading VM: status, ledger, services, bounded log tail, bounded backtest, trading-VEKL resolve, owner-signed halt, doctor, accounts | HMAC-signed requests with a 0600 token file; no shell, no file writes, no order path; account-credential commands are hidden from MCP and refused for agent requesters |
+| `van_trading_local_commander` | Full Desktop Commander machine/session actuator on Trading Core, owned by Hermes; process/session/file/config tools and local ChatGPT/Codex session control | Private forced-command SSH stdio from `dial-hermes-control`; complete pinned Commander surface; calls pass through DIAL's Hermes Commander authority gateway |
 
 The commander reaches the dedicated trading VEKL (`trading/vekl`, loopback :9134 on the VM) and the VATI ledger. It cannot place, size, modify or cancel an order; halting is the only trading effect and it needs an owner signature reference (A4). Registration is spliced into `~/.hermes/config.yaml` by `deploy/van-trading-core/hermes/register-commander-mcp.sh`.
+
+The two commander surfaces are intentionally different. `van_trading_commander` remains the bounded **trading-domain** API and preserves VATI as the sole trading execution/risk authority. `van_trading_local_commander` is the **machine/session** actuator: Hermes receives the complete pinned Desktop Commander capability surface so it can operate processes, files, terminals and persistent ChatGPT/Codex work sessions. It is not an order-routing API and must not be used to bypass VATI.
+
+Hermes reaches the full Commander over a purpose-specific SSH key whose `authorized_keys` entry is `restrict,command="/home/ubuntu/.local/bin/van-local-commander-mcp"`. The key therefore opens the Commander stdio process and cannot open a general shell. DIAL's authority gateway sits above that full capability: authenticated owner turns may use the complete surface; unattended calls require a named designed automation.
 
 ## Google Workspace — gateway mediated
 
