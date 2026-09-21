@@ -406,12 +406,12 @@
     "open": 0,
     "external_gate": 8,
     "superseded": 0,
-    "merge_ready": false,
-    "reason": "All reconstructed and newly discovered repository-side findings are closed. External/device/runtime gates remain separate. The register-summary consistency guard and this reconciliation commit require a final green CI before merge."
+    "merge_ready": true,
+    "reason": "All reconstructed and newly discovered repository-side findings are closed. External/device/runtime gates remain separate. Full repository CI run 35620770902 passed on implementation head 724025c86a055c38d83785c36427651b0e4a25e1; this commit only reconciles closure metadata."
   },
-  "last_reconciled_against_head": "a5c657c3bc9db343cca12bbe171cb3d2c8805a3d",
+  "last_reconciled_against_head": "724025c86a055c38d83785c36427651b0e4a25e1",
   "last_reconciled_ci": {
-    "run_id": 35613394583,
+    "run_id": 35620770902,
     "conclusion": "success"
   }
 }
