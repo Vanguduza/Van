@@ -41,6 +41,13 @@ def test_caddyfile_uses_valid_multiline_handle_blocks_and_bootstrap_validates_it
     boot = BOOTSTRAP.read_text()
     assert "caddy validate --config /etc/caddy/Caddyfile --adapter caddyfile" in boot
 
+def test_bootstrap_rejects_non_exact_commit_sha_before_provisioning():
+    result = subprocess.run(["bash", str(BOOTSTRAP), "--dry-run", "--commit-sha=not-a-sha"], text=True, capture_output=True)
+    assert result.returncode != 0
+    assert "--commit-sha must be an exact 40-hex Git commit" in result.stderr
+    subprocess.run(["bash", "-n", str(BOOTSTRAP)], check=True)
+
+
 def test_runtime_qualification_is_bound_to_exact_clean_repository_sha():
     qual = QUALIFY.read_text()
     rebuild = REBUILD.read_text()
