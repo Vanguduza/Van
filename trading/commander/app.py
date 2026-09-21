@@ -32,11 +32,14 @@ REDACT = re.compile(r"(?i)(password|passwd|token|api[_-]?key|secret|bearer|signi
 UNIT_RE = re.compile(r"^[A-Za-z0-9@._-]+$")
 DEFAULT_UNITS = ("vati-session@*.service", "vati-commander.service", "vati-vekl.service", "vati-supabase.service", "vati-mt5-pull.service", "caddy.service")
 COMMANDS = ("status", "ledger_status", "services", "restart_service", "tail_log", "run_backtest", "vekl_resolve", "halt", "doctor", "accounts") + ACCOUNT_COMMANDS + PROMOTION_COMMANDS
-# Credential-bearing commands are reachable only from the gateway's device-signed onboarding path.
-# They are never listed as MCP tools and are refused when an agent (Hermes) is the requester,
-# so broker credentials cannot enter a model prompt or tool call.
-AGENT_HIDDEN_COMMANDS = frozenset(ACCOUNT_COMMANDS + PROMOTION_COMMANDS)
-AGENT_REQUESTERS = frozenset({"hermes", "agent", "model", "claude", "codex", "sol", "sonnet"})
+# Credential-bearing and strategy-promotion commands are gateway-only. This is a
+# positive allow-list: the authenticated principal must be exactly van-gateway.
+# A legacy/shared credential or a future/renamed agent cannot acquire mutation
+# authority merely by avoiding a deny-list.
+GATEWAY_PRINCIPAL = "van-gateway"
+GATEWAY_ONLY_COMMANDS = frozenset(ACCOUNT_COMMANDS + PROMOTION_COMMANDS)
+# Compatibility name used by the MCP/tool-list contract.
+AGENT_HIDDEN_COMMANDS = GATEWAY_ONLY_COMMANDS
 Runner = Callable[[list[str], int], tuple[int, str, str]]
 
 
@@ -79,31 +82,48 @@ class CommanderSettings:
     _owner_authority: Any = None     # lazily built OwnerAuthorityVerifier (P0-TRADE-001)
 
     def load_tokens(self) -> dict[str, str]:
-        """Every credential this commander accepts, by the principal it authenticates.
+        """Load authenticated principals and fail closed on ambiguous credentials.
 
-        P1-HER-005. A single shared token cannot tell Hermes from the owner's app, so
-        `requested_by` was left to the caller and became the gate for the credential
-        commands. Per-principal tokens live beside the main one as
-        `<token_file>.<principal>`; where only the shared token exists, it authenticates
-        DEFAULT_PRINCIPAL and the agent-hidden commands stay reachable by whoever holds
-        it — which is the pre-existing trust boundary, not a new one, and is now at least
-        stated rather than implied.
+        The base token remains the legacy commander principal for non-sensitive
+        compatibility. Privileged mutations require the dedicated van-gateway
+        principal at the route boundary.
+
+        Per-principal files are named <token_file>.<principal>. Weak, loosely
+        permissioned, or duplicate values are configuration errors rather than entries
+        silently ignored, because partial deployment must never fall back to shared
+        authority.
         """
-        if self.tokens:
-            return dict(self.tokens)
-        tokens = {DEFAULT_PRINCIPAL: self.load_token()}
-        if self.token:
-            return tokens
-        base = Path(self.token_file)
-        for extra in sorted(base.parent.glob(f"{base.name}.*")):
-            principal = extra.name[len(base.name) + 1:]
-            if not principal or stat.S_IMODE(extra.stat().st_mode) & 0o077:
-                continue
-            value = extra.read_text().strip()
-            if len(value) >= 32:
-                tokens[principal] = value
-        return tokens
+        if self.tokens is not None:
+            tokens = dict(self.tokens)
+        else:
+            tokens = {DEFAULT_PRINCIPAL: self.load_token()}
+            if not self.token:
+                base = Path(self.token_file)
+                for extra in sorted(base.parent.glob(f"{base.name}.*")):
+                    principal = extra.name[len(base.name) + 1:]
+                    if not principal:
+                        raise RuntimeError(f"invalid commander principal token path: {extra}")
+                    if stat.S_IMODE(extra.stat().st_mode) & 0o077:
+                        raise RuntimeError(f"commander principal token must be mode 0600: {extra}")
+                    value = extra.read_text().strip()
+                    if len(value) < 32:
+                        raise RuntimeError(
+                            f"commander principal token too short for {principal} (need ≥ 32 chars)"
+                        )
+                    tokens[principal] = value
 
+        if not tokens:
+            raise RuntimeError("no commander principal tokens configured")
+        values: dict[str, str] = {}
+        for principal, value in sorted(tokens.items()):
+            if not principal or len(value) < 32:
+                raise RuntimeError(f"invalid commander token for principal {principal!r}")
+            if value in values:
+                raise RuntimeError(
+                    f"commander principals {values[value]!r} and {principal!r} share a token"
+                )
+            values[value] = principal
+        return tokens
     def owner_authority(self):
         """The verifier for owner-signed acts on this host (P0-TRADE-001)."""
         from vati.authority import OwnerAuthorityVerifier, load_owner_keys
@@ -385,9 +405,12 @@ def create_app(settings: Optional[CommanderSettings] = None) -> FastAPI:
                 "caller's to declare",
             )
         parsed.requested_by = principal
-        if name in AGENT_HIDDEN_COMMANDS and principal.lower() in AGENT_REQUESTERS:
-            audit(name, principal, parsed.args, "refused:agent_requester")
-            raise HTTPException(403, "owner-only trading mutation commands are not available to agents; use the app owner-action path")
+        if name in GATEWAY_ONLY_COMMANDS and principal.lower() != GATEWAY_PRINCIPAL:
+            audit(name, principal, parsed.args, "refused:gateway_only")
+            raise HTTPException(
+                403,
+                "credential and strategy mutations require the authenticated van-gateway principal",
+            )
         try:
             result = handlers[name](parsed.args)
         except HTTPException as exc:
