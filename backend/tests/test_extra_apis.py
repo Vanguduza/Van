@@ -181,6 +181,31 @@ async def test_google_fake_transport_requires_authorized_execution_and_readback(
     calls = [name for name, _args in _app.state.google.transport.calls]
     assert calls == ["gmail_send", "gmail_message_get"]
 
+    # A4 without owner approval produces an execution record, but not one the provider
+    # executor may use. This separates "has an execution id" from "is authorized".
+    blocked = await _app.state.owner_runtime.actions.begin(
+        execution_id="exec-google-send-blocked",
+        command_id="cmd-google-send-blocked",
+        turn_id="turn-google-send-blocked",
+        action_id="google.gmail.send",
+        principal_type=PrincipalType.OWNER_DEVICE,
+        requested_by="device:pytest-client",
+        idempotency_key="turn-google-send-blocked:google.gmail.send",
+        parameters={"draft_id": "d2"},
+        snapshot_id="snapshot-google-send-blocked",
+        owner_approved=False,
+    )
+    assert blocked.status is ExecutionStatus.AUTHORIZATION_REQUIRED
+    before = list(_app.state.google.transport.calls)
+    refused = await ac.post(
+        "/v1/google/actions/execute",
+        headers=headers,
+        json={"execution_id": blocked.execution_id, "parameters": {"draft_id": "d2"}},
+    )
+    assert refused.status_code == 409
+    assert refused.json()["detail"] == "execution_not_authorized"
+    assert _app.state.google.transport.calls == before
+
     scrubbed = GoogleService.scrub_for_prompt({"access_token": "tok", "snippet": "hi"})
     assert "access_token" not in scrubbed
     assert scrubbed["snippet"] == "hi"
