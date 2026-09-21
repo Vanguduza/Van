@@ -309,12 +309,13 @@ data class CognitionSnapshot(
             }?.toMap() ?: emptyMap()
             val models = root.arr("models").map { row ->
                 val perf = row.obj("performance")
+                val qualification = perf?.obj("qualification")
                 CognitionModelRow(
                     modelId = row.str("model_id") ?: "unknown",
                     assessments = row.long("assessments")?.toInt() ?: 0,
                     verdict = row.obj("latest")?.str("verdict"),
                     confidence = row.obj("latest")?.num("confidence"),
-                    qualified = perf?.bool("qualified"),
+                    qualified = perf?.bool("qualified") ?: qualification?.bool("qualified"),
                     sampleSufficient = perf?.bool("sample_sufficient"),
                 )
             }
@@ -330,7 +331,9 @@ data class CognitionSnapshot(
                     proposalId = row.str("proposal_id") ?: "?",
                     title = row.str("title") ?: "Untitled proposal",
                     liveAffecting = row.bool("live_affecting") ?: false,
-                    admission = row.obj("admission")?.str("decision"),
+                    admission = row.obj("admission")?.let {
+                        it.str("state") ?: it.str("decision")
+                    },
                 )
             } ?: emptyList()
             fun intMap(parent: JsonObject?, key: String): Map<String, Int> =

@@ -157,6 +157,11 @@ class ModelRecord:
             "divergences": self.divergences,
             "resolved_divergences": self.resolved_divergences,
             "expired": self.expired,
+            # Owner/read-model surfaces need the qualification state without
+            # re-implementing the qualification thresholds. Keep the detailed
+            # explanation below as well.
+            "sample_sufficient": self.sample_sufficient,
+            "qualified": self.qualified,
             "divergence_rate": None if self.divergence_rate is None else str(self.divergence_rate),
             "total_delta_r": str(self.total_delta_r),
             "mean_delta_r": None if self.mean_delta_r is None else str(self.mean_delta_r),

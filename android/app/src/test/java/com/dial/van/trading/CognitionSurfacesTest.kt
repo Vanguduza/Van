@@ -37,7 +37,11 @@ class CognitionSurfacesTest {
             "model_id": "fable-5.1",
             "assessments": 7,
             "latest": {"verdict":"CONCUR","confidence":"0.73"},
-            "performance": {"qualified":false,"sample_sufficient":false}
+            "performance": {
+              "resolved_divergences": 7,
+              "sample_sufficient": false,
+              "qualification": {"qualified":false,"blocking":["sample 7 < 50"]}
+            }
           }],
           "research": {
             "missions": [{"mission_id":"m-1","state":"RUNNING","hypothesis":"edge drift?"}],
@@ -50,7 +54,7 @@ class CognitionSurfacesTest {
               "proposal_id":"p-1",
               "title":"candidate improvement",
               "live_affecting":true,
-              "admission":{"decision":"HELD_FOR_AUTHORISED_REVIEW"}
+              "admission":{"state":"HELD_FOR_AUTHORISED_REVIEW"}
             }],
             "recent_admissions":[]
           },

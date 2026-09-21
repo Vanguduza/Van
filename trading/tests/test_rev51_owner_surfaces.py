@@ -30,9 +30,13 @@ def test_assessment_performance_and_handoff_are_projected_without_inference():
             "reason_codes": ["EVIDENCE_THIN"], "confidence": "0.7",
             "produced_ms": 10, "seal": "a",
         }}, 10, "i1")
+    # Persist the older nested shape too: the owner projection must remain
+    # truthful across durable event-version upgrades.
     emit(ledger, EventKind.COGNITIVE_PERFORMANCE, {
-        "model_id": "fable-5.1", "qualified": False,
-        "sample_sufficient": False, "total_delta_r": "0.0"}, 20, "fable-5.1")
+        "model_id": "fable-5.1", "resolved_divergences": 7,
+        "total_delta_r": "0.0",
+        "qualification": {"qualified": False, "blocking": ["sample 7 < 50"]},
+    }, 20, "fable-5.1")
     emit(ledger, EventKind.MODEL_HANDOFF, {
         "from_model_id": "fable-5.1", "to_model_id": "gpt-6-astra",
         "reason": "TIMEOUT", "control_profile": "rev51/1"}, 30, "ctx")
@@ -40,6 +44,7 @@ def test_assessment_performance_and_handoff_are_projected_without_inference():
     fable = model["models"][0]
     assert fable["latest"]["verdict"] == "REDUCE"
     assert fable["performance"]["qualified"] is False
+    assert fable["performance"]["sample_sufficient"] is False
     assert model["handoffs"][0]["payload"]["reason"] == "TIMEOUT"
 
 
@@ -54,11 +59,11 @@ def test_research_and_evolution_join_on_durable_ids():
     emit(ledger, EventKind.IMPROVEMENT_PROPOSAL, {
         "proposal_id": "p1", "title": "candidate", "live_affecting": True}, 40, "p1")
     emit(ledger, EventKind.PROPOSAL_ADMISSION, {
-        "proposal_id": "p1", "decision": "HOLD_OWNER_APPROVAL"}, 50, "p1")
+        "proposal_id": "p1", "state": "HELD_FOR_AUTHORISED_REVIEW"}, 50, "p1")
     model = build_cognition_read_model(ledger)
     assert model["research"]["missions"][0]["mission_id"] == "m1"
     assert model["summary"]["research_packets"] == 1
-    assert model["evolution"]["proposals"][0]["admission"]["decision"] == "HOLD_OWNER_APPROVAL"
+    assert model["evolution"]["proposals"][0]["admission"]["state"] == "HELD_FOR_AUTHORISED_REVIEW"
 
 
 def test_expansion_projection_never_claims_live_promotion():

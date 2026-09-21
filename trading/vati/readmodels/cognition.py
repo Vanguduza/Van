@@ -9,6 +9,7 @@ from __future__ import annotations
 from collections import Counter
 from typing import Any
 
+from vati.cognition.performance_ledger import MIN_DIVERGENCES_FOR_QUALIFICATION
 from vati.core.events import EventKind
 
 READ_MODEL_VERSION = "trading-cognition-readmodel/5.1.0"
@@ -71,7 +72,22 @@ def build_cognition_read_model(ledger) -> dict[str, Any]:
     for ev in performance:
         model = str((ev.payload or {}).get("model_id") or ev.correlation_id or "unknown")
         row = by_model.setdefault(model, {"model_id": model, "assessments": 0, "latest": None})
-        row["performance"] = dict(ev.payload)
+        perf = dict(ev.payload)
+        # Older durable performance events predate the explicit top-level owner
+        # fields. Normalise them here from their canonical evidence rather than
+        # showing "unknown" or duplicating qualification logic in Android.
+        qualification = perf.get("qualification")
+        if "qualified" not in perf and isinstance(qualification, dict):
+            perf["qualified"] = qualification.get("qualified")
+        if "sample_sufficient" not in perf:
+            try:
+                perf["sample_sufficient"] = (
+                    int(perf.get("resolved_divergences") or 0)
+                    >= MIN_DIVERGENCES_FOR_QUALIFICATION
+                )
+            except (TypeError, ValueError):
+                perf["sample_sufficient"] = False
+        row["performance"] = perf
     for model in MODEL_HIERARCHY:
         by_model.setdefault(model, {"model_id": model, "assessments": 0, "latest": None})
 
