@@ -128,6 +128,7 @@ class ChromeSession:
     def ensure(self) -> str:
         with self.lock:
             if self.process is not None and self.process.poll() is None and self.cdp_url:
+                self._publish_cdp()
                 return self.cdp_url
             if not CHROMIUM or not Path(CHROMIUM).is_file():
                 raise WorkerError("CHROMIUM_EXECUTABLE_UNAVAILABLE", 503)
@@ -162,15 +163,36 @@ class ChromeSession:
                     lines = active.read_text(encoding="utf-8").splitlines()
                     if lines and lines[0].isdigit():
                         self.cdp_url = f"http://127.0.0.1:{int(lines[0])}"
+                        self._publish_cdp()
                         return self.cdp_url
                 time.sleep(0.1)
             self.stop()
             raise WorkerError("CHROMIUM_START_TIMEOUT", 503)
 
+    def _publish_cdp(self) -> None:
+        if not self.cdp_url or self.process is None:
+            return
+        target = self.runtime_dir / "cdp-endpoint.json"
+        tmp = self.runtime_dir / ".cdp-endpoint.json.tmp"
+        tmp.write_text(
+            json.dumps(
+                {
+                    "profile_alias": self.alias,
+                    "cdp_url": self.cdp_url,
+                    "pid": self.process.pid,
+                },
+                separators=(",", ":"),
+            ),
+            encoding="utf-8",
+        )
+        os.chmod(tmp, 0o600)
+        os.replace(tmp, target)
+
     def stop(self) -> None:
         with self.lock:
             proc, self.process = self.process, None
             self.cdp_url = None
+            (self.runtime_dir / "cdp-endpoint.json").unlink(missing_ok=True)
             if proc is None or proc.poll() is not None:
                 return
             proc.terminate()
