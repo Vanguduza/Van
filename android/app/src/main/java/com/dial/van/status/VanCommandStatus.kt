@@ -22,6 +22,15 @@ enum class VanCommandStatus {
     /** VAN would not do this. Different from failing to do it, and acted on differently. */
     REFUSED,
     CANCELLED,
+    /**
+     * §20.14 — held on the phone because there was no path, and it will be sent.
+     *
+     * Distinct from `LOCAL_DRAFT`, which the owner has not sent, and from `FAILED`, which
+     * is not coming back. Before this existed, a command stored by the outbox had to
+     * borrow one of those two, and both are lies in the direction that matters: one says
+     * the owner still has to do something, the other says their work is gone.
+     */
+    QUEUED,
     EXPIRED,
     /**
      * The gateway said something this build does not recognise.

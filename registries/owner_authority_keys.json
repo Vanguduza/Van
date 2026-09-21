@@ -6,7 +6,7 @@
     "mandate-admit": "subject is <mandate_id>:<version>; standing, not single use",
     "owner-halt": "subject is the session id, or 'van-trading-core' for the commander and gateway",
     "kill-switch-clear": "subject is the session id",
-    "capsule-promote": "subject is <strategy_id>:<target_state>",
+    "capsule-promote": "subject is <strategy_id>:<target_state>:<validation_hash> for certificate-gated states; research-only states omit the hash",
     "ticket-confirm": "subject is the ticket id"
   },
   "keys": {}

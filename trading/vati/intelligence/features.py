@@ -7,6 +7,7 @@ from dataclasses import dataclass, field
 from decimal import Decimal, getcontext
 from typing import Optional, Sequence
 
+from vati.core.canonical import canonical_hash
 from vati.market_data.bars import Bar
 
 getcontext().prec = 28
@@ -97,13 +98,24 @@ class FeatureVector:
     swing_high: Optional[Decimal]
     swing_low: Optional[Decimal]
     complete: bool
+    history_bars: int = 0
     feature_version: str = "features/1.0.0"
+    #: TRD-ENH-004. Without this, an M5 vector and an H1 vector for the same
+    #: symbol and instant are indistinguishable by their recorded fields, so the
+    #: state hash on a decision cannot say what the system actually looked at.
+    #: `UNKNOWN` is the compatibility value for a caller that has not yet been
+    #: given a timeframe; it is a distinct value, never treated as "any".
+    timeframe: str = "UNKNOWN"
 
     def as_dict(self) -> dict:
         return {k: (str(v) if isinstance(v, Decimal) else v) for k, v in self.__dict__.items()}
 
+    def feature_hash(self) -> str:
+        """Identity of this vector, timeframe included (TRD-ENH-004)."""
+        return canonical_hash(self.as_dict())
 
-def compute_features(bars: Sequence[Bar], *, fast: int = 20, slow: int = 50, atr_period: int = 14, vol_period: int = 20, lookback: int = 100) -> FeatureVector:
+
+def compute_features(bars: Sequence[Bar], *, fast: int = 20, slow: int = 50, atr_period: int = 14, vol_period: int = 20, lookback: int = 100, timeframe: str = "UNKNOWN") -> FeatureVector:
     closes = [b.close for b in bars]
     last = bars[-1]
     ef, es, a = ema(closes, fast), ema(closes, slow), atr(bars, atr_period)
@@ -121,4 +133,117 @@ def compute_features(bars: Sequence[Bar], *, fast: int = 20, slow: int = 50, atr
         spread_percentile=percentile_rank(spreads, last.avg_spread), trend_slope=slope, range_compression=compression,
         swing_high=max(b.high for b in window) if window else None, swing_low=min(b.low for b in window) if window else None,
         complete=all(x is not None for x in (ef, es, a, rv)),
+        history_bars=len(bars),
+        timeframe=timeframe,
     )
+
+
+# --------------------------------------------------------------------------
+# First research tranche (§7.3, TRD-ENH-015..018).
+#
+# Pure functions over bars, like everything above. They are *candidates*: a
+# capsule may not declare one in `required_features` until a
+# FeatureValidationCertificate admits it, and the redundant-pair rule means a
+# second member of a pair must beat the first, not the baseline without either.
+# --------------------------------------------------------------------------
+
+
+def _true_ranges(bars: Sequence[Bar]) -> list[Decimal]:
+    return [max(cur.high - cur.low, abs(cur.high - prev.close), abs(cur.low - prev.close))
+            for prev, cur in zip(bars[:-1], bars[1:])]
+
+
+def _wilder(values: Sequence[Decimal], period: int) -> Optional[Decimal]:
+    """Wilder's smoothing — the one ADX is defined against."""
+    if len(values) < period:
+        return None
+    acc = sum(values[:period], ZERO)
+    for v in values[period:]:
+        acc = acc - (acc / Decimal(period)) + v
+    return acc
+
+
+def dmi(bars: Sequence[Bar], period: int = 14) -> tuple[Optional[Decimal], Optional[Decimal]]:
+    """+DI and -DI. Directional movement, normalised by true range."""
+    if len(bars) < period + 1:
+        return None, None
+    plus_dm: list[Decimal] = []
+    minus_dm: list[Decimal] = []
+    for prev, cur in zip(bars[:-1], bars[1:]):
+        up = cur.high - prev.high
+        down = prev.low - cur.low
+        plus_dm.append(up if (up > down and up > ZERO) else ZERO)
+        minus_dm.append(down if (down > up and down > ZERO) else ZERO)
+    tr = _wilder(_true_ranges(bars), period)
+    if tr is None or tr == ZERO:
+        return None, None
+    p, m = _wilder(plus_dm, period), _wilder(minus_dm, period)
+    if p is None or m is None:
+        return None, None
+    hundred = Decimal(100)
+    return (hundred * p / tr), (hundred * m / tr)
+
+
+def adx(bars: Sequence[Bar], period: int = 14) -> Optional[Decimal]:
+    """Trend *strength*, direction-agnostic. High ADX in a range is the tell
+    that the range is about to stop being one."""
+    if len(bars) < 2 * period + 1:
+        return None
+    dxs: list[Decimal] = []
+    for end in range(period + 1, len(bars) + 1):
+        p, m = dmi(bars[:end], period)
+        if p is None or m is None:
+            continue
+        total = p + m
+        if total == ZERO:
+            continue
+        dxs.append(Decimal(100) * abs(p - m) / total)
+    if len(dxs) < period:
+        return None
+    return sum(dxs[-period:], ZERO) / Decimal(period)
+
+
+def donchian(bars: Sequence[Bar], period: int = 20) -> tuple[Optional[Decimal], Optional[Decimal], Optional[Decimal]]:
+    """Upper, lower, and position within the channel in [0, 1].
+
+    Donchian rather than Keltner for the tranche: it is a pure price-structure
+    statement with no volatility term, so it is less colinear with `atr` and
+    `range_compression`, which the registry already carries.
+    """
+    if len(bars) < period:
+        return None, None, None
+    window = bars[-period:]
+    hi = max(b.high for b in window)
+    lo = min(b.low for b in window)
+    if hi == lo:
+        return hi, lo, Decimal("0.5")
+    pos = (window[-1].close - lo) / (hi - lo)
+    return hi, lo, max(ZERO, min(Decimal(1), pos))
+
+
+def ppo(closes: Sequence[Decimal], fast: int = 12, slow: int = 26) -> Optional[Decimal]:
+    """Percentage price oscillator: MACD normalised by the slow EMA.
+
+    PPO rather than MACD for the tranche. They are the same construction, and
+    the redundant-pair rule admits only one — PPO because its output is
+    comparable across instruments and price levels, which MACD's is not.
+    """
+    if len(closes) < slow:
+        return None
+    ef, es = ema(closes, fast), ema(closes, slow)
+    if ef is None or es is None or es == ZERO:
+        return None
+    return Decimal(100) * (ef - es) / es
+
+
+def roc(closes: Sequence[Decimal], period: int) -> Optional[Decimal]:
+    """Rate of change over one horizon, in percent."""
+    if len(closes) < period + 1 or closes[-period - 1] == ZERO:
+        return None
+    return Decimal(100) * (closes[-1] - closes[-period - 1]) / closes[-period - 1]
+
+
+def multi_horizon_roc(closes: Sequence[Decimal], periods: Sequence[int] = (5, 20, 60)) -> dict[str, Optional[Decimal]]:
+    """Momentum at several horizons. One number cannot say "up this week,
+    down this quarter", and that disagreement is the informative part."""
+    return {f"roc_{p}": roc(closes, p) for p in periods}

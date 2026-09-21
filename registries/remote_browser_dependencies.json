@@ -1,0 +1,147 @@
+{
+  "$schema_note": "Rev 1.5 §32 dependency registry for the VAN Remote Browser. No floating versions (§32). A dependency is admissible only when it carries a digest that was computed from the artefact itself, not copied from a document; `pin_status: PINNED_DIGEST_VERIFIED` means the digest in this file was produced by downloading that exact artefact. Entries whose runtime does not exist in this repository stay EXTERNAL and are never counted as installed.",
+  "manifest_version": 1,
+  "verified_at": "2026-09-19",
+  "verified_against": "repo1.maven.org (artefacts downloaded and hashed locally)",
+  "android": {
+    "webrtc": {
+      "coordinate": "io.github.webrtc-sdk:android:150.7871.01",
+      "packaging": "aar",
+      "artifact_sha256": "0a1627b1a48c2bc17d9a40d62fc47bd45166f44a311e95917f147c402de379b0",
+      "artifact_bytes": 49147033,
+      "licence": "BSD-3-Clause",
+      "licence_class": "PERMISSIVE",
+      "upstream_repository": "https://github.com/webrtc-sdk/android",
+      "supported_abis": [
+        "arm64-v8a",
+        "armeabi-v7a",
+        "x86",
+        "x86_64"
+      ],
+      "production_abi_filter": [
+        "arm64-v8a"
+      ],
+      "abi_filter_rationale": "The owner device is an S24 Ultra (arm64). Shipping all four ABIs adds roughly 35 MB to an APK that is already 95 MB, and the three unused ones can never execute on the only handset the production build is bound to (§0D.3).",
+      "pin_status": "PINNED_DIGEST_VERIFIED",
+      "adoption_decision_ref": "docs/decisions/VAN-ADOPT-REMOTE-BROWSER-STREAMING-001.yaml",
+      "source_revision_status": "UNRESOLVED",
+      "source_revision_note": "§32.1 requires the upstream Chromium/WebRTC source revision this build represents. The version string 150.7871.01 indicates the M150 branch, but the exact upstream commit is not recoverable from the artefact metadata and has not been confirmed against the upstream release. Recorded as unresolved rather than guessed.",
+      "runtime_canary_status": "NOT_RUN",
+      "runtime_canary_note": "§32.1 requires a minimal decode/DataChannel canary and H.264 MediaCodec confirmation on the S24. Neither is possible in this container; both are S24 device gates.",
+      "api_surface_verified": {
+        "verified_at": "2026-09-20",
+        "method": "The AAR was downloaded again, its digest re-confirmed byte for byte against the pin above, and `classes.jar` extracted and read with `javap`. Every `org.webrtc.*` symbol the app imports, and every method, field and enum constant it calls, was checked against the artefact's own signatures.",
+        "checked": [
+          "15 imported classes all present",
+          "PeerConnection.Observer: the 10 abstract methods the adapter implements, plus onConnectionChange and onAddTrack which are default",
+          "SdpObserver's 4 abstract methods",
+          "createPeerConnection(RTCConfiguration, Observer), createDataChannel(String, Init), createOffer(SdpObserver, MediaConstraints), setLocalDescription, setRemoteDescription, getLocalDescription, close, dispose",
+          "DataChannel.Init public fields ordered/maxRetransmits/negotiated; Buffer(ByteBuffer, boolean); state(); send(Buffer); State.OPEN",
+          "PeerConnectionFactory.Builder.setVideoDecoderFactory/setVideoEncoderFactory/createPeerConnectionFactory; InitializationOptions.builder(Context).createInitializationOptions()",
+          "DefaultVideoDecoderFactory(EglBase.Context) and DefaultVideoEncoderFactory(EglBase.Context, boolean, boolean)",
+          "IceServer.builder(List<String>).setUsername/setPassword/createIceServer",
+          "RTCConfiguration(List<IceServer>) and its sdpSemantics/iceTransportsType/bundlePolicy/rtcpMuxPolicy fields",
+          "EglBase.create(), getEglBaseContext(), release(); VideoTrack.addSink(VideoSink)",
+          "SurfaceViewRenderer(Context), (Context, AttributeSet), init(EglBase.Context, RendererEvents), setScalingType, setEnableHardwareScaler",
+          "enum constants IceTransportsType.ALL, SdpSemantics.UNIFIED_PLAN, BundlePolicy.MAXBUNDLE, RtcpMuxPolicy.REQUIRE, SessionDescription.Type.ANSWER, IceGatheringState.COMPLETE, PeerConnectionState.{CONNECTED,DISCONNECTED,FAILED,CLOSED}, ScalingType.SCALE_ASPECT_FIT",
+          "the four ABIs in jni/, confirming the production_abi_filter discards three of them"
+        ],
+        "why_this_is_recorded": "The Android Gradle Plugin is unreachable in the audit container, so nothing here compiles this code and CI is the only authority. Reading the artefact's own signatures is weaker than compiling and much stronger than pushing and hoping: it catches the whole class of 'the method is called something else in this version', which is what a floating or mis-pinned dependency actually costs.",
+        "not_proven_by_this": "Nothing about runtime behaviour. Whether an S24 negotiates H.264 with a real stream host is RB-121 and remains a device gate; the runtime canary below is still NOT_RUN."
+      }
+    },
+    "okhttp": {
+      "coordinate": "com.squareup.okhttp3:okhttp:4.12.0",
+      "packaging": "jar",
+      "artifact_sha256": "b1050081b14bb7a3a7e55a4d3ef01b5dcfabc453b4573a4fc019767191d5f4e0",
+      "artifact_bytes": 789531,
+      "licence": "Apache-2.0",
+      "licence_class": "PERMISSIVE",
+      "transitive": {
+        "com.squareup.okio:okio": "3.6.0",
+        "org.jetbrains.kotlin:kotlin-stdlib-jdk8": "1.8.21"
+      },
+      "pin_status": "PINNED_DIGEST_VERIFIED",
+      "adoption_decision_ref": "docs/decisions/VAN-ADOPT-REMOTE-BROWSER-STREAMING-001.yaml",
+      "deviation_from_blueprint": {
+        "blueprint_candidate": "com.squareup.okhttp3:okhttp:5.5.0",
+        "candidate_sha256": "aebaab3fe77633befcf69fd0ee3052083999a7eaa98d6f2f7c4b498e7bdbb732",
+        "rejected_because": "okhttp 5.5.0 depends on kotlin-stdlib 2.1.21 and ships Kotlin 2.1 metadata. This project builds with the Kotlin 1.9.24 plugin (android/build.gradle.kts) and the Compose compiler extension 1.5.14 that pairs with it, so a 2.1-metadata artefact cannot be read by this compiler. Admitting it would have made the Android build fail on first use, which is exactly the class of unverified dependency claim §32 exists to stop.",
+        "revisit_when": "the project's Kotlin toolchain is upgraded to 2.x under its own decision; the 5.x line is then the preferred long-term dependency"
+      }
+    }
+  },
+  "stream_host": {
+    "$note": "Nothing in this section is installed anywhere. The Browser Stream Host does not exist yet (RB-002/RB-010); these are the versions the deployment package targets, and each stays EXTERNAL until a real host reports its own runtime identity.",
+    "chromium": {
+      "version": "UNRESOLVED_AT_PROVISIONING",
+      "licence": "BSD-3-Clause",
+      "licence_class": "PERMISSIVE",
+      "pin_status": "EXTERNAL_UNPROVISIONED"
+    },
+    "gstreamer": {
+      "version": "UNRESOLVED_AT_PROVISIONING",
+      "licence": "LGPL-2.1",
+      "licence_class": "WEAK_COPYLEFT",
+      "pin_status": "EXTERNAL_UNPROVISIONED"
+    },
+    "x264": {
+      "version": "UNRESOLVED_AT_PROVISIONING",
+      "licence": "GPL-2.0-or-later",
+      "licence_class": "STRONG_COPYLEFT",
+      "licence_note": "x264 is GPL. It is used as a separate process/plugin on the stream host and is never linked into the Android application or into VAN gateway code. If that separation is ever broken, the encoder choice must be revisited before distribution.",
+      "pin_status": "EXTERNAL_UNPROVISIONED"
+    },
+    "coturn": {
+      "version": "UNRESOLVED_AT_PROVISIONING",
+      "licence": "BSD-3-Clause",
+      "licence_class": "PERMISSIVE",
+      "pin_status": "EXTERNAL_UNPROVISIONED"
+    },
+    "compositor": {
+      "version": "UNRESOLVED_AT_PROVISIONING",
+      "implementation": "headless Wayland (§25.2)",
+      "pin_status": "EXTERNAL_UNPROVISIONED"
+    }
+  },
+  "offline_voice": {
+    "$note": "Rev 1.5 §§21.3, 32.5. Nothing in this section is installed. VAN-ADOPT-OFFLINE-VOICE-RUNTIME-001 admits sherpa-onnx as the runtime and is explicit that the repository builds the loader, the manifest, the fail-closed readiness classification and the routing, and cannot author a model. So these entries record what would have to be pinned, and stay EXTERNAL until an artefact exists to measure. §32.8 forbids moving a ledger row on the strength of an adapter existing.",
+    "sherpa_onnx": {
+      "coordinate": "UNRESOLVED_AT_ADOPTION",
+      "licence": "Apache-2.0",
+      "licence_class": "PERMISSIVE",
+      "upstream_repository": "https://github.com/k2-fsa/sherpa-onnx",
+      "pin_status": "EXTERNAL_UNPROVISIONED",
+      "adoption_decision_ref": "docs/decisions/VAN-ADOPT-OFFLINE-VOICE-RUNTIME-001.yaml",
+      "must_pin_before_use": [
+        "sherpa-onnx version",
+        "Android native binaries and their ABIs",
+        "SHA-256 of each artefact, measured rather than quoted",
+        "upstream source revision",
+        "ASR model ids and hashes",
+        "VAD model id and hash",
+        "TTS model id and hash",
+        "vocabulary/lexicon revision"
+      ],
+      "why_not_pinned_here": "§21.3 forbids 'latest' in production, and a digest can only be recorded by downloading the artefact. The owner has not supplied a model bundle, and a pinned native library with no model is a dependency that cannot do anything."
+    },
+    "voice_models": {
+      "wake": {
+        "pin_status": "EXTERNAL_UNPROVISIONED"
+      },
+      "vad": {
+        "pin_status": "EXTERNAL_UNPROVISIONED"
+      },
+      "asr": {
+        "pin_status": "EXTERNAL_UNPROVISIONED"
+      },
+      "tts": {
+        "pin_status": "EXTERNAL_UNPROVISIONED"
+      },
+      "critical_phrases": {
+        "pin_status": "EXTERNAL_UNPROVISIONED"
+      },
+      "$note": "§21.19 requires the TTS model to be chosen by measurement on the owner's S24 — size, cold init, first-audio latency, real-time factor, peak memory, thermal effect, and pronunciation on VAN's own vocabulary — not by reputation. None of those measurements exists, so no model is named here."
+    }
+  }
+}

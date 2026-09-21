@@ -132,6 +132,176 @@ def _production_references(
     return sorted(hits)
 
 
+#: §40.5 — the Remote Browser programme ledger. It is a programme register, not a maturity
+#: authority, and the whole point of reading it here is that a programme row must never be
+#: able to claim more about a component than the component ledger itself records.
+DEFAULT_MATRIX = ROOT / "docs" / "project-state" / "REMOTE_BROWSER_IMPLEMENTATION_MATRIX.json"
+
+RB_STATUSES = {
+    "NOT_STARTED",
+    "BUILT_UNWIRED",
+    "WIRED_UNPROVEN",
+    "LIVE_UNVERIFIED",
+    "VERIFIED_UNCERTIFIED",
+    "CERTIFIED",
+    "BLOCKED",
+    "DELIBERATELY_REMOVED",
+}
+
+LEDGER_EXPECTATIONS = {
+    "NONE",
+    "NON_TERMINAL",
+    "INTEGRATED_AND_EVIDENCED",
+    "EXTERNALLY_BLOCKED_REPOSITORY_COMPLETE",
+    "DELIBERATELY_REMOVED_CANON_CORRECTED",
+}
+
+#: §40.4 — a row's status constrains what it may expect of the component ledger. The
+#: interesting entries are the short ones: CERTIFIED may expect nothing weaker than full
+#: integration, and DELIBERATELY_REMOVED may expect nothing but removal.
+ALLOWED_EXPECTATION = {
+    "NOT_STARTED": {"NONE", "NON_TERMINAL"},
+    "BUILT_UNWIRED": {"NONE", "NON_TERMINAL"},
+    "WIRED_UNPROVEN": {"NONE", "NON_TERMINAL"},
+    "LIVE_UNVERIFIED": {"NONE", "NON_TERMINAL"},
+    "VERIFIED_UNCERTIFIED": {"NONE", "NON_TERMINAL"},
+    "CERTIFIED": {"INTEGRATED_AND_EVIDENCED"},
+    "BLOCKED": {"NONE", "NON_TERMINAL", "EXTERNALLY_BLOCKED_REPOSITORY_COMPLETE"},
+    "DELIBERATELY_REMOVED": {"DELIBERATELY_REMOVED_CANON_CORRECTED"},
+}
+
+#: The five fields a component must name before anything may call it integrated. Same list
+#: the maturity gate enforces; repeated here because this is the other direction of travel —
+#: a programme row pointing at a component that has not earned them.
+INTEGRATION_EVIDENCE_FIELDS = ("producer", "consumer", "production_caller", "tests", "runtime_evidence")
+
+#: The engineering ladder of §40.6, in order. A row cannot be verified without being live,
+#: or live without being wired. Nothing here says a row must be anything; it says a row
+#: cannot skip a rung and still describe itself coherently.
+PROGRESS_LADDER = ("built", "wired", "reachable", "live", "verified")
+
+#: What each status asserts about the booleans. A status and a set of booleans that
+#: contradict each other is the same defect one level up from a component claiming
+#: integration with no caller: two registers, one of them wrong, and nothing comparing them.
+STATUS_REQUIRES = {
+    "NOT_STARTED": {"built": False},
+    "BUILT_UNWIRED": {"built": True, "wired": False},
+    "WIRED_UNPROVEN": {"built": True, "wired": True, "verified": False},
+    "LIVE_UNVERIFIED": {"live": True, "verified": False},
+    "VERIFIED_UNCERTIFIED": {"verified": True, "certified": False},
+    "CERTIFIED": {"certified": True},
+    "BLOCKED": {"certified": False},
+    "DELIBERATELY_REMOVED": {"certified": False},
+}
+
+
+def check_matrix(matrix_path: Path | None = None, ledger_path: Path | None = None) -> list[str]:
+    """§40.5 — enforce the RB programme ledger against the component ledger.
+
+    Returns one line per violation. An absent matrix is not a violation: the bridge exists
+    for a programme that may not have started in a given checkout.
+    """
+    path = matrix_path or DEFAULT_MATRIX
+    if not path.is_file():
+        return []
+
+    matrix = json.loads(path.read_text())
+    rows = matrix["rows"] if isinstance(matrix, dict) else matrix
+
+    ledger = json.loads((ledger_path or DEFAULT_LEDGER).read_text())
+    components = ledger["components"] if isinstance(ledger, dict) else ledger
+    by_n = {c.get("n"): c for c in components}
+
+    problems: list[str] = []
+    for r in rows:
+        rid = r.get("id", "<unnamed>")
+        status = r.get("status")
+        if status not in RB_STATUSES:
+            problems.append(f"{rid}: status {status!r} is not one of {sorted(RB_STATUSES)}")
+            continue
+
+        expectation = r.get("ledger_expectation", "NONE")
+        if expectation not in LEDGER_EXPECTATIONS:
+            problems.append(f"{rid}: ledger_expectation {expectation!r} is not a known value")
+            continue
+        if expectation not in ALLOWED_EXPECTATION[status]:
+            problems.append(
+                f"{rid}: status {status} may not expect {expectation}; allowed: "
+                f"{sorted(ALLOWED_EXPECTATION[status])}"
+            )
+
+        for field, required in STATUS_REQUIRES[status].items():
+            if bool(r.get(field, False)) is not required:
+                problems.append(
+                    f"{rid}: status {status} requires {field}={required}, row says "
+                    f"{field}={bool(r.get(field, False))}"
+                )
+
+        reached_false = False
+        for rung in PROGRESS_LADDER:
+            if reached_false and r.get(rung):
+                problems.append(
+                    f"{rid}: claims {rung} while an earlier rung of the ladder is false. "
+                    "A row cannot be verified without being live, or live without being wired."
+                )
+                break
+            if not r.get(rung):
+                reached_false = True
+        if r.get("certified") and not all(r.get(rung) for rung in PROGRESS_LADDER):
+            problems.append(f"{rid}: certified with an incomplete ladder {PROGRESS_LADDER}")
+
+        # §40.5 — the column that says which rows a commit can still move.
+        #
+        # An empty list could mean either "nothing external is blocking this" or "nobody
+        # filled this in", and those are the two answers a reader most needs to tell
+        # apart: the first says the row is waiting on hardware, the second says the row
+        # has never been thought about. Forty rows carried an empty list, including
+        # several that were genuinely blocked, so the column could not be used for the
+        # one question it exists to answer. A row with no external blocker now says so in
+        # words, and the empty list becomes a violation rather than a silence.
+        if status != "CERTIFIED" and not (r.get("external_gates") or []):
+            problems.append(
+                f"{rid}: status {status} names no external_gates. A row with nothing "
+                "external says so in words; an empty list cannot be told from an "
+                "unfilled one."
+            )
+
+        refs = r.get("component_refs") or []
+        if refs and expectation == "NONE":
+            problems.append(
+                f"{rid}: names component_refs {refs} while expecting NONE of the ledger. "
+                "A reference that expects nothing cannot be checked."
+            )
+        for n in refs:
+            component = by_n.get(n)
+            if component is None:
+                problems.append(f"{rid}: component_ref {n} is not in the component ledger")
+                continue
+            terminal = component.get("terminal_state")
+            name = component.get("component", f"n={n}")
+
+            if expectation == "NON_TERMINAL" and terminal:
+                problems.append(
+                    f"{rid}: expects a non-terminal component but {name} is {terminal}"
+                )
+            elif expectation in {
+                "INTEGRATED_AND_EVIDENCED",
+                "EXTERNALLY_BLOCKED_REPOSITORY_COMPLETE",
+                "DELIBERATELY_REMOVED_CANON_CORRECTED",
+            } and terminal != expectation:
+                problems.append(
+                    f"{rid}: expects {name} to be {expectation}, ledger says {terminal!r}"
+                )
+
+            if expectation == "INTEGRATED_AND_EVIDENCED":
+                missing = [f for f in INTEGRATION_EVIDENCE_FIELDS if not component.get(f)]
+                if missing:
+                    problems.append(
+                        f"{rid}: {name} is claimed integrated but names no {', '.join(missing)}"
+                    )
+    return problems
+
+
 def reconcile(ledger_path: Path | None = None) -> tuple[list[str], list[str], list[str]]:
     ledger = json.loads((ledger_path or DEFAULT_LEDGER).read_text())
     components = ledger["components"] if isinstance(ledger, dict) else ledger
@@ -164,11 +334,30 @@ def reconcile(ledger_path: Path | None = None) -> tuple[list[str], list[str], li
     return contradicted, unverifiable, confirmed
 
 
+def _matrix_summary(matrix_path: Path | None = None) -> str:
+    """One line so a silently absent matrix cannot look like a passing one."""
+    path = matrix_path or DEFAULT_MATRIX
+    if not path.is_file():
+        return "absent"
+    rows = json.loads(path.read_text())["rows"]
+    counts: dict[str, int] = {}
+    for r in rows:
+        counts[r.get("status", "?")] = counts.get(r.get("status", "?"), 0) + 1
+    ordered = ", ".join(f"{n} {s}" for s, n in sorted(counts.items(), key=lambda kv: -kv[1]))
+    return f"{len(rows)} rows — {ordered}"
+
+
 def main() -> int:
     parser = argparse.ArgumentParser(description=__doc__)
     parser.add_argument(
         "--strict", action="store_true",
         help="also fail when an entry declares no reachability_symbols",
+    )
+    parser.add_argument(
+        "--matrix", type=Path, default=None,
+        help="a Remote Browser programme matrix to check instead of the repository's, for "
+             "the self-test. §40.5's rules are only worth as much as a run that has been "
+             "shown to refuse an invalid combination.",
     )
     parser.add_argument(
         "--ledger", type=Path, default=None,
@@ -179,6 +368,7 @@ def main() -> int:
     args = parser.parse_args()
 
     contradicted, unverifiable, confirmed = reconcile(args.ledger)
+    matrix_problems = check_matrix(args.matrix, args.ledger)
 
     print(f"{len(confirmed)} unreached claims confirmed against the source")
     for name in confirmed:
@@ -190,6 +380,15 @@ def main() -> int:
             print(f"  unverifiable     {name}")
         print("  These are judged by hand. Adding `reachability_symbols` brings one under CI.")
 
+    if matrix_problems:
+        print(f"\n{len(matrix_problems)} Remote Browser matrix violations (§40.5):")
+        for line in matrix_problems:
+            print(f"  RB  {line}")
+        print(
+            "\nA programme row may never claim more about a component than the component "
+            "ledger records. Fix the row, or earn the component state it is asserting."
+        )
+
     if contradicted:
         print(f"\n{len(contradicted)} STALE — the ledger says unreached, the source disagrees:")
         for line in contradicted:
@@ -200,9 +399,13 @@ def main() -> int:
         )
         return 1
 
+    if matrix_problems:
+        return 1
+
     if args.strict and unverifiable:
         return 1
 
+    print(f"\nRemote Browser matrix: {_matrix_summary(args.matrix)}")
     print("\nLEDGER RECONCILED — no component understates its own integration.")
     return 0
 

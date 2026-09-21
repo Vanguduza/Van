@@ -11,6 +11,8 @@ import com.dial.van.queue.CommandKind
 import com.dial.van.queue.CommandSensitivity
 import com.dial.van.queue.QueueEnqueueRequest
 import java.util.UUID
+import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.launch
 import kotlinx.serialization.json.Json
 import kotlinx.serialization.json.JsonArray
 import kotlinx.serialization.json.JsonPrimitive
@@ -68,6 +70,20 @@ class ShareIntakeActivity : Activity() {
 
         val app = application as? VanApplication ?: return UNAVAILABLE
         val shareId = UUID.randomUUID().toString()
+        // Off the main thread, and that is not a tidy-up.
+        //
+        // `EncryptedCommandQueue` writes with `commit()` rather than `apply()` so the
+        // owner's outbox is on disk before the caller is told it is — a durability fix
+        // that also made this call an AES-GCM encryption plus a synchronous disk write on
+        // whatever thread ran it. This one is `Activity.onCreate`, which is the UI
+        // thread, so a share of a large payload on a slow device would block the frame
+        // the owner is looking at and can end in an ANR.
+        //
+        // The acknowledgement below is still immediate: what the owner is told is that
+        // VAN has taken the share, and ordering the write behind it costs nothing, because
+        // captured content losing a race with a process death is not the class of harm the
+        // outbox's synchronous write exists to prevent.
+        app.appScope.launch(Dispatchers.IO) {
         app.commandQueue.enqueue(
             QueueEnqueueRequest(
                 kind = CommandKind.CONTEXT_INGEST,
@@ -93,6 +109,7 @@ class ShareIntakeActivity : Activity() {
                 idempotencyKey = "share:$shareId",
             ),
         )
+        }
         return acknowledgement
     }
 

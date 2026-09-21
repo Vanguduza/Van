@@ -1,41 +1,47 @@
 {
+  "capsule_hash": "bd94f7bcf0f840edd15d9d86430359ef2a587b71360252b47db9637a7bffe794",
+  "cost_model_ref": "vati.market_data.costs.FxCostModel",
   "discipline": "NFP/CPI/FOMC event",
-  "instruments": [
-    "EURUSD",
-    "USDJPY",
-    "XAUUSD"
-  ],
-  "horizons": [
-    "SESSION"
-  ],
   "eligible_regimes": [
     "BULL",
     "BEAR",
     "RANGE"
   ],
+  "entry_logic_ref": "vati.strategies.event_drift",
+  "event_certified": true,
+  "event_rules": {
+    "tier1": "drift window only; requires 2-source release verification"
+  },
+  "evidence_refs": [],
+  "execution_model": "LIMIT in DRIFT window only",
   "forbidden_regimes": [],
+  "horizons": [
+    "SESSION"
+  ],
+  "instruments": [
+    "EURUSD",
+    "USDJPY",
+    "XAUUSD"
+  ],
+  "invalidation_logic_ref": "move reverses through release price",
   "required_data_granularity": "BARS",
   "required_features": [
     "atr"
   ],
-  "entry_logic_ref": "vati.strategies.event_drift",
-  "invalidation_logic_ref": "move reverses through release price",
-  "stop_model": "1.5 ATR",
-  "target_model": "2.5 ATR",
   "risk_limits": {
     "max_risk_per_trade": "0.0050"
   },
-  "execution_model": "LIMIT in DRIFT window only",
-  "event_rules": {
-    "tier1": "drift window only; requires 2-source release verification"
+  "state": "RESEARCH",
+  "stop_model": "1.5 ATR",
+  "strategy_id": "FX-EVENT-DRIFT-01",
+  "target_model": "2.5 ATR",
+  "timeframe_contract": {
+    "execution": "M5",
+    "regime": "H1",
+    "setup": "M15",
+    "structural": "H4"
   },
   "training_period": "2019-01-01/2024-12-31",
   "validation_period": "2025-01-01/2026-06-30",
-  "cost_model_ref": "vati.market_data.costs.FxCostModel",
-  "state": "RESEARCH",
-  "evidence_refs": [],
-  "strategy_id": "FX-EVENT-DRIFT-01",
-  "version": "1.0.0",
-  "event_certified": true,
-  "capsule_hash": "ae36b55b207e4851faa293fa385ffc1d4dedeb67585354f85c8f718ed04fdfcc"
+  "version": "1.0.0"
 }

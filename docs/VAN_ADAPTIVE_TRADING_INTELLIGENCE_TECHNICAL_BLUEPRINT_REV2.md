@@ -548,7 +548,7 @@ Each Feature enters implementation with its own acceptance contract (`product-ma
 Unit (pips/ticks, sizing, margin, stops, event parsing, time zones, contract mapping); property (P1–P8 below, and per Feature); replay; failure injection (disconnect, delayed quotes, duplicates, reordered events, reconnects, restarts, DB outage, clock skew, spread explosion, partial fills, rejected stops); strategy tests; **induced-failure drills** for every gate, recorded as evidence.
 
 ### Certification gates (Rev 1 §52, extended)
-Strategy certification adds: calibration gate passed; deflated Sharpe > 0; PBO ≤ 0.10; parameter perturbation passed; ≥ 200 OOS trades and ≥ 30 per regime; capsule signed by owner. Platform certification adds: induced-failure drills passed; decision replay identical; unprotected-position seconds = 0 in demo/shadow; `evaluate_safe` fault path exercised.
+Strategy certification adds: calibration gate passed; dsr_probability >= 0.95; PBO ≤ 0.10; parameter perturbation passed; ≥ 200 OOS trades and ≥ 30 per regime; capsule signed by owner. Platform certification adds: induced-failure drills passed; decision replay identical; unprotected-position seconds = 0 in demo/shadow; `evaluate_safe` fault path exercised.
 
 ---
 

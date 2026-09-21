@@ -33,6 +33,7 @@ from vati.market_data.calendars import FX_CALENDAR
 from vati.market_data.feeds.lake import TIMEFRAMES_MS, BarLake
 from vati.learning.episodes import Environment
 from vati.learning.hooks import LearningHooks
+from vati.learning.replay import restore_learning_runtime
 from vati.risk import AuthorizationMode, TradingMandate
 from vati.risk.serde import contract_from_dict
 from vati.strategies import STRATEGY_IMPLEMENTATIONS, CapsuleRegistry
@@ -50,6 +51,9 @@ class ServiceConfig:
     contract: dict
     mandate: dict
     capsules: list[str]
+    #: Additional instruments activate the account-level coordinator runtime.
+    #: Each mapping may override symbol/base/quote/timeframe/contract/capsules/cost.
+    instruments: list[dict] = field(default_factory=list)
     round_trip_cost_pct: str = "0.0003"
     registry_path: str = "accounts.json"
     ledger: str = "vati.sqlite"
@@ -149,7 +153,7 @@ class SessionService:
         self.adapter = self.adapter or build_adapter(account, registry)
         self._ledger = open_ledger(c.ledger)
         contract = contract_from_dict({**c.contract, "venue": account.router_venue})   # the account decides the venue; a contract copied from another venue must not silently mismatch
-        scfg = SessionConfig(symbol=c.symbol, base=c.base, quote=c.quote, venue=account.router_venue, account_alias=account.alias, contract=contract, mandate_dict=c.mandate,
+        scfg = SessionConfig(symbol=c.symbol, base=c.base, quote=c.quote, venue=account.router_venue, account_alias=account.alias, contract=contract, mandate_dict=c.mandate, timeframe=c.timeframe,
                              warmup_bars=c.warmup_bars, max_quote_age_ms=c.max_quote_age_ms, session_id=f"{account.alias}:{c.symbol}:{int(self.clock())}", activation_id=c.activation_id,
                              software_stops=account.broker == BrokerKind.ZSE_OWNER_TICKET)
         reg = CapsuleRegistry.load_dir(c.capsule_dir or ROOT / "strategies" / "registry")
@@ -169,6 +173,8 @@ class SessionService:
             environment=ENVIRONMENT_FOR_MODE[mandate.mode],
             broker=str(getattr(account.broker, "value", account.broker)).lower(),
         )
+        self.learning_replay = restore_learning_runtime(
+            self._ledger, learning, {c.symbol.upper(): engine})
         cycle = DecisionCycle(cfg=scfg, adapter=self.adapter, ledger=self._ledger, engine=engine, cost_fn=lambda st: cost, calendar=FX_CALENDAR, events=build_matrix(c.calendar_path), learning=learning)
         self.learning = learning
         self.runner = SessionRunner(cycle)

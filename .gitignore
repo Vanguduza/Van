@@ -67,3 +67,10 @@ android/verification/build/
 # The preview renderer is a settings-only entry point onto :visual-preview; its Gradle
 # working directory is not evidence and must not be committed.
 android/preview-render/.gradle/
+
+# The mutation harness writes this while a run is in progress; a run that finishes
+# removes it, and a run that is killed leaves it for the next run to recover from.
+tools/audit/.mutation-journal.json
+
+# Kotlin compiler session directory, written by recent Gradle Kotlin plugins.
+android/verification/.kotlin/

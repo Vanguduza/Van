@@ -26,7 +26,6 @@ import androidx.compose.foundation.verticalScroll
 import androidx.compose.material3.Button
 import androidx.compose.material3.Card
 import androidx.compose.material3.MaterialTheme
-import androidx.compose.material3.OutlinedTextField
 import androidx.compose.material3.Text
 import androidx.compose.material3.TextButton
 import androidx.compose.runtime.Composable
@@ -34,13 +33,11 @@ import androidx.compose.runtime.DisposableEffect
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
-import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.platform.LocalLifecycleOwner
-import androidx.compose.ui.text.input.PasswordVisualTransformation
 import androidx.compose.ui.unit.dp
 import androidx.core.content.ContextCompat
 import androidx.core.content.edit
@@ -52,7 +49,6 @@ import com.dial.van.command.CommandCentreActivity
 import com.dial.van.notification.VanNotificationListenerService
 import com.dial.van.overlay.FloatingOverlayService
 import com.dial.van.visual.VanTheme
-import kotlinx.coroutines.launch
 
 /**
  * First run.
@@ -146,7 +142,6 @@ private fun notificationListenerEnabled(context: Context): Boolean {
 private fun OnboardingFlow(onComplete: () -> Unit) {
     val context = LocalContext.current
     val app = context.applicationContext as VanApplication
-    val scope = rememberCoroutineScope()
     val scroll = rememberScrollState()
 
     // P3-AND-007 — survives rotation. Which optional steps the owner chose to pass is a
@@ -156,8 +151,6 @@ private fun OnboardingFlow(onComplete: () -> Unit) {
     // rotated the phone on an optional step.
     var skipped by rememberSaveable { mutableStateOf(emptyList<String>()) }
     var grants by remember { mutableStateOf(readGrants(context, app.gatewayClient.isPaired())) }
-    var pairingError by remember { mutableStateOf<String?>(null) }
-    var pairing by remember { mutableStateOf(false) }
 
     fun refresh() {
         grants = readGrants(context, app.gatewayClient.isPaired())
@@ -254,70 +247,50 @@ private fun OnboardingFlow(onComplete: () -> Unit) {
             },
             content = {
                 if (step == OnboardingStep.PAIRING) {
-                    PairingForm(
-                        busy = pairing,
-                        error = pairingError,
-                        onPair = { url, code ->
-                            pairing = true
-                            pairingError = null
-                            scope.launch {
-                                runCatching { app.gatewayClient.pairThisDevice(url, code) }
-                                    .onFailure { pairingError = pairingMessage(it) }
-                                pairing = false
-                                refresh()
-                            }
-                        },
-                    )
+                    ProvisioningStatus(configured = app.provisioning.configured)
                 }
             },
         )
     }
 }
 
-/** Pairing failures, in the owner's words rather than the client's `require` messages. */
-private fun pairingMessage(error: Throwable): String = when (error.message) {
-    "pairing_token_too_short" -> "That code looks too short. Copy the whole thing from the gateway."
-    "pairing_response_missing_ingress_token",
-    "pairing_response_missing_device_access_token",
-    -> "The gateway answered but did not send the keys this phone needs. Try generating a new code."
-    else -> "Van could not reach that address. Check it is the gateway's address and that the code has not expired."
-}
 
+/**
+ * Rev 1.5 §0D.2 — what replaced the pairing form, and why there is nothing to fill in.
+ *
+ * This used to be two text fields: "Gateway address" and "Pairing code". They are the
+ * first and fifth entries on §0D.2's list of fields a production build must never expose,
+ * and the reason is not tidiness. A box asking the owner to type a server address is a
+ * phishing surface with their entire assistant behind it — anyone who persuades them to
+ * retype an address owns every command from that moment, and nothing on the phone would
+ * look wrong afterwards. A pairing code is worse: it is exactly the kind of string someone
+ * can be talked into reading out over the phone.
+ *
+ * ADR-RB-026 replaces both with an installer-driven path. The deployment pipeline hands
+ * this device one signed, single-use, short-lived payload; the device verifies it against
+ * a key compiled into this build, pairs and binds itself, and the owner watches.
+ *
+ * So what is left here is a status, and the status is honest about the two states that
+ * are not the same: a build with no trust anchor can never be provisioned and says so,
+ * while a build that has one is simply waiting.
+ */
 @Composable
-private fun PairingForm(
-    busy: Boolean,
-    error: String?,
-    onPair: (url: String, code: String) -> Unit,
-) {
-    // Saved, so a rotation mid-pairing does not make the owner re-type an address and a
-    // one-time code from another screen.
-    var url by rememberSaveable { mutableStateOf("") }
-    var code by rememberSaveable { mutableStateOf("") }
-
+private fun ProvisioningStatus(configured: Boolean) {
     Column(verticalArrangement = Arrangement.spacedBy(8.dp)) {
-        OutlinedTextField(
-            value = url,
-            onValueChange = { url = it },
-            label = { Text("Gateway address") },
-            placeholder = { Text("https://…") },
-            singleLine = true,
-            modifier = Modifier.fillMaxWidth(),
-        )
-        OutlinedTextField(
-            value = code,
-            onValueChange = { code = it },
-            label = { Text("Pairing code") },
-            singleLine = true,
-            visualTransformation = PasswordVisualTransformation(),
-            modifier = Modifier.fillMaxWidth(),
-        )
-        error?.let { Text(it, color = MaterialTheme.colorScheme.error) }
-        Button(
-            onClick = { onPair(url, code) },
-            enabled = !busy && url.isNotBlank() && code.isNotBlank(),
-            modifier = Modifier.fillMaxWidth(),
-        ) {
-            Text(if (busy) "Pairing…" else "Pair now")
+        if (configured) {
+            Text(
+                "Van is waiting for its installer to finish setting this phone up. " +
+                    "There is nothing here for you to type — that is deliberate.",
+                color = MaterialTheme.colorScheme.onSurfaceVariant,
+            )
+        } else {
+            // Not "waiting": this build will never provision, and saying "waiting" would
+            // leave the owner watching a screen that cannot change.
+            Text(
+                "This build was not given the key it needs to be set up. It cannot be " +
+                    "paired from this screen, and a rebuild is what it needs.",
+                color = MaterialTheme.colorScheme.error,
+            )
         }
     }
 }

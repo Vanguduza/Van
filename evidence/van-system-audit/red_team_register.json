@@ -1,0 +1,679 @@
+{
+  "schema": "van-red-team-register/1",
+  "authority": "docs/VAN_REMOTE_BROWSER_PRODUCTION_BLUEPRINT_REV_1_5.md §38",
+  "purpose": "RB-052. §38 lists fifty release-suite scenarios and nine Rev 1.2 continuity attacks and says every finding is PASS, FAIL, BLOCKED_EXTERNAL or NOT_APPLICABLE_WITH_REASON — never `assumed`. This register is that list with a status against each, and `tools/ci/red_team_register.py` is what stops a status being a claim: every PASS must cite evidence that exists on disk, and every citation naming a test function must name one that is actually defined.",
+  "vocabulary": [
+    "PASS",
+    "FAIL",
+    "BLOCKED_EXTERNAL",
+    "NOT_APPLICABLE_WITH_REASON"
+  ],
+  "forbidden_status": "assumed",
+  "enforced_by": "tools/ci/red_team_register.py",
+  "note": "A PASS here means the repository can demonstrate the refusal, not that a live Remote Browser has been attacked and survived. The distinction is the programme's own: NOT VERIFIED is not NOT IMPLEMENTED, and neither is substituted for the other. The scenarios that need a Browser Stream Host, a carrier or a physical handset are BLOCKED_EXTERNAL and name what is missing.",
+  "scenarios": [
+    {
+      "n": 1,
+      "scenario": "replay BrowserStreamGrant",
+      "status": "PASS",
+      "evidence": [
+        "backend/tests/test_interactive_browser_session.py::TestStreamGrants::test_a_grant_is_redeemable_exactly_once"
+      ],
+      "note": "Redemption is recorded, so the second presentation of a valid token is refused rather than accepted for being well-formed."
+    },
+    {
+      "n": 2,
+      "scenario": "use grant from second device",
+      "status": "PASS",
+      "evidence": [
+        "backend/tests/test_interactive_browser_api.py::TestOwnerSurface::test_a_second_device_cannot_see_or_drive_the_session",
+        "backend/tests/test_interactive_browser_api.py::TestStreamGrantRoute::test_the_grant_is_not_for_another_device"
+      ],
+      "note": "The grant names its session and the session names its owner device; a second paired phone is answered 404 rather than 403, so it does not learn the session exists."
+    },
+    {
+      "n": 3,
+      "scenario": "expired grant",
+      "status": "PASS",
+      "evidence": [
+        "backend/tests/test_interactive_browser_session.py::TestStreamGrants::test_an_expired_grant_is_refused"
+      ],
+      "note": ""
+    },
+    {
+      "n": 4,
+      "scenario": "grant signed by retired/rotated key",
+      "status": "PASS",
+      "evidence": [
+        "backend/tests/test_interactive_browser_session.py::TestStreamGrants::test_rotation_keeps_the_previous_verifier_and_then_stops"
+      ],
+      "note": "Rotation keeps the previous verifier for a window and then stops, so a retired key fails as a refusal rather than as an outage during the cutover."
+    },
+    {
+      "n": 5,
+      "scenario": "unknown `kid`",
+      "status": "PASS",
+      "evidence": [
+        "backend/tests/test_interactive_browser_session.py::TestStreamGrants::test_an_unknown_kid_is_refused_rather_than_tried_against_every_key"
+      ],
+      "note": ""
+    },
+    {
+      "n": 6,
+      "scenario": "tampered session ID",
+      "status": "PASS",
+      "evidence": [
+        "backend/tests/test_interactive_browser_session.py::TestStreamGrants::test_a_tampered_claim_is_refused"
+      ],
+      "note": ""
+    },
+    {
+      "n": 7,
+      "scenario": "stale control generation",
+      "status": "PASS",
+      "evidence": [
+        "backend/tests/test_interactive_browser_session.py::TestControlLease::test_the_right_lease_with_the_wrong_generation_is_still_refused",
+        "services/browser_stream_host/tests/test_input_router.py::TestTheRevisionDecidesWhetherItActuates::test_a_preempted_control_generation_is_refused"
+      ],
+      "note": "Checked twice on purpose: at the Gateway when the lease is used, and again at the last possible moment before a tap becomes a click."
+    },
+    {
+      "n": 8,
+      "scenario": "agent input after owner takeover",
+      "status": "PASS",
+      "evidence": [
+        "backend/tests/test_interactive_browser_session.py::TestControlLease::test_the_agents_in_flight_input_is_invalid_the_instant_the_owner_touches"
+      ],
+      "note": ""
+    },
+    {
+      "n": 9,
+      "scenario": "owner input during pending agent mutation",
+      "status": "PASS",
+      "evidence": [
+        "backend/tests/test_browser_takeover_and_downloads.py::TestTakeControlThroughTheIngress::test_taking_control_discards_what_the_agent_had_queued",
+        "backend/tests/test_browser_takeover_and_downloads.py::TestOwnerPreemption::test_a_queued_action_is_discarded_not_merely_refused_later"
+      ],
+      "note": "Discarded rather than refused later: a queued action that is merely refused is an action that runs if anything ever stops checking."
+    },
+    {
+      "n": 10,
+      "scenario": "malformed binary input",
+      "status": "PASS",
+      "evidence": [
+        "backend/tests/test_browser_input_protocol.py",
+        "android/verification/src/test/kotlin/com/dial/van/browser/BrowserInputProtocolTest.kt"
+      ],
+      "note": ""
+    },
+    {
+      "n": 11,
+      "scenario": "oversized packet",
+      "status": "PASS",
+      "evidence": [
+        "backend/tests/test_browser_input_protocol.py",
+        "android/verification/src/test/kotlin/com/dial/van/browser/BrowserInputProtocolTest.kt"
+      ],
+      "note": "The header is fixed width and every variable field carries a 16-bit length the encoder refuses to exceed, so an oversized packet cannot be built or parsed."
+    },
+    {
+      "n": 12,
+      "scenario": "input flood",
+      "status": "PASS",
+      "evidence": [
+        "backend/tests/test_browser_flood_bounds.py::TestTheInputRateBound",
+        "services/browser_stream_host/tests/test_input_router.py::TestTheInputFloodBound"
+      ],
+      "note": "§38 item 12. Bounded at the router, where the packets are translated, because the Gateway is not in that path and cannot count what it never sees."
+    },
+    {
+      "n": 13,
+      "scenario": "fast MOVE before reliable DOWN",
+      "status": "PASS",
+      "evidence": [
+        "backend/tests/test_browser_input_protocol.py"
+      ],
+      "note": "The pointer state machine refuses a MOVE with no open gesture rather than synthesising one."
+    },
+    {
+      "n": 14,
+      "scenario": "fast MOVE after reliable UP",
+      "status": "PASS",
+      "evidence": [
+        "backend/tests/test_browser_input_protocol.py"
+      ],
+      "note": ""
+    },
+    {
+      "n": 15,
+      "scenario": "lost unreliable MOVE",
+      "status": "PASS",
+      "evidence": [
+        "backend/tests/test_browser_input_protocol.py"
+      ],
+      "note": "A gap in the fast sequence is a dropped MOVE, not a protocol fault: that is why the three sequence spaces are separate."
+    },
+    {
+      "n": 16,
+      "scenario": "duplicate gesture edge",
+      "status": "PASS",
+      "evidence": [
+        "backend/tests/test_browser_input_protocol.py",
+        "android/verification/src/test/kotlin/com/dial/van/browser/BrowserInputProtocolTest.kt"
+      ],
+      "note": "§8.3 sends every edge on both channels; both copies carry one edge id so the server can tell one finger from two."
+    },
+    {
+      "n": 17,
+      "scenario": "tab flood",
+      "status": "PASS",
+      "evidence": [
+        "backend/tests/test_browser_flood_bounds.py::TestTheTabFloodBound"
+      ],
+      "note": "§38 item 17. The new tab is refused rather than an old one closed, and navigation inside an existing tab is never counted."
+    },
+    {
+      "n": 18,
+      "scenario": "download flood",
+      "status": "PASS",
+      "evidence": [
+        "backend/tests/test_browser_flood_bounds.py::TestTheDownloadFloodBound"
+      ],
+      "note": "§38 item 18. Counted over the non-terminal states, so an owner who finishes a hundred downloads in an afternoon never reaches it."
+    },
+    {
+      "n": 19,
+      "scenario": "navigation to localhost",
+      "status": "PASS",
+      "evidence": [
+        "backend/tests/test_browser_escalation_boundary.py::test_a_local_target_can_never_become_a_question",
+        "android/verification/src/test/kotlin/com/dial/van/browser/BrowserOmniboxTest.kt"
+      ],
+      "note": ""
+    },
+    {
+      "n": 20,
+      "scenario": "navigation to `169.254.169.254`",
+      "status": "PASS",
+      "evidence": [
+        "backend/tests/test_browser_escalation_boundary.py::test_a_local_target_can_never_become_a_question"
+      ],
+      "note": "The cloud metadata address. Refused as a target rather than surfaced to the owner as a question, because a question is a way to get a yes."
+    },
+    {
+      "n": 21,
+      "scenario": "unapproved private VCN target",
+      "status": "PASS",
+      "evidence": [
+        "backend/tests/test_browser_escalation_boundary.py::test_a_local_target_can_never_become_a_question"
+      ],
+      "note": ""
+    },
+    {
+      "n": 22,
+      "scenario": "`file://` access",
+      "status": "PASS",
+      "evidence": [
+        "android/verification/src/test/kotlin/com/dial/van/browser/BrowserOmniboxTest.kt"
+      ],
+      "note": "Refused at the omnibox by scheme, and the input router has no mapping that could navigate at all (§17.2)."
+    },
+    {
+      "n": 23,
+      "scenario": "privileged `chrome://`",
+      "status": "PASS",
+      "evidence": [
+        "android/verification/src/test/kotlin/com/dial/van/browser/BrowserOmniboxTest.kt"
+      ],
+      "note": ""
+    },
+    {
+      "n": 24,
+      "scenario": "DNS rebinding",
+      "status": "BLOCKED_EXTERNAL",
+      "evidence": [],
+      "blocked_by": "a live resolver and a host that answers twice; nothing in this repository resolves a name, so the attack has no surface here to be run against",
+      "note": "The repository-side half — that a resolved private address is refused however it was reached — is covered by the escalation boundary above. What cannot be shown here is that the second resolution is caught, which needs a Browser Stream Host with a real network stack (RB-010)."
+    },
+    {
+      "n": 25,
+      "scenario": "page prompt injection",
+      "status": "PASS",
+      "evidence": [
+        "backend/tests/test_browser_injection_containment.py::test_the_canary_corpus_is_graded_as_written",
+        "backend/tests/test_browser_injection_containment.py::test_confirmed_injection_is_reachable_at_all"
+      ],
+      "note": ""
+    },
+    {
+      "n": 26,
+      "scenario": "page asks agent to reveal cookies",
+      "status": "PASS",
+      "evidence": [
+        "backend/tests/test_browser_takeover_and_downloads.py::TestWhatTheAgentIsGiven::test_no_credential_reaches_the_agent",
+        "backend/tests/test_browser_takeover_and_downloads.py::TestWhatTheAgentIsGiven::test_a_caller_cannot_attach_a_credential_through_a_passthrough"
+      ],
+      "note": "The agent's scope is nine fields and none of them is a credential, so there is nothing for the page to ask for."
+    },
+    {
+      "n": 27,
+      "scenario": "page asks agent to raise action class",
+      "status": "PASS",
+      "evidence": [
+        "backend/tests/test_browser_escalation_boundary.py::test_classify_boundary",
+        "backend/tests/test_browser_escalation_boundary.py::test_plausible_hostname_rejects_prompt_text"
+      ],
+      "note": ""
+    },
+    {
+      "n": 28,
+      "scenario": "password appears in logs",
+      "status": "PASS",
+      "evidence": [
+        "backend/tests/test_browser_takeover_and_downloads.py::TestWhatTheAgentIsGiven::test_no_credential_reaches_the_agent",
+        "tests/contracts/test_owner_device_provisioning.py::test_the_tool_never_writes_the_credential_to_disk"
+      ],
+      "note": "Nothing that could carry a password is in the agent's scope, and the one credential the installer handles is passed once and never written down."
+    },
+    {
+      "n": 29,
+      "scenario": "cookies appear in evidence",
+      "status": "PASS",
+      "evidence": [
+        "backend/tests/test_automation_security_contracts.py::test_browser_evidence_refuses_cookie_material",
+        "backend/tests/test_browser_fabric.py::test_evidence_is_digest_only"
+      ],
+      "note": ""
+    },
+    {
+      "n": 30,
+      "scenario": "OTP appears in evidence",
+      "status": "PASS",
+      "evidence": [
+        "backend/tests/test_automation_security_contracts.py::test_evidence_containing_secrets_is_refused"
+      ],
+      "note": ""
+    },
+    {
+      "n": 31,
+      "scenario": "Browser Runtime attempts internal-control endpoint",
+      "status": "PASS",
+      "evidence": [
+        "backend/tests/test_interactive_browser_api.py::TestTheClassifierAgreesWithTheRoutes::test_the_rest_of_the_browser_surface_is_still_hermes_only"
+      ],
+      "note": "P0-SEC-001's fall-through, closed: a wrong or under-scoped control credential is a terminal refusal rather than falling back to device authentication."
+    },
+    {
+      "n": 32,
+      "scenario": "Stagehand exceeds step budget",
+      "status": "PASS",
+      "evidence": [
+        "backend/tests/test_browser_takeover_and_downloads.py::TestOwnerPreemption::test_a_budget_that_runs_out_stops_the_agent",
+        "backend/tests/test_browser_takeover_and_downloads.py::TestOwnerPreemption::test_the_budget_is_spent_by_the_service_not_the_caller"
+      ],
+      "note": "Spent by the service, not reported by the caller: a budget an agent decrements itself is not a budget."
+    },
+    {
+      "n": 33,
+      "scenario": "Stagehand continues after control lease revocation",
+      "status": "PASS",
+      "evidence": [
+        "services/browser_control_agent/tests/test_control_authority.py"
+      ],
+      "note": ""
+    },
+    {
+      "n": 34,
+      "scenario": "payment attempt",
+      "status": "PASS",
+      "evidence": [
+        "backend/tests/test_browser_escalation_boundary.py::test_classify_boundary"
+      ],
+      "note": "Classified as an action class the browser path cannot reach; an A4 needs the owner's approval and no page-originated flow can supply one."
+    },
+    {
+      "n": 35,
+      "scenario": "trading execution attempt outside VATI",
+      "status": "PASS",
+      "evidence": [
+        "backend/tests/test_trading_api.py"
+      ],
+      "note": "Execution is the trading path's and is gated on a device-signed owner approval, so a browser session has no route to it whatever a page says."
+    },
+    {
+      "n": 36,
+      "scenario": "Chromium renderer crash",
+      "status": "BLOCKED_EXTERNAL",
+      "evidence": [],
+      "blocked_by": "a Chromium to crash (RB-010). The device's half — that a stream which stops is reported as a frozen picture rather than as a working one — is covered by android/verification/src/test/kotlin/com/dial/van/telemetry/BrowserStreamTelemetryTest.kt",
+      "note": "`browser_last_frame_age_ms` is the number behind a frozen picture and it is produced and tested here; what the Stream Host does when its renderer dies is not."
+    },
+    {
+      "n": 37,
+      "scenario": "Browser Stream Runtime restart",
+      "status": "BLOCKED_EXTERNAL",
+      "evidence": [],
+      "blocked_by": "a deployed Browser Stream Host (RB-010)",
+      "note": "The Android half is covered: BrowserProcessRecovery refuses to produce an owner-visible state from a restored record it cannot reconcile."
+    },
+    {
+      "n": 38,
+      "scenario": "Gateway restart",
+      "status": "PASS",
+      "evidence": [
+        "backend/tests/test_van_hermes_session.py",
+        "backend/tests/test_session_transport_api.py::TestTheEpochAResumeGrantsIsTheEpochTheNextEnvelopeMustCarry"
+      ],
+      "note": "A restart is a resume from the device's side, and the epoch the resume grants is the one the next envelope must carry — P0-SESS-001."
+    },
+    {
+      "n": 39,
+      "scenario": "Hermes unavailable",
+      "status": "PASS",
+      "evidence": [
+        "backend/tests/test_extra_apis.py::test_health_ok_false_when_hermes_offline"
+      ],
+      "note": "Reported as `ok: false` with the reason rather than as a generic failure, so an operator is told which part of VAN is not answering. A health check that stayed green with Hermes down would be the honest-looking lie this programme removes."
+    },
+    {
+      "n": 40,
+      "scenario": "mobile network loss",
+      "status": "BLOCKED_EXTERNAL",
+      "evidence": [],
+      "blocked_by": "a real carrier handover. The decisions are executed: android/verification/src/test/kotlin/com/dial/van/session/TransportSupervisorTest.kt and android/verification/src/test/kotlin/com/dial/van/session/DurableOutboxTest.kt cover what VAN does with no path, including that an A4 is never stored across the outage",
+      "note": "What cannot be shown here is the timing an owner actually experiences, which is `session_failover_ms` and is measured on the device (§20.16)."
+    },
+    {
+      "n": 41,
+      "scenario": "packet reordering",
+      "status": "PASS",
+      "evidence": [
+        "backend/tests/test_browser_input_protocol.py"
+      ],
+      "note": "A reordered MOVE is dropped by its per-gesture motion sequence rather than treated as loss; that is why there are three sequence spaces and not one."
+    },
+    {
+      "n": 42,
+      "scenario": "high jitter",
+      "status": "PASS",
+      "evidence": [
+        "backend/tests/test_browser_quality_api.py::TestTheControllerOutlivesTheRequest"
+      ],
+      "note": "Jitter lowers the rung, and §27.4's hysteresis means it does not oscillate the owner's badge while it does."
+    },
+    {
+      "n": 43,
+      "scenario": "TURN fallback",
+      "status": "BLOCKED_EXTERNAL",
+      "evidence": [],
+      "blocked_by": "a TURN server and a network that needs one (RB-010/RB-016)",
+      "note": "The ICE configuration the Gateway hands out is tested; whether a relay candidate is selected is a property of a live network."
+    },
+    {
+      "n": 44,
+      "scenario": "app process death",
+      "status": "PASS",
+      "evidence": [
+        "android/verification/src/test/kotlin/com/dial/van/browser/BrowserProcessRecoveryTest.kt"
+      ],
+      "note": "`restore` cannot produce an owner-visible state and `reconcile` cannot see the persisted record, so a restored session cannot claim to be live."
+    },
+    {
+      "n": 45,
+      "scenario": "device reboot",
+      "status": "BLOCKED_EXTERNAL",
+      "evidence": [],
+      "blocked_by": "a physical device (Gate 14)",
+      "note": "The persisted-state decisions are executed in the harness; what a reboot does to the Keystore and the app's own lifecycle is not observable here."
+    },
+    {
+      "n": 46,
+      "scenario": "stale session resume",
+      "status": "PASS",
+      "evidence": [
+        "backend/tests/test_van_hermes_session.py",
+        "backend/tests/test_session_transport_api.py::TestTheFailoverCounterSaysWhatTheGatewayCanSee::test_a_refused_resume_is_counted_as_its_refusal"
+      ],
+      "note": "A resume naming an older session epoch has missed a deliberate invalidation and is refused rather than resurrecting authority the Gateway has withdrawn."
+    },
+    {
+      "n": 47,
+      "scenario": "profile lease expires while pixels still flow",
+      "status": "PASS",
+      "evidence": [
+        "backend/tests/test_interactive_browser_session.py::TestRenewableProfileLease::test_an_expired_lease_cannot_be_renewed_back_to_life",
+        "backend/tests/test_interactive_browser_session.py::TestRenewableProfileLease::test_assert_lease_active_refuses_at_the_expiry_instant"
+      ],
+      "note": "Refused at the expiry instant rather than after it: the boundary case is the one a long-running stream actually hits."
+    },
+    {
+      "n": 48,
+      "scenario": "profile lease renewal races a session close",
+      "status": "PASS",
+      "evidence": [
+        "backend/tests/test_interactive_browser_session.py::TestRenewableProfileLease::test_renewal_extends_exclusivity_without_moving_the_fence",
+        "backend/tests/test_interactive_browser_session.py::TestRenewableProfileLease::test_a_stale_generation_cannot_renew"
+      ],
+      "note": "Renewal extends the lease without moving the generation, so a renewal that lands after a close cannot revive exclusivity the close gave up."
+    },
+    {
+      "n": 49,
+      "scenario": "metered-network entry during active high-quality stream",
+      "status": "PASS",
+      "evidence": [
+        "backend/tests/test_browser_quality_api.py::TestTheVerdictIsTheGatewaysToMake::test_a_metered_link_meeting_its_own_profile_is_not_certified"
+      ],
+      "note": "Switching to a metered network lowers the ceiling under the session, and §26.2's rule is that the session is not *failed* for it — it is judged against the metered profile and loses its certification."
+    },
+    {
+      "n": 50,
+      "scenario": "canary origin cannot reach blocked metadata/internal targets",
+      "status": "BLOCKED_EXTERNAL",
+      "evidence": [],
+      "blocked_by": "a Browser Stream Host to run the canaries against (RB-010)",
+      "note": "tools/certification/certify_browser_stream_host.py carries the three canaries and records readiness evidence for exactly one of them; the fence canary is the one this scenario needs and it has no host to run on."
+    },
+    {
+      "n": 51,
+      "scenario": "old path sends command after new path_epoch committed",
+      "status": "PASS",
+      "evidence": [
+        "backend/tests/test_session_transport_api.py::TestTheEpochAResumeGrantsIsTheEpochTheNextEnvelopeMustCarry::test_an_envelope_carrying_the_open_epoch_after_a_resume_is_fenced",
+        "android/verification/src/test/kotlin/com/dial/van/session/WarmStandbyTest.kt"
+      ],
+      "note": "The fence, and the client-side transaction that stops two paths believing they are both authoritative."
+    },
+    {
+      "n": 52,
+      "scenario": "two transports race same command",
+      "status": "PASS",
+      "evidence": [
+        "backend/tests/test_van_hermes_session.py"
+      ],
+      "note": "§20.12's effectively-once admission: the idempotency key is minted once and carried through every retry and failover, so the second arrival is recognised."
+    },
+    {
+      "n": 53,
+      "scenario": "fallback receives replay before live event",
+      "status": "PASS",
+      "evidence": [
+        "backend/tests/test_van_hermes_session.py"
+      ],
+      "note": "§20.13 — realtime push and REST replay are two carriers for one authority and share one cursor."
+    },
+    {
+      "n": 54,
+      "scenario": "malicious/invalid session resume cursor",
+      "status": "PASS",
+      "evidence": [
+        "backend/tests/test_van_hermes_session.py",
+        "android/verification/src/test/kotlin/com/dial/van/session/SessionEnvelopeTest.kt"
+      ],
+      "note": "The Gateway's cursor wins. A client cursor ahead of the server's is not adopted."
+    },
+    {
+      "n": 55,
+      "scenario": "session resume from different device",
+      "status": "PASS",
+      "evidence": [
+        "backend/tests/test_van_hermes_session.py"
+      ],
+      "note": "Refused as the wrong device rather than as an unknown session, so a stolen session id plus a valid device token does not resume."
+    },
+    {
+      "n": 56,
+      "scenario": "replayed session-open proof",
+      "status": "BLOCKED_EXTERNAL",
+      "evidence": [],
+      "blocked_by": "a hardware Keystore to produce a real device proof (§0D.3, Gate 14)",
+      "note": "The proof's canonicalisation and its nonce handling are executed in the harness (android/verification/src/test/kotlin/com/dial/van/security/DeviceProofCanonicalTest.kt) and cross-checked against the Gateway's own vectors; what cannot be shown here is a replay against a real key."
+    },
+    {
+      "n": 57,
+      "scenario": "tampered response segment index",
+      "status": "PASS",
+      "evidence": [
+        "backend/tests/test_voice_speech_stream.py"
+      ],
+      "note": ""
+    },
+    {
+      "n": 58,
+      "scenario": "duplicate speech segment with different digest",
+      "status": "PASS",
+      "evidence": [
+        "backend/tests/test_voice_speech_stream.py"
+      ],
+      "note": "Two segments claiming one index with different content is not a duplicate to be deduplicated; it is a conflict, and it is refused."
+    },
+    {
+      "n": 59,
+      "scenario": "speech segment arrives after owner barge-in",
+      "status": "PASS",
+      "evidence": [
+        "backend/tests/test_voice_speech_stream.py",
+        "android/verification/src/test/kotlin/com/dial/van/voice/OfflineVoiceTest.kt"
+      ],
+      "note": ""
+    },
+    {
+      "n": 60,
+      "scenario": "stale queued A4 command after reconnect",
+      "status": "PASS",
+      "evidence": [
+        "android/verification/src/test/kotlin/com/dial/van/session/DurableOutboxTest.kt"
+      ],
+      "note": "§20.14's last sentence, and the reason `DurableOutbox.admit` returns null for an A4 rather than storing one with a flag: the only way to keep an irreversible command across an outage is to not call the classifier."
+    },
+    {
+      "n": 61,
+      "scenario": "all route descriptors point to same physical endpoint",
+      "status": "PASS",
+      "evidence": [
+        "android/verification/src/test/kotlin/com/dial/van/session/TransportSupervisorTest.kt",
+        "backend/tests/test_van_hermes_session.py"
+      ],
+      "note": "§0B by name. Two carriers over one ingress report SINGLE_PATH, not MULTIPATH_HEALTHY, and the owner-readable string says \"Connected\" rather than \"Connected, with a spare route\" — the honest answer being the unflattering one. `WarmStandbyPolicy` answers COLD for the same reason."
+    },
+    {
+      "n": 62,
+      "scenario": "voice asset manifest tampered",
+      "status": "PASS",
+      "evidence": [
+        "android/verification/src/test/kotlin/com/dial/van/voice/OfflineVoiceTest.kt"
+      ],
+      "note": "A substituted model decides what VAN believes it heard, so the manifest's digests are checked rather than its file names."
+    },
+    {
+      "n": 63,
+      "scenario": "ASR model missing",
+      "status": "PASS",
+      "evidence": [
+        "android/verification/src/test/kotlin/com/dial/van/voice/OfflineVoiceTest.kt"
+      ],
+      "note": "§21.4's property: the five capabilities fail independently. A bundle with a working voice and no ASR model is a VAN that can speak and cannot hear, and \"voice is unavailable\" is the wrong sentence for it."
+    },
+    {
+      "n": 64,
+      "scenario": "TTS model missing",
+      "status": "PASS",
+      "evidence": [
+        "android/verification/src/test/kotlin/com/dial/van/voice/OfflineVoiceTest.kt"
+      ]
+    },
+    {
+      "n": 65,
+      "scenario": "Android system TTS loses offline voice data",
+      "status": "BLOCKED_EXTERNAL",
+      "evidence": [],
+      "blocked_by": "an Android system TTS engine that can be made to drop its downloaded voice data; the engine is the platform's and this repository has no way to put it into that state",
+      "note": "The decision that depends on it is executed: `LocalTtsRouter` routes to what is actually present and reports the absence rather than speaking silently."
+    },
+    {
+      "n": 66,
+      "scenario": "browser audio refuses duck/focus",
+      "status": "PASS",
+      "evidence": [
+        "android/verification/src/test/kotlin/com/dial/van/voice/VoiceAudioTest.kt"
+      ],
+      "note": "VAN pauses page audio rather than ducking under it: speaking under a video voiceover is unintelligible, which is the same as not answering."
+    },
+    {
+      "scenario": "a reconnect silently discards the owner's unacknowledged command",
+      "status": "PASS",
+      "evidence": [
+        "android/verification/src/test/kotlin/com/dial/van/session/SessionReconciliationTest.kt::a command the Gateway has never heard of is sent again",
+        "backend/tests/test_session_transport_api.py::TestWhatAResumeSaysAboutWhatTheClientLost::test_a_message_the_gateway_has_never_seen_is_reported_unknown"
+      ],
+      "note": "This was the live behaviour, not a hypothetical. The phone asked by message id, the Gateway answered by command id, so every answer was `UNKNOWN` — and the phone then dropped every key it had asked about. `UNKNOWN` is the one answer that means resend. Both halves now come from one function, and silence is treated the same as `UNKNOWN` so the Gateway's fifty-id cap cannot lose the fifty-first command.",
+      "n": 67
+    },
+    {
+      "scenario": "a kill between the socket write and the durable forget delivers a command twice",
+      "status": "PASS",
+      "evidence": [
+        "android/verification/src/test/kotlin/com/dial/van/session/SessionOutboxDurabilityTest.kt::a command killed between the send and the forget is not delivered twice"
+      ],
+      "note": "The attempt counter is stamped on failure, not on send, so the restored record carries no hint that it ever left. The Gateway is the only thing that knows, and the resume asks it about the restored outbox in full rather than only the entries with an attempt recorded — which would have missed precisely this kill.",
+      "n": 68
+    },
+    {
+      "scenario": "an owner instruction is acknowledged, never performed, and cannot be resent",
+      "status": "PASS",
+      "evidence": [
+        "backend/tests/test_van_hermes_session.py::TestSessionRouter::test_a_kind_with_no_delegate_is_not_written_into_the_admission_table",
+        "backend/tests/test_session_transport_api.py::TestTheSessionCarriesEveryKindItClaimsTo::test_a_refused_message_does_not_take_its_idempotency_key_with_it"
+      ],
+      "note": "§20.12's table answers a resubmission with what happened the first time. A row with no result promises that about nothing, so a refused message that kept its key was answered ALREADY_KNOWN with a null result on every retry — which reads as success. The delegate is now resolved before admission, and a refusal or an unexpected failure un-records the message.",
+      "n": 69
+    },
+    {
+      "scenario": "a process death restores work into a session the owner's commands were abandoned with",
+      "status": "PASS",
+      "evidence": [
+        "android/verification/src/test/kotlin/com/dial/van/session/SessionOutboxDurabilityTest.kt::a replaced session drops its work from the disk and tells the owner",
+        "backend/tests/test_session_transport_api.py::TestWhatAResumeSaysAboutWhatTheClientLost::test_the_answer_is_scoped_to_the_session_that_asked"
+      ],
+      "note": "Two doors into the same room. `SESSION_REPLACED` cleared the in-memory outbox and left the records on disk, so the next start flushed them into the new session; and a resume answer that ignored the session id would tell the new session it already holds the old one's work. Both are closed, and the dropped commands are now reported to the owner rather than vanishing.",
+      "n": 70
+    },
+    {
+      "scenario": "an owner command ends up silently absent after a process death",
+      "status": "PASS",
+      "evidence": [
+        "android/verification/src/test/kotlin/com/dial/van/session/CommandLifecycleKillSweepTest.kt::no kill point leaves a command silently absent"
+      ],
+      "note": "Asked for by external review, and the right shape: each link of the chain had its own test, and the defect C15 found was two correct links cancelling each other out. The sweep kills at every boundary — store, send, acknowledge, reconcile, remove — across whether the Gateway received it and whether the phone learned that it did, and asserts the same thing each time: delivered once, still held, or given up on with the owner told. Never gone with nothing said.",
+      "n": 71
+    },
+    {
+      "scenario": "a durable write blocks the thread the owner is looking at",
+      "status": "PASS",
+      "evidence": [
+        "tests/contracts/test_encrypted_queue_writes_are_off_the_main_thread.py::test_every_file_that_writes_to_the_queue_dispatches_it_off_the_caller"
+      ],
+      "note": "The cost of making the queue durable. `commit()` blocks until the bytes are down, which is right for the outbox and turned three main-thread Android entry points into synchronous encrypted disk writers. Raised by review asking where the write actually runs rather than accepting that durability had improved.",
+      "n": 72
+    }
+  ]
+}

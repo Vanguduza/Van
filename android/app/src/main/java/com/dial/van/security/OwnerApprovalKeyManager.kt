@@ -6,6 +6,7 @@ import android.security.keystore.KeyProperties
 import android.util.Base64
 import java.security.KeyPairGenerator
 import java.security.KeyStore
+import java.security.MessageDigest
 import java.security.PrivateKey
 import java.security.Signature
 import java.security.spec.ECGenParameterSpec
@@ -57,6 +58,29 @@ class OwnerApprovalKeyManager {
         val body = encoded.chunked(64).joinToString("\n")
         return "-----BEGIN PUBLIC KEY-----\n$body\n-----END PUBLIC KEY-----\n"
     }
+
+    fun ownerAuthorityKeyId(): String {
+        ensureKey()
+        val certificate = keyStore.getCertificate(KEY_ALIAS)
+            ?: error("owner_approval_certificate_missing")
+        val digest = MessageDigest.getInstance("SHA-256")
+            .digest(certificate.publicKey.encoded)
+            .joinToString("") { byte -> "%02x".format(byte.toInt() and 0xff) }
+        return "device-" + digest.take(24)
+    }
+
+    fun prepareOwnerAuthority(
+        act: String,
+        subject: String,
+        issuedAtUnix: Long = System.currentTimeMillis() / 1000L,
+        lifetimeSeconds: Long = OwnerAuthorityToken.DEFAULT_LIFETIME_SECONDS,
+    ): OwnerAuthorityToken.Prepared = OwnerAuthorityToken.prepare(
+        act = act,
+        subject = subject,
+        keyId = ownerAuthorityKeyId(),
+        issuedAtUnix = issuedAtUnix,
+        lifetimeSeconds = lifetimeSeconds,
+    )
 
     fun newSigningSignature(): Signature {
         ensureKey()

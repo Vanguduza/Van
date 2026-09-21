@@ -1,0 +1,103 @@
+{
+  "$note": "Cross-language vectors for the two byte formats VAN implements twice: the canonical JSON the gateway signs and digests, and the device-proof signing input. Generated from the Python implementation, which is the authority, and asserted against it by tests/contracts/test_cross_language_vectors.py so the file cannot rot. The Kotlin harness reads the same file, which is the point: a text comparison of two source files would not have caught a non-ASCII escape.",
+  "canonical_json": [
+    {
+      "payload": {},
+      "canonical": "{}",
+      "sha256": "44136fa355b3678a1146ad16f7e8649e94fb4fc21fe77e8310c060f61caaff8a"
+    },
+    {
+      "payload": {
+        "b": 1,
+        "a": 2
+      },
+      "canonical": "{\"a\":2,\"b\":1}",
+      "sha256": "d3626ac30a87e6f7a6428233b3c68299976865fa5508e4267c5415c76af7a772"
+    },
+    {
+      "payload": {
+        "text": "naïve — 東京",
+        "emoji": "😀"
+      },
+      "canonical": "{\"emoji\":\"\\ud83d\\ude00\",\"text\":\"na\\u00efve \\u2014 \\u6771\\u4eac\"}",
+      "sha256": "7e890c8aefa34d50e77795a1575b4428563fd17b405e944607074dd2fbfb328c"
+    },
+    {
+      "payload": {
+        "nested": {
+          "z": [
+            1,
+            2,
+            {
+              "k": "v"
+            }
+          ],
+          "a": null
+        },
+        "flag": true,
+        "off": false
+      },
+      "canonical": "{\"flag\":true,\"nested\":{\"a\":null,\"z\":[1,2,{\"k\":\"v\"}]},\"off\":false}",
+      "sha256": "62b747c23d297a2ad204ee98c1eb623d2fbbfcb977418bc624c7f9d686f55b00"
+    },
+    {
+      "payload": {
+        "escapes": "quote \" backslash \\ newline \n tab \t control \u0001"
+      },
+      "canonical": "{\"escapes\":\"quote \\\" backslash \\\\ newline \\n tab \\t control \\u0001\"}",
+      "sha256": "4e23b95f8054a45777b798e14f43e0e625dc796a333563b70814c35e8542ee93"
+    },
+    {
+      "payload": {
+        "numbers": [
+          0,
+          -1,
+          2147483648,
+          1.5
+        ]
+      },
+      "canonical": "{\"numbers\":[0,-1,2147483648,1.5]}",
+      "sha256": "613a76c97e7d24ccadab8659fb1be0e04d86e209be5d52c967e025dc52919dd0"
+    },
+    {
+      "payload": {
+        "alias": "authenticated_owner",
+        "viewport": {
+          "width": 1080,
+          "height": 2016
+        }
+      },
+      "canonical": "{\"alias\":\"authenticated_owner\",\"viewport\":{\"height\":2016,\"width\":1080}}",
+      "sha256": "8b10ee682a1da63a5b0289c015ac1dfdf472abdabeed965a9677b19c1026f7b3"
+    }
+  ],
+  "device_proof": [
+    {
+      "method": "POST",
+      "path": "/v1/browser/interactive-sessions",
+      "device_id": "s24-ultra-owner",
+      "issued_at_ms": 1758326400000,
+      "body_utf8": "",
+      "body_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "signing_input_sha256": "b6d478427f98513a6280a8b97a67a61c04539dee48cdd8cd808663477fb882d1"
+    },
+    {
+      "method": "post",
+      "path": "/v1/browser/interactive-sessions/ibs_1/take-control",
+      "device_id": "dev-1",
+      "issued_at_ms": 1,
+      "body_utf8": "{}",
+      "body_sha256": "44136fa355b3678a1146ad16f7e8649e94fb4fc21fe77e8310c060f61caaff8a",
+      "signing_input_sha256": "f4c74afe83706d58106d0eb627bf0f247da3207bb5f56549f0f93c010c39c8c4"
+    },
+    {
+      "method": "DELETE",
+      "path": "/v1/session/close",
+      "device_id": "dev-2",
+      "issued_at_ms": 1758326400123,
+      "body_utf8": "naïve",
+      "body_sha256": "f86fd89de87a848a45bfe77708d91a5d2ff48b8e4a4b98af5165af82692f8928",
+      "signing_input_sha256": "5615eeac43d17221f5951ec1c8b16716ee3fc66e0e1211c3b6e3472f97727d26"
+    }
+  ]
+}

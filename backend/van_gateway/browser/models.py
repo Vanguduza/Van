@@ -154,17 +154,55 @@ class BrowserTask(BaseModel):
     completed_at_ms: int | None = None
 
 
+class ProfileLeaseHolderKind(str, Enum):
+    """§5.3 — a profile lease is held either by a task or by an interactive session.
+
+    It lives beside PageLease rather than in interactive_models because the lease is the
+    older contract: the interactive layer imports from here, and putting the enum the other
+    way round would make the Browser Fabric depend on the feature built on top of it.
+    """
+
+    TASK = "TASK"
+    INTERACTIVE_SESSION = "INTERACTIVE_SESSION"
+
+
 class PageLease(BaseModel):
-    """§183 — one holder at a time, time-bounded, so tasks cannot collide on a profile."""
+    """§183 — one holder at a time, time-bounded, so tasks cannot collide on a profile.
+
+    Rev 1.5 §5.3 evolves it rather than forking it. It was task-shaped and non-renewable:
+    one ``task_id``, five minutes, no way to extend. An interactive session is held by a
+    person for as long as they are looking at the page, so a five-minute hard stop would end
+    the owner's browsing mid-scroll, and a second lease type would mean two answers to "who
+    holds this profile".
+
+    ``task_id`` is kept for the existing task consumers and is now optional. ``holder_kind``
+    and ``holder_id`` are the general form; for a task they carry TASK and the task id.
+
+    ``generation`` is the fence. A profile taken again has a higher generation, so work
+    holding the previous one is refused rather than applied to whoever holds the profile
+    now. Renewal deliberately does **not** increment it: renewing extends exclusivity, and
+    changing the fence on every heartbeat would make the fence meaningless.
+    """
 
     lease_id: str
     profile_alias: str
-    task_id: str
+
+    holder_kind: ProfileLeaseHolderKind = ProfileLeaseHolderKind.TASK
+    holder_id: str = ""
+
+    #: Compatibility field for the existing task consumers only (§5.3).
+    task_id: str | None = None
+
     acquired_at_ms: int
     expires_at_ms: int
+    generation: int = 0
 
     def active(self, now_ms: int) -> bool:
         return now_ms < self.expires_at_ms
+
+    def renewal_due(self, now_ms: int, *, threshold_ms: int = 80_000) -> bool:
+        """§5.3's normative timing: renew when less than 80 seconds remain on a 120s lease."""
+        return (self.expires_at_ms - now_ms) < threshold_ms
 
 
 class InjectionAssessment(str, Enum):
