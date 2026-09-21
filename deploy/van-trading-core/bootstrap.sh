@@ -122,11 +122,13 @@ fi
 if (( DRY_RUN )); then
   plan "install full pinned Desktop Commander for ubuntu on van-trading-core"
   plan "install bounded GitHub/OCI recovery command"
+  plan "install separately authenticated ChatGPT/Codex SPMRF review worker"
 else
   bash "$APP/deploy/van-trading-core/install-full-desktop-commander.sh"
   bash "$APP/deploy/van-trading-core/install-github-recovery.sh"
+  bash "$APP/deploy/van-trading-core/spmrf/install-spmrf-review-worker.sh"
 fi
-ok "full Desktop Commander subordinate + recovery command"
+ok "full Desktop Commander subordinate + recovery command + SPMRF review worker"
 
 # ---------------------------------------------------------------- python venv
 if [[ ! -x "$VENV/bin/python" ]]; then run sudo -u vati python3.12 -m venv "$VENV"; ok "venv (python3.12)"; else skip "venv present"; fi
@@ -252,7 +254,8 @@ echo "$REPORT" | jq .
 echo "[bootstrap] next: 1) copy $SECRETS/pki/mt5-worker.{crt,key} + ca.crt to the Windows worker and run windows/mt5_worker/install.ps1"
 echo "[bootstrap]       2) sudo -u vati $VENV/bin/python -m vati accounts add --registry $CONFIG/accounts.json --alias <alias> --broker MT5|DERIV|PAPER ..."
 echo "[bootstrap]       3) write $CONFIG/sessions/<alias>.json and: systemctl enable --now vati-session@<alias>"
-echo "[bootstrap]       4) on dial-hermes-control: bash deploy/van-trading-core/hermes/install-full-commander-transport.sh"
-echo "[bootstrap]       5) on dial-hermes-control: bash deploy/van-trading-core/hermes/register-commander-mcp.sh && bash deploy/van-trading-core/hermes/register-full-desktop-commander-mcp.sh"
-echo "[bootstrap]       6) on dial-hermes-control: bash deploy/van-trading-core/hermes/qualify-full-desktop-commander-mcp.sh"
-echo "[bootstrap]       7) bash deploy/van-trading-core/qualify.sh"
+echo "[bootstrap]       4) as ubuntu on van-trading-core, if reported PAIRING_REQUIRED: ~/.local/share/van/spmrf/codex/node_modules/.bin/codex login"
+echo "[bootstrap]       5) on dial-hermes-control: bash deploy/van-trading-core/hermes/install-full-commander-transport.sh"
+echo "[bootstrap]       6) on dial-hermes-control: bash deploy/van-trading-core/hermes/register-commander-mcp.sh && bash deploy/van-trading-core/hermes/register-full-desktop-commander-mcp.sh"
+echo "[bootstrap]       7) on dial-hermes-control: bash deploy/van-trading-core/hermes/qualify-full-desktop-commander-mcp.sh"
+echo "[bootstrap]       8) bash deploy/van-trading-core/qualify.sh"
