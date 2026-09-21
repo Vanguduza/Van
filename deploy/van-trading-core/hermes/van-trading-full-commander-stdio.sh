@@ -2,7 +2,7 @@
 set -euo pipefail
 
 HOST="${VAN_TRADING_COMMANDER_HOST:-van-trading-core}"
-USER_NAME="${VAN_TRADING_COMMANDER_USER:-ubuntu}"
+USER_NAME="${VAN_TRADING_COMMANDER_USER:-vancommander}"
 KEY="${VAN_TRADING_COMMANDER_SSH_KEY:-$HOME/.ssh/van-trading-commander}"
 KNOWN_HOSTS="${VAN_TRADING_COMMANDER_KNOWN_HOSTS:-$HOME/.ssh/known_hosts}"
 
