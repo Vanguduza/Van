@@ -22,6 +22,14 @@ def oci(*args, check=True):
     p=run([OCI,*args,'--auth','instance_principal','--output','json'],check=check)
     return json.loads(p.stdout) if p.returncode==0 and p.stdout.strip() else None
 
+def resolve_repository_sha():
+    """Resolve the selected branch once so provisioning cannot silently chase a moving ref."""
+    p=run(['git','ls-remote',REPO,f'refs/heads/{BRANCH}'])
+    parts=p.stdout.strip().split()
+    if len(parts) < 2 or not re.fullmatch(r'[0-9a-f]{40}',parts[0]):
+        raise RuntimeError(f'cannot resolve exact repository SHA for branch {BRANCH!r}')
+    return parts[0]
+
 def imds():
     r=urllib.request.Request('http://169.254.169.254/opc/v2/instance/',headers={'Authorization':'Bearer Oracle'})
     return json.load(urllib.request.urlopen(r,timeout=5))
@@ -117,7 +125,7 @@ def terminate_trading(active):
     for x in doomed: wait_instance(x['id'],'TERMINATED',1200)
     return doomed
 
-def firstboot(public_host):
+def firstboot(public_host, expected_sha):
     return textwrap.dedent(f'''\
     #!/bin/bash
     set -Eeuo pipefail
@@ -132,8 +140,8 @@ def firstboot(public_host):
     git clone --depth 1 --branch {shlex.quote(BRANCH)} {shlex.quote(REPO)} /opt/van-bootstrap-source
     cd /opt/van-bootstrap-source
     bash deploy/van-trading-core/bootstrap.sh --branch={shlex.quote(BRANCH)} --public-host={shlex.quote(public_host)} --with-nautilus
-    bash deploy/van-trading-core/qualify.sh | tee /var/lib/van-trading/qualification-latest.json
-    jq -e '.status=="GREEN" and .required_failures==0' /var/lib/van-trading/qualification-latest.json >/dev/null
+    VAN_EXPECTED_REPOSITORY_SHA={shlex.quote(expected_sha)} bash deploy/van-trading-core/qualify.sh | tee /var/lib/van-trading/qualification-latest.json
+    jq -e '.status=="GREEN" and .required_failures==0 and .repository_sha==.expected_repository_sha' /var/lib/van-trading/qualification-latest.json >/dev/null
     install -m 0600 /dev/null /var/lib/van-trading/firstboot-complete
     date -u +%Y-%m-%dT%H:%M:%SZ > /var/lib/van-trading/firstboot-complete
     echo FIRSTBOOT_GREEN
@@ -299,6 +307,8 @@ def main():
         action='force-recreate the existing trading core' if doomed else 'create a clean trading core'
         print(f'DRY_RUN_GREEN: would harden trading subnet and {action}; protected control nodes remain untouched',flush=True)
         return
+    expected_sha=resolve_repository_sha()
+    print('EXPECTED_REPOSITORY_SHA',expected_sha,flush=True)
     apub,hpub=ensure_keys()
     reserved_id,reserved_addr,public_host=ensure_reserved_ip(comp)
     harden_subnet(sub)
@@ -309,23 +319,24 @@ def main():
     with tempfile.TemporaryDirectory() as td:
         td=pathlib.Path(td)
         keys=td/'authorized_keys'; keys.write_text(apub+'\n'+hpub+'\n')
-        ud=td/'firstboot.sh'; ud.write_text(firstboot(public_host)); os.chmod(ud,0o600)
+        ud=td/'firstboot.sh'; ud.write_text(firstboot(public_host,expected_sha)); os.chmod(ud,0o600)
         iid=launch_instance(comp,ad,sub,image,keys,ud)
     bind_reserved_ip(comp,iid,reserved_id)
     wait_ssh(PRIVATE_IP,ADMIN_KEY,False,900); print('ORACLE_ADMIN_SSH_GREEN',flush=True)
     wait_ssh(PRIVATE_IP,None,True,900); print('HERMES_SSH_GREEN',flush=True)
     install_ssh_aliases()
     wait_firstboot(3000); print('FIRSTBOOT_GREEN',flush=True)
-    q=ssh(f'ubuntu@{PRIVATE_IP}',"sudo -n bash /opt/van-trading/app/deploy/van-trading-core/qualify.sh",key=ADMIN_KEY,timeout=180)
+    q=ssh(f'ubuntu@{PRIVATE_IP}',f"sudo -n env VAN_EXPECTED_REPOSITORY_SHA={expected_sha} bash /opt/van-trading/app/deploy/van-trading-core/qualify.sh",key=ADMIN_KEY,timeout=180)
     try: qj=json.loads(q.stdout)
     except Exception as exc: raise RuntimeError('qualification output not JSON') from exc
-    if qj.get('status')!='GREEN' or qj.get('required_failures')!=0: raise RuntimeError('trading qualification not green')
+    if qj.get('status')!='GREEN' or qj.get('required_failures')!=0 or qj.get('repository_sha')!=expected_sha or qj.get('expected_repository_sha')!=expected_sha:
+        raise RuntimeError('trading qualification not green for the exact selected repository SHA')
     print('TRADING_QUALIFICATION_GREEN',flush=True)
     repo='/home/ubuntu/work/van-google-runtime-closure'
     configure_hermes_access(repo)
     verify_hermes_access(repo)
     public_tls_canary(public_host,900)
-    print(json.dumps({'status':'GREEN','instance_id':iid,'private_ip':PRIVATE_IP,'reserved_public_ip':reserved_addr,'public_host':public_host,'protected_vekl_worker':VEKL_OCID,'branch':BRANCH},indent=2),flush=True)
+    print(json.dumps({'status':'GREEN','instance_id':iid,'private_ip':PRIVATE_IP,'reserved_public_ip':reserved_addr,'public_host':public_host,'protected_vekl_worker':VEKL_OCID,'branch':BRANCH,'repository_sha':expected_sha},indent=2),flush=True)
 
 if __name__=='__main__':
     main()
