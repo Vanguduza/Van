@@ -134,6 +134,9 @@ class CommandRequest(BaseModel):
     context_capsule_revision: int | None = None
     context_capsule_hash: str | None = None
     speech_evidence_ref: str | None = None
+    # Device-signed provenance only. 0..1000 maps deterministic fixed-point similarity
+    # and avoids cross-language floating-point canonicalisation in the HMAC envelope.
+    speaker_evidence_milli: int | None = Field(default=None, ge=0, le=1000)
     no_stale_replay: bool = False
 
 
