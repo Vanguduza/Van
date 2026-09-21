@@ -24,6 +24,24 @@ else
   add full_desktop_commander RED "full Desktop Commander stdio runtime missing"
 fi
 [[ -x /usr/local/bin/van-github-recovery ]] && add github_recovery_command GREEN "bounded recovery entrypoint installed" || add github_recovery_command RED "van-github-recovery missing"
+if [[ -x /home/ubuntu/.local/bin/van-spmrf-review-worker && -x /home/ubuntu/.local/share/van/spmrf/codex/node_modules/.bin/codex ]]; then
+  cv="$(/home/ubuntu/.local/share/van/spmrf/codex/node_modules/.bin/codex --version 2>/dev/null || true)"
+  [[ "$cv" == *"0.153.1"* ]] && add spmrf_review_worker GREEN "$cv; worker installed" || add spmrf_review_worker RED "unexpected Codex version: ${cv:-missing}"
+else
+  add spmrf_review_worker RED "SPMRF review worker/Codex runtime missing"
+fi
+auth="$(sudo -u ubuntu env HOME=/home/ubuntu /home/ubuntu/.local/share/van/spmrf/codex/node_modules/.bin/codex login status 2>&1 || true)"
+grep -q 'Logged in using ChatGPT' <<<"$auth" && add spmrf_chatgpt_auth GREEN "secondary ChatGPT subscription OAuth active" || add spmrf_chatgpt_auth RED "secondary ChatGPT account must run codex login once"
+if [[ -x /home/ubuntu/.local/bin/dial-shared-memory-chatgpt-stdio && -x /home/ubuntu/.local/bin/dial-shared-memory-claude-stdio ]]; then
+  add spmrf_memory_clients GREEN "ChatGPT and Claude forced-SSH stdio clients installed"
+else
+  add spmrf_memory_clients RED "shared-memory stdio clients missing"
+fi
+if sudo -u ubuntu ssh-keygen -F "${DIAL_HERMES_CONTROL_HOST:-dial-hermes-control}" -f /home/ubuntu/.ssh/known_hosts >/dev/null 2>&1; then
+  add spmrf_hermes_host_key GREEN "trusted Hermes host key present"
+else
+  add spmrf_hermes_host_key RED "trusted dial-hermes-control host key missing"
+fi
 for f in "$BASE/secrets/commander.token" "$BASE/secrets/vekl.token" "$BASE/secrets/pki/ca.crt"; do
   if [[ -f "$f" ]]; then m=$(stat -c %a "$f"); [[ "$m" =~ ^600$|^400$ ]] && add "secret:$(basename "$f")" GREEN "mode $m" || add "secret:$(basename "$f")" RED "mode $m (need 0600)"; else add "secret:$(basename "$f")" RED missing; fi
 done
