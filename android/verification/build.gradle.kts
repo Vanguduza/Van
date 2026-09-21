@@ -106,7 +106,6 @@ sourceSets {
             "com/dial/van/telemetry/SessionTelemetry.kt",
             "com/dial/van/trading/TradingFormat.kt",
             "com/dial/van/trading/ChartViewport.kt",
-            "com/dial/van/voice/SpeakerVerification.kt",
             "com/dial/van/voice/VoiceRecognitionModels.kt",
             "com/dial/van/voice/WakeModelAsset.kt",
             // Rev 1.5 §21 — the offline voice edge's decisions. Every case that matters
