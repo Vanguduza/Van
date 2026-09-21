@@ -111,3 +111,18 @@ def test_trading_core_commander_scripts_are_shell_syntax_valid():
     ]
     for rel in scripts:
         subprocess.run(["bash", "-n", str(ROOT / rel)], check=True)
+
+
+def test_isolated_commander_has_only_enumerated_recovery_elevation():
+    installer = read("deploy/van-trading-core/install-github-recovery.sh")
+    qualifier = read("deploy/van-trading-core/qualify.sh")
+
+    assert "vancommander-recovery" in installer
+    assert "/usr/local/bin/van-github-recovery probe" in installer
+    assert "/usr/local/bin/van-github-recovery collect_diagnostics" in installer
+    assert "/usr/local/bin/van-github-recovery restart_trading_services" in installer
+    assert "/usr/local/bin/van-github-recovery recover_trading_chatgpt_sessions" in installer
+    assert "sudo -n true" in installer
+    assert "generic sudo authority" in installer
+    assert "full_desktop_commander_no_generic_sudo" in qualifier
+    assert "full_desktop_commander_recovery_sudo" in qualifier
