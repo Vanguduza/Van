@@ -26,6 +26,21 @@ A `WorkflowCapability` request or an `ActionProposal` naming a `capability_id`.
 Never a raw workflow ID — those are foreign runtime references, not VAN
 identity.
 
+## Tools (`van_owner_runtime` MCP)
+
+- `automation_route` — ask the deterministic router which medium (native / hot workflow /
+  cold generation / browser) serves a goal. Routing only; compiling, admitting and running
+  are separate steps this tool does not perform.
+- `automation_execute` — run an already-admitted capability under this command's existing
+  signed authority (`command_id` + `snapshot_id`). There is no approval or action-class
+  field: both come from the sealed command record, so this tool cannot escalate one.
+- `automation_run_status` — read a run's persisted status back by the `run_id`
+  `automation_execute` returned.
+
+Compiling, admitting and publishing a new capability (`/v1/automation/compile`, `/admit`,
+`/generate`, `/hot/publish`) and standing-intent creation are not on this shim; those stay
+gateway-internal surfaces beyond what Hermes reaches directly today.
+
 ## Routing
 
 Prefer, in order:

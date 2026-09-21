@@ -412,7 +412,11 @@ def create_app() -> FastAPI:
     briefing = BriefingService(store, attention)
     reminders = ReminderService(store)
     decisions = DecisionService(store, attention)
-    owner_runtime = OwnerRuntimeApi(store, settings)
+    # GAP-F-003/002: the Hermes-facing runtime can read attention/briefing, create
+    # reminders on the owner's behalf and (below, once constructed) read trading state.
+    owner_runtime = OwnerRuntimeApi(
+        store, settings, reminders=reminders, attention=attention, briefing=briefing,
+    )
     automation_registry = AutomationRegistry(store)
     automation_hot_index = HotWorkflowIndex()
     # One index, so `/v1/automation/health` reports the index work is routed
@@ -459,6 +463,9 @@ def create_app() -> FastAPI:
         lake_root=settings.vati_lake_root,
         reporting_currency=settings.vati_reporting_currency,
     )
+    # GAP-F-003: Hermes reads the same trading read models the owner sees, through
+    # /v1/runtime/trading/* (RUNTIME scope). Never a mutation.
+    owner_runtime.trading = trading
     account_control = (
         CommanderAccountControl(settings.van_commander_url, settings.van_commander_token_file, settings.van_commander_ca_file)
         if settings.van_commander_url

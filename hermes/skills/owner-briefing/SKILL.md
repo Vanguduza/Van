@@ -18,11 +18,22 @@ Synthesize **verified** owner-relevant state into a concise briefing. Briefings 
 - Target projects identified; Project Truth paths known from `registries/projects.json`
 - No OAuth tokens in prompt context
 
+## Tools (`van_owner_runtime` MCP)
+
+- `briefing_read` — the deterministic owner briefing (needs-you-now, today,
+  waiting-on-others, projects-at-risk, messages, recent completions, handled,
+  lower-priority). Prefer this over reassembling the sections by hand.
+- `attention_list` — the open attention queue on its own, post-scoring and post-dedupe,
+  when only that section is needed. Neither tool can acknowledge, snooze or resolve an
+  item; read-only.
+- `reminder_create` — to set a reminder the owner asked for while reviewing the briefing.
+  `text` must be the owner's own words; this is not a memory-admission path.
+
 ## Workflow
 
 1. **Scope** — Confirm time window (today, week) and projects in scope
 2. **Gather verified state only**
-   - Attention queue / reminders (deterministic)
+   - Attention queue / reminders via `briefing_read` / `attention_list` (deterministic)
    - Open decisions awaiting owner input
    - Infrastructure readiness (gateway, Hermes profile doctor if relevant)
    - Per-project: last known SHA, ledger gaps — **only if evidenced**

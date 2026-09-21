@@ -14,10 +14,13 @@ Canonical authority: `docs/VAN_ADAPTIVE_TRADING_INTELLIGENCE_TECHNICAL_BLUEPRINT
 
 ## Invariants (never invert)
 
-1. **No model sends a broker order.** Hermes produces analysis, `OpportunityAssessment`
-   and at most a `TradeIntent`. Only the Deterministic Risk Authority
-   (`trading/vati/risk`) can approve a size, and only a certified execution
-   adapter can send it. `direct_broker_order` / `llm_broker_order` are A5.
+1. **No model sends a broker order, and no MCP tool submits a `TradeIntent` from
+   Hermes.** Hermes produces analysis and an `OpportunityAssessment`; a proposed trade is
+   recorded as evidence (the trade-review artifact, the owner-facing narrative), never
+   submitted into the Risk Authority's decision path by Hermes itself. Only the
+   Deterministic Risk Authority (`trading/vati/risk`), acting on VATI's own pipeline, can
+   approve a size, and only a certified execution adapter can send it.
+   `direct_broker_order` / `llm_broker_order` are A5.
 2. **Owner mandate outranks everything Hermes thinks.** Mandate, platform risk
    ceilings, kill switch and drawdown governor are protected surfaces. Hermes
    may explain them and may draft a *proposal* for a new mandate version; it may
@@ -38,19 +41,37 @@ Canonical authority: `docs/VAN_ADAPTIVE_TRADING_INTELLIGENCE_TECHNICAL_BLUEPRINT
 
 | Work | Class | Gate |
 |---|---|---|
-| Read market state, positions, risk state, ledger, TCA | A1 | device auth |
+| Read market state, positions, risk state, ledger, TCA | A1 | device auth (owner surface) / `trading_*` runtime tools (Hermes, read-only) |
 | Fetch external market/macro research, Deep Research, NotebookLM | A2 | capability grant |
-| Submit `TradeIntent` to the Risk Authority under an active mandate | A3 | mandate = grant; policy hook |
+| Submit `TradeIntent` to the Risk Authority under an active mandate | A3 | mandate = grant; policy hook; **no Hermes MCP tool does this** — VATI's own pipeline is the only producer today |
 | Propose a `StrategyCapsule` promotion, new mandate version, capital step | A3 (draft) → A4 (owner signs) | explicit owner approval |
 | Escalate mode (DEMO → SHADOW → LIMITED_LIVE → AUTONOMOUS_LIVE), raise ceilings, clear a kill switch | A4 | owner biometric approval |
 | Flatten all / owner halt | A4 pre-armed | owner device |
 | Remove/widen a protective stop, martingale, grid, revenge sizing, trade stale data or unverified account, bypass risk authority | A5 | always deny |
 
+## Tools (`van_owner_runtime` MCP)
+
+Read-only. There is no halt, ticket-confirm, account-action or `TradeIntent`-submission
+tool anywhere on the Hermes MCP surface; those stay owner-signed (A4) on the owner-device
+`/v1/trading/*` routes Android calls, or on `van_trading_commander`'s `halt`.
+
+- `trading_status` — ledger health: chain integrity, event counts, kill-switch state, open
+  ticket count, staleness.
+- `trading_portfolio` — accounts, totals, risk, exposure, recent trades, open/potential
+  positions.
+- `trading_positions` — currently open positions only.
+- `trading_risk` — concentration and per-position risk from the Risk Authority's own read
+  model.
+- `trading_market_state` — regime/session/execution-quality state for one symbol, or all
+  tracked symbols when called with no argument.
+- `trading_trade_detail` — full detail for one `trade_intent_id`, for trade review or "why
+  is my trade moving".
+
 ## Workflow for an analysis request
 
 1. Resolve `account_alias`, venue and the active mandate version (read-only).
-2. Load `MarketState` for the instrument: regime, session, event proximity,
-   execution quality, integrity state, uncertainty. If any input is stale or
+2. Load `MarketState` for the instrument via `trading_market_state`: regime, session, event
+   proximity, execution quality, integrity state, uncertainty. If any input is stale or
    missing, say which and stop at `NO_TRADE`.
 3. Resolve the VTIL Trading Knowledge Activation Manifest (analogues,
    strategy evidence, anti-patterns, durable knowledge) and cite its
@@ -60,17 +81,19 @@ Canonical authority: `docs/VAN_ADAPTIVE_TRADING_INTELLIGENCE_TECHNICAL_BLUEPRINT
 5. Produce the Trading Confidence Matrix (macro, rates, technical, order flow,
    positioning, options, execution, event risk) and an `OpportunityAssessment`
    with explicit `uncertainty` and `model_disagreement`.
-6. If proposing a trade: emit a `TradeIntent` with entry, protective stop,
-   targets, requested risk ≤ mandate, multipliers ≤ 1, expiry, hashes and
-   `owner_authority: MANDATE`. Never state a size; the Risk Authority sizes.
+6. If proposing a trade: describe entry, protective stop, targets, requested risk ≤
+   mandate, multipliers ≤ 1 and expiry in the owner-facing narrative and trade-review
+   evidence. This is a proposal for VATI's own pipeline and the owner to act on, not a
+   `TradeIntent` Hermes submits — no tool on this MCP surface does that. Never state a
+   size; the Risk Authority sizes.
 7. Report what would change the decision.
 
 ## Operating the built system (Rev 4)
 
-- Status questions are answered from the VATI ledger through the gateway (`GET /v1/trading/status`), never from memory.
-- A ZSE ticket appears as an OWNER_TICKET event; the owner enters it and confirms through `POST /v1/trading/tickets/{id}/confirm` (A4). Hermes may explain the ticket; it never confirms it.
-- An owner halt is `POST /v1/trading/halt` with owner-signed authority (A4); Hermes may recommend it, never send it.
-- The overlay's Trades panel (past / current / potential, `GET /v1/trading/trades`) is the owner's preview of the ledger. When asked about a row, explain it from the ledger fields; the confidence score is an uncalibrated rule score for ranking and explanation, never a probability of profit and never a size.
+- Status questions are answered from the VATI ledger via `trading_status`/`trading_portfolio`/`trading_risk`/`trading_market_state`/`trading_trade_detail`, never from memory.
+- A ZSE ticket appears as an OWNER_TICKET event; the owner enters it and confirms through `POST /v1/trading/tickets/{id}/confirm` (A4, owner device). Hermes may explain the ticket from `trading_trade_detail`/`trading_status`; it has no tool that confirms it.
+- An owner halt is `POST /v1/trading/halt` (owner device, A4) or `van_trading_commander`'s `halt` (needs `owner_signature_ref`, A4); Hermes may recommend it from what `trading_status` shows, never send it.
+- The overlay's Trades panel (past / current / potential) is the owner's own preview of the ledger, read by Android over the owner-device `GET /v1/trading/trades`. When asked about a row, explain it from `trading_trade_detail`/`trading_positions`; the confidence score is an uncalibrated rule score for ranking and explanation, never a probability of profit and never a size.
 - On `van-trading-core` Hermes acts only through the `van_trading_commander` subordinate MCP: `status`, `ledger_status`, `services`, `restart_service` (allowlisted vati-* units), `tail_log` (redacted), `run_backtest` (data dir only), `vekl_resolve` (dedicated trading VEKL), `halt` (needs `owner_signature_ref`, A4), `doctor`, `accounts`. There is no shell, no file write and no order path; do not ask for one.
 - Accounts are added from the Van app (Trading Command Center → Accounts → Add account): Deriv (sign-in, token, or create a demo), cTrader (cTrader ID sign-in or tokens), MT5 via the VanBridgeEA pull bridge (no Windows on Van's side), Paper. Hermes may explain the steps and read `accounts` (aliases and safety identity only). It never asks for, repeats or stores a token, password or signing key; if the owner pastes one into chat, say so and point them to the app.
 - The Trading Command Center (Android) reads `/v1/trading/portfolio`, `/accounts`, `/market-state`, `/risk`, `/trades/{id}`, `/bars`. When the owner asks about a screen, answer from those read models; data-state badges (LIVE/DELAYED/STALE/OFFLINE/SIMULATED) are truth, not decoration.
