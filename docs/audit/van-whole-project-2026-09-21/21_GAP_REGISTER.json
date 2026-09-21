@@ -414,11 +414,11 @@
     "external_gate": 8,
     "superseded": 0,
     "merge_ready": true,
-    "reason": "All reconstructed and newly discovered repository-side findings are closed. External/device/runtime gates remain separate. Full PR-head CI run 35621632137 passed on 90756a06e5f6a26be2ad11a9a25afa8dcdf76271 before PR #55 merged to canonical main as ae96854b85c1ff1c8bcd483cd90cef270c7cf23b."
+    "reason": "All reconstructed and newly discovered repository-side findings are closed. External/device/runtime gates remain separate. Full PR-head CI run 35621632137 passed on 90756a06e5f6a26be2ad11a9a25afa8dcdf76271; after PR #55 merged as ae96854b85c1ff1c8bcd483cd90cef270c7cf23b, canonical-main van-ci run 35622699643 also passed."
   },
-  "last_reconciled_against_head": "90756a06e5f6a26be2ad11a9a25afa8dcdf76271",
+  "last_reconciled_against_head": "ae96854b85c1ff1c8bcd483cd90cef270c7cf23b",
   "last_reconciled_ci": {
-    "run_id": 35621632137,
+    "run_id": 35622699643,
     "conclusion": "success"
   },
   "post_merge_reconciliation": {
@@ -427,6 +427,9 @@
     "merge_commit": "ae96854b85c1ff1c8bcd483cd90cef270c7cf23b",
     "certified_pr_head": "90756a06e5f6a26be2ad11a9a25afa8dcdf76271",
     "certified_ci_run": 35621632137,
-    "certification_scope": "Full PR-head CI was green before merge. Runtime, provider, device and live-environment gates remain independently evidence-gated."
+    "certification_scope": "Full CI was green on both the PR #55 certified implementation head and the resulting canonical main merge commit. Runtime, provider, device and live-environment gates remain independently evidence-gated.",
+    "certified_pr_head_ci_run": 35621632137,
+    "canonical_main_ci_run": 35622699643,
+    "canonical_main_ci_conclusion": "success"
   }
 }
