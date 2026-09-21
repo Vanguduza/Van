@@ -127,8 +127,9 @@ else
   bash "$APP/deploy/van-trading-core/install-full-desktop-commander.sh"
   bash "$APP/deploy/van-trading-core/install-github-recovery.sh"
   bash "$APP/deploy/van-trading-core/spmrf/install-spmrf-review-worker.sh"
+  bash "$APP/deploy/van-trading-core/spmrf/install-shared-memory-client.sh"
 fi
-ok "full Desktop Commander subordinate + recovery command + SPMRF review worker"
+ok "full Desktop Commander subordinate + recovery command + SPMRF review worker/client"
 
 # ---------------------------------------------------------------- python venv
 if [[ ! -x "$VENV/bin/python" ]]; then run sudo -u vati python3.12 -m venv "$VENV"; ok "venv (python3.12)"; else skip "venv present"; fi
