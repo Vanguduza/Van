@@ -8,7 +8,7 @@
  * never appears in tool output. The tool list is whatever the commander
  * publishes: there is no generic shell tool to expose.
  *
- *   VAN_COMMANDER_URL=https://10.0.1.233:9133 VAN_COMMANDER_TOKEN_FILE=~/.van/commander.token node mcp_stdio.mjs
+ *   VAN_COMMANDER_URL=https://10.0.1.233:9133 VAN_COMMANDER_TOKEN_FILE=~/.van/commander.hermes.token node mcp_stdio.mjs
  */
 import crypto from 'node:crypto';
 import fs from 'node:fs';
