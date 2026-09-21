@@ -17,6 +17,13 @@ command -v python3.12 >/dev/null && add python GREEN "$(python3.12 --version)" |
 command -v node >/dev/null && [[ "$(node -v | cut -c2- | cut -d. -f1)" -ge 20 ]] && add node GREEN "$(node -v)" || add node RED "node ≥ 20 missing"
 command -v docker >/dev/null && docker compose version >/dev/null 2>&1 && add docker GREEN "$(docker --version)" || add docker RED "docker/compose missing"
 id vati >/dev/null 2>&1 && add user GREEN vati || add user RED "vati missing"
+if [[ -x /home/ubuntu/.local/bin/van-local-commander-mcp && -f /home/ubuntu/.local/share/van/desktop-commander/node_modules/@wonderwhy-er/desktop-commander/package.json ]]; then
+  dcver="$(node -e 'const p=require(process.argv[1]);process.stdout.write(String(p.version||""))' /home/ubuntu/.local/share/van/desktop-commander/node_modules/@wonderwhy-er/desktop-commander/package.json 2>/dev/null || true)"
+  [[ "$dcver" == "0.2.50" ]] && add full_desktop_commander GREEN "Desktop Commander $dcver; stdio wrapper installed" || add full_desktop_commander RED "unexpected Desktop Commander version: ${dcver:-missing}"
+else
+  add full_desktop_commander RED "full Desktop Commander stdio runtime missing"
+fi
+[[ -x /usr/local/bin/van-github-recovery ]] && add github_recovery_command GREEN "bounded recovery entrypoint installed" || add github_recovery_command RED "van-github-recovery missing"
 for f in "$BASE/secrets/commander.token" "$BASE/secrets/vekl.token" "$BASE/secrets/pki/ca.crt"; do
   if [[ -f "$f" ]]; then m=$(stat -c %a "$f"); [[ "$m" =~ ^600$|^400$ ]] && add "secret:$(basename "$f")" GREEN "mode $m" || add "secret:$(basename "$f")" RED "mode $m (need 0600)"; else add "secret:$(basename "$f")" RED missing; fi
 done
