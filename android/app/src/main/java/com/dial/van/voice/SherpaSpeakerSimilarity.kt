@@ -103,14 +103,18 @@ class SherpaSpeakerSimilarityScorer private constructor(
             val embeddingFile = admitted("owner_embedding", ".f32", MAX_EMBEDDING_BYTES) ?: return null
             val embedding = readEmbedding(embeddingFile) ?: return null
 
-            val config = SpeakerEmbeddingExtractorConfig.builder()
-                .setModel(model.absolutePath)
-                .setNumThreads(numThreads)
-                .setDebug(false)
-                .build()
+            val config = SpeakerEmbeddingExtractorConfig(
+                model = model.absolutePath,
+                numThreads = numThreads,
+                debug = false,
+                provider = "cpu",
+            )
             return runCatching {
-                val extractor = SpeakerEmbeddingExtractor(config)
-                if (extractor.dim != embedding.size) return null
+                val extractor = SpeakerEmbeddingExtractor(config = config)
+                if (extractor.dim() != embedding.size) {
+                    extractor.release()
+                    return null
+                }
                 SherpaSpeakerSimilarityScorer(extractor, embedding, sampleRate)
             }.getOrNull()
         }
