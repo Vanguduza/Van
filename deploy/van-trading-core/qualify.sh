@@ -2,7 +2,7 @@
 # Qualification report for van-trading-core. Exit 0 only when every REQUIRED check is GREEN.
 # Machine-readable JSON on stdout; run after bootstrap and after every change.
 set -uo pipefail
-BASE=/opt/van-trading; DATA=/var/lib/van-trading
+BASE=/opt/van-trading; DATA=/var/lib/van-trading; APP="${VAN_APP_DIR:-$BASE/app}"
 ENVF="$BASE/config/van-trading-core.env"; [[ -f "$ENVF" ]] && set -a && . "$ENVF" && set +a
 checks=(); fails=0
 add() {
@@ -12,6 +12,29 @@ add() {
   return 0
 }
 unit() { local u="$1" req="${2:-1}"; if systemctl is-active --quiet "$u"; then add "unit:$u" GREEN "active" "$req"; else add "unit:$u" RED "$(systemctl is-active "$u" 2>&1)" "$req"; fi; }
+
+# A runtime qualification is evidence only for the exact repository revision that was
+# requested by the external certifier. Never self-certify "whatever happens to be
+# installed": a stale checkout could otherwise produce a GREEN report after main moved.
+EXPECTED_REPOSITORY_SHA="${VAN_EXPECTED_REPOSITORY_SHA:-}"
+OBSERVED_REPOSITORY_SHA=""
+if [[ ! -d "$APP/.git" ]]; then
+  add repository_exact_sha RED "canonical app checkout missing at $APP"
+else
+  OBSERVED_REPOSITORY_SHA="$(git -C "$APP" rev-parse HEAD 2>/dev/null || true)"
+  dirty="$(git -C "$APP" status --porcelain --untracked-files=no 2>/dev/null || true)"
+  if [[ ! "$OBSERVED_REPOSITORY_SHA" =~ ^[0-9a-f]{40}$ ]]; then
+    add repository_exact_sha RED "cannot resolve deployed repository SHA"
+  elif [[ -n "$dirty" ]]; then
+    add repository_exact_sha RED "deployed repository has tracked working-tree changes"
+  elif [[ ! "$EXPECTED_REPOSITORY_SHA" =~ ^[0-9a-f]{40}$ ]]; then
+    add repository_exact_sha RED "VAN_EXPECTED_REPOSITORY_SHA must be the externally selected 40-hex commit"
+  elif [[ "$OBSERVED_REPOSITORY_SHA" != "$EXPECTED_REPOSITORY_SHA" ]]; then
+    add repository_exact_sha RED "deployed $OBSERVED_REPOSITORY_SHA != expected $EXPECTED_REPOSITORY_SHA"
+  else
+    add repository_exact_sha GREEN "$OBSERVED_REPOSITORY_SHA"
+  fi
+fi
 [[ "$(uname -m)" == "aarch64" || "$(uname -m)" == "x86_64" ]] && add arch GREEN "$(uname -m)" || add arch RED "$(uname -m)"
 command -v python3.12 >/dev/null && add python GREEN "$(python3.12 --version)" || add python RED "python3.12 missing"
 command -v node >/dev/null && [[ "$(node -v | cut -c2- | cut -d. -f1)" -ge 20 ]] && add node GREEN "$(node -v)" || add node RED "node ≥ 20 missing"
@@ -131,5 +154,5 @@ if [[ -z "$bad_listeners" && -z "$missing_ports" ]]; then add supabase_loopback 
 shopt -s nullglob; hb=("$DATA"/heartbeats/*.json); if (( ${#hb[@]} )); then for f in "${hb[@]}"; do age=$(( $(date +%s) - $(jq -r '.updated_ms' "$f")/1000 )); [[ $age -lt 300 ]] && add "session:$(basename "$f" .json)" GREEN "$(jq -c '{status,cycles,kill_switch}' "$f") age=${age}s" 0 || add "session:$(basename "$f" .json)" AMBER "stale heartbeat ${age}s" 0; done; else add sessions AMBER "no session heartbeats yet (no account enabled)" 0; fi
 [[ "$(uname -m)" == "x86_64" ]] && add mt5_native AMBER "x86_64: MT5 could run here, but the design keeps MT5 on the Windows worker" 0 || add mt5_native AMBER "ARM64 host: MT5 runs on the Windows bridge worker; this VM holds only the mTLS client" 0
 status=GREEN; (( fails )) && status=RED
-printf '{"host":"%s","status":"%s","required_failures":%d,"at":"%s","checks":[%s]}\n' "$(hostname)" "$status" "$fails" "$(date -u +%Y-%m-%dT%H:%M:%SZ)" "$(IFS=,; echo "${checks[*]}")" | jq .
+printf '{"host":"%s","status":"%s","required_failures":%d,"repository_sha":"%s","expected_repository_sha":"%s","at":"%s","checks":[%s]}\n' "$(hostname)" "$status" "$fails" "$OBSERVED_REPOSITORY_SHA" "$EXPECTED_REPOSITORY_SHA" "$(date -u +%Y-%m-%dT%H:%M:%SZ)" "$(IFS=,; echo "${checks[*]}")" | jq .
 (( fails == 0 ))
