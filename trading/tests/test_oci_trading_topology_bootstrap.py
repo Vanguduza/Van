@@ -61,3 +61,14 @@ def test_runtime_qualification_is_bound_to_exact_clean_repository_sha():
     assert "EXPECTED_REPOSITORY_SHA" in rebuild
     assert "repository_sha')!=expected_sha" in rebuild
 
+    boot = BOOTSTRAP.read_text()
+    assert 'COMMIT_SHA="${VAN_COMMIT_SHA:-}"' in boot
+    assert '--commit-sha=*) COMMIT_SHA="${a#*=}"' in boot
+    assert 'checkout -q --detach "$COMMIT_SHA"' in boot
+    assert 'reset -q --hard "$COMMIT_SHA"' in boot
+    assert 'repo pinned to exact commit $COMMIT_SHA' in boot
+
+    assert "git clone -q --no-checkout {shlex.quote(REPO)} /opt/van-bootstrap-source" in rebuild
+    assert "checkout -q --detach {shlex.quote(expected_sha)}" in rebuild
+    assert "--commit-sha={shlex.quote(expected_sha)}" in rebuild
+
