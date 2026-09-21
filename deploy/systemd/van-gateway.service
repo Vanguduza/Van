@@ -10,6 +10,7 @@ Environment=PYTHONUNBUFFERED=1
 Environment=PYTHONPATH=%h/.local/share/van/runtime/backend
 EnvironmentFile=%h/.config/van/google-workspace.env
 EnvironmentFile=%h/.config/van/gateway.env
+EnvironmentFile=-%h/.config/van/trading-commander.env
 ExecStart=%h/.local/share/van/venv/bin/uvicorn van_gateway.app:app --host 127.0.0.1 --port 8787
 Restart=on-failure
 RestartSec=3
