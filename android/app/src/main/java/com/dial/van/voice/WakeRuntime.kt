@@ -82,20 +82,43 @@ class WakePipeline(
     private val speaker: SpeakerSimilarityScorer? = null,
     private val vad: EnergyVadGate = EnergyVadGate(),
     private val decisionEngine: WakeDecisionEngine = WakeDecisionEngine(),
+    private val speechHangoverFrames: Int = 6,
 ) {
+    private var remainingSpeechHangover = 0
+
+    @Synchronized
     fun evaluate(pcm16: ByteArray): WakeEvidence {
-        val speech = vad.isSpeech(pcm16)
-        if (!speech) return WakeEvidence(false, 0f, 0f, null, WakeDecision.REJECT)
+        val speechNow = vad.isSpeech(pcm16)
+        if (speechNow) {
+            remainingSpeechHangover = speechHangoverFrames
+        } else if (remainingSpeechHangover > 0) {
+            remainingSpeechHangover--
+        } else {
+            // Do not spend KWS compute on indefinite room silence. Once speech begins,
+            // however, trailing silence must still reach sherpa: KWS may need those blank
+            // frames before it emits the keyword.
+            return WakeEvidence(false, 0f, 0f, null, WakeDecision.REJECT)
+        }
+
+        // Both native streams see the same admitted PCM history. Calling the verifier only
+        // after the first detector fired left its stream with no phrase history, making a
+        // two-stage detector structurally incapable of agreeing on the same utterance.
         val kwsScore = kws.score(pcm16).coerceIn(0f, 1f)
-        if (kwsScore <= 0f) return WakeEvidence(true, kwsScore, 0f, null, WakeDecision.REJECT)
         val phraseScore = verifier.verify(pcm16).coerceIn(0f, 1f)
-        val speakerScore = speaker?.similarity(pcm16)?.coerceIn(0f, 1f)
+        val speechWindowActive = speechNow || remainingSpeechHangover > 0
+        val speakerScore = if (kwsScore > 0f || phraseScore > 0f) {
+            speaker?.similarity(pcm16)?.coerceIn(0f, 1f)
+        } else {
+            null
+        }
         return WakeEvidence(
-            vadActive = true,
+            vadActive = speechWindowActive,
             kwsScore = kwsScore,
             phraseScore = phraseScore,
             speakerScore = speakerScore,
-            decision = decisionEngine.decide(true, kwsScore, phraseScore, speakerScore),
+            decision = decisionEngine.decide(
+                speechWindowActive, kwsScore, phraseScore, speakerScore,
+            ),
         )
     }
 }
