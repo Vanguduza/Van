@@ -31,6 +31,11 @@ from van_gateway.models import (
     PrincipalType,
 )
 from van_gateway.projects.router import ProjectRouter
+from van_gateway.voice.speaker import (
+    SpeakerDisposition,
+    classify_speaker_evidence,
+    speaker_disposition,
+)
 
 LOGGER = logging.getLogger("van.command")
 
@@ -109,6 +114,7 @@ class CommandOrchestrator:
             and req.context_capsule_revision is None
             and req.context_capsule_hash is None
             and req.speech_evidence_ref is None
+            and req.speaker_evidence_milli is None
             and not req.no_stale_replay
         )
 
@@ -166,6 +172,11 @@ class CommandOrchestrator:
                     req.project_id,
                 )
             elif req.signature_version == 2:
+                if req.speaker_evidence_milli is not None:
+                    raise AuthError(
+                        "unsigned_speaker_evidence",
+                        "Signature v2 cannot bind speaker evidence; use signature v3",
+                    )
                 if req.principal_type != PrincipalType.OWNER_DEVICE:
                     raise AuthError("invalid_owner_device_principal", "Owner-device ingress must use OWNER_DEVICE principal")
                 expected_requester = f"device:{req.device_id}"
@@ -188,6 +199,33 @@ class CommandOrchestrator:
                     context_capsule_revision=req.context_capsule_revision,
                     context_capsule_hash=req.context_capsule_hash,
                     speech_evidence_ref=req.speech_evidence_ref,
+                    no_stale_replay=req.no_stale_replay,
+                    context_trust=req.context_trust.value,
+                )
+            elif req.signature_version == 3:
+                if req.principal_type != PrincipalType.OWNER_DEVICE:
+                    raise AuthError("invalid_owner_device_principal", "Owner-device ingress must use OWNER_DEVICE principal")
+                expected_requester = f"device:{req.device_id}"
+                if req.requested_by != expected_requester:
+                    raise AuthError("requested_by_mismatch", "requested_by must match authenticated owner device")
+                canonical = AuthService.canonical_command_v3(
+                    command_id=req.command_id,
+                    idempotency_key=req.idempotency_key,
+                    device_id=req.device_id,
+                    issued_at_unix=req.issued_at_unix,
+                    text=req.text,
+                    action_class=req.action_class.value,
+                    project_id=req.project_id,
+                    turn_id=req.turn_id,
+                    origin_channel=req.origin_channel.value,
+                    principal_type=req.principal_type.value,
+                    requested_by=req.requested_by,
+                    expires_at_unix=req.expires_at_unix,
+                    nonce=req.nonce,
+                    context_capsule_revision=req.context_capsule_revision,
+                    context_capsule_hash=req.context_capsule_hash,
+                    speech_evidence_ref=req.speech_evidence_ref,
+                    speaker_evidence_milli=req.speaker_evidence_milli,
                     no_stale_replay=req.no_stale_replay,
                     context_trust=req.context_trust.value,
                 )
@@ -218,8 +256,24 @@ class CommandOrchestrator:
             return result
         self.throttle.record_success("command_signature", req.device_id)
 
+        if req.speaker_evidence_milli is not None and req.origin_channel != OriginChannel.VOICE:
+            result = CommandResult(
+                status="denied",
+                command_id=req.command_id,
+                idempotency_key=req.idempotency_key,
+                message="Speaker evidence is valid only for a live voice-origin command",
+            )
+            await self.audit.record(
+                result="denied",
+                command_id=req.command_id,
+                device_id=req.device_id,
+                failure_reason="speaker_evidence_non_voice_origin",
+            )
+            await self.idempotency.fail(req.idempotency_key, result.model_dump())
+            return result
 
-        # The nonce is covered by the v2 signature and, until now, was never stored — so a
+
+        # The nonce is covered by the v2/v3 signature and, until now, was never stored — so a
         # captured command could be replayed inside its validity window with a fresh
         # idempotency key (finding P1-SEC-005). Consume it after the signature verifies and
         # before anything observable happens.
@@ -249,6 +303,11 @@ class CommandOrchestrator:
         resolution = self.resolver.resolve(req.text)
         effective_action_class = self.resolver.stronger_class(req.action_class, resolution.canonical_action_class)
         effective_no_stale_replay = req.no_stale_replay or resolution.no_stale_replay
+        speaker_evidence = (
+            classify_speaker_evidence(req.speaker_evidence_milli)
+            if req.origin_channel == OriginChannel.VOICE
+            else None
+        )
         now = int(time.time())
 
         if req.expires_at_unix is not None and now >= req.expires_at_unix:
@@ -303,6 +362,33 @@ class CommandOrchestrator:
             await self.idempotency.complete(req.idempotency_key, result.model_dump())
             return result
 
+        if speaker_evidence is not None:
+            voice_disposition = speaker_disposition(effective_action_class, speaker_evidence)
+            if voice_disposition is SpeakerDisposition.REFUSE:
+                result = CommandResult(
+                    status="denied",
+                    command_id=req.command_id,
+                    idempotency_key=req.idempotency_key,
+                    message=(
+                        "This consequential voice command was refused because the local "
+                        "speaker evidence did not match the enrolled owner profile"
+                    ),
+                    resolved_action_id=resolution.action_id,
+                    effective_action_class=effective_action_class,
+                )
+                await self.audit.record(
+                    result="denied",
+                    command_id=req.command_id,
+                    device_id=req.device_id,
+                    approval="not_applicable",
+                    failure_reason="voice_speaker_mismatch",
+                    before={"speaker_evidence": speaker_evidence.value},
+                )
+                await self.idempotency.complete(req.idempotency_key, result.model_dump())
+                return result
+            if voice_disposition is SpeakerDisposition.REQUIRE_OWNER_APPROVAL:
+                required_gate = Gate.OWNER_APPROVAL
+
         owner_approved = False
         if required_gate is Gate.OWNER_APPROVAL:
             if resolution.mode != ResolutionMode.EXACT_ACTION or not resolution.action_id:
@@ -310,7 +396,7 @@ class CommandOrchestrator:
                     status="denied",
                     command_id=req.command_id,
                     idempotency_key=req.idempotency_key,
-                    message="A4 requires an exact gateway-resolved action before owner approval",
+                    message="Owner approval requires an exact gateway-resolved action",
                     effective_action_class=effective_action_class,
                 )
                 await self.audit.record(
@@ -336,7 +422,7 @@ class CommandOrchestrator:
                     status="approval_required",
                     command_id=req.command_id,
                     idempotency_key=req.idempotency_key,
-                    message="A4 requires biometric owner approval bound to the paired device key",
+                    message="This action requires biometric owner approval bound to the paired device key",
                     requires_approval=True,
                     approval_challenge_id=challenge.challenge_id,
                     approval_challenge=challenge.canonical,
@@ -522,6 +608,8 @@ class CommandOrchestrator:
             "signed_action_class": req.action_class.value,
             "effective_action_class": effective_action_class.value,
         }
+        if speaker_evidence is not None:
+            before["speaker_evidence"] = speaker_evidence.value
         live_state_refs: list[str] = []
         policy_refs = [
             "security-policy:A1-A5",
@@ -532,6 +620,8 @@ class CommandOrchestrator:
         ]
         if resolution.rule_id:
             policy_refs.append(f"resolver-rule:{resolution.rule_id}")
+        if speaker_evidence is not None:
+            policy_refs.append(f"speaker-evidence:{speaker_evidence.value}")
         if owner_approved:
             policy_refs.append("owner-approval:ECDSA_P256_SHA256")
 
@@ -737,6 +827,7 @@ class CommandOrchestrator:
                         "context_capsule_revision": req.context_capsule_revision,
                         "context_capsule_hash": req.context_capsule_hash,
                         "speech_evidence_ref": req.speech_evidence_ref,
+                        "speaker_evidence": speaker_evidence.value if speaker_evidence else None,
                         "no_stale_replay": effective_no_stale_replay,
                         "client_context": req.client_context,
                         "client_context_authoritative": False,
