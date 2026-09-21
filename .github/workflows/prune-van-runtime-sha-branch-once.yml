@@ -1,0 +1,34 @@
+name: prune-van-runtime-sha-branch-once
+
+on:
+  push:
+    branches:
+      - main
+
+permissions:
+  contents: write
+
+jobs:
+  prune:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Delete merged closure branch
+        env:
+          GH_TOKEN: ${{ github.token }}
+          GH_REPO: ${{ github.repository }}
+        run: |
+          set -euo pipefail
+          branch='gpt/van-runtime-sha-pinning-20260921'
+          encoded="${branch//\//%2F}"
+          status="$(curl -sS -o /tmp/delete-response.json -w '%{http_code}' \
+            -X DELETE \
+            -H "Authorization: Bearer ${GH_TOKEN}" \
+            -H "Accept: application/vnd.github+json" \
+            -H "X-GitHub-Api-Version: 2022-11-28" \
+            "https://api.github.com/repos/${GH_REPO}/git/refs/heads/${encoded}")"
+          if [[ "${status}" != "204" && "${status}" != "422" ]]; then
+            cat /tmp/delete-response.json >&2 || true
+            echo "failed to delete ${branch}: HTTP ${status}" >&2
+            exit 1
+          fi
+          echo "${branch}: HTTP ${status}"
