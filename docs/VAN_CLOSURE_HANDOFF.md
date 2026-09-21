@@ -1,5 +1,19 @@
 # VAN closure programme — handoff
 
+> **SUPERSEDED FOR CURRENT RESUME — historical handoff only.** This file captures the
+> 2026-09-19 closure programme state and intentionally preserves its historical branch,
+> counts and commands as evidence. **Do not follow the checkout/resume instructions below
+> as current repository truth.** Canonical development is now on `main`. PR #55 merged the
+> completed Sol audit closure into `main` at
+> `ae96854b85c1ff1c8bcd483cd90cef270c7cf23b`; its certified implementation head
+> `90756a06e5f6a26be2ad11a9a25afa8dcdf76271` passed full `van-ci` run
+> `35621632137`. For current closure state use
+> `docs/audit/van-whole-project-2026-09-21/21_GAP_REGISTER.json`,
+> `docs/project-state/REMOTE_BROWSER_CLOSURE_RECORD.md`, and
+> `docs/EXTERNAL_GATES.md`. Repository closure and live/device/provider certification are
+> deliberately separate claims.
+
+
 **Branch:** `claude/van-system-audit-ysgtcd` · **HEAD at writing:** `85cc5e6` · **Date:** 2026-09-19
 
 This document exists so the next agent can pick the work up cold. It is written to be
