@@ -8,8 +8,9 @@ import { execFileSync, spawn } from 'node:child_process';
 const BEGIN = 'SPMRF_REVIEW_RESULT_BEGIN';
 const END = 'SPMRF_REVIEW_RESULT_END';
 const MODEL = process.env.VAN_SPMRF_CODEX_MODEL || 'gpt-5.6-sol';
-const CODEX = process.env.VAN_SPMRF_CODEX_BIN || '/home/ubuntu/.local/share/van/spmrf/codex/node_modules/.bin/codex';
-const CACHE = process.env.VAN_SPMRF_CACHE || '/home/ubuntu/.cache/van-spmrf';
+const HOME = os.homedir();
+const CODEX = process.env.VAN_SPMRF_CODEX_BIN || path.join(HOME, '.local/share/van/spmrf/codex/node_modules/.bin/codex');
+const CACHE = process.env.VAN_SPMRF_CACHE || path.join(HOME, '.cache/van-spmrf');
 const ALLOWED = new Map([
   ['https://github.com/Vanguduza/dial-new.git', 'dial-new'],
   ['https://github.com/Vanguduza/Van.git', 'Van'],
