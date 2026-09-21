@@ -1,7 +1,8 @@
 # Remote Browser Rev 1.5 — closure record
 
 **Date:** 2026-09-20
-**Branch:** `claude/van-system-audit-ysgtcd`
+**Historical implementation branch:** `claude/van-system-audit-ysgtcd`  
+**Current canonical branch:** `main` (PR #55 merged at `ae96854b85c1ff1c8bcd483cd90cef270c7cf23b`)
 **Authority:** `docs/VAN_REMOTE_BROWSER_PRODUCTION_BLUEPRINT_REV_1_5.md`
 **Verdict:** `REPOSITORY_COMPLETE_PENDING_EXTERNAL`
 
