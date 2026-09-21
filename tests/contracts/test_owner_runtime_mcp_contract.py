@@ -36,6 +36,7 @@ REQUIRED_TOOLS = {
     "google_contacts_resolve",
     "google_tasks_list",
     "google_job_plan",
+    "google_action_execute",
     "research_status",
     "research_search",
     "action_begin",
@@ -170,4 +171,10 @@ def test_google_mcp_surface_is_read_or_plan_only():
     assert "/v1/google/gmail/send" not in text
     assert "/v1/google/gmail/draft" not in text
     assert "/v1/google/calendar/reschedule" not in text
+    assert "/v1/google/actions/execute" in text
+    action_tool = re.search(
+        r"name: 'google_action_execute'.*?additionalProperties: false", text, re.S
+    )
+    assert action_tool is not None
+    assert "approved" not in action_tool.group(0).lower()
 
