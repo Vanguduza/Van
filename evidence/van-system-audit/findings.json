@@ -1049,7 +1049,7 @@
       "severity": "P1",
       "domain": "voice",
       "title": "No wake word, no speech output, no barge-in, no background voice, no mission binding",
-      "description": "WakeWordEngine, WakePhraseVerifier and SpeakerSimilarityScorer are interfaces with no implementations; no KWS dependency or native library ships; the wake pipeline is never constructed; TtsOutputManager.speak and WakeAcknowledgementManager.play have zero call sites; the FGS type is specialUse not microphone.",
+      "description": "The original audit found no production wake-word runtime: WakeWordEngine/WakePhraseVerifier were interfaces, no KWS dependency was present, the wake pipeline was not constructible, and wake/TTS/background-voice paths were partly unreachable.",
       "requirement": "See the requirements traceability matrix in the canonical report.",
       "authority": "docs/VAN_WHOLE_SYSTEM_IMPLEMENTATION_AUDIT_AND_CERTIFICATION_REV_1.md s30",
       "repository_evidence": [
@@ -1070,24 +1070,28 @@
       "current_status": "CLOSED",
       "remediation_gate": "GATE 9",
       "closure": {
-        "summary": "The wake path exists, fails closed, and says why — and the pieces that had no callers have them. `WakePipeline` was never constructed anywhere in the app, so 'Hey Van' did nothing and nothing said so: `WakeCoordinator.KWS_NOT_READY` existed and was unreachable because no coordinator existed either. `VanApplication` now builds the coordinator on boot; without a usable model it publishes a broken `wake_word` subsystem the owner can see, rather than silence. The wake word is its own subsystem because it fails on its own — push-to-talk voice works perfectly while 'Hey Van' does nothing, and reporting them together told the owner voice was fine. `TtsOutputManager.speak` has a caller, bound to the owner status projection so VAN speaks when work finished or needs the owner and stays quiet otherwise; reading every status change aloud is how an assistant gets muted. `WakeAcknowledgementManager.play` is called by the coordinator on wake acceptance. The microphone service is its own service typed `microphone`, because a service that holds the microphone while declaring `specialUse` loses microphone access on Android 14 while believing it has it — and it refuses to start without a usable model rather than holding the owner's microphone to do nothing.",
+        "summary": "The repository now contains a real local wake-word implementation rather than a fail-closed placeholder. The Android app exact-pins sherpa-onnx, WakeSherpaBundle admits only checksum-pinned model/token/keyword files confined to app-private voice storage, and SherpaWakeRuntime constructs two independent streaming KWS decoder states for candidate detection and phrase verification. WakeModelLoader.pipelineOrNull() now builds that runtime and fails closed if model/JNI initialization fails. VanApplication constructs the path, WakeListenerService owns the microphone-typed foreground service, the acknowledgement plays before recognition, and a wake-originated STT terminal result/error re-arms only the matching wake turn; manual voice turns cannot silently enable background listening. TTS remains bound to owner-relevant outcome projection rather than every state transition.",
         "changed": [
-          "android/app/src/main/java/com/dial/van/voice/WakeModelAsset.kt",
+          "android/settings.gradle.kts",
+          "android/app/build.gradle.kts",
+          "android/app/src/main/java/com/dial/van/voice/WakeSherpaBundle.kt",
+          "android/app/src/main/java/com/dial/van/voice/SherpaWakeRuntime.kt",
           "android/app/src/main/java/com/dial/van/voice/WakeModelLoader.kt",
+          "android/app/src/main/java/com/dial/van/voice/WakeRuntime.kt",
+          "android/app/src/main/java/com/dial/van/voice/WakeCoordinator.kt",
           "android/app/src/main/java/com/dial/van/voice/WakeListenerService.kt",
           "android/app/src/main/java/com/dial/van/VanApplication.kt",
-          "android/app/src/main/java/com/dial/van/control/VanCommandController.kt",
-          "android/app/src/main/java/com/dial/van/degraded/DegradedMode.kt",
           "android/app/src/main/AndroidManifest.xml"
         ],
         "verified_by": [
+          "android/app/src/test/java/com/dial/van/voice/WakeRuntimeTest.kt",
           "android/verification/src/test/kotlin/com/dial/van/voice/WakeModelAssetTest.kt"
         ],
         "runtime_evidence": [
-          "evidence/van-system-audit/gate-6/kotlin_verification_tests.txt"
+          "https://github.com/Vanguduza/Van/actions/runs/35613394583"
         ],
-        "residual": "No keyword-spotting model ships, so VAN still cannot wake to its name. `WakeModelLoader.pipelineOrNull` returns null and the owner is told.",
-        "residual_reason": "A keyword spotter trained on 'Hey Van' is a trained artefact, not code — owner supply, like the Rive artboard. Shipping a stub engine that scores zero would make the pipeline constructible and the coordinator arm, and VAN would listen forever and never wake: indistinguishable from the defect except that it would also report itself as working. The repository half is complete; the absence is reported rather than hidden.",
+        "residual": "The trained Hey Van sherpa KWS model/token/keyword bundle is a deployment artefact and has not been installed and measured on the target Samsung device. Without it the runtime reports wake-word unavailable and does not hold the microphone pretending to be ready.",
+        "residual_reason": "The repository can ship and validate the executable KWS runtime and its admission contract, but it cannot fabricate or certify the trained acoustic artefact or physical-device false-positive/latency behavior. Those remain explicit device/artefact gates.",
         "residual_class": "EXTERNAL_ARTEFACT",
         "state": "EXTERNALLY_BLOCKED_REPOSITORY_COMPLETE"
       }
@@ -2237,21 +2241,29 @@
       "current_status": "CLOSED",
       "remediation_gate": "GATE 8",
       "closure": {
-        "summary": "The browser task path reaches a real adapter. Neither `api.py`, `service.py` nor `subagent.py` imported `adapters.py`, `SubagentWorker` was a Protocol with no implementation, and `create_app` passed `worker=None` — so POST /v1/browser/assignments answered 503 and the only way a task ever acquired evidence was for its caller to hand the evidence in. A page snapshot in the evidence table was whatever somebody said it was. `AdapterBackedWorker` proposes from a deterministic plan and executes by calling the harness adapter, so the observation the runner grades reports what the page did. It is deliberately narrow: it does not decide, because the runner is the enforcement point and a second policy check would be a second copy of one that works; it does not invent a plan, because a semantic tier needs a model and `SemanticWorkerUnavailable` says so rather than degrading to a guess; and it does not soften an adapter failure into an empty-but-successful observation. The adapter is the health surface's own, so there is one connection to the browser worker and one readiness verdict about it. The mission binder was wired in Gate 2 and a binding now appears on every task created with a mission id.",
+        "summary": "The browser task path now reaches deployable private workers rather than only adapters. Browser Harness is implemented as a loopback service with pinned browser-harness 0.1.13, systemd/bootstrap/health checks and a private CDP handoff. Stagehand 4.1.0 is implemented as a separate loopback semantic worker sharing the Harness-owned Chromium session. BrowserApi constructs HybridBrowserWorker: deterministic tiers execute through Harness; semantic tiers ask Stagehand for exactly one observed action, BrowserSubagentRunner enforces the immutable Hermes assignment/domain/action-class/payment/injection/step budget, then Harness independently reads the page back. Direct Stagehand agent loops are hard-refused in both the adapter and worker so L5 cannot bypass VAN's per-step authority boundary.",
         "changed": [
           "backend/van_gateway/browser/worker.py",
           "backend/van_gateway/browser/api.py",
-          "backend/van_gateway/app.py"
+          "backend/van_gateway/browser/adapters.py",
+          "backend/van_gateway/app.py",
+          "deploy/van-trading-core/browser/harness_service.py",
+          "deploy/van-trading-core/browser/stagehand_service.mjs",
+          "deploy/van-trading-core/browser/bootstrap-browser-runtime.sh",
+          "deploy/van-trading-core/systemd/vati-browser-harness.service",
+          "deploy/van-trading-core/systemd/vati-stagehand.service"
         ],
         "verified_by": [
-          "backend/tests/test_browser_injection_containment.py::test_the_worker_actually_drives_the_adapter",
-          "backend/tests/test_browser_injection_containment.py::test_the_observation_reports_the_page_the_adapter_saw",
-          "backend/tests/test_browser_injection_containment.py::test_an_adapter_failure_is_not_an_empty_success",
-          "backend/tests/test_browser_injection_containment.py::test_a_plan_cannot_widen_its_assignment",
-          "backend/tests/test_browser_injection_containment.py::test_a_semantic_tier_is_refused_rather_than_walked_deterministically"
+          "backend/tests/test_browser_injection_containment.py",
+          "backend/tests/test_browser_semantic_worker.py",
+          "backend/tests/test_browser_fabric.py",
+          "tests/contracts/test_automation_browser_governance.py"
         ],
-        "residual": "No browser worker process runs in this environment, so the adapter is exercised against a fake shaped like the documented worker protocol; semantic tiers still have no implementation.",
-        "residual_reason": "The browser worker and Stagehand are external runtimes the owner deploys. What was absent was the code path between VAN and them, and that now exists, fails closed when they are not there, and is driven end to end in the tests.",
+        "runtime_evidence": [
+          "https://github.com/Vanguduza/Van/actions/runs/35613394583"
+        ],
+        "residual": "The private Browser Harness/Stagehand services and authenticated owner profile have not yet been deployed and live-certified on Trading Core with a real model/provider credential and target browsing canaries.",
+        "residual_reason": "Repository closure now contains the services, authority boundary, deployment units and fail-closed tests. Live process/model/profile behavior requires the external Trading Core runtime and credentials.",
         "residual_class": "EXTERNAL_RUNTIME",
         "state": "EXTERNALLY_BLOCKED_REPOSITORY_COMPLETE"
       }
@@ -2413,7 +2425,7 @@
           "backend/tests/test_voice_speaker_authority.py"
         ],
         "runtime_evidence": [
-          "GitHub van-ci after the current closure head"
+          "https://github.com/Vanguduza/Van/actions/runs/35613394583"
         ],
         "residual": "The trained speaker-embedding ONNX model and owner reference embedding are deployment artefacts and are not committed to the repository. Without them Android emits no positive speaker evidence, so consequential voice actions fail safe into biometric approval or refusal according to the gateway policy.",
         "residual_reason": "A trained acoustic model and an owner-derived embedding are runtime/deployment artefacts. Repository closure consists of the pinned runtime, checksum-confined loader, signed transport, authoritative policy, and fail-safe behavior when those artefacts are absent.",

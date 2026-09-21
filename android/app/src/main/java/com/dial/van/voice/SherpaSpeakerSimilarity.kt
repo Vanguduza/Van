@@ -13,10 +13,11 @@ import kotlin.math.sqrt
 /**
  * Local speaker-similarity evidence over a provisioned owner embedding.
  *
- * This is deliberately not an authenticator. It emits a bounded similarity score consumed
- * by SpeakerVerificationPolicy; destructive authority still comes from the paired device
- * and biometric approval. Missing/short/unusable evidence maps to 0.5 (inconclusive), not
- * to a mismatch that could lock the owner out.
+ * This is deliberately not an authenticator. It emits a bounded similarity score that the
+ * paired device signs as fixed-point provenance; the gateway interprets it only after
+ * deterministic action resolution. Destructive authority still comes from the paired
+ * device and biometric approval. Missing/short/unusable evidence maps to 0.5
+ * (inconclusive), not to a mismatch that could lock the owner out.
  */
 class SherpaSpeakerSimilarityScorer private constructor(
     private val extractor: SpeakerEmbeddingExtractor,
