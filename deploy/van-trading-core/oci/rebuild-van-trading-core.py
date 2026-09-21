@@ -218,8 +218,17 @@ def configure_hermes_access(repo):
     py="import re,pathlib,os; p=pathlib.Path.home()/'.ssh/config'; s=p.read_text() if p.exists() else ''; s=re.sub(r'(?ms)^Host van-trading-core\\n(?:^[ \\t].*\\n?)*','',s); p.write_text(s.rstrip()+'\\n\\n'+"+repr(hcfg)+"); os.chmod(p,0o600)"
     ssh('hermes','python3 -c '+shlex.quote(py))
     pipe_secret_to_hermes('/opt/van-trading/secrets/commander.token.hermes','/home/ubuntu/.van/commander.hermes.token')
+    # The owner gateway gets its own mutation principal. It is deliberately not the
+    # Hermes token and is never placed in the Hermes MCP configuration.
+    pipe_secret_to_hermes('/opt/van-trading/secrets/commander.token.van-gateway','/home/ubuntu/.config/van/commander.gateway.token')
     pipe_secret_to_hermes('/opt/van-trading/secrets/pki/ca.crt','/home/ubuntu/.van/van-trading-bridge-ca.crt')
     pipe_secret_to_hermes('/opt/van-trading/secrets/automation/n8n-hermes-api.key','/home/ubuntu/.van/n8n-api.key')
+    gateway_commander_env=(
+        f'VAN_COMMANDER_URL=https://{PRIVATE_IP}:9133\\n'
+        'VAN_COMMANDER_TOKEN_FILE=/home/ubuntu/.config/van/commander.gateway.token\\n'
+        'VAN_COMMANDER_CA_FILE=/home/ubuntu/.van/van-trading-bridge-ca.crt\\n'
+    )
+    remote_write('hermes','/home/ubuntu/.config/van/trading-commander.env',gateway_commander_env,'0600')
     reg=(f'cd {shlex.quote(repo)} && VAN_REPO={shlex.quote(repo)} '
          f'COMMANDER_URL=https://{PRIVATE_IP}:9133 TOKEN_FILE=/home/ubuntu/.van/commander.hermes.token '
          'CA_FILE=/home/ubuntu/.van/van-trading-bridge-ca.crt bash deploy/van-trading-core/hermes/register-commander-mcp.sh')
@@ -229,6 +238,10 @@ def configure_hermes_access(repo):
     ssh('hermes','systemctl --user daemon-reload && systemctl --user enable --now van-trading-core-n8n-tunnel.service',timeout=60)
     env='VAN_TRADING_CORE_HOST=10.0.1.233\nVAN_COMMANDER_URL=https://10.0.1.233:9133\nVAN_N8N_API_URL=http://127.0.0.1:15678/api/v1\n'
     remote_write('hermes','/home/ubuntu/.van/trading-core.env',env,'0600')
+    # Re-read the isolated commander environment immediately. A deployment that
+    # provisions the mutation credential but leaves the gateway on LocalAccountControl
+    # is not a completed account-onboarding path.
+    ssh('hermes','systemctl --user daemon-reload && systemctl --user restart van-gateway.service && systemctl --user is-active --quiet van-gateway.service',timeout=60)
 
 def verify_hermes_access(repo):
     p=ssh('hermes',"curl -fsS -H \"X-N8N-API-KEY: $(cat /home/ubuntu/.van/n8n-api.key)\" 'http://127.0.0.1:15678/api/v1/workflows?limit=1' >/dev/null && echo N8N_HERMES_GREEN",timeout=30)
