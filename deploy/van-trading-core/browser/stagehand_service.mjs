@@ -228,13 +228,14 @@ async function withAliasLock(alias, fn) {
   const previous = aliasLocks.get(alias) || Promise.resolve();
   let release;
   const current = new Promise((resolve) => { release = resolve; });
-  aliasLocks.set(alias, previous.then(() => current));
+  const queued = previous.then(() => current);
+  aliasLocks.set(alias, queued);
   await previous;
   try {
     return await fn();
   } finally {
     release();
-    if (aliasLocks.get(alias) === current) aliasLocks.delete(alias);
+    if (aliasLocks.get(alias) === queued) aliasLocks.delete(alias);
   }
 }
 
