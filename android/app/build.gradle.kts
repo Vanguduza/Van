@@ -265,6 +265,17 @@ dependencies {
     implementation("io.github.webrtc-sdk:android:150.7871.01")
     implementation("com.squareup.okhttp3:okhttp:4.12.0")
 
+    /*
+     * Gate 9 / P1-VOICE-001 — real local wake-word runtime.
+     *
+     * Official sherpa-onnx Android examples publish this exact AAR through JitPack. The
+     * trained KWS model is not embedded here: WakeModelLoader admits a checksum-pinned
+     * owner/deployment bundle from app-private storage. That keeps the executable pinned
+     * while allowing the acoustic model to be replaced only through an explicit artefact
+     * deployment rather than silently changing the APK's authority-sensitive wake edge.
+     */
+    implementation("com.github.k2-fsa.sherpa-onnx:sherpa-onnx:v1.13.8")
+
     debugImplementation("androidx.compose.ui:ui-tooling")
     debugImplementation("androidx.compose.ui:ui-test-manifest")
 
