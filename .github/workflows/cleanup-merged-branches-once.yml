@@ -1,0 +1,99 @@
+name: cleanup-merged-branches-once
+
+on:
+  push:
+    branches:
+      - main
+    paths:
+      - .github/workflows/cleanup-merged-branches-once.yml
+
+permissions:
+  contents: write
+
+jobs:
+  cleanup:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout full repository
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+
+      - name: Delete only branches already fully merged into main
+        shell: bash
+        run: |
+          set -euo pipefail
+          git fetch origin '+refs/heads/*:refs/remotes/origin/*' --prune
+
+          branches=(
+            "claude/integration-plan-review-369mxs"
+            "claude/new-session-v8lvlg"
+            "claude/plan-review-r45a7u"
+            "claude/van-system-audit-ysgtcd"
+            "gpt/all-wip-production-closure-20260918"
+            "gpt/android-dashboard-navigation-20260918"
+            "gpt/caddy-bootstrap-fix-20260918"
+            "gpt/caddy-live-bootstrap-fix-20260918"
+            "gpt/hermes-full-trading-commander-20260921"
+            "gpt/live-trading-core-cert-20260918"
+            "gpt/live-trading-core-cert-final-20260918"
+            "gpt/n8n-provision-hardening-20260918"
+            "gpt/rev3-1-full-knowledge-runtime-20260917"
+            "gpt/rev3-1-owner-runtime-20260917"
+            "gpt/rev31-browser-automation-reconciliation-20260918"
+            "gpt/trading-bootstrap-hardening-20260917"
+            "gpt/van-convergence-20260920"
+          )
+
+          refused=0
+          for branch in "${branches[@]}"; do
+            if ! git show-ref --verify --quiet "refs/remotes/origin/${branch}"; then
+              echo "ALREADY_GONE ${branch}"
+              continue
+            fi
+
+            if git merge-base --is-ancestor "origin/${branch}" "origin/main"; then
+              echo "DELETE ${branch}"
+              git push origin --delete "${branch}"
+            else
+              echo "REFUSE_UNMERGED ${branch}"
+              refused=1
+            fi
+          done
+
+          if [ "${refused}" -ne 0 ]; then
+            echo "At least one candidate was no longer fully merged; nothing unmerged was deleted."
+            exit 1
+          fi
+
+      - name: Verify candidates are gone
+        shell: bash
+        run: |
+          set -euo pipefail
+          remote_heads="$(git ls-remote --heads origin)"
+          branches=(
+            "claude/integration-plan-review-369mxs"
+            "claude/new-session-v8lvlg"
+            "claude/plan-review-r45a7u"
+            "claude/van-system-audit-ysgtcd"
+            "gpt/all-wip-production-closure-20260918"
+            "gpt/android-dashboard-navigation-20260918"
+            "gpt/caddy-bootstrap-fix-20260918"
+            "gpt/caddy-live-bootstrap-fix-20260918"
+            "gpt/hermes-full-trading-commander-20260921"
+            "gpt/live-trading-core-cert-20260918"
+            "gpt/live-trading-core-cert-final-20260918"
+            "gpt/n8n-provision-hardening-20260918"
+            "gpt/rev3-1-full-knowledge-runtime-20260917"
+            "gpt/rev3-1-owner-runtime-20260917"
+            "gpt/rev31-browser-automation-reconciliation-20260918"
+            "gpt/trading-bootstrap-hardening-20260917"
+            "gpt/van-convergence-20260920"
+          )
+          for branch in "${branches[@]}"; do
+            if grep -Fq "refs/heads/${branch}" <<<"${remote_heads}"; then
+              echo "STILL_PRESENT ${branch}"
+              exit 1
+            fi
+          done
+          echo "All fully merged candidate branches were deleted."
