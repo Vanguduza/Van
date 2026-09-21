@@ -46,6 +46,7 @@ AUDIT_ONLY_LABELS = frozenset({
     "browser.download.quarantine",
     "browser.interactive.create",
     "browser.interactive.end",
+    "context.data.ingest",
     "context.export",
     "context.memory.forget",
     "context.owner_fact.forget",
