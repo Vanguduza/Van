@@ -427,15 +427,35 @@
       ],
       "acceptance": "Qualification now fails unless a clean deployed checkout exactly matches VAN_EXPECTED_REPOSITORY_SHA; the report records observed and expected SHA, and rebuild resolves the branch once before provisioning so a moving ref cannot silently change the certified revision.",
       "detail": "Repository closure and runtime qualification are separate claims. This guard makes later Trading Core live evidence causally attributable to a specific canonical commit rather than to whatever checkout happens to be installed."
+    },
+    {
+      "id": "REC-P2-011",
+      "severity": "P2",
+      "title": "Trading Core rebuild resolved a certification SHA but still deployed a moving branch rather than that exact revision",
+      "status": "CLOSED",
+      "disposition": "IMMUTABLE_DEPLOYMENT_SHA_PINNING",
+      "evidence": [
+        "commit:e8b5f9e63d154d6b38588d1b998496a9de59c199",
+        "commit:1d390acb37b99bac46e81a4c097b804b7b571f3f",
+        "commit:6c5a6bc161805ab2d7b5a98c3485359be6c47930",
+        "commit:a9b5f6c904fe51ccd04f09e4a1388b0d6231ab3f",
+        "commit:22c1e2d9b95c07ed6e619b6562d0776bd19799b9",
+        "deploy/van-trading-core/bootstrap.sh",
+        "deploy/van-trading-core/oci/rebuild-van-trading-core.py",
+        "trading/tests/test_oci_trading_topology_bootstrap.py"
+      ],
+      "acceptance": "The externally resolved 40-hex revision is now the revision actually checked out for both first-boot installer source and /opt/van-trading/app; bootstrap rejects malformed revision pins before provisioning, and qualification still independently verifies exact clean HEAD equality.",
+      "detail": "REC-P1-015 made stale/mutated runtime evidence fail closed, but provisioning could still race a moving branch and fail nondeterministically after the external SHA had been selected. Exact-SHA deployment removes that race instead of merely detecting it after installation.",
+      "provenance": "NEWLY_DISCOVERED_DURING_POST_MERGE_AUDIT"
     }
   ],
   "closure_summary": {
-    "closed": 22,
+    "closed": 23,
     "open": 0,
     "external_gate": 8,
     "superseded": 0,
     "merge_ready": true,
-    "reason": "All reconstructed and newly discovered repository-side findings are closed. External/device/runtime gates remain separate. Full PR-head CI run 35621632137 passed on 90756a06e5f6a26be2ad11a9a25afa8dcdf76271; after PR #55 merged as ae96854b85c1ff1c8bcd483cd90cef270c7cf23b, canonical-main van-ci run 35622699643 also passed."
+    "reason": "All reconstructed and newly discovered repository-side findings are closed, including exact-SHA Trading Core deployment pinning discovered during post-merge audit. External/device/runtime gates remain separate. Full PR-head CI run 35621632137 passed on 90756a06e5f6a26be2ad11a9a25afa8dcdf76271; canonical-main van-ci run 35622699643 passed after PR #55. PR #57 carries the post-merge deterministic deployment hardening and must pass full head CI before merge."
   },
   "last_reconciled_against_head": "ae96854b85c1ff1c8bcd483cd90cef270c7cf23b",
   "last_reconciled_ci": {
