@@ -233,10 +233,16 @@ class VanApplication : Application(), VoiceInputCallback, TtsOutputCallback {
         commandController = VanCommandController(
             gatewayClient, appScope, speak = { text -> ttsOutput.speak(text) },
         )
+        val secondPassCoordinator = SherpaLocalSecondPassAsr.fromFiles(this)
+            ?.let(::VoiceSecondPassCoordinator)
         voiceInput = VoiceInputManager(
             context = this,
             callback = this,
             biasingStringsProvider = { personalSpeechModel.biasingStrings(activeSpeechContexts()) },
+            secondPassCoordinator = secondPassCoordinator,
+            personalConfusionProvider = { transcript ->
+                personalSpeechModel.correctionFor(transcript, activeSpeechContexts()) != null
+            },
         )
         voiceSession = VoiceSessionCoordinator(voiceInput, ttsOutput)
         queueReplayer = QueueReplayer(commandQueue, gatewayClient, degradedModeStore, appScope)
