@@ -57,3 +57,32 @@ def test_newly_discovered_findings_are_marked_as_reconstruction_additions():
     ]
     assert additions, "later audit findings must be distinguishable from reconstructed Sol rows"
     assert all(row["status"] == "CLOSED" for row in additions)
+
+def test_post_merge_register_points_at_canonical_main_without_overstating_live_gates():
+    data = _load()
+    reconciliation = data["post_merge_reconciliation"]
+
+    assert data["canonical_branch"] == "main"
+    assert reconciliation["merged_pr"] == 55
+    assert reconciliation["merge_commit"] == "ae96854b85c1ff1c8bcd483cd90cef270c7cf23b"
+    assert reconciliation["certified_pr_head"] == data["last_reconciled_against_head"]
+    assert reconciliation["certified_ci_run"] == data["last_reconciled_ci"]["run_id"]
+    assert data["last_reconciled_ci"]["conclusion"] == "success"
+    assert data["closure_summary"]["merge_ready"] is True
+
+
+def test_external_gate_wording_does_not_erase_already_live_certified_subscopes():
+    data = _load()
+    rows = {row["id"]: row for row in data["findings"]}
+
+    google = rows["REC-P2-004"]
+    assert google["status"] == "EXTERNAL_GATE"
+    assert "non-Workspace" in google["title"]
+    assert "Workspace OAuth itself is already live-certified READY" in google["detail"]
+
+    automation = rows["REC-P2-005"]
+    assert automation["status"] == "EXTERNAL_GATE"
+    assert "end-to-end automation fabric" in automation["title"]
+    assert "n8n runtime was live-certified GREEN" in automation["detail"]
+    assert "current-head end-to-end live re-qualification" in automation["detail"]
+
