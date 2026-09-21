@@ -418,6 +418,8 @@
         "commit:e92d318060db42b1e6fba8e40e9e4a819fdfc6a6",
         "commit:4d3a544d4a7c0a4d0ca4c0eff333a3eeea460219",
         "commit:70c7709beb27bef1a198cae4a03c2fb2a8eb1d55",
+        "commit:8f81debcd9de4141b0ea604ec007aee81629f1ce",
+        "commit:3ef4832bb253d75d4633a845f9184b791b165687",
         "deploy/van-trading-core/qualify.sh",
         "deploy/van-trading-core/oci/rebuild-van-trading-core.py",
         "trading/tests/test_oci_trading_topology_bootstrap.py"
