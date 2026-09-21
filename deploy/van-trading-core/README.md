@@ -29,9 +29,9 @@ dial-hermes-control (10.0.0.184)                 van-trading-core (10.0.1.233)  
 ## Run
 
 ```bash
-sudo bash deploy/van-trading-core/bootstrap.sh --dry-run        # inspect the plan
-sudo bash deploy/van-trading-core/bootstrap.sh                  # idempotent install
-EXPECTED_SHA=<40-hex canonical commit selected for certification>
+EXPECTED_SHA=<40-hex canonical commit selected for deployment and certification>
+sudo bash deploy/van-trading-core/bootstrap.sh --dry-run --commit-sha="$EXPECTED_SHA"  # inspect the exact revision plan
+sudo bash deploy/van-trading-core/bootstrap.sh --commit-sha="$EXPECTED_SHA"            # idempotent exact-revision install
 sudo env VAN_EXPECTED_REPOSITORY_SHA="$EXPECTED_SHA" bash deploy/van-trading-core/qualify.sh
 # JSON report exits 0 only when every required check is GREEN and the deployed clean checkout is exactly EXPECTED_SHA.
 ```
