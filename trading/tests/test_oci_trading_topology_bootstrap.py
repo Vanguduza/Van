@@ -60,8 +60,9 @@ def test_runtime_qualification_is_bound_to_exact_clean_repository_sha():
     assert 'elif (( status_ok == 0 )); then' in qual
     assert 'status --porcelain --untracked-files=all 2>/dev/null || true' not in qual
     assert "repository_exact_sha" in qual
-    assert '"repository_sha"' in qual
-    assert '"expected_repository_sha"' in qual
+    assert "repository_sha:$repository_sha" in qual
+    assert "expected_repository_sha:$expected_repository_sha" in qual
+    assert "jq -n" in qual
 
     assert "def resolve_repository_sha():" in rebuild
     assert "'git','ls-remote',REPO" in rebuild
