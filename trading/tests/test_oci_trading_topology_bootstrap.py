@@ -40,3 +40,20 @@ def test_caddyfile_uses_valid_multiline_handle_blocks_and_bootstrap_validates_it
     assert "handle @automation {\n        reverse_proxy 127.0.0.1:5678\n    }" in text
     boot = BOOTSTRAP.read_text()
     assert "caddy validate --config /etc/caddy/Caddyfile --adapter caddyfile" in boot
+
+def test_runtime_qualification_is_bound_to_exact_clean_repository_sha():
+    qual = QUALIFY.read_text()
+    rebuild = REBUILD.read_text()
+
+    assert "VAN_EXPECTED_REPOSITORY_SHA" in qual
+    assert 'git -C "$APP" rev-parse HEAD' in qual
+    assert 'git -C "$APP" status --porcelain --untracked-files=no' in qual
+    assert "repository_exact_sha" in qual
+    assert '"repository_sha"' in qual
+    assert '"expected_repository_sha"' in qual
+
+    assert "def resolve_repository_sha():" in rebuild
+    assert "'git','ls-remote',REPO" in rebuild
+    assert "EXPECTED_REPOSITORY_SHA" in rebuild
+    assert "repository_sha')!=expected_sha" in rebuild
+
