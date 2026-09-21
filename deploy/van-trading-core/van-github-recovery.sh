@@ -16,7 +16,7 @@ probe() {
   for u in vati-commander.service vati-vekl.service vati-automation.service vati-supabase.service; do
     printf '%s=' "$u"; systemctl is-active "$u" 2>/dev/null || true
   done
-  if [[ -x /home/ubuntu/.local/bin/van-local-commander-mcp ]]; then echo "FULL_DESKTOP_COMMANDER=INSTALLED"; else echo "FULL_DESKTOP_COMMANDER=MISSING"; fi
+  if [[ -x /var/lib/van-commander/.local/bin/van-local-commander-mcp ]]; then echo "FULL_DESKTOP_COMMANDER=INSTALLED"; else echo "FULL_DESKTOP_COMMANDER=MISSING"; fi
 }
 
 case "$ACTION" in
@@ -43,7 +43,7 @@ case "$ACTION" in
   recover_trading_chatgpt_sessions)
     # Full Desktop Commander is stdio/on-demand, not a daemon. Verify its installation
     # and leave session reconstruction to Hermes' durable session registry.
-    [[ -x /home/ubuntu/.local/bin/van-local-commander-mcp ]] || { echo "FULL_DESKTOP_COMMANDER=MISSING" >&2; exit 6; }
+    [[ -x /var/lib/van-commander/.local/bin/van-local-commander-mcp ]] || { echo "FULL_DESKTOP_COMMANDER=MISSING" >&2; exit 6; }
     echo "CHATGPT_SESSION_RECOVERY=DELEGATED_TO_HERMES"
     echo "FULL_DESKTOP_COMMANDER=READY"
     ;;
