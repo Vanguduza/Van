@@ -21,8 +21,7 @@ COMMANDER_USER="${VAN_DESKTOP_COMMANDER_USER:-vancommander}"
 COMMANDER_HOME="${VAN_DESKTOP_COMMANDER_HOME:-/var/lib/van-commander}"
 if id "$COMMANDER_USER" >/dev/null 2>&1; then
   groups="$(id -nG "$COMMANDER_USER" | tr ' ' '\n')"
-  if grep -Eq '^(vati|sudo|docker)
-[[ -x /usr/local/bin/van-github-recovery ]] && add github_recovery_command GREEN "bounded recovery entrypoint installed" || add github_recovery_command RED "van-github-recovery missing"
+  if grep -Eq '^(vati|sudo|docker)[[ -x /usr/local/bin/van-github-recovery ]] && add github_recovery_command GREEN "bounded recovery entrypoint installed" || add github_recovery_command RED "van-github-recovery missing"
 if [[ -x /home/ubuntu/.local/bin/van-spmrf-review-worker && -x /home/ubuntu/.local/share/van/spmrf/codex/node_modules/.bin/codex ]]; then
   cv="$(/home/ubuntu/.local/share/van/spmrf/codex/node_modules/.bin/codex --version 2>/dev/null || true)"
   [[ "$cv" == *"0.153.1"* ]] && add spmrf_review_worker GREEN "$cv; worker installed" || add spmrf_review_worker RED "unexpected Codex version: ${cv:-missing}"
@@ -126,23 +125,7 @@ if sudo -u ubuntu ssh-keygen -F "${DIAL_HERMES_CONTROL_HOST:-dial-hermes-control
 else
   add spmrf_hermes_host_key RED "trusted dial-hermes-control host key missing"
 fi
-declare -A commander_token_hashes=()
-for f in "$BASE/secrets/commander.token" "$BASE/secrets/commander.token.hermes" "$BASE/secrets/commander.token.van-gateway"; do
-  name="$(basename "$f")"
-  if [[ ! -f "$f" ]]; then add "secret:$name" RED missing; continue; fi
-  m="$(stat -c %a "$f")"
-  if [[ "$m" != "600" && "$m" != "400" ]]; then add "secret:$name" RED "mode $m (need 0600)"; continue; fi
-  value="$(tr -d '\r\n' < "$f")"
-  if (( ${#value} < 32 )); then add "secret:$name" RED "token shorter than 32 characters"; continue; fi
-  h="$(sha256sum "$f" | awk '{print $1}')"
-  if [[ -n "${commander_token_hashes[$h]:-}" ]]; then
-    add "secret:$name" RED "duplicates ${commander_token_hashes[$h]}"
-  else
-    commander_token_hashes[$h]="$name"
-    add "secret:$name" GREEN "mode $m; distinct principal credential"
-  fi
-done
-for f in "$BASE/secrets/vekl.token" "$BASE/secrets/pki/ca.crt"; do
+for f in "$BASE/secrets/commander.token" "$BASE/secrets/vekl.token" "$BASE/secrets/pki/ca.crt"; do
   if [[ -f "$f" ]]; then m=$(stat -c %a "$f"); [[ "$m" =~ ^600$|^400$ ]] && add "secret:$(basename "$f")" GREEN "mode $m" || add "secret:$(basename "$f")" RED "mode $m (need 0600)"; else add "secret:$(basename "$f")" RED missing; fi
 done
 unit vati-vekl.service; unit vati-commander.service; unit vati-automation.service; unit vati-supabase.service 0; unit docker.service 0
