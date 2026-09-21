@@ -34,6 +34,7 @@ private class SherpaKeywordDetector(
     private val lock = Any()
     private val spotter: KeywordSpotter
     private var stream: OnlineStream
+    private var detectionLatchFrames: Int = 0
 
     init {
         val config = KeywordSpotterConfig(
@@ -78,11 +79,19 @@ private class SherpaKeywordDetector(
                 // The admitted keywords file contains exactly one phrase identity. Any
                 // non-empty KWS result therefore means the model decoded "Hey Van".
                 detected = true
+                detectionLatchFrames = DETECTION_LATCH_FRAMES
                 spotter.reset(stream)
                 break
             }
         }
-        if (detected) DETECTED_SCORE else 0f
+        if (detected) {
+            DETECTED_SCORE
+        } else if (detectionLatchFrames > 0) {
+            detectionLatchFrames--
+            DETECTED_SCORE
+        } else {
+            0f
+        }
     }
 
     private fun pcm16ToFloat(pcm16: ByteArray): FloatArray {
@@ -94,5 +103,9 @@ private class SherpaKeywordDetector(
     companion object {
         private const val MAX_DECODE_STEPS_PER_FRAME = 64
         private const val DETECTED_SCORE = 0.99f
+        // Independent decoders can finalize on adjacent trailing-blank frames. Holding the
+        // positive edge briefly lets the two-stage policy compare the same utterance
+        // instead of requiring both native decoders to emit on the exact same 100 ms frame.
+        private const val DETECTION_LATCH_FRAMES = 8
     }
 }
