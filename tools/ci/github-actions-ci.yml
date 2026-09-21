@@ -26,7 +26,9 @@ jobs:
           python-version: "3.12"
       - name: Install backend dependencies
         working-directory: backend
-        run: pip install -r requirements.txt
+        # GAP-F-017 — installed from the exact-pinned lock, not the floating spec, so this
+        # run resolves the same dependency set the release host does.
+        run: pip install -r requirements.lock
       # Layer A — static truth and policy. This runs FIRST and blocks the rest.
       # The audit's core defect was capabilities described as BUILT that no production
       # path invoked. This gate makes that a CI failure rather than a later discovery.
@@ -226,3 +228,39 @@ jobs:
           name: van-visual-evidence
           path: artifacts/release/preview/
           if-no-files-found: error
+
+  # GAP-F-023 — tools/audit/mutation_suite.py exists, is correct, and was reachable from
+  # nowhere but a developer's own terminal: a mutation the suite fails to catch is a test
+  # that would not have noticed the bug it names, and nothing was reading that signal on
+  # any PR. Non-blocking on purpose: a survivor is a test-quality finding to triage, not a
+  # reason to hold up every other change on this branch while it is investigated, and it
+  # must never become a load-bearing step the other gates depend on.
+  mutation:
+    runs-on: ubuntu-latest
+    continue-on-error: true
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+      - uses: actions/setup-java@v4
+        with:
+          distribution: temurin
+          java-version: "17"
+      - name: Install backend dependencies
+        working-directory: backend
+        run: pip install -r requirements.lock
+      - name: Mutation testing (non-blocking)
+        working-directory: backend
+        timeout-minutes: 45
+        continue-on-error: true
+        run: |
+          mkdir -p ../artifacts/mutation
+          python ../tools/audit/mutation_suite.py 2>&1 | tee ../artifacts/mutation/mutation-report.txt
+      - name: Upload mutation report
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: van-mutation-report
+          path: artifacts/mutation/mutation-report.txt
+          if-no-files-found: warn

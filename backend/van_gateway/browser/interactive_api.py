@@ -264,6 +264,15 @@ def build_interactive_router(
         session = await _owned(request, session_id)
         if session.state.is_terminal:
             raise HTTPException(status_code=409, detail="interactive_session_ended")
+        if not signal_url:
+            # GAP-F-016 — the router mounts on `browser_stream_signing_key_file` alone
+            # (app.py), so a host with a signing key but no signal URL would otherwise
+            # mint a verifiable-looking grant that points nowhere. A device that
+            # negotiates against an empty endpoint reports a transport error, which
+            # looks like a stream host outage rather than the configuration defect it
+            # actually is. Refusing here makes the mount condition's blind spot
+            # harmless regardless of what app.py checks before including this router.
+            raise HTTPException(status_code=503, detail="BROWSER_STREAM_UNCONFIGURED")
         try:
             token, claims = await grants.mint(
                 session_id=session.session_id,
@@ -276,6 +285,15 @@ def build_interactive_router(
             )
         except StreamGrantError as exc:
             raise HTTPException(status_code=400, detail=str(exc)) from exc
+        if session.connected_at_ms is None:
+            # §28.1 — "session created to first stream grant", not "time to first frame":
+            # the Gateway never sees a frame, so it only ever reports what it can measure.
+            # `connected_at_ms` is set once the session reaches INTERACTIVE (first WebRTC
+            # connect), so a grant minted before that has not been recorded yet is the
+            # first one — every later grant on this session is a reconnect.
+            instruments.record_browser_connect(
+                max(0, (int(time.time() * 1000) - session.created_at_ms))
+            )
         return {
             "session_id": session.session_id,
             "state": session.state.value,

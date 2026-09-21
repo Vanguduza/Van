@@ -59,12 +59,20 @@ trap 'rm -rf "$STAGE"' EXIT
 mkdir -p "$STAGE/backend"
 cp -a "$ROOT/backend/van_gateway" "$STAGE/backend/"
 cp "$ROOT/backend/requirements.txt" "$STAGE/backend/requirements.txt"
+cp "$ROOT/backend/requirements.lock" "$STAGE/backend/requirements.lock"
 cp -a "$ROOT/registries" "$STAGE/registries"
+# GAP-F-018/021 — `qualify_gateway_host.sh` reports the deployed commit on a GREEN
+# qualification. The staged runtime is a plain `cp -a`, not a git checkout, so the SHA has
+# to be captured here, at the one point that still has the source tree's git metadata.
+git -C "$ROOT" rev-parse HEAD > "$STAGE/DEPLOYED_SHA" 2>/dev/null || echo "unknown" > "$STAGE/DEPLOYED_SHA"
 
 if [[ ! -x "$VENV/bin/python" ]]; then
   python3 -m venv "$VENV"
 fi
-"$VENV/bin/python" -m pip install --quiet -r "$STAGE/backend/requirements.txt"
+# GAP-F-017 — install from the exact-pinned lock, not the floating spec. Two installs of
+# the same commit must resolve to the same bytes; requirements.txt alone cannot promise
+# that once any dependency ships a new release between them.
+"$VENV/bin/python" -m pip install --quiet -r "$STAGE/backend/requirements.lock"
 
 rm -rf "$RUNTIME_ROOT.previous"
 if [[ -d "$RUNTIME_ROOT" ]]; then

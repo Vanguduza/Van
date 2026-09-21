@@ -124,10 +124,6 @@ def record_browser_connect(duration_ms: float, registry: MetricsRegistry = REGIS
     registry.observe("van_browser_session_connect_ms", max(duration_ms, 0.0))
 
 
-def record_browser_input_dispatch(duration_ms: float, registry: MetricsRegistry = REGISTRY) -> None:
-    registry.observe("van_browser_input_dispatch_ms", max(duration_ms, 0.0))
-
-
 def record_control_preempt(duration_ms: float, registry: MetricsRegistry = REGISTRY) -> None:
     """§26 gives owner takeover acknowledgement a 100ms target.
 
@@ -135,10 +131,6 @@ def record_control_preempt(duration_ms: float, registry: MetricsRegistry = REGIS
     "Take over" felt instant, and the owner's judgement of the whole feature rests on it.
     """
     registry.observe("van_browser_control_preempt_ms", max(duration_ms, 0.0))
-
-
-def record_agent_grant(state: object, registry: MetricsRegistry = REGISTRY) -> None:
-    registry.increment("van_browser_agent_grant_total", labels={"state": _clean(state)})
 
 
 def record_download(state: object, registry: MetricsRegistry = REGISTRY) -> None:

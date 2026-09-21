@@ -287,7 +287,15 @@ class GoogleIdentityBroker:
 class GoogleCapabilityRouter:
     """Deterministic planner only; Hermes owns actual agent execution."""
 
+    #: GAP-F-025 — a capability is *selectable as a candidate* (its credential plane has
+    #: something behind it) in either state, but only READY is the execution predicate
+    #: that `capability/readiness.py`'s `GoogleMeshReadiness` enforces ("CONFIGURED is not
+    #: READY", docs/EXTERNAL_GATES.md). Two predicates for the same fact is exactly how the
+    #: router used to plan a job on a CONFIGURED capability that the readiness surface would
+    #: refuse to execute. USABLE_STATES stays the wider "can be planned" set; EXECUTION_READY
+    #: is the narrower one that decides whether `plan()` may report `status="planned"`.
     USABLE_STATES = {GoogleCapabilityState.READY, GoogleCapabilityState.CONFIGURED}
+    EXECUTION_READY_STATES = {GoogleCapabilityState.READY}
 
     def __init__(self, store: Store, broker: GoogleIdentityBroker) -> None:
         self.store = store
@@ -347,6 +355,24 @@ class GoogleCapabilityRouter:
                     GoogleCapabilityState.RATE_LIMITED,
                 }:
                     degraded.append("ANTIGRAVITY_CAPACITY_LIMITED")
+            if status.state not in self.EXECUTION_READY_STATES:
+                # GAP-F-025 — CONFIGURED is recorded (the job row exists, PLANNED, so the
+                # work is not lost when the capability finishes verifying) but never
+                # reported as executable. A caller that only branches on
+                # `status == "planned"` must never see that here; it must be told the
+                # capability is not ready the same way `GoogleMeshReadiness.is_ready`
+                # would tell it.
+                return GoogleRouteDecision(
+                    status="degraded",
+                    capability_id=descriptor.capability_id,
+                    fallback_capability_id=descriptor.fallback,
+                    state=status.state,
+                    identity_alias=descriptor.identity_alias,
+                    action_class=request.action_class,
+                    reason="CONFIGURED_IS_NOT_READY",
+                    job_id=job_id,
+                    degraded=[*degraded, "CONFIGURED_IS_NOT_READY"],
+                )
             return GoogleRouteDecision(
                 status="planned",
                 capability_id=descriptor.capability_id,

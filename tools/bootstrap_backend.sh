@@ -6,6 +6,8 @@ cd "$ROOT/backend"
 python3 -m venv .venv
 # shellcheck disable=SC1091
 source .venv/bin/activate
-pip install -r requirements.txt
+# GAP-F-017 — install from the exact-pinned lock so a local bootstrap resolves the same
+# dependency set CI and the release host do.
+pip install -r requirements.lock
 pytest -q
 echo "VAN gateway bootstrap OK"

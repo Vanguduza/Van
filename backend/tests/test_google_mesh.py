@@ -90,9 +90,16 @@ async def test_antigravity_route_exposes_delegated_identity(tmp_path):
     broker = GoogleIdentityBroker(store, registry, consumer_connected_capabilities="antigravity")
     await broker.register_principal(subject="worker-subject", owner_id="antigravity_worker_account")
     decision = await GoogleCapabilityRouter(store, broker).plan(GoogleRouteRequest(owner_intent_id="intent-dev", intent="development", action_class=ActionClass.A2))
-    assert decision.status == "planned"
+    # GAP-F-025 — antigravity is only CONFIGURED here (evidence was never raised to
+    # READY), so the router must report the same "not ready to execute" verdict
+    # `GoogleMeshReadiness` would, even though it is still the selected candidate.
+    assert decision.status == "degraded"
+    assert decision.reason == "CONFIGURED_IS_NOT_READY"
     assert decision.capability_id == "antigravity"
     assert decision.identity_alias == "antigravity_worker_account"
+    assert decision.job_id
+    job = await GoogleCapabilityRouter(store, broker).job(decision.job_id)
+    assert job["status"] == "PLANNED"
 
 
 @pytest.mark.asyncio
@@ -102,7 +109,11 @@ async def test_runtime_route_is_deterministic_and_persisted(tmp_path):
     await broker.register_principal(subject="sub-2", ai_plan="PRO")
     router = GoogleCapabilityRouter(store, broker)
     decision = await router.plan(GoogleRouteRequest(owner_intent_id="intent-1", intent="deep_research", action_class=ActionClass.A2, input_refs=["artifact://a", "artifact://b"]))
-    assert decision.status == "planned" and decision.capability_id == "deep_research" and decision.job_id
+    # GAP-F-025 — gemini_runtime_configured only gets the capability to CONFIGURED, not
+    # READY, so the route is recorded (a job exists) but reported degraded rather than
+    # planned; execution needs READY evidence, exactly like `GoogleMeshReadiness`.
+    assert decision.status == "degraded" and decision.reason == "CONFIGURED_IS_NOT_READY"
+    assert decision.capability_id == "deep_research" and decision.job_id
     job = await router.job(decision.job_id)
     assert job["capability_id"] == "deep_research" and job["status"] == "PLANNED" and len(job["input_hash"]) == 64
 
@@ -168,6 +179,60 @@ async def test_a3_google_job_requires_explicit_grant(tmp_path):
     await broker.register_principal(subject="sub-grant", ai_plan="PRO")
     decision = await GoogleCapabilityRouter(store, broker).plan(GoogleRouteRequest(owner_intent_id="intent-no-grant", intent="development", action_class=ActionClass.A3, project_id="gtr", truth_sha="truth-sha"))
     assert decision.status == "degraded" and "capability grant" in decision.reason
+
+
+@pytest.mark.asyncio
+async def test_ready_evidence_is_the_only_state_that_plans_as_executable(tmp_path):
+    """GAP-F-025 — one predicate. `status == "planned"` must mean the same thing the
+    capability readiness registry's `GoogleMeshReadiness.is_ready` means: READY, not
+    CONFIGURED."""
+    store = Store(str(tmp_path / "mesh.sqlite3")); await store.migrate()
+    broker = GoogleIdentityBroker(store, GoogleCapabilityRegistry(registry_path()), consumer_connected_capabilities="antigravity")
+    await broker.register_principal(subject="sub-ready")
+    await broker.register_principal(subject="sub-ready-worker", owner_id="antigravity_worker_account")
+    await broker.record_capability_evidence(
+        "antigravity", state=GoogleCapabilityState.READY, evidence_pointer="live://antigravity/ready",
+    )
+    decision = await GoogleCapabilityRouter(store, broker).plan(
+        GoogleRouteRequest(owner_intent_id="intent-ready", intent="development", action_class=ActionClass.A2)
+    )
+    assert decision.status == "planned"
+    assert decision.state == GoogleCapabilityState.READY
+    assert decision.capability_id == "antigravity"
+
+
+@pytest.mark.asyncio
+async def test_configured_capabilities_can_never_be_reported_as_executable(tmp_path):
+    """GAP-F-025 acceptance criterion: CONFIGURED capabilities cannot be executed.
+
+    Sweeps every capability the registry declares an executor for, forces its evidence to
+    CONFIGURED, and asserts the router never reports `status == "planned"` for it — the
+    exact contradiction the router and `capability/readiness.py` used to disagree about.
+    """
+    store = Store(str(tmp_path / "mesh.sqlite3")); await store.migrate()
+    registry = GoogleCapabilityRegistry(registry_path())
+    broker = GoogleIdentityBroker(store, registry)
+    await broker.register_principal(subject="sub-configured-sweep")
+    for alias in registry.delegated_identities:
+        await broker.register_principal(subject=f"sub-{alias}", owner_id=alias)
+    router = GoogleCapabilityRouter(store, broker)
+    for descriptor in registry.list():
+        if not descriptor.executable or not descriptor.intents:
+            continue
+        await broker.record_capability_evidence(
+            descriptor.capability_id,
+            state=GoogleCapabilityState.CONFIGURED,
+            evidence_pointer=f"config://{descriptor.capability_id}",
+            owner_id=descriptor.identity_alias,
+        )
+        decision = await router.plan(
+            GoogleRouteRequest(
+                owner_intent_id=f"intent-{descriptor.capability_id}",
+                intent=descriptor.intents[0],
+                action_class=ActionClass.A2,
+            )
+        )
+        assert decision.status != "planned", descriptor.capability_id
 
 
 @pytest.mark.asyncio
@@ -245,9 +310,15 @@ async def test_antigravity_capacity_limited_falls_back_to_jules(tmp_path):
     decision = await GoogleCapabilityRouter(store, broker).plan(
         GoogleRouteRequest(owner_intent_id="dev-1", intent="development", action_class=ActionClass.A2)
     )
-    assert decision.status == "planned"
+    # GAP-F-025 — jules is only CONFIGURED (explicit evidence, never READY), so even
+    # though it is the fallback the router selects, the decision must not read as
+    # executable. Both degraded reasons travel together: the fallback happened because
+    # antigravity is capacity-limited, and the capability it fell back to is not READY.
+    assert decision.status == "degraded"
+    assert decision.reason == "CONFIGURED_IS_NOT_READY"
     assert decision.capability_id == "jules"
     assert decision.identity_alias == "owner_google_account"
     assert "ANTIGRAVITY_CAPACITY_LIMITED" in decision.degraded
+    assert "CONFIGURED_IS_NOT_READY" in decision.degraded
     ag = await broker.capability_status("antigravity")
     assert ag.state == GoogleCapabilityState.CAPACITY_LIMITED

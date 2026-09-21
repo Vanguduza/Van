@@ -26,8 +26,6 @@ from enum import Enum
 
 from pydantic import BaseModel, Field
 
-from van_gateway.storage.db import Store
-
 PROTOCOL_VERSION = 1
 
 
@@ -213,7 +211,3 @@ class CommandAdmission(str, Enum):
     #: Same key, different payload. Never executed: one of the two is not what the owner
     #: asked for, and the Gateway cannot tell which.
     CONFLICT = "CONFLICT"
-
-
-def store_dumps(value: object) -> str:
-    return Store.dumps(value)
