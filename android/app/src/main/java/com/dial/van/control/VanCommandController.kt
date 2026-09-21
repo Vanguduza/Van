@@ -470,6 +470,7 @@ class VanCommandController(
                 expiresAtUnix = command.expiresAtUnix,
                 noStaleReplay = command.noStaleReplay,
                 speechEvidenceRef = command.speechEvidenceRef,
+                speakerEvidenceMilli = command.speakerEvidenceMilli,
             )
         }.getOrNull() ?: return false
         return store(body, needsReconfirm)
