@@ -28,6 +28,8 @@ import com.dial.van.browser.PersistedBrowserSession
 import com.dial.van.telemetry.DeviceTelemetryReporter
 import com.dial.van.visual.VanLiveVisualState
 import com.dial.van.voice.PersonalSpeechModel
+import com.dial.van.voice.SherpaLocalSecondPassAsr
+import com.dial.van.voice.SherpaSpeakerSimilarityScorer
 import com.dial.van.voice.SpeechContext
 import com.dial.van.voice.SpeechSyncFrame
 import com.dial.van.voice.TtsOutputCallback
