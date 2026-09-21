@@ -589,12 +589,16 @@ class VanApplication : Application(), VoiceInputCallback, TtsOutputCallback {
                 speechEvidenceRef = result.speechEvidenceRef,
             )
         }
+        // Re-arm only when this was the exact turn opened by WakeCoordinator. Manual voice
+        // turns have no active wake turn and therefore cannot enable background listening.
+        wakeCoordinator.commandTurnFinished(turnId = result.turnId)
     }
 
     override fun onError(code: Int) {
         voiceUi.error(code)
         VanLiveVisualState.warning(urgency = 0.25f)
         VanLiveVisualState.settleToIdle(delayMs = 1_200L, allowCritical = true)
+        wakeCoordinator.commandTurnFinished()
     }
 
     override fun onListeningChanged(listening: Boolean) {
