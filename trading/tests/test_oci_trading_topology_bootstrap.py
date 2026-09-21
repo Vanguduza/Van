@@ -49,6 +49,9 @@ def test_runtime_qualification_is_bound_to_exact_clean_repository_sha():
     assert 'git -C "$APP" rev-parse HEAD' in qual
     assert 'git -C "$APP" status --porcelain --untracked-files=all' in qual
     assert "--untracked-files=no" not in qual
+    assert 'dirty="$(git -C "$APP" status --porcelain --untracked-files=all 2>/dev/null)" || status_ok=0' in qual
+    assert 'elif (( status_ok == 0 )); then' in qual
+    assert 'status --porcelain --untracked-files=all 2>/dev/null || true' not in qual
     assert "repository_exact_sha" in qual
     assert '"repository_sha"' in qual
     assert '"expected_repository_sha"' in qual
