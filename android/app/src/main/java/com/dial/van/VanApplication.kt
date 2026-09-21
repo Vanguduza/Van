@@ -38,6 +38,7 @@ import com.dial.van.voice.VanVoiceUiStore
 import com.dial.van.voice.VoiceInputCallback
 import com.dial.van.voice.VoiceInputManager
 import com.dial.van.voice.VoiceRecognitionResult
+import com.dial.van.voice.VoiceSecondPassCoordinator
 import com.dial.van.voice.VoiceSessionCoordinator
 import com.dial.van.voice.VoiceAudioArbiter
 import com.dial.van.voice.WakeAcknowledgementManager
