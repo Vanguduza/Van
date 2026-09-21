@@ -14,7 +14,7 @@
 # Linux. The MT5 bridge worker runs on a Windows host (windows/mt5_worker) and this VM holds only
 # the bridge CLIENT (mTLS). The script records that fact instead of pretending.
 #
-# Usage:  sudo bash bootstrap.sh [--dry-run] [--with-nautilus] [--repo-url URL] [--branch NAME] [--skip-supabase] [--skip-docker]
+# Usage:  sudo bash bootstrap.sh [--dry-run] [--with-nautilus] [--repo-url URL] [--branch NAME] [--commit-sha 40HEX] [--skip-supabase] [--skip-docker]
 # Re-running is safe; each step checks its own state.
 # =============================================================================
 set -euo pipefail
@@ -22,9 +22,10 @@ set -euo pipefail
 DRY_RUN=0; WITH_NAUTILUS=0; SKIP_SUPABASE=0; SKIP_DOCKER=0; PUBLIC_HOST="${VAN_PUBLIC_HOST:-}"
 REPO_URL="${VAN_REPO_URL:-https://github.com/Vanguduza/Van.git}"
 BRANCH="${VAN_BRANCH:-main}"
+COMMIT_SHA="${VAN_COMMIT_SHA:-}"
 for a in "$@"; do case "$a" in
   --dry-run) DRY_RUN=1;; --with-nautilus) WITH_NAUTILUS=1;; --skip-supabase) SKIP_SUPABASE=1;; --skip-docker) SKIP_DOCKER=1;;
-  --repo-url=*) REPO_URL="${a#*=}";; --branch=*) BRANCH="${a#*=}";; --public-host=*) PUBLIC_HOST="${a#*=}";;
+  --repo-url=*) REPO_URL="${a#*=}";; --branch=*) BRANCH="${a#*=}";; --commit-sha=*) COMMIT_SHA="${a#*=}";; --public-host=*) PUBLIC_HOST="${a#*=}";;
   *) echo "unknown arg $a" >&2; exit 2;; esac; done
 
 BASE=/opt/van-trading; APP=$BASE/app; VENV=$BASE/venv; SECRETS=$BASE/secrets; CONFIG=$BASE/config; DATA=/var/lib/van-trading; LOGS=/var/log/van-trading
@@ -33,6 +34,7 @@ HERE="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
 STEPS=(); ok() { STEPS+=("OK   $1"); echo "[bootstrap] OK   $1"; }; skip() { STEPS+=("SKIP $1"); echo "[bootstrap] SKIP $1"; }; plan() { STEPS+=("PLAN $1"); echo "[bootstrap] PLAN $1"; }
 run() { if (( DRY_RUN )); then plan "$*"; else "$@"; fi; }
 die() { echo "[bootstrap] ERROR: $*" >&2; exit 1; }
+[[ -z "$COMMIT_SHA" || "$COMMIT_SHA" =~ ^[0-9a-f]{40}$ ]] || die "--commit-sha must be an exact 40-hex Git commit"
 
 # ---------------------------------------------------------------- preflight
 ARCH="$(uname -m)"; . /etc/os-release 2>/dev/null || true
@@ -113,9 +115,31 @@ ok "layout under $BASE, $DATA, $LOGS"
 
 # ---------------------------------------------------------------- repo
 if [[ -d "$APP/.git" ]]; then
-  run sudo -u vati git -C "$APP" fetch -q origin "$BRANCH"; run sudo -u vati git -C "$APP" checkout -q "$BRANCH"; run sudo -u vati git -C "$APP" reset -q --hard "origin/$BRANCH"; ok "repo updated to origin/$BRANCH"
+  if [[ -n "$COMMIT_SHA" ]]; then
+    if (( DRY_RUN )); then
+      plan "fetch and pin existing repo to exact commit $COMMIT_SHA"
+    else
+      sudo -u vati git -C "$APP" fetch -q origin "$BRANCH"
+      sudo -u vati git -C "$APP" cat-file -e "$COMMIT_SHA^{commit}" 2>/dev/null || sudo -u vati git -C "$APP" fetch -q origin "$COMMIT_SHA"
+      sudo -u vati git -C "$APP" checkout -q --detach "$COMMIT_SHA"
+      sudo -u vati git -C "$APP" reset -q --hard "$COMMIT_SHA"
+    fi
+    ok "repo pinned to exact commit $COMMIT_SHA"
+  else
+    run sudo -u vati git -C "$APP" fetch -q origin "$BRANCH"; run sudo -u vati git -C "$APP" checkout -q "$BRANCH"; run sudo -u vati git -C "$APP" reset -q --hard "origin/$BRANCH"; ok "repo updated to origin/$BRANCH"
+  fi
 else
-  run sudo -u vati git clone -q --branch "$BRANCH" "$REPO_URL" "$APP"; ok "repo cloned ($BRANCH)"
+  if [[ -n "$COMMIT_SHA" ]]; then
+    if (( DRY_RUN )); then
+      plan "clone repo and pin exact commit $COMMIT_SHA"
+    else
+      sudo -u vati git clone -q "$REPO_URL" "$APP"
+      sudo -u vati git -C "$APP" checkout -q --detach "$COMMIT_SHA"
+    fi
+    ok "repo cloned at exact commit $COMMIT_SHA"
+  else
+    run sudo -u vati git clone -q --branch "$BRANCH" "$REPO_URL" "$APP"; ok "repo cloned ($BRANCH)"
+  fi
 fi
 
 # ---------------------------------------------------------------- full Hermes subordinate Commander + GitHub recovery
