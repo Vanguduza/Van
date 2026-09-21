@@ -7,6 +7,8 @@ routing, and a fallback may never relax controls (INV-MODEL-001).
 
 from __future__ import annotations
 
+from decimal import Decimal
+
 import pytest
 
 from vati.cognition.contracts import ModelRole

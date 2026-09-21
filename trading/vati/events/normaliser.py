@@ -132,7 +132,13 @@ class ReleaseNormaliser:
             name=sched.name,
             tier=cls.tier if cls is not None else sched.tier,
             currencies=tuple(sched.currencies),
-            released_ms=record.first_observed_ms or sched.scheduled_ms,
+            # Reaction horizons are measured from when the release printed, not
+            # from when our transport first observed it.  Arrival latency is preserved
+            # separately by CalendarRecorder.first_observed_ms/latency_ms.
+            released_ms=min(
+                (o.released_ms for o in record.observations),
+                default=sched.scheduled_ms,
+            ),
             actual=record.agreed_actual,
             forecast=sched.forecast,
             previous=sched.previous,
