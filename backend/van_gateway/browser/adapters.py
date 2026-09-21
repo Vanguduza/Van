@@ -147,6 +147,7 @@ class HttpBrowserHarnessAdapter(_PrivateWorkerClient):
         return {
             "task_id": task.task_id,
             "profile_alias": task.profile_alias,
+            "target_domain": task.target_domain,
             # §381 — the worker is told, every call, that it is not allowed to
             # author helpers. The worker enforces it; the gateway asserts it.
             "mode": "PRODUCTION_ACTUATOR",
@@ -236,6 +237,7 @@ class StagehandAdapter(_PrivateWorkerClient):
         return {
             "task_id": task.task_id,
             "profile_alias": task.profile_alias,
+            "target_domain": task.target_domain,
             "model_provider": self.model_provider,
             "model_name": self.model_name,
             "allow_model_self_selection": False,
@@ -274,24 +276,19 @@ class StagehandAdapter(_PrivateWorkerClient):
     async def agent(
         self, task: BrowserTask, goal: str, *, max_steps: int, assignment_id: str, turn_id: str
     ) -> dict[str, Any]:
-        """L5 — an assigned, bounded run.
+        """Direct Stagehand agent loops are forbidden in production.
 
-        The assignment is mandatory: a bare "go and do this" has no budget and no
-        attribution, which is the difference between a subagent and an independent
-        loop. `BrowserSubagentRunner` is the supported caller.
+        L5 is implemented by `HybridBrowserWorker`: Stagehand proposes one observed
+        action, `BrowserSubagentRunner` enforces Hermes's immutable assignment, then that
+        one action is replayed. Keeping this method as a hard refusal preserves API
+        compatibility while preventing a future caller from bypassing the per-step gate.
         """
         if self.max_tier.ordinal < AutonomyTier.L5_STAGEHAND_AGENT.ordinal:
             raise BrowserPolicyError("stagehand_agent_not_permitted_at_current_tier")
         if max_steps < 1 or max_steps > 50:
             raise BrowserPolicyError("stagehand_agent_requires_bounded_step_budget")
         assert_not_automated_payment(goal=goal, domain=task.target_domain, context="stagehand_agent")
-        return await self._call(
-            "/agent",
-            self._envelope(
-                task, goal=goal, max_steps=max_steps,
-                assignment_id=assignment_id, turn_id=turn_id,
-            ),
-        )
+        raise BrowserPolicyError("direct_stagehand_agent_loop_forbidden")
 
     async def status(self) -> ExternalRuntimeStatus:  # type: ignore[override]
         return await super().status("BROWSER_SEMANTIC_UNAVAILABLE")

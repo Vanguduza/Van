@@ -107,8 +107,16 @@ class WakeCoordinator(
             }
     }
 
-    /** Called after final STT/error. Re-arms on the same arbiter capture where supported. */
-    fun commandTurnFinished(rearm: Boolean = true): Boolean {
+    /**
+     * Called after final STT/error for a wake-originated turn.
+     *
+     * A manual Voice button turn must never silently enable always-listening mode, so an
+     * absent or mismatched wake turn is a no-op. The final-result path supplies the exact
+     * turn id; error callbacks without one may finish only the currently active wake turn.
+     */
+    fun commandTurnFinished(turnId: String? = null, rearm: Boolean = true): Boolean {
+        val active = activeTurnId ?: return false
+        if (turnId != null && turnId != active) return false
         activeTurnId = null
         return if (rearm) arm() else {
             disarm(stopCapture = false)

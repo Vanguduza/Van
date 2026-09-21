@@ -1,5 +1,6 @@
 from __future__ import annotations
 
+from contextlib import contextmanager
 from decimal import Decimal
 
 import pytest
@@ -7,7 +8,7 @@ import pytest
 from conftest import intent, mandate_dict, snapshot
 from vati.core import EventKind, Ledger
 from vati.execution import (
-    DerivAdapter, ExecutionRouter, Mt5BridgeAdapter, Mt5BridgeClient, Outcome, OwnerTicketAdapter, PaperAdapter, ProtectionError, ProtectionManager,
+    DerivAdapter, ExecutionReceipt, ExecutionRouter, Mt5BridgeAdapter, Mt5BridgeClient, Outcome, OwnerTicketAdapter, PaperAdapter, ProtectionError, ProtectionManager,
     ReconciliationClass, RouterError, StopMode, VenuePosition, VenueUnavailable, compute_tca, map_deriv_contract, reconcile, review_trade,
 )
 from vati.execution.reconciliation import LedgerPosition
@@ -28,6 +29,65 @@ def approved(mandate, eurusd, **it):
 def router(adapter, ledger=None, ks=None):
     led = ledger or Ledger()
     return ExecutionRouter(ledger=led, adapters={adapter.venue: adapter}, kill_switch=ks or KillSwitch(), protection=ProtectionManager()), led
+
+
+def test_router_holds_submission_guard_through_command_submit_receipt_and_protection(mandate, eurusd):
+    active = {"guard": False}
+    observed = []
+
+    @contextmanager
+    def submission_guard(epoch):
+        assert epoch == 7
+        active["guard"] = True
+        try:
+            yield True
+        finally:
+            active["guard"] = False
+
+    class ProbeLedger(Ledger):
+        def append(self, event):
+            if event.kind in (EventKind.ORDER_COMMAND, EventKind.EXECUTION_RECEIPT):
+                observed.append((event.kind.value, active["guard"]))
+                assert active["guard"], f"{event.kind.value} escaped the submission guard"
+            return super().append(event)
+
+    class ProbeProtection(ProtectionManager):
+        def register(self, *args, **kwargs):
+            observed.append(("PROTECTION_REGISTER", active["guard"]))
+            assert active["guard"], "protection registration escaped the submission guard"
+            return super().register(*args, **kwargs)
+
+    class ProbePaper(PaperAdapter):
+        def submit(self, cmd, *, now_ms):
+            observed.append(("ADAPTER_SUBMIT", active["guard"], cmd.lease_epoch))
+            assert active["guard"], "adapter.submit escaped the lease submission guard"
+            return super().submit(cmd, now_ms=now_ms)
+
+    m = TradingMandate.from_mapping(
+        mandate_dict(venue="paper", mode="DEMO_TRADER"))
+    contract = SymbolContract(**{**eurusd.__dict__, "venue": "paper"})
+    i, d = approved(
+        m, contract, venue="paper", strategy_state=StrategyState.DEMO)
+    adapter = ProbePaper()
+    ledger = ProbeLedger()
+    protection = ProbeProtection()
+    r = ExecutionRouter(
+        ledger=ledger,
+        adapters={"paper": adapter},
+        kill_switch=KillSwitch(),
+        protection=protection,
+        lease_fence=lambda epoch: epoch == 7,
+        lease_submission_guard=submission_guard,
+    )
+    rec = r.execute(i, d, m, now_ms=NOW, lease_epoch=7)
+    assert rec.status == "FILLED"
+    assert not active["guard"]
+    assert ("ORDER_COMMAND", True) in observed
+    assert ("ADAPTER_SUBMIT", True, 7) in observed
+    assert ("EXECUTION_RECEIPT", True) in observed
+    assert ("PROTECTION_REGISTER", True) in observed
+    assert ledger.count(EventKind.ORDER_COMMAND) == 1
+    assert ledger.count(EventKind.EXECUTION_RECEIPT) == 1
 
 
 def test_router_happy_path_paper(mandate, eurusd):
@@ -117,9 +177,52 @@ def test_protection_break_even_and_trailing():
     assert [x.reason for x in ins] == ["TRAIL"] and pm.stop_of("P1") == Decimal("1.1015")
     assert pm.on_mark("EURUSD", Decimal("1.1020"), Decimal("1.1021"), now_ms=4) == []  # pullback never loosens
     ins = pm.on_mark("EURUSD", Decimal("1.1020"), Decimal("1.1021"), now_ms=10_001)
-    assert ins[0].reason == "TIME_STOP" and "P1" not in pm.rules
+    assert ins[0].reason == "TIME_STOP"
+    assert "P1" in pm.rules and pm.is_close_pending("P1")
+    assert pm.on_mark("EURUSD", Decimal("1.1020"), Decimal("1.1021"), now_ms=10_002) == []
+    pm.close_failed("P1")
+    assert pm.on_mark("EURUSD", Decimal("1.1020"), Decimal("1.1021"), now_ms=10_003)
+    pm.close_confirmed("P1")
+    assert "P1" not in pm.rules
     with pytest.raises(ProtectionError):
         pm.register("P2", symbol="X", direction=Direction.LONG, entry=Decimal("1"), stop=Decimal("2"), target=None, opened_ms=0)
+
+
+def test_rejected_venue_stop_tighten_rolls_back_local_truth_and_halts(mandate, eurusd):
+    class RejectModifyPaper(PaperAdapter):
+        def modify_stop(self, position_id, new_stop, *, now_ms):
+            p = self._positions[position_id]
+            return ExecutionReceipt(
+                p["intent"], "", self.venue, "REJECTED", Decimal("0"), None,
+                p["entry"], p["entry"], p["entry"], True, now_ms, now_ms,
+                broker_position_id=position_id,
+                protective_stop_price=p["stop"],
+                reject_reason="injected_stop_modify_reject",
+            ).sealed()
+
+    m = TradingMandate.from_mapping(
+        mandate_dict(venue="paper", mode="DEMO_TRADER"))
+    i, d = approved(
+        m, SymbolContract(**{**eurusd.__dict__, "venue": "paper"}),
+        venue="paper", strategy_state=StrategyState.DEMO)
+    ad = RejectModifyPaper()
+    ks = KillSwitch()
+    r, led = router(ad, ks=ks)
+    rec = r.execute(i, d, m, now_ms=NOW)
+    pid = rec.broker_position_id
+    original_stop = r.protection.stop_of(pid)
+    r.protection.rules[pid].break_even_trigger = Decimal("0.0005")
+
+    out = r.apply_exits(
+        "paper", "EURUSD",
+        i.entry + Decimal("0.0010"), i.entry + Decimal("0.0011"),
+        now_ms=NOW + 1_000,
+    )
+    assert out and out[0].status == "REJECTED"
+    assert r.protection.stop_of(pid) == original_stop
+    assert ad.positions()[0].stop_price == original_stop
+    assert KillSwitchTrigger.STOP_REJECTED in ks.active
+    assert led.count(EventKind.KILL_SWITCH) == 1
 
 
 def test_owner_ticket_channel_for_zse():
@@ -142,6 +245,39 @@ def test_owner_ticket_channel_for_zse():
         ad.confirm(t.ticket_id, fill_price=Decimal("25.50"), filled_qty=Decimal("1500"), contract_note_ref="CN-1", now_ms=NOW)
     conf = ad.confirm(t.ticket_id, fill_price=Decimal("24.90"), filled_qty=Decimal("1500"), contract_note_ref="CN-1", now_ms=NOW + 1000)
     assert conf.status == "OWNER_EXECUTED" and ad.positions()[0].loss_model is LossModel.ILLIQUID_EQUITY
+    with pytest.raises(ValueError, match="already confirmed"):
+        ad.confirm(t.ticket_id, fill_price=Decimal("24.90"), filled_qty=Decimal("1500"), contract_note_ref="CN-1", now_ms=NOW + 1001)
+
+    # A software-stop close is a durable SELL ticket, not an immediate close.
+    pid = ad.positions()[0].position_id
+    r.protection.register(
+        pid, symbol="DELTA", direction=Direction.LONG,
+        entry=Decimal("24.90"), stop=Decimal("22.50"), target=None,
+        opened_ms=NOW + 1000, software_stop=True,
+    )
+    exits = r.apply_exits(
+        "zse", "DELTA", Decimal("22.40"), Decimal("22.41"),
+        now_ms=NOW + 2000,
+    )
+    assert exits[0].status == "ACCEPTED"
+    assert ad.positions() and r.protection.is_close_pending(pid)
+    assert led.count(EventKind.OWNER_TICKET) == 2
+    # Pending-close state suppresses duplicate SELL tickets.
+    assert r.apply_exits(
+        "zse", "DELTA", Decimal("22.30"), Decimal("22.31"),
+        now_ms=NOW + 3000,
+    ) == []
+    sell = [ticket for ticket in ad.tickets.values() if ticket.side == "SELL"][0]
+    sell_fill = ad.confirm(
+        sell.ticket_id, fill_price=Decimal("22.30"),
+        filled_qty=Decimal("1500"), contract_note_ref="CN-SELL",
+        now_ms=NOW + 4000,
+    )
+    assert sell_fill.status == "OWNER_EXECUTED"
+    assert sell_fill.broker_position_id == pid
+    assert ad.positions() == []
+    r.protection.close_confirmed(pid)
+    assert pid not in r.protection.rules
     # a SHORT never becomes a ticket
     bad = ad.submit(__import__("vati.execution", fromlist=["OrderCommand"]).OrderCommand("x", "h", "k", "zse_primary", "zse", "DELTA", Direction.SHORT, "LIMIT", Decimal("100"), Decimal("25"), None, StopMode.SOFTWARE, LossModel.ILLIQUID_EQUITY).sealed(), now_ms=NOW)
     assert bad.status == "REJECTED"
@@ -204,6 +340,17 @@ def test_reconciliation_classes_and_gate():
     assert reconcile(ledger[:1], venue[:1], account_verified=False).permit_new_orders is False
     nostop = reconcile([LedgerPosition("a", "EURUSD", Decimal("0.2"), Decimal("1.09"))], [VenuePosition("1", "EURUSD", Direction.LONG, Decimal("0.2"), Decimal("1.1"), None, "a")], account_verified=True)
     assert ReconciliationClass.STOP_MISSING.value in nostop.counts() and not nostop.permit_new_orders
+
+
+    attributed_but_unrecovered = reconcile(
+        [],
+        [VenuePosition(
+            "existing", "EURUSD", Direction.LONG, Decimal("0.2"),
+            Decimal("1.1"), Decimal("1.09"), "known-intent")],
+        account_verified=True,
+    )
+    assert attributed_but_unrecovered.counts()[ReconciliationClass.ORPHAN_VENUE_POSITION.value] == 1
+    assert not attributed_but_unrecovered.permit_new_orders
 
 
 def test_tca_and_review_and_admission():

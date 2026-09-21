@@ -46,6 +46,11 @@ import sys
 from collections import defaultdict
 from pathlib import Path
 
+# The scanner is shared with the compile gate: see tools/audit/kotlin_source.py for
+# why it is one implementation rather than two.
+sys.path.insert(0, str(Path(__file__).resolve().parent))
+from kotlin_source import strip_noise  # noqa: E402
+
 ROOT = Path(__file__).resolve().parents[2]
 APP = ROOT / "android" / "app" / "src" / "main" / "java"
 MANIFEST = ROOT / "android" / "app" / "src" / "main" / "AndroidManifest.xml"
@@ -89,18 +94,7 @@ def _kotlin_files(base: Path) -> list[Path]:
     return sorted(base.rglob("*.kt")) if base.is_dir() else []
 
 
-def _strip_noise(text: str) -> str:
-    """Remove comments and string literals before counting references.
-
-    A symbol named in a KDoc paragraph is documentation, not a call site. Counting it would
-    make every well-documented dead class look alive — which is precisely the confusion this
-    whole programme exists to correct.
-    """
-    text = re.sub(r"/\*.*?\*/", " ", text, flags=re.DOTALL)
-    text = re.sub(r"//[^\n]*", " ", text)
-    text = re.sub(r'"""(?:.|\n)*?"""', ' "" ', text)
-    text = re.sub(r'"(?:[^"\\\n]|\\.)*"', ' "" ', text)
-    return text
+_strip_noise = strip_noise
 
 
 def _declarations(text: str) -> set[str]:

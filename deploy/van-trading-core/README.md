@@ -37,10 +37,22 @@ sudo bash deploy/van-trading-core/qualify.sh                    # JSON report; e
 Then on `dial-hermes-control`:
 
 ```bash
-scp van-trading-core:/opt/van-trading/secrets/commander.token ~/.van/commander.token && chmod 600 ~/.van/commander.token
+scp van-trading-core:/opt/van-trading/secrets/commander.token.hermes ~/.van/commander.hermes.token && chmod 600 ~/.van/commander.hermes.token
 scp van-trading-core:/opt/van-trading/secrets/pki/ca.crt ~/.van/van-trading-bridge-ca.crt
 bash deploy/van-trading-core/hermes/register-commander-mcp.sh --dry-run && bash deploy/van-trading-core/hermes/register-commander-mcp.sh
+bash deploy/van-trading-core/hermes/install-full-commander-transport.sh
+bash deploy/van-trading-core/hermes/register-full-desktop-commander-mcp.sh
+bash deploy/van-trading-core/hermes/qualify-full-desktop-commander-mcp.sh
 ```
+
+The bounded trading-domain Commander authenticates Hermes with `commander.token.hermes`. The owner gateway receives the separate `commander.token.van-gateway` through the deployment path and uses it only for credential/strategy mutations. The full machine/session Commander runs as the isolated `vancommander` account, not `ubuntu` or `vati`.
+
+The independent SPMRF model reviewer runs as `vanreviewer` with no `sudo`, `docker`, or `vati` group membership. Its ChatGPT/Codex OAuth is paired once under that identity:
+
+```bash
+sudo -u vanreviewer -H /var/lib/van-reviewer/.local/share/van/spmrf/codex/node_modules/.bin/codex login
+```
+
 
 ## Plugging in an account
 
@@ -73,6 +85,8 @@ the reverse, refuses to start (safety identity mismatch).
 - The PostgreSQL ledger is tested on a real PostgreSQL 16 (`trading/tests/test_infra_live.py`).
 
 ## What only the VM can verify
+
+The commander uses three distinct HMAC identities: legacy commander (non-sensitive compatibility), hermes (bounded agent tools), and van-gateway (credential/strategy mutations only). They must never share token values.
 
 Package installation on arm64, Supabase image pulls, systemd activation, ufw, and the commander over the
 private VCN. `qualify.sh` is the acceptance instrument for those; its JSON belongs in the implementation ledger.

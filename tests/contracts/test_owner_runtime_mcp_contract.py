@@ -14,6 +14,7 @@ REGISTER = ROOT / "tools" / "hermes" / "register_owner_runtime_mcp.sh"
 
 REQUIRED_TOOLS = {
     "runtime_status",
+    "mission_result",
     "resolve_command",
     "context_graph_query",
     "context_lexical_query",
@@ -27,6 +28,15 @@ REQUIRED_TOOLS = {
     "notebook_enterprise_get",
     "notebook_consumer_ask",
     "knowledge_action_execute",
+    "google_status",
+    "google_capabilities",
+    "google_gmail_search",
+    "google_calendar_agenda",
+    "google_drive_search",
+    "google_contacts_resolve",
+    "google_tasks_list",
+    "google_job_plan",
+    "google_action_execute",
     "research_status",
     "research_search",
     "action_begin",
@@ -41,6 +51,13 @@ def test_owner_runtime_mcp_has_fixed_narrow_surface():
     for tool in REQUIRED_TOOLS:
         assert f"name: '{tool}'" in text
     assert "/v1/runtime/context/facts" not in text
+    assert "/v1/runtime/missions/result" in text
+    assert "this tool cannot assert verified success" in text.lower()
+    mission_tool = re.search(
+        r"name: 'mission_result'.*?additionalProperties: false", text, re.S
+    )
+    assert mission_tool is not None
+    assert "VERIFIED_SUCCESS" not in mission_tool.group(0)
     assert "/v1/runtime/context/edges" not in text
     assert "/v1/runtime/context/lexical/query" in text
     assert "/v1/runtime/context/hot-capsules" in text
@@ -135,3 +152,29 @@ def test_knowledge_mutation_tool_is_authorized_execution_only():
     assert "knowledge_action_execute: { method: 'POST'" in text
     assert "/knowledge/notebook/enterprise/create" not in text
     assert "/knowledge/notebook/consumer/note" not in text
+
+def test_google_mcp_surface_is_read_or_plan_only():
+    text = SHIM.read_text(encoding="utf-8")
+    for path in (
+        "/v1/google/status",
+        "/v1/google/capabilities",
+        "/v1/google/gmail/search",
+        "/v1/google/calendar/agenda",
+        "/v1/google/drive/search",
+        "/v1/google/contacts/resolve",
+        "/v1/google/tasks",
+        "/v1/google/jobs/plan",
+    ):
+        assert path in text
+    # Mutating Workspace routes must not be raw MCP tools. They have caller-supplied
+    # approval parameters today and therefore need the Action Runtime boundary first.
+    assert "/v1/google/gmail/send" not in text
+    assert "/v1/google/gmail/draft" not in text
+    assert "/v1/google/calendar/reschedule" not in text
+    assert "/v1/google/actions/execute" in text
+    action_tool = re.search(
+        r"name: 'google_action_execute'.*?additionalProperties: false", text, re.S
+    )
+    assert action_tool is not None
+    assert "approved" not in action_tool.group(0).lower()
+

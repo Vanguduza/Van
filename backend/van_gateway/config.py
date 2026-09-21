@@ -2,6 +2,7 @@ from __future__ import annotations
 
 from functools import lru_cache
 
+from pydantic import AliasChoices, Field
 from pydantic_settings import BaseSettings, SettingsConfigDict
 
 
@@ -35,9 +36,18 @@ class Settings(BaseSettings):
     vati_lake_root: str = "data/vati_lake"
     vati_reporting_currency: str = "USD"
     vati_secrets_dir: str = "data/vati_secrets"
-    van_commander_url: str = ""
-    van_commander_token_file: str = ""
-    van_commander_ca_file: str = ""
+    # These fields predate the global VAN_ settings prefix and therefore retain a
+    # "van_" Python name. Explicit aliases prevent the accidental VAN_VAN_* environment
+    # spelling while accepting it for backwards compatibility.
+    van_commander_url: str = Field(
+        "", validation_alias=AliasChoices("VAN_COMMANDER_URL", "VAN_VAN_COMMANDER_URL")
+    )
+    van_commander_token_file: str = Field(
+        "", validation_alias=AliasChoices("VAN_COMMANDER_TOKEN_FILE", "VAN_VAN_COMMANDER_TOKEN_FILE")
+    )
+    van_commander_ca_file: str = Field(
+        "", validation_alias=AliasChoices("VAN_COMMANDER_CA_FILE", "VAN_VAN_COMMANDER_CA_FILE")
+    )
     van_public_base_url: str = "http://127.0.0.1:8787"
     vati_deriv_app_id: str = "1089"
 
@@ -172,6 +182,51 @@ class Settings(BaseSettings):
     #: backup; a week is often enough to catch a format or permission change before the
     #: night it matters.
     backup_drill_interval_seconds: int = 604_800
+
+    # ---- Remote Browser Rev 1.5 -------------------------------------------------
+    #
+    # Empty is the honest default. There is no Browser Stream Host in this deployment
+    # until the owner provisions one (RB-002/RB-010), and a gateway that invents a signal
+    # URL would hand the phone an endpoint that does not answer — §42.5's "integrated
+    # because a dependency exists", one layer down.
+    #: PEM file holding the dedicated ES256 grant-signing private key (§5.5). Empty means
+    #: no grant can be minted, so the interactive routes are not mounted at all.
+    browser_stream_signing_key_file: str = ""
+    #: Mandatory `kid`. Rotation keeps the previous verifier for an overlap window on the
+    #: stream host; the Gateway signs with exactly one.
+    browser_stream_signing_kid: str = "browser-stream-signing-1"
+    #: Where the device performs SDP/ICE signalling. §6.4: never `van-trading-core`, which
+    #: is private and holds the Browser Fabric's authority.
+    browser_stream_signal_url: str = ""
+    #: JSON array of ICE servers, passed through to the device verbatim. Deployment
+    #: configuration, not owner authority.
+    browser_stream_ice_servers: str = "[]"
+
+    # ---- owner-device binding (§0D.3) -------------------------------------------
+    #
+    #: The package the attestation must name. Fixed by the build, not by deployment.
+    owner_device_package: str = "com.dial.van"
+    #: SHA-256 of the app signing certificate the owner's build is signed with. Empty
+    #: disables enrolment entirely: there is no weaker binding to fall back to, and
+    #: §0E.1 D5 forbids inventing one.
+    owner_device_signing_cert_sha256: str = ""
+    #: Comma-separated Google attestation root fingerprints. Empty means the root is
+    #: recorded but not pinned, which is the honest state until one has been observed from
+    #: the owner's own device (RB-120).
+    owner_device_attestation_roots: str = ""
+    #: ADR-RB-025 — whether a privileged owner request from an *unbound* device is
+    #: refused outright. A bound device is always held to its proof; this decides what
+    #: happens before enrolment has run. False keeps an already-paired phone working on
+    #: its device token alone, which is the honest state of a deployment mid-migration;
+    #: True is where a finished deployment ends up, and the transition is the owner's to
+    #: make rather than a default that locks them out on upgrade.
+    require_device_binding: bool = False
+
+    # ---- signed connectivity configuration (ADR-RB-024/027) ---------------------
+    #: PEM private key that signs connectivity manifests. Empty means this deployment
+    #: publishes none, and the device keeps whatever it was provisioned with.
+    connectivity_signing_key_file: str = ""
+    connectivity_signing_kid: str = "connectivity-1"
 
 
 @lru_cache

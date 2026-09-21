@@ -313,6 +313,146 @@ class MissionService:
             await self.learning.record_decision_outcome(refreshed, state=refreshed.state)
         return refreshed
 
+    async def for_hermes_run(self, hermes_run_id: str) -> Mission | None:
+        """Resolve a Hermes run through the durable mission-event ledger.
+
+        The run binding is written when the mission reaches RUNNING. Keeping the mapping in
+        the event ledger rather than an in-memory dictionary means a gateway restart cannot
+        make a still-running Hermes job anonymous. More than one mission for one run is a
+        corruption, not something to guess through.
+        """
+        run_id = hermes_run_id.strip()
+        if not run_id:
+            raise MissionError("HERMES_RUN_ID_REQUIRED")
+        rows = await self.store.fetchall(
+            "SELECT DISTINCT mission_id FROM mission_events "
+            "WHERE evidence_ref = ? ORDER BY mission_id LIMIT 2",
+            (f"hermes-run:{run_id}",),
+        )
+        if not rows:
+            return None
+        if len(rows) != 1:
+            raise MissionError("HERMES_RUN_BINDING_AMBIGUOUS", run_id)
+        return await self.get(str(rows[0]["mission_id"]))
+
+    async def apply_hermes_result(
+        self,
+        *,
+        hermes_run_id: str,
+        outcome: str,
+        summary: str = "",
+    ) -> Mission:
+        """Project Hermes execution state onto the Mission without trusting success.
+
+        Hermes may report lifecycle, never VERIFIED_SUCCESS. A completed run enters
+        VERIFYING and reaches success only through the mission's independent verifier.
+        Duplicate callbacks are idempotent; conflicting terminal callbacks fail closed.
+        """
+        mission = await self.for_hermes_run(hermes_run_id)
+        if mission is None:
+            raise MissionError("HERMES_RUN_UNBOUND", hermes_run_id)
+
+        outcome = outcome.strip().upper()
+        allowed = {"COMPLETED", "FAILED", "WAITING_FOR_OWNER", "WAITING_EXTERNAL"}
+        if outcome not in allowed:
+            raise MissionError("HERMES_RESULT_UNSUPPORTED", outcome)
+
+        if mission.is_terminal:
+            compatible = (
+                outcome == "COMPLETED"
+                and mission.state in {
+                    MissionState.VERIFIED_SUCCESS,
+                    MissionState.PARTIAL_SUCCESS,
+                    MissionState.UNVERIFIABLE,
+                }
+            ) or (outcome == "FAILED" and mission.state is MissionState.FAILED)
+            if compatible:
+                return mission
+            raise MissionError("HERMES_RESULT_CONFLICT", f"{outcome}->{mission.state.value}")
+
+        if mission.state in {MissionState.WAITING_EXTERNAL, MissionState.RESUME_AUTHORIZED}:
+            if outcome in {"COMPLETED", "FAILED"}:
+                mission = await self.transition(
+                    mission.mission_id,
+                    target=MissionState.RUNNING,
+                    expected=mission.state,
+                    actor=PrincipalType.HERMES_AGENT,
+                    summary="Hermes resumed execution before reporting a result",
+                )
+
+        if outcome == "WAITING_EXTERNAL":
+            if mission.state is MissionState.WAITING_EXTERNAL:
+                return mission
+            return await self.transition(
+                mission.mission_id,
+                target=MissionState.WAITING_EXTERNAL,
+                expected=mission.state,
+                actor=PrincipalType.HERMES_AGENT,
+                summary=summary or "Hermes is waiting on an external dependency",
+            )
+
+        if outcome == "WAITING_FOR_OWNER":
+            if mission.state is MissionState.WAITING_FOR_OWNER:
+                return mission
+            return await self.transition(
+                mission.mission_id,
+                target=MissionState.WAITING_FOR_OWNER,
+                expected=mission.state,
+                actor=PrincipalType.HERMES_AGENT,
+                summary=summary or "Hermes needs an owner decision",
+            )
+
+        if outcome == "FAILED":
+            return await self.transition(
+                mission.mission_id,
+                target=MissionState.FAILED,
+                expected=mission.state,
+                actor=PrincipalType.HERMES_AGENT,
+                summary=summary or "Hermes reported that execution failed",
+                final_outcome=summary or "execution failed",
+            )
+
+        if mission.state is not MissionState.RUNNING:
+            raise MissionError("HERMES_RESULT_STATE_INVALID", f"{mission.state.value}->COMPLETED")
+        mission = await self.transition(
+            mission.mission_id,
+            target=MissionState.VERIFYING,
+            expected=MissionState.RUNNING,
+            actor=PrincipalType.HERMES_AGENT,
+            summary=summary or "Hermes reported execution complete; verifying independently",
+        )
+
+        if not mission.success_contract.is_checkable:
+            return await self.transition(
+                mission.mission_id,
+                target=MissionState.UNVERIFIABLE,
+                expected=MissionState.VERIFYING,
+                actor=PrincipalType.SYSTEM,
+                summary="Hermes finished, but VAN has no independent postcondition it can check",
+                final_outcome=summary or "execution completed without an independently checkable result",
+            )
+
+        try:
+            return await self.transition(
+                mission.mission_id,
+                target=MissionState.VERIFIED_SUCCESS,
+                expected=MissionState.VERIFYING,
+                actor=PrincipalType.SYSTEM,
+                summary="Independent postcondition verification passed",
+                final_outcome=summary or "execution completed and independently verified",
+            )
+        except MissionError as exc:
+            if exc.code != "MISSION_VERIFICATION_INSUFFICIENT":
+                raise
+            return await self.transition(
+                mission.mission_id,
+                target=MissionState.UNVERIFIABLE,
+                expected=MissionState.VERIFYING,
+                actor=PrincipalType.SYSTEM,
+                summary="Hermes finished, but independent verification was insufficient",
+                final_outcome=summary or "execution completed but could not be independently verified",
+            )
+
     async def set_deadline(self, mission_id: str, deadline_ms: int) -> None:
         """P0-EXEC-002 — when VAN should stop believing it will hear back."""
         await self.store.execute(

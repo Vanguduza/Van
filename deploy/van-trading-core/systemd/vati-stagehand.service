@@ -1,0 +1,46 @@
+[Unit]
+Description=VAN private Stagehand semantic browser worker
+After=network-online.target vati-browser-harness.service
+Wants=network-online.target
+Requires=vati-browser-harness.service
+StartLimitIntervalSec=300
+StartLimitBurst=5
+
+[Service]
+Type=simple
+User=van-browser
+Group=van-browser
+EnvironmentFile=/opt/van-trading/config/browser-runtime.env
+WorkingDirectory=/opt/van-browser-runtime
+ExecStart=/usr/bin/node /opt/van-browser-runtime/stagehand_service.mjs
+Restart=on-failure
+RestartSec=5
+TimeoutStartSec=45
+TimeoutStopSec=15
+
+# Stagehand may contact the explicitly configured model provider, but it shares no shell,
+# raw cookie or generic CDP HTTP surface with Hermes/Gateway.
+NoNewPrivileges=true
+PrivateTmp=true
+ProtectSystem=strict
+ProtectHome=true
+ReadWritePaths=/var/lib/van-trading/browser /var/lib/van-trading/evidence/browser /run/van-browser /var/log/van-trading/browser
+ReadOnlyPaths=/opt/van-browser-runtime /opt/van-trading/config/browser-runtime.env
+RestrictAddressFamilies=AF_UNIX AF_INET AF_INET6
+RestrictNamespaces=true
+LockPersonality=true
+MemoryDenyWriteExecute=false
+CapabilityBoundingSet=
+AmbientCapabilities=
+UMask=0077
+
+CPUWeight=20
+IOWeight=20
+MemoryAccounting=true
+CPUAccounting=true
+TasksAccounting=true
+MemoryMax=1536M
+TasksMax=384
+
+[Install]
+WantedBy=multi-user.target

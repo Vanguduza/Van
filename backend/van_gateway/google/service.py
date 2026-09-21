@@ -3,11 +3,14 @@ from __future__ import annotations
 import base64
 import hashlib
 import time
+from datetime import datetime
 from typing import Any
 
 from cryptography.fernet import Fernet, InvalidToken
 
-from van_gateway.models import ActionClass, DegradedCode, GoogleConnectionStatus
+from van_gateway.action.models import ExecutionStatus, VerificationObservation
+from van_gateway.action.service import ActionPolicyError, ActionRuntime
+from van_gateway.models import DegradedCode, GoogleConnectionStatus
 from van_gateway.storage.db import Store
 
 
@@ -128,23 +131,173 @@ class GoogleService:
         token = await self._api_token(owner_id)
         return await self._require_transport().gmail_draft(token, thread_id, body)
 
-    async def gmail_send(self, draft_id: str, *, action_class: ActionClass, approved: bool, owner_id: str = "owner") -> dict:
-        if action_class == ActionClass.A5:
-            raise GoogleAuthError("prohibited")
-        if action_class == ActionClass.A4 and not approved:
-            raise GoogleAuthError("approval_required")
+    async def gmail_draft_get(self, draft_id: str, *, owner_id: str = "owner") -> dict:
+        token = await self._api_token(owner_id)
+        return await self._require_transport().gmail_draft_get(token, draft_id)
+
+    async def gmail_send(self, draft_id: str, *, owner_id: str = "owner") -> dict:
         token = await self._api_token(owner_id)
         return await self._require_transport().gmail_send(token, draft_id)
+
+    async def gmail_message_get(self, message_id: str, *, owner_id: str = "owner") -> dict:
+        token = await self._api_token(owner_id)
+        return await self._require_transport().gmail_message_get(token, message_id)
 
     async def calendar_agenda(self, *, owner_id: str = "owner") -> list[dict]:
         token = await self._api_token(owner_id)
         return await self._require_transport().calendar_agenda(token)
 
-    async def calendar_reschedule(self, event_id: str, new_start_unix: int, *, approved: bool, owner_id: str = "owner") -> dict:
-        if not approved:
-            raise GoogleAuthError("approval_required")
+    async def calendar_reschedule(self, event_id: str, new_start_unix: int, *, owner_id: str = "owner") -> dict:
         token = await self._api_token(owner_id)
         return await self._require_transport().calendar_reschedule(token, event_id, new_start_unix)
+
+    async def calendar_event_get(self, event_id: str, *, owner_id: str = "owner") -> dict:
+        token = await self._api_token(owner_id)
+        return await self._require_transport().calendar_event_get(token, event_id)
+
+    async def execute_authorized_action(
+        self,
+        actions: ActionRuntime,
+        *,
+        execution_id: str,
+        parameters: dict[str, Any],
+    ) -> dict[str, Any]:
+        """Execute a Workspace mutation only after canonical action authorization.
+
+        The internal-control token authenticates the runtime; it is not owner approval.
+        Parameter digest equality prevents Hermes or another internal caller from changing
+        the object or content after the signed command was authorized. A second provider
+        read is required before VERIFIED_SUCCESS can be emitted.
+        """
+        execution = await actions.get_execution(execution_id)
+        if execution is None:
+            raise ActionPolicyError("unknown_execution")
+        if execution.status is not ExecutionStatus.AUTHORIZED:
+            raise ActionPolicyError("execution_not_authorized")
+        if execution.parameters_digest != actions.digest_parameters(parameters):
+            raise ActionPolicyError("authorized_parameter_mismatch")
+        if execution.action_id not in {
+            "google.gmail.draft",
+            "google.gmail.send",
+            "google.calendar.reschedule",
+        }:
+            raise ActionPolicyError("google_action_not_supported")
+
+        await actions.mark_executing(execution_id)
+        try:
+            if execution.action_id == "google.gmail.draft":
+                thread_id = str(parameters["thread_id"])
+                body = str(parameters["body"])
+                provider = await self.gmail_draft(thread_id, body)
+                object_id = str(provider.get("id") or "")
+                if not object_id:
+                    raise GoogleAuthError("gmail_draft_id_missing")
+                correlation = {"draft_id": object_id}
+                pointer = f"google://gmail/drafts/{object_id}"
+                await actions.mark_submitted(
+                    execution_id, correlation=correlation, evidence_pointer=pointer
+                )
+                await actions.mark_verifying(execution_id)
+                try:
+                    observed = await self.gmail_draft_get(object_id)
+                    message = dict(observed.get("message") or {})
+                    success = (
+                        str(observed.get("id") or "") == object_id
+                        and str(message.get("threadId") or "") == thread_id
+                        and str(message.get("raw") or "") == body
+                    )
+                except Exception:
+                    success, observed = False, {}
+                receipt = await actions.verify(
+                    VerificationObservation(
+                        execution_id=execution_id,
+                        success=success,
+                        partial=not success,
+                        correlation=correlation,
+                        observed_postcondition={
+                            "draft_id": object_id,
+                            "thread_id": str((observed.get("message") or {}).get("threadId") or ""),
+                        },
+                        evidence_pointer=pointer,
+                    )
+                )
+                return {"provider": provider, "verification": receipt.model_dump(mode="json")}
+
+            if execution.action_id == "google.gmail.send":
+                draft_id = str(parameters["draft_id"])
+                provider = await self.gmail_send(draft_id)
+                message_id = str(provider.get("id") or "")
+                if not message_id:
+                    raise GoogleAuthError("gmail_sent_message_id_missing")
+                correlation = {"message_id": message_id}
+                pointer = f"google://gmail/messages/{message_id}"
+                await actions.mark_submitted(
+                    execution_id, correlation=correlation, evidence_pointer=pointer
+                )
+                await actions.mark_verifying(execution_id)
+                try:
+                    observed = await self.gmail_message_get(message_id)
+                    labels = {str(item) for item in observed.get("labelIds") or []}
+                    success = str(observed.get("id") or "") == message_id and "SENT" in labels
+                except Exception:
+                    success, observed = False, {}
+                receipt = await actions.verify(
+                    VerificationObservation(
+                        execution_id=execution_id,
+                        success=success,
+                        partial=not success,
+                        correlation=correlation,
+                        observed_postcondition={
+                            "message_id": str(observed.get("id") or ""),
+                            "sent": "SENT" in {str(item) for item in observed.get("labelIds") or []},
+                        },
+                        evidence_pointer=pointer,
+                    )
+                )
+                return {"provider": provider, "verification": receipt.model_dump(mode="json")}
+
+            event_id = str(parameters["event_id"])
+            new_start_unix = int(parameters["new_start_unix"])
+            provider = await self.calendar_reschedule(event_id, new_start_unix)
+            correlation = {"event_id": str(provider.get("id") or event_id)}
+            pointer = f"google://calendar/events/{event_id}"
+            await actions.mark_submitted(
+                execution_id, correlation=correlation, evidence_pointer=pointer
+            )
+            await actions.mark_verifying(execution_id)
+            try:
+                observed = await self.calendar_event_get(event_id)
+                raw = str((observed.get("start") or {}).get("dateTime") or "")
+                parsed = datetime.fromisoformat(raw.replace("Z", "+00:00"))
+                success = (
+                    str(observed.get("id") or "") == event_id
+                    and int(parsed.timestamp()) == new_start_unix
+                )
+            except Exception:
+                success, observed = False, {}
+            receipt = await actions.verify(
+                VerificationObservation(
+                    execution_id=execution_id,
+                    success=success,
+                    partial=not success,
+                    correlation=correlation,
+                    observed_postcondition={
+                        "event_id": str(observed.get("id") or ""),
+                        "start": (observed.get("start") or {}).get("dateTime"),
+                    },
+                    evidence_pointer=pointer,
+                )
+            )
+            return {"provider": provider, "verification": receipt.model_dump(mode="json")}
+        except (GoogleAuthError, RuntimeError, KeyError, ValueError) as exc:
+            await actions.fail_execution(
+                execution_id,
+                status=ExecutionStatus.EXECUTION_FAILED,
+                error_code=str(exc)[:200],
+            )
+            if isinstance(exc, GoogleAuthError):
+                raise
+            raise GoogleAuthError(str(exc)) from exc
 
     async def drive_search(self, query: str, *, owner_id: str = "owner") -> list[dict]:
         token = await self._api_token(owner_id)

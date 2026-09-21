@@ -92,14 +92,38 @@ class QueueReplayer(
         }
         var sent = 0
         for (cmd in queue.drainExecutable()) {
-            // Captured third-party content is data, not an owner command. The previous
-            // version fell through to `payload.toString()` when a payload had no "text"
-            // key, which is exactly what a notification envelope looks like — so an
-            // arbitrary app's notification JSON became the text of a device-signed owner
-            // command (finding P0-SEC-002). Context ingress now has no path to dispatch.
-            if (!ReplayDispatchPolicy.mayDispatch(cmd.kind)) {
-                queue.remove(cmd.id)
-                continue
+            // There are three different things in the one canonical durable queue, and
+            // treating "not an owner command" as "discard" destroyed two of them:
+            //
+            // * CONTEXT_INGEST is third-party data. It must cross the data-only ingress
+            //   lane and can never be promoted into owner authority.
+            // * SESSION_ENVELOPE belongs to VanHermesSessionManager. The generic replayer
+            //   must leave it untouched so process-death recovery can restore it.
+            // * everything else is owner-authored work and may use /v1/commands.
+            //
+            // The old branch removed both first categories. Because application startup
+            // starts this replayer before the session manager restores its outbox, a
+            // durable session command could be deleted from disk before restore read it.
+            when (ReplayDispatchPolicy.route(cmd.kind)) {
+                QueueReplayRoute.SESSION_OUTBOX -> continue
+                QueueReplayRoute.CAPTURED_CONTEXT -> {
+                    try {
+                        val payload = JSONObject(cmd.payloadJson)
+                        gateway.ingestCapturedContext(payload)
+                        queue.remove(cmd.id)
+                        sent += 1
+                        degraded.markWorking("gateway")
+                    } catch (ex: Exception) {
+                        queue.markAttempt(cmd.id, ex.message)
+                        degraded.markBroken(
+                            "gateway",
+                            ex.message ?: "context_ingest_failed",
+                            RestoreAction.RETRY_CONNECTION,
+                        )
+                    }
+                    continue
+                }
+                QueueReplayRoute.OWNER_COMMAND -> Unit
             }
             try {
                 val payload = JSONObject(cmd.payloadJson)
@@ -153,13 +177,29 @@ class QueueReplayer(
  * including an arbitrary app's attacker-controlled body — became the text of a
  * device-signed owner command.
  */
+enum class QueueReplayRoute {
+    OWNER_COMMAND,
+    CAPTURED_CONTEXT,
+    SESSION_OUTBOX,
+}
+
 object ReplayDispatchPolicy {
 
-    /** Kinds that are captured data rather than owner intent, and may never be dispatched. */
-    private val NEVER_DISPATCHABLE = setOf(CommandKind.CONTEXT_INGEST.name)
+    /**
+     * One routing answer for every queue kind.
+     *
+     * "Not a command" is not a disposal policy. CONTEXT_INGEST has its own data plane and
+     * SESSION_ENVELOPE has its own durable-session consumer. Keeping those states distinct
+     * is what prevents both authority escalation and startup data loss.
+     */
+    fun route(kind: String): QueueReplayRoute = when (kind) {
+        CommandKind.CONTEXT_INGEST.name -> QueueReplayRoute.CAPTURED_CONTEXT
+        CommandKind.SESSION_ENVELOPE.name -> QueueReplayRoute.SESSION_OUTBOX
+        else -> QueueReplayRoute.OWNER_COMMAND
+    }
 
     /** True only for queue kinds that represent an owner-authored command. */
-    fun mayDispatch(kind: String): Boolean = kind !in NEVER_DISPATCHABLE
+    fun mayDispatch(kind: String): Boolean = route(kind) == QueueReplayRoute.OWNER_COMMAND
 
     /**
      * The command text, or null when the payload carries none.

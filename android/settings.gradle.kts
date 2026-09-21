@@ -11,6 +11,9 @@ dependencyResolutionManagement {
     repositories {
         google()
         mavenCentral()
+        // P1-VOICE-001 — sherpa-onnx publishes its Android AAR through JitPack.
+        // The dependency itself is exact-pinned below; no dynamic version is admitted.
+        maven { url = uri("https://jitpack.io") }
     }
 }
 

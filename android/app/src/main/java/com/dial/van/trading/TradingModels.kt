@@ -66,6 +66,60 @@ data class AccountCard(
     }
 }
 
+data class StrategyPromotionCandidate(
+    val strategyId: String,
+    val currentState: String,
+    val targetState: String,
+    val capsuleHash: String,
+    val validationHash: String,
+    val certificateId: String,
+    val certificate: JsonObject,
+    val evidenceRefs: List<String>,
+    val dataManifestHash: String,
+    val dsrProbability: Double?,
+    val pboProbability: Double?,
+    val expectancyR: Double?,
+    val expectancyLowerBoundR: Double?,
+    val profitFactor: Double?,
+    val maxDrawdown: Double?,
+    val certificateEventHash: String,
+    val certificateEventMs: Long?,
+) {
+    companion object {
+        fun from(o: JsonObject): StrategyPromotionCandidate? {
+            val strategyId = o.str("strategy_id") ?: return null
+            val targetState = o.str("target_state") ?: return null
+            val validationHash = o.str("validation_hash") ?: return null
+            val certificate = o.obj("certificate") ?: return null
+            return StrategyPromotionCandidate(
+                strategyId = strategyId,
+                currentState = o.str("current_state") ?: "UNKNOWN",
+                targetState = targetState,
+                capsuleHash = o.str("capsule_hash") ?: "",
+                validationHash = validationHash,
+                certificateId = o.str("certificate_id") ?: "",
+                certificate = certificate,
+                evidenceRefs = o.strList("evidence_refs"),
+                dataManifestHash = o.str("data_manifest_hash") ?: "",
+                dsrProbability = o.num("dsr_probability"),
+                pboProbability = o.num("pbo_probability"),
+                expectancyR = o.num("expectancy_R"),
+                expectancyLowerBoundR = o.num("expectancy_lower_bound_R"),
+                profitFactor = o.num("profit_factor"),
+                maxDrawdown = o.num("max_drawdown"),
+                certificateEventHash = o.str("certificate_event_hash") ?: "",
+                certificateEventMs = o.long("certificate_event_ms"),
+            )
+        }
+
+        fun parseAll(body: String): List<StrategyPromotionCandidate>? {
+            val root = parseObject(body) ?: return null
+            val raw = root.arr("candidates")
+            return raw.mapNotNull(::from).takeIf { it.size == raw.size }
+        }
+    }
+}
+
 data class PortfolioSummary(
     val ledgerAvailable: Boolean, val reportingCurrency: String, val accounts: List<AccountCard>, val balance: Money, val equity: Money, val floatingPnl: Money, val dayPnl: Money, val weekPnl: Money,
     val otherCurrencyAccounts: List<String>, val portfolioHeat: Pct, val killSwitch: List<String>, val openTrades: Int, val exposureBySymbol: Map<String, Int>,
@@ -205,6 +259,99 @@ data class TradeDetail(
                 o.arr("timeline").map(TimelineEntry::from), o.strList("van_interpretation"), ch?.str("timeframe"), ch?.arr("bars")?.mapNotNull(BarPoint::from) ?: emptyList(),
                 ch?.arr("markers")?.map { ChartMarker(it.long("at_ms") ?: 0L, it.str("kind") ?: "?", it.num("price")) } ?: emptyList(),
                 o.str("decision_hash"), o.str("market_snapshot_hash"), o.long("decided_ms"), o.long("opened_ms"), o.long("closed_ms"), o.num("cost_ratio"), view,
+            )
+        }
+    }
+}
+
+
+data class CognitionModelRow(
+    val modelId: String,
+    val assessments: Int,
+    val verdict: String?,
+    val confidence: Double?,
+    val qualified: Boolean?,
+    val sampleSufficient: Boolean?,
+)
+
+data class ResearchMissionRow(
+    val missionId: String,
+    val state: String,
+    val hypothesis: String,
+)
+
+data class ImprovementProposalRow(
+    val proposalId: String,
+    val title: String,
+    val liveAffecting: Boolean,
+    val admission: String?,
+)
+
+data class CognitionSnapshot(
+    val ledgerAvailable: Boolean,
+    val cognitionMode: String,
+    val liveAdvisory: String,
+    val liveStatus: String,
+    val modelHierarchy: List<String>,
+    val summary: Map<String, Int>,
+    val models: List<CognitionModelRow>,
+    val missions: List<ResearchMissionRow>,
+    val proposals: List<ImprovementProposalRow>,
+    val rejectionCategories: Map<String, Int>,
+    val expansionModes: Map<String, Int>,
+) {
+    companion object {
+        fun parse(body: String): CognitionSnapshot? {
+            val root = parseObject(body) ?: return null
+            val authority = root.obj("authority") ?: return null
+            val summary = root.obj("summary")?.entries?.mapNotNull { (k, v) ->
+                (v as? JsonPrimitive)?.content?.toIntOrNull()?.let { k to it }
+            }?.toMap() ?: emptyMap()
+            val models = root.arr("models").map { row ->
+                val perf = row.obj("performance")
+                val qualification = perf?.obj("qualification")
+                CognitionModelRow(
+                    modelId = row.str("model_id") ?: "unknown",
+                    assessments = row.long("assessments")?.toInt() ?: 0,
+                    verdict = row.obj("latest")?.str("verdict"),
+                    confidence = row.obj("latest")?.num("confidence"),
+                    qualified = perf?.bool("qualified") ?: qualification?.bool("qualified"),
+                    sampleSufficient = perf?.bool("sample_sufficient"),
+                )
+            }
+            val missions = root.obj("research")?.arr("missions")?.map { row ->
+                ResearchMissionRow(
+                    missionId = row.str("mission_id") ?: "?",
+                    state = row.str("state") ?: "UNKNOWN",
+                    hypothesis = row.str("hypothesis") ?: "",
+                )
+            } ?: emptyList()
+            val proposals = root.obj("evolution")?.arr("proposals")?.map { row ->
+                ImprovementProposalRow(
+                    proposalId = row.str("proposal_id") ?: "?",
+                    title = row.str("title") ?: "Untitled proposal",
+                    liveAffecting = row.bool("live_affecting") ?: false,
+                    admission = row.obj("admission")?.let {
+                        it.str("state") ?: it.str("decision")
+                    },
+                )
+            } ?: emptyList()
+            fun intMap(parent: JsonObject?, key: String): Map<String, Int> =
+                parent?.obj(key)?.entries?.mapNotNull { (k, v) ->
+                    (v as? JsonPrimitive)?.content?.toIntOrNull()?.let { k to it }
+                }?.toMap() ?: emptyMap()
+            return CognitionSnapshot(
+                ledgerAvailable = root.bool("ledger_available") ?: false,
+                cognitionMode = authority.str("cognition_mode") ?: "UNKNOWN",
+                liveAdvisory = authority.str("live_advisory") ?: "UNKNOWN",
+                liveStatus = authority.str("live_status") ?: "UNKNOWN",
+                modelHierarchy = authority.strList("model_hierarchy"),
+                summary = summary,
+                models = models,
+                missions = missions,
+                proposals = proposals,
+                rejectionCategories = intMap(root.obj("rejections"), "by_category"),
+                expansionModes = intMap(root.obj("expansion"), "mode_counts"),
             )
         }
     }

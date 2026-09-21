@@ -50,7 +50,7 @@ def env(tmp_path):
         return CtraderTransport(host="live.ctraderapi.com" if is_live else "demo.ctraderapi.com", connector=f.connector, timeout_s=3)
     ctl = AccountControlSettings(registry_path=str(tmp_path / "accounts.json"), secrets_dir=str(tmp_path / "secrets"), deriv_connector=deriv.connector, ctrader_transport_factory=ct_factory,
                                  ctrader_http=lambda url, params: {"accessToken": "ct-at", "refreshToken": "ct-rt", "expiresIn": 100} if params.get("code") == "good" else {"errorCode": "INVALID_GRANT"})
-    st = CommanderSettings(token=TOKEN, ledger=str(tmp_path / "l.sqlite"), heartbeat_dir=str(tmp_path / "hb"), log_dir=str(tmp_path / "log"), data_dir=str(tmp_path), runner=FakeRunner(), accounts_registry=str(tmp_path / "accounts.json"), secrets_dir=str(tmp_path / "secrets"), account_control=ctl)
+    st = CommanderSettings(tokens={"van-gateway": TOKEN}, ledger=str(tmp_path / "l.sqlite"), heartbeat_dir=str(tmp_path / "hb"), log_dir=str(tmp_path / "log"), data_dir=str(tmp_path), runner=FakeRunner(), accounts_registry=str(tmp_path / "accounts.json"), secrets_dir=str(tmp_path / "secrets"), account_control=ctl)
     return TestClient(create_app(st)), tmp_path, deriv, fakes
 
 

@@ -51,6 +51,7 @@ spec = {
         # drift here silently removes capabilities AGENTS.md instructs Hermes to use.
         "include": [
             "runtime_status",
+            "mission_result",
             "resolve_command",
             "context_graph_query",
             "context_lexical_query",
@@ -64,6 +65,15 @@ spec = {
             "notebook_enterprise_get",
             "notebook_consumer_ask",
             "knowledge_action_execute",
+            "google_status",
+            "google_capabilities",
+            "google_gmail_search",
+            "google_calendar_agenda",
+            "google_drive_search",
+            "google_contacts_resolve",
+            "google_tasks_list",
+            "google_job_plan",
+            "google_action_execute",
             "research_status",
             "research_search",
             "action_begin",

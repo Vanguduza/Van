@@ -20,17 +20,26 @@ from fastapi.responses import JSONResponse
 from pydantic import BaseModel, Field
 
 from commander.accounts import ACCOUNT_COMMANDS, ACCOUNT_TOOL_SCHEMAS, AccountControlSettings, build_account_handlers, redact_args
+from commander.strategies import (
+    PROMOTION_COMMANDS,
+    PROMOTION_TOOL_SCHEMAS,
+    StrategyPromotionSettings,
+    build_strategy_handlers,
+)
 from commander.auth import DEFAULT_PRINCIPAL, NonceCache, verify_request_principal
 
 REDACT = re.compile(r"(?i)(password|passwd|token|api[_-]?key|secret|bearer|signing[_-]?key)(\s*[:=]\s*)\S+")
 UNIT_RE = re.compile(r"^[A-Za-z0-9@._-]+$")
 DEFAULT_UNITS = ("vati-session@*.service", "vati-commander.service", "vati-vekl.service", "vati-supabase.service", "vati-mt5-pull.service", "caddy.service")
-COMMANDS = ("status", "ledger_status", "services", "restart_service", "tail_log", "run_backtest", "vekl_resolve", "halt", "doctor", "accounts") + ACCOUNT_COMMANDS
-# Credential-bearing commands are reachable only from the gateway's device-signed onboarding path.
-# They are never listed as MCP tools and are refused when an agent (Hermes) is the requester,
-# so broker credentials cannot enter a model prompt or tool call.
-AGENT_HIDDEN_COMMANDS = frozenset(ACCOUNT_COMMANDS)
-AGENT_REQUESTERS = frozenset({"hermes", "agent", "model", "claude", "codex", "sol", "sonnet"})
+COMMANDS = ("status", "ledger_status", "services", "restart_service", "tail_log", "run_backtest", "vekl_resolve", "halt", "doctor", "accounts") + ACCOUNT_COMMANDS + PROMOTION_COMMANDS
+# Credential-bearing and strategy-promotion commands are gateway-only. This is a
+# positive allow-list: the authenticated principal must be exactly van-gateway.
+# A legacy/shared credential or a future/renamed agent cannot acquire mutation
+# authority merely by avoiding a deny-list.
+GATEWAY_PRINCIPAL = "van-gateway"
+GATEWAY_ONLY_COMMANDS = frozenset(ACCOUNT_COMMANDS + PROMOTION_COMMANDS)
+# Compatibility name used by the MCP/tool-list contract.
+AGENT_HIDDEN_COMMANDS = GATEWAY_ONLY_COMMANDS
 Runner = Callable[[list[str], int], tuple[int, str, str]]
 
 
@@ -56,6 +65,11 @@ class CommanderSettings:
     vekl_token: str = os.environ.get("VAN_VEKL_TOKEN", "")
     accounts_registry: str = os.environ.get("VAN_ACCOUNTS_REGISTRY", "/opt/van-trading/config/accounts.json")
     secrets_dir: str = os.environ.get("VAN_SECRETS", "/opt/van-trading/secrets")
+    capsule_dir: str = os.environ.get("VAN_CAPSULE_DIR", "")
+    owner_authority_keys: str = os.environ.get(
+        "VAN_OWNER_AUTHORITY_KEYS",
+        "/var/lib/van-trading/owner_authority_keys.json",
+    )
     account_control: Optional[AccountControlSettings] = None   # injected for tests; else derived
     units: tuple[str, ...] = tuple(filter(None, os.environ.get("VAN_COMMANDER_UNITS", ",".join(DEFAULT_UNITS)).split(",")))
     backtest_timeout_s: int = int(os.environ.get("VAN_COMMANDER_BACKTEST_TIMEOUT", "600"))
@@ -68,37 +82,56 @@ class CommanderSettings:
     _owner_authority: Any = None     # lazily built OwnerAuthorityVerifier (P0-TRADE-001)
 
     def load_tokens(self) -> dict[str, str]:
-        """Every credential this commander accepts, by the principal it authenticates.
+        """Load authenticated principals and fail closed on ambiguous credentials.
 
-        P1-HER-005. A single shared token cannot tell Hermes from the owner's app, so
-        `requested_by` was left to the caller and became the gate for the credential
-        commands. Per-principal tokens live beside the main one as
-        `<token_file>.<principal>`; where only the shared token exists, it authenticates
-        DEFAULT_PRINCIPAL and the agent-hidden commands stay reachable by whoever holds
-        it — which is the pre-existing trust boundary, not a new one, and is now at least
-        stated rather than implied.
+        The base token remains the legacy commander principal for non-sensitive
+        compatibility. Privileged mutations require the dedicated van-gateway
+        principal at the route boundary.
+
+        Per-principal files are named <token_file>.<principal>. Weak, loosely
+        permissioned, or duplicate values are configuration errors rather than entries
+        silently ignored, because partial deployment must never fall back to shared
+        authority.
         """
-        if self.tokens:
-            return dict(self.tokens)
-        tokens = {DEFAULT_PRINCIPAL: self.load_token()}
-        if self.token:
-            return tokens
-        base = Path(self.token_file)
-        for extra in sorted(base.parent.glob(f"{base.name}.*")):
-            principal = extra.name[len(base.name) + 1:]
-            if not principal or stat.S_IMODE(extra.stat().st_mode) & 0o077:
-                continue
-            value = extra.read_text().strip()
-            if len(value) >= 32:
-                tokens[principal] = value
-        return tokens
+        if self.tokens is not None:
+            tokens = dict(self.tokens)
+        else:
+            tokens = {DEFAULT_PRINCIPAL: self.load_token()}
+            if not self.token:
+                base = Path(self.token_file)
+                for extra in sorted(base.parent.glob(f"{base.name}.*")):
+                    principal = extra.name[len(base.name) + 1:]
+                    if not principal:
+                        raise RuntimeError(f"invalid commander principal token path: {extra}")
+                    if stat.S_IMODE(extra.stat().st_mode) & 0o077:
+                        raise RuntimeError(f"commander principal token must be mode 0600: {extra}")
+                    value = extra.read_text().strip()
+                    if len(value) < 32:
+                        raise RuntimeError(
+                            f"commander principal token too short for {principal} (need ≥ 32 chars)"
+                        )
+                    tokens[principal] = value
 
+        if not tokens:
+            raise RuntimeError("no commander principal tokens configured")
+        values: dict[str, str] = {}
+        for principal, value in sorted(tokens.items()):
+            if not principal or len(value) < 32:
+                raise RuntimeError(f"invalid commander token for principal {principal!r}")
+            if value in values:
+                raise RuntimeError(
+                    f"commander principals {values[value]!r} and {principal!r} share a token"
+                )
+            values[value] = principal
+        return tokens
     def owner_authority(self):
         """The verifier for owner-signed acts on this host (P0-TRADE-001)."""
-        from vati.authority import OwnerAuthorityVerifier
+        from vati.authority import OwnerAuthorityVerifier, load_owner_keys
 
         if self._owner_authority is None:
-            self._owner_authority = OwnerAuthorityVerifier()
+            self._owner_authority = OwnerAuthorityVerifier(
+                load_owner_keys(self.owner_authority_keys)
+            )
         return self._owner_authority
 
     def load_token(self) -> str:
@@ -146,6 +179,7 @@ TOOL_SCHEMAS = {
     "doctor": {"description": "Host diagnostics: runtimes, disk, ledger reachability, VEKL, heartbeat ages, secret file modes.", "properties": {}},
     "accounts": {"description": "Public view of the account registry (aliases, broker kind, safety identity). Never credentials.", "properties": {}},
     **ACCOUNT_TOOL_SCHEMAS,
+    **PROMOTION_TOOL_SCHEMAS,
 }
 
 
@@ -319,9 +353,16 @@ def create_app(settings: Optional[CommanderSettings] = None) -> FastAPI:
             return {"accounts": [], "registry": str(p), "note": "no registry yet: add one with `python -m vati accounts add`"}
         return {"accounts": AccountRegistry(p).public(), "registry": str(p)}
 
+    capsule_dir = st.capsule_dir or str(Path(st.repo_root) / "trading" / "strategies" / "registry")
     handlers = {"status": cmd_status, "ledger_status": cmd_ledger_status, "services": cmd_services, "restart_service": cmd_restart, "tail_log": cmd_tail, "run_backtest": cmd_backtest,
                 "vekl_resolve": cmd_vekl, "halt": cmd_halt, "doctor": cmd_doctor, "accounts": cmd_accounts,
-                **build_account_handlers(st.account_control or AccountControlSettings(registry_path=st.accounts_registry, secrets_dir=st.secrets_dir))}
+                **build_account_handlers(st.account_control or AccountControlSettings(registry_path=st.accounts_registry, secrets_dir=st.secrets_dir)),
+                **build_strategy_handlers(StrategyPromotionSettings(
+                    capsule_dir=capsule_dir,
+                    ledger=st.ledger,
+                    owner_authority=st.owner_authority(),
+                    owner_authority_keys_path=st.owner_authority_keys,
+                ))}
     assert set(handlers) == set(COMMANDS) == set(TOOL_SCHEMAS)
 
     # ------------------------------------------------------------ routes
@@ -364,9 +405,12 @@ def create_app(settings: Optional[CommanderSettings] = None) -> FastAPI:
                 "caller's to declare",
             )
         parsed.requested_by = principal
-        if name in AGENT_HIDDEN_COMMANDS and principal.lower() in AGENT_REQUESTERS:
-            audit(name, principal, parsed.args, "refused:agent_requester")
-            raise HTTPException(403, "credential-bearing account commands are not available to agents; use the app onboarding path")
+        if name in GATEWAY_ONLY_COMMANDS and principal.lower() != GATEWAY_PRINCIPAL:
+            audit(name, principal, parsed.args, "refused:gateway_only")
+            raise HTTPException(
+                403,
+                "credential and strategy mutations require the authenticated van-gateway principal",
+            )
         try:
             result = handlers[name](parsed.args)
         except HTTPException as exc:

@@ -2,68 +2,90 @@ package com.dial.van.voice
 
 import android.content.Context
 import java.io.File
-import java.security.MessageDigest
 
 /**
- * Reads the owner-supplied wake word model off disk (P1-VOICE-001).
+ * Admits and binds the local wake-word model bundle.
  *
- * Separate from [WakeModelPolicy] because the classification is the part worth testing and a
- * filesystem is not. The model lands in app-private storage — it is an owner-installed
- * artefact like the acknowledgement asset, not something bundled in the APK, because a
- * keyword spotter trained on the owner's phrase is not ours to ship.
+ * wake_hey_van.kws is a small manifest, not a fake monolithic model. It pins every
+ * sherpa-onnx model/token/keyword file by SHA-256 below app-private files/voice/.
+ * pipelineOrNull() constructs two real native KWS streams; it never returns an armed
+ * zero-score stub.
  */
 class WakeModelLoader(
     context: Context,
     private val expectedSha256: String? = null,
 ) {
-    private val modelFile = File(context.applicationContext.filesDir, MODEL_PATH)
+    private val voiceRoot = File(context.applicationContext.filesDir, VOICE_ROOT)
+    private val manifestFile = File(voiceRoot, MANIFEST_NAME)
+
+    @Volatile
+    private var runtimeUnavailable: Boolean = false
 
     fun status(): WakeModelStatus {
-        if (!modelFile.isFile) return WakeModelPolicy.classify(null)
-        val size = modelFile.length()
-        // Digest only when a size makes it worth reading: hashing a 64MB placeholder to
-        // discover it is a placeholder is work nobody needs at boot.
-        val digest = if (
-            expectedSha256 != null &&
-            size in WakeModelPolicy.MIN_MODEL_BYTES..WakeModelPolicy.MAX_MODEL_BYTES
-        ) {
-            sha256()
-        } else {
-            null
+        if (!manifestFile.isFile) return WakeModelPolicy.classify(null)
+        if (runtimeUnavailable) {
+            return WakeModelStatus(
+                state = WakeModelState.UNUSABLE,
+                phrase = WakeModelPolicy.PHRASE,
+                sizeBytes = manifestFile.length(),
+                sha256 = null,
+            )
         }
-        return WakeModelPolicy.classify(size, digest, expectedSha256)
+        return try {
+            val bundle = loadBundle()
+            WakeModelStatus(
+                state = WakeModelState.READY,
+                phrase = WakeModelPolicy.PHRASE,
+                sizeBytes = bundle.totalModelBytes,
+                sha256 = bundle.manifestSha256,
+            )
+        } catch (_: WakeBundleDigestMismatch) {
+            WakeModelStatus(
+                state = WakeModelState.DIGEST_MISMATCH,
+                phrase = WakeModelPolicy.PHRASE,
+                sizeBytes = manifestFile.length(),
+                sha256 = null,
+            )
+        } catch (_: Throwable) {
+            WakeModelStatus(
+                state = WakeModelState.UNUSABLE,
+                phrase = WakeModelPolicy.PHRASE,
+                sizeBytes = manifestFile.length(),
+                sha256 = null,
+            )
+        }
     }
 
     /**
-     * The engines, or null when there is no usable model.
+     * Build the production wake pipeline or fail closed.
      *
-     * Null rather than a stub that scores zero. A stub would make `WakePipeline` constructible
-     * and `WakeCoordinator` arm, and VAN would sit there listening and never wake — which is
-     * indistinguishable from the defect this closes, except that it would also report itself
-     * as working.
+     * Native/JNI/model initialisation is part of readiness. A bundle whose checksums pass
+     * but whose runtime cannot initialise is not allowed to make WakeCoordinator arm.
      */
     fun pipelineOrNull(): WakePipeline? {
-        if (!status().ready) return null
-        // A real keyword spotter is a trained artefact this repository does not contain.
-        // When one is installed, this is where it is bound; until then the honest answer is
-        // that VAN cannot listen for its name, and `status()` says so in words.
-        return null
+        val bundle = try {
+            loadBundle()
+        } catch (_: Throwable) {
+            return null
+        }
+        return try {
+            SherpaWakePipelineFactory.create(bundle).also { runtimeUnavailable = false }
+        } catch (_: Throwable) {
+            runtimeUnavailable = true
+            null
+        }
     }
 
-    private fun sha256(): String {
-        val digest = MessageDigest.getInstance("SHA-256")
-        modelFile.inputStream().use { input ->
-            val buffer = ByteArray(1 shl 16)
-            while (true) {
-                val read = input.read(buffer)
-                if (read <= 0) break
-                digest.update(buffer, 0, read)
-            }
-        }
-        return digest.digest().joinToString("") { "%02x".format(it) }
-    }
+    private fun loadBundle(): WakeSherpaBundle =
+        WakeSherpaBundle.load(
+            voiceRoot = voiceRoot,
+            manifestFile = manifestFile,
+            expectedManifestSha256 = expectedSha256,
+        )
 
     companion object {
-        const val MODEL_PATH = "voice/wake_hey_van.kws"
+        const val VOICE_ROOT = "voice"
+        const val MANIFEST_NAME = "wake_hey_van.kws"
+        const val MODEL_PATH = "$VOICE_ROOT/$MANIFEST_NAME"
     }
 }

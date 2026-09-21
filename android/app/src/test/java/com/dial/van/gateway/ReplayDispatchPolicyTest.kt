@@ -38,6 +38,19 @@ class ReplayDispatchPolicyTest {
             ReplayDispatchPolicy.mayDispatch(CommandKind.CONTEXT_INGEST.name),
             "captured third-party content must not reach the owner-command path",
         )
+        assertEquals(
+            QueueReplayRoute.CAPTURED_CONTEXT,
+            ReplayDispatchPolicy.route(CommandKind.CONTEXT_INGEST.name),
+        )
+    }
+
+    @Test
+    fun sessionEnvelopeBelongsToTheSessionOutboxAndIsNeverACommand() {
+        assertFalse(ReplayDispatchPolicy.mayDispatch(CommandKind.SESSION_ENVELOPE.name))
+        assertEquals(
+            QueueReplayRoute.SESSION_OUTBOX,
+            ReplayDispatchPolicy.route(CommandKind.SESSION_ENVELOPE.name),
+        )
     }
 
     @Test
@@ -56,6 +69,7 @@ class ReplayDispatchPolicyTest {
                 ReplayDispatchPolicy.mayDispatch(kind.name),
                 "${kind.name} is owner intent and must still replay",
             )
+            assertEquals(QueueReplayRoute.OWNER_COMMAND, ReplayDispatchPolicy.route(kind.name))
         }
     }
 

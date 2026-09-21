@@ -291,6 +291,24 @@ async def test_stagehand_act_refused_above_the_adapter_tier(tmp_path):
                             assignment_id="bsub_1", turn_id="turn-1")
 
 
+async def test_direct_stagehand_agent_loop_is_forbidden_even_when_bounded(tmp_path):
+    store, service = await _service(tmp_path)
+    task = await service.create_task(
+        profile_alias="public_research", strategy=BrowserStrategy.STAGEHAND,
+        autonomy_tier=AutonomyTier.L5_STAGEHAND_AGENT, action_class=ActionClass.A2,
+        target_domain="research.example.com", goal="research",
+    )
+    adapter = StagehandAdapter(
+        ExternalRuntimeRegistry(store), base_url="http://127.0.0.1:9140", enabled=True,
+        model_provider="anthropic", model_name="claude-sonnet-5",
+    )
+    with pytest.raises(BrowserPolicyError, match="direct_stagehand_agent_loop_forbidden"):
+        await adapter.agent(
+            task, "research", max_steps=5,
+            assignment_id="bsub_1", turn_id="turn-1",
+        )
+
+
 async def test_stagehand_agent_requires_a_bounded_budget(tmp_path):
     """An L5 run without a step budget is an unbounded loop, so it is refused."""
     store, service = await _service(tmp_path)

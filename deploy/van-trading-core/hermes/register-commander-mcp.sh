@@ -8,7 +8,7 @@ HERMES_HOME="${HERMES_HOME:-$HOME/.hermes}"
 HERMES_CONFIG="${HERMES_CONFIG:-$HERMES_HOME/config.yaml}"
 VAN_REPO="${VAN_REPO:-$(cd "$(dirname "${BASH_SOURCE[0]}")/../../.." && pwd)}"
 COMMANDER_URL="${COMMANDER_URL:-https://10.0.1.233:9133}"
-TOKEN_FILE="${TOKEN_FILE:-$HOME/.van/commander.token}"
+TOKEN_FILE="${TOKEN_FILE:-$HOME/.van/commander.hermes.token}"
 CA_FILE="${CA_FILE:-$HOME/.van/van-trading-bridge-ca.crt}"
 DRY_RUN=0; [[ "${1:-}" == "--dry-run" ]] && DRY_RUN=1
 fail() { echo "ERROR: $*" >&2; exit 1; }
@@ -16,7 +16,7 @@ command -v node >/dev/null || fail "node is required on the Hermes host"
 python3 -c 'import yaml' 2>/dev/null || fail "python3 PyYAML is required (apt-get install -y python3-yaml)"
 [[ -f "$HERMES_CONFIG" ]] || fail "Hermes config not found: $HERMES_CONFIG"
 [[ -f "$VAN_REPO/trading/commander/mcp_stdio.mjs" ]] || fail "shim not found under $VAN_REPO"
-if [[ ! -f "$TOKEN_FILE" ]]; then echo "NOTE: token file $TOKEN_FILE missing; copy /opt/van-trading/secrets/commander.token from van-trading-core (mode 0600) before Hermes can call the commander." >&2; fi
+if [[ ! -f "$TOKEN_FILE" ]]; then echo "NOTE: token file $TOKEN_FILE missing; copy /opt/van-trading/secrets/commander.token.hermes from van-trading-core (mode 0600) before Hermes can call the commander." >&2; fi
 VAN_DRY_RUN="$DRY_RUN" python3 - "$HERMES_CONFIG" "$VAN_REPO" "$COMMANDER_URL" "$TOKEN_FILE" "$CA_FILE" <<'PY'
 import os, re, sys, shutil, tempfile, datetime, yaml
 path, repo, url, token_file, ca_file = sys.argv[1:6]

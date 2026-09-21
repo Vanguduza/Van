@@ -72,6 +72,32 @@ class WakeRuntimeTest {
         assertFalse(vad.isSpeech(ByteArray(3200)))
     }
 
+
+
+    @Test
+    fun trailingSilenceStillFeedsBothKwsStagesAfterSpeech() {
+        var kwsCalls = 0
+        var verifierCalls = 0
+        val pipeline = WakePipeline(
+            kws = WakeWordEngine {
+                kwsCalls++
+                if (kwsCalls >= 2) 0.99f else 0f
+            },
+            verifier = WakePhraseVerifier {
+                verifierCalls++
+                if (verifierCalls >= 2) 0.99f else 0f
+            },
+            vad = EnergyVadGate(threshold = 0.01f),
+        )
+
+        assertEquals(WakeDecision.REJECT, pipeline.evaluate(loudPcm()).decision)
+        val trailing = pipeline.evaluate(ByteArray(3200))
+        assertEquals(WakeDecision.ACCEPT, trailing.decision)
+        assertTrue(trailing.vadActive)
+        assertEquals(2, kwsCalls)
+        assertEquals(2, verifierCalls)
+    }
+
     private fun loudPcm(): ByteArray {
         val result = ByteArray(3200)
         var i = 0

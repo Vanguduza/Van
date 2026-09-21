@@ -37,10 +37,11 @@ import com.dial.van.control.VanMessageRole
 import com.dial.van.events.EventPage
 import com.dial.van.events.EventRecord
 import com.dial.van.events.EventStream
-import com.dial.van.events.EventStreamState
-import com.dial.van.events.PreferencesEventCursorStore
+import com.dial.van.session.OwnerReconfirmationRequest
+import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.launch
+import kotlinx.coroutines.withContext
 
 /** Tasks, projects and activity. Split out of `CommandCentreActivity` (P3-AND-009). */
 
@@ -51,8 +52,21 @@ internal fun TasksModule(
     openChat: () -> Unit,
 ) {
     val conversation by app.commandController.state.collectAsState()
+    val sessionState by app.vanSession.state.collectAsState()
     val operational = conversation.messages.filter { it.status != null && it.role != VanMessageRole.OWNER }
     val queueCount = app.commandQueue.size()
+    val scope = rememberCoroutineScope()
+    var confirmations by remember { mutableStateOf<List<OwnerReconfirmationRequest>>(emptyList()) }
+    var confirmationNotice by remember { mutableStateOf<String?>(null) }
+
+    fun refreshConfirmations() {
+        confirmations = app.vanSession.pendingOwnerReconfirmations()
+    }
+
+    // A queue-depth change means an item arrived, expired, flushed or was cancelled.
+    // Reconfirmation itself leaves the depth unchanged, so the button handlers refresh
+    // this projection explicitly after the durable write.
+    LaunchedEffect(sessionState.outboxDepth) { refreshConfirmations() }
 
     LazyColumn(
         modifier = Modifier.fillMaxSize().padding(horizontal = 14.dp),
@@ -68,6 +82,60 @@ internal fun TasksModule(
                 }
             }
         }
+        if (confirmations.isNotEmpty()) {
+            item {
+                SectionHeader(
+                    "Waiting for you",
+                    "These were held during an outage and will not run until you confirm them.",
+                )
+            }
+            items(confirmations, key = { "reconfirm:${it.messageId}" }) { request ->
+                AdminCard(glass) {
+                    Column(verticalArrangement = Arrangement.spacedBy(7.dp)) {
+                        Text(request.commandText, color = Color.White, fontWeight = FontWeight.Bold)
+                        Text(
+                            request.ownerReadableState,
+                            color = Color(0xFFFFC86B),
+                            fontSize = 11.sp,
+                        )
+                        Text(
+                            "Action ${request.actionClass} • ${request.commandId.takeLast(8)}",
+                            color = Color(0xFFBCD1D8),
+                            fontSize = 10.sp,
+                        )
+                        Row(horizontalArrangement = Arrangement.spacedBy(8.dp)) {
+                            Button(onClick = {
+                                scope.launch {
+                                    val accepted = withContext(Dispatchers.IO) {
+                                        app.vanSession.reconfirmAndFlush(request.messageId)
+                                    }
+                                    confirmationNotice = if (accepted) {
+                                        "Confirmed. VAN will send it on the current path, or the next one that becomes available."
+                                    } else {
+                                        "That queued command is no longer waiting for confirmation."
+                                    }
+                                    refreshConfirmations()
+                                }
+                            }) { Text("Confirm") }
+                            Button(onClick = {
+                                scope.launch {
+                                    val cancelled = withContext(Dispatchers.IO) {
+                                        app.vanSession.cancelReconfirmation(request.messageId)
+                                    }
+                                    confirmationNotice = if (cancelled) {
+                                        "Cancelled. VAN will not send that queued command."
+                                    } else {
+                                        "That queued command is no longer waiting for confirmation."
+                                    }
+                                    refreshConfirmations()
+                                }
+                            }) { Text("Cancel") }
+                        }
+                    }
+                }
+            }
+        }
+        confirmationNotice?.let { notice -> item { TruthMessage(notice) } }
         if (operational.isEmpty()) item { TruthMessage("No dispatched owner work is present in this session.") }
         items(operational.reversed(), key = { it.id }) { message ->
             CommandMessageBubble(message, glass)
@@ -142,8 +210,12 @@ internal fun ProjectsModule(
 @Composable
 internal fun ActivityModule(app: VanApplication, glass: com.dial.van.visual.VanGlassStyle) {
     val context = LocalContext.current
-    val cursorStore = remember(context) { PreferencesEventCursorStore(context) }
-    var stream by remember { mutableStateOf(EventStreamState(cursor = cursorStore.load())) }
+    // The app's history, not this screen's. It used to be `remember`ed here, which meant
+    // it existed only while this screen was composed: a mission finishing while the owner
+    // was anywhere else produced nothing they could see, and §20.1's socket had nowhere to
+    // deliver a durable page to.
+    val store = app.eventStream
+    val stream by store.state.collectAsState()
     val events = if (stream.loaded) stream.events else null
     val error = stream.error
         ?: if (!app.gatewayClient.isEnrolled()) {
@@ -156,7 +228,7 @@ internal fun ActivityModule(app: VanApplication, glass: com.dial.van.visual.VanG
         if (!app.gatewayClient.isEnrolled()) return@LaunchedEffect
         while (true) {
             var truncated = false
-            runCatching { app.gatewayClient.events(stream.cursor) }
+            runCatching { app.gatewayClient.events(store.cursor()) }
                 .onSuccess { body ->
                     val page = EventPage(
                         events = body.optJSONArray("events")?.objectList().orEmpty().map {
@@ -167,17 +239,16 @@ internal fun ActivityModule(app: VanApplication, glass: com.dial.van.visual.VanG
                                 createdAtUnix = it.optLong("created_at_unix"),
                             )
                         },
-                        nextCursor = body.optLong("next_cursor", stream.cursor),
+                        nextCursor = body.optLong("next_cursor", store.cursor()),
                         truncated = body.optBoolean("truncated", false),
                     )
                     truncated = page.truncated
-                    stream = EventStream.applyPage(stream, page)
-                    cursorStore.save(stream.cursor)
+                    // Into the shared history, which saves the cursor itself — and
+                    // merges seq-keyed with whatever the socket has already pushed.
+                    store.apply(page)
                 }
                 .onFailure { failure ->
-                    stream = EventStream.applyFailure(
-                        stream, failure.message ?: "Unable to load activity",
-                    )
+                    store.fail(failure.message ?: "Unable to load activity")
                 }
             // P3-PERF-003 — the poll rate answers to the whole-runtime envelope. A null
             // means the device has minutes left and this stream is not what the owner would

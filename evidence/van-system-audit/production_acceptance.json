@@ -1,0 +1,1056 @@
+{
+  "schema": "van-production-acceptance/1",
+  "authority": "docs/VAN_REMOTE_BROWSER_PRODUCTION_BLUEPRINT_REV_1_5.md §43",
+  "purpose": "RB-058. §43 says Remote Browser Rev 1.5 is production complete only when all of one hundred and four things are true. This is that list with a status against each. `tools/ci/production_acceptance.py` reads §43 out of the blueprint, refuses a requirement that is missing or unclassified, refuses a REPOSITORY_PROVEN row whose evidence does not exist, and recomputes the verdict from the rows — so the ledger cannot claim more than its own rows support.",
+  "vocabulary": {
+    "REPOSITORY_PROVEN": "The repository demonstrates it and names what does. Not a claim that it has been observed working on real hardware.",
+    "BLOCKED_EXTERNAL": "Needs something no commit can supply: a Browser Stream Host, a carrier, a physical handset. Names which.",
+    "OWNER_DEPLOYMENT_DECISION": "Needs the owner to provision or accept something: a keystore, a voice asset pack, a second ingress, a look at a screen.",
+    "NOT_APPLICABLE_WITH_REASON": "Does not apply, and says why."
+  },
+  "verdict_rule": "PRODUCTION_ACCEPTED only when every requirement is REPOSITORY_PROVEN or NOT_APPLICABLE_WITH_REASON. Anything else is REPOSITORY_COMPLETE_PENDING_EXTERNAL, and the checker recomputes it.",
+  "verdict": "REPOSITORY_COMPLETE_PENDING_EXTERNAL",
+  "blocked_count": 45,
+  "note": "REPOSITORY_PROVEN is the strongest thing a repository can say and it is weaker than certification. The programme's distinction holds here: NOT VERIFIED is not NOT IMPLEMENTED, and neither is substituted for the other.",
+  "requirements": [
+    {
+      "n": 1,
+      "group": "Authority",
+      "requirement": "one authoritative Browser Fabric",
+      "status": "REPOSITORY_PROVEN",
+      "evidence": [
+        "tests/contracts/test_authority_map.py",
+        "backend/tests/test_browser_fabric.py"
+      ],
+      "note": "The authority map is the enforcement: every invariant is owned once, and the gate fails on a subject owned twice."
+    },
+    {
+      "n": 2,
+      "group": "Authority",
+      "requirement": "no duplicate policy engine",
+      "status": "REPOSITORY_PROVEN",
+      "evidence": [
+        "tests/contracts/test_authority_map.py"
+      ],
+      "note": ""
+    },
+    {
+      "n": 3,
+      "group": "Authority",
+      "requirement": "no duplicate profile registry",
+      "status": "REPOSITORY_PROVEN",
+      "evidence": [
+        "tests/contracts/test_authority_map.py",
+        "backend/tests/test_browser_fabric.py"
+      ],
+      "note": ""
+    },
+    {
+      "n": 4,
+      "group": "Authority",
+      "requirement": "no duplicate task system",
+      "status": "REPOSITORY_PROVEN",
+      "evidence": [
+        "tests/contracts/test_authority_map.py"
+      ],
+      "note": ""
+    },
+    {
+      "n": 5,
+      "group": "Authority",
+      "requirement": "owner device authentication enforced",
+      "status": "REPOSITORY_PROVEN",
+      "evidence": [
+        "backend/tests/test_interactive_browser_api.py",
+        "backend/tests/test_device_proof_enforcement.py"
+      ],
+      "note": "404 rather than 403 for another paired device: one that does not own a session must not learn it exists."
+    },
+    {
+      "n": 6,
+      "group": "Authority",
+      "requirement": "one-time stream grants proven",
+      "status": "REPOSITORY_PROVEN",
+      "evidence": [
+        "backend/tests/test_interactive_browser_session.py::TestStreamGrants::test_a_grant_is_redeemable_exactly_once"
+      ],
+      "note": ""
+    },
+    {
+      "n": 7,
+      "group": "Authority",
+      "requirement": "owner touch preemption proven",
+      "status": "REPOSITORY_PROVEN",
+      "evidence": [
+        "backend/tests/test_interactive_browser_session.py::TestControlLease::test_the_agents_in_flight_input_is_invalid_the_instant_the_owner_touches",
+        "backend/tests/test_browser_takeover_and_downloads.py::TestTakeControlThroughTheIngress::test_taking_control_discards_what_the_agent_had_queued"
+      ],
+      "note": "Proven as a decision, not as a click: the queued action is discarded rather than refused later, because an action merely refused is one that runs if anything stops checking."
+    },
+    {
+      "n": 8,
+      "group": "Runtime",
+      "requirement": "actual Oracle Chromium runs",
+      "status": "BLOCKED_EXTERNAL",
+      "evidence": [],
+      "blocked_by": "a provisioned Browser Stream Host running Chromium and the media pipeline (RB-010)",
+      "note": ""
+    },
+    {
+      "n": 9,
+      "group": "Runtime",
+      "requirement": "actual public web pages load through Oracle internet",
+      "status": "BLOCKED_EXTERNAL",
+      "evidence": [],
+      "blocked_by": "a provisioned Browser Stream Host running Chromium and the media pipeline (RB-010)",
+      "note": ""
+    },
+    {
+      "n": 10,
+      "group": "Runtime",
+      "requirement": "actual H.264 stream reaches S24",
+      "status": "BLOCKED_EXTERNAL",
+      "evidence": [],
+      "blocked_by": "a Browser Stream Host and the owner's S24 Ultra (RB-010, Gate 14)",
+      "note": "The Android decoder, both data channels and the renderer are written and reached from the owner surface. Not one frame has been drawn anywhere: WebRTC needs a peer."
+    },
+    {
+      "n": 11,
+      "group": "Runtime",
+      "requirement": "audio reaches S24",
+      "status": "BLOCKED_EXTERNAL",
+      "evidence": [],
+      "blocked_by": "a Browser Stream Host and the owner's S24 Ultra (RB-010, Gate 14)",
+      "note": ""
+    },
+    {
+      "n": 12,
+      "group": "Runtime",
+      "requirement": "real touch/scroll/IME reach Chromium",
+      "status": "BLOCKED_EXTERNAL",
+      "evidence": [],
+      "blocked_by": "a provisioned Browser Stream Host running Chromium and the media pipeline (RB-010)",
+      "note": "The translation is proven — `services/browser_stream_host/tests/test_input_router.py` pins the coordinate mapping and every CDP detail — so when a host exists the remaining question is whether the host works rather than whether the mapping was ever correct."
+    },
+    {
+      "n": 13,
+      "group": "Runtime",
+      "requirement": "tabs sync",
+      "status": "BLOCKED_EXTERNAL",
+      "evidence": [],
+      "blocked_by": "a provisioned Browser Stream Host running Chromium and the media pipeline (RB-010)",
+      "note": "The Gateway's side is implemented and bounded (§38 item 17); what synchronises is a host reporting targets."
+    },
+    {
+      "n": 14,
+      "group": "Runtime",
+      "requirement": "downloads work",
+      "status": "BLOCKED_EXTERNAL",
+      "evidence": [],
+      "blocked_by": "a provisioned Browser Stream Host running Chromium and the media pipeline (RB-010)",
+      "note": "Both surfaces, the classification, the quarantine ladder and the flood bound are proven; a file arriving needs a browser."
+    },
+    {
+      "n": 15,
+      "group": "Runtime",
+      "requirement": "reconnect works",
+      "status": "REPOSITORY_PROVEN",
+      "evidence": [
+        "backend/tests/test_session_transport_api.py",
+        "backend/tests/test_van_hermes_session.py",
+        "android/verification/src/test/kotlin/com/dial/van/session/TransportSupervisorTest.kt"
+      ],
+      "note": "The logical session's reconnect is proven, including the path epoch a resume grants (P0-SESS-001). The media reconnect is the stream host's and is blocked with it."
+    },
+    {
+      "n": 16,
+      "group": "Native experience",
+      "requirement": "no Linux desktop chrome visible",
+      "status": "BLOCKED_EXTERNAL",
+      "evidence": [],
+      "blocked_by": "a provisioned Browser Stream Host running Chromium and the media pipeline (RB-010)",
+      "note": ""
+    },
+    {
+      "n": 17,
+      "group": "Native experience",
+      "requirement": "native Android browser chrome",
+      "status": "OWNER_DEPLOYMENT_DECISION",
+      "evidence": [],
+      "blocked_by": "CI, the only authority that compiles the Android app module",
+      "note": "`BrowserActivity` and the Compose chrome are written; the app module compiles only in CI, and how it looks is an owner acceptance."
+    },
+    {
+      "n": 18,
+      "group": "Native experience",
+      "requirement": "native IME",
+      "status": "BLOCKED_EXTERNAL",
+      "evidence": [],
+      "blocked_by": "a Browser Stream Host and the owner's S24 Ultra (RB-010, Gate 14)",
+      "note": "The IME path is in the input protocol and proven there — a composition is set rather than committed, and text is inserted rather than typed, because an IME that produced one word from five keystrokes did not produce five keys."
+    },
+    {
+      "n": 19,
+      "group": "Native experience",
+      "requirement": "orientation works",
+      "status": "REPOSITORY_PROVEN",
+      "evidence": [
+        "android/verification/src/test/kotlin/com/dial/van/browser/BrowserWindowTest.kt"
+      ],
+      "note": "The arithmetic is proven: a resize renegotiates the viewport rather than restarting the session, and a tap is never transformed across an unacknowledged reflow. Whether it looks right on a handset is Gate 14's."
+    },
+    {
+      "n": 20,
+      "group": "Native experience",
+      "requirement": "high-quality text",
+      "status": "BLOCKED_EXTERNAL",
+      "evidence": [],
+      "blocked_by": "a Browser Stream Host and the owner's S24 Ultra (RB-010, Gate 14)",
+      "note": ""
+    },
+    {
+      "n": 21,
+      "group": "Native experience",
+      "requirement": "scrolling is comfortable",
+      "status": "BLOCKED_EXTERNAL",
+      "evidence": [],
+      "blocked_by": "a Browser Stream Host and the owner's S24 Ultra (RB-010, Gate 14)",
+      "note": ""
+    },
+    {
+      "n": 22,
+      "group": "Native experience",
+      "requirement": "connection degradation is truthful",
+      "status": "REPOSITORY_PROVEN",
+      "evidence": [
+        "android/verification/src/test/kotlin/com/dial/van/session/TransportSupervisorTest.kt",
+        "backend/tests/test_van_hermes_session.py",
+        "backend/tests/test_browser_quality_api.py"
+      ],
+      "note": "§0B by name. Two carriers over one ingress report SINGLE_PATH and the owner reads \"Connected\" rather than \"Connected, with a spare route\" — the honest answer being the unflattering one."
+    },
+    {
+      "n": 23,
+      "group": "VAN symbiosis",
+      "requirement": "voice command can operate active session",
+      "status": "BLOCKED_EXTERNAL",
+      "evidence": [],
+      "blocked_by": "a provisioned Browser Stream Host running Chromium and the media pipeline (RB-010)",
+      "note": ""
+    },
+    {
+      "n": 24,
+      "group": "VAN symbiosis",
+      "requirement": "Hermes analyses current page by server-side browser context",
+      "status": "BLOCKED_EXTERNAL",
+      "evidence": [],
+      "blocked_by": "a provisioned Browser Stream Host running Chromium and the media pipeline (RB-010)",
+      "note": ""
+    },
+    {
+      "n": 25,
+      "group": "VAN symbiosis",
+      "requirement": "Stagehand acts on same visible browser",
+      "status": "BLOCKED_EXTERNAL",
+      "evidence": [],
+      "blocked_by": "a provisioned Browser Stream Host running Chromium and the media pipeline (RB-010)",
+      "note": "The agent grant, its nine-field scope and its six authority checks are proven; thirteen mutations, thirteen caught. What has never happened is a TLS handshake."
+    },
+    {
+      "n": 26,
+      "group": "VAN symbiosis",
+      "requirement": "owner can take back control immediately",
+      "status": "REPOSITORY_PROVEN",
+      "evidence": [
+        "backend/tests/test_browser_takeover_and_downloads.py::TestOwnerPreemption::test_a_queued_action_is_discarded_not_merely_refused_later",
+        "services/browser_control_agent/tests/test_control_authority.py"
+      ],
+      "note": ""
+    },
+    {
+      "n": 27,
+      "group": "VAN symbiosis",
+      "requirement": "result arrives through realtime event path",
+      "status": "REPOSITORY_PROVEN",
+      "evidence": [
+        "backend/tests/test_van_hermes_session.py",
+        "backend/tests/test_session_transport_api.py"
+      ],
+      "note": ""
+    },
+    {
+      "n": 28,
+      "group": "VAN symbiosis",
+      "requirement": "VAN can speak concise result locally",
+      "status": "REPOSITORY_PROVEN",
+      "evidence": [
+        "android/verification/src/test/kotlin/com/dial/van/voice/OfflineVoiceTest.kt"
+      ],
+      "note": ""
+    },
+    {
+      "n": 29,
+      "group": "VAN symbiosis",
+      "requirement": "barge-in works",
+      "status": "REPOSITORY_PROVEN",
+      "evidence": [
+        "android/verification/src/test/kotlin/com/dial/van/voice/VoiceAudioTest.kt",
+        "backend/tests/test_voice_speech_stream.py"
+      ],
+      "note": ""
+    },
+    {
+      "n": 30,
+      "group": "VAN symbiosis",
+      "requirement": "visual state reflects real work",
+      "status": "REPOSITORY_PROVEN",
+      "evidence": [
+        "android/verification/src/test/kotlin/com/dial/van/visual/VanStatePriorityTest.kt",
+        "android/verification/src/test/kotlin/com/dial/van/browser/BrowserVisualStateTest.kt"
+      ],
+      "note": "The browser never displaces an authority-held state, and `propose` has no path to SUCCESS — a browser cannot report that work succeeded."
+    },
+    {
+      "n": 31,
+      "group": "Governance",
+      "requirement": "Mission binding works without manual backfill",
+      "status": "REPOSITORY_PROVEN",
+      "evidence": [
+        "backend/tests/test_browser_mission_binding_regression.py"
+      ],
+      "note": "And it fails closed: `browser.interactive.session` is declared EXTERNAL_RUNTIME, so until a stream-host canary has run, binding a session to a Mission is refused and the refusal names the missing evidence."
+    },
+    {
+      "n": 32,
+      "group": "Governance",
+      "requirement": "evidence is produced",
+      "status": "REPOSITORY_PROVEN",
+      "evidence": [
+        "backend/tests/test_browser_fabric.py",
+        "backend/tests/test_automation_security_contracts.py"
+      ],
+      "note": ""
+    },
+    {
+      "n": 33,
+      "group": "Governance",
+      "requirement": "Browser secrets never enter prompts/evidence",
+      "status": "REPOSITORY_PROVEN",
+      "evidence": [
+        "backend/tests/test_automation_security_contracts.py::test_browser_evidence_refuses_cookie_material",
+        "backend/tests/test_automation_security_contracts.py::test_evidence_containing_secrets_is_refused",
+        "backend/tests/test_browser_takeover_and_downloads.py::TestWhatTheAgentIsGiven::test_no_credential_reaches_the_agent"
+      ],
+      "note": ""
+    },
+    {
+      "n": 34,
+      "group": "Governance",
+      "requirement": "prompt injection remains untrusted",
+      "status": "REPOSITORY_PROVEN",
+      "evidence": [
+        "backend/tests/test_browser_injection_containment.py"
+      ],
+      "note": ""
+    },
+    {
+      "n": 35,
+      "group": "Governance",
+      "requirement": "payments remain gated",
+      "status": "REPOSITORY_PROVEN",
+      "evidence": [
+        "backend/tests/test_browser_escalation_boundary.py"
+      ],
+      "note": ""
+    },
+    {
+      "n": 36,
+      "group": "Governance",
+      "requirement": "VATI remains trading authority",
+      "status": "REPOSITORY_PROVEN",
+      "evidence": [
+        "backend/tests/test_trading_api.py",
+        "tests/contracts/test_authority_map.py"
+      ],
+      "note": ""
+    },
+    {
+      "n": 37,
+      "group": "Reliability",
+      "requirement": "app process death recovery",
+      "status": "REPOSITORY_PROVEN",
+      "evidence": [
+        "android/verification/src/test/kotlin/com/dial/van/browser/BrowserProcessRecoveryTest.kt"
+      ],
+      "note": "`restore` cannot produce an owner-visible state and `reconcile` cannot see the persisted record, so a restored session cannot claim to be live."
+    },
+    {
+      "n": 38,
+      "group": "Reliability",
+      "requirement": "Chromium crash recovery",
+      "status": "BLOCKED_EXTERNAL",
+      "evidence": [],
+      "blocked_by": "a provisioned Browser Stream Host running Chromium and the media pipeline (RB-010)",
+      "note": ""
+    },
+    {
+      "n": 39,
+      "group": "Reliability",
+      "requirement": "stream service restart recovery",
+      "status": "BLOCKED_EXTERNAL",
+      "evidence": [],
+      "blocked_by": "a provisioned Browser Stream Host running Chromium and the media pipeline (RB-010)",
+      "note": ""
+    },
+    {
+      "n": 40,
+      "group": "Reliability",
+      "requirement": "network handoff recovery",
+      "status": "BLOCKED_EXTERNAL",
+      "evidence": [],
+      "blocked_by": "a real carrier handover (Gate 14)",
+      "note": "The decisions are executed: the supervisor, the failover transaction and the durable outbox. What cannot be shown here is the gap an owner actually experiences, which is `session_failover_ms` and is measured on the device."
+    },
+    {
+      "n": 41,
+      "group": "Reliability",
+      "requirement": "stale lease protection",
+      "status": "REPOSITORY_PROVEN",
+      "evidence": [
+        "backend/tests/test_interactive_browser_session.py::TestRenewableProfileLease::test_assert_lease_active_refuses_at_the_expiry_instant"
+      ],
+      "note": ""
+    },
+    {
+      "n": 42,
+      "group": "Reliability",
+      "requirement": "replay protection",
+      "status": "REPOSITORY_PROVEN",
+      "evidence": [
+        "backend/tests/test_van_hermes_session.py",
+        "backend/tests/test_interactive_browser_session.py::TestStreamGrants::test_a_grant_is_redeemable_exactly_once",
+        "android/verification/src/test/kotlin/com/dial/van/connectivity/ProvisioningPayloadTest.kt"
+      ],
+      "note": ""
+    },
+    {
+      "n": 43,
+      "group": "Reliability",
+      "requirement": "soak test",
+      "status": "BLOCKED_EXTERNAL",
+      "evidence": [],
+      "blocked_by": "a Browser Stream Host and the owner's S24 Ultra (RB-010, Gate 14)",
+      "note": "A soak needs something to soak."
+    },
+    {
+      "n": 44,
+      "group": "Performance",
+      "requirement": "measured component latency",
+      "status": "BLOCKED_EXTERNAL",
+      "evidence": [],
+      "blocked_by": "a Browser Stream Host and the owner's S24 Ultra (RB-010, Gate 14)",
+      "note": "The histograms are declared and have producers; nothing has produced a sample because nothing has run."
+    },
+    {
+      "n": 45,
+      "group": "Performance",
+      "requirement": "measured actual device FPS",
+      "status": "BLOCKED_EXTERNAL",
+      "evidence": [],
+      "blocked_by": "a Browser Stream Host and the owner's S24 Ultra (RB-010, Gate 14)",
+      "note": ""
+    },
+    {
+      "n": 46,
+      "group": "Performance",
+      "requirement": "measured encode load",
+      "status": "BLOCKED_EXTERNAL",
+      "evidence": [],
+      "blocked_by": "a provisioned Browser Stream Host running Chromium and the media pipeline (RB-010)",
+      "note": ""
+    },
+    {
+      "n": 47,
+      "group": "Performance",
+      "requirement": "measured network path",
+      "status": "BLOCKED_EXTERNAL",
+      "evidence": [],
+      "blocked_by": "a Browser Stream Host and the owner's S24 Ultra (RB-010, Gate 14)",
+      "note": ""
+    },
+    {
+      "n": 48,
+      "group": "Performance",
+      "requirement": "target SLOs green or an explicit owner-accepted exception exists",
+      "status": "BLOCKED_EXTERNAL",
+      "evidence": [],
+      "blocked_by": "a Browser Stream Host and the owner's S24 Ultra (RB-010, Gate 14)",
+      "note": "The two SLO profiles are implemented and the verdict always names which one it was measured against (§26.2). Nothing has been measured against either."
+    },
+    {
+      "n": 49,
+      "group": "Certification",
+      "requirement": "CI green",
+      "status": "REPOSITORY_PROVEN",
+      "evidence": [
+        ".github/workflows/van-ci.yml",
+        "tests/contracts/test_ci_workflow_is_what_it_claims.py"
+      ],
+      "note": "What this row proves is that the workflow is pinned against its template byte for byte, because drift in that direction silently deletes whatever the template is missing.\n\nIt is deliberately *not* a claim that a run was green, and a review was right to press on the difference. The run for e13cbf4 in fact failed — Maven Central returned 403 for `kotlin-gradle-plugins-bom-2.0.21.pom` during Gradle configuration, before any test body ran — and the identical Kotlin passed at 05d8844, which is what makes that an infrastructure failure rather than a defect. Per-SHA conclusions belong in the checkpoint record, not in a row that would go stale the moment anything is pushed."
+    },
+    {
+      "n": 50,
+      "group": "Certification",
+      "requirement": "live Oracle canaries green",
+      "status": "BLOCKED_EXTERNAL",
+      "evidence": [],
+      "blocked_by": "a provisioned Browser Stream Host running Chromium and the media pipeline (RB-010)",
+      "note": "tools/certification/certify_browser_stream_host.py carries the three canaries and only one of them records readiness evidence; no host has answered a handshake."
+    },
+    {
+      "n": 51,
+      "group": "Certification",
+      "requirement": "S24 device canaries green",
+      "status": "BLOCKED_EXTERNAL",
+      "evidence": [],
+      "blocked_by": "the owner's S24 Ultra (Gate 14); no repository test substitutes for a handset",
+      "note": ""
+    },
+    {
+      "n": 52,
+      "group": "Certification",
+      "requirement": "external gates updated",
+      "status": "REPOSITORY_PROVEN",
+      "evidence": [
+        "docs/EXTERNAL_GATES.md"
+      ],
+      "note": "RB-057, this checkpoint."
+    },
+    {
+      "n": 53,
+      "group": "Certification",
+      "requirement": "Production Acceptance Ledger updated",
+      "status": "REPOSITORY_PROVEN",
+      "evidence": [
+        "docs/PRODUCTION_ACCEPTANCE_LEDGER.md",
+        "evidence/van-system-audit/production_acceptance.json",
+        "tools/ci/production_acceptance.py"
+      ],
+      "note": "RB-058, this checkpoint — and the ledger's verdict is recomputed from the rows rather than written, so it cannot claim more than the rows support."
+    },
+    {
+      "n": 54,
+      "group": "Certification",
+      "requirement": "implementation matrix contains no hidden `BUILT_UNWIRED` item",
+      "status": "REPOSITORY_PROVEN",
+      "evidence": [
+        "tools/ci/ledger_reconcile.py",
+        "tests/contracts/test_remote_browser_matrix.py"
+      ],
+      "note": "Eight rows are BUILT_UNWIRED and all eight say so. The word that matters is hidden: the reconciler refuses a row whose booleans contradict its status, and every row names what stands between it and its next state."
+    },
+    {
+      "n": 55,
+      "group": "VAN⇄Hermes continuity",
+      "requirement": "primary control/event path works",
+      "status": "REPOSITORY_PROVEN",
+      "evidence": [
+        "backend/tests/test_session_transport_api.py",
+        "backend/tests/test_van_hermes_session.py"
+      ],
+      "note": ""
+    },
+    {
+      "n": 56,
+      "group": "VAN⇄Hermes continuity",
+      "requirement": "at least one protocol fallback works",
+      "status": "REPOSITORY_PROVEN",
+      "evidence": [
+        "backend/tests/test_van_hermes_session.py",
+        "backend/tests/test_session_transport_api.py"
+      ],
+      "note": "§20.5's HTTP/2 pair exists and routes through the same envelope and router as the socket. Deliberately a different code path: sharing one with the WebSocket would defeat the point, which is surviving a middlebox that breaks WebSockets."
+    },
+    {
+      "n": 57,
+      "group": "VAN⇄Hermes continuity",
+      "requirement": "path failover keeps the same logical session",
+      "status": "REPOSITORY_PROVEN",
+      "evidence": [
+        "android/verification/src/test/kotlin/com/dial/van/session/WarmStandbyTest.kt",
+        "backend/tests/test_session_transport_api.py"
+      ],
+      "note": "The transaction and the epoch adoption are proven: `FailoverTransaction` refuses a promotion to an epoch the Gateway did not advance, and the phone adopts the grant rather than minting one (P0-SESS-001).\n\nWhat is *not* claimed here is §20.9's make-before-break. There is one socket; the warm standby is policy and the second transport is unbuilt, so a failover today is break-before-make on the same path."
+    },
+    {
+      "n": 58,
+      "group": "VAN⇄Hermes continuity",
+      "requirement": "ACK-unknown command reconciliation is proven",
+      "status": "REPOSITORY_PROVEN",
+      "evidence": [
+        "backend/tests/test_van_hermes_session.py",
+        "backend/tests/test_session_transport_api.py",
+        "android/verification/src/test/kotlin/com/dial/van/session/SessionReconciliationTest.kt",
+        "android/verification/src/test/kotlin/com/dial/van/session/SessionOutboxDurabilityTest.kt"
+      ],
+      "note": "**Narrowed at C16.** What is proven is the Gateway's half and the device's decisions, which is what REPOSITORY_PROVEN means in this register. The device never performs a resume, because it never opens a session (P0-SESS-009), so no reconciliation runs in the app. The live command path is `POST /v1/commands`, where a lost acknowledgement is answered by the Gateway's idempotency service rather than by §20.12.\n\nThis row was REPOSITORY_PROVEN and the requirement was false, which is the single most useful thing in this register. Its evidence proved the Gateway's admission and the envelope's identity — both correct — and nothing proved the phone's half. The phone asked by message id, the Gateway answered by command id, so every answer was `UNKNOWN`; and the phone then dropped every key it had asked about, unknowns included. Every reconnect silently discarded every unacknowledged owner command (P0-SESS-005).\n\nThe green came from evidence that was about the right section and the wrong side of it. What is now cited executes both sides: the Gateway's answer for a message it admitted without opening a mission, scoped to the asking session, and the phone's plan — resend on absent or `UNKNOWN`, settle on anything else — including a restored outbox entry killed between the socket write and the durable `forget`."
+    },
+    {
+      "n": 59,
+      "group": "VAN⇄Hermes continuity",
+      "requirement": "no duplicate consequential execution occurs",
+      "status": "REPOSITORY_PROVEN",
+      "evidence": [
+        "backend/tests/test_van_hermes_session.py",
+        "android/verification/src/test/kotlin/com/dial/van/session/WarmStandbyTest.kt"
+      ],
+      "note": "Two mechanisms, because one is not enough: §20.12's admission at the Gateway, and §20.9's rule that a warm path carries no new upstream — so the duplicate is not produced by VAN's own client in the first place."
+    },
+    {
+      "n": 60,
+      "group": "VAN⇄Hermes continuity",
+      "requirement": "durable event replay is complete",
+      "status": "REPOSITORY_PROVEN",
+      "evidence": [
+        "backend/tests/test_van_hermes_session.py"
+      ],
+      "note": ""
+    },
+    {
+      "n": 61,
+      "group": "VAN⇄Hermes continuity",
+      "requirement": "stale path epochs are fenced",
+      "status": "REPOSITORY_PROVEN",
+      "evidence": [
+        "backend/tests/test_session_transport_api.py::TestTheEpochAResumeGrantsIsTheEpochTheNextEnvelopeMustCarry::test_an_envelope_carrying_the_open_epoch_after_a_resume_is_fenced",
+        "tests/contracts/test_session_epoch_contract.py"
+      ],
+      "note": "P0-SESS-001. The fence worked; the phone did not adopt the epoch the resume granted, so every owner message was fenced from the first connect."
+    },
+    {
+      "n": 62,
+      "group": "VAN⇄Hermes continuity",
+      "requirement": "route-diversity status is truthful",
+      "status": "REPOSITORY_PROVEN",
+      "evidence": [
+        "android/verification/src/test/kotlin/com/dial/van/session/TransportSupervisorTest.kt",
+        "backend/tests/test_van_hermes_session.py"
+      ],
+      "note": ""
+    },
+    {
+      "n": 63,
+      "group": "VAN⇄Hermes continuity",
+      "requirement": "STORE_AND_FORWARD state is proven",
+      "status": "BLOCKED_EXTERNAL",
+      "evidence": [
+        "android/verification/src/test/kotlin/com/dial/van/session/DurableOutboxTest.kt",
+        "android/verification/src/test/kotlin/com/dial/van/session/OutboxPersistenceTest.kt",
+        "android/verification/src/test/kotlin/com/dial/van/session/RestartSeamTest.kt",
+        "android/verification/src/test/kotlin/com/dial/van/session/SessionOutboxDurabilityTest.kt"
+      ],
+      "note": "**Repository side now includes the §20.15 owner reconfirmation surface.** The path exists end to end: a command whose dispatch failed is handed to §20.14's outbox, stored with no session because that is what offline means, restored after a process death, rebound to the session that exists on reconnect, and held when policy requires the owner again. The Tasks surface projects only those held entries from the canonical encrypted outbox, shows the owner's original command text, and offers explicit Confirm and Cancel controls. Confirm stamps the durable record before an immediate/live-path flush; if still offline, the same message/idempotency identity is sent on a later reconnect. Cancel removes only an entry that is presently waiting for reconfirmation. The projection/decision rules execute in android/verification and the app wiring compiles in CI.\n\nThis requirement remains BLOCKED_EXTERNAL because repository execution cannot prove that a real S24 survives a carrier outage/process death and that the owner can tap the reconfirmation surface afterward. That is Gate 14 device evidence, not a reason to leave a repository-side UI gap.",
+      "blocked_by": "the owner's S24 Ultra executing an offline → process-death/reconnect → explicit reconfirm/cancel journey (Gate 14)"
+    },
+    {
+      "n": 64,
+      "group": "Offline voice",
+      "requirement": "wake acknowledgement is local",
+      "status": "REPOSITORY_PROVEN",
+      "evidence": [
+        "android/verification/src/test/kotlin/com/dial/van/voice/WakeModelAssetTest.kt"
+      ],
+      "note": ""
+    },
+    {
+      "n": 65,
+      "group": "Offline voice",
+      "requirement": "local ASR remains functional with public internet blocked",
+      "status": "OWNER_DEPLOYMENT_DECISION",
+      "evidence": [],
+      "blocked_by": "a signed voice asset pack the owner supplies; no ASR model ships (RB-073/RB-078)",
+      "note": "Owner decision 2 declines to build Sherpa, and minSdk was raised to 31 so the platform recogniser is always present. The manifest proves the capability fails independently rather than being reported as \"voice unavailable\"."
+    },
+    {
+      "n": 66,
+      "group": "Offline voice",
+      "requirement": "bundled/fallback local ASR is proven",
+      "status": "OWNER_DEPLOYMENT_DECISION",
+      "evidence": [],
+      "blocked_by": "a signed voice asset pack the owner supplies (RB-073/RB-078)",
+      "note": ""
+    },
+    {
+      "n": 67,
+      "group": "Offline voice",
+      "requirement": "arbitrary local TTS remains functional with public internet blocked",
+      "status": "OWNER_DEPLOYMENT_DECISION",
+      "evidence": [],
+      "blocked_by": "an Android system TTS engine with offline voice data installed on the handset",
+      "note": ""
+    },
+    {
+      "n": 68,
+      "group": "Offline voice",
+      "requirement": "critical phrase bank is local",
+      "status": "REPOSITORY_PROVEN",
+      "evidence": [
+        "android/verification/src/test/kotlin/com/dial/van/voice/OfflineVoiceTest.kt"
+      ],
+      "note": ""
+    },
+    {
+      "n": 69,
+      "group": "Offline voice",
+      "requirement": "speech segment dedupe is proven",
+      "status": "REPOSITORY_PROVEN",
+      "evidence": [
+        "backend/tests/test_voice_speech_stream.py"
+      ],
+      "note": ""
+    },
+    {
+      "n": 70,
+      "group": "Offline voice",
+      "requirement": "failover while speaking does not restart the answer",
+      "status": "REPOSITORY_PROVEN",
+      "evidence": [
+        "android/verification/src/test/kotlin/com/dial/van/voice/OfflineVoiceTest.kt"
+      ],
+      "note": ""
+    },
+    {
+      "n": 71,
+      "group": "Offline voice",
+      "requirement": "barge-in is local and within latency target",
+      "status": "BLOCKED_EXTERNAL",
+      "evidence": [],
+      "blocked_by": "the owner's S24 Ultra (Gate 14); no repository test substitutes for a handset",
+      "note": "Local is proven; within the latency target is a measurement on a handset."
+    },
+    {
+      "n": 72,
+      "group": "Offline voice",
+      "requirement": "voice-originated fresh web question → Hermes/Oracle → local spoken answer canary passes",
+      "status": "BLOCKED_EXTERNAL",
+      "evidence": [],
+      "blocked_by": "a Browser Stream Host and the owner's S24 Ultra (RB-010, Gate 14)",
+      "note": ""
+    },
+    {
+      "n": 73,
+      "group": "Native Android browser behavior",
+      "requirement": "Browser opens normally full-screen",
+      "status": "OWNER_DEPLOYMENT_DECISION",
+      "evidence": [],
+      "blocked_by": "CI, the only authority that compiles the Android app module",
+      "note": ""
+    },
+    {
+      "n": 74,
+      "group": "Native Android browser behavior",
+      "requirement": "S24 split-screen works",
+      "status": "BLOCKED_EXTERNAL",
+      "evidence": [],
+      "blocked_by": "the owner's S24 Ultra (Gate 14); no repository test substitutes for a handset",
+      "note": ""
+    },
+    {
+      "n": 75,
+      "group": "Native Android browser behavior",
+      "requirement": "Samsung pop-up/freeform works",
+      "status": "BLOCKED_EXTERNAL",
+      "evidence": [],
+      "blocked_by": "the owner's S24 Ultra (Gate 14); no repository test substitutes for a handset",
+      "note": ""
+    },
+    {
+      "n": 76,
+      "group": "Native Android browser behavior",
+      "requirement": "window resize does not restart the remote browser",
+      "status": "REPOSITORY_PROVEN",
+      "evidence": [
+        "android/verification/src/test/kotlin/com/dial/van/browser/BrowserWindowTest.kt"
+      ],
+      "note": "The coalescer, the stability window and the viewport swap are proven arithmetic: a drag converges rather than renegotiating on every callback, and a transition never sends Chromium a negative viewport."
+    },
+    {
+      "n": 77,
+      "group": "Native Android browser behavior",
+      "requirement": "browser chrome adapts cleanly to narrow window sizes",
+      "status": "OWNER_DEPLOYMENT_DECISION",
+      "evidence": [],
+      "blocked_by": "CI, the only authority that compiles the Android app module",
+      "note": ""
+    },
+    {
+      "n": 78,
+      "group": "Native Android browser behavior",
+      "requirement": "touch remains accurately mapped throughout viewport changes",
+      "status": "REPOSITORY_PROVEN",
+      "evidence": [
+        "android/verification/src/test/kotlin/com/dial/van/browser/BrowserWindowTest.kt",
+        "services/browser_stream_host/tests/test_input_router.py::TestTheRevisionDecidesWhetherItActuates"
+      ],
+      "note": "The revision is the mechanism: a packet built against a layout the host has left is refused rather than transformed, because transforming it would put the tap where the page used to be and nothing downstream could tell."
+    },
+    {
+      "n": 79,
+      "group": "Native Android browser behavior",
+      "requirement": "home-screen browser shortcut works",
+      "status": "REPOSITORY_PROVEN",
+      "evidence": [
+        "android/verification/src/test/kotlin/com/dial/van/browser/BrowserShortcutsTest.kt"
+      ],
+      "note": ""
+    },
+    {
+      "n": 80,
+      "group": "Native Android browser behavior",
+      "requirement": "saved-page shortcut works",
+      "status": "REPOSITORY_PROVEN",
+      "evidence": [
+        "android/verification/src/test/kotlin/com/dial/van/browser/BrowserShortcutsTest.kt"
+      ],
+      "note": ""
+    },
+    {
+      "n": 81,
+      "group": "Native Android browser behavior",
+      "requirement": "launcher confirmation/cancellation is handled correctly",
+      "status": "REPOSITORY_PROVEN",
+      "evidence": [
+        "android/verification/src/test/kotlin/com/dial/van/browser/BrowserShortcutsTest.kt"
+      ],
+      "note": ""
+    },
+    {
+      "n": 82,
+      "group": "Native Android browser behavior",
+      "requirement": "shortcut carries no credential",
+      "status": "REPOSITORY_PROVEN",
+      "evidence": [
+        "android/verification/src/test/kotlin/com/dial/van/browser/BrowserShortcutsTest.kt"
+      ],
+      "note": "A tile on a home screen is readable by anything that can read the launcher, so the payload carries a profile alias and no token, and a revoked shortcut cannot navigate."
+    },
+    {
+      "n": 83,
+      "group": "Owner-S24 zero-config binding",
+      "requirement": "all connectivity settings are preconfigured/signed",
+      "status": "REPOSITORY_PROVEN",
+      "evidence": [
+        "android/verification/src/test/kotlin/com/dial/van/connectivity/ConnectivityManifestTest.kt",
+        "tests/contracts/test_release_build_is_bound.py"
+      ],
+      "note": "And the release build refuses to exist without a trust anchor (RB-121): with none it would install, open and wait forever with nothing saying why."
+    },
+    {
+      "n": 84,
+      "group": "Owner-S24 zero-config binding",
+      "requirement": "no production connectivity form exists",
+      "status": "REPOSITORY_PROVEN",
+      "evidence": [
+        "tests/contracts/test_owner_device_provisioning.py"
+      ],
+      "note": "P0-SEC-013. Two screens carried one. The guard reads shape rather than wording: a rebuild that dropped the labels would pass a text search."
+    },
+    {
+      "n": 85,
+      "group": "Owner-S24 zero-config binding",
+      "requirement": "no manual pairing-token entry exists",
+      "status": "REPOSITORY_PROVEN",
+      "evidence": [
+        "tests/contracts/test_owner_device_provisioning.py"
+      ],
+      "note": ""
+    },
+    {
+      "n": 86,
+      "group": "Owner-S24 zero-config binding",
+      "requirement": "first-install provisioning is automated",
+      "status": "REPOSITORY_PROVEN",
+      "evidence": [
+        "tests/contracts/test_owner_device_provisioning.py",
+        "backend/tests/test_owner_device_provisioning.py",
+        "android/verification/src/test/kotlin/com/dial/van/connectivity/ProvisioningPayloadTest.kt"
+      ],
+      "note": "RB-108. One call mints both single-use credentials and the expiry, so an installer cannot extend a provisioning window by asking for it."
+    },
+    {
+      "n": 87,
+      "group": "Owner-S24 zero-config binding",
+      "requirement": "hardware-backed device key is enrolled",
+      "status": "BLOCKED_EXTERNAL",
+      "evidence": [],
+      "blocked_by": "the owner's S24 Ultra (Gate 14); no repository test substitutes for a handset",
+      "note": "The attestation parser, the policy and the enforcement are implemented and tested against the structures Android documents, including the high-tag-number DER forms a naive reader silently never finds. No handset has emitted a chain."
+    },
+    {
+      "n": 88,
+      "group": "Owner-S24 zero-config binding",
+      "requirement": "Gateway enforces one active owner-device key",
+      "status": "REPOSITORY_PROVEN",
+      "evidence": [
+        "backend/tests/test_device_proof_enforcement.py"
+      ],
+      "note": "Enforced by the database rather than by a model check (§5.7)."
+    },
+    {
+      "n": 89,
+      "group": "Owner-S24 zero-config binding",
+      "requirement": "copied APK on another phone is nonfunctional",
+      "status": "BLOCKED_EXTERNAL",
+      "evidence": [],
+      "blocked_by": "the owner's S24 Ultra (Gate 14); no repository test substitutes for a handset",
+      "note": "RB-112's canary: a second phone with a valid paired device token, refused on an owner mutation. Enforced and tested in-process; the canary is the same claim against hardware."
+    },
+    {
+      "n": 90,
+      "group": "Owner-S24 zero-config binding",
+      "requirement": "copied tokens without device private key are nonfunctional",
+      "status": "REPOSITORY_PROVEN",
+      "evidence": [
+        "backend/tests/test_device_proof_enforcement.py"
+      ],
+      "note": "The key is non-exportable, so copying the tokens copies everything except the thing that signs."
+    },
+    {
+      "n": 91,
+      "group": "Owner-S24 zero-config binding",
+      "requirement": "stable app signing identity is used",
+      "status": "REPOSITORY_PROVEN",
+      "evidence": [
+        "tests/contracts/test_release_build_is_bound.py",
+        "tests/contracts/test_debug_signing_identity.py"
+      ],
+      "note": "RB-111. The release gate refuses the Android debug key by name: it is generated per machine, so a release signed with one is signed by whichever machine built it."
+    },
+    {
+      "n": 92,
+      "group": "Owner-S24 zero-config binding",
+      "requirement": "normal APK upgrade preserves binding",
+      "status": "BLOCKED_EXTERNAL",
+      "evidence": [],
+      "blocked_by": "the owner's S24 Ultra (Gate 14); no repository test substitutes for a handset",
+      "note": "Follows from a stable signing identity, and the failure mode — \"App not installed\" on the owner's first sideload — is the one this programme already saw once."
+    },
+    {
+      "n": 93,
+      "group": "Owner-S24 zero-config binding",
+      "requirement": "rebind is explicit, audited and administrative",
+      "status": "REPOSITORY_PROVEN",
+      "evidence": [
+        "backend/tests/test_device_proof_enforcement.py"
+      ],
+      "note": "`POST /v1/devices/rebind` sits behind the device-enrolment scope, which the legacy control token is deliberately not granted."
+    },
+    {
+      "n": 94,
+      "group": "Owner-S24 zero-config binding",
+      "requirement": "direct VAN/Hermes control paths require no WireGuard",
+      "status": "REPOSITORY_PROVEN",
+      "evidence": [
+        "tests/contracts/test_remote_browser_dependencies.py",
+        "docs/EXTERNAL_GATES.md"
+      ],
+      "note": "The public path is the named tunnel and the ingress bearer; the private path is the Browser Control Agent's mTLS. Neither is a VPN the owner has to hold open."
+    },
+    {
+      "n": 95,
+      "group": "Stream/control topology",
+      "requirement": "Stream Host public media interface proven",
+      "status": "BLOCKED_EXTERNAL",
+      "evidence": [],
+      "blocked_by": "a provisioned Browser Stream Host running Chromium and the media pipeline (RB-010)",
+      "note": ""
+    },
+    {
+      "n": 96,
+      "group": "Stream/control topology",
+      "requirement": "Stream Host private VCN interface proven",
+      "status": "BLOCKED_EXTERNAL",
+      "evidence": [],
+      "blocked_by": "a private VCN and issued client certificates (RB-115/RB-116)",
+      "note": ""
+    },
+    {
+      "n": 97,
+      "group": "Stream/control topology",
+      "requirement": "raw CDP proven loopback-only",
+      "status": "BLOCKED_EXTERNAL",
+      "evidence": [],
+      "blocked_by": "a host with interfaces to scan (RB-117)",
+      "note": "The Chromium unit pins `--remote-debugging-address=127.0.0.1` and the CDP client refuses any endpoint that is not a loopback literal. `qualify.sh` reports UNKNOWN, which fails, rather than GREEN when it cannot scan."
+    },
+    {
+      "n": 98,
+      "group": "Stream/control topology",
+      "requirement": "Stagehand/Harness remains on private Trading Core",
+      "status": "OWNER_DEPLOYMENT_DECISION",
+      "evidence": [],
+      "blocked_by": "the Trading Core host's deployment, which is the owner's",
+      "note": ""
+    },
+    {
+      "n": 99,
+      "group": "Stream/control topology",
+      "requirement": "Browser Control Agent mTLS path proven",
+      "status": "BLOCKED_EXTERNAL",
+      "evidence": [],
+      "blocked_by": "a real TLS handshake, in either direction (RB-115)",
+      "note": "The narrow contract, its six authority checks and the mTLS server context exist and are executed. Thirteen mutations, thirteen caught."
+    },
+    {
+      "n": 100,
+      "group": "Stream/control topology",
+      "requirement": "owner takeover/control-generation enforcement proven across the cross-host control path",
+      "status": "BLOCKED_EXTERNAL",
+      "evidence": [],
+      "blocked_by": "a cross-host control path (RB-010/RB-115)",
+      "note": "Both ends enforce it and both are tested; what is unproven is the path between them."
+    },
+    {
+      "n": 101,
+      "group": "Programme/ledger coherence",
+      "requirement": "every Remote Browser matrix row has valid `component_refs`",
+      "status": "REPOSITORY_PROVEN",
+      "evidence": [
+        "tools/ci/ledger_reconcile.py",
+        "tests/contracts/test_remote_browser_matrix.py"
+      ],
+      "note": ""
+    },
+    {
+      "n": 102,
+      "group": "Programme/ledger coherence",
+      "requirement": "status→ledger mapping passes reconciliation",
+      "status": "REPOSITORY_PROVEN",
+      "evidence": [
+        "tools/ci/ledger_reconcile.py"
+      ],
+      "note": ""
+    },
+    {
+      "n": 103,
+      "group": "Programme/ledger coherence",
+      "requirement": "no `CERTIFIED` row points at an external-block/non-terminal component",
+      "status": "REPOSITORY_PROVEN",
+      "evidence": [
+        "tests/contracts/test_remote_browser_matrix.py::test_certified_pointing_at_an_externally_blocked_component_is_refused"
+      ],
+      "note": ""
+    },
+    {
+      "n": 104,
+      "group": "Programme/ledger coherence",
+      "requirement": "no external runtime is laundered into a repository-complete claim",
+      "status": "REPOSITORY_PROVEN",
+      "evidence": [
+        "tools/ci/maturity_gate.py",
+        "tests/contracts/test_maturity_gate.py"
+      ],
+      "note": "The gate's own rule: a residual class that says the repository cannot finish alone refuses a closure state that says it did."
+    }
+  ]
+}

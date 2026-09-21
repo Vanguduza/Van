@@ -1,7 +1,10 @@
 from __future__ import annotations
 
 from contextlib import asynccontextmanager
+import base64
+import binascii
 import hmac
+import json
 import shutil
 import time
 from typing import Any
@@ -9,8 +12,9 @@ from pathlib import Path
 
 from fastapi import FastAPI, Header, HTTPException, Request
 from fastapi.responses import JSONResponse, PlainTextResponse
-from pydantic import BaseModel, Field
+from pydantic import BaseModel, Field, ValidationError
 
+from van_gateway.action.service import ActionPolicyError
 from van_gateway.attention.engine import AttentionEngine
 from van_gateway.audit.service import AuditService
 from van_gateway.auth.service import AuthError, AuthService
@@ -44,9 +48,10 @@ from van_gateway.models import (
     AttentionSeverity,
     CommandRequest,
     OwnerApprovalProof,
+    PrincipalType,
     ReminderCreate,
 )
-from van_gateway.notifications.intelligence import NotificationIntelligence, PhoneNotification
+from van_gateway.notifications.intelligence import AppPolicy, NotificationIntelligence, PhoneNotification
 from van_gateway.observability import alerts as observability_alerts
 from van_gateway.observability import instruments as observability_instruments
 from van_gateway.observability.correlation import for_command as correlation_for_command
@@ -71,8 +76,38 @@ from van_gateway.automation.dispatch import AutomationDispatcher
 from van_gateway.automation.grants import RunGrantService
 from van_gateway.automation.health import AutomationHealthApi
 from van_gateway.automation.registry import AutomationRegistry, HotWorkflowIndex
+from van_gateway.browser.agent_grant import AgentGrantService
 from van_gateway.browser.api import BrowserApi
-from van_gateway.browser.worker import AdapterBackedWorker
+from van_gateway.browser.control_lease import ControlLeaseService
+from van_gateway.browser.downloads import DownloadBroker
+from van_gateway.browser.downloads_api import build_download_report_router
+from van_gateway.browser.interactive_api import (
+    build_interactive_router,
+    is_interactive_browser_owner_route,
+)
+from van_gateway.browser.interactive_service import InteractiveSessionService
+from van_gateway.browser.quality_api import QualityControllers, build_quality_router
+from van_gateway.connectivity.provisioning import (
+    build_provisioning_payload,
+    sign_provisioning_payload,
+)
+from van_gateway.browser.stream_grants import (
+    SigningKey,
+    StreamGrantService,
+    StreamGrantSigner,
+)
+from van_gateway.browser.worker import HybridBrowserWorker
+from van_gateway.session.api import build_session_router, is_session_owner_route
+from van_gateway.voice.speech_stream import SpeechStreamService
+from van_gateway.session.router import (
+    SessionDelegateError,
+    SessionDelegates,
+    SessionRouter,
+)
+from van_gateway.session.service import VanHermesSessionService
+from van_gateway.auth.device_binding import DeviceBindingError, OwnerDeviceBindingService
+from van_gateway.auth.device_proof import AttestationPolicy
+from van_gateway.connectivity.config import ConnectivityConfigService, ConnectivityError
 from van_gateway.capability.models import ReadinessSource
 from van_gateway.capability.readiness import (
     AutomationReadiness,
@@ -82,6 +117,8 @@ from van_gateway.capability.readiness import (
 from van_gateway.capability.registry import CapabilityRegistry
 from van_gateway.capability.router import CapabilityRouter
 from van_gateway.mission.api import MissionApi
+from van_gateway.mission.models import MissionEventType, MissionState
+from van_gateway.mission.service import MissionError
 from van_gateway.mission.binding import MissionBinder
 from van_gateway.understanding.api import UnderstandingApi
 from van_gateway.verification.production import build_automation_verifier, build_mission_registry
@@ -92,6 +129,7 @@ from van_gateway.runtime_api import OwnerRuntimeApi
 from van_gateway.storage.db import Store
 from van_gateway.trading import TradingAuthorityError, TradingControlError, TradingService
 from van_gateway.trading.accounts import ACTIONS as ACCOUNT_ACTIONS, AccountOnboarding, CommanderAccountControl, LocalAccountControl, OAuthPending, canonical_action, redact as redact_account_args, requires_owner_approval
+from van_gateway.trading.strategies import StrategyPromotionGateway, canonical_strategy_promotion
 
 
 class EnrollBody(BaseModel):
@@ -150,6 +188,11 @@ class GoogleConnectBody(BaseModel):
     scopes: list[str] = Field(default_factory=lambda: list(NARROW_SCOPES))
 
 
+class GoogleAuthorizedActionBody(BaseModel):
+    execution_id: str = Field(min_length=1, max_length=256)
+    parameters: dict[str, Any] = Field(default_factory=dict)
+
+
 class GoogleArtifactBody(BaseModel):
     source_tool: str
     output_hash: str
@@ -206,6 +249,21 @@ class AccountChallengeRequest(BaseModel):
     args: dict = Field(default_factory=dict)
 
 
+class StrategyPromotionChallengeRequest(BaseModel):
+    device_id: str
+    issued_at_unix: int
+    signature: str
+    strategy_id: str = Field(min_length=1)
+    target_state: str = Field(min_length=1)
+    owner_signature_ref: str = Field(min_length=1)
+    certificate: dict
+    evidence_refs: list[str] = Field(default_factory=list)
+
+
+class StrategyPromotionRequest(StrategyPromotionChallengeRequest):
+    approval_proof: OwnerApprovalProof | None = None
+
+
 class OwnerFactBody(BaseModel):
     subject: str = Field(min_length=1)
     predicate: str = Field(min_length=1)
@@ -226,6 +284,11 @@ class DeviceTelemetrySample(BaseModel):
     name: str
     value: float
     surface: str | None = None
+    #: The one dimension a series other than `aura_frame_time_ms` may carry — the
+    #: storability of a queued command, today. Kept separate from `surface` because
+    #: `surface` is already on the wire and shipped devices post it; renaming it here
+    #: would quietly drop the aura label from every phone that had not been updated.
+    dimension: str | None = None
 
 
 class DeviceTelemetryBody(BaseModel):
@@ -256,6 +319,7 @@ class TicketConfirmRequest(BaseModel):
 #: route at all.
 GOOGLE_CONTROL_ROUTES: frozenset[str] = frozenset({
     "/v1/google/gmail/search",
+    "/v1/google/actions/execute",
     "/v1/google/gmail/send",
     "/v1/google/gmail/draft",
     "/v1/google/calendar/agenda",
@@ -267,6 +331,60 @@ GOOGLE_CONTROL_ROUTES: frozenset[str] = frozenset({
     "/v1/google/revoke",
     "/v1/google/jobs/plan",
 })
+
+
+class BootstrapCreateBody(BaseModel):
+    note: str | None = None
+
+
+class ProvisioningPayloadBody(BaseModel):
+    """ADR-RB-026 — what the installer asks for, which is deliberately almost nothing.
+
+    The installer names the Gateway the device should reach, because it is the only party
+    that knows which deployment this is. Everything else — the one-time credential, the
+    attestation challenge, the expiry — is the Gateway's to mint, so that an installer
+    cannot extend a provisioning window or reuse a token by asking for it.
+    """
+
+    gateway_url: str = Field(min_length=1)
+    note: str | None = None
+
+class BootstrapChallengeBody(BaseModel):
+    token: str
+
+class BootstrapAttestBody(BaseModel):
+    token: str
+    device_id: str
+    public_key_pem: str
+    #: Base64 of the raw attestation extension octets from the device key's certificate.
+    attestation_extension_b64: str
+    attestation_root_fingerprint: str | None = None
+    os_version: str | None = None
+    os_patch_level: str | None = None
+
+class RebindBody(BaseModel):
+    reason: str
+
+
+def _read_stream_signing_key(path: str) -> str:
+    """Load the grant-signing key from disk (§5.5: it never leaves the Gateway host).
+
+    A missing or unreadable file raises rather than falling back to a generated key. A
+    gateway that quietly generates its own would mint grants the stream host cannot verify,
+    and the failure would appear as "the browser will not connect" on the owner's phone
+    rather than as a misconfiguration here.
+    """
+    return Path(path).read_text(encoding="utf-8")
+
+
+def _parse_ice_servers(raw: str) -> list[dict]:
+    """Deployment configuration. Malformed JSON is empty rather than fatal: no ICE server
+    means direct connectivity only, which is a degraded browser, not a broken gateway."""
+    try:
+        parsed = json.loads(raw or "[]")
+    except json.JSONDecodeError:
+        return []
+    return parsed if isinstance(parsed, list) else []
 
 
 def create_app() -> FastAPI:
@@ -322,18 +440,16 @@ def create_app() -> FastAPI:
         standing=StandingAutomationAuthorityService(store, owner_runtime.authority),
         dispatcher=automation_dispatcher,
     )
-    # No worker is configured: the semantic worker is a separate private service
-    # and the gateway refuses an assignment rather than pretending to run one.
-    # P2-BROW-001 — the browser task path reaches a real adapter. `worker` was None, so
-    # POST /v1/browser/assignments answered 503 and the only way a task acquired evidence
-    # was for its caller to hand the evidence in: a page snapshot in the evidence table was
-    # whatever somebody said it was. The adapter is `automation_health`'s, not a second
-    # one, so there is one connection to the browser worker and one readiness verdict about
-    # it — two adapters would mean the health surface could report READY while the task
-    # path talked to something else.
+    # P2-BROW-001 — one production browser worker spans the two admitted runtimes.
+    # Deterministic tiers drive Browser Harness. Semantic tiers use Stagehand to propose one
+    # observed action at a time, but BrowserSubagentRunner remains the authority boundary
+    # and Browser Harness independently reads the page after every semantic action.
     browser = BrowserApi(
         store, settings, decisions=decisions,
-        worker=AdapterBackedWorker(automation_health.harness),
+        worker=HybridBrowserWorker(
+            automation_health.harness,
+            automation_health.stagehand,
+        ),
     )
 
 
@@ -350,6 +466,9 @@ def create_app() -> FastAPI:
     )
     oauth_pending = OAuthPending(store, settings.google_token_fernet_key)
     onboarding = AccountOnboarding(account_control, oauth_pending, settings.van_public_base_url, settings.vati_deriv_app_id)
+    strategy_promotions = StrategyPromotionGateway(
+        account_control if settings.van_commander_url else None
+    )
 
     google_transport = None
     google_oauth = None
@@ -386,6 +505,31 @@ def create_app() -> FastAPI:
     # Constructed before the mission service, which publishes every owner-visible
     # mission event to it (P0-EXEC-001).
     events = EventBus(store, settings.event_page_size)
+    # Rev 1.5 §§5, 6 — the interactive browser session.
+    #
+    # It shares the Browser Fabric's broker and policy engine rather than constructing its
+    # own: ADR-RB-005 says the existing fabric owns browser authority, and two brokers would
+    # mean two answers to "who holds this profile".
+    browser_control_leases = ControlLeaseService(store)
+    interactive_sessions = InteractiveSessionService(
+        store, browser.broker, browser_control_leases, events=events,
+    )
+    # §5.5 — a dedicated ES256 key, separate from owner approval and device enrolment.
+    # Absent configuration means grants cannot be minted, which is the honest state of a
+    # deployment with no stream host: the routes refuse rather than issuing a credential
+    # nothing can verify.
+    browser_stream_grants = (
+        StreamGrantService(
+            store,
+            StreamGrantSigner(SigningKey(
+                kid=settings.browser_stream_signing_kid,
+                private_pem=_read_stream_signing_key(settings.browser_stream_signing_key_file),
+            )),
+        )
+        if settings.browser_stream_signing_key_file
+        else None
+    )
+
     # P0-VERIFY-001 — the registry that performs verification, rather than a receipt
     # the claimant writes. Built before the service because the service fails closed
     # without it.
@@ -403,6 +547,7 @@ def create_app() -> FastAPI:
         store, capabilities=capability_registry, bus=events, verifiers=verifiers,
         learning=learning,
     )
+    owner_runtime.bind_missions(missions)
     mission_api = MissionApi(
         store, settings, missions=missions, registry=capability_registry,
         router=capability_router,
@@ -678,10 +823,233 @@ def create_app() -> FastAPI:
     app.state.reminders = reminders
     app.state.trading = trading
     app.state.onboarding = onboarding
+    app.state.strategy_promotions = strategy_promotions
     app.include_router(owner_runtime.router)
     app.include_router(automation_health.router)
     app.include_router(automation.router)
     app.include_router(browser.router)
+    if browser_stream_grants is not None:
+        # Rev 1.5 §§22.2, 22.3 — what Hermes is handed when it drives the owner's
+        # browser, and what is destroyed when the owner takes it back.
+        agent_grants = AgentGrantService()
+        app.state.browser_agent_grants = agent_grants
+        downloads_broker = DownloadBroker(store)
+        app.state.browser_downloads = downloads_broker
+        # §27 — the link report. `BrowserQualityController` was written, correct and
+        # called by nothing; this is the caller. The phone measures what only it can see,
+        # the Gateway picks the rung, and the target travels back.
+        #
+        # Built before the interactive router because that router is handed its
+        # `forget`: the §27.3 byte accounting and the §27.4 hysteresis are per session,
+        # and a controller that outlived its session would report the previous owner's
+        # data usage to the next one.
+        quality_controllers = QualityControllers()
+        app.state.browser_quality = quality_controllers
+        app.include_router(build_interactive_router(
+            sessions=interactive_sessions,
+            control=browser_control_leases,
+            grants=browser_stream_grants,
+            agent_grants=agent_grants,
+            downloads_broker=downloads_broker,
+            signal_url=settings.browser_stream_signal_url,
+            ice_servers=_parse_ice_servers(settings.browser_stream_ice_servers),
+            mission_binder=mission_binder,
+            audit=audit,
+            on_session_ended=quality_controllers.forget,
+        ))
+        # §18 — the Hermes-scoped side of the same records. Separate router because
+        # it is a different authority, not a different concern: the owner's phone
+        # never saw the download happen.
+        app.include_router(build_download_report_router(
+            broker=downloads_broker,
+            sessions=interactive_sessions,
+            audit=audit,
+        ))
+        app.include_router(build_quality_router(
+            controllers=quality_controllers,
+            sessions=interactive_sessions,
+        ))
+    # Rev 1.5 §20 — the durable logical session. It holds no command authority: the
+    # router delegates to the same POST /v1/commands path the phone has always used, and
+    # §20.2 forbids a second one.
+    van_sessions = VanHermesSessionService(store, events=events)
+
+    async def _submit_command_through_session(payload: dict, device_id: str) -> dict:
+        try:
+            request = CommandRequest(**{**payload, "device_id": device_id})
+        except ValidationError as exc:
+            # A malformed command is the phone's mistake, not the Gateway's fault: it is
+            # refused rather than raised. Left as an exception it became a 500, which the
+            # client's retry policy treats as "try again" — and the same malformed payload
+            # would be retried forever.
+            raise SessionDelegateError("command_payload_invalid") from exc
+        result = await orchestrator.handle(request)
+        return result if isinstance(result, dict) else result.model_dump(mode="json")
+
+    async def _answer_decision_through_session(payload: dict, device_id: str) -> dict:
+        """§20.2 — the owner's answer, delivered to the authority that already owns it."""
+        decision_id = str(payload.get("decision_id") or "")
+        if not decision_id:
+            raise SessionDelegateError("decision_id_required")
+        if "approved" not in payload:
+            # Not defaulted. An absent answer is not a "no", and guessing either way
+            # decides something on the owner's behalf that they did not say.
+            raise SessionDelegateError("approved_required")
+        try:
+            record = await decisions.resolve(
+                decision_id, approved=bool(payload["approved"])
+            )
+        except KeyError as exc:
+            raise SessionDelegateError("decision_not_found") from exc
+        return record.model_dump(mode="json")
+
+    async def _cancel_mission_through_session(payload: dict, device_id: str) -> dict:
+        """Stopping your own mission is yours to say — over this carrier too."""
+        mission_id = str(payload.get("mission_id") or "")
+        if not mission_id:
+            raise SessionDelegateError("mission_id_required")
+        try:
+            mission = await missions.transition(
+                mission_id,
+                target=MissionState.CANCELLED,
+                actor=PrincipalType.OWNER_DEVICE,
+                final_outcome="cancelled by owner",
+            )
+        except MissionError as exc:
+            raise SessionDelegateError(str(exc)) from exc
+        return {"mission_id": mission.mission_id, "state": mission.state.value}
+
+    async def _message_mission_through_session(payload: dict, device_id: str) -> dict:
+        """§2.3 — a note on the record. It does not move the mission by itself."""
+        mission_id = str(payload.get("mission_id") or "")
+        text = str(payload.get("text") or payload.get("message") or "")
+        if not mission_id or not text:
+            raise SessionDelegateError("mission_id_and_text_required")
+        if await missions.get(mission_id) is None:
+            raise SessionDelegateError("mission_unknown")
+        event = await missions.record_event(
+            mission_id=mission_id,
+            event_type=MissionEventType.MISSION_CREATED,
+            actor=PrincipalType.OWNER_DEVICE,
+            summary=text[:500],
+            severity="INFO",
+        )
+        return {"event_id": event.event_id, "recorded": True}
+
+    # Rev 1.5 §20.2 — all four kinds the router knows, delegated to the authorities that
+    # already exist.
+    #
+    # Three of these were left unwired, and the effect was not a missing feature. The
+    # router admitted the envelope into §20.12's table *before* discovering it had nobody
+    # to hand it to, so "cancel this mission" sent over the durable session was recorded,
+    # refused, and — because its idempotency key was now taken — answered ALREADY_KNOWN
+    # on every retry. Acknowledged, never performed, and unrepeatable.
+    session_router = SessionRouter(
+        van_sessions,
+        SessionDelegates(
+            submit_command=_submit_command_through_session,
+            answer_decision=_answer_decision_through_session,
+            cancel_mission=_cancel_mission_through_session,
+            message_mission=_message_mission_through_session,
+        ),
+    )
+
+    # Rev 1.5 §21.16 — the spoken half of an answer, so a reconnect does not start it
+    # again from the beginning. Held in memory deliberately: a restart loses the text of an
+    # answer in flight, while the command that produced it and its result are both durable.
+    speech_streams = SpeechStreamService()
+    app.state.speech_streams = speech_streams
+
+    async def _resume_snapshot(
+        *, device_id: str, van_session_id: str, pending_command_ids: list[str]
+    ) -> dict:
+        """§20.11 — what the Gateway authoritatively knows about what the client lost.
+
+        Answered from two places, because the Gateway knows a thing in two ways and the
+        client cannot tell which applies. A mission is the richer answer and is preferred.
+        Failing that, `van_session_messages` is the §20.12 admission table — the record
+        that makes a resubmission safe — and a row in it means the Gateway holds this
+        message whether or not anything downstream opened a mission for it.
+
+        Consulting only the mission table made every answer for an admitted-but-missionless
+        message `UNKNOWN`, which the client correctly reads as *resend*. The command was
+        not lost, but it was re-sent on every single resume for the life of the session,
+        because nothing the client could ever receive would settle it.
+
+        `UNKNOWN` is emitted rather than the key omitted: the client treats both as
+        resend, and sending it makes "I looked and I do not have this" a statement the
+        client can be tested against rather than an absence it has to infer.
+        """
+        states: dict[str, str] = {}
+        for identity in pending_command_ids[:50]:
+            mission = await command_missions.existing_for_command(identity)
+            if mission is not None:
+                states[identity] = mission.state.value
+                continue
+            # The client asks by command id when it has one and by message id otherwise,
+            # and a resubmitted envelope carries both. Matching either is what lets one
+            # question be answered without the two sides agreeing in advance which
+            # identity a given command happens to have.
+            row = await store.fetchone(
+                """
+                SELECT admitted_state FROM van_session_messages
+                 WHERE van_session_id = ? AND (command_id = ? OR message_id = ?)
+                 LIMIT 1
+                """,
+                (van_session_id, identity, identity),
+            )
+            states[identity] = row["admitted_state"] if row is not None else "UNKNOWN"
+        cursor_row = await store.fetchone(
+            "SELECT last_seq FROM event_cursors WHERE device_id = ?", (device_id,)
+        )
+        return {
+            "command_states": states,
+            "authoritative_event_cursor": int(cursor_row["last_seq"]) if cursor_row else 0,
+            # §21.16 — where the owner actually got to in the spoken answer. Absent when
+            # there is nothing in flight, which is the ordinary case.
+            "response_state": speech_streams.response_state(device_id),
+        }
+
+    app.include_router(build_session_router(
+        sessions=van_sessions, router=session_router, events=events,
+        resume_snapshot=_resume_snapshot,
+    ))
+    # Rev 1.5 §§0D.3, 5.7 — the owner-device binding.
+    #
+    # The policy is configuration because the signing certificate differs between a debug
+    # build and the owner's release build, and pinning the debug one would mean the
+    # production APK could never enrol. Absent configuration disables enrolment rather than
+    # weakening it: §0E.1 D5 forbids a downgrade to a weaker binding, and an unconfigured
+    # deployment is exactly where one would be tempting.
+    owner_device_bindings = (
+        OwnerDeviceBindingService(
+            store,
+            AttestationPolicy(
+                expected_package=settings.owner_device_package,
+                expected_signing_cert_sha256=settings.owner_device_signing_cert_sha256,
+                allowed_root_fingerprints=frozenset(
+                    f.strip() for f in settings.owner_device_attestation_roots.split(",") if f.strip()
+                ),
+            ),
+        )
+        if settings.owner_device_signing_cert_sha256
+        else None
+    )
+    connectivity_config = ConnectivityConfigService(
+        store,
+        private_pem=(
+            _read_stream_signing_key(settings.connectivity_signing_key_file)
+            if settings.connectivity_signing_key_file else None
+        ),
+        kid=settings.connectivity_signing_kid,
+    )
+    app.state.owner_device_bindings = owner_device_bindings
+    app.state.connectivity_config = connectivity_config
+    app.state.van_sessions = van_sessions
+    app.state.session_router = session_router
+    app.state.interactive_sessions = interactive_sessions
+    app.state.browser_control_leases = browser_control_leases
+    app.state.browser_stream_grants = browser_stream_grants
     app.include_router(mission_api.router)
     app.include_router(understanding_api.router)
 
@@ -717,10 +1085,29 @@ def create_app() -> FastAPI:
             path in ("/v1/technology-radar", "/v1/eval", "/v1/autonomy")
         ):
             return ControlScope.UNDERSTANDING if path == "/v1/understanding/observe" else None
+        if is_session_owner_route(path):
+            # §20 — the logical session carries the owner's own commands, so it
+            # authenticates as the owner's device. Same predicate-with-one-reader shape as
+            # the interactive browser routes below.
+            return None
+        if is_interactive_browser_owner_route(path):
+            # Rev 1.5 §6.1 — the owner's phone creates, heartbeats and closes its own
+            # browser session, so these are device-authenticated rather than Hermes-only.
+            # One predicate, two readers: a route classified here and not below would fall
+            # through to owner-device authentication on a Hermes surface, which is the hole
+            # P0-SEC-001 closed and P2-GOOG-004 nearly reopened.
+            return None
         if path.startswith("/v1/browser/"):
             return None if method == "GET" else ControlScope.BROWSER
         if method == "PUT" and path.startswith("/v1/projects/") and path.endswith("/truth"):
             return ControlScope.PROJECTS
+        if method == "POST" and path in {
+            "/v1/devices/bootstrap/create", "/v1/devices/rebind",
+            "/v1/devices/provisioning-payload",
+        }:
+            # ADR-RB-026 — minting an enrolment credential, and replacing the owner's
+            # device, are the same authority as enrolment itself.
+            return ControlScope.DEVICE_ENROLMENT
         if method == "POST" and path in {"/v1/devices/enroll", "/v1/devices/pairing-ticket"}:
             # The scope that can mint owner-device authority, and the reason this module
             # exists. Not granted to the legacy token.
@@ -737,64 +1124,106 @@ def create_app() -> FastAPI:
             return ControlScope.GOOGLE
         return None
 
-    def internal_control_route(method: str, path: str) -> bool:
-        if path.startswith("/v1/runtime/"):
-            return True
-        # Rev 1.3 §219 — automation/browser health is an internal control surface;
-        # it exposes runtime identity and governance state, never an owner route.
-        # P2-CU-001 adds the computer-use fabric on the same terms: it reports which
-        # surfaces have a worker, which is runtime shape, not owner-facing work.
-        if path in {
-            "/v1/automation/health", "/v1/browser/health", "/v1/computer-use/health",
-        }:
-            return True
-        # Gate 11. The operator surface is internal control; device telemetry is not,
-        # for the reason given in control_scope_for.
-        if path.startswith("/v1/observability/") and path != "/v1/observability/device-telemetry":
-            return True
-        # §§219-222 — the whole automation control surface is Hermes-only. It never
-        # accepts owner ingress, so a compromised ingress token cannot compile,
-        # admit or publish a capability.
-        if path.startswith("/v1/automation/"):
-            return True
-        # §§2.3, 43 — the mission read model is owner-facing; planning is not.
-        # Cancel and message are the two mutations that are the owner's to make.
-        if path.startswith("/v1/missions") or path in ("/v1/needs-you", "/v1/activity",
-                                                        "/v1/capabilities/status"):
-            if method == "GET":
-                return False
-            return not (path.endswith("/cancel") or path.endswith("/message"))
-        # §§33, 63.6 — the Understanding surface is the owner's. Hermes may
-        # observe; only the owner confirms, corrects, rejects or reverts.
-        if path.startswith("/v1/understanding") or path.startswith("/v1/permissions") or (
-            path in ("/v1/technology-radar", "/v1/eval", "/v1/autonomy")
-        ):
-            # §36 — revoking a permission is emphatically the owner's, so the
-            # only internal-control route on this surface is Hermes observing.
-            return path == "/v1/understanding/observe"
-        # Owner Android may inspect browser truth through authenticated GETs.
-        # Browser mutations/assignments remain Hermes internal-control only.
-        if path.startswith("/v1/browser/"):
-            return method != "GET"
-        if method == "PUT" and path.startswith("/v1/projects/") and path.endswith("/truth"):
-            return True
-        if method == "POST" and path in {
-            "/v1/devices/enroll",
-            "/v1/devices/pairing-ticket",
-        }:
-            return True
-        if method == "POST" and path.startswith("/v1/devices/") and path.endswith("/revoke"):
-            return True
-        if method == "POST" and path == "/v1/trading/halt":
-            return True
-        if method == "POST" and path.startswith("/v1/trading/tickets/") and path.endswith("/confirm"):
-            return True
-        # The test-transport route that used to sit at the head of this set is gone
-        # (P2-SEC-009); leaving its name in the allow-list would be dead policy for a
-        # route that no longer exists.
-        if path in GOOGLE_CONTROL_ROUTES:
-            return True
-        return path.startswith("/v1/google/jobs/")
+    def requires_device_proof(method: str, path: str) -> bool:
+        """ADR-RB-025 — which owner requests must prove possession of the bound key.
+
+        Reading a session or a browser tab list is not on this list; *changing* something
+        is. The distinction matters because a proof costs a hardware-key signature on the
+        phone, and demanding one for a polling read would put a Keystore operation in the
+        battery path for no security gain.
+
+        `require_proof` existed in `OwnerDeviceBindingService` before this predicate did,
+        and nothing called it. A binding nobody checks is a fingerprint in a table: a
+        stolen device token would have worked on every route, with or without a bound
+        device, and `/v1/device-binding/status` would still have reported `bound: true`.
+        """
+        if method not in {"POST", "PUT", "PATCH", "DELETE"}:
+            return False
+        if path in {"/v1/devices/bootstrap/challenge", "/v1/devices/bootstrap/attest"}:
+            # The enrolment itself. There is no bound key yet to prove possession of.
+            return False
+        return (
+            is_interactive_browser_owner_route(path)
+            or is_session_owner_route(path)
+            or path == "/v1/commands"
+            or path == "/v1/context/ingest"
+        )
+
+    async def enforce_device_proof(request: Request, device_id: str) -> JSONResponse | None:
+        """Refuse a privileged request from a bound device that did not sign it.
+
+        Fail-closed where it can be: once a device is bound, a missing or invalid proof is
+        a refusal, and there is no header a caller can omit to get the old behaviour back.
+
+        For an *unbound* device this returns None and the token alone carries the request,
+        because a gateway that already has paired devices would otherwise lock its owner
+        out the moment this shipped. That downgrade is visible rather than silent:
+        `/v1/device-binding/status` reports `bound: false`, and `settings.require_device_
+        binding` turns the fallback off for a deployment that has finished enrolling.
+        """
+        if owner_device_bindings is None:
+            if settings.require_device_binding:
+                return JSONResponse(
+                    status_code=503,
+                    content={"detail": "owner_device_binding_unconfigured"},
+                )
+            return None
+        # Once *any* device is bound, the owner has one device and this is not a question
+        # about the caller: a second paired phone asking to be treated as unbound is the
+        # downgrade §0E.1 D5 forbids. A first version asked `for_device(device_id)`, so a
+        # second paired device skipped the gate entirely by never having enrolled — the
+        # proof was mandatory only for the device that had already proved itself.
+        binding = await owner_device_bindings.active()
+        if binding is None:
+            if settings.require_device_binding:
+                return JSONResponse(status_code=403, content={"detail": "device_not_bound"})
+            return None
+        if binding.device_id != device_id:
+            return JSONResponse(
+                status_code=403, content={"detail": "device_not_owner_device"}
+            )
+
+        signature_b64 = request.headers.get("X-Van-Device-Proof", "")
+        issued_at_raw = request.headers.get("X-Van-Device-Proof-Issued-At", "")
+        if not signature_b64 or not issued_at_raw:
+            return JSONResponse(
+                status_code=401, content={"detail": "device_proof_required"}
+            )
+        try:
+            signature = base64.b64decode(signature_b64, validate=True)
+            issued_at_ms = int(issued_at_raw)
+        except (ValueError, binascii.Error):
+            return JSONResponse(
+                status_code=400, content={"detail": "device_proof_malformed"}
+            )
+
+        # The handler still needs this body after we have read it.
+        #
+        # A first version followed `await request.body()` with a hand-rolled replay that
+        # reassigned `request._receive`. A mutation deleting that replay changed nothing,
+        # which is how it was found to be dead: Starlette's `BaseHTTPMiddleware` already
+        # wraps the request in a `_CachedRequest` whose documented behaviour is that a body
+        # read in `dispatch` is cached and passed downstream. Poking a private attribute to
+        # re-implement that was two mechanisms for one job, and the one I wrote was the
+        # one nothing exercised.
+        #
+        # The dependency is real, so it is tested rather than assumed: a proved POST must
+        # come back with the field it sent, which fails if this ever stops being true.
+        body = await request.body()
+
+        try:
+            await owner_device_bindings.require_proof(
+                device_id=device_id,
+                signature=signature,
+                method=request.method,
+                path=request.url.path,
+                issued_at_ms=issued_at_ms,
+                body=body,
+            )
+        except DeviceBindingError as exc:
+            return JSONResponse(status_code=401, content={"detail": exc.reason})
+        request.state.van_device_proved = True
+        return None
 
     def throttled_response(detail: str, locked: Throttled) -> JSONResponse:
         """429 with the one header a client can actually act on."""
@@ -804,9 +1233,28 @@ def create_app() -> FastAPI:
             headers={"Retry-After": str(locked.retry_after_seconds)},
         )
 
+    # `internal_control_route` used to live here: a second copy of the route
+    # classification that once let the internal token bypass the device gate. P0-SEC-001
+    # replaced that mechanism with `control_scope_for` plus scoped credentials, and left
+    # this behind. A repository-wide search finds no caller — not in the middleware, not in
+    # a handler, not in a test — so it has been decided-by-nobody since that closure.
+    #
+    # It was deleted rather than updated when the interactive browser routes were added.
+    # A mutation removing the exemption I had just written into it changed nothing, which
+    # is how it was found: a guard whose removal is undetectable is not protecting
+    # anything. Keeping it would have meant two classifiers to edit and one of them
+    # silently ignored, which is exactly how the Rev 1.3 drift this programme closed began.
+
     @app.middleware("http")
     async def require_ingress_auth(request: Request, call_next):
         if request.method == "POST" and request.url.path == "/v1/devices/pair":
+            return await call_next(request)
+        # ADR-RB-026 — a phone being enrolled has no device token yet, by definition. These
+        # two are protected by the single-use bootstrap token instead, which is the whole
+        # credential: short-lived, hashed at rest, and spent by the enrolment it authorises.
+        if request.method == "POST" and request.url.path in {
+            "/v1/devices/bootstrap/challenge", "/v1/devices/bootstrap/attest",
+        }:
             return await call_next(request)
         if request.method == "GET" and request.url.path.startswith("/v1/trading/oauth/") and request.url.path.endswith("/callback"):
             return await call_next(request)
@@ -878,6 +1326,10 @@ def create_app() -> FastAPI:
             return JSONResponse(status_code=401, content={"detail": "device_access_denied"})
         throttle.record_success("device_token", GLOBAL_SUBJECT)
         request.state.van_device_id = device.device_id
+        if requires_device_proof(request.method, request.url.path):
+            refusal = await enforce_device_proof(request, device.device_id)
+            if refusal is not None:
+                return refusal
         return await call_next(request)
 
     def require_internal_control(
@@ -1042,6 +1494,163 @@ def create_app() -> FastAPI:
         if getattr(request.state, "van_device_id", None) != req.device_id:
             raise HTTPException(status_code=403, detail="device_identity_mismatch")
         return await orchestrator.handle(req)
+
+    def _require_binding_service() -> OwnerDeviceBindingService:
+        if owner_device_bindings is None:
+            # §0E.1 D5 — no configuration means no enrolment, not a weaker one.
+            raise HTTPException(status_code=503, detail="owner_device_binding_unconfigured")
+        return owner_device_bindings
+
+    @app.post("/v1/devices/bootstrap/create")
+    async def create_bootstrap(body: BootstrapCreateBody):
+        """ADR-RB-026 — the installer's one-time credential, for the deployment pipeline."""
+        token, challenge = await _require_binding_service().create_bootstrap_token(note=body.note)
+        await audit.record(
+            result="ok", capability="device.bootstrap.create", after={"note": body.note}
+        )
+        return {"bootstrap_token": token, "attestation_challenge": challenge}
+
+    @app.post("/v1/devices/provisioning-payload")
+    async def create_provisioning_payload(
+        body: ProvisioningPayloadBody,
+        x_van_internal_token: str | None = Header(default=None),
+    ):
+        """ADR-RB-026 — the installer's one call, and the owner types nothing.
+
+        One call rather than three, because the alternative is an installer that mints a
+        token, reads a challenge and assembles a document itself — and an installer that
+        assembles the document decides its expiry. §0D.2's rule survives only if the
+        short-lived, single-use, signed envelope is built by the party that also enforces
+        those three properties.
+        """
+        require_internal_control(x_van_internal_token, ControlScope.DEVICE_ENROLMENT)
+        if not connectivity_config.private_pem or not connectivity_config.kid:
+            # No signing key means no provisioning, not an unsigned one. A payload the
+            # device cannot verify is a payload it must refuse, and handing the installer
+            # one would make the failure look like the phone's.
+            raise HTTPException(status_code=503, detail="connectivity_signing_unconfigured")
+        token, challenge = await _require_binding_service().create_bootstrap_token(
+            note=body.note
+        )
+        # Both credentials, minted together, because provisioning is one act. A device
+        # that paired but did not bind would hold working tokens and no hardware identity,
+        # which is §0D.3's failure exactly: an APK copied to another handset would work.
+        ticket = await auth.create_pairing_ticket(body.note or "owner-device")
+        active = await connectivity_config.active()
+        try:
+            payload = build_provisioning_payload(
+                gateway_url=body.gateway_url,
+                pairing_token=ticket.token,
+                bootstrap_token=token,
+                attestation_challenge=challenge,
+                manifest_version=active.manifest_version if active else 0,
+            )
+            signature = sign_provisioning_payload(
+                payload, private_pem=connectivity_config.private_pem
+            )
+        except ConnectivityError as exc:
+            raise HTTPException(status_code=400, detail=exc.reason) from exc
+        await audit.record(
+            result="ok", capability="device.provisioning.issue",
+            # The token is not recorded. An audit row that carried it would be a second
+            # copy of the one credential that can bind a new device, in the table a backup
+            # copies — which is the reason `create_bootstrap_token` only stores its hash.
+            after={"provisioning_id": payload["provisioning_id"], "note": body.note},
+        )
+        return JSONResponse(
+            {"payload": payload, "signature": signature, "kid": connectivity_config.kid},
+            headers={"Cache-Control": "no-store"},
+        )
+
+    @app.post("/v1/devices/bootstrap/challenge")
+    async def bootstrap_challenge(body: BootstrapChallengeBody):
+        """The challenge this enrolment must be attested against."""
+        try:
+            challenge = await _require_binding_service().challenge_for(body.token)
+        except DeviceBindingError as exc:
+            raise HTTPException(status_code=403, detail=exc.reason) from exc
+        return {"attestation_challenge": challenge}
+
+    @app.post("/v1/devices/bootstrap/attest")
+    async def bootstrap_attest(body: BootstrapAttestBody):
+        """Bind the owner's device, or refuse and record why."""
+        try:
+            extension = base64.b64decode(body.attestation_extension_b64, validate=True)
+        except Exception as exc:
+            raise HTTPException(status_code=400, detail="attestation_not_base64") from exc
+        try:
+            binding = await _require_binding_service().bind(
+                token=body.token,
+                device_id=body.device_id,
+                public_key_pem=body.public_key_pem,
+                attestation_extension=extension,
+                attestation_root_fingerprint=body.attestation_root_fingerprint,
+                os_version=body.os_version,
+                os_patch_level=body.os_patch_level,
+            )
+        except DeviceBindingError as exc:
+            await audit.record(
+                result="refused", device_id=body.device_id,
+                capability="device.bootstrap.attest", error_class=exc.reason,
+            )
+            raise HTTPException(status_code=403, detail=exc.reason) from exc
+        await audit.record(
+            result="ok", device_id=body.device_id, capability="device.bootstrap.attest",
+            after={"fingerprint": binding.device_key_fingerprint},
+        )
+        return {
+            "binding_id": binding.binding_id,
+            "device_id": binding.device_id,
+            "device_key_fingerprint": binding.device_key_fingerprint,
+            "key_security_level": binding.key_security_level,
+            "verified_boot_state": binding.verified_boot_state,
+        }
+
+    @app.get("/v1/device-binding/status")
+    async def device_binding_status(request: Request):
+        """What this device's binding looks like from the Gateway's side."""
+        device_id = getattr(request.state, "van_device_id", None)
+        if not device_id:
+            raise HTTPException(status_code=403, detail="device_identity_required")
+        if owner_device_bindings is None:
+            return {"configured": False, "bound": False, "reason": "binding_unconfigured"}
+        binding = await owner_device_bindings.for_device(device_id)
+        if binding is None:
+            return {"configured": True, "bound": False}
+        return {
+            "configured": True,
+            "bound": binding.status.value == "ACTIVE",
+            "status": binding.status.value,
+            "device_key_fingerprint": binding.device_key_fingerprint,
+            "key_security_level": binding.key_security_level,
+            "verified_boot_state": binding.verified_boot_state,
+            "bound_at_ms": binding.bound_at_ms,
+            "last_proof_at_ms": binding.last_proof_at_ms,
+        }
+
+    @app.post("/v1/devices/rebind")
+    async def rebind_owner_device(body: RebindBody):
+        """§0D.3's recovery path: revoke the current binding and issue one enrolment token.
+
+        Administrative on purpose. A device that could rebind on its own behalf would be a
+        way to become the owner's phone by asserting that it is.
+        """
+        token, challenge = await _require_binding_service().rebind_token(reason=body.reason)
+        await audit.record(
+            result="ok", capability="device.rebind", after={"reason": body.reason}
+        )
+        return {"bootstrap_token": token, "attestation_challenge": challenge}
+
+    @app.get("/v1/connectivity/manifest")
+    async def connectivity_manifest(request: Request, known_version: int = 0):
+        """ADR-RB-027 — a newer signed manifest when there is one, nothing when there is not."""
+        device_id = getattr(request.state, "van_device_id", None)
+        if not device_id:
+            raise HTTPException(status_code=403, detail="device_identity_required")
+        served = await connectivity_config.serve(known_version=known_version)
+        if served is None:
+            return {"current": True, "manifest": None}
+        return {"current": False, **served}
 
     @app.get("/v1/commands/{command_id}")
     async def command_status(command_id: str, request: Request):
@@ -1344,18 +1953,47 @@ def create_app() -> FastAPI:
         except GoogleAuthError as exc:
             raise HTTPException(status_code=503, detail=str(exc)) from exc
 
+    async def _execute_google_action(
+        execution_id: str,
+        parameters: dict[str, Any],
+    ):
+        try:
+            return await google.execute_authorized_action(
+                owner_runtime.actions,
+                execution_id=execution_id,
+                parameters=parameters,
+            )
+        except ActionPolicyError as exc:
+            code = 404 if str(exc) == "unknown_execution" else 409
+            raise HTTPException(status_code=code, detail=str(exc)) from exc
+        except GoogleAuthError as exc:
+            raise HTTPException(status_code=503, detail=str(exc)) from exc
+
+    @app.post("/v1/google/actions/execute")
+    async def execute_google_action(
+        body: GoogleAuthorizedActionBody,
+        x_van_internal_token: str | None = Header(default=None),
+    ):
+        """Execute a mutation that Action Runtime already authorized.
+
+        The caller supplies an execution id, not approval. The execution record binds the
+        signed owner command, action class, parameters, principal, freshness and any A4
+        biometric approval. This endpoint cannot manufacture any of them.
+        """
+        require_internal_control(x_van_internal_token, ControlScope.GOOGLE)
+        return await _execute_google_action(body.execution_id, body.parameters)
+
     @app.post("/v1/google/gmail/send")
     async def gmail_send(
+        execution_id: str,
         draft_id: str,
-        approved: bool = False,
         x_van_internal_token: str | None = Header(default=None),
     ):
         require_internal_control(x_van_internal_token, ControlScope.GOOGLE)
-        try:
-            return await google.gmail_send(draft_id, action_class=ActionClass.A4, approved=approved)
-        except GoogleAuthError as exc:
-            code = 403 if str(exc) == "approval_required" else 503
-            raise HTTPException(status_code=code, detail=str(exc)) from exc
+        return await _execute_google_action(
+            execution_id,
+            {"draft_id": draft_id},
+        )
 
     # P2-GOOG-004 — six capabilities with a transport, a service method and no way in.
     #
@@ -1371,20 +2009,17 @@ def create_app() -> FastAPI:
 
     @app.post("/v1/google/gmail/draft")
     async def gmail_draft(
-        thread_id: str, body: str, x_van_internal_token: str | None = Header(default=None)
+        execution_id: str,
+        thread_id: str,
+        body: str,
+        x_van_internal_token: str | None = Header(default=None),
     ):
-        """A draft is written, not sent, which is why it is not gated like a send.
-
-        gmail_send is A4 and demands an owner approval bound to the command. Drafting
-        leaves something the owner can read and discard; gating it the same way would train
-        them to approve without reading, and the approval that matters is the one on the
-        send.
-        """
+        """Create a draft through the same sealed action boundary as every other mutation."""
         require_internal_control(x_van_internal_token, ControlScope.GOOGLE)
-        try:
-            return await google.gmail_draft(thread_id, body)
-        except GoogleAuthError as exc:
-            raise HTTPException(status_code=503, detail=str(exc)) from exc
+        return await _execute_google_action(
+            execution_id,
+            {"thread_id": thread_id, "body": body},
+        )
 
     @app.get("/v1/google/calendar/agenda")
     async def calendar_agenda(x_van_internal_token: str | None = Header(default=None)):
@@ -1396,22 +2031,16 @@ def create_app() -> FastAPI:
 
     @app.post("/v1/google/calendar/reschedule")
     async def calendar_reschedule(
+        execution_id: str,
         event_id: str,
         new_start_unix: int,
-        approved: bool = False,
         x_van_internal_token: str | None = Header(default=None),
     ):
-        """Moving something in the owner's calendar needs their approval.
-
-        The service already refuses without it. The route passes the flag rather than
-        deciding, so there is one place that says what rescheduling costs.
-        """
         require_internal_control(x_van_internal_token, ControlScope.GOOGLE)
-        try:
-            return await google.calendar_reschedule(event_id, new_start_unix, approved=approved)
-        except GoogleAuthError as exc:
-            code = 403 if str(exc) == "approval_required" else 503
-            raise HTTPException(status_code=code, detail=str(exc)) from exc
+        return await _execute_google_action(
+            execution_id,
+            {"event_id": event_id, "new_start_unix": new_start_unix},
+        )
 
     @app.get("/v1/google/drive/search")
     async def drive_search(q: str, x_van_internal_token: str | None = Header(default=None)):
@@ -1567,6 +2196,123 @@ def create_app() -> FastAPI:
             )
         return filtered
 
+    @app.post("/v1/context/ingest")
+    async def ingest_captured_context(body: dict[str, Any], request: Request):
+        """Device-captured data lane. It cannot mint owner authority.
+
+        Notifications and shares originate in other applications. The device may preserve
+        and forward them, but VAN must never turn their text into an OWNER_DEVICE command.
+        The Android queue therefore sends CONTEXT_INGEST records here rather than through
+        /v1/commands. This route is device-authenticated, hardware-proofed when the owner
+        device binding is active, bounded, explicitly UNTRUSTED_EXTERNAL, and produces only
+        evidence/event/attention state.
+
+        SESSION_ENVELOPE never reaches this route; it belongs to the durable session
+        consumer. Keeping those two non-command queue classes separate is also what stops
+        the generic replayer deleting a persisted session command before restore reads it.
+        """
+        device_id = getattr(request.state, "van_device_id", None)
+        if not device_id:
+            raise HTTPException(status_code=403, detail="device_identity_required")
+
+        if body.get("untrusted_content") is not True:
+            raise HTTPException(status_code=422, detail="captured_context_must_be_untrusted")
+
+        source = str(body.get("source") or "").strip().lower()
+        context_id = str(body.get("context_id") or "").strip()
+        if source not in {"notification", "share"}:
+            raise HTTPException(status_code=422, detail="captured_context_source_unsupported")
+        if not context_id or len(context_id) > 256:
+            raise HTTPException(status_code=422, detail="captured_context_id_required")
+
+        encoded = json.dumps(body, sort_keys=True, separators=(",", ":"), ensure_ascii=False)
+        if len(encoded.encode("utf-8")) > 65_536:
+            raise HTTPException(status_code=413, detail="captured_context_too_large")
+
+        event_payload: dict[str, Any]
+        suppressed = False
+        if source == "notification":
+            package = str(body.get("package") or "").strip()
+            if not package:
+                raise HTTPException(status_code=422, detail="notification_package_required")
+            priority = str(body.get("priority") or "NORMAL").strip().upper()
+            posted_at_ms = int(body.get("posted_at") or 0)
+            policy = AppPolicy.PRIORITY if priority == "PRIORITY" else AppPolicy.NORMAL
+            note = PhoneNotification(
+                key=context_id,
+                package=package,
+                title=str(body.get("title") or ""),
+                text=str(body.get("body") or ""),
+                importance=4 if policy is AppPolicy.PRIORITY else 3,
+                posted_at_unix=max(0, posted_at_ms // 1000),
+                policy=policy,
+            )
+            filtered = await notifications.ingest_durable(note)
+            suppressed = filtered.suppressed
+            if not filtered.suppressed:
+                await attention.upsert(
+                    title=filtered.title,
+                    severity=AttentionSeverity(filtered.classification.value),
+                    source=f"notification:{filtered.package}",
+                    dedupe_key=f"notif:{filtered.key}",
+                    payload={"text": filtered.text, "redacted": filtered.redacted},
+                )
+            event_payload = {
+                "context_id": context_id,
+                "source": source,
+                "package": filtered.package,
+                "title": filtered.title,
+                "text": filtered.text,
+                "classification": filtered.classification.value,
+                "suppressed": filtered.suppressed,
+                "redacted": filtered.redacted,
+                "source_trust": "UNTRUSTED_EXTERNAL",
+                "authority": "NONE",
+            }
+        else:
+            # Share content was already secret-filtered on the handset. The gateway still
+            # refuses an empty envelope rather than creating a durable event that carries
+            # nothing and later looks like successful ingestion.
+            text_value = str(body.get("text") or "")
+            subject_value = str(body.get("subject") or "")
+            uris = body.get("uris") if isinstance(body.get("uris"), list) else []
+            if not text_value and not subject_value and not uris:
+                raise HTTPException(status_code=422, detail="share_content_required")
+            event_payload = {
+                "context_id": context_id,
+                "source": source,
+                "share_id": str(body.get("share_id") or ""),
+                "mime": str(body.get("mime") or ""),
+                "kind": str(body.get("kind") or ""),
+                "text": text_value,
+                "subject": subject_value,
+                "uris": [str(item) for item in uris[:32]],
+                "source_trust": "UNTRUSTED_EXTERNAL",
+                "authority": "NONE",
+            }
+
+        event_seq = await events.publish(
+            f"context.{source}.ingested",
+            event_payload,
+            target_device_id=device_id,
+            event_id=f"context:{device_id}:{context_id}",
+        )
+        await audit.record(
+            result="ok",
+            device_id=device_id,
+            capability="context.data.ingest",
+            after={"source": source, "context_id": context_id, "event_seq": event_seq},
+        )
+        return {
+            "accepted": True,
+            "source": source,
+            "context_id": context_id,
+            "event_seq": event_seq,
+            "suppressed": suppressed,
+            "authority": "NONE",
+            "source_trust": "UNTRUSTED_EXTERNAL",
+        }
+
     # --------------------------------------------------- Gate 11: operator surface
     @app.post("/v1/observability/device-telemetry")
     async def ingest_device_telemetry(body: DeviceTelemetryBody):
@@ -1581,9 +2327,16 @@ def create_app() -> FastAPI:
         for sample in body.samples[:200]:
             try:
                 accepted.append(observability_instruments.record_device_sample(
-                    sample.name, sample.value, surface=sample.surface
+                    sample.name, sample.value,
+                    surface=sample.surface, dimension=sample.dimension,
                 ))
             except observability_instruments.UnknownDeviceMetric:
+                refused.append(sample.name)
+            except observability_instruments.DeviceDimensionMissing:
+                # Refused rather than recorded under a default. A depth with no
+                # storability would put approval-bearing commands in the same bucket as
+                # a retry queue, and an operator reading that chart would be told the
+                # opposite of what is true.
                 refused.append(sample.name)
         return {"accepted": len(accepted), "refused": refused}
 
@@ -1713,6 +2466,11 @@ def create_app() -> FastAPI:
     @app.get("/v1/trading/risk")
     async def trading_risk():
         return trading.risk()
+
+    @app.get("/v1/trading/cognition")
+    async def trading_cognition():
+        """Read-only Rev 5.1 cognition/research/evolution projection."""
+        return trading.cognition()
 
     @app.get("/v1/trading/trades/{trade_intent_id}")
     async def trading_trade_detail(trade_intent_id: str):
@@ -1847,6 +2605,185 @@ def create_app() -> FastAPI:
                 for k, v in result.items()
                 if k in ("account", "alias", "state", "ready", "stored_keys", "removed", "ok")
             },
+        )
+        return result
+
+    def _strategy_promotion_text(req) -> str:
+        return canonical_strategy_promotion(
+            req.device_id,
+            req.issued_at_unix,
+            strategy_id=req.strategy_id,
+            target_state=req.target_state,
+            owner_signature_ref=req.owner_signature_ref,
+            certificate=req.certificate,
+            evidence_refs=req.evidence_refs,
+        )
+
+    async def _authenticate_strategy_promotion(request: Request, req) -> None:
+        if getattr(request.state, "van_device_id", None) != req.device_id:
+            raise HTTPException(status_code=403, detail="device_identity_mismatch")
+        try:
+            await auth.require_device(req.device_id)
+            auth.verify_signature(
+                req.device_id,
+                _strategy_promotion_text(req),
+                req.signature,
+            )
+        except AuthError as exc:
+            await audit.record(
+                result="denied",
+                device_id=req.device_id,
+                capability="trading.strategy.promote",
+                failure_reason=exc.code,
+            )
+            raise HTTPException(status_code=403, detail=exc.message) from exc
+        import time as _time
+        if abs(int(_time.time()) - req.issued_at_unix) > 300:
+            raise HTTPException(status_code=403, detail="stale owner action; sign again")
+
+    @app.get("/v1/trading/strategies/promotion-candidates")
+    async def trading_strategy_promotion_candidates(request: Request):
+        """Owner-device read of sealed validation evidence eligible for promotion."""
+        device_id = getattr(request.state, "van_device_id", None)
+        if not device_id:
+            raise HTTPException(status_code=403, detail="owner_device_required")
+        try:
+            await auth.require_device(device_id)
+            result = app.state.strategy_promotions.candidates()
+        except AuthError as exc:
+            raise HTTPException(status_code=403, detail=exc.message) from exc
+        return result
+
+    @app.post("/v1/trading/strategies/promotion-challenge")
+    async def trading_strategy_promotion_challenge(
+        request: Request, req: StrategyPromotionChallengeRequest
+    ):
+        """Issue an A4 challenge bound to the exact strategy, target and certificate."""
+        await _authenticate_strategy_promotion(request, req)
+        text = _strategy_promotion_text(req)
+        challenge = await app.state.orchestrator.approvals.issue(
+            device_id=req.device_id,
+            source_command_id="strategy:promote",
+            turn_id=None,
+            action_id="trading.strategy.promote",
+            text=text,
+            project_id=None,
+        )
+        return {
+            "approval_challenge_id": challenge.challenge_id,
+            "approval_challenge": challenge.canonical,
+            "approval_expires_at_unix": challenge.expires_at_unix,
+            "resolved_action_id": "trading.strategy.promote",
+        }
+
+    @app.post("/v1/trading/strategies/promote")
+    async def trading_strategy_promote(
+        request: Request, req: StrategyPromotionRequest
+    ):
+        """Owner-device/A4 gated server-side strategy promotion workflow.
+
+        The gateway does not mutate the capsule. It proves current owner intent and
+        forwards the certificate-bound request to the private commander, which verifies
+        van-oa1 authority and commits the VATI ledger event.
+        """
+        await _authenticate_strategy_promotion(request, req)
+        proof = req.approval_proof
+        if proof is None or proof.algorithm != OwnerApprovalService.ALGORITHM:
+            await audit.record(
+                result="denied",
+                device_id=req.device_id,
+                capability="trading.strategy.promote",
+                failure_reason="approval_proof_missing",
+            )
+            raise HTTPException(
+                status_code=403,
+                detail="owner biometric approval proof is required for strategy promotion",
+            )
+        text = _strategy_promotion_text(req)
+        try:
+            await app.state.orchestrator.approvals.verify_and_consume(
+                challenge_id=proof.challenge_id,
+                source_command_id="strategy:promote",
+                signature_b64=proof.signature_b64,
+                device_id=req.device_id,
+                turn_id=None,
+                action_id="trading.strategy.promote",
+                text=text,
+                project_id=None,
+            )
+        except OwnerApprovalError as exc:
+            await audit.record(
+                result="denied",
+                device_id=req.device_id,
+                capability="trading.strategy.promote",
+                approval="invalid",
+                failure_reason=str(exc),
+            )
+            raise HTTPException(status_code=403, detail=str(exc)) from exc
+
+        device_row = await store.fetchone(
+            "SELECT public_key_pem, revoked_at_unix FROM devices WHERE device_id = ?",
+            (req.device_id,),
+        )
+        if (
+            device_row is None
+            or device_row["revoked_at_unix"] is not None
+            or not str(device_row["public_key_pem"] or "").strip()
+        ):
+            raise HTTPException(
+                status_code=403,
+                detail="paired owner approval key is unavailable or revoked",
+            )
+
+        try:
+            enrollment = app.state.strategy_promotions.ensure_owner_authority(
+                device_id=req.device_id,
+                public_key_pem=str(device_row["public_key_pem"]),
+            )
+            result = app.state.strategy_promotions.promote(
+                strategy_id=req.strategy_id,
+                target_state=req.target_state,
+                owner_signature_ref=req.owner_signature_ref,
+                certificate=req.certificate,
+                evidence_refs=req.evidence_refs,
+                approved_at_unix=req.issued_at_unix,
+            )
+        except HTTPException as exc:
+            await audit.record(
+                result="refused",
+                device_id=req.device_id,
+                capability="trading.strategy.promote",
+                failure_reason=str(exc.detail)[:200],
+                before={
+                    "strategy_id": req.strategy_id,
+                    "target_state": req.target_state,
+                    "validation_hash": req.certificate.get("validation_hash"),
+                },
+            )
+            raise
+
+        await audit.record(
+            result="strategy_promotion_recorded",
+            device_id=req.device_id,
+            capability="trading.strategy.promote",
+            approval=result.get("owner_authority_ref"),
+            tool="van_trading_commander",
+            before={
+                "strategy_id": req.strategy_id,
+                "target_state": req.target_state,
+                "validation_hash": req.certificate.get("validation_hash"),
+            },
+            after={
+                **{
+                    k: result.get(k)
+                    for k in (
+                        "strategy_id", "from", "to", "capsule_hash",
+                        "validation_hash", "event_hash", "registry_projection",
+                    )
+                },
+                "owner_key_id": enrollment.get("key_id"),
+            },
+            evidence_pointer=result.get("event_hash"),
         )
         return result
 

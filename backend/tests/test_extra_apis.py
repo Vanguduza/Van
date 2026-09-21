@@ -4,10 +4,12 @@ import pytest
 from cryptography.fernet import Fernet
 from httpx import ASGITransport, AsyncClient
 
+from van_gateway.action.models import ExecutionStatus
 from van_gateway.app import create_app
 from van_gateway.config import get_settings
 from van_gateway.google.service import GoogleService
 from van_gateway.google.transport import FakeGoogleTransport
+from van_gateway.models import PrincipalType
 from van_gateway.storage.db import Store
 
 
@@ -126,7 +128,7 @@ async def test_reminder_parse_expression(client):
 
 
 @pytest.mark.asyncio
-async def test_google_fake_transport_and_approval(client):
+async def test_google_fake_transport_requires_authorized_execution_and_readback(client):
     ac, _app = client
     headers = {"X-Van-Internal-Token": "test-internal-token"}
     connected = await ac.post(
@@ -136,21 +138,74 @@ async def test_google_fake_transport_and_approval(client):
             "refresh_token": "refresh-xyz",
             "scopes": [
                 "https://www.googleapis.com/auth/gmail.readonly",
+                "https://www.googleapis.com/auth/gmail.compose",
                 "https://www.googleapis.com/auth/gmail.send",
             ],
         },
     )
     assert connected.status_code == 200
-    # Install the fake transport directly. There is deliberately no production route that
-    # does this: /v1/google/test-transport could swap a live transport for a fake on the
-    # running app with no undo (finding P2-SEC-009). The assertion this test exists for —
-    # that A4 send requires explicit approval — is unchanged.
     _app.state.google.transport = FakeGoogleTransport()
     _app.state.google.oauth = None
-    denied = await ac.post("/v1/google/gmail/send", headers=headers, params={"draft_id": "d1", "approved": False})
-    assert denied.status_code == 403
-    ok = await ac.post("/v1/google/gmail/send", headers=headers, params={"draft_id": "d1", "approved": True})
-    assert ok.status_code == 200
+
+    # An internal-control credential is not owner approval. The historical route accepted
+    # approved=true here; the new route has no such authority-bearing parameter.
+    bypass = await ac.post(
+        "/v1/google/gmail/send",
+        headers=headers,
+        params={"draft_id": "d1", "approved": True},
+    )
+    assert bypass.status_code == 422
+
+    parameters = {"draft_id": "d1"}
+    execution = await _app.state.owner_runtime.actions.begin(
+        execution_id="exec-google-send",
+        command_id="cmd-google-send",
+        turn_id="turn-google-send",
+        action_id="google.gmail.send",
+        principal_type=PrincipalType.OWNER_DEVICE,
+        requested_by="device:pytest-client",
+        idempotency_key="turn-google-send:google.gmail.send",
+        parameters=parameters,
+        snapshot_id=None,
+        owner_approved=True,
+    )
+    assert execution.status is ExecutionStatus.AUTHORIZED
+
+    ok = await ac.post(
+        "/v1/google/actions/execute",
+        headers=headers,
+        json={"execution_id": execution.execution_id, "parameters": parameters},
+    )
+    assert ok.status_code == 200, ok.text
+    assert ok.json()["verification"]["status"] == "VERIFIED_SUCCESS"
+    calls = [name for name, _args in _app.state.google.transport.calls]
+    assert calls == ["gmail_send", "gmail_message_get"]
+
+    # A4 without owner approval produces an execution record, but not one the provider
+    # executor may use. This separates "has an execution id" from "is authorized".
+    blocked = await _app.state.owner_runtime.actions.begin(
+        execution_id="exec-google-send-blocked",
+        command_id="cmd-google-send-blocked",
+        turn_id="turn-google-send-blocked",
+        action_id="google.gmail.send",
+        principal_type=PrincipalType.OWNER_DEVICE,
+        requested_by="device:pytest-client",
+        idempotency_key="turn-google-send-blocked:google.gmail.send",
+        parameters={"draft_id": "d2"},
+        snapshot_id=None,
+        owner_approved=False,
+    )
+    assert blocked.status is ExecutionStatus.AUTHORIZATION_REQUIRED
+    before = list(_app.state.google.transport.calls)
+    refused = await ac.post(
+        "/v1/google/actions/execute",
+        headers=headers,
+        json={"execution_id": blocked.execution_id, "parameters": {"draft_id": "d2"}},
+    )
+    assert refused.status_code == 409
+    assert refused.json()["detail"] == "execution_not_authorized"
+    assert _app.state.google.transport.calls == before
+
     scrubbed = GoogleService.scrub_for_prompt({"access_token": "tok", "snippet": "hi"})
     assert "access_token" not in scrubbed
     assert scrubbed["snippet"] == "hi"

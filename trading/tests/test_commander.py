@@ -10,6 +10,7 @@ from fastapi.testclient import TestClient
 
 from conftest_owner_authority import OwnerAuthorityHarness
 from commander.accounts import ACCOUNT_COMMANDS
+from commander.strategies import PROMOTION_COMMANDS
 from commander.app import AGENT_HIDDEN_COMMANDS, COMMANDS, CommanderSettings, create_app, redact
 from commander.auth import HDR_NONCE, HDR_SIG, HDR_TS, NonceCache, sign_headers, verify_request
 from vati.core import EventKind, Ledger, make_event
@@ -194,8 +195,8 @@ def test_credential_commands_are_hidden_from_agents_but_open_to_the_gateway(env)
     r = client.get("/v1/tools", headers=sign_headers(TOKEN, "GET", "/v1/tools", b""))
     assert r.status_code == 200
     listed = {t["name"] for t in r.json()["tools"]}
-    assert listed.isdisjoint(ACCOUNT_COMMANDS) and "status" in listed and "accounts" in listed
-    assert AGENT_HIDDEN_COMMANDS == set(ACCOUNT_COMMANDS)
+    assert listed.isdisjoint(ACCOUNT_COMMANDS + PROMOTION_COMMANDS) and "status" in listed and "accounts" in listed
+    assert AGENT_HIDDEN_COMMANDS == set(ACCOUNT_COMMANDS + PROMOTION_COMMANDS)
 
 
 def test_requested_by_is_not_the_callers_to_declare(two_principal_env):
@@ -234,3 +235,29 @@ def test_an_unknown_token_authenticates_nobody(two_principal_env):
     client = two_principal_env
     r = _call(client, "accounts", "z" * 40)
     assert r.status_code == 401
+
+def test_legacy_shared_principal_cannot_mutate_accounts_or_strategies(env):
+    """A valid old/shared token is compatibility authority, never owner mutation authority."""
+    client, _, _ = env
+    account = _call(
+        client, "account_upsert", TOKEN,
+        {"alias": "deriv_demo", "broker": "DERIV", "server": "1089"},
+    )
+    assert account.status_code == 403
+    assert "van-gateway principal" in account.json()["detail"]
+
+    # The strategy surface is protected by the same positive principal gate. It must be
+    # refused before payload validation can become a way around the boundary.
+    promotion = _call(client, PROMOTION_COMMANDS[0], TOKEN, {})
+    assert promotion.status_code == 403
+    assert "van-gateway principal" in promotion.json()["detail"]
+
+
+def test_principal_token_configuration_rejects_weak_and_duplicate_authority():
+    with pytest.raises(RuntimeError, match="invalid commander token"):
+        CommanderSettings(tokens={"hermes": "too-short"}).load_tokens()
+
+    same = "s" * 40
+    with pytest.raises(RuntimeError, match="share a token"):
+        CommanderSettings(tokens={"hermes": same, "van-gateway": same}).load_tokens()
+

@@ -45,7 +45,8 @@ Use the owner-runtime tools in this order; do not start with semantic inference:
    `context_snapshot` in step 7 is planning evidence and **cannot** authorize `action_begin`. When
    calling `action_begin`, pass the `canonical_context.snapshot_id` you received in the run metadata,
    not the id returned by your own `context_snapshot` call. Passing the wrong one fails closed.
-10. Report success only for the gateway's verified terminal state. `knowledge_action_execute` performs provider submission/readback and action verification; generic actions still use `action_submitted` then `action_verify`.
+10. Before ending an owner-directed run, call `mission_result` with the `hermes_run_id` returned by Hermes and one of COMPLETED / FAILED / WAITING_FOR_OWNER / WAITING_EXTERNAL. This is lifecycle reporting only: COMPLETED causes the gateway to enter VERIFYING and cannot itself produce VERIFIED_SUCCESS. The `mission_id` supplied in the run metadata is for correlation; the gateway resolves authority from the durable run binding rather than trusting a caller-supplied mission id.
+11. Report success only for the gateway's verified terminal state. `knowledge_action_execute` performs provider submission/readback and action verification; generic actions still use `action_submitted` then `action_verify`.
 
 Graph and lexical results are retrieval evidence, not truth resolution. Hot capsules are latency optimizations over revision-bound evidence, not memory authority. Inferred/model-derived context cannot override owner, locked authority, Project Truth or verified live state. The owner-runtime MCP intentionally exposes no tool that can mint canonical owner memory.
 

@@ -22,7 +22,24 @@ import javax.crypto.spec.GCMParameterSpec
  * Rev 3.1 invariant: exact A1-A5 policy and replay semantics travel with each queued command.
  * A5 never executes. NO_STALE_REPLAY commands are never retried after a dispatch attempt.
  */
-class EncryptedCommandQueue(context: Context) {
+/**
+ * **Every mutating call on this class blocks until the bytes are on disk.**
+ *
+ * `persist` and `remove` use `commit()` rather than `apply()`, because the session outbox
+ * tells the owner their command is saved and that sentence has to be true before it is
+ * said. The cost is that a write is AES-GCM plus a synchronous file write on whatever
+ * thread called it — so no caller may be on the Android main thread.
+ *
+ * That is not hypothetical. When this changed from `apply()` to `commit()` for the
+ * outbox's sake, two callers that had always been fine — `ShareIntakeActivity.onCreate`
+ * and `VanNotificationListenerService.onNotificationPosted`, both main-thread Android
+ * entry points — silently became main-thread disk writers, with a burst of notifications
+ * producing one encrypted write per notification on the thread that draws. Both now
+ * dispatch to `Dispatchers.IO`, and
+ * `tests/contracts/test_encrypted_queue_writes_are_off_the_main_thread.py` refuses a call
+ * site that is not.
+ */
+class EncryptedCommandQueue(context: Context) : OutboxRecordStore {
 
     private val json = Json { ignoreUnknownKeys = true; encodeDefaults = true }
     private val appContext = context.applicationContext
@@ -74,6 +91,41 @@ class EncryptedCommandQueue(context: Context) {
         return command
     }
 
+    /**
+     * §20.14 — write or replace a record the caller has built, keyed on its own id.
+     *
+     * Distinct from [enqueue], which mints a fresh id and is therefore an insert. The
+     * session outbox needs replacement: an attempt count or a reconfirmation is the same
+     * command with one more fact known about it, and a remove-then-enqueue pair would put
+     * a process-death window between the two halves of one update — losing the owner's
+     * command entirely, which is worse than the metadata loss it was introduced to fix.
+     */
+    override fun upsert(command: QueuedCommand) {
+        persist(command)
+    }
+
+    /**
+     * Every unexpired record of one kind, oldest first.
+     *
+     * Deliberately not [peekReady]. That reader filters on `isReplayEligible`, which
+     * drops a `NO_STALE_REPLAY` command once `attemptCount > 0` — and that is precisely
+     * the §20.14 class a restore exists to recover: a command that was tried, was not
+     * acknowledged, and must be put back to the owner rather than sent on their behalf.
+     * Reading the queue through `peekReady` here would have made a restart *silently
+     * discard* the commands the owner most needed to be asked about, with every test of
+     * the mapping still green because the mapping was never the broken half.
+     *
+     * Expiry is still honoured: a window that closed while the process was dead has
+     * closed, and §20.14 says that command does not run.
+     */
+    override fun recordsOfKind(kind: String): List<QueuedCommand> {
+        val now = System.currentTimeMillis()
+        return listIds()
+            .mapNotNull { load(it) }
+            .filter { it.kind == kind && !it.isExpired(now) }
+            .sortedBy { it.createdAtEpochMs }
+    }
+
     fun peekReady(nowMs: Long = System.currentTimeMillis()): List<QueuedCommand> {
         purgeExpired(nowMs)
         return listIds()
@@ -89,9 +141,21 @@ class EncryptedCommandQueue(context: Context) {
         return updated
     }
 
-    fun remove(id: String) {
-        indexPrefs.edit().remove(blobKey(id)).apply()
-        reindex(listIds().filterNot { it == id })
+    /**
+     * Forget one command. Atomic: the blob and the index move together.
+     *
+     * This was two editors and two `apply()` calls. Either order has a window a process
+     * death fits through — blob gone and still indexed leaves a row that loads as null,
+     * index gone and blob still present leaks a record nothing can reach — and `apply()`
+     * makes it worse by writing on a background thread, so a kill can lose a change the
+     * caller was already told had happened.
+     */
+    override fun remove(id: String) {
+        val ids = listIds().filterNot { it == id }
+        indexPrefs.edit()
+            .remove(blobKey(id))
+            .putString(KEY_INDEX, ids.joinToString(","))
+            .commit()
     }
 
     fun findByIdempotencyKey(key: String): QueuedCommand? =
@@ -132,17 +196,37 @@ class EncryptedCommandQueue(context: Context) {
      * not be.
      */
     fun clear() {
-        for (id in listIds()) remove(id)
+        // One editor, not one per command. `remove` commits synchronously, so looping it
+        // made the owner's "discard everything" tap N encrypted disk writes in a row —
+        // and the deeper the queue, the longer they wait, which is exactly backwards.
+        // It was also N chances to be killed half way through, leaving a queue that is
+        // neither what it was nor empty.
+        val editor = indexPrefs.edit()
+        for (id in listIds()) editor.remove(blobKey(id))
+        editor.putString(KEY_INDEX, "").commit()
     }
 
+    /**
+     * Write or replace one command. Atomic, and `commit()` rather than `apply()`.
+     *
+     * One editor because the blob and the index are one fact: a record that is in the
+     * index and not on disk is a row that loads as null, and one on disk and not in the
+     * index is unreachable. SharedPreferences applies an editor's changes together and
+     * writes the file by rename, so a single edit is the atomicity this needs.
+     *
+     * `commit()` because `apply()` returns before the disk write. The caller of this is
+     * told the owner's command is queued; a kill a moment later must not be able to make
+     * that a lie. The cost is a synchronous write on a path that already does AES-GCM.
+     */
     private fun persist(command: QueuedCommand) {
         val plaintext = json.encodeToString(command)
         val encrypted = encrypt(plaintext.toByteArray(Charsets.UTF_8))
         val encoded = Base64.encodeToString(encrypted, Base64.NO_WRAP)
-        indexPrefs.edit().putString(blobKey(command.id), encoded).apply()
-        val ids = listIds().toMutableSet()
-        ids.add(command.id)
-        reindex(ids.toList())
+        val ids = (listIds() + command.id).distinct()
+        indexPrefs.edit()
+            .putString(blobKey(command.id), encoded)
+            .putString(KEY_INDEX, ids.joinToString(","))
+            .commit()
     }
 
     private fun load(id: String): QueuedCommand? {
@@ -157,10 +241,6 @@ class EncryptedCommandQueue(context: Context) {
         val raw = indexPrefs.getString(KEY_INDEX, "") ?: ""
         if (raw.isEmpty()) return emptyList()
         return raw.split(",").filter { it.isNotBlank() }
-    }
-
-    private fun reindex(ids: List<String>) {
-        indexPrefs.edit().putString(KEY_INDEX, ids.joinToString(",")).apply()
     }
 
     private fun blobKey(id: String) = "cmd_$id"
@@ -205,7 +285,8 @@ class EncryptedCommandQueue(context: Context) {
     }
 
     companion object {
-        const val DEFAULT_TTL_MS = 24L * 60 * 60 * 1000 // 24h
+        /** Kept as the name every caller already uses; the value lives in the pure model file. */
+        const val DEFAULT_TTL_MS = COMMAND_QUEUE_DEFAULT_TTL_MS
         private const val PREFS_INDEX = "van_command_queue_index"
         private const val KEY_INDEX = "index"
         private const val KEYSTORE_ALIAS = "van_queue_aes"

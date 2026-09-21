@@ -11,6 +11,7 @@ from test_backtest_runner_cli import fx_cfg, fx_engine, synthetic_bars
 from test_intelligence import mk_bars
 from vati.backtest import BacktestEngine
 from vati.core import EventKind, Ledger
+from vati.core.events import make_event
 from vati.intelligence.events import EventMatrix
 from vati.learning import (
     CURRICULUM, ENVIRONMENT_WEIGHT, BrokerLearner, BrokerState, CounterfactualVariant, Environment, ExperienceEpisode, HealthObservation,
@@ -18,6 +19,8 @@ from vati.learning import (
     cluster_failures, curriculum_gate, daily_report, episode_from_ledger, evaluate_missed_opportunity, monthly_report, propose_candidate, run_counterfactuals, weekly_report,
 )
 from vati.learning.boundary import FORBIDDEN_TARGETS, LiveTarget
+from vati.learning.hooks import LearningHooks
+from vati.learning.replay import restore_learning_runtime
 from vati.market_data import FX_CALENDAR
 from vati.risk.contracts import Direction
 from vati.strategies import CapsuleRegistry
@@ -103,6 +106,78 @@ def test_broker_learning_ignores_simulated_execution_facts_and_degrades_on_real_
     for _ in range(4):
         q = ev.observe(broker="b", symbol="XAUUSD", session="NY", environment=Environment.LIVE, cost_ratio=D("3.0"), slippage_pips=D("2"), rejected=False, in_event_window=True)
     assert q.state() is BrokerState.EVENT_LIMITED
+
+
+def test_restart_replays_capsule_health_before_new_decisions(eurusd, tmp_path):
+    """A process restart cannot erase a reduce-only health gate or demotion."""
+    cfg = fx_cfg(eurusd)
+    engine = fx_engine(cfg)
+    sid = "FX-TREND-PULLBACK-01"
+    assert engine.registry.get(sid).state.value == "DEMO"
+
+    ledger = Ledger(tmp_path / "learning-replay.sqlite")
+    for i in range(30):
+        artifact_hash = f"{i + 1:064x}"
+        ledger.append(make_event(
+            EventKind.TRADE_EXPERIENCE_ARTIFACT,
+            "test-learning",
+            {
+                "artifact_hash": artifact_hash,
+                "environment": "LIVE",
+                "strategy_id": sid,
+                "outcome": {"r_multiple": "-1.00"},
+                "review": {"process_ok": False},
+                "execution": {"tca": {"cost_ratio": "2.5"}},
+            },
+            event_time_ms=1_000 + i,
+            received_time_ms=1_000 + i,
+            correlation_id=f"intent-{i}",
+        ))
+
+    fresh = LearningHooks(environment=Environment.LIVE, broker="paper")
+    report = restore_learning_runtime(
+        ledger, fresh, {"EURUSD": engine})
+
+    assert report.health_observations == 30
+    assert report.capsule_multipliers >= 1
+    assert engine.m.capsule_health[sid] < D("0.55")
+    assert engine.registry.get(sid).state.value == "DEGRADED"
+    assert fresh.health.verdict(sid).weighted_samples == D("30")
+
+
+def test_restart_replays_broker_liquidity_cap_from_contextual_tca(eurusd, tmp_path):
+    """A restart cannot turn a learned SUSPENDED broker profile back into 1.0."""
+    cfg = fx_cfg(eurusd)
+    engine = fx_engine(cfg)
+    ledger = Ledger(tmp_path / "broker-replay.sqlite")
+    for i in range(40):
+        ledger.append(make_event(
+            EventKind.TCA_RECORD,
+            "test-learning",
+            {
+                "trade_intent_id": f"intent-{i}",
+                "cost_ratio": "2.5",
+                "slippage": "1.0",
+                "learning_environment": "LIVE",
+                "broker": "paper",
+                "symbol": "EURUSD",
+                "session": "LONDON",
+                "event_window": "NORMAL",
+                "rejected": False,
+            },
+            event_time_ms=2_000 + i,
+            received_time_ms=2_000 + i,
+            correlation_id=f"intent-{i}",
+        ))
+
+    fresh = LearningHooks(environment=Environment.LIVE, broker="paper")
+    report = restore_learning_runtime(
+        ledger, fresh, {"EURUSD": engine})
+
+    assert report.tca_observations == 40
+    assert report.broker_multipliers >= 1
+    assert fresh.broker_liquidity("EURUSD") == D("0")
+    assert engine.m.broker_liquidity["EURUSD"] == D("0")
 
 
 # ------------------------------------------------------------ counterfactual
@@ -277,6 +352,7 @@ def test_cycle_applies_boundary_checked_demotion_and_capsule_stops_trading(eurus
     for ev in evs:
         sid = ev.payload["strategy_id"]
         assert ev.payload["from"] == "DEMO" and ev.payload["to"] == "DEGRADED" and ev.payload["authority"] == "AUTOMATIC_DEMOTION_ONLY"
+        assert ev.payload["capsule"]["capsule_hash"] == ev.payload["capsule_hash"]
         assert engine.registry.get(sid).state.value == "DEGRADED" and engine.registry.get(sid).data["supersedes"] == ev.payload["supersedes"]
         assert engine.m.capsule_health[sid] < D("0.55")
         assert any("not active" in r for c in led.iter(EventKind.OPPORTUNITY_ASSESSMENT) if c.event_time_ms > ev.event_time_ms for cand in c.payload["candidates"] if cand["strategy_id"] == sid for r in cand["reasons"])

@@ -1,5 +1,6 @@
 from __future__ import annotations
 
+from enum import Enum
 from typing import Any
 
 from fastapi import APIRouter, Header, HTTPException
@@ -46,6 +47,7 @@ from van_gateway.knowledge.obsidian import ObsidianProviderError
 from van_gateway.knowledge.service import KnowledgeRuntime
 from van_gateway.knowledge.vekl import VeklProviderError
 from van_gateway.models import PrincipalType
+from van_gateway.mission.service import MissionError, MissionService
 from van_gateway.research.exa import ExaResearchService, ResearchPolicyError
 from van_gateway.research.models import ResearchSearchRequest
 from van_gateway.storage.db import Store
@@ -125,6 +127,19 @@ class KnowledgeActionExecuteBody(BaseModel):
     parameters: dict[str, Any] = Field(default_factory=dict)
 
 
+class HermesMissionResultStatus(str, Enum):
+    COMPLETED = "COMPLETED"
+    FAILED = "FAILED"
+    WAITING_FOR_OWNER = "WAITING_FOR_OWNER"
+    WAITING_EXTERNAL = "WAITING_EXTERNAL"
+
+
+class HermesMissionResultBody(BaseModel):
+    hermes_run_id: str = Field(min_length=1, max_length=256)
+    status: HermesMissionResultStatus
+    summary: str = Field(default="", max_length=4000)
+
+
 class ActionSubmittedBody(BaseModel):
     correlation: dict[str, Any] = Field(default_factory=dict)
     evidence_pointer: str | None = None
@@ -158,8 +173,12 @@ class OwnerRuntimeApi:
             egress_enabled=settings.exa_egress_enabled,
             timeout_seconds=settings.exa_timeout_seconds,
         )
+        self.missions: MissionService | None = None
         self.router = APIRouter(prefix="/v1/runtime", tags=["owner-runtime"])
         self._install_routes()
+
+    def bind_missions(self, missions: MissionService) -> None:
+        self.missions = missions
 
     async def _refuse_irreversible_work_on_unsettled_assumptions(
         self, definition: Any, command_id: str
@@ -242,6 +261,31 @@ class OwnerRuntimeApi:
         async def runtime_status(x_van_internal_token: str | None = Header(default=None)):
             self._require_internal(x_van_internal_token)
             return await self.status()
+
+        @router.post("/missions/result")
+        async def report_mission_result(
+            body: HermesMissionResultBody,
+            x_van_internal_token: str | None = Header(default=None),
+        ):
+            self._require_internal(x_van_internal_token)
+            if self.missions is None:
+                raise HTTPException(status_code=503, detail="mission_runtime_unbound")
+            try:
+                mission = await self.missions.apply_hermes_result(
+                    hermes_run_id=body.hermes_run_id,
+                    outcome=body.status.value,
+                    summary=body.summary,
+                )
+            except MissionError as exc:
+                code = 404 if exc.code == "HERMES_RUN_UNBOUND" else 409
+                raise HTTPException(status_code=code, detail=exc.code) from exc
+            return {
+                "hermes_run_id": body.hermes_run_id,
+                "mission_id": mission.mission_id,
+                "state": mission.state.value,
+                "verification_state": mission.verification_state.value,
+                "final_outcome": mission.final_outcome,
+            }
 
         @router.post("/resolve")
         async def resolve_command(body: CommandResolveBody, x_van_internal_token: str | None = Header(default=None)):

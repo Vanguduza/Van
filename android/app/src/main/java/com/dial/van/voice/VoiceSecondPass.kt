@@ -127,14 +127,26 @@ object SpeechFusionEngine {
         }
     }
 
+    /**
+     * The form two transcripts are compared in — never the form either is reported in.
+     *
+     * Trailing punctuation is dropped because recognisers differ on it and nothing else.
+     * Without that, "Open the browser." and "open the browser" count as disagreeing: the
+     * fusion then picks one on confidence and records the result as `FUSED_ANDROID_SHERPA`
+     * with a second-pass transcript, when in fact both recognisers heard the same sentence.
+     * The text is identical either way, so the only damage is to the evidence — VAN reports
+     * having resolved a disagreement that did not exist — and evidence is the thing this
+     * whole path is for.
+     */
     private fun normalize(value: String): String =
-        value.trim().lowercase(Locale.ROOT).replace(WHITESPACE, " ")
+        value.trim().lowercase(Locale.ROOT).replace(WHITESPACE, " ").trim(*TRAILING_PUNCTUATION)
 
     private const val ANDROID_WEAK_THRESHOLD = 0.62f
     private const val LOCAL_STRONG_THRESHOLD = 0.82f
     private const val CORROBORATED_LOCAL_THRESHOLD = 0.72f
     private const val MIN_CONFIDENCE_ADVANTAGE = 0.18f
     private val WHITESPACE = Regex("\\s+")
+    private val TRAILING_PUNCTUATION = charArrayOf('.', ',', '!', '?', ';', ':')
 }
 
 class VoiceSecondPassCoordinator(

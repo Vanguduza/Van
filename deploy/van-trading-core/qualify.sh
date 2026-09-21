@@ -17,32 +17,94 @@ command -v python3.12 >/dev/null && add python GREEN "$(python3.12 --version)" |
 command -v node >/dev/null && [[ "$(node -v | cut -c2- | cut -d. -f1)" -ge 20 ]] && add node GREEN "$(node -v)" || add node RED "node ≥ 20 missing"
 command -v docker >/dev/null && docker compose version >/dev/null 2>&1 && add docker GREEN "$(docker --version)" || add docker RED "docker/compose missing"
 id vati >/dev/null 2>&1 && add user GREEN vati || add user RED "vati missing"
-if [[ -x /home/ubuntu/.local/bin/van-local-commander-mcp && -f /home/ubuntu/.local/share/van/desktop-commander/node_modules/@wonderwhy-er/desktop-commander/package.json ]]; then
-  dcver="$(node -e 'const p=require(process.argv[1]);process.stdout.write(String(p.version||""))' /home/ubuntu/.local/share/van/desktop-commander/node_modules/@wonderwhy-er/desktop-commander/package.json 2>/dev/null || true)"
-  [[ "$dcver" == "0.2.50" ]] && add full_desktop_commander GREEN "Desktop Commander $dcver; stdio wrapper installed" || add full_desktop_commander RED "unexpected Desktop Commander version: ${dcver:-missing}"
+COMMANDER_USER="${VAN_DESKTOP_COMMANDER_USER:-vancommander}"
+COMMANDER_HOME="${VAN_DESKTOP_COMMANDER_HOME:-/var/lib/van-commander}"
+if id "$COMMANDER_USER" >/dev/null 2>&1; then
+  groups="$(id -nG "$COMMANDER_USER" | tr ' ' '\n')"
+  if grep -Eq '^(vati|sudo|docker)$' <<<"$groups"; then
+    add full_desktop_commander_identity RED "$COMMANDER_USER belongs to a forbidden privileged group"
+  else
+    add full_desktop_commander_identity GREEN "$COMMANDER_USER isolated from vati/sudo/docker"
+  fi
 else
-  add full_desktop_commander RED "full Desktop Commander stdio runtime missing"
+  add full_desktop_commander_identity RED "$COMMANDER_USER missing"
 fi
+if [[ -x "$COMMANDER_HOME/.local/bin/van-local-commander-mcp" && -f "$COMMANDER_HOME/.local/share/van/desktop-commander/node_modules/@wonderwhy-er/desktop-commander/package.json" ]]; then
+  dcver="$(node -e 'const p=require(process.argv[1]);process.stdout.write(String(p.version||""))' "$COMMANDER_HOME/.local/share/van/desktop-commander/node_modules/@wonderwhy-er/desktop-commander/package.json" 2>/dev/null || true)"
+  [[ "$dcver" == "0.2.50" ]] && add full_desktop_commander GREEN "Desktop Commander $dcver; isolated stdio wrapper installed" || add full_desktop_commander RED "unexpected Desktop Commander version: ${dcver:-missing}"
+else
+  add full_desktop_commander RED "isolated full Desktop Commander stdio runtime missing"
+fi
+if id "$COMMANDER_USER" >/dev/null 2>&1 && sudo -u "$COMMANDER_USER" test -r "$BASE/secrets/commander.token" 2>/dev/null; then
+  add full_desktop_commander_secret_boundary RED "$COMMANDER_USER can read VATI Commander secrets"
+else
+  add full_desktop_commander_secret_boundary GREEN "$COMMANDER_USER cannot read VATI Commander secrets"
+fi
+[[ -d "$COMMANDER_HOME/work/Van/.git" ]] && add full_desktop_commander_workspace GREEN "isolated Git workspace present" || add full_desktop_commander_workspace RED "isolated Git workspace missing"
+[[ -x /usr/local/sbin/van-install-commander-key && "$(stat -c '%U:%G:%a' /usr/local/sbin/van-install-commander-key 2>/dev/null)" == "root:root:755" ]] && add full_desktop_commander_key_enrolment GREEN "root-owned forced-key installer present" || add full_desktop_commander_key_enrolment RED "root-owned key installer missing or wrong mode"
 [[ -x /usr/local/bin/van-github-recovery ]] && add github_recovery_command GREEN "bounded recovery entrypoint installed" || add github_recovery_command RED "van-github-recovery missing"
-if [[ -x /home/ubuntu/.local/bin/van-spmrf-review-worker && -x /home/ubuntu/.local/share/van/spmrf/codex/node_modules/.bin/codex ]]; then
-  cv="$(/home/ubuntu/.local/share/van/spmrf/codex/node_modules/.bin/codex --version 2>/dev/null || true)"
-  [[ "$cv" == *"0.153.1"* ]] && add spmrf_review_worker GREEN "$cv; worker installed" || add spmrf_review_worker RED "unexpected Codex version: ${cv:-missing}"
+if sudo -n -u "$COMMANDER_USER" sudo -n /usr/local/bin/van-github-recovery probe >/dev/null 2>&1; then
+  add full_desktop_commander_recovery_sudo GREEN "enumerated recovery helper is callable"
 else
-  add spmrf_review_worker RED "SPMRF review worker/Codex runtime missing"
+  add full_desktop_commander_recovery_sudo RED "bounded recovery sudo rule missing or unusable"
 fi
-auth="$(sudo -u ubuntu env HOME=/home/ubuntu /home/ubuntu/.local/share/van/spmrf/codex/node_modules/.bin/codex login status 2>&1 || true)"
-grep -q 'Logged in using ChatGPT' <<<"$auth" && add spmrf_chatgpt_auth GREEN "secondary ChatGPT subscription OAuth active" || add spmrf_chatgpt_auth RED "secondary ChatGPT account must run codex login once"
-if [[ -x /home/ubuntu/.local/bin/dial-shared-memory-chatgpt-stdio && -x /home/ubuntu/.local/bin/dial-shared-memory-claude-stdio ]]; then
-  add spmrf_memory_clients GREEN "ChatGPT and Claude forced-SSH stdio clients installed"
+if sudo -n -u "$COMMANDER_USER" sudo -n true >/dev/null 2>&1; then
+  add full_desktop_commander_no_generic_sudo RED "$COMMANDER_USER can invoke generic sudo"
 else
-  add spmrf_memory_clients RED "shared-memory stdio clients missing"
+  add full_desktop_commander_no_generic_sudo GREEN "$COMMANDER_USER has no generic sudo"
 fi
-if sudo -u ubuntu ssh-keygen -F "${DIAL_HERMES_CONTROL_HOST:-dial-hermes-control}" -f /home/ubuntu/.ssh/known_hosts >/dev/null 2>&1; then
-  add spmrf_hermes_host_key GREEN "trusted Hermes host key present"
+REVIEW_USER="${VAN_SPMRF_REVIEW_USER:-vanreviewer}"
+REVIEW_HOME="${VAN_SPMRF_REVIEW_HOME:-/var/lib/van-reviewer}"
+if id "$REVIEW_USER" >/dev/null 2>&1; then
+  review_groups="$(id -nG "$REVIEW_USER" | tr ' ' '\n')"
+  if grep -Eq '^(vati|sudo|docker)$' <<<"$review_groups"; then
+    add spmrf_reviewer_identity RED "$REVIEW_USER belongs to a forbidden privileged group"
+  else
+    add spmrf_reviewer_identity GREEN "$REVIEW_USER isolated from vati/sudo/docker"
+  fi
 else
-  add spmrf_hermes_host_key RED "trusted dial-hermes-control host key missing"
+  add spmrf_reviewer_identity RED "$REVIEW_USER missing"
 fi
-for f in "$BASE/secrets/commander.token" "$BASE/secrets/vekl.token" "$BASE/secrets/pki/ca.crt"; do
+if [[ -x "$REVIEW_HOME/.local/bin/van-spmrf-review-worker" && -x "$REVIEW_HOME/.local/share/van/spmrf/codex/node_modules/.bin/codex" ]]; then
+  cv="$("$REVIEW_HOME/.local/share/van/spmrf/codex/node_modules/.bin/codex" --version 2>/dev/null || true)"
+  [[ "$cv" == *"0.153.1"* ]] && add spmrf_review_worker GREEN "$cv; isolated worker installed" || add spmrf_review_worker RED "unexpected Codex version: ${cv:-missing}"
+else
+  add spmrf_review_worker RED "isolated SPMRF review worker/Codex runtime missing"
+fi
+if id "$REVIEW_USER" >/dev/null 2>&1 && sudo -u "$REVIEW_USER" test -r "$BASE/secrets/commander.token" 2>/dev/null; then
+  add spmrf_secret_boundary RED "$REVIEW_USER can read VATI Commander secrets"
+else
+  add spmrf_secret_boundary GREEN "$REVIEW_USER cannot read VATI Commander secrets"
+fi
+auth="$(sudo -u "$REVIEW_USER" env HOME="$REVIEW_HOME" "$REVIEW_HOME/.local/share/van/spmrf/codex/node_modules/.bin/codex" login status 2>&1 || true)"
+grep -q 'Logged in using ChatGPT' <<<"$auth" && add spmrf_chatgpt_auth GREEN "secondary ChatGPT subscription OAuth active under isolated reviewer" || add spmrf_chatgpt_auth RED "isolated reviewer must run codex login once"
+if [[ -x "$REVIEW_HOME/.local/bin/dial-shared-memory-chatgpt-stdio" && -x "$REVIEW_HOME/.local/bin/dial-shared-memory-claude-stdio" ]]; then
+  add spmrf_memory_clients GREEN "ChatGPT and Claude forced-SSH stdio clients installed under isolated reviewer"
+else
+  add spmrf_memory_clients RED "isolated shared-memory stdio clients missing"
+fi
+if sudo -u "$REVIEW_USER" ssh-keygen -F "${DIAL_HERMES_CONTROL_HOST:-dial-hermes-control}" -f "$REVIEW_HOME/.ssh/known_hosts" >/dev/null 2>&1; then
+  add spmrf_hermes_host_key GREEN "trusted Hermes host key present for isolated reviewer"
+else
+  add spmrf_hermes_host_key RED "trusted dial-hermes-control host key missing for isolated reviewer"
+fi
+declare -A commander_token_hashes=()
+for f in "$BASE/secrets/commander.token" "$BASE/secrets/commander.token.hermes" "$BASE/secrets/commander.token.van-gateway"; do
+  name="$(basename "$f")"
+  if [[ ! -f "$f" ]]; then add "secret:$name" RED missing; continue; fi
+  m="$(stat -c %a "$f")"
+  if [[ "$m" != "600" && "$m" != "400" ]]; then add "secret:$name" RED "mode $m (need 0600)"; continue; fi
+  value="$(tr -d '\r\n' < "$f")"
+  if (( ${#value} < 32 )); then add "secret:$name" RED "token shorter than 32 characters"; continue; fi
+  h="$(sha256sum "$f" | awk '{print $1}')"
+  if [[ -n "${commander_token_hashes[$h]:-}" ]]; then
+    add "secret:$name" RED "duplicates ${commander_token_hashes[$h]}"
+  else
+    commander_token_hashes[$h]="$name"
+    add "secret:$name" GREEN "mode $m; distinct principal credential"
+  fi
+done
+for f in "$BASE/secrets/vekl.token" "$BASE/secrets/pki/ca.crt"; do
   if [[ -f "$f" ]]; then m=$(stat -c %a "$f"); [[ "$m" =~ ^600$|^400$ ]] && add "secret:$(basename "$f")" GREEN "mode $m" || add "secret:$(basename "$f")" RED "mode $m (need 0600)"; else add "secret:$(basename "$f")" RED missing; fi
 done
 unit vati-vekl.service; unit vati-commander.service; unit vati-automation.service; unit vati-supabase.service 0; unit docker.service 0

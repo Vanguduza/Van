@@ -143,6 +143,11 @@ VERIFICATION_ALIASES: dict[str, str] = {
 ACTION_REVERSIBILITY: dict[str, Reversibility] = {
     "owner.context.read": Reversibility.READ_ONLY,
     "research.web.search": Reversibility.READ_ONLY,
+    # A draft can be discarded without sending; moving a calendar event can be moved back.
+    # A sent email is an external disclosure and cannot be reliably recalled once accepted.
+    "google.gmail.draft": Reversibility.REVERSIBLE,
+    "google.gmail.send": Reversibility.IRREVERSIBLE,
+    "google.calendar.reschedule": Reversibility.REVERSIBLE,
     "google.notebook.note.create": Reversibility.REVERSIBLE,
     "google.notebook.enterprise.create": Reversibility.REVERSIBLE,
     "google.notebook.enterprise.sources.add": Reversibility.REVERSIBLE,

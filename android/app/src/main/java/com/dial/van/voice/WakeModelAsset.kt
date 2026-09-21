@@ -3,11 +3,11 @@ package com.dial.van.voice
 /**
  * Whether VAN can listen for its name, and why not when it cannot.
  *
- * P1-VOICE-001. `WakeWordEngine`, `WakePhraseVerifier` and `SpeakerSimilarityScorer` are
- * `fun interface`s with no implementations, no keyword-spotting model ships, and
- * `WakePipeline` was never constructed anywhere in the app. "Hey Van" did nothing, and
- * nothing said so: the coordinator's `KWS_NOT_READY` state existed and was unreachable
- * because no coordinator existed either.
+ * P1-VOICE-001 originally found an interface-only wake path with no KWS runtime and no
+ * production constructor. The repository now exact-pins sherpa-onnx and constructs a real
+ * two-stage KWS pipeline from a checksum-admitted app-private bundle. The trained model is
+ * still a deployment artefact, so this policy remains the fail-closed owner-facing truth
+ * when that bundle is absent, substituted, truncated, or cannot initialize.
  *
  * A keyword-spotting model is a trained artefact, not code. It is owner supply in the same
  * way `van.riv` is, and this file treats it the same way `VanVisualRuntime` treats the
