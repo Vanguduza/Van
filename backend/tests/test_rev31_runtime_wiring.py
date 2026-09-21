@@ -196,6 +196,10 @@ async def test_v2_signature_binds_voice_provenance_and_canonical_context(runtime
         "action-class:effective:A1",
         "principal:OWNER_DEVICE",
         "resolver:rev3.1.1",
+        # A legacy v2 voice command cannot carry signed speaker evidence. The gateway
+        # records that absence explicitly so later mission/audit readers cannot mistake
+        # "not measured" for "owner voice matched".
+        "speaker-evidence:UNAVAILABLE",
     ]
     assert metadata["client_context_authoritative"] is False
     assert metadata["context_capsule_revision"] == 7
