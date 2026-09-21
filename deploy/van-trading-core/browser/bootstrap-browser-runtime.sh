@@ -80,7 +80,9 @@ harness_freeze_sha="$(sha256sum "$BASE/harness-freeze.txt" | awk '{print $1}')"
 harness_ver="$("$BASE/harness-venv/bin/python" -c 'import importlib.metadata as m; print(m.version("browser-harness"))')"
 
 install -o root -g root -m 0755 "$HERE/harness_service.py" "$BASE/harness_service.py"
+install -o root -g root -m 0755 "$HERE/stagehand_service.mjs" "$BASE/stagehand_service.mjs"
 install -o root -g root -m 0644 "$HERE/../systemd/vati-browser-harness.service" /etc/systemd/system/vati-browser-harness.service
+install -o root -g root -m 0644 "$HERE/../systemd/vati-stagehand.service" /etc/systemd/system/vati-stagehand.service
 
 python3 - "$CONFIG" "$chromium_path" "$BASE/harness-venv/bin/browser-harness" <<'PY'
 import re, sys
@@ -101,7 +103,7 @@ PY
 chmod 0644 "$CONFIG"
 
 systemctl daemon-reload
-systemctl enable vati-browser-harness.service
+systemctl enable vati-browser-harness.service vati-stagehand.service
 systemctl restart vati-browser-harness.service
 for attempt in 1 2 3 4 5; do
   if curl -fsS --max-time 3 "http://127.0.0.1:${VAN_HARNESS_PORT:-9141}/health" >/tmp/van-harness-health.json 2>/dev/null \
@@ -120,6 +122,28 @@ PY
   if [[ "$attempt" == 5 ]]; then
     journalctl -u vati-browser-harness.service -n 100 --no-pager >&2 || true
     exit 46
+  fi
+  sleep 2
+done
+
+systemctl restart vati-stagehand.service
+for attempt in 1 2 3 4 5; do
+  if curl -fsS --max-time 3 "http://127.0.0.1:${VAN_STAGEHAND_PORT:-9140}/health" >/tmp/van-stagehand-health.json 2>/dev/null \
+     && python3 - /tmp/van-stagehand-health.json <<'PY'
+import json, sys
+d = json.load(open(sys.argv[1], encoding="utf-8"))
+assert d["ok"] is True
+assert d["runtime_version"] == "4.1.0"
+assert d["direct_agent_loop"] is False
+assert d["model_self_selection"] is False
+PY
+  then
+    echo STAGEHAND_RUNTIME_GREEN
+    break
+  fi
+  if [[ "$attempt" == 5 ]]; then
+    journalctl -u vati-stagehand.service -n 100 --no-pager >&2 || true
+    exit 47
   fi
   sleep 2
 done
@@ -143,9 +167,9 @@ cat > /var/lib/van-trading/evidence/browser/runtime-manifest.json <<JSON
   "stagehand_bind": "127.0.0.1:9140",
   "harness_bind": "127.0.0.1:9141",
   "vekl_worker": "$VEKL_WORKER_HOST",
-  "service_state": "HARNESS_IMPLEMENTED_STAGEHAND_PENDING",
+  "service_state": "HARNESS_AND_STAGEHAND_IMPLEMENTED_PENDING_LIVE_QUALIFICATION",
   "generated_at": "$(date -u +%Y-%m-%dT%H:%M:%SZ)"
 }
 JSON
 chmod 0644 /var/lib/van-trading/evidence/browser/runtime-manifest.json
-echo BROWSER_DEVELOPMENT_RUNTIME_GREEN
+echo BROWSER_RUNTIME_REPOSITORY_COMPLETE
