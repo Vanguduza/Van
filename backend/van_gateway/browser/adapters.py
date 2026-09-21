@@ -147,6 +147,7 @@ class HttpBrowserHarnessAdapter(_PrivateWorkerClient):
         return {
             "task_id": task.task_id,
             "profile_alias": task.profile_alias,
+            "target_domain": task.target_domain,
             # §381 — the worker is told, every call, that it is not allowed to
             # author helpers. The worker enforces it; the gateway asserts it.
             "mode": "PRODUCTION_ACTUATOR",
@@ -236,6 +237,7 @@ class StagehandAdapter(_PrivateWorkerClient):
         return {
             "task_id": task.task_id,
             "profile_alias": task.profile_alias,
+            "target_domain": task.target_domain,
             "model_provider": self.model_provider,
             "model_name": self.model_name,
             "allow_model_self_selection": False,
