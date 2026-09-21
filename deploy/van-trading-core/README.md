@@ -37,7 +37,7 @@ sudo bash deploy/van-trading-core/qualify.sh                    # JSON report; e
 Then on `dial-hermes-control`:
 
 ```bash
-scp van-trading-core:/opt/van-trading/secrets/commander.token ~/.van/commander.token && chmod 600 ~/.van/commander.token
+scp van-trading-core:/opt/van-trading/secrets/commander.token.hermes ~/.van/commander.hermes.token && chmod 600 ~/.van/commander.hermes.token
 scp van-trading-core:/opt/van-trading/secrets/pki/ca.crt ~/.van/van-trading-bridge-ca.crt
 bash deploy/van-trading-core/hermes/register-commander-mcp.sh --dry-run && bash deploy/van-trading-core/hermes/register-commander-mcp.sh
 ```
@@ -74,5 +74,5 @@ the reverse, refuses to start (safety identity mismatch).
 
 ## What only the VM can verify
 
-Package installation on arm64, Supabase image pulls, systemd activation, ufw, and the commander over the
+The commander uses three distinct HMAC identities: legacy commander (non-sensitive compatibility), hermes (bounded agent tools), and van-gateway (credential/strategy mutations only). They must never share token values.\n\nPackage installation on arm64, Supabase image pulls, systemd activation, ufw, and the commander over the
 private VCN. `qualify.sh` is the acceptance instrument for those; its JSON belongs in the implementation ledger.
