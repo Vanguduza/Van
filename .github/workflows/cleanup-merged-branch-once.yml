@@ -1,0 +1,48 @@
+name: cleanup-merged-branch-once
+
+on:
+  push:
+    branches:
+      - main
+    paths:
+      - .github/workflows/cleanup-merged-branch-once.yml
+
+permissions:
+  contents: write
+
+jobs:
+  cleanup:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout full repository
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+
+      - name: Delete merged PR 42 head branch only
+        shell: bash
+        run: |
+          set -euo pipefail
+          branch="fix/current-van-launcher-icon"
+          expected="32d48ff389decc970739172985a490289bd2baca"
+
+          git fetch origin '+refs/heads/*:refs/remotes/origin/*' --prune
+          actual="$(git rev-parse "origin/${branch}")"
+
+          if [ "${actual}" != "${expected}" ]; then
+            echo "REFUSE_MOVED ${branch}: expected ${expected}, found ${actual}"
+            exit 1
+          fi
+
+          echo "Deleting merged PR #42 branch ${branch} at ${actual}"
+          git push origin --delete "${branch}"
+
+      - name: Verify branch is gone
+        shell: bash
+        run: |
+          set -euo pipefail
+          if git ls-remote --exit-code --heads origin "fix/current-van-launcher-icon"; then
+            echo "Branch still exists"
+            exit 1
+          fi
+          echo "Merged branch deleted."
