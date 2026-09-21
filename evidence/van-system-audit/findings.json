@@ -224,7 +224,7 @@
     "product_completeness": 4.1,
     "architecture": 7.8,
     "determinism": 8.2,
-    "cross_module_coherence": 5.0,
+    "cross_module_coherence": 5,
     "experience_layer_unity": 3.4,
     "command_execution": 3.6,
     "voice": 2.9,
@@ -234,7 +234,7 @@
     "memory": 5.4,
     "learning_and_adaptation": 2.6,
     "hermes_integration": 6.6,
-    "vekl_integration": 3.0,
+    "vekl_integration": 3,
     "browser_intelligence": 3.5,
     "google_ecosystem": 4.4,
     "trading_architecture": 7.1,
@@ -2375,35 +2375,48 @@
       "severity": "P2",
       "domain": "security",
       "title": "No speaker verification on voice commands",
-      "description": "Any voice reaching the microphone produces a transcript signed as an owner command; SpeakerSimilarityScorer is an interface with no implementation.",
+      "description": "Voice commands previously carried no speaker provenance into the authoritative gateway. The device now computes local speaker similarity when a provisioned sherpa embedding bundle is available, signs that fixed-point evidence in command envelope v3, and the gateway enforces it only after deterministic action resolution.",
       "requirement": "See the requirements traceability matrix in the canonical report.",
       "authority": "docs/VAN_WHOLE_SYSTEM_IMPLEMENTATION_AUDIT_AND_CERTIFICATION_REV_1.md s30",
       "repository_evidence": [
-        "android/app/src/main/java/com/dial/van/voice/WakeRuntime.kt:41-44"
+        "android/app/src/main/java/com/dial/van/voice/SherpaSpeakerSimilarity.kt",
+        "android/app/src/main/java/com/dial/van/control/VanCommandController.kt",
+        "android/app/src/main/java/com/dial/van/gateway/VanGatewayClient.kt",
+        "backend/van_gateway/voice/speaker.py",
+        "backend/van_gateway/orchestrator.py",
+        "backend/van_gateway/auth/service.py"
       ],
       "runtime_evidence": [],
       "affected_components": [
         "security"
       ],
       "root_cause": "see s32 root-cause map",
-      "remediation": "Implement speaker verification and gate command dispatch on it.",
+      "remediation": "Compute speaker similarity locally as provenance, sign it with the paired-device command envelope, and enforce the evidence at the gateway after deterministic action resolution without replacing biometric approval.",
       "validation_gate": "G1",
       "current_status": "CLOSED",
       "remediation_gate": "GATE 9",
       "closure": {
-        "summary": "A spoken command carries authority in proportion to how sure VAN is that the owner spoke. Any voice reaching the microphone produced a transcript signed as an owner command: the device HMAC proves *this device* sent it and nothing proved who was speaking, so a visitor, a television or a recording had the owner's authority for as long as they were in the room. The obvious fix is wrong, and the code already said so — `SpeakerSimilarityScorer` is documented as confidence-only, never an absolute reject gate, because speaker embeddings on phone microphones are a likelihood and a VAN that ignores its owner with a cold is a VAN people shout at. So speaker evidence does not decide whether a command is heard; it decides what a spoken command may do alone. Reads and drafts are untouched. Anything that changes the world outside VAN needs a confident match, or it is escalated to the biometric class — which already means 'the owner is here and said yes', a stronger statement about who is speaking than any score. A voice unlike the owner's is refused rather than escalated, because offering an approval prompt puts the decision in front of whoever is holding the phone. An owner with no enrolled voice is escalated, not locked out: a control that removes the product is not a control.",
+        "summary": "Speaker similarity is now a signed provenance signal on the real voice-command path, not an Android-side authority decision. Android computes a bounded local similarity score when a checksum-pinned sherpa speaker bundle and owner embedding are provisioned, converts it to fixed-point speaker_evidence_milli, and signs it in command envelope v3. The gateway rejects unsigned/tampered/non-voice speaker claims, resolves the command's true action class first, then applies one canonical speaker policy: A1/A2 never gain authority from voice identity; A3 with MATCH may proceed under its normal policy, while missing/inconclusive evidence tightens it to exact owner biometric approval; a consequential MISMATCH is refused; A4 still requires biometric approval even on MATCH. Speaker evidence therefore can only preserve or tighten authority, never mint it.",
         "changed": [
-          "android/app/src/main/java/com/dial/van/voice/SpeakerVerification.kt",
-          "android/app/src/main/java/com/dial/van/control/VanCommandController.kt"
+          "android/app/src/main/java/com/dial/van/voice/SherpaSpeakerSimilarity.kt",
+          "android/app/src/main/java/com/dial/van/voice/VoiceRecognitionModels.kt",
+          "android/app/src/main/java/com/dial/van/voice/VoiceInterfaces.kt",
+          "android/app/src/main/java/com/dial/van/control/VanCommandController.kt",
+          "android/app/src/main/java/com/dial/van/gateway/VanGatewayClient.kt",
+          "android/app/src/main/java/com/dial/van/VanApplication.kt",
+          "backend/van_gateway/voice/speaker.py",
+          "backend/van_gateway/models.py",
+          "backend/van_gateway/auth/service.py",
+          "backend/van_gateway/orchestrator.py"
         ],
         "verified_by": [
-          "android/verification/src/test/kotlin/com/dial/van/voice/SpeakerVerificationTest.kt"
+          "backend/tests/test_voice_speaker_authority.py"
         ],
         "runtime_evidence": [
-          "evidence/van-system-audit/gate-6/kotlin_verification_tests.txt"
+          "GitHub van-ci after the current closure head"
         ],
-        "residual": "No speaker model ships, so every voice command is classified UNAVAILABLE and consequential ones require the biometric approval.",
-        "residual_reason": "A speaker embedding model is a trained artefact and owner supply, like the wake word model. The gate is complete, is on the production submission path, and its behaviour without a model is the deliberate one: escalate rather than allow, and escalate rather than refuse.",
+        "residual": "The trained speaker-embedding ONNX model and owner reference embedding are deployment artefacts and are not committed to the repository. Without them Android emits no positive speaker evidence, so consequential voice actions fail safe into biometric approval or refusal according to the gateway policy.",
+        "residual_reason": "A trained acoustic model and an owner-derived embedding are runtime/deployment artefacts. Repository closure consists of the pinned runtime, checksum-confined loader, signed transport, authoritative policy, and fail-safe behavior when those artefacts are absent.",
         "residual_class": "EXTERNAL_ARTEFACT",
         "state": "EXTERNALLY_BLOCKED_REPOSITORY_COMPLETE"
       }
