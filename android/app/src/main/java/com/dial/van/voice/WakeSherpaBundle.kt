@@ -144,13 +144,19 @@ data class WakeSherpaBundle(
             val keywordLines = keywords.readLines(Charsets.UTF_8)
                 .map { it.trim() }
                 .filter { it.isNotEmpty() }
-            if (
-                keywordLines.size != 1 ||
-                !keywordLines.single().contains(KEYWORD_IDENTITY) ||
-                keywordLines.single().contains("#") ||
-                keywordLines.single().contains(":")
-            ) {
-                throw WakeBundleInvalid("wake_keywords_not_exactly_hey_van")
+            if (keywordLines.size != 1) {
+                throw WakeBundleInvalid("wake_keywords_not_exactly_one_phrase")
+            }
+            val keywordLine = keywordLines.single()
+            // sherpa KWS permits per-keyword :boost and #threshold suffixes. English BPE
+            // files may omit the @ORIGINAL_PHRASE marker entirely, so the signed manifest
+            // is the canonical human-readable identity. If a marker is present, however,
+            // it must agree with that identity rather than silently naming a second phrase.
+            val originalMarker = keywordLine
+                .split(Regex("\\s+"))
+                .firstOrNull { it.startsWith("@") }
+            if (originalMarker != null && originalMarker != KEYWORD_IDENTITY) {
+                throw WakeBundleInvalid("wake_keyword_identity_mismatch")
             }
 
             val total = listOf(encoder, decoder, joiner, tokens, keywords).sumOf { it.length() }
