@@ -2,6 +2,7 @@ from __future__ import annotations
 
 from functools import lru_cache
 
+from pydantic import AliasChoices, Field
 from pydantic_settings import BaseSettings, SettingsConfigDict
 
 
@@ -35,9 +36,18 @@ class Settings(BaseSettings):
     vati_lake_root: str = "data/vati_lake"
     vati_reporting_currency: str = "USD"
     vati_secrets_dir: str = "data/vati_secrets"
-    van_commander_url: str = ""
-    van_commander_token_file: str = ""
-    van_commander_ca_file: str = ""
+    # These fields predate the global VAN_ settings prefix and therefore retain a
+    # "van_" Python name. Explicit aliases prevent the accidental VAN_VAN_* environment
+    # spelling while accepting it for backwards compatibility.
+    van_commander_url: str = Field(
+        "", validation_alias=AliasChoices("VAN_COMMANDER_URL", "VAN_VAN_COMMANDER_URL")
+    )
+    van_commander_token_file: str = Field(
+        "", validation_alias=AliasChoices("VAN_COMMANDER_TOKEN_FILE", "VAN_VAN_COMMANDER_TOKEN_FILE")
+    )
+    van_commander_ca_file: str = Field(
+        "", validation_alias=AliasChoices("VAN_COMMANDER_CA_FILE", "VAN_VAN_COMMANDER_CA_FILE")
+    )
     van_public_base_url: str = "http://127.0.0.1:8787"
     vati_deriv_app_id: str = "1089"
 
