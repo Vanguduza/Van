@@ -137,9 +137,11 @@ def firstboot(public_host, expected_sha):
     for n in $(seq 1 30); do apt-get -o Acquire::Retries=3 update -qq && apt-get install -y -qq --no-install-recommends git ca-certificates curl jq >/dev/null && break; sleep 5; done
     command -v git >/dev/null || exit 41
     rm -rf /opt/van-bootstrap-source
-    git clone --depth 1 --branch {shlex.quote(BRANCH)} {shlex.quote(REPO)} /opt/van-bootstrap-source
+    git clone -q --no-checkout {shlex.quote(REPO)} /opt/van-bootstrap-source
+    git -C /opt/van-bootstrap-source checkout -q --detach {shlex.quote(expected_sha)}
+    test "$(git -C /opt/van-bootstrap-source rev-parse HEAD)" = {shlex.quote(expected_sha)}
     cd /opt/van-bootstrap-source
-    bash deploy/van-trading-core/bootstrap.sh --branch={shlex.quote(BRANCH)} --public-host={shlex.quote(public_host)} --with-nautilus
+    bash deploy/van-trading-core/bootstrap.sh --branch={shlex.quote(BRANCH)} --commit-sha={shlex.quote(expected_sha)} --public-host={shlex.quote(public_host)} --with-nautilus
     VAN_EXPECTED_REPOSITORY_SHA={shlex.quote(expected_sha)} bash deploy/van-trading-core/qualify.sh | tee /var/lib/van-trading/qualification-latest.json
     jq -e '.status=="GREEN" and .required_failures==0 and .repository_sha==.expected_repository_sha' /var/lib/van-trading/qualification-latest.json >/dev/null
     install -m 0600 /dev/null /var/lib/van-trading/firstboot-complete

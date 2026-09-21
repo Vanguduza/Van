@@ -41,6 +41,13 @@ def test_caddyfile_uses_valid_multiline_handle_blocks_and_bootstrap_validates_it
     boot = BOOTSTRAP.read_text()
     assert "caddy validate --config /etc/caddy/Caddyfile --adapter caddyfile" in boot
 
+def test_bootstrap_rejects_non_exact_commit_sha_before_provisioning():
+    result = subprocess.run(["bash", str(BOOTSTRAP), "--dry-run", "--commit-sha=not-a-sha"], text=True, capture_output=True)
+    assert result.returncode != 0
+    assert "--commit-sha must be an exact 40-hex Git commit" in result.stderr
+    subprocess.run(["bash", "-n", str(BOOTSTRAP)], check=True)
+
+
 def test_runtime_qualification_is_bound_to_exact_clean_repository_sha():
     qual = QUALIFY.read_text()
     rebuild = REBUILD.read_text()
@@ -53,11 +60,23 @@ def test_runtime_qualification_is_bound_to_exact_clean_repository_sha():
     assert 'elif (( status_ok == 0 )); then' in qual
     assert 'status --porcelain --untracked-files=all 2>/dev/null || true' not in qual
     assert "repository_exact_sha" in qual
-    assert '"repository_sha"' in qual
-    assert '"expected_repository_sha"' in qual
+    assert "repository_sha:$repository_sha" in qual
+    assert "expected_repository_sha:$expected_repository_sha" in qual
+    assert "jq -n" in qual
 
     assert "def resolve_repository_sha():" in rebuild
     assert "'git','ls-remote',REPO" in rebuild
     assert "EXPECTED_REPOSITORY_SHA" in rebuild
     assert "repository_sha')!=expected_sha" in rebuild
+
+    boot = BOOTSTRAP.read_text()
+    assert 'COMMIT_SHA="${VAN_COMMIT_SHA:-}"' in boot
+    assert '--commit-sha=*) COMMIT_SHA="${a#*=}"' in boot
+    assert 'checkout -q --detach "$COMMIT_SHA"' in boot
+    assert 'reset -q --hard "$COMMIT_SHA"' in boot
+    assert 'repo pinned to exact commit $COMMIT_SHA' in boot
+
+    assert "git clone -q --no-checkout {shlex.quote(REPO)} /opt/van-bootstrap-source" in rebuild
+    assert "checkout -q --detach {shlex.quote(expected_sha)}" in rebuild
+    assert "--commit-sha={shlex.quote(expected_sha)}" in rebuild
 
