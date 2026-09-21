@@ -1,5 +1,6 @@
 from pathlib import Path
 import json
+import subprocess
 
 ROOT = Path(__file__).resolve().parents[2]
 
@@ -92,3 +93,21 @@ def test_hermes_side_qualification_proves_full_surface_and_authority_gate():
     assert "van_trading_local_commander" in qualifier
     assert "capability_surface" in qualifier
     assert "FULL" in qualifier
+
+
+def test_trading_core_commander_scripts_are_shell_syntax_valid():
+    scripts = [
+        "deploy/van-trading-core/qualify.sh",
+        "deploy/van-trading-core/install-full-desktop-commander.sh",
+        "deploy/van-trading-core/install-github-recovery.sh",
+        "deploy/van-trading-core/van-github-recovery.sh",
+        "deploy/van-trading-core/hermes/install-full-commander-transport.sh",
+        "deploy/van-trading-core/hermes/register-commander-mcp.sh",
+        "deploy/van-trading-core/hermes/register-full-desktop-commander-mcp.sh",
+        "deploy/van-trading-core/hermes/qualify-full-desktop-commander-mcp.sh",
+        "deploy/van-trading-core/hermes/van-trading-full-commander-stdio.sh",
+        "deploy/van-trading-core/spmrf/install-spmrf-review-worker.sh",
+        "deploy/van-trading-core/spmrf/install-shared-memory-client.sh",
+    ]
+    for rel in scripts:
+        subprocess.run(["bash", "-n", str(ROOT / rel)], check=True)
