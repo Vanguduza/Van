@@ -67,18 +67,6 @@ def reconcile(ledger: Iterable[LedgerPosition], venue: Iterable[VenuePosition], 
             items.append((iid, ReconciliationClass.MATCH, ""))
         if not lp.software_stop and vp.stop_price is None:
             items.append((iid, ReconciliationClass.STOP_MISSING, "venue position without protective stop; restore or flatten")); block = True
-    # A venue position with an intent id is still an orphan when the caller
-    # cannot reconstruct that intent as open ledger state.  The previous
-    # implementation only classified positions whose trade_intent_id was empty,
-    # so reconcile([], [attributed_position]) incorrectly returned green.
-    for iid, vp in V.items():
-        if iid not in L:
-            items.append((
-                iid,
-                ReconciliationClass.ORPHAN_VENUE_POSITION,
-                f"venue position {vp.position_id} attributes intent {iid}, but no open ledger position was supplied",
-            ))
-            block = True
     for p in orphans_v:
         items.append((p.position_id, ReconciliationClass.ORPHAN_VENUE_POSITION, "venue position with no intent attribution; protect with hard stop, block, escalate")); block = True
     return ReconciliationResult(tuple(items), permit_new_orders=not block, account_verified=account_verified)

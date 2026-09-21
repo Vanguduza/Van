@@ -2,7 +2,6 @@ package com.dial.van.runtime
 
 import android.app.ActivityManager
 import android.content.Context
-import android.net.ConnectivityManager
 import android.os.BatteryManager
 import android.os.Build
 import android.os.PowerManager
@@ -59,33 +58,4 @@ object DeviceRuntimeReadings {
     /** The current envelope pressure, for a caller that only needs the verdict. */
     fun pressure(context: Context): RuntimePressure =
         VanResourceEnvelope.evaluate(read(context)).pressure
-
-    /**
-     * Rev 1.5 §20.9 — what the owner's data plan says about holding a second socket open.
-     *
-     * Both readings fail *towards restraint*: a device that will not say whether its link
-     * is metered is treated as metered. The asymmetry is deliberate and it is the opposite
-     * of [read]'s. An unreadable battery costs VAN capability it probably had; an
-     * unreadable data plan would cost the owner money they did not agree to spend, and
-     * they cannot undo that by plugging the phone in.
-     */
-    fun networkCost(context: Context): NetworkCost {
-        val manager = context.getSystemService(ConnectivityManager::class.java)
-            ?: return NetworkCost(metered = true, dataSaverEnabled = true)
-        val metered = runCatching { manager.isActiveNetworkMetered }.getOrDefault(true)
-        val restricted = runCatching {
-            manager.restrictBackgroundStatus ==
-                ConnectivityManager.RESTRICT_BACKGROUND_STATUS_ENABLED
-        }.getOrDefault(true)
-        return NetworkCost(metered = metered, dataSaverEnabled = restricted)
-    }
 }
-
-/**
- * What the active link costs, as far as the platform will say.
- *
- * `dataSaverEnabled` is the owner's own setting, which is why §20.9 treats it as an
- * instruction rather than as a hint: a warm standby on mobile data is precisely the
- * background traffic Data Saver exists to stop, and charging does not make the data free.
- */
-data class NetworkCost(val metered: Boolean, val dataSaverEnabled: Boolean)

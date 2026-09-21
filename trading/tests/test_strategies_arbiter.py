@@ -5,7 +5,7 @@ from pathlib import Path
 
 import pytest
 
-from conftest import mandate_dict, passing_certificate, snapshot
+from conftest import mandate_dict, snapshot
 from test_intelligence import mk_bars, noisy_trend, pullback_fixture, ranging, trending
 from vati.arbiter import HorizonArbiter, MetaLabel, MetaLabeler, OpportunityEngine, StrategyArbiter
 from vati.intelligence import DEFAULT_EVENT_MATRIX, EventMatrix, RegimeEngine, Tier1Event, build_market_state
@@ -49,58 +49,23 @@ def test_capsule_promotion_requires_signature_and_one_step():
 
     owner = OwnerAuthorityHarness()
     reg = CapsuleRegistry.load_dir(REG, authority=owner.verifier)
-    signature_gate_cert = passing_certificate(
-        strategy_id="FX-TREND-PULLBACK-01",
-        capsule_hash=reg.get("FX-TREND-PULLBACK-01").capsule_hash,
-    )
-    # Certificate validation now precedes owner-authority validation. Supply
-    # valid semantic evidence here so these assertions isolate the signature gate.
     with pytest.raises(CapsuleError, match="signature"):
-        reg.promote(
-            "FX-TREND-PULLBACK-01", StrategyState.SHADOW,
-            approval_signature_ref="", evidence_refs=["bt-1"],
-            approved_at_unix=1, certificate=signature_gate_cert,
-        )
+        reg.promote("FX-TREND-PULLBACK-01", StrategyState.SHADOW, approval_signature_ref="", evidence_refs=[], approved_at_unix=1)
     with pytest.raises(CapsuleError, match="signature"):
-        reg.promote(
-            "FX-TREND-PULLBACK-01", StrategyState.SHADOW,
-            approval_signature_ref="sig:owner", evidence_refs=["bt-1"],
-            approved_at_unix=1, certificate=signature_gate_cert,
-        )
+        reg.promote("FX-TREND-PULLBACK-01", StrategyState.SHADOW, approval_signature_ref="sig:owner", evidence_refs=["bt-1"], approved_at_unix=1)
     # Authority to promote to SHADOW is not authority to promote to CERTIFIED_LIVE.
     with pytest.raises(CapsuleError, match="one state"):
         reg.promote("FX-TREND-PULLBACK-01", StrategyState.CERTIFIED_LIVE,
                     approval_signature_ref=owner.token(act="capsule-promote", subject="FX-TREND-PULLBACK-01:CERTIFIED_LIVE", issued_at_unix=1),
                     evidence_refs=["e"], approved_at_unix=1)
-    cert_for_shadow = passing_certificate(
-        strategy_id="FX-TREND-PULLBACK-01",
-        capsule_hash=reg.get("FX-TREND-PULLBACK-01").capsule_hash,
-    )
     with pytest.raises(CapsuleError, match="signature"):
         reg.promote("FX-TREND-PULLBACK-01", StrategyState.SHADOW,
-                    approval_signature_ref=owner.token(
-                        act="capsule-promote",
-                        subject=f"FX-TREND-PULLBACK-01:CERTIFIED_LIVE:{cert_for_shadow.validation_hash}",
-                        issued_at_unix=1,
-                    ),
-                    evidence_refs=["bt-1"], approved_at_unix=1, certificate=cert_for_shadow)
-    # TRD-ENH-021 — a signed promotion with only opaque evidence refs is refused
-    # from DEMO onwards; the certificate is the semantic content refs never had.
-    with pytest.raises(CapsuleError, match="StrategyValidationCertificate"):
-        reg.promote("FX-TREND-PULLBACK-01", StrategyState.SHADOW,
+                    approval_signature_ref=owner.token(act="capsule-promote", subject="FX-TREND-PULLBACK-01:CERTIFIED_LIVE", issued_at_unix=1),
+                    evidence_refs=["bt-1"], approved_at_unix=1)
+    c = reg.promote("FX-TREND-PULLBACK-01", StrategyState.SHADOW,
                     approval_signature_ref=owner.token(act="capsule-promote", subject="FX-TREND-PULLBACK-01:SHADOW", issued_at_unix=1),
                     evidence_refs=["bt-1"], approved_at_unix=1)
-    cert = passing_certificate(strategy_id="FX-TREND-PULLBACK-01",
-                               capsule_hash=reg.get("FX-TREND-PULLBACK-01").capsule_hash)
-    c = reg.promote("FX-TREND-PULLBACK-01", StrategyState.SHADOW,
-                    approval_signature_ref=owner.token(
-                        act="capsule-promote",
-                        subject=f"FX-TREND-PULLBACK-01:SHADOW:{cert.validation_hash}",
-                        issued_at_unix=1,
-                    ),
-                    evidence_refs=["bt-1"], approved_at_unix=1, certificate=cert)
     assert c.state is StrategyState.SHADOW and c.data["supersedes"] and c.capsule_hash == c.body_hash()
-    assert c.data["validation_hash"] == cert.validation_hash
     d = reg.demote("FX-TREND-PULLBACK-01", StrategyState.DEGRADED, reason="health 0.5")
     assert d.state is StrategyState.DEGRADED
 

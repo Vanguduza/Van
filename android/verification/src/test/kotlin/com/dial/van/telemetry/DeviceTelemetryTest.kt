@@ -128,26 +128,4 @@ class DeviceTelemetryTest {
         }
         assertNull(DeviceMetric.forWire("something_nobody_declared"))
     }
-
-    @Test
-    fun `only the aura frame time carries a surface`() {
-        // Rev 1.5 §28.1 added four browser metrics, none of them labelled. A metric that
-        // declared `surfaced` without the gateway declaring the label would post a field
-        // the route drops, and the phone would be measuring a dimension nobody stores.
-        val labelled = DeviceMetric.entries.filter { it.surfaced }
-        assertEquals(listOf(DeviceMetric.AURA_FRAME_TIME_MS), labelled)
-    }
-
-    @Test
-    fun `a surface on an unlabelled metric never reaches the wire`() {
-        // The enum says which metrics carry one; `body` has to honour that rather than
-        // sending whatever the caller passed. A browser frame-age sample tagged with a
-        // surface would be refused at the route, and the owner's frozen-picture number
-        // would be the one thing missing at the moment it mattered.
-        val body = DeviceTelemetry.body(
-            listOf(DeviceSample(DeviceMetric.BROWSER_LAST_FRAME_AGE_MS, 4_000.0, "browser")),
-        )
-        assertFalse(body.contains("surface"), body)
-        assertTrue(body.contains("browser_last_frame_age_ms"), body)
-    }
 }

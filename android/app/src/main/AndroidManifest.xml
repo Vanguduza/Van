@@ -50,97 +50,11 @@
             </intent-filter>
         </activity>
 
-        <!--
-          Rev 1.5 ADR-RB-026 — the installer's way in, started over ADB and never by the
-          owner.
-
-          `exported="true"` with no intent filter, so it is reachable by an explicit
-          component name and does not appear anywhere. It usually would not be acceptable
-          to export a component that provisions a device; it is here because the entry
-          point holds no authority. The payload must be signed by a key compiled into this
-          build, must not have expired, must not have been used before, and even then only
-          earns two single-use tokens whose value depends on a hardware attestation the
-          caller cannot produce (§0D.3). The signature is the guard; exportedness is only
-          the channel.
-
-          `noHistory` and `excludeFromRecents` because there is no screen and nothing for
-          the owner to return to — §0D.2's point is that they are not part of this.
-        -->
-        <activity
-            android:name=".provisioning.ProvisioningActivity"
-            android:exported="true"
-            android:excludeFromRecents="true"
-            android:noHistory="true"
-            android:theme="@android:style/Theme.NoDisplay" />
-
         <activity
             android:name=".command.CommandCentreActivity"
             android:exported="true"
             android:launchMode="singleTop"
             android:theme="@style/Theme.Van" />
-
-        <!--
-          Rev 1.5 §7 — the owner holding a browser that runs somewhere else.
-
-          `exported="false"`: nothing outside VAN may open a session on the owner's
-          profile, and an exported activity taking a session id in an extra would be
-          exactly that. `configChanges` for orientation and size because a recreate would
-          tear down the WebRTC peer and the session behind it for what is a resize —
-          §8.6's viewport revision handles the layout change without losing the stream.
-        -->
-        <activity
-            android:name=".browser.BrowserActivity"
-            android:exported="false"
-            android:windowSoftInputMode="adjustResize"
-            android:label="@string/browser_activity_label"
-            android:configChanges="orientation|screenSize|screenLayout|smallestScreenSize|keyboardHidden|density"
-            android:launchMode="singleTop"
-            android:resizeableActivity="true"
-            android:supportsPictureInPicture="false"
-            android:theme="@style/Theme.Van" />
-
-        <!--
-            Rev 1.5 §17.5 — an http/https link another app handed to VAN.
-
-            Exported, because the whole point is that other apps can reach it, and
-            separate from BrowserActivity for exactly that reason: the activity the owner
-            opens from inside VAN and the one a messaging app can start are different
-            trust positions, and one activity serving both would mean an external intent
-            arriving at the surface that already holds a session.
-
-            BrowserExternalLink decides what happens next, and its answer is always the
-            same shape: open it untrusted, in the public profile, with no Mission.
-        -->
-        <activity
-            android:name=".browser.BrowserExternalLinkActivity"
-            android:exported="true"
-            android:excludeFromRecents="true"
-            android:noHistory="true"
-            android:label="@string/browser_activity_label"
-            android:theme="@android:style/Theme.NoDisplay">
-            <intent-filter android:autoVerify="false">
-                <action android:name="android.intent.action.VIEW" />
-                <category android:name="android.intent.category.DEFAULT" />
-                <category android:name="android.intent.category.BROWSABLE" />
-                <data android:scheme="http" />
-                <data android:scheme="https" />
-            </intent-filter>
-        </activity>
-
-        <!--
-            ADR-RB-023 — the target of a pinned home-screen shortcut.
-
-            It receives an opaque shortcut_id and nothing else. Not exported: a launcher
-            starts it through the explicit component in the shortcut VAN created, and an
-            exported one would let any app open the owner's saved pages by guessing ids.
-        -->
-        <activity
-            android:name=".browser.BrowserShortcutActivity"
-            android:exported="false"
-            android:excludeFromRecents="true"
-            android:noHistory="true"
-            android:label="@string/browser_activity_label"
-            android:theme="@android:style/Theme.NoDisplay" />
 
         <activity
             android:name=".trading.TradingCommandCentreActivity"

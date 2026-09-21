@@ -1,10 +1,8 @@
 package com.dial.van.control
 
 import androidx.fragment.app.FragmentActivity
-import com.dial.van.gateway.GatewayHttpException
 import com.dial.van.gateway.VanGatewayClient
 import com.dial.van.security.BiometricGate
-import com.dial.van.session.OfflineSubmission
 import com.dial.van.status.OwnerStatusProjection
 import com.dial.van.status.OwnerWorkStatus
 import com.dial.van.status.VanCommandStatus
@@ -13,7 +11,6 @@ import com.dial.van.voice.VoiceAuthorityDecision
 import com.dial.van.status.commandStatusFor
 import com.dial.van.visual.VanLiveVisualState
 import kotlinx.coroutines.CoroutineScope
-import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
@@ -91,20 +88,6 @@ class VanCommandController(
 ) {
     private val _state = MutableStateFlow(VanConversationState())
     val state: StateFlow<VanConversationState> = _state.asStateFlow()
-
-    /**
-     * §20.14 — where a command goes when it could not be sent.
-     *
-     * A property assigned after construction rather than a constructor parameter, because
-     * `VanApplication` builds this controller before it builds the session and the
-     * session needs the same gateway client. A lambda rather than the session type, so
-     * this class keeps knowing nothing about transports.
-     *
-     * Null means there is no outbox, and [recordFailure] says so rather than pretending:
-     * a build with nothing behind this must not tell the owner their work was saved.
-     * It returns whether the command was actually stored.
-     */
-    var storeForLater: ((body: org.json.JSONObject, needsReconfirm: Boolean) -> Boolean)? = null
 
     fun selectProject(projectId: String?) {
         _state.update { it.copy(selectedProjectId = projectId) }
@@ -220,9 +203,7 @@ class VanCommandController(
         // A4 requests are allowed to reach the gateway only to obtain a one-time
         // cryptographic challenge. They cannot execute until approvePendingA4()
         // supplies a biometric-bound signature over that challenge.
-        // `Dispatchers.IO` because the failure branch writes to the encrypted outbox with
-        // a synchronous `commit()`, and the scope's default pool is sized for CPU work.
-        scope.launch(Dispatchers.IO) {
+        scope.launch {
             try {
                 val response = gateway.dispatchCommand(
                     text = normalized,
@@ -389,108 +370,18 @@ class VanCommandController(
             OwnerStatusProjection.needsOwner(ownerStatus)
     }
 
-    /**
-     * §20.14 — the command did not go out, so it is held or the owner is told it did not.
-     *
-     * This used to append "Command dispatch failed" and stop. Nothing stored the command
-     * and nothing retried it, so an instruction given in a tunnel was gone — the exact
-     * failure §20.14 exists to prevent, reached by the one path nobody had connected to
-     * the outbox (P0-SESS-011).
-     *
-     * The decision is [OfflineSubmission]'s, not this method's. Whether a refusal may be
-     * replayed later and whether an A4 may be stored at all are the two rules worth
-     * getting right, and they belong somewhere a test can execute them.
-     */
     private fun recordFailure(command: VanOwnerCommand, throwable: Throwable) {
         val safeMessage = throwable.message?.take(240) ?: throwable::class.java.simpleName
-        // An HTTP status came back, so the command arrived and was answered. A timeout or
-        // a dropped connection did not, and only that may be held.
-        val gatewayAnswered = throwable is GatewayHttpException
-        val verdict = OfflineSubmission.decide(
-            actionClass = command.actionClass,
-            // No separate signal for this at this call site yet: nothing upstream marks a
-            // command as only meaningful with the owner present. Stated rather than
-            // guessed, because passing `noStaleReplay` here — which was the first version
-            // — conflates a sixty-second Gateway contract with a storage policy, and the
-            // two want opposite answers.
-            requiresLiveOwnerContext = false,
-            gatewayAnswered = gatewayAnswered,
-            failureSummary = safeMessage,
-            noStaleReplay = command.noStaleReplay,
-        )
-        val stored = when (verdict) {
-            is OfflineSubmission.Verdict.Store -> storeSignedBody(command, verdict.needsReconfirm)
-            is OfflineSubmission.Verdict.Drop -> false
-        }
-        // Said rather than assumed. A build with no outbox behind `storeForLater`, or a
-        // store that refused, must not leave the owner told their work was saved.
-        val text = if (stored) verdict.ownerMessage else when (verdict) {
-            is OfflineSubmission.Verdict.Drop -> verdict.ownerMessage
-            is OfflineSubmission.Verdict.Store -> "Not sent, and not saved: $safeMessage"
-        }
         _state.update {
             it.copy(
                 messages = it.messages + VanConversationMessage(
                     role = VanMessageRole.SYSTEM,
-                    text = text,
+                    text = "Command dispatch failed: $safeMessage",
                     projectId = command.projectId,
-                    status = if (stored) VanCommandStatus.QUEUED else VanCommandStatus.FAILED,
+                    status = VanCommandStatus.FAILED,
                 ),
                 submitting = false,
-                lastError = if (stored) null else safeMessage,
-            )
-        }
-    }
-
-    /**
-     * Build the body the Gateway would have received, and hand *that* to the outbox.
-     *
-     * The first version stored `{text, action_class, idempotency_key}`, which is not a
-     * command: `CommandRequest` requires `command_id`, `issued_at_unix` and `signature`,
-     * so the delegate refuses it as `command_payload_invalid` when the outbox flushes.
-     * The owner would have been told their work was saved and it would have been rejected
-     * on their behalf hours later — nothing looking wrong until it was too late to redo.
-     *
-     * Signed here rather than at flush time so that `issued_at_unix` is the moment the
-     * owner issued it. Re-signing later would make a day-old instruction look fresh and
-     * defeat the Gateway's own stale-intent refusal.
-     */
-    private fun storeSignedBody(command: VanOwnerCommand, needsReconfirm: Boolean): Boolean {
-        val store = storeForLater ?: return false
-        val body = runCatching {
-            gateway.buildCommandBody(
-                text = command.text.trim(),
-                actionClass = command.actionClass,
-                projectId = command.projectId,
-                idempotencyKey = command.idempotencyKey,
-                approvalToken = command.approvalToken,
-                turnId = command.turnId,
-                originChannel = originChannel(command.source),
-                expiresAtUnix = command.expiresAtUnix,
-                noStaleReplay = command.noStaleReplay,
-                speechEvidenceRef = command.speechEvidenceRef,
-            )
-        }.getOrNull() ?: return false
-        return store(body, needsReconfirm)
-    }
-
-    /**
-     * §20.15 — work the outbox will not send, surfaced where the owner is already looking.
-     *
-     * Called by the session when a stored command expires or the session it belonged to
-     * is replaced. Without a caller for this, "the owner is told" is an intention.
-     */
-    fun reportUndelivered(reasons: List<Pair<String, String>>) {
-        if (reasons.isEmpty()) return
-        _state.update { current ->
-            current.copy(
-                messages = current.messages + reasons.map { (_, line) ->
-                    VanConversationMessage(
-                        role = VanMessageRole.SYSTEM,
-                        text = line,
-                        status = VanCommandStatus.FAILED,
-                    )
-                },
+                lastError = safeMessage,
             )
         }
     }

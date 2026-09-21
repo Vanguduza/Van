@@ -5,8 +5,6 @@ from decimal import Decimal
 import pytest
 
 from conftest_owner_authority import OWNER_KEY_ID
-from vati.validation.certificates import GREEN, StrategyValidationCertificate
-from vati.validation.policy import ValidationStatistics
 from vati.risk import (
     AuthorizationMode,
     Direction,
@@ -170,34 +168,3 @@ def intent(**overrides) -> TradeIntent:
     )
     base.update(overrides)
     return TradeIntent(**base)
-
-
-def passing_certificate(
-    *,
-    strategy_id: str,
-    strategy_version: str = "1.0.0",
-    capsule_hash: str = "",
-    data_manifest_hash: str = "manifest:test",
-    evidence_refs: tuple[str, ...] = ("artifact:test-validation",),
-    feature_set_version: str = "features/1.0.0",
-    cost_model_revision: str = "costs/1.0.0",
-) -> StrategyValidationCertificate:
-    """Test-only valid certificate. Production has no synthetic passing factory."""
-    return StrategyValidationCertificate(
-        certificate_id=f"svc_{strategy_id}",
-        strategy_id=strategy_id,
-        strategy_version=strategy_version,
-        capsule_hash=capsule_hash,
-        data_manifest_hash=data_manifest_hash,
-        evidence_refs=evidence_refs,
-        feature_set_version=feature_set_version,
-        cost_model_revision=cost_model_revision,
-        stats=ValidationStatistics(
-            observed_sharpe=0.6, dsr_probability=0.99, pbo_probability=0.05,
-            n_trials=1, n_observations=250, walk_forward_windows=5,
-        ),
-        expectancy_R=0.35, expectancy_lower_bound_R=0.22,
-        profit_factor=1.6, max_drawdown=0.08,
-        cost_stress_2x=GREEN, latency_slippage_stress=GREEN,
-        parameter_perturbation_stability=GREEN, leakage_switch_result=GREEN,
-    ).sealed()

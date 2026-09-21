@@ -22,7 +22,6 @@ from vati.authority import (
     MAX_STANDING_LIFETIME_SECONDS,
     OwnerAuthorityError,
     OwnerAuthorityVerifier,
-    build_token,
     canonical_statement,
     load_owner_keys,
     sign_token,
@@ -161,42 +160,6 @@ class TestTheKeyMatters:
         path = Path(__file__).resolve().parents[2] / "registries" / "owner_authority_keys.json"
         assert path.is_file()
         assert load_owner_keys(path) == {}
-
-
-class TestAndroidWireParity:
-    def test_android_vector_matches_python_token_bytes(self):
-        import base64
-
-        subject = "FX-TREND-PULLBACK-01:SHADOW:" + "a" * 64
-        statement = canonical_statement(
-            act="capsule-promote",
-            subject=subject,
-            issued_at_unix=1770000000,
-            expires_at_unix=1770000300,
-            nonce="nonce_-123",
-        )
-        assert statement == (
-            "van-oa1|capsule-promote|" + subject
-            + "|1770000000|1770000300|nonce_-123"
-        )
-        token = build_token(
-            act="capsule-promote",
-            subject=subject,
-            issued_at_unix=1770000000,
-            expires_at_unix=1770000300,
-            nonce="nonce_-123",
-            key_id="device-0123456789abcdef01234567",
-            signature=bytes(range(1, 17)),
-        )
-        assert token == (
-            "van-oa1."
-            "eyJhY3QiOiJjYXBzdWxlLXByb21vdGUiLCJleHAiOjE3NzAwMDAzMDAsImlhdCI6MTc3MDAwMDAwMCwia2lkIjoiZGV2aWNlLTAxMjM0NTY3ODlhYmNkZWYwMTIzNDU2NyIsIm5vbmNlIjoibm9uY2VfLTEyMyIsInN1YmplY3QiOiJGWC1UUkVORC1QVUxMQkFDSy0wMTpTSEFET1c6YWFhYWFhYWFhYWFhYWFhYWFhYWFhYWFhYWFhYWFhYWFhYWFhYWFhYWFhYWFhYWFhYWFhYWFhYWFhYWFhYWFhYSJ9."
-            "AQIDBAUGBwgJCgsMDQ4PEA"
-        )
-        payload = token.split(".")[1]
-        assert base64.urlsafe_b64decode(
-            payload + "=" * (-len(payload) % 4)
-        ).decode().startswith('{"act":"capsule-promote","exp":1770000300')
 
 
 class TestReplay:

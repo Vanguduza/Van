@@ -5,18 +5,8 @@ from __future__ import annotations
 from dataclasses import dataclass
 
 from vati.intelligence.events import EventWindowState
-from vati.intelligence.feature_contract import (
-    FEATURE_CONTRACT_UNSATISFIED,
-    FeatureContractValidator,
-    FeatureContractVerdict,
-    availability_from_context,
-    availability_from_feature_vector,
-    requirements_from_capsule,
-)
 from vati.intelligence.market_state import MarketState
 from vati.risk.contracts import StrategyState
-from vati.observability import metrics
-from vati.observability.enhancement_metrics import FEATURE_CONTRACT_FAILURES
 from vati.risk.mandate import TradingMandate
 from vati.strategies.capsule import Capsule
 
@@ -28,17 +18,10 @@ class EligibilityVerdict:
     strategy_id: str
     eligible: bool
     reasons: tuple[str, ...]
-    #: TRD-ENH-003. Present when the feature contract ran; the capsule abstains
-    #: on an unsatisfied contract rather than trading on whatever remains.
-    feature_contract: FeatureContractVerdict | None = None
 
 
 class StrategyArbiter:
-    def __init__(self, *, feature_validator: FeatureContractValidator | None = None) -> None:
-        self.feature_validator = feature_validator or FeatureContractValidator()
-
-    def evaluate(self, capsule: Capsule, state: MarketState, mandate: TradingMandate, *, regime_label: str, currency_regime_label: str | None = None,
-                 venue_class: str | None = None, history_bars: int | None = None, context: object | None = None) -> EligibilityVerdict:
+    def evaluate(self, capsule: Capsule, state: MarketState, mandate: TradingMandate, *, regime_label: str, currency_regime_label: str | None = None) -> EligibilityVerdict:
         reasons = []
         if capsule.state not in ACTIVE_STATES:
             reasons.append(f"capsule state {capsule.state.value} is not active")
@@ -59,18 +42,4 @@ class StrategyArbiter:
             reasons.append("quiet window: capsule not event-certified")
         if state.integrity.value in ("ABNORMAL", "HALTED"):
             reasons.append(f"market integrity {state.integrity.value}")
-        # TRD-ENH-003 — the declared feature dependencies, checked at evaluation
-        # time. A contract satisfied at startup can be unsatisfied an hour later.
-        available = availability_from_feature_vector(state.features, venue_class=venue_class, history_bars=history_bars)
-        available.update(availability_from_context(context, as_of_ms=state.as_of_ms, venue_class=venue_class,
-                                                   timeframe=getattr(state, "timeframe", "UNKNOWN")))
-        contract = self.feature_validator.validate(
-            requirements=requirements_from_capsule(capsule, timeframe=getattr(state, "timeframe", None) if getattr(state, "timeframe", "UNKNOWN") != "UNKNOWN" else None),
-            available=available,
-            now_ms=state.as_of_ms,
-            venue_class=venue_class,
-        )
-        if not contract.satisfied:
-            metrics.inc(FEATURE_CONTRACT_FAILURES, strategy_id=capsule.strategy_id)
-            reasons.append(f"{FEATURE_CONTRACT_UNSATISFIED}:{','.join(contract.reasons)}")
-        return EligibilityVerdict(capsule.strategy_id, not reasons, tuple(reasons), contract)
+        return EligibilityVerdict(capsule.strategy_id, not reasons, tuple(reasons))

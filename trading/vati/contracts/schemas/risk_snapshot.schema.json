@@ -2,7 +2,7 @@
   "$schema": "https://json-schema.org/draft/2020-12/schema",
   "$id": "https://van.dial/vati/risk_snapshot.schema.json",
   "title": "RiskSnapshot",
-  "description": "Everything the Risk Authority consults, captured atomically at decision time and hashed into the RiskDecision (Rev 2 §27). Any unprovable field is supplied at its fail-closed value.",
+  "description": "Everything the Risk Authority consults, captured atomically at decision time and hashed into the RiskDecision (Rev 2 \u00a727). Any unprovable field is supplied at its fail-closed value.",
   "type": "object",
   "additionalProperties": false,
   "required": [
@@ -27,9 +27,7 @@
     "tier1_event_blackout_active",
     "kill_switch_triggers",
     "margin_level_pct",
-    "free_margin",
-    "preservation_blocks_new_risk",
-    "preservation_reason"
+    "free_margin"
   ],
   "properties": {
     "now_unix": {
@@ -123,7 +121,7 @@
           },
           "liquidity_haircut_per_unit": {
             "type": "string",
-            "description": "ILLIQUID_EQUITY: price × liquidity haircut per share."
+            "description": "ILLIQUID_EQUITY: price \u00d7 liquidity haircut per share."
           }
         }
       }
@@ -181,14 +179,6 @@
         "null"
       ],
       "description": "P0-TRADE-006. Equity not committed to open positions, as the venue reports it."
-    },
-    "preservation_blocks_new_risk": {
-      "type": "boolean",
-      "description": "Rev 5.1 preservation precedence. True only when the deterministic post-entry lifecycle has an unresolved preservation condition that must block new risk."
-    },
-    "preservation_reason": {
-      "type": "string",
-      "description": "Owner/replay-visible deterministic reason for a preservation block. Empty when preservation_blocks_new_risk is false."
     }
   }
 }

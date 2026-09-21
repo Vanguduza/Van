@@ -1,22 +1,5 @@
 {
-  "capsule_hash": "2032b50566f293a69a9cbcde322858e316c1881b4f727a7581c7bf9baf12bc38",
-  "cost_model_ref": "vati.zse.costs.ZSE_EQUITY_COSTS",
   "discipline": "ZSE liquidity premium",
-  "eligible_regimes": [
-    "ANCHORED",
-    "ELEVATED"
-  ],
-  "entry_logic_ref": "vati.strategies.zse_liquidity_provision",
-  "event_rules": {},
-  "evidence_refs": [],
-  "execution_model": "PASSIVE_LIMIT GTC 30d via OWNER_TICKET",
-  "forbidden_regimes": [
-    "STRESSED",
-    "DISORDERLY"
-  ],
-  "horizons": [
-    "SWING"
-  ],
   "instruments": [
     "DELTA",
     "CBZ",
@@ -24,24 +7,38 @@
     "OKZIM",
     "MASIMBA"
   ],
-  "invalidation_logic_ref": "spread normalises or regime STRESSED",
+  "horizons": [
+    "SWING"
+  ],
+  "eligible_regimes": [
+    "ANCHORED",
+    "ELEVATED"
+  ],
+  "forbidden_regimes": [
+    "STRESSED",
+    "DISORDERLY"
+  ],
   "required_data_granularity": "BARS",
   "required_features": [
     "median_spread_pct",
     "adv_20d",
     "trading_days_of_20"
   ],
+  "entry_logic_ref": "vati.strategies.zse_liquidity_provision",
+  "invalidation_logic_ref": "spread normalises or regime STRESSED",
+  "stop_model": "software stop 15% + haircut",
+  "target_model": "half spread",
   "risk_limits": {
     "max_risk_per_trade": "0.0050"
   },
-  "state": "RESEARCH",
-  "stop_model": "software stop 15% + haircut",
-  "strategy_id": "ZSE-LIQUIDITY-PROVISION-01",
-  "target_model": "half spread",
-  "timeframe_contract": {
-    "primary": "D1"
-  },
+  "execution_model": "PASSIVE_LIMIT GTC 30d via OWNER_TICKET",
+  "event_rules": {},
   "training_period": "2019-01-01/2024-12-31",
   "validation_period": "2025-01-01/2026-06-30",
-  "version": "1.0.0"
+  "cost_model_ref": "vati.zse.costs.ZSE_EQUITY_COSTS",
+  "state": "RESEARCH",
+  "evidence_refs": [],
+  "strategy_id": "ZSE-LIQUIDITY-PROVISION-01",
+  "version": "1.0.0",
+  "capsule_hash": "3ea8988376cbe79b76986c9d991cd3fe4a859a61a4f2dc659ed21e15b4dd2166"
 }

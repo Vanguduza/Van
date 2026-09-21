@@ -11,8 +11,6 @@ import android.speech.SpeechRecognizer
 import androidx.biometric.BiometricManager
 import androidx.core.content.ContextCompat
 import com.dial.van.VanApplication
-import kotlinx.coroutines.Dispatchers
-import kotlinx.coroutines.launch
 import com.dial.van.notification.VanNotificationListenerService
 import com.dial.van.overlay.FloatingOverlayService
 
@@ -84,13 +82,8 @@ object DeviceSignals {
                 true
             }
             RestoreAction.CLEAR_QUEUE -> {
-                // Off the thread that handled the tap. The queue commits synchronously so
-                // the outbox's "saved" is true when said, which makes this an encrypted
-                // disk write — and this one is reached from a button on a screen.
-                app.appScope.launch(Dispatchers.IO) {
-                    app.commandQueue.clear()
-                    publish(app)
-                }
+                app.commandQueue.clear()
+                publish(app)
                 true
             }
             RestoreAction.RESTART_OVERLAY -> {

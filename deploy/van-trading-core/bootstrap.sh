@@ -118,6 +118,16 @@ else
   run sudo -u vati git clone -q --branch "$BRANCH" "$REPO_URL" "$APP"; ok "repo cloned ($BRANCH)"
 fi
 
+# ---------------------------------------------------------------- full Hermes subordinate Commander + GitHub recovery
+if (( DRY_RUN )); then
+  plan "install full pinned Desktop Commander for ubuntu on van-trading-core"
+  plan "install bounded GitHub/OCI recovery command"
+else
+  bash "$APP/deploy/van-trading-core/install-full-desktop-commander.sh"
+  bash "$APP/deploy/van-trading-core/install-github-recovery.sh"
+fi
+ok "full Desktop Commander subordinate + recovery command"
+
 # ---------------------------------------------------------------- python venv
 if [[ ! -x "$VENV/bin/python" ]]; then run sudo -u vati python3.12 -m venv "$VENV"; ok "venv (python3.12)"; else skip "venv present"; fi
 run sudo -u vati "$VENV/bin/pip" install -q --upgrade pip
@@ -133,21 +143,6 @@ if [[ ! -f "$SECRETS/pki/ca.crt" ]]; then run bash -c "OUT='$SECRETS/pki' CORE_I
 # ---------------------------------------------------------------- config
 if [[ ! -f "$CONFIG/van-trading-core.env" ]]; then run install -o root -g vati -m 0640 "$HERE/env/van-trading-core.env.example" "$CONFIG/van-trading-core.env"; ok "config env"; else skip "config env exists"; fi
 if [[ ! -f "$CONFIG/accounts.json" ]]; then run bash -c "echo '{\"schema_version\": 1, \"accounts\": []}' > '$CONFIG/accounts.json'"; run chown vati:vati "$CONFIG/accounts.json"; run chmod 0640 "$CONFIG/accounts.json"; ok "empty account registry (add accounts with: sudo -u vati $VENV/bin/python -m vati accounts add ...)"; fi
-OWNER_AUTHORITY_REGISTRY="$DATA/owner_authority_keys.json"
-if [[ ! -f "$OWNER_AUTHORITY_REGISTRY" ]]; then
-  run bash -c "umask 077; printf '%s\\n' '{\"version\":1,\"keys\":{}}' > '$OWNER_AUTHORITY_REGISTRY'"
-  run chown vati:vati "$OWNER_AUTHORITY_REGISTRY"
-  run chmod 0600 "$OWNER_AUTHORITY_REGISTRY"
-  ok "empty runtime owner-authority registry (paired S24 enrolls through A4)"
-else
-  if (( ! DRY_RUN )); then
-    chown vati:vati "$OWNER_AUTHORITY_REGISTRY"
-    chmod 0600 "$OWNER_AUTHORITY_REGISTRY"
-    jq -e '(.keys // {}) | type == "object" and (length <= 1)' "$OWNER_AUTHORITY_REGISTRY" >/dev/null \
-      || die "owner authority registry malformed or contains more than one active owner key"
-  fi
-  skip "runtime owner-authority registry already present"
-fi
 
 # ---------------------------------------------------------------- supabase
 if (( ! SKIP_SUPABASE )); then
@@ -257,5 +252,7 @@ echo "$REPORT" | jq .
 echo "[bootstrap] next: 1) copy $SECRETS/pki/mt5-worker.{crt,key} + ca.crt to the Windows worker and run windows/mt5_worker/install.ps1"
 echo "[bootstrap]       2) sudo -u vati $VENV/bin/python -m vati accounts add --registry $CONFIG/accounts.json --alias <alias> --broker MT5|DERIV|PAPER ..."
 echo "[bootstrap]       3) write $CONFIG/sessions/<alias>.json and: systemctl enable --now vati-session@<alias>"
-echo "[bootstrap]       4) on dial-hermes-control: bash deploy/van-trading-core/hermes/register-commander-mcp.sh"
-echo "[bootstrap]       5) bash deploy/van-trading-core/qualify.sh"
+echo "[bootstrap]       4) on dial-hermes-control: bash deploy/van-trading-core/hermes/install-full-commander-transport.sh"
+echo "[bootstrap]       5) on dial-hermes-control: bash deploy/van-trading-core/hermes/register-commander-mcp.sh && bash deploy/van-trading-core/hermes/register-full-desktop-commander-mcp.sh"
+echo "[bootstrap]       6) on dial-hermes-control: bash deploy/van-trading-core/hermes/qualify-full-desktop-commander-mcp.sh"
+echo "[bootstrap]       7) bash deploy/van-trading-core/qualify.sh"

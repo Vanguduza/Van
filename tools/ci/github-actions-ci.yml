@@ -46,13 +46,6 @@ jobs:
       - name: Contract tests
         run: pytest -q tests/contracts
 
-      # Rev 1.5 §13.2 — the Browser Control Agent. It lives outside backend/ because it
-      # runs on the Browser Stream Host rather than on the Gateway, so neither of the two
-      # suites above reaches it. Its authority checks are pure and executed here; the CDP
-      # transport behind them needs a Chromium and is RB-010/RB-117, a host gate.
-      - name: Browser Control Agent and stream-host logic
-        run: pytest -q services
-
       # Protocol rule 31, Android half. A compiler finds code that does not build; this
       # finds code that builds, is tested, and nothing reaches — the class P0-AND-012 lived
       # beside. It runs here rather than in the Android job because it needs no toolchain.
@@ -65,25 +58,6 @@ jobs:
       # component ledger came to list 65 entries as unfinished when 22 of them were done.
       - name: Ledger reconciliation (does the source still agree?)
         run: python tools/ci/ledger_reconcile.py
-
-      # Rev 1.5 §38 / RB-052 — the red-team register. §38 says every finding is PASS,
-      # FAIL, BLOCKED_EXTERNAL or NOT_APPLICABLE_WITH_REASON and never `assumed`, and a
-      # register of sixty-six statuses is the natural place for an unchecked claim to
-      # live. This refuses one: every PASS must cite a runnable pytest node id or a
-      # Kotlin test that exists.
-      - name: Red-team register (§38)
-        run: python tools/ci/red_team_register.py
-      # And the checker itself must reject a register that has quietly gone wrong.
-      - name: Red-team register self-test
-        run: pytest -q tests/contracts/test_red_team_register.py
-
-      # Rev 1.5 §43 / RB-058 — the production acceptance register. The verdict is
-      # recomputed from the rows rather than read, so the ledger cannot say accepted
-      # while one of its own hundred and four requirements says otherwise.
-      - name: Production acceptance (§43)
-        run: python tools/ci/production_acceptance.py
-      - name: Production acceptance self-test
-        run: pytest -q tests/contracts/test_production_acceptance.py
 
       # The maturity gate must fail on the defect shape it exists to prevent.
       # A gate that only ever passes proves nothing.
@@ -99,28 +73,6 @@ jobs:
         run: pytest -q tests/hermes
       - name: Trading stack-lock and adoption-proposal tests
         run: pytest -q trading/tests/test_stack_lock.py trading/tests/test_automation_browser_stack_proposal.py
-
-      # TRD-ENH-087. AST guardrails, not greps: a docstring naming ExecutionRouter
-      # must not fail the build and a real import must not pass it. These catch the
-      # structural mistakes that would quietly undo the authority boundaries --
-      # a candidate gaining a size field, the allocator ranking on an uncalibrated
-      # score, a proposal reaching the mandate, trading truth in the gateway schema.
-      - name: Trading enhancement architecture guardrails
-        run: python trading/tools/check_enhancement_architecture.py
-
-      # The capsule registry and its migration records must agree: a rehash with
-      # no provenance is indistinguishable from silent_strategy_mutation.
-      - name: Capsule timeframe migration is settled
-        run: python trading/tools/migrate_capsule_timeframes.py --check
-
-      - name: Trading enhancement tests
-        run: pytest -q trading/tests/
-
-      # Rev 5.1 G15 / TRD-REV51-133. This certifies repository implementation
-      # closure only. It deliberately keeps runtime/shadow/live as evidence-bound
-      # external states and fails if source/tests silently claim live eligibility.
-      - name: Trading Rev 5.1 certification harness
-        run: python tools/certification/rev51_harness.py --check
       # Rev 1.3 §359 — the Automation & Browser Fabric suites. These certify
       # repository-side behaviour only; live readiness stays an external gate
       # (docs/EXTERNAL_GATES.md) and needs the Trading Core VM.

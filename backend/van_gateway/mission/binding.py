@@ -59,7 +59,6 @@ _AUTOMATION_STATE = {
 #: it was never declared to provide.
 BROWSER_CAPABILITY = "browser.semantic.extract"
 AUTOMATION_CAPABILITY = "automation.workflow.execute"
-INTERACTIVE_BROWSER_CAPABILITY = "browser.interactive.session"
 
 
 @dataclass(frozen=True)
@@ -92,26 +91,6 @@ class MissionBinder:
         return await self._bind(
             mission_id=mission_id, executor="BROWSER_FABRIC", executor_ref=task_id,
             activity_type="browser.task", capability_id=capability_id,
-        )
-
-    async def bind_browser_session(
-        self, *, mission_id: str, session_id: str,
-        capability_id: str = INTERACTIVE_BROWSER_CAPABILITY,
-    ) -> str | None:
-        """Rev 1.5 §0A/S2 — an interactive session attaches to a Mission that already exists.
-
-        `BrowserTask` has no `mission_id`, and the request-time binder above is keyed on a
-        task. An interactive session is neither: it is a person looking at a browser, and it
-        may outlive several tasks or carry none at all.
-
-        ADR-RB-018 is the rule this implements. The session never creates a Mission — the
-        command that opened it already did — so a session with `mission_id=None` is the
-        normal case for manual browsing, and binding is what happens when the owner asks
-        Van to do something with the page in front of them.
-        """
-        return await self._bind(
-            mission_id=mission_id, executor="BROWSER_FABRIC", executor_ref=session_id,
-            activity_type="browser.interactive_session", capability_id=capability_id,
         )
 
     async def bind_automation_run(

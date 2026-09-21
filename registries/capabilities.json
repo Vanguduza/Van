@@ -156,31 +156,6 @@
       ]
     },
     {
-      "capability_id": "browser.interactive.session",
-      "provider": "browser_stream_host",
-      "executor": "BROWSER_FABRIC",
-      "capability_class": "BROWSER_INTERACTION",
-      "authority_class": "A2",
-      "requires_network": true,
-      "requires_owner_presence": false,
-      "data_domains": [
-        "external_web"
-      ],
-      "side_effects": [
-        "NETWORK_READ"
-      ],
-      "idempotency": "IDEMPOTENT",
-      "supports_checkpoint": true,
-      "supports_resume": true,
-      "verification_strategy": "NONE",
-      "latency_class": "SECONDS",
-      "cost_class": "CHEAP",
-      "privacy_class": "EXTERNAL_DISCLOSING",
-      "readiness_source": "EXTERNAL_RUNTIME",
-      "health_probe": "browser_stream_host",
-      "fallback_capabilities": []
-    },
-    {
       "capability_id": "automation.workflow.execute",
       "provider": "n8n",
       "executor": "AUTOMATION_FABRIC",

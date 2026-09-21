@@ -55,7 +55,6 @@ object OwnerLanguage {
         VanCommandStatus.COULD_NOT_VERIFY -> "Done, but not confirmed"
         VanCommandStatus.FAILED -> "Did not work"
         VanCommandStatus.REFUSED -> "VAN would not do this"
-        VanCommandStatus.QUEUED -> "Saved for when you're online"
         VanCommandStatus.CANCELLED -> "Stopped"
         VanCommandStatus.EXPIRED -> "Never came back"
         VanCommandStatus.UNKNOWN -> "VAN is not sure"

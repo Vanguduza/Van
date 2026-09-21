@@ -139,11 +139,6 @@ class TradingService:
         pf, _, _ = _import_portfolio()
         return self._with_ledger(lambda led: pf.risk(led), empty={"ledger_available": False, "positions": [], "concentration": {}})
 
-    def cognition(self) -> dict[str, Any]:
-        """Rev 5.1 owner read model: cognition, research and evolution evidence only."""
-        from van_gateway.trading.cognition import cognition_from_ledger, empty_cognition_read_model
-        return self._with_ledger(cognition_from_ledger, empty=empty_cognition_read_model())
-
     def trade_detail(self, trade_intent_id: str) -> Optional[dict[str, Any]]:
         pf, _, _ = _import_portfolio()
         lake = self._lake()
@@ -235,20 +230,7 @@ class TradingService:
                           "contract_note_ref": ev.payload.get("contract_note_ref"), "confirmation_hash": ev.hash})
             else:
                 t = by_id.setdefault(tid, {"ticket": tid, "status": "OPEN"})
-                t.update({
-                    "symbol": ev.payload.get("symbol"),
-                    "qty": ev.payload.get("qty"),
-                    "side": ev.payload.get("side", "BUY"),
-                    "limit_price": ev.payload.get("limit_price"),
-                    "software_stop": ev.payload.get("software_stop"),
-                    "position_id": ev.payload.get("position_id"),
-                    "exit_reason": ev.payload.get("exit_reason"),
-                    "issued_ms": ev.event_time_ms,
-                    "trade_intent_id": (
-                        ev.payload.get("trade_intent_id") or ev.correlation_id
-                    ),
-                    "ticket_hash": ev.hash,
-                })
+                t.update({"symbol": ev.payload.get("symbol"), "qty": ev.payload.get("qty"), "issued_ms": ev.event_time_ms, "trade_intent_id": ev.correlation_id, "ticket_hash": ev.hash})
         return sorted(by_id.values(), key=lambda t: t.get("issued_ms", 0))
 
     def tickets(self, *, status: Optional[str] = None) -> list[dict[str, Any]]:

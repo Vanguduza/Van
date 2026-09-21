@@ -20,14 +20,11 @@ import androidx.compose.runtime.remember
 import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
-import android.content.Intent
 import com.dial.van.VanApplication
-import com.dial.van.browser.BrowserActivity
 import com.dial.van.command.AdminActionCard
 import com.dial.van.command.AdminCard
 import com.dial.van.command.CommandModule
@@ -309,7 +306,6 @@ internal fun BrowserSessionsPage(
     glass: com.dial.van.visual.VanGlassStyle,
     back: () -> Unit,
 ) {
-    val context = LocalContext.current
     var status by remember { mutableStateOf<JSONObject?>(null) }
     var error by remember { mutableStateOf<String?>(null) }
 
@@ -348,25 +344,6 @@ internal fun BrowserSessionsPage(
         }
         item {
             TruthMessage("Managed aliases only. Raw cookies, credentials and provider tokens are never displayed.")
-        }
-        item {
-            AdminActionCard(
-                title = "Open the browser here",
-                detail = "The browser runs on VAN's host and is drawn on this phone. " +
-                    "Taking control is a handover, not a new session.",
-                glass = glass,
-                onClick = {
-                    // The profile is fixed rather than chosen: an alias typed into a field
-                    // is an alias an attacker can suggest, and the authenticated profile is
-                    // the one holding the owner's logged-in sessions (§0D.2's reasoning,
-                    // one layer in).
-                    context.startActivity(
-                        Intent(context, BrowserActivity::class.java).putExtra(
-                            BrowserActivity.EXTRA_PROFILE_ALIAS, "authenticated_owner",
-                        ),
-                    )
-                },
-            )
         }
     }
 }

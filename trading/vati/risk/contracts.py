@@ -186,10 +186,6 @@ class RiskSnapshot:
     #: healthy; a paper or owner-ticket venue has no margin and legitimately reports None.
     margin_level_pct: Optional[Decimal] = None
     free_margin: Optional[Decimal] = None
-    #: Rev 5.1 preservation is evaluated before new risk. The flag is supplied
-    #: by the deterministic lifecycle supervisor and consumed only by RiskAuthority.
-    preservation_blocks_new_risk: bool = False
-    preservation_reason: str = ""
 
     @property
     def data_fresh(self) -> bool:

@@ -134,20 +134,7 @@ async def test_status_and_tickets_read_from_chained_ledger(client, tmp_path):
     assert st["degraded"] == ["TRADING_LEDGER_UNAVAILABLE"]
     assert "old" in st["ledger_stale_reason"]
     tk = (await ac.get("/v1/trading/tickets")).json()["tickets"]
-    assert tk == [{
-        "ticket": "ZSE-T-1",
-        "status": "OPEN",
-        "symbol": "DELTA",
-        "qty": "1200",
-        "side": "BUY",
-        "limit_price": None,
-        "software_stop": None,
-        "position_id": None,
-        "exit_reason": None,
-        "issued_ms": 2_000,
-        "trade_intent_id": "intent-1",
-        "ticket_hash": tk[0]["ticket_hash"],
-    }]
+    assert tk == [{"ticket": "ZSE-T-1", "status": "OPEN", "symbol": "DELTA", "qty": "1200", "issued_ms": 2_000, "trade_intent_id": "intent-1", "ticket_hash": tk[0]["ticket_hash"]}]
 
 
 @pytest.mark.asyncio
@@ -244,7 +231,7 @@ def test_service_never_exposes_an_order_path():
     """The gateway trading surface has no method that could create, size, modify or cancel an order."""
     from van_gateway.trading import TradingService
     names = {n for n in dir(TradingService) if not n.startswith("_")}
-    assert names == {"available", "status", "tickets", "halt", "confirm_ticket", "trade_book", "portfolio", "accounts", "market_state", "risk", "cognition", "trade_detail", "bars", "producer", "accounts_registry", "lake_root", "reporting_currency", "owner_authority"}
+    assert names == {"available", "status", "tickets", "halt", "confirm_ticket", "trade_book", "portfolio", "accounts", "market_state", "risk", "trade_detail", "bars", "producer", "accounts_registry", "lake_root", "reporting_currency", "owner_authority"}
     for banned in ("order", "submit", "size", "cancel", "modify", "credential", "token"):
         assert not any(banned in n.lower() for n in names), banned
     # P0-TRADE-001 — the one field added since is the verifier for owner-signed acts, and
@@ -306,110 +293,6 @@ def _sign_action(secret: str, device_id: str, issued: int, action: str, args: di
     from van_gateway.trading.accounts import canonical_action
     return hmac.new(secret.encode(), canonical_action(device_id, issued, action, args).encode(), hashlib.sha256).hexdigest()
 
-
-@pytest.mark.asyncio
-async def test_strategy_promotion_requires_exact_device_signature_and_a4_proof(client):
-    import time as _time
-    from van_gateway.trading.strategies import canonical_strategy_promotion
-
-    ac, app = client
-    now = int(_time.time())
-    certificate = {
-        "certificate_id": "svc-test",
-        "strategy_id": "FX-TREND-PULLBACK-01",
-        "validation_hash": "v" * 64,
-    }
-    authority_placeholder = "owner-authority-input"
-    evidence = ["artifact:test-validation"]
-
-    class FakePromotions:
-        def __init__(self):
-            self.calls = []
-            self.enrollments = []
-        def candidates(self):
-            return {
-                "candidates": [{
-                    "strategy_id": "FX-TREND-PULLBACK-01",
-                    "current_state": "DEMO",
-                    "target_state": "SHADOW",
-                    "validation_hash": "v" * 64,
-                }],
-                "authority": "OWNER_DECISION_REQUIRED",
-            }
-        def ensure_owner_authority(self, **kw):
-            self.enrollments.append(kw)
-            return {"enrolled": True, "key_id": "device-test"}
-        def promote(self, **kw):
-            self.calls.append(kw)
-            return {
-                "promoted": True, "strategy_id": kw["strategy_id"],
-                "from": "DEMO", "to": kw["target_state"],
-                "capsule_hash": "c" * 64,
-                "validation_hash": kw["certificate"]["validation_hash"],
-                "owner_authority_ref": "owner-authority:test-ref",
-                "event_hash": "e" * 64, "registry_projection": "WRITTEN",
-            }
-
-    fake = FakePromotions()
-    app.state.strategy_promotions = fake
-
-    candidates = await ac.get("/v1/trading/strategies/promotion-candidates")
-    assert candidates.status_code == 200, candidates.text
-    assert candidates.json()["candidates"][0]["target_state"] == "SHADOW"
-
-    paired_key = await app.state.store.fetchone(
-        "SELECT public_key_pem FROM devices WHERE device_id = ?",
-        ("test-device",),
-    )
-    assert paired_key is not None and "BEGIN PUBLIC KEY" in paired_key["public_key_pem"]
-
-    def body(*, target="SHADOW", proof=None):
-        canonical = canonical_strategy_promotion(
-            "test-device", now,
-            strategy_id="FX-TREND-PULLBACK-01", target_state=target,
-            owner_signature_ref=authority_placeholder, certificate=certificate,
-            evidence_refs=evidence,
-        )
-        out = {
-            "device_id": "test-device", "issued_at_unix": now,
-            "signature": app.state.auth.sign("test-device", canonical),
-            "strategy_id": "FX-TREND-PULLBACK-01", "target_state": target,
-            "owner_signature_ref": authority_placeholder,
-            "certificate": certificate, "evidence_refs": evidence,
-        }
-        if proof is not None:
-            out["approval_proof"] = proof
-        return out
-
-    no_proof = await ac.post("/v1/trading/strategies/promote", json=body())
-    assert no_proof.status_code == 403 and fake.calls == [] and fake.enrollments == []
-
-    challenge = await ac.post(
-        "/v1/trading/strategies/promotion-challenge", json=body())
-    assert challenge.status_code == 200, challenge.text
-    proof = _approval_proof(challenge.json())
-    tampered = await ac.post(
-        "/v1/trading/strategies/promote",
-        json=body(target="CERTIFIED_LIVE", proof=proof),
-    )
-    assert tampered.status_code == 403 and fake.calls == [] and fake.enrollments == []
-
-    challenge2 = await ac.post(
-        "/v1/trading/strategies/promotion-challenge", json=body())
-    proof2 = _approval_proof(challenge2.json())
-    promoted = await ac.post(
-        "/v1/trading/strategies/promote", json=body(proof=proof2))
-    assert promoted.status_code == 200, promoted.text
-    assert len(fake.calls) == 1
-    assert len(fake.enrollments) == 1
-    assert fake.enrollments[0]["device_id"] == "test-device"
-    assert fake.enrollments[0]["public_key_pem"] == paired_key["public_key_pem"]
-    assert fake.calls[0]["target_state"] == "SHADOW"
-    assert fake.calls[0]["certificate"]["validation_hash"] == "v" * 64
-
-    replay = await ac.post(
-        "/v1/trading/strategies/promote", json=body(proof=proof2))
-    assert replay.status_code == 403 and len(fake.calls) == 1 and len(fake.enrollments) == 1
 
 @pytest.mark.asyncio
 async def test_account_onboarding_is_device_signed_and_forwards_without_storing_secrets(client, tmp_path, monkeypatch):

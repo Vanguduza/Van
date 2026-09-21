@@ -20,22 +20,16 @@ from fastapi.responses import JSONResponse
 from pydantic import BaseModel, Field
 
 from commander.accounts import ACCOUNT_COMMANDS, ACCOUNT_TOOL_SCHEMAS, AccountControlSettings, build_account_handlers, redact_args
-from commander.strategies import (
-    PROMOTION_COMMANDS,
-    PROMOTION_TOOL_SCHEMAS,
-    StrategyPromotionSettings,
-    build_strategy_handlers,
-)
 from commander.auth import DEFAULT_PRINCIPAL, NonceCache, verify_request_principal
 
 REDACT = re.compile(r"(?i)(password|passwd|token|api[_-]?key|secret|bearer|signing[_-]?key)(\s*[:=]\s*)\S+")
 UNIT_RE = re.compile(r"^[A-Za-z0-9@._-]+$")
 DEFAULT_UNITS = ("vati-session@*.service", "vati-commander.service", "vati-vekl.service", "vati-supabase.service", "vati-mt5-pull.service", "caddy.service")
-COMMANDS = ("status", "ledger_status", "services", "restart_service", "tail_log", "run_backtest", "vekl_resolve", "halt", "doctor", "accounts") + ACCOUNT_COMMANDS + PROMOTION_COMMANDS
+COMMANDS = ("status", "ledger_status", "services", "restart_service", "tail_log", "run_backtest", "vekl_resolve", "halt", "doctor", "accounts") + ACCOUNT_COMMANDS
 # Credential-bearing commands are reachable only from the gateway's device-signed onboarding path.
 # They are never listed as MCP tools and are refused when an agent (Hermes) is the requester,
 # so broker credentials cannot enter a model prompt or tool call.
-AGENT_HIDDEN_COMMANDS = frozenset(ACCOUNT_COMMANDS + PROMOTION_COMMANDS)
+AGENT_HIDDEN_COMMANDS = frozenset(ACCOUNT_COMMANDS)
 AGENT_REQUESTERS = frozenset({"hermes", "agent", "model", "claude", "codex", "sol", "sonnet"})
 Runner = Callable[[list[str], int], tuple[int, str, str]]
 
@@ -62,11 +56,6 @@ class CommanderSettings:
     vekl_token: str = os.environ.get("VAN_VEKL_TOKEN", "")
     accounts_registry: str = os.environ.get("VAN_ACCOUNTS_REGISTRY", "/opt/van-trading/config/accounts.json")
     secrets_dir: str = os.environ.get("VAN_SECRETS", "/opt/van-trading/secrets")
-    capsule_dir: str = os.environ.get("VAN_CAPSULE_DIR", "")
-    owner_authority_keys: str = os.environ.get(
-        "VAN_OWNER_AUTHORITY_KEYS",
-        "/var/lib/van-trading/owner_authority_keys.json",
-    )
     account_control: Optional[AccountControlSettings] = None   # injected for tests; else derived
     units: tuple[str, ...] = tuple(filter(None, os.environ.get("VAN_COMMANDER_UNITS", ",".join(DEFAULT_UNITS)).split(",")))
     backtest_timeout_s: int = int(os.environ.get("VAN_COMMANDER_BACKTEST_TIMEOUT", "600"))
@@ -106,12 +95,10 @@ class CommanderSettings:
 
     def owner_authority(self):
         """The verifier for owner-signed acts on this host (P0-TRADE-001)."""
-        from vati.authority import OwnerAuthorityVerifier, load_owner_keys
+        from vati.authority import OwnerAuthorityVerifier
 
         if self._owner_authority is None:
-            self._owner_authority = OwnerAuthorityVerifier(
-                load_owner_keys(self.owner_authority_keys)
-            )
+            self._owner_authority = OwnerAuthorityVerifier()
         return self._owner_authority
 
     def load_token(self) -> str:
@@ -159,7 +146,6 @@ TOOL_SCHEMAS = {
     "doctor": {"description": "Host diagnostics: runtimes, disk, ledger reachability, VEKL, heartbeat ages, secret file modes.", "properties": {}},
     "accounts": {"description": "Public view of the account registry (aliases, broker kind, safety identity). Never credentials.", "properties": {}},
     **ACCOUNT_TOOL_SCHEMAS,
-    **PROMOTION_TOOL_SCHEMAS,
 }
 
 
@@ -333,16 +319,9 @@ def create_app(settings: Optional[CommanderSettings] = None) -> FastAPI:
             return {"accounts": [], "registry": str(p), "note": "no registry yet: add one with `python -m vati accounts add`"}
         return {"accounts": AccountRegistry(p).public(), "registry": str(p)}
 
-    capsule_dir = st.capsule_dir or str(Path(st.repo_root) / "trading" / "strategies" / "registry")
     handlers = {"status": cmd_status, "ledger_status": cmd_ledger_status, "services": cmd_services, "restart_service": cmd_restart, "tail_log": cmd_tail, "run_backtest": cmd_backtest,
                 "vekl_resolve": cmd_vekl, "halt": cmd_halt, "doctor": cmd_doctor, "accounts": cmd_accounts,
-                **build_account_handlers(st.account_control or AccountControlSettings(registry_path=st.accounts_registry, secrets_dir=st.secrets_dir)),
-                **build_strategy_handlers(StrategyPromotionSettings(
-                    capsule_dir=capsule_dir,
-                    ledger=st.ledger,
-                    owner_authority=st.owner_authority(),
-                    owner_authority_keys_path=st.owner_authority_keys,
-                ))}
+                **build_account_handlers(st.account_control or AccountControlSettings(registry_path=st.accounts_registry, secrets_dir=st.secrets_dir))}
     assert set(handlers) == set(COMMANDS) == set(TOOL_SCHEMAS)
 
     # ------------------------------------------------------------ routes
@@ -387,7 +366,7 @@ def create_app(settings: Optional[CommanderSettings] = None) -> FastAPI:
         parsed.requested_by = principal
         if name in AGENT_HIDDEN_COMMANDS and principal.lower() in AGENT_REQUESTERS:
             audit(name, principal, parsed.args, "refused:agent_requester")
-            raise HTTPException(403, "owner-only trading mutation commands are not available to agents; use the app owner-action path")
+            raise HTTPException(403, "credential-bearing account commands are not available to agents; use the app onboarding path")
         try:
             result = handlers[name](parsed.args)
         except HTTPException as exc:

@@ -137,7 +137,8 @@ append-only at the database, not only by convention.
 
 ## Part F — Session service (NFP/Event Engine, Market Brain, Risk Authority, Router, adapters)
 
-python -m vati serve --config /opt/van-trading/config/sessions/<alias>.json keeps the proven single-symbol DecisionCycle compatibility path. When the same signed account configuration names additional instruments, vati serve instead constructs one AccountCoordinatorService for the account alias so fresh candidates from all configured symbols compete before Risk Authority admission. The account runtime requires the shared PostgreSQL VATI authority store and a cross-host lease; it never falls back to process-local arbitration. The single-symbol path performs startup reconciliation, then per closed bar: MARKET_STATE → OPPORTUNITY → RISK AUTHORITY → ROUTER → PROTECT
+`python -m vati serve --config /opt/van-trading/config/sessions/<alias>.json` runs one `DecisionCycle` per account
+alias: startup reconciliation, then per closed bar: MARKET_STATE → OPPORTUNITY → RISK AUTHORITY → ROUTER → PROTECT
 → RECONCILE → TCA → REVIEW → LEARN, plus `ACCOUNT_SNAPSHOT` and a heartbeat file each loop. The Tier-1 calendar
 (`vati.intelligence.calendar_feed`) loads an owner or vendor file; an event is live-eligible only with two independent
 sources, otherwise the matrix fails closed (whole pre-window is blackout). An `OWNER_HALT` written by the gateway or
@@ -246,96 +247,3 @@ on the success path). Both are fixed here; the tool list Hermes sees is the orig
 6. Android build on a workstation with the SDK; device check of the Trading Command Center and the overlay panel.
 7. Everything Rev 4 Part M already listed: real-data validation, Nautilus donor gate, curriculum, ZSE broker facts,
    independent security review, owner-signed LIMITED_LIVE.
-
----
-
-## Part L — PR #49 closure authority addendum (owner-directed repository repair, 2026-09-20)
-
-This addendum records the repository-level invariants the owner directed to be repaired during the PR #49 audit.
-It does not mint live trading authority. Runtime authority still comes from the signed mandate and signed
-strategy-promotion artifacts already required by this blueprint.
-
-1. **Account-level allocation authority.** In a multi-instrument session, symbol-local evaluators may only produce
-   CandidateOpportunity objects. Exactly one AccountDecisionCoordinator per account alias selects the order in
-   which candidates reach the Risk Authority. It re-reads a candidate-specific RiskSnapshot before every
-   admission. A missing Risk Authority or execution path is a refusal, never a successful selection.
-
-2. **Risk-ceiling precedence.** Candidate conversion to TradeIntent requests no more than the capsule's admitted
-   risk_limits.max_risk_per_trade and no more than the strategy budget in the signed mandate. Strategy budgets can
-   narrow the existing capsule/mandate law automatically; raising a live ceiling requires a newly signed mandate
-   and can never be applied by CapitalBudgetProposal itself.
-
-3. **Evidence-bound strategy promotion.** For certificate-gated promotion states, the owner authority statement
-   binds strategy_id, target state and the exact StrategyValidationCertificate.validation_hash. A token for one
-   certificate cannot authorize another certificate. A strategy certificate must name immutable evidence refs and
-   a data-manifest hash; production code provides no synthetic factory for a passing certificate. The production
-   server join is owner device -> exact device-signed request -> one-time CryptoObject A4 approval -> private
-   gateway-to-commander channel -> agent-hidden capsule_promote -> CapsuleRegistry.promote. Hermes/model principals
-   cannot list or invoke that command. The commander independently verifies the sealed certificate and its
-   certificate-bound owner authority, rejects durable owner-authority replay across commander restart, writes the
-   authoritative CAPSULE_STATE event before projecting the strategy JSON, and evaluates every later promotion
-   against capsule state reconstructed from that ledger. A crash between event commit and file projection therefore
-   cannot lose the authorized promotion or allow a second token to fork the stale parent. The owner-visible Android
-   Strategy Governance surface is part of this production join: it reads only current-lineage, policy-passing
-   promotion candidates; uses the same BIOMETRIC_STRONG Android Keystore P-256 key for a short-lived certificate-bound
-   van-oa1 owner grant and the gateway's separate one-time A4 CryptoObject challenge; and may report promotion complete
-   only after the 2xx response is bound to the exact strategy/target/validation hash, carries a durable CAPSULE_STATE
-   event hash and a new capsule hash, and authoritative candidate read-back no longer offers the old parent
-   certificate. Transport success, biometric UI success, or a raw commander receipt alone is not owner-visible
-   completion.
-
-4. **Certificate-backed feature admission.** A FeatureDefinition being registered does not make it production
-   admissible. A certificate-required feature is unavailable to a capsule until FeatureRegistry re-evaluates a
-   sealed FeatureValidationCertificate and records a PRODUCTION_ADMITTED certificate hash. Per-pass feature
-   contracts also enforce venue class, timeframe and minimum history.
-
-5. **Execution-policy boundary.** ExecutionPolicyEngine decides only how an already-approved trade is attempted.
-   ExecutionRouter independently verifies the sealed policy decision, refuses DO_NOT_EXECUTE, and applies the
-   selected template's bounded entry type and maximum slippage immediately before order submission.
-
-6. **Cross-host account fence.** Multi-instrument production coordination uses a transactional PostgreSQL
-   account_runtime_leases row. The current lease epoch travels to ExecutionRouter. An early fence re-reads shared
-   authority, but the decisive submission fence is a PostgreSQL SELECT ... FOR UPDATE guard held across durable
-   ORDER_COMMAND creation, the broker adapter call, receipt logging and immediate protection handling. Store loss,
-   takeover or stale epoch fail closed; another host cannot acquire the account while that critical section is in
-   flight, even if the nominal lease TTL expires. If the process dies, PostgreSQL releases the row lock and the
-   successor reconstructs from the durable command/reconciliation path. A process-local cached lease is never
-   sufficient authority to submit.
-
-7. **MTF adoption boundary.** The timeframe-contract migration is provenance/schema adoption, not silent strategy
-   mutation. The account runtime builds one required multi-timeframe causal evidence envelope per instrument/pass
-   from the existing BarLake, and completeness is evaluated against the capsule contract that is actually being
-   considered. Existing strategy formulas remain on their configured primary timeframe; H4/H1/M15/M5 role values
-   cannot alter entry, stop, target or eligibility logic until a separately validated and owner-signed capsule
-   revision explicitly adopts that MTF behavior.
-
-8. **Candidate replay law.** Candidate IDs are deterministic across polling/restart. Re-admitting the same
-   candidate ID and hash preserves its existing lifecycle state; a previously selected/rejected/expired candidate
-   cannot become ACTIVE merely because the source bar was evaluated again.
-
-9. **Restart lifecycle reconstruction law.** Restart never treats venue attribution alone as sufficient trading
-   truth. An open venue position is reconstructed only when its trade_intent_id joins to the durable VATI
-   ORDER_COMMAND that created it. Protection is rebuilt from the original command and may use a venue or durable
-   current stop only when that stop is equal to or tighter than the original protection. When a non-owner broker
-   fill has a valid durable EXECUTION_RECEIPT but the process died before TCA was appended, restart deterministically
-   reconstructs the missing TCA_RECORD from the command, sealed receipt and symbol contract exactly once and restores
-   its cost ratio into lifecycle state. It does not invent or replay session/event-window learning context that was
-   not durably recorded. Where the original learning environment, broker, symbol, session and event-window context
-   are durable, restart replays those facts before the next decision and rebuilds only reduce-only broker-liquidity
-   and capsule-health state. TRADE_EXPERIENCE_ARTIFACT remains the durable source for strategy-health environment
-   weighting. Capsule-state replay is hash-lineage aware: durable AUTOMATIC_DEMOTION_ONLY events reconstruct exact
-   demotions, while a durable OWNER_SIGNED_PROMOTION may reconstruct only the exact already-authorized promoted
-   capsule whose supersedes hash matches current lineage. Restart may never originate a promotion, invent owner
-   authority, or raise a learning multiplier above 1; it may only restore authority that was already durably
-   committed. An older demotion/promotion event whose parent no longer matches cannot roll a newer registry
-   projection backward. Any unjoinable position, missing protection fact or widened stop remains unresolved and
-   blocks new risk through reconciliation.
-
-10. **Owner-ticket downstream-evidence law.** A signed owner ticket confirmation is consumed into runtime position
-    truth before new risk is admitted. EXECUTION_RECEIPT durability and downstream lifecycle evidence are separate
-    facts: after a crash, an existing receipt must not suppress a missing TCA_RECORD for an owner BUY or a missing
-    TRADE_REVIEW for an owner SELL. Replay reconstructs memory/protection on every restart, repairs missing
-    downstream evidence exactly once, and never duplicates evidence that is already durable.
-
-The PR #48 anti-gap rule applies to all ten: a test or helper object is not a production join, and a repository
-wiring gap may not be labelled an external runtime blocker.

@@ -37,6 +37,8 @@ import com.dial.van.control.VanMessageRole
 import com.dial.van.events.EventPage
 import com.dial.van.events.EventRecord
 import com.dial.van.events.EventStream
+import com.dial.van.events.EventStreamState
+import com.dial.van.events.PreferencesEventCursorStore
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.launch
 
@@ -140,12 +142,8 @@ internal fun ProjectsModule(
 @Composable
 internal fun ActivityModule(app: VanApplication, glass: com.dial.van.visual.VanGlassStyle) {
     val context = LocalContext.current
-    // The app's history, not this screen's. It used to be `remember`ed here, which meant
-    // it existed only while this screen was composed: a mission finishing while the owner
-    // was anywhere else produced nothing they could see, and §20.1's socket had nowhere to
-    // deliver a durable page to.
-    val store = app.eventStream
-    val stream by store.state.collectAsState()
+    val cursorStore = remember(context) { PreferencesEventCursorStore(context) }
+    var stream by remember { mutableStateOf(EventStreamState(cursor = cursorStore.load())) }
     val events = if (stream.loaded) stream.events else null
     val error = stream.error
         ?: if (!app.gatewayClient.isEnrolled()) {
@@ -158,7 +156,7 @@ internal fun ActivityModule(app: VanApplication, glass: com.dial.van.visual.VanG
         if (!app.gatewayClient.isEnrolled()) return@LaunchedEffect
         while (true) {
             var truncated = false
-            runCatching { app.gatewayClient.events(store.cursor()) }
+            runCatching { app.gatewayClient.events(stream.cursor) }
                 .onSuccess { body ->
                     val page = EventPage(
                         events = body.optJSONArray("events")?.objectList().orEmpty().map {
@@ -169,16 +167,17 @@ internal fun ActivityModule(app: VanApplication, glass: com.dial.van.visual.VanG
                                 createdAtUnix = it.optLong("created_at_unix"),
                             )
                         },
-                        nextCursor = body.optLong("next_cursor", store.cursor()),
+                        nextCursor = body.optLong("next_cursor", stream.cursor),
                         truncated = body.optBoolean("truncated", false),
                     )
                     truncated = page.truncated
-                    // Into the shared history, which saves the cursor itself — and
-                    // merges seq-keyed with whatever the socket has already pushed.
-                    store.apply(page)
+                    stream = EventStream.applyPage(stream, page)
+                    cursorStore.save(stream.cursor)
                 }
                 .onFailure { failure ->
-                    store.fail(failure.message ?: "Unable to load activity")
+                    stream = EventStream.applyFailure(
+                        stream, failure.message ?: "Unable to load activity",
+                    )
                 }
             // P3-PERF-003 — the poll rate answers to the whole-runtime envelope. A null
             // means the device has minutes left and this stream is not what the owner would

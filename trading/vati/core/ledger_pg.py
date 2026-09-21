@@ -30,16 +30,6 @@ CREATE INDEX IF NOT EXISTS ix_vati_events_kind ON vati.events(kind);
 CREATE TABLE IF NOT EXISTS vati.chain_head (
   ledger TEXT PRIMARY KEY, chain_hash TEXT NOT NULL, seq BIGINT NOT NULL
 );
-CREATE TABLE IF NOT EXISTS vati.account_runtime_leases (
-  account_alias TEXT PRIMARY KEY,
-  holder_instance_id TEXT NOT NULL,
-  lease_epoch BIGINT NOT NULL,
-  acquired_at_ms BIGINT NOT NULL,
-  heartbeat_at_ms BIGINT NOT NULL,
-  expires_at_ms BIGINT NOT NULL,
-  software_version TEXT NOT NULL DEFAULT '',
-  git_sha TEXT NOT NULL DEFAULT ''
-);
 """
 
 

@@ -17,25 +17,16 @@ command -v python3.12 >/dev/null && add python GREEN "$(python3.12 --version)" |
 command -v node >/dev/null && [[ "$(node -v | cut -c2- | cut -d. -f1)" -ge 20 ]] && add node GREEN "$(node -v)" || add node RED "node ≥ 20 missing"
 command -v docker >/dev/null && docker compose version >/dev/null 2>&1 && add docker GREEN "$(docker --version)" || add docker RED "docker/compose missing"
 id vati >/dev/null 2>&1 && add user GREEN vati || add user RED "vati missing"
+if [[ -x /home/ubuntu/.local/bin/van-local-commander-mcp && -f /home/ubuntu/.local/share/van/desktop-commander/node_modules/@wonderwhy-er/desktop-commander/package.json ]]; then
+  dcver="$(node -e 'const p=require(process.argv[1]);process.stdout.write(String(p.version||""))' /home/ubuntu/.local/share/van/desktop-commander/node_modules/@wonderwhy-er/desktop-commander/package.json 2>/dev/null || true)"
+  [[ "$dcver" == "0.2.50" ]] && add full_desktop_commander GREEN "Desktop Commander $dcver; stdio wrapper installed" || add full_desktop_commander RED "unexpected Desktop Commander version: ${dcver:-missing}"
+else
+  add full_desktop_commander RED "full Desktop Commander stdio runtime missing"
+fi
+[[ -x /usr/local/bin/van-github-recovery ]] && add github_recovery_command GREEN "bounded recovery entrypoint installed" || add github_recovery_command RED "van-github-recovery missing"
 for f in "$BASE/secrets/commander.token" "$BASE/secrets/vekl.token" "$BASE/secrets/pki/ca.crt"; do
   if [[ -f "$f" ]]; then m=$(stat -c %a "$f"); [[ "$m" =~ ^600$|^400$ ]] && add "secret:$(basename "$f")" GREEN "mode $m" || add "secret:$(basename "$f")" RED "mode $m (need 0600)"; else add "secret:$(basename "$f")" RED missing; fi
 done
-owner_keys="${VAN_OWNER_AUTHORITY_KEYS:-$DATA/owner_authority_keys.json}"
-if [[ ! -f "$owner_keys" ]]; then
-  add owner_authority_registry RED "missing: $owner_keys"
-else
-  owner_mode="$(stat -c %a "$owner_keys" 2>/dev/null || echo unknown)"
-  owner_uid="$(stat -c %U "$owner_keys" 2>/dev/null || echo unknown)"
-  owner_gid="$(stat -c %G "$owner_keys" 2>/dev/null || echo unknown)"
-  if [[ "$owner_mode" != "600" ]]; then
-    add owner_authority_registry RED "mode $owner_mode (need 600)"
-  elif ! jq -e '(.keys // {}) | type == "object" and (length <= 1)' "$owner_keys" >/dev/null 2>&1; then
-    add owner_authority_registry RED "malformed JSON or more than one active owner key"
-  else
-    owner_count="$(jq '(.keys // {}) | length' "$owner_keys")"
-    add owner_authority_registry GREEN "mode=$owner_mode owner=$owner_uid:$owner_gid active_keys=$owner_count"
-  fi
-fi
 unit vati-vekl.service; unit vati-commander.service; unit vati-automation.service; unit vati-supabase.service 0; unit docker.service 0
 curl -fsS --max-time 5 "${VAN_VEKL_URL:-http://127.0.0.1:9134}/health" >/tmp/vekl.json 2>/dev/null && jq -e '.ok==true' /tmp/vekl.json >/dev/null && add vekl_health GREEN "$(jq -c '.registry|{resources,sources}' /tmp/vekl.json)" || add vekl_health RED "VEKL health not ok"
 curl -fsSk --max-time 5 "https://127.0.0.1:${VAN_COMMANDER_PORT:-9133}/health" >/tmp/cmd.json 2>/dev/null && jq -e '.ok==true' /tmp/cmd.json >/dev/null && add commander_health GREEN "$(jq -c '.commands|length' /tmp/cmd.json) commands" || add commander_health RED "commander health not ok"

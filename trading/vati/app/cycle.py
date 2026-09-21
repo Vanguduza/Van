@@ -18,11 +18,7 @@ from vati.core.canonical import canonical_hash
 from vati.core.events import EventKind, make_event
 from vati.core.ledger import Ledger
 from vati.execution.base import StopMode, VenueAdapter
-from vati.execution.policy import ExecutionBucket, ExecutionPolicyEngine
 from vati.execution.protection import ProtectionManager
-from vati.execution.pretrade import MarketReference, PreTradeControls
-from vati.execution.route_registry import RouteRegistry
-from vati.execution.style_selector import ExecutionStyleSelector, LiquidityView
 from vati.execution.router import ExecutionRouter, RouterError
 from vati.execution.review import review_trade
 from vati.execution.tca import compute_tca
@@ -53,9 +49,6 @@ class SessionConfig:
     account_alias: str
     contract: SymbolContract
     mandate_dict: dict
-    #: Explicit market-state identity. Production services always set this from
-    #: ServiceConfig; UNKNOWN is retained only for legacy/research callers.
-    timeframe: str = "UNKNOWN"
     warmup_bars: int = 60
     max_quote_age_ms: int = 5000
     targets_from_signal: bool = True
@@ -86,22 +79,7 @@ class DecisionCycle:
         self.mandate = TradingMandate.from_mapping(cfg.mandate_dict)
         self.authority = RiskAuthority(self.mandate)
         self.protection = ProtectionManager()
-        self.routes = RouteRegistry(ledger=ledger)
-        self.routes.refresh(
-            account_alias=cfg.account_alias,
-            adapter_id=cfg.venue,
-            contracts={cfg.symbol.upper(): cfg.contract},
-            now_ms=0,
-            source="decision_cycle_init",
-        )
-        self.pretrade = PreTradeControls(routes=self.routes, ledger=ledger)
-        self.style_selector = ExecutionStyleSelector(ledger=ledger)
-        self.execution_policy = ExecutionPolicyEngine()
-        self.router = ExecutionRouter(
-            ledger=ledger, adapters={cfg.venue: adapter}, kill_switch=self.kill,
-            protection=self.protection, route_registry=self.routes,
-            pretrade_controls=self.pretrade, style_selector=self.style_selector,
-            enforce_rev51_controls=True)
+        self.router = ExecutionRouter(ledger=ledger, adapters={cfg.venue: adapter}, kill_switch=self.kill, protection=self.protection)
         self.admission = admission or AdmissionLedger()
         self.ctx_fn = ctx_fn or (lambda st, cost: StrategyContext(round_trip_cost_pct=cost))
         self.peak_equity = ZERO
@@ -210,8 +188,7 @@ class DecisionCycle:
         if len(bars) < cfg.warmup_bars:
             return CycleResult(bars[-1].end_ms if bars else now_ms, "", "NO_TRADE", "warmup")
         state = build_market_state(symbol=cfg.symbol, base=cfg.base, quote=cfg.quote, bars=bars, regime_engine=self.regime, calendar=self.calendar, events=self.events,
-                                   integrity=self.integrity, now_ms=now_ms, last_quote_ms=last_quote_ms, activation_id=cfg.activation_id,
-                                   timeframe=cfg.timeframe)
+                                   integrity=self.integrity, now_ms=now_ms, last_quote_ms=last_quote_ms, activation_id=cfg.activation_id)
         cost = self.cost_fn(state)
         self._log(EventKind.MARKET_STATE, {"state": state.as_dict(), "cost_pct": str(cost)}, now_ms=now_ms)
         ctx = self.ctx_fn(state, cost)
@@ -249,39 +226,8 @@ class DecisionCycle:
             t = intent.entry * (Decimal(1) + intent.expected_gross_move_pct) if intent.direction is Direction.LONG else intent.entry * (Decimal(1) - intent.expected_gross_move_pct)
             targets = (t,)
         try:
-            # Refresh route truth at the decision instant so the registry cannot
-            # age out while the session continues to run.
-            self.routes.refresh(
-                account_alias=cfg.account_alias, adapter_id=cfg.venue,
-                contracts={cfg.symbol.upper(): cfg.contract}, now_ms=now_ms,
-                source="decision_cycle",
-            )
-            execution_bucket = ExecutionBucket(
-                broker=cfg.venue,
-                account_alias=cfg.account_alias,
-                symbol=cfg.symbol,
-                session=state.session.value,
-                volatility_bucket=state.regime.vol.value,
-                event_proximity=state.event_window.value,
-                direction=intent.direction.value,
-            )
-            policy_decision = self.execution_policy.select(
-                candidate_id=intent.trade_intent_id,
-                bucket=execution_bucket,
-                event_state=state.event_window.value,
-            )
-            rec = self.router.execute(
-                intent, decision, self.mandate, now_ms=now_ms,
-                stop_mode=StopMode.SOFTWARE if cfg.software_stops else StopMode.VENUE,
-                targets=targets, time_in_force=cfg.time_in_force, entry_type="LIMIT",
-                execution_policy_decision=policy_decision,
-                market_reference=MarketReference(
-                    last_price=state.features.close,
-                    mark_age_ms=state.quote_age_ms,
-                    max_mark_age_ms=cfg.max_quote_age_ms,
-                ),
-                liquidity=LiquidityView(),
-            )
+            rec = self.router.execute(intent, decision, self.mandate, now_ms=now_ms, stop_mode=StopMode.SOFTWARE if cfg.software_stops else StopMode.VENUE, targets=targets,
+                                      time_in_force=cfg.time_in_force, entry_type="LIMIT")
         except RouterError as exc:
             self._log(EventKind.SESSION, {"router_refused": str(exc)}, now_ms=now_ms, corr=intent.trade_intent_id)
             return CycleResult(state.as_of_ms, state.state_hash, "ROUTER_REFUSED", str(exc), decision.approved_size)
@@ -289,17 +235,7 @@ class DecisionCycle:
             self._entries[intent.trade_intent_id] = {"entry": rec.average_fill or intent.entry, "stop": intent.stop, "direction": intent.direction, "strategy_id": intent.strategy_id, "cost_pct": cost, "decision_price": intent.entry}
             if rec.average_fill is not None and rec.filled_qty > ZERO:
                 tca = compute_tca(rec, direction=intent.direction, qty=rec.filled_qty, value_per_unit=cfg.contract.value_per_price_unit_per_lot if cfg.contract.loss_model is LossModel.STOP_DISTANCE else Decimal(1), modelled_cost_pct=cost)
-                tca_payload = tca.as_dict()
-                if self.learning is not None:
-                    tca_payload |= {
-                        "learning_environment": self.learning.environment.value,
-                        "broker": self.learning.broker,
-                        "symbol": cfg.symbol,
-                        "session": state.session.value,
-                        "event_window": state.event_window.value,
-                        "rejected": False,
-                    }
-                self._log(EventKind.TCA_RECORD, tca_payload, now_ms=now_ms, corr=intent.trade_intent_id)
+                self._log(EventKind.TCA_RECORD, tca.as_dict(), now_ms=now_ms, corr=intent.trade_intent_id)
                 self._entries[intent.trade_intent_id]["cost_ratio"] = tca.cost_ratio
                 if self.learning is not None:
                     self.learning.on_tca(symbol=cfg.symbol, session=state.session.value, event_window=state.event_window.value, cost_ratio=tca.cost_ratio, slippage=tca.slippage)
@@ -356,5 +292,5 @@ class DecisionCycle:
                 new = self.engine.registry.demote(rv.strategy_id, target, reason=f"learning health {adj.multiplier}: {'; '.join(self.learning.health.verdict(rv.strategy_id).reasons)}")
                 self.learning.demotions.append((rv.strategy_id, target.value))
                 self._log(EventKind.CAPSULE_STATE, {"strategy_id": rv.strategy_id, "from": cap.state.value, "to": target.value, "capsule_hash": new.capsule_hash, "supersedes": cap.capsule_hash,
-                                                    "capsule": new.data, "by": "vati-learning", "authority": "AUTOMATIC_DEMOTION_ONLY"}, now_ms=now_ms, corr=intent_id)
+                                                    "by": "vati-learning", "authority": "AUTOMATIC_DEMOTION_ONLY"}, now_ms=now_ms, corr=intent_id)
                 metrics.inc("vati_capsule_demotions_total", strategy=rv.strategy_id, to=target.value)

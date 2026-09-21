@@ -38,29 +38,16 @@ def test_trade_book_from_backtest_ledger(eurusd, tmp_path):
     assert p["state"] == "CLOSED" and p["symbol"] == "EURUSD" and p["risk_decision"] in ("APPROVED", "REDUCED") and p["outcome"] and p["pnl"] is not None and p["r_multiple"] is not None
     assert p["confidence"]["band"] in ("HIGH", "MEDIUM", "LOW", "MINIMAL") and D("0") <= D(p["confidence"]["score"]) <= D("1") and len(p["decision_hash"]) == 64
     assert [r["closed_ms"] for r in book["past"]] == sorted((r["closed_ms"] for r in book["past"]), reverse=True)
-    # Potential trades come from the latest assessment plus deterministic
-    # refusals. Rev 5.1 adds a non-bypassable router/pre-trade boundary, so a
-    # refusal may now be RISK_REJECTED or ROUTER_REFUSED depending on which
-    # authority legitimately rejected it. Neither candidate rows nor refusals
-    # acquire a new size from this read model.
+    # potential trades come from the latest assessment plus Risk Authority rejections; none carries a size
     pot = book["potential"]
     assert pot and all("approved_size" not in r or r["kind"] != "CANDIDATE" for r in pot)
     kinds = {r["kind"] for r in pot}
-    assert "CANDIDATE" in kinds
-    assert kinds <= {"CANDIDATE", "RISK_REJECTED", "ROUTER_REFUSED"}
-    refusals = [r for r in pot if r["kind"] in ("RISK_REJECTED", "ROUTER_REFUSED")]
-    assert refusals
-    assert all(
-        r["label"].startswith("REJECTED:")
-        for r in refusals if r["kind"] == "RISK_REJECTED"
-    )
-    assert all(
-        r["label"] == "ROUTER_REFUSED"
-        for r in refusals if r["kind"] == "ROUTER_REFUSED"
-    )
-    # Refusals older than a day of ledger time are history, not potential.
+    assert kinds == {"CANDIDATE", "RISK_REJECTED"} and all(r["label"].startswith("REJECTED:") for r in pot if r["kind"] == "RISK_REJECTED")
+    # refusals older than a day of ledger time are history, not potential: the backtest holds ~57 rejections, the book shows only the recent ones
+    all_rejected = sum(1 for e in led.iter(EventKind.RISK_DECISION) if e.payload["decision"]["decision"] == "REJECTED")
+    recent = [r for r in pot if r["kind"] == "RISK_REJECTED"]
     newest = max(r["assessed_ms"] for r in pot)
-    assert all(newest - r["assessed_ms"] <= 24 * 3_600_000 for r in refusals)
+    assert 0 < len(recent) < all_rejected and all(newest - r["assessed_ms"] <= 24 * 3_600_000 for r in recent)
     assert all(set(r["confidence"]) == {"score", "band", "basis"} for r in pot)
     assert pot == sorted(pot, key=lambda r: (-r["assessed_ms"], -D(r["confidence"]["score"])))
     # per-view calls return only that view; limits apply
