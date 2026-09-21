@@ -117,6 +117,8 @@ data class VoiceRecognitionResult(
     val secondPassUsed: Boolean = false,
     val secondPassText: String? = null,
     val secondPassConfidence: Float? = null,
+    /** Confidence-only provenance signal; never authentication. */
+    val speakerSimilarity: Float? = null,
 ) {
     val speechEvidenceRef: String = "android://voice/$turnId"
 }
