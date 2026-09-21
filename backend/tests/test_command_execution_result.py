@@ -105,6 +105,80 @@ async def test_an_accepted_command_can_be_asked_about(client):
 
 
 @pytest.mark.asyncio
+async def test_hermes_result_is_bound_to_run_and_cannot_self_verify(client, monkeypatch):
+    ac, app = client
+    device_id = await _enrol(ac, app)
+    observed: dict[str, object] = {}
+
+    async def run(text, metadata=None):
+        observed["metadata"] = metadata or {}
+        return {"id": "run-result-1", "status": "accepted"}
+
+    monkeypatch.setattr(app.state.orchestrator.hermes, "create_run", run)
+    body = _signed(
+        app,
+        device_id,
+        "brief me about the current project",
+        idempotency_key="exec-result",
+    )
+    accepted = await ac.post("/v1/commands", json=body)
+    assert accepted.status_code == 200
+    mission_id = accepted.json()["mission_id"]
+    assert observed["metadata"]["mission_id"] == mission_id
+
+    result = await ac.post(
+        "/v1/runtime/missions/result",
+        headers={"X-Van-Internal-Token": INTERNAL},
+        json={
+            "hermes_run_id": "run-result-1",
+            "status": "COMPLETED",
+            "summary": "Hermes finished producing the briefing",
+        },
+    )
+    assert result.status_code == 200, result.text
+    payload = result.json()
+    assert payload["mission_id"] == mission_id
+    assert payload["state"] == MissionState.UNVERIFIABLE.value
+    assert payload["verification_state"] == "UNVERIFIABLE"
+
+    owner = (await ac.get(f"/v1/commands/{body['command_id']}")).json()
+    assert owner["owner_status"] == OwnerWorkStatus.COULD_NOT_VERIFY.value
+    assert owner["finished"] is True
+
+    duplicate = await ac.post(
+        "/v1/runtime/missions/result",
+        headers={"X-Van-Internal-Token": INTERNAL},
+        json={"hermes_run_id": "run-result-1", "status": "COMPLETED"},
+    )
+    assert duplicate.status_code == 200
+    assert duplicate.json()["state"] == MissionState.UNVERIFIABLE.value
+
+    forged = await ac.post(
+        "/v1/runtime/missions/result",
+        headers={"X-Van-Internal-Token": INTERNAL},
+        json={"hermes_run_id": "run-result-1", "status": "VERIFIED_SUCCESS"},
+    )
+    assert forged.status_code == 422
+
+
+@pytest.mark.asyncio
+async def test_unknown_hermes_run_cannot_move_a_mission(client):
+    ac, app = client
+    await _enrol(ac, app)
+    response = await ac.post(
+        "/v1/runtime/missions/result",
+        headers={"X-Van-Internal-Token": INTERNAL},
+        json={
+            "hermes_run_id": "run-never-bound",
+            "status": "FAILED",
+            "summary": "failed",
+        },
+    )
+    assert response.status_code == 404
+    assert response.json()["detail"] == "HERMES_RUN_UNBOUND"
+
+
+@pytest.mark.asyncio
 async def test_a_command_nobody_sent_is_404(client):
     ac, app = client
     await _enrol(ac, app)

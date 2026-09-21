@@ -542,6 +542,7 @@ def create_app() -> FastAPI:
         store, capabilities=capability_registry, bus=events, verifiers=verifiers,
         learning=learning,
     )
+    owner_runtime.bind_missions(missions)
     mission_api = MissionApi(
         store, settings, missions=missions, registry=capability_registry,
         router=capability_router,

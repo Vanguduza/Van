@@ -14,6 +14,7 @@ REGISTER = ROOT / "tools" / "hermes" / "register_owner_runtime_mcp.sh"
 
 REQUIRED_TOOLS = {
     "runtime_status",
+    "mission_result",
     "resolve_command",
     "context_graph_query",
     "context_lexical_query",
@@ -41,6 +42,13 @@ def test_owner_runtime_mcp_has_fixed_narrow_surface():
     for tool in REQUIRED_TOOLS:
         assert f"name: '{tool}'" in text
     assert "/v1/runtime/context/facts" not in text
+    assert "/v1/runtime/missions/result" in text
+    assert "this tool cannot assert verified success" in text.lower()
+    mission_tool = re.search(
+        r"name: 'mission_result'.*?additionalProperties: false", text, re.S
+    )
+    assert mission_tool is not None
+    assert "VERIFIED_SUCCESS" not in mission_tool.group(0)
     assert "/v1/runtime/context/edges" not in text
     assert "/v1/runtime/context/lexical/query" in text
     assert "/v1/runtime/context/hot-capsules" in text

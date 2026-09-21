@@ -49,6 +49,7 @@ const TOKEN = loadToken();
 
 const TOOLS = [
   { name: 'runtime_status', description: 'Read VAN owner-runtime health and capability status.', inputSchema: { type: 'object', properties: {}, additionalProperties: false } },
+  { name: 'mission_result', description: 'Report this Hermes run lifecycle result to the bound Mission. COMPLETED starts gateway verification; this tool cannot assert verified success.', inputSchema: { type: 'object', properties: { hermes_run_id: { type: 'string', minLength: 1, maxLength: 256 }, status: { type: 'string', enum: ['COMPLETED', 'FAILED', 'WAITING_FOR_OWNER', 'WAITING_EXTERNAL'] }, summary: { type: 'string', maxLength: 4000 } }, required: ['hermes_run_id', 'status'], additionalProperties: false } },
   { name: 'resolve_command', description: 'Deterministically resolve a known owner command without granting execution authority.', inputSchema: { type: 'object', properties: { text: { type: 'string' } }, required: ['text'], additionalProperties: false } },
   { name: 'context_graph_query', description: 'Query the bounded temporal owner-context graph. This retrieves evidence; it does not decide truth.', inputSchema: { type: 'object', properties: { seed_nodes: { type: 'array', items: { type: 'string' }, minItems: 1, maxItems: 32 }, scope: { type: 'string' }, direction: { type: 'string', enum: ['OUT', 'IN', 'BOTH'] }, predicates: { type: 'array', items: { type: 'string' } }, max_depth: { type: 'integer', minimum: 1, maximum: 3 }, max_edges: { type: 'integer', minimum: 1, maximum: 256 }, allow_inferred: { type: 'boolean' }, min_confidence_permille: { type: 'integer', minimum: 0, maximum: 1000 } }, required: ['seed_nodes'], additionalProperties: false } },
   { name: 'context_lexical_query', description: 'Run deterministic local lexical/entity retrieval over current owner facts and graph edges. No embedding, model inference or remote call is used.', inputSchema: { type: 'object', properties: { query: { type: 'string', minLength: 1, maxLength: 256 }, scope: { type: 'string' }, max_results: { type: 'integer', minimum: 1, maximum: 64 }, allow_inferred: { type: 'boolean' }, include_facts: { type: 'boolean' }, include_edges: { type: 'boolean' } }, required: ['query'], additionalProperties: false } },
@@ -72,6 +73,7 @@ const TOOLS = [
 
 const ROUTES = {
   runtime_status: { method: 'GET', path: () => '/v1/runtime/status' },
+  mission_result: { method: 'POST', path: () => '/v1/runtime/missions/result', body: (a) => a },
   resolve_command: { method: 'POST', path: () => '/v1/runtime/resolve', body: (a) => a },
   context_graph_query: { method: 'POST', path: () => '/v1/runtime/context/graph/query', body: (a) => a },
   context_lexical_query: { method: 'POST', path: () => '/v1/runtime/context/lexical/query', body: (a) => a },

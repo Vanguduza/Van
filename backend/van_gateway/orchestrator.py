@@ -719,6 +719,7 @@ class CommandOrchestrator:
                     req.text,
                     metadata={
                         "command_id": req.command_id,
+                        "mission_id": mission.mission_id if mission else None,
                         "idempotency_key": req.idempotency_key,
                         "device_id": req.device_id,
                         "project_id": req.project_id,

@@ -51,6 +51,7 @@ spec = {
         # drift here silently removes capabilities AGENTS.md instructs Hermes to use.
         "include": [
             "runtime_status",
+            "mission_result",
             "resolve_command",
             "context_graph_query",
             "context_lexical_query",
