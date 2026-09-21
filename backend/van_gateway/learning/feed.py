@@ -22,12 +22,13 @@ which is what they are.
 
 from __future__ import annotations
 
+import hashlib
+import json
 import time
 from typing import Any
 
-from van_gateway.evolution.radar import StrategyLearning, StrategyOutcome
+from van_gateway.evolution.radar import PromotionState, StrategyLearning, StrategyOutcome
 from van_gateway.mission.models import Mission, MissionState
-from van_gateway.models import ActionClass
 from van_gateway.storage.db import Store
 from van_gateway.understanding.memory import (
     DecisionFingerprints,
@@ -230,13 +231,93 @@ class LearningFeed:
         await self.strategies.record_outcome(strategy_id, outcome=outcome, now_ms=now_ms)
         return strategy_id
 
+    #: GAP-F-008 — promotion states that mean a strategy has cleared VanEval, not merely
+    #: accumulated runs. `permitted_for`/`preferred_for` answer "what does VAN prefer",
+    #: which includes EXPERIMENTAL and SHADOW sequences nobody has reviewed evidence for;
+    #: a caller placing this in `canonical_context` for Hermes to read is asking a
+    #: narrower question — "what has VAN actually been allowed to keep doing" — so only
+    #: the two states `StrategyLearning.promote` reaches with eval evidence behind them
+    #: are offered here. Never CANDIDATE, EXPERIMENTAL, or SHADOW.
+    READ_BACK_STATES = (PromotionState.ADMITTED.value, PromotionState.PREFERRED.value)
+
     async def strategies_for(
-        self, mission_class: str, *, envelope_max_action_class: ActionClass
+        self,
+        *,
+        intent_id: str | None,
+        project_id: str | None = None,
+        text: str = "",
+        limit: int = 5,
     ) -> list[dict[str, Any]]:
-        """What VAN has learned that this mission's authority actually permits."""
-        return await self.strategies.permitted_for(
-            mission_class, envelope_max_action_class=envelope_max_action_class,
+        """GAP-F-008 read-back — what VAN has actually learned works for this intent.
+
+        `strategies_for` → `permitted_for` (evolution/radar.py) had no caller: every
+        mission outcome fed the learning stores and nothing downstream ever read them
+        back, so promotion existed and never changed what happened next. This is the
+        caller — attached to `canonical_context` so a promoted strategy can inform the
+        next same-intent command instead of being knowledge VAN has and never uses.
+
+        `intent_id` is the typed resolver's intent (`CommandResolution.intent_id`, which
+        is exactly what `Mission.mission_class` is populated from — see
+        `mission/models.py`'s docstring on that field), so this matches directly on the
+        column `record_strategy_outcome` writes strategies under. A missing intent (free
+        text VAN could not classify, or no resolution yet) has nothing to match and
+        returns nothing rather than guessing.
+
+        `project_id` and `text` are accepted for symmetry with `context_requirements`'s
+        call shape and so a future project- or fingerprint-scoped match can be added
+        without changing every caller; `execution_strategies` rows are not project- or
+        text-scoped today, so neither parameter narrows the match yet, and that is
+        reported here rather than left to look like unused arguments.
+
+        Bounded and read-only in every direction that matters for §27's discipline:
+        results are capped at `limit`, nothing here is written, and a strategy's own
+        `max_action_class` travels with it as `evidence_rate`/`outcome_counts` context —
+        never as a grant. Offering a sequence proven under a wider envelope in `context`
+        does not authorise it: `ActionRuntime.begin` re-checks principal, class and
+        approval independently of anything in `canonical_context`, so nothing read back
+        here can widen what a mission is actually permitted to execute.
+        """
+        if not intent_id:
+            return []
+        placeholders = ",".join("?" for _ in self.READ_BACK_STATES)
+        rows = await self.store.fetchall(
+            f"SELECT * FROM execution_strategies WHERE mission_class = ? "  # noqa: S608
+            f"AND promotion_state IN ({placeholders}) ORDER BY updated_at_ms DESC",
+            (intent_id, *self.READ_BACK_STATES),
         )
+        out: list[dict[str, Any]] = []
+        for row in rows:
+            success = int(row["success_count"])
+            failure = int(row["failure_count"])
+            inconclusive = int(row["inconclusive_count"])
+            runs = success + failure
+            if runs == 0:
+                # ADMITTED needs an eval run, not a production run — §25 promotion is
+                # separate from §41 "measurable improvement". A strategy the owner's
+                # eval approved but that has never actually executed for this owner is
+                # not yet evidence of what works *here*, so it is left out rather than
+                # offered on the strength of a benchmark alone.
+                continue
+            sequence = json.loads(str(row["capability_sequence_json"]))
+            fingerprint = hashlib.sha256(
+                str(row["capability_sequence_json"]).encode("utf-8")
+            ).hexdigest()[:16]
+            out.append({
+                "strategy_id": str(row["strategy_id"]),
+                "fingerprint": fingerprint,
+                "summary": f"{intent_id}: " + " -> ".join(sequence[:8]),
+                "evidence_rate": round(success / runs, 3),
+                "outcome_counts": {
+                    "success": success, "failure": failure, "inconclusive": inconclusive,
+                },
+                # Always true: only PROMOTED strategies with real outcome evidence reach
+                # this list, never a candidate. The field names that filter explicitly so
+                # a consumer reading one row out of context still sees the guarantee.
+                "permitted": True,
+            })
+            if len(out) >= max(0, limit):
+                break
+        return out
 
     async def record_owner_correction(
         self,

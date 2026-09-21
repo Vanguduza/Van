@@ -69,6 +69,8 @@ from van_gateway.ops.scheduler import OpsScheduler, ScheduledJob
 from van_gateway.ops.suppression import SuppressionChannel, SuppressionStore
 from van_gateway.orchestrator import CommandOrchestrator
 from van_gateway.projects.router import ProjectRouter
+from van_gateway.proactive.autonomy import ActionAutonomyGate, DomainTrustService
+from van_gateway.proactive.followups import ProactiveFollowUpJob
 from van_gateway.reminders.service import ReminderService
 from van_gateway.reminders.timeparse import TimeParseError, parse_due_expression
 from van_gateway.automation.api import AutomationApi
@@ -414,8 +416,11 @@ def create_app() -> FastAPI:
     decisions = DecisionService(store, attention)
     # GAP-F-003/002: the Hermes-facing runtime can read attention/briefing, create
     # reminders on the owner's behalf and (below, once constructed) read trading state.
+    domain_trust = DomainTrustService(store)
     owner_runtime = OwnerRuntimeApi(
         store, settings, reminders=reminders, attention=attention, briefing=briefing,
+        # GAP-F-008: agent-initiated mutations consult the earned/granted domain trust.
+        autonomy=ActionAutonomyGate(domain_trust),
     )
     automation_registry = AutomationRegistry(store)
     automation_hot_index = HotWorkflowIndex()
@@ -575,6 +580,11 @@ def create_app() -> FastAPI:
     browser.binder = mission_binder
     automation.binder = mission_binder
     understanding_api = UnderstandingApi(store, settings)
+    # GAP-F-028: VAN's only self-initiated behaviour — bounded FOLLOW_UP attention items
+    # for work the owner left waiting. Never opens a mission or executes an action.
+    proactive_followups = ProactiveFollowUpJob(
+        store, attention, missions, decisions, understanding_api.policies,
+    )
     google_router = GoogleCapabilityRouter(store, google_broker)
 
     # P3-OPS-005 — dedupe that survives a restart, instead of a set() on the instance.
@@ -733,6 +743,9 @@ def create_app() -> FastAPI:
             "rows_compared": report["rows_compared"],
         }
 
+    async def _run_proactive_followups() -> dict:
+        return await proactive_followups.run(int(time.time() * 1000))
+
     def _scheduler_jobs() -> tuple[ScheduledJob, ...]:
         jobs = [
             ScheduledJob("reminders.fire_due", settings.reminder_sweep_seconds, _sweep_reminders),
@@ -741,6 +754,7 @@ def create_app() -> FastAPI:
                 _expire_overdue_missions,
             ),
             ScheduledJob("ops.retention", settings.retention_interval_seconds, _run_retention),
+            ScheduledJob("proactive.follow_ups", settings.reminder_sweep_seconds, _run_proactive_followups),
         ]
         if settings.pki_dir:
             jobs.append(ScheduledJob("ops.pki_scan", settings.pki_scan_interval_seconds, _scan_pki))

@@ -184,6 +184,7 @@ class OwnerRuntimeApi:
         store: Store,
         settings: Settings,
         *,
+        autonomy=None,
         trading: TradingService | None = None,
         reminders: ReminderService | None = None,
         attention: AttentionEngine | None = None,
@@ -202,7 +203,8 @@ class OwnerRuntimeApi:
         self.briefing = briefing
         self.context = OwnerContextService(store)
         self.retrieval = ContextRetrievalService(store, self.context)
-        self.actions = ActionRuntime(store)
+        # GAP-F-008: agent-initiated mutating actions are gated by the autonomy policy.
+        self.actions = ActionRuntime(store, autonomy=autonomy)
         self.authority = CommandAuthorityService(store)
         self.resolver = TypedCommandResolver(
             default_notebook_id=getattr(settings, "notebook_default_id", ""),
