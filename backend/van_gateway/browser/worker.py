@@ -33,7 +33,11 @@ from typing import Any
 
 from pydantic import BaseModel, Field
 
-from van_gateway.browser.adapters import BrowserAdapterError, BrowserHarnessAdapter
+from van_gateway.browser.adapters import (
+    BrowserAdapterError,
+    BrowserHarnessAdapter,
+    StagehandAdapter,
+)
 from van_gateway.browser.models import (
     AutonomyTier,
     BrowserObservation,
@@ -224,9 +228,103 @@ class AdapterBackedWorker:
         )
 
 
+class HybridBrowserWorker:
+    """One worker surface for deterministic Harness and semantic Stagehand tiers.
+
+    Stagehand never gets an opaque autonomous loop here. It proposes exactly one observed
+    action, BrowserSubagentRunner checks that proposal against Hermes's immutable
+    assignment, and only then does this worker replay that one observed action. The page is
+    read back through Browser Harness after execution, so Stagehand cannot certify its own
+    effect.
+
+    L5 therefore means repeated semantic proposal under the gateway runner's hard bounds,
+    not handing the browser to a second independent agent until it says it is finished.
+    """
+
+    def __init__(
+        self,
+        harness: BrowserHarnessAdapter,
+        stagehand: StagehandAdapter,
+        *,
+        plan: BrowserTaskPlan | None = None,
+        task: BrowserTask | None = None,
+    ) -> None:
+        self.harness = harness
+        self.stagehand = stagehand
+        self.plan = plan or BrowserTaskPlan()
+        self.task = task
+        self._deterministic = AdapterBackedWorker(harness, plan=self.plan, task=task)
+
+    def for_task(self, task: BrowserTask, plan: BrowserTaskPlan | None) -> "HybridBrowserWorker":
+        return HybridBrowserWorker(
+            self.harness, self.stagehand, plan=plan, task=task
+        )
+
+    async def propose(
+        self, assignment: SubagentAssignment, history: list[SubagentStep]
+    ) -> ProposedAction:
+        if assignment.autonomy_tier in DETERMINISTIC_TIERS:
+            return await self._deterministic.propose(assignment, history)
+        task = self.task
+        if task is None:
+            raise BrowserAdapterError("BROWSER_WORKER_TASK_MISSING", assignment.task_id)
+
+        instruction = (
+            "Choose the single best next browser action for this assigned goal. "
+            "If the goal is already satisfied, return no actions. "
+            f"Goal: {assignment.goal}. "
+            f"Step: {len(history) + 1} of {assignment.max_steps}."
+        )
+        observation = await self.stagehand.observe(task, instruction)
+        if not observation.controls:
+            return ProposedAction(
+                kind="finish",
+                domain=task.target_domain,
+                action_class=assignment.action_class_ceiling,
+                done=True,
+                rationale="semantic runtime found no further action for the assigned goal",
+            )
+
+        candidate = dict(observation.controls[0])
+        method = str(candidate.get("method") or "act").strip().lower()
+        kind = {
+            "type": "fill",
+            "input": "fill",
+            "tap": "click",
+        }.get(method, method)
+        if not kind or len(kind) > 64:
+            kind = "act"
+        description = str(candidate.get("description") or "")[:2000]
+        return ProposedAction(
+            kind=kind,
+            domain=task.target_domain,
+            action_class=assignment.action_class_ceiling,
+            instruction=description or instruction,
+            rationale=description or "Stagehand semantic proposal",
+            payload={"stagehand_action": candidate},
+        )
+
+    async def execute(
+        self, assignment: SubagentAssignment, action: ProposedAction
+    ) -> BrowserObservation:
+        if assignment.autonomy_tier in DETERMINISTIC_TIERS:
+            return await self._deterministic.execute(assignment, action)
+        task = self.task
+        if task is None:
+            raise BrowserAdapterError("BROWSER_WORKER_TASK_MISSING", assignment.task_id)
+        observed = action.payload.get("stagehand_action")
+        if not isinstance(observed, dict) or not observed:
+            raise BrowserAdapterError("STAGEHAND_OBSERVED_ACTION_MISSING", action.kind)
+
+        await self.stagehand.act(task, dict(observed))
+        payload = await self.harness.page_info(task)
+        return AdapterBackedWorker._observation(task, action, payload)
+
+
 __all__ = [
     "DETERMINISTIC_TIERS",
     "AdapterBackedWorker",
+    "HybridBrowserWorker",
     "BrowserTaskPlan",
     "PlannedStep",
     "SemanticWorkerUnavailable",
