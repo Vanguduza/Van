@@ -1,0 +1,353 @@
+{
+  "schema": "van-gap-register/2",
+  "audit_id": "van-whole-project-2026-09-21",
+  "generated_at": "2026-09-21",
+  "provenance": {
+    "source_register_recovered": false,
+    "source_register_expected_path": "docs/audit/van-whole-project-2026-09-21/21_GAP_REGISTER.json",
+    "unrecovered_source_note": "The original Sol 24-finding machine-readable register was not present in surviving branch history and the referenced orphan commit could not be resolved. This file is a reconstruction from surviving audit prose, current source, PR #55 commits, CI evidence, and adversarial reachability checks. It must not be represented as byte-for-byte or item-for-item identical to the lost source.",
+    "original_reported_summary": {
+      "total": 24,
+      "severity_counts": {
+        "P0": 3,
+        "P1": 9,
+        "P2": 10,
+        "P3": 2
+      }
+    },
+    "reconstruction_rule": "A finding appears here only when current repository evidence supports its state. Newly discovered findings are included even when they may not have been in the original 24."
+  },
+  "canonical_branch": "gpt/van-sol-audit-closure-20260921",
+  "current_head_at_reconstruction": "84549608e0a8e0663cbeb9d525b70478caaa6542",
+  "state_vocabulary": {
+    "CLOSED": "Repository implementation and regression evidence exist on the closure branch.",
+    "OPEN": "Repository-side implementation remains incomplete or unsafe.",
+    "EXTERNAL_GATE": "Repository-side implementation is present enough to fail closed, but live/device/provider evidence is still required.",
+    "SUPERSEDED": "Earlier finding was replaced by a more accurate current finding."
+  },
+  "findings": [
+    {
+      "id": "REC-P0-001",
+      "severity": "P0",
+      "title": "Canonical Rev 5.1 tree was dropped by later Commander merge",
+      "status": "CLOSED",
+      "disposition": "RESTORE_AND_GUARD",
+      "evidence": [
+        "commit:2fd3ffe5c9c22ce5424ff3bdf0fc4b3de768042c",
+        "commit:43fb37d",
+        "commit:c19faeb"
+      ],
+      "acceptance": "Canonical sentinels are present and CI includes the tree-regression guard."
+    },
+    {
+      "id": "REC-P0-002",
+      "severity": "P0",
+      "title": "Commander authorization trusted caller-provided requested_by identity",
+      "status": "CLOSED",
+      "disposition": "AUTHENTICATED_PRINCIPAL_BOUNDARY",
+      "evidence": [
+        "commit:e35cd6b",
+        "commit:5378bf0",
+        "commit:089e43d"
+      ],
+      "acceptance": "Gateway/Hermes Commander credentials are distinct and requested_by cannot mint credential-bearing authority."
+    },
+    {
+      "id": "REC-P0-003",
+      "severity": "P0",
+      "title": "Captured third-party notification/share content had no safe production consumer",
+      "status": "CLOSED",
+      "disposition": "SEPARATE_DATA_INGRESS",
+      "evidence": [
+        "commit:976aada31313f38c7be2751b6cf3e6bf4ce94cc8",
+        "backend/van_gateway/app.py:/v1/context/ingest",
+        "android/.../QueueReplayer.kt"
+      ],
+      "acceptance": "CONTEXT_INGEST is hardware-proofed, untrusted, authority NONE, and never routed through /v1/commands."
+    },
+    {
+      "id": "REC-P0-004",
+      "severity": "P0",
+      "title": "Generic Android replay deleted durable SESSION_ENVELOPE before session restoration",
+      "status": "CLOSED",
+      "disposition": "ROUTE_BY_QUEUE_OWNER",
+      "evidence": [
+        "commit:976aada31313f38c7be2751b6cf3e6bf4ce94cc8",
+        "tests/contracts/test_context_ingest_queue_routing.py"
+      ],
+      "acceptance": "Generic replayer leaves SESSION_ENVELOPE to VanHermesSessionManager and removes it only through the session consumer."
+    },
+    {
+      "id": "REC-P0-005",
+      "severity": "P0",
+      "title": "Hermes execution had no deterministic result-to-Mission reconciliation path",
+      "status": "CLOSED",
+      "disposition": "DURABLE_RUN_BINDING_AND_CALLBACK",
+      "evidence": [
+        "commit:ec5423f3cef1a497e3ea09dfe536883518507bb2",
+        "/v1/runtime/missions/result",
+        "mission_result MCP"
+      ],
+      "acceptance": "Hermes reports lifecycle by bound run id; COMPLETED enters gateway verification and Hermes cannot assert VERIFIED_SUCCESS."
+    },
+    {
+      "id": "REC-P1-001",
+      "severity": "P1",
+      "title": "Full Desktop Commander inherited VM-admin identity",
+      "status": "CLOSED",
+      "disposition": "ISOLATED_SERVICE_IDENTITY",
+      "evidence": [
+        "commit:f080ec4",
+        "commit:f108a02",
+        "commit:06fa332",
+        "commit:c884279"
+      ]
+    },
+    {
+      "id": "REC-P1-002",
+      "severity": "P1",
+      "title": "Recovery control was broader than bounded recovery purpose",
+      "status": "CLOSED",
+      "disposition": "BOUND_RECOVERY_ELEVATION",
+      "evidence": [
+        "commit:d8d6826",
+        "commit:321cb5c",
+        "commit:7c32453"
+      ]
+    },
+    {
+      "id": "REC-P1-003",
+      "severity": "P1",
+      "title": "SPMRF/ChatGPT reviewer inherited VM-admin identity/home permissions",
+      "status": "CLOSED",
+      "disposition": "ISOLATED_REVIEWER_IDENTITY",
+      "evidence": [
+        "commit:fab2f26",
+        "commit:48f1a8d",
+        "commit:2bff6fe",
+        "commit:f4dd703"
+      ]
+    },
+    {
+      "id": "REC-P1-004",
+      "severity": "P1",
+      "title": "Gateway and Hermes Commander environment/credential binding was ambiguous",
+      "status": "CLOSED",
+      "disposition": "EXPLICIT_DISTINCT_BINDINGS",
+      "evidence": [
+        "commit:2cf2d63",
+        "commit:acd4749",
+        "commit:c45f868",
+        "commit:7ae4951",
+        "commit:4de3c05"
+      ]
+    },
+    {
+      "id": "REC-P1-005",
+      "severity": "P1",
+      "title": "Privileged recovery diagnostics could expose sensitive runtime detail",
+      "status": "CLOSED",
+      "disposition": "REDACT",
+      "evidence": [
+        "commit:fb3a331",
+        "commit:474a913"
+      ]
+    },
+    {
+      "id": "REC-P1-006",
+      "severity": "P1",
+      "title": "Owner had no deterministic offline reconfirmation surface",
+      "status": "CLOSED",
+      "disposition": "OWNER_SURFACE",
+      "evidence": [
+        "commit:ae60a3b40316604ead05da6e566242c6407f6c4d"
+      ]
+    },
+    {
+      "id": "REC-P1-007",
+      "severity": "P1",
+      "title": "Hermes Google capabilities existed but common read-only Workspace functions were not exposed through typed MCP",
+      "status": "CLOSED",
+      "disposition": "SAFE_TYPED_MCP_READS",
+      "evidence": [
+        "commit:84549608e0a8e0663cbeb9d525b70478caaa6542"
+      ],
+      "acceptance": "Gmail search, agenda, Drive search, contacts, tasks, status/capabilities and deterministic job planning are exposed; raw mutations are not."
+    },
+    {
+      "id": "REC-P1-008",
+      "severity": "P1",
+      "title": "Wake-word runtime cannot arm even with an admitted wake asset",
+      "status": "OPEN",
+      "disposition": "IMPLEMENT_REAL_LOCAL_KWS",
+      "evidence": [
+        "android/app/src/main/java/com/dial/van/voice/WakeModelLoader.kt:pipelineOrNull",
+        "android/app/src/main/java/com/dial/van/voice/WakeRuntime.kt"
+      ],
+      "detail": "pipelineOrNull() returns null after readiness succeeds because no concrete WakeWordEngine/WakePhraseVerifier implementation is shipped. A model file alone cannot close this."
+    },
+    {
+      "id": "REC-P1-009",
+      "severity": "P1",
+      "title": "Browser Harness private worker service is absent",
+      "status": "OPEN",
+      "disposition": "IMPLEMENT_PINNED_PRIVATE_WORKER",
+      "evidence": [
+        "deploy/van-trading-core/browser/bootstrap-browser-runtime.sh",
+        "backend/van_gateway/browser/adapters.py"
+      ],
+      "detail": "Bootstrap installs dependencies then records service_state=ENVIRONMENT_PREPARED_NOT_IMPLEMENTED; gateway expects a live worker at 127.0.0.1:9141."
+    },
+    {
+      "id": "REC-P1-010",
+      "severity": "P1",
+      "title": "Stagehand private semantic worker service is absent",
+      "status": "OPEN",
+      "disposition": "IMPLEMENT_PINNED_PRIVATE_WORKER",
+      "evidence": [
+        "deploy/van-trading-core/browser/bootstrap-browser-runtime.sh",
+        "backend/van_gateway/browser/adapters.py"
+      ],
+      "detail": "Gateway has StagehandAdapter and bounded subagent policy, but no service implements /observe /extract /act /agent at 127.0.0.1:9140."
+    },
+    {
+      "id": "REC-P1-011",
+      "severity": "P1",
+      "title": "Google mutation routes still accept caller-provided approval booleans outside Action Runtime",
+      "status": "OPEN",
+      "disposition": "ROUTE_MUTATIONS_THROUGH_ACTION_RUNTIME",
+      "evidence": [
+        "backend/van_gateway/app.py:/v1/google/gmail/send",
+        "backend/van_gateway/app.py:/v1/google/calendar/reschedule"
+      ],
+      "detail": "These routes are internal-control only and are intentionally not exposed as raw Hermes MCP tools. Closure requires approval to derive from sealed command/action authority, not a boolean parameter."
+    },
+    {
+      "id": "REC-P2-001",
+      "severity": "P2",
+      "title": "Notification/share ingest producer and gateway schemas drifted",
+      "status": "CLOSED",
+      "disposition": "CANONICAL_MAPPING",
+      "evidence": [
+        "commit:976aada31313f38c7be2751b6cf3e6bf4ce94cc8"
+      ],
+      "acceptance": "Context IDs are stable; notification mapping converts Android fields into gateway intelligence input and share remains untrusted."
+    },
+    {
+      "id": "REC-P2-002",
+      "severity": "P2",
+      "title": "New context data audit label was outside explicit audit namespace contract",
+      "status": "CLOSED",
+      "disposition": "REGISTER_AUDIT_ONLY_LABEL",
+      "evidence": [
+        "commit:d4ac99e39622d693acdd8a103fd403f2d53707a2",
+        "CI:35591938794"
+      ]
+    },
+    {
+      "id": "REC-P2-003",
+      "severity": "P2",
+      "title": "Wake/voice physical-device behavior is not certified on target S24",
+      "status": "EXTERNAL_GATE",
+      "disposition": "DEVICE_CERTIFICATION",
+      "evidence": [
+        "docs/EXTERNAL_GATES.md"
+      ],
+      "dependencies": [
+        "target Samsung S24",
+        "installed wake/voice assets",
+        "runtime permissions"
+      ]
+    },
+    {
+      "id": "REC-P2-004",
+      "severity": "P2",
+      "title": "Google OAuth/provider workflows are not live-certified",
+      "status": "EXTERNAL_GATE",
+      "disposition": "LIVE_PROVIDER_CERTIFICATION",
+      "evidence": [
+        "docs/EXTERNAL_GATES.md"
+      ]
+    },
+    {
+      "id": "REC-P2-005",
+      "severity": "P2",
+      "title": "n8n automation fabric is not live-certified",
+      "status": "EXTERNAL_GATE",
+      "disposition": "LIVE_RUNTIME_CERTIFICATION",
+      "evidence": [
+        "docs/EXTERNAL_GATES.md",
+        "deploy/van-trading-core/automation/"
+      ]
+    },
+    {
+      "id": "REC-P2-006",
+      "severity": "P2",
+      "title": "VATI live broker path remains outside repository-only certification",
+      "status": "EXTERNAL_GATE",
+      "disposition": "SHADOW_THEN_LIMITED_LIVE_CERTIFICATION",
+      "evidence": [
+        "docs/EXTERNAL_GATES.md",
+        "trading/"
+      ]
+    },
+    {
+      "id": "REC-P2-007",
+      "severity": "P2",
+      "title": "Authenticated browser profile persistence/readback not live-certified",
+      "status": "EXTERNAL_GATE",
+      "disposition": "LIVE_PROFILE_CERTIFICATION",
+      "evidence": [
+        "docs/EXTERNAL_GATES.md"
+      ],
+      "dependencies": [
+        "REC-P1-009",
+        "REC-P1-010"
+      ]
+    },
+    {
+      "id": "REC-P2-008",
+      "severity": "P2",
+      "title": "Rive embodiment asset/runtime remains externally supplied where native fallback is used",
+      "status": "EXTERNAL_GATE",
+      "disposition": "ASSET_AND_DEVICE_CERTIFICATION",
+      "evidence": [
+        "docs/EXTERNAL_GATES.md",
+        "visual-authority/"
+      ]
+    },
+    {
+      "id": "REC-P2-009",
+      "severity": "P2",
+      "title": "Production Cloudflare authenticated ingress is not certified by quick-tunnel evidence",
+      "status": "EXTERNAL_GATE",
+      "disposition": "NAMED_ACCESS_INGRESS_CERTIFICATION",
+      "evidence": [
+        "docs/EXTERNAL_GATES.md"
+      ]
+    },
+    {
+      "id": "REC-P2-010",
+      "severity": "P2",
+      "title": "Hermes live runtime/profile registration must be re-qualified after MCP surface changes",
+      "status": "EXTERNAL_GATE",
+      "disposition": "DEPLOY_AND_DOCTOR",
+      "evidence": [
+        "tools/hermes/install_van_profile.sh",
+        "tools/hermes/register_owner_runtime_mcp.sh",
+        "tools/hermes/doctor_van_profile.sh"
+      ],
+      "dependencies": [
+        "commit:84549608e0a8e0663cbeb9d525b70478caaa6542"
+      ]
+    }
+  ],
+  "closure_summary": {
+    "closed": 13,
+    "open": 4,
+    "external_gate": 7,
+    "superseded": 0,
+    "merge_ready": false,
+    "reason": "Repository-side OPEN findings remain: local wake engine, Browser Harness worker, Stagehand worker, and Google mutation authority reconciliation."
+  }
+}
