@@ -455,7 +455,7 @@
     "external_gate": 8,
     "superseded": 0,
     "merge_ready": true,
-    "reason": "All reconstructed and newly discovered repository-side findings are closed, including exact-SHA Trading Core deployment pinning discovered during post-merge audit. External/device/runtime gates remain separate. Full PR-head CI run 35621632137 passed on 90756a06e5f6a26be2ad11a9a25afa8dcdf76271; canonical-main van-ci run 35622699643 passed after PR #55. PR #57 carries the post-merge deterministic deployment hardening and must pass full head CI before merge."
+    "reason": "All reconstructed and newly discovered repository-side findings are closed, including exact-SHA Trading Core deployment pinning discovered during post-merge audit. External/device/runtime gates remain separate. The historical post-merge reconciliation remains anchored to PR #55 and canonical-main CI run 35622699643; REC-P2-011 records the later deterministic deployment hardening independently rather than rewriting that certification provenance."
   },
   "last_reconciled_against_head": "ae96854b85c1ff1c8bcd483cd90cef270c7cf23b",
   "last_reconciled_ci": {
