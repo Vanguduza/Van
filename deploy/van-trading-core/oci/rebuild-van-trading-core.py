@@ -217,11 +217,11 @@ def configure_hermes_access(repo):
     hcfg='''Host van-trading-core\n    HostName 10.0.1.233\n    User ubuntu\n    IdentityFile ~/.ssh/node-hermes-to-trading\n    IdentitiesOnly yes\n    ServerAliveInterval 30\n    ServerAliveCountMax 3\n'''
     py="import re,pathlib,os; p=pathlib.Path.home()/'.ssh/config'; s=p.read_text() if p.exists() else ''; s=re.sub(r'(?ms)^Host van-trading-core\\n(?:^[ \\t].*\\n?)*','',s); p.write_text(s.rstrip()+'\\n\\n'+"+repr(hcfg)+"); os.chmod(p,0o600)"
     ssh('hermes','python3 -c '+shlex.quote(py))
-    pipe_secret_to_hermes('/opt/van-trading/secrets/commander.token','/home/ubuntu/.van/commander.token')
+    pipe_secret_to_hermes('/opt/van-trading/secrets/commander.token.hermes','/home/ubuntu/.van/commander.hermes.token')
     pipe_secret_to_hermes('/opt/van-trading/secrets/pki/ca.crt','/home/ubuntu/.van/van-trading-bridge-ca.crt')
     pipe_secret_to_hermes('/opt/van-trading/secrets/automation/n8n-hermes-api.key','/home/ubuntu/.van/n8n-api.key')
     reg=(f'cd {shlex.quote(repo)} && VAN_REPO={shlex.quote(repo)} '
-         f'COMMANDER_URL=https://{PRIVATE_IP}:9133 TOKEN_FILE=/home/ubuntu/.van/commander.token '
+         f'COMMANDER_URL=https://{PRIVATE_IP}:9133 TOKEN_FILE=/home/ubuntu/.van/commander.hermes.token '
          'CA_FILE=/home/ubuntu/.van/van-trading-bridge-ca.crt bash deploy/van-trading-core/hermes/register-commander-mcp.sh')
     ssh('hermes',reg,timeout=60)
     unit='''[Unit]\nDescription=VAN Trading Core n8n management tunnel\nAfter=network-online.target\nWants=network-online.target\n\n[Service]\nExecStart=/usr/bin/ssh -N -o BatchMode=yes -o ExitOnForwardFailure=yes -o ServerAliveInterval=30 -o ServerAliveCountMax=3 -L 127.0.0.1:15678:127.0.0.1:5678 van-trading-core\nRestart=always\nRestartSec=5\n\n[Install]\nWantedBy=default.target\n'''
@@ -235,7 +235,7 @@ def verify_hermes_access(repo):
     if 'N8N_HERMES_GREEN' not in p.stdout: raise RuntimeError('Hermes n8n management canary failed')
     live=("printf '%s\\n' '{\"jsonrpc\":\"2.0\",\"id\":1,\"method\":\"initialize\",\"params\":{}}' "
           "'{\"jsonrpc\":\"2.0\",\"id\":2,\"method\":\"tools/call\",\"params\":{\"name\":\"status\",\"arguments\":{}}}' | "
-          f"VAN_COMMANDER_URL=https://{PRIVATE_IP}:9133 VAN_COMMANDER_TOKEN_FILE=/home/ubuntu/.van/commander.token "
+          f"VAN_COMMANDER_URL=https://{PRIVATE_IP}:9133 VAN_COMMANDER_TOKEN_FILE=/home/ubuntu/.van/commander.hermes.token "
           f"NODE_EXTRA_CA_CERTS=/home/ubuntu/.van/van-trading-bridge-ca.crt timeout 25 node {shlex.quote(repo)}/trading/commander/mcp_stdio.mjs")
     q=ssh('hermes',live,check=False,timeout=35)
     if q.returncode or '"id":2' not in q.stdout or '"isError":false' not in q.stdout.replace(' ',''):
