@@ -125,10 +125,9 @@ class VanCommandController(
          * P2-SEC-010 — how sure VAN is that the owner spoke.
          *
          * Null for anything that did not come through a microphone. For voice it is the
-         * speaker similarity score, and [SpeakerVerificationPolicy] decides what authority
-         * a spoken command carries on it: any voice reaching the microphone used to produce
-         * a transcript that was signed as an owner command, so a visitor, a television or a
-         * recording had the owner's authority for as long as they were in the room.
+         * speaker similarity score. Android signs this evidence but does not interpret it
+         * as authority: only the gateway can do that after deterministic action resolution.
+         * This prevents a raw A1 transcript from bypassing an A3/A4 voice gate.
          */
         speakerScore: Float? = null,
     ) {
