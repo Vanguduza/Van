@@ -120,7 +120,7 @@ fi
 
 # ---------------------------------------------------------------- full Hermes subordinate Commander + GitHub recovery
 if (( DRY_RUN )); then
-  plan "install full pinned Desktop Commander for ubuntu on van-trading-core"
+  plan "install full pinned Desktop Commander for isolated vancommander user on van-trading-core"
   plan "install bounded GitHub/OCI recovery command"
   plan "install separately authenticated ChatGPT/Codex SPMRF review worker"
 else
@@ -140,7 +140,7 @@ if (( WITH_NAUTILUS )); then run sudo -u vati "$VENV/bin/pip" install -q "nautil
 
 # ---------------------------------------------------------------- secrets + pki
 gen_token() { local f="$1"; if [[ ! -f "$f" ]]; then run bash -c "umask 077; openssl rand -hex 32 > '$f'"; run chown vati:vati "$f"; ok "token $f"; else skip "token $f exists"; fi; }
-gen_token "$SECRETS/commander.token"; gen_token "$SECRETS/vekl.token"
+gen_token "$SECRETS/commander.token"; gen_token "$SECRETS/commander.token.hermes"; gen_token "$SECRETS/commander.token.van-gateway"; gen_token "$SECRETS/vekl.token"
 if [[ ! -f "$SECRETS/pki/ca.crt" ]]; then run bash -c "OUT='$SECRETS/pki' CORE_IP='$CORE_IP' bash '$HERE/pki/make-bridge-pki.sh' >/dev/null"; run chown -R vati:vati "$SECRETS/pki"; ok "bridge PKI (ca, commander, mt5-worker, client)"; else skip "PKI present"; fi
 
 # ---------------------------------------------------------------- config
