@@ -347,7 +347,7 @@ def scroll_page(body: dict[str, Any], alias: str, domain: str) -> dict[str, Any]
         raise WorkerError("SCROLL_DELTA_OUT_OF_RANGE", 422)
     run_harness(
         alias,
-        'import json,os\nscroll(int(os.environ["VAN_BH_DX"]),int(os.environ["VAN_BH_DY"]))\nprint("__VAN_JSON__"+json.dumps({"scrolled":True}))\n',
+        'import json,os\ninfo=page_info()\nx=max(0,int(info.get("w",0))//2)\ny=max(0,int(info.get("h",0))//2)\nscroll(x,y,dy=int(os.environ["VAN_BH_DY"]),dx=int(os.environ["VAN_BH_DX"]))\nprint("__VAN_JSON__"+json.dumps({"scrolled":True}))\n',
         {"VAN_BH_DX": str(dx), "VAN_BH_DY": str(dy)},
     )
     return page_info_result(alias, domain)
