@@ -51,9 +51,11 @@ The context graph is a bounded temporal retrieval primitive, not an autonomous G
 
 The commander reaches the dedicated trading VEKL (`trading/vekl`, loopback :9134 on the VM) and the VATI ledger. It cannot place, size, modify or cancel an order; halting is the only trading effect and it needs an owner signature reference (A4). Registration is spliced into `~/.hermes/config.yaml` by `deploy/van-trading-core/hermes/register-commander-mcp.sh`.
 
+The independent Trading Core review worker is also isolated from the VM administrator. It runs as `vanreviewer`, with no `vati`, `sudo`, or `docker` membership, and uses a separately authenticated ChatGPT/Codex session plus forced-SSH shared-memory clients. Its model session is read-only and cannot inherit broker/VATI secret access from the `ubuntu` administrator.
+
 The two commander surfaces are intentionally different. `van_trading_commander` remains the bounded **trading-domain** API and preserves VATI as the sole trading execution/risk authority. `van_trading_local_commander` is the **machine/session** actuator: Hermes receives the complete pinned Desktop Commander capability surface so it can operate processes, files, terminals and persistent ChatGPT/Codex work sessions. It is not an order-routing API and must not be used to bypass VATI.
 
-Hermes reaches the full Commander over a purpose-specific SSH key whose `authorized_keys` entry is `restrict,command="/home/ubuntu/.local/bin/van-local-commander-mcp"`. The key therefore opens the Commander stdio process and cannot open a general shell. DIAL's authority gateway sits above that full capability: authenticated owner turns may use the complete surface; unattended calls require a named designed automation.
+Hermes reaches the full Commander over a purpose-specific SSH key enrolled only into the dedicated `vancommander` OS account. Its `authorized_keys` entry is `restrict,command="/var/lib/van-commander/.local/bin/van-local-commander-mcp"`. The account is excluded from `vati`, `sudo`, and `docker`, cannot read `/opt/van-trading/secrets`, and works from its own isolated Git checkout. The key therefore opens the Commander stdio process and cannot open a general shell or inherit VATI secret authority. DIAL's authority gateway sits above that full capability: authenticated owner turns may use the complete surface; unattended calls require a named designed automation.
 
 ## Google Workspace — gateway mediated
 
