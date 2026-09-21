@@ -14,7 +14,7 @@
 # Linux. The MT5 bridge worker runs on a Windows host (windows/mt5_worker) and this VM holds only
 # the bridge CLIENT (mTLS). The script records that fact instead of pretending.
 #
-# Usage:  sudo bash bootstrap.sh [--dry-run] [--with-nautilus] [--repo-url URL] [--branch NAME] [--commit-sha 40HEX] [--skip-supabase] [--skip-docker]
+# Usage:  sudo bash bootstrap.sh [--dry-run] [--with-nautilus] [--repo-url URL] [--branch NAME] [--commit-sha=40HEX] [--skip-supabase] [--skip-docker]
 # Re-running is safe; each step checks its own state.
 # =============================================================================
 set -euo pipefail
