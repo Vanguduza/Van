@@ -114,7 +114,7 @@ mcp_servers:
     cwd: "<van-repo-root>"
     env:
       VAN_COMMANDER_URL: "https://10.0.1.233:9133"
-      VAN_COMMANDER_TOKEN_FILE: "~/.van/commander.token"
+      VAN_COMMANDER_TOKEN_FILE: "~/.van/commander.hermes.token"
     enabled: true
     connect_timeout: 20
     timeout: 120
