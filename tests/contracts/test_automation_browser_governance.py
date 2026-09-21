@@ -286,3 +286,52 @@ def test_browser_autonomy_ceiling_never_widens_by_accident(monkeypatch):
     reset_policy_cache()
     assert load_browser_policy().max_autonomy_tier == "L2"
     reset_policy_cache()
+
+
+def test_private_browser_workers_are_real_and_fail_closed():
+    """Repository closure means deployable workers, not just gateway adapters.
+
+    Live identity/model/profile qualification remains an external gate, but CI prevents the
+    private worker processes from silently collapsing back into "environment prepared".
+    """
+    browser = ROOT / "deploy" / "van-trading-core" / "browser"
+    harness = (browser / "harness_service.py").read_text(encoding="utf-8")
+    stagehand = (browser / "stagehand_service.mjs").read_text(encoding="utf-8")
+    bootstrap = (browser / "bootstrap-browser-runtime.sh").read_text(encoding="utf-8")
+    env = (browser / "runtime.env.example").read_text(encoding="utf-8")
+    harness_unit = (
+        ROOT / "deploy" / "van-trading-core" / "systemd" / "vati-browser-harness.service"
+    ).read_text(encoding="utf-8")
+    stagehand_unit = (
+        ROOT / "deploy" / "van-trading-core" / "systemd" / "vati-stagehand.service"
+    ).read_text(encoding="utf-8")
+
+    assert "browser-harness==0.1.13" in bootstrap
+    assert "BROWSER_HARNESS_RUNTIME_GREEN" in bootstrap
+    assert "vati-browser-harness.service" in bootstrap
+    assert "127.0.0.1" in harness
+    assert "allow_helper_authoring" in harness
+    assert "cdp-endpoint.json" in harness
+    assert "os.chmod(tmp, 0o600)" in harness
+    assert "User=van-browser" in harness_unit
+
+    assert '@browserbasehq/stagehand' in (browser / "package.json").read_text(encoding="utf-8")
+    assert "Stagehand.create" in stagehand
+    assert "localBrowser.connect" in stagehand
+    assert 'req.url === "/agent"' in stagehand
+    assert "DIRECT_STAGEHAND_AGENT_LOOP_FORBIDDEN" in stagehand
+    assert "allow_model_self_selection !== false" in stagehand
+    assert "allow_unbounded_agent_loop !== false" in stagehand
+    assert "VAN_STAGEHAND_MODEL_KEY_REF" in env
+    assert "secretref://browser/stagehand-model" in env
+    assert "STAGEHAND_RUNTIME_GREEN" in bootstrap
+    assert "HARNESS_AND_STAGEHAND_IMPLEMENTED_PENDING_LIVE_QUALIFICATION" in bootstrap
+    assert "User=van-browser" in stagehand_unit
+    assert "Requires=vati-browser-harness.service" in stagehand_unit
+    assert "NoNewPrivileges=true" in stagehand_unit
+
+    # The credential is a file-backed secret reference. Neither service file nor bootstrap
+    # may contain a provider key literal.
+    for text in (stagehand, bootstrap, env, stagehand_unit):
+        assert "sk-ant-" not in text
+        assert "sk-proj-" not in text
