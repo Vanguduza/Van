@@ -72,11 +72,12 @@ class VoiceInputManager(
     private val biasingStringsProvider: () -> List<String> = { emptyList() },
     private val secondPassCoordinator: VoiceSecondPassCoordinator? = null,
     private val personalConfusionProvider: (String) -> Boolean = { false },
+    private val speakerSimilarityScorer: SpeakerSimilarityScorer? = null,
 ) {
     private val appContext = context.applicationContext
     private val mainHandler = Handler(Looper.getMainLooper())
-    private val secondPassExecutor = Executors.newSingleThreadExecutor { runnable ->
-        Thread(runnable, "van-voice-second-pass").apply { isDaemon = true }
+    private val evidenceExecutor = Executors.newSingleThreadExecutor { runnable ->
+        Thread(runnable, "van-voice-evidence").apply { isDaemon = true }
     }
     private val listening = AtomicBoolean(false)
     private val onDeviceAvailable =
@@ -178,20 +179,38 @@ class VoiceInputManager(
             val biasingStrings = if (secondPassCoordinator != null) biasingStringsProvider() else emptyList()
             val knownConfusion = personalConfusionProvider(androidResult.text)
             val secondPassDecision = secondPassCoordinator?.shouldRun(androidResult, knownConfusion)
+            val hasCapturedEvidence = capturedPcm.isNotEmpty()
+            val needsSecondPass =
+                secondPassCoordinator != null && secondPassDecision?.run == true && hasCapturedEvidence
+            val needsSpeakerEvidence = speakerSimilarityScorer != null && hasCapturedEvidence
 
             cleanupTurn(preserveCapture = true)
 
-            if (secondPassCoordinator != null && secondPassDecision?.run == true && capturedPcm.isNotEmpty()) {
-                secondPassExecutor.execute {
-                    val resolved = runCatching {
-                        secondPassCoordinator.resolve(
-                            android = androidResult,
-                            pcm16 = capturedPcm,
-                            biasingStrings = biasingStrings,
-                            knownPersonalConfusion = knownConfusion,
-                        )
-                    }.getOrDefault(androidResult)
-                    mainHandler.post { finishRecognition(resolved) }
+            if (needsSecondPass || needsSpeakerEvidence) {
+                evidenceExecutor.execute {
+                    val resolved = if (needsSecondPass) {
+                        runCatching {
+                            secondPassCoordinator!!.resolve(
+                                android = androidResult,
+                                pcm16 = capturedPcm,
+                                biasingStrings = biasingStrings,
+                                knownPersonalConfusion = knownConfusion,
+                            )
+                        }.getOrDefault(androidResult)
+                    } else {
+                        androidResult
+                    }
+                    val speakerScore = if (needsSpeakerEvidence) {
+                        runCatching { speakerSimilarityScorer!!.similarity(capturedPcm) }
+                            .getOrNull()
+                            ?.takeIf { it.isFinite() }
+                            ?.coerceIn(0f, 1f)
+                    } else {
+                        null
+                    }
+                    mainHandler.post {
+                        finishRecognition(resolved.copy(speakerSimilarity = speakerScore))
+                    }
                 }
             } else {
                 finishRecognition(androidResult)
@@ -355,7 +374,7 @@ class VoiceInputManager(
             stopListeningOnMain(notify = false, preserveCapture = false)
             recognizer?.destroy()
             audioArbiter.close()
-            secondPassExecutor.shutdownNow()
+            evidenceExecutor.shutdownNow()
         }
     }
 
