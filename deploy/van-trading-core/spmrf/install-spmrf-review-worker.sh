@@ -30,6 +30,8 @@ for forbidden in sudo docker vati; do
   fi
 done
 passwd -l "$REVIEW_USER" >/dev/null 2>&1 || true
+chown "$REVIEW_USER:$REVIEW_USER" "$REVIEW_HOME"
+chmod 0700 "$REVIEW_HOME"
 
 observed_integrity="$(npm view "@openai/codex@$PIN_VERSION" dist.integrity --json | jq -r '.')"
 [[ "$observed_integrity" == "$PIN_INTEGRITY" ]] || fail "Codex registry integrity mismatch for $PIN_VERSION"
@@ -39,8 +41,8 @@ cat > "$PREFIX/package.json" <<JSON
 {"private":true,"dependencies":{"@openai/codex":"$PIN_VERSION"}}
 JSON
 chown "$REVIEW_USER:$REVIEW_USER" "$PREFIX/package.json"
-sudo -u "$REVIEW_USER" npm --prefix "$PREFIX" install --ignore-scripts --no-fund --no-audit --package-lock-only
-sudo -u "$REVIEW_USER" npm --prefix "$PREFIX" ci --ignore-scripts --no-fund --no-audit
+sudo -u "$REVIEW_USER" env HOME="$REVIEW_HOME" npm --prefix "$PREFIX" install --ignore-scripts --no-fund --no-audit --package-lock-only
+sudo -u "$REVIEW_USER" env HOME="$REVIEW_HOME" npm --prefix "$PREFIX" ci --ignore-scripts --no-fund --no-audit
 
 actual="$(node -e 'process.stdout.write(require(process.argv[1]).version)' "$PREFIX/node_modules/@openai/codex/package.json")"
 [[ "$actual" == "$PIN_VERSION" ]] || fail "installed Codex version mismatch: $actual"
