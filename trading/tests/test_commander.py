@@ -235,3 +235,29 @@ def test_an_unknown_token_authenticates_nobody(two_principal_env):
     client = two_principal_env
     r = _call(client, "accounts", "z" * 40)
     assert r.status_code == 401
+
+def test_legacy_shared_principal_cannot_mutate_accounts_or_strategies(env):
+    """A valid old/shared token is compatibility authority, never owner mutation authority."""
+    client, _, _ = env
+    account = _call(
+        client, "account_upsert", TOKEN,
+        {"alias": "deriv_demo", "broker": "DERIV", "server": "1089"},
+    )
+    assert account.status_code == 403
+    assert "van-gateway principal" in account.json()["detail"]
+
+    # The strategy surface is protected by the same positive principal gate. It must be
+    # refused before payload validation can become a way around the boundary.
+    promotion = _call(client, PROMOTION_COMMANDS[0], TOKEN, {})
+    assert promotion.status_code == 403
+    assert "van-gateway principal" in promotion.json()["detail"]
+
+
+def test_principal_token_configuration_rejects_weak_and_duplicate_authority():
+    with pytest.raises(RuntimeError, match="invalid commander token"):
+        CommanderSettings(tokens={"hermes": "too-short"}).load_tokens()
+
+    same = "s" * 40
+    with pytest.raises(RuntimeError, match="share a token"):
+        CommanderSettings(tokens={"hermes": same, "van-gateway": same}).load_tokens()
+
