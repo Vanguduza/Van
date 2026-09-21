@@ -29,6 +29,7 @@ INTERNAL = "google-routes-internal"
 #: The six this finding added, and what each is for. Named rather than derived from the
 #: route table, because deriving the expectation from the thing under test proves nothing.
 NEW_ROUTES = {
+    "/v1/google/actions/execute": "POST",
     "/v1/google/gmail/draft": "POST",
     "/v1/google/calendar/agenda": "GET",
     "/v1/google/calendar/reschedule": "POST",
@@ -129,19 +130,27 @@ def test_each_new_route_is_declared_in_the_one_scope_set():
 
 
 @pytest.mark.asyncio
-async def test_rescheduling_the_owners_calendar_needs_the_owner(client):
-    """The one mutating route of the six.
+async def test_rescheduling_cannot_turn_an_internal_boolean_into_owner_authority(client):
+    """An internal token authenticates Hermes/control; it is not biometric approval.
 
-    Refused before the transport is consulted, so the absence of a Google credential cannot
-    mask a missing approval — a 503 here would look like "VAN is not connected" and hide
-    that the approval was never checked.
+    The old route accepted approved=true directly. Now the route requires an execution id
+    already authorized by Action Runtime, so supplying the historical flag cannot mutate.
     """
-    ac, _ = client
+    ac, app = client
+    app.state.google.transport = __import__(
+        "van_gateway.google.transport", fromlist=["FakeGoogleTransport"]
+    ).FakeGoogleTransport()
+    app.state.google.oauth = None
     denied = await _call(
-        ac, "/v1/google/calendar/reschedule", "POST", event_id="e1", new_start_unix=1,
+        ac,
+        "/v1/google/calendar/reschedule",
+        "POST",
+        event_id="e1",
+        new_start_unix=1,
+        approved=True,
     )
-    assert denied.status_code == 403
-    assert denied.json()["detail"] == "approval_required"
+    assert denied.status_code == 422
+    assert not app.state.google.transport.calls
 
 
 @pytest.mark.asyncio
@@ -154,15 +163,14 @@ async def test_an_unconnected_google_reports_unable_rather_than_refusing(client)
 
 
 @pytest.mark.asyncio
-async def test_drafting_is_not_gated_like_sending(client):
-    """A draft leaves something the owner can read and discard.
-
-    Gating it with the send's approval would train them to approve without reading, and the
-    approval that matters is the one on the send. So this reaches the transport and fails
-    on the missing credential rather than on authority.
-    """
-    ac, _ = client
+async def test_drafting_is_a_typed_a3_mutation_not_a_raw_internal_write(client):
+    ac, app = client
+    app.state.google.transport = __import__(
+        "van_gateway.google.transport", fromlist=["FakeGoogleTransport"]
+    ).FakeGoogleTransport()
+    app.state.google.oauth = None
     response = await _call(
         ac, "/v1/google/gmail/draft", "POST", thread_id="t1", body="hello",
     )
-    assert response.status_code == 503, "drafting was refused on authority rather than reach"
+    assert response.status_code == 422
+    assert not app.state.google.transport.calls
