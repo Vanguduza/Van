@@ -7,12 +7,23 @@ import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.darkColorScheme
 import androidx.compose.material3.lightColorScheme
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.CompositionLocalProvider
 import androidx.compose.runtime.SideEffect
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.toArgb
+import androidx.compose.ui.platform.LocalConfiguration
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.platform.LocalView
 import androidx.core.view.WindowCompat
+import com.dial.van.design.LocalVanTokens
+import com.dial.van.design.VanColorTokens
+import com.dial.van.design.VanDensity
+import com.dial.van.design.VanElevation
+import com.dial.van.design.VanMotion
+import com.dial.van.design.VanRadius
+import com.dial.van.design.VanSpace
+import com.dial.van.design.VanTokens
+import com.dial.van.design.VanTypeTokens
 
 /**
  * The one theme every VAN screen uses (P3-AND-008).
@@ -24,6 +35,12 @@ import androidx.core.view.WindowCompat
  *
  * The system bars follow the scheme rather than the manifest's fixed `#111820`: a light app
  * under a dark status bar with dark icons is a status bar the owner cannot read.
+ *
+ * Since the design system (`com.dial.van.design`, `docs/design/VAN_PRODUCT_DESIGN_DNA.md`)
+ * landed, this is also where [VanTokens] is assembled and published through
+ * [com.dial.van.design.LocalVanTokens] — one theme call still wraps every screen, and now
+ * also hands it the tokens it paints with, rather than each screen reaching into
+ * `VanPalette`/`VanGlassTokens` directly.
  */
 private fun VanScheme.toMaterial(dark: Boolean): ColorScheme {
     val base = if (dark) darkColorScheme() else lightColorScheme()
@@ -45,6 +62,20 @@ private fun VanScheme.toMaterial(dark: Boolean): ColorScheme {
 @Composable
 fun VanTheme(
     dark: Boolean = isSystemInDarkTheme(),
+    /**
+     * Whether the caller is the floating overlay (DNA §1: "low" density, always [VanDensity.Compact])
+     * rather than a full-screen destination. Defaults to `false`; the overlay's own composition
+     * root passes `true`.
+     */
+    isOverlay: Boolean = false,
+    /**
+     * DNA §2: "Reduced motion: all durations 0, state changes still communicated by
+     * colour/shape." The caller supplies this (from `Settings.Global` animator scale or an
+     * accessibility signal, the same input `VanEffectConditions.reducedMotion` already reads
+     * elsewhere) rather than `VanTheme` reading it itself, so the same policy input drives
+     * both the aura's [VanEffectBudget] and every screen's [VanMotion].
+     */
+    reducedMotion: Boolean = false,
     content: @Composable () -> Unit,
 ) {
     val scheme = VanPalette.scheme(dark)
@@ -61,5 +92,18 @@ fun VanTheme(
             }
         }
     }
-    MaterialTheme(colorScheme = scheme.toMaterial(dark), content = content)
+    val configuration = LocalConfiguration.current
+    val tokens = VanTokens(
+        color = VanColorTokens.from(scheme),
+        type = VanTypeTokens.DEFAULT,
+        space = VanSpace(),
+        radius = VanRadius(),
+        elevation = VanElevation(),
+        motion = VanMotion.resolve(reducedMotion),
+        density = VanDensity.from(configuration.screenWidthDp, isOverlay),
+        dark = dark,
+    )
+    CompositionLocalProvider(LocalVanTokens provides tokens) {
+        MaterialTheme(colorScheme = scheme.toMaterial(dark), content = content)
+    }
 }

@@ -67,6 +67,17 @@ sourceSets {
             "com/dial/van/visual/VanCharacterMotion.kt",
             "com/dial/van/visual/VanDrawOp.kt",
             "com/dial/van/visual/VanEffectBudget.kt",
+            // GAP-F-012 — the event-to-embodiment decision functions, and the total-map
+            // registry that proves every VanDurableState/VanFiniteAction has a producer.
+            "com/dial/van/visual/VanEmbodimentReducer.kt",
+            "com/dial/van/visual/VanEmbodimentProducers.kt",
+            // §2/§6 — overlay/action motion timing, kept pure so the durations that decide
+            // when VanLiveVisualState.action() auto-clears are exercised on the JVM.
+            "com/dial/van/visual/VanMotionMap.kt",
+            // GAP-F-014 — the renderer decision as an owner-facing fact, and the bridge
+            // that lets `visual/` publish it without depending on `degraded/`.
+            "com/dial/van/visual/VanRendererStatus.kt",
+            "com/dial/van/visual/DegradedBridge.kt",
             "com/dial/van/visual/VanFieldGeometry.kt",
             "com/dial/van/visual/VanFrameBudget.kt",
             "com/dial/van/visual/VanGlassTokens.kt",
@@ -115,6 +126,9 @@ sourceSets {
             "com/dial/van/voice/VoiceAssetManifest.kt",
             "com/dial/van/voice/VoiceTurn.kt",
             "com/dial/van/voice/SpeechQueue.kt",
+            // GAP-F-013 — the device-side cue timing model and the pure lookup
+            // TtsOutputManager drives it with.
+            "com/dial/van/voice/SpeechCueTiming.kt",
             "com/dial/van/voice/LocalTtsRouter.kt",
             "com/dial/van/voice/VoiceAudioPolicy.kt",
             // Written before this checkpoint and never executed: it is pure, it decides
@@ -168,6 +182,18 @@ sourceSets {
             // that agree on every ASCII document and disagree on one accented character.
             "com/dial/van/security/DeviceProofCanonical.kt",
             "com/dial/van/security/VanCanonicalJson.kt",
+            // The Android design system's pure half (docs/design/VAN_PRODUCT_DESIGN_DNA.md).
+            // Screen-state reduction, density-tier and motion arithmetic, the domain→colour-role
+            // mapping and the chart-axis math have no Compose or Android imports, so — same
+            // reasoning as Gate 6 above — they are executed here rather than only reasoned
+            // about. The Compose-facing wrapper (`VanTokens.kt` and `design/components/**`)
+            // is not included: it cannot compile without the Android Gradle Plugin.
+            "com/dial/van/design/ScreenState.kt",
+            "com/dial/van/design/DensityTier.kt",
+            "com/dial/van/design/MotionSpec.kt",
+            "com/dial/van/design/StatusSemantics.kt",
+            "com/dial/van/design/LiveBadgeFormat.kt",
+            "com/dial/van/design/charts/ChartAxes.kt",
         )
     }
 }
