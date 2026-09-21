@@ -1,0 +1,62 @@
+name: canonical-tree-guard
+
+on:
+  pull_request_target:
+    branches: [main]
+  push:
+    branches: [main]
+
+permissions:
+  contents: read
+
+jobs:
+  canonical-tree:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout candidate tree without executing candidate code
+        uses: actions/checkout@v4
+        with:
+          ref: ${{ github.event_name == 'pull_request_target' && github.event.pull_request.head.sha || github.sha }}
+          persist-credentials: false
+          fetch-depth: 1
+
+      - name: Verify canonical VAN implementation sentinels
+        shell: bash
+        run: |
+          set -euo pipefail
+          required=(
+            "docs/trading/rev51/REV51_EXECUTION_PACK_MASTER.md"
+            "docs/trading/rev51/REV51_REPOSITORY_CLOSURE.md"
+            "docs/trading/rev51/packets.json"
+            "tools/certification/rev51_harness.py"
+            "tools/verify_build_ready.py"
+            "trading/tests/test_rev51_certification.py"
+            "trading/tests/test_rev51_execution_conformal.py"
+            "trading/vati/execution/router.py"
+            "trading/vati/risk/authority.py"
+            "backend/van_gateway/session/service.py"
+            "backend/van_gateway/trading/strategies.py"
+            "android/app/src/main/java/com/dial/van/session/VanHermesSessionManager.kt"
+            "android/app/src/main/java/com/dial/van/trading/StrategyPromotionProtocol.kt"
+            "services/browser_control_agent/server.py"
+            "deploy/van-browser-stream/qualify.sh"
+            "evidence/van-system-audit/production_acceptance.json"
+            "tests/contracts/test_closure_record_is_current.py"
+          )
+          missing=0
+          for path in "${required[@]}"; do
+            if [[ ! -f "$path" ]]; then
+              echo "::error file=$path::canonical VAN sentinel is missing"
+              missing=$((missing+1))
+            fi
+          done
+          rev51_tests="$(find trading/tests -maxdepth 1 -type f -name 'test_rev51_*.py' | wc -l)"
+          if (( rev51_tests < 15 )); then
+            echo "::error::Rev 5.1 test surface collapsed: found $rev51_tests, expected at least 15"
+            missing=$((missing+1))
+          fi
+          if (( missing )); then
+            echo "CANONICAL_TREE_GUARD=RED missing=$missing"
+            exit 1
+          fi
+          echo "CANONICAL_TREE_GUARD=GREEN"
