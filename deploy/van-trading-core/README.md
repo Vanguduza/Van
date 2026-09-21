@@ -31,7 +31,9 @@ dial-hermes-control (10.0.0.184)                 van-trading-core (10.0.1.233)  
 ```bash
 sudo bash deploy/van-trading-core/bootstrap.sh --dry-run        # inspect the plan
 sudo bash deploy/van-trading-core/bootstrap.sh                  # idempotent install
-sudo bash deploy/van-trading-core/qualify.sh                    # JSON report; exit 0 only when every required check is GREEN
+EXPECTED_SHA=<40-hex canonical commit selected for certification>
+sudo env VAN_EXPECTED_REPOSITORY_SHA="$EXPECTED_SHA" bash deploy/van-trading-core/qualify.sh
+# JSON report exits 0 only when every required check is GREEN and the deployed clean checkout is exactly EXPECTED_SHA.
 ```
 
 Then on `dial-hermes-control`:
@@ -90,3 +92,5 @@ The commander uses three distinct HMAC identities: legacy commander (non-sensiti
 
 Package installation on arm64, Supabase image pulls, systemd activation, ufw, and the commander over the
 private VCN. `qualify.sh` is the acceptance instrument for those; its JSON belongs in the implementation ledger.
+Qualification is deliberately exact-SHA bound: `VAN_EXPECTED_REPOSITORY_SHA` is mandatory, tracked working-tree
+changes fail the gate, and the emitted evidence records both the observed and expected repository SHA.
