@@ -406,6 +406,24 @@
       ],
       "detail": "STT final/error callbacks re-arm only the active wake-originated turn; manual voice turns cannot enable background listening.",
       "provenance": "NEWLY_DISCOVERED_DURING_RECONSTRUCTION"
+    },
+    {
+      "id": "REC-P1-015",
+      "severity": "P1",
+      "title": "Trading Core runtime qualification could certify a stale or locally modified checkout without binding evidence to the externally selected repository SHA",
+      "status": "CLOSED",
+      "disposition": "EXACT_SHA_RUNTIME_EVIDENCE_BINDING",
+      "evidence": [
+        "commit:7b07df1767abc910c683cbcf1e24cceef1d1db45",
+        "commit:e92d318060db42b1e6fba8e40e9e4a819fdfc6a6",
+        "commit:4d3a544d4a7c0a4d0ca4c0eff333a3eeea460219",
+        "commit:70c7709beb27bef1a198cae4a03c2fb2a8eb1d55",
+        "deploy/van-trading-core/qualify.sh",
+        "deploy/van-trading-core/oci/rebuild-van-trading-core.py",
+        "trading/tests/test_oci_trading_topology_bootstrap.py"
+      ],
+      "acceptance": "Qualification now fails unless a clean deployed checkout exactly matches VAN_EXPECTED_REPOSITORY_SHA; the report records observed and expected SHA, and rebuild resolves the branch once before provisioning so a moving ref cannot silently change the certified revision.",
+      "detail": "Repository closure and runtime qualification are separate claims. This guard makes later Trading Core live evidence causally attributable to a specific canonical commit rather than to whatever checkout happens to be installed."
     }
   ],
   "closure_summary": {
