@@ -63,8 +63,10 @@ object VoiceRecognitionPolicy {
             requiresArbiterYield = true,
         )
         // The designed tier: below API 31 there is no on-device recognizer API at all, so
-        // Sherpa was always the plan here. Unreachable in a shipping build, because minSdk
-        // is 31 and the build guard refuses any lower floor without a Sherpa runtime.
+        // Sherpa primary ASR was always the plan here. Unreachable in the current shipping
+        // build because minSdk is 31 and the build guard refuses a lower floor unless a
+        // primary ASR bundle is explicitly declared. KWS/second-pass sherpa usage does not
+        // satisfy that separate requirement.
         apiLevel <= 30 -> VoiceRecognitionCapabilityDecision(
             backend = VoiceRecognitionBackend.SHERPA_PRIMARY_REQUIRED,
             callerAudioSupported = false,
