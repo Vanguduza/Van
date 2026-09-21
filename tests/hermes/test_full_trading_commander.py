@@ -126,3 +126,12 @@ def test_isolated_commander_has_only_enumerated_recovery_elevation():
     assert "generic sudo authority" in installer
     assert "full_desktop_commander_no_generic_sudo" in qualifier
     assert "full_desktop_commander_recovery_sudo" in qualifier
+
+
+def test_privileged_recovery_diagnostics_are_redacted_before_commander_sees_them():
+    recovery = read("deploy/van-trading-core/van-github-recovery.sh")
+    assert "redact_stream()" in recovery
+    assert "journalctl -u \"$u\" -n 30 --no-pager 2>/dev/null | redact_stream" in recovery
+    for secret_word in ("password", "token", "api[_-]?key", "signing[_-]?key"):
+        assert secret_word in recovery
+    assert "[REDACTED]" in recovery
