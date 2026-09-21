@@ -235,6 +235,7 @@ class VanApplication : Application(), VoiceInputCallback, TtsOutputCallback {
         )
         val secondPassCoordinator = SherpaLocalSecondPassAsr.fromFiles(this)
             ?.let(::VoiceSecondPassCoordinator)
+        val speakerSimilarityScorer = SherpaSpeakerSimilarityScorer.fromFiles(this)
         voiceInput = VoiceInputManager(
             context = this,
             callback = this,
@@ -243,6 +244,7 @@ class VanApplication : Application(), VoiceInputCallback, TtsOutputCallback {
             personalConfusionProvider = { transcript ->
                 personalSpeechModel.correctionFor(transcript, activeSpeechContexts()) != null
             },
+            speakerSimilarityScorer = speakerSimilarityScorer,
         )
         voiceSession = VoiceSessionCoordinator(voiceInput, ttsOutput)
         queueReplayer = QueueReplayer(commandQueue, gatewayClient, degradedModeStore, appScope)
@@ -593,6 +595,7 @@ class VanApplication : Application(), VoiceInputCallback, TtsOutputCallback {
                 source = VanCommandSource.VOICE,
                 turnId = result.turnId,
                 speechEvidenceRef = result.speechEvidenceRef,
+                speakerScore = result.speakerSimilarity,
             )
         }
         // Re-arm only when this was the exact turn opened by WakeCoordinator. Manual voice
