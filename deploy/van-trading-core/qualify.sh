@@ -154,5 +154,14 @@ if [[ -z "$bad_listeners" && -z "$missing_ports" ]]; then add supabase_loopback 
 shopt -s nullglob; hb=("$DATA"/heartbeats/*.json); if (( ${#hb[@]} )); then for f in "${hb[@]}"; do age=$(( $(date +%s) - $(jq -r '.updated_ms' "$f")/1000 )); [[ $age -lt 300 ]] && add "session:$(basename "$f" .json)" GREEN "$(jq -c '{status,cycles,kill_switch}' "$f") age=${age}s" 0 || add "session:$(basename "$f" .json)" AMBER "stale heartbeat ${age}s" 0; done; else add sessions AMBER "no session heartbeats yet (no account enabled)" 0; fi
 [[ "$(uname -m)" == "x86_64" ]] && add mt5_native AMBER "x86_64: MT5 could run here, but the design keeps MT5 on the Windows worker" 0 || add mt5_native AMBER "ARM64 host: MT5 runs on the Windows bridge worker; this VM holds only the mTLS client" 0
 status=GREEN; (( fails )) && status=RED
-printf '{"host":"%s","status":"%s","required_failures":%d,"repository_sha":"%s","expected_repository_sha":"%s","at":"%s","checks":[%s]}\n' "$(hostname)" "$status" "$fails" "$OBSERVED_REPOSITORY_SHA" "$EXPECTED_REPOSITORY_SHA" "$(date -u +%Y-%m-%dT%H:%M:%SZ)" "$(IFS=,; echo "${checks[*]}")" | jq .
+checks_json="[$(IFS=,; echo "${checks[*]}")]"
+jq -n \
+  --arg host "$(hostname)" \
+  --arg status "$status" \
+  --arg repository_sha "$OBSERVED_REPOSITORY_SHA" \
+  --arg expected_repository_sha "$EXPECTED_REPOSITORY_SHA" \
+  --arg at "$(date -u +%Y-%m-%dT%H:%M:%SZ)" \
+  --argjson required_failures "$fails" \
+  --argjson checks "$checks_json" \
+  '{host:$host,status:$status,required_failures:$required_failures,repository_sha:$repository_sha,expected_repository_sha:$expected_repository_sha,at:$at,checks:$checks}'
 (( fails == 0 ))
