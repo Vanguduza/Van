@@ -73,6 +73,7 @@ spec = {
             "google_contacts_resolve",
             "google_tasks_list",
             "google_job_plan",
+            "google_action_execute",
             "research_status",
             "research_search",
             "action_begin",
