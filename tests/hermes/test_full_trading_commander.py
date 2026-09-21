@@ -32,12 +32,30 @@ def test_private_transport_is_forced_command_and_fail_closed():
     transport = read("deploy/van-trading-core/hermes/install-full-commander-transport.sh")
     wrapper = read("deploy/van-trading-core/hermes/van-trading-full-commander-stdio.sh")
 
-    assert 'restrict,command=' in transport
-    assert "/home/$USER_NAME/.local/bin/van-local-commander-mcp" in transport
+    assert "van-install-commander-key" in transport
+    assert "ADMIN_USER" in transport and "COMMANDER_USER" in transport
+    assert "vancommander" in transport
     assert "BatchMode=yes" in wrapper
     assert "IdentitiesOnly=yes" in wrapper
     assert "StrictHostKeyChecking=yes" in wrapper
     assert "StrictHostKeyChecking=no" not in wrapper
+
+
+def test_full_commander_has_an_os_identity_and_secret_boundary():
+    installer = read("deploy/van-trading-core/install-full-desktop-commander.sh")
+    qualifier = read("deploy/van-trading-core/qualify.sh")
+    wrapper = read("deploy/van-trading-core/hermes/van-trading-full-commander-stdio.sh")
+    recovery = read("deploy/van-trading-core/van-github-recovery.sh")
+
+    assert 'SERVICE_USER="${VAN_DESKTOP_COMMANDER_USER:-vancommander}"' in installer
+    assert '/var/lib/van-commander' in installer
+    assert 'passwd -l "$SERVICE_USER"' in installer
+    assert 'for forbidden in sudo docker vati' in installer
+    assert 'test -r /opt/van-trading/secrets/commander.token' in installer
+    assert 'USER_NAME="${VAN_TRADING_COMMANDER_USER:-vancommander}"' in wrapper
+    assert "full_desktop_commander_secret_boundary" in qualifier
+    assert "full_desktop_commander_identity" in qualifier
+    assert "/var/lib/van-commander/.local/bin/van-local-commander-mcp" in recovery
 
 
 def test_full_commander_is_bootstrapped_on_trading_core():
