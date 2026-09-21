@@ -22,11 +22,11 @@ if [[ ! -d "$APP/.git" ]]; then
   add repository_exact_sha RED "canonical app checkout missing at $APP"
 else
   OBSERVED_REPOSITORY_SHA="$(git -C "$APP" rev-parse HEAD 2>/dev/null || true)"
-  dirty="$(git -C "$APP" status --porcelain --untracked-files=no 2>/dev/null || true)"
+  dirty="$(git -C "$APP" status --porcelain --untracked-files=all 2>/dev/null || true)"
   if [[ ! "$OBSERVED_REPOSITORY_SHA" =~ ^[0-9a-f]{40}$ ]]; then
     add repository_exact_sha RED "cannot resolve deployed repository SHA"
   elif [[ -n "$dirty" ]]; then
-    add repository_exact_sha RED "deployed repository has tracked working-tree changes"
+    add repository_exact_sha RED "deployed repository has tracked or untracked working-tree changes"
   elif [[ ! "$EXPECTED_REPOSITORY_SHA" =~ ^[0-9a-f]{40}$ ]]; then
     add repository_exact_sha RED "VAN_EXPECTED_REPOSITORY_SHA must be the externally selected 40-hex commit"
   elif [[ "$OBSERVED_REPOSITORY_SHA" != "$EXPECTED_REPOSITORY_SHA" ]]; then
