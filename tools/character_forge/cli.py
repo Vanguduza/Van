@@ -46,6 +46,9 @@ def cmd_source_admit(args):
     manifest=load_yaml(); status=load_status(); records=source_records()
     old={(x.get("path"),x.get("sha256")) for x in manifest.get("sources") or []}; new={(x.get("path"),x.get("sha256")) for x in records}
     manifest["sources"]=records
+    if old != new and manifest.get("owner_confirmed_complete"):
+        manifest["owner_confirmed_complete"]=False
+        manifest["owner_confirmation_date"]=None
     if not status.get("baseline_sha"): status["baseline_sha"]=_git_head()
     manifest["baseline_sha"]=status["baseline_sha"]; status["current_stage"]="admission"; status["build_ready"]=False
     status["blockers"]=["OWNER_SOURCE_CONFIRMATION_PENDING","RIVE_EDITOR_UNPINNED","LAYER_ARTIFACT_MISSING","RIVE_ASSET_MISSING","S24_DEVICE_GATES_NOT_RUN"]
@@ -60,7 +63,11 @@ def cmd_vectors_admit(args):
     svg=Path(args.svg).resolve(); report=lint_svg(svg,require_geometry=True)
     if not report.ok: print(json.dumps(report.as_dict(),indent=2)); return 1
     manifest=load_yaml(); status=load_status(); sha=sha256_file(svg)
+    for previous in manifest.get("artifacts") or []:
+        if previous.get("kind")=="layer_svg" and previous.get("sha256")!=sha:
+            previous["promotion"]="SUPERSEDED"
     upsert_artifact(manifest,{"artifact_id":f"layer_svg:{sha}","kind":"layer_svg","path":rel(svg),"sha256":sha,"stage":"vector","promotion":"CANDIDATE","produced_by":f"artist:{args.artist}","inputs":[r["artifact_id"] for r in manifest.get("sources") or []],"lint":report.as_dict()})
+    manifest.setdefault("reviews",{}).pop("layer_svg",None)
     output=VALIDATION_DIR/"layer_sheet.png"; render_layer_sheet(svg,output); append_receipt(manifest,_receipt("vectors admit",[sha],[sha256_file(output)],args.actor))
     status["current_stage"]="vector"; status["next_action"]="Independent reviewer/owner records MANIFEST.yaml reviews.layer_svg verdict PASS"; _save(manifest,status); return 0
 

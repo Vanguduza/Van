@@ -95,7 +95,7 @@ def append_receipt(manifest: dict[str, Any], receipt: dict[str, Any]) -> None:
     manifest["receipts"] = receipts
 
 def find_artifact(manifest: dict[str, Any], *, kind: str | None = None, sha256: str | None = None) -> dict[str, Any] | None:
-    for artifact in manifest.get("artifacts") or []:
+    for artifact in reversed(manifest.get("artifacts") or []):
         if kind is not None and artifact.get("kind") != kind:
             continue
         if sha256 is not None and artifact.get("sha256") != sha256:

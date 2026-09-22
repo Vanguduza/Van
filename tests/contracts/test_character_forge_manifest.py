@@ -23,3 +23,11 @@ def test_admitted_source_set_has_no_unlisted_file():
     listed = {record["path"] for record in sources}
     actual = {rel(path) for path in iter_source_files()}
     assert listed == actual
+
+def test_latest_artifact_lookup_prefers_newest():
+    from tools.character_forge.manifest import find_artifact
+    manifest={"artifacts":[
+        {"kind":"layer_svg","sha256":"old"},
+        {"kind":"layer_svg","sha256":"new"},
+    ]}
+    assert find_artifact(manifest,kind="layer_svg")["sha256"]=="new"

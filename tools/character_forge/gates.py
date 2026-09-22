@@ -41,7 +41,10 @@ def _rive_android_pin():
 def m0():
     manifest=load_yaml(); status=load_status(); tools=_yaml(TOOLS); problems=validate_status(status)
     if not status.get("baseline_sha"): problems.append("baseline SHA missing")
-    if not manifest.get("owner_confirmed_complete"): problems.append("owner source confirmation pending")
+    if not manifest.get("owner_confirmed_complete"):
+        problems.append("owner source confirmation pending")
+    elif not str(manifest.get("owner_confirmation_date") or "").strip():
+        problems.append("owner source confirmation date missing")
     sources=manifest.get("sources") or []
     if not sources: problems.append("source set not admitted")
     problems.extend(verify_records(sources))
@@ -60,7 +63,10 @@ def m1():
     if not layer: problems.append("no admitted layer_svg")
     elif verify_records([layer]): problems.append("admitted layer_svg hash mismatch")
     review=((manifest.get("reviews") or {}).get("layer_svg") or {})
-    if review.get("verdict")!="PASS": problems.append("layer SVG independent/owner review not PASS")
+    if review.get("verdict")!="PASS":
+        problems.append("layer SVG independent/owner review not PASS")
+    elif layer and review.get("sha256")!=layer.get("sha256"):
+        problems.append("layer SVG review is for a superseded SHA")
     return problems
 
 def m2():
