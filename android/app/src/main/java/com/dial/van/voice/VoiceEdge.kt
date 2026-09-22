@@ -165,7 +165,8 @@ class VoiceEdge(
             return null
         }
         speech.mark(segment.segmentId, SpeechSegmentState.SPEAKING)
-        tts.speak(segment.text, utteranceId = segment.segmentId)
+        // GAP-F-013 — the segment's estimated cue timing, when the Gateway sent one.
+        tts.speak(segment.text, utteranceId = segment.segmentId, cueTiming = segment.cueTiming)
         return null
     }
 

@@ -43,6 +43,22 @@ data class OverlayVisibility(
     val minimized: Boolean = false,
     /** Something is covering the overlay entirely — a full-screen app, the keyguard shade. */
     val occluded: Boolean = false,
+    /**
+     * Item 3 — obstruction extension. The on-screen keyboard is covering wherever VAN
+     * currently sits. Kept apart from [occluded]: the owner-facing reason differs ("the
+     * keyboard is up" is expected and actionable; "something is covering VAN" reads as a
+     * fault), and a future producer may want to reposition VAN above the keyboard rather
+     * than only pause it — that needs its own boolean, not a shared "something is wrong"
+     * flag it cannot tell apart from a full-screen app or the keyguard.
+     */
+    val keyboardVisible: Boolean = false,
+    /**
+     * A foreground app has gone full-screen/immersive (video, a game, a camera viewfinder)
+     * and is drawing over the overlay's touch space even though the overlay window itself
+     * is still attached. Also kept apart from [occluded]: this is "another app claimed the
+     * screen", not "VAN's own window stack put something in front of VAN".
+     */
+    val fullscreenAppActive: Boolean = false,
     val destroying: Boolean = false,
 )
 
@@ -52,6 +68,8 @@ object OverlayVisibilityPolicy {
         !visibility.attached -> OverlayLifecycleTarget.PAUSED
         !visibility.screenOn -> OverlayLifecycleTarget.PAUSED
         visibility.occluded -> OverlayLifecycleTarget.PAUSED
+        visibility.fullscreenAppActive -> OverlayLifecycleTarget.PAUSED
+        visibility.keyboardVisible -> OverlayLifecycleTarget.PAUSED
         else -> OverlayLifecycleTarget.ANIMATING
     }
 
@@ -70,6 +88,8 @@ object OverlayVisibilityPolicy {
         !visibility.attached -> "overlay view is not attached"
         !visibility.screenOn -> "screen is off"
         visibility.occluded -> "overlay is fully covered"
+        visibility.fullscreenAppActive -> "a full-screen app is in front"
+        visibility.keyboardVisible -> "the keyboard is covering VAN"
         visibility.minimized -> "minimized portrait, still animating"
         else -> "visible and animating"
     }

@@ -24,8 +24,10 @@ class OverlayDragControllerTest {
     ) : OverlayWindowPort {
         val log = mutableListOf<String>()
         var haptics = 0
+        var dockTicks = 0
         var dismissed = false
         var docked: DockEdge? = null
+        var dockDurationMs: Int? = null
 
         override fun screen() = screen
         override fun dp(value: Int) = value * 3
@@ -42,7 +44,11 @@ class OverlayDragControllerTest {
         override fun refreshDismissTarget() { log += "refresh" }
         override fun hideDismissTarget() { log += "hide" }
         override fun dismissOverlay() { dismissed = true }
-        override fun dockedTo(edge: DockEdge) { docked = edge }
+        override fun dockedTo(edge: DockEdge, durationMs: Int) {
+            docked = edge
+            dockDurationMs = durationMs
+        }
+        override fun dockFeedback() { dockTicks += 1 }
     }
 
     private val resting = VanOverlayUiState(presentation = VanOverlayPresentation.FULL_FLOATING)
@@ -150,5 +156,84 @@ class OverlayDragControllerTest {
             end(OverlayDragController(window), resting.copy(dragging = true))
             assertTrue(window.log.contains("hide"), "$window left the dismiss target up")
         }
+    }
+
+    // ---------------------------------------------------------------- item 3: velocity/fling
+
+    @Test
+    fun `a slow release mid-screen docks nowhere and ticks nothing`() {
+        // No position-only reason to dock (touch size 184dp*3=552px, screen 1080px wide, so
+        // safely mid-screen is roughly 48..480; 264 is nowhere near either edge threshold)
+        // and no speed to read as a flick: VAN stays exactly where the owner left it.
+        val window = FakeWindow(x = 264, y = 1200)
+        val controller = OverlayDragController(window)
+        controller.begin(resting, nowMs = 0L)
+        controller.drag(resting, dx = 1, dy = 0, nowMs = 500L)
+        val after = controller.finish(resting.copy(xPx = window.x, yPx = window.y))
+        assertEquals(DockEdge.NONE, window.docked)
+        assertEquals(0, window.dockTicks, "ticked on a release that did not dock")
+        assertNotNull(after)
+    }
+
+    @Test
+    fun `a fast flick toward an edge docks there even released mid-screen`() {
+        // Starts and (after the drag) stays mid-screen — see the note above on why 264 is
+        // nowhere near either edge threshold — so only the release velocity, not position,
+        // can explain docking LEFT.
+        val window = FakeWindow(x = 264, y = 1200)
+        val controller = OverlayDragController(window)
+        controller.begin(resting, nowMs = 0L)
+        // A leftward delta over a short time, well past the flick threshold, that still
+        // lands the window mid-screen (164) rather than clamped against the edge.
+        controller.drag(resting, dx = -100, dy = 0, nowMs = 20L)
+        assertTrue(window.x in 49..479, "test setup drifted onto an edge threshold: ${window.x}")
+        val after = controller.finish(resting.copy(xPx = window.x, yPx = window.y))
+        assertEquals(DockEdge.LEFT, window.docked)
+        assertEquals(1, window.dockTicks, "a real dock did not tick")
+        assertNotNull(after)
+        assertEquals(0, after.xPx)
+    }
+
+    @Test
+    fun `docking ticks but dismissing never does`() {
+        val window = FakeWindow()
+        OverlayDragController(window).finish(resting.copy(dismissTargetArmed = true))
+        assertEquals(0, window.dockTicks, "a dismiss should never feel like a dock")
+    }
+
+    @Test
+    fun `reduced motion still reports a duration of zero for a fast flick`() {
+        val window = FakeWindow(x = 264, y = 1200)
+        val controller = OverlayDragController(window)
+        controller.begin(resting, nowMs = 0L)
+        controller.drag(resting, dx = -100, dy = 0, nowMs = 20L)
+        controller.finish(resting.copy(xPx = window.x, yPx = window.y), reducedMotion = true)
+        assertEquals(0, window.dockDurationMs)
+    }
+
+    @Test
+    fun `an ordinary dock still reports a positive duration`() {
+        val window = FakeWindow(x = 4, y = 900)
+        val controller = OverlayDragController(window)
+        controller.finish(resting.copy(dragging = true))
+        assertNotNull(window.dockDurationMs)
+        assertTrue(window.dockDurationMs!! > 0)
+    }
+
+    @Test
+    fun `velocity resets on a new drag so a stale flick cannot dock the next one`() {
+        val window = FakeWindow(x = 264, y = 1200)
+        val controller = OverlayDragController(window)
+        controller.begin(resting, nowMs = 0L)
+        controller.drag(resting, dx = -100, dy = 0, nowMs = 20L)
+        controller.cancel(resting)
+
+        // A fresh, slow drag mid-screen — the earlier flick must not still count.
+        window.x = 264
+        window.y = 1200
+        controller.begin(resting, nowMs = 1000L)
+        controller.drag(resting, dx = 1, dy = 0, nowMs = 1500L)
+        controller.finish(resting.copy(xPx = window.x, yPx = window.y))
+        assertEquals(DockEdge.NONE, window.docked)
     }
 }

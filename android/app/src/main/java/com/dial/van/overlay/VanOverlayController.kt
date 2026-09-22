@@ -81,9 +81,22 @@ object VanOverlayController {
      * the edge detection as two consecutive calls with the same five arguments, which is
      * one argument-order slip away from an avatar that snaps to one edge and reports the
      * other.
+     *
+     * [velocityXPxPerMs]/[velocityYPxPerMs] default to 0 — a caller with no velocity to
+     * report (or that does not care, like a test exercising position alone) gets exactly
+     * the position-only behaviour this had before item 3's fling-to-edge addition.
      */
-    fun settle(x: Int, y: Int, touchSize: Int, screen: OverlayScreen): Pair<OverlayPlacement, DockEdge> {
-        val snapped = EdgeDocking.snap(x, y, touchSize, screen.widthPx, screen.heightPx)
+    fun settle(
+        x: Int,
+        y: Int,
+        touchSize: Int,
+        screen: OverlayScreen,
+        velocityXPxPerMs: Float = 0f,
+        velocityYPxPerMs: Float = 0f,
+    ): Pair<OverlayPlacement, DockEdge> {
+        val snapped = EdgeDocking.flingSnap(
+            x, y, velocityXPxPerMs, velocityYPxPerMs, touchSize, screen.widthPx, screen.heightPx,
+        )
         val edge = EdgeDocking.detectEdge(
             snapped.first, snapped.second, touchSize, screen.widthPx, screen.heightPx,
         )

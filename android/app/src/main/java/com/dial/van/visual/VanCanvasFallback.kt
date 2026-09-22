@@ -50,7 +50,7 @@ fun VanAvatar(
     state: VanVisualState,
     modifier: Modifier = Modifier,
     presentation: VanPresentation = VanPresentation.COMPACT,
-    onDecision: (VanRenderDecision) -> Unit = {},
+    onDecision: (VanRenderDecision) -> Unit = VanRendererStatusPublisher::publish,
 ) {
     val context = LocalContext.current
     var decision by remember(context) { mutableStateOf(resolveRenderer(context)) }
@@ -123,7 +123,7 @@ fun VanEmbodiment(
     modifier: Modifier = Modifier,
     presentation: VanPresentation = VanPresentation.COMPACT,
     budget: VanEffectBudget = VanEffectBudget.FULL,
-    onDecision: (VanRenderDecision) -> Unit = {},
+    onDecision: (VanRenderDecision) -> Unit = VanRendererStatusPublisher::publish,
     characterFraction: Float = 1f,
     /**
      * P1-PERF-002 — false stops the frame loop entirely. The overlay passes
@@ -136,7 +136,13 @@ fun VanEmbodiment(
     // local activity and Zone C follows semantic truth, and they change independently, so
     // each carries its own transition; sharing one would make a health change drag the
     // activity field with it.
-    val activitySpec = rememberBlendedAura(state.durableState, budget)
+    // DNA §2 — reactive to voice RMS: a pure post-transform over the already-blended spec,
+    // so a louder syllable brightens the field without retriggering P1-AURA-002's blend
+    // machinery (`mouthOpen` is not one of that effect's keys, deliberately: it changes many
+    // times a second during speech, and restarting a 120-420ms blend that often would be the
+    // exact snap-on-change P1-AURA-002 exists to remove). Zero outside LISTENING/SPEAKING —
+    // see `reactToVoiceAmplitude`'s doc — so this is a no-op for every other state.
+    val activitySpec = rememberBlendedAura(state.durableState, budget).reactToVoiceAmplitude(state.mouthOpen)
     val semanticSpec = rememberBlendedAura(state.resolvedSemanticState, budget)
     val phase = vanIdlePhase(state.durableState, !budget.allowMotion, animate = animate)
     val body = characterFraction.coerceIn(0.40f, 1f)

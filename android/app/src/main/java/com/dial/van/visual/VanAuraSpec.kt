@@ -280,3 +280,25 @@ object VanAuraSpecs {
         envelopeSegments = segments,
     )
 }
+
+/**
+ * DNA §2 — the aura reacts to voice amplitude, not only to the state's fixed baseline.
+ *
+ * [amplitude] is 0f..1f — VAN's own mouth-open/RMS-derived signal during LISTENING/SPEAKING
+ * (see `VanPresenceFrame.mouthOpen`, and GAP-F-013's cue timing that now drives it during
+ * speech). 0 leaves [this] unchanged, so calling this unconditionally on every state's spec
+ * is safe: outside LISTENING/SPEAKING the amplitude is always 0 (`VanPresenceReducer.idle`/
+ * `speechEnded` reset it), and the identity path costs nothing extra. Filament/spark energy
+ * is nudged rather than replaced, so a loud syllable brightens the field VAN already has
+ * rather than overriding what the state says — the field must still read as "listening",
+ * only more or less animatedly so.
+ */
+fun VanAuraSpec.reactToVoiceAmplitude(amplitude: Float): VanAuraSpec {
+    val level = amplitude.coerceIn(0f, 1f)
+    if (level <= 0f) return this
+    return copy(
+        intensity = (intensity + level * 0.18f).coerceAtMost(VanAuraSpec.MAX_INTENSITY),
+        arcActivity = (arcActivity + level * 0.25f).coerceAtMost(1f),
+        sparkRate = (sparkRate + level * 0.15f).coerceAtMost(1f),
+    )
+}

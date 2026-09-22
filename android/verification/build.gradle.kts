@@ -95,14 +95,27 @@ sourceSets {
             "com/dial/van/runtime/VanResourceEnvelope.kt",
             "com/dial/van/degraded/DegradedMode.kt",
             "com/dial/van/degraded/SubsystemSignals.kt",
+            // GAP-F-010 — the gateway's structured /health.degraded[] mapped onto subsystem
+            // rows, and the store that reconciles them into DegradedMode.subsystems. Both are
+            // free of Android imports (org.json + kotlinx.coroutines only), same reasoning as
+            // every other pure file in this list.
+            "com/dial/van/degraded/GatewayDegradedMapping.kt",
+            "com/dial/van/degraded/DegradedModeStore.kt",
             "com/dial/van/overlay/OverlayTheme.kt",
             "com/dial/van/overlay/EdgeDocking.kt",
             "com/dial/van/overlay/OverlayVisibilityPolicy.kt",
             "com/dial/van/overlay/OverlayDragController.kt",
             "com/dial/van/overlay/VanOverlayController.kt",
             "com/dial/van/overlay/VanOverlayInteraction.kt",
-            "com/dial/van/command/CommandModule.kt",
-            "com/dial/van/command/CommandCentreNav.kt",
+            // Replaces CommandModule.kt/CommandCentreNav.kt (P3-AND-009's flat 17-module
+            // grid) — the typed DNA §4 route registry and the pure nav model built on it:
+            // process-death restoration, legacy-intent/deep-link resolution, and the
+            // one-level "back" rule.
+            "com/dial/van/command/nav/VanRoute.kt",
+            "com/dial/van/command/nav/VanNavModel.kt",
+            // GAP-F-011 — whether a dispatched command's thread still needs polling, and
+            // what GET /v1/commands/{id} becomes once it answers.
+            "com/dial/van/command/work/ConversationReducer.kt",
             "com/dial/van/events/EventStream.kt",
             // One history for the app, rather than one per screen. Pure because the
             // cursor is an interface, so the merge of a socket page and a polled one

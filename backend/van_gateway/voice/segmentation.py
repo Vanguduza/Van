@@ -18,7 +18,9 @@ from __future__ import annotations
 
 import hashlib
 import re
-from dataclasses import dataclass
+from dataclasses import dataclass, field
+
+from van_gateway.voice.speech_cues import SegmentCueTiming, estimate_segment_timing
 
 #: Long enough that VAN does not sound like it is reading a list; short enough that a drop
 #: costs at most this much audio, and a barge-in lands within it.
@@ -53,6 +55,14 @@ class SpeechSegment:
     final: bool
     interruptible: bool
     content_digest: str
+    #: GAP-F-013 — estimated viseme cue timing for this segment's text, attached at build
+    #: time so the device receives it in the same payload as the words rather than needing
+    #: a second round trip. Defaulted via `field` so every existing construction site
+    #: (`SpeechSegment(**{**last.__dict__, ...})` in `speech_stream.append`) keeps working
+    #: without naming it explicitly.
+    cue_timing: SegmentCueTiming = field(
+        default_factory=lambda: SegmentCueTiming(cues=(), estimated_duration_ms=0)
+    )
 
     def as_json(self) -> dict:
         return {
@@ -64,6 +74,10 @@ class SpeechSegment:
             "final": self.final,
             "interruptible": self.interruptible,
             "content_digest": self.content_digest,
+            # GAP-F-013 — the device already receives this segment's text in this same
+            # payload; the cue timing rides along so lip sync does not wait on a second
+            # request the Gateway would otherwise have to correlate back to this segment.
+            "cue_timing": self.cue_timing.as_json(),
         }
 
 
@@ -162,6 +176,7 @@ def build_segments(
                 final=offset == len(pieces) - 1,
                 interruptible=interruptible,
                 content_digest=hashlib.sha256(piece.encode("utf-8")).hexdigest(),
+                cue_timing=estimate_segment_timing(piece),
             )
         )
     return out

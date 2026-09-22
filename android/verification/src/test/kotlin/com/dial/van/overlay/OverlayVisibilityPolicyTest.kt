@@ -47,6 +47,35 @@ class OverlayVisibilityPolicyTest {
     }
 
     @Test
+    fun `the keyboard covering VAN pauses the overlay and says why`() {
+        val visibility = OverlayVisibility(keyboardVisible = true)
+        assertFalse(OverlayVisibilityPolicy.shouldAnimate(visibility))
+        assertEquals(OverlayLifecycleTarget.PAUSED, OverlayVisibilityPolicy.target(visibility))
+        assertEquals("the keyboard is covering VAN", OverlayVisibilityPolicy.describe(visibility))
+    }
+
+    @Test
+    fun `a full-screen app in front pauses the overlay and says why`() {
+        val visibility = OverlayVisibility(fullscreenAppActive = true)
+        assertFalse(OverlayVisibilityPolicy.shouldAnimate(visibility))
+        assertEquals(OverlayLifecycleTarget.PAUSED, OverlayVisibilityPolicy.target(visibility))
+        assertEquals("a full-screen app is in front", OverlayVisibilityPolicy.describe(visibility))
+    }
+
+    @Test
+    fun `the keyboard and a full-screen app are distinct reasons from being fully occluded`() {
+        // Same lifecycle outcome (PAUSED), but a reader should never confuse "the keyboard
+        // is up" with "the window stack put something over VAN" — they are different
+        // repair actions for an owner support flow.
+        val reasons = setOf(
+            OverlayVisibilityPolicy.describe(OverlayVisibility(occluded = true)),
+            OverlayVisibilityPolicy.describe(OverlayVisibility(keyboardVisible = true)),
+            OverlayVisibilityPolicy.describe(OverlayVisibility(fullscreenAppActive = true)),
+        )
+        assertEquals(3, reasons.size)
+    }
+
+    @Test
     fun `a detached view does not animate`() {
         assertFalse(OverlayVisibilityPolicy.shouldAnimate(OverlayVisibility(attached = false)))
     }
@@ -71,6 +100,8 @@ class OverlayVisibilityPolicyTest {
             OverlayVisibility(attached = false),
             OverlayVisibility(destroying = true),
             OverlayVisibility(minimized = true),
+            OverlayVisibility(keyboardVisible = true),
+            OverlayVisibility(fullscreenAppActive = true),
             OverlayVisibility(),
         )
         for (case in cases) {
@@ -87,16 +118,21 @@ class OverlayVisibilityPolicyTest {
             for (attached in listOf(true, false)) {
                 for (minimized in listOf(true, false)) {
                     for (occluded in listOf(true, false)) {
-                        for (destroying in listOf(true, false)) {
-                            val visibility = OverlayVisibility(
-                                screenOn, attached, minimized, occluded, destroying,
-                            )
-                            val target = OverlayVisibilityPolicy.target(visibility)
-                            assertEquals(
-                                target == OverlayLifecycleTarget.ANIMATING,
-                                OverlayVisibilityPolicy.shouldAnimate(visibility),
-                                "shouldAnimate disagrees with target for $visibility",
-                            )
+                        for (keyboardVisible in listOf(true, false)) {
+                            for (fullscreenAppActive in listOf(true, false)) {
+                                for (destroying in listOf(true, false)) {
+                                    val visibility = OverlayVisibility(
+                                        screenOn, attached, minimized, occluded,
+                                        keyboardVisible, fullscreenAppActive, destroying,
+                                    )
+                                    val target = OverlayVisibilityPolicy.target(visibility)
+                                    assertEquals(
+                                        target == OverlayLifecycleTarget.ANIMATING,
+                                        OverlayVisibilityPolicy.shouldAnimate(visibility),
+                                        "shouldAnimate disagrees with target for $visibility",
+                                    )
+                                }
+                            }
                         }
                     }
                 }

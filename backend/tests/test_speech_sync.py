@@ -1,71 +1,16 @@
 from __future__ import annotations
 
-"""Cue-clock speech sync model used by Android/TTS binding."""
+"""Cue-clock speech sync model used by Android/TTS binding.
 
+GAP-F-013 — `SpeechCueClock` used to be defined in this test file: a decision function
+written, exercised here, and imported by nothing that runs. It now lives in production at
+`van_gateway.voice.speech_cues`, re-exported here so these tests keep exercising the exact
+class the Gateway ships rather than a copy of it.
+"""
 
-class SpeechCueClock:
-    """Timestamped visemes with RMS/mouth_open fallback, bounded slew, visual lead.
+from van_gateway.voice.speech_cues import SpeechCueClock
 
-    Task state is independent from TTS state — ending TTS must not imply task SUCCESS.
-    """
-
-    def __init__(self, *, visual_lead_ms: int = 40, max_slew: float = 0.25) -> None:
-        self.visual_lead_ms = visual_lead_ms
-        self.max_slew = max_slew
-        self.mouth_open = 0.0
-        self.viseme = 0
-        self.speaking = False
-        self.paused = False
-        self._anchor_ms = 0
-        self._cues: list[tuple[int, int, float]] = []
-
-    def start_phrase(self, cues: list[tuple[int, int, float]], now_ms: int) -> None:
-        self._cues = sorted(cues)
-        self._anchor_ms = now_ms
-        self.speaking = True
-        self.paused = False
-
-    def pause(self) -> None:
-        self.paused = True
-
-    def resume(self, now_ms: int) -> None:
-        if not self.paused:
-            return
-        self._anchor_ms = now_ms
-        self.paused = False
-
-    def interrupt(self) -> None:
-        self.speaking = False
-        self.paused = False
-        self.mouth_open = 0.0
-        self.viseme = 0
-        self._cues = []
-
-    def tick(self, now_ms: int, *, rms: float | None = None) -> dict:
-        if not self.speaking or self.paused:
-            target = 0.0
-            viseme = 0
-        elif self._cues:
-            t = now_ms - self._anchor_ms + self.visual_lead_ms
-            current = self._cues[0]
-            for cue in self._cues:
-                if cue[0] <= t:
-                    current = cue
-                else:
-                    break
-            viseme, target = current[1], current[2]
-        else:
-            viseme = 0
-            target = max(0.0, min(1.0, (rms or 0.0) * 1.5))
-
-        delta = target - self.mouth_open
-        if delta > self.max_slew:
-            delta = self.max_slew
-        elif delta < -self.max_slew:
-            delta = -self.max_slew
-        self.mouth_open = max(0.0, min(1.0, self.mouth_open + delta))
-        self.viseme = viseme
-        return {"mouth_open": self.mouth_open, "viseme": self.viseme, "speaking": self.speaking}
+__all__ = ["SpeechCueClock"]
 
 
 def test_viseme_clock_and_interrupt():
