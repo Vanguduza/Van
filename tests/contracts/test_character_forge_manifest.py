@@ -31,3 +31,29 @@ def test_latest_artifact_lookup_prefers_newest():
         {"kind":"layer_svg","sha256":"new"},
     ]}
     assert find_artifact(manifest,kind="layer_svg")["sha256"]=="new"
+
+
+def test_every_state_changing_character_forge_command_records_provenance():
+    import inspect
+    from tools.character_forge import cli
+
+    mutators = (
+        cli.cmd_source_admit,
+        cli.cmd_vectors_admit,
+        cli.cmd_rive_receipt,
+        cli.cmd_rive_stage,
+        cli.cmd_gate,
+        cli.cmd_record_validation,
+        cli.cmd_review,
+        cli.cmd_confirm_source,
+        cli.cmd_core_verdict,
+        cli.cmd_integrate,
+        cli.cmd_record_acceptance,
+        cli.cmd_release,
+    )
+    missing = [
+        fn.__name__
+        for fn in mutators
+        if "append_receipt" not in inspect.getsource(fn)
+    ]
+    assert missing == [], f"state-changing commands without manifest receipts: {missing}"

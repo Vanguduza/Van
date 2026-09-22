@@ -123,7 +123,9 @@ def cmd_rive_receipt(args):
             print("NO_CHANGE"); return 0
     receipt=packaging_receipt(candidate=candidate,stage=stage,editor_version=args.editor_version,rive_file_id=args.rive_file_id,rive_revision=args.rive_revision,svg_sha=args.svg_sha,contract_sha=contract_sha,artist=args.artist,notes=args.notes or "")
     path.write_text(json.dumps(receipt,indent=2)+"\n",encoding="utf-8")
-    append_receipt(manifest,_receipt("rive receipt",[args.svg_sha,receipt["contract_sha256"]],[receipt["candidate_sha256"]],args.actor)); dump_yaml(manifest); print(path.relative_to(ROOT)); return 0
+    append_receipt(manifest,_receipt("rive receipt",[args.svg_sha,receipt["contract_sha256"]],[receipt["candidate_sha256"]],args.actor))
+    status=load_status(); status["next_action"]=f"python -m tools.character_forge.cli rive stage-candidate {rel(candidate)} --stage {stage}"
+    _save(manifest,status); print(path.relative_to(ROOT)); return 0
 
 def _receipt_for_candidate(candidate):
     sha=sha256_file(candidate)
@@ -169,8 +171,26 @@ def cmd_rive_stage(args):
 
 def cmd_gate(args):
     result=evaluate(args.gate); status=load_status()
-    if args.gate=="m0": status["build_ready"]=result.passed
-    save_status(status); print(json.dumps({"gate":result.gate,"passed":result.passed,"reasons":list(result.reasons)},indent=2) if args.json else (f"{result.gate}: PASS" if result.passed else f"{result.gate}: FAIL\n- "+"\n- ".join(result.reasons))); return 0 if result.passed else 1
+    if args.gate=="m0":
+        prior=bool(status.get("build_ready")); status["build_ready"]=result.passed
+        if prior!=result.passed:
+            manifest=load_yaml()
+            append_receipt(
+                manifest,
+                _receipt(
+                    "gate m0",
+                    [str(status.get("baseline_sha") or "")]+[str(r.get("sha256") or "") for r in manifest.get("sources") or []],
+                    [f"BUILD_READY={str(result.passed).lower()}"],
+                    args.actor,
+                    "M0 gate transition recorded from the evaluated repository evidence",
+                ),
+            )
+            _save(manifest,status)
+        else:
+            save_status(status)
+    else:
+        save_status(status)
+    print(json.dumps({"gate":result.gate,"passed":result.passed,"reasons":list(result.reasons)},indent=2) if args.json else (f"{result.gate}: PASS" if result.passed else f"{result.gate}: FAIL\n- "+"\n- ".join(result.reasons))); return 0 if result.passed else 1
 
 def cmd_record_validation(args):
     status=load_status(); manifest=load_yaml(); run=str(args.ci_run or "").strip()
@@ -211,6 +231,17 @@ def cmd_record_validation(args):
         status["production"]={"emulator_validation":args.result,"ci_run":run,"rive_sha256":sha}
         manifest.setdefault("ci_evidence",{})[sha]={"stage":"production","result":args.result,"ci_run":run,"recorded_at":now_iso()}
         status["next_action"]="Complete S24 DEVICE_CHECKLIST.yaml and owner biometric acceptance" if args.result=="PASS" else "Fix production validation failure"
+        expected=sha
+    append_receipt(
+        manifest,
+        _receipt(
+            "record validation",
+            [str(expected),run],
+            [f"{args.stage}={args.result}"],
+            args.actor,
+            "CI validation result bound to the exact candidate/production SHA",
+        ),
+    )
     _save(manifest,status); return 0
 
 def cmd_review(args):
@@ -231,6 +262,17 @@ def cmd_review(args):
         manifest.setdefault("reviews",{})["full_rig"]=row
         status["full_rig"]["reviewed"]=args.verdict
         status["next_action"]="python -m tools.character_forge.cli gate m3" if args.verdict=="PASS" else "Artist revises the full rig"
+    review_sha=row["sha256"]
+    append_receipt(
+        manifest,
+        _receipt(
+            f"review {args.target}",
+            [review_sha],
+            [args.verdict],
+            args.actor,
+            f"review by {args.reviewer} on {args.date}",
+        ),
+    )
     _save(manifest,status); return 0
 
 def cmd_confirm_source(args):
@@ -243,7 +285,8 @@ def cmd_confirm_source(args):
         print("NO_CHANGE"); return 0
     manifest["owner_confirmed_complete"]=True; manifest["owner_confirmation_date"]=args.date
     append_receipt(manifest,_receipt("owner confirm-source",[r["sha256"] for r in manifest["sources"]],["OWNER_CONFIRMED_COMPLETE"],args.actor))
-    dump_yaml(manifest)
+    status=load_status(); status["next_action"]="python -m tools.character_forge.cli gate m0"
+    _save(manifest,status)
     return 0
 
 def cmd_core_verdict(args):
@@ -257,7 +300,19 @@ def cmd_core_verdict(args):
     if existing.get("candidate_sha256")==core["candidate_sha256"] and existing.get("verdict")==args.verdict and existing.get("notes","")== (args.notes or "") and existing.get("ci_run")==args.ci_run:
         print("NO_CHANGE"); return 0
     acceptance["core_rig"]={"candidate_sha256":core["candidate_sha256"],"verdict":args.verdict,"notes":args.notes or "","ci_run":args.ci_run,"recorded_at":now_iso()}; _write_yaml(ACCEPTANCE_PATH,acceptance)
-    core["ci_run"]=args.ci_run; core["owner_verdict"]=args.verdict; status["core_rig"]=core; status["next_action"]="Complete full rig" if args.verdict=="PASS" else "Artist revises core rig"; save_status(status); return 0
+    core["ci_run"]=args.ci_run; core["owner_verdict"]=args.verdict; status["core_rig"]=core; status["next_action"]="Complete full rig" if args.verdict=="PASS" else "Artist revises core rig"
+    manifest=load_yaml()
+    append_receipt(
+        manifest,
+        _receipt(
+            "owner record-core-verdict",
+            [core["candidate_sha256"],args.ci_run],
+            [args.verdict],
+            args.actor,
+            "owner core verdict bound to the already-recorded emulator CI evidence",
+        ),
+    )
+    _save(manifest,status); return 0
 
 def cmd_integrate(args):
     candidate=Path(args.candidate).resolve(); status=load_status(); full=status.get("full_rig") or {}
@@ -300,7 +355,19 @@ def cmd_record_acceptance(args):
     acceptance=_yaml(ACCEPTANCE_PATH)
     if acceptance.get("final")==final and load_status().get("owner_accepted"):
         print("NO_CHANGE"); return 0
-    acceptance["final"]=final; _write_yaml(ACCEPTANCE_PATH,acceptance); status=load_status(); status["owner_accepted"]=True; status["current_stage"]="certified"; status["next_action"]="python -m tools.character_forge.cli gate m4"; save_status(status); return 0
+    acceptance["final"]=final; _write_yaml(ACCEPTANCE_PATH,acceptance); status=load_status(); status["owner_accepted"]=True; status["current_stage"]="certified"; status["next_action"]="python -m tools.character_forge.cli gate m4"
+    manifest=load_yaml()
+    append_receipt(
+        manifest,
+        _receipt(
+            "owner record-acceptance",
+            [sha,str(final.get("key_id") or ""),str(final.get("verified_by") or "")],
+            ["OWNER_ACCEPTED"],
+            args.actor,
+            "verified visual-accept authority imported without copying the credential into the manifest receipt",
+        ),
+    )
+    _save(manifest,status); return 0
 
 
 def _update_release_truth(sha, status):
