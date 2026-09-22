@@ -65,6 +65,9 @@ REQUIRED_TOOLS = {
     "automation_route",
     "automation_execute",
     "automation_run_status",
+    "temporal_start",
+    "temporal_status",
+    "temporal_signal",
 }
 
 
