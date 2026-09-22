@@ -30,6 +30,7 @@ def _env(tmp_path, monkeypatch):
     monkeypatch.setenv("VAN_INGRESS_TOKEN", "test-ingress-token-0123456789abcdef0123456789")
     monkeypatch.setenv("VAN_DEVICE_SECRET_FERNET_KEY", Fernet.generate_key().decode())
     monkeypatch.setenv("VAN_INTERNAL_CONTROL_TOKEN", "test-internal-token")
+    monkeypatch.setenv("VAN_DEVICE_ENROLMENT_TOKEN", "test-device-enrolment-token")
     get_settings.cache_clear()
     yield
     get_settings.cache_clear()
@@ -43,7 +44,7 @@ async def client():
             ticket = await ac.post(
                 "/v1/devices/pairing-ticket",
                 json={"label": "visual-test", "ttl_seconds": 600},
-                headers={"x-van-internal-token": "test-internal-token"},
+                headers={"x-van-internal-token": "test-device-enrolment-token"},
             )
             assert ticket.status_code == 200, ticket.text
             paired = await ac.post(
