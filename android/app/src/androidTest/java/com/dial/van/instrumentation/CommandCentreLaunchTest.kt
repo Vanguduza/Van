@@ -10,10 +10,10 @@ import androidx.compose.ui.test.assertIsSelected
 import androidx.compose.ui.test.captureToImage
 import androidx.compose.ui.test.hasContentDescription
 import androidx.compose.ui.test.hasText
+import androidx.compose.ui.test.isRoot
 import androidx.compose.ui.test.isSelectable
 import androidx.compose.ui.test.junit4.createEmptyComposeRule
 import androidx.compose.ui.test.onNodeWithText
-import androidx.compose.ui.test.onRoot
 import androidx.compose.ui.test.performClick
 import androidx.test.core.app.ActivityScenario
 import androidx.test.core.app.ApplicationProvider
@@ -103,7 +103,14 @@ class CommandCentreLaunchTest {
         val additional = InstrumentationRegistry.getArguments().getString("additionalTestOutputDir")
         val root = additional?.let(::File) ?: context.filesDir
         val dir = File(root, "screenshots").apply { mkdirs() }
-        val bitmap = compose.onRoot().captureToImage().asAndroidBitmap()
-        File(dir, "$name.png").outputStream().use { bitmap.compress(Bitmap.CompressFormat.PNG, 100, it) }
+        // A ModalBottomSheet is its own window, so there can be two compose roots; capture
+        // each (the second file carries the sheet).
+        val roots = compose.onAllNodes(isRoot())
+        val count = roots.fetchSemanticsNodes().size
+        for (i in 0 until count) {
+            val bitmap = roots[i].captureToImage().asAndroidBitmap()
+            val file = File(dir, if (i == 0) "$name.png" else "$name-$i.png")
+            file.outputStream().use { bitmap.compress(Bitmap.CompressFormat.PNG, 100, it) }
+        }
     }
 }
