@@ -36,7 +36,7 @@
     "commits": "528366b, b78cbf4, 5498a6f",
     "evidence": "command/local_executors.py memory.remember + memory.decision.record via OwnerFactAuthor; owner-fact-readback verifier; test_local_typed_actions.py; shim context_fact_candidate/context_edge_candidate; memory/MemoryRoute.kt",
     "date": "2026-09-22",
-    "head": "176f25a"
+    "head": "08bad2c"
    }
   },
   {
@@ -68,7 +68,7 @@
     "commits": "528366b, b78cbf4, 5498a6f",
     "evidence": "reminder.create executor + resolver; migration 29 reminders.source; reminder-readback verifier; shim reminder_create → POST /v1/runtime/reminders; Home 'Upcoming' from GET /v1/reminders",
     "date": "2026-09-22",
-    "head": "176f25a"
+    "head": "08bad2c"
    }
   },
   {
@@ -103,7 +103,7 @@
     "commits": "b78cbf4, 3d845bc",
     "evidence": "/v1/runtime/trading/* (6 tools); commander positions/assessment read-only; test_runtime_hermes_surface.py; test_owner_runtime_mcp_contract.py (48 tools)",
     "date": "2026-09-22",
-    "head": "176f25a"
+    "head": "08bad2c"
    }
   },
   {
@@ -135,7 +135,7 @@
     "commits": "3d845bc",
     "evidence": "cognition/invokers.py Null/HttpJson/HermesRun from session config; read model names the real invoker or MODEL_INVOKER_UNCONFIGURED; test_active_trade_e2e.py. Live invoker credentials remain QUAL-TRD-05.",
     "date": "2026-09-22",
-    "head": "176f25a"
+    "head": "08bad2c"
    }
   },
   {
@@ -168,7 +168,7 @@
     "commits": "528366b, 81805c9",
     "evidence": "TradingHaltExecutor with owner-halt OwnerAuthority token (client_context.owner_halt_authority_ref) + A4 proof; test_local_typed_actions.py halt cases; Android trading/TradingHaltAuthority.kt + Trading screen halt path",
     "date": "2026-09-22",
-    "head": "176f25a"
+    "head": "08bad2c"
    }
   },
   {
@@ -204,7 +204,7 @@
     "commits": "b78cbf4",
     "evidence": "shim browser_task_create/assignment_run/task_status/task_evidence + automation_route/execute/run_status; AGENTS.md/skills truthful",
     "date": "2026-09-22",
-    "head": "176f25a"
+    "head": "08bad2c"
    }
   },
   {
@@ -236,7 +236,7 @@
     "commits": "c193d47",
     "evidence": "degraded/registry.py 9-code CATALOG, tolerant snapshot(); test_degraded_catalog_is_exhaustive.py",
     "date": "2026-09-22",
-    "head": "176f25a"
+    "head": "08bad2c"
    }
   },
   {
@@ -269,7 +269,7 @@
     "commits": "b952b40, 528366b",
     "evidence": "learning/feed.py strategies_for; calibrate() wired in understanding/api.py; ActionAutonomyGate; canonical_context.permitted_strategies; test_learning_read_back.py, test_action_runtime_autonomy.py",
     "date": "2026-09-22",
-    "head": "176f25a"
+    "head": "08bad2c"
    }
   },
   {
@@ -299,7 +299,7 @@
     "commits": "c193d47",
     "evidence": "auth/control_scopes.py require_scoped_internal in 6 routers; test_scoped_internal_control_reaches_routers.py",
     "date": "2026-09-22",
-    "head": "176f25a"
+    "head": "08bad2c"
    }
   },
   {
@@ -328,7 +328,7 @@
     "commits": "5498a6f",
     "evidence": "degraded/GatewayDegradedMapping.kt; DegradedModeStore.applyGatewayHealth bound via DegradedBridge in VanApplication.onCreate; Settings reconciled list; GatewayDegradedMappingTest (12)",
     "date": "2026-09-22",
-    "head": "176f25a"
+    "head": "08bad2c"
    }
   },
   {
@@ -358,7 +358,7 @@
     "commits": "5498a6f",
     "evidence": "command/work/ConversationReducer.kt; VanCommandController.pollUnfinishedCommands (4 s); VanGatewayClient.commandStatus; context_gaps as 'VAN did not know'; control/VanSpokenAnswer.kt → VoiceEdge.speak; ConversationReducerTest (8)",
     "date": "2026-09-22",
-    "head": "176f25a"
+    "head": "08bad2c"
    }
   },
   {
@@ -387,7 +387,7 @@
     "commits": "17f4fba, 3d845bc",
     "evidence": "visual/VanEmbodimentReducer.kt + VanEmbodimentProducers.kt + VanMotionMap.kt; trading/bridge.py trading.trade.closed producer; visual-preview VanEmbodimentCoverageTest",
     "date": "2026-09-22",
-    "head": "176f25a"
+    "head": "08bad2c"
    }
   },
   {
@@ -418,7 +418,7 @@
     "commits": "17f4fba",
     "evidence": "voice/speech_cues.py production SpeechCueClock on the speech_stream wire; voice/SpeechCueTiming.kt + TtsOutputManager cue track; SHERPA_ONNX TTS preference removed (no synthesizer exists; local TTS = QUAL-VOI-02)",
     "date": "2026-09-22",
-    "head": "176f25a"
+    "head": "08bad2c"
    }
   },
   {
@@ -446,7 +446,7 @@
     "commits": "17f4fba, 5498a6f",
     "evidence": "visual/VanRendererStatus.kt via DegradedBridge.rendererStatus; Settings 'Character' row from DegradedBridge.lastRendererStatus",
     "date": "2026-09-22",
-    "head": "176f25a"
+    "head": "08bad2c"
    }
   },
   {
@@ -475,7 +475,7 @@
     "commits": "b78cbf4",
     "evidence": "AGENTS.md, skills, hermes README regenerated from the 48-tool shim; contract test pins REQUIRED_TOOLS",
     "date": "2026-09-22",
-    "head": "176f25a"
+    "head": "08bad2c"
    }
   },
   {
@@ -504,7 +504,7 @@
     "commits": "1b6e44e",
     "evidence": "interactive_api.py mint_stream_grant → 503 BROWSER_STREAM_UNCONFIGURED without a stream host",
     "date": "2026-09-22",
-    "head": "176f25a"
+    "head": "08bad2c"
    }
   },
   {
@@ -533,7 +533,7 @@
     "commits": "1b6e44e",
     "evidence": "backend/requirements.lock; installers and CI install from the lock",
     "date": "2026-09-22",
-    "head": "176f25a"
+    "head": "08bad2c"
    }
   },
   {
@@ -561,7 +561,7 @@
     "commits": "1b6e44e",
     "evidence": "config.py van_env + assert_production_safe(); tools/runtime/qualify_gateway_host.sh",
     "date": "2026-09-22",
-    "head": "176f25a"
+    "head": "08bad2c"
    }
   },
   {
@@ -588,7 +588,7 @@
     "commits": "528366b",
     "evidence": "Commands no longer block on missing owner context; context_gaps computed, returned in CommandResult, shown to the owner and passed to Hermes in canonical_context. Blocking a safety action on an unknown fact was the wrong contract.",
     "date": "2026-09-22",
-    "head": "176f25a"
+    "head": "08bad2c"
    }
   },
   {
@@ -618,7 +618,7 @@
     "commits": "c193d47, 1b6e44e, b78cbf4",
     "evidence": "_scrubbed() on every Google read; instruments wired or deleted; owner_approved removed; input_protocol retained (stream host caller)",
     "date": "2026-09-22",
-    "head": "176f25a"
+    "head": "08bad2c"
    }
   },
   {
@@ -645,7 +645,7 @@
     "commits": "1b6e44e",
     "evidence": "production config refuses loopback/empty secrets",
     "date": "2026-09-22",
-    "head": "176f25a"
+    "head": "08bad2c"
    }
   },
   {
@@ -672,7 +672,7 @@
     "commits": "1b6e44e",
     "evidence": "tests/contracts/__init__.py; root collection no longer collides",
     "date": "2026-09-22",
-    "head": "176f25a"
+    "head": "08bad2c"
    }
   },
   {
@@ -701,7 +701,7 @@
     "commits": "1b6e44e, a60b009",
     "evidence": "van-ci.yml mutation job (non-blocking, report uploaded); android-instrumentation job on an API 31 emulator running src/androidTest CommandCentreLaunchTest + FloatingOverlayServiceTest (advisory; report uploaded). Real-device certification remains QUAL-AND-01.",
     "date": "2026-09-22",
-    "head": "176f25a"
+    "head": "08bad2c"
    }
   },
   {
@@ -731,7 +731,7 @@
     "commits": "c193d47, 5498a6f",
     "evidence": "POST /v1/google/owner-revoke (device-proofed); test_google_owner_revoke_and_scrub.py; Connected screen Revoke Google with confirm",
     "date": "2026-09-22",
-    "head": "176f25a"
+    "head": "08bad2c"
    }
   },
   {
@@ -760,7 +760,7 @@
     "commits": "1b6e44e",
     "evidence": "google/mesh.py EXECUTION_READY_STATES single predicate",
     "date": "2026-09-22",
-    "head": "176f25a"
+    "head": "08bad2c"
    }
   },
   {
@@ -787,7 +787,7 @@
     "commits": "—",
     "evidence": "Temporal stays stack-locked at adoption phase 11; automation/router.py states the decision in owner-visible detail; component ledger DELIBERATE_SCOPE; REQ-AUT-04 re-stated as DELIBERATE_SCOPE",
     "date": "2026-09-22",
-    "head": "176f25a"
+    "head": "08bad2c"
    }
   },
   {
@@ -814,7 +814,7 @@
     "commits": "5498a6f, b46ca65",
     "evidence": "OverlayStateStore and browser session store on EncryptedSharedPreferences; tests/contracts/test_android_storage_policy.py explains the three remaining non-sensitive plain writers",
     "date": "2026-09-22",
-    "head": "176f25a"
+    "head": "08bad2c"
    }
   },
   {
@@ -843,10 +843,10 @@
     "commits": "b952b40",
     "evidence": "proactive/followups.py ProactiveFollowUpJob + scheduler job proactive.follow_ups; owner-disableable; test_proactive_followups.py",
     "date": "2026-09-22",
-    "head": "176f25a"
+    "head": "08bad2c"
    }
   }
  ],
- "closure_head": "176f25a",
+ "closure_head": "08bad2c",
  "closure_date": "2026-09-22"
 }

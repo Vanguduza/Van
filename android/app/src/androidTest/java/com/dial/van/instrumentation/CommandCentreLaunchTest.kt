@@ -8,10 +8,10 @@ import androidx.compose.ui.graphics.asAndroidBitmap
 import androidx.compose.ui.test.assertIsDisplayed
 import androidx.compose.ui.test.assertIsSelected
 import androidx.compose.ui.test.captureToImage
+import androidx.compose.ui.test.hasContentDescription
 import androidx.compose.ui.test.hasText
 import androidx.compose.ui.test.isSelectable
 import androidx.compose.ui.test.junit4.createEmptyComposeRule
-import androidx.compose.ui.test.onAllNodesWithText
 import androidx.compose.ui.test.onNodeWithText
 import androidx.compose.ui.test.onRoot
 import androidx.compose.ui.test.performClick
@@ -70,11 +70,12 @@ class CommandCentreLaunchTest {
             compose.onNodeWithText("More").performClick()
             // The More sheet is a ModalBottomSheet in its own window with an enter
             // animation; wait for its items to exist rather than asserting mid-slide.
-            for (label in listOf("Projects", "Connected", "Settings")) {
-                compose.waitUntil(5_000) {
-                    compose.onAllNodesWithText(label).fetchSemanticsNodes().isNotEmpty()
-                }
-                compose.onNodeWithText(label).assertExists()
+            // Sheet rows are VanPressables whose accessible name is "<title>. <detail>.", so
+            // match by content description (title as prefix), not by a bare Text node.
+            for (label in listOf("Projects", "Connected", "Settings & Devices")) {
+                val row = hasContentDescription("$label.", substring = true)
+                compose.waitUntil(10_000) { compose.onAllNodes(row).fetchSemanticsNodes().isNotEmpty() }
+                compose.onNode(row).assertExists()
             }
             compose.waitForIdle()
             capture("more")
