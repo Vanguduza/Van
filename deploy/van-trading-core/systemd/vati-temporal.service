@@ -1,0 +1,43 @@
+[Unit]
+Description=VAN Temporal durable coordination worker and private bridge
+After=network-online.target
+Wants=network-online.target
+StartLimitIntervalSec=300
+StartLimitBurst=5
+
+[Service]
+Type=simple
+User=vati
+Group=vati
+EnvironmentFile=/opt/van-trading/config/temporal-runtime.env
+WorkingDirectory=/opt/van-trading/app/deploy/van-trading-core/temporal
+ExecStart=/opt/van-trading/venv/bin/python /opt/van-trading/app/deploy/van-trading-core/temporal/runtime.py
+Restart=on-failure
+RestartSec=5
+TimeoutStartSec=45
+TimeoutStopSec=30
+
+NoNewPrivileges=true
+PrivateTmp=true
+ProtectSystem=strict
+ProtectHome=true
+ReadWritePaths=/var/lib/van-trading/evidence/temporal
+ReadOnlyPaths=/opt/van-trading/app /opt/van-trading/config/temporal-runtime.env /opt/van-trading/secrets/temporal-bridge.token
+RestrictAddressFamilies=AF_UNIX AF_INET AF_INET6
+RestrictNamespaces=true
+LockPersonality=true
+MemoryDenyWriteExecute=false
+CapabilityBoundingSet=
+AmbientCapabilities=
+UMask=0077
+
+CPUWeight=20
+IOWeight=20
+MemoryAccounting=true
+CPUAccounting=true
+TasksAccounting=true
+MemoryMax=768M
+TasksMax=192
+
+[Install]
+WantedBy=multi-user.target
