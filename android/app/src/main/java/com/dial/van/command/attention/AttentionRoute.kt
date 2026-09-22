@@ -163,11 +163,17 @@ fun AttentionRoute(app: VanApplication) {
                                 .onSuccess { load() }
                         }
                     },
-                    // No backend route exists for snooze (`AttentionEngine.snooze` is never
-                    // routed in `app.py`) — offering the gesture without a call behind it
-                    // would be exactly the fixture-data-in-production rule this build
-                    // refuses, so the direction is disabled rather than faked.
-                    onSnooze = null,
+                    onSnooze = {
+                        scope.launch {
+                            // The swipe gesture is deliberately one-hour. Longer/shorter
+                            // durations belong in the detail surface; the gesture itself
+                            // must remain a single deterministic action.
+                            val until = (System.currentTimeMillis() / 1000L) + 60L * 60L
+                            runCatching {
+                                app.gatewayClient.attentionSnooze(record.optString("id"), until)
+                            }.onSuccess { load() }
+                        }
+                    },
                 )
             }
 
