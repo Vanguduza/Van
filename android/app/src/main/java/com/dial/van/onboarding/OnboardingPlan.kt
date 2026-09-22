@@ -23,6 +23,7 @@ enum class OnboardingStep(val id: String) {
     /** Without this VAN cannot talk to its gateway at all, so it is first. */
     PAIRING("pairing"),
     OVERLAY("overlay"),
+    DISPLAY_AWARENESS("display_awareness"),
     NOTIFICATIONS("notifications"),
     NOTIFICATION_LISTENER("notification_listener"),
     MICROPHONE("microphone"),
@@ -37,6 +38,7 @@ enum class OnboardingStep(val id: String) {
 data class OnboardingGrants(
     val paired: Boolean = false,
     val overlayGranted: Boolean = false,
+    val displayAwarenessEnabled: Boolean = false,
     val notificationsGranted: Boolean = false,
     val notificationListenerEnabled: Boolean = false,
     val microphoneGranted: Boolean = false,
@@ -70,6 +72,7 @@ object OnboardingPlan {
     fun satisfied(step: OnboardingStep, grants: OnboardingGrants): Boolean = when (step) {
         OnboardingStep.PAIRING -> grants.paired
         OnboardingStep.OVERLAY -> grants.overlayGranted
+        OnboardingStep.DISPLAY_AWARENESS -> grants.displayAwarenessEnabled
         OnboardingStep.NOTIFICATIONS ->
             grants.notificationsGranted || grants.notificationsNotApplicable
         OnboardingStep.NOTIFICATION_LISTENER -> grants.notificationListenerEnabled
@@ -121,6 +124,13 @@ object OnboardingPlan {
             "Let VAN appear over other apps",
             "This is how the floating assistant reaches you while you are using something else.",
             "Allow",
+            satisfied(step, grants), skippable = false,
+        )
+        OnboardingStep.DISPLAY_AWARENESS -> OnboardingStepView(
+            step,
+            "Let VAN understand screen obstruction",
+            "VAN uses Android Accessibility window metadata to detect the keyboard and immersive full-screen apps, so the floating assistant can move or pause instead of blocking what you are doing. VAN does not read accessibility text.",
+            "Open accessibility settings",
             satisfied(step, grants), skippable = false,
         )
         OnboardingStep.NOTIFICATIONS -> OnboardingStepView(
