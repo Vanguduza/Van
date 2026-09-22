@@ -267,7 +267,10 @@ jobs:
             chmod +x gradlew
             ./gradlew :app:connectedDebugAndroidTest --console=plain
             mkdir -p ../artifacts/instrumentation-screenshots
-            adb pull /sdcard/Android/data/com.dial.van/files/screenshots ../artifacts/instrumentation-screenshots || echo "no screenshots captured"
+            for f in $(adb shell run-as com.dial.van ls files/screenshots 2>/dev/null); do
+              adb exec-out run-as com.dial.van cat "files/screenshots/$f" > "../artifacts/instrumentation-screenshots/$f"
+            done
+            ls -la ../artifacts/instrumentation-screenshots || echo "no screenshots captured"
       - name: Upload instrumentation report
         if: always()
         uses: actions/upload-artifact@v4

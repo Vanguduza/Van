@@ -8,6 +8,7 @@ import android.content.IntentFilter
 import android.graphics.PixelFormat
 import android.os.IBinder
 import android.os.PowerManager
+import android.provider.Settings
 import android.view.Gravity
 import android.view.HapticFeedbackConstants
 import android.view.WindowManager
@@ -97,6 +98,13 @@ class FloatingOverlayService : Service(), LifecycleOwner, SavedStateRegistryOwne
 
     override fun onCreate() {
         super.onCreate()
+        // Foreground first: a slow or failing addView below must not spend the seconds
+        // startForegroundService allows, and an ungranted overlay stops honestly (running=false).
+        startForeground(NOTIFICATION_ID, OverlayNotification.build(this))
+        if (!Settings.canDrawOverlays(this)) {
+            stopSelf()
+            return
+        }
         running = true
         savedStateController.performRestore(null)
         lifecycleRegistry.currentState = Lifecycle.State.CREATED
@@ -148,7 +156,6 @@ class FloatingOverlayService : Service(), LifecycleOwner, SavedStateRegistryOwne
             },
         )
         applyVisibilityLifecycle()
-        startForeground(NOTIFICATION_ID, OverlayNotification.build(this))
         stateStore.markRunning(true)
     }
 

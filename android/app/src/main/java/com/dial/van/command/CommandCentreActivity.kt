@@ -146,7 +146,7 @@ internal fun CommandCentreScreen(app: VanApplication, initial: String) {
     // Synchronous, not a LaunchedEffect: NavHost reads `viewModel.startDestination` once, at
     // its own first composition, so the fresh-vs-restored decision has to be settled before
     // that — a `start` called from a side effect would run one frame too late.
-    remember(Unit) { viewModel.start(initial) }
+    remember(viewModel) { viewModel.also { it.start(initial) } }
     val nav = rememberNavController()
     val currentRoute by viewModel.currentRoute.collectAsState()
     var moreSheetOpen by remember { mutableStateOf(false) }
