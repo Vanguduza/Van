@@ -157,6 +157,7 @@ fun AttentionItem(
     }
 }
 
+@OptIn(ExperimentalMaterial3Api::class)
 @Composable
 private fun AttentionSwipeBackground(direction: SwipeToDismissBoxValue) {
     val tokens = LocalVanTokens.current
