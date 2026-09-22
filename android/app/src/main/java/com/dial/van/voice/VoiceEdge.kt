@@ -89,8 +89,14 @@ class VoiceEdge(
                 }
             }
 
+            val capabilities = VoiceAssetManifest.classifyAll(bundle, observed)
+            // LOCAL_TTS is not READY merely because files exist. The runtime is prepared and
+            // self-tested on this IO dispatcher before the router is allowed to select it.
+            if (capabilities[VoiceCapability.LOCAL_TTS]?.ready == true) {
+                tts.prepareSherpa()
+            }
             _readiness.value = Readiness(
-                capabilities = VoiceAssetManifest.classifyAll(bundle, observed),
+                capabilities = capabilities,
                 bundleVersion = bundle?.bundleVersion,
             )
         }
@@ -101,7 +107,9 @@ class VoiceEdge(
         val state = _readiness.value
         return mapOf(
             TtsEngineKind.SHERPA_ONNX to TtsEngineReadiness(
-                TtsEngineKind.SHERPA_ONNX, installed = state.ready(VoiceCapability.LOCAL_TTS),
+                TtsEngineKind.SHERPA_ONNX,
+                installed = state.ready(VoiceCapability.LOCAL_TTS),
+                selfTestPassed = tts.sherpaReady(),
             ),
             // Android's engine is present on every device this build supports. Whether its
             // *offline* data is there is the question §21.18 is about, and `isSpeaking` is
@@ -133,11 +141,16 @@ class VoiceEdge(
         )
         return when (selection) {
             is TtsSelection.Engine -> {
-                // The phrase bank plays a file; anything else synthesises and is late.
-                if (selection.kind != TtsEngineKind.CRITICAL_PHRASE_BANK) {
-                    tts.speak(LocalTtsRouter.CRITICAL_PHRASES.getValue("wake_ack"))
+                // The phrase bank is played by WakeAcknowledgementManager. Any synthesiser
+                // here is a late fallback, but it must be the engine the router selected.
+                if (selection.kind == TtsEngineKind.CRITICAL_PHRASE_BANK) {
+                    true
+                } else {
+                    tts.speak(
+                        LocalTtsRouter.CRITICAL_PHRASES.getValue("wake_ack"),
+                        engine = selection.kind,
+                    )
                 }
-                true
             }
             is TtsSelection.Silent -> false
         }
@@ -152,6 +165,7 @@ class VoiceEdge(
     fun speak(segment: SpeechSegment, browserAudioPlaying: Boolean): String? {
         val selection = LocalTtsRouter.select(SpeechKind.ASSISTANT_ANSWER, engines())
         if (selection is TtsSelection.Silent) return selection.ownerSentence
+        selection as TtsSelection.Engine
 
         currentDucking = AudioFocusPolicy.decide(
             vanIsSpeaking = true,
@@ -164,9 +178,16 @@ class VoiceEdge(
             // failure to answer: the segment stays queued.
             return null
         }
+        val started = tts.speak(
+            segment.text,
+            utteranceId = segment.segmentId,
+            cueTiming = segment.cueTiming,
+            engine = selection.kind,
+        )
+        if (!started) {
+            return "I can't answer aloud right now — it's on the screen instead."
+        }
         speech.mark(segment.segmentId, SpeechSegmentState.SPEAKING)
-        // GAP-F-013 — the segment's estimated cue timing, when the Gateway sent one.
-        tts.speak(segment.text, utteranceId = segment.segmentId, cueTiming = segment.cueTiming)
         return null
     }
 
