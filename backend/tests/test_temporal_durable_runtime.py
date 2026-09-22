@@ -46,10 +46,11 @@ async def test_temporal_bridge_sends_dedicated_token_and_exact_start_contract(mo
         return httpx.Response(200, json={"accepted": True, "workflow_id": "wf-1"})
 
     transport = httpx.MockTransport(handler)
+    real_async_client = httpx.AsyncClient
 
     class ClientFactory:
         def __init__(self, *args, **kwargs):
-            self.client = httpx.AsyncClient(transport=transport, timeout=kwargs.get("timeout"))
+            self.client = real_async_client(transport=transport, timeout=kwargs.get("timeout"))
         async def __aenter__(self):
             return self.client
         async def __aexit__(self, exc_type, exc, tb):
@@ -79,10 +80,11 @@ async def test_temporal_bridge_translates_runtime_refusal(monkeypatch):
         return httpx.Response(409, json={"detail": "workflow_id_idempotency_conflict"})
 
     transport = httpx.MockTransport(handler)
+    real_async_client = httpx.AsyncClient
 
     class ClientFactory:
         def __init__(self, *args, **kwargs):
-            self.client = httpx.AsyncClient(transport=transport)
+            self.client = real_async_client(transport=transport)
         async def __aenter__(self):
             return self.client
         async def __aexit__(self, exc_type, exc, tb):
