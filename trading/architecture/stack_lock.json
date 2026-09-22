@@ -337,7 +337,9 @@
         "never inside the tick-to-order path",
         "durable coordination only; no live-order or owner-authority execution"
       ],
-      "build_status": "repository-complete: self-hosted loopback Temporal 1.32.0 + isolated PostgreSQL, Python SDK worker/bridge, gateway/Hermes controls, systemd/bootstrap/qualification; live restart/recovery canary pending"
+      "build_status": "repository-complete: self-hosted loopback Temporal 1.32.0 + isolated PostgreSQL, Python SDK worker/bridge, gateway/Hermes controls, systemd/bootstrap/qualification; live restart/recovery canary pending",
+      "pin_evidence_ref": "docs/audit/van-fable-whole-project-2026-09-21/VAN_CANONICAL_GAP_REGISTER.json#GAP-F-026",
+      "pin_reason": "Repository implementation closure fixed GAP-F-026 with Temporal 1.32.0 server and temporalio 1.33.0 SDK; live restart/recovery qualification remains external."
     },
     {
       "layer": "trading_knowledge_layer",
