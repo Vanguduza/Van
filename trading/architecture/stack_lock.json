@@ -331,12 +331,13 @@
       "latency_tier": "T3",
       "licence": "MIT",
       "licence_class": "PERMISSIVE",
-      "observed_version": null,
-      "pin_status": "UNPINNED_VERIFY_AT_ADOPTION",
+      "observed_version": "1.33.0",
+      "pin_status": "PINNED",
       "constraints": [
-        "never inside the tick-to-order path"
+        "never inside the tick-to-order path",
+        "durable coordination only; no live-order or owner-authority execution"
       ],
-      "build_status": "not started"
+      "build_status": "Temporal Python SDK 1.33.0 pinned; VanDurableWorkflow, private token-auth bridge, worker, hardened systemd unit, bootstrap and live qualifier implemented. External Temporal server provisioning and live restart/recovery qualification remain pending."
     },
     {
       "layer": "trading_knowledge_layer",
