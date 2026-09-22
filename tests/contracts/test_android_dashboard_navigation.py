@@ -12,7 +12,7 @@ SHELL = COMMAND_DIR / "CommandCentreActivity.kt"
 ROUTES = COMMAND_DIR / "nav" / "VanRoute.kt"
 NAV_MODEL = COMMAND_DIR / "nav" / "VanNavModel.kt"
 MODULES = COMMAND_DIR / "modules"
-TRADING = ROOT / "android/app/src/main/java/com/dial/van/trading/ui/TradingScreens.kt"
+TRADING = ROOT / "android/app/src/main/java/com/dial/van/trading/ui/OverviewScreen.kt"
 
 
 def code_of(path: Path) -> str:
@@ -124,19 +124,22 @@ def test_browser_hub_is_summary_first_not_full_module_stack():
 
 
 def test_trading_home_routes_modules_instead_of_embedding_full_lists():
+    """The trading worker's rebuild (DNA §4 destination 4) replaced the old link-card
+    `QuickAccess` grid with real, *bounded* previews — active positions, significant
+    events, VAN's own assessment — each with a "see all"/"→" link to its own destination.
+    The property this test has always guarded is unchanged: Overview shows a summary and
+    routes to the full screen for the rest, it does not embed that full screen's content
+    (a whole chart, a whole trade book, a whole account table) inline.
+    """
     text = TRADING.read_text()
-    start = text.index("fun OverviewScreen(")
-    end = text.index("private fun QuickAccess(", start)
-    overview = text[start:end]
-    assert '"Open positions"' in overview
-    assert '"Potential trades"' in overview
-    assert '"Recent trades"' in overview
-    assert '"Risk Center"' in overview
-    assert '"Accounts"' in overview
-    assert '"Market workspace"' in overview
-    assert "TradeChartCanvas(" not in overview
-    assert "TradeRowCard(" not in overview
-    assert "AccountRow(" not in overview
+    assert "fun OverviewScreen(" in text
+    # Routes to the other six/seven inner destinations rather than embedding them.
+    for nav_call in ("nav.openPositions", "nav.openAccounts", "nav.openStrategies", "nav.openCognition"):
+        assert nav_call in text, nav_call
+    # Bounded previews (`.take(n)`), not the full ledger list, and no embedded chart.
+    assert ".take(5)" in text
+    assert "TradeChartCanvas(" not in text
+    assert "AccountRow(" not in text
 
 
 def test_the_command_centre_is_no_longer_one_file():

@@ -41,34 +41,14 @@ EXPLAINED_UNREFERENCED: dict[str, str] = {
     # growing it screen-by-screen, and `tools/audit/android_design_lint.py`'s baseline
     # already tracks every screen package that has not migrated onto it yet. This worker
     # adopted VanScreen/VanPanel/StatusChip/MetricTile/LiveBadge/SectionHeader/AttentionItem/
-    # TimelineRail/EmptyState/VanPressable across Home/Attention/Work/Connected/Settings;
-    # these six are reserved for surfaces this worker does not own:
-    "android/app/src/main/java/com/dial/van/design/components/PositionCard.kt": (
-        "DNA §3: direction/exposure/R/protection/thesis state — the trading worker's "
-        "PositionCard, not adopted by trading/ui/TradingScreens.kt yet."
-    ),
-    "android/app/src/main/java/com/dial/van/design/components/ThesisCard.kt": (
-        "DNA §3: thesis state/invalidation/confirmation — the trading worker's, same as "
-        "PositionCard."
-    ),
-    "android/app/src/main/java/com/dial/van/design/components/EvidenceRow.kt": (
-        "DNA §3: source/trust tier/time/open — provenance rows for Memory's evidence "
-        "surface, owned by the memory/projects worker who has not landed yet."
-    ),
-    "android/app/src/main/java/com/dial/van/design/components/FindingCard.kt": (
-        "DNA §3: \"the Attention screen's non-swipeable cousin of AttentionItem, for Work/"
-        "Memory surfaces that list findings inline\" (its own doc comment) — not yet needed "
-        "by this worker's Attention/Work screens, which use AttentionItem/plain rows."
-    ),
-    "android/app/src/main/java/com/dial/van/design/components/HeatBar.kt": (
-        "DNA §3: portfolio heat/budget — the trading worker's."
-    ),
-    "android/app/src/main/java/com/dial/van/design/components/ApprovalSheet.kt": (
-        "DNA §3: a `ModalBottomSheet` approval flow. This worker's A4 approval surfaces "
-        "(Attention, Work) use an inline Button + VanCommandController.approvePendingA4 "
-        "instead, matching the pre-existing pattern; ApprovalSheet is available for a "
-        "future migration of that flow."
-    ),
+    # TimelineRail/EmptyState/VanPressable across Home/Attention/Work/Connected/Settings.
+    #
+    # PositionCard, ThesisCard, EvidenceRow, FindingCard, HeatBar and ApprovalSheet were
+    # reserved here for the trading worker, who has since rebuilt `trading/ui/**` onto the
+    # design system (OverviewScreen/PositionsScreen/PositionDetailScreen/PotentialScreen/
+    # HistoryScreen adopt all six) — none of them are unreferenced any more, so their
+    # entries are removed rather than kept as stale excuses (see
+    # `test_every_explained_entry_still_describes_something_real`).
 }
 
 #: Production symbols reached only from tests. Each is the TEST_ONLY maturity class and must

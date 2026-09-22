@@ -1145,7 +1145,7 @@
       "requirement": "See the requirements traceability matrix in the canonical report.",
       "authority": "docs/VAN_WHOLE_SYSTEM_IMPLEMENTATION_AUDIT_AND_CERTIFICATION_REV_1.md s30",
       "repository_evidence": [
-        "android/app/src/main/java/com/dial/van/trading/TradingCommandCentreActivity.kt:78-81",
+        "android/app/src/main/java/com/dial/van/trading/ui/TradingRoute.kt:98-98",
         "android/app/src/main/java/com/dial/van/visual/VanAuraSpec.kt:237-299",
         "android/visual-preview/src/main/kotlin/com/dial/van/preview/VanPreviewSheets.kt:750"
       ],
@@ -1174,7 +1174,7 @@
         "runtime_evidence": [
           "evidence/van-system-audit/gate-6/kotlin_verification_tests.txt"
         ],
-        "residual": "The publishing composable in TradingCommandCentreActivity.kt is not compiled here.",
+        "residual": "The publishing composable (PublishTradeSemantic in trading/ui/TradingRoute.kt) is not compiled here.",
         "residual_reason": "It needs the Android toolchain, which this environment cannot fetch. The classifier, the presence reducer and the precedence rules — everything that decides what the owner sees — are executed in the JVM harness.",
         "residual_class": "ENVIRONMENT_UNVERIFIED",
         "state": "EXTERNALLY_BLOCKED_REPOSITORY_COMPLETE"
@@ -3393,7 +3393,7 @@
       "requirement": "See the requirements traceability matrix in the canonical report.",
       "authority": "docs/VAN_WHOLE_SYSTEM_IMPLEMENTATION_AUDIT_AND_CERTIFICATION_REV_1.md s31",
       "repository_evidence": [
-        "android/app/src/main/java/com/dial/van/trading/ui/TradingScreens.kt"
+        "android/app/src/main/java/com/dial/van/trading/ui/PositionsScreen.kt"
       ],
       "runtime_evidence": [],
       "affected_components": [
@@ -3410,8 +3410,8 @@
         "changed": [
           "android/app/src/main/java/com/dial/van/trading/TradingFormat.kt",
           "android/app/src/main/java/com/dial/van/trading/TradingModels.kt",
-          "android/app/src/main/java/com/dial/van/trading/ui/TradingScreens.kt",
-          "android/app/src/main/java/com/dial/van/trading/ui/TradingComponents.kt"
+          "android/app/src/main/java/com/dial/van/trading/ui/PositionsScreen.kt",
+          "android/app/src/main/java/com/dial/van/trading/ui/OverviewScreen.kt"
         ],
         "verified_by": [
           "android/verification/src/test/kotlin/com/dial/van/trading/TradingFormatTest.kt"
@@ -3430,7 +3430,7 @@
       "requirement": "See the requirements traceability matrix in the canonical report.",
       "authority": "docs/VAN_WHOLE_SYSTEM_IMPLEMENTATION_AUDIT_AND_CERTIFICATION_REV_1.md s31",
       "repository_evidence": [
-        "android/app/src/main/java/com/dial/van/trading/ui/TradingScreens.kt"
+        "android/app/src/main/java/com/dial/van/trading/ui/PositionsScreen.kt"
       ],
       "runtime_evidence": [],
       "affected_components": [
@@ -3447,8 +3447,8 @@
         "changed": [
           "android/app/src/main/java/com/dial/van/trading/TradingFormat.kt",
           "android/app/src/main/java/com/dial/van/trading/TradeBook.kt",
-          "android/app/src/main/java/com/dial/van/trading/ui/TradingScreens.kt",
-          "android/app/src/main/java/com/dial/van/trading/ui/TradingComponents.kt",
+          "android/app/src/main/java/com/dial/van/trading/ui/PositionsScreen.kt",
+          "android/app/src/main/java/com/dial/van/trading/ui/TradingUiSupport.kt",
           "android/app/src/main/java/com/dial/van/trading/ui/TradeChartCanvas.kt",
           "android/app/src/main/java/com/dial/van/overlay/VanOverlayPanels.kt"
         ],

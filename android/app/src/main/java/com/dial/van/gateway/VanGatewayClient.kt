@@ -1061,6 +1061,7 @@ class VanGatewayClient(context: Context) {
         contextCapsuleRevision: Int? = null,
         contextCapsuleHash: String? = null,
         declaredTrust: String = TRUST_CONVERSATION,
+        clientContext: Map<String, String> = emptyMap(),
     ): JSONObject {
         val id = deviceId ?: error("not_enrolled")
         val secret = deviceSecret ?: error("not_enrolled")
@@ -1133,6 +1134,15 @@ class VanGatewayClient(context: Context) {
         if (speakerEvidenceMilli != null) body.put("speaker_evidence_milli", speakerEvidenceMilli)
         if (contextCapsuleRevision != null) body.put("context_capsule_revision", contextCapsuleRevision)
         if (contextCapsuleHash != null) body.put("context_capsule_hash", contextCapsuleHash)
+        // GAP-F-005 — `CommandRequest.client_context`: read by the gateway's typed-action
+        // executors (e.g. `owner_halt_authority_ref`). Outside the v3 HMAC canonical on both
+        // sides by design: each value is a separately signed credential the gateway verifies
+        // itself, so the device's HMAC adds nothing to it.
+        if (clientContext.isNotEmpty()) {
+            val context = JSONObject()
+            for ((key, value) in clientContext) context.put(key, value)
+            body.put("client_context", context)
+        }
 
         return body
     }
@@ -1156,6 +1166,7 @@ class VanGatewayClient(context: Context) {
         contextCapsuleRevision: Int? = null,
         contextCapsuleHash: String? = null,
         declaredTrust: String = TRUST_CONVERSATION,
+        clientContext: Map<String, String> = emptyMap(),
     ): JSONObject = withContext(Dispatchers.IO) {
         val body = buildCommandBody(
             text = text,
@@ -1176,6 +1187,7 @@ class VanGatewayClient(context: Context) {
             contextCapsuleRevision = contextCapsuleRevision,
             contextCapsuleHash = contextCapsuleHash,
             declaredTrust = declaredTrust,
+            clientContext = clientContext,
         )
         VanLiveVisualState.dispatchStarted()
         try {

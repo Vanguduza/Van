@@ -130,6 +130,18 @@ sourceSets {
             "com/dial/van/telemetry/SessionTelemetry.kt",
             "com/dial/van/trading/TradingFormat.kt",
             "com/dial/van/trading/ChartViewport.kt",
+            // GAP-F-003/GAP-F-005 — the trading UI rebuild's own pure layer. TradingModels.kt
+            // and TradeBook.kt are included so TradingReadModels.kt's package-internal helpers
+            // (`str`/`num`/`arr`/...) and `TradeConfidence`/`ConfidenceBand` resolve; their one
+            // external dependency, `com.dial.van.visual.VanTradeSignals`, is already in this
+            // list via VanTradeSemantic.kt above. ChartGeometry.kt now builds its grid/time
+            // ticks through `design/charts/ChartAxes` (already listed), so it moves here too —
+            // same reasoning as Gate 6: no Android import, so it is executed rather than only
+            // reasoned about.
+            "com/dial/van/trading/TradingModels.kt",
+            "com/dial/van/trading/TradeBook.kt",
+            "com/dial/van/trading/ChartGeometry.kt",
+            "com/dial/van/trading/TradingReadModels.kt",
             "com/dial/van/voice/VoiceRecognitionModels.kt",
             "com/dial/van/voice/WakeModelAsset.kt",
             // Rev 1.5 §21 — the offline voice edge's decisions. Every case that matters

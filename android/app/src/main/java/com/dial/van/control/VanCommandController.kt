@@ -66,6 +66,12 @@ data class VanOwnerCommand(
     val speakerEvidenceMilli: Int? = null,
     val expiresAtUnix: Long? = null,
     val noStaleReplay: Boolean = false,
+    /**
+     * GAP-F-005 — typed-action context the gateway's local executors read from the request's
+     * `client_context` (e.g. `owner_halt_authority_ref` for `trading.halt`). Never authority
+     * on its own: the gateway verifies each value against its own keys and policies.
+     */
+    val clientContext: Map<String, String> = emptyMap(),
 )
 
 data class PendingA4Approval(
@@ -138,6 +144,7 @@ class VanCommandController(
          * This prevents a raw A1 transcript from bypassing an A3/A4 voice gate.
          */
         speakerScore: Float? = null,
+        clientContext: Map<String, String> = emptyMap(),
     ) {
         val normalized = text.trim()
         if (normalized.isEmpty()) return
@@ -173,6 +180,7 @@ class VanCommandController(
                 speakerEvidenceMilli = speakerEvidenceMilli,
                 expiresAtUnix = expiresAtUnix,
                 noStaleReplay = noStaleReplay,
+                clientContext = clientContext,
             ),
         )
     }
@@ -242,6 +250,7 @@ class VanCommandController(
                     noStaleReplay = command.noStaleReplay,
                     speechEvidenceRef = command.speechEvidenceRef,
                     speakerEvidenceMilli = command.speakerEvidenceMilli,
+                    clientContext = command.clientContext,
                 )
                 recordResponse(command, response)
             } catch (t: Throwable) {
@@ -302,6 +311,7 @@ class VanCommandController(
                             noStaleReplay = pending.noStaleReplay,
                             speechEvidenceRef = pending.command.speechEvidenceRef,
                             speakerEvidenceMilli = pending.command.speakerEvidenceMilli,
+                            clientContext = pending.command.clientContext,
                         )
                         recordResponse(pending.command, response)
                     } catch (t: Throwable) {

@@ -1,16 +1,13 @@
 package com.dial.van.trading.ui
 
-import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.Row
-import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
-import androidx.compose.foundation.layout.height
-import androidx.compose.foundation.layout.padding
-import androidx.compose.foundation.shape.RoundedCornerShape
+import androidx.compose.foundation.lazy.LazyColumn
+import androidx.compose.foundation.lazy.items
 import androidx.compose.material3.Button
 import androidx.compose.material3.ButtonDefaults
 import androidx.compose.material3.Text
@@ -23,20 +20,22 @@ import androidx.compose.runtime.remember
 import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.draw.clip
-import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.platform.LocalContext
-import androidx.compose.ui.text.font.FontFamily
-import androidx.compose.ui.text.font.FontWeight
-import androidx.compose.ui.unit.dp
-import androidx.compose.ui.unit.sp
 import androidx.fragment.app.FragmentActivity
 import com.dial.van.VanApplication
+import com.dial.van.design.LocalVanTokens
+import com.dial.van.design.StatusSemantics
+import com.dial.van.design.components.MetricTile
+import com.dial.van.design.components.SectionHeader
+import com.dial.van.design.components.StatusChip
+import com.dial.van.design.components.VanPanel
 import com.dial.van.security.BiometricGate
 import com.dial.van.security.OwnerApprovalKeyManager
 import com.dial.van.trading.Loaded
 import com.dial.van.trading.StrategyPromotionCandidate
 import com.dial.van.trading.StrategyPromotionVerification
+import com.dial.van.trading.TradingFormat
+import com.dial.van.trading.TradingRepository
 import kotlinx.coroutines.launch
 import kotlinx.serialization.json.Json
 import kotlinx.serialization.json.buildJsonObject
@@ -46,33 +45,27 @@ import kotlinx.serialization.json.jsonPrimitive
 import kotlinx.serialization.json.put
 
 /**
- * Owner-only strategy authority surface.
+ * Owner-only strategy authority surface, migrated onto the design system. The protocol below
+ * (two independent biometric signatures — the VATI owner-authority grant, then the gateway's
+ * one-time A4 challenge — and the candidate-bound verification after promotion) is unchanged
+ * from the pre-migration screen; only the presentation layer moved onto tokens.
  *
- * This screen never derives a certificate and never chooses a target state. Both
- * arrive from the policy-passing, current-lineage server candidate read model.
- * Promotion requires two independent biometric signatures from the same
- * hardware-backed owner key: the VATI owner-authority grant and the gateway A4
- * one-time challenge.
+ * @DataSource("GET /v1/trading/strategies/promotion-candidates")
  */
 @Composable
-fun StrategiesScreen(
-    env: ScreenEnv,
-    padding: PaddingValues,
-    app: VanApplication,
-) {
+fun StrategiesScreen(app: VanApplication, repo: TradingRepository) {
+    val tokens = LocalVanTokens.current
     val context = LocalContext.current
     val gate = remember(context) { (context as? FragmentActivity)?.let(::BiometricGate) }
     val scope = rememberCoroutineScope()
     var tick by remember { mutableIntStateOf(0) }
-    var candidates: Loaded<List<StrategyPromotionCandidate>> by remember {
-        mutableStateOf(Loaded.Loading)
-    }
+    var candidates: Loaded<List<StrategyPromotionCandidate>> by remember { mutableStateOf(Loaded.Loading) }
     var busyStrategy by remember { mutableStateOf<String?>(null) }
     var status by remember { mutableStateOf("") }
 
     LaunchedEffect(tick) {
         candidates = Loaded.Loading
-        candidates = env.repo.promotionCandidates()
+        candidates = repo.promotionCandidates()
     }
 
     fun promote(candidate: StrategyPromotionCandidate) {
@@ -134,18 +127,14 @@ fun StrategiesScreen(
                     val parsed = challengeReply.takeIf { it.first in 200..299 }?.let {
                         runCatching { Json.parseToJsonElement(it.second).jsonObject }.getOrNull()
                     }
-                    val challenge = parsed?.get("approval_challenge")
-                        ?.jsonPrimitive?.contentOrNull
-                    val challengeId = parsed?.get("approval_challenge_id")
-                        ?.jsonPrimitive?.contentOrNull
+                    val challenge = parsed?.get("approval_challenge")?.jsonPrimitive?.contentOrNull
+                    val challengeId = parsed?.get("approval_challenge_id")?.jsonPrimitive?.contentOrNull
                     if (challenge.isNullOrBlank() || challengeId.isNullOrBlank()) {
                         busyStrategy = null
                         status = "Gateway did not issue a valid A4 challenge; no promotion was sent."
                         return@launch
                     }
-                    val approvalSignature = runCatching {
-                        app.gatewayClient.newA4ApprovalSignature()
-                    }.getOrNull()
+                    val approvalSignature = runCatching { app.gatewayClient.newA4ApprovalSignature() }.getOrNull()
                     if (approvalSignature == null) {
                         busyStrategy = null
                         status = "Owner approval key unavailable; no promotion was sent."
@@ -180,9 +169,7 @@ fun StrategiesScreen(
                                     status = "Promotion request failed; current strategy state was not claimed changed."
                                     return@launch
                                 }
-                                val body = runCatching {
-                                    Json.parseToJsonElement(finalReply.second).jsonObject
-                                }.getOrNull()
+                                val body = runCatching { Json.parseToJsonElement(finalReply.second).jsonObject }.getOrNull()
                                 if (finalReply.first !in 200..299) {
                                     busyStrategy = null
                                     status = body?.get("detail")?.jsonPrimitive?.contentOrNull
@@ -191,10 +178,6 @@ fun StrategiesScreen(
                                     return@launch
                                 }
 
-                                // A 2xx transport answer is not enough to tell the owner that
-                                // authority changed. Pin the response to the exact candidate and
-                                // require a ledger event before asking the authoritative candidate
-                                // read model whether the old parent certificate disappeared.
                                 if (!StrategyPromotionVerification.receiptMatches(candidate, body)) {
                                     busyStrategy = null
                                     status = "Gateway returned success without a complete, candidate-bound ledger receipt; VAN is not claiming promotion."
@@ -202,20 +185,16 @@ fun StrategiesScreen(
                                 }
 
                                 status = "Promotion receipt received. Verifying authoritative strategy read-back…"
-                                when (val refreshed = env.repo.promotionCandidates()) {
+                                when (val refreshed = repo.promotionCandidates()) {
                                     is Loaded.Ready -> {
                                         candidates = refreshed
-                                        val staleParentStillOffered =
-                                            StrategyPromotionVerification.oldParentStillOffered(
-                                                candidate, refreshed.value
-                                            )
+                                        val staleParentStillOffered = StrategyPromotionVerification.oldParentStillOffered(candidate, refreshed.value)
                                         busyStrategy = null
-                                        if (staleParentStillOffered) {
-                                            status = "Promotion receipt exists, but the old certificate is still offered by authoritative read-back. VAN is not claiming completion."
+                                        status = if (staleParentStillOffered) {
+                                            "Promotion receipt exists, but the old certificate is still offered by authoritative read-back. VAN is not claiming completion."
                                         } else {
-                                            val restart = body?.get("requires_session_restart")
-                                                ?.jsonPrimitive?.contentOrNull == "true"
-                                            status = if (restart) {
+                                            val restart = body?.get("requires_session_restart")?.jsonPrimitive?.contentOrNull == "true"
+                                            if (restart) {
                                                 "Promotion verified in the ledger and read-back. Trading session restart is required before the new strategy state can be active."
                                             } else {
                                                 "Promotion verified in the ledger and authoritative strategy read-back."
@@ -235,173 +214,95 @@ fun StrategiesScreen(
                                 }
                             }
                         },
-                        onDenied = { reason ->
-                            busyStrategy = null
-                            status = "Final owner approval was not granted: " + reason
-                        },
+                        onDenied = { reason -> busyStrategy = null; status = "Final owner approval was not granted: " + reason },
                     )
                 }
             },
-            onDenied = { reason ->
-                busyStrategy = null
-                status = "Owner authority was not granted: " + reason
-            },
+            onDenied = { reason -> busyStrategy = null; status = "Owner authority was not granted: " + reason },
         )
     }
 
-    androidx.compose.foundation.lazy.LazyColumn(
-        modifier = Modifier.fillMaxSize().padding(padding).padding(horizontal = 14.dp),
-        verticalArrangement = Arrangement.spacedBy(10.dp),
-        contentPadding = PaddingValues(vertical = 10.dp),
+    LazyColumn(
+        modifier = Modifier.fillMaxSize(),
+        contentPadding = PaddingValues(horizontal = tokens.space.pageGutter, vertical = tokens.space.space3),
+        verticalArrangement = Arrangement.spacedBy(tokens.space.space3),
     ) {
         item {
-            Text(
-                "Strategies",
-                color = Color.White,
-                fontSize = 20.sp,
-                fontWeight = FontWeight.Bold,
-            )
-            Text(
-                "Only sealed validation certificates on the current capsule lineage appear here. VAN cannot promote itself.",
-                color = TradingColors.muted,
-                fontSize = 10.sp,
+            SectionHeader(
+                title = "Strategies",
+                detail = "Only sealed validation certificates on the current capsule lineage appear here. VAN cannot promote itself.",
+                trailing = { TradingRefreshAction { tick += 1 } },
             )
         }
         if (status.isNotBlank()) {
             item {
-                Text(
-                    status,
-                    color = if (
-                        status.contains("refused", true) ||
-                        status.contains("failed", true) ||
-                        status.contains("not granted", true)
-                    ) TradingColors.warning else TradingColors.text,
-                    fontSize = 11.sp,
-                )
+                val warn = status.contains("refused", true) || status.contains("failed", true) || status.contains("not granted", true)
+                Text(status, style = tokens.type.body, color = if (warn) tokens.color.forStatusRole(StatusSemantics.ROLE_EVENT_RISK) else tokens.color.textSecondary)
             }
         }
-        item {
-            LoadedBox(candidates, empty = "No strategy is currently eligible for owner promotion.") { rows ->
-                if (rows.isEmpty()) {
-                    EmptyState(
-                        "No strategy is currently eligible for owner promotion.",
-                        "A strategy appears only after its exact current revision has a policy-passing validation certificate.",
-                    )
+        val loaded = candidates
+        when (loaded) {
+            Loaded.Loading -> item { Text("Reading the ledger…", style = tokens.type.body, color = tokens.color.textSecondary) }
+            is Loaded.Unavailable -> item {
+                Text(TradingFormat.unavailableState(loaded.reason), style = tokens.type.body, color = tokens.color.forStatusRole(StatusSemantics.ROLE_EVENT_RISK))
+            }
+            is Loaded.Ready -> {
+                if (loaded.value.isEmpty()) {
+                    item { Text("No strategy is currently eligible for owner promotion.", style = tokens.type.body, color = tokens.color.textSecondary) }
                 } else {
-                    Column(verticalArrangement = Arrangement.spacedBy(10.dp)) {
-                        rows.forEach { candidate ->
-                            StrategyCandidateCard(
-                                candidate = candidate,
-                                busy = busyStrategy != null,
-                                onPromote = { promote(candidate) },
-                            )
-                        }
+                    items(loaded.value, key = { it.strategyId }) { candidate ->
+                        StrategyCandidateCard(candidate, busyStrategy != null) { promote(candidate) }
                     }
                 }
             }
         }
         item {
-            Text(
-                "Promotion changes authority, not market analysis. The private key never leaves Android Keystore. " +
-                    "Two biometric confirmations are deliberate: one signs the VATI owner grant and one signs the gateway's one-time A4 challenge.",
-                color = TradingColors.muted,
-                fontSize = 9.sp,
+            TradingDisclosure(
+                "Promotion changes authority, not market analysis. The private key never leaves " +
+                    "Android Keystore. Two biometric confirmations are deliberate: one signs the " +
+                    "VATI owner grant and one signs the gateway's one-time A4 challenge.",
             )
         }
     }
 }
 
 @Composable
-private fun StrategyCandidateCard(
-    candidate: StrategyPromotionCandidate,
-    busy: Boolean,
-    onPromote: () -> Unit,
-) {
-    Column(
-        modifier = Modifier.fillMaxWidth()
-            .clip(RoundedCornerShape(12.dp))
-            .background(Color.White.copy(alpha = 0.05f))
-            .padding(12.dp),
-        verticalArrangement = Arrangement.spacedBy(7.dp),
-    ) {
-        Row {
-            Column(modifier = Modifier.weight(1f)) {
-                Text(
-                    candidate.strategyId,
-                    color = Color.White,
-                    fontSize = 13.sp,
-                    fontWeight = FontWeight.SemiBold,
-                )
-                Text(
-                    candidate.currentState + " → " + candidate.targetState,
-                    color = TradingColors.accent,
-                    fontSize = 11.sp,
-                    fontWeight = FontWeight.Bold,
-                )
+private fun StrategyCandidateCard(candidate: StrategyPromotionCandidate, busy: Boolean, onPromote: () -> Unit) {
+    val tokens = LocalVanTokens.current
+    VanPanel {
+        Column(verticalArrangement = Arrangement.spacedBy(tokens.space.space2)) {
+            Row(modifier = Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.SpaceBetween) {
+                Column {
+                    Text(candidate.strategyId, style = tokens.type.headline, color = tokens.color.textPrimary)
+                    Text(candidate.currentState + " → " + candidate.targetState, style = tokens.type.data, color = tokens.color.accentCyan)
+                }
+                StatusChip(label = "OWNER DECISION", role = StatusSemantics.ROLE_EVENT_RISK)
             }
-            Chip("OWNER DECISION", 0xFFFFB300L)
-        }
-
-        Row(horizontalArrangement = Arrangement.spacedBy(8.dp)) {
-            MetricTile(
-                "DSR",
-                candidate.dsrProbability?.let { String.format(java.util.Locale.ROOT, "%.3f", it) } ?: "—",
-                Modifier.weight(1f),
-            )
-            MetricTile(
-                "PBO",
-                candidate.pboProbability?.let { String.format(java.util.Locale.ROOT, "%.3f", it) } ?: "—",
-                Modifier.weight(1f),
-            )
-            MetricTile(
-                "Edge floor R",
-                candidate.expectancyLowerBoundR?.let {
-                    String.format(java.util.Locale.ROOT, "%.3f", it)
-                } ?: "—",
-                Modifier.weight(1f),
-            )
-        }
-        Row(horizontalArrangement = Arrangement.spacedBy(8.dp)) {
-            MetricTile(
-                "Profit factor",
-                candidate.profitFactor?.let { String.format(java.util.Locale.ROOT, "%.2f", it) } ?: "—",
-                Modifier.weight(1f),
-            )
-            MetricTile(
-                "Max drawdown",
-                candidate.maxDrawdown?.let { String.format(java.util.Locale.ROOT, "%.2f%%", it) } ?: "—",
-                Modifier.weight(1f),
-            )
-        }
-
-        Text(
-            "validation " + candidate.validationHash.take(16) + "… · capsule " + candidate.capsuleHash.take(16) + "…",
-            color = TradingColors.muted,
-            fontSize = 9.sp,
-            fontFamily = FontFamily.Monospace,
-        )
-        Text(
-            "data " + candidate.dataManifestHash.take(18) + "… · " +
-                candidate.evidenceRefs.size + " immutable evidence reference(s)",
-            color = TradingColors.muted,
-            fontSize = 9.sp,
-            fontFamily = FontFamily.Monospace,
-        )
-
-        Spacer(Modifier.height(2.dp))
-        Button(
-            onClick = onPromote,
-            enabled = !busy,
-            modifier = Modifier.fillMaxWidth(),
-            colors = ButtonDefaults.buttonColors(
-                containerColor = TradingColors.accent.copy(alpha = 0.18f),
-                contentColor = TradingColors.accent,
-            ),
-        ) {
+            Row(horizontalArrangement = Arrangement.spacedBy(tokens.space.space2)) {
+                MetricTile("DSR", candidate.dsrProbability?.let { String.format(java.util.Locale.ROOT, "%.3f", it) } ?: "—", Modifier.weight(1f))
+                MetricTile("PBO", candidate.pboProbability?.let { String.format(java.util.Locale.ROOT, "%.3f", it) } ?: "—", Modifier.weight(1f))
+                MetricTile("Edge floor R", candidate.expectancyLowerBoundR?.let { String.format(java.util.Locale.ROOT, "%.3f", it) } ?: "—", Modifier.weight(1f))
+            }
+            Row(horizontalArrangement = Arrangement.spacedBy(tokens.space.space2)) {
+                MetricTile("Profit factor", candidate.profitFactor?.let { String.format(java.util.Locale.ROOT, "%.2f", it) } ?: "—", Modifier.weight(1f))
+                MetricTile("Max drawdown", candidate.maxDrawdown?.let { String.format(java.util.Locale.ROOT, "%.2f%%", it) } ?: "—", Modifier.weight(1f))
+            }
             Text(
-                "Review biometrics & promote to " + candidate.targetState,
-                fontWeight = FontWeight.SemiBold,
+                "validation " + candidate.validationHash.take(16) + "… · capsule " + candidate.capsuleHash.take(16) + "…",
+                style = tokens.type.label, color = tokens.color.textTertiary,
             )
+            Text(
+                "data " + candidate.dataManifestHash.take(18) + "… · " + candidate.evidenceRefs.size + " immutable evidence reference(s)",
+                style = tokens.type.label, color = tokens.color.textTertiary,
+            )
+            Button(
+                onClick = onPromote,
+                enabled = !busy,
+                modifier = Modifier.fillMaxWidth(),
+                colors = ButtonDefaults.buttonColors(containerColor = tokens.color.accentCyan.copy(alpha = 0.18f), contentColor = tokens.color.accentCyan),
+            ) {
+                Text("Review biometrics & promote to " + candidate.targetState, style = tokens.type.headline)
+            }
         }
     }
 }
