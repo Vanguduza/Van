@@ -2,6 +2,7 @@ package com.dial.van.instrumentation
 
 import android.content.Intent
 import android.graphics.Bitmap
+import android.graphics.BitmapFactory
 import android.graphics.Color
 import android.os.ParcelFileDescriptor
 import android.os.SystemClock
@@ -110,6 +111,7 @@ class RiveContractTest {
         capture(rig, "listening-off", state = 4, listening = false)
         capture(rig, "speaking-on", state = 9, speaking = true)
         capture(rig, "speaking-off", state = 9, speaking = false)
+        if (rig.mode != Mode.CORE) assertCoreBaselines(rig)
     }
 
     @Test
@@ -222,6 +224,48 @@ class RiveContractTest {
         val failed = VanVisualRuntime.decide(assetBytes = 4096L, riveRuntimeAvailable = true, ownerArtAvailable = true, loadFailed = true)
         assertEquals(VanRenderer.OWNER_ART, failed.renderer)
         assertEquals(VanCanvasReason.LOAD_FAILED, failed.reason)
+    }
+
+
+    private fun assertCoreBaselines(rig: Rig) {
+        data class BaselineCase(
+            val name: String,
+            val state: Int = 2,
+            val speaking: Boolean = false,
+            val listening: Boolean = false,
+            val attentionX: Float = 0f,
+            val attentionY: Float = 0f,
+            val mouthOpen: Float = 0f,
+            val viseme: Int = 0,
+            val action: Int = 0,
+            val trigger: String? = null,
+        )
+        val cases = listOf(
+            BaselineCase("gaze-neg", state=4, attentionX=-1f, attentionY=-1f),
+            BaselineCase("gaze-pos", state=4, attentionX=1f, attentionY=1f),
+            BaselineCase("mouth-0", state=9, speaking=true, mouthOpen=0f, viseme=2),
+            BaselineCase("mouth-1", state=9, speaking=true, mouthOpen=1f, viseme=2),
+            BaselineCase("core-state-2", state=2),
+            BaselineCase("core-state-4", state=4),
+            BaselineCase("core-state-5", state=5),
+            BaselineCase("core-state-9", state=9),
+            BaselineCase("core-action-1", state=2, action=1, trigger="wave"),
+            BaselineCase("core-action-2", state=2, action=2, trigger="ack"),
+            BaselineCase("core-action-7", state=2, action=7, trigger="point"),
+        )
+        for (item in cases) {
+            val baseline = runCatching {
+                testContext.assets.open("core_baseline/${item.name}.png").use(BitmapFactory::decodeStream)
+            }.getOrNull()
+            assertTrue("missing M2 core baseline ${item.name}", baseline != null)
+            val current = capture(
+                rig, "regression-${item.name}", state=item.state, speaking=item.speaking,
+                listening=item.listening, attentionX=item.attentionX, attentionY=item.attentionY,
+                mouthOpen=item.mouthOpen, viseme=item.viseme, action=item.action, trigger=item.trigger,
+            )
+            val diff = meanAbsRgb(requireNotNull(baseline), current)
+            assertTrue("core regression ${item.name}: mean RGB difference $diff > 0.06", diff <= 0.06)
+        }
     }
 
     private data class Case(
