@@ -6,6 +6,11 @@ Status vocabulary is the audit taxonomy (INTEGRATED_AND_EVIDENCED, IMPLEMENTED_N
 
 This register is independent of `docs/audit/van-whole-project-2026-09-21/21_GAP_REGISTER.json` (the reconstructed Sol register, all repository items CLOSED). Every item below was found open at the audited commit by tracing code, and none duplicates a REC-* item except where noted. The companion JSON is generated from the same source and is byte-consistent with this file.
 
+> **Forensic-history rule.** Detailed finding bodies below preserve what was true at the audited
+> commit; they are not current defect claims. The closure table is re-stated by the post-Fable
+> product pass in PR #59. Current live/device/provider gates are authoritative only in
+> `VAN_RUNTIME_QUALIFICATION_MATRIX.md`.
+
 ## Summary
 
 | Priority | Count |
@@ -31,12 +36,11 @@ This register is independent of `docs/audit/van-whole-project-2026-09-21/21_GAP_
 
 ## Closure (2026-09-22)
 
-Closure HEAD: `100d898`. Full evidence per gap in `VAN_FABLE_IMPLEMENTATION_CLOSURE_REPORT.md` §2.
+Original Fable closure HEAD: `100d898`; post-Fable product closure: PR #59. Full evidence per gap is reconciled in `VAN_FABLE_IMPLEMENTATION_CLOSURE_REPORT.md` §2 and the runtime qualification matrix.
 
 | Closure status | Count |
 |---|---|
-| DELIBERATELY_REMOVED_CANON_UPDATED | 1 |
-| FIXED_AND_EVIDENCED | 26 |
+| FIXED_AND_EVIDENCED | 27 |
 | SUPERSEDED_BY_BETTER_IMPLEMENTATION | 1 |
 | **Total** | **28** |
 
@@ -56,7 +60,7 @@ Mixed rows (a slash) count under their first status; the second half names the p
 | GAP-F-010 | FIXED_AND_EVIDENCED | 5498a6f |
 | GAP-F-011 | FIXED_AND_EVIDENCED | 5498a6f |
 | GAP-F-012 | FIXED_AND_EVIDENCED | 17f4fba, 3d845bc |
-| GAP-F-013 | FIXED_AND_EVIDENCED (device cue path) / DELIBERATELY_REMOVED_CANON_UPDATED (sherpa TTS preference) | 17f4fba |
+| GAP-F-013 | FIXED_AND_EVIDENCED (repository local-TTS path) / DEVICE_ARTEFACT_QUALIFICATION_REQUIRED | 17f4fba, PR #59 |
 | GAP-F-014 | FIXED_AND_EVIDENCED | 17f4fba, 5498a6f |
 | GAP-F-015 | FIXED_AND_EVIDENCED | b78cbf4 |
 | GAP-F-016 | FIXED_AND_EVIDENCED | 1b6e44e |
@@ -69,7 +73,7 @@ Mixed rows (a slash) count under their first status; the second half names the p
 | GAP-F-023 | FIXED_AND_EVIDENCED (mutation, instrumentation job) / EXTERNALLY_GATED_REPOSITORY_COMPLETE (device sign-off) | 1b6e44e, a60b009 |
 | GAP-F-024 | FIXED_AND_EVIDENCED | c193d47, 5498a6f |
 | GAP-F-025 | FIXED_AND_EVIDENCED | 1b6e44e |
-| GAP-F-026 | DELIBERATELY_REMOVED_CANON_UPDATED | — |
+| GAP-F-026 | FIXED_AND_EVIDENCED (repository durable runtime) / PENDING_LIVE | PR #59 |
 | GAP-F-027 | FIXED_AND_EVIDENCED | 5498a6f, b46ca65 |
 | GAP-F-028 | FIXED_AND_EVIDENCED | b952b40 |
 
