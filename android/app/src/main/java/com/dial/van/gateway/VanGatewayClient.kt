@@ -495,6 +495,11 @@ class VanGatewayClient(context: Context) {
         JSONArray(rawGet("/v1/attention"))
     }
 
+    /** POST /v1/attention/{id}/ack — the Attention screen's swipe-to-acknowledge. */
+    suspend fun attentionAck(itemId: String): JSONObject = withContext(Dispatchers.IO) {
+        postJson("/v1/attention/${encodeSegment(itemId)}/ack", JSONObject())
+    }
+
     suspend fun browserStatus(): JSONObject = withContext(Dispatchers.IO) {
         getJson("/v1/browser/status")
     }
@@ -843,6 +848,173 @@ class VanGatewayClient(context: Context) {
 
     /** §41 — the scoreboard, including every dimension VAN cannot yet measure. */
     suspend fun evalReport(): JSONObject = withContext(Dispatchers.IO) { getJson("/v1/eval") }
+
+    // ---------------------------------------------------------------- owner memory (Memory)
+    //
+    // DNA §4's Memory destination: facts, decisions, assumptions, preferences, unresolved
+    // threads, provenance; add/correct/forget. Every write below is device-proofed like
+    // ingest, because a canonical fact about the owner can only come from the owner
+    // (backend/van_gateway/app.py's own reasoning for POST /v1/context/facts).
+
+    /** GET /v1/context/memory — what VAN holds about the owner, store by store. */
+    suspend fun contextMemory(): JSONObject = withContext(Dispatchers.IO) {
+        getJson("/v1/context/memory")
+    }
+
+    /**
+     * GET /v1/context/export — everything VAN holds about the owner, not a count of it
+     * (`app.py`'s own distinction: `/v1/context/memory` says how many facts exist,
+     * `/v1/context/export` is what they say — `stores.owner_facts.records[]`, each a full
+     * `OwnerFactRecord`).
+     */
+    suspend fun contextExport(): JSONObject = withContext(Dispatchers.IO) {
+        getJson("/v1/context/export")
+    }
+
+    /** GET /v1/context/conflicts — what VAN holds two contradictory answers to. */
+    suspend fun contextConflicts(): JSONObject = withContext(Dispatchers.IO) {
+        getJson("/v1/context/conflicts")
+    }
+
+    /** GET /v1/context/history?subject&predicate&scope — what VAN believed before. */
+    suspend fun contextHistory(
+        subject: String,
+        predicate: String,
+        scope: String = "global",
+    ): JSONObject = withContext(Dispatchers.IO) {
+        getJson(
+            "/v1/context/history?subject=${encodeQuery(subject)}" +
+                "&predicate=${encodeQuery(predicate)}&scope=${encodeQuery(scope)}",
+        )
+    }
+
+    /**
+     * POST /v1/context/facts — the owner stating something about themselves, at
+     * CANONICAL_OWNER. Device-proofed: the gateway requires the caller's device identity
+     * (`app.py`'s `state_owner_fact`) and refuses without it.
+     */
+    suspend fun stateOwnerFact(
+        subject: String,
+        predicate: String,
+        value: String,
+        scope: String = "global",
+    ): JSONObject = withContext(Dispatchers.IO) {
+        postProved(
+            "/v1/context/facts",
+            JSONObject()
+                .put("subject", subject)
+                .put("predicate", predicate)
+                .put("value", value)
+                .put("scope", scope),
+        )
+    }
+
+    /**
+     * DELETE /v1/context/facts?subject&predicate&scope — the owner's own way to end a fact
+     * they stated. The gateway route takes the fact's identity (subject/predicate/scope),
+     * not an opaque id (`app.py`'s `forget_owner_fact`), so that is what this takes too.
+     */
+    suspend fun forgetOwnerFact(
+        subject: String,
+        predicate: String,
+        scope: String = "global",
+    ): JSONObject = withContext(Dispatchers.IO) {
+        deleteProved(
+            "/v1/context/facts?subject=${encodeQuery(subject)}" +
+                "&predicate=${encodeQuery(predicate)}&scope=${encodeQuery(scope)}",
+        )
+    }
+
+    // -------------------------------------------------------------------------- reminders
+
+    /** GET /v1/reminders — the owner's open reminders (Home's "Upcoming"). */
+    suspend fun reminders(): JSONArray = withContext(Dispatchers.IO) {
+        JSONArray(rawGet("/v1/reminders"))
+    }
+
+    /**
+     * POST /v1/reminders — `text` plus a due expression, resolved gateway-side. Mirrors
+     * `ReminderParseBody`'s shape (`app.py`'s `/v1/reminders/parse`, the richer of the two
+     * creation routes) so the same call parses "tomorrow at 9" the owner typed.
+     */
+    suspend fun createReminder(text: String, dueExpression: String): JSONObject =
+        withContext(Dispatchers.IO) {
+            postJson(
+                "/v1/reminders/parse",
+                JSONObject().put("text", text).put("due_expression", dueExpression),
+            )
+        }
+
+    suspend fun resolveReminder(reminderId: String): JSONObject = withContext(Dispatchers.IO) {
+        postJson("/v1/reminders/${encodeSegment(reminderId)}/resolve", JSONObject())
+    }
+
+    suspend fun cancelReminder(reminderId: String): JSONObject = withContext(Dispatchers.IO) {
+        postJson("/v1/reminders/${encodeSegment(reminderId)}/cancel", JSONObject())
+    }
+
+    // --------------------------------------------------------------------------- degraded
+
+    /** GET /v1/degraded — the gateway's own degraded snapshot (GAP-F-010). */
+    suspend fun degraded(): JSONObject = withContext(Dispatchers.IO) {
+        // The route returns a bare JSON array of DegradedCapability, matching `/health`'s
+        // own `degraded` field — wrapped here so callers get the one shape
+        // `GatewayDegradedMapping.parse` already reads off `/health`.
+        JSONObject().put("degraded", JSONArray(rawGet("/v1/degraded")))
+    }
+
+    // ---------------------------------------------------------------------- command status
+
+    /** GET /v1/commands/{id} — GAP-F-011: what became of a dispatched command. */
+    suspend fun commandStatus(commandId: String): JSONObject = withContext(Dispatchers.IO) {
+        getJson("/v1/commands/${encodeSegment(commandId)}")
+    }
+
+    // ------------------------------------------------------------------------------ Google
+
+    /** GET /v1/google/planes — the four Google credentials, reported one by one. */
+    suspend fun googlePlanes(): JSONObject = withContext(Dispatchers.IO) {
+        getJson("/v1/google/planes")
+    }
+
+    /**
+     * POST /v1/google/owner-revoke — the owner cutting Google from the phone. Device-proofed
+     * like every other owner mutation (GAP-F-024); `google.revoke()` + `google.status()` is
+     * the whole of the route's own effect, so nothing further is required in the body.
+     */
+    suspend fun googleOwnerRevoke(): JSONObject = withContext(Dispatchers.IO) {
+        postProved("/v1/google/owner-revoke", JSONObject())
+    }
+
+    // ---------------------------------------------------------------- trading (read-only)
+    //
+    // DNA §4's Trading destination and Home's "Significant trade state" panel. Raw response
+    // bodies, like the rest of this client's `tradingTrades`/`tradingPortfolio` family —
+    // `trading/TradingFormat` and the trading worker's own read models own parsing them.
+    // These five routes are not present in `backend/van_gateway/app.py` as of this change
+    // (only `/v1/trading/{status,trades,portfolio,accounts,market-state,risk,cognition,
+    // trades/{id},bars,tickets,halt,...}` exist there today); see this worker's final report
+    // for what `tests/contracts/test_android_gateway_routes_match.py` says about them.
+
+    suspend fun tradingAssessment(): String = withContext(Dispatchers.IO) {
+        rawGet("/v1/trading/assessment")
+    }
+
+    suspend fun tradingPositions(): String = withContext(Dispatchers.IO) {
+        rawGet("/v1/trading/positions")
+    }
+
+    suspend fun tradingEvents(limit: Int = 20): String = withContext(Dispatchers.IO) {
+        rawGet("/v1/trading/events?limit=$limit")
+    }
+
+    suspend fun tradingPotential(): String = withContext(Dispatchers.IO) {
+        rawGet("/v1/trading/potential")
+    }
+
+    suspend fun tradingHistory(limit: Int = 50): String = withContext(Dispatchers.IO) {
+        rawGet("/v1/trading/history?limit=$limit")
+    }
 
     suspend fun events(afterSeq: Long = 0L): JSONObject = withContext(Dispatchers.IO) {
         val id = deviceId ?: error("not_enrolled")

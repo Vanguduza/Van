@@ -6,6 +6,7 @@ import android.net.Network
 import android.net.NetworkCapabilities
 import android.net.NetworkRequest
 import com.dial.van.control.VanCommandController
+import com.dial.van.control.VanSpokenAnswer
 import com.dial.van.control.VanCommandSource
 import com.dial.van.degraded.DegradedModeStore
 import com.dial.van.events.PreferencesEventCursorStore
@@ -224,6 +225,10 @@ class VanApplication : Application(), VoiceInputCallback, TtsOutputCallback {
         commandQueue = EncryptedCommandQueue(this)
         notificationPolicyStore = NotificationPolicyStore(this)
         degradedModeStore = DegradedModeStore()
+        // GAP-F-010 — the gateway's `/health.degraded[]` reaches the device's degraded
+        // store through the bridge, so Settings shows one reconciled list (device signals
+        // + gateway-declared capability loss) instead of two that disagree.
+        DegradedBridge.bindGatewayHealth { json -> degradedModeStore.applyGatewayHealth(json) }
         personalSpeechModel = PersonalSpeechModel(this)
         wakeAcknowledgement = WakeAcknowledgementManager(this)
         voiceUi = VanVoiceUiStore()
@@ -236,8 +241,11 @@ class VanApplication : Application(), VoiceInputCallback, TtsOutputCallback {
         // P1-VOICE-001 — TtsOutputManager.speak finally has a caller. Bound to the outcome
         // projection, so VAN speaks when work finished or needs the owner and stays quiet
         // otherwise.
+        // Spoken outcomes go through VoiceEdge's speech-stream path (SpeechQueue + audio
+        // focus), not a bare TtsOutputManager.speak; `voiceEdge` is constructed below and
+        // only dereferenced when a command actually finishes.
         commandController = VanCommandController(
-            gatewayClient, appScope, speak = { text -> ttsOutput.speak(text) },
+            gatewayClient, appScope, speak = { text -> VanSpokenAnswer.speak(voiceEdge, text) },
         )
         val secondPassCoordinator = SherpaLocalSecondPassAsr.fromFiles(this)
             ?.let(::VoiceSecondPassCoordinator)
@@ -639,9 +647,9 @@ class VanApplication : Application(), VoiceInputCallback, TtsOutputCallback {
     private suspend fun refreshGatewayHealth() {
         try {
             val health = gatewayClient.health()
-            // GAP-F-014/bridge — `degraded/` is out of scope for this change; see
-            // `DegradedBridge`'s class doc for how this reaches it and how to finish the
-            // wiring once `degradedModeStore.applyGatewayHealth` exists.
+            // GAP-F-010 — the bridge is bound to `degradedModeStore.applyGatewayHealth`
+            // in onCreate, so this reconciles gateway-declared capability loss into the
+            // device's degraded list on every health poll.
             DegradedBridge.applyGatewayHealth(health.toString())
             degradedModeStore.markWorking("gateway")
             // P3-AND-006 — the gateway coming back is the other recovery edge. A phone with

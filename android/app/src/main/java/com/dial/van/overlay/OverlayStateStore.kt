@@ -3,6 +3,8 @@ package com.dial.van.overlay
 import android.content.Context
 import android.content.SharedPreferences
 import androidx.core.content.edit
+import androidx.security.crypto.EncryptedSharedPreferences
+import androidx.security.crypto.MasterKey
 
 data class OverlayPersistedState(
     val x: Int,
@@ -13,8 +15,20 @@ data class OverlayPersistedState(
 )
 
 class OverlayStateStore(context: Context) {
-    private val prefs: SharedPreferences =
-        context.getSharedPreferences(PREFS, Context.MODE_PRIVATE)
+    /**
+     * GAP-F-027 — this was the one plain `SharedPreferences` writer left in the app while
+     * credentials, the command queue and the session outbox were all encrypted. The
+     * contents are low-sensitivity (position, presentation, dock edge, running flag), but
+     * one storage policy is easier to audit than one-with-an-exception, and the same
+     * Keystore-backed scheme the gateway client uses costs nothing here.
+     */
+    private val prefs: SharedPreferences = EncryptedSharedPreferences.create(
+        context.applicationContext,
+        PREFS,
+        MasterKey.Builder(context.applicationContext).setKeyScheme(MasterKey.KeyScheme.AES256_GCM).build(),
+        EncryptedSharedPreferences.PrefKeyEncryptionScheme.AES256_SIV,
+        EncryptedSharedPreferences.PrefValueEncryptionScheme.AES256_GCM,
+    )
 
     fun save(state: OverlayPersistedState) {
         prefs.edit {

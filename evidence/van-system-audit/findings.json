@@ -1319,7 +1319,7 @@
       "repository_evidence": [
         "android/app/src/main/java/com/dial/van/onboarding/OnboardingActivity.kt:116",
         "android/app/src/main/java/com/dial/van/onboarding/OnboardingPlan.kt:90",
-        "android/app/src/main/java/com/dial/van/command/modules/AdminModules.kt:103"
+        "android/app/src/main/java/com/dial/van/command/settings/SettingsRoute.kt:104"
       ],
       "runtime_evidence": [],
       "affected_components": [
@@ -2107,7 +2107,7 @@
       "authority": "docs/VAN_WHOLE_SYSTEM_IMPLEMENTATION_AUDIT_AND_CERTIFICATION_REV_1.md s30",
       "repository_evidence": [
         "android/app/src/main/java/com/dial/van/command/CommandCentreComponents.kt:100",
-        "android/app/src/main/java/com/dial/van/command/CommandCentreComponents.kt:143",
+        "android/app/src/main/java/com/dial/van/command/work/WorkRoute.kt:309",
         "android/app/src/main/java/com/dial/van/command/modules/BrowserModules.kt:184",
         "android/app/src/main/java/com/dial/van/status/OwnerLanguage.kt:19"
       ],
@@ -2127,11 +2127,11 @@
           "android/app/src/main/java/com/dial/van/status/OwnerLanguage.kt",
           "android/app/src/main/java/com/dial/van/command/CommandCentreComponents.kt",
           "android/app/src/main/java/com/dial/van/command/modules/BrowserModules.kt",
-          "android/app/src/main/java/com/dial/van/command/modules/OverviewModule.kt",
-          "android/app/src/main/java/com/dial/van/command/modules/ChatModule.kt",
-          "android/app/src/main/java/com/dial/van/command/modules/AdminModules.kt",
+          "android/app/src/main/java/com/dial/van/command/home/HomeRoute.kt",
+          "android/app/src/main/java/com/dial/van/command/work/WorkRoute.kt",
+          "android/app/src/main/java/com/dial/van/command/settings/SettingsRoute.kt",
           "android/app/src/main/java/com/dial/van/command/modules/WorkModules.kt",
-          "android/app/src/main/java/com/dial/van/command/modules/DecisionsModule.kt",
+          "android/app/src/main/java/com/dial/van/command/attention/AttentionRoute.kt",
           "android/app/src/main/java/com/dial/van/overlay/VanOverlayPanels.kt"
         ],
         "verified_by": [
@@ -3156,7 +3156,7 @@
           "android/app/src/main/java/com/dial/van/overlay/FloatingOverlayService.kt",
           "android/app/src/main/java/com/dial/van/queue/EncryptedCommandQueue.kt",
           "android/app/src/main/java/com/dial/van/VanApplication.kt",
-          "android/app/src/main/java/com/dial/van/command/modules/OverviewModule.kt"
+          "android/app/src/main/java/com/dial/van/command/home/HomeRoute.kt"
         ],
         "verified_by": [
           "android/verification/src/test/kotlin/com/dial/van/degraded/SubsystemHealthTest.kt"
@@ -3265,14 +3265,14 @@
         "summary": "Owner state survives rotation and process death. Everything was held in `remember`, so rotating the phone, changing the font size or having Android reclaim the process dropped the owner back on Home with their typed text gone; on an assistant meant to stay resident, process death is what happens overnight, not an edge case. `CommandCentreViewModel` holds the selected module and the draft in a `SavedStateHandle`, the onboarding flow keeps its skipped steps and the half-typed pairing address and code in `rememberSaveable`, and the chart keeps the owner's place in the series. The navigation rules are in `CommandNav`, which is pure: saved state is keyed by id rather than ordinal, because ordinals restore the wrong screen the first time a module is inserted into the enum, silently, to an owner whose process Android had just killed.",
         "changed": [
           "android/app/src/main/java/com/dial/van/command/CommandCentreViewModel.kt",
-          "android/app/src/main/java/com/dial/van/command/CommandCentreNav.kt",
+          "android/app/src/main/java/com/dial/van/command/nav/VanNavModel.kt",
           "android/app/src/main/java/com/dial/van/command/CommandCentreActivity.kt",
           "android/app/src/main/java/com/dial/van/onboarding/OnboardingActivity.kt",
           "android/app/src/main/java/com/dial/van/trading/ui/TradeChartCanvas.kt",
           "android/app/build.gradle.kts"
         ],
         "verified_by": [
-          "android/verification/src/test/kotlin/com/dial/van/command/CommandNavTest.kt"
+          "android/verification/src/test/kotlin/com/dial/van/command/nav/VanNavModelTest.kt"
         ],
         "runtime_evidence": [
           "evidence/van-system-audit/gate-10/kotlin_verification_tests.txt"
@@ -3348,16 +3348,16 @@
         "summary": "Both god files are split, and both splits are contracts rather than tidy-ups.\n\n`CommandCentreActivity.kt` was 1,342 lines carrying the Activity, the navigation, fourteen module bodies, the shared components and two JSON helpers. It is now nine files, the largest 403 lines, and `tests/contracts/test_android_dashboard_navigation.py` fails if any of them passes 450. That is not a style rule: the status projection P0-EXEC-003 found painting unverified outcomes in the working colour sat at line 1,310 of that file, and the reason nobody had seen it is that nobody reads to line 1,310.\n\n`FloatingOverlayService.kt` was 1,096 lines and was, at once, a foreground service, a WindowManager client, a drag controller and an entire Compose tree, with every panel reading the service's own mutable fields and calling its private methods. It is now 420 lines — window, lifecycle, composition host, state persistence and interaction routing, which is what Rev 3.0 s41 says a service with a window is for — beside eight files that each do one job. `VanOverlaySurface` and `VanOverlayWorkboards` draw from a state snapshot and act through a callback bundle, so `MaximizedWorkboard` no longer sizes itself from the service's display metrics and the chips no longer call `startActivity` on it. `OverlayDragController` owns the drag behind an `OverlayWindowPort`, which is the boundary that makes the gesture sequence executable: the haptic fires on the arming edge rather than on every frame, a cancelled drag never leaves the overlay armed to close on the owner's next unrelated touch, and a lift over the dismiss target returns null rather than a state update for a window that is going away. `VanOverlayController` and `EdgeDocking` hold the geometry; `EdgeDocking` had to leave `OverlayStateStore.kt`, where it sat below a `SharedPreferences` class in a file that imports `android.content`, which is exactly why none of that arithmetic could be executed anywhere.\n\n`tests/contracts/test_android_overlay_split.py` holds the boundary: no file in the package over 450 lines, no drawing in the service, no reaching around the parameters from the surface, and the geometry files kept free of Android imports and present in the harness — because a split that is not asserted is a split that lasts until the next hurried change.",
         "changed": [
           "android/app/src/main/java/com/dial/van/command/CommandCentreActivity.kt",
-          "android/app/src/main/java/com/dial/van/command/CommandModule.kt",
-          "android/app/src/main/java/com/dial/van/command/CommandCentreNav.kt",
+          "android/app/src/main/java/com/dial/van/command/nav/VanRoute.kt",
+          "android/app/src/main/java/com/dial/van/command/nav/VanNavModel.kt",
           "android/app/src/main/java/com/dial/van/command/CommandCentreComponents.kt",
           "android/app/src/main/java/com/dial/van/command/DegradedPanel.kt",
-          "android/app/src/main/java/com/dial/van/command/modules/OverviewModule.kt",
-          "android/app/src/main/java/com/dial/van/command/modules/ChatModule.kt",
-          "android/app/src/main/java/com/dial/van/command/modules/DecisionsModule.kt",
+          "android/app/src/main/java/com/dial/van/command/home/HomeRoute.kt",
+          "android/app/src/main/java/com/dial/van/command/work/WorkRoute.kt",
+          "android/app/src/main/java/com/dial/van/command/attention/AttentionRoute.kt",
           "android/app/src/main/java/com/dial/van/command/modules/WorkModules.kt",
           "android/app/src/main/java/com/dial/van/command/modules/BrowserModules.kt",
-          "android/app/src/main/java/com/dial/van/command/modules/AdminModules.kt",
+          "android/app/src/main/java/com/dial/van/command/settings/SettingsRoute.kt",
           "android/app/src/main/java/com/dial/van/overlay/FloatingOverlayService.kt",
           "android/app/src/main/java/com/dial/van/overlay/VanOverlaySurface.kt",
           "android/app/src/main/java/com/dial/van/overlay/VanOverlayWorkboards.kt",
@@ -3375,7 +3375,7 @@
         "verified_by": [
           "android/verification/src/test/kotlin/com/dial/van/overlay/VanOverlayControllerTest.kt",
           "android/verification/src/test/kotlin/com/dial/van/overlay/OverlayDragControllerTest.kt",
-          "android/verification/src/test/kotlin/com/dial/van/command/CommandNavTest.kt",
+          "android/verification/src/test/kotlin/com/dial/van/command/nav/VanNavModelTest.kt",
           "tests/contracts/test_android_dashboard_navigation.py",
           "tests/contracts/test_android_overlay_split.py"
         ],
@@ -5228,10 +5228,10 @@
         "state": "EXTERNALLY_BLOCKED_REPOSITORY_COMPLETE",
         "summary": "Three screens, each wired into CommandModule and rendered by CommandCentreActivity.\n\n**Work** renders the gateway's own status rather than deriving one: MissionSummary.ownerStatus prefers ownerStatusFromGateway and falls back to UNKNOWN, never to a working state, which is what P0-EXEC-003 found painting unverified outcomes in the working colour. It separates waiting from running, because a mission in WAITING_FOR_OWNER is not progressing and listing it among the active ones tells the owner VAN is busy when it is in fact stuck on them. And it states the verification rather than implying it by absence — §6's distinction between done, partly done and finished-but-unconfirmed reaches the screen instead of being flattened into a tick.\n\n**Notifications** lists apps the owner has already decided about rather than every installed package: enumerating those needs QUERY_ALL_PACKAGES, which Play treats as sensitive and VAN does not need. An app reaches the list because a notification from it did, which needed a new `decidedPackages()` on the store — it could be written to and read per package and could not say what it held.\n\n**Speech** passes no trust argument, so recordCorrection's OWNER_CONFIRMED default applies. That is deliberate and is why this is a screen rather than something inferred from a retry: a model that teaches itself from its own second guess learns its own mistakes.\n\nAll three use rememberSaveable for the state a rotation would otherwise lose — the open mission, a half-typed package name, a half-typed correction. Losing that reads as VAN forgetting.\n\nSix mutations, six caught, after three survived a first pass. Those three all had the same cause: the assertions named a function rather than a binding, so `store.setPolicy(` was satisfied by either of two call sites and `rememberSaveable` by any one of four fields. A presence check on a name that appears more than once tests almost nothing.\n\nThree existing contract tests failed when this landed, and all three were right to. They encoded 'MissionRepository is dead' — an allowlist entry, a ledger cross-check and an excludes assertion — and this made it alive. The allowlist entry is gone, which is exactly what `test_every_explained_entry_still_describes_something_real` exists to force; the excludes assertion moved to a synthetic ledger, because pinning a mechanism to a real row meant the test failed when the row was fixed.\n\nCONFIRMED by run 35463788324 on bfc9f41: :app:compileDebugKotlin, :app:testDebugUnitTest, :app:assembleDebug and :app:lintDebug all passed with the three screens in the tree. That settles that they compile and that lint has no objection; whether they render and are usable is Gate 14's.",
         "changed": [
-          "android/app/src/main/java/com/dial/van/command/modules/MissionsModule.kt",
+          "android/app/src/main/java/com/dial/van/command/work/WorkRoute.kt",
           "android/app/src/main/java/com/dial/van/command/modules/NotificationPolicyModule.kt",
           "android/app/src/main/java/com/dial/van/command/modules/SpeechModule.kt",
-          "android/app/src/main/java/com/dial/van/command/CommandModule.kt",
+          "android/app/src/main/java/com/dial/van/command/nav/VanRoute.kt",
           "android/app/src/main/java/com/dial/van/command/CommandCentreActivity.kt",
           "android/app/src/main/java/com/dial/van/notification/NotificationPolicy.kt"
         ],
@@ -5812,7 +5812,7 @@
         "summary": "Both forms are gone and replaced by read-only status. The onboarding screen now distinguishes two states that are not the same: a build with a trust anchor is waiting for its installer, and a build without one can never be provisioned and says so rather than leaving the owner watching a screen that cannot change.\n\n`VanGatewayClient.baseUrl` has a private setter and `pairThisDevice` is private, so a new form cannot be written without editing the client. `provisionThisDevice` is the only caller and it does both halves of §0D.3 — pair and bind — because a device that paired without binding is an APK that works on another handset.\n\nTen contract tests read the Android sources, and the strong one is not the label check: it refuses any editable field at all on the two screens that carried the problem, because a rebuild without a label would pass a check that looked for wording.",
         "changed": [
           "android/app/src/main/java/com/dial/van/onboarding/OnboardingActivity.kt",
-          "android/app/src/main/java/com/dial/van/command/modules/AdminModules.kt",
+          "android/app/src/main/java/com/dial/van/command/settings/SettingsRoute.kt",
           "android/app/src/main/java/com/dial/van/gateway/VanGatewayClient.kt",
           "android/app/src/main/java/com/dial/van/connectivity/ProvisioningPayload.kt",
           "android/app/src/main/java/com/dial/van/connectivity/ProvisioningIntake.kt",

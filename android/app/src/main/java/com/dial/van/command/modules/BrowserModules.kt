@@ -30,7 +30,6 @@ import com.dial.van.VanApplication
 import com.dial.van.browser.BrowserActivity
 import com.dial.van.command.AdminActionCard
 import com.dial.van.command.AdminCard
-import com.dial.van.command.CommandModule
 import com.dial.van.command.DashboardPageHeader
 import com.dial.van.command.SectionHeader
 import com.dial.van.command.TruthMessage
@@ -48,7 +47,10 @@ import org.json.JSONObject
 internal fun BrowserAutomationModule(
     app: VanApplication,
     glass: com.dial.van.visual.VanGlassStyle,
-    navigate: (CommandModule) -> Unit,
+    onOpenEscalations: () -> Unit,
+    onOpenTasks: () -> Unit,
+    onOpenSessions: () -> Unit,
+    onOpenPolicy: () -> Unit,
 ) {
     val scope = rememberCoroutineScope()
     var status by remember { mutableStateOf<JSONObject?>(null) }
@@ -112,7 +114,7 @@ internal fun BrowserAutomationModule(
                     "$open awaiting owner decision • ${rows.size} returned"
                 } ?: "Loading escalation summary…",
                 glass,
-            ) { navigate(CommandModule.BROWSER_ESCALATIONS) }
+            ) { onOpenEscalations() }
         }
         item {
             AdminActionCard(
@@ -122,7 +124,7 @@ internal fun BrowserAutomationModule(
                     "${rows.size} active/recent task(s) • $waiting resumably waiting"
                 } ?: "Loading task summary…",
                 glass,
-            ) { navigate(CommandModule.BROWSER_TASKS) }
+            ) { onOpenTasks() }
         }
         item {
             val profiles = status?.optJSONArray("profiles")?.objectList().orEmpty()
@@ -133,7 +135,7 @@ internal fun BrowserAutomationModule(
                     "${profiles.size} managed profile(s) • $active active lease(s)"
                 },
                 glass,
-            ) { navigate(CommandModule.BROWSER_SESSIONS) }
+            ) { onOpenSessions() }
         }
         item {
             AdminActionCard(
@@ -142,7 +144,7 @@ internal fun BrowserAutomationModule(
                     "What VAN is allowed to do on the web, and how far it may go on its own"
                 } ?: "Checking what VAN is allowed to do…",
                 glass,
-            ) { navigate(CommandModule.BROWSER_POLICY) }
+            ) { onOpenPolicy() }
         }
         item { Button(onClick = { refresh() }) { Text("Refresh summary") } }
     }

@@ -36,6 +36,39 @@ EXPLAINED_UNREFERENCED: dict[str, str] = {
         "@Preview composables. Android Studio renders them; nothing calls them, by design. "
         "They are a development surface, not a shipping one."
     ),
+    # docs/design/COMPONENT_CATALOGUE.md's own catalogue, built ahead of the surfaces that
+    # adopt each one — `com.dial.van.design` builds the full component set once rather than
+    # growing it screen-by-screen, and `tools/audit/android_design_lint.py`'s baseline
+    # already tracks every screen package that has not migrated onto it yet. This worker
+    # adopted VanScreen/VanPanel/StatusChip/MetricTile/LiveBadge/SectionHeader/AttentionItem/
+    # TimelineRail/EmptyState/VanPressable across Home/Attention/Work/Connected/Settings;
+    # these six are reserved for surfaces this worker does not own:
+    "android/app/src/main/java/com/dial/van/design/components/PositionCard.kt": (
+        "DNA §3: direction/exposure/R/protection/thesis state — the trading worker's "
+        "PositionCard, not adopted by trading/ui/TradingScreens.kt yet."
+    ),
+    "android/app/src/main/java/com/dial/van/design/components/ThesisCard.kt": (
+        "DNA §3: thesis state/invalidation/confirmation — the trading worker's, same as "
+        "PositionCard."
+    ),
+    "android/app/src/main/java/com/dial/van/design/components/EvidenceRow.kt": (
+        "DNA §3: source/trust tier/time/open — provenance rows for Memory's evidence "
+        "surface, owned by the memory/projects worker who has not landed yet."
+    ),
+    "android/app/src/main/java/com/dial/van/design/components/FindingCard.kt": (
+        "DNA §3: \"the Attention screen's non-swipeable cousin of AttentionItem, for Work/"
+        "Memory surfaces that list findings inline\" (its own doc comment) — not yet needed "
+        "by this worker's Attention/Work screens, which use AttentionItem/plain rows."
+    ),
+    "android/app/src/main/java/com/dial/van/design/components/HeatBar.kt": (
+        "DNA §3: portfolio heat/budget — the trading worker's."
+    ),
+    "android/app/src/main/java/com/dial/van/design/components/ApprovalSheet.kt": (
+        "DNA §3: a `ModalBottomSheet` approval flow. This worker's A4 approval surfaces "
+        "(Attention, Work) use an inline Button + VanCommandController.approvePendingA4 "
+        "instead, matching the pre-existing pattern; ApprovalSheet is available for a "
+        "future migration of that flow."
+    ),
 }
 
 #: Production symbols reached only from tests. Each is the TEST_ONLY maturity class and must
@@ -207,3 +240,19 @@ object Zeta
 typealias Eta = String
 """
     assert declarations(source) == {"Alpha", "Beta", "Gamma", "Delta", "Epsilon", "Zeta", "Eta"}
+
+
+def test_a_generic_function_declaration_is_still_found():
+    """`fun <T> Name(...)` — a type parameter list sits between the keyword and the name.
+
+    Without this, `fun <T> VanScreen(state: ScreenState<T>, ...)` never matched at all: the
+    character after `fun\\s+` is `<`, not an identifier. `VanScreen` then silently dropped
+    out of `declared[VanScreen.kt]`, and — because that file's other, non-generic symbols
+    (`VanScreenSkeleton`, `VanErrorState`, ...) are called only from inside `VanScreen`
+    itself, which is excluded as self-reference — the whole file read as unreferenced despite
+    being called from three production screens.
+    """
+    declarations = _scanner()._declarations
+    assert "VanScreen" in declarations("fun <T> VanScreen(state: ScreenState<T>) {}")
+    assert "VanPanel" in declarations("@Composable\nfun VanPanel(modifier: Modifier) {}")
+    assert declarations("fun <K, V> merge(a: K, b: V) {}") == {"merge"}

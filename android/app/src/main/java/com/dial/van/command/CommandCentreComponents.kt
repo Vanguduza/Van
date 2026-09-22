@@ -17,10 +17,6 @@ import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
-import com.dial.van.control.VanConversationMessage
-import com.dial.van.control.VanMessageRole
-import com.dial.van.status.OwnerLanguage
-import com.dial.van.status.VanCommandStatus
 import com.dial.van.visual.VanGlassSurface
 import com.dial.van.visual.VanGlassTokens
 import org.json.JSONArray
@@ -96,72 +92,11 @@ internal fun TruthMessage(text: String, warning: Boolean = false) {
     )
 }
 
-@Composable
-internal fun CommandMessageBubble(
-    message: VanConversationMessage,
-    glass: com.dial.van.visual.VanGlassStyle,
-) {
-    val tint = when (message.role) {
-        VanMessageRole.OWNER -> Color(VanGlassTokens.ACCENT_CYAN)
-        VanMessageRole.VAN -> Color(VanGlassTokens.BABY_CYAN)
-        VanMessageRole.SYSTEM -> Color(VanGlassTokens.ACCENT_AMBER)
-    }
-    VanGlassSurface(
-        style = glass.copy(
-            backgroundAlpha = (glass.backgroundAlpha - 0.08f).coerceAtLeast(0.52f),
-            contaminationAlpha = 0.08f,
-        ),
-        modifier = Modifier.fillMaxWidth(),
-    ) {
-        Column(modifier = Modifier.padding(10.dp)) {
-            Text(
-                when (message.role) {
-                    VanMessageRole.OWNER -> "You"
-                    VanMessageRole.VAN -> "Van"
-                    VanMessageRole.SYSTEM -> "System"
-                },
-                color = tint,
-                fontSize = 10.sp,
-                fontWeight = FontWeight.Bold,
-            )
-            Text(message.text, color = Color(0xFFF4FCFF), fontSize = 12.sp)
-            message.status?.let {
-                // P2-UX-001 — this printed `status.name`, so the owner read
-                // PARTIALLY_SUCCEEDED and COULD_NOT_VERIFY off their own phone.
-                Text(OwnerLanguage.commandStatus(it), color = statusColor(it), fontSize = 9.sp)
-            }
-        }
-    }
-}
-
-/**
- * Exhaustive on purpose (P0-EXEC-003). The `else` branch this replaces painted every
- * status it did not name in the working colour, so an unknown or unverified outcome looked
- * to the owner exactly like one under way.
- */
-
-internal fun statusColor(status: VanCommandStatus): Color = when (status) {
-    VanCommandStatus.SUCCEEDED -> Color(VanGlassTokens.ACCENT_GREEN)
-    VanCommandStatus.FAILED,
-    VanCommandStatus.CANCELLED,
-    VanCommandStatus.EXPIRED,
-    VanCommandStatus.REFUSED,
-    -> Color(VanGlassTokens.ACCENT_RED)
-    // Finished, but not cleanly. Amber is the colour that asks the owner to look.
-    VanCommandStatus.PARTIALLY_SUCCEEDED,
-    VanCommandStatus.COULD_NOT_VERIFY,
-    VanCommandStatus.APPROVAL_REQUIRED,
-    VanCommandStatus.UNKNOWN,
-    -> Color(VanGlassTokens.ACCENT_AMBER)
-    VanCommandStatus.LOCAL_DRAFT,
-    VanCommandStatus.SUBMITTING,
-    VanCommandStatus.ACCEPTED,
-    VanCommandStatus.IN_FLIGHT,
-    // Queued is cyan rather than amber: nothing is wrong and nothing is being asked of
-    // the owner. It is work in hand, waiting on a network rather than on them.
-    VanCommandStatus.QUEUED,
-    -> Color(VanGlassTokens.EDGE_CYAN)
-}
+// CommandMessageBubble/statusColor (the VanGlassStyle-based conversation bubble and its
+// P0-EXEC-003 exhaustive status→colour mapping) are removed here: the Work destination that
+// replaced ChatModule.kt/the old Tasks surface (`command/work/WorkRoute.kt`) has its own
+// tokens-based `ConversationBubble`/`statusRole`, following the same exhaustive-`when` rule
+// (see that file). Nothing else called these two.
 
 internal fun JSONArray.objectList(): List<JSONObject> = buildList {
     for (index in 0 until length()) optJSONObject(index)?.let(::add)

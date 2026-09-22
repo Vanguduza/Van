@@ -67,6 +67,14 @@ DECLARATION = re.compile(
     r"expect|actual|external)\s+)*"
     r"(?:(?:enum|annotation|companion)\s+)?"
     r"(class|object|interface|fun|val|var|typealias)\s+"
+    # `fun <T> Name(...)` / `fun <T, U> Name(...)` — a generic function's type parameter
+    # list sits between the keyword and the name. Without this, `fun <T> VanScreen(` never
+    # matches at all: the next character after `fun\s+` is `<`, not an identifier, so the
+    # whole declaration — and every symbol this file also declares — silently drops out of
+    # the reachability graph, which is a false "nothing calls this" on a component that is
+    # in fact called from three screens (`VanScreen.kt`, found on this scanner's first run
+    # over the DNA §4 rebuild).
+    r"(?:<[^<>]*>\s+)?"
     r"([A-Za-z_][A-Za-z0-9_]*)",
     re.MULTILINE,
 )

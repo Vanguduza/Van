@@ -207,6 +207,14 @@ sourceSets {
             "com/dial/van/design/StatusSemantics.kt",
             "com/dial/van/design/LiveBadgeFormat.kt",
             "com/dial/van/design/charts/ChartAxes.kt",
+            // DNA §4 destinations 5/6 (Memory, Projects): the read models that turn
+            // `/v1/context/export`, `/v1/context/conflicts`, `/v1/projects/{id}/truth`,
+            // `/v1/missions`, `/v1/attention` and `/v1/decisions` into what those two
+            // screens show. Depend only on org.json and the other pure files already in
+            // this list (`com/dial/van/mission/MissionModels.kt`,
+            // `com/dial/van/design/StatusSemantics.kt`).
+            "com/dial/van/memory/MemoryModels.kt",
+            "com/dial/van/projects/ProjectModels.kt",
         )
     }
 }

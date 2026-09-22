@@ -42,6 +42,14 @@ data class VanConversationMessage(
     val commandId: String? = null,
     val status: VanCommandStatus? = null,
     val createdAtEpochMs: Long = System.currentTimeMillis(),
+    /** The owner-input channel this reply answers, for GAP-F-011's polled follow-up: it
+     *  decides whether the eventual answer is worth speaking, same rule [shouldSpeak] uses
+     *  for the synchronous one. Null on an OWNER message (its own source is [VanOwnerCommand.source]). */
+    val source: VanCommandSource? = null,
+    /** GAP-F-019 — `context_gaps` from the dispatch response, already turned into the
+     *  "VAN did not know: …" sentence a Work screen renders under the reply. Null when the
+     *  gateway reported no gaps. */
+    val contextGapsSentence: String? = null,
 )
 
 data class VanOwnerCommand(
@@ -357,6 +365,13 @@ class VanCommandController(
             else -> OwnerStatusProjection.sentenceFor(ownerStatus)
         }
 
+        // GAP-F-019 — what VAN did not know when it answered, from `CommandResult.context_gaps`.
+        val gapsSentence = com.dial.van.command.work.ConversationReducer.contextGapsSentence(
+            response.optJSONArray("context_gaps")?.let { array ->
+                (0 until array.length()).mapNotNull { array.optJSONObject(it)?.optString("label") }
+            }.orEmpty(),
+        )
+
         _state.update {
             it.copy(
                 messages = it.messages + VanConversationMessage(
@@ -365,6 +380,8 @@ class VanCommandController(
                     projectId = command.projectId,
                     commandId = response.optString("command_id").ifBlank { null },
                     status = status,
+                    source = command.source,
+                    contextGapsSentence = gapsSentence,
                 ),
                 submitting = false,
                 pendingA4Approval = pending,
@@ -373,6 +390,63 @@ class VanCommandController(
         }
         if (shouldSpeak(command, ownerStatus)) speak(responseText)
     }
+
+    /**
+     * GAP-F-011 — the conversational surface never received the completed answer.
+     *
+     * Polled every 4s by the Work screen while any VAN message's status is unfinished
+     * ([com.dial.van.command.work.ConversationReducer.needsPolling]). The original message's
+     * status is updated in place (so it stops being polled) and the answer is appended as a
+     * new VAN message, same as the synchronous path — the owner sees the thread move, rather
+     * than having to reopen it.
+     */
+    fun pollUnfinishedCommands() {
+        val pending = _state.value.messages.filter {
+            it.role == VanMessageRole.VAN &&
+                com.dial.van.command.work.ConversationReducer.needsPolling(it.commandId, it.status)
+        }
+        for (message in pending) {
+            val commandId = message.commandId ?: continue
+            scope.launch(Dispatchers.IO) {
+                val response = runCatching { gateway.commandStatus(commandId) }.getOrNull() ?: return@launch
+                val outcome = com.dial.van.command.work.ConversationReducer.outcomeFor(
+                    com.dial.van.command.work.ConversationReducer.PollResult(
+                        ownerStatus = response.optString("owner_status").ifBlank { null },
+                        sentence = response.optString("sentence").ifBlank { null },
+                        finalOutcome = response.optString("final_outcome").ifBlank { null },
+                        finished = response.optBoolean("finished", false),
+                    ),
+                )
+                // Nothing new to say yet (still WORKING) — leave the thread as it is rather
+                // than appending "Working on it" again every 4 seconds.
+                if (outcome.status == message.status) return@launch
+                _state.update { s ->
+                    s.copy(
+                        messages = s.messages.map {
+                            if (it.id == message.id) it.copy(status = outcome.status) else it
+                        } + VanConversationMessage(
+                            role = VanMessageRole.VAN,
+                            text = outcome.text,
+                            projectId = message.projectId,
+                            commandId = commandId,
+                            status = outcome.status,
+                            source = message.source,
+                        ),
+                    )
+                }
+                if (!outcome.keepPolling && shouldSpeakPolledOutcome(message.source)) speak(outcome.text)
+            }
+        }
+    }
+
+    /**
+     * The polled-answer half of [shouldSpeak]'s rule: spoken only for a command the owner
+     * spoke — an answer typed in Work and read out loud minutes later would be startling —
+     * every other finished outcome is text-only here, same as the synchronous path is for
+     * a typed command.
+     */
+    private fun shouldSpeakPolledOutcome(source: VanCommandSource?): Boolean =
+        source == VanCommandSource.VOICE
 
     /**
      * Whether this outcome is worth saying out loud.
