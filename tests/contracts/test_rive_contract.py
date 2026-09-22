@@ -1,7 +1,10 @@
 from __future__ import annotations
 
+import hashlib
 import json
 from pathlib import Path
+
+import yaml
 
 
 ROOT = Path(__file__).resolve().parents[2]
@@ -71,3 +74,28 @@ def test_identity_forbids_dark_hair_and_robot():
     forbid = set(CONTRACT["identity_lock"]["forbid"])
     assert "dark_hair" in forbid
     assert "generic_robot" in forbid
+
+
+def _sha256(path: Path) -> str:
+    return hashlib.sha256(path.read_bytes()).hexdigest()
+
+
+def test_character_forge_asset_hash_contract_when_present():
+    manifest_path = ROOT / "docs" / "character_forge" / "MANIFEST.yaml"
+    source = ROOT / "visual-authority" / "rive" / "van_runtime.riv"
+    shipped = ROOT / "android" / "app" / "src" / "main" / "assets" / "van.riv"
+    sha_file = ROOT / "visual-authority" / "rive" / "van_runtime.sha256"
+
+    if source.exists():
+        manifest = yaml.safe_load(manifest_path.read_text(encoding="utf-8"))
+        source_sha = _sha256(source)
+        assert any(
+            artifact.get("sha256") == source_sha and artifact.get("kind") == "riv_accepted"
+            for artifact in manifest.get("artifacts", [])
+        )
+        assert sha_file.is_file()
+        assert sha_file.read_text(encoding="utf-8").strip() == source_sha
+
+    if shipped.exists():
+        assert source.is_file()
+        assert _sha256(shipped) == _sha256(source)
