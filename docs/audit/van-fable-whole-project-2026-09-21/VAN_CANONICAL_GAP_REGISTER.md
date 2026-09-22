@@ -77,7 +77,7 @@ Mixed rows (a slash) count under their first status; the second half names the p
 
 | Root cause | Statement | Gaps |
 |---|---|---|
-| RC-A | The Hermes tool surface (`hermes/mcp/owner_runtime_stdio.mjs`, 30 tools) is narrower than the gateway's authority model and than the canonical Hermes docs/skills: no memory candidate, no trading read, no browser/automation initiation, no trading halt executor. | GAP-F-001 (part), 003, 005 (part), 006, 015 |
+| RC-A | **Audit-time state:** the Hermes tool surface had 30 tools and was narrower than the gateway authority model. **Current post-closure state:** the fixed allowlist has 51 tools, including memory candidates, trading reads, browser/automation initiation and Temporal durable controls; exact shim/registration equality is contract-tested. | GAP-F-001 (part), 003, 005 (part), 006, 015 |
 | RC-B | Owner-facing write surfaces exist in the gateway with no owner-side producer (no Android caller, no typed command): owner facts, reminders, trading halt execution, Google revoke. | GAP-F-001, 002, 005, 024 |
 | RC-C | Learning, calibration, proactive-policy and context-requirement stores are produced but never consumed by a decision path. | GAP-F-008, 019, 028 |
 | RC-D | Enum/catalog/predicate drift with no exhaustiveness test: DegradedCode vs CATALOG, legacy vs scoped internal tokens, two Google readiness predicates, Android degraded vocabulary, stream-grant mount gate. | GAP-F-007, 009, 010, 016, 025 |
@@ -323,24 +323,22 @@ Mixed rows (a slash) count under their first status; the second half names the p
 - **External qualification required:** None.
 - **Acceptance criteria:** JVM test on VanPresenceReducer maps each listed runtime signal to the action/state; reachability test lists no unproduced VanFiniteAction.
 
-### GAP-F-013 — Speech output: sherpa-onnx TTS preference has no synthesizer; lip-sync is a frame-modulo heuristic; backend SpeechCueClock exists only in a test
+### GAP-F-013 — Speech output: sherpa-onnx TTS preference had no synthesizer; lip-sync/runtime path was incomplete
 
-- **Priority:** P3  
-- **Status:** TEST_ONLY  
-- **Closure (2026-09-22):** FIXED_AND_EVIDENCED (device cue path) / DELIBERATELY_REMOVED_CANON_UPDATED (sherpa TTS preference) — commits 17f4fba — voice/speech_cues.py production SpeechCueClock on the speech_stream wire; voice/SpeechCueTiming.kt + TtsOutputManager cue track; SHERPA_ONNX TTS preference removed (no synthesizer exists; local TTS = QUAL-VOI-02)  
-- **Affected requirements:** REQ-VOI-03, REQ-VOI-04  
-- **Subsystem:** Android voice / gateway voice  
+- **Priority:** P3
+- **Audit-time status:** TEST_ONLY
+- **Current closure (2026-09-22):** **FIXED_AND_EVIDENCED (repository) / DEVICE+EXTERNAL_ARTEFACT qualification pending**
+- **Affected requirements:** REQ-VOI-03, REQ-VOI-04
+- **Subsystem:** Android voice / gateway voice
 - **Root cause:** RC-G (design artefact not wired)
-- **Evidence:**
-  - android voice/LocalTtsRouter.kt:63-141 prefers SHERPA_ONNX but voice/VoiceEdge.kt:152-170 always calls the same Android TextToSpeech (no OfflineTts class exists)
-  - android voice/VoiceInterfaces.kt:455-461 open=(frame%10)/10, viseme=frame%15 from TTS onRangeStart
-  - backend/tests/test_speech_sync.py:1-97 defines SpeechCueClock; grep SpeechCueClock backend/van_gateway → none
-- **Dependent symptoms:**
-  - Aura/mouth animation during speech is not phoneme-driven
-  - Misleading engine-selection code
-- **Repository fix required:** Either implement a sherpa-onnx OfflineTts path behind the existing manifest gate and derive visemes from its timestamps, or remove the SHERPA_ONNX preference and delete/relocate SpeechCueClock into production (speech_stream payload) with a device consumer.
-- **External qualification required:** Local TTS model bundle (QUAL-VOI-01).
-- **Acceptance criteria:** Selected engine is the engine that speaks (JVM test); viseme cues are timestamped, not frame-modulo.
+- **Repository evidence now:**
+  - `backend/van_gateway/voice/speech_cues.py` provides the production speech cue clock and the device consumes cue timing.
+  - `android/.../voice/SherpaLocalTtsRuntime.kt` creates sherpa-onnx `OfflineTts`, synthesizes locally and plays VAN-owned PCM through `AudioTrack`.
+  - The sherpa path emits measured PCM RMS frames, supports barge-in/stop and is released with the voice runtime.
+  - `LocalTtsRouter` selects SHERPA_ONNX only when both the admitted LOCAL_TTS asset bundle and runtime self-test are ready; Android offline TTS remains the fallback.
+  - `TtsOutputManager` executes the engine the router selected; JVM contracts assert sherpa preference/fallback semantics.
+- **External qualification required:** Deploy the checksum-pinned local voice bundle and `voice/tts/runtime.json` to the owner S24; measure synthesis latency, offline speech, barge-in, RMS/viseme output and owner acceptance (QUAL-VOI-01/02).
+- **Acceptance criteria:** Repository path is met. Live promotion requires the device receipt; absence of the bundle remains a truthful degraded state, not a repository gap.
 
 ### GAP-F-014 — Rive asset absent; silent Canvas fallback with no owner-visible notice
 
@@ -363,7 +361,7 @@ Mixed rows (a slash) count under their first status; the second half names the p
 
 - **Priority:** P3  
 - **Status:** CONTRADICTORY_IMPLEMENTATION  
-- **Closure (2026-09-22):** FIXED_AND_EVIDENCED — commits b78cbf4 — AGENTS.md, skills, hermes README regenerated from the 48-tool shim; contract test pins REQUIRED_TOOLS  
+- **Closure (2026-09-22):** FIXED_AND_EVIDENCED — commits b78cbf4 — AGENTS.md, skills and Hermes README were reconciled to the expanded shim; PR #59 now pins an exact 51-tool shim/registration/REQUIRED_TOOLS set  
 - **Affected requirements:** REQ-MEM-02, REQ-COH-02  
 - **Subsystem:** hermes profile docs / MCP shim  
 - **Root cause:** RC-A
@@ -547,21 +545,24 @@ Mixed rows (a slash) count under their first status; the second half names the p
 - **External qualification required:** None.
 - **Acceptance criteria:** One predicate; test asserts CONFIGURED capabilities cannot be executed.
 
-### GAP-F-026 — Temporal execution medium is routed but not built
+### GAP-F-026 — Temporal execution medium was routed but had no executor
 
-- **Priority:** P4  
-- **Status:** STUB_OR_PLACEHOLDER  
-- **Closure (2026-09-22):** DELIBERATELY_REMOVED_CANON_UPDATED — commits — — Temporal stays stack-locked at adoption phase 11; automation/router.py states the decision in owner-visible detail; component ledger DELIBERATE_SCOPE; REQ-AUT-04 re-stated as DELIBERATE_SCOPE  
-- **Affected requirements:** REQ-AUT-04  
-- **Subsystem:** gateway automation router  
-- **Root cause:** Stack-lock phase 11 (deliberate)
-- **Evidence:**
-  - backend/van_gateway/automation/router.py:41,127-136 ExecutionMedium.TEMPORAL decision with detail 'not yet built; use a native VAN state machine'; no temporalio import in the gateway (deploy/van-trading-core/requirements-vm.txt pins temporalio==1.33.0 for the VM only)
-- **Dependent symptoms:**
-  - critical_durable automation falls back to native missions
-- **Repository fix required:** None now; keep the routing decision explicit in owner-visible output.
-- **External qualification required:** Temporal adoption decision.
-- **Acceptance criteria:** Documented as DELIBERATE_SCOPE in the component ledger (already).
+- **Priority:** P4
+- **Audit-time status:** STUB_OR_PLACEHOLDER
+- **Current closure (2026-09-22):** **FIXED_AND_EVIDENCED (repository) / EXTERNAL live runtime pending**
+- **Affected requirements:** REQ-AUT-04
+- **Subsystem:** gateway automation router / van-trading-core durable runtime
+- **Root cause:** The phase-11 stack lock had been treated as permission to leave the selected medium unimplemented.
+- **Repository evidence now:**
+  - `automation/router.py` still deterministically selects TEMPORAL for `critical_durable`, but reports whether the bridge is actually configured.
+  - `automation/temporal_bridge.py` exposes scoped start/status/signal routes and fails closed when the deployment bridge is absent.
+  - `deploy/van-trading-core/temporal/workflows.py` implements `VanDurableWorkflow` with replay-safe state, checkpoints, signals, durable waits and terminal outcomes.
+  - `deploy/van-trading-core/temporal/runtime.py` runs a Temporal client/worker plus a private token-authenticated bridge and writes token-free lifecycle evidence.
+  - `vati-temporal.service`, bootstrap and `qualify.sh` stage/qualify the runtime; `temporalio==1.33.0` is pinned.
+  - Hermes exposes `temporal_start`, `temporal_status` and `temporal_signal`; the fixed MCP allowlist contract includes them.
+- **Authority constraint:** Temporal owns durable coordination only and explicitly does **not** execute live orders or grant owner/trading authority.
+- **External qualification required:** Supply and operate a real Temporal server address, enable `vati-temporal.service`, then record start → restart/recovery → checkpoint → terminal-result evidence (QUAL-AUT-02).
+- **Acceptance criteria:** Repository executor exists and fails closed without its host. Live promotion requires the external Temporal canary.
 
 ### GAP-F-027 — Overlay state persisted in plain SharedPreferences
 
@@ -595,3 +596,24 @@ Mixed rows (a slash) count under their first status; the second half names the p
 - **Repository fix required:** Add a bounded proactive job: stale intents / unresolved attention / expired missions → FOLLOW_UP attention items under ProactivePolicy ceilings, never executing actions.
 - **External qualification required:** None.
 - **Acceptance criteria:** A mission left WAITING_FOR_OWNER > N hours yields a FOLLOW_UP attention item produced by the proactive job.
+
+---
+
+## Post-closure product reconciliation — 2026-09-22
+
+The phrase “zero repository gaps” in the original Fable closure referred only to its 28-item
+register. A follow-up owner/product review correctly identified additional omissions that were
+not represented by those 28 IDs. They are now tracked explicitly rather than hidden by that
+phrase:
+
+| ID | Product omission discovered after Fable closure | Repository disposition | Remaining live gate |
+|---|---|---|---|
+| PROD-F-001 | Attention snooze gesture had no backend mutation route | **FIXED_AND_EVIDENCED** — durable `AttentionEngine.snooze`, POST route, Android client + swipe caller, route test | Device UX acceptance |
+| PROD-F-002 | Keyboard/full-screen obstruction policy had no producer | **FIXED_AND_EVIDENCED** — `VanObstructionAccessibilityService`, manifest/config, overlay consumer/repositioning, onboarding + Settings state | Owner grants Accessibility permission; S24 behavior check |
+| PROD-F-003 | Trading History lacked an equity/R curve model | **FIXED_AND_EVIDENCED** — VATI server read model emits cumulative R/P&L curves; Android parses and renders them | Live trading history data |
+| PROD-F-004 | Local sherpa TTS was classified but not implemented | **FIXED_AND_EVIDENCED (repository)** — `OfflineTts` + VAN-owned PCM path | Voice bundle + S24 qualification (QUAL-VOI-02) |
+| PROD-F-005 | Temporal was named as a durable medium but had no executor | **FIXED_AND_EVIDENCED (repository)** — bridge, workflow, worker, service, bootstrap, qualifier, Hermes tools | Real Temporal server + live recovery canary (QUAL-AUT-02) |
+
+These product rows are also enforced by `tools/audit/fable_anti_gap_check.py` so a future
+closure cannot regress them without CI evidence.
+
