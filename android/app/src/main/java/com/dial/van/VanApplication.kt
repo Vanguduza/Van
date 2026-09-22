@@ -1,6 +1,8 @@
 package com.dial.van
 
 import android.app.Application
+import androidx.security.crypto.EncryptedSharedPreferences
+import androidx.security.crypto.MasterKey
 import android.net.ConnectivityManager
 import android.net.Network
 import android.net.NetworkCapabilities
@@ -173,7 +175,15 @@ class VanApplication : Application(), VoiceInputCallback, TtsOutputCallback {
     }
 
     private val browserSessionStore by lazy {
-        getSharedPreferences("van_browser_session", MODE_PRIVATE)
+        // Encrypted, as the KDoc above promises: the record names the profile the owner
+        // was logged into and the live browser session id (GAP-F-027 storage policy).
+        EncryptedSharedPreferences.create(
+            this,
+            "van_browser_session",
+            MasterKey.Builder(this).setKeyScheme(MasterKey.KeyScheme.AES256_GCM).build(),
+            EncryptedSharedPreferences.PrefKeyEncryptionScheme.AES256_SIV,
+            EncryptedSharedPreferences.PrefValueEncryptionScheme.AES256_GCM,
+        )
     }
 
     /**
