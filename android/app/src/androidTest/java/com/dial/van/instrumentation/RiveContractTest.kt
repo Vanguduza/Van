@@ -87,6 +87,15 @@ class RiveContractTest {
             }
         }
         assertEquals(expected, actual)
+        val rig = rigOrSkip()
+        if (rig.mode == Mode.PRODUCTION) {
+            val decision = VanVisualRuntime.decide(
+                assetBytes = rig.bytes.size.toLong(),
+                riveRuntimeAvailable = true,
+                ownerArtAvailable = true,
+            )
+            assertEquals("production asset must select the Rive renderer", VanRenderer.RIVE, decision.renderer)
+        }
     }
 
     @Test
@@ -177,7 +186,9 @@ class RiveContractTest {
             val expected = if (background == "light") Color.rgb(244, 246, 248) else Color.rgb(11, 15, 20)
             assertCornersNear(frame, expected)
         }
-        assertFalse("busy background frame is blank", looksBlank(capture(rig, "transparent-busy", background = "busy", state = 2)))
+        val busy = capture(rig, "transparent-busy", background = "busy", state = 2)
+        assertFalse("busy background frame is blank", looksBlank(busy))
+        assertBusyCornersUnaffected(busy)
     }
 
     @Test
@@ -347,6 +358,26 @@ class RiveContractTest {
         var different = 0
         for (y in 0 until bitmap.height step 8) for (x in 0 until bitmap.width step 8) if (bitmap.getPixel(x,y) != first) different++
         return different < 4
+    }
+
+
+    private fun assertBusyCornersUnaffected(bitmap: Bitmap) {
+        val patch = min(8, min(bitmap.width, bitmap.height))
+        val points = listOf(
+            0 to 0,
+            bitmap.width - patch to 0,
+            0 to bitmap.height - patch,
+            bitmap.width - patch to bitmap.height - patch,
+        )
+        for ((sx, sy) in points) {
+            for (y in sy until sy + patch) for (x in sx until sx + patch) {
+                val c = bitmap.getPixel(x, y)
+                val r = Color.red(c); val g = Color.green(c); val b = Color.blue(c)
+                val neutral = abs(r - g) <= 8 && abs(g - b) <= 8
+                val checker = r <= 12 || r >= 243
+                assertTrue("busy-background corner was altered by the artboard", neutral && checker)
+            }
+        }
     }
 
     private fun assertCornersNear(bitmap: Bitmap, expected: Int) {
