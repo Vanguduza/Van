@@ -205,7 +205,14 @@ class AutomationApi:
             policy=self.policy, templates=self.templates, validator=self.validator
         )
         self.router_service = AutomationMediumRouter(
-            registry=registry, hot_index=hot_index, templates=self.templates
+            registry=registry,
+            hot_index=hot_index,
+            templates=self.templates,
+            temporal_available=(
+                settings.temporal_enabled
+                and bool(settings.temporal_bridge_url)
+                and bool(settings.temporal_bridge_token)
+            ),
         )
         # P2-DEAD-001 — three complete services that nothing imported. Each enforces a rule
         # the fabric is documented to enforce, so an unconstructed one is an unenforced rule.
