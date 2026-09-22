@@ -1,0 +1,50 @@
+services:
+  temporal-postgresql:
+    image: postgres:16.10
+    container_name: van-temporal-postgresql
+    restart: unless-stopped
+    environment:
+      POSTGRES_USER: temporal
+      POSTGRES_PASSWORD: ${TEMPORAL_POSTGRES_PASSWORD:?TEMPORAL_POSTGRES_PASSWORD is required}
+    volumes:
+      - temporal-postgresql:/var/lib/postgresql/data
+    networks:
+      - temporal-private
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U temporal"]
+      interval: 5s
+      timeout: 5s
+      retries: 30
+      start_period: 15s
+
+  temporal:
+    # Single-node owner deployment. Pinned server release; the gRPC listener is loopback-only.
+    # auto-setup is intentionally bounded to this private single-node estate: it creates and
+    # upgrades the two PostgreSQL schemas before starting the server. No UI or public listener.
+    image: temporalio/auto-setup:1.32.0
+    container_name: van-temporal
+    restart: unless-stopped
+    depends_on:
+      temporal-postgresql:
+        condition: service_healthy
+    environment:
+      DB: postgres12
+      DB_PORT: "5432"
+      POSTGRES_USER: temporal
+      POSTGRES_PWD: ${TEMPORAL_POSTGRES_PASSWORD:?TEMPORAL_POSTGRES_PASSWORD is required}
+      POSTGRES_SEEDS: temporal-postgresql
+      DEFAULT_NAMESPACE: van
+      DEFAULT_NAMESPACE_RETENTION: 168h
+      SKIP_DEFAULT_NAMESPACE_CREATION: "false"
+    ports:
+      - "127.0.0.1:7233:7233"
+    networks:
+      - temporal-private
+
+volumes:
+  temporal-postgresql:
+
+networks:
+  temporal-private:
+    driver: bridge
+    internal: true
