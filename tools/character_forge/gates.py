@@ -33,6 +33,29 @@ def contract_surface_problems(contract:dict[str,Any])->list[str]:
     if set(actions.values())!=set(range(1,15)) or len(actions)!=14: problems.append("finite action surface drift")
     return problems
 
+def _packaging_receipt(sha):
+    working=ROOT/"visual-authority"/"character-forge"/"09-rive-working"
+    if not working.is_dir(): return None
+    for path in working.glob("*.receipt.json"):
+        try: row=json.loads(path.read_text(encoding="utf-8"))
+        except Exception: continue
+        if row.get("candidate_sha256")==sha: return row
+    return None
+
+def _receipt_problems(sha, stage, manifest, tools):
+    row=_packaging_receipt(sha)
+    if not row: return [f"{stage} packaging receipt file missing"]
+    problems=[]
+    layer=find_artifact(manifest,kind="layer_svg")
+    if row.get("stage")!=stage: problems.append(f"{stage} receipt stage mismatch")
+    if row.get("contract_sha256")!=sha256_file(CONTRACT): problems.append(f"{stage} receipt contract SHA stale")
+    if not layer or row.get("svg_sha256")!=layer.get("sha256"): problems.append(f"{stage} receipt layer SHA stale")
+    pin=str((((tools.get("critical_path") or {}).get("rive_editor") or {}).get("version")))
+    if row.get("rive_editor_version")!=pin: problems.append(f"{stage} receipt Rive Editor version mismatch")
+    candidate=ROOT/str(row.get("candidate_path") or "")
+    if not candidate.is_file() or sha256_file(candidate)!=sha: problems.append(f"{stage} receipt candidate path/hash mismatch")
+    return problems
+
 def _rive_android_pin():
     if not GRADLE.is_file(): return None
     m=re.search(r'app\.rive:rive-android:([^"\)]+)',GRADLE.read_text(encoding="utf-8"))
@@ -79,19 +102,27 @@ def m2():
     if not core.get("ci_run"): problems.append("core CI run missing")
     sha=core.get("candidate_sha256")
     if not sha or not find_artifact(manifest,kind="riv_candidate",sha256=sha): problems.append("core candidate not recorded")
-    if sha and not any(r.get("command")=="rive receipt" and sha in (r.get("outputs") or []) for r in manifest.get("receipts") or []): problems.append("core packaging receipt missing")
+    if sha:
+        if not any(r.get("command")=="rive receipt" and sha in (r.get("outputs") or []) for r in manifest.get("receipts") or []): problems.append("core packaging receipt missing")
+        problems.extend(_receipt_problems(sha,"core_rig",manifest,tools))
     baseline=ROOT/"visual-authority"/"character-forge"/"11-device-evidence"/"core_baseline"
     if core.get("emulator_validation")=="PASS" and not list(baseline.glob("*.png")):
         problems.append("core baseline evidence missing")
     return problems
 
 def m3():
-    problems=m2(); status=load_status(); full=status.get("full_rig") or {}; manifest=load_yaml()
+    problems=m2(); status=load_status(); full=status.get("full_rig") or {}; manifest=load_yaml(); tools=_yaml(TOOLS)
     if full.get("emulator_validation")!="PASS": problems.append("full emulator validation not PASS")
     if full.get("reviewed")!="PASS": problems.append("full independent review not PASS")
     if not full.get("ci_run"): problems.append("full CI run missing")
     sha=full.get("candidate_sha256")
-    if not sha or not find_artifact(manifest,kind="riv_candidate",sha256=sha): problems.append("full candidate not recorded")
+    if not sha or not find_artifact(manifest,kind="riv_candidate",sha256=sha):
+        problems.append("full candidate not recorded")
+    else:
+        problems.extend(_receipt_problems(sha,"full_rig",manifest,tools))
+    review=((manifest.get("reviews") or {}).get("full_rig") or {})
+    if sha and review.get("verdict")=="PASS" and review.get("sha256")!=sha:
+        problems.append("full-rig review is for a superseded SHA")
     return problems
 
 def _device_complete(device):
@@ -114,14 +145,17 @@ def m4():
     if not production.get("ci_run"): problems.append("production CI run missing")
     if not SOURCE_RIV.is_file() or not APP_RIV.is_file(): return problems+["integrated Rive asset missing"]
     source_sha=sha256_file(SOURCE_RIV); app_sha=sha256_file(APP_RIV)
+    if production.get("rive_sha256")!=source_sha: problems.append("production validation SHA differs from integrated asset")
     if source_sha!=app_sha: problems.append("source and shipped Rive bytes differ")
     device=_yaml(DEVICE)
     if not _device_complete(device): problems.append("S24 device checklist incomplete")
+    if not str(device.get("thermal_note") or "").strip(): problems.append("S24 thermal note missing")
     elif (device.get("device") or {}).get("rive_sha256")!=source_sha: problems.append("device checklist Rive SHA differs")
     acceptance=_yaml(ACCEPTANCE).get("final")
     if not isinstance(acceptance,dict) or not acceptance.get("verified"):
         problems.append("verified final owner acceptance missing")
     else:
+        if acceptance.get("act") not in (None,"visual-accept"): problems.append("owner acceptance act is not visual-accept")
         if acceptance.get("subject")!=f"sha256:{source_sha}":
             problems.append("owner acceptance subject differs from integrated asset")
         checklist_identity=device.get("device") or {}
