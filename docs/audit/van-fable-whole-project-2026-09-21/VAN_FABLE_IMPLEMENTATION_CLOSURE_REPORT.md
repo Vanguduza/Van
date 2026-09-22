@@ -4,6 +4,11 @@ Branch: `claude/van-fable-forensic-audit-ds8g0o`. Audited base: `0067d55071342b9
 
 This report closes the remediation mission that consumed `VAN_FABLE_WHOLE_PROJECT_AUDIT.md`, `VAN_CANONICAL_GAP_REGISTER.md` (28 gaps), `VAN_REQUIREMENT_TRACEABILITY_MATRIX.md` (119 requirements), `VAN_RUNTIME_QUALIFICATION_MATRIX.md` (33 live gates) and `VAN_SYMBIOTIC_INTEGRATION_AUDIT.md`. Every statement below points at a commit, a file or a test that a reader can run. Nothing is marked closed on the strength of a description.
 
+> **Post-Fable reconciliation — PR #59.** This report now carries a current-state addendum rather
+> than treating the original Fable closure as immutable product truth. Audit-time facts remain
+> identifiable as such; current repository claims are reconciled against the post-Fable branch.
+> Live/device/provider/artist claims still require receipts and are not promoted by code alone.
+
 Status vocabulary for this report: **FIXED_AND_EVIDENCED**, **SUPERSEDED_BY_BETTER_IMPLEMENTATION**, **DELIBERATELY_REMOVED_CANON_UPDATED**, **EXTERNALLY_GATED_REPOSITORY_COMPLETE**. No other status is used for a gap.
 
 ---
@@ -51,7 +56,7 @@ Commit key: c193d47 (authority/degraded/revoke) · b78cbf4 (Hermes surface) · b
 | GAP-F-023 | Mutation harness not in CI; no androidTest | FIXED_AND_EVIDENCED (mutation) / EXTERNALLY_GATED_REPOSITORY_COMPLETE (instrumentation) | 1b6e44e `van-ci.yml` `mutation` job (non-blocking, report uploaded). Instrumentation: a60b009/2cf03d0 `src/androidTest` CommandCentreLaunchTest (primary destinations, every destination renders offline, `van://` deep link) + FloatingOverlayServiceTest (appops grant, start/stop), run by the `android-instrumentation` emulator job (advisory, report + screenshots uploaded). Real-device sign-off stays QUAL-AND-01. |
 | GAP-F-024 | Owner cannot revoke Google from the device | FIXED_AND_EVIDENCED | c193d47 `POST /v1/google/owner-revoke` (device-proofed) · `test_google_owner_revoke_and_scrub.py` · 5498a6f Connected screen "Revoke Google" with confirm dialog. |
 | GAP-F-025 | Two Google readiness predicates disagree | FIXED_AND_EVIDENCED | 1b6e44e `google/mesh.py EXECUTION_READY_STATES`, single predicate. |
-| GAP-F-026 | Temporal routed but not built | FIXED_AND_EVIDENCED (repository) / EXTERNAL live runtime | PR #59 adds scoped gateway bridge/API, `VanDurableWorkflow`, Temporal worker/private bridge, hardened `vati-temporal.service`, bootstrap + live qualifier and Hermes `temporal_start/status/signal`; a real Temporal server/recovery canary remains QUAL-AUT-02. |
+| GAP-F-026 | Temporal routed but not built | FIXED_AND_EVIDENCED (repository) / PENDING_LIVE | PR #59 adds scoped gateway bridge/API, `VanDurableWorkflow`, Hermes `temporal_start/status/signal`, a loopback-only self-hosted Temporal 1.32.0 + isolated PostgreSQL stack, hardened server/worker systemd units, complete-bootstrap default and live qualifier. A restart/recovery canary remains QUAL-AUT-02. |
 | GAP-F-027 | Overlay state in plain SharedPreferences | FIXED_AND_EVIDENCED | 5498a6f `OverlayStateStore` → EncryptedSharedPreferences · b46ca65 browser session store encrypted · `tests/contracts/test_android_storage_policy.py` (every plain writer encrypted or explained by name). |
 | GAP-F-028 | Proactive follow-ups never scheduled | FIXED_AND_EVIDENCED | b952b40 `proactive/followups.py` + scheduler job `proactive.follow_ups`, owner-disableable · `test_proactive_followups.py`. |
 
@@ -61,7 +66,7 @@ Fable's original 28-gap register remains fully dispositioned. Post-closure revie
 
 ## 3. Architecture before / after
 
-**Before (0067d55).** The gateway received typed commands and forwarded every mutating one to Hermes, including the four actions it already owned the storage for (owner facts, decisions, reminders, trading halt). Hermes had 27 tools, none of which could write owner memory, create reminders, read trading state or start browser/automation work, so the symbiotic loop returned to the owner as text. Internal control tokens were minted with scopes that no router checked. Learning wrote strategies that nothing read. The Android app was one activity with a hand-rolled module switch, Material cards and 464 design-lint violations; embodiment states existed with no producers.
+**Before (0067d55).** The gateway received typed commands and forwarded every mutating one to Hermes, including the four actions it already owned the storage for (owner facts, decisions, reminders, trading halt). Hermes had 30 tools, and the missing memory/trading/browser/automation producers described by the audit prevented the symbiotic loop from closing. Internal control tokens were minted with scopes that no router checked. Learning wrote strategies that nothing read. The Android app was one activity with a hand-rolled module switch, Material cards and 464 design-lint violations; embodiment states existed with no producers.
 
 **After.**
 
@@ -74,7 +79,7 @@ Gateway (FastAPI)
   ├─ CommandOrchestrator ──► LOCAL_EXECUTORS (memory / decision / reminder / trading.halt)
   │        │                    └─ ActionRuntime begin → verify(read-back) → mission VERIFIED_SUCCESS
   │        └─ everything else ──► Hermes run (canonical_context + context_gaps + permitted_strategies)
-  ├─ OwnerRuntimeApi (scoped internal token, ControlScope.RUNTIME) ◄── Hermes MCP shim (48 tools)
+  ├─ OwnerRuntimeApi (scoped internal token, ControlScope.RUNTIME) ◄── Hermes MCP shim (51 tools, exact-set contract)
   ├─ Learning: calibrate() ← owner corrections; strategies_for() → canonical_context; AutonomyGate
   ├─ Proactive follow-ups (scheduler) · TradingEventBridge (trading.trade.closed → device events)
   └─ Degraded registry (9 codes) → /health.degraded[] → device DegradedModeStore
@@ -149,7 +154,7 @@ Every panel is bound to a gateway route and renders through the seven-state cont
 | Trading · Overview | `GET /v1/trading/portfolio`, `/assessment`, `/positions`, `/events` | on resume + refresh action | Offline badge; bounded previews (5) route to sub-screens |
 | Trading · Positions / detail | `GET /v1/trading/positions`, `/trades/{id}`, `/events`, `/market-state` | on resume + refresh | EmptyState "No open trades" vs "cannot see the ledger" kept distinct |
 | Trading · Potential | `GET /v1/trading/potential` | on resume + refresh | EmptyState |
-| Trading · History | `GET /v1/trading/history` (quadrant tally from per-trade rows) | on resume + refresh | EmptyState; no equity sparkline (no R-sequence field exists, so none is drawn) |
+| Trading · History | `GET /v1/trading/history` (closed trades + authoritative cumulative R/P&L curves) | on resume + refresh | EmptyState when no history; Sparkline renders backend-owned curve data and never invents a series |
 | Trading · Accounts / Strategies / Cognition | `GET /v1/trading/accounts`, `/strategies/promotion-candidates` (+ challenge/promote), `/cognition` | on resume | protocol unchanged; cognition names the real invoker or MODEL_INVOKER_UNCONFIGURED |
 | Trading · halt | `POST /v1/commands` "halt trading" (A4) + `client_context.owner_halt_authority_ref` | on tap | HALT AUTHORITY / OWNER APPROVAL PENDING / outcome chips in the gateway's words |
 | Memory | `GET /v1/context/memory`, `/conflicts`, `/history`, `/export`; `POST`/`DELETE /v1/context/facts` | on resume | EmptyState; conflicts panel |
@@ -165,13 +170,13 @@ Every panel is bound to a gateway route and renders through the seven-state cont
 - **Aura** reacts to microphone amplitude (`VanAuraSpec.reactToVoiceAmplitude`) and to speech cue timing from the gateway (`voice/speech_cues.py`), not to frame counters.
 - **Motion**: durations and easings from `design/MotionSpec.kt`; reduced-motion collapses every transition to 0 ms; overlay fling docking with velocity (`EdgeDocking.flingSnap`), docking feedback, presentation changes cross-fade through `AnimatedContent` (b46ca65); press scale 0.97 via `VanPressable`.
 - **Coverage proof**: `visual-preview` `VanEmbodimentCoverageTest` fails if any state or gesture lacks a producer.
-- **Design-bounded**: keyboard/fullscreen obstruction inputs exist in `OverlayVisibilityPolicy`, but a `TYPE_APPLICATION_OVERLAY` window receives neither IME insets nor a foreground-app signal without an AccessibilityService; the producer is an external permission decision, not a repository gap.
+- **Obstruction producer**: `VanObstructionAccessibilityService` now supplies keyboard/full-screen window metadata to `FloatingOverlayService`; VAN repositions above the IME and pauses expensive animation for immersive full-screen use. The remaining Android Accessibility grant is a physical-device permission/acceptance gate, not missing code.
 
 ---
 
 ## 9. Tests — commands and results
 
-All commands run from the repository root unless stated. Results are from the closure HEAD.
+All commands run from the repository root unless stated. Results are from the closure HEAD. The table preserves the original Fable closure receipts; PR #59 must independently pass current-head CI before merge, and its live/device rows are not inferred from these historical counts.
 
 | Suite | Command | Result |
 |---|---|---|
@@ -212,7 +217,7 @@ remains here is deliberately **live evidence**, not missing code:
 - **Hermes current-head requalification:** mount the exact **51-tool** `van_owner_runtime` surface and prove VAN command → gateway → Hermes run → MCP tool → `mission_result` → verification → owner-visible final result. Earlier profile/model receipts do not certify the changed interface.
 - **Trading:** live feed provenance, demo broker fills, SHADOW and LIMITED_LIVE progression remain required. The cognition injection path is implemented; provider/Hermes credentials and a live shadow round-trip are deployment evidence.
 - **Voice:** KWS/ASR/speaker assets and the new sherpa TTS bundle/config must be deployed to the S24 and measured. Repository code no longer treats sherpa as a fictional engine.
-- **Temporal:** the durable workflow/worker/bridge is implemented, but a real Temporal server address and restart/recovery canary are still required.
+- **Temporal:** the repository now self-hosts a loopback-only single-node Temporal 1.32.0 server with isolated PostgreSQL by default, plus the durable worker/bridge. Deployment and a restart/recovery canary are still required before LIVE qualification.
 - **Authored character:** the canonical `van.riv` remains an external artist/Character Forge artefact and needs checksum + contract + owner visual acceptance.
 - **Google Workspace OAuth is already LIVE_CERTIFIED** in the qualification matrix. It is **not** an outstanding setup item; only periodic re-canary/token-rotation evidence remains.
 - **Accessibility permission:** the obstruction producer is now implemented; the owner must grant the Android Accessibility permission and the behavior must be accepted on the physical S24.
@@ -230,7 +235,7 @@ deferred runtime were still visible in the product itself. They are now first-cl
 - **PROD-F-002 obstruction awareness:** AccessibilityService window-metadata producer + overlay consumer/repositioning + onboarding/Settings state.
 - **PROD-F-003 Trading History curves:** VATI server emits cumulative R/P&L series; Android renders only those live read-model values.
 - **PROD-F-004 local sherpa TTS:** real OfflineTts synthesis/PCM/barge-in path; bundle/device qualification remains external.
-- **PROD-F-005 Temporal:** durable workflow/worker/private bridge/service/qualification tooling; server deployment remains external.
+- **PROD-F-005 Temporal:** durable workflow/worker/private bridge plus self-hosted loopback server/PostgreSQL, server+worker systemd supervision, bootstrap and qualification; only live deployment/restart-recovery evidence remains.
 
 Accordingly, **no currently known code-path omission from the supplied review is being hidden
 as “design-bounded.”** The remaining items in §11 are live/device/provider/artist evidence
