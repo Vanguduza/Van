@@ -19,4 +19,17 @@ checks:
   idle_five_minutes_no_visible_loop: NOT_RUN
   mixed_soak_thirty_minutes: NOT_RUN
 thermal_note: null
-evidence: []
+evidence:
+  renderer_rive_active: null
+  identity_floating_size: null
+  minimized_portrait_reads_as_van: null
+  gaze_finger_drag: null
+  blink_cadence: null
+  real_speech_articulation: null
+  hello_wave_first_session: null
+  waiting_for_owner_pose: null
+  urgent_on_hermes_offline: null
+  workboard_resize_no_freeze_or_clip: null
+  aura_character_coexist_no_double_glow: null
+  idle_five_minutes_no_visible_loop: null
+  mixed_soak_thirty_minutes: null

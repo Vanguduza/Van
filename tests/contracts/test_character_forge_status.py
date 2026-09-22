@@ -33,6 +33,10 @@ def test_external_asset_state_is_honest_before_release():
     if status.get("device_qualified"):
         data=yaml.safe_load(checklist.read_text(encoding="utf-8"))
         assert data.get("checks") and all(v=="PASS" for v in data["checks"].values())
+        identity=data.get("device") or {}
+        assert all(identity.get(key) for key in ("model","android_build","apk_sha256","rive_sha256","checked_at"))
+        evidence=data.get("evidence") or {}
+        assert all(evidence.get(name) for name in data["checks"])
     if status.get("owner_accepted"):
         data=yaml.safe_load(acceptance.read_text(encoding="utf-8"))
         assert data.get("final",{}).get("verified") is True

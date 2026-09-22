@@ -90,7 +90,16 @@ def m3():
 
 def _device_complete(device):
     checks=device.get("checks") or {}
-    return bool(checks) and all(v=="PASS" for v in checks.values()) and bool((device.get("device") or {}).get("rive_sha256"))
+    identity=device.get("device") or {}
+    evidence=device.get("evidence") or {}
+    required_identity=("model","android_build","apk_sha256","rive_sha256","checked_at")
+    return (
+        bool(checks)
+        and all(v=="PASS" for v in checks.values())
+        and all(str(identity.get(key) or "").strip() for key in required_identity)
+        and isinstance(evidence,dict)
+        and all(str(evidence.get(name) or "").strip() for name in checks)
+    )
 
 def m4():
     problems=m3(); status=load_status()
@@ -104,8 +113,18 @@ def m4():
     if not _device_complete(device): problems.append("S24 device checklist incomplete")
     elif (device.get("device") or {}).get("rive_sha256")!=source_sha: problems.append("device checklist Rive SHA differs")
     acceptance=_yaml(ACCEPTANCE).get("final")
-    if not isinstance(acceptance,dict) or not acceptance.get("verified"): problems.append("verified final owner acceptance missing")
-    elif acceptance.get("subject")!=f"sha256:{source_sha}": problems.append("owner acceptance subject differs from integrated asset")
+    if not isinstance(acceptance,dict) or not acceptance.get("verified"):
+        problems.append("verified final owner acceptance missing")
+    else:
+        if acceptance.get("subject")!=f"sha256:{source_sha}":
+            problems.append("owner acceptance subject differs from integrated asset")
+        checklist_identity=device.get("device") or {}
+        if acceptance.get("apk_sha256") and acceptance.get("apk_sha256")!=checklist_identity.get("apk_sha256"):
+            problems.append("owner acceptance APK SHA differs from S24 checklist")
+        if acceptance.get("device_model") and acceptance.get("device_model")!=checklist_identity.get("model"):
+            problems.append("owner acceptance device model differs from S24 checklist")
+        if acceptance.get("android_build") and acceptance.get("android_build")!=checklist_identity.get("android_build"):
+            problems.append("owner acceptance Android build differs from S24 checklist")
     return problems
 
 def m5():
