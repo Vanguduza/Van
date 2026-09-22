@@ -175,8 +175,35 @@ if [[ ! -f "$CONFIG/temporal-runtime.env" ]]; then
 else
   skip "Temporal runtime config exists"
 fi
-if [[ -n "${VAN_TEMPORAL_ADDRESS:-}" ]]; then
-  run sed -i "s#^VAN_TEMPORAL_ADDRESS=.*#VAN_TEMPORAL_ADDRESS=${VAN_TEMPORAL_ADDRESS}#" "$CONFIG/temporal-runtime.env"
+TEMPORAL_ADDRESS="${VAN_TEMPORAL_ADDRESS:-127.0.0.1:7233}"
+run sed -i "s#^VAN_TEMPORAL_ADDRESS=.*#VAN_TEMPORAL_ADDRESS=$TEMPORAL_ADDRESS#" "$CONFIG/temporal-runtime.env"
+
+# Self-host durable coordination by default. An explicitly supplied non-loopback
+# VAN_TEMPORAL_ADDRESS selects an external/private cluster and leaves this stack stopped.
+if [[ "$TEMPORAL_ADDRESS" == "127.0.0.1:7233" ]]; then
+  (( SKIP_DOCKER == 0 )) || die "local Temporal requires Docker; remove --skip-docker or supply VAN_TEMPORAL_ADDRESS"
+  run install -d -o root -g root -m 0750 "$BASE/temporal-server"
+  run install -o root -g root -m 0644 "$HERE/temporal/docker-compose.yml" "$BASE/temporal-server/docker-compose.yml"
+  if [[ ! -f "$BASE/temporal-server/.env" ]]; then
+    if (( DRY_RUN )); then
+      plan "generate Temporal PostgreSQL credential"
+    else
+      umask 077
+      printf 'TEMPORAL_POSTGRES_PASSWORD=%s\n' "$(openssl rand -hex 32)" > "$BASE/temporal-server/.env"
+      chmod 0600 "$BASE/temporal-server/.env"
+    fi
+    ok "Temporal server secret"
+  else
+    skip "Temporal server secret exists"
+  fi
+  if (( DRY_RUN )); then
+    plan "pull pinned Temporal 1.32.0 + PostgreSQL 16.10 images"
+  else
+    (cd "$BASE/temporal-server" && docker compose --env-file .env pull -q) || die "Temporal image pull failed"
+  fi
+  ok "self-hosted Temporal server staged (loopback 7233)"
+else
+  skip "local Temporal server: external/private cluster selected at $TEMPORAL_ADDRESS"
 fi
 if [[ ! -f "$CONFIG/accounts.json" ]]; then run bash -c "echo '{\"schema_version\": 1, \"accounts\": []}' > '$CONFIG/accounts.json'"; run chown vati:vati "$CONFIG/accounts.json"; run chmod 0640 "$CONFIG/accounts.json"; ok "empty account registry (add accounts with: sudo -u vati $VENV/bin/python -m vati accounts add ...)"; fi
 
@@ -203,7 +230,7 @@ if (( ! SKIP_SUPABASE )); then
 fi
 
 # ---------------------------------------------------------------- systemd
-for u in vati-commander.service vati-vekl.service vati-session@.service vati-mt5-pull.service vati-temporal.service; do run install -m 0644 "$HERE/systemd/$u" "/etc/systemd/system/$u"; done
+for u in vati-commander.service vati-vekl.service vati-session@.service vati-mt5-pull.service vati-temporal-server.service vati-temporal.service; do run install -m 0644 "$HERE/systemd/$u" "/etc/systemd/system/$u"; done
 run install -d -m 0755 /etc/polkit-1/rules.d
 run install -m 0644 "$HERE/systemd/vati-polkit-restart.rules" /etc/polkit-1/rules.d/49-vati-restart.rules
 run systemctl daemon-reload
@@ -225,11 +252,15 @@ run systemctl enable --now vati-vekl.service
 run systemctl enable --now vati-commander.service
 run systemctl enable --now vati-mt5-pull.service
 TEMPORAL_ADDRESS_CONFIGURED="$(sed -n 's/^VAN_TEMPORAL_ADDRESS=//p' "$CONFIG/temporal-runtime.env" 2>/dev/null | tail -1)"
+if [[ "$TEMPORAL_ADDRESS_CONFIGURED" == "127.0.0.1:7233" ]]; then
+  run systemctl enable --now vati-temporal-server.service
+  ok "self-hosted Temporal server enabled"
+fi
 if [[ -n "$TEMPORAL_ADDRESS_CONFIGURED" ]]; then
   run systemctl enable --now vati-temporal.service
-  ok "Temporal durable coordination runtime enabled"
+  ok "Temporal durable coordination worker/bridge enabled"
 else
-  skip "Temporal service staged but not enabled: VAN_TEMPORAL_ADDRESS is an external deployment gate"
+  die "Temporal address missing after configuration"
 fi
 ok "systemd units installed and enabled (sessions: systemctl enable --now vati-session@<alias> after adding an account)"
 
