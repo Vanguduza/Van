@@ -5,4 +5,5 @@
     <string name="overlay_notification_body">Owner assistant overlay running</string>
     <string name="share_intake_label">Send to Van</string>
     <string name="browser_activity_label">Van Browser</string>
+    <string name="obstruction_accessibility_description">Lets VAN detect the keyboard and immersive full-screen windows so the floating assistant can move or pause safely. VAN does not read accessibility text.</string>
 </resources>
