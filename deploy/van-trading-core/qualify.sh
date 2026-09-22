@@ -130,10 +130,27 @@ for f in "$BASE/secrets/commander.token" "$BASE/secrets/commander.token.hermes" 
     add "secret:$name" GREEN "mode $m; distinct principal credential"
   fi
 done
-for f in "$BASE/secrets/vekl.token" "$BASE/secrets/pki/ca.crt"; do
+for f in "$BASE/secrets/vekl.token" "$BASE/secrets/temporal-bridge.token" "$BASE/secrets/pki/ca.crt"; do
   if [[ -f "$f" ]]; then m=$(stat -c %a "$f"); [[ "$m" =~ ^600$|^400$ ]] && add "secret:$(basename "$f")" GREEN "mode $m" || add "secret:$(basename "$f")" RED "mode $m (need 0600)"; else add "secret:$(basename "$f")" RED missing; fi
 done
 unit vati-vekl.service; unit vati-commander.service; unit vati-automation.service; unit vati-supabase.service 0; unit docker.service 0
+TEMPORAL_ENV="$BASE/config/temporal-runtime.env"
+TEMPORAL_ADDRESS_CONFIGURED="$(sed -n 's/^VAN_TEMPORAL_ADDRESS=//p' "$TEMPORAL_ENV" 2>/dev/null | tail -1)"
+if [[ -n "$TEMPORAL_ADDRESS_CONFIGURED" ]]; then
+  unit vati-temporal.service
+  TEMPORAL_TOKEN_FILE="$(sed -n 's/^VAN_TEMPORAL_BRIDGE_TOKEN_FILE=//p' "$TEMPORAL_ENV" 2>/dev/null | tail -1)"
+  TEMPORAL_PORT="$(sed -n 's/^VAN_TEMPORAL_BRIDGE_PORT=//p' "$TEMPORAL_ENV" 2>/dev/null | tail -1)"
+  TEMPORAL_TOKEN_FILE="${TEMPORAL_TOKEN_FILE:-$BASE/secrets/temporal-bridge.token}"
+  TEMPORAL_PORT="${TEMPORAL_PORT:-9150}"
+  TEMPORAL_TOKEN="$(cat "$TEMPORAL_TOKEN_FILE" 2>/dev/null || true)"
+  if [[ -n "$TEMPORAL_TOKEN" ]] && curl -fsS --max-time 5 -H "X-Van-Temporal-Token: $TEMPORAL_TOKEN" "http://127.0.0.1:$TEMPORAL_PORT/health" >/tmp/temporal-health.json 2>/dev/null && jq -e '.ok==true and .state=="READY" and .executes_live_orders==false' /tmp/temporal-health.json >/dev/null; then
+    add temporal_runtime GREEN "$(jq -c '{state,namespace,task_queue,authority}' /tmp/temporal-health.json)"
+  else
+    add temporal_runtime RED "Temporal address configured but worker/bridge health is not READY"
+  fi
+else
+  add temporal_runtime AMBER "Temporal implementation is staged; no VAN_TEMPORAL_ADDRESS deployment was supplied" 0
+fi
 curl -fsS --max-time 5 "${VAN_VEKL_URL:-http://127.0.0.1:9134}/health" >/tmp/vekl.json 2>/dev/null && jq -e '.ok==true' /tmp/vekl.json >/dev/null && add vekl_health GREEN "$(jq -c '.registry|{resources,sources}' /tmp/vekl.json)" || add vekl_health RED "VEKL health not ok"
 curl -fsSk --max-time 5 "https://127.0.0.1:${VAN_COMMANDER_PORT:-9133}/health" >/tmp/cmd.json 2>/dev/null && jq -e '.ok==true' /tmp/cmd.json >/dev/null && add commander_health GREEN "$(jq -c '.commands|length' /tmp/cmd.json) commands" || add commander_health RED "commander health not ok"
 if "$BASE/automation/qualify-automation-runtime.sh" >/tmp/automation-qualify.log 2>&1; then add automation_fabric GREEN "$(tail -n 1 /tmp/automation-qualify.log)"; else add automation_fabric RED "$(tail -c 500 /tmp/automation-qualify.log)"; fi
