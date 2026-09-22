@@ -10,9 +10,34 @@
   "device_qualified": false,
   "owner_accepted": false,
   "qual_emb_01": "EXTERNAL_ARTEFACT",
-  "core_rig": {"candidate_sha256": null, "emulator_validation": "NOT_RUN", "ci_run": null, "owner_verdict": "NONE"},
-  "full_rig": {"candidate_sha256": null, "emulator_validation": "NOT_RUN", "ci_run": null, "reviewed": "NONE"},
-  "performance": {"max_janky_percent": 5.0, "last_janky_percent": null},
-  "blockers": ["SOURCE_SET_NOT_ADMITTED", "OWNER_SOURCE_CONFIRMATION_PENDING", "RIVE_EDITOR_UNPINNED", "LAYER_ARTIFACT_MISSING", "RIVE_ASSET_MISSING", "S24_DEVICE_GATES_NOT_RUN"],
-  "next_action": "python -m tools.character_forge.cli source admit"
+  "core_rig": {
+    "candidate_sha256": null,
+    "emulator_validation": "NOT_RUN",
+    "ci_run": null,
+    "owner_verdict": "NONE"
+  },
+  "full_rig": {
+    "candidate_sha256": null,
+    "emulator_validation": "NOT_RUN",
+    "ci_run": null,
+    "reviewed": "NONE"
+  },
+  "performance": {
+    "max_janky_percent": 5,
+    "last_janky_percent": null
+  },
+  "blockers": [
+    "SOURCE_SET_NOT_ADMITTED",
+    "OWNER_SOURCE_CONFIRMATION_PENDING",
+    "RIVE_EDITOR_UNPINNED",
+    "LAYER_ARTIFACT_MISSING",
+    "RIVE_ASSET_MISSING",
+    "S24_DEVICE_GATES_NOT_RUN"
+  ],
+  "next_action": "python -m tools.character_forge.cli source admit",
+  "production": {
+    "emulator_validation": "NOT_RUN",
+    "ci_run": null,
+    "rive_sha256": null
+  }
 }

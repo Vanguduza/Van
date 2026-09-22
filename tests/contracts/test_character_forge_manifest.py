@@ -13,3 +13,13 @@ def test_owner_confirmation_cannot_exist_without_sources():
     if manifest.get("owner_confirmed_complete"):
         assert manifest.get("sources")
         assert manifest.get("owner_confirmation_date")
+
+def test_admitted_source_set_has_no_unlisted_file():
+    from tools.character_forge.manifest import iter_source_files, rel
+    manifest = load_yaml()
+    sources = manifest.get("sources") or []
+    if not sources:
+        return
+    listed = {record["path"] for record in sources}
+    actual = {rel(path) for path in iter_source_files()}
+    assert listed == actual

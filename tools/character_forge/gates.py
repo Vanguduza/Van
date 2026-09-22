@@ -47,11 +47,16 @@ def m0():
     problems.extend(verify_records(sources))
     pin=(((tools.get("critical_path") or {}).get("rive_android") or {}).get("version"))
     if pin!=_rive_android_pin(): problems.append(f"rive-android pin mismatch: tools={pin!r} gradle={_rive_android_pin()!r}")
+    if manifest.get("baseline_sha") != status.get("baseline_sha"):
+        problems.append("manifest/status baseline SHA mismatch")
     problems.extend(contract_surface_problems(json.loads(CONTRACT.read_text(encoding="utf-8"))))
     return problems
 
 def m1():
     problems=m0(); manifest=load_yaml(); layer=find_artifact(manifest,kind="layer_svg")
+    tools=_yaml(TOOLS)
+    if str((((tools.get("critical_path") or {}).get("inkscape") or {}).get("version"))) in {"", "None", "UNPINNED"}:
+        problems.append("Inkscape version unpinned")
     if not layer: problems.append("no admitted layer_svg")
     elif verify_records([layer]): problems.append("admitted layer_svg hash mismatch")
     review=((manifest.get("reviews") or {}).get("layer_svg") or {})
@@ -60,12 +65,18 @@ def m1():
 
 def m2():
     problems=m1(); status=load_status(); core=status.get("core_rig") or {}; manifest=load_yaml()
+    tools=_yaml(TOOLS)
+    if str((((tools.get("critical_path") or {}).get("rive_editor") or {}).get("version"))) in {"", "None", "UNPINNED"}:
+        problems.append("Rive Editor version unpinned")
     if core.get("emulator_validation")!="PASS": problems.append("core emulator validation not PASS")
     if core.get("owner_verdict")!="PASS": problems.append("core owner verdict not PASS")
     if not core.get("ci_run"): problems.append("core CI run missing")
     sha=core.get("candidate_sha256")
     if not sha or not find_artifact(manifest,kind="riv_candidate",sha256=sha): problems.append("core candidate not recorded")
     if sha and not any(r.get("command")=="rive receipt" and sha in (r.get("outputs") or []) for r in manifest.get("receipts") or []): problems.append("core packaging receipt missing")
+    baseline=ROOT/"visual-authority"/"character-forge"/"11-device-evidence"/"core_baseline"
+    if core.get("emulator_validation")=="PASS" and not list(baseline.glob("*.png")):
+        problems.append("core baseline evidence missing")
     return problems
 
 def m3():
@@ -82,7 +93,10 @@ def _device_complete(device):
     return bool(checks) and all(v=="PASS" for v in checks.values()) and bool((device.get("device") or {}).get("rive_sha256"))
 
 def m4():
-    problems=m3()
+    problems=m3(); status=load_status()
+    production=status.get("production") or {}
+    if production.get("emulator_validation")!="PASS": problems.append("production emulator validation not PASS")
+    if not production.get("ci_run"): problems.append("production CI run missing")
     if not SOURCE_RIV.is_file() or not APP_RIV.is_file(): return problems+["integrated Rive asset missing"]
     source_sha=sha256_file(SOURCE_RIV); app_sha=sha256_file(APP_RIV)
     if source_sha!=app_sha: problems.append("source and shipped Rive bytes differ")

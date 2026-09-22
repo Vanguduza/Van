@@ -99,3 +99,9 @@ def test_character_forge_asset_hash_contract_when_present():
     if shipped.exists():
         assert source.is_file()
         assert _sha256(shipped) == _sha256(source)
+
+def test_instrumentation_contract_asset_matches_canonical():
+    canonical = ROOT / "visual-authority" / "rive_contract.json"
+    embedded = ROOT / "android" / "app" / "src" / "androidTest" / "assets" / "rive_contract.json"
+    assert embedded.is_file()
+    assert json.loads(embedded.read_text(encoding="utf-8")) == json.loads(canonical.read_text(encoding="utf-8"))
