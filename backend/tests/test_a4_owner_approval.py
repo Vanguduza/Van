@@ -1,8 +1,10 @@
 from __future__ import annotations
 
 import base64
+import sys
 import time
 import uuid
+from pathlib import Path
 
 import pytest
 import pytest_asyncio
@@ -14,6 +16,20 @@ from httpx import ASGITransport, AsyncClient
 from van_gateway.app import create_app
 from van_gateway.auth.service import AuthService
 from van_gateway.config import get_settings
+
+#: GAP-F-005 — the same fixtures test_trading_api.py and test_local_typed_actions.py use to
+#: mint a real owner-signed trading-halt authority instead of a bare string, so this test's
+#: "approved" A4 command can complete the local execution it now names rather than stopping
+#: at a refusal that has nothing to do with what this test is proving (one-time biometric
+#: approval and replay rejection).
+sys.path[:0] = [
+    str(Path(__file__).resolve().parents[2] / "trading" / "tests"),
+    str(Path(__file__).resolve().parents[2] / "trading"),
+]
+from conftest_owner_authority import OwnerAuthorityHarness  # noqa: E402
+from van_gateway.trading.service import _import_vati  # noqa: E402
+
+EventKind, make_event, Ledger = _import_vati()
 
 
 INGRESS = "a4-test-ingress-token-0123456789abcdef"
@@ -31,9 +47,20 @@ def _settings(tmp_path, monkeypatch):
     # P0-SEC-001 — device enrolment is its own credential now.
     monkeypatch.setenv("VAN_DEVICE_ENROLMENT_TOKEN", INTERNAL)
     monkeypatch.setenv("VAN_EXA_EGRESS_ENABLED", "false")
+    monkeypatch.setenv("VAN_VATI_LEDGER_PATH", str(tmp_path / "vati.sqlite"))
     get_settings.cache_clear()
     yield
     get_settings.cache_clear()
+
+
+def _seed_fresh_ledger(path) -> None:
+    now = int(time.time() * 1000)
+    led = Ledger(path)
+    led.append(make_event(
+        EventKind.SESSION, "vati-runner", {"startup": True},
+        event_time_ms=now, received_time_ms=now, correlation_id="s1",
+    ))
+    led.close()
 
 
 @pytest_asyncio.fixture
@@ -97,6 +124,7 @@ def _signed_command(
     no_stale_replay: bool = False,
     approval_token: str | None = None,
     approval_proof: dict | None = None,
+    client_context: dict | None = None,
 ) -> dict:
     command_id = str(uuid.uuid4())
     nonce = str(uuid.uuid4())
@@ -143,12 +171,18 @@ def _signed_command(
         body["approval_token"] = approval_token
     if approval_proof is not None:
         body["approval_proof"] = approval_proof
+    if client_context is not None:
+        body["client_context"] = client_context
     return body
 
 
 @pytest.mark.asyncio
-async def test_a4_requires_one_time_biometric_signature_and_rejects_legacy_token(client_and_app):
+async def test_a4_requires_one_time_biometric_signature_and_rejects_legacy_token(client_and_app, tmp_path):
     client, app = client_and_app
+    _seed_fresh_ledger(tmp_path / "vati.sqlite")
+    harness = OwnerAuthorityHarness()
+    app.state.trading.owner_authority = harness.verifier
+
     private_key = ec.generate_private_key(ec.SECP256R1())
     device_id = "device-a4"
     secret = "device-a4-secret"
@@ -208,6 +242,7 @@ async def test_a4_requires_one_time_biometric_signature_and_rejects_legacy_token
     }
 
     approved_at = int(time.time())
+    halt_token = harness.token(act="owner-halt", subject="van-trading-core")
     approved = await client.post(
         "/v1/commands",
         json=_signed_command(
@@ -219,14 +254,29 @@ async def test_a4_requires_one_time_biometric_signature_and_rejects_legacy_token
             expires_at=approved_at + 5,
             no_stale_replay=True,
             approval_proof=proof,
+            client_context={"owner_halt_authority_ref": halt_token},
         ),
         headers=headers,
     )
     assert approved.status_code == 200
     approved_body = approved.json()
+    # GAP-F-005 — the biometric approval this test proves is only half the A4 story now
+    # that trading.halt executes on the gateway: with a real owner-halt authority alongside
+    # it, the command reaches genuine VERIFIED_SUCCESS, not just "approval accepted".
     assert approved_body["status"] == "accepted"
     assert approved_body["effective_action_class"] == "A4"
     assert approved_body["resolved_action_id"] == "trading.halt"
+    assert approved_body["local_execution"]["verification_state"] == "VERIFIED_SUCCESS"
+    mission = await app.state.missions.get(approved_body["mission_id"])
+    assert mission.state.value == "VERIFIED_SUCCESS"
+
+    # The halt is a ledger fact, not just an in-process claim: exactly one OWNER_HALT
+    # KILL_SWITCH event, signed by the owner-halt authority this test minted.
+    led = Ledger(tmp_path / "vati.sqlite")
+    kill_events = list(led.iter(EventKind.KILL_SWITCH))
+    assert len(kill_events) == 1
+    assert kill_events[0].payload["trigger"] == "OWNER_HALT"
+    assert kill_events[0].payload["sig"].startswith("owner-authority:")
 
     replay_at = int(time.time())
     replay = await client.post(

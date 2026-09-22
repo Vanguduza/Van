@@ -1,9 +1,13 @@
 from __future__ import annotations
 
+import json
 import logging
 import time
+import uuid
 from typing import Any
 
+from van_gateway.action.models import ExecutionStatus, VerificationObservation
+from van_gateway.action.service import ActionPolicyError, ActionRuntime
 from van_gateway.approval.service import OwnerApprovalError, OwnerApprovalService
 from van_gateway.audit.service import AuditService
 from van_gateway.authority.descriptor import Gate, gate_for
@@ -12,13 +16,18 @@ from van_gateway.auth.throttle import AuthThrottle, Throttled
 from van_gateway.command.authority import CommandAuthorityError, CommandAuthorityRecord, CommandAuthorityService
 from van_gateway.command import context_requirements
 from van_gateway.command.ingress_trust import derive_effective_trust
+from van_gateway.command.local_executors import LOCAL_EXECUTORS, LocalExecutionContext, LocalExecutionError
 from van_gateway.command.mission_link import CommandMissionLink
 from van_gateway.command.nonce import CommandNonceService, NonceReplay
 from van_gateway.command.resolver import ResolutionMode, TypedCommandResolver
+from van_gateway.context.authoring import OwnerFactAuthor
+from van_gateway.context.models import ReadinessState
 from van_gateway.context.service import OwnerContextService
 from van_gateway.degraded.registry import DegradedRegistry
 from van_gateway.hermes.bridge import HermesBridge, HermesBridgeError
 from van_gateway.idempotency.service import IdempotencyConflict, IdempotencyInFlight, IdempotencyService
+from van_gateway.mission.models import MissionState
+from van_gateway.mission.service import MissionError
 from van_gateway.observability import instruments
 from van_gateway.observability.logging import log_event
 from van_gateway.models import (
@@ -31,6 +40,7 @@ from van_gateway.models import (
     PrincipalType,
 )
 from van_gateway.projects.router import ProjectRouter
+from van_gateway.reminders.service import ReminderService
 from van_gateway.voice.speaker import (
     SpeakerDisposition,
     classify_speaker_evidence,
@@ -81,6 +91,11 @@ class CommandOrchestrator:
         owner_intent_max_age_seconds: int,
         throttle: AuthThrottle | None = None,
         missions: CommandMissionLink | None = None,
+        actions: ActionRuntime | None = None,
+        owner_fact_author: OwnerFactAuthor | None = None,
+        reminders: ReminderService | None = None,
+        trading: Any | None = None,
+        learning: Any | None = None,
     ) -> None:
         self.auth = auth
         self.idempotency = idempotency
@@ -100,6 +115,20 @@ class CommandOrchestrator:
         # working, but create_app always supplies one: without it an accepted command
         # leaves no durable record of what the owner asked for.
         self.missions = missions
+        # GAP-F-001, GAP-F-002, GAP-F-005 — the services a gateway-executed typed action
+        # (command/local_executors.py) needs. All optional and all None by default so an
+        # orchestrator built directly in a test keeps working; a resolution naming a
+        # LOCAL_EXECUTORS action falls back to the Hermes dispatch path when `actions` is
+        # not wired, rather than executing with services it does not have.
+        self.actions = actions
+        self.owner_fact_author = owner_fact_author
+        self.reminders = reminders
+        self.trading = trading
+        # GAP-F-008 (strategies_for read-back) — what VAN has already learned that this
+        # mission's authority permits, attached to `canonical_context` as
+        # `permitted_strategies`. None by default; without it a command simply carries no
+        # strategy hints, which is the same "recorded, never read" state the gap named.
+        self.learning = learning
         self.owner_intent_max_age_seconds = owner_intent_max_age_seconds
 
     @staticmethod
@@ -707,6 +736,34 @@ class CommandOrchestrator:
             return result
 
         self.degraded.set(DegradedCode.OWNER_CONTEXT_UNAVAILABLE, False)
+
+        # GAP-F-019 — every derived requirement is non-blocking (safety actions must never
+        # be blocked by missing memory, and that stays true here), but a requirement VAN
+        # could not resolve was previously only visible as a bare "subject.predicate" pair
+        # buried in `missing_requirements`. This re-runs the same readiness computation
+        # `compile_snapshot` already performed (a second, side-effect-free read) so each gap
+        # can carry the owner-readable label `context_requirements.label_for` gives it.
+        readiness = await self.context.readiness(
+            req.command_id, requirements, now_ms=int(time.time() * 1000)
+        )
+        context_gaps = [
+            {
+                "subject": resolution_item.requirement.subject,
+                "predicate": resolution_item.requirement.predicate,
+                "scope": resolution_item.requirement.scope,
+                "state": resolution_item.state.value,
+                "label": context_requirements.label_for(resolution_item.requirement),
+            }
+            for resolution_item in readiness.requirements
+            if resolution_item.state in (ReadinessState.MISSING, ReadinessState.STALE)
+        ]
+
+        # GAP-F-008 (strategies_for read-back) — what VAN has already learned that this
+        # mission class is permitted, under this command's own authority ceiling. Bounded
+        # to 5 and reduced to an id and a one-line summary: this is a hint attached to the
+        # context, not a plan the gateway or Hermes is bound to follow.
+        permitted_strategies = await self._permitted_strategies(resolution, effective_action_class)
+
         canonical_context = {
             "snapshot_id": context_snapshot.snapshot_id,
             "digest": context_snapshot.digest,
@@ -718,6 +775,8 @@ class CommandOrchestrator:
             # from "VAN asked nothing" — which was indistinguishable before.
             "requirements_asked": len(requirements),
             "readiness": context_snapshot.readiness_state,
+            "context_gaps": context_gaps,
+            "permitted_strategies": permitted_strategies,
         }
         before["canonical_context"] = canonical_context
 
@@ -779,6 +838,30 @@ class CommandOrchestrator:
         if mission is not None:
             mission = await self.missions.authorized(
                 mission, summary=f"authority-sealed:{effective_action_class.value}"
+            )
+
+        # GAP-F-001, GAP-F-002, GAP-F-005 — the gateway already owns this state (owner
+        # facts, reminders, the trading kill switch), so a resolution naming one of these
+        # actions is executed here rather than handed to Hermes, which has no tool for any
+        # of them. `self.actions` is None only when the orchestrator was built directly
+        # without it (a test, or a deployment that has not wired it yet); in that case this
+        # falls through to the Hermes dispatch below exactly as it always has.
+        if (
+            mission is not None
+            and self.actions is not None
+            and resolution.mode == ResolutionMode.EXACT_ACTION
+            and resolution.action_id in LOCAL_EXECUTORS
+        ):
+            return await self._execute_local_action(
+                req=req,
+                resolution=resolution,
+                mission=mission,
+                context_snapshot=context_snapshot,
+                effective_action_class=effective_action_class,
+                effective_no_stale_replay=effective_no_stale_replay,
+                owner_approved=owner_approved,
+                before=before,
+                context_gaps=context_gaps,
             )
 
         health = await self.hermes.health()
@@ -895,9 +978,360 @@ class CommandOrchestrator:
             effective_action_class=effective_action_class,
             no_stale_replay=effective_no_stale_replay,
             max_age_seconds=resolution.max_age_seconds,
+            context_gaps=context_gaps,
         )
         await self.idempotency.complete(req.idempotency_key, result.model_dump())
         return result
+
+    async def _execute_local_action(
+        self,
+        *,
+        req: CommandRequest,
+        resolution,
+        mission,
+        context_snapshot,
+        effective_action_class: ActionClass,
+        effective_no_stale_replay: bool,
+        owner_approved: bool,
+        before: dict[str, Any],
+        context_gaps: list[dict[str, Any]],
+    ) -> CommandResult:
+        """GAP-F-001, GAP-F-002, GAP-F-005 — run a gateway-owned typed action in place of a
+        Hermes dispatch.
+
+        This reuses exactly the paths a Hermes-executed action already goes through —
+        `ActionRuntime.begin`/`mark_executing`/`mark_submitted`/`verify` for the execution
+        ledger (the same sequence `runtime_api.py`'s `/actions/*` routes drive on Hermes's
+        behalf) — and `MissionService.transition` for RUNNING -> VERIFYING -> a verified
+        terminal state, the same fallback `MissionService.apply_hermes_result` uses:
+        attempt VERIFIED_SUCCESS, fall back to UNVERIFIABLE when the mission's success
+        contract names no independent check for this action id. Neither ledger gets a
+        parallel state machine.
+
+        `status` on the returned `CommandResult` is "accepted" only when the local action
+        actually succeeded. A failure never reaches "accepted" here — `_fail_local_action`
+        reports "denied" for an owner/authority/parameter refusal or "degraded" for an
+        infrastructure fault, exactly the wire vocabulary the rest of this method already
+        uses for the same distinction. `local_execution` and the mission's own terminal
+        state carry the detail either way.
+        """
+        parameters = dict(resolution.parameters)
+        execution_id = f"exec_{uuid.uuid4().hex}"
+        assert self.actions is not None
+        definition = await self.actions.get_definition(resolution.action_id)
+        if definition is None:
+            # The registry and the resolver disagreed about which actions exist — a
+            # programming error, not an owner-facing refusal.
+            await self.missions.note_stall(mission, reason=f"unknown_local_action:{resolution.action_id}")
+            result = CommandResult(
+                status="degraded",
+                command_id=req.command_id,
+                idempotency_key=req.idempotency_key,
+                message="This action is not registered on the gateway; command not executed",
+                degraded=["LOCAL_ACTION_UNREGISTERED"],
+                mission_id=mission.mission_id,
+                context_snapshot_id=context_snapshot.snapshot_id,
+                resolved_action_id=resolution.action_id,
+                effective_action_class=effective_action_class,
+                context_gaps=context_gaps,
+            )
+            await self.audit.record(
+                result="degraded", command_id=req.command_id, device_id=req.device_id,
+                project_id=req.project_id, failure_reason="local_action_unregistered", before=before,
+            )
+            await self.idempotency.complete(req.idempotency_key, result.model_dump())
+            return result
+
+        try:
+            authority, age = await self.authority.authorize_action(
+                command_id=req.command_id, action=definition, principal_type=req.principal_type,
+                requested_by=req.requested_by, snapshot_id=context_snapshot.snapshot_id,
+                turn_id=req.turn_id, parameters=parameters,
+            )
+            execution = await self.actions.begin(
+                execution_id=execution_id, command_id=req.command_id, turn_id=authority.turn_id,
+                action_id=resolution.action_id, principal_type=authority.principal_type,
+                requested_by=authority.requested_by, idempotency_key=req.idempotency_key,
+                parameters=parameters, snapshot_id=authority.snapshot_id,
+                owner_approved=authority.owner_approved, command_age_seconds=age,
+            )
+        except (CommandAuthorityError, ActionPolicyError) as exc:
+            await self.missions.note_stall(mission, reason=f"local_action_authorize_failed:{exc}")
+            result = CommandResult(
+                status="degraded",
+                command_id=req.command_id,
+                idempotency_key=req.idempotency_key,
+                message="This action could not be authorised against the sealed command; command not executed",
+                degraded=["LOCAL_ACTION_AUTHORITY_MISMATCH"],
+                mission_id=mission.mission_id,
+                context_snapshot_id=context_snapshot.snapshot_id,
+                resolved_action_id=resolution.action_id,
+                effective_action_class=effective_action_class,
+                context_gaps=context_gaps,
+            )
+            await self.audit.record(
+                result="degraded", command_id=req.command_id, device_id=req.device_id,
+                project_id=req.project_id, failure_reason=str(exc), before=before,
+            )
+            await self.idempotency.complete(req.idempotency_key, result.model_dump())
+            return result
+
+        if execution.status != ExecutionStatus.AUTHORIZED:
+            # DENIED (A5/disabled) or EXPIRED (no-stale-replay/max-age): both legal edges
+            # out of AUTHORIZED. AUTHORIZATION_REQUIRED should not be reachable here, since
+            # Gate.OWNER_APPROVAL already ran for any A4 action before this method is
+            # called; if it somehow is, it is treated the same as DENIED rather than left
+            # to raise.
+            target_state = (
+                MissionState.EXPIRED if execution.status == ExecutionStatus.EXPIRED
+                else MissionState.BLOCKED_POLICY
+            )
+            result_status = "expired" if execution.status == ExecutionStatus.EXPIRED else "denied"
+            mission_after = await self.missions.missions.transition(
+                mission.mission_id, target=target_state, expected=mission.state,
+                actor=PrincipalType.SYSTEM,
+                summary=f"local action not authorized: {execution.error_code}",
+                final_outcome=execution.error_code,
+            )
+            result = CommandResult(
+                status=result_status,
+                command_id=req.command_id,
+                idempotency_key=req.idempotency_key,
+                message=f"Action not executed: {execution.error_code}",
+                mission_id=mission_after.mission_id,
+                context_snapshot_id=context_snapshot.snapshot_id,
+                resolved_action_id=resolution.action_id,
+                effective_action_class=effective_action_class,
+                execution_id=execution.execution_id,
+                context_gaps=context_gaps,
+            )
+            await self.audit.record(
+                result=result_status, command_id=req.command_id, device_id=req.device_id,
+                project_id=req.project_id, failure_reason=execution.error_code, before=before,
+            )
+            await self.idempotency.complete(req.idempotency_key, result.model_dump())
+            return result
+
+        await self.actions.mark_executing(execution.execution_id)
+        mission = await self.missions.running(mission, hermes_run_id=None)
+
+        ctx = LocalExecutionContext(
+            store=self.context.store,
+            context=self.context,
+            owner_fact_author=self.owner_fact_author,
+            reminders=self.reminders,
+            trading=self.trading,
+            device_id=req.device_id,
+            command_id=req.command_id,
+            mission_id=mission.mission_id,
+            parameters=parameters,
+            client_context=req.client_context or {},
+            now_ms=int(time.time() * 1000),
+        )
+        executor = LOCAL_EXECUTORS[resolution.action_id]()
+        try:
+            local_result = await executor.execute(ctx)
+        except LocalExecutionError as exc:
+            return await self._fail_local_action(
+                req=req, resolution=resolution, mission=mission, execution_id=execution.execution_id,
+                context_snapshot=context_snapshot, effective_action_class=effective_action_class,
+                before=before, context_gaps=context_gaps, code=exc.code, message=exc.message,
+                status=exc.status,
+            )
+        except Exception:  # pragma: no cover - defensive; never a false success
+            LOGGER.exception(
+                "local action executor raised unexpectedly",
+                extra={"action_id": resolution.action_id, "command_id": req.command_id},
+            )
+            return await self._fail_local_action(
+                req=req, resolution=resolution, mission=mission, execution_id=execution.execution_id,
+                context_snapshot=context_snapshot, effective_action_class=effective_action_class,
+                before=before, context_gaps=context_gaps, code="local_execution_error",
+                message="This action could not be completed", status="degraded",
+            )
+
+        await self.actions.mark_submitted(
+            execution.execution_id, correlation=local_result.observed_postcondition,
+            evidence_pointer=local_result.evidence_ref,
+        )
+        receipt = await self.actions.verify(
+            VerificationObservation(
+                execution_id=execution.execution_id, success=True,
+                # The executor already re-read the store independently of its own write
+                # before reporting success (command/local_executors.py); this is that same
+                # independently-observed postcondition, not the write call's own return
+                # value.
+                correlation=local_result.observed_postcondition,
+                observed_postcondition=local_result.observed_postcondition,
+                evidence_pointer=local_result.evidence_ref,
+            )
+        )
+
+        mission = await self.missions.missions.transition(
+            mission.mission_id, target=MissionState.VERIFYING, expected=MissionState.RUNNING,
+            actor=PrincipalType.SYSTEM, summary="local execution complete; verifying independently",
+        )
+        if not mission.success_contract.is_checkable:
+            mission = await self.missions.missions.transition(
+                mission.mission_id, target=MissionState.UNVERIFIABLE, expected=MissionState.VERIFYING,
+                actor=PrincipalType.SYSTEM,
+                summary="executed locally; no mission-level independent postcondition is registered for this action",
+                final_outcome=local_result.summary,
+            )
+        else:
+            try:
+                mission = await self.missions.missions.transition(
+                    mission.mission_id, target=MissionState.VERIFIED_SUCCESS, expected=MissionState.VERIFYING,
+                    actor=PrincipalType.SYSTEM, summary="Independent postcondition verification passed",
+                    final_outcome=local_result.summary,
+                )
+            except MissionError as exc:
+                if exc.code != "MISSION_VERIFICATION_INSUFFICIENT":
+                    raise
+                mission = await self.missions.missions.transition(
+                    mission.mission_id, target=MissionState.UNVERIFIABLE, expected=MissionState.VERIFYING,
+                    actor=PrincipalType.SYSTEM,
+                    summary="executed locally, but independent mission-level verification was insufficient",
+                    final_outcome=local_result.summary,
+                )
+
+        local_execution = {
+            "action_id": resolution.action_id,
+            "execution_id": execution.execution_id,
+            "verification_state": receipt.status.value,
+            "summary": local_result.summary,
+            "evidence_ref": local_result.evidence_ref,
+        }
+        evidence_id = await self.audit.record(
+            result="accepted", command_id=req.command_id, device_id=req.device_id,
+            project_id=req.project_id, capability=effective_action_class.value,
+            approval="biometric_proof_verified" if owner_approved else "not_required",
+            model_delegate="gateway:local", before=before,
+            after={
+                "local_execution": local_execution,
+                "mission_state": mission.state.value,
+                "typed_action_id": resolution.action_id,
+                "effective_action_class": effective_action_class.value,
+                "owner_approved": owner_approved,
+            },
+            evidence_pointer=local_result.evidence_ref,
+        )
+        result = CommandResult(
+            status="accepted",
+            command_id=req.command_id,
+            idempotency_key=req.idempotency_key,
+            message=local_result.summary,
+            mission_id=mission.mission_id,
+            evidence_id=evidence_id,
+            context_snapshot_id=context_snapshot.snapshot_id,
+            resolved_action_id=resolution.action_id,
+            effective_action_class=effective_action_class,
+            no_stale_replay=effective_no_stale_replay,
+            max_age_seconds=resolution.max_age_seconds,
+            execution_id=execution.execution_id,
+            local_execution=local_execution,
+            context_gaps=context_gaps,
+        )
+        await self.idempotency.complete(req.idempotency_key, result.model_dump())
+        return result
+
+    async def _fail_local_action(
+        self,
+        *,
+        req: CommandRequest,
+        resolution,
+        mission,
+        execution_id: str,
+        context_snapshot,
+        effective_action_class: ActionClass,
+        before: dict[str, Any],
+        context_gaps: list[dict[str, Any]],
+        code: str,
+        message: str,
+        status: str = "denied",
+    ) -> CommandResult:
+        """A local executor refused or could not complete. Never a false success: the
+        execution ledger and the mission both end on a named failure, and `status` is
+        never "accepted" — "denied" for an owner/authority/parameter refusal (a missing
+        required field, a missing or invalid `owner_halt_authority_ref`), "degraded" for
+        an infrastructure fault (a service not wired, a store that would not read back its
+        own write). `local_execution.verification_state` and the mission's FAILED state
+        carry the same detail for whichever reader wants it.
+        """
+        assert self.actions is not None
+        await self.actions.fail_execution(
+            execution_id, status=ExecutionStatus.EXECUTION_FAILED, error_code=code,
+        )
+        mission_after = await self.missions.missions.transition(
+            mission.mission_id, target=MissionState.FAILED, expected=mission.state,
+            actor=PrincipalType.SYSTEM, summary=message, final_outcome=code,
+        )
+        local_execution = {
+            "action_id": resolution.action_id,
+            "execution_id": execution_id,
+            "verification_state": ExecutionStatus.EXECUTION_FAILED.value,
+            "summary": message,
+            "evidence_ref": None,
+        }
+        await self.audit.record(
+            result=status, command_id=req.command_id, device_id=req.device_id,
+            project_id=req.project_id, capability=resolution.action_id, before=before,
+            after={"local_execution": local_execution, "mission_state": mission_after.state.value},
+            failure_reason=code,
+        )
+        result = CommandResult(
+            status=status,
+            command_id=req.command_id,
+            idempotency_key=req.idempotency_key,
+            message=message,
+            mission_id=mission_after.mission_id,
+            context_snapshot_id=context_snapshot.snapshot_id,
+            resolved_action_id=resolution.action_id,
+            effective_action_class=effective_action_class,
+            execution_id=execution_id,
+            local_execution=local_execution,
+            context_gaps=context_gaps,
+        )
+        await self.idempotency.complete(req.idempotency_key, result.model_dump())
+        return result
+
+    async def _permitted_strategies(
+        self, resolution, effective_action_class: ActionClass,
+    ) -> list[dict[str, Any]]:
+        """GAP-F-008 (strategies_for read-back) — what VAN has already learned that this
+        mission's authority actually permits, bounded to 5 entries of an id and a one-line
+        summary. `mission_class` mirrors exactly what `CommandMissionLink.open` gives the
+        mission itself, so this names the same strategies the mission's own outcome would
+        one day be recorded under.
+        """
+        if self.learning is None:
+            return []
+        mission_class = resolution.intent_id or "GENERAL_OWNER_INTENT"
+        try:
+            rows = await self.learning.strategies_for(
+                mission_class, envelope_max_action_class=effective_action_class,
+            )
+        except Exception:
+            # A learning-store fault must never block or fail a command; strategies are a
+            # hint layered on top of the context, not a dependency of it.
+            return []
+        strategies: list[dict[str, Any]] = []
+        for row in rows[:5]:
+            strategy_id = str(row.get("strategy_id") or "")
+            try:
+                sequence = json.loads(row.get("capability_sequence_json") or "[]")
+            except (TypeError, ValueError):
+                sequence = []
+            sequence_text = (
+                " -> ".join(str(step) for step in sequence) if sequence
+                else "no capability sequence recorded"
+            )
+            summary = (
+                f"{sequence_text} ({int(row.get('success_count') or 0)} succeeded, "
+                f"{int(row.get('failure_count') or 0)} failed)"
+            )
+            strategies.append({"strategy_id": strategy_id, "summary": summary})
+        return strategies
 
     def _log_outcome(self, req: CommandRequest, result: CommandResult) -> None:
         """One structured line per command outcome (P3-OBS-001).

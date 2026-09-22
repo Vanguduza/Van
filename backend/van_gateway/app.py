@@ -605,6 +605,13 @@ def create_app() -> FastAPI:
         owner_intent_max_age_seconds=settings.owner_intent_max_age_seconds,
         throttle=throttle,
         missions=command_missions,
+        # GAP-F-001/002/005: gateway-executed typed actions (memory, reminders,
+        # trading halt) run here with the same authority/action/mission ledgers.
+        actions=owner_runtime.actions,
+        owner_fact_author=owner_fact_author,
+        reminders=reminders,
+        trading=trading,
+        learning=learning,
     )
 
     # ---------------------------------------------------------- Gate 11: ops jobs

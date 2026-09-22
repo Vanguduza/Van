@@ -16,6 +16,7 @@ from __future__ import annotations
 
 import base64
 import re
+import sys
 import time
 import uuid
 from pathlib import Path
@@ -37,6 +38,20 @@ from van_gateway.auth.throttle import (
     Throttled,
 )
 from van_gateway.config import get_settings
+
+#: GAP-F-005 — "halt autonomous trading" now resolves to the gateway-executed
+#: `trading.halt` typed action (command/local_executors.py) rather than a Hermes
+#: dispatch, so a genuine approval of it needs a real owner-halt authority token to
+#: reach VERIFIED_SUCCESS. Same fixtures test_a4_owner_approval.py and
+#: test_local_typed_actions.py use.
+sys.path[:0] = [
+    str(Path(__file__).resolve().parents[2] / "trading" / "tests"),
+    str(Path(__file__).resolve().parents[2] / "trading"),
+]
+from conftest_owner_authority import OwnerAuthorityHarness  # noqa: E402
+from van_gateway.trading.service import _import_vati  # noqa: E402
+
+EventKind, make_event, Ledger = _import_vati()
 
 INGRESS = "throttle-ingress-token-0123456789abcd"
 
@@ -145,6 +160,7 @@ def _settings(tmp_path, monkeypatch):
     monkeypatch.setenv("VAN_INTERNAL_CONTROL_TOKEN", "throttle-internal-token")
     # P0-SEC-001 — device enrolment is its own credential now.
     monkeypatch.setenv("VAN_DEVICE_ENROLMENT_TOKEN", "throttle-internal-token")
+    monkeypatch.setenv("VAN_VATI_LEDGER_PATH", str(tmp_path / "vati.sqlite"))
     get_settings.cache_clear()
     yield
     get_settings.cache_clear()
@@ -396,7 +412,7 @@ class TestApprovalChallengeThrottle:
             serialization.PublicFormat.SubjectPublicKeyInfo,
         ).decode("utf-8")
 
-    def _a4_command(self, app, *, device_id, idempotency_key, proof=None):
+    def _a4_command(self, app, *, device_id, idempotency_key, proof=None, client_context=None):
         issued = int(time.time())
         command_id = str(uuid.uuid4())
         nonce = str(uuid.uuid4())
@@ -442,6 +458,8 @@ class TestApprovalChallengeThrottle:
         }
         if proof is not None:
             body["approval_proof"] = proof
+        if client_context is not None:
+            body["client_context"] = client_context
         return body
 
     async def test_forged_approval_proofs_lock_the_device_out(self, client):
@@ -476,9 +494,19 @@ class TestApprovalChallengeThrottle:
             f"approval-proof forgery was never throttled: {messages[-1]}"
         )
 
-    async def test_a_genuine_approval_still_succeeds_while_throttled(self, client):
+    async def test_a_genuine_approval_still_succeeds_while_throttled(self, client, tmp_path):
         """The soft posture on A4: the owner can always approve, whatever an attacker did."""
         ac, app = client
+        now = int(time.time() * 1000)
+        led = Ledger(tmp_path / "vati.sqlite")
+        led.append(make_event(
+            EventKind.SESSION, "vati-runner", {"startup": True},
+            event_time_ms=now, received_time_ms=now, correlation_id="thr-s1",
+        ))
+        led.close()
+        harness = OwnerAuthorityHarness()
+        app.state.trading.owner_authority = harness.verifier
+
         device_id = "thr-a4-ok"
         key = ec.generate_private_key(ec.SECP256R1())
         ticket = await app.state.auth.create_pairing_ticket(device_id)
@@ -515,6 +543,7 @@ class TestApprovalChallengeThrottle:
         signature = key.sign(
             challenge["approval_challenge"].encode("utf-8"), ec.ECDSA(hashes.SHA256())
         )
+        halt_token = harness.token(act="owner-halt", subject="van-trading-core")
         approved = await ac.post(
             "/v1/commands",
             json=self._a4_command(
@@ -526,6 +555,7 @@ class TestApprovalChallengeThrottle:
                     "signature_b64": base64.b64encode(signature).decode("ascii"),
                     "algorithm": "ECDSA_P256_SHA256",
                 },
+                client_context={"owner_halt_authority_ref": halt_token},
             ),
         )
         assert approved.json()["status"] == "accepted", approved.text

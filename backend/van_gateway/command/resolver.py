@@ -8,7 +8,9 @@ from pydantic import BaseModel, Field
 
 from van_gateway.action.models import VerifierType
 from van_gateway.action.registry import BUILTIN_ACTIONS
+from van_gateway.command.context_requirements import OWNER_SUBJECT
 from van_gateway.models import ActionClass
+from van_gateway.reminders.timeparse import TimeParseError, parse_due_expression
 
 
 class ResolutionMode(str, Enum):
@@ -39,6 +41,12 @@ _MUTATION_WORDS = {
 
 def _normalize(text: str) -> str:
     return re.sub(r"\s+", " ", text.strip()).casefold()
+
+
+def _slugify_predicate(text: str) -> str:
+    """"phone number" -> "phone_number", matching the snake_case predicates already used
+    by `context_requirements.ACTION_FAMILY_PREDICATES` (e.g. "working_hours")."""
+    return re.sub(r"\s+", "_", text.strip().casefold())
 
 
 def _has_composite_mutation(text: str) -> bool:
@@ -155,6 +163,41 @@ class TypedCommandResolver:
         re.compile(r"^what have i told you about (?P<topic>.+)\??$", re.IGNORECASE),
     )
 
+    #: GAP-F-001 — "remember ..." / "note ..." strip to a remainder, which is matched
+    #: against `_MY_PREDICATE_PATTERN` first (a structured "my X is Y" statement becomes a
+    #: named predicate/value pair) and, only for the "remember" prefix, falls back to the
+    #: whole remainder as an unstructured statement. "note ..." alone (not shaped like
+    #: "my X is Y") does not resolve — conservative, so it is not confused with the
+    #: NotebookLM note-creation patterns above, which require "create"/"make".
+    _REMEMBER_PREFIX_PATTERN = re.compile(r"^remember (?:that )?(?P<rest>.+)$", re.IGNORECASE)
+    _NOTE_PREFIX_PATTERN = re.compile(r"^note (?:that )?(?P<rest>.+)$", re.IGNORECASE)
+    _MY_PREDICATE_PATTERN = re.compile(r"^my (?P<predicate>[a-z ]+?) is (?P<value>.+)$", re.IGNORECASE)
+
+    RECORD_DECISION_PATTERN = re.compile(
+        r"^record (?:the |this )?decision:?\s*(?P<decision>.+)$", re.IGNORECASE
+    )
+    WE_DECIDED_PATTERN = re.compile(
+        r"^(?:van,?\s+)?we decided (?:that )?(?P<decision>.+)$", re.IGNORECASE
+    )
+
+    #: GAP-F-002 — reminder patterns. Text-then-due is tried before due-then-text so
+    #: "remind me to call Thandi at 3pm" does not have its "at 3pm" swallowed by the
+    #: non-greedy `text` group of the due-then-text pattern instead.
+    REMIND_TEXT_THEN_DUE_PATTERN = re.compile(
+        r"^remind me (?:to |about |that )?(?P<text>.+?) "
+        r"(?P<due>(?:at|in|on|tomorrow|tonight|next) .+)$",
+        re.IGNORECASE,
+    )
+    REMIND_DUE_THEN_TEXT_PATTERN = re.compile(
+        r"^remind me (?P<due>(?:at|in|on|tomorrow|tonight|next) .+?) (?:to |about )(?P<text>.+)$",
+        re.IGNORECASE,
+    )
+    FOLLOW_UP_PATTERN = re.compile(
+        r"^follow up (?:on |with )?(?P<text>.+?) "
+        r"(?P<due>(?:at|in|on|tomorrow|tonight|next|later).*)$",
+        re.IGNORECASE,
+    )
+
     def resolve(self, text: str) -> CommandResolution:
         raw_compact = re.sub(r"\s+", " ", text.strip())
         normalized = raw_compact.casefold()
@@ -251,10 +294,88 @@ class TypedCommandResolver:
                         rule_id="owner.context.read.v1",
                     )
 
+        for prefix_pattern, allow_generic_statement, rule_prefix in (
+            (self._REMEMBER_PREFIX_PATTERN, True, "memory.remember"),
+            (self._NOTE_PREFIX_PATTERN, False, "memory.remember"),
+        ):
+            prefix_match = prefix_pattern.fullmatch(raw_compact)
+            if not prefix_match:
+                continue
+            rest = prefix_match.group("rest").strip()
+            predicate_match = self._MY_PREDICATE_PATTERN.fullmatch(rest)
+            if predicate_match:
+                predicate = _slugify_predicate(predicate_match.group("predicate"))
+                value = predicate_match.group("value").strip(" \"'.")
+                if predicate and value:
+                    return _from_action(
+                        "memory.remember",
+                        text=normalized,
+                        intent_id="MEMORY_REMEMBER",
+                        parameters={"subject": OWNER_SUBJECT, "predicate": predicate, "value": value, "scope": "global"},
+                        rule_id=f"{rule_prefix}.predicate.v1",
+                    )
+            elif allow_generic_statement:
+                statement = rest.strip(" \"'.")
+                if statement:
+                    return _from_action(
+                        "memory.remember",
+                        text=normalized,
+                        intent_id="MEMORY_REMEMBER",
+                        parameters={"subject": OWNER_SUBJECT, "predicate": "statement", "value": statement, "scope": "global"},
+                        rule_id=f"{rule_prefix}.statement.v1",
+                    )
+
+        for pattern, rule_id in (
+            (self.RECORD_DECISION_PATTERN, "memory.decision.record.exact.v1"),
+            (self.WE_DECIDED_PATTERN, "memory.decision.record.decided.v1"),
+        ):
+            match = pattern.fullmatch(raw_compact)
+            if match:
+                decision = match.group("decision").strip(" \"'.")
+                if decision:
+                    return _from_action(
+                        "memory.decision.record",
+                        text=normalized,
+                        intent_id="MEMORY_DECISION_RECORD",
+                        parameters={"decision": decision},
+                        rule_id=rule_id,
+                    )
+
+        # GAP-F-002 — a reminder pattern may match syntactically and still name a due
+        # expression `parse_due_expression` cannot parse ("next Tuesday", "tonight" beyond
+        # its own phrasing). Those fall through to Hermes rather than resolving to a
+        # command that would fail deterministically, but the intent id still names what was
+        # recognised, so the mission this becomes is not a bare GENERAL_OWNER_INTENT.
+        reminder_hint: str | None = None
+        for pattern, rule_id in (
+            (self.REMIND_TEXT_THEN_DUE_PATTERN, "reminder.create.text_then_due.v1"),
+            (self.REMIND_DUE_THEN_TEXT_PATTERN, "reminder.create.due_then_text.v1"),
+            (self.FOLLOW_UP_PATTERN, "reminder.create.follow_up.v1"),
+        ):
+            match = pattern.fullmatch(raw_compact)
+            if not match:
+                continue
+            text = match.group("text").strip(" \"'.")
+            due_expression = match.group("due").strip(" \"'.")
+            if not text or not due_expression:
+                continue
+            try:
+                parse_due_expression(due_expression)
+            except TimeParseError:
+                reminder_hint = "REMINDER_UNPARSEABLE_DUE"
+                continue
+            return _from_action(
+                "reminder.create",
+                text=normalized,
+                intent_id="REMINDER_CREATE",
+                parameters={"text": text, "due_expression": due_expression},
+                rule_id=rule_id,
+            )
+
         return CommandResolution(
             mode=ResolutionMode.HERMES_INTERPRETATION_REQUIRED,
             normalized_text=normalized,
-            intent_id="GENERAL_OWNER_INTENT",
+            intent_id=reminder_hint or "GENERAL_OWNER_INTENT",
         )
 
     @staticmethod

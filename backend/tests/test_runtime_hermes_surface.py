@@ -218,6 +218,11 @@ async def test_reminder_create_is_visible_at_owner_get_reminders(client, monkeyp
     assert owner_view.status_code == 200
     rows = owner_view.json()
     assert any(r["id"] == reminder_id and r["text"] == "remind me to call the accountant" for r in rows)
+    # GAP-F-002 — the *persisted* provenance is always "hermes" for this route, independent
+    # of whatever free-form `source` label Hermes sent (echoed back above, not trusted as
+    # the stored record of who actually reached this internal-control-only route).
+    owner_row = next(r for r in rows if r["id"] == reminder_id)
+    assert owner_row["source"] == "hermes"
 
 
 @pytest.mark.asyncio

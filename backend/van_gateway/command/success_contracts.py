@@ -30,6 +30,7 @@ refusal is Mission Core's and this module does not soften it.
 
 from __future__ import annotations
 
+from van_gateway.command.context_requirements import OWNER_SUBJECT
 from van_gateway.command.resolver import CommandResolution, ResolutionMode
 from van_gateway.mission.models import SuccessContract
 
@@ -37,6 +38,13 @@ from van_gateway.mission.models import SuccessContract
 TRADING_HALT = "trading-halt"
 NOTEBOOK_READBACK = "api-readback"
 NOTEBOOK_SOURCE_READBACK = "notebook-source-readback"
+#: GAP-F-001/002 — the gateway's own owner-fact store and reminders table are systems
+#: independent of the local executor that wrote to them (`command/local_executors.py`
+#: already re-reads before reporting success at the *execution* ledger; this is the
+#: separate, *mission*-level check, built fresh from the store rather than from the
+#: executor's own report).
+OWNER_FACT_READBACK = "owner-fact-readback"
+REMINDER_READBACK = "reminder-readback"
 
 #: Why an exactly-resolved action still gets no checkable contract. Recorded rather than
 #: implied: "VAN cannot confirm this" is a supported outcome and the owner is entitled to
@@ -95,6 +103,53 @@ def contract_for(resolution: CommandResolution) -> SuccessContract:
         return SuccessContract(
             verifier_class=TRADING_HALT,
             postconditions={"kill_switch_active": True, "owner_halt_active": True},
+            evidence_required=True,
+        )
+
+    if action_id == "memory.remember":
+        subject = str(resolution.parameters.get("subject") or "").strip()
+        predicate = str(resolution.parameters.get("predicate") or "").strip()
+        scope = str(resolution.parameters.get("scope") or "global").strip()
+        value = resolution.parameters.get("value")
+        if not subject or not predicate or value in (None, ""):
+            # The resolver sealed nothing to check, so there is nothing to claim.
+            return SuccessContract()
+        return SuccessContract(
+            verifier_class=OWNER_FACT_READBACK,
+            postconditions={
+                "subject": subject, "predicate": predicate, "scope": scope,
+                "value": str(value), "fact_exists": True,
+            },
+            evidence_required=True,
+        )
+
+    if action_id == "memory.decision.record":
+        decision = resolution.parameters.get("decision")
+        if not decision:
+            return SuccessContract()
+        return SuccessContract(
+            verifier_class=OWNER_FACT_READBACK,
+            postconditions={
+                "subject": OWNER_SUBJECT, "predicate": "decision", "scope": "decisions",
+                "value": str(decision), "fact_exists": True,
+            },
+            evidence_required=True,
+        )
+
+    if action_id == "reminder.create":
+        text = str(resolution.parameters.get("text") or "").strip()
+        due_expression = str(resolution.parameters.get("due_expression") or "").strip()
+        if not text or not due_expression:
+            return SuccessContract()
+        # No `due_at_unix` here: the resolver sealed the owner's phrase
+        # ("in 2 hours"), and the unix timestamp is computed at execution time, not
+        # command time — the same reason `google.notebook.enterprise.create` gets no
+        # contract until the provider assigns an id. The verifier reconstructs *which*
+        # reminder to read back from the mission's own sealed authority envelope
+        # (its source command id), not from anything claimed here.
+        return SuccessContract(
+            verifier_class=REMINDER_READBACK,
+            postconditions={"text": text, "reminder_exists": True},
             evidence_required=True,
         )
 

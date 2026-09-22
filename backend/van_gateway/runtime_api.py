@@ -154,14 +154,16 @@ class HermesReminderCreateBody(BaseModel):
     """What Hermes may ask the gateway to remind the owner about, on the owner's behalf.
 
     `text` must be the owner's own words, not Hermes's paraphrase (AGENTS.md's run
-    procedure says so explicitly). `mission_id` and `source` are correlation context for
-    the caller, not owner-authored data: `reminders` has no free-form metadata column to
-    hold them (GAP-F-003/006 gave runtime_api.py alone to close, not the reminder schema),
-    so they are echoed back in this route's response rather than persisted, and the
-    persisted row is byte-for-byte what `ReminderService.create` would have written for
-    any other caller. `created_by` in the response is this route's own honest statement of
-    who reached it -- only a RUNTIME-scoped internal-control credential (Hermes) can -- not
-    a claim about storage.
+    procedure says so explicitly). `mission_id` is correlation context for the caller, not
+    owner-authored data, and is echoed back in this route's response rather than persisted
+    (reminders has no mission_id column). `source` on the request is likewise echoed back
+    as this route received it — it is Hermes's own label, not trusted as the persisted
+    record of who reached this route. The *persisted* `source` column (added for
+    GAP-F-002, closing the gap this docstring used to name: "reminders has no free-form
+    metadata column to hold them") is always the literal `"hermes"` this route sets, never
+    `body.source`, because only a RUNTIME-scoped internal-control credential can reach here
+    at all, and that is the fact worth recording. `created_by` in the response says the
+    same thing for the reader who does not want to open the database to see it.
     """
 
     text: str = Field(min_length=1, max_length=2000)
@@ -389,6 +391,11 @@ class OwnerRuntimeApi:
                     text=body.text,
                     due_at_unix=due_at_unix,
                     idempotency_key=f"hermes:{uuid.uuid4().hex}",
+                    # GAP-F-002 — persisted provenance, independent of whatever `body.source`
+                    # Hermes sent (echoed back below, but not trusted as the stored record of
+                    # who actually reached this route: only a RUNTIME-scoped internal-control
+                    # credential can, and that is what "hermes" here states).
+                    source="hermes",
                 )
             )
             return {
