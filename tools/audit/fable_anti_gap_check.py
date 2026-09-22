@@ -96,6 +96,11 @@ CHECKS: list[Check] = [
     ("PROD-F-002", "floating overlay consumes obstruction broadcasts", "android/app/src/main/java/com/dial/van/overlay/FloatingOverlayService.kt", r"ACTION_OBSTRUCTION_STATE", True, 1),
     ("PROD-F-003", "trading history read model emits an R equity curve", "trading/vati/readmodels/active.py", r'equity_curve_r', True, 1),
     ("PROD-F-003", "trading history UI renders backend-owned curve data", "android/app/src/main/java/com/dial/van/trading/ui/HistoryScreen.kt", r"equityCurveR|equity_curve_r", True, 1),
+    ("PROD-F-004", "local sherpa TTS constructs a real OfflineTts runtime", "android/app/src/main/java/com/dial/van/voice/SherpaLocalTtsRuntime.kt", r"OfflineTts\(", True, 1),
+    ("PROD-F-004", "VoiceEdge gates sherpa selection on runtime self-test", "android/app/src/main/java/com/dial/van/voice/VoiceEdge.kt", r"localTtsRuntimeReady", True, 2),
+    ("PROD-F-005", "critical durable work has a gateway Temporal bridge", "backend/van_gateway/automation/temporal_bridge.py", r"class TemporalAutomationApi", True, 1),
+    ("PROD-F-005", "self-hosted Temporal is loopback-only and pinned", "deploy/van-trading-core/temporal/docker-compose.yml", r"127\.0\.0\.1:7233:7233", True, 1),
+    ("PROD-F-005", "Temporal worker executes VanDurableWorkflow", "deploy/van-trading-core/temporal/runtime.py", r"workflows=\[VanDurableWorkflow\]", True, 1),
 ]
 
 #: Behavioural evidence per gap: the suites CI runs. Listed so the report can cite them.
@@ -121,6 +126,8 @@ SUITES: dict[str, list[str]] = {
     "PROD-F-001": ["backend/tests/test_extra_apis.py"],
     "PROD-F-002": ["android/verification (OnboardingPlanTest, OverlayVisibilityPolicyTest)"],
     "PROD-F-003": ["trading/tests/test_active_trade_e2e.py"],
+    "PROD-F-004": ["android/verification/src/test/kotlin/com/dial/van/voice/VoiceAudioTest.kt", "android app compile"],
+    "PROD-F-005": ["backend/tests/test_temporal_durable_runtime.py", "backend/tests/test_automation_hot_warm_cold.py"],
 }
 
 
