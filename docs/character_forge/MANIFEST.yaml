@@ -1,0 +1,14 @@
+pack: VAN-CHARACTER-FORGE-DP-R2
+baseline_sha: 3c337efe91faa8461dd28b1f18a26cf346a1b66f
+owner_confirmed_complete: false
+owner_confirmation_date: null
+source_roots:
+  - visual-authority/assets
+  - visual-authority/rive_contract.json
+  - docs/VAN_CHARACTER_VISUAL_IDENTITY.md
+  - docs/VAN_VISUAL_ACCEPTANCE_MATRIX.md
+sources: []
+artifacts: []
+reviews: {}
+receipts: []
+ci_evidence: {}

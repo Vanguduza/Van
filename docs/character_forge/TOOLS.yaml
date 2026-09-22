@@ -1,0 +1,17 @@
+critical_path:
+  rive_android:
+    version: "9.6.5"
+    class: RUNTIME
+    source: android/app/build.gradle.kts
+  rive_editor:
+    version: UNPINNED
+    class: AUTHORING
+    required_from: M2
+  inkscape:
+    version: UNPINNED
+    class: AUTHORING
+    required_from: M1
+lanes:
+  comfyui: {class: LANE, enabled: false}
+  sam2_birefnet: {class: LANE, enabled: false}
+  inochi2d_blender_corive: {class: LANE, enabled: false}

@@ -1,0 +1,22 @@
+device:
+  model: Samsung Galaxy S24 Ultra
+  android_build: null
+  apk_sha256: null
+  rive_sha256: null
+  checked_at: null
+checks:
+  renderer_rive_active: NOT_RUN
+  identity_floating_size: NOT_RUN
+  minimized_portrait_reads_as_van: NOT_RUN
+  gaze_finger_drag: NOT_RUN
+  blink_cadence: NOT_RUN
+  real_speech_articulation: NOT_RUN
+  hello_wave_first_session: NOT_RUN
+  waiting_for_owner_pose: NOT_RUN
+  urgent_on_hermes_offline: NOT_RUN
+  workboard_resize_no_freeze_or_clip: NOT_RUN
+  aura_character_coexist_no_double_glow: NOT_RUN
+  idle_five_minutes_no_visible_loop: NOT_RUN
+  mixed_soak_thirty_minutes: NOT_RUN
+thermal_note: null
+evidence: []
