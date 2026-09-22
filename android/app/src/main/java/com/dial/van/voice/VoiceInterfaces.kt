@@ -412,16 +412,12 @@ class VoiceInputManager(
 /**
  * TTS output with barge-in support and speech sync frames for avatar animation.
  *
- * GAP-F-013 — mouth-open/viseme comes from whichever of three sources is available, in
- * order: the Gateway's per-segment [SegmentCueTiming] (a text-length estimate, ticked here
- * against wall-clock time since [onStart]); failing that, Android's own
- * `onRangeStart`/[UtteranceProgressListener] callback, which is a real signal from the
- * engine actually speaking but not an amplitude one; RMS of the *played* audio is not read
- * here at all — `TextToSpeech.speak` hands playback to the platform's own audio track with
- * no callback into its samples, so reading real output RMS would need routing synthesis
- * through an `AudioTrack` this class manages itself, which is a bigger change than this one
- * and is not implemented; the fallback chain therefore ends at `onRangeStart`, which is
- * exactly the existing heuristic DNA asks this class to fall back to.
+ * GAP-F-013 now has two explicit playback paths. Sherpa synthesis is PCM owned by VAN
+ * through AudioTrack, so RMS/mouth-open frames come from the samples actually being played.
+ * Android TextToSpeech remains the fallback; because Android does not expose its playback
+ * samples, that path uses the Gateway's [SegmentCueTiming] estimate and then onRangeStart
+ * when no cue track exists. The active engine is tracked explicitly so the output layer
+ * cannot silently ignore LocalTtsRouter's selection.
  */
 class TtsOutputManager(
     context: Context,
