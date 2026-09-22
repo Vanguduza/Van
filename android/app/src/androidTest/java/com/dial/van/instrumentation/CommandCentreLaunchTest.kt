@@ -5,7 +5,6 @@ import android.content.Intent
 import android.graphics.Bitmap
 import android.net.Uri
 import androidx.compose.ui.graphics.asAndroidBitmap
-import androidx.compose.ui.test.assertExists
 import androidx.compose.ui.test.assertIsDisplayed
 import androidx.compose.ui.test.assertIsSelected
 import androidx.compose.ui.test.captureToImage

@@ -29,6 +29,50 @@ This register is independent of `docs/audit/van-whole-project-2026-09-21/21_GAP_
 | TEST_ONLY | 1 |
 | UI_ONLY | 1 |
 
+## Closure (2026-09-22)
+
+Closure HEAD: `176f25a`. Full evidence per gap in `VAN_FABLE_IMPLEMENTATION_CLOSURE_REPORT.md` §2.
+
+| Closure status | Count |
+|---|---|
+| DELIBERATELY_REMOVED_CANON_UPDATED | 1 |
+| FIXED_AND_EVIDENCED | 26 |
+| SUPERSEDED_BY_BETTER_IMPLEMENTATION | 1 |
+| **Total** | **28** |
+
+Mixed rows (a slash) count under their first status; the second half names the part that is deliberately removed or externally gated.
+
+| Gap | Closure status | Commits |
+|---|---|---|
+| GAP-F-001 | FIXED_AND_EVIDENCED | 528366b, b78cbf4, 5498a6f |
+| GAP-F-002 | FIXED_AND_EVIDENCED | 528366b, b78cbf4, 5498a6f |
+| GAP-F-003 | FIXED_AND_EVIDENCED | b78cbf4, 3d845bc |
+| GAP-F-004 | FIXED_AND_EVIDENCED | 3d845bc |
+| GAP-F-005 | FIXED_AND_EVIDENCED | 528366b, 81805c9 |
+| GAP-F-006 | FIXED_AND_EVIDENCED | b78cbf4 |
+| GAP-F-007 | FIXED_AND_EVIDENCED | c193d47 |
+| GAP-F-008 | FIXED_AND_EVIDENCED | b952b40, 528366b |
+| GAP-F-009 | FIXED_AND_EVIDENCED | c193d47 |
+| GAP-F-010 | FIXED_AND_EVIDENCED | 5498a6f |
+| GAP-F-011 | FIXED_AND_EVIDENCED | 5498a6f |
+| GAP-F-012 | FIXED_AND_EVIDENCED | 17f4fba, 3d845bc |
+| GAP-F-013 | FIXED_AND_EVIDENCED (device cue path) / DELIBERATELY_REMOVED_CANON_UPDATED (sherpa TTS preference) | 17f4fba |
+| GAP-F-014 | FIXED_AND_EVIDENCED | 17f4fba, 5498a6f |
+| GAP-F-015 | FIXED_AND_EVIDENCED | b78cbf4 |
+| GAP-F-016 | FIXED_AND_EVIDENCED | 1b6e44e |
+| GAP-F-017 | FIXED_AND_EVIDENCED | 1b6e44e |
+| GAP-F-018 | FIXED_AND_EVIDENCED | 1b6e44e |
+| GAP-F-019 | SUPERSEDED_BY_BETTER_IMPLEMENTATION | 528366b |
+| GAP-F-020 | FIXED_AND_EVIDENCED | c193d47, 1b6e44e, b78cbf4 |
+| GAP-F-021 | FIXED_AND_EVIDENCED | 1b6e44e |
+| GAP-F-022 | FIXED_AND_EVIDENCED | 1b6e44e |
+| GAP-F-023 | FIXED_AND_EVIDENCED (mutation, instrumentation job) / EXTERNALLY_GATED_REPOSITORY_COMPLETE (device sign-off) | 1b6e44e, a60b009 |
+| GAP-F-024 | FIXED_AND_EVIDENCED | c193d47, 5498a6f |
+| GAP-F-025 | FIXED_AND_EVIDENCED | 1b6e44e |
+| GAP-F-026 | DELIBERATELY_REMOVED_CANON_UPDATED | — |
+| GAP-F-027 | FIXED_AND_EVIDENCED | 5498a6f, b46ca65 |
+| GAP-F-028 | FIXED_AND_EVIDENCED | b952b40 |
+
 ## Root causes
 
 | Root cause | Statement | Gaps |
@@ -47,6 +91,7 @@ This register is independent of `docs/audit/van-whole-project-2026-09-21/21_GAP_
 
 - **Priority:** P1  
 - **Status:** OPEN_GAP  
+- **Closure (2026-09-22):** FIXED_AND_EVIDENCED — commits 528366b, b78cbf4, 5498a6f — command/local_executors.py memory.remember + memory.decision.record via OwnerFactAuthor; owner-fact-readback verifier; test_local_typed_actions.py; shim context_fact_candidate/context_edge_candidate; memory/MemoryRoute.kt  
 - **Affected requirements:** REQ-MEM-02, REQ-SYM-09, REQ-FLOW-05  
 - **Subsystem:** gateway context / Android Command Centre / Hermes MCP shim  
 - **Root cause:** RC-B (gateway write surfaces without an owner-side producer) + RC-A (Hermes tool surface narrower than the authority model)
@@ -69,6 +114,7 @@ This register is independent of `docs/audit/van-whole-project-2026-09-21/21_GAP_
 
 - **Priority:** P1  
 - **Status:** BACKEND_ONLY  
+- **Closure (2026-09-22):** FIXED_AND_EVIDENCED — commits 528366b, b78cbf4, 5498a6f — reminder.create executor + resolver; migration 29 reminders.source; reminder-readback verifier; shim reminder_create → POST /v1/runtime/reminders; Home 'Upcoming' from GET /v1/reminders  
 - **Affected requirements:** REQ-ATT-04, REQ-FLOW-06  
 - **Subsystem:** gateway reminders / Android / typed resolver  
 - **Root cause:** RC-B
@@ -88,6 +134,7 @@ This register is independent of `docs/audit/van-whole-project-2026-09-21/21_GAP_
 
 - **Priority:** P1  
 - **Status:** IMPLEMENTED_NOT_REACHABLE  
+- **Closure (2026-09-22):** FIXED_AND_EVIDENCED — commits b78cbf4, 3d845bc — /v1/runtime/trading/* (6 tools); commander positions/assessment read-only; test_runtime_hermes_surface.py; test_owner_runtime_mcp_contract.py (48 tools)  
 - **Affected requirements:** REQ-TRD-01, REQ-TRD-05, REQ-FLOW-07, REQ-FLOW-08, REQ-FLOW-09  
 - **Subsystem:** Hermes MCP shim / trading commander / gateway trading routes  
 - **Root cause:** RC-A
@@ -107,6 +154,7 @@ This register is independent of `docs/audit/van-whole-project-2026-09-21/21_GAP_
 
 - **Priority:** P2  
 - **Status:** IMPLEMENTED_NOT_REACHABLE  
+- **Closure (2026-09-22):** FIXED_AND_EVIDENCED — commits 3d845bc — cognition/invokers.py Null/HttpJson/HermesRun from session config; read model names the real invoker or MODEL_INVOKER_UNCONFIGURED; test_active_trade_e2e.py. Live invoker credentials remain QUAL-TRD-05.  
 - **Affected requirements:** REQ-TRD-06, REQ-TRD-08  
 - **Subsystem:** trading/vati/cognition  
 - **Root cause:** RC-E (external dependency declared but no injection point)
@@ -126,6 +174,7 @@ This register is independent of `docs/audit/van-whole-project-2026-09-21/21_GAP_
 
 - **Priority:** P1  
 - **Status:** PARTIAL_IMPLEMENTATION  
+- **Closure (2026-09-22):** FIXED_AND_EVIDENCED — commits 528366b, 81805c9 — TradingHaltExecutor with owner-halt OwnerAuthority token (client_context.owner_halt_authority_ref) + A4 proof; test_local_typed_actions.py halt cases; Android trading/TradingHaltAuthority.kt + Trading screen halt path  
 - **Affected requirements:** REQ-SEC-05, REQ-TRD-09, REQ-FLOW-10  
 - **Subsystem:** gateway action runtime / Android trading / commander  
 - **Root cause:** RC-B + RC-A
@@ -145,6 +194,7 @@ This register is independent of `docs/audit/van-whole-project-2026-09-21/21_GAP_
 
 - **Priority:** P1  
 - **Status:** IMPLEMENTED_NOT_REACHABLE  
+- **Closure (2026-09-22):** FIXED_AND_EVIDENCED — commits b78cbf4 — shim browser_task_create/assignment_run/task_status/task_evidence + automation_route/execute/run_status; AGENTS.md/skills truthful  
 - **Affected requirements:** REQ-BRW-01, REQ-AUT-01, REQ-FLOW-03, REQ-FLOW-15  
 - **Subsystem:** Hermes MCP shim / browser api / automation api  
 - **Root cause:** RC-A
@@ -166,6 +216,7 @@ This register is independent of `docs/audit/van-whole-project-2026-09-21/21_GAP_
 
 - **Priority:** P2  
 - **Status:** OPEN_GAP  
+- **Closure (2026-09-22):** FIXED_AND_EVIDENCED — commits c193d47 — degraded/registry.py 9-code CATALOG, tolerant snapshot(); test_degraded_catalog_is_exhaustive.py  
 - **Affected requirements:** REQ-RES-04, REQ-OBS-03  
 - **Subsystem:** gateway degraded registry / observability  
 - **Root cause:** RC-D (enum/catalog drift with no exhaustiveness test)
@@ -185,6 +236,7 @@ This register is independent of `docs/audit/van-whole-project-2026-09-21/21_GAP_
 
 - **Priority:** P2  
 - **Status:** PARTIAL_IMPLEMENTATION  
+- **Closure (2026-09-22):** FIXED_AND_EVIDENCED — commits b952b40, 528366b — learning/feed.py strategies_for; calibrate() wired in understanding/api.py; ActionAutonomyGate; canonical_context.permitted_strategies; test_learning_read_back.py, test_action_runtime_autonomy.py  
 - **Affected requirements:** REQ-SYM-08, REQ-SYM-10, REQ-COG-06  
 - **Subsystem:** gateway learning / evolution / reasoning / proactive  
 - **Root cause:** RC-C
@@ -204,6 +256,7 @@ This register is independent of `docs/audit/van-whole-project-2026-09-21/21_GAP_
 
 - **Priority:** P2  
 - **Status:** CONTRADICTORY_IMPLEMENTATION  
+- **Closure (2026-09-22):** FIXED_AND_EVIDENCED — commits c193d47 — auth/control_scopes.py require_scoped_internal in 6 routers; test_scoped_internal_control_reaches_routers.py  
 - **Affected requirements:** REQ-SEC-02  
 - **Subsystem:** gateway auth / routers  
 - **Root cause:** RC-D (two authority checks for one rule)
@@ -222,6 +275,7 @@ This register is independent of `docs/audit/van-whole-project-2026-09-21/21_GAP_
 
 - **Priority:** P3  
 - **Status:** PARTIAL_IMPLEMENTATION  
+- **Closure (2026-09-22):** FIXED_AND_EVIDENCED — commits 5498a6f — degraded/GatewayDegradedMapping.kt; DegradedModeStore.applyGatewayHealth bound via DegradedBridge in VanApplication.onCreate; Settings reconciled list; GatewayDegradedMappingTest (12)  
 - **Affected requirements:** REQ-RES-04, REQ-AND-14  
 - **Subsystem:** Android degraded / gateway degraded  
 - **Root cause:** RC-D
@@ -238,6 +292,7 @@ This register is independent of `docs/audit/van-whole-project-2026-09-21/21_GAP_
 
 - **Priority:** P3  
 - **Status:** PARTIAL_IMPLEMENTATION  
+- **Closure (2026-09-22):** FIXED_AND_EVIDENCED — commits 5498a6f — command/work/ConversationReducer.kt; VanCommandController.pollUnfinishedCommands (4 s); VanGatewayClient.commandStatus; context_gaps as 'VAN did not know'; control/VanSpokenAnswer.kt → VoiceEdge.speak; ConversationReducerTest (8)  
 - **Affected requirements:** REQ-UX-03, REQ-HER-05  
 - **Subsystem:** Android chat / gateway command status  
 - **Root cause:** RC-F (UI coherence)
@@ -255,6 +310,7 @@ This register is independent of `docs/audit/van-whole-project-2026-09-21/21_GAP_
 
 - **Priority:** P3  
 - **Status:** UI_ONLY  
+- **Closure (2026-09-22):** FIXED_AND_EVIDENCED — commits 17f4fba, 3d845bc — visual/VanEmbodimentReducer.kt + VanEmbodimentProducers.kt + VanMotionMap.kt; trading/bridge.py trading.trade.closed producer; visual-preview VanEmbodimentCoverageTest  
 - **Affected requirements:** REQ-EMB-03, REQ-EMB-04  
 - **Subsystem:** Android visual  
 - **Root cause:** RC-F
@@ -271,6 +327,7 @@ This register is independent of `docs/audit/van-whole-project-2026-09-21/21_GAP_
 
 - **Priority:** P3  
 - **Status:** TEST_ONLY  
+- **Closure (2026-09-22):** FIXED_AND_EVIDENCED (device cue path) / DELIBERATELY_REMOVED_CANON_UPDATED (sherpa TTS preference) — commits 17f4fba — voice/speech_cues.py production SpeechCueClock on the speech_stream wire; voice/SpeechCueTiming.kt + TtsOutputManager cue track; SHERPA_ONNX TTS preference removed (no synthesizer exists; local TTS = QUAL-VOI-02)  
 - **Affected requirements:** REQ-VOI-03, REQ-VOI-04  
 - **Subsystem:** Android voice / gateway voice  
 - **Root cause:** RC-G (design artefact not wired)
@@ -289,6 +346,7 @@ This register is independent of `docs/audit/van-whole-project-2026-09-21/21_GAP_
 
 - **Priority:** P4  
 - **Status:** EXTERNALLY_BLOCKED_REPOSITORY_COMPLETE  
+- **Closure (2026-09-22):** FIXED_AND_EVIDENCED — commits 17f4fba, 5498a6f — visual/VanRendererStatus.kt via DegradedBridge.rendererStatus; Settings 'Character' row from DegradedBridge.lastRendererStatus  
 - **Affected requirements:** REQ-EMB-05  
 - **Subsystem:** Android visual / visual-authority  
 - **Root cause:** External artefact (docs/EXTERNAL_GATES.md 'Artist .riv')
@@ -305,6 +363,7 @@ This register is independent of `docs/audit/van-whole-project-2026-09-21/21_GAP_
 
 - **Priority:** P3  
 - **Status:** CONTRADICTORY_IMPLEMENTATION  
+- **Closure (2026-09-22):** FIXED_AND_EVIDENCED — commits b78cbf4 — AGENTS.md, skills, hermes README regenerated from the 48-tool shim; contract test pins REQUIRED_TOOLS  
 - **Affected requirements:** REQ-MEM-02, REQ-COH-02  
 - **Subsystem:** hermes profile docs / MCP shim  
 - **Root cause:** RC-A
@@ -321,6 +380,7 @@ This register is independent of `docs/audit/van-whole-project-2026-09-21/21_GAP_
 
 - **Priority:** P3  
 - **Status:** OPEN_GAP  
+- **Closure (2026-09-22):** FIXED_AND_EVIDENCED — commits 1b6e44e — interactive_api.py mint_stream_grant → 503 BROWSER_STREAM_UNCONFIGURED without a stream host  
 - **Affected requirements:** REQ-RES-05, REQ-BRW-04  
 - **Subsystem:** gateway browser interactive api  
 - **Root cause:** RC-D
@@ -337,6 +397,7 @@ This register is independent of `docs/audit/van-whole-project-2026-09-21/21_GAP_
 
 - **Priority:** P3  
 - **Status:** OPEN_GAP  
+- **Closure (2026-09-22):** FIXED_AND_EVIDENCED — commits 1b6e44e — backend/requirements.lock; installers and CI install from the lock  
 - **Affected requirements:** REQ-DET-03  
 - **Subsystem:** backend/requirements.txt / deploy  
 - **Root cause:** Determinism
@@ -354,6 +415,7 @@ This register is independent of `docs/audit/van-whole-project-2026-09-21/21_GAP_
 
 - **Priority:** P3  
 - **Status:** OPEN_GAP  
+- **Closure (2026-09-22):** FIXED_AND_EVIDENCED — commits 1b6e44e — config.py van_env + assert_production_safe(); tools/runtime/qualify_gateway_host.sh  
 - **Affected requirements:** REQ-SEC-03  
 - **Subsystem:** gateway config / qualification  
 - **Root cause:** Determinism/security hardening
@@ -370,6 +432,7 @@ This register is independent of `docs/audit/van-whole-project-2026-09-21/21_GAP_
 
 - **Priority:** P3  
 - **Status:** PARTIAL_IMPLEMENTATION  
+- **Closure (2026-09-22):** SUPERSEDED_BY_BETTER_IMPLEMENTATION — commits 528366b — Commands no longer block on missing owner context; context_gaps computed, returned in CommandResult, shown to the owner and passed to Hermes in canonical_context. Blocking a safety action on an unknown fact was the wrong contract.  
 - **Affected requirements:** REQ-COG-02  
 - **Subsystem:** gateway command/context_requirements  
 - **Root cause:** RC-C
@@ -385,6 +448,7 @@ This register is independent of `docs/audit/van-whole-project-2026-09-21/21_GAP_
 
 - **Priority:** P4  
 - **Status:** IMPLEMENTED_NOT_REACHABLE  
+- **Closure (2026-09-22):** FIXED_AND_EVIDENCED — commits c193d47, 1b6e44e, b78cbf4 — _scrubbed() on every Google read; instruments wired or deleted; owner_approved removed; input_protocol retained (stream host caller)  
 - **Affected requirements:** REQ-COH-05  
 - **Subsystem:** gateway  
 - **Root cause:** Coherence hygiene
@@ -403,6 +467,7 @@ This register is independent of `docs/audit/van-whole-project-2026-09-21/21_GAP_
 
 - **Priority:** P4  
 - **Status:** OPEN_GAP  
+- **Closure (2026-09-22):** FIXED_AND_EVIDENCED — commits 1b6e44e — production config refuses loopback/empty secrets  
 - **Affected requirements:** REQ-DET-04  
 - **Subsystem:** gateway config  
 - **Root cause:** Determinism
@@ -418,6 +483,7 @@ This register is independent of `docs/audit/van-whole-project-2026-09-21/21_GAP_
 
 - **Priority:** P4  
 - **Status:** OPEN_GAP  
+- **Closure (2026-09-22):** FIXED_AND_EVIDENCED — commits 1b6e44e — tests/contracts/__init__.py; root collection no longer collides  
 - **Affected requirements:** REQ-TST-01  
 - **Subsystem:** tests  
 - **Root cause:** Test hygiene
@@ -433,6 +499,7 @@ This register is independent of `docs/audit/van-whole-project-2026-09-21/21_GAP_
 
 - **Priority:** P4  
 - **Status:** PARTIAL_IMPLEMENTATION  
+- **Closure (2026-09-22):** FIXED_AND_EVIDENCED (mutation, instrumentation job) / EXTERNALLY_GATED_REPOSITORY_COMPLETE (device sign-off) — commits 1b6e44e, a60b009 — van-ci.yml mutation job (non-blocking, report uploaded); android-instrumentation job on an API 31 emulator running src/androidTest CommandCentreLaunchTest + FloatingOverlayServiceTest (advisory; report uploaded). Real-device certification remains QUAL-AND-01.  
 - **Affected requirements:** REQ-TST-02, REQ-TST-03  
 - **Subsystem:** CI / android  
 - **Root cause:** Test coverage
@@ -449,6 +516,7 @@ This register is independent of `docs/audit/van-whole-project-2026-09-21/21_GAP_
 
 - **Priority:** P3  
 - **Status:** BACKEND_ONLY  
+- **Closure (2026-09-22):** FIXED_AND_EVIDENCED — commits c193d47, 5498a6f — POST /v1/google/owner-revoke (device-proofed); test_google_owner_revoke_and_scrub.py; Connected screen Revoke Google with confirm  
 - **Affected requirements:** REQ-GOO-05, REQ-AND-12  
 - **Subsystem:** Android / gateway google  
 - **Root cause:** RC-B
@@ -466,6 +534,7 @@ This register is independent of `docs/audit/van-whole-project-2026-09-21/21_GAP_
 
 - **Priority:** P3  
 - **Status:** CONTRADICTORY_IMPLEMENTATION  
+- **Closure (2026-09-22):** FIXED_AND_EVIDENCED — commits 1b6e44e — google/mesh.py EXECUTION_READY_STATES single predicate  
 - **Affected requirements:** REQ-GOO-04, REQ-COH-02  
 - **Subsystem:** gateway google mesh / capability readiness  
 - **Root cause:** RC-D
@@ -482,6 +551,7 @@ This register is independent of `docs/audit/van-whole-project-2026-09-21/21_GAP_
 
 - **Priority:** P4  
 - **Status:** STUB_OR_PLACEHOLDER  
+- **Closure (2026-09-22):** DELIBERATELY_REMOVED_CANON_UPDATED — commits — — Temporal stays stack-locked at adoption phase 11; automation/router.py states the decision in owner-visible detail; component ledger DELIBERATE_SCOPE; REQ-AUT-04 re-stated as DELIBERATE_SCOPE  
 - **Affected requirements:** REQ-AUT-04  
 - **Subsystem:** gateway automation router  
 - **Root cause:** Stack-lock phase 11 (deliberate)
@@ -497,6 +567,7 @@ This register is independent of `docs/audit/van-whole-project-2026-09-21/21_GAP_
 
 - **Priority:** P4  
 - **Status:** OPEN_GAP  
+- **Closure (2026-09-22):** FIXED_AND_EVIDENCED — commits 5498a6f, b46ca65 — OverlayStateStore and browser session store on EncryptedSharedPreferences; tests/contracts/test_android_storage_policy.py explains the three remaining non-sensitive plain writers  
 - **Affected requirements:** REQ-AND-05  
 - **Subsystem:** Android overlay  
 - **Root cause:** Consistency
@@ -512,6 +583,7 @@ This register is independent of `docs/audit/van-whole-project-2026-09-21/21_GAP_
 
 - **Priority:** P2  
 - **Status:** PARTIAL_IMPLEMENTATION  
+- **Closure (2026-09-22):** FIXED_AND_EVIDENCED — commits b952b40 — proactive/followups.py ProactiveFollowUpJob + scheduler job proactive.follow_ups; owner-disableable; test_proactive_followups.py  
 - **Affected requirements:** REQ-SYM-06, REQ-SYM-11  
 - **Subsystem:** gateway proactive / scheduler  
 - **Root cause:** RC-C
