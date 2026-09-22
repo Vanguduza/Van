@@ -24,6 +24,7 @@ import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.LocalContext
+import androidx.fragment.app.FragmentActivity
 import com.dial.van.BuildConfig
 import com.dial.van.VanApplication
 import com.dial.van.command.DegradedPanel
@@ -40,6 +41,7 @@ import com.dial.van.design.components.VanPressable
 import com.dial.van.overlay.FloatingOverlayService
 import com.dial.van.overlay.VanObstructionAccessibilityService
 import com.dial.van.visual.DegradedBridge
+import com.dial.van.visual.VanCharacterAcceptance
 import com.dial.van.visual.VanGlassTokens
 import com.dial.van.visual.VanPresence
 import com.dial.van.visual.rememberVanEffectBudget
@@ -69,6 +71,10 @@ fun SettingsRoute(
     var gatewayDegraded by remember { mutableStateOf<JSONObject?>(null) }
     var gatewayDegradedError by remember { mutableStateOf<String?>(null) }
     var unfixable by remember { mutableStateOf<String?>(null) }
+    var characterAcceptanceStatus by remember { mutableStateOf<String?>(null) }
+    val characterAcceptance = remember(context, app.gatewayClient) {
+        (context as? FragmentActivity)?.let { VanCharacterAcceptance(it, app.gatewayClient) }
+    }
 
     fun loadDiagnostics() {
         scope.launch {
@@ -163,6 +169,13 @@ fun SettingsRoute(
                         style = tokens.type.body,
                         color = tokens.color.textSecondary,
                     )
+                    characterAcceptanceStatus?.let {
+                        Text(it, style = tokens.type.label, color = tokens.color.textSecondary)
+                    }
+                    Button(
+                        enabled = characterAcceptance != null,
+                        onClick = { characterAcceptance?.accept { characterAcceptanceStatus = it } },
+                    ) { Text("Accept this character asset") }
                     if (BuildConfig.DEBUG) {
                         Button(
                             onClick = {

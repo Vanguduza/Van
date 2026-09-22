@@ -961,6 +961,31 @@ class VanGatewayClient(context: Context) {
         postJson("/v1/reminders/${encodeSegment(reminderId)}/cancel", JSONObject())
     }
 
+    // --------------------------------------------------------------- Character Forge
+
+    /** M4: device-proofed, biometric owner acceptance for the exact installed Rive SHA. */
+    suspend fun recordVisualAcceptance(
+        token: String,
+        riveSha256: String,
+        apkSha256: String,
+        deviceModel: String,
+        androidBuild: String,
+    ): JSONObject = withContext(Dispatchers.IO) {
+        postProved(
+            "/v1/visual/acceptance",
+            JSONObject()
+                .put("token", token)
+                .put("rive_sha256", riveSha256)
+                .put("apk_sha256", apkSha256)
+                .put("device_model", deviceModel)
+                .put("android_build", androidBuild),
+        )
+    }
+
+    suspend fun latestVisualAcceptance(): JSONObject = withContext(Dispatchers.IO) {
+        getJson("/v1/visual/acceptance")
+    }
+
     // --------------------------------------------------------------------------- degraded
 
     /** GET /v1/degraded — the gateway's own degraded snapshot (GAP-F-010). */

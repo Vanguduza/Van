@@ -132,8 +132,17 @@ from van_gateway.command.standing import StandingAutomationAuthorityService
 from van_gateway.runtime_api import OwnerRuntimeApi
 from van_gateway.storage.db import Store
 from van_gateway.trading import TradingAuthorityError, TradingControlError, TradingService
+from van_gateway.visual.acceptance import VisualAcceptanceError, VisualAcceptanceService
 from van_gateway.trading.accounts import ACTIONS as ACCOUNT_ACTIONS, AccountOnboarding, CommanderAccountControl, LocalAccountControl, OAuthPending, canonical_action, redact as redact_account_args, requires_owner_approval
 from van_gateway.trading.strategies import StrategyPromotionGateway, canonical_strategy_promotion
+
+
+class VisualAcceptanceBody(BaseModel):
+    token: str
+    rive_sha256: str
+    apk_sha256: str
+    device_model: str
+    android_build: str
 
 
 class EnrollBody(BaseModel):
@@ -478,6 +487,7 @@ def create_app() -> FastAPI:
         lake_root=settings.vati_lake_root,
         reporting_currency=settings.vati_reporting_currency,
     )
+    visual_acceptance = VisualAcceptanceService(store)
     # GAP-F-003: Hermes reads the same trading read models the owner sees, through
     # /v1/runtime/trading/* (RUNTIME scope). Never a mutation.
     owner_runtime.trading = trading
@@ -841,6 +851,7 @@ def create_app() -> FastAPI:
     app.state.owner_memory = owner_memory
     app.state.learning = learning
     app.state.degraded = degraded
+    app.state.visual_acceptance = visual_acceptance
     # Exposed like `degraded`: which jobs a build actually installs is a property of
     # the running app, and a job list that exists only inside a closure is how
     # `learning.auto_demote` went uncalled for as long as it did.
@@ -1195,6 +1206,7 @@ def create_app() -> FastAPI:
             or path == "/v1/commands"
             or path == "/v1/context/ingest"
             or path == "/v1/google/owner-revoke"
+            or path == "/v1/visual/acceptance"
         )
 
     async def enforce_device_proof(request: Request, device_id: str) -> JSONResponse | None:
@@ -2932,6 +2944,30 @@ def create_app() -> FastAPI:
             f"<h2>Van: {html.escape(str(result['broker']))} linked</h2>"
             "<p>Return to the Van app to choose the account. You can close this page.</p>"
         )
+
+    @app.post("/v1/visual/acceptance")
+    async def record_visual_acceptance(req: VisualAcceptanceBody, request: Request):
+        if not getattr(request.state, "van_device_id", None):
+            raise HTTPException(status_code=401, detail="owner_device_required")
+        try:
+            return await visual_acceptance.record(
+                token=req.token,
+                rive_sha256=req.rive_sha256,
+                apk_sha256=req.apk_sha256,
+                device_model=req.device_model,
+                android_build=req.android_build,
+            )
+        except VisualAcceptanceError as exc:
+            raise HTTPException(status_code=403, detail=str(exc)) from exc
+
+    @app.get("/v1/visual/acceptance")
+    async def latest_visual_acceptance(request: Request):
+        if not getattr(request.state, "van_device_id", None):
+            raise HTTPException(status_code=401, detail="owner_device_required")
+        record = await visual_acceptance.latest()
+        if record is None:
+            raise HTTPException(status_code=404, detail="visual_acceptance_not_recorded")
+        return record
 
     @app.get("/v1/trading/tickets")
     async def trading_tickets(status: str | None = None):
