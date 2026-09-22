@@ -31,7 +31,7 @@ This register is independent of `docs/audit/van-whole-project-2026-09-21/21_GAP_
 
 ## Closure (2026-09-22)
 
-Closure HEAD: `6b4fca4`. Full evidence per gap in `VAN_FABLE_IMPLEMENTATION_CLOSURE_REPORT.md` §2.
+Closure HEAD: `100d898`. Full evidence per gap in `VAN_FABLE_IMPLEMENTATION_CLOSURE_REPORT.md` §2.
 
 | Closure status | Count |
 |---|---|

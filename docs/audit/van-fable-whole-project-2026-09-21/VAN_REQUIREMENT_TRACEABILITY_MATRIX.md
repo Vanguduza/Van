@@ -18,7 +18,7 @@ Audited commit `0067d55071342b963293d0724f5a1604d233d105`. 119 canonical require
 | STUB_OR_PLACEHOLDER | 1 |
 | **Total** | **119** |
 
-> Closure 2026-09-22: statuses updated at HEAD `6b4fca4`; the audit-time status of every changed row is kept in the JSON as `status_at_audit`.
+> Closure 2026-09-22: statuses updated at HEAD `100d898`; the audit-time status of every changed row is kept in the JSON as `status_at_audit`.
 
 ## Matrix
 
