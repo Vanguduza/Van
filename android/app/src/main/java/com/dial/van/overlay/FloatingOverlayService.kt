@@ -56,6 +56,8 @@ class FloatingOverlayService : Service(), LifecycleOwner, SavedStateRegistryOwne
     private var tradeView by mutableStateOf(TradeView.CURRENT)
     private var tradeRefreshTick by mutableStateOf(0)
 
+    private var visibility by mutableStateOf(OverlayVisibility())
+
     /** Broadcast parsing is isolated; the service owns lifecycle state and policy. */
     private val screenReceiver = OverlayScreenStateReceiver(::setScreenOn)
 
