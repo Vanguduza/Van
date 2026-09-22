@@ -500,6 +500,14 @@ class VanGatewayClient(context: Context) {
         postJson("/v1/attention/${encodeSegment(itemId)}/ack", JSONObject())
     }
 
+    /** POST /v1/attention/{id}/snooze — durable owner attention suppression. */
+    suspend fun attentionSnooze(itemId: String, untilUnix: Long): JSONObject = withContext(Dispatchers.IO) {
+        postJson(
+            "/v1/attention/${encodeSegment(itemId)}/snooze",
+            JSONObject().put("until_unix", untilUnix),
+        )
+    }
+
     suspend fun browserStatus(): JSONObject = withContext(Dispatchers.IO) {
         getJson("/v1/browser/status")
     }
