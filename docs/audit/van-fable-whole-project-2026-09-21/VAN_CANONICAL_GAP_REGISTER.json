@@ -411,14 +411,14 @@
     "Misleading engine-selection code"
    ],
    "fix": "Either implement a sherpa-onnx OfflineTts path behind the existing manifest gate and derive visemes from its timestamps, or remove the SHERPA_ONNX preference and delete/relocate SpeechCueClock into production (speech_stream payload) with a device consumer.",
-   "external": "Local TTS model bundle (QUAL-VOI-01).",
-   "acceptance": "Selected engine is the engine that speaks (JVM test); viseme cues are timestamped, not frame-modulo.",
+   "external": "Checksum-pinned local voice bundle + voice/tts/runtime.json deployed and measured on S24 (QUAL-VOI-01/02).",
+   "acceptance": "Repository path implemented. Live promotion requires device evidence for offline synthesis, latency, barge-in and audio/viseme output.",
    "closure": {
-    "status": "FIXED_AND_EVIDENCED (device cue path) / DELIBERATELY_REMOVED_CANON_UPDATED (sherpa TTS preference)",
-    "commits": "17f4fba",
-    "evidence": "voice/speech_cues.py production SpeechCueClock on the speech_stream wire; voice/SpeechCueTiming.kt + TtsOutputManager cue track; SHERPA_ONNX TTS preference removed (no synthesizer exists; local TTS = QUAL-VOI-02)",
+    "status": "FIXED_AND_EVIDENCED (repository) / DEVICE+EXTERNAL_ARTEFACT qualification pending",
+    "commits": "17f4fba + PR #59 post-closure voice implementation",
+    "evidence": "Production SpeechCueClock + device cue consumer; SherpaLocalTtsRuntime constructs sherpa-onnx OfflineTts, owns AudioTrack PCM playback, measured RMS frames and barge-in; LocalTtsRouter selects sherpa only after asset + runtime self-test readiness; TtsOutputManager executes selected engine.",
     "date": "2026-09-22",
-    "head": "100d898"
+    "head": "PR-59"
    }
   },
   {
@@ -473,7 +473,7 @@
    "closure": {
     "status": "FIXED_AND_EVIDENCED",
     "commits": "b78cbf4",
-    "evidence": "AGENTS.md, skills, hermes README regenerated from the 48-tool shim; contract test pins REQUIRED_TOOLS",
+    "evidence": "Hermes docs and profile reconciled to expanded shim; PR #59 pins an exact 51-tool shim/registration/REQUIRED_TOOLS set.",
     "date": "2026-09-22",
     "head": "100d898"
    }
@@ -765,29 +765,32 @@
   },
   {
    "id": "GAP-F-026",
-   "title": "Temporal execution medium is routed but not built",
+   "title": "Temporal execution medium was routed but had no executor",
    "priority": "P4",
    "status": "STUB_OR_PLACEHOLDER",
    "reqs": [
     "REQ-AUT-04"
    ],
-   "subsystem": "gateway automation router",
+   "subsystem": "gateway automation router / van-trading-core durable runtime",
    "evidence": [
-    "backend/van_gateway/automation/router.py:41,127-136 ExecutionMedium.TEMPORAL decision with detail 'not yet built; use a native VAN state machine'; no temporalio import in the gateway (deploy/van-trading-core/requirements-vm.txt pins temporalio==1.33.0 for the VM only)"
+    "backend/van_gateway/automation/router.py selects TEMPORAL for critical_durable and reports configured/unconfigured state",
+    "backend/van_gateway/automation/temporal_bridge.py provides scoped start/status/signal bridge routes that fail closed when unconfigured",
+    "deploy/van-trading-core/temporal/workflows.py implements VanDurableWorkflow with durable wait/checkpoint/signal/terminal state",
+    "deploy/van-trading-core/temporal/runtime.py runs the Temporal worker/private bridge and records token-free checkpoint evidence",
+    "deploy/van-trading-core/systemd/vati-temporal.service plus bootstrap.sh/qualify.sh stage and qualify the runtime; temporalio==1.33.0 is pinned",
+    "hermes/mcp/owner_runtime_stdio.mjs exposes temporal_start/status/signal in the exact 51-tool allowlist"
    ],
-   "root_cause": "Stack-lock phase 11 (deliberate)",
-   "symptoms": [
-    "critical_durable automation falls back to native missions"
-   ],
-   "fix": "None now; keep the routing decision explicit in owner-visible output.",
-   "external": "Temporal adoption decision.",
-   "acceptance": "Documented as DELIBERATE_SCOPE in the component ledger (already).",
+   "root_cause": "Phase-11 stack lock had been treated as permission to leave the selected execution medium unimplemented.",
+   "symptoms": [],
+   "fix": "Implemented in repository. Temporal retains durable-coordination-only authority and cannot execute live orders.",
+   "external": "Real Temporal server/address plus live restart/recovery canary (QUAL-AUT-02).",
+   "acceptance": "Repository executor exists and fails closed without a host; live promotion requires start -> restart/recovery -> checkpoint -> terminal-result evidence.",
    "closure": {
-    "status": "DELIBERATELY_REMOVED_CANON_UPDATED",
-    "commits": "—",
-    "evidence": "Temporal stays stack-locked at adoption phase 11; automation/router.py states the decision in owner-visible detail; component ledger DELIBERATE_SCOPE; REQ-AUT-04 re-stated as DELIBERATE_SCOPE",
+    "status": "FIXED_AND_EVIDENCED (repository) / EXTERNAL live runtime pending",
+    "commits": "PR #59 post-closure Temporal implementation",
+    "evidence": "Gateway bridge/API, Temporal workflow+worker, hardened systemd service, bootstrap/qualifier and Hermes durable tools implemented; real Temporal server remains a live deployment gate.",
     "date": "2026-09-22",
-    "head": "100d898"
+    "head": "PR-59"
    }
   },
   {
@@ -848,5 +851,42 @@
   }
  ],
  "closure_head": "100d898",
- "closure_date": "2026-09-22"
+ "closure_date": "2026-09-22",
+ "post_closure_product_reconciliation": {
+  "date": "2026-09-22",
+  "pr": 59,
+  "note": "Additional owner-facing omissions discovered after the 28-gap Fable closure are now first-class and enforced by tools/audit/fable_anti_gap_check.py.",
+  "items": [
+   {
+    "id": "PROD-F-001",
+    "title": "Attention snooze had no backend route",
+    "status": "FIXED_AND_EVIDENCED",
+    "external": "device UX acceptance"
+   },
+   {
+    "id": "PROD-F-002",
+    "title": "Overlay keyboard/full-screen obstruction policy had no producer",
+    "status": "FIXED_AND_EVIDENCED",
+    "external": "Accessibility permission + S24 acceptance"
+   },
+   {
+    "id": "PROD-F-003",
+    "title": "Trading History lacked server-owned equity/R curves",
+    "status": "FIXED_AND_EVIDENCED",
+    "external": "live trading history data"
+   },
+   {
+    "id": "PROD-F-004",
+    "title": "Local sherpa TTS had no synthesis backend",
+    "status": "FIXED_AND_EVIDENCED_REPOSITORY",
+    "external": "voice bundle + S24 qualification"
+   },
+   {
+    "id": "PROD-F-005",
+    "title": "Temporal durable medium had no executor",
+    "status": "FIXED_AND_EVIDENCED_REPOSITORY",
+    "external": "Temporal server + recovery canary"
+   }
+  ]
+ }
 }
