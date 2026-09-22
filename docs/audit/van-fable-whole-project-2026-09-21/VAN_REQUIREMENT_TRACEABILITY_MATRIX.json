@@ -153,13 +153,13 @@
    "id": "REQ-HER-03",
    "requirement": "Hermes tool surface is a fixed allowlist mapped 1:1 to gateway routes",
    "source": "hermes/mcp/README.md",
-   "implementation": "owner_runtime_stdio.mjs:50-114; register_owner_runtime_mcp.sh",
+   "implementation": "owner_runtime_stdio.mjs + register_owner_runtime_mcp.sh (exact fixed allowlist)",
    "runtime_caller": "Hermes MCP client",
    "owner_surface": "-",
-   "tests": "tests/contracts/test_owner_runtime_mcp_contract (runs node)",
-   "runtime_evidence": "-",
-   "status": "INTEGRATED_AND_EVIDENCED (b78cbf4: 48-tool surface)",
-   "gap": "GAP-F-003",
+   "tests": "tests/contracts/test_owner_runtime_mcp_contract (node subprocess + exact shim/registration/set equality)",
+   "runtime_evidence": "current-head live 51-tool invocation pending QUAL-HERMES-02",
+   "status": "INTEGRATED_AND_EVIDENCED (PR #59: 51-tool surface) / live RUNTIME_CERTIFICATION_REQUIRED",
+   "gap": "QUAL-HERMES-02",
    "status_at_audit": "INTEGRATED_AND_EVIDENCED (surface too narrow: see GAP-F-001/003/006)"
   },
   {
@@ -228,13 +228,13 @@
    "id": "REQ-MEM-02",
    "requirement": "Owner can add memory from conversation; VAN develops continuity",
    "source": "Audit brief §7",
-   "implementation": "POST /v1/context/facts (app.py:1810); OwnerFactAuthor",
-   "runtime_caller": "NONE",
-   "owner_surface": "NONE",
-   "tests": "test_owner_context_is_real (route only)",
-   "runtime_evidence": "-",
-   "status": "INTEGRATED_AND_EVIDENCED (528366b: gateway-executed memory.remember)",
-   "gap": "GAP-F-001",
+   "implementation": "typed memory.remember / memory.decision.record executors -> OwnerFactAuthor; POST /v1/context/facts; inferred-candidate MCP path",
+   "runtime_caller": "TypedCommandResolver -> LocalTypedActionExecutor; Hermes INFERRED/MODEL_DERIVED candidate path",
+   "owner_surface": "Chat/Voice + Memory",
+   "tests": "test_local_typed_actions; test_owner_memory_has_a_producer; owner-fact readback verifier",
+   "runtime_evidence": "live Hermes dereference remains QUAL-HERMES-03",
+   "status": "INTEGRATED_AND_EVIDENCED (producer + consumer path) / live RUNTIME_CERTIFICATION_REQUIRED",
+   "gap": "QUAL-HERMES-03",
    "status_at_audit": "OPEN_GAP"
   },
   {
@@ -951,14 +951,14 @@
   {
    "id": "REQ-AUT-04",
    "requirement": "Durable execution (Temporal) for critical_durable",
-   "source": "stack lock phase 11",
-   "implementation": "automation/router.py:127-136 routing only",
-   "runtime_caller": "-",
-   "owner_surface": "-",
-   "tests": "-",
-   "runtime_evidence": "-",
-   "status": "DELIBERATE_SCOPE (Temporal stack-locked at phase 11; decision owner-visible)",
-   "gap": "GAP-F-026",
+   "source": "stack lock phase 11; post-Fable owner closure",
+   "implementation": "automation/router.py + automation/temporal_bridge.py; deploy/van-trading-core/temporal/{workflows.py,runtime.py}; vati-temporal.service",
+   "runtime_caller": "Hermes temporal_start/status/signal -> gateway bridge -> Temporal worker",
+   "owner_surface": "Missions/automation status via durable workflow state",
+   "tests": "test_automation_hot_warm_cold; test_owner_runtime_mcp_contract; qualify.sh live-service check",
+   "runtime_evidence": "real Temporal server/address not yet certified",
+   "status": "INTEGRATED_AND_EVIDENCED (repository) / EXTERNALLY_BLOCKED_REPOSITORY_COMPLETE (live runtime)",
+   "gap": "QUAL-AUT-02",
    "status_at_audit": "STUB_OR_PLACEHOLDER (deliberate)"
   },
   {
@@ -1487,5 +1487,11 @@
    "status_at_audit": "PARTIAL_IMPLEMENTATION"
   }
  ],
- "closure_head": "100d898"
+ "closure_head": "100d898",
+ "post_closure_reconciliation": {
+  "date": "2026-09-22",
+  "branch": "gpt/van-post-fable-product-closure-20260922",
+  "pr": 59,
+  "note": "Post-Fable product closure updates current implementation/caller/status fields without rewriting status_at_audit provenance."
+ }
 }
