@@ -79,6 +79,7 @@ from van_gateway.automation.dispatch import AutomationDispatcher
 from van_gateway.automation.grants import RunGrantService
 from van_gateway.automation.health import AutomationHealthApi
 from van_gateway.automation.registry import AutomationRegistry, HotWorkflowIndex
+from van_gateway.automation.temporal_bridge import TemporalAutomationApi
 from van_gateway.browser.agent_grant import AgentGrantService
 from van_gateway.browser.api import BrowserApi
 from van_gateway.browser.control_lease import ControlLeaseService
@@ -454,6 +455,10 @@ def create_app() -> FastAPI:
         standing=StandingAutomationAuthorityService(store, owner_runtime.authority),
         dispatcher=automation_dispatcher,
     )
+    # Critical durable coordination is a separate Temporal runtime, not an n8n workflow.
+    # It is repository-complete even when this host has not yet supplied the deployment
+    # bridge URL/token; in that state its routes fail closed and health says UNCONFIGURED.
+    temporal_automation = TemporalAutomationApi(settings)
     # P2-BROW-001 — one production browser worker spans the two admitted runtimes.
     # Deterministic tiers drive Browser Harness. Semantic tiers use Stagehand to propose one
     # observed action at a time, but BrowserSubagentRunner remains the authority boundary
@@ -847,6 +852,7 @@ def create_app() -> FastAPI:
     app.state.owner_runtime = owner_runtime
     app.state.automation_health = automation_health
     app.state.automation = automation
+    app.state.temporal_automation = temporal_automation
     app.state.automation_registry = automation_registry
     app.state.automation_hot_index = automation_hot_index
     app.state.automation_dispatcher = automation_dispatcher
@@ -867,6 +873,7 @@ def create_app() -> FastAPI:
     app.include_router(owner_runtime.router)
     app.include_router(automation_health.router)
     app.include_router(automation.router)
+    app.include_router(temporal_automation.router)
     app.include_router(browser.router)
     if browser_stream_grants is not None:
         # Rev 1.5 §§22.2, 22.3 — what Hermes is handed when it drives the owner's
