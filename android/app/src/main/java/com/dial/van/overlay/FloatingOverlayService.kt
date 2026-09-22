@@ -6,6 +6,7 @@ import android.content.Context
 import android.content.Intent
 import android.content.IntentFilter
 import android.graphics.PixelFormat
+import android.os.Build
 import android.os.IBinder
 import android.os.PowerManager
 import android.provider.Settings
@@ -74,6 +75,55 @@ class FloatingOverlayService : Service(), LifecycleOwner, SavedStateRegistryOwne
                 Intent.ACTION_SCREEN_OFF -> setScreenOn(false)
             }
         }
+    }
+
+    /**
+     * The producer for the two obstruction fields that used to be policy-only.
+     *
+     * The AccessibilityService broadcasts only window metadata. Keyboard obstruction moves
+     * VAN above the IME before pausing expensive animation; immersive full-screen pauses the
+     * animation without pretending the overlay is detached.
+     */
+    private val obstructionReceiver = object : BroadcastReceiver() {
+        override fun onReceive(context: Context?, intent: Intent?) {
+            if (intent?.action != VanObstructionAccessibilityService.ACTION_OBSTRUCTION_STATE) return
+            val keyboardVisible = intent.getBooleanExtra(
+                VanObstructionAccessibilityService.EXTRA_KEYBOARD_VISIBLE,
+                false,
+            )
+            val fullscreen = intent.getBooleanExtra(
+                VanObstructionAccessibilityService.EXTRA_FULLSCREEN_APP_ACTIVE,
+                false,
+            )
+            visibility = visibility.copy(
+                keyboardVisible = keyboardVisible,
+                fullscreenAppActive = fullscreen,
+            )
+            if (keyboardVisible) {
+                val keyboardTop = intent.getIntExtra(
+                    VanObstructionAccessibilityService.EXTRA_KEYBOARD_TOP_PX,
+                    Int.MAX_VALUE,
+                )
+                moveAboveKeyboard(keyboardTop)
+            }
+            applyVisibilityLifecycle()
+        }
+    }
+
+    private fun moveAboveKeyboard(keyboardTopPx: Int) {
+        if (
+            keyboardTopPx == Int.MAX_VALUE ||
+            !::overlayView.isInitialized ||
+            !::layoutParams.isInitialized ||
+            !::windowManager.isInitialized
+        ) return
+        val measuredHeight = overlayView.height.takeIf { it > 0 } ?: dp(180)
+        val safeY = (keyboardTopPx - measuredHeight - dp(12)).coerceAtLeast(0)
+        if (layoutParams.y <= safeY) return
+        layoutParams.y = safeY
+        uiState = uiState.copy(yPx = safeY)
+        runCatching { windowManager.updateViewLayout(overlayView, layoutParams) }
+        persistState()
     }
 
     private fun setScreenOn(on: Boolean) {
@@ -155,6 +205,15 @@ class FloatingOverlayService : Service(), LifecycleOwner, SavedStateRegistryOwne
                 addAction(Intent.ACTION_USER_PRESENT)
             },
         )
+        val obstructionFilter = IntentFilter(
+            VanObstructionAccessibilityService.ACTION_OBSTRUCTION_STATE,
+        )
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.TIRAMISU) {
+            registerReceiver(obstructionReceiver, obstructionFilter, RECEIVER_NOT_EXPORTED)
+        } else {
+            @Suppress("DEPRECATION")
+            registerReceiver(obstructionReceiver, obstructionFilter)
+        }
         applyVisibilityLifecycle()
         stateStore.markRunning(true)
     }
@@ -170,6 +229,7 @@ class FloatingOverlayService : Service(), LifecycleOwner, SavedStateRegistryOwne
     override fun onDestroy() {
         visibility = visibility.copy(destroying = true, attached = false)
         runCatching { unregisterReceiver(screenReceiver) }
+        runCatching { unregisterReceiver(obstructionReceiver) }
         stateStore.markRunning(false)
         persistState(running = false)
         hideDismissTarget()
