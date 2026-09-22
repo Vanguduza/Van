@@ -34,7 +34,11 @@ class ChartGeometryTest {
         assertEquals(listOf("ENTRY", "EXIT"), markers.map { it.kind })
         assertTrue(markers[0].x < markers[1].x)
         assertTrue(scene.ops.filterIsInstance<ChartOp.GridLine>().size in 3..8)
-        assertTrue(scene.ops.filterIsInstance<ChartOp.TimeTick>().size in 4..5)
+        // Time ticks snap to human boundaries through ChartAxes.timeTicks (a 39-minute span
+        // steps at 15 minutes → 2 ticks), not to "every Nth bar"; they must still be ordered.
+        val ticks = scene.ops.filterIsInstance<ChartOp.TimeTick>()
+        assertTrue("ticks: ${'$'}{ticks.size}", ticks.size in 2..5)
+        assertTrue(ticks.zipWithNext().all { (a, b) -> a.x < b.x })
         // an off-scale level widens the price range instead of being clipped away
         val wide = ChartGeometry.build(bars(40), layout, listOf(ChartLevel(LevelKind.STOP, 1.0)))
         assertTrue(wide.priceMin < 1.0)
@@ -46,7 +50,9 @@ class ChartGeometryTest {
         val flat = ChartGeometry.build(List(5) { BarPoint(it.toLong(), 1.0, 1.0, 1.0, 1.0) }, layout)
         assertEquals(5, flat.candles.size)
         flat.candles.forEach { assertTrue(it.yHigh.isFinite() && it.yLow.isFinite()) }
-        assertEquals(0.02, ChartGeometry.gridStep(0.1), 1e-12); assertEquals(500.0, ChartGeometry.gridStep(2300.0), 1e-9); assertEquals(1.0, ChartGeometry.gridStep(0.0), 1e-9)
+        // gridStep delegates to ChartAxes.ticks (Heckbert "nice numbers": the range is niced
+        // first, so 2300 → 5000 / 4 → 1000), not the old 1/2/5 rounding of range/lines (500).
+        assertEquals(0.02, ChartGeometry.gridStep(0.1), 1e-12); assertEquals(1000.0, ChartGeometry.gridStep(2300.0), 1e-9); assertEquals(1.0, ChartGeometry.gridStep(0.0), 1e-9)
         val spark = ChartGeometry.sparkline(listOf(1.0, 2.0, 1.5), 100f, 50f)
         assertEquals(3, spark.size); assertEquals(0f, spark[1].second, 1e-6f); assertEquals(50f, spark[0].second, 1e-6f)
         assertEquals(0, ChartGeometry.sparkline(listOf(1.0), 10f, 10f).size)
