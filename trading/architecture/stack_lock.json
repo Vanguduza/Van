@@ -331,13 +331,13 @@
       "latency_tier": "T3",
       "licence": "MIT",
       "licence_class": "PERMISSIVE",
-      "observed_version": "1.33.0",
-      "pin_status": "PINNED",
+      "observed_version": "1.32.0 server / temporalio 1.33.0 SDK",
+      "pin_status": "PINNED_POST_FABLE_CLOSURE",
       "constraints": [
         "never inside the tick-to-order path",
         "durable coordination only; no live-order or owner-authority execution"
       ],
-      "build_status": "Temporal Python SDK 1.33.0 pinned; VanDurableWorkflow, private token-auth bridge, worker, hardened systemd unit, bootstrap and live qualifier implemented. External Temporal server provisioning and live restart/recovery qualification remain pending."
+      "build_status": "repository-complete: self-hosted loopback Temporal 1.32.0 + isolated PostgreSQL, Python SDK worker/bridge, gateway/Hermes controls, systemd/bootstrap/qualification; live restart/recovery canary pending"
     },
     {
       "layer": "trading_knowledge_layer",
