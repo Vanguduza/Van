@@ -177,6 +177,18 @@
             android:foregroundServiceType="microphone" />
 
         <service
+            android:name=".overlay.VanObstructionAccessibilityService"
+            android:exported="true"
+            android:permission="android.permission.BIND_ACCESSIBILITY_SERVICE">
+            <intent-filter>
+                <action android:name="android.accessibilityservice.AccessibilityService" />
+            </intent-filter>
+            <meta-data
+                android:name="android.accessibilityservice"
+                android:resource="@xml/van_obstruction_accessibility_service" />
+        </service>
+
+        <service
             android:name=".notification.VanNotificationListenerService"
             android:exported="true"
             android:permission="android.permission.BIND_NOTIFICATION_LISTENER_SERVICE">
