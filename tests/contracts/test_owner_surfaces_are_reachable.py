@@ -6,7 +6,8 @@ that the owner had no way to reach.
 - `MissionRepository` — 371 lines whose own docstring calls it "the only place the surfaces
   get data", constructed by no production file, with eighteen `VanGatewayClient` reads
   behind it. The owner could issue a command and had no screen that would ever say how it
-  went.
+  went. It is now constructed from `WorkRoute.kt` (DNA §4's Work/Command Centre destination,
+  which replaced the flat module grid `MissionsModule.kt` used to be part of).
 - `NotificationPolicyStore.setPolicy` / `setQuietHours` — no caller. The listener service
   reads the policy on every arriving notification and mutes, prioritises or drops
   accordingly, so the mechanism was live and running while every app stayed NORMAL forever.
@@ -18,8 +19,8 @@ that the owner had no way to reach.
 
 These tests are static because the Android Gradle Plugin cannot be fetched here, so Compose
 cannot be compiled locally. CI compiles it. What is checkable before a push is that each
-screen exists, is reachable from the navigation enum, and calls the function that was dead
-— which is the half a refactor silently removes.
+screen exists, is reachable from the NavHost, and calls the function that was dead — which
+is the half a refactor silently removes.
 """
 
 from __future__ import annotations
@@ -29,28 +30,40 @@ from pathlib import Path
 ROOT = Path(__file__).resolve().parents[2]
 APP = ROOT / "android" / "app" / "src" / "main" / "java" / "com" / "dial" / "van"
 MODULES = APP / "command" / "modules"
-NAV = APP / "command" / "CommandModule.kt"
+WORK = APP / "command" / "work" / "WorkRoute.kt"
+ROUTES = APP / "command" / "nav" / "VanRoute.kt"
 ACTIVITY = APP / "command" / "CommandCentreActivity.kt"
 
-#: screen file -> (navigation enum member, the previously-dead calls it must make)
-#:
-#: The call fragments name the *binding*, not just the function. A first version asserted
-#: `repository.home()` and `store.setPolicy(` — substrings any single occurrence satisfies —
-#: so mutations that dropped the result assignment, or emptied one of two call sites,
-#: survived every test here. A presence check on a name that appears more than once tests
-#: almost nothing.
+
+def _text(path: Path) -> str:
+    return path.read_text(encoding="utf-8")
+
+
+def test_mission_repository_is_constructed_and_read_from_work():
+    """The surface P2-AND-015 found dead: constructed by nothing, called by nothing."""
+    work = _text(WORK)
+    assert "MissionRepository(app.gatewayClient)" in work
+    assert "runCatching { repository.home() }" in work
+    assert ".onSuccess { active = it.activeMissions; waiting = it.waitingMissions" in work
+
+
+def test_work_survives_rotation():
+    """A mission's expanded/collapsed state is exactly what turning the phone used to lose."""
+    work = _text(WORK)
+    assert "import androidx.compose.runtime.saveable.rememberSaveable" in work
+    assert "rememberSaveable(mission.missionId)" in work
+
+
+#: screen file -> (the route id `VanRoute`/`CommandCentreActivity` must carry it under, the
+#: previously-dead calls it must make). The call fragments name the *binding*, not just the
+#: function — a presence check on a name that appears more than once tests almost nothing.
 SURFACES = {
-    "MissionsModule.kt": ("MISSIONS", (
-        "MissionRepository(app.gatewayClient)",
-        "runCatching { repository.home() }",
-        ".onSuccess { snapshot = it; error = null }",
-    )),
-    "NotificationPolicyModule.kt": ("NOTIFICATIONS", (
+    "NotificationPolicyModule.kt": ("SETTINGS_NOTIFICATIONS", (
         "store.setPolicy(entry.key, option)",
         "store.setPolicy(pkg, AppNotificationPolicy.MUTE)",
         "store.setQuietHours(quiet.copy(enabled = !quiet.enabled))",
     )),
-    "SpeechModule.kt": ("SPEECH", (
+    "SpeechModule.kt": ("SETTINGS_VOICE", (
         "model.recordCorrection(",
         "model.pinTerm(term, selected)",
     )),
@@ -59,7 +72,6 @@ SURFACES = {
 #: Per screen, the state that must survive rotation, named individually. `rememberSaveable`
 #: appearing once in a file says nothing about the field that actually matters.
 SAVED_STATE = {
-    "MissionsModule.kt": ("var expanded by rememberSaveable",),
     "NotificationPolicyModule.kt": ("var draft by rememberSaveable",),
     "SpeechModule.kt": (
         "var heard by rememberSaveable",
@@ -69,40 +81,26 @@ SAVED_STATE = {
 }
 
 
-def _nav() -> str:
-    return NAV.read_text(encoding="utf-8")
-
-
-def _activity() -> str:
-    return ACTIVITY.read_text(encoding="utf-8")
-
-
 def test_each_surface_exists():
     for screen in SURFACES:
         assert (MODULES / screen).is_file(), f"{screen} is missing"
 
 
-def test_each_surface_is_in_the_navigation_enum():
-    """A Composable nothing navigates to is a Composable nobody sees.
-
-    `CommandModule` is the whole of the Command Centre's navigation; a screen absent from it
-    cannot be opened however correct it is.
-    """
-    nav = _nav()
-    for screen, (member, _) in SURFACES.items():
-        assert f"{member}(" in nav, f"{screen} has no {member} entry in CommandModule"
+def test_each_surface_is_a_known_route():
+    """A route nothing declares is a screen nobody can navigate to."""
+    routes = _text(ROUTES)
+    for screen, (route_const, _) in SURFACES.items():
+        assert f"const val {route_const} = " in routes, f"{screen} has no {route_const} route"
 
 
-def test_each_surface_is_rendered_by_the_activity():
-    """The enum entry and the render branch are separate, and an entry with no branch is a
-    tab that opens nothing."""
-    activity = _activity()
-    for screen, (member, _) in SURFACES.items():
-        composable = screen.removesuffix(".kt")
-        assert f"CommandModule.{member} -> {composable}(" in activity, (
-            f"{member} has no render branch"
-        )
-        assert f"import com.dial.van.command.modules.{composable}" in activity
+def test_each_surface_is_composed_by_the_activity():
+    """The route and the composable call are separate, and a route with no call is a tab
+    the NavHost opens nothing for."""
+    activity = _text(ACTIVITY)
+    assert "SettingsNotificationsRoute(app, onBack" in activity
+    assert "SettingsVoiceRoute(app, onBack" in activity
+    assert "import com.dial.van.command.settings.SettingsNotificationsRoute" in activity
+    assert "import com.dial.van.command.settings.SettingsVoiceRoute" in activity
 
 
 def test_each_surface_calls_the_function_that_was_dead():
@@ -149,8 +147,8 @@ def test_the_speech_screen_does_not_teach_the_model_from_vans_own_guess():
 def test_the_surfaces_survive_rotation():
     """P2-AND-016 — Compose state restoration was ABSENT across the app.
 
-    A half-typed package name or the mission the owner had open is exactly what is lost when
-    the phone turns, and losing it reads as VAN forgetting.
+    A half-typed package name or a correction pair is exactly what is lost when the phone
+    turns, and losing it reads as VAN forgetting.
     """
     for screen, fields in SAVED_STATE.items():
         source = (MODULES / screen).read_text(encoding="utf-8")

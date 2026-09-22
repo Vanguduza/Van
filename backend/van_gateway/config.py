@@ -1,9 +1,23 @@
 from __future__ import annotations
 
 from functools import lru_cache
+from urllib.parse import urlsplit
 
-from pydantic import AliasChoices, Field
+from pydantic import AliasChoices, Field, model_validator
 from pydantic_settings import BaseSettings, SettingsConfigDict
+
+#: GAP-F-021 — hostnames that mean "this process, this machine only". A URL pointing at
+#: one of these is the honest default for a dev box and a silent misconfiguration on a
+#: release host: nothing else on the network can reach it, including the owner's phone.
+_LOOPBACK_HOSTS = frozenset({"127.0.0.1", "localhost", "::1", "0.0.0.0"})
+
+
+def _is_loopback_url(value: str) -> bool:
+    try:
+        host = urlsplit(value).hostname
+    except ValueError:
+        return False
+    return (host or "").lower() in _LOOPBACK_HOSTS
 
 
 class Settings(BaseSettings):
@@ -48,7 +62,15 @@ class Settings(BaseSettings):
     van_commander_ca_file: str = Field(
         "", validation_alias=AliasChoices("VAN_COMMANDER_CA_FILE", "VAN_VAN_COMMANDER_CA_FILE")
     )
-    van_public_base_url: str = "http://127.0.0.1:8787"
+    #: Same double-prefix trap as the three fields above: `van_public_base_url` plus
+    #: `env_prefix="VAN_"` would otherwise only accept `VAN_VAN_PUBLIC_BASE_URL`. Additive
+    #: fix (GAP-F-021) — `VAN_VAN_PUBLIC_BASE_URL` keeps working for anything already
+    #: setting it; `VAN_PUBLIC_BASE_URL` is accepted too, which is what an operator
+    #: reading `assert_production_safe`'s refusal message would actually try to set.
+    van_public_base_url: str = Field(
+        "http://127.0.0.1:8787",
+        validation_alias=AliasChoices("VAN_PUBLIC_BASE_URL", "VAN_VAN_PUBLIC_BASE_URL"),
+    )
     vati_deriv_app_id: str = "1089"
 
     owner_intent_max_age_seconds: int = 24 * 60 * 60
@@ -227,6 +249,76 @@ class Settings(BaseSettings):
     #: publishes none, and the device keeps whatever it was provisioned with.
     connectivity_signing_key_file: str = ""
     connectivity_signing_kid: str = "connectivity-1"
+
+    # ---- GAP-F-018/021: release-time determinism and hardening ------------------
+    #: What kind of host this process believes it is running on. Not read anywhere else
+    #: in the gateway — its only consumer is `assert_production_safe` below — so setting
+    #: it is exactly the act of asking for the stricter checks a release host must pass.
+    #:
+    #: Explicit alias for the same reason `van_commander_url` above needs one: the field
+    #: already starts with `van_`, so `env_prefix="VAN_"` would otherwise expect the
+    #: environment spelling `VAN_VAN_ENV` rather than the `VAN_ENV` a release host sets.
+    van_env: str = Field("development", validation_alias=AliasChoices("VAN_ENV"))
+    #: The escape hatch for a production deployment that genuinely does talk to itself
+    #: only (Hermes and the gateway colocated with nothing external reaching either
+    #: port). Off by default: `assert_production_safe` must refuse a loopback default it
+    #: was never actually set for, not trust one because the host happens to be in
+    #: production. Same double-prefix reasoning as `van_env` above.
+    van_allow_loopback_in_production: bool = Field(
+        False, validation_alias=AliasChoices("VAN_ALLOW_LOOPBACK_IN_PRODUCTION")
+    )
+
+    @model_validator(mode="after")
+    def _check_production_safety(self) -> "Settings":
+        """Runs on every construction, including every `Settings()` a test builds.
+
+        That is deliberate: `assert_production_safe` only ever does anything when
+        `van_env == "production"`, and nothing in this repository sets that today, so
+        the validator is a no-op for every existing caller. It exists here rather than
+        as a manual call some deployment path could forget, because a check a release
+        host has to remember to run is a check a release host will eventually skip.
+        """
+        self.assert_production_safe()
+        return self
+
+    def assert_production_safe(self) -> None:
+        """GAP-F-018/021 — refuse to construct a production `Settings` that still
+        carries a migration-era or localhost-only default.
+
+        Two refusals, both unconditional except where noted:
+
+        * `require_device_binding=False` in production accepts token-only mutations
+          from a device that was never proven to be the owner's (§0D.3). There is no
+          override — a production host that needs this off is not ready to be a
+          production host.
+        * `hermes_base_url` / `van_public_base_url` left at their loopback defaults in
+          production means the gateway is silently talking to itself rather than to the
+          Hermes runtime or the tunnel it was actually deployed behind. The override,
+          `VAN_ALLOW_LOOPBACK_IN_PRODUCTION=1`, exists for the one legitimate case (both
+          colocated on one host with nothing external reaching either port) and has to
+          be set explicitly rather than assumed from the environment being production.
+        """
+        if self.van_env.strip().lower() != "production":
+            return
+        if not self.require_device_binding:
+            raise ValueError(
+                "GAP-F-018: VAN_REQUIRE_DEVICE_BINDING must be true when "
+                "VAN_ENV=production. A production gateway must not accept "
+                "token-only mutations from a device that was never bound to the "
+                "owner (Section 0D.3)."
+            )
+        if not self.van_allow_loopback_in_production:
+            for env_name, value in (
+                ("VAN_HERMES_BASE_URL", self.hermes_base_url),
+                ("VAN_PUBLIC_BASE_URL", self.van_public_base_url),
+            ):
+                if _is_loopback_url(value):
+                    raise ValueError(
+                        f"GAP-F-021: {env_name}={value!r} is a loopback default and "
+                        "VAN_ENV=production. Set an explicit non-loopback value for "
+                        "this host, or set VAN_ALLOW_LOOPBACK_IN_PRODUCTION=1 if this "
+                        "deployment genuinely talks to itself only."
+                    )
 
 
 @lru_cache

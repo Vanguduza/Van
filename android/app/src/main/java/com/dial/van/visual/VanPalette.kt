@@ -39,6 +39,30 @@ data class VanScheme(
     val outline: Int,
     val error: Int,
     val onError: Int,
+    // --- Additive: com.dial.van.design.VanColorTokens (docs/design/VAN_PRODUCT_DESIGN_DNA.md
+    // §2). These extend the palette for the design-system layer without touching a single
+    // field above — every existing construction site and every existing test is untouched.
+    /**
+     * DNA §2 `text.tertiary` — de-emphasised text, one step past [onSurfaceVariant]. Verified
+     * at AA_NORMAL against both [background] and [surface] in `VanDesignRolesTest`, same as
+     * every other text role: DNA's "minimum text size 12sp anywhere" does not buy tertiary
+     * text a lower contrast floor.
+     */
+    val textTertiary: Int,
+    /**
+     * DNA §2 status roles, keyed by [com.dial.van.design.StatusSemantics] role name
+     * (`monitor`, `engaged`, `cognition`, `hypothesis`, `eventRisk`, `favourable`,
+     * `deteriorating`, `critical`, `disabled`). `accent.cyan`/`accent.cyanSoft`/
+     * `accent.blueWhite` are `engaged`/`monitor`/`cognition` respectively — DNA names them
+     * twice (once as a VAN accent, once as a status colour) because they *are* the same
+     * colour used two ways, not two colours that happen to match.
+     *
+     * The dark scheme keeps DNA's literal vivid hex values (a dark field is forgiving of
+     * saturated colour). The light scheme deepens every one of them, the same move
+     * [LIGHT]'s own doc comment describes for `primary`: a vivid accent that is legible on
+     * navy is frequently under 2:1 on white.
+     */
+    val statusRoles: Map<String, Int>,
 ) {
     /** Every foreground/background pair a screen will actually put text on. */
     fun textPairs(): List<VanColorRole> = listOf(
@@ -48,6 +72,19 @@ data class VanScheme(
         VanColorRole("onPrimary", onPrimary, primary),
         VanColorRole("onError", onError, error),
     )
+
+    /**
+     * [textTertiary] and every [statusRoles] colour, each checked against both [background]
+     * and [surface] — the two fields every screen actually paints text or a status chip on.
+     */
+    fun designRolePairs(): List<VanColorRole> = buildList {
+        add(VanColorRole("textTertiary/background", textTertiary, background))
+        add(VanColorRole("textTertiary/surface", textTertiary, surface))
+        for ((role, color) in statusRoles) {
+            add(VanColorRole("status.$role/background", color, background))
+            add(VanColorRole("status.$role/surface", color, surface))
+        }
+    }
 }
 
 object VanPalette {
@@ -76,6 +113,21 @@ object VanPalette {
         outline = 0xFF587B8A.toInt(),
         error = VanGlassTokens.ACCENT_RED,
         onError = 0xFF2A0707.toInt(),
+        textTertiary = 0xFF7F97A2.toInt(),
+        statusRoles = mapOf(
+            "monitor" to 0xFF4DD0E1.toInt(),
+            "engaged" to 0xFF00E5FF.toInt(),
+            "cognition" to 0xFFCFEFFF.toInt(),
+            "hypothesis" to 0xFFB388FF.toInt(),
+            "eventRisk" to 0xFFFFB300.toInt(),
+            "favourable" to 0xFF64FFDA.toInt(),
+            "deteriorating" to 0xFFFF6E40.toInt(),
+            // DNA's literal #FF1744 clears AA against `background` (4.94:1) but not quite
+            // `surface` (4.49:1, just under 4.5). Lightened by 2% toward white to clear both
+            // — a shift no eye will notice and the one this whole file exists to catch.
+            "critical" to 0xFFFF1B47.toInt(),
+            "disabled" to 0xFF78909C.toInt(),
+        ),
     )
 
     /**
@@ -98,6 +150,18 @@ object VanPalette {
         outline = 0xFF5C7682.toInt(),
         error = 0xFFB3261E.toInt(),
         onError = 0xFFFFFFFF.toInt(),
+        textTertiary = 0xFF4A6874.toInt(),
+        statusRoles = mapOf(
+            "monitor" to 0xFF2E7C87.toInt(),
+            "engaged" to 0xFF007B89.toInt(),
+            "cognition" to 0xFF63727A.toInt(),
+            "hypothesis" to 0xFF8061B7.toInt(),
+            "eventRisk" to 0xFF936700.toInt(),
+            "favourable" to 0xFF307A68.toInt(),
+            "deteriorating" to 0xFFBC512F.toInt(),
+            "critical" to 0xFFE0143B.toInt(),
+            "disabled" to 0xFF60737C.toInt(),
+        ),
     )
 
     fun scheme(dark: Boolean): VanScheme = if (dark) DARK else LIGHT

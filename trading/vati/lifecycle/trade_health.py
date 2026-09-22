@@ -167,10 +167,25 @@ class PositionHealthInputs:
 
     @property
     def stop_is_wider_than_approved(self) -> bool:
-        """INV-RISK-001 has no stop widening, so this is a defect, not a state."""
+        """INV-RISK-001 has no stop widening, so this is a defect, not a state.
+
+        Measured on the *losing* side of entry only. The previous form compared
+        `abs(entry - current_stop)` against the risk distance, which made a stop
+        trailed past break-even — the single most common protective move there
+        is, and one `ProtectionManager` performs itself — look identical to a
+        stop that had been widened, so a healthy, well-protected winner was
+        reported FAILING and `preservation.py` acted on it. A stop at or beyond
+        break-even has no risk left to widen, and that is now what this says.
+        """
         if self.current_stop is None:
             return False
-        return abs(self.entry_price - self.current_stop) > self.risk_distance
+        if self.direction is Direction.LONG:
+            if self.current_stop >= self.entry_price:
+                return False
+            return (self.entry_price - self.current_stop) > self.risk_distance
+        if self.current_stop <= self.entry_price:
+            return False
+        return (self.current_stop - self.entry_price) > self.risk_distance
 
 
 @dataclass(frozen=True)

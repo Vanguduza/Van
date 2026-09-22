@@ -39,4 +39,45 @@ object EdgeDocking {
         y + avatarSize >= screenH -> DockEdge.BOTTOM
         else -> DockEdge.NONE
     }
+
+    /**
+     * Item 3 — velocity-based fling-to-edge. [snap] alone only docks a release that already
+     * landed within [DOCK_THRESHOLD_PX] of an edge; a fast flick released mid-screen has no
+     * position-only reason to dock anywhere, and stranding VAN wherever the finger happened
+     * to lift reads as the overlay fighting the gesture rather than continuing it (the same
+     * complaint [VanMotionMap.flingDockDurationMs] exists to answer for how *fast* the dock
+     * animates, this answers for *whether* one happens at all).
+     *
+     * Falls straight through to [snap] whenever the release is already close enough to an
+     * edge to dock on position alone, or the release carries no clearly-directional speed —
+     * a slow drag that happens to end mid-screen must stay exactly where the owner left it.
+     * Direction is decided by whichever axis' velocity dominates, which keeps a mostly-
+     * horizontal flick from being read as a vertical one on a few stray pixels of jitter.
+     */
+    fun flingSnap(
+        x: Int,
+        y: Int,
+        velocityXPxPerMs: Float,
+        velocityYPxPerMs: Float,
+        avatarSize: Int,
+        screenW: Int,
+        screenH: Int,
+    ): Pair<Int, Int> {
+        val (snappedX, snappedY) = snap(x, y, avatarSize, screenW, screenH)
+        if (detectEdge(snappedX, snappedY, avatarSize, screenW, screenH) != DockEdge.NONE) {
+            return snappedX to snappedY
+        }
+        val speed = kotlin.math.hypot(velocityXPxPerMs, velocityYPxPerMs)
+        if (speed < FLING_VELOCITY_THRESHOLD_PX_PER_MS) return snappedX to snappedY
+        val maxX = (screenW - avatarSize).coerceAtLeast(0)
+        val maxY = (screenH - avatarSize).coerceAtLeast(0)
+        return if (kotlin.math.abs(velocityXPxPerMs) >= kotlin.math.abs(velocityYPxPerMs)) {
+            (if (velocityXPxPerMs < 0f) 0 else maxX) to snappedY.coerceIn(0, maxY)
+        } else {
+            snappedX.coerceIn(0, maxX) to (if (velocityYPxPerMs < 0f) 0 else maxY)
+        }
+    }
+
+    /** Same flick threshold [VanMotionMap.flingDockDurationMs] uses for how fast to dock. */
+    private const val FLING_VELOCITY_THRESHOLD_PX_PER_MS = 1.3f
 }

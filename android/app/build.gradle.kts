@@ -281,6 +281,13 @@ dependencies {
 
     testImplementation("junit:junit:4.13.2")
     testImplementation("org.jetbrains.kotlin:kotlin-test-junit:1.9.24")
+
+    // GAP-F-023 — instrumentation (src/androidTest): the owner surface and Floating VAN
+    // on a real runtime. Run by CI's `android-instrumentation` job on an emulator.
+    androidTestImplementation("androidx.test.ext:junit:1.2.1")
+    androidTestImplementation("androidx.test:runner:1.6.1")
+    androidTestImplementation("androidx.test:core-ktx:1.6.1")
+    androidTestImplementation("androidx.compose.ui:ui-test-junit4")
     testImplementation("org.jetbrains.kotlinx:kotlinx-serialization-json:1.6.3")
     // The mockable android.jar stubs org.json and every call throws
     // "Method ... not mocked", so any local unit test over a parsed gateway

@@ -14,6 +14,7 @@ from dataclasses import asdict, dataclass, field
 from decimal import Decimal
 from typing import Mapping, Optional, Sequence
 
+from vati.core.canonical import canonical_hash
 from vati.core.events import EventKind, make_event
 from vati.execution.base import ExecutionReceipt, VenueAdapter
 from vati.execution.protection import ProtectionManager
@@ -21,20 +22,30 @@ from vati.execution.review import Outcome, review_trade
 from vati.execution.router import ExecutionRouter
 from vati.execution.tca import compute_tca
 from vati.learning.hooks import LearningHooks, to_payload
-from vati.cognition.attribution import AttributionEngine, TradeFacts
 from vati.lifecycle.envelope import EnvelopeCalculator
 from vati.lifecycle.expansion import ProfitExpansionEngine
 from vati.lifecycle.family import FamilyMember, FamilyRegistry, MemberRole
 from vati.lifecycle.preservation import ActionKind, PreservationEngine
-from vati.lifecycle.scale_policy import ScalePolicyRegistry
+from vati.lifecycle.scale_policy import (
+    Adjustment, AdjustmentPolicyRegistry, PositionAdjustmentEngine, ScalePolicyRegistry,
+)
+from vati.lifecycle.thesis import (
+    ThesisEngine, ThesisInputs, ThesisState, thesis_from_capsule,
+)
 from vati.lifecycle.trade_health import PositionHealthInputs, TradeHealthEngine
+from vati.cognition.attribution import (
+    AttributionEngine, DecisionQualityInputs, DecisionQualityLedger, TradeFacts,
+)
+from vati.learning.episodes import LessonStore, lesson_from_verdict
 from vati.market_data.bars import Bar
 from vati.observability import metrics
 from vati.risk.contracts import Direction, LossModel, StrategyState, SymbolContract, TradeIntent
+from vati.risk.serde import intent_to_dict, snapshot_to_dict
 from vati.arbiter.strategy_arbiter import ACTIVE_STATES
 from vati.vtil import AdmissionLedger
 
 ZERO = Decimal("0")
+ONE = Decimal("1")
 STRATEGY_LEARNING_OUTCOMES = frozenset({
     Outcome.GOOD_WIN, Outcome.GOOD_LOSS, Outcome.BAD_WIN, Outcome.BAD_LOSS,
 })
@@ -62,6 +73,32 @@ class AccountTradeLifecycle:
     expansion: ProfitExpansionEngine = field(init=False)
     scale_policies: ScalePolicyRegistry = field(init=False)
     attribution: AttributionEngine = field(init=False)
+    #: GAP-F-003. Active-trade intelligence. All optional so an existing
+    #: deployment keeps its behaviour: with no authority, mandate or news
+    #: source the thesis is still sealed and assessed (it is derived from facts
+    #: the trade already carries), and size-changing adjustments are refused
+    #: rather than attempted without a gate.
+    authority: Optional[object] = None
+    mandate: Optional[object] = None
+    news: Optional[object] = None
+    #: Builds and submits the delta order for an approved ADD. Injected by the
+    #: runtime that owns the execution policy/route plumbing, so this module
+    #: never assembles a second execution path. `ExecutionRouter.execute`
+    #: remains the only caller of `adapter.submit` (INV-EXEC-001).
+    execute_add_fn: Optional[object] = None
+    #: (symbol) -> the current MarketState, for regime/structure/volatility.
+    market_state_fn: Optional[object] = None
+    #: (symbol) -> correlation multiplier in [0, 1] from risk/dependency.
+    correlation_fn: Optional[object] = None
+    #: (symbol) -> a RiskSnapshot for the delta intent.
+    snapshot_fn: Optional[object] = None
+    thesis: ThesisEngine = field(init=False)
+    adjustments: PositionAdjustmentEngine = field(init=False)
+    adjustment_policies: AdjustmentPolicyRegistry = field(init=False)
+    decision_quality: DecisionQualityLedger = field(init=False)
+    lessons: LessonStore = field(init=False)
+    proposals: list = field(default_factory=list)
+    _delta_intent_cache: dict = field(default_factory=dict)
     _family_halts: dict[str, tuple[str, ...]] = field(default_factory=dict)
 
     def __post_init__(self) -> None:
@@ -72,6 +109,12 @@ class AccountTradeLifecycle:
         self.expansion = ProfitExpansionEngine(ledger=self.ledger)
         self.scale_policies = ScalePolicyRegistry()
         self.attribution = AttributionEngine(ledger=self.ledger)
+        self.thesis = ThesisEngine(ledger=self.ledger)
+        self.adjustment_policies = AdjustmentPolicyRegistry()
+        self.adjustments = PositionAdjustmentEngine(
+            ledger=self.ledger, policies=self.adjustment_policies)
+        self.decision_quality = DecisionQualityLedger(ledger=self.ledger)
+        self.lessons = LessonStore(ledger=self.ledger)
 
     @property
     def preservation_blocks_new_risk(self) -> bool:
@@ -492,6 +535,9 @@ class AccountTradeLifecycle:
         state,
         modelled_cost_pct: Decimal,
         software_stop: bool,
+        decision=None,
+        targets: tuple = (),
+        expected_horizon_ms: int = 0,
     ) -> None:
         """Record the router result and feed filled entries into TCA/learning."""
         if receipt.status not in ("FILLED", "PARTIAL", "ACCEPTED", "OWNER_EXECUTED"):
@@ -541,6 +587,11 @@ class AccountTradeLifecycle:
                 now_ms=receipt.received_time_unix_ms,
             )
 
+        self._seal_thesis(
+            intent=intent, receipt=receipt, state=state, decision=decision,
+            targets=tuple(targets), expected_horizon_ms=expected_horizon_ms,
+            entry_price=entry_price)
+
         contract = self.contracts[intent.symbol.upper()]
         value_per_unit = (
             contract.value_per_price_unit_per_lot
@@ -582,6 +633,429 @@ class AccountTradeLifecycle:
             if engine is not None:
                 engine.m.broker_liquidity[intent.symbol] = self.learning.broker_liquidity(
                     intent.symbol)
+
+    # ------------------------------------------------- active-trade intelligence
+    def _seal_thesis(self, *, intent: TradeIntent, receipt: ExecutionReceipt, state,
+                     decision, targets: tuple, expected_horizon_ms: int,
+                     entry_price: Decimal) -> None:
+        """Write down why this position exists, before anything can rewrite it.
+
+        GAP-F-003. Without this the position carries a price and a stop and no
+        claim, so no later cycle can ask whether the reason is still there and
+        the owner's "why is my trade moving" has no answer but the price.
+
+        The thesis is sealed at approval and never edited (INV-REPLAY-001). It
+        also carries `original_approved_risk_pct`, which is the ceiling every
+        later ADD is measured against — recorded here, at the only moment it is
+        unambiguous.
+        """
+        if intent.stop is None:
+            # No stop, no risk distance, no R unit, no falsifiable claim. Say
+            # so by not sealing one rather than sealing an unfalsifiable one;
+            # the decision-quality axis then reads THESIS_ABSENT, which is the
+            # honest verdict.
+            return
+        symbol = intent.symbol.upper()
+        capsule_data: dict = {}
+        capsule_hash = ""
+        engine = self.engines_by_symbol.get(symbol)
+        if engine is not None:
+            try:
+                capsule = engine.registry.get(intent.strategy_id)
+                capsule_data = dict(capsule.data)
+                capsule_hash = capsule.capsule_hash
+            except Exception:  # noqa: BLE001 — a missing capsule is not a reason to skip
+                capsule_data, capsule_hash = {}, ""
+        approved_risk = Decimal(str(
+            getattr(decision, "approved_risk_pct", None) or intent.requested_risk_pct))
+        regime_label = ""
+        volatility = liquidity = None
+        event_sensitivity: tuple = ()
+        if state is not None:
+            regime_label = getattr(getattr(state, "regime", None), "trend", None)
+            regime_label = getattr(regime_label, "value", "") or ""
+            features = getattr(state, "features", None)
+            volatility = getattr(features, "atr", None) if features is not None else None
+            spread_pct = getattr(features, "spread_percentile", None) if features is not None else None
+            if spread_pct is not None:
+                # Liquidity as "how far from the worst spread we are": higher is
+                # better, so the thesis' impaired-liquidity test reads the same
+                # way for every instrument.
+                liquidity = Decimal("1") - Decimal(str(spread_pct))
+            event_sensitivity = tuple(
+                x for x in (getattr(state, "base", ""), getattr(state, "quote", "")) if x)
+        try:
+            thesis = thesis_from_capsule(
+                trade_intent_id=intent.trade_intent_id,
+                symbol=symbol,
+                strategy_id=intent.strategy_id,
+                direction=intent.direction,
+                capsule_hash=capsule_hash,
+                market_state_hash=intent.market_snapshot_hash,
+                entry=entry_price,
+                original_stop=intent.stop,
+                original_approved_risk_pct=approved_risk,
+                created_ms=receipt.received_time_unix_ms,
+                capsule_data=capsule_data,
+                expected_gross_move_pct=intent.expected_gross_move_pct,
+                targets=tuple(Decimal(str(x)) for x in targets),
+                expected_horizon_ms=expected_horizon_ms,
+                regime_label=regime_label,
+                entry_volatility=(None if volatility is None else Decimal(str(volatility))),
+                entry_liquidity=liquidity,
+                event_sensitivity=event_sensitivity,
+            )
+            self.thesis.seal(thesis, now_ms=receipt.received_time_unix_ms)
+        except Exception as exc:  # noqa: BLE001 — a thesis fault never blocks a trade
+            self._log(
+                EventKind.SESSION,
+                {"event": "THESIS_NOT_SEALED", "trade_intent_id": intent.trade_intent_id,
+                 "error": str(exc)[:300]},
+                now_ms=receipt.received_time_unix_ms, corr=intent.trade_intent_id)
+            return
+        row = self.entries.get(intent.trade_intent_id)
+        if row is not None:
+            row["thesis_seal"] = thesis.seal
+            row["original_approved_risk_pct"] = approved_risk
+            row["expected_horizon_ms"] = expected_horizon_ms
+            row["opened_in_blackout"] = bool(
+                state is not None
+                and getattr(getattr(state, "event_window", None), "value", "")
+                in ("PRE_BLACKOUT", "POST_BLACKOUT"))
+            row["event_certified"] = bool(intent.is_event_certified)
+            row["execution_policy_applied"] = True
+            row["regime"] = regime_label
+            row["session"] = getattr(getattr(state, "session", None), "value", "") or ""
+
+    def _event_impact_for(self, *, intent_id: str, symbol: str, direction,
+                          now_ms: int) -> tuple[Decimal, tuple[str, ...]]:
+        """Peak materiality of relevant headlines, and their evidence refs.
+
+        Reduce-only by construction: the number returned is in [0, 1] and every
+        consumer of it — the thesis assessment and the meta-labeller's
+        `event_risk_multiplier` — can only use it to shrink. The economic
+        calendar remains the blackout authority; nothing here changes a window.
+        """
+        if self.news is None:
+            return ZERO, ()
+        try:
+            impacts = self.news.assess_subject(
+                subject_kind="POSITION", subject_id=intent_id, symbol=symbol,
+                direction=getattr(direction, "value", str(direction)), now_ms=now_ms)
+            return type(self.news).peak(impacts)
+        except Exception:  # noqa: BLE001 — a news fault never blocks a cycle
+            return ZERO, ()
+
+    def _assess_thesis(self, *, intent_id: str, row: dict, health, mark: Decimal,
+                       current_stop, now_ms: int):
+        """Per-cycle thesis verdict for one open position, or None."""
+        thesis = self.thesis.thesis_for(intent_id)
+        if thesis is None:
+            return None
+        symbol = str(row.get("symbol", "")).upper()
+        state = None
+        if self.market_state_fn is not None:
+            try:
+                state = self.market_state_fn(symbol)
+            except Exception:  # noqa: BLE001
+                state = None
+        correlation = ONE
+        if self.correlation_fn is not None:
+            try:
+                correlation = min(ONE, max(ZERO, Decimal(str(self.correlation_fn(symbol)))))
+            except Exception:  # noqa: BLE001
+                correlation = ONE
+        materiality, refs = self._event_impact_for(
+            intent_id=intent_id, symbol=symbol, direction=row["direction"], now_ms=now_ms)
+
+        volatility = liquidity = None
+        regime_label = ""
+        structure_broken = False
+        if state is not None:
+            features = getattr(state, "features", None)
+            raw_vol = getattr(features, "atr", None) if features is not None else None
+            volatility = None if raw_vol is None else Decimal(str(raw_vol))
+            spread_pct = getattr(features, "spread_percentile", None) if features is not None else None
+            if spread_pct is not None:
+                liquidity = ONE - Decimal(str(spread_pct))
+            regime_label = getattr(
+                getattr(getattr(state, "regime", None), "trend", None), "value", "") or ""
+            structure_broken = bool(
+                getattr(getattr(state, "integrity", None), "value", "") in
+                ("ABNORMAL", "HALTED"))
+
+        confirmations: list[str] = []
+        first_target = thesis.confirmation.get("first_target")
+        if first_target is not None:
+            level = Decimal(str(first_target))
+            reached = (mark >= level if row["direction"] is Direction.LONG else mark <= level)
+            if reached:
+                confirmations.append("first_target")
+        progress = thesis.confirmation.get("progress_r")
+        if progress is not None and thesis.risk_distance > ZERO:
+            current_r = thesis.sign * (mark - thesis.entry) / thesis.risk_distance
+            if current_r >= Decimal(str(progress)):
+                confirmations.append("progress_r")
+
+        adverse = tuple(
+            signal for signal in thesis.adverse_signals
+            if signal.upper() in {r.upper() for r in health.reasons})
+
+        return self.thesis.assess(ThesisInputs(
+            thesis=thesis,
+            health=health,
+            current_price=mark,
+            now_ms=now_ms,
+            current_stop=(None if current_stop is None else Decimal(str(current_stop))),
+            volatility=volatility,
+            liquidity=liquidity,
+            correlation_multiplier=correlation,
+            structure_broken=structure_broken,
+            regime_label=regime_label,
+            adverse_present=adverse,
+            confirmations_met=tuple(confirmations),
+            event_materiality=materiality,
+            event_refs=refs,
+        ))
+
+    def _adjust(self, *, assessment, health, row: dict, intent_id: str,
+                family, mark: Decimal, current_stop, now_ms: int) -> None:
+        """Propose an adjustment for one position and execute what is permitted."""
+        thesis = self.thesis.thesis_for(intent_id)
+        if thesis is None or assessment is None:
+            return
+        strategy_id = str(row.get("strategy_id") or "")
+        protection_be = (
+            current_stop is not None
+            and (Decimal(str(current_stop)) >= thesis.entry
+                 if row["direction"] is Direction.LONG
+                 else Decimal(str(current_stop)) <= thesis.entry))
+        original_risk = row.get("original_approved_risk_pct")
+        original_risk = None if original_risk is None else Decimal(str(original_risk))
+        # Risk still at stake on this position. Once protection is at or
+        # beyond break-even the position can no longer lose its original risk,
+        # so the headroom for an add is the whole original allowance — and no
+        # more, which is the rule that stops a winner becoming a bigger bet.
+        current_risk = ZERO if protection_be else (original_risk or ZERO)
+        proposal = self.adjustments.propose(
+            assessment,
+            health=health,
+            original_approved_risk_pct=original_risk,
+            current_risk_pct=current_risk,
+            protection_at_break_even=protection_be,
+            scale_policy=self.scale_policies.policy_for(strategy_id),
+            scale_ins_used=int(row.get("scale_ins_used", 0)),
+            proposed_stop=(thesis.entry if not protection_be else None),
+            now_ms=now_ms,
+        )
+        self.proposals.append(proposal)
+        row["last_proposal"] = proposal.action.value
+        self._execute_adjustment(
+            proposal=proposal, row=row, intent_id=intent_id, thesis=thesis,
+            family=family, mark=mark, now_ms=now_ms)
+
+    def _execute_adjustment(self, *, proposal, row: dict, intent_id: str, thesis,
+                            family, mark: Decimal, now_ms: int) -> None:
+        """Turn a permitted proposal into action, through the existing gates.
+
+        Nothing in this method places an order. A size change is expressed as a
+        delta `TradeIntent`, evaluated by `RiskAuthority.evaluate` (portfolio
+        heat, open stop risk, per-trade ceiling, correlation legs, drawdown,
+        mandate) and executed only through `ExecutionRouter` — `execute` for an
+        add, `apply_preservation` for a reduction or a close, both of which are
+        inside the single `adapter.submit` caller (INV-AUTH-001, INV-EXEC-001).
+
+        The authority's answer is read in the safe direction on both sides:
+
+        * an **ADD** happens only on APPROVED/REDUCED. A rejection stops it.
+        * a **REDUCE / PARTIAL_TAKE** asks the authority whether the book can
+          carry the *remainder*. A rejection escalates to EXIT rather than
+          cancelling the reduction: a control that can block de-risking is a
+          control that can trap the account, and that failure direction is not
+          one this system accepts.
+        """
+        action = proposal.action
+        position_id = str(row.get("broker_position_id") or "")
+        if action is Adjustment.HOLD:
+            return
+        if action is Adjustment.MOVE_PROTECTION and proposal.new_stop is not None:
+            if position_id:
+                # execution/protection.py refuses a widening; this can only tighten.
+                self.router.apply_preservation(
+                    self.adapter.venue, position_id=position_id,
+                    trade_intent_id=intent_id, action="TIGHTEN_STOP",
+                    now_ms=now_ms, new_stop=proposal.new_stop,
+                    reason="THESIS_" + proposal.thesis_state)
+                if family is not None:
+                    self.families.tighten_stop(
+                        family.family_id, proposal.new_stop, now_ms=now_ms)
+                row["stop"] = proposal.new_stop
+            return
+        if action is Adjustment.EXIT:
+            if position_id:
+                receipt = self.router.apply_preservation(
+                    self.adapter.venue, position_id=position_id,
+                    trade_intent_id=intent_id, action="FULL_CLOSE", now_ms=now_ms,
+                    reason="THESIS_" + proposal.thesis_state)
+                if receipt is not None and receipt.status in (
+                    "FILLED", "OWNER_EXECUTED", "BROKER_CONFIRMED"
+                ):
+                    self._on_close(intent_id, receipt.average_fill, action.value, now_ms)
+            return
+
+        decision = self._authorise_delta(
+            proposal=proposal, row=row, intent_id=intent_id, thesis=thesis,
+            mark=mark, now_ms=now_ms)
+        if decision is None:
+            return
+        approved = str(getattr(decision.decision, "value", decision.decision))
+
+        if action is Adjustment.ADD:
+            if approved not in ("APPROVED", "REDUCED") or self.execute_add_fn is None:
+                return
+            receipt = self.execute_add_fn(self._delta_intent_cache[intent_id], decision)
+            if receipt is not None and receipt.filled_qty > ZERO and family is not None:
+                self.families.apply(
+                    family.family_id,
+                    FamilyMember(
+                        member_id=f"{intent_id}:add:{now_ms}",
+                        role=MemberRole.SCALE_IN,
+                        quantity=receipt.filled_qty,
+                        price=receipt.average_fill or mark,
+                        occurred_ms=now_ms,
+                        trade_intent_id=intent_id,
+                    ),
+                    now_ms=now_ms,
+                )
+                row["quantity"] = Decimal(str(row.get("quantity", ZERO))) + receipt.filled_qty
+                row["scale_ins_used"] = int(row.get("scale_ins_used", 0)) + 1
+            return
+
+        # REDUCE / PARTIAL_TAKE
+        if not position_id:
+            return
+        if approved == "REJECTED":
+            receipt = self.router.apply_preservation(
+                self.adapter.venue, position_id=position_id,
+                trade_intent_id=intent_id, action="FULL_CLOSE", now_ms=now_ms,
+                reason="AUTHORITY_REFUSED_REMAINDER")
+            if receipt is not None and receipt.status in (
+                "FILLED", "OWNER_EXECUTED", "BROKER_CONFIRMED"
+            ):
+                self._on_close(intent_id, receipt.average_fill, "EXIT", now_ms)
+            return
+        quantity = Decimal(str(row.get("quantity", ZERO))) * Decimal(
+            str(proposal.size_fraction or ZERO))
+        if quantity <= ZERO:
+            return
+        receipt = self.router.apply_preservation(
+            self.adapter.venue, position_id=position_id,
+            trade_intent_id=intent_id, action="PARTIAL_CLOSE", now_ms=now_ms,
+            quantity=quantity, reason="THESIS_" + proposal.thesis_state)
+        if receipt is not None and receipt.status in (
+            "FILLED", "OWNER_EXECUTED", "BROKER_CONFIRMED"
+        ) and receipt.average_fill is not None and family is not None:
+            closed = min(receipt.filled_qty, family.net_quantity)
+            if closed > ZERO:
+                self.families.apply(
+                    family.family_id,
+                    FamilyMember(
+                        member_id=f"{intent_id}:{proposal.action.value.lower()}:{now_ms}",
+                        role=MemberRole.PARTIAL_EXIT,
+                        quantity=closed,
+                        price=receipt.average_fill,
+                        occurred_ms=now_ms,
+                        trade_intent_id=intent_id,
+                    ),
+                    now_ms=now_ms,
+                )
+                row["quantity"] = max(
+                    ZERO, Decimal(str(row.get("quantity", ZERO))) - closed)
+
+    def _authorise_delta(self, *, proposal, row: dict, intent_id: str, thesis,
+                         mark: Decimal, now_ms: int):
+        """Build the delta intent and put it through RiskAuthority.evaluate.
+
+        Returns the sealed `RiskDecision`, or None when there is no authority
+        or mandate to decide with — in which case the proposal is recorded and
+        nothing happens, which is the fail-closed answer (INV-FAIL-001).
+        """
+        import uuid
+
+        if self.authority is None or self.mandate is None:
+            self._log(
+                EventKind.SESSION,
+                {"event": "ADJUSTMENT_NOT_AUTHORISED",
+                 "trade_intent_id": intent_id, "action": proposal.action.value,
+                 "reason": "no risk authority or mandate is bound to this lifecycle"},
+                now_ms=now_ms, corr=intent_id)
+            return None
+        snapshot = None
+        if self.snapshot_fn is not None:
+            try:
+                snapshot = self.snapshot_fn(str(row.get("symbol", "")).upper())
+            except Exception:  # noqa: BLE001
+                snapshot = None
+        if snapshot is None:
+            self._log(
+                EventKind.SESSION,
+                {"event": "ADJUSTMENT_NOT_AUTHORISED",
+                 "trade_intent_id": intent_id, "action": proposal.action.value,
+                 "reason": "no risk snapshot available for the delta intent"},
+                now_ms=now_ms, corr=intent_id)
+            return None
+
+        if proposal.action is Adjustment.ADD:
+            requested = proposal.delta_risk_pct or ZERO
+            stop = thesis.entry   # an add is protected at the root's break-even
+        else:
+            # The remainder after the reduction: can the book carry what is
+            # left? A rejection means it cannot, and the reduction becomes a
+            # close rather than being cancelled.
+            fraction = Decimal(str(proposal.size_fraction or ZERO))
+            requested = (Decimal(str(row.get("original_approved_risk_pct", ZERO)))
+                         * (ONE - fraction))
+            stop = thesis.original_stop
+        if requested <= ZERO:
+            return None
+
+        decision_hash = canonical_hash({
+            "parent_intent": intent_id,
+            "action": proposal.action.value,
+            "proposal": proposal.digest,
+            "requested_risk_pct": str(requested),
+            "at": now_ms,
+        })
+        delta = TradeIntent(
+            trade_intent_id=str(uuid.uuid5(uuid.NAMESPACE_URL, f"vati:delta:{decision_hash}")),
+            idempotency_key=canonical_hash({"delta": decision_hash})[:32],
+            account_alias=getattr(self.mandate, "account_alias", ""),
+            venue=self.adapter.venue,
+            symbol=str(row.get("symbol", "")).upper(),
+            direction=row["direction"],
+            strategy_id=str(row.get("strategy_id") or ""),
+            strategy_version=str(row.get("strategy_version") or ""),
+            strategy_state=StrategyState(str(row.get("strategy_state") or "CERTIFIED_LIVE")),
+            entry=mark,
+            stop=stop,
+            requested_risk_pct=requested,
+            decision_hash=decision_hash,
+            market_snapshot_hash=thesis.market_state_hash,
+            owner_authority="MANDATE",
+            is_event_certified=bool(row.get("event_certified")),
+            holds_over_weekend=bool(row.get("holds_over_weekend")),
+        )
+        decision = self.authority.evaluate_safe(delta, snapshot)
+        self._delta_intent_cache[intent_id] = delta
+        self._log(
+            EventKind.RISK_DECISION,
+            {"inputs": {"intent": intent_to_dict(delta),
+                        "snapshot": snapshot_to_dict(snapshot)},
+             "decision": decision.to_dict(),
+             "adjustment": proposal.body() | {"proposal_hash": proposal.digest},
+             "parent_trade_intent_id": intent_id},
+            now_ms=now_ms, corr=delta.trade_intent_id)
+        return decision
 
     def _supervise_open_families(self, symbol: str, bid: Decimal, ask: Decimal,
                                  *, now_ms: int) -> None:
@@ -712,6 +1186,25 @@ class AccountTradeLifecycle:
                         self._on_close(
                             intent_id, receipt.average_fill, action.kind.value, now_ms)
                         continue
+
+            # GAP-F-003. The thesis runs live here, inside the PROTECT stage,
+            # after the deterministic health verdict and the preservation
+            # action and before expansion is even considered. Order matters:
+            # protection is decided by facts that read no model and no news,
+            # and only then does VAN ask whether the reason for the position is
+            # still there (INV-FAIL-001).
+            assessment = self._assess_thesis(
+                intent_id=intent_id, row=row, health=health, mark=mark,
+                current_stop=current_stop, now_ms=now_ms)
+            if assessment is not None and intent_id in self.entries:
+                self._adjust(
+                    assessment=assessment, health=health, row=row,
+                    intent_id=intent_id, family=self.families.for_intent(intent_id),
+                    mark=mark, current_stop=current_stop, now_ms=now_ms)
+                if intent_id not in self.entries:
+                    # The adjustment closed the position; there is nothing left
+                    # for expansion to consider.
+                    continue
 
             policy = self.scale_policies.policy_for(str(row.get("strategy_id") or ""))
             root_qty = next(
@@ -889,6 +1382,10 @@ class AccountTradeLifecycle:
         )
         metrics.inc("vati_trades_closed_total", outcome=review.outcome.value)
 
+        verdict = self._classify_decision(
+            intent_id=intent_id, entry=entry, review=review, now_ms=now_ms)
+        self.thesis.forget(intent_id)
+
         if (
             self.learning is not None
             and review.outcome in STRATEGY_LEARNING_OUTCOMES
@@ -898,16 +1395,94 @@ class AccountTradeLifecycle:
                 review,
                 Decimal(str(entry.get("cost_ratio", "1"))),
                 now_ms,
+                process_ok=(verdict is None or not verdict.faults),
             )
 
-    def _learn(self, intent_id: str, review, cost_ratio: Decimal, now_ms: int) -> None:
+    def _classify_decision(self, *, intent_id: str, entry: dict, review, now_ms: int):
+        """Place the closed trade on both axes and write the lesson it taught.
+
+        GAP-F-003. The four process facts are all ex-ante: the thesis was
+        sealed at approval, the approved risk and the mandate ceiling were
+        fixed then, the execution policy either applied or did not, and the
+        blackout state was recorded at entry. None of them consults the
+        outcome, which is what keeps the axes independent — an axis that peeked
+        at R would collapse into R and say nothing new.
+        """
+        thesis = self.thesis.thesis_for(intent_id)
+        max_risk = ZERO
+        if self.mandate is not None:
+            max_risk = Decimal(str(getattr(self.mandate, "max_risk_per_trade", ZERO) or ZERO))
+        inputs = DecisionQualityInputs(
+            trade_intent_id=intent_id,
+            strategy_id=str(entry.get("strategy_id") or ""),
+            thesis_sealed=thesis is not None,
+            thesis_falsifiable=bool(thesis is not None and thesis.invalidation),
+            thesis_intact_at_entry=True,
+            approved_risk_pct=Decimal(str(entry.get("original_approved_risk_pct", ZERO) or ZERO)),
+            mandate_max_risk_pct=max_risk,
+            protective_stop_confirmed=bool(entry.get("protective_stop_confirmed", True)),
+            stop_widened=bool(entry.get("stop_widened")),
+            execution_policy_applied=bool(entry.get("execution_policy_applied", True)),
+            cost_ratio=(None if entry.get("cost_ratio") is None
+                        else Decimal(str(entry["cost_ratio"]))),
+            opened_in_blackout=bool(entry.get("opened_in_blackout")),
+            event_certified=bool(entry.get("event_certified")),
+        )
+        try:
+            verdict = self.decision_quality.record(
+                inputs, symbol=str(entry.get("symbol", "")),
+                r_multiple=review.r_multiple, now_ms=now_ms,
+                evidence_refs=(review.artifact_hash,)
+                + ((thesis.seal,) if thesis is not None else ()))
+        except Exception as exc:  # noqa: BLE001 — classification never blocks a close
+            self._log(
+                EventKind.SESSION,
+                {"event": "DECISION_QUALITY_FAULT", "trade_intent_id": intent_id,
+                 "error": str(exc)[:300]},
+                now_ms=now_ms, corr=intent_id)
+            return None
+
+        if self.learning is not None:
+            try:
+                self.lessons.record(lesson_from_verdict(
+                    verdict,
+                    symbol=str(entry.get("symbol", "")),
+                    regime=str(entry.get("regime", "")),
+                    session=str(entry.get("session", "")),
+                    environment=self.learning.environment,
+                    now_ms=now_ms,
+                    evidence_refs=(review.artifact_hash,),
+                ), now_ms=now_ms)
+            except Exception:  # noqa: BLE001 — a lesson fault never blocks a close
+                pass
+        return verdict
+
+    def _learn(self, intent_id: str, review, cost_ratio: Decimal, now_ms: int,
+               *, process_ok: Optional[bool] = None) -> None:
+        """Reduce-only learning, with capsule health driven by decision quality.
+
+        GAP-F-003. `process_ok` used to be the literal `True` on every close, so
+        the health tracker's process term was a constant and only R moved the
+        number. It now carries the decision-quality verdict, and the quadrant
+        multiplier is applied on top with `min`, which gives the two properties
+        the axis exists for:
+
+        * a **lucky bad decision** reduces capsule health — the quadrant
+          multiplier falls even though R was positive;
+        * an **unlucky good decision** does not reduce it through this axis —
+          the quadrant multiplier stays at 1, and `min` cannot raise anything.
+
+        `min` is what keeps the whole thing reduce-only: whatever the quality
+        axis says, it can only take health down, never up, so no combination of
+        inputs here can widen a ceiling (INV-RISK-001, INV-LEARN-001).
+        """
         assert self.learning is not None
         episode, adjustment = self.learning.on_review(
             self.ledger,
             trade_intent_id=intent_id,
             strategy_id=review.strategy_id,
             r_multiple=review.r_multiple,
-            process_ok=review.process_ok,
+            process_ok=review.process_ok if process_ok is None else process_ok,
             cost_ratio=cost_ratio,
         )
         if episode is not None:
@@ -928,12 +1503,14 @@ class AccountTradeLifecycle:
 
         # Every per-symbol engine carrying this strategy receives the same
         # reduce-only health view and automatic demotion.
+        quality = self.decision_quality.health_multiplier(review.strategy_id)
+        health_multiplier = min(adjustment.multiplier, quality)
         for engine in self.engines_by_symbol.values():
             try:
                 capsule = engine.registry.get(review.strategy_id)
             except KeyError:
                 continue
-            engine.m.capsule_health[review.strategy_id] = adjustment.multiplier
+            engine.m.capsule_health[review.strategy_id] = health_multiplier
             if not adjustment.demote_to:
                 continue
             target = (

@@ -33,8 +33,9 @@ from vati.cognition.translator import ActionTranslator, Mode
 from vati.cognition.world_model import TradingWorldModel
 from vati.core.canonical import canonical_hash
 from vati.core.events import EventKind, make_event
+from vati.research.agents import ResearchAgentFactory
 from vati.research.director import FableResearchDirector, ResearchTrigger
-from vati.research.missions import MissionLedger
+from vati.research.missions import MissionLedger, ResearchPacket
 from vati.risk.serde import snapshot_to_dict
 
 InvokeFn = Callable[[ProviderLease, Mapping[str, Any]], Mapping[str, Any]]
@@ -47,6 +48,11 @@ class CognitionWakeResult:
     context_hash: str
     provider_attempts: int
     model_available: bool
+    #: GAP-F-003 item 6. Structured research commissioned by this wake, as
+    #: sealed `ResearchPacket`s. Claims carry provenance; there is no free-form
+    #: agent conclusion anywhere in this path, and nothing here reaches sizing.
+    research_packets: tuple[ResearchPacket, ...] = ()
+    research_mission_id: str = ""
 
 
 class ShadowCognitionRuntime:
@@ -58,9 +64,16 @@ class ShadowCognitionRuntime:
     """
 
     def __init__(self, *, ledger, invoker: Optional[InvokeFn] = None,
-                 budget: Optional[CognitiveBudget] = None) -> None:
+                 budget: Optional[CognitiveBudget] = None,
+                 research_invoker: Optional[Callable[..., Mapping[str, Any]]] = None,
+                 research_budget_micros: int = 0,
+                 research_roles: tuple[str, ...] = ("evidence", "contradiction"),
+                 invoker_mode: str = "none") -> None:
         self.ledger = ledger
         self.invoker = invoker
+        #: What the owner read model reports (GAP-F-004): the *actual* invoker
+        #: state, not a mode string that is true regardless of configuration.
+        self.invoker_mode = invoker_mode if invoker is not None else "none"
         self.scheduler = QuotaScheduler(default_registry())
         self.budget = budget or CognitiveBudget(
             micros_per_window=5_000_000,
@@ -74,6 +87,18 @@ class ShadowCognitionRuntime:
         self.handoffs = HandoffRecorder(ledger=ledger)
         self.missions = MissionLedger(ledger=ledger)
         self.director = FableResearchDirector(self.missions)
+        # GAP-F-003 item 6. The director, the agent factory and the mission
+        # ledger existed and were reachable only from tests. They are now
+        # composed here, so a PROPOSE_RESEARCH verdict actually commissions
+        # bounded specialist work instead of opening a mission nobody runs.
+        # The agents share this runtime's QuotaScheduler and HandoffRecorder,
+        # so research spends the same provider quota the hierarchy already
+        # accounts for rather than a second, invisible one.
+        self.agents = ResearchAgentFactory(self.scheduler, handoffs=self.handoffs)
+        self.research_invoker = research_invoker
+        self.research_budget_micros = max(0, int(research_budget_micros))
+        self.research_roles = tuple(dict.fromkeys(research_roles))
+        self.research_packets: list[ResearchPacket] = []
         self._seen_event_hashes: set[str] = set()
 
     def _sync_world(self) -> None:
@@ -252,8 +277,10 @@ class ShadowCognitionRuntime:
             horizon_ms=max(assessment.horizon_ms, 86_400_000),
         )
 
+        packets: tuple[ResearchPacket, ...] = ()
+        mission_id = ""
         if assessment.verdict is Verdict.PROPOSE_RESEARCH:
-            self.director.open(
+            mission = self.director.open(
                 ResearchTrigger(
                     trigger_id=f"cognition:{assessment.assessment_id}",
                     question=assessment.narrative or (
@@ -261,10 +288,13 @@ class ShadowCognitionRuntime:
                         f"{intent.trade_intent_id}"),
                     evidence_ids=(assessment.seal, context_hash),
                     data_domains=("external_web", "repository"),
-                    specialist_roles=("evidence", "contradiction"),
+                    specialist_roles=self.research_roles,
                 ),
                 now_ms=now_ms,
+                budget_micros=self.research_budget_micros or None,
             )
+            mission_id = mission.mission_id
+            packets = self.run_research(mission, now_ms=now_ms)
 
         return CognitionWakeResult(
             assessment=assessment,
@@ -272,7 +302,49 @@ class ShadowCognitionRuntime:
             context_hash=context_hash,
             provider_attempts=attempts,
             model_available=available,
+            research_packets=packets,
+            research_mission_id=mission_id,
         )
+
+    def run_research(self, mission, *, now_ms: int) -> tuple[ResearchPacket, ...]:
+        """Run the mission's required roles under its own budget.
+
+        Bounded three ways, all of which must hold before a single agent runs:
+        a research invoker must be configured, a positive budget must have been
+        granted, and the mission's own `ResearchBudget` caps agents,
+        invocations, cost and wall time. With no invoker or no budget this
+        returns nothing at all rather than a placeholder packet — an empty
+        result is an honest "no research happened", and a synthesised one is
+        not (INV-EVID-001).
+
+        A packet is structured evidence: sealed claims with source ids,
+        retrieval timestamps, methods and counterevidence. `ResearchAgentFactory`
+        refuses a result that lacks any of those, so a free-form agent
+        conclusion cannot enter the ledger as a finding. Nothing here can size,
+        route or approve anything — the director's `PROHIBITED` list is part of
+        the sealed mission.
+        """
+        if self.research_invoker is None or self.research_budget_micros <= 0:
+            return ()
+        budget = mission.budget
+        out: list[ResearchPacket] = []
+        spent = 0
+        for role in mission.required_roles[:budget.max_agents]:
+            if spent >= self.research_budget_micros:
+                break
+            try:
+                packet = self.agents.run(
+                    mission, role, invoke=self.research_invoker, now_ms=now_ms)
+            except Exception as exc:  # noqa: BLE001 — research never breaks a cycle
+                packet = ResearchPacket.failed(
+                    mission_id=mission.mission_id, agent_role=role, model_id="",
+                    reason=f"{type(exc).__name__}:{str(exc)[:160]}", created_ms=now_ms)
+            provider = self.scheduler.registry.by_model_id(packet.model_id)
+            spent += 0 if provider is None else provider.cost_per_request_micros
+            out.append(packet)
+            self.missions.add_packet(packet)
+        self.research_packets.extend(out)
+        return tuple(out)
 
     def resolve_trade(self, trade_intent_id: str, *, actual_r, now_ms: int) -> Optional[ShadowEntry]:
         entry = self.shadow.for_decision_point(trade_intent_id)

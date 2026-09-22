@@ -36,6 +36,19 @@ EXPLAINED_UNREFERENCED: dict[str, str] = {
         "@Preview composables. Android Studio renders them; nothing calls them, by design. "
         "They are a development surface, not a shipping one."
     ),
+    # docs/design/COMPONENT_CATALOGUE.md's own catalogue, built ahead of the surfaces that
+    # adopt each one — `com.dial.van.design` builds the full component set once rather than
+    # growing it screen-by-screen, and `tools/audit/android_design_lint.py`'s baseline
+    # already tracks every screen package that has not migrated onto it yet. This worker
+    # adopted VanScreen/VanPanel/StatusChip/MetricTile/LiveBadge/SectionHeader/AttentionItem/
+    # TimelineRail/EmptyState/VanPressable across Home/Attention/Work/Connected/Settings.
+    #
+    # PositionCard, ThesisCard, EvidenceRow, FindingCard, HeatBar and ApprovalSheet were
+    # reserved here for the trading worker, who has since rebuilt `trading/ui/**` onto the
+    # design system (OverviewScreen/PositionsScreen/PositionDetailScreen/PotentialScreen/
+    # HistoryScreen adopt all six) — none of them are unreferenced any more, so their
+    # entries are removed rather than kept as stale excuses (see
+    # `test_every_explained_entry_still_describes_something_real`).
 }
 
 #: Production symbols reached only from tests. Each is the TEST_ONLY maturity class and must
@@ -207,3 +220,19 @@ object Zeta
 typealias Eta = String
 """
     assert declarations(source) == {"Alpha", "Beta", "Gamma", "Delta", "Epsilon", "Zeta", "Eta"}
+
+
+def test_a_generic_function_declaration_is_still_found():
+    """`fun <T> Name(...)` — a type parameter list sits between the keyword and the name.
+
+    Without this, `fun <T> VanScreen(state: ScreenState<T>, ...)` never matched at all: the
+    character after `fun\\s+` is `<`, not an identifier. `VanScreen` then silently dropped
+    out of `declared[VanScreen.kt]`, and — because that file's other, non-generic symbols
+    (`VanScreenSkeleton`, `VanErrorState`, ...) are called only from inside `VanScreen`
+    itself, which is excluded as self-reference — the whole file read as unreferenced despite
+    being called from three production screens.
+    """
+    declarations = _scanner()._declarations
+    assert "VanScreen" in declarations("fun <T> VanScreen(state: ScreenState<T>) {}")
+    assert "VanPanel" in declarations("@Composable\nfun VanPanel(modifier: Modifier) {}")
+    assert declarations("fun <K, V> merge(a: K, b: V) {}") == {"merge"}

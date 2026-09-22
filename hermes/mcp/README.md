@@ -6,10 +6,15 @@ Hermes profile **`van`** is the sole agent runtime. Credentials are brokered thr
 
 | Server | Purpose | Credential model |
 |---|---|---|
-| `van_owner_runtime` | Deterministic owner-context readiness/graph/lexical/hot-capsule/snapshot, typed resolution, research routing and action lifecycle verification | Local Hermes internal-control credential; fixed tool allowlist; no generic HTTP; no canonical-memory admission |
-| `van-gateway` | Owner auth, grants, Google planner, evidence, attention/reminders, health | Device-signed; no secret passthrough |
+| `van_owner_runtime` | Deterministic owner-context readiness/graph/lexical/hot-capsule/snapshot, typed resolution, research routing, action lifecycle verification, read-only trading/attention/briefing state, owner-behalf reminders, INFERRED/MODEL_DERIVED memory candidates, and the already-governed browser-assignment/automation-execute routes | Local Hermes internal-control credential; fixed tool allowlist; no generic HTTP; no canonical-memory admission |
 | `filesystem` (scoped) | Registered project files | Path allowlist + Project Truth + grants |
 | `git` (scoped) | SHA/evidence/diff/write | Read default; writes require grant |
+
+There is no separate `van-gateway` MCP server: an earlier revision of this document
+described one (grants, evidence, health) that was never built. Every gateway surface
+Hermes reaches goes through the single `van_owner_runtime` shim above, or through the
+`van_trading_commander`/`van_trading_local_commander` servers documented below for
+Trading Core.
 
 ### `van_owner_runtime`
 
@@ -22,15 +27,40 @@ The canonical stdio shim is `hermes/mcp/owner_runtime_stdio.mjs`. Register it in
 
 The registration script reads no secret into YAML. The shim obtains `VAN_INTERNAL_CONTROL_TOKEN` from the existing local gateway environment (default `~/.config/van/gateway.env`) or an explicitly configured local token file. The token is used only as `X-Van-Internal-Token` and is never emitted as tool output.
 
+The credential this shim reads must be scoped for `runtime`, `browser` and `automation`
+(`ControlScope` in `backend/van_gateway/auth/control_scopes.py`) — for example, in
+`internal_control_scoped_tokens`: `runtime,browser,automation:<32+ char token>`. A token
+scoped for `runtime` alone still answers `runtime_status`, the context/knowledge/research/
+action/trading/reminder/attention/briefing tools, but the `browser_*` and `automation_*`
+tools answer 403 until `browser`/`automation` are granted too. Device enrolment and
+observability are deliberately never granted to this credential.
+
 Allowed tools are deliberately narrow:
 
 - `runtime_status`
+- `mission_result`
 - `resolve_command`
 - `context_graph_query`
 - `context_lexical_query`
 - `context_hot_capsule`
 - `context_readiness`
 - `context_snapshot`
+- `context_fact_candidate` / `context_edge_candidate` — INFERRED/MODEL_DERIVED only
+- `knowledge_status`, `vekl_query`, `obsidian_query`, `notebook_enterprise_recent`,
+  `notebook_enterprise_get`, `notebook_consumer_ask`, `knowledge_action_execute`
+- `google_status`, `google_capabilities`, `google_gmail_search`, `google_calendar_agenda`,
+  `google_drive_search`, `google_contacts_resolve`, `google_tasks_list`, `google_job_plan`,
+  `google_action_execute`
+- `trading_portfolio`, `trading_positions`, `trading_risk`, `trading_market_state`,
+  `trading_trade_detail`, `trading_status` — read-only; no halt, ticket or account tool
+- `reminder_create` — on the owner's behalf; `text` must be the owner's own words
+- `attention_list`, `briefing_read` — read-only
+- `browser_task_create`, `browser_assignment_run`, `browser_task_status`,
+  `browser_task_evidence` — creation carries `command_id`/`mission_id` (that route has no
+  `turn_id` field); the run itself is bounded and enforced by `browser/api.py`'s
+  `run_assignment`, not by this shim
+- `automation_route`, `automation_execute`, `automation_run_status` — execution runs only
+  under an existing signed command authority; this tool cannot mint or approve one
 - `research_status`
 - `research_search`
 - `action_begin`
@@ -38,7 +68,11 @@ Allowed tools are deliberately narrow:
 - `action_verify`
 - `action_get`
 
-There is **no** generic HTTP/shell tool and no fact/edge canonical-admission tool. Hermes is not a truth authority. Any Hermes-originated memory candidate reaching the internal runtime API is forced to `MODEL_DERIVED + INFERRED`; owner/canonical promotion requires a separate trusted gateway/owner path.
+There is **no** generic HTTP/shell tool and no CANONICAL_OWNER-tier fact/edge admission
+tool. Hermes is not a truth authority. Any Hermes-originated memory candidate reaching the
+internal runtime API is forced to `MODEL_DERIVED + INFERRED`; owner/canonical promotion
+requires a separate trusted gateway/owner path (GAP-F-015: this shim's memory-candidate
+tools and AGENTS.md's "may submit inferred/model-derived memory candidates" now agree).
 
 The context graph is a bounded temporal retrieval primitive, not an autonomous GraphRAG loop. Deterministic lexical retrieval runs locally over current owner facts and graph edges without embeddings, model inference or a remote call. Hot-context capsules are revision-sealed, bounded caches of evidence references used to reduce repeated lookup latency; they are invalidated by context revision/expiry and are never a new truth store. Exact facts remain ahead of graph/lexical retrieval in the critical path; external research remains an escalation.
 

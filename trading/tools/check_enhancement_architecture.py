@@ -63,6 +63,36 @@ RULES: tuple[Rule, ...] = (
          forbidden_imports=("vati.execution.router",),
          forbidden_attrs=("approve", "create_intent", "submit"),
          why="it decides how to execute, never whether"),
+    # --- GAP-F-003 / GAP-F-004 -------------------------------------------
+    # Four modules were added that reason about live positions. Each of them
+    # produces evidence or a proposal, and each would be dangerous in a
+    # different way if it could reach the gates directly, so each is pinned
+    # here rather than trusted to stay well behaved.
+    Rule("thesis-cannot-execute", "vati/lifecycle/thesis.py",
+         forbidden_imports=("vati.execution", "vati.risk.authority"),
+         forbidden_attrs=("execute", "submit", "approve", "size"),
+         why="a thesis describes and withholds; it never sizes or sends"),
+    Rule("adjustment-cannot-execute", "vati/lifecycle/scale_policy.py",
+         forbidden_imports=("vati.execution.router", "vati.execution.protection",
+                            "vati.risk.authority"),
+         forbidden_attrs=("execute", "submit", "approve"),
+         why="a PositionAdjustmentProposal must reach RiskAuthority and "
+             "ExecutionRouter through the lifecycle, never by itself"),
+    Rule("news-cannot-execute", "vati/events/news_ingress.py",
+         forbidden_imports=("vati.execution", "vati.risk.authority",
+                            "vati.intelligence.calendar_feed"),
+         forbidden_attrs=("execute", "submit", "approve", "blackout"),
+         why="news is reduce-only evidence; the economic calendar keeps the "
+             "blackout authority"),
+    Rule("cognition-invoker-cannot-execute", "vati/cognition/invokers.py",
+         forbidden_imports=("vati.execution", "vati.risk.authority",
+                            "vati.arbiter.intent_factory"),
+         forbidden_attrs=("execute", "submit", "approve", "size"),
+         why="a model invoker fetches a result; contracts.py decides what it means"),
+    Rule("active-readmodel-cannot-execute", "vati/readmodels/active.py",
+         forbidden_imports=("vati.execution", "vati.risk.authority"),
+         forbidden_attrs=("execute", "submit", "approve", "halt"),
+         why="a read model classifies what happened; it cannot act"),
 )
 
 
@@ -252,6 +282,108 @@ def check_required_production_joins() -> list[str]:
     return failures
 
 
+def check_active_trade_intelligence_joins() -> list[str]:
+    """GAP-F-003 / GAP-F-004 joins, whose absence recreates the audit findings.
+
+    Each of these was found *implemented and unreachable*. A guardrail that
+    only forbids the wrong imports would let them quietly become unreachable
+    again, which is the exact failure mode the audit recorded, so the joins
+    themselves are asserted.
+    """
+    failures: list[str] = []
+
+    service_tree = _tree("vati/app/account_service.py")
+    names = {n.id for n in ast.walk(service_tree) if isinstance(n, ast.Name)}
+    if "build_invoker" not in names:
+        failures.append(
+            "cognition-invoker-live-join: account service no longer constructs a "
+            "provider invoker (GAP-F-004); ShadowCognitionRuntime would abstain "
+            "MODEL_UNAVAILABLE with no way to configure otherwise")
+    if "CognitionConfig" not in names:
+        failures.append(
+            "cognition-invoker-live-join: account service has no cognition "
+            "configuration; the invoker would have no injection point")
+    # GAP-F-003 item 6. The research director, agent factory and mission ledger
+    # were composed into the runtime, but a runtime with no research invoker
+    # runs no agents at all — which is the same "implemented and unreachable"
+    # shape the audit recorded one level down. Asserted here so it cannot
+    # silently return to it.
+    if "build_research_invoker" not in names:
+        failures.append(
+            "research-invoker-live-join: account service no longer constructs a "
+            "research invoker, so `run_research` can only ever return nothing "
+            "and a PROPOSE_RESEARCH verdict commissions no work")
+    service_defs = {n.name for n in ast.walk(service_tree)
+                    if isinstance(n, (ast.FunctionDef, ast.AsyncFunctionDef))}
+    # GAP-F-003 item 4, the candidate half. News reaching an *open* position is
+    # not the same join as news reaching the next candidate's size; the second
+    # one runs entirely through the meta-labeller and would be invisible if it
+    # were dropped.
+    if "_apply_news_event_risk" not in service_defs:
+        failures.append(
+            "news-sizing-join: account service no longer feeds recorded headlines "
+            "into the meta-labeller's event_risk_multiplier, so news would reach "
+            "open positions but never the candidates about to become them")
+    labeler_tree = _tree("vati/arbiter/meta_labeler.py")
+    labeler_attrs = {n.attr for n in ast.walk(labeler_tree) if isinstance(n, ast.Attribute)}
+    if "news_event_risk" not in labeler_attrs:
+        failures.append(
+            "news-sizing-join: MetaLabeler has no news_event_risk term, so the "
+            "reduce-only headline multiplier has nowhere to land")
+
+    lifecycle_tree = _tree("vati/app/trade_lifecycle.py")
+    lifecycle_names = {n.id for n in ast.walk(lifecycle_tree) if isinstance(n, ast.Name)}
+    lifecycle_defs = {n.name for n in ast.walk(lifecycle_tree)
+                      if isinstance(n, (ast.FunctionDef, ast.AsyncFunctionDef))}
+    if "thesis_from_capsule" not in lifecycle_names:
+        failures.append(
+            "thesis-live-join: the account lifecycle no longer seals a TradeThesis "
+            "on entry (GAP-F-003); open positions would carry no falsifiable claim")
+    if "_assess_thesis" not in lifecycle_defs or "_adjust" not in lifecycle_defs:
+        failures.append(
+            "thesis-live-join: the account lifecycle no longer assesses theses or "
+            "proposes adjustments for open positions")
+    if "_authorise_delta" not in lifecycle_defs:
+        failures.append(
+            "adjustment-authority-join: a size-changing adjustment no longer goes "
+            "through RiskAuthority.evaluate (INV-AUTH-001)")
+    if "DecisionQualityLedger" not in lifecycle_names:
+        failures.append(
+            "decision-quality-live-join: closed trades are no longer classified on "
+            "the decision-quality axis, so capsule_health is fed by outcome alone")
+
+    cycle_tree = _tree("vati/app/cycle.py")
+    cycle_defs = {n.name for n in ast.walk(cycle_tree)
+                  if isinstance(n, (ast.FunctionDef, ast.AsyncFunctionDef))}
+    if "_review_open_theses" not in cycle_defs or "_seal_thesis" not in cycle_defs:
+        failures.append(
+            "thesis-live-join: DecisionCycle no longer seals or reviews theses, so "
+            "the single-symbol runtime and the account runtime would disagree")
+
+    runtime_tree = _tree("vati/cognition/runtime.py")
+    runtime_names = {n.id for n in ast.walk(runtime_tree) if isinstance(n, ast.Name)}
+    if "ResearchAgentFactory" not in runtime_names:
+        failures.append(
+            "research-cognition-join: ShadowCognitionRuntime no longer composes the "
+            "research agent factory, so a PROPOSE_RESEARCH verdict would open a "
+            "mission nobody runs")
+
+    main_tree = _tree("vati/__main__.py")
+    main_defs = {n.name for n in ast.walk(main_tree) if isinstance(n, ast.FunctionDef)}
+    if "cmd_news_ingest" not in main_defs:
+        failures.append(
+            "news-ingress-runner-join: `python -m vati news-ingest` is absent, so "
+            "headlines would have no production producer")
+
+    commander = (ROOT / "commander" / "app.py").read_text()
+    if '"positions"' not in commander or '"assessment"' not in commander:
+        failures.append(
+            "trading-observation-join: the commander no longer exposes the read-only "
+            "positions/assessment commands (GAP-F-003), so Hermes has no path to "
+            "trading state")
+    return failures
+
+
 def check_certificate_producer_boundary() -> list[str]:
     """Only the certificate module and canonical builder may instantiate certs."""
     allowed = {
@@ -287,6 +419,7 @@ def main() -> int:
     failures.extend(check_allocator_v0_ignores_confidence())
     failures.extend(check_no_trading_table_in_gateway_schema())
     failures.extend(check_required_production_joins())
+    failures.extend(check_active_trade_intelligence_joins())
     failures.extend(check_certificate_producer_boundary())
 
     if failures:
@@ -294,7 +427,7 @@ def main() -> int:
         for f in failures:
             print(f"  - {f}", file=sys.stderr)
         return 1
-    print(f"Architecture guardrails OK ({len(RULES)} rules + confidence + store placement + production joins + certificate producer)")
+    print(f"Architecture guardrails OK ({len(RULES)} rules + confidence + store placement + production joins + active-trade joins + certificate producer)")
     return 0
 
 

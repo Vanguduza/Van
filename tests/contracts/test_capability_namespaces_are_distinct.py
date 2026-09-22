@@ -62,6 +62,9 @@ AUDIT_ONLY_LABELS = frozenset({
     "trading.strategy.promote",
     "trading.owner_halt",
     "trading.ticket_confirm",
+    # GAP-F-024 — the owner cutting Google from the phone is an audit event, not a
+    # routable capability; routing it would let the capability router revoke consent.
+    "google.owner_revoke",
 })
 
 

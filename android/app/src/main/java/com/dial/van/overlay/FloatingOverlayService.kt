@@ -8,6 +8,7 @@ import android.content.IntentFilter
 import android.graphics.PixelFormat
 import android.os.IBinder
 import android.os.PowerManager
+import android.provider.Settings
 import android.view.Gravity
 import android.view.HapticFeedbackConstants
 import android.view.WindowManager
@@ -97,6 +98,13 @@ class FloatingOverlayService : Service(), LifecycleOwner, SavedStateRegistryOwne
 
     override fun onCreate() {
         super.onCreate()
+        // Foreground first: a slow or failing addView below must not spend the seconds
+        // startForegroundService allows, and an ungranted overlay stops honestly (running=false).
+        startForeground(NOTIFICATION_ID, OverlayNotification.build(this))
+        if (!Settings.canDrawOverlays(this)) {
+            stopSelf()
+            return
+        }
         running = true
         savedStateController.performRestore(null)
         lifecycleRegistry.currentState = Lifecycle.State.CREATED
@@ -148,7 +156,6 @@ class FloatingOverlayService : Service(), LifecycleOwner, SavedStateRegistryOwne
             },
         )
         applyVisibilityLifecycle()
-        startForeground(NOTIFICATION_ID, OverlayNotification.build(this))
         stateStore.markRunning(true)
     }
 
@@ -299,8 +306,15 @@ class FloatingOverlayService : Service(), LifecycleOwner, SavedStateRegistryOwne
     }
 
     private fun finishDrag() {
-        dragController.finish(uiState)?.let(::updateUiState)
+        dragController.finish(uiState, reducedMotion = isReducedMotion())?.let(::updateUiState)
     }
+
+    /** DNA §2's reduced-motion rule — read directly since this call is not inside Compose. */
+    private fun isReducedMotion(): Boolean = runCatching {
+        android.provider.Settings.Global.getFloat(
+            contentResolver, android.provider.Settings.Global.ANIMATOR_DURATION_SCALE, 1f,
+        ) == 0f
+    }.getOrDefault(false)
 
     private fun cancelDrag() = updateUiState(dragController.cancel(uiState))
 
@@ -338,8 +352,19 @@ class FloatingOverlayService : Service(), LifecycleOwner, SavedStateRegistryOwne
             stopSelf()
         }
 
-        override fun dockedTo(edge: DockEdge) {
+        override fun dockedTo(edge: DockEdge, durationMs: Int) {
             dockEdge = edge
+            // `moveTo` has already placed the window at its final, snapped position by the
+            // time this is called (Rev 3.0 s41's ordering: the controller decides *where*,
+            // this records *which edge*); `durationMs` — item 3's velocity-based fling
+            // duration — is kept on the state for a future Compose-driven glide rather than
+            // animated here, since the window itself is WindowManager-placed, not Compose-
+            // observed, and animating it needs its own interpolation loop this change does
+            // not add.
+        }
+
+        override fun dockFeedback() {
+            overlayView.performHapticFeedback(HapticFeedbackConstants.CLOCK_TICK)
         }
     }
 

@@ -5,6 +5,7 @@ import com.dial.van.visual.VanAuraSpecs
 import com.dial.van.visual.VanAuthorityState
 import com.dial.van.visual.VanDurableState
 import com.dial.van.visual.VanEffectBudget
+import com.dial.van.visual.VanEmbodimentProducers
 import com.dial.van.visual.VanFiniteAction
 import com.dial.van.visual.VanGlassTokens
 import com.dial.van.visual.VanHealthState
@@ -13,6 +14,8 @@ import com.dial.van.visual.VanPresentation
 import com.dial.van.visual.VanScene
 import com.dial.van.visual.VanSceneFrame
 import com.dial.van.visual.VanSpeechState
+import com.dial.van.visual.VanTradeSemantic
+import com.dial.van.visual.VanTradeSemantics
 import com.dial.van.visual.VanTurnPhase
 import com.dial.van.visual.VanVisualState
 import java.awt.Color
@@ -44,6 +47,12 @@ object VanEvidenceMatrix {
         val reducedMotion: Boolean,
         val action: String = "none",
         val blur: String = "optical-glass",
+        /**
+         * Motion-cycle phase this shot is rendered at. A finite-action shot renders at 0.5
+         * (mid-cycle) rather than the ambient idle phase every other shot uses, so the
+         * evidence does not always catch a gesture at its very first frame.
+         */
+        val phase: Float = PHASE,
     )
 
     private data class OrthogonalCase(
@@ -106,6 +115,22 @@ object VanEvidenceMatrix {
         ),
     )
 
+    /**
+     * DNA §2's four trade semantic tiers, each represented by the [VanTradeSemantic] whose
+     * Zone C topology is that tier's clearest example. `VanTradeSemantic` itself has finer
+     * gradations (WATCHING/SETUP/ENTRY on the way to favourable, RISK vs STOP on the way to
+     * critical); this board is about proving the *tier* separation DNA names, not every
+     * intermediate step — those already have their own coverage in `VanTradeSemanticTest`.
+     */
+    private data class SemanticTier(val label: String, val semantic: VanTradeSemantic)
+
+    private val semanticTiers = listOf(
+        SemanticTier("favourable", VanTradeSemantic.PROFIT),
+        SemanticTier("deteriorating", VanTradeSemantic.RISK),
+        SemanticTier("eventRisk", VanTradeSemantic.STOP),
+        SemanticTier("critical", VanTradeSemantic.HALTED),
+    )
+
     private val shots = listOf(
         Shot("floating-minimal-idle", VanDurableState.IDLE, "RESTING", VanEffectBudget.FULL, false),
         Shot("floating-minimal-listening", VanDurableState.LISTENING, "RESTING", VanEffectBudget.FULL, false),
@@ -141,8 +166,14 @@ object VanEvidenceMatrix {
             budget = VanEffectBudget.FULL,
             reducedMotion = false,
             action = action.name,
+            // GAP-F-012 — every finite-action frame is rendered mid-gesture (t=0.5) rather
+            // than at frame zero, so the evidence shows the gesture actually playing.
+            phase = 0.5f,
         )
     }
+
+    /** GAP-F-012 — exposed for `VanEmbodimentCoverageTest`; production code has no need of it. */
+    fun shotsForTest(): List<Shot> = shots
 
     fun writeAll(outputDir: File) {
         val dir = File(outputDir, EVIDENCE_DIR)
@@ -150,6 +181,10 @@ object VanEvidenceMatrix {
 
         val orthogonalFile = File(dir, "orthogonal-presence.png")
         ImageIO.write(orthogonalPresenceBoard(), "png", orthogonalFile)
+
+        // GAP-F-012 — every durable state against every trade semantic tier, one board.
+        val semanticTierFile = File(dir, "state-by-semantic-tier.png")
+        ImageIO.write(stateBySemanticTierBoard(), "png", semanticTierFile)
 
         val manifest = StringBuilder()
         manifest.appendLine("{")
@@ -169,7 +204,10 @@ object VanEvidenceMatrix {
         manifest.appendLine()
         manifest.appendLine("  ],")
         manifest.appendLine(
-            """  "boards": [{"id":"orthogonal-presence","authority_revision":"$AUTHORITY_REVISION","sha256":"${sha256(orthogonalFile)}","bytes":${orthogonalFile.length()}}]""",
+            """  "boards": [""" +
+                """{"id":"orthogonal-presence","authority_revision":"$AUTHORITY_REVISION","sha256":"${sha256(orthogonalFile)}","bytes":${orthogonalFile.length()}},""" +
+                """{"id":"state-by-semantic-tier","authority_revision":"$AUTHORITY_REVISION","sha256":"${sha256(semanticTierFile)}","bytes":${semanticTierFile.length()}}""" +
+                """]""",
         )
         manifest.appendLine("}")
         File(dir, "manifest.json").writeText(manifest.toString())
@@ -250,6 +288,79 @@ object VanEvidenceMatrix {
             size = size * 0.80f,
             forceCanvas = true,
         )
+        g.dispose()
+        return image
+    }
+
+    /**
+     * DNA §2 — every durable state against every trade semantic tier: Zone A/B (character +
+     * activity field) come from [state], Zone C (the outer semantic envelope) comes from the
+     * tier's representative [VanTradeSemantic], exactly as the running app composes them
+     * (`VanPresenceFrame.semanticState`/`resolvedSemanticState` — never colour on the body).
+     */
+    fun stateBySemanticTierBoard(): BufferedImage {
+        val states = VanDurableState.entries
+        val cell = 132
+        val labelW = 160
+        val headerH = 74
+        val image = BufferedImage(
+            labelW + cell * semanticTiers.size,
+            headerH + cell * states.size,
+            BufferedImage.TYPE_INT_ARGB,
+        )
+        val g = image.createGraphics()
+        AwtVanRenderer.prepare(g)
+        g.color = Color(0xFF0B1016.toInt())
+        g.fillRect(0, 0, image.width, image.height)
+        g.color = Color.WHITE
+        g.font = Font("SansSerif", Font.BOLD, 18)
+        g.drawString("GAP-F-012 — every state × every trade semantic tier", 20, 30)
+        g.font = Font("SansSerif", Font.PLAIN, 11)
+        g.color = Color(0xFF9AA7B6.toInt())
+        g.drawString("Zone A/B = state · Zone C = tier — colour never lands on VAN's body", 20, 50)
+
+        semanticTiers.forEachIndexed { col, tier ->
+            val x = labelW + col * cell
+            g.color = Color.WHITE
+            g.font = Font("SansSerif", Font.BOLD, 12)
+            g.drawString(tier.label, x + 10, headerH - 8)
+        }
+
+        states.forEachIndexed { row, state ->
+            val y = headerH + row * cell
+            g.color = Color(0xFFB6C2D0.toInt())
+            g.font = Font("SansSerif", Font.PLAIN, 11)
+            g.drawString(state.name.lowercase().replace('_', ' '), 10, y + cell / 2)
+
+            semanticTiers.forEachIndexed { col, tier ->
+                val x = labelW + col * cell
+                val tile = stateSemanticTierTile(state, tier.semantic, cell - 10)
+                g.drawImage(tile, x + 5, y + 5, null)
+            }
+        }
+        g.dispose()
+        return image
+    }
+
+    fun stateSemanticTierTile(state: VanDurableState, semantic: VanTradeSemantic, size: Int = 120): BufferedImage {
+        val image = BufferedImage(size, size, BufferedImage.TYPE_INT_ARGB)
+        val g = image.createGraphics()
+        AwtVanRenderer.prepare(g)
+        g.color = Color(0xFF10161D.toInt())
+        g.fillRect(0, 0, size, size)
+        val activitySpec = VanAuraSpecs.forState(state)
+        val semanticSpec = VanTradeSemantics.auraFor(semantic)
+        GlassPainter.drawAura(
+            g = g,
+            spec = activitySpec,
+            cx = size * 0.5f,
+            cy = size * 0.5f,
+            radius = size * 0.30f,
+            budget = VanEffectBudget.FULL,
+            phase = PHASE,
+            semanticSpec = semanticSpec,
+        )
+        paintCharacter(g, state, size * 0.10f, size * 0.05f, size * 0.80f, forceCanvas = true)
         g.dispose()
         return image
     }
@@ -367,8 +478,9 @@ object VanEvidenceMatrix {
             }
             "ACTION" -> {
                 val actionCode = VanFiniteAction.entries.first { it.name == shot.action }.code
-                GlassPainter.drawAura(g, spec, 240f, 300f, 90f, shot.budget, PHASE)
-                paintCharacter(g, shot.state, 150f, 180f, 180f, shot.reducedMotion, actionCode)
+                // GAP-F-012 — rendered mid-gesture (shot.phase = 0.5), not at frame zero.
+                GlassPainter.drawAura(g, spec, 240f, 300f, 90f, shot.budget, shot.phase)
+                paintCharacter(g, shot.state, 150f, 180f, 180f, shot.reducedMotion, actionCode, phase = shot.phase)
             }
             else -> {
                 GlassPainter.drawAura(g, spec, 240f, 300f, 90f, shot.budget, PHASE)
@@ -406,13 +518,14 @@ object VanEvidenceMatrix {
         reducedMotion: Boolean = false,
         actionCode: Int = 0,
         forceCanvas: Boolean = false,
+        phase: Float = PHASE,
     ) {
         if (!forceCanvas && actionCode == 0 && OwnerArt.paint(g, state, x, y, size, size)) return
         AwtVanRenderer.paint(
             g,
             VanScene.build(
                 VanVisualState(durableState = state, actionCode = actionCode),
-                VanSceneFrame(presentation = VanPresentation.COMPACT, phase = PHASE, reducedMotion = reducedMotion),
+                VanSceneFrame(presentation = VanPresentation.COMPACT, phase = phase, reducedMotion = reducedMotion),
             ),
             x, y, size, size,
         )

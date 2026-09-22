@@ -48,6 +48,23 @@ out of budget or time, making no progress, or touching anything that looks like
 a payment. You will get a stop reason back; treat a non-`GOAL_ACHIEVED` stop as
 a result to reason about, not a failure to retry blindly.
 
+## Tools (`van_owner_runtime` MCP)
+
+- `browser_task_create` — creates the task before you run it. Pass this run's own
+  `command_id` and, to bind the task as a Mission Activity, `mission_id`; the route has no
+  `turn_id` field and no approval or owner-signature field — it cannot mint authority, only
+  open a task for `browser_assignment_run` to run against.
+- `browser_assignment_run` — the only way a browser worker runs autonomously (§379). It
+  requires this run's own `task_id` (from `browser_task_create`), `turn_id` and
+  `command_id`, the `goal`, `allowed_domains`, an `action_class_ceiling` and
+  `autonomy_tier`, and a `max_steps` budget; the runner (`browser/api.py`'s
+  `run_assignment`) enforces every bound server-side, not this tool.
+- `browser_task_status` — read one task and its evidence summary.
+- `browser_task_evidence` — read the sealed evidence records (digests only) for one task.
+
+There is no tool here that creates a browser profile, grants a lease, or bypasses the
+runner's bounds; those remain internal-control surfaces this shim does not expose.
+
 Pick the lowest tier that works. An autonomous run costs model calls and is
 harder to audit than a deterministic one, so if you already know the steps, use
 L1.

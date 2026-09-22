@@ -1,5 +1,7 @@
 package com.dial.van.trading
 
+import com.dial.van.design.charts.ChartAxes
+import kotlin.math.abs
 import kotlin.math.max
 import kotlin.math.min
 
@@ -36,14 +38,17 @@ object ChartGeometry {
     const val UP = 0xFF69F0AEL
     const val DOWN = 0xFFFF5252L
 
-    /** Nice grid step so price labels land on round numbers. */
+    /**
+     * Nice grid step so price labels land on round numbers.
+     *
+     * Delegates to [ChartAxes.ticks] (DNA's own "nice numbers" axis arithmetic, shared with
+     * every other VAN chart) rather than a second, home-rolled 1/2/5×10ⁿ rounding — this used
+     * to duplicate that algorithm by hand.
+     */
     fun gridStep(range: Double, targetLines: Int = 5): Double {
         if (range <= 0) return 1.0
-        val raw = range / targetLines
-        val mag = Math.pow(10.0, Math.floor(Math.log10(raw)))
-        val norm = raw / mag
-        val nice = when { norm < 1.5 -> 1.0; norm < 3.5 -> 2.0; norm < 7.5 -> 5.0; else -> 10.0 }
-        return nice * mag
+        val ticks = ChartAxes.ticks(0.0, range, targetLines.coerceAtLeast(2))
+        return ticks.getOrNull(1)?.let { it - ticks[0] } ?: range
     }
 
     fun build(bars: List<BarPoint>, layout: ChartLayout, levels: List<ChartLevel> = emptyList(), markers: List<ChartMarker> = emptyList(), maxVisible: Int = 120): ChartScene {
@@ -60,12 +65,17 @@ object ChartGeometry {
         fun y(p: Double): Float = (layout.plotBottom - ((p - lo) / (hi - lo)).toFloat() * plotH)
         fun xAt(i: Int): Float = layout.plotLeft + slot * i + slot / 2f
         val ops = mutableListOf<ChartOp>()
-        val step = gridStep(hi - lo)
-        var g = Math.ceil(lo / step) * step
-        while (g < hi) { ops += ChartOp.GridLine(y(g), g); g += step }
+        // DNA's own "nice numbers" axis arithmetic (design/charts/ChartAxes), shared with
+        // every other VAN chart, rather than this file's own step-and-loop.
+        ChartAxes.ticks(lo, hi, 5).forEach { g -> if (g in lo..hi) ops += ChartOp.GridLine(y(g), g) }
         visible.forEachIndexed { i, b -> ops += ChartOp.Candle(xAt(i), half, y(b.o), y(b.h), y(b.l), y(b.c), b.c >= b.o, b.t) }
-        val tickEvery = max(1, visible.size / 4)
-        visible.forEachIndexed { i, b -> if (i % tickEvery == 0) ops += ChartOp.TimeTick(xAt(i), b.t) }
+        // Ticks snapped to a human time boundary (minute/hour/day) rather than "every Nth
+        // bar" — a gap or a session break used to leave the labels landing at an arbitrary
+        // offset from the series' first candle instead of where an owner expects one.
+        ChartAxes.timeTicks(visible.first().t, visible.last().t, 5).forEach { t ->
+            val idx = visible.indices.minByOrNull { abs(visible[it].t - t) } ?: return@forEach
+            ops += ChartOp.TimeTick(xAt(idx), visible[idx].t)
+        }
         levels.forEach { ops += ChartOp.HLine(y(it.price), it.label, it.kind, it.price) }
         val entry = levels.firstOrNull { it.kind == LevelKind.ENTRY }; val stop = levels.firstOrNull { it.kind == LevelKind.STOP }; val target = levels.firstOrNull { it.kind == LevelKind.TARGET }
         if (entry != null && stop != null) ops += ChartOp.Zone(y(max(entry.price, stop.price)), y(min(entry.price, stop.price)), LevelKind.STOP)

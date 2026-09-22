@@ -67,16 +67,23 @@ def test_no_screen_offers_an_editable_field_for_anything_section_0D2_names():
 
 
 def test_the_two_screens_that_carried_the_forms_have_no_editable_field_at_all():
-    """Stronger than the label rule, and only for the two screens that had the problem.
+    """Stronger than the label rule, and only for the screens that had the problem.
 
-    `OnboardingActivity` and the Connections admin module exist to say what is set up,
-    not to set it up. Any editable field on either is a new form, whatever it is labelled,
-    so this refuses the composable rather than the wording — the check the first version of
-    this file did not have, and the one that would have caught an unlabelled rebuild.
+    `OnboardingActivity` and the pairing/connectivity status screens exist to say what is
+    set up, not to set it up. Any editable field on any of them is a new form, whatever it
+    is labelled, so this refuses the composable rather than the wording — the check the
+    first version of this file did not have, and the one that would have caught an
+    unlabelled rebuild.
+
+    DNA §4's rebuild split the old `command/modules/AdminModules.kt` (`ConnectionsModule` /
+    `SystemsModule` / `SettingsModule`) into two DNA destinations: `command/connected/
+    ConnectedRoute.kt` (Google planes, Hermes, knowledge readiness) and `command/settings/
+    SettingsRoute.kt` (pairing/binding status, which is what this test is actually about).
     """
     for path in (
         APP / "onboarding/OnboardingActivity.kt",
-        APP / "command/modules/AdminModules.kt",
+        APP / "command/connected/ConnectedRoute.kt",
+        APP / "command/settings/SettingsRoute.kt",
     ):
         text = path.read_text(encoding="utf-8")
         found = [field for field in EDITABLE if re.search(rf"\b{field}\s*\(", text)]

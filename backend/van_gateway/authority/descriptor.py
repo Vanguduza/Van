@@ -157,6 +157,14 @@ ACTION_REVERSIBILITY: dict[str, Reversibility] = {
     "google.notebook.enterprise.sources.delete": Reversibility.IRREVERSIBLE,
     # Halting is reversible by resuming; the owner is never stuck with it.
     "trading.halt": Reversibility.REVERSIBLE,
+    # GAP-F-001 — a remembered fact or decision supersedes rather than destroys (the prior
+    # row's `valid_until_ms` closes, it is not deleted) and `OwnerFactAuthor.forget` /
+    # `DELETE /v1/context/facts` can end it, so the owner is never stuck with either.
+    "memory.remember": Reversibility.REVERSIBLE,
+    "memory.decision.record": Reversibility.REVERSIBLE,
+    # GAP-F-002 — a created reminder can be cancelled (`POST /v1/reminders/{id}/cancel`)
+    # any time before it fires.
+    "reminder.create": Reversibility.REVERSIBLE,
     "secret.exfiltrate": Reversibility.IRREVERSIBLE,
 }
 

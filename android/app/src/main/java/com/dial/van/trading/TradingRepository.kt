@@ -27,4 +27,11 @@ class TradingRepository(private val client: VanGatewayClient) {
 
     suspend fun promotionCandidates(): Loaded<List<StrategyPromotionCandidate>> =
         load(StrategyPromotionCandidate::parseAll) { client.tradingPromotionCandidates() }
+
+    // ---------------------------------------------------------- GAP-F-003 intelligence read models
+    suspend fun positions(): Loaded<PositionsReadModel> = load(PositionsReadModel::parse) { client.tradingPositions() }
+    suspend fun events(limit: Int = 50): Loaded<EventsReadModel> = load(EventsReadModel::parse) { client.tradingEvents(limit) }
+    suspend fun potentialTrades(): Loaded<PotentialReadModel> = load(PotentialReadModel::parse) { client.tradingPotential() }
+    suspend fun history(limit: Int = 50): Loaded<HistoryReadModel> = load(HistoryReadModel::parse) { client.tradingHistory(limit) }
+    suspend fun assessment(): Loaded<AssessmentReadModel> = load(AssessmentReadModel::parse) { client.tradingAssessment() }
 }

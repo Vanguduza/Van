@@ -48,6 +48,24 @@ _NAME = re.compile(
 )
 
 
+def label_for(requirement: ContextRequirement) -> str:
+    """An owner-readable name for a requirement, for `context_gaps` (GAP-F-019).
+
+    The orchestrator reports what it did not know so the owner and Hermes can see it —
+    "VAN did not know: your timezone" rather than the bare pair `("OWNER", "timezone")`.
+    This is read-only description; it changes nothing about whether a requirement blocks,
+    which stays exactly as `derive` set it.
+    """
+    predicate_readable = requirement.predicate.replace("_", " ")
+    if requirement.subject == OWNER_SUBJECT:
+        return f"your {predicate_readable}"
+    if requirement.scope.startswith("project:"):
+        return f"{predicate_readable} for project {requirement.subject}"
+    if requirement.scope == "people":
+        return f"who {requirement.subject} is"
+    return f"{requirement.subject} {predicate_readable}"
+
+
 def derive(
     *,
     text: str,
@@ -118,4 +136,4 @@ def derive(
     return unique
 
 
-__all__ = ["ACTION_FAMILY_PREDICATES", "OWNER_SUBJECT", "PROJECT_PREDICATES", "derive"]
+__all__ = ["ACTION_FAMILY_PREDICATES", "OWNER_SUBJECT", "PROJECT_PREDICATES", "derive", "label_for"]

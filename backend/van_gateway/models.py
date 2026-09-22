@@ -167,6 +167,19 @@ class CommandResult(BaseModel):
     #: is present on every result including the refusals, and an owner reporting a
     #: problem can quote it before anything downstream has run at all.
     correlation_id: str | None = None
+    #: GAP-F-001, GAP-F-002, GAP-F-005 — set when this command resolved to a typed action
+    #: the gateway executed itself (memory, reminders, the trading kill switch) rather than
+    #: dispatching to Hermes. `verification_state` is the `ActionExecution`'s own ledger
+    #: status (e.g. VERIFIED_SUCCESS, EXECUTION_FAILED). A failed local action is never
+    #: reported as "accepted" above: `status` is "denied" for an owner/authority/parameter
+    #: refusal or "degraded" for an infrastructure fault, matching this field's detail.
+    local_execution: dict[str, Any] | None = None
+    #: GAP-F-019 — what VAN did not know when it answered this command: the requirements
+    #: `context_requirements.derive` asked for that came back MISSING or STALE, each with
+    #: an owner-readable `label`. Every requirement here was non-blocking by design, so its
+    #: absence never stopped the command; this is what lets the owner and Hermes see the
+    #: gap rather than infer it from silence.
+    context_gaps: list[dict[str, Any]] = Field(default_factory=list)
 
     @model_validator(mode="after")
     def _derive_correlation_id(self) -> "CommandResult":
@@ -237,6 +250,10 @@ class ReminderCreate(BaseModel):
     project_id: str | None = None
     chain_follow_up_text: str | None = None
     chain_follow_up_offset_seconds: int | None = None
+    #: GAP-F-002 — who asked for this reminder: the owner device (the default, and every
+    #: producer before this field existed) or "hermes" when
+    #: `POST /v1/runtime/reminders` created it on the owner's behalf.
+    source: str = "owner_device"
 
 
 class GoogleConnectionStatus(BaseModel):

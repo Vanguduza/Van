@@ -48,7 +48,42 @@ Use the owner-runtime tools in this order; do not start with semantic inference:
 10. Before ending an owner-directed run, call `mission_result` with the `hermes_run_id` returned by Hermes and one of COMPLETED / FAILED / WAITING_FOR_OWNER / WAITING_EXTERNAL. This is lifecycle reporting only: COMPLETED causes the gateway to enter VERIFYING and cannot itself produce VERIFIED_SUCCESS. The `mission_id` supplied in the run metadata is for correlation; the gateway resolves authority from the durable run binding rather than trusting a caller-supplied mission id.
 11. Report success only for the gateway's verified terminal state. `knowledge_action_execute` performs provider submission/readback and action verification; generic actions still use `action_submitted` then `action_verify`.
 
-Graph and lexical results are retrieval evidence, not truth resolution. Hot capsules are latency optimizations over revision-bound evidence, not memory authority. Inferred/model-derived context cannot override owner, locked authority, Project Truth or verified live state. The owner-runtime MCP intentionally exposes no tool that can mint canonical owner memory.
+Graph and lexical results are retrieval evidence, not truth resolution. Hot capsules are latency optimizations over revision-bound evidence, not memory authority. Inferred/model-derived context cannot override owner, locked authority, Project Truth or verified live state. `context_fact_candidate`/`context_edge_candidate` are the only memory-admission tools this shim carries, and the gateway route forces every candidate through them to `authority=INFERRED` + `source_trust=MODEL_DERIVED`; owner/canonical promotion is a separate trusted gateway/owner path this shim does not expose.
+
+## Trading, reminders, attention/briefing, browser and automation tools
+
+These close RC-A: Hermes can now observe trading state, propose a reminder, and read the
+attention/briefing state, and can initiate the already-governed browser/automation
+assignment routes, all through `van_owner_runtime`. None of this mints owner authority.
+
+- **Trading reads** (`trading_portfolio`, `trading_positions`, `trading_risk`,
+  `trading_market_state`, `trading_trade_detail`, `trading_status`) are evidence for
+  analysis and trade review (`trading-intelligence` skill), never a signal to act on
+  unprompted. There is no trading mutation tool here: no halt, no ticket confirmation, no
+  account action. VATI remains the sole risk/execution authority; a proposal Hermes
+  reasons about from these reads is recorded as evidence for the owner, never submitted as
+  a TradeIntent.
+- **`reminder_create`** is exercised on the owner's behalf, not on Hermes's own initiative
+  invented from nothing: call it when the owner said something that names a due time
+  ("remind me to...", "follow up on... at/in..."), and pass `text` as close to the owner's
+  own words as the channel allows — do not summarize or embellish it. It creates no
+  canonical owner fact; the created row is an ordinary reminder, visible at owner
+  `GET /v1/reminders` like any other.
+- **`attention_list`** and **`briefing_read`** are read-only projections of the same state
+  the owner surface shows. Use them for `owner-briefing`/`notification-triage` work; they
+  cannot acknowledge, snooze or resolve anything.
+- **`browser_task_create`** opens the task before you assign work against it. Pass this
+  run's own `command_id` (and `mission_id`, so the task binds as a Mission Activity); the
+  route itself carries no `turn_id` — that arrives at the next step, on the assignment.
+  **`browser_assignment_run`** then requires this run's own `turn_id` and `command_id` and
+  inherits the mission's domain/action-class/step bounds — it does not choose or widen
+  them. The runner (`browser/api.py`'s `run_assignment`) enforces every bound server-side.
+  `browser_task_status` and `browser_task_evidence` read the task and its sealed evidence
+  afterward.
+- **`automation_route`** and **`automation_execute`** likewise run only under this
+  command's existing signed authority (`command_id` + `snapshot_id`); neither tool has an
+  approval field, so neither can mint or escalate one. `automation_run_status` reads a run
+  back by `run_id` after `automation_execute` returns it.
 
 ## Skills map
 

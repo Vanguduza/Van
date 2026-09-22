@@ -15,7 +15,23 @@ package com.dial.van.voice
  * to be synthesised is an acknowledgement that arrives after the owner has started talking.
  */
 enum class TtsEngineKind {
-    /** The bundled offline model. Preferred for anything VAN composes. */
+    /**
+     * The bundled offline model — asset readiness only, no runtime backend.
+     *
+     * GAP-F-013/voice audit — this used to be [LocalTtsRouter.select]'s first choice for
+     * anything VAN composes, and nothing had ever implemented it: `TtsOutputManager` speaks
+     * exclusively through Android's own `TextToSpeech`, whatever [TtsSelection] said, so the
+     * "preference" changed nothing about what spoke and only misdescribed why in logs and
+     * `readiness.ownerSentences`. [VoiceCapability.LOCAL_TTS] asset classification still
+     * populates this kind's [TtsEngineReadiness] — that check is real, a bundle can genuinely
+     * be present or missing — but [LocalTtsRouter.select] never routes to it. The gate to
+     * implement before it can: a `sherpa-onnx` `OfflineTts` instance actually wired into
+     * `TtsOutputManager.speak`, producing PCM this class plays, with its own barge-in and
+     * `UtteranceProgressListener`-equivalent hooks. Until that exists, leave this here
+     * documented and unrouted rather than delete it: the asset manifest still needs a
+     * capability id to classify the bundle against, and a reader still needs to be told the
+     * bundle is present-but-unused rather than have the field disappear.
+     */
     SHERPA_ONNX,
 
     /** Android's own, usable only when verified offline voice data is installed. */
@@ -95,12 +111,9 @@ object LocalTtsRouter {
             // bank, then whatever can speak.
         }
 
-        val sherpa = engines[TtsEngineKind.SHERPA_ONNX]
-        if (sherpa?.usableOffline == true) {
-            return TtsSelection.Engine(
-                TtsEngineKind.SHERPA_ONNX, "the bundled offline voice",
-            )
-        }
+        // TtsEngineKind.SHERPA_ONNX is deliberately never selected here — see its doc on
+        // the enum entry: no OfflineTts backend exists to synthesise through it yet, so
+        // routing to it would be exactly the misleading "preference" this comment replaces.
 
         val android = engines[TtsEngineKind.ANDROID_OFFLINE]
         if (android?.usableOffline == true) {

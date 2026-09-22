@@ -30,7 +30,14 @@ from vati.execution.reconciliation import LedgerPosition, reconcile
 from vati.intelligence.events import EventMatrix, EventWindowState
 from vati.intelligence.market_state import MarketState, build_market_state
 from vati.intelligence.regimes import RegimeEngine
+from vati.learning.episodes import LessonStore, lesson_from_verdict
 from vati.learning.hooks import LearningHooks, to_payload
+from vati.lifecycle.scale_policy import (
+    Adjustment, AdjustmentPolicyRegistry, PositionAdjustmentEngine, ScalePolicyRegistry,
+)
+from vati.lifecycle.thesis import ThesisEngine, ThesisInputs, thesis_from_capsule
+from vati.lifecycle.trade_health import PositionHealthInputs, TradeHealthEngine
+from vati.cognition.attribution import DecisionQualityInputs, DecisionQualityLedger
 from vati.market_data.bars import Bar
 from vati.market_data.calendars import MarketCalendar
 from vati.observability import metrics
@@ -112,6 +119,23 @@ class DecisionCycle:
         self.reviews: list = []
         self._closed_seen = 0
         self._entries: dict[str, dict] = {}   # trade_intent_id → {entry, stop, direction, strategy_id, cost_pct}
+        # GAP-F-003. Active-trade intelligence on the single-symbol runtime.
+        # Same components the account runtime uses, so backtest-to-live parity
+        # covers the thesis path too rather than only the order path.
+        self.thesis = ThesisEngine(ledger=ledger)
+        self.trade_health = TradeHealthEngine(ledger=ledger)
+        self.adjustment_policies = AdjustmentPolicyRegistry()
+        self.adjustments = PositionAdjustmentEngine(
+            ledger=ledger, policies=self.adjustment_policies)
+        self.scale_policies = ScalePolicyRegistry()
+        self.decision_quality = DecisionQualityLedger(ledger=ledger)
+        self.lessons = LessonStore(ledger=ledger)
+        self.lessons.restore_from_ledger(ledger)
+        self.engine.lessons = self.lessons
+        #: Headline ingress (events/news_ingress.py) when the runtime has one.
+        #: Reduce-only; the calendar keeps the blackout authority.
+        self.news = None
+        self.proposals: list = []
 
     # --------------------------------------------------------------- helpers
     def _log(self, kind: EventKind, payload: dict, *, now_ms: int, corr: str = "") -> None:
@@ -286,7 +310,27 @@ class DecisionCycle:
             self._log(EventKind.SESSION, {"router_refused": str(exc)}, now_ms=now_ms, corr=intent.trade_intent_id)
             return CycleResult(state.as_of_ms, state.state_hash, "ROUTER_REFUSED", str(exc), decision.approved_size)
         if rec.status in ("FILLED", "PARTIAL", "ACCEPTED", "OWNER_EXECUTED"):
-            self._entries[intent.trade_intent_id] = {"entry": rec.average_fill or intent.entry, "stop": intent.stop, "direction": intent.direction, "strategy_id": intent.strategy_id, "cost_pct": cost, "decision_price": intent.entry}
+            entry_price = rec.average_fill or intent.entry
+            self._entries[intent.trade_intent_id] = {
+                "entry": entry_price, "stop": intent.stop, "direction": intent.direction,
+                "strategy_id": intent.strategy_id, "cost_pct": cost,
+                "decision_price": intent.entry,
+                "quantity": rec.filled_qty,
+                "broker_position_id": rec.broker_position_id,
+                "opened_ms": now_ms,
+                "best_price": entry_price, "worst_price": entry_price,
+                "original_approved_risk_pct": decision.approved_risk_pct,
+                "protective_stop_confirmed": bool(
+                    rec.protective_stop_confirmed or cfg.software_stops),
+                "opened_in_blackout": state.event_window.value in (
+                    "PRE_BLACKOUT", "POST_BLACKOUT"),
+                "event_certified": bool(intent.is_event_certified),
+                "execution_policy_applied": True,
+                "regime": state.regime.trend.value,
+                "session": state.session.value,
+                "symbol": cfg.symbol,
+            }
+            self._seal_thesis(intent, decision, state, targets, entry_price, now_ms)
             if rec.average_fill is not None and rec.filled_qty > ZERO:
                 tca = compute_tca(rec, direction=intent.direction, qty=rec.filled_qty, value_per_unit=cfg.contract.value_per_price_unit_per_lot if cfg.contract.loss_model is LossModel.STOP_DISTANCE else Decimal(1), modelled_cost_pct=cost)
                 tca_payload = tca.as_dict()
@@ -309,6 +353,10 @@ class DecisionCycle:
     # ------------------------------------------------------- marks and exits
     def mark(self, bid: Decimal, ask: Decimal, *, now_ms: int) -> None:
         cfg = self.cfg
+        # PROTECT stage. Thesis assessment runs before exits are applied, so an
+        # invalidated claim is acted on in the same mark rather than waiting for
+        # a stop that may be further away than the reason for holding.
+        self._review_open_theses(bid, ask, now_ms=now_ms)
         receipts = list(self.router.apply_exits(cfg.venue, cfg.symbol, bid, ask, now_ms=now_ms))
         if hasattr(self.adapter, "mark"):
             receipts += self.adapter.mark(cfg.symbol, bid, ask, now_ms=now_ms)  # type: ignore[attr-defined]
@@ -316,6 +364,195 @@ class DecisionCycle:
             if r.status == "FILLED" and r.trade_intent_id in self._entries and r.reject_reason not in ("TRAIL", "BREAK_EVEN"):
                 self._on_close(r.trade_intent_id, r.average_fill, r.reject_reason, now_ms)
                 self.protection.forget(r.broker_position_id)
+
+    # ------------------------------------------ active-trade intelligence
+    def _seal_thesis(self, intent, decision, state, targets, entry_price: Decimal,
+                     now_ms: int) -> None:
+        """Seal the claim this position is making (GAP-F-003).
+
+        Written once, at approval, and never edited afterwards
+        (INV-REPLAY-001). It also fixes `original_approved_risk_pct`, the
+        ceiling every later ADD is measured against.
+        """
+        if intent.stop is None:
+            return
+        capsule_data: dict = {}
+        capsule_hash = ""
+        try:
+            capsule = self.engine.registry.get(intent.strategy_id)
+            capsule_data, capsule_hash = dict(capsule.data), capsule.capsule_hash
+        except Exception:  # noqa: BLE001 — a missing capsule is not a reason to skip
+            pass
+        spread_pct = getattr(state.features, "spread_percentile", None)
+        try:
+            self.thesis.seal(thesis_from_capsule(
+                trade_intent_id=intent.trade_intent_id,
+                symbol=self.cfg.symbol,
+                strategy_id=intent.strategy_id,
+                direction=intent.direction,
+                capsule_hash=capsule_hash,
+                market_state_hash=intent.market_snapshot_hash,
+                entry=entry_price,
+                original_stop=intent.stop,
+                original_approved_risk_pct=decision.approved_risk_pct,
+                created_ms=now_ms,
+                capsule_data=capsule_data,
+                expected_gross_move_pct=intent.expected_gross_move_pct,
+                targets=tuple(targets),
+                regime_label=state.regime.trend.value,
+                entry_volatility=getattr(state.features, "atr", None),
+                entry_liquidity=(None if spread_pct is None
+                                 else Decimal("1") - Decimal(str(spread_pct))),
+                event_sensitivity=(self.cfg.base, self.cfg.quote),
+            ), now_ms=now_ms)
+        except Exception as exc:  # noqa: BLE001 — a thesis fault never blocks a trade
+            self._log(EventKind.SESSION,
+                      {"event": "THESIS_NOT_SEALED", "error": str(exc)[:300]},
+                      now_ms=now_ms, corr=intent.trade_intent_id)
+
+    def _review_open_theses(self, bid: Decimal, ask: Decimal, *, now_ms: int) -> None:
+        """Assess every open position's claim and act on what the policy allows."""
+        for intent_id, row in list(self._entries.items()):
+            thesis = self.thesis.thesis_for(intent_id)
+            if thesis is None:
+                continue
+            direction = row["direction"]
+            mark = bid if direction is Direction.LONG else ask
+            row["best_price"] = (
+                max(Decimal(str(row.get("best_price", mark))), mark)
+                if direction is Direction.LONG
+                else min(Decimal(str(row.get("best_price", mark))), mark))
+            row["worst_price"] = (
+                min(Decimal(str(row.get("worst_price", mark))), mark)
+                if direction is Direction.LONG
+                else max(Decimal(str(row.get("worst_price", mark))), mark))
+            position_id = str(row.get("broker_position_id") or "")
+            rule = self.protection.rules.get(position_id)
+            current_stop = rule.stop if rule is not None else row.get("stop")
+            try:
+                health = self.trade_health.assess(PositionHealthInputs(
+                    trade_intent_id=intent_id, symbol=self.cfg.symbol,
+                    direction=direction,
+                    entry_price=Decimal(str(row["entry"])),
+                    current_price=mark,
+                    original_stop=thesis.original_stop,
+                    current_stop=(None if current_stop is None else Decimal(str(current_stop))),
+                    has_confirmed_stop=bool(
+                        row.get("protective_stop_confirmed")
+                        or (rule is not None and rule.software_stop)),
+                    opened_ms=int(row.get("opened_ms") or now_ms),
+                    now_ms=now_ms,
+                    expected_horizon_ms=int(row.get("expected_horizon_ms") or 0),
+                    worst_price=Decimal(str(row["worst_price"])),
+                    best_price=Decimal(str(row["best_price"])),
+                    spread=max(ZERO, ask - bid),
+                ))
+            except Exception:  # noqa: BLE001 — health is advisory here; exits still run
+                continue
+
+            materiality, refs = ZERO, ()
+            if self.news is not None:
+                try:
+                    impacts = self.news.assess_subject(
+                        subject_kind="POSITION", subject_id=intent_id,
+                        symbol=self.cfg.symbol, direction=direction.value, now_ms=now_ms)
+                    materiality, refs = type(self.news).peak(impacts)
+                except Exception:  # noqa: BLE001
+                    materiality, refs = ZERO, ()
+
+            confirmations: list[str] = []
+            first_target = thesis.confirmation.get("first_target")
+            if first_target is not None:
+                level = Decimal(str(first_target))
+                if (mark >= level if direction is Direction.LONG else mark <= level):
+                    confirmations.append("first_target")
+
+            assessment = self.thesis.assess(ThesisInputs(
+                thesis=thesis, health=health, current_price=mark, now_ms=now_ms,
+                current_stop=(None if current_stop is None else Decimal(str(current_stop))),
+                adverse_present=tuple(
+                    s for s in thesis.adverse_signals
+                    if s.upper() in {r.upper() for r in health.reasons}),
+                confirmations_met=tuple(confirmations),
+                event_materiality=materiality, event_refs=refs,
+            ))
+
+            protection_be = (
+                current_stop is not None
+                and (Decimal(str(current_stop)) >= thesis.entry
+                     if direction is Direction.LONG
+                     else Decimal(str(current_stop)) <= thesis.entry))
+            original_risk = row.get("original_approved_risk_pct")
+            original_risk = None if original_risk is None else Decimal(str(original_risk))
+            proposal = self.adjustments.propose(
+                assessment, health=health,
+                original_approved_risk_pct=original_risk,
+                current_risk_pct=(ZERO if protection_be else (original_risk or ZERO)),
+                protection_at_break_even=protection_be,
+                scale_policy=self.scale_policies.policy_for(str(row.get("strategy_id") or "")),
+                scale_ins_used=int(row.get("scale_ins_used", 0)),
+                proposed_stop=(thesis.entry if not protection_be else None),
+                now_ms=now_ms,
+            )
+            self.proposals.append(proposal)
+            row["last_proposal"] = proposal.action.value
+            # Only the two adjustments that cannot add exposure execute on this
+            # runtime: the single-symbol cycle has no account-level snapshot to
+            # put a delta intent through, and an add without RiskAuthority is
+            # not an add this system is willing to make (INV-AUTH-001).
+            if position_id and proposal.action is Adjustment.MOVE_PROTECTION \
+                    and proposal.new_stop is not None:
+                try:
+                    self.router.apply_preservation(
+                        self.cfg.venue, position_id=position_id,
+                        trade_intent_id=intent_id, action="TIGHTEN_STOP",
+                        now_ms=now_ms, new_stop=proposal.new_stop,
+                        reason="THESIS_" + proposal.thesis_state)
+                    row["stop"] = proposal.new_stop
+                except Exception:  # noqa: BLE001 — a refused tighten leaves the stop as is
+                    pass
+            elif position_id and proposal.action is Adjustment.EXIT:
+                try:
+                    receipt = self.router.apply_preservation(
+                        self.cfg.venue, position_id=position_id,
+                        trade_intent_id=intent_id, action="FULL_CLOSE", now_ms=now_ms,
+                        reason="THESIS_" + proposal.thesis_state)
+                except Exception:  # noqa: BLE001
+                    receipt = None
+                if receipt is not None and receipt.status in (
+                    "FILLED", "OWNER_EXECUTED", "BROKER_CONFIRMED"
+                ):
+                    self._on_close(intent_id, receipt.average_fill, "EXIT", now_ms)
+                    self.protection.forget(position_id)
+
+    def _classify_decision(self, intent_id: str, entry: dict, rv, now_ms: int):
+        """Decision quality x outcome, and the lesson it teaches (GAP-F-003)."""
+        thesis = self.thesis.thesis_for(intent_id)
+        inputs = DecisionQualityInputs(
+            trade_intent_id=intent_id,
+            strategy_id=str(entry.get("strategy_id") or ""),
+            thesis_sealed=thesis is not None,
+            thesis_falsifiable=bool(thesis is not None and thesis.invalidation),
+            approved_risk_pct=Decimal(str(entry.get("original_approved_risk_pct", ZERO) or ZERO)),
+            mandate_max_risk_pct=self.mandate.max_risk_per_trade,
+            protective_stop_confirmed=bool(entry.get("protective_stop_confirmed", True)),
+            execution_policy_applied=bool(entry.get("execution_policy_applied", True)),
+            cost_ratio=(None if entry.get("cost_ratio") is None
+                        else Decimal(str(entry["cost_ratio"]))),
+            opened_in_blackout=bool(entry.get("opened_in_blackout")),
+            event_certified=bool(entry.get("event_certified")),
+        )
+        verdict = self.decision_quality.record(
+            inputs, symbol=self.cfg.symbol, r_multiple=rv.r_multiple, now_ms=now_ms,
+            evidence_refs=(rv.artifact_hash,) + ((thesis.seal,) if thesis else ()))
+        if self.learning is not None:
+            self.lessons.record(lesson_from_verdict(
+                verdict, symbol=self.cfg.symbol,
+                regime=str(entry.get("regime", "")), session=str(entry.get("session", "")),
+                environment=self.learning.environment, now_ms=now_ms,
+                evidence_refs=(rv.artifact_hash,)), now_ms=now_ms)
+        self.thesis.forget(intent_id)
+        return verdict
 
     def _on_close(self, intent_id: str, exit_price: Optional[Decimal], reason: str, now_ms: int) -> None:
         e = self._entries.pop(intent_id, None)
@@ -334,20 +571,38 @@ class DecisionCycle:
         self._log(EventKind.TRADE_REVIEW, {k: (v.value if hasattr(v, "value") else (str(v) if isinstance(v, Decimal) else (list(v) if isinstance(v, tuple) else v))) for k, v in asdict(rv).items()}, now_ms=now_ms, corr=intent_id)
         self.admission.propose(rv.artifact_hash, knowledge_class="TRADE_EXPERIENCE", proposed_by=rv.proposed_by, trust_tier="T0_VAN_TRADING_POLICY")
         metrics.inc("vati_trades_closed_total", outcome=rv.outcome.value)
+        verdict = None
+        try:
+            verdict = self._classify_decision(intent_id, e, rv, now_ms)
+        except Exception as exc:  # noqa: BLE001 — classification never blocks a close
+            self._log(EventKind.SESSION,
+                      {"event": "DECISION_QUALITY_FAULT", "error": str(exc)[:300]},
+                      now_ms=now_ms, corr=intent_id)
         if self.learning is not None:
-            self._learn(intent_id, rv, e.get("cost_ratio", Decimal(1)), now_ms)
+            self._learn(intent_id, rv, e.get("cost_ratio", Decimal(1)), now_ms,
+                        process_ok=(verdict is None or not verdict.faults))
 
     # ------------------------------------------------------------ learning
-    def _learn(self, intent_id: str, rv, cost_ratio: Decimal, now_ms: int) -> None:
-        """Observe the closed trade; apply only LearningBoundary-checked, reduce-only effects."""
+    def _learn(self, intent_id: str, rv, cost_ratio: Decimal, now_ms: int,
+               *, process_ok: Optional[bool] = None) -> None:
+        """Observe the closed trade; apply only LearningBoundary-checked, reduce-only effects.
+
+        GAP-F-003. `process_ok` now carries the decision-quality verdict rather
+        than the review's constant, and the quadrant multiplier is combined
+        with `min` below — so a lucky bad decision reduces capsule health and
+        an unlucky good one does not, while nothing here can raise it
+        (INV-RISK-001).
+        """
         assert self.learning is not None
-        ep, adj = self.learning.on_review(self.ledger, trade_intent_id=intent_id, strategy_id=rv.strategy_id, r_multiple=rv.r_multiple, process_ok=rv.process_ok, cost_ratio=cost_ratio)
+        ep, adj = self.learning.on_review(self.ledger, trade_intent_id=intent_id, strategy_id=rv.strategy_id, r_multiple=rv.r_multiple,
+                                          process_ok=(rv.process_ok if process_ok is None else process_ok), cost_ratio=cost_ratio)
         if ep is not None:
             self._log(EventKind.TRADE_EXPERIENCE_ARTIFACT, to_payload(ep), now_ms=now_ms, corr=intent_id)
             self.admission.propose(ep.artifact_hash, knowledge_class="TRADE_EXPERIENCE", proposed_by="vati-learning", trust_tier="T0_VAN_TRADING_POLICY")
         if adj is None:
             return
-        self.engine.m.capsule_health[rv.strategy_id] = adj.multiplier
+        self.engine.m.capsule_health[rv.strategy_id] = min(
+            adj.multiplier, self.decision_quality.health_multiplier(rv.strategy_id))
         if adj.demote_to:
             cap = self.engine.registry.get(rv.strategy_id)
             # Live capsules step down to SHADOW (observe, no orders); pre-live capsules become DEGRADED (inactive).

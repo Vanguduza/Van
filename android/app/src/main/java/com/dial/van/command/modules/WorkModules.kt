@@ -4,22 +4,15 @@ import com.dial.van.runtime.DeviceRuntimeReadings
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.PaddingValues
-import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.padding
-import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
-import androidx.compose.material3.Button
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
-import androidx.compose.runtime.mutableStateOf
-import androidx.compose.runtime.remember
-import androidx.compose.runtime.rememberCoroutineScope
-import androidx.compose.runtime.setValue
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.platform.LocalContext
@@ -28,175 +21,21 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import com.dial.van.VanApplication
 import com.dial.van.command.AdminCard
-import com.dial.van.command.CommandMessageBubble
 import com.dial.van.command.SectionHeader
 import com.dial.van.command.TruthMessage
 import com.dial.van.command.objectList
-import com.dial.van.command.stringList
-import com.dial.van.control.VanMessageRole
 import com.dial.van.events.EventPage
 import com.dial.van.events.EventRecord
 import com.dial.van.events.EventStream
-import com.dial.van.session.OwnerReconfirmationRequest
-import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.delay
-import kotlinx.coroutines.launch
-import kotlinx.coroutines.withContext
 
-/** Tasks, projects and activity. Split out of `CommandCentreActivity` (P3-AND-009). */
-
-@Composable
-internal fun TasksModule(
-    app: VanApplication,
-    glass: com.dial.van.visual.VanGlassStyle,
-    openChat: () -> Unit,
-) {
-    val conversation by app.commandController.state.collectAsState()
-    val sessionState by app.vanSession.state.collectAsState()
-    val operational = conversation.messages.filter { it.status != null && it.role != VanMessageRole.OWNER }
-    val queueCount = app.commandQueue.size()
-    val scope = rememberCoroutineScope()
-    var confirmations by remember { mutableStateOf<List<OwnerReconfirmationRequest>>(emptyList()) }
-    var confirmationNotice by remember { mutableStateOf<String?>(null) }
-
-    fun refreshConfirmations() {
-        confirmations = app.vanSession.pendingOwnerReconfirmations()
-    }
-
-    // A queue-depth change means an item arrived, expired, flushed or was cancelled.
-    // Reconfirmation itself leaves the depth unchanged, so the button handlers refresh
-    // this projection explicitly after the durable write.
-    LaunchedEffect(sessionState.outboxDepth) { refreshConfirmations() }
-
-    LazyColumn(
-        modifier = Modifier.fillMaxSize().padding(horizontal = 14.dp),
-        verticalArrangement = Arrangement.spacedBy(9.dp),
-        contentPadding = PaddingValues(vertical = 8.dp),
-    ) {
-        item { SectionHeader("Tasks", "What VAN is doing, and what is waiting to be sent") }
-        item {
-            AdminCard(glass) {
-                Column {
-                    Text("Encrypted offline queue", color = Color.White, fontWeight = FontWeight.Bold)
-                    Text("$queueCount command(s) currently queued", color = Color(0xFFBCD1D8), fontSize = 12.sp)
-                }
-            }
-        }
-        if (confirmations.isNotEmpty()) {
-            item {
-                SectionHeader(
-                    "Waiting for you",
-                    "These were held during an outage and will not run until you confirm them.",
-                )
-            }
-            items(confirmations, key = { "reconfirm:${it.messageId}" }) { request ->
-                AdminCard(glass) {
-                    Column(verticalArrangement = Arrangement.spacedBy(7.dp)) {
-                        Text(request.commandText, color = Color.White, fontWeight = FontWeight.Bold)
-                        Text(
-                            request.ownerReadableState,
-                            color = Color(0xFFFFC86B),
-                            fontSize = 11.sp,
-                        )
-                        Text(
-                            "Action ${request.actionClass} • ${request.commandId.takeLast(8)}",
-                            color = Color(0xFFBCD1D8),
-                            fontSize = 10.sp,
-                        )
-                        Row(horizontalArrangement = Arrangement.spacedBy(8.dp)) {
-                            Button(onClick = {
-                                scope.launch {
-                                    val accepted = withContext(Dispatchers.IO) {
-                                        app.vanSession.reconfirmAndFlush(request.messageId)
-                                    }
-                                    confirmationNotice = if (accepted) {
-                                        "Confirmed. VAN will send it on the current path, or the next one that becomes available."
-                                    } else {
-                                        "That queued command is no longer waiting for confirmation."
-                                    }
-                                    refreshConfirmations()
-                                }
-                            }) { Text("Confirm") }
-                            Button(onClick = {
-                                scope.launch {
-                                    val cancelled = withContext(Dispatchers.IO) {
-                                        app.vanSession.cancelReconfirmation(request.messageId)
-                                    }
-                                    confirmationNotice = if (cancelled) {
-                                        "Cancelled. VAN will not send that queued command."
-                                    } else {
-                                        "That queued command is no longer waiting for confirmation."
-                                    }
-                                    refreshConfirmations()
-                                }
-                            }) { Text("Cancel") }
-                        }
-                    }
-                }
-            }
-        }
-        confirmationNotice?.let { notice -> item { TruthMessage(notice) } }
-        if (operational.isEmpty()) item { TruthMessage("No dispatched owner work is present in this session.") }
-        items(operational.reversed(), key = { it.id }) { message ->
-            CommandMessageBubble(message, glass)
-        }
-        item { Button(onClick = openChat) { Text("Send instruction") } }
-    }
-}
-
-@Composable
-internal fun ProjectsModule(
-    app: VanApplication,
-    glass: com.dial.van.visual.VanGlassStyle,
-    selectForChat: (String) -> Unit,
-) {
-    val scope = rememberCoroutineScope()
-    var projects by remember { mutableStateOf<List<String>?>(null) }
-    var truthSummary by remember { mutableStateOf<Map<String, String>>(emptyMap()) }
-    var error by remember { mutableStateOf<String?>(null) }
-
-    LaunchedEffect(Unit) {
-        runCatching { app.gatewayClient.projects().stringList() }
-            .onSuccess { projects = it }
-            .onFailure { error = it.message ?: "VAN could not read your projects just now." }
-    }
-
-    LazyColumn(
-        modifier = Modifier.fillMaxSize().padding(horizontal = 14.dp),
-        verticalArrangement = Arrangement.spacedBy(9.dp),
-        contentPadding = PaddingValues(vertical = 8.dp),
-    ) {
-        item { SectionHeader("Projects", "What VAN knows you are working on") }
-        if (projects == null && error == null) item { TruthMessage("Loading project registry…") }
-        if (error != null) item { TruthMessage(error!!, warning = true) }
-        if (projects?.isEmpty() == true) item { TruthMessage("Gateway returned no registered projects.") }
-        items(projects.orEmpty(), key = { it }) { projectId ->
-            AdminCard(glass) {
-                Column(verticalArrangement = Arrangement.spacedBy(6.dp)) {
-                    Text(projectId, color = Color.White, fontSize = 15.sp, fontWeight = FontWeight.Bold)
-                    truthSummary[projectId]?.let { Text(it, color = Color(0xFFBCD1D8), fontSize = 10.sp, maxLines = 4) }
-                    Row(horizontalArrangement = Arrangement.spacedBy(7.dp)) {
-                        Button(onClick = { selectForChat(projectId) }) { Text("Select + Chat") }
-                        Button(onClick = {
-                            scope.launch {
-                                runCatching { app.gatewayClient.projectTruth(projectId) }
-                                    .onSuccess { obj ->
-                                        val summary = if (obj.optBoolean("ok")) {
-                                            "Truth ${obj.optString("truth_sha").take(12)} • repo ${obj.optString("repo_sha").take(12)}"
-                                        } else {
-                                            "Truth unavailable: ${obj.optString("error", obj.optString("degraded", "unknown"))}"
-                                        }
-                                        truthSummary = truthSummary + (projectId to summary)
-                                    }
-                                    .onFailure { t -> truthSummary = truthSummary + (projectId to "Truth load failed: ${t.message}") }
-                            }
-                        }) { Text("Truth") }
-                    }
-                }
-            }
-        }
-    }
-}
+/**
+ * The delegated agents/activity feed. Split out of `CommandCentreActivity` (P3-AND-009);
+ * `TasksModule` and `ProjectsModule` — this file's other two former occupants — are
+ * superseded by the Work route's own conversation+missions surface and by the `projects/`
+ * package's `ProjectsRoute`, so only the event stream remains here, called as a Work child
+ * (`work/activity`, DNA §4: "delegated agents, activity feed").
+ */
 
 /**
  * P3-AND-002 — the event stream, actually streamed.

@@ -69,6 +69,9 @@ from van_gateway.ops.scheduler import OpsScheduler, ScheduledJob
 from van_gateway.ops.suppression import SuppressionChannel, SuppressionStore
 from van_gateway.orchestrator import CommandOrchestrator
 from van_gateway.projects.router import ProjectRouter
+from van_gateway.proactive.autonomy import ActionAutonomyGate, DomainTrustService
+from van_gateway.proactive.followups import ProactiveFollowUpJob
+from van_gateway.trading.bridge import TradingEventBridge
 from van_gateway.reminders.service import ReminderService
 from van_gateway.reminders.timeparse import TimeParseError, parse_due_expression
 from van_gateway.automation.api import AutomationApi
@@ -412,7 +415,14 @@ def create_app() -> FastAPI:
     briefing = BriefingService(store, attention)
     reminders = ReminderService(store)
     decisions = DecisionService(store, attention)
-    owner_runtime = OwnerRuntimeApi(store, settings)
+    # GAP-F-003/002: the Hermes-facing runtime can read attention/briefing, create
+    # reminders on the owner's behalf and (below, once constructed) read trading state.
+    domain_trust = DomainTrustService(store)
+    owner_runtime = OwnerRuntimeApi(
+        store, settings, reminders=reminders, attention=attention, briefing=briefing,
+        # GAP-F-008: agent-initiated mutations consult the earned/granted domain trust.
+        autonomy=ActionAutonomyGate(domain_trust),
+    )
     automation_registry = AutomationRegistry(store)
     automation_hot_index = HotWorkflowIndex()
     # One index, so `/v1/automation/health` reports the index work is routed
@@ -459,6 +469,9 @@ def create_app() -> FastAPI:
         lake_root=settings.vati_lake_root,
         reporting_currency=settings.vati_reporting_currency,
     )
+    # GAP-F-003: Hermes reads the same trading read models the owner sees, through
+    # /v1/runtime/trading/* (RUNTIME scope). Never a mutation.
+    owner_runtime.trading = trading
     account_control = (
         CommanderAccountControl(settings.van_commander_url, settings.van_commander_token_file, settings.van_commander_ca_file)
         if settings.van_commander_url
@@ -505,6 +518,9 @@ def create_app() -> FastAPI:
     # Constructed before the mission service, which publishes every owner-visible
     # mission event to it (P0-EXEC-001).
     events = EventBus(store, settings.event_page_size)
+    # Closed trades become owner-visible events (Activity feed, embodiment CELEBRATE
+    # on GOOD_DECISION_GOOD_OUTCOME only). A projection of the ledger, never an authority.
+    trading_events = TradingEventBridge(store, trading, events)
     # Rev 1.5 §§5, 6 — the interactive browser session.
     #
     # It shares the Browser Fabric's broker and policy engine rather than constructing its
@@ -568,6 +584,11 @@ def create_app() -> FastAPI:
     browser.binder = mission_binder
     automation.binder = mission_binder
     understanding_api = UnderstandingApi(store, settings)
+    # GAP-F-028: VAN's only self-initiated behaviour — bounded FOLLOW_UP attention items
+    # for work the owner left waiting. Never opens a mission or executes an action.
+    proactive_followups = ProactiveFollowUpJob(
+        store, attention, missions, decisions, understanding_api.policies,
+    )
     google_router = GoogleCapabilityRouter(store, google_broker)
 
     # P3-OPS-005 — dedupe that survives a restart, instead of a set() on the instance.
@@ -588,6 +609,13 @@ def create_app() -> FastAPI:
         owner_intent_max_age_seconds=settings.owner_intent_max_age_seconds,
         throttle=throttle,
         missions=command_missions,
+        # GAP-F-001/002/005: gateway-executed typed actions (memory, reminders,
+        # trading halt) run here with the same authority/action/mission ledgers.
+        actions=owner_runtime.actions,
+        owner_fact_author=owner_fact_author,
+        reminders=reminders,
+        trading=trading,
+        learning=learning,
     )
 
     # ---------------------------------------------------------- Gate 11: ops jobs
@@ -726,6 +754,12 @@ def create_app() -> FastAPI:
             "rows_compared": report["rows_compared"],
         }
 
+    async def _run_trading_events() -> dict:
+        return await trading_events.run(int(time.time() * 1000))
+
+    async def _run_proactive_followups() -> dict:
+        return await proactive_followups.run(int(time.time() * 1000))
+
     def _scheduler_jobs() -> tuple[ScheduledJob, ...]:
         jobs = [
             ScheduledJob("reminders.fire_due", settings.reminder_sweep_seconds, _sweep_reminders),
@@ -734,6 +768,8 @@ def create_app() -> FastAPI:
                 _expire_overdue_missions,
             ),
             ScheduledJob("ops.retention", settings.retention_interval_seconds, _run_retention),
+            ScheduledJob("proactive.follow_ups", settings.reminder_sweep_seconds, _run_proactive_followups),
+            ScheduledJob("trading.publish_closed", settings.reminder_sweep_seconds, _run_trading_events),
         ]
         if settings.pki_dir:
             jobs.append(ScheduledJob("ops.pki_scan", settings.pki_scan_interval_seconds, _scan_pki))
@@ -1147,6 +1183,7 @@ def create_app() -> FastAPI:
             or is_session_owner_route(path)
             or path == "/v1/commands"
             or path == "/v1/context/ingest"
+            or path == "/v1/google/owner-revoke"
         )
 
     async def enforce_device_proof(request: Request, device_id: str) -> JSONResponse | None:
@@ -1942,12 +1979,23 @@ def create_app() -> FastAPI:
     # no undo route (finding P2-SEC-009). Tests install a fake transport directly on
     # app.state.google, which is where that capability belongs. tools/ci/maturity_gate.py
     # fails CI if the route reappears.
+
+    def _scrubbed(payload: Any) -> Any:
+        """GAP-F-020 — `scrub_for_prompt` had no production caller. Every Google read
+        that reaches Hermes passes through here, recursively, so a provider payload
+        can never carry credential-shaped keys into a model-visible tool result."""
+        if isinstance(payload, dict):
+            return {k: _scrubbed(v) for k, v in GoogleService.scrub_for_prompt(payload).items()}
+        if isinstance(payload, list):
+            return [_scrubbed(v) for v in payload]
+        return payload
+
     @app.get("/v1/google/gmail/search")
     async def gmail_search(q: str, x_van_internal_token: str | None = Header(default=None)):
         require_internal_control(x_van_internal_token, ControlScope.GOOGLE)
         try:
             return {
-                "messages": await google.gmail_search(q),
+                "messages": _scrubbed(await google.gmail_search(q)),
                 "live": google.transport is not None and not isinstance(google.transport, FakeGoogleTransport),
             }
         except GoogleAuthError as exc:
@@ -2025,7 +2073,7 @@ def create_app() -> FastAPI:
     async def calendar_agenda(x_van_internal_token: str | None = Header(default=None)):
         require_internal_control(x_van_internal_token, ControlScope.GOOGLE)
         try:
-            return {"events": await google.calendar_agenda()}
+            return {"events": _scrubbed(await google.calendar_agenda())}
         except GoogleAuthError as exc:
             raise HTTPException(status_code=503, detail=str(exc)) from exc
 
@@ -2046,7 +2094,7 @@ def create_app() -> FastAPI:
     async def drive_search(q: str, x_van_internal_token: str | None = Header(default=None)):
         require_internal_control(x_van_internal_token, ControlScope.GOOGLE)
         try:
-            return {"files": await google.drive_search(q)}
+            return {"files": _scrubbed(await google.drive_search(q))}
         except GoogleAuthError as exc:
             raise HTTPException(status_code=503, detail=str(exc)) from exc
 
@@ -2054,7 +2102,7 @@ def create_app() -> FastAPI:
     async def contacts_resolve(q: str, x_van_internal_token: str | None = Header(default=None)):
         require_internal_control(x_van_internal_token, ControlScope.GOOGLE)
         try:
-            return {"contacts": await google.contacts_resolve(q)}
+            return {"contacts": _scrubbed(await google.contacts_resolve(q))}
         except GoogleAuthError as exc:
             raise HTTPException(status_code=503, detail=str(exc)) from exc
 
@@ -2062,7 +2110,7 @@ def create_app() -> FastAPI:
     async def tasks_list(x_van_internal_token: str | None = Header(default=None)):
         require_internal_control(x_van_internal_token, ControlScope.GOOGLE)
         try:
-            return {"tasks": await google.tasks_list()}
+            return {"tasks": _scrubbed(await google.tasks_list())}
         except GoogleAuthError as exc:
             raise HTTPException(status_code=503, detail=str(exc)) from exc
 
@@ -2110,6 +2158,25 @@ def create_app() -> FastAPI:
     async def google_revoke(x_van_internal_token: str | None = Header(default=None)):
         require_internal_control(x_van_internal_token, ControlScope.GOOGLE)
         await google.revoke()
+        return await google.status()
+
+    @app.post("/v1/google/owner-revoke")
+    async def google_owner_revoke(request: Request):
+        """GAP-F-024 — the owner can cut Google from the phone.
+
+        Revocation was reachable only with the internal-control credential (an operator
+        on the host). A compromised token is exactly when the owner is not at the host,
+        so this route is device-authenticated and device-proofed like every other
+        owner mutation. Connect stays on the host: consent needs the OAuth client secret.
+        """
+        device_id = getattr(request.state, "van_device_id", None)
+        if not device_id:
+            raise HTTPException(status_code=403, detail="device_identity_required")
+        await google.revoke()
+        await audit.record(
+            result="ok", device_id=device_id, capability="google.owner_revoke",
+            after={"status": "revoked"},
+        )
         return await google.status()
 
     @app.get("/v1/google/mesh")
@@ -2454,6 +2521,29 @@ def create_app() -> FastAPI:
     @app.get("/v1/trading/portfolio")
     async def trading_portfolio():
         return trading.portfolio()
+
+    # Trading intelligence read models (owner-device routes). Each reads the
+    # hash-chained ledger directly and answers {"ledger_available": False, ...}
+    # when it cannot; the device shows an honest unavailable state, never a fixture.
+    @app.get("/v1/trading/positions")
+    async def trading_positions():
+        return trading.positions()
+
+    @app.get("/v1/trading/events")
+    async def trading_events(limit: int = 50):
+        return trading.events(limit=max(1, min(limit, 500)))
+
+    @app.get("/v1/trading/potential")
+    async def trading_potential():
+        return trading.potential_trades()
+
+    @app.get("/v1/trading/history")
+    async def trading_history(limit: int = 50):
+        return trading.history(limit=max(1, min(limit, 500)))
+
+    @app.get("/v1/trading/assessment")
+    async def trading_assessment():
+        return trading.assessment()
 
     @app.get("/v1/trading/accounts")
     async def trading_accounts():

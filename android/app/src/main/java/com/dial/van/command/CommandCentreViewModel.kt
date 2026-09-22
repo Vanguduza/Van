@@ -2,60 +2,63 @@ package com.dial.van.command
 
 import androidx.lifecycle.SavedStateHandle
 import androidx.lifecycle.ViewModel
+import com.dial.van.command.nav.VanNavModel
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
 
 /**
- * The Command Centre's surviving state (P3-AND-007).
+ * The Command Centre's surviving state (P3-AND-007), now over the DNA §4 route graph.
  *
  * Held in a `ViewModel` with a `SavedStateHandle` rather than in `remember`, so it survives
- * both a configuration change (rotation, font scale, day/night) and process death. The
- * distinction matters: a `rememberSaveable` alone covers rotation, and the case that
- * actually bites a resident assistant is Android reclaiming the process overnight.
+ * both a configuration change and process death — the case that actually bites a resident
+ * assistant is Android reclaiming the process overnight, not a rotation.
  *
- * The navigation rules themselves are in [CommandNav], which is pure and executed in
- * `android/verification`. This class is the Android plumbing around them and nothing else.
+ * The route the owner was on is a `String` (a `NavHost` route, concrete — arguments filled
+ * in), never an enum ordinal: [VanNavModel.restore] is what decides a saved value is still a
+ * destination this build knows about, and it is pure and executed in `android/verification`.
+ * This class is the Android plumbing around it — [start] is called once per composition with
+ * the Activity's freshly-computed launch destination and only acts on a genuinely new
+ * instance (mirrors the old `CommandCentreViewModel.start`'s reasoning: a restored instance
+ * already knows where the owner was, and replaying the launch intent's destination over that
+ * would move them). `CommandCentreActivity`'s `NavHostController` then publishes every
+ * further destination change here via `currentBackStackEntryFlow`.
  */
-// P0-AND-012 — `internal`, because `CommandModule` is. A public class cannot expose an
-// internal type in its API, and this one did in three places, so the app has not compiled
-// since the Gate 10 split. Widening CommandModule instead would be the wrong direction:
-// the navigation surface is app-internal and nothing outside the module has any business
-// naming a screen.
-internal class CommandCentreViewModel(
+class CommandCentreViewModel(
     private val state: SavedStateHandle,
 ) : ViewModel() {
 
-    private val _selected = MutableStateFlow(CommandNav.restore(state[KEY_MODULE]))
-    val selected: StateFlow<CommandModule> = _selected.asStateFlow()
+    private val _currentRoute = MutableStateFlow(VanNavModel.restore(state[KEY_ROUTE]))
+    val currentRoute: StateFlow<String> = _currentRoute.asStateFlow()
 
-    /** The owner's half-typed message, so a rotation does not discard it. */
+    /** What the `NavHost` should start on. Stable across recomposition once [start] has run. */
+    val startDestination: String get() = _currentRoute.value
+
+    /** The owner's half-typed message on the Work command bar, so a rotation keeps it. */
     var draft: String
         get() = state[KEY_DRAFT] ?: ""
         set(value) {
             state[KEY_DRAFT] = value
         }
 
-    fun start(initial: CommandModule) {
-        // Only on a genuinely fresh instance: a restored one already knows where the owner
-        // was, and an intent extra replayed after process death would move them.
-        if (state.get<String>(KEY_MODULE) == null) navigate(initial)
+    /**
+     * Only on a genuinely fresh instance: a restored one already has a route in
+     * [SavedStateHandle] (even if that route is Home, because [onRouteChanged] wrote it),
+     * and a launch intent replayed after process death would move the owner off the screen
+     * Android just recreated them onto.
+     */
+    fun start(initial: String) {
+        if (state.get<String>(KEY_ROUTE) == null) onRouteChanged(initial)
     }
 
-    fun navigate(module: CommandModule) {
-        _selected.value = module
-        state[KEY_MODULE] = CommandNav.save(module)
-    }
-
-    /** True when back was handled here; false when the Activity should handle it. */
-    fun back(): Boolean {
-        val target = CommandNav.back(_selected.value) ?: return false
-        navigate(target)
-        return true
+    /** Called from the `NavHostController`'s back-stack flow on every navigation. */
+    fun onRouteChanged(route: String) {
+        _currentRoute.value = route
+        state[KEY_ROUTE] = route
     }
 
     private companion object {
-        const val KEY_MODULE = "command_centre.module"
+        const val KEY_ROUTE = "command_centre.route"
         const val KEY_DRAFT = "command_centre.draft"
     }
 }

@@ -283,6 +283,44 @@ class TestStreamGrantRoute:
         resp = await ac.post(f"{SESSIONS}/{session_id}/stream-grant", headers=_headers(owner))
         assert resp.status_code == 409
 
+    async def test_a_signing_key_with_no_signal_url_refuses_rather_than_minting(
+        self, tmp_path, monkeypatch, signing_key
+    ):
+        """GAP-F-016 — a signing key alone is not a configured stream host.
+
+        The interactive router mounts on `browser_stream_signing_key_file` alone, so this
+        is the state of a host that provisioned the signing key but never set the signal
+        URL. It must fail loudly (503) rather than mint a grant pointing at "".
+        """
+        _, key_path = signing_key
+        monkeypatch.setenv("VAN_DATABASE_PATH", str(tmp_path / "no-signal-url.sqlite3"))
+        monkeypatch.setenv("VAN_HERMES_BASE_URL", "http://hermes.invalid")
+        monkeypatch.setenv("VAN_GOOGLE_TOKEN_FERNET_KEY", Fernet.generate_key().decode())
+        monkeypatch.setenv("VAN_DEVICE_SECRET_FERNET_KEY", Fernet.generate_key().decode())
+        monkeypatch.setenv("VAN_INGRESS_TOKEN", INGRESS)
+        monkeypatch.setenv("VAN_INTERNAL_CONTROL_TOKEN", INTERNAL)
+        monkeypatch.setenv("VAN_BROWSER_STREAM_SIGNING_KEY_FILE", str(key_path))
+        monkeypatch.setenv("VAN_BROWSER_STREAM_SIGNING_KID", SIGNING_KID)
+        monkeypatch.setenv("VAN_BROWSER_STREAM_SIGNAL_URL", "")
+        get_settings.cache_clear()
+        app = create_app()
+        try:
+            transport = ASGITransport(app=app)
+            async with AsyncClient(transport=transport, base_url="http://test") as ac:
+                async with app.router.lifespan_context(app):
+                    await app.state.browser.broker.register_profile(
+                        profile_alias="authenticated_owner"
+                    )
+                    owner = await _device(app)
+                    session_id = (await _create(ac, owner)).json()["session_id"]
+                    resp = await ac.post(
+                        f"{SESSIONS}/{session_id}/stream-grant", headers=_headers(owner)
+                    )
+                    assert resp.status_code == 503, resp.text
+                    assert resp.json()["detail"] == "BROWSER_STREAM_UNCONFIGURED"
+        finally:
+            get_settings.cache_clear()
+
 
 @pytest.mark.asyncio
 class TestControlRoutes:

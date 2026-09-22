@@ -67,6 +67,17 @@ sourceSets {
             "com/dial/van/visual/VanCharacterMotion.kt",
             "com/dial/van/visual/VanDrawOp.kt",
             "com/dial/van/visual/VanEffectBudget.kt",
+            // GAP-F-012 — the event-to-embodiment decision functions, and the total-map
+            // registry that proves every VanDurableState/VanFiniteAction has a producer.
+            "com/dial/van/visual/VanEmbodimentReducer.kt",
+            "com/dial/van/visual/VanEmbodimentProducers.kt",
+            // §2/§6 — overlay/action motion timing, kept pure so the durations that decide
+            // when VanLiveVisualState.action() auto-clears are exercised on the JVM.
+            "com/dial/van/visual/VanMotionMap.kt",
+            // GAP-F-014 — the renderer decision as an owner-facing fact, and the bridge
+            // that lets `visual/` publish it without depending on `degraded/`.
+            "com/dial/van/visual/VanRendererStatus.kt",
+            "com/dial/van/visual/DegradedBridge.kt",
             "com/dial/van/visual/VanFieldGeometry.kt",
             "com/dial/van/visual/VanFrameBudget.kt",
             "com/dial/van/visual/VanGlassTokens.kt",
@@ -84,14 +95,27 @@ sourceSets {
             "com/dial/van/runtime/VanResourceEnvelope.kt",
             "com/dial/van/degraded/DegradedMode.kt",
             "com/dial/van/degraded/SubsystemSignals.kt",
+            // GAP-F-010 — the gateway's structured /health.degraded[] mapped onto subsystem
+            // rows, and the store that reconciles them into DegradedMode.subsystems. Both are
+            // free of Android imports (org.json + kotlinx.coroutines only), same reasoning as
+            // every other pure file in this list.
+            "com/dial/van/degraded/GatewayDegradedMapping.kt",
+            "com/dial/van/degraded/DegradedModeStore.kt",
             "com/dial/van/overlay/OverlayTheme.kt",
             "com/dial/van/overlay/EdgeDocking.kt",
             "com/dial/van/overlay/OverlayVisibilityPolicy.kt",
             "com/dial/van/overlay/OverlayDragController.kt",
             "com/dial/van/overlay/VanOverlayController.kt",
             "com/dial/van/overlay/VanOverlayInteraction.kt",
-            "com/dial/van/command/CommandModule.kt",
-            "com/dial/van/command/CommandCentreNav.kt",
+            // Replaces CommandModule.kt/CommandCentreNav.kt (P3-AND-009's flat 17-module
+            // grid) — the typed DNA §4 route registry and the pure nav model built on it:
+            // process-death restoration, legacy-intent/deep-link resolution, and the
+            // one-level "back" rule.
+            "com/dial/van/command/nav/VanRoute.kt",
+            "com/dial/van/command/nav/VanNavModel.kt",
+            // GAP-F-011 — whether a dispatched command's thread still needs polling, and
+            // what GET /v1/commands/{id} becomes once it answers.
+            "com/dial/van/command/work/ConversationReducer.kt",
             "com/dial/van/events/EventStream.kt",
             // One history for the app, rather than one per screen. Pure because the
             // cursor is an interface, so the merge of a socket page and a polled one
@@ -106,6 +130,18 @@ sourceSets {
             "com/dial/van/telemetry/SessionTelemetry.kt",
             "com/dial/van/trading/TradingFormat.kt",
             "com/dial/van/trading/ChartViewport.kt",
+            // GAP-F-003/GAP-F-005 — the trading UI rebuild's own pure layer. TradingModels.kt
+            // and TradeBook.kt are included so TradingReadModels.kt's package-internal helpers
+            // (`str`/`num`/`arr`/...) and `TradeConfidence`/`ConfidenceBand` resolve; their one
+            // external dependency, `com.dial.van.visual.VanTradeSignals`, is already in this
+            // list via VanTradeSemantic.kt above. ChartGeometry.kt now builds its grid/time
+            // ticks through `design/charts/ChartAxes` (already listed), so it moves here too —
+            // same reasoning as Gate 6: no Android import, so it is executed rather than only
+            // reasoned about.
+            "com/dial/van/trading/TradingModels.kt",
+            "com/dial/van/trading/TradeBook.kt",
+            "com/dial/van/trading/ChartGeometry.kt",
+            "com/dial/van/trading/TradingReadModels.kt",
             "com/dial/van/voice/VoiceRecognitionModels.kt",
             "com/dial/van/voice/WakeModelAsset.kt",
             // Rev 1.5 §21 — the offline voice edge's decisions. Every case that matters
@@ -115,6 +151,9 @@ sourceSets {
             "com/dial/van/voice/VoiceAssetManifest.kt",
             "com/dial/van/voice/VoiceTurn.kt",
             "com/dial/van/voice/SpeechQueue.kt",
+            // GAP-F-013 — the device-side cue timing model and the pure lookup
+            // TtsOutputManager drives it with.
+            "com/dial/van/voice/SpeechCueTiming.kt",
             "com/dial/van/voice/LocalTtsRouter.kt",
             "com/dial/van/voice/VoiceAudioPolicy.kt",
             // Written before this checkpoint and never executed: it is pure, it decides
@@ -168,6 +207,26 @@ sourceSets {
             // that agree on every ASCII document and disagree on one accented character.
             "com/dial/van/security/DeviceProofCanonical.kt",
             "com/dial/van/security/VanCanonicalJson.kt",
+            // The Android design system's pure half (docs/design/VAN_PRODUCT_DESIGN_DNA.md).
+            // Screen-state reduction, density-tier and motion arithmetic, the domain→colour-role
+            // mapping and the chart-axis math have no Compose or Android imports, so — same
+            // reasoning as Gate 6 above — they are executed here rather than only reasoned
+            // about. The Compose-facing wrapper (`VanTokens.kt` and `design/components/**`)
+            // is not included: it cannot compile without the Android Gradle Plugin.
+            "com/dial/van/design/ScreenState.kt",
+            "com/dial/van/design/DensityTier.kt",
+            "com/dial/van/design/MotionSpec.kt",
+            "com/dial/van/design/StatusSemantics.kt",
+            "com/dial/van/design/LiveBadgeFormat.kt",
+            "com/dial/van/design/charts/ChartAxes.kt",
+            // DNA §4 destinations 5/6 (Memory, Projects): the read models that turn
+            // `/v1/context/export`, `/v1/context/conflicts`, `/v1/projects/{id}/truth`,
+            // `/v1/missions`, `/v1/attention` and `/v1/decisions` into what those two
+            // screens show. Depend only on org.json and the other pure files already in
+            // this list (`com/dial/van/mission/MissionModels.kt`,
+            // `com/dial/van/design/StatusSemantics.kt`).
+            "com/dial/van/memory/MemoryModels.kt",
+            "com/dial/van/projects/ProjectModels.kt",
         )
     }
 }

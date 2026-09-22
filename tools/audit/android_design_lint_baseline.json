@@ -1,0 +1,38 @@
+{
+  "font_size_literal_outside_design": {
+    "com/dial/van/command/CommandCentreComponents.kt": 10,
+    "com/dial/van/command/DegradedPanel.kt": 6,
+    "com/dial/van/command/modules/BrowserModules.kt": 21,
+    "com/dial/van/command/modules/NotificationPolicyModule.kt": 6,
+    "com/dial/van/command/modules/SpeechModule.kt": 6,
+    "com/dial/van/command/modules/WorkModules.kt": 6,
+    "com/dial/van/overlay/VanOverlayPanels.kt": 10,
+    "com/dial/van/overlay/VanOverlaySurface.kt": 1,
+    "com/dial/van/overlay/VanOverlayWorkboards.kt": 9
+  },
+  "font_size_under_12sp": {
+    "com/dial/van/command/CommandCentreComponents.kt": 5,
+    "com/dial/van/command/DegradedPanel.kt": 4,
+    "com/dial/van/command/modules/BrowserModules.kt": 19,
+    "com/dial/van/command/modules/NotificationPolicyModule.kt": 1,
+    "com/dial/van/command/modules/SpeechModule.kt": 3,
+    "com/dial/van/command/modules/WorkModules.kt": 4,
+    "com/dial/van/overlay/VanOverlayPanels.kt": 9,
+    "com/dial/van/overlay/VanOverlaySurface.kt": 1,
+    "com/dial/van/overlay/VanOverlayWorkboards.kt": 6
+  },
+  "material_card_outside_design": {
+    "com/dial/van/onboarding/OnboardingActivity.kt": 1
+  },
+  "raw_color_literal": {
+    "com/dial/van/command/CommandCentreComponents.kt": 4,
+    "com/dial/van/command/modules/BrowserModules.kt": 17,
+    "com/dial/van/command/modules/NotificationPolicyModule.kt": 7,
+    "com/dial/van/command/modules/SpeechModule.kt": 7,
+    "com/dial/van/command/modules/WorkModules.kt": 5,
+    "com/dial/van/overlay/VanMinimizedAvatar.kt": 12,
+    "com/dial/van/overlay/VanOverlayPanels.kt": 12,
+    "com/dial/van/overlay/VanOverlaySurface.kt": 1,
+    "com/dial/van/overlay/VanOverlayWorkboards.kt": 6
+  }
+}

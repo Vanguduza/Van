@@ -1,5 +1,8 @@
 package com.dial.van.events
 
+import kotlinx.coroutines.launch
+import kotlinx.coroutines.runBlocking
+import kotlinx.coroutines.yield
 import kotlin.test.Test
 import kotlin.test.assertEquals
 import kotlin.test.assertTrue
@@ -73,6 +76,42 @@ class VanEventStreamStoreTest {
         store.apply(page(41))
         assertEquals(null, store.state.value.error)
         assertTrue(store.state.value.loaded)
+    }
+
+    // ---------------------------------------------------------------- GAP-F-012 new-record flow
+
+    @Test
+    fun `newRecords emits only what a subscriber had not already been shown`() = runBlocking {
+        val store = VanEventStreamStore(Cursor())
+        // Applied before anything subscribes — replay is deliberately 0, so a producer
+        // that starts listening later must not react to history it missed as though it
+        // just happened.
+        store.apply(page(41, 42))
+
+        val collected = mutableListOf<Long>()
+        val job = launch { store.newRecords.collect { collected.add(it.seq) } }
+        yield()
+
+        store.apply(page(42, 43))
+        yield()
+        job.cancel()
+
+        assertEquals(listOf(43L), collected, "seq 42 was already held and must not re-fire a producer")
+    }
+
+    @Test
+    fun `newRecords stays empty for an overlapping page with nothing new`() = runBlocking {
+        val store = VanEventStreamStore(Cursor())
+        val collected = mutableListOf<Long>()
+        val job = launch { store.newRecords.collect { collected.add(it.seq) } }
+        yield()
+
+        store.apply(page(41, 42))
+        store.apply(page(41, 42))
+        yield()
+        job.cancel()
+
+        assertEquals(listOf(41L, 42L), collected)
     }
 
     @Test

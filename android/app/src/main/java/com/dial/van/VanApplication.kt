@@ -1,11 +1,14 @@
 package com.dial.van
 
 import android.app.Application
+import androidx.security.crypto.EncryptedSharedPreferences
+import androidx.security.crypto.MasterKey
 import android.net.ConnectivityManager
 import android.net.Network
 import android.net.NetworkCapabilities
 import android.net.NetworkRequest
 import com.dial.van.control.VanCommandController
+import com.dial.van.control.VanSpokenAnswer
 import com.dial.van.control.VanCommandSource
 import com.dial.van.degraded.DegradedModeStore
 import com.dial.van.events.PreferencesEventCursorStore
@@ -26,6 +29,9 @@ import com.dial.van.runtime.RuntimeReading
 import com.dial.van.browser.BrowserShortcutStore
 import com.dial.van.browser.PersistedBrowserSession
 import com.dial.van.telemetry.DeviceTelemetryReporter
+import com.dial.van.visual.DegradedBridge
+import com.dial.van.visual.VanEmbodimentProducers
+import com.dial.van.visual.VanEmbodimentReducer
 import com.dial.van.visual.VanLiveVisualState
 import com.dial.van.voice.PersonalSpeechModel
 import com.dial.van.voice.SherpaLocalSecondPassAsr
@@ -169,7 +175,15 @@ class VanApplication : Application(), VoiceInputCallback, TtsOutputCallback {
     }
 
     private val browserSessionStore by lazy {
-        getSharedPreferences("van_browser_session", MODE_PRIVATE)
+        // Encrypted, as the KDoc above promises: the record names the profile the owner
+        // was logged into and the live browser session id (GAP-F-027 storage policy).
+        EncryptedSharedPreferences.create(
+            this,
+            "van_browser_session",
+            MasterKey.Builder(this).setKeyScheme(MasterKey.KeyScheme.AES256_GCM).build(),
+            EncryptedSharedPreferences.PrefKeyEncryptionScheme.AES256_SIV,
+            EncryptedSharedPreferences.PrefValueEncryptionScheme.AES256_GCM,
+        )
     }
 
     /**
@@ -221,6 +235,10 @@ class VanApplication : Application(), VoiceInputCallback, TtsOutputCallback {
         commandQueue = EncryptedCommandQueue(this)
         notificationPolicyStore = NotificationPolicyStore(this)
         degradedModeStore = DegradedModeStore()
+        // GAP-F-010 — the gateway's `/health.degraded[]` reaches the device's degraded
+        // store through the bridge, so Settings shows one reconciled list (device signals
+        // + gateway-declared capability loss) instead of two that disagree.
+        DegradedBridge.bindGatewayHealth { json -> degradedModeStore.applyGatewayHealth(json) }
         personalSpeechModel = PersonalSpeechModel(this)
         wakeAcknowledgement = WakeAcknowledgementManager(this)
         voiceUi = VanVoiceUiStore()
@@ -233,8 +251,11 @@ class VanApplication : Application(), VoiceInputCallback, TtsOutputCallback {
         // P1-VOICE-001 — TtsOutputManager.speak finally has a caller. Bound to the outcome
         // projection, so VAN speaks when work finished or needs the owner and stays quiet
         // otherwise.
+        // Spoken outcomes go through VoiceEdge's speech-stream path (SpeechQueue + audio
+        // focus), not a bare TtsOutputManager.speak; `voiceEdge` is constructed below and
+        // only dereferenced when a command actually finishes.
         commandController = VanCommandController(
-            gatewayClient, appScope, speak = { text -> ttsOutput.speak(text) },
+            gatewayClient, appScope, speak = { text -> VanSpokenAnswer.speak(voiceEdge, text) },
         )
         val secondPassCoordinator = SherpaLocalSecondPassAsr.fromFiles(this)
             ?.let(::VoiceSecondPassCoordinator)
@@ -299,6 +320,25 @@ class VanApplication : Application(), VoiceInputCallback, TtsOutputCallback {
         startConnectivityMonitor()
         startGatewayHealthMonitor()
         startSignedConnectivityRefresh()
+        // GAP-F-012 — the embodiment producers DNA §6 names that nothing wired: mission and
+        // attention events off the durable stream, the first session of the day, and quiet
+        // hours. See `VanEmbodimentReducer`'s class doc for why these are pure decisions and
+        // this is only the wiring.
+        startEmbodimentEventWatch()
+        publishFirstSessionOfDay()
+        startQuietHoursWatch()
+        // GAP-F-012 regression guard, at runtime as well as in `VanEmbodimentCoverageTest`
+        // (android/visual-preview) and `VanEmbodimentReducerTest` (android/verification): a
+        // future state or action added to `VanDurableState`/`VanFiniteAction` with no
+        // producer registered in `VanEmbodimentProducers` is loud here rather than silent,
+        // the same defect this whole change exists to stop recurring.
+        if (!VanEmbodimentProducers.isComplete()) {
+            val (missingStates, missingActions) = VanEmbodimentProducers.missing()
+            android.util.Log.w(
+                "VanEmbodiment",
+                "producer registry incomplete — states=$missingStates actions=$missingActions",
+            )
+        }
     }
 
     /**
@@ -324,7 +364,10 @@ class VanApplication : Application(), VoiceInputCallback, TtsOutputCallback {
         // wrong pool for a call that waits on a disk.
         appScope.launch(Dispatchers.IO) {
             if (!gatewayClient.isEnrolled()) return@launch
+            // GAP-F-012 — CONNECTING's producer (DNA §6: "session handshake").
+            applyEmbodimentEffect(VanEmbodimentReducer.forSessionHandshake(connecting = true))
             runCatching { vanSession.start() }
+            VanLiveVisualState.settleToIdle()
         }
     }
 
@@ -525,6 +568,83 @@ class VanApplication : Application(), VoiceInputCallback, TtsOutputCallback {
         }
     }
 
+    /**
+     * GAP-F-012 — mission, attention and (guarded on presence) trading events off the
+     * durable event stream, turned into embodiment decisions.
+     *
+     * `newRecords` is additive and replay-less (see `VanEventStreamStore`'s class doc): a
+     * record this collector was not yet subscribed for is never re-delivered, which is
+     * exactly right here — VAN reacting to a `mission.failed` from before this collector
+     * started would be reacting to something already resolved. All three reducer functions
+     * run per record; at most one recognises the record's `type` and the rest return
+     * `Effect.None`, which `applyEmbodimentEffect` no-ops on.
+     */
+    private fun startEmbodimentEventWatch() {
+        appScope.launch {
+            eventStream.newRecords.collect { record ->
+                applyEmbodimentEffect(VanEmbodimentReducer.forMissionEvent(record.type, record.payloadJson))
+                applyEmbodimentEffect(VanEmbodimentReducer.forAttentionEventJson(record.type, record.payloadJson))
+                applyEmbodimentEffect(VanEmbodimentReducer.forTradingEventJson(record.type, record.payloadJson))
+            }
+        }
+    }
+
+    private fun applyEmbodimentEffect(effect: VanEmbodimentReducer.Effect) {
+        when (effect) {
+            is VanEmbodimentReducer.Effect.ToState ->
+                VanLiveVisualState.transition(state = effect.state, urgency = effect.urgency)
+            is VanEmbodimentReducer.Effect.ToAction ->
+                VanLiveVisualState.action(effect.action)
+            is VanEmbodimentReducer.Effect.Both ->
+                VanLiveVisualState.transition(
+                    state = effect.state,
+                    urgency = effect.urgency,
+                    finiteAction = effect.action,
+                )
+            VanEmbodimentReducer.Effect.None -> Unit
+        }
+    }
+
+    /**
+     * GAP-F-012 — HELLO_WAVE's producer: the first session opened on a calendar day the
+     * owner has not been in yet. The marker is a plain (unencrypted) preference — a
+     * calendar-day string carries nothing sensitive — persisted separately from every other
+     * store so this one small fact does not entangle with the encrypted ones.
+     */
+    private fun publishFirstSessionOfDay() {
+        val prefs = getSharedPreferences(EMBODIMENT_PREFS_NAME, MODE_PRIVATE)
+        val today = java.text.SimpleDateFormat("yyyy-MM-dd", java.util.Locale.US)
+            .format(java.util.Date())
+        val effect = VanEmbodimentReducer.forFirstSessionOfDay(
+            lastMarkerDay = prefs.getString(KEY_LAST_SESSION_DAY, null),
+            todayDay = today,
+        )
+        applyEmbodimentEffect(effect)
+        if (effect != VanEmbodimentReducer.Effect.None) {
+            prefs.edit().putString(KEY_LAST_SESSION_DAY, today).apply()
+        }
+    }
+
+    /**
+     * GAP-F-012 — SLEEPING's producer: quiet hours with no open attention. There is no
+     * Attention screen/store on this device yet to ask directly, so "open attention" is
+     * approximated by VAN's own authority channel being non-NONE — a WAITING_FOR_OWNER,
+     * WARNING, ERROR or URGENT pose is, in every case that channel is set today, exactly the
+     * situation "something needs the owner" describes. Replace this proxy with a direct read
+     * once an Attention store exists on the device.
+     */
+    private fun startQuietHoursWatch() {
+        appScope.launch {
+            while (isActive) {
+                val quietNow = notificationPolicyStore.isQuietNow()
+                val hasOpenAttention =
+                    VanLiveVisualState.frame.authority != com.dial.van.visual.VanAuthorityState.NONE
+                applyEmbodimentEffect(VanEmbodimentReducer.forQuietHours(quietNow, hasOpenAttention))
+                delay(QUIET_HOURS_CHECK_INTERVAL_MS)
+            }
+        }
+    }
+
     private fun startGatewayHealthMonitor() {
         appScope.launch {
             while (isActive) {
@@ -537,6 +657,10 @@ class VanApplication : Application(), VoiceInputCallback, TtsOutputCallback {
     private suspend fun refreshGatewayHealth() {
         try {
             val health = gatewayClient.health()
+            // GAP-F-010 — the bridge is bound to `degradedModeStore.applyGatewayHealth`
+            // in onCreate, so this reconciles gateway-declared capability loss into the
+            // device's degraded list on every health poll.
+            DegradedBridge.applyGatewayHealth(health.toString())
             degradedModeStore.markWorking("gateway")
             // P3-AND-006 — the gateway coming back is the other recovery edge. A phone with
             // a working network and an unreachable gateway is the normal condition of a
@@ -638,6 +762,11 @@ class VanApplication : Application(), VoiceInputCallback, TtsOutputCallback {
 
     companion object {
         private const val GATEWAY_HEALTH_INTERVAL_MS = 60_000L
+
+        // GAP-F-012 — the first-session-of-the-day marker and the quiet-hours poll cadence.
+        private const val EMBODIMENT_PREFS_NAME = "van_embodiment"
+        private const val KEY_LAST_SESSION_DAY = "last_session_day"
+        private const val QUIET_HOURS_CHECK_INTERVAL_MS = 5 * 60_000L
 
         // Rev 1.5 §29.10 — the browser session record's keys. Named constants rather
         // than literals at each call site, because a typo in one of eight strings

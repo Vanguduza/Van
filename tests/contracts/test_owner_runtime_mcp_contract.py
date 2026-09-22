@@ -43,6 +43,28 @@ REQUIRED_TOOLS = {
     "action_submitted",
     "action_verify",
     "action_get",
+    # GAP-F-003/006/015 — read-or-proposal surfaces that close RC-A: Hermes may observe
+    # trading state, propose inferred memory candidates, create owner reminders on the
+    # owner's behalf, read the attention/briefing state, and initiate the already-governed
+    # browser/automation assignment routes. Nothing here mints owner authority.
+    "context_fact_candidate",
+    "context_edge_candidate",
+    "trading_portfolio",
+    "trading_positions",
+    "trading_risk",
+    "trading_market_state",
+    "trading_trade_detail",
+    "trading_status",
+    "reminder_create",
+    "attention_list",
+    "briefing_read",
+    "browser_task_create",
+    "browser_assignment_run",
+    "browser_task_status",
+    "browser_task_evidence",
+    "automation_route",
+    "automation_execute",
+    "automation_run_status",
 }
 
 
@@ -50,7 +72,19 @@ def test_owner_runtime_mcp_has_fixed_narrow_surface():
     text = SHIM.read_text(encoding="utf-8")
     for tool in REQUIRED_TOOLS:
         assert f"name: '{tool}'" in text
-    assert "/v1/runtime/context/facts" not in text
+    # GAP-F-015 — AGENTS.md says Hermes may submit inferred/model-derived memory
+    # candidates, so the shim now carries that tool; the route itself still refuses
+    # anything but authority=INFERRED + source_trust=MODEL_DERIVED (checked below).
+    assert "/v1/runtime/context/facts" in text
+    assert "/v1/runtime/context/edges" in text
+    fact_tool = re.search(r"name: 'context_fact_candidate'.*?additionalProperties: false", text, re.S)
+    assert fact_tool is not None
+    assert "enum: ['INFERRED']" in fact_tool.group(0)
+    assert "enum: ['MODEL_DERIVED']" in fact_tool.group(0)
+    edge_tool = re.search(r"name: 'context_edge_candidate'.*?additionalProperties: false", text, re.S)
+    assert edge_tool is not None
+    assert "enum: ['INFERRED']" in edge_tool.group(0)
+    assert "enum: ['MODEL_DERIVED']" in edge_tool.group(0)
     assert "/v1/runtime/missions/result" in text
     assert "this tool cannot assert verified success" in text.lower()
     mission_tool = re.search(
@@ -58,7 +92,6 @@ def test_owner_runtime_mcp_has_fixed_narrow_surface():
     )
     assert mission_tool is not None
     assert "VERIFIED_SUCCESS" not in mission_tool.group(0)
-    assert "/v1/runtime/context/edges" not in text
     assert "/v1/runtime/context/lexical/query" in text
     assert "/v1/runtime/context/hot-capsules" in text
     assert "/v1/runtime/knowledge/vekl/query" in text
@@ -177,4 +210,94 @@ def test_google_mcp_surface_is_read_or_plan_only():
     )
     assert action_tool is not None
     assert "approved" not in action_tool.group(0).lower()
+
+
+def test_trading_tools_are_read_only_and_never_reach_halt_or_tickets():
+    """GAP-F-003 — observation only. Hermes gets the same read models the owner Command
+    Centre shows and never the owner-signed (A4) halt/ticket-confirm/account-action
+    routes, which stay reachable only from `/v1/trading/*` (a different, owner-device
+    surface this shim does not talk to at all)."""
+    text = SHIM.read_text(encoding="utf-8")
+    for tool, path in (
+        ("trading_portfolio", "/v1/runtime/trading/portfolio"),
+        ("trading_positions", "/v1/runtime/trading/positions"),
+        ("trading_risk", "/v1/runtime/trading/risk"),
+        ("trading_market_state", "/v1/runtime/trading/market-state"),
+        ("trading_trade_detail", "/v1/runtime/trading/trade/"),
+        ("trading_status", "/v1/runtime/trading/status"),
+    ):
+        assert path in text, tool
+    assert "/v1/trading/halt" not in text
+    assert "/v1/trading/tickets" not in text
+    assert "/v1/trading/accounts" not in text
+    for tool in ("trading_portfolio", "trading_positions", "trading_risk", "trading_market_state", "trading_trade_detail", "trading_status"):
+        block = re.search(rf"name: '{tool}'.*?additionalProperties: false", text, re.S)
+        assert block is not None
+        assert "method: 'GET'" in re.search(rf"{tool}: \{{ method: '(GET|POST)'", text).group(0)
+
+
+def test_reminder_create_is_owner_behalf_and_not_a_memory_admission():
+    text = SHIM.read_text(encoding="utf-8")
+    assert "reminder_create: { method: 'POST', path: () => '/v1/runtime/reminders'" in text
+    tool = re.search(r"name: 'reminder_create'.*?additionalProperties: false", text, re.S)
+    assert tool is not None
+    assert "own words" in tool.group(0)
+    assert "creates no canonical owner fact" in tool.group(0)
+
+
+def test_attention_and_briefing_reads_are_read_only():
+    text = SHIM.read_text(encoding="utf-8")
+    assert "attention_list: { method: 'GET', path: () => '/v1/runtime/attention' }" in text
+    assert "briefing_read: { method: 'GET', path: () => '/v1/runtime/briefing' }" in text
+
+
+def test_browser_assignment_tool_mirrors_the_governed_assignment_route():
+    """GAP-F-006 — the assignment route already enforces bounds server-side (`run_assignment`
+    in `browser/api.py`); the shim only needs to carry the same fields, with no field that
+    could widen or approve them from the model side."""
+    text = SHIM.read_text(encoding="utf-8")
+    assert "browser_assignment_run: { method: 'POST', path: () => '/v1/browser/assignments'" in text
+    assert "browser_task_status: { method: 'GET', path: (a) => `/v1/browser/tasks/${encodeURIComponent(a.task_id)}`" in text
+    assert "browser_task_evidence: { method: 'GET', path: (a) => `/v1/browser/tasks/${encodeURIComponent(a.task_id)}/evidence`" in text
+    tool = re.search(r"name: 'browser_assignment_run'.*?additionalProperties: false", text, re.S)
+    assert tool is not None
+    for field in ("task_id", "turn_id", "command_id", "goal", "allowed_domains", "action_class_ceiling", "autonomy_tier", "max_steps"):
+        assert field in tool.group(0)
+    assert "approved" not in tool.group(0).lower()
+    assert "owner_signature" not in tool.group(0)
+
+
+def test_browser_task_create_carries_the_runs_command_id_and_no_authority_fields():
+    """A run must be able to create the task it then hands to browser_assignment_run.
+
+    `browser/api.py`'s `CreateTaskBody` -- the route this tool mirrors -- has no
+    `turn_id` field at all (only `browser_assignment_run`'s `AssignmentBody` does), so
+    this checks what the real route actually carries: `command_id` anchors the task to
+    this run, `mission_id` binds it as a Mission Activity, and the assigning `turn_id`
+    is supplied later, at `browser_assignment_run`, not here.
+    """
+    text = SHIM.read_text(encoding="utf-8")
+    assert "browser_task_create: { method: 'POST', path: () => '/v1/browser/tasks'" in text
+    tool = re.search(r"name: 'browser_task_create'.*?additionalProperties: false", text, re.S)
+    assert tool is not None
+    input_schema = tool.group(0).split("inputSchema:", 1)[1]
+    for field in ("profile_alias", "strategy", "autonomy_tier", "action_class", "target_domain", "goal", "command_id", "mission_id"):
+        assert field in input_schema, field
+    assert "turn_id:" not in input_schema
+    assert "approved" not in input_schema.lower()
+    assert "owner_signature" not in input_schema
+
+
+def test_automation_tools_carry_no_approval_field():
+    """GAP-F-006 — `automation_execute` runs only under an existing signed command
+    authority (`command_id` + `snapshot_id`); it has no field that could mint one."""
+    text = SHIM.read_text(encoding="utf-8")
+    assert "automation_route: { method: 'POST', path: () => '/v1/automation/route'" in text
+    assert "automation_execute: { method: 'POST', path: () => '/v1/automation/execute'" in text
+    assert "automation_run_status: { method: 'GET'" in text
+    execute_tool = re.search(r"name: 'automation_execute'.*?additionalProperties: false", text, re.S)
+    assert execute_tool is not None
+    assert "approved" not in execute_tool.group(0).lower()
+    for field in ("capability_id", "action_id", "command_id", "snapshot_id", "requested_by", "principal_type"):
+        assert field in execute_tool.group(0)
 

@@ -43,11 +43,19 @@ class MetaVerdict:
 
 
 class MetaLabeler:
-    def __init__(self, *, capsule_health: dict[str, Decimal] | None = None, t2_assessment: dict | None = None, broker_liquidity: dict[str, Decimal] | None = None) -> None:
+    def __init__(self, *, capsule_health: dict[str, Decimal] | None = None, t2_assessment: dict | None = None, broker_liquidity: dict[str, Decimal] | None = None,
+                 news_event_risk: dict[str, Decimal] | None = None) -> None:
         self.capsule_health = capsule_health or {}
         self.t2 = t2_assessment or {}
         # Learned broker execution profile per symbol (Rev 4 Part L): reduce-only, ≤ 1, 0 = SUSPENDED
         self.broker_liquidity = broker_liquidity or {}
+        # GAP-F-003. Per-symbol event risk drawn from recorded headlines
+        # (`events/news_ingress.py` -> `candidate_risk`). Reduce-only in two
+        # independent ways: the producing function cannot return a value above
+        # 1, and `score()` combines it with `min` against the event-window term
+        # it would otherwise use. A missing symbol means 1 — no news is not
+        # evidence of safety, it is simply no reduction (INV-RISK-001).
+        self.news_event_risk = news_event_risk or {}
 
     def score(self, state: MarketState, signal: Signal, cost_multiple: Decimal, ctx: StrategyContext | None = None) -> MetaVerdict:
         reasons: list[str] = []
@@ -87,6 +95,10 @@ class MetaLabeler:
             ev_m = Decimal("0.75")
         elif state.minutes_to_next_event is not None and state.minutes_to_next_event <= 60:
             ev_m = Decimal("0.5"); reasons.append(f"Tier-1 event in {state.minutes_to_next_event} min")
+        news_m = min(ONE, max(ZERO, self.news_event_risk.get(signal.symbol, ONE)))
+        if news_m < ev_m:
+            ev_m = news_m
+            reasons.append(f"recorded headlines reduce event risk to {news_m}")
         conf_m = min(ONE, signal.confidence_hint)
         health = self.capsule_health.get(signal.strategy_id, ONE)
         if health < Decimal("0.55"):

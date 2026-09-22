@@ -15,7 +15,15 @@ from van_gateway.action.models import (
     VerifierType,
 )
 from van_gateway.models import ActionClass, PrincipalType
+from van_gateway.proactive.autonomy import AutonomyPolicy
 from van_gateway.storage.db import Store
+
+#: GAP-F-008 — principals `ActionRuntime` asks the autonomy hook about. Owner-device
+#: actions are the owner acting, never a candidate for an autonomy ceiling; AUTOMATION
+#: and EXTERNAL_UNTRUSTED are governed by their own existing gates (the automation
+#: policy engine, and refusal by definition) and are left alone here rather than
+#: folded into a check this change was not asked to extend.
+_AUTONOMY_GATED_PRINCIPALS = frozenset({PrincipalType.HERMES_AGENT, PrincipalType.SYSTEM})
 
 
 class ActionPolicyError(ValueError):
@@ -30,8 +38,14 @@ class ActionRuntime:
     adapter is permitted to execute.
     """
 
-    def __init__(self, store: Store) -> None:
+    def __init__(self, store: Store, *, autonomy: AutonomyPolicy | None = None) -> None:
         self.store = store
+        # GAP-F-008 — `DomainTrustService`/`ProactivePolicyService` existed and nothing
+        # in the action path ever consulted them, so an earned or granted autonomy
+        # ceiling changed nothing about what an unprompted principal could actually do.
+        # Optional and `None` by default: a runtime built without one behaves exactly as
+        # before, and every caller that does not wire one is unaffected.
+        self.autonomy = autonomy
 
     @staticmethod
     def digest_parameters(parameters: dict[str, Any]) -> str:
@@ -117,6 +131,32 @@ class ActionRuntime:
             ))
         if principal_type not in definition.allowed_principals:
             raise ActionPolicyError("principal_not_allowed")
+        if (
+            self.autonomy is not None
+            and principal_type in _AUTONOMY_GATED_PRINCIPALS
+            and definition.mutates_state
+        ):
+            # Manager decision: reads and research (mutates_state=False) are how the
+            # agent reasons; the autonomy ceiling governs what it may *change*.
+            # GAP-F-008 — consulted before authorization, not after: a refusal here
+            # never reaches AUTHORIZED, so no adapter is ever asked to run it. A
+            # refusal reuses AUTHORIZATION_REQUIRED rather than minting a new status —
+            # the owner (or a wider grant) is exactly what would resolve it, which is
+            # the same story that status already tells for an unapproved A4.
+            verdict = await self.autonomy.permits(
+                action_id=action_id, action_class=definition.action_class,
+                principal_type=principal_type, requested_by=requested_by,
+            )
+            if not verdict.allowed:
+                return await self._persist_execution(ActionExecution(
+                    execution_id=execution_id, command_id=command_id, turn_id=turn_id,
+                    action_id=action_id, action_class=definition.action_class,
+                    principal_type=principal_type, requested_by=requested_by,
+                    status=ExecutionStatus.AUTHORIZATION_REQUIRED,
+                    idempotency_key=idempotency_key, snapshot_id=snapshot_id,
+                    parameters_digest=self.digest_parameters(parameters),
+                    error_code=f"AUTONOMY_DENIED:{verdict.reason}",
+                ))
         if definition.action_class == ActionClass.A4 and not owner_approved:
             return await self._persist_execution(ActionExecution(
                 execution_id=execution_id, command_id=command_id, turn_id=turn_id,

@@ -43,6 +43,8 @@ data class SpeechSegment(
     val interruptible: Boolean = true,
     val contentDigest: String = "",
     val state: SpeechSegmentState = SpeechSegmentState.RECEIVED,
+    /** GAP-F-013 — estimated viseme cues, when the Gateway sent them. */
+    val cueTiming: SegmentCueTiming = SegmentCueTiming.EMPTY,
 )
 
 /** §21.16 — the two numbers a resume reports. */

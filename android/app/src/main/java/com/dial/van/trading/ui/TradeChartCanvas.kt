@@ -32,6 +32,8 @@ import com.dial.van.trading.ChartTextScale
 import com.dial.van.trading.ChartViewport
 import com.dial.van.trading.ChartViewports
 import com.dial.van.trading.TradingFormat
+import com.dial.van.design.LocalVanTokens
+import com.dial.van.design.charts.ChartAxes
 
 /**
  * Candlestick chart with levels, zones and trade markers, drawn from [ChartGeometry] ops
@@ -49,6 +51,7 @@ fun TradeChartCanvas(
     heightDp: Int = 220,
     maxVisible: Int = 120,
 ) {
+    val tokens = LocalVanTokens.current
     // P4-AND-012 — these were `textSize = 26f` and `24f`, raw pixels, so the owner's font
     // scale did nothing to them. An owner who has enlarged their system font has done so
     // because they need it, and a chart that ignores that is a chart they cannot read.
@@ -123,7 +126,7 @@ fun TradeChartCanvas(
             )
             return@Canvas
         }
-        val grid = Color(0xFF1B2636)
+        val grid = tokens.color.lineHair
         scene.ops.forEach { op ->
             when (op) {
                 is ChartOp.GridLine -> {
@@ -160,8 +163,12 @@ fun TradeChartCanvas(
             drawPath(path, color)
             drawCircle(color, radius = 3f, center = Offset(m.x, m.y))
         }
+        // design/charts/ChartAxes chooses the label's granularity from the whole visible
+        // span, so every tick on this axis reads at the same precision (09:00, 10:00...)
+        // instead of each guessing its own.
+        val spanMs = (scene.lastT - scene.firstT).coerceAtLeast(0L)
         scene.ops.filterIsInstance<ChartOp.TimeTick>().forEach { t ->
-            drawContext.canvas.nativeCanvas.drawText(TradingFormat.dateShort(t.t) + " " + TradingFormat.timeHm(t.t), t.x - 30f, size.height - 4f, labelPaint)
+            drawContext.canvas.nativeCanvas.drawText(ChartAxes.timeLabel(t.t, spanMs), t.x - 30f, size.height - 4f, labelPaint)
         }
 
         crosshairAt?.let { at ->
@@ -172,7 +179,7 @@ fun TradeChartCanvas(
                 viewport = ChartViewport(0, shown.size), barCount = shown.size,
                 highPrice = scene.priceMax, lowPrice = scene.priceMin,
             ) ?: return@let
-            val ink = Color(0xFF8FA6B4)
+            val ink = tokens.color.textSecondary
             drawLine(ink, Offset(hit.x, layout.plotTop), Offset(hit.x, layout.plotBottom), strokeWidth = 1f)
             drawLine(ink, Offset(layout.plotLeft, hit.y), Offset(layout.plotRight, hit.y), strokeWidth = 1f)
             val bar = shown.getOrNull(hit.barIndex)

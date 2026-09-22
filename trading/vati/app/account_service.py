@@ -28,9 +28,11 @@ from vati.app.instrument_evaluator import InstrumentEvaluator, InstrumentEvaluat
 from vati.app.trade_lifecycle import AccountTradeLifecycle
 from vati.arbiter import OpportunityEngine
 from vati.arbiter.candidate import CandidateOpportunity
+from vati.arbiter.opportunity import CANDIDATE_TTL_MS, DEFAULT_CANDIDATE_TTL_MS
 from vati.arbiter.portfolio_allocator import OpportunityPortfolioAllocator
 from vati.core.canonical import canonical_hash
 from vati.core.events import EventKind, make_event
+from vati.cognition.invokers import CognitionConfig, build_invoker, build_research_invoker
 from vati.cognition.runtime import ShadowCognitionRuntime
 from vati.core.ledger_pg import open_ledger
 from vati.execution.base import StopMode, VenueAdapter
@@ -120,7 +122,12 @@ class AccountCoordinatorService:
         self.style_selector: Optional[ExecutionStyleSelector] = None
         self.learning: Optional[LearningHooks] = None
         self.cognition: Optional[ShadowCognitionRuntime] = None
+        # GAP-F-004. Present from construction so the read model and the
+        # heartbeat can always state the invoker's actual state, including
+        # on a service that has not finished building.
+        self.cognition_config = CognitionConfig()
         self.event_research: Optional[EventResearchRuntime] = None
+        self.news = None
         self.rejection_analytics: Optional[RejectionAnalyticsEngine] = None
         self.lifecycle: Optional[AccountTradeLifecycle] = None
         self.account = None
@@ -172,10 +179,39 @@ class AccountCoordinatorService:
         self.adapter = self.adapter or build_adapter(account, registry)
         self._ledger = open_ledger(c.ledger)
         self._lease_store = PostgresLeaseStore(c.ledger)
-        # Persistent first-pass cognition is shadow-only. A provider invoker is
-        # an external runtime dependency; without one this records an explicit
-        # MODEL_UNAVAILABLE abstention and leaves deterministic trading untouched.
-        self.cognition = ShadowCognitionRuntime(ledger=self._ledger)
+        # GAP-F-004 closed here. Persistent first-pass cognition is still
+        # shadow-only and still wakes *after* RiskAuthority has decided; what
+        # changes is that the provider invoker now has a construction path.
+        # `cognition.invoker` defaults to "none", which builds no invoker at
+        # all and leaves the explicit MODEL_UNAVAILABLE abstention exactly as
+        # it was — nothing changes without configuration. With one configured,
+        # `wake()` records a real CognitiveAssessment, and the contract in
+        # cognition/contracts.py still refuses any result that carries order
+        # fields or a multiplier above 1 (INV-AUTH-001, INV-RISK-001).
+        self.cognition_config = CognitionConfig.from_mapping(
+            getattr(c, "cognition", None) or {},
+            secrets_dir=getattr(c, "secrets_dir", "") or "",
+        )
+        # GAP-F-003 item 6. The research invoker is built here too, so a
+        # PROPOSE_RESEARCH verdict commissions bounded specialist work from the
+        # live runtime rather than only from a test. It is None unless a
+        # positive research budget and a research destination were configured,
+        # and with None `run_research` records nothing at all — an empty result
+        # is an honest "no research happened" and a synthesised packet is not.
+        self.cognition = ShadowCognitionRuntime(
+            ledger=self._ledger,
+            invoker=build_invoker(self.cognition_config),
+            research_invoker=build_research_invoker(self.cognition_config),
+            research_budget_micros=self.cognition_config.research_budget_micros,
+            research_roles=self.cognition_config.research_roles,
+            invoker_mode=self.cognition_config.invoker,
+        )
+        self._ledger.append(make_event(
+            EventKind.SESSION, "vati-account-service",
+            {"event": "COGNITION_INVOKER", **self.cognition_config.read_model()},
+            event_time_ms=self.clock(), received_time_ms=self.clock(),
+            correlation_id=account.alias,
+        ))
         self.lease = AccountRuntimeLease(
             self._lease_store,
             account_alias=account.alias,
@@ -313,6 +349,7 @@ class AccountCoordinatorService:
                 for symbol, evaluator in self.evaluators.items()
             },
         )
+        self.news = self._build_news(events)
         self.lifecycle = AccountTradeLifecycle(
             ledger=self._ledger,
             adapter=self.adapter,
@@ -327,7 +364,27 @@ class AccountCoordinatorService:
             },
             learning=self.learning,
             cognition=self.cognition,
+            # GAP-F-003. The adaptive-management path is given the same gate
+            # the opening path uses: the account's RiskAuthority, its mandate,
+            # and the same snapshot builder. A size-changing adjustment is a
+            # delta TradeIntent through `RiskAuthority.evaluate` and then
+            # `ExecutionRouter` — never a second execution path.
+            authority=self.authority,
+            mandate=mandate,
+            news=self.news,
+            execute_add_fn=self._execute_delta,
+            market_state_fn=lambda symbol: (
+                self.evaluators[symbol].last_state
+                if symbol in self.evaluators else None),
+            correlation_fn=self._correlation_for,
+            snapshot_fn=self._snapshot_for_symbol,
         )
+        # Lessons drawn from closed trades become candidate evidence on the
+        # next pass. Evidence only: `evidence_for` returns strings, never a
+        # multiplier (INV-RISK-001).
+        self.lifecycle.lessons.restore_from_ledger(self._ledger)
+        for evaluator in self.evaluators.values():
+            evaluator.engine.lessons = self.lifecycle.lessons
         # One account-scoped lifecycle owns entry truth for reconciliation,
         # TCA, protection, trade review and reduce-only learning.
         self._entries = self.lifecycle.entries
@@ -345,6 +402,161 @@ class AccountCoordinatorService:
         )
         return self
 
+
+    def _build_news(self, events):
+        """Headline ingress from configuration, or None.
+
+        GAP-F-003. Absent configuration means no news path at all, which is the
+        behaviour that existed before this — not a degraded or partially wired
+        one. Whatever this produces is reduce-only; the economic calendar
+        (`calendar/recorder.py` -> `tier1_event_blackout_active`) remains the
+        blackout authority and is untouched.
+        """
+        cfg = dict(getattr(self.cfg, "news", None) or {})
+        if not cfg:
+            return None
+        from vati.events.news_ingress import (
+            NewsIngress, rows_from_file, sources_from_config,
+        )
+        registry = (
+            self.event_research.registry
+            if self.event_research is not None else None)
+        ingress = NewsIngress(
+            registry=registry,
+            ledger=self._ledger,
+            sources=sources_from_config(cfg),
+            relevance_window_ms=int(
+                cfg.get("relevance_window_ms", 6 * 3_600_000)),
+        )
+        path = cfg.get("path")
+        if path and Path(path).is_file():
+            ingress.ingest_rows(rows_from_file(path), now_ms=self.clock())
+        return ingress
+
+    def refresh_news(self, now_ms: int) -> dict:
+        """Re-read the headline file. Called from the VERIFY DATA stage."""
+        cfg = dict(getattr(self.cfg, "news", None) or {})
+        path = cfg.get("path")
+        if self.news is None or not path or not Path(path).is_file():
+            return {"accepted": 0, "duplicates": 0, "skipped": 0}
+        from vati.events.news_ingress import rows_from_file
+
+        try:
+            return self.news.ingest_rows(rows_from_file(path), now_ms=now_ms)
+        except Exception as exc:  # noqa: BLE001 — a bad news file never stops a cycle
+            self._ledger.append(make_event(
+                EventKind.MARKET_DATA_HEALTH, "vati-account-service",
+                {"source": "news", "state": "UNREADABLE", "error": str(exc)[:200]},
+                event_time_ms=now_ms, received_time_ms=now_ms,
+                correlation_id=self.cfg.account_alias))
+            return {"accepted": 0, "duplicates": 0, "skipped": 1}
+
+    def _apply_news_event_risk(self, now_ms: int) -> dict:
+        """Push recorded headlines into every evaluator's meta-labeller.
+
+        GAP-F-003, the candidate half. The position half of the news path runs
+        in `AccountTradeLifecycle._event_impact_for`; this is the half that
+        reaches a trade that has not been opened yet, and it is the only route
+        by which news touches sizing at all.
+
+        Reduce-only twice over: `candidate_risk` returns a value in [0, 1] by
+        construction, and `MetaLabeler.score` takes the `min` of it against the
+        event-window multiplier it would otherwise have used. A symbol with no
+        relevant headline gets 1, which changes nothing (INV-RISK-001).
+        """
+        if self.news is None:
+            return {}
+        applied: dict[str, dict] = {}
+        for symbol, evaluator in self.evaluators.items():
+            try:
+                multiplier, materiality, refs = self.news.candidate_risk(
+                    symbol, now_ms=now_ms)
+            except Exception:  # noqa: BLE001 — a news fault never stops a cycle
+                continue
+            evaluator.engine.m.news_event_risk[symbol.upper()] = multiplier
+            if multiplier < Decimal("1"):
+                # The per-headline EVENT_IMPACT rows behind this number are
+                # already sealed by `candidate_risk`; this is the applied
+                # result, which the cycle summary carries.
+                applied[symbol.upper()] = {
+                    "event_risk_multiplier": str(multiplier),
+                    "materiality": str(materiality),
+                    "evidence_refs": list(refs)[:5],
+                }
+        return applied
+
+    def _correlation_for(self, symbol: str) -> Decimal:
+        """Latest correlation multiplier for a symbol, from the ledger."""
+        latest = Decimal("1")
+        try:
+            for event in self._ledger.iter(EventKind.PORTFOLIO_DEPENDENCY):
+                if str(event.payload.get("symbol", "")).upper() == symbol.upper():
+                    latest = Decimal(str(event.payload.get("correlation_multiplier", "1")))
+        except Exception:  # noqa: BLE001
+            return Decimal("1")
+        return min(Decimal("1"), max(Decimal("0"), latest))
+
+    def _snapshot_for_symbol(self, symbol: str):
+        """A RiskSnapshot for a delta intent on an already-open position."""
+        symbol = symbol.upper()
+        if symbol not in self.contracts:
+            return None
+
+        class _Probe:
+            def __init__(self, sym): self.symbol = sym
+        try:
+            return self._snapshot_for(_Probe(symbol))
+        except Exception:  # noqa: BLE001 — no snapshot means no adjustment
+            return None
+
+    def _execute_delta(self, intent, decision):
+        """Submit an authority-approved delta intent through ExecutionRouter.
+
+        The same route refresh, execution policy and market reference the
+        opening path uses. `ExecutionRouter.execute` stays the only caller of
+        `adapter.submit` (INV-EXEC-001), and the decision handed in here was
+        produced by `RiskAuthority.evaluate_safe` (INV-AUTH-001).
+        """
+        symbol = intent.symbol.upper()
+        state = self.evaluators[symbol].last_state if symbol in self.evaluators else None
+        if state is None or self.router is None or self.mandate is None:
+            return None
+        bucket = ExecutionBucket(
+            broker=str(getattr(self.account.broker, "value", self.account.broker)).lower(),
+            account_alias=self.account.alias, symbol=symbol,
+            session=state.session.value, volatility_bucket=state.regime.vol.value,
+            event_proximity=state.event_window.value, direction=intent.direction.value)
+        policy_decision = self.policy.select(
+            candidate_id=intent.trade_intent_id, bucket=bucket,
+            event_state=state.event_window.value)
+        software = self.account.broker == BrokerKind.ZSE_OWNER_TICKET
+        self.routes.refresh(
+            account_alias=self.account.alias,
+            adapter_id=str(getattr(self.account.broker, "value", self.account.broker)).lower(),
+            contracts=self.contracts, now_ms=self.clock(), source="delta_intent_refresh")
+        try:
+            return self.router.execute(
+                intent, decision, self.mandate, now_ms=self.clock(),
+                stop_mode=StopMode.SOFTWARE if software else StopMode.VENUE,
+                targets=(), time_in_force=self.specs[symbol].time_in_force,
+                lease_epoch=self.lease.epoch if self.lease is not None else None,
+                execution_policy_decision=policy_decision,
+                market_reference=MarketReference(
+                    last_price=state.features.close,
+                    mark_age_ms=state.quote_age_ms,
+                    max_mark_age_ms=self.cfg.max_quote_age_ms,
+                ),
+                liquidity=LiquidityView(),
+            )
+        except RouterError as exc:
+            now = self.clock()
+            self._ledger.append(make_event(
+                EventKind.SESSION, "vati-account-service",
+                {"event": "DELTA_ROUTER_REFUSED", "error": str(exc)[:300],
+                 "trade_intent_id": intent.trade_intent_id},
+                event_time_ms=now, received_time_ms=now,
+                correlation_id=intent.trade_intent_id))
+            return None
 
     def _open_positions(self) -> tuple[OpenPosition, ...]:
         assert self.adapter is not None
@@ -535,6 +747,10 @@ class AccountCoordinatorService:
             state=state,
             modelled_cost_pct=self.specs[candidate.symbol.upper()].round_trip_cost_pct,
             software_stop=software,
+            decision=decision,
+            targets=tuple(targets or ()),
+            expected_horizon_ms=CANDIDATE_TTL_MS.get(
+                getattr(candidate, "horizon", ""), DEFAULT_CANDIDATE_TTL_MS),
         )
         return receipt
 
@@ -881,6 +1097,13 @@ class AccountCoordinatorService:
                 event_time_ms=now, received_time_ms=now,
                 correlation_id=self.cfg.account_alias,
             ))
+        # GAP-F-003. VERIFY DATA / MARKET STATE reads the latest headlines
+        # before any position is marked or any candidate is admitted, so an
+        # adverse headline is present in the same pass that assesses the
+        # theses it bears on rather than one pass late.
+        news_report = self.refresh_news(now)
+        news_report["event_risk"] = self._apply_news_event_risk(now)
+
         observed_bars = {}
         advanced_bars = {}
         for symbol, source in self.bar_sources.items():
@@ -957,6 +1180,8 @@ class AccountCoordinatorService:
             "allocation_epoch_id": result.allocation_epoch_id,
             "ranking": list(result.ranking),
             "outcomes": [o.as_dict() for o in result.outcomes],
+            "news": news_report,
+            "cognition_invoker": self.cognition_config.invoker,
         })
         return result
     def run_forever(self) -> int:

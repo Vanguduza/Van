@@ -23,11 +23,13 @@ from __future__ import annotations
 
 import time
 import uuid
+from dataclasses import dataclass
 from enum import Enum
-from typing import Any
+from typing import Any, Protocol
 
 from pydantic import BaseModel
 
+from van_gateway.models import ActionClass, PrincipalType
 from van_gateway.storage.db import Store
 
 
@@ -159,6 +161,116 @@ class DomainTrust(BaseModel):
         return self.effective_ceiling.ordinal >= mission_type.minimum_level.ordinal
 
 
+@dataclass(frozen=True)
+class AutonomyVerdict:
+    """GAP-F-008 — what `ActionRuntime.begin` gets back from an autonomy check.
+
+    Deliberately two fields. `allowed` is the only thing `begin` acts on; `reason` is
+    what an owner reads on `/v1/understanding/autonomy` or in the execution's
+    `error_code` to see *why* — never a bare denial with nothing to argue with.
+    """
+
+    allowed: bool
+    reason: str
+
+
+class AutonomyPolicy(Protocol):
+    """The shape `ActionRuntime(autonomy=...)` consults. See `ActionAutonomyGate`.
+
+    Kept as a `Protocol` rather than a base class so `ActionRuntime` (action/service.py)
+    never has to import anything from `proactive` beyond this type — the dependency runs
+    one way, into the module that owns autonomy policy, not back out of it.
+    """
+
+    async def permits(
+        self,
+        *,
+        action_id: str,
+        action_class: ActionClass,
+        principal_type: PrincipalType,
+        requested_by: str,
+    ) -> AutonomyVerdict: ...
+
+
+#: GAP-F-008 — the least-privilege reading of "reads": only A1 is guaranteed
+#: non-mutating everywhere it appears in `action/registry.py` today (§10's read-only
+#: side of `owner.context.read`). A2 already covers non-mutating capabilities such as
+#: `research.web.search`, so it is treated as mutating here rather than assumed safe —
+#: the asymmetry costs nothing (a domain with real evidence reaches S1 quickly) and
+#: means this table can only ever be too cautious, never too permissive.
+#:
+#: The level required rises with the class because what a class *means* rises with it:
+#: A2 is prepared/proposed work, which S1_SUGGEST already covers; A3 is a reversible
+#: execution, which needs VAN to have earned the right to prepare unprompted (S2); A4 is
+#: the class that mutates without an easy way back, which needs S3 — actual unprompted
+#: execution — before an unprompted agent may even attempt it. A5 is unreachable here:
+#: `ActionRuntime.begin` refuses it before any principal or autonomy check runs.
+_REQUIRED_CEILING: dict[ActionClass, AutonomyLevel] = {
+    ActionClass.A2: AutonomyLevel.S1_SUGGEST,
+    ActionClass.A3: AutonomyLevel.S2_PREPARE,
+    ActionClass.A4: AutonomyLevel.S3_REVERSIBLE_EXECUTION,
+    ActionClass.A5: AutonomyLevel.S5_MAINTAIN_DOMAIN,
+}
+
+
+def _domain_for(action_id: str) -> str:
+    """`google.gmail.send` → `google.gmail`; `trading.halt` → `trading`.
+
+    §30 asks for domain-specific autonomy, and `action_id` is already namespaced by
+    provider and surface (`action/registry.py`), so the first two dotted segments are a
+    real domain boundary rather than an invented one — gmail and calendar trust stay
+    apart even though both are Google.
+    """
+    parts = action_id.split(".")
+    return ".".join(parts[:2]) if len(parts) > 1 else action_id
+
+
+class ActionAutonomyGate:
+    """GAP-F-008 — the `AutonomyPolicy` `ActionRuntime` consults for non-owner principals.
+
+    §31's asymmetry is the whole implementation: a domain's `DomainTrust` grows only
+    from verified evidence or an owner grant, never from this gate, and this gate does
+    nothing but read that ceiling and compare it with what the action asks for. It
+    cannot raise anything — `DomainTrustService.grant` and `ProactivePolicyService`
+    already own that, and this class holds no write path to either store.
+
+    Default deny: an unknown domain has `DomainTrust()`'s zero-evidence ceiling (S0),
+    which permits nothing above A1, so a mutating action from an agent principal is
+    refused until the domain has actually earned trust or the owner has granted it.
+    """
+
+    def __init__(self, trust: DomainTrustService) -> None:
+        self.trust = trust
+
+    async def permits(
+        self,
+        *,
+        action_id: str,
+        action_class: ActionClass,
+        principal_type: PrincipalType,
+        requested_by: str,
+    ) -> AutonomyVerdict:
+        if action_class is ActionClass.A1:
+            # §10 — reads are not what §31 is protecting; refusing them here would not
+            # add safety, only make VAN unable to look at its own context unprompted.
+            return AutonomyVerdict(True, "read_action")
+        domain = _domain_for(action_id)
+        trust = await self.trust.get(domain)
+        required = _REQUIRED_CEILING.get(action_class, AutonomyLevel.S5_MAINTAIN_DOMAIN)
+        if trust.effective_ceiling.ordinal >= required.ordinal:
+            return AutonomyVerdict(
+                True,
+                f"{domain} ceiling {trust.effective_ceiling.value} permits "
+                f"{action_class.value} for {principal_type.value}",
+            )
+        return AutonomyVerdict(
+            False,
+            f"{domain} ceiling {trust.effective_ceiling.value} < {required.value} "
+            f"required for {principal_type.value} to run {action_class.value} "
+            f"({action_id}) unprompted",
+        )
+
+
 class AutonomyError(ValueError):
     def __init__(self, code: str, detail: str | None = None) -> None:
         super().__init__(code if detail is None else f"{code}: {detail}")
@@ -261,6 +373,16 @@ class DomainTrustService:
         return trust
 
 
+#: GAP-F-028 — the `mission_class` marker for a policy row that turns proactive
+#: follow-ups off for a domain, rather than granting standing autonomy. Reuses
+#: `proactive_policies` instead of a new table: it is still "a policy under which VAN
+#: may [not] start work unprompted", which is exactly what that table already records.
+#: It carries `autonomy_level='S0'` because the column is `NOT NULL` and S0 is the
+#: truthful value — a disabled domain gets no unprompted initiative at all — not
+#: because disabling is a grant.
+FOLLOW_UP_POLICY_MARKER = "__proactive_follow_up_disabled__"
+
+
 class ProactivePolicyService:
     """§11 — the standing policies under which VAN may start work unprompted."""
 
@@ -303,6 +425,40 @@ class ProactivePolicyService:
             return False, exc.detail
         return True, None
 
+    async def disable_follow_ups(
+        self, domain: str, *, reason: str = "owner request", now_ms: int | None = None
+    ) -> str:
+        """GAP-F-028 — turn `ProactiveFollowUpJob` off for a domain.
+
+        §31's asymmetry the other way round: earning trust needs verified evidence and
+        an owner grant needs `evidence_ref`; muting VAN's own initiative needs neither,
+        because the direction that needs safeguarding is VAN acting, not VAN staying
+        quiet. `reason` is kept for the owner-visible record, not as a gate.
+        """
+        now = int(time.time() * 1000) if now_ms is None else now_ms
+        policy_id = f"ppol_{uuid.uuid4().hex}"
+        await self.store.execute(
+            "INSERT INTO proactive_policies(policy_id, domain, autonomy_level, "
+            "mission_class, owner_granted_at_ms, owner_evidence_ref, enabled, "
+            "created_at_ms, updated_at_ms) VALUES (?, ?, 'S0', ?, ?, ?, 1, ?, ?)",
+            (policy_id, domain, FOLLOW_UP_POLICY_MARKER, now, reason, now, now),
+        )
+        return policy_id
+
+    async def follow_ups_enabled(self, domain: str) -> bool:
+        """GAP-F-028 — whether `ProactiveFollowUpJob` may surface anything for `domain`.
+
+        Enabled unless an owner has explicitly disabled it: a domain nobody has an
+        opinion about is exactly the case the job exists for, so absence of a policy
+        means "go ahead", not "wait for permission" — the job never executes anything
+        and never opens a mission, so there is nothing here for §31's earn-don't-infer
+        rule to protect against.
+        """
+        rows = await self.policies(domain)
+        return not any(
+            str(row["mission_class"]) == FOLLOW_UP_POLICY_MARKER for row in rows
+        )
+
     async def policies(self, domain: str | None = None) -> list[dict[str, Any]]:
         if domain is None:
             rows = await self.store.fetchall(
@@ -328,9 +484,13 @@ class ProactivePolicyService:
 
 __all__ = [
     "FALSE_SUCCESS_PENALTY",
+    "FOLLOW_UP_POLICY_MARKER",
     "MAX_EARNED_LEVEL",
+    "ActionAutonomyGate",
     "AutonomyError",
     "AutonomyLevel",
+    "AutonomyPolicy",
+    "AutonomyVerdict",
     "DomainTrust",
     "DomainTrustService",
     "ProactiveMissionType",

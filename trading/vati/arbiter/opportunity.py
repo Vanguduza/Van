@@ -91,9 +91,27 @@ def capsule_mtf_evidence(
 
 
 class OpportunityEngine:
-    def __init__(self, registry: CapsuleRegistry, implementations: dict[str, Strategy], mandate: TradingMandate, *, labeler: MetaLabeler | None = None) -> None:
+    def __init__(self, registry: CapsuleRegistry, implementations: dict[str, Strategy], mandate: TradingMandate, *, labeler: MetaLabeler | None = None,
+                 lessons=None) -> None:
         self.registry, self.impl, self.mandate = registry, implementations, mandate
         self.h, self.s, self.m = HorizonArbiter(), StrategyArbiter(), labeler or MetaLabeler()
+        #: GAP-F-003. A `LessonStore` (learning/episodes.py) whose lessons are
+        #: attached to candidates as *evidence strings*. It is read through
+        #: `evidence_for`, which returns no number, so retrieval can inform the
+        #: owner and the arbiter's reasons without ever becoming a size
+        #: multiplier (INV-RISK-001 — no intelligence input may exceed 1, and
+        #: this one has no numeric form at all).
+        self.lessons = lessons
+
+    def _lesson_evidence(self, strategy_id: str, state: MarketState,
+                         regime_label: str) -> tuple[str, ...]:
+        if self.lessons is None:
+            return ()
+        try:
+            return tuple(self.lessons.evidence_for(
+                strategy_id, regime_label, state.session.value))
+        except Exception:  # noqa: BLE001 — evidence retrieval never blocks a decision
+            return ()
 
     def assess_candidates(self, state: MarketState, ctx: StrategyContext, *, regime_label: str,
                           currency_regime_label: str | None = None, account_alias: str, venue: str,
@@ -167,7 +185,8 @@ class OpportunityEngine:
                 event_risk_multiplier=mv.event_risk_multiplier,
                 holds_over_weekend=sig.holds_over_weekend,
                 is_event_certified=cap.event_certified, meta_label=mv.label.value,
-                evidence_refs=tuple(mv.reasons),
+                evidence_refs=tuple(mv.reasons) + self._lesson_evidence(
+                    cap.strategy_id, state, regime_label),
             ).sealed())
         return tuple(out)
 
@@ -200,7 +219,9 @@ class OpportunityEngine:
             mults = {"regime_multiplier": str(mv.regime_multiplier), "volatility_multiplier": str(mv.volatility_multiplier), "liquidity_multiplier": str(mv.liquidity_multiplier),
                      "event_risk_multiplier": str(mv.event_risk_multiplier), "confidence_multiplier": str(mv.confidence_multiplier)}
             conf = confidence_score(mults, capsule_health=self.m.capsule_health.get(cap.strategy_id))
-            row.update({"label": mv.label.value, "meta_reasons": list(mv.reasons), "direction": sig.direction.value, "entry": str(sig.entry), "stop": str(sig.stop),
+            row.update({"label": mv.label.value, "meta_reasons": list(mv.reasons),
+                        "lessons": list(self._lesson_evidence(cap.strategy_id, state, regime_label)),
+                        "direction": sig.direction.value, "entry": str(sig.entry), "stop": str(sig.stop),
                         "expected_gross_move_pct": str(sig.expected_gross_move_pct) if sig.expected_gross_move_pct is not None else None,
                         "multipliers": mults, "confidence": conf.as_dict()})
             cands.append(row)

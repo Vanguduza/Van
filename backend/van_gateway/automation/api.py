@@ -18,6 +18,7 @@ from typing import Any
 
 from fastapi import APIRouter, Header, HTTPException, Request
 
+from van_gateway.auth.control_scopes import ControlScope, require_scoped_internal
 from van_gateway.automation.credentials import (
     CredentialAlias,
     CredentialClass,
@@ -63,7 +64,6 @@ from van_gateway.command.standing import (
     StandingAutomationAuthorityService,
 )
 from van_gateway.config import Settings
-from van_gateway.google.control import GoogleControlAuthError, verify_internal_control
 from van_gateway.models import ActionClass, PrincipalType
 from van_gateway.storage.db import Store
 
@@ -225,11 +225,8 @@ class AutomationApi:
         self._install_routes()
 
     def _require_internal(self, token: str | None) -> None:
-        try:
-            verify_internal_control(self.settings.internal_control_token, token)
-        except GoogleControlAuthError as exc:
-            code = 503 if exc.code == "internal_control_token_unconfigured" else 403
-            raise HTTPException(status_code=code, detail=exc.code) from exc
+        # GAP-F-009: scope-aware, same authority as the middleware.
+        require_scoped_internal(self.settings, token, ControlScope.AUTOMATION)
 
     def _require_enabled(self) -> None:
         if not self.settings.automation_enabled:

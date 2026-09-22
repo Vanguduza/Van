@@ -1,4 +1,10 @@
 package com.dial.van.overlay
+import androidx.compose.animation.AnimatedContent
+import androidx.compose.animation.core.tween
+import androidx.compose.animation.fadeIn
+import androidx.compose.animation.fadeOut
+import androidx.compose.animation.scaleIn
+import androidx.compose.animation.togetherWith
 import androidx.compose.foundation.Canvas
 import androidx.compose.foundation.ExperimentalFoundationApi
 import androidx.compose.foundation.background
@@ -36,6 +42,8 @@ import com.dial.van.visual.VanLiveVisualState
 import com.dial.van.visual.VanPresence
 import com.dial.van.visual.VanPresentation
 import com.dial.van.visual.VanVisualState
+import com.dial.van.design.VanMotionSpec
+import com.dial.van.visual.rememberReducedMotion
 import com.dial.van.visual.rememberVanEffectBudget
 
 /**
@@ -129,8 +137,22 @@ internal fun VanOverlaySurface(
     val conversation by app.commandController.state.collectAsState()
     val systemLine = chrome.healthLine ?: VanPresence.meshCue(degraded)
 
+    // DNA §6 motion: a presentation change is one continuous surface re-shaping, not a
+    // hard cut. Size is owned by the window (the service resizes the layout params), so
+    // only the content cross-fades/scales; reduced motion collapses both to 0ms.
+    val reducedMotion = rememberReducedMotion()
+    val transitionMs = VanMotionSpec.sharedElementDurationMs(reducedMotion)
     MaterialTheme {
-        when (state.presentation) {
+        AnimatedContent(
+            targetState = state.presentation,
+            transitionSpec = {
+                (fadeIn(tween(transitionMs)) + scaleIn(tween(transitionMs), initialScale = 0.96f))
+                    .togetherWith(fadeOut(tween(transitionMs / 2)))
+                    .using(null)
+            },
+            label = "overlay-presentation",
+        ) { presentation ->
+        when (presentation) {
             VanOverlayPresentation.FULL_FLOATING -> FullFloatingPresence(
                 visualState = visualState,
                 showControls = state.quickControlsVisible,
@@ -173,6 +195,7 @@ internal fun VanOverlaySurface(
             )
             VanOverlayPresentation.MINIMIZED -> MinimizedPresence(visualState, actions)
             VanOverlayPresentation.DOCKED -> DockedPresence(visualState, state, actions)
+        }
         }
     }
 }

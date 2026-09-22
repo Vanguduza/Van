@@ -261,3 +261,49 @@ def test_principal_token_configuration_rejects_weak_and_duplicate_authority():
     with pytest.raises(RuntimeError, match="share a token"):
         CommanderSettings(tokens={"hermes": same, "van-gateway": same}).load_tokens()
 
+
+
+def test_positions_and_assessment_are_signed_read_only_and_not_gateway_only(env):
+    """GAP-F-003 item 8. Observation is not a mutation.
+
+    Both commands are projections of the same VATI ledger the gateway reads,
+    so Hermes and the Command Centre cannot disagree about what is open. They
+    carry the same HMAC binding every other command does — an unsigned or
+    wrongly-signed request is refused before the handler is reached — and they
+    are deliberately absent from the gateway-only allow-list, because a
+    read-only view is not credential-bearing.
+    """
+    client, _runner, _tmp = env
+
+    assert "positions" in COMMANDS and "assessment" in COMMANDS
+    assert "positions" not in AGENT_HIDDEN_COMMANDS
+    assert "assessment" not in AGENT_HIDDEN_COMMANDS
+
+    # The HMAC binding is intact: a wrong token, and a signature made for a
+    # different path, are both refused.
+    assert post(client, "positions", token="wrong" * 8).status_code == 401
+    body = json.dumps({"args": {}}).encode()
+    borrowed = sign_headers(TOKEN, "POST", "/v1/cmd/status", body)
+    assert client.post("/v1/cmd/positions", content=body,
+                       headers={**borrowed, "content-type": "application/json"}
+                       ).status_code == 401
+
+    positions = post(client, "positions").json()["result"]
+    assert positions["ledger_available"] is True
+    assert positions["count"] == 0 and positions["positions"] == []
+    assert "read model of the VATI" in positions["authority"]
+
+    assessment = post(client, "assessment").json()["result"]
+    assert assessment["ledger_available"] is True
+    assert assessment["cognition"]["state"] == "MODEL_INVOKER_UNCONFIGURED"
+    assert assessment["kill_switch_active"] == []
+
+
+def test_the_observation_commands_are_described_for_the_tool_surface(env):
+    """A tool the caller cannot read the authority of is a tool they will misuse."""
+    from commander.app import TOOL_SCHEMAS
+
+    for name in ("positions", "assessment"):
+        schema = TOOL_SCHEMAS[name]
+        assert "Read-only" in schema["description"]
+        assert "properties" in schema

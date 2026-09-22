@@ -8,7 +8,7 @@ from typing import Any, AsyncIterator
 
 import aiosqlite
 
-SCHEMA_VERSION = 28
+SCHEMA_VERSION = 29
 
 
 MIGRATION_17 = """
@@ -580,6 +580,17 @@ CREATE UNIQUE INDEX IF NOT EXISTS uq_session_idempotency
 
 CREATE INDEX IF NOT EXISTS idx_session_messages_command
   ON van_session_messages(command_id);
+"""
+
+MIGRATION_29 = """
+-- GAP-F-002 — a reminder row said nothing about who asked for it: the owner, through the
+-- gateway's own `reminder.create` typed action, or Hermes on the owner's behalf through
+-- POST /v1/runtime/reminders (`HermesReminderCreateBody`'s own docstring in runtime_api.py
+-- named this gap explicitly: "reminders has no free-form metadata column to hold them").
+-- Additive, and backfilled to the value every existing reminder already has by
+-- construction: it was created by the owner device, the only producer that existed before
+-- this migration.
+ALTER TABLE reminders ADD COLUMN source TEXT NOT NULL DEFAULT 'owner_device';
 """
 
 MIGRATIONS: dict[int, str] = {
@@ -1912,6 +1923,7 @@ MIGRATIONS: dict[int, str] = {
     26: MIGRATION_26,
     27: MIGRATION_27,
     28: MIGRATION_28,
+    29: MIGRATION_29,
 }
 
 

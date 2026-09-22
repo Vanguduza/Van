@@ -1,5 +1,7 @@
 package com.dial.van.overlay
 
+import com.dial.van.visual.VanMotionMap
+
 /**
  * Dragging VAN around the screen.
  *
@@ -38,13 +40,31 @@ internal interface OverlayWindowPort {
     /** Close the overlay: the owner dropped VAN on the dismiss target. */
     fun dismissOverlay()
 
-    /** Remember which edge VAN ended up docked to. */
-    fun dockedTo(edge: DockEdge)
+    /**
+     * Remember which edge VAN ended up docked to.
+     *
+     * [durationMs] is item 3's velocity-based fling duration ([VanMotionMap.flingDockDurationMs]
+     * — quicker after a fast flick, the ordinary dock speed otherwise, zero under reduced
+     * motion) so a caller that animates the settle rather than snapping it instantly has the
+     * number to animate with.
+     */
+    fun dockedTo(edge: DockEdge, durationMs: Int)
+
+    /** DNA §2 — "tick on dock/snap". Fired once a drag actually ends in a dock, never on a dismiss. */
+    fun dockFeedback()
 }
 
 internal class OverlayDragController(private val window: OverlayWindowPort) {
 
-    fun begin(state: VanOverlayUiState): VanOverlayUiState {
+    /** Smoothed release velocity, in pixels per millisecond, reset at every [begin]. */
+    private var velocityX = 0f
+    private var velocityY = 0f
+    private var lastDragAtMs = 0L
+
+    fun begin(state: VanOverlayUiState, nowMs: Long = System.currentTimeMillis()): VanOverlayUiState {
+        velocityX = 0f
+        velocityY = 0f
+        lastDragAtMs = nowMs
         window.showDismissTarget()
         return state.copy(
             dragging = true,
@@ -54,7 +74,17 @@ internal class OverlayDragController(private val window: OverlayWindowPort) {
         )
     }
 
-    fun drag(state: VanOverlayUiState, dx: Int, dy: Int): VanOverlayUiState {
+    fun drag(state: VanOverlayUiState, dx: Int, dy: Int, nowMs: Long = System.currentTimeMillis()): VanOverlayUiState {
+        // Item 3 — velocity for the release, exponentially smoothed so one jittery frame
+        // (a pointer sample with an unusually small or large elapsed time) does not by
+        // itself decide whether the release reads as a flick.
+        val elapsedMs = (nowMs - lastDragAtMs).coerceAtLeast(1L)
+        val sampleVx = dx / elapsedMs.toFloat()
+        val sampleVy = dy / elapsedMs.toFloat()
+        velocityX = velocityX * VELOCITY_SMOOTHING + sampleVx * (1f - VELOCITY_SMOOTHING)
+        velocityY = velocityY * VELOCITY_SMOOTHING + sampleVy * (1f - VELOCITY_SMOOTHING)
+        lastDragAtMs = nowMs
+
         val touch = VanOverlayController.touchSizeFor(state.presentation, window::dp)
         val at = window.position()
         val placed = VanOverlayController.clamp(at.x + dx, at.y + dy, touch, window.screen())
@@ -74,8 +104,13 @@ internal class OverlayDragController(private val window: OverlayWindowPort) {
      * Returns null when the drag closed the overlay, because there is then no state to
      * render into: a copy() applied to a service that has just called `stopSelf` is an
      * update to a window that is going away.
+     *
+     * [reducedMotion] only affects [VanMotionMap.flingDockDurationMs]'s reported duration —
+     * the placement itself (including whether a fast flick docks to an edge it did not
+     * start near) is unaffected, matching DNA §2's rule that reduced motion changes how long
+     * a transition takes, never what it communicates.
      */
-    fun finish(state: VanOverlayUiState): VanOverlayUiState? {
+    fun finish(state: VanOverlayUiState, reducedMotion: Boolean = false): VanOverlayUiState? {
         window.hideDismissTarget()
         if (state.dismissTargetArmed) {
             window.dismissOverlay()
@@ -83,9 +118,11 @@ internal class OverlayDragController(private val window: OverlayWindowPort) {
         }
         val touch = VanOverlayController.touchSizeFor(state.presentation, window::dp)
         val at = window.position()
-        val (snapped, edge) = VanOverlayController.settle(at.x, at.y, touch, window.screen())
+        val (snapped, edge) = VanOverlayController.settle(at.x, at.y, touch, window.screen(), velocityX, velocityY)
+        val speed = kotlin.math.hypot(velocityX, velocityY)
         window.moveTo(snapped.x, snapped.y)
-        window.dockedTo(edge)
+        window.dockedTo(edge, VanMotionMap.flingDockDurationMs(speed, reducedMotion))
+        if (edge != DockEdge.NONE) window.dockFeedback()
         return state.copy(
             xPx = snapped.x,
             yPx = snapped.y,
@@ -104,5 +141,10 @@ internal class OverlayDragController(private val window: OverlayWindowPort) {
             // closes on the owner's next, unrelated touch.
             dismissTargetArmed = false,
         )
+    }
+
+    private companion object {
+        /** How much of the previous smoothed velocity survives each new sample. */
+        const val VELOCITY_SMOOTHING = 0.7f
     }
 }

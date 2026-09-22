@@ -26,6 +26,7 @@ from typing import Any
 from fastapi import APIRouter, Header, HTTPException
 from pydantic import BaseModel, ConfigDict, Field
 
+from van_gateway.auth.control_scopes import ControlScope, require_scoped_internal
 from van_gateway.action.registry import BUILTIN_ACTIONS
 from van_gateway.authority.descriptor import describe_action, describe_capability
 from van_gateway.capability.models import CapabilityClass, RoutingConstraints
@@ -33,7 +34,6 @@ from van_gateway.capability.registry import CapabilityRegistry, CapabilityRegist
 from van_gateway.capability.router import CapabilityRouter
 from van_gateway.coherence import owner_status
 from van_gateway.config import Settings
-from van_gateway.google.control import GoogleControlAuthError, verify_internal_control
 from van_gateway.mission.binding import MissionBinder
 from van_gateway.mission.models import (
     MissionOrigin,
@@ -135,11 +135,8 @@ class MissionApi:
         self._install_routes()
 
     def _require_internal(self, token: str | None) -> None:
-        try:
-            verify_internal_control(self.settings.internal_control_token, token)
-        except GoogleControlAuthError as exc:
-            code = 503 if exc.code == "internal_control_token_unconfigured" else 403
-            raise HTTPException(status_code=code, detail=exc.code) from exc
+        # GAP-F-009: scope-aware, same authority as the middleware.
+        require_scoped_internal(self.settings, token, ControlScope.MISSIONS)
 
     @staticmethod
     def _translate(exc: MissionError) -> HTTPException:

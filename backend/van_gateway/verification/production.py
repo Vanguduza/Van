@@ -21,13 +21,17 @@ from __future__ import annotations
 from typing import Any
 
 from van_gateway.automation.verifier import DocumentUploadObserver, PostconditionSpec, WorkflowVerifier
+from van_gateway.context.models import ContextRequirement
+from van_gateway.context.service import OwnerContextService
 from van_gateway.mission.verifiers import (
     ApiReadbackVerifier,
     LedgerEventVerifier,
+    ObservationVerifier,
     ScreenshotVerifier,
     VerifierRegistry,
     UnobservableStrategyVerifier,
 )
+from van_gateway.reminders.service import ReminderService
 from van_gateway.storage.db import Store
 from van_gateway.verification import observations
 
@@ -60,6 +64,67 @@ def _browser_observation(store: Store):
 def _trading_halt_observation(trading: Any):
     async def observe(context: dict[str, Any]) -> dict[str, Any]:
         return await observations.trading_halt_readback(trading)
+
+    return observe
+
+
+def _owner_fact_readback_observation(context: OwnerContextService):
+    """GAP-F-001 — ask the gateway's own owner-fact store what it holds *now*.
+
+    Independent of `command/local_executors.py`'s own STATE_PREDICATE re-read: that one
+    confirms the write at the execution ledger, from inside the same request that made it.
+    This is the mission's own check, run fresh from `contract.postconditions` (what the
+    owner's command sealed, before execution) against a new query — not the executor's
+    report of what it saw.
+    """
+
+    async def observe(context_dict: dict[str, Any]) -> dict[str, Any]:
+        postconditions = context_dict.get("postconditions") or {}
+        subject = str(postconditions.get("subject") or "").strip()
+        predicate = str(postconditions.get("predicate") or "").strip()
+        scope = str(postconditions.get("scope") or "").strip()
+        if not subject or not predicate or not scope:
+            raise ValueError("success contract names no subject/predicate/scope to read back")
+        candidates = await context.current_candidates(
+            ContextRequirement(subject=subject, predicate=predicate, scope=scope),
+            now_ms=context_dict.get("now_ms"),
+        )
+        if not candidates:
+            return {"subject": subject, "predicate": predicate, "scope": scope, "fact_exists": False}
+        fact = candidates[0]
+        return {
+            "subject": subject, "predicate": predicate, "scope": scope,
+            "fact_exists": True, "value": str(fact.value),
+            "evidence_ref": f"owner-fact:{fact.fact_id}",
+        }
+
+    return observe
+
+
+def _reminder_readback_observation(reminders: ReminderService):
+    """GAP-F-002 — ask the reminders table what it holds now, independent of the executor.
+
+    A created reminder has no id the contract could have named at command time (the same
+    reason `google.notebook.enterprise.create` gets no contract until the provider assigns
+    one) — but its idempotency key is deterministic (`f"reminder:{command_id}"`, set by
+    `command/local_executors.py`'s `ReminderCreateExecutor`) and the mission's own sealed
+    authority envelope already carries that command id, independent of anything the
+    executor claims. Reconstructing the key from there and reading it back is what makes
+    this an independent check rather than a trust in the executor's reported id.
+    """
+
+    async def observe(context_dict: dict[str, Any]) -> dict[str, Any]:
+        envelope = context_dict.get("authority_envelope") or {}
+        command_id = str(envelope.get("source_command_id") or "").strip()
+        if not command_id:
+            raise ValueError("mission has no source command id to derive the reminder's idempotency key from")
+        row = await reminders.get_by_idempotency_key(f"reminder:{command_id}")
+        if row is None:
+            return {"reminder_exists": False}
+        return {
+            "text": row["text"], "reminder_exists": True,
+            "evidence_ref": f"reminder:{row['id']}",
+        }
 
     return observe
 
@@ -119,9 +184,34 @@ DECLARED_BUT_UNOBSERVABLE_STRATEGIES: dict[str, str] = {
 def build_mission_registry(
     *, store: Store, trading: Any, knowledge: Any
 ) -> VerifierRegistry:
-    """The registry MissionService runs when a mission asks for a verification outcome."""
+    """The registry MissionService runs when a mission asks for a verification outcome.
+
+    GAP-F-001/002 — `OwnerContextService` and `ReminderService` are constructed fresh here
+    from `store` rather than injected, the same `store` every other adapter above already
+    reads. Both are stateless wrappers over it (no in-memory state of their own), so a
+    second instance reads exactly the same rows any other instance would; this is what lets
+    `create_app()`'s existing call — `build_mission_registry(store=store, trading=trading,
+    knowledge=owner_runtime.knowledge)` — pick up both new strategies with no wiring change.
+    """
     registry = VerifierRegistry()
     registry.register("ledger-event", LedgerEventVerifier(_ledger_observation(trading)))
+    # GAP-F-001 — the owner-fact readback trading.halt's ledger readback already modelled:
+    # a system the executor wrote to, asked independently what it now holds.
+    registry.register(
+        "owner-fact-readback",
+        ObservationVerifier(
+            _owner_fact_readback_observation(OwnerContextService(store)),
+            verifier_version="owner-fact-readback/1", evidence_prefix="owner-fact://",
+        ),
+    )
+    # GAP-F-002 — same shape, for the reminders table.
+    registry.register(
+        "reminder-readback",
+        ObservationVerifier(
+            _reminder_readback_observation(ReminderService(store)),
+            verifier_version="reminder-readback/1", evidence_prefix="reminder://",
+        ),
+    )
     # §§22, 421 — a halt is a ledger fact like a fill is, written by the trading process
     # and hash-chained there, so the same adapter reads it. P1-VERIFY-003: `trading.halt`
     # is the one A4 command an owner issues under time pressure, and until this was
@@ -152,7 +242,7 @@ def build_mission_registry(
 #: Mission verification strategies a success contract may name today.
 WIRED_MISSION_STRATEGIES = (
     "ledger-event", "trading-halt", "browser-evidence", "api-readback",
-    "notebook-source-readback",
+    "notebook-source-readback", "owner-fact-readback", "reminder-readback",
 )
 
 

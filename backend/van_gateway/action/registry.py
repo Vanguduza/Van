@@ -124,6 +124,54 @@ BUILTIN_ACTIONS: tuple[ActionDefinition, ...] = (
         no_stale_replay=True,
         max_age_seconds=5,
     ),
+    # GAP-F-001 — the owner saying "remember that my accountant is Thandi" now has a typed
+    # action and a gateway-side executor (command/local_executors.py) rather than a route
+    # (`POST /v1/context/facts`) with no producer. STATE_PREDICATE — the independent check
+    # is the gateway re-reading its own owner-fact store after the write.
+    ActionDefinition(
+        action_id="memory.remember",
+        action_class=ActionClass.A2,
+        mutates_state=True,
+        allowed_principals={PrincipalType.OWNER_DEVICE},
+        verifier_type=VerifierType.STATE_PREDICATE,
+        max_age_seconds=300,
+        parameter_schema={
+            "required": ["subject", "predicate", "value"],
+            "properties": {
+                "subject": "string", "predicate": "string", "value": "string", "scope": "string",
+            },
+        },
+    ),
+    # GAP-F-001 — "record decision: ..." / "we decided ...". Same writer and check as
+    # `memory.remember`, kept as its own action id so a decision is never confused with an
+    # arbitrary remembered statement in the audit trail or the learning stores.
+    ActionDefinition(
+        action_id="memory.decision.record",
+        action_class=ActionClass.A2,
+        mutates_state=True,
+        allowed_principals={PrincipalType.OWNER_DEVICE},
+        verifier_type=VerifierType.STATE_PREDICATE,
+        max_age_seconds=300,
+        parameter_schema={
+            "required": ["decision"],
+            "properties": {"decision": "string"},
+        },
+    ),
+    # GAP-F-002 — reminders had two production routes (`POST /v1/reminders`,
+    # `/v1/reminders/parse`) and no owner-side producer. STATE_PREDICATE — the independent
+    # check is the gateway re-reading its own open-reminders table after the write.
+    ActionDefinition(
+        action_id="reminder.create",
+        action_class=ActionClass.A2,
+        mutates_state=True,
+        allowed_principals={PrincipalType.OWNER_DEVICE},
+        verifier_type=VerifierType.STATE_PREDICATE,
+        max_age_seconds=300,
+        parameter_schema={
+            "required": ["text", "due_expression"],
+            "properties": {"text": "string", "due_expression": "string"},
+        },
+    ),
     ActionDefinition(
         action_id="secret.exfiltrate",
         action_class=ActionClass.A5,

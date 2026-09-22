@@ -1,16 +1,11 @@
 package com.dial.van.trading.ui
 
-import androidx.compose.foundation.background
-import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.fillMaxSize
-import androidx.compose.foundation.layout.fillMaxWidth
-import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.lazy.LazyColumn
-import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
@@ -20,70 +15,65 @@ import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.draw.clip
-import androidx.compose.ui.graphics.Color
-import androidx.compose.ui.text.font.FontFamily
-import androidx.compose.ui.text.font.FontWeight
-import androidx.compose.ui.unit.dp
-import androidx.compose.ui.unit.sp
+import com.dial.van.design.LocalVanTokens
+import com.dial.van.design.StatusSemantics
+import com.dial.van.design.components.MetricTile
+import com.dial.van.design.components.SectionHeader
+import com.dial.van.design.components.StatusChip
+import com.dial.van.design.components.VanPanel
 import com.dial.van.trading.CognitionSnapshot
 import com.dial.van.trading.Loaded
+import com.dial.van.trading.TradingFormat
+import com.dial.van.trading.TradingRepository
 
 /**
- * Rev 5.1 owner cognition surface (TRD-REV51-130).
+ * Rev 5.1 owner cognition surface (TRD-REV51-130), migrated onto the design system. A
+ * dedicated page, not another vertically-stacked dashboard module: it renders the gateway's
+ * ledger projection and has no mutation controls. Reachable from Overview's "Cognition &
+ * research →" link — not one of DNA §4's seven named Trading destinations, kept because it is
+ * real functionality this worker migrates rather than discards.
  *
- * This is a dedicated page, not another vertically-stacked dashboard module. It renders
- * the gateway's ledger projection and has no mutation controls. Research/evolution state
- * is deliberately separate from strategy promotion: a proposal is evidence, not authority.
+ * @DataSource("GET /v1/trading/cognition")
  */
 @Composable
-fun CognitionScreen(env: ScreenEnv, padding: PaddingValues) {
+fun CognitionScreen(repo: TradingRepository) {
+    val tokens = LocalVanTokens.current
     var tick by remember { mutableIntStateOf(0) }
     var selected by remember { mutableStateOf("OVERVIEW") }
     var snapshot: Loaded<CognitionSnapshot> by remember { mutableStateOf(Loaded.Loading) }
 
     LaunchedEffect(tick) {
         snapshot = Loaded.Loading
-        snapshot = env.repo.cognition()
+        snapshot = repo.cognition()
     }
 
     LazyColumn(
-        modifier = Modifier.fillMaxSize().padding(padding).padding(horizontal = 14.dp),
-        verticalArrangement = Arrangement.spacedBy(10.dp),
-        contentPadding = PaddingValues(vertical = 10.dp),
+        modifier = Modifier.fillMaxSize(),
+        contentPadding = PaddingValues(horizontal = tokens.space.pageGutter, vertical = tokens.space.space3),
+        verticalArrangement = Arrangement.spacedBy(tokens.space.space3),
     ) {
         item {
-            Row {
-                Column(modifier = Modifier.weight(1f)) {
-                    Text("Trading Cognition", color = Color.White, fontSize = 20.sp, fontWeight = FontWeight.Bold)
-                    Text(
-                        "Fable-led shadow cognition, research and evolution evidence. No control on this page can place or resize a trade.",
-                        color = TradingColors.muted,
-                        fontSize = 10.sp,
-                    )
-                }
-                Text(
-                    "Refresh",
-                    color = TradingColors.accent,
-                    fontSize = 11.sp,
-                    modifier = Modifier.clickable { tick += 1 }.padding(8.dp),
-                )
-            }
-            TabRowChips(listOf("OVERVIEW", "MODELS", "RESEARCH", "EVOLUTION"), selected) {
-                selected = it
-            }
+            SectionHeader(
+                title = "Trading Cognition",
+                detail = "Fable-led shadow cognition, research and evolution evidence. No control on this page can place or resize a trade.",
+                trailing = { TradingRefreshAction { tick += 1 } },
+            )
         }
+        item { TradingTabs(listOf("OVERVIEW", "MODELS", "RESEARCH", "EVOLUTION"), selected) { selected = it } }
 
-        item {
-            LoadedBox(snapshot, empty = "No cognition evidence has been recorded yet.") { model ->
-                Column(verticalArrangement = Arrangement.spacedBy(10.dp)) {
-                    AuthorityHeader(model)
-                    when (selected) {
-                        "MODELS" -> ModelsPanel(env, model)
-                        "RESEARCH" -> ResearchPanel(env, model)
-                        "EVOLUTION" -> EvolutionPanel(env, model)
-                        else -> CognitionOverview(env, model)
-                    }
+        val loaded = snapshot
+        when (loaded) {
+            Loaded.Loading -> item { Text("Reading the ledger…", style = tokens.type.body, color = tokens.color.textSecondary) }
+            is Loaded.Unavailable -> item {
+                Text(TradingFormat.unavailableState(loaded.reason), style = tokens.type.body, color = tokens.color.forStatusRole(StatusSemantics.ROLE_EVENT_RISK))
+            }
+            is Loaded.Ready -> {
+                item { AuthorityHeader(loaded.value) }
+                when (selected) {
+                    "MODELS" -> item { ModelsPanel(loaded.value) }
+                    "RESEARCH" -> item { ResearchPanel(loaded.value) }
+                    "EVOLUTION" -> item { EvolutionPanel(loaded.value) }
+                    else -> item { CognitionOverview(loaded.value) }
                 }
             }
         }
@@ -92,91 +82,48 @@ fun CognitionScreen(env: ScreenEnv, padding: PaddingValues) {
 
 @Composable
 private fun AuthorityHeader(model: CognitionSnapshot) {
-    Column(
-        modifier = Modifier.fillMaxWidth()
-            .clip(RoundedCornerShape(12.dp))
-            .background(Color.White.copy(alpha = 0.05f))
-            .padding(12.dp),
-        verticalArrangement = Arrangement.spacedBy(6.dp),
-    ) {
-        Row(horizontalArrangement = Arrangement.spacedBy(6.dp)) {
-            Chip(model.cognitionMode, 0xFF00E5FFL)
-            Chip("LIVE ADVISORY " + model.liveAdvisory, 0xFFFFB300L)
-            Chip("LIVE " + model.liveStatus, 0xFF78909CL)
-        }
-        Text(
-            if (model.ledgerAvailable) "Ledger evidence connected" else "Trading cognition ledger unavailable",
-            color = if (model.ledgerAvailable) TradingColors.text else TradingColors.warning,
-            fontSize = 10.sp,
-        )
-    }
-}
-
-@Composable
-private fun CognitionOverview(env: ScreenEnv, model: CognitionSnapshot) {
-    SectionPanel(title = "Evidence summary", glass = env.glass) {
-        Row(horizontalArrangement = Arrangement.spacedBy(8.dp)) {
-            MetricTile("Assessments", (model.summary["assessments"] ?: 0).toString(), Modifier.weight(1f))
-            MetricTile("Shadow decisions", (model.summary["shadow_decisions"] ?: 0).toString(), Modifier.weight(1f))
-            MetricTile("Handoffs", (model.summary["handoffs"] ?: 0).toString(), Modifier.weight(1f))
-        }
-        Row(horizontalArrangement = Arrangement.spacedBy(8.dp)) {
-            MetricTile("Research missions", (model.summary["research_missions"] ?: 0).toString(), Modifier.weight(1f))
-            MetricTile("Proposals", (model.summary["improvement_proposals"] ?: 0).toString(), Modifier.weight(1f))
-            MetricTile("Admissions", (model.summary["proposal_admissions"] ?: 0).toString(), Modifier.weight(1f))
-        }
-        Text(
-            if (model.expansionModes.isEmpty()) "Expansion: no evidence yet"
-            else "Expansion evidence: " + model.expansionModes.entries.joinToString { it.key + "=" + it.value },
-            color = TradingColors.text,
-            fontSize = 10.sp,
-        )
-        if (model.rejectionCategories.isNotEmpty()) {
+    val tokens = LocalVanTokens.current
+    VanPanel(dense = true) {
+        Column(verticalArrangement = Arrangement.spacedBy(tokens.space.space2)) {
+            Row(horizontalArrangement = Arrangement.spacedBy(tokens.space.space2)) {
+                StatusChip(label = model.cognitionMode, role = StatusSemantics.ROLE_MONITOR)
+                StatusChip(label = "LIVE ADVISORY ${model.liveAdvisory}", role = StatusSemantics.ROLE_EVENT_RISK)
+                StatusChip(label = "LIVE ${model.liveStatus}", role = StatusSemantics.ROLE_DISABLED)
+            }
             Text(
-                "Rejection categories: " + model.rejectionCategories.entries
-                    .sortedByDescending { it.value }.take(4)
-                    .joinToString { it.key + " " + it.value },
-                color = TradingColors.muted,
-                fontSize = 10.sp,
+                if (model.ledgerAvailable) "Ledger evidence connected" else "Trading cognition ledger unavailable",
+                style = tokens.type.body,
+                color = if (model.ledgerAvailable) tokens.color.textSecondary else tokens.color.forStatusRole(StatusSemantics.ROLE_EVENT_RISK),
             )
         }
     }
 }
 
 @Composable
-private fun ModelsPanel(env: ScreenEnv, model: CognitionSnapshot) {
-    SectionPanel(title = "Model hierarchy & measured contribution", glass = env.glass) {
-        model.models.forEachIndexed { index, row ->
-            Column(
-                modifier = Modifier.fillMaxWidth()
-                    .clip(RoundedCornerShape(10.dp))
-                    .background(Color.White.copy(alpha = 0.035f))
-                    .padding(10.dp),
-            ) {
-                Row {
-                    Text(
-                        (index + 1).toString() + ". " + row.modelId,
-                        color = Color.White,
-                        fontWeight = FontWeight.SemiBold,
-                        modifier = Modifier.weight(1f),
-                    )
-                    Chip(
-                        when (row.qualified) {
-                            true -> "MEASURED"
-                            false -> "NOT QUALIFIED"
-                            null -> "NO PERFORMANCE"
-                        },
-                        if (row.qualified == true) 0xFF69F0AEL else 0xFF78909CL,
-                    )
-                }
-                val confidence = row.confidence?.let {
-                    String.format(java.util.Locale.ROOT, "%.2f", it)
-                } ?: "—"
+private fun CognitionOverview(model: CognitionSnapshot) {
+    val tokens = LocalVanTokens.current
+    VanPanel {
+        Column(verticalArrangement = Arrangement.spacedBy(tokens.space.space2)) {
+            Text("Evidence summary", style = tokens.type.headline, color = tokens.color.textPrimary)
+            Row(horizontalArrangement = Arrangement.spacedBy(tokens.space.space2)) {
+                MetricTile("Assessments", (model.summary["assessments"] ?: 0).toString(), Modifier.weight(1f))
+                MetricTile("Shadow decisions", (model.summary["shadow_decisions"] ?: 0).toString(), Modifier.weight(1f))
+                MetricTile("Handoffs", (model.summary["handoffs"] ?: 0).toString(), Modifier.weight(1f))
+            }
+            Row(horizontalArrangement = Arrangement.spacedBy(tokens.space.space2)) {
+                MetricTile("Research missions", (model.summary["research_missions"] ?: 0).toString(), Modifier.weight(1f))
+                MetricTile("Proposals", (model.summary["improvement_proposals"] ?: 0).toString(), Modifier.weight(1f))
+                MetricTile("Admissions", (model.summary["proposal_admissions"] ?: 0).toString(), Modifier.weight(1f))
+            }
+            Text(
+                if (model.expansionModes.isEmpty()) "Expansion: no evidence yet"
+                else "Expansion evidence: " + model.expansionModes.entries.joinToString { it.key + "=" + it.value },
+                style = tokens.type.body, color = tokens.color.textSecondary,
+            )
+            if (model.rejectionCategories.isNotEmpty()) {
                 Text(
-                    row.assessments.toString() + " assessment(s) · latest " +
-                        (row.verdict ?: "—") + " · confidence " + confidence,
-                    color = TradingColors.muted,
-                    fontSize = 10.sp,
+                    "Rejection categories: " + model.rejectionCategories.entries.sortedByDescending { it.value }.take(4).joinToString { it.key + " " + it.value },
+                    style = tokens.type.label, color = tokens.color.textTertiary,
                 )
             }
         }
@@ -184,23 +131,22 @@ private fun ModelsPanel(env: ScreenEnv, model: CognitionSnapshot) {
 }
 
 @Composable
-private fun ResearchPanel(env: ScreenEnv, model: CognitionSnapshot) {
-    SectionPanel(title = "Research missions", glass = env.glass) {
-        if (model.missions.isEmpty()) {
-            EmptyState("No research missions in the ledger yet.")
-        } else {
-            model.missions.forEach { mission ->
-                Column(
-                    modifier = Modifier.fillMaxWidth()
-                        .clip(RoundedCornerShape(10.dp))
-                        .background(Color.White.copy(alpha = 0.035f))
-                        .padding(10.dp),
-                ) {
-                    Row {
-                        Text(mission.missionId, color = TradingColors.accent, fontFamily = FontFamily.Monospace, fontSize = 10.sp, modifier = Modifier.weight(1f))
-                        Chip(mission.state, if (mission.state == "COMPLETE") 0xFF69F0AEL else 0xFFFFB300L)
+private fun ModelsPanel(model: CognitionSnapshot) {
+    val tokens = LocalVanTokens.current
+    VanPanel {
+        Column(verticalArrangement = Arrangement.spacedBy(tokens.space.space2)) {
+            Text("Model hierarchy & measured contribution", style = tokens.type.headline, color = tokens.color.textPrimary)
+            model.models.forEachIndexed { index, row ->
+                Column(verticalArrangement = Arrangement.spacedBy(tokens.space.space1)) {
+                    Row(horizontalArrangement = Arrangement.spacedBy(tokens.space.space2)) {
+                        Text("${index + 1}. ${row.modelId}", style = tokens.type.body, color = tokens.color.textPrimary, modifier = Modifier.weight(1f))
+                        StatusChip(
+                            label = when (row.qualified) { true -> "MEASURED"; false -> "NOT QUALIFIED"; null -> "NO PERFORMANCE" },
+                            role = if (row.qualified == true) StatusSemantics.ROLE_FAVOURABLE else StatusSemantics.ROLE_DISABLED,
+                        )
                     }
-                    Text(mission.hypothesis.ifBlank { "No hypothesis text" }, color = TradingColors.text, fontSize = 11.sp)
+                    val confidence = row.confidence?.let { String.format(java.util.Locale.ROOT, "%.2f", it) } ?: "—"
+                    Text("${row.assessments} assessment(s) · latest ${row.verdict ?: "—"} · confidence $confidence", style = tokens.type.label, color = tokens.color.textTertiary)
                 }
             }
         }
@@ -208,35 +154,52 @@ private fun ResearchPanel(env: ScreenEnv, model: CognitionSnapshot) {
 }
 
 @Composable
-private fun EvolutionPanel(env: ScreenEnv, model: CognitionSnapshot) {
-    SectionPanel(title = "Evolution proposals", glass = env.glass) {
-        if (model.proposals.isEmpty()) {
-            EmptyState("No improvement proposals have been admitted into the evolution ledger.")
-        } else {
-            model.proposals.forEach { proposal ->
-                Column(
-                    modifier = Modifier.fillMaxWidth()
-                        .clip(RoundedCornerShape(10.dp))
-                        .background(Color.White.copy(alpha = 0.035f))
-                        .padding(10.dp),
-                ) {
-                    Row {
-                        Text(proposal.title, color = Color.White, fontWeight = FontWeight.SemiBold, modifier = Modifier.weight(1f))
-                        if (proposal.liveAffecting) Chip("LIVE-AFFECTING", 0xFFFFB300L)
+private fun ResearchPanel(model: CognitionSnapshot) {
+    val tokens = LocalVanTokens.current
+    VanPanel {
+        Column(verticalArrangement = Arrangement.spacedBy(tokens.space.space2)) {
+            Text("Research missions", style = tokens.type.headline, color = tokens.color.textPrimary)
+            if (model.missions.isEmpty()) {
+                Text("No research missions in the ledger yet.", style = tokens.type.body, color = tokens.color.textSecondary)
+            } else {
+                model.missions.forEach { mission ->
+                    Column(verticalArrangement = Arrangement.spacedBy(tokens.space.space1)) {
+                        Row(horizontalArrangement = Arrangement.spacedBy(tokens.space.space2)) {
+                            Text(mission.missionId, style = tokens.type.label, color = tokens.color.accentCyan, modifier = Modifier.weight(1f))
+                            StatusChip(label = mission.state, role = if (mission.state == "COMPLETE") StatusSemantics.ROLE_FAVOURABLE else StatusSemantics.ROLE_EVENT_RISK)
+                        }
+                        Text(mission.hypothesis.ifBlank { "No hypothesis text" }, style = tokens.type.body, color = tokens.color.textPrimary)
                     }
-                    Text(proposal.proposalId, color = TradingColors.muted, fontFamily = FontFamily.Monospace, fontSize = 9.sp)
-                    Text(
-                        "Admission: " + (proposal.admission ?: "NOT EVALUATED"),
-                        color = TradingColors.text,
-                        fontSize = 10.sp,
-                    )
                 }
             }
         }
-        Text(
-            "A proposal, model qualification or research result never grants trading authority. Live-affecting changes still require engineering gates and owner authority.",
-            color = TradingColors.muted,
-            fontSize = 9.sp,
-        )
+    }
+}
+
+@Composable
+private fun EvolutionPanel(model: CognitionSnapshot) {
+    val tokens = LocalVanTokens.current
+    VanPanel {
+        Column(verticalArrangement = Arrangement.spacedBy(tokens.space.space2)) {
+            Text("Evolution proposals", style = tokens.type.headline, color = tokens.color.textPrimary)
+            if (model.proposals.isEmpty()) {
+                Text("No improvement proposals have been admitted into the evolution ledger.", style = tokens.type.body, color = tokens.color.textSecondary)
+            } else {
+                model.proposals.forEach { proposal ->
+                    Column(verticalArrangement = Arrangement.spacedBy(tokens.space.space1)) {
+                        Row(horizontalArrangement = Arrangement.spacedBy(tokens.space.space2)) {
+                            Text(proposal.title, style = tokens.type.body, color = tokens.color.textPrimary, modifier = Modifier.weight(1f))
+                            if (proposal.liveAffecting) StatusChip(label = "LIVE-AFFECTING", role = StatusSemantics.ROLE_EVENT_RISK)
+                        }
+                        Text(proposal.proposalId, style = tokens.type.label, color = tokens.color.textTertiary)
+                        Text("Admission: ${proposal.admission ?: "NOT EVALUATED"}", style = tokens.type.label, color = tokens.color.textSecondary)
+                    }
+                }
+            }
+            TradingDisclosure(
+                "A proposal, model qualification or research result never grants trading authority. " +
+                    "Live-affecting changes still require engineering gates and owner authority.",
+            )
+        }
     }
 }

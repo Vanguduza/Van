@@ -39,6 +39,7 @@ from van_gateway.browser.interactive_models import (
 )
 from van_gateway.browser.policy import BrowserPolicyError
 from van_gateway.browser.service import BrowserSessionBroker
+from van_gateway.observability import instruments
 from van_gateway.storage.db import Store
 
 
@@ -137,6 +138,7 @@ class InteractiveSessionService:
             last_profile_lease_renewed_at_ms=now,
         )
         await self._insert(session)
+        await self._refresh_active_sessions_gauge()
         # The owner holds control from the first instant. A session that starts with NONE
         # would need a grant before the owner could touch their own browser.
         control = await self.control.issue(
@@ -238,6 +240,23 @@ class InteractiveSessionService:
             session_id=session.session_id, event_type="session.ended", severity="INFO",
             summary=reason, now_ms=now, device_id=session.owner_device_id,
         )
+        await self._refresh_active_sessions_gauge()
+
+    async def _refresh_active_sessions_gauge(self) -> None:
+        """Rev 1.5 §28.1 — `van_browser_session_active`, the one gauge the Gateway can
+        report honestly about the Remote Browser without a Stream Host attached.
+
+        Queried rather than kept as a running counter: a process restart would otherwise
+        resume counting from zero while sessions a crash never released are still open in
+        the store, and a gauge that lies about "how many" is worse than one that costs a
+        cheap `COUNT(*)` on every create/release.
+        """
+        row = await self.store.fetchone(
+            "SELECT COUNT(*) AS n FROM browser_interactive_sessions "
+            "WHERE state NOT IN (?, ?)",
+            (InteractiveSessionState.TERMINATED.value, InteractiveSessionState.FAILED.value),
+        )
+        instruments.set_browser_sessions_active(int(row["n"]) if row is not None else 0)
 
     # ------------------------------------------------------------------ the lease heartbeat
 

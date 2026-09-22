@@ -73,11 +73,25 @@
             android:noHistory="true"
             android:theme="@android:style/Theme.NoDisplay" />
 
+        <!--
+          DNA §4 — the `van://<route>` deep links `CommandCentreActivity.onCreate`/
+          `onNewIntent` resolve through `VanNavModel.deepLink`, never a raw path handed
+          straight to the NavHost. `singleTop` because the Activity is meant to stay
+          resident; `onNewIntent` reopens as a fresh task rather than threading a second
+          route into an already-composed `NavHostController` (see that method's comment).
+        -->
         <activity
             android:name=".command.CommandCentreActivity"
             android:exported="true"
             android:launchMode="singleTop"
-            android:theme="@style/Theme.Van" />
+            android:theme="@style/Theme.Van">
+            <intent-filter android:autoVerify="false">
+                <action android:name="android.intent.action.VIEW" />
+                <category android:name="android.intent.category.DEFAULT" />
+                <category android:name="android.intent.category.BROWSABLE" />
+                <data android:scheme="van" />
+            </intent-filter>
+        </activity>
 
         <!--
           Rev 1.5 §7 — the owner holding a browser that runs somewhere else.

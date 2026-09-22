@@ -36,11 +36,20 @@ class LocalTtsRouterTest {
     )
 
     @Test
-    fun `the bundled voice is preferred for anything VAN composes`() {
+    fun `the sherpa asset being ready never routes speech through it — no backend implements it`() {
+        // GAP-F-013/voice audit — SHERPA_ONNX used to be preferred here even though nothing
+        // ever spoke through it: TtsOutputManager only ever calls Android's TextToSpeech.
+        // Reporting the bundle "ready" is real asset classification; routing to it was not.
         val selection = LocalTtsRouter.select(
             SpeechKind.ASSISTANT_ANSWER, engines(sherpa = true, android = true),
         )
-        assertEquals(TtsEngineKind.SHERPA_ONNX, (selection as TtsSelection.Engine).kind)
+        assertEquals(TtsEngineKind.ANDROID_OFFLINE, (selection as TtsSelection.Engine).kind)
+    }
+
+    @Test
+    fun `the sherpa asset alone, with no other engine, is silent rather than falsely engine-selected`() {
+        val selection = LocalTtsRouter.select(SpeechKind.ASSISTANT_ANSWER, engines(sherpa = true))
+        assertEquals("no_usable_tts_engine", (selection as TtsSelection.Silent).reason)
     }
 
     @Test
@@ -73,11 +82,12 @@ class LocalTtsRouterTest {
 
     @Test
     fun `a critical phrase with no bank falls through to a synthesiser rather than silence`() {
-        // Late is worse than immediate and much better than nothing.
+        // Late is worse than immediate and much better than nothing. The fallback
+        // synthesiser is a real one (Android's), not the unrouted sherpa asset.
         val selection = LocalTtsRouter.select(
-            SpeechKind.CRITICAL_PHRASE, engines(sherpa = true), phraseKey = "wake_ack",
+            SpeechKind.CRITICAL_PHRASE, engines(android = true), phraseKey = "wake_ack",
         )
-        assertEquals(TtsEngineKind.SHERPA_ONNX, (selection as TtsSelection.Engine).kind)
+        assertEquals(TtsEngineKind.ANDROID_OFFLINE, (selection as TtsSelection.Engine).kind)
     }
 
     @Test

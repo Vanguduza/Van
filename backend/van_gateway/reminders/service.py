@@ -13,7 +13,7 @@ class ReminderService:
 
     async def create(self, body: ReminderCreate) -> dict:
         existing = await self.store.fetchone(
-            "SELECT id, text, due_at_unix, status, project_id, idempotency_key FROM reminders WHERE idempotency_key = ?",
+            "SELECT id, text, due_at_unix, status, project_id, idempotency_key, source FROM reminders WHERE idempotency_key = ?",
             (body.idempotency_key,),
         )
         if existing:
@@ -22,14 +22,16 @@ class ReminderService:
                 "text": existing["text"],
                 "due_at_unix": int(existing["due_at_unix"]),
                 "status": existing["status"],
+                "source": existing["source"],
                 "replayed": True,
             }
         now = int(time.time())
         reminder_id = str(uuid.uuid4())
+        source = (body.source or "owner_device").strip() or "owner_device"
         await self.store.execute(
             """
-            INSERT INTO reminders(id, text, due_at_unix, status, project_id, idempotency_key, chain_follow_up_text, chain_follow_up_offset_seconds, created_at_unix, updated_at_unix)
-            VALUES (?, ?, ?, 'OPEN', ?, ?, ?, ?, ?, ?)
+            INSERT INTO reminders(id, text, due_at_unix, status, project_id, idempotency_key, chain_follow_up_text, chain_follow_up_offset_seconds, source, created_at_unix, updated_at_unix)
+            VALUES (?, ?, ?, 'OPEN', ?, ?, ?, ?, ?, ?, ?)
             """,
             (
                 reminder_id,
@@ -39,15 +41,19 @@ class ReminderService:
                 body.idempotency_key,
                 body.chain_follow_up_text,
                 body.chain_follow_up_offset_seconds,
+                source,
                 now,
                 now,
             ),
         )
-        return {"id": reminder_id, "text": body.text, "due_at_unix": body.due_at_unix, "status": "OPEN", "replayed": False}
+        return {
+            "id": reminder_id, "text": body.text, "due_at_unix": body.due_at_unix,
+            "status": "OPEN", "source": source, "replayed": False,
+        }
 
     async def list_open(self) -> list[dict]:
         rows = await self.store.fetchall(
-            "SELECT id, text, due_at_unix, status, project_id FROM reminders WHERE status = 'OPEN' ORDER BY due_at_unix ASC"
+            "SELECT id, text, due_at_unix, status, project_id, source FROM reminders WHERE status = 'OPEN' ORDER BY due_at_unix ASC"
         )
         return [
             {
@@ -56,9 +62,35 @@ class ReminderService:
                 "due_at_unix": int(r["due_at_unix"]),
                 "status": r["status"],
                 "project_id": r["project_id"],
+                "source": r["source"],
             }
             for r in rows
         ]
+
+    async def get_by_idempotency_key(self, idempotency_key: str) -> dict | None:
+        """The row a caller who already knows its own idempotency key would find.
+
+        GAP-F-001/002/005's mission-level readback (`verification/production.py`'s
+        "reminder-readback" strategy) uses this to independently confirm a
+        `reminder.create` execution without trusting the executor's own report: the
+        mission's authority envelope carries the source command id, from which the same
+        deterministic idempotency key (`f"reminder:{command_id}"`) the executor used can be
+        reconstructed and looked up here, a plain read with no side effect.
+        """
+        row = await self.store.fetchone(
+            "SELECT id, text, due_at_unix, status, project_id, source FROM reminders WHERE idempotency_key = ?",
+            (idempotency_key,),
+        )
+        if row is None:
+            return None
+        return {
+            "id": row["id"],
+            "text": row["text"],
+            "due_at_unix": int(row["due_at_unix"]),
+            "status": row["status"],
+            "project_id": row["project_id"],
+            "source": row["source"],
+        }
 
     async def resolve(self, reminder_id: str) -> None:
         now = int(time.time())

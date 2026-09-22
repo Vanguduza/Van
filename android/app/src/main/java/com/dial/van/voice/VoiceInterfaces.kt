@@ -409,7 +409,20 @@ class VoiceInputManager(
     }
 }
 
-/** TTS output with barge-in support and speech sync frames for avatar animation. */
+/**
+ * TTS output with barge-in support and speech sync frames for avatar animation.
+ *
+ * GAP-F-013 — mouth-open/viseme comes from whichever of three sources is available, in
+ * order: the Gateway's per-segment [SegmentCueTiming] (a text-length estimate, ticked here
+ * against wall-clock time since [onStart]); failing that, Android's own
+ * `onRangeStart`/[UtteranceProgressListener] callback, which is a real signal from the
+ * engine actually speaking but not an amplitude one; RMS of the *played* audio is not read
+ * here at all — `TextToSpeech.speak` hands playback to the platform's own audio track with
+ * no callback into its samples, so reading real output RMS would need routing synthesis
+ * through an `AudioTrack` this class manages itself, which is a bigger change than this one
+ * and is not implemented; the fallback chain therefore ends at `onRangeStart`, which is
+ * exactly the existing heuristic DNA asks this class to fall back to.
+ */
 class TtsOutputManager(
     context: Context,
     private val callback: TtsOutputCallback,
@@ -418,6 +431,13 @@ class TtsOutputManager(
     private var tts: TextToSpeech? = TextToSpeech(context.applicationContext, this)
     private val speaking = AtomicBoolean(false)
     private var ready = false
+    private val main by lazy(LazyThreadSafetyMode.SYNCHRONIZED) { Handler(Looper.getMainLooper()) }
+
+    /** Set by [speak] just before `TextToSpeech.speak`, read once in [onStart]. */
+    private var pendingCueTiming: SegmentCueTiming = SegmentCueTiming.EMPTY
+    private var activeCueTiming: SegmentCueTiming? = null
+    private var cueStartAtMs: Long = 0L
+    private var cueGeneration = 0L
 
     private val _visualState = MutableStateFlow(VanVisualState())
     val visualState: StateFlow<VanVisualState> = _visualState.asStateFlow()
@@ -433,12 +453,23 @@ class TtsOutputManager(
                     durableState = VanDurableState.SPEAKING,
                     speaking = true,
                 )
+                // GAP-F-013 — a cue track for this utterance takes over mouth-open/viseme
+                // from onRangeStart below until it ends or is interrupted.
+                val timing = pendingCueTiming.takeIf { it.cues.isNotEmpty() }
+                activeCueTiming = timing
+                if (timing != null) {
+                    cueStartAtMs = System.currentTimeMillis()
+                    cueGeneration += 1L
+                    tickCues(cueGeneration, timing)
+                }
             }
 
             override fun onDone(utteranceId: String?) {
                 speaking.set(false)
                 callback.onSpeakingChanged(false)
                 callback.onUtteranceDone(utteranceId.orEmpty())
+                activeCueTiming = null
+                cueGeneration += 1L
                 _visualState.value = _visualState.value.copy(
                     durableState = VanDurableState.IDLE,
                     speaking = false,
@@ -450,9 +481,14 @@ class TtsOutputManager(
             override fun onError(utteranceId: String?) {
                 speaking.set(false)
                 callback.onSpeakingChanged(false)
+                activeCueTiming = null
+                cueGeneration += 1L
             }
 
             override fun onRangeStart(utteranceId: String?, start: Int, end: Int, frame: Int) {
+                // GAP-F-013 — an active cue track owns mouth-open/viseme; this is the
+                // "existing heuristic" fallback DNA asks for, used only when there is none.
+                if (activeCueTiming != null) return
                 val open = ((frame % 10) / 10f).coerceIn(0f, 1f)
                 val viseme = frame % 15
                 val sync = SpeechSyncFrame(System.currentTimeMillis(), rmsDb = open, mouthOpen = open, viseme = viseme)
@@ -462,15 +498,40 @@ class TtsOutputManager(
         })
     }
 
-    fun speak(text: String, utteranceId: String = "van-tts-${System.currentTimeMillis()}") {
+    fun speak(
+        text: String,
+        utteranceId: String = "van-tts-${System.currentTimeMillis()}",
+        cueTiming: SegmentCueTiming = SegmentCueTiming.EMPTY,
+    ) {
         if (!ready) return
+        pendingCueTiming = cueTiming
         tts?.speak(text, TextToSpeech.QUEUE_FLUSH, null, utteranceId)
+    }
+
+    /**
+     * GAP-F-013 — walks [timing] against wall-clock time since [onStart], at a rate fine
+     * enough to read as continuous lip movement without redrawing every frame budget has to
+     * pay for. Stops on its own once the estimated duration passes, and [token] makes a
+     * stale tick from an utterance that already ended or was interrupted a no-op rather
+     * than a delayed write to the *next* utterance's mouth.
+     */
+    private fun tickCues(token: Long, timing: SegmentCueTiming) {
+        if (token != cueGeneration || !speaking.get()) return
+        val elapsed = System.currentTimeMillis() - cueStartAtMs
+        val (viseme, mouthOpen) = VanCueWalker.cueAt(timing.cues, elapsed)
+        callback.onSpeechFrame(SpeechSyncFrame(System.currentTimeMillis(), rmsDb = mouthOpen, mouthOpen = mouthOpen, viseme = viseme))
+        _visualState.value = _visualState.value.copy(mouthOpen = mouthOpen, viseme = viseme)
+        if (elapsed < timing.estimatedDurationMs + CUE_TAIL_MS) {
+            main.postDelayed({ tickCues(token, timing) }, CUE_TICK_INTERVAL_MS)
+        }
     }
 
     override fun onBargeInRequested() {
         if (speaking.get()) {
             tts?.stop()
             speaking.set(false)
+            activeCueTiming = null
+            cueGeneration += 1L
             callback.onSpeakingChanged(false)
             _visualState.value = _visualState.value.copy(
                 speaking = false,
@@ -485,6 +546,14 @@ class TtsOutputManager(
     fun shutdown() {
         tts?.shutdown()
         tts = null
+    }
+
+    private companion object {
+        /** Fine enough to read as continuous lip movement; coarse enough to be cheap. */
+        const val CUE_TICK_INTERVAL_MS = 60L
+
+        /** Grace past the estimated duration before the ticker gives up on its own. */
+        const val CUE_TAIL_MS = 250L
     }
 }
 
