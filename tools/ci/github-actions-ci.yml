@@ -266,12 +266,22 @@ jobs:
           script: |
             chmod +x gradlew
             ./gradlew :app:connectedDebugAndroidTest --console=plain
+            mkdir -p ../artifacts/instrumentation-screenshots
+            adb pull /sdcard/Android/data/com.dial.van/files/screenshots ../artifacts/instrumentation-screenshots || echo "no screenshots captured"
       - name: Upload instrumentation report
         if: always()
         uses: actions/upload-artifact@v4
         with:
           name: van-instrumentation-report
           path: android/app/build/reports/androidTests/connected
+          if-no-files-found: warn
+      # What the device actually drew for each destination of the redesigned owner surface.
+      - name: Upload instrumentation screenshots
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: van-instrumentation-screenshots
+          path: artifacts/instrumentation-screenshots
           if-no-files-found: warn
 
   mutation:
