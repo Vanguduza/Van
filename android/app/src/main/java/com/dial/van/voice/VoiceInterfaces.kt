@@ -429,11 +429,13 @@ class TtsOutputManager(
 ) : BargeInHook, TextToSpeech.OnInitListener {
 
     private var tts: TextToSpeech? = TextToSpeech(context.applicationContext, this)
+    private val sherpa = SherpaLocalTtsRuntime(context.applicationContext)
     private val speaking = AtomicBoolean(false)
-    private var ready = false
+    private var androidReady = false
+    @Volatile private var activeEngine: TtsEngineKind? = null
     private val main by lazy(LazyThreadSafetyMode.SYNCHRONIZED) { Handler(Looper.getMainLooper()) }
 
-    /** Set by [speak] just before `TextToSpeech.speak`, read once in [onStart]. */
+    /** Set by [speak] just before Android TextToSpeech.speak, read once in onStart. */
     private var pendingCueTiming: SegmentCueTiming = SegmentCueTiming.EMPTY
     private var activeCueTiming: SegmentCueTiming? = null
     private var cueStartAtMs: Long = 0L
@@ -442,84 +444,167 @@ class TtsOutputManager(
     private val _visualState = MutableStateFlow(VanVisualState())
     val visualState: StateFlow<VanVisualState> = _visualState.asStateFlow()
 
+    /** Load and self-test VAN's checksum-pinned sherpa OfflineTts model. */
+    fun prepareSherpa(): Boolean = sherpa.prepare()
+
+    fun sherpaReady(): Boolean = sherpa.ready
+
+    fun sherpaPreparationError(): String? = sherpa.lastPreparationError
+
     override fun onInit(status: Int) {
-        ready = status == TextToSpeech.SUCCESS
+        androidReady = status == TextToSpeech.SUCCESS
         tts?.language = Locale.getDefault()
         tts?.setOnUtteranceProgressListener(object : UtteranceProgressListener() {
             override fun onStart(utteranceId: String?) {
-                speaking.set(true)
-                callback.onSpeakingChanged(true)
-                _visualState.value = _visualState.value.copy(
-                    durableState = VanDurableState.SPEAKING,
-                    speaking = true,
-                )
-                // GAP-F-013 — a cue track for this utterance takes over mouth-open/viseme
-                // from onRangeStart below until it ends or is interrupted.
-                val timing = pendingCueTiming.takeIf { it.cues.isNotEmpty() }
-                activeCueTiming = timing
-                if (timing != null) {
-                    cueStartAtMs = System.currentTimeMillis()
-                    cueGeneration += 1L
-                    tickCues(cueGeneration, timing)
-                }
+                markStarted(TtsEngineKind.ANDROID_OFFLINE, pendingCueTiming)
             }
 
             override fun onDone(utteranceId: String?) {
-                speaking.set(false)
-                callback.onSpeakingChanged(false)
-                callback.onUtteranceDone(utteranceId.orEmpty())
-                activeCueTiming = null
-                cueGeneration += 1L
-                _visualState.value = _visualState.value.copy(
-                    durableState = VanDurableState.IDLE,
-                    speaking = false,
-                    mouthOpen = 0f,
-                )
+                markDone(TtsEngineKind.ANDROID_OFFLINE, utteranceId.orEmpty())
             }
 
             @Deprecated("Deprecated in API")
             override fun onError(utteranceId: String?) {
-                speaking.set(false)
-                callback.onSpeakingChanged(false)
-                activeCueTiming = null
-                cueGeneration += 1L
+                markError(TtsEngineKind.ANDROID_OFFLINE)
             }
 
             override fun onRangeStart(utteranceId: String?, start: Int, end: Int, frame: Int) {
-                // GAP-F-013 — an active cue track owns mouth-open/viseme; this is the
-                // "existing heuristic" fallback DNA asks for, used only when there is none.
-                if (activeCueTiming != null) return
+                if (activeEngine != TtsEngineKind.ANDROID_OFFLINE || activeCueTiming != null) return
                 val open = ((frame % 10) / 10f).coerceIn(0f, 1f)
                 val viseme = frame % 15
-                val sync = SpeechSyncFrame(System.currentTimeMillis(), rmsDb = open, mouthOpen = open, viseme = viseme)
+                val sync = SpeechSyncFrame(
+                    System.currentTimeMillis(),
+                    rmsDb = open,
+                    mouthOpen = open,
+                    viseme = viseme,
+                )
                 callback.onSpeechFrame(sync)
                 _visualState.value = _visualState.value.copy(mouthOpen = open, viseme = viseme)
             }
         })
     }
 
+    /**
+     * Speak through the engine selected by LocalTtsRouter.
+     *
+     * Returns false when the selected engine cannot actually start; callers can then show
+     * the answer on screen rather than claiming speech that never happened.
+     */
     fun speak(
         text: String,
         utteranceId: String = "van-tts-${System.currentTimeMillis()}",
         cueTiming: SegmentCueTiming = SegmentCueTiming.EMPTY,
-    ) {
-        if (!ready) return
-        pendingCueTiming = cueTiming
-        tts?.speak(text, TextToSpeech.QUEUE_FLUSH, null, utteranceId)
+        engine: TtsEngineKind = TtsEngineKind.ANDROID_OFFLINE,
+    ): Boolean = when (engine) {
+        TtsEngineKind.SHERPA_ONNX -> {
+            if (!sherpa.ready) {
+                false
+            } else {
+                activeEngine = TtsEngineKind.SHERPA_ONNX
+                activeCueTiming = null
+                sherpa.speak(
+                    text = text,
+                    utteranceId = utteranceId,
+                    onStart = {
+                        // PCM frames from SherpaLocalTtsRuntime own mouth-open while this
+                        // engine speaks; estimated text cues are intentionally not started.
+                        markStarted(TtsEngineKind.SHERPA_ONNX, SegmentCueTiming.EMPTY)
+                    },
+                    onFrame = { frame ->
+                        if (activeEngine == TtsEngineKind.SHERPA_ONNX && speaking.get()) {
+                            callback.onSpeechFrame(frame)
+                            _visualState.value = _visualState.value.copy(
+                                mouthOpen = frame.mouthOpen,
+                                viseme = frame.viseme,
+                            )
+                        }
+                    },
+                    onDone = { id -> markDone(TtsEngineKind.SHERPA_ONNX, id) },
+                    onError = { markError(TtsEngineKind.SHERPA_ONNX) },
+                )
+            }
+        }
+
+        TtsEngineKind.ANDROID_OFFLINE -> {
+            if (!androidReady) {
+                false
+            } else {
+                activeEngine = TtsEngineKind.ANDROID_OFFLINE
+                pendingCueTiming = cueTiming
+                tts?.speak(text, TextToSpeech.QUEUE_FLUSH, null, utteranceId) == TextToSpeech.SUCCESS
+            }
+        }
+
+        // Phrase-bank playback is owned by WakeAcknowledgementManager, not by a synthesiser.
+        TtsEngineKind.CRITICAL_PHRASE_BANK -> false
+    }
+
+    private fun markStarted(engine: TtsEngineKind, cueTiming: SegmentCueTiming) {
+        if (activeEngine != engine) return
+        speaking.set(true)
+        callback.onSpeakingChanged(true)
+        _visualState.value = _visualState.value.copy(
+            durableState = VanDurableState.SPEAKING,
+            speaking = true,
+        )
+        val timing = cueTiming.takeIf { it.cues.isNotEmpty() }
+        activeCueTiming = timing
+        if (timing != null) {
+            cueStartAtMs = System.currentTimeMillis()
+            cueGeneration += 1L
+            tickCues(cueGeneration, timing)
+        }
+    }
+
+    private fun markDone(engine: TtsEngineKind, utteranceId: String) {
+        if (activeEngine != engine) return
+        speaking.set(false)
+        activeEngine = null
+        callback.onSpeakingChanged(false)
+        callback.onUtteranceDone(utteranceId)
+        activeCueTiming = null
+        cueGeneration += 1L
+        _visualState.value = _visualState.value.copy(
+            durableState = VanDurableState.IDLE,
+            speaking = false,
+            mouthOpen = 0f,
+        )
+    }
+
+    private fun markError(engine: TtsEngineKind) {
+        if (activeEngine != engine) return
+        speaking.set(false)
+        activeEngine = null
+        callback.onSpeakingChanged(false)
+        activeCueTiming = null
+        cueGeneration += 1L
+        _visualState.value = _visualState.value.copy(
+            durableState = VanDurableState.IDLE,
+            speaking = false,
+            mouthOpen = 0f,
+        )
     }
 
     /**
-     * GAP-F-013 — walks [timing] against wall-clock time since [onStart], at a rate fine
-     * enough to read as continuous lip movement without redrawing every frame budget has to
-     * pay for. Stops on its own once the estimated duration passes, and [token] makes a
-     * stale tick from an utterance that already ended or was interrupted a no-op rather
-     * than a delayed write to the *next* utterance's mouth.
+     * Android fallback: walks the Gateway cue estimate when the platform TTS does not expose
+     * PCM. Sherpa does not use this because its AudioTrack path emits measured PCM RMS.
      */
     private fun tickCues(token: Long, timing: SegmentCueTiming) {
-        if (token != cueGeneration || !speaking.get()) return
+        if (
+            token != cueGeneration ||
+            !speaking.get() ||
+            activeEngine != TtsEngineKind.ANDROID_OFFLINE
+        ) return
         val elapsed = System.currentTimeMillis() - cueStartAtMs
         val (viseme, mouthOpen) = VanCueWalker.cueAt(timing.cues, elapsed)
-        callback.onSpeechFrame(SpeechSyncFrame(System.currentTimeMillis(), rmsDb = mouthOpen, mouthOpen = mouthOpen, viseme = viseme))
+        callback.onSpeechFrame(
+            SpeechSyncFrame(
+                System.currentTimeMillis(),
+                rmsDb = mouthOpen,
+                mouthOpen = mouthOpen,
+                viseme = viseme,
+            ),
+        )
         _visualState.value = _visualState.value.copy(mouthOpen = mouthOpen, viseme = viseme)
         if (elapsed < timing.estimatedDurationMs + CUE_TAIL_MS) {
             main.postDelayed({ tickCues(token, timing) }, CUE_TICK_INTERVAL_MS)
@@ -528,8 +613,10 @@ class TtsOutputManager(
 
     override fun onBargeInRequested() {
         if (speaking.get()) {
+            sherpa.stop()
             tts?.stop()
             speaking.set(false)
+            activeEngine = null
             activeCueTiming = null
             cueGeneration += 1L
             callback.onSpeakingChanged(false)
@@ -544,6 +631,7 @@ class TtsOutputManager(
     override fun isSpeaking(): Boolean = speaking.get()
 
     fun shutdown() {
+        sherpa.release()
         tts?.shutdown()
         tts = null
     }
