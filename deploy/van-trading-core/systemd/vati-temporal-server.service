@@ -1,0 +1,18 @@
+[Unit]
+Description=VAN self-hosted Temporal server (single-node, loopback only)
+Requires=docker.service
+After=docker.service network-online.target
+Wants=network-online.target
+
+[Service]
+Type=oneshot
+RemainAfterExit=true
+WorkingDirectory=/opt/van-trading/temporal-server
+ExecStart=/usr/bin/docker compose --env-file /opt/van-trading/temporal-server/.env up -d --remove-orphans
+ExecStartPost=/bin/bash -c 'for i in {1..60}; do (echo > /dev/tcp/127.0.0.1/7233) >/dev/null 2>&1 && exit 0; sleep 2; done; echo "Temporal 7233 did not become ready" >&2; exit 1'
+ExecStop=/usr/bin/docker compose --env-file /opt/van-trading/temporal-server/.env stop
+TimeoutStartSec=180
+TimeoutStopSec=60
+
+[Install]
+WantedBy=multi-user.target
