@@ -266,11 +266,7 @@ jobs:
           script: |
             chmod +x gradlew
             ./gradlew :app:connectedDebugAndroidTest --console=plain
-            mkdir -p ../artifacts/instrumentation-screenshots
-            for f in $(adb shell run-as com.dial.van ls files/screenshots 2>/dev/null); do
-              adb exec-out run-as com.dial.van cat "files/screenshots/$f" > "../artifacts/instrumentation-screenshots/$f"
-            done
-            ls -la ../artifacts/instrumentation-screenshots || echo "no screenshots captured"
+            find app/build/outputs/connected_android_test_additional_output -type f -print || echo "no screenshots captured"
       - name: Upload instrumentation report
         if: always()
         uses: actions/upload-artifact@v4
@@ -284,7 +280,7 @@ jobs:
         uses: actions/upload-artifact@v4
         with:
           name: van-instrumentation-screenshots
-          path: artifacts/instrumentation-screenshots
+          path: android/app/build/outputs/connected_android_test_additional_output
           if-no-files-found: warn
 
   mutation:

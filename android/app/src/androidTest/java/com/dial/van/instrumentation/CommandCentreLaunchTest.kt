@@ -5,18 +5,21 @@ import android.content.Intent
 import android.graphics.Bitmap
 import android.net.Uri
 import androidx.compose.ui.graphics.asAndroidBitmap
+import androidx.compose.ui.test.assertExists
 import androidx.compose.ui.test.assertIsDisplayed
 import androidx.compose.ui.test.assertIsSelected
 import androidx.compose.ui.test.captureToImage
 import androidx.compose.ui.test.hasText
 import androidx.compose.ui.test.isSelectable
 import androidx.compose.ui.test.junit4.createEmptyComposeRule
+import androidx.compose.ui.test.onAllNodesWithText
 import androidx.compose.ui.test.onNodeWithText
 import androidx.compose.ui.test.onRoot
 import androidx.compose.ui.test.performClick
 import androidx.test.core.app.ActivityScenario
 import androidx.test.core.app.ApplicationProvider
 import androidx.test.ext.junit.runners.AndroidJUnit4
+import androidx.test.platform.app.InstrumentationRegistry
 import com.dial.van.command.CommandCentreActivity
 import org.junit.Rule
 import org.junit.Test
@@ -30,9 +33,10 @@ import java.io.File
  * every screen renders its OFFLINE/EMPTY state honestly when the gateway is unreachable,
  * which is the case this test runs in.
  *
- * Each destination is also captured to `<files dir>/screenshots/<route>.png`. CI reads that
- * directory back (`run-as`) into the `van-instrumentation-screenshots` artifact: the visual
- * evidence for the redesign is what the device rendered, not a mock-up.
+ * Each destination is also captured to `<additionalTestOutputDir>/screenshots/<route>.png`,
+ * which AGP pulls into `build/outputs/connected_android_test_additional_output` and CI
+ * uploads as `van-instrumentation-screenshots`: the visual evidence for the redesign is what
+ * the device rendered, not a mock-up.
  */
 @RunWith(AndroidJUnit4::class)
 class CommandCentreLaunchTest {
@@ -65,10 +69,15 @@ class CommandCentreLaunchTest {
                 capture(label.lowercase())
             }
             compose.onNodeWithText("More").performClick()
-            compose.waitForIdle()
+            // The More sheet is a ModalBottomSheet in its own window with an enter
+            // animation; wait for its items to exist rather than asserting mid-slide.
             for (label in listOf("Projects", "Connected", "Settings")) {
-                compose.onNodeWithText(label).assertIsDisplayed()
+                compose.waitUntil(5_000) {
+                    compose.onAllNodesWithText(label).fetchSemanticsNodes().isNotEmpty()
+                }
+                compose.onNodeWithText(label).assertExists()
             }
+            compose.waitForIdle()
             capture("more")
         }
     }
@@ -88,9 +97,12 @@ class CommandCentreLaunchTest {
     private fun navItem(label: String) = compose.onNode(hasText(label) and isSelectable())
 
     private fun capture(name: String) {
-        // Internal files dir: CI reads it back with `run-as com.dial.van`, which needs no
-        // root and no scoped-storage exception on the emulator.
-        val dir = File(context.filesDir, "screenshots").apply { mkdirs() }
+        // AGP's additional-test-output channel: the runner argument names a directory the
+        // Gradle plugin pulls into build/outputs/connected_android_test_additional_output
+        // before it uninstalls the app (an uninstall is what erased the files dir before).
+        val additional = InstrumentationRegistry.getArguments().getString("additionalTestOutputDir")
+        val root = additional?.let(::File) ?: context.filesDir
+        val dir = File(root, "screenshots").apply { mkdirs() }
         val bitmap = compose.onRoot().captureToImage().asAndroidBitmap()
         File(dir, "$name.png").outputStream().use { bitmap.compress(Bitmap.CompressFormat.PNG, 100, it) }
     }
