@@ -26,6 +26,7 @@ fun VanRiveAvatar(
         modifier = modifier,
         factory = { ctx ->
             try {
+                VanRiveRuntime.ensure(ctx.applicationContext)
                 RiveAnimationView(ctx).apply {
                     val bytes = ctx.assets.open(RiveBindingContract.ASSET_FILE).use { it.readBytes() }
                     setRiveBytes(

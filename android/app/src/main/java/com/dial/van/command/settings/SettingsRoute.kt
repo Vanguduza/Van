@@ -24,6 +24,7 @@ import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.LocalContext
+import com.dial.van.BuildConfig
 import com.dial.van.VanApplication
 import com.dial.van.command.DegradedPanel
 import com.dial.van.command.modules.NotificationPolicyModule
@@ -162,6 +163,18 @@ fun SettingsRoute(
                         style = tokens.type.body,
                         color = tokens.color.textSecondary,
                     )
+                    if (BuildConfig.DEBUG) {
+                        Button(
+                            onClick = {
+                                context.startActivity(
+                                    Intent().setClassName(
+                                        context.packageName,
+                                        "com.dial.van.visual.RiveCandidateHostActivity",
+                                    ),
+                                )
+                            },
+                        ) { Text("Preview staged candidate") }
+                    }
                 }
             }
         }
