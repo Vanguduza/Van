@@ -87,6 +87,18 @@ class EventKind(str, Enum):
     GROWTH_DIAGNOSTIC = "GROWTH_DIAGNOSTIC"          # 127 growth-optimality reading
     REJECTION_ANALYTICS = "REJECTION_ANALYTICS"      # 128 aggregated rejection reasons
 
+    # ---- GAP-F-003 / GAP-F-004 closure (active-trade intelligence, news
+    # ingress, adaptive position management, decision-quality learning).
+    # None of these is an order: every one is evidence or a proposal that must
+    # still pass RiskAuthority.evaluate and ExecutionRouter.execute.
+    TRADE_THESIS = "TRADE_THESIS"                    # sealed thesis at approval
+    THESIS_ASSESSMENT = "THESIS_ASSESSMENT"          # per-cycle thesis state change
+    POSITION_ADJUSTMENT = "POSITION_ADJUSTMENT"      # adaptive management proposal
+    NEWS_HEADLINE = "NEWS_HEADLINE"                  # T1/T2 headline ingress record
+    EVENT_IMPACT = "EVENT_IMPACT"                    # headline -> position/candidate impact
+    DECISION_QUADRANT = "DECISION_QUADRANT"          # decision quality x outcome
+    TRADE_LESSON = "TRADE_LESSON"                    # retrievable lesson record
+
 
 @dataclass(frozen=True)
 class Event:

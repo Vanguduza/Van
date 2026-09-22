@@ -9,6 +9,7 @@
   python -m vati lake import-csv|list|dukascopy --root lake ...
   python -m vati calendar --file calendar.json
   python -m vati calendar-record --schedule sched.json [--releases obs.json] [--ledger vati.sqlite]
+  python -m vati news-ingest --config news.json [--file headlines.jsonl] [--ledger vati.sqlite]
   python -m vati serve --config service.json [--once]
 
 CSV bars: symbol,start_ms,end_ms,open,high,low,close,volume,ticks,avg_spread
@@ -186,6 +187,44 @@ def cmd_calendar_record(a: argparse.Namespace) -> int:
     return 1 if report["disputed"] else 0
 
 
+def cmd_news_ingest(a: argparse.Namespace) -> int:
+    """GAP-F-003. Record T1/T2 headlines into the VATI ledger.
+
+    Mirrors `calendar-record`: the file says what was published, the recorder
+    says what it made of it, and the ledger is the durable answer. Nothing here
+    can change a blackout window — the economic calendar keeps that authority —
+    and every impact this produces is reduce-only.
+
+    Exit 1 when any row was skipped: a malformed headline is a feed defect, and
+    a runner that exits 0 on a broken feed is a runner nobody looks at.
+    """
+    import time as _t
+    from vati.core.ledger import Ledger
+    from vati.events.news_ingress import NewsIngress, rows_from_file, sources_from_config
+
+    config = json.loads(Path(a.config).read_text(encoding="utf-8"))
+    ledger = Ledger(a.ledger) if a.ledger else None
+    ingress = NewsIngress(
+        ledger=ledger,
+        sources=sources_from_config(config),
+        relevance_window_ms=int(config.get("relevance_window_ms", 6 * 3_600_000)),
+    )
+    now_ms = int(a.now) if a.now else int(_t.time() * 1000)
+    path = a.file or config.get("path")
+    if not path:
+        print(json.dumps({"error": "no headline file given by --file or config `path`"}))
+        return 2
+    counts = ingress.ingest_rows(rows_from_file(path), now_ms=now_ms)
+    report = ingress.report(now_ms=now_ms) | {"counts": counts}
+    report["headlines_recorded"] = [
+        h.body() for h in ingress.headlines(limit=int(a.limit))
+    ]
+    print(json.dumps(report, indent=2))
+    if a.out:
+        Path(a.out).write_text(json.dumps(report, indent=2))
+    return 1 if ingress.skipped else 0
+
+
 def cmd_serve(a: argparse.Namespace) -> int:
     from vati.app.process_lock import SessionAlreadyRunning, SessionLock
     from vati.app.service import ServiceConfig, SessionService, lake_bar_source
@@ -235,6 +274,8 @@ def main(argv=None) -> int:
     cr = sub.add_parser("calendar-record"); cr.add_argument("--schedule", required=True); cr.add_argument("--releases"); cr.add_argument("--ledger")
     cr.add_argument("--out"); cr.add_argument("--now"); cr.set_defaults(fn=cmd_calendar_record)
     rs = sub.add_parser("research"); rs.add_argument("--spec", required=True); rs.add_argument("--ledger"); rs.set_defaults(fn=cmd_research)
+    ni = sub.add_parser("news-ingest"); ni.add_argument("--config", required=True); ni.add_argument("--file"); ni.add_argument("--ledger")
+    ni.add_argument("--out"); ni.add_argument("--now"); ni.add_argument("--limit", default="20"); ni.set_defaults(fn=cmd_news_ingest)
     sv = sub.add_parser("serve"); sv.add_argument("--config", required=True); sv.add_argument("--once", action="store_true"); sv.set_defaults(fn=cmd_serve)
     a = p.parse_args(argv)
     return a.fn(a)

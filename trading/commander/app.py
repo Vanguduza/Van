@@ -31,7 +31,14 @@ from commander.auth import DEFAULT_PRINCIPAL, NonceCache, verify_request_princip
 REDACT = re.compile(r"(?i)(password|passwd|token|api[_-]?key|secret|bearer|signing[_-]?key)(\s*[:=]\s*)\S+")
 UNIT_RE = re.compile(r"^[A-Za-z0-9@._-]+$")
 DEFAULT_UNITS = ("vati-session@*.service", "vati-commander.service", "vati-vekl.service", "vati-supabase.service", "vati-mt5-pull.service", "caddy.service")
-COMMANDS = ("status", "ledger_status", "services", "restart_service", "tail_log", "run_backtest", "vekl_resolve", "halt", "doctor", "accounts") + ACCOUNT_COMMANDS + PROMOTION_COMMANDS
+COMMANDS = ("status", "ledger_status", "services", "restart_service", "tail_log", "run_backtest", "vekl_resolve", "halt", "doctor", "accounts",
+            # GAP-F-003. Read-only trading observation, so the Hermes MCP shim
+            # for the commander can ground a question about the book instead of
+            # answering it from host uptime and event counts. Both are
+            # projections of the VATI ledger; neither can create, size, modify
+            # or cancel anything, and neither is in GATEWAY_ONLY_COMMANDS
+            # because observation is not a mutation.
+            "positions", "assessment") + ACCOUNT_COMMANDS + PROMOTION_COMMANDS
 # Credential-bearing and strategy-promotion commands are gateway-only. This is a
 # positive allow-list: the authenticated principal must be exactly van-gateway.
 # A legacy/shared credential or a future/renamed agent cannot acquire mutation
@@ -178,6 +185,8 @@ TOOL_SCHEMAS = {
     "halt": {"description": "Owner-signed halt (A4): appends KILL_SWITCH OWNER_HALT to the ledger; sessions stop new orders. Requires owner_signature_ref.", "properties": {"owner_signature_ref": {"type": "string"}, "reason": {"type": "string"}}, "required": ["owner_signature_ref"]},
     "doctor": {"description": "Host diagnostics: runtimes, disk, ledger reachability, VEKL, heartbeat ages, secret file modes.", "properties": {}},
     "accounts": {"description": "Public view of the account registry (aliases, broker kind, safety identity). Never credentials.", "properties": {}},
+    "positions": {"description": "Open positions read from the VATI ledger: thesis and its current state, health, exposure, protection, unrealised R, linked events and the latest adjustment proposal. Read-only; no order path.", "properties": {"limit": {"type": "integer", "default": 20}}},
+    "assessment": {"description": "VAN's reading of the book: urgent risks, portfolio heat, available risk headroom, active theses by state, kill-switch state and the cognition invoker actually configured. Read-only; a reading, never a permission.", "properties": {}},
     **ACCOUNT_TOOL_SCHEMAS,
     **PROMOTION_TOOL_SCHEMAS,
 }
@@ -346,6 +355,37 @@ def create_app(settings: Optional[CommanderSettings] = None) -> FastAPI:
         checks["ok"] = checks["ledger_reachable"] and not bad and du.free > 2e9
         return checks
 
+    def _active_read_model(name: str, **kwargs) -> dict:
+        """One of the GAP-F-003 ledger projections, or an explicit unavailable.
+
+        The commander opens the same ledger the gateway does and runs the same
+        projection, so Hermes and the Command Centre cannot disagree about what
+        is open. A ledger that will not open answers `ledger_available: False`
+        rather than raising, for the same reason `status` does: "I could not
+        look" must be distinguishable from "nothing is there".
+        """
+        from vati.readmodels import active
+
+        led = None
+        try:
+            led = ledger()
+            return getattr(active, name)(led, **kwargs)
+        except Exception as exc:  # noqa: BLE001 — an unreadable ledger is reported, not raised
+            return active.empty({"error": str(exc)[:200]})
+        finally:
+            if led is not None:
+                led.close()
+
+    def cmd_positions(a: dict) -> dict:
+        limit = max(1, min(int(a.get("limit", 20)), 100))
+        payload = _active_read_model("positions")
+        payload["positions"] = payload.get("positions", [])[:limit]
+        payload["count"] = len(payload["positions"])
+        return payload
+
+    def cmd_assessment(a: dict) -> dict:
+        return _active_read_model("assessment")
+
     def cmd_accounts(a: dict) -> dict:
         from vati.accounts import AccountRegistry
         p = Path(st.accounts_registry)
@@ -356,6 +396,7 @@ def create_app(settings: Optional[CommanderSettings] = None) -> FastAPI:
     capsule_dir = st.capsule_dir or str(Path(st.repo_root) / "trading" / "strategies" / "registry")
     handlers = {"status": cmd_status, "ledger_status": cmd_ledger_status, "services": cmd_services, "restart_service": cmd_restart, "tail_log": cmd_tail, "run_backtest": cmd_backtest,
                 "vekl_resolve": cmd_vekl, "halt": cmd_halt, "doctor": cmd_doctor, "accounts": cmd_accounts,
+                "positions": cmd_positions, "assessment": cmd_assessment,
                 **build_account_handlers(st.account_control or AccountControlSettings(registry_path=st.accounts_registry, secrets_dir=st.secrets_dir)),
                 **build_strategy_handlers(StrategyPromotionSettings(
                     capsule_dir=capsule_dir,

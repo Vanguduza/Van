@@ -71,6 +71,7 @@ from van_gateway.orchestrator import CommandOrchestrator
 from van_gateway.projects.router import ProjectRouter
 from van_gateway.proactive.autonomy import ActionAutonomyGate, DomainTrustService
 from van_gateway.proactive.followups import ProactiveFollowUpJob
+from van_gateway.trading.bridge import TradingEventBridge
 from van_gateway.reminders.service import ReminderService
 from van_gateway.reminders.timeparse import TimeParseError, parse_due_expression
 from van_gateway.automation.api import AutomationApi
@@ -517,6 +518,9 @@ def create_app() -> FastAPI:
     # Constructed before the mission service, which publishes every owner-visible
     # mission event to it (P0-EXEC-001).
     events = EventBus(store, settings.event_page_size)
+    # Closed trades become owner-visible events (Activity feed, embodiment CELEBRATE
+    # on GOOD_DECISION_GOOD_OUTCOME only). A projection of the ledger, never an authority.
+    trading_events = TradingEventBridge(store, trading, events)
     # Rev 1.5 §§5, 6 — the interactive browser session.
     #
     # It shares the Browser Fabric's broker and policy engine rather than constructing its
@@ -750,6 +754,9 @@ def create_app() -> FastAPI:
             "rows_compared": report["rows_compared"],
         }
 
+    async def _run_trading_events() -> dict:
+        return await trading_events.run(int(time.time() * 1000))
+
     async def _run_proactive_followups() -> dict:
         return await proactive_followups.run(int(time.time() * 1000))
 
@@ -762,6 +769,7 @@ def create_app() -> FastAPI:
             ),
             ScheduledJob("ops.retention", settings.retention_interval_seconds, _run_retention),
             ScheduledJob("proactive.follow_ups", settings.reminder_sweep_seconds, _run_proactive_followups),
+            ScheduledJob("trading.publish_closed", settings.reminder_sweep_seconds, _run_trading_events),
         ]
         if settings.pki_dir:
             jobs.append(ScheduledJob("ops.pki_scan", settings.pki_scan_interval_seconds, _scan_pki))
@@ -2513,6 +2521,29 @@ def create_app() -> FastAPI:
     @app.get("/v1/trading/portfolio")
     async def trading_portfolio():
         return trading.portfolio()
+
+    # Trading intelligence read models (owner-device routes). Each reads the
+    # hash-chained ledger directly and answers {"ledger_available": False, ...}
+    # when it cannot; the device shows an honest unavailable state, never a fixture.
+    @app.get("/v1/trading/positions")
+    async def trading_positions():
+        return trading.positions()
+
+    @app.get("/v1/trading/events")
+    async def trading_events(limit: int = 50):
+        return trading.events(limit=max(1, min(limit, 500)))
+
+    @app.get("/v1/trading/potential")
+    async def trading_potential():
+        return trading.potential_trades()
+
+    @app.get("/v1/trading/history")
+    async def trading_history(limit: int = 50):
+        return trading.history(limit=max(1, min(limit, 500)))
+
+    @app.get("/v1/trading/assessment")
+    async def trading_assessment():
+        return trading.assessment()
 
     @app.get("/v1/trading/accounts")
     async def trading_accounts():

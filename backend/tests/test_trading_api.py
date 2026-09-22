@@ -244,7 +244,11 @@ def test_service_never_exposes_an_order_path():
     """The gateway trading surface has no method that could create, size, modify or cancel an order."""
     from van_gateway.trading import TradingService
     names = {n for n in dir(TradingService) if not n.startswith("_")}
-    assert names == {"available", "status", "tickets", "halt", "confirm_ticket", "trade_book", "portfolio", "accounts", "market_state", "risk", "cognition", "trade_detail", "bars", "producer", "accounts_registry", "lake_root", "reporting_currency", "owner_authority"}
+    # GAP-F-003 added five read models (positions, events, potential_trades,
+    # history, assessment). Each is a projection of the ledger; none of them is
+    # a capability, which the banned-substring check below still proves.
+    assert names == {"available", "status", "tickets", "halt", "confirm_ticket", "trade_book", "portfolio", "accounts", "market_state", "risk", "cognition", "trade_detail", "bars", "producer", "accounts_registry", "lake_root", "reporting_currency", "owner_authority",
+                     "positions", "events", "potential_trades", "history", "assessment"}
     for banned in ("order", "submit", "size", "cancel", "modify", "credential", "token"):
         assert not any(banned in n.lower() for n in names), banned
     # P0-TRADE-001 — the one field added since is the verifier for owner-signed acts, and

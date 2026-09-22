@@ -62,6 +62,15 @@ def _import_trade_book():
     return VIEWS, build_trade_book
 
 
+def _import_active():
+    """GAP-F-003 read models. Imported lazily for the same reason the rest are:
+    the gateway must still start (degraded TRADING_LEDGER_UNAVAILABLE) on a host
+    with no `vati` package on the path."""
+    _import_vati()
+    from vati.readmodels import active
+    return active
+
+
 def _import_portfolio():
     _import_vati()
     import importlib
@@ -143,6 +152,56 @@ class TradingService:
         """Rev 5.1 owner read model: cognition, research and evolution evidence only."""
         from van_gateway.trading.cognition import cognition_from_ledger, empty_cognition_read_model
         return self._with_ledger(cognition_from_ledger, empty=empty_cognition_read_model())
+
+    # ------------------------------------------- active-trade read models (GAP-F-003)
+    def positions(self) -> dict[str, Any]:
+        """Open positions with thesis, health, exposure, protection and events.
+
+        GAP-F-003: the reasoning layer had no path to this at all, so
+        "why is my trade moving" and "does this news change my thesis" had no
+        grounding. Read straight from the ledger; when the ledger is
+        unavailable this answers `ledger_available: False` like `status()`
+        rather than raising, because "I could not look" and "nothing is open"
+        must never be indistinguishable to a caller.
+        """
+        active = _import_active()
+        return self._with_ledger(
+            active.positions, empty=active.empty({"count": 0, "positions": []}))
+
+    def events(self, limit: int = 50) -> dict[str, Any]:
+        """Recorded headlines, calendar releases and the impacts drawn from them.
+
+        The two sources are labelled with their authority: a calendar release
+        can put an instrument into a blackout; a headline can only reduce
+        exposure (`events/news_ingress.py`).
+        """
+        active = _import_active()
+        return self._with_ledger(
+            lambda led: active.events(led, limit=limit),
+            empty=active.empty({"count": 0, "events": [], "impacts": []}))
+
+    def potential_trades(self) -> dict[str, Any]:
+        """The candidate pool with evidence, confidence, invalidation and risk."""
+        active = _import_active()
+        return self._with_ledger(
+            active.potential, empty=active.empty({"count": 0, "potential_trades": []}))
+
+    def history(self, limit: int = 50) -> dict[str, Any]:
+        """Closed trades with the decision quadrant, attribution and lessons."""
+        active = _import_active()
+        return self._with_ledger(
+            lambda led: active.history(led, limit=limit),
+            empty=active.empty({"count": 0, "by_quadrant": {}, "history": []}))
+
+    def assessment(self) -> dict[str, Any]:
+        """VAN's reading of the book: urgent risks, heat, theses, invoker state."""
+        active = _import_active()
+        return self._with_ledger(active.assessment, empty=active.empty({
+            "urgent_risks": [], "portfolio_heat": None, "available_risk": None,
+            "open_positions": 0, "active_theses": {}, "kill_switch_active": [],
+            "cognition": {"cognition_invoker": "none",
+                          "state": "MODEL_INVOKER_UNCONFIGURED"},
+        }))
 
     def trade_detail(self, trade_intent_id: str) -> Optional[dict[str, Any]]:
         pf, _, _ = _import_portfolio()

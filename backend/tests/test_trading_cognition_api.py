@@ -16,9 +16,18 @@ def test_cognition_without_a_ledger_is_explicitly_unavailable(tmp_path):
     service = TradingService(str(tmp_path / "missing.sqlite"))
     payload = service.cognition()
     assert payload["ledger_available"] is False
-    assert payload["authority"]["cognition_mode"] == "OFFLINE_EVOLUTION+SHADOW_LIVE"
+    # GAP-F-004. This used to claim SHADOW_LIVE on every host while no provider
+    # invoker existed anywhere in production. With no invoker reported, the read
+    # model now says so explicitly instead of describing a system that is
+    # structurally empty.
+    assert payload["authority"]["cognition_invoker"] == "none"
+    assert payload["authority"]["invoker_state"] == "MODEL_INVOKER_UNCONFIGURED"
+    assert payload["authority"]["cognition_mode"] == "OFFLINE_EVOLUTION_ONLY"
     assert payload["authority"]["live_advisory"] == "DISABLED"
     assert payload["authority"]["live_status"] == "NOT_CLAIMED"
+    # The hierarchy is still listed, but as what this build supports rather
+    # than as evidence that any of it answered.
+    assert payload["authority"]["supported_model_hierarchy"][0] == "fable-5.1"
     assert payload["authority"]["execution_authority"] == (
         "VATI_RISK_AUTHORITY_AND_EXECUTION_ROUTER_ONLY"
     )

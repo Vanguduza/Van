@@ -65,6 +65,30 @@ class ServiceConfig:
     max_quote_age_ms: int = 5000
     poll_seconds: float = 5.0
     activation_id: str = "vtil-act-unresolved"
+    #: GAP-F-004. Shadow cognition's provider invoker, which had no injection
+    #: point anywhere in production. Shape:
+    #:
+    #:   {"invoker": "none" | "http_json" | "hermes_run",
+    #:    "endpoint": "...", "credential_ref": "secretref://cognition/primary#TOKEN",
+    #:    "model_id": "...", "timeout_s": 20,
+    #:    "research_budget_micros": 0}
+    #:
+    #: The default is `none`, so an existing deployment behaves exactly as it
+    #: did: an explicit MODEL_UNAVAILABLE abstention and an untouched
+    #: deterministic decision.
+    cognition: dict = field(default_factory=dict)
+    #: Where `secretref://` credential handles resolve. Mirrors the gateway's
+    #: `vati_secrets_dir`; the credential value itself is never configuration.
+    secrets_dir: str = ""
+    #: GAP-F-003. Headline ingress for active-trade intelligence. Shape:
+    #:
+    #:   {"path": "news.jsonl", "sources": [{"source_id": "...", "trust": "T1_PRIMARY"}],
+    #:    "relevance_window_ms": 21600000}
+    #:
+    #: Empty means no news path, which is the behaviour before this existed.
+    #: News is reduce-only wherever it lands; the economic calendar remains the
+    #: blackout authority.
+    news: dict = field(default_factory=dict)
 
     @classmethod
     def load(cls, path: str | Path) -> "ServiceConfig":
@@ -136,6 +160,8 @@ class SessionService:
     cycles: int = 0
     last_bar_end_ms: int = 0
     runner: Optional[SessionRunner] = None
+    #: GAP-F-003 headline ingress, built from `cfg.news`; None when unconfigured.
+    news: object = None
     _ledger: object = None
     _started_ms: int = 0
 
@@ -176,9 +202,67 @@ class SessionService:
         self.learning_replay = restore_learning_runtime(
             self._ledger, learning, {c.symbol.upper(): engine})
         cycle = DecisionCycle(cfg=scfg, adapter=self.adapter, ledger=self._ledger, engine=engine, cost_fn=lambda st: cost, calendar=FX_CALENDAR, events=build_matrix(c.calendar_path), learning=learning)
+        # GAP-F-003. The single-symbol runtime gets the same headline ingress the
+        # account runtime has, so backtest-to-live parity covers the thesis and
+        # event path rather than only the order path. No `news` block in the
+        # config means no news path at all — the behaviour before this existed.
+        cycle.news = self._build_news()
+        self.news = cycle.news
         self.learning = learning
         self.runner = SessionRunner(cycle)
         return self
+
+    def _build_news(self):
+        """Headline ingress from `cfg.news`, or None. Reduce-only everywhere."""
+        cfg = dict(getattr(self.cfg, "news", None) or {})
+        if not cfg:
+            return None
+        from vati.events.news_ingress import (
+            NewsIngress, rows_from_file, sources_from_config,
+        )
+        ingress = NewsIngress(
+            ledger=self._ledger,
+            sources=sources_from_config(cfg),
+            relevance_window_ms=int(cfg.get("relevance_window_ms", 6 * 3_600_000)),
+        )
+        path = cfg.get("path")
+        if path and Path(path).is_file():
+            ingress.ingest_rows(rows_from_file(path), now_ms=self.clock())
+        return ingress
+
+    def refresh_news(self, now_ms: int) -> dict:
+        """Re-read the headline file and push candidate event risk into sizing.
+
+        Runs before the bar is handed to the cycle, so an adverse headline is
+        present in the pass that assesses the theses it bears on and in the
+        meta-labeller that judges the next candidate, rather than one pass late.
+        """
+        news = getattr(self, "news", None)
+        if news is None:
+            return {}
+        cfg = dict(getattr(self.cfg, "news", None) or {})
+        path = cfg.get("path")
+        counts: dict = {}
+        if path and Path(path).is_file():
+            from vati.events.news_ingress import rows_from_file
+            try:
+                counts = news.ingest_rows(rows_from_file(path), now_ms=now_ms)
+            except Exception as exc:  # noqa: BLE001 — a bad news file never stops a cycle
+                self.runner.cycle.ledger.append(make_event(
+                    EventKind.MARKET_DATA_HEALTH, "vati-service",
+                    {"source": "news", "state": "UNREADABLE", "error": str(exc)[:200]},
+                    event_time_ms=now_ms, received_time_ms=now_ms,
+                    correlation_id=self.cfg.symbol))
+                return {"skipped": 1}
+        try:
+            multiplier, _materiality, _refs = news.candidate_risk(
+                self.cfg.symbol, now_ms=now_ms)
+            self.runner.cycle.engine.m.news_event_risk[
+                self.cfg.symbol.upper()] = multiplier
+            counts = dict(counts) | {"event_risk_multiplier": str(multiplier)}
+        except Exception:  # noqa: BLE001
+            pass
+        return counts
 
     # ------------------------------------------------------------------ loop
     def _heartbeat(self, status: str, extra: Optional[dict] = None) -> None:
@@ -268,6 +352,7 @@ class SessionService:
         age = now - last.end_ms
         state = "LIVE" if age <= 2 * TIMEFRAMES_MS[self.cfg.timeframe] else ("DELAYED" if age <= 6 * TIMEFRAMES_MS[self.cfg.timeframe] else "STALE")
         self.runner.cycle.ledger.append(make_event(EventKind.MARKET_DATA_HEALTH, "vati-service", {"symbol": self.cfg.symbol, "state": state, "bar_age_ms": age, "bars": len(bars)}, event_time_ms=now, received_time_ms=now, correlation_id=self.cfg.symbol))
+        self.refresh_news(now)
         res = self.runner.on_bar(bars, now_ms=now, last_quote_ms=last.end_ms if state == "LIVE" else last.end_ms - age)
         self.last_bar_end_ms = last.end_ms
         self.cycles += 1
