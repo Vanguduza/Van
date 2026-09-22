@@ -215,6 +215,10 @@ class AttentionUpsertBody(BaseModel):
     project_id: str | None = None
 
 
+class AttentionSnoozeBody(BaseModel):
+    until_unix: int = Field(gt=0)
+
+
 class ReminderParseBody(BaseModel):
     text: str
     due_expression: str
@@ -2245,6 +2249,25 @@ def create_app() -> FastAPI:
     async def ack_attention(item_id: str):
         await attention.acknowledge(item_id)
         return {"acknowledged": True}
+
+    @app.post("/v1/attention/{item_id}/snooze")
+    async def snooze_attention(item_id: str, body: AttentionSnoozeBody):
+        """Owner-device snooze route used by the Attention swipe action.
+
+        The durable state remains in AttentionEngine; this route only validates/serialises the
+        device request and emits the same event-bus evidence style as other attention changes.
+        """
+        try:
+            changed = await attention.snooze(item_id, body.until_unix)
+        except ValueError as exc:
+            raise HTTPException(status_code=400, detail=str(exc)) from exc
+        if not changed:
+            raise HTTPException(status_code=404, detail="attention_item_not_found")
+        await events.publish(
+            "attention.snoozed",
+            {"item_id": item_id, "snooze_until_unix": int(body.until_unix)},
+        )
+        return {"snoozed": True, "snooze_until_unix": int(body.until_unix)}
 
     @app.post("/v1/notifications/ingest")
     async def ingest_notification(note: PhoneNotification):
