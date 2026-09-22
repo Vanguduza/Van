@@ -14,6 +14,13 @@
 
 No production code was modified. Only this directory was added.
 
+> **Historical audit snapshot — not current repository truth.** The findings below describe
+> audited commit `0067d55` before remediation. References such as the 30-tool Hermes shim,
+> absent memory producer/invoker, floating backend pins, and missing product paths are retained
+> as forensic provenance. Current repository state is represented by
+> `VAN_FABLE_IMPLEMENTATION_CLOSURE_REPORT.md`, `VAN_REQUIREMENT_TRACEABILITY_MATRIX.md`
+> and `VAN_RUNTIME_QUALIFICATION_MATRIX.md`.
+
 ---
 
 ## 1. Executive summary
