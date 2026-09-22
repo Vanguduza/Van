@@ -57,16 +57,10 @@ class VisualAcceptanceService:
         rive_sha = self._sha(rive_sha256, "rive_sha256")
         apk_sha = self._sha(apk_sha256, "apk_sha256")
         subject = f"sha256:{rive_sha}"
-        try:
-            verified = self._verifier().verify(
-                token,
-                act="visual-accept",
-                subject=subject,
-                single_use=False,
-            )
-        except Exception as exc:
-            raise VisualAcceptanceError(str(exc)) from exc
 
+        # Idempotency is a database fact, not a relaxation of owner authority. An exact
+        # retry returns the already-verified receipt before touching the one-shot verifier.
+        # A token replayed with different bytes is refused even after a process restart.
         existing = await self.store.fetchone(
             "SELECT * FROM visual_acceptances WHERE token = ?",
             (token,),
@@ -76,6 +70,15 @@ class VisualAcceptanceService:
             if row["rive_sha256"] != rive_sha or row["apk_sha256"] != apk_sha:
                 raise VisualAcceptanceError("acceptance_token_replayed_with_different_artifact")
             return self._public(row)
+
+        try:
+            verified = self._verifier().verify(
+                token,
+                act="visual-accept",
+                subject=subject,
+            )
+        except Exception as exc:
+            raise VisualAcceptanceError(str(exc)) from exc
 
         verified_at = int(time.time())
         receipt_id = "visual-acceptance:" + hashlib.sha256(token.encode("utf-8")).hexdigest()

@@ -122,3 +122,21 @@ def test_visual_acceptance_is_declared_device_proofed():
     source = (Path(__file__).resolve().parents[1] / "van_gateway" / "app.py").read_text(encoding="utf-8")
     predicate = source[source.index("def requires_device_proof"):source.index("async def enforce_device_proof")]
     assert 'path == "/v1/visual/acceptance"' in predicate
+
+
+@pytest.mark.asyncio
+async def test_signed_acceptance_cannot_be_replayed_for_different_apk(client):
+    ac, app = client
+    token = OWNER.token(act="visual-accept", subject=f"sha256:{RIVE_SHA}")
+    first = await ac.post("/v1/visual/acceptance", json=payload(token))
+    assert first.status_code == 200, first.text
+
+    changed = payload(token)
+    changed["apk_sha256"] = "c" * 64
+    replay = await ac.post("/v1/visual/acceptance", json=changed)
+    assert replay.status_code == 403
+    assert "different_artifact" in replay.text
+
+    rows = await app.state.store.fetchall("SELECT id, apk_sha256 FROM visual_acceptances")
+    assert len(rows) == 1
+    assert rows[0]["apk_sha256"] == APK_SHA
