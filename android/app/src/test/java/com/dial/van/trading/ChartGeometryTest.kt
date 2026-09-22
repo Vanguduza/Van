@@ -37,7 +37,7 @@ class ChartGeometryTest {
         // Time ticks snap to human boundaries through ChartAxes.timeTicks (a 39-minute span
         // steps at 15 minutes → 2 ticks), not to "every Nth bar"; they must still be ordered.
         val ticks = scene.ops.filterIsInstance<ChartOp.TimeTick>()
-        assertTrue("ticks: ${'$'}{ticks.size}", ticks.size in 2..5)
+        assertTrue("ticks: ${ticks.size}", ticks.size in 2..5)
         assertTrue(ticks.zipWithNext().all { (a, b) -> a.x < b.x })
         // an off-scale level widens the price range instead of being clipped away
         val wide = ChartGeometry.build(bars(40), layout, listOf(ChartLevel(LevelKind.STOP, 1.0)))
