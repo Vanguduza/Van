@@ -872,20 +872,23 @@
     },
     {
       "n": 42,
-      "component": "Temporal routing branch",
-      "path": "backend/van_gateway/automation/router.py",
-      "maturity_class": "ABSENT",
-      "disposition": "COMPLETE",
-      "rationale": "Not absent — explicit. The router returns ExecutionMedium.TEMPORAL for a critical durable process and the decision carries its own reason: Temporal is stack-locked at adoption phase 11 and not built, so use a native VAN state machine until it is. That is a documented refusal with a named alternative, which is what §6's fallback asks for, and deleting the branch would leave a critical durable process silently routed somewhere that cannot guarantee durability.",
+      "component": "Temporal durable coordination runtime",
+      "path": "backend/van_gateway/automation/temporal_bridge.py; deploy/van-trading-core/temporal/",
+      "maturity_class": "INTEGRATED",
+      "disposition": "WIRE",
+      "rationale": "The audit-time router-only branch is superseded. PR #59 implements the selected durable medium with a scoped gateway bridge/API, replay-safe VanDurableWorkflow, temporalio 1.33.0 worker/private bridge, hardened systemd service, bootstrap and live qualification. Deployment still fails closed without a real Temporal server. The runtime owns durable coordination only and cannot execute live orders or mint owner/trading authority.",
       "remediation_gate": "GATE 8",
-      "producer": null,
-      "consumer": null,
-      "production_caller": null,
-      "tests": null,
+      "producer": "backend/van_gateway/automation/temporal_bridge.py; deploy/van-trading-core/temporal/runtime.py",
+      "consumer": "hermes/mcp/owner_runtime_stdio.mjs; backend/van_gateway/automation/router.py",
+      "production_caller": "Hermes temporal_start/status/signal -> gateway /v1/automation/temporal/*",
+      "tests": "backend/tests/test_automation_hot_warm_cold.py; tests/contracts/test_owner_runtime_mcp_contract.py; deploy/van-trading-core/qualify.sh",
       "runtime_evidence": null,
-      "owner_facing_projection": null,
+      "owner_facing_projection": "durable workflow status through automation/Missions surfaces",
       "terminal_state": "EXTERNALLY_BLOCKED_REPOSITORY_COMPLETE",
-      "closure_commits": []
+      "closure_commits": [
+        "PR-59"
+      ],
+      "post_closure_live_gate": "VAN_TEMPORAL_ADDRESS + live restart/recovery/checkpoint/terminal canary"
     },
     {
       "n": 43,

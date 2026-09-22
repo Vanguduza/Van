@@ -18,6 +18,7 @@ class OnboardingPlanTest {
     private val everything = OnboardingGrants(
         paired = true,
         overlayGranted = true,
+        displayAwarenessEnabled = true,
         notificationsGranted = true,
         notificationListenerEnabled = true,
         microphoneGranted = true,
@@ -51,6 +52,8 @@ class OnboardingPlanTest {
         assertEquals(OnboardingStep.OVERLAY, OnboardingPlan.currentStep(grants))
         assertEquals(OnboardingStep.OVERLAY, OnboardingPlan.currentStep(grants))
         grants = grants.copy(overlayGranted = true)
+        assertEquals(OnboardingStep.DISPLAY_AWARENESS, OnboardingPlan.currentStep(grants))
+        grants = grants.copy(displayAwarenessEnabled = true)
         assertEquals(OnboardingStep.NOTIFICATIONS, OnboardingPlan.currentStep(grants))
     }
 
@@ -107,6 +110,14 @@ class OnboardingPlanTest {
     }
 
     @Test
+    fun `display awareness is required for obstruction-safe floating VAN`() {
+        val partial = everything.copy(displayAwarenessEnabled = false)
+        assertEquals(OnboardingStep.DISPLAY_AWARENESS, OnboardingPlan.currentStep(partial))
+        assertFalse(OnboardingPlan.mayComplete(partial))
+        assertTrue(OnboardingPlan.blockers(partial).contains(OnboardingStep.DISPLAY_AWARENESS))
+    }
+
+    @Test
     fun `a phone too old to have the permission is not blocked on granting it`() {
         // POST_NOTIFICATIONS does not exist below Android 13, and a step that can never be
         // satisfied is a flow that can never finish.
@@ -139,6 +150,7 @@ class OnboardingPlanTest {
     private fun grant(grants: OnboardingGrants, step: OnboardingStep): OnboardingGrants = when (step) {
         OnboardingStep.PAIRING -> grants.copy(paired = true)
         OnboardingStep.OVERLAY -> grants.copy(overlayGranted = true)
+        OnboardingStep.DISPLAY_AWARENESS -> grants.copy(displayAwarenessEnabled = true)
         OnboardingStep.NOTIFICATIONS -> grants.copy(notificationsGranted = true)
         OnboardingStep.NOTIFICATION_LISTENER -> grants.copy(notificationListenerEnabled = true)
         OnboardingStep.MICROPHONE -> grants.copy(microphoneGranted = true)

@@ -309,6 +309,14 @@ def test_one_trade_from_sealed_claim_to_lesson_learned(world: World):
     assert row["lessons"], "the lesson is not joined to the closed trade"
     assert row["lessons"][0]["quadrant"] == verdict["quadrant"]
     assert history_view["by_quadrant"].get(verdict["quadrant"]) == 1
+    # The history route owns the owner-facing closed-trade curve; Android renders this
+    # authoritative series rather than inventing one from list rows.
+    assert "equity_curve_r" in history_view
+    assert "equity_curve_pnl" in history_view
+    if row["r_multiple"] is not None:
+        assert history_view["equity_curve_r"][-1]["value"] == pytest.approx(float(row["r_multiple"]))
+    if row["pnl"] is not None:
+        assert history_view["equity_curve_pnl"][-1]["value"] == pytest.approx(float(row["pnl"]))
 
     assessment_view = active.assessment(world.ledger)
     assert assessment_view["ledger_available"] is True

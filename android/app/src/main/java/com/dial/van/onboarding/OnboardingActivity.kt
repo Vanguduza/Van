@@ -48,6 +48,7 @@ import com.dial.van.VanApplication
 import com.dial.van.command.CommandCentreActivity
 import com.dial.van.notification.VanNotificationListenerService
 import com.dial.van.overlay.FloatingOverlayService
+import com.dial.van.overlay.VanObstructionAccessibilityService
 import com.dial.van.visual.VanTheme
 
 /**
@@ -112,6 +113,7 @@ class OnboardingActivity : FragmentActivity() {
 internal fun readGrants(context: Context, paired: Boolean): OnboardingGrants = OnboardingGrants(
     paired = paired,
     overlayGranted = Settings.canDrawOverlays(context),
+    displayAwarenessEnabled = VanObstructionAccessibilityService.isEnabled(context),
     notificationsGranted = Build.VERSION.SDK_INT < Build.VERSION_CODES.TIRAMISU ||
         ContextCompat.checkSelfPermission(
             context, Manifest.permission.POST_NOTIFICATIONS,
@@ -229,6 +231,8 @@ private fun OnboardingFlow(onComplete: () -> Unit) {
                             Uri.parse("package:${context.packageName}"),
                         ),
                     )
+                    OnboardingStep.DISPLAY_AWARENESS ->
+                        context.startActivity(Intent(Settings.ACTION_ACCESSIBILITY_SETTINGS))
                     OnboardingStep.NOTIFICATIONS ->
                         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.TIRAMISU) {
                             notificationLauncher.launch(Manifest.permission.POST_NOTIFICATIONS)

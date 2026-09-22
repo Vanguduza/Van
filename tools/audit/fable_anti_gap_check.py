@@ -56,7 +56,10 @@ CHECKS: list[Check] = [
     ("GAP-F-012", "closed trades reach the device as events", "backend/van_gateway/trading/bridge.py", r"trading\.trade\.closed", True, 1),
     ("GAP-F-013", "speech cue clock is production code", "backend/van_gateway/voice/speech_cues.py", r"class SpeechCueClock", True, 1),
     ("GAP-F-013", "device consumes cue timing", "android/app/src/main/java/com/dial/van/voice/SpeechCueTiming.kt", None, True, 1),
-    ("GAP-F-013", "the router never selects the engine that has no synthesizer", "android/app/src/main/java/com/dial/van/voice/LocalTtsRouter.kt", r"SHERPA_ONNX is deliberately never selected", True, 1),
+    ("GAP-F-013", "sherpa local TTS runtime constructs OfflineTts", "android/app/src/main/java/com/dial/van/voice/SherpaLocalTtsRuntime.kt", r"OfflineTts\(", True, 1),
+    ("GAP-F-013", "sherpa PCM is played through VAN-owned AudioTrack", "android/app/src/main/java/com/dial/van/voice/SherpaLocalTtsRuntime.kt", r"AudioTrack\.Builder", True, 1),
+    ("GAP-F-013", "router may select the real sherpa engine", "android/app/src/main/java/com/dial/van/voice/LocalTtsRouter.kt", r"TtsEngineKind\.SHERPA_ONNX", True, 3),
+    ("GAP-F-013", "TTS output manager invokes sherpa playback", "android/app/src/main/java/com/dial/van/voice/VoiceInterfaces.kt", r"sherpa\.speak\(", True, 1),
     ("GAP-F-014", "renderer status reaches Settings", "android/app/src/main/java/com/dial/van/command/settings/SettingsRoute.kt", r"lastRendererStatus", True, 1),
     ("GAP-F-015", "contract pins the tool surface", "tests/contracts/test_owner_runtime_mcp_contract.py", r"REQUIRED_TOOLS", True, 1),
     ("GAP-F-016", "stream grant refuses without a host", "backend/van_gateway/browser/interactive_api.py", r"BROWSER_STREAM_UNCONFIGURED", True, 1),
@@ -74,10 +77,30 @@ CHECKS: list[Check] = [
     ("GAP-F-024", "owner revoke route", "backend/van_gateway/app.py", r"/v1/google/owner-revoke", True, 1),
     ("GAP-F-024", "device can revoke", "android/app/src/main/java/com/dial/van/gateway/VanGatewayClient.kt", r"fun googleOwnerRevoke", True, 1),
     ("GAP-F-025", "one readiness predicate", "backend/van_gateway/google/mesh.py", r"EXECUTION_READY_STATES", True, 1),
-    ("GAP-F-026", "Temporal decision stays explicit and owner-visible", "backend/van_gateway/automation/router.py", r"not yet built", True, 1),
+    ("GAP-F-026", "critical durable routing selects Temporal", "backend/van_gateway/automation/router.py", r"ExecutionMedium\.TEMPORAL", True, 2),
+    ("GAP-F-026", "gateway exposes the Temporal bridge", "backend/van_gateway/automation/temporal_bridge.py", r"class TemporalAutomationApi", True, 1),
+    ("GAP-F-026", "Temporal durable workflow is implemented", "deploy/van-trading-core/temporal/workflows.py", r"class VanDurableWorkflow", True, 1),
+    ("GAP-F-026", "Temporal runtime worker is implemented", "deploy/van-trading-core/temporal/runtime.py", r"Worker\(", True, 1),
+    ("GAP-F-026", "Hermes can start durable workflows", "hermes/mcp/owner_runtime_stdio.mjs", r"name: 'temporal_start'", True, 1),
     ("GAP-F-027", "overlay state encrypted", "android/app/src/main/java/com/dial/van/overlay/OverlayStateStore.kt", r"EncryptedSharedPreferences\.create", True, 1),
     ("GAP-F-027", "storage policy contract", "tests/contracts/test_android_storage_policy.py", None, True, 1),
     ("GAP-F-028", "follow-ups are scheduled", "backend/van_gateway/app.py", r"proactive\.follow_ups", True, 1),
+
+    # 2026-09-22 post-Fable product reconciliation: these were genuine owner-facing
+    # omissions that the original 28-gap register did not count. Keeping them in this
+    # executable anti-gap pass prevents a future closure from hiding them behind "zero
+    # repository gaps".
+    ("PROD-F-001", "owner can snooze an attention item through a durable backend route", "backend/van_gateway/app.py", r'/v1/attention/\{item_id\}/snooze', True, 1),
+    ("PROD-F-001", "Android attention UI calls the snooze route", "android/app/src/main/java/com/dial/van/command/attention/AttentionRoute.kt", r"attentionSnooze", True, 1),
+    ("PROD-F-002", "overlay obstruction has a real AccessibilityService producer", "android/app/src/main/java/com/dial/van/overlay/VanObstructionAccessibilityService.kt", r"class VanObstructionAccessibilityService", True, 1),
+    ("PROD-F-002", "floating overlay consumes obstruction broadcasts", "android/app/src/main/java/com/dial/van/overlay/FloatingOverlayService.kt", r"ACTION_OBSTRUCTION_STATE", True, 1),
+    ("PROD-F-003", "trading history read model emits an R equity curve", "trading/vati/readmodels/active.py", r'equity_curve_r', True, 1),
+    ("PROD-F-003", "trading history UI renders backend-owned curve data", "android/app/src/main/java/com/dial/van/trading/ui/HistoryScreen.kt", r"equityCurveR|equity_curve_r", True, 1),
+    ("PROD-F-004", "local sherpa TTS constructs a real OfflineTts runtime", "android/app/src/main/java/com/dial/van/voice/SherpaLocalTtsRuntime.kt", r"OfflineTts\(", True, 1),
+    ("PROD-F-004", "VoiceEdge gates sherpa selection on runtime self-test", "android/app/src/main/java/com/dial/van/voice/VoiceEdge.kt", r"localTtsRuntimeReady", True, 2),
+    ("PROD-F-005", "critical durable work has a gateway Temporal bridge", "backend/van_gateway/automation/temporal_bridge.py", r"class TemporalAutomationApi", True, 1),
+    ("PROD-F-005", "self-hosted Temporal is loopback-only and pinned", "deploy/van-trading-core/temporal/docker-compose.yml", r"127\.0\.0\.1:7233:7233", True, 1),
+    ("PROD-F-005", "Temporal worker executes VanDurableWorkflow", "deploy/van-trading-core/temporal/runtime.py", r"workflows=\[VanDurableWorkflow\]", True, 1),
 ]
 
 #: Behavioural evidence per gap: the suites CI runs. Listed so the report can cite them.
@@ -94,11 +117,17 @@ SUITES: dict[str, list[str]] = {
     "GAP-F-010": ["android/verification (GatewayDegradedMappingTest)"],
     "GAP-F-011": ["android/verification (ConversationReducerTest)"],
     "GAP-F-012": ["visual-preview (VanEmbodimentCoverageTest)", "backend/tests/test_trading_event_bridge.py"],
-    "GAP-F-013": ["backend/tests/test_speech_sync.py", "android/verification (SpeechCueTimingTest)"],
+    "GAP-F-013": ["backend/tests/test_speech_sync.py", "android/verification (SpeechCueTimingTest, LocalTtsRouterTest)"],
     "GAP-F-023": ["van-ci mutation job", "van-ci android-instrumentation job"],
     "GAP-F-024": ["backend/tests/test_google_owner_revoke_and_scrub.py"],
     "GAP-F-027": ["tests/contracts/test_android_storage_policy.py"],
+    "GAP-F-026": ["backend/tests/test_automation_hot_warm_cold.py", "tests/contracts/test_owner_runtime_mcp_contract.py"],
     "GAP-F-028": ["backend/tests/test_proactive_followups.py"],
+    "PROD-F-001": ["backend/tests/test_extra_apis.py"],
+    "PROD-F-002": ["android/verification (OnboardingPlanTest, OverlayVisibilityPolicyTest)"],
+    "PROD-F-003": ["trading/tests/test_active_trade_e2e.py"],
+    "PROD-F-004": ["android/verification/src/test/kotlin/com/dial/van/voice/VoiceAudioTest.kt", "android app compile"],
+    "PROD-F-005": ["backend/tests/test_temporal_durable_runtime.py", "backend/tests/test_automation_hot_warm_cold.py"],
 }
 
 

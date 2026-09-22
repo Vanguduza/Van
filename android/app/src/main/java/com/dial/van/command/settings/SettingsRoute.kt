@@ -1,5 +1,7 @@
 package com.dial.van.command.settings
 
+import android.content.Intent
+import android.provider.Settings
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.PaddingValues
@@ -35,6 +37,7 @@ import com.dial.van.design.components.StatusChip
 import com.dial.van.design.components.VanPanel
 import com.dial.van.design.components.VanPressable
 import com.dial.van.overlay.FloatingOverlayService
+import com.dial.van.overlay.VanObstructionAccessibilityService
 import com.dial.van.visual.DegradedBridge
 import com.dial.van.visual.VanGlassTokens
 import com.dial.van.visual.VanPresence
@@ -123,6 +126,29 @@ fun SettingsRoute(
                         Button(onClick = { FloatingOverlayService.start(app) }) { Text("Start") }
                         Button(onClick = { FloatingOverlayService.stop(app) }) { Text("Stop") }
                     }
+                }
+            }
+        }
+
+        item {
+            VanPanel {
+                Column(verticalArrangement = Arrangement.spacedBy(tokens.space.space2)) {
+                    Text("Display awareness", style = tokens.type.headline, color = tokens.color.textPrimary)
+                    val enabled = VanObstructionAccessibilityService.isEnabled(context)
+                    Row(horizontalArrangement = Arrangement.spacedBy(tokens.space.space2)) {
+                        StatusChip(
+                            label = if (enabled) "ENABLED" else "REQUIRED",
+                            role = if (enabled) StatusSemantics.ROLE_FAVOURABLE else StatusSemantics.ROLE_EVENT_RISK,
+                        )
+                        Button(
+                            onClick = { context.startActivity(Intent(Settings.ACTION_ACCESSIBILITY_SETTINGS)) },
+                        ) { Text(if (enabled) "Review" else "Enable") }
+                    }
+                    Text(
+                        "Window metadata only: this lets Floating VAN move above the keyboard and pause for immersive full-screen apps. VAN does not read accessibility text.",
+                        style = tokens.type.body,
+                        color = tokens.color.textSecondary,
+                    )
                 }
             }
         }

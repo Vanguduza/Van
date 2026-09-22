@@ -317,7 +317,7 @@ async def test_proposer_failure_is_not_a_policy_pass():
 # ------------------------------------------------------------- the router
 
 
-async def _router(tmp_path, *, hot: bool = False):
+async def _router(tmp_path, *, hot: bool = False, temporal_available: bool = False):
     store = await make_store(tmp_path)
     registry = AutomationRegistry(store)
     index = HotWorkflowIndex()
@@ -325,7 +325,11 @@ async def _router(tmp_path, *, hot: bool = False):
         await registry.upsert_capability(sample_capability(lifecycle=WorkflowLifecycle.HOT))
         await registry.record_artifact(sample_artifact(lifecycle=WorkflowLifecycle.ADMITTED))
         index.publish(_signature(), "wfcap_statements", 1, "n8n-1")
-    return AutomationMediumRouter(registry=registry, hot_index=index), registry, index
+    return AutomationMediumRouter(
+        registry=registry,
+        hot_index=index,
+        temporal_available=temporal_available,
+    ), registry, index
 
 
 async def test_hot_capability_wins(tmp_path):
@@ -401,15 +405,32 @@ async def test_web_only_prefers_the_deterministic_harness(tmp_path):
     assert novel.medium is ExecutionMedium.BROWSER_SEMANTIC
 
 
-async def test_critical_durable_routes_to_temporal_with_an_honest_caveat(tmp_path):
-    """§6 — Temporal is stack-locked but unbuilt, so say so rather than pretend."""
+async def test_critical_durable_routes_to_temporal_and_fails_closed_until_configured(tmp_path):
+    """§6 — the executor now exists; deployment readiness is stated separately."""
     router, _r, _i = await _router(tmp_path)
     decision = await router.route(
-        RouteRequest(goal="run the promotion state machine", signature=_signature(),
-                     critical_durable=True)
+        RouteRequest(
+            goal="run the promotion state machine",
+            signature=_signature(),
+            critical_durable=True,
+        )
     )
     assert decision.medium is ExecutionMedium.TEMPORAL
-    assert "not yet built" in (decision.detail or "")
+    assert "implemented" in (decision.detail or "")
+    assert "not configured" in (decision.detail or "")
+
+
+async def test_critical_durable_route_names_the_live_start_surface_when_configured(tmp_path):
+    router, _r, _i = await _router(tmp_path, temporal_available=True)
+    decision = await router.route(
+        RouteRequest(
+            goal="run the promotion state machine",
+            signature=_signature(),
+            critical_durable=True,
+        )
+    )
+    assert decision.medium is ExecutionMedium.TEMPORAL
+    assert "/v1/automation/temporal/start" in (decision.detail or "")
 
 
 async def test_payment_goal_is_refused_at_the_router(tmp_path):

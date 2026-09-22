@@ -130,10 +130,82 @@ for f in "$BASE/secrets/commander.token" "$BASE/secrets/commander.token.hermes" 
     add "secret:$name" GREEN "mode $m; distinct principal credential"
   fi
 done
-for f in "$BASE/secrets/vekl.token" "$BASE/secrets/pki/ca.crt"; do
+for f in "$BASE/secrets/vekl.token" "$BASE/secrets/temporal-bridge.token" "$BASE/secrets/pki/ca.crt"; do
   if [[ -f "$f" ]]; then m=$(stat -c %a "$f"); [[ "$m" =~ ^600$|^400$ ]] && add "secret:$(basename "$f")" GREEN "mode $m" || add "secret:$(basename "$f")" RED "mode $m (need 0600)"; else add "secret:$(basename "$f")" RED missing; fi
 done
 unit vati-vekl.service; unit vati-commander.service; unit vati-automation.service; unit vati-supabase.service 0; unit docker.service 0
+TEMPORAL_ENV="$BASE/config/temporal-runtime.env"
+TEMPORAL_ADDRESS_CONFIGURED="$(sed -n 's/^VAN_TEMPORAL_ADDRESS=//p' "$TEMPORAL_ENV" 2>/dev/null | tail -1)"
+if [[ -n "$TEMPORAL_ADDRESS_CONFIGURED" ]]; then
+  if [[ "$TEMPORAL_ADDRESS_CONFIGURED" == "127.0.0.1:7233" ]]; then
+    unit vati-temporal-server.service
+    if ss -ltnH 2>/dev/null | awk '{print $4}' | grep -Eq '^127\.0\.0\.1:7233"$(sed -n 's/^VAN_TEMPORAL_BRIDGE_TOKEN_FILE=//p' "$TEMPORAL_ENV" 2>/dev/null | tail -1)"
+  TEMPORAL_PORT="$(sed -n 's/^VAN_TEMPORAL_BRIDGE_PORT=//p' "$TEMPORAL_ENV" 2>/dev/null | tail -1)"
+  TEMPORAL_TOKEN_FILE="${TEMPORAL_TOKEN_FILE:-$BASE/secrets/temporal-bridge.token}"
+  TEMPORAL_PORT="${TEMPORAL_PORT:-9150}"
+  TEMPORAL_TOKEN="$(cat "$TEMPORAL_TOKEN_FILE" 2>/dev/null || true)"
+  if [[ -n "$TEMPORAL_TOKEN" ]] && curl -fsS --max-time 5 -H "X-Van-Temporal-Token: $TEMPORAL_TOKEN" "http://127.0.0.1:$TEMPORAL_PORT/health" >/tmp/temporal-health.json 2>/dev/null && jq -e '.ok==true and .state=="READY" and .executes_live_orders==false' /tmp/temporal-health.json >/dev/null; then
+    add temporal_runtime GREEN "$(jq -c '{state,namespace,task_queue,authority}' /tmp/temporal-health.json)"
+  else
+    add temporal_runtime RED "Temporal address configured but worker/bridge health is not READY"
+  fi
+else
+  add temporal_runtime RED "Temporal address missing; complete bootstrap must configure local or external runtime"
+fi
+curl -fsS --max-time 5 "${VAN_VEKL_URL:-http://127.0.0.1:9134}/health" >/tmp/vekl.json 2>/dev/null && jq -e '.ok==true' /tmp/vekl.json >/dev/null && add vekl_health GREEN "$(jq -c '.registry|{resources,sources}' /tmp/vekl.json)" || add vekl_health RED "VEKL health not ok"
+curl -fsSk --max-time 5 "https://127.0.0.1:${VAN_COMMANDER_PORT:-9133}/health" >/tmp/cmd.json 2>/dev/null && jq -e '.ok==true' /tmp/cmd.json >/dev/null && add commander_health GREEN "$(jq -c '.commands|length' /tmp/cmd.json) commands" || add commander_health RED "commander health not ok"
+if "$BASE/automation/qualify-automation-runtime.sh" >/tmp/automation-qualify.log 2>&1; then add automation_fabric GREEN "$(tail -n 1 /tmp/automation-qualify.log)"; else add automation_fabric RED "$(tail -c 500 /tmp/automation-qualify.log)"; fi
+if "$BASE/app/deploy/van-trading-core/supabase/qualify-supabase-runtime.sh" >/tmp/supabase-qualify.log 2>&1; then add supabase_runtime GREEN "$(tail -n 1 /tmp/supabase-qualify.log)"; else add supabase_runtime RED "$(tail -c 500 /tmp/supabase-qualify.log)"; fi
+if [[ -f "$DATA/evidence/browser/runtime-manifest.json" ]] && jq -e '.stagehand=="4.1.0" and .playwright=="1.63.0" and .temporalio=="1.33.0"' "$DATA/evidence/browser/runtime-manifest.json" >/dev/null; then add browser_runtime GREEN "Stagehand 4.1.0 / Playwright 1.63.0 / Temporal 1.33.0"; else add browser_runtime RED "browser runtime manifest missing or mismatched"; fi
+if [[ -n "${VAN_COMMANDER_LEDGER:-}" ]]; then PYTHONPATH="$BASE/app/trading" "$BASE/venv/bin/python" - <<PY >/tmp/ledger.json 2>/tmp/ledger.err && add ledger GREEN "$(cat /tmp/ledger.json)" || add ledger RED "$(tail -c 300 /tmp/ledger.err)"
+import json
+from vati.core.ledger_pg import open_ledger
+l = open_ledger("${VAN_COMMANDER_LEDGER}"); ok, n = l.verify_chain(); print(json.dumps({"backend": type(l).__name__, "chain_ok": ok, "events": n})); l.close()
+PY
+fi
+if ufw status 2>/dev/null | grep -q "Status: active"; then ufw status | grep -q "9133" && add firewall GREEN "ufw active, 9133 scoped" || add firewall RED "9133 rule missing"; else add firewall RED "ufw inactive"; fi
+if VAN_ADMIN_CIDRS="${VAN_ADMIN_CIDRS:-10.0.0.123/32,10.0.0.184/32}" VAN_PUBLIC_HOST="${VAN_PUBLIC_HOST:-}" bash "$BASE/app/deploy/van-trading-core/oci/harden-oracle-image-firewall.sh" --verify >/tmp/oracle-firewall.log 2>&1; then add oracle_image_firewall GREEN "$(tail -n 1 /tmp/oracle-firewall.log)"; else add oracle_image_firewall RED "$(tail -c 500 /tmp/oracle-firewall.log)"; fi
+listeners="$(ss -ltnH 2>/dev/null | awk '{print $4}' | grep -E ':(3000|5432|5433|6543|8000)$' || true)"
+bad_listeners="$(printf '%s
+' "$listeners" | grep -Ev '^(127\.0\.0\.1|\[::1\]):' || true)"
+missing_ports=""
+for p in 3000 5432 5433 6543 8000; do printf '%s
+' "$listeners" | grep -Eq ":${p}$" || missing_ports="$missing_ports $p"; done
+if [[ -z "$bad_listeners" && -z "$missing_ports" ]]; then add supabase_loopback GREEN "ports 3000,5432,5433,6543,8000 loopback-only"; else add supabase_loopback RED "non-loopback=${bad_listeners:-none}; missing=${missing_ports:-none}"; fi
+shopt -s nullglob; hb=("$DATA"/heartbeats/*.json); if (( ${#hb[@]} )); then for f in "${hb[@]}"; do age=$(( $(date +%s) - $(jq -r '.updated_ms' "$f")/1000 )); [[ $age -lt 300 ]] && add "session:$(basename "$f" .json)" GREEN "$(jq -c '{status,cycles,kill_switch}' "$f") age=${age}s" 0 || add "session:$(basename "$f" .json)" AMBER "stale heartbeat ${age}s" 0; done; else add sessions AMBER "no session heartbeats yet (no account enabled)" 0; fi
+[[ "$(uname -m)" == "x86_64" ]] && add mt5_native AMBER "x86_64: MT5 could run here, but the design keeps MT5 on the Windows worker" 0 || add mt5_native AMBER "ARM64 host: MT5 runs on the Windows bridge worker; this VM holds only the mTLS client" 0
+status=GREEN; (( fails )) && status=RED
+checks_json="[$(IFS=,; echo "${checks[*]}")]"
+jq -n \
+  --arg host "$(hostname)" \
+  --arg status "$status" \
+  --arg repository_sha "$OBSERVED_REPOSITORY_SHA" \
+  --arg expected_repository_sha "$EXPECTED_REPOSITORY_SHA" \
+  --arg at "$(date -u +%Y-%m-%dT%H:%M:%SZ)" \
+  --argjson required_failures "$fails" \
+  --argjson checks "$checks_json" \
+  '{host:$host,status:$status,required_failures:$required_failures,repository_sha:$repository_sha,expected_repository_sha:$expected_repository_sha,at:$at,checks:$checks}'
+(( fails == 0 ))
+; then
+      add temporal_server GREEN "self-hosted Temporal gRPC is loopback-only on 127.0.0.1:7233"
+    else
+      add temporal_server RED "expected loopback Temporal listener 127.0.0.1:7233 is absent"
+    fi
+  fi
+  unit vati-temporal.service
+  TEMPORAL_TOKEN_FILE="$(sed -n 's/^VAN_TEMPORAL_BRIDGE_TOKEN_FILE=//p' "$TEMPORAL_ENV" 2>/dev/null | tail -1)"
+  TEMPORAL_PORT="$(sed -n 's/^VAN_TEMPORAL_BRIDGE_PORT=//p' "$TEMPORAL_ENV" 2>/dev/null | tail -1)"
+  TEMPORAL_TOKEN_FILE="${TEMPORAL_TOKEN_FILE:-$BASE/secrets/temporal-bridge.token}"
+  TEMPORAL_PORT="${TEMPORAL_PORT:-9150}"
+  TEMPORAL_TOKEN="$(cat "$TEMPORAL_TOKEN_FILE" 2>/dev/null || true)"
+  if [[ -n "$TEMPORAL_TOKEN" ]] && curl -fsS --max-time 5 -H "X-Van-Temporal-Token: $TEMPORAL_TOKEN" "http://127.0.0.1:$TEMPORAL_PORT/health" >/tmp/temporal-health.json 2>/dev/null && jq -e '.ok==true and .state=="READY" and .executes_live_orders==false' /tmp/temporal-health.json >/dev/null; then
+    add temporal_runtime GREEN "$(jq -c '{state,namespace,task_queue,authority}' /tmp/temporal-health.json)"
+  else
+    add temporal_runtime RED "Temporal address configured but worker/bridge health is not READY"
+  fi
+else
+  add temporal_runtime AMBER "Temporal implementation is staged; no VAN_TEMPORAL_ADDRESS deployment was supplied" 0
+fi
 curl -fsS --max-time 5 "${VAN_VEKL_URL:-http://127.0.0.1:9134}/health" >/tmp/vekl.json 2>/dev/null && jq -e '.ok==true' /tmp/vekl.json >/dev/null && add vekl_health GREEN "$(jq -c '.registry|{resources,sources}' /tmp/vekl.json)" || add vekl_health RED "VEKL health not ok"
 curl -fsSk --max-time 5 "https://127.0.0.1:${VAN_COMMANDER_PORT:-9133}/health" >/tmp/cmd.json 2>/dev/null && jq -e '.ok==true' /tmp/cmd.json >/dev/null && add commander_health GREEN "$(jq -c '.commands|length' /tmp/cmd.json) commands" || add commander_health RED "commander health not ok"
 if "$BASE/automation/qualify-automation-runtime.sh" >/tmp/automation-qualify.log 2>&1; then add automation_fabric GREEN "$(tail -n 1 /tmp/automation-qualify.log)"; else add automation_fabric RED "$(tail -c 500 /tmp/automation-qualify.log)"; fi

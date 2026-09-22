@@ -1,852 +1,897 @@
 {
- "schema": "van-fable-gap-register/1",
- "audited_commit": "0067d55071342b963293d0724f5a1604d233d105",
- "generated_at": "2026-09-21",
- "gaps": [
-  {
-   "id": "GAP-F-001",
-   "title": "Owner memory has no conversational producer: canonical owner facts are never written from any owner interaction",
-   "priority": "P1",
-   "status": "OPEN_GAP",
-   "reqs": [
-    "REQ-MEM-02",
-    "REQ-SYM-09",
-    "REQ-FLOW-05"
-   ],
-   "subsystem": "gateway context / Android Command Centre / Hermes MCP shim",
-   "evidence": [
-    "backend/van_gateway/app.py:1810 POST /v1/context/facts is the only CANONICAL_OWNER writer (device-authenticated) - zero callers in android/app/src/main (grep 'context/facts' → none)",
-    "hermes/mcp/owner_runtime_stdio.mjs:50-114 exposes 30 tools; none maps to /v1/runtime/context/facts or /context/edges (the INFERRED candidate route at runtime_api.py:295-312)",
-    "backend/van_gateway/command/resolver.py:107-155 typed patterns cover notebook notes, research, 'what do you know about'; no 'remember ...' pattern",
-    "backend/van_gateway/orchestrator.py:672-721 compile_snapshot → canonical_context.fact_ids: with no producer the kernel is always empty (only PROJECT_TRUTH import via PUT /v1/projects/{id}/truth app.py:1784 populates owner_facts)",
-    "hermes/profile/van/AGENTS.md:12 states Hermes 'may submit inferred/model-derived memory candidates' - the shim provides no such tool (contradiction)"
-   ],
-   "root_cause": "RC-B (gateway write surfaces without an owner-side producer) + RC-A (Hermes tool surface narrower than the authority model)",
-   "symptoms": [
-    "GAP-F-015",
-    "GAP-F-019",
-    "Flow 5 'Van, remember this decision' cannot complete",
-    "Flow 1/2 context snapshots carry requirements_asked>0 with fact_ids=[] on every command"
-   ],
-   "fix": "(1) Add a typed owner-device action 'memory.remember' (A2/A3, allowed_principals OWNER_DEVICE) in action/registry.py + resolver pattern ('remember (that )?...') whose executor calls OwnerFactAuthor.state; (2) add a Memory module to the Command Centre that calls POST /v1/context/facts, GET /v1/context/memory, DELETE /v1/context/facts; (3) either add a 'context_fact_candidate' shim tool bound to /v1/runtime/context/facts (INFERRED only) or correct AGENTS.md:12.",
-   "external": "None. Live proof that Hermes dereferences fact_ids remains RUNTIME_CERTIFICATION_REQUIRED (QUAL-HERMES-03).",
-   "acceptance": "A signed owner command 'remember that my accountant is Thandi' produces an owner_facts row at CANONICAL_OWNER; the next command's canonical_context.fact_ids is non-empty and /v1/runtime/context/lexical/query returns the fact. Contract test asserts POST /v1/context/facts has an Android caller or a typed-action executor.",
-   "closure": {
-    "status": "FIXED_AND_EVIDENCED",
-    "commits": "528366b, b78cbf4, 5498a6f",
-    "evidence": "command/local_executors.py memory.remember + memory.decision.record via OwnerFactAuthor; owner-fact-readback verifier; test_local_typed_actions.py; shim context_fact_candidate/context_edge_candidate; memory/MemoryRoute.kt",
+  "schema": "van-fable-gap-register/1",
+  "audited_commit": "0067d55071342b963293d0724f5a1604d233d105",
+  "generated_at": "2026-09-21",
+  "gaps": [
+    {
+      "id": "GAP-F-001",
+      "title": "Owner memory has no conversational producer: canonical owner facts are never written from any owner interaction",
+      "priority": "P1",
+      "status": "OPEN_GAP",
+      "reqs": [
+        "REQ-MEM-02",
+        "REQ-SYM-09",
+        "REQ-FLOW-05"
+      ],
+      "subsystem": "gateway context / Android Command Centre / Hermes MCP shim",
+      "evidence": [
+        "backend/van_gateway/app.py:1810 POST /v1/context/facts is the only CANONICAL_OWNER writer (device-authenticated) - zero callers in android/app/src/main (grep 'context/facts' → none)",
+        "hermes/mcp/owner_runtime_stdio.mjs:50-114 exposes 30 tools; none maps to /v1/runtime/context/facts or /context/edges (the INFERRED candidate route at runtime_api.py:295-312)",
+        "backend/van_gateway/command/resolver.py:107-155 typed patterns cover notebook notes, research, 'what do you know about'; no 'remember ...' pattern",
+        "backend/van_gateway/orchestrator.py:672-721 compile_snapshot → canonical_context.fact_ids: with no producer the kernel is always empty (only PROJECT_TRUTH import via PUT /v1/projects/{id}/truth app.py:1784 populates owner_facts)",
+        "hermes/profile/van/AGENTS.md:12 states Hermes 'may submit inferred/model-derived memory candidates' - the shim provides no such tool (contradiction)"
+      ],
+      "root_cause": "RC-B (gateway write surfaces without an owner-side producer) + RC-A (Hermes tool surface narrower than the authority model)",
+      "symptoms": [
+        "GAP-F-015",
+        "GAP-F-019",
+        "Flow 5 'Van, remember this decision' cannot complete",
+        "Flow 1/2 context snapshots carry requirements_asked>0 with fact_ids=[] on every command"
+      ],
+      "fix": "(1) Add a typed owner-device action 'memory.remember' (A2/A3, allowed_principals OWNER_DEVICE) in action/registry.py + resolver pattern ('remember (that )?...') whose executor calls OwnerFactAuthor.state; (2) add a Memory module to the Command Centre that calls POST /v1/context/facts, GET /v1/context/memory, DELETE /v1/context/facts; (3) either add a 'context_fact_candidate' shim tool bound to /v1/runtime/context/facts (INFERRED only) or correct AGENTS.md:12.",
+      "external": "None. Live proof that Hermes dereferences fact_ids remains RUNTIME_CERTIFICATION_REQUIRED (QUAL-HERMES-03).",
+      "acceptance": "A signed owner command 'remember that my accountant is Thandi' produces an owner_facts row at CANONICAL_OWNER; the next command's canonical_context.fact_ids is non-empty and /v1/runtime/context/lexical/query returns the fact. Contract test asserts POST /v1/context/facts has an Android caller or a typed-action executor.",
+      "closure": {
+        "status": "FIXED_AND_EVIDENCED",
+        "commits": "528366b, b78cbf4, 5498a6f",
+        "evidence": "command/local_executors.py memory.remember + memory.decision.record via OwnerFactAuthor; owner-fact-readback verifier; test_local_typed_actions.py; shim context_fact_candidate/context_edge_candidate; memory/MemoryRoute.kt",
+        "date": "2026-09-22",
+        "head": "100d898"
+      }
+    },
+    {
+      "id": "GAP-F-002",
+      "title": "Reminders have no production producer",
+      "priority": "P1",
+      "status": "BACKEND_ONLY",
+      "reqs": [
+        "REQ-ATT-04",
+        "REQ-FLOW-06"
+      ],
+      "subsystem": "gateway reminders / Android / typed resolver",
+      "evidence": [
+        "backend/van_gateway/app.py:1731-1765 POST /v1/reminders and /v1/reminders/parse exist (owner-device routes)",
+        "android/app/src/main/java/com/dial/van/gateway/VanGatewayClient.kt: no '/v1/reminders' path (grep → none); Command Centre has no reminder module (command/CommandModule.kt:14-38)",
+        "hermes/mcp/owner_runtime_stdio.mjs: no reminder tool; backend/van_gateway/command/resolver.py: no 'remind' pattern (only context_requirements.py:47 names people for 'remind Thandi')",
+        "Consumers are real: app.py:592-616 _sweep_reminders fires due reminders into attention + events; briefing/service.py:57-64 lists TODAY"
+      ],
+      "root_cause": "RC-B",
+      "symptoms": [
+        "Flow 6 'Van, remind/follow up on this later' cannot complete",
+        "README claim 'deterministic attention/reminders' is consumer-only"
+      ],
+      "fix": "Add resolver patterns ('remind me (to|about) ... (at|in|on) ...', 'follow up on ... later') resolving to a typed owner-device action 'reminder.create' executed by the gateway via parse_due_expression + ReminderService.create; add a Reminders card to the Overview/Tasks module calling POST /v1/reminders.",
+      "external": "None.",
+      "acceptance": "'remind me to call Thandi at 3pm' → reminders row with due time; sweep fires it into /v1/attention and the device event stream; contract test asserts a production producer exists for reminders.create.",
+      "closure": {
+        "status": "FIXED_AND_EVIDENCED",
+        "commits": "528366b, b78cbf4, 5498a6f",
+        "evidence": "reminder.create executor + resolver; migration 29 reminders.source; reminder-readback verifier; shim reminder_create → POST /v1/runtime/reminders; Home 'Upcoming' from GET /v1/reminders",
+        "date": "2026-09-22",
+        "head": "100d898"
+      }
+    },
+    {
+      "id": "GAP-F-003",
+      "title": "Hermes has no in-repository path to observe trading state (positions, portfolio, risk, trades)",
+      "priority": "P1",
+      "status": "IMPLEMENTED_NOT_REACHABLE",
+      "reqs": [
+        "REQ-TRD-01",
+        "REQ-TRD-05",
+        "REQ-FLOW-07",
+        "REQ-FLOW-08",
+        "REQ-FLOW-09"
+      ],
+      "subsystem": "Hermes MCP shim / trading commander / gateway trading routes",
+      "evidence": [
+        "trading/commander/app.py:34 COMMANDS = status, ledger_status, services, restart_service, tail_log, run_backtest, vekl_resolve, halt, doctor, accounts (+gateway-only account/promotion). cmd_status (app.py:245-251) returns host/uptime/ledger head+count/units; cmd_ledger_status returns chain_ok/counts - no positions, no trades",
+        "backend/van_gateway/app.py:2443-2487 /v1/trading/* GET routes have control_scope None (app.py:1056-1125) → owner-device routes; hermes/mcp/owner_runtime_stdio.mjs has no trading tool and only carries the internal token",
+        "hermes/skills/trading-intelligence/SKILL.md:16-27 instructs Hermes to analyse open positions and submit TradeIntent (A3) - no tool exists for either",
+        "backend/van_gateway/trading/cognition.py:12 live_advisory DISABLED; no news/event feed other than the economic calendar recorder (trading/vati/calendar/recorder.py) which only drives tier1 blackout"
+      ],
+      "root_cause": "RC-A",
+      "symptoms": [
+        "Flows 7-9 (why is my trade moving / does this news change my thesis / propose what to do) have no cognition-side data path",
+        "hermes/skills/trading-intelligence promises analysis it cannot ground"
+      ],
+      "fix": "Add read-only shim tools (trading_portfolio, trading_positions, trading_risk, trading_market_state, trading_trade_detail) bound to new internal-control routes under /v1/runtime/trading/* (ControlScope.RUNTIME) that reuse backend/van_gateway/trading/service.py read models; or add a 'positions' command to the commander tool list. Keep all mutation out of scope (VATI authority unchanged).",
+      "external": "Live VATI ledger (Postgres) on van-trading-core; broker live path (QUAL-TRD-01/02).",
+      "acceptance": "Hermes 'van' can call trading_positions and receive the same read model Android shows; no new mutation tool is added; test_owner_runtime_mcp_contract updated.",
+      "closure": {
+        "status": "FIXED_AND_EVIDENCED",
+        "commits": "b78cbf4, 3d845bc",
+        "evidence": "/v1/runtime/trading/* (6 tools); commander positions/assessment read-only; test_runtime_hermes_surface.py; test_owner_runtime_mcp_contract.py (48 tools)",
+        "date": "2026-09-22",
+        "head": "100d898"
+      }
+    },
+    {
+      "id": "GAP-F-004",
+      "title": "VATI shadow cognition has no model invoker in production; the entire cognition package abstains MODEL_UNAVAILABLE",
+      "priority": "P2",
+      "status": "IMPLEMENTED_NOT_REACHABLE",
+      "reqs": [
+        "REQ-TRD-06",
+        "REQ-TRD-08"
+      ],
+      "subsystem": "trading/vati/cognition",
+      "evidence": [
+        "trading/vati/app/account_service.py:175-178 ShadowCognitionRuntime(ledger=self._ledger) constructed without an invoker; comment: 'A provider invoker is an external runtime dependency'",
+        "trading/vati/cognition/runtime.py:132-140 with invoker None → narrative 'no model invoker is configured on this runtime'",
+        "grep invoker across trading/ (non-test) → no config, CLI, env or service constructs one",
+        "backend/van_gateway/trading/cognition.py:11-22 read model advertises model_hierarchy [fable-5.1, gpt-6-astra, claude-opus-5, gpt-5.6-sol] while shadow/handoffs/decision_exam are structurally empty in production"
+      ],
+      "root_cause": "RC-E (external dependency declared but no injection point)",
+      "symptoms": [
+        "Android Cognition screens render an empty shadow book",
+        "Trading learning loop's cognition attribution (trade_lifecycle.py:844 resolve_trade) never has entries"
+      ],
+      "fix": "Add a provider-invoker construction path (config-driven, credentials from vault, provider registry in cognition/providers.py) in account_service or a dedicated vati-cognition worker; until then, mark cognition_mode in the read model as MODEL_INVOKER_UNCONFIGURED rather than OFFLINE_EVOLUTION+SHADOW_LIVE.",
+      "external": "Model provider credentials on van-trading-core (QUAL-TRD-05).",
+      "acceptance": "With a configured invoker, wake() records a CognitiveAssessment; without one the read model states the abstention explicitly; RiskAuthority decision unchanged in both cases (existing contract tests).",
+      "closure": {
+        "status": "FIXED_AND_EVIDENCED",
+        "commits": "3d845bc",
+        "evidence": "cognition/invokers.py Null/HttpJson/HermesRun from session config; read model names the real invoker or MODEL_INVOKER_UNCONFIGURED; test_active_trade_e2e.py. Live invoker credentials remain QUAL-TRD-05.",
+        "date": "2026-09-22",
+        "head": "100d898"
+      }
+    },
+    {
+      "id": "GAP-F-005",
+      "title": "Typed A4 action trading.halt reaches biometric approval but has no executor",
+      "priority": "P1",
+      "status": "PARTIAL_IMPLEMENTATION",
+      "reqs": [
+        "REQ-SEC-05",
+        "REQ-TRD-09",
+        "REQ-FLOW-10"
+      ],
+      "subsystem": "gateway action runtime / Android trading / commander",
+      "evidence": [
+        "backend/van_gateway/command/resolver.py:89-168 'halt trading' → typed action trading.halt (A4); tests/scenarios/test_acceptance_scenarios.py:207-211 proves approval_required",
+        "backend/van_gateway/action/registry.py:119-126 trading.halt allowed_principals OWNER_DEVICE, verifier DOMAIN_ATTESTATION; verification/production.py:129 'trading-halt' readback expects an OWNER_HALT ledger event",
+        "backend/van_gateway/orchestrator.py:803-838: after approval the command is dispatched to Hermes; no gateway-side executor for trading.halt (grep 'trading.halt' → registry, verification, descriptor, control_scopes only)",
+        "backend/van_gateway/app.py:2820-2842 POST /v1/trading/halt requires ControlScope.TRADING and owner_signature_ref = OwnerAuthority token for act 'owner-halt' (trading/service.py:310-313); the shim has no trading tool; android/app/src/main has no 'owner-halt' OwnerAuthorityToken preparation (only 'capsule-promote', VanGatewayClient.kt:205-219)"
+      ],
+      "root_cause": "RC-B + RC-A",
+      "symptoms": [
+        "Flow 10 ends at approval; the mission would reach VERIFYING then UNVERIFIABLE/FAILED",
+        "Owner has no emergency kill-switch surface on the phone (Android trading is read-only + promotion)"
+      ],
+      "fix": "On A4-approved trading.halt, have the gateway self-execute: Android prepares an 'owner-halt' OwnerAuthorityToken (subject 'van-trading-core') alongside the approval proof; orchestrator calls trading.halt() before/instead of Hermes dispatch and verifies via trading_halt_readback. Add a Halt button to TradingCommandCentreActivity behind BiometricGate.",
+      "external": "Owner authority key enrolled on van-trading-core (registries/owner_authority_keys.json is empty by design; QUAL-TRD-03).",
+      "acceptance": "'halt trading' + biometric → OWNER_HALT event in the ledger → mission VERIFIED_SUCCESS via trading-halt readback; scenario test extended past approval_required.",
+      "closure": {
+        "status": "FIXED_AND_EVIDENCED",
+        "commits": "528366b, 81805c9",
+        "evidence": "TradingHaltExecutor with owner-halt OwnerAuthority token (client_context.owner_halt_authority_ref) + A4 proof; test_local_typed_actions.py halt cases; Android trading/TradingHaltAuthority.kt + Trading screen halt path",
+        "date": "2026-09-22",
+        "head": "100d898"
+      }
+    },
+    {
+      "id": "GAP-F-006",
+      "title": "Autonomous browser and automation execution has no production initiator",
+      "priority": "P1",
+      "status": "IMPLEMENTED_NOT_REACHABLE",
+      "reqs": [
+        "REQ-BRW-01",
+        "REQ-AUT-01",
+        "REQ-FLOW-03",
+        "REQ-FLOW-15"
+      ],
+      "subsystem": "Hermes MCP shim / browser api / automation api",
+      "evidence": [
+        "backend/van_gateway/browser/api.py:884-984 run_assignment is 'the only way a browser worker runs autonomously' (internal-control, ControlScope.BROWSER); backend/van_gateway/automation/api.py:243-759 all internal-control",
+        "hermes/mcp/owner_runtime_stdio.mjs: no browser_* or automation_* tool; hermes/profile/van/config.yaml:110-128 registers only van_trading_commander; tools/hermes/register_owner_runtime_mcp.sh registers only van_owner_runtime",
+        "hermes/mcp/README.md:8-10 lists a 'van-gateway' MCP server (grants, evidence, health) that has no shim or registration script in the repository",
+        "android VanGatewayClient.kt:498-517 browser calls are GET only (+ owner interactive sessions); Android never POSTs /v1/browser/tasks or /assignments",
+        "Reachability worker: /v1/automation/* (13 routes) have no caller in Android, shim, tools, deploy or gateway-internal code"
+      ],
+      "root_cause": "RC-A",
+      "symptoms": [
+        "Flow 3 'investigate this link' cannot reach Harness/Stagehand; only the owner's manual remote browser (needs stream host) exists",
+        "Flow 15 delegated multi-step job cannot use automation/browser",
+        "Boundary escalation (browser/api.py:289-626) is reachable only from tests"
+      ],
+      "fix": "Add scoped shim tools: browser_assignment_run/browser_task_status/browser_task_evidence (→ /v1/browser/assignments, /tasks/{id}) and automation_route/automation_execute/automation_run_status (→ /v1/automation/*), registered through register_owner_runtime_mcp.sh with BROWSER/AUTOMATION scoped credentials; or ship the documented 'van-gateway' MCP server. Update hermes/skills/browser-intelligence and automation-fabric to name the tools.",
+      "external": "Harness/Stagehand/n8n live runtimes (QUAL-BRW-01/02, QUAL-AUT-01).",
+      "acceptance": "With browser_enabled=true and a fake worker, a Hermes tool call creates a browser task bound to the command's mission and its evidence appears in /v1/missions/{id}/evidence; test_owner_runtime_mcp_contract lists the new tools.",
+      "closure": {
+        "status": "FIXED_AND_EVIDENCED",
+        "commits": "b78cbf4",
+        "evidence": "shim browser_task_create/assignment_run/task_status/task_evidence + automation_route/execute/run_status; AGENTS.md/skills truthful",
+        "date": "2026-09-22",
+        "head": "100d898"
+      }
+    },
+    {
+      "id": "GAP-F-007",
+      "title": "/health and /v1/degraded return HTTP 500 when an uncatalogued DegradedCode is active (9 of 35 codes missing from CATALOG)",
+      "priority": "P2",
+      "status": "OPEN_GAP",
+      "reqs": [
+        "REQ-RES-04",
+        "REQ-OBS-03"
+      ],
+      "subsystem": "gateway degraded registry / observability",
+      "evidence": [
+        "backend/van_gateway/degraded/registry.py CATALOG has 26 entries; backend/van_gateway/models.py DegradedCode has 35 members; missing: GOOGLE_PRINCIPAL_UNVERIFIED, GOOGLE_CAPABILITY_UNAVAILABLE, GOOGLE_OAUTH_CLIENT_UNCONFIGURED, GOOGLE_ACCOUNT_ENTITLEMENT_UNVERIFIED, OWNER_CONTEXT_UNAVAILABLE, OWNER_CONTEXT_CONFLICTED, RESEARCH_UNAVAILABLE, RESEARCH_EGRESS_DENIED, DEVICE_OR_GRANT_REVOKED",
+        "backend/van_gateway/orchestrator.py:685 degraded.set(DegradedCode.OWNER_CONTEXT_UNAVAILABLE, True) on any snapshot exception - the only one of the 9 missing codes that reaches DegradedRegistry.set() today; the other 8 appear only as strings in response payloads (google/service.py:73, google/mesh.py:302,362, action/service.py:295) and are latent",
+        "Reproduced (scratch probe against create_app): GET /health 200 → after set(OWNER_CONTEXT_UNAVAILABLE) → KeyError → HTTP 500 (log line error_class KeyError)",
+        "android VanApplication.kt:537-558 marks 'gateway' BROKEN on non-200 /health → owner sees 'gateway broken' during a context-store fault"
+      ],
+      "root_cause": "RC-D (enum/catalog drift with no exhaustiveness test)",
+      "symptoms": [
+        "Observability lost during the fault it should report",
+        "False 'gateway broken' on Android"
+      ],
+      "fix": "Add the 9 CATALOG entries; add a test asserting set(DegradedCode) == set(CATALOG); make snapshot() tolerate unknown codes with a generic entry.",
+      "external": "None.",
+      "acceptance": "Test passes; /health returns 200 with degraded list containing OWNER_CONTEXT_UNAVAILABLE when set.",
+      "closure": {
+        "status": "FIXED_AND_EVIDENCED",
+        "commits": "c193d47",
+        "evidence": "degraded/registry.py 9-code CATALOG, tolerant snapshot(); test_degraded_catalog_is_exhaustive.py",
+        "date": "2026-09-22",
+        "head": "100d898"
+      }
+    },
+    {
+      "id": "GAP-F-008",
+      "title": "Learning and adaptation stores are write-only with respect to future decisions",
+      "priority": "P2",
+      "status": "PARTIAL_IMPLEMENTATION",
+      "reqs": [
+        "REQ-SYM-08",
+        "REQ-SYM-10",
+        "REQ-COG-06"
+      ],
+      "subsystem": "gateway learning / evolution / reasoning / proactive",
+      "evidence": [
+        "backend/van_gateway/learning/feed.py:233 strategies_for → evolution/radar.py:649 permitted_for: zero callers outside their definitions (grep)",
+        "backend/van_gateway/reasoning/calibration.py RelationshipCalibrationEngine constructed at understanding/api.py:95; .calibrate() never called (grep)",
+        "backend/van_gateway/proactive/autonomy.py DomainTrustService/ProactivePolicyService read only inside understanding/api.py routes (api.py:334,347); orchestrator.py and action/service.py never consult them",
+        "Producers are real: mission/service.py:180,295,310,313 → learning/feed.py writes learning_outcomes, execution_strategies, intent_nodes, decision_fingerprints, symbiotic_growth; scheduled auto_demote/mark_stale mutate the stores (app.py:670-682)"
+      ],
+      "root_cause": "RC-C",
+      "symptoms": [
+        "Symbiotic loop link 'learn/update → improve future behaviour' is broken for the owner-agent runtime (trading has its own capsule_health read-back which works)",
+        "/v1/understanding shows learned data the system does not use"
+      ],
+      "fix": "Consume strategies_for in orchestrator (attach permitted strategies to canonical_context or a runtime route Hermes calls), consult DomainTrust/ProactivePolicy in action/service.authorize for autonomy ceilings, and call calibrate() on owner corrections.",
+      "external": "None.",
+      "acceptance": "A mission whose strategy was promoted changes the next same-intent command's canonical_context (or a Hermes-readable route); test_learning_records_and_bounds extended with a read-back assertion.",
+      "closure": {
+        "status": "FIXED_AND_EVIDENCED",
+        "commits": "b952b40, 528366b",
+        "evidence": "learning/feed.py strategies_for; calibrate() wired in understanding/api.py; ActionAutonomyGate; canonical_context.permitted_strategies; test_learning_read_back.py, test_action_runtime_autonomy.py",
+        "date": "2026-09-22",
+        "head": "100d898"
+      }
+    },
+    {
+      "id": "GAP-F-009",
+      "title": "Scoped internal-control credentials are not honoured by six routers (fail-closed 503 for scoped-only deployments)",
+      "priority": "P2",
+      "status": "CONTRADICTORY_IMPLEMENTATION",
+      "reqs": [
+        "REQ-SEC-02"
+      ],
+      "subsystem": "gateway auth / routers",
+      "evidence": [
+        "backend/van_gateway/app.py:1248-1333 middleware uses control_authority.permits(token, scope) (scoped credentials, P0-SEC-001)",
+        "runtime_api.py:221-224, mission/api.py:137-139, understanding/api.py:116-118, automation/api.py:227-229, automation/health.py:127-129, browser/api.py:162-164 each call verify_internal_control(settings.internal_control_token, token) - legacy token only; constructors receive settings but not control_authority",
+        "Reproduced: VAN_INTERNAL_CONTROL_TOKEN='' + VAN_INTERNAL_CONTROL_SCOPED_TOKENS='runtime:…' → GET /v1/runtime/status 503 internal_control_token_unconfigured; GET /v1/automation/health 503",
+        "backend/tests/test_control_scopes.py always sets the legacy token, so the gap is untested"
+      ],
+      "root_cause": "RC-D (two authority checks for one rule)",
+      "symptoms": [
+        "Operators must keep one shared legacy token, defeating least-privilege separation"
+      ],
+      "fix": "Inject ControlAuthority into the six router classes and replace _require_internal with a scope-aware check identical to app.py require_internal_control; add a scoped-only test.",
+      "external": "None.",
+      "acceptance": "Scoped-only configuration reaches /v1/runtime/status, /v1/missions POST, /v1/automation/*, /v1/browser/* mutation, /v1/understanding/observe with the correct scope and is refused with the wrong one.",
+      "closure": {
+        "status": "FIXED_AND_EVIDENCED",
+        "commits": "c193d47",
+        "evidence": "auth/control_scopes.py require_scoped_internal in 6 routers; test_scoped_internal_control_reaches_routers.py",
+        "date": "2026-09-22",
+        "head": "100d898"
+      }
+    },
+    {
+      "id": "GAP-F-010",
+      "title": "Android does not consume the gateway's structured degraded state",
+      "priority": "P3",
+      "status": "PARTIAL_IMPLEMENTATION",
+      "reqs": [
+        "REQ-RES-04",
+        "REQ-AND-14"
+      ],
+      "subsystem": "Android degraded / gateway degraded",
+      "evidence": [
+        "android VanApplication.kt:537-558 reads only health.ok and health.hermes.degraded; GET /v1/degraded never called from Android (grep)",
+        "android degraded/DegradedMode.kt:47-66 vocabulary (hermes, gateway, overlay, queue, notifications, voice, wake_word, biometric, google) has no mapping from backend DegradedCode (TRADING_LEDGER_UNAVAILABLE, STORAGE_PROBLEM, AUTOMATION_*, BROWSER_*, ...)"
+      ],
+      "root_cause": "RC-D",
+      "symptoms": [
+        "Backend faults collapse into 'gateway/hermes broken' with canned text"
+      ],
+      "fix": "Map /health.degraded[] (still_works/will_not_do/restore_action) into DegradedSubsystem entries; render in DegradedPanel.",
+      "external": "None.",
+      "acceptance": "Setting TRADING_LEDGER_UNAVAILABLE on the gateway shows a trading-specific degraded row on the device (JVM test on the mapper).",
+      "closure": {
+        "status": "FIXED_AND_EVIDENCED",
+        "commits": "5498a6f",
+        "evidence": "degraded/GatewayDegradedMapping.kt; DegradedModeStore.applyGatewayHealth bound via DegradedBridge in VanApplication.onCreate; Settings reconciled list; GatewayDegradedMappingTest (12)",
+        "date": "2026-09-22",
+        "head": "100d898"
+      }
+    },
+    {
+      "id": "GAP-F-011",
+      "title": "The conversational surface never receives the completed answer; completion is visible only in Activity/Missions",
+      "priority": "P3",
+      "status": "PARTIAL_IMPLEMENTATION",
+      "reqs": [
+        "REQ-UX-03",
+        "REQ-HER-05"
+      ],
+      "subsystem": "Android chat / gateway command status",
+      "evidence": [
+        "android control/VanCommandController.kt:319-378 recordResponse stores the synchronous dispatch response (status 'accepted', message) as the VAN message; no polling of GET /v1/commands/{id} anywhere in android/app/src/main (grep 'commands/' → none)",
+        "backend/van_gateway/app.py:1655-1713 GET /v1/commands/{id} returns status/sentence/final_outcome, not the Hermes summary text",
+        "backend/van_gateway/mission/service.py:695-720 owner-visible mission events (with summary) reach the device via events bus → session WS/SSE (session/api.py:255-330) → events/VanEventStreamStore → Activity module; final_outcome appears in MissionsModule.kt:146"
+      ],
+      "root_cause": "RC-F (UI coherence)",
+      "symptoms": [
+        "Owner asks in Chat, must open Activity/Missions to read the result; spoken response is 'working on it' semantics only"
+      ],
+      "fix": "Subscribe the chat conversation to mission events for its command_id (or poll /v1/commands/{id}) and append the final_outcome/summary as a VAN message; speak it when finished.",
+      "external": "None.",
+      "acceptance": "After a mission_result COMPLETED callback, the chat thread shows the summary without navigating away.",
+      "closure": {
+        "status": "FIXED_AND_EVIDENCED",
+        "commits": "5498a6f",
+        "evidence": "command/work/ConversationReducer.kt; VanCommandController.pollUnfinishedCommands (4 s); VanGatewayClient.commandStatus; context_gaps as 'VAN did not know'; control/VanSpokenAnswer.kt → VoiceEdge.speak; ConversationReducerTest (8)",
+        "date": "2026-09-22",
+        "head": "100d898"
+      }
+    },
+    {
+      "id": "GAP-F-012",
+      "title": "Embodiment gestures and three durable states are declared and rendered but never produced by runtime",
+      "priority": "P3",
+      "status": "UI_ONLY",
+      "reqs": [
+        "REQ-EMB-03",
+        "REQ-EMB-04"
+      ],
+      "subsystem": "Android visual",
+      "evidence": [
+        "android visual/RiveContract.kt:7-53 VanFiniteAction (14: HELLO_WAVE, ACK_NOD, POINT_*, CELEBRATE, CAUTION, CONFIRM, SHRUG, PRESENT_CARD, OPEN_PANEL, CLOSE_PANEL) rendered by visual/VanScene.kt:156-361; grep -rln VanFiniteAction android → only tests and visual-preview; VanLiveVisualState.action() has no production caller",
+        "VanDurableState.URGENT: VanLiveVisualState.urgent() never called; WAITING and SLEEPING never assigned (only referenced in BrowserVisualState.NEVER_PROPOSED)"
+      ],
+      "root_cause": "RC-F",
+      "symptoms": [
+        "Canonical intent (audit brief §2) lists these actions/states as required behaviours; in the shipped app they cannot play"
+      ],
+      "fix": "Produce actions from real transitions: HELLO_WAVE on first pairing/session open, ACK_NOD on command accepted, CONFIRM on VERIFIED_SUCCESS, CAUTION on WAITING_FOR_OWNER, SHRUG on UNVERIFIABLE, PRESENT_CARD on attention URGENT_INTERRUPT; set URGENT from attention disposition URGENT_INTERRUPT, WAITING from mission WAITING_EXTERNAL, SLEEPING from quiet hours.",
+      "external": "None.",
+      "acceptance": "JVM test on VanPresenceReducer maps each listed runtime signal to the action/state; reachability test lists no unproduced VanFiniteAction.",
+      "closure": {
+        "status": "FIXED_AND_EVIDENCED",
+        "commits": "17f4fba, 3d845bc",
+        "evidence": "visual/VanEmbodimentReducer.kt + VanEmbodimentProducers.kt + VanMotionMap.kt; trading/bridge.py trading.trade.closed producer; visual-preview VanEmbodimentCoverageTest",
+        "date": "2026-09-22",
+        "head": "100d898"
+      }
+    },
+    {
+      "id": "GAP-F-013",
+      "title": "Speech output: sherpa-onnx TTS preference has no synthesizer; lip-sync is a frame-modulo heuristic; backend SpeechCueClock exists only in a test",
+      "priority": "P3",
+      "status": "TEST_ONLY",
+      "reqs": [
+        "REQ-VOI-03",
+        "REQ-VOI-04"
+      ],
+      "subsystem": "Android voice / gateway voice",
+      "evidence": [
+        "android voice/LocalTtsRouter.kt:63-141 prefers SHERPA_ONNX but voice/VoiceEdge.kt:152-170 always calls the same Android TextToSpeech (no OfflineTts class exists)",
+        "android voice/VoiceInterfaces.kt:455-461 open=(frame%10)/10, viseme=frame%15 from TTS onRangeStart",
+        "backend/tests/test_speech_sync.py:1-97 defines SpeechCueClock; grep SpeechCueClock backend/van_gateway → none"
+      ],
+      "root_cause": "RC-G (design artefact not wired)",
+      "symptoms": [
+        "Aura/mouth animation during speech is not phoneme-driven",
+        "Misleading engine-selection code"
+      ],
+      "fix": "Either implement a sherpa-onnx OfflineTts path behind the existing manifest gate and derive visemes from its timestamps, or remove the SHERPA_ONNX preference and delete/relocate SpeechCueClock into production (speech_stream payload) with a device consumer.",
+      "external": "Checksum-pinned local voice bundle + voice/tts/runtime.json deployed and measured on S24 (QUAL-VOI-01/02).",
+      "acceptance": "Repository path implemented. Live promotion requires device evidence for offline synthesis, latency, barge-in and audio/viseme output.",
+      "closure": {
+        "status": "FIXED_AND_EVIDENCED (repository local-TTS path) / DEVICE_ARTEFACT_QUALIFICATION_REQUIRED",
+        "commits": "17f4fba, PR #59",
+        "evidence": "SpeechCueClock remains production-wired; PR #59 adds SherpaLocalTtsRuntime using sherpa-onnx OfflineTts, explicit LocalTtsRouter engine selection, AudioTrack PCM playback/RMS frames, barge-in, and VoiceEdge runtime self-test gating. Model/runtime assets and S24 latency/quality remain QUAL-VOI-02.",
+        "date": "2026-09-22",
+        "head": "post-fable-product-closure"
+      }
+    },
+    {
+      "id": "GAP-F-014",
+      "title": "Rive asset absent; silent Canvas fallback with no owner-visible notice",
+      "priority": "P4",
+      "status": "EXTERNALLY_BLOCKED_REPOSITORY_COMPLETE",
+      "reqs": [
+        "REQ-EMB-05"
+      ],
+      "subsystem": "Android visual / visual-authority",
+      "evidence": [
+        "find . -iname '*.riv' → none; android/app/build.gradle.kts:251 rive-android:9.6.5 present",
+        "android visual/VanVisualRuntime.kt:54-69 decide() → OWNER_ART/CANVAS on ASSET_MISSING; VanVisualRuntime.describe() (lines 71-80, doc-comment: reason is 'surfaced in diagnostics') has zero callers in android/app/src/main - the diagnostic is dead code"
+      ],
+      "root_cause": "External artefact (docs/EXTERNAL_GATES.md 'Artist .riv')",
+      "symptoms": [
+        "Owner cannot tell whether the authored character is installed"
+      ],
+      "fix": "Surface VanVisualRuntime.describe() in Settings/Systems as 'Character: Canvas fallback (Rive asset not installed)'.",
+      "external": "Authored van.riv from the Rive editor (QUAL-EMB-01).",
+      "acceptance": "Systems module shows the active renderer and reason.",
+      "closure": {
+        "status": "FIXED_AND_EVIDENCED",
+        "commits": "17f4fba, 5498a6f",
+        "evidence": "visual/VanRendererStatus.kt via DegradedBridge.rendererStatus; Settings 'Character' row from DegradedBridge.lastRendererStatus",
+        "date": "2026-09-22",
+        "head": "100d898"
+      }
+    },
+    {
+      "id": "GAP-F-015",
+      "title": "Contradiction: AGENTS.md says Hermes may submit memory candidates; the MCP shim deliberately exposes no such tool",
+      "priority": "P3",
+      "status": "CONTRADICTORY_IMPLEMENTATION",
+      "reqs": [
+        "REQ-MEM-02",
+        "REQ-COH-02"
+      ],
+      "subsystem": "hermes profile docs / MCP shim",
+      "evidence": [
+        "hermes/profile/van/AGENTS.md:12 'It may query canonical context, submit inferred/model-derived memory candidates'",
+        "hermes/mcp/owner_runtime_stdio.mjs:8 'Canonical owner-context admission is intentionally NOT exposed' and no tool for /v1/runtime/context/facts; backend/van_gateway/runtime_api.py:295-312 route exists with INFERRED/MODEL_DERIVED gate"
+      ],
+      "root_cause": "RC-A",
+      "symptoms": [
+        "Dependent symptom of GAP-F-001"
+      ],
+      "fix": "Decide one: add the INFERRED-only candidate tool to the shim, or amend AGENTS.md:12 and the runtime route's docstring.",
+      "external": "None.",
+      "acceptance": "AGENTS.md and TOOLS list agree; test_owner_runtime_mcp_contract asserts the decided state.",
+      "closure": {
+        "status": "FIXED_AND_EVIDENCED",
+        "commits": "b78cbf4",
+        "evidence": "Hermes docs and profile reconciled to expanded shim; PR #59 pins an exact 51-tool shim/registration/REQUIRED_TOOLS set.",
+        "date": "2026-09-22",
+        "head": "100d898"
+      }
+    },
+    {
+      "id": "GAP-F-016",
+      "title": "Interactive browser stream grant returns HTTP 200 with an empty signal_url when the signing key is set but the signal URL is not",
+      "priority": "P3",
+      "status": "OPEN_GAP",
+      "reqs": [
+        "REQ-RES-05",
+        "REQ-BRW-04"
+      ],
+      "subsystem": "gateway browser interactive api",
+      "evidence": [
+        "backend/van_gateway/app.py:521-529,831-870 interactive routers mount when browser_stream_signing_key_file is set",
+        "backend/van_gateway/browser/interactive_api.py:283 mint_stream_grant returns settings.browser_stream_signal_url unguarded"
+      ],
+      "root_cause": "RC-D",
+      "symptoms": [
+        "Device would negotiate against an empty endpoint and report a transport error rather than a configuration error"
+      ],
+      "fix": "Refuse (503 BROWSER_STREAM_UNCONFIGURED) when signal_url is empty; mount gate on both settings.",
+      "external": "Browser Stream Host (QUAL-BRW-03).",
+      "acceptance": "Test: signing key set, signal_url empty → 503.",
+      "closure": {
+        "status": "FIXED_AND_EVIDENCED",
+        "commits": "1b6e44e",
+        "evidence": "interactive_api.py mint_stream_grant → 503 BROWSER_STREAM_UNCONFIGURED without a stream host",
+        "date": "2026-09-22",
+        "head": "100d898"
+      }
+    },
+    {
+      "id": "GAP-F-017",
+      "title": "Backend dependency set is floating (>=) while the trading VM is exact-pinned",
+      "priority": "P3",
+      "status": "OPEN_GAP",
+      "reqs": [
+        "REQ-DET-03"
+      ],
+      "subsystem": "backend/requirements.txt / deploy",
+      "evidence": [
+        "backend/requirements.txt: 10 of 11 lines use >= (fastapi, uvicorn, pydantic, httpx, cryptography, pytest, pytest-asyncio, aiosqlite, python-multipart, pydantic-settings); only playwright==1.63.0 exact",
+        "deploy/van-trading-core/requirements-vm.txt exact pins (fastapi==0.141.1, uvicorn==0.53.0, httpx==0.28.1, psycopg==3.2.9, temporalio==1.33.0)",
+        "tools/runtime/install_van_gateway_service.sh installs from backend/requirements.txt"
+      ],
+      "root_cause": "Determinism",
+      "symptoms": [
+        "Two gateway installs from the same SHA can differ; CI and the certified host can diverge"
+      ],
+      "fix": "Add a lock file (pip-compile/uv lock) consumed by CI and install_van_gateway_service.sh; record the lock hash in release metadata.",
+      "external": "None.",
+      "acceptance": "Contract test asserts every backend requirement is exact-pinned or locked.",
+      "closure": {
+        "status": "FIXED_AND_EVIDENCED",
+        "commits": "1b6e44e",
+        "evidence": "backend/requirements.lock; installers and CI install from the lock",
+        "date": "2026-09-22",
+        "head": "100d898"
+      }
+    },
+    {
+      "id": "GAP-F-018",
+      "title": "require_device_binding defaults False with no release-time gate forcing it on",
+      "priority": "P3",
+      "status": "OPEN_GAP",
+      "reqs": [
+        "REQ-SEC-03"
+      ],
+      "subsystem": "gateway config / qualification",
+      "evidence": [
+        "backend/van_gateway/config.py:198-204 require_device_binding=False documented as 'mid-migration'",
+        "deploy/van-trading-core/qualify.sh and tools/ci/production_acceptance.py do not check it"
+      ],
+      "root_cause": "Determinism/security hardening",
+      "symptoms": [
+        "A production gateway can accept token-only mutations from an unbound device"
+      ],
+      "fix": "Add a qualification check (qualify.sh / production_acceptance row) that fails unless VAN_REQUIRE_DEVICE_BINDING=true on release hosts.",
+      "external": "None.",
+      "acceptance": "qualify.sh RED when the flag is false on a release host.",
+      "closure": {
+        "status": "FIXED_AND_EVIDENCED",
+        "commits": "1b6e44e",
+        "evidence": "config.py van_env + assert_production_safe(); tools/runtime/qualify_gateway_host.sh",
+        "date": "2026-09-22",
+        "head": "100d898"
+      }
+    },
+    {
+      "id": "GAP-F-019",
+      "title": "Every derived context requirement is non-blocking; missing owner facts never block a consequential command",
+      "priority": "P3",
+      "status": "PARTIAL_IMPLEMENTATION",
+      "reqs": [
+        "REQ-COG-02"
+      ],
+      "subsystem": "gateway command/context_requirements",
+      "evidence": [
+        "backend/van_gateway/command/context_requirements.py:74,85,96,105 blocking=False for timezone, project predicates, action-family predicates and named people"
+      ],
+      "root_cause": "RC-C",
+      "symptoms": [
+        "Dependent on GAP-F-001: with an empty kernel, blocking=True would deny everything; the design is therefore coupled to the missing producer"
+      ],
+      "fix": "After GAP-F-001, make action-family requirements for trading./message. blocking=True with an owner-visible MISSING explanation.",
+      "external": "None.",
+      "acceptance": "A trading-family command with MISSING mandate facts returns needs_you with the missing requirement named.",
+      "closure": {
+        "status": "SUPERSEDED_BY_BETTER_IMPLEMENTATION",
+        "commits": "528366b",
+        "evidence": "Commands no longer block on missing owner context; context_gaps computed, returned in CommandResult, shown to the owner and passed to Hermes in canonical_context. Blocking a safety action on an unknown fact was the wrong contract.",
+        "date": "2026-09-22",
+        "head": "100d898"
+      }
+    },
+    {
+      "id": "GAP-F-020",
+      "title": "Dead or orphaned production symbols",
+      "priority": "P4",
+      "status": "IMPLEMENTED_NOT_REACHABLE",
+      "reqs": [
+        "REQ-COH-05"
+      ],
+      "subsystem": "gateway",
+      "evidence": [
+        "tools/audit/entrypoint_reach.py: van_gateway.browser.input_protocol never imported from app/orchestrator/runtime_api",
+        "tools/audit/reachability.py: observability/instruments.py set_browser_sessions_active, record_browser_connect, record_browser_input_dispatch, record_agent_grant and session/models.py store_dumps have no reference",
+        "backend/van_gateway/google/service.py:314-318 scrub_for_prompt called only from tests",
+        "backend/van_gateway/runtime_api.py:83 ActionBeginBody.owner_approved never read (by design; misleading)"
+      ],
+      "root_cause": "Coherence hygiene",
+      "symptoms": [
+        "False confidence that scrubbing/telemetry is active"
+      ],
+      "fix": "Wire or delete each; deprecate the dead request field.",
+      "external": "None.",
+      "acceptance": "reachability.py reports 0 NO_REFERENCE; scrub_for_prompt has a production call site or is removed.",
+      "closure": {
+        "status": "FIXED_AND_EVIDENCED",
+        "commits": "c193d47, 1b6e44e, b78cbf4",
+        "evidence": "_scrubbed() on every Google read; instruments wired or deleted; owner_approved removed; input_protocol retained (stream host caller)",
+        "date": "2026-09-22",
+        "head": "100d898"
+      }
+    },
+    {
+      "id": "GAP-F-021",
+      "title": "Loopback defaults for Hermes and public base URLs have no fail-closed check",
+      "priority": "P4",
+      "status": "OPEN_GAP",
+      "reqs": [
+        "REQ-DET-04"
+      ],
+      "subsystem": "gateway config",
+      "evidence": [
+        "backend/van_gateway/config.py:14 hermes_base_url http://127.0.0.1:8642, :41 van_public_base_url http://127.0.0.1:8787; unlike ingress_token, no startup refusal when defaults are used off-host"
+      ],
+      "root_cause": "Determinism",
+      "symptoms": [
+        "A misconfigured host silently talks to localhost"
+      ],
+      "fix": "Require explicit values in the systemd env file (installer) and log/refuse defaults when VAN_ENV=production.",
+      "external": "None.",
+      "acceptance": "Installer fails without explicit VAN_HERMES_BASE_URL.",
+      "closure": {
+        "status": "FIXED_AND_EVIDENCED",
+        "commits": "1b6e44e",
+        "evidence": "production config refuses loopback/empty secrets",
+        "date": "2026-09-22",
+        "head": "100d898"
+      }
+    },
+    {
+      "id": "GAP-F-022",
+      "title": "Whole-tree pytest collection collides on a duplicate test basename",
+      "priority": "P4",
+      "status": "OPEN_GAP",
+      "reqs": [
+        "REQ-TST-01"
+      ],
+      "subsystem": "tests",
+      "evidence": [
+        "tests/contracts/test_owner_device_provisioning.py vs backend/tests/test_owner_device_provisioning.py → 'import file mismatch' when collected together (reproduced); CI avoids it by running per directory"
+      ],
+      "root_cause": "Test hygiene",
+      "symptoms": [
+        "A whole-tree run reports 0 tests; auditors can misread this as a broken suite"
+      ],
+      "fix": "Rename one file or add __init__.py/importmode=importlib in pytest.ini.",
+      "external": "None.",
+      "acceptance": "`pytest` from the repo root collects all suites.",
+      "closure": {
+        "status": "FIXED_AND_EVIDENCED",
+        "commits": "1b6e44e",
+        "evidence": "tests/contracts/__init__.py; root collection no longer collides",
+        "date": "2026-09-22",
+        "head": "100d898"
+      }
+    },
+    {
+      "id": "GAP-F-023",
+      "title": "Mutation harness is not in CI and there are no Android instrumentation tests",
+      "priority": "P4",
+      "status": "PARTIAL_IMPLEMENTATION",
+      "reqs": [
+        "REQ-TST-02",
+        "REQ-TST-03"
+      ],
+      "subsystem": "CI / android",
+      "evidence": [
+        "tools/audit/mutation.py not referenced by .github/workflows/van-ci.yml",
+        "android/app/src/androidTest is empty; only 28 JVM test files (147 @Test)"
+      ],
+      "root_cause": "Test coverage",
+      "symptoms": [
+        "Overlay, permissions, wake pipeline, biometric prompt behaviour are certified only by device checklist"
+      ],
+      "fix": "Schedule mutation.py as a non-blocking CI job; add a minimal androidTest set (overlay service start, share intake, notification listener) run on CI emulator.",
+      "external": "Emulator/device (QUAL-AND-01).",
+      "acceptance": "CI shows both jobs.",
+      "closure": {
+        "status": "FIXED_AND_EVIDENCED (mutation, instrumentation job) / EXTERNALLY_GATED_REPOSITORY_COMPLETE (device sign-off)",
+        "commits": "1b6e44e, a60b009",
+        "evidence": "van-ci.yml mutation job (non-blocking, report uploaded); android-instrumentation job on an API 31 emulator running src/androidTest CommandCentreLaunchTest + FloatingOverlayServiceTest (advisory; report uploaded). Real-device certification remains QUAL-AND-01.",
+        "date": "2026-09-22",
+        "head": "100d898"
+      }
+    },
+    {
+      "id": "GAP-F-024",
+      "title": "Google connect/revoke and Google actions have no owner-device surface",
+      "priority": "P3",
+      "status": "BACKEND_ONLY",
+      "reqs": [
+        "REQ-GOO-05",
+        "REQ-AND-12"
+      ],
+      "subsystem": "Android / gateway google",
+      "evidence": [
+        "android: only GET /v1/google/mesh (VanGatewayClient.kt:310) rendered as read-only text in AdminModules.kt:37-92; no connect/revoke call",
+        "backend/van_gateway/app.py:2100-2113 /v1/google/connect and /revoke are internal-control routes; OAuth is completed by tools/google/authorize_workspace_oauth.py on the host",
+        "Google actions are reachable only through Hermes shim tools; the owner cannot directly ask the phone to draft/send (design: Hermes-mediated)"
+      ],
+      "root_cause": "RC-B",
+      "symptoms": [
+        "Owner cannot revoke Google from the phone when a token is compromised; Flow 2 depends on Hermes calling google_calendar_agenda"
+      ],
+      "fix": "Add a device-authenticated POST /v1/google/revoke (owner-device scope, device-proofed) and a Connections module action; keep connect on the host.",
+      "external": "None.",
+      "acceptance": "Revoke from the phone sets google_connections status revoked and /v1/google/status reports disconnected.",
+      "closure": {
+        "status": "FIXED_AND_EVIDENCED",
+        "commits": "c193d47, 5498a6f",
+        "evidence": "POST /v1/google/owner-revoke (device-proofed); test_google_owner_revoke_and_scrub.py; Connected screen Revoke Google with confirm",
+        "date": "2026-09-22",
+        "head": "100d898"
+      }
+    },
+    {
+      "id": "GAP-F-025",
+      "title": "Two definitions of Google readiness",
+      "priority": "P3",
+      "status": "CONTRADICTORY_IMPLEMENTATION",
+      "reqs": [
+        "REQ-GOO-04",
+        "REQ-COH-02"
+      ],
+      "subsystem": "gateway google mesh / capability readiness",
+      "evidence": [
+        "backend/van_gateway/google/mesh.py:290 USABLE_STATES = {READY, CONFIGURED}",
+        "backend/van_gateway/capability/readiness.py:44-67 is_ready requires READY only (rule 'CONFIGURED is not READY', docs/EXTERNAL_GATES.md)"
+      ],
+      "root_cause": "RC-D",
+      "symptoms": [
+        "The router may plan a job on a CONFIGURED capability that the readiness surface reports not ready"
+      ],
+      "fix": "Make the router use GoogleMeshReadiness (or document CONFIGURED as plan-only, never execute).",
+      "external": "None.",
+      "acceptance": "One predicate; test asserts CONFIGURED capabilities cannot be executed.",
+      "closure": {
+        "status": "FIXED_AND_EVIDENCED",
+        "commits": "1b6e44e",
+        "evidence": "google/mesh.py EXECUTION_READY_STATES single predicate",
+        "date": "2026-09-22",
+        "head": "100d898"
+      }
+    },
+    {
+      "id": "GAP-F-026",
+      "title": "Temporal execution medium was routed but had no executor",
+      "priority": "P4",
+      "status": "STUB_OR_PLACEHOLDER",
+      "reqs": [
+        "REQ-AUT-04"
+      ],
+      "subsystem": "gateway automation router / van-trading-core durable runtime",
+      "evidence": [
+        "backend/van_gateway/automation/router.py selects TEMPORAL for critical_durable and reports configured/unconfigured state",
+        "backend/van_gateway/automation/temporal_bridge.py provides scoped start/status/signal bridge routes that fail closed when unconfigured",
+        "deploy/van-trading-core/temporal/workflows.py implements VanDurableWorkflow with durable wait/checkpoint/signal/terminal state",
+        "deploy/van-trading-core/temporal/runtime.py runs the Temporal worker/private bridge and records token-free checkpoint evidence",
+        "deploy/van-trading-core/systemd/vati-temporal.service plus bootstrap.sh/qualify.sh stage and qualify the runtime; temporalio==1.33.0 is pinned",
+        "hermes/mcp/owner_runtime_stdio.mjs exposes temporal_start/status/signal in the exact 51-tool allowlist"
+      ],
+      "root_cause": "Phase-11 stack lock had been treated as permission to leave the selected execution medium unimplemented.",
+      "symptoms": [],
+      "fix": "Implemented in repository. Temporal retains durable-coordination-only authority and cannot execute live orders.",
+      "external": "Real Temporal server/address plus live restart/recovery canary (QUAL-AUT-02).",
+      "acceptance": "Repository executor exists and fails closed without a host; live promotion requires start -> restart/recovery -> checkpoint -> terminal-result evidence.",
+      "closure": {
+        "status": "FIXED_AND_EVIDENCED (repository durable runtime) / PENDING_LIVE",
+        "commits": "PR #59",
+        "evidence": "Gateway Temporal bridge/API + 51-tool Hermes controls + VanDurableWorkflow + self-hosted loopback Temporal 1.32.0/PostgreSQL stack + worker/server systemd units + bootstrap/qualification. Live restart/recovery canary remains QUAL-AUT-02.",
+        "date": "2026-09-22",
+        "head": "post-fable-product-closure"
+      }
+    },
+    {
+      "id": "GAP-F-027",
+      "title": "Overlay state persisted in plain SharedPreferences",
+      "priority": "P4",
+      "status": "OPEN_GAP",
+      "reqs": [
+        "REQ-AND-05"
+      ],
+      "subsystem": "Android overlay",
+      "evidence": [
+        "android overlay/OverlayStateStore.kt uses SharedPreferences MODE_PRIVATE (position, presentation, dock, running flag); every other store uses EncryptedSharedPreferences/Keystore"
+      ],
+      "root_cause": "Consistency",
+      "symptoms": [
+        "None security-relevant (no secrets)"
+      ],
+      "fix": "Migrate to EncryptedSharedPreferences for uniform policy.",
+      "external": "None.",
+      "acceptance": "No plain SharedPreferences writers remain (JVM contract test).",
+      "closure": {
+        "status": "FIXED_AND_EVIDENCED",
+        "commits": "5498a6f, b46ca65",
+        "evidence": "OverlayStateStore and browser session store on EncryptedSharedPreferences; tests/contracts/test_android_storage_policy.py explains the three remaining non-sensitive plain writers",
+        "date": "2026-09-22",
+        "head": "100d898"
+      }
+    },
+    {
+      "id": "GAP-F-028",
+      "title": "No proactive initiation path: VAN never opens an attention item or mission without an owner command or an external event",
+      "priority": "P2",
+      "status": "PARTIAL_IMPLEMENTATION",
+      "reqs": [
+        "REQ-SYM-06",
+        "REQ-SYM-11"
+      ],
+      "subsystem": "gateway proactive / scheduler",
+      "evidence": [
+        "backend/van_gateway/proactive/autonomy.py:295 ProactivePolicyService.may_create() is the gate for VAN starting a mission unprompted; it has no caller outside its module and tests. No OpsScheduler job (app.py:729-754: reminders.fire_due, missions.expire_overdue, ops.retention, ops.pki_scan, ops.backup, ops.backup_drill, learning.auto_demote, understanding.mark_stale_intents) or route initiates proactive work; understanding/api.py:98 only reads .policies()",
+        "Reactive producers exist: reminder sweep → attention; notification ingest → attention; browser escalation → decisions"
+      ],
+      "root_cause": "RC-C",
+      "symptoms": [
+        "'Anticipate useful follow-ups' (audit brief §8) has no engine; VAN is reactive"
+      ],
+      "fix": "Add a bounded proactive job: stale intents / unresolved attention / expired missions → FOLLOW_UP attention items under ProactivePolicy ceilings, never executing actions.",
+      "external": "None.",
+      "acceptance": "A mission left WAITING_FOR_OWNER > N hours yields a FOLLOW_UP attention item produced by the proactive job.",
+      "closure": {
+        "status": "FIXED_AND_EVIDENCED",
+        "commits": "b952b40",
+        "evidence": "proactive/followups.py ProactiveFollowUpJob + scheduler job proactive.follow_ups; owner-disableable; test_proactive_followups.py",
+        "date": "2026-09-22",
+        "head": "100d898"
+      }
+    }
+  ],
+  "closure_head": "100d898",
+  "closure_date": "2026-09-22",
+  "post_closure_product_reconciliation": {
     "date": "2026-09-22",
-    "head": "100d898"
-   }
+    "pr": 59,
+    "note": "Additional owner-facing omissions discovered after the 28-gap Fable closure are now first-class and enforced by tools/audit/fable_anti_gap_check.py.",
+    "items": [
+      {
+        "id": "PROD-F-001",
+        "title": "Attention snooze had no backend route",
+        "status": "FIXED_AND_EVIDENCED",
+        "external": "device UX acceptance"
+      },
+      {
+        "id": "PROD-F-002",
+        "title": "Overlay keyboard/full-screen obstruction policy had no producer",
+        "status": "FIXED_AND_EVIDENCED",
+        "external": "Accessibility permission + S24 acceptance"
+      },
+      {
+        "id": "PROD-F-003",
+        "title": "Trading History lacked server-owned equity/R curves",
+        "status": "FIXED_AND_EVIDENCED",
+        "external": "live trading history data"
+      },
+      {
+        "id": "PROD-F-004",
+        "title": "Local sherpa TTS had no synthesis backend",
+        "status": "FIXED_AND_EVIDENCED_REPOSITORY",
+        "external": "voice bundle + S24 qualification"
+      },
+      {
+        "id": "PROD-F-005",
+        "title": "Temporal durable medium had no executor",
+        "status": "FIXED_AND_EVIDENCED_REPOSITORY",
+        "external": "Temporal server + recovery canary"
+      }
+    ]
   },
-  {
-   "id": "GAP-F-002",
-   "title": "Reminders have no production producer",
-   "priority": "P1",
-   "status": "BACKEND_ONLY",
-   "reqs": [
-    "REQ-ATT-04",
-    "REQ-FLOW-06"
-   ],
-   "subsystem": "gateway reminders / Android / typed resolver",
-   "evidence": [
-    "backend/van_gateway/app.py:1731-1765 POST /v1/reminders and /v1/reminders/parse exist (owner-device routes)",
-    "android/app/src/main/java/com/dial/van/gateway/VanGatewayClient.kt: no '/v1/reminders' path (grep → none); Command Centre has no reminder module (command/CommandModule.kt:14-38)",
-    "hermes/mcp/owner_runtime_stdio.mjs: no reminder tool; backend/van_gateway/command/resolver.py: no 'remind' pattern (only context_requirements.py:47 names people for 'remind Thandi')",
-    "Consumers are real: app.py:592-616 _sweep_reminders fires due reminders into attention + events; briefing/service.py:57-64 lists TODAY"
-   ],
-   "root_cause": "RC-B",
-   "symptoms": [
-    "Flow 6 'Van, remind/follow up on this later' cannot complete",
-    "README claim 'deterministic attention/reminders' is consumer-only"
-   ],
-   "fix": "Add resolver patterns ('remind me (to|about) ... (at|in|on) ...', 'follow up on ... later') resolving to a typed owner-device action 'reminder.create' executed by the gateway via parse_due_expression + ReminderService.create; add a Reminders card to the Overview/Tasks module calling POST /v1/reminders.",
-   "external": "None.",
-   "acceptance": "'remind me to call Thandi at 3pm' → reminders row with due time; sweep fires it into /v1/attention and the device event stream; contract test asserts a production producer exists for reminders.create.",
-   "closure": {
-    "status": "FIXED_AND_EVIDENCED",
-    "commits": "528366b, b78cbf4, 5498a6f",
-    "evidence": "reminder.create executor + resolver; migration 29 reminders.source; reminder-readback verifier; shim reminder_create → POST /v1/runtime/reminders; Home 'Upcoming' from GET /v1/reminders",
+  "post_fable_product_closure": {
+    "pr": 59,
     "date": "2026-09-22",
-    "head": "100d898"
-   }
-  },
-  {
-   "id": "GAP-F-003",
-   "title": "Hermes has no in-repository path to observe trading state (positions, portfolio, risk, trades)",
-   "priority": "P1",
-   "status": "IMPLEMENTED_NOT_REACHABLE",
-   "reqs": [
-    "REQ-TRD-01",
-    "REQ-TRD-05",
-    "REQ-FLOW-07",
-    "REQ-FLOW-08",
-    "REQ-FLOW-09"
-   ],
-   "subsystem": "Hermes MCP shim / trading commander / gateway trading routes",
-   "evidence": [
-    "trading/commander/app.py:34 COMMANDS = status, ledger_status, services, restart_service, tail_log, run_backtest, vekl_resolve, halt, doctor, accounts (+gateway-only account/promotion). cmd_status (app.py:245-251) returns host/uptime/ledger head+count/units; cmd_ledger_status returns chain_ok/counts - no positions, no trades",
-    "backend/van_gateway/app.py:2443-2487 /v1/trading/* GET routes have control_scope None (app.py:1056-1125) → owner-device routes; hermes/mcp/owner_runtime_stdio.mjs has no trading tool and only carries the internal token",
-    "hermes/skills/trading-intelligence/SKILL.md:16-27 instructs Hermes to analyse open positions and submit TradeIntent (A3) - no tool exists for either",
-    "backend/van_gateway/trading/cognition.py:12 live_advisory DISABLED; no news/event feed other than the economic calendar recorder (trading/vati/calendar/recorder.py) which only drives tier1 blackout"
-   ],
-   "root_cause": "RC-A",
-   "symptoms": [
-    "Flows 7-9 (why is my trade moving / does this news change my thesis / propose what to do) have no cognition-side data path",
-    "hermes/skills/trading-intelligence promises analysis it cannot ground"
-   ],
-   "fix": "Add read-only shim tools (trading_portfolio, trading_positions, trading_risk, trading_market_state, trading_trade_detail) bound to new internal-control routes under /v1/runtime/trading/* (ControlScope.RUNTIME) that reuse backend/van_gateway/trading/service.py read models; or add a 'positions' command to the commander tool list. Keep all mutation out of scope (VATI authority unchanged).",
-   "external": "Live VATI ledger (Postgres) on van-trading-core; broker live path (QUAL-TRD-01/02).",
-   "acceptance": "Hermes 'van' can call trading_positions and receive the same read model Android shows; no new mutation tool is added; test_owner_runtime_mcp_contract updated.",
-   "closure": {
-    "status": "FIXED_AND_EVIDENCED",
-    "commits": "b78cbf4, 3d845bc",
-    "evidence": "/v1/runtime/trading/* (6 tools); commander positions/assessment read-only; test_runtime_hermes_surface.py; test_owner_runtime_mcp_contract.py (48 tools)",
-    "date": "2026-09-22",
-    "head": "100d898"
-   }
-  },
-  {
-   "id": "GAP-F-004",
-   "title": "VATI shadow cognition has no model invoker in production; the entire cognition package abstains MODEL_UNAVAILABLE",
-   "priority": "P2",
-   "status": "IMPLEMENTED_NOT_REACHABLE",
-   "reqs": [
-    "REQ-TRD-06",
-    "REQ-TRD-08"
-   ],
-   "subsystem": "trading/vati/cognition",
-   "evidence": [
-    "trading/vati/app/account_service.py:175-178 ShadowCognitionRuntime(ledger=self._ledger) constructed without an invoker; comment: 'A provider invoker is an external runtime dependency'",
-    "trading/vati/cognition/runtime.py:132-140 with invoker None → narrative 'no model invoker is configured on this runtime'",
-    "grep invoker across trading/ (non-test) → no config, CLI, env or service constructs one",
-    "backend/van_gateway/trading/cognition.py:11-22 read model advertises model_hierarchy [fable-5.1, gpt-6-astra, claude-opus-5, gpt-5.6-sol] while shadow/handoffs/decision_exam are structurally empty in production"
-   ],
-   "root_cause": "RC-E (external dependency declared but no injection point)",
-   "symptoms": [
-    "Android Cognition screens render an empty shadow book",
-    "Trading learning loop's cognition attribution (trade_lifecycle.py:844 resolve_trade) never has entries"
-   ],
-   "fix": "Add a provider-invoker construction path (config-driven, credentials from vault, provider registry in cognition/providers.py) in account_service or a dedicated vati-cognition worker; until then, mark cognition_mode in the read model as MODEL_INVOKER_UNCONFIGURED rather than OFFLINE_EVOLUTION+SHADOW_LIVE.",
-   "external": "Model provider credentials on van-trading-core (QUAL-TRD-05).",
-   "acceptance": "With a configured invoker, wake() records a CognitiveAssessment; without one the read model states the abstention explicitly; RiskAuthority decision unchanged in both cases (existing contract tests).",
-   "closure": {
-    "status": "FIXED_AND_EVIDENCED",
-    "commits": "3d845bc",
-    "evidence": "cognition/invokers.py Null/HttpJson/HermesRun from session config; read model names the real invoker or MODEL_INVOKER_UNCONFIGURED; test_active_trade_e2e.py. Live invoker credentials remain QUAL-TRD-05.",
-    "date": "2026-09-22",
-    "head": "100d898"
-   }
-  },
-  {
-   "id": "GAP-F-005",
-   "title": "Typed A4 action trading.halt reaches biometric approval but has no executor",
-   "priority": "P1",
-   "status": "PARTIAL_IMPLEMENTATION",
-   "reqs": [
-    "REQ-SEC-05",
-    "REQ-TRD-09",
-    "REQ-FLOW-10"
-   ],
-   "subsystem": "gateway action runtime / Android trading / commander",
-   "evidence": [
-    "backend/van_gateway/command/resolver.py:89-168 'halt trading' → typed action trading.halt (A4); tests/scenarios/test_acceptance_scenarios.py:207-211 proves approval_required",
-    "backend/van_gateway/action/registry.py:119-126 trading.halt allowed_principals OWNER_DEVICE, verifier DOMAIN_ATTESTATION; verification/production.py:129 'trading-halt' readback expects an OWNER_HALT ledger event",
-    "backend/van_gateway/orchestrator.py:803-838: after approval the command is dispatched to Hermes; no gateway-side executor for trading.halt (grep 'trading.halt' → registry, verification, descriptor, control_scopes only)",
-    "backend/van_gateway/app.py:2820-2842 POST /v1/trading/halt requires ControlScope.TRADING and owner_signature_ref = OwnerAuthority token for act 'owner-halt' (trading/service.py:310-313); the shim has no trading tool; android/app/src/main has no 'owner-halt' OwnerAuthorityToken preparation (only 'capsule-promote', VanGatewayClient.kt:205-219)"
-   ],
-   "root_cause": "RC-B + RC-A",
-   "symptoms": [
-    "Flow 10 ends at approval; the mission would reach VERIFYING then UNVERIFIABLE/FAILED",
-    "Owner has no emergency kill-switch surface on the phone (Android trading is read-only + promotion)"
-   ],
-   "fix": "On A4-approved trading.halt, have the gateway self-execute: Android prepares an 'owner-halt' OwnerAuthorityToken (subject 'van-trading-core') alongside the approval proof; orchestrator calls trading.halt() before/instead of Hermes dispatch and verifies via trading_halt_readback. Add a Halt button to TradingCommandCentreActivity behind BiometricGate.",
-   "external": "Owner authority key enrolled on van-trading-core (registries/owner_authority_keys.json is empty by design; QUAL-TRD-03).",
-   "acceptance": "'halt trading' + biometric → OWNER_HALT event in the ledger → mission VERIFIED_SUCCESS via trading-halt readback; scenario test extended past approval_required.",
-   "closure": {
-    "status": "FIXED_AND_EVIDENCED",
-    "commits": "528366b, 81805c9",
-    "evidence": "TradingHaltExecutor with owner-halt OwnerAuthority token (client_context.owner_halt_authority_ref) + A4 proof; test_local_typed_actions.py halt cases; Android trading/TradingHaltAuthority.kt + Trading screen halt path",
-    "date": "2026-09-22",
-    "head": "100d898"
-   }
-  },
-  {
-   "id": "GAP-F-006",
-   "title": "Autonomous browser and automation execution has no production initiator",
-   "priority": "P1",
-   "status": "IMPLEMENTED_NOT_REACHABLE",
-   "reqs": [
-    "REQ-BRW-01",
-    "REQ-AUT-01",
-    "REQ-FLOW-03",
-    "REQ-FLOW-15"
-   ],
-   "subsystem": "Hermes MCP shim / browser api / automation api",
-   "evidence": [
-    "backend/van_gateway/browser/api.py:884-984 run_assignment is 'the only way a browser worker runs autonomously' (internal-control, ControlScope.BROWSER); backend/van_gateway/automation/api.py:243-759 all internal-control",
-    "hermes/mcp/owner_runtime_stdio.mjs: no browser_* or automation_* tool; hermes/profile/van/config.yaml:110-128 registers only van_trading_commander; tools/hermes/register_owner_runtime_mcp.sh registers only van_owner_runtime",
-    "hermes/mcp/README.md:8-10 lists a 'van-gateway' MCP server (grants, evidence, health) that has no shim or registration script in the repository",
-    "android VanGatewayClient.kt:498-517 browser calls are GET only (+ owner interactive sessions); Android never POSTs /v1/browser/tasks or /assignments",
-    "Reachability worker: /v1/automation/* (13 routes) have no caller in Android, shim, tools, deploy or gateway-internal code"
-   ],
-   "root_cause": "RC-A",
-   "symptoms": [
-    "Flow 3 'investigate this link' cannot reach Harness/Stagehand; only the owner's manual remote browser (needs stream host) exists",
-    "Flow 15 delegated multi-step job cannot use automation/browser",
-    "Boundary escalation (browser/api.py:289-626) is reachable only from tests"
-   ],
-   "fix": "Add scoped shim tools: browser_assignment_run/browser_task_status/browser_task_evidence (→ /v1/browser/assignments, /tasks/{id}) and automation_route/automation_execute/automation_run_status (→ /v1/automation/*), registered through register_owner_runtime_mcp.sh with BROWSER/AUTOMATION scoped credentials; or ship the documented 'van-gateway' MCP server. Update hermes/skills/browser-intelligence and automation-fabric to name the tools.",
-   "external": "Harness/Stagehand/n8n live runtimes (QUAL-BRW-01/02, QUAL-AUT-01).",
-   "acceptance": "With browser_enabled=true and a fake worker, a Hermes tool call creates a browser task bound to the command's mission and its evidence appears in /v1/missions/{id}/evidence; test_owner_runtime_mcp_contract lists the new tools.",
-   "closure": {
-    "status": "FIXED_AND_EVIDENCED",
-    "commits": "b78cbf4",
-    "evidence": "shim browser_task_create/assignment_run/task_status/task_evidence + automation_route/execute/run_status; AGENTS.md/skills truthful",
-    "date": "2026-09-22",
-    "head": "100d898"
-   }
-  },
-  {
-   "id": "GAP-F-007",
-   "title": "/health and /v1/degraded return HTTP 500 when an uncatalogued DegradedCode is active (9 of 35 codes missing from CATALOG)",
-   "priority": "P2",
-   "status": "OPEN_GAP",
-   "reqs": [
-    "REQ-RES-04",
-    "REQ-OBS-03"
-   ],
-   "subsystem": "gateway degraded registry / observability",
-   "evidence": [
-    "backend/van_gateway/degraded/registry.py CATALOG has 26 entries; backend/van_gateway/models.py DegradedCode has 35 members; missing: GOOGLE_PRINCIPAL_UNVERIFIED, GOOGLE_CAPABILITY_UNAVAILABLE, GOOGLE_OAUTH_CLIENT_UNCONFIGURED, GOOGLE_ACCOUNT_ENTITLEMENT_UNVERIFIED, OWNER_CONTEXT_UNAVAILABLE, OWNER_CONTEXT_CONFLICTED, RESEARCH_UNAVAILABLE, RESEARCH_EGRESS_DENIED, DEVICE_OR_GRANT_REVOKED",
-    "backend/van_gateway/orchestrator.py:685 degraded.set(DegradedCode.OWNER_CONTEXT_UNAVAILABLE, True) on any snapshot exception - the only one of the 9 missing codes that reaches DegradedRegistry.set() today; the other 8 appear only as strings in response payloads (google/service.py:73, google/mesh.py:302,362, action/service.py:295) and are latent",
-    "Reproduced (scratch probe against create_app): GET /health 200 → after set(OWNER_CONTEXT_UNAVAILABLE) → KeyError → HTTP 500 (log line error_class KeyError)",
-    "android VanApplication.kt:537-558 marks 'gateway' BROKEN on non-200 /health → owner sees 'gateway broken' during a context-store fault"
-   ],
-   "root_cause": "RC-D (enum/catalog drift with no exhaustiveness test)",
-   "symptoms": [
-    "Observability lost during the fault it should report",
-    "False 'gateway broken' on Android"
-   ],
-   "fix": "Add the 9 CATALOG entries; add a test asserting set(DegradedCode) == set(CATALOG); make snapshot() tolerate unknown codes with a generic entry.",
-   "external": "None.",
-   "acceptance": "Test passes; /health returns 200 with degraded list containing OWNER_CONTEXT_UNAVAILABLE when set.",
-   "closure": {
-    "status": "FIXED_AND_EVIDENCED",
-    "commits": "c193d47",
-    "evidence": "degraded/registry.py 9-code CATALOG, tolerant snapshot(); test_degraded_catalog_is_exhaustive.py",
-    "date": "2026-09-22",
-    "head": "100d898"
-   }
-  },
-  {
-   "id": "GAP-F-008",
-   "title": "Learning and adaptation stores are write-only with respect to future decisions",
-   "priority": "P2",
-   "status": "PARTIAL_IMPLEMENTATION",
-   "reqs": [
-    "REQ-SYM-08",
-    "REQ-SYM-10",
-    "REQ-COG-06"
-   ],
-   "subsystem": "gateway learning / evolution / reasoning / proactive",
-   "evidence": [
-    "backend/van_gateway/learning/feed.py:233 strategies_for → evolution/radar.py:649 permitted_for: zero callers outside their definitions (grep)",
-    "backend/van_gateway/reasoning/calibration.py RelationshipCalibrationEngine constructed at understanding/api.py:95; .calibrate() never called (grep)",
-    "backend/van_gateway/proactive/autonomy.py DomainTrustService/ProactivePolicyService read only inside understanding/api.py routes (api.py:334,347); orchestrator.py and action/service.py never consult them",
-    "Producers are real: mission/service.py:180,295,310,313 → learning/feed.py writes learning_outcomes, execution_strategies, intent_nodes, decision_fingerprints, symbiotic_growth; scheduled auto_demote/mark_stale mutate the stores (app.py:670-682)"
-   ],
-   "root_cause": "RC-C",
-   "symptoms": [
-    "Symbiotic loop link 'learn/update → improve future behaviour' is broken for the owner-agent runtime (trading has its own capsule_health read-back which works)",
-    "/v1/understanding shows learned data the system does not use"
-   ],
-   "fix": "Consume strategies_for in orchestrator (attach permitted strategies to canonical_context or a runtime route Hermes calls), consult DomainTrust/ProactivePolicy in action/service.authorize for autonomy ceilings, and call calibrate() on owner corrections.",
-   "external": "None.",
-   "acceptance": "A mission whose strategy was promoted changes the next same-intent command's canonical_context (or a Hermes-readable route); test_learning_records_and_bounds extended with a read-back assertion.",
-   "closure": {
-    "status": "FIXED_AND_EVIDENCED",
-    "commits": "b952b40, 528366b",
-    "evidence": "learning/feed.py strategies_for; calibrate() wired in understanding/api.py; ActionAutonomyGate; canonical_context.permitted_strategies; test_learning_read_back.py, test_action_runtime_autonomy.py",
-    "date": "2026-09-22",
-    "head": "100d898"
-   }
-  },
-  {
-   "id": "GAP-F-009",
-   "title": "Scoped internal-control credentials are not honoured by six routers (fail-closed 503 for scoped-only deployments)",
-   "priority": "P2",
-   "status": "CONTRADICTORY_IMPLEMENTATION",
-   "reqs": [
-    "REQ-SEC-02"
-   ],
-   "subsystem": "gateway auth / routers",
-   "evidence": [
-    "backend/van_gateway/app.py:1248-1333 middleware uses control_authority.permits(token, scope) (scoped credentials, P0-SEC-001)",
-    "runtime_api.py:221-224, mission/api.py:137-139, understanding/api.py:116-118, automation/api.py:227-229, automation/health.py:127-129, browser/api.py:162-164 each call verify_internal_control(settings.internal_control_token, token) - legacy token only; constructors receive settings but not control_authority",
-    "Reproduced: VAN_INTERNAL_CONTROL_TOKEN='' + VAN_INTERNAL_CONTROL_SCOPED_TOKENS='runtime:…' → GET /v1/runtime/status 503 internal_control_token_unconfigured; GET /v1/automation/health 503",
-    "backend/tests/test_control_scopes.py always sets the legacy token, so the gap is untested"
-   ],
-   "root_cause": "RC-D (two authority checks for one rule)",
-   "symptoms": [
-    "Operators must keep one shared legacy token, defeating least-privilege separation"
-   ],
-   "fix": "Inject ControlAuthority into the six router classes and replace _require_internal with a scope-aware check identical to app.py require_internal_control; add a scoped-only test.",
-   "external": "None.",
-   "acceptance": "Scoped-only configuration reaches /v1/runtime/status, /v1/missions POST, /v1/automation/*, /v1/browser/* mutation, /v1/understanding/observe with the correct scope and is refused with the wrong one.",
-   "closure": {
-    "status": "FIXED_AND_EVIDENCED",
-    "commits": "c193d47",
-    "evidence": "auth/control_scopes.py require_scoped_internal in 6 routers; test_scoped_internal_control_reaches_routers.py",
-    "date": "2026-09-22",
-    "head": "100d898"
-   }
-  },
-  {
-   "id": "GAP-F-010",
-   "title": "Android does not consume the gateway's structured degraded state",
-   "priority": "P3",
-   "status": "PARTIAL_IMPLEMENTATION",
-   "reqs": [
-    "REQ-RES-04",
-    "REQ-AND-14"
-   ],
-   "subsystem": "Android degraded / gateway degraded",
-   "evidence": [
-    "android VanApplication.kt:537-558 reads only health.ok and health.hermes.degraded; GET /v1/degraded never called from Android (grep)",
-    "android degraded/DegradedMode.kt:47-66 vocabulary (hermes, gateway, overlay, queue, notifications, voice, wake_word, biometric, google) has no mapping from backend DegradedCode (TRADING_LEDGER_UNAVAILABLE, STORAGE_PROBLEM, AUTOMATION_*, BROWSER_*, ...)"
-   ],
-   "root_cause": "RC-D",
-   "symptoms": [
-    "Backend faults collapse into 'gateway/hermes broken' with canned text"
-   ],
-   "fix": "Map /health.degraded[] (still_works/will_not_do/restore_action) into DegradedSubsystem entries; render in DegradedPanel.",
-   "external": "None.",
-   "acceptance": "Setting TRADING_LEDGER_UNAVAILABLE on the gateway shows a trading-specific degraded row on the device (JVM test on the mapper).",
-   "closure": {
-    "status": "FIXED_AND_EVIDENCED",
-    "commits": "5498a6f",
-    "evidence": "degraded/GatewayDegradedMapping.kt; DegradedModeStore.applyGatewayHealth bound via DegradedBridge in VanApplication.onCreate; Settings reconciled list; GatewayDegradedMappingTest (12)",
-    "date": "2026-09-22",
-    "head": "100d898"
-   }
-  },
-  {
-   "id": "GAP-F-011",
-   "title": "The conversational surface never receives the completed answer; completion is visible only in Activity/Missions",
-   "priority": "P3",
-   "status": "PARTIAL_IMPLEMENTATION",
-   "reqs": [
-    "REQ-UX-03",
-    "REQ-HER-05"
-   ],
-   "subsystem": "Android chat / gateway command status",
-   "evidence": [
-    "android control/VanCommandController.kt:319-378 recordResponse stores the synchronous dispatch response (status 'accepted', message) as the VAN message; no polling of GET /v1/commands/{id} anywhere in android/app/src/main (grep 'commands/' → none)",
-    "backend/van_gateway/app.py:1655-1713 GET /v1/commands/{id} returns status/sentence/final_outcome, not the Hermes summary text",
-    "backend/van_gateway/mission/service.py:695-720 owner-visible mission events (with summary) reach the device via events bus → session WS/SSE (session/api.py:255-330) → events/VanEventStreamStore → Activity module; final_outcome appears in MissionsModule.kt:146"
-   ],
-   "root_cause": "RC-F (UI coherence)",
-   "symptoms": [
-    "Owner asks in Chat, must open Activity/Missions to read the result; spoken response is 'working on it' semantics only"
-   ],
-   "fix": "Subscribe the chat conversation to mission events for its command_id (or poll /v1/commands/{id}) and append the final_outcome/summary as a VAN message; speak it when finished.",
-   "external": "None.",
-   "acceptance": "After a mission_result COMPLETED callback, the chat thread shows the summary without navigating away.",
-   "closure": {
-    "status": "FIXED_AND_EVIDENCED",
-    "commits": "5498a6f",
-    "evidence": "command/work/ConversationReducer.kt; VanCommandController.pollUnfinishedCommands (4 s); VanGatewayClient.commandStatus; context_gaps as 'VAN did not know'; control/VanSpokenAnswer.kt → VoiceEdge.speak; ConversationReducerTest (8)",
-    "date": "2026-09-22",
-    "head": "100d898"
-   }
-  },
-  {
-   "id": "GAP-F-012",
-   "title": "Embodiment gestures and three durable states are declared and rendered but never produced by runtime",
-   "priority": "P3",
-   "status": "UI_ONLY",
-   "reqs": [
-    "REQ-EMB-03",
-    "REQ-EMB-04"
-   ],
-   "subsystem": "Android visual",
-   "evidence": [
-    "android visual/RiveContract.kt:7-53 VanFiniteAction (14: HELLO_WAVE, ACK_NOD, POINT_*, CELEBRATE, CAUTION, CONFIRM, SHRUG, PRESENT_CARD, OPEN_PANEL, CLOSE_PANEL) rendered by visual/VanScene.kt:156-361; grep -rln VanFiniteAction android → only tests and visual-preview; VanLiveVisualState.action() has no production caller",
-    "VanDurableState.URGENT: VanLiveVisualState.urgent() never called; WAITING and SLEEPING never assigned (only referenced in BrowserVisualState.NEVER_PROPOSED)"
-   ],
-   "root_cause": "RC-F",
-   "symptoms": [
-    "Canonical intent (audit brief §2) lists these actions/states as required behaviours; in the shipped app they cannot play"
-   ],
-   "fix": "Produce actions from real transitions: HELLO_WAVE on first pairing/session open, ACK_NOD on command accepted, CONFIRM on VERIFIED_SUCCESS, CAUTION on WAITING_FOR_OWNER, SHRUG on UNVERIFIABLE, PRESENT_CARD on attention URGENT_INTERRUPT; set URGENT from attention disposition URGENT_INTERRUPT, WAITING from mission WAITING_EXTERNAL, SLEEPING from quiet hours.",
-   "external": "None.",
-   "acceptance": "JVM test on VanPresenceReducer maps each listed runtime signal to the action/state; reachability test lists no unproduced VanFiniteAction.",
-   "closure": {
-    "status": "FIXED_AND_EVIDENCED",
-    "commits": "17f4fba, 3d845bc",
-    "evidence": "visual/VanEmbodimentReducer.kt + VanEmbodimentProducers.kt + VanMotionMap.kt; trading/bridge.py trading.trade.closed producer; visual-preview VanEmbodimentCoverageTest",
-    "date": "2026-09-22",
-    "head": "100d898"
-   }
-  },
-  {
-   "id": "GAP-F-013",
-   "title": "Speech output: sherpa-onnx TTS preference has no synthesizer; lip-sync is a frame-modulo heuristic; backend SpeechCueClock exists only in a test",
-   "priority": "P3",
-   "status": "TEST_ONLY",
-   "reqs": [
-    "REQ-VOI-03",
-    "REQ-VOI-04"
-   ],
-   "subsystem": "Android voice / gateway voice",
-   "evidence": [
-    "android voice/LocalTtsRouter.kt:63-141 prefers SHERPA_ONNX but voice/VoiceEdge.kt:152-170 always calls the same Android TextToSpeech (no OfflineTts class exists)",
-    "android voice/VoiceInterfaces.kt:455-461 open=(frame%10)/10, viseme=frame%15 from TTS onRangeStart",
-    "backend/tests/test_speech_sync.py:1-97 defines SpeechCueClock; grep SpeechCueClock backend/van_gateway → none"
-   ],
-   "root_cause": "RC-G (design artefact not wired)",
-   "symptoms": [
-    "Aura/mouth animation during speech is not phoneme-driven",
-    "Misleading engine-selection code"
-   ],
-   "fix": "Either implement a sherpa-onnx OfflineTts path behind the existing manifest gate and derive visemes from its timestamps, or remove the SHERPA_ONNX preference and delete/relocate SpeechCueClock into production (speech_stream payload) with a device consumer.",
-   "external": "Local TTS model bundle (QUAL-VOI-01).",
-   "acceptance": "Selected engine is the engine that speaks (JVM test); viseme cues are timestamped, not frame-modulo.",
-   "closure": {
-    "status": "FIXED_AND_EVIDENCED (device cue path) / DELIBERATELY_REMOVED_CANON_UPDATED (sherpa TTS preference)",
-    "commits": "17f4fba",
-    "evidence": "voice/speech_cues.py production SpeechCueClock on the speech_stream wire; voice/SpeechCueTiming.kt + TtsOutputManager cue track; SHERPA_ONNX TTS preference removed (no synthesizer exists; local TTS = QUAL-VOI-02)",
-    "date": "2026-09-22",
-    "head": "100d898"
-   }
-  },
-  {
-   "id": "GAP-F-014",
-   "title": "Rive asset absent; silent Canvas fallback with no owner-visible notice",
-   "priority": "P4",
-   "status": "EXTERNALLY_BLOCKED_REPOSITORY_COMPLETE",
-   "reqs": [
-    "REQ-EMB-05"
-   ],
-   "subsystem": "Android visual / visual-authority",
-   "evidence": [
-    "find . -iname '*.riv' → none; android/app/build.gradle.kts:251 rive-android:9.6.5 present",
-    "android visual/VanVisualRuntime.kt:54-69 decide() → OWNER_ART/CANVAS on ASSET_MISSING; VanVisualRuntime.describe() (lines 71-80, doc-comment: reason is 'surfaced in diagnostics') has zero callers in android/app/src/main - the diagnostic is dead code"
-   ],
-   "root_cause": "External artefact (docs/EXTERNAL_GATES.md 'Artist .riv')",
-   "symptoms": [
-    "Owner cannot tell whether the authored character is installed"
-   ],
-   "fix": "Surface VanVisualRuntime.describe() in Settings/Systems as 'Character: Canvas fallback (Rive asset not installed)'.",
-   "external": "Authored van.riv from the Rive editor (QUAL-EMB-01).",
-   "acceptance": "Systems module shows the active renderer and reason.",
-   "closure": {
-    "status": "FIXED_AND_EVIDENCED",
-    "commits": "17f4fba, 5498a6f",
-    "evidence": "visual/VanRendererStatus.kt via DegradedBridge.rendererStatus; Settings 'Character' row from DegradedBridge.lastRendererStatus",
-    "date": "2026-09-22",
-    "head": "100d898"
-   }
-  },
-  {
-   "id": "GAP-F-015",
-   "title": "Contradiction: AGENTS.md says Hermes may submit memory candidates; the MCP shim deliberately exposes no such tool",
-   "priority": "P3",
-   "status": "CONTRADICTORY_IMPLEMENTATION",
-   "reqs": [
-    "REQ-MEM-02",
-    "REQ-COH-02"
-   ],
-   "subsystem": "hermes profile docs / MCP shim",
-   "evidence": [
-    "hermes/profile/van/AGENTS.md:12 'It may query canonical context, submit inferred/model-derived memory candidates'",
-    "hermes/mcp/owner_runtime_stdio.mjs:8 'Canonical owner-context admission is intentionally NOT exposed' and no tool for /v1/runtime/context/facts; backend/van_gateway/runtime_api.py:295-312 route exists with INFERRED/MODEL_DERIVED gate"
-   ],
-   "root_cause": "RC-A",
-   "symptoms": [
-    "Dependent symptom of GAP-F-001"
-   ],
-   "fix": "Decide one: add the INFERRED-only candidate tool to the shim, or amend AGENTS.md:12 and the runtime route's docstring.",
-   "external": "None.",
-   "acceptance": "AGENTS.md and TOOLS list agree; test_owner_runtime_mcp_contract asserts the decided state.",
-   "closure": {
-    "status": "FIXED_AND_EVIDENCED",
-    "commits": "b78cbf4",
-    "evidence": "AGENTS.md, skills, hermes README regenerated from the 48-tool shim; contract test pins REQUIRED_TOOLS",
-    "date": "2026-09-22",
-    "head": "100d898"
-   }
-  },
-  {
-   "id": "GAP-F-016",
-   "title": "Interactive browser stream grant returns HTTP 200 with an empty signal_url when the signing key is set but the signal URL is not",
-   "priority": "P3",
-   "status": "OPEN_GAP",
-   "reqs": [
-    "REQ-RES-05",
-    "REQ-BRW-04"
-   ],
-   "subsystem": "gateway browser interactive api",
-   "evidence": [
-    "backend/van_gateway/app.py:521-529,831-870 interactive routers mount when browser_stream_signing_key_file is set",
-    "backend/van_gateway/browser/interactive_api.py:283 mint_stream_grant returns settings.browser_stream_signal_url unguarded"
-   ],
-   "root_cause": "RC-D",
-   "symptoms": [
-    "Device would negotiate against an empty endpoint and report a transport error rather than a configuration error"
-   ],
-   "fix": "Refuse (503 BROWSER_STREAM_UNCONFIGURED) when signal_url is empty; mount gate on both settings.",
-   "external": "Browser Stream Host (QUAL-BRW-03).",
-   "acceptance": "Test: signing key set, signal_url empty → 503.",
-   "closure": {
-    "status": "FIXED_AND_EVIDENCED",
-    "commits": "1b6e44e",
-    "evidence": "interactive_api.py mint_stream_grant → 503 BROWSER_STREAM_UNCONFIGURED without a stream host",
-    "date": "2026-09-22",
-    "head": "100d898"
-   }
-  },
-  {
-   "id": "GAP-F-017",
-   "title": "Backend dependency set is floating (>=) while the trading VM is exact-pinned",
-   "priority": "P3",
-   "status": "OPEN_GAP",
-   "reqs": [
-    "REQ-DET-03"
-   ],
-   "subsystem": "backend/requirements.txt / deploy",
-   "evidence": [
-    "backend/requirements.txt: 10 of 11 lines use >= (fastapi, uvicorn, pydantic, httpx, cryptography, pytest, pytest-asyncio, aiosqlite, python-multipart, pydantic-settings); only playwright==1.63.0 exact",
-    "deploy/van-trading-core/requirements-vm.txt exact pins (fastapi==0.141.1, uvicorn==0.53.0, httpx==0.28.1, psycopg==3.2.9, temporalio==1.33.0)",
-    "tools/runtime/install_van_gateway_service.sh installs from backend/requirements.txt"
-   ],
-   "root_cause": "Determinism",
-   "symptoms": [
-    "Two gateway installs from the same SHA can differ; CI and the certified host can diverge"
-   ],
-   "fix": "Add a lock file (pip-compile/uv lock) consumed by CI and install_van_gateway_service.sh; record the lock hash in release metadata.",
-   "external": "None.",
-   "acceptance": "Contract test asserts every backend requirement is exact-pinned or locked.",
-   "closure": {
-    "status": "FIXED_AND_EVIDENCED",
-    "commits": "1b6e44e",
-    "evidence": "backend/requirements.lock; installers and CI install from the lock",
-    "date": "2026-09-22",
-    "head": "100d898"
-   }
-  },
-  {
-   "id": "GAP-F-018",
-   "title": "require_device_binding defaults False with no release-time gate forcing it on",
-   "priority": "P3",
-   "status": "OPEN_GAP",
-   "reqs": [
-    "REQ-SEC-03"
-   ],
-   "subsystem": "gateway config / qualification",
-   "evidence": [
-    "backend/van_gateway/config.py:198-204 require_device_binding=False documented as 'mid-migration'",
-    "deploy/van-trading-core/qualify.sh and tools/ci/production_acceptance.py do not check it"
-   ],
-   "root_cause": "Determinism/security hardening",
-   "symptoms": [
-    "A production gateway can accept token-only mutations from an unbound device"
-   ],
-   "fix": "Add a qualification check (qualify.sh / production_acceptance row) that fails unless VAN_REQUIRE_DEVICE_BINDING=true on release hosts.",
-   "external": "None.",
-   "acceptance": "qualify.sh RED when the flag is false on a release host.",
-   "closure": {
-    "status": "FIXED_AND_EVIDENCED",
-    "commits": "1b6e44e",
-    "evidence": "config.py van_env + assert_production_safe(); tools/runtime/qualify_gateway_host.sh",
-    "date": "2026-09-22",
-    "head": "100d898"
-   }
-  },
-  {
-   "id": "GAP-F-019",
-   "title": "Every derived context requirement is non-blocking; missing owner facts never block a consequential command",
-   "priority": "P3",
-   "status": "PARTIAL_IMPLEMENTATION",
-   "reqs": [
-    "REQ-COG-02"
-   ],
-   "subsystem": "gateway command/context_requirements",
-   "evidence": [
-    "backend/van_gateway/command/context_requirements.py:74,85,96,105 blocking=False for timezone, project predicates, action-family predicates and named people"
-   ],
-   "root_cause": "RC-C",
-   "symptoms": [
-    "Dependent on GAP-F-001: with an empty kernel, blocking=True would deny everything; the design is therefore coupled to the missing producer"
-   ],
-   "fix": "After GAP-F-001, make action-family requirements for trading./message. blocking=True with an owner-visible MISSING explanation.",
-   "external": "None.",
-   "acceptance": "A trading-family command with MISSING mandate facts returns needs_you with the missing requirement named.",
-   "closure": {
-    "status": "SUPERSEDED_BY_BETTER_IMPLEMENTATION",
-    "commits": "528366b",
-    "evidence": "Commands no longer block on missing owner context; context_gaps computed, returned in CommandResult, shown to the owner and passed to Hermes in canonical_context. Blocking a safety action on an unknown fact was the wrong contract.",
-    "date": "2026-09-22",
-    "head": "100d898"
-   }
-  },
-  {
-   "id": "GAP-F-020",
-   "title": "Dead or orphaned production symbols",
-   "priority": "P4",
-   "status": "IMPLEMENTED_NOT_REACHABLE",
-   "reqs": [
-    "REQ-COH-05"
-   ],
-   "subsystem": "gateway",
-   "evidence": [
-    "tools/audit/entrypoint_reach.py: van_gateway.browser.input_protocol never imported from app/orchestrator/runtime_api",
-    "tools/audit/reachability.py: observability/instruments.py set_browser_sessions_active, record_browser_connect, record_browser_input_dispatch, record_agent_grant and session/models.py store_dumps have no reference",
-    "backend/van_gateway/google/service.py:314-318 scrub_for_prompt called only from tests",
-    "backend/van_gateway/runtime_api.py:83 ActionBeginBody.owner_approved never read (by design; misleading)"
-   ],
-   "root_cause": "Coherence hygiene",
-   "symptoms": [
-    "False confidence that scrubbing/telemetry is active"
-   ],
-   "fix": "Wire or delete each; deprecate the dead request field.",
-   "external": "None.",
-   "acceptance": "reachability.py reports 0 NO_REFERENCE; scrub_for_prompt has a production call site or is removed.",
-   "closure": {
-    "status": "FIXED_AND_EVIDENCED",
-    "commits": "c193d47, 1b6e44e, b78cbf4",
-    "evidence": "_scrubbed() on every Google read; instruments wired or deleted; owner_approved removed; input_protocol retained (stream host caller)",
-    "date": "2026-09-22",
-    "head": "100d898"
-   }
-  },
-  {
-   "id": "GAP-F-021",
-   "title": "Loopback defaults for Hermes and public base URLs have no fail-closed check",
-   "priority": "P4",
-   "status": "OPEN_GAP",
-   "reqs": [
-    "REQ-DET-04"
-   ],
-   "subsystem": "gateway config",
-   "evidence": [
-    "backend/van_gateway/config.py:14 hermes_base_url http://127.0.0.1:8642, :41 van_public_base_url http://127.0.0.1:8787; unlike ingress_token, no startup refusal when defaults are used off-host"
-   ],
-   "root_cause": "Determinism",
-   "symptoms": [
-    "A misconfigured host silently talks to localhost"
-   ],
-   "fix": "Require explicit values in the systemd env file (installer) and log/refuse defaults when VAN_ENV=production.",
-   "external": "None.",
-   "acceptance": "Installer fails without explicit VAN_HERMES_BASE_URL.",
-   "closure": {
-    "status": "FIXED_AND_EVIDENCED",
-    "commits": "1b6e44e",
-    "evidence": "production config refuses loopback/empty secrets",
-    "date": "2026-09-22",
-    "head": "100d898"
-   }
-  },
-  {
-   "id": "GAP-F-022",
-   "title": "Whole-tree pytest collection collides on a duplicate test basename",
-   "priority": "P4",
-   "status": "OPEN_GAP",
-   "reqs": [
-    "REQ-TST-01"
-   ],
-   "subsystem": "tests",
-   "evidence": [
-    "tests/contracts/test_owner_device_provisioning.py vs backend/tests/test_owner_device_provisioning.py → 'import file mismatch' when collected together (reproduced); CI avoids it by running per directory"
-   ],
-   "root_cause": "Test hygiene",
-   "symptoms": [
-    "A whole-tree run reports 0 tests; auditors can misread this as a broken suite"
-   ],
-   "fix": "Rename one file or add __init__.py/importmode=importlib in pytest.ini.",
-   "external": "None.",
-   "acceptance": "`pytest` from the repo root collects all suites.",
-   "closure": {
-    "status": "FIXED_AND_EVIDENCED",
-    "commits": "1b6e44e",
-    "evidence": "tests/contracts/__init__.py; root collection no longer collides",
-    "date": "2026-09-22",
-    "head": "100d898"
-   }
-  },
-  {
-   "id": "GAP-F-023",
-   "title": "Mutation harness is not in CI and there are no Android instrumentation tests",
-   "priority": "P4",
-   "status": "PARTIAL_IMPLEMENTATION",
-   "reqs": [
-    "REQ-TST-02",
-    "REQ-TST-03"
-   ],
-   "subsystem": "CI / android",
-   "evidence": [
-    "tools/audit/mutation.py not referenced by .github/workflows/van-ci.yml",
-    "android/app/src/androidTest is empty; only 28 JVM test files (147 @Test)"
-   ],
-   "root_cause": "Test coverage",
-   "symptoms": [
-    "Overlay, permissions, wake pipeline, biometric prompt behaviour are certified only by device checklist"
-   ],
-   "fix": "Schedule mutation.py as a non-blocking CI job; add a minimal androidTest set (overlay service start, share intake, notification listener) run on CI emulator.",
-   "external": "Emulator/device (QUAL-AND-01).",
-   "acceptance": "CI shows both jobs.",
-   "closure": {
-    "status": "FIXED_AND_EVIDENCED (mutation, instrumentation job) / EXTERNALLY_GATED_REPOSITORY_COMPLETE (device sign-off)",
-    "commits": "1b6e44e, a60b009",
-    "evidence": "van-ci.yml mutation job (non-blocking, report uploaded); android-instrumentation job on an API 31 emulator running src/androidTest CommandCentreLaunchTest + FloatingOverlayServiceTest (advisory; report uploaded). Real-device certification remains QUAL-AND-01.",
-    "date": "2026-09-22",
-    "head": "100d898"
-   }
-  },
-  {
-   "id": "GAP-F-024",
-   "title": "Google connect/revoke and Google actions have no owner-device surface",
-   "priority": "P3",
-   "status": "BACKEND_ONLY",
-   "reqs": [
-    "REQ-GOO-05",
-    "REQ-AND-12"
-   ],
-   "subsystem": "Android / gateway google",
-   "evidence": [
-    "android: only GET /v1/google/mesh (VanGatewayClient.kt:310) rendered as read-only text in AdminModules.kt:37-92; no connect/revoke call",
-    "backend/van_gateway/app.py:2100-2113 /v1/google/connect and /revoke are internal-control routes; OAuth is completed by tools/google/authorize_workspace_oauth.py on the host",
-    "Google actions are reachable only through Hermes shim tools; the owner cannot directly ask the phone to draft/send (design: Hermes-mediated)"
-   ],
-   "root_cause": "RC-B",
-   "symptoms": [
-    "Owner cannot revoke Google from the phone when a token is compromised; Flow 2 depends on Hermes calling google_calendar_agenda"
-   ],
-   "fix": "Add a device-authenticated POST /v1/google/revoke (owner-device scope, device-proofed) and a Connections module action; keep connect on the host.",
-   "external": "None.",
-   "acceptance": "Revoke from the phone sets google_connections status revoked and /v1/google/status reports disconnected.",
-   "closure": {
-    "status": "FIXED_AND_EVIDENCED",
-    "commits": "c193d47, 5498a6f",
-    "evidence": "POST /v1/google/owner-revoke (device-proofed); test_google_owner_revoke_and_scrub.py; Connected screen Revoke Google with confirm",
-    "date": "2026-09-22",
-    "head": "100d898"
-   }
-  },
-  {
-   "id": "GAP-F-025",
-   "title": "Two definitions of Google readiness",
-   "priority": "P3",
-   "status": "CONTRADICTORY_IMPLEMENTATION",
-   "reqs": [
-    "REQ-GOO-04",
-    "REQ-COH-02"
-   ],
-   "subsystem": "gateway google mesh / capability readiness",
-   "evidence": [
-    "backend/van_gateway/google/mesh.py:290 USABLE_STATES = {READY, CONFIGURED}",
-    "backend/van_gateway/capability/readiness.py:44-67 is_ready requires READY only (rule 'CONFIGURED is not READY', docs/EXTERNAL_GATES.md)"
-   ],
-   "root_cause": "RC-D",
-   "symptoms": [
-    "The router may plan a job on a CONFIGURED capability that the readiness surface reports not ready"
-   ],
-   "fix": "Make the router use GoogleMeshReadiness (or document CONFIGURED as plan-only, never execute).",
-   "external": "None.",
-   "acceptance": "One predicate; test asserts CONFIGURED capabilities cannot be executed.",
-   "closure": {
-    "status": "FIXED_AND_EVIDENCED",
-    "commits": "1b6e44e",
-    "evidence": "google/mesh.py EXECUTION_READY_STATES single predicate",
-    "date": "2026-09-22",
-    "head": "100d898"
-   }
-  },
-  {
-   "id": "GAP-F-026",
-   "title": "Temporal execution medium is routed but not built",
-   "priority": "P4",
-   "status": "STUB_OR_PLACEHOLDER",
-   "reqs": [
-    "REQ-AUT-04"
-   ],
-   "subsystem": "gateway automation router",
-   "evidence": [
-    "backend/van_gateway/automation/router.py:41,127-136 ExecutionMedium.TEMPORAL decision with detail 'not yet built; use a native VAN state machine'; no temporalio import in the gateway (deploy/van-trading-core/requirements-vm.txt pins temporalio==1.33.0 for the VM only)"
-   ],
-   "root_cause": "Stack-lock phase 11 (deliberate)",
-   "symptoms": [
-    "critical_durable automation falls back to native missions"
-   ],
-   "fix": "None now; keep the routing decision explicit in owner-visible output.",
-   "external": "Temporal adoption decision.",
-   "acceptance": "Documented as DELIBERATE_SCOPE in the component ledger (already).",
-   "closure": {
-    "status": "DELIBERATELY_REMOVED_CANON_UPDATED",
-    "commits": "—",
-    "evidence": "Temporal stays stack-locked at adoption phase 11; automation/router.py states the decision in owner-visible detail; component ledger DELIBERATE_SCOPE; REQ-AUT-04 re-stated as DELIBERATE_SCOPE",
-    "date": "2026-09-22",
-    "head": "100d898"
-   }
-  },
-  {
-   "id": "GAP-F-027",
-   "title": "Overlay state persisted in plain SharedPreferences",
-   "priority": "P4",
-   "status": "OPEN_GAP",
-   "reqs": [
-    "REQ-AND-05"
-   ],
-   "subsystem": "Android overlay",
-   "evidence": [
-    "android overlay/OverlayStateStore.kt uses SharedPreferences MODE_PRIVATE (position, presentation, dock, running flag); every other store uses EncryptedSharedPreferences/Keystore"
-   ],
-   "root_cause": "Consistency",
-   "symptoms": [
-    "None security-relevant (no secrets)"
-   ],
-   "fix": "Migrate to EncryptedSharedPreferences for uniform policy.",
-   "external": "None.",
-   "acceptance": "No plain SharedPreferences writers remain (JVM contract test).",
-   "closure": {
-    "status": "FIXED_AND_EVIDENCED",
-    "commits": "5498a6f, b46ca65",
-    "evidence": "OverlayStateStore and browser session store on EncryptedSharedPreferences; tests/contracts/test_android_storage_policy.py explains the three remaining non-sensitive plain writers",
-    "date": "2026-09-22",
-    "head": "100d898"
-   }
-  },
-  {
-   "id": "GAP-F-028",
-   "title": "No proactive initiation path: VAN never opens an attention item or mission without an owner command or an external event",
-   "priority": "P2",
-   "status": "PARTIAL_IMPLEMENTATION",
-   "reqs": [
-    "REQ-SYM-06",
-    "REQ-SYM-11"
-   ],
-   "subsystem": "gateway proactive / scheduler",
-   "evidence": [
-    "backend/van_gateway/proactive/autonomy.py:295 ProactivePolicyService.may_create() is the gate for VAN starting a mission unprompted; it has no caller outside its module and tests. No OpsScheduler job (app.py:729-754: reminders.fire_due, missions.expire_overdue, ops.retention, ops.pki_scan, ops.backup, ops.backup_drill, learning.auto_demote, understanding.mark_stale_intents) or route initiates proactive work; understanding/api.py:98 only reads .policies()",
-    "Reactive producers exist: reminder sweep → attention; notification ingest → attention; browser escalation → decisions"
-   ],
-   "root_cause": "RC-C",
-   "symptoms": [
-    "'Anticipate useful follow-ups' (audit brief §8) has no engine; VAN is reactive"
-   ],
-   "fix": "Add a bounded proactive job: stale intents / unresolved attention / expired missions → FOLLOW_UP attention items under ProactivePolicy ceilings, never executing actions.",
-   "external": "None.",
-   "acceptance": "A mission left WAITING_FOR_OWNER > N hours yields a FOLLOW_UP attention item produced by the proactive job.",
-   "closure": {
-    "status": "FIXED_AND_EVIDENCED",
-    "commits": "b952b40",
-    "evidence": "proactive/followups.py ProactiveFollowUpJob + scheduler job proactive.follow_ups; owner-disableable; test_proactive_followups.py",
-    "date": "2026-09-22",
-    "head": "100d898"
-   }
+    "note": "Audit-time evidence remains historical; current live gates are in VAN_RUNTIME_QUALIFICATION_MATRIX.md."
   }
- ],
- "closure_head": "100d898",
- "closure_date": "2026-09-22"
 }

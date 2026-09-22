@@ -390,6 +390,33 @@ def history(ledger: Ledger, *, limit: int = 50) -> dict[str, Any]:
                 for l in lessons_by_trade.get(review_hash, ())
             ],
         })
+    # The owner UI needs a real history curve, but it must not invent starting balance or
+    # extrapolate missing trades. Build cumulative closed-trade series directly from the same
+    # authoritative TRADE_REVIEW rows. Points with a missing metric are omitted from that
+    # metric's series; timestamps remain the actual close times.
+    chronological = sorted(rows, key=lambda r: r["closed_ms"])
+    cumulative_r = 0.0
+    cumulative_pnl = 0.0
+    equity_curve_r: list[dict[str, Any]] = []
+    equity_curve_pnl: list[dict[str, Any]] = []
+    for row in chronological:
+        r_value = row.get("r_multiple")
+        if r_value is not None:
+            cumulative_r += float(r_value)
+            equity_curve_r.append({
+                "closed_ms": int(row["closed_ms"]),
+                "value": cumulative_r,
+                "trade_intent_id": row["trade_intent_id"],
+            })
+        pnl_value = row.get("pnl")
+        if pnl_value is not None:
+            cumulative_pnl += float(pnl_value)
+            equity_curve_pnl.append({
+                "closed_ms": int(row["closed_ms"]),
+                "value": cumulative_pnl,
+                "trade_intent_id": row["trade_intent_id"],
+            })
+
     rows.sort(key=lambda r: r["closed_ms"], reverse=True)
     counts: dict[str, int] = {}
     for row in rows:
@@ -402,6 +429,8 @@ def history(ledger: Ledger, *, limit: int = 50) -> dict[str, Any]:
         "authority": AUTHORITY_NOTE,
         "count": len(rows),
         "by_quadrant": dict(sorted(counts.items())),
+        "equity_curve_r": equity_curve_r,
+        "equity_curve_pnl": equity_curve_pnl,
         "history": rows[:limit],
     }
 

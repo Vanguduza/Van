@@ -71,6 +71,44 @@ async def test_decision_escalation_surfaces_attention(client):
 
 
 @pytest.mark.asyncio
+async def test_attention_snooze_route_is_durable_and_validated(client):
+    ac, _app = client
+    created = await ac.post(
+        "/v1/attention",
+        json={
+            "title": "Follow up supplier",
+            "severity": "FOLLOW_UP",
+            "source": "pytest",
+            "dedupe_key": "pytest:snooze",
+        },
+    )
+    assert created.status_code == 200
+    item_id = created.json()["id"]
+
+    now = int(__import__("time").time())
+    invalid = await ac.post(
+        f"/v1/attention/{item_id}/snooze",
+        json={"until_unix": now - 1},
+    )
+    assert invalid.status_code == 400
+
+    snoozed = await ac.post(
+        f"/v1/attention/{item_id}/snooze",
+        json={"until_unix": now + 3600},
+    )
+    assert snoozed.status_code == 200
+    assert snoozed.json()["snoozed"] is True
+    visible = (await ac.get("/v1/attention")).json()
+    assert all(item["id"] != item_id for item in visible)
+
+    missing = await ac.post(
+        "/v1/attention/not-a-real-item/snooze",
+        json={"until_unix": now + 3600},
+    )
+    assert missing.status_code == 404
+
+
+@pytest.mark.asyncio
 async def test_project_truth_put_requires_internal_token(client):
     ac, _app = client
     denied = await ac.put(

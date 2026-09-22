@@ -17,7 +17,7 @@
       "gpt/van-unified-intelligence-improvements-rev1-20260918": 2
     },
     "branches_fully_merged": 11,
-    "finding": "Every gpt/* implementation branch is an ancestor of main. No unique required implementation is stranded on any branch, so \u00a752's post-merge certification already holds for them."
+    "finding": "Every gpt/* implementation branch is an ancestor of main. No unique required implementation is stranded on any branch, so §52's post-merge certification already holds for them."
   },
   "counts": {
     "BUILT": 33,
@@ -32,7 +32,7 @@
       "status": "BUILT",
       "note": "Mission Core on migration 10: missions/mission_activities/mission_events, deterministic state machine, VERIFIED_SUCCESS unreachable without a verifier receipt. Activities bind to the capability registry.",
       "prompt_refs": [
-        "\u00a75",
+        "§5",
         "WS1"
       ],
       "audit_class": "IMPLEMENTED_BUT_ISOLATED",
@@ -45,7 +45,7 @@
       "status": "BUILT",
       "note": "Verifier adapters per capability class (API readback, repository SHA, CI run, ledger event, screenshot). EngineReportVerifier exists solely to make 'the worker said OK' always UNVERIFIABLE.",
       "prompt_refs": [
-        "\u00a76"
+        "§6"
       ],
       "audit_class": "IMPLEMENTED_BUT_ISOLATED",
       "audit_note": "VerifierRegistry and every verifier adapter are constructed only in tests. VERIFIED_SUCCESS is reachable on a caller-authored receipt. P0-VERIFY-001.",
@@ -57,7 +57,7 @@
       "status": "BUILT",
       "note": "Canonical registry on migration 11 + registries/capabilities.json. Resolved the two-registry problem by splitting declaration from readiness: this registry declares, `readiness_source` delegates to the automation fabric / Google mesh / ExternalRuntimeRegistry that already owned that fact. No third copy of state.",
       "prompt_refs": [
-        "\u00a77"
+        "§7"
       ]
     },
     {
@@ -66,7 +66,7 @@
       "status": "BUILT",
       "note": "CapabilityRouter with policy as a hard pre-filter and pure arithmetic over declared facts. Route decisions persisted as evidence. Naming collision resolved: automation's router renamed AutomationMediumRouter (it selects the execution medium, not the capability).",
       "prompt_refs": [
-        "\u00a78"
+        "§8"
       ],
       "audit_class": "IMPLEMENTED_BUT_ISOLATED",
       "audit_note": "CapabilityRouter.route has exactly one production call site: POST /v1/missions/route.",
@@ -78,7 +78,7 @@
       "status": "BUILT",
       "note": "ContextCompiler + ContextPacket. Hard cross-project isolation, stale claims carried but stripped of authority, contradiction groups kept together, budget enforced by deliberate drop order.",
       "prompt_refs": [
-        "\u00a79"
+        "§9"
       ],
       "audit_class": "IMPLEMENTED_BUT_ISOLATED",
       "audit_note": "ContextCompiler has zero callers and the Claim objects it consumes are produced nowhere. Disposition: DELETE after porting three behaviours.",
@@ -90,7 +90,7 @@
       "status": "BUILT",
       "note": "Memory taxonomy: owner model, strategic, vocabulary, intent graph, complement map, growth ledger as separate stores. Procedural/anti-pattern remain.",
       "prompt_refs": [
-        "\u00a710"
+        "§10"
       ],
       "audit_class": "PARTIAL",
       "audit_note": "Seven of the ten memory stores have no production writer.",
@@ -102,7 +102,7 @@
       "status": "BUILT",
       "note": "OwnerCognitiveModel with episode-independent admission. Autonomy-bearing fields never confirm from evidence alone.",
       "prompt_refs": [
-        "\u00a711"
+        "§11"
       ],
       "audit_class": "IMPLEMENTED_BUT_ISOLATED",
       "audit_note": "OwnerCognitiveModel has no production feeder; /v1/understanding/observe has no caller in backend, Hermes pack, tests or Android.",
@@ -114,7 +114,7 @@
       "status": "BUILT",
       "note": "DecisionFingerprints with record_outcome, so an inferred reason can be falsified.",
       "prompt_refs": [
-        "\u00a712"
+        "§12"
       ],
       "audit_class": "IMPLEMENTED_BUT_ISOLATED",
       "audit_note": "DecisionFingerprints has no production constructor.",
@@ -126,7 +126,7 @@
       "status": "BUILT",
       "note": "CriticalReasoningKernel: solver/critic/verifier separation, mode-gated rigour, unsourced facts refused.",
       "prompt_refs": [
-        "\u00a713"
+        "§13"
       ],
       "audit_class": "ABSENT_AS_REASONER",
       "audit_note": "assess() validates the shape of a caller-authored record. A runtime probe stored a fabricated fact with an invented source, zero critic findings and 0.99 confidence as actionable. Solver/critic/verifier are three JSON columns filled by the caller, not three passes. P0-COG-001.",
@@ -138,7 +138,7 @@
       "status": "BUILT",
       "note": "SemanticClass with is_factual_authority; FORBIDDEN_SELF_PROMOTIONS blocks inference becoming fact.",
       "prompt_refs": [
-        "\u00a714"
+        "§14"
       ],
       "audit_class": "IMPLEMENTED_BUT_ISOLATED",
       "audit_note": "FORBIDDEN_SELF_PROMOTIONS and may_promote have no production callers; no table stores a Claim. A second unenforced taxonomy beside the enforced EpistemicState.",
@@ -150,7 +150,7 @@
       "status": "BUILT",
       "note": "AssumptionLedger with assert_safe_for_irreversible_work gate.",
       "prompt_refs": [
-        "\u00a715"
+        "§15"
       ],
       "audit_class": "IMPLEMENTED_BUT_ISOLATED",
       "audit_note": "assert_safe_for_irreversible_work has no caller in action/, mission/, automation/ or browser/.",
@@ -162,7 +162,7 @@
       "status": "BUILT",
       "note": "REQUIRED_COUNTERFACTUALS + missing_counterfactuals reporting.",
       "prompt_refs": [
-        "\u00a716"
+        "§16"
       ],
       "audit_class": "IMPLEMENTED_BUT_ISOLATED",
       "audit_note": "missing_counterfactuals compares question strings; nothing requires a counterfactual before a decision.",
@@ -174,7 +174,7 @@
       "status": "BUILT",
       "note": "premise_assessments with derived agreed_without_evidence; sycophancy metrics measured, not claimed.",
       "prompt_refs": [
-        "\u00a717"
+        "§17"
       ],
       "audit_class": "IMPLEMENTED_BUT_ISOLATED",
       "audit_note": "premise_assessments has no route and no producer. Sycophancy metrics are computed over a ledger nothing writes.",
@@ -186,7 +186,7 @@
       "status": "BUILT",
       "note": "CognitiveComplementMap; vulnerability candidates require task evidence.",
       "prompt_refs": [
-        "\u00a718"
+        "§18"
       ],
       "audit_class": "IMPLEMENTED_BUT_ISOLATED",
       "audit_note": "CognitiveComplementMap is constructed but only read; no writer.",
@@ -198,7 +198,7 @@
       "status": "BUILT",
       "note": "SharedVocabularyRegistry with anti-examples and project-scoped resolution.",
       "prompt_refs": [
-        "\u00a719"
+        "§19"
       ],
       "audit_class": "IMPLEMENTED_BUT_ISOLATED",
       "audit_note": "SharedVocabularyRegistry has no write route.",
@@ -210,7 +210,7 @@
       "status": "BUILT",
       "note": "IntentContinuityGraph with conflicts/supersedes edges and staleness.",
       "prompt_refs": [
-        "\u00a720"
+        "§20"
       ],
       "audit_class": "IMPLEMENTED_BUT_ISOLATED",
       "audit_note": "IntentContinuityGraph has no production constructor.",
@@ -222,7 +222,7 @@
       "status": "BUILT",
       "note": "StrategicMemory with already_rejected lookup.",
       "prompt_refs": [
-        "\u00a721"
+        "§21"
       ],
       "audit_class": "IMPLEMENTED_BUT_ISOLATED",
       "audit_note": "StrategicMemory has no production constructor.",
@@ -232,9 +232,9 @@
       "id": "WS18",
       "name": "External reality model",
       "status": "BUILT",
-      "note": "ExternalRealityModel, kept strictly apart from the owner model (\u00a722).",
+      "note": "ExternalRealityModel, kept strictly apart from the owner model (§22).",
       "prompt_refs": [
-        "\u00a722"
+        "§22"
       ],
       "audit_class": "DELETED_PENDING",
       "audit_note": "ExternalRealityModel has no production constructor, producer or consumer. Disposition: DELETE.",
@@ -246,7 +246,7 @@
       "status": "BUILT",
       "note": "AIEvolutionRadar; ADMITTED unreachable without benchmark, security profile, licence and owner decision.",
       "prompt_refs": [
-        "\u00a723"
+        "§23"
       ],
       "audit_class": "IMPLEMENTED_BUT_ISOLATED",
       "audit_note": "AIEvolutionRadar is read-only over HTTP; no discover or transition route exists and no scanner feeds it.",
@@ -258,7 +258,7 @@
       "status": "BUILT",
       "note": "BenchmarkHarness over 14 VAN-specific suites with two-run regression detection.",
       "prompt_refs": [
-        "\u00a724"
+        "§24"
       ],
       "audit_class": "IMPLEMENTED_BUT_ISOLATED",
       "audit_note": "BenchmarkHarness has no production constructor; the CI benchmark does not call it.",
@@ -270,7 +270,7 @@
       "status": "BUILT",
       "note": "StrategyLearning; PREFERRED needs eval evidence and 10 runs at 90%. Demotion automatic.",
       "prompt_refs": [
-        "\u00a725"
+        "§25"
       ],
       "audit_class": "IMPLEMENTED_BUT_ISOLATED",
       "audit_note": "StrategyLearning has no production constructor and no executor records an outcome.",
@@ -282,7 +282,7 @@
       "status": "BUILT",
       "note": "SymbioticGrowthLedger; adaptations not in force until confirmed, and revertible.",
       "prompt_refs": [
-        "\u00a726"
+        "§26"
       ],
       "audit_class": "IMPLEMENTED_BUT_ISOLATED",
       "audit_note": "SymbioticGrowthLedger records nothing; no code proposes an adaptation.",
@@ -292,9 +292,9 @@
       "id": "WS23",
       "name": "Relationship calibration",
       "status": "BUILT",
-      "note": "RelationshipCalibrationEngine. \u00a727's invariant is structural: the Calibration dataclass has no field that could relax a verification requirement or evidence bar, and a test asserts the field set. Consequence sets a floor the relationship cannot lower; corrections raise the challenge mode rather than softening it.",
+      "note": "RelationshipCalibrationEngine. §27's invariant is structural: the Calibration dataclass has no field that could relax a verification requirement or evidence bar, and a test asserts the field set. Consequence sets a floor the relationship cannot lower; corrections raise the challenge mode rather than softening it.",
       "prompt_refs": [
-        "\u00a727"
+        "§27"
       ],
       "audit_class": "IMPLEMENTED_BUT_ISOLATED",
       "audit_note": "RelationshipCalibrationEngine has no production caller, and it reports evidence-derived state as owner-confirmed. P1-SYM-001.",
@@ -304,9 +304,9 @@
       "id": "WS24",
       "name": "Challenge modes",
       "status": "BUILT",
-      "note": "ChallengeMode with mode-gated alternative counts; required_mode() encodes \u00a728.",
+      "note": "ChallengeMode with mode-gated alternative counts; required_mode() encodes §28.",
       "prompt_refs": [
-        "\u00a728"
+        "§28"
       ]
     },
     {
@@ -315,7 +315,7 @@
       "status": "BUILT",
       "note": "AttentionScorer in front of the existing queue: 5 dispositions, dedupe window, suppression recorded.",
       "prompt_refs": [
-        "\u00a729"
+        "§29"
       ],
       "audit_class": "IMPLEMENTED_BUT_ISOLATED",
       "audit_note": "AttentionScorer is isolated; decisions/service still uses the older AttentionEngine.",
@@ -327,7 +327,7 @@
       "status": "BUILT",
       "note": "ProactivePolicyService + S0-S5 AutonomyLevel, domain-specific.",
       "prompt_refs": [
-        "\u00a730"
+        "§30"
       ],
       "audit_class": "IMPLEMENTED_BUT_ISOLATED",
       "audit_note": "ProactivePolicyService is read-only; no proactive mission creation path exists to gate.",
@@ -339,7 +339,7 @@
       "status": "BUILT",
       "note": "DomainTrust; earned ceiling caps at S2, false success needs demonstrated recovery.",
       "prompt_refs": [
-        "\u00a731"
+        "§31"
       ],
       "audit_class": "IMPLEMENTED_BUT_ISOLATED",
       "audit_note": "DomainTrustService record/grant/assert_may_run have no callers.",
@@ -351,7 +351,7 @@
       "status": "EXISTS_UPGRADE",
       "note": "Wake pipeline, 'hie van' pre-rendered ack, PersonalSpeechModel, second-pass ASR fusion and signed transcript provenance all exist. Mission binding is the delta.",
       "prompt_refs": [
-        "\u00a732"
+        "§32"
       ],
       "audit_class": "PARTIAL",
       "audit_note": "No wake-word engine, phrase verifier or local ASR implementation exists; the wake pipeline is never constructed; TTS speak and acknowledgement play have zero call sites. The note 'all exist, mission binding is the delta' materially overstates the state. P1-VOICE-001.",
@@ -361,10 +361,10 @@
       "id": "WS29",
       "name": "Unified Android experience (6 surfaces)",
       "status": "PARTIAL_BUILT",
-      "note": "Data layer built: VanGatewayClient extended with the mission, understanding, permission, autonomy, radar and eval reads; MissionModels + MissionRepository provide the six surfaces' read models with owner-readable status strings. NOT COMPILED IN THIS CONTAINER \u2014 the Android Gradle Plugin does not resolve here, so the Kotlin is verified only by CI (:app:testDebugUnitTest). Compose screens themselves remain unwritten.",
+      "note": "Data layer built: VanGatewayClient extended with the mission, understanding, permission, autonomy, radar and eval reads; MissionModels + MissionRepository provide the six surfaces' read models with owner-readable status strings. NOT COMPILED IN THIS CONTAINER — the Android Gradle Plugin does not resolve here, so the Kotlin is verified only by CI (:app:testDebugUnitTest). Compose screens themselves remain unwritten.",
       "prompt_refs": [
-        "\u00a733",
-        "\u00a748"
+        "§33",
+        "§48"
       ]
     },
     {
@@ -373,7 +373,7 @@
       "status": "BUILT",
       "note": "MissionEvent normalized; browser tasks and automation runs bind to Activities by reference via executor_ref. Backfill is idempotent and reversible. /v1/activity groups by mission; /v1/missions/{id}/evidence gathers receipts.",
       "prompt_refs": [
-        "\u00a734"
+        "§34"
       ],
       "audit_class": "PARTIAL",
       "audit_note": "MissionBinder is not passed in app.py, so browser and automation binding is always None.",
@@ -385,7 +385,7 @@
       "status": "BUILT",
       "note": "DecisionService was already the single approval path; /v1/needs-you now presents waiting missions and open decisions as one surface.",
       "prompt_refs": [
-        "\u00a735"
+        "§35"
       ]
     },
     {
@@ -394,7 +394,7 @@
       "status": "BUILT",
       "note": "PermissionRegistry: owner-readable grants with origin, expiry, last use, stale detection and revoke. Credential-shaped material and unlisted permissions are refused.",
       "prompt_refs": [
-        "\u00a736"
+        "§36"
       ],
       "audit_class": "IMPLEMENTED_BUT_ISOLATED",
       "audit_note": "PermissionRegistry is reachable only by API.",
@@ -404,13 +404,20 @@
       "id": "WS33",
       "name": "Durable orchestration (Temporal)",
       "status": "EXTERNAL_GATED",
-      "note": "Temporal is stack-locked at adoption phase 11 and NOT deployed. automation/router.py already routes critical_durable to TEMPORAL with an honest 'not yet built' detail.",
+      "note": "Temporal durable coordination is repository-implemented: critical_durable routing, scoped gateway bridge, VanDurableWorkflow, temporalio 1.33.0 worker/private bridge, hardened vati-temporal.service, bootstrap/qualify path and Hermes start/status/signal tools. A real Temporal server address and restart/recovery live canary remain external.",
       "prompt_refs": [
-        "\u00a737"
+        "§37"
       ],
       "audit_class": "ABSENT",
-      "audit_note": "No Temporal client, worker, workflow, activity or service exists anywhere. The router names TEMPORAL as a medium with no executor. Blueprint Rev 3 decision D9 makes Temporal optional; disposition is DELETE the routing branch. P1-DOC-002.",
-      "audit_authority": "docs/VAN_WHOLE_SYSTEM_IMPLEMENTATION_AUDIT_AND_CERTIFICATION_REV_1.md"
+      "audit_note": "Historical audit-time finding: no Temporal executor existed at the audited commit. Superseded by PR #59; retained only as provenance.",
+      "audit_authority": "docs/VAN_WHOLE_SYSTEM_IMPLEMENTATION_AUDIT_AND_CERTIFICATION_REV_1.md",
+      "post_closure": {
+        "date": "2026-09-22",
+        "pr": 59,
+        "repository_state": "INTEGRATED_AND_EVIDENCED",
+        "live_state": "EXTERNAL_GATED",
+        "authority": "DURABLE_COORDINATION_ONLY; never live-order authority"
+      }
     },
     {
       "id": "WS34",
@@ -418,7 +425,7 @@
       "status": "BUILT",
       "note": "ComputerInteractionFabric: closed set of typed operations (no RUN_ARBITRARY/EXECUTE/EVAL), per-type action ceilings, never A4 on any surface, browser boundary vocabulary reused unchanged.",
       "prompt_refs": [
-        "\u00a738"
+        "§38"
       ],
       "audit_class": "STUB",
       "audit_note": "ComputerInteractionFabric declares 12 typed operations and nothing executes them; DESKTOP, TERMINAL and MOBILE have no backing code.",
@@ -430,7 +437,7 @@
       "status": "BUILT",
       "note": "Development missions served by RepositoryShaVerifier and CiRunVerifier through the same success-contract interface as every other capability class.",
       "prompt_refs": [
-        "\u00a739"
+        "§39"
       ],
       "audit_class": "IMPLEMENTED_BUT_ISOLATED",
       "audit_note": "RepositoryShaVerifier and CiRunVerifier are constructed only in tests.",
@@ -442,7 +449,7 @@
       "status": "BUILT",
       "note": "VanEval across 11 dimensions; reports unmeasured rather than a flattering pass.",
       "prompt_refs": [
-        "\u00a740"
+        "§40"
       ],
       "audit_class": "IMPLEMENTED_BUT_ISOLATED",
       "audit_note": "VanEval is an API-reachable scoreboard; its scores are threshold constants applied to row counts.",
@@ -471,11 +478,11 @@
     "POST /v1/missions/{id}/backfill (internal)"
   ],
   "red_team_covered": [
-    "\u00a745.6 Android tampers with planning state",
-    "\u00a745.9 broker order bypassing VATI",
-    "\u00a745.11 mission forges verification",
-    "\u00a745.16 mission self-escalates its envelope",
-    "\u00a77 undeclared capability becomes work"
+    "§45.6 Android tampers with planning state",
+    "§45.9 broker order bypassing VATI",
+    "§45.11 mission forges verification",
+    "§45.16 mission self-escalates its envelope",
+    "§7 undeclared capability becomes work"
   ],
   "owner_decisions_made_on_behalf": [
     "Context token budget 8000, ~4 chars/token estimate (not a tokenizer call).",
@@ -490,9 +497,9 @@
     "3 eval dimensions declared unmeasurable without owner ground truth rather than estimated."
   ],
   "remaining": {
-    "WS28": "Voice 2.0 \u2014 wake pipeline and signed transcripts exist; mission binding is Kotlin work plus a device gate for the P95 targets.",
-    "WS29": "Unified Android experience \u2014 six surfaces consuming the mission/understanding APIs. Kotlin, not yet written.",
-    "WS33": "Durable orchestration \u2014 Temporal is stack-locked at adoption phase 11 and not deployed. External gate by your own governance."
+    "WS28": "Voice 2.0 — wake pipeline and signed transcripts exist; mission binding is Kotlin work plus a device gate for the P95 targets.",
+    "WS29": "Unified Android experience — six surfaces consuming the mission/understanding APIs. Kotlin, not yet written.",
+    "WS33": "Durable orchestration — Temporal is stack-locked at adoption phase 11 and not deployed. External gate by your own governance."
   },
   "verification_caveats": {
     "kotlin": "android/ changes are unverified in this container: the Android Gradle Plugin 8.10.1 does not resolve offline or through the proxy. CI runs :app:testDebugUnitTest :app:assembleDebug :app:lintDebug and is the first real check of this code. Do not treat it as tested until CI is green.",
@@ -501,10 +508,10 @@
   "integration_status": {
     "note": "BUILT means the capability exists and is tested. It does not by itself mean a real execution path calls it. This section tracks that separately, because the distinction is easy to lose and expensive to discover late.",
     "wired_into_execution": [
-      "MissionBinder \u2014 browser task creation and automation execute bind themselves when a mission_id is supplied; no manual backfill needed.",
-      "CapabilityRegistry \u2014 MissionService.add_activity validates every capability against the mission's own authority envelope.",
-      "AutomationMediumRouter, WorkflowHealthService, TelemetryService, DeadLetterService \u2014 called by AutomationDispatcher on every run.",
-      "DecisionService \u2014 browser escalation raises through it; Android resolves through it."
+      "MissionBinder — browser task creation and automation execute bind themselves when a mission_id is supplied; no manual backfill needed.",
+      "CapabilityRegistry — MissionService.add_activity validates every capability against the mission's own authority envelope.",
+      "AutomationMediumRouter, WorkflowHealthService, TelemetryService, DeadLetterService — called by AutomationDispatcher on every run.",
+      "DecisionService — browser escalation raises through it; Android resolves through it."
     ],
     "reachable_only_by_api": [
       "CapabilityRouter (/v1/missions/route)",
@@ -512,9 +519,9 @@
       "AttentionScorer, DomainTrustService, AIEvolutionRadar, VanEval (/v1/eval, /v1/autonomy)"
     ],
     "not_yet_called_by_anything": [
-      "ContextCompiler \u2014 Hermes must compile a ContextPacket per turn; that is a Hermes-side change, not a gateway one.",
-      "VerifierRegistry \u2014 AutomationDispatcher still uses its own WorkflowVerifier. Unifying them is a behaviour change to a verified path and deserves its own commit.",
-      "CriticalReasoningKernel, RelationshipCalibrationEngine \u2014 consumed by Hermes, not the gateway."
+      "ContextCompiler — Hermes must compile a ContextPacket per turn; that is a Hermes-side change, not a gateway one.",
+      "VerifierRegistry — AutomationDispatcher still uses its own WorkflowVerifier. Unifying them is a behaviour change to a verified path and deserves its own commit.",
+      "CriticalReasoningKernel, RelationshipCalibrationEngine — consumed by Hermes, not the gateway."
     ]
   },
   "audit_correction": {

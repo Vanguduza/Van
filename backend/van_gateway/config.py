@@ -114,6 +114,14 @@ class Settings(BaseSettings):
     automation_timeout_seconds: float = 15.0
     automation_max_concurrency: int = 1
 
+    # Durable critical-process runtime. The gateway deliberately talks to a narrow
+    # token-authenticated bridge rather than importing temporalio: the Temporal client and
+    # worker live on the trading/runtime host where temporalio is exactly pinned.
+    temporal_enabled: bool = False
+    temporal_bridge_url: str = ""
+    temporal_bridge_token: str = ""
+    temporal_timeout_seconds: float = 10.0
+
     browser_enabled: bool = False
     browser_harness_base_url: str = "http://127.0.0.1:9141"
     browser_harness_expected_version: str = ""

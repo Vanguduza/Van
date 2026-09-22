@@ -106,11 +106,13 @@ class AutomationMediumRouter:
         hot_index: HotWorkflowIndex,
         templates: TemplateLibrary | None = None,
         health: WorkflowHealthService | None = None,
+        temporal_available: bool = False,
     ) -> None:
         self.registry = registry
         self.hot_index = hot_index
         self.templates = templates or TemplateLibrary()
         self.health = health
+        self.temporal_available = temporal_available
 
     async def route(self, request: RouteRequest) -> RouteDecision:
         # 0. Hard refusals first, so nothing downstream has to re-check them.
@@ -127,13 +129,21 @@ class AutomationMediumRouter:
                 detail="A5",
             )
 
-        # 1. Critical durable processes leave the automation fabric entirely (§86).
+        # 1. Critical durable processes leave n8n and use the Temporal coordination
+        #    runtime. The implementation is always a real route; deployment readiness is
+        #    stated separately so a missing Temporal host never masquerades as durability.
         if request.critical_durable:
             return RouteDecision(
-                medium=ExecutionMedium.TEMPORAL, reason=RouteReason.CRITICAL_DURABLE_PROCESS,
+                medium=ExecutionMedium.TEMPORAL,
+                reason=RouteReason.CRITICAL_DURABLE_PROCESS,
                 detail=(
-                    "Temporal is stack-locked at adoption phase 11 and not yet built; "
-                    "use a native VAN state machine until it is (§6 fallback)"
+                    "Temporal durable runtime configured; start through "
+                    "/v1/automation/temporal/start"
+                    if self.temporal_available
+                    else
+                    "Temporal durable runtime is implemented but this gateway has not "
+                    "configured its bridge; execution fails closed until VAN_TEMPORAL_* "
+                    "deployment settings are present"
                 ),
             )
 

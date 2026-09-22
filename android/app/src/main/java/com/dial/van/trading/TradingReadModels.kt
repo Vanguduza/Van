@@ -376,14 +376,44 @@ data class ClosedTrade(
     }
 }
 
-data class HistoryReadModel(val ledgerAvailable: Boolean, val count: Int, val byQuadrant: Map<String, Int>, val trades: List<ClosedTrade>) {
+data class HistoryCurvePoint(
+    val closedMs: Long,
+    val value: Double,
+    val tradeIntentId: String?,
+) {
+    companion object {
+        fun from(o: JsonObject): HistoryCurvePoint? {
+            val value = o.num("value") ?: return null
+            return HistoryCurvePoint(
+                closedMs = o.long("closed_ms") ?: 0L,
+                value = value,
+                tradeIntentId = o.str("trade_intent_id"),
+            )
+        }
+    }
+}
+
+data class HistoryReadModel(
+    val ledgerAvailable: Boolean,
+    val count: Int,
+    val byQuadrant: Map<String, Int>,
+    val equityCurveR: List<HistoryCurvePoint>,
+    val equityCurvePnl: List<HistoryCurvePoint>,
+    val trades: List<ClosedTrade>,
+) {
     companion object {
         fun parse(body: String): HistoryReadModel? {
             val o = parseObject(body) ?: return null
-            val byQuadrant = o.obj("by_quadrant")?.entries?.mapNotNull { (k, v) -> (v as? kotlinx.serialization.json.JsonPrimitive)?.content?.toIntOrNull()?.let { k to it } }?.toMap() ?: emptyMap()
+            val byQuadrant = o.obj("by_quadrant")?.entries?.mapNotNull { (k, v) ->
+                (v as? kotlinx.serialization.json.JsonPrimitive)?.content?.toIntOrNull()?.let { k to it }
+            }?.toMap() ?: emptyMap()
             return HistoryReadModel(
-                o.bool("ledger_available") ?: false, o.long("count")?.toInt() ?: 0, byQuadrant,
-                o.arr("history").mapNotNull(ClosedTrade::from),
+                ledgerAvailable = o.bool("ledger_available") ?: false,
+                count = o.long("count")?.toInt() ?: 0,
+                byQuadrant = byQuadrant,
+                equityCurveR = o.arr("equity_curve_r").mapNotNull(HistoryCurvePoint::from),
+                equityCurvePnl = o.arr("equity_curve_pnl").mapNotNull(HistoryCurvePoint::from),
+                trades = o.arr("history").mapNotNull(ClosedTrade::from),
             )
         }
     }

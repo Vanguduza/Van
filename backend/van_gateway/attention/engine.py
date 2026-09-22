@@ -160,12 +160,24 @@ class AttentionEngine:
             (AttentionState.ACKNOWLEDGED.value, now, item_id),
         )
 
-    async def snooze(self, item_id: str, until_unix: int) -> None:
+    async def snooze(self, item_id: str, until_unix: int) -> bool:
+        """Snooze one existing owner-attention item until an absolute Unix timestamp.
+
+        Returning a boolean rather than silently updating zero rows gives the HTTP surface a
+        deterministic 404 path and prevents the Android swipe gesture from reporting success for
+        an item that was already resolved or removed.
+        """
         now = int(time.time())
+        if int(until_unix) <= now:
+            raise ValueError("snooze_until_must_be_in_future")
+        existing = await self.store.fetchone("SELECT id FROM attention WHERE id = ?", (item_id,))
+        if existing is None:
+            return False
         await self.store.execute(
             "UPDATE attention SET state = ?, snooze_until_unix = ?, updated_at_unix = ? WHERE id = ?",
-            (AttentionState.SNOOZED.value, until_unix, now, item_id),
+            (AttentionState.SNOOZED.value, int(until_unix), now, item_id),
         )
+        return True
 
     async def mark_handled(self, item_id: str) -> None:
         now = int(time.time())

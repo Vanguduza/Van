@@ -27,6 +27,7 @@ import androidx.compose.ui.Modifier
 import com.dial.van.design.LocalVanTokens
 import com.dial.van.design.StatusSemantics
 import com.dial.van.design.components.SectionHeader
+import com.dial.van.design.components.Sparkline
 import com.dial.van.design.components.StatusChip
 import com.dial.van.design.components.VanPanel
 import com.dial.van.trading.ClosedTrade
@@ -38,12 +39,9 @@ import com.dial.van.trading.TradingRepository
 
 /**
  * DNA §4 Trading destination 5, "History & intelligence": closed trades with the decision
- * quadrant (never P&L alone, DNA §2/§6), attribution and lessons, and a small quadrant
- * distribution visual built from [TradingReadModels.quadrantTally]. There is no equity-curve
- * `Sparkline` here: `history()`'s response carries per-trade `r_multiple`/`pnl`, not a
- * ready-made R sequence, and this screen does not derive one — DNA's live-data rule is that a
- * panel shows what its `@DataSource` actually returned, never a value this screen computed to
- * fill the space.
+ * quadrant (never P&L alone, DNA §2/§6), attribution and lessons, a quadrant distribution,
+ * and the authoritative cumulative closed-trade R/P&L curves returned by the gateway. The
+ * screen does not synthesize a starting balance or derive hidden data locally.
  *
  * @DataSource("GET /v1/trading/history")
  */
@@ -73,6 +71,7 @@ fun HistoryScreen(repo: TradingRepository, nav: TradingNav) {
                 Text(TradingFormat.unavailableState(loaded.reason), style = tokens.type.body, color = tokens.color.forStatusRole(StatusSemantics.ROLE_EVENT_RISK))
             }
             is Loaded.Ready -> {
+                item { HistoryCurvePanel(loaded.value) }
                 item { QuadrantDistribution(loaded.value) }
                 if (loaded.value.trades.isEmpty()) {
                     item { Text("No closed trades yet.", style = tokens.type.body, color = tokens.color.textSecondary) }
@@ -86,6 +85,50 @@ fun HistoryScreen(repo: TradingRepository, nav: TradingNav) {
                 "The decision quadrant, not the P&L sign, is the axis that changes what VAN " +
                     "does next (DNA §6). Read model of the VATI ledger.",
             )
+        }
+    }
+}
+
+@Composable
+private fun HistoryCurvePanel(model: HistoryReadModel) {
+    val tokens = LocalVanTokens.current
+    val r = model.equityCurveR
+    val pnl = model.equityCurvePnl
+    VanPanel {
+        Column(verticalArrangement = Arrangement.spacedBy(tokens.space.space2)) {
+            Text("Closed-trade equity", style = tokens.type.headline, color = tokens.color.textPrimary)
+            when {
+                r.size >= 2 -> {
+                    Text(
+                        "Cumulative R · ${TradingFormat.number(r.last().value)}R",
+                        style = tokens.type.body,
+                        color = tokens.color.textSecondary,
+                    )
+                    Sparkline(values = r.map { it.value.toFloat() })
+                }
+                pnl.size >= 2 -> {
+                    Text(
+                        "Cumulative realised P&L · ${TradingFormat.number(pnl.last().value)}",
+                        style = tokens.type.body,
+                        color = tokens.color.textSecondary,
+                    )
+                    Sparkline(values = pnl.map { it.value.toFloat() })
+                }
+                r.size == 1 || pnl.size == 1 -> {
+                    Text(
+                        "One closed trade recorded — a trend appears after the next close.",
+                        style = tokens.type.body,
+                        color = tokens.color.textSecondary,
+                    )
+                }
+                else -> {
+                    Text(
+                        "No closed-trade curve data yet.",
+                        style = tokens.type.body,
+                        color = tokens.color.textSecondary,
+                    )
+                }
+            }
         }
     }
 }
