@@ -11,11 +11,11 @@ from .manifest import ROOT, sha256_file
 def now_iso() -> str:
     return datetime.now(timezone.utc).isoformat()
 
-def packaging_receipt(*, candidate: Path, stage: str, editor_version: str, rive_file_id: str, rive_revision: str, svg_sha: str, contract_sha: str, artist: str, notes: str = "") -> dict[str, Any]:
+def packaging_receipt(*, candidate: Path, stage: str, authoring_tool: str, authoring_version: str, rive_file_id: str, rive_revision: str, svg_sha: str, contract_sha: str, artist: str, notes: str = "") -> dict[str, Any]:
     if stage not in {"core_rig", "full_rig"}: raise ValueError("stage must be core_rig or full_rig")
     if not candidate.is_file(): raise FileNotFoundError(candidate)
-    fields = {"candidate_sha256": sha256_file(candidate), "candidate_path": candidate.resolve().relative_to(ROOT.resolve()).as_posix(), "stage": stage, "rive_editor_version": editor_version, "rive_file_id": rive_file_id, "rive_revision": rive_revision, "svg_sha256": svg_sha, "contract_sha256": contract_sha, "artist": artist, "exported_at": now_iso(), "notes": notes}
-    for key in ("rive_editor_version", "rive_file_id", "rive_revision", "svg_sha256", "contract_sha256", "artist"):
+    fields = {"candidate_sha256": sha256_file(candidate), "candidate_path": candidate.resolve().relative_to(ROOT.resolve()).as_posix(), "stage": stage, "authoring_tool": authoring_tool, "authoring_version": authoring_version, "rive_file_id": rive_file_id, "rive_revision": rive_revision, "svg_sha256": svg_sha, "contract_sha256": contract_sha, "artist": artist, "exported_at": now_iso(), "notes": notes}
+    for key in ("authoring_tool", "authoring_version", "rive_file_id", "rive_revision", "svg_sha256", "contract_sha256", "artist"):
         if not str(fields[key]).strip(): raise ValueError(f"{key} is required")
     return fields
 
