@@ -10,11 +10,13 @@ PY_VENV="$INSTALL_ROOT/venv"
 RIVE_HOME="$STATE_ROOT/rive-home"
 RIVE_PROJECT_ROOT="$WORKSPACE/visual-authority/character-forge/09-rive-working/rml"
 RIVE_CLOUD_WRITE_SENTINEL="$STATE_ROOT/allow-rive-cloud-write"
+JAVA_HOME="${CHARACTER_FORGE_JAVA_HOME:-/usr/lib/jvm/java-17-openjdk-amd64}"
 
 export HOME="$RIVE_HOME"
 export U2NET_HOME="$STATE_ROOT/rembg"
 export ANDROID_SDK_ROOT
-export PATH="/usr/local/bin:$ANDROID_SDK_ROOT/platform-tools:$ANDROID_SDK_ROOT/emulator:$ANDROID_SDK_ROOT/cmdline-tools/latest/bin:$PATH"
+export JAVA_HOME
+export PATH="$JAVA_HOME/bin:/usr/local/bin:$ANDROID_SDK_ROOT/platform-tools:$ANDROID_SDK_ROOT/emulator:$ANDROID_SDK_ROOT/cmdline-tools/latest/bin:$PATH"
 
 cd "$WORKSPACE"
 
