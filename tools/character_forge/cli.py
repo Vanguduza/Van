@@ -64,7 +64,7 @@ def cmd_source_admit(args):
         manifest["owner_confirmation_date"]=None
     if not status.get("baseline_sha"): status["baseline_sha"]=_git_head()
     manifest["baseline_sha"]=status["baseline_sha"]; status["current_stage"]="admission"; status["build_ready"]=False
-    status["blockers"]=["OWNER_SOURCE_CONFIRMATION_PENDING","RIVE_EDITOR_UNPINNED","LAYER_ARTIFACT_MISSING","RIVE_ASSET_MISSING","S24_DEVICE_GATES_NOT_RUN"]
+    status["blockers"]=["OWNER_SOURCE_CONFIRMATION_PENDING","RIVE_CLI_UNPINNED","LAYER_ARTIFACT_MISSING","RIVE_ASSET_MISSING","S24_DEVICE_GATES_NOT_RUN"]
     status["next_action"]="Owner reviews MANIFEST.yaml source set and sets owner_confirmed_complete: true with owner_confirmation_date"
     append_receipt(manifest,_receipt("source admit",sorted(f"{p}:{s}" for p,s in old),sorted(f"{p}:{s}" for p,s in new),args.actor)); _save(manifest,status)
     print("NO_CHANGE" if old==new else f"admitted {len(records)} source files"); return 0
@@ -177,7 +177,8 @@ def cmd_rive_stage(args):
     if receipt.get("contract_sha256")!=sha256_file(CONTRACT_PATH): print("refused: contract changed after Rive export",file=sys.stderr); return 1
     layer=find_artifact(load_yaml(),kind="layer_svg")
     if not layer or receipt.get("svg_sha256")!=layer.get("sha256"): print("refused: receipt references a superseded layer SVG",file=sys.stderr); return 1
-    if receipt.get("rive_editor_version")!=_pinned_tool("rive_editor"): print("refused: receipt editor version no longer matches TOOLS.yaml",file=sys.stderr); return 1
+    if receipt.get("authoring_tool")!="rive_cli": print("refused: receipt authoring tool is not rive_cli",file=sys.stderr); return 1
+    if receipt.get("authoring_version")!=_pinned_tool("rive_cli"): print("refused: receipt Rive CLI version no longer matches TOOLS.yaml",file=sys.stderr); return 1
     sha=sha256_file(candidate); mode="core" if stage=="core_rig" else "full"; threshold={"max_janky_percent":float((load_status().get("performance") or {}).get("max_janky_percent",5.0))}
     current_status=load_status(); key="core_rig" if stage=="core_rig" else "full_rig"
     staged=[ANDROID_TEST_ASSETS/"van_candidate.riv",ANDROID_DEBUG_ASSETS/"van_candidate.riv"]
