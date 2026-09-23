@@ -57,7 +57,7 @@ apt-get install -y --no-install-recommends \
   openjdk-17-jdk-headless \
   inkscape potrace imagemagick librsvg2-bin ffmpeg blender \
   xvfb dbus-x11 fonts-dejavu-core \
-  qemu-kvm libgl1 libpulse0 libnss3 libx11-6 libxcomposite1 libxcursor1 libxi6 \
+  qemu-kvm libgl1 libegl1 libgles2 libpulse0 libnss3 libx11-6 libxcomposite1 libxcursor1 libxi6 \
   libxrandr2 libxdamage1 libxfixes3 libxtst6
 
 if ! command -v google-chrome >/dev/null 2>&1; then
