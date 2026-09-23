@@ -8,7 +8,7 @@ from typing import Any, AsyncIterator
 
 import aiosqlite
 
-SCHEMA_VERSION = 29
+SCHEMA_VERSION = 30
 
 
 MIGRATION_17 = """
@@ -591,6 +591,24 @@ MIGRATION_29 = """
 -- construction: it was created by the owner device, the only producer that existed before
 -- this migration.
 ALTER TABLE reminders ADD COLUMN source TEXT NOT NULL DEFAULT 'owner_device';
+"""
+
+MIGRATION_30 = """
+-- VAN Character Forge Rev 2 §15. The acceptance record binds an owner-authority
+-- signature to the exact authored Rive bytes and the APK/device that displayed them.
+-- UNIQUE(token) makes replay of the same signed verdict idempotent.
+CREATE TABLE IF NOT EXISTS visual_acceptances (
+  id TEXT PRIMARY KEY,
+  rive_sha256 TEXT NOT NULL,
+  apk_sha256 TEXT NOT NULL,
+  token TEXT NOT NULL UNIQUE,
+  key_id TEXT NOT NULL,
+  device_model TEXT NOT NULL,
+  android_build TEXT NOT NULL,
+  verified_at INTEGER NOT NULL
+);
+CREATE INDEX IF NOT EXISTS idx_visual_acceptances_latest
+  ON visual_acceptances(verified_at DESC);
 """
 
 MIGRATIONS: dict[int, str] = {
@@ -1924,6 +1942,7 @@ MIGRATIONS: dict[int, str] = {
     27: MIGRATION_27,
     28: MIGRATION_28,
     29: MIGRATION_29,
+    30: MIGRATION_30,
 }
 
 

@@ -1,23 +1,14 @@
 # VAN Rive Authoring Handoff
 
-Status: EXTERNAL AUTHORING GATE
+This file is intentionally a pointer, not a second source of truth.
 
-## Deliverable
+The authoritative executable authoring specification is:
 
-Single `.riv` file: `visual-authority/rive/van_runtime.riv`
+`docs/character_forge/VAN_CHARACTER_FORGE_DEVELOPMENT_PACK_REV_2.md`
 
-- Artboard name: `Van`
-- State machine: `VanRuntime`
-- Inputs/triggers/state codes: exactly as `visual-authority/rive_contract.json`
-- Identity: silver/white hair, cyan visor, medium-brown skin, blue eyes, technical jacket, cyan orb
+Use its M1-M3 layer, core-rig, full-rig, packaging-receipt, candidate-staging,
+validation and owner-verdict contracts exactly. The public Rive wire surface remains
+authoritative in `visual-authority/rive_contract.json`.
 
-## Acceptance
-
-- All durable states render without frantic motion
-- Compact avatar remains readable at overlay size
-- Unknown action codes are unused (runtime rejects them)
-- Dark hair / generic robot = automatic rejection
-
-## Runtime until delivery
-
-Android uses Canvas fallback driven by the same state/action enums. Tests bind Kotlin enums to `rive_contract.json`.
+Do not copy requirements back into this file. A duplicated handoff would create a
+second visual/rigging truth and is forbidden by Character Forge Rev 2.

@@ -242,6 +242,12 @@ POLICIES: tuple[TablePolicy, ...] = (
        note="A dismissal is the owner's decision; it expires by its own "
             "suppressed_until, not by a retention sweep."),
     _p("scheduler_runs", _TEL, "run_at_unix", TimeUnit.SECONDS),
+    _p(
+        "visual_acceptances",
+        _OWNER,
+        note="The owner's cryptographic acceptance of an exact character/APK release. "
+             "Release provenance must not disappear because a retention timer elapsed.",
+    ),
 
     # ---- children -----------------------------------------------------------
     _p("mission_events", _CHILD, parent=("mission_id", "missions")),

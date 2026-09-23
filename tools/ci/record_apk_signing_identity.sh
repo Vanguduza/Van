@@ -48,3 +48,28 @@ fi
 
 echo "signing-identity: $apk"
 cat "$out"
+
+# Character Forge M5 — bind the APK to the exact shipped Rive bytes when present.
+manifest="visual-authority/rive/manifest.json"
+rive_entry="assets/van.riv"
+if unzip -l "$apk" "$rive_entry" >/dev/null 2>&1; then
+  tmp_rive="$(mktemp)"
+  trap 'rm -f "$tmp_rive"' EXIT
+  unzip -p "$apk" "$rive_entry" > "$tmp_rive"
+  rive_sha256="$(sha256sum "$tmp_rive" | awk '{print $1}')"
+  echo "rive_sha256=$rive_sha256" >> "$out"
+  if [ -f "$manifest" ]; then
+    expected="$(python3 - "$manifest" <<'PY'
+import json,sys
+print(json.load(open(sys.argv[1], encoding="utf-8"))["rive_sha256"])
+PY
+)"
+    if [ "$rive_sha256" != "$expected" ]; then
+      echo "signing-identity: APK Rive SHA $rive_sha256 differs from release manifest $expected" >&2
+      exit 1
+    fi
+  fi
+elif [ -f "$manifest" ]; then
+  echo "signing-identity: release manifest exists but $rive_entry is missing from APK" >&2
+  exit 1
+fi

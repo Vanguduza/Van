@@ -2,5 +2,11 @@
 <manifest xmlns:android="http://schemas.android.com/apk/res/android">
     <!-- Debug-only transport for the intentional 127.0.0.1/localhost fallback in
          VanGatewayClient. Release builds remain HTTPS-only and never merge this manifest. -->
-    <application android:usesCleartextTraffic="true" />
+    <application android:usesCleartextTraffic="true">
+        <activity
+            android:name=".visual.RiveCandidateHostActivity"
+            android:exported="false"
+            android:label="VAN Rive candidate"
+            android:theme="@style/Theme.Van" />
+    </application>
 </manifest>

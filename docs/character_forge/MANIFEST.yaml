@@ -1,0 +1,27 @@
+pack: VAN-CHARACTER-FORGE-DP-R2
+baseline_sha: 3c337efe91faa8461dd28b1f18a26cf346a1b66f
+owner_confirmed_complete: false
+owner_confirmation_date: null
+source_roots:
+  - visual-authority/assets
+  - visual-authority/rive_contract.json
+  - docs/VAN_CHARACTER_VISUAL_IDENTITY.md
+  - docs/VAN_VISUAL_ACCEPTANCE_MATRIX.md
+sources: []
+artifacts: []
+reviews: {}
+receipts: []
+ci_evidence: {}
+decisions:
+  - id: CF-D-02-REV2_1
+    status: ADOPTED
+    date: 2026-09-23
+    authority: owner_direction
+    decision: Pinned Linux x86_64 Rive CLI is the deterministic M2/M3 authoring/build authority; Rive Editor is optional review.
+    milestone_effect: NONE
+  - id: CF-D-03-REV2_1
+    status: ADOPTED
+    date: 2026-09-23
+    authority: owner_direction
+    decision: Optional preparation and review lanes may be installed on Netcup but are not milestone prerequisites unless explicitly invoked.
+    milestone_effect: NONE

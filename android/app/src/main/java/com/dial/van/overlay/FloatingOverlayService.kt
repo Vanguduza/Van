@@ -1,7 +1,6 @@
 package com.dial.van.overlay
 
 import android.app.Service
-import android.content.BroadcastReceiver
 import android.content.Context
 import android.content.Intent
 import android.content.IntentFilter
@@ -25,6 +24,7 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.input.pointer.pointerInput
 import androidx.compose.ui.platform.ComposeView
 import androidx.compose.ui.unit.dp
+import androidx.core.content.ContextCompat
 import androidx.lifecycle.Lifecycle
 import androidx.lifecycle.LifecycleOwner
 import androidx.lifecycle.LifecycleRegistry
@@ -57,57 +57,18 @@ class FloatingOverlayService : Service(), LifecycleOwner, SavedStateRegistryOwne
     private var tradeView by mutableStateOf(TradeView.CURRENT)
     private var tradeRefreshTick by mutableStateOf(0)
 
-    /**
-     * P1-PERF-002 — the overlay used to animate with the screen off.
-     *
-     * The lifecycle was driven to STARTED when the view was added and never below it while
-     * the service lived, and there was no screen-state receiver, so the infinite transition
-     * kept producing frames into a display nobody was looking at. `visibility` is the
-     * policy's input; `OverlayVisibilityPolicy` decides what it means, and the frame loop in
-     * `VanEmbodiment` stops when it says so.
-     */
     private var visibility by mutableStateOf(OverlayVisibility())
 
-    private val screenReceiver = object : BroadcastReceiver() {
-        override fun onReceive(context: Context?, intent: Intent?) {
-            when (intent?.action) {
-                Intent.ACTION_SCREEN_ON, Intent.ACTION_USER_PRESENT -> setScreenOn(true)
-                Intent.ACTION_SCREEN_OFF -> setScreenOn(false)
-            }
-        }
-    }
+    /** Broadcast parsing is isolated; the service owns lifecycle state and policy. */
+    private val screenReceiver = OverlayScreenStateReceiver(::setScreenOn)
 
-    /**
-     * The producer for the two obstruction fields that used to be policy-only.
-     *
-     * The AccessibilityService broadcasts only window metadata. Keyboard obstruction moves
-     * VAN above the IME before pausing expensive animation; immersive full-screen pauses the
-     * animation without pretending the overlay is detached.
-     */
-    private val obstructionReceiver = object : BroadcastReceiver() {
-        override fun onReceive(context: Context?, intent: Intent?) {
-            if (intent?.action != VanObstructionAccessibilityService.ACTION_OBSTRUCTION_STATE) return
-            val keyboardVisible = intent.getBooleanExtra(
-                VanObstructionAccessibilityService.EXTRA_KEYBOARD_VISIBLE,
-                false,
-            )
-            val fullscreen = intent.getBooleanExtra(
-                VanObstructionAccessibilityService.EXTRA_FULLSCREEN_APP_ACTIVE,
-                false,
-            )
-            visibility = visibility.copy(
-                keyboardVisible = keyboardVisible,
-                fullscreenAppActive = fullscreen,
-            )
-            if (keyboardVisible) {
-                val keyboardTop = intent.getIntExtra(
-                    VanObstructionAccessibilityService.EXTRA_KEYBOARD_TOP_PX,
-                    Int.MAX_VALUE,
-                )
-                moveAboveKeyboard(keyboardTop)
-            }
-            applyVisibilityLifecycle()
-        }
+    private val obstructionReceiver = OverlayObstructionReceiver { state ->
+        visibility = visibility.copy(
+            keyboardVisible = state.keyboardVisible,
+            fullscreenAppActive = state.fullscreenAppActive,
+        )
+        if (state.keyboardVisible) moveAboveKeyboard(state.keyboardTopPx)
+        applyVisibilityLifecycle()
     }
 
     private fun moveAboveKeyboard(keyboardTopPx: Int) {
@@ -208,12 +169,12 @@ class FloatingOverlayService : Service(), LifecycleOwner, SavedStateRegistryOwne
         val obstructionFilter = IntentFilter(
             VanObstructionAccessibilityService.ACTION_OBSTRUCTION_STATE,
         )
-        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.TIRAMISU) {
-            registerReceiver(obstructionReceiver, obstructionFilter, RECEIVER_NOT_EXPORTED)
-        } else {
-            @Suppress("DEPRECATION")
-            registerReceiver(obstructionReceiver, obstructionFilter)
-        }
+        ContextCompat.registerReceiver(
+            this,
+            obstructionReceiver,
+            obstructionFilter,
+            ContextCompat.RECEIVER_NOT_EXPORTED,
+        )
         applyVisibilityLifecycle()
         stateStore.markRunning(true)
     }
@@ -369,12 +330,7 @@ class FloatingOverlayService : Service(), LifecycleOwner, SavedStateRegistryOwne
         dragController.finish(uiState, reducedMotion = isReducedMotion())?.let(::updateUiState)
     }
 
-    /** DNA §2's reduced-motion rule — read directly since this call is not inside Compose. */
-    private fun isReducedMotion(): Boolean = runCatching {
-        android.provider.Settings.Global.getFloat(
-            contentResolver, android.provider.Settings.Global.ANIMATOR_DURATION_SCALE, 1f,
-        ) == 0f
-    }.getOrDefault(false)
+    private fun isReducedMotion(): Boolean = systemReducedMotionEnabled()
 
     private fun cancelDrag() = updateUiState(dragController.cancel(uiState))
 
@@ -414,13 +370,7 @@ class FloatingOverlayService : Service(), LifecycleOwner, SavedStateRegistryOwne
 
         override fun dockedTo(edge: DockEdge, durationMs: Int) {
             dockEdge = edge
-            // `moveTo` has already placed the window at its final, snapped position by the
-            // time this is called (Rev 3.0 s41's ordering: the controller decides *where*,
-            // this records *which edge*); `durationMs` — item 3's velocity-based fling
-            // duration — is kept on the state for a future Compose-driven glide rather than
-            // animated here, since the window itself is WindowManager-placed, not Compose-
-            // observed, and animating it needs its own interpolation loop this change does
-            // not add.
+            // Placement is already snapped; this callback records the owning edge.
         }
 
         override fun dockFeedback() {
@@ -480,15 +430,7 @@ class FloatingOverlayService : Service(), LifecycleOwner, SavedStateRegistryOwne
         const val ACTION_OPEN_COMMAND = "com.dial.van.overlay.OPEN_COMMAND"
         private const val NOTIFICATION_ID = 1001
 
-        /**
-         * Whether the overlay service is up.
-         *
-         * P3-AND-004 — the health screen had no way to ask, so "the floating assistant is
-         * not running" was a state VAN could be in and never report. Set in `onCreate` and
-         * cleared in `onDestroy` rather than inferred from `ActivityManager`, whose running
-         * services list has returned only this app's own services since Android 8 and is
-         * deprecated besides.
-         */
+        /** Explicit service health; never inferred from deprecated ActivityManager state. */
         @Volatile
         private var running: Boolean = false
 

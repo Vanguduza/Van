@@ -100,7 +100,7 @@ private fun HistoryCurvePanel(model: HistoryReadModel) {
             when {
                 r.size >= 2 -> {
                     Text(
-                        "Cumulative R · ${TradingFormat.number(r.last().value)}R",
+                        "Cumulative R · ${TradingFormat.r(r.last().value)}",
                         style = tokens.type.body,
                         color = tokens.color.textSecondary,
                     )
@@ -108,7 +108,7 @@ private fun HistoryCurvePanel(model: HistoryReadModel) {
                 }
                 pnl.size >= 2 -> {
                     Text(
-                        "Cumulative realised P&L · ${TradingFormat.number(pnl.last().value)}",
+                        "Cumulative realised P&L · ${TradingFormat.money(pnl.last().value, signed = true)}",
                         style = tokens.type.body,
                         color = tokens.color.textSecondary,
                     )

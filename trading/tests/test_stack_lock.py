@@ -48,9 +48,27 @@ def test_non_permissive_licences_require_owner_decision():
             assert any("owner-signed adoption decision" in c for c in l.get("constraints", [])), l["layer"]
 
 
-def test_nothing_is_pinned_before_adoption_gate():
-    for l in LAYERS:
-        assert l["pin_status"] in {"UNPINNED_VERIFY_AT_ADOPTION", "PIN_TO_DIAL_COMMIT_AT_ADOPTION", "N/A"}, l["layer"]
+def test_pins_are_unadopted_or_backed_by_closure_evidence():
+    pre_adoption = {"UNPINNED_VERIFY_AT_ADOPTION", "PIN_TO_DIAL_COMMIT_AT_ADOPTION", "N/A"}
+    for layer in LAYERS:
+        status = layer["pin_status"]
+        if status in pre_adoption:
+            continue
+        assert status == "PINNED_POST_FABLE_CLOSURE", layer["layer"]
+        assert "repository-complete" in layer.get("build_status", "").lower(), layer["layer"]
+        assert layer.get("observed_version"), layer["layer"]
+        ref = layer.get("pin_evidence_ref", "")
+        path_text, separator, gap_id = ref.partition("#")
+        assert separator and gap_id, f"{layer['layer']} pin has no gap evidence reference"
+        evidence_path = Path(__file__).resolve().parents[2] / path_text
+        assert evidence_path.is_file(), ref
+        register = json.loads(evidence_path.read_text(encoding="utf-8"))
+        gap = next((row for row in register.get("gaps", []) if row.get("id") == gap_id), None)
+        assert gap is not None, ref
+        closure = gap.get("closure") or {}
+        assert closure.get("commits"), f"{ref} has no closure commit"
+        assert "implemented" in (gap.get("fix") or "").lower(), ref
+        assert layer.get("pin_reason"), f"{layer['layer']} pin has no reason"
 
 
 def test_single_authorities_declared():

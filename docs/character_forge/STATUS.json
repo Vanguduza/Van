@@ -1,0 +1,43 @@
+{
+  "pack": "VAN-CHARACTER-FORGE-DP-R2",
+  "baseline_sha": "3c337efe91faa8461dd28b1f18a26cf346a1b66f",
+  "build_ready": false,
+  "current_stage": "admission",
+  "rive_authored": false,
+  "rive_contract_ready": true,
+  "rive_runtime_ready": true,
+  "rive_asset_ready": false,
+  "device_qualified": false,
+  "owner_accepted": false,
+  "qual_emb_01": "EXTERNAL_ARTEFACT",
+  "core_rig": {
+    "candidate_sha256": null,
+    "emulator_validation": "NOT_RUN",
+    "ci_run": null,
+    "owner_verdict": "NONE"
+  },
+  "full_rig": {
+    "candidate_sha256": null,
+    "emulator_validation": "NOT_RUN",
+    "ci_run": null,
+    "reviewed": "NONE"
+  },
+  "performance": {
+    "max_janky_percent": 5,
+    "last_janky_percent": null
+  },
+  "blockers": [
+    "SOURCE_SET_NOT_ADMITTED",
+    "OWNER_SOURCE_CONFIRMATION_PENDING",
+    "RIVE_CLI_UNPINNED",
+    "LAYER_ARTIFACT_MISSING",
+    "RIVE_ASSET_MISSING",
+    "S24_DEVICE_GATES_NOT_RUN"
+  ],
+  "next_action": "Run the Netcup Character Forge authoring bootstrap after DIAL control setup, then pin the qualified Rive CLI version before M2.",
+  "production": {
+    "emulator_validation": "NOT_RUN",
+    "ci_run": null,
+    "rive_sha256": null
+  }
+}
