@@ -3,15 +3,24 @@ critical_path:
     version: "9.6.5"
     class: RUNTIME
     source: android/app/build.gradle.kts
-  rive_editor:
+  rive_cli:
     version: UNPINNED
-    class: AUTHORING
+    class: AUTHORING_BUILD
     required_from: M2
+    qualification_source: deploy/character-forge/qualify-netcup-authoring.sh
   inkscape:
     version: UNPINNED
     class: AUTHORING
     required_from: M1
+review_lanes:
+  rive_editor:
+    version: OPTIONAL
+    class: HUMAN_REVIEW
+  chrome:
+    version: UNPINNED
+    class: HUMAN_REVIEW
 lanes:
-  comfyui: {class: LANE, enabled: false}
-  sam2_birefnet: {class: LANE, enabled: false}
-  inochi2d_blender_corive: {class: LANE, enabled: false}
+  rembg_birefnet: {class: PREP, enabled: true}
+  vtracer: {class: PREP, enabled: true}
+  blender: {class: AUXILIARY, enabled: true}
+  comfyui: {class: OPTIONAL_AI, enabled: false}
