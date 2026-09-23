@@ -22,6 +22,27 @@ grep -q '<StateMachine' "$PROJECT/scene.rml" || {
   exit 1
 }
 
+python3 - "$PROJECT/scene.rml" <<'PY'
+from pathlib import Path
+import sys
+
+path = Path(sys.argv[1])
+text = path.read_text(encoding="utf-8")
+needle = "<StateMachine "
+start = text.find(needle)
+if start < 0:
+    raise SystemExit("Rive smoke: StateMachine opening tag missing")
+close = text.find(">", start)
+if close < 0:
+    raise SystemExit("Rive smoke: malformed StateMachine opening tag")
+inputs = """
+            <StateMachineBool name="smoke_bool" value="false"/>
+            <StateMachineTrigger name="smoke_trigger"/>
+"""
+text = text[: close + 1] + inputs + text[close + 1 :]
+path.write_text(text, encoding="utf-8")
+PY
+
 verify_json="$(rive "$PROJECT" --verify --format=json)"
 printf '%s
 ' "$verify_json" | jq -e '.success == true and .command == "verify"' >/dev/null
@@ -35,10 +56,20 @@ if [[ "$riv_path" != /* ]]; then
 fi
 [[ -s "$riv_path" ]] || { echo "Rive smoke: built .riv missing/empty: $riv_path" >&2; exit 1; }
 
-inspect_json="$(rive inspect "$PROJECT" --summary --json)"
+inspect_json="$(rive inspect "$PROJECT" --json)"
 printf '%s
 ' "$inspect_json" | grep -q 'StateMachine' || {
   echo "Rive smoke: inspect output contains no StateMachine" >&2
+  exit 1
+}
+printf '%s
+' "$inspect_json" | grep -q 'smoke_bool' || {
+  echo "Rive smoke: compiled StateMachineBool input missing from inspect output" >&2
+  exit 1
+}
+printf '%s
+' "$inspect_json" | grep -q 'smoke_trigger' || {
+  echo "Rive smoke: compiled StateMachineTrigger input missing from inspect output" >&2
   exit 1
 }
 
@@ -61,6 +92,8 @@ jq -n   --arg at "$(date -u +%Y-%m-%dT%H:%M:%SZ)"   --arg version "$(rive --vers
     at:$at,
     rive_version:$version,
     project_scaffold_state_machine:true,
+    compiled_boolean_input:"smoke_bool",
+    compiled_trigger_input:"smoke_trigger",
     state_machine_bool_schema:true,
     state_machine_trigger_schema:true,
     built_riv:$riv,
