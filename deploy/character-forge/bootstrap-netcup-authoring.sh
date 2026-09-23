@@ -171,7 +171,7 @@ visudo -cf /etc/sudoers.d/van-character-forge >/dev/null
 
 log "recording installed toolchain"
 RIVE_VERSION="$(runuser -u "$FORGE_USER" -- env HOME="$RIVE_HOME" rive --version 2>&1 | head -n1 || true)"
-[[ -n "$RIVE_VERSION" ]] || RIVE_VERSION="version-command-unavailable"
+[[ -n "$RIVE_VERSION" ]] || die "Rive CLI did not expose an exact version; refusing an unpinned authoring workstation"
 INKSCAPE_VERSION="$(inkscape --version | head -n1)"
 CHROME_VERSION="$(google-chrome --version | head -n1)"
 JAVA_VERSION="$(java -version 2>&1 | head -n1)"
