@@ -58,3 +58,17 @@ def test_every_state_changing_character_forge_command_records_provenance():
         if "append_receipt" not in inspect.getsource(fn)
     ]
     assert missing == [], f"state-changing commands without manifest receipts: {missing}"
+
+
+def test_rev2_canon_uses_rive_cli_not_editor_as_m2_authority():
+    from pathlib import Path
+    from tools.character_forge.manifest import ROOT
+
+    pack = (ROOT / "docs" / "character_forge" / "VAN_CHARACTER_FORGE_DEVELOPMENT_PACK_REV_2.md").read_text(encoding="utf-8")
+    tools = (ROOT / "docs" / "character_forge" / "TOOLS.yaml").read_text(encoding="utf-8")
+
+    assert "CF-D-02 | **Rev 2.1 amendment:** the pinned Linux x86_64 Rive CLI" in pack
+    assert "rive_cli:" in tools
+    assert "review_lanes:" in tools
+    critical = tools.split("review_lanes:", 1)[0]
+    assert "rive_editor:" not in critical
