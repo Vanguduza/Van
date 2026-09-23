@@ -34,8 +34,8 @@ import com.dial.van.design.components.SectionHeader
  * The ARTEMIS web surface inside VAN.
  *
  * ARTEMIS remains a Hermes subordinate. This WebView never carries the Netcup console
- * bearer token and the Netcup proxy is observe-only; task mutations continue through
- * Hermes' governed Android testing broker.
+ * bearer token. State-changing requests are accepted only by the narrow Hermes-governed
+ * Netcup owner allowlist; privileged ARTEMIS admin mutations remain blocked.
  */
 @Composable
 fun ArtemisConsoleRoute(app: VanApplication, onBack: () -> Unit) {
@@ -75,9 +75,9 @@ fun ArtemisConsoleRoute(app: VanApplication, onBack: () -> Unit) {
         ) {
             Button(onClick = onBack) { Text("← Work") }
         }
-        SectionHeader("ARTEMIS Android Lab", detail = "Hermes-governed • observation console")
+        SectionHeader("ARTEMIS Android Lab", detail = "Hermes-governed • owner control console")
         Text(
-            "Live device state, traces, replay and diagnostics are shown here. Start, stop, guide or diagnose Android work through VAN/Hermes so ARTEMIS remains a subordinate executor.",
+            "Live device state, tasks, traces and diagnostics are shown here. Task start/stop, admitted device selection, admitted emulator launch and safe ADB recovery stay behind Hermes governance; credential, destructive-history and ARTEMIS lifecycle admin remain blocked.",
             style = tokens.type.label,
             color = tokens.color.textSecondary,
         )
@@ -98,6 +98,7 @@ fun ArtemisConsoleRoute(app: VanApplication, onBack: () -> Unit) {
                         WebView.setWebContentsDebuggingEnabled(BuildConfig.DEBUG)
                         WebView(context).also { view ->
                             webView = view
+                            CookieManager.getInstance().setAcceptThirdPartyCookies(view, false)
                             view.settings.javaScriptEnabled = true
                             view.settings.domStorageEnabled = true
                             view.settings.allowFileAccess = false
