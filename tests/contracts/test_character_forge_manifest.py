@@ -39,6 +39,7 @@ def test_every_state_changing_character_forge_command_records_provenance():
 
     mutators = (
         cli.cmd_source_admit,
+        cli.cmd_tools_import_lock,
         cli.cmd_vectors_admit,
         cli.cmd_rive_receipt,
         cli.cmd_rive_stage,
