@@ -105,14 +105,29 @@ else
   add rive_authoring_surface RED "$(tail -c 500 /tmp/van-rive-authoring.txt 2>/dev/null)"
 fi
 
+if runuser -u "$FORGE_USER" -- env \
+  CHARACTER_FORGE_STATE_ROOT="$STATE_ROOT" \
+  RIVE_HOME="$RIVE_HOME" \
+  /usr/local/libexec/van-character-forge-rive-smoke >/tmp/van-rive-smoke.json 2>/tmp/van-rive-smoke.err; then
+  add rive_authoring_smoke GREEN "$(jq -c '{rive_version,built_riv_sha256,project_scaffold_state_machine,state_machine_bool_schema,state_machine_trigger_schema}' /tmp/van-rive-smoke.json)"
+else
+  add rive_authoring_smoke RED "$(tail -c 800 /tmp/van-rive-smoke.err 2>/dev/null)"
+fi
+
 if sudo -n -u "$FORGE_USER" /usr/local/libexec/van-character-forge-worker doctor >/tmp/van-forge-worker.txt 2>&1; then
   add commander_worker GREEN "$(tail -n1 /tmp/van-forge-worker.txt)"
 else
   add commander_worker RED "$(tail -c 500 /tmp/van-forge-worker.txt 2>/dev/null)"
 fi
 
-if [[ -s "$STATE_ROOT/toolchain.lock.json" ]] && jq -e '.rive_cli.version and .android.avd' "$STATE_ROOT/toolchain.lock.json" >/dev/null 2>&1; then
-  add toolchain_lock GREEN "$STATE_ROOT/toolchain.lock.json"
+if [[ -s "$STATE_ROOT/toolchain.lock.json" ]] && jq -e '.rive_cli.version and .rive_cli.archive_sha256 and .android.avd' "$STATE_ROOT/toolchain.lock.json" >/dev/null 2>&1; then
+  locked_rive="$(jq -r '.rive_cli.version' "$STATE_ROOT/toolchain.lock.json")"
+  reported_rive="$(runuser -u "$FORGE_USER" -- env HOME="$RIVE_HOME" rive --version 2>&1 | head -n1 || true)"
+  if [[ "$reported_rive" == *"$locked_rive"* ]]; then
+    add toolchain_lock GREEN "$STATE_ROOT/toolchain.lock.json"
+  else
+    add toolchain_lock RED "Rive lock/version mismatch: lock=$locked_rive observed=$reported_rive"
+  fi
 else
   add toolchain_lock RED missing
 fi
