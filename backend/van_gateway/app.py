@@ -1504,13 +1504,13 @@ def create_app() -> FastAPI:
         response.headers["Cache-Control"] = "no-store"
         return response
 
-    @app.api_route("/v1/artemis/console", methods=["GET", "HEAD", "OPTIONS"])
-    @app.api_route("/v1/artemis/console/", methods=["GET", "HEAD", "OPTIONS"])
-    @app.api_route("/v1/artemis/console/{resource_path:path}", methods=["GET", "HEAD", "OPTIONS"])
+    @app.api_route("/v1/artemis/console", methods=["GET", "HEAD", "OPTIONS", "POST"])
+    @app.api_route("/v1/artemis/console/", methods=["GET", "HEAD", "OPTIONS", "POST"])
+    @app.api_route("/v1/artemis/console/{resource_path:path}", methods=["GET", "HEAD", "OPTIONS", "POST"])
     async def proxy_artemis_console(request: Request, resource_path: str = ""):
         return await artemis_console.proxy(request)
 
-    @app.api_route("/api/{resource_path:path}", methods=["GET", "HEAD", "OPTIONS"])
+    @app.api_route("/api/{resource_path:path}", methods=["GET", "HEAD", "OPTIONS", "POST"])
     async def proxy_artemis_console_api(request: Request, resource_path: str):
         return await artemis_console.proxy(request)
 
