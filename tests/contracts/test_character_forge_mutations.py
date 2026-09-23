@@ -5,7 +5,7 @@ from pathlib import Path
 
 import yaml
 
-from tools.character_forge import gates
+from tools.character_forge import cli, gates, manifest as manifest_module, receipts
 from tools.character_forge.gates import contract_surface_problems
 from tools.character_forge.manifest import load_yaml, sha256_file
 from tools.character_forge.status import load_status, validate_status
@@ -228,3 +228,106 @@ def test_unreceipted_candidate_is_not_stageable(monkeypatch, tmp_path: Path):
     candidate = tmp_path / "unreceipted_core.riv"
     candidate.write_bytes(b"x" * 2048)
     assert cli.main(["rive", "stage-candidate", str(candidate), "--stage", "core_rig"]) == 1
+
+
+def test_rive_cli_receipt_can_stage_and_reach_m2_positive_path(monkeypatch, tmp_path: Path):
+    root = tmp_path
+    working = root / "visual-authority" / "character-forge" / "09-rive-working"
+    working.mkdir(parents=True)
+    candidate = working / "van_core.riv"
+    candidate.write_bytes(b"RIVE" * 512)
+
+    contract = root / "visual-authority" / "rive_contract.json"
+    contract.parent.mkdir(parents=True, exist_ok=True)
+    contract.write_text('{"artboard":"Van","state_machine":"VanRuntime"}\n', encoding="utf-8")
+
+    test_assets = root / "androidTest" / "assets"
+    debug_assets = root / "debug" / "assets"
+    layer_sha = "a" * 64
+    manifest = {
+        "artifacts": [
+            {
+                "artifact_id": f"layer_svg:{layer_sha}",
+                "kind": "layer_svg",
+                "path": "visual-authority/character-forge/van_layers.svg",
+                "sha256": layer_sha,
+                "stage": "vector",
+                "promotion": "CANDIDATE",
+            }
+        ],
+        "receipts": [],
+        "reviews": {},
+    }
+    status = {
+        "performance": {"max_janky_percent": 5.0},
+        "core_rig": {
+            "candidate_sha256": None,
+            "emulator_validation": "NOT_RUN",
+            "ci_run": None,
+            "owner_verdict": "NONE",
+        },
+        "full_rig": {
+            "candidate_sha256": None,
+            "emulator_validation": "NOT_RUN",
+            "ci_run": None,
+            "reviewed": "NONE",
+        },
+        "current_stage": "vector",
+        "next_action": "",
+    }
+    tools = {"critical_path": {"rive_cli": {"version": "0.1.0"}}}
+
+    monkeypatch.setattr(manifest_module, "ROOT", root)
+    monkeypatch.setattr(receipts, "ROOT", root)
+    monkeypatch.setattr(cli, "WORKING_DIR", working)
+    monkeypatch.setattr(cli, "CONTRACT_PATH", contract)
+    monkeypatch.setattr(cli, "ANDROID_TEST_ASSETS", test_assets)
+    monkeypatch.setattr(cli, "ANDROID_DEBUG_ASSETS", debug_assets)
+    monkeypatch.setattr(cli, "load_yaml", lambda: manifest)
+    monkeypatch.setattr(cli, "load_status", lambda: status)
+    monkeypatch.setattr(cli, "_yaml", lambda _path: tools)
+    monkeypatch.setattr(cli, "_save", lambda _manifest, _status: None)
+
+    assert cli.main([
+        "--actor", "test",
+        "rive", "receipt",
+        "--candidate", str(candidate),
+        "--stage", "core_rig",
+        "--authoring-version", "0.1.0",
+        "--rive-file-id", "local:test",
+        "--rive-revision", "1",
+        "--svg-sha", layer_sha,
+        "--artist", "test",
+    ]) == 0
+
+    assert cli.main([
+        "--actor", "test",
+        "rive", "stage-candidate", str(candidate),
+        "--stage", "core_rig",
+    ]) == 0
+
+    candidate_sha = sha256_file(candidate)
+    assert status["core_rig"]["candidate_sha256"] == candidate_sha
+    assert sha256_file(test_assets / "van_candidate.riv") == candidate_sha
+    assert sha256_file(debug_assets / "van_candidate.riv") == candidate_sha
+
+    status["core_rig"].update(
+        {
+            "emulator_validation": "PASS",
+            "ci_run": "https://github.com/Vanguduza/Van/actions/runs/123",
+            "owner_verdict": "PASS",
+        }
+    )
+    baseline = root / "visual-authority" / "character-forge" / "11-device-evidence" / "core_baseline"
+    baseline.mkdir(parents=True)
+    (baseline / "idle.png").write_bytes(b"PNG")
+
+    monkeypatch.setattr(gates, "ROOT", root)
+    monkeypatch.setattr(gates, "CONTRACT", contract)
+    monkeypatch.setattr(gates, "m1", lambda: [])
+    monkeypatch.setattr(gates, "load_yaml", lambda: manifest)
+    monkeypatch.setattr(gates, "load_status", lambda: status)
+    monkeypatch.setattr(gates, "_yaml", lambda _path: tools)
+
+    assert gates._receipt_problems(candidate_sha, "core_rig", manifest, tools) == []
+    assert gates.m2() == []
