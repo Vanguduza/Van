@@ -131,6 +131,22 @@ def m3():
         problems.append("full-rig review is for a superseded SHA")
     return problems
 
+# Galaxy S24 Ultra model numbers (regional variants). The checklist is the physical-device
+# gate; an emulator or another handset cannot satisfy it.
+S24_ULTRA_MODELS=re.compile(r"^SM-S928[0-9A-Z]{0,3}$")
+DEVICE_EVIDENCE_ROOT="visual-authority/character-forge/11-device-evidence/"
+
+def _device_problems(device):
+    problems=[]
+    model=str((device.get("device") or {}).get("model") or "").strip()
+    if model and not S24_ULTRA_MODELS.match(model): problems.append(f"device checklist model {model!r} is not a Galaxy S24 Ultra")
+    for name,ref in (device.get("evidence") or {}).items():
+        ref=str(ref or "").strip()
+        if not ref: continue
+        if not ref.startswith(DEVICE_EVIDENCE_ROOT) or ".." in ref or not (ROOT/ref).is_file():
+            problems.append(f"device evidence for {name} is not a committed file under {DEVICE_EVIDENCE_ROOT}")
+    return problems
+
 def _device_complete(device):
     checks=device.get("checks") or {}
     identity=device.get("device") or {}
@@ -155,8 +171,9 @@ def m4():
     if source_sha!=app_sha: problems.append("source and shipped Rive bytes differ")
     device=_yaml(DEVICE)
     if not _device_complete(device): problems.append("S24 device checklist incomplete")
+    problems.extend(_device_problems(device))
     if not str(device.get("thermal_note") or "").strip(): problems.append("S24 thermal note missing")
-    elif (device.get("device") or {}).get("rive_sha256")!=source_sha: problems.append("device checklist Rive SHA differs")
+    if (device.get("device") or {}).get("rive_sha256")!=source_sha: problems.append("device checklist Rive SHA differs")
     acceptance=_yaml(ACCEPTANCE).get("final")
     if not isinstance(acceptance,dict) or not acceptance.get("verified"):
         problems.append("verified final owner acceptance missing")

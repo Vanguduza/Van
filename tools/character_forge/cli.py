@@ -1,6 +1,7 @@
 from __future__ import annotations
 
 import argparse
+import hashlib
 import json
 import os
 import re
@@ -294,72 +295,111 @@ def _validation_binding(evidence_dir, filename):
         raise ValueError(f"{filename} does not contain a SHA-256")
     return value.lower(), sha256_file(matches[0]), root
 
+STAGE_MODE={"core_rig":"core","full_rig":"full","production":"production"}
+GIT_ASSET={"core_rig":"android/app/src/androidTest/assets/van_candidate.riv","full_rig":"android/app/src/androidTest/assets/van_candidate.riv","production":"android/app/src/main/assets/van.riv"}
+
+def _validation_outcome(evidence_root:Path, *, stage:str, expected_sha:str, run_url:str, result:str)->dict[str,Any]:
+    """Refuses unless the CI-written `van_validation.json` itself states this result for these
+    exact bytes in this run, and the named commit really carried those bytes."""
+    matches=list(evidence_root.rglob("van_validation.json"))
+    if len(matches)!=1: raise ValueError(f"expected exactly one van_validation.json, found {len(matches)}")
+    binding=json.loads(matches[0].read_text(encoding="utf-8"))
+    run=re.search(r"/actions/runs/(\d+)",run_url)
+    github=binding.get("github") or {}
+    if not run or str(github.get("run_id") or "")!=run.group(1):
+        raise ValueError("van_validation.json belongs to a different CI run than --ci-run")
+    if binding.get("mode")!=STAGE_MODE[stage]:
+        raise ValueError(f"CI validated mode {binding.get('mode')!r}, not {STAGE_MODE[stage]!r}")
+    bound=binding.get("production_sha256" if stage=="production" else "candidate_sha256")
+    if bound!=expected_sha: raise ValueError(f"CI validated {bound}, not {expected_sha}")
+    if binding.get("result")!=result:
+        raise ValueError(f"CI result is {binding.get('result')!r}; refusing to record {result!r}: {'; '.join(binding.get('reasons') or [])}")
+    commit=str(github.get("sha") or "")
+    if not re.fullmatch(r"[0-9a-f]{40}",commit): raise ValueError("van_validation.json names no commit")
+    shown=subprocess.run(["git","show",f"{commit}:{GIT_ASSET[stage]}"],cwd=ROOT,capture_output=True)
+    if shown.returncode!=0: raise ValueError(f"validated commit {commit} or its asset is not in local git history; fetch it first")
+    if hashlib.sha256(shown.stdout).hexdigest()!=expected_sha: raise ValueError(f"commit {commit} does not carry the bytes being recorded")
+    return {"binding":binding,"binding_sha256":sha256_file(matches[0]),"commit":commit}
+
+def _core_frames(source:Path)->list[Path]:
+    """Only RiveContractTest's own core-mode captures become the M2 regression baseline."""
+    return sorted(p for p in source.rglob("*.png") if p.parent.name=="core" and p.parent.parent.name=="rive")
+
 def cmd_record_validation(args):
     status=load_status(); manifest=load_yaml(); run=str(args.ci_run or "").strip()
-    if not run.startswith(("https://github.com/","http://github.com/")):
+    if not re.match(r"^https://github\.com/[^/]+/[^/]+/actions/runs/\d+",run):
         print("refused: --ci-run must be a GitHub Actions run URL",file=sys.stderr); return 2
     if args.stage in {"core_rig","full_rig"}:
         record=status[args.stage]; expected=record.get("candidate_sha256")
         if not expected or args.candidate_sha != expected:
             print("refused: candidate SHA does not equal the staged candidate",file=sys.stderr); return 1
-        try:
-            bound_sha,binding_file_sha,source=_validation_binding(args.evidence_dir,"van_candidate.sha256")
-        except ValueError as exc:
-            print(f"refused: {exc}",file=sys.stderr); return 2
-        if bound_sha!=expected:
-            print(f"refused: CI evidence SHA {bound_sha} does not equal staged candidate {expected}",file=sys.stderr); return 1
-        previous=(manifest.get("ci_evidence") or {}).get(expected) or {}
-        baseline_ready=bool(list((EVIDENCE_DIR/"core_baseline").glob("*.png")))
-        if record.get("emulator_validation")==args.result and record.get("ci_run")==run and previous.get("result")==args.result and previous.get("candidate_sha256")==expected and previous.get("binding_file_sha256")==binding_file_sha and (args.stage!="core_rig" or args.result!="PASS" or baseline_ready):
-            print("NO_CHANGE"); return 0
-        record["emulator_validation"]=args.result; record["ci_run"]=run
-        manifest.setdefault("ci_evidence",{})[expected]={"stage":args.stage,"result":args.result,"ci_run":run,"candidate_sha256":expected,"binding_file_sha256":binding_file_sha,"recorded_at":now_iso()}
-        if args.stage=="core_rig" and args.result=="PASS":
-            pngs=list(source.rglob("*.png"))
-            if not pngs:
-                print("refused: no PNG core evidence found",file=sys.stderr); return 1
-            baseline=EVIDENCE_DIR/"core_baseline"
-            if baseline.exists(): shutil.rmtree(baseline)
-            baseline.mkdir(parents=True,exist_ok=True)
-            for path in pngs:
-                shutil.copyfile(path,baseline/path.name)
-            status["next_action"]="Owner views the exact core candidate on the S24 and records the core verdict"
-        elif args.stage=="full_rig" and args.result=="PASS":
-            status["next_action"]="Independent reviewer records full-rig PASS"
+        filename="van_candidate.sha256"
     else:
         if not SOURCE_RIV.is_file() or not APP_RIV.is_file() or sha256_file(SOURCE_RIV)!=sha256_file(APP_RIV):
             print("refused: production validation requires byte-identical integrated assets",file=sys.stderr); return 1
-        sha=sha256_file(APP_RIV)
-        try:
-            bound_sha,binding_file_sha,_=_validation_binding(args.evidence_dir,"van_production.sha256")
-        except ValueError as exc:
-            print(f"refused: {exc}",file=sys.stderr); return 2
-        if bound_sha!=sha:
-            print(f"refused: CI production evidence SHA {bound_sha} does not equal integrated asset {sha}",file=sys.stderr); return 1
-        prod=status.get("production") or {}; prior=(manifest.get("ci_evidence") or {}).get(sha) or {}
-        if prod.get("emulator_validation")==args.result and prod.get("ci_run")==run and prod.get("rive_sha256")==sha and prior.get("stage")=="production" and prior.get("result")==args.result and prior.get("binding_file_sha256")==binding_file_sha:
-            print("NO_CHANGE"); return 0
-        status["production"]={"emulator_validation":args.result,"ci_run":run,"rive_sha256":sha}
-        manifest.setdefault("ci_evidence",{})[sha]={"stage":"production","result":args.result,"ci_run":run,"candidate_sha256":sha,"binding_file_sha256":binding_file_sha,"recorded_at":now_iso()}
+        expected=sha256_file(APP_RIV); filename="van_production.sha256"
+    try:
+        bound_sha,_,source=_validation_binding(args.evidence_dir,filename)
+        if bound_sha!=expected: raise ValueError(f"CI evidence SHA {bound_sha} does not equal {expected}")
+        outcome=_validation_outcome(source,stage=args.stage,expected_sha=expected,run_url=run,result=args.result)
+    except (ValueError,json.JSONDecodeError) as exc:
+        print(f"refused: {exc}",file=sys.stderr); return 1
+    evidence_row={"stage":args.stage,"result":args.result,"ci_run":run,"candidate_sha256":expected,"binding_file_sha256":outcome["binding_sha256"],"validated_commit":outcome["commit"],"tests":outcome["binding"].get("tests")}
+    previous=(manifest.get("ci_evidence") or {}).get(expected) or {}
+    if args.stage=="production":
+        current=status.get("production") or {}
+        unchanged=current.get("emulator_validation")==args.result and current.get("ci_run")==run and current.get("rive_sha256")==expected
+    else:
+        current=status[args.stage]
+        unchanged=current.get("emulator_validation")==args.result and current.get("ci_run")==run
+        if args.stage=="core_rig" and args.result=="PASS" and not list((EVIDENCE_DIR/"core_baseline").glob("*.png")): unchanged=False
+    if unchanged and all(previous.get(k)==v for k,v in evidence_row.items()):
+        print("NO_CHANGE"); return 0
+    if args.stage=="core_rig" and args.result=="PASS":
+        frames=_core_frames(source)
+        if not frames:
+            print("refused: no rive/core/*.png frames in the evidence (download van-instrumentation-screenshots too)",file=sys.stderr); return 1
+        baseline=EVIDENCE_DIR/"core_baseline"
+        if baseline.exists(): shutil.rmtree(baseline)
+        baseline.mkdir(parents=True,exist_ok=True)
+        for path in frames: shutil.copyfile(path,baseline/path.name)
+        status["next_action"]="Owner views the exact core candidate on the S24 and records the core verdict"
+    elif args.stage=="full_rig" and args.result=="PASS":
+        status["next_action"]="Independent reviewer records full-rig PASS"
+    elif args.stage=="production":
         status["next_action"]="Complete S24 DEVICE_CHECKLIST.yaml and owner biometric acceptance" if args.result=="PASS" else "Fix production validation failure"
-        expected=sha
+    if args.stage=="production":
+        status["production"]={"emulator_validation":args.result,"ci_run":run,"rive_sha256":expected}
+    else:
+        current["emulator_validation"]=args.result; current["ci_run"]=run
+    manifest.setdefault("ci_evidence",{})[expected]=dict(evidence_row,recorded_at=now_iso())
     append_receipt(
         manifest,
         _receipt(
             "record validation",
-            [str(expected),run],
+            [str(expected),run,outcome["commit"]],
             [f"{args.stage}={args.result}"],
             args.actor,
-            "CI validation result bound to the exact candidate/production SHA",
+            "CI-stated RiveContractTest outcome bound to the exact SHA, run and commit",
         ),
     )
     _save(manifest,status); return 0
 
+def _same_party(a:str|None,b:str|None)->bool:
+    norm=lambda v: re.sub(r"^(artist|agent|cli):","",str(v or "").strip().lower())
+    return bool(norm(a)) and norm(a)==norm(b)
+
 def cmd_review(args):
     manifest=load_yaml(); status=load_status()
+    # Rev 2 §3: the independent reviewer may not be the author, and the bounded Commander
+    # worker that drives authoring may not review what it produced.
+    if str(args.actor or "").strip().lower()=="commander" or _same_party(args.reviewer,"commander"):
+        print("refused: the Commander authoring surface cannot record an independent review",file=sys.stderr); return 1
     if args.target=="layer":
         layer=find_artifact(manifest,kind="layer_svg")
         if not layer: print("refused: no admitted layer SVG",file=sys.stderr); return 1
+        if _same_party(args.reviewer,layer.get("produced_by")):
+            print("refused: the layer SVG author cannot review it",file=sys.stderr); return 1
         row={"sha256":layer["sha256"],"reviewed_by":args.reviewer,"date":args.date,"verdict":args.verdict,"notes":args.notes or ""}
         if (manifest.get("reviews") or {}).get("layer_svg")==row: print("NO_CHANGE"); return 0
         manifest.setdefault("reviews",{})["layer_svg"]=row
@@ -368,6 +408,9 @@ def cmd_review(args):
         sha=(status.get("full_rig") or {}).get("candidate_sha256")
         if not sha or (status.get("full_rig") or {}).get("emulator_validation")!="PASS":
             print("refused: full review requires a full candidate with emulator PASS",file=sys.stderr); return 1
+        receipt=next((json.loads(p.read_text(encoding="utf-8")) for p in WORKING_DIR.glob("*.receipt.json") if json.loads(p.read_text(encoding="utf-8")).get("candidate_sha256")==sha),{}) if WORKING_DIR.is_dir() else {}
+        if _same_party(args.reviewer,receipt.get("artist")):
+            print("refused: the full-rig author cannot review it",file=sys.stderr); return 1
         row={"sha256":sha,"reviewed_by":args.reviewer,"date":args.date,"verdict":args.verdict,"notes":args.notes or ""}
         if (manifest.get("reviews") or {}).get("full_rig")==row and status["full_rig"].get("reviewed")==args.verdict: print("NO_CHANGE"); return 0
         manifest.setdefault("reviews",{})["full_rig"]=row

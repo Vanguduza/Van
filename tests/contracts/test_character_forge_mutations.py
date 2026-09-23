@@ -454,3 +454,40 @@ def test_silver_hair_in_rgb_notation_is_still_admitted(tmp_path: Path):
     svg = tmp_path / "rgb-silver.svg"
     svg.write_text(text, encoding="utf-8")
     assert not [f for f in lint_svg(svg, require_geometry=False).findings if ":hair:" in f]
+
+
+def test_mutation_emulator_or_other_handset_cannot_satisfy_s24_checklist():
+    for model in ("sdk_gphone64_x86_64", "SM-S918B", "Pixel 8"):
+        assert any("is not a Galaxy S24 Ultra" in p for p in gates._device_problems({"device": {"model": model}}))
+    assert gates._device_problems({"device": {"model": "SM-S928B"}}) == []
+
+
+def test_mutation_label_instead_of_evidence_file_fails_s24_checklist(monkeypatch, tmp_path: Path):
+    monkeypatch.setattr(gates, "ROOT", tmp_path)
+    evidence = tmp_path / gates.DEVICE_EVIDENCE_ROOT / "renderer.png"
+    evidence.parent.mkdir(parents=True)
+    evidence.write_bytes(b"PNG")
+    ok = {"device": {"model": "SM-S928B"}, "evidence": {"renderer_rive_active": gates.DEVICE_EVIDENCE_ROOT + "renderer.png"}}
+    assert gates._device_problems(ok) == []
+    for ref in ("clip://renderer", "PASS", gates.DEVICE_EVIDENCE_ROOT + "missing.mp4", gates.DEVICE_EVIDENCE_ROOT + "../../../etc/passwd"):
+        bad = {"device": {"model": "SM-S928B"}, "evidence": {"renderer_rive_active": ref}}
+        assert gates._device_problems(bad), ref
+
+
+def _review_fixture(monkeypatch, *, layer_author="artist:vector-agent"):
+    manifest = {"artifacts": [{"kind": "layer_svg", "sha256": "a" * 64, "produced_by": layer_author}], "reviews": {}, "receipts": []}
+    status = {"full_rig": {}}
+    monkeypatch.setattr(cli, "load_yaml", lambda: manifest)
+    monkeypatch.setattr(cli, "load_status", lambda: status)
+    monkeypatch.setattr(cli, "_save", lambda *_: None)
+    return manifest
+
+
+def test_mutation_author_cannot_review_own_layer_svg(monkeypatch):
+    manifest = _review_fixture(monkeypatch)
+    args = ["review", "record", "--target", "layer", "--verdict", "PASS", "--date", "2026-09-23"]
+    assert cli.main(args + ["--reviewer", "Vector-Agent"]) == 1
+    assert cli.main(["--actor", "commander"] + args + ["--reviewer", "someone-else"]) == 1
+    assert "layer_svg" not in manifest["reviews"]
+    assert cli.main(args + ["--reviewer", "independent-reviewer"]) == 0
+    assert manifest["reviews"]["layer_svg"]["verdict"] == "PASS"
