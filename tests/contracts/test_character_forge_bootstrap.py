@@ -16,6 +16,7 @@ def test_character_forge_shell_scripts_parse():
         "bootstrap-netcup-authoring.sh",
         "qualify-netcup-authoring.sh",
         "commander-worker.sh",
+        "rive-cli-smoke.sh",
     ):
         result = subprocess.run(
             ["bash", "-n", str(DEPLOY / name)],
@@ -82,6 +83,7 @@ def test_commander_surface_cannot_perform_owner_or_release_authority():
         "rive-build)",
         "rive-test)",
         "rive-screenshot)",
+        "rive-smoke)",
         "android-build",
         "instrumentation",
         "import-toolchain-lock",
@@ -115,3 +117,19 @@ def test_cloud_rive_writes_are_explicitly_gated():
     assert "require_cloud_write" in publish_block
     assert 'exec rive push "$project"' in push_block
     assert 'exec rive "$project" --publish' in publish_block
+
+
+def test_rive_smoke_is_fail_closed_and_checks_interactive_schema():
+    smoke = _text("rive-cli-smoke.sh")
+    for required in (
+        "rive create",
+        "--verify --format=json",
+        "--once --format=json",
+        "rive inspect",
+        "StateMachineBool",
+        "StateMachineTrigger",
+        "built_riv_sha256",
+    ):
+        assert required in smoke
+    assert "set +e" not in smoke
+    assert "|| true" not in smoke
