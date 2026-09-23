@@ -13,8 +13,10 @@ ANDROID_CLI_ZIP="commandlinetools-linux-15859902_latest.zip"
 ANDROID_CLI_SHA256="4e4c464f145a7512b57d088ac6c278c03c9eea610886b35a5e0804e74eedf583"
 ANDROID_CLI_URL="https://dl.google.com/android/repository/$ANDROID_CLI_ZIP"
 AVD_NAME="${CHARACTER_FORGE_AVD_NAME:-van-character-forge-api31}"
-RIVE_INSTALLER_URL="${RIVE_INSTALLER_URL:-https://releases.rive.app/cli/install.sh}"
-RIVE_INSTALLER_LOCK="$STATE_ROOT/rive-cli-installer.sha256"
+RIVE_CLI_VERSION="1.1.1"
+RIVE_CLI_ARCHIVE="rive-linux-x64.tar.gz"
+RIVE_CLI_SHA256="41684e9d99fea98e01c2c155e07ec985130b95b640410dc0fbe4ca30c271a7d5"
+RIVE_CLI_URL="https://releases.rive.app/cli/v$RIVE_CLI_VERSION/$RIVE_CLI_ARCHIVE"
 TOOLCHAIN_LOCK="$STATE_ROOT/toolchain.lock.json"
 PY_VENV="$INSTALL_ROOT/venv"
 RIVE_HOME="$STATE_ROOT/rive-home"
@@ -92,24 +94,22 @@ runuser -u "$FORGE_USER" -- "$PY_VENV/bin/python" -m pip install \
 runuser -u "$FORGE_USER" -- env U2NET_HOME="$REMBG_HOME" \
   "$PY_VENV/bin/rembg" d birefnet-general
 
-log "installing official Rive CLI with installer-byte continuity lock"
-TMP_RIVE="$(mktemp)"
-trap 'rm -f "$TMP_RIVE"' EXIT
-curl -fsSL "$RIVE_INSTALLER_URL" -o "$TMP_RIVE"
-RIVE_INSTALLER_SHA="$(sha256sum "$TMP_RIVE" | awk '{print $1}')"
-if [[ -s "$RIVE_INSTALLER_LOCK" ]]; then
-  LOCKED="$(tr -d '[:space:]' < "$RIVE_INSTALLER_LOCK")"
-  [[ "$LOCKED" == "$RIVE_INSTALLER_SHA" ]] \
-    || die "Rive installer changed ($LOCKED -> $RIVE_INSTALLER_SHA); review before updating lock"
-fi
-printf '%s\n' "$RIVE_INSTALLER_SHA" >"$RIVE_INSTALLER_LOCK"
-chown "$FORGE_USER:$FORGE_USER" "$RIVE_INSTALLER_LOCK"
-chmod 0644 "$RIVE_INSTALLER_LOCK"
-
-runuser -u "$FORGE_USER" -- env HOME="$RIVE_HOME" bash "$TMP_RIVE"
-RIVE_BIN="$(find "$RIVE_HOME" -type f -name rive -perm -u+x -print -quit 2>/dev/null || true)"
-[[ -n "$RIVE_BIN" && -x "$RIVE_BIN" ]] || die "Rive installer completed but no executable was found under $RIVE_HOME"
-ln -sfn "$RIVE_BIN" /usr/local/bin/rive
+log "installing checksum-pinned official Rive CLI $RIVE_CLI_VERSION"
+TMP_RIVE_DIR="$(mktemp -d)"
+trap 'rm -rf "$TMP_RIVE_DIR"' EXIT
+curl -fsSL "$RIVE_CLI_URL" -o "$TMP_RIVE_DIR/$RIVE_CLI_ARCHIVE"
+echo "$RIVE_CLI_SHA256  $TMP_RIVE_DIR/$RIVE_CLI_ARCHIVE" | sha256sum -c -
+mkdir -p "$TMP_RIVE_DIR/unpacked"
+tar -xzf "$TMP_RIVE_DIR/$RIVE_CLI_ARCHIVE" -C "$TMP_RIVE_DIR/unpacked"
+RIVE_ARCHIVE_BIN="$(find "$TMP_RIVE_DIR/unpacked" -type f -name rive -perm -u+x -print -quit 2>/dev/null || true)"
+[[ -n "$RIVE_ARCHIVE_BIN" && -x "$RIVE_ARCHIVE_BIN" ]] || die "pinned Rive archive contains no executable rive binary"
+RIVE_INSTALL_DIR="$INSTALL_ROOT/rive/$RIVE_CLI_VERSION"
+install -d -o root -g root -m 0755 "$RIVE_INSTALL_DIR"
+install -o root -g root -m 0755 "$RIVE_ARCHIVE_BIN" "$RIVE_INSTALL_DIR/rive"
+ln -sfn "$RIVE_INSTALL_DIR/rive" /usr/local/bin/rive
+RIVE_VERSION_OUTPUT="$(runuser -u "$FORGE_USER" -- env HOME="$RIVE_HOME" rive --version 2>&1 | head -n1 || true)"
+[[ "$RIVE_VERSION_OUTPUT" == *"$RIVE_CLI_VERSION"* ]] \
+  || die "Rive CLI version mismatch: expected $RIVE_CLI_VERSION, observed '$RIVE_VERSION_OUTPUT'"
 runuser -u "$FORGE_USER" -- env HOME="$RIVE_HOME" rive --help >/dev/null
 
 log "installing checksum-pinned Android command-line tools"
@@ -170,8 +170,9 @@ chmod 0440 /etc/sudoers.d/van-character-forge
 visudo -cf /etc/sudoers.d/van-character-forge >/dev/null
 
 log "recording installed toolchain"
-RIVE_VERSION="$(runuser -u "$FORGE_USER" -- env HOME="$RIVE_HOME" rive --version 2>&1 | head -n1 || true)"
-[[ -n "$RIVE_VERSION" ]] || die "Rive CLI did not expose an exact version; refusing an unpinned authoring workstation"
+RIVE_VERSION="$RIVE_CLI_VERSION"
+RIVE_REPORTED_VERSION="$(runuser -u "$FORGE_USER" -- env HOME="$RIVE_HOME" rive --version 2>&1 | head -n1 || true)"
+[[ "$RIVE_REPORTED_VERSION" == *"$RIVE_VERSION"* ]] || die "Rive CLI version drift: expected $RIVE_VERSION, observed '$RIVE_REPORTED_VERSION'"
 INKSCAPE_VERSION="$(inkscape --version | head -n1)"
 CHROME_VERSION="$(google-chrome --version | head -n1)"
 JAVA_VERSION="$(java -version 2>&1 | head -n1)"
@@ -184,7 +185,9 @@ jq -n \
   --arg arch "$(uname -m)" \
   --arg repo_sha "$VAN_COMMIT_SHA" \
   --arg rive "$RIVE_VERSION" \
-  --arg rive_installer_sha "$RIVE_INSTALLER_SHA" \
+  --arg rive_reported "$RIVE_REPORTED_VERSION" \
+  --arg rive_archive_sha "$RIVE_CLI_SHA256" \
+  --arg rive_source "$RIVE_CLI_URL" \
   --arg inkscape "$INKSCAPE_VERSION" \
   --arg vtracer "$VTRACER_VERSION" \
   --arg rembg "$REMBG_VERSION" \
@@ -198,7 +201,7 @@ jq -n \
     host:$host,
     arch:$arch,
     repository_sha:$repo_sha,
-    rive_cli:{version:$rive,installer_sha256:$rive_installer_sha},
+    rive_cli:{version:$rive,reported_version:$rive_reported,archive_sha256:$rive_archive_sha,source:$rive_source},
     inkscape:{version:$inkscape},
     vtracer:{version:$vtracer},
     rembg:{version:$rembg,model:"birefnet-general"},
