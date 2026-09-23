@@ -69,6 +69,7 @@ import java.util.Locale
 fun WorkRoute(
     app: VanApplication,
     onOpenBrowser: () -> Unit,
+    onOpenArtemis: () -> Unit,
     onOpenActivity: () -> Unit,
 ) {
     val tokens = LocalVanTokens.current
@@ -165,6 +166,12 @@ fun WorkRoute(
         item {
             OutlinedButton(onClick = onOpenBrowser) {
                 Text("Browser & Automation")
+            }
+        }
+
+        item {
+            OutlinedButton(onClick = onOpenArtemis) {
+                Text("ARTEMIS Android Lab")
             }
         }
 
