@@ -174,3 +174,11 @@ def test_android_avd_home_is_explicit_and_shared():
     assert 'runuser -u "$FORGE_USER" -- env ANDROID_USER_HOME="$ANDROID_USER_HOME" ANDROID_AVD_HOME="$ANDROID_AVD_HOME"' in qualifier
     assert 'export ANDROID_USER_HOME' in worker
     assert 'export ANDROID_AVD_HOME' in worker
+
+
+def test_qualifier_is_callable_as_forge_user():
+    qualifier = _text("qualify-netcup-authoring.sh")
+    assert "as_forge()" in qualifier
+    assert 'if [[ "$(id -u)" -eq "$(id -u "$FORGE_USER")" ]]' in qualifier
+    assert "as_forge /usr/local/libexec/van-character-forge-worker doctor" in qualifier
+    assert 'sudo -n -u "$FORGE_USER" /usr/local/libexec/van-character-forge-worker doctor' not in qualifier
