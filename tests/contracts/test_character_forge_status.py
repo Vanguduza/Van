@@ -66,3 +66,22 @@ def test_m2_refuses_unpinned_rive_cli(monkeypatch):
         lambda _path: {"critical_path": {"rive_cli": {"version": "UNPINNED"}}},
     )
     assert "Rive CLI authoring version is not pinned" in gates.m2()
+
+
+def test_toolchain_import_rejects_placeholder_rive_version(monkeypatch, tmp_path):
+    from argparse import Namespace
+    from tools.character_forge import cli
+
+    lock = tmp_path / "toolchain.lock.json"
+    lock.write_text(
+        '{"repository_sha":"1111111111111111111111111111111111111111",'
+        '"rive_cli":{"version":"version-command-unavailable"},'
+        '"inkscape":{"version":"Inkscape 1.4"}}',
+        encoding="utf-8",
+    )
+    monkeypatch.setattr(cli, "_git_head", lambda: "1111111111111111111111111111111111111111")
+    writes = []
+    monkeypatch.setattr(cli, "_write_yaml", lambda *args, **kwargs: writes.append(args))
+
+    assert cli.cmd_tools_import_lock(Namespace(path=str(lock), actor="test")) == 1
+    assert writes == []
