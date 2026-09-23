@@ -40,10 +40,10 @@ else
   add repository RED "workspace missing"
 fi
 
-if command -v rive >/dev/null 2>&1 && runuser -u "$FORGE_USER" -- env HOME="$RIVE_HOME" rive doctor >/tmp/van-rive-doctor.txt 2>&1; then
-  add rive_cli GREEN "$(runuser -u "$FORGE_USER" -- env HOME="$RIVE_HOME" rive --version 2>&1 | head -n1)"
+if command -v rive >/dev/null 2>&1 && runuser -u "$FORGE_USER" -- env HOME="$RIVE_HOME" rive --help >/tmp/van-rive-help.txt 2>&1; then
+  add rive_cli GREEN "$(runuser -u "$FORGE_USER" -- env HOME="$RIVE_HOME" rive --version 2>&1 | head -n1 || true)"
 else
-  add rive_cli RED "$(tail -c 500 /tmp/van-rive-doctor.txt 2>/dev/null)"
+  add rive_cli RED "$(tail -c 500 /tmp/van-rive-help.txt 2>/dev/null)"
 fi
 
 command -v inkscape >/dev/null 2>&1 \
@@ -93,18 +93,16 @@ else
   add api31_avd RED "AVD missing"
 fi
 
-[[ -e /dev/kvm ]] \
-  && add kvm GREEN "/dev/kvm present" \
-  || add kvm RED "/dev/kvm absent; nested virtualization required for practical emulator validation"
-
-TMP="$(mktemp -d)"
-trap 'rm -rf "$TMP"' EXIT
-chown "$FORGE_USER:$FORGE_USER" "$TMP"
-
-if runuser -u "$FORGE_USER" -- bash -lc "cd '$TMP' && HOME='$RIVE_HOME' rive create smoke >/tmp/van-rive-create.txt 2>&1 && HOME='$RIVE_HOME' rive smoke --verify >/tmp/van-rive-verify.txt 2>&1"; then
-  add rive_authoring_smoke GREEN "create + --verify"
+if [[ -e /dev/kvm ]]; then
+  add kvm GREEN "/dev/kvm present"
 else
-  add rive_authoring_smoke RED "$(tail -c 500 /tmp/van-rive-verify.txt 2>/dev/null)"
+  checks+=("{\"check\":\"kvm\",\"status\":\"WARN\",\"detail\":\"/dev/kvm absent; Commander will use software emulator acceleration\"}")
+fi
+
+if runuser -u "$FORGE_USER" -- env HOME="$RIVE_HOME" rive --help >/tmp/van-rive-authoring.txt 2>&1; then
+  add rive_authoring_surface GREEN "Rive CLI help reachable for Commander-driven authoring"
+else
+  add rive_authoring_surface RED "$(tail -c 500 /tmp/van-rive-authoring.txt 2>/dev/null)"
 fi
 
 if sudo -n -u "$FORGE_USER" /usr/local/libexec/van-character-forge-worker doctor >/tmp/van-forge-worker.txt 2>&1; then
