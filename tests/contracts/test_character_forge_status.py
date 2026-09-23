@@ -112,3 +112,71 @@ def test_validation_binding_rejects_no_asset_sentinel(tmp_path):
 
     with pytest.raises(ValueError, match="does not contain a SHA-256"):
         cli._validation_binding(evidence, "van_candidate.sha256")
+
+
+def _write_lock(tmp_path, **overrides):
+    lock = {
+        "repository_sha": "1" * 40,
+        "rive_cli": {"version": "1.1.1", "archive_sha256": "41684e9d99fea98e01c2c155e07ec985130b95b640410dc0fbe4ca30c271a7d5"},
+        "inkscape": {"version": "Inkscape 1.2.2 (b0a8486541, 2022-12-01)"},
+    }
+    lock.update(overrides)
+    path = tmp_path / "toolchain.lock.json"
+    path.write_text(json.dumps(lock), encoding="utf-8")
+    return path
+
+
+def _capture_tools(monkeypatch, cli):
+    written = {}
+    monkeypatch.setattr(cli, "_git_head", lambda: "1" * 40)
+    monkeypatch.setattr(cli, "_yaml", lambda _path: {"critical_path": {}})
+    monkeypatch.setattr(cli, "_write_yaml", lambda _path, data: written.update(data))
+    monkeypatch.setattr(cli, "load_status", lambda: {"blockers": []})
+    monkeypatch.setattr(cli, "load_yaml", lambda: {"receipts": []})
+    monkeypatch.setattr(cli, "_save", lambda *_: None)
+    return written
+
+
+def test_bootstrap_inkscape_lock_pins_the_version_vectors_admit_observes(monkeypatch, tmp_path):
+    """CF-OPUS-002: the bootstrap records `Inkscape 1.2.2 (hash, date)`; the pin must be the
+    bare version `_inkscape_version()` reads, or M1 `vectors admit` can never pass."""
+    from argparse import Namespace
+    from tools.character_forge import cli
+
+    written = _capture_tools(monkeypatch, cli)
+    assert cli.cmd_tools_import_lock(Namespace(path=str(_write_lock(tmp_path)), actor="test")) == 0
+    assert written["critical_path"]["inkscape"]["version"] == "1.2.2"
+    assert cli.normalize_inkscape_version("Inkscape 1.2.2 (b0a8486541, 2022-12-01)") == "1.2.2"
+
+
+def test_toolchain_import_requires_exact_repository_sha(monkeypatch, tmp_path):
+    from argparse import Namespace
+    from tools.character_forge import cli
+
+    written = _capture_tools(monkeypatch, cli)
+    for bad in ("", "abc", "2" * 40):
+        path = _write_lock(tmp_path, repository_sha=bad)
+        assert cli.cmd_tools_import_lock(Namespace(path=str(path), actor="test")) == 1
+    assert written == {}
+
+
+def test_toolchain_import_refuses_unpinned_rive_release(monkeypatch, tmp_path):
+    from argparse import Namespace
+    from tools.character_forge import cli
+
+    written = _capture_tools(monkeypatch, cli)
+    for rive in ({"version": "1.2.0", "archive_sha256": "41684e9d99fea98e01c2c155e07ec985130b95b640410dc0fbe4ca30c271a7d5"},
+                 {"version": "1.1.1", "archive_sha256": "0" * 64}):
+        path = _write_lock(tmp_path, rive_cli=rive)
+        assert cli.cmd_tools_import_lock(Namespace(path=str(path), actor="test")) == 1
+    assert written == {}
+
+
+def test_blockers_are_derived_from_truth_not_a_stale_list(monkeypatch):
+    from tools.character_forge import cli
+
+    monkeypatch.setattr(cli, "_pinned_tool", lambda name: "1.1.1" if name == "rive_cli" else "1.2.2")
+    blockers = cli._current_blockers({"sources": [{"path": "x"}], "artifacts": []}, {})
+    assert "RIVE_CLI_UNPINNED" not in blockers
+    assert "SOURCE_SET_NOT_ADMITTED" not in blockers
+    assert "OWNER_SOURCE_CONFIRMATION_PENDING" in blockers

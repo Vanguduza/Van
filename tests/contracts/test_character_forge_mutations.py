@@ -236,6 +236,9 @@ def test_rive_cli_receipt_can_stage_and_reach_m2_positive_path(monkeypatch, tmp_
     working.mkdir(parents=True)
     candidate = working / "van_core.riv"
     candidate.write_bytes(b"RIVE" * 512)
+    project = working / "rml" / "van"
+    project.mkdir(parents=True)
+    (project / "scene.rml").write_text("<Artboard name=\"Van\"/>\n", encoding="utf-8")
 
     contract = root / "visual-authority" / "rive_contract.json"
     contract.parent.mkdir(parents=True, exist_ok=True)
@@ -281,6 +284,7 @@ def test_rive_cli_receipt_can_stage_and_reach_m2_positive_path(monkeypatch, tmp_
     monkeypatch.setattr(receipts, "ROOT", root)
     monkeypatch.setattr(cli, "ROOT", root)
     monkeypatch.setattr(cli, "WORKING_DIR", working)
+    monkeypatch.setattr(cli, "RML_ROOT", working / "rml")
     monkeypatch.setattr(cli, "CONTRACT_PATH", contract)
     monkeypatch.setattr(cli, "ANDROID_TEST_ASSETS", test_assets)
     monkeypatch.setattr(cli, "ANDROID_DEBUG_ASSETS", debug_assets)
@@ -298,6 +302,7 @@ def test_rive_cli_receipt_can_stage_and_reach_m2_positive_path(monkeypatch, tmp_
         "--rive-file-id", "local:test",
         "--rive-revision", "1",
         "--svg-sha", layer_sha,
+        "--source-project", str(project),
         "--artist", "test",
     ]) == 0
 
@@ -332,3 +337,120 @@ def test_rive_cli_receipt_can_stage_and_reach_m2_positive_path(monkeypatch, tmp_
 
     assert gates._receipt_problems(candidate_sha, "core_rig", manifest, tools) == []
     assert gates.m2() == []
+
+
+def _receipted_candidate(monkeypatch, tmp_path: Path):
+    """A pinned, receipted core candidate built from a real RML project, ready to stage."""
+    root = tmp_path
+    working = root / "visual-authority" / "character-forge" / "09-rive-working"
+    project = working / "rml" / "van"
+    project.mkdir(parents=True)
+    (project / "scene.rml").write_text("<Artboard name=\"Van\"/>\n", encoding="utf-8")
+    candidate = working / "van_core_1.riv"
+    candidate.write_bytes(b"RIVE" * 512)
+    contract = root / "visual-authority" / "rive_contract.json"
+    contract.write_text("{}\n", encoding="utf-8")
+    layer_sha = "a" * 64
+    manifest = {"artifacts": [{"kind": "layer_svg", "sha256": layer_sha, "path": "x.svg"}], "receipts": [], "reviews": {}}
+    status = {"performance": {}, "core_rig": {"candidate_sha256": None, "emulator_validation": "NOT_RUN", "ci_run": None, "owner_verdict": "NONE"},
+              "full_rig": {"candidate_sha256": None, "emulator_validation": "NOT_RUN", "ci_run": None, "reviewed": "NONE"}}
+    for module in (manifest_module, receipts, cli):
+        monkeypatch.setattr(module, "ROOT", root)
+    monkeypatch.setattr(cli, "WORKING_DIR", working)
+    monkeypatch.setattr(cli, "RML_ROOT", working / "rml")
+    monkeypatch.setattr(cli, "CONTRACT_PATH", contract)
+    monkeypatch.setattr(cli, "ANDROID_TEST_ASSETS", root / "androidTest" / "assets")
+    monkeypatch.setattr(cli, "ANDROID_DEBUG_ASSETS", root / "debug" / "assets")
+    monkeypatch.setattr(cli, "load_yaml", lambda: manifest)
+    monkeypatch.setattr(cli, "load_status", lambda: status)
+    monkeypatch.setattr(cli, "_yaml", lambda _path: {"critical_path": {"rive_cli": {"version": "1.1.1"}}})
+    monkeypatch.setattr(cli, "_save", lambda _m, _s: None)
+    return candidate, project, layer_sha
+
+
+def test_receipt_refuses_rml_project_outside_the_jail(monkeypatch, tmp_path: Path):
+    candidate, _, layer_sha = _receipted_candidate(monkeypatch, tmp_path)
+    stray = tmp_path / "elsewhere"
+    stray.mkdir()
+    (stray / "scene.rml").write_text("x", encoding="utf-8")
+    assert cli.main(["rive", "receipt", "--candidate", str(candidate), "--stage", "core_rig", "--authoring-version", "1.1.1",
+                     "--rive-file-id", "LOCAL", "--rive-revision", "LOCAL", "--svg-sha", layer_sha,
+                     "--source-project", str(stray), "--artist", "t"]) == 1
+
+
+def test_mutation_rml_source_edited_after_receipt_blocks_staging(monkeypatch, tmp_path: Path):
+    candidate, project, layer_sha = _receipted_candidate(monkeypatch, tmp_path)
+    assert cli.main(["rive", "receipt", "--candidate", str(candidate), "--stage", "core_rig", "--authoring-version", "1.1.1",
+                     "--rive-file-id", "LOCAL", "--rive-revision", "LOCAL", "--svg-sha", layer_sha,
+                     "--source-project", str(project), "--artist", "t"]) == 0
+    (project / "scene.rml").write_text("<Artboard name=\"Van\"><Edited/></Artboard>\n", encoding="utf-8")
+    assert cli.main(["rive", "stage-candidate", str(candidate), "--stage", "core_rig"]) == 1
+
+
+def test_source_tree_digest_ignores_build_products_but_not_source(tmp_path: Path):
+    from tools.character_forge.manifest import source_tree_sha256
+    project = tmp_path / "van"
+    project.mkdir()
+    (project / "scene.rml").write_text("a", encoding="utf-8")
+    first, count = source_tree_sha256(project)
+    (project / "van.riv").write_bytes(b"built")
+    (project / "screenshots").mkdir()
+    (project / "screenshots" / "idle.png").write_bytes(b"png")
+    assert source_tree_sha256(project) == (first, count)
+    (project / "scene.rml").write_text("b", encoding="utf-8")
+    assert source_tree_sha256(project)[0] != first
+
+
+def test_gate_rejects_receipt_without_rml_source_binding(monkeypatch, tmp_path: Path):
+    import json
+    working = tmp_path / "visual-authority" / "character-forge" / "09-rive-working"
+    working.mkdir(parents=True)
+    candidate = working / "c.riv"
+    candidate.write_bytes(b"R" * 2048)
+    sha = sha256_file(candidate)
+    contract = tmp_path / "contract.json"
+    contract.write_text("{}", encoding="utf-8")
+    (working / "c.receipt.json").write_text(json.dumps({
+        "candidate_sha256": sha, "candidate_path": "visual-authority/character-forge/09-rive-working/c.riv",
+        "stage": "core_rig", "authoring_tool": "rive_cli", "authoring_version": "1.1.1",
+        "svg_sha256": "a" * 64, "contract_sha256": sha256_file(contract)}), encoding="utf-8")
+    monkeypatch.setattr(gates, "ROOT", tmp_path)
+    monkeypatch.setattr(gates, "CONTRACT", contract)
+    problems = gates._receipt_problems(sha, "core_rig", {"artifacts": [{"kind": "layer_svg", "sha256": "a" * 64}]},
+                                       {"critical_path": {"rive_cli": {"version": "1.1.1"}}})
+    assert "core_rig receipt does not bind an RML source project" in problems
+
+
+def test_mutation_non_hex_palette_encodings_cannot_hide_dark_hair(tmp_path: Path):
+    for label, node in (
+        ("rgb", '<path fill="rgb(17,17,17)" d="M 10 10 L 90 10 L 90 90 Z"/>'),
+        ("named", '<path fill="black" d="M 10 10 L 90 10 L 90 90 Z"/>'),
+        ("gradient", '<path fill="url(#dark)" d="M 10 10 L 90 10 L 90 90 Z"/>'),
+    ):
+        text = _svg(list(REQUIRED_GROUPS)).replace(
+            '<g id="hair"><path fill="#eeeeee" d="M 10 10 L 90 10 L 90 90 Z"/></g>',
+            f'<g id="hair">{node}</g>',
+        ).replace(
+            'viewBox="0 0 100 100">',
+            'viewBox="0 0 100 100"><defs><linearGradient id="dark"><stop offset="0" stop-color="#101010"/>'
+            '<stop offset="1" stop-color="#050505"/></linearGradient></defs>',
+        )
+        svg = tmp_path / f"{label}.svg"
+        svg.write_text(text, encoding="utf-8")
+        findings = lint_svg(svg, require_geometry=False).findings
+        assert any(f.startswith("PALETTE_OUTSIDE_LOCK:hair:") for f in findings), label
+
+
+def test_unparseable_colour_in_locked_group_is_refused_not_skipped(tmp_path: Path):
+    text = _svg(list(REQUIRED_GROUPS)).replace(
+        '<g id="hair"><path fill="#eeeeee"', '<g id="hair"><path fill="hsl(0, 0%, 5%)"')
+    svg = tmp_path / "hsl.svg"
+    svg.write_text(text, encoding="utf-8")
+    assert any(f.startswith("UNVERIFIABLE_COLOR:hair:") for f in lint_svg(svg, require_geometry=False).findings)
+
+
+def test_silver_hair_in_rgb_notation_is_still_admitted(tmp_path: Path):
+    text = _svg(list(REQUIRED_GROUPS)).replace('<g id="hair"><path fill="#eeeeee"', '<g id="hair"><path fill="rgb(232,235,240)"')
+    svg = tmp_path / "rgb-silver.svg"
+    svg.write_text(text, encoding="utf-8")
+    assert not [f for f in lint_svg(svg, require_geometry=False).findings if ":hair:" in f]

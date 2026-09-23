@@ -55,6 +55,8 @@ def _receipt_problems(sha, stage, manifest, tools):
         problems.append(f"{stage} receipt authoring tool is not rive_cli")
     if row.get("authoring_version")!=pin:
         problems.append(f"{stage} receipt Rive CLI version mismatch")
+    if not re.fullmatch(r"[0-9a-f]{64}",str(row.get("source_tree_sha256") or "")) or not str(row.get("source_project") or "").startswith("visual-authority/character-forge/09-rive-working/rml/"):
+        problems.append(f"{stage} receipt does not bind an RML source project")
     candidate=ROOT/str(row.get("candidate_path") or "")
     if not candidate.is_file() or sha256_file(candidate)!=sha: problems.append(f"{stage} receipt candidate path/hash mismatch")
     return problems
