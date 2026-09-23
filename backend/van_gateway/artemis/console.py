@@ -2,8 +2,6 @@ from __future__ import annotations
 
 from dataclasses import dataclass
 import hashlib
-import hmac
-import html
 import secrets
 import time
 from pathlib import Path
@@ -253,6 +251,10 @@ class ArtemisConsoleProxy:
             finally:
                 await upstream_response.aclose()
                 await client.aclose()
+            # httpx decodes Content-Encoding when reading the body. Do not forward the
+            # upstream encoding/length after rewriting the Angular base path.
+            response_headers.pop("content-encoding", None)
+            response_headers.pop("content-type", None)
             return Response(
                 content=body,
                 status_code=upstream_response.status_code,
