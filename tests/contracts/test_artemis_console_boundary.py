@@ -13,11 +13,13 @@ def test_android_never_contains_private_artemis_console_credential_or_private_en
     assert "DIAL_ARTEMIS_CONSOLE" not in text
 
 
-def test_console_session_is_hardware_device_proofed_and_proxy_is_read_only():
+def test_console_session_is_hardware_device_proofed_and_proxy_is_hermes_governed():
     app = Path("backend/van_gateway/app.py").read_text(encoding="utf-8")
     console = Path("backend/van_gateway/artemis/console.py").read_text(encoding="utf-8")
     assert 'or path == "/v1/artemis/console/session"' in app
-    assert 'request.method not in {"GET", "HEAD", "OPTIONS"}' in console
+    assert 'request.method not in {"GET", "HEAD", "OPTIONS", "POST"}' in console
+    assert "artemis_console_origin_refused" in console
     assert 'headers["Authorization"] = f"Bearer {token}"' in console
     assert "X-Van-Ingress-Token" not in console
     assert "X-Van-Device-Token" not in console
+    assert 'methods=["GET", "HEAD", "OPTIONS", "POST"]' in app
