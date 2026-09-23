@@ -234,7 +234,7 @@ def cmd_rive_stage(args):
         print("refused: receipt names no readable RML source project",file=sys.stderr); return 1
     if tree_sha!=receipt.get("source_tree_sha256"):
         print("refused: RML source changed after this candidate was receipted; rebuild and re-receipt",file=sys.stderr); return 1
-    sha=sha256_file(candidate); mode="core" if stage=="core_rig" else "full"; threshold={"max_janky_percent":float((load_status().get("performance") or {}).get("max_janky_percent",5.0))}
+    sha=sha256_file(candidate); mode="core" if stage=="core_rig" else "full"; performance=load_status().get("performance") or {}; threshold={"max_janky_percent":float(performance.get("max_janky_percent",5.0)),"min_distinct_rgb":float(performance.get("min_distinct_rgb",0.004)),"max_translucent_fraction":float(performance.get("max_translucent_fraction",0.08))}
     current_status=load_status(); key="core_rig" if stage=="core_rig" else "full_rig"
     staged=[ANDROID_TEST_ASSETS/"van_candidate.riv",ANDROID_DEBUG_ASSETS/"van_candidate.riv"]
     if current_status.get(key,{}).get("candidate_sha256")==sha and all(p.is_file() and sha256_file(p)==sha for p in staged):

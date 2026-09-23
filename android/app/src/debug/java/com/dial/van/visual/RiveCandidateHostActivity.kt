@@ -7,6 +7,7 @@ import androidx.compose.foundation.Canvas
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.fillMaxSize
+import androidx.compose.foundation.layout.size
 import androidx.compose.material3.Text
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
@@ -22,7 +23,22 @@ class RiveCandidateHostActivity : ComponentActivity() {
         val bytes = runCatching { assets.open(asset).use { it.readBytes() } }.getOrNull()
         setContent {
             VanTheme {
-                if (bytes == null) {
+                if (intent.getBooleanExtra(EXTRA_PRODUCTION_PATH, false)) {
+                    // The production renderer, not RiveCandidateFrame: VanAvatar resolves the
+                    // shipped van.riv itself and reports RIVE or its fallback reason.
+                    Box(Modifier.fillMaxSize().background(Color(0xFF0B0F14)), contentAlignment = Alignment.Center) {
+                        VanAvatar(
+                            state = VanVisualState(
+                                durableState = VanDurableState.fromCode(intent.getIntExtra(EXTRA_STATE, 2)),
+                                speaking = intent.getBooleanExtra(EXTRA_SPEAKING, false),
+                                mouthOpen = intent.getFloatExtra(EXTRA_MOUTH_OPEN, 0f),
+                                actionCode = intent.getIntExtra(EXTRA_ACTION, 0),
+                            ),
+                            modifier = Modifier.size(96.dp),
+                            onDecision = { lastProductionDecision = it },
+                        )
+                    }
+                } else if (bytes == null) {
                     Box(Modifier.fillMaxSize(), contentAlignment = Alignment.Center) { Text("NO_RIVE_ASSET") }
                 } else if (intent.getBooleanExtra(EXTRA_TEST_MODE, false)) {
                     val backgroundName = intent.getStringExtra(EXTRA_BACKGROUND) ?: "dark"
@@ -74,6 +90,9 @@ class RiveCandidateHostActivity : ComponentActivity() {
     }
 
     companion object {
+        /** Last decision the production VanAvatar reported; read by RiveContractTest. */
+        @Volatile var lastProductionDecision: VanRenderDecision? = null
+        const val EXTRA_PRODUCTION_PATH = "forge.productionPath"
         const val EXTRA_TEST_MODE = "forge.test"
         const val EXTRA_PRODUCTION = "forge.production"
         const val EXTRA_BACKGROUND = "forge.background"

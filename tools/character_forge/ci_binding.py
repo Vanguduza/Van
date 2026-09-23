@@ -30,10 +30,16 @@ ALL_TESTS = (
     "identityColourFamilies",
     "idleSoakFrameStats",
     "brokenAssetFallsBack",
+    "productionAvatarPathKeepsRive",
 )
-# RiveContractTest assumes these away in core mode (`FULL_OR_PRODUCTION_ONLY`); any other skip
-# with an asset present means a case silently did not run.
-CORE_ONLY_SKIPS = frozenset({"everyStateAndActionRenders", "mandatoryCombinations", "idleSoakFrameStats"})
+# The skips RiveContractTest declares per mode (`FULL_OR_PRODUCTION_ONLY`, `PRODUCTION_ONLY`);
+# any other skip with an asset present means a case silently did not run.
+EXPECTED_SKIPS = {
+    "core": frozenset({"everyStateAndActionRenders", "mandatoryCombinations", "idleSoakFrameStats", "productionAvatarPathKeepsRive"}),
+    "full": frozenset({"productionAvatarPathKeepsRive"}),
+    "production": frozenset(),
+}
+CORE_ONLY_SKIPS = EXPECTED_SKIPS["core"]
 CANDIDATE = Path("android/app/src/androidTest/assets/van_candidate.riv")
 FORGE_MODE = Path("android/app/src/androidTest/assets/forge_mode.txt")
 PRODUCTION = Path("android/app/src/main/assets/van.riv")
@@ -88,7 +94,7 @@ def evaluate(mode: str, outcomes: dict[str, str]) -> tuple[str, list[str]]:
             reasons.append(f"{name}: missing from results")
         elif outcome in {"failed", "error"}:
             reasons.append(f"{name}: {outcome}")
-        elif outcome == "skipped" and not (mode == "core" and name in CORE_ONLY_SKIPS):
+        elif outcome == "skipped" and name not in EXPECTED_SKIPS.get(mode, frozenset()):
             reasons.append(f"{name}: skipped with a {mode} asset present")
     return ("FAIL" if reasons else "PASS"), reasons
 

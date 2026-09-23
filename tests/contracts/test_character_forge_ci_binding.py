@@ -33,6 +33,9 @@ def test_core_mode_allows_only_the_declared_full_only_skips():
         outcomes[name] = "skipped"
     assert ci_binding.evaluate("core", outcomes) == ("PASS", [])
     assert ci_binding.evaluate("full", outcomes)[0] == "FAIL"
+    full = _all(); full["productionAvatarPathKeepsRive"] = "skipped"
+    assert ci_binding.evaluate("full", full) == ("PASS", [])
+    assert ci_binding.evaluate("production", full)[0] == "FAIL"
 
 
 def test_unexpected_skip_missing_case_or_failure_fails():
@@ -49,7 +52,8 @@ def test_summary_reads_junit_and_hashes_the_staged_candidate(tmp_path: Path):
     assets.mkdir(parents=True)
     (assets / "van_candidate.riv").write_bytes(b"R" * 2048)
     (assets / "forge_mode.txt").write_text("full\n", encoding="utf-8")
-    _junit(tmp_path / "results" / "TEST-device.xml", _all())
+    outcomes = _all(); outcomes["productionAvatarPathKeepsRive"] = "skipped"
+    _junit(tmp_path / "results" / "TEST-device.xml", outcomes)
     summary = ci_binding.summarise(tmp_path, tmp_path / "results", {"GITHUB_RUN_ID": "77", "GITHUB_SHA": "a" * 40})
     assert summary["mode"] == "full" and summary["result"] == "PASS"
     assert summary["candidate_sha256"] == sha256_file(assets / "van_candidate.riv")
