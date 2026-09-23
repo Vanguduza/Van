@@ -20,7 +20,7 @@ shift || true
 
 case "$cmd" in
   doctor)
-    rive doctor >/dev/null
+    rive --help >/dev/null
     python3 -m tools.character_forge.cli status --json >/dev/null
     echo CHARACTER_FORGE_COMMANDER_READY
     ;;
@@ -52,24 +52,19 @@ case "$cmd" in
   rive)
     exec rive "$@"
     ;;
-  rive-create)
-    [[ $# -eq 1 ]] || { echo "usage: rive-create PROJECT_DIR" >&2; exit 2; }
-    exec rive create "$1"
-    ;;
-  rive-verify)
-    [[ $# -eq 1 ]] || { echo "usage: rive-verify PROJECT_DIR" >&2; exit 2; }
-    exec rive "$1" --verify
-    ;;
-  rive-build)
-    [[ $# -eq 1 ]] || { echo "usage: rive-build PROJECT_DIR" >&2; exit 2; }
-    exec rive "$1" --once
+  rive-help)
+    exec rive --help
     ;;
   android-build)
     cd android
     exec ./gradlew :app:testDebugUnitTest :app:assembleDebug :app:lintDebug
     ;;
   emulator-up)
-    nohup "$ANDROID_SDK_ROOT/emulator/emulator"       -avd "$AVD_NAME" -no-window -no-audio -no-boot-anim       -gpu swiftshader_indirect >"$STATE_ROOT/emulator.log" 2>&1 &
+    accel=(-accel off)
+    [[ -e /dev/kvm ]] && accel=(-accel on)
+    nohup "$ANDROID_SDK_ROOT/emulator/emulator" \
+      -avd "$AVD_NAME" -no-window -no-audio -no-boot-anim \
+      -gpu swiftshader_indirect "${accel[@]}" >"$STATE_ROOT/emulator.log" 2>&1 &
     "$ANDROID_SDK_ROOT/platform-tools/adb" wait-for-device
     for _ in $(seq 1 180); do
       if [[ "$("$ANDROID_SDK_ROOT/platform-tools/adb" shell getprop sys.boot_completed 2>/dev/null | tr -d '\r')" == "1" ]]; then
@@ -99,7 +94,7 @@ case "$cmd" in
 Allowed commands:
   doctor status git-status source-admit gate
   remove-bg vectorize svg-lint
-  rive rive-create rive-verify rive-build
+  rive rive-help
   android-build emulator-up emulator-down instrumentation
   qualify toolchain-lock
 EOF
