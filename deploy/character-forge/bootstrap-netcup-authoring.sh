@@ -86,10 +86,9 @@ if [[ ! -x "$PY_VENV/bin/python" ]]; then
 fi
 runuser -u "$FORGE_USER" -- "$PY_VENV/bin/python" -m pip install --upgrade pip wheel
 runuser -u "$FORGE_USER" -- "$PY_VENV/bin/python" -m pip install \
-  -r <(printf '%s\n' \
-    'rembg[cpu,cli]==2.0.85' \
-    'vtracer==0.6.15' \
-    'Pillow==12.3.0')
+  'rembg[cpu,cli]==2.0.85' \
+  'vtracer==0.6.15' \
+  'Pillow==12.3.0'
 runuser -u "$FORGE_USER" -- env U2NET_HOME="$REMBG_HOME" \
   "$PY_VENV/bin/rembg" d birefnet-general
 
@@ -108,8 +107,8 @@ chown "$FORGE_USER:$FORGE_USER" "$RIVE_INSTALLER_LOCK"
 chmod 0644 "$RIVE_INSTALLER_LOCK"
 
 runuser -u "$FORGE_USER" -- env HOME="$RIVE_HOME" bash "$TMP_RIVE"
-RIVE_BIN="$RIVE_HOME/.rive/bin/rive"
-[[ -x "$RIVE_BIN" ]] || die "Rive installer completed but $RIVE_BIN is missing"
+RIVE_BIN="$(find "$RIVE_HOME" -type f -name rive -perm -u+x -print -quit 2>/dev/null || true)"
+[[ -n "$RIVE_BIN" && -x "$RIVE_BIN" ]] || die "Rive installer completed but no executable was found under $RIVE_HOME"
 ln -sfn "$RIVE_BIN" /usr/local/bin/rive
 runuser -u "$FORGE_USER" -- env HOME="$RIVE_HOME" rive --help >/dev/null
 
