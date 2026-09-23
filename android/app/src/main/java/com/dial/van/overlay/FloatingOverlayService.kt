@@ -24,6 +24,7 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.input.pointer.pointerInput
 import androidx.compose.ui.platform.ComposeView
 import androidx.compose.ui.unit.dp
+import androidx.core.content.ContextCompat
 import androidx.lifecycle.Lifecycle
 import androidx.lifecycle.LifecycleOwner
 import androidx.lifecycle.LifecycleRegistry
@@ -168,12 +169,12 @@ class FloatingOverlayService : Service(), LifecycleOwner, SavedStateRegistryOwne
         val obstructionFilter = IntentFilter(
             VanObstructionAccessibilityService.ACTION_OBSTRUCTION_STATE,
         )
-        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.TIRAMISU) {
-            registerReceiver(obstructionReceiver, obstructionFilter, RECEIVER_NOT_EXPORTED)
-        } else {
-            @Suppress("DEPRECATION")
-            registerReceiver(obstructionReceiver, obstructionFilter)
-        }
+        ContextCompat.registerReceiver(
+            this,
+            obstructionReceiver,
+            obstructionFilter,
+            ContextCompat.RECEIVER_NOT_EXPORTED,
+        )
         applyVisibilityLifecycle()
         stateStore.markRunning(true)
     }
