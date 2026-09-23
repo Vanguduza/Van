@@ -95,6 +95,10 @@ def m1():
 def m2():
     problems=m1(); status=load_status(); core=status.get("core_rig") or {}; manifest=load_yaml()
     tools=_yaml(TOOLS)
+    rive_cli=str((((tools.get("critical_path") or {}).get("rive_cli") or {}).get("version")))
+    if rive_cli in {"", "None", "UNPINNED"}:
+        problems.append("Rive CLI authoring version is not pinned")
+    tools=_yaml(TOOLS)
     if str((((tools.get("critical_path") or {}).get("rive_editor") or {}).get("version"))) in {"", "None", "UNPINNED"}:
         problems.append("Rive Editor version unpinned")
     if core.get("emulator_validation")!="PASS": problems.append("core emulator validation not PASS")
