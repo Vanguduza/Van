@@ -8,6 +8,8 @@ ANDROID_SDK_ROOT="${ANDROID_SDK_ROOT:-$INSTALL_ROOT/android-sdk}"
 AVD_NAME="${CHARACTER_FORGE_AVD_NAME:-van-character-forge-api31}"
 PY_VENV="$INSTALL_ROOT/venv"
 RIVE_HOME="$STATE_ROOT/rive-home"
+RIVE_PROJECT_ROOT="$WORKSPACE/visual-authority/character-forge/09-rive-working/rml"
+RIVE_CLOUD_WRITE_SENTINEL="$STATE_ROOT/allow-rive-cloud-write"
 
 export HOME="$RIVE_HOME"
 export U2NET_HOME="$STATE_ROOT/rembg"
@@ -15,6 +17,25 @@ export ANDROID_SDK_ROOT
 export PATH="/usr/local/bin:$ANDROID_SDK_ROOT/platform-tools:$ANDROID_SDK_ROOT/emulator:$ANDROID_SDK_ROOT/cmdline-tools/latest/bin:$PATH"
 
 cd "$WORKSPACE"
+
+project_path() {
+  local raw="${1:-}"
+  [[ -n "$raw" ]] || { echo "project path required" >&2; exit 2; }
+  local resolved
+  resolved="$(realpath -m -- "$raw")"
+  case "$resolved" in
+    "$RIVE_PROJECT_ROOT"|"$RIVE_PROJECT_ROOT"/*) printf '%s\n' "$resolved" ;;
+    *) echo "refused: Rive project must stay under $RIVE_PROJECT_ROOT" >&2; exit 2 ;;
+  esac
+}
+
+require_cloud_write() {
+  [[ -f "$RIVE_CLOUD_WRITE_SENTINEL" ]] || {
+    echo "refused: Rive cloud-write authority is not enabled" >&2
+    exit 3
+  }
+}
+
 cmd="${1:-}"
 shift || true
 
@@ -49,11 +70,63 @@ case "$cmd" in
     [[ $# -eq 1 ]] || { echo "usage: svg-lint FILE.svg" >&2; exit 2; }
     exec python3 -m tools.character_forge.cli vectors lint "$1"
     ;;
-  rive)
-    exec rive "$@"
-    ;;
   rive-help)
     exec rive --help
+    ;;
+  rive-docs)
+    exec rive docs "$@"
+    ;;
+  rive-schema)
+    exec rive schema "$@"
+    ;;
+  rive-create)
+    [[ $# -eq 1 ]] || { echo "usage: rive-create PROJECT_DIR" >&2; exit 2; }
+    target="$(project_path "$1")"
+    mkdir -p "$RIVE_PROJECT_ROOT"
+    exec rive create "$target"
+    ;;
+  rive-inspect)
+    [[ $# -eq 1 ]] || { echo "usage: rive-inspect PROJECT_DIR" >&2; exit 2; }
+    project="$(project_path "$1")"
+    exec rive inspect "$project" --json
+    ;;
+  rive-verify)
+    [[ $# -eq 1 ]] || { echo "usage: rive-verify PROJECT_DIR" >&2; exit 2; }
+    project="$(project_path "$1")"
+    exec rive "$project" --verify --format=json
+    ;;
+  rive-build)
+    [[ $# -eq 1 ]] || { echo "usage: rive-build PROJECT_DIR" >&2; exit 2; }
+    project="$(project_path "$1")"
+    exec rive "$project" --once --format=json
+    ;;
+  rive-test)
+    [[ $# -eq 1 ]] || { echo "usage: rive-test PROJECT_DIR" >&2; exit 2; }
+    project="$(project_path "$1")"
+    exec rive "$project" --test --format=json
+    ;;
+  rive-screenshot)
+    [[ $# -eq 1 ]] || { echo "usage: rive-screenshot PROJECT_DIR" >&2; exit 2; }
+    project="$(project_path "$1")"
+    exec rive "$project" --screenshot
+    ;;
+  rive-auth-status)
+    exec rive whoami
+    ;;
+  rive-login)
+    exec rive login
+    ;;
+  rive-push)
+    [[ $# -eq 1 ]] || { echo "usage: rive-push PROJECT_DIR" >&2; exit 2; }
+    require_cloud_write
+    project="$(project_path "$1")"
+    exec rive push "$project" --name "VAN Character Forge"
+    ;;
+  rive-publish)
+    [[ $# -eq 1 ]] || { echo "usage: rive-publish PROJECT_DIR" >&2; exit 2; }
+    require_cloud_write
+    project="$(project_path "$1")"
+    exec rive "$project" --publish --format=json
     ;;
   android-build)
     cd android
@@ -97,7 +170,9 @@ case "$cmd" in
 Allowed commands:
   doctor status git-status source-admit gate
   remove-bg vectorize svg-lint
-  rive rive-help
+  rive-help rive-docs rive-schema rive-create rive-inspect
+  rive-verify rive-build rive-test rive-screenshot
+  rive-auth-status rive-login rive-push rive-publish
   android-build emulator-up emulator-down instrumentation
   qualify toolchain-lock import-toolchain-lock
 EOF
