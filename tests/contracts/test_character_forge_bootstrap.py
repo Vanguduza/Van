@@ -133,3 +133,32 @@ def test_rive_smoke_is_fail_closed_and_checks_interactive_schema():
         assert required in smoke
     assert "set +e" not in smoke
     assert "|| true" not in smoke
+
+
+def test_netcup_qualification_reads_workspace_as_forge_user():
+    qualifier = _text("qualify-netcup-authoring.sh")
+    assert 'runuser -u "$FORGE_USER" -- git -C "$WORKSPACE" rev-parse HEAD' in qualifier
+    assert 'runuser -u "$FORGE_USER" -- git -C "$WORKSPACE" status --porcelain' in qualifier
+    assert 'observed="$(git -C "$WORKSPACE"' not in qualifier
+
+
+def test_character_forge_pins_java17_across_bootstrap_qualifier_and_worker():
+    expected = '/usr/lib/jvm/java-17-openjdk-amd64'
+    bootstrap = _text("bootstrap-netcup-authoring.sh")
+    qualifier = _text("qualify-netcup-authoring.sh")
+    worker = _text("commander-worker.sh")
+
+    assert expected in bootstrap
+    assert expected in qualifier
+    assert expected in worker
+    assert 'JAVA_VERSION="$("$JAVA_HOME/bin/java" -version' in bootstrap
+    assert '"$JAVA_HOME/bin/java" -version' in qualifier
+    assert 'export JAVA_HOME' in worker
+    assert 'PATH="$JAVA_HOME/bin:' in worker
+
+
+def test_avd_creation_does_not_depend_on_host_hardware_profile_catalog():
+    bootstrap = _text("bootstrap-netcup-authoring.sh")
+    assert '--package "system-images;android-31;google_apis;x86_64"' in bootstrap
+    assert '--device "pixel_6"' not in bootstrap
+    assert '|| die "Android AVD $AVD_NAME was not created"' in bootstrap
