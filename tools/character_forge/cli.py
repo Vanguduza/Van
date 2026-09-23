@@ -226,6 +226,20 @@ def cmd_gate(args):
         save_status(status)
     print(json.dumps({"gate":result.gate,"passed":result.passed,"reasons":list(result.reasons)},indent=2) if args.json else (f"{result.gate}: PASS" if result.passed else f"{result.gate}: FAIL\n- "+"\n- ".join(result.reasons))); return 0 if result.passed else 1
 
+def _validation_binding(evidence_dir, filename):
+    if not evidence_dir:
+        raise ValueError(f"validation requires --evidence-dir containing {filename}")
+    root=Path(evidence_dir).resolve()
+    if not root.is_dir():
+        raise ValueError(f"evidence directory missing: {root}")
+    matches=list(root.rglob(filename))
+    if len(matches)!=1:
+        raise ValueError(f"expected exactly one {filename}, found {len(matches)}")
+    value=matches[0].read_text(encoding="utf-8").strip()
+    if len(value)!=64 or any(ch not in "0123456789abcdef" for ch in value.lower()):
+        raise ValueError(f"{filename} does not contain a SHA-256")
+    return value.lower(), sha256_file(matches[0]), root
+
 def cmd_record_validation(args):
     status=load_status(); manifest=load_yaml(); run=str(args.ci_run or "").strip()
     if not run.startswith(("https://github.com/","http://github.com/")):
@@ -234,17 +248,20 @@ def cmd_record_validation(args):
         record=status[args.stage]; expected=record.get("candidate_sha256")
         if not expected or args.candidate_sha != expected:
             print("refused: candidate SHA does not equal the staged candidate",file=sys.stderr); return 1
+        try:
+            bound_sha,binding_file_sha,source=_validation_binding(args.evidence_dir,"van_candidate.sha256")
+        except ValueError as exc:
+            print(f"refused: {exc}",file=sys.stderr); return 2
+        if bound_sha!=expected:
+            print(f"refused: CI evidence SHA {bound_sha} does not equal staged candidate {expected}",file=sys.stderr); return 1
         previous=(manifest.get("ci_evidence") or {}).get(expected) or {}
         baseline_ready=bool(list((EVIDENCE_DIR/"core_baseline").glob("*.png")))
-        if record.get("emulator_validation")==args.result and record.get("ci_run")==run and previous.get("result")==args.result and (args.stage!="core_rig" or args.result!="PASS" or baseline_ready):
+        if record.get("emulator_validation")==args.result and record.get("ci_run")==run and previous.get("result")==args.result and previous.get("candidate_sha256")==expected and previous.get("binding_file_sha256")==binding_file_sha and (args.stage!="core_rig" or args.result!="PASS" or baseline_ready):
             print("NO_CHANGE"); return 0
         record["emulator_validation"]=args.result; record["ci_run"]=run
-        manifest.setdefault("ci_evidence",{})[expected]={"stage":args.stage,"result":args.result,"ci_run":run,"recorded_at":now_iso()}
+        manifest.setdefault("ci_evidence",{})[expected]={"stage":args.stage,"result":args.result,"ci_run":run,"candidate_sha256":expected,"binding_file_sha256":binding_file_sha,"recorded_at":now_iso()}
         if args.stage=="core_rig" and args.result=="PASS":
-            if not args.evidence_dir:
-                print("refused: core PASS requires --evidence-dir from the CI screenshot artifact",file=sys.stderr); return 2
-            source=Path(args.evidence_dir).resolve()
-            pngs=list(source.rglob("*.png")) if source.is_dir() else []
+            pngs=list(source.rglob("*.png"))
             if not pngs:
                 print("refused: no PNG core evidence found",file=sys.stderr); return 1
             baseline=EVIDENCE_DIR/"core_baseline"
@@ -259,11 +276,17 @@ def cmd_record_validation(args):
         if not SOURCE_RIV.is_file() or not APP_RIV.is_file() or sha256_file(SOURCE_RIV)!=sha256_file(APP_RIV):
             print("refused: production validation requires byte-identical integrated assets",file=sys.stderr); return 1
         sha=sha256_file(APP_RIV)
+        try:
+            bound_sha,binding_file_sha,_=_validation_binding(args.evidence_dir,"van_production.sha256")
+        except ValueError as exc:
+            print(f"refused: {exc}",file=sys.stderr); return 2
+        if bound_sha!=sha:
+            print(f"refused: CI production evidence SHA {bound_sha} does not equal integrated asset {sha}",file=sys.stderr); return 1
         prod=status.get("production") or {}; prior=(manifest.get("ci_evidence") or {}).get(sha) or {}
-        if prod.get("emulator_validation")==args.result and prod.get("ci_run")==run and prod.get("rive_sha256")==sha and prior.get("stage")=="production" and prior.get("result")==args.result:
+        if prod.get("emulator_validation")==args.result and prod.get("ci_run")==run and prod.get("rive_sha256")==sha and prior.get("stage")=="production" and prior.get("result")==args.result and prior.get("binding_file_sha256")==binding_file_sha:
             print("NO_CHANGE"); return 0
         status["production"]={"emulator_validation":args.result,"ci_run":run,"rive_sha256":sha}
-        manifest.setdefault("ci_evidence",{})[sha]={"stage":"production","result":args.result,"ci_run":run,"recorded_at":now_iso()}
+        manifest.setdefault("ci_evidence",{})[sha]={"stage":"production","result":args.result,"ci_run":run,"candidate_sha256":sha,"binding_file_sha256":binding_file_sha,"recorded_at":now_iso()}
         status["next_action"]="Complete S24 DEVICE_CHECKLIST.yaml and owner biometric acceptance" if args.result=="PASS" else "Fix production validation failure"
         expected=sha
     append_receipt(
