@@ -10,6 +10,9 @@ on:
     branches:
       - main
       - 'claude/**'
+      # Character Forge candidates pushed by the bounded worker (`forge-push`); without this
+      # a staged candidate would never reach RiveContractTest or character-forge-gate.
+      - 'forge/**'
   pull_request:
 
 concurrency:
