@@ -508,6 +508,17 @@ class VanGatewayClient(context: Context) {
         )
     }
 
+    /**
+     * Mint a short-lived, owner-device-bound ARTEMIS web-console launch.
+     *
+     * The Netcup ARTEMIS bearer token never reaches Android. This POST is protected by
+     * VAN ingress auth, the device access token, and the hardware device proof; the
+     * returned one-use URL exchanges into an HttpOnly same-origin Gateway cookie.
+     */
+    suspend fun artemisConsoleSession(): JSONObject = withContext(Dispatchers.IO) {
+        postProved("/v1/artemis/console/session", JSONObject())
+    }
+
     suspend fun browserStatus(): JSONObject = withContext(Dispatchers.IO) {
         getJson("/v1/browser/status")
     }

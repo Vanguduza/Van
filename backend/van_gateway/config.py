@@ -130,6 +130,15 @@ class Settings(BaseSettings):
     browser_stagehand_model_provider: str = ""
     browser_stagehand_model_name: str = ""
 
+    # Hermes-governed ARTEMIS Android console. The raw UI remains on Netcup loopback;
+    # VAN Gateway reaches only the authenticated private-overlay proxy. Android never
+    # receives this bearer credential.
+    artemis_console_enabled: bool = False
+    artemis_console_base_url: str = ""
+    artemis_console_token_file: str = ""
+    artemis_console_session_ttl_seconds: int = 900
+    artemis_console_launch_ttl_seconds: int = 60
+
     # Rev 3.1 knowledge-source capability plane. These providers emit evidence
     # or verified mutation receipts only; none can promote itself to owner truth.
     vekl_enabled: bool = False

@@ -48,6 +48,7 @@ import androidx.navigation.compose.rememberNavController
 import androidx.navigation.navArgument
 import com.dial.van.VanApplication
 import com.dial.van.command.attention.AttentionRoute
+import com.dial.van.command.artemis.ArtemisConsoleRoute
 import com.dial.van.command.connected.ConnectedRoute
 import com.dial.van.command.home.HomeRoute
 import com.dial.van.command.modules.BrowserEscalationsPage
@@ -195,11 +196,15 @@ internal fun CommandCentreScreen(app: VanApplication, initial: String) {
                         WorkRoute(
                             app = app,
                             onOpenBrowser = { nav.navigate(VanRoute.WORK_BROWSER) },
+                            onOpenArtemis = { nav.navigate(VanRoute.WORK_ARTEMIS) },
                             onOpenActivity = { nav.navigate(VanRoute.WORK_ACTIVITY) },
                         )
                     }
                     composable(VanRoute.WORK_ACTIVITY) {
                         WorkActivityRoute(app, onBack = { nav.popBackStack() })
+                    }
+                    composable(VanRoute.WORK_ARTEMIS) {
+                        ArtemisConsoleRoute(app, onBack = { nav.popBackStack() })
                     }
                     composable(VanRoute.WORK_BROWSER) {
                         val glass = legacyGlass(app)
@@ -235,6 +240,7 @@ internal fun CommandCentreScreen(app: VanApplication, initial: String) {
                         WorkRoute(
                             app = app,
                             onOpenBrowser = { nav.navigate(VanRoute.WORK_BROWSER) },
+                            onOpenArtemis = { nav.navigate(VanRoute.WORK_ARTEMIS) },
                             onOpenActivity = { nav.navigate(VanRoute.WORK_ACTIVITY) },
                         )
                     }

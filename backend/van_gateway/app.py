@@ -11,10 +11,11 @@ from typing import Any
 from pathlib import Path
 
 from fastapi import FastAPI, Header, HTTPException, Request
-from fastapi.responses import JSONResponse, PlainTextResponse
+from fastapi.responses import JSONResponse, PlainTextResponse, RedirectResponse
 from pydantic import BaseModel, Field, ValidationError
 
 from van_gateway.action.service import ActionPolicyError
+from van_gateway.artemis.console import ArtemisConsoleProxy
 from van_gateway.attention.engine import AttentionEngine
 from van_gateway.audit.service import AuditService
 from van_gateway.auth.service import AuthError, AuthService
@@ -407,6 +408,14 @@ def _parse_ice_servers(raw: str) -> list[dict]:
 def create_app() -> FastAPI:
     settings = get_settings()
     store = Store(settings.database_path)
+    artemis_console = ArtemisConsoleProxy(
+        upstream_base_url=settings.artemis_console_base_url,
+        upstream_token_file=settings.artemis_console_token_file,
+        public_base_url=settings.van_public_base_url,
+        session_ttl_seconds=settings.artemis_console_session_ttl_seconds,
+        launch_ttl_seconds=settings.artemis_console_launch_ttl_seconds,
+        enabled=settings.artemis_console_enabled,
+    )
     auth = AuthService(store, settings.device_secret_fernet_key)
     throttle = AuthThrottle()
     rotation = CredentialRotation(store)
@@ -842,6 +851,7 @@ def create_app() -> FastAPI:
     # for rather than what the handler took after every other middleware.
     app.add_middleware(MetricsMiddleware)
     app.state.store = store
+    app.state.artemis_console = artemis_console
     app.state.auth = auth
     app.state.auth_throttle = throttle
     app.state.credential_rotation = rotation
@@ -1207,6 +1217,7 @@ def create_app() -> FastAPI:
             or path == "/v1/context/ingest"
             or path == "/v1/google/owner-revoke"
             or path == "/v1/visual/acceptance"
+            or path == "/v1/artemis/console/session"
         )
 
     async def enforce_device_proof(request: Request, device_id: str) -> JSONResponse | None:
@@ -1307,6 +1318,13 @@ def create_app() -> FastAPI:
 
     @app.middleware("http")
     async def require_ingress_auth(request: Request, call_next):
+        # The embedded ARTEMIS browser surface uses a short-lived HttpOnly session
+        # minted only after a normal owner-device proof. The one-use launch URL and
+        # subsequent cookie-authenticated GETs do not carry Android bearer headers.
+        if artemis_console.is_public_launch_request(request):
+            return await call_next(request)
+        if artemis_console.browser_request_authorized(request):
+            return await call_next(request)
         if request.method == "POST" and request.url.path == "/v1/devices/pair":
             return await call_next(request)
         # ADR-RB-026 — a phone being enrolled has no device token yet, by definition. These
@@ -1461,6 +1479,52 @@ def create_app() -> FastAPI:
             ),
             "enrolment_grants": await auth.expiring_grants(),
         }
+
+    @app.post("/v1/artemis/console/session")
+    async def create_artemis_console_session(request: Request):
+        device_id = getattr(request.state, "van_device_id", "")
+        if not device_id:
+            raise HTTPException(status_code=401, detail="owner_device_required")
+        try:
+            return JSONResponse(
+                artemis_console.mint(device_id),
+                headers={"Cache-Control": "no-store"},
+            )
+        except RuntimeError as exc:
+            raise HTTPException(status_code=503, detail=str(exc)) from exc
+
+    @app.get("/v1/artemis/console/launch/{launch_token}")
+    async def launch_artemis_console(launch_token: str):
+        redeemed = artemis_console.redeem(launch_token)
+        if redeemed is None:
+            raise HTTPException(status_code=401, detail="artemis_console_launch_invalid_or_expired")
+        cookie, _session = redeemed
+        response = RedirectResponse(url="/v1/artemis/console/", status_code=303)
+        response.set_cookie(value=cookie, **artemis_console.launch_cookie_kwargs())
+        response.headers["Cache-Control"] = "no-store"
+        return response
+
+    @app.api_route("/v1/artemis/console", methods=["GET", "HEAD", "OPTIONS", "POST"])
+    @app.api_route("/v1/artemis/console/", methods=["GET", "HEAD", "OPTIONS", "POST"])
+    @app.api_route("/v1/artemis/console/{resource_path:path}", methods=["GET", "HEAD", "OPTIONS", "POST"])
+    async def proxy_artemis_console(request: Request, resource_path: str = ""):
+        return await artemis_console.proxy(request)
+
+    @app.api_route("/api/{resource_path:path}", methods=["GET", "HEAD", "OPTIONS", "POST"])
+    async def proxy_artemis_console_api(request: Request, resource_path: str):
+        return await artemis_console.proxy(request)
+
+    @app.api_route("/images/{resource_path:path}", methods=["GET", "HEAD", "OPTIONS"])
+    async def proxy_artemis_console_images(request: Request, resource_path: str):
+        return await artemis_console.proxy(request)
+
+    @app.api_route("/videos/{resource_path:path}", methods=["GET", "HEAD", "OPTIONS"])
+    async def proxy_artemis_console_videos(request: Request, resource_path: str):
+        return await artemis_console.proxy(request)
+
+    @app.api_route("/local_file/{resource_path:path}", methods=["GET", "HEAD", "OPTIONS"])
+    async def proxy_artemis_console_local_file(request: Request, resource_path: str):
+        return await artemis_console.proxy(request)
 
     @app.post("/v1/devices/pairing-ticket")
     async def create_pairing_ticket(
