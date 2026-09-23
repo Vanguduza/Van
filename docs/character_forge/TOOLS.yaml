@@ -20,7 +20,7 @@ review_lanes:
     version: UNPINNED
     class: HUMAN_REVIEW
 lanes:
-  rembg_birefnet: {class: PREP, enabled: true}
-  vtracer: {class: PREP, enabled: true}
-  blender: {class: AUXILIARY, enabled: true}
+  rembg_birefnet: {class: PREP, enabled: false, installed_by_bootstrap: true}
+  vtracer: {class: PREP, enabled: false, installed_by_bootstrap: true}
+  blender: {class: AUXILIARY, enabled: false, installed_by_bootstrap: true}
   comfyui: {class: OPTIONAL_AI, enabled: false}
