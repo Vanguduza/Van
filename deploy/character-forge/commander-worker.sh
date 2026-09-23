@@ -8,13 +8,15 @@ ANDROID_SDK_ROOT="${ANDROID_SDK_ROOT:-$INSTALL_ROOT/android-sdk}"
 AVD_NAME="${CHARACTER_FORGE_AVD_NAME:-van-character-forge-api31}"
 PY_VENV="$INSTALL_ROOT/venv"
 RIVE_HOME="$STATE_ROOT/rive-home"
+JAVA_HOME="${CHARACTER_FORGE_JAVA_HOME:-/usr/lib/jvm/java-17-openjdk-amd64}"
 RIVE_PROJECT_ROOT="$WORKSPACE/visual-authority/character-forge/09-rive-working/rml"
 RIVE_CLOUD_WRITE_SENTINEL="$STATE_ROOT/allow-rive-cloud-write"
 
-export HOME="$RIVE_HOME"
+export HOME="$STATE_ROOT"
 export U2NET_HOME="$STATE_ROOT/rembg"
 export ANDROID_SDK_ROOT
-export PATH="/usr/local/bin:$ANDROID_SDK_ROOT/platform-tools:$ANDROID_SDK_ROOT/emulator:$ANDROID_SDK_ROOT/cmdline-tools/latest/bin:$PATH"
+export JAVA_HOME
+export PATH="$JAVA_HOME/bin:/usr/local/bin:$ANDROID_SDK_ROOT/platform-tools:$ANDROID_SDK_ROOT/emulator:$ANDROID_SDK_ROOT/cmdline-tools/latest/bin:$PATH"
 
 cd "$WORKSPACE"
 
@@ -41,7 +43,7 @@ shift || true
 
 case "$cmd" in
   doctor)
-    rive --help >/dev/null
+    env HOME="$RIVE_HOME" rive --help >/dev/null
     python3 -m tools.character_forge.cli status --json >/dev/null
     echo CHARACTER_FORGE_COMMANDER_READY
     ;;
@@ -71,65 +73,65 @@ case "$cmd" in
     exec python3 -m tools.character_forge.cli vectors lint "$1"
     ;;
   rive-help)
-    exec rive --help
+    exec env HOME="$RIVE_HOME" rive --help
     ;;
   rive-docs)
-    exec rive docs "$@"
+    exec env HOME="$RIVE_HOME" rive docs "$@"
     ;;
   rive-schema)
-    exec rive schema "$@"
+    exec env HOME="$RIVE_HOME" rive schema "$@"
     ;;
   rive-create)
     [[ $# -eq 1 ]] || { echo "usage: rive-create PROJECT_DIR" >&2; exit 2; }
     target="$(project_path "$1")"
     mkdir -p "$RIVE_PROJECT_ROOT"
-    exec rive create "$target"
+    exec env HOME="$RIVE_HOME" rive create "$target"
     ;;
   rive-inspect)
     [[ $# -eq 1 ]] || { echo "usage: rive-inspect PROJECT_DIR" >&2; exit 2; }
     project="$(project_path "$1")"
-    exec rive inspect "$project" --json
+    exec env HOME="$RIVE_HOME" rive inspect "$project" --json
     ;;
   rive-verify)
     [[ $# -eq 1 ]] || { echo "usage: rive-verify PROJECT_DIR" >&2; exit 2; }
     project="$(project_path "$1")"
-    exec rive "$project" --verify --format=json
+    exec env HOME="$RIVE_HOME" rive "$project" --verify --format=json
     ;;
   rive-build)
     [[ $# -eq 1 ]] || { echo "usage: rive-build PROJECT_DIR" >&2; exit 2; }
     project="$(project_path "$1")"
-    exec rive "$project" --once --format=json
+    exec env HOME="$RIVE_HOME" rive "$project" --once --format=json
     ;;
   rive-test)
     [[ $# -eq 1 ]] || { echo "usage: rive-test PROJECT_DIR" >&2; exit 2; }
     project="$(project_path "$1")"
-    exec rive "$project" --test --format=json
+    exec env HOME="$RIVE_HOME" rive "$project" --test --format=json
     ;;
   rive-screenshot)
     [[ $# -eq 1 ]] || { echo "usage: rive-screenshot PROJECT_DIR" >&2; exit 2; }
     project="$(project_path "$1")"
-    exec rive "$project" --screenshot
+    exec env HOME="$RIVE_HOME" rive "$project" --screenshot
     ;;
   rive-smoke)
     exec /usr/local/libexec/van-character-forge-rive-smoke
     ;;
   rive-auth-status)
-    exec rive whoami
+    exec env HOME="$RIVE_HOME" rive whoami
     ;;
   rive-login)
-    exec rive login
+    exec env HOME="$RIVE_HOME" rive login
     ;;
   rive-push)
     [[ $# -eq 1 ]] || { echo "usage: rive-push PROJECT_DIR" >&2; exit 2; }
     require_cloud_write
     project="$(project_path "$1")"
-    exec rive push "$project" --name "VAN Character Forge"
+    exec env HOME="$RIVE_HOME" rive push "$project" --name "VAN Character Forge"
     ;;
   rive-publish)
     [[ $# -eq 1 ]] || { echo "usage: rive-publish PROJECT_DIR" >&2; exit 2; }
     require_cloud_write
     project="$(project_path "$1")"
-    exec rive "$project" --publish --format=json
+    exec env HOME="$RIVE_HOME" rive "$project" --publish --format=json
     ;;
   android-build)
     cd android

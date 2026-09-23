@@ -133,3 +133,25 @@ def test_rive_smoke_is_fail_closed_and_checks_interactive_schema():
         assert required in smoke
     assert "set +e" not in smoke
     assert "|| true" not in smoke
+
+
+def test_netup_qualification_uses_forge_identity_for_repo_and_avd():
+    qualifier = _text("qualify-netcup-authoring.sh")
+    assert 'runuser -u "$FORGE_USER" -- git -C "$WORKSPACE" rev-parse HEAD' in qualifier
+    assert 'HOME="$STATE_ROOT" ANDROID_SDK_ROOT="$ANDROID_SDK_ROOT"' in qualifier
+    assert 'JAVA_HOME="${CHARACTER_FORGE_JAVA_HOME:-/usr/lib/jvm/java-17-openjdk-amd64}"' in qualifier
+
+
+def test_commander_keeps_android_home_separate_from_rive_home():
+    worker = _text("commander-worker.sh")
+    assert 'export HOME="$STATE_ROOT"' in worker
+    assert 'export JAVA_HOME' in worker
+    assert 'exec env HOME="$RIVE_HOME" rive' in worker
+    assert 'export HOME="$RIVE_HOME"' not in worker
+
+
+def test_bootstrap_records_character_forge_java17_not_host_default():
+    script = _text("bootstrap-netcup-authoring.sh")
+    assert 'JAVA_HOME="${CHARACTER_FORGE_JAVA_HOME:-/usr/lib/jvm/java-17-openjdk-amd64}"' in script
+    assert 'JAVA_VERSION="$("$JAVA_HOME/bin/java" -version 2>&1 | head -n1)"' in script
+    assert 'HOME="$STATE_ROOT" JAVA_HOME="$JAVA_HOME" ANDROID_SDK_ROOT="$ANDROID_SDK_ROOT"' in script

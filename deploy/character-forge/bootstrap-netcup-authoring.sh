@@ -20,6 +20,7 @@ RIVE_CLI_URL="https://releases.rive.app/cli/v$RIVE_CLI_VERSION/$RIVE_CLI_ARCHIVE
 TOOLCHAIN_LOCK="$STATE_ROOT/toolchain.lock.json"
 PY_VENV="$INSTALL_ROOT/venv"
 RIVE_HOME="$STATE_ROOT/rive-home"
+JAVA_HOME="${CHARACTER_FORGE_JAVA_HOME:-/usr/lib/jvm/java-17-openjdk-amd64}"
 REMBG_HOME="$STATE_ROOT/rembg"
 
 log(){ printf '[character-forge bootstrap] %s\n' "$*"; }
@@ -59,6 +60,8 @@ apt-get install -y --no-install-recommends \
   xvfb dbus-x11 fonts-dejavu-core \
   qemu-kvm libgl1 libegl1 libgles2 libpulse0 libnss3 libx11-6 libxcomposite1 libxcursor1 libxi6 \
   libxrandr2 libxdamage1 libxfixes3 libxtst6
+
+[[ -x "$JAVA_HOME/bin/java" ]] || die "Character Forge Java 17 missing at $JAVA_HOME"
 
 if ! command -v google-chrome >/dev/null 2>&1; then
   log "installing Chrome for optional Rive web-editor review"
@@ -178,7 +181,7 @@ RIVE_REPORTED_VERSION="$(runuser -u "$FORGE_USER" -- env HOME="$RIVE_HOME" rive 
 [[ "$RIVE_REPORTED_VERSION" == *"$RIVE_VERSION"* ]] || die "Rive CLI version drift: expected $RIVE_VERSION, observed '$RIVE_REPORTED_VERSION'"
 INKSCAPE_VERSION="$(inkscape --version | head -n1)"
 CHROME_VERSION="$(google-chrome --version | head -n1)"
-JAVA_VERSION="$(java -version 2>&1 | head -n1)"
+JAVA_VERSION="$("$JAVA_HOME/bin/java" -version 2>&1 | head -n1)"
 EMULATOR_VERSION="$("$ANDROID_SDK_ROOT/emulator/emulator" -version 2>&1 | head -n1)"
 VTRACER_VERSION="$(runuser -u "$FORGE_USER" -- "$PY_VENV/bin/python" -c 'import importlib.metadata as m; print(m.version("vtracer"))')"
 REMBG_VERSION="$(runuser -u "$FORGE_USER" -- "$PY_VENV/bin/python" -c 'import importlib.metadata as m; print(m.version("rembg"))')"

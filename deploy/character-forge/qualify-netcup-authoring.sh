@@ -10,6 +10,7 @@ ANDROID_SDK_ROOT="${ANDROID_SDK_ROOT:-$INSTALL_ROOT/android-sdk}"
 AVD_NAME="${CHARACTER_FORGE_AVD_NAME:-van-character-forge-api31}"
 PY_VENV="$INSTALL_ROOT/venv"
 RIVE_HOME="$STATE_ROOT/rive-home"
+JAVA_HOME="${CHARACTER_FORGE_JAVA_HOME:-/usr/lib/jvm/java-17-openjdk-amd64}"
 
 checks=()
 fails=0
@@ -29,8 +30,8 @@ else
 fi
 
 if [[ -d "$WORKSPACE/.git" ]]; then
-  observed="$(git -C "$WORKSPACE" rev-parse HEAD 2>/dev/null || true)"
-  dirty="$(git -C "$WORKSPACE" status --porcelain 2>/dev/null || true)"
+  observed="$(runuser -u "$FORGE_USER" -- git -C "$WORKSPACE" rev-parse HEAD 2>/dev/null || true)"
+  dirty="$(runuser -u "$FORGE_USER" -- git -C "$WORKSPACE" status --porcelain 2>/dev/null || true)"
   if [[ "$observed" == "$EXPECTED_SHA" && -z "$dirty" ]]; then
     add repository GREEN "$observed clean"
   else
@@ -74,11 +75,15 @@ command -v google-chrome >/dev/null 2>&1 \
   && add web_editor_lane GREEN "$(google-chrome --version)" \
   || add web_editor_lane RED missing
 
-java -version >/tmp/van-java.txt 2>&1
-if grep -q '"17\.' /tmp/van-java.txt; then
-  add java17 GREEN "$(head -n1 /tmp/van-java.txt)"
+if [[ -x "$JAVA_HOME/bin/java" ]]; then
+  "$JAVA_HOME/bin/java" -version >/tmp/van-java.txt 2>&1
+  if grep -q '"17\.' /tmp/van-java.txt; then
+    add java17 GREEN "$(head -n1 /tmp/van-java.txt)"
+  else
+    add java17 RED "$(head -n1 /tmp/van-java.txt 2>/dev/null)"
+  fi
 else
-  add java17 RED "$(head -n1 /tmp/van-java.txt 2>/dev/null)"
+  add java17 RED "Character Forge Java 17 missing at $JAVA_HOME"
 fi
 
 if [[ -x "$ANDROID_SDK_ROOT/platform-tools/adb" && -x "$ANDROID_SDK_ROOT/emulator/emulator" ]]; then
@@ -87,7 +92,7 @@ else
   add android_sdk RED missing
 fi
 
-if "$ANDROID_SDK_ROOT/emulator/emulator" -list-avds 2>/dev/null | grep -Fxq "$AVD_NAME"; then
+if runuser -u "$FORGE_USER" -- env HOME="$STATE_ROOT" ANDROID_SDK_ROOT="$ANDROID_SDK_ROOT" JAVA_HOME="$JAVA_HOME"   "$ANDROID_SDK_ROOT/emulator/emulator" -list-avds 2>/dev/null | grep -Fxq "$AVD_NAME"; then
   add api31_avd GREEN "$AVD_NAME"
 else
   add api31_avd RED "AVD missing"
@@ -114,7 +119,7 @@ else
   add rive_authoring_smoke RED "$(tail -c 800 /tmp/van-rive-smoke.err 2>/dev/null)"
 fi
 
-if sudo -n -u "$FORGE_USER" /usr/local/libexec/van-character-forge-worker doctor >/tmp/van-forge-worker.txt 2>&1; then
+if runuser -u "$FORGE_USER" -- env HOME="$STATE_ROOT" JAVA_HOME="$JAVA_HOME"   /usr/local/libexec/van-character-forge-worker doctor >/tmp/van-forge-worker.txt 2>&1; then
   add commander_worker GREEN "$(tail -n1 /tmp/van-forge-worker.txt)"
 else
   add commander_worker RED "$(tail -c 500 /tmp/van-forge-worker.txt 2>/dev/null)"
