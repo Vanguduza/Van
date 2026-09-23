@@ -284,6 +284,10 @@ class RiveContractTest {
         val rig = rigOrSkip()
         assumeTrue("FULL_OR_PRODUCTION_ONLY", rig.mode != Mode.CORE)
         launchScenario(rig, state = 2).use {
+            // Count only the soak: gfxinfo is cumulative since process start (launch frames).
+            // It measures HWUI frames; Rive's own render thread is profiled on the S24 (Perfetto).
+            SystemClock.sleep(2_000L)
+            shell("dumpsys gfxinfo ${targetContext.packageName} reset")
             SystemClock.sleep(300_000L)
             val text = shell("dumpsys gfxinfo ${targetContext.packageName}")
             val out = outputDir(rig).resolve("gfxinfo.txt")
