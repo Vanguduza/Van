@@ -115,8 +115,8 @@ def cmd_tools_import_lock(args):
         print(f"refused: toolchain lock repository SHA {repo_sha} differs from HEAD {_git_head()}",file=sys.stderr); return 1
     rive_version=str(((lock.get("rive_cli") or {}).get("version") or "")).strip()
     inkscape_version=str(((lock.get("inkscape") or {}).get("version") or "")).strip()
-    if not rive_version or not inkscape_version:
-        print("refused: toolchain lock lacks rive_cli.version or inkscape.version",file=sys.stderr); return 1
+    if not rive_version or rive_version in {"UNPINNED","version-command-unavailable"} or not inkscape_version:
+        print("refused: toolchain lock lacks a qualified Rive CLI/Inkscape version",file=sys.stderr); return 1
     tools=_yaml(TOOLS_PATH)
     tools.setdefault("critical_path",{}).setdefault("rive_cli",{})["version"]=rive_version
     tools.setdefault("critical_path",{}).setdefault("inkscape",{})["version"]=inkscape_version
