@@ -157,7 +157,7 @@ Work:
 1. Recapture the SHA: `git rev-parse HEAD` on `main` at execution start; write it to `STATUS.json.baseline_sha`.
 2. Create the layout in §8 and the five machine-readable files.
 3. `python -m tools.character_forge.cli source admit` hashes every file under `visual-authority/assets/**`, `visual-authority/rive_contract.json`, `docs/VAN_CHARACTER_VISUAL_IDENTITY.md`, `docs/VAN_VISUAL_ACCEPTANCE_MATRIX.md` into `MANIFEST.yaml`. The owner confirms (a line in `MANIFEST.yaml`: `owner_confirmed_complete: true`, with date) that this set is the complete authoritative source. Until that line exists the manifest is `PROVISIONAL`.
-4. `TOOLS.yaml`: `rive_android: "9.6.5"` (must equal the gradle pin; the test reads the gradle file), `rive_editor: "<version the artist will use>"` (may be `UNPINNED` until M2 starts; M2 gate requires a value), `inkscape: "<version>"`.
+4. `TOOLS.yaml`: `rive_android: "9.6.5"` (must equal the gradle pin; the test reads the gradle file), `rive_cli` and `inkscape` (bare dotted versions, imported from the qualified Netcup toolchain lock by `cli tools import-lock`; `UNPINNED` until then; M1 requires Inkscape, M2 requires the Rive CLI — Rev 2.1).
 5. Extend `tests/contracts/test_rive_contract.py`: if `visual-authority/rive/van_runtime.riv` exists, its SHA must appear in `MANIFEST.yaml` and `van_runtime.sha256` must match; if `android/app/src/main/assets/van.riv` exists, it must be byte-identical to the source asset.
 6. Add `tests/contracts/test_character_forge_manifest.py`: every path in `MANIFEST.yaml` exists and hashes match; every hashed source file is listed (no unlisted file under the hashed roots).
 7. Rewrite `docs/VAN_RIVE_AUTHORING_HANDOFF.md` to a pointer at this pack (§11–§14).
@@ -190,9 +190,9 @@ Must not: vectorize the character as one flat path; introduce colours outside th
 Inputs: admitted `van_layers.svg`, `rive_contract.json`, §12.
 
 Work:
-1. In the Rive Editor (version recorded in `TOOLS.yaml` before starting), build artboard `Van` with state machine `VanRuntime`, all nine inputs and eight triggers with exact names and types, and only the §12 core scope.
-2. Export `visual-authority/character-forge/09-rive-working/van_runtime_core_<n>.riv`.
-3. Write the packaging receipt (§14): `cli rive receipt --candidate <path> --editor-version <v> --rive-file-id <id> --rive-revision <rev> --svg-sha <sha> --artist <name>`.
+1. Author RML under `visual-authority/character-forge/09-rive-working/rml/<project>/` with the pinned Rive CLI (Rev 2.1): artboard `Van`, state machine `VanRuntime`, all nine inputs and eight triggers with exact names and types, and only the §12 core scope. An optional Rive Editor review pass never replaces the RML source (see the audit's Editor round-trip rule).
+2. Build `visual-authority/character-forge/09-rive-working/van_runtime_core_<n>.riv` from that project (Commander: `rive-candidate <project> core <n>`; candidates are immutable).
+3. Write the packaging receipt (§14): `cli rive receipt --candidate <path> --source-project <rml project> --authoring-version <pinned rive_cli> --rive-file-id LOCAL --rive-revision LOCAL --svg-sha <sha> --artist <name>`. The receipt records the RML source-tree digest; `stage-candidate` refuses if the RML changed afterwards.
 4. `cli rive stage-candidate <path>` copies the file to `android/app/src/androidTest/assets/van_candidate.riv` and records it (kind `riv_candidate`, stage `core_rig`).
 5. Push; CI runs `RiveContractTest` (§10) in `core` mode (chosen by `STATUS.json.current_stage`).
 6. Install the CI debug APK on the S24 (artifact `van-debug-apk`). The app keeps rendering OWNER_ART/CANVAS in production (the candidate is only in the test APK), so the owner views the core rig through the instrumentation frames and through the debug host screen `RiveCandidateHost` (§10.6), which renders the candidate at overlay size, minimized-portrait crop, and full size on the device.
@@ -353,10 +353,11 @@ A test host composable `RiveCandidateHost` renders `VanRiveAvatar` from the give
 | Test | Cases | Assertion beyond "did not throw" |
 |---|---|---|
 | `coreInputsDriveTheRig` (core, full, production) | states 2,4,5,9; actions 1,2,7 via `action_code` and their triggers; `attention_x/y` at (−1,−1),(1,−1),(−1,1),(1,1),(0,0); `mouth_open` 0/0.5/1 with `viseme` 0–4; `speaking` true/false; `listening` true/false | frames differ pairwise where they must (gaze extremes are not pixel-identical; mouth_open 0 vs 1 differ) |
-| `everyStateAndActionRenders` (full, production) | `state` 0–17 each; `action_code` 1–14 each | 32 frames present; each state frame differs from `IDLE` except where the contract allows identical presentation (none; all must differ) |
+| `everyStateAndActionRenders` (full, production) | `state` 0–17 each; `action_code` 1–14 each (no trigger: production drives actions by `action_code` only) | 32 frames present; every state and every action differs from `IDLE` by more than 3× the measured IDLE-vs-IDLE noise (floor `min_distinct_rgb`) |
 | `mandatoryCombinations` (full, production) | WORKING+speaking; THINKING+speaking; WAITING_FOR_OWNER+speaking; URGENT+speaking; LISTENING+attention sweep; WORKING+POINT_TARGET; WAITING_FOR_OWNER+PRESENT_CARD; SUCCESS+CELEBRATE; WARNING+CAUTION; DEGRADED+LISTENING | frames present; no exception |
+| `productionAvatarPathKeepsRive` (production) | shipped `van.riv` rendered through the real `VanAvatar` composable | renderer decision stays RIVE (no LOAD_FAILED fallback) |
 | `invalidInputsDegradeSafely` (all modes) | state −1, 18, 999; action_code −1, 15, 999; attention ±2; mouth_open −1, 2; urgency −1, 2; viseme 99 | no exception; a frame is still produced; the frame is not fully transparent |
-| `artboardIsTransparentOnThreeBackgrounds` (all modes) | IDLE on light, dark, busy | the four corner 8×8 patches of the 320 dp frame equal the background (alpha of the artboard is 0 there) |
+| `artboardIsTransparentOnThreeBackgrounds` (all modes) | IDLE on light, dark, busy | the four corner 8×8 patches equal the background, and translucent coverage (pixels differing from both backgrounds and between them) ≤ `max_translucent_fraction` (default 0.08) so no halo/aura is baked in |
 | `identityColourFamilies` (all modes) | IDLE full-size frame | dominant hue in the hair region is low-saturation light (silver/white); a cyan family is present (visor/accents); no dominant dark hair mass. Implemented as coarse HSV histograms over the upper-third and centre regions with thresholds recorded in the test. This is a drift alarm, not an acceptance criterion. |
 | `idleSoakFrameStats` (full, production) | render IDLE with breathing for 300 s inside the host; then `UiAutomation.executeShellCommand("dumpsys gfxinfo com.dial.van")` | write raw output to `<out>/rive/<mode>/gfxinfo.txt`; parse "Janky frames" percentage; assert ≤ `max_janky_percent` (from a test asset `forge_thresholds.json` written by the CLI) |
 | `brokenAssetFallsBack` (production) | `VanVisualRuntime.decide(assetBytes = 512, riveRuntimeAvailable = true, ownerArtAvailable = true)` and with `loadFailed = true` | renderer is OWNER_ART with reasons ASSET_UNUSABLE and LOAD_FAILED respectively |
@@ -442,17 +443,21 @@ The ten mandatory combinations in §10.4 must render without artefacts; `urgency
   "candidate_sha256": "<hex>",
   "candidate_path": "visual-authority/character-forge/09-rive-working/van_runtime_core_1.riv",
   "stage": "core_rig",
-  "rive_editor_version": "<exact>",
+  "authoring_tool": "rive_cli",
+  "authoring_version": "<exact pinned Rive CLI version>",
   "rive_file_id": "<cloud file id or LOCAL>",
   "rive_revision": "<revision id or LOCAL>",
   "svg_sha256": "<hex of the admitted layer artifact>",
   "contract_sha256": "<hex of rive_contract.json at export>",
+  "source_project": "visual-authority/character-forge/09-rive-working/rml/<project>",
+  "source_tree_sha256": "<deterministic digest of the RML project (cli rive source-hash)>",
+  "source_file_count": 0,
   "artist": "<name>",
   "exported_at": "<ISO-8601>",
   "notes": "<free text>"
 }
 ```
-The receipt is required by `rive stage-candidate`; the validator run in CI records the run URL against `candidate_sha256` in `MANIFEST.yaml`.
+The receipt is required by `rive stage-candidate`. Validation is recorded with `cli rive record-validation`, which requires the CI artifact `van-character-forge-validation-binding` (`van_validation.json`, written by `tools/character_forge/ci_binding.py` from the RiveContractTest JUnit results): its run id, mode, SHA and machine-derived result must match what is being recorded, and the commit it names must carry the exact bytes. A bare SHA file with a typed PASS is refused. The blocking `character-forge-gate` CI job fails any commit that stages or ships an asset whose validation is not PASS.
 
 ---
 
@@ -480,7 +485,8 @@ Repository side: `ACCEPTANCE.yaml.final` holds the record verbatim plus `verifie
   "contract_sha256": "<exact>",
   "visual_authority_revision": "2.3",
   "rive_android": "9.6.5",
-  "rive_editor_version": "<exact>",
+  "rive_authoring_tool": "rive_cli",
+  "rive_authoring_version": "<exact>",
   "emulator_validation_run": "<CI run URL>",
   "device_checklist": "docs/character_forge/DEVICE_CHECKLIST.yaml",
   "acceptance": "docs/character_forge/ACCEPTANCE.yaml#final",
@@ -551,7 +557,7 @@ A gate that stays green under its mutation is a defect in the gate; fix the gate
 
 | Failure | Behaviour | Recovery |
 |---|---|---|
-| Rive Editor unavailable or version drifts | M2/M3 blocked; `STATUS.json.blockers` says so; nothing else changes | pin and record the version; resume |
+| Rive CLI unavailable or version/binary drifts from the lock | M2/M3 blocked; the qualifier is RED; `STATUS.json.blockers` says so | requalify, re-import the lock; resume |
 | Candidate fails to load on the emulator | `RiveContractTest` fails; candidate promotion REJECTED; production untouched | new candidate + receipt |
 | Emulator job infrastructure fails (no tests ran) | `ci_run` absent → gate cannot pass; not treated as a PASS | re-run the job |
 | S24 unavailable | M2 verdict / M4 checklist blocked; repository work continues | record when available |
@@ -565,7 +571,7 @@ Every stage restarts from immutable inputs named by hash; no stage depends on tr
 
 ## 21. Security
 
-Critical path tools (Inkscape, Rive Editor) run on the artist's workstation with no production secrets required. Lanes run in isolated environments with no home-directory mounts, no owner tokens, no GitHub write credentials, egress denied except admitted fetches. Generated code (Blender scripts, custom nodes) is arbitrary code and runs only inside the lane sandbox. Acceptance is cryptographic (§15): no file in the repository can claim owner acceptance without a signature the gateway or the local verifier accepts. Promotion writes are limited to the CLI commands in §9.
+Critical path tools (Inkscape, pinned Rive CLI) run on the Netcup Character Forge workstation as the unprivileged `vanforge` user behind the bounded Commander worker, with no production secrets; Rive cloud write and git push each need a root-owned switch under `/etc/van-character-forge` that only the owner creates. Lanes run in isolated environments with no home-directory mounts, no owner tokens, no GitHub write credentials, egress denied except admitted fetches. Generated code (Blender scripts, custom nodes) is arbitrary code and runs only inside the lane sandbox. Acceptance is cryptographic (§15): no file in the repository can claim owner acceptance without a signature the gateway or the local verifier accepts. Promotion writes are limited to the CLI commands in §9.
 
 ---
 
@@ -619,7 +625,7 @@ All true, each checkable by command:
 [ ] 6  cli gate m0 → BUILD_READY=true; commit "character-forge: M0 admission"
 [ ] 7  artist: van_layers.svg; cli vectors lint; cli vectors admit; review line; cli gate m1
 [ ] 8  implement RiveContractTest.kt, RiveCandidateHost.kt (debug), forge_mode/thresholds assets
-[ ] 9  pin rive_editor in TOOLS.yaml; artist builds core rig; cli rive receipt; cli rive stage-candidate --stage core_rig
+[ ] 9  import the qualified toolchain lock (pins rive_cli + inkscape); author the core rig in RML; build; cli rive receipt --source-project; cli rive stage-candidate --stage core_rig
 [ ] 10 push; read android-instrumentation run; fix candidate until green; record ci_run
 [ ] 11 owner views RiveCandidateHost on the S24 from the CI debug APK; cli owner record-core-verdict; cli gate m2
 [ ] 12 artist completes 18 states + 14 actions; receipt; stage --stage full_rig; push until green; reviewer line; cli gate m3

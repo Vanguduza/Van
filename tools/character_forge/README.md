@@ -7,12 +7,12 @@ This tooling makes the art pipeline deterministic. It never grants itself owner 
 Execution path:
 
 1. Bootstrap and qualify the Netcup Character Forge workstation.
-2. Import its exact toolchain lock with `tools import-lock`; M2 remains blocked while Rive CLI is unpinned.
+2. Import its exact toolchain lock with `tools import-lock` (exact repository SHA, the repository-pinned Rive CLI release, bare Inkscape version); M1/M2 remain blocked while unpinned.
 3. Run `source admit`; the owner separately confirms the source set.
 4. Run `gate m0`.
 5. Produce and admit `van_layers.svg`.
-6. Build core/full Rive candidates with the pinned Rive CLI and record a receipt using `--authoring-version`.
-7. Stage candidates only into androidTest/debug, push, and record exact CI evidence.
+6. Build core/full Rive candidates with the pinned Rive CLI from RML under `09-rive-working/rml/` and record a receipt using `--authoring-version` and `--source-project`.
+7. Stage candidates only into androidTest/debug, push, download the `van-character-forge-validation-binding` (and screenshots) artifacts and run `rive record-validation`; it accepts only the CI-stated outcome for that exact run, SHA and commit.
 8. The owner performs the core verdict; an independent reviewer records the full-rig verdict.
 9. `android integrate` refuses anything other than the M3-qualified exact candidate.
 10. Complete production CI, S24 physical evidence and biometric owner acceptance.
