@@ -50,8 +50,11 @@ def _receipt_problems(sha, stage, manifest, tools):
     if row.get("stage")!=stage: problems.append(f"{stage} receipt stage mismatch")
     if row.get("contract_sha256")!=sha256_file(CONTRACT): problems.append(f"{stage} receipt contract SHA stale")
     if not layer or row.get("svg_sha256")!=layer.get("sha256"): problems.append(f"{stage} receipt layer SHA stale")
-    pin=str((((tools.get("critical_path") or {}).get("rive_editor") or {}).get("version")))
-    if row.get("rive_editor_version")!=pin: problems.append(f"{stage} receipt Rive Editor version mismatch")
+    pin=str((((tools.get("critical_path") or {}).get("rive_cli") or {}).get("version")))
+    if row.get("authoring_tool")!="rive_cli":
+        problems.append(f"{stage} receipt authoring tool is not rive_cli")
+    if row.get("authoring_version")!=pin:
+        problems.append(f"{stage} receipt Rive CLI version mismatch")
     candidate=ROOT/str(row.get("candidate_path") or "")
     if not candidate.is_file() or sha256_file(candidate)!=sha: problems.append(f"{stage} receipt candidate path/hash mismatch")
     return problems
@@ -98,9 +101,6 @@ def m2():
     rive_cli=str((((tools.get("critical_path") or {}).get("rive_cli") or {}).get("version")))
     if rive_cli in {"", "None", "UNPINNED"}:
         problems.append("Rive CLI authoring version is not pinned")
-    tools=_yaml(TOOLS)
-    if str((((tools.get("critical_path") or {}).get("rive_editor") or {}).get("version"))) in {"", "None", "UNPINNED"}:
-        problems.append("Rive Editor version unpinned")
     if core.get("emulator_validation")!="PASS": problems.append("core emulator validation not PASS")
     if core.get("owner_verdict")!="PASS": problems.append("core owner verdict not PASS")
     if not core.get("ci_run"): problems.append("core CI run missing")
