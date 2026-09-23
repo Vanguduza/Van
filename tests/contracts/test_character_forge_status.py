@@ -45,3 +45,24 @@ def test_external_asset_state_is_honest_before_release():
         assert release.is_file()
     else:
         assert status["qual_emb_01"]=="EXTERNAL_ARTEFACT"
+
+
+def test_m2_refuses_unpinned_rive_cli(monkeypatch):
+    from tools.character_forge import gates
+
+    monkeypatch.setattr(gates, "m1", lambda: [])
+    monkeypatch.setattr(gates, "load_status", lambda: {
+        "core_rig": {
+            "candidate_sha256": None,
+            "emulator_validation": "NOT_RUN",
+            "ci_run": None,
+            "owner_verdict": "NONE",
+        }
+    })
+    monkeypatch.setattr(gates, "load_yaml", lambda: {"artifacts": [], "receipts": []})
+    monkeypatch.setattr(
+        gates,
+        "_yaml",
+        lambda _path: {"critical_path": {"rive_cli": {"version": "UNPINNED"}}},
+    )
+    assert "Rive CLI authoring version is not pinned" in gates.m2()
