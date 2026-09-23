@@ -110,6 +110,9 @@ case "$cmd" in
     project="$(project_path "$1")"
     exec rive "$project" --screenshot
     ;;
+  rive-smoke)
+    exec /usr/local/libexec/van-character-forge-rive-smoke
+    ;;
   rive-auth-status)
     exec rive whoami
     ;;
@@ -171,7 +174,7 @@ Allowed commands:
   doctor status git-status source-admit gate
   remove-bg vectorize svg-lint
   rive-help rive-docs rive-schema rive-create rive-inspect
-  rive-verify rive-build rive-test rive-screenshot
+  rive-verify rive-build rive-test rive-screenshot rive-smoke
   rive-auth-status rive-login rive-push rive-publish
   android-build emulator-up emulator-down instrumentation
   qualify toolchain-lock import-toolchain-lock
