@@ -129,9 +129,9 @@ if [[ ! -x "$ANDROID_SDK_ROOT/cmdline-tools/latest/bin/sdkmanager" ]]; then
 fi
 
 SDKMANAGER="$ANDROID_SDK_ROOT/cmdline-tools/latest/bin/sdkmanager"
-yes | runuser -u "$FORGE_USER" -- env ANDROID_SDK_ROOT="$ANDROID_SDK_ROOT" \
+yes | runuser -u "$FORGE_USER" -- env HOME="$STATE_ROOT" JAVA_HOME="$JAVA_HOME" ANDROID_SDK_ROOT="$ANDROID_SDK_ROOT" \
   "$SDKMANAGER" --licenses >/dev/null || true
-runuser -u "$FORGE_USER" -- env ANDROID_SDK_ROOT="$ANDROID_SDK_ROOT" "$SDKMANAGER" \
+runuser -u "$FORGE_USER" -- env HOME="$STATE_ROOT" JAVA_HOME="$JAVA_HOME" ANDROID_SDK_ROOT="$ANDROID_SDK_ROOT" "$SDKMANAGER" \
   "platform-tools" \
   "platforms;android-36" \
   "build-tools;36.0.0" \
@@ -139,9 +139,9 @@ runuser -u "$FORGE_USER" -- env ANDROID_SDK_ROOT="$ANDROID_SDK_ROOT" "$SDKMANAGE
   "system-images;android-31;google_apis;x86_64"
 
 AVDMANAGER="$ANDROID_SDK_ROOT/cmdline-tools/latest/bin/avdmanager"
-if ! runuser -u "$FORGE_USER" -- env ANDROID_SDK_ROOT="$ANDROID_SDK_ROOT" \
+if ! runuser -u "$FORGE_USER" -- env HOME="$STATE_ROOT" JAVA_HOME="$JAVA_HOME" ANDROID_SDK_ROOT="$ANDROID_SDK_ROOT" \
   "$ANDROID_SDK_ROOT/emulator/emulator" -list-avds | grep -Fxq "$AVD_NAME"; then
-  printf 'no\n' | runuser -u "$FORGE_USER" -- env ANDROID_SDK_ROOT="$ANDROID_SDK_ROOT" \
+  printf 'no\n' | runuser -u "$FORGE_USER" -- env HOME="$STATE_ROOT" JAVA_HOME="$JAVA_HOME" ANDROID_SDK_ROOT="$ANDROID_SDK_ROOT" \
     "$AVDMANAGER" create avd --force --name "$AVD_NAME" \
     --package "system-images;android-31;google_apis;x86_64" --device "pixel_6"
 fi
@@ -230,6 +230,7 @@ CHARACTER_FORGE_WORKSPACE="$WORKSPACE" \
 VAN_COMMIT_SHA="$VAN_COMMIT_SHA" \
 ANDROID_SDK_ROOT="$ANDROID_SDK_ROOT" \
 CHARACTER_FORGE_AVD_NAME="$AVD_NAME" \
+CHARACTER_FORGE_JAVA_HOME="$JAVA_HOME" \
   /usr/local/sbin/qualify-van-character-forge
 
 cat <<EOF
