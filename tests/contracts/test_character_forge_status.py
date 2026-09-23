@@ -85,3 +85,30 @@ def test_toolchain_import_rejects_placeholder_rive_version(monkeypatch, tmp_path
 
     assert cli.cmd_tools_import_lock(Namespace(path=str(lock), actor="test")) == 1
     assert writes == []
+
+
+def test_validation_binding_requires_exact_sha(tmp_path):
+    from tools.character_forge import cli
+
+    evidence = tmp_path / "binding"
+    evidence.mkdir()
+    proof = evidence / "van_candidate.sha256"
+    expected = "ab" * 32
+    proof.write_text(expected + "\n", encoding="utf-8")
+
+    bound, proof_sha, root = cli._validation_binding(evidence, "van_candidate.sha256")
+    assert bound == expected
+    assert len(proof_sha) == 64
+    assert root == evidence.resolve()
+
+
+def test_validation_binding_rejects_no_asset_sentinel(tmp_path):
+    from tools.character_forge import cli
+    import pytest
+
+    evidence = tmp_path / "binding"
+    evidence.mkdir()
+    (evidence / "van_candidate.sha256").write_text("NO_RIVE_ASSET\n", encoding="utf-8")
+
+    with pytest.raises(ValueError, match="does not contain a SHA-256"):
+        cli._validation_binding(evidence, "van_candidate.sha256")
