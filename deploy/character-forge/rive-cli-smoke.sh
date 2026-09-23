@@ -15,7 +15,11 @@ export TERM=dumb
 rm -rf "$OUT_DIR"
 mkdir -p "$OUT_DIR"
 
-rive create "$PROJECT" >/tmp/van-rive-smoke-create.txt 2>&1
+if ! rive create "$PROJECT" >/tmp/van-rive-smoke-create.txt 2>&1; then
+  cat /tmp/van-rive-smoke-create.txt >&2 || true
+  echo "Rive smoke: project scaffold failed" >&2
+  exit 1
+fi
 [[ -f "$PROJECT/scene.rml" ]] || { echo "Rive smoke: scene.rml missing" >&2; exit 1; }
 grep -q '<StateMachine' "$PROJECT/scene.rml" || {
   echo "Rive smoke: scaffold has no state machine" >&2
