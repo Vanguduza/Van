@@ -279,6 +279,7 @@ def test_rive_cli_receipt_can_stage_and_reach_m2_positive_path(monkeypatch, tmp_
 
     monkeypatch.setattr(manifest_module, "ROOT", root)
     monkeypatch.setattr(receipts, "ROOT", root)
+    monkeypatch.setattr(cli, "ROOT", root)
     monkeypatch.setattr(cli, "WORKING_DIR", working)
     monkeypatch.setattr(cli, "CONTRACT_PATH", contract)
     monkeypatch.setattr(cli, "ANDROID_TEST_ASSETS", test_assets)
