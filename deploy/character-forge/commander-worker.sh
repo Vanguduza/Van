@@ -6,6 +6,8 @@ INSTALL_ROOT="${CHARACTER_FORGE_INSTALL_ROOT:-/opt/dial-character-forge}"
 WORKSPACE="${CHARACTER_FORGE_WORKSPACE:-$STATE_ROOT/work/Van}"
 ANDROID_SDK_ROOT="${ANDROID_SDK_ROOT:-$INSTALL_ROOT/android-sdk}"
 AVD_NAME="${CHARACTER_FORGE_AVD_NAME:-van-character-forge-api31}"
+ANDROID_USER_HOME="${CHARACTER_FORGE_ANDROID_USER_HOME:-$STATE_ROOT/.android}"
+ANDROID_AVD_HOME="${CHARACTER_FORGE_ANDROID_AVD_HOME:-$ANDROID_USER_HOME/avd}"
 PY_VENV="$INSTALL_ROOT/venv"
 RIVE_HOME="$STATE_ROOT/rive-home"
 RIVE_PROJECT_ROOT="$WORKSPACE/visual-authority/character-forge/09-rive-working/rml"
@@ -15,6 +17,8 @@ JAVA_HOME="${CHARACTER_FORGE_JAVA_HOME:-/usr/lib/jvm/java-17-openjdk-amd64}"
 export HOME="$RIVE_HOME"
 export U2NET_HOME="$STATE_ROOT/rembg"
 export ANDROID_SDK_ROOT
+export ANDROID_USER_HOME
+export ANDROID_AVD_HOME
 export JAVA_HOME
 export PATH="$JAVA_HOME/bin:/usr/local/bin:$ANDROID_SDK_ROOT/platform-tools:$ANDROID_SDK_ROOT/emulator:$ANDROID_SDK_ROOT/cmdline-tools/latest/bin:$PATH"
 
