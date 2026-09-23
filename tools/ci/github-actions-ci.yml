@@ -252,6 +252,21 @@ jobs:
           echo 'KERNEL=="kvm", GROUP="kvm", MODE="0666", OPTIONS+="static_node=kvm"' | sudo tee /etc/udev/rules.d/99-kvm4all.rules
           sudo udevadm control --reload-rules
           sudo udevadm trigger --name-match=kvm
+      - name: Bind Character Forge validation input
+        run: |
+          mkdir -p artifacts/character-forge
+          candidate="android/app/src/androidTest/assets/van_candidate.riv"
+          production="android/app/src/main/assets/van.riv"
+          if [[ -f "$candidate" ]]; then
+            sha256sum "$candidate" | awk '{print $1}' > artifacts/character-forge/van_candidate.sha256
+          else
+            printf '%s\n' NO_RIVE_ASSET > artifacts/character-forge/van_candidate.sha256
+          fi
+          if [[ -f "$production" ]]; then
+            sha256sum "$production" | awk '{print $1}' > artifacts/character-forge/van_production.sha256
+          else
+            printf '%s\n' NO_RIVE_ASSET > artifacts/character-forge/van_production.sha256
+          fi
       - name: Instrumentation tests (owner surface, Floating VAN)
         uses: reactivecircus/android-emulator-runner@v2
         timeout-minutes: 40
@@ -274,6 +289,13 @@ jobs:
           name: van-instrumentation-report
           path: android/app/build/reports/androidTests/connected
           if-no-files-found: warn
+      - name: Upload Character Forge validation binding
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: van-character-forge-validation-binding
+          path: artifacts/character-forge
+          if-no-files-found: error
       # What the device actually drew for each destination of the redesigned owner surface.
       - name: Upload instrumentation screenshots
         if: always()
