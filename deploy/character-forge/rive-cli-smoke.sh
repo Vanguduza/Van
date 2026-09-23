@@ -16,7 +16,9 @@ rm -rf "$OUT_DIR"
 mkdir -p "$OUT_DIR"
 
 if ! rive create "$PROJECT" >/tmp/van-rive-smoke-create.txt 2>&1; then
-  cat /tmp/van-rive-smoke-create.txt >&2 || true
+  if [[ -f /tmp/van-rive-smoke-create.txt ]]; then
+    cat /tmp/van-rive-smoke-create.txt >&2
+  fi
   echo "Rive smoke: project scaffold failed" >&2
   exit 1
 fi
