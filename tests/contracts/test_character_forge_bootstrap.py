@@ -162,3 +162,15 @@ def test_avd_creation_does_not_depend_on_host_hardware_profile_catalog():
     assert '--package "system-images;android-31;google_apis;x86_64"' in bootstrap
     assert '--device "pixel_6"' not in bootstrap
     assert '|| die "Android AVD $AVD_NAME was not created"' in bootstrap
+
+
+def test_android_avd_home_is_explicit_and_shared():
+    bootstrap = _text("bootstrap-netcup-authoring.sh")
+    qualifier = _text("qualify-netcup-authoring.sh")
+    worker = _text("commander-worker.sh")
+    for text in (bootstrap, qualifier, worker):
+        assert 'ANDROID_USER_HOME=' in text
+        assert 'ANDROID_AVD_HOME=' in text
+    assert 'runuser -u "$FORGE_USER" -- env ANDROID_USER_HOME="$ANDROID_USER_HOME" ANDROID_AVD_HOME="$ANDROID_AVD_HOME"' in qualifier
+    assert 'export ANDROID_USER_HOME' in worker
+    assert 'export ANDROID_AVD_HOME' in worker
