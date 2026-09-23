@@ -31,6 +31,7 @@ _FORWARD_ALLOWLIST = {
     "if-none-match",
     "range",
     "user-agent",
+    "content-type",
 }
 _SESSION_COOKIE = "__Host-van_artemis_console"
 
@@ -50,8 +51,9 @@ class ArtemisConsoleProxy:
     Browser asset/API requests are then same-origin to the VAN Gateway and are proxied
     server-side to the Netcup Hermes console proxy.
 
-    The Netcup side is observe-only; this class intentionally does not create another
-    Android-execution authority.
+    The Netcup side exposes a narrow Hermes-governed owner mutation allowlist. The
+    browser never talks to raw ARTEMIS directly and this class never receives provider,
+    ADB-server or lifecycle authority.
     """
 
     SESSION_PATH = "/v1/artemis/console/session"
@@ -109,7 +111,7 @@ class ArtemisConsoleProxy:
         return {
             "launch_url": f"{self.public_base_url}{path}",
             "expires_at_unix": int(expires),
-            "mode": "OBSERVE_ONLY",
+            "mode": "HERMES_GOVERNED_CONTROL",
             "authority": "HERMES_CONTROL_AUTHORITY",
             "subordinate": "ARTEMIS",
         }
@@ -159,6 +161,14 @@ class ArtemisConsoleProxy:
     def browser_request_authorized(self, request: Request) -> bool:
         return self.is_console_resource_path(request.url.path) and self.cookie_session(request) is not None
 
+    def mutation_origin_allowed(self, request: Request) -> bool:
+        """CSRF boundary for cookie-authenticated console mutations."""
+        if request.method in {"GET", "HEAD", "OPTIONS"}:
+            return True
+        origin = request.headers.get("origin", "").strip().rstrip("/")
+        expected = self.public_base_url.strip().rstrip("/")
+        return bool(origin) and origin == expected
+
     def launch_cookie_kwargs(self) -> dict:
         return {
             "key": _SESSION_COOKIE,
@@ -194,12 +204,20 @@ class ArtemisConsoleProxy:
         return request_path
 
     async def proxy(self, request: Request) -> Response:
-        if request.method not in {"GET", "HEAD", "OPTIONS"}:
+        if request.method not in {"GET", "HEAD", "OPTIONS", "POST"}:
             return JSONResponse(
                 status_code=405,
                 content={
-                    "detail": "hermes_governed_control_required",
-                    "mode": "OBSERVE_ONLY",
+                    "detail": "artemis_console_method_not_admitted",
+                    "mode": "HERMES_GOVERNED_CONTROL",
+                },
+            )
+        if request.method == "POST" and not self.mutation_origin_allowed(request):
+            return JSONResponse(
+                status_code=403,
+                content={
+                    "detail": "artemis_console_origin_refused",
+                    "mode": "HERMES_GOVERNED_CONTROL",
                 },
             )
         session = self.cookie_session(request)
@@ -224,7 +242,13 @@ class ArtemisConsoleProxy:
 
         client = httpx.AsyncClient(timeout=None, follow_redirects=False)
         try:
-            upstream_request = client.build_request(request.method, target, headers=headers)
+            content = await request.body() if request.method == "POST" else None
+            upstream_request = client.build_request(
+                request.method,
+                target,
+                headers=headers,
+                content=content,
+            )
             upstream_response = await client.send(upstream_request, stream=True)
         except httpx.HTTPError as exc:
             await client.aclose()
@@ -240,7 +264,7 @@ class ArtemisConsoleProxy:
             and key.lower() not in {"content-length", "set-cookie"}
         }
         response_headers["Cache-Control"] = "no-store"
-        response_headers["X-Van-Artemis-Mode"] = "OBSERVE_ONLY"
+        response_headers["X-Van-Artemis-Mode"] = "HERMES_GOVERNED_CONTROL"
         response_headers["X-Van-Artemis-Authority"] = "HERMES_SUBORDINATE"
 
         content_type = upstream_response.headers.get("content-type", "")
