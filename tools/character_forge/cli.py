@@ -105,23 +105,56 @@ def _infer_stage(path,explicit):
     if "full" in name:return "full_rig"
     raise ValueError("cannot infer stage")
 
+def cmd_tools_import_lock(args):
+    lock_path=Path(args.path).resolve()
+    if not lock_path.is_file():
+        print(f"refused: toolchain lock missing: {lock_path}",file=sys.stderr); return 1
+    lock=json.loads(lock_path.read_text(encoding="utf-8"))
+    repo_sha=str(lock.get("repository_sha") or "")
+    if repo_sha and repo_sha != _git_head():
+        print(f"refused: toolchain lock repository SHA {repo_sha} differs from HEAD {_git_head()}",file=sys.stderr); return 1
+    rive_version=str(((lock.get("rive_cli") or {}).get("version") or "")).strip()
+    inkscape_version=str(((lock.get("inkscape") or {}).get("version") or "")).strip()
+    if not rive_version or not inkscape_version:
+        print("refused: toolchain lock lacks rive_cli.version or inkscape.version",file=sys.stderr); return 1
+    tools=_yaml(TOOLS_PATH)
+    tools.setdefault("critical_path",{}).setdefault("rive_cli",{})["version"]=rive_version
+    tools.setdefault("critical_path",{}).setdefault("inkscape",{})["version"]=inkscape_version
+    _write_yaml(TOOLS_PATH,tools)
+    status=load_status()
+    status["blockers"]=[b for b in status.get("blockers",[]) if b!="RIVE_CLI_UNPINNED"]
+    status["next_action"]="Run source admission/owner confirmation if pending, then proceed to M1/M2 with the pinned Netcup toolchain."
+    manifest=load_yaml()
+    append_receipt(
+        manifest,
+        _receipt(
+            "tools import-lock",
+            [sha256_file(lock_path),repo_sha],
+            [f"rive_cli={rive_version}",f"inkscape={inkscape_version}"],
+            args.actor,
+            "Qualified Netcup authoring toolchain imported into repository authority",
+        ),
+    )
+    _save(manifest,status)
+    return 0
+
 def cmd_rive_receipt(args):
     candidate=Path(args.candidate).resolve(); stage=_infer_stage(candidate,args.stage); manifest=load_yaml(); layer=find_artifact(manifest,kind="layer_svg")
     try: candidate.relative_to(WORKING_DIR.resolve())
     except ValueError:
         print("refused: Rive candidate must be under visual-authority/character-forge/09-rive-working",file=sys.stderr); return 1
     if not layer or args.svg_sha!=layer.get("sha256"): print("refused: svg-sha is not the admitted layer artifact",file=sys.stderr); return 1
-    pinned=str((((_yaml(TOOLS_PATH).get("critical_path") or {}).get("rive_editor") or {}).get("version")))
-    if pinned in {"", "None", "UNPINNED"} or args.editor_version != pinned:
-        print(f"refused: editor version {args.editor_version!r} does not equal pinned version {pinned!r}",file=sys.stderr); return 1
+    pinned=str((((_yaml(TOOLS_PATH).get("critical_path") or {}).get("rive_cli") or {}).get("version")))
+    if pinned in {"", "None", "UNPINNED"} or args.authoring_version != pinned:
+        print(f"refused: Rive CLI version {args.authoring_version!r} does not equal pinned version {pinned!r}",file=sys.stderr); return 1
     contract_sha=sha256_file(CONTRACT_PATH)
     WORKING_DIR.mkdir(parents=True,exist_ok=True); path=WORKING_DIR/f"{candidate.stem}.receipt.json"
-    expected_static={"candidate_sha256":sha256_file(candidate),"candidate_path":rel(candidate),"stage":stage,"rive_editor_version":args.editor_version,"rive_file_id":args.rive_file_id,"rive_revision":args.rive_revision,"svg_sha256":args.svg_sha,"contract_sha256":contract_sha,"artist":args.artist,"notes":args.notes or ""}
+    expected_static={"candidate_sha256":sha256_file(candidate),"candidate_path":rel(candidate),"stage":stage,"authoring_tool":"rive_cli","authoring_version":args.authoring_version,"rive_file_id":args.rive_file_id,"rive_revision":args.rive_revision,"svg_sha256":args.svg_sha,"contract_sha256":contract_sha,"artist":args.artist,"notes":args.notes or ""}
     if path.is_file():
         existing=json.loads(path.read_text(encoding="utf-8"))
         if all(existing.get(k)==v for k,v in expected_static.items()):
             print("NO_CHANGE"); return 0
-    receipt=packaging_receipt(candidate=candidate,stage=stage,editor_version=args.editor_version,rive_file_id=args.rive_file_id,rive_revision=args.rive_revision,svg_sha=args.svg_sha,contract_sha=contract_sha,artist=args.artist,notes=args.notes or "")
+    receipt=packaging_receipt(candidate=candidate,stage=stage,authoring_tool="rive_cli",authoring_version=args.authoring_version,rive_file_id=args.rive_file_id,rive_revision=args.rive_revision,svg_sha=args.svg_sha,contract_sha=contract_sha,artist=args.artist,notes=args.notes or "")
     path.write_text(json.dumps(receipt,indent=2)+"\n",encoding="utf-8")
     append_receipt(manifest,_receipt("rive receipt",[args.svg_sha,receipt["contract_sha256"]],[receipt["candidate_sha256"]],args.actor))
     status=load_status(); status["next_action"]=f"python -m tools.character_forge.cli rive stage-candidate {rel(candidate)} --stage {stage}"
@@ -450,7 +483,7 @@ def cmd_release(args):
         existing=json.loads(release_path.read_text(encoding="utf-8"))
         if existing.get("rive_sha256")==sha and existing.get("contract_sha256")==sha256_file(CONTRACT_PATH):
             print("NO_CHANGE"); return 0
-    release={"asset":rel(APP_RIV),"source_asset":rel(SOURCE_RIV),"artboard":"Van","state_machine":"VanRuntime","git_sha":_git_head(),"rive_sha256":sha,"contract_sha256":sha256_file(CONTRACT_PATH),"visual_authority_revision":"2.3","rive_android":str((((tools.get("critical_path") or {}).get("rive_android") or {}).get("version"))),"rive_editor_version":str((((tools.get("critical_path") or {}).get("rive_editor") or {}).get("version"))),"emulator_validation_run":(status.get("production") or {}).get("ci_run"),"device_checklist":rel(DEVICE_PATH),"acceptance":rel(ACCEPTANCE_PATH)+"#final","released_at":now_iso()}
+    release={"asset":rel(APP_RIV),"source_asset":rel(SOURCE_RIV),"artboard":"Van","state_machine":"VanRuntime","git_sha":_git_head(),"rive_sha256":sha,"contract_sha256":sha256_file(CONTRACT_PATH),"visual_authority_revision":"2.3","rive_android":str((((tools.get("critical_path") or {}).get("rive_android") or {}).get("version"))),"rive_authoring_tool":"rive_cli","rive_authoring_version":str((((tools.get("critical_path") or {}).get("rive_cli") or {}).get("version"))),"emulator_validation_run":(status.get("production") or {}).get("ci_run"),"device_checklist":rel(DEVICE_PATH),"acceptance":rel(ACCEPTANCE_PATH)+"#final","released_at":now_iso()}
     release_path.write_text(json.dumps(release,indent=2)+"\n",encoding="utf-8"); manifest=load_yaml(); artifact=find_artifact(manifest,kind="riv_accepted",sha256=sha)
     if artifact:artifact["promotion"]="RELEASED"; artifact["stage"]="released"
     append_receipt(manifest,_receipt("release promote",[sha],[sha256_file(release_path)],args.actor,"M4 green; exact owner-accepted, S24-qualified production asset promoted")); status.update({"current_stage":"released","device_qualified":True,"owner_accepted":True,"rive_authored":True,"rive_asset_ready":True,"qual_emb_01":"READY","blockers":[],"next_action":"Commit the release outputs and require van-ci green on that commit"})
@@ -459,9 +492,10 @@ def cmd_release(args):
 def _parser():
     parser=argparse.ArgumentParser(prog="character-forge"); parser.add_argument("--actor",default=None); sub=parser.add_subparsers(dest="group",required=True)
     p=sub.add_parser("status"); p.add_argument("--json",action="store_true"); p.set_defaults(func=cmd_status)
+    tools_cmd=sub.add_parser("tools").add_subparsers(dest="command",required=True); p=tools_cmd.add_parser("import-lock"); p.add_argument("--path",required=True); p.set_defaults(func=cmd_tools_import_lock)
     source=sub.add_parser("source").add_subparsers(dest="command",required=True); p=source.add_parser("admit"); p.set_defaults(func=cmd_source_admit)
     vectors=sub.add_parser("vectors").add_subparsers(dest="command",required=True); p=vectors.add_parser("lint"); p.add_argument("svg"); p.add_argument("--no-geometry",action="store_true",help=argparse.SUPPRESS); p.set_defaults(func=cmd_vectors_lint); p=vectors.add_parser("admit"); p.add_argument("svg"); p.add_argument("--artist",required=True); p.set_defaults(func=cmd_vectors_admit)
-    rive=sub.add_parser("rive").add_subparsers(dest="command",required=True); p=rive.add_parser("receipt"); p.add_argument("--candidate",required=True); p.add_argument("--stage",choices=["core_rig","full_rig"]); p.add_argument("--editor-version",required=True); p.add_argument("--rive-file-id",required=True); p.add_argument("--rive-revision",required=True); p.add_argument("--svg-sha",required=True); p.add_argument("--artist",required=True); p.add_argument("--notes"); p.set_defaults(func=cmd_rive_receipt); p=rive.add_parser("stage-candidate"); p.add_argument("riv"); p.add_argument("--stage",choices=["core_rig","full_rig"],required=True); p.set_defaults(func=cmd_rive_stage)
+    rive=sub.add_parser("rive").add_subparsers(dest="command",required=True); p=rive.add_parser("receipt"); p.add_argument("--candidate",required=True); p.add_argument("--stage",choices=["core_rig","full_rig"]); p.add_argument("--authoring-version",required=True); p.add_argument("--rive-file-id",required=True); p.add_argument("--rive-revision",required=True); p.add_argument("--svg-sha",required=True); p.add_argument("--artist",required=True); p.add_argument("--notes"); p.set_defaults(func=cmd_rive_receipt); p=rive.add_parser("stage-candidate"); p.add_argument("riv"); p.add_argument("--stage",choices=["core_rig","full_rig"],required=True); p.set_defaults(func=cmd_rive_stage)
     p=rive.add_parser("record-validation"); p.add_argument("--stage",choices=["core_rig","full_rig","production"],required=True); p.add_argument("--result",choices=["PASS","FAIL"],required=True); p.add_argument("--ci-run",required=True); p.add_argument("--candidate-sha"); p.add_argument("--evidence-dir"); p.set_defaults(func=cmd_record_validation)
     review=sub.add_parser("review").add_subparsers(dest="command",required=True); p=review.add_parser("record"); p.add_argument("--target",choices=["layer","full"],required=True); p.add_argument("--verdict",choices=["PASS","FAIL"],required=True); p.add_argument("--reviewer",required=True); p.add_argument("--date",required=True); p.add_argument("--notes"); p.set_defaults(func=cmd_review)
     p=sub.add_parser("gate"); p.add_argument("gate",choices=["m0","m1","m2","m3","m4","m5"]); p.add_argument("--json",action="store_true"); p.set_defaults(func=cmd_gate)
