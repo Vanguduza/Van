@@ -13,6 +13,8 @@ ANDROID_CLI_ZIP="commandlinetools-linux-15859902_latest.zip"
 ANDROID_CLI_SHA256="4e4c464f145a7512b57d088ac6c278c03c9eea610886b35a5e0804e74eedf583"
 ANDROID_CLI_URL="https://dl.google.com/android/repository/$ANDROID_CLI_ZIP"
 AVD_NAME="${CHARACTER_FORGE_AVD_NAME:-van-character-forge-api31}"
+ANDROID_USER_HOME="${CHARACTER_FORGE_ANDROID_USER_HOME:-$STATE_ROOT/.android}"
+ANDROID_AVD_HOME="${CHARACTER_FORGE_ANDROID_AVD_HOME:-$ANDROID_USER_HOME/avd}"
 RIVE_CLI_VERSION="1.1.1"
 RIVE_CLI_ARCHIVE="rive-linux-x64.tar.gz"
 RIVE_CLI_SHA256="41684e9d99fea98e01c2c155e07ec985130b95b640410dc0fbe4ca30c271a7d5"
@@ -84,7 +86,7 @@ fi
 getent group kvm >/dev/null 2>&1 && usermod -aG kvm "$FORGE_USER" || true
 
 install -d -o "$FORGE_USER" -g "$FORGE_USER" -m 0755 \
-  "$INSTALL_ROOT" "$STATE_ROOT" "$RIVE_HOME" "$REMBG_HOME" "$(dirname "$WORKSPACE")"
+  "$INSTALL_ROOT" "$STATE_ROOT" "$RIVE_HOME" "$REMBG_HOME" "$ANDROID_USER_HOME" "$ANDROID_AVD_HOME" "$(dirname "$WORKSPACE")"
 
 log "installing pinned image-preparation lane"
 if [[ ! -x "$PY_VENV/bin/python" ]]; then
@@ -131,9 +133,9 @@ if [[ ! -x "$ANDROID_SDK_ROOT/cmdline-tools/latest/bin/sdkmanager" ]]; then
 fi
 
 SDKMANAGER="$ANDROID_SDK_ROOT/cmdline-tools/latest/bin/sdkmanager"
-yes | runuser -u "$FORGE_USER" -- env JAVA_HOME="$JAVA_HOME" PATH="$JAVA_HOME/bin:/usr/local/bin:/usr/bin:/bin" ANDROID_SDK_ROOT="$ANDROID_SDK_ROOT" \
+yes | runuser -u "$FORGE_USER" -- env JAVA_HOME="$JAVA_HOME" PATH="$JAVA_HOME/bin:/usr/local/bin:/usr/bin:/bin" ANDROID_SDK_ROOT="$ANDROID_SDK_ROOT" ANDROID_USER_HOME="$ANDROID_USER_HOME" ANDROID_AVD_HOME="$ANDROID_AVD_HOME" \
   "$SDKMANAGER" --licenses >/dev/null || true
-runuser -u "$FORGE_USER" -- env JAVA_HOME="$JAVA_HOME" PATH="$JAVA_HOME/bin:/usr/local/bin:/usr/bin:/bin" ANDROID_SDK_ROOT="$ANDROID_SDK_ROOT" "$SDKMANAGER" \
+runuser -u "$FORGE_USER" -- env JAVA_HOME="$JAVA_HOME" PATH="$JAVA_HOME/bin:/usr/local/bin:/usr/bin:/bin" ANDROID_SDK_ROOT="$ANDROID_SDK_ROOT" ANDROID_USER_HOME="$ANDROID_USER_HOME" ANDROID_AVD_HOME="$ANDROID_AVD_HOME" "$SDKMANAGER" \
   "platform-tools" \
   "platforms;android-36" \
   "build-tools;36.0.0" \
@@ -141,13 +143,13 @@ runuser -u "$FORGE_USER" -- env JAVA_HOME="$JAVA_HOME" PATH="$JAVA_HOME/bin:/usr
   "system-images;android-31;google_apis;x86_64"
 
 AVDMANAGER="$ANDROID_SDK_ROOT/cmdline-tools/latest/bin/avdmanager"
-if ! runuser -u "$FORGE_USER" -- env JAVA_HOME="$JAVA_HOME" PATH="$JAVA_HOME/bin:/usr/local/bin:/usr/bin:/bin" ANDROID_SDK_ROOT="$ANDROID_SDK_ROOT" \
+if ! runuser -u "$FORGE_USER" -- env JAVA_HOME="$JAVA_HOME" PATH="$JAVA_HOME/bin:/usr/local/bin:/usr/bin:/bin" ANDROID_SDK_ROOT="$ANDROID_SDK_ROOT" ANDROID_USER_HOME="$ANDROID_USER_HOME" ANDROID_AVD_HOME="$ANDROID_AVD_HOME" \
   "$ANDROID_SDK_ROOT/emulator/emulator" -list-avds | grep -Fxq "$AVD_NAME"; then
-  printf 'no\n' | runuser -u "$FORGE_USER" -- env JAVA_HOME="$JAVA_HOME" PATH="$JAVA_HOME/bin:/usr/local/bin:/usr/bin:/bin" ANDROID_SDK_ROOT="$ANDROID_SDK_ROOT" \
+  printf 'no\n' | runuser -u "$FORGE_USER" -- env JAVA_HOME="$JAVA_HOME" PATH="$JAVA_HOME/bin:/usr/local/bin:/usr/bin:/bin" ANDROID_SDK_ROOT="$ANDROID_SDK_ROOT" ANDROID_USER_HOME="$ANDROID_USER_HOME" ANDROID_AVD_HOME="$ANDROID_AVD_HOME" \
     "$AVDMANAGER" create avd --force --name "$AVD_NAME" \
     --package "system-images;android-31;google_apis;x86_64"
 fi
-runuser -u "$FORGE_USER" -- env ANDROID_SDK_ROOT="$ANDROID_SDK_ROOT" \
+runuser -u "$FORGE_USER" -- env ANDROID_SDK_ROOT="$ANDROID_SDK_ROOT" ANDROID_USER_HOME="$ANDROID_USER_HOME" ANDROID_AVD_HOME="$ANDROID_AVD_HOME" \
   "$ANDROID_SDK_ROOT/emulator/emulator" -list-avds | grep -Fxq "$AVD_NAME" \
   || die "Android AVD $AVD_NAME was not created"
 
@@ -236,6 +238,8 @@ VAN_COMMIT_SHA="$VAN_COMMIT_SHA" \
 ANDROID_SDK_ROOT="$ANDROID_SDK_ROOT" \
 CHARACTER_FORGE_AVD_NAME="$AVD_NAME" \
 CHARACTER_FORGE_JAVA_HOME="$JAVA_HOME" \
+CHARACTER_FORGE_ANDROID_USER_HOME="$ANDROID_USER_HOME" \
+CHARACTER_FORGE_ANDROID_AVD_HOME="$ANDROID_AVD_HOME" \
   /usr/local/sbin/qualify-van-character-forge
 
 cat <<EOF
