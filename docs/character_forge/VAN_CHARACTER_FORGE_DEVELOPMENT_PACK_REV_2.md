@@ -113,8 +113,8 @@ Enforcement: the only writer of `ACCEPTANCE.yaml` is `cli owner record-acceptanc
 | ID | Decision | Rev 1 → Rev 2 change |
 |---|---|---|
 | CF-D-01 | The Android runtime on the CI emulator is the only contract validator | Replaces a desktop parser and a separate evidence engine |
-| CF-D-02 | Rive Editor is the final authoring tool for Rev 2; its version is pinned in `TOOLS.yaml` and must export a format rive-android 9.6.5 loads | Unchanged in substance; compatibility made concrete |
-| CF-D-03 | Minimal critical path is Inkscape from the lock sheet → Rive. AI reconstruction, segmentation and motion labs are optional lanes | Removes ComfyUI, SAM2/BiRefNet, VTracer, Inochi2D, Blender MCP, Rhubarb from the critical path |
+| CF-D-02 | **Rev 2.1 amendment:** the pinned Linux x86_64 Rive CLI is the deterministic M2/M3 authoring/build authority on Netcup DIAL control. The Rive Editor is an optional human visual-review lane, not a build dependency. All candidates must still load under rive-android 9.6.5 and pass the Android-runtime validator. | Supersedes the Rev 2 Editor-only authoring requirement so the full build can be Commander-orchestrated on Linux |
+| CF-D-03 | **Rev 2.1 amendment:** minimal deterministic path is owner lock/source → Inkscape/vector layer sheet → pinned Rive CLI → Android emulator validator. Image reconstruction, segmentation, Blender and web-Editor tooling may be installed on the workstation but are optional lanes and never become milestone prerequisites merely by being present. | Preserves the minimal critical-path rule while allowing a fully equipped Netcup workstation |
 | CF-D-04 | Candidates are validated from the test APK (`androidTest/assets/van_candidate.riv`); the production asset changes only at M4 | New: candidates never touch the product |
 | CF-D-05 | Owner acceptance is an `OwnerAuthorityToken` (act `visual-accept`, subject `sha256:<hex>`) signed under biometrics on the device and verified by the gateway with the same verifier used for `owner-halt` | Replaces a YAML line |
 | CF-D-06 | Two artifact fields, `stage` and `promotion`, replace three state machines | Simplification |
