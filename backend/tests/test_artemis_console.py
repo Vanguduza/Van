@@ -65,3 +65,31 @@ def test_console_rewrites_angular_base_and_never_treats_session_post_as_browser_
     assert proxy.is_console_resource_path("/api/stream/device-state")
     assert not proxy.is_console_resource_path("/v1/artemis/console/session")
     assert proxy.is_public_launch_request(_request("/v1/artemis/console/launch/abc"))
+
+
+def test_console_mutation_requires_same_origin(tmp_path):
+    secret = tmp_path / "artemis-console.token"
+    secret.write_text("c" * 64)
+    proxy = ArtemisConsoleProxy(
+        upstream_base_url="http://10.10.0.2:9135",
+        upstream_token_file=str(secret),
+        public_base_url="https://van.example",
+        enabled=True,
+    )
+    scope = {
+        "type": "http",
+        "http_version": "1.1",
+        "method": "POST",
+        "scheme": "https",
+        "path": "/api/run",
+        "raw_path": b"/api/run",
+        "query_string": b"",
+        "headers": [(b"origin", b"https://van.example")],
+        "client": ("127.0.0.1", 12345),
+        "server": ("van.example", 443),
+    }
+    assert proxy.mutation_origin_allowed(Request(scope))
+    scope["headers"] = [(b"origin", b"https://evil.example")]
+    assert not proxy.mutation_origin_allowed(Request(scope))
+    scope["headers"] = []
+    assert not proxy.mutation_origin_allowed(Request(scope))
