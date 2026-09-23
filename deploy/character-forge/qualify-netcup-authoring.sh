@@ -10,6 +10,9 @@ ANDROID_SDK_ROOT="${ANDROID_SDK_ROOT:-$INSTALL_ROOT/android-sdk}"
 AVD_NAME="${CHARACTER_FORGE_AVD_NAME:-van-character-forge-api31}"
 PY_VENV="$INSTALL_ROOT/venv"
 RIVE_HOME="$STATE_ROOT/rive-home"
+JAVA_HOME="${CHARACTER_FORGE_JAVA_HOME:-/usr/lib/jvm/java-17-openjdk-amd64}"
+export JAVA_HOME
+export PATH="$JAVA_HOME/bin:$PATH"
 
 checks=()
 fails=0
@@ -29,8 +32,8 @@ else
 fi
 
 if [[ -d "$WORKSPACE/.git" ]]; then
-  observed="$(git -C "$WORKSPACE" rev-parse HEAD 2>/dev/null || true)"
-  dirty="$(git -C "$WORKSPACE" status --porcelain 2>/dev/null || true)"
+  observed="$(runuser -u "$FORGE_USER" -- git -C "$WORKSPACE" rev-parse HEAD 2>/dev/null || true)"
+  dirty="$(runuser -u "$FORGE_USER" -- git -C "$WORKSPACE" status --porcelain 2>/dev/null || true)"
   if [[ "$observed" == "$EXPECTED_SHA" && -z "$dirty" ]]; then
     add repository GREEN "$observed clean"
   else
@@ -74,8 +77,8 @@ command -v google-chrome >/dev/null 2>&1 \
   && add web_editor_lane GREEN "$(google-chrome --version)" \
   || add web_editor_lane RED missing
 
-java -version >/tmp/van-java.txt 2>&1
-if grep -q '"17\.' /tmp/van-java.txt; then
+"$JAVA_HOME/bin/java" -version >/tmp/van-java.txt 2>&1
+if [[ -x "$JAVA_HOME/bin/java" ]] && grep -q '"17\.' /tmp/van-java.txt; then
   add java17 GREEN "$(head -n1 /tmp/van-java.txt)"
 else
   add java17 RED "$(head -n1 /tmp/van-java.txt 2>/dev/null)"
