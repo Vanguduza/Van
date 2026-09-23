@@ -115,8 +115,8 @@ def test_cloud_rive_writes_are_explicitly_gated():
     publish_block = worker[worker.index("  rive-publish)"):worker.index("  android-build)")]
     assert "require_cloud_write" in push_block
     assert "require_cloud_write" in publish_block
-    assert 'exec rive push "$project"' in push_block
-    assert 'exec rive "$project" --publish' in publish_block
+    assert 'exec env HOME="$RIVE_HOME" rive push "$project"' in push_block
+    assert 'exec env HOME="$RIVE_HOME" rive "$project" --publish' in publish_block
 
 
 def test_rive_smoke_is_fail_closed_and_checks_interactive_schema():
