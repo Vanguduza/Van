@@ -162,6 +162,9 @@ install -o root -g root -m 0755 \
 install -o root -g root -m 0755 \
   "$WORKSPACE/deploy/character-forge/qualify-netcup-authoring.sh" \
   /usr/local/sbin/qualify-van-character-forge
+install -o root -g root -m 0755 \
+  "$WORKSPACE/deploy/character-forge/rive-cli-smoke.sh" \
+  /usr/local/libexec/van-character-forge-rive-smoke
 
 cat >/etc/sudoers.d/van-character-forge <<EOF
 $COMMANDER_USER ALL=($FORGE_USER) NOPASSWD: /usr/local/libexec/van-character-forge-worker *
