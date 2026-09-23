@@ -18,7 +18,7 @@ The worker exposes deterministic preparation, Rive, Android/emulator and qualifi
 
 The bootstrap installs and qualifies:
 
-- Rive CLI from Rive's official installer.
+- Rive CLI 1.1.1 from Rive's official Linux x86_64 release archive, pinned by repository SHA-256.
 - Inkscape, Potrace, VTracer and rembg + BiRefNet General.
 - ImageMagick, FFmpeg and Blender.
 - Chrome + Xvfb for optional web-Editor review.
@@ -26,7 +26,10 @@ The bootstrap installs and qualifies:
 - Android command-line tools, platform-tools, platform 36/build-tools 36, Android Emulator, an API-31 Google APIs x86_64 image and a dedicated Forge AVD.
 - Exact-SHA VAN checkout and a machine-readable toolchain lock.
 - A bounded Commander worker and fail-closed qualifier.
+- A Rive authoring smoke that scaffolds, verifies, builds and inspects a real local project and confirms StateMachineBool/StateMachineTrigger authoring schema availability.
 
 ## Truth rule
 
 Bootstrap success means only `AUTHORING_WORKSTATION_READY`. It must never set owner confirmation, validation PASS, device qualification, owner acceptance or `QUAL-EMB-01=READY`.
+
+Local `--verify`, `--once`, tests and screenshots are Commander-authorizable inside the jailed Rive project root. Rive account login is an explicit owner action. Cloud `push` and signed `--publish` are additionally blocked until a root-managed cloud-write sentinel exists; the bootstrap never creates that sentinel.
