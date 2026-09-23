@@ -1,0 +1,4 @@
+# Netcup Character Forge image-preparation lane.
+rembg[cpu,cli]==2.0.85
+vtracer==0.6.15
+Pillow==12.3.0
