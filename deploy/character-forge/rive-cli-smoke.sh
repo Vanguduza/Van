@@ -43,6 +43,7 @@ if close < 0:
     raise SystemExit("Rive smoke: malformed StateMachine opening tag")
 inputs = """
             <StateMachineBool name="smoke_bool" value="false"/>
+            <StateMachineNumber name="smoke_number" value="0"/>
             <StateMachineTrigger name="smoke_trigger"/>
 """
 text = text[: close + 1] + inputs + text[close + 1 :]
@@ -61,6 +62,17 @@ if [[ "$riv_path" != /* ]]; then
   riv_path="$PROJECT/$riv_path"
 fi
 [[ -s "$riv_path" ]] || { echo "Rive smoke: built .riv missing/empty: $riv_path" >&2; exit 1; }
+first_sha="$(sha256sum "$riv_path" | awk '{print $1}')"
+
+# Determinism probe: an unchanged project rebuilt must give identical bytes, or receipts can
+# bind a candidate to its RML source but never let a reviewer reproduce it. Recorded, and the
+# evidence line says which; M2 provenance relies on the receipt either way.
+rebuild_json="$(rive "$PROJECT" --once --format=json)"
+rebuild_path="$(printf '%s\n' "$rebuild_json" | jq -r '.data.riv // empty')"
+[[ "$rebuild_path" == /* ]] || rebuild_path="$PROJECT/$rebuild_path"
+second_sha="$(sha256sum "$rebuild_path" | awk '{print $1}')"
+reproducible=false
+[[ "$first_sha" == "$second_sha" ]] && reproducible=true
 
 inspect_json="$(rive inspect "$PROJECT" --json)"
 printf '%s
@@ -74,6 +86,11 @@ printf '%s
   exit 1
 }
 printf '%s
+' "$inspect_json" | grep -q 'smoke_number' || {
+  echo "Rive smoke: compiled StateMachineNumber input missing from inspect output" >&2
+  exit 1
+}
+printf '%s
 ' "$inspect_json" | grep -q 'smoke_trigger' || {
   echo "Rive smoke: compiled StateMachineTrigger input missing from inspect output" >&2
   exit 1
@@ -81,6 +98,11 @@ printf '%s
 
 bool_schema="$(rive schema --search StateMachineBool --json)"
 trigger_schema="$(rive schema --search StateMachineTrigger --json)"
+number_schema="$(rive schema --search StateMachineNumber --json)"
+printf '%s\n' "$number_schema" | grep -q 'StateMachineNumber' || {
+  echo "Rive smoke: StateMachineNumber schema unavailable" >&2
+  exit 1
+}
 printf '%s
 ' "$bool_schema" | grep -q 'StateMachineBool' || {
   echo "Rive smoke: StateMachineBool schema unavailable" >&2
@@ -92,16 +114,20 @@ printf '%s
   exit 1
 }
 
-riv_sha="$(sha256sum "$riv_path" | awk '{print $1}')"
-jq -n   --arg at "$(date -u +%Y-%m-%dT%H:%M:%SZ)"   --arg version "$(rive --version 2>&1 | head -n1)"   --arg riv "$riv_path"   --arg riv_sha "$riv_sha"   '{
+riv_sha="$first_sha"
+jq -n   --arg at "$(date -u +%Y-%m-%dT%H:%M:%SZ)"   --arg version "$(rive --version 2>&1 | head -n1)"   --arg riv "$riv_path"   --arg riv_sha "$riv_sha"   --arg rebuild_sha "$second_sha"   --argjson reproducible "$reproducible"   '{
     status:"PASS",
     at:$at,
     rive_version:$version,
     project_scaffold_state_machine:true,
     compiled_boolean_input:"smoke_bool",
     compiled_trigger_input:"smoke_trigger",
+    number_input:"smoke_number",
+    reproducible_build:$reproducible,
+    rebuilt_riv_sha256:$rebuild_sha,
     state_machine_bool_schema:true,
     state_machine_trigger_schema:true,
+    state_machine_number_schema:true,
     built_riv:$riv,
     built_riv_sha256:$riv_sha
   }' > "$REPORT"

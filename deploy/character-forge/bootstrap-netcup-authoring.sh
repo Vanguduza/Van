@@ -155,6 +155,9 @@ runuser -u "$FORGE_USER" -- git -C "$WORKSPACE" checkout --detach "$VAN_COMMIT_S
   || die "workspace not clean"
 
 log "installing bounded Commander surface"
+# Root-owned authority switches (Rive cloud write, git push). Created empty: enabling either
+# is an explicit owner action (`touch` as root), never something this bootstrap does.
+install -d -o root -g root -m 0755 /etc/van-character-forge
 install -d -m 0755 /usr/local/libexec
 install -o root -g root -m 0755 \
   "$WORKSPACE/deploy/character-forge/commander-worker.sh" \
@@ -176,7 +179,13 @@ log "recording installed toolchain"
 RIVE_VERSION="$RIVE_CLI_VERSION"
 RIVE_REPORTED_VERSION="$(runuser -u "$FORGE_USER" -- env HOME="$RIVE_HOME" rive --version 2>&1 | head -n1 || true)"
 [[ "$RIVE_REPORTED_VERSION" == *"$RIVE_VERSION"* ]] || die "Rive CLI version drift: expected $RIVE_VERSION, observed '$RIVE_REPORTED_VERSION'"
-INKSCAPE_VERSION="$(inkscape --version | head -n1)"
+INKSCAPE_REPORTED="$(inkscape --version 2>/dev/null | head -n1)"
+INKSCAPE_VERSION="$(grep -oE '[0-9]+\.[0-9]+(\.[0-9]+)*' <<<"$INKSCAPE_REPORTED" | head -n1)"
+[[ -n "$INKSCAPE_VERSION" ]] || die "cannot parse Inkscape version from '$INKSCAPE_REPORTED'"
+RIVE_BINARY_SHA256="$(sha256sum "$RIVE_INSTALL_DIR/rive" | awk '{print $1}')"
+BIREFNET_MODEL="$(find "$REMBG_HOME" -type f -iname '*birefnet*' -print -quit)"
+[[ -n "$BIREFNET_MODEL" ]] || die "birefnet-general model missing after download"
+BIREFNET_SHA256="$(sha256sum "$BIREFNET_MODEL" | awk '{print $1}')"
 CHROME_VERSION="$(google-chrome --version | head -n1)"
 JAVA_VERSION="$(java -version 2>&1 | head -n1)"
 EMULATOR_VERSION="$("$ANDROID_SDK_ROOT/emulator/emulator" -version 2>&1 | head -n1)"
@@ -192,6 +201,9 @@ jq -n \
   --arg rive_archive_sha "$RIVE_CLI_SHA256" \
   --arg rive_source "$RIVE_CLI_URL" \
   --arg inkscape "$INKSCAPE_VERSION" \
+  --arg inkscape_reported "$INKSCAPE_REPORTED" \
+  --arg rive_binary_sha "$RIVE_BINARY_SHA256" \
+  --arg birefnet_sha "$BIREFNET_SHA256" \
   --arg vtracer "$VTRACER_VERSION" \
   --arg rembg "$REMBG_VERSION" \
   --arg chrome "$CHROME_VERSION" \
@@ -204,10 +216,10 @@ jq -n \
     host:$host,
     arch:$arch,
     repository_sha:$repo_sha,
-    rive_cli:{version:$rive,reported_version:$rive_reported,archive_sha256:$rive_archive_sha,source:$rive_source},
-    inkscape:{version:$inkscape},
+    rive_cli:{version:$rive,reported_version:$rive_reported,archive_sha256:$rive_archive_sha,binary_sha256:$rive_binary_sha,source:$rive_source},
+    inkscape:{version:$inkscape,reported_version:$inkscape_reported},
     vtracer:{version:$vtracer},
-    rembg:{version:$rembg,model:"birefnet-general"},
+    rembg:{version:$rembg,model:"birefnet-general",model_sha256:$birefnet_sha},
     chrome:{version:$chrome},
     java:{version:$java},
     android:{
@@ -220,6 +232,7 @@ chown "$FORGE_USER:$FORGE_USER" "$TOOLCHAIN_LOCK"
 chmod 0644 "$TOOLCHAIN_LOCK"
 
 log "running fail-closed qualification"
+CHARACTER_FORGE_QUALIFY_STRICT=1 \
 CHARACTER_FORGE_INSTALL_ROOT="$INSTALL_ROOT" \
 CHARACTER_FORGE_STATE_ROOT="$STATE_ROOT" \
 CHARACTER_FORGE_USER="$FORGE_USER" \
