@@ -89,6 +89,9 @@ case "$cmd" in
   toolchain-lock)
     exec cat "$STATE_ROOT/toolchain.lock.json"
     ;;
+  import-toolchain-lock)
+    exec python3 -m tools.character_forge.cli --actor commander tools import-lock --path "$STATE_ROOT/toolchain.lock.json"
+    ;;
   *)
     cat >&2 <<'EOF'
 Allowed commands:
@@ -96,7 +99,7 @@ Allowed commands:
   remove-bg vectorize svg-lint
   rive rive-help
   android-build emulator-up emulator-down instrumentation
-  qualify toolchain-lock
+  qualify toolchain-lock import-toolchain-lock
 EOF
     exit 2
     ;;
