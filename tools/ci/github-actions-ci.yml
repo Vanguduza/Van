@@ -46,7 +46,7 @@ jobs:
         run: |
           sudo apt-get update
           sudo apt-get install -y --no-install-recommends \
-            libgl1 libegl1 libx11-6 libxkbcommon0 libfontconfig1 libfreetype6 libxcb1
+            libgl1 libegl1 libgles2 libx11-6 libxkbcommon0 libfontconfig1 libfreetype6 libxcb1
           tmp="$(mktemp -d)"
           curl -fsSL https://releases.rive.app/cli/v1.1.1/rive-linux-x64.tar.gz -o "$tmp/rive.tar.gz"
           echo "41684e9d99fea98e01c2c155e07ec985130b95b640410dc0fbe4ca30c271a7d5  $tmp/rive.tar.gz" | sha256sum -c -
