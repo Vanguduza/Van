@@ -1,6 +1,6 @@
 schema_version: 3
 master_id: VAN-HIGHRES-MASTER-V1
-status: CANDIDATE_REQUIRED
+status: OWNER_SELECTED_PENDING_BINARY_INGEST
 source_authority:
   path: visual-authority/assets/pack/owner_board_visual_authority.png
   git_blob_sha: fc18bbe0b91e5b85d8cf8211314a69cb90b8bc0b
@@ -8,8 +8,13 @@ source_authority:
   identity_lock: visual-authority/character-forge/00-source/asset-pack/APPROVED_IDENTITY_LOCK.yaml
 candidate:
   expected_path: visual-authority/character-forge/01-master-candidates/van_master_highres_v1.png
-  sha256: null
-  status: NOT_ADMITTED
+  sha256: 42474ee9595f09f4ef59c060faf756e1db4222234b827fae0311007248b9b9e7
+  status: OWNER_SELECTED_PENDING_BINARY_INGEST
+  selected_candidate_label: Candidate B
+  selected_source_sha256: cf7f51793692bfe8ea2e5f58f1a12e64d3a76468a85cb19d76d0db64ccef374c
+  dimensions_px: [6144, 4096]
+  derivation: 4x_LANCZOS_FROM_SELECTED_CANDIDATE
+  generative_redraw: false
   minimum_short_edge_px: 2048
   minimum_full_body_height_px: 1600
   background: transparent_or_neutral_review_only
