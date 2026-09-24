@@ -26,6 +26,8 @@ EVIDENCE_DIR=ROOT/"visual-authority"/"character-forge"/"11-device-evidence"
 COMPONENT_LEDGER=ROOT/"evidence"/"van-system-audit"/"component_ledger.json"
 QUAL_MATRIX=ROOT/"docs"/"audit"/"van-fable-whole-project-2026-09-21"/"VAN_RUNTIME_QUALIFICATION_MATRIX.md"
 IDENTITY_DOC=ROOT/"docs"/"VAN_CHARACTER_VISUAL_IDENTITY.md"
+VISUAL_ACCEPTANCE_MATRIX=ROOT/"docs"/"VAN_VISUAL_ACCEPTANCE_MATRIX.md"
+IDENTITY_LOCK=ROOT/"visual-authority"/"character-forge"/"00-source"/"asset-pack"/"APPROVED_IDENTITY_LOCK.yaml"
 BOOTSTRAP=ROOT/"deploy"/"character-forge"/"bootstrap-netcup-authoring.sh"
 RML_ROOT=WORKING_DIR/"rml"
 
@@ -506,6 +508,10 @@ def cmd_record_acceptance(args):
         if not args.token or not args.device_public_key:return 2
         verified=verify_owner_token(args.token,Path(args.device_public_key).read_text(encoding="utf-8"),act="visual-accept",subject=subject)
         final={"token":args.token,"rive_sha256":sha,"subject":subject,"key_id":verified["key_id"],"verified":True,"verified_by":"local","verified_at":now_iso()}
+    final["contract_sha256"]=sha256_file(CONTRACT_PATH)
+    final["identity_spec_sha256"]=sha256_file(IDENTITY_DOC)
+    final["visual_acceptance_matrix_sha256"]=sha256_file(VISUAL_ACCEPTANCE_MATRIX)
+    final["identity_lock_sha256"]=sha256_file(IDENTITY_LOCK)
     acceptance=_yaml(ACCEPTANCE_PATH)
     if acceptance.get("final")==final and load_status().get("owner_accepted"):
         print("NO_CHANGE"); return 0
@@ -515,7 +521,7 @@ def cmd_record_acceptance(args):
         manifest,
         _receipt(
             "owner record-acceptance",
-            [sha,str(final.get("key_id") or ""),str(final.get("verified_by") or "")],
+            [sha,final["contract_sha256"],final["identity_spec_sha256"],final["visual_acceptance_matrix_sha256"],final["identity_lock_sha256"],str(final.get("key_id") or ""),str(final.get("verified_by") or "")],
             ["OWNER_ACCEPTED"],
             args.actor,
             "verified visual-accept authority imported without copying the credential into the manifest receipt",
@@ -602,9 +608,9 @@ def cmd_release(args):
     release_path=SOURCE_RIV.parent/"manifest.json"
     if release_path.is_file() and status.get("qual_emb_01")=="READY":
         existing=json.loads(release_path.read_text(encoding="utf-8"))
-        if existing.get("rive_sha256")==sha and existing.get("contract_sha256")==sha256_file(CONTRACT_PATH):
+        if existing.get("rive_sha256")==sha and existing.get("contract_sha256")==sha256_file(CONTRACT_PATH) and existing.get("identity_spec_sha256")==sha256_file(IDENTITY_DOC) and existing.get("visual_acceptance_matrix_sha256")==sha256_file(VISUAL_ACCEPTANCE_MATRIX) and existing.get("identity_lock_sha256")==sha256_file(IDENTITY_LOCK):
             print("NO_CHANGE"); return 0
-    release={"asset":rel(APP_RIV),"source_asset":rel(SOURCE_RIV),"artboard":"Van","state_machine":"VanRuntime","git_sha":_git_head(),"rive_sha256":sha,"contract_sha256":sha256_file(CONTRACT_PATH),"visual_authority_revision":"2.3","rive_android":str((((tools.get("critical_path") or {}).get("rive_android") or {}).get("version"))),"rive_authoring_tool":"rive_cli","rive_authoring_version":str((((tools.get("critical_path") or {}).get("rive_cli") or {}).get("version"))),"emulator_validation_run":(status.get("production") or {}).get("ci_run"),"device_checklist":rel(DEVICE_PATH),"acceptance":rel(ACCEPTANCE_PATH)+"#final","released_at":now_iso()}
+    release={"asset":rel(APP_RIV),"source_asset":rel(SOURCE_RIV),"artboard":"Van","state_machine":"VanRuntime","git_sha":_git_head(),"rive_sha256":sha,"contract_sha256":sha256_file(CONTRACT_PATH),"identity_spec_sha256":sha256_file(IDENTITY_DOC),"visual_acceptance_matrix_sha256":sha256_file(VISUAL_ACCEPTANCE_MATRIX),"identity_lock_sha256":sha256_file(IDENTITY_LOCK),"visual_authority_revision":"2.3","rive_android":str((((tools.get("critical_path") or {}).get("rive_android") or {}).get("version"))),"rive_authoring_tool":"rive_cli","rive_authoring_version":str((((tools.get("critical_path") or {}).get("rive_cli") or {}).get("version"))),"emulator_validation_run":(status.get("production") or {}).get("ci_run"),"device_checklist":rel(DEVICE_PATH),"acceptance":rel(ACCEPTANCE_PATH)+"#final","released_at":now_iso()}
     release_path.write_text(json.dumps(release,indent=2)+"\n",encoding="utf-8"); manifest=load_yaml(); artifact=find_artifact(manifest,kind="riv_accepted",sha256=sha)
     if artifact:artifact["promotion"]="RELEASED"; artifact["stage"]="released"
     append_receipt(manifest,_receipt("release promote",[sha],[sha256_file(release_path)],args.actor,"M4 green; exact owner-accepted, S24-qualified production asset promoted")); status.update({"current_stage":"released","device_qualified":True,"owner_accepted":True,"rive_authored":True,"rive_asset_ready":True,"qual_emb_01":"READY","blockers":[],"next_action":"Commit the release outputs and require van-ci green on that commit"})
