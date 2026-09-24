@@ -1,0 +1,23 @@
+status: NOT_CLEARED
+approved_by: null
+approved_at: null
+models:
+  - name: layerdiff_v3
+    source: null
+    path: /opt/dial-character-forge-gpu/models/layerdiff_v3.bin
+    sha256: null
+    license: null
+  - name: marigold_anime_depth
+    source: null
+    path: /opt/dial-character-forge-gpu/models/marigold_anime_depth.bin
+    sha256: null
+    license: null
+  - name: sam_body_parsing
+    source: null
+    path: /opt/dial-character-forge-gpu/models/sam_body_parsing.bin
+    sha256: null
+    license: null
+notes: |
+  Production mode is fail-closed until every model entry has an exact local file,
+  SHA-256, licence, source and owner/operator approval. Trial-only runs may not be
+  promoted to VAN production authority.
