@@ -25,9 +25,9 @@ register:
     finding: physical S24 and owner final acceptance are not yet performed
     disposition: never claim M4/M5 before evidence
   - id: ASSET-GAP-007
-    state: OWNER_SELECTED_PENDING_BINARY_INGEST
-    finding: Candidate B is selected as the high-resolution master direction but the exact 6144x4096 bytes are not yet stored in the repository
-    disposition: ingest van_master_highres_candidate_b_v1.png at the declared path, verify SHA-256 42474ee9595f09f4ef59c060faf756e1db4222234b827fae0311007248b9b9e7, then run the exact-SHA master admission/approval gate
+    state: RESOLVED_OWNER_APPROVED_EXACT_MASTER
+    finding: Candidate B required exact binary ingestion and owner-bound promotion
+    disposition: exact 6144x4096 bytes are committed, SHA-256 42474ee9595f09f4ef59c060faf756e1db4222234b827fae0311007248b9b9e7 is hash-locked, and docs/character_forge/HIGHRES_MASTER_APPROVAL.yaml promotes those exact bytes
   - id: ASSET-GAP-008
     state: OPEN_LICENSE_AND_EVIDENCE_GATE
     finding: See-through model checkpoints are not yet licensed and hash-locked for production
