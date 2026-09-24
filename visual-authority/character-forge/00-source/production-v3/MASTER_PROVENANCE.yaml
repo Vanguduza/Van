@@ -1,0 +1,47 @@
+schema_version: 3
+master_id: VAN-HIGHRES-MASTER-V1
+status: CANDIDATE_REQUIRED
+source_authority:
+  path: visual-authority/assets/pack/owner_board_visual_authority.png
+  git_blob_sha: fc18bbe0b91e5b85d8cf8211314a69cb90b8bc0b
+  declared_skin_token: "#B8853C"
+  identity_lock: visual-authority/character-forge/00-source/asset-pack/APPROVED_IDENTITY_LOCK.yaml
+candidate:
+  expected_path: visual-authority/character-forge/01-master-candidates/van_master_highres_v1.png
+  sha256: null
+  status: NOT_ADMITTED
+  minimum_short_edge_px: 2048
+  minimum_full_body_height_px: 1600
+  background: transparent_or_neutral_review_only
+approved_master:
+  expected_path: visual-authority/character-forge/01-master-approved/van_master_highres.png
+  sha256: null
+  status: NOT_APPROVED
+generation_policy:
+  visible_identity_invention: FORBIDDEN
+  edge_cleanup: ALLOWED
+  deterministic_upscale: ALLOWED
+  ai_reconstruction: CANDIDATE_ONLY
+  hidden_geometry_generation: INFERRED_OCCLUSION_ONLY
+  source_priority:
+    - exact canonical board pixels
+    - owner-approved high-resolution master
+    - owner-approved occlusion construction
+provenance_classes:
+  CANONICAL_VISIBLE:
+    production_admissible: true
+  DERIVED_VISIBLE:
+    production_admissible: true
+  INFERRED_OCCLUSION:
+    production_admissible: false
+    promotion: OWNER_APPROVED_OCCLUSION
+  OWNER_APPROVED_OCCLUSION:
+    production_admissible: true
+  GENERATIVE_VISIBLE:
+    production_admissible: false
+    promotion: FORBIDDEN
+acceptance:
+  requires_owner_signature: true
+  binds_exact_candidate_sha: true
+  binds_source_git_blob_sha: true
+  binds_identity_lock_sha: true
