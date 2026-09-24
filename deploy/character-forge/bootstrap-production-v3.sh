@@ -75,11 +75,16 @@ log "validating repository production contract"
 runuser -u "$FORGE_USER" -- env PYTHONPATH="$WORKSPACE" \
   "$PY_VENV/bin/python" -m tools.character_forge.production_cli --help >/dev/null
 
-if command -v node >/dev/null 2>&1 && command -v npm >/dev/null 2>&1; then
-  NODE_MAJOR="$(node -p 'process.versions.node.split(".")[0]')"
+# The base bootstrap installs a forge-owned, checksum-pinned Node under INSTALL_ROOT. Use it
+# explicitly: root's PATH may not carry a Node at all, and the one it does find may live in
+# another user's home, which the forge user cannot (and should not) read.
+NODE_BIN="$INSTALL_ROOT/node/current/bin"
+if [[ -x "$NODE_BIN/node" && -x "$NODE_BIN/npm" ]]; then
+  NODE_MAJOR="$("$NODE_BIN/node" -p 'process.versions.node.split(".")[0]')"
   [[ "$NODE_MAJOR" -ge 18 ]] || die "Stretchy Studio requires Node 18+"
   log "building pinned Stretchy Studio from package-lock.json"
-  runuser -u "$FORGE_USER" -- bash -lc "cd '$VENDOR_ROOT/stretchystudio' && npm ci --no-audit --no-fund && npm run build"
+  runuser -u "$FORGE_USER" -- env PATH="$NODE_BIN:/usr/local/bin:/usr/bin:/bin" HOME="$STATE_ROOT" \
+    bash -c "cd '$VENDOR_ROOT/stretchystudio' && npm ci --no-audit --no-fund && npm run build"
   [[ -f "$VENDOR_ROOT/stretchystudio/dist/index.html" ]] || die "Stretchy Studio build produced no dist/index.html"
   cat > /etc/systemd/system/van-stretchy-studio.service <<EOF
 [Unit]
@@ -108,7 +113,7 @@ EOF
   curl --fail --silent --show-error http://127.0.0.1:5173/ >/dev/null || die "Stretchy Studio health check failed"
   log "Stretchy Studio available to Commander/browser automation at http://127.0.0.1:5173"
 else
-  log "Node/npm absent; Stretchy source is pinned but editor build is skipped."
+  log "Forge Node.js missing at $NODE_BIN (run the base bootstrap); Stretchy source is pinned but editor build is skipped."
 fi
 
 if command -v nvidia-smi >/dev/null 2>&1; then

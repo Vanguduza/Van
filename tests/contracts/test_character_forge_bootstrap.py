@@ -283,3 +283,22 @@ def test_scripts_the_bootstrap_runs_do_not_depend_on_their_file_mode():
     ).stdout.splitlines()
     scripts = [line for line in modes if line.endswith(".sh")]
     assert scripts and all(line.startswith("100755") for line in scripts), scripts
+
+
+def test_stretchy_build_uses_a_forge_owned_checksum_pinned_node():
+    # Netcup's /usr/bin/node links into another user's home, and apt's nodejs/npm would
+    # replace it. The forge installs its own official Node under INSTALL_ROOT, verified by
+    # checksum, and the V3 step builds Stretchy Studio with that Node only.
+    import re
+    base = (ROOT / "deploy" / "character-forge" / "bootstrap-netcup-authoring.sh").read_text()
+    v3 = (ROOT / "deploy" / "character-forge" / "bootstrap-production-v3.sh").read_text()
+    assert re.search(r'^NODE_VERSION="\d+\.\d+\.\d+"$', base, re.M)
+    assert re.search(r'^NODE_SHA256="[0-9a-f]{64}"$', base, re.M)
+    assert 'NODE_URL="https://nodejs.org/dist/' in base
+    assert 'echo "$NODE_SHA256  $TMP_NODE/$NODE_ARCHIVE" | sha256sum -c -' in base
+    apt_block = base[base.index("apt-get install -y --no-install-recommends"):base.index("[[ -x \"$JAVA17_HOME")]
+    assert not re.search(r"\b(nodejs|npm)\b", apt_block), "apt node would overwrite the host's /usr/bin/node"
+    code = "\n".join(l for l in base.splitlines() if not l.lstrip().startswith("#"))
+    assert not re.search(r"(ln|install|cp|mv)\b[^\n]*/usr/(local/)?bin/node\b", code)
+    assert 'NODE_BIN="$INSTALL_ROOT/node/current/bin"' in v3
+    assert 'env PATH="$NODE_BIN:' in v3 and "bash -lc" not in v3

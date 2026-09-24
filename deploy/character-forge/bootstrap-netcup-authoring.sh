@@ -19,6 +19,16 @@ RIVE_CLI_VERSION="1.1.1"
 RIVE_CLI_ARCHIVE="rive-linux-x64.tar.gz"
 RIVE_CLI_SHA256="41684e9d99fea98e01c2c155e07ec985130b95b640410dc0fbe4ca30c271a7d5"
 RIVE_CLI_URL="https://releases.rive.app/cli/v$RIVE_CLI_VERSION/$RIVE_CLI_ARCHIVE"
+# Stretchy Studio's editor build (Production V3) needs Node + npm. A forge-owned, checksum-pinned
+# official build under INSTALL_ROOT rather than apt's `nodejs`/`npm`: those would install their
+# own /usr/bin/node over whatever the host already runs (Netcup links /usr/bin/node to a
+# Node 22 in another user's home), and the forge must not depend on another user's home.
+# SHA-256 from https://nodejs.org/dist/v22.23.3/SHASUMS256.txt, whose release signature was
+# verified against the Node.js release key 5BE8A3F6C8A5C01D106C0AD820B1A390B168D356.
+NODE_VERSION="22.23.3"
+NODE_ARCHIVE="node-v$NODE_VERSION-linux-x64.tar.xz"
+NODE_SHA256="df450af89261115ef9f9e3830c3eeb2cc9213b63c720b1af623cb5dcbe2e02de"
+NODE_URL="https://nodejs.org/dist/v$NODE_VERSION/$NODE_ARCHIVE"
 TOOLCHAIN_LOCK="$STATE_ROOT/toolchain.lock.json"
 PY_VENV="$INSTALL_ROOT/venv"
 RIVE_HOME="$STATE_ROOT/rive-home"
@@ -118,6 +128,20 @@ RIVE_VERSION_OUTPUT="$(runuser -u "$FORGE_USER" -- env HOME="$RIVE_HOME" rive --
 [[ "$RIVE_VERSION_OUTPUT" == *"$RIVE_CLI_VERSION"* ]] \
   || die "Rive CLI version mismatch: expected $RIVE_CLI_VERSION, observed '$RIVE_VERSION_OUTPUT'"
 runuser -u "$FORGE_USER" -- env HOME="$RIVE_HOME" rive --help >/dev/null
+
+log "installing checksum-pinned Node.js $NODE_VERSION for the Stretchy Studio build"
+NODE_INSTALL_DIR="$INSTALL_ROOT/node/v$NODE_VERSION"
+if [[ ! -x "$NODE_INSTALL_DIR/bin/node" ]]; then
+  TMP_NODE="$(mktemp -d)"
+  curl -fsSL "$NODE_URL" -o "$TMP_NODE/$NODE_ARCHIVE"
+  echo "$NODE_SHA256  $TMP_NODE/$NODE_ARCHIVE" | sha256sum -c -
+  install -d -o root -g root -m 0755 "$NODE_INSTALL_DIR"
+  tar -xJf "$TMP_NODE/$NODE_ARCHIVE" -C "$NODE_INSTALL_DIR" --strip-components=1 --no-same-owner
+  rm -rf "$TMP_NODE"
+fi
+ln -sfn "$NODE_INSTALL_DIR" "$INSTALL_ROOT/node/current"
+[[ "$("$INSTALL_ROOT/node/current/bin/node" --version)" == "v$NODE_VERSION" ]] \
+  || die "Node.js version mismatch under $INSTALL_ROOT/node/current"
 
 log "installing checksum-pinned Android command-line tools"
 install -d -o "$FORGE_USER" -g "$FORGE_USER" -m 0755 "$ANDROID_SDK_ROOT"
@@ -221,6 +245,8 @@ jq -n \
   --arg emulator "$EMULATOR_VERSION" \
   --arg android_cli_sha "$ANDROID_CLI_SHA256" \
   --arg avd "$AVD_NAME" \
+  --arg node "$("$INSTALL_ROOT/node/current/bin/node" --version)" \
+  --arg node_archive_sha "$NODE_SHA256" \
   '{
     schema_version:1,
     host:$host,
@@ -231,6 +257,7 @@ jq -n \
     vtracer:{version:$vtracer},
     rembg:{version:$rembg,model:"birefnet-general",model_sha256:$birefnet_sha},
     chrome:{version:$chrome},
+    node:{version:$node,archive_sha256:$node_archive_sha},
     java:{version:$java},
     android:{
       command_line_tools_sha256:$android_cli_sha,
