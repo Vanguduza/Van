@@ -11,7 +11,7 @@ from .rig_ir import validate_rig_ir
 from .spine_import import import_spine_json
 from .rive_emit import write_rive_authoring_plan
 from .layer_map import map_layer_names
-from .gpu_jobs import build_see_through_job, canonical_job_sha256
+from .gpu_jobs import build_see_through_job, canonical_job_sha256, sha256_file as gpu_sha256_file
 
 
 def _json(path: Path):
@@ -98,15 +98,30 @@ def cmd_layers_map(args) -> int:
 
 def cmd_gpu_job(args) -> int:
     try:
-        weights=_json(Path(args.weights)) if args.weights else {}
+        weight_hashes={}
+        weight_lock_sha=None
+        if args.weight_lock:
+            lock_path=Path(args.weight_lock)
+            lock=_yaml(lock_path)
+            if args.mode!="trial" and lock.get("status")!="CLEARED":
+                raise ValueError("production GPU job requires a CLEARED weight lock")
+            models=lock.get("models") or []
+            for row in models:
+                name=str(row.get("name") or "").strip()
+                digest=str(row.get("sha256") or "").strip()
+                if name and digest:
+                    weight_hashes[name]=digest
+            weight_lock_sha=gpu_sha256_file(lock_path)
         job=build_see_through_job(
             source=Path(args.source),
             master_sha256=args.master_sha,
             code_commit=args.code_commit,
             mode=args.mode,
             resolution=args.resolution,
-            weight_hashes=weights,
+            weight_hashes=weight_hashes,
         )
+        if weight_lock_sha:
+            job["weight_lock_sha256"]=weight_lock_sha
         job["job_sha256"]=canonical_job_sha256(job)
         output=Path(args.output)
         output.parent.mkdir(parents=True,exist_ok=True)
@@ -145,7 +160,7 @@ def parser() -> argparse.ArgumentParser:
     p.add_argument("--code-commit", default="7f139bb25c46a0c8ac720d95ddab185fcda5451c")
     p.add_argument("--mode", choices=["full_precision","group_offload","nf4_quantized","trial"], default="trial")
     p.add_argument("--resolution", type=int, default=1280)
-    p.add_argument("--weights")
+    p.add_argument("--weight-lock")
     p.add_argument("--output", required=True)
     p.set_defaults(func=cmd_gpu_job)
 
