@@ -112,14 +112,15 @@ def test_identity_lock_contains_approved_character_invariants():
     assert lock["hair"] == "silver_white_swept"
     assert lock["visor"] == "cyan_blue_transparent"
     assert lock["skin"] == "medium_brown"
-    assert lock["skin_token"] == "#B8853C"
+    assert lock["skin_token"] == "#AF6A53"
     assert lock["skin_delta_e2000_max"] == 8
     assert lock["eyes"] == "blue"
     assert lock["jacket"] == "black_white_technical"
     assert lock["underlayer"] == "charcoal_technical"
     assert lock["gloves"] == "black_technical"
     assert lock["headband"] == "forbidden"
-    assert lock["proportions"]["head_count_target"] == 5.75
-    assert lock["proportions"]["three_head_chibi_forbidden"] is True
+    assert lock["proportions"]["head_count_target"] == 3.2
+    assert lock["proportions"]["tall_realistic_proportions_forbidden"] is True
+    assert lock["companion"] == "dark_orb_cyan_bar_eyes"
     assert "light_peach_skin" in lock["forbid"]
     assert "headband" in lock["forbid"]

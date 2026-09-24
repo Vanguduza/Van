@@ -25,8 +25,8 @@ identity_roles:
   underlayer: charcoal_technical_opaque
   hand_l: black_technical_glove
   hand_r: black_technical_glove
-  orb_shell: cyan_holographic_orb
-  orb_core: dial_cyan
+  orb_shell: dark_orb_shell
+  orb_core: dial_cyan_bar_eyes
 required_for_m2_extra_groups:
   - extra_jacket_back
   - extra_jacket_collar

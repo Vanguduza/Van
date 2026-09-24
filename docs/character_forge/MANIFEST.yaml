@@ -26,7 +26,7 @@ decisions:
     decision: Optional preparation and review lanes may be installed on Netcup but are not milestone prerequisites unless explicitly invoked.
     milestone_effect: NONE
   - id: CF-D-04-REV2_1
-    status: ADOPTED
+    status: SUPERSEDED_BY_CF-D-05-REV2_1
     date: 2026-09-24
     authority: owner_visual_authority
     decision: The sole primary character board explicitly prints Skin Tone #B8853C in its colour-token panel. That declared token outranks raster sampling variance; #B8853C is the canonical medium-brown skin token with DeltaE2000 tolerance <= 8.
@@ -36,3 +36,24 @@ decisions:
       declared_palette_token: "#B8853C"
       machine_lock: visual-authority/character-forge/00-source/asset-pack/APPROVED_IDENTITY_LOCK.yaml
     milestone_effect: M1_AND_LATER_MUST_USE_CANONICAL_TOKEN
+  - id: CF-D-05-REV2_1
+    status: ADOPTED
+    date: 2026-09-24
+    authority: owner
+    decision: >-
+      Candidate B is the new visual identity of VAN, replacing the original owner board as the
+      primary visual authority. Adopted traits, measured on the native 1536x1024 Candidate B:
+      compact chibi proportions of 3.2 +/- 0.3 heads (hair crown to chin over crown to sole),
+      replacing 5.75 heads and the three-head-chibi prohibition; a dark orb with two vertical
+      cyan bar eyes, replacing the cyan smiling-face orb; a clear wraparound goggle visor with
+      dark side pods and cyan trim, replacing the glowing cyan band; larger eyes and spikier
+      silver hair; full black technical gloves; skin token #AF6A53 measured from Candidate B,
+      superseding #B8853C (DeltaE2000 17.7 from the master). Candidate B is frozen: no further
+      generated candidates; later artwork is redrawn from it and checked against it.
+    evidence:
+      primary_visual: visual-authority/character-forge/01-master-candidates/van_master_source_candidate_b.png
+      primary_visual_sha256: cf7f51793692bfe8ea2e5f58f1a12e64d3a76468a85cb19d76d0db64ccef374c
+      superseded_visual: visual-authority/assets/pack/owner_board_visual_authority.png
+      machine_lock: visual-authority/character-forge/00-source/asset-pack/APPROVED_IDENTITY_LOCK.yaml
+      landmarks: visual-authority/character-forge/00-source/reference-pack/PROPORTIONS.yaml
+    milestone_effect: M1_AND_LATER_MUST_MATCH_CANDIDATE_B

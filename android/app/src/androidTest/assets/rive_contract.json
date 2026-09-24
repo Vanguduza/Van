@@ -97,7 +97,7 @@
     "hair": "silver_white_swept",
     "visor": "cyan_blue_transparent",
     "skin": "medium_brown",
-    "skin_token": "#B8853C",
+    "skin_token": "#AF6A53",
     "skin_delta_e2000_max": 8,
     "eyes": "blue",
     "jacket": "black_white_technical",
@@ -105,21 +105,23 @@
     "gloves": "black_technical",
     "headband": "forbidden",
     "proportions": {
-      "head_count_target": 5.75,
-      "head_count_tolerance": 0.25,
-      "three_head_chibi_forbidden": true
+      "head_count_definition": "hair_crown_to_chin_over_crown_to_sole",
+      "head_count_target": 3.2,
+      "head_count_tolerance": 0.3,
+      "tall_realistic_proportions_forbidden": true
     },
     "opacity": "opaque_body_except_visor_and_orb_optics",
     "accents": "dial_cyan",
-    "companion": "cyan_holographic_orb",
+    "companion": "dark_orb_cyan_bar_eyes",
     "forbid": [
       "dark_hair",
       "light_peach_skin",
       "headband",
-      "three_head_chibi",
       "generic_robot",
       "random_mascot",
-      "glassified_body"
+      "glassified_body",
+      "tall_realistic_proportions",
+      "legacy_cyan_face_orb"
     ]
   }
 }

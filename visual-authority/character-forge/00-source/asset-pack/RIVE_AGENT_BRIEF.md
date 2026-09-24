@@ -8,8 +8,9 @@ Build VAN from this pack without visual invention.
 `RIG_SPEC.yaml`, `ANIMATION_SPEC.yaml`, `STATE_ACTION_MATRIX.yaml`,
 `SPEECH_SPEC.yaml`, `AURA_HANDOFF_SPEC.yaml`, `VALIDATION_MATRIX.yaml`.
 
-The sole primary image authority is
-`visual-authority/assets/pack/owner_board_visual_authority.png`.
+The sole primary image authority is Candidate B,
+`visual-authority/character-forge/01-master-candidates/van_master_source_candidate_b.png` (native 1536×1024; CF-D-05-REV2_1).
+The original owner board is history only.
 
 ## Never use
 
@@ -19,8 +20,8 @@ procedural placeholder sheets, or derived crops created from them.
 ## Identity invariants
 
 Medium-brown skin; silver/white swept hair; blue eyes; cyan transparent visor; black/white technical
-jacket; charcoal underlayer; black gloves; DIAL cyan accents; cyan holographic orb; no headband;
-approximately 5.75-head proportions. Character body remains opaque.
+jacket; charcoal underlayer; black gloves; DIAL cyan accents; dark orb with cyan bar eyes; no headband;
+compact chibi proportions of about 3.2 heads; a dark orb with cyan bar eyes; a clear goggle visor with dark side pods. Character body remains opaque. Candidate B is the primary visual; the production-v3 supporting sheets are off-model and define meaning only.
 
 ## Rive boundary
 

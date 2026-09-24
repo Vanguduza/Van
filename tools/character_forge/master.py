@@ -9,7 +9,8 @@ import yaml
 ROOT = Path(__file__).resolve().parents[2]
 POLICY = ROOT / "visual-authority" / "character-forge" / "00-source" / "production-v3" / "MASTER_PROVENANCE.yaml"
 IDENTITY_LOCK = ROOT / "visual-authority" / "character-forge" / "00-source" / "asset-pack" / "APPROVED_IDENTITY_LOCK.yaml"
-CANONICAL = ROOT / "visual-authority" / "assets" / "pack" / "owner_board_visual_authority.png"
+# CF-D-05-REV2_1: new master candidates are measured against Candidate B, the primary visual.
+CANONICAL = ROOT / "visual-authority" / "character-forge" / "01-master-candidates" / "van_master_source_candidate_b.png"
 APPROVED = ROOT / "visual-authority" / "character-forge" / "01-master-approved" / "van_master_highres.png"
 
 

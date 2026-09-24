@@ -3,8 +3,13 @@ pack_id: VAN-RIVE-APPROVED-ASSET-PACK-2026-09-24
 status: PRODUCTION_V3_ARTWORK_HASH_LOCKED_PRE_M1
 authority:
   primary_visual:
+    path: visual-authority/character-forge/01-master-candidates/van_master_source_candidate_b.png
+    git_blob_sha: c925dcdbe7f05aa89eac862f2e258549fe5a49d4
+    decision: CF-D-05-REV2_1
+  superseded_visual:
     path: visual-authority/assets/pack/owner_board_visual_authority.png
     git_blob_sha: fc18bbe0b91e5b85d8cf8211314a69cb90b8bc0b
+    role: historical_context_only
   machine_locks:
     - visual-authority/character-forge/00-source/asset-pack/APPROVED_IDENTITY_LOCK.yaml
     - visual-authority/rive_contract.json

@@ -1,20 +1,23 @@
 # VAN Character Visual Identity
 
-Status: LOCKED CANONICAL
+Status: LOCKED CANONICAL — revision R2 (CF-D-05-REV2_1, 2026-09-24)
+
+Primary visual authority: `visual-authority/character-forge/01-master-candidates/van_master_source_candidate_b.png`
+(Candidate B, native 1536×1024). The original owner board is kept as history only.
 
 ## Canonical Van
 
-- Silver/white swept hair (never dark hair)
-- Cyan/blue transparent visor
-- Medium-brown skin; canonical board token `#B8853C` (ΔE2000 tolerance ≤ 8)
-- Blue eyes
+- Silver/white swept, spiky hair (never dark hair)
+- Clear cyan/blue wraparound goggle visor with dark side pods and cyan trim
+- Medium-brown skin; canonical token `#AF6A53` measured on Candidate B (ΔE2000 tolerance ≤ 8)
+- Large blue eyes
 - Black/white technical jacket
 - Charcoal technical underlayer
 - DIAL cyan accents
-- Compact human-stylized proportions: 5.75 heads tall ±0.25 (not three-head chibi)
+- Compact chibi proportions: 3.2 ± 0.3 heads tall, measured hair crown to chin over crown to sole
 - Expressive face; black technical gloves on both hands
 - Technical hood/collar; no headband
-- Floating cyan holographic orb companion
+- Floating dark orb companion with two vertical cyan bar eyes (no mouth)
 - Hair, skin, eyes and clothing optically opaque; only visor/orb optical layers may be translucent
 
 ## Forbidden substitutions
@@ -23,7 +26,8 @@ Status: LOCKED CANONICAL
 - Light/peach skin family
 - Any headband or headband branding
 - Bare/skin-coloured hands in place of the locked black technical gloves
-- Three-head chibi proportions
+- Tall realistic proportions (more than ~3.5 heads)
+- The superseded cyan smiling-face orb
 - Generic robot mascot
 - Random unrelated character
 - Glassified/translucent body
@@ -43,13 +47,14 @@ Source of truth: `visual-authority/` plus this document and the Rive contract.
 
 ## Owner UI lock
 
-The owner-supplied boards remain stored unmodified under `visual-authority/assets/pack/`. The **sole
-primary character image authority** is
+The owner-supplied boards remain stored unmodified under `visual-authority/assets/pack/`. Since
+CF-D-05-REV2_1 the **sole primary character image authority** is Candidate B,
+`visual-authority/character-forge/01-master-candidates/van_master_source_candidate_b.png` (Git blob `c925dcdbe7f05aa89eac862f2e258549fe5a49d4`). The original
 `visual-authority/assets/pack/owner_board_visual_authority.png` (Git blob
-`fc18bbe0b91e5b85d8cf8211314a69cb90b8bc0b`). The former light-skinned/headband lock sheet,
+`fc18bbe0b91e5b85d8cf8211314a69cb90b8bc0b`) is kept as history and no longer defines identity. The former light-skinned/headband lock sheet,
 procedural placeholder sheets and their derived crops are rejected, deleted and denylisted by the
-Character Forge approved asset pack. Other owner boards are context-only and cannot override the
-primary board or `APPROVED_IDENTITY_LOCK.yaml`.
+Character Forge approved asset pack. Other owner boards are context-only and cannot override
+Candidate B or `APPROVED_IDENTITY_LOCK.yaml`.
 
 The interaction shell around the character is specified by
 `docs/VAN_GLASSMORPHIC_FLOATING_ASSISTANT_DESIGN.md`. Its canonical rule governs every visual

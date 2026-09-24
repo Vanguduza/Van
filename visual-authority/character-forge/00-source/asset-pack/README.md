@@ -8,7 +8,8 @@ light-skinned/headband lock sheet, procedural placeholder sheets and crops deriv
 
 ## Authority order
 
-1. `visual-authority/assets/pack/owner_board_visual_authority.png` — canonical owner-approved visual board.
+1. `visual-authority/character-forge/01-master-candidates/van_master_source_candidate_b.png` — Candidate B, the owner-adopted primary visual (CF-D-05-REV2_1). The original
+   `owner_board_visual_authority.png` is history only.
 2. `APPROVED_IDENTITY_LOCK.yaml` — machine-readable identity and geometry lock.
 3. `visual-authority/rive_contract.json` — public artboard/state-machine wire contract.
 4. `LAYER_SPEC.yaml`, `RIG_SPEC.yaml`, `ANIMATION_SPEC.yaml`, `STATE_ACTION_MATRIX.yaml`,
@@ -23,7 +24,7 @@ canonical visual board or identity lock.
 
 VAN has silver/white swept hair, medium-brown skin, blue eyes, a cyan/blue transparent visor,
 black/white technical clothing over a charcoal underlayer, black technical gloves, DIAL-cyan accents,
-a cyan holographic orb, no headband, and compact but human-readable approximately 5.75-head proportions.
+a dark orb with cyan bar eyes, no headband, and compact chibi proportions of about 3.2 heads (Candidate B, CF-D-05-REV2_1).
 Hair, skin, eyes and clothing are opaque. Only visor/orb optical layers may be translucent.
 
 ## Hard boundary

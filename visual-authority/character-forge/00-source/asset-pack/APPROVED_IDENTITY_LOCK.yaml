@@ -1,20 +1,29 @@
 schema_version: 2
-lock_id: VAN-IDENTITY-LOCK-2026-09-24
+lock_id: VAN-IDENTITY-LOCK-2026-09-24-R2
 status: LOCKED
+revision_decision: CF-D-05-REV2_1 (docs/character_forge/MANIFEST.yaml)
 canonical_visual:
+  path: visual-authority/character-forge/01-master-candidates/van_master_source_candidate_b.png
+  sha256: cf7f51793692bfe8ea2e5f58f1a12e64d3a76468a85cb19d76d0db64ccef374c
+  git_blob_sha: c925dcdbe7f05aa89eac862f2e258549fe5a49d4
+  role: sole_primary_character_image_authority
+  note: native 1536x1024 Candidate B; the 4x Lanczos master holds no additional detail and is not used for measurement
+superseded_visual:
   path: visual-authority/assets/pack/owner_board_visual_authority.png
   git_blob_sha: fc18bbe0b91e5b85d8cf8211314a69cb90b8bc0b
-  role: sole_primary_character_image_authority
+  role: historical_context_only
 identity:
   hair:
     form: silver_white_swept
+    style: spiky_voluminous
     base: "#E9EDF3"
-    shadow: "#BFC8D3"
+    shadow: "#B1A3A8"
     dark_hair_forbidden: true
   skin:
     family: medium_brown
-    canonical_token: "#B8853C"
-    observed_board_range: ["#9C614E", "#AF6C50"]
+    canonical_token: "#AF6A53"
+    measured_master_ramp: {shadow_p10: "#774137", mid_p50: "#AF6A53", lit_p90: "#D3875D"}
+    superseded_tokens: ["#B8853C (board printed swatch, DeltaE2000 17.7 from master)", "#A4654E (old-board painted mid)"]
     render_delta_e2000_max: 8
     light_peach_family_forbidden: true
   eyes:
@@ -23,8 +32,10 @@ identity:
     sclera: "#F2F6FA"
   visor:
     family: cyan_blue_transparent
-    lens: "#00E5FF"
-    frame: "#62EAF7"
+    form: clear_wraparound_goggle_lens_with_dark_side_pods_and_cyan_trim
+    lens: "#3F8ACE"
+    frame: "#00E5FF"
+    side_pods: "#1F212A"
     transparency_scope: visor_only
     body_transparency_forbidden: true
   clothing:
@@ -38,17 +49,20 @@ identity:
   accents:
     dial_cyan: "#00E5FF"
   companion:
-    type: cyan_holographic_orb
-    shell: "#0C2436"
+    type: dark_orb_cyan_bar_eyes
+    shell: "#020C1C"
     core: "#00E5FF"
+    face: two_vertical_cyan_bar_eyes_no_mouth
+    size_heads: 0.55
   headband:
     disposition: FORBIDDEN
     reason: superseded rejected visual
   proportions:
-    style: compact_human_stylized
-    head_count_target: 5.75
-    head_count_tolerance: 0.25
-    three_head_chibi_forbidden: true
+    style: compact_chibi_stylized
+    head_count_definition: hair_crown_to_chin_over_crown_to_sole
+    head_count_target: 3.2
+    head_count_tolerance: 0.3
+    tall_realistic_proportions_forbidden: true
   opacity:
     hair_skin_eyes_clothing: opaque
     translucent_layers_allowed: [visor_lens, orb_optical_layers]
@@ -56,7 +70,8 @@ forbid:
   - dark_hair
   - light_peach_skin
   - headband
-  - three_head_chibi
+  - tall_realistic_proportions
+  - legacy_cyan_face_orb
   - generic_robot
   - random_mascot
   - glassified_body

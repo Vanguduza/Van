@@ -24,7 +24,7 @@ master:
     - orb_front
     - orb_side
 identity:
-  skin_token: "#B8853C"
+  skin_token: "#AF6A53"
   hair: silver_white_swept
   eyes: blue
   visor: cyan_blue_transparent

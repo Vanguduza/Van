@@ -4,7 +4,7 @@ status: HASH_LOCKED
 hash_algorithm: sha256
 authority_precedence:
   - visual-authority/character-forge/00-source/asset-pack/APPROVED_IDENTITY_LOCK.yaml
-  - visual-authority/assets/pack/owner_board_visual_authority.png
+  - visual-authority/character-forge/01-master-candidates/van_master_source_candidate_b.png
   - visual-authority/character-forge/01-master-approved/van_master_highres.png
   - visual-authority/character-forge/00-source/asset-pack
   - visual-authority/character-forge/00-source/production-v3/artwork
@@ -16,7 +16,7 @@ selected_master:
   git_blob_sha: e18b1f6ba89619dec79b7a54075a65024f65bbf9
   dimensions_px: [6144, 4096]
   admission_class: OWNER_APPROVED_MASTER
-  authority_scope: rigging_and_detail_authority_subordinate_to_identity_lock_and_primary_visual
+  authority_scope: rigging_and_detail_master_of_the_primary_visual_candidate_b
   approval_record: docs/character_forge/HIGHRES_MASTER_APPROVAL.yaml
 assets:
   - id: candidate_b_source
@@ -24,9 +24,10 @@ assets:
     sha256: cf7f51793692bfe8ea2e5f58f1a12e64d3a76468a85cb19d76d0db64ccef374c
     git_blob_sha: c925dcdbe7f05aa89eac862f2e258549fe5a49d4
     dimensions_px: [1536, 1024]
-    role: selected_master_source_history
+    role: primary_visual_identity_authority
     admission_class: OWNER_SELECTED_SOURCE
-    identity_authority: false
+    identity_authority: primary
+    decision: CF-D-05-REV2_1
   - id: candidate_b_highres_exact
     path: visual-authority/character-forge/01-master-candidates/van_master_highres_v1.png
     sha256: 42474ee9595f09f4ef59c060faf756e1db4222234b827fae0311007248b9b9e7
@@ -103,3 +104,9 @@ rules:
   hash_drift: BLOCK
   master_identity_conflict: BLOCK
   support_sheet_conflict_resolution: approved_master_and_machine_specs_win
+off_model_note: >-
+  The five supporting sheets under production-v3/artwork predate CF-D-05-REV2_1 and draw VAN
+  off-model: about 6-7 heads tall, a glowing cyan visor band and a bright cyan orb. They may
+  define only what an expression, viseme, gesture or pose means (their may_define lists); every
+  shape, proportion and colour comes from Candidate B and the identity lock. On-model expression
+  and pose drawings in Candidate B's style do not exist yet.
