@@ -1,5 +1,13 @@
 # VAN Living Wind Field Runtime — Rev 1.2
 
+> **Superseded (2026-09-24).** Owner decisions CF-D-06 and CF-D-06-REV1
+> (`docs/character_forge/MANIFEST.yaml`) replace the wind field with a Goku/Naruto-style flame
+> envelope that wraps VAN's silhouette, and remove its strands, branches, ion specks and orb link
+> line. CF-D-08 adds the live silhouette and the trading aura. The runtime is
+> `android/app/src/main/java/com/dial/van/visual/VanFlameAura.kt`; the bounds are in
+> `visual-authority/character-forge/aura/AURA_RUNTIME_CONTRACT.yaml`. This document is kept as
+> provenance for the three-zone semantic ownership, which still stands.
+
 Status: implementation companion to canonical visual authority Rev 2.3  
 Baseline: `a6756df`  
 Scope: floating overlay, Command Centre, owner-art/Canvas/Rive-compatible inputs, shared field geometry, reduced-motion and power fallbacks

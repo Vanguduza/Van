@@ -67,10 +67,12 @@ import com.dial.van.design.LocalVanTokens
 import com.dial.van.design.VanDensity
 import com.dial.van.design.components.SectionHeader
 import com.dial.van.design.components.VanPressable
+import com.dial.van.overlay.OverlayRecovery
 import com.dial.van.visual.VanGlassTokens
 import com.dial.van.visual.VanPresence
 import com.dial.van.visual.VanTheme
 import com.dial.van.visual.rememberVanEffectBudget
+import com.dial.van.voice.WakeListenerService
 
 /**
  * The Command Centre shell: the Activity, the theme, and the one `NavHost` DNA §4 describes.
@@ -100,6 +102,15 @@ class CommandCentreActivity : FragmentActivity() {
                 }
             }
         }
+    }
+
+    override fun onResume() {
+        super.onResume()
+        // P1-VOICE-001 — the wake listener's only production caller. Resume, not create:
+        // the owner may grant the microphone or install the wake bundle while VAN is open.
+        WakeListenerService.startIfReady(this)
+        // process_kill — a force-stop leaves the overlay off with nothing to bring it back.
+        OverlayRecovery.restoreIfOwnerHadItOn(this)
     }
 
     override fun onNewIntent(intent: Intent) {
