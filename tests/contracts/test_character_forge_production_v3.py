@@ -11,6 +11,8 @@ from tools.character_forge.provenance import classify_layer, production_admissib
 from tools.character_forge.rig_ir import validate_rig_ir
 from tools.character_forge.spine_import import import_spine_json
 from tools.character_forge.svg_lint import REQUIRED_GROUPS, lint_svg
+from tools.character_forge.layer_map import map_layer_names
+from tools.character_forge.gpu_jobs import build_see_through_job, canonical_job_sha256
 
 
 ROOT = Path(__file__).resolve().parents[2]
@@ -167,3 +169,47 @@ def test_bootstraps_pin_sources_and_do_not_silently_admit_model_weights():
     assert "BLOCKED_PENDING_LICENSE_AND_HASH_LOCK" in controller
     assert 'status")!="CLEARED"' in gpu
     assert "nvidia-smi" in gpu
+
+
+def test_semantic_layer_mapping_is_fail_closed_on_unknown_or_ambiguous_names(tmp_path):
+    mapping=ROOT/"visual-authority"/"character-forge"/"00-source"/"production-v3"/"SEE_THROUGH_LAYER_MAP.yaml"
+    ok=map_layer_names(["hair","face","visor","jacket"],mapping)
+    assert ok["ok"] is True
+    assert {row["semantic"] for row in ok["mapped"]}=={"hair","face","visor","jacket"}
+
+    bad=map_layer_names(["mystery_part"],mapping)
+    assert bad["ok"] is False
+    assert bad["unmapped"]==["mystery_part"]
+
+
+def test_gpu_job_requires_weight_hashes_outside_trial(tmp_path):
+    source=tmp_path/"master.png"
+    _fake_png(source,3072,2048)
+    trial=build_see_through_job(
+        source=source,
+        master_sha256="a"*64,
+        code_commit="7f139bb25c46a0c8ac720d95ddab185fcda5451c",
+        mode="trial",
+        resolution=1280,
+        weight_hashes={},
+    )
+    assert trial["output_policy"]["hidden_generated"]=="INFERRED_OCCLUSION"
+    assert len(canonical_job_sha256(trial))==64
+
+    import pytest
+    with pytest.raises(ValueError,match="requires weight hashes"):
+        build_see_through_job(
+            source=source,
+            master_sha256="a"*64,
+            code_commit="7f139bb25c46a0c8ac720d95ddab185fcda5451c",
+            mode="full_precision",
+            resolution=1280,
+            weight_hashes={},
+        )
+
+
+def test_controller_bootstrap_installs_cli_wrapper_and_pins_proposal_tools():
+    controller=(ROOT/"deploy"/"character-forge"/"bootstrap-production-v3.sh").read_text(encoding="utf-8")
+    assert "/usr/local/bin/van-character-forge-v3" in controller
+    assert "git -C \"$target\" checkout --detach \"$commit\"" in controller
+    assert "BLOCKED_PENDING_LICENSE_AND_HASH_LOCK" in controller
