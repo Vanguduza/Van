@@ -1,5 +1,7 @@
 decision: REVIEW
 authority: owner
+approved_by: owner
+approved_at: null
 candidate_sha256: null
 canonical_source_git_blob_sha: fc18bbe0b91e5b85d8cf8211314a69cb90b8bc0b
 identity_lock_sha256: null
