@@ -49,7 +49,7 @@ def validate() -> list[str]:
 
     if list(speech["visemes"].keys()) != [0, 1, 2, 3, 4]:
         problems.append("VISEME_DRIFT")
-    if not rig["artboard"]["aura_in_rive_forbidden"]:
+    if not rig["artboard_policy"]["aura_in_rive_forbidden"]:
         problems.append("AURA_BOUNDARY_DRIFT")
     if not rig["architecture"]["single_character_rig"]:
         problems.append("MULTI_RIG_DRIFT")
