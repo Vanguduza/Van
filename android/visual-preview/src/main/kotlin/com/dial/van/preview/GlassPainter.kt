@@ -1,6 +1,7 @@
 package com.dial.van.preview
 
 import com.dial.van.visual.VanAuraOp
+import com.dial.van.visual.VanFlameAura
 import com.dial.van.visual.VanAuraPlanner
 import com.dial.van.visual.VanAuraSpec
 import com.dial.van.visual.VanEffectBudget
@@ -295,6 +296,17 @@ object GlassPainter {
                             op.cx - op.radius, op.cy - op.radius, op.radius * 2f, op.radius * 2f,
                         ),
                     )
+                }
+                is VanAuraOp.Flame -> {
+                    if (op.path.isEmpty() || op.gradientRadius <= 1f || op.alpha <= 0.001f) continue
+                    val c = argb(op.color, op.alpha)
+                    g.paint = RadialGradientPaint(
+                        Point2D.Float(op.gradientX, op.gradientY),
+                        op.gradientRadius,
+                        floatArrayOf(0f, VanFlameAura.FLAME_SOLID_STOP_FRACTION, 1f),
+                        arrayOf(c, c, fade(c, VanFlameAura.FLAME_TIP_ALPHA_FRACTION)),
+                    )
+                    g.fill(op.path.toPath())
                 }
                 is VanAuraOp.Quad -> {
                     if (op.alpha <= 0.001f) continue

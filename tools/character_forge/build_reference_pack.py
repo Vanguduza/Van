@@ -408,6 +408,48 @@ def overlay_template_svg(overlay: dict) -> str:
             f'<rect x="{-ART*0.5}" y="{-ART*0.5}" width="{ART*2}" height="{ART*2}" fill="#0B0F14"/>' + "".join(parts) + "</svg>\n")
 
 
+# ── Interim character art (CF-D-05-REV2_1 owner choice: real Candidate B art until van.riv) ───
+INTERIM_ROI = (0, 0, 360, 520)          # Candidate B front figure incl. the orb, board px
+INTERIM_GAP_SEEDS = ((212, 430), (214, 470), (208, 500), (205, 512))  # enclosed background between the legs
+INTERIM_ASSET = ROOT / "android" / "app" / "src" / "main" / "res" / "drawable-nodpi" / "van_candidate_b_front.png"
+
+
+def interim_cutout(board):
+    """Candidate B's front figure cut from its light background, at native resolution, placed in
+    the same unit-square framing as the Rive artboard (see PROPORTIONS.yaml artboard_mapping).
+
+    The background is flood-filled from the region's edges (the line art stops the fill) and
+    from the enclosed gap between the legs; the mask is eroded one pixel to drop the halo and
+    feathered for anti-aliasing. No upscaling: one output pixel is one Candidate B pixel."""
+    from PIL import Image, ImageDraw, ImageFilter
+    im = board.crop(INTERIM_ROI)
+    marker = (255, 0, 255)
+    work = im.copy()
+    w, h = work.size
+    seeds = [(x, 0) for x in range(0, w, 6)] + [(0, y) for y in range(0, h, 6)] + \
+            [(w - 1, y) for y in range(0, h, 6)] + [(x, h - 1) for x in range(0, w, 6)] + list(INTERIM_GAP_SEEDS)
+    for seed in seeds:
+        if work.getpixel(seed) != marker:
+            ImageDraw.floodfill(work, seed, marker, thresh=40)
+    mask = Image.new("L", (w, h), 0)
+    src, dst = work.load(), mask.load()
+    for y in range(h):
+        for x in range(w):
+            if src[x, y] != marker:
+                dst[x, y] = 255
+    mask = mask.filter(ImageFilter.MinFilter(3)).filter(ImageFilter.GaussianBlur(0.7))
+    cut = im.convert("RGBA")
+    cut.putalpha(mask)
+    side = round(1 / _K)
+    ox, oy = round(0.5 / _K - LANDMARKS["centre_x"]), round(0.07 / _K - LANDMARKS["hair_crown"])
+    square = Image.new("RGBA", (side, side), (0, 0, 0, 0))
+    square.paste(cut, (INTERIM_ROI[0] + ox, INTERIM_ROI[1] + oy))
+    return square, {"unit_square_px": side, "board_origin_in_square": [ox, oy], "roi_board_px": list(INTERIM_ROI)}
+
+
+_K = 0.86 / (LANDMARKS["sole"] - LANDMARKS["hair_crown"])  # unit-square length per board px
+
+
 # ── Pack writers ───────────────────────────────────────────────────────────────────────────────
 def _save_png(img, path: Path) -> None:
     path.parent.mkdir(parents=True, exist_ok=True)
@@ -521,6 +563,20 @@ def build() -> dict:
     ref_map["aura"] = {"references": [sheet("aura")], "note": "Android-native field; never drawn in the .riv"}
     (PACK / "STATE_ACTION_REFERENCE_MAP.yaml").write_text(yaml.safe_dump(ref_map, sort_keys=False, width=140), encoding="utf-8")
     (PACK / "REFERENCE_INDEX.json").write_text(json.dumps(index, indent=2) + "\n", encoding="utf-8")
+
+    # Interim character art: the app shows real Candidate B art until van.riv exists.
+    square, mapping = interim_cutout(board.convert("RGB"))
+    _save_png(square, PACK / "interim" / "van_candidate_b_front.png")
+    INTERIM_ASSET.parent.mkdir(parents=True, exist_ok=True)
+    _save_png(square, INTERIM_ASSET)
+    (PACK / "interim" / "INTERIM_ART.yaml").write_text(yaml.safe_dump({
+        "decision": "Owner choice 2026-09-24: until van.riv lands, VAN is shown as real Candidate B art, not the procedural drawing.",
+        "source": _rel(BOARD), "source_sha256": board_sha,
+        "android_asset": _rel(INTERIM_ASSET), "android_asset_sha256": sha256_file(INTERIM_ASSET),
+        "framing": "unit square identical to the Rive artboard: character 86% of height, 7% top margin",
+        **mapping,
+        "limits": "a still: no expressions, blinks or gestures; motion is a gentle bob only. Replaced by van.riv.",
+    }, sort_keys=False, allow_unicode=True, width=120), encoding="utf-8")
 
     # Review contact sheet of the whole pack.
     tiles = [ROOT / c["file"] for c in index["crops"]]

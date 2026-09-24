@@ -32,6 +32,7 @@ parsed from the shipping Android code and `van-visual-authority-v2.yaml`.
 | `AURA_STATE_TABLE.yaml` | per-state aura parameters and segment angles **parsed from `VanAuraSpec.kt`**, with status accents | keeping the character clear of the Android field |
 | `STATE_ACTION_REFERENCE_MAP.yaml` | the 18 states and 14 actions, each with semantic references or an explicit composition note | M2/M3 pose planning |
 | `guides/reference_contact_sheet.png` | review sheet of every crop | reviewers |
+| `interim/van_candidate_b_front.png` + `INTERIM_ART.yaml` | native cut-out of B's front view, framed like the artboard; bundled as the app's interim VAN (CF-D-07) | shipping interim character |
 | `PACK_MANIFEST.json` | SHA-256 of every file, plus the authority's SHA | drift check |
 
 ## On-model versus semantic references
@@ -78,7 +79,7 @@ The blockout keeps two conventions:
 | REF-GAP-001 | There is no on-model expression, gesture or viseme art in Candidate B's style. The supporting sheets are off-model. | An owner-reviewed expression/pose sheet drawn on B's proportions, or owner review of faces at M2. |
 | REF-GAP-002 | Candidate B has no references for OFFLINE, CONNECTING, SEARCHING, DELEGATING, WAITING, DEGRADED, POINT_LEFT/RIGHT/UP/DOWN, OPEN_PANEL or CLOSE_PANEL. | Accept the composition notes in the map, or supply references. |
 | REF-GAP-003 | Candidate B is AI-generated. Fine detail such as zips, glove panels and boot trim is interpreted, not traced. | Owner review of detail at M1. |
-| REF-GAP-004 | The interim Canvas `VanScene` fallback is older than CF-D-05-REV2_1. It still draws a cyan holographic orb, and its geometry has not been re-measured against B. | Update `VanScene` to B's orb and proportions. |
+| REF-GAP-004 | RESOLVED: the app shows real Candidate B art (`interim/`, CF-D-07); `VanScene` is redrawn from B's landmarks as the last resort. | — |
 
 ## Regenerating
 

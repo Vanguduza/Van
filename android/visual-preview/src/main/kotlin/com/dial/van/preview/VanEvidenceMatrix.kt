@@ -520,12 +520,10 @@ object VanEvidenceMatrix {
         forceCanvas: Boolean = false,
         phase: Float = PHASE,
     ) {
-        AwtVanRenderer.paint(
+        AwtVanRenderer.paintVan(
             g,
-            VanScene.build(
-                VanVisualState(durableState = state, actionCode = actionCode),
-                VanSceneFrame(presentation = VanPresentation.COMPACT, phase = phase, reducedMotion = reducedMotion),
-            ),
+            VanVisualState(durableState = state, actionCode = actionCode),
+            VanSceneFrame(presentation = VanPresentation.COMPACT, phase = phase, reducedMotion = reducedMotion),
             x, y, size, size,
         )
     }

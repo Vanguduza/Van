@@ -79,6 +79,20 @@ sealed interface VanAuraOp {
         val bloomAlphaScale: Float = 0.16f,
     ) : VanAuraOp
 
+    /**
+     * CF-D-06 — one layer of the flame envelope: a closed ring of tongues around the body,
+     * filled with a radial gradient from the body's centre. It is drawn behind the character,
+     * so the body covers the gradient's bright middle and only the flames show.
+     */
+    data class Flame(
+        val path: List<VanPathSeg>,
+        val gradientX: Float,
+        val gradientY: Float,
+        val gradientRadius: Float,
+        override val color: Int,
+        override val alpha: Float,
+    ) : VanAuraOp
+
     /** The occasional bridge toward the orb companion. */
     data class Quad(
         val startX: Float,
@@ -120,9 +134,10 @@ object VanAuraPlanner {
     const val BRANCH_CHILD_WIDTH_SCALE = 0.78f
     const val BRANCH_CHILD_GLOW_SCALE = 0.72f
 
+
     /**
-     * The whole aura, in draw order: Zone A haze, then the field, then the electrical
-     * branches, then ion fragments, then the orb link.
+     * The whole aura, in draw order: the soft Zone A haze and ground glow, then the flame
+     * envelope and its embers (CF-D-06).
      *
      * Returns an empty list for a body too small or a field too quiet to draw, so a caller
      * does not need its own guard — the AWT painter's guard and the Compose painter's guard
@@ -138,103 +153,25 @@ object VanAuraPlanner {
         phase: Float = 0.18f,
         identityColor: Int = VanGlassTokens.ACCENT_CYAN,
         bodyEdgeDp: Float? = null,
+        framing: VanFraming = VanFraming.FULL_BODY,
+        /** Where the character box is centred, when that differs from the field centre. */
+        characterCenterY: Float = centerY,
     ): List<VanAuraOp> {
         if (radius <= 1f || (spec.intensity <= 0.01f && semanticSpec.intensity <= 0.01f)) {
             return emptyList()
         }
         val bodyEdge = radius * 2f
-        val semanticColor = semanticSpec.semanticColor ?: identityColor
         val motion = VanWindFieldMotion.sample(spec, phase, budget)
         val ops = mutableListOf<VanAuraOp>()
 
         ops += zoneA(spec, motion, centerX, centerY, bodyEdge, identityColor)
+        ops += VanFlameAura.plan(spec, semanticSpec, centerX, characterCenterY, bodyEdge, budget, phase, identityColor, framing)
 
-        val geometry = VanFieldGeometryEngine.build(
-            spec = spec,
-            phase = phase,
-            budget = budget,
-            bodyEdge = bodyEdge,
-            centerX = centerX,
-            centerY = centerY,
-            semanticSpec = semanticSpec,
-            bodyEdgeDp = bodyEdgeDp,
-        )
-
-        for (stroke in geometry.strokes) {
-            ops += VanAuraOp.Polyline(
-                points = stroke.points,
-                color = if (stroke.ink == VanFieldInk.IDENTITY) identityColor else semanticColor,
-                alpha = stroke.alpha,
-                width = stroke.width,
-                glowWidth = stroke.glowWidth,
-            )
-        }
-
-        // The layer the AWT painter never drew.
-        for (branch in geometry.electricalBranches) {
-            val color = if (branch.ink == VanFieldInk.IDENTITY) identityColor else semanticColor
-            ops += electrical(branch.trunk, color, branch.alpha, branch.width, branch.glowWidth)
-            for (child in branch.children) {
-                ops += electrical(
-                    child,
-                    color,
-                    branch.alpha * BRANCH_CHILD_ALPHA_SCALE,
-                    branch.width * BRANCH_CHILD_WIDTH_SCALE,
-                    branch.glowWidth * BRANCH_CHILD_GLOW_SCALE,
-                )
-            }
-        }
-
-        for (dot in geometry.dots) {
-            ops += VanAuraOp.Dot(
-                cx = dot.point.x,
-                cy = dot.point.y,
-                radius = dot.radius,
-                color = if (dot.ink == VanFieldInk.IDENTITY) identityColor else semanticColor,
-                alpha = dot.alpha,
-                bloomRadiusScale = DOT_BLOOM_RADIUS_SCALE,
-                bloomAlphaScale = DOT_BLOOM_ALPHA_SCALE,
-            )
-        }
-
-        if (spec.orbLink > 0.05f) {
-            val pulse = ORB_PULSE_BASE + ORB_PULSE_RANGE * motion.electricPulse
-            ops += VanAuraOp.Quad(
-                startX = centerX + bodyEdge * 0.18f,
-                startY = centerY - bodyEdge * 0.03f,
-                controlX = centerX + bodyEdge * 0.30f,
-                controlY = centerY - bodyEdge * 0.19f,
-                endX = centerX + bodyEdge * 0.39f,
-                endY = centerY - bodyEdge * 0.12f,
-                color = identityColor,
-                alpha = pulse * spec.orbLink,
-                width = max(bodyEdge * 0.009f, 1f),
-            )
-        }
+        // CF-D-06 (owner): the aura is the flame envelope and its embers, nothing else. The
+        // wind strands, electrical branches, scattered ion specks and the orb link line all
+        // read as noise on a phone screen, so the plan no longer draws them. The field
+        // geometry engine stays in the codebase; the aura simply stops asking it for lines.
         return ops
-    }
-
-    private fun electrical(
-        points: List<VanFieldPoint>,
-        color: Int,
-        alpha: Float,
-        width: Float,
-        glowWidth: Float,
-    ): List<VanAuraOp> {
-        if (points.size < 2 || alpha <= 0.01f) return emptyList()
-        return listOf(
-            VanAuraOp.Polyline(
-                points = points,
-                color = color,
-                alpha = minOf(alpha, 0.92f),
-                width = width,
-                glowWidth = glowWidth,
-                glowAlphaScale = 0.20f,
-                glowAlphaCeiling = 0.22f,
-                whiteCoreWidth = max(width * 0.48f, 0.55f),
-                whiteCoreAlpha = minOf(alpha * 0.62f, 0.82f),
-            ),
-        )
     }
 
     private fun zoneA(

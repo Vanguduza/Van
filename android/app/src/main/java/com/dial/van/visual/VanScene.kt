@@ -6,13 +6,13 @@ import kotlin.math.sin
 
 /** How much of Van is composed for the surface he is appearing on. */
 enum class VanPresentation {
-    /** Floating overlay bubble — head, visor and orb must read at ~72dp. */
+    /** Floating overlay bubble — framed on head and shoulders so the face reads at ~72dp. */
     COMPACT,
 
     /** Mid-size docked card with quick actions. */
     EXPANDED,
 
-    /** Full Command Centre composition including arms and hands. */
+    /** Full Command Centre composition: the whole figure, framed like the Rive artboard. */
     COMMAND_CENTRE,
 }
 
@@ -30,416 +30,339 @@ data class VanSceneFrame(
     val reducedMotion: Boolean = false,
 )
 
-private data class VanRig(
-    val headCx: Float,
-    val headCy: Float,
-    val headRx: Float,
-    val headRy: Float,
-    val torsoTop: Float,
-    val torsoHalfW: Float,
-    val orbCx: Float,
-    val orbCy: Float,
-    val orbR: Float,
-    val ringR: Float,
-    val withLimbs: Boolean,
-)
+/**
+ * Maps Candidate B board pixels into the framed unit square. Every coordinate in [VanScene]
+ * is a point measured on the native Candidate B front view, so the fallback is drawn from the
+ * same landmarks as the reference pack and the flame aura, not from a separate guess.
+ */
+private class Pen(val framing: VanFraming) {
+    fun x(boardX: Float): Float = framing.x(VanBodyLayout.u(boardX))
+    fun y(boardY: Float): Float = framing.y(VanBodyLayout.v(boardY))
+    fun l(boardPx: Float): Float = VanBodyLayout.len(boardPx) * framing.zoom
+
+    /** The board y that lands at framed [y]; used to keep limbs inside a zoomed frame. */
+    fun boardYAt(y: Float): Float = 8f + (framing.unframeY(y) - 0.07f) / VanBodyLayout.len(1f)
+
+    /**
+     * Lower-body shapes are clamped to just outside the box. A zoomed framing crops the legs,
+     * and a clamped polygon stays drawable where a dropped one would leave a hole at the edge.
+     */
+    fun poly(color: Int, vararg board: Pair<Float, Float>): VanDrawOp.PathOp = VanDrawOp.PathOp(
+        vanPath {
+            board.forEachIndexed { i, (bx, by) ->
+                val px = x(bx).coerceIn(-0.10f, 1.10f)
+                val py = y(by).coerceIn(-0.10f, 1.10f)
+                if (i == 0) moveTo(px, py) else lineTo(px, py)
+            }
+            close()
+        },
+        color,
+    )
+}
 
 /**
- * Builds the canonical Van bust as renderer-independent ops.
+ * Builds VAN as renderer-independent ops: Candidate B (CF-D-05-REV2_1) drawn procedurally.
  *
- * This is the interim character: it is deliberately a *character*, not a status widget, so
- * the embodiment survives until the authored `.riv` lands. The identity lock in
- * `visual-authority/rive_contract.json` is honoured element for element — silver swept hair,
- * cyan transparent visor, medium-brown skin, blue eyes, black/white technical jacket over a
- * charcoal underlayer, DIAL cyan accents, and the cyan holographic orb companion.
+ * This is the interim character until the authored `.riv` lands. It follows the identity lock
+ * element for element: spiky silver hair, a clear blue goggle visor with cyan trim and dark
+ * side pods over large blue eyes, medium-brown skin (#AF6A53), a black/white technical jacket
+ * over a charcoal underlayer, full black gloves, black cargo trousers and white boots, DIAL cyan
+ * accents, and the dark orb companion with two vertical cyan bar eyes. The compact overlay
+ * frames head and shoulders ([VanFraming.COMPACT]); the Command Centre shows the whole figure,
+ * framed like the Rive artboard.
  */
 object VanScene {
 
-    const val SKIN = 0xFFB8853CL
-    const val SKIN_SHADOW = 0xFF8A5E35L
-    const val HAIR = 0xFFE9EAF0L
-    const val HAIR_SHADOW = 0xFFC2C7D3L
+    const val SKIN = 0xFFAF6A53L
+    const val SKIN_SHADOW = 0xFF774137L
+    const val HAIR = 0xFFE9EDF3L
+    const val HAIR_SHADOW = 0xFFB1A3A8L
+    const val BROW = 0xFF3A2A26L
     const val EYE_IRIS = 0xFF1E88E5L
     const val EYE_IRIS_DEEP = 0xFF0D47A1L
     const val EYE_SCLERA = 0xFFF2F6FAL
     const val EYE_PUPIL = 0xFF10233AL
-    const val VISOR = 0xFF00E5FFL
+    /** The clear goggle lens (identity lock `visor.lens`). */
+    const val VISOR = 0xFF3F8ACEL
+    const val VISOR_FRAME = 0xFF00E5FFL
+    const val VISOR_POD = 0xFF1F212AL
     const val JACKET = 0xFF15181CL
     const val JACKET_PANEL = 0xFFEDEFF3L
     const val UNDERLAYER = 0xFF2B3138L
     const val MOUTH = 0xFF4A2A1AL
     const val GLOVE = 0xFF111820L
-    const val ORB_BODY = 0xFF0C2436L
+    const val ORB_BODY = 0xFF020C1CL
+    const val ORB_FACE = 0xFF0A1A2EL
+    const val ORB_EYE = 0xFF00E5FFL
 
     fun build(state: VanVisualState, frame: VanSceneFrame): List<VanDrawOp> {
         val palette = VanStatusPalette.forState(state.durableState)
-        val rig = rigFor(frame.presentation)
+        val pen = Pen(VanFraming.forPresentation(frame.presentation))
         val motion = if (frame.reducedMotion) 0f else 1f
         val tau = (2f * PI).toFloat()
 
-        val bodyBob = sin(frame.phase * tau) * 0.008f * motion
-        val headBob = sin(frame.phase * tau + 0.6f) * 0.005f * motion
+        val bodyBob = sin(frame.phase * tau) * 0.006f * motion * pen.framing.zoom
+        val headBob = sin(frame.phase * tau + 0.6f) * 0.004f * motion * pen.framing.zoom
 
         val character = buildList {
-            addAll(torso(rig, palette))
-            if (rig.withLimbs) addAll(limbs(rig, palette, state))
-            addAll(neck(rig))
-        }.translated(0f, bodyBob + actionHeadDrop(state))
+            addAll(backLayers(pen))
+            addAll(legs(pen, palette))
+            addAll(torso(pen, palette))
+            addAll(arms(pen, palette, state))
+            addAll(neck(pen))
+        }.translated(0f, bodyBob)
 
         val head = buildList {
-            addAll(headShape(rig))
-            addAll(eyes(rig, state, frame))
-            addAll(brows(rig, palette, state))
-            addAll(visor(rig, palette))
-            addAll(mouth(rig, palette, state))
-            addAll(hair(rig))
-        }.translated(0f, bodyBob + headBob)
+            addAll(headShape(pen))
+            addAll(eyes(pen, state, frame))
+            addAll(brows(pen, palette, state))
+            addAll(visor(pen, palette))
+            addAll(mouth(pen, palette, state))
+            addAll(hair(pen))
+        }.translated(0f, bodyBob + headBob + actionHeadDrop(state) * pen.framing.zoom)
 
-        val orbDrift = sin(frame.phase * tau + 1.9f) * 0.018f * motion
-        val orb = orb(rig, palette, state, frame)
-            .translated(state.attentionX * rig.orbR * 0.35f, orbDrift + state.attentionY * rig.orbR * 0.25f)
+        val orbDrift = sin(frame.phase * tau + 1.9f) * 0.012f * motion * pen.framing.zoom
+        val orb = orb(pen, palette, state, frame)
+            .translated(state.attentionX * pen.l(18f), orbDrift + state.attentionY * pen.l(12f))
 
         val muted = (character + head).muted(palette.desaturation, palette.dim)
 
         return muted +
-            statusMarks(rig, palette, state, frame) +
-            hologramGlyph(rig, palette, state) +
+            statusMarks(pen, palette, state, frame) +
+            hologramGlyph(pen, palette, state) +
             orb
+    }
+
+    /**
+     * Only the state marks: broken status arcs and the hologram glyph (triangle, card, cross,
+     * tick…). Drawn over the interim Candidate B art, which is a still and cannot carry them,
+     * so critical states stay distinguishable by shape in grayscale (Gate E) whichever
+     * renderer is showing VAN.
+     */
+    fun stateMarks(state: VanVisualState, frame: VanSceneFrame): List<VanDrawOp> {
+        val palette = VanStatusPalette.forState(state.durableState)
+        val pen = Pen(VanFraming.forPresentation(frame.presentation))
+        return statusMarks(pen, palette, state, frame) + hologramGlyph(pen, palette, state)
     }
 
     /** Exposed so overlay chrome and previews can label state with the same words. */
     fun statusLabel(state: VanDurableState): String = VanStatusPalette.forState(state).label
 
-    private fun rigFor(presentation: VanPresentation): VanRig = when (presentation) {
-        VanPresentation.COMPACT -> VanRig(
-            headCx = 0.470f,
-            headCy = 0.445f,
-            headRx = 0.228f,
-            headRy = 0.250f,
-            torsoTop = 0.735f,
-            torsoHalfW = 0.300f,
-            orbCx = 0.840f,
-            orbCy = 0.192f,
-            orbR = 0.078f,
-            ringR = 0.452f,
-            withLimbs = true,
-        )
-        VanPresentation.EXPANDED -> VanRig(
-            headCx = 0.480f,
-            headCy = 0.400f,
-            headRx = 0.198f,
-            headRy = 0.218f,
-            torsoTop = 0.652f,
-            torsoHalfW = 0.298f,
-            orbCx = 0.855f,
-            orbCy = 0.168f,
-            orbR = 0.070f,
-            ringR = 0.462f,
-            withLimbs = true,
-        )
-        VanPresentation.COMMAND_CENTRE -> VanRig(
-            headCx = 0.492f,
-            headCy = 0.330f,
-            headRx = 0.152f,
-            headRy = 0.168f,
-            torsoTop = 0.530f,
-            torsoHalfW = 0.272f,
-            orbCx = 0.812f,
-            orbCy = 0.152f,
-            orbR = 0.058f,
-            ringR = 0.474f,
-            withLimbs = true,
-        )
+    /** Where the orb sits in a framing — the companion floats over VAN's open palm. */
+    fun orbCentre(presentation: VanPresentation): Pair<Float, Float> {
+        val pen = Pen(VanFraming.forPresentation(presentation))
+        return pen.x(ORB_X) to pen.y(ORB_Y)
     }
 
+    private const val ORB_X = 67f
+    private const val ORB_Y = 171f
+    private const val ORB_R = 50f
+    private const val FACE_X = 190f
+
     private fun actionHeadDrop(state: VanVisualState): Float = when (VanFiniteAction.fromCode(state.actionCode)) {
-        VanFiniteAction.ACK_NOD -> 0.028f
-        VanFiniteAction.SHRUG -> 0.012f
+        VanFiniteAction.ACK_NOD -> 0.016f
+        VanFiniteAction.SHRUG -> 0.008f
         else -> 0f
     }
 
-    private fun torso(rig: VanRig, palette: VanStatusPalette): List<VanDrawOp> {
-        val cx = rig.headCx
-        val top = rig.torsoTop
-        val hw = rig.torsoHalfW
-        val bottom = 1.02f
-        val collarY = top - 0.012f
+    private fun backLayers(pen: Pen): List<VanDrawOp> = listOf(
+        VanDrawOp.Oval(pen.x(FACE_X), pen.y(86f), pen.l(90f), pen.l(60f), VanColors.of(HAIR_SHADOW)),
+        pen.poly(VanColors.of(JACKET), 128f to 168f, 262f to 168f, 292f to 222f, 108f to 222f),
+    )
 
-        val jacket = vanPath {
-            moveTo(cx - hw, bottom)
-            lineTo(cx - hw * 0.90f, top + 0.055f)
-            quadTo(cx - hw * 0.78f, collarY, cx - hw * 0.34f, collarY)
-            lineTo(cx + hw * 0.34f, collarY)
-            quadTo(cx + hw * 0.78f, collarY, cx + hw * 0.90f, top + 0.055f)
-            lineTo(cx + hw, bottom)
-            close()
-        }
-
-        val underlayer = vanPath {
-            moveTo(cx - hw * 0.30f, collarY)
-            quadTo(cx, top + 0.075f, cx + hw * 0.30f, collarY)
-            lineTo(cx + hw * 0.36f, bottom)
-            lineTo(cx - hw * 0.36f, bottom)
-            close()
-        }
-
-        val leftPanel = vanPath {
-            moveTo(cx - hw * 0.34f, collarY)
-            quadTo(cx - hw * 0.30f, top + 0.085f, cx - hw * 0.16f, bottom)
-            lineTo(cx - hw * 0.46f, bottom)
-            quadTo(cx - hw * 0.62f, top + 0.070f, cx - hw * 0.68f, top + 0.014f)
-            close()
-        }
-
-        val rightPanel = vanPath {
-            moveTo(cx + hw * 0.34f, collarY)
-            quadTo(cx + hw * 0.30f, top + 0.085f, cx + hw * 0.16f, bottom)
-            lineTo(cx + hw * 0.46f, bottom)
-            quadTo(cx + hw * 0.62f, top + 0.070f, cx + hw * 0.68f, top + 0.014f)
-            close()
-        }
-
-        val collarAccent = vanPath {
-            moveTo(cx - hw * 0.66f, top + 0.020f)
-            quadTo(cx - hw * 0.34f, collarY - 0.004f, cx, top + 0.070f)
-            quadTo(cx + hw * 0.34f, collarY - 0.004f, cx + hw * 0.66f, top + 0.020f)
-        }
-
+    private fun legs(pen: Pen, palette: VanStatusPalette): List<VanDrawOp> {
+        val trousers = VanColors.of(JACKET)
+        val accent = VanColors.scaleAlpha(palette.accent, 0.9f)
         return listOf(
-            VanDrawOp.PathOp(jacket, VanColors.of(JACKET)),
-            VanDrawOp.PathOp(underlayer, VanColors.of(UNDERLAYER)),
-            VanDrawOp.PathOp(leftPanel, VanColors.of(JACKET_PANEL, 0.92f)),
-            VanDrawOp.PathOp(rightPanel, VanColors.of(JACKET_PANEL, 0.92f)),
-            VanDrawOp.PathOp(collarAccent, VanColors.scaleAlpha(palette.accent, 0.85f), strokeWidth = 0.011f),
-            // DIAL "D" emblem, centre chest on the dark underlayer.
+            pen.poly(trousers, 135f to 330f, 197f to 330f, 180f to 414f, 124f to 414f),
+            pen.poly(trousers, 125f to 410f, 179f to 410f, 164f to 460f, 114f to 460f),
+            pen.poly(trousers, 208f to 330f, 270f to 330f, 278f to 414f, 222f to 414f),
+            pen.poly(trousers, 223f to 410f, 277f to 410f, 294f to 460f, 242f to 460f),
+            pen.poly(accent, 122f to 368f, 152f to 376f, 150f to 384f, 121f to 377f),
+            pen.poly(accent, 234f to 384f, 266f to 368f, 268f to 377f, 236f to 392f),
+            // White technical boots with dark soles and the cyan triangle badge.
+            pen.poly(VanColors.of(JACKET_PANEL), 84f to 448f, 184f to 448f, 192f to 500f, 190f to 516f, 84f to 516f, 80f to 500f),
+            pen.poly(VanColors.of(JACKET), 80f to 506f, 192f to 506f, 190f to 518f, 82f to 518f),
+            pen.poly(accent, 126f to 462f, 148f to 462f, 137f to 478f),
+            pen.poly(VanColors.of(JACKET_PANEL), 232f to 448f, 310f to 448f, 316f to 500f, 314f to 516f, 230f to 516f, 228f to 500f),
+            pen.poly(VanColors.of(JACKET), 228f to 506f, 316f to 506f, 314f to 518f, 230f to 518f),
+            pen.poly(accent, 262f to 462f, 284f to 462f, 273f to 478f),
+        )
+    }
+
+    private fun torso(pen: Pen, palette: VanStatusPalette): List<VanDrawOp> {
+        val panel = VanColors.of(JACKET_PANEL, 0.96f)
+        val accent = VanColors.scaleAlpha(palette.accent, 0.9f)
+        return listOf(
+            pen.poly(VanColors.of(JACKET), 106f to 192f, 300f to 192f, 314f to 340f, 98f to 340f),
+            pen.poly(VanColors.of(UNDERLAYER), 170f to 196f, 232f to 196f, 228f to 300f, 172f to 300f),
+            // White shoulder yokes and lower side panels over the black body.
+            pen.poly(panel, 106f to 192f, 150f to 188f, 140f to 240f, 100f to 252f),
+            pen.poly(panel, 300f to 192f, 252f to 188f, 262f to 240f, 306f to 252f),
+            pen.poly(panel, 98f to 262f, 150f to 272f, 162f to 340f, 98f to 340f),
+            pen.poly(panel, 306f to 262f, 250f to 272f, 238f to 340f, 314f to 340f),
+            pen.poly(VanColors.of(JACKET), 150f to 300f, 250f to 300f, 250f to 312f, 150f to 312f),
+            // Hood collar and its cyan trim.
+            pen.poly(VanColors.of(JACKET), 134f to 180f, 176f to 162f, 188f to 204f, 150f to 214f),
+            pen.poly(VanColors.of(JACKET), 266f to 180f, 208f to 162f, 202f to 204f, 250f to 214f),
+            VanDrawOp.PathOp(
+                vanPath {
+                    moveTo(pen.x(136f), pen.y(184f))
+                    quadTo(pen.x(170f), pen.y(160f), pen.x(190f), pen.y(206f))
+                    quadTo(pen.x(212f), pen.y(160f), pen.x(264f), pen.y(184f))
+                },
+                accent,
+                strokeWidth = pen.l(4f),
+            ),
+            // Zip and flank piping.
+            VanDrawOp.PathOp(vanPath { moveTo(pen.x(186f), pen.y(204f)); lineTo(pen.x(186f), pen.y(336f)) }, accent, strokeWidth = pen.l(3.5f)),
+            VanDrawOp.PathOp(vanPath { moveTo(pen.x(146f), pen.y(206f)); lineTo(pen.x(150f), pen.y(320f)) }, accent, strokeWidth = pen.l(3f)),
+            // DIAL "D" emblem on the right chest.
             VanDrawOp.RoundRect(
-                cx = cx - 0.013f,
-                cy = top + 0.132f,
-                halfW = 0.0045f,
-                halfH = 0.022f,
-                radius = 0.0045f,
+                cx = pen.x(216f), cy = pen.y(236f), halfW = pen.l(2.6f), halfH = pen.l(12f), radius = pen.l(2.6f),
                 color = VanColors.scaleAlpha(palette.accent, 0.95f),
             ),
             VanDrawOp.Arc(
-                cx = cx - 0.013f,
-                cy = top + 0.132f,
-                r = 0.022f,
-                startDegrees = -90f,
-                sweepDegrees = 180f,
-                color = VanColors.scaleAlpha(palette.accent, 0.95f),
-                strokeWidth = 0.009f,
+                cx = pen.x(216f), cy = pen.y(236f), r = pen.l(12f), startDegrees = -90f, sweepDegrees = 180f,
+                color = VanColors.scaleAlpha(palette.accent, 0.95f), strokeWidth = pen.l(4.5f),
             ),
         )
     }
 
-    private fun limbs(rig: VanRig, palette: VanStatusPalette, state: VanVisualState): List<VanDrawOp> {
-        val cx = rig.headCx
-        val hw = rig.torsoHalfW
-        val shoulderY = rig.torsoTop + 0.075f
+    private fun arms(pen: Pen, palette: VanStatusPalette, state: VanVisualState): List<VanDrawOp> {
         val action = VanFiniteAction.fromCode(state.actionCode)
         val presenting = state.durableState == VanDurableState.SPEAKING ||
             state.durableState == VanDurableState.DELEGATING ||
             action == VanFiniteAction.PRESENT_CARD
 
-        var leftHandX = cx - hw * 1.12f
-        var leftHandY = 0.885f
-        var rightHandX = cx + hw * 1.14f
-        var rightHandY = 0.868f
-        if (presenting) rightHandY -= 0.085f
-
+        // Candidate B's rest pose: viewer-left palm open under the orb, viewer-right arm down.
+        var left = 48f to 262f
+        var right = 302f to 350f
+        if (presenting) right = 318f to 300f
         when (action) {
-            VanFiniteAction.HELLO_WAVE -> {
-                rightHandX = cx + hw * 0.92f
-                rightHandY = rig.headCy - rig.headRy * 0.15f
-            }
-            VanFiniteAction.ACK_NOD -> rightHandY -= 0.02f
-            VanFiniteAction.POINT_LEFT -> {
-                leftHandX = cx - hw * 1.38f
-                leftHandY = rig.headCy + rig.headRy * 0.10f
-            }
-            VanFiniteAction.POINT_RIGHT -> {
-                rightHandX = cx + hw * 1.42f
-                rightHandY = rig.headCy + rig.headRy * 0.08f
-            }
-            VanFiniteAction.POINT_UP -> {
-                rightHandX = cx + hw * 0.70f
-                rightHandY = rig.headCy - rig.headRy * 0.55f
-            }
-            VanFiniteAction.POINT_DOWN -> {
-                rightHandX = cx + hw * 0.70f
-                rightHandY = 0.97f
-            }
-            VanFiniteAction.POINT_TARGET -> {
-                rightHandX = cx + hw * 1.30f
-                rightHandY = rig.headCy
-            }
-            VanFiniteAction.CELEBRATE -> {
-                leftHandX = cx - hw * 0.85f
-                leftHandY = rig.headCy - rig.headRy * 0.20f
-                rightHandX = cx + hw * 0.85f
-                rightHandY = rig.headCy - rig.headRy * 0.28f
-            }
-            VanFiniteAction.CAUTION -> {
-                rightHandX = cx + hw * 0.55f
-                rightHandY = rig.headCy + rig.headRy * 0.05f
-            }
-            VanFiniteAction.CONFIRM -> {
-                rightHandX = cx + hw * 0.62f
-                rightHandY = rig.torsoTop + 0.18f
-            }
-            VanFiniteAction.SHRUG -> {
-                leftHandY = 0.72f
-                rightHandY = 0.72f
-                leftHandX = cx - hw * 1.28f
-                rightHandX = cx + hw * 1.28f
-            }
-            VanFiniteAction.OPEN_PANEL -> {
-                leftHandX = cx - hw * 1.22f
-                rightHandX = cx + hw * 1.22f
-                leftHandY = 0.70f
-                rightHandY = 0.70f
-            }
-            VanFiniteAction.CLOSE_PANEL -> {
-                leftHandX = cx - hw * 0.55f
-                rightHandX = cx + hw * 0.55f
-                leftHandY = 0.78f
-                rightHandY = 0.78f
-            }
+            VanFiniteAction.HELLO_WAVE -> right = 306f to 72f
+            VanFiniteAction.ACK_NOD -> right = 302f to 336f
+            VanFiniteAction.POINT_LEFT -> left = 18f to 196f
+            VanFiniteAction.POINT_RIGHT -> right = 372f to 200f
+            VanFiniteAction.POINT_UP -> right = 292f to 40f
+            VanFiniteAction.POINT_DOWN -> right = 330f to 400f
+            VanFiniteAction.POINT_TARGET -> right = 362f to 150f
+            VanFiniteAction.CELEBRATE -> { left = 88f to 64f; right = 304f to 52f }
+            VanFiniteAction.CAUTION -> right = 282f to 150f
+            VanFiniteAction.CONFIRM -> right = 250f to 250f
+            VanFiniteAction.SHRUG -> { left = 78f to 228f; right = 324f to 228f }
+            VanFiniteAction.OPEN_PANEL -> { left = 38f to 286f; right = 362f to 286f }
+            VanFiniteAction.CLOSE_PANEL -> { left = 152f to 296f; right = 248f to 296f }
             VanFiniteAction.PRESENT_CARD -> Unit
             null -> Unit
         }
 
-        val sleeve = 0.062f
-        val leftSleeve = vanPath {
-            moveTo(cx - hw * 0.80f, shoulderY)
-            quadTo(cx - hw * 1.24f, shoulderY + 0.150f, leftHandX, leftHandY - 0.020f)
+        val ops = mutableListOf<VanDrawOp>()
+        for ((shoulder, hand, side) in listOf(Triple(136f to 206f, left, -1f), Triple(270f to 206f, right, 1f))) {
+            val (sx, sy) = shoulder
+            val hx = hand.first
+            // A zoomed framing crops the hanging hand; keep the glove inside the box.
+            val hy = minOf(hand.second, pen.boardYAt(0.97f))
+            // The elbow bows outward and down, so every hand target reads as a bent arm.
+            val ex = (sx + hx) / 2f + side * 26f
+            val ey = (sy + hy) / 2f + 22f
+            ops += VanDrawOp.PathOp(
+                vanPath { moveTo(pen.x(sx), pen.y(sy)); quadTo(pen.x(ex), pen.y(ey), pen.x((ex + hx) / 2f), pen.y((ey + hy) / 2f)) },
+                VanColors.of(JACKET_PANEL),
+                strokeWidth = pen.l(40f),
+            )
+            ops += VanDrawOp.PathOp(
+                vanPath { moveTo(pen.x((ex + hx) / 2f), pen.y((ey + hy) / 2f)); lineTo(pen.x(hx), pen.y(hy)) },
+                VanColors.of(JACKET),
+                strokeWidth = pen.l(34f),
+            )
+            ops += VanDrawOp.Oval(pen.x(hx), pen.y(hy), pen.l(24f), pen.l(20f), VanColors.of(GLOVE))
+            ops += VanDrawOp.Circle(
+                pen.x(hx), pen.y(hy) - pen.l(18f), pen.l(15f),
+                VanColors.scaleAlpha(palette.accent, 0.8f), pen.l(4f),
+            )
         }
-        val rightSleeve = vanPath {
-            moveTo(cx + hw * 0.80f, shoulderY)
-            quadTo(cx + hw * 1.28f, shoulderY + 0.130f, rightHandX, rightHandY - 0.020f)
-        }
-
-        val ops = mutableListOf(
-            VanDrawOp.PathOp(leftSleeve, VanColors.of(JACKET), strokeWidth = sleeve),
-            VanDrawOp.PathOp(rightSleeve, VanColors.of(JACKET), strokeWidth = sleeve),
-            VanDrawOp.Oval(leftHandX, leftHandY, 0.030f, 0.026f, VanColors.of(GLOVE)),
-            VanDrawOp.Oval(rightHandX, rightHandY, 0.030f, 0.026f, VanColors.of(GLOVE)),
-            VanDrawOp.Circle(leftHandX, leftHandY - 0.026f, 0.026f, VanColors.scaleAlpha(palette.accent, 0.8f), 0.008f),
-            VanDrawOp.Circle(rightHandX, rightHandY - 0.026f, 0.026f, VanColors.scaleAlpha(palette.accent, 0.8f), 0.008f),
-        )
 
         if (action == VanFiniteAction.PRESENT_CARD) {
-            ops += VanDrawOp.RoundRect(
-                cx = rightHandX + 0.010f,
-                cy = rightHandY - 0.105f,
-                halfW = 0.070f,
-                halfH = 0.055f,
-                radius = 0.014f,
-                color = VanColors.scaleAlpha(palette.accent, 0.18f),
-            )
-            ops += VanDrawOp.RoundRect(
-                cx = rightHandX + 0.010f,
-                cy = rightHandY - 0.105f,
-                halfW = 0.070f,
-                halfH = 0.055f,
-                radius = 0.014f,
-                color = VanColors.scaleAlpha(palette.accent, 0.75f),
-                strokeWidth = 0.006f,
-            )
+            val (hx, hy) = right
+            ops += VanDrawOp.RoundRect(pen.x(hx + 6f), pen.y(hy - 62f), pen.l(42f), pen.l(32f), pen.l(8f), VanColors.scaleAlpha(palette.accent, 0.18f))
+            ops += VanDrawOp.RoundRect(pen.x(hx + 6f), pen.y(hy - 62f), pen.l(42f), pen.l(32f), pen.l(8f), VanColors.scaleAlpha(palette.accent, 0.75f), pen.l(3.5f))
         }
         if (action == VanFiniteAction.POINT_LEFT || action == VanFiniteAction.POINT_RIGHT ||
             action == VanFiniteAction.POINT_UP || action == VanFiniteAction.POINT_DOWN ||
             action == VanFiniteAction.POINT_TARGET
         ) {
             val fromLeft = action == VanFiniteAction.POINT_LEFT
-            val originX = if (fromLeft) leftHandX else rightHandX
-            val originY = if (fromLeft) leftHandY else rightHandY
-            val tipX = originX + if (fromLeft) -0.08f else 0.06f
+            val (ox, oy) = if (fromLeft) left else right
+            val tipX = ox + if (fromLeft) -44f else 36f
             val tipY = when (action) {
-                VanFiniteAction.POINT_UP -> originY - 0.08f
-                VanFiniteAction.POINT_DOWN -> originY + 0.08f
-                else -> originY
+                VanFiniteAction.POINT_UP -> oy - 44f
+                VanFiniteAction.POINT_DOWN -> oy + 44f
+                else -> oy
             }
+            // Full gloves (CF-D-05-REV2_1): the pointing finger is glove, not skin.
             ops += VanDrawOp.PathOp(
-                vanPath {
-                    moveTo(originX, originY)
-                    lineTo(tipX, tipY)
-                },
-                VanColors.of(SKIN),
-                strokeWidth = 0.016f,
+                vanPath { moveTo(pen.x(ox), pen.y(oy)); lineTo(pen.x(tipX), pen.y(tipY)) },
+                VanColors.of(GLOVE),
+                strokeWidth = pen.l(10f),
             )
         }
         return ops
     }
 
-    private fun neck(rig: VanRig): List<VanDrawOp> = listOf(
+    private fun neck(pen: Pen): List<VanDrawOp> = listOf(
         VanDrawOp.RoundRect(
-            cx = rig.headCx,
-            cy = rig.headCy + rig.headRy * 0.82f,
-            halfW = rig.headRx * 0.34f,
-            halfH = rig.headRy * 0.30f,
-            radius = rig.headRx * 0.14f,
+            cx = pen.x(191f), cy = pen.y(178f), halfW = pen.l(16f), halfH = pen.l(15f), radius = pen.l(6f),
             color = VanColors.of(SKIN_SHADOW),
         ),
     )
 
-    private fun headShape(rig: VanRig): List<VanDrawOp> {
-        val cx = rig.headCx
-        val cy = rig.headCy
-        val rx = rig.headRx
-        val ry = rig.headRy
+    private fun headShape(pen: Pen): List<VanDrawOp> {
         val jaw = vanPath {
-            moveTo(cx - rx * 0.98f, cy + ry * 0.10f)
-            quadTo(cx - rx * 0.88f, cy + ry * 0.92f, cx, cy + ry * 1.02f)
-            quadTo(cx + rx * 0.88f, cy + ry * 0.92f, cx + rx * 0.98f, cy + ry * 0.10f)
+            moveTo(pen.x(128f), pen.y(118f))
+            quadTo(pen.x(136f), pen.y(166f), pen.x(FACE_X), pen.y(172f))
+            quadTo(pen.x(244f), pen.y(166f), pen.x(252f), pen.y(118f))
             close()
         }
         return listOf(
-            // Ears
-            VanDrawOp.Oval(cx - rx * 0.98f, cy + ry * 0.10f, rx * 0.14f, ry * 0.20f, VanColors.of(SKIN_SHADOW)),
-            VanDrawOp.Oval(cx + rx * 0.98f, cy + ry * 0.10f, rx * 0.14f, ry * 0.20f, VanColors.of(SKIN_SHADOW)),
-            VanDrawOp.Oval(cx, cy, rx, ry, VanColors.of(SKIN)),
+            VanDrawOp.Oval(pen.x(126f), pen.y(130f), pen.l(10f), pen.l(15f), VanColors.of(SKIN_SHADOW)),
+            VanDrawOp.Oval(pen.x(256f), pen.y(130f), pen.l(10f), pen.l(15f), VanColors.of(SKIN_SHADOW)),
+            VanDrawOp.Oval(pen.x(FACE_X), pen.y(114f), pen.l(64f), pen.l(54f), VanColors.of(SKIN)),
             VanDrawOp.PathOp(jaw, VanColors.of(SKIN)),
         )
     }
 
-    private fun eyes(rig: VanRig, state: VanVisualState, frame: VanSceneFrame): List<VanDrawOp> {
-        val cx = rig.headCx
-        val cy = rig.headCy
-        val rx = rig.headRx
-        val ry = rig.headRy
-        val eyeY = cy - ry * 0.06f
-        val dx = rx * 0.40f
-        val scleraRx = rx * 0.235f
+    private fun eyes(pen: Pen, state: VanVisualState, frame: VanSceneFrame): List<VanDrawOp> {
+        val eyeY = pen.y(122f)
         val open = (1f - frame.blink.coerceIn(0f, 1f))
-        val scleraRy = ry * 0.175f * open.coerceAtLeast(0.04f)
-        val irisR = rx * 0.150f
-        val gazeX = state.attentionX.coerceIn(-1f, 1f) * rx * 0.070f
-        val gazeY = state.attentionY.coerceIn(-1f, 1f) * ry * 0.045f
+        val scleraRx = pen.l(17f)
+        val scleraRy = pen.l(14f) * open.coerceAtLeast(0.04f)
+        val irisR = pen.l(11.5f)
+        val gazeX = state.attentionX.coerceIn(-1f, 1f) * pen.l(4f)
+        val gazeY = state.attentionY.coerceIn(-1f, 1f) * pen.l(2.5f)
 
         val ops = mutableListOf<VanDrawOp>()
-        listOf(-1f, 1f).forEach { side ->
-            val ex = cx + side * dx
+        for (bx in listOf(158f, 220f)) {
+            val ex = pen.x(bx)
             ops += VanDrawOp.Oval(ex, eyeY, scleraRx, scleraRy, VanColors.of(EYE_SCLERA))
             if (open > 0.2f) {
                 ops += VanDrawOp.Circle(ex + gazeX, eyeY + gazeY, irisR * open, VanColors.of(EYE_IRIS))
                 ops += VanDrawOp.Circle(ex + gazeX, eyeY + gazeY, irisR * 0.92f * open, VanColors.of(EYE_IRIS_DEEP, 0.45f))
-                ops += VanDrawOp.Circle(ex + gazeX, eyeY + gazeY, irisR * 0.44f * open, VanColors.of(EYE_PUPIL))
+                ops += VanDrawOp.Circle(ex + gazeX, eyeY + gazeY, irisR * 0.46f * open, VanColors.of(EYE_PUPIL))
                 ops += VanDrawOp.Circle(
                     ex + gazeX - irisR * 0.38f,
-                    eyeY + gazeY - irisR * 0.40f,
-                    irisR * 0.26f * open,
-                    VanColors.of(0xFFFFFFFFL, 0.88f),
+                    eyeY + gazeY - irisR * 0.42f,
+                    irisR * 0.28f * open,
+                    VanColors.of(0xFFFFFFFFL, 0.9f),
                 )
             }
-            // Upper lid rides down over the eye during a blink.
             if (frame.blink > 0.02f) {
                 ops += VanDrawOp.RoundRect(
                     cx = ex,
-                    cy = eyeY - scleraRy - ry * 0.175f * (1f - frame.blink) * 0.5f,
+                    cy = eyeY - scleraRy - pen.l(14f) * (1f - frame.blink) * 0.5f,
                     halfW = scleraRx * 1.18f,
-                    halfH = ry * 0.175f * frame.blink,
-                    radius = ry * 0.05f,
+                    halfH = pen.l(14f) * frame.blink,
+                    radius = pen.l(4f),
                     color = VanColors.of(SKIN),
                 )
             }
@@ -447,253 +370,152 @@ object VanScene {
         return ops
     }
 
-    private fun brows(rig: VanRig, palette: VanStatusPalette, state: VanVisualState): List<VanDrawOp> {
-        val cx = rig.headCx
-        val cy = rig.headCy
-        val rx = rig.headRx
-        val ry = rig.headRy
-        val browY = cy - ry * 0.42f
-        // Concern pulls inner brow ends down; alertness lifts the outer ends.
+    private fun brows(pen: Pen, palette: VanStatusPalette, state: VanVisualState): List<VanDrawOp> {
         val concern = when (palette.mood) {
             VanMood.CONCERNED -> 1f
             VanMood.ALERT -> 0.35f
             else -> 0f
         } * (0.4f + 0.6f * state.urgency.coerceIn(0f, 1f)).coerceAtLeast(0.4f)
-        val lift = if (palette.mood == VanMood.ALERT) ry * 0.035f else 0f
-
-        return listOf(-1f, 1f).map { side ->
-            val inner = cx + side * rx * 0.20f
-            val outer = cx + side * rx * 0.66f
+        val lift = if (palette.mood == VanMood.ALERT) 4f else 0f
+        return listOf(158f to -1f, 220f to 1f).map { (bx, side) ->
+            val inner = bx - side * 14f
+            val outer = bx + side * 18f
             VanDrawOp.PathOp(
                 vanPath {
-                    moveTo(inner, browY + ry * 0.10f * concern)
-                    quadTo(
-                        cx + side * rx * 0.44f,
-                        browY - ry * 0.10f - lift,
-                        outer,
-                        browY - ry * 0.02f - lift * 0.6f,
-                    )
+                    moveTo(pen.x(inner), pen.y(100f + 7f * concern))
+                    quadTo(pen.x(bx), pen.y(92f - lift), pen.x(outer), pen.y(97f - lift * 0.6f))
                 },
-                VanColors.of(HAIR_SHADOW, 0.95f),
-                strokeWidth = rx * 0.055f,
+                VanColors.of(BROW, 0.95f),
+                strokeWidth = pen.l(5f),
             )
         }
     }
 
-    private fun visor(rig: VanRig, palette: VanStatusPalette): List<VanDrawOp> {
-        val cx = rig.headCx
-        val cy = rig.headCy
-        val rx = rig.headRx
-        val ry = rig.headRy
-        val visorCy = cy - ry * 0.06f
-        val halfW = rx * 0.98f
-        val halfH = ry * 0.255f
+    private fun visor(pen: Pen, palette: VanStatusPalette): List<VanDrawOp> {
+        val cx = pen.x(190f)
+        val cy = pen.y(122f)
+        val halfW = pen.l(66f)
+        val halfH = pen.l(22f)
         val specular = vanPath {
-            moveTo(cx - halfW * 0.80f, visorCy + halfH * 0.55f)
-            lineTo(cx - halfW * 0.30f, visorCy - halfH * 0.80f)
-            lineTo(cx - halfW * 0.08f, visorCy - halfH * 0.80f)
-            lineTo(cx - halfW * 0.58f, visorCy + halfH * 0.55f)
+            moveTo(cx - halfW * 0.80f, cy + halfH * 0.55f)
+            lineTo(cx - halfW * 0.34f, cy - halfH * 0.80f)
+            lineTo(cx - halfW * 0.12f, cy - halfH * 0.80f)
+            lineTo(cx - halfW * 0.58f, cy + halfH * 0.55f)
             close()
         }
         return listOf(
-            VanDrawOp.RoundRect(
-                cx = cx,
-                cy = visorCy,
-                halfW = halfW,
-                halfH = halfH,
-                radius = halfH * 0.85f,
-                color = VanColors.of(VISOR, 0.30f),
-            ),
-            VanDrawOp.PathOp(specular, VanColors.of(0xFFFFFFFFL, 0.16f)),
-            VanDrawOp.RoundRect(
-                cx = cx,
-                cy = visorCy,
-                halfW = halfW,
-                halfH = halfH,
-                radius = halfH * 0.85f,
-                color = VanColors.of(VISOR, 0.90f),
-                strokeWidth = rx * 0.045f,
-            ),
-            // Temple mount tying the visor into the DIAL accent language.
-            VanDrawOp.RoundRect(
-                cx = cx + halfW * 0.99f,
-                cy = visorCy,
-                halfW = rx * 0.055f,
-                halfH = halfH * 0.62f,
-                radius = rx * 0.03f,
-                color = VanColors.scaleAlpha(palette.accent, 0.9f),
-            ),
+            // Clear lens first, so the large blue eyes read through it.
+            VanDrawOp.RoundRect(cx, cy, halfW, halfH, halfH * 0.85f, VanColors.of(VISOR, 0.30f)),
+            VanDrawOp.PathOp(specular, VanColors.of(0xFFFFFFFFL, 0.18f)),
+            VanDrawOp.RoundRect(cx, cy, halfW, halfH, halfH * 0.85f, VanColors.of(VISOR_FRAME, 0.92f), strokeWidth = pen.l(3.5f)),
+            // Dark side pods, each with a cyan status light.
+            VanDrawOp.Oval(cx - halfW - pen.l(3f), cy, pen.l(8f), pen.l(15f), VanColors.of(VISOR_POD)),
+            VanDrawOp.Oval(cx + halfW + pen.l(3f), cy, pen.l(8f), pen.l(15f), VanColors.of(VISOR_POD)),
+            VanDrawOp.Circle(cx + halfW + pen.l(3f), cy, pen.l(3f), VanColors.scaleAlpha(palette.accent, 0.95f)),
         )
     }
 
-    private fun mouth(rig: VanRig, palette: VanStatusPalette, state: VanVisualState): List<VanDrawOp> {
-        val cx = rig.headCx
-        val cy = rig.headCy
-        val rx = rig.headRx
-        val ry = rig.headRy
-        val mouthY = cy + ry * 0.55f
+    private fun mouth(pen: Pen, palette: VanStatusPalette, state: VanVisualState): List<VanDrawOp> {
+        val mx = pen.x(193f)
+        val my = pen.y(153f)
         val openness = state.mouthOpen.coerceIn(0f, 1f)
         val speaking = state.speaking || openness > 0.05f
-
         if (speaking) {
-            val h = ry * (0.045f + 0.115f * openness)
-            val w = rx * (0.24f + 0.10f * openness)
+            val h = pen.l(3f + 9f * openness)
+            val w = pen.l(13f + 5f * openness)
             return listOf(
-                VanDrawOp.Oval(cx, mouthY, w, h, VanColors.of(MOUTH)),
-                VanDrawOp.Oval(cx, mouthY + h * 0.42f, w * 0.62f, h * 0.42f, VanColors.of(0xFFD98C7AL, 0.75f)),
+                VanDrawOp.Oval(mx, my, w, h, VanColors.of(MOUTH)),
+                VanDrawOp.Oval(mx, my + h * 0.42f, w * 0.62f, h * 0.42f, VanColors.of(0xFFD98C7AL, 0.75f)),
             )
         }
-
         val curve = when (palette.mood) {
-            VanMood.PLEASED -> ry * 0.16f
-            VanMood.CALM -> ry * 0.11f
-            VanMood.ALERT -> ry * 0.05f
+            VanMood.PLEASED -> pen.l(8f)
+            VanMood.CALM -> pen.l(5.5f)
+            VanMood.ALERT -> pen.l(2.5f)
             VanMood.MUTED -> 0f
-            VanMood.CONCERNED -> -ry * 0.07f
+            VanMood.CONCERNED -> -pen.l(3.5f)
         }
         return listOf(
             VanDrawOp.PathOp(
                 vanPath {
-                    moveTo(cx - rx * 0.28f, mouthY - curve * 0.30f)
-                    quadTo(cx, mouthY + curve, cx + rx * 0.28f, mouthY - curve * 0.30f)
+                    moveTo(mx - pen.l(16f), my - curve * 0.30f)
+                    quadTo(mx, my + curve, mx + pen.l(16f), my - curve * 0.30f)
                 },
                 VanColors.of(MOUTH, 0.85f),
-                strokeWidth = rx * 0.055f,
+                strokeWidth = pen.l(3.5f),
             ),
         )
     }
 
     /**
-     * Silver swept hair as *defined locks*, not a smooth cap.
-     *
-     * The outer silhouette is walked left temple → crown → right temple through alternating
-     * spike tips and valleys, then closed back along the hairline through three fringe locks
-     * that hang over the brow. Straight segments are deliberate: rounded curves read as a
-     * swim cap at overlay size, which is the exact drift the owner design sheet rejects.
+     * Spiky, voluminous silver hair as defined locks: the outline is walked through Candidate
+     * B's spike tips and valleys, then closed along a fringe that falls over the brow.
+     * Straight segments are deliberate: rounded curves read as a swim cap at overlay size.
      */
-    private fun hair(rig: VanRig): List<VanDrawOp> {
-        val cx = rig.headCx
-        val cy = rig.headCy
-        val rx = rig.headRx
-        val ry = rig.headRy
-        fun hx(u: Float) = cx + rx * u
-        fun hy(v: Float) = cy + ry * v
-
+    private fun hair(pen: Pen): List<VanDrawOp> {
+        val tips = listOf(
+            104f to 118f, 94f to 92f, 110f to 72f, 100f to 52f, 126f to 44f, 124f to 20f, 156f to 26f,
+            170f to 8f, 196f to 20f, 224f to 8f, 234f to 32f, 264f to 30f, 260f to 54f, 288f to 68f,
+            268f to 84f, 280f to 106f, 256f to 100f, 244f to 86f, 226f to 100f, 212f to 86f, 196f to 102f,
+            184f to 88f, 166f to 100f, 154f to 88f, 138f to 100f, 126f to 98f, 116f to 122f,
+        )
         val mass = vanPath {
-            moveTo(hx(-1.04f), hy(0.06f))
-            // Spikes sweep up and back, peaking just off-centre.
-            lineTo(hx(-1.34f), hy(-0.46f))
-            lineTo(hx(-1.00f), hy(-0.58f))
-            lineTo(hx(-1.14f), hy(-1.00f))
-            lineTo(hx(-0.76f), hy(-0.90f))
-            lineTo(hx(-0.60f), hy(-1.40f))
-            lineTo(hx(-0.28f), hy(-1.08f))
-            lineTo(hx(-0.04f), hy(-1.54f))
-            lineTo(hx(0.30f), hy(-1.10f))
-            lineTo(hx(0.54f), hy(-1.44f))
-            lineTo(hx(0.78f), hy(-0.98f))
-            lineTo(hx(1.14f), hy(-1.12f))
-            lineTo(hx(1.18f), hy(-0.66f))
-            lineTo(hx(1.42f), hy(-0.38f))
-            lineTo(hx(1.06f), hy(0.04f))
-            // Hairline home, dipping into three fringe locks over the brow.
-            quadTo(hx(1.02f), hy(-0.44f), hx(0.74f), hy(-0.60f))
-            lineTo(hx(0.48f), hy(-0.30f))
-            lineTo(hx(0.20f), hy(-0.64f))
-            lineTo(hx(-0.06f), hy(-0.34f))
-            lineTo(hx(-0.34f), hy(-0.66f))
-            lineTo(hx(-0.58f), hy(-0.38f))
-            quadTo(hx(-0.88f), hy(-0.58f), hx(-1.04f), hy(0.06f))
+            tips.forEachIndexed { i, (bx, by) ->
+                if (i == 0) moveTo(pen.x(bx), pen.y(by)) else lineTo(pen.x(bx), pen.y(by))
+            }
             close()
         }
-
-        // Strand shading runs along the sweep direction so the locks separate at small sizes.
         val strandLow = vanPath {
-            moveTo(hx(-0.92f), hy(-0.46f))
-            quadTo(hx(-0.10f), hy(-0.96f), hx(0.92f), hy(-0.74f))
+            moveTo(pen.x(116f), pen.y(78f)); quadTo(pen.x(180f), pen.y(46f), pen.x(262f), pen.y(66f))
         }
         val strandMid = vanPath {
-            moveTo(hx(-0.78f), hy(-0.74f))
-            quadTo(hx(-0.02f), hy(-1.12f), hx(0.80f), hy(-0.96f))
+            moveTo(pen.x(132f), pen.y(56f)); quadTo(pen.x(190f), pen.y(28f), pen.x(248f), pen.y(46f))
         }
         val highlight = vanPath {
-            moveTo(hx(-0.44f), hy(-0.98f))
-            quadTo(hx(0.14f), hy(-1.22f), hx(0.66f), hy(-1.06f))
+            moveTo(pen.x(150f), pen.y(40f)); quadTo(pen.x(192f), pen.y(22f), pen.x(232f), pen.y(30f))
         }
-
         return listOf(
             VanDrawOp.PathOp(mass, VanColors.of(HAIR)),
-            VanDrawOp.PathOp(strandLow, VanColors.of(HAIR_SHADOW, 0.85f), strokeWidth = rx * 0.070f),
-            VanDrawOp.PathOp(strandMid, VanColors.of(HAIR_SHADOW, 0.55f), strokeWidth = rx * 0.055f),
-            VanDrawOp.PathOp(highlight, VanColors.of(0xFFFFFFFFL, 0.80f), strokeWidth = rx * 0.050f),
+            VanDrawOp.PathOp(strandLow, VanColors.of(HAIR_SHADOW, 0.85f), strokeWidth = pen.l(4.5f)),
+            VanDrawOp.PathOp(strandMid, VanColors.of(HAIR_SHADOW, 0.55f), strokeWidth = pen.l(3.5f)),
+            VanDrawOp.PathOp(highlight, VanColors.of(0xFFFFFFFFL, 0.80f), strokeWidth = pen.l(3f)),
         )
     }
 
+    /** The dark orb companion: navy-black shell, cyan rim, two vertical cyan bar eyes, no mouth. */
     private fun orb(
-        rig: VanRig,
+        pen: Pen,
         palette: VanStatusPalette,
         state: VanVisualState,
         frame: VanSceneFrame,
     ): List<VanDrawOp> {
         val offline = state.durableState == VanDurableState.OFFLINE ||
             state.durableState == VanDurableState.SLEEPING
-        val orbColor = if (offline) VanColors.desaturate(palette.accent, 0.85f) else palette.accent
+        val eye = if (offline) VanColors.desaturate(VanColors.of(ORB_EYE), 0.85f) else VanColors.of(ORB_EYE)
         val alive = if (offline) 0.35f else 1f
-        val r = rig.orbR * if (offline) 0.82f else 1f
+        val cx = pen.x(ORB_X)
+        val cy = pen.y(ORB_Y)
+        val r = pen.l(ORB_R) * if (offline) 0.9f else 1f
         val ops = mutableListOf<VanDrawOp>()
-
         if (!offline) {
-            ops += VanDrawOp.Circle(rig.orbCx, rig.orbCy, r * 1.85f, VanColors.scaleAlpha(orbColor, 0.10f))
-            ops += VanDrawOp.Circle(rig.orbCx, rig.orbCy, r * 1.38f, VanColors.scaleAlpha(orbColor, 0.20f))
+            ops += VanDrawOp.Circle(cx, cy, r * 1.30f, VanColors.scaleAlpha(palette.accent, 0.12f))
         }
-        // Deep navy sphere with a lit face — the orb is a companion, not a status dot.
-        ops += VanDrawOp.Circle(rig.orbCx, rig.orbCy, r, VanColors.of(ORB_BODY))
-        ops += VanDrawOp.Circle(
-            rig.orbCx,
-            rig.orbCy,
-            r,
-            VanColors.scaleAlpha(orbColor, 0.85f * alive + 0.15f),
-            strokeWidth = r * 0.14f,
-        )
-        val faceAlpha = 0.92f * alive + 0.08f
-        listOf(-1f, 1f).forEach { side ->
-            ops += VanDrawOp.Oval(
-                rig.orbCx + side * r * 0.34f,
-                rig.orbCy - r * 0.10f,
-                r * 0.15f,
-                r * 0.23f,
-                VanColors.scaleAlpha(orbColor, faceAlpha),
+        ops += VanDrawOp.Circle(cx, cy, r, VanColors.of(ORB_BODY))
+        ops += VanDrawOp.Circle(cx, cy, r * 0.94f, VanColors.scaleAlpha(eye, 0.70f * alive + 0.15f), strokeWidth = r * 0.06f)
+        ops += VanDrawOp.Circle(cx + r * 0.18f, cy - r * 0.04f, r * 0.64f, VanColors.of(ORB_FACE))
+        // Bar eyes squash into a blink with VAN's own blink.
+        val squash = (1f - frame.blink.coerceIn(0f, 1f) * 0.85f)
+        for (dx in listOf(0.02f, 0.40f)) {
+            ops += VanDrawOp.RoundRect(
+                cx = cx + r * dx,
+                cy = cy - r * 0.04f,
+                halfW = r * 0.075f,
+                halfH = r * 0.24f * squash,
+                radius = r * 0.075f,
+                color = VanColors.scaleAlpha(eye, 0.92f * alive + 0.08f),
             )
         }
-        ops += VanDrawOp.PathOp(
-            vanPath {
-                moveTo(rig.orbCx - r * 0.34f, rig.orbCy + r * 0.34f)
-                quadTo(rig.orbCx, rig.orbCy + r * 0.66f, rig.orbCx + r * 0.34f, rig.orbCy + r * 0.34f)
-            },
-            VanColors.scaleAlpha(orbColor, faceAlpha),
-            strokeWidth = r * 0.12f,
-        )
-        ops += VanDrawOp.Circle(
-            rig.orbCx - r * 0.44f,
-            rig.orbCy - r * 0.52f,
-            r * 0.20f,
-            VanColors.of(0xFFFFFFFFL, 0.55f * alive + 0.10f),
-        )
-
-        // Two orbit motes read as "holographic" without adding glow.
-        if (!offline) {
-            val motion = if (frame.reducedMotion) 0f else 1f
-            val tau = (2f * PI).toFloat()
-            listOf(0f, 0.5f).forEach { offset ->
-                val a = (frame.phase + offset) * tau * motion + offset * tau
-                ops += VanDrawOp.Circle(
-                    rig.orbCx + cos(a) * r * 1.55f,
-                    rig.orbCy + sin(a) * r * 0.72f,
-                    r * 0.16f,
-                    VanColors.scaleAlpha(orbColor, 0.75f),
-                )
-            }
-        }
+        ops += VanDrawOp.Circle(cx - r * 0.46f, cy - r * 0.50f, r * 0.16f, VanColors.of(0xFFFFFFFFL, 0.45f * alive + 0.10f))
         return ops
     }
 
@@ -702,14 +524,14 @@ object VanScene {
      * Distinct shapes carry warning/error/success/urgent/approval in grayscale (Gate E).
      */
     private fun statusMarks(
-        rig: VanRig,
+        pen: Pen,
         palette: VanStatusPalette,
         @Suppress("UNUSED_PARAMETER") state: VanVisualState,
         frame: VanSceneFrame,
     ): List<VanDrawOp> {
         val cx = 0.5f
         val cy = 0.48f
-        val r = rig.ringR
+        val r = 0.47f - 0.012f * (pen.framing.zoom - 1f)
         val motion = if (frame.reducedMotion) 0f else 1f
         val spin = frame.phase * 40f * motion
         val width = 0.018f
@@ -752,12 +574,12 @@ object VanScene {
     }
 
     private fun hologramGlyph(
-        rig: VanRig,
+        pen: Pen,
         palette: VanStatusPalette,
         state: VanVisualState,
     ): List<VanDrawOp> {
-        val gx = rig.headCx + rig.headRx * 1.05f
-        val gy = rig.headCy + rig.headRy * 1.05f
+        val gx = pen.x(292f).coerceAtMost(0.86f)
+        val gy = pen.y(176f)
         val ink = VanColors.scaleAlpha(palette.accent, 0.92f)
         val fill = VanColors.scaleAlpha(palette.accent, 0.42f)
         return when (state.durableState) {

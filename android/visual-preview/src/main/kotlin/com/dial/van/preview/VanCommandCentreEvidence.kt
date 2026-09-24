@@ -244,12 +244,10 @@ object VanCommandCentreEvidence {
     )
 
     private fun paintCharacter(g: Graphics2D, state: VanDurableState, x: Float, y: Float, size: Float) {
-        AwtVanRenderer.paint(
+        AwtVanRenderer.paintVan(
             g,
-            VanScene.build(
-                VanVisualState(durableState = state),
-                VanSceneFrame(presentation = VanPresentation.COMMAND_CENTRE, phase = PHASE),
-            ),
+            VanVisualState(durableState = state),
+            VanSceneFrame(presentation = VanPresentation.COMMAND_CENTRE, phase = PHASE),
             x,
             y,
             size,

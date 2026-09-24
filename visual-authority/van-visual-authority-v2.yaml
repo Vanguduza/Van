@@ -2,6 +2,12 @@ aura_v2_3:
   revision: "2.3"
   supersedes: "2.2"
   thesis: "VAN is a solid expressive character inside a compact three-zone living windy electrical field: inner identity, mid interaction, outer semantic envelope."
+  flame_envelope:
+    decision: CF-D-06
+    thesis: "VAN's aura reads as a Goku/Naruto-style flame envelope: tongues that wrap his silhouette and rise off it, with a white-hot rim, state-coloured outer flames and rising embers. The wind field survives only as faint wisps."
+    canonical_planner: "VanFlameAura"
+    wraps_character_silhouette: true
+    drawn_behind_opaque_character: true
   full_ring_forbidden: true
   concentric_orbit_geometry_forbidden: true
   canonical_geometry_engine: "VanFieldGeometryEngine"

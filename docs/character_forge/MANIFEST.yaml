@@ -57,3 +57,43 @@ decisions:
       machine_lock: visual-authority/character-forge/00-source/asset-pack/APPROVED_IDENTITY_LOCK.yaml
       landmarks: visual-authority/character-forge/00-source/reference-pack/PROPORTIONS.yaml
     milestone_effect: M1_AND_LATER_MUST_MATCH_CANDIDATE_B
+  - id: CF-D-06
+    status: ADOPTED
+    date: 2026-09-24
+    authority: owner
+    decision: >-
+      VAN's aura is redesigned to resemble Goku's and Naruto's: a flame envelope that wraps his
+      silhouette and rises off it, with layered state-coloured outer tongues, a white-hot core
+      rim and rising embers. This reverses the earlier detached-field rule; the wind field is
+      kept only as faint wisps. The aura remains Android-native, drawn behind the opaque
+      character; van.riv stays transparent and carries no aura geometry.
+    evidence:
+      planner: android/app/src/main/java/com/dial/van/visual/VanFlameAura.kt
+      silhouette: android/app/src/main/java/com/dial/van/visual/VanBodyLayout.kt
+      tests: android/verification/src/test/kotlin/com/dial/van/visual/VanFlameAuraTest.kt
+      handoff: visual-authority/character-forge/00-source/asset-pack/AURA_HANDOFF_SPEC.yaml
+    milestone_effect: AURA_EVIDENCE_MUST_SHOW_FLAME_ENVELOPE
+  - id: CF-D-06-REV1
+    status: ADOPTED
+    date: 2026-09-24
+    authority: owner
+    decision: >-
+      The aura's wind strands, electrical branches, scattered ion specks and orb link line are
+      removed: on an Android screen they are noise. The aura is the flame envelope and its
+      embers only.
+    milestone_effect: AURA_HAS_NO_LINE_GEOMETRY
+  - id: CF-D-07
+    status: ADOPTED
+    date: 2026-09-24
+    authority: owner
+    decision: >-
+      Until the authored van.riv loads, VAN is shown as real Candidate B art: a native-resolution
+      cut-out of the Candidate B front view, framed like the Rive artboard, with the flame aura
+      and the state marks drawn around it. It is a still (gentle bob only; no expressions or
+      gestures). The procedural Canvas drawing remains only as the last-resort fallback. The
+      retired owner-art poses stay retired.
+    evidence:
+      asset: android/app/src/main/res/drawable-nodpi/van_candidate_b_front.png
+      provenance: visual-authority/character-forge/00-source/reference-pack/interim/INTERIM_ART.yaml
+      renderer: android/app/src/main/java/com/dial/van/visual/VanVisualRuntime.kt
+    milestone_effect: RENDERER_ORDER_RIVE_THEN_CANDIDATE_B_THEN_CANVAS

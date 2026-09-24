@@ -25,6 +25,7 @@ fun main(args: Array<String>) {
     val sheets = listOf(
         "van_floating_overlay_preview.png" to VanPreviewSheets.floatingOverlaySheet(),
         "van_state_matrix.png" to VanPreviewSheets.stateSheet(),
+        "van_flame_aura.png" to VanPreviewSheets.flameAuraSheet(),
         "van_state_matrix_reduced_motion.png" to VanPreviewSheets.stateSheet(reducedMotion = true),
         "van_state_matrix_low.png" to VanPreviewSheets.stateSheet(budget = VanEffectBudget.LOW),
         "van_state_matrix_static.png" to VanPreviewSheets.stateSheet(budget = VanEffectBudget.STATIC),

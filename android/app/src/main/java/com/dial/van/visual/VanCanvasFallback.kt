@@ -27,16 +27,21 @@ import androidx.compose.ui.geometry.Size
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.ColorFilter
 import androidx.compose.ui.graphics.ColorMatrix
+import androidx.compose.ui.graphics.FilterQuality
+import androidx.compose.ui.graphics.ImageBitmap
 import androidx.compose.ui.graphics.Path
 import androidx.compose.ui.graphics.drawscope.DrawScope
 import androidx.compose.ui.graphics.drawscope.Stroke
 import androidx.compose.ui.graphics.graphicsLayer
 import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.platform.LocalContext
+import androidx.compose.ui.res.imageResource
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.semantics.contentDescription
 import androidx.compose.ui.semantics.semantics
 import androidx.compose.ui.tooling.preview.Preview
+import androidx.compose.ui.unit.IntOffset
+import androidx.compose.ui.unit.IntSize
 import androidx.compose.ui.unit.dp
 import com.dial.van.runtime.DeviceRuntimeReadings
 import com.dial.van.runtime.VanResourceEnvelope
@@ -67,17 +72,76 @@ fun VanAvatar(
                     riveRuntimeAvailable = false,
                     ownerArtAvailable = VanStateArt.artAvailable(context),
                     loadFailed = true,
+                    candidateBAvailable = true,
                 )
             },
         )
 
         VanRenderer.OWNER_ART -> VanOwnerArtAvatar(state = state, modifier = modifier)
 
+        VanRenderer.CANDIDATE_B -> VanCandidateBAvatar(
+            state = state,
+            modifier = modifier,
+            presentation = presentation,
+        )
+
         VanRenderer.CANVAS -> VanCanvasAvatar(
             state = state,
             modifier = modifier,
             presentation = presentation,
         )
+    }
+}
+
+/**
+ * The owner's chosen interim VAN: real Candidate B art, framed per presentation exactly like
+ * the Canvas character and the flame aura, with the same state-aware micro-motion the
+ * character sampler gives a still. Offline and degraded desaturate him; he never fades.
+ */
+@Composable
+fun VanCandidateBAvatar(
+    state: VanVisualState,
+    modifier: Modifier = Modifier,
+    presentation: VanPresentation = VanPresentation.COMPACT,
+) {
+    val image = ImageBitmap.imageResource(com.dial.van.R.drawable.van_candidate_b_front)
+    val palette = VanStatusPalette.forState(state.durableState)
+    val description = vanContentDescription(state)
+    val reducedMotion = rememberReducedMotion()
+    val phase = vanIdlePhase(state.durableState, reducedMotion)
+    val motion = VanCharacterMotion.sample(state, phase, reducedMotion)
+    val framing = VanFraming.forPresentation(presentation)
+    val marks = VanScene.stateMarks(
+        state,
+        VanSceneFrame(presentation = presentation, phase = phase, reducedMotion = reducedMotion),
+    )
+    val filter = if (palette.desaturation > 0.01f) {
+        ColorFilter.colorMatrix(ColorMatrix().apply { setToSaturation(1f - palette.desaturation) })
+    } else {
+        null
+    }
+    Canvas(
+        modifier = modifier
+            .semantics { contentDescription = description }
+            .offset(x = motion.offsetXDp.dp, y = motion.offsetYDp.dp)
+            .graphicsLayer {
+                rotationZ = motion.rotationDeg
+                scaleX = motion.scale
+                scaleY = motion.scale
+            },
+    ) {
+        val blit = VanInterimArt.blit(framing, image.width, size.width, size.height) ?: return@Canvas
+        drawImage(
+            image = image,
+            srcOffset = IntOffset(blit.srcLeft, blit.srcTop),
+            srcSize = IntSize(blit.srcWidth, blit.srcHeight),
+            dstOffset = IntOffset(blit.dstLeft.toInt(), blit.dstTop.toInt()),
+            dstSize = IntSize(blit.dstWidth.toInt(), blit.dstHeight.toInt()),
+            alpha = palette.dim,
+            colorFilter = filter,
+            filterQuality = FilterQuality.High,
+        )
+        drawVanScene(marks)
     }
 }
 
@@ -154,6 +218,7 @@ fun VanEmbodiment(
             phase = phase,
             budget = budget,
             characterScale = body,
+            framing = VanFraming.forPresentation(presentation),
             modifier = Modifier.matchParentSize(),
         )
         VanAvatar(
@@ -265,6 +330,8 @@ private fun resolveRenderer(context: Context): VanRenderDecision {
         assetBytes = bytes,
         riveRuntimeAvailable = riveRuntimeAvailable(),
         ownerArtAvailable = VanStateArt.artAvailable(context),
+        // Bundled with the app (res/drawable-nodpi/van_candidate_b_front.png).
+        candidateBAvailable = true,
     )
 }
 

@@ -73,11 +73,36 @@ class VanSceneIdentityTest {
 
     @Test
     fun orbCompanionAccompaniesEveryPresentation() {
+        // CF-D-05-REV2_1: the dark bar-eyed orb floats over VAN's open palm, on the viewer's
+        // left at chin height, exactly where Candidate B places it.
         VanPresentation.entries.forEach { presentation ->
+            val (ox, oy) = VanScene.orbCentre(presentation)
+            assertTrue("$presentation orb is not on the viewer's left: $ox", ox < 0.40f)
             val ops = scene(presentation = presentation)
-            val orbish = ops.filterIsInstance<VanDrawOp.Circle>().filter { it.cx > 0.7f && it.cy < 0.35f }
-            assertTrue("orb companion missing for $presentation", orbish.isNotEmpty())
+            val shell = ops.filterIsInstance<VanDrawOp.Circle>().filter {
+                (it.color and 0x00FFFFFF) == (VanScene.ORB_BODY.toInt() and 0x00FFFFFF) &&
+                    kotlin.math.abs(it.cx - ox) < 0.03f && kotlin.math.abs(it.cy - oy) < 0.05f
+            }
+            assertTrue("dark orb shell missing for $presentation", shell.isNotEmpty())
+            val barEyes = ops.filterIsInstance<VanDrawOp.RoundRect>().filter {
+                (it.color and 0x00FFFFFF) == (VanScene.ORB_EYE.toInt() and 0x00FFFFFF) && it.halfH > it.halfW * 2f &&
+                    kotlin.math.abs(it.cx - ox) < shell.first().r && kotlin.math.abs(it.cy - oy) < shell.first().r
+            }
+            assertEquals("the orb has two vertical bar eyes for $presentation", 2, barEyes.size)
         }
+    }
+
+    @Test
+    fun fullFigureIsCandidateBsCompactBuild() {
+        // Command Centre shows the whole figure, framed like the Rive artboard, so its head
+        // count must sit inside the locked 3.2 ± 0.3.
+        val ops = scene(presentation = VanPresentation.COMMAND_CENTRE)
+        val hair = ops.filterIsInstance<VanDrawOp.PathOp>().first { (it.color and 0x00FFFFFF) == (VanScene.HAIR.toInt() and 0x00FFFFFF) }
+        val crown = hair.segments.mapNotNull { (it as? VanPathSeg.LineTo)?.y ?: (it as? VanPathSeg.MoveTo)?.y }.min()
+        val sole = ops.filterIsInstance<VanDrawOp.PathOp>().flatMap { op -> op.segments.mapNotNull { (it as? VanPathSeg.LineTo)?.y } }.max()
+        val chin = VanBodyLayout.CHIN_V
+        val heads = (sole - crown) / (chin - crown)
+        assertTrue("Canvas VAN is $heads heads tall, outside 2.9–3.5", heads in 2.9f..3.5f)
     }
 
     @Test

@@ -104,3 +104,20 @@ def test_state_action_map_marks_supporting_sheets_as_semantic_only():
     ref_map = _yaml("STATE_ACTION_REFERENCE_MAP.yaml")
     assert ref_map["reference_policy"].startswith("OFF_MODEL_SEMANTIC_ONLY")
     assert ref_map["on_model_reference"] == json.loads((pack.PACK / "REFERENCE_INDEX.json").read_text(encoding="utf-8"))["authority"]["path"]
+
+
+def test_interim_art_is_the_bundled_asset_and_regenerates_from_candidate_b():
+    """Owner choice: until van.riv exists the app shows real Candidate B art. The bundled
+    drawable must be exactly the pack's cut-out, traced to Candidate B's hash."""
+    meta = yaml.safe_load((pack.PACK / "interim" / "INTERIM_ART.yaml").read_text(encoding="utf-8"))
+    assert meta["source"] == "visual-authority/character-forge/01-master-candidates/van_master_source_candidate_b.png"
+    assert meta["source_sha256"] == pack.sha256_file(pack.BOARD)
+    assert pack.sha256_file(pack.INTERIM_ASSET) == meta["android_asset_sha256"]
+    assert pack.sha256_file(pack.INTERIM_ASSET) == pack.sha256_file(pack.PACK / "interim" / "van_candidate_b_front.png")
+    PIL = pytest.importorskip("PIL.Image")
+    committed = PIL.open(pack.INTERIM_ASSET).convert("RGBA")
+    assert committed.size == (meta["unit_square_px"], meta["unit_square_px"])
+    fresh, _ = pack.interim_cutout(PIL.open(pack.BOARD).convert("RGB"))
+    # Pixel-tolerant: Pillow's blur may differ by a level between versions.
+    diff = sum(abs(a - b) for a, b in zip(fresh.tobytes(), committed.tobytes())) / len(fresh.tobytes())
+    assert diff < 0.5, f"interim art drifted from its generator: mean abs diff {diff:.3f}"

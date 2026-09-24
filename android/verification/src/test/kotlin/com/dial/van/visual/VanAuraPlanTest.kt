@@ -32,32 +32,16 @@ class VanAuraPlanTest {
     )
 
     @Test
-    fun `the plan carries the electrical layer the evidence painter omitted`() {
-        // Electrical branches are finite events, so sweep the phase rather than asserting
-        // that one arbitrary frame has them.
-        val sawBranches = (0 until 200).any { index ->
-            plan(state = VanDurableState.URGENT, phase = index / 200f)
-                .filterIsInstance<VanAuraOp.Polyline>()
-                .any { it.whiteCoreWidth != null }
+    fun `the aura draws no lines, lightning, specks or orb link (CF-D-06)`() {
+        // The owner judged the wind strands and electrical branches to be noise on a phone
+        // screen. Swept over the whole loop and every state so no frame can bring them back.
+        for (state in VanDurableState.entries) {
+            for (index in 0 until 40) {
+                val ops = plan(state = state, phase = index / 40f)
+                assertTrue(ops.none { it is VanAuraOp.Polyline }, "$state planned a strand or branch")
+                assertTrue(ops.none { it is VanAuraOp.Quad }, "$state planned the orb link line")
+            }
         }
-        assertTrue(sawBranches, "no electrical branch reached the plan in a full phase sweep")
-    }
-
-    @Test
-    fun `an electrical branch has a bright core and a field strand does not`() {
-        // That bright inner core is what makes a branch read as discharge rather than as
-        // another ribbon; the evidence painter drew neither.
-        val ops = (0 until 200).firstNotNullOfOrNull { index ->
-            plan(state = VanDurableState.URGENT, phase = index / 200f)
-                .filterIsInstance<VanAuraOp.Polyline>()
-                .takeIf { list -> list.any { it.whiteCoreWidth != null } }
-        }
-        assertNotNull(ops)
-        val branch = ops.first { it.whiteCoreWidth != null }
-        val strand = ops.first { it.whiteCoreWidth == null }
-        assertTrue(branch.whiteCoreAlpha > 0f)
-        assertTrue(branch.whiteCoreWidth!! < branch.width, "the core should sit inside the stroke")
-        assertEquals(0f, strand.whiteCoreAlpha)
     }
 
     @Test
@@ -93,9 +77,9 @@ class VanAuraPlanTest {
     }
 
     @Test
-    fun `ion fragments bloom`() {
+    fun `embers bloom`() {
         val dots = plan().filterIsInstance<VanAuraOp.Dot>()
-        assertTrue(dots.isNotEmpty(), "no ion fragments at all")
+        assertTrue(dots.isNotEmpty(), "no embers at all")
         for (dot in dots) {
             assertTrue(dot.bloomRadiusScale > 1f, "the fragment has no bloom")
             assertTrue(dot.bloomAlphaScale in 0.01f..0.5f)
@@ -148,8 +132,8 @@ class VanAuraPlanTest {
         val semantic = error.semanticColor
         if (semantic != null) {
             assertTrue(
-                ops.filterIsInstance<VanAuraOp.Polyline>().any { it.color == semantic },
-                "the semantic colour never reached the field",
+                ops.filterIsInstance<VanAuraOp.Flame>().any { it.color == semantic },
+                "the semantic colour never reached the flames",
             )
         }
     }
@@ -160,20 +144,5 @@ class VanAuraPlanTest {
         val still = plan(budget = VanEffectBudget.REDUCED_MOTION)
         assertTrue(still.isNotEmpty())
         assertTrue(still.filterIsInstance<VanAuraOp.Radial>().isNotEmpty())
-    }
-
-    @Test
-    fun `the orb link is planned only when the spec asks for it`() {
-        val quiet = VanAuraSpecs.forState(VanDurableState.IDLE).copy(orbLink = 0f)
-        val ops = VanAuraPlanner.plan(
-            spec = quiet, semanticSpec = quiet, centerX = 240f, centerY = 240f, radius = 240f,
-        )
-        assertNull(ops.filterIsInstance<VanAuraOp.Quad>().firstOrNull())
-        val linked = quiet.copy(orbLink = 0.6f)
-        assertNotNull(
-            VanAuraPlanner.plan(
-                spec = linked, semanticSpec = linked, centerX = 240f, centerY = 240f, radius = 240f,
-            ).filterIsInstance<VanAuraOp.Quad>().firstOrNull(),
-        )
     }
 }

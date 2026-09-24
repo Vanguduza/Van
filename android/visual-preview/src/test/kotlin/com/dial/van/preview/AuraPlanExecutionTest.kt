@@ -11,13 +11,13 @@ import org.junit.Assert.assertTrue
 import org.junit.Test
 
 /**
- * P1-VIS-001 — the Java2D painter draws the plan, including the layer it used to omit.
+ * P1-VIS-001 — the Java2D painter draws the plan, and nothing but the plan.
  *
- * The complementary tests in `android/verification` assert that the *plan* contains
- * electrical branches. These assert that the AWT executor puts them on the canvas, which is
- * the half that was actually missing: the painter was a hand-written reimplementation of
- * `VanAura.kt` and simply had no code for `geometry.electricalBranches`, so every committed
- * piece of visual evidence was a picture of VAN without them.
+ * The complementary tests in `android/verification` assert what the *plan* contains (since
+ * CF-D-06, the flame envelope and its embers). These assert that the AWT executor puts it on
+ * the canvas: the painter was once a hand-written reimplementation of `VanAura.kt` that
+ * silently dropped a whole layer, so every committed piece of evidence showed a VAN the
+ * app did not draw.
  */
 class AuraPlanExecutionTest {
 
@@ -28,42 +28,26 @@ class AuraPlanExecutionTest {
         return image to g
     }
 
-    /** A phase at which the urgent field has produced at least one electrical branch. */
-    private fun branchPhase(): Float {
-        for (index in 0 until 400) {
-            val phase = index / 400f
-            val hasBranch = VanAuraPlanner.plan(
-                spec = VanAuraSpecs.forState(VanDurableState.URGENT),
-                semanticSpec = VanAuraSpecs.forState(VanDurableState.URGENT),
-                centerX = 240f, centerY = 240f, radius = 200f, phase = phase,
-            ).filterIsInstance<VanAuraOp.Polyline>().any { it.whiteCoreWidth != null }
-            if (hasBranch) return phase
-        }
-        throw AssertionError("no electrical branch in a full phase sweep")
-    }
+    private val phase = 0.18f
 
     @Test
-    fun electricalBranchesReachTheCanvas() {
-        // The layer the painter had no code for at all. Asserted by drawing the same plan
-        // twice — once whole, once with the electrical ops removed — and requiring the two
-        // to differ. A "look for white pixels" check would pass on a painter that drew a
-        // highlight somewhere else; this can only pass if these ops changed the canvas.
-        val phase = branchPhase()
-        val spec = VanAuraSpecs.forState(VanDurableState.URGENT)
+    fun flameLayersReachTheCanvas() {
+        // Drawn twice, once whole and once without its flame ops, and the two must differ.
+        // A "look for coloured pixels" check would pass on a painter that drew the haze
+        // somewhere else; this can only pass if the flame ops changed the canvas.
+        val spec = VanAuraSpecs.forState(VanDurableState.WORKING)
         val ops = VanAuraPlanner.plan(
             spec = spec, semanticSpec = spec,
             centerX = 240f, centerY = 240f, radius = 200f, phase = phase,
         )
-        val withoutBranches = ops.filterNot {
-            it is VanAuraOp.Polyline && it.whiteCoreWidth != null
-        }
-        assertTrue("the plan had no electrical ops to remove", withoutBranches.size < ops.size)
+        val withoutFlames = ops.filterNot { it is VanAuraOp.Flame }
+        assertTrue("the plan had no flame ops to remove", withoutFlames.size < ops.size)
 
         val (whole, g1) = canvas()
         GlassPainter.drawAuraOps(g1, ops)
         g1.dispose()
         val (partial, g2) = canvas()
-        GlassPainter.drawAuraOps(g2, withoutBranches)
+        GlassPainter.drawAuraOps(g2, withoutFlames)
         g2.dispose()
 
         var differing = 0
@@ -73,8 +57,8 @@ class AuraPlanExecutionTest {
             }
         }
         assertTrue(
-            "removing the electrical ops changed $differing pixels: the painter is not drawing them",
-            differing > 200,
+            "removing the flame ops changed $differing pixels: the painter is not drawing them",
+            differing > 2000,
         )
     }
 
@@ -100,8 +84,7 @@ class AuraPlanExecutionTest {
         // number the painter draws with came out of the plan. Asserted behaviourally — the
         // same plan, executed twice, produces the same pixels, and a plan whose ops are
         // changed produces different ones.
-        val phase = branchPhase()
-        val spec = VanAuraSpecs.forState(VanDurableState.URGENT)
+        val spec = VanAuraSpecs.forState(VanDurableState.WORKING)
         val ops = VanAuraPlanner.plan(
             spec = spec, semanticSpec = spec,
             centerX = 240f, centerY = 240f, radius = 200f, phase = phase,
@@ -120,6 +103,7 @@ class AuraPlanExecutionTest {
                 is VanAuraOp.Radial -> op.copy(alpha = op.alpha * 0.2f)
                 is VanAuraOp.Dot -> op.copy(alpha = op.alpha * 0.2f)
                 is VanAuraOp.Quad -> op.copy(alpha = op.alpha * 0.2f)
+                is VanAuraOp.Flame -> op.copy(alpha = op.alpha * 0.2f)
             }
         }
         val (third, g3) = canvas()
