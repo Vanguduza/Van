@@ -1,0 +1,68 @@
+schema_version: 2
+output: visual-authority/character-forge/06-vectors-clean/van_layers.svg
+rules:
+  transparent_artboard: true
+  raster_images_forbidden: true
+  text_fonts_forbidden: true
+  external_refs_forbidden: true
+  max_paths: 1200
+  character_margin_percent_min: 6
+  additional_root_groups_prefix: extra_
+  aura_geometry_forbidden: true
+required_root_groups:
+  [hair, visor_frame, visor_lens, face, eye_l, eye_r, brow_l, brow_r, mouth_upper, mouth_lower,
+   mouth_inner, neck, jacket, underlayer, arm_l_upper, arm_l_fore, hand_l, arm_r_upper, arm_r_fore,
+   hand_r, orb_shell, orb_core]
+identity_roles:
+  hair: silver_white_swept
+  visor_frame: cyan_technical
+  visor_lens: cyan_blue_transparent
+  face: medium_brown_opaque
+  neck: medium_brown_opaque
+  eye_l: blue
+  eye_r: blue
+  jacket: black_white_technical_opaque
+  underlayer: charcoal_technical_opaque
+  hand_l: black_technical_glove
+  hand_r: black_technical_glove
+  orb_shell: cyan_holographic_orb
+  orb_core: dial_cyan
+required_for_m2_extra_groups:
+  - extra_jacket_back
+  - extra_jacket_collar
+  - extra_accents_cyan
+  - extra_hair_back
+  - extra_hair_lock_l
+  - extra_hair_lock_r
+  - extra_face_shadow
+  - extra_jaw
+  - extra_sclera_l
+  - extra_sclera_r
+  - extra_iris_l
+  - extra_iris_r
+  - extra_pupil_l
+  - extra_pupil_r
+  - extra_catchlight_l
+  - extra_catchlight_r
+  - extra_lid_upper_l
+  - extra_lid_upper_r
+  - extra_lid_lower_l
+  - extra_lid_lower_r
+  - extra_brow_inner_l
+  - extra_brow_inner_r
+  - extra_brow_outer_l
+  - extra_brow_outer_r
+  - extra_teeth
+  - extra_tongue
+  - extra_visor_glint
+  - extra_glove_l
+  - extra_glove_r
+  - extra_fingers_l_index
+  - extra_fingers_l_mid_ring_pinky
+  - extra_fingers_l_thumb
+  - extra_fingers_r_index
+  - extra_fingers_r_mid_ring_pinky
+  - extra_fingers_r_thumb
+  - extra_orb_face
+  - extra_orb_eyes
+explicitly_forbidden_groups: [headband, extra_headband, aura, halo, background, workboard]
