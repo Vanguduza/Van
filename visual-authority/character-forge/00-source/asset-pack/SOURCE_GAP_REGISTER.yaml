@@ -1,0 +1,18 @@
+schema_version: 1
+register:
+  - id: ASSET-GAP-001
+    severity: BLOCKER_IF_TURNAROUND_REQUIRED
+    finding: "turnaround.png and app_icon.png share Git blob 9f53bf43422027693dc1e2e54275a34f0520b028"
+    disposition: OWNER_CONFIRM_OR_REPLACE_BEFORE_M1_IF_HIDDEN_GEOMETRY_REQUIRED
+  - id: ASSET-GAP-002
+    severity: BLOCKER_IF_EXPRESSION_OR_GESTURE_SHEET_REQUIRED
+    finding: "expressions.png and gestures.png share Git blob 0a0cbc4241ab84b05b0a8a464300ab109852706f"
+    disposition: OWNER_CONFIRM_OR_REPLACE_BEFORE_M1
+  - id: ASSET-GAP-003
+    severity: REVIEW
+    finding: "command_centre.png and onboarding_hero.png share Git blob b209cb4a11c7003104ee23f0e596ce90710ded68"
+    disposition: OWNER_CONFIRM_INTENDED_REUSE
+  - id: ASSET-GAP-004
+    severity: CANON_CONFLICT
+    finding: "Character Forge §13.2 requires every finite action to be 600–1800 ms; Android VanMotionMap uses 240 ms for OPEN_PANEL/CLOSE_PANEL."
+    disposition: "Rive asset pack follows Character Forge canon. Panel Rive actions must be authored within 600–1800 ms; Android chrome motion may remain 240 ms because it is a separate presentation transition."
