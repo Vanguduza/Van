@@ -87,3 +87,8 @@ def test_known_source_duplicates_are_explicitly_registered():
     assert "turnaround.png and app_icon.png" in text
     assert "expressions.png and gestures.png" in text
     assert "command_centre.png and onboarding_hero.png" in text
+
+
+def test_standalone_asset_pack_checker_is_green():
+    from tools.character_forge.asset_pack_check import validate
+    assert validate() == []
