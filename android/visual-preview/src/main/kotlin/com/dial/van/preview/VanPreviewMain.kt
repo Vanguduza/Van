@@ -35,13 +35,7 @@ fun main(args: Array<String>) {
         "van_orthogonal_presence.png" to VanEvidenceMatrix.orthogonalPresenceBoard(),
     )
 
-    println(
-        if (OwnerArt.available()) {
-            "owner art pack: all ${com.dial.van.visual.VanArtPose.entries.size} poses packaged"
-        } else {
-            "owner art pack: incomplete — falling back to the VanScene Canvas character"
-        },
-    )
+    println("owner-art bitmap rung retired — previews use the current Canvas/Rive visual pipeline")
 
     sheets.forEach { (name, image) ->
         val file = File(outputDir, name)
