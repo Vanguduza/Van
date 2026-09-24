@@ -78,12 +78,12 @@ fun VanMinimizedAvatar(
 
         // Ears + solid medium-brown face.
         drawOval(
-            color = Color(0xFFB8853C),
+            color = Color(0xFFA4654E),
             topLeft = Offset(faceCenter.x - faceRx * 1.11f, faceCenter.y - faceRy * 0.18f),
             size = Size(faceRx * 2.22f, faceRy * 0.45f),
         )
         drawOval(
-            color = Color(0xFFB8853C),
+            color = Color(0xFFA4654E),
             topLeft = Offset(faceCenter.x - faceRx, faceCenter.y - faceRy),
             size = Size(faceRx * 2f, faceRy * 2f),
         )
