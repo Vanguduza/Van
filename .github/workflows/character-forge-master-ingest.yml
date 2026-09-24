@@ -1,0 +1,111 @@
+name: Character Forge selected master ingest
+
+on:
+  push:
+    branches:
+      - gpt/van-character-forge-production-v3-20260924
+    paths:
+      - .github/workflows/character-forge-master-ingest.yml
+      - visual-authority/character-forge/01-master-candidates/van_master_source_candidate_b.png
+  workflow_dispatch:
+
+permissions:
+  contents: write
+
+jobs:
+  ingest-selected-master:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          ref: gpt/van-character-forge-production-v3-20260924
+          fetch-depth: 0
+
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.13'
+
+      - name: Install deterministic image toolchain
+        run: python -m pip install --disable-pip-version-check Pillow==12.3.0
+
+      - name: Rebuild exact Candidate B high-resolution master
+        shell: bash
+        run: |
+          set -euo pipefail
+          python - <<'PY'
+          from PIL import Image, PngImagePlugin, __version__ as pillow_version
+          from pathlib import Path
+          import hashlib, json, zlib
+
+          src = Path("visual-authority/character-forge/01-master-candidates/van_master_source_candidate_b.png")
+          out = Path("visual-authority/character-forge/01-master-candidates/van_master_highres_v1.png")
+          receipt = out.with_suffix(".receipt.json")
+
+          expected_source = "cf7f51793692bfe8ea2e5f58f1a12e64d3a76468a85cb19d76d0db64ccef374c"
+          expected_output = "42474ee9595f09f4ef59c060faf756e1db4222234b827fae0311007248b9b9e7"
+
+          def sha256(path: Path) -> str:
+              h = hashlib.sha256()
+              with path.open("rb") as f:
+                  for chunk in iter(lambda: f.read(1024 * 1024), b""):
+                      h.update(chunk)
+              return h.hexdigest()
+
+          source_sha = sha256(src)
+          if source_sha != expected_source:
+              raise SystemExit(f"source SHA drift: {source_sha} != {expected_source}")
+
+          image = Image.open(src).convert("RGB")
+          if image.size != (1536, 1024):
+              raise SystemExit(f"source dimensions drift: {image.size}")
+
+          scaled = image.resize((6144, 4096), Image.Resampling.LANCZOS)
+          meta = PngImagePlugin.PngInfo()
+          meta.add_text("VAN_Character_Forge_Status", "OWNER_SELECTED_CANDIDATE_NOT_YET_CANONICAL_REPOSITORY_ASSET")
+          meta.add_text("VAN_Source_Candidate", "Candidate B")
+          meta.add_text("VAN_Derivation", "Deterministic 4x Lanczos upscale; no generative redraw")
+          out.parent.mkdir(parents=True, exist_ok=True)
+          scaled.save(out, format="PNG", optimize=True, pnginfo=meta)
+
+          output_sha = sha256(out)
+          print(json.dumps({
+              "python": __import__("sys").version,
+              "pillow": pillow_version,
+              "zlib_runtime": zlib.ZLIB_RUNTIME_VERSION,
+              "source_sha256": source_sha,
+              "output_sha256": output_sha,
+              "dimensions": [6144, 4096],
+          }, indent=2))
+          if output_sha != expected_output:
+              raise SystemExit(f"Candidate B high-res SHA mismatch: {output_sha} != {expected_output}")
+
+          receipt.write_text(json.dumps({
+              "schema_version": 1,
+              "status": "OWNER_SELECTED_EXACT_BINARY_INGESTED",
+              "candidate_label": "Candidate B",
+              "source_path": src.as_posix(),
+              "source_sha256": source_sha,
+              "output_path": out.as_posix(),
+              "output_sha256": output_sha,
+              "output_dimensions": [6144, 4096],
+              "derivation": "Pillow Image.Resampling.LANCZOS 4x",
+              "pillow_version": pillow_version,
+              "zlib_runtime": zlib.ZLIB_RUNTIME_VERSION,
+              "generative_redraw": False,
+              "owner_approval_required_for_master_promotion": True,
+          }, indent=2, sort_keys=True) + "\n", encoding="utf-8")
+          PY
+
+      - name: Commit exact binary and receipt
+        shell: bash
+        run: |
+          set -euo pipefail
+          git config user.name "van-character-forge[bot]"
+          git config user.email "van-character-forge[bot]@users.noreply.github.com"
+          git add             visual-authority/character-forge/01-master-candidates/van_master_highres_v1.png             visual-authority/character-forge/01-master-candidates/van_master_highres_v1.receipt.json
+          if git diff --cached --quiet; then
+            echo "NO_CHANGE"
+            exit 0
+          fi
+          git commit -m "character-forge: ingest exact owner-selected Candidate B master"
+          git push origin HEAD:gpt/van-character-forge-production-v3-20260924
