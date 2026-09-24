@@ -107,7 +107,7 @@ object VanAuraSpecs {
             VanDurableState.THINKING -> spec(
                 intensity = 0.42f, arc = 0.26f, spark = 0.10f, ground = 0.20f, orb = 0.20f,
                 filaments = 3, asymmetry = 0.18f, deform = 0.16f,
-                envelopeScale = 1.52f, envelopeAlpha = 0.12f, semantic = null,
+                envelopeScale = 1.52f, envelopeAlpha = 0.12f, semantic = VanGlassTokens.ACCENT_THINK,
                 segments = listOf(VanAuraEnvelopeSegment(310f, 70f)),
             )
             VanDurableState.SEARCHING -> spec(
@@ -210,11 +210,16 @@ object VanAuraSpecs {
             VanDurableState.SLEEPING -> spec(
                 intensity = 0.12f, arc = 0f, spark = 0f, ground = 0.10f, orb = 0f,
                 filaments = 0, asymmetry = 0.12f, deform = 0.08f,
-                envelopeScale = 1.36f, envelopeAlpha = 0.07f, semantic = VanGlassTokens.ACCENT_GOLD,
+                envelopeScale = 1.36f, envelopeAlpha = 0.07f, semantic = VanGlassTokens.ACCENT_SLEEP,
                 segments = listOf(VanAuraEnvelopeSegment(240f, 26f)),
             )
         }
 
+        return budgeted(base, budget)
+    }
+
+    /** Scales a FULL-budget field to [budget]; shared by durable states and trade families. */
+    fun budgeted(base: VanAuraSpec, budget: VanEffectBudget): VanAuraSpec {
         val filaments = if (base.filamentCount <= 0) {
             0
         } else {
@@ -233,6 +238,13 @@ object VanAuraSpecs {
             envelopeAlpha = base.envelopeAlpha * if (budget == VanEffectBudget.STATIC) 0.85f else 1f,
         )
     }
+
+    /**
+     * Aura Rev 2 — the outer field for a visual state: the live trade when one is resolved
+     * onto it, otherwise the semantic state's own field.
+     */
+    fun semanticSpecFor(state: VanVisualState, budget: VanEffectBudget = VanEffectBudget.FULL): VanAuraSpec =
+        state.trade?.let { VanTradeSemantics.auraFor(it, budget) } ?: forState(state.resolvedSemanticState, budget)
 
     /**
      * Board adapter for the eight trade families.

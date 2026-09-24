@@ -4,8 +4,10 @@ authority: owner
 owner_decision: Candidate B
 owner_decision_date: '2026-09-24'
 candidate_sha256: 42474ee9595f09f4ef59c060faf756e1db4222234b827fae0311007248b9b9e7
-canonical_source_git_blob_sha: fc18bbe0b91e5b85d8cf8211314a69cb90b8bc0b
-identity_lock_sha256: 946ab1c73b9da6b0c8a623556047bea3baab489acb9fdaeccb8ecdae0eb00d50
-scope: high_resolution_rigging_master_subordinate_to_canonical_identity_lock
+canonical_source_git_blob_sha: c925dcdbe7f05aa89eac862f2e258549fe5a49d4
+identity_lock_sha256: 08eac9827d4d276fceed28a9fbef154a6fae10e93cb47ddf3f5d4f33c1e8e84b
+scope: high_resolution_rigging_master_of_the_primary_visual_candidate_b
 notes: Owner explicitly selected Candidate B and instructed completion of its V3 pack
-  ingestion.
+  ingestion. Re-bound on 2026-09-24 to identity lock revision R2 after the owner adopted
+  Candidate B as VAN's identity (CF-D-05-REV2_1); the approved bytes are unchanged.
+decision_reference: CF-D-05-REV2_1

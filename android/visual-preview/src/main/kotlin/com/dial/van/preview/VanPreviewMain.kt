@@ -25,6 +25,8 @@ fun main(args: Array<String>) {
     val sheets = listOf(
         "van_floating_overlay_preview.png" to VanPreviewSheets.floatingOverlaySheet(),
         "van_state_matrix.png" to VanPreviewSheets.stateSheet(),
+        "van_flame_aura.png" to VanPreviewSheets.flameAuraSheet(),
+        "van_trade_aura.png" to VanAuraMotion.tradeSheet(),
         "van_state_matrix_reduced_motion.png" to VanPreviewSheets.stateSheet(reducedMotion = true),
         "van_state_matrix_low.png" to VanPreviewSheets.stateSheet(budget = VanEffectBudget.LOW),
         "van_state_matrix_static.png" to VanPreviewSheets.stateSheet(budget = VanEffectBudget.STATIC),
@@ -44,6 +46,9 @@ fun main(args: Array<String>) {
     }
     // The matrix writes the truthful Command Centre boards itself now; the
     // overwrite-and-patch-the-manifest pass that used to follow is gone (P2-VIS-003).
+    // Aura Rev 2 — 8-second motion clips (CI evidence; git-ignored).
+    VanAuraMotion.writeMotionClips(outputDir)
+    println("wrote aura motion clips under ${File(outputDir, "motion").absolutePath}")
     VanEvidenceMatrix.writeAll(outputDir)
     println(
         "wrote named Rev ${VanEvidenceMatrix.AUTHORITY_REVISION} evidence matrix under " +

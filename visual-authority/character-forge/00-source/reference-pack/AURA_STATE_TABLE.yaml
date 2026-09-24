@@ -1,0 +1,347 @@
+source_of_truth:
+- android/app/src/main/java/com/dial/van/visual/VanAuraSpec.kt
+- android/app/src/main/java/com/dial/van/visual/VanStatusPalette.kt
+- android/app/src/main/java/com/dial/van/visual/VanGlassTokens.kt
+source_sha256:
+  android/app/src/main/java/com/dial/van/visual/VanAuraSpec.kt: ccf978e09a45cf81662f43b2dacf56aae5d0b1900be837f40e59865b2631b18f
+  android/app/src/main/java/com/dial/van/visual/VanStatusPalette.kt: 56b00aabab1164b22ad41c0946a3639b5e3b837aff1294932beeb3e17774ec0f
+  android/app/src/main/java/com/dial/van/visual/VanGlassTokens.kt: 223a573ffdefa3e61006d6c92be0b006d85b136fe39015246ead8d74643bcd06
+ownership: ANDROID_NATIVE — this table tells the Rive author where the field lives so the character never competes with it;
+  nothing here is drawn in the .riv
+constants:
+  MAX_INTENSITY: 0.75
+  MAX_ARC_SWEEP_DEG: 110.0
+  MAX_TOTAL_ARC_DEG: 220.0
+  MAX_ENVELOPE_COVERAGE_DEG: 180.0
+  MIN_ENVELOPE_SCALE: 1.35
+  MAX_ENVELOPE_SCALE: 1.7
+  INNER_RADIUS_SCALE: 1.0
+  MID_RADIUS_SCALE: 1.12
+states:
+  IDLE:
+    intensity: 0.25
+    arc: 0.08
+    spark: 0.04
+    ground: 0.18
+    orb: 0.1
+    filaments: 2
+    asymmetry: 0.28
+    deform: 0.22
+    envelope_scale: 1.48
+    envelope_alpha: 0.12
+    semantic_colour: null
+    envelope_segments:
+    - centre_deg: 210.0
+      sweep_deg: 48.0
+      node: false
+    status_accent: '#00E5FF'
+  CONNECTING:
+    intensity: 0.28
+    arc: 0.14
+    spark: 0.08
+    ground: 0.16
+    orb: 0.14
+    filaments: 2
+    asymmetry: 0.24
+    deform: 0.18
+    envelope_scale: 1.38
+    envelope_alpha: 0.1
+    semantic_colour: null
+    envelope_segments:
+    - centre_deg: 40.0
+      sweep_deg: 36.0
+      node: true
+    status_accent: '#4DD0E1'
+  ATTENTIVE:
+    intensity: 0.32
+    arc: 0.18
+    spark: 0.08
+    ground: 0.2
+    orb: 0.16
+    filaments: 3
+    asymmetry: 0.22
+    deform: 0.16
+    envelope_scale: 1.42
+    envelope_alpha: 0.11
+    semantic_colour: null
+    envelope_segments:
+    - centre_deg: -20.0
+      sweep_deg: 48.0
+      node: false
+    status_accent: '#00E5FF'
+  LISTENING:
+    intensity: 0.52
+    arc: 0.5
+    spark: 0.18
+    ground: 0.28
+    orb: 0.5
+    filaments: 4
+    asymmetry: 0.24
+    deform: 0.2
+    envelope_scale: 1.48
+    envelope_alpha: 0.14
+    semantic_colour: null
+    envelope_segments:
+    - centre_deg: 300.0
+      sweep_deg: 54.0
+      node: false
+    status_accent: '#00E5FF'
+  THINKING:
+    intensity: 0.42
+    arc: 0.26
+    spark: 0.1
+    ground: 0.2
+    orb: 0.2
+    filaments: 3
+    asymmetry: 0.18
+    deform: 0.16
+    envelope_scale: 1.52
+    envelope_alpha: 0.12
+    semantic_colour: '#7B7CF8'
+    envelope_segments:
+    - centre_deg: 310.0
+      sweep_deg: 70.0
+      node: false
+    status_accent: '#00E5FF'
+  SEARCHING:
+    intensity: 0.44
+    arc: 0.32
+    spark: 0.14
+    ground: 0.2
+    orb: 0.24
+    filaments: 3
+    asymmetry: 0.26
+    deform: 0.2
+    envelope_scale: 1.55
+    envelope_alpha: 0.13
+    semantic_colour: null
+    envelope_segments:
+    - centre_deg: 10.0
+      sweep_deg: 62.0
+      node: false
+    status_accent: '#00E5FF'
+  WORKING:
+    intensity: 0.68
+    arc: 0.7
+    spark: 0.3
+    ground: 0.3
+    orb: 0.6
+    filaments: 5
+    asymmetry: 0.26
+    deform: 0.22
+    envelope_scale: 1.58
+    envelope_alpha: 0.16
+    semantic_colour: null
+    envelope_segments:
+    - centre_deg: 20.0
+      sweep_deg: 50.0
+      node: false
+    - centre_deg: 140.0
+      sweep_deg: 40.0
+      node: false
+    - centre_deg: 250.0
+      sweep_deg: 48.0
+      node: false
+    status_accent: '#00E5FF'
+  DELEGATING:
+    intensity: 0.42
+    arc: 0.28
+    spark: 0.12
+    ground: 0.2
+    orb: 0.28
+    filaments: 3
+    asymmetry: 0.22
+    deform: 0.18
+    envelope_scale: 1.54
+    envelope_alpha: 0.13
+    semantic_colour: null
+    envelope_segments:
+    - centre_deg: 30.0
+      sweep_deg: 28.0
+      node: true
+    - centre_deg: 210.0
+      sweep_deg: 32.0
+      node: true
+    status_accent: '#00E5FF'
+  SPEAKING:
+    intensity: 0.45
+    arc: 0.3
+    spark: 0.1
+    ground: 0.24
+    orb: 0.28
+    filaments: 3
+    asymmetry: 0.2
+    deform: 0.16
+    envelope_scale: 1.44
+    envelope_alpha: 0.1
+    semantic_colour: null
+    envelope_segments:
+    - centre_deg: 200.0
+      sweep_deg: 44.0
+      node: false
+    status_accent: '#00E5FF'
+  WAITING:
+    intensity: 0.28
+    arc: 0.12
+    spark: 0.05
+    ground: 0.18
+    orb: 0.1
+    filaments: 2
+    asymmetry: 0.18
+    deform: 0.14
+    envelope_scale: 1.38
+    envelope_alpha: 0.08
+    semantic_colour: null
+    envelope_segments:
+    - centre_deg: 180.0
+      sweep_deg: 32.0
+      node: false
+    status_accent: '#FFD54F'
+  WAITING_FOR_OWNER:
+    intensity: 0.3
+    arc: 0.08
+    spark: 0.04
+    ground: 0.16
+    orb: 0.08
+    filaments: 2
+    asymmetry: 0.16
+    deform: 0.12
+    envelope_scale: 1.55
+    envelope_alpha: 0.18
+    semantic_colour: '#FFB300'
+    envelope_segments:
+    - centre_deg: -30.0
+      sweep_deg: 55.0
+      node: true
+    - centre_deg: 150.0
+      sweep_deg: 50.0
+      node: true
+    status_accent: '#FFD54F'
+  DEGRADED:
+    intensity: 0.16
+    arc: 0.04
+    spark: 0.0
+    ground: 0.1
+    orb: 0.0
+    filaments: 2
+    asymmetry: 0.16
+    deform: 0.12
+    envelope_scale: 1.42
+    envelope_alpha: 0.1
+    semantic_colour: '#FFB300'
+    envelope_segments:
+    - centre_deg: 200.0
+      sweep_deg: 28.0
+      node: false
+    status_accent: '#FFB300'
+  WARNING:
+    intensity: 0.4
+    arc: 0.2
+    spark: 0.08
+    ground: 0.2
+    orb: 0.12
+    filaments: 3
+    asymmetry: 0.22
+    deform: 0.16
+    envelope_scale: 1.52
+    envelope_alpha: 0.17
+    semantic_colour: '#FFB300'
+    envelope_segments:
+    - centre_deg: -40.0
+      sweep_deg: 40.0
+      node: false
+    - centre_deg: 140.0
+      sweep_deg: 38.0
+      node: false
+    status_accent: '#FF9100'
+  ERROR:
+    intensity: 0.4
+    arc: 0.22
+    spark: 0.08
+    ground: 0.2
+    orb: 0.12
+    filaments: 3
+    asymmetry: 0.22
+    deform: 0.17
+    envelope_scale: 1.5
+    envelope_alpha: 0.17
+    semantic_colour: '#EF4444'
+    envelope_segments:
+    - centre_deg: 10.0
+      sweep_deg: 36.0
+      node: false
+    - centre_deg: 200.0
+      sweep_deg: 28.0
+      node: false
+    status_accent: '#FF5252'
+  SUCCESS:
+    intensity: 0.35
+    arc: 0.18
+    spark: 0.1
+    ground: 0.22
+    orb: 0.14
+    filaments: 3
+    asymmetry: 0.18
+    deform: 0.14
+    envelope_scale: 1.48
+    envelope_alpha: 0.16
+    semantic_colour: '#22C55E'
+    envelope_segments:
+    - centre_deg: 220.0
+      sweep_deg: 72.0
+      node: false
+    status_accent: '#69F0AE'
+  URGENT:
+    intensity: 0.34
+    arc: 0.12
+    spark: 0.06
+    ground: 0.16
+    orb: 0.08
+    filaments: 2
+    asymmetry: 0.18
+    deform: 0.14
+    envelope_scale: 1.45
+    envelope_alpha: 0.18
+    semantic_colour: '#EF4444'
+    envelope_segments:
+    - centre_deg: -50.0
+      sweep_deg: 32.0
+      node: true
+    - centre_deg: 40.0
+      sweep_deg: 32.0
+      node: true
+    status_accent: '#FF1744'
+  OFFLINE:
+    intensity: 0.12
+    arc: 0.0
+    spark: 0.0
+    ground: 0.08
+    orb: 0.0
+    filaments: 0
+    asymmetry: 0.14
+    deform: 0.1
+    envelope_scale: 1.35
+    envelope_alpha: 0.06
+    semantic_colour: null
+    envelope_segments:
+    - centre_deg: 200.0
+      sweep_deg: 22.0
+      node: false
+    status_accent: '#78909C'
+  SLEEPING:
+    intensity: 0.12
+    arc: 0.0
+    spark: 0.0
+    ground: 0.1
+    orb: 0.0
+    filaments: 0
+    asymmetry: 0.12
+    deform: 0.08
+    envelope_scale: 1.36
+    envelope_alpha: 0.07
+    semantic_colour: '#6E8FD8'
+    envelope_segments:
+    - centre_deg: 240.0
+      sweep_deg: 26.0
+      node: false
+    status_accent: '#5C6BC0'

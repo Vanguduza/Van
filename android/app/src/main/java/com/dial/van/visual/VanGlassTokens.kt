@@ -52,6 +52,10 @@ object VanGlassTokens {
     const val ACCENT_VIOLET = 0xFF8B5CF6.toInt()
     const val ACCENT_GOLD = 0xFFEAB308.toInt()
     const val ACCENT_TEAL = 0xFF14B8A6.toInt()
+    /** Aura Rev 2 — THINKING's cyan-violet flame. */
+    const val ACCENT_THINK = 0xFF7B7CF8.toInt()
+    /** Aura Rev 2 — SLEEPING's faint night blue (was gold, which read as a warning). */
+    const val ACCENT_SLEEP = 0xFF6E8FD8.toInt()
 
     const val MIN_COMPACT_ALPHA = 0.54f
     const val MAX_COMPACT_ALPHA = 0.76f

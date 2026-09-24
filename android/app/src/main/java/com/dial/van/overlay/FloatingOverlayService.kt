@@ -105,6 +105,7 @@ class FloatingOverlayService : Service(), LifecycleOwner, SavedStateRegistryOwne
             OverlayLifecycleTarget.PAUSED -> Lifecycle.State.CREATED
             OverlayLifecycleTarget.DESTROYED -> Lifecycle.State.DESTROYED
         }
+        OverlayTradeAura.hold(application, OverlayVisibilityPolicy.target(visibility) == OverlayLifecycleTarget.ANIMATING)
     }
 
     override fun onCreate() {
@@ -194,6 +195,7 @@ class FloatingOverlayService : Service(), LifecycleOwner, SavedStateRegistryOwne
         stateStore.markRunning(false)
         persistState(running = false)
         hideDismissTarget()
+        OverlayTradeAura.hold(application, visible = false)
         if (::overlayView.isInitialized) runCatching { windowManager.removeView(overlayView) }
         lifecycleRegistry.currentState = Lifecycle.State.DESTROYED
         running = false

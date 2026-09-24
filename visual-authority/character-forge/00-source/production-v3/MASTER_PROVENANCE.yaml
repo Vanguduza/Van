@@ -2,9 +2,11 @@ schema_version: 4
 master_id: VAN-HIGHRES-MASTER-V1
 status: OWNER_APPROVED
 source_authority:
-  path: visual-authority/assets/pack/owner_board_visual_authority.png
-  git_blob_sha: fc18bbe0b91e5b85d8cf8211314a69cb90b8bc0b
-  declared_skin_token: "#B8853C"
+  path: visual-authority/character-forge/01-master-candidates/van_master_source_candidate_b.png
+  git_blob_sha: c925dcdbe7f05aa89eac862f2e258549fe5a49d4
+  declared_skin_token: "#AF6A53"
+  decision: CF-D-05-REV2_1
+  superseded_board: visual-authority/assets/pack/owner_board_visual_authority.png
   identity_lock: visual-authority/character-forge/00-source/asset-pack/APPROVED_IDENTITY_LOCK.yaml
 exact_derived_reference:
   path: visual-authority/character-forge/01-master-candidates/van_canonical_reference_2x.png
@@ -32,7 +34,7 @@ approved_master:
   git_blob_sha: e18b1f6ba89619dec79b7a54075a65024f65bbf9
   status: OWNER_APPROVED
   approval_record: docs/character_forge/HIGHRES_MASTER_APPROVAL.yaml
-  authority_scope: rigging_and_detail_authority_subordinate_to_canonical_visual_and_identity_lock
+  authority_scope: rigging_and_detail_master_of_the_primary_visual_candidate_b
 supporting_artwork:
   manifest: visual-authority/character-forge/00-source/production-v3/ARTWORK_MANIFEST.yaml
   provenance_graph: visual-authority/character-forge/00-source/production-v3/PROVENANCE_GRAPH.yaml

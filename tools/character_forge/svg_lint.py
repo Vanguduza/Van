@@ -212,6 +212,15 @@ def lint_svg(path: Path, *, require_geometry: bool=True) -> LintReport:
             x,y,w,h=box
             if h<vh*0.005: findings.append(f"NOISE_BOUNDS:{name}")
             if x<vx-mx or y<vy-my or x+w>vx+vw+mx or y+h>vy+vh+my: findings.append(f"OUTSIDE_VIEWBOX:{name}")
+    if geometry_verified:
+        # CF-D-05: the drawn character must keep the locked head count (crown-to-chin rule).
+        from . import proportions
+        try:
+            measured=proportions.svg_head_count(bbox)
+            problem=proportions.check(measured)
+            if problem: findings.append(problem)
+        except (ValueError,KeyError) as exc:
+            findings.append(f"PROPORTION_UNMEASURABLE:{exc}")
     policy=topology_cfg.get("policy") or {}; hard_paths=int(policy.get("hard_total_paths",1200)); hard_nodes=int(policy.get("hard_total_numeric_nodes",30000))
     metrics={"path_count":path_count,"node_count":node_count,"file_size":path.stat().st_size if path.is_file() else 0,"palette":palette,"required_group_count":len(REQUIRED_GROUPS),"group_topology":group_topology,"hard_total_paths":hard_paths,"hard_total_numeric_nodes":hard_nodes}
     if path_count>hard_paths: findings.append(f"PATH_BUDGET_EXCEEDED:{path_count}>{hard_paths}")

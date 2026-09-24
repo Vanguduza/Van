@@ -1,20 +1,23 @@
 # VAN Character Visual Identity
 
-Status: LOCKED CANONICAL
+Status: LOCKED CANONICAL — revision R2 (CF-D-05-REV2_1, 2026-09-24)
+
+Primary visual authority: `visual-authority/character-forge/01-master-candidates/van_master_source_candidate_b.png`
+(Candidate B, native 1536×1024). The original owner board is kept as history only.
 
 ## Canonical Van
 
-- Silver/white swept hair (never dark hair)
-- Cyan/blue transparent visor
-- Medium-brown skin; canonical board token `#B8853C` (ΔE2000 tolerance ≤ 8)
-- Blue eyes
+- Silver/white swept, spiky hair (never dark hair)
+- Clear cyan/blue wraparound goggle visor with dark side pods and cyan trim
+- Medium-brown skin; canonical token `#AF6A53` measured on Candidate B (ΔE2000 tolerance ≤ 8)
+- Large blue eyes
 - Black/white technical jacket
 - Charcoal technical underlayer
 - DIAL cyan accents
-- Compact human-stylized proportions: 5.75 heads tall ±0.25 (not three-head chibi)
+- Compact chibi proportions: 3.2 ± 0.3 heads tall, measured hair crown to chin over crown to sole
 - Expressive face; black technical gloves on both hands
 - Technical hood/collar; no headband
-- Floating cyan holographic orb companion
+- Floating dark orb companion with two vertical cyan bar eyes (no mouth)
 - Hair, skin, eyes and clothing optically opaque; only visor/orb optical layers may be translucent
 
 ## Forbidden substitutions
@@ -23,7 +26,8 @@ Status: LOCKED CANONICAL
 - Light/peach skin family
 - Any headband or headband branding
 - Bare/skin-coloured hands in place of the locked black technical gloves
-- Three-head chibi proportions
+- Tall realistic proportions (more than ~3.5 heads)
+- The superseded cyan smiling-face orb
 - Generic robot mascot
 - Random unrelated character
 - Glassified/translucent body
@@ -43,13 +47,14 @@ Source of truth: `visual-authority/` plus this document and the Rive contract.
 
 ## Owner UI lock
 
-The owner-supplied boards remain stored unmodified under `visual-authority/assets/pack/`. The **sole
-primary character image authority** is
+The owner-supplied boards remain stored unmodified under `visual-authority/assets/pack/`. Since
+CF-D-05-REV2_1 the **sole primary character image authority** is Candidate B,
+`visual-authority/character-forge/01-master-candidates/van_master_source_candidate_b.png` (Git blob `c925dcdbe7f05aa89eac862f2e258549fe5a49d4`). The original
 `visual-authority/assets/pack/owner_board_visual_authority.png` (Git blob
-`fc18bbe0b91e5b85d8cf8211314a69cb90b8bc0b`). The former light-skinned/headband lock sheet,
+`fc18bbe0b91e5b85d8cf8211314a69cb90b8bc0b`) is kept as history and no longer defines identity. The former light-skinned/headband lock sheet,
 procedural placeholder sheets and their derived crops are rejected, deleted and denylisted by the
-Character Forge approved asset pack. Other owner boards are context-only and cannot override the
-primary board or `APPROVED_IDENTITY_LOCK.yaml`.
+Character Forge approved asset pack. Other owner boards are context-only and cannot override
+Candidate B or `APPROVED_IDENTITY_LOCK.yaml`.
 
 The interaction shell around the character is specified by
 `docs/VAN_GLASSMORPHIC_FLOATING_ASSISTANT_DESIGN.md`. Its canonical rule governs every visual
@@ -64,7 +69,8 @@ Van is painted by the first source that can be trusted to show a truthful charac
 | Order | Renderer | Condition |
 |---|---|---|
 | 1 | `RIVE` | `van.riv` present, ≥ `MIN_ARTBOARD_BYTES`, runtime loadable, bind succeeds |
-| 2 | `CANVAS` | Fail-closed interim procedural `VanScene` while accepted Rive art is absent |
+| 2 | `CANDIDATE_B` | Owner choice (CF-D-07): real Candidate B art, a native cut-out framed like the artboard, with the flame aura and state marks around it |
+| 3 | `CANVAS` | Last-resort procedural `VanScene`, drawn from Candidate B's measured landmarks |
 
 `OWNER_ART` bitmap poses are retired because the packaged pose set was derived from rejected/low-resolution source material. The runtime must never select that rung.
 
@@ -78,12 +84,33 @@ document in this repository may report Rive as `READY`. `rive_contract.json` pre
 strengthened with the approved skin token, gloves, no-headband, proportions and opacity rules. The
 Canvas fallback follows the same identity lock so the artboard can replace it without product drift.
 
-### Interim Canvas character
+### Interim character
 
-`VanScene` is a renderer-independent draw program shared by the Compose overlay and the JVM
-preview renderer, so a preview can never flatter the app. It is an interim embodiment, not
-owner-accepted art, and it honours the identity lock element for element: spiked silver swept
-hair, **no headband**, cyan transparent visor over blue eyes, medium-brown skin,
-black/white technical jacket over a charcoal underlayer, black technical gloves, the DIAL cyan
-chest emblem, and the navy/cyan orb companion. Any residual headband geometry in the Canvas or
-minimized portrait is a defect, not an identity feature.
+While `van.riv` is absent, VAN is shown as **real Candidate B art** (CF-D-07). It is a
+native-resolution cut-out of the Candidate B front view, generated by
+`tools/character_forge/build_reference_pack.py` and bundled as
+`res/drawable-nodpi/van_candidate_b_front.png`. The compact overlay frames head and shoulders
+so the face reads at 72–92 dp; the Command Centre shows the full figure. The state marks
+(broken status arcs, glyphs) are drawn over it so critical states stay distinguishable in
+grayscale. It is a still: VAN bobs, but has no expressions or gestures until the rig lands.
+
+`VanScene` is the last-resort procedural character. It is drawn from Candidate B's measured
+landmarks (3.2-head chibi build, clear goggle with side pods, full black gloves, dark orb with
+two vertical cyan bar eyes, no headband) and shares its framing with the flame aura.
+
+### Aura
+
+VAN's aura is a Goku/Naruto-style flame envelope (CF-D-06): tongues that wrap his silhouette
+and rise off it, a white-hot rim, a state-coloured outer flame and rising embers. It has no
+strands, lightning or specks (CF-D-06-REV1). It is Android-native and drawn behind the opaque
+character; `van.riv` never contains it.
+
+Aura Rev 2 (CF-D-08) makes the field follow what is on screen and carry more meaning:
+- The flames wrap a silhouette read from the rendered image: the Rive artboard's alpha,
+  sampled every few frames once the rig lands, or the Candidate B art's alpha today.
+- Flame fragments break off and rise.
+- Faint wisps cross in front of the legs and forearms, never the face, and a rim light
+  falls on VAN's edge.
+- A slow second clock keeps the motion from visibly repeating.
+- A live trade sets the field's colour and energy, and a closed position pulses white.
+- Every tunable is bounded by `visual-authority/character-forge/aura/AURA_RUNTIME_CONTRACT.yaml`.

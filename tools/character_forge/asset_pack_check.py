@@ -10,7 +10,14 @@ from .svg_lint import COLOR_GROUPS, REQUIRED_GROUPS
 
 PACK = ROOT / "visual-authority" / "character-forge" / "00-source" / "asset-pack"
 V3 = ROOT / "visual-authority" / "character-forge" / "00-source" / "production-v3"
+# CF-D-05-REV2_1: Candidate B (native 1536x1024) is the primary visual identity authority.
+PRIMARY_VISUAL_PATH = "visual-authority/character-forge/01-master-candidates/van_master_source_candidate_b.png"
+PRIMARY_BLOB_SHA = "c925dcdbe7f05aa89eac862f2e258549fe5a49d4"
+SKIN_TOKEN = "#AF6A53"
+# The original owner board: superseded as identity authority, kept as history and as the source
+# of the exact 2x derived reference.
 CANONICAL_BLOB_SHA = "fc18bbe0b91e5b85d8cf8211314a69cb90b8bc0b"
+SUPERSEDED_BOARD_PATH = "visual-authority/assets/pack/owner_board_visual_authority.png"
 
 
 def _yaml(name: str):
@@ -37,11 +44,11 @@ def validate() -> list[str]:
     provenance_graph = yaml.safe_load(provenance_graph_path.read_text(encoding="utf-8")) if provenance_graph_path.is_file() else {}
 
     primary = manifest["authority"]["primary_visual"]["path"]
-    if primary != "visual-authority/assets/pack/owner_board_visual_authority.png":
+    if primary != PRIMARY_VISUAL_PATH:
         problems.append("PRIMARY_VISUAL_DRIFT")
     if not (ROOT / primary).is_file():
         problems.append("PRIMARY_VISUAL_MISSING")
-    if manifest["authority"]["primary_visual"].get("git_blob_sha") != CANONICAL_BLOB_SHA:
+    if manifest["authority"]["primary_visual"].get("git_blob_sha") != PRIMARY_BLOB_SHA:
         problems.append("PRIMARY_VISUAL_BLOB_DRIFT")
 
     if rig["artboard"] != contract["artboard"]:
@@ -91,7 +98,7 @@ def validate() -> list[str]:
         problems.append("HEADBAND_CONTRACT_DRIFT")
     if lock.get("gloves") != "black_technical":
         problems.append("GLOVE_CONTRACT_DRIFT")
-    if lock.get("skin_token") != "#B8853C" or expected["skin"].get("canonical_token") != "#B8853C":
+    if lock.get("skin_token") != SKIN_TOKEN or expected["skin"].get("canonical_token") != SKIN_TOKEN:
         problems.append("SKIN_TOKEN_DRIFT")
 
     if int(manifest.get("schema_version") or 0) < 3:
@@ -110,11 +117,11 @@ def validate() -> list[str]:
     ):
         if not (ROOT / rel).is_file():
             problems.append(f"V3_AUTHORITY_MISSING:{rel}")
-    if (master_policy.get("source_authority") or {}).get("git_blob_sha") != CANONICAL_BLOB_SHA:
+    if (master_policy.get("source_authority") or {}).get("git_blob_sha") != PRIMARY_BLOB_SHA:
         problems.append("MASTER_SOURCE_BLOB_DRIFT")
-    if (master_policy.get("source_authority") or {}).get("declared_skin_token") != "#B8853C":
+    if (master_policy.get("source_authority") or {}).get("declared_skin_token") != SKIN_TOKEN:
         problems.append("MASTER_SKIN_TOKEN_DRIFT")
-    if ((master_spec.get("identity") or {}).get("skin_token")) != "#B8853C":
+    if ((master_spec.get("identity") or {}).get("skin_token")) != SKIN_TOKEN:
         problems.append("HIGHRES_SPEC_SKIN_TOKEN_DRIFT")
     if int(((topology.get("policy") or {}).get("hard_total_paths")) or 0) != 1200:
         problems.append("TOPOLOGY_HARD_CEILING_DRIFT")
@@ -135,7 +142,7 @@ def validate() -> list[str]:
             problems.append("EXACT_REFERENCE_RECEIPT_OUTPUT_DRIFT")
         if receipt.get("source_git_blob_sha") != CANONICAL_BLOB_SHA:
             problems.append("EXACT_REFERENCE_RECEIPT_SOURCE_DRIFT")
-        if receipt.get("source_sha256") != sha256_file(ROOT / primary):
+        if receipt.get("source_sha256") != sha256_file(ROOT / SUPERSEDED_BOARD_PATH):
             problems.append("EXACT_REFERENCE_SOURCE_HASH_DRIFT")
         if receipt.get("adds_new_identity_detail") is not False:
             problems.append("EXACT_REFERENCE_INVENTION_FLAG_DRIFT")
@@ -160,7 +167,7 @@ def validate() -> list[str]:
             problems.append("APPROVED_MASTER_OWNER_DECISION_DRIFT")
         if approval.get("candidate_sha256") != approved.get("sha256"):
             problems.append("APPROVED_MASTER_APPROVAL_HASH_DRIFT")
-        if approval.get("canonical_source_git_blob_sha") != CANONICAL_BLOB_SHA:
+        if approval.get("canonical_source_git_blob_sha") != PRIMARY_BLOB_SHA:
             problems.append("APPROVED_MASTER_APPROVAL_SOURCE_DRIFT")
         if approval.get("identity_lock_sha256") != sha256_file(PACK / "APPROVED_IDENTITY_LOCK.yaml"):
             problems.append("APPROVED_MASTER_APPROVAL_IDENTITY_LOCK_DRIFT")

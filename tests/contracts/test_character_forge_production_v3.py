@@ -159,7 +159,7 @@ def test_highres_master_is_candidate_until_exact_owner_approval(monkeypatch,tmp_
 
 def test_v3_source_policy_preserves_explicit_board_skin_token():
     policy=yaml.safe_load((ROOT/"visual-authority"/"character-forge"/"00-source"/"production-v3"/"MASTER_PROVENANCE.yaml").read_text(encoding="utf-8"))
-    assert policy["source_authority"]["declared_skin_token"]=="#B8853C"
+    assert policy["source_authority"]["declared_skin_token"]=="#AF6A53"
 
 
 def test_bootstraps_pin_sources_and_do_not_silently_admit_model_weights():

@@ -3,6 +3,7 @@ package com.dial.van.preview
 import com.dial.van.degraded.DegradedMode
 import com.dial.van.overlay.OverlayTheme
 import com.dial.van.visual.VanAuraSpec
+import com.dial.van.visual.VanAuraDepth
 import com.dial.van.visual.VanAuraSpecs
 import com.dial.van.visual.VanCaptions
 import com.dial.van.visual.VanDurableState
@@ -172,6 +173,75 @@ object VanPreviewSheets {
     // ------------------------------------------------------------------ state matrix
 
     /** All 18 durable states: frameless VAN + field, named in words as well as accent. */
+    /**
+     * CF-D-06 evidence: every durable state with the flame envelope around the full figure,
+     * plus a strip of WORKING across the loop so the rising motion can be judged from stills.
+     */
+    fun flameAuraSheet(): BufferedImage {
+        val states = VanDurableState.entries
+        val cols = 6
+        val cell = 330
+        val box = 250f
+        val padX = 40
+        val headerH = 150
+        val rows = (states.size + cols - 1) / cols
+        val stripH = 360
+        val w = padX * 2 + cell * cols
+        val h = headerH + rows * (cell + 40) + stripH + 40
+        val image = BufferedImage(w, h, BufferedImage.TYPE_INT_ARGB)
+        val g = image.createGraphics()
+        AwtVanRenderer.prepare(g)
+        g.paint = GradientPaint(0f, 0f, Color(0xFF080C13.toInt()), 0f, h.toFloat(), Color(0xFF05080D.toInt()))
+        g.fillRect(0, 0, w, h)
+        g.color = Color(TEXT, true)
+        g.font = font(38, bold = true)
+        g.drawString("VAN flame aura — Rev 2 (CF-D-06 / CF-D-08)", padX, 70)
+        g.color = Color(TEXT_DIM, true)
+        g.font = font(18)
+        g.drawString("Flames wrap the silhouette read from the art itself; fragments break off and rise; faint wisps and rim light in front; embers. No lines.", padX, 104)
+
+        val shape = AwtVanRenderer.interimSilhouette(VanPresentation.COMMAND_CENTRE)
+        fun paintVan(state: VanDurableState, cx: Float, cy: Float, phase: Float) {
+            val spec = VanAuraSpecs.forState(state)
+            // Aura Rev 2: behind, VAN, then the front wisps and rim light over him.
+            GlassPainter.drawAura(g, spec, cx, cy, box / 2f, VanEffectBudget.FULL, phase, silhouette = shape, slowPhase = phase * 0.37f)
+            AwtVanRenderer.paintVan(
+                g,
+                VanVisualState(
+                    durableState = state,
+                    listening = state == VanDurableState.LISTENING,
+                    speaking = state == VanDurableState.SPEAKING,
+                    urgency = if (state == VanDurableState.URGENT) 1f else 0f,
+                ),
+                VanSceneFrame(presentation = VanPresentation.COMMAND_CENTRE, phase = phase),
+                cx - box / 2f, cy - box / 2f, box, box,
+            )
+            GlassPainter.drawAura(
+                g, spec, cx, cy, box / 2f, VanEffectBudget.FULL, phase,
+                depth = VanAuraDepth.FRONT, silhouette = shape, slowPhase = phase * 0.37f,
+            )
+        }
+
+        states.forEachIndexed { i, state ->
+            val cx = padX + (i % cols) * cell + cell / 2f
+            val cy = headerH + (i / cols) * (cell + 40) + cell / 2f
+            paintVan(state, cx, cy, PHASE)
+            g.color = Color(VanGlassTokens.EDGE_CYAN, true)
+            g.font = font(18, bold = true)
+            centerString(g, state.name.lowercase().replace('_', ' '), cx, cy + box / 2f + 34f)
+        }
+        val stripY = headerH + rows * (cell + 40) + 20
+        g.color = Color(TEXT_DIM, true)
+        g.font = font(18)
+        g.drawString("WORKING across one loop (phase 0.0 → 0.83)", padX, stripY)
+        repeat(6) { k ->
+            val cx = padX + k * cell + cell / 2f
+            paintVan(VanDurableState.WORKING, cx, stripY + stripH / 2f + 10f, k / 6f)
+        }
+        g.dispose()
+        return image
+    }
+
     fun stateSheet(reducedMotion: Boolean = false): BufferedImage = stateSheet(
         budget = if (reducedMotion) VanEffectBudget.REDUCED_MOTION else VanEffectBudget.FULL,
         reducedMotion = reducedMotion,
@@ -915,18 +985,16 @@ object VanPreviewSheets {
         reducedMotion: Boolean = false,
         actionCode: Int = 0,
     ) {
-        AwtVanRenderer.paint(
+        AwtVanRenderer.paintVan(
             g,
-            VanScene.build(
-                VanVisualState(
-                    durableState = state,
-                    listening = state == VanDurableState.LISTENING,
-                    speaking = state == VanDurableState.SPEAKING,
-                    actionCode = actionCode,
-                    urgency = if (state == VanDurableState.URGENT) 1f else 0f,
-                ),
-                frame(presentation, reducedMotion),
+            VanVisualState(
+                durableState = state,
+                listening = state == VanDurableState.LISTENING,
+                speaking = state == VanDurableState.SPEAKING,
+                actionCode = actionCode,
+                urgency = if (state == VanDurableState.URGENT) 1f else 0f,
             ),
+            frame(presentation, reducedMotion),
             x,
             y,
             w,

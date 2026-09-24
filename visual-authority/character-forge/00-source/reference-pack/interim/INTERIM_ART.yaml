@@ -1,0 +1,16 @@
+decision: 'Owner choice 2026-09-24: until van.riv lands, VAN is shown as real Candidate B art, not the procedural drawing.'
+source: visual-authority/character-forge/01-master-candidates/van_master_source_candidate_b.png
+source_sha256: cf7f51793692bfe8ea2e5f58f1a12e64d3a76468a85cb19d76d0db64ccef374c
+android_asset: android/app/src/main/res/drawable-nodpi/van_candidate_b_front.png
+android_asset_sha256: a0d62bf492950bcef23d01390940cb64cfc4e91d55356c61c97c293637502193
+framing: 'unit square identical to the Rive artboard: character 86% of height, 7% top margin'
+unit_square_px: 593
+board_origin_in_square:
+- 97
+- 34
+roi_board_px:
+- 0
+- 0
+- 360
+- 520
+limits: 'a still: no expressions, blinks or gestures; motion is a gentle bob only. Replaced by van.riv.'

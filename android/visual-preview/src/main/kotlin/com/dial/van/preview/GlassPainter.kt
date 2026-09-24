@@ -1,6 +1,10 @@
 package com.dial.van.preview
 
+import com.dial.van.visual.VanAuraDepth
 import com.dial.van.visual.VanAuraOp
+import com.dial.van.visual.VanFraming
+import com.dial.van.visual.VanSilhouette
+import com.dial.van.visual.VanFlameAura
 import com.dial.van.visual.VanAuraPlanner
 import com.dial.van.visual.VanAuraSpec
 import com.dial.van.visual.VanEffectBudget
@@ -235,6 +239,11 @@ object GlassPainter {
         budget: VanEffectBudget = VanEffectBudget.FULL,
         phase: Float = 0.18f,
         semanticSpec: VanAuraSpec = spec,
+        depth: VanAuraDepth = VanAuraDepth.BACK,
+        silhouette: VanSilhouette? = null,
+        slowPhase: Float = 0f,
+        pulse: Float = 0f,
+        framing: VanFraming = VanFraming.FULL_BODY,
     ) {
         drawAuraOps(
             g,
@@ -246,12 +255,18 @@ object GlassPainter {
                 radius = radius,
                 budget = budget,
                 phase = phase,
+                framing = framing,
+                silhouette = silhouette,
+                slowPhase = slowPhase,
+                pulse = pulse,
             ),
+            depth,
         )
     }
 
-    fun drawAuraOps(g: Graphics2D, ops: List<VanAuraOp>) {
+    fun drawAuraOps(g: Graphics2D, ops: List<VanAuraOp>, depth: VanAuraDepth = VanAuraDepth.ALL) {
         for (op in ops) {
+            if (!depth.accepts(op)) continue
             when (op) {
                 is VanAuraOp.Radial -> {
                     if (op.radius <= 0f || op.alpha <= 0.001f) continue
@@ -295,6 +310,33 @@ object GlassPainter {
                             op.cx - op.radius, op.cy - op.radius, op.radius * 2f, op.radius * 2f,
                         ),
                     )
+                }
+                is VanAuraOp.Flame -> {
+                    if (op.path.isEmpty() || op.gradientRadius <= 1f || op.alpha <= 0.001f) continue
+                    val c = argb(op.color, op.alpha)
+                    g.paint = RadialGradientPaint(
+                        Point2D.Float(op.gradientX, op.gradientY),
+                        op.gradientRadius,
+                        floatArrayOf(0f, VanFlameAura.FLAME_SOLID_STOP_FRACTION, 1f),
+                        arrayOf(c, c, fade(c, VanFlameAura.FLAME_TIP_ALPHA_FRACTION)),
+                    )
+                    g.fill(op.path.toPath())
+                }
+                is VanAuraOp.Rim -> {
+                    if (op.alpha <= 0.001f) continue
+                    for (run in op.runs) {
+                        if (run.size < 2) continue
+                        val path = Path2D.Float()
+                        run.forEachIndexed { index, point ->
+                            if (index == 0) path.moveTo(point.x, point.y) else path.lineTo(point.x, point.y)
+                        }
+                        g.stroke = BasicStroke(op.width * 3f, BasicStroke.CAP_ROUND, BasicStroke.JOIN_ROUND)
+                        g.color = argb(op.color, op.alpha * 0.35f)
+                        g.draw(path)
+                        g.stroke = BasicStroke(op.width, BasicStroke.CAP_ROUND, BasicStroke.JOIN_ROUND)
+                        g.color = argb(op.color, op.alpha)
+                        g.draw(path)
+                    }
                 }
                 is VanAuraOp.Quad -> {
                     if (op.alpha <= 0.001f) continue

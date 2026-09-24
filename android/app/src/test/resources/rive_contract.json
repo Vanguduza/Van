@@ -57,7 +57,7 @@
     "jacket": "black_white_technical",
     "underlayer": "charcoal_technical",
     "accents": "dial_cyan",
-    "companion": "cyan_holographic_orb",
+    "companion": "dark_orb_cyan_bar_eyes",
     "forbid": ["dark_hair", "generic_robot", "random_mascot"]
   }
 }

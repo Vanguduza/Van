@@ -7,6 +7,27 @@ rive_boundary:
   full_ring_inside_riv: FORBIDDEN
   character_artboard_background: transparent
   allowed_character_optics: [visor_lens, orb_local_optics]
+# CF-D-06 (owner, 2026-09-24): the aura is a flame envelope that wraps VAN's silhouette and rises
+# off it, in the manner of Goku's and Naruto's auras. It is still drawn by Android behind the
+# opaque character, never inside van.riv. CF-D-06-REV1: no strands, lightning, specks or orb link;
+# the wind zones below are superseded and kept only for the Zone A haze and ground glow.
+flame_envelope:
+  decision: CF-D-06
+  primary_read: true
+  source_of_truth: android/app/src/main/java/com/dial/van/visual/VanFlameAura.kt
+  silhouette: android/app/src/main/java/com/dial/van/visual/VanBodyLayout.kt
+  layers: [outer_state_colour, mid_lightened, core_white_hot_rim]
+  embers: rising_sparks_off_upper_flanks
+  line_geometry: forbidden  # CF-D-06-REV1
+  rev2: CF-D-08               # runtime contract: visual-authority/character-forge/aura/AURA_RUNTIME_CONTRACT.yaml
+  silhouette_source: rive_artboard_alpha_sampled_per_frame  # the rig drives the aura's shape
+  depth: [back_flames_fragments_embers, front_wisps_and_rim_light]
+  rive_author_note_rev2: keep the artboard background fully transparent; the aura reads VAN's shape from the rendered alpha, so any opaque backdrop pixel would be wrapped in fire
+  colour: state_semantic_colour_else_dial_identity_cyan
+  height_scales_with_intensity: superlinear
+  drawn_behind_opaque_character: true
+  reach_limit_radius_scale: 1.70
+  rive_author_note: keep the artboard transparent and the silhouette inside RIG framing; the flames are fitted to Candidate B's measured silhouette
 zones:
   inner_presence:
     radius_scale: 1.00
@@ -26,7 +47,8 @@ zones:
     topology: state_specific_directional_flow
 motion_components: [multi_harmonic_wave, directional_wind, curl, particle_advection, electrical_pulse]
 requirements:
-  detached_from_character_silhouette: true
+  detached_from_character_silhouette: false  # CF-D-06: flames wrap the silhouette
+  flames_never_drawn_over_character: true
   procedural_not_gif: true
   deterministic_for_same_inputs: true
   reduced_motion_freezes_geometry: true

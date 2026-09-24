@@ -30,7 +30,7 @@ def test_public_rive_surface_is_exact():
 
 def test_identity_authority_is_single_and_rejected_visuals_are_absent():
     manifest = y("ASSET_PACK_MANIFEST.yaml")
-    assert manifest["authority"]["primary_visual"]["path"] == "visual-authority/assets/pack/owner_board_visual_authority.png"
+    assert manifest["authority"]["primary_visual"]["path"] == "visual-authority/character-forge/01-master-candidates/van_master_source_candidate_b.png"
     deny = y("LEGACY_ASSET_DENYLIST.yaml")
     assert len(deny["paths"]) >= 20
     for rel in deny["paths"]:
@@ -42,8 +42,9 @@ def test_identity_lock_closes_known_audit_conflicts():
     assert lock["skin"]["family"] == "medium_brown"
     assert lock["headband"]["disposition"] == "FORBIDDEN"
     assert lock["clothing"]["gloves"] == "black_technical"
-    assert lock["proportions"]["head_count_target"] == 5.75
-    assert lock["proportions"]["three_head_chibi_forbidden"] is True
+    assert lock["proportions"]["head_count_target"] == 3.2
+    assert lock["proportions"]["tall_realistic_proportions_forbidden"] is True
+    assert lock["companion"]["type"] == "dark_orb_cyan_bar_eyes"
 
 
 def test_layer_spec_matches_linter_and_gloves():
