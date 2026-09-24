@@ -1,0 +1,90 @@
+schema_version: 1
+output: visual-authority/character-forge/06-vectors-clean/van_layers.svg
+rules:
+  root_groups_must_match_svg_lint: true
+  raster_images_forbidden: true
+  text_fonts_forbidden: true
+  external_refs_forbidden: true
+  max_paths: 1200
+  minimum_group_height_percent_of_artboard: 0.5
+  geometry_overflow_tolerance_percent: 5
+  additional_root_groups_prefix: extra_
+  artboard_background: transparent
+  character_margin_percent_min: 6
+required_root_groups:
+  - hair
+  - visor_frame
+  - visor_lens
+  - face
+  - eye_l
+  - eye_r
+  - brow_l
+  - brow_r
+  - mouth_upper
+  - mouth_lower
+  - mouth_inner
+  - neck
+  - jacket
+  - underlayer
+  - arm_l_upper
+  - arm_l_fore
+  - hand_l
+  - arm_r_upper
+  - arm_r_fore
+  - hand_r
+  - orb_shell
+  - orb_core
+group_roles:
+  hair: {identity: silver_white_swept, rig: head-bound}
+  visor_frame: {identity: technical frame, rig: head-bound}
+  visor_lens: {identity: cyan_blue_transparent, transparency_allowed: true, rig: head-bound}
+  face: {identity: medium_brown_solid, transparency_allowed: false, rig: head-bound}
+  eye_l: {identity: blue, rig: gaze}
+  eye_r: {identity: blue, rig: gaze}
+  brow_l: {rig: expression}
+  brow_r: {rig: expression}
+  mouth_upper: {rig: speech}
+  mouth_lower: {rig: speech}
+  mouth_inner: {rig: viseme}
+  neck: {identity: medium_brown_solid, rig: torso/head bridge}
+  jacket: {identity: black_white_technical, transparency_allowed: false, rig: torso}
+  underlayer: {identity: charcoal_technical, transparency_allowed: false, rig: torso}
+  arm_l_upper: {rig: gesture}
+  arm_l_fore: {rig: gesture}
+  hand_l: {identity: medium_brown_solid, rig: gesture}
+  arm_r_upper: {rig: gesture}
+  arm_r_fore: {rig: gesture}
+  hand_r: {identity: medium_brown_solid, rig: gesture}
+  orb_shell: {identity: cyan_holographic_orb, transparency_allowed: true, rig: orb}
+  orb_core: {identity: dial_cyan, transparency_allowed: true, rig: orb}
+palette_families_from_linter:
+  hair: silver
+  visor_lens: cyan
+  eye_l: blue
+  eye_r: blue
+  face: skin
+  neck: skin
+  hand_l: skin
+  hand_r: skin
+  jacket: neutral
+  underlayer: neutral
+  orb_core: cyan
+renderer_reference_swatches_not_owner_canon:
+  skin: "#A9764E"
+  skin_shadow: "#8A5C3A"
+  hair: "#E9EAF0"
+  hair_shadow: "#C2C7D3"
+  eye_iris: "#1E88E5"
+  eye_iris_deep: "#0D47A1"
+  eye_sclera: "#F2F6FA"
+  eye_pupil: "#10233A"
+  visor: "#00E5FF"
+  jacket: "#15181C"
+  jacket_panel: "#EDEFF3"
+  underlayer: "#2B3138"
+  mouth: "#4A2A1A"
+  orb_body: "#0C2436"
+notes:
+  - "Exact owner art outranks renderer reference swatches."
+  - "No aura/electrical field geometry belongs in this SVG."
+  - "Nested paths/subgroups may be used inside required groups; extra root groups must use extra_."

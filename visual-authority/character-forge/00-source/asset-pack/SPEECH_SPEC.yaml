@@ -1,0 +1,28 @@
+schema_version: 1
+inputs:
+  speaking: boolean
+  mouth_open: {type: number, min: 0.0, max: 1.0}
+  viseme: {type: number}
+visemes:
+  0: {shape: neutral_closed_or_rest}
+  1: {shape: small_neutral}
+  2: {shape: medium_spread}
+  3: {shape: wide_vertical}
+  4: {shape: rounded}
+fallback_rule:
+  unknown_positive_viseme_renders_as: 1
+timing_authority:
+  producer: backend/van_gateway/voice/speech_cues.py
+  device_consumer: SpeechCueTiming
+  do_not_embed_tts_timing_in_rive: true
+  mouth_open_is_amplitude: true
+  viseme_selects_shape: true
+reference_only_gateway_values:
+  chars_per_second: 15.0
+  visual_lead_ms: 40
+  max_slew_per_tick: 0.25
+requirements:
+  speaking_must_overlay_underlying_activity: true
+  speaking_must_not_override: [WAITING_FOR_OWNER, ERROR, URGENT]
+  mouth_open_0_vs_1_must_render_different_frames: true
+  all_visemes_0_to_4_must_render: true

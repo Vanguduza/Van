@@ -1,0 +1,80 @@
+schema_version: 1
+global_state_rules:
+  entry_ms_max: 300
+  loop_visible_period_seconds_min: 6
+  every_state_must_differ_from_idle: true
+  pose_or_motion_required_for_colour_blind_readability: true
+  degraded_warning_must_not_suppress_local_activity: true
+  speaking_is_articulation_layer: true
+  urgent_error_are_not_colour_only: true
+states:
+  OFFLINE: {code: 0, producer: "gateway/hermes uplink unreachable", reference_motion_profile: offline}
+  CONNECTING: {code: 1, producer: "session handshake starting", reference_motion_profile: thinking_connecting}
+  IDLE: {code: 2, producer: "owner turn settled with nothing outstanding", reference_motion_profile: idle_waiting, derived_reference: visual-authority/assets/derived/van_state_idle.png}
+  ATTENTIVE: {code: 3, producer: "overlay tap / command bar focus", reference_motion_profile: attentive_listening}
+  LISTENING: {code: 4, producer: "microphone capture started", reference_motion_profile: attentive_listening, derived_reference: visual-authority/assets/derived/van_state_listening.png}
+  THINKING: {code: 5, producer: "final transcript received with text", reference_motion_profile: thinking_connecting, derived_reference: visual-authority/assets/derived/van_state_thinking.png}
+  SEARCHING: {code: 6, producer: "research/browser activity started", reference_motion_profile: searching, derived_reference: visual-authority/assets/derived/van_state_searching.png}
+  WORKING: {code: 7, producer: "gateway accepted / mission running", reference_motion_profile: working_delegating, derived_reference: visual-authority/assets/derived/van_state_working.png}
+  DELEGATING: {code: 8, producer: "dispatch started / Hermes run id present", reference_motion_profile: working_delegating}
+  SPEAKING: {code: 9, producer: "TTS started", reference_motion_profile: speaking, articulation_overlay: true}
+  WAITING: {code: 10, producer: "mission waiting external", reference_motion_profile: idle_waiting}
+  WAITING_FOR_OWNER: {code: 11, producer: "approval required / mission waiting owner / halted trade", reference_motion_profile: waiting_for_owner, critical_authority: true}
+  DEGRADED: {code: 12, producer: "broken subsystem or stale/unreadable trading ledger", reference_motion_profile: degraded, preserve_local_activity: true}
+  WARNING: {code: 13, producer: "degraded/unverifiable/partial result or trade risk/stop", reference_motion_profile: warning, derived_reference: visual-authority/assets/derived/van_state_warning.png}
+  ERROR: {code: 14, producer: "command denied/failed or local ASR error", reference_motion_profile: error, posture_change_required: true}
+  SUCCESS: {code: 15, producer: "verified success / mission completed", reference_motion_profile: success, derived_reference: visual-authority/assets/derived/van_state_success.png}
+  URGENT: {code: 16, producer: "urgent attention item", reference_motion_profile: urgent, posture_change_required: true}
+  SLEEPING: {code: 17, producer: "quiet hours with no open attention", reference_motion_profile: sleeping}
+reference_motion_profiles:
+  authority: IMPLEMENTATION_REFERENCE_ONLY
+  source: android/app/src/main/java/com/dial/van/visual/VanCharacterMotion.kt
+  fields: [bobDp, breathLiftDp, driftXDp, swayDeg, breathScale, attentionLeanDp, attentionTurnDeg, alertTension]
+  sleeping: [0.75, 0.38, 0.16, 0.24, 0.0035, 0.18, 0.18, 0.0]
+  offline: [0.42, 0.22, 0.12, 0.16, 0.0022, 0.12, 0.12, 0.0]
+  idle_waiting: [1.65, 0.52, 0.42, 0.62, 0.0065, 0.55, 0.48, 0.0]
+  attentive_listening: [1.20, 0.44, 0.30, 0.48, 0.0052, 1.05, 0.82, 0.0]
+  thinking_connecting: [0.92, 0.42, 0.52, 0.72, 0.0055, 0.62, 0.58, 0.0]
+  searching: [1.10, 0.46, 0.72, 0.82, 0.0058, 0.82, 0.78, 0.0]
+  working_delegating: [1.32, 0.50, 0.48, 0.62, 0.0062, 0.68, 0.58, 0.0]
+  speaking: [1.05, 0.48, 0.36, 0.54, 0.0058, 0.78, 0.68, 0.0]
+  waiting_for_owner: [0.82, 0.34, 0.24, 0.38, 0.0040, 0.62, 0.55, 0.0]
+  success: [1.48, 0.55, 0.46, 0.72, 0.0070, 0.68, 0.58, 0.0]
+  degraded: [0.70, 0.30, 0.20, 0.28, 0.0032, 0.42, 0.38, 0.10]
+  warning: [0.88, 0.34, 0.24, 0.36, 0.0038, 0.55, 0.48, 0.18]
+  error: [0.72, 0.30, 0.20, 0.30, 0.0032, 0.48, 0.42, 0.24]
+  urgent: [0.95, 0.36, 0.28, 0.42, 0.0042, 0.62, 0.54, 0.30]
+actions:
+  HELLO_WAVE: {code: 1, duration_ms: 1400, producer: "first session opened today"}
+  ACK_NOD: {code: 2, duration_ms: 650, producer: "gateway command accepted"}
+  POINT_LEFT: {code: 3, duration_ms: 1200, producer: "highlight card left"}
+  POINT_RIGHT: {code: 4, duration_ms: 1200, producer: "highlight card right"}
+  POINT_UP: {code: 5, duration_ms: 1200, producer: "highlight card above"}
+  POINT_DOWN: {code: 6, duration_ms: 1200, producer: "highlight card below"}
+  POINT_TARGET: {code: 7, duration_ms: 1200, producer: "highlight focal card"}
+  CELEBRATE: {code: 8, duration_ms: 1800, producer: "good-decision/good-outcome trade close"}
+  CAUTION: {code: 9, duration_ms: 1000, producer: "approval required or urgent attention"}
+  CONFIRM: {code: 10, duration_ms: 900, producer: "verified success"}
+  SHRUG: {code: 11, duration_ms: 1100, producer: "degraded/unverifiable/partial outcome"}
+  PRESENT_CARD: {code: 12, duration_ms: 1500, producer: "mission result summary ready"}
+  OPEN_PANEL: {code: 13, duration_ms: 240, producer: "overlay expanded"}
+  CLOSE_PANEL: {code: 14, duration_ms: 240, producer: "overlay collapsed"}
+action_rules:
+  min_ms: 600
+  max_ms: 1800
+  panel_actions_exception_uses_existing_standard_motion_ms: 240
+  anticipation_main_return_required: true
+  return_to_underlying_state: true
+  mouth_continues_when_speaking: true
+  gaze_resumes_after_action: true
+  point_directions_must_be_unambiguous_at_dp: 96
+trigger_families:
+  point: [POINT_LEFT, POINT_RIGHT, POINT_UP, POINT_DOWN, POINT_TARGET]
+  ack: [ACK_NOD, CONFIRM]
+  celebrate: [CELEBRATE]
+  warning: [CAUTION]
+  wave: [HELLO_WAVE]
+  shrug: [SHRUG]
+  present: [PRESENT_CARD]
+  panel: [OPEN_PANEL, CLOSE_PANEL]
+note: "Trigger-family mapping is internal authoring guidance; public wire names remain only the 8 trigger names in rive_contract.json."

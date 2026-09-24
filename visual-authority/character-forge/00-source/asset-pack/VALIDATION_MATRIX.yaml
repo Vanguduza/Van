@@ -1,0 +1,63 @@
+schema_version: 1
+validator: android/app/src/androidTest/java/com/dial/van/instrumentation/RiveContractTest.kt
+runtime: rive-android:9.6.5
+modes: [core, full, production]
+contract_surface:
+  artboard: Van
+  state_machine: VanRuntime
+  exact_public_input_count: 9
+  exact_trigger_count: 8
+  extra_public_inputs_forbidden: true
+core_evidence:
+  required_baseline_frames:
+    - gaze-neg
+    - gaze-pos
+    - mouth-0
+    - mouth-1
+    - core-state-2
+    - core-state-4
+    - core-state-5
+    - core-state-9
+    - core-action-1
+    - core-action-2
+    - core-action-7
+full_evidence:
+  state_frames: 18
+  action_frames: 14
+  mandatory_combinations:
+    - WORKING+speaking
+    - THINKING+speaking
+    - WAITING_FOR_OWNER+speaking
+    - URGENT+speaking
+    - LISTENING+attention_sweep
+    - WORKING+POINT_TARGET
+    - WAITING_FOR_OWNER+PRESENT_CARD
+    - SUCCESS+CELEBRATE
+    - WARNING+CAUTION
+    - DEGRADED+LISTENING
+  attention_positions:
+    - [-1, -1]
+    - [1, -1]
+    - [-1, 1]
+    - [1, 1]
+    - [0, 0]
+  visemes: [0, 1, 2, 3, 4]
+  invalid_inputs_must_render_nonblank: true
+background_transparency:
+  backgrounds:
+    light: "#F4F6F8"
+    dark: "#0B0F14"
+    busy: checker
+  corner_patches_must_remain_background: true
+identity_detection:
+  silver_white_hair_required: true
+  cyan_family_required: true
+performance:
+  soak_seconds: 300
+  max_janky_percent_from_status: true
+full_regression:
+  core_baseline_mean_rgb_diff_max: 0.06
+release:
+  source_and_app_riv_must_be_byte_identical: true
+  production_must_select_rive_renderer: true
+  broken_asset_must_fall_back: true
