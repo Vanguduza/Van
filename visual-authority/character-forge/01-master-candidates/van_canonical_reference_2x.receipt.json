@@ -1,0 +1,23 @@
+{
+  "adds_new_identity_detail": false,
+  "output_dimensions": [
+    3072,
+    2048
+  ],
+  "output_path": "visual-authority/character-forge/01-master-candidates/van_canonical_reference_2x.png",
+  "output_sha256": "efdd0c900aa2e821f66878f7b012cfb9e969c364860cfb69423ce3a54812cd38",
+  "owner_approval_required_for_master_promotion": true,
+  "pillow_version": "11.3.0",
+  "provenance": "DERIVED_VISIBLE",
+  "resampler": "Pillow.Image.Resampling.LANCZOS",
+  "scale": 2,
+  "schema_version": 1,
+  "source_dimensions": [
+    1536,
+    1024
+  ],
+  "source_git_blob_sha": "fc18bbe0b91e5b85d8cf8211314a69cb90b8bc0b",
+  "source_path": "visual-authority/assets/pack/owner_board_visual_authority.png",
+  "source_sha256": "fc986466ee830d4bac4f56ab291416e8ebaf1d6c19c24d5f6468fdbdae5a0fe9",
+  "status": "EXACT_DERIVED_REFERENCE_NOT_APPROVED_MASTER"
+}
