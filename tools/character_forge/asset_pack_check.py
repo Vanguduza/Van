@@ -9,6 +9,8 @@ from .manifest import ROOT
 from .svg_lint import COLOR_GROUPS, REQUIRED_GROUPS
 
 PACK = ROOT / "visual-authority" / "character-forge" / "00-source" / "asset-pack"
+V3 = ROOT / "visual-authority" / "character-forge" / "00-source" / "production-v3"
+CANONICAL_BLOB_SHA = "fc18bbe0b91e5b85d8cf8211314a69cb90b8bc0b"
 
 
 def _yaml(name: str):
@@ -25,12 +27,18 @@ def validate() -> list[str]:
     matrix = _yaml("STATE_ACTION_MATRIX.yaml")
     aura = _yaml("AURA_HANDOFF_SPEC.yaml")
     deny = _yaml("LEGACY_ASSET_DENYLIST.yaml")
+    master_policy = yaml.safe_load((V3 / "MASTER_PROVENANCE.yaml").read_text(encoding="utf-8"))
+    master_spec = yaml.safe_load((V3 / "HIGHRES_MASTER_SPEC.yaml").read_text(encoding="utf-8"))
+    topology = yaml.safe_load((V3 / "TOPOLOGY_BUDGETS.yaml").read_text(encoding="utf-8"))
+    gpu_lane = yaml.safe_load((V3 / "GPU_LANE.yaml").read_text(encoding="utf-8"))
 
     primary = manifest["authority"]["primary_visual"]["path"]
     if primary != "visual-authority/assets/pack/owner_board_visual_authority.png":
         problems.append("PRIMARY_VISUAL_DRIFT")
     if not (ROOT / primary).is_file():
         problems.append("PRIMARY_VISUAL_MISSING")
+    if manifest["authority"]["primary_visual"].get("git_blob_sha") != CANONICAL_BLOB_SHA:
+        problems.append("PRIMARY_VISUAL_BLOB_DRIFT")
 
     if rig["artboard"] != contract["artboard"]:
         problems.append("ARTBOARD_DRIFT")
@@ -79,6 +87,39 @@ def validate() -> list[str]:
         problems.append("HEADBAND_CONTRACT_DRIFT")
     if lock.get("gloves") != "black_technical":
         problems.append("GLOVE_CONTRACT_DRIFT")
+    if lock.get("skin_token") != "#B8853C" or expected["skin"].get("canonical_token") != "#B8853C":
+        problems.append("SKIN_TOKEN_DRIFT")
+
+    if int(manifest.get("schema_version") or 0) < 3:
+        problems.append("ASSET_PACK_SCHEMA_NOT_V3")
+    v3 = manifest.get("production_v3") or {}
+    for rel in (
+        "visual-authority/character-forge/00-source/production-v3/MASTER_PROVENANCE.yaml",
+        "visual-authority/character-forge/00-source/production-v3/HIGHRES_MASTER_SPEC.yaml",
+        "visual-authority/character-forge/00-source/production-v3/SEE_THROUGH_LAYER_MAP.yaml",
+        "visual-authority/character-forge/00-source/production-v3/TOPOLOGY_BUDGETS.yaml",
+        "visual-authority/character-forge/00-source/production-v3/RIG_IR_SCHEMA.json",
+        "visual-authority/character-forge/00-source/production-v3/RIVE_MAPPING.yaml",
+        "visual-authority/character-forge/00-source/production-v3/GPU_LANE.yaml",
+    ):
+        if not (ROOT / rel).is_file():
+            problems.append(f"V3_AUTHORITY_MISSING:{rel}")
+    if (master_policy.get("source_authority") or {}).get("git_blob_sha") != CANONICAL_BLOB_SHA:
+        problems.append("MASTER_SOURCE_BLOB_DRIFT")
+    if (master_policy.get("source_authority") or {}).get("declared_skin_token") != "#B8853C":
+        problems.append("MASTER_SKIN_TOKEN_DRIFT")
+    if ((master_spec.get("identity") or {}).get("skin_token")) != "#B8853C":
+        problems.append("HIGHRES_SPEC_SKIN_TOKEN_DRIFT")
+    if int(((topology.get("policy") or {}).get("hard_total_paths")) or 0) != 1200:
+        problems.append("TOPOLOGY_HARD_CEILING_DRIFT")
+    if ((gpu_lane.get("gpu_worker") or {}).get("source_tool") or {}).get("commit") != "7f139bb25c46a0c8ac720d95ddab185fcda5451c":
+        problems.append("SEE_THROUGH_PIN_DRIFT")
+    if (gpu_lane.get("stretchy_studio") or {}).get("commit") != "24a83a27ba43e43e9d2e3de5e33994594e6199c2":
+        problems.append("STRETCHY_PIN_DRIFT")
+    approved_path = ROOT / "visual-authority" / "character-forge" / "01-master-approved" / "van_master_highres.png"
+    approved = master_policy.get("approved_master") or {}
+    if approved_path.exists() and (not approved.get("sha256") or approved.get("status") != "OWNER_APPROVED"):
+        problems.append("APPROVED_MASTER_PRESENT_WITHOUT_BOUND_AUTHORITY")
 
     if rig["artboard_policy"]["aura_in_rive_forbidden"] is not True:
         problems.append("RIVE_AURA_BOUNDARY_DRIFT")
