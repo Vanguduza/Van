@@ -1,0 +1,83 @@
+name: Character Forge approve selected master
+
+on:
+  push:
+    branches:
+      - gpt/van-character-forge-production-v3-20260924
+    paths:
+      - .github/workflows/character-forge-master-approve.yml
+  workflow_dispatch:
+
+permissions:
+  contents: write
+
+jobs:
+  approve-selected-master:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          ref: gpt/van-character-forge-production-v3-20260924
+          fetch-depth: 0
+
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.13'
+
+      - name: Install Character Forge Python dependencies
+        run: python -m pip install --disable-pip-version-check PyYAML==6.0.2
+
+      - name: Bind owner selection to exact Candidate B bytes
+        shell: bash
+        run: |
+          set -euo pipefail
+          python - <<'PY'
+          from pathlib import Path
+          import hashlib, yaml
+
+          candidate = Path("visual-authority/character-forge/01-master-candidates/van_master_highres_v1.png")
+          identity = Path("visual-authority/character-forge/00-source/asset-pack/APPROVED_IDENTITY_LOCK.yaml")
+          approval = Path("docs/character_forge/HIGHRES_MASTER_APPROVAL.yaml")
+
+          def sha256(path: Path) -> str:
+              h = hashlib.sha256()
+              with path.open("rb") as f:
+                  for chunk in iter(lambda: f.read(1024 * 1024), b""):
+                      h.update(chunk)
+              return h.hexdigest()
+
+          candidate_sha = sha256(candidate)
+          expected = "42474ee9595f09f4ef59c060faf756e1db4222234b827fae0311007248b9b9e7"
+          if candidate_sha != expected:
+              raise SystemExit(f"selected Candidate B SHA drift: {candidate_sha} != {expected}")
+
+          record = {
+              "schema_version": 1,
+              "decision": "APPROVE",
+              "authority": "owner",
+              "owner_decision": "Candidate B",
+              "owner_decision_date": "2026-09-24",
+              "candidate_sha256": candidate_sha,
+              "canonical_source_git_blob_sha": "fc18bbe0b91e5b85d8cf8211314a69cb90b8bc0b",
+              "identity_lock_sha256": sha256(identity),
+              "scope": "high_resolution_rigging_master_subordinate_to_canonical_identity_lock",
+              "notes": "Owner explicitly selected Candidate B and instructed completion of its V3 pack ingestion.",
+          }
+          approval.write_text(yaml.safe_dump(record, sort_keys=False), encoding="utf-8")
+          PY
+
+          PYTHONPATH=. python -m tools.character_forge.production_cli master approve             --candidate visual-authority/character-forge/01-master-candidates/van_master_highres_v1.png             --approval docs/character_forge/HIGHRES_MASTER_APPROVAL.yaml
+
+      - name: Commit approved master and exact approval record
+        shell: bash
+        run: |
+          set -euo pipefail
+          git config user.name "van-character-forge[bot]"
+          git config user.email "van-character-forge[bot]@users.noreply.github.com"
+          git add             docs/character_forge/HIGHRES_MASTER_APPROVAL.yaml             visual-authority/character-forge/01-master-approved/van_master_highres.png
+          if git diff --cached --quiet; then
+            echo "NO_CHANGE"
+            exit 0
+          fi
+          git commit -m "character-forge: promote owner-selected Candidate B master"
+          git push origin HEAD:gpt/van-character-forge-production-v3-20260924
