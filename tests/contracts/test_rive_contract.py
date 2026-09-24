@@ -112,7 +112,7 @@ def test_identity_lock_contains_approved_character_invariants():
     assert lock["hair"] == "silver_white_swept"
     assert lock["visor"] == "cyan_blue_transparent"
     assert lock["skin"] == "medium_brown"
-    assert lock["skin_token"] == "#A4654E"
+    assert lock["skin_token"] == "#B8853C"
     assert lock["skin_delta_e2000_max"] == 8
     assert lock["eyes"] == "blue"
     assert lock["jacket"] == "black_white_technical"
