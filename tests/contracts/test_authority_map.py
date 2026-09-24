@@ -230,7 +230,7 @@ def test_load_bearing_trading_subjects_cannot_disappear():
 
 
 def test_dial_development_subjects_cannot_disappear():
-    """VAN-DEV-001 — DIAL VAN-DEVCC-R1 §3.4 names these subjects.
+    """VAN-DEV-001/002 — DIAL VAN-DEVCC-R1 §3.4 names these three subjects.
 
     Same reasoning as the trading pin above: the gate validates entries that exist, so a
     deleted subject would leave the map smaller and still green while the credential
@@ -241,6 +241,7 @@ def test_dial_development_subjects_cannot_disappear():
     required = {
         "dial_dev.projection_proxy": "docs/SECURITY_POLICY.md",
         "dial_dev.action_forwarder": "docs/SECURITY_POLICY.md",
+        "dial_dev.attention_ingest": "docs/VAN_FINISHED_PRODUCT_BLUEPRINT_REV_1.md",
     }
     missing = sorted(set(required) - set(by_subject))
     assert not missing, "DIAL development subjects disappeared: " + ", ".join(missing)

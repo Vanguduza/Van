@@ -433,6 +433,7 @@ async def test_disabled_is_404_feature_disabled(tmp_path, monkeypatch):
             read = await ac.get("/v1/dial-dev/projects", headers=_auth(enrolled))
             events = await ac.get("/v1/dial-dev/events", headers=_auth(enrolled))
             act = await _post_action(ac, enrolled, key, _action())
+            assert app.state.dial_dev_attention.running is False
     get_settings.cache_clear()
     for response in (read, events, act):
         assert response.status_code == 404

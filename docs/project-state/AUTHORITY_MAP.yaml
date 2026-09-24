@@ -759,3 +759,15 @@ invariants:
       - backend/tests/test_dial_dev_proxy.py
       - tests/contracts/test_dial_dev_boundary.py
 
+  - subject: dial_dev.attention_ingest
+    owner: docs/VAN_FINISHED_PRODUCT_BLUEPRINT_REV_1.md
+    statement: >-
+      DIAL approvals, blockers, sensitive findings and lease-bypass alerts enter VAN's one
+      Attention queue with source dial-dev, one item per kind, identity and projection
+      revision of origin, and such an item closes only when a later DIAL projection shows
+      it APPLIED, never because the owner tapped it or because DIAL stopped listing it.
+    implemented_by:
+      - backend/van_gateway/dial_dev/attention.py
+      - backend/van_gateway/attention/engine.py
+    tested_by:
+      - backend/tests/test_dial_dev_attention.py

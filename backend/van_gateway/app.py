@@ -37,6 +37,7 @@ from van_gateway.config import get_settings
 from van_gateway.decisions.service import DecisionCreate, DecisionService
 from van_gateway.degraded.registry import DegradedRegistry
 from van_gateway.dial_dev.api import build_dial_dev_router
+from van_gateway.dial_dev.attention import DialDevAttentionIngest
 from van_gateway.dial_dev.client import DialDevClient
 from van_gateway.dial_dev.config import ACTIONS_PATH as DIAL_DEV_ACTIONS_PATH, DialDevConfig
 from van_gateway.events.bus import EventBus
@@ -623,10 +624,13 @@ def create_app() -> FastAPI:
     google_router = GoogleCapabilityRouter(store, google_broker)
 
     # VAN-DEV-001/002 (DIAL VAN-DEVCC-R1 §3.4) — the DIAL development projection proxy
-    # VAN displays DIAL state and forwards typed owner commands; it forms no agent
-    # loop of its own.
+    # and the Attention ingestion that follows DIAL's event stream. VAN displays DIAL
+    # state and forwards typed owner commands; it forms no agent loop of its own.
     dial_dev_config = DialDevConfig.from_settings(settings)
     dial_dev_client = DialDevClient(dial_dev_config)
+    dial_dev_attention = DialDevAttentionIngest(
+        dial_dev_client, attention, degraded=degraded, events=events,
+    )
 
     # P3-OPS-005 — dedupe that survives a restart, instead of a set() on the instance.
     suppressions = SuppressionStore(store)
@@ -850,9 +854,12 @@ def create_app() -> FastAPI:
         await capability_registry.sync()
         if settings.scheduler_enabled:
             await scheduler.start()
+        if dial_dev_config.enabled and dial_dev_config.attention_enabled:
+            dial_dev_attention.start()
         try:
             yield
         finally:
+            await dial_dev_attention.stop()
             await scheduler.stop()
 
     app = FastAPI(title="VAN Gateway", version="0.5.0-dev", lifespan=lifespan)
@@ -902,6 +909,7 @@ def create_app() -> FastAPI:
     app.state.strategy_promotions = strategy_promotions
     app.state.dial_dev_config = dial_dev_config
     app.state.dial_dev_client = dial_dev_client
+    app.state.dial_dev_attention = dial_dev_attention
     app.include_router(owner_runtime.router)
     app.include_router(build_dial_dev_router(
         client=dial_dev_client,

@@ -186,6 +186,28 @@ class AttentionEngine:
             (AttentionState.HANDLED.value, now, item_id),
         )
 
+    async def auto_resolve(self, dedupe_key: str, evidence: dict[str, Any]) -> bool:
+        """Close an item because its source proved the underlying condition is over.
+
+        Distinct from `mark_handled`, which records that the owner or VAN dealt with it.
+        This is for a source that is itself the authority on the condition — DIAL's
+        projection showing a decision APPLIED (VAN-DEV-002) — and it records that
+        evidence on the row. An item already HANDLED or AUTO_RESOLVED is left alone.
+        """
+        row = await self.store.fetchone(
+            "SELECT id, state, payload_json FROM attention WHERE dedupe_key = ?", (dedupe_key,)
+        )
+        if row is None or row["state"] in (
+            AttentionState.HANDLED.value, AttentionState.AUTO_RESOLVED.value,
+        ):
+            return False
+        payload = {**__import__("json").loads(row["payload_json"] or "{}"), **evidence}
+        await self.store.execute(
+            "UPDATE attention SET state = ?, updated_at_unix = ?, payload_json = ? WHERE id = ?",
+            (AttentionState.AUTO_RESOLVED.value, int(time.time()), Store.dumps(payload), row["id"]),
+        )
+        return True
+
     async def list_open(self, *, now: int | None = None, quiet_hours: bool = False) -> list[AttentionItem]:
         now = now or int(time.time())
         rows = await self.store.fetchall(

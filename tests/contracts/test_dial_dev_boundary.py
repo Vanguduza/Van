@@ -190,3 +190,5 @@ def test_van_forms_no_agent_loop_over_dial():
         for forbidden in ("van_gateway.hermes", "van_gateway.orchestrator",
                           "van_gateway.mission", "van_gateway.command"):
             assert forbidden not in text, f"{path.relative_to(ROOT)} imports {forbidden}"
+    attention = (DIAL_DEV / "attention.py").read_text(encoding="utf-8")
+    assert "client.post(" not in attention
