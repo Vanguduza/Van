@@ -19,3 +19,11 @@ The approved output is copied to:
 `visual-authority/character-forge/01-master-approved/van_master_highres.png`
 
 No decomposition, vectorisation or rigging milestone may treat an unapproved candidate as visual authority.
+
+## Exact derived reference
+
+`van_canonical_reference_2x.png` is a 3072×2048 deterministic 2× Lanczos derivative of the canonical owner board.
+
+It adds **no new identity detail** and is therefore safe as a pixel-faithful comparison/reference surface. Its exact provenance is in `van_canonical_reference_2x.receipt.json`.
+
+It is not the final rigging master. A recreated high-detail master must still pass the owner-approval gate above.
