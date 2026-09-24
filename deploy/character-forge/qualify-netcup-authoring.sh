@@ -40,6 +40,12 @@ else
   add repository RED "workspace missing"
 fi
 
+if runuser -u "$FORGE_USER" -- bash -lc "cd '$WORKSPACE' && python3 -m tools.character_forge.asset_pack_check" >/tmp/van-asset-pack-check.txt 2>&1; then
+  add asset_pack GREEN "$(tail -n1 /tmp/van-asset-pack-check.txt)"
+else
+  add asset_pack RED "$(tail -c 800 /tmp/van-asset-pack-check.txt 2>/dev/null)"
+fi
+
 if command -v rive >/dev/null 2>&1 && runuser -u "$FORGE_USER" -- env HOME="$RIVE_HOME" rive --help >/tmp/van-rive-help.txt 2>&1; then
   add rive_cli GREEN "$(runuser -u "$FORGE_USER" -- env HOME="$RIVE_HOME" rive --version 2>&1 | head -n1 || true)"
 else
