@@ -45,7 +45,7 @@ def test_asset_pack_core_scope_is_exact():
     assert rig["core_m2"]["durable_states"] == ["IDLE", "LISTENING", "THINKING", "SPEAKING"]
     assert rig["core_m2"]["finite_actions"] == ["HELLO_WAVE", "ACK_NOD", "POINT_TARGET"]
     assert rig["architecture"]["single_character_rig"] is True
-    assert rig["artboard"]["aura_in_rive_forbidden"] is True
+    assert rig["artboard_policy"]["aura_in_rive_forbidden"] is True
 
 
 def test_asset_pack_sources_exist_without_duplicate_copies():
