@@ -42,6 +42,7 @@ shift || true
 case "$cmd" in
   doctor)
     rive --help >/dev/null
+    python3 -m tools.character_forge.asset_pack_check >/dev/null
     python3 -m tools.character_forge.cli status --json >/dev/null
     echo CHARACTER_FORGE_COMMANDER_READY
     ;;
