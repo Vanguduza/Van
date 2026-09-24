@@ -1,0 +1,48 @@
+schema_version: 1
+source:
+  path: visual-authority/assets/pack/owner_board_visual_authority.png
+  git_blob_sha: fc18bbe0b91e5b85d8cf8211314a69cb90b8bc0b
+master:
+  role: rigging_and_detail_authority_after_owner_acceptance
+  minimum_short_edge_px: 2048
+  preferred_canvas_px: [4096, 4096]
+  required_views:
+    - front
+    - three_quarter_front
+    - profile
+    - three_quarter_rear
+    - rear
+  required_detail_views:
+    - head_front
+    - head_three_quarter
+    - visor
+    - left_glove
+    - right_glove
+    - jacket_front
+    - jacket_back
+    - boot
+    - orb_front
+    - orb_side
+identity:
+  skin_token: "#B8853C"
+  hair: silver_white_swept
+  eyes: blue
+  visor: cyan_blue_transparent
+  jacket: black_white_technical
+  underlayer: charcoal_technical
+  gloves: black_technical
+  orb: dark_navy_cyan_holographic
+  headband: forbidden
+  proportions_heads: {min: 5.5, max: 6.0}
+  opaque_body: true
+drift_policy:
+  face_shape_change: BLOCK
+  hairstyle_silhouette_change: BLOCK
+  visor_geometry_change: BLOCK
+  clothing_silhouette_change: BLOCK
+  glove_or_boot_redesign: BLOCK
+  orb_identity_change: BLOCK
+  generative_visible_detail: OWNER_REVIEW_REQUIRED_AND_NOT_CANON_BY_DEFAULT
+acceptance:
+  candidate_only_until_owner_signed: true
+  exact_sha_binding: true
