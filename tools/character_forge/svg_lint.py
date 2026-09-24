@@ -11,7 +11,8 @@ from typing import Any
 from xml.etree import ElementTree as ET
 
 REQUIRED_GROUPS = ("hair","visor_frame","visor_lens","face","eye_l","eye_r","brow_l","brow_r","mouth_upper","mouth_lower","mouth_inner","neck","jacket","underlayer","arm_l_upper","arm_l_fore","hand_l","arm_r_upper","arm_r_fore","hand_r","orb_shell","orb_core")
-COLOR_GROUPS = {"hair":"silver","visor_lens":"cyan","eye_l":"blue","eye_r":"blue","face":"skin","neck":"skin","hand_l":"skin","hand_r":"skin","jacket":"neutral","underlayer":"neutral","orb_core":"cyan"}
+COLOR_GROUPS = {"hair":"silver","visor_lens":"cyan","eye_l":"blue","eye_r":"blue","face":"skin","neck":"skin","hand_l":"neutral","hand_r":"neutral","jacket":"neutral","underlayer":"neutral","orb_core":"cyan"}
+FORBIDDEN_GROUPS = {"headband","extra_headband","aura","halo","background","workboard"}
 HEX = re.compile(r"^#([0-9a-fA-F]{3}|[0-9a-fA-F]{6})$")
 RGB_FN = re.compile(r"^rgba?\(\s*([^)]*)\)$", re.IGNORECASE)
 URL_REF = re.compile(r"^url\(\s*#([^)\s]+)\s*\)$")
@@ -101,7 +102,7 @@ def _allowed(family: str, rgb) -> bool:
     if family=="silver": return s<=0.30 and v>=0.55
     if family=="cyan": return 165<=deg<=225 and s>=0.25 and v>=0.35
     if family=="blue": return 185<=deg<=245 and s>=0.25 and v>=0.30
-    if family=="skin": return (deg<=55 or deg>=345) and 0.18<=s<=0.95 and 0.20<=v<=0.90
+    if family=="skin": return 10<=deg<=45 and 0.38<=s<=0.78 and 0.45<=v<=0.82
     if family=="neutral": return v<=0.38 or s<=0.18
     return True
 
@@ -151,6 +152,7 @@ def lint_svg(path: Path, *, require_geometry: bool=True) -> LintReport:
     findings += [f"MISSING_GROUP:{name}" for name in REQUIRED_GROUPS if name not in groups]
     root_groups={child.attrib.get("id") for child in list(root) if _local(child.tag)=="g"}
     for name in sorted(root_groups):
+        if name in FORBIDDEN_GROUPS: findings.append(f"FORBIDDEN_IDENTITY_GROUP:{name}")
         if name and name not in REQUIRED_GROUPS and not name.startswith("extra_"): findings.append(f"UNSCOPED_EXTRA_GROUP:{name}")
     palette={}; gradients=_gradient_stops(root)
     for group_name,family in COLOR_GROUPS.items():
