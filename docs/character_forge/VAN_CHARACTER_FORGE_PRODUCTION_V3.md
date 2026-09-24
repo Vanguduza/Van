@@ -1,6 +1,6 @@
 # VAN Character Forge Production V3
 
-Status: IMPLEMENTATION AUTHORITY — PRE-PRODUCTION / OWNER-GATED
+Status: IMPLEMENTATION AUTHORITY — ARTWORK INPUT PACK LOCKED / PRE-M1
 
 ## Purpose
 
@@ -215,3 +215,29 @@ as the starting point.
 The exact 2× reference is intentionally not described as adding detail; its receipt records
 `adds_new_identity_detail: false`. This prevents an interpolation upscale from being confused with
 a genuinely authored high-resolution master.
+
+
+## Locked V3 artwork pack
+
+The exact owner-selected Candidate B high-resolution master has been promoted to:
+
+`visual-authority/character-forge/01-master-approved/van_master_highres.png`
+
+SHA-256:
+
+`42474ee9595f09f4ef59c060faf756e1db4222234b827fae0311007248b9b9e7`
+
+The owner decision is bound in `docs/character_forge/HIGHRES_MASTER_APPROVAL.yaml`.
+
+The expression, viseme, glove/gesture, state/action and aura boards are committed under
+`visual-authority/character-forge/00-source/production-v3/artwork/` and hash-locked by
+`ARTWORK_MANIFEST.yaml`. They are reference-only assets. They may define semantic acting,
+speech, gesture, pose and aura direction, but may not override character identity geometry,
+palette, proportions or public runtime contracts.
+
+`PROVENANCE_GRAPH.yaml` records the complete authority chain from the canonical owner board
+through Candidate B, deterministic 4x derivation, exact owner approval and the future M1-M5
+outputs.
+
+This closes the artwork-input pack. It does **not** mark M1 vectorization, M2 rigging, M3
+animation, M4 physical-device qualification or M5 release complete.
