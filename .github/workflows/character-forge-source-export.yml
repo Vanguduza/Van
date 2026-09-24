@@ -1,0 +1,28 @@
+name: Character Forge source export
+
+on:
+  push:
+    branches:
+      - gpt/van-character-forge-production-v3-20260924
+    paths:
+      - .github/workflows/character-forge-source-export.yml
+  workflow_dispatch:
+
+jobs:
+  export-canonical-source:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - name: Verify canonical source hash
+        shell: bash
+        run: |
+          set -euo pipefail
+          test -f visual-authority/assets/pack/owner_board_visual_authority.png
+          printf '%s  %s\n' "$(sha256sum visual-authority/assets/pack/owner_board_visual_authority.png | awk '{print $1}')" "visual-authority/assets/pack/owner_board_visual_authority.png"
+      - name: Upload canonical source
+        uses: actions/upload-artifact@v4
+        with:
+          name: van-canonical-source
+          path: visual-authority/assets/pack/owner_board_visual_authority.png
+          if-no-files-found: error
+          retention-days: 1
