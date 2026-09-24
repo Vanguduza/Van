@@ -2,17 +2,61 @@
   "artboard": "Van",
   "state_machine": "VanRuntime",
   "inputs": [
-    {"name": "state", "type": "number"},
-    {"name": "speaking", "type": "boolean"},
-    {"name": "listening", "type": "boolean"},
-    {"name": "attention_x", "type": "number", "min": -1.0, "max": 1.0},
-    {"name": "attention_y", "type": "number", "min": -1.0, "max": 1.0},
-    {"name": "mouth_open", "type": "number", "min": 0.0, "max": 1.0},
-    {"name": "urgency", "type": "number", "min": 0.0, "max": 1.0},
-    {"name": "viseme", "type": "number"},
-    {"name": "action_code", "type": "number"}
+    {
+      "name": "state",
+      "type": "number"
+    },
+    {
+      "name": "speaking",
+      "type": "boolean"
+    },
+    {
+      "name": "listening",
+      "type": "boolean"
+    },
+    {
+      "name": "attention_x",
+      "type": "number",
+      "min": -1,
+      "max": 1
+    },
+    {
+      "name": "attention_y",
+      "type": "number",
+      "min": -1,
+      "max": 1
+    },
+    {
+      "name": "mouth_open",
+      "type": "number",
+      "min": 0,
+      "max": 1
+    },
+    {
+      "name": "urgency",
+      "type": "number",
+      "min": 0,
+      "max": 1
+    },
+    {
+      "name": "viseme",
+      "type": "number"
+    },
+    {
+      "name": "action_code",
+      "type": "number"
+    }
   ],
-  "triggers": ["point", "ack", "celebrate", "warning", "wave", "shrug", "present", "panel"],
+  "triggers": [
+    "point",
+    "ack",
+    "celebrate",
+    "warning",
+    "wave",
+    "shrug",
+    "present",
+    "panel"
+  ],
   "durable_states": {
     "OFFLINE": 0,
     "CONNECTING": 1,
@@ -53,11 +97,29 @@
     "hair": "silver_white_swept",
     "visor": "cyan_blue_transparent",
     "skin": "medium_brown",
+    "skin_token": "#B8853C",
+    "skin_delta_e2000_max": 8,
     "eyes": "blue",
     "jacket": "black_white_technical",
     "underlayer": "charcoal_technical",
+    "gloves": "black_technical",
+    "headband": "forbidden",
+    "proportions": {
+      "head_count_target": 5.75,
+      "head_count_tolerance": 0.25,
+      "three_head_chibi_forbidden": true
+    },
+    "opacity": "opaque_body_except_visor_and_orb_optics",
     "accents": "dial_cyan",
     "companion": "cyan_holographic_orb",
-    "forbid": ["dark_hair", "generic_robot", "random_mascot"]
+    "forbid": [
+      "dark_hair",
+      "light_peach_skin",
+      "headband",
+      "three_head_chibi",
+      "generic_robot",
+      "random_mascot",
+      "glassified_body"
+    ]
   }
 }
