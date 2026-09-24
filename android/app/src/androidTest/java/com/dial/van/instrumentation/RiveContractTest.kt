@@ -305,10 +305,10 @@ class RiveContractTest {
     @Test
     fun brokenAssetFallsBack() {
         val unusable = VanVisualRuntime.decide(assetBytes = 512L, riveRuntimeAvailable = true, ownerArtAvailable = true)
-        assertEquals(VanRenderer.OWNER_ART, unusable.renderer)
+        assertEquals(VanRenderer.CANVAS, unusable.renderer)
         assertEquals(VanCanvasReason.ASSET_UNUSABLE, unusable.reason)
         val failed = VanVisualRuntime.decide(assetBytes = 4096L, riveRuntimeAvailable = true, ownerArtAvailable = true, loadFailed = true)
-        assertEquals(VanRenderer.OWNER_ART, failed.renderer)
+        assertEquals(VanRenderer.CANVAS, failed.renderer)
         assertEquals(VanCanvasReason.LOAD_FAILED, failed.reason)
     }
 
