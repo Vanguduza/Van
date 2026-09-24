@@ -5,7 +5,7 @@ from pathlib import Path
 
 import yaml
 
-from .manifest import ROOT
+from .manifest import ROOT, sha256_file
 from .svg_lint import COLOR_GROUPS, REQUIRED_GROUPS
 
 PACK = ROOT / "visual-authority" / "character-forge" / "00-source" / "asset-pack"
@@ -116,6 +116,24 @@ def validate() -> list[str]:
         problems.append("SEE_THROUGH_PIN_DRIFT")
     if (gpu_lane.get("stretchy_studio") or {}).get("commit") != "24a83a27ba43e43e9d2e3de5e33994594e6199c2":
         problems.append("STRETCHY_PIN_DRIFT")
+    reference = master_policy.get("exact_derived_reference") or {}
+    reference_path = ROOT / str(reference.get("path") or "")
+    receipt_path = ROOT / str(reference.get("receipt") or "")
+    if not reference_path.is_file() or sha256_file(reference_path) != reference.get("sha256"):
+        problems.append("EXACT_REFERENCE_HASH_DRIFT")
+    if not receipt_path.is_file():
+        problems.append("EXACT_REFERENCE_RECEIPT_MISSING")
+    else:
+        receipt = json.loads(receipt_path.read_text(encoding="utf-8"))
+        if receipt.get("output_sha256") != reference.get("sha256"):
+            problems.append("EXACT_REFERENCE_RECEIPT_OUTPUT_DRIFT")
+        if receipt.get("source_git_blob_sha") != CANONICAL_BLOB_SHA:
+            problems.append("EXACT_REFERENCE_RECEIPT_SOURCE_DRIFT")
+        if receipt.get("source_sha256") != sha256_file(ROOT / primary):
+            problems.append("EXACT_REFERENCE_SOURCE_HASH_DRIFT")
+        if receipt.get("adds_new_identity_detail") is not False:
+            problems.append("EXACT_REFERENCE_INVENTION_FLAG_DRIFT")
+
     approved_path = ROOT / "visual-authority" / "character-forge" / "01-master-approved" / "van_master_highres.png"
     approved = master_policy.get("approved_master") or {}
     if approved_path.exists() and (not approved.get("sha256") or approved.get("status") != "OWNER_APPROVED"):
