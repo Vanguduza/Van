@@ -66,13 +66,7 @@ tasks.register<JavaExec>("renderVanPreviews") {
     systemProperty("java.awt.headless", "true")
 }
 
-tasks.register<JavaExec>("extractOwnerArt") {
-    group = "van"
-    description = "Cuts shippable Van assets out of the owner-supplied design boards."
-    mainClass.set("com.dial.van.preview.OwnerArtMainKt")
-    classpath = sourceSets["main"].runtimeClasspath
-    systemProperty("java.awt.headless", "true")
-}
+// Legacy owner-art extraction intentionally removed: rejected bitmap poses must not be regenerated.
 
 tasks.named<Test>("test") {
     systemProperty("java.awt.headless", "true")
