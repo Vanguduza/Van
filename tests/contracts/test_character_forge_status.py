@@ -197,7 +197,7 @@ def test_m4_rejects_owner_acceptance_when_visual_authority_changes(monkeypatch, 
     contract.write_text('{"artboard":"Van"}\n', encoding="utf-8")
     identity.write_text("identity-v3\n", encoding="utf-8")
     matrix.write_text("matrix-rev3\n", encoding="utf-8")
-    identity_lock.write_text("skin: '#A4654E'\n", encoding="utf-8")
+    identity_lock.write_text("skin: '#B8853C'\n", encoding="utf-8")
 
     checklist = tmp_path / "DEVICE_CHECKLIST.yaml"
     checklist.write_text(
