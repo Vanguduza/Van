@@ -1,0 +1,18 @@
+{
+  "candidate_label": "Candidate B",
+  "derivation": "Pillow Image.Resampling.LANCZOS 4x",
+  "generative_redraw": false,
+  "output_dimensions": [
+    6144,
+    4096
+  ],
+  "output_path": "visual-authority/character-forge/01-master-candidates/van_master_highres_v1.png",
+  "output_sha256": "42474ee9595f09f4ef59c060faf756e1db4222234b827fae0311007248b9b9e7",
+  "owner_approval_required_for_master_promotion": true,
+  "pillow_version": "12.3.0",
+  "schema_version": 1,
+  "source_path": "visual-authority/character-forge/01-master-candidates/van_master_source_candidate_b.png",
+  "source_sha256": "cf7f51793692bfe8ea2e5f58f1a12e64d3a76468a85cb19d76d0db64ccef374c",
+  "status": "OWNER_SELECTED_EXACT_BINARY_INGESTED",
+  "zlib_runtime": "1.3"
+}
