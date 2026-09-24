@@ -180,3 +180,66 @@ def test_blockers_are_derived_from_truth_not_a_stale_list(monkeypatch):
     assert "RIVE_CLI_UNPINNED" not in blockers
     assert "SOURCE_SET_NOT_ADMITTED" not in blockers
     assert "OWNER_SOURCE_CONFIRMATION_PENDING" in blockers
+
+
+def test_m4_rejects_owner_acceptance_when_visual_authority_changes(monkeypatch, tmp_path):
+    from tools.character_forge import gates
+    source = tmp_path / "van_runtime.riv"
+    shipped = tmp_path / "van.riv"
+    source.write_bytes(b"RIVE" * 512)
+    shipped.write_bytes(source.read_bytes())
+    asset_sha = sha256_file(source)
+
+    contract = tmp_path / "rive_contract.json"
+    identity = tmp_path / "VAN_CHARACTER_VISUAL_IDENTITY.md"
+    matrix = tmp_path / "VAN_VISUAL_ACCEPTANCE_MATRIX.md"
+    identity_lock = tmp_path / "APPROVED_IDENTITY_LOCK.yaml"
+    contract.write_text('{"artboard":"Van"}\n', encoding="utf-8")
+    identity.write_text("identity-v3\n", encoding="utf-8")
+    matrix.write_text("matrix-rev3\n", encoding="utf-8")
+    identity_lock.write_text("skin: '#A4654E'\n", encoding="utf-8")
+
+    checklist = tmp_path / "DEVICE_CHECKLIST.yaml"
+    checklist.write_text(
+        yaml.safe_dump({
+            "device": {"model":"SM-S928B","android_build":"test","apk_sha256":"b"*64,"rive_sha256":asset_sha,"checked_at":"2026-09-24T00:00:00Z"},
+            "checks": {"renderer_rive_active":"PASS"},
+            "thermal_note":"nominal",
+            "perfetto_trace":"trace.perfetto",
+            "evidence":{"renderer_rive_active":"evidence.png"},
+        }, sort_keys=False),
+        encoding="utf-8",
+    )
+    acceptance = tmp_path / "ACCEPTANCE.yaml"
+    acceptance.write_text(
+        yaml.safe_dump({"final":{
+            "verified":True,
+            "subject":f"sha256:{asset_sha}",
+            "contract_sha256":"0"*64,
+            "identity_spec_sha256":"1"*64,
+            "visual_acceptance_matrix_sha256":"2"*64,
+            "identity_lock_sha256":"3"*64,
+        }}, sort_keys=False),
+        encoding="utf-8",
+    )
+    evidence = tmp_path / gates.DEVICE_EVIDENCE_ROOT / "evidence.png"
+    evidence.parent.mkdir(parents=True)
+    evidence.write_bytes(b"PNG")
+
+    monkeypatch.setattr(gates, "m3", lambda: [])
+    monkeypatch.setattr(gates, "load_status", lambda: {"production":{"emulator_validation":"PASS","ci_run":"https://github.com/Vanguduza/Van/actions/runs/1","rive_sha256":asset_sha}})
+    monkeypatch.setattr(gates, "ROOT", tmp_path)
+    monkeypatch.setattr(gates, "SOURCE_RIV", source)
+    monkeypatch.setattr(gates, "APP_RIV", shipped)
+    monkeypatch.setattr(gates, "CONTRACT", contract)
+    monkeypatch.setattr(gates, "IDENTITY_DOC", identity)
+    monkeypatch.setattr(gates, "VISUAL_ACCEPTANCE_MATRIX", matrix)
+    monkeypatch.setattr(gates, "IDENTITY_LOCK", identity_lock)
+    monkeypatch.setattr(gates, "DEVICE", checklist)
+    monkeypatch.setattr(gates, "ACCEPTANCE", acceptance)
+
+    problems = gates.m4()
+    assert "owner acceptance contract SHA is stale" in problems
+    assert "owner acceptance identity-spec SHA is stale" in problems
+    assert "owner acceptance visual-matrix SHA is stale" in problems
+    assert "owner acceptance identity-lock SHA is stale" in problems
