@@ -112,3 +112,81 @@ def test_validation_binding_rejects_no_asset_sentinel(tmp_path):
 
     with pytest.raises(ValueError, match="does not contain a SHA-256"):
         cli._validation_binding(evidence, "van_candidate.sha256")
+
+
+def test_m4_rejects_owner_acceptance_when_visual_authority_changes(monkeypatch, tmp_path):
+    from tools.character_forge import gates
+
+    source = tmp_path / "van_runtime.riv"
+    shipped = tmp_path / "van.riv"
+    source.write_bytes(b"RIVE" * 512)
+    shipped.write_bytes(source.read_bytes())
+    asset_sha = sha256_file(source)
+
+    contract = tmp_path / "rive_contract.json"
+    identity = tmp_path / "VAN_CHARACTER_VISUAL_IDENTITY.md"
+    matrix = tmp_path / "VAN_VISUAL_ACCEPTANCE_MATRIX.md"
+    contract.write_text('{"artboard":"Van"}\n', encoding="utf-8")
+    identity.write_text("identity-v2\n", encoding="utf-8")
+    matrix.write_text("matrix-rev3\n", encoding="utf-8")
+
+    checklist = tmp_path / "DEVICE_CHECKLIST.yaml"
+    checklist.write_text(
+        yaml.safe_dump(
+            {
+                "device": {
+                    "model": "SM-S928B",
+                    "android_build": "test",
+                    "apk_sha256": "b" * 64,
+                    "rive_sha256": asset_sha,
+                    "checked_at": "2026-09-24T00:00:00Z",
+                },
+                "checks": {"renderer_rive_active": "PASS"},
+                "thermal_note": "nominal",
+                "evidence": {"renderer_rive_active": "evidence.png"},
+            },
+            sort_keys=False,
+        ),
+        encoding="utf-8",
+    )
+    acceptance = tmp_path / "ACCEPTANCE.yaml"
+    acceptance.write_text(
+        yaml.safe_dump(
+            {
+                "final": {
+                    "verified": True,
+                    "subject": f"sha256:{asset_sha}",
+                    "contract_sha256": "0" * 64,
+                    "identity_spec_sha256": "1" * 64,
+                    "visual_acceptance_matrix_sha256": "2" * 64,
+                }
+            },
+            sort_keys=False,
+        ),
+        encoding="utf-8",
+    )
+
+    monkeypatch.setattr(gates, "m3", lambda: [])
+    monkeypatch.setattr(
+        gates,
+        "load_status",
+        lambda: {
+            "production": {
+                "emulator_validation": "PASS",
+                "ci_run": "https://github.com/Vanguduza/Van/actions/runs/1",
+                "rive_sha256": asset_sha,
+            }
+        },
+    )
+    monkeypatch.setattr(gates, "SOURCE_RIV", source)
+    monkeypatch.setattr(gates, "APP_RIV", shipped)
+    monkeypatch.setattr(gates, "CONTRACT", contract)
+    monkeypatch.setattr(gates, "IDENTITY_DOC", identity)
+    monkeypatch.setattr(gates, "VISUAL_ACCEPTANCE_MATRIX", matrix)
+    monkeypatch.setattr(gates, "DEVICE", checklist)
+    monkeypatch.setattr(gates, "ACCEPTANCE", acceptance)
+
+    problems = gates.m4()
+    assert "owner acceptance contract SHA is stale" in problems
+    assert "owner acceptance identity-spec SHA is stale" in problems
+    assert "owner acceptance visual-matrix SHA is stale" in problems
