@@ -1,0 +1,74 @@
+schema_version: 1
+purpose: "Pre-authoring inventory: everything required to create van_layers.svg and the M2/M3 Rive rig without identity invention."
+status_values: [PRESENT, REVIEW_REQUIRED, TO_AUTHOR_FROM_CONFIRMED_SOURCE, OPTIONAL_REFERENCE]
+requirements:
+  owner_visual_lock:
+    status: PRESENT
+    path: visual-authority/assets/owner_visual_lock_sheet.jpg
+    use: highest visual reference for identity/silhouette/composition
+  turnaround_master:
+    status: REVIEW_REQUIRED
+    path: visual-authority/assets/turnaround.png
+    use: front/body proportion and hidden-geometry reconstruction
+    finding: "Git blob is byte-identical to visual-authority/assets/app_icon.png; do not treat as a true turnaround until owner confirms."
+  expression_reference:
+    status: REVIEW_REQUIRED
+    path: visual-authority/assets/expressions.png
+    use: brows/eyes/mouth neutral and expressive bounds
+    finding: "Git blob is byte-identical to gestures.png; confirm that this is intentional before M1."
+  gesture_hand_reference:
+    status: REVIEW_REQUIRED
+    path: visual-authority/assets/gestures.png
+    use: hands/arms and finite-action silhouettes
+    finding: "Git blob is byte-identical to expressions.png; confirm that this is intentional before M1."
+  presentation_reference:
+    status: PRESENT
+    path: visual-authority/assets/presentation.png
+    use: expanded/full-body presentation
+  compact_readability_reference:
+    status: PRESENT
+    path: visual-authority/assets/compact_avatar.png
+    use: 48-96dp recognition/crop
+  urgent_reference:
+    status: PRESENT
+    path: visual-authority/assets/urgent_decision.png
+    use: critical-state reference
+  offline_degraded_reference:
+    status: PRESENT
+    path: visual-authority/assets/offline_degraded.png
+    use: offline/degraded reference
+  command_centre_reference:
+    status: REVIEW_REQUIRED
+    path: visual-authority/assets/command_centre.png
+    use: command-centre composition
+    finding: "Git blob is byte-identical to onboarding_hero.png; confirm intended reuse."
+  onboarding_hero_reference:
+    status: REVIEW_REQUIRED
+    path: visual-authority/assets/onboarding_hero.png
+    use: large-format presentation
+    finding: "Git blob is byte-identical to command_centre.png; confirm intended reuse."
+  viseme_shapes:
+    status: TO_AUTHOR_FROM_CONFIRMED_SOURCE
+    output_location: "inside mouth_upper/mouth_lower/mouth_inner groups and Rive deformation keys"
+    required_shapes:
+      0: neutral
+      1: small_neutral
+      2: medium_spread
+      3: wide_vertical
+      4: rounded
+    rule: "Do not generate a new face identity; derive mouth shapes from confirmed VAN face geometry."
+  clean_semantic_vector_layers:
+    status: TO_AUTHOR_FROM_CONFIRMED_SOURCE
+    output: visual-authority/character-forge/06-vectors-clean/van_layers.svg
+    required_root_groups: 23
+  core_rive_candidate:
+    status: TO_AUTHOR_FROM_CONFIRMED_SOURCE
+    output: visual-authority/character-forge/09-rive-working/van_runtime_core_1.riv
+  full_rive_candidate:
+    status: TO_AUTHOR_FROM_CONFIRMED_SOURCE
+    output: visual-authority/character-forge/09-rive-working/van_runtime_full_1.riv
+pre_m1_stop_conditions:
+  - "Any REVIEW_REQUIRED source is material to the layer being drawn and has not been owner-confirmed."
+  - "The lock sheet and a source render conflict."
+  - "A hidden body/hand/face shape would need to be invented rather than reconstructed as a candidate."
+  - "Identity colour would have to leave svg_lint.py's locked family."
