@@ -77,6 +77,16 @@ trade_palette:
   STOP: ACCENT_RED
   HALTED: ACCENT_RED
 
+# CF-D-08-REV1 — the trading aura is always on: the floating overlay holds the shared reader
+# while VAN is visible (screen on), the trading screen holds it strictly while open.
+trade_reader:
+  source: android/app/src/main/java/com/dial/van/trading/VanTradeAuraPublisher.kt
+  policy: android/app/src/main/java/com/dial/van/visual/VanTradeSemantic.kt  # VanTradeAuraPolicy
+  poll_ms: [4000, 15000]
+  polls_with_screen_off: false
+  background_unreadable_ledger: UNKNOWN only if money was at stake, otherwise no trading field
+  publishes_only_on_change: true
+
 # Trade energy ordering the owner reads: calm while in a trade, turbulent under risk, highest on a stop.
 trade_energy_rules:
   - [RISK.deformation, ">", IN_TRADE.deformation]

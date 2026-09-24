@@ -239,4 +239,41 @@ class VanTradeSemanticTest {
         val low = VanTradeSemantics.auraFor(VanTradeSemantic.STOP, VanEffectBudget.LOW)
         assertTrue(low.sparkRate < stop.sparkRate, "trade fields must honour the effect budget")
     }
+
+    // ---- Always-on trading aura (VanTradeAuraPolicy) ------------------------------------------
+
+    private val flatBook = VanTradeSignals(ledgerAvailable = true, ledgerStale = false)
+    private val exposedBook = flatBook.copy(openPositions = 1, unrealizedPnl = 12.0)
+
+    @Test
+    fun `a readable ledger is classified the same on the screen and in the background`() {
+        for (signals in listOf(flatBook, exposedBook, flatBook.copy(ownerHaltActive = true))) {
+            assertEquals(
+                VanTradeAuraPolicy.resolve(signals, null, strict = true),
+                VanTradeAuraPolicy.resolve(signals, null, strict = false),
+            )
+        }
+        assertEquals(VanTradeSemantic.PROFIT, VanTradeAuraPolicy.resolve(exposedBook, null, strict = false))
+    }
+
+    @Test
+    fun `the trading screen never shows an unreadable ledger as calm`() {
+        assertEquals(VanTradeSemantic.UNKNOWN, VanTradeAuraPolicy.resolve(null, null, strict = true))
+        assertEquals(VanTradeSemantic.UNKNOWN, VanTradeAuraPolicy.resolve(flatBook.copy(ledgerStale = true), null, strict = true))
+    }
+
+    @Test
+    fun `in the background an unreadable ledger alarms only when money was at stake`() {
+        // Nothing known, nothing at stake: no trading field, VAN's own states show.
+        assertNull(VanTradeAuraPolicy.resolve(null, null, strict = false))
+        assertNull(VanTradeAuraPolicy.resolve(null, VanTradeSemantic.FLAT, strict = false))
+        assertNull(VanTradeAuraPolicy.resolve(flatBook.copy(ledgerStale = true), VanTradeSemantic.WATCHING, strict = false))
+        // Money at risk and VAN loses sight of it: alarm.
+        assertEquals(VanTradeSemantic.UNKNOWN, VanTradeAuraPolicy.resolve(null, VanTradeSemantic.IN_TRADE, strict = false))
+        assertEquals(VanTradeSemantic.UNKNOWN, VanTradeAuraPolicy.resolve(null, VanTradeSemantic.HALTED, strict = false))
+        assertEquals(VanTradeSemantic.UNKNOWN, VanTradeAuraPolicy.resolve(exposedBook.copy(ledgerStale = true), null, strict = false))
+        // Once alarmed it stays alarmed until the ledger is readable again.
+        assertEquals(VanTradeSemantic.UNKNOWN, VanTradeAuraPolicy.resolve(null, VanTradeSemantic.UNKNOWN, strict = false))
+        assertEquals(VanTradeSemantic.FLAT, VanTradeAuraPolicy.resolve(flatBook, VanTradeSemantic.UNKNOWN, strict = false))
+    }
 }

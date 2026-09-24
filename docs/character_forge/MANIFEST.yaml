@@ -122,3 +122,19 @@ decisions:
       trade: android/app/src/main/java/com/dial/van/visual/VanTradeSemantic.kt
       tests: [android/verification/src/test/kotlin/com/dial/van/visual/VanFlameAuraTest.kt, android/verification/src/test/kotlin/com/dial/van/visual/VanTradeSemanticTest.kt, tests/contracts/test_aura_runtime_contract.py]
     milestone_effect: AURA_REV2_IS_THE_AURA_AUTHORITY
+  - id: CF-D-08-REV1
+    status: ADOPTED
+    date: 2026-09-24
+    authority: owner
+    decision: >-
+      The trading aura is always on, not only while the trading screen is open. One shared
+      reader (VanTradeAuraPublisher) polls the portfolio every 6 s. The floating overlay holds
+      it while VAN is visible; with the screen off nothing polls. The trading screen holds it
+      strictly (an unreadable ledger is UNKNOWN). In the background an unreadable ledger raises
+      UNKNOWN only when money was at stake, so a gateway blip does not paint VAN red all day for
+      an owner who is not trading. It publishes only on change.
+    evidence:
+      publisher: android/app/src/main/java/com/dial/van/trading/VanTradeAuraPublisher.kt
+      policy: android/app/src/main/java/com/dial/van/visual/VanTradeSemantic.kt
+      tests: [android/verification/src/test/kotlin/com/dial/van/visual/VanTradeSemanticTest.kt, tests/contracts/test_aura_runtime_contract.py]
+    milestone_effect: TRADING_AURA_ALWAYS_ON

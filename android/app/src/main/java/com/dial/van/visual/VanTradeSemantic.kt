@@ -248,3 +248,37 @@ object VanTradeSemantics {
         VanTradeSemantic.UNKNOWN -> "I cannot read the trading ledger, so I am not telling you it is fine."
     }
 }
+
+/**
+ * Aura Rev 2 — what the always-on trading aura publishes after each portfolio read.
+ *
+ * The trading screen is *strict*: while the owner is looking at trades, an unreadable or
+ * stale ledger is [VanTradeSemantic.UNKNOWN], because absence of evidence must not look calm.
+ *
+ * The floating overlay reads in the background, all day, for an owner who may not be trading
+ * at all. Painting VAN alarm-red whenever the gateway blips would teach the owner to ignore
+ * red, so the background reader is *lenient* in exactly one way: an unreadable ledger raises
+ * UNKNOWN only when the last thing VAN knew was money at risk (live exposure) or a state the
+ * owner must act on. Otherwise it publishes no trading field at all (null), and VAN's own
+ * states show. A readable ledger is always classified exactly as the screen classifies it.
+ */
+object VanTradeAuraPolicy {
+
+    /**
+     * @param signals the classifier's input from this read, or null when the portfolio could
+     *   not be read at all.
+     * @param previous what was published last time (null if nothing).
+     * @param strict true while the trading screen holds the reader.
+     */
+    fun resolve(signals: VanTradeSignals?, previous: VanTradeSemantic?, strict: Boolean): VanTradeSemantic? {
+        val wasAtStake = previous != null && (previous.isLive || previous.needsOwner)
+        if (signals == null) {
+            return if (strict || wasAtStake) VanTradeSemantic.UNKNOWN else null
+        }
+        val classified = VanTradeSemantics.classify(signals)
+        if (strict || classified != VanTradeSemantic.UNKNOWN) return classified
+        // A stale or unavailable ledger in the background: alarm only if something was at stake.
+        val exposed = signals.openPositions > 0 || signals.workingOrders > 0 || signals.openTickets > 0
+        return if (exposed || wasAtStake) VanTradeSemantic.UNKNOWN else null
+    }
+}

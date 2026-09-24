@@ -98,3 +98,16 @@ def test_no_line_geometry_reaches_the_plan():
     body = plan[plan.index("fun plan("):plan.index("private fun zoneA(")]
     assert "VanFieldGeometryEngine.build" not in body, "CF-D-06-REV1: the plan must not draw field strands again"
     assert "VanAuraOp.Polyline(" not in body and "VanAuraOp.Quad(" not in body
+
+
+def test_always_on_trade_reader_stays_inside_the_contract():
+    reader = CONTRACT["trade_reader"]
+    publisher = ROOT / reader["source"]
+    consts = _consts(publisher)
+    assert _within(consts["POLL_MS"], reader["poll_ms"]), consts["POLL_MS"]
+    overlay = (ROOT / "android/app/src/main/java/com/dial/van/overlay/FloatingOverlayService.kt").read_text(encoding="utf-8")
+    # The overlay holds the reader only while it animates, and always lets go on destroy.
+    assert "OverlayTradeAura.hold(application, OverlayVisibilityPolicy.target(visibility) == OverlayLifecycleTarget.ANIMATING)" in overlay
+    assert "OverlayTradeAura.hold(application, visible = false)" in overlay
+    route = (ROOT / "android/app/src/main/java/com/dial/van/trading/ui/TradingRoute.kt").read_text(encoding="utf-8")
+    assert "VanTradeAuraPublisher.acquire(TRADING_SCREEN_HOLDER, repo, strict = true)" in route

@@ -24,7 +24,6 @@ import androidx.compose.material3.TopAppBar
 import androidx.compose.material3.TopAppBarDefaults
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.DisposableEffect
-import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
@@ -48,14 +47,10 @@ import com.dial.van.design.StatusSemantics
 import com.dial.van.design.components.ApprovalSheet
 import com.dial.van.design.components.StatusChip
 import com.dial.van.design.components.VanPanel
-import com.dial.van.trading.Loaded
 import com.dial.van.security.BiometricGate
 import com.dial.van.trading.TradingHaltAuthority
 import com.dial.van.trading.TradingRepository
-import com.dial.van.visual.VanLiveVisualState
-import com.dial.van.visual.VanTradeSemantic
-import com.dial.van.visual.VanTradeSemantics
-import kotlinx.coroutines.delay
+import com.dial.van.trading.VanTradeAuraPublisher
 
 /** Navigation callbacks the inner destinations need; [TradingRoute] wires them to the NavController. */
 class TradingNav(
@@ -318,33 +313,20 @@ private fun TradingHaltStatusBar(app: VanApplication) {
 }
 
 /**
- * P1-AURA-003 — the trading system's route into VAN's visual state, carried over verbatim
- * from the pre-rebuild `TradingCommandCentreActivity`. It reads the same portfolio read
- * model the Overview screen renders, classifies it through the pure classifier, and
- * publishes it, so the field and the numbers on screen cannot disagree. Runs for as long as
- * [TradingRoute] is composed, regardless of which host (the legacy activity, or the main
- * nav shell's Trading destination) renders it — previously this only ran from the legacy
- * activity, which would have silently dropped it once the nav shell started hosting
- * [TradingRoute] directly.
+ * P1-AURA-003 — the trading system's route into VAN's visual state.
+ *
+ * Aura Rev 2: the reading itself now lives in [VanTradeAuraPublisher], which the floating
+ * overlay also holds so the trading aura is always on. This screen holds it *strict* while
+ * composed: while the owner is looking at trades, an unreadable ledger shows as UNKNOWN,
+ * never as calm. Leaving the screen releases the hold; the overlay's lenient hold (if VAN is
+ * visible) keeps the field live.
  */
 @Composable
 private fun PublishTradeSemantic(repo: TradingRepository) {
     DisposableEffect(repo) {
-        onDispose { VanLiveVisualState.tradeSemantic(null) }
-    }
-    LaunchedEffect(repo) {
-        while (true) {
-            val semantic = when (val loaded = repo.portfolio()) {
-                is Loaded.Ready -> VanTradeSemantics.classify(loaded.value.toTradeSignals())
-                else -> VanTradeSemantic.UNKNOWN
-            }
-            VanLiveVisualState.tradeSemantic(semantic)
-            delay(TRADE_SEMANTIC_POLL_MS)
-        }
+        VanTradeAuraPublisher.acquire(TRADING_SCREEN_HOLDER, repo, strict = true)
+        onDispose { VanTradeAuraPublisher.release(TRADING_SCREEN_HOLDER) }
     }
 }
 
-/** How often VAN re-reads the portfolio for its visual state (unchanged from the pre-rebuild
- * activity): fast enough that a stop firing reaches the field while the owner is still
- * looking at the screen, slow enough that it is not a poll loop against the gateway. */
-private const val TRADE_SEMANTIC_POLL_MS = 6_000L
+private const val TRADING_SCREEN_HOLDER = "trading-screen"
