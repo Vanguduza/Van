@@ -3,6 +3,7 @@ from __future__ import annotations
 from pathlib import Path
 import json
 import struct
+import subprocess
 import yaml
 
 from tools.character_forge import master as master_module
@@ -213,3 +214,13 @@ def test_controller_bootstrap_installs_cli_wrapper_and_pins_proposal_tools():
     assert "/usr/local/bin/van-character-forge-v3" in controller
     assert "git -C \"$target\" checkout --detach \"$commit\"" in controller
     assert "BLOCKED_PENDING_LICENSE_AND_HASH_LOCK" in controller
+
+
+def test_v3_bootstrap_shell_syntax():
+    for rel in (
+        "deploy/character-forge/bootstrap-production-v3.sh",
+        "deploy/character-forge/bootstrap-gpu-worker-v3.sh",
+        "deploy/character-forge/bootstrap-netcup-authoring.sh",
+    ):
+        result=subprocess.run(["bash","-n",str(ROOT/rel)],capture_output=True,text=True)
+        assert result.returncode==0, result.stderr
