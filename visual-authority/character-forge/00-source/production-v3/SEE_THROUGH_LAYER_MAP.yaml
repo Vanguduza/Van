@@ -1,0 +1,44 @@
+schema_version: 1
+tool:
+  repository: shitagaki-lab/see-through
+  commit: 7f139bb25c46a0c8ac720d95ddab185fcda5451c
+  role: semantic_decomposition_proposal
+  production_authority: false
+mapping:
+  hair:
+    target_groups: [hair]
+    aliases: [hair, front_hair, back_hair, side_hair, ahoge]
+  face:
+    target_groups: [face, neck]
+    aliases: [face, head, skin, neck]
+  eyes:
+    target_groups: [eye_l, eye_r, brow_l, brow_r]
+    aliases: [eye, eyes, eyebrow, eyebrows]
+  mouth:
+    target_groups: [mouth_upper, mouth_lower, mouth_inner]
+    aliases: [mouth, lips]
+  visor:
+    target_groups: [visor_frame, visor_lens]
+    aliases: [glasses, eyewear, visor, accessory_face]
+  jacket:
+    target_groups: [jacket]
+    aliases: [outerwear, jacket, coat, top_outer]
+  underlayer:
+    target_groups: [underlayer]
+    aliases: [shirt, inner_top, top_inner]
+  left_arm:
+    target_groups: [arm_l_upper, arm_l_fore, hand_l]
+    aliases: [left_arm, arm_left, left_hand, hand_left, handwear_left]
+  right_arm:
+    target_groups: [arm_r_upper, arm_r_fore, hand_r]
+    aliases: [right_arm, arm_right, right_hand, hand_right, handwear_right]
+  companion_orb:
+    target_groups: [orb_shell, orb_core]
+    aliases: [accessory, prop, orb, companion]
+rules:
+  unmapped_layer: BLOCK
+  ambiguous_side: BLOCK
+  generated_hidden_region_provenance: INFERRED_OCCLUSION
+  visible_region_provenance: DERIVED_VISIBLE
+  generated_visible_identity_region: GENERATIVE_VISIBLE
+  require_manual_review_before_vectorization: true
