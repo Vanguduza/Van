@@ -12,6 +12,7 @@ from .status import load_status, validate_status
 DOCS=ROOT/"docs"/"character_forge"; TOOLS=DOCS/"TOOLS.yaml"; ACCEPTANCE=DOCS/"ACCEPTANCE.yaml"; DEVICE=DOCS/"DEVICE_CHECKLIST.yaml"
 CONTRACT=ROOT/"visual-authority"/"rive_contract.json"; SOURCE_RIV=ROOT/"visual-authority"/"rive"/"van_runtime.riv"; APP_RIV=ROOT/"android"/"app"/"src"/"main"/"assets"/"van.riv"
 RELEASE_MANIFEST=ROOT/"visual-authority"/"rive"/"manifest.json"; GRADLE=ROOT/"android"/"app"/"build.gradle.kts"
+IDENTITY_DOC=ROOT/"docs"/"VAN_CHARACTER_VISUAL_IDENTITY.md"; VISUAL_ACCEPTANCE_MATRIX=ROOT/"docs"/"VAN_VISUAL_ACCEPTANCE_MATRIX.md"
 
 @dataclass(frozen=True)
 class GateResult:
@@ -162,6 +163,12 @@ def m4():
         if acceptance.get("act") not in (None,"visual-accept"): problems.append("owner acceptance act is not visual-accept")
         if acceptance.get("subject")!=f"sha256:{source_sha}":
             problems.append("owner acceptance subject differs from integrated asset")
+        if acceptance.get("contract_sha256")!=sha256_file(CONTRACT):
+            problems.append("owner acceptance contract SHA is stale")
+        if acceptance.get("identity_spec_sha256")!=sha256_file(IDENTITY_DOC):
+            problems.append("owner acceptance identity-spec SHA is stale")
+        if acceptance.get("visual_acceptance_matrix_sha256")!=sha256_file(VISUAL_ACCEPTANCE_MATRIX):
+            problems.append("owner acceptance visual-matrix SHA is stale")
         checklist_identity=device.get("device") or {}
         if acceptance.get("apk_sha256") and acceptance.get("apk_sha256")!=checklist_identity.get("apk_sha256"):
             problems.append("owner acceptance APK SHA differs from S24 checklist")
@@ -177,6 +184,9 @@ def m5():
     else:
         release=json.loads(RELEASE_MANIFEST.read_text(encoding="utf-8"))
         if APP_RIV.is_file() and release.get("rive_sha256")!=sha256_file(APP_RIV): problems.append("release manifest Rive SHA differs")
+        if release.get("contract_sha256")!=sha256_file(CONTRACT): problems.append("release manifest contract SHA differs")
+        if release.get("identity_spec_sha256")!=sha256_file(IDENTITY_DOC): problems.append("release manifest identity-spec SHA differs")
+        if release.get("visual_acceptance_matrix_sha256")!=sha256_file(VISUAL_ACCEPTANCE_MATRIX): problems.append("release manifest visual-matrix SHA differs")
     if status.get("qual_emb_01")!="READY": problems.append("QUAL-EMB-01 not READY")
     return problems
 
