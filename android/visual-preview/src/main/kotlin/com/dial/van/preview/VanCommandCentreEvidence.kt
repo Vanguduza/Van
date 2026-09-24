@@ -244,7 +244,6 @@ object VanCommandCentreEvidence {
     )
 
     private fun paintCharacter(g: Graphics2D, state: VanDurableState, x: Float, y: Float, size: Float) {
-        if (OwnerArt.paint(g, state, x, y, size, size)) return
         AwtVanRenderer.paint(
             g,
             VanScene.build(
