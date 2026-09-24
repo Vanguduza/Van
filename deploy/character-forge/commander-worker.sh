@@ -49,7 +49,7 @@ case "$cmd" in
     exec python3 -m tools.character_forge.cli status --json
     ;;
   asset-pack-check)
-    exec python3 -m pytest tests/contracts/test_character_forge_asset_pack.py -q
+    exec python3 -m tools.character_forge.asset_pack_check
     ;;
   git-status)
     exec git status --short --branch
