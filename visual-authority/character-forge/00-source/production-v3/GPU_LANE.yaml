@@ -1,0 +1,28 @@
+schema_version: 1
+controller:
+  role: dial_control
+  gpu_required: false
+gpu_worker:
+  required_for: [see_through_full_precision, see_through_quantized]
+  protocol: job_bundle_plus_receipt
+  minimum_vram_gb:
+    full_precision_1280: 12
+    group_offload_1280: 10
+    quantized_1280: 8
+  source_tool:
+    repository: shitagaki-lab/see-through
+    commit: 7f139bb25c46a0c8ac720d95ddab185fcda5451c
+    code_license: Apache-2.0
+  model_weights:
+    production_status: BLOCKED_PENDING_LICENSE_AND_HASH_LOCK
+    required_fields: [name, source, sha256, license, approved_by, approved_at]
+stretchy_studio:
+  repository: MangoLion/stretchystudio
+  commit: 24a83a27ba43e43e9d2e3de5e33994594e6199c2
+  license: MIT
+  runtime: browser
+  production_authority: false
+  export_format: spine_4_json
+  automation:
+    default: human_or_browser_assisted
+    deterministic_input_output_hashing: required
