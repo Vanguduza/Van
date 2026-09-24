@@ -302,3 +302,6 @@ def test_stretchy_build_uses_a_forge_owned_checksum_pinned_node():
     assert not re.search(r"(ln|install|cp|mv)\b[^\n]*/usr/(local/)?bin/node\b", code)
     assert 'NODE_BIN="$INSTALL_ROOT/node/current/bin"' in v3
     assert 'env PATH="$NODE_BIN:' in v3 and "bash -lc" not in v3
+    # The health check waits for the port instead of racing `systemctl enable --now`.
+    health = v3[v3.index("enable --now van-stretchy-studio"):]
+    assert health.index("for _ in") < health.index('die "Stretchy Studio health check failed"')

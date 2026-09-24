@@ -110,6 +110,12 @@ WantedBy=multi-user.target
 EOF
   systemctl daemon-reload
   systemctl enable --now van-stretchy-studio.service
+  # `enable --now` returns before the server has bound its port; the first live run failed
+  # its health check this way while the service came up healthy a moment later.
+  for _ in {1..30}; do
+    curl --fail --silent http://127.0.0.1:5173/ >/dev/null && break
+    sleep 0.5
+  done
   curl --fail --silent --show-error http://127.0.0.1:5173/ >/dev/null || die "Stretchy Studio health check failed"
   log "Stretchy Studio available to Commander/browser automation at http://127.0.0.1:5173"
 else
