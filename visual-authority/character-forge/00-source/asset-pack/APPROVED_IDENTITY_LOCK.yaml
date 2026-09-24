@@ -1,0 +1,64 @@
+schema_version: 2
+lock_id: VAN-IDENTITY-LOCK-2026-09-24
+status: LOCKED
+canonical_visual:
+  path: visual-authority/assets/pack/owner_board_visual_authority.png
+  git_blob_sha: fc18bbe0b91e5b85d8cf8211314a69cb90b8bc0b
+  role: sole_primary_character_image_authority
+identity:
+  hair:
+    form: silver_white_swept
+    base: "#E9EDF3"
+    shadow: "#BFC8D3"
+    dark_hair_forbidden: true
+  skin:
+    family: medium_brown
+    canonical_token: "#B8853C"
+    observed_board_range: ["#9C614E", "#AF6C50"]
+    render_delta_e2000_max: 8
+    light_peach_family_forbidden: true
+  eyes:
+    iris: "#1E88E5"
+    deep: "#0D47A1"
+    sclera: "#F2F6FA"
+  visor:
+    family: cyan_blue_transparent
+    lens: "#00E5FF"
+    frame: "#62EAF7"
+    transparency_scope: visor_only
+    body_transparency_forbidden: true
+  clothing:
+    jacket: black_white_technical
+    jacket_dark: "#15181C"
+    jacket_light: "#EDEFF3"
+    underlayer: "#2B3138"
+    gloves: black_technical
+    glove_token: "#111820"
+    hood_or_technical_collar: required
+  accents:
+    dial_cyan: "#00E5FF"
+  companion:
+    type: cyan_holographic_orb
+    shell: "#0C2436"
+    core: "#00E5FF"
+  headband:
+    disposition: FORBIDDEN
+    reason: superseded rejected visual
+  proportions:
+    style: compact_human_stylized
+    head_count_target: 5.75
+    head_count_tolerance: 0.25
+    three_head_chibi_forbidden: true
+  opacity:
+    hair_skin_eyes_clothing: opaque
+    translucent_layers_allowed: [visor_lens, orb_optical_layers]
+forbid:
+  - dark_hair
+  - light_peach_skin
+  - headband
+  - three_head_chibi
+  - generic_robot
+  - random_mascot
+  - glassified_body
+  - body_hugging_halo
+  - full_concentric_ring

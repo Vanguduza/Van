@@ -1,34 +1,35 @@
 # VAN Visual Production System
 
-Status: CANONICAL
+Status: CANONICAL — APPROVED CHARACTER AUTHORITY CONSOLIDATED 2026-09-24
 
 ## Pipeline
 
-1. Identity lock (`VAN_CHARACTER_VISUAL_IDENTITY.md`)
-2. Rive contract (`RIVE_CHARACTER_CONTRACT.md` / `rive_contract.json`)
-3. Platform asset pack under `visual-authority/assets/`
-4. Android binding contract tests vs authority JSON
-5. Canvas fallback when `.riv` unavailable or fails to load
-6. Device golden captures vs acceptance matrix
+1. Canonical owner board: `visual-authority/assets/pack/owner_board_visual_authority.png`
+2. Machine identity lock: `visual-authority/character-forge/00-source/asset-pack/APPROVED_IDENTITY_LOCK.yaml`
+3. Rive wire contract: `visual-authority/rive_contract.json`
+4. Deterministic Character Forge injection pack under `visual-authority/character-forge/00-source/asset-pack/`
+5. M1 semantic vector layer sheet: `visual-authority/character-forge/06-vectors-clean/van_layers.svg`
+6. M2/M3 Rive candidates with receipts, CI motion evidence and independent review
+7. Production integration only after M3; physical SM-S928* qualification and owner acceptance for M4/M5
 
-## Required assets
+## Canonical visual sources
 
-| Asset | Path |
+| Role | Path |
 |---|---|
-| Canonical turnaround | `visual-authority/assets/turnaround.png` |
-| Expression authority | `visual-authority/assets/expressions.png` |
-| Gesture/action authority | `visual-authority/assets/gestures.png` |
-| Android/Hermes presentation | `visual-authority/assets/presentation.png` |
-| App icon | `visual-authority/assets/app_icon.png` |
-| Adaptive icon foreground | `visual-authority/assets/adaptive_fg.png` |
-| Monochrome icon | `visual-authority/assets/monochrome_icon.png` |
-| Notification icon | `visual-authority/assets/notification_icon.png` |
-| Compact avatar | `visual-authority/assets/compact_avatar.png` |
-| Hermes profile avatar | `visual-authority/assets/hermes_avatar.png` |
-| Onboarding hero | `visual-authority/assets/onboarding_hero.png` |
-| Command Centre | `visual-authority/assets/command_centre.png` |
-| Offline/degraded | `visual-authority/assets/offline_degraded.png` |
-| Urgent/decision | `visual-authority/assets/urgent_decision.png` |
-| Production Rive (when authored) | `visual-authority/rive/van_runtime.riv` |
+| Sole primary character image authority | `visual-authority/assets/pack/owner_board_visual_authority.png` |
+| Identity / palette / geometry lock | `visual-authority/character-forge/00-source/asset-pack/APPROVED_IDENTITY_LOCK.yaml` |
+| Layers | `visual-authority/character-forge/00-source/asset-pack/LAYER_SPEC.yaml` |
+| Rig | `visual-authority/character-forge/00-source/asset-pack/RIG_SPEC.yaml` |
+| Motion | `visual-authority/character-forge/00-source/asset-pack/ANIMATION_SPEC.yaml` |
+| States/actions | `visual-authority/character-forge/00-source/asset-pack/STATE_ACTION_MATRIX.yaml` |
+| Speech | `visual-authority/character-forge/00-source/asset-pack/SPEECH_SPEC.yaml` |
+| Android aura boundary | `visual-authority/character-forge/00-source/asset-pack/AURA_HANDOFF_SPEC.yaml` |
+| Validation | `visual-authority/character-forge/00-source/asset-pack/VALIDATION_MATRIX.yaml` |
+| Rejected-source denylist | `visual-authority/character-forge/00-source/asset-pack/LEGACY_ASSET_DENYLIST.yaml` |
+| Production Rive after accepted promotion | `visual-authority/rive/van_runtime.riv` |
 
-Until artist `.riv` exists: enforce contract in runtime, ship Canvas fallback that remains recognizably canonical Van, document exact Rive authoring handoff.
+The former top-level PNG reference sheets, light-skinned/headband lock sheet and their derived Android
+bitmap poses are deleted. They are not historical fallback authority and must not be regenerated.
+
+Until the accepted `.riv` exists, the product fails closed to the canonical Canvas VAN; the retired
+OWNER_ART bitmap rung is never selected.

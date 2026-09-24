@@ -1,0 +1,66 @@
+schema_version: 2
+artboard: Van
+state_machine: VanRuntime
+runtime: app.rive:rive-android:9.6.5
+public_surface:
+  inputs:
+    - {name: state, type: number}
+    - {name: speaking, type: boolean}
+    - {name: listening, type: boolean}
+    - {name: attention_x, type: number, min: -1.0, max: 1.0}
+    - {name: attention_y, type: number, min: -1.0, max: 1.0}
+    - {name: mouth_open, type: number, min: 0.0, max: 1.0}
+    - {name: urgency, type: number, min: 0.0, max: 1.0}
+    - {name: viseme, type: number}
+    - {name: action_code, type: number}
+  triggers: [point, ack, celebrate, warning, wave, shrug, present, panel]
+architecture:
+  single_character_rig: true
+  per_state_character_copies_forbidden: true
+  skeleton_freezes_after_m2_owner_pass: true
+  layers:
+    L0: base_micro_motion
+    L1: durable_pose
+    L2: urgency_intensity
+    L3: gaze
+    L4: blink_and_face
+    L5: speech
+    L6: listening
+    L7: finite_action
+    L8: orb
+bones:
+  torso: [root, hips, spine, chest, neck, head]
+  each_arm: [shoulder, upper, fore, hand, finger_index, finger_group, thumb]
+  hair: "2-3 two-bone chains"
+  orb: [orb]
+constraints:
+  arm_ik: two_bone_each_side
+  head_follows_chest_percent: 30
+  orb_follows_damped_chest_and_gaze: true
+meshes:
+  required: [face, mouth, brows, hair_front, jacket_front]
+  max_vertices_per_mesh: 60
+artboard_policy:
+  transparent: true
+  aura_in_rive_forbidden: true
+  full_artboard_effects_forbidden: true
+  character_margin_percent_min: 6
+  validation_sizes_dp: [48, 96, 320]
+performance:
+  max_paths: 1200
+  max_meshes: 20
+  max_active_animation_layers: 8
+  max_clipping_shapes: 6
+  max_translucent_fraction: 0.08
+core_m2:
+  durable_states: [IDLE, LISTENING, THINKING, SPEAKING]
+  finite_actions: [HELLO_WAVE, ACK_NOD, POINT_TARGET]
+  full_public_surface_required: true
+full_m3:
+  all_18_states_required: true
+  all_14_actions_required: true
+  action_code_authoritative: true
+  action_latches_to_completion: true
+  action_duration_ms_range: [600, 1800]
+  unknown_state: IDLE
+  unknown_action: NO_ACTION

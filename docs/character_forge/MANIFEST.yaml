@@ -25,3 +25,14 @@ decisions:
     authority: owner_direction
     decision: Optional preparation and review lanes may be installed on Netcup but are not milestone prerequisites unless explicitly invoked.
     milestone_effect: NONE
+  - id: CF-D-04-REV2_1
+    status: ADOPTED
+    date: 2026-09-24
+    authority: owner_visual_authority
+    decision: The sole primary character board explicitly prints Skin Tone #B8853C in its colour-token panel. That declared token outranks raster sampling variance; #B8853C is the canonical medium-brown skin token with DeltaE2000 tolerance <= 8.
+    evidence:
+      primary_visual: visual-authority/assets/pack/owner_board_visual_authority.png
+      primary_visual_git_blob_sha: fc18bbe0b91e5b85d8cf8211314a69cb90b8bc0b
+      declared_palette_token: "#B8853C"
+      machine_lock: visual-authority/character-forge/00-source/asset-pack/APPROVED_IDENTITY_LOCK.yaml
+    milestone_effect: M1_AND_LATER_MUST_USE_CANONICAL_TOKEN

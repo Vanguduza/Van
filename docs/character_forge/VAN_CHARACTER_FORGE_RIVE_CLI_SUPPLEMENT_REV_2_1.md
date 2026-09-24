@@ -32,4 +32,8 @@ The bootstrap installs and qualifies:
 
 Bootstrap success means only `AUTHORING_WORKSTATION_READY`. It must never set owner confirmation, validation PASS, device qualification, owner acceptance or `QUAL-EMB-01=READY`.
 
-Local `--verify`, `--once`, tests and screenshots are Commander-authorizable inside the jailed Rive project root. Rive account login is an explicit owner action. Cloud `push` and signed `--publish` are additionally blocked until a root-managed cloud-write sentinel exists; the bootstrap never creates that sentinel.
+Local `--verify`, `--once`, tests and screenshots are Commander-authorizable inside the jailed Rive project root. Rive account login is an explicit owner action and is not on the Commander surface. Cloud `push` and signed `--publish` are additionally blocked until the root-owned sentinel `/etc/van-character-forge/allow-rive-cloud-write` exists in a root-owned directory; the bootstrap creates the directory but never the sentinel. Pushing candidate branches (`forge/*`) needs the owner's credential and `/etc/van-character-forge/allow-git-push`.
+
+## Provenance (audit 2026-09-23)
+
+A CLI candidate is traceable only if its receipt names the RML it was built from: `rive receipt --source-project` records a deterministic source-tree digest, `stage-candidate` refuses if the RML changed afterwards, and the RML project is committed beside the candidate. Validation is recorded only from the CI outcome file `van_validation.json` (see pack §14).

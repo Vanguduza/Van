@@ -28,7 +28,6 @@ private val sharedVisualSources = listOf(
     "visual/VanTradeSemantic.kt",
     "visual/VanBodyExclusionProfile.kt",
     "visual/VanFieldGeometry.kt",
-    "visual/VanArtPose.kt",
     // GAP-F-012 — the dependency-free half of the embodiment producer registry (no JSON,
     // unlike VanEmbodimentReducer.kt, which visual-preview has no JSON library to compile).
     "visual/VanEmbodimentProducers.kt",
@@ -66,13 +65,7 @@ tasks.register<JavaExec>("renderVanPreviews") {
     systemProperty("java.awt.headless", "true")
 }
 
-tasks.register<JavaExec>("extractOwnerArt") {
-    group = "van"
-    description = "Cuts shippable Van assets out of the owner-supplied design boards."
-    mainClass.set("com.dial.van.preview.OwnerArtMainKt")
-    classpath = sourceSets["main"].runtimeClasspath
-    systemProperty("java.awt.headless", "true")
-}
+// Legacy owner-art extraction intentionally removed: rejected bitmap poses must not be regenerated.
 
 tasks.named<Test>("test") {
     systemProperty("java.awt.headless", "true")

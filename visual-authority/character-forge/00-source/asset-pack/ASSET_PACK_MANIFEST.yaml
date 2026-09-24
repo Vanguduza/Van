@@ -1,0 +1,46 @@
+schema_version: 2
+pack_id: VAN-RIVE-APPROVED-ASSET-PACK-2026-09-24
+status: IDENTITY_LOCKED_PRE_M1
+authority:
+  primary_visual:
+    path: visual-authority/assets/pack/owner_board_visual_authority.png
+    git_blob_sha: fc18bbe0b91e5b85d8cf8211314a69cb90b8bc0b
+  machine_locks:
+    - visual-authority/character-forge/00-source/asset-pack/APPROVED_IDENTITY_LOCK.yaml
+    - visual-authority/rive_contract.json
+    - visual-authority/van-visual-authority-v2.yaml
+  human_canon:
+    - docs/VAN_CHARACTER_VISUAL_IDENTITY.md
+    - docs/VAN_VISUAL_ACCEPTANCE_MATRIX.md
+context_only_owner_boards:
+  - visual-authority/assets/pack/owner_board_android_ui_showcase.png
+  - visual-authority/assets/pack/owner_board_dial_hermes_showcase.png
+  - visual-authority/assets/pack/owner_board_futuristic_interface.png
+  - visual-authority/assets/pack/owner_board_interface_concept.png
+rejected_sources:
+  registry: visual-authority/character-forge/00-source/asset-pack/LEGACY_ASSET_DENYLIST.yaml
+  admission: FORBIDDEN
+rive_inputs:
+  - APPROVED_IDENTITY_LOCK.yaml
+  - LAYER_SPEC.yaml
+  - RIG_SPEC.yaml
+  - ANIMATION_SPEC.yaml
+  - STATE_ACTION_MATRIX.yaml
+  - SPEECH_SPEC.yaml
+  - AURA_HANDOFF_SPEC.yaml
+  - VALIDATION_MATRIX.yaml
+required_generated_assets:
+  m1:
+    - visual-authority/character-forge/06-vectors-clean/van_layers.svg
+    - visual-authority/character-forge/10-validation/layer_sheet.png
+  m2:
+    - visual-authority/character-forge/09-rive-working/van_runtime_core_1.riv
+    - visual-authority/character-forge/09-rive-working/van_runtime_core_1.receipt.json
+  m3:
+    - visual-authority/character-forge/09-rive-working/van_runtime_full_1.riv
+    - visual-authority/character-forge/09-rive-working/van_runtime_full_1.receipt.json
+  m4:
+    - visual-authority/rive/van_runtime.riv
+    - visual-authority/rive/van_runtime.sha256
+  m5:
+    - visual-authority/rive/manifest.json

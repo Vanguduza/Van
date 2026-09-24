@@ -23,6 +23,27 @@ def sha256_file(path: Path) -> str:
             digest.update(chunk)
     return digest.hexdigest()
 
+# Build products and review captures that live beside RML but are not authoring source.
+SOURCE_TREE_EXCLUDED_SUFFIXES = (".riv", ".receipt.json")
+SOURCE_TREE_EXCLUDED_DIRS = {".git", ".rive", "build", "out", "screenshots", "__pycache__"}
+
+def source_tree_sha256(project: Path) -> tuple[str, int]:
+    """Deterministic digest of an RML authoring project: sorted relative paths, each bound to
+    its content SHA-256. Independent of mtimes, ownership and traversal order."""
+    if not project.is_dir():
+        raise FileNotFoundError(project)
+    lines = []
+    for path in sorted(project.rglob("*"), key=lambda p: p.relative_to(project).as_posix()):
+        relative = path.relative_to(project)
+        if not path.is_file() or any(part in SOURCE_TREE_EXCLUDED_DIRS for part in relative.parts[:-1]):
+            continue
+        if path.name.endswith(SOURCE_TREE_EXCLUDED_SUFFIXES):
+            continue
+        lines.append(f"{relative.as_posix()}\0{sha256_file(path)}\n")
+    if not lines:
+        raise ValueError(f"RML project has no source files: {project}")
+    return hashlib.sha256("".join(lines).encode("utf-8")).hexdigest(), len(lines)
+
 def rel(path: Path) -> str:
     return path.resolve().relative_to(ROOT.resolve()).as_posix()
 

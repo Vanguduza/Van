@@ -1,0 +1,51 @@
+schema_version: 2
+validator: android/app/src/androidTest/java/com/dial/van/instrumentation/RiveContractTest.kt
+contract:
+  artboard: Van
+  state_machine: VanRuntime
+  exact_public_inputs: 9
+  exact_triggers: 8
+identity:
+  source: APPROVED_IDENTITY_LOCK.yaml
+  skin_delta_e2000_max: 8
+  silhouette_iou_min: 0.85
+  face_landmark_ratio_tolerance_percent: 5
+  dark_hair_forbidden: true
+  headband_forbidden: true
+  black_gloves_required: true
+  body_opacity_required: true
+evidence_sizes_dp: [48, 96, 320]
+core:
+  states: [IDLE, LISTENING, THINKING, SPEAKING]
+  actions: [HELLO_WAVE, ACK_NOD, POINT_TARGET]
+  gaze_extremes_required: true
+  mouth_0_vs_1_distinct: true
+full:
+  state_frames: 18
+  action_frames: 14
+  all_state_action_frames_must_clear_noise_floor: true
+  motion_sequences:
+    fps: 10
+    seconds: 8
+    states: [IDLE, LISTENING, THINKING, SPEAKING]
+    all_actions: true
+    transitions_min: 6
+  webm_and_contact_sheet_required: true
+transparency:
+  backgrounds: [light, dark, busy]
+  max_translucent_fraction: 0.08
+  aura_inside_artboard_forbidden: true
+production:
+  real_VanAvatar_path_must_keep_renderer_RIVE: true
+  source_and_app_riv_byte_identical: true
+  acceptance_binds:
+    - rive_sha256
+    - contract_sha256
+    - identity_spec_sha256
+    - visual_acceptance_matrix_sha256
+s24:
+  model_pattern: "SM-S928*"
+  committed_evidence_required: true
+  perfetto_frame_timeline_required: true
+  mixed_soak_minutes: 30
+  owner_acceptance_required: true

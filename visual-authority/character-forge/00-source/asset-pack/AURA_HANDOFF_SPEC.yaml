@@ -1,0 +1,34 @@
+schema_version: 2
+ownership: ANDROID_NATIVE
+canonical_source: visual-authority/van-visual-authority-v2.yaml
+rive_boundary:
+  aura_inside_riv: FORBIDDEN
+  body_glow_inside_riv: FORBIDDEN
+  full_ring_inside_riv: FORBIDDEN
+  character_artboard_background: transparent
+  allowed_character_optics: [visor_lens, orb_local_optics]
+zones:
+  inner_presence:
+    radius_scale: 1.00
+    colour: dial_identity_cyan
+    motion: restrained_breathing
+  mid_interaction:
+    radius_scale: 1.12
+    filament_count: [2, 5]
+    topology: directional_wind_ribbons
+    body_safe_exclusion: required
+  outer_semantic:
+    radius_scale: [1.35, 1.70]
+    segment_count: [1, 4]
+    max_total_coverage_degrees: 180
+    full_ring_forbidden: true
+    minimum_gap_from_mid_field_dp: 8
+    topology: state_specific_directional_flow
+motion_components: [multi_harmonic_wave, directional_wind, curl, particle_advection, electrical_pulse]
+requirements:
+  detached_from_character_silhouette: true
+  procedural_not_gif: true
+  deterministic_for_same_inputs: true
+  reduced_motion_freezes_geometry: true
+  workboard_does_not_replace_field: true
+  no_double_glow_with_rive: true

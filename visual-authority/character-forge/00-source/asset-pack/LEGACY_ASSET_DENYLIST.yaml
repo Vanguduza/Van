@@ -1,0 +1,38 @@
+schema_version: 1
+policy: paths_must_not_exist_in_canonical_tree
+reason: rejected_or_placeholder_character_visuals_can_reintroduce_identity_drift
+paths:
+  - visual-authority/assets/owner_visual_lock_sheet.jpg
+  - visual-authority/assets/turnaround.png
+  - visual-authority/assets/expressions.png
+  - visual-authority/assets/gestures.png
+  - visual-authority/assets/presentation.png
+  - visual-authority/assets/compact_avatar.png
+  - visual-authority/assets/urgent_decision.png
+  - visual-authority/assets/offline_degraded.png
+  - visual-authority/assets/command_centre.png
+  - visual-authority/assets/onboarding_hero.png
+  - visual-authority/assets/app_icon.png
+  - visual-authority/assets/adaptive_fg.png
+  - visual-authority/assets/hermes_avatar.png
+  - visual-authority/assets/monochrome_icon.png
+  - visual-authority/assets/notification_icon.png
+  - visual-authority/assets/derived/_contact_sheet.png
+  - visual-authority/assets/derived/van_compact_docked.png
+  - visual-authority/assets/derived/van_state_idle.png
+  - visual-authority/assets/derived/van_state_listening.png
+  - visual-authority/assets/derived/van_state_notifications.png
+  - visual-authority/assets/derived/van_state_searching.png
+  - visual-authority/assets/derived/van_state_success.png
+  - visual-authority/assets/derived/van_state_thinking.png
+  - visual-authority/assets/derived/van_state_warning.png
+  - visual-authority/assets/derived/van_state_working.png
+  - android/app/src/main/res/drawable-nodpi/van_compact_docked.png
+  - android/app/src/main/res/drawable-nodpi/van_state_idle.png
+  - android/app/src/main/res/drawable-nodpi/van_state_listening.png
+  - android/app/src/main/res/drawable-nodpi/van_state_notifications.png
+  - android/app/src/main/res/drawable-nodpi/van_state_searching.png
+  - android/app/src/main/res/drawable-nodpi/van_state_success.png
+  - android/app/src/main/res/drawable-nodpi/van_state_thinking.png
+  - android/app/src/main/res/drawable-nodpi/van_state_warning.png
+  - android/app/src/main/res/drawable-nodpi/van_state_working.png

@@ -1,8 +1,10 @@
 from __future__ import annotations
 
 import argparse
+import hashlib
 import json
 import os
+import re
 import shutil
 import subprocess
 import sys
@@ -11,7 +13,7 @@ from pathlib import Path
 from typing import Any
 import yaml
 from .gates import evaluate
-from .manifest import ROOT, append_receipt, dump_yaml, find_artifact, load_yaml, rel, sha256_file, source_records, upsert_artifact
+from .manifest import ROOT, append_receipt, dump_yaml, find_artifact, load_yaml, rel, sha256_file, source_records, source_tree_sha256, upsert_artifact
 from .receipts import now_iso, packaging_receipt, verify_owner_token
 from .status import load_status, save_status
 from .svg_lint import lint_svg, render_layer_sheet
@@ -24,6 +26,10 @@ EVIDENCE_DIR=ROOT/"visual-authority"/"character-forge"/"11-device-evidence"
 COMPONENT_LEDGER=ROOT/"evidence"/"van-system-audit"/"component_ledger.json"
 QUAL_MATRIX=ROOT/"docs"/"audit"/"van-fable-whole-project-2026-09-21"/"VAN_RUNTIME_QUALIFICATION_MATRIX.md"
 IDENTITY_DOC=ROOT/"docs"/"VAN_CHARACTER_VISUAL_IDENTITY.md"
+VISUAL_ACCEPTANCE_MATRIX=ROOT/"docs"/"VAN_VISUAL_ACCEPTANCE_MATRIX.md"
+IDENTITY_LOCK=ROOT/"visual-authority"/"character-forge"/"00-source"/"asset-pack"/"APPROVED_IDENTITY_LOCK.yaml"
+BOOTSTRAP=ROOT/"deploy"/"character-forge"/"bootstrap-netcup-authoring.sh"
+RML_ROOT=WORKING_DIR/"rml"
 
 def _yaml(path:Path)->dict[str,Any]:
     if not path.is_file(): return {}
@@ -43,10 +49,34 @@ def _pinned_tool(name:str)->str:
     return str((((_yaml(TOOLS_PATH).get("critical_path") or {}).get(name) or {}).get("version")) or "")
 
 def _inkscape_version()->str:
-    raw=subprocess.check_output(["inkscape","--version"],text=True).strip()
-    parts=raw.split()
-    if len(parts)<2: raise RuntimeError(f"unparseable Inkscape version: {raw}")
-    return parts[1]
+    return normalize_inkscape_version(subprocess.check_output(["inkscape","--version"],text=True).strip())
+
+def normalize_inkscape_version(raw:str)->str:
+    """`inkscape --version` prints `Inkscape 1.2.2 (b0a8486541, 2022-12-01)`; the pin is the
+    bare dotted version so the lock import and `vectors admit` compare like with like."""
+    match=re.search(r"(\d+\.\d+(?:\.\d+)*)",raw or "")
+    if not match: raise RuntimeError(f"unparseable Inkscape version: {raw!r}")
+    return match.group(1)
+
+def _bootstrap_rive_pin()->tuple[str,str]:
+    """The Rive CLI release the repository pins, read from the bootstrap itself so a host lock
+    can only import the exact reviewed version and archive checksum."""
+    text=BOOTSTRAP.read_text(encoding="utf-8") if BOOTSTRAP.is_file() else ""
+    version=re.search(r'^RIVE_CLI_VERSION="([^"]+)"',text,re.M); archive=re.search(r'^RIVE_CLI_SHA256="([0-9a-f]{64})"',text,re.M)
+    return (version.group(1) if version else "", archive.group(1) if archive else "")
+
+def _current_blockers(manifest:dict[str,Any], status:dict[str,Any])->list[str]:
+    """Blockers derived from repository truth rather than a hard-coded list, so a step that is
+    already satisfied (e.g. a pinned Rive CLI) is never reported as outstanding again."""
+    blockers=[]
+    if not manifest.get("sources"): blockers.append("SOURCE_SET_NOT_ADMITTED")
+    if not manifest.get("owner_confirmed_complete"): blockers.append("OWNER_SOURCE_CONFIRMATION_PENDING")
+    if _pinned_tool("rive_cli") in {"","None","UNPINNED"}: blockers.append("RIVE_CLI_UNPINNED")
+    if _pinned_tool("inkscape") in {"","None","UNPINNED"}: blockers.append("INKSCAPE_UNPINNED")
+    if not find_artifact(manifest,kind="layer_svg"): blockers.append("LAYER_ARTIFACT_MISSING")
+    if not status.get("rive_asset_ready"): blockers.append("RIVE_ASSET_MISSING")
+    if not status.get("device_qualified"): blockers.append("S24_DEVICE_GATES_NOT_RUN")
+    return blockers
 
 def _save(manifest,status): dump_yaml(manifest); save_status(status)
 
@@ -64,7 +94,7 @@ def cmd_source_admit(args):
         manifest["owner_confirmation_date"]=None
     if not status.get("baseline_sha"): status["baseline_sha"]=_git_head()
     manifest["baseline_sha"]=status["baseline_sha"]; status["current_stage"]="admission"; status["build_ready"]=False
-    status["blockers"]=["OWNER_SOURCE_CONFIRMATION_PENDING","RIVE_CLI_UNPINNED","LAYER_ARTIFACT_MISSING","RIVE_ASSET_MISSING","S24_DEVICE_GATES_NOT_RUN"]
+    status["blockers"]=_current_blockers(manifest,status)
     status["next_action"]="Owner reviews MANIFEST.yaml source set and sets owner_confirmed_complete: true with owner_confirmation_date"
     append_receipt(manifest,_receipt("source admit",sorted(f"{p}:{s}" for p,s in old),sorted(f"{p}:{s}" for p,s in new),args.actor)); _save(manifest,status)
     print("NO_CHANGE" if old==new else f"admitted {len(records)} source files"); return 0
@@ -111,20 +141,27 @@ def cmd_tools_import_lock(args):
         print(f"refused: toolchain lock missing: {lock_path}",file=sys.stderr); return 1
     lock=json.loads(lock_path.read_text(encoding="utf-8"))
     repo_sha=str(lock.get("repository_sha") or "")
-    if repo_sha and repo_sha != _git_head():
+    if not re.fullmatch(r"[0-9a-f]{40}",repo_sha):
+        print("refused: toolchain lock has no exact 40-hex repository_sha",file=sys.stderr); return 1
+    if repo_sha != _git_head():
         print(f"refused: toolchain lock repository SHA {repo_sha} differs from HEAD {_git_head()}",file=sys.stderr); return 1
     rive_version=str(((lock.get("rive_cli") or {}).get("version") or "")).strip()
-    inkscape_version=str(((lock.get("inkscape") or {}).get("version") or "")).strip()
-    if not rive_version or rive_version in {"UNPINNED","version-command-unavailable"} or not inkscape_version:
+    raw_inkscape=str(((lock.get("inkscape") or {}).get("version") or "")).strip()
+    if not rive_version or rive_version in {"UNPINNED","version-command-unavailable"} or not raw_inkscape:
         print("refused: toolchain lock lacks a qualified Rive CLI/Inkscape version",file=sys.stderr); return 1
+    pinned_version,pinned_archive=_bootstrap_rive_pin()
+    if rive_version!=pinned_version or str((lock.get("rive_cli") or {}).get("archive_sha256") or "")!=pinned_archive:
+        print(f"refused: toolchain lock Rive CLI {rive_version!r} is not the repository-pinned release {pinned_version!r}/{pinned_archive}",file=sys.stderr); return 1
+    try: inkscape_version=normalize_inkscape_version(raw_inkscape)
+    except RuntimeError as exc:
+        print(f"refused: {exc}",file=sys.stderr); return 1
     tools=_yaml(TOOLS_PATH)
     tools.setdefault("critical_path",{}).setdefault("rive_cli",{})["version"]=rive_version
     tools.setdefault("critical_path",{}).setdefault("inkscape",{})["version"]=inkscape_version
     _write_yaml(TOOLS_PATH,tools)
-    status=load_status()
-    status["blockers"]=[b for b in status.get("blockers",[]) if b!="RIVE_CLI_UNPINNED"]
+    status=load_status(); manifest=load_yaml()
+    status["blockers"]=_current_blockers(manifest,status)
     status["next_action"]="Run source admission/owner confirmation if pending, then proceed to M1/M2 with the pinned Netcup toolchain."
-    manifest=load_yaml()
     append_receipt(
         manifest,
         _receipt(
@@ -147,18 +184,32 @@ def cmd_rive_receipt(args):
     pinned=str((((_yaml(TOOLS_PATH).get("critical_path") or {}).get("rive_cli") or {}).get("version")))
     if pinned in {"", "None", "UNPINNED"} or args.authoring_version != pinned:
         print(f"refused: Rive CLI version {args.authoring_version!r} does not equal pinned version {pinned!r}",file=sys.stderr); return 1
+    project=Path(args.source_project).resolve()
+    try: project.relative_to(RML_ROOT.resolve())
+    except ValueError:
+        print("refused: --source-project must be an RML project under visual-authority/character-forge/09-rive-working/rml",file=sys.stderr); return 1
+    try: tree_sha,file_count=source_tree_sha256(project)
+    except (FileNotFoundError,ValueError) as exc:
+        print(f"refused: {exc}",file=sys.stderr); return 1
     contract_sha=sha256_file(CONTRACT_PATH)
     WORKING_DIR.mkdir(parents=True,exist_ok=True); path=WORKING_DIR/f"{candidate.stem}.receipt.json"
-    expected_static={"candidate_sha256":sha256_file(candidate),"candidate_path":rel(candidate),"stage":stage,"authoring_tool":"rive_cli","authoring_version":args.authoring_version,"rive_file_id":args.rive_file_id,"rive_revision":args.rive_revision,"svg_sha256":args.svg_sha,"contract_sha256":contract_sha,"artist":args.artist,"notes":args.notes or ""}
+    expected_static={"candidate_sha256":sha256_file(candidate),"candidate_path":rel(candidate),"stage":stage,"authoring_tool":"rive_cli","authoring_version":args.authoring_version,"rive_file_id":args.rive_file_id,"rive_revision":args.rive_revision,"svg_sha256":args.svg_sha,"contract_sha256":contract_sha,"source_project":rel(project),"source_tree_sha256":tree_sha,"source_file_count":file_count,"artist":args.artist,"notes":args.notes or ""}
     if path.is_file():
         existing=json.loads(path.read_text(encoding="utf-8"))
         if all(existing.get(k)==v for k,v in expected_static.items()):
             print("NO_CHANGE"); return 0
-    receipt=packaging_receipt(candidate=candidate,stage=stage,authoring_tool="rive_cli",authoring_version=args.authoring_version,rive_file_id=args.rive_file_id,rive_revision=args.rive_revision,svg_sha=args.svg_sha,contract_sha=contract_sha,artist=args.artist,notes=args.notes or "")
+    receipt=packaging_receipt(candidate=candidate,stage=stage,authoring_tool="rive_cli",authoring_version=args.authoring_version,rive_file_id=args.rive_file_id,rive_revision=args.rive_revision,svg_sha=args.svg_sha,contract_sha=contract_sha,artist=args.artist,source_project=rel(project),source_tree_sha256=tree_sha,source_file_count=file_count,notes=args.notes or "")
     path.write_text(json.dumps(receipt,indent=2)+"\n",encoding="utf-8")
-    append_receipt(manifest,_receipt("rive receipt",[args.svg_sha,receipt["contract_sha256"]],[receipt["candidate_sha256"]],args.actor))
+    append_receipt(manifest,_receipt("rive receipt",[args.svg_sha,receipt["contract_sha256"],tree_sha],[receipt["candidate_sha256"]],args.actor))
     status=load_status(); status["next_action"]=f"python -m tools.character_forge.cli rive stage-candidate {rel(candidate)} --stage {stage}"
     _save(manifest,status); print(path.relative_to(ROOT)); return 0
+
+def cmd_rive_source_hash(args):
+    """Read-only: print the deterministic RML source digest a reviewer can compare to a receipt."""
+    try: tree_sha,count=source_tree_sha256(Path(args.project).resolve())
+    except (FileNotFoundError,ValueError) as exc:
+        print(f"refused: {exc}",file=sys.stderr); return 1
+    print(json.dumps({"source_tree_sha256":tree_sha,"source_file_count":count})); return 0
 
 def _receipt_for_candidate(candidate):
     sha=sha256_file(candidate)
@@ -179,7 +230,13 @@ def cmd_rive_stage(args):
     if not layer or receipt.get("svg_sha256")!=layer.get("sha256"): print("refused: receipt references a superseded layer SVG",file=sys.stderr); return 1
     if receipt.get("authoring_tool")!="rive_cli": print("refused: receipt authoring tool is not rive_cli",file=sys.stderr); return 1
     if receipt.get("authoring_version")!=_pinned_tool("rive_cli"): print("refused: receipt Rive CLI version no longer matches TOOLS.yaml",file=sys.stderr); return 1
-    sha=sha256_file(candidate); mode="core" if stage=="core_rig" else "full"; threshold={"max_janky_percent":float((load_status().get("performance") or {}).get("max_janky_percent",5.0))}
+    project=ROOT/str(receipt.get("source_project") or "")
+    try: tree_sha,_=source_tree_sha256(project)
+    except (FileNotFoundError,ValueError):
+        print("refused: receipt names no readable RML source project",file=sys.stderr); return 1
+    if tree_sha!=receipt.get("source_tree_sha256"):
+        print("refused: RML source changed after this candidate was receipted; rebuild and re-receipt",file=sys.stderr); return 1
+    sha=sha256_file(candidate); mode="core" if stage=="core_rig" else "full"; performance=load_status().get("performance") or {}; threshold={"max_janky_percent":float(performance.get("max_janky_percent",5.0)),"min_distinct_rgb":float(performance.get("min_distinct_rgb",0.004)),"max_translucent_fraction":float(performance.get("max_translucent_fraction",0.08))}
     current_status=load_status(); key="core_rig" if stage=="core_rig" else "full_rig"
     staged=[ANDROID_TEST_ASSETS/"van_candidate.riv",ANDROID_DEBUG_ASSETS/"van_candidate.riv"]
     if current_status.get(key,{}).get("candidate_sha256")==sha and all(p.is_file() and sha256_file(p)==sha for p in staged):
@@ -240,72 +297,111 @@ def _validation_binding(evidence_dir, filename):
         raise ValueError(f"{filename} does not contain a SHA-256")
     return value.lower(), sha256_file(matches[0]), root
 
+STAGE_MODE={"core_rig":"core","full_rig":"full","production":"production"}
+GIT_ASSET={"core_rig":"android/app/src/androidTest/assets/van_candidate.riv","full_rig":"android/app/src/androidTest/assets/van_candidate.riv","production":"android/app/src/main/assets/van.riv"}
+
+def _validation_outcome(evidence_root:Path, *, stage:str, expected_sha:str, run_url:str, result:str)->dict[str,Any]:
+    """Refuses unless the CI-written `van_validation.json` itself states this result for these
+    exact bytes in this run, and the named commit really carried those bytes."""
+    matches=list(evidence_root.rglob("van_validation.json"))
+    if len(matches)!=1: raise ValueError(f"expected exactly one van_validation.json, found {len(matches)}")
+    binding=json.loads(matches[0].read_text(encoding="utf-8"))
+    run=re.search(r"/actions/runs/(\d+)",run_url)
+    github=binding.get("github") or {}
+    if not run or str(github.get("run_id") or "")!=run.group(1):
+        raise ValueError("van_validation.json belongs to a different CI run than --ci-run")
+    if binding.get("mode")!=STAGE_MODE[stage]:
+        raise ValueError(f"CI validated mode {binding.get('mode')!r}, not {STAGE_MODE[stage]!r}")
+    bound=binding.get("production_sha256" if stage=="production" else "candidate_sha256")
+    if bound!=expected_sha: raise ValueError(f"CI validated {bound}, not {expected_sha}")
+    if binding.get("result")!=result:
+        raise ValueError(f"CI result is {binding.get('result')!r}; refusing to record {result!r}: {'; '.join(binding.get('reasons') or [])}")
+    commit=str(github.get("sha") or "")
+    if not re.fullmatch(r"[0-9a-f]{40}",commit): raise ValueError("van_validation.json names no commit")
+    shown=subprocess.run(["git","show",f"{commit}:{GIT_ASSET[stage]}"],cwd=ROOT,capture_output=True)
+    if shown.returncode!=0: raise ValueError(f"validated commit {commit} or its asset is not in local git history; fetch it first")
+    if hashlib.sha256(shown.stdout).hexdigest()!=expected_sha: raise ValueError(f"commit {commit} does not carry the bytes being recorded")
+    return {"binding":binding,"binding_sha256":sha256_file(matches[0]),"commit":commit}
+
+def _core_frames(source:Path)->list[Path]:
+    """Only RiveContractTest's own core-mode captures become the M2 regression baseline."""
+    return sorted(p for p in source.rglob("*.png") if p.parent.name=="core" and p.parent.parent.name=="rive")
+
 def cmd_record_validation(args):
     status=load_status(); manifest=load_yaml(); run=str(args.ci_run or "").strip()
-    if not run.startswith(("https://github.com/","http://github.com/")):
+    if not re.match(r"^https://github\.com/[^/]+/[^/]+/actions/runs/\d+",run):
         print("refused: --ci-run must be a GitHub Actions run URL",file=sys.stderr); return 2
     if args.stage in {"core_rig","full_rig"}:
         record=status[args.stage]; expected=record.get("candidate_sha256")
         if not expected or args.candidate_sha != expected:
             print("refused: candidate SHA does not equal the staged candidate",file=sys.stderr); return 1
-        try:
-            bound_sha,binding_file_sha,source=_validation_binding(args.evidence_dir,"van_candidate.sha256")
-        except ValueError as exc:
-            print(f"refused: {exc}",file=sys.stderr); return 2
-        if bound_sha!=expected:
-            print(f"refused: CI evidence SHA {bound_sha} does not equal staged candidate {expected}",file=sys.stderr); return 1
-        previous=(manifest.get("ci_evidence") or {}).get(expected) or {}
-        baseline_ready=bool(list((EVIDENCE_DIR/"core_baseline").glob("*.png")))
-        if record.get("emulator_validation")==args.result and record.get("ci_run")==run and previous.get("result")==args.result and previous.get("candidate_sha256")==expected and previous.get("binding_file_sha256")==binding_file_sha and (args.stage!="core_rig" or args.result!="PASS" or baseline_ready):
-            print("NO_CHANGE"); return 0
-        record["emulator_validation"]=args.result; record["ci_run"]=run
-        manifest.setdefault("ci_evidence",{})[expected]={"stage":args.stage,"result":args.result,"ci_run":run,"candidate_sha256":expected,"binding_file_sha256":binding_file_sha,"recorded_at":now_iso()}
-        if args.stage=="core_rig" and args.result=="PASS":
-            pngs=list(source.rglob("*.png"))
-            if not pngs:
-                print("refused: no PNG core evidence found",file=sys.stderr); return 1
-            baseline=EVIDENCE_DIR/"core_baseline"
-            if baseline.exists(): shutil.rmtree(baseline)
-            baseline.mkdir(parents=True,exist_ok=True)
-            for path in pngs:
-                shutil.copyfile(path,baseline/path.name)
-            status["next_action"]="Owner views the exact core candidate on the S24 and records the core verdict"
-        elif args.stage=="full_rig" and args.result=="PASS":
-            status["next_action"]="Independent reviewer records full-rig PASS"
+        filename="van_candidate.sha256"
     else:
         if not SOURCE_RIV.is_file() or not APP_RIV.is_file() or sha256_file(SOURCE_RIV)!=sha256_file(APP_RIV):
             print("refused: production validation requires byte-identical integrated assets",file=sys.stderr); return 1
-        sha=sha256_file(APP_RIV)
-        try:
-            bound_sha,binding_file_sha,_=_validation_binding(args.evidence_dir,"van_production.sha256")
-        except ValueError as exc:
-            print(f"refused: {exc}",file=sys.stderr); return 2
-        if bound_sha!=sha:
-            print(f"refused: CI production evidence SHA {bound_sha} does not equal integrated asset {sha}",file=sys.stderr); return 1
-        prod=status.get("production") or {}; prior=(manifest.get("ci_evidence") or {}).get(sha) or {}
-        if prod.get("emulator_validation")==args.result and prod.get("ci_run")==run and prod.get("rive_sha256")==sha and prior.get("stage")=="production" and prior.get("result")==args.result and prior.get("binding_file_sha256")==binding_file_sha:
-            print("NO_CHANGE"); return 0
-        status["production"]={"emulator_validation":args.result,"ci_run":run,"rive_sha256":sha}
-        manifest.setdefault("ci_evidence",{})[sha]={"stage":"production","result":args.result,"ci_run":run,"candidate_sha256":sha,"binding_file_sha256":binding_file_sha,"recorded_at":now_iso()}
+        expected=sha256_file(APP_RIV); filename="van_production.sha256"
+    try:
+        bound_sha,_,source=_validation_binding(args.evidence_dir,filename)
+        if bound_sha!=expected: raise ValueError(f"CI evidence SHA {bound_sha} does not equal {expected}")
+        outcome=_validation_outcome(source,stage=args.stage,expected_sha=expected,run_url=run,result=args.result)
+    except (ValueError,json.JSONDecodeError) as exc:
+        print(f"refused: {exc}",file=sys.stderr); return 1
+    evidence_row={"stage":args.stage,"result":args.result,"ci_run":run,"candidate_sha256":expected,"binding_file_sha256":outcome["binding_sha256"],"validated_commit":outcome["commit"],"tests":outcome["binding"].get("tests")}
+    previous=(manifest.get("ci_evidence") or {}).get(expected) or {}
+    if args.stage=="production":
+        current=status.get("production") or {}
+        unchanged=current.get("emulator_validation")==args.result and current.get("ci_run")==run and current.get("rive_sha256")==expected
+    else:
+        current=status[args.stage]
+        unchanged=current.get("emulator_validation")==args.result and current.get("ci_run")==run
+        if args.stage=="core_rig" and args.result=="PASS" and not list((EVIDENCE_DIR/"core_baseline").glob("*.png")): unchanged=False
+    if unchanged and all(previous.get(k)==v for k,v in evidence_row.items()):
+        print("NO_CHANGE"); return 0
+    if args.stage=="core_rig" and args.result=="PASS":
+        frames=_core_frames(source)
+        if not frames:
+            print("refused: no rive/core/*.png frames in the evidence (download van-instrumentation-screenshots too)",file=sys.stderr); return 1
+        baseline=EVIDENCE_DIR/"core_baseline"
+        if baseline.exists(): shutil.rmtree(baseline)
+        baseline.mkdir(parents=True,exist_ok=True)
+        for path in frames: shutil.copyfile(path,baseline/path.name)
+        status["next_action"]="Owner views the exact core candidate on the S24 and records the core verdict"
+    elif args.stage=="full_rig" and args.result=="PASS":
+        status["next_action"]="Independent reviewer records full-rig PASS"
+    elif args.stage=="production":
         status["next_action"]="Complete S24 DEVICE_CHECKLIST.yaml and owner biometric acceptance" if args.result=="PASS" else "Fix production validation failure"
-        expected=sha
+    if args.stage=="production":
+        status["production"]={"emulator_validation":args.result,"ci_run":run,"rive_sha256":expected}
+    else:
+        current["emulator_validation"]=args.result; current["ci_run"]=run
+    manifest.setdefault("ci_evidence",{})[expected]=dict(evidence_row,recorded_at=now_iso())
     append_receipt(
         manifest,
         _receipt(
             "record validation",
-            [str(expected),run],
+            [str(expected),run,outcome["commit"]],
             [f"{args.stage}={args.result}"],
             args.actor,
-            "CI validation result bound to the exact candidate/production SHA",
+            "CI-stated RiveContractTest outcome bound to the exact SHA, run and commit",
         ),
     )
     _save(manifest,status); return 0
 
+def _same_party(a:str|None,b:str|None)->bool:
+    norm=lambda v: re.sub(r"^(artist|agent|cli):","",str(v or "").strip().lower())
+    return bool(norm(a)) and norm(a)==norm(b)
+
 def cmd_review(args):
     manifest=load_yaml(); status=load_status()
+    # Rev 2 §3: the independent reviewer may not be the author, and the bounded Commander
+    # worker that drives authoring may not review what it produced.
+    if str(args.actor or "").strip().lower()=="commander" or _same_party(args.reviewer,"commander"):
+        print("refused: the Commander authoring surface cannot record an independent review",file=sys.stderr); return 1
     if args.target=="layer":
         layer=find_artifact(manifest,kind="layer_svg")
         if not layer: print("refused: no admitted layer SVG",file=sys.stderr); return 1
+        if _same_party(args.reviewer,layer.get("produced_by")):
+            print("refused: the layer SVG author cannot review it",file=sys.stderr); return 1
         row={"sha256":layer["sha256"],"reviewed_by":args.reviewer,"date":args.date,"verdict":args.verdict,"notes":args.notes or ""}
         if (manifest.get("reviews") or {}).get("layer_svg")==row: print("NO_CHANGE"); return 0
         manifest.setdefault("reviews",{})["layer_svg"]=row
@@ -314,6 +410,9 @@ def cmd_review(args):
         sha=(status.get("full_rig") or {}).get("candidate_sha256")
         if not sha or (status.get("full_rig") or {}).get("emulator_validation")!="PASS":
             print("refused: full review requires a full candidate with emulator PASS",file=sys.stderr); return 1
+        receipt=next((json.loads(p.read_text(encoding="utf-8")) for p in WORKING_DIR.glob("*.receipt.json") if json.loads(p.read_text(encoding="utf-8")).get("candidate_sha256")==sha),{}) if WORKING_DIR.is_dir() else {}
+        if _same_party(args.reviewer,receipt.get("artist")):
+            print("refused: the full-rig author cannot review it",file=sys.stderr); return 1
         row={"sha256":sha,"reviewed_by":args.reviewer,"date":args.date,"verdict":args.verdict,"notes":args.notes or ""}
         if (manifest.get("reviews") or {}).get("full_rig")==row and status["full_rig"].get("reviewed")==args.verdict: print("NO_CHANGE"); return 0
         manifest.setdefault("reviews",{})["full_rig"]=row
@@ -409,6 +508,10 @@ def cmd_record_acceptance(args):
         if not args.token or not args.device_public_key:return 2
         verified=verify_owner_token(args.token,Path(args.device_public_key).read_text(encoding="utf-8"),act="visual-accept",subject=subject)
         final={"token":args.token,"rive_sha256":sha,"subject":subject,"key_id":verified["key_id"],"verified":True,"verified_by":"local","verified_at":now_iso()}
+    final["contract_sha256"]=sha256_file(CONTRACT_PATH)
+    final["identity_spec_sha256"]=sha256_file(IDENTITY_DOC)
+    final["visual_acceptance_matrix_sha256"]=sha256_file(VISUAL_ACCEPTANCE_MATRIX)
+    final["identity_lock_sha256"]=sha256_file(IDENTITY_LOCK)
     acceptance=_yaml(ACCEPTANCE_PATH)
     if acceptance.get("final")==final and load_status().get("owner_accepted"):
         print("NO_CHANGE"); return 0
@@ -418,7 +521,7 @@ def cmd_record_acceptance(args):
         manifest,
         _receipt(
             "owner record-acceptance",
-            [sha,str(final.get("key_id") or ""),str(final.get("verified_by") or "")],
+            [sha,final["contract_sha256"],final["identity_spec_sha256"],final["visual_acceptance_matrix_sha256"],final["identity_lock_sha256"],str(final.get("key_id") or ""),str(final.get("verified_by") or "")],
             ["OWNER_ACCEPTED"],
             args.actor,
             "verified visual-accept authority imported without copying the credential into the manifest receipt",
@@ -505,9 +608,9 @@ def cmd_release(args):
     release_path=SOURCE_RIV.parent/"manifest.json"
     if release_path.is_file() and status.get("qual_emb_01")=="READY":
         existing=json.loads(release_path.read_text(encoding="utf-8"))
-        if existing.get("rive_sha256")==sha and existing.get("contract_sha256")==sha256_file(CONTRACT_PATH):
+        if existing.get("rive_sha256")==sha and existing.get("contract_sha256")==sha256_file(CONTRACT_PATH) and existing.get("identity_spec_sha256")==sha256_file(IDENTITY_DOC) and existing.get("visual_acceptance_matrix_sha256")==sha256_file(VISUAL_ACCEPTANCE_MATRIX) and existing.get("identity_lock_sha256")==sha256_file(IDENTITY_LOCK):
             print("NO_CHANGE"); return 0
-    release={"asset":rel(APP_RIV),"source_asset":rel(SOURCE_RIV),"artboard":"Van","state_machine":"VanRuntime","git_sha":_git_head(),"rive_sha256":sha,"contract_sha256":sha256_file(CONTRACT_PATH),"visual_authority_revision":"2.3","rive_android":str((((tools.get("critical_path") or {}).get("rive_android") or {}).get("version"))),"rive_authoring_tool":"rive_cli","rive_authoring_version":str((((tools.get("critical_path") or {}).get("rive_cli") or {}).get("version"))),"emulator_validation_run":(status.get("production") or {}).get("ci_run"),"device_checklist":rel(DEVICE_PATH),"acceptance":rel(ACCEPTANCE_PATH)+"#final","released_at":now_iso()}
+    release={"asset":rel(APP_RIV),"source_asset":rel(SOURCE_RIV),"artboard":"Van","state_machine":"VanRuntime","git_sha":_git_head(),"rive_sha256":sha,"contract_sha256":sha256_file(CONTRACT_PATH),"identity_spec_sha256":sha256_file(IDENTITY_DOC),"visual_acceptance_matrix_sha256":sha256_file(VISUAL_ACCEPTANCE_MATRIX),"identity_lock_sha256":sha256_file(IDENTITY_LOCK),"visual_authority_revision":"2.3","rive_android":str((((tools.get("critical_path") or {}).get("rive_android") or {}).get("version"))),"rive_authoring_tool":"rive_cli","rive_authoring_version":str((((tools.get("critical_path") or {}).get("rive_cli") or {}).get("version"))),"emulator_validation_run":(status.get("production") or {}).get("ci_run"),"device_checklist":rel(DEVICE_PATH),"acceptance":rel(ACCEPTANCE_PATH)+"#final","released_at":now_iso()}
     release_path.write_text(json.dumps(release,indent=2)+"\n",encoding="utf-8"); manifest=load_yaml(); artifact=find_artifact(manifest,kind="riv_accepted",sha256=sha)
     if artifact:artifact["promotion"]="RELEASED"; artifact["stage"]="released"
     append_receipt(manifest,_receipt("release promote",[sha],[sha256_file(release_path)],args.actor,"M4 green; exact owner-accepted, S24-qualified production asset promoted")); status.update({"current_stage":"released","device_qualified":True,"owner_accepted":True,"rive_authored":True,"rive_asset_ready":True,"qual_emb_01":"READY","blockers":[],"next_action":"Commit the release outputs and require van-ci green on that commit"})
@@ -519,7 +622,8 @@ def _parser():
     tools_cmd=sub.add_parser("tools").add_subparsers(dest="command",required=True); p=tools_cmd.add_parser("import-lock"); p.add_argument("--path",required=True); p.set_defaults(func=cmd_tools_import_lock)
     source=sub.add_parser("source").add_subparsers(dest="command",required=True); p=source.add_parser("admit"); p.set_defaults(func=cmd_source_admit)
     vectors=sub.add_parser("vectors").add_subparsers(dest="command",required=True); p=vectors.add_parser("lint"); p.add_argument("svg"); p.add_argument("--no-geometry",action="store_true",help=argparse.SUPPRESS); p.set_defaults(func=cmd_vectors_lint); p=vectors.add_parser("admit"); p.add_argument("svg"); p.add_argument("--artist",required=True); p.set_defaults(func=cmd_vectors_admit)
-    rive=sub.add_parser("rive").add_subparsers(dest="command",required=True); p=rive.add_parser("receipt"); p.add_argument("--candidate",required=True); p.add_argument("--stage",choices=["core_rig","full_rig"]); p.add_argument("--authoring-version",required=True); p.add_argument("--rive-file-id",required=True); p.add_argument("--rive-revision",required=True); p.add_argument("--svg-sha",required=True); p.add_argument("--artist",required=True); p.add_argument("--notes"); p.set_defaults(func=cmd_rive_receipt); p=rive.add_parser("stage-candidate"); p.add_argument("riv"); p.add_argument("--stage",choices=["core_rig","full_rig"],required=True); p.set_defaults(func=cmd_rive_stage)
+    rive=sub.add_parser("rive").add_subparsers(dest="command",required=True); p=rive.add_parser("receipt"); p.add_argument("--candidate",required=True); p.add_argument("--stage",choices=["core_rig","full_rig"]); p.add_argument("--authoring-version",required=True); p.add_argument("--rive-file-id",required=True); p.add_argument("--rive-revision",required=True); p.add_argument("--svg-sha",required=True); p.add_argument("--source-project",required=True,help="RML project the candidate was built from"); p.add_argument("--artist",required=True); p.add_argument("--notes"); p.set_defaults(func=cmd_rive_receipt)
+    p=rive.add_parser("source-hash"); p.add_argument("project"); p.set_defaults(func=cmd_rive_source_hash); p=rive.add_parser("stage-candidate"); p.add_argument("riv"); p.add_argument("--stage",choices=["core_rig","full_rig"],required=True); p.set_defaults(func=cmd_rive_stage)
     p=rive.add_parser("record-validation"); p.add_argument("--stage",choices=["core_rig","full_rig","production"],required=True); p.add_argument("--result",choices=["PASS","FAIL"],required=True); p.add_argument("--ci-run",required=True); p.add_argument("--candidate-sha"); p.add_argument("--evidence-dir"); p.set_defaults(func=cmd_record_validation)
     review=sub.add_parser("review").add_subparsers(dest="command",required=True); p=review.add_parser("record"); p.add_argument("--target",choices=["layer","full"],required=True); p.add_argument("--verdict",choices=["PASS","FAIL"],required=True); p.add_argument("--reviewer",required=True); p.add_argument("--date",required=True); p.add_argument("--notes"); p.set_defaults(func=cmd_review)
     p=sub.add_parser("gate"); p.add_argument("gate",choices=["m0","m1","m2","m3","m4","m5"]); p.add_argument("--json",action="store_true"); p.set_defaults(func=cmd_gate)

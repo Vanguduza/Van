@@ -78,12 +78,12 @@ fun VanMinimizedAvatar(
 
         // Ears + solid medium-brown face.
         drawOval(
-            color = Color(0xFFA9764E),
+            color = Color(0xFFB8853C),
             topLeft = Offset(faceCenter.x - faceRx * 1.11f, faceCenter.y - faceRy * 0.18f),
             size = Size(faceRx * 2.22f, faceRy * 0.45f),
         )
         drawOval(
-            color = Color(0xFFA9764E),
+            color = Color(0xFFB8853C),
             topLeft = Offset(faceCenter.x - faceRx, faceCenter.y - faceRy),
             size = Size(faceRx * 2f, faceRy * 2f),
         )
@@ -148,9 +148,6 @@ fun VanMinimizedAvatar(
             style = Stroke(width = (d * 0.013f).coerceAtLeast(1f)),
         )
 
-        // Small dark headband/temple anchors keep the portrait recognisably VAN.
-        drawCircle(Color(0xFF101720), d * 0.035f, Offset(center.x - d * 0.275f, center.y + d * 0.005f))
-        drawCircle(Color(0xFF101720), d * 0.035f, Offset(center.x + d * 0.275f, center.y + d * 0.005f))
     }
 }
 

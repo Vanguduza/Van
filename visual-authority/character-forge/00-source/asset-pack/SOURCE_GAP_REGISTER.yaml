@@ -1,0 +1,26 @@
+schema_version: 2
+register:
+  - id: ASSET-GAP-001
+    state: RESOLVED_BY_AUTHORITY_CONSOLIDATION
+    finding: rejected light-skinned/headband lock sheet conflicted with canonical medium-brown/no-headband VAN
+    disposition: removed and denylisted; canonical owner_board_visual_authority.png is sole primary visual
+  - id: ASSET-GAP-002
+    state: RESOLVED_BY_DELETION
+    finding: procedural placeholder turnaround/expression/gesture/presentation/icon sheets were named as authority
+    disposition: deleted and denylisted
+  - id: ASSET-GAP-003
+    state: RESOLVED_BY_RUNTIME_FAIL_CLOSED
+    finding: rejected derived owner-art PNGs could outrank Canvas when Rive was absent
+    disposition: packaged PNGs deleted; owner-art fallback disabled; RIVE -> CANVAS until accepted Rive exists
+  - id: ASSET-GAP-004
+    state: OPEN_EVIDENCE_GATE
+    finding: production vector layer sheet is not yet authored/reviewed
+    disposition: M1 cannot pass until van_layers.svg is authored from this pack and independently reviewed
+  - id: ASSET-GAP-005
+    state: OPEN_EVIDENCE_GATE
+    finding: premium RML feature expressiveness remains unproven on the real rig
+    disposition: run rig-capability probe before M2 and record CLI-only vs hybrid decision
+  - id: ASSET-GAP-006
+    state: OPEN_EXTERNAL_GATE
+    finding: physical S24 and owner final acceptance are not yet performed
+    disposition: never claim M4/M5 before evidence

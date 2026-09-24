@@ -12,6 +12,7 @@ from .status import load_status, validate_status
 DOCS=ROOT/"docs"/"character_forge"; TOOLS=DOCS/"TOOLS.yaml"; ACCEPTANCE=DOCS/"ACCEPTANCE.yaml"; DEVICE=DOCS/"DEVICE_CHECKLIST.yaml"
 CONTRACT=ROOT/"visual-authority"/"rive_contract.json"; SOURCE_RIV=ROOT/"visual-authority"/"rive"/"van_runtime.riv"; APP_RIV=ROOT/"android"/"app"/"src"/"main"/"assets"/"van.riv"
 RELEASE_MANIFEST=ROOT/"visual-authority"/"rive"/"manifest.json"; GRADLE=ROOT/"android"/"app"/"build.gradle.kts"
+IDENTITY_DOC=ROOT/"docs"/"VAN_CHARACTER_VISUAL_IDENTITY.md"; VISUAL_ACCEPTANCE_MATRIX=ROOT/"docs"/"VAN_VISUAL_ACCEPTANCE_MATRIX.md"; IDENTITY_LOCK=ROOT/"visual-authority"/"character-forge"/"00-source"/"asset-pack"/"APPROVED_IDENTITY_LOCK.yaml"
 
 @dataclass(frozen=True)
 class GateResult:
@@ -55,6 +56,8 @@ def _receipt_problems(sha, stage, manifest, tools):
         problems.append(f"{stage} receipt authoring tool is not rive_cli")
     if row.get("authoring_version")!=pin:
         problems.append(f"{stage} receipt Rive CLI version mismatch")
+    if not re.fullmatch(r"[0-9a-f]{64}",str(row.get("source_tree_sha256") or "")) or not str(row.get("source_project") or "").startswith("visual-authority/character-forge/09-rive-working/rml/"):
+        problems.append(f"{stage} receipt does not bind an RML source project")
     candidate=ROOT/str(row.get("candidate_path") or "")
     if not candidate.is_file() or sha256_file(candidate)!=sha: problems.append(f"{stage} receipt candidate path/hash mismatch")
     return problems
@@ -129,6 +132,22 @@ def m3():
         problems.append("full-rig review is for a superseded SHA")
     return problems
 
+# Galaxy S24 Ultra model numbers (regional variants). The checklist is the physical-device
+# gate; an emulator or another handset cannot satisfy it.
+S24_ULTRA_MODELS=re.compile(r"^SM-S928[0-9A-Z]{0,3}$")
+DEVICE_EVIDENCE_ROOT="visual-authority/character-forge/11-device-evidence/"
+
+def _device_problems(device):
+    problems=[]
+    model=str((device.get("device") or {}).get("model") or "").strip()
+    if model and not S24_ULTRA_MODELS.match(model): problems.append(f"device checklist model {model!r} is not a Galaxy S24 Ultra")
+    for name,ref in (device.get("evidence") or {}).items():
+        ref=str(ref or "").strip()
+        if not ref: continue
+        if not ref.startswith(DEVICE_EVIDENCE_ROOT) or ".." in ref or not (ROOT/ref).is_file():
+            problems.append(f"device evidence for {name} is not a committed file under {DEVICE_EVIDENCE_ROOT}")
+    return problems
+
 def _device_complete(device):
     checks=device.get("checks") or {}
     identity=device.get("device") or {}
@@ -153,8 +172,10 @@ def m4():
     if source_sha!=app_sha: problems.append("source and shipped Rive bytes differ")
     device=_yaml(DEVICE)
     if not _device_complete(device): problems.append("S24 device checklist incomplete")
+    problems.extend(_device_problems(device))
     if not str(device.get("thermal_note") or "").strip(): problems.append("S24 thermal note missing")
-    elif (device.get("device") or {}).get("rive_sha256")!=source_sha: problems.append("device checklist Rive SHA differs")
+    if not str(device.get("perfetto_trace") or "").strip(): problems.append("S24 Perfetto trace missing")
+    if (device.get("device") or {}).get("rive_sha256")!=source_sha: problems.append("device checklist Rive SHA differs")
     acceptance=_yaml(ACCEPTANCE).get("final")
     if not isinstance(acceptance,dict) or not acceptance.get("verified"):
         problems.append("verified final owner acceptance missing")
@@ -162,6 +183,10 @@ def m4():
         if acceptance.get("act") not in (None,"visual-accept"): problems.append("owner acceptance act is not visual-accept")
         if acceptance.get("subject")!=f"sha256:{source_sha}":
             problems.append("owner acceptance subject differs from integrated asset")
+        if acceptance.get("contract_sha256")!=sha256_file(CONTRACT): problems.append("owner acceptance contract SHA is stale")
+        if acceptance.get("identity_spec_sha256")!=sha256_file(IDENTITY_DOC): problems.append("owner acceptance identity-spec SHA is stale")
+        if acceptance.get("visual_acceptance_matrix_sha256")!=sha256_file(VISUAL_ACCEPTANCE_MATRIX): problems.append("owner acceptance visual-matrix SHA is stale")
+        if acceptance.get("identity_lock_sha256")!=sha256_file(IDENTITY_LOCK): problems.append("owner acceptance identity-lock SHA is stale")
         checklist_identity=device.get("device") or {}
         if acceptance.get("apk_sha256") and acceptance.get("apk_sha256")!=checklist_identity.get("apk_sha256"):
             problems.append("owner acceptance APK SHA differs from S24 checklist")
@@ -177,6 +202,10 @@ def m5():
     else:
         release=json.loads(RELEASE_MANIFEST.read_text(encoding="utf-8"))
         if APP_RIV.is_file() and release.get("rive_sha256")!=sha256_file(APP_RIV): problems.append("release manifest Rive SHA differs")
+        if release.get("contract_sha256")!=sha256_file(CONTRACT): problems.append("release manifest contract SHA differs")
+        if release.get("identity_spec_sha256")!=sha256_file(IDENTITY_DOC): problems.append("release manifest identity-spec SHA differs")
+        if release.get("visual_acceptance_matrix_sha256")!=sha256_file(VISUAL_ACCEPTANCE_MATRIX): problems.append("release manifest visual-matrix SHA differs")
+        if release.get("identity_lock_sha256")!=sha256_file(IDENTITY_LOCK): problems.append("release manifest identity-lock SHA differs")
     if status.get("qual_emb_01")!="READY": problems.append("QUAL-EMB-01 not READY")
     return problems
 

@@ -1,0 +1,57 @@
+schema_version: 2
+personality: calm_capable_owner_oriented_professional_futurist
+motion_rules:
+  economical: true
+  bounce_forbidden: true
+  jitter_forbidden: true
+  character_squash_stretch_forbidden: true
+  orb_squash_stretch_allowed: true
+  anticipation_max_percent: 15
+  overshoot_max_percent: 8
+  overshoot_settle_ms: 150
+base_life:
+  visible_loop_period_seconds_min: 6
+  breathing_cycle_seconds_approx: 4
+  breathing_scale_percent_max: 2
+  asynchronous_phases_required: true
+gaze:
+  range: [-1.0, 1.0]
+  dead_zone: 0.05
+  pupil_offset_max_iris_radius_percent: 35
+  head_yaw_deg: 12
+  head_pitch_deg: 8
+  chest_yaw_deg: 4
+  eye_response_ms: 100
+  head_response_ms: 220
+  micro_saccade_interval_seconds: [1.2, 2.5]
+  micro_saccade_max_percent: 6
+blink:
+  interval_seconds: [3, 6]
+  duration_ms: [120, 160]
+  double_blink_probability: 0.15
+  close_open_ratio: [40, 60]
+  suppress_during: [POINT_LEFT, POINT_RIGHT, POINT_UP, POINT_DOWN, POINT_TARGET, PRESENT_CARD]
+  urgent_entry_suppression_ms: 300
+speech:
+  viseme_blend_ms: [60, 80]
+  silence_close_ms: 120
+  jaw_driven_by_mouth_open: true
+  additive_over_pose: true
+  speech_head_nod_deg_max: 2
+transitions:
+  durable_to_durable_ms: [200, 300]
+  warning_error_urgent:
+    anticipation_ms: 80
+    rise_ms: 220
+  urgent_exit_settle_ms: 400
+  return_idle_ms: 300
+finite_action:
+  rising_edge_source: action_code
+  latching: play_to_completion
+  duration_ms: [600, 1800]
+  new_action_interrupt_after_anticipation_only: true
+  speech_continues: true
+  gaze_resume_after_return_ms: 200
+reduced_motion:
+  autonomous_hover_breath_sway: disabled
+  identity_state_speech_attention: preserved

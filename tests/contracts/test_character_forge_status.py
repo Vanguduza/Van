@@ -112,3 +112,134 @@ def test_validation_binding_rejects_no_asset_sentinel(tmp_path):
 
     with pytest.raises(ValueError, match="does not contain a SHA-256"):
         cli._validation_binding(evidence, "van_candidate.sha256")
+
+
+def _write_lock(tmp_path, **overrides):
+    lock = {
+        "repository_sha": "1" * 40,
+        "rive_cli": {"version": "1.1.1", "archive_sha256": "41684e9d99fea98e01c2c155e07ec985130b95b640410dc0fbe4ca30c271a7d5"},
+        "inkscape": {"version": "Inkscape 1.2.2 (b0a8486541, 2022-12-01)"},
+    }
+    lock.update(overrides)
+    path = tmp_path / "toolchain.lock.json"
+    path.write_text(json.dumps(lock), encoding="utf-8")
+    return path
+
+
+def _capture_tools(monkeypatch, cli):
+    written = {}
+    monkeypatch.setattr(cli, "_git_head", lambda: "1" * 40)
+    monkeypatch.setattr(cli, "_yaml", lambda _path: {"critical_path": {}})
+    monkeypatch.setattr(cli, "_write_yaml", lambda _path, data: written.update(data))
+    monkeypatch.setattr(cli, "load_status", lambda: {"blockers": []})
+    monkeypatch.setattr(cli, "load_yaml", lambda: {"receipts": []})
+    monkeypatch.setattr(cli, "_save", lambda *_: None)
+    return written
+
+
+def test_bootstrap_inkscape_lock_pins_the_version_vectors_admit_observes(monkeypatch, tmp_path):
+    """CF-OPUS-002: the bootstrap records `Inkscape 1.2.2 (hash, date)`; the pin must be the
+    bare version `_inkscape_version()` reads, or M1 `vectors admit` can never pass."""
+    from argparse import Namespace
+    from tools.character_forge import cli
+
+    written = _capture_tools(monkeypatch, cli)
+    assert cli.cmd_tools_import_lock(Namespace(path=str(_write_lock(tmp_path)), actor="test")) == 0
+    assert written["critical_path"]["inkscape"]["version"] == "1.2.2"
+    assert cli.normalize_inkscape_version("Inkscape 1.2.2 (b0a8486541, 2022-12-01)") == "1.2.2"
+
+
+def test_toolchain_import_requires_exact_repository_sha(monkeypatch, tmp_path):
+    from argparse import Namespace
+    from tools.character_forge import cli
+
+    written = _capture_tools(monkeypatch, cli)
+    for bad in ("", "abc", "2" * 40):
+        path = _write_lock(tmp_path, repository_sha=bad)
+        assert cli.cmd_tools_import_lock(Namespace(path=str(path), actor="test")) == 1
+    assert written == {}
+
+
+def test_toolchain_import_refuses_unpinned_rive_release(monkeypatch, tmp_path):
+    from argparse import Namespace
+    from tools.character_forge import cli
+
+    written = _capture_tools(monkeypatch, cli)
+    for rive in ({"version": "1.2.0", "archive_sha256": "41684e9d99fea98e01c2c155e07ec985130b95b640410dc0fbe4ca30c271a7d5"},
+                 {"version": "1.1.1", "archive_sha256": "0" * 64}):
+        path = _write_lock(tmp_path, rive_cli=rive)
+        assert cli.cmd_tools_import_lock(Namespace(path=str(path), actor="test")) == 1
+    assert written == {}
+
+
+def test_blockers_are_derived_from_truth_not_a_stale_list(monkeypatch):
+    from tools.character_forge import cli
+
+    monkeypatch.setattr(cli, "_pinned_tool", lambda name: "1.1.1" if name == "rive_cli" else "1.2.2")
+    blockers = cli._current_blockers({"sources": [{"path": "x"}], "artifacts": []}, {})
+    assert "RIVE_CLI_UNPINNED" not in blockers
+    assert "SOURCE_SET_NOT_ADMITTED" not in blockers
+    assert "OWNER_SOURCE_CONFIRMATION_PENDING" in blockers
+
+
+def test_m4_rejects_owner_acceptance_when_visual_authority_changes(monkeypatch, tmp_path):
+    from tools.character_forge import gates
+    source = tmp_path / "van_runtime.riv"
+    shipped = tmp_path / "van.riv"
+    source.write_bytes(b"RIVE" * 512)
+    shipped.write_bytes(source.read_bytes())
+    asset_sha = sha256_file(source)
+
+    contract = tmp_path / "rive_contract.json"
+    identity = tmp_path / "VAN_CHARACTER_VISUAL_IDENTITY.md"
+    matrix = tmp_path / "VAN_VISUAL_ACCEPTANCE_MATRIX.md"
+    identity_lock = tmp_path / "APPROVED_IDENTITY_LOCK.yaml"
+    contract.write_text('{"artboard":"Van"}\n', encoding="utf-8")
+    identity.write_text("identity-v3\n", encoding="utf-8")
+    matrix.write_text("matrix-rev3\n", encoding="utf-8")
+    identity_lock.write_text("skin: '#B8853C'\n", encoding="utf-8")
+
+    checklist = tmp_path / "DEVICE_CHECKLIST.yaml"
+    checklist.write_text(
+        yaml.safe_dump({
+            "device": {"model":"SM-S928B","android_build":"test","apk_sha256":"b"*64,"rive_sha256":asset_sha,"checked_at":"2026-09-24T00:00:00Z"},
+            "checks": {"renderer_rive_active":"PASS"},
+            "thermal_note":"nominal",
+            "perfetto_trace":"trace.perfetto",
+            "evidence":{"renderer_rive_active":"evidence.png"},
+        }, sort_keys=False),
+        encoding="utf-8",
+    )
+    acceptance = tmp_path / "ACCEPTANCE.yaml"
+    acceptance.write_text(
+        yaml.safe_dump({"final":{
+            "verified":True,
+            "subject":f"sha256:{asset_sha}",
+            "contract_sha256":"0"*64,
+            "identity_spec_sha256":"1"*64,
+            "visual_acceptance_matrix_sha256":"2"*64,
+            "identity_lock_sha256":"3"*64,
+        }}, sort_keys=False),
+        encoding="utf-8",
+    )
+    evidence = tmp_path / gates.DEVICE_EVIDENCE_ROOT / "evidence.png"
+    evidence.parent.mkdir(parents=True)
+    evidence.write_bytes(b"PNG")
+
+    monkeypatch.setattr(gates, "m3", lambda: [])
+    monkeypatch.setattr(gates, "load_status", lambda: {"production":{"emulator_validation":"PASS","ci_run":"https://github.com/Vanguduza/Van/actions/runs/1","rive_sha256":asset_sha}})
+    monkeypatch.setattr(gates, "ROOT", tmp_path)
+    monkeypatch.setattr(gates, "SOURCE_RIV", source)
+    monkeypatch.setattr(gates, "APP_RIV", shipped)
+    monkeypatch.setattr(gates, "CONTRACT", contract)
+    monkeypatch.setattr(gates, "IDENTITY_DOC", identity)
+    monkeypatch.setattr(gates, "VISUAL_ACCEPTANCE_MATRIX", matrix)
+    monkeypatch.setattr(gates, "IDENTITY_LOCK", identity_lock)
+    monkeypatch.setattr(gates, "DEVICE", checklist)
+    monkeypatch.setattr(gates, "ACCEPTANCE", acceptance)
+
+    problems = gates.m4()
+    assert "owner acceptance contract SHA is stale" in problems
+    assert "owner acceptance identity-spec SHA is stale" in problems
+    assert "owner acceptance visual-matrix SHA is stale" in problems
+    assert "owner acceptance identity-lock SHA is stale" in problems

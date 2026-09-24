@@ -11,9 +11,17 @@ from typing import Any
 from xml.etree import ElementTree as ET
 
 REQUIRED_GROUPS = ("hair","visor_frame","visor_lens","face","eye_l","eye_r","brow_l","brow_r","mouth_upper","mouth_lower","mouth_inner","neck","jacket","underlayer","arm_l_upper","arm_l_fore","hand_l","arm_r_upper","arm_r_fore","hand_r","orb_shell","orb_core")
-COLOR_GROUPS = {"hair":"silver","visor_lens":"cyan","eye_l":"blue","eye_r":"blue","face":"skin","neck":"skin","hand_l":"skin","hand_r":"skin","jacket":"neutral","underlayer":"neutral","orb_core":"cyan"}
+COLOR_GROUPS = {"hair":"silver","visor_lens":"cyan","eye_l":"blue","eye_r":"blue","face":"skin","neck":"skin","hand_l":"neutral","hand_r":"neutral","jacket":"neutral","underlayer":"neutral","orb_core":"cyan"}
+FORBIDDEN_GROUPS = {"headband","extra_headband","aura","halo","background","workboard"}
 HEX = re.compile(r"^#([0-9a-fA-F]{3}|[0-9a-fA-F]{6})$")
+RGB_FN = re.compile(r"^rgba?\(\s*([^)]*)\)$", re.IGNORECASE)
+URL_REF = re.compile(r"^url\(\s*#([^)\s]+)\s*\)$")
 NUMBERS = re.compile(r"[-+]?(?:\d+\.?\d*|\.\d+)(?:[eE][-+]?\d+)?")
+# CSS named colours an SVG tool can emit. A name outside this table is not guessed at: it is
+# reported as UNVERIFIABLE_COLOR so an identity-locked group can never hide behind it.
+NAMED = {"black":"#000000","white":"#ffffff","silver":"#c0c0c0","gray":"#808080","grey":"#808080","dimgray":"#696969","dimgrey":"#696969","darkgray":"#a9a9a9","darkgrey":"#a9a9a9","lightgray":"#d3d3d3","lightgrey":"#d3d3d3","gainsboro":"#dcdcdc","whitesmoke":"#f5f5f5","snow":"#fffafa","ghostwhite":"#f8f8ff","navy":"#000080","blue":"#0000ff","darkblue":"#00008b","midnightblue":"#191970","royalblue":"#4169e1","dodgerblue":"#1e90ff","deepskyblue":"#00bfff","skyblue":"#87ceeb","lightblue":"#add8e6","steelblue":"#4682b4","cyan":"#00ffff","aqua":"#00ffff","darkcyan":"#008b8b","teal":"#008080","turquoise":"#40e0d0","darkturquoise":"#00ced1","brown":"#a52a2a","saddlebrown":"#8b4513","sienna":"#a0522d","chocolate":"#d2691e","peru":"#cd853f","tan":"#d2b48c","burlywood":"#deb887","red":"#ff0000","green":"#008000","yellow":"#ffff00","orange":"#ffa500","purple":"#800080","magenta":"#ff00ff","fuchsia":"#ff00ff","pink":"#ffc0cb"}
+# Values that paint nothing, or inherit a colour the linter checks where it is actually set.
+NO_PAINT = {"none","transparent","inherit","currentcolor",""}
 
 @dataclass
 class LintReport:
@@ -36,19 +44,65 @@ def _style_value(node: ET.Element, name: str) -> str | None:
     return None
 
 def _rgb(value: str | None):
-    if not value or value in {"none","transparent","currentColor"}: return None
-    match=HEX.match(value.strip())
-    if not match: return None
-    raw=match.group(1)
-    if len(raw)==3: raw="".join(ch*2 for ch in raw)
-    return tuple(int(raw[i:i+2],16)/255.0 for i in (0,2,4))
+    """Parse one concrete colour. Returns None for no-paint values; raises ValueError when a
+    value paints but cannot be parsed, so the caller can refuse rather than skip it."""
+    raw=(value or "").strip()
+    if raw.lower() in NO_PAINT: return None
+    raw=NAMED.get(raw.lower(),raw)
+    match=HEX.match(raw)
+    if match:
+        hexes=match.group(1)
+        if len(hexes)==3: hexes="".join(ch*2 for ch in hexes)
+        return tuple(int(hexes[i:i+2],16)/255.0 for i in (0,2,4))
+    match=RGB_FN.match(raw)
+    if match:
+        parts=[p.strip() for p in match.group(1).replace("/"," ").replace(","," ").split()]
+        if len(parts)>=3:
+            channels=[]
+            for part in parts[:3]:
+                number=float(part.rstrip("%"))
+                channels.append(number/100.0 if part.endswith("%") else number/255.0)
+            if all(0.0<=c<=1.0 for c in channels): return tuple(channels)
+    raise ValueError(raw)
+
+def _paints(node: ET.Element, gradients: dict[str, list[str]]) -> list[str]:
+    """Every fill colour a node paints with (§11.2 governs fills; strokes are line work),
+    with gradient references resolved to their stops (following href chains)."""
+    values=[]
+    for name in ("fill","stop-color"):
+        value=_style_value(node,name)
+        if value is None: continue
+        ref=URL_REF.match(value.strip())
+        if ref:
+            stops=gradients.get(ref.group(1))
+            values.extend(stops if stops is not None else [f"url(#{ref.group(1)})"])
+        else:
+            values.append(value)
+    return values
+
+def _gradient_stops(root: ET.Element) -> dict[str, list[str]]:
+    direct={}; links={}
+    for node in root.iter():
+        if _local(node.tag) not in {"linearGradient","radialGradient"}: continue
+        gid=node.attrib.get("id")
+        if not gid: continue
+        direct[gid]=[_style_value(stop,"stop-color") or "#000000" for stop in node if _local(stop.tag)=="stop"]
+        href=node.attrib.get("href") or node.attrib.get("{http://www.w3.org/1999/xlink}href") or ""
+        if href.startswith("#"): links[gid]=href[1:]
+    resolved={}
+    for gid in direct:
+        seen=set(); current=gid
+        while not direct.get(current) and current in links and current not in seen:
+            seen.add(current); current=links[current]
+        resolved[gid]=direct.get(current) or []
+    return resolved
 
 def _allowed(family: str, rgb) -> bool:
     h,s,v=colorsys.rgb_to_hsv(*rgb); deg=h*360.0
     if family=="silver": return s<=0.30 and v>=0.55
     if family=="cyan": return 165<=deg<=225 and s>=0.25 and v>=0.35
     if family=="blue": return 185<=deg<=245 and s>=0.25 and v>=0.30
-    if family=="skin": return (deg<=55 or deg>=345) and 0.18<=s<=0.95 and 0.20<=v<=0.90
+    if family=="skin": return 10<=deg<=45 and 0.38<=s<=0.78 and 0.45<=v<=0.82
     if family=="neutral": return v<=0.38 or s<=0.18
     return True
 
@@ -98,17 +152,21 @@ def lint_svg(path: Path, *, require_geometry: bool=True) -> LintReport:
     findings += [f"MISSING_GROUP:{name}" for name in REQUIRED_GROUPS if name not in groups]
     root_groups={child.attrib.get("id") for child in list(root) if _local(child.tag)=="g"}
     for name in sorted(root_groups):
+        if name in FORBIDDEN_GROUPS: findings.append(f"FORBIDDEN_IDENTITY_GROUP:{name}")
         if name and name not in REQUIRED_GROUPS and not name.startswith("extra_"): findings.append(f"UNSCOPED_EXTRA_GROUP:{name}")
-    palette={}
+    palette={}; gradients=_gradient_stops(root)
     for group_name,family in COLOR_GROUPS.items():
         group=groups.get(group_name)
         if group is None: continue
         colors=[]
         for node in group.iter():
-            value=_style_value(node,"fill"); rgb=_rgb(value)
-            if rgb is None: continue
-            colors.append(str(value))
-            if not _allowed(family,rgb): findings.append(f"PALETTE_OUTSIDE_LOCK:{group_name}:{value}")
+            for value in _paints(node,gradients):
+                try: rgb=_rgb(value)
+                except ValueError:
+                    findings.append(f"UNVERIFIABLE_COLOR:{group_name}:{value}"); continue
+                if rgb is None: continue
+                colors.append(str(value))
+                if not _allowed(family,rgb): findings.append(f"PALETTE_OUTSIDE_LOCK:{group_name}:{value}")
         palette[group_name]=sorted(set(colors))
     geometry_verified=False; bbox={}
     if require_geometry:

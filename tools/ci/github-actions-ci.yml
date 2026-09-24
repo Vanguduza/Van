@@ -10,6 +10,9 @@ on:
     branches:
       - main
       - 'claude/**'
+      # Character Forge candidates pushed by the bounded worker (`forge-push`); without this
+      # a staged candidate would never reach RiveContractTest or character-forge-gate.
+      - 'forge/**'
   pull_request:
 
 concurrency:
@@ -302,6 +305,16 @@ jobs:
             chmod +x gradlew
             ./gradlew :app:connectedDebugAndroidTest --console=plain
             find app/build/outputs/connected_android_test_additional_output -type f -print || echo "no screenshots captured"
+      # The SHA files above say which bytes were checked out; this says what RiveContractTest
+      # concluded about them. `cli rive record-validation` refuses a PASS this file does not state.
+      - name: Summarise Character Forge validation outcome
+        if: always()
+        run: |
+          python3 -m tools.character_forge.ci_binding summarise \
+            --results android/app/build/outputs/androidTest-results \
+            --out artifacts/character-forge/van_validation.json
+          mkdir -p artifacts/character-forge/junit
+          find android/app/build/outputs/androidTest-results -name '*.xml' -exec cp {} artifacts/character-forge/junit/ \; 2>/dev/null || true
       - name: Upload instrumentation report
         if: always()
         uses: actions/upload-artifact@v4
@@ -324,6 +337,24 @@ jobs:
           name: van-instrumentation-screenshots
           path: android/app/build/outputs/connected_android_test_additional_output
           if-no-files-found: warn
+
+  # android-instrumentation stays advisory for commits with no Rive asset (hosted-emulator
+  # flakiness must not block unrelated work). Once a candidate is staged or van.riv ships,
+  # this job makes its RiveContractTest outcome blocking.
+  character-forge-gate:
+    runs-on: ubuntu-latest
+    needs: android-instrumentation
+    if: always()
+    steps:
+      - uses: actions/checkout@v4
+      - name: Download Character Forge validation binding
+        continue-on-error: true
+        uses: actions/download-artifact@v4
+        with:
+          name: van-character-forge-validation-binding
+          path: artifacts/character-forge
+      - name: Rive asset present means RiveContractTest must have passed
+        run: python3 -m tools.character_forge.ci_binding gate --binding artifacts/character-forge/van_validation.json
 
   mutation:
     runs-on: ubuntu-latest

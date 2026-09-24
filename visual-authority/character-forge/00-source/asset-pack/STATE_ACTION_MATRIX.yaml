@@ -1,0 +1,40 @@
+schema_version: 2
+global:
+  state_entry_ms_max: 300
+  loop_visible_period_seconds_min: 6
+  pose_or_motion_required_for_colour_blind_readability: true
+  action_code_authoritative: true
+states:
+  OFFLINE: {code: 0, pose: "slump 2deg; lids 60%; orb dim docked", loop_s: 8}
+  CONNECTING: {code: 1, pose: "straighten; lids rise; orb 1Hz slow pulse", loop_s: 6}
+  IDLE: {code: 2, pose: "neutral calm; slow figure-8 orb", loop_s: 8}
+  ATTENTIVE: {code: 3, pose: "chest +2deg; forward head; steady owner gaze", loop_s: 8}
+  LISTENING: {code: 4, pose: "lean 3deg; head tilt 6deg; hand near chest; orb toward owner", loop_s: 7}
+  THINKING: {code: 5, pose: "weight back 2deg; eyes up-left; right hand to chin; orb behind shoulder", loop_s: 9}
+  SEARCHING: {code: 6, pose: "upright; stepped eye/head scan +/-8deg; orb forward lens", loop_s: 6}
+  WORKING: {code: 7, pose: "forward engaged; eyes down-front; hands low-front operate", loop_s: 7}
+  DELEGATING: {code: 8, pose: "open posture; right hand outward; eyes follow orb", loop_s: 6}
+  SPEAKING: {code: 9, pose: "inherits activity; mouth/viseme additive; restrained nods", loop_s: 6}
+  WAITING: {code: 10, pose: "neutral one-leg weight; hands clasped; orb lower", loop_s: 10}
+  WAITING_FOR_OWNER: {code: 11, pose: "square owner gaze; one palm-up held; orb at chest", loop_s: 8}
+  DEGRADED: {code: 12, pose: "activity preserved; flatter brows; orb desaturated 40%", loop_s: 8}
+  WARNING: {code: 13, pose: "upright; one low raised hold-hand; focused face", loop_s: 8}
+  ERROR: {code: 14, pose: "head down 6deg; open low hands; orb drops 15%", loop_s: 8}
+  SUCCESS: {code: 15, pose: "upright; soft smile; small nod/thumbs-up; orb gentle spin", loop_s: 8}
+  URGENT: {code: 16, pose: "forward 4deg; wide eyes; both hands forward; orb front 2Hz", loop_s: 4}
+  SLEEPING: {code: 17, pose: "slump 3deg; eyes closed; head tilt 8deg; orb shoulder", loop_s: 12}
+actions:
+  HELLO_WAVE: {code: 1, duration_ms: 1400, motion: "right hand up; 2.5 wrist/finger waves; head tilt 5deg"}
+  ACK_NOD: {code: 2, duration_ms: 650, motion: "single 8deg nod plus blink"}
+  POINT_LEFT: {code: 3, duration_ms: 1200, motion: "IK arm to left; index extended; gaze converges"}
+  POINT_RIGHT: {code: 4, duration_ms: 1200, motion: "IK arm to right; index extended; gaze converges"}
+  POINT_UP: {code: 5, duration_ms: 1200, motion: "IK arm up; index extended; gaze converges"}
+  POINT_DOWN: {code: 6, duration_ms: 1200, motion: "IK arm down; index extended; gaze converges"}
+  POINT_TARGET: {code: 7, duration_ms: 1200, motion: "IK target from attention_x/y sampled at start"}
+  CELEBRATE: {code: 8, duration_ms: 1800, motion: "3% crouch; both fists briefly up; orb one spin; no jump"}
+  CAUTION: {code: 9, duration_ms: 1000, motion: "lean back 2deg; palm-out at chest; brows in"}
+  CONFIRM: {code: 10, duration_ms: 900, motion: "thumbs-up plus nod"}
+  SHRUG: {code: 11, duration_ms: 1100, motion: "shoulders +6%; palms up; head tilt; brows up"}
+  PRESENT_CARD: {code: 12, duration_ms: 1500, motion: "turn 5deg; right palm-up side extension; orb clears card"}
+  OPEN_PANEL: {code: 13, duration_ms: 700, motion: "latched outward hand sweep"}
+  CLOSE_PANEL: {code: 14, duration_ms: 700, motion: "latched inward hand sweep"}

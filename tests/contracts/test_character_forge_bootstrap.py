@@ -133,3 +133,138 @@ def test_rive_smoke_is_fail_closed_and_checks_interactive_schema():
         assert required in smoke
     assert "set +e" not in smoke
     assert "|| true" not in smoke
+
+
+def _worker_sandbox(tmp_path: Path):
+    """Run the real worker script against a throwaway workspace. The jail and authority checks
+    run before any external tool, so no Rive/rembg install is needed to prove refusals."""
+    import os
+    state = tmp_path / "state"
+    workspace = state / "work" / "Van"
+    (workspace / "visual-authority" / "character-forge" / "09-rive-working" / "rml" / "van").mkdir(parents=True)
+    (workspace / "visual-authority" / "assets").mkdir(parents=True)
+    authority = tmp_path / "etc-van-character-forge"
+    authority.mkdir()
+    env = dict(os.environ, CHARACTER_FORGE_STATE_ROOT=str(state), CHARACTER_FORGE_WORKSPACE=str(workspace),
+               CHARACTER_FORGE_AUTHORITY_DIR=str(authority), CHARACTER_FORGE_INSTALL_ROOT=str(tmp_path / "opt"))
+
+    def run(*args, stdin=b""):
+        return subprocess.run(["bash", str(DEPLOY / "commander-worker.sh"), *args], env=env, input=stdin,
+                              capture_output=True)
+    return run, workspace, state, authority
+
+
+def test_worker_jails_every_prep_path(tmp_path):
+    run, workspace, state, _ = _worker_sandbox(tmp_path)
+    forge = workspace / "visual-authority" / "character-forge"
+    for args in (
+        ("remove-bg", "/etc/passwd", str(forge / "03-masks" / "x.png")),
+        ("remove-bg", str(workspace / "visual-authority" / "assets" / "a.png"), str(state / "allow-rive-cloud-write")),
+        ("vectorize", str(workspace / "visual-authority" / "assets" / "a.png"), str(workspace / "docs" / "character_forge" / "STATUS.json")),
+        ("vectorize", str(workspace / "visual-authority" / "assets" / "a.png"), str(forge / "06-vectors-clean" / "van_layers.svg")),
+        ("svg-lint", "/etc/hostname"),
+        ("rml-cat", str(workspace / "tools" / "character_forge" / "gates.py")),
+    ):
+        result = run(*args)
+        assert result.returncode == 2, (args, result.stderr)
+        assert b"refused" in result.stderr, args
+
+
+def test_worker_rml_put_writes_only_inside_the_named_project(tmp_path):
+    run, workspace, _, _ = _worker_sandbox(tmp_path)
+    project = workspace / "visual-authority" / "character-forge" / "09-rive-working" / "rml" / "van"
+    ok = run("rml-put", str(project), "scene.rml", stdin=b"<Artboard name=\"Van\"/>\n")
+    assert ok.returncode == 0, ok.stderr
+    assert (project / "scene.rml").read_bytes() == b"<Artboard name=\"Van\"/>\n"
+    for relpath in ("../../../../../tools/x.rml", "scene.riv", "../van2/scene.rml", "run.sh"):
+        assert run("rml-put", str(project), relpath, stdin=b"x").returncode == 2, relpath
+    assert run("rml-put", str(project.parent), "scene.rml", stdin=b"x").returncode == 2
+
+
+def test_worker_cloud_write_sentinel_cannot_be_forged_by_the_forge_user(tmp_path):
+    """The old sentinel lived under the vanforge-owned state root, so any worker command that
+    writes a file (remove-bg OUTPUT) could create it. Now it must be root-owned in a root-owned
+    directory; a sentinel owned by anyone else is refused."""
+    import os
+    run, workspace, state, authority = _worker_sandbox(tmp_path)
+    project = workspace / "visual-authority" / "character-forge" / "09-rive-working" / "rml" / "van"
+    (state / "allow-rive-cloud-write").write_text("")  # the old, forgeable location
+    assert run("rive-push", str(project)).returncode == 3
+    sentinel = authority / "allow-rive-cloud-write"
+    sentinel.write_text("")
+    if os.geteuid() == 0:
+        os.chown(sentinel, 65534, 65534)  # nobody: what a non-root writer would produce
+    assert run("rive-push", str(project)).returncode == 3
+    assert run("forge-push", "forge/core-1", "msg").returncode == 3
+
+
+def test_worker_rive_login_is_not_a_commander_command(tmp_path):
+    run, *_ = _worker_sandbox(tmp_path)
+    assert run("rive-login").returncode == 2
+    assert "rive login" not in _text("commander-worker.sh")
+
+
+def test_qualifier_runs_as_the_forge_user_and_uses_private_temp():
+    qualify = _text("qualify-netcup-authoring.sh")
+    assert "as_forge()" in qualify
+    assert "/tmp/" not in qualify
+    assert "CHARACTER_FORGE_QUALIFY_STRICT" in qualify
+    assert "binary_sha256" in qualify
+    bootstrap = _text("bootstrap-netcup-authoring.sh")
+    assert "CHARACTER_FORGE_QUALIFY_STRICT=1" in bootstrap
+    assert "install -d -o root -g root -m 0755 /etc/van-character-forge" in bootstrap
+    assert "touch /etc/van-character-forge" not in bootstrap
+
+
+def test_bootstrap_records_a_bare_inkscape_version():
+    """CF-OPUS-002: the lock carries the bare version `vectors admit` compares against."""
+    bootstrap = _text("bootstrap-netcup-authoring.sh")
+    assert "INKSCAPE_VERSION=\"$(grep -oE" in bootstrap
+    assert 'INKSCAPE_VERSION="$(inkscape --version | head -n1)"' not in bootstrap
+
+
+def test_rive_smoke_proves_number_inputs_and_probes_rebuild_determinism():
+    smoke = _text("rive-cli-smoke.sh")
+    assert "StateMachineNumber" in smoke
+    assert "smoke_number" in smoke
+    assert "reproducible_build" in smoke
+
+
+def test_netcup_qualification_reads_workspace_as_forge_user():
+    qualifier = _text("qualify-netcup-authoring.sh")
+    assert 'as_forge git -C "$WORKSPACE" rev-parse HEAD' in qualifier
+    assert 'as_forge git -C "$WORKSPACE" status --porcelain' in qualifier
+    assert 'observed="$(git -C "$WORKSPACE"' not in qualifier
+
+
+def test_character_forge_pins_java17_across_bootstrap_qualifier_and_worker():
+    expected = '/usr/lib/jvm/java-17-openjdk-amd64'
+    bootstrap = _text("bootstrap-netcup-authoring.sh")
+    qualifier = _text("qualify-netcup-authoring.sh")
+    worker = _text("commander-worker.sh")
+    assert expected in bootstrap
+    assert expected in qualifier
+    assert expected in worker
+    assert 'JAVA_VERSION="$("$JAVA_HOME/bin/java" -version' in bootstrap
+    assert '"$JAVA_HOME/bin/java" -version' in qualifier
+    assert 'export JAVA_HOME' in worker
+    assert 'PATH="$JAVA_HOME/bin:' in worker
+
+
+def test_avd_creation_does_not_depend_on_host_hardware_profile_catalog():
+    bootstrap = _text("bootstrap-netcup-authoring.sh")
+    assert '--package "system-images;android-31;google_apis;x86_64"' in bootstrap
+    assert '--device "pixel_6"' not in bootstrap
+    assert '|| die "Android AVD $AVD_NAME was not created"' in bootstrap
+
+
+def test_android_avd_home_is_explicit_and_shared():
+    bootstrap = _text("bootstrap-netcup-authoring.sh")
+    qualifier = _text("qualify-netcup-authoring.sh")
+    worker = _text("commander-worker.sh")
+    for text in (bootstrap, qualifier, worker):
+        assert 'ANDROID_USER_HOME=' in text
+        assert 'ANDROID_AVD_HOME=' in text
+    assert 'as_forge env ANDROID_USER_HOME="$ANDROID_USER_HOME" ANDROID_AVD_HOME="$ANDROID_AVD_HOME"' in qualifier
+    assert 'export ANDROID_USER_HOME' in worker
+    assert 'export ANDROID_AVD_HOME' in worker

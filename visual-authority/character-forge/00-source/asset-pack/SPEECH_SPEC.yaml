@@ -1,0 +1,24 @@
+schema_version: 2
+inputs:
+  speaking: boolean
+  mouth_open: {type: number, min: 0.0, max: 1.0}
+  viseme: {type: number, valid: [0, 1, 2, 3, 4]}
+visemes:
+  0: neutral_closed
+  1: small_neutral
+  2: medium_spread
+  3: wide_vertical
+  4: rounded
+unknown_positive_viseme: 1
+rig:
+  viseme_blend_ms: [60, 80]
+  mouth_open_drives_jaw_additively: true
+  speaking_false_close_ms: 120
+  speech_head_nod_deg_max: 2
+runtime_requirements:
+  viseme_must_be_clamped_0_4: true
+  mouth_open_max_frame_jump: 0.35
+  vowel_mapping: [2, 3, 4]
+  consonant_mapping: 1
+  silence_mapping: 0
+  do_not_embed_tts_timing_in_rive: true

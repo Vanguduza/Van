@@ -33,6 +33,13 @@ import kotlin.math.min
 
 @RunWith(AndroidJUnit4::class)
 class RiveContractTest {
+    private companion object {
+        /** Floor for "visibly different" mean RGB distance (0-1) when measured noise is lower. */
+        const val MIN_DISTINCT_RGB = 0.004
+        /** ~300 ms into a 600-1800 ms action once the host's 250 ms input delay has elapsed. */
+        const val ACTION_PEAK_MS = 550L
+    }
+
     private val instrumentation get() = InstrumentationRegistry.getInstrumentation()
     private val testContext get() = instrumentation.context
     private val targetContext get() = instrumentation.targetContext
@@ -98,6 +105,31 @@ class RiveContractTest {
         }
     }
 
+    /**
+     * The shipped asset must load and bind through the composable production renders
+     * (`VanAvatar` -> `VanRiveAvatar`), not only through the debug frame host: a load or bind
+     * failure there flips the decision to OWNER_ART/CANVAS with LOAD_FAILED.
+     */
+    @Test
+    fun productionAvatarPathKeepsRive() {
+        val rig = rigOrSkip()
+        assumeTrue("PRODUCTION_ONLY", rig.mode == Mode.PRODUCTION)
+        RiveCandidateHostActivity.lastProductionDecision = null
+        val intent = Intent(targetContext, RiveCandidateHostActivity::class.java)
+            .putExtra(RiveCandidateHostActivity.EXTRA_PRODUCTION_PATH, true)
+            .putExtra(RiveCandidateHostActivity.EXTRA_STATE, 9)
+            .putExtra(RiveCandidateHostActivity.EXTRA_SPEAKING, true)
+            .putExtra(RiveCandidateHostActivity.EXTRA_MOUTH_OPEN, 0.7f)
+            .putExtra(RiveCandidateHostActivity.EXTRA_ACTION, 1)
+        ActivityScenario.launch<RiveCandidateHostActivity>(intent).use {
+            instrumentation.waitForIdleSync()
+            SystemClock.sleep(2_000L)
+            val decision = RiveCandidateHostActivity.lastProductionDecision
+            assertTrue("VanAvatar never reported a renderer decision", decision != null)
+            assertEquals("production VanAvatar fell back: ${decision?.reason}", VanRenderer.RIVE, decision?.renderer)
+        }
+    }
+
     @Test
     fun coreInputsDriveTheRig() {
         val rig = rigOrSkip()
@@ -115,6 +147,20 @@ class RiveContractTest {
         for ((x, y) in listOf(-1f to -1f, 1f to -1f, -1f to 1f, 1f to 1f, 0f to 0f)) {
             capture(rig, "attention-${x.toInt()}-${y.toInt()}", state = 4, attentionX = x, attentionY = y)
         }
+        val threshold = distinctThreshold(rig)
+        for ((action, trigger) in listOf(1 to "wave", 2 to "ack", 7 to "point")) {
+            val idle = capture(rig, "core-idle-peak-$action", state = 2, settleMs = ACTION_PEAK_MS)
+            val peak = capture(rig, "core-action-peak-$action", state = 2, action = action, trigger = trigger, settleMs = ACTION_PEAK_MS)
+            val diff = meanAbsRgb(idle, peak)
+            assertTrue("core action $action is indistinguishable from IDLE ($diff <= $threshold)", diff > threshold)
+        }
+        // Overlay (96 dp) and minimized (48 dp) sizes: evidence for readability review, never blank.
+        for (sizeDp in listOf(96, 48)) {
+            for ((name, state) in listOf("idle" to 2, "listening" to 4, "thinking" to 5, "speaking" to 9)) {
+                val frame = capture(rig, "size-$sizeDp-$name", state = state, speaking = state == 9, mouthOpen = if (state == 9) 0.7f else 0f, sizeDp = sizeDp)
+                assertFalse("$name at $sizeDp dp is blank", looksBlank(frame))
+            }
+        }
         for (viseme in 0..4) capture(rig, "viseme-$viseme", state = 9, speaking = true, mouthOpen = 0.7f, viseme = viseme)
         capture(rig, "listening-on", state = 4, listening = true)
         capture(rig, "listening-off", state = 4, listening = false)
@@ -127,15 +173,24 @@ class RiveContractTest {
     fun everyStateAndActionRenders() {
         val rig = rigOrSkip()
         assumeTrue("FULL_OR_PRODUCTION_ONLY", rig.mode != Mode.CORE)
+        val threshold = distinctThreshold(rig)
         val idle = capture(rig, "state-2", state = 2)
         for (state in 0..17) {
             val frame = if (state == 2) idle else capture(rig, "state-$state", state = state)
             assertFalse("state $state produced a transparent/blank frame", looksBlank(frame))
-            if (state != 2) assertTrue("state $state is pixel-identical to IDLE", meanAbsRgb(idle, frame) > 0.001)
+            if (state != 2) {
+                val diff = meanAbsRgb(idle, frame)
+                assertTrue("state $state is indistinguishable from IDLE ($diff <= $threshold)", diff > threshold)
+            }
         }
+        // Production drives actions through `action_code` only (VanRiveAvatar fires no trigger),
+        // so each action must read without its trigger.
+        val idlePeak = capture(rig, "action-idle-peak", state = 2, settleMs = ACTION_PEAK_MS)
         for (action in 1..14) {
-            val frame = capture(rig, "action-$action", state = 2, action = action)
+            val frame = capture(rig, "action-$action", state = 2, action = action, settleMs = ACTION_PEAK_MS)
             assertFalse("action $action produced a transparent/blank frame", looksBlank(frame))
+            val diff = meanAbsRgb(idlePeak, frame)
+            assertTrue("action $action via action_code is indistinguishable from IDLE ($diff <= $threshold)", diff > threshold)
         }
     }
 
@@ -181,11 +236,27 @@ class RiveContractTest {
     @Test
     fun artboardIsTransparentOnThreeBackgrounds() {
         val rig = rigOrSkip()
-        for (background in listOf("light", "dark")) {
-            val frame = capture(rig, "transparent-$background", background = background, state = 2)
-            val expected = if (background == "light") Color.rgb(244, 246, 248) else Color.rgb(11, 15, 20)
-            assertCornersNear(frame, expected)
+        val lightBg = Color.rgb(244, 246, 248)
+        val darkBg = Color.rgb(11, 15, 20)
+        val light = capture(rig, "transparent-light", background = "light", state = 2)
+        val dark = capture(rig, "transparent-dark", background = "dark", state = 2)
+        assertCornersNear(light, lightBg)
+        assertCornersNear(dark, darkBg)
+        // Opaque pixels look the same on both backgrounds; empty pixels equal their background.
+        // A pixel that differs from both backgrounds AND between them is translucent. Only the
+        // visor lens and orb glow may be; a full-artboard glow is the Android aura's job.
+        var translucent = 0
+        var sampled = 0
+        for (y in 0 until min(light.height, dark.height) step 2) for (x in 0 until min(light.width, dark.width) step 2) {
+            val l = light.getPixel(x, y)
+            val d = dark.getPixel(x, y)
+            if (channelDistance(l, lightBg) > 24 && channelDistance(d, darkBg) > 24 && channelDistance(l, d) > 24) translucent++
+            sampled++
         }
+        val fraction = translucent.toDouble() / sampled.coerceAtLeast(1)
+        outputDir(rig).resolve("translucency.txt").apply { parentFile?.mkdirs() }.writeText("translucent_fraction=$fraction\n")
+        val limit = threshold("max_translucent_fraction", 0.08)
+        assertTrue("translucent coverage $fraction > $limit: a halo/aura is baked into the artboard", fraction <= limit)
         val busy = capture(rig, "transparent-busy", background = "busy", state = 2)
         assertFalse("busy background frame is blank", looksBlank(busy))
         assertBusyCornersUnaffected(busy)
@@ -213,6 +284,10 @@ class RiveContractTest {
         val rig = rigOrSkip()
         assumeTrue("FULL_OR_PRODUCTION_ONLY", rig.mode != Mode.CORE)
         launchScenario(rig, state = 2).use {
+            // Count only the soak: gfxinfo is cumulative since process start (launch frames).
+            // It measures HWUI frames; Rive's own render thread is profiled on the S24 (Perfetto).
+            SystemClock.sleep(2_000L)
+            shell("dumpsys gfxinfo ${targetContext.packageName} reset")
             SystemClock.sleep(300_000L)
             val text = shell("dumpsys gfxinfo ${targetContext.packageName}")
             val out = outputDir(rig).resolve("gfxinfo.txt")
@@ -230,10 +305,10 @@ class RiveContractTest {
     @Test
     fun brokenAssetFallsBack() {
         val unusable = VanVisualRuntime.decide(assetBytes = 512L, riveRuntimeAvailable = true, ownerArtAvailable = true)
-        assertEquals(VanRenderer.OWNER_ART, unusable.renderer)
+        assertEquals(VanRenderer.CANVAS, unusable.renderer)
         assertEquals(VanCanvasReason.ASSET_UNUSABLE, unusable.reason)
         val failed = VanVisualRuntime.decide(assetBytes = 4096L, riveRuntimeAvailable = true, ownerArtAvailable = true, loadFailed = true)
-        assertEquals(VanRenderer.OWNER_ART, failed.renderer)
+        assertEquals(VanRenderer.CANVAS, failed.renderer)
         assertEquals(VanCanvasReason.LOAD_FAILED, failed.reason)
     }
 
@@ -289,13 +364,13 @@ class RiveContractTest {
         rig: Rig, background: String = "dark", state: Int = 2, speaking: Boolean = false,
         listening: Boolean = false, attentionX: Float = 0f, attentionY: Float = 0f,
         mouthOpen: Float = 0f, urgency: Float = 0f, viseme: Int = 0, action: Int = 0,
-        trigger: String? = null,
+        trigger: String? = null, sizeDp: Int = 320,
     ): ActivityScenario<RiveCandidateHostActivity> {
         val intent = Intent(targetContext, RiveCandidateHostActivity::class.java)
             .putExtra(RiveCandidateHostActivity.EXTRA_TEST_MODE, true)
             .putExtra(RiveCandidateHostActivity.EXTRA_PRODUCTION, rig.mode == Mode.PRODUCTION)
             .putExtra(RiveCandidateHostActivity.EXTRA_BACKGROUND, background)
-            .putExtra(RiveCandidateHostActivity.EXTRA_SIZE_DP, 320)
+            .putExtra(RiveCandidateHostActivity.EXTRA_SIZE_DP, sizeDp)
             .putExtra(RiveCandidateHostActivity.EXTRA_STATE, state)
             .putExtra(RiveCandidateHostActivity.EXTRA_SPEAKING, speaking)
             .putExtra(RiveCandidateHostActivity.EXTRA_LISTENING, listening)
@@ -313,14 +388,15 @@ class RiveContractTest {
         rig: Rig, name: String, background: String = "dark", state: Int = 2,
         speaking: Boolean = false, listening: Boolean = false, attentionX: Float = 0f,
         attentionY: Float = 0f, mouthOpen: Float = 0f, urgency: Float = 0f,
-        viseme: Int = 0, action: Int = 0, trigger: String? = null,
+        viseme: Int = 0, action: Int = 0, trigger: String? = null, sizeDp: Int = 320,
+        settleMs: Long = 850L,
     ): Bitmap {
-        launchScenario(rig, background, state, speaking, listening, attentionX, attentionY, mouthOpen, urgency, viseme, action, trigger).use {
+        launchScenario(rig, background, state, speaking, listening, attentionX, attentionY, mouthOpen, urgency, viseme, action, trigger, sizeDp).use {
             instrumentation.waitForIdleSync()
-            SystemClock.sleep(850L)
+            SystemClock.sleep(settleMs)
             val screen = instrumentation.uiAutomation.takeScreenshot()
             val density = targetContext.resources.displayMetrics.density
-            val size = min((320f * density).toInt(), min(screen.width, screen.height))
+            val size = min((sizeDp * density).toInt(), min(screen.width, screen.height))
             val x = ((screen.width - size) / 2).coerceAtLeast(0)
             val y = ((screen.height - size) / 2).coerceAtLeast(0)
             val crop = Bitmap.createBitmap(screen, x, y, size, size)
@@ -341,6 +417,28 @@ class RiveContractTest {
         val fd: ParcelFileDescriptor = instrumentation.uiAutomation.executeShellCommand(command)
         return ParcelFileDescriptor.AutoCloseInputStream(fd).bufferedReader().use { it.readText() }
     }
+
+    /**
+     * Two IDLE captures differ by breathing/blink phase alone. A state or action only counts as
+     * "different" when it clears that measured noise with margin, never a fixed 0.1 %.
+     */
+    private fun distinctThreshold(rig: Rig): Double {
+        val a = capture(rig, "noise-idle-a", state = 2)
+        val b = capture(rig, "noise-idle-b", state = 2)
+        val noise = meanAbsRgb(a, b)
+        val floor = threshold("min_distinct_rgb", MIN_DISTINCT_RGB)
+        return maxOf(floor, 3.0 * noise)
+    }
+
+    private fun threshold(name: String, default: Double): Double = runCatching {
+        JSONObject(testContext.assets.open("forge_thresholds.json").bufferedReader().use { it.readText() }).getDouble(name)
+    }.getOrDefault(default)
+
+    private fun channelDistance(a: Int, b: Int): Int = maxOf(
+        abs(Color.red(a) - Color.red(b)),
+        abs(Color.green(a) - Color.green(b)),
+        abs(Color.blue(a) - Color.blue(b)),
+    )
 
     private fun meanAbsRgb(a: Bitmap, b: Bitmap): Double {
         val w = min(a.width, b.width); val h = min(a.height, b.height)

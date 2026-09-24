@@ -1,0 +1,41 @@
+schema_version: 2
+purpose: deterministic source inventory for VAN M1-M5
+requirements:
+  canonical_character_board:
+    status: PRESENT
+    path: visual-authority/assets/pack/owner_board_visual_authority.png
+    role: sole image identity authority
+  identity_lock:
+    status: PRESENT
+    path: visual-authority/character-forge/00-source/asset-pack/APPROVED_IDENTITY_LOCK.yaml
+  clean_semantic_vector_layers:
+    status: TO_AUTHOR
+    output: visual-authority/character-forge/06-vectors-clean/van_layers.svg
+    rule: redraw from canonical board plus identity/geometry lock; never reconstruct from deleted placeholder sheets
+  viseme_shapes:
+    status: TO_AUTHOR
+    required_shapes:
+      0: neutral
+      1: small_neutral
+      2: medium_spread
+      3: wide_vertical
+      4: rounded
+  core_rive_candidate:
+    status: TO_AUTHOR
+    output: visual-authority/character-forge/09-rive-working/van_runtime_core_1.riv
+  full_rive_candidate:
+    status: TO_AUTHOR
+    output: visual-authority/character-forge/09-rive-working/van_runtime_full_1.riv
+source_resolution_policy:
+  canonical_board_can_define: [identity, palette, silhouette, visible proportions, visible clothing, visor, orb]
+  hidden_geometry_may_be_constructed_only_from:
+    - symmetric continuation of visible geometry
+    - explicit LAYER_SPEC and RIG_SPEC dimensions
+    - owner-approved revision
+  ai_identity_invention_forbidden: true
+stop_conditions:
+  - canonical board conflicts with APPROVED_IDENTITY_LOCK
+  - required geometry would change head count, skin family, visor, hair, gloves, hood/collar or orb identity
+  - a new public input or trigger appears necessary
+  - aura/electrical field is being added to the Rive artboard
+  - legacy denylisted source is referenced
