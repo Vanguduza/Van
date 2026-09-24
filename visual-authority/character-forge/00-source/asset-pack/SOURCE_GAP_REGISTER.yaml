@@ -1,4 +1,4 @@
-schema_version: 2
+schema_version: 3
 register:
   - id: ASSET-GAP-001
     state: RESOLVED_BY_AUTHORITY_CONSOLIDATION
@@ -24,3 +24,15 @@ register:
     state: OPEN_EXTERNAL_GATE
     finding: physical S24 and owner final acceptance are not yet performed
     disposition: never claim M4/M5 before evidence
+  - id: ASSET-GAP-007
+    state: OPEN_OWNER_GATE
+    finding: high-resolution canonical master candidate is not yet owner-approved
+    disposition: stage an exact candidate SHA through van-character-forge-v3 master stage and require owner approval before decomposition
+  - id: ASSET-GAP-008
+    state: OPEN_LICENSE_AND_EVIDENCE_GATE
+    finding: See-through model checkpoints are not yet licensed and hash-locked for production
+    disposition: GPU trial outputs remain proposal-only; production mode refuses until the weight lock is CLEARED
+  - id: ASSET-GAP-009
+    state: OPEN_EVIDENCE_GATE
+    finding: Stretchy Studio rig proposal has not yet been proven against the approved VAN master
+    disposition: export Spine 4 proposal, import through CF Rig IR, then validate and rebuild through the Rive schema-driven plane
