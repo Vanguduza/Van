@@ -55,7 +55,7 @@ private data class VanRig(
  */
 object VanScene {
 
-    const val SKIN = 0xFFB8853CL
+    const val SKIN = 0xFFA4654EL
     const val SKIN_SHADOW = 0xFF8A5E35L
     const val HAIR = 0xFFE9EAF0L
     const val HAIR_SHADOW = 0xFFC2C7D3L
