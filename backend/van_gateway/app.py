@@ -36,6 +36,9 @@ from van_gateway.briefing.service import BriefingService
 from van_gateway.config import get_settings
 from van_gateway.decisions.service import DecisionCreate, DecisionService
 from van_gateway.degraded.registry import DegradedRegistry
+from van_gateway.dial_dev.api import build_dial_dev_router
+from van_gateway.dial_dev.client import DialDevClient
+from van_gateway.dial_dev.config import ACTIONS_PATH as DIAL_DEV_ACTIONS_PATH, DialDevConfig
 from van_gateway.events.bus import EventBus
 from van_gateway.google.control import GoogleControlAuthError, verify_internal_control
 from van_gateway.google.planes import plane_health, summarise
@@ -619,6 +622,12 @@ def create_app() -> FastAPI:
     )
     google_router = GoogleCapabilityRouter(store, google_broker)
 
+    # VAN-DEV-001/002 (DIAL VAN-DEVCC-R1 §3.4) — the DIAL development projection proxy
+    # VAN displays DIAL state and forwards typed owner commands; it forms no agent
+    # loop of its own.
+    dial_dev_config = DialDevConfig.from_settings(settings)
+    dial_dev_client = DialDevClient(dial_dev_config)
+
     # P3-OPS-005 — dedupe that survives a restart, instead of a set() on the instance.
     suppressions = SuppressionStore(store)
     notifications = NotificationIntelligence(suppressions=suppressions)
@@ -891,7 +900,16 @@ def create_app() -> FastAPI:
     app.state.trading = trading
     app.state.onboarding = onboarding
     app.state.strategy_promotions = strategy_promotions
+    app.state.dial_dev_config = dial_dev_config
+    app.state.dial_dev_client = dial_dev_client
     app.include_router(owner_runtime.router)
+    app.include_router(build_dial_dev_router(
+        client=dial_dev_client,
+        config=dial_dev_config,
+        idempotency=idempotency,
+        degraded=degraded,
+        audit=audit,
+    ))
     app.include_router(automation_health.router)
     app.include_router(automation.router)
     app.include_router(temporal_automation.router)
@@ -1218,6 +1236,9 @@ def create_app() -> FastAPI:
             or path == "/v1/google/owner-revoke"
             or path == "/v1/visual/acceptance"
             or path == "/v1/artemis/console/session"
+            # VAN-DEV-001 — the one DIAL development mutation. Reads under /v1/dial-dev
+            # stay on owner-device authentication without a proof, like every poll.
+            or path == DIAL_DEV_ACTIONS_PATH
         )
 
     async def enforce_device_proof(request: Request, device_id: str) -> JSONResponse | None:

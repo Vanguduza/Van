@@ -718,3 +718,44 @@ invariants:
     tested_by:
       - trading/tests/test_account_trade_lifecycle.py
       - trading/tests/test_execution.py
+
+  # ------------------------------------------------------ DIAL development fabric
+  #
+  # VAN-DEV-001/002 (DIAL VAN-DEVCC-R1 §3.4). The design is DIAL's; what VAN owns is how
+  # its own authority rules apply to the proxy. The owners below are VAN owning documents
+  # on purpose: DIAL's design file is not in this repository, and adding a new owning
+  # document is a deliberate owner act this unit does not take (docs/decisions/VAN-DEV-001.md).
+
+  - subject: dial_dev.projection_proxy
+    owner: docs/SECURITY_POLICY.md
+    statement: >-
+      DIAL development state reaches Android only through the gateway's /v1/dial-dev reads,
+      each behind owner-device authentication; the gateway alone calls DIAL with a
+      DIAL-scoped credential read from a gateway-side token file, never forwards a VAN
+      header upstream, passes DIAL's envelope through unchanged, answers an unreachable DIAL
+      with 503 dial_dev_unavailable, and refuses rather than relays any DIAL answer that
+      would disclose that credential.
+    implemented_by:
+      - backend/van_gateway/dial_dev/client.py
+      - backend/van_gateway/dial_dev/api.py
+      - backend/van_gateway/app.py
+    tested_by:
+      - backend/tests/test_dial_dev_proxy.py
+      - tests/contracts/test_dial_dev_boundary.py
+
+  - subject: dial_dev.action_forwarder
+    owner: docs/SECURITY_POLICY.md
+    statement: >-
+      An owner action on DIAL is one of a closed set of ten typed actions, is accepted only
+      with a verified hardware device proof, carries a gateway-minted proof reference and
+      the projection revision the owner acted on, is forwarded at most once per idempotency
+      key, and is never marked done by VAN, since DIAL's projection decides the outcome and
+      a 409 STALE_VIEW is returned to the device unchanged.
+    implemented_by:
+      - backend/van_gateway/dial_dev/api.py
+      - backend/van_gateway/idempotency/service.py
+      - backend/van_gateway/app.py
+    tested_by:
+      - backend/tests/test_dial_dev_proxy.py
+      - tests/contracts/test_dial_dev_boundary.py
+
