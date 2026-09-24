@@ -55,8 +55,8 @@ private data class VanRig(
  */
 object VanScene {
 
-    const val SKIN = 0xFFA9764EL
-    const val SKIN_SHADOW = 0xFF8A5C3AL
+    const val SKIN = 0xFFB8853CL
+    const val SKIN_SHADOW = 0xFF8A5E35L
     const val HAIR = 0xFFE9EAF0L
     const val HAIR_SHADOW = 0xFFC2C7D3L
     const val EYE_IRIS = 0xFF1E88E5L
@@ -68,7 +68,7 @@ object VanScene {
     const val JACKET_PANEL = 0xFFEDEFF3L
     const val UNDERLAYER = 0xFF2B3138L
     const val MOUTH = 0xFF4A2A1AL
-    const val HEADBAND = 0xFF101720L
+    const val GLOVE = 0xFF111820L
     const val ORB_BODY = 0xFF0C2436L
 
     fun build(state: VanVisualState, frame: VanSceneFrame): List<VanDrawOp> {
@@ -93,7 +93,6 @@ object VanScene {
             addAll(visor(rig, palette))
             addAll(mouth(rig, palette, state))
             addAll(hair(rig))
-            addAll(headband(rig, palette))
         }.translated(0f, bodyBob + headBob)
 
         val orbDrift = sin(frame.phase * tau + 1.9f) * 0.018f * motion
@@ -323,8 +322,8 @@ object VanScene {
         val ops = mutableListOf(
             VanDrawOp.PathOp(leftSleeve, VanColors.of(JACKET), strokeWidth = sleeve),
             VanDrawOp.PathOp(rightSleeve, VanColors.of(JACKET), strokeWidth = sleeve),
-            VanDrawOp.Oval(leftHandX, leftHandY, 0.030f, 0.026f, VanColors.of(SKIN)),
-            VanDrawOp.Oval(rightHandX, rightHandY, 0.030f, 0.026f, VanColors.of(SKIN)),
+            VanDrawOp.Oval(leftHandX, leftHandY, 0.030f, 0.026f, VanColors.of(GLOVE)),
+            VanDrawOp.Oval(rightHandX, rightHandY, 0.030f, 0.026f, VanColors.of(GLOVE)),
             VanDrawOp.Circle(leftHandX, leftHandY - 0.026f, 0.026f, VanColors.scaleAlpha(palette.accent, 0.8f), 0.008f),
             VanDrawOp.Circle(rightHandX, rightHandY - 0.026f, 0.026f, VanColors.scaleAlpha(palette.accent, 0.8f), 0.008f),
         )
@@ -627,47 +626,6 @@ object VanScene {
             VanDrawOp.PathOp(strandLow, VanColors.of(HAIR_SHADOW, 0.85f), strokeWidth = rx * 0.070f),
             VanDrawOp.PathOp(strandMid, VanColors.of(HAIR_SHADOW, 0.55f), strokeWidth = rx * 0.055f),
             VanDrawOp.PathOp(highlight, VanColors.of(0xFFFFFFFFL, 0.80f), strokeWidth = rx * 0.050f),
-        )
-    }
-
-    /**
-     * The dark VAN headband, worn over the hair at the hairline.
-     *
-     * The brand mark is a cyan tag rather than lettering: at a 72–112dp character height the
-     * word would be sub-pixel, and painting unreadable glyphs would be a fake detail.
-     */
-    private fun headband(rig: VanRig, palette: VanStatusPalette): List<VanDrawOp> {
-        val cx = rig.headCx
-        val cy = rig.headCy
-        val rx = rig.headRx
-        val ry = rig.headRy
-        val bandCy = cy - ry * 0.60f
-        val bandHalfH = ry * 0.125f
-        return listOf(
-            VanDrawOp.RoundRect(
-                cx = cx,
-                cy = bandCy,
-                halfW = rx * 0.86f,
-                halfH = bandHalfH,
-                radius = bandHalfH * 0.6f,
-                color = VanColors.of(HEADBAND),
-            ),
-            VanDrawOp.RoundRect(
-                cx = cx,
-                cy = bandCy,
-                halfW = rx * 0.26f,
-                halfH = bandHalfH * 0.42f,
-                radius = bandHalfH * 0.21f,
-                color = VanColors.scaleAlpha(palette.accent, 0.92f),
-            ),
-            VanDrawOp.RoundRect(
-                cx = cx,
-                cy = bandCy + bandHalfH * 0.74f,
-                halfW = rx * 0.80f,
-                halfH = ry * 0.012f,
-                radius = ry * 0.012f,
-                color = VanColors.scaleAlpha(palette.accent, 0.40f),
-            ),
         )
     }
 
