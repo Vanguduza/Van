@@ -55,7 +55,7 @@ full_m3:
   gaze_resumes_after_action: true
   point_directions_readable_at_dp: 96
   urgency_only_modulates: [URGENT, WARNING, ERROR]
-artboard:
+artboard_policy:
   transparent: true
   full_artboard_effects_forbidden: true
   aura_in_rive_forbidden: true
