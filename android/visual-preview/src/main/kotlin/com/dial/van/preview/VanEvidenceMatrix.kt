@@ -520,7 +520,6 @@ object VanEvidenceMatrix {
         forceCanvas: Boolean = false,
         phase: Float = PHASE,
     ) {
-        if (!forceCanvas && actionCode == 0 && OwnerArt.paint(g, state, x, y, size, size)) return
         AwtVanRenderer.paint(
             g,
             VanScene.build(
