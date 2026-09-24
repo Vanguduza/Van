@@ -4,7 +4,7 @@ from tools.character_forge.svg_lint import REQUIRED_GROUPS, lint_svg
 def _svg(groups,hair="#eeeeee"):
     body=[]
     for name in groups:
-        fill=hair if name=="hair" else "#00bcd4" if name in {"visor_lens","orb_core"} else "#2196f3" if name in {"eye_l","eye_r"} else "#8d5524" if name in {"face","neck","hand_l","hand_r"} else "#222222"
+        fill=hair if name=="hair" else "#00bcd4" if name in {"visor_lens","orb_core"} else "#2196f3" if name in {"eye_l","eye_r"} else "#8d5524" if name in {"face","neck"} else "#222222"
         body.append(f'<g id="{name}"><path fill="{fill}" d="M 10 10 L 90 10 L 90 90 Z"/></g>')
     return '<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 100 100">'+"".join(body)+"</svg>"
 
