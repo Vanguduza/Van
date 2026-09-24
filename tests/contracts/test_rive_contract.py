@@ -105,3 +105,17 @@ def test_instrumentation_contract_asset_matches_canonical():
     embedded = ROOT / "android" / "app" / "src" / "androidTest" / "assets" / "rive_contract.json"
     assert embedded.is_file()
     assert json.loads(embedded.read_text(encoding="utf-8")) == json.loads(canonical.read_text(encoding="utf-8"))
+
+
+def test_identity_lock_is_exact():
+    assert CONTRACT["identity_lock"] == {
+        "hair": "silver_white_swept",
+        "visor": "cyan_blue_transparent",
+        "skin": "medium_brown",
+        "eyes": "blue",
+        "jacket": "black_white_technical",
+        "underlayer": "charcoal_technical",
+        "accents": "dial_cyan",
+        "companion": "cyan_holographic_orb",
+        "forbid": ["dark_hair", "generic_robot", "random_mascot"],
+    }
