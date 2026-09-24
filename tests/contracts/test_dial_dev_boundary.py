@@ -15,6 +15,10 @@ from pathlib import Path
 
 ROOT = Path(__file__).resolve().parents[2]
 ANDROID = ROOT / "android"
+#: What ships: the app's own sources and build files. JVM test fixtures under
+#: android/verification may legitimately carry projection data such as a host name.
+ANDROID_APP = ANDROID / "app"
+CLIENT = ANDROID_APP / "src" / "main" / "java" / "com" / "dial" / "van" / "gateway" / "VanGatewayClient.kt"
 BACKEND = ROOT / "backend" / "van_gateway"
 DIAL_DEV = BACKEND / "dial_dev"
 
@@ -32,11 +36,16 @@ from van_gateway.dial_dev.config import (  # noqa: E402
 def _android_sources() -> dict[Path, str]:
     """Everything that ships in, or builds, the Android app — not only Kotlin."""
     suffixes = {".kt", ".kts", ".java", ".xml", ".json", ".properties", ".gradle"}
-    return {
-        path: path.read_text(encoding="utf-8", errors="ignore")
-        for path in ANDROID.rglob("*")
-        if path.is_file() and path.suffix in suffixes and "build" not in path.parts
-    }
+    roots = [ANDROID_APP / "src" / "main", ANDROID_APP]
+    found: dict[Path, str] = {}
+    for root in roots:
+        candidates = root.rglob("*") if root.name == "main" else root.glob("*")
+        for path in candidates:
+            if path.is_file() and path.suffix in suffixes and "build" not in path.parts:
+                found[path] = path.read_text(encoding="utf-8", errors="ignore")
+    for path in ANDROID.glob("*.gradle.kts"):
+        found[path] = path.read_text(encoding="utf-8", errors="ignore")
+    return found
 
 
 #: What would mean the phone is talking to DIAL, or holding what lets it.
@@ -118,18 +127,76 @@ def _normalise(literal: str) -> str:
     return path.rstrip("/")
 
 
+def _android_dial_dev_paths() -> list[tuple[str, str]]:
+    """(where, path) for every DIAL development route the Android app names.
+
+    Three spellings: a full literal (`"/v1/dial-dev/agents"`), a literal joined onto the
+    prefix constant (`"$DIAL_DEV_PREFIX/actions"`), and the relative paths the client's
+    `DialDevClient` hands to its `read(...)` helper. Also the `@DataSource("GET …")` notes,
+    which are how every screen declares what it reads (DNA §5).
+    """
+    found: list[tuple[str, str]] = []
+    for path, text in _android_sources().items():
+        where = str(path.relative_to(ROOT))
+        for literal in re.findall(r'"(/v1/dial-dev[^"]*)"', text):
+            found.append((where, literal))
+        for literal in re.findall(r'"\$\{?DIAL_DEV_PREFIX\}?(/[^"]*)"', text):
+            found.append((where, PREFIX + literal))
+        for literal in re.findall(r'@DataSource\("(?:GET|POST) (/v1/dial-dev/[^"]*)"\)', text):
+            found.append((where, literal))
+    if CLIENT.is_file():
+        text = CLIENT.read_text(encoding="utf-8")
+        start = text.find("inner class DialDevClient")
+        if start >= 0:
+            end = text.find("\n    }\n", start)
+            body = text[start:end if end > 0 else None]
+            for literal in re.findall(r'\bread\("(/[^"]*)"\)', body):
+                found.append((str(CLIENT.relative_to(ROOT)), PREFIX + literal))
+    return found
+
+
+def _normalise_route(literal: str) -> str:
+    path = _normalise(literal)
+    return re.sub(r"\{[^}]*\}", "{}", path)
+
+
 def test_every_dial_dev_path_the_phone_builds_is_one_the_gateway_serves():
     """Vacuous until the Android half lands; binding from the moment it does."""
     served = _gateway_dial_dev_paths()
     unknown = []
-    for path, text in _android_sources().items():
-        for literal in re.findall(r'"(/v1/dial-dev[^"]*)"', text):
-            normalised = _normalise(literal)
-            if normalised == PREFIX:
-                continue  # a prefix constant, joined later
-            if normalised not in served:
-                unknown.append(f"{path.relative_to(ROOT)}: {literal}")
+    for where, literal in _android_dial_dev_paths():
+        normalised = _normalise_route(literal)
+        if normalised == PREFIX:
+            continue  # the prefix constant itself
+        if literal.endswith("/${section.path}"):
+            continue  # the hub children; checked against HUB_CHILDREN below
+        if normalised not in served:
+            unknown.append(f"{where}: {literal}")
     assert unknown == [], "the phone builds routes the gateway does not serve:\n" + "\n".join(unknown)
+
+
+def test_the_route_scan_would_catch_a_renamed_route():
+    served = _gateway_dial_dev_paths()
+    assert _normalise_route("/v1/dial-dev/workspaces/${id}/terminal-tail?lines=200") in served
+    assert _normalise_route("GET /v1/dial-dev/projects/{p}/tasks?view={view}".split(" ")[1]) in served
+    assert _normalise_route("/v1/dial-dev/workspace/${id}") not in served
+
+
+def test_hub_sections_the_phone_names_are_hub_children_the_gateway_serves():
+    if not CLIENT.is_file():
+        return
+    text = CLIENT.read_text(encoding="utf-8")
+    match = re.search(r"enum class HubSection\(val path: String\) \{(.*?)\}", text, re.S)
+    if match is None:
+        return
+    paths = set(re.findall(r'\("([a-z-]+)"\)', match.group(1)))
+    assert paths and paths <= set(HUB_CHILDREN), paths
+
+
+def test_a_declared_prefix_constant_is_the_gateways_prefix():
+    for path, text in _android_sources().items():
+        for value in re.findall(r'const val DIAL_DEV_PREFIX\s*=\s*"([^"]*)"', text):
+            assert value == PREFIX, f"{path.relative_to(ROOT)} declares DIAL_DEV_PREFIX = {value!r}"
 
 
 def test_the_phone_never_posts_a_dial_action_without_a_proof():
