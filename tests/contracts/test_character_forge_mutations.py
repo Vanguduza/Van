@@ -84,7 +84,7 @@ def _svg(groups: list[str], *, hair: str = "#eeeeee") -> str:
             hair if name == "hair"
             else "#00bcd4" if name in {"visor_lens", "orb_core"}
             else "#2196f3" if name in {"eye_l", "eye_r"}
-            else "#8d5524" if name in {"face", "neck", "hand_l", "hand_r"}
+            else "#8d5524" if name in {"face", "neck"}
             else "#222222"
         )
         body.append(
