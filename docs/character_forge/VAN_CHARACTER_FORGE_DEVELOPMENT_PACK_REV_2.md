@@ -25,10 +25,10 @@ Every item below is present at the baseline SHA. An implementer who recreates an
 | Human-readable contract | `docs/RIVE_CHARACTER_CONTRACT.md` | Same content as the JSON; the JSON is authoritative |
 | Kotlin binding | `android/app/src/main/java/com/dial/van/visual/RiveContract.kt` (`VanDurableState`, `VanFiniteAction`, `VanTrigger`, `VanInput`, `RiveBindingContract` with `ARTBOARD="Van"`, `STATE_MACHINE="VanRuntime"`, `ASSET_FILE="van.riv"`) | Bound to the JSON by `tests/contracts/test_rive_contract.py` |
 | Rive playback | `android/app/src/main/java/com/dial/van/visual/VanRiveAvatar.kt` (`setRiveBytes`, `setNumberState`, `setBooleanState`) | Loads `assets/van.riv`; calls `onLoadFailed` on any throwable |
-| Renderer order and fail-closed decision | `android/app/src/main/java/com/dial/van/visual/VanVisualRuntime.kt` `decide()`: RIVE → OWNER_ART → CANVAS; `MIN_ARTBOARD_BYTES = 1024` | Reasons: ASSET_MISSING, ASSET_UNUSABLE, RUNTIME_UNAVAILABLE, LOAD_FAILED |
+| Renderer order and fail-closed decision | `android/app/src/main/java/com/dial/van/visual/VanVisualRuntime.kt` `decide()`: RIVE → CANVAS (legacy OWNER_ART retired); `MIN_ARTBOARD_BYTES = 1024` | Reasons: ASSET_MISSING, ASSET_UNUSABLE, RUNTIME_UNAVAILABLE, LOAD_FAILED |
 | Renderer status to the owner | `visual/VanRendererStatus.kt` via `DegradedBridge`; Settings "Character" row | Live |
 | Rive runtime | `android/app/build.gradle.kts` line 251: `app.rive:rive-android:9.6.5` | Pinned |
-| Owner source art | `visual-authority/assets/` (turnaround.png, expressions.png, gestures.png, presentation.png, owner_visual_lock_sheet.jpg, compact_avatar.png, urgent_decision.png, offline_degraded.png, command_centre.png, onboarding_hero.png, icons) plus `assets/derived/` state renders and `assets/pack/` owner boards | Present; unhashed |
+| Owner source art | approved asset pack under `visual-authority/character-forge/00-source/asset-pack/` + sole primary image authority `visual-authority/assets/pack/owner_board_visual_authority.png` | Locked; rejected placeholders/derived poses deleted |
 | Identity canon | `docs/VAN_CHARACTER_VISUAL_IDENTITY.md`, `visual-authority/van-visual-authority-v2.yaml` (aura v2.3) | Canon; the aura is Android-native and stays out of the `.riv` |
 | Acceptance criteria | `docs/VAN_VISUAL_ACCEPTANCE_MATRIX.md` (identity, presence, floating UX, physical Samsung checklist) | Canon; this pack references, never restates |
 | Authoring handoff | `docs/VAN_RIVE_AUTHORING_HANDOFF.md` | Superseded by §11–§13 of this pack; update it to point here in M0 |
@@ -80,7 +80,7 @@ A polished `.riv` without this chain is a milestone, not completion.
 | CF-R-11 | Aura stays Android-native; the `.riv` has a transparent artboard and no full-artboard effects | `RiveContractTest.artboardIsTransparentOnThreeBackgrounds` (corner-pixel alpha check) |
 | CF-R-12 | Invalid wire values never corrupt rendering | `RiveContractTest.invalidInputsDegradeSafely` |
 | CF-R-13 | Performance judged in the real composition | `RiveContractTest.idleSoakFrameStats` (`dumpsys gfxinfo`, janky-frame percentage recorded) |
-| CF-R-14 | Fallback preserved: deliberately broken asset selects OWNER_ART/CANVAS | Existing `VanVisualRuntime.decide` tests + `RiveContractTest.brokenAssetFallsBack` |
+| CF-R-14 | Fallback preserved: deliberately broken asset selects CANVAS | Existing `VanVisualRuntime.decide` tests + `RiveContractTest.brokenAssetFallsBack` |
 | CF-R-15 | Never report READY before asset, device and owner gates pass | `STATUS.json` vocabulary (§18) + `test_character_forge_status.py` |
 | CF-R-16 | Tool versions pinned; editor export loadable by rive-android 9.6.5 | `TOOLS.yaml` checked against `build.gradle.kts` pin; emulator load is the compatibility proof |
 | CF-R-17 | Provenance across the editor step | Packaging receipt (§14) required before validation runs |
@@ -195,7 +195,7 @@ Work:
 3. Write the packaging receipt (§14): `cli rive receipt --candidate <path> --source-project <rml project> --authoring-version <pinned rive_cli> --rive-file-id LOCAL --rive-revision LOCAL --svg-sha <sha> --artist <name>`. The receipt records the RML source-tree digest; `stage-candidate` refuses if the RML changed afterwards.
 4. `cli rive stage-candidate <path>` copies the file to `android/app/src/androidTest/assets/van_candidate.riv` and records it (kind `riv_candidate`, stage `core_rig`).
 5. Push; CI runs `RiveContractTest` (§10) in `core` mode (chosen by `STATUS.json.current_stage`).
-6. Install the CI debug APK on the S24 (artifact `van-debug-apk`). The app keeps rendering OWNER_ART/CANVAS in production (the candidate is only in the test APK), so the owner views the core rig through the instrumentation frames and through the debug host screen `RiveCandidateHost` (§10.6), which renders the candidate at overlay size, minimized-portrait crop, and full size on the device.
+6. Install the CI debug APK on the S24 (artifact `van-debug-apk`). The app keeps rendering CANVAS in production (the candidate is only in the test APK), so the owner views the core rig through the instrumentation frames and through the debug host screen `RiveCandidateHost` (§10.6), which renders the candidate at overlay size, minimized-portrait crop, and full size on the device.
 7. Owner records the core verdict: `cli owner record-core-verdict --verdict PASS|REVISE|REJECT --notes "..."` (plain record; the cryptographic receipt is reserved for final acceptance).
 
 Gate M2: `RiveContractTest` core mode green; packaging receipt present; `STATUS.json.core_rig.owner_verdict == "PASS"`.
@@ -360,7 +360,7 @@ A test host composable `RiveCandidateHost` renders `VanRiveAvatar` from the give
 | `artboardIsTransparentOnThreeBackgrounds` (all modes) | IDLE on light, dark, busy | the four corner 8×8 patches equal the background, and translucent coverage (pixels differing from both backgrounds and between them) ≤ `max_translucent_fraction` (default 0.08) so no halo/aura is baked in |
 | `identityColourFamilies` (all modes) | IDLE full-size frame | dominant hue in the hair region is low-saturation light (silver/white); a cyan family is present (visor/accents); no dominant dark hair mass. Implemented as coarse HSV histograms over the upper-third and centre regions with thresholds recorded in the test. This is a drift alarm, not an acceptance criterion. |
 | `idleSoakFrameStats` (full, production) | render IDLE with breathing for 300 s inside the host; then `UiAutomation.executeShellCommand("dumpsys gfxinfo com.dial.van")` | write raw output to `<out>/rive/<mode>/gfxinfo.txt`; parse "Janky frames" percentage; assert ≤ `max_janky_percent` (from a test asset `forge_thresholds.json` written by the CLI) |
-| `brokenAssetFallsBack` (production) | `VanVisualRuntime.decide(assetBytes = 512, riveRuntimeAvailable = true, ownerArtAvailable = true)` and with `loadFailed = true` | renderer is OWNER_ART with reasons ASSET_UNUSABLE and LOAD_FAILED respectively |
+| `brokenAssetFallsBack` (production) | `VanVisualRuntime.decide(assetBytes = 512, riveRuntimeAvailable = true, ownerArtAvailable = true)` and with `loadFailed = true` | renderer is CANVAS with reasons ASSET_UNUSABLE and LOAD_FAILED respectively |
 
 ### 10.5 Baselines and diffs
 
