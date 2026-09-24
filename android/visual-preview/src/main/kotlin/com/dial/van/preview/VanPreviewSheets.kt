@@ -31,7 +31,7 @@ import java.awt.image.BufferedImage
  * Composes the owner-facing preview sheets.
  *
  * Every value that decides how this looks comes from shipping code: [VanGlassTokens] for the
- * DIAL Glass shell (§3/§8), [VanAuraSpecs] for the electrical aura (§7), [OwnerArt] for the
+ * DIAL Glass shell (§3/§8), [VanAuraSpecs] for the electrical aura (§7), the retired owner-art rung no longer participates in
  * character bitmaps, [VanScene] when owner art is absent, and [VanStatusPalette]/[VanPresence]
  * for wording. Nothing here is hand-tuned for the screenshot.
  *
@@ -915,7 +915,6 @@ object VanPreviewSheets {
         reducedMotion: Boolean = false,
         actionCode: Int = 0,
     ) {
-        if (actionCode == 0 && OwnerArt.paint(g, state, x, y, w, h)) return
         AwtVanRenderer.paint(
             g,
             VanScene.build(
