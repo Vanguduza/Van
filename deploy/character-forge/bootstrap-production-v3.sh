@@ -62,7 +62,8 @@ cat > "$STATE_ROOT/production-v3.lock.json" <<EOF
   },
   "stretchy_studio": {
     "repository": "$STRETCHY_REPO",
-    "commit": "$STRETCHY_COMMIT"
+    "commit": "$STRETCHY_COMMIT",
+    "url": "http://127.0.0.1:5173"
   },
   "rive_cli": "$(rive --version 2>&1 | head -n1)"
 }
@@ -74,10 +75,40 @@ log "validating repository production contract"
 runuser -u "$FORGE_USER" -- env PYTHONPATH="$WORKSPACE" \
   "$PY_VENV/bin/python" -m tools.character_forge.production_cli --help >/dev/null
 
-if command -v node >/dev/null 2>&1 && command -v corepack >/dev/null 2>&1; then
-  log "Node/corepack available; Stretchy Studio can be installed from the pinned source."
+if command -v node >/dev/null 2>&1 && command -v npm >/dev/null 2>&1; then
+  NODE_MAJOR="$(node -p 'process.versions.node.split(".")[0]')"
+  [[ "$NODE_MAJOR" -ge 18 ]] || die "Stretchy Studio requires Node 18+"
+  log "building pinned Stretchy Studio from package-lock.json"
+  runuser -u "$FORGE_USER" -- bash -lc "cd '$VENDOR_ROOT/stretchystudio' && npm ci --no-audit --no-fund && npm run build"
+  [[ -f "$VENDOR_ROOT/stretchystudio/dist/index.html" ]] || die "Stretchy Studio build produced no dist/index.html"
+  cat > /etc/systemd/system/van-stretchy-studio.service <<EOF
+[Unit]
+Description=VAN Character Forge Stretchy Studio
+After=network-online.target
+Wants=network-online.target
+
+[Service]
+Type=simple
+User=$FORGE_USER
+Group=$FORGE_USER
+WorkingDirectory=$VENDOR_ROOT/stretchystudio
+ExecStart=/usr/bin/python3 -m http.server 5173 --bind 127.0.0.1 --directory dist
+Restart=on-failure
+RestartSec=3
+NoNewPrivileges=true
+PrivateTmp=true
+ProtectSystem=strict
+ProtectHome=true
+
+[Install]
+WantedBy=multi-user.target
+EOF
+  systemctl daemon-reload
+  systemctl enable --now van-stretchy-studio.service
+  curl --fail --silent --show-error http://127.0.0.1:5173/ >/dev/null || die "Stretchy Studio health check failed"
+  log "Stretchy Studio available to Commander/browser automation at http://127.0.0.1:5173"
 else
-  log "Node/corepack absent; Stretchy source is pinned but editor dependencies are not installed."
+  log "Node/npm absent; Stretchy source is pinned but editor build is skipped."
 fi
 
 if command -v nvidia-smi >/dev/null 2>&1; then
