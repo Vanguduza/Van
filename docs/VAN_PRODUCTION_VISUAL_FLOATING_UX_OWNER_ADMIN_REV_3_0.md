@@ -250,7 +250,7 @@ Identity priorities:
 2. medium-brown face;
 3. cyan visor;
 4. readable blue-eye region where scale permits;
-5. recognisable headband / facial silhouette.
+5. recognisable silver-hair / visor / facial silhouette; **no headband**.
 
 Minimized motion must be quiet but alive: blink, tiny gaze shift and restrained cyan rim pulse. No bouncing bubble or rotating ring.
 
@@ -292,7 +292,7 @@ enum class VanVisualLayer {
 
 Nominal skin/hair/jacket/eye alpha must remain effectively 1.0. DEGRADED/OFFLINE should use desaturation, lower luminance, muted accents and semantic field changes rather than character transparency.
 
-Owner-art images may have transparent background, but interior body pixels must not be globally faded.
+The approved authored character may have a transparent artboard, but interior body pixels must not be globally faded. Legacy owner-art bitmap poses are retired.
 
 ---
 
