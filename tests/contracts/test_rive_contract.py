@@ -105,3 +105,21 @@ def test_instrumentation_contract_asset_matches_canonical():
     embedded = ROOT / "android" / "app" / "src" / "androidTest" / "assets" / "rive_contract.json"
     assert embedded.is_file()
     assert json.loads(embedded.read_text(encoding="utf-8")) == json.loads(canonical.read_text(encoding="utf-8"))
+
+
+def test_identity_lock_contains_approved_character_invariants():
+    lock = CONTRACT["identity_lock"]
+    assert lock["hair"] == "silver_white_swept"
+    assert lock["visor"] == "cyan_blue_transparent"
+    assert lock["skin"] == "medium_brown"
+    assert lock["skin_token"] == "#A4654E"
+    assert lock["skin_delta_e2000_max"] == 8
+    assert lock["eyes"] == "blue"
+    assert lock["jacket"] == "black_white_technical"
+    assert lock["underlayer"] == "charcoal_technical"
+    assert lock["gloves"] == "black_technical"
+    assert lock["headband"] == "forbidden"
+    assert lock["proportions"]["head_count_target"] == 5.75
+    assert lock["proportions"]["three_head_chibi_forbidden"] is True
+    assert "light_peach_skin" in lock["forbid"]
+    assert "headband" in lock["forbid"]
