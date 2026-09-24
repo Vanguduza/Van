@@ -1,0 +1,69 @@
+schema_version: 1
+pack_id: VAN-RIVE-BUILD-INPUT-ASSET-PACK-1
+compiled_from_git_sha: 61d86cd0f2291df3f244b941d4ad3c96a1a1aaca
+status: PRE_ADMISSION
+sha256_policy: "source admit computes SHA-256; do not fabricate it before M0"
+authority:
+  highest:
+    - path: visual-authority/assets/owner_visual_lock_sheet.jpg
+      git_blob_sha: 9244e98991e80ca7856f02ed669f12f7eab2ba28
+      role: locked character/composition reference
+    - path: visual-authority/assets/pack/owner_board_visual_authority.png
+      git_blob_sha: fc18bbe0b91e5b85d8cf8211314a69cb90b8bc0b
+      role: owner visual authority board
+  contracts:
+    - path: visual-authority/rive_contract.json
+      git_blob_sha: 144f732602027b4592ed81a8cb751712124b30ae
+    - path: docs/VAN_CHARACTER_VISUAL_IDENTITY.md
+      git_blob_sha: 0988aea96ff5e5a5e0d8922324acc93552eef5cf
+    - path: docs/VAN_VISUAL_ACCEPTANCE_MATRIX.md
+      git_blob_sha: f9d7a07eb6940c47eb6660d19d1751b4f3bd3b38
+    - path: visual-authority/van-visual-authority-v2.yaml
+      role: Android-native aura/presence canon; exclusion boundary for Rive
+source_art:
+  - {path: visual-authority/assets/turnaround.png, git_blob_sha: 9f53bf43422027693dc1e2e54275a34f0520b028, use: silhouette/proportion reference}
+  - {path: visual-authority/assets/expressions.png, git_blob_sha: 0a0cbc4241ab84b05b0a8a464300ab109852706f, use: facial-expression reference}
+  - {path: visual-authority/assets/gestures.png, git_blob_sha: 0a0cbc4241ab84b05b0a8a464300ab109852706f, use: hand/gesture reference}
+  - {path: visual-authority/assets/presentation.png, git_blob_sha: a9f1dea9e0810e23f24cea493e611d58432781cc, use: expanded/full presentation reference}
+  - {path: visual-authority/assets/compact_avatar.png, git_blob_sha: 50bd59cd858d919539cbd55efaad79c3315332e8, use: small-size readability reference}
+  - {path: visual-authority/assets/urgent_decision.png, git_blob_sha: 6a60a93d7d16a28e1055020331bfb7ce59f7e786, use: urgent/decision reference}
+  - {path: visual-authority/assets/offline_degraded.png, git_blob_sha: 44494ae47d3792bca1dbe0b6109fc86d457f2d02, use: offline/degraded reference}
+  - {path: visual-authority/assets/command_centre.png, git_blob_sha: b209cb4a11c7003104ee23f0e596ce90710ded68, use: command-centre scale/composition reference}
+  - {path: visual-authority/assets/onboarding_hero.png, git_blob_sha: b209cb4a11c7003104ee23f0e596ce90710ded68, use: large presentation reference}
+owner_boards:
+  - {path: visual-authority/assets/pack/owner_board_android_ui_showcase.png, git_blob_sha: aa78e6ec992b94ac0a03973c9c74201ea9e879b0}
+  - {path: visual-authority/assets/pack/owner_board_dial_hermes_showcase.png, git_blob_sha: 9b7601bce6ce0e76a9f3828b19fe8d0f8c3139f6}
+  - {path: visual-authority/assets/pack/owner_board_futuristic_interface.png, git_blob_sha: 83f5f1ecd959a01c8d387e5b38a05aa7c279bb88}
+  - {path: visual-authority/assets/pack/owner_board_interface_concept.png, git_blob_sha: 9b4c8806420b580281591d6eb412472f18849793}
+  - {path: visual-authority/assets/pack/owner_board_visual_authority.png, git_blob_sha: fc18bbe0b91e5b85d8cf8211314a69cb90b8bc0b}
+derived_reference_only:
+  - {path: visual-authority/assets/derived/_contact_sheet.png, git_blob_sha: 0a45d96041c2a33da75ba234d0822824d2a2230d}
+  - {path: visual-authority/assets/derived/van_compact_docked.png, git_blob_sha: ab43f388d839e246fe0d1f184a7b481154f0e7ef}
+  - {path: visual-authority/assets/derived/van_state_idle.png, git_blob_sha: 623dd6dc43bdb9752042f2b9a51bba7222c64c2d}
+  - {path: visual-authority/assets/derived/van_state_listening.png, git_blob_sha: e867944a2f63be37951aaa1e2b31fee09559d28d}
+  - {path: visual-authority/assets/derived/van_state_searching.png, git_blob_sha: 1d14e2b9f1f7fd33ce6eba52292b8a14e8f48c8e}
+  - {path: visual-authority/assets/derived/van_state_success.png, git_blob_sha: d5ca7886494489c0600e9e74d887e2b78311c515}
+  - {path: visual-authority/assets/derived/van_state_thinking.png, git_blob_sha: 030b51e802a11ea06b6b8dee622ad9e8cfd34752}
+  - {path: visual-authority/assets/derived/van_state_warning.png, git_blob_sha: cfa6bcdacbb204e376e125f6a90cf2e5fcc3a94e}
+  - {path: visual-authority/assets/derived/van_state_working.png, git_blob_sha: 9a0b4179e4062a1daf3323d796cd364de7ca77d4}
+implementation_reference_only:
+  - android/app/src/main/java/com/dial/van/visual/VanScene.kt
+  - android/app/src/main/java/com/dial/van/visual/VanCharacterMotion.kt
+  - android/app/src/main/java/com/dial/van/visual/VanMotionMap.kt
+  - android/app/src/main/java/com/dial/van/visual/VanEmbodimentProducers.kt
+  - backend/van_gateway/voice/speech_cues.py
+required_generated_assets:
+  m1:
+    - visual-authority/character-forge/06-vectors-clean/van_layers.svg
+    - visual-authority/character-forge/10-validation/layer_sheet.png
+  m2:
+    - visual-authority/character-forge/09-rive-working/van_runtime_core_1.riv
+    - visual-authority/character-forge/09-rive-working/van_runtime_core_1.receipt.json
+  m3:
+    - visual-authority/character-forge/09-rive-working/van_runtime_full_1.riv
+    - visual-authority/character-forge/09-rive-working/van_runtime_full_1.receipt.json
+  m4:
+    - visual-authority/rive/van_runtime.riv
+    - visual-authority/rive/van_runtime.sha256
+  m5:
+    - visual-authority/rive/manifest.json

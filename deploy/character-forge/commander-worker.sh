@@ -42,11 +42,15 @@ shift || true
 case "$cmd" in
   doctor)
     rive --help >/dev/null
+    python3 -m tools.character_forge.asset_pack_check >/dev/null
     python3 -m tools.character_forge.cli status --json >/dev/null
     echo CHARACTER_FORGE_COMMANDER_READY
     ;;
   status)
     exec python3 -m tools.character_forge.cli status --json
+    ;;
+  asset-pack-check)
+    exec python3 -m tools.character_forge.asset_pack_check
     ;;
   git-status)
     exec git status --short --branch
@@ -171,7 +175,7 @@ case "$cmd" in
   *)
     cat >&2 <<'EOF'
 Allowed commands:
-  doctor status git-status source-admit gate
+  doctor status asset-pack-check git-status source-admit gate
   remove-bg vectorize svg-lint
   rive-help rive-docs rive-schema rive-create rive-inspect
   rive-verify rive-build rive-test rive-screenshot rive-smoke

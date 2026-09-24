@@ -1,0 +1,63 @@
+schema_version: 1
+artboard: Van
+state_machine: VanRuntime
+runtime: app.rive:rive-android:9.6.5
+authoring: pinned Linux x86_64 Rive CLI from TOOLS.yaml
+public_surface:
+  inputs:
+    - {name: state, type: number}
+    - {name: speaking, type: boolean}
+    - {name: listening, type: boolean}
+    - {name: attention_x, type: number, min: -1.0, max: 1.0}
+    - {name: attention_y, type: number, min: -1.0, max: 1.0}
+    - {name: mouth_open, type: number, min: 0.0, max: 1.0}
+    - {name: urgency, type: number, min: 0.0, max: 1.0}
+    - {name: viseme, type: number}
+    - {name: action_code, type: number}
+  triggers: [point, ack, celebrate, warning, wave, shrug, present, panel]
+architecture:
+  single_character_rig: true
+  additive_channels:
+    - base_micro_motion
+    - durable_state
+    - gaze
+    - blink_face
+    - speech
+    - finite_action
+    - orb
+  per_state_character_copies_forbidden: true
+  skeleton_freezes_at_m2_pass: true
+core_m2:
+  durable_states: [IDLE, LISTENING, THINKING, SPEAKING]
+  finite_actions: [HELLO_WAVE, ACK_NOD, POINT_TARGET]
+  gaze:
+    input: [attention_x, attention_y]
+    range: [-1.0, 1.0]
+    rule: eyes_lead_head
+  blink:
+    interval_seconds: [3, 6]
+    duration_ms: [120, 160]
+    suppress_during_point: true
+  breathing:
+    cycle_seconds_approx: 4
+    max_scale_percent: 2
+  orb_idle_drift: true
+  speech_required: true
+  recognizable_at_dp: 48
+full_m3:
+  all_18_states_required: true
+  all_14_actions_required: true
+  state_entry_ms_max: 300
+  state_loop_visible_period_seconds_min: 6
+  action_duration_ms_range: [600, 1800]
+  action_must_return_to_underlying_state: true
+  action_must_preserve_speech: true
+  gaze_resumes_after_action: true
+  point_directions_readable_at_dp: 96
+  urgency_only_modulates: [URGENT, WARNING, ERROR]
+artboard_policy:
+  transparent: true
+  full_artboard_effects_forbidden: true
+  aura_in_rive_forbidden: true
+  character_margin_percent_min: 6
+  validation_sizes_dp: [48, 96, 320]
