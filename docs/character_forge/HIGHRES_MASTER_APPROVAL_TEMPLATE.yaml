@@ -1,0 +1,15 @@
+decision: REVIEW
+authority: owner
+candidate_sha256: null
+canonical_source_git_blob_sha: fc18bbe0b91e5b85d8cf8211314a69cb90b8bc0b
+identity_lock_sha256: null
+review:
+  face_identity_match: NOT_REVIEWED
+  hair_silhouette_match: NOT_REVIEWED
+  visor_geometry_match: NOT_REVIEWED
+  skin_token_match: NOT_REVIEWED
+  jacket_and_underlayer_match: NOT_REVIEWED
+  gloves_and_boots_match: NOT_REVIEWED
+  orb_identity_match: NOT_REVIEWED
+  proportions_match: NOT_REVIEWED
+notes: ""
