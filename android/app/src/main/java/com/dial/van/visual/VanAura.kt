@@ -29,6 +29,10 @@ fun VanAuraLayer(
     characterScale: Float = 1f,
     semanticSpec: VanAuraSpec = spec,
     framing: VanFraming = VanFraming.FULL_BODY,
+    silhouette: VanSilhouette? = null,
+    slowPhase: Float = 0f,
+    pulse: Float = 0f,
+    depth: VanAuraDepth = VanAuraDepth.BACK,
 ) {
     Canvas(modifier = modifier) {
         drawVanAura(
@@ -38,6 +42,10 @@ fun VanAuraLayer(
             characterScale = characterScale,
             semanticSpec = semanticSpec,
             framing = framing,
+            silhouette = silhouette,
+            slowPhase = slowPhase,
+            pulse = pulse,
+            depth = depth,
         )
     }
 }
@@ -66,6 +74,10 @@ fun DrawScope.drawVanAura(
     semanticSpec: VanAuraSpec = spec,
     bodyEdgeDp: Float? = null,
     framing: VanFraming = VanFraming.FULL_BODY,
+    silhouette: VanSilhouette? = null,
+    slowPhase: Float = 0f,
+    pulse: Float = 0f,
+    depth: VanAuraDepth = VanAuraDepth.BACK,
 ) {
     val minEdge = minOf(size.width, size.height)
     if (minEdge <= 0f) return
@@ -84,19 +96,25 @@ fun DrawScope.drawVanAura(
             framing = framing,
             // The avatar is centred in the box; the field sits 2% higher by design.
             characterCenterY = size.height / 2f,
+            silhouette = silhouette,
+            slowPhase = slowPhase,
+            pulse = pulse,
         ),
+        depth,
     )
 }
 
 /** The Compose executor for [VanAuraOp]. Knows how to draw; decides nothing. */
-fun DrawScope.drawAuraOps(ops: List<VanAuraOp>) {
+fun DrawScope.drawAuraOps(ops: List<VanAuraOp>, depth: VanAuraDepth = VanAuraDepth.ALL) {
     for (op in ops) {
+        if (!depth.accepts(op)) continue
         when (op) {
             is VanAuraOp.Radial -> drawRadialOp(op)
             is VanAuraOp.Polyline -> drawPolylineOp(op)
             is VanAuraOp.Dot -> drawDotOp(op)
             is VanAuraOp.Quad -> drawQuadOp(op)
             is VanAuraOp.Flame -> drawFlameOp(op)
+            is VanAuraOp.Rim -> drawRimOp(op)
         }
     }
 }
@@ -166,6 +184,19 @@ private fun DrawScope.drawFlameOp(op: VanAuraOp.Flame) {
         radius = op.gradientRadius,
     )
     drawPath(path = op.path.toComposePath(), brush = brush)
+}
+
+private fun DrawScope.drawRimOp(op: VanAuraOp.Rim) {
+    if (op.alpha <= 0.001f) return
+    val color = Color(op.color)
+    for (run in op.runs) {
+        if (run.size < 2) continue
+        val path = Path().apply {
+            run.forEachIndexed { index, point -> if (index == 0) moveTo(point.x, point.y) else lineTo(point.x, point.y) }
+        }
+        drawPath(path, color.copy(alpha = op.alpha * 0.35f), style = Stroke(op.width * 3f, cap = StrokeCap.Round, join = StrokeJoin.Round))
+        drawPath(path, color.copy(alpha = op.alpha), style = Stroke(op.width, cap = StrokeCap.Round, join = StrokeJoin.Round))
+    }
 }
 
 private fun DrawScope.drawQuadOp(op: VanAuraOp.Quad) {

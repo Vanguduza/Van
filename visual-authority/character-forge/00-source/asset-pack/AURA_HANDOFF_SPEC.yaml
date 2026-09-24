@@ -19,6 +19,10 @@ flame_envelope:
   layers: [outer_state_colour, mid_lightened, core_white_hot_rim]
   embers: rising_sparks_off_upper_flanks
   line_geometry: forbidden  # CF-D-06-REV1
+  rev2: CF-D-08               # runtime contract: visual-authority/character-forge/aura/AURA_RUNTIME_CONTRACT.yaml
+  silhouette_source: rive_artboard_alpha_sampled_per_frame  # the rig drives the aura's shape
+  depth: [back_flames_fragments_embers, front_wisps_and_rim_light]
+  rive_author_note_rev2: keep the artboard background fully transparent; the aura reads VAN's shape from the rendered alpha, so any opaque backdrop pixel would be wrapped in fire
   colour: state_semantic_colour_else_dial_identity_cyan
   height_scales_with_intensity: superlinear
   drawn_behind_opaque_character: true

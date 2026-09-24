@@ -74,3 +74,6 @@ tools/audit/.mutation-journal.json
 
 # Kotlin compiler session directory, written by recent Gradle Kotlin plugins.
 android/verification/.kotlin/
+
+# Aura Rev 2 motion clips: CI evidence (van-visual-evidence artifact), not committed.
+artifacts/release/preview/motion/

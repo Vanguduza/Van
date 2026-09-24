@@ -66,6 +66,7 @@ sourceSets {
             "com/dial/van/visual/VanBodyExclusionProfile.kt",
             "com/dial/van/visual/VanBodyLayout.kt",
             "com/dial/van/visual/VanFlameAura.kt",
+            "com/dial/van/visual/VanSilhouette.kt",
             "com/dial/van/visual/VanCharacterMotion.kt",
             "com/dial/van/visual/VanDrawOp.kt",
             "com/dial/van/visual/VanEffectBudget.kt",

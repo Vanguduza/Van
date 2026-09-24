@@ -104,6 +104,7 @@ class AuraPlanExecutionTest {
                 is VanAuraOp.Dot -> op.copy(alpha = op.alpha * 0.2f)
                 is VanAuraOp.Quad -> op.copy(alpha = op.alpha * 0.2f)
                 is VanAuraOp.Flame -> op.copy(alpha = op.alpha * 0.2f)
+                is VanAuraOp.Rim -> op.copy(alpha = op.alpha * 0.2f)
             }
         }
         val (third, g3) = canvas()

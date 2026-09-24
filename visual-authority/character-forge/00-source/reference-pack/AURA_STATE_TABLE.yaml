@@ -3,9 +3,9 @@ source_of_truth:
 - android/app/src/main/java/com/dial/van/visual/VanStatusPalette.kt
 - android/app/src/main/java/com/dial/van/visual/VanGlassTokens.kt
 source_sha256:
-  android/app/src/main/java/com/dial/van/visual/VanAuraSpec.kt: acc93cd828802225b154f4c4a861eb9bb9a104ba44c401415bd9723e6b17c0cd
+  android/app/src/main/java/com/dial/van/visual/VanAuraSpec.kt: ccf978e09a45cf81662f43b2dacf56aae5d0b1900be837f40e59865b2631b18f
   android/app/src/main/java/com/dial/van/visual/VanStatusPalette.kt: 56b00aabab1164b22ad41c0946a3639b5e3b837aff1294932beeb3e17774ec0f
-  android/app/src/main/java/com/dial/van/visual/VanGlassTokens.kt: b6f773fccd7734f475f303b197979911817d63e63dbcff94567f565f9b9c3840
+  android/app/src/main/java/com/dial/van/visual/VanGlassTokens.kt: 223a573ffdefa3e61006d6c92be0b006d85b136fe39015246ead8d74643bcd06
 ownership: ANDROID_NATIVE — this table tells the Rive author where the field lives so the character never competes with it;
   nothing here is drawn in the .riv
 constants:
@@ -97,7 +97,7 @@ states:
     deform: 0.16
     envelope_scale: 1.52
     envelope_alpha: 0.12
-    semantic_colour: null
+    semantic_colour: '#7B7CF8'
     envelope_segments:
     - centre_deg: 310.0
       sweep_deg: 70.0
@@ -339,7 +339,7 @@ states:
     deform: 0.08
     envelope_scale: 1.36
     envelope_alpha: 0.07
-    semantic_colour: '#EAB308'
+    semantic_colour: '#6E8FD8'
     envelope_segments:
     - centre_deg: 240.0
       sweep_deg: 26.0

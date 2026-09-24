@@ -146,25 +146,35 @@ object VanTradeSemantics {
         semantic: VanTradeSemantic,
         budget: VanEffectBudget = VanEffectBudget.FULL,
     ): VanAuraSpec {
-        val idle = VanAuraSpecs.forState(VanDurableState.IDLE, budget)
-        return when (semantic) {
+        // Built at FULL and scaled once at the end, so the per-family energy below is budgeted
+        // exactly like a durable state's field.
+        val idle = VanAuraSpecs.forState(VanDurableState.IDLE, VanEffectBudget.FULL)
+        val raw = when (semantic) {
             VanTradeSemantic.FLAT -> idle
+            // Aura Rev 2 — each family also has its own flame energy: intensity (height and
+            // brightness), arcActivity (tongue count), sparkRate (embers) and deformation
+            // (turbulence). Calm coherent fire while in a trade, turbulence under risk, a
+            // high-energy fragmented field on a stop. Bounds: AURA_RUNTIME_CONTRACT.yaml.
             VanTradeSemantic.WATCHING -> idle.copy(
+                intensity = 0.30f, arcActivity = 0.12f, sparkRate = 0.05f, deformation = 0.12f,
                 envelopeRadiusScale = 1.46f, envelopeAlpha = 0.14f,
                 semanticColor = VanGlassTokens.ACCENT_TEAL,
                 envelopeSegments = listOf(VanAuraEnvelopeSegment(200f, 58f)),
             )
             VanTradeSemantic.SETUP -> idle.copy(
+                intensity = 0.40f, arcActivity = 0.30f, sparkRate = 0.12f, deformation = 0.18f,
                 envelopeRadiusScale = 1.50f, envelopeAlpha = 0.14f,
                 semanticColor = VanGlassTokens.ACCENT_VIOLET,
                 envelopeSegments = listOf(VanAuraEnvelopeSegment(300f, 50f, node = true)),
             )
             VanTradeSemantic.ENTRY -> idle.copy(
+                intensity = 0.52f, arcActivity = 0.45f, sparkRate = 0.28f, deformation = 0.22f,
                 envelopeRadiusScale = 1.48f, envelopeAlpha = 0.16f,
                 semanticColor = VanGlassTokens.ACCENT_GOLD,
                 envelopeSegments = listOf(VanAuraEnvelopeSegment(-25f, 44f, node = true)),
             )
             VanTradeSemantic.IN_TRADE -> idle.copy(
+                intensity = 0.52f, arcActivity = 0.30f, sparkRate = 0.10f, deformation = 0.10f,
                 envelopeRadiusScale = 1.58f, envelopeAlpha = 0.16f,
                 semanticColor = VanGlassTokens.ACCENT_CYAN,
                 envelopeSegments = listOf(
@@ -173,11 +183,13 @@ object VanTradeSemantics {
                 ),
             )
             VanTradeSemantic.PROFIT -> idle.copy(
+                intensity = 0.55f, arcActivity = 0.32f, sparkRate = 0.18f, deformation = 0.12f,
                 envelopeRadiusScale = 1.48f, envelopeAlpha = 0.16f,
                 semanticColor = VanGlassTokens.ACCENT_GREEN,
                 envelopeSegments = listOf(VanAuraEnvelopeSegment(220f, 64f)),
             )
             VanTradeSemantic.RISK -> idle.copy(
+                intensity = 0.58f, arcActivity = 0.60f, sparkRate = 0.30f, deformation = 0.42f,
                 envelopeRadiusScale = 1.52f, envelopeAlpha = 0.16f,
                 semanticColor = VanGlassTokens.ACCENT_AMBER,
                 envelopeSegments = listOf(
@@ -186,6 +198,7 @@ object VanTradeSemantics {
                 ),
             )
             VanTradeSemantic.STOP -> idle.copy(
+                intensity = 0.68f, arcActivity = 0.85f, sparkRate = 0.50f, deformation = 0.58f,
                 envelopeRadiusScale = 1.50f, envelopeAlpha = 0.17f,
                 semanticColor = VanGlassTokens.ACCENT_RED,
                 envelopeSegments = listOf(
@@ -194,6 +207,7 @@ object VanTradeSemantics {
                 ),
             )
             VanTradeSemantic.HALTED, VanTradeSemantic.UNKNOWN -> idle.copy(
+                intensity = 0.45f, arcActivity = 0.35f, sparkRate = 0.10f, deformation = 0.32f,
                 envelopeRadiusScale = 1.45f, envelopeAlpha = 0.16f,
                 semanticColor = VanGlassTokens.ACCENT_RED,
                 envelopeSegments = listOf(
@@ -202,6 +216,7 @@ object VanTradeSemantics {
                 ),
             )
         }
+        return VanAuraSpecs.budgeted(raw, budget)
     }
 
     /**

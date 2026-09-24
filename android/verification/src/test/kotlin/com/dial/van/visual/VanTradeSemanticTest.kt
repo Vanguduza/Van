@@ -198,4 +198,45 @@ class VanTradeSemanticTest {
             assertTrue(semantic.name !in line, "$semantic leaks its enum name to the owner")
         }
     }
+
+    // ---- Aura Rev 2 (CF-D-08): the trading field is live, and each family has its own energy ----
+
+    @Test
+    fun `a live trade reaches the aura unless authority or health outranks it`() {
+        val profit = VanPresenceReducer.trade(VanPresenceFrame(), VanTradeSemantic.PROFIT).toVisualState()
+        assertEquals(VanTradeSemantic.PROFIT, profit.trade)
+        assertEquals(VanTradeSemantics.auraFor(VanTradeSemantic.PROFIT), VanAuraSpecs.semanticSpecFor(profit))
+        val approval = VanPresenceReducer.authority(VanPresenceFrame(trade = VanTradeSemantic.RISK), VanAuthorityState.WAITING_FOR_OWNER)
+        assertNull(approval.toVisualState().trade, "an owner approval must outrank the market in the field")
+        val offline = VanPresenceFrame(health = VanHealthState.OFFLINE, trade = VanTradeSemantic.PROFIT)
+        assertNull(offline.toVisualState().trade)
+        val degradedCalm = VanPresenceFrame(health = VanHealthState.DEGRADED, trade = VanTradeSemantic.PROFIT)
+        assertNull(degradedCalm.toVisualState().trade, "a degraded subsystem outranks a calm market")
+    }
+
+    @Test
+    fun `closing a live position pulses the field once`() {
+        var frame = VanPresenceReducer.trade(VanPresenceFrame(), VanTradeSemantic.IN_TRADE)
+        frame = VanPresenceReducer.trade(frame, VanTradeSemantic.PROFIT)
+        assertEquals(0, frame.tradeClosePulse, "moving between live states is not a close")
+        frame = VanPresenceReducer.trade(frame, VanTradeSemantic.FLAT)
+        assertEquals(1, frame.toVisualState().auraPulseGeneration)
+        frame = VanPresenceReducer.trade(frame, VanTradeSemantic.WATCHING)
+        assertEquals(1, frame.tradeClosePulse, "a flat book becoming watched is not a close")
+        frame = VanPresenceReducer.trade(frame, VanTradeSemantic.STOP)
+        assertEquals(1, frame.tradeClosePulse, "a stop firing is an alarm, not a celebration pulse")
+    }
+
+    @Test
+    fun `each trade family carries its own flame energy`() {
+        val calm = VanTradeSemantics.auraFor(VanTradeSemantic.IN_TRADE)
+        val risk = VanTradeSemantics.auraFor(VanTradeSemantic.RISK)
+        val stop = VanTradeSemantics.auraFor(VanTradeSemantic.STOP)
+        val entry = VanTradeSemantics.auraFor(VanTradeSemantic.ENTRY)
+        assertTrue(risk.deformation > calm.deformation, "risk must be more turbulent than a calm trade")
+        assertTrue(stop.intensity > risk.intensity && stop.arcActivity > risk.arcActivity, "a stop is the highest-energy field")
+        assertTrue(entry.sparkRate > calm.sparkRate, "an opportunity sheds more particles")
+        val low = VanTradeSemantics.auraFor(VanTradeSemantic.STOP, VanEffectBudget.LOW)
+        assertTrue(low.sparkRate < stop.sparkRate, "trade fields must honour the effect budget")
+    }
 }

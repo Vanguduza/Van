@@ -5,6 +5,7 @@ import kotlin.math.sqrt
 import kotlin.test.Test
 import kotlin.test.assertEquals
 import kotlin.test.assertNotEquals
+import kotlin.test.assertNull
 import kotlin.test.assertTrue
 
 /**
@@ -29,8 +30,9 @@ class VanFlameAuraTest {
         centerX = cx, centerY = cy, radius = radius, budget = budget, phase = phase,
     )
 
+    /** The envelope rings (one closed path around the whole figure), not fragments or wisps. */
     private fun flames(state: VanDurableState, budget: VanEffectBudget = VanEffectBudget.FULL, phase: Float = 0.18f) =
-        plan(state, budget, phase).filterIsInstance<VanAuraOp.Flame>()
+        plan(state, budget, phase).filterIsInstance<VanAuraOp.Flame>().filter { it.path.size > VanFlameAura.SAMPLES }
 
     private fun VanAuraOp.Flame.points(): List<Pair<Float, Float>> = path.mapNotNull {
         when (it) {
@@ -102,6 +104,7 @@ class VanFlameAuraTest {
     fun `the outer flame carries the state colour and the core runs white-hot`() {
         val error = VanAuraSpecs.forState(VanDurableState.ERROR).semanticColor!!
         val layers = plan(VanDurableState.IDLE, semantic = VanDurableState.ERROR).filterIsInstance<VanAuraOp.Flame>()
+            .filter { it.path.size > VanFlameAura.SAMPLES }
         assertTrue(layers.any { it.color and 0xFFFFFF == error and 0xFFFFFF }, "the semantic colour never reached the flames")
         val core = layers.last()
         val r = (core.color shr 16) and 0xFF; val g = (core.color shr 8) and 0xFF; val b = core.color and 0xFF
@@ -147,5 +150,100 @@ class VanFlameAuraTest {
         assertTrue(VanBodyLayout.contains(0.49f, 0.20f), "no head at the top")
         assertTrue(VanBodyLayout.contains(0.40f, 0.88f), "no boot at the bottom")
         assertTrue(!VanBodyLayout.contains(0.05f, 0.05f))
+    }
+
+    // ---- Aura Rev 2 (CF-D-08) --------------------------------------------------------------
+
+    private fun ops(state: VanDurableState, phase: Float = 0.18f, slow: Float = 0f, pulse: Float = 0f,
+                    silhouette: VanSilhouette? = null, budget: VanEffectBudget = VanEffectBudget.FULL) =
+        VanAuraPlanner.plan(
+            spec = VanAuraSpecs.forState(state, budget), semanticSpec = VanAuraSpecs.forState(state, budget),
+            centerX = cx, centerY = cy, radius = radius, budget = budget, phase = phase,
+            silhouette = silhouette, slowPhase = slow, pulse = pulse,
+        )
+
+    private val crownY get() = cy + (VanBodyLayout.HAIR_CROWN_V - 0.5f) * edge
+
+    @Test
+    fun `flame fragments break off and rise above the envelope`() {
+        val fragments = ops(VanDurableState.WORKING).filterIsInstance<VanAuraOp.Flame>()
+            .filter { !it.front && it.path.size <= VanFlameAura.SAMPLES }
+        assertTrue(fragments.size >= 3, "only ${fragments.size} fragments on a working aura")
+        assertTrue(fragments.size <= VanFlameAura.MAX_FRAGMENTS)
+        assertTrue(fragments.any { f -> f.points().minOf { it.second } < crownY - edge * 0.12f }, "no fragment clears the crown")
+        val still = ops(VanDurableState.WORKING, budget = VanEffectBudget.STATIC).filterIsInstance<VanAuraOp.Flame>()
+            .filter { it.path.size <= VanFlameAura.SAMPLES }
+        assertTrue(still.isEmpty(), "a static budget must not animate fragments")
+    }
+
+    @Test
+    fun `front wisps cross the lower body only, never the face, and stay translucent`() {
+        val front = ops(VanDurableState.WORKING).filter { it.front }
+        val wisps = front.filterIsInstance<VanAuraOp.Flame>()
+        assertTrue(wisps.isNotEmpty(), "no front wisps: the field has no depth")
+        val shape = VanSilhouette.fromLayout()
+        val faceLine = cy + (shape.topV + VanFlameAura.FRONT_TOP_FRACTION * (shape.bottomV - shape.topV) - 0.5f) * edge
+        for (w in wisps) {
+            assertTrue(w.alpha <= VanFlameAura.FRONT_ALPHA_MAX + 1e-4f, "front wisp alpha ${w.alpha}")
+            assertTrue(w.points().minOf { it.second } >= faceLine - 0.5f, "a front wisp rises over the face")
+        }
+        assertTrue(ops(VanDurableState.IDLE).filter { !it.front }.none { it is VanAuraOp.Rim }, "rim must be in front")
+    }
+
+    @Test
+    fun `the rim lights VAN's edge and never bridges a gap across the background`() {
+        val rim = ops(VanDurableState.WORKING).filterIsInstance<VanAuraOp.Rim>().single()
+        assertTrue(rim.alpha <= VanFlameAura.RIM_ALPHA_MAX + 1e-4f)
+        assertTrue(rim.runs.size >= 2, "one continuous rim would have to cross the gap between the legs")
+        for (run in rim.runs) {
+            for ((a, b) in run.zipWithNext()) {
+                val mx = (a.x + b.x) / 2f; val my = (a.y + b.y) / 2f
+                val gap = kotlin.math.hypot(b.x - a.x, b.y - a.y)
+                assertTrue(gap < edge * 0.08f, "rim chord of $gap px spans empty space")
+                assertTrue(insideBody(mx + (cx - mx) * 0.05f, my + (cy - my) * 0.05f) || insideBody(mx, my) ||
+                    gap < edge * 0.02f, "rim chord crosses the background at ($mx,$my)")
+            }
+        }
+    }
+
+    @Test
+    fun `the slow clock changes the fire while the fast loop stays seamless`() {
+        val a = flames(VanDurableState.WORKING, phase = 0.3f)
+        val b = ops(VanDurableState.WORKING, phase = 0.3f, slow = 0.37f).filterIsInstance<VanAuraOp.Flame>()
+            .filter { it.path.size > VanFlameAura.SAMPLES }
+        assertNotEquals(a, b, "the second clock does nothing: the loop would visibly repeat")
+        val s0 = ops(VanDurableState.WORKING, phase = 0f, slow = 0.37f).filterIsInstance<VanAuraOp.Flame>().filter { it.path.size > VanFlameAura.SAMPLES }
+        val s1 = ops(VanDurableState.WORKING, phase = 1f, slow = 0.37f).filterIsInstance<VanAuraOp.Flame>().filter { it.path.size > VanFlameAura.SAMPLES }
+        for ((x, y) in s0.zip(s1)) for ((p, q) in x.points().zip(y.points())) {
+            assertTrue(abs(p.first - q.first) < 0.6f && abs(p.second - q.second) < 0.6f, "fast loop jumps at the wrap")
+        }
+    }
+
+    @Test
+    fun `a pulse expands and whitens the fire`() {
+        fun top(p: Float) = ops(VanDurableState.IDLE, pulse = p).filterIsInstance<VanAuraOp.Flame>()
+            .filter { it.path.size > VanFlameAura.SAMPLES }.minOf { f -> f.points().minOf { it.second } }
+        assertTrue(top(1f) < top(0f) - edge * 0.03f, "the pulse did not expand the field")
+    }
+
+    @Test
+    fun `a live alpha mask drives the flames`() {
+        // A tall capsule-shaped figure, off to the left: flames must follow it, not the layout.
+        val w = 64; val h = 64
+        val mask = ByteArray(w * h) { i ->
+            val x = i % w; val y = i / w
+            if (x in 14..26 && y in 8..58) 255.toByte() else 0
+        }
+        val shape = VanSilhouette.fromAlphaMask(w, h, mask)!!
+        assertEquals(20.5f / 64f, shape.centerU, 0.02f)
+        assertTrue(shape.contains(0.31f, 0.5f) && !shape.contains(0.7f, 0.5f))
+        val rings = ops(VanDurableState.WORKING, silhouette = shape).filterIsInstance<VanAuraOp.Flame>()
+            .filter { it.path.size > VanFlameAura.SAMPLES }
+        for (ring in rings) for ((x, y) in ring.points()) {
+            assertTrue(!shape.contains((x - cx) / edge + 0.5f, (y - cy) / edge + 0.5f), "a tongue lands inside the masked figure")
+        }
+        val meanX = rings.first().points().map { it.first }.average()
+        assertTrue(meanX < cx - edge * 0.05f, "the flames did not move with the figure: mean x $meanX")
+        assertNull(VanSilhouette.fromAlphaMask(w, h, ByteArray(w * h)), "an empty mask must not replace the last silhouette")
     }
 }

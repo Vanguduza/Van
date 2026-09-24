@@ -35,6 +35,9 @@ sealed interface VanAuraOp {
     val color: Int
     val alpha: Float
 
+    /** Drawn over VAN (true) or behind him (false). Only faint flame wisps and the rim are in front. */
+    val front: Boolean get() = false
+
     /**
      * A soft radial falloff. Zone A identity haze and the ground crescent.
      *
@@ -77,6 +80,7 @@ sealed interface VanAuraOp {
         override val alpha: Float,
         val bloomRadiusScale: Float = 2.8f,
         val bloomAlphaScale: Float = 0.16f,
+        override val front: Boolean = false,
     ) : VanAuraOp
 
     /**
@@ -91,7 +95,23 @@ sealed interface VanAuraOp {
         val gradientRadius: Float,
         override val color: Int,
         override val alpha: Float,
+        /** Aura Rev 2 depth: front ops are drawn over VAN (faint wisps on legs and forearms). */
+        override val front: Boolean = false,
     ) : VanAuraOp
+
+    /**
+     * Aura Rev 2 — light falling on VAN's own edge. Runs of points along the silhouette, each
+     * stroked as a soft wide pass and a thin bright pass; drawn in front of VAN. Runs break
+     * where the silhouette has a gap, so the rim never becomes a line across the background.
+     */
+    data class Rim(
+        val runs: List<List<VanFieldPoint>>,
+        override val color: Int,
+        override val alpha: Float,
+        val width: Float,
+    ) : VanAuraOp {
+        override val front: Boolean get() = true
+    }
 
     /** The occasional bridge toward the orb companion. */
     data class Quad(
@@ -105,6 +125,17 @@ sealed interface VanAuraOp {
         override val alpha: Float,
         val width: Float,
     ) : VanAuraOp
+}
+
+/** Which part of the aura a painter pass draws: behind VAN, over him, or both (evidence strips). */
+enum class VanAuraDepth {
+    BACK, FRONT, ALL;
+
+    fun accepts(op: VanAuraOp): Boolean = when (this) {
+        BACK -> !op.front
+        FRONT -> op.front
+        ALL -> true
+    }
 }
 
 object VanAuraPlanner {
@@ -156,6 +187,12 @@ object VanAuraPlanner {
         framing: VanFraming = VanFraming.FULL_BODY,
         /** Where the character box is centred, when that differs from the field centre. */
         characterCenterY: Float = centerY,
+        /** What is on screen: Rive alpha, Candidate B alpha, or null for the measured layout. */
+        silhouette: VanSilhouette? = null,
+        /** A long, unrelated second clock so the motion does not visibly repeat. */
+        slowPhase: Float = 0f,
+        /** 0..1 white expansion pulse (a closed trade, a success burst). */
+        pulse: Float = 0f,
     ): List<VanAuraOp> {
         if (radius <= 1f || (spec.intensity <= 0.01f && semanticSpec.intensity <= 0.01f)) {
             return emptyList()
@@ -165,7 +202,10 @@ object VanAuraPlanner {
         val ops = mutableListOf<VanAuraOp>()
 
         ops += zoneA(spec, motion, centerX, centerY, bodyEdge, identityColor)
-        ops += VanFlameAura.plan(spec, semanticSpec, centerX, characterCenterY, bodyEdge, budget, phase, identityColor, framing)
+        ops += VanFlameAura.plan(
+            spec, semanticSpec, centerX, characterCenterY, bodyEdge, budget, phase, identityColor,
+            framing, silhouette, slowPhase, pulse,
+        )
 
         // CF-D-06 (owner): the aura is the flame envelope and its embers, nothing else. The
         // wind strands, electrical branches, scattered ion specks and the orb link line all

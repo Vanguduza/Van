@@ -3,6 +3,7 @@ package com.dial.van.preview
 import com.dial.van.degraded.DegradedMode
 import com.dial.van.overlay.OverlayTheme
 import com.dial.van.visual.VanAuraSpec
+import com.dial.van.visual.VanAuraDepth
 import com.dial.van.visual.VanAuraSpecs
 import com.dial.van.visual.VanCaptions
 import com.dial.van.visual.VanDurableState
@@ -194,14 +195,16 @@ object VanPreviewSheets {
         g.fillRect(0, 0, w, h)
         g.color = Color(TEXT, true)
         g.font = font(38, bold = true)
-        g.drawString("VAN flame aura — CF-D-06 (Goku / Naruto read)", padX, 70)
+        g.drawString("VAN flame aura — Rev 2 (CF-D-06 / CF-D-08)", padX, 70)
         g.color = Color(TEXT_DIM, true)
         g.font = font(18)
-        g.drawString("Tongues wrap Candidate B's silhouette and rise off it; state colour on the outer flame, white-hot rim, rising embers. Android-native, behind the opaque body.", padX, 104)
+        g.drawString("Flames wrap the silhouette read from the art itself; fragments break off and rise; faint wisps and rim light in front; embers. No lines.", padX, 104)
 
+        val shape = AwtVanRenderer.interimSilhouette(VanPresentation.COMMAND_CENTRE)
         fun paintVan(state: VanDurableState, cx: Float, cy: Float, phase: Float) {
             val spec = VanAuraSpecs.forState(state)
-            GlassPainter.drawAura(g, spec, cx, cy, box / 2f, VanEffectBudget.FULL, phase)
+            // Aura Rev 2: behind, VAN, then the front wisps and rim light over him.
+            GlassPainter.drawAura(g, spec, cx, cy, box / 2f, VanEffectBudget.FULL, phase, silhouette = shape, slowPhase = phase * 0.37f)
             AwtVanRenderer.paintVan(
                 g,
                 VanVisualState(
@@ -212,6 +215,10 @@ object VanPreviewSheets {
                 ),
                 VanSceneFrame(presentation = VanPresentation.COMMAND_CENTRE, phase = phase),
                 cx - box / 2f, cy - box / 2f, box, box,
+            )
+            GlassPainter.drawAura(
+                g, spec, cx, cy, box / 2f, VanEffectBudget.FULL, phase,
+                depth = VanAuraDepth.FRONT, silhouette = shape, slowPhase = phase * 0.37f,
             )
         }
 

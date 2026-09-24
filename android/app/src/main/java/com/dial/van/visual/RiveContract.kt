@@ -109,6 +109,13 @@ data class VanVisualState(
     val urgency: Float = 0f,
     val viseme: Int = 0,
     val actionCode: Int = 0,
+    /**
+     * Aura Rev 2 — the live trade the outer field should show, already resolved against
+     * authority, health and offline truth by [VanPresenceFrame]. Renderer-only: never sent to Rive.
+     */
+    val trade: VanTradeSemantic? = null,
+    /** Increments each time a live position closes; the field answers with a brief white pulse. */
+    val auraPulseGeneration: Int = 0,
 ) {
     val resolvedSemanticState: VanDurableState get() = semanticState ?: durableState
 

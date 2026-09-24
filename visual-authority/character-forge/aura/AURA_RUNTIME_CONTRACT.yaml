@@ -1,0 +1,92 @@
+# VAN aura runtime contract — Aura Rev 2 (CF-D-08). Machine authority for every tunable the
+# Android aura uses. tests/contracts/test_aura_runtime_contract.py reads the shipping Kotlin
+# back and fails when a value leaves its range, so the code cannot invent values outside it.
+schema_version: 1
+decision: CF-D-08
+ownership: ANDROID_NATIVE        # van.riv never contains aura geometry (CI gate)
+sources:
+  planner: android/app/src/main/java/com/dial/van/visual/VanFlameAura.kt
+  states: android/app/src/main/java/com/dial/van/visual/VanAuraSpec.kt
+  trade: android/app/src/main/java/com/dial/van/visual/VanTradeSemantic.kt
+  silhouette: android/app/src/main/java/com/dial/van/visual/VanSilhouette.kt
+  rive_sampler: android/app/src/main/java/com/dial/van/visual/VanRiveAvatar.kt
+  tokens: android/app/src/main/java/com/dial/van/visual/VanGlassTokens.kt
+
+architecture:
+  layers_back: [outer_bloom, outer_flame, mid_flame, core_flame, breakaway_fragments, embers]
+  layers_front: [front_wisps, rim_light]
+  silhouette_sources: [rive_alpha_per_frame, candidate_b_alpha, measured_layout]
+  line_geometry: forbidden          # CF-D-06-REV1: no strands, lightning, specks or orb link
+
+# Per-state and per-trade field parameters (VanAuraSpec). Every state and trade family must
+# fall inside these.
+spec_bounds:
+  intensity: [0.0, 0.75]
+  arcActivity: [0.0, 1.0]
+  sparkRate: [0.0, 1.0]
+  deformation: [0.0, 0.6]
+  envelopeScale: [1.35, 1.70]
+
+# VanFlameAura constants.
+planner_bounds:
+  OUTER_PAD: [0.01, 0.06]
+  HEIGHT_BASE: [0.0, 0.10]
+  HEIGHT_PER_INTENSITY: [0.10, 0.50]
+  OUTER_ALPHA_MAX: [0.40, 0.80]
+  MIN_TONGUES: [8, 16]
+  MAX_TONGUES: [16, 28]
+  MAX_FRAGMENTS: [0, 16]
+  MAX_FRONT_WISPS: [0, 8]
+  FRONT_ALPHA_MAX: [0.0, 0.25]      # VAN must read through front wisps
+  FRONT_TOP_FRACTION: [0.40, 0.60]  # front wisps never rise over the face
+  RIM_ALPHA_MAX: [0.0, 0.50]
+  RIM_WIDTH: [0.004, 0.02]
+  PULSE_HEIGHT_GAIN: [0.0, 1.2]
+
+motion:
+  fast_loop: per-state phase from VanAnimationClock, seamless at the wrap
+  slow_clock_period_ms: 23700       # unrelated to every state period, so the fire never visibly repeats
+  transition_ms: [120, 420]         # P1-AURA-002 blends; trade changes retarget the same way
+  close_pulse_ms: 900
+
+silhouette:
+  square_grid: [48, 96]             # VanSilhouette.SQUARE must sit in this range
+  rive_sample_grid: [32, 64]
+  rive_sample_interval_ms: [50, 125]
+
+# Colour is meaning: which token each state's flame carries (null = identity cyan).
+state_palette:
+  IDLE: null
+  CONNECTING: null
+  ATTENTIVE: null
+  LISTENING: null
+  THINKING: ACCENT_THINK
+  SEARCHING: null
+  SPEAKING: null
+  WAITING: null
+  OFFLINE: null
+  SLEEPING: ACCENT_SLEEP
+
+trade_palette:
+  WATCHING: ACCENT_TEAL
+  SETUP: ACCENT_VIOLET
+  ENTRY: ACCENT_GOLD
+  IN_TRADE: ACCENT_CYAN
+  PROFIT: ACCENT_GREEN
+  RISK: ACCENT_AMBER
+  STOP: ACCENT_RED
+  HALTED: ACCENT_RED
+
+# Trade energy ordering the owner reads: calm while in a trade, turbulent under risk, highest on a stop.
+trade_energy_rules:
+  - [RISK.deformation, ">", IN_TRADE.deformation]
+  - [STOP.intensity, ">", RISK.intensity]
+  - [STOP.arcActivity, ">", RISK.arcActivity]
+  - [ENTRY.sparkRate, ">", IN_TRADE.sparkRate]
+
+performance_tiers:                 # VanEffectBudget → what the planner draws
+  FULL: all layers
+  REDUCED: all layers
+  REDUCED_MOTION: all layers, frozen (no fragments; slow clock off)
+  LOW: outer and core flame, embers, rim
+  STATIC: outer and core flame, rim; no embers, fragments or front wisps

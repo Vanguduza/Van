@@ -36,6 +36,8 @@ data class VanPresenceFrame(
      * open") and from [VanTradeSemantic.UNKNOWN] ("I cannot read the ledger").
      */
     val trade: VanTradeSemantic? = null,
+    /** Aura Rev 2 — counts closed positions, so the field can pulse once per close. */
+    val tradeClosePulse: Int = 0,
 ) {
     /** DEGRADED does not suppress local activity; OFFLINE uplink truth does. */
     val poseState: VanDurableState
@@ -87,6 +89,18 @@ data class VanPresenceFrame(
         return derived
     }
 
+    /**
+     * Aura Rev 2 — which trade, if any, shapes the outer field. Explicit authority (an owner
+     * approval, a warning, an error, urgent) and offline truth outrank a market; a degraded
+     * subsystem outranks a calm market. What is left drives the field's colour and energy.
+     */
+    private fun tradeAuraSemantic(): VanTradeSemantic? {
+        val semantic = trade ?: return null
+        if (health == VanHealthState.OFFLINE || authority != VanAuthorityState.NONE) return null
+        if (health == VanHealthState.DEGRADED && VanTradeSemantics.durableStateFor(semantic) == null) return null
+        return semantic
+    }
+
     fun toVisualState(): VanVisualState = VanVisualState(
         durableState = poseState,
         semanticState = semanticState,
@@ -98,6 +112,8 @@ data class VanPresenceFrame(
         urgency = urgency.coerceIn(0f, 1f),
         viseme = if (health == VanHealthState.OFFLINE) 0 else viseme.coerceAtLeast(0),
         actionCode = actionCode,
+        trade = tradeAuraSemantic(),
+        auraPulseGeneration = tradeClosePulse,
     )
 }
 
@@ -110,8 +126,14 @@ object VanPresenceReducer {
      * does to VAN is the same place that decides what voice and health do, and so the JVM
      * tests exercise the production transition rather than an imitation of it.
      */
-    fun trade(frame: VanPresenceFrame, semantic: VanTradeSemantic?): VanPresenceFrame =
-        if (frame.trade == semantic) frame else frame.copy(trade = semantic)
+    fun trade(frame: VanPresenceFrame, semantic: VanTradeSemantic?): VanPresenceFrame {
+        if (frame.trade == semantic) return frame
+        // A live position that becomes flat (or merely watched/setting up) has closed: the
+        // field answers with one brief white expansion, then returns to the new state.
+        val closed = frame.trade?.isLive == true && semantic != null && !semantic.isLive &&
+            (semantic == VanTradeSemantic.FLAT || semantic == VanTradeSemantic.WATCHING || semantic == VanTradeSemantic.SETUP)
+        return frame.copy(trade = semantic, tradeClosePulse = frame.tradeClosePulse + if (closed) 1 else 0)
+    }
 
     fun listeningStarted(frame: VanPresenceFrame): VanPresenceFrame = frame.copy(
         activity = VanDurableState.LISTENING,

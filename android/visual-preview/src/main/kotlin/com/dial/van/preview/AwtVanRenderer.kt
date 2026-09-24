@@ -4,6 +4,8 @@ import com.dial.van.visual.VanColors
 import com.dial.van.visual.VanDrawOp
 import com.dial.van.visual.VanFraming
 import com.dial.van.visual.VanInterimArt
+import com.dial.van.visual.VanPresentation
+import com.dial.van.visual.VanSilhouette
 import com.dial.van.visual.VanScene
 import com.dial.van.visual.VanSceneFrame
 import com.dial.van.visual.VanStatusPalette
@@ -157,6 +159,22 @@ object AwtVanRenderer {
     private val interimArt: BufferedImage by lazy {
         ImageIO.read(File(repoRoot(), "android/app/src/main/res/drawable-nodpi/van_candidate_b_front.png"))
     }
+
+    /** The cut-out's alpha on the silhouette grid, exactly as the app downsamples it. */
+    private val interimUnitAlpha: ByteArray by lazy {
+        val n = VanSilhouette.SQUARE
+        val small = BufferedImage(n, n, BufferedImage.TYPE_INT_ARGB)
+        val g = small.createGraphics()
+        g.setRenderingHint(RenderingHints.KEY_INTERPOLATION, RenderingHints.VALUE_INTERPOLATION_BILINEAR)
+        g.drawImage(interimArt, 0, 0, n, n, null)
+        g.dispose()
+        ByteArray(n * n) { i -> (small.getRGB(i % n, i / n) ushr 24).toByte() }
+    }
+
+    /** Aura Rev 2 — the silhouette the app builds from the Candidate B art for [presentation]. */
+    fun interimSilhouette(presentation: VanPresentation): VanSilhouette? = VanSilhouette.framedFromUnitAlpha(
+        VanSilhouette.SQUARE, VanSilhouette.SQUARE, interimUnitAlpha, VanFraming.forPresentation(presentation),
+    )
 
     private val desaturatedCache = HashMap<Float, BufferedImage>()
 

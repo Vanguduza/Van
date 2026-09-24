@@ -104,3 +104,13 @@ VAN's aura is a Goku/Naruto-style flame envelope (CF-D-06): tongues that wrap hi
 and rise off it, a white-hot rim, a state-coloured outer flame and rising embers. It has no
 strands, lightning or specks (CF-D-06-REV1). It is Android-native and drawn behind the opaque
 character; `van.riv` never contains it.
+
+Aura Rev 2 (CF-D-08) makes the field follow what is on screen and carry more meaning:
+- The flames wrap a silhouette read from the rendered image: the Rive artboard's alpha,
+  sampled every few frames once the rig lands, or the Candidate B art's alpha today.
+- Flame fragments break off and rise.
+- Faint wisps cross in front of the legs and forearms, never the face, and a rim light
+  falls on VAN's edge.
+- A slow second clock keeps the motion from visibly repeating.
+- A live trade sets the field's colour and energy, and a closed position pulses white.
+- Every tunable is bounded by `visual-authority/character-forge/aura/AURA_RUNTIME_CONTRACT.yaml`.
