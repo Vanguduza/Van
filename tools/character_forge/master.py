@@ -59,7 +59,7 @@ def stage_master(candidate: Path, *, receipt_path: Path | None = None) -> dict[s
     receipt = {
         "schema_version": 1,
         "status": "CANDIDATE_NOT_AUTHORITY",
-        "candidate_path": candidate.as_posix(),
+        "candidate_path": _display_path(candidate),
         "candidate_sha256": sha256_file(candidate),
         "width": width,
         "height": height,
