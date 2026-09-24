@@ -8,6 +8,11 @@ WORKSPACE="${CHARACTER_FORGE_WORKSPACE:-$STATE_ROOT/work/Van}"
 EXPECTED_SHA="${VAN_COMMIT_SHA:-}"
 ANDROID_SDK_ROOT="${ANDROID_SDK_ROOT:-$INSTALL_ROOT/android-sdk}"
 AVD_NAME="${CHARACTER_FORGE_AVD_NAME:-van-character-forge-api31}"
+ANDROID_USER_HOME="${CHARACTER_FORGE_ANDROID_USER_HOME:-$STATE_ROOT/.android}"
+ANDROID_AVD_HOME="${CHARACTER_FORGE_ANDROID_AVD_HOME:-$ANDROID_USER_HOME/avd}"
+JAVA_HOME="${CHARACTER_FORGE_JAVA_HOME:-/usr/lib/jvm/java-17-openjdk-amd64}"
+export JAVA_HOME
+export PATH="$JAVA_HOME/bin:$PATH"
 PY_VENV="$INSTALL_ROOT/venv"
 RIVE_HOME="$STATE_ROOT/rive-home"
 # STRICT=1 (bootstrap): the checkout must be exactly VAN_COMMIT_SHA and clean. Otherwise
@@ -50,11 +55,11 @@ else
 fi
 
 if [[ -d "$WORKSPACE/.git" ]]; then
-  observed="$(git -C "$WORKSPACE" rev-parse HEAD 2>/dev/null || true)"
-  dirty="$(git -C "$WORKSPACE" status --porcelain 2>/dev/null || true)"
+  observed="$(as_forge git -C "$WORKSPACE" rev-parse HEAD 2>/dev/null || true)"
+  dirty="$(as_forge git -C "$WORKSPACE" status --porcelain 2>/dev/null || true)"
   if [[ "$observed" == "$EXPECTED_SHA" && -z "$dirty" ]]; then
     add repository GREEN "$observed clean"
-  elif [[ "$STRICT" != 1 ]] && git -C "$WORKSPACE" merge-base --is-ancestor "$EXPECTED_SHA" "$observed" 2>/dev/null; then
+  elif [[ "$STRICT" != 1 ]] && as_forge git -C "$WORKSPACE" merge-base --is-ancestor "$EXPECTED_SHA" "$observed" 2>/dev/null; then
     add repository GREEN "$observed descends from $EXPECTED_SHA"
     [[ -z "$dirty" ]] || warn repository_worktree "authoring in progress: $(wc -l <<<"$dirty") changed paths"
   else
@@ -106,8 +111,8 @@ command -v google-chrome >/dev/null 2>&1 \
   && add web_editor_lane GREEN "$(google-chrome --version)" \
   || add web_editor_lane RED missing
 
-java -version >"$TMP/java.txt" 2>&1
-if grep -q '"17\.' "$TMP/java.txt"; then
+"$JAVA_HOME/bin/java" -version >"$TMP/java.txt" 2>&1
+if [[ -x "$JAVA_HOME/bin/java" ]] && grep -q '"17\.' "$TMP/java.txt"; then
   add java17 GREEN "$(head -n1 "$TMP/java.txt")"
 else
   add java17 RED "$(head -n1 "$TMP/java.txt" 2>/dev/null)"
@@ -119,7 +124,7 @@ else
   add android_sdk RED missing
 fi
 
-if "$ANDROID_SDK_ROOT/emulator/emulator" -list-avds 2>/dev/null | grep -Fxq "$AVD_NAME"; then
+if as_forge env ANDROID_USER_HOME="$ANDROID_USER_HOME" ANDROID_AVD_HOME="$ANDROID_AVD_HOME" "$ANDROID_SDK_ROOT/emulator/emulator" -list-avds 2>/dev/null | grep -Fxq "$AVD_NAME"; then
   add api31_avd GREEN "$AVD_NAME"
 else
   add api31_avd RED "AVD missing"
