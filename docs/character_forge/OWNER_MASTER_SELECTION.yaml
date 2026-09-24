@@ -1,0 +1,27 @@
+schema_version: 1
+selection_id: VAN-MASTER-CANDIDATE-B-20260924
+authority: owner_selection
+status: SELECTED_FOR_ADMISSION
+selected_at: 2026-09-24
+source_candidate:
+  label: Candidate B
+  filename: a_clean_character_design_sheet_highly_detailed_3d.png
+  dimensions_px: [1536, 1024]
+  sha256: cf7f51793692bfe8ea2e5f58f1a12e64d3a76468a85cb19d76d0db64ccef374c
+deterministic_master_derivative:
+  filename: van_master_highres_candidate_b_v1.png
+  expected_repository_path: visual-authority/character-forge/01-master-candidates/van_master_highres_v1.png
+  dimensions_px: [6144, 4096]
+  sha256: 42474ee9595f09f4ef59c060faf756e1db4222234b827fae0311007248b9b9e7
+  derivation: 4x_LANCZOS_FROM_SELECTED_CANDIDATE
+  generative_redraw: false
+  visible_identity_invention: false
+admission:
+  repository_binary_present: false
+  next_gate: INGEST_EXACT_BYTES_AND_VERIFY_SHA
+  may_become_canonical_before_ingest: false
+notes: >
+  Candidate B is the owner-selected high-resolution master direction. The 6144x4096
+  derivative is a deterministic pixel resample of the selected candidate, not a generative
+  redraw. Promotion remains fail-closed until these exact bytes are ingested into the
+  repository and the SHA-256 matches.
