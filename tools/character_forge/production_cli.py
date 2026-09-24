@@ -10,6 +10,8 @@ from .master import approve_master, stage_master
 from .rig_ir import validate_rig_ir
 from .spine_import import import_spine_json
 from .rive_emit import write_rive_authoring_plan
+from .layer_map import map_layer_names
+from .gpu_jobs import build_see_through_job, canonical_job_sha256
 
 
 def _json(path: Path):
@@ -78,6 +80,44 @@ def cmd_rive_plan(args) -> int:
     return 0
 
 
+def cmd_layers_map(args) -> int:
+    try:
+        names=_json(Path(args.names))
+        if not isinstance(names,list) or not all(isinstance(x,str) for x in names):
+            raise ValueError("names file must contain a JSON array of strings")
+        result=map_layer_names(names)
+        output=Path(args.output)
+        output.parent.mkdir(parents=True,exist_ok=True)
+        output.write_text(yaml.safe_dump(result,sort_keys=False),encoding="utf-8")
+    except Exception as exc:
+        print(f"refused: {exc}",file=sys.stderr)
+        return 1
+    print(output)
+    return 0 if result.get("ok") else 1
+
+
+def cmd_gpu_job(args) -> int:
+    try:
+        weights=_json(Path(args.weights)) if args.weights else {}
+        job=build_see_through_job(
+            source=Path(args.source),
+            master_sha256=args.master_sha,
+            code_commit=args.code_commit,
+            mode=args.mode,
+            resolution=args.resolution,
+            weight_hashes=weights,
+        )
+        job["job_sha256"]=canonical_job_sha256(job)
+        output=Path(args.output)
+        output.parent.mkdir(parents=True,exist_ok=True)
+        output.write_text(json.dumps(job,indent=2,sort_keys=True)+"\n",encoding="utf-8")
+    except Exception as exc:
+        print(f"refused: {exc}",file=sys.stderr)
+        return 1
+    print(output)
+    return 0
+
+
 def parser() -> argparse.ArgumentParser:
     root = argparse.ArgumentParser(prog="van-character-forge-v3")
     group = root.add_subparsers(dest="group", required=True)
@@ -91,6 +131,23 @@ def parser() -> argparse.ArgumentParser:
     p.add_argument("--candidate", required=True)
     p.add_argument("--approval", required=True)
     p.set_defaults(func=cmd_master_approve)
+
+    layers = group.add_parser("layers").add_subparsers(dest="command", required=True)
+    p = layers.add_parser("map")
+    p.add_argument("--names", required=True)
+    p.add_argument("--output", required=True)
+    p.set_defaults(func=cmd_layers_map)
+
+    gpu = group.add_parser("gpu").add_subparsers(dest="command", required=True)
+    p = gpu.add_parser("job")
+    p.add_argument("--source", required=True)
+    p.add_argument("--master-sha", required=True)
+    p.add_argument("--code-commit", default="7f139bb25c46a0c8ac720d95ddab185fcda5451c")
+    p.add_argument("--mode", choices=["full_precision","group_offload","nf4_quantized","trial"], default="trial")
+    p.add_argument("--resolution", type=int, default=1280)
+    p.add_argument("--weights")
+    p.add_argument("--output", required=True)
+    p.set_defaults(func=cmd_gpu_job)
 
     rig = group.add_parser("rig").add_subparsers(dest="command", required=True)
     p = rig.add_parser("validate")
