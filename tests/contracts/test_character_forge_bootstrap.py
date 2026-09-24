@@ -268,3 +268,18 @@ def test_android_avd_home_is_explicit_and_shared():
     assert 'as_forge env ANDROID_USER_HOME="$ANDROID_USER_HOME" ANDROID_AVD_HOME="$ANDROID_AVD_HOME"' in qualifier
     assert 'export ANDROID_USER_HOME' in worker
     assert 'export ANDROID_AVD_HOME' in worker
+
+
+def test_scripts_the_bootstrap_runs_do_not_depend_on_their_file_mode():
+    # The first live Netcup run qualified GREEN and then died on "Permission denied":
+    # bootstrap-production-v3.sh was committed 100644 and executed directly from the
+    # checkout. Invoking through bash makes the mode irrelevant; the mode is fixed too.
+    import subprocess
+    text = (ROOT / "deploy" / "character-forge" / "bootstrap-netcup-authoring.sh").read_text()
+    assert 'bash "$WORKSPACE/deploy/character-forge/bootstrap-production-v3.sh"' in text
+    modes = subprocess.run(
+        ["git", "ls-files", "-s", "deploy/character-forge"], cwd=ROOT,
+        capture_output=True, text=True, check=True,
+    ).stdout.splitlines()
+    scripts = [line for line in modes if line.endswith(".sh")]
+    assert scripts and all(line.startswith("100755") for line in scripts), scripts

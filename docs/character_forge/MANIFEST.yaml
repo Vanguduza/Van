@@ -3,138 +3,153 @@ baseline_sha: 3c337efe91faa8461dd28b1f18a26cf346a1b66f
 owner_confirmed_complete: false
 owner_confirmation_date: null
 source_roots:
-  - visual-authority/assets
-  - visual-authority/rive_contract.json
-  - docs/VAN_CHARACTER_VISUAL_IDENTITY.md
-  - docs/VAN_VISUAL_ACCEPTANCE_MATRIX.md
+- visual-authority/assets
+- visual-authority/rive_contract.json
+- docs/VAN_CHARACTER_VISUAL_IDENTITY.md
+- docs/VAN_VISUAL_ACCEPTANCE_MATRIX.md
 sources: []
 artifacts: []
 reviews: {}
-receipts: []
+receipts:
+- command: tools import-lock
+  actor: claude-code:netcup-bootstrap-2026-09-24
+  inputs:
+  - 4b8e299539fd96820c2c626296715174015bfa6512329307d8fa38286608e338
+  - be49e8e734181f99733742119912d810a49d0a3b
+  outputs:
+  - rive_cli=1.1.1
+  - inkscape=1.2.2
+  timestamp: '2026-09-24T22:50:06.711630+00:00'
+  reason: Qualified Netcup authoring toolchain imported into repository authority
 ci_evidence: {}
 decisions:
-  - id: CF-D-02-REV2_1
-    status: ADOPTED
-    date: 2026-09-23
-    authority: owner_direction
-    decision: Pinned Linux x86_64 Rive CLI is the deterministic M2/M3 authoring/build authority; Rive Editor is optional review.
-    milestone_effect: NONE
-  - id: CF-D-03-REV2_1
-    status: ADOPTED
-    date: 2026-09-23
-    authority: owner_direction
-    decision: Optional preparation and review lanes may be installed on Netcup but are not milestone prerequisites unless explicitly invoked.
-    milestone_effect: NONE
-  - id: CF-D-04-REV2_1
-    status: SUPERSEDED_BY_CF-D-05-REV2_1
-    date: 2026-09-24
-    authority: owner_visual_authority
-    decision: The sole primary character board explicitly prints Skin Tone #B8853C in its colour-token panel. That declared token outranks raster sampling variance; #B8853C is the canonical medium-brown skin token with DeltaE2000 tolerance <= 8.
-    evidence:
-      primary_visual: visual-authority/assets/pack/owner_board_visual_authority.png
-      primary_visual_git_blob_sha: fc18bbe0b91e5b85d8cf8211314a69cb90b8bc0b
-      declared_palette_token: "#B8853C"
-      machine_lock: visual-authority/character-forge/00-source/asset-pack/APPROVED_IDENTITY_LOCK.yaml
-    milestone_effect: M1_AND_LATER_MUST_USE_CANONICAL_TOKEN
-  - id: CF-D-05-REV2_1
-    status: ADOPTED
-    date: 2026-09-24
-    authority: owner
-    decision: >-
-      Candidate B is the new visual identity of VAN, replacing the original owner board as the
-      primary visual authority. Adopted traits, measured on the native 1536x1024 Candidate B:
-      compact chibi proportions of 3.2 +/- 0.3 heads (hair crown to chin over crown to sole),
-      replacing 5.75 heads and the three-head-chibi prohibition; a dark orb with two vertical
-      cyan bar eyes, replacing the cyan smiling-face orb; a clear wraparound goggle visor with
-      dark side pods and cyan trim, replacing the glowing cyan band; larger eyes and spikier
-      silver hair; full black technical gloves; skin token #AF6A53 measured from Candidate B,
-      superseding #B8853C (DeltaE2000 17.7 from the master). Candidate B is frozen: no further
-      generated candidates; later artwork is redrawn from it and checked against it.
-    evidence:
-      primary_visual: visual-authority/character-forge/01-master-candidates/van_master_source_candidate_b.png
-      primary_visual_sha256: cf7f51793692bfe8ea2e5f58f1a12e64d3a76468a85cb19d76d0db64ccef374c
-      superseded_visual: visual-authority/assets/pack/owner_board_visual_authority.png
-      machine_lock: visual-authority/character-forge/00-source/asset-pack/APPROVED_IDENTITY_LOCK.yaml
-      landmarks: visual-authority/character-forge/00-source/reference-pack/PROPORTIONS.yaml
-    milestone_effect: M1_AND_LATER_MUST_MATCH_CANDIDATE_B
-  - id: CF-D-06
-    status: ADOPTED
-    date: 2026-09-24
-    authority: owner
-    decision: >-
-      VAN's aura is redesigned to resemble Goku's and Naruto's: a flame envelope that wraps his
-      silhouette and rises off it, with layered state-coloured outer tongues, a white-hot core
-      rim and rising embers. This reverses the earlier detached-field rule; the wind field is
-      kept only as faint wisps. The aura remains Android-native, drawn behind the opaque
-      character; van.riv stays transparent and carries no aura geometry.
-    evidence:
-      planner: android/app/src/main/java/com/dial/van/visual/VanFlameAura.kt
-      silhouette: android/app/src/main/java/com/dial/van/visual/VanBodyLayout.kt
-      tests: android/verification/src/test/kotlin/com/dial/van/visual/VanFlameAuraTest.kt
-      handoff: visual-authority/character-forge/00-source/asset-pack/AURA_HANDOFF_SPEC.yaml
-    milestone_effect: AURA_EVIDENCE_MUST_SHOW_FLAME_ENVELOPE
-  - id: CF-D-06-REV1
-    status: ADOPTED
-    date: 2026-09-24
-    authority: owner
-    decision: >-
-      The aura's wind strands, electrical branches, scattered ion specks and orb link line are
-      removed: on an Android screen they are noise. The aura is the flame envelope and its
-      embers only.
-    milestone_effect: AURA_HAS_NO_LINE_GEOMETRY
-  - id: CF-D-07
-    status: ADOPTED
-    date: 2026-09-24
-    authority: owner
-    decision: >-
-      Until the authored van.riv loads, VAN is shown as real Candidate B art: a native-resolution
-      cut-out of the Candidate B front view, framed like the Rive artboard, with the flame aura
-      and the state marks drawn around it. It is a still (gentle bob only; no expressions or
-      gestures). The procedural Canvas drawing remains only as the last-resort fallback. The
-      retired owner-art poses stay retired.
-    evidence:
-      asset: android/app/src/main/res/drawable-nodpi/van_candidate_b_front.png
-      provenance: visual-authority/character-forge/00-source/reference-pack/interim/INTERIM_ART.yaml
-      renderer: android/app/src/main/java/com/dial/van/visual/VanVisualRuntime.kt
-    milestone_effect: RENDERER_ORDER_RIVE_THEN_CANDIDATE_B_THEN_CANVAS
-  - id: CF-D-08
-    status: ADOPTED
-    date: 2026-09-24
-    authority: owner
-    decision: >-
-      Aura Rev 2 adopts the useful parts of the Living Plasma Field proposal inside the flame
-      design and the no-lines rule. The aura wraps the silhouette read from what is on screen:
-      the Rive artboard's alpha, sampled every few frames once the rig lands; the Candidate B
-      art's alpha today; the measured layout for the Canvas fallback. The trading aura is live:
-      a published trade drives the field's colour and flame energy (calm in a trade, turbulent
-      under risk, highest on a stop), below owner authority, alerts and offline truth, and a
-      closed position fires one white pulse. Also adopted: breakaway flame fragments; front/back
-      depth (faint wisps over legs and forearms, never the face); rim light on VAN's edge; a
-      slow second clock so motion never visibly repeats; THINKING cyan-violet and SLEEPING faint
-      blue; a bounded runtime contract; 8-second motion clips as CI evidence. Not adopted:
-      electrical filaments and long detached strands (CF-D-06-REV1 stands); GPU shader plasma
-      and refraction are deferred.
-    evidence:
-      contract: visual-authority/character-forge/aura/AURA_RUNTIME_CONTRACT.yaml
-      planner: android/app/src/main/java/com/dial/van/visual/VanFlameAura.kt
-      silhouette: android/app/src/main/java/com/dial/van/visual/VanSilhouette.kt
-      rive_sampler: android/app/src/main/java/com/dial/van/visual/VanRiveAvatar.kt
-      trade: android/app/src/main/java/com/dial/van/visual/VanTradeSemantic.kt
-      tests: [android/verification/src/test/kotlin/com/dial/van/visual/VanFlameAuraTest.kt, android/verification/src/test/kotlin/com/dial/van/visual/VanTradeSemanticTest.kt, tests/contracts/test_aura_runtime_contract.py]
-    milestone_effect: AURA_REV2_IS_THE_AURA_AUTHORITY
-  - id: CF-D-08-REV1
-    status: ADOPTED
-    date: 2026-09-24
-    authority: owner
-    decision: >-
-      The trading aura is always on, not only while the trading screen is open. One shared
-      reader (VanTradeAuraPublisher) polls the portfolio every 6 s. The floating overlay holds
-      it while VAN is visible; with the screen off nothing polls. The trading screen holds it
-      strictly (an unreadable ledger is UNKNOWN). In the background an unreadable ledger raises
-      UNKNOWN only when money was at stake, so a gateway blip does not paint VAN red all day for
-      an owner who is not trading. It publishes only on change.
-    evidence:
-      publisher: android/app/src/main/java/com/dial/van/trading/VanTradeAuraPublisher.kt
-      policy: android/app/src/main/java/com/dial/van/visual/VanTradeSemantic.kt
-      tests: [android/verification/src/test/kotlin/com/dial/van/visual/VanTradeSemanticTest.kt, tests/contracts/test_aura_runtime_contract.py]
-    milestone_effect: TRADING_AURA_ALWAYS_ON
+- id: CF-D-02-REV2_1
+  status: ADOPTED
+  date: 2026-09-23
+  authority: owner_direction
+  decision: Pinned Linux x86_64 Rive CLI is the deterministic M2/M3 authoring/build
+    authority; Rive Editor is optional review.
+  milestone_effect: NONE
+- id: CF-D-03-REV2_1
+  status: ADOPTED
+  date: 2026-09-23
+  authority: owner_direction
+  decision: Optional preparation and review lanes may be installed on Netcup but are
+    not milestone prerequisites unless explicitly invoked.
+  milestone_effect: NONE
+- id: CF-D-04-REV2_1
+  status: SUPERSEDED_BY_CF-D-05-REV2_1
+  date: 2026-09-24
+  authority: owner_visual_authority
+  decision: The sole primary character board explicitly prints Skin Tone
+  evidence:
+    primary_visual: visual-authority/assets/pack/owner_board_visual_authority.png
+    primary_visual_git_blob_sha: fc18bbe0b91e5b85d8cf8211314a69cb90b8bc0b
+    declared_palette_token: '#B8853C'
+    machine_lock: visual-authority/character-forge/00-source/asset-pack/APPROVED_IDENTITY_LOCK.yaml
+  milestone_effect: M1_AND_LATER_MUST_USE_CANONICAL_TOKEN
+- id: CF-D-05-REV2_1
+  status: ADOPTED
+  date: 2026-09-24
+  authority: owner
+  decision: 'Candidate B is the new visual identity of VAN, replacing the original
+    owner board as the primary visual authority. Adopted traits, measured on the native
+    1536x1024 Candidate B: compact chibi proportions of 3.2 +/- 0.3 heads (hair crown
+    to chin over crown to sole), replacing 5.75 heads and the three-head-chibi prohibition;
+    a dark orb with two vertical cyan bar eyes, replacing the cyan smiling-face orb;
+    a clear wraparound goggle visor with dark side pods and cyan trim, replacing the
+    glowing cyan band; larger eyes and spikier silver hair; full black technical gloves;
+    skin token #AF6A53 measured from Candidate B, superseding #B8853C (DeltaE2000
+    17.7 from the master). Candidate B is frozen: no further generated candidates;
+    later artwork is redrawn from it and checked against it.'
+  evidence:
+    primary_visual: visual-authority/character-forge/01-master-candidates/van_master_source_candidate_b.png
+    primary_visual_sha256: cf7f51793692bfe8ea2e5f58f1a12e64d3a76468a85cb19d76d0db64ccef374c
+    superseded_visual: visual-authority/assets/pack/owner_board_visual_authority.png
+    machine_lock: visual-authority/character-forge/00-source/asset-pack/APPROVED_IDENTITY_LOCK.yaml
+    landmarks: visual-authority/character-forge/00-source/reference-pack/PROPORTIONS.yaml
+  milestone_effect: M1_AND_LATER_MUST_MATCH_CANDIDATE_B
+- id: CF-D-06
+  status: ADOPTED
+  date: 2026-09-24
+  authority: owner
+  decision: 'VAN''s aura is redesigned to resemble Goku''s and Naruto''s: a flame
+    envelope that wraps his silhouette and rises off it, with layered state-coloured
+    outer tongues, a white-hot core rim and rising embers. This reverses the earlier
+    detached-field rule; the wind field is kept only as faint wisps. The aura remains
+    Android-native, drawn behind the opaque character; van.riv stays transparent and
+    carries no aura geometry.'
+  evidence:
+    planner: android/app/src/main/java/com/dial/van/visual/VanFlameAura.kt
+    silhouette: android/app/src/main/java/com/dial/van/visual/VanBodyLayout.kt
+    tests: android/verification/src/test/kotlin/com/dial/van/visual/VanFlameAuraTest.kt
+    handoff: visual-authority/character-forge/00-source/asset-pack/AURA_HANDOFF_SPEC.yaml
+  milestone_effect: AURA_EVIDENCE_MUST_SHOW_FLAME_ENVELOPE
+- id: CF-D-06-REV1
+  status: ADOPTED
+  date: 2026-09-24
+  authority: owner
+  decision: 'The aura''s wind strands, electrical branches, scattered ion specks and
+    orb link line are removed: on an Android screen they are noise. The aura is the
+    flame envelope and its embers only.'
+  milestone_effect: AURA_HAS_NO_LINE_GEOMETRY
+- id: CF-D-07
+  status: ADOPTED
+  date: 2026-09-24
+  authority: owner
+  decision: 'Until the authored van.riv loads, VAN is shown as real Candidate B art:
+    a native-resolution cut-out of the Candidate B front view, framed like the Rive
+    artboard, with the flame aura and the state marks drawn around it. It is a still
+    (gentle bob only; no expressions or gestures). The procedural Canvas drawing remains
+    only as the last-resort fallback. The retired owner-art poses stay retired.'
+  evidence:
+    asset: android/app/src/main/res/drawable-nodpi/van_candidate_b_front.png
+    provenance: visual-authority/character-forge/00-source/reference-pack/interim/INTERIM_ART.yaml
+    renderer: android/app/src/main/java/com/dial/van/visual/VanVisualRuntime.kt
+  milestone_effect: RENDERER_ORDER_RIVE_THEN_CANDIDATE_B_THEN_CANVAS
+- id: CF-D-08
+  status: ADOPTED
+  date: 2026-09-24
+  authority: owner
+  decision: 'Aura Rev 2 adopts the useful parts of the Living Plasma Field proposal
+    inside the flame design and the no-lines rule. The aura wraps the silhouette read
+    from what is on screen: the Rive artboard''s alpha, sampled every few frames once
+    the rig lands; the Candidate B art''s alpha today; the measured layout for the
+    Canvas fallback. The trading aura is live: a published trade drives the field''s
+    colour and flame energy (calm in a trade, turbulent under risk, highest on a stop),
+    below owner authority, alerts and offline truth, and a closed position fires one
+    white pulse. Also adopted: breakaway flame fragments; front/back depth (faint
+    wisps over legs and forearms, never the face); rim light on VAN''s edge; a slow
+    second clock so motion never visibly repeats; THINKING cyan-violet and SLEEPING
+    faint blue; a bounded runtime contract; 8-second motion clips as CI evidence.
+    Not adopted: electrical filaments and long detached strands (CF-D-06-REV1 stands);
+    GPU shader plasma and refraction are deferred.'
+  evidence:
+    contract: visual-authority/character-forge/aura/AURA_RUNTIME_CONTRACT.yaml
+    planner: android/app/src/main/java/com/dial/van/visual/VanFlameAura.kt
+    silhouette: android/app/src/main/java/com/dial/van/visual/VanSilhouette.kt
+    rive_sampler: android/app/src/main/java/com/dial/van/visual/VanRiveAvatar.kt
+    trade: android/app/src/main/java/com/dial/van/visual/VanTradeSemantic.kt
+    tests:
+    - android/verification/src/test/kotlin/com/dial/van/visual/VanFlameAuraTest.kt
+    - android/verification/src/test/kotlin/com/dial/van/visual/VanTradeSemanticTest.kt
+    - tests/contracts/test_aura_runtime_contract.py
+  milestone_effect: AURA_REV2_IS_THE_AURA_AUTHORITY
+- id: CF-D-08-REV1
+  status: ADOPTED
+  date: 2026-09-24
+  authority: owner
+  decision: The trading aura is always on, not only while the trading screen is open.
+    One shared reader (VanTradeAuraPublisher) polls the portfolio every 6 s. The floating
+    overlay holds it while VAN is visible; with the screen off nothing polls. The
+    trading screen holds it strictly (an unreadable ledger is UNKNOWN). In the background
+    an unreadable ledger raises UNKNOWN only when money was at stake, so a gateway
+    blip does not paint VAN red all day for an owner who is not trading. It publishes
+    only on change.
+  evidence:
+    publisher: android/app/src/main/java/com/dial/van/trading/VanTradeAuraPublisher.kt
+    policy: android/app/src/main/java/com/dial/van/visual/VanTradeSemantic.kt
+    tests:
+    - android/verification/src/test/kotlin/com/dial/van/visual/VanTradeSemanticTest.kt
+    - tests/contracts/test_aura_runtime_contract.py
+  milestone_effect: TRADING_AURA_ALWAYS_ON

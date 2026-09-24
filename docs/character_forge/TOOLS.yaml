@@ -1,15 +1,15 @@
 critical_path:
   rive_android:
-    version: "9.6.5"
+    version: 9.6.5
     class: RUNTIME
     source: android/app/build.gradle.kts
   rive_cli:
-    version: UNPINNED
+    version: 1.1.1
     class: AUTHORING_BUILD
     required_from: M2
     qualification_source: deploy/character-forge/qualify-netcup-authoring.sh
   inkscape:
-    version: UNPINNED
+    version: 1.2.2
     class: AUTHORING
     required_from: M1
 review_lanes:
@@ -20,7 +20,18 @@ review_lanes:
     version: UNPINNED
     class: HUMAN_REVIEW
 lanes:
-  rembg_birefnet: {class: PREP, enabled: false, installed_by_bootstrap: true}
-  vtracer: {class: PREP, enabled: false, installed_by_bootstrap: true}
-  blender: {class: AUXILIARY, enabled: false, installed_by_bootstrap: true}
-  comfyui: {class: OPTIONAL_AI, enabled: false}
+  rembg_birefnet:
+    class: PREP
+    enabled: false
+    installed_by_bootstrap: true
+  vtracer:
+    class: PREP
+    enabled: false
+    installed_by_bootstrap: true
+  blender:
+    class: AUXILIARY
+    enabled: false
+    installed_by_bootstrap: true
+  comfyui:
+    class: OPTIONAL_AI
+    enabled: false

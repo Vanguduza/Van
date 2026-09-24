@@ -261,7 +261,7 @@ if [[ "${CHARACTER_FORGE_ENABLE_PRODUCTION_V3:-1}" == "1" ]]; then
   CHARACTER_FORGE_STATE_ROOT="$STATE_ROOT" \
   CHARACTER_FORGE_USER="$FORGE_USER" \
   CHARACTER_FORGE_WORKSPACE="$WORKSPACE" \
-    "$WORKSPACE/deploy/character-forge/bootstrap-production-v3.sh"
+    bash "$WORKSPACE/deploy/character-forge/bootstrap-production-v3.sh"
 fi
 
 cat <<EOF

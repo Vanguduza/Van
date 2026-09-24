@@ -29,12 +29,11 @@
   "blockers": [
     "SOURCE_SET_NOT_ADMITTED",
     "OWNER_SOURCE_CONFIRMATION_PENDING",
-    "RIVE_CLI_UNPINNED",
     "LAYER_ARTIFACT_MISSING",
     "RIVE_ASSET_MISSING",
     "S24_DEVICE_GATES_NOT_RUN"
   ],
-  "next_action": "Run the Netcup Character Forge authoring bootstrap after DIAL control setup, then pin the qualified Rive CLI version before M2.",
+  "next_action": "Run source admission/owner confirmation if pending, then proceed to M1/M2 with the pinned Netcup toolchain.",
   "production": {
     "emulator_validation": "NOT_RUN",
     "ci_run": null,
