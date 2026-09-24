@@ -73,3 +73,17 @@ def test_asset_pack_speech_and_validation_requirements():
     assert validation["contract_surface"]["exact_trigger_count"] == 8
     assert validation["full_evidence"]["state_frames"] == 18
     assert validation["full_evidence"]["action_frames"] == 14
+
+
+def test_rive_action_durations_follow_character_forge_canon():
+    matrix = _yaml("STATE_ACTION_MATRIX.yaml")
+    for name, row in matrix["actions"].items():
+        assert 600 <= row["duration_ms"] <= 1800, name
+
+
+def test_known_source_duplicates_are_explicitly_registered():
+    gaps = _yaml("SOURCE_GAP_REGISTER.yaml")
+    text = "\n".join(item["finding"] for item in gaps["register"])
+    assert "turnaround.png and app_icon.png" in text
+    assert "expressions.png and gestures.png" in text
+    assert "command_centre.png and onboarding_hero.png" in text
