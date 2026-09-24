@@ -7,12 +7,14 @@ public wire contract, Android-owned aura, or owner authority.
 
 Read these files before authoring:
 1. `ASSET_PACK_MANIFEST.yaml`
-2. `LAYER_SPEC.yaml`
-3. `RIG_SPEC.yaml`
-4. `STATE_ACTION_MATRIX.yaml`
-5. `SPEECH_SPEC.yaml`
-6. `VALIDATION_MATRIX.yaml`
-7. the canonical owner sources referenced by the manifest
+2. `ASSET_REQUIREMENTS.yaml`
+3. `SOURCE_GAP_REGISTER.yaml`
+4. `LAYER_SPEC.yaml`
+5. `RIG_SPEC.yaml`
+6. `STATE_ACTION_MATRIX.yaml`
+7. `SPEECH_SPEC.yaml`
+8. `VALIDATION_MATRIX.yaml`
+9. the canonical owner sources referenced by the manifest
 
 ## Non-negotiable build boundary
 
@@ -26,7 +28,7 @@ Read these files before authoring:
 
 ## Stage 1 — vector admission
 
-Do not start Rive authoring until:
+Do not start Rive authoring until `asset-pack-check` is green and:
 - source admission has recorded hashes,
 - owner source-set confirmation exists,
 - `van_layers.svg` passes `vectors lint`,
