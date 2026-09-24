@@ -1,155 +1,436 @@
-reference_policy: "OFF_MODEL_SEMANTIC_ONLY \u2014 the cited production-v3 sheets show what a state or action MEANS; their figure is off-model\
-  \ (tall, glowing visor, cyan face orb). Shape, proportion and palette come only from Candidate B (reference/turnaround, reference/details, blockout)."
+reference_policy: "ON_MODEL_KEY_POSES_FIRST \u2014 every state and action has an on-model key pose made from Candidate itself (keyposes/, with\
+  \ the bone rotations that produce it). The production-v3 sheets are listed under semantic_only: they say what a state MEANS; their figure is\
+  \ off-model."
 on_model_reference: visual-authority/character-forge/01-master-candidates/van_master_source_candidate_b.png
 states:
   OFFLINE:
     code: 0
-    references: []
-    gap: no panel; SLEEPING face with the orb dimmed, health shown by the aura (Android)
+    references:
+    - visual-authority/character-forge/00-source/reference-pack/keyposes/states/00_offline.png
+    rig:
+      head_drop: 4
+      orb_dy: 10
+      orb_dim: 0.8
+      eyes: closed
+      brows: neutral
+      mouth: flat
+      desaturate: 0.85
+      note: 'Powered down: eyes shut, orb dark and sunk; the aura is almost out.'
+    semantic_only: null
+    composition_note: no panel; SLEEPING face with the orb dimmed, health shown by the aura (Android)
   CONNECTING:
     code: 1
-    references: []
-    gap: "no panel; OFFLINE\u2192IDLE lift per STATE_ACTION_MATRIX"
+    references:
+    - visual-authority/character-forge/00-source/reference-pack/keyposes/states/01_connecting.png
+    rig:
+      orb_dy: -6
+      eyes: up
+      brows: raised
+      mouth: flat
+      note: 'Lifting from OFFLINE: eyes up to the orb as it rises.'
+    semantic_only: null
+    composition_note: "no panel; OFFLINE\u2192IDLE lift per STATE_ACTION_MATRIX"
   IDLE:
     code: 2
     references:
+    - visual-authority/character-forge/00-source/reference-pack/keyposes/states/02_idle.png
+    rig:
+      eyes: open
+      brows: neutral
+      mouth: smile
+      note: 'Candidate B''s own pose: palm open under the orb, easy smile.'
+    semantic_only:
     - visual-authority/character-forge/00-source/production-v3/artwork/van_expression_and_facial_acting_sheet.png
     - visual-authority/character-forge/00-source/production-v3/artwork/van_states_and_actions_pose_pack.png
   ATTENTIVE:
     code: 3
     references:
+    - visual-authority/character-forge/00-source/reference-pack/keyposes/states/03_attentive.png
+    rig:
+      head_tilt: -3
+      eyes: open
+      brows: raised
+      mouth: smile
+      note: Brows up, head squared to the owner.
+    semantic_only:
     - visual-authority/character-forge/00-source/production-v3/artwork/van_expression_and_facial_acting_sheet.png
   LISTENING:
     code: 4
     references:
+    - visual-authority/character-forge/00-source/reference-pack/keyposes/states/04_listening.png
+    rig:
+      head_tilt: 7
+      eyes: open
+      brows: raised
+      mouth: flat
+      note: Head cocked to listen; mouth closed.
+    semantic_only:
     - visual-authority/character-forge/00-source/production-v3/artwork/van_expression_and_facial_acting_sheet.png
     - visual-authority/character-forge/00-source/production-v3/artwork/van_states_and_actions_pose_pack.png
   THINKING:
     code: 5
     references:
+    - visual-authority/character-forge/00-source/reference-pack/keyposes/states/05_thinking.png
+    rig:
+      head_tilt: -5
+      orb_dy: -8
+      eyes: up
+      brows: focused
+      mouth: flat
+      note: Eyes up and aside, one brow working; orb drifts up.
+    semantic_only:
     - visual-authority/character-forge/00-source/production-v3/artwork/van_expression_and_facial_acting_sheet.png
     - visual-authority/character-forge/00-source/production-v3/artwork/van_states_and_actions_pose_pack.png
   SEARCHING:
     code: 6
-    references: []
-    gap: no panel; THINKING eyes + scan head turn, orb as forward lens
+    references:
+    - visual-authority/character-forge/00-source/reference-pack/keyposes/states/06_searching.png
+    rig:
+      head_tilt: -4
+      orb_dx: -14
+      eyes: side
+      brows: focused
+      mouth: flat
+      note: Scanning sideways; orb pushed forward as a lens.
+    semantic_only: null
+    composition_note: no panel; THINKING eyes + scan head turn, orb as forward lens
   WORKING:
     code: 7
     references:
+    - visual-authority/character-forge/00-source/reference-pack/keyposes/states/07_working.png
+    rig:
+      forearm_l: -18
+      eyes: open
+      brows: focused
+      mouth: flat
+      note: Focused brows, hand working the orb.
+    semantic_only:
     - visual-authority/character-forge/00-source/production-v3/artwork/van_states_and_actions_pose_pack.png
   DELEGATING:
     code: 8
-    references: []
-    gap: no panel; WORKING face + PRESENT_CARD arm outward, orb travels outward
+    references:
+    - visual-authority/character-forge/00-source/reference-pack/keyposes/states/08_delegating.png
+    rig:
+      forearm_r: 75
+      orb_dx: -22
+      orb_dy: -10
+      eyes: open
+      brows: neutral
+      mouth: smile
+      note: Hand out, handing the task on; orb travels outward.
+    semantic_only: null
+    composition_note: no panel; WORKING face + PRESENT_CARD arm outward, orb travels outward
   SPEAKING:
     code: 9
     references:
+    - visual-authority/character-forge/00-source/reference-pack/keyposes/states/09_speaking.png
+    rig:
+      eyes: open
+      brows: raised
+      mouth: viseme_2
+      note: Mouth driven by visemes (see visemes/).
+    semantic_only:
     - visual-authority/character-forge/00-source/production-v3/artwork/van_expression_and_facial_acting_sheet.png
     - visual-authority/character-forge/00-source/production-v3/artwork/van_states_and_actions_pose_pack.png
     - visual-authority/character-forge/00-source/production-v3/artwork/van_ai_assistant_viseme_construction_sheet.png
   WAITING:
     code: 10
-    references: []
-    gap: no panel; ATTENTIVE face with slower breathing
+    references:
+    - visual-authority/character-forge/00-source/reference-pack/keyposes/states/10_waiting.png
+    rig:
+      head_tilt: 3
+      eyes: open
+      brows: neutral
+      mouth: flat
+      note: 'Patient: flat mouth, slight tilt.'
+    semantic_only: null
+    composition_note: no panel; ATTENTIVE face with slower breathing
   WAITING_FOR_OWNER:
     code: 11
     references:
+    - visual-authority/character-forge/00-source/reference-pack/keyposes/states/11_waiting_for_owner.png
+    rig:
+      forearm_r: 100
+      eyes: open
+      brows: raised
+      mouth: flat
+      prop: card
+      note: Holds the decision card up to the owner.
+    semantic_only:
     - visual-authority/character-forge/00-source/production-v3/artwork/van_states_and_actions_pose_pack.png
   DEGRADED:
     code: 12
-    references: []
-    gap: no panel; IDLE face with flatter brows; health is shown by the aura, not the body
+    references:
+    - visual-authority/character-forge/00-source/reference-pack/keyposes/states/12_degraded.png
+    rig:
+      eyes: open
+      brows: concerned
+      mouth: flat
+      desaturate: 0.35
+      note: Muted, uneasy; health shown by the aura.
+    semantic_only: null
+    composition_note: no panel; IDLE face with flatter brows; health is shown by the aura, not the body
   WARNING:
     code: 13
     references:
+    - visual-authority/character-forge/00-source/reference-pack/keyposes/states/13_warning.png
+    rig:
+      head_tilt: -3
+      eyes: open
+      brows: concerned
+      mouth: flat
+      note: Concerned brows, lips pressed.
+    semantic_only:
     - visual-authority/character-forge/00-source/production-v3/artwork/van_expression_and_facial_acting_sheet.png
     - visual-authority/character-forge/00-source/production-v3/artwork/van_states_and_actions_pose_pack.png
   ERROR:
     code: 14
     references:
+    - visual-authority/character-forge/00-source/reference-pack/keyposes/states/14_error.png
+    rig:
+      head_drop: 3
+      eyes: open
+      brows: sad
+      mouth: frown
+      note: 'Apologetic: brows up in the middle, frown.'
+    semantic_only:
     - visual-authority/character-forge/00-source/production-v3/artwork/van_expression_and_facial_acting_sheet.png
     - visual-authority/character-forge/00-source/production-v3/artwork/van_states_and_actions_pose_pack.png
   SUCCESS:
     code: 15
     references:
+    - visual-authority/character-forge/00-source/reference-pack/keyposes/states/15_success.png
+    rig:
+      forearm_r: 160
+      eyes: open
+      brows: raised
+      mouth: grin
+      note: Fist up, big grin.
+    semantic_only:
     - visual-authority/character-forge/00-source/production-v3/artwork/van_expression_and_facial_acting_sheet.png
     - visual-authority/character-forge/00-source/production-v3/artwork/van_states_and_actions_pose_pack.png
   URGENT:
     code: 16
     references:
+    - visual-authority/character-forge/00-source/reference-pack/keyposes/states/16_urgent.png
+    rig:
+      head_tilt: -2
+      eyes: open
+      brows: alert
+      mouth: o
+      note: Alert brows, mouth open to speak up.
+    semantic_only:
     - visual-authority/character-forge/00-source/production-v3/artwork/van_expression_and_facial_acting_sheet.png
     - visual-authority/character-forge/00-source/production-v3/artwork/van_states_and_actions_pose_pack.png
   SLEEPING:
     code: 17
     references:
+    - visual-authority/character-forge/00-source/reference-pack/keyposes/states/17_sleeping.png
+    rig:
+      head_tilt: 8
+      head_drop: 8
+      orb_dy: 14
+      orb_dim: 0.6
+      eyes: closed
+      brows: neutral
+      mouth: flat
+      note: 'Dozing: head slumped, eyes shut, orb resting low.'
+    semantic_only:
     - visual-authority/character-forge/00-source/production-v3/artwork/van_expression_and_facial_acting_sheet.png
     - visual-authority/character-forge/00-source/production-v3/artwork/van_states_and_actions_pose_pack.png
 actions:
   HELLO_WAVE:
     code: 1
     references:
+    - visual-authority/character-forge/00-source/reference-pack/keyposes/actions/00_hello_wave.png
+    rig:
+      forearm_r: 170
+      eyes: open
+      brows: raised
+      mouth: grin
+      note: Forearm up, open hand waving at the elbow.
+    semantic_only:
     - visual-authority/character-forge/00-source/production-v3/artwork/van_states_and_actions_pose_pack.png
     - visual-authority/character-forge/00-source/production-v3/artwork/van_hand_and_glove_gesture_reference_sheet.png
   ACK_NOD:
     code: 2
     references:
+    - visual-authority/character-forge/00-source/reference-pack/keyposes/actions/01_ack_nod.png
+    rig:
+      head_drop: 7
+      eyes: half
+      brows: neutral
+      mouth: smile
+      note: 'Key pose of the nod: chin down.'
+    semantic_only:
     - visual-authority/character-forge/00-source/production-v3/artwork/van_states_and_actions_pose_pack.png
   POINT_LEFT:
     code: 3
-    references: []
-    gap: reuse the POINT_TARGET arm chain aimed left
+    references:
+    - visual-authority/character-forge/00-source/reference-pack/keyposes/actions/02_point_left.png
+    rig:
+      forearm_l: -12
+      eyes: side
+      brows: neutral
+      mouth: flat
+      note: Left arm leads out to the left.
+    semantic_only: null
+    composition_note: reuse the POINT_TARGET arm chain aimed left
   POINT_RIGHT:
     code: 4
-    references: []
-    gap: reuse the POINT_TARGET arm chain aimed right
+    references:
+    - visual-authority/character-forge/00-source/reference-pack/keyposes/actions/03_point_right.png
+    rig:
+      forearm_r: 90
+      eyes: open
+      brows: neutral
+      mouth: flat
+      note: Right forearm swung out horizontal.
+    semantic_only: null
+    composition_note: reuse the POINT_TARGET arm chain aimed right
   POINT_UP:
     code: 5
-    references: []
-    gap: reuse the POINT_TARGET arm chain aimed up
+    references:
+    - visual-authority/character-forge/00-source/reference-pack/keyposes/actions/04_point_up.png
+    rig:
+      forearm_r: 178
+      eyes: up
+      brows: neutral
+      mouth: flat
+      note: Right forearm straight up.
+    semantic_only: null
+    composition_note: reuse the POINT_TARGET arm chain aimed up
   POINT_DOWN:
     code: 6
-    references: []
-    gap: reuse the POINT_TARGET arm chain aimed down
+    references:
+    - visual-authority/character-forge/00-source/reference-pack/keyposes/actions/05_point_down.png
+    rig:
+      forearm_r: -28
+      head_drop: 3
+      eyes: open
+      brows: neutral
+      mouth: flat
+      note: Right forearm angled down and out.
+    semantic_only: null
+    composition_note: reuse the POINT_TARGET arm chain aimed down
   POINT_TARGET:
     code: 7
     references:
+    - visual-authority/character-forge/00-source/reference-pack/keyposes/actions/06_point_target.png
+    rig:
+      forearm_r: 125
+      eyes: open
+      brows: focused
+      mouth: flat
+      note: Aimed by attention_x/y (IK).
+    semantic_only:
     - visual-authority/character-forge/00-source/production-v3/artwork/van_states_and_actions_pose_pack.png
     - visual-authority/character-forge/00-source/production-v3/artwork/van_hand_and_glove_gesture_reference_sheet.png
   CELEBRATE:
     code: 8
     references:
+    - visual-authority/character-forge/00-source/reference-pack/keyposes/actions/07_celebrate.png
+    rig:
+      forearm_l: -115
+      forearm_r: 175
+      head_tilt: 4
+      eyes: open
+      brows: raised
+      mouth: grin
+      note: Both hands up.
+    semantic_only:
     - visual-authority/character-forge/00-source/production-v3/artwork/van_states_and_actions_pose_pack.png
   CAUTION:
     code: 9
     references:
+    - visual-authority/character-forge/00-source/reference-pack/keyposes/actions/08_caution.png
+    rig:
+      forearm_r: 150
+      eyes: open
+      brows: concerned
+      mouth: flat
+      note: 'Palm raised: hold on.'
+    semantic_only:
     - visual-authority/character-forge/00-source/production-v3/artwork/van_states_and_actions_pose_pack.png
     - visual-authority/character-forge/00-source/production-v3/artwork/van_hand_and_glove_gesture_reference_sheet.png
   CONFIRM:
     code: 10
     references:
+    - visual-authority/character-forge/00-source/reference-pack/keyposes/actions/09_confirm.png
+    rig:
+      forearm_r: 112
+      eyes: open
+      brows: raised
+      mouth: smile
+      note: Hand up in a thumbs-up position.
+    semantic_only:
     - visual-authority/character-forge/00-source/production-v3/artwork/van_states_and_actions_pose_pack.png
     - visual-authority/character-forge/00-source/production-v3/artwork/van_hand_and_glove_gesture_reference_sheet.png
   SHRUG:
     code: 11
     references:
+    - visual-authority/character-forge/00-source/reference-pack/keyposes/actions/10_shrug.png
+    rig:
+      forearm_l: -22
+      forearm_r: 80
+      head_tilt: 8
+      eyes: open
+      brows: raised
+      mouth: flat
+      note: Palms out, head tilted.
+    semantic_only:
     - visual-authority/character-forge/00-source/production-v3/artwork/van_states_and_actions_pose_pack.png
   PRESENT_CARD:
     code: 12
     references:
+    - visual-authority/character-forge/00-source/reference-pack/keyposes/actions/11_present_card.png
+    rig:
+      forearm_r: 78
+      eyes: open
+      brows: neutral
+      mouth: smile
+      prop: card
+      note: Offers a card forward.
+    semantic_only:
     - visual-authority/character-forge/00-source/production-v3/artwork/van_states_and_actions_pose_pack.png
     - visual-authority/character-forge/00-source/production-v3/artwork/van_hand_and_glove_gesture_reference_sheet.png
   OPEN_PANEL:
     code: 13
-    references: []
-    gap: no panel; PRESENT_CARD sweep outward
+    references:
+    - visual-authority/character-forge/00-source/reference-pack/keyposes/actions/12_open_panel.png
+    rig:
+      forearm_l: -8
+      forearm_r: 85
+      eyes: open
+      brows: neutral
+      mouth: smile
+      prop: panel
+      note: Hands spread a panel open.
+    semantic_only: null
+    composition_note: no panel; PRESENT_CARD sweep outward
   CLOSE_PANEL:
     code: 14
-    references: []
-    gap: no panel; PRESENT_CARD sweep inward
+    references:
+    - visual-authority/character-forge/00-source/reference-pack/keyposes/actions/13_close_panel.png
+    rig:
+      forearm_l: -55
+      forearm_r: 35
+      eyes: open
+      brows: neutral
+      mouth: flat
+      note: Hands come in to fold it away.
+    semantic_only: null
+    composition_note: no panel; PRESENT_CARD sweep inward
 speech_visemes:
   references:
+  - visual-authority/character-forge/00-source/reference-pack/keyposes/visemes/00_viseme_0.png
+  - visual-authority/character-forge/00-source/reference-pack/keyposes/visemes/01_viseme_1.png
+  - visual-authority/character-forge/00-source/reference-pack/keyposes/visemes/02_viseme_2.png
+  - visual-authority/character-forge/00-source/reference-pack/keyposes/visemes/03_viseme_3.png
+  - visual-authority/character-forge/00-source/reference-pack/keyposes/visemes/04_viseme_4.png
+  semantic_only:
   - visual-authority/character-forge/00-source/production-v3/artwork/van_ai_assistant_viseme_construction_sheet.png
-  note: "viseme 0\u20134 mouth shapes; redraw on Candidate B's face"
+  note: "viseme 0\u20134 mouth shapes on Candidate B's own face"
 aura:
   references:
   - visual-authority/character-forge/00-source/production-v3/artwork/van_aura_runtime_field_guide.png

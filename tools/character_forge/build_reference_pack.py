@@ -547,19 +547,27 @@ def build() -> dict:
             "POINT_LEFT": "reuse the POINT_TARGET arm chain aimed left", "POINT_RIGHT": "reuse the POINT_TARGET arm chain aimed right",
             "POINT_UP": "reuse the POINT_TARGET arm chain aimed up", "POINT_DOWN": "reuse the POINT_TARGET arm chain aimed down",
             "OPEN_PANEL": "no panel; PRESENT_CARD sweep outward", "CLOSE_PANEL": "no panel; PRESENT_CARD sweep inward"}
-    ref_map = {"reference_policy": "OFF_MODEL_SEMANTIC_ONLY — the cited production-v3 sheets show what a state or action MEANS; "
-                                   "their figure is off-model (tall, glowing visor, cyan face orb). Shape, proportion and palette come only "
-                                   "from Candidate B (reference/turnaround, reference/details, blockout).",
+    # On-model key poses: Candidate B posed as a cut-out puppet about the rig pivots.
+    from . import build_key_poses
+    poses = build_key_poses.build(board)
+    ref_map = {"reference_policy": "ON_MODEL_KEY_POSES_FIRST — every state and action has an on-model key pose made from Candidate "
+                                   "itself (keyposes/, with the bone rotations that produce it). The production-v3 sheets are "
+                                   "listed under semantic_only: they say what a state MEANS; their figure is off-model.",
                "on_model_reference": _rel(BOARD), "states": {}, "actions": {}}
     for s_, code in states.items():
-        refs = [sheet(k) for k in SEMANTIC_STATES.get(s_, [])]
-        ref_map["states"][s_] = {"code": code, "references": refs, **({"gap": gaps[s_]} if not refs else {})}
+        ref_map["states"][s_] = {"code": code, "references": [poses["states"][s_]["file"]],
+                                 "rig": poses["states"][s_]["rig"],
+                                 "semantic_only": [sheet(k) for k in SEMANTIC_STATES.get(s_, [])] or None,
+                                 **({"composition_note": gaps[s_]} if s_ in gaps else {})}
     actions = {"HELLO_WAVE": 1, "ACK_NOD": 2, "POINT_LEFT": 3, "POINT_RIGHT": 4, "POINT_UP": 5, "POINT_DOWN": 6, "POINT_TARGET": 7, "CELEBRATE": 8,
                "CAUTION": 9, "CONFIRM": 10, "SHRUG": 11, "PRESENT_CARD": 12, "OPEN_PANEL": 13, "CLOSE_PANEL": 14}
     for a, code in actions.items():
-        refs = [sheet(k) for k in SEMANTIC_ACTIONS.get(a, [])]
-        ref_map["actions"][a] = {"code": code, "references": refs, **({"gap": gaps[a]} if not refs else {})}
-    ref_map["speech_visemes"] = {"references": [sheet("visemes")], "note": "viseme 0–4 mouth shapes; redraw on Candidate B's face"}
+        ref_map["actions"][a] = {"code": code, "references": [poses["actions"][a]["file"]],
+                                 "rig": poses["actions"][a]["rig"],
+                                 "semantic_only": [sheet(k) for k in SEMANTIC_ACTIONS.get(a, [])] or None,
+                                 **({"composition_note": gaps[a]} if a in gaps else {})}
+    ref_map["speech_visemes"] = {"references": [v["file"] for v in poses["visemes"].values()],
+                                 "semantic_only": [sheet("visemes")], "note": "viseme 0–4 mouth shapes on Candidate B's own face"}
     ref_map["aura"] = {"references": [sheet("aura")], "note": "Android-native field; never drawn in the .riv"}
     (PACK / "STATE_ACTION_REFERENCE_MAP.yaml").write_text(yaml.safe_dump(ref_map, sort_keys=False, width=140), encoding="utf-8")
     (PACK / "REFERENCE_INDEX.json").write_text(json.dumps(index, indent=2) + "\n", encoding="utf-8")

@@ -30,20 +30,24 @@ parsed from the shipping Android code and `van-visual-authority-v2.yaml`.
 | `guides/artboard_overlay_template.svg` | artboard `Van`, 6% gesture margin, aura zones A–C (1.00/1.12/1.35–1.70×), 48/96 dp crop circles, pivots | locked guide layer in Inkscape/Rive |
 | `OVERLAY_COMPOSITION.yaml` | overlay sizes (92 dp resting, 76 dp docked, 168/88 dp hit, 280 dp compact), rendered sizes, aura reach check | framing |
 | `AURA_STATE_TABLE.yaml` | per-state aura parameters and segment angles **parsed from `VanAuraSpec.kt`**, with status accents | keeping the character clear of the Android field |
-| `STATE_ACTION_REFERENCE_MAP.yaml` | the 18 states and 14 actions, each with semantic references or an explicit composition note | M2/M3 pose planning |
+| `keyposes/` + `KEY_POSES.yaml` | **on-model key poses** for all 18 states, 14 actions and 5 visemes, made from Candidate B itself as a cut-out puppet posed about the rig pivots; each lists the bone rotations and face settings that produce it | M2/M3 key poses and rig targets |
+| `STATE_ACTION_REFERENCE_MAP.yaml` | each state and action → its on-model key pose and rig values; off-model production-v3 sheets listed last as `semantic_only` | M2/M3 pose planning |
 | `guides/reference_contact_sheet.png` | review sheet of every crop | reviewers |
 | `interim/van_candidate_b_front.png` + `INTERIM_ART.yaml` | native cut-out of B's front view, framed like the artboard; bundled as the app's interim VAN (CF-D-07) | shipping interim character |
 | `PACK_MANIFEST.json` | SHA-256 of every file, plus the authority's SHA | drift check |
 
 ## On-model versus semantic references
 
-Candidate B has the turnaround and the detail panels, but no expressions, gestures or visemes.
-The production-v3 sheets (expression, state/action pose, viseme, hand, aura guide) are **off-model**:
-the figure in them is ~6–7 heads tall, with a glowing visor and the superseded cyan face orb.
-`STATE_ACTION_REFERENCE_MAP.yaml` therefore cites them under
-`reference_policy: OFF_MODEL_SEMANTIC_ONLY`. They say what a state or action *means*: the brow
-set for WARNING, the arm path for HELLO_WAVE, the mouth for viseme 2. Every shape, proportion and
-colour comes from Candidate B. They are never cropped into this pack.
+Every state, action and viseme has an **on-model key pose** in `keyposes/`. Each one is made from
+Candidate B's own pixels: the native front view is cut into head, forearms, orb and body and
+posed about the neck and elbow pivots, which is what the Rive rig will do. Faces change through
+feathered edits in B's own sampled colours: closed lids, brow angles and mouth shapes.
+`KEY_POSES.yaml` lists the rotations for each pose, so it doubles as a rig target sheet.
+
+They are construction references, not final art: the upper arms don't move, and fingers can't
+change shape (pointing and thumbs-up are shown by forearm angle). The production-v3 sheets stay
+listed as `semantic_only`: they illustrate meaning, but their figure is off-model and is never
+cropped into this pack.
 
 ## How to use it (M1 → M3)
 
@@ -76,8 +80,8 @@ The blockout keeps two conventions:
 
 | ID | Finding | Needed |
 |---|---|---|
-| REF-GAP-001 | There is no on-model expression, gesture or viseme art in Candidate B's style. The supporting sheets are off-model. | An owner-reviewed expression/pose sheet drawn on B's proportions, or owner review of faces at M2. |
-| REF-GAP-002 | Candidate B has no references for OFFLINE, CONNECTING, SEARCHING, DELEGATING, WAITING, DEGRADED, POINT_LEFT/RIGHT/UP/DOWN, OPEN_PANEL or CLOSE_PANEL. | Accept the composition notes in the map, or supply references. |
+| REF-GAP-001 | PARTLY RESOLVED: on-model key poses now exist for every state, action and viseme (`keyposes/`). They are puppet construction references; finger poses and upper-arm motion still need the rig author. | Owner review of the key-pose sheet; finger shapes authored at M2. |
+| REF-GAP-002 | RESOLVED: every state and action, including the twelve previously without references, has an on-model key pose. | — |
 | REF-GAP-003 | Candidate B is AI-generated. Fine detail such as zips, glove panels and boot trim is interpreted, not traced. | Owner review of detail at M1. |
 | REF-GAP-004 | RESOLVED: the app shows real Candidate B art (`interim/`, CF-D-07); `VanScene` is redrawn from B's landmarks as the last resort. | — |
 

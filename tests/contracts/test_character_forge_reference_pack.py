@@ -53,14 +53,17 @@ def test_blockout_is_lint_clean_and_carries_the_full_layer_topology():
     assert "NOT admitted art" in text
 
 
-def test_every_contract_state_and_action_has_references_or_an_explicit_gap():
+def test_every_contract_state_and_action_has_an_on_model_key_pose():
     ref_map = _yaml("STATE_ACTION_REFERENCE_MAP.yaml")
     assert {k: v["code"] for k, v in ref_map["states"].items()} == CONTRACT["durable_states"]
     assert {k: v["code"] for k, v in ref_map["actions"].items()} == CONTRACT["finite_actions"]
-    for row in list(ref_map["states"].values()) + list(ref_map["actions"].values()):
-        assert row["references"] or row.get("gap")
+    for name, row in list(ref_map["states"].items()) + list(ref_map["actions"].items()):
+        assert row["references"], name
         for ref in row["references"]:
+            assert ref.startswith("visual-authority/character-forge/00-source/reference-pack/keyposes/"), f"{name}: {ref} is not on-model"
             assert (pack.ROOT / ref).is_file(), ref
+        assert isinstance(row["rig"], dict), name
+    assert len(ref_map["speech_visemes"]["references"]) == 5
 
 
 def test_measured_palette_keeps_the_lock_inside_its_own_tolerance():
@@ -100,9 +103,12 @@ def test_candidate_b_landmarks_keep_the_locked_head_count():
     assert abs(data["orb_diameter_over_head_height"] - lock["companion"]["size_heads"]) <= 0.05
 
 
-def test_state_action_map_marks_supporting_sheets_as_semantic_only():
+def test_state_action_map_puts_on_model_poses_first_and_off_model_sheets_last():
     ref_map = _yaml("STATE_ACTION_REFERENCE_MAP.yaml")
-    assert ref_map["reference_policy"].startswith("OFF_MODEL_SEMANTIC_ONLY")
+    assert ref_map["reference_policy"].startswith("ON_MODEL_KEY_POSES_FIRST")
+    for row in list(ref_map["states"].values()) + list(ref_map["actions"].values()):
+        for ref in row.get("semantic_only") or []:
+            assert "/production-v3/" in ref
     assert ref_map["on_model_reference"] == json.loads((pack.PACK / "REFERENCE_INDEX.json").read_text(encoding="utf-8"))["authority"]["path"]
 
 
@@ -121,3 +127,11 @@ def test_interim_art_is_the_bundled_asset_and_regenerates_from_candidate_b():
     # Pixel-tolerant: Pillow's blur may differ by a level between versions.
     diff = sum(abs(a - b) for a, b in zip(fresh.tobytes(), committed.tobytes())) / len(fresh.tobytes())
     assert diff < 0.5, f"interim art drifted from its generator: mean abs diff {diff:.3f}"
+
+
+def test_key_poses_are_made_from_candidate_b():
+    poses = _yaml("keyposes/KEY_POSES.yaml")
+    assert poses["source"] == "visual-authority/character-forge/01-master-candidates/van_master_source_candidate_b.png"
+    assert poses["status"] == "CONSTRUCTION_REFERENCE_NOT_FINAL_ART"
+    assert set(poses["states"]) == set(CONTRACT["durable_states"])
+    assert set(poses["actions"]) == set(CONTRACT["finite_actions"])

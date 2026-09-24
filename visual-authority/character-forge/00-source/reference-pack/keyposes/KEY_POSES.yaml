@@ -1,0 +1,357 @@
+source: visual-authority/character-forge/01-master-candidates/van_master_source_candidate_b.png
+method: cut-out puppet of Candidate B posed about RIG_PIVOTS; faces edited in sampled B colours
+status: CONSTRUCTION_REFERENCE_NOT_FINAL_ART
+pivots_board_px:
+  neck:
+  - 190.0
+  - 176.0
+  elbow_l:
+  - 100.0
+  - 272.0
+  elbow_r:
+  - 298.0
+  - 292.0
+states:
+  OFFLINE:
+    file: visual-authority/character-forge/00-source/reference-pack/keyposes/states/00_offline.png
+    rig:
+      head_drop: 4
+      orb_dy: 10
+      orb_dim: 0.8
+      eyes: closed
+      brows: neutral
+      mouth: flat
+      desaturate: 0.85
+      note: 'Powered down: eyes shut, orb dark and sunk; the aura is almost out.'
+    note: 'Powered down: eyes shut, orb dark and sunk; the aura is almost out.'
+  CONNECTING:
+    file: visual-authority/character-forge/00-source/reference-pack/keyposes/states/01_connecting.png
+    rig:
+      orb_dy: -6
+      eyes: up
+      brows: raised
+      mouth: flat
+      note: 'Lifting from OFFLINE: eyes up to the orb as it rises.'
+    note: 'Lifting from OFFLINE: eyes up to the orb as it rises.'
+  IDLE:
+    file: visual-authority/character-forge/00-source/reference-pack/keyposes/states/02_idle.png
+    rig:
+      eyes: open
+      brows: neutral
+      mouth: smile
+      note: 'Candidate B''s own pose: palm open under the orb, easy smile.'
+    note: 'Candidate B''s own pose: palm open under the orb, easy smile.'
+  ATTENTIVE:
+    file: visual-authority/character-forge/00-source/reference-pack/keyposes/states/03_attentive.png
+    rig:
+      head_tilt: -3
+      eyes: open
+      brows: raised
+      mouth: smile
+      note: Brows up, head squared to the owner.
+    note: Brows up, head squared to the owner.
+  LISTENING:
+    file: visual-authority/character-forge/00-source/reference-pack/keyposes/states/04_listening.png
+    rig:
+      head_tilt: 7
+      eyes: open
+      brows: raised
+      mouth: flat
+      note: Head cocked to listen; mouth closed.
+    note: Head cocked to listen; mouth closed.
+  THINKING:
+    file: visual-authority/character-forge/00-source/reference-pack/keyposes/states/05_thinking.png
+    rig:
+      head_tilt: -5
+      orb_dy: -8
+      eyes: up
+      brows: focused
+      mouth: flat
+      note: Eyes up and aside, one brow working; orb drifts up.
+    note: Eyes up and aside, one brow working; orb drifts up.
+  SEARCHING:
+    file: visual-authority/character-forge/00-source/reference-pack/keyposes/states/06_searching.png
+    rig:
+      head_tilt: -4
+      orb_dx: -14
+      eyes: side
+      brows: focused
+      mouth: flat
+      note: Scanning sideways; orb pushed forward as a lens.
+    note: Scanning sideways; orb pushed forward as a lens.
+  WORKING:
+    file: visual-authority/character-forge/00-source/reference-pack/keyposes/states/07_working.png
+    rig:
+      forearm_l: -18
+      eyes: open
+      brows: focused
+      mouth: flat
+      note: Focused brows, hand working the orb.
+    note: Focused brows, hand working the orb.
+  DELEGATING:
+    file: visual-authority/character-forge/00-source/reference-pack/keyposes/states/08_delegating.png
+    rig:
+      forearm_r: 75
+      orb_dx: -22
+      orb_dy: -10
+      eyes: open
+      brows: neutral
+      mouth: smile
+      note: Hand out, handing the task on; orb travels outward.
+    note: Hand out, handing the task on; orb travels outward.
+  SPEAKING:
+    file: visual-authority/character-forge/00-source/reference-pack/keyposes/states/09_speaking.png
+    rig:
+      eyes: open
+      brows: raised
+      mouth: viseme_2
+      note: Mouth driven by visemes (see visemes/).
+    note: Mouth driven by visemes (see visemes/).
+  WAITING:
+    file: visual-authority/character-forge/00-source/reference-pack/keyposes/states/10_waiting.png
+    rig:
+      head_tilt: 3
+      eyes: open
+      brows: neutral
+      mouth: flat
+      note: 'Patient: flat mouth, slight tilt.'
+    note: 'Patient: flat mouth, slight tilt.'
+  WAITING_FOR_OWNER:
+    file: visual-authority/character-forge/00-source/reference-pack/keyposes/states/11_waiting_for_owner.png
+    rig:
+      forearm_r: 100
+      eyes: open
+      brows: raised
+      mouth: flat
+      prop: card
+      note: Holds the decision card up to the owner.
+    note: Holds the decision card up to the owner.
+  DEGRADED:
+    file: visual-authority/character-forge/00-source/reference-pack/keyposes/states/12_degraded.png
+    rig:
+      eyes: open
+      brows: concerned
+      mouth: flat
+      desaturate: 0.35
+      note: Muted, uneasy; health shown by the aura.
+    note: Muted, uneasy; health shown by the aura.
+  WARNING:
+    file: visual-authority/character-forge/00-source/reference-pack/keyposes/states/13_warning.png
+    rig:
+      head_tilt: -3
+      eyes: open
+      brows: concerned
+      mouth: flat
+      note: Concerned brows, lips pressed.
+    note: Concerned brows, lips pressed.
+  ERROR:
+    file: visual-authority/character-forge/00-source/reference-pack/keyposes/states/14_error.png
+    rig:
+      head_drop: 3
+      eyes: open
+      brows: sad
+      mouth: frown
+      note: 'Apologetic: brows up in the middle, frown.'
+    note: 'Apologetic: brows up in the middle, frown.'
+  SUCCESS:
+    file: visual-authority/character-forge/00-source/reference-pack/keyposes/states/15_success.png
+    rig:
+      forearm_r: 160
+      eyes: open
+      brows: raised
+      mouth: grin
+      note: Fist up, big grin.
+    note: Fist up, big grin.
+  URGENT:
+    file: visual-authority/character-forge/00-source/reference-pack/keyposes/states/16_urgent.png
+    rig:
+      head_tilt: -2
+      eyes: open
+      brows: alert
+      mouth: o
+      note: Alert brows, mouth open to speak up.
+    note: Alert brows, mouth open to speak up.
+  SLEEPING:
+    file: visual-authority/character-forge/00-source/reference-pack/keyposes/states/17_sleeping.png
+    rig:
+      head_tilt: 8
+      head_drop: 8
+      orb_dy: 14
+      orb_dim: 0.6
+      eyes: closed
+      brows: neutral
+      mouth: flat
+      note: 'Dozing: head slumped, eyes shut, orb resting low.'
+    note: 'Dozing: head slumped, eyes shut, orb resting low.'
+actions:
+  HELLO_WAVE:
+    file: visual-authority/character-forge/00-source/reference-pack/keyposes/actions/00_hello_wave.png
+    rig:
+      forearm_r: 170
+      eyes: open
+      brows: raised
+      mouth: grin
+      note: Forearm up, open hand waving at the elbow.
+    note: Forearm up, open hand waving at the elbow.
+  ACK_NOD:
+    file: visual-authority/character-forge/00-source/reference-pack/keyposes/actions/01_ack_nod.png
+    rig:
+      head_drop: 7
+      eyes: half
+      brows: neutral
+      mouth: smile
+      note: 'Key pose of the nod: chin down.'
+    note: 'Key pose of the nod: chin down.'
+  POINT_LEFT:
+    file: visual-authority/character-forge/00-source/reference-pack/keyposes/actions/02_point_left.png
+    rig:
+      forearm_l: -12
+      eyes: side
+      brows: neutral
+      mouth: flat
+      note: Left arm leads out to the left.
+    note: Left arm leads out to the left.
+  POINT_RIGHT:
+    file: visual-authority/character-forge/00-source/reference-pack/keyposes/actions/03_point_right.png
+    rig:
+      forearm_r: 90
+      eyes: open
+      brows: neutral
+      mouth: flat
+      note: Right forearm swung out horizontal.
+    note: Right forearm swung out horizontal.
+  POINT_UP:
+    file: visual-authority/character-forge/00-source/reference-pack/keyposes/actions/04_point_up.png
+    rig:
+      forearm_r: 178
+      eyes: up
+      brows: neutral
+      mouth: flat
+      note: Right forearm straight up.
+    note: Right forearm straight up.
+  POINT_DOWN:
+    file: visual-authority/character-forge/00-source/reference-pack/keyposes/actions/05_point_down.png
+    rig:
+      forearm_r: -28
+      head_drop: 3
+      eyes: open
+      brows: neutral
+      mouth: flat
+      note: Right forearm angled down and out.
+    note: Right forearm angled down and out.
+  POINT_TARGET:
+    file: visual-authority/character-forge/00-source/reference-pack/keyposes/actions/06_point_target.png
+    rig:
+      forearm_r: 125
+      eyes: open
+      brows: focused
+      mouth: flat
+      note: Aimed by attention_x/y (IK).
+    note: Aimed by attention_x/y (IK).
+  CELEBRATE:
+    file: visual-authority/character-forge/00-source/reference-pack/keyposes/actions/07_celebrate.png
+    rig:
+      forearm_l: -115
+      forearm_r: 175
+      head_tilt: 4
+      eyes: open
+      brows: raised
+      mouth: grin
+      note: Both hands up.
+    note: Both hands up.
+  CAUTION:
+    file: visual-authority/character-forge/00-source/reference-pack/keyposes/actions/08_caution.png
+    rig:
+      forearm_r: 150
+      eyes: open
+      brows: concerned
+      mouth: flat
+      note: 'Palm raised: hold on.'
+    note: 'Palm raised: hold on.'
+  CONFIRM:
+    file: visual-authority/character-forge/00-source/reference-pack/keyposes/actions/09_confirm.png
+    rig:
+      forearm_r: 112
+      eyes: open
+      brows: raised
+      mouth: smile
+      note: Hand up in a thumbs-up position.
+    note: Hand up in a thumbs-up position.
+  SHRUG:
+    file: visual-authority/character-forge/00-source/reference-pack/keyposes/actions/10_shrug.png
+    rig:
+      forearm_l: -22
+      forearm_r: 80
+      head_tilt: 8
+      eyes: open
+      brows: raised
+      mouth: flat
+      note: Palms out, head tilted.
+    note: Palms out, head tilted.
+  PRESENT_CARD:
+    file: visual-authority/character-forge/00-source/reference-pack/keyposes/actions/11_present_card.png
+    rig:
+      forearm_r: 78
+      eyes: open
+      brows: neutral
+      mouth: smile
+      prop: card
+      note: Offers a card forward.
+    note: Offers a card forward.
+  OPEN_PANEL:
+    file: visual-authority/character-forge/00-source/reference-pack/keyposes/actions/12_open_panel.png
+    rig:
+      forearm_l: -8
+      forearm_r: 85
+      eyes: open
+      brows: neutral
+      mouth: smile
+      prop: panel
+      note: Hands spread a panel open.
+    note: Hands spread a panel open.
+  CLOSE_PANEL:
+    file: visual-authority/character-forge/00-source/reference-pack/keyposes/actions/13_close_panel.png
+    rig:
+      forearm_l: -55
+      forearm_r: 35
+      eyes: open
+      brows: neutral
+      mouth: flat
+      note: Hands come in to fold it away.
+    note: Hands come in to fold it away.
+visemes:
+  viseme_0:
+    file: visual-authority/character-forge/00-source/reference-pack/keyposes/visemes/00_viseme_0.png
+    rig:
+      eyes: open
+      brows: raised
+      mouth: viseme_0
+    note: ''
+  viseme_1:
+    file: visual-authority/character-forge/00-source/reference-pack/keyposes/visemes/01_viseme_1.png
+    rig:
+      eyes: open
+      brows: raised
+      mouth: viseme_1
+    note: ''
+  viseme_2:
+    file: visual-authority/character-forge/00-source/reference-pack/keyposes/visemes/02_viseme_2.png
+    rig:
+      eyes: open
+      brows: raised
+      mouth: viseme_2
+    note: ''
+  viseme_3:
+    file: visual-authority/character-forge/00-source/reference-pack/keyposes/visemes/03_viseme_3.png
+    rig:
+      eyes: open
+      brows: raised
+      mouth: viseme_3
+    note: ''
+  viseme_4:
+    file: visual-authority/character-forge/00-source/reference-pack/keyposes/visemes/04_viseme_4.png
+    rig:
+      eyes: open
+      brows: raised
+      mouth: viseme_4
+    note: ''
