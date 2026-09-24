@@ -8,6 +8,7 @@ import tempfile
 from dataclasses import dataclass
 from pathlib import Path
 from typing import Any
+import yaml
 from xml.etree import ElementTree as ET
 
 REQUIRED_GROUPS = ("hair","visor_frame","visor_lens","face","eye_l","eye_r","brow_l","brow_r","mouth_upper","mouth_lower","mouth_inner","neck","jacket","underlayer","arm_l_upper","arm_l_fore","hand_l","arm_r_upper","arm_r_fore","hand_r","orb_shell","orb_core")
@@ -22,6 +23,24 @@ NUMBERS = re.compile(r"[-+]?(?:\d+\.?\d*|\.\d+)(?:[eE][-+]?\d+)?")
 NAMED = {"black":"#000000","white":"#ffffff","silver":"#c0c0c0","gray":"#808080","grey":"#808080","dimgray":"#696969","dimgrey":"#696969","darkgray":"#a9a9a9","darkgrey":"#a9a9a9","lightgray":"#d3d3d3","lightgrey":"#d3d3d3","gainsboro":"#dcdcdc","whitesmoke":"#f5f5f5","snow":"#fffafa","ghostwhite":"#f8f8ff","navy":"#000080","blue":"#0000ff","darkblue":"#00008b","midnightblue":"#191970","royalblue":"#4169e1","dodgerblue":"#1e90ff","deepskyblue":"#00bfff","skyblue":"#87ceeb","lightblue":"#add8e6","steelblue":"#4682b4","cyan":"#00ffff","aqua":"#00ffff","darkcyan":"#008b8b","teal":"#008080","turquoise":"#40e0d0","darkturquoise":"#00ced1","brown":"#a52a2a","saddlebrown":"#8b4513","sienna":"#a0522d","chocolate":"#d2691e","peru":"#cd853f","tan":"#d2b48c","burlywood":"#deb887","red":"#ff0000","green":"#008000","yellow":"#ffff00","orange":"#ffa500","purple":"#800080","magenta":"#ff00ff","fuchsia":"#ff00ff","pink":"#ffc0cb"}
 # Values that paint nothing, or inherit a colour the linter checks where it is actually set.
 NO_PAINT = {"none","transparent","inherit","currentcolor",""}
+ROOT = Path(__file__).resolve().parents[2]
+TOPOLOGY_BUDGETS = ROOT / "visual-authority" / "character-forge" / "00-source" / "production-v3" / "TOPOLOGY_BUDGETS.yaml"
+
+def _topology_budgets() -> dict[str, Any]:
+    if not TOPOLOGY_BUDGETS.is_file():
+        return {"policy":{"hard_total_paths":1200,"hard_total_numeric_nodes":30000},"groups":{},"extra_group_policy":{"prefix":"extra_","default_max_paths":24,"default_max_numeric_nodes":900}}
+    data = yaml.safe_load(TOPOLOGY_BUDGETS.read_text(encoding="utf-8")) or {}
+    return data if isinstance(data, dict) else {}
+
+def _group_topology(group: ET.Element) -> tuple[int, int]:
+    paths = 0
+    nodes = 0
+    for node in group.iter():
+        if _local(node.tag) != "path":
+            continue
+        paths += 1
+        nodes += len(NUMBERS.findall((node.attrib.get("d") or "").strip()))
+    return paths, nodes
 
 @dataclass
 class LintReport:
@@ -155,6 +174,18 @@ def lint_svg(path: Path, *, require_geometry: bool=True) -> LintReport:
         if name in FORBIDDEN_GROUPS: findings.append(f"FORBIDDEN_IDENTITY_GROUP:{name}")
         if name and name not in REQUIRED_GROUPS and not name.startswith("extra_"): findings.append(f"UNSCOPED_EXTRA_GROUP:{name}")
     palette={}; gradients=_gradient_stops(root)
+    topology_cfg=_topology_budgets(); group_topology={}
+    group_budgets=topology_cfg.get("groups") or {}; extra_policy=topology_cfg.get("extra_group_policy") or {}
+    extra_prefix=str(extra_policy.get("prefix") or "extra_")
+    for group_name,group in groups.items():
+        paths,nodes=_group_topology(group); group_topology[group_name]={"paths":paths,"numeric_nodes":nodes}
+        budget=group_budgets.get(group_name)
+        if budget is None and group_name.startswith(extra_prefix):
+            budget={"max_paths":int(extra_policy.get("default_max_paths",24)),"max_numeric_nodes":int(extra_policy.get("default_max_numeric_nodes",900))}
+        if isinstance(budget,dict):
+            max_paths=int(budget.get("max_paths",0) or 0); max_nodes=int(budget.get("max_numeric_nodes",0) or 0)
+            if max_paths and paths>max_paths: findings.append(f"GROUP_PATH_BUDGET_EXCEEDED:{group_name}:{paths}>{max_paths}")
+            if max_nodes and nodes>max_nodes: findings.append(f"GROUP_NODE_BUDGET_EXCEEDED:{group_name}:{nodes}>{max_nodes}")
     for group_name,family in COLOR_GROUPS.items():
         group=groups.get(group_name)
         if group is None: continue
@@ -181,8 +212,10 @@ def lint_svg(path: Path, *, require_geometry: bool=True) -> LintReport:
             x,y,w,h=box
             if h<vh*0.005: findings.append(f"NOISE_BOUNDS:{name}")
             if x<vx-mx or y<vy-my or x+w>vx+vw+mx or y+h>vy+vh+my: findings.append(f"OUTSIDE_VIEWBOX:{name}")
-    metrics={"path_count":path_count,"node_count":node_count,"file_size":path.stat().st_size if path.is_file() else 0,"palette":palette,"required_group_count":len(REQUIRED_GROUPS)}
-    if path_count>1200: findings.append(f"PATH_BUDGET_EXCEEDED:{path_count}>1200")
+    policy=topology_cfg.get("policy") or {}; hard_paths=int(policy.get("hard_total_paths",1200)); hard_nodes=int(policy.get("hard_total_numeric_nodes",30000))
+    metrics={"path_count":path_count,"node_count":node_count,"file_size":path.stat().st_size if path.is_file() else 0,"palette":palette,"required_group_count":len(REQUIRED_GROUPS),"group_topology":group_topology,"hard_total_paths":hard_paths,"hard_total_numeric_nodes":hard_nodes}
+    if path_count>hard_paths: findings.append(f"PATH_BUDGET_EXCEEDED:{path_count}>{hard_paths}")
+    if node_count>hard_nodes: findings.append(f"NODE_BUDGET_EXCEEDED:{node_count}>{hard_nodes}")
     return LintReport(str(path),sorted(set(findings)),metrics,geometry_verified)
 
 def render_layer_sheet(svg: Path, output: Path) -> None:

@@ -1,4 +1,4 @@
-schema_version: 2
+schema_version: 3
 register:
   - id: ASSET-GAP-001
     state: RESOLVED_BY_AUTHORITY_CONSOLIDATION
@@ -24,3 +24,15 @@ register:
     state: OPEN_EXTERNAL_GATE
     finding: physical S24 and owner final acceptance are not yet performed
     disposition: never claim M4/M5 before evidence
+  - id: ASSET-GAP-007
+    state: RESOLVED_OWNER_APPROVED_EXACT_MASTER
+    finding: Candidate B required exact binary ingestion and owner-bound promotion
+    disposition: exact 6144x4096 bytes are committed, SHA-256 42474ee9595f09f4ef59c060faf756e1db4222234b827fae0311007248b9b9e7 is hash-locked, and docs/character_forge/HIGHRES_MASTER_APPROVAL.yaml promotes those exact bytes
+  - id: ASSET-GAP-008
+    state: OPEN_LICENSE_AND_EVIDENCE_GATE
+    finding: See-through model checkpoints are not yet licensed and hash-locked for production
+    disposition: GPU trial outputs remain proposal-only; production mode refuses until the weight lock is CLEARED
+  - id: ASSET-GAP-009
+    state: OPEN_EVIDENCE_GATE
+    finding: Stretchy Studio rig proposal has not yet been proven against the approved VAN master
+    disposition: export Spine 4 proposal, import through CF Rig IR, then validate and rebuild through the Rive schema-driven plane

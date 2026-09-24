@@ -1,4 +1,4 @@
-schema_version: 2
+schema_version: 3
 purpose: deterministic source inventory for VAN M1-M5
 requirements:
   canonical_character_board:
@@ -8,6 +8,23 @@ requirements:
   identity_lock:
     status: PRESENT
     path: visual-authority/character-forge/00-source/asset-pack/APPROVED_IDENTITY_LOCK.yaml
+  approved_highres_master:
+    status: PRESENT_OWNER_APPROVED_HASH_LOCKED
+    path: visual-authority/character-forge/01-master-approved/van_master_highres.png
+    sha256: 42474ee9595f09f4ef59c060faf756e1db4222234b827fae0311007248b9b9e7
+    approval: docs/character_forge/HIGHRES_MASTER_APPROVAL.yaml
+    role: production rigging/detail authority subordinate to canonical identity
+  supporting_reference_artwork:
+    status: PRESENT_HASH_LOCKED_REFERENCE_ONLY
+    manifest: visual-authority/character-forge/00-source/production-v3/ARTWORK_MANIFEST.yaml
+    provenance_graph: visual-authority/character-forge/00-source/production-v3/PROVENANCE_GRAPH.yaml
+    required:
+      - expression_reference
+      - viseme_reference
+      - glove_gesture_reference
+      - state_action_reference
+      - aura_reference
+    rule: supporting sheets may define semantic performance reference only and may not override approved master identity
   clean_semantic_vector_layers:
     status: TO_AUTHOR
     output: visual-authority/character-forge/06-vectors-clean/van_layers.svg
@@ -28,6 +45,8 @@ requirements:
     output: visual-authority/character-forge/09-rive-working/van_runtime_full_1.riv
 source_resolution_policy:
   canonical_board_can_define: [identity, palette, silhouette, visible proportions, visible clothing, visor, orb]
+  approved_master_can_define: [high_resolution_visible_geometry, rigging_landmarks, approved_detail_geometry]
+  supporting_reference_artwork_can_define: [expression_semantics, viseme_semantics, gesture_semantics, state_action_pose_intent, aura_visual_direction]
   hidden_geometry_may_be_constructed_only_from:
     - symmetric continuation of visible geometry
     - explicit LAYER_SPEC and RIG_SPEC dimensions

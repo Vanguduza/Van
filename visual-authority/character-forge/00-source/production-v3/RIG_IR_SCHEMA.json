@@ -1,0 +1,196 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://dial.local/schemas/van-character-forge-rig-ir-v1.json",
+  "title": "VAN Character Forge Rig IR",
+  "type": "object",
+  "required": [
+    "schema_version",
+    "source_master_sha256",
+    "bones",
+    "meshes",
+    "draw_order",
+    "constraints",
+    "provenance"
+  ],
+  "properties": {
+    "schema_version": {
+      "const": 1
+    },
+    "source_master_sha256": {
+      "type": "string",
+      "pattern": "^[0-9a-f]{64}$"
+    },
+    "toolchain": {
+      "type": "object"
+    },
+    "bones": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "required": [
+          "id",
+          "name",
+          "parent",
+          "x",
+          "y",
+          "rotation",
+          "scale_x",
+          "scale_y"
+        ],
+        "properties": {
+          "id": {
+            "type": "string",
+            "minLength": 1
+          },
+          "name": {
+            "type": "string",
+            "minLength": 1
+          },
+          "parent": {
+            "type": [
+              "string",
+              "null"
+            ]
+          },
+          "x": {
+            "type": "number"
+          },
+          "y": {
+            "type": "number"
+          },
+          "rotation": {
+            "type": "number"
+          },
+          "scale_x": {
+            "type": "number"
+          },
+          "scale_y": {
+            "type": "number"
+          }
+        },
+        "additionalProperties": false
+      }
+    },
+    "meshes": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "required": [
+          "part",
+          "vertices",
+          "triangles",
+          "weights",
+          "provenance"
+        ],
+        "properties": {
+          "part": {
+            "type": "string",
+            "minLength": 1
+          },
+          "vertices": {
+            "type": "array",
+            "items": {
+              "type": "array",
+              "minItems": 2,
+              "maxItems": 2,
+              "items": {
+                "type": "number"
+              }
+            }
+          },
+          "triangles": {
+            "type": "array",
+            "items": {
+              "type": "array",
+              "minItems": 3,
+              "maxItems": 3,
+              "items": {
+                "type": "integer",
+                "minimum": 0
+              }
+            }
+          },
+          "weights": {
+            "type": "array",
+            "items": {
+              "type": "array",
+              "items": {
+                "type": "object",
+                "required": [
+                  "bone",
+                  "weight"
+                ],
+                "properties": {
+                  "bone": {
+                    "type": "string"
+                  },
+                  "weight": {
+                    "type": "number",
+                    "minimum": 0,
+                    "maximum": 1
+                  }
+                },
+                "additionalProperties": false
+              }
+            }
+          },
+          "provenance": {
+            "enum": [
+              "CANONICAL_VISIBLE",
+              "DERIVED_VISIBLE",
+              "INFERRED_OCCLUSION",
+              "OWNER_APPROVED_OCCLUSION",
+              "GENERATIVE_VISIBLE"
+            ]
+          },
+          "approved_occlusion_receipt": {
+            "type": [
+              "string",
+              "null"
+            ]
+          }
+        },
+        "additionalProperties": false
+      }
+    },
+    "draw_order": {
+      "type": "array",
+      "items": {
+        "type": "string"
+      }
+    },
+    "constraints": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "required": [
+          "type",
+          "target"
+        ],
+        "properties": {
+          "type": {
+            "enum": [
+              "two_bone_ik",
+              "rotation_limit",
+              "transform_copy"
+            ]
+          },
+          "target": {
+            "type": "string"
+          },
+          "data": {
+            "type": "object"
+          }
+        },
+        "additionalProperties": false
+      }
+    },
+    "animations": {
+      "type": "object"
+    },
+    "provenance": {
+      "type": "object"
+    }
+  },
+  "additionalProperties": false
+}

@@ -1,0 +1,77 @@
+schema_version: 4
+master_id: VAN-HIGHRES-MASTER-V1
+status: OWNER_APPROVED
+source_authority:
+  path: visual-authority/assets/pack/owner_board_visual_authority.png
+  git_blob_sha: fc18bbe0b91e5b85d8cf8211314a69cb90b8bc0b
+  declared_skin_token: "#B8853C"
+  identity_lock: visual-authority/character-forge/00-source/asset-pack/APPROVED_IDENTITY_LOCK.yaml
+exact_derived_reference:
+  path: visual-authority/character-forge/01-master-candidates/van_canonical_reference_2x.png
+  sha256: efdd0c900aa2e821f66878f7b012cfb9e969c364860cfb69423ce3a54812cd38
+  receipt: visual-authority/character-forge/01-master-candidates/van_canonical_reference_2x.receipt.json
+  status: HASH_LOCKED_NON_INVENTIVE_REFERENCE
+candidate:
+  expected_path: visual-authority/character-forge/01-master-candidates/van_master_highres_v1.png
+  receipt: visual-authority/character-forge/01-master-candidates/van_master_highres_v1.receipt.json
+  sha256: 42474ee9595f09f4ef59c060faf756e1db4222234b827fae0311007248b9b9e7
+  git_blob_sha: e18b1f6ba89619dec79b7a54075a65024f65bbf9
+  status: INGESTED_OWNER_APPROVED
+  selected_candidate_label: Candidate B
+  selected_source_path: visual-authority/character-forge/01-master-candidates/van_master_source_candidate_b.png
+  selected_source_sha256: cf7f51793692bfe8ea2e5f58f1a12e64d3a76468a85cb19d76d0db64ccef374c
+  dimensions_px: [6144, 4096]
+  derivation: 4x_LANCZOS_FROM_SELECTED_CANDIDATE
+  generative_redraw: false
+  minimum_short_edge_px: 2048
+  minimum_full_body_height_px: 1600
+  background: transparent_or_neutral_review_only
+approved_master:
+  expected_path: visual-authority/character-forge/01-master-approved/van_master_highres.png
+  sha256: 42474ee9595f09f4ef59c060faf756e1db4222234b827fae0311007248b9b9e7
+  git_blob_sha: e18b1f6ba89619dec79b7a54075a65024f65bbf9
+  status: OWNER_APPROVED
+  approval_record: docs/character_forge/HIGHRES_MASTER_APPROVAL.yaml
+  authority_scope: rigging_and_detail_authority_subordinate_to_canonical_visual_and_identity_lock
+supporting_artwork:
+  manifest: visual-authority/character-forge/00-source/production-v3/ARTWORK_MANIFEST.yaml
+  provenance_graph: visual-authority/character-forge/00-source/production-v3/PROVENANCE_GRAPH.yaml
+  status: HASH_LOCKED_REFERENCE_ONLY
+generation_policy:
+  unapproved_visible_identity_invention: FORBIDDEN
+  owner_approved_master_revision: ALLOWED_ONLY_BY_EXACT_SHA_APPROVAL
+  supporting_reference_identity_override: FORBIDDEN
+  edge_cleanup: ALLOWED
+  deterministic_upscale: ALLOWED
+  hidden_geometry_generation: INFERRED_OCCLUSION_ONLY
+  source_priority:
+    - exact canonical board and machine identity lock
+    - owner-approved high-resolution master
+    - owner-approved occlusion construction
+    - hash-locked supporting references for semantics only
+provenance_classes:
+  CANONICAL_VISIBLE:
+    production_admissible: true
+  DERIVED_VISIBLE:
+    production_admissible: true
+  OWNER_APPROVED_MASTER:
+    production_admissible: true
+    scope: master_only_not_layer_default
+  INFERRED_OCCLUSION:
+    production_admissible: false
+    promotion: OWNER_APPROVED_OCCLUSION
+  OWNER_APPROVED_OCCLUSION:
+    production_admissible: true
+  GENERATIVE_VISIBLE:
+    production_admissible: false
+    promotion: FORBIDDEN_FOR_UNAPPROVED_LAYER_GEOMETRY
+  GENERATIVE_REFERENCE_ONLY:
+    production_admissible: false
+    use: semantic_reference_only
+acceptance:
+  requires_owner_signature: true
+  decision_recorded: true
+  decision: Candidate B
+  binds_exact_candidate_sha: true
+  binds_source_git_blob_sha: true
+  binds_identity_lock_sha: true

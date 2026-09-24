@@ -1,6 +1,6 @@
-schema_version: 2
+schema_version: 3
 pack_id: VAN-RIVE-APPROVED-ASSET-PACK-2026-09-24
-status: IDENTITY_LOCKED_PRE_M1
+status: PRODUCTION_V3_ARTWORK_HASH_LOCKED_PRE_M1
 authority:
   primary_visual:
     path: visual-authority/assets/pack/owner_board_visual_authority.png
@@ -44,3 +44,30 @@ required_generated_assets:
     - visual-authority/rive/van_runtime.sha256
   m5:
     - visual-authority/rive/manifest.json
+production_v3:
+  authority: docs/character_forge/VAN_CHARACTER_FORGE_PRODUCTION_V3.md
+  source_root: visual-authority/character-forge/00-source/production-v3
+  highres_master:
+    spec: visual-authority/character-forge/00-source/production-v3/HIGHRES_MASTER_SPEC.yaml
+    provenance: visual-authority/character-forge/00-source/production-v3/MASTER_PROVENANCE.yaml
+    approved_path: visual-authority/character-forge/01-master-approved/van_master_highres.png
+    approved_sha256: 42474ee9595f09f4ef59c060faf756e1db4222234b827fae0311007248b9b9e7
+    approval: docs/character_forge/HIGHRES_MASTER_APPROVAL.yaml
+    candidate_status: OWNER_APPROVED
+  artwork:
+    manifest: visual-authority/character-forge/00-source/production-v3/ARTWORK_MANIFEST.yaml
+    provenance_graph: visual-authority/character-forge/00-source/production-v3/PROVENANCE_GRAPH.yaml
+    status: HASH_LOCKED_REFERENCE_PACK
+    identity_override: FORBIDDEN
+  semantic_decomposition:
+    tool_role: PROPOSAL_ONLY
+    mapping: visual-authority/character-forge/00-source/production-v3/SEE_THROUGH_LAYER_MAP.yaml
+  topology:
+    budgets: visual-authority/character-forge/00-source/production-v3/TOPOLOGY_BUDGETS.yaml
+    hard_total_paths: 1200
+  rig_intermediate_representation:
+    schema: visual-authority/character-forge/00-source/production-v3/RIG_IR_SCHEMA.json
+    rive_mapping: visual-authority/character-forge/00-source/production-v3/RIVE_MAPPING.yaml
+  gpu_lane:
+    spec: visual-authority/character-forge/00-source/production-v3/GPU_LANE.yaml
+    production_weights: BLOCKED_PENDING_LICENSE_AND_HASH_LOCK

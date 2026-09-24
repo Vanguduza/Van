@@ -1,0 +1,98 @@
+schema_version: 1
+graph_id: VAN-CHARACTER-FORGE-V3-PROVENANCE
+status: HASH_LOCKED
+nodes:
+  canonical_visual_root:
+    type: OWNER_VISUAL_AUTHORITY
+    path: visual-authority/assets/pack/owner_board_visual_authority.png
+    git_blob_sha: fc18bbe0b91e5b85d8cf8211314a69cb90b8bc0b
+  identity_lock:
+    type: MACHINE_IDENTITY_AUTHORITY
+    path: visual-authority/character-forge/00-source/asset-pack/APPROVED_IDENTITY_LOCK.yaml
+  candidate_b_source:
+    type: OWNER_SELECTED_GENERATED_SOURCE
+    path: visual-authority/character-forge/01-master-candidates/van_master_source_candidate_b.png
+    sha256: cf7f51793692bfe8ea2e5f58f1a12e64d3a76468a85cb19d76d0db64ccef374c
+  candidate_b_highres:
+    type: DETERMINISTIC_DERIVATIVE
+    path: visual-authority/character-forge/01-master-candidates/van_master_highres_v1.png
+    sha256: 42474ee9595f09f4ef59c060faf756e1db4222234b827fae0311007248b9b9e7
+  owner_approval:
+    type: OWNER_DECISION
+    path: docs/character_forge/HIGHRES_MASTER_APPROVAL.yaml
+  approved_master:
+    type: OWNER_APPROVED_RIGGING_MASTER
+    path: visual-authority/character-forge/01-master-approved/van_master_highres.png
+    sha256: 42474ee9595f09f4ef59c060faf756e1db4222234b827fae0311007248b9b9e7
+  expression_reference:
+    type: SUPPORTING_REFERENCE_ONLY
+    path: visual-authority/character-forge/00-source/production-v3/artwork/van_expression_and_facial_acting_sheet.png
+    sha256: 1a9af6d247fc50ebd76a6602033cc8bcae58396c556922d5f513b70236884503
+  viseme_reference:
+    type: SUPPORTING_REFERENCE_ONLY
+    path: visual-authority/character-forge/00-source/production-v3/artwork/van_ai_assistant_viseme_construction_sheet.png
+    sha256: 6c40f9dc7868001d1647c79f4d8e7c3b70dfd1e2f0d9811560ed0b12c0d24b2c
+  glove_reference:
+    type: SUPPORTING_REFERENCE_ONLY
+    path: visual-authority/character-forge/00-source/production-v3/artwork/van_hand_and_glove_gesture_reference_sheet.png
+    sha256: 0adb71d1a0cc8a81c392afc337d55c6b1165e59a534e6b60a952b6c06dd388c6
+  state_action_reference:
+    type: SUPPORTING_REFERENCE_ONLY
+    path: visual-authority/character-forge/00-source/production-v3/artwork/van_states_and_actions_pose_pack.png
+    sha256: 1ec68a663d379a113ca0b65ee48c3bd60a7a5bbdcb8dd52187b95875d3fd14f4
+  aura_reference:
+    type: SUPPORTING_REFERENCE_ONLY
+    path: visual-authority/character-forge/00-source/production-v3/artwork/van_aura_runtime_field_guide.png
+    sha256: 0232bb8225c2080948e129843a390480a0939808ea98214dce4be58ba39e86f9
+  semantic_vectors:
+    type: FUTURE_DERIVED_M1_OUTPUT
+    path: visual-authority/character-forge/06-vectors-clean/van_layers.svg
+  rive_runtime:
+    type: FUTURE_DERIVED_M4_OUTPUT
+    path: visual-authority/rive/van_runtime.riv
+edges:
+  - from: canonical_visual_root
+    to: identity_lock
+    relation: codified_by
+  - from: canonical_visual_root
+    to: candidate_b_source
+    relation: constrains_identity_of
+  - from: candidate_b_source
+    to: candidate_b_highres
+    relation: deterministic_4x_lanczos
+  - from: candidate_b_highres
+    to: owner_approval
+    relation: exact_sha_reviewed_by
+  - from: owner_approval
+    to: approved_master
+    relation: promotes_exact_bytes
+  - from: identity_lock
+    to: approved_master
+    relation: remains_superior_identity_constraint
+  - from: approved_master
+    to: semantic_vectors
+    relation: primary_rigging_geometry_source
+  - from: expression_reference
+    to: semantic_vectors
+    relation: reference_expression_semantics_only
+  - from: viseme_reference
+    to: semantic_vectors
+    relation: reference_viseme_semantics_only
+  - from: glove_reference
+    to: semantic_vectors
+    relation: reference_gesture_semantics_only
+  - from: state_action_reference
+    to: rive_runtime
+    relation: reference_pose_semantics_only
+  - from: aura_reference
+    to: rive_runtime
+    relation: forbidden_inside_rive_android_runtime_reference_only
+  - from: semantic_vectors
+    to: rive_runtime
+    relation: deterministic_rig_and_authoring_pipeline
+invariants:
+  - canonical_visual_root_and_identity_lock_outrank_all_supporting_art
+  - approved_master_is_the_only_high_resolution_rigging_geometry_authority
+  - supporting_reference_nodes_cannot_override_identity_geometry_palette_or_public_runtime_contracts
+  - all_artwork_edges_are_hash_locked_before_M1
+  - inferred_hidden_geometry_requires_separate_owner_approval

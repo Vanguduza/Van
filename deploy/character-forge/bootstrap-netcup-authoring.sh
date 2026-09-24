@@ -255,6 +255,15 @@ CHARACTER_FORGE_ANDROID_USER_HOME="$ANDROID_USER_HOME" \
 CHARACTER_FORGE_ANDROID_AVD_HOME="$ANDROID_AVD_HOME" \
   /usr/local/sbin/qualify-van-character-forge
 
+if [[ "${CHARACTER_FORGE_ENABLE_PRODUCTION_V3:-1}" == "1" ]]; then
+  log "bootstrapping Character Forge Production V3 controller"
+  CHARACTER_FORGE_INSTALL_ROOT="$INSTALL_ROOT" \
+  CHARACTER_FORGE_STATE_ROOT="$STATE_ROOT" \
+  CHARACTER_FORGE_USER="$FORGE_USER" \
+  CHARACTER_FORGE_WORKSPACE="$WORKSPACE" \
+    "$WORKSPACE/deploy/character-forge/bootstrap-production-v3.sh"
+fi
+
 cat <<EOF
 [character-forge bootstrap] AUTHORING_WORKSTATION_READY
 Desktop Commander:

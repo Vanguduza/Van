@@ -1,0 +1,23 @@
+schema_version: 1
+rig_ir_version: 1
+rive:
+  artboard: Van
+  state_machine: VanRuntime
+  authoring_authority: rive_cli_rml
+  strategy: schema_driven
+  schema_probe_required: true
+supported_constraints:
+  - two_bone_ik
+  - rotation_limit
+  - transform_copy
+supported_mesh_features:
+  - triangles
+  - bone_weights
+  - draw_order
+  - clipping_intent
+unsupported_policy: FAIL_CLOSED
+public_surface_source: visual-authority/rive_contract.json
+aura:
+  owner: android_native
+  allowed_inside_rive: [visor_local_optics, orb_local_optics]
+  forbidden_inside_rive: [aura, halo, full_ring, body_field]
