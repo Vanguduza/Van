@@ -31,6 +31,10 @@ def validate() -> list[str]:
     master_spec = yaml.safe_load((V3 / "HIGHRES_MASTER_SPEC.yaml").read_text(encoding="utf-8"))
     topology = yaml.safe_load((V3 / "TOPOLOGY_BUDGETS.yaml").read_text(encoding="utf-8"))
     gpu_lane = yaml.safe_load((V3 / "GPU_LANE.yaml").read_text(encoding="utf-8"))
+    artwork_manifest_path = V3 / "ARTWORK_MANIFEST.yaml"
+    provenance_graph_path = V3 / "PROVENANCE_GRAPH.yaml"
+    artwork_manifest = yaml.safe_load(artwork_manifest_path.read_text(encoding="utf-8")) if artwork_manifest_path.is_file() else {}
+    provenance_graph = yaml.safe_load(provenance_graph_path.read_text(encoding="utf-8")) if provenance_graph_path.is_file() else {}
 
     primary = manifest["authority"]["primary_visual"]["path"]
     if primary != "visual-authority/assets/pack/owner_board_visual_authority.png":
@@ -101,6 +105,8 @@ def validate() -> list[str]:
         "visual-authority/character-forge/00-source/production-v3/RIG_IR_SCHEMA.json",
         "visual-authority/character-forge/00-source/production-v3/RIVE_MAPPING.yaml",
         "visual-authority/character-forge/00-source/production-v3/GPU_LANE.yaml",
+        "visual-authority/character-forge/00-source/production-v3/ARTWORK_MANIFEST.yaml",
+        "visual-authority/character-forge/00-source/production-v3/PROVENANCE_GRAPH.yaml",
     ):
         if not (ROOT / rel).is_file():
             problems.append(f"V3_AUTHORITY_MISSING:{rel}")
@@ -138,6 +144,88 @@ def validate() -> list[str]:
     approved = master_policy.get("approved_master") or {}
     if approved_path.exists() and (not approved.get("sha256") or approved.get("status") != "OWNER_APPROVED"):
         problems.append("APPROVED_MASTER_PRESENT_WITHOUT_BOUND_AUTHORITY")
+    if approved.get("status") != "OWNER_APPROVED":
+        problems.append("APPROVED_MASTER_STATUS_DRIFT")
+    if not approved_path.is_file():
+        problems.append("APPROVED_MASTER_MISSING")
+    elif sha256_file(approved_path) != approved.get("sha256"):
+        problems.append("APPROVED_MASTER_HASH_DRIFT")
+
+    approval_path = ROOT / str(approved.get("approval_record") or "")
+    if not approval_path.is_file():
+        problems.append("APPROVED_MASTER_APPROVAL_MISSING")
+    else:
+        approval = yaml.safe_load(approval_path.read_text(encoding="utf-8")) or {}
+        if approval.get("decision") != "APPROVE" or approval.get("authority") != "owner":
+            problems.append("APPROVED_MASTER_OWNER_DECISION_DRIFT")
+        if approval.get("candidate_sha256") != approved.get("sha256"):
+            problems.append("APPROVED_MASTER_APPROVAL_HASH_DRIFT")
+        if approval.get("canonical_source_git_blob_sha") != CANONICAL_BLOB_SHA:
+            problems.append("APPROVED_MASTER_APPROVAL_SOURCE_DRIFT")
+        if approval.get("identity_lock_sha256") != sha256_file(PACK / "APPROVED_IDENTITY_LOCK.yaml"):
+            problems.append("APPROVED_MASTER_APPROVAL_IDENTITY_LOCK_DRIFT")
+
+    if manifest.get("status") != "PRODUCTION_V3_ARTWORK_HASH_LOCKED_PRE_M1":
+        problems.append("ASSET_PACK_STATUS_DRIFT")
+    artwork_cfg = (manifest.get("production_v3") or {}).get("artwork") or {}
+    if artwork_cfg.get("manifest") != "visual-authority/character-forge/00-source/production-v3/ARTWORK_MANIFEST.yaml":
+        problems.append("ARTWORK_MANIFEST_REFERENCE_DRIFT")
+    if artwork_cfg.get("provenance_graph") != "visual-authority/character-forge/00-source/production-v3/PROVENANCE_GRAPH.yaml":
+        problems.append("PROVENANCE_GRAPH_REFERENCE_DRIFT")
+
+    if not artwork_manifest:
+        problems.append("ARTWORK_MANIFEST_MISSING")
+    else:
+        selected = artwork_manifest.get("selected_master") or {}
+        if selected.get("sha256") != approved.get("sha256"):
+            problems.append("ARTWORK_SELECTED_MASTER_HASH_DRIFT")
+        if selected.get("path") != "visual-authority/character-forge/01-master-approved/van_master_highres.png":
+            problems.append("ARTWORK_SELECTED_MASTER_PATH_DRIFT")
+        seen_ids = set()
+        for row in artwork_manifest.get("assets") or []:
+            asset_id = str(row.get("id") or "")
+            if not asset_id:
+                problems.append("ARTWORK_ASSET_ID_MISSING")
+                continue
+            if asset_id in seen_ids:
+                problems.append(f"ARTWORK_DUPLICATE_ID:{asset_id}")
+            seen_ids.add(asset_id)
+            rel = str(row.get("path") or "")
+            path = ROOT / rel
+            if not path.is_file():
+                problems.append(f"ARTWORK_MISSING:{asset_id}")
+                continue
+            expected_sha = str(row.get("sha256") or "")
+            if not expected_sha or sha256_file(path) != expected_sha:
+                problems.append(f"ARTWORK_HASH_DRIFT:{asset_id}")
+        required_refs = {
+            "expression_reference",
+            "viseme_reference",
+            "glove_gesture_reference",
+            "state_action_reference",
+            "aura_reference",
+        }
+        if not required_refs.issubset(seen_ids):
+            problems.append("ARTWORK_SUPPORTING_SET_INCOMPLETE")
+        for row in artwork_manifest.get("assets") or []:
+            if row.get("id") in required_refs:
+                if row.get("admission_class") != "GENERATIVE_REFERENCE_ONLY":
+                    problems.append(f"ARTWORK_REFERENCE_CLASS_DRIFT:{row.get('id')}")
+                if row.get("identity_authority") is not False:
+                    problems.append(f"ARTWORK_REFERENCE_IDENTITY_AUTHORITY_DRIFT:{row.get('id')}")
+
+    if not provenance_graph:
+        problems.append("PROVENANCE_GRAPH_MISSING")
+    else:
+        nodes = provenance_graph.get("nodes") or {}
+        approved_node = nodes.get("approved_master") or {}
+        if approved_node.get("sha256") != approved.get("sha256"):
+            problems.append("PROVENANCE_APPROVED_MASTER_HASH_DRIFT")
+        if "approved_master_is_the_only_high_resolution_rigging_geometry_authority" not in set(provenance_graph.get("invariants") or []):
+            problems.append("PROVENANCE_MASTER_AUTHORITY_INVARIANT_MISSING")
+        for node_name in ("expression_reference","viseme_reference","glove_reference","state_action_reference","aura_reference"):
+            if (nodes.get(node_name) or {}).get("type") != "SUPPORTING_REFERENCE_ONLY":
+                problems.append(f"PROVENANCE_REFERENCE_TYPE_DRIFT:{node_name}")
 
     if rig["artboard_policy"]["aura_in_rive_forbidden"] is not True:
         problems.append("RIVE_AURA_BOUNDARY_DRIFT")
