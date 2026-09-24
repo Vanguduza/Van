@@ -1,0 +1,27 @@
+resting_avatar_dp: 92.0
+resting_hit_dp: 168.0
+dock_character_dp: 76.0
+dock_hit_dp: 88.0
+compact_width_dp: 280.0
+van_glass_overlap_dp: 20.0
+aura_zone_scales:
+  inner_presence: 1.0
+  mid_interaction: 1.12
+  outer_semantic_min: 1.35
+  outer_semantic_max: 1.7
+outer_semantic_max_coverage_deg: 180.0
+artboard:
+  name: Van
+  units:
+  - 1000.0
+  - 1000.0
+  transparent: true
+  gesture_safe_margin_fraction: 0.06
+  rendered_size_dp:
+    floating_resting: 92.0
+    docked: 76.0
+    minimized_portrait: 48
+    full_preview: 320
+  aura_reach_check: resting avatar 92 dp × 1.70 outer semantic = 156 dp ≤ hit area 168 dp
+inner_presence_radius_rule: Zone radii scale from half the character height, centred on the character's vertical midpoint
+  (see guides/artboard_overlay_template.svg).

@@ -1,0 +1,88 @@
+# VAN Rive Reference Pack — artwork and measurement inputs
+
+Status: **REFERENCE INPUT, PRE-M1** · Authority: **Candidate B** (CF-D-05-REV2_1)
+· Generator: `python -m tools.character_forge.build_reference_pack`
+· Drift check: `python -m tools.character_forge.build_reference_pack --check` (runs in the contract suite)
+
+This pack is the artwork half of Character Forge's Rive injection. Its sibling
+`../asset-pack/` holds the rules: identity lock, layers, rig, animation, state/action, speech,
+aura boundary and validation. This pack holds what an artist or agent builds from: every
+reference image, measurement, pivot, guide and blockout. Each one traces to exact pixels of the one
+approved image, `visual-authority/character-forge/01-master-candidates/van_master_source_candidate_b.png`
+(native 1536×1024). The crops come from the native file, never from the 4× Lanczos upscale, so they
+carry no interpolated detail.
+
+Nothing here adds identity. Crops are exact regions of Candidate B, and `REFERENCE_INDEX.json` lists
+every box. Colours and proportions are measured from those pixels. Aura and overlay numbers are
+parsed from the shipping Android code and `van-visual-authority-v2.yaml`.
+
+## Contents
+
+| Path | What it is | Used at |
+|---|---|---|
+| `reference/turnaround/*.png` | front, ¾ front, side, ¾ rear and rear construction views | M1 vector tracing; M2 rig pivots |
+| `reference/details/orb_*.png` | the orb in all five turnaround views | M1 orb, M2 orb drift |
+| `reference/details/detail_*.png` | head front and ¾, visor, gloves, jacket, orb and boot detail panels | M1 detail and shading |
+| `PALETTE_MEASURED.yaml` | measured shadow/mid/lit ramps per material; ΔE2000 checks against the lock | M1 fills and shading |
+| `PROPORTIONS.yaml` + `guides/proportion_guide_front.png` | measured landmarks, the locked head count (3.15 measured, lock 3.2 ± 0.3), orb size, artboard mapping | M1 construction |
+| `RIG_PIVOTS.yaml` | bone and pivot positions (hips, knees, ankles and the orb included) in artboard units (1000×1000) | M2 skeleton |
+| `blockout/van_layers_blockout.svg` | **layered construction scaffold**: every required and `extra_` group at B's measured positions in lock colours; passes `vectors lint` | M1 starting file |
+| `guides/artboard_overlay_template.svg` | artboard `Van`, 6% gesture margin, aura zones A–C (1.00/1.12/1.35–1.70×), 48/96 dp crop circles, pivots | locked guide layer in Inkscape/Rive |
+| `OVERLAY_COMPOSITION.yaml` | overlay sizes (92 dp resting, 76 dp docked, 168/88 dp hit, 280 dp compact), rendered sizes, aura reach check | framing |
+| `AURA_STATE_TABLE.yaml` | per-state aura parameters and segment angles **parsed from `VanAuraSpec.kt`**, with status accents | keeping the character clear of the Android field |
+| `STATE_ACTION_REFERENCE_MAP.yaml` | the 18 states and 14 actions, each with semantic references or an explicit composition note | M2/M3 pose planning |
+| `guides/reference_contact_sheet.png` | review sheet of every crop | reviewers |
+| `PACK_MANIFEST.json` | SHA-256 of every file, plus the authority's SHA | drift check |
+
+## On-model versus semantic references
+
+Candidate B has the turnaround and the detail panels, but no expressions, gestures or visemes.
+The production-v3 sheets (expression, state/action pose, viseme, hand, aura guide) are **off-model**:
+the figure in them is ~6–7 heads tall, with a glowing visor and the superseded cyan face orb.
+`STATE_ACTION_REFERENCE_MAP.yaml` therefore cites them under
+`reference_policy: OFF_MODEL_SEMANTIC_ONLY`. They say what a state or action *means*: the brow
+set for WARNING, the arm path for HELLO_WAVE, the mouth for viseme 2. Every shape, proportion and
+colour comes from Candidate B. They are never cropped into this pack.
+
+## How to use it (M1 → M3)
+
+1. Open `blockout/van_layers_blockout.svg` in Inkscape.
+   - Place `reference/turnaround/turnaround_front.png` underneath, scaled so the landmarks in `PROPORTIONS.yaml` meet the blockout.
+   - Place `guides/artboard_overlay_template.svg` above it as a locked guide.
+2. **Redraw every group** over the reference, keeping group ids and topology.
+   - Base fills use the identity-lock tokens.
+   - Shading shapes use the measured `shadow_p10`/`lit_p90` of the same material.
+   - The body stays opaque. Only `visor_lens` and the orb optics may be translucent.
+3. Keep the character inside the 6% margin. The aura zones on the template are **Android's**, so the `.riv` stays transparent there.
+4. Lint, admit, and get an independent review (`vectors lint` → `vectors admit` → `review record --target layer`).
+   - With Inkscape geometry, the lint also measures head count (hair crown→chin over crown→sole).
+   - It fails with `PROPORTION_OUTSIDE_LOCK` outside 2.9–3.5.
+5. Build the M2 skeleton on `RIG_PIVOTS.yaml`.
+   - Pose meaning comes from `STATE_ACTION_REFERENCE_MAP.yaml`.
+   - Motion timing comes from `../asset-pack/ANIMATION_SPEC.yaml` and `STATE_ACTION_MATRIX.yaml`.
+   - Every pose is drawn on B's proportions.
+6. Where the map says `gap:`, compose from the named note plus the matrix pose. Never invent a new face, prop or costume element.
+
+The blockout is a scaffold, not art. Its shapes are simple primitives placed at measured
+positions, so pivots, layer order and proportions are right from the first file. Admitting it
+unchanged as `van_layers.svg` would fail the independent layer review by design.
+
+The blockout keeps two conventions:
+- `_l` is the viewer's left, matching the crops. The viewer-left arm reaches out palm-up under the orb, as in B.
+- The legs and boots are carried as `extra_leg_*` and `extra_boot_*` so knees can bend.
+
+## Open items (not resolved by this pack)
+
+| ID | Finding | Needed |
+|---|---|---|
+| REF-GAP-001 | There is no on-model expression, gesture or viseme art in Candidate B's style. The supporting sheets are off-model. | An owner-reviewed expression/pose sheet drawn on B's proportions, or owner review of faces at M2. |
+| REF-GAP-002 | Candidate B has no references for OFFLINE, CONNECTING, SEARCHING, DELEGATING, WAITING, DEGRADED, POINT_LEFT/RIGHT/UP/DOWN, OPEN_PANEL or CLOSE_PANEL. | Accept the composition notes in the map, or supply references. |
+| REF-GAP-003 | Candidate B is AI-generated. Fine detail such as zips, glove panels and boot trim is interpreted, not traced. | Owner review of detail at M1. |
+| REF-GAP-004 | The interim Canvas `VanScene` fallback is older than CF-D-05-REV2_1. It still draws a cyan holographic orb, and its geometry has not been re-measured against B. | Update `VanScene` to B's orb and proportions. |
+
+## Regenerating
+
+Regenerate the pack only when Candidate B, the aura code or the identity lock changes:
+`python -m tools.character_forge.build_reference_pack`, then commit. The contract
+test fails if any file drifts from `PACK_MANIFEST.json`, or if the authority's SHA changes
+without a rebuild.

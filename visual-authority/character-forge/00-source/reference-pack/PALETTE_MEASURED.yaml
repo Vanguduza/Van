@@ -1,0 +1,102 @@
+authority: visual-authority/character-forge/01-master-candidates/van_master_source_candidate_b.png
+measured_ramps:
+  skin:
+    sample_boxes:
+    - - 60
+      - 790
+      - 130
+      - 870
+    - - 215
+      - 790
+      - 285
+      - 870
+    - - 140
+      - 885
+      - 210
+      - 925
+    pixels: 5840
+    family_filter: skin
+    shadow_p10: '#774137'
+    mid_p50: '#AF6A53'
+    lit_p90: '#D3875D'
+    mean: '#AA664A'
+  hair:
+    sample_boxes:
+    - - 40
+      - 570
+      - 300
+      - 660
+    pixels: 18936
+    family_filter: silver
+    shadow_p10: '#B1A3A8'
+    mid_p50: '#DDCECB'
+    lit_p90: '#F7F6F6'
+    mean: '#D9CFCE'
+  visor_lens:
+    sample_boxes:
+    - - 700
+      - 585
+      - 900
+      - 650
+    pixels: 1738
+    family_filter: cyan
+    shadow_p10: '#28538C'
+    mid_p50: '#3F8ACE'
+    lit_p90: '#2598F9'
+    mean: '#3C86C9'
+  jacket_white:
+    sample_boxes:
+    - - 690
+      - 720
+      - 760
+      - 860
+    pixels: 3478
+    family_filter: white
+    shadow_p10: '#D4C8CD'
+    mid_p50: '#E6DDDD'
+    lit_p90: '#F5F6F5'
+    mean: '#E6DFE0'
+  glove:
+    sample_boxes:
+    - - 1160
+      - 580
+      - 1240
+      - 660
+    pixels: 2484
+    family_filter: dark
+    shadow_p10: '#121116'
+    mid_p50: '#1F212A'
+    lit_p90: '#2D2E35'
+    mean: '#202027'
+  orb_shell:
+    sample_boxes:
+    - - 1140
+      - 700
+      - 1260
+      - 820
+    pixels: 4798
+    family_filter: dark
+    shadow_p10: '#00060E'
+    mid_p50: '#020C1C'
+    lit_p90: '#102032'
+    mean: '#08111E'
+identity_lock_tokens:
+  skin: '#AF6A53'
+  hair: '#E9EDF3'
+  hair_shadow: '#B1A3A8'
+  iris: '#1E88E5'
+  visor_lens: '#3F8ACE'
+  visor_frame: '#00E5FF'
+  visor_side_pods: '#1F212A'
+  jacket_dark: '#15181C'
+  jacket_light: '#EDEFF3'
+  underlayer: '#2B3138'
+  glove: '#111820'
+  orb_shell: '#020C1C'
+  orb_core: '#00E5FF'
+checks_delta_e2000:
+  lock_skin_vs_measured_mid: 0.0
+  lock_hair_vs_measured_lit: 3.91
+  lock_visor_lens_vs_measured_mid: 0.0
+vector_shading_rule: Flat base = identity-lock token; shadow and highlight shapes use the measured shadow_p10 / lit_p90 of
+  the same material. Never shade by opacity over the body (body is opaque).

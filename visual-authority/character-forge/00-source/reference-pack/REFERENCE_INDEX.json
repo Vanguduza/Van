@@ -1,0 +1,182 @@
+{
+  "authority": {
+    "path": "visual-authority/character-forge/01-master-candidates/van_master_source_candidate_b.png",
+    "sha256": "cf7f51793692bfe8ea2e5f58f1a12e64d3a76468a85cb19d76d0db64ccef374c",
+    "size": [
+      1536,
+      1024
+    ]
+  },
+  "crops": [
+    {
+      "file": "visual-authority/character-forge/00-source/reference-pack/reference/turnaround/turnaround_front.png",
+      "board_box": [
+        40,
+        0,
+        330,
+        525
+      ],
+      "role": "construction view (silhouette, proportion, clothing)"
+    },
+    {
+      "file": "visual-authority/character-forge/00-source/reference-pack/reference/turnaround/turnaround_three_quarter_front.png",
+      "board_box": [
+        380,
+        0,
+        600,
+        525
+      ],
+      "role": "construction view (silhouette, proportion, clothing)"
+    },
+    {
+      "file": "visual-authority/character-forge/00-source/reference-pack/reference/turnaround/turnaround_side.png",
+      "board_box": [
+        695,
+        0,
+        860,
+        525
+      ],
+      "role": "construction view (silhouette, proportion, clothing)"
+    },
+    {
+      "file": "visual-authority/character-forge/00-source/reference-pack/reference/turnaround/turnaround_three_quarter_rear.png",
+      "board_box": [
+        945,
+        0,
+        1150,
+        525
+      ],
+      "role": "construction view (silhouette, proportion, clothing)"
+    },
+    {
+      "file": "visual-authority/character-forge/00-source/reference-pack/reference/turnaround/turnaround_rear.png",
+      "board_box": [
+        1230,
+        0,
+        1460,
+        525
+      ],
+      "role": "construction view (silhouette, proportion, clothing)"
+    },
+    {
+      "file": "visual-authority/character-forge/00-source/reference-pack/reference/details/orb_front.png",
+      "board_box": [
+        18,
+        118,
+        122,
+        212
+      ],
+      "role": "orb turnaround view"
+    },
+    {
+      "file": "visual-authority/character-forge/00-source/reference-pack/reference/details/orb_three_quarter_front.png",
+      "board_box": [
+        560,
+        145,
+        655,
+        240
+      ],
+      "role": "orb turnaround view"
+    },
+    {
+      "file": "visual-authority/character-forge/00-source/reference-pack/reference/details/orb_side.png",
+      "board_box": [
+        845,
+        165,
+        940,
+        262
+      ],
+      "role": "orb turnaround view"
+    },
+    {
+      "file": "visual-authority/character-forge/00-source/reference-pack/reference/details/orb_three_quarter_rear.png",
+      "board_box": [
+        1143,
+        148,
+        1242,
+        242
+      ],
+      "role": "orb turnaround view"
+    },
+    {
+      "file": "visual-authority/character-forge/00-source/reference-pack/reference/details/orb_rear.png",
+      "board_box": [
+        1435,
+        118,
+        1530,
+        212
+      ],
+      "role": "orb turnaround view"
+    },
+    {
+      "file": "visual-authority/character-forge/00-source/reference-pack/reference/details/detail_head_front.png",
+      "board_box": [
+        0,
+        555,
+        345,
+        968
+      ],
+      "role": "detail/material reference"
+    },
+    {
+      "file": "visual-authority/character-forge/00-source/reference-pack/reference/details/detail_head_three_quarter.png",
+      "board_box": [
+        348,
+        555,
+        660,
+        968
+      ],
+      "role": "detail/material reference"
+    },
+    {
+      "file": "visual-authority/character-forge/00-source/reference-pack/reference/details/detail_visor.png",
+      "board_box": [
+        675,
+        560,
+        1122,
+        695
+      ],
+      "role": "detail/material reference"
+    },
+    {
+      "file": "visual-authority/character-forge/00-source/reference-pack/reference/details/detail_gloves.png",
+      "board_box": [
+        1128,
+        560,
+        1536,
+        695
+      ],
+      "role": "detail/material reference"
+    },
+    {
+      "file": "visual-authority/character-forge/00-source/reference-pack/reference/details/detail_jacket.png",
+      "board_box": [
+        675,
+        700,
+        1122,
+        948
+      ],
+      "role": "detail/material reference"
+    },
+    {
+      "file": "visual-authority/character-forge/00-source/reference-pack/reference/details/detail_orb.png",
+      "board_box": [
+        1128,
+        700,
+        1536,
+        840
+      ],
+      "role": "detail/material reference"
+    },
+    {
+      "file": "visual-authority/character-forge/00-source/reference-pack/reference/details/detail_boots.png",
+      "board_box": [
+        1098,
+        845,
+        1536,
+        970
+      ],
+      "role": "detail/material reference"
+    }
+  ]
+}

@@ -1,0 +1,157 @@
+units: artboard (1000×1000)
+source: measured front turnaround
+pivots:
+  root:
+    artboard:
+    - 500.0
+    - 930.0
+    board_px:
+    - 200
+    - 518
+  hips:
+    artboard:
+    - 500.0
+    - 618.0
+    board_px:
+    - 200
+    - 333
+  spine:
+    artboard:
+    - 500.0
+    - 570.8
+    board_px:
+    - 200
+    - 305
+  chest:
+    artboard:
+    - 500.0
+    - 444.4
+    board_px:
+    - 200
+    - 230
+  neck:
+    artboard:
+    - 483.1
+    - 368.5
+    board_px:
+    - 190
+    - 185
+  head:
+    artboard:
+    - 483.1
+    - 333.1
+    board_px:
+    - 190
+    - 164
+  shoulder_l:
+    artboard:
+    - 382.0
+    - 393.8
+    board_px:
+    - 130
+    - 200
+  shoulder_r:
+    artboard:
+    - 634.9
+    - 393.8
+    board_px:
+    - 280
+    - 200
+  elbow_l:
+    artboard:
+    - 331.4
+    - 486.5
+    board_px:
+    - 100
+    - 255
+  elbow_r:
+    artboard:
+    - 665.3
+    - 498.3
+    board_px:
+    - 298
+    - 262
+  wrist_l:
+    artboard:
+    - 297.6
+    - 528.7
+    board_px:
+    - 80
+    - 280
+  wrist_r:
+    artboard:
+    - 672.0
+    - 592.7
+    board_px:
+    - 302
+    - 318
+  hip_l:
+    artboard:
+    - 441.0
+    - 618.0
+    board_px:
+    - 165
+    - 333
+  hip_r:
+    artboard:
+    - 567.5
+    - 618.0
+    board_px:
+    - 240
+    - 333
+  knee_l:
+    artboard:
+    - 419.1
+    - 747.9
+    board_px:
+    - 152
+    - 410
+  knee_r:
+    artboard:
+    - 584.3
+    - 747.9
+    board_px:
+    - 250
+    - 410
+  ankle_l:
+    artboard:
+    - 398.8
+    - 835.6
+    board_px:
+    - 140
+    - 462
+  ankle_r:
+    artboard:
+    - 614.7
+    - 835.6
+    board_px:
+    - 268
+    - 462
+  eye_l_centre:
+    artboard:
+    - 429.2
+    - 262.2
+    board_px:
+    - 158
+    - 122
+  eye_r_centre:
+    artboard:
+    - 533.7
+    - 262.2
+    board_px:
+    - 220
+    - 122
+  jaw:
+    artboard:
+    - 483.1
+    - 336.4
+    board_px:
+    - 190
+    - 166
+  orb_anchor:
+    artboard:
+    - 275.7
+    - 344.9
+    board_px:
+    - 67
+    - 171

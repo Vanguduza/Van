@@ -1,0 +1,52 @@
+source: reference/turnaround/turnaround_front.png
+landmarks_board_px:
+  centre_x: 200
+  face_cx: 190
+  hair_crown: 8
+  skull_top: 45
+  brow_line: 97
+  eye_line: 122
+  mouth_line: 153
+  chin: 170
+  collar: 185
+  shoulder_line: 200
+  belt: 305
+  crotch: 345
+  fingertips: 390
+  knee: 410
+  boot_top: 450
+  sole: 518
+  face_left: 125
+  face_right: 255
+  shoulder_left: 105
+  shoulder_right: 300
+character_height_px: 510
+head_count_definition: hair_crown_to_chin_over_crown_to_sole
+head_count: 3.15
+locked_range:
+- 2.9
+- 3.5
+within_lock: true
+head_count_skull_top_to_chin_for_construction: 4.08
+ratios_of_height:
+  brow_line: 0.175
+  eye_line: 0.224
+  chin: 0.318
+  shoulder_line: 0.376
+  belt: 0.582
+  crotch: 0.661
+  knee: 0.788
+  sole: 1.0
+shoulder_width_heads: 1.5
+orb_board_px:
+  cx: 67
+  cy: 171
+  r: 50
+orb_diameter_over_head_height: 0.62
+artboard_mapping:
+  artboard:
+  - 1000.0
+  - 1000.0
+  character_height_fraction: 0.86
+  scale_artboard_units_per_board_px: 1.6863
+  top_margin_fraction: 0.07

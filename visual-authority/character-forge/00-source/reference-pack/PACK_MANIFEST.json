@@ -1,0 +1,39 @@
+{
+  "pack": "VAN-RIVE-REFERENCE-PACK",
+  "generator": "tools/character_forge/build_reference_pack.py",
+  "authority": {
+    "path": "visual-authority/character-forge/01-master-candidates/van_master_source_candidate_b.png",
+    "sha256": "cf7f51793692bfe8ea2e5f58f1a12e64d3a76468a85cb19d76d0db64ccef374c"
+  },
+  "files": {
+    "AURA_STATE_TABLE.yaml": "d0c8b83b080ea9604029303e44f710b9f8ddfe73bdf9d4d4c24e4130643ec89f",
+    "OVERLAY_COMPOSITION.yaml": "12a341d439976745b0021f610cf7d0ee8d9d28c4a30feaff3088378cb23a55f5",
+    "PALETTE_MEASURED.yaml": "4303e92b59c91e48533041ca3068607dcbcda4bca10004dd70357de96fe9089d",
+    "PROPORTIONS.yaml": "9e8cd323b4c696f91034d31db866262e6cf3f1ee6d4da93ab627129c40aa7e6f",
+    "README.md": "b3d41f7f5bb089f51bf6f5de14f42e363effce5f3993dbdea3eeb709cb0c4083",
+    "REFERENCE_INDEX.json": "8f55748c653bb1bb7031d1458b2ab0d633d9c1195a1f6a3cc97cae1ec7e496e1",
+    "RIG_PIVOTS.yaml": "abb302ffe344b2ca4e167434464d170bdb44cb57194f1d3facf0fa6dc985face",
+    "STATE_ACTION_REFERENCE_MAP.yaml": "76e287db8b42b2015f4e792b2bb01954e1a1d1142fd88a495dd06b9a1e0e4529",
+    "blockout/van_layers_blockout.svg": "14f4447d8d72ec2523635555a3de1e740ea1e18c6e321f680cb5f7067555cbe3",
+    "guides/artboard_overlay_template.svg": "b8bb41d6cbb41b03dc0b978904de24196710d041e39e7eda2cd0ef3839d079c2",
+    "guides/proportion_guide_front.png": "ed41c282e5c8dbf7c0e48eedeef692d4c03a2a131fd9c57f97b9be6b55b8a126",
+    "guides/reference_contact_sheet.png": "9cd0fe86c8d4794e82b95d3ded574ab2405f095dc2d8f7a360c2db7501bebaaf",
+    "reference/details/detail_boots.png": "535cf944d5095bea291f3245515fb5656ba04436d270f012bdf376eb204bcdf4",
+    "reference/details/detail_gloves.png": "6ee835fd2901022c2398d1abcd3ee31f53dce1001c6bf978283cf49b05b407d5",
+    "reference/details/detail_head_front.png": "d460011db1953473d5e6862039f39487cfbbbbcd6b68dff6f14e00bc64b7569d",
+    "reference/details/detail_head_three_quarter.png": "d032511a9d627d23a70bc957968b61719fc83bcf9fc7802311673b906d826b20",
+    "reference/details/detail_jacket.png": "aea536be78178f038aa63b19c83957900d09bfe0985e857627c54e60aa052725",
+    "reference/details/detail_orb.png": "c09e5fbcd3100e24d5c565450cc087a6f537f6ec9b47da5709389adc3ce4eefd",
+    "reference/details/detail_visor.png": "7190704ff03f59c6d1342c11b1ef6dda4c86bfe65ee062545a06ca01a790b4c4",
+    "reference/details/orb_front.png": "dda0e65c5c90442be88d86adacc7db0bbb6b8120f33d0e38052e31c7e76404b3",
+    "reference/details/orb_rear.png": "09230df0a29c8427ed9eaa9f5b9d96002525fd97822d4fb04198b15b6449d097",
+    "reference/details/orb_side.png": "3beea472aa4f5f218d233aa2671dcb27772d2f66abe5a5b1b908d86ce13036c1",
+    "reference/details/orb_three_quarter_front.png": "7e7ed93301df380f405d6fc565e398cc2cbcb005091fc302adf639e112d098df",
+    "reference/details/orb_three_quarter_rear.png": "3b2a770bf4382c2a474ac2b871650288e090a90730d326b6405efacd347675a6",
+    "reference/turnaround/turnaround_front.png": "8ed4926c28cf9e7c6a6c1aa9e542ab7a9babd92b934e8cb0a3177b8ae05f0b2d",
+    "reference/turnaround/turnaround_rear.png": "28f0e5d986bf0efc5918e391aa8e5ff154de483d6de5bc295c5953e620da9ded",
+    "reference/turnaround/turnaround_side.png": "8b77b7b4a3e81153dd342cfc243ebc49b263b563d121be010a3e1fac1284272a",
+    "reference/turnaround/turnaround_three_quarter_front.png": "20b323193200c8de6f857c669247108f7dbc6ce059f0ca4b9642d8652cd1133f",
+    "reference/turnaround/turnaround_three_quarter_rear.png": "ac22ea4dddebab806a713187a7a9ccbaf3bef72b2665938584ba929e4b357df5"
+  }
+}

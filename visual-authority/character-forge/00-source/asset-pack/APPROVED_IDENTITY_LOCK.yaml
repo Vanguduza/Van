@@ -53,7 +53,8 @@ identity:
     shell: "#020C1C"
     core: "#00E5FF"
     face: two_vertical_cyan_bar_eyes_no_mouth
-    size_heads: 0.55
+    size_heads: 0.62
+    size_definition: orb_diameter_over_hair_crown_to_chin_measured_on_candidate_b
   headband:
     disposition: FORBIDDEN
     reason: superseded rejected visual

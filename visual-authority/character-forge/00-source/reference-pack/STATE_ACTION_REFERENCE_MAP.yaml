@@ -1,0 +1,156 @@
+reference_policy: "OFF_MODEL_SEMANTIC_ONLY \u2014 the cited production-v3 sheets show what a state or action MEANS; their figure is off-model\
+  \ (tall, glowing visor, cyan face orb). Shape, proportion and palette come only from Candidate B (reference/turnaround, reference/details, blockout)."
+on_model_reference: visual-authority/character-forge/01-master-candidates/van_master_source_candidate_b.png
+states:
+  OFFLINE:
+    code: 0
+    references: []
+    gap: no panel; SLEEPING face with the orb dimmed, health shown by the aura (Android)
+  CONNECTING:
+    code: 1
+    references: []
+    gap: "no panel; OFFLINE\u2192IDLE lift per STATE_ACTION_MATRIX"
+  IDLE:
+    code: 2
+    references:
+    - visual-authority/character-forge/00-source/production-v3/artwork/van_expression_and_facial_acting_sheet.png
+    - visual-authority/character-forge/00-source/production-v3/artwork/van_states_and_actions_pose_pack.png
+  ATTENTIVE:
+    code: 3
+    references:
+    - visual-authority/character-forge/00-source/production-v3/artwork/van_expression_and_facial_acting_sheet.png
+  LISTENING:
+    code: 4
+    references:
+    - visual-authority/character-forge/00-source/production-v3/artwork/van_expression_and_facial_acting_sheet.png
+    - visual-authority/character-forge/00-source/production-v3/artwork/van_states_and_actions_pose_pack.png
+  THINKING:
+    code: 5
+    references:
+    - visual-authority/character-forge/00-source/production-v3/artwork/van_expression_and_facial_acting_sheet.png
+    - visual-authority/character-forge/00-source/production-v3/artwork/van_states_and_actions_pose_pack.png
+  SEARCHING:
+    code: 6
+    references: []
+    gap: no panel; THINKING eyes + scan head turn, orb as forward lens
+  WORKING:
+    code: 7
+    references:
+    - visual-authority/character-forge/00-source/production-v3/artwork/van_states_and_actions_pose_pack.png
+  DELEGATING:
+    code: 8
+    references: []
+    gap: no panel; WORKING face + PRESENT_CARD arm outward, orb travels outward
+  SPEAKING:
+    code: 9
+    references:
+    - visual-authority/character-forge/00-source/production-v3/artwork/van_expression_and_facial_acting_sheet.png
+    - visual-authority/character-forge/00-source/production-v3/artwork/van_states_and_actions_pose_pack.png
+    - visual-authority/character-forge/00-source/production-v3/artwork/van_ai_assistant_viseme_construction_sheet.png
+  WAITING:
+    code: 10
+    references: []
+    gap: no panel; ATTENTIVE face with slower breathing
+  WAITING_FOR_OWNER:
+    code: 11
+    references:
+    - visual-authority/character-forge/00-source/production-v3/artwork/van_states_and_actions_pose_pack.png
+  DEGRADED:
+    code: 12
+    references: []
+    gap: no panel; IDLE face with flatter brows; health is shown by the aura, not the body
+  WARNING:
+    code: 13
+    references:
+    - visual-authority/character-forge/00-source/production-v3/artwork/van_expression_and_facial_acting_sheet.png
+    - visual-authority/character-forge/00-source/production-v3/artwork/van_states_and_actions_pose_pack.png
+  ERROR:
+    code: 14
+    references:
+    - visual-authority/character-forge/00-source/production-v3/artwork/van_expression_and_facial_acting_sheet.png
+    - visual-authority/character-forge/00-source/production-v3/artwork/van_states_and_actions_pose_pack.png
+  SUCCESS:
+    code: 15
+    references:
+    - visual-authority/character-forge/00-source/production-v3/artwork/van_expression_and_facial_acting_sheet.png
+    - visual-authority/character-forge/00-source/production-v3/artwork/van_states_and_actions_pose_pack.png
+  URGENT:
+    code: 16
+    references:
+    - visual-authority/character-forge/00-source/production-v3/artwork/van_expression_and_facial_acting_sheet.png
+    - visual-authority/character-forge/00-source/production-v3/artwork/van_states_and_actions_pose_pack.png
+  SLEEPING:
+    code: 17
+    references:
+    - visual-authority/character-forge/00-source/production-v3/artwork/van_expression_and_facial_acting_sheet.png
+    - visual-authority/character-forge/00-source/production-v3/artwork/van_states_and_actions_pose_pack.png
+actions:
+  HELLO_WAVE:
+    code: 1
+    references:
+    - visual-authority/character-forge/00-source/production-v3/artwork/van_states_and_actions_pose_pack.png
+    - visual-authority/character-forge/00-source/production-v3/artwork/van_hand_and_glove_gesture_reference_sheet.png
+  ACK_NOD:
+    code: 2
+    references:
+    - visual-authority/character-forge/00-source/production-v3/artwork/van_states_and_actions_pose_pack.png
+  POINT_LEFT:
+    code: 3
+    references: []
+    gap: reuse the POINT_TARGET arm chain aimed left
+  POINT_RIGHT:
+    code: 4
+    references: []
+    gap: reuse the POINT_TARGET arm chain aimed right
+  POINT_UP:
+    code: 5
+    references: []
+    gap: reuse the POINT_TARGET arm chain aimed up
+  POINT_DOWN:
+    code: 6
+    references: []
+    gap: reuse the POINT_TARGET arm chain aimed down
+  POINT_TARGET:
+    code: 7
+    references:
+    - visual-authority/character-forge/00-source/production-v3/artwork/van_states_and_actions_pose_pack.png
+    - visual-authority/character-forge/00-source/production-v3/artwork/van_hand_and_glove_gesture_reference_sheet.png
+  CELEBRATE:
+    code: 8
+    references:
+    - visual-authority/character-forge/00-source/production-v3/artwork/van_states_and_actions_pose_pack.png
+  CAUTION:
+    code: 9
+    references:
+    - visual-authority/character-forge/00-source/production-v3/artwork/van_states_and_actions_pose_pack.png
+    - visual-authority/character-forge/00-source/production-v3/artwork/van_hand_and_glove_gesture_reference_sheet.png
+  CONFIRM:
+    code: 10
+    references:
+    - visual-authority/character-forge/00-source/production-v3/artwork/van_states_and_actions_pose_pack.png
+    - visual-authority/character-forge/00-source/production-v3/artwork/van_hand_and_glove_gesture_reference_sheet.png
+  SHRUG:
+    code: 11
+    references:
+    - visual-authority/character-forge/00-source/production-v3/artwork/van_states_and_actions_pose_pack.png
+  PRESENT_CARD:
+    code: 12
+    references:
+    - visual-authority/character-forge/00-source/production-v3/artwork/van_states_and_actions_pose_pack.png
+    - visual-authority/character-forge/00-source/production-v3/artwork/van_hand_and_glove_gesture_reference_sheet.png
+  OPEN_PANEL:
+    code: 13
+    references: []
+    gap: no panel; PRESENT_CARD sweep outward
+  CLOSE_PANEL:
+    code: 14
+    references: []
+    gap: no panel; PRESENT_CARD sweep inward
+speech_visemes:
+  references:
+  - visual-authority/character-forge/00-source/production-v3/artwork/van_ai_assistant_viseme_construction_sheet.png
+  note: "viseme 0\u20134 mouth shapes; redraw on Candidate B's face"
+aura:
+  references:
+  - visual-authority/character-forge/00-source/production-v3/artwork/van_aura_runtime_field_guide.png
+  note: Android-native field; never drawn in the .riv
