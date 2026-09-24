@@ -4,32 +4,115 @@ device:
   apk_sha256: null
   rive_sha256: null
   checked_at: null
+
 checks:
   renderer_rive_active: NOT_RUN
+
+  # Canonical VAN identity — every item must be visibly true on the physical S24.
+  identity_silver_white_swept_hair: NOT_RUN
+  identity_cyan_blue_transparent_visor: NOT_RUN
+  identity_medium_brown_skin: NOT_RUN
+  identity_blue_eyes: NOT_RUN
+  identity_black_white_technical_jacket: NOT_RUN
+  identity_charcoal_technical_underlayer: NOT_RUN
+  identity_dial_cyan_accents: NOT_RUN
+  identity_compact_friendly_proportions: NOT_RUN
+  identity_orb_present_when_composition_supports_it: NOT_RUN
   identity_floating_size: NOT_RUN
   minimized_portrait_reads_as_van: NOT_RUN
+  launcher_icon_reads_as_van: NOT_RUN
+
+  # Character optical integrity.
+  character_solid_on_light_background: NOT_RUN
+  character_solid_on_dark_background: NOT_RUN
+  character_solid_on_busy_background: NOT_RUN
+  visor_transparency_does_not_glassify_face_or_body: NOT_RUN
+  hair_skin_eyes_clothing_effectively_opaque: NOT_RUN
+
+  # Character motion and public Rive contract behaviour.
   gaze_finger_drag: NOT_RUN
   blink_cadence: NOT_RUN
   real_speech_articulation: NOT_RUN
   hello_wave_first_session: NOT_RUN
   waiting_for_owner_pose: NOT_RUN
   urgent_on_hermes_offline: NOT_RUN
-  workboard_resize_no_freeze_or_clip: NOT_RUN
-  aura_character_coexist_no_double_glow: NOT_RUN
+  listening_thinking_working_transition: NOT_RUN
+  character_motion_continues_with_board_open: NOT_RUN
   idle_five_minutes_no_visible_loop: NOT_RUN
   mixed_soak_thirty_minutes: NOT_RUN
+
+  # Aura / living electrical field. Aura must remain Android-native, detached and alive.
+  aura_character_coexist_no_double_glow: NOT_RUN
+  aura_visibly_detached_from_body: NOT_RUN
+  aura_wavy_continuous_advection_30s: NOT_RUN
+  electrical_life_visible_without_strobing: NOT_RUN
+  aura_remains_alive_with_workboard_open: NOT_RUN
+
+  # Floating workboard and owner-control interaction.
+  baby_cyan_workboard_glass_readable: NOT_RUN
+  single_tap_opens_board: NOT_RUN
+  single_tap_on_van_closes_board: NOT_RUN
+  double_tap_opens_command_centre: NOT_RUN
+  board_scroll_does_not_move_van: NOT_RUN
+  board_expand_maximize_collapse: NOT_RUN
+  workboard_resize_no_freeze_or_clip: NOT_RUN
+  long_press_controls_execute: NOT_RUN
+  minimize_produces_live_van_face: NOT_RUN
+  minimized_tap_restores_van: NOT_RUN
+  drag_shows_dismiss_target_and_drop_closes: NOT_RUN
+
+  # Truthful live owner surfaces.
+  typed_chat_dispatches_harmless_real_owner_command: NOT_RUN
+  voice_transcript_uses_same_command_lifecycle: NOT_RUN
+  decisions_tasks_projects_systems_interactive_and_truthful: NOT_RUN
+
 thermal_note: null
+
 evidence:
   renderer_rive_active: null
+  identity_silver_white_swept_hair: null
+  identity_cyan_blue_transparent_visor: null
+  identity_medium_brown_skin: null
+  identity_blue_eyes: null
+  identity_black_white_technical_jacket: null
+  identity_charcoal_technical_underlayer: null
+  identity_dial_cyan_accents: null
+  identity_compact_friendly_proportions: null
+  identity_orb_present_when_composition_supports_it: null
   identity_floating_size: null
   minimized_portrait_reads_as_van: null
+  launcher_icon_reads_as_van: null
+  character_solid_on_light_background: null
+  character_solid_on_dark_background: null
+  character_solid_on_busy_background: null
+  visor_transparency_does_not_glassify_face_or_body: null
+  hair_skin_eyes_clothing_effectively_opaque: null
   gaze_finger_drag: null
   blink_cadence: null
   real_speech_articulation: null
   hello_wave_first_session: null
   waiting_for_owner_pose: null
   urgent_on_hermes_offline: null
-  workboard_resize_no_freeze_or_clip: null
-  aura_character_coexist_no_double_glow: null
+  listening_thinking_working_transition: null
+  character_motion_continues_with_board_open: null
   idle_five_minutes_no_visible_loop: null
   mixed_soak_thirty_minutes: null
+  aura_character_coexist_no_double_glow: null
+  aura_visibly_detached_from_body: null
+  aura_wavy_continuous_advection_30s: null
+  electrical_life_visible_without_strobing: null
+  aura_remains_alive_with_workboard_open: null
+  baby_cyan_workboard_glass_readable: null
+  single_tap_opens_board: null
+  single_tap_on_van_closes_board: null
+  double_tap_opens_command_centre: null
+  board_scroll_does_not_move_van: null
+  board_expand_maximize_collapse: null
+  workboard_resize_no_freeze_or_clip: null
+  long_press_controls_execute: null
+  minimize_produces_live_van_face: null
+  minimized_tap_restores_van: null
+  drag_shows_dismiss_target_and_drop_closes: null
+  typed_chat_dispatches_harmless_real_owner_command: null
+  voice_transcript_uses_same_command_lifecycle: null
+  decisions_tasks_projects_systems_interactive_and_truthful: null
