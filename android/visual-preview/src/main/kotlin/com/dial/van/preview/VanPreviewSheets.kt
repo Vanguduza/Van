@@ -901,8 +901,8 @@ object VanPreviewSheets {
     }
 
     /**
-     * Draws Van himself: owner art when the pose is packaged, otherwise the [VanScene] Canvas
-     * character. Both paths are what the app does, in the app's own order of preference.
+     * Draws the fail-closed interim [VanScene] Canvas character.
+     * Rejected owner-art bitmap poses are retired and are never selected by the app or evidence renderer.
      */
     private fun drawCharacter(
         g: Graphics2D,
