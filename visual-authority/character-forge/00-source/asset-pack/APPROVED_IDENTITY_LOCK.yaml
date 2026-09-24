@@ -13,7 +13,7 @@ identity:
     dark_hair_forbidden: true
   skin:
     family: medium_brown
-    canonical_token: "#B8853C"
+    canonical_token: "#A4654E"
     observed_board_range: ["#9C614E", "#AF6C50"]
     render_delta_e2000_max: 8
     light_peach_family_forbidden: true
