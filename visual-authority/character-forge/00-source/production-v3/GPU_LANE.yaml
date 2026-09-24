@@ -15,7 +15,7 @@ gpu_worker:
     code_license: Apache-2.0
   model_weights:
     production_status: BLOCKED_PENDING_LICENSE_AND_HASH_LOCK
-    required_fields: [name, source, sha256, license, approved_by, approved_at]
+    required_fields: [name, source, path, sha256, license, approved_by, approved_at]
 stretchy_studio:
   repository: MangoLion/stretchystudio
   commit: 24a83a27ba43e43e9d2e3de5e33994594e6199c2
