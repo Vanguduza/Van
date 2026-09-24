@@ -167,3 +167,51 @@ The bootstrap lives under:
 `deploy/character-forge/bootstrap-production-v3.sh`
 
 No M1–M5 milestone may be marked complete solely because these files exist.
+
+
+## Bootstrap commands
+
+After this branch is merged, bootstrap the exact merged revision on the Netcup DIAL-control VM:
+
+```bash
+cd /path/to/Van
+export VAN_COMMIT_SHA="$(git rev-parse HEAD)"
+sudo -E ./deploy/character-forge/bootstrap-netcup-authoring.sh
+```
+
+The base bootstrap now invokes `bootstrap-production-v3.sh` by default. Set
+`CHARACTER_FORGE_ENABLE_PRODUCTION_V3=0` only for recovery/diagnostic runs.
+
+The resulting controller exposes:
+
+```text
+van-character-forge-v3
+Stretchy Studio: http://127.0.0.1:5173
+state/lock: /var/lib/dial-character-forge/production-v3.lock.json
+GPU job outbox: /var/lib/dial-character-forge/gpu-outbox
+GPU result inbox: /var/lib/dial-character-forge/gpu-inbox
+```
+
+A GPU worker is bootstrapped separately:
+
+```bash
+sudo CHARACTER_FORGE_WEIGHT_LOCK=/etc/van-character-forge/see-through-weights.lock.yaml \
+  ./deploy/character-forge/bootstrap-gpu-worker-v3.sh
+```
+
+Production mode refuses to start until the weight lock is `CLEARED` and every configured
+checkpoint exists locally and matches its exact SHA-256. Use the checked-in weight-lock template
+as the starting point.
+
+### High-resolution master workflow
+
+1. Use the committed `van_canonical_reference_2x.png` as the exact 3072×2048 comparison reference.
+2. Recreate/commission a genuinely detailed master from the canonical character.
+3. Stage it with `van-character-forge-v3 master stage`.
+4. Review every item in `HIGHRES_MASTER_APPROVAL_TEMPLATE.yaml`.
+5. Only an exact owner-approved SHA may be promoted to `01-master-approved/van_master_highres.png`.
+6. Semantic decomposition and rig proposal begin only after that promotion.
+
+The exact 2× reference is intentionally not described as adding detail; its receipt records
+`adds_new_identity_detail: false`. This prevents an interpolation upscale from being confused with
+a genuinely authored high-resolution master.
