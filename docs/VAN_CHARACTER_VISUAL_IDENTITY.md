@@ -6,7 +6,7 @@ Status: LOCKED CANONICAL
 
 - Silver/white swept hair (never dark hair)
 - Cyan/blue transparent visor
-- Medium-brown skin
+- Medium-brown skin; canonical sampled token `#A4654E` (ΔE2000 tolerance ≤ 8)
 - Blue eyes
 - Black/white technical jacket
 - Charcoal technical underlayer
