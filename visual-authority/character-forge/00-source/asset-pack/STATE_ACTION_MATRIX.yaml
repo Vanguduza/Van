@@ -57,12 +57,13 @@ actions:
   CONFIRM: {code: 10, duration_ms: 900, producer: "verified success"}
   SHRUG: {code: 11, duration_ms: 1100, producer: "degraded/unverifiable/partial outcome"}
   PRESENT_CARD: {code: 12, duration_ms: 1500, producer: "mission result summary ready"}
-  OPEN_PANEL: {code: 13, duration_ms: 240, producer: "overlay expanded"}
-  CLOSE_PANEL: {code: 14, duration_ms: 240, producer: "overlay collapsed"}
+  OPEN_PANEL: {code: 13, duration_ms: 600, producer: "overlay expanded", android_chrome_reference_ms: 240}
+  CLOSE_PANEL: {code: 14, duration_ms: 600, producer: "overlay collapsed", android_chrome_reference_ms: 240}
 action_rules:
   min_ms: 600
   max_ms: 1800
-  panel_actions_exception_uses_existing_standard_motion_ms: 240
+  panel_rive_actions_follow_character_forge_range: true
+  android_chrome_transition_timing_is_separate: true
   anticipation_main_return_required: true
   return_to_underlying_state: true
   mouth_continues_when_speaking: true
