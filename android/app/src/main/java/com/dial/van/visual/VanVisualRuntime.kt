@@ -5,7 +5,7 @@ enum class VanRenderer {
     /** Authored `van.riv` artboard. Still EXTERNAL work — never assumed present. */
     RIVE,
 
-    /** Owner-supplied bitmap poses cut from the design boards. */
+    /** Retired legacy bitmap rung. Kept only for binary/source compatibility; decide() never selects it. */
     OWNER_ART,
 
     /** Procedural Canvas character — last-resort interim embodiment. */
@@ -64,13 +64,15 @@ object VanVisualRuntime {
             !riveRuntimeAvailable -> VanCanvasReason.RUNTIME_UNAVAILABLE
             else -> return VanRenderDecision(VanRenderer.RIVE, VanCanvasReason.NOT_APPLICABLE)
         }
-        val renderer = if (ownerArtAvailable) VanRenderer.OWNER_ART else VanRenderer.CANVAS
-        return VanRenderDecision(renderer, reason)
+        // Rejected/low-resolution owner-art bitmaps are deliberately retired. Even if an old
+        // caller claims they are available, fail closed to the approved Canvas identity until
+        // an accepted Rive asset loads.
+        return VanRenderDecision(VanRenderer.CANVAS, reason)
     }
 
     fun describe(decision: VanRenderDecision): String = when (decision.renderer) {
         VanRenderer.RIVE -> "Rive artboard active"
-        VanRenderer.OWNER_ART -> "Owner art poses — ${describe(decision.reason)}"
+        VanRenderer.OWNER_ART -> "Retired owner-art renderer (must never be selected) — ${describe(decision.reason)}"
         VanRenderer.CANVAS -> "Interim Canvas Van — ${describe(decision.reason)}"
     }
 
