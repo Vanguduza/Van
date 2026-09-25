@@ -2,7 +2,7 @@
   "pack": "VAN-CHARACTER-FORGE-DP-R2",
   "baseline_sha": "3c337efe91faa8461dd28b1f18a26cf346a1b66f",
   "build_ready": false,
-  "current_stage": "admission",
+  "current_stage": "vector",
   "rive_authored": false,
   "rive_contract_ready": true,
   "rive_runtime_ready": true,
@@ -29,11 +29,10 @@
   "blockers": [
     "SOURCE_SET_NOT_ADMITTED",
     "OWNER_SOURCE_CONFIRMATION_PENDING",
-    "LAYER_ARTIFACT_MISSING",
     "RIVE_ASSET_MISSING",
     "S24_DEVICE_GATES_NOT_RUN"
   ],
-  "next_action": "Run source admission/owner confirmation if pending, then proceed to M1/M2 with the pinned Netcup toolchain.",
+  "next_action": "Owner: cli source admit, then cli owner confirm-source (M0 is the only open M1 blocker); then build the M2 core rig from the admitted raster layer set",
   "production": {
     "emulator_validation": "NOT_RUN",
     "ci_run": null,

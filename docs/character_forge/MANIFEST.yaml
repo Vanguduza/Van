@@ -8,8 +8,77 @@ source_roots:
 - docs/VAN_CHARACTER_VISUAL_IDENTITY.md
 - docs/VAN_VISUAL_ACCEPTANCE_MATRIX.md
 sources: []
-artifacts: []
-reviews: {}
+artifacts:
+- artifact_id: layer_raster_set:67af011894d53660293ef2c60388ef45acf1a839eb2fe7f49f61f2554e0d0b1c
+  kind: layer_raster_set
+  path: visual-authority/character-forge/06-raster-clean/candidate_b_front/LAYERS.json
+  sha256: 67af011894d53660293ef2c60388ef45acf1a839eb2fe7f49f61f2554e0d0b1c
+  stage: vector
+  promotion: CANDIDATE
+  produced_by: artist:claude-code-build_raster_layers
+  decision: CF-D-09
+  inputs: []
+  layer_files:
+    hair_back: 03effddde2104a4167caefeab915d53be0b24bf5ff6a7d30ec0d139c2f74c523
+    jacket_back: 46c366412e88872733abc2240d593f4e7fce6e9788c6547f83a685969460199c
+    underlayer: eb070714c6d45e5e44a108049984cb3f576cd33a241ef9c5f06c2b36404ff905
+    leg_l_upper: 502d72b578f4f4e09785231f72cd2325e90aa554a18c5ece326b700c315a3387
+    leg_l_lower: d7cc7f3bc76e19c50e3d04d3e71f1a7a996edafeb13cb146c0def681df870acb
+    boot_l: 730c77a615c01fb5830fe969093741cc8820f308032be08824ff3bd6f0af229f
+    leg_r_upper: f46b90b71e2f0225e27e139b9fd350c7eb22ae62646ba9abd29abca95635b434
+    leg_r_lower: 9f2c763bece85c581961ab577a943d5f739eb9853883730b38710619cacbb78d
+    boot_r: 87f8143c7951a77c46ff9fa339e89138097a4f8073ab94ebe609a1fd2f61dcf2
+    neck: 097db3ecf5d6e73d862b9ad087bbe3bd52161271dc4f1c288e3c8bcf3ffff169
+    jacket: 080847d46b26f9a7d9b824422941f71b3c84ac95c5eee6ff7550bbb85d96a16c
+    arm_l_upper: d8ff64b4d8d5d324ca43cbcc926bf95fc77f65c38b0b207c36ecaff90f9ca5bf
+    arm_l_fore: 5e2b5547ff4ae85e45daa6d590516a4570cdae188c138213dae70c82f620026d
+    hand_l: 048b011b04c67d6ab40250be1cf34b1780ef6b4d73e1ccc5c16b34e3c60d247d
+    arm_r_upper: 6d7a3f5415bec0e77c2202d3319bd06958bdb4ae4b1dcd279f5fe250620f93bd
+    arm_r_fore: 0e27121e6805c2f7e825fefc75adfa47ce4c54dea5d6a2c9ad2be74cb465fe7e
+    hand_r: f27f7668bedb8fd42f80dbfbd86bf1a931f026eef972f6c05403909435c6289f
+    face: 9fb09f5c00a2342c8f32cffcdc722d500f6f85d9b0199a311fec9f0b29312772
+    sclera_l: 6d7f4e03df2bfee8f478968d57c04b6244760f0672bef82e07a078fecbda44cf
+    eye_l: 7fa4fa86e7735d737b6f04e4c5fe60a4ba87fc25f6644a010a60b54d23394818
+    lid_l: bfd082d33bb602b762e5d7d9a550a3f5345bd98bd80a645f1fe162954f45a82e
+    sclera_r: 9be9a50c7ca02978b3131833177e98ed75e3c4e58dc5cc0b73c98a97ca9862b7
+    eye_r: 9881cb50840d99d61553d5ae597cb33f2ad4ea850e6b56e36db1de65564bba78
+    lid_r: 1eb86bffc97413a4b145e15e16dcc7aa8fb860b404915967f716cef726a02737
+    brow_l: 791bed432cd431119dfac63b66629cbad4369eae5adce1da9dae8099608f03c9
+    brow_r: 87aa5888087970002f65226fdd2ae1e539b0a8e0f0a65bef4da5d40370f55fa3
+    mouth: 03418c7e1b7c596453c1de674335cf111e4cb2c45c5e0bd5659cfc6d4da019ba
+    visor_lens: 49457ef52f88699fe6b2b35c79e001b383ce09d88f564b16a0dfa69a6a57ada2
+    visor_frame: bfcdfde3ad5a982a571918e798e66d5d50d772ff7c6df0bb09803ee97cb24586
+    hair: 19801c2ecc3320ed3d2c6304f60287e4351f1e04c97efbe9294c38f8db355779
+    orb_shell: d29b4b067a3fd7b220c80ac3066c8003532f1b58da9cd02165febdf96dafedf9
+    orb_core: 8d5ca4e812b9b255068051188ae5f07695234da98d014e47fddf1f5dd9f8953a
+  lint:
+    path: /home/user/Van/visual-authority/character-forge/06-raster-clean/candidate_b_front
+    ok: true
+    findings: []
+    metrics:
+      layers: 32
+      drawn: 32
+      canvas_px:
+      - 593
+      - 593
+      underlap_fill_pixels:
+        big-lama: 60357
+        lens_tint: 2999
+        sclera_white: 1083
+        skin_rim: 646
+      recomposite_max_error_outside_lens: 0
+      recomposite_lens_pixels_over_8: 21
+      recomposite_lens_max_error: 19
+      head_count: 3.174
+reviews:
+  layer_raster_set:
+    sha256: 67af011894d53660293ef2c60388ef45acf1a839eb2fe7f49f61f2554e0d0b1c
+    reviewed_by: owner
+    date: '2026-09-25'
+    verdict: PASS
+    notes: Owner accepted the CF-D-09-HYBRID raster layer set ('Accepted', Claude
+      Code session 2026-09-25) after the layer sheet, pose and eye tests; recording
+      authorised by the owner in the same session.
 receipts:
 - command: tools import-lock
   actor: claude-code:netcup-bootstrap-2026-09-24
@@ -21,6 +90,53 @@ receipts:
   - inkscape=1.2.2
   timestamp: '2026-09-24T22:50:06.711630+00:00'
   reason: Qualified Netcup authoring toolchain imported into repository authority
+- command: layers admit
+  actor: owner-authorised:claude-code
+  inputs:
+  - 67af011894d53660293ef2c60388ef45acf1a839eb2fe7f49f61f2554e0d0b1c
+  outputs:
+  - 03418c7e1b7c596453c1de674335cf111e4cb2c45c5e0bd5659cfc6d4da019ba
+  - 03effddde2104a4167caefeab915d53be0b24bf5ff6a7d30ec0d139c2f74c523
+  - 048b011b04c67d6ab40250be1cf34b1780ef6b4d73e1ccc5c16b34e3c60d247d
+  - 080847d46b26f9a7d9b824422941f71b3c84ac95c5eee6ff7550bbb85d96a16c
+  - 097db3ecf5d6e73d862b9ad087bbe3bd52161271dc4f1c288e3c8bcf3ffff169
+  - 0e27121e6805c2f7e825fefc75adfa47ce4c54dea5d6a2c9ad2be74cb465fe7e
+  - 19801c2ecc3320ed3d2c6304f60287e4351f1e04c97efbe9294c38f8db355779
+  - 1eb86bffc97413a4b145e15e16dcc7aa8fb860b404915967f716cef726a02737
+  - 46c366412e88872733abc2240d593f4e7fce6e9788c6547f83a685969460199c
+  - 49457ef52f88699fe6b2b35c79e001b383ce09d88f564b16a0dfa69a6a57ada2
+  - 502d72b578f4f4e09785231f72cd2325e90aa554a18c5ece326b700c315a3387
+  - 5e2b5547ff4ae85e45daa6d590516a4570cdae188c138213dae70c82f620026d
+  - 6d7a3f5415bec0e77c2202d3319bd06958bdb4ae4b1dcd279f5fe250620f93bd
+  - 6d7f4e03df2bfee8f478968d57c04b6244760f0672bef82e07a078fecbda44cf
+  - 730c77a615c01fb5830fe969093741cc8820f308032be08824ff3bd6f0af229f
+  - 791bed432cd431119dfac63b66629cbad4369eae5adce1da9dae8099608f03c9
+  - 7fa4fa86e7735d737b6f04e4c5fe60a4ba87fc25f6644a010a60b54d23394818
+  - 87aa5888087970002f65226fdd2ae1e539b0a8e0f0a65bef4da5d40370f55fa3
+  - 87f8143c7951a77c46ff9fa339e89138097a4f8073ab94ebe609a1fd2f61dcf2
+  - 8d5ca4e812b9b255068051188ae5f07695234da98d014e47fddf1f5dd9f8953a
+  - 9881cb50840d99d61553d5ae597cb33f2ad4ea850e6b56e36db1de65564bba78
+  - 9be9a50c7ca02978b3131833177e98ed75e3c4e58dc5cc0b73c98a97ca9862b7
+  - 9f2c763bece85c581961ab577a943d5f739eb9853883730b38710619cacbb78d
+  - 9fb09f5c00a2342c8f32cffcdc722d500f6f85d9b0199a311fec9f0b29312772
+  - bfcdfde3ad5a982a571918e798e66d5d50d772ff7c6df0bb09803ee97cb24586
+  - bfd082d33bb602b762e5d7d9a550a3f5345bd98bd80a645f1fe162954f45a82e
+  - d29b4b067a3fd7b220c80ac3066c8003532f1b58da9cd02165febdf96dafedf9
+  - d7cc7f3bc76e19c50e3d04d3e71f1a7a996edafeb13cb146c0def681df870acb
+  - d8ff64b4d8d5d324ca43cbcc926bf95fc77f65c38b0b207c36ecaff90f9ca5bf
+  - eb070714c6d45e5e44a108049984cb3f576cd33a241ef9c5f06c2b36404ff905
+  - f27f7668bedb8fd42f80dbfbd86bf1a931f026eef972f6c05403909435c6289f
+  - f46b90b71e2f0225e27e139b9fd350c7eb22ae62646ba9abd29abca95635b434
+  timestamp: '2026-09-25T06:34:34.627137+00:00'
+  reason: lint-clean raster layer set admitted under CF-D-09
+- command: review raster
+  actor: owner-authorised:claude-code
+  inputs:
+  - 67af011894d53660293ef2c60388ef45acf1a839eb2fe7f49f61f2554e0d0b1c
+  outputs:
+  - PASS
+  timestamp: '2026-09-25T06:35:47.089849+00:00'
+  reason: review by owner on 2026-09-25
 ci_evidence: {}
 decisions:
 - id: CF-D-02-REV2_1
@@ -184,11 +300,11 @@ decisions:
   authority: owner
   decision: 'The first raster layer set was judged bad by the owner (misassigned eyes,
     brows and goggle pixels; smeared fill in hidden regions). Owner instruction 2026-09-25:
-    ''do a hybrid of option 1 and 2'' - (1) cut the face parts, sleeves and torso on
-    hand-placed geometry measured on the approved cut-out rather than on the blockout,
+    ''do a hybrid of option 1 and 2'' - (1) cut the face parts, sleeves and torso
+    on hand-placed geometry measured on the approved cut-out rather than on the blockout,
     and (2) paint the hidden regions of each layer with an AI inpainting model (big-lama,
-    pinned by SHA-256 in TOOLS.yaml) from that layer''s own pixels. Visible pixels stay
-    Candidate B''s own; the neutral pose must still recompose to the source. The AI
-    fill is labelled per layer in LAYERS.json and cached with its model hash in 02-ai-working.
-    A human-painted layer set remains the route to final quality.'
+    pinned by SHA-256 in TOOLS.yaml) from that layer''s own pixels. Visible pixels
+    stay Candidate B''s own; the neutral pose must still recompose to the source.
+    The AI fill is labelled per layer in LAYERS.json and cached with its model hash
+    in 02-ai-working. A human-painted layer set remains the route to final quality.'
   milestone_effect: RASTER_UNDERLAP_MAY_BE_AI_PAINTED

@@ -1,9 +1,11 @@
 # Character Forge gate hand-off — what is ready, and what only the owner or a device can supply
 
-Status on 2026-09-24: **no gate is promoted.** `python -m tools.character_forge.cli status` reports
-`current_stage: admission` with blockers `SOURCE_SET_NOT_ADMITTED`,
-`OWNER_SOURCE_CONFIRMATION_PENDING`, `LAYER_ARTIFACT_MISSING`,
-`RIVE_ASSET_MISSING` and `S24_DEVICE_GATES_NOT_RUN`.
+Status on 2026-09-25: **no gate is promoted.** `python -m tools.character_forge.cli status` reports
+`current_stage: vector` with blockers `SOURCE_SET_NOT_ADMITTED`,
+`OWNER_SOURCE_CONFIRMATION_PENDING`, `RIVE_ASSET_MISSING` and `S24_DEVICE_GATES_NOT_RUN`.
+The M1 layer artifact is admitted: the CF-D-09-HYBRID raster set
+(`06-raster-clean/candidate_b_front`, `layer_raster_set:67af0118…`), with the owner's PASS review
+recorded at the owner's instruction on 2026-09-25. `gate m1` now fails only on M0.
 
 The gates are designed so that nobody can pass them on someone else's behalf. The owner's
 verdicts, the owner's biometric acceptance, physical Galaxy S24 Ultra (SM-S928*) runs and an
