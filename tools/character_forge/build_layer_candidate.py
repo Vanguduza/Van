@@ -109,7 +109,12 @@ def _local(tag: str) -> str:
     return tag.rsplit("}", 1)[-1]
 
 
+SVG_NS = "http://www.w3.org/2000/svg"
+
+
 def load_blockout(path: Path = BLOCKOUT) -> list[Group]:
+    # Serialise SVG elements without an `ns0:` prefix, so a group's XML can be re-wrapped.
+    ET.register_namespace("", SVG_NS)
     root = ET.parse(path).getroot()
     groups = []
     for g in root:
@@ -151,6 +156,28 @@ def rasterise(group: Group) -> np.ndarray:
             else:
                 draw.line(p.points + p.points[:1], fill=255, width=width, joint="curve")
     return np.asarray(img) > 127
+
+
+#: The lint's floor for a layer's height is 0.5% of the artboard (5 units); lips drawn thinner
+#: than that are both refused and unriggable, so primitives get at least this much height.
+MIN_PRIMITIVE_HEIGHT = 6.0
+
+
+def _thicken(group: Group) -> str:
+    """The group's blockout XML, stretched about its centre to MIN_PRIMITIVE_HEIGHT if thinner."""
+    if group.mask is None or not group.mask.any():
+        return group.raw
+    ys = np.nonzero(group.mask.any(axis=1))[0]
+    height = float(ys.max() + 1 - ys.min())
+    if height >= MIN_PRIMITIVE_HEIGHT:
+        return group.raw
+    k = MIN_PRIMITIVE_HEIGHT / max(height, 1.0)
+    centre = (ys.max() + 1 + ys.min()) / 2.0
+    inner = group.raw.split(">", 1)[1].rsplit("</g>", 1)[0]
+    # On each shape rather than a wrapper group: the lint refuses a group without an id.
+    transform = f'transform="matrix(1,0,0,{k:.4g},0,{centre * (1 - k):.4g})" '
+    inner = re.sub(r"<(path|ellipse) ", lambda m: f"<{m.group(1)} {transform}", inner)
+    return f'<g id="{group.gid}">{inner}</g>'
 
 
 def load_source(path: Path = SOURCE) -> tuple[np.ndarray, np.ndarray]:
@@ -424,7 +451,7 @@ def build(out: Path, *, label_png: Path | None = None) -> dict:
             report[g.gid] = {"source": "traced", **params,
                              "paths": _cost(paths)[0], "numeric_nodes": _cost(paths)[1]}
         elif g.raw:
-            body.append(g.raw)
+            body.append(_thicken(g))
             report[g.gid] = {"source": "blockout_primitive"}
         else:
             # An added layer with nothing to hold (an arm segment with no cyan stripe) stays in

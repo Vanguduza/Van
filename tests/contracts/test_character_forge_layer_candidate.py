@@ -62,3 +62,14 @@ def test_it_writes_a_lane_candidate_and_says_so() -> None:
     assert builder.OUT_DIR.name == "05-vectors-candidate"
     text = (Path(builder.__file__)).read_text(encoding="utf-8")
     assert "vectors admit" in text and "06-vectors-clean" not in text.split('"""', 2)[2]
+
+
+def test_thin_blockout_lips_are_given_riggable_height(candidate) -> None:
+    # The blockout's lips are 3.4 units tall; Inkscape's geometry lint refuses anything under
+    # 5 (NOISE_BOUNDS), and a lip with no thickness cannot carry a viseme.
+    out, _ = candidate
+    root = ET.parse(out).getroot()
+    for gid in ("mouth_upper", "mouth_lower"):
+        group = next(g for g in root if g.attrib.get("id") == gid)
+        shapes = list(group)
+        assert shapes and all("matrix(1,0,0," in s.attrib.get("transform", "") for s in shapes)
