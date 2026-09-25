@@ -164,9 +164,15 @@ class VanHermesSessionManager(
         .pingInterval(HeartbeatPolicy.ACTIVE_INTERVAL_MS, TimeUnit.MILLISECONDS)
         .connectTimeout(15, TimeUnit.SECONDS)
         .readTimeout(0, TimeUnit.MILLISECONDS) // a WebSocket is supposed to be idle
-        // Direct mutual-TLS link: pinned gateway CA and this phone's client certificate.
-        .apply { gateway.tlsTransport()?.let { (factory, trust) -> sslSocketFactory(factory, trust) } }
         .build()
+
+    /**
+     * The client for a socket to [url]. On the direct mutual-TLS endpoint: the pinned gateway
+     * CA and this phone's client certificate. Anywhere else: platform trust. Derived from
+     * [http], so both share one connection pool and dispatcher.
+     */
+    private fun clientFor(url: String): OkHttpClient =
+        gateway.tlsTransport(url)?.let { (factory, trust) -> http.newBuilder().sslSocketFactory(factory, trust).build() } ?: http
 
     /**
      * Submit owner work over the session.
@@ -402,8 +408,9 @@ class VanHermesSessionManager(
             )
         }
         val sessionId = _state.value.vanSessionId ?: return
-        val request = Request.Builder().url(gateway.sessionSocketUrl(sessionId)).build()
-        socket = http.newWebSocket(request, Listener())
+        val socketUrl = gateway.sessionSocketUrl(sessionId)
+        val request = Request.Builder().url(socketUrl).build()
+        socket = clientFor(socketUrl).newWebSocket(request, Listener())
         publish(SupervisorState.PRIMARY_CONNECTING)
     }
 

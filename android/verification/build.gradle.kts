@@ -215,6 +215,10 @@ sourceSets {
             // because the Keystore key cannot be handed to a library; if a byte is wrong the
             // gateway refuses the request and the phone never gets onto the direct link.
             "com/dial/van/security/Pkcs10.kt",
+            // Which connections the pinned CA and client certificate apply to. Wrong in one
+            // direction it strands a phone on an older route; in the other it sends the
+            // client certificate somewhere it was never meant to go.
+            "com/dial/van/security/MutualTlsScope.kt",
             // The Android design system's pure half (docs/design/VAN_PRODUCT_DESIGN_DNA.md).
             // Screen-state reduction, density-tier and motion arithmetic, the domain→colour-role
             // mapping and the chart-axis math have no Compose or Android imports, so — same

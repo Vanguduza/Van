@@ -13,6 +13,7 @@ import com.dial.van.dialdev.DialDevChange
 import com.dial.van.dialdev.DialDevSse
 import com.dial.van.security.DeviceProofSigner
 import com.dial.van.security.MutualTlsIdentity
+import com.dial.van.security.MutualTlsScope
 import com.dial.van.security.OwnerDeviceIdentity
 import com.dial.van.security.OwnerApprovalKeyManager
 import com.dial.van.security.OwnerAuthorityToken
@@ -84,14 +85,18 @@ class VanGatewayClient(context: Context) {
      */
     private fun open(url: String): HttpURLConnection {
         val conn = URL(url).openConnection() as HttpURLConnection
-        if (conn is HttpsURLConnection) {
+        if (conn is HttpsURLConnection && MutualTlsScope.applies(BuildConfig.VAN_GATEWAY_BASE_URL, url)) {
             mtls.socketFactory()?.let { (factory, _) -> conn.sslSocketFactory = factory }
         }
         return conn
     }
 
-    /** Socket factory + pinned trust for the session WebSocket, or null without a pinned CA. */
-    fun tlsTransport(): Pair<SSLSocketFactory, X509TrustManager>? = mtls.socketFactory()
+    /**
+     * Socket factory + pinned trust for a session WebSocket to [url]: only when [url] is the
+     * direct mutual-TLS endpoint this build pins, otherwise null (platform trust).
+     */
+    fun tlsTransport(url: String): Pair<SSLSocketFactory, X509TrustManager>? =
+        if (MutualTlsScope.applies(BuildConfig.VAN_GATEWAY_BASE_URL, url)) mtls.socketFactory() else null
 
     /**
      * Hold a current client certificate for the direct mutual-TLS link: enrol on first use,
@@ -101,6 +106,7 @@ class VanGatewayClient(context: Context) {
      */
     fun ensureTlsIdentity() {
         if (!mtls.isConfigured || mtls.hasUsableCertificate()) return
+        if (!MutualTlsScope.applies(BuildConfig.VAN_GATEWAY_BASE_URL, baseUrl)) return  // not on the direct link
         val device = deviceId?.takeIf { it.isNotBlank() } ?: return
         val answer = postProved(TLS_CERTIFICATE_PATH, JSONObject().put("csr_pem", mtls.certificateRequestPem(device)))
         mtls.storeCertificate(answer.getString("certificate_pem"))
