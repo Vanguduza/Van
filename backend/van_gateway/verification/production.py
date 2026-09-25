@@ -145,16 +145,17 @@ def _jev_readback_observation(jev: Any):
                 "evidence_ref": f"jev-module://{module_id}",
             }
         if kind == "global":
-            operation = str(postconditions.get("operation") or "").strip().lower()
             project_id = str(postconditions.get("project_id") or "").strip() or None
             observed = await jev.status()
             global_state = observed.get("global") or {}
-            result = {"kind": "global", "operation": operation, "project_id": project_id}
+            result = {"kind": "global", "project_id": project_id}
             if project_id:
                 result["project_enabled"] = bool((global_state.get("projects") or {}).get(project_id, True))
             else:
-                result["owner_active"] = bool(global_state.get("owner_active", True))
-                result["bypassed"] = bool(global_state.get("bypassed", False))
+                if "owner_active" in postconditions:
+                    result["owner_active"] = bool(global_state.get("owner_active", True))
+                if "bypassed" in postconditions:
+                    result["bypassed"] = bool(global_state.get("bypassed", False))
             result["evidence_ref"] = "jev-global://control"
             return result
         raise ValueError("unknown Jev readback contract")
