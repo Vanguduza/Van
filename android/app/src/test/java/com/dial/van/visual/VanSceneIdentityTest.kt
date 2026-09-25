@@ -134,23 +134,19 @@ class VanSceneIdentityTest {
     }
 
     @Test
-    fun offlineAndDegradedDesaturateWithoutFadingTheCharacter() {
+    fun theCharacterIsAlwaysOpaqueAndInFullColour() {
+        // Owner direction (2026-09-25): offline desaturation made VAN read as grey and
+        // see-through like his aura. State lives in the aura, ring and copy, never in VAN.
         val idle = VanStatusPalette.forState(VanDurableState.IDLE)
         val offline = VanStatusPalette.forState(VanDurableState.OFFLINE)
         val degraded = VanStatusPalette.forState(VanDurableState.DEGRADED)
         val urgent = VanStatusPalette.forState(VanDurableState.URGENT)
 
-        assertTrue("offline must be the most muted", offline.desaturation > degraded.desaturation)
         VanDurableState.entries.forEach { state ->
-            assertEquals(
-                "$state must keep the character optically solid",
-                1f,
-                VanStatusPalette.forState(state).dim,
-                0.0001f,
-            )
+            val palette = VanStatusPalette.forState(state)
+            assertEquals("$state must keep the character optically solid", 1f, palette.dim, 0.0001f)
+            assertEquals("$state must keep the character in full colour", 0f, palette.desaturation, 0.0001f)
         }
-        assertEquals("idle is never muted", 0f, idle.desaturation)
-        assertEquals("urgent must not look drained", 0f, urgent.desaturation)
         assertNotEquals("offline and degraded need different ring accents", offline.accent, degraded.accent)
         assertNotEquals("degraded and urgent need different ring accents", degraded.accent, urgent.accent)
         assertNotEquals("urgent must not reuse the calm ring", idle.ringStyle, urgent.ringStyle)

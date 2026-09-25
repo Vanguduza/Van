@@ -57,6 +57,8 @@ class FloatingOverlayService : Service(), LifecycleOwner, SavedStateRegistryOwne
     private var tradeRefreshTick by mutableStateOf(0)
 
     private var visibility by mutableStateOf(OverlayVisibility())
+    /** Where VAN and any open board sit in the window ([WorkboardPlacement]). */
+    private var overlayLayout by mutableStateOf(WorkboardPlacement.resting(0, 0, 1))
 
     /** Broadcast parsing is isolated; the service owns lifecycle state and policy. */
     private val screenReceiver = OverlayScreenStateReceiver(::setScreenOn)
@@ -80,10 +82,8 @@ class FloatingOverlayService : Service(), LifecycleOwner, SavedStateRegistryOwne
         val measuredHeight = overlayView.height.takeIf { it > 0 } ?: dp(180)
         val safeY = (keyboardTopPx - measuredHeight - dp(12)).coerceAtLeast(0)
         if (layoutParams.y <= safeY) return
-        layoutParams.y = safeY
-        uiState = uiState.copy(yPx = safeY)
-        runCatching { windowManager.updateViewLayout(overlayView, layoutParams) }
-        persistState()
+        // uiState holds VAN's position; the window (VAN and his board) moves up with him.
+        updateUiState(uiState.copy(yPx = uiState.yPx - (layoutParams.y - safeY)))
     }
 
     private fun setScreenOn(on: Boolean) {
@@ -140,9 +140,8 @@ class FloatingOverlayService : Service(), LifecycleOwner, SavedStateRegistryOwne
             PixelFormat.TRANSLUCENT,
         ).apply {
             gravity = Gravity.TOP or Gravity.START
-            x = uiState.xPx
-            y = uiState.yPx
         }
+        overlayLayout = placement().also { layoutParams.x = it.windowX; layoutParams.y = it.windowY }
         applyBackdropBlur()
 
         overlayView = ComposeView(this).apply {
@@ -214,8 +213,6 @@ class FloatingOverlayService : Service(), LifecycleOwner, SavedStateRegistryOwne
      */
     @Composable
     private fun OverlayContent() {
-        val metrics = resources.displayMetrics
-        val density = metrics.density
         // One gesture chain for every presentation, so dragging VAN feels the same whatever
         // it happens to be showing.
         val gestures = remember { Modifier.vanGestures() }
@@ -245,10 +242,7 @@ class FloatingOverlayService : Service(), LifecycleOwner, SavedStateRegistryOwne
                 tradeRefreshTick = tradeRefreshTick,
                 animate = OverlayVisibilityPolicy.shouldAnimate(visibility),
                 blurBehindActive = blurBehindActive,
-                maximizedWidthDp = metrics.widthPixels / density -
-                    OverlayTheme.MAXIMIZED_HORIZONTAL_MARGIN_DP * 2,
-                maximizedHeightDp = metrics.heightPixels / density *
-                    OverlayTheme.MAXIMIZED_HEIGHT_FRACTION,
+                layout = overlayLayout,
             ),
             actions = actions,
         )
@@ -315,24 +309,30 @@ class FloatingOverlayService : Service(), LifecycleOwner, SavedStateRegistryOwne
     private fun updateUiState(next: VanOverlayUiState) {
         uiState = next
         if (::layoutParams.isInitialized && ::overlayView.isInitialized) {
+            overlayLayout = placement().also { layoutParams.x = it.windowX; layoutParams.y = it.windowY }
             updateWindowFlags()
             persistState()
         }
     }
 
+    /** VAN at uiState's position, with the board for the current presentation beside him. */
+    private fun placement(): WorkboardLayout = resources.displayMetrics.let {
+        WorkboardPlacement.forPresentation(
+            uiState.presentation, uiState.quickControls == VanQuickControlsState.VISIBLE,
+            uiState.xPx, uiState.yPx, OverlayScreen(it.widthPixels, it.heightPixels), ::dp,
+        )
+    }
+
     private fun beginDrag() = updateUiState(dragController.begin(uiState))
 
     private fun dragBy(dx: Int, dy: Int) {
-        // Assigned directly rather than through updateUiState: that also writes the window
-        // position, and the drag has just written it.
+        // Not through updateUiState: that also writes the window position, which the drag just did.
         uiState = dragController.drag(uiState, dx, dy)
     }
 
     private fun finishDrag() {
-        dragController.finish(uiState, reducedMotion = isReducedMotion())?.let(::updateUiState)
+        dragController.finish(uiState, reducedMotion = systemReducedMotionEnabled())?.let(::updateUiState)
     }
-
-    private fun isReducedMotion(): Boolean = systemReducedMotionEnabled()
 
     private fun cancelDrag() = updateUiState(dragController.cancel(uiState))
 

@@ -8,6 +8,8 @@ import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.ColumnScope
+import androidx.compose.foundation.layout.ExperimentalLayoutApi
+import androidx.compose.foundation.layout.FlowRow
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxSize
@@ -81,7 +83,7 @@ internal fun ColumnScope.TradesWorkboardPanel(
         )
     }
     Column(modifier = Modifier.fillMaxWidth().weight(1f)) {
-        Row(horizontalArrangement = Arrangement.spacedBy(5.dp), verticalAlignment = Alignment.CenterVertically) {
+        ChipFlow {
             TradeView.entries.forEach { candidate ->
                 WorkChip(candidate.label, accent) { onView(candidate) }
             }
@@ -214,6 +216,22 @@ internal fun WorkChip(label: String, accent: Int, onClick: () -> Unit) {
     ) {
         Text(label, color = Color(0xFFF4FCFF), fontSize = 10.sp, fontWeight = FontWeight.SemiBold)
     }
+}
+
+
+/**
+ * A board's chips, wrapping onto a second line rather than running past its edge: a board
+ * is as narrow as the room beside VAN, and a chip clipped by the glass is a chip nobody can
+ * press.
+ */
+@OptIn(ExperimentalLayoutApi::class)
+@Composable
+internal fun ChipFlow(content: @Composable () -> Unit) {
+    FlowRow(
+        modifier = Modifier.fillMaxWidth(),
+        horizontalArrangement = Arrangement.spacedBy(5.dp),
+        verticalArrangement = Arrangement.spacedBy(5.dp),
+    ) { content() }
 }
 
 

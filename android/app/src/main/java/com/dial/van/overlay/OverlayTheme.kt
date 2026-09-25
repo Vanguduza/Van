@@ -11,7 +11,30 @@ object OverlayTheme {
 
     /** Full floating VAN and living field. */
     const val RESTING_HIT_DP: Int = 184
-    const val RESTING_AVATAR_DP: Int = 96
+
+    /**
+     * VAN's own box inside [RESTING_HIT_DP]: his whole body, head to shoes (owner direction,
+     * 2026-09-25 — floating VAN was cut off at the chest). The rest is his aura.
+     */
+    const val RESTING_AVATAR_DP: Int = 172
+
+    /**
+     * The part of the resting box that is VAN himself, orb and hand included, and so the
+     * only part that takes his drag and tap. A workboard may use the rest of the box.
+     */
+    const val FLOATING_BODY_WIDTH_DP: Int = 96
+    const val FLOATING_BODY_HEIGHT_DP: Int = 160
+
+    /** Board placement: kept this far from VAN's body and from the screen edge. */
+    const val WORKBOARD_GAP_DP: Int = 6
+    const val WORKBOARD_MARGIN_DP: Int = 8
+
+    /** The narrowest a workboard is still useful at. */
+    const val WORKBOARD_MIN_WIDTH_DP: Int = 240
+
+    /** Quick controls open beside VAN like a board. */
+    const val QUICK_CONTROLS_WIDTH_DP: Int = 176
+    const val QUICK_CONTROLS_HEIGHT_DP: Int = 232
 
     /** Workboard sizing. Height is bounded by presentation, content remains scrollable. */
     const val COMPACT_WIDTH_DP: Int = 300

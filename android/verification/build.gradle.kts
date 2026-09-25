@@ -111,6 +111,8 @@ sourceSets {
             "com/dial/van/overlay/OverlayDragController.kt",
             "com/dial/van/overlay/VanOverlayController.kt",
             "com/dial/van/overlay/VanOverlayInteraction.kt",
+            // Where a workboard opens beside VAN (owner direction, 2026-09-25).
+            "com/dial/van/overlay/WorkboardPlacement.kt",
             // Replaces CommandModule.kt/CommandCentreNav.kt (P3-AND-009's flat 17-module
             // grid) — the typed DNA §4 route registry and the pure nav model built on it:
             // process-death restoration, legacy-intent/deep-link resolution, and the

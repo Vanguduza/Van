@@ -4,15 +4,11 @@ import androidx.compose.foundation.combinedClickable
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
-import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
-import androidx.compose.foundation.layout.offset
 import androidx.compose.foundation.layout.padding
-import androidx.compose.foundation.layout.size
-import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.rememberScrollState
@@ -29,11 +25,7 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import com.dial.van.VanApplication
 import com.dial.van.trading.TradingCommandCentreActivity
-import com.dial.van.visual.VanEmbodiment
 import com.dial.van.visual.VanGlassSurface
-import com.dial.van.visual.VanPresentation
-import com.dial.van.visual.VanVisualState
-import com.dial.van.visual.rememberVanEffectBudget
 
 /**
  * The three workboard presentations: compact, expanded and maximized.
@@ -49,29 +41,21 @@ internal fun CompactWorkboard(
     state: VanOverlaySurfaceState,
     actions: VanOverlayActions,
     app: VanApplication,
-    visualState: VanVisualState,
     glass: com.dial.van.visual.VanGlassStyle,
     caption: String,
     healthLine: String?,
     accent: Int,
     latestMessage: String?,
 ) {
-    val budget = rememberVanEffectBudget()
-    Box(
-        modifier = Modifier
-            .width(OverlayTheme.COMPACT_WIDTH_DP.dp)
-            .height(OverlayTheme.COMPACT_HEIGHT_DP.dp),
-    ) {
+    Box(modifier = Modifier.fillMaxSize()) {
         VanGlassSurface(
             style = glass,
-            modifier = Modifier
-                .fillMaxSize()
-                .padding(top = 22.dp),
+            modifier = Modifier.fillMaxSize(),
         ) {
             Column(
                 modifier = Modifier
                     .fillMaxSize()
-                    .padding(start = 102.dp, end = 10.dp, top = 12.dp, bottom = 8.dp),
+                    .padding(start = 12.dp, end = 10.dp, top = 12.dp, bottom = 8.dp),
                 verticalArrangement = Arrangement.spacedBy(5.dp),
             ) {
                 Text(caption, color = Color(accent), fontSize = 12.sp, fontWeight = FontWeight.SemiBold)
@@ -84,12 +68,10 @@ internal fun CompactWorkboard(
                 if (state.workboardMode == VanWorkboardMode.CHAT) {
                     ChatComposer(app, accent, compact = true, draft = state.chatDraft, onDraft = actions.onDraft)
                 } else {
-                    Row(horizontalArrangement = Arrangement.spacedBy(5.dp)) {
+                    ChipFlow {
                         WorkChip("Chat", accent) { actions.onChat(false) }
                         WorkChip("Voice", accent) { actions.onVoice() }
                         WorkChip("More", accent) { actions.onPresentation(VanOverlayPresentation.WORKBOARD_EXPANDED) }
-                    }
-                    Row(horizontalArrangement = Arrangement.spacedBy(5.dp)) {
                         WorkChip("Projects", accent) { actions.onCommandCentre("projects") }
                         WorkChip("Tasks", accent) { actions.onCommandCentre("tasks") }
                         WorkChip("Decisions", accent) { actions.onCommandCentre("decisions") }
@@ -97,18 +79,6 @@ internal fun CompactWorkboard(
                 }
             }
         }
-
-        VanEmbodiment(
-            animate = state.animate,
-            state = visualState,
-            budget = budget,
-            presentation = VanPresentation.COMPACT,
-            modifier = Modifier
-                .size(OverlayTheme.RESTING_HIT_DP.dp)
-                .offset(x = (-42).dp, y = (-2).dp)
-                .then(actions.gestures),
-            characterFraction = 0.55f,
-        )
         Text(
             "Expand",
             color = Color(0xFFBDEFFF),
@@ -128,7 +98,6 @@ internal fun ExpandedWorkboard(
     state: VanOverlaySurfaceState,
     actions: VanOverlayActions,
     app: VanApplication,
-    visualState: VanVisualState,
     glass: com.dial.van.visual.VanGlassStyle,
     headline: String,
     caption: String,
@@ -136,28 +105,21 @@ internal fun ExpandedWorkboard(
     accent: Int,
     messages: List<com.dial.van.control.VanConversationMessage>,
 ) {
-    val budget = rememberVanEffectBudget()
-    Box(
-        modifier = Modifier
-            .width(OverlayTheme.EXPANDED_WIDTH_DP.dp)
-            .height(OverlayTheme.EXPANDED_HEIGHT_DP.dp),
-    ) {
+    Box(modifier = Modifier.fillMaxSize()) {
         VanGlassSurface(
             style = glass,
-            modifier = Modifier
-                .fillMaxSize()
-                .padding(top = 20.dp),
+            modifier = Modifier.fillMaxSize(),
         ) {
             Column(
                 modifier = Modifier
                     .fillMaxSize()
-                    .padding(start = 104.dp, end = 12.dp, top = 12.dp, bottom = 10.dp),
+                    .padding(start = 12.dp, end = 12.dp, top = 12.dp, bottom = 10.dp),
             ) {
                 Text(headline, color = Color(accent), fontSize = 14.sp, fontWeight = FontWeight.Bold)
                 Text(caption, color = Color(0xFFF4FCFF), fontSize = 11.sp, maxLines = 2)
                 Text(systemLine, color = Color(0xFFB8CBD2), fontSize = 10.sp, maxLines = 1)
                 Spacer(Modifier.height(6.dp))
-                Row(horizontalArrangement = Arrangement.spacedBy(5.dp)) {
+                ChipFlow {
                     WorkChip("Chat", accent) { actions.onChat(true) }
                     WorkChip("Voice", accent) { actions.onVoice() }
                     WorkChip("Trades", accent) { actions.onWorkboardMode(VanWorkboardMode.TRADES) }
@@ -210,18 +172,6 @@ internal fun ExpandedWorkboard(
                 }
             }
         }
-
-        VanEmbodiment(
-            animate = state.animate,
-            state = visualState,
-            budget = budget,
-            presentation = VanPresentation.EXPANDED,
-            modifier = Modifier
-                .size(OverlayTheme.RESTING_HIT_DP.dp)
-                .offset(x = (-40).dp, y = (-4).dp)
-                .then(actions.gestures),
-            characterFraction = 0.55f,
-        )
     }
 }
 
@@ -230,33 +180,24 @@ internal fun MaximizedWorkboard(
     state: VanOverlaySurfaceState,
     actions: VanOverlayActions,
     app: VanApplication,
-    visualState: VanVisualState,
     glass: com.dial.van.visual.VanGlassStyle,
     headline: String,
     systemLine: String,
     accent: Int,
     messages: List<com.dial.van.control.VanConversationMessage>,
 ) {
-    val budget = rememberVanEffectBudget()
-    // Measured by the service, which is the thing that owns a window. A composable reaching
-    // into the display metrics is exactly the coupling this split removes.
-    val widthDp = state.maximizedWidthDp
-    val heightDp = state.maximizedHeightDp
-    Box(
-        modifier = Modifier
-            .width(widthDp.dp)
-            .height(heightDp.dp),
-    ) {
-        VanGlassSurface(style = glass, modifier = Modifier.fillMaxSize().padding(top = 18.dp)) {
+    // Sized by the placement the service measured, like every board: the outer Box fills it.
+    Box(modifier = Modifier.fillMaxSize()) {
+        VanGlassSurface(style = glass, modifier = Modifier.fillMaxSize()) {
             Column(
                 modifier = Modifier
                     .fillMaxSize()
-                    .padding(start = 106.dp, end = 14.dp, top = 14.dp, bottom = 12.dp),
+                    .padding(start = 14.dp, end = 14.dp, top = 14.dp, bottom = 12.dp),
             ) {
                 Text("Van • $headline", color = Color(accent), fontSize = 15.sp, fontWeight = FontWeight.Bold)
                 Text(systemLine, color = Color(0xFFB8CBD2), fontSize = 10.sp)
                 Spacer(Modifier.height(6.dp))
-                Row(horizontalArrangement = Arrangement.spacedBy(5.dp)) {
+                ChipFlow {
                     WorkChip("Chat", accent) { actions.onWorkboardMode(VanWorkboardMode.CHAT) }
                     WorkChip("Voice", accent) { actions.onVoice() }
                     WorkChip("Trades", accent) {
@@ -277,16 +218,5 @@ internal fun MaximizedWorkboard(
                 ChatComposer(app, accent, compact = false, draft = state.chatDraft, onDraft = actions.onDraft)
             }
         }
-        VanEmbodiment(
-            animate = state.animate,
-            state = visualState,
-            budget = budget,
-            presentation = VanPresentation.EXPANDED,
-            modifier = Modifier
-                .size(OverlayTheme.RESTING_HIT_DP.dp)
-                .offset(x = (-38).dp, y = (-5).dp)
-                .then(actions.gestures),
-            characterFraction = 0.55f,
-        )
     }
 }

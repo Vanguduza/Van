@@ -35,8 +35,9 @@ class VanAuraGeometryTest {
 
     @Test
     fun `the old proportional gap is the 5 point 3 dp the audit measured`() {
-        // Stated rather than assumed: the fraction that shipped, at the size that shipped.
-        val avatarDp = OverlayTheme.RESTING_AVATAR_DP.toFloat()
+        // Stated rather than assumed: the fraction that shipped, at the size that shipped
+        // then (96 dp, before floating VAN became full body at the owner's direction).
+        val avatarDp = 96f
         val legacy = avatarDp * VanBodyExclusionProfile.LEGACY_GAP_FRACTION
         assertEquals(5.28f, legacy, 0.01f)
         assertTrue(legacy < VanBodyExclusionProfile.MIN_BODY_GAP_DP)
