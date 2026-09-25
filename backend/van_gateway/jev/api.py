@@ -24,6 +24,7 @@ class JevProjectionApi:
         self.router.add_api_route("/modules", self.modules, methods=["GET"])
         self.router.add_api_route("/modules/{module_id:path}", self.module, methods=["GET"])
         self.router.add_api_route("/activity", self.activity, methods=["GET"])
+        self.router.add_api_route("/performance", self.performance, methods=["GET"])
         self.router.add_api_route("/contribution", self.contribution, methods=["GET"])
 
     async def _call(self, fn):
@@ -59,7 +60,14 @@ class JevProjectionApi:
         project_id: str = Query(default="van", min_length=1, max_length=128),
         limit: int = Query(default=100, ge=1, le=500),
     ) -> dict:
-        return await self._call(lambda: self.client.outcomes(project_id=project_id, limit=limit))
+        return await self._call(lambda: self.client.activity(project_id=project_id, limit=limit))
+
+    async def performance(
+        self,
+        project_id: str = Query(default="van", min_length=1, max_length=128),
+        module_id: str | None = Query(default=None, max_length=256),
+    ) -> dict:
+        return await self._call(lambda: self.client.performance(project_id=project_id, module_id=module_id))
 
     async def contribution(
         self,
