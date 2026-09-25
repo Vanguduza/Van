@@ -114,6 +114,18 @@ class JevProjectionClient:
             params["module_id"] = module_id
         return await self._get("/v1/evaluation/proposals", params)
 
+    async def evaluation_reviews(self, *, proposal_id: str | None = None, limit: int = 100) -> dict:
+        params: dict[str, Any] = {"limit": limit}
+        if proposal_id:
+            params["proposal_id"] = proposal_id
+        return await self._get("/v1/evaluation/reviews", params)
+
+    async def evaluation_candidates(self, *, module_id: str | None = None, limit: int = 100) -> dict:
+        params: dict[str, Any] = {"limit": limit}
+        if module_id:
+            params["module_id"] = module_id
+        return await self._get("/v1/evaluation/candidates", params)
+
     async def transition_module(
         self, *, module_id: str, target_state: str, authority_ref: str,
         reason: str | None = None, owner_approved: bool = False,
