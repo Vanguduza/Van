@@ -307,6 +307,24 @@ class VanGatewayClient(context: Context) {
 
     suspend fun health(): JSONObject = withContext(Dispatchers.IO) { getJson("/health") }
 
+    suspend fun jevHealth(): JSONObject = withContext(Dispatchers.IO) { getJson("/v1/jev/health") }
+
+    suspend fun jevStatus(): JSONObject = withContext(Dispatchers.IO) { getJson("/v1/jev/status") }
+
+    suspend fun jevModules(): JSONObject = withContext(Dispatchers.IO) { getJson("/v1/jev/modules") }
+
+    suspend fun jevModule(moduleId: String): JSONObject = withContext(Dispatchers.IO) {
+        getJson("/v1/jev/modules/${encodeSegment(moduleId)}")
+    }
+
+    suspend fun jevActivity(projectId: String = "van", limit: Int = 100): JSONObject = withContext(Dispatchers.IO) {
+        getJson("/v1/jev/activity?project_id=${encodeQuery(projectId)}&limit=$limit")
+    }
+
+    suspend fun jevContribution(projectId: String, moduleId: String): JSONObject = withContext(Dispatchers.IO) {
+        getJson("/v1/jev/contribution?project_id=${encodeQuery(projectId)}&module_id=${encodeQuery(moduleId)}")
+    }
+
     suspend fun googleMesh(): JSONObject = withContext(Dispatchers.IO) { getJson("/v1/google/mesh") }
 
     suspend fun briefing(): JSONObject = withContext(Dispatchers.IO) { getJson("/v1/briefing") }
