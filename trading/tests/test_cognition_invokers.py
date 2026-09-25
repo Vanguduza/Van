@@ -281,7 +281,7 @@ def test_the_hermes_prompt_asks_for_only_the_assessment_json():
     assert "Optional Jev System-1 support" in prompt
     assert "jev_registered_batch" in prompt
     assert "authority_effect=NONE" in prompt or "subordinate evidence only" in prompt
-    assert "never an independent/background trading loop" in prompt
+    assert "Never call Jev as an independent/background trading loop" in prompt
 
 
 @pytest.mark.parametrize("text", [
