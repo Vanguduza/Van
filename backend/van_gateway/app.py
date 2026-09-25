@@ -589,7 +589,7 @@ def create_app() -> FastAPI:
     # the claimant writes. Built before the service because the service fails closed
     # without it.
     verifiers = build_mission_registry(
-        store=store, trading=trading, knowledge=owner_runtime.knowledge,
+        store=store, trading=trading, knowledge=owner_runtime.knowledge, jev=jev_projection.client,
     )
     # P1-AUTO-001 — the dispatcher was constructed with an empty observer map, so every
     # production run came back UNVERIFIABLE and owner_success could never be true; the
