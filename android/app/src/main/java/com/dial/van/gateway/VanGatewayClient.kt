@@ -341,6 +341,16 @@ class VanGatewayClient(context: Context) {
         getJson("/v1/jev/evaluation/proposals?limit=$limit$module")
     }
 
+    suspend fun jevEvaluationReviews(proposalId: String? = null, limit: Int = 100): JSONObject = withContext(Dispatchers.IO) {
+        val proposal = proposalId?.let { "&proposal_id=${encodeQuery(it)}" } ?: ""
+        getJson("/v1/jev/evaluation/reviews?limit=$limit$proposal")
+    }
+
+    suspend fun jevEvaluationCandidates(moduleId: String? = null, limit: Int = 100): JSONObject = withContext(Dispatchers.IO) {
+        val module = moduleId?.let { "&module_id=${encodeQuery(it)}" } ?: ""
+        getJson("/v1/jev/evaluation/candidates?limit=$limit$module")
+    }
+
     suspend fun googleMesh(): JSONObject = withContext(Dispatchers.IO) { getJson("/v1/google/mesh") }
 
     suspend fun briefing(): JSONObject = withContext(Dispatchers.IO) { getJson("/v1/briefing") }
