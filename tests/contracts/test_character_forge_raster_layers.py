@@ -91,3 +91,26 @@ def test_moving_layers_carry_underlap(built) -> None:
 
 def test_it_writes_only_to_the_raster_lane() -> None:
     assert raster.OUT_DIR.parent.name == "04-raster-layers"
+
+
+def test_the_lint_passes_the_built_set_and_catches_tampering(built, tmp_path) -> None:
+    import shutil
+
+    from tools.character_forge.raster_lint import lint_raster_set
+
+    out, _ = built
+    report = lint_raster_set(out)
+    assert report.ok, report.findings
+    assert report.metrics["recomposite_max_error_outside_lens"] == 0
+    tampered = tmp_path / "tampered"
+    shutil.copytree(out, tampered)
+    # The top layer, so the changed pixel is visible in the composite.
+    face = next(tampered.glob("*_orb_core.png"))
+    img = Image.open(face).convert("RGBA")
+    px = np.asarray(img).copy()
+    ys, xs = np.nonzero(px[..., 3] == 255)
+    px[ys[0], xs[0], :3] = 255 - px[ys[0], xs[0], :3]
+    Image.fromarray(px).save(face)
+    findings = lint_raster_set(tampered).findings
+    assert "LAYER_HASH_MISMATCH:orb_core" in findings
+    assert any(f.startswith("RECOMPOSITE_NOT_EXACT") for f in findings)

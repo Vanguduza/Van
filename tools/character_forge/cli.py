@@ -12,7 +12,7 @@ import urllib.request
 from pathlib import Path
 from typing import Any
 import yaml
-from .gates import evaluate
+from .gates import admitted_layer, decision_adopted, evaluate
 from .manifest import ROOT, append_receipt, dump_yaml, find_artifact, load_yaml, rel, sha256_file, source_records, source_tree_sha256, upsert_artifact
 from .receipts import now_iso, packaging_receipt, verify_owner_token
 from .status import load_status, save_status
@@ -30,6 +30,7 @@ VISUAL_ACCEPTANCE_MATRIX=ROOT/"docs"/"VAN_VISUAL_ACCEPTANCE_MATRIX.md"
 IDENTITY_LOCK=ROOT/"visual-authority"/"character-forge"/"00-source"/"asset-pack"/"APPROVED_IDENTITY_LOCK.yaml"
 BOOTSTRAP=ROOT/"deploy"/"character-forge"/"bootstrap-netcup-authoring.sh"
 RML_ROOT=WORKING_DIR/"rml"
+RASTER_CLEAN_DIR=ROOT/"visual-authority"/"character-forge"/"06-raster-clean"
 
 def _yaml(path:Path)->dict[str,Any]:
     if not path.is_file(): return {}
@@ -73,7 +74,7 @@ def _current_blockers(manifest:dict[str,Any], status:dict[str,Any])->list[str]:
     if not manifest.get("owner_confirmed_complete"): blockers.append("OWNER_SOURCE_CONFIRMATION_PENDING")
     if _pinned_tool("rive_cli") in {"","None","UNPINNED"}: blockers.append("RIVE_CLI_UNPINNED")
     if _pinned_tool("inkscape") in {"","None","UNPINNED"}: blockers.append("INKSCAPE_UNPINNED")
-    if not find_artifact(manifest,kind="layer_svg"): blockers.append("LAYER_ARTIFACT_MISSING")
+    if not admitted_layer(manifest): blockers.append("LAYER_ARTIFACT_MISSING")
     if not status.get("rive_asset_ready"): blockers.append("RIVE_ASSET_MISSING")
     if not status.get("device_qualified"): blockers.append("S24_DEVICE_GATES_NOT_RUN")
     return blockers
@@ -116,17 +117,54 @@ def cmd_vectors_admit(args):
     manifest=load_yaml(); status=load_status(); sha=sha256_file(svg)
     current=find_artifact(manifest,kind="layer_svg")
     output=VALIDATION_DIR/"layer_sheet.png"
-    if current and current.get("sha256")==sha and current.get("inkscape_version")==pinned and output.is_file():
+    if current and current is admitted_layer(manifest) and current.get("sha256")==sha and current.get("inkscape_version")==pinned and output.is_file():
         print("NO_CHANGE"); return 0
-    for previous in manifest.get("artifacts") or []:
-        if previous.get("kind")=="layer_svg" and previous.get("sha256")!=sha:
-            previous["promotion"]="SUPERSEDED"
+    _supersede_layers(manifest,keep=("layer_svg",sha))
     upsert_artifact(manifest,{"artifact_id":f"layer_svg:{sha}","kind":"layer_svg","path":rel(svg),"sha256":sha,"stage":"vector","promotion":"CANDIDATE","produced_by":f"artist:{args.artist}","inputs":[r["artifact_id"] for r in manifest.get("sources") or []],"lint":report.as_dict(),"inkscape_version":pinned})
     manifest.setdefault("reviews",{}).pop("layer_svg",None)
     render_layer_sheet(svg,output)
     latest=find_artifact(manifest,kind="layer_svg"); latest["layer_sheet_sha256"]=sha256_file(output)
     append_receipt(manifest,_receipt("vectors admit",[sha],[sha256_file(output)],args.actor,"lint-clean SVG rendered with pinned Inkscape"))
     status["current_stage"]="vector"; status["next_action"]="Independent reviewer/owner records MANIFEST.yaml reviews.layer_svg verdict PASS"; _save(manifest,status); return 0
+
+def _supersede_layers(manifest,*,keep):
+    """One M1 layer artifact is live at a time: admitting a layer SVG or raster set supersedes
+    every other one of either kind."""
+    for previous in manifest.get("artifacts") or []:
+        if previous.get("kind") in ("layer_svg","layer_raster_set") and (previous.get("kind"),previous.get("sha256"))!=keep:
+            previous["promotion"]="SUPERSEDED"
+
+def _raster_lint(directory:Path):
+    from .raster_lint import lint_raster_set  # numpy/Pillow: a forge-host dependency
+    return lint_raster_set(directory)
+
+def cmd_layers_lint(args):
+    report=_raster_lint(Path(args.directory)); print(json.dumps(report.as_dict(),indent=2)); return 0 if report.ok else 1
+
+def cmd_layers_admit(args):
+    """CF-D-09: admit a raster layer set cut from Candidate B's pixels as the M1 layer artifact."""
+    manifest=load_yaml()
+    if not decision_adopted(manifest,"CF-D-09"):
+        print("refused: raster layer sets need owner decision CF-D-09 ADOPTED in MANIFEST.yaml",file=sys.stderr); return 1
+    directory=Path(args.directory).resolve()
+    try: directory.relative_to(RASTER_CLEAN_DIR.resolve())
+    except ValueError:
+        print("refused: a raster layer set is admitted only from visual-authority/character-forge/06-raster-clean",file=sys.stderr); return 1
+    layers_json=directory/"LAYERS.json"
+    if not layers_json.is_file(): print("refused: LAYERS.json missing",file=sys.stderr); return 1
+    report=_raster_lint(directory)
+    if not report.ok: print(json.dumps(report.as_dict(),indent=2)); return 1
+    status=load_status(); sha=sha256_file(layers_json)
+    current=find_artifact(manifest,kind="layer_raster_set",sha256=sha)
+    if current and current is admitted_layer(manifest): print("NO_CHANGE"); return 0
+    _supersede_layers(manifest,keep=("layer_raster_set",sha))
+    layer_files={row["name"]:row["sha256"] for row in json.loads(layers_json.read_text(encoding="utf-8")).get("layers") or [] if not row.get("empty")}
+    upsert_artifact(manifest,{"artifact_id":f"layer_raster_set:{sha}","kind":"layer_raster_set","path":rel(layers_json),"sha256":sha,"stage":"vector","promotion":"CANDIDATE","produced_by":f"artist:{args.artist}","decision":"CF-D-09","inputs":[r["artifact_id"] for r in manifest.get("sources") or []],"layer_files":layer_files,"lint":report.as_dict()})
+    manifest.setdefault("reviews",{}).pop("layer_raster_set",None)
+    append_receipt(manifest,_receipt("layers admit",[sha],sorted(layer_files.values()),args.actor,"lint-clean raster layer set admitted under CF-D-09"))
+    status["current_stage"]="vector"; status["blockers"]=_current_blockers(manifest,status)
+    status["next_action"]="Independent reviewer/owner records MANIFEST.yaml reviews.layer_raster_set verdict PASS"
+    _save(manifest,status); print(f"admitted layer_raster_set:{sha}"); return 0
 
 def _infer_stage(path,explicit):
     if explicit: return explicit
@@ -176,7 +214,7 @@ def cmd_tools_import_lock(args):
     return 0
 
 def cmd_rive_receipt(args):
-    candidate=Path(args.candidate).resolve(); stage=_infer_stage(candidate,args.stage); manifest=load_yaml(); layer=find_artifact(manifest,kind="layer_svg")
+    candidate=Path(args.candidate).resolve(); stage=_infer_stage(candidate,args.stage); manifest=load_yaml(); layer=admitted_layer(manifest)
     try: candidate.relative_to(WORKING_DIR.resolve())
     except ValueError:
         print("refused: Rive candidate must be under visual-authority/character-forge/09-rive-working",file=sys.stderr); return 1
@@ -226,8 +264,8 @@ def cmd_rive_stage(args):
     if not receipt or receipt.get("stage")!=stage: print("refused: matching packaging receipt missing",file=sys.stderr); return 1
     if receipt.get("candidate_path")!=rel(candidate): print("refused: receipt belongs to another candidate path",file=sys.stderr); return 1
     if receipt.get("contract_sha256")!=sha256_file(CONTRACT_PATH): print("refused: contract changed after Rive export",file=sys.stderr); return 1
-    layer=find_artifact(load_yaml(),kind="layer_svg")
-    if not layer or receipt.get("svg_sha256")!=layer.get("sha256"): print("refused: receipt references a superseded layer SVG",file=sys.stderr); return 1
+    layer=admitted_layer(load_yaml())
+    if not layer or receipt.get("svg_sha256")!=layer.get("sha256"): print("refused: receipt references a superseded layer artifact",file=sys.stderr); return 1
     if receipt.get("authoring_tool")!="rive_cli": print("refused: receipt authoring tool is not rive_cli",file=sys.stderr); return 1
     if receipt.get("authoring_version")!=_pinned_tool("rive_cli"): print("refused: receipt Rive CLI version no longer matches TOOLS.yaml",file=sys.stderr); return 1
     project=ROOT/str(receipt.get("source_project") or "")
@@ -254,7 +292,7 @@ def cmd_rive_stage(args):
     for target in (ANDROID_TEST_ASSETS,ANDROID_DEBUG_ASSETS):
         target.mkdir(parents=True,exist_ok=True); shutil.copyfile(candidate,target/"van_candidate.riv"); shutil.copyfile(CONTRACT_PATH,target/"rive_contract.json")
         (target/"forge_mode.txt").write_text(mode+"\n",encoding="utf-8"); (target/"forge_thresholds.json").write_text(json.dumps(threshold,indent=2)+"\n",encoding="utf-8")
-    manifest=load_yaml(); upsert_artifact(manifest,{"artifact_id":f"riv_candidate:{sha}","kind":"riv_candidate","path":rel(candidate),"sha256":sha,"stage":stage,"promotion":"CANDIDATE","produced_by":f"artist:{receipt.get('artist')}","inputs":[f"layer_svg:{receipt.get('svg_sha256')}",f"source:{receipt.get('contract_sha256')}"]})
+    manifest=load_yaml(); upsert_artifact(manifest,{"artifact_id":f"riv_candidate:{sha}","kind":"riv_candidate","path":rel(candidate),"sha256":sha,"stage":stage,"promotion":"CANDIDATE","produced_by":f"artist:{receipt.get('artist')}","inputs":[f"{layer.get('kind')}:{receipt.get('svg_sha256')}",f"source:{receipt.get('contract_sha256')}"]})
     append_receipt(manifest,_receipt("rive stage-candidate",[sha],[sha],args.actor)); status=load_status(); status["current_stage"]=stage; key="core_rig" if stage=="core_rig" else "full_rig"; status[key]["candidate_sha256"]=sha; status[key]["emulator_validation"]="NOT_RUN"; status[key]["ci_run"]=None
     if stage=="core_rig":status[key]["owner_verdict"]="NONE"
     else:status[key]["reviewed"]="NONE"
@@ -406,6 +444,15 @@ def cmd_review(args):
         if (manifest.get("reviews") or {}).get("layer_svg")==row: print("NO_CHANGE"); return 0
         manifest.setdefault("reviews",{})["layer_svg"]=row
         status["next_action"]="Build the M2 core rig" if args.verdict=="PASS" else "Artist revises the layer SVG"
+    elif args.target=="raster":
+        layer=admitted_layer(manifest)
+        if not layer or layer.get("kind")!="layer_raster_set": print("refused: no admitted raster layer set",file=sys.stderr); return 1
+        if _same_party(args.reviewer,layer.get("produced_by")):
+            print("refused: the raster layer set's author cannot review it",file=sys.stderr); return 1
+        row={"sha256":layer["sha256"],"reviewed_by":args.reviewer,"date":args.date,"verdict":args.verdict,"notes":args.notes or ""}
+        if (manifest.get("reviews") or {}).get("layer_raster_set")==row: print("NO_CHANGE"); return 0
+        manifest.setdefault("reviews",{})["layer_raster_set"]=row
+        status["next_action"]="Build the M2 core rig" if args.verdict=="PASS" else "Revise the raster layer set"
     else:
         sha=(status.get("full_rig") or {}).get("candidate_sha256")
         if not sha or (status.get("full_rig") or {}).get("emulator_validation")!="PASS":
@@ -622,10 +669,11 @@ def _parser():
     tools_cmd=sub.add_parser("tools").add_subparsers(dest="command",required=True); p=tools_cmd.add_parser("import-lock"); p.add_argument("--path",required=True); p.set_defaults(func=cmd_tools_import_lock)
     source=sub.add_parser("source").add_subparsers(dest="command",required=True); p=source.add_parser("admit"); p.set_defaults(func=cmd_source_admit)
     vectors=sub.add_parser("vectors").add_subparsers(dest="command",required=True); p=vectors.add_parser("lint"); p.add_argument("svg"); p.add_argument("--no-geometry",action="store_true",help=argparse.SUPPRESS); p.set_defaults(func=cmd_vectors_lint); p=vectors.add_parser("admit"); p.add_argument("svg"); p.add_argument("--artist",required=True); p.set_defaults(func=cmd_vectors_admit)
-    rive=sub.add_parser("rive").add_subparsers(dest="command",required=True); p=rive.add_parser("receipt"); p.add_argument("--candidate",required=True); p.add_argument("--stage",choices=["core_rig","full_rig"]); p.add_argument("--authoring-version",required=True); p.add_argument("--rive-file-id",required=True); p.add_argument("--rive-revision",required=True); p.add_argument("--svg-sha",required=True); p.add_argument("--source-project",required=True,help="RML project the candidate was built from"); p.add_argument("--artist",required=True); p.add_argument("--notes"); p.set_defaults(func=cmd_rive_receipt)
+    layers=sub.add_parser("layers").add_subparsers(dest="command",required=True); p=layers.add_parser("lint"); p.add_argument("directory"); p.set_defaults(func=cmd_layers_lint); p=layers.add_parser("admit"); p.add_argument("directory"); p.add_argument("--artist",required=True); p.set_defaults(func=cmd_layers_admit)
+    rive=sub.add_parser("rive").add_subparsers(dest="command",required=True); p=rive.add_parser("receipt"); p.add_argument("--candidate",required=True); p.add_argument("--stage",choices=["core_rig","full_rig"]); p.add_argument("--authoring-version",required=True); p.add_argument("--rive-file-id",required=True); p.add_argument("--rive-revision",required=True); p.add_argument("--svg-sha","--layer-sha",dest="svg_sha",required=True,help="SHA-256 of the admitted layer SVG or raster set LAYERS.json"); p.add_argument("--source-project",required=True,help="RML project the candidate was built from"); p.add_argument("--artist",required=True); p.add_argument("--notes"); p.set_defaults(func=cmd_rive_receipt)
     p=rive.add_parser("source-hash"); p.add_argument("project"); p.set_defaults(func=cmd_rive_source_hash); p=rive.add_parser("stage-candidate"); p.add_argument("riv"); p.add_argument("--stage",choices=["core_rig","full_rig"],required=True); p.set_defaults(func=cmd_rive_stage)
     p=rive.add_parser("record-validation"); p.add_argument("--stage",choices=["core_rig","full_rig","production"],required=True); p.add_argument("--result",choices=["PASS","FAIL"],required=True); p.add_argument("--ci-run",required=True); p.add_argument("--candidate-sha"); p.add_argument("--evidence-dir"); p.set_defaults(func=cmd_record_validation)
-    review=sub.add_parser("review").add_subparsers(dest="command",required=True); p=review.add_parser("record"); p.add_argument("--target",choices=["layer","full"],required=True); p.add_argument("--verdict",choices=["PASS","FAIL"],required=True); p.add_argument("--reviewer",required=True); p.add_argument("--date",required=True); p.add_argument("--notes"); p.set_defaults(func=cmd_review)
+    review=sub.add_parser("review").add_subparsers(dest="command",required=True); p=review.add_parser("record"); p.add_argument("--target",choices=["layer","raster","full"],required=True); p.add_argument("--verdict",choices=["PASS","FAIL"],required=True); p.add_argument("--reviewer",required=True); p.add_argument("--date",required=True); p.add_argument("--notes"); p.set_defaults(func=cmd_review)
     p=sub.add_parser("gate"); p.add_argument("gate",choices=["m0","m1","m2","m3","m4","m5"]); p.add_argument("--json",action="store_true"); p.set_defaults(func=cmd_gate)
     owner=sub.add_parser("owner").add_subparsers(dest="command",required=True); p=owner.add_parser("confirm-source"); p.add_argument("--confirm-complete",action="store_true"); p.add_argument("--date",required=True); p.set_defaults(func=cmd_confirm_source); p=owner.add_parser("record-core-verdict"); p.add_argument("--verdict",choices=["PASS","REVISE","REJECT"],required=True); p.add_argument("--notes"); p.add_argument("--ci-run",required=True); p.set_defaults(func=cmd_core_verdict); p=owner.add_parser("record-acceptance"); p.add_argument("--from-gateway",action="store_true"); p.add_argument("--gateway-url"); p.add_argument("--token"); p.add_argument("--device-public-key"); p.set_defaults(func=cmd_record_acceptance)
     android=sub.add_parser("android").add_subparsers(dest="command",required=True); p=android.add_parser("integrate"); p.add_argument("--candidate",required=True); p.set_defaults(func=cmd_integrate)
