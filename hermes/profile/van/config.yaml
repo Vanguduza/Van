@@ -61,6 +61,7 @@ skills:
     - trading-intelligence
     - automation-fabric
     - browser-intelligence
+    - jev-management
 
 bot:
   chat_spec: bot/BOT_CHAT.md
