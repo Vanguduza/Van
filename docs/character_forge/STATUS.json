@@ -11,7 +11,7 @@
   "owner_accepted": false,
   "qual_emb_01": "EXTERNAL_ARTEFACT",
   "core_rig": {
-    "candidate_sha256": "862fcf753f15eca74efe462ab783f8977ab9710c9321a561a0535ab942ff448c",
+    "candidate_sha256": "597e63d8993f30a4ee51729435e8d72de2bdabb90b66dc6e3e9194c04c1307a3",
     "emulator_validation": "NOT_RUN",
     "ci_run": null,
     "owner_verdict": "NONE"

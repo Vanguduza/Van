@@ -1,0 +1,17 @@
+{
+  "candidate_sha256": "597e63d8993f30a4ee51729435e8d72de2bdabb90b66dc6e3e9194c04c1307a3",
+  "candidate_path": "visual-authority/character-forge/09-rive-working/van_core_05.riv",
+  "stage": "core_rig",
+  "authoring_tool": "rive_cli",
+  "authoring_version": "1.1.1",
+  "rive_file_id": "LOCAL",
+  "rive_revision": "LOCAL",
+  "svg_sha256": "67af011894d53660293ef2c60388ef45acf1a839eb2fe7f49f61f2554e0d0b1c",
+  "contract_sha256": "67b0390f51fff92de165a439a519dc9ac1f1b18896ed722d0ac94b748b5ecef0",
+  "source_project": "visual-authority/character-forge/09-rive-working/rml/van_core",
+  "source_tree_sha256": "2d71ff51b0578f28fc9a440421a16f275ed8577fd78e02a810402c9103c53fcd",
+  "source_file_count": 40,
+  "artist": "claude-code-build_rive_core",
+  "exported_at": "2026-09-25T12:33:34.631167+00:00",
+  "notes": "Built on Netcup dial-control by the pinned Rive CLI 1.1.1 (rive <project> --once) from this RML at 1371abe. Supersedes van_core_04, which failed emulator validation: HELLO_WAVE read as IDLE (0.0031 <= 0.004) because a held action_code replayed the one-shot from rest. A held action_code now holds its gesture. Desktop renders with the code held, at 0.33 s to 4 s: wave 0.022, nod 0.011-0.012, point 0.023 against IDLE (floor 0.004)."
+}
