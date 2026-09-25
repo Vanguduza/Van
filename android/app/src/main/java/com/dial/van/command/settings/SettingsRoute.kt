@@ -199,6 +199,16 @@ fun SettingsRoute(
                                 )
                             },
                         ) { Text("Preview staged candidate") }
+                        Button(
+                            onClick = {
+                                context.startActivity(
+                                    Intent().setClassName(
+                                        context.packageName,
+                                        "com.dial.van.visual.VrmTestModelActivity",
+                                    ),
+                                )
+                            },
+                        ) { Text("Test model (VRM)") }
                     }
                 }
             }

@@ -8,5 +8,16 @@
             android:exported="false"
             android:label="VAN Rive candidate"
             android:theme="@style/Theme.Van" />
+        <!-- Owner test of a third-party VRM model in place of VAN (2026-09-25). Debug only:
+             the provider registers the renderer, so a release build never has one. -->
+        <provider
+            android:name=".visual.VrmTestInitProvider"
+            android:authorities="${applicationId}.vrmtest"
+            android:exported="false" />
+        <activity
+            android:name=".visual.VrmTestModelActivity"
+            android:exported="false"
+            android:label="VAN test model"
+            android:theme="@style/Theme.Van" />
     </application>
 </manifest>

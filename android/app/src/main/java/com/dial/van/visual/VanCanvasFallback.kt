@@ -67,6 +67,14 @@ fun VanAvatar(
     onSilhouette: (VanSilhouette?) -> Unit = {},
 ) {
     val context = LocalContext.current
+    // Debug builds only: an imported test model stands in for VAN (see VanTestModel).
+    val testModel = VanTestModel.renderer
+    var testModelFailed by remember { mutableStateOf(false) }
+    if (testModel != null && !testModelFailed && testModel.available(context)) {
+        LaunchedEffect(Unit) { onSilhouette(null) }
+        testModel.Render(state, presentation, modifier) { testModelFailed = true }
+        return
+    }
     var decision by remember(context) { mutableStateOf(resolveRenderer(context)) }
 
     LaunchedEffect(decision) { onDecision(decision) }

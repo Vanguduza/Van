@@ -77,3 +77,7 @@ android/verification/.kotlin/
 
 # Aura Rev 2 motion clips: CI evidence (van-visual-evidence artifact), not committed.
 artifacts/release/preview/motion/
+
+# Owner test models (VRM): imported on the device only, never committed (licences forbid
+# redistribution). See android/app/src/debug/java/com/dial/van/visual/VrmTestRenderer.kt.
+*.vrm
