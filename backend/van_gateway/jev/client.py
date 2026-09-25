@@ -82,8 +82,17 @@ class JevProjectionClient:
     async def module(self, module_id: str) -> dict:
         return await self._get(f"/v1/modules/{module_id}")
 
+    async def activity(self, *, project_id: str, limit: int = 100) -> dict:
+        return await self._get("/v1/activity", {"project_id": project_id, "limit": limit})
+
     async def outcomes(self, *, project_id: str, limit: int = 100) -> dict:
         return await self._get("/v1/outcomes", {"project_id": project_id, "limit": limit})
+
+    async def performance(self, *, project_id: str, module_id: str | None = None) -> dict:
+        params: dict[str, Any] = {"project_id": project_id}
+        if module_id:
+            params["module_id"] = module_id
+        return await self._get("/v1/performance", params)
 
     async def contribution(self, *, project_id: str, module_id: str) -> dict:
         return await self._get("/v1/contribution", {"project_id": project_id, "module_id": module_id})
