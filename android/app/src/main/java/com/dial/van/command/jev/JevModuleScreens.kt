@@ -68,8 +68,10 @@ internal fun Modules(modules: List<JevModule>, onSelect: (JevModule) -> Unit) {
 internal fun ModuleDetail(
     module: JevModule,
     contribution: JevContribution?,
+    safety: JevSafetySnapshot?,
     onBack: () -> Unit,
     onLoadContribution: () -> Unit,
+    onLoadSafety: () -> Unit,
     onTransition: (String) -> Unit,
 ) {
     val tokens = LocalVanTokens.current
@@ -108,6 +110,47 @@ internal fun ModuleDetail(
                     Button(onClick = { onTransition("ACTIVE") }) { Text("Active") }
                     OutlinedButton(onClick = { onTransition("DISABLED") }) { Text("Disable") }
                     OutlinedButton(onClick = { onTransition("BYPASSED") }) { Text("Bypass") }
+                }
+            }
+        }
+        item {
+            VanPanel {
+                SectionHeader(
+                    title = "Safety budgets",
+                    detail = "Deterministic quarantine guards for calibration, false raises, reviewer load and p99 latency.",
+                    trailing = {
+                        StatusChip(
+                            label = if (safety?.healthy == true) "HEALTHY" else if (safety == null) "UNKNOWN" else "BREACH",
+                            role = if (safety?.healthy == true) com.dial.van.design.StatusSemantics.ROLE_FAVOURABLE
+                            else if (safety == null) com.dial.van.design.StatusSemantics.ROLE_DISABLED
+                            else com.dial.van.design.StatusSemantics.ROLE_CRITICAL,
+                        )
+                    },
+                )
+                if (safety == null) {
+                    OutlinedButton(onClick = onLoadSafety) { Text("Load safety evidence") }
+                } else {
+                    Text("Trusted outcomes: ${safety.outcomeSamples}", style = tokens.type.body)
+                    safety.highConfidenceErrorRate?.let {
+                        Text("High-confidence error rate: %.2f%%".format(it * 100), style = tokens.type.body)
+                    }
+                    safety.falseRaiseRate?.let {
+                        Text("False-raise rate: %.2f%%".format(it * 100), style = tokens.type.body)
+                    }
+                    safety.reviewLoadPer100?.let {
+                        Text("Review load: %.1f / 100 outcomes".format(it), style = tokens.type.body)
+                    }
+                    if (safety.breaches.isEmpty()) {
+                        Text("No deterministic safety budget breach recorded.", style = tokens.type.body, color = tokens.color.textSecondary)
+                    } else {
+                        safety.breaches.forEach { breach ->
+                            Text(
+                                "${breach.code}: %.3f > %.3f (${breach.samples} samples)".format(breach.value, breach.threshold),
+                                style = tokens.type.label,
+                                color = tokens.color.statusEventRisk,
+                            )
+                        }
+                    }
                 }
             }
         }
