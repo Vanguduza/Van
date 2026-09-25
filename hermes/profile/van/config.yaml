@@ -1,4 +1,4 @@
-# Hermes profile metadata — VAN
+﻿# Hermes profile metadata â€” VAN
 # Profile name MUST remain exactly "van"
 
 profile: van
@@ -137,7 +137,7 @@ mcp_servers:
     timeout: 30
     supports_parallel_tool_calls: true
     tools:
-      include: [jev_registered_batch, jev_subordinate, jev_evaluation_packet, jev_status]
+      include: [jev_registered_batch, jev_subordinate, jev_evaluation_packet, jev_record_evaluation_proposal, jev_record_evaluation_review, jev_status]
       resources: false
       prompts: false
     authority: SUBORDINATE_JUDGMENT_EVIDENCE_NOT_AUTHORITY
