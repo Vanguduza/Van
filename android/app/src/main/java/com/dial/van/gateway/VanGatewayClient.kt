@@ -332,6 +332,10 @@ class VanGatewayClient(context: Context) {
         getJson("/v1/jev/contribution?project_id=${encodeQuery(projectId)}&module_id=${encodeQuery(moduleId)}")
     }
 
+    suspend fun jevSafety(projectId: String, moduleId: String): JSONObject = withContext(Dispatchers.IO) {
+        getJson("/v1/jev/safety?project_id=${encodeQuery(projectId)}&module_id=${encodeQuery(moduleId)}")
+    }
+
     suspend fun jevEvaluationPacket(projectId: String, moduleId: String): JSONObject = withContext(Dispatchers.IO) {
         getJson("/v1/jev/evaluation/packet?project_id=${encodeQuery(projectId)}&module_id=${encodeQuery(moduleId)}")
     }
