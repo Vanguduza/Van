@@ -68,6 +68,7 @@ fun JevControlRoute(app: VanApplication, onBack: () -> Unit) {
     var activityItems by remember { mutableStateOf<List<JevActivityItem>>(emptyList()) }
     var performance by remember { mutableStateOf<JevPerformance?>(null) }
     var selectedContribution by remember { mutableStateOf<JevContribution?>(null) }
+    var evaluationProposals by remember { mutableStateOf<List<JevEvaluationProposal>>(emptyList()) }
 
     fun refresh() {
         scope.launch {
@@ -81,6 +82,8 @@ fun JevControlRoute(app: VanApplication, onBack: () -> Unit) {
                     }
                 }
                 .onFailure { error = it.message ?: "Jev status unavailable" }
+            runCatching { repository.evaluationProposals(limit = 50) }
+                .onSuccess { evaluationProposals = it }
             loading = false
         }
     }
@@ -116,6 +119,19 @@ fun JevControlRoute(app: VanApplication, onBack: () -> Unit) {
             projectId = projectId,
             actionClass = "A4",
             noStaleReplay = true,
+        )
+    }
+
+    fun requestEvaluation(module: JevModule) {
+        app.commandController.submitText(
+            text = "Evaluate Jev marginal contribution for ${module.id} in project ${projectFor(module)}. " +
+                "Use the Jev evaluation packet, trusted downstream outcomes and non-Jev counterfactual baseline. " +
+                "Recommend only KEEP, RECALIBRATE, REVISE, DEMOTE, QUARANTINE, RETIRE or DETACH_GLOBAL. " +
+                "Do not mutate lifecycle state; record the proposal for independent review.",
+            source = VanCommandSource.SYSTEM,
+            projectId = projectFor(module),
+            actionClass = "A2",
+            noStaleReplay = false,
         )
     }
 
@@ -164,10 +180,17 @@ fun JevControlRoute(app: VanApplication, onBack: () -> Unit) {
                     selectedContribution = null
                 }
                 tabIndex == JevTab.ACTIVITY.ordinal -> Activity(activityProject, activityItems) { activityProject = it }
-                tabIndex == JevTab.VALUE.ordinal -> Value(snapshot!!.modules, performance, selectedContribution) { module ->
-                    selectedModule = module
-                    loadContribution(module)
-                }
+                tabIndex == JevTab.VALUE.ordinal -> Value(
+                    modules = snapshot!!.modules,
+                    performance = performance,
+                    contribution = selectedContribution,
+                    proposals = evaluationProposals,
+                    onSelect = { module ->
+                        selectedModule = module
+                        loadContribution(module)
+                    },
+                    onEvaluate = ::requestEvaluation,
+                )
                 else -> Controls(snapshot!!) { ownerCommand(it) }
             }
         }
@@ -429,7 +452,14 @@ private fun Activity(projectId: String, activity: List<JevActivityItem>, onProje
 }
 
 @Composable
-private fun Value(modules: List<JevModule>, performance: JevPerformance?, contribution: JevContribution?, onSelect: (JevModule) -> Unit) {
+private fun Value(
+    modules: List<JevModule>,
+    performance: JevPerformance?,
+    contribution: JevContribution?,
+    proposals: List<JevEvaluationProposal>,
+    onSelect: (JevModule) -> Unit,
+    onEvaluate: (JevModule) -> Unit,
+) {
     val tokens = LocalVanTokens.current
     LazyColumn(verticalArrangement = Arrangement.spacedBy(tokens.space.space2)) {
         item {
@@ -451,11 +481,70 @@ private fun Value(modules: List<JevModule>, performance: JevPerformance?, contri
                 }
             }
         }
+        item {
+            VanPanel {
+                SectionHeader(
+                    "Independent evaluator",
+                    "LLM proposals are advisory, provenance-bound and require independent review before any lifecycle change.",
+                )
+                if (proposals.isEmpty()) {
+                    Text(
+                        "No evaluator proposals recorded yet.",
+                        style = tokens.type.body,
+                        color = tokens.color.textSecondary,
+                    )
+                } else {
+                    proposals.take(8).forEach { proposal ->
+                        Row(
+                            modifier = Modifier.fillMaxWidth().padding(vertical = tokens.space.space1),
+                            horizontalArrangement = Arrangement.spacedBy(tokens.space.space2),
+                        ) {
+                            Column(modifier = Modifier.weight(1f)) {
+                                Text(proposal.moduleId, style = tokens.type.headline)
+                                Text(
+                                    proposal.rationale.take(180).ifBlank { "No rationale projected." },
+                                    style = tokens.type.label,
+                                    color = tokens.color.textSecondary,
+                                )
+                                Text(
+                                    "${proposal.proposerLineage} · ${proposal.proposedAt}",
+                                    style = tokens.type.label,
+                                    color = tokens.color.textTertiary,
+                                )
+                            }
+                            StatusChip(proposal.recommendation, statusRole(
+                                when (proposal.recommendation) {
+                                    "KEEP" -> "ACTIVE"
+                                    "QUARANTINE", "DETACH_GLOBAL" -> "QUARANTINED"
+                                    "DEMOTE", "RETIRE" -> "BYPASSED"
+                                    else -> "ADVISORY"
+                                }
+                            ))
+                        }
+                    }
+                }
+            }
+        }
         items(modules, key = { it.id }) { module ->
-            VanPanel(dense = true, modifier = Modifier.clickable { onSelect(module) }) {
+            VanPanel(dense = true) {
                 Row(modifier = Modifier.fillMaxWidth()) {
-                    Text(module.id, modifier = Modifier.weight(1f), style = tokens.type.body)
+                    Text(
+                        module.id,
+                        modifier = Modifier.weight(1f).clickable { onSelect(module) },
+                        style = tokens.type.body,
+                    )
                     StatusChip(module.status, statusRole(module.status))
+                }
+                Row(
+                    modifier = Modifier.fillMaxWidth().padding(top = tokens.space.space1),
+                    horizontalArrangement = Arrangement.spacedBy(tokens.space.space2),
+                ) {
+                    OutlinedButton(onClick = { onSelect(module) }, modifier = Modifier.weight(1f)) {
+                        Text("Inspect")
+                    }
+                    OutlinedButton(onClick = { onEvaluate(module) }, modifier = Modifier.weight(1f)) {
+                        Text("Evaluate value")
+                    }
                 }
             }
         }
