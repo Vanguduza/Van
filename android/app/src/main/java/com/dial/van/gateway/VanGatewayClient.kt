@@ -84,9 +84,16 @@ class VanGatewayClient(context: Context) {
      * trust and the client certificate when the build is configured for the direct link.
      */
     private fun open(url: String): HttpURLConnection {
+        val direct = MutualTlsScope.applies(BuildConfig.VAN_GATEWAY_BASE_URL, url)
+        val preEnrolment = MutualTlsScope.isPreEnrolment(url)
+        // Every other route on the direct link refuses a phone without a certificate, so
+        // enrol (or renew) first. Best effort: an unpaired or unbound phone cannot yet, and
+        // the gateway's 403 then says exactly that.
+        if (direct && !preEnrolment) runCatching { ensureTlsIdentity() }
         val conn = URL(url).openConnection() as HttpURLConnection
-        if (conn is HttpsURLConnection && MutualTlsScope.applies(BuildConfig.VAN_GATEWAY_BASE_URL, url)) {
-            mtls.socketFactory()?.let { (factory, _) -> conn.sslSocketFactory = factory }
+        if (conn is HttpsURLConnection && direct) {
+            val factory = if (preEnrolment) mtls.enrolmentSocketFactory() else mtls.socketFactory()?.first
+            factory?.let { conn.sslSocketFactory = it }
         }
         return conn
     }
@@ -104,6 +111,7 @@ class VanGatewayClient(context: Context) {
      * the build pins no CA or the phone is not paired yet. The request is proved with the
      * bound device key, and the certificate's key never leaves the Keystore.
      */
+    @Synchronized
     fun ensureTlsIdentity() {
         if (!mtls.isConfigured || mtls.hasUsableCertificate()) return
         if (!MutualTlsScope.applies(BuildConfig.VAN_GATEWAY_BASE_URL, baseUrl)) return  // not on the direct link
@@ -193,7 +201,12 @@ class VanGatewayClient(context: Context) {
      */
     var baseUrl: String
         get() {
-            val configured = prefs.getString(KEY_BASE, null)
+            val saved = prefs.getString(KEY_BASE, null)
+            val configured = MutualTlsScope.effectiveBaseUrl(saved, BuildConfig.VAN_GATEWAY_BASE_URL, mtls.isConfigured)
+            if (configured != null && configured != saved) {
+                // Upgraded onto a build that pins the direct link: move this phone over once.
+                prefs.edit().putString(KEY_BASE, configured).apply()
+            }
             return if (configured.isNullOrBlank()) {
                 defaultGatewayBaseUrl()
             } else {

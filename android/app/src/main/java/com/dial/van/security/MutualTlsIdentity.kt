@@ -57,18 +57,37 @@ class MutualTlsIdentity(context: Context) {
         }
     }
 
-    private val sslContext: SSLContext? by lazy {
+    /**
+     * The context that presents the client certificate. Rebuilt whenever the certificate
+     * changes, which also drops its TLS session cache: a session resumed from before
+     * enrolment would reach the gateway as a connection with no certificate.
+     */
+    @Volatile private var sslContext: SSLContext? = null
+
+    /** Pinned trust, never a certificate: pairing, bootstrap and certificate enrolment only. */
+    private val enrolmentContext: SSLContext? by lazy {
         val tm = trustManager ?: return@lazy null
-        SSLContext.getInstance("TLSv1.3").apply {
-            init(arrayOf<KeyManager>(KeystoreKeyManager()), arrayOf(tm), null)
+        SSLContext.getInstance("TLSv1.3").apply { init(null, arrayOf(tm), null) }
+    }
+
+    private fun certificateContext(): SSLContext? {
+        sslContext?.let { return it }
+        val tm = trustManager ?: return null
+        return synchronized(this) {
+            sslContext ?: SSLContext.getInstance("TLSv1.3").apply {
+                init(arrayOf<KeyManager>(KeystoreKeyManager()), arrayOf(tm), null)
+            }.also { sslContext = it }
         }
     }
 
-    /** Socket factory and the trust manager it pins, or null when the build has no CA. */
+    /** Socket factory that presents the client certificate, and its pinned trust; null without a CA. */
     fun socketFactory(): Pair<SSLSocketFactory, X509TrustManager>? {
-        val ctx = sslContext ?: return null
+        val ctx = certificateContext() ?: return null
         return ctx.socketFactory to trustManager!!
     }
+
+    /** Socket factory for the pre-enrolment routes: pinned trust, no certificate. */
+    fun enrolmentSocketFactory(): SSLSocketFactory? = enrolmentContext?.socketFactory
 
     /** True when a certificate for the current key is held and is not within [renewWithinMs] of expiry. */
     fun hasUsableCertificate(renewWithinMs: Long = RENEW_WITHIN_MS): Boolean {
@@ -94,11 +113,13 @@ class MutualTlsIdentity(context: Context) {
         val tmp = File(certFile.parentFile, "client.pem.tmp")
         tmp.writeText(certificatePem, StandardCharsets.US_ASCII)
         if (!tmp.renameTo(certFile)) error("mtls_certificate_store_failed")
+        sslContext = null  // next connection builds a fresh context with the new certificate
     }
 
     fun forget() {
         certFile.delete()
         runCatching { androidKeyStore().deleteEntry(KEY_ALIAS) }
+        sslContext = null
     }
 
     private fun currentCertificate(): X509Certificate? =

@@ -6,11 +6,22 @@ plugins {
 
 import java.util.Properties
 
-val vanGatewayBaseUrl = providers.gradleProperty("VAN_GATEWAY_BASE_URL")
+/*
+ * Where the app connects, and the CA it pins there. The committed default is
+ * android/van-gateway.properties, so every build (CI's debug APK included) ships configured
+ * for the direct mutual-TLS link. A VAN_GATEWAY_BASE_URL Gradle property or environment
+ * variable overrides it, and then the CA comes from the same override or not at all: the
+ * committed CA belongs to the committed address and must never be pinned on another one.
+ */
+val committedGateway = Properties().apply {
+    val file = rootProject.file("van-gateway.properties")
+    if (file.exists()) file.inputStream().use { load(it) }
+}
+val overriddenGatewayBaseUrl = providers.gradleProperty("VAN_GATEWAY_BASE_URL")
     .orElse(providers.environmentVariable("VAN_GATEWAY_BASE_URL"))
-    .orElse("")
-    .get()
-    .trim()
+    .orNull
+    ?.trim()
+val vanGatewayBaseUrl = (overriddenGatewayBaseUrl ?: committedGateway.getProperty("VAN_GATEWAY_BASE_URL", "")).trim()
 val escapedVanGatewayBaseUrl = vanGatewayBaseUrl
     .replace("\\", "\\\\")
     .replace("\"", "\\\"")
@@ -21,12 +32,20 @@ val escapedVanGatewayBaseUrl = vanGatewayBaseUrl
  * a Keystore-backed client certificate the gateway issues. Base64 so the PEM's newlines never
  * reach the generated Java source.
  */
-val vanGatewayCaPemB64 = providers.gradleProperty("VAN_GATEWAY_CA_PEM_B64")
-    .orElse(providers.environmentVariable("VAN_GATEWAY_CA_PEM_B64"))
-    .orElse("")
-    .get()
-    .trim()
+val vanGatewayCaPemB64 = (
+    if (overriddenGatewayBaseUrl != null) {
+        providers.gradleProperty("VAN_GATEWAY_CA_PEM_B64")
+            .orElse(providers.environmentVariable("VAN_GATEWAY_CA_PEM_B64"))
+            .orElse("")
+            .get()
+    } else {
+        committedGateway.getProperty("VAN_GATEWAY_CA_PEM_B64", "")
+    }
+).trim()
 require(vanGatewayCaPemB64.matches(Regex("^[A-Za-z0-9+/=]*$"))) { "VAN_GATEWAY_CA_PEM_B64 must be base64" }
+require(vanGatewayCaPemB64.isEmpty() || vanGatewayBaseUrl.startsWith("https://")) {
+    "VAN_GATEWAY_CA_PEM_B64 is set but VAN_GATEWAY_BASE_URL is not an https:// address to pin it on"
+}
 
 /*
  * ADR-RB-027 — the keys this build will accept a signed connectivity manifest from,

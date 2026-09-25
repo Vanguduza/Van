@@ -93,8 +93,11 @@ tools/runtime/install_van_gateway_service.sh
 tools/runtime/enable_van_mtls.sh --san IP:<public address>   # listens on 8443
 ```
 
-The last line it prints is the CA certificate, base64-encoded. It is public, and the app
-build needs it together with the base URL `https://<public address>:8443`. The CA key stays
+The last line it prints is the CA certificate, base64-encoded. It is public. The app pins
+it together with the base URL `https://<public address>:8443`; both are committed in
+`android/van-gateway.properties`, which every app build reads, so update that file whenever
+the CA or the address changes. An installed phone moves to the committed address on upgrade,
+keeping its device id and tokens. The CA key stays
 in `~/.local/share/van/mtls` (mode 0700) and is never printed. Revoke by device with
 `python -m van_gateway.mtls.pki revoke --dir ~/.local/share/van/mtls --device-id <id>`.
 

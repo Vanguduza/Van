@@ -64,3 +64,48 @@ def test_the_installer_ships_a_runtime_that_starts(tmp_path):
     assert (runtime / "trading/commander/accounts.py").is_file()
     assert not (runtime / "trading/tests").exists()
     assert (runtime / "backend/van_gateway/mtls/serve.py").is_file()
+
+
+def _committed_gateway() -> dict:
+    props = {}
+    for line in (ROOT / "android/van-gateway.properties").read_text(encoding="utf-8").splitlines():
+        line = line.strip()
+        if line and not line.startswith("#") and "=" in line:
+            key, value = line.split("=", 1)
+            props[key.strip()] = value.strip()
+    return props
+
+
+def test_the_app_ships_configured_for_the_direct_link():
+    """android/van-gateway.properties is what every build pins unless overridden."""
+    import base64
+    from datetime import datetime, timezone
+    from urllib.parse import urlsplit
+
+    from cryptography import x509
+    from cryptography.hazmat.primitives.asymmetric import ec
+
+    props = _committed_gateway()
+    url = urlsplit(props["VAN_GATEWAY_BASE_URL"])
+    assert url.scheme == "https" and url.hostname and url.port, props["VAN_GATEWAY_BASE_URL"]
+    assert url.path in ("", "/")
+    ca = x509.load_pem_x509_certificate(base64.b64decode(props["VAN_GATEWAY_CA_PEM_B64"], validate=True))
+    assert ca.extensions.get_extension_for_class(x509.BasicConstraints).value.ca
+    assert isinstance(ca.public_key(), ec.EllipticCurvePublicKey) and ca.public_key().curve.name == "secp256r1"
+    assert ca.not_valid_before_utc <= datetime.now(timezone.utc) < ca.not_valid_after_utc
+    assert "PRIVATE KEY" not in (ROOT / "android/van-gateway.properties").read_text(encoding="utf-8")
+    gradle = (ROOT / "android/app/build.gradle.kts").read_text(encoding="utf-8")
+    assert 'rootProject.file("van-gateway.properties")' in gradle
+
+
+def test_the_phone_and_the_gateway_agree_on_the_routes_that_need_no_certificate():
+    import re
+    import sys
+
+    sys.path.insert(0, str(ROOT / "backend"))
+    from van_gateway.mtls.transport import _NO_CERT_POSTS
+
+    kotlin = (ROOT / "android/app/src/main/java/com/dial/van/security/MutualTlsScope.kt").read_text(encoding="utf-8")
+    block = kotlin[kotlin.index("PRE_ENROLMENT_PATHS"):]
+    block = block[: block.index(")")]
+    assert set(re.findall(r'"(/v1/[^"]+)"', block)) == set(_NO_CERT_POSTS)

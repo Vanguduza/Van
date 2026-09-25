@@ -51,6 +51,18 @@ If `gradlew.bat` is missing, install Gradle 8.7+ and run `gradle wrapper`, or us
 gradle -p android assembleDebug
 ```
 
+### Gateway connection
+
+Every build, debug and release, connects to the address in `van-gateway.properties` and pins
+the VAN device CA committed beside it. That is the direct mutual-TLS link to the gateway on
+the Hermes host (backend README, "Direct phone link"). A phone installed from an older build
+moves to that address on upgrade and enrols its client certificate on first use.
+
+To build against a different gateway, pass `VAN_GATEWAY_BASE_URL`, and with it
+`VAN_GATEWAY_CA_PEM_B64` if that gateway uses a private CA, as Gradle properties or
+environment variables. An override replaces both: the committed CA is never pinned on
+another address.
+
 ## Gradle wrapper
 
 - Wrapper config: `gradle/wrapper/gradle-wrapper.properties` (Gradle 8.7)
