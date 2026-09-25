@@ -4,7 +4,7 @@ import com.dial.van.gateway.VanGatewayClient
 
 class JevRepository(private val gateway: VanGatewayClient) {
     suspend fun snapshot(): JevServiceSnapshot =
-        JevJson.snapshot(gateway.jevStatus(), gateway.jevHealth())
+        JevJson.snapshot(gateway.jevStatus(), gateway.jevHealth(), gateway.jevProvider())
 
     suspend fun activity(projectId: String, limit: Int = 100): List<JevActivityItem> =
         JevJson.activity(gateway.jevActivity(projectId, limit))
