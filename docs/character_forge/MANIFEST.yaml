@@ -1,140 +1,576 @@
 pack: VAN-CHARACTER-FORGE-DP-R2
 baseline_sha: 3c337efe91faa8461dd28b1f18a26cf346a1b66f
-owner_confirmed_complete: false
-owner_confirmation_date: null
+owner_confirmed_complete: true
+owner_confirmation_date: '2026-09-25'
 source_roots:
-  - visual-authority/assets
-  - visual-authority/rive_contract.json
-  - docs/VAN_CHARACTER_VISUAL_IDENTITY.md
-  - docs/VAN_VISUAL_ACCEPTANCE_MATRIX.md
-sources: []
-artifacts: []
-reviews: {}
-receipts: []
-ci_evidence: {}
+- visual-authority/assets
+- visual-authority/rive_contract.json
+- docs/VAN_CHARACTER_VISUAL_IDENTITY.md
+- docs/VAN_VISUAL_ACCEPTANCE_MATRIX.md
+sources:
+- artifact_id: source:b5e457409f3775ed588594dffd513a1e6fecd639004d1d6ec2f9aa4e69fe8877
+  kind: source
+  path: docs/VAN_CHARACTER_VISUAL_IDENTITY.md
+  sha256: b5e457409f3775ed588594dffd513a1e6fecd639004d1d6ec2f9aa4e69fe8877
+  stage: admitted
+  promotion: CANDIDATE
+  produced_by: owner
+  inputs: []
+- artifact_id: source:fbbdd1656470eaf5b12c66983cfd8cbdd9bdffa1f366cca78e38747e4ae90726
+  kind: source
+  path: docs/VAN_VISUAL_ACCEPTANCE_MATRIX.md
+  sha256: fbbdd1656470eaf5b12c66983cfd8cbdd9bdffa1f366cca78e38747e4ae90726
+  stage: admitted
+  promotion: CANDIDATE
+  produced_by: owner
+  inputs: []
+- artifact_id: source:4535a306f737f620d6ab61d475c8edf206054b9b5805bb7cbf8cb4b1681a4a17
+  kind: source
+  path: visual-authority/assets/pack/owner_board_android_ui_showcase.png
+  sha256: 4535a306f737f620d6ab61d475c8edf206054b9b5805bb7cbf8cb4b1681a4a17
+  stage: admitted
+  promotion: CANDIDATE
+  produced_by: owner
+  inputs: []
+- artifact_id: source:5f84795fd538fbaa442ee6991eb46d761a1d7f84f1c58b42d162b64b8bb9d745
+  kind: source
+  path: visual-authority/assets/pack/owner_board_dial_hermes_showcase.png
+  sha256: 5f84795fd538fbaa442ee6991eb46d761a1d7f84f1c58b42d162b64b8bb9d745
+  stage: admitted
+  promotion: CANDIDATE
+  produced_by: owner
+  inputs: []
+- artifact_id: source:bb82f59c494d639a1b5562455ee3b6830d6f1a1150771cc252bc3c824c4898c1
+  kind: source
+  path: visual-authority/assets/pack/owner_board_futuristic_interface.png
+  sha256: bb82f59c494d639a1b5562455ee3b6830d6f1a1150771cc252bc3c824c4898c1
+  stage: admitted
+  promotion: CANDIDATE
+  produced_by: owner
+  inputs: []
+- artifact_id: source:eb27945a3db1cceea503f2786af0f12ee61109c3570fc985ea410c1c3d9d58bb
+  kind: source
+  path: visual-authority/assets/pack/owner_board_interface_concept.png
+  sha256: eb27945a3db1cceea503f2786af0f12ee61109c3570fc985ea410c1c3d9d58bb
+  stage: admitted
+  promotion: CANDIDATE
+  produced_by: owner
+  inputs: []
+- artifact_id: source:fc986466ee830d4bac4f56ab291416e8ebaf1d6c19c24d5f6468fdbdae5a0fe9
+  kind: source
+  path: visual-authority/assets/pack/owner_board_visual_authority.png
+  sha256: fc986466ee830d4bac4f56ab291416e8ebaf1d6c19c24d5f6468fdbdae5a0fe9
+  stage: admitted
+  promotion: CANDIDATE
+  produced_by: owner
+  inputs: []
+- artifact_id: source:67b0390f51fff92de165a439a519dc9ac1f1b18896ed722d0ac94b748b5ecef0
+  kind: source
+  path: visual-authority/rive_contract.json
+  sha256: 67b0390f51fff92de165a439a519dc9ac1f1b18896ed722d0ac94b748b5ecef0
+  stage: admitted
+  promotion: CANDIDATE
+  produced_by: owner
+  inputs: []
+artifacts:
+- artifact_id: layer_raster_set:67af011894d53660293ef2c60388ef45acf1a839eb2fe7f49f61f2554e0d0b1c
+  kind: layer_raster_set
+  path: visual-authority/character-forge/06-raster-clean/candidate_b_front/LAYERS.json
+  sha256: 67af011894d53660293ef2c60388ef45acf1a839eb2fe7f49f61f2554e0d0b1c
+  stage: vector
+  promotion: CANDIDATE
+  produced_by: artist:claude-code-build_raster_layers
+  decision: CF-D-09
+  inputs: []
+  layer_files:
+    hair_back: 03effddde2104a4167caefeab915d53be0b24bf5ff6a7d30ec0d139c2f74c523
+    jacket_back: 46c366412e88872733abc2240d593f4e7fce6e9788c6547f83a685969460199c
+    underlayer: eb070714c6d45e5e44a108049984cb3f576cd33a241ef9c5f06c2b36404ff905
+    leg_l_upper: 502d72b578f4f4e09785231f72cd2325e90aa554a18c5ece326b700c315a3387
+    leg_l_lower: d7cc7f3bc76e19c50e3d04d3e71f1a7a996edafeb13cb146c0def681df870acb
+    boot_l: 730c77a615c01fb5830fe969093741cc8820f308032be08824ff3bd6f0af229f
+    leg_r_upper: f46b90b71e2f0225e27e139b9fd350c7eb22ae62646ba9abd29abca95635b434
+    leg_r_lower: 9f2c763bece85c581961ab577a943d5f739eb9853883730b38710619cacbb78d
+    boot_r: 87f8143c7951a77c46ff9fa339e89138097a4f8073ab94ebe609a1fd2f61dcf2
+    neck: 097db3ecf5d6e73d862b9ad087bbe3bd52161271dc4f1c288e3c8bcf3ffff169
+    jacket: 080847d46b26f9a7d9b824422941f71b3c84ac95c5eee6ff7550bbb85d96a16c
+    arm_l_upper: d8ff64b4d8d5d324ca43cbcc926bf95fc77f65c38b0b207c36ecaff90f9ca5bf
+    arm_l_fore: 5e2b5547ff4ae85e45daa6d590516a4570cdae188c138213dae70c82f620026d
+    hand_l: 048b011b04c67d6ab40250be1cf34b1780ef6b4d73e1ccc5c16b34e3c60d247d
+    arm_r_upper: 6d7a3f5415bec0e77c2202d3319bd06958bdb4ae4b1dcd279f5fe250620f93bd
+    arm_r_fore: 0e27121e6805c2f7e825fefc75adfa47ce4c54dea5d6a2c9ad2be74cb465fe7e
+    hand_r: f27f7668bedb8fd42f80dbfbd86bf1a931f026eef972f6c05403909435c6289f
+    face: 9fb09f5c00a2342c8f32cffcdc722d500f6f85d9b0199a311fec9f0b29312772
+    sclera_l: 6d7f4e03df2bfee8f478968d57c04b6244760f0672bef82e07a078fecbda44cf
+    eye_l: 7fa4fa86e7735d737b6f04e4c5fe60a4ba87fc25f6644a010a60b54d23394818
+    lid_l: bfd082d33bb602b762e5d7d9a550a3f5345bd98bd80a645f1fe162954f45a82e
+    sclera_r: 9be9a50c7ca02978b3131833177e98ed75e3c4e58dc5cc0b73c98a97ca9862b7
+    eye_r: 9881cb50840d99d61553d5ae597cb33f2ad4ea850e6b56e36db1de65564bba78
+    lid_r: 1eb86bffc97413a4b145e15e16dcc7aa8fb860b404915967f716cef726a02737
+    brow_l: 791bed432cd431119dfac63b66629cbad4369eae5adce1da9dae8099608f03c9
+    brow_r: 87aa5888087970002f65226fdd2ae1e539b0a8e0f0a65bef4da5d40370f55fa3
+    mouth: 03418c7e1b7c596453c1de674335cf111e4cb2c45c5e0bd5659cfc6d4da019ba
+    visor_lens: 49457ef52f88699fe6b2b35c79e001b383ce09d88f564b16a0dfa69a6a57ada2
+    visor_frame: bfcdfde3ad5a982a571918e798e66d5d50d772ff7c6df0bb09803ee97cb24586
+    hair: 19801c2ecc3320ed3d2c6304f60287e4351f1e04c97efbe9294c38f8db355779
+    orb_shell: d29b4b067a3fd7b220c80ac3066c8003532f1b58da9cd02165febdf96dafedf9
+    orb_core: 8d5ca4e812b9b255068051188ae5f07695234da98d014e47fddf1f5dd9f8953a
+  lint:
+    path: /home/user/Van/visual-authority/character-forge/06-raster-clean/candidate_b_front
+    ok: true
+    findings: []
+    metrics:
+      layers: 32
+      drawn: 32
+      canvas_px:
+      - 593
+      - 593
+      underlap_fill_pixels:
+        big-lama: 60357
+        lens_tint: 2999
+        sclera_white: 1083
+        skin_rim: 646
+      recomposite_max_error_outside_lens: 0
+      recomposite_lens_pixels_over_8: 21
+      recomposite_lens_max_error: 19
+      head_count: 3.174
+- artifact_id: riv_candidate:3784c7dfd31a295c3f88273691a398328688f7e3abb3b137f4a7f8f1231d15c8
+  kind: riv_candidate
+  path: visual-authority/character-forge/09-rive-working/van_core_01.riv
+  sha256: 3784c7dfd31a295c3f88273691a398328688f7e3abb3b137f4a7f8f1231d15c8
+  stage: core_rig
+  promotion: CANDIDATE
+  produced_by: artist:claude-code-build_rive_core
+  inputs:
+  - layer_raster_set:67af011894d53660293ef2c60388ef45acf1a839eb2fe7f49f61f2554e0d0b1c
+  - source:67b0390f51fff92de165a439a519dc9ac1f1b18896ed722d0ac94b748b5ecef0
+- artifact_id: riv_candidate:4d1f8a969ae549dc2635c3522ae0335f7cf98d2a9418980c80d147ccaa75f18c
+  kind: riv_candidate
+  path: visual-authority/character-forge/09-rive-working/van_core_02.riv
+  sha256: 4d1f8a969ae549dc2635c3522ae0335f7cf98d2a9418980c80d147ccaa75f18c
+  stage: core_rig
+  promotion: CANDIDATE
+  produced_by: artist:claude-code-build_rive_core
+  inputs:
+  - layer_raster_set:67af011894d53660293ef2c60388ef45acf1a839eb2fe7f49f61f2554e0d0b1c
+  - source:67b0390f51fff92de165a439a519dc9ac1f1b18896ed722d0ac94b748b5ecef0
+- artifact_id: riv_candidate:bc6466485a9fef2f178df99d8193494429a03aa704a022c8f97455914929f55c
+  kind: riv_candidate
+  path: visual-authority/character-forge/09-rive-working/van_core_03.riv
+  sha256: bc6466485a9fef2f178df99d8193494429a03aa704a022c8f97455914929f55c
+  stage: core_rig
+  promotion: CANDIDATE
+  produced_by: artist:claude-code-build_rive_core
+  inputs:
+  - layer_raster_set:67af011894d53660293ef2c60388ef45acf1a839eb2fe7f49f61f2554e0d0b1c
+  - source:67b0390f51fff92de165a439a519dc9ac1f1b18896ed722d0ac94b748b5ecef0
+- artifact_id: riv_candidate:862fcf753f15eca74efe462ab783f8977ab9710c9321a561a0535ab942ff448c
+  kind: riv_candidate
+  path: visual-authority/character-forge/09-rive-working/van_core_04.riv
+  sha256: 862fcf753f15eca74efe462ab783f8977ab9710c9321a561a0535ab942ff448c
+  stage: core_rig
+  promotion: CANDIDATE
+  produced_by: artist:claude-code-build_rive_core
+  inputs:
+  - layer_raster_set:67af011894d53660293ef2c60388ef45acf1a839eb2fe7f49f61f2554e0d0b1c
+  - source:67b0390f51fff92de165a439a519dc9ac1f1b18896ed722d0ac94b748b5ecef0
+- artifact_id: riv_candidate:597e63d8993f30a4ee51729435e8d72de2bdabb90b66dc6e3e9194c04c1307a3
+  kind: riv_candidate
+  path: visual-authority/character-forge/09-rive-working/van_core_05.riv
+  sha256: 597e63d8993f30a4ee51729435e8d72de2bdabb90b66dc6e3e9194c04c1307a3
+  stage: core_rig
+  promotion: CANDIDATE
+  produced_by: artist:claude-code-build_rive_core
+  inputs:
+  - layer_raster_set:67af011894d53660293ef2c60388ef45acf1a839eb2fe7f49f61f2554e0d0b1c
+  - source:67b0390f51fff92de165a439a519dc9ac1f1b18896ed722d0ac94b748b5ecef0
+reviews:
+  layer_raster_set:
+    sha256: 67af011894d53660293ef2c60388ef45acf1a839eb2fe7f49f61f2554e0d0b1c
+    reviewed_by: owner
+    date: '2026-09-25'
+    verdict: PASS
+    notes: Owner accepted the CF-D-09-HYBRID raster layer set ('Accepted', Claude
+      Code session 2026-09-25) after the layer sheet, pose and eye tests; recording
+      authorised by the owner in the same session.
+receipts:
+- command: tools import-lock
+  actor: claude-code:netcup-bootstrap-2026-09-24
+  inputs:
+  - 4b8e299539fd96820c2c626296715174015bfa6512329307d8fa38286608e338
+  - be49e8e734181f99733742119912d810a49d0a3b
+  outputs:
+  - rive_cli=1.1.1
+  - inkscape=1.2.2
+  timestamp: '2026-09-24T22:50:06.711630+00:00'
+  reason: Qualified Netcup authoring toolchain imported into repository authority
+- command: layers admit
+  actor: owner-authorised:claude-code
+  inputs:
+  - 67af011894d53660293ef2c60388ef45acf1a839eb2fe7f49f61f2554e0d0b1c
+  outputs:
+  - 03418c7e1b7c596453c1de674335cf111e4cb2c45c5e0bd5659cfc6d4da019ba
+  - 03effddde2104a4167caefeab915d53be0b24bf5ff6a7d30ec0d139c2f74c523
+  - 048b011b04c67d6ab40250be1cf34b1780ef6b4d73e1ccc5c16b34e3c60d247d
+  - 080847d46b26f9a7d9b824422941f71b3c84ac95c5eee6ff7550bbb85d96a16c
+  - 097db3ecf5d6e73d862b9ad087bbe3bd52161271dc4f1c288e3c8bcf3ffff169
+  - 0e27121e6805c2f7e825fefc75adfa47ce4c54dea5d6a2c9ad2be74cb465fe7e
+  - 19801c2ecc3320ed3d2c6304f60287e4351f1e04c97efbe9294c38f8db355779
+  - 1eb86bffc97413a4b145e15e16dcc7aa8fb860b404915967f716cef726a02737
+  - 46c366412e88872733abc2240d593f4e7fce6e9788c6547f83a685969460199c
+  - 49457ef52f88699fe6b2b35c79e001b383ce09d88f564b16a0dfa69a6a57ada2
+  - 502d72b578f4f4e09785231f72cd2325e90aa554a18c5ece326b700c315a3387
+  - 5e2b5547ff4ae85e45daa6d590516a4570cdae188c138213dae70c82f620026d
+  - 6d7a3f5415bec0e77c2202d3319bd06958bdb4ae4b1dcd279f5fe250620f93bd
+  - 6d7f4e03df2bfee8f478968d57c04b6244760f0672bef82e07a078fecbda44cf
+  - 730c77a615c01fb5830fe969093741cc8820f308032be08824ff3bd6f0af229f
+  - 791bed432cd431119dfac63b66629cbad4369eae5adce1da9dae8099608f03c9
+  - 7fa4fa86e7735d737b6f04e4c5fe60a4ba87fc25f6644a010a60b54d23394818
+  - 87aa5888087970002f65226fdd2ae1e539b0a8e0f0a65bef4da5d40370f55fa3
+  - 87f8143c7951a77c46ff9fa339e89138097a4f8073ab94ebe609a1fd2f61dcf2
+  - 8d5ca4e812b9b255068051188ae5f07695234da98d014e47fddf1f5dd9f8953a
+  - 9881cb50840d99d61553d5ae597cb33f2ad4ea850e6b56e36db1de65564bba78
+  - 9be9a50c7ca02978b3131833177e98ed75e3c4e58dc5cc0b73c98a97ca9862b7
+  - 9f2c763bece85c581961ab577a943d5f739eb9853883730b38710619cacbb78d
+  - 9fb09f5c00a2342c8f32cffcdc722d500f6f85d9b0199a311fec9f0b29312772
+  - bfcdfde3ad5a982a571918e798e66d5d50d772ff7c6df0bb09803ee97cb24586
+  - bfd082d33bb602b762e5d7d9a550a3f5345bd98bd80a645f1fe162954f45a82e
+  - d29b4b067a3fd7b220c80ac3066c8003532f1b58da9cd02165febdf96dafedf9
+  - d7cc7f3bc76e19c50e3d04d3e71f1a7a996edafeb13cb146c0def681df870acb
+  - d8ff64b4d8d5d324ca43cbcc926bf95fc77f65c38b0b207c36ecaff90f9ca5bf
+  - eb070714c6d45e5e44a108049984cb3f576cd33a241ef9c5f06c2b36404ff905
+  - f27f7668bedb8fd42f80dbfbd86bf1a931f026eef972f6c05403909435c6289f
+  - f46b90b71e2f0225e27e139b9fd350c7eb22ae62646ba9abd29abca95635b434
+  timestamp: '2026-09-25T06:34:34.627137+00:00'
+  reason: lint-clean raster layer set admitted under CF-D-09
+- command: review raster
+  actor: owner-authorised:claude-code
+  inputs:
+  - 67af011894d53660293ef2c60388ef45acf1a839eb2fe7f49f61f2554e0d0b1c
+  outputs:
+  - PASS
+  timestamp: '2026-09-25T06:35:47.089849+00:00'
+  reason: review by owner on 2026-09-25
+- command: source admit
+  actor: owner-authorised:claude-code
+  inputs: []
+  outputs:
+  - docs/VAN_CHARACTER_VISUAL_IDENTITY.md:b5e457409f3775ed588594dffd513a1e6fecd639004d1d6ec2f9aa4e69fe8877
+  - docs/VAN_VISUAL_ACCEPTANCE_MATRIX.md:fbbdd1656470eaf5b12c66983cfd8cbdd9bdffa1f366cca78e38747e4ae90726
+  - visual-authority/assets/pack/owner_board_android_ui_showcase.png:4535a306f737f620d6ab61d475c8edf206054b9b5805bb7cbf8cb4b1681a4a17
+  - visual-authority/assets/pack/owner_board_dial_hermes_showcase.png:5f84795fd538fbaa442ee6991eb46d761a1d7f84f1c58b42d162b64b8bb9d745
+  - visual-authority/assets/pack/owner_board_futuristic_interface.png:bb82f59c494d639a1b5562455ee3b6830d6f1a1150771cc252bc3c824c4898c1
+  - visual-authority/assets/pack/owner_board_interface_concept.png:eb27945a3db1cceea503f2786af0f12ee61109c3570fc985ea410c1c3d9d58bb
+  - visual-authority/assets/pack/owner_board_visual_authority.png:fc986466ee830d4bac4f56ab291416e8ebaf1d6c19c24d5f6468fdbdae5a0fe9
+  - visual-authority/rive_contract.json:67b0390f51fff92de165a439a519dc9ac1f1b18896ed722d0ac94b748b5ecef0
+  timestamp: '2026-09-25T06:59:03.819231+00:00'
+- command: owner confirm-source
+  actor: owner-authorised:claude-code
+  inputs:
+  - b5e457409f3775ed588594dffd513a1e6fecd639004d1d6ec2f9aa4e69fe8877
+  - fbbdd1656470eaf5b12c66983cfd8cbdd9bdffa1f366cca78e38747e4ae90726
+  - 4535a306f737f620d6ab61d475c8edf206054b9b5805bb7cbf8cb4b1681a4a17
+  - 5f84795fd538fbaa442ee6991eb46d761a1d7f84f1c58b42d162b64b8bb9d745
+  - bb82f59c494d639a1b5562455ee3b6830d6f1a1150771cc252bc3c824c4898c1
+  - eb27945a3db1cceea503f2786af0f12ee61109c3570fc985ea410c1c3d9d58bb
+  - fc986466ee830d4bac4f56ab291416e8ebaf1d6c19c24d5f6468fdbdae5a0fe9
+  - 67b0390f51fff92de165a439a519dc9ac1f1b18896ed722d0ac94b748b5ecef0
+  outputs:
+  - OWNER_CONFIRMED_COMPLETE
+  timestamp: '2026-09-25T06:59:03.990857+00:00'
+- command: gate m0
+  actor: owner-authorised:claude-code
+  inputs:
+  - 3c337efe91faa8461dd28b1f18a26cf346a1b66f
+  - b5e457409f3775ed588594dffd513a1e6fecd639004d1d6ec2f9aa4e69fe8877
+  - fbbdd1656470eaf5b12c66983cfd8cbdd9bdffa1f366cca78e38747e4ae90726
+  - 4535a306f737f620d6ab61d475c8edf206054b9b5805bb7cbf8cb4b1681a4a17
+  - 5f84795fd538fbaa442ee6991eb46d761a1d7f84f1c58b42d162b64b8bb9d745
+  - bb82f59c494d639a1b5562455ee3b6830d6f1a1150771cc252bc3c824c4898c1
+  - eb27945a3db1cceea503f2786af0f12ee61109c3570fc985ea410c1c3d9d58bb
+  - fc986466ee830d4bac4f56ab291416e8ebaf1d6c19c24d5f6468fdbdae5a0fe9
+  - 67b0390f51fff92de165a439a519dc9ac1f1b18896ed722d0ac94b748b5ecef0
+  outputs:
+  - BUILD_READY=true
+  timestamp: '2026-09-25T06:59:04.265220+00:00'
+  reason: M0 gate transition recorded from the evaluated repository evidence
+- command: rive receipt
+  actor: claude-code
+  inputs:
+  - 67af011894d53660293ef2c60388ef45acf1a839eb2fe7f49f61f2554e0d0b1c
+  - 67b0390f51fff92de165a439a519dc9ac1f1b18896ed722d0ac94b748b5ecef0
+  - 5aeca6563812df693665e41dca5cde858c52299f37518eec4065397dc8c609b4
+  outputs:
+  - 3784c7dfd31a295c3f88273691a398328688f7e3abb3b137f4a7f8f1231d15c8
+  timestamp: '2026-09-25T07:40:51.979057+00:00'
+- command: rive stage-candidate
+  actor: claude-code
+  inputs:
+  - 3784c7dfd31a295c3f88273691a398328688f7e3abb3b137f4a7f8f1231d15c8
+  outputs:
+  - 3784c7dfd31a295c3f88273691a398328688f7e3abb3b137f4a7f8f1231d15c8
+  timestamp: '2026-09-25T07:40:59.831563+00:00'
+- command: rive receipt
+  actor: claude-code
+  inputs:
+  - 67af011894d53660293ef2c60388ef45acf1a839eb2fe7f49f61f2554e0d0b1c
+  - 67b0390f51fff92de165a439a519dc9ac1f1b18896ed722d0ac94b748b5ecef0
+  - b63aa17a29d2b9ad4f16cc1a3042c2d129b0e6b311e27462d5af972312403052
+  outputs:
+  - 4d1f8a969ae549dc2635c3522ae0335f7cf98d2a9418980c80d147ccaa75f18c
+  timestamp: '2026-09-25T08:12:04.459970+00:00'
+- command: rive stage-candidate
+  actor: claude-code
+  inputs:
+  - 4d1f8a969ae549dc2635c3522ae0335f7cf98d2a9418980c80d147ccaa75f18c
+  outputs:
+  - 4d1f8a969ae549dc2635c3522ae0335f7cf98d2a9418980c80d147ccaa75f18c
+  timestamp: '2026-09-25T08:12:04.633243+00:00'
+- command: rive receipt
+  actor: claude-code
+  inputs:
+  - 67af011894d53660293ef2c60388ef45acf1a839eb2fe7f49f61f2554e0d0b1c
+  - 67b0390f51fff92de165a439a519dc9ac1f1b18896ed722d0ac94b748b5ecef0
+  - 4b165ee97a33020bf92af585f1acdc46d523f719e764d8af807ae756cb1ec819
+  outputs:
+  - bc6466485a9fef2f178df99d8193494429a03aa704a022c8f97455914929f55c
+  timestamp: '2026-09-25T08:49:11.412664+00:00'
+- command: rive stage-candidate
+  actor: claude-code
+  inputs:
+  - bc6466485a9fef2f178df99d8193494429a03aa704a022c8f97455914929f55c
+  outputs:
+  - bc6466485a9fef2f178df99d8193494429a03aa704a022c8f97455914929f55c
+  timestamp: '2026-09-25T08:49:11.618534+00:00'
+- command: rive receipt
+  actor: claude-code
+  inputs:
+  - 67af011894d53660293ef2c60388ef45acf1a839eb2fe7f49f61f2554e0d0b1c
+  - 67b0390f51fff92de165a439a519dc9ac1f1b18896ed722d0ac94b748b5ecef0
+  - 101e32047a9cbf5a8917e9594f3b9d7016a53598b90f439253fd79c17cfa96aa
+  outputs:
+  - 862fcf753f15eca74efe462ab783f8977ab9710c9321a561a0535ab942ff448c
+  timestamp: '2026-09-25T12:17:46.208261+00:00'
+- command: rive stage-candidate
+  actor: claude-code
+  inputs:
+  - 862fcf753f15eca74efe462ab783f8977ab9710c9321a561a0535ab942ff448c
+  outputs:
+  - 862fcf753f15eca74efe462ab783f8977ab9710c9321a561a0535ab942ff448c
+  timestamp: '2026-09-25T12:17:46.399724+00:00'
+- command: rive receipt
+  actor: claude-code
+  inputs:
+  - 67af011894d53660293ef2c60388ef45acf1a839eb2fe7f49f61f2554e0d0b1c
+  - 67b0390f51fff92de165a439a519dc9ac1f1b18896ed722d0ac94b748b5ecef0
+  - 2d71ff51b0578f28fc9a440421a16f275ed8577fd78e02a810402c9103c53fcd
+  outputs:
+  - 597e63d8993f30a4ee51729435e8d72de2bdabb90b66dc6e3e9194c04c1307a3
+  timestamp: '2026-09-25T12:33:34.631379+00:00'
+- command: rive stage-candidate
+  actor: claude-code
+  inputs:
+  - 597e63d8993f30a4ee51729435e8d72de2bdabb90b66dc6e3e9194c04c1307a3
+  outputs:
+  - 597e63d8993f30a4ee51729435e8d72de2bdabb90b66dc6e3e9194c04c1307a3
+  timestamp: '2026-09-25T12:33:34.861978+00:00'
+- command: record validation
+  actor: claude-code
+  inputs:
+  - 597e63d8993f30a4ee51729435e8d72de2bdabb90b66dc6e3e9194c04c1307a3
+  - https://github.com/Vanguduza/Van/actions/runs/36135651806
+  - e9925964398b4035d678188ebc7c21905d68ea0d
+  outputs:
+  - core_rig=PASS
+  timestamp: '2026-09-25T13:05:10.018345+00:00'
+  reason: CI-stated RiveContractTest outcome bound to the exact SHA, run and commit
+ci_evidence:
+  597e63d8993f30a4ee51729435e8d72de2bdabb90b66dc6e3e9194c04c1307a3:
+    stage: core_rig
+    result: PASS
+    ci_run: https://github.com/Vanguduza/Van/actions/runs/36135651806
+    candidate_sha256: 597e63d8993f30a4ee51729435e8d72de2bdabb90b66dc6e3e9194c04c1307a3
+    binding_file_sha256: b3615624e13d59b71f9e8190b3689143382f5a8e26b578777c2a7967a044bea9
+    validated_commit: e9925964398b4035d678188ebc7c21905d68ea0d
+    tests:
+      artboardIsTransparentOnThreeBackgrounds: passed
+      brokenAssetFallsBack: passed
+      contractSurfaceMatches: passed
+      coreInputsDriveTheRig: passed
+      everyStateAndActionRenders: skipped
+      identityColourFamilies: passed
+      idleSoakFrameStats: skipped
+      invalidInputsDegradeSafely: passed
+      mandatoryCombinations: skipped
+      productionAvatarPathKeepsRive: skipped
+    recorded_at: '2026-09-25T13:05:10.018275+00:00'
 decisions:
-  - id: CF-D-02-REV2_1
-    status: ADOPTED
-    date: 2026-09-23
-    authority: owner_direction
-    decision: Pinned Linux x86_64 Rive CLI is the deterministic M2/M3 authoring/build authority; Rive Editor is optional review.
-    milestone_effect: NONE
-  - id: CF-D-03-REV2_1
-    status: ADOPTED
-    date: 2026-09-23
-    authority: owner_direction
-    decision: Optional preparation and review lanes may be installed on Netcup but are not milestone prerequisites unless explicitly invoked.
-    milestone_effect: NONE
-  - id: CF-D-04-REV2_1
-    status: SUPERSEDED_BY_CF-D-05-REV2_1
-    date: 2026-09-24
-    authority: owner_visual_authority
-    decision: The sole primary character board explicitly prints Skin Tone #B8853C in its colour-token panel. That declared token outranks raster sampling variance; #B8853C is the canonical medium-brown skin token with DeltaE2000 tolerance <= 8.
-    evidence:
-      primary_visual: visual-authority/assets/pack/owner_board_visual_authority.png
-      primary_visual_git_blob_sha: fc18bbe0b91e5b85d8cf8211314a69cb90b8bc0b
-      declared_palette_token: "#B8853C"
-      machine_lock: visual-authority/character-forge/00-source/asset-pack/APPROVED_IDENTITY_LOCK.yaml
-    milestone_effect: M1_AND_LATER_MUST_USE_CANONICAL_TOKEN
-  - id: CF-D-05-REV2_1
-    status: ADOPTED
-    date: 2026-09-24
-    authority: owner
-    decision: >-
-      Candidate B is the new visual identity of VAN, replacing the original owner board as the
-      primary visual authority. Adopted traits, measured on the native 1536x1024 Candidate B:
-      compact chibi proportions of 3.2 +/- 0.3 heads (hair crown to chin over crown to sole),
-      replacing 5.75 heads and the three-head-chibi prohibition; a dark orb with two vertical
-      cyan bar eyes, replacing the cyan smiling-face orb; a clear wraparound goggle visor with
-      dark side pods and cyan trim, replacing the glowing cyan band; larger eyes and spikier
-      silver hair; full black technical gloves; skin token #AF6A53 measured from Candidate B,
-      superseding #B8853C (DeltaE2000 17.7 from the master). Candidate B is frozen: no further
-      generated candidates; later artwork is redrawn from it and checked against it.
-    evidence:
-      primary_visual: visual-authority/character-forge/01-master-candidates/van_master_source_candidate_b.png
-      primary_visual_sha256: cf7f51793692bfe8ea2e5f58f1a12e64d3a76468a85cb19d76d0db64ccef374c
-      superseded_visual: visual-authority/assets/pack/owner_board_visual_authority.png
-      machine_lock: visual-authority/character-forge/00-source/asset-pack/APPROVED_IDENTITY_LOCK.yaml
-      landmarks: visual-authority/character-forge/00-source/reference-pack/PROPORTIONS.yaml
-    milestone_effect: M1_AND_LATER_MUST_MATCH_CANDIDATE_B
-  - id: CF-D-06
-    status: ADOPTED
-    date: 2026-09-24
-    authority: owner
-    decision: >-
-      VAN's aura is redesigned to resemble Goku's and Naruto's: a flame envelope that wraps his
-      silhouette and rises off it, with layered state-coloured outer tongues, a white-hot core
-      rim and rising embers. This reverses the earlier detached-field rule; the wind field is
-      kept only as faint wisps. The aura remains Android-native, drawn behind the opaque
-      character; van.riv stays transparent and carries no aura geometry.
-    evidence:
-      planner: android/app/src/main/java/com/dial/van/visual/VanFlameAura.kt
-      silhouette: android/app/src/main/java/com/dial/van/visual/VanBodyLayout.kt
-      tests: android/verification/src/test/kotlin/com/dial/van/visual/VanFlameAuraTest.kt
-      handoff: visual-authority/character-forge/00-source/asset-pack/AURA_HANDOFF_SPEC.yaml
-    milestone_effect: AURA_EVIDENCE_MUST_SHOW_FLAME_ENVELOPE
-  - id: CF-D-06-REV1
-    status: ADOPTED
-    date: 2026-09-24
-    authority: owner
-    decision: >-
-      The aura's wind strands, electrical branches, scattered ion specks and orb link line are
-      removed: on an Android screen they are noise. The aura is the flame envelope and its
-      embers only.
-    milestone_effect: AURA_HAS_NO_LINE_GEOMETRY
-  - id: CF-D-07
-    status: ADOPTED
-    date: 2026-09-24
-    authority: owner
-    decision: >-
-      Until the authored van.riv loads, VAN is shown as real Candidate B art: a native-resolution
-      cut-out of the Candidate B front view, framed like the Rive artboard, with the flame aura
-      and the state marks drawn around it. It is a still (gentle bob only; no expressions or
-      gestures). The procedural Canvas drawing remains only as the last-resort fallback. The
-      retired owner-art poses stay retired.
-    evidence:
-      asset: android/app/src/main/res/drawable-nodpi/van_candidate_b_front.png
-      provenance: visual-authority/character-forge/00-source/reference-pack/interim/INTERIM_ART.yaml
-      renderer: android/app/src/main/java/com/dial/van/visual/VanVisualRuntime.kt
-    milestone_effect: RENDERER_ORDER_RIVE_THEN_CANDIDATE_B_THEN_CANVAS
-  - id: CF-D-08
-    status: ADOPTED
-    date: 2026-09-24
-    authority: owner
-    decision: >-
-      Aura Rev 2 adopts the useful parts of the Living Plasma Field proposal inside the flame
-      design and the no-lines rule. The aura wraps the silhouette read from what is on screen:
-      the Rive artboard's alpha, sampled every few frames once the rig lands; the Candidate B
-      art's alpha today; the measured layout for the Canvas fallback. The trading aura is live:
-      a published trade drives the field's colour and flame energy (calm in a trade, turbulent
-      under risk, highest on a stop), below owner authority, alerts and offline truth, and a
-      closed position fires one white pulse. Also adopted: breakaway flame fragments; front/back
-      depth (faint wisps over legs and forearms, never the face); rim light on VAN's edge; a
-      slow second clock so motion never visibly repeats; THINKING cyan-violet and SLEEPING faint
-      blue; a bounded runtime contract; 8-second motion clips as CI evidence. Not adopted:
-      electrical filaments and long detached strands (CF-D-06-REV1 stands); GPU shader plasma
-      and refraction are deferred.
-    evidence:
-      contract: visual-authority/character-forge/aura/AURA_RUNTIME_CONTRACT.yaml
-      planner: android/app/src/main/java/com/dial/van/visual/VanFlameAura.kt
-      silhouette: android/app/src/main/java/com/dial/van/visual/VanSilhouette.kt
-      rive_sampler: android/app/src/main/java/com/dial/van/visual/VanRiveAvatar.kt
-      trade: android/app/src/main/java/com/dial/van/visual/VanTradeSemantic.kt
-      tests: [android/verification/src/test/kotlin/com/dial/van/visual/VanFlameAuraTest.kt, android/verification/src/test/kotlin/com/dial/van/visual/VanTradeSemanticTest.kt, tests/contracts/test_aura_runtime_contract.py]
-    milestone_effect: AURA_REV2_IS_THE_AURA_AUTHORITY
-  - id: CF-D-08-REV1
-    status: ADOPTED
-    date: 2026-09-24
-    authority: owner
-    decision: >-
-      The trading aura is always on, not only while the trading screen is open. One shared
-      reader (VanTradeAuraPublisher) polls the portfolio every 6 s. The floating overlay holds
-      it while VAN is visible; with the screen off nothing polls. The trading screen holds it
-      strictly (an unreadable ledger is UNKNOWN). In the background an unreadable ledger raises
-      UNKNOWN only when money was at stake, so a gateway blip does not paint VAN red all day for
-      an owner who is not trading. It publishes only on change.
-    evidence:
-      publisher: android/app/src/main/java/com/dial/van/trading/VanTradeAuraPublisher.kt
-      policy: android/app/src/main/java/com/dial/van/visual/VanTradeSemantic.kt
-      tests: [android/verification/src/test/kotlin/com/dial/van/visual/VanTradeSemanticTest.kt, tests/contracts/test_aura_runtime_contract.py]
-    milestone_effect: TRADING_AURA_ALWAYS_ON
+- id: CF-D-02-REV2_1
+  status: ADOPTED
+  date: 2026-09-23
+  authority: owner_direction
+  decision: Pinned Linux x86_64 Rive CLI is the deterministic M2/M3 authoring/build
+    authority; Rive Editor is optional review.
+  milestone_effect: NONE
+- id: CF-D-03-REV2_1
+  status: ADOPTED
+  date: 2026-09-23
+  authority: owner_direction
+  decision: Optional preparation and review lanes may be installed on Netcup but are
+    not milestone prerequisites unless explicitly invoked.
+  milestone_effect: NONE
+- id: CF-D-04-REV2_1
+  status: SUPERSEDED_BY_CF-D-05-REV2_1
+  date: 2026-09-24
+  authority: owner_visual_authority
+  decision: The sole primary character board explicitly prints Skin Tone
+  evidence:
+    primary_visual: visual-authority/assets/pack/owner_board_visual_authority.png
+    primary_visual_git_blob_sha: fc18bbe0b91e5b85d8cf8211314a69cb90b8bc0b
+    declared_palette_token: '#B8853C'
+    machine_lock: visual-authority/character-forge/00-source/asset-pack/APPROVED_IDENTITY_LOCK.yaml
+  milestone_effect: M1_AND_LATER_MUST_USE_CANONICAL_TOKEN
+- id: CF-D-05-REV2_1
+  status: ADOPTED
+  date: 2026-09-24
+  authority: owner
+  decision: 'Candidate B is the new visual identity of VAN, replacing the original
+    owner board as the primary visual authority. Adopted traits, measured on the native
+    1536x1024 Candidate B: compact chibi proportions of 3.2 +/- 0.3 heads (hair crown
+    to chin over crown to sole), replacing 5.75 heads and the three-head-chibi prohibition;
+    a dark orb with two vertical cyan bar eyes, replacing the cyan smiling-face orb;
+    a clear wraparound goggle visor with dark side pods and cyan trim, replacing the
+    glowing cyan band; larger eyes and spikier silver hair; full black technical gloves;
+    skin token #AF6A53 measured from Candidate B, superseding #B8853C (DeltaE2000
+    17.7 from the master). Candidate B is frozen: no further generated candidates;
+    later artwork is redrawn from it and checked against it.'
+  evidence:
+    primary_visual: visual-authority/character-forge/01-master-candidates/van_master_source_candidate_b.png
+    primary_visual_sha256: cf7f51793692bfe8ea2e5f58f1a12e64d3a76468a85cb19d76d0db64ccef374c
+    superseded_visual: visual-authority/assets/pack/owner_board_visual_authority.png
+    machine_lock: visual-authority/character-forge/00-source/asset-pack/APPROVED_IDENTITY_LOCK.yaml
+    landmarks: visual-authority/character-forge/00-source/reference-pack/PROPORTIONS.yaml
+  milestone_effect: M1_AND_LATER_MUST_MATCH_CANDIDATE_B
+- id: CF-D-06
+  status: ADOPTED
+  date: 2026-09-24
+  authority: owner
+  decision: 'VAN''s aura is redesigned to resemble Goku''s and Naruto''s: a flame
+    envelope that wraps his silhouette and rises off it, with layered state-coloured
+    outer tongues, a white-hot core rim and rising embers. This reverses the earlier
+    detached-field rule; the wind field is kept only as faint wisps. The aura remains
+    Android-native, drawn behind the opaque character; van.riv stays transparent and
+    carries no aura geometry.'
+  evidence:
+    planner: android/app/src/main/java/com/dial/van/visual/VanFlameAura.kt
+    silhouette: android/app/src/main/java/com/dial/van/visual/VanBodyLayout.kt
+    tests: android/verification/src/test/kotlin/com/dial/van/visual/VanFlameAuraTest.kt
+    handoff: visual-authority/character-forge/00-source/asset-pack/AURA_HANDOFF_SPEC.yaml
+  milestone_effect: AURA_EVIDENCE_MUST_SHOW_FLAME_ENVELOPE
+- id: CF-D-06-REV1
+  status: ADOPTED
+  date: 2026-09-24
+  authority: owner
+  decision: 'The aura''s wind strands, electrical branches, scattered ion specks and
+    orb link line are removed: on an Android screen they are noise. The aura is the
+    flame envelope and its embers only.'
+  milestone_effect: AURA_HAS_NO_LINE_GEOMETRY
+- id: CF-D-07
+  status: ADOPTED
+  date: 2026-09-24
+  authority: owner
+  decision: 'Until the authored van.riv loads, VAN is shown as real Candidate B art:
+    a native-resolution cut-out of the Candidate B front view, framed like the Rive
+    artboard, with the flame aura and the state marks drawn around it. It is a still
+    (gentle bob only; no expressions or gestures). The procedural Canvas drawing remains
+    only as the last-resort fallback. The retired owner-art poses stay retired.'
+  evidence:
+    asset: android/app/src/main/res/drawable-nodpi/van_candidate_b_front.png
+    provenance: visual-authority/character-forge/00-source/reference-pack/interim/INTERIM_ART.yaml
+    renderer: android/app/src/main/java/com/dial/van/visual/VanVisualRuntime.kt
+  milestone_effect: RENDERER_ORDER_RIVE_THEN_CANDIDATE_B_THEN_CANVAS
+- id: CF-D-08
+  status: ADOPTED
+  date: 2026-09-24
+  authority: owner
+  decision: 'Aura Rev 2 adopts the useful parts of the Living Plasma Field proposal
+    inside the flame design and the no-lines rule. The aura wraps the silhouette read
+    from what is on screen: the Rive artboard''s alpha, sampled every few frames once
+    the rig lands; the Candidate B art''s alpha today; the measured layout for the
+    Canvas fallback. The trading aura is live: a published trade drives the field''s
+    colour and flame energy (calm in a trade, turbulent under risk, highest on a stop),
+    below owner authority, alerts and offline truth, and a closed position fires one
+    white pulse. Also adopted: breakaway flame fragments; front/back depth (faint
+    wisps over legs and forearms, never the face); rim light on VAN''s edge; a slow
+    second clock so motion never visibly repeats; THINKING cyan-violet and SLEEPING
+    faint blue; a bounded runtime contract; 8-second motion clips as CI evidence.
+    Not adopted: electrical filaments and long detached strands (CF-D-06-REV1 stands);
+    GPU shader plasma and refraction are deferred.'
+  evidence:
+    contract: visual-authority/character-forge/aura/AURA_RUNTIME_CONTRACT.yaml
+    planner: android/app/src/main/java/com/dial/van/visual/VanFlameAura.kt
+    silhouette: android/app/src/main/java/com/dial/van/visual/VanSilhouette.kt
+    rive_sampler: android/app/src/main/java/com/dial/van/visual/VanRiveAvatar.kt
+    trade: android/app/src/main/java/com/dial/van/visual/VanTradeSemantic.kt
+    tests:
+    - android/verification/src/test/kotlin/com/dial/van/visual/VanFlameAuraTest.kt
+    - android/verification/src/test/kotlin/com/dial/van/visual/VanTradeSemanticTest.kt
+    - tests/contracts/test_aura_runtime_contract.py
+  milestone_effect: AURA_REV2_IS_THE_AURA_AUTHORITY
+- id: CF-D-08-REV1
+  status: ADOPTED
+  date: 2026-09-24
+  authority: owner
+  decision: The trading aura is always on, not only while the trading screen is open.
+    One shared reader (VanTradeAuraPublisher) polls the portfolio every 6 s. The floating
+    overlay holds it while VAN is visible; with the screen off nothing polls. The
+    trading screen holds it strictly (an unreadable ledger is UNKNOWN). In the background
+    an unreadable ledger raises UNKNOWN only when money was at stake, so a gateway
+    blip does not paint VAN red all day for an owner who is not trading. It publishes
+    only on change.
+  evidence:
+    publisher: android/app/src/main/java/com/dial/van/trading/VanTradeAuraPublisher.kt
+    policy: android/app/src/main/java/com/dial/van/visual/VanTradeSemantic.kt
+    tests:
+    - android/verification/src/test/kotlin/com/dial/van/visual/VanTradeSemanticTest.kt
+    - tests/contracts/test_aura_runtime_contract.py
+  milestone_effect: TRADING_AURA_ALWAYS_ON
+- id: CF-D-09-REJECT-TRACED
+  status: ADOPTED
+  date: '2026-09-25'
+  authority: owner
+  decision: 'The traced M1 lane candidate (05-vectors-candidate/van_layers_traced_candidate.svg,
+    sha256 f8768aa5e9a0f6eb653645dbf15a7f56935f835b497cbb8980a38193cb6f1c6e, built
+    by tools/character_forge/build_layer_candidate.py) is rejected by the owner: an
+    automatic trace inside M1''s node budgets does not keep Candidate B''s likeness.
+    It is never admitted.'
+  milestone_effect: TRACED_VECTOR_CANDIDATE_REJECTED
+- id: CF-D-09
+  status: ADOPTED
+  date: '2026-09-25'
+  authority: owner
+  decision: 'M1 may be satisfied by a raster layer set cut from Candidate B''s own
+    native pixels instead of a vector redraw (owner instruction 2026-09-25: ''use
+    option 2''). Each rig part is a PNG layer, pixel-exact to the approved art, with
+    painted underlap where other parts hide it, so the neutral pose recomposes to
+    the source. The Rive rig deforms those images with triangle meshes skinned to
+    bones (Rive CLI 1.1.1 ImageAsset + Image/Mesh/Skin). The identity lock, the 3.2
+    +/- 0.3 head count, the Rive contract and every owner/device gate are unchanged.
+    A vector redraw by an artist remains the long-term target and still satisfies
+    M1 through vectors admit. Known costs: native resolution only (no invented detail),
+    softer edges at extreme poses, a larger .riv.'
+  milestone_effect: M1_ACCEPTS_RASTER_LAYER_SET
+- id: CF-D-09-HYBRID
+  status: ADOPTED
+  date: '2026-09-25'
+  authority: owner
+  decision: 'The first raster layer set was judged bad by the owner (misassigned eyes,
+    brows and goggle pixels; smeared fill in hidden regions). Owner instruction 2026-09-25:
+    ''do a hybrid of option 1 and 2'' - (1) cut the face parts, sleeves and torso
+    on hand-placed geometry measured on the approved cut-out rather than on the blockout,
+    and (2) paint the hidden regions of each layer with an AI inpainting model (big-lama,
+    pinned by SHA-256 in TOOLS.yaml) from that layer''s own pixels. Visible pixels
+    stay Candidate B''s own; the neutral pose must still recompose to the source.
+    The AI fill is labelled per layer in LAYERS.json and cached with its model hash
+    in 02-ai-working. A human-painted layer set remains the route to final quality.'
+  milestone_effect: RASTER_UNDERLAP_MAY_BE_AI_PAINTED

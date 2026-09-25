@@ -1,0 +1,17 @@
+{
+  "candidate_sha256": "bc6466485a9fef2f178df99d8193494429a03aa704a022c8f97455914929f55c",
+  "candidate_path": "visual-authority/character-forge/09-rive-working/van_core_03.riv",
+  "stage": "core_rig",
+  "authoring_tool": "rive_cli",
+  "authoring_version": "1.1.1",
+  "rive_file_id": "LOCAL",
+  "rive_revision": "LOCAL",
+  "svg_sha256": "67af011894d53660293ef2c60388ef45acf1a839eb2fe7f49f61f2554e0d0b1c",
+  "contract_sha256": "67b0390f51fff92de165a439a519dc9ac1f1b18896ed722d0ac94b748b5ecef0",
+  "source_project": "visual-authority/character-forge/09-rive-working/rml/van_core",
+  "source_tree_sha256": "4b165ee97a33020bf92af585f1acdc46d523f719e764d8af807ae756cb1ec819",
+  "source_file_count": 40,
+  "artist": "claude-code-build_rive_core",
+  "exported_at": "2026-09-25T08:49:11.412447+00:00",
+  "notes": "Built on Netcup dial-control by the pinned Rive CLI 1.1.1 (rive <project> --once) from this RML at 7fb5de2. Supersedes van_core_02 before any validation was recorded for it, at the owner's request: the blink now closes painted lids of her own skin (build_eyelids) in place of flat vector lids, POINT_TARGET points up and out along a diagonal so the hand stays well inside the artboard, and the open eyes no longer show a pale seam line when scaled."
+}

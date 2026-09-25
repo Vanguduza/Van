@@ -96,9 +96,7 @@ object VanMotionPeriods {
         VanDurableState.WAITING_FOR_OWNER,
         -> 2800
 
-        VanDurableState.SLEEPING,
-        VanDurableState.OFFLINE,
-        -> 6000
+        VanDurableState.SLEEPING -> 6000
 
         else -> 4200
     }

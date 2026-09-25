@@ -14,8 +14,6 @@ import org.junit.Assert.assertTrue
 import org.junit.Test
 import java.awt.image.BufferedImage
 import kotlin.math.abs
-import kotlin.math.max
-import kotlin.math.min
 
 /**
  * Measures the acceptance-matrix distinctness requirements on real pixels, so "offline,
@@ -85,24 +83,13 @@ class VanPreviewRenderTest {
     }
 
     @Test
-    fun offlineAndDegradedLoseColourWithoutFadingTheCharacter() {
-        val idleChroma = averageChroma(renderCompact(VanDurableState.IDLE))
-        val degradedChroma = averageChroma(renderCompact(VanDurableState.DEGRADED))
-        val offlineChroma = averageChroma(renderCompact(VanDurableState.OFFLINE))
-
-        assertTrue(
-            "degraded should visibly lose colour versus ready ($degradedChroma vs $idleChroma)",
-            degradedChroma < idleChroma,
-        )
-        assertTrue(
-            "offline should visibly lose more colour than degraded ($offlineChroma vs $degradedChroma)",
-            offlineChroma < degradedChroma,
-        )
+    fun offlineAndDegradedKeepTheCharacterOpaqueAndInColour() {
+        // Owner direction (2026-09-25): state is carried by the aura and copy; VAN himself is
+        // never greyed or faded, because either reads as a see-through ghost on the device.
         listOf(VanDurableState.IDLE, VanDurableState.DEGRADED, VanDurableState.OFFLINE).forEach { state ->
-            assertTrue(
-                "$state must keep full character opacity",
-                abs(VanStatusPalette.forState(state).dim - 1f) < 0.0001f,
-            )
+            val palette = VanStatusPalette.forState(state)
+            assertTrue("$state must keep full character opacity", abs(palette.dim - 1f) < 0.0001f)
+            assertTrue("$state must keep the character in full colour", palette.desaturation < 0.0001f)
         }
     }
 
@@ -165,20 +152,6 @@ class VanPreviewRenderTest {
             }
         }
         return total.toDouble() / (a.width * a.height * 3)
-    }
-
-    private fun averageChroma(image: BufferedImage): Double {
-        var total = 0L
-        for (y in 0 until image.height) {
-            for (x in 0 until image.width) {
-                val p = image.getRGB(x, y)
-                val r = (p shr 16) and 0xFF
-                val g = (p shr 8) and 0xFF
-                val b = p and 0xFF
-                total += max(r, max(g, b)) - min(r, min(g, b))
-            }
-        }
-        return total.toDouble() / (image.width * image.height)
     }
 
     private fun nonBackgroundRatio(image: BufferedImage): Double {

@@ -67,6 +67,23 @@ class OverlayDragControllerTest {
     }
 
     @Test
+    fun `picking VAN up closes an open board but leaves minimized and docked VAN alone`() {
+        // The board opens beside VAN; dragged along with him it would be pushed off screen.
+        for (board in listOf(
+            VanOverlayPresentation.WORKBOARD_COMPACT,
+            VanOverlayPresentation.WORKBOARD_EXPANDED,
+            VanOverlayPresentation.WORKBOARD_MAXIMIZED,
+        )) {
+            val state = OverlayDragController(FakeWindow()).begin(resting.copy(presentation = board))
+            assertEquals(VanOverlayPresentation.FULL_FLOATING, state.presentation, board.name)
+        }
+        for (own in listOf(VanOverlayPresentation.MINIMIZED, VanOverlayPresentation.DOCKED)) {
+            val state = OverlayDragController(FakeWindow()).begin(resting.copy(presentation = own))
+            assertEquals(own, state.presentation, own.name)
+        }
+    }
+
+    @Test
     fun `a drag moves the window and reports where it ended up`() {
         val window = FakeWindow(x = 400, y = 900)
         val state = OverlayDragController(window).drag(resting, dx = 30, dy = -50)

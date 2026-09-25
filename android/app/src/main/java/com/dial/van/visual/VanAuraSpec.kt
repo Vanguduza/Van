@@ -201,9 +201,11 @@ object VanAuraSpecs {
                     VanAuraEnvelopeSegment(40f, 32f, node = true),
                 ),
             )
+            // Subdued but alive (owner direction, 2026-09-25): one slow filament and a faint
+            // arc keep the field moving; the slate colour, not stillness, says offline.
             VanDurableState.OFFLINE -> spec(
-                intensity = 0.12f, arc = 0f, spark = 0f, ground = 0.08f, orb = 0f,
-                filaments = 0, asymmetry = 0.14f, deform = 0.10f,
+                intensity = 0.16f, arc = 0.05f, spark = 0f, ground = 0.08f, orb = 0f,
+                filaments = 1, asymmetry = 0.14f, deform = 0.12f,
                 envelopeScale = 1.35f, envelopeAlpha = 0.06f, semantic = null,
                 segments = listOf(VanAuraEnvelopeSegment(200f, 22f)),
             )

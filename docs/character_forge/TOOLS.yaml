@@ -1,15 +1,15 @@
 critical_path:
   rive_android:
-    version: "9.6.5"
+    version: 9.6.5
     class: RUNTIME
     source: android/app/build.gradle.kts
   rive_cli:
-    version: UNPINNED
+    version: 1.1.1
     class: AUTHORING_BUILD
     required_from: M2
     qualification_source: deploy/character-forge/qualify-netcup-authoring.sh
   inkscape:
-    version: UNPINNED
+    version: 1.2.2
     class: AUTHORING
     required_from: M1
 review_lanes:
@@ -20,7 +20,25 @@ review_lanes:
     version: UNPINNED
     class: HUMAN_REVIEW
 lanes:
-  rembg_birefnet: {class: PREP, enabled: false, installed_by_bootstrap: true}
-  vtracer: {class: PREP, enabled: false, installed_by_bootstrap: true}
-  blender: {class: AUXILIARY, enabled: false, installed_by_bootstrap: true}
-  comfyui: {class: OPTIONAL_AI, enabled: false}
+  rembg_birefnet:
+    class: PREP
+    enabled: false
+    installed_by_bootstrap: true
+  vtracer:
+    class: PREP
+    enabled: false
+    installed_by_bootstrap: true
+  blender:
+    class: AUXILIARY
+    enabled: false
+    installed_by_bootstrap: true
+  comfyui:
+    class: OPTIONAL_AI
+    enabled: false
+  big_lama_inpaint:
+    class: OPTIONAL_AI
+    enabled: true
+    used_by: tools/character_forge/underlap_fill.py (CF-D-09 raster layer underlap)
+    model_url: https://github.com/enesmsahin/simple-lama-inpainting/releases/download/v0.1.0/big-lama.pt
+    model_sha256: 7ba7aa7ac37a4d41fdbbeba3a2af7ead18058552997e3a3cd1a3b2210c9e6b4c
+    runtime: torch (CPU), forge host only; builds without it use the committed fill cache

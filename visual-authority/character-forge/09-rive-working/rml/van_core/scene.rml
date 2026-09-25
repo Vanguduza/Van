@@ -1,0 +1,928 @@
+<Rive version="1" kind="fragment">
+<Artboard defaultStateMachineId="0:13" styleId="0:12" width="593" height="593" name="Van" id="0:11">
+<LayoutComponentStyle name="Artboard Style" id="0:12"/>
+<Node name="follow_orb_core"><TransformConstraint targetId="0:42" name="c"/><Image x="14.0099" y="0.9743" assetId="0:74" name="orb_core"></Image></Node>
+<Node name="follow_orb_shell"><TransformConstraint targetId="0:42" name="c"/><Image x="1.0099" y="1.4743" assetId="0:73" name="orb_shell"></Image></Node>
+<Node name="follow_eyelid_over_l" opacity="0" id="0:80"><TransformConstraint targetId="0:21" name="c"/><Image x="-27.4783" y="-57.0205" assetId="0:78" name="eyelid_over_l"/></Node>
+<Node name="follow_eye_cover_l" opacity="1" id="0:81"><TransformConstraint targetId="0:21" name="c"/><Image x="-31.9783" y="-57.0205" assetId="0:79" name="eye_cover_l"/></Node>
+<Node name="follow_eyelid_over_r" opacity="0" id="0:85"><TransformConstraint targetId="0:21" name="c"/><Image x="35.5217" y="-72.0205" assetId="0:83" name="eyelid_over_r"/></Node>
+<Node name="follow_eye_cover_r" opacity="1" id="0:86"><TransformConstraint targetId="0:21" name="c"/><Image x="36.0217" y="-64.0205" assetId="0:84" name="eye_cover_r"/></Node>
+<Node name="follow_hair"><TransformConstraint targetId="0:21" name="c"/><Image x="1.5217" y="-103.0205" assetId="0:72" name="hair"></Image></Node>
+<Node name="follow_visor_frame"><TransformConstraint targetId="0:21" name="c"/><Image x="1.5217" y="-63.5205" assetId="0:71" name="visor_frame"></Image></Node>
+<Node name="follow_visor_lens"><TransformConstraint targetId="0:21" name="c"/><Image x="7.5217" y="-62.5205" assetId="0:70" name="visor_lens"></Image></Node>
+<Node name="follow_inner_mouth"><TransformConstraint targetId="0:34" name="c"/><Node name="inner_mouth"><Shape name="teeth" y="-3.84"><Rectangle width="14.88" height="2.64" cornerRadiusTL="1" cornerRadiusTR="1" cornerRadiusBL="1" cornerRadiusBR="1" originX="0.5" originY="0.5" name="p"/><Fill name="f"><SolidColor colorValue="FFF1ECE6" name="c"/></Fill></Shape><Shape name="tongue" y="2.64"><Ellipse width="14.88" height="5.4" originX="0.5" originY="0.5" name="p"/><Fill name="f"><SolidColor colorValue="FFB9575C" name="c"/></Fill></Shape><Shape name="mouth_dark"><Ellipse width="24" height="12" originX="0.5" originY="0.5" name="p"/><Fill name="f"><SolidColor colorValue="FF4A1B1E" name="c"/></Fill></Shape></Node></Node>
+<Node name="follow_mouth"><TransformConstraint targetId="0:32" name="c"/><Image x="1.6818" y="0.5" assetId="0:69" name="mouth"></Image></Node>
+<Node name="follow_brow_r"><TransformConstraint targetId="0:31" name="c"/><Image x="-0.6667" y="1" assetId="0:68" name="brow_r"></Image></Node>
+<Node name="follow_brow_l"><TransformConstraint targetId="0:30" name="c"/><Image x="2.1" y="0.6" assetId="0:67" name="brow_l"></Image></Node>
+<Node name="follow_eyelid_r"><TransformConstraint targetId="0:25" name="c"/><Node name="eyelid_r_hinge"><Shape name="eyelid_r_lash"><PointsPath isClosed="false" name="p"><StraightVertex x="-17" y="14"/><StraightVertex x="-14.875" y="15.6523"/><StraightVertex x="-12.75" y="17.1094"/><StraightVertex x="-10.625" y="18.3711"/><StraightVertex x="-8.5" y="19.4375"/><StraightVertex x="-6.375" y="20.3086"/><StraightVertex x="-4.25" y="20.9844"/><StraightVertex x="-2.125" y="21.4648"/><StraightVertex x="0" y="21.75"/><StraightVertex x="2.125" y="21.8398"/><StraightVertex x="4.25" y="21.7344"/><StraightVertex x="6.375" y="21.4336"/><StraightVertex x="8.5" y="20.9375"/><StraightVertex x="10.625" y="20.2461"/><StraightVertex x="12.75" y="19.3594"/><StraightVertex x="14.875" y="18.2773"/><StraightVertex x="17" y="17"/></PointsPath><Stroke thickness="1.6" cap="round" join="round" name="lash"><SolidColor colorValue="FF2B1714" name="c"/></Stroke></Shape><Image x="1" y="14.5" assetId="0:82" name="eyelid_r"/></Node></Node>
+<Node name="follow_lid_r"><TransformConstraint targetId="0:23" name="c"/><Image x="0.5" y="-5.4" assetId="0:66" name="lid_r"></Image></Node>
+<Node name="follow_eye_r"><TransformConstraint targetId="0:29" name="c"/><Image x="0.5" y="0.5" assetId="0:65" name="eye_r"><ClippingShape sourceId="0:76" name="clip"/></Image></Node>
+<Node name="follow_sclera_r"><TransformConstraint targetId="0:23" name="c"/><Image x="2" y="-0.9" assetId="0:64" name="sclera_r"></Image></Node>
+<Node name="follow_eye_socket_r"><TransformConstraint targetId="0:23" name="c"/><Image x="1" y="-0.9" assetId="0:82" name="eye_socket_r"/></Node>
+<Node name="follow_eyelid_l"><TransformConstraint targetId="0:24" name="c"/><Node name="eyelid_l_hinge"><Shape name="eyelid_l_lash"><PointsPath isClosed="false" name="p"><StraightVertex x="-17.3077" y="9"/><StraightVertex x="-15.1827" y="10.9023"/><StraightVertex x="-13.0577" y="12.6094"/><StraightVertex x="-10.9327" y="14.1211"/><StraightVertex x="-8.8077" y="15.4375"/><StraightVertex x="-6.6827" y="16.5586"/><StraightVertex x="-4.5577" y="17.4844"/><StraightVertex x="-2.4327" y="18.2148"/><StraightVertex x="-0.3077" y="18.75"/><StraightVertex x="1.8173" y="19.0898"/><StraightVertex x="3.9423" y="19.2344"/><StraightVertex x="6.0673" y="19.1836"/><StraightVertex x="8.1923" y="18.9375"/><StraightVertex x="10.3173" y="18.4961"/><StraightVertex x="12.4423" y="17.8594"/><StraightVertex x="14.5673" y="17.0273"/><StraightVertex x="16.6923" y="16"/></PointsPath><Stroke thickness="1.6" cap="round" join="round" name="lash"><SolidColor colorValue="FF2B1714" name="c"/></Stroke></Shape><Image x="1.1923" y="12.5" assetId="0:77" name="eyelid_l"/></Node></Node>
+<Node name="follow_lid_l"><TransformConstraint targetId="0:22" name="c"/><Image x="-0.3077" y="-2.25" assetId="0:63" name="lid_l"></Image></Node>
+<Node name="follow_eye_l"><TransformConstraint targetId="0:28" name="c"/><Image x="-1" y="-2.5" assetId="0:62" name="eye_l"><ClippingShape sourceId="0:75" name="clip"/></Image></Node>
+<Node name="follow_sclera_l"><TransformConstraint targetId="0:22" name="c"/><Image x="-0.3077" y="-1.25" assetId="0:61" name="sclera_l"></Image></Node>
+<Node name="follow_eye_socket_l"><TransformConstraint targetId="0:22" name="c"/><Image x="1.1923" y="-1.25" assetId="0:77" name="eye_socket_l"/></Node>
+<Node name="follow_face"><TransformConstraint targetId="0:21" name="c"/><Image x="-0.4783" y="-93.5205" assetId="0:60" name="face"></Image></Node>
+<Node name="follow_hand_r"><TransformConstraint targetId="0:40" name="c"/><Image x="-0.996" y="32.5289" assetId="0:59" name="hand_r"></Image></Node>
+<Node name="follow_arm_r_fore"><TransformConstraint targetId="0:39" name="c"/><Image x="-6.5229" y="32.5081" assetId="0:58" name="arm_r_fore"></Image></Node>
+<Node name="follow_arm_r_upper"><TransformConstraint targetId="0:38" name="c"/><Image x="2.5043" y="38.9766" assetId="0:57" name="arm_r_upper"></Image></Node>
+<Node name="follow_hand_l"><TransformConstraint targetId="0:37" name="c"/><Image x="-26.9768" y="-18.5191" assetId="0:56" name="hand_l"></Image></Node>
+<Node name="follow_arm_l_fore"><TransformConstraint targetId="0:36" name="c"/><Image x="-12.5202" y="20.0055" assetId="0:55" name="arm_l_fore"></Image></Node>
+<Node name="follow_arm_l_upper"><TransformConstraint targetId="0:35" name="c"/><Image x="-14.526" y="27.4766" assetId="0:54" name="arm_l_upper"></Image></Node>
+<Node name="follow_jacket"><TransformConstraint targetId="0:16" name="c"/><Image x="-8.5" y="26.9708" assetId="0:53" name="jacket"></Image></Node>
+<Node name="follow_neck"><TransformConstraint targetId="0:16" name="c"/><Image x="-4.5" y="-49.0292" assetId="0:52" name="neck"></Image></Node>
+<Node name="follow_boot_r"><TransformConstraint targetId="0:14" name="c"/><Image x="69" y="149.526" assetId="0:51" name="boot_r"></Image></Node>
+<Node name="follow_leg_r_lower"><TransformConstraint targetId="0:14" name="c"/><Image x="52" y="108.526" assetId="0:50" name="leg_r_lower"></Image></Node>
+<Node name="follow_leg_r_upper"><TransformConstraint targetId="0:14" name="c"/><Image x="38.5" y="43.026" assetId="0:49" name="leg_r_upper"></Image></Node>
+<Node name="follow_boot_l"><TransformConstraint targetId="0:14" name="c"/><Image x="-66" y="148.526" assetId="0:48" name="boot_l"></Image></Node>
+<Node name="follow_leg_l_lower"><TransformConstraint targetId="0:14" name="c"/><Image x="-41" y="97.026" assetId="0:47" name="leg_l_lower"></Image></Node>
+<Node name="follow_leg_l_upper"><TransformConstraint targetId="0:14" name="c"/><Image x="-33" y="42.526" assetId="0:46" name="leg_l_upper"></Image></Node>
+<Node name="follow_underlayer"><TransformConstraint targetId="0:16" name="c"/><Image x="0" y="36.9708" assetId="0:45" name="underlayer"></Image></Node>
+<Node name="follow_jacket_back"><TransformConstraint targetId="0:16" name="c"/><Image x="-2.5" y="-37.0292" assetId="0:44" name="jacket_back"></Image></Node>
+<Node name="follow_hair_back"><TransformConstraint targetId="0:21" name="c"/><Image x="-0.4783" y="-107.5205" assetId="0:43" name="hair_back"></Image></Node>
+<Node name="follow_clip_l"><TransformConstraint targetId="0:22" name="c"/><Shape name="eye_opening_l" id="0:75"><PointsPath isClosed="true" name="p"><StraightVertex x="-17.3077" y="-4.75"/><StraightVertex x="-14.3077" y="-9.75"/><StraightVertex x="-8.3077" y="-12.75"/><StraightVertex x="0.6923" y="-13.75"/><StraightVertex x="8.6923" y="-12.75"/><StraightVertex x="13.6923" y="-9.75"/><StraightVertex x="16.6923" y="-4.75"/><StraightVertex x="16.6923" y="2.25"/><StraightVertex x="12.6923" y="8.25"/><StraightVertex x="4.6923" y="11.25"/><StraightVertex x="-5.3077" y="10.25"/><StraightVertex x="-12.3077" y="7.25"/><StraightVertex x="-16.3077" y="1.25"/></PointsPath></Shape></Node>
+<Node name="follow_clip_r"><TransformConstraint targetId="0:23" name="c"/><Shape name="eye_opening_r" id="0:76"><PointsPath isClosed="true" name="p"><StraightVertex x="-17" y="-1.4"/><StraightVertex x="-14" y="-8.4"/><StraightVertex x="-8" y="-13.4"/><StraightVertex x="0" y="-15.4"/><StraightVertex x="8" y="-13.4"/><StraightVertex x="14" y="-10.4"/><StraightVertex x="17" y="-5.4"/><StraightVertex x="17" y="1.6"/><StraightVertex x="13" y="8.6"/><StraightVertex x="5" y="12.6"/><StraightVertex x="-6" y="12.6"/><StraightVertex x="-13" y="9.6"/><StraightVertex x="-16" y="4.6"/></PointsPath></Shape></Node>
+<Node x="296.5" y="366.474" name="rig_body" id="0:14">
+  <Node x="0" y="-102.9448" name="rig_chest" id="0:15">
+    <Node x="0" y="0" name="rig_torso" id="0:16"/>
+    <Node x="-10.0217" y="-45.0087" name="rig_head_bob" id="0:17">
+      <Node x="0" y="0" name="rig_neck" id="0:18">
+        <Node x="0" y="0" name="rig_nod" id="0:19">
+          <Node x="0" y="0" name="rig_talk" id="0:20">
+            <Node x="0" y="0" name="rig_head" id="0:21">
+              <Node x="-31.1706" y="-55.7705" name="rig_eye_l" id="0:22">
+                <Node x="4.1923" y="-0.75" name="rig_look_l" id="0:26">
+                  <Node x="0" y="0" name="rig_iris_l" id="0:28"/>
+                </Node>
+              </Node>
+              <Node x="30.5217" y="-64.1205" name="rig_eye_r" id="0:23">
+                <Node x="-3.5" y="-0.4" name="rig_look_r" id="0:27">
+                  <Node x="0" y="0" name="rig_iris_r" id="0:29"/>
+                </Node>
+              </Node>
+              <Node x="-31.1706" y="-69.5205" scaleY="0.02" name="rig_eyelid_l" id="0:24"/>
+              <Node x="30.5217" y="-79.5205" scaleY="0.02" name="rig_eyelid_r" id="0:25"/>
+              <Node x="-34.0783" y="-83.1205" name="rig_brow_l" id="0:30"/>
+              <Node x="26.1884" y="-90.5205" name="rig_brow_r" id="0:31"/>
+              <Node x="1.3399" y="-29.5205" name="rig_mouth" id="0:32">
+                <Node x="0" y="0" name="rig_viseme" id="0:33">
+                  <Node x="0" y="0" name="rig_mouth_open" id="0:34"/>
+                </Node>
+              </Node>
+            </Node>
+          </Node>
+        </Node>
+      </Node>
+    </Node>
+    <Node x="-69.974" y="-30.0058" name="rig_shoulder_l" id="0:35">
+      <Node x="-30.0058" y="54.9711" name="rig_elbow_l" id="0:36">
+        <Node x="-20.0434" y="25.0246" name="rig_wrist_l" id="0:37"/>
+      </Node>
+    </Node>
+    <Node x="79.9957" y="-30.0058" name="rig_shoulder_r" id="0:38">
+      <Node x="18.0272" y="61.9685" name="rig_elbow_r" id="0:39">
+        <Node x="3.9731" y="55.9792" name="rig_wrist_r" id="0:40"/>
+      </Node>
+    </Node>
+  </Node>
+  <Node x="-133.0099" y="-161.9483" name="rig_orb_home" id="0:41">
+    <Node x="0" y="0" name="rig_orb" id="0:42"/>
+  </Node>
+</Node>
+<StateMachine name="VanRuntime" id="0:13">
+  <StateMachineNumber name="state" value="2" id="0:87"/>
+  <StateMachineBool name="speaking" id="0:88"/>
+  <StateMachineBool name="listening" id="0:89"/>
+  <StateMachineNumber name="attention_x" value="0" id="0:90"/>
+  <StateMachineNumber name="attention_y" value="0" id="0:91"/>
+  <StateMachineNumber name="mouth_open" value="0" id="0:92"/>
+  <StateMachineNumber name="urgency" value="0" id="0:93"/>
+  <StateMachineNumber name="viseme" value="0" id="0:94"/>
+  <StateMachineNumber name="action_code" value="0" id="0:95"/>
+  <StateMachineTrigger name="point" id="0:96"/>
+  <StateMachineTrigger name="ack" id="0:97"/>
+  <StateMachineTrigger name="celebrate" id="0:98"/>
+  <StateMachineTrigger name="warning" id="0:99"/>
+  <StateMachineTrigger name="wave" id="0:100"/>
+  <StateMachineTrigger name="shrug" id="0:101"/>
+  <StateMachineTrigger name="present" id="0:102"/>
+  <StateMachineTrigger name="panel" id="0:103"/>
+  <StateMachineLayer name="Breathe" id="0:106">
+    <AnyState x="600" y="-120"/><ExitState x="800" y="-120"/>
+    <EntryState x="0" y="-120"><StateTransition stateToId="0:104"/></EntryState>
+    <AnimationState animationId="0:105" x="200" y="0" id="0:104"/>
+  </StateMachineLayer>
+  <StateMachineLayer name="Blink" id="0:109">
+    <AnyState x="600" y="-120"/><ExitState x="800" y="-120"/>
+    <EntryState x="0" y="-120"><StateTransition stateToId="0:107"/></EntryState>
+    <AnimationState animationId="0:108" x="200" y="0" id="0:107"/>
+  </StateMachineLayer>
+  <StateMachineLayer name="State" id="0:118">
+    <AnyState x="600" y="-120"/><ExitState x="800" y="-120"/>
+    <EntryState x="0" y="-120"><StateTransition stateToId="0:110"/></EntryState>
+    <AnimationState animationId="0:114" x="200" y="0" id="0:110"><StateTransition stateToId="0:111" duration="300"><TransitionNumberCondition inputId="0:87" opValue="equal" value="4"/></StateTransition><StateTransition stateToId="0:112" duration="300"><TransitionNumberCondition inputId="0:87" opValue="equal" value="5"/></StateTransition><StateTransition stateToId="0:113" duration="300"><TransitionNumberCondition inputId="0:87" opValue="equal" value="9"/></StateTransition></AnimationState>
+    <AnimationState animationId="0:115" x="400" y="0" id="0:111"><StateTransition stateToId="0:110" duration="300"><TransitionNumberCondition inputId="0:87" opValue="notEqual" value="4"/><TransitionNumberCondition inputId="0:87" opValue="notEqual" value="5"/><TransitionNumberCondition inputId="0:87" opValue="notEqual" value="9"/></StateTransition><StateTransition stateToId="0:112" duration="300"><TransitionNumberCondition inputId="0:87" opValue="equal" value="5"/></StateTransition><StateTransition stateToId="0:113" duration="300"><TransitionNumberCondition inputId="0:87" opValue="equal" value="9"/></StateTransition></AnimationState>
+    <AnimationState animationId="0:116" x="600" y="0" id="0:112"><StateTransition stateToId="0:110" duration="300"><TransitionNumberCondition inputId="0:87" opValue="notEqual" value="4"/><TransitionNumberCondition inputId="0:87" opValue="notEqual" value="5"/><TransitionNumberCondition inputId="0:87" opValue="notEqual" value="9"/></StateTransition><StateTransition stateToId="0:111" duration="300"><TransitionNumberCondition inputId="0:87" opValue="equal" value="4"/></StateTransition><StateTransition stateToId="0:113" duration="300"><TransitionNumberCondition inputId="0:87" opValue="equal" value="9"/></StateTransition></AnimationState>
+    <AnimationState animationId="0:117" x="800" y="0" id="0:113"><StateTransition stateToId="0:110" duration="300"><TransitionNumberCondition inputId="0:87" opValue="notEqual" value="4"/><TransitionNumberCondition inputId="0:87" opValue="notEqual" value="5"/><TransitionNumberCondition inputId="0:87" opValue="notEqual" value="9"/></StateTransition><StateTransition stateToId="0:111" duration="300"><TransitionNumberCondition inputId="0:87" opValue="equal" value="4"/></StateTransition><StateTransition stateToId="0:112" duration="300"><TransitionNumberCondition inputId="0:87" opValue="equal" value="5"/></StateTransition></AnimationState>
+  </StateMachineLayer>
+  <StateMachineLayer name="Gaze x" id="0:123">
+    <AnyState x="600" y="-120"/><ExitState x="800" y="-120"/>
+    <EntryState x="0" y="-120"><StateTransition stateToId="0:119"/></EntryState>
+    <BlendState1DInput inputId="0:90" x="200" y="0" id="0:119"><BlendAnimation1D animationId="0:120" value="-1"/><BlendAnimation1D animationId="0:121" value="0"/><BlendAnimation1D animationId="0:122" value="1"/></BlendState1DInput>
+  </StateMachineLayer>
+  <StateMachineLayer name="Gaze y" id="0:128">
+    <AnyState x="600" y="-120"/><ExitState x="800" y="-120"/>
+    <EntryState x="0" y="-120"><StateTransition stateToId="0:124"/></EntryState>
+    <BlendState1DInput inputId="0:91" x="200" y="0" id="0:124"><BlendAnimation1D animationId="0:125" value="-1"/><BlendAnimation1D animationId="0:126" value="0"/><BlendAnimation1D animationId="0:127" value="1"/></BlendState1DInput>
+  </StateMachineLayer>
+  <StateMachineLayer name="Viseme" id="0:139">
+    <AnyState x="600" y="-120"/><ExitState x="800" y="-120"/>
+    <EntryState x="0" y="-120"><StateTransition stateToId="0:129"/></EntryState>
+    <AnimationState animationId="0:134" x="200" y="0" id="0:129"><StateTransition stateToId="0:130" duration="60"><TransitionNumberCondition inputId="0:94" opValue="equal" value="1"/></StateTransition><StateTransition stateToId="0:131" duration="60"><TransitionNumberCondition inputId="0:94" opValue="equal" value="2"/></StateTransition><StateTransition stateToId="0:132" duration="60"><TransitionNumberCondition inputId="0:94" opValue="equal" value="3"/></StateTransition><StateTransition stateToId="0:133" duration="60"><TransitionNumberCondition inputId="0:94" opValue="equal" value="4"/></StateTransition></AnimationState>
+    <AnimationState animationId="0:135" x="400" y="0" id="0:130"><StateTransition stateToId="0:129" duration="60"><TransitionNumberCondition inputId="0:94" opValue="equal" value="0"/></StateTransition><StateTransition stateToId="0:131" duration="60"><TransitionNumberCondition inputId="0:94" opValue="equal" value="2"/></StateTransition><StateTransition stateToId="0:132" duration="60"><TransitionNumberCondition inputId="0:94" opValue="equal" value="3"/></StateTransition><StateTransition stateToId="0:133" duration="60"><TransitionNumberCondition inputId="0:94" opValue="equal" value="4"/></StateTransition></AnimationState>
+    <AnimationState animationId="0:136" x="600" y="0" id="0:131"><StateTransition stateToId="0:129" duration="60"><TransitionNumberCondition inputId="0:94" opValue="equal" value="0"/></StateTransition><StateTransition stateToId="0:130" duration="60"><TransitionNumberCondition inputId="0:94" opValue="equal" value="1"/></StateTransition><StateTransition stateToId="0:132" duration="60"><TransitionNumberCondition inputId="0:94" opValue="equal" value="3"/></StateTransition><StateTransition stateToId="0:133" duration="60"><TransitionNumberCondition inputId="0:94" opValue="equal" value="4"/></StateTransition></AnimationState>
+    <AnimationState animationId="0:137" x="800" y="0" id="0:132"><StateTransition stateToId="0:129" duration="60"><TransitionNumberCondition inputId="0:94" opValue="equal" value="0"/></StateTransition><StateTransition stateToId="0:130" duration="60"><TransitionNumberCondition inputId="0:94" opValue="equal" value="1"/></StateTransition><StateTransition stateToId="0:131" duration="60"><TransitionNumberCondition inputId="0:94" opValue="equal" value="2"/></StateTransition><StateTransition stateToId="0:133" duration="60"><TransitionNumberCondition inputId="0:94" opValue="equal" value="4"/></StateTransition></AnimationState>
+    <AnimationState animationId="0:138" x="1000" y="0" id="0:133"><StateTransition stateToId="0:129" duration="60"><TransitionNumberCondition inputId="0:94" opValue="equal" value="0"/></StateTransition><StateTransition stateToId="0:130" duration="60"><TransitionNumberCondition inputId="0:94" opValue="equal" value="1"/></StateTransition><StateTransition stateToId="0:131" duration="60"><TransitionNumberCondition inputId="0:94" opValue="equal" value="2"/></StateTransition><StateTransition stateToId="0:132" duration="60"><TransitionNumberCondition inputId="0:94" opValue="equal" value="3"/></StateTransition></AnimationState>
+  </StateMachineLayer>
+  <StateMachineLayer name="Mouth" id="0:143">
+    <AnyState x="600" y="-120"/><ExitState x="800" y="-120"/>
+    <EntryState x="0" y="-120"><StateTransition stateToId="0:140"/></EntryState>
+    <BlendState1DInput inputId="0:92" x="200" y="0" id="0:140"><BlendAnimation1D animationId="0:141" value="0"/><BlendAnimation1D animationId="0:142" value="1"/></BlendState1DInput>
+  </StateMachineLayer>
+  <StateMachineLayer name="Action" id="0:158">
+    <AnyState x="600" y="-120"/><ExitState x="800" y="-120"/>
+    <EntryState x="0" y="-120"><StateTransition stateToId="0:144"/></EntryState>
+    <AnimationState animationId="0:151" x="200" y="0" id="0:144"><StateTransition stateToId="0:148" duration="250"><TransitionNumberCondition inputId="0:95" opValue="equal" value="1"/></StateTransition><StateTransition stateToId="0:149" duration="250"><TransitionNumberCondition inputId="0:95" opValue="equal" value="2"/></StateTransition><StateTransition stateToId="0:150" duration="250"><TransitionNumberCondition inputId="0:95" opValue="equal" value="7"/></StateTransition><StateTransition stateToId="0:145" duration="80"><TransitionTriggerCondition inputId="0:100"/></StateTransition><StateTransition stateToId="0:146" duration="80"><TransitionTriggerCondition inputId="0:97"/></StateTransition><StateTransition stateToId="0:147" duration="80"><TransitionTriggerCondition inputId="0:96"/></StateTransition></AnimationState>
+    <AnimationState animationId="0:152" reset="true" x="400" y="160" id="0:145"><StateTransition stateToId="0:144" duration="120" enableExitTime="true" exitTimeIsPercetange="true" exitTime="100"/></AnimationState>
+    <AnimationState animationId="0:153" x="400" y="320" id="0:148"><StateTransition stateToId="0:144" duration="300"><TransitionNumberCondition inputId="0:95" opValue="notEqual" value="1"/></StateTransition></AnimationState>
+    <AnimationState animationId="0:154" reset="true" x="600" y="160" id="0:146"><StateTransition stateToId="0:144" duration="120" enableExitTime="true" exitTimeIsPercetange="true" exitTime="100"/></AnimationState>
+    <AnimationState animationId="0:155" x="600" y="320" id="0:149"><StateTransition stateToId="0:144" duration="300"><TransitionNumberCondition inputId="0:95" opValue="notEqual" value="2"/></StateTransition></AnimationState>
+    <AnimationState animationId="0:156" reset="true" x="800" y="160" id="0:147"><StateTransition stateToId="0:144" duration="120" enableExitTime="true" exitTimeIsPercetange="true" exitTime="100"/></AnimationState>
+    <AnimationState animationId="0:157" x="800" y="320" id="0:150"><StateTransition stateToId="0:144" duration="300"><TransitionNumberCondition inputId="0:95" opValue="notEqual" value="7"/></StateTransition></AnimationState>
+  </StateMachineLayer>
+</StateMachine>
+<LinearAnimation loopValue="loop" fps="60" duration="240" name="idle_breathe" id="0:105">
+  <KeyedObject objectId="0:16">
+    <KeyedProperty propertyKey="17">
+      <KeyFrameDouble value="1" frame="0" interpolationType="cubic"><CubicEaseInterpolator x1="0.42" y1="0" x2="0.58" y2="1"/></KeyFrameDouble>
+      <KeyFrameDouble value="1.012" frame="120" interpolationType="cubic"><CubicEaseInterpolator x1="0.42" y1="0" x2="0.58" y2="1"/></KeyFrameDouble>
+      <KeyFrameDouble value="1" frame="240"/>
+    </KeyedProperty>
+  </KeyedObject>
+  <KeyedObject objectId="0:17">
+    <KeyedProperty propertyKey="14">
+      <KeyFrameDouble value="-45.0087" frame="0" interpolationType="cubic"><CubicEaseInterpolator x1="0.42" y1="0" x2="0.58" y2="1"/></KeyFrameDouble>
+      <KeyFrameDouble value="-45.6087" frame="120" interpolationType="cubic"><CubicEaseInterpolator x1="0.42" y1="0" x2="0.58" y2="1"/></KeyFrameDouble>
+      <KeyFrameDouble value="-45.0087" frame="240"/>
+    </KeyedProperty>
+  </KeyedObject>
+  <KeyedObject objectId="0:42">
+    <KeyedProperty propertyKey="14">
+      <KeyFrameDouble value="0" frame="0" interpolationType="cubic"><CubicEaseInterpolator x1="0.42" y1="0" x2="0.58" y2="1"/></KeyFrameDouble>
+      <KeyFrameDouble value="-1.5" frame="120" interpolationType="cubic"><CubicEaseInterpolator x1="0.42" y1="0" x2="0.58" y2="1"/></KeyFrameDouble>
+      <KeyFrameDouble value="0" frame="240"/>
+    </KeyedProperty>
+    <KeyedProperty propertyKey="15">
+      <KeyFrameDouble value="0" frame="0" interpolationType="cubic"><CubicEaseInterpolator x1="0.42" y1="0" x2="0.58" y2="1"/></KeyFrameDouble>
+      <KeyFrameDouble value="0.03" frame="120" interpolationType="cubic"><CubicEaseInterpolator x1="0.42" y1="0" x2="0.58" y2="1"/></KeyFrameDouble>
+      <KeyFrameDouble value="0" frame="240"/>
+    </KeyedProperty>
+  </KeyedObject>
+</LinearAnimation>
+<LinearAnimation loopValue="loop" fps="60" duration="360" name="blink" id="0:108">
+  <KeyedObject objectId="0:24">
+    <KeyedProperty propertyKey="17">
+      <KeyFrameDouble value="0.02" frame="0" interpolationType="cubic"><CubicEaseInterpolator x1="0.42" y1="0" x2="0.58" y2="1"/></KeyFrameDouble>
+      <KeyFrameDouble value="0.02" frame="138" interpolationType="cubic"><CubicEaseInterpolator x1="0.42" y1="0" x2="0.58" y2="1"/></KeyFrameDouble>
+      <KeyFrameDouble value="1" frame="142" interpolationType="cubic"><CubicEaseInterpolator x1="0.42" y1="0" x2="0.58" y2="1"/></KeyFrameDouble>
+      <KeyFrameDouble value="0.02" frame="148" interpolationType="cubic"><CubicEaseInterpolator x1="0.42" y1="0" x2="0.58" y2="1"/></KeyFrameDouble>
+      <KeyFrameDouble value="0.02" frame="276" interpolationType="cubic"><CubicEaseInterpolator x1="0.42" y1="0" x2="0.58" y2="1"/></KeyFrameDouble>
+      <KeyFrameDouble value="1" frame="280" interpolationType="cubic"><CubicEaseInterpolator x1="0.42" y1="0" x2="0.58" y2="1"/></KeyFrameDouble>
+      <KeyFrameDouble value="0.02" frame="286" interpolationType="cubic"><CubicEaseInterpolator x1="0.42" y1="0" x2="0.58" y2="1"/></KeyFrameDouble>
+      <KeyFrameDouble value="0.02" frame="360"/>
+    </KeyedProperty>
+  </KeyedObject>
+  <KeyedObject objectId="0:80">
+    <KeyedProperty propertyKey="18">
+      <KeyFrameDouble value="0" frame="0" interpolationType="cubic"><CubicEaseInterpolator x1="0.42" y1="0" x2="0.58" y2="1"/></KeyFrameDouble>
+      <KeyFrameDouble value="0" frame="140" interpolationType="cubic"><CubicEaseInterpolator x1="0.42" y1="0" x2="0.58" y2="1"/></KeyFrameDouble>
+      <KeyFrameDouble value="1" frame="142" interpolationType="cubic"><CubicEaseInterpolator x1="0.42" y1="0" x2="0.58" y2="1"/></KeyFrameDouble>
+      <KeyFrameDouble value="0" frame="145" interpolationType="cubic"><CubicEaseInterpolator x1="0.42" y1="0" x2="0.58" y2="1"/></KeyFrameDouble>
+      <KeyFrameDouble value="0" frame="278" interpolationType="cubic"><CubicEaseInterpolator x1="0.42" y1="0" x2="0.58" y2="1"/></KeyFrameDouble>
+      <KeyFrameDouble value="1" frame="280" interpolationType="cubic"><CubicEaseInterpolator x1="0.42" y1="0" x2="0.58" y2="1"/></KeyFrameDouble>
+      <KeyFrameDouble value="0" frame="283" interpolationType="cubic"><CubicEaseInterpolator x1="0.42" y1="0" x2="0.58" y2="1"/></KeyFrameDouble>
+      <KeyFrameDouble value="0" frame="360"/>
+    </KeyedProperty>
+  </KeyedObject>
+  <KeyedObject objectId="0:81">
+    <KeyedProperty propertyKey="18">
+      <KeyFrameDouble value="1" frame="0" interpolationType="cubic"><CubicEaseInterpolator x1="0.42" y1="0" x2="0.58" y2="1"/></KeyFrameDouble>
+      <KeyFrameDouble value="1" frame="138" interpolationType="cubic"><CubicEaseInterpolator x1="0.42" y1="0" x2="0.58" y2="1"/></KeyFrameDouble>
+      <KeyFrameDouble value="0" frame="140" interpolationType="cubic"><CubicEaseInterpolator x1="0.42" y1="0" x2="0.58" y2="1"/></KeyFrameDouble>
+      <KeyFrameDouble value="0" frame="145" interpolationType="cubic"><CubicEaseInterpolator x1="0.42" y1="0" x2="0.58" y2="1"/></KeyFrameDouble>
+      <KeyFrameDouble value="1" frame="148" interpolationType="cubic"><CubicEaseInterpolator x1="0.42" y1="0" x2="0.58" y2="1"/></KeyFrameDouble>
+      <KeyFrameDouble value="1" frame="276" interpolationType="cubic"><CubicEaseInterpolator x1="0.42" y1="0" x2="0.58" y2="1"/></KeyFrameDouble>
+      <KeyFrameDouble value="0" frame="278" interpolationType="cubic"><CubicEaseInterpolator x1="0.42" y1="0" x2="0.58" y2="1"/></KeyFrameDouble>
+      <KeyFrameDouble value="0" frame="283" interpolationType="cubic"><CubicEaseInterpolator x1="0.42" y1="0" x2="0.58" y2="1"/></KeyFrameDouble>
+      <KeyFrameDouble value="1" frame="286" interpolationType="cubic"><CubicEaseInterpolator x1="0.42" y1="0" x2="0.58" y2="1"/></KeyFrameDouble>
+      <KeyFrameDouble value="1" frame="360"/>
+    </KeyedProperty>
+  </KeyedObject>
+  <KeyedObject objectId="0:25">
+    <KeyedProperty propertyKey="17">
+      <KeyFrameDouble value="0.02" frame="0" interpolationType="cubic"><CubicEaseInterpolator x1="0.42" y1="0" x2="0.58" y2="1"/></KeyFrameDouble>
+      <KeyFrameDouble value="0.02" frame="138" interpolationType="cubic"><CubicEaseInterpolator x1="0.42" y1="0" x2="0.58" y2="1"/></KeyFrameDouble>
+      <KeyFrameDouble value="1" frame="142" interpolationType="cubic"><CubicEaseInterpolator x1="0.42" y1="0" x2="0.58" y2="1"/></KeyFrameDouble>
+      <KeyFrameDouble value="0.02" frame="148" interpolationType="cubic"><CubicEaseInterpolator x1="0.42" y1="0" x2="0.58" y2="1"/></KeyFrameDouble>
+      <KeyFrameDouble value="0.02" frame="276" interpolationType="cubic"><CubicEaseInterpolator x1="0.42" y1="0" x2="0.58" y2="1"/></KeyFrameDouble>
+      <KeyFrameDouble value="1" frame="280" interpolationType="cubic"><CubicEaseInterpolator x1="0.42" y1="0" x2="0.58" y2="1"/></KeyFrameDouble>
+      <KeyFrameDouble value="0.02" frame="286" interpolationType="cubic"><CubicEaseInterpolator x1="0.42" y1="0" x2="0.58" y2="1"/></KeyFrameDouble>
+      <KeyFrameDouble value="0.02" frame="360"/>
+    </KeyedProperty>
+  </KeyedObject>
+  <KeyedObject objectId="0:85">
+    <KeyedProperty propertyKey="18">
+      <KeyFrameDouble value="0" frame="0" interpolationType="cubic"><CubicEaseInterpolator x1="0.42" y1="0" x2="0.58" y2="1"/></KeyFrameDouble>
+      <KeyFrameDouble value="0" frame="140" interpolationType="cubic"><CubicEaseInterpolator x1="0.42" y1="0" x2="0.58" y2="1"/></KeyFrameDouble>
+      <KeyFrameDouble value="1" frame="142" interpolationType="cubic"><CubicEaseInterpolator x1="0.42" y1="0" x2="0.58" y2="1"/></KeyFrameDouble>
+      <KeyFrameDouble value="0" frame="145" interpolationType="cubic"><CubicEaseInterpolator x1="0.42" y1="0" x2="0.58" y2="1"/></KeyFrameDouble>
+      <KeyFrameDouble value="0" frame="278" interpolationType="cubic"><CubicEaseInterpolator x1="0.42" y1="0" x2="0.58" y2="1"/></KeyFrameDouble>
+      <KeyFrameDouble value="1" frame="280" interpolationType="cubic"><CubicEaseInterpolator x1="0.42" y1="0" x2="0.58" y2="1"/></KeyFrameDouble>
+      <KeyFrameDouble value="0" frame="283" interpolationType="cubic"><CubicEaseInterpolator x1="0.42" y1="0" x2="0.58" y2="1"/></KeyFrameDouble>
+      <KeyFrameDouble value="0" frame="360"/>
+    </KeyedProperty>
+  </KeyedObject>
+  <KeyedObject objectId="0:86">
+    <KeyedProperty propertyKey="18">
+      <KeyFrameDouble value="1" frame="0" interpolationType="cubic"><CubicEaseInterpolator x1="0.42" y1="0" x2="0.58" y2="1"/></KeyFrameDouble>
+      <KeyFrameDouble value="1" frame="138" interpolationType="cubic"><CubicEaseInterpolator x1="0.42" y1="0" x2="0.58" y2="1"/></KeyFrameDouble>
+      <KeyFrameDouble value="0" frame="140" interpolationType="cubic"><CubicEaseInterpolator x1="0.42" y1="0" x2="0.58" y2="1"/></KeyFrameDouble>
+      <KeyFrameDouble value="0" frame="145" interpolationType="cubic"><CubicEaseInterpolator x1="0.42" y1="0" x2="0.58" y2="1"/></KeyFrameDouble>
+      <KeyFrameDouble value="1" frame="148" interpolationType="cubic"><CubicEaseInterpolator x1="0.42" y1="0" x2="0.58" y2="1"/></KeyFrameDouble>
+      <KeyFrameDouble value="1" frame="276" interpolationType="cubic"><CubicEaseInterpolator x1="0.42" y1="0" x2="0.58" y2="1"/></KeyFrameDouble>
+      <KeyFrameDouble value="0" frame="278" interpolationType="cubic"><CubicEaseInterpolator x1="0.42" y1="0" x2="0.58" y2="1"/></KeyFrameDouble>
+      <KeyFrameDouble value="0" frame="283" interpolationType="cubic"><CubicEaseInterpolator x1="0.42" y1="0" x2="0.58" y2="1"/></KeyFrameDouble>
+      <KeyFrameDouble value="1" frame="286" interpolationType="cubic"><CubicEaseInterpolator x1="0.42" y1="0" x2="0.58" y2="1"/></KeyFrameDouble>
+      <KeyFrameDouble value="1" frame="360"/>
+    </KeyedProperty>
+  </KeyedObject>
+</LinearAnimation>
+<LinearAnimation loopValue="oneShot" fps="60" duration="1" name="state_idle" id="0:114">
+  <KeyedObject objectId="0:18">
+    <KeyedProperty propertyKey="15">
+      <KeyFrameDouble value="0" frame="0"/>
+    </KeyedProperty>
+  </KeyedObject>
+  <KeyedObject objectId="0:30">
+    <KeyedProperty propertyKey="14">
+      <KeyFrameDouble value="-83.1205" frame="0"/>
+    </KeyedProperty>
+  </KeyedObject>
+  <KeyedObject objectId="0:26">
+    <KeyedProperty propertyKey="13">
+      <KeyFrameDouble value="4.1923" frame="0"/>
+    </KeyedProperty>
+    <KeyedProperty propertyKey="14">
+      <KeyFrameDouble value="-0.75" frame="0"/>
+    </KeyedProperty>
+  </KeyedObject>
+  <KeyedObject objectId="0:31">
+    <KeyedProperty propertyKey="14">
+      <KeyFrameDouble value="-90.5205" frame="0"/>
+    </KeyedProperty>
+  </KeyedObject>
+  <KeyedObject objectId="0:27">
+    <KeyedProperty propertyKey="13">
+      <KeyFrameDouble value="-3.5" frame="0"/>
+    </KeyedProperty>
+    <KeyedProperty propertyKey="14">
+      <KeyFrameDouble value="-0.4" frame="0"/>
+    </KeyedProperty>
+  </KeyedObject>
+  <KeyedObject objectId="0:41">
+    <KeyedProperty propertyKey="14">
+      <KeyFrameDouble value="-161.9483" frame="0"/>
+    </KeyedProperty>
+  </KeyedObject>
+</LinearAnimation>
+<LinearAnimation loopValue="oneShot" fps="60" duration="1" name="state_listening" id="0:115">
+  <KeyedObject objectId="0:18">
+    <KeyedProperty propertyKey="15">
+      <KeyFrameDouble value="0.0873" frame="0"/>
+    </KeyedProperty>
+  </KeyedObject>
+  <KeyedObject objectId="0:30">
+    <KeyedProperty propertyKey="14">
+      <KeyFrameDouble value="-85.1205" frame="0"/>
+    </KeyedProperty>
+  </KeyedObject>
+  <KeyedObject objectId="0:26">
+    <KeyedProperty propertyKey="13">
+      <KeyFrameDouble value="4.1923" frame="0"/>
+    </KeyedProperty>
+    <KeyedProperty propertyKey="14">
+      <KeyFrameDouble value="-0.75" frame="0"/>
+    </KeyedProperty>
+  </KeyedObject>
+  <KeyedObject objectId="0:31">
+    <KeyedProperty propertyKey="14">
+      <KeyFrameDouble value="-92.5205" frame="0"/>
+    </KeyedProperty>
+  </KeyedObject>
+  <KeyedObject objectId="0:27">
+    <KeyedProperty propertyKey="13">
+      <KeyFrameDouble value="-3.5" frame="0"/>
+    </KeyedProperty>
+    <KeyedProperty propertyKey="14">
+      <KeyFrameDouble value="-0.4" frame="0"/>
+    </KeyedProperty>
+  </KeyedObject>
+  <KeyedObject objectId="0:41">
+    <KeyedProperty propertyKey="14">
+      <KeyFrameDouble value="-161.9483" frame="0"/>
+    </KeyedProperty>
+  </KeyedObject>
+</LinearAnimation>
+<LinearAnimation loopValue="oneShot" fps="60" duration="1" name="state_thinking" id="0:116">
+  <KeyedObject objectId="0:18">
+    <KeyedProperty propertyKey="15">
+      <KeyFrameDouble value="-0.0698" frame="0"/>
+    </KeyedProperty>
+  </KeyedObject>
+  <KeyedObject objectId="0:30">
+    <KeyedProperty propertyKey="14">
+      <KeyFrameDouble value="-84.1205" frame="0"/>
+    </KeyedProperty>
+  </KeyedObject>
+  <KeyedObject objectId="0:26">
+    <KeyedProperty propertyKey="13">
+      <KeyFrameDouble value="6.1923" frame="0"/>
+    </KeyedProperty>
+    <KeyedProperty propertyKey="14">
+      <KeyFrameDouble value="-2.95" frame="0"/>
+    </KeyedProperty>
+  </KeyedObject>
+  <KeyedObject objectId="0:31">
+    <KeyedProperty propertyKey="14">
+      <KeyFrameDouble value="-91.5205" frame="0"/>
+    </KeyedProperty>
+  </KeyedObject>
+  <KeyedObject objectId="0:27">
+    <KeyedProperty propertyKey="13">
+      <KeyFrameDouble value="-1.5" frame="0"/>
+    </KeyedProperty>
+    <KeyedProperty propertyKey="14">
+      <KeyFrameDouble value="-2.6" frame="0"/>
+    </KeyedProperty>
+  </KeyedObject>
+  <KeyedObject objectId="0:41">
+    <KeyedProperty propertyKey="14">
+      <KeyFrameDouble value="-169.9483" frame="0"/>
+    </KeyedProperty>
+  </KeyedObject>
+</LinearAnimation>
+<LinearAnimation loopValue="oneShot" fps="60" duration="1" name="state_speaking" id="0:117">
+  <KeyedObject objectId="0:18">
+    <KeyedProperty propertyKey="15">
+      <KeyFrameDouble value="0.0349" frame="0"/>
+    </KeyedProperty>
+  </KeyedObject>
+  <KeyedObject objectId="0:30">
+    <KeyedProperty propertyKey="14">
+      <KeyFrameDouble value="-84.6205" frame="0"/>
+    </KeyedProperty>
+  </KeyedObject>
+  <KeyedObject objectId="0:26">
+    <KeyedProperty propertyKey="13">
+      <KeyFrameDouble value="4.1923" frame="0"/>
+    </KeyedProperty>
+    <KeyedProperty propertyKey="14">
+      <KeyFrameDouble value="-0.75" frame="0"/>
+    </KeyedProperty>
+  </KeyedObject>
+  <KeyedObject objectId="0:31">
+    <KeyedProperty propertyKey="14">
+      <KeyFrameDouble value="-92.0205" frame="0"/>
+    </KeyedProperty>
+  </KeyedObject>
+  <KeyedObject objectId="0:27">
+    <KeyedProperty propertyKey="13">
+      <KeyFrameDouble value="-3.5" frame="0"/>
+    </KeyedProperty>
+    <KeyedProperty propertyKey="14">
+      <KeyFrameDouble value="-0.4" frame="0"/>
+    </KeyedProperty>
+  </KeyedObject>
+  <KeyedObject objectId="0:41">
+    <KeyedProperty propertyKey="14">
+      <KeyFrameDouble value="-161.9483" frame="0"/>
+    </KeyedProperty>
+  </KeyedObject>
+</LinearAnimation>
+<LinearAnimation loopValue="oneShot" fps="60" duration="1" name="gaze_x_neg" id="0:120">
+  <KeyedObject objectId="0:28">
+    <KeyedProperty propertyKey="13">
+      <KeyFrameDouble value="-3.5" frame="0"/>
+    </KeyedProperty>
+  </KeyedObject>
+  <KeyedObject objectId="0:29">
+    <KeyedProperty propertyKey="13">
+      <KeyFrameDouble value="-3.5" frame="0"/>
+    </KeyedProperty>
+  </KeyedObject>
+  <KeyedObject objectId="0:21">
+    <KeyedProperty propertyKey="15">
+      <KeyFrameDouble value="-0.04" frame="0"/>
+    </KeyedProperty>
+  </KeyedObject>
+</LinearAnimation>
+<LinearAnimation loopValue="oneShot" fps="60" duration="1" name="gaze_x_mid" id="0:121">
+  <KeyedObject objectId="0:28">
+    <KeyedProperty propertyKey="13">
+      <KeyFrameDouble value="0" frame="0"/>
+    </KeyedProperty>
+  </KeyedObject>
+  <KeyedObject objectId="0:29">
+    <KeyedProperty propertyKey="13">
+      <KeyFrameDouble value="0" frame="0"/>
+    </KeyedProperty>
+  </KeyedObject>
+  <KeyedObject objectId="0:21">
+    <KeyedProperty propertyKey="15">
+      <KeyFrameDouble value="0" frame="0"/>
+    </KeyedProperty>
+  </KeyedObject>
+</LinearAnimation>
+<LinearAnimation loopValue="oneShot" fps="60" duration="1" name="gaze_x_pos" id="0:122">
+  <KeyedObject objectId="0:28">
+    <KeyedProperty propertyKey="13">
+      <KeyFrameDouble value="3.5" frame="0"/>
+    </KeyedProperty>
+  </KeyedObject>
+  <KeyedObject objectId="0:29">
+    <KeyedProperty propertyKey="13">
+      <KeyFrameDouble value="3.5" frame="0"/>
+    </KeyedProperty>
+  </KeyedObject>
+  <KeyedObject objectId="0:21">
+    <KeyedProperty propertyKey="15">
+      <KeyFrameDouble value="0.04" frame="0"/>
+    </KeyedProperty>
+  </KeyedObject>
+</LinearAnimation>
+<LinearAnimation loopValue="oneShot" fps="60" duration="1" name="gaze_y_neg" id="0:125">
+  <KeyedObject objectId="0:28">
+    <KeyedProperty propertyKey="14">
+      <KeyFrameDouble value="-2" frame="0"/>
+    </KeyedProperty>
+  </KeyedObject>
+  <KeyedObject objectId="0:29">
+    <KeyedProperty propertyKey="14">
+      <KeyFrameDouble value="-2" frame="0"/>
+    </KeyedProperty>
+  </KeyedObject>
+</LinearAnimation>
+<LinearAnimation loopValue="oneShot" fps="60" duration="1" name="gaze_y_mid" id="0:126">
+  <KeyedObject objectId="0:28">
+    <KeyedProperty propertyKey="14">
+      <KeyFrameDouble value="0" frame="0"/>
+    </KeyedProperty>
+  </KeyedObject>
+  <KeyedObject objectId="0:29">
+    <KeyedProperty propertyKey="14">
+      <KeyFrameDouble value="0" frame="0"/>
+    </KeyedProperty>
+  </KeyedObject>
+</LinearAnimation>
+<LinearAnimation loopValue="oneShot" fps="60" duration="1" name="gaze_y_pos" id="0:127">
+  <KeyedObject objectId="0:28">
+    <KeyedProperty propertyKey="14">
+      <KeyFrameDouble value="2" frame="0"/>
+    </KeyedProperty>
+  </KeyedObject>
+  <KeyedObject objectId="0:29">
+    <KeyedProperty propertyKey="14">
+      <KeyFrameDouble value="2" frame="0"/>
+    </KeyedProperty>
+  </KeyedObject>
+</LinearAnimation>
+<LinearAnimation loopValue="oneShot" fps="60" duration="1" name="viseme_0" id="0:134">
+  <KeyedObject objectId="0:33">
+    <KeyedProperty propertyKey="16">
+      <KeyFrameDouble value="0.55" frame="0"/>
+    </KeyedProperty>
+  </KeyedObject>
+</LinearAnimation>
+<LinearAnimation loopValue="oneShot" fps="60" duration="1" name="viseme_1" id="0:135">
+  <KeyedObject objectId="0:33">
+    <KeyedProperty propertyKey="16">
+      <KeyFrameDouble value="1" frame="0"/>
+    </KeyedProperty>
+  </KeyedObject>
+</LinearAnimation>
+<LinearAnimation loopValue="oneShot" fps="60" duration="1" name="viseme_2" id="0:136">
+  <KeyedObject objectId="0:33">
+    <KeyedProperty propertyKey="16">
+      <KeyFrameDouble value="1.15" frame="0"/>
+    </KeyedProperty>
+  </KeyedObject>
+</LinearAnimation>
+<LinearAnimation loopValue="oneShot" fps="60" duration="1" name="viseme_3" id="0:137">
+  <KeyedObject objectId="0:33">
+    <KeyedProperty propertyKey="16">
+      <KeyFrameDouble value="0.6" frame="0"/>
+    </KeyedProperty>
+  </KeyedObject>
+</LinearAnimation>
+<LinearAnimation loopValue="oneShot" fps="60" duration="1" name="viseme_4" id="0:138">
+  <KeyedObject objectId="0:33">
+    <KeyedProperty propertyKey="16">
+      <KeyFrameDouble value="0.45" frame="0"/>
+    </KeyedProperty>
+  </KeyedObject>
+</LinearAnimation>
+<LinearAnimation loopValue="oneShot" fps="60" duration="1" name="mouth_closed" id="0:141">
+  <KeyedObject objectId="0:34">
+    <KeyedProperty propertyKey="17">
+      <KeyFrameDouble value="0" frame="0"/>
+    </KeyedProperty>
+    <KeyedProperty propertyKey="18">
+      <KeyFrameDouble value="0" frame="0"/>
+    </KeyedProperty>
+  </KeyedObject>
+  <KeyedObject objectId="0:20">
+    <KeyedProperty propertyKey="14">
+      <KeyFrameDouble value="0" frame="0"/>
+    </KeyedProperty>
+  </KeyedObject>
+</LinearAnimation>
+<LinearAnimation loopValue="oneShot" fps="60" duration="1" name="mouth_open" id="0:142">
+  <KeyedObject objectId="0:34">
+    <KeyedProperty propertyKey="17">
+      <KeyFrameDouble value="1" frame="0"/>
+    </KeyedProperty>
+    <KeyedProperty propertyKey="18">
+      <KeyFrameDouble value="1" frame="0"/>
+    </KeyedProperty>
+  </KeyedObject>
+  <KeyedObject objectId="0:20">
+    <KeyedProperty propertyKey="14">
+      <KeyFrameDouble value="-2" frame="0"/>
+    </KeyedProperty>
+  </KeyedObject>
+</LinearAnimation>
+<LinearAnimation loopValue="oneShot" fps="60" duration="1" name="action_none" id="0:151">
+  <KeyedObject objectId="0:38">
+    <KeyedProperty propertyKey="15">
+      <KeyFrameDouble value="0" frame="0"/>
+    </KeyedProperty>
+  </KeyedObject>
+  <KeyedObject objectId="0:39">
+    <KeyedProperty propertyKey="15">
+      <KeyFrameDouble value="0" frame="0"/>
+    </KeyedProperty>
+  </KeyedObject>
+  <KeyedObject objectId="0:40">
+    <KeyedProperty propertyKey="15">
+      <KeyFrameDouble value="0" frame="0"/>
+    </KeyedProperty>
+  </KeyedObject>
+  <KeyedObject objectId="0:19">
+    <KeyedProperty propertyKey="14">
+      <KeyFrameDouble value="0" frame="0"/>
+    </KeyedProperty>
+    <KeyedProperty propertyKey="15">
+      <KeyFrameDouble value="0" frame="0"/>
+    </KeyedProperty>
+  </KeyedObject>
+</LinearAnimation>
+<LinearAnimation loopValue="oneShot" fps="60" duration="114" name="action_hello_wave" id="0:152">
+  <KeyedObject objectId="0:38">
+    <KeyedProperty propertyKey="15">
+      <KeyFrameDouble value="0" frame="0" interpolationType="cubic"><CubicEaseInterpolator x1="0.42" y1="0" x2="0.58" y2="1"/></KeyFrameDouble>
+      <KeyFrameDouble value="-1.05" frame="15" interpolationType="cubic"><CubicEaseInterpolator x1="0.42" y1="0" x2="0.58" y2="1"/></KeyFrameDouble>
+      <KeyFrameDouble value="-1.05" frame="93" interpolationType="cubic"><CubicEaseInterpolator x1="0.42" y1="0" x2="0.58" y2="1"/></KeyFrameDouble>
+      <KeyFrameDouble value="0" frame="114"/>
+    </KeyedProperty>
+  </KeyedObject>
+  <KeyedObject objectId="0:39">
+    <KeyedProperty propertyKey="15">
+      <KeyFrameDouble value="0" frame="0" interpolationType="cubic"><CubicEaseInterpolator x1="0.42" y1="0" x2="0.58" y2="1"/></KeyFrameDouble>
+      <KeyFrameDouble value="-1.55" frame="15" interpolationType="cubic"><CubicEaseInterpolator x1="0.42" y1="0" x2="0.58" y2="1"/></KeyFrameDouble>
+      <KeyFrameDouble value="-1.25" frame="27" interpolationType="cubic"><CubicEaseInterpolator x1="0.42" y1="0" x2="0.58" y2="1"/></KeyFrameDouble>
+      <KeyFrameDouble value="-1.7" frame="39" interpolationType="cubic"><CubicEaseInterpolator x1="0.42" y1="0" x2="0.58" y2="1"/></KeyFrameDouble>
+      <KeyFrameDouble value="-1.25" frame="51" interpolationType="cubic"><CubicEaseInterpolator x1="0.42" y1="0" x2="0.58" y2="1"/></KeyFrameDouble>
+      <KeyFrameDouble value="-1.7" frame="63" interpolationType="cubic"><CubicEaseInterpolator x1="0.42" y1="0" x2="0.58" y2="1"/></KeyFrameDouble>
+      <KeyFrameDouble value="-1.25" frame="75" interpolationType="cubic"><CubicEaseInterpolator x1="0.42" y1="0" x2="0.58" y2="1"/></KeyFrameDouble>
+      <KeyFrameDouble value="-1.55" frame="93" interpolationType="cubic"><CubicEaseInterpolator x1="0.42" y1="0" x2="0.58" y2="1"/></KeyFrameDouble>
+      <KeyFrameDouble value="0" frame="114"/>
+    </KeyedProperty>
+  </KeyedObject>
+  <KeyedObject objectId="0:40">
+    <KeyedProperty propertyKey="15">
+      <KeyFrameDouble value="0" frame="0" interpolationType="cubic"><CubicEaseInterpolator x1="0.42" y1="0" x2="0.58" y2="1"/></KeyFrameDouble>
+      <KeyFrameDouble value="0.1" frame="15" interpolationType="cubic"><CubicEaseInterpolator x1="0.42" y1="0" x2="0.58" y2="1"/></KeyFrameDouble>
+      <KeyFrameDouble value="0.1" frame="93" interpolationType="cubic"><CubicEaseInterpolator x1="0.42" y1="0" x2="0.58" y2="1"/></KeyFrameDouble>
+      <KeyFrameDouble value="0" frame="114"/>
+    </KeyedProperty>
+  </KeyedObject>
+  <KeyedObject objectId="0:19">
+    <KeyedProperty propertyKey="14">
+      <KeyFrameDouble value="0" frame="0" interpolationType="cubic"><CubicEaseInterpolator x1="0.42" y1="0" x2="0.58" y2="1"/></KeyFrameDouble>
+      <KeyFrameDouble value="0" frame="114"/>
+    </KeyedProperty>
+    <KeyedProperty propertyKey="15">
+      <KeyFrameDouble value="0" frame="0" interpolationType="cubic"><CubicEaseInterpolator x1="0.42" y1="0" x2="0.58" y2="1"/></KeyFrameDouble>
+      <KeyFrameDouble value="-0.03" frame="18" interpolationType="cubic"><CubicEaseInterpolator x1="0.42" y1="0" x2="0.58" y2="1"/></KeyFrameDouble>
+      <KeyFrameDouble value="-0.03" frame="93" interpolationType="cubic"><CubicEaseInterpolator x1="0.42" y1="0" x2="0.58" y2="1"/></KeyFrameDouble>
+      <KeyFrameDouble value="0" frame="114"/>
+    </KeyedProperty>
+  </KeyedObject>
+</LinearAnimation>
+<LinearAnimation loopValue="loop" fps="60" duration="24" name="action_hello_wave_hold" id="0:153">
+  <KeyedObject objectId="0:38">
+    <KeyedProperty propertyKey="15">
+      <KeyFrameDouble value="-1.05" frame="0" interpolationType="cubic"><CubicEaseInterpolator x1="0.42" y1="0" x2="0.58" y2="1"/></KeyFrameDouble>
+      <KeyFrameDouble value="-1.05" frame="24"/>
+    </KeyedProperty>
+  </KeyedObject>
+  <KeyedObject objectId="0:39">
+    <KeyedProperty propertyKey="15">
+      <KeyFrameDouble value="-1.25" frame="0" interpolationType="cubic"><CubicEaseInterpolator x1="0.42" y1="0" x2="0.58" y2="1"/></KeyFrameDouble>
+      <KeyFrameDouble value="-1.7" frame="12" interpolationType="cubic"><CubicEaseInterpolator x1="0.42" y1="0" x2="0.58" y2="1"/></KeyFrameDouble>
+      <KeyFrameDouble value="-1.25" frame="24"/>
+    </KeyedProperty>
+  </KeyedObject>
+  <KeyedObject objectId="0:40">
+    <KeyedProperty propertyKey="15">
+      <KeyFrameDouble value="0.1" frame="0" interpolationType="cubic"><CubicEaseInterpolator x1="0.42" y1="0" x2="0.58" y2="1"/></KeyFrameDouble>
+      <KeyFrameDouble value="0.1" frame="24"/>
+    </KeyedProperty>
+  </KeyedObject>
+  <KeyedObject objectId="0:19">
+    <KeyedProperty propertyKey="14">
+      <KeyFrameDouble value="0" frame="0" interpolationType="cubic"><CubicEaseInterpolator x1="0.42" y1="0" x2="0.58" y2="1"/></KeyFrameDouble>
+      <KeyFrameDouble value="0" frame="24"/>
+    </KeyedProperty>
+    <KeyedProperty propertyKey="15">
+      <KeyFrameDouble value="-0.03" frame="0" interpolationType="cubic"><CubicEaseInterpolator x1="0.42" y1="0" x2="0.58" y2="1"/></KeyFrameDouble>
+      <KeyFrameDouble value="-0.03" frame="24"/>
+    </KeyedProperty>
+  </KeyedObject>
+</LinearAnimation>
+<LinearAnimation loopValue="oneShot" fps="60" duration="108" name="action_ack_nod" id="0:154">
+  <KeyedObject objectId="0:19">
+    <KeyedProperty propertyKey="14">
+      <KeyFrameDouble value="0" frame="0" interpolationType="cubic"><CubicEaseInterpolator x1="0.42" y1="0" x2="0.58" y2="1"/></KeyFrameDouble>
+      <KeyFrameDouble value="4" frame="12" interpolationType="cubic"><CubicEaseInterpolator x1="0.42" y1="0" x2="0.58" y2="1"/></KeyFrameDouble>
+      <KeyFrameDouble value="4" frame="78" interpolationType="cubic"><CubicEaseInterpolator x1="0.42" y1="0" x2="0.58" y2="1"/></KeyFrameDouble>
+      <KeyFrameDouble value="1" frame="87" interpolationType="cubic"><CubicEaseInterpolator x1="0.42" y1="0" x2="0.58" y2="1"/></KeyFrameDouble>
+      <KeyFrameDouble value="2.5" frame="96" interpolationType="cubic"><CubicEaseInterpolator x1="0.42" y1="0" x2="0.58" y2="1"/></KeyFrameDouble>
+      <KeyFrameDouble value="0" frame="108"/>
+    </KeyedProperty>
+    <KeyedProperty propertyKey="15">
+      <KeyFrameDouble value="0" frame="0" interpolationType="cubic"><CubicEaseInterpolator x1="0.42" y1="0" x2="0.58" y2="1"/></KeyFrameDouble>
+      <KeyFrameDouble value="0.05" frame="12" interpolationType="cubic"><CubicEaseInterpolator x1="0.42" y1="0" x2="0.58" y2="1"/></KeyFrameDouble>
+      <KeyFrameDouble value="0.05" frame="78" interpolationType="cubic"><CubicEaseInterpolator x1="0.42" y1="0" x2="0.58" y2="1"/></KeyFrameDouble>
+      <KeyFrameDouble value="0" frame="108"/>
+    </KeyedProperty>
+  </KeyedObject>
+  <KeyedObject objectId="0:24">
+    <KeyedProperty propertyKey="17">
+      <KeyFrameDouble value="0.02" frame="0" interpolationType="cubic"><CubicEaseInterpolator x1="0.42" y1="0" x2="0.58" y2="1"/></KeyFrameDouble>
+      <KeyFrameDouble value="0.5" frame="12" interpolationType="cubic"><CubicEaseInterpolator x1="0.42" y1="0" x2="0.58" y2="1"/></KeyFrameDouble>
+      <KeyFrameDouble value="0.5" frame="78" interpolationType="cubic"><CubicEaseInterpolator x1="0.42" y1="0" x2="0.58" y2="1"/></KeyFrameDouble>
+      <KeyFrameDouble value="0.02" frame="108"/>
+    </KeyedProperty>
+  </KeyedObject>
+  <KeyedObject objectId="0:80">
+    <KeyedProperty propertyKey="18">
+      <KeyFrameDouble value="0" frame="0" interpolationType="cubic"><CubicEaseInterpolator x1="0.42" y1="0" x2="0.58" y2="1"/></KeyFrameDouble>
+      <KeyFrameDouble value="1" frame="12" interpolationType="cubic"><CubicEaseInterpolator x1="0.42" y1="0" x2="0.58" y2="1"/></KeyFrameDouble>
+      <KeyFrameDouble value="1" frame="78" interpolationType="cubic"><CubicEaseInterpolator x1="0.42" y1="0" x2="0.58" y2="1"/></KeyFrameDouble>
+      <KeyFrameDouble value="0" frame="108"/>
+    </KeyedProperty>
+  </KeyedObject>
+  <KeyedObject objectId="0:81">
+    <KeyedProperty propertyKey="18">
+      <KeyFrameDouble value="1" frame="0" interpolationType="cubic"><CubicEaseInterpolator x1="0.42" y1="0" x2="0.58" y2="1"/></KeyFrameDouble>
+      <KeyFrameDouble value="0" frame="6" interpolationType="cubic"><CubicEaseInterpolator x1="0.42" y1="0" x2="0.58" y2="1"/></KeyFrameDouble>
+      <KeyFrameDouble value="0" frame="102" interpolationType="cubic"><CubicEaseInterpolator x1="0.42" y1="0" x2="0.58" y2="1"/></KeyFrameDouble>
+      <KeyFrameDouble value="1" frame="108"/>
+    </KeyedProperty>
+  </KeyedObject>
+  <KeyedObject objectId="0:25">
+    <KeyedProperty propertyKey="17">
+      <KeyFrameDouble value="0.02" frame="0" interpolationType="cubic"><CubicEaseInterpolator x1="0.42" y1="0" x2="0.58" y2="1"/></KeyFrameDouble>
+      <KeyFrameDouble value="0.5" frame="12" interpolationType="cubic"><CubicEaseInterpolator x1="0.42" y1="0" x2="0.58" y2="1"/></KeyFrameDouble>
+      <KeyFrameDouble value="0.5" frame="78" interpolationType="cubic"><CubicEaseInterpolator x1="0.42" y1="0" x2="0.58" y2="1"/></KeyFrameDouble>
+      <KeyFrameDouble value="0.02" frame="108"/>
+    </KeyedProperty>
+  </KeyedObject>
+  <KeyedObject objectId="0:85">
+    <KeyedProperty propertyKey="18">
+      <KeyFrameDouble value="0" frame="0" interpolationType="cubic"><CubicEaseInterpolator x1="0.42" y1="0" x2="0.58" y2="1"/></KeyFrameDouble>
+      <KeyFrameDouble value="1" frame="12" interpolationType="cubic"><CubicEaseInterpolator x1="0.42" y1="0" x2="0.58" y2="1"/></KeyFrameDouble>
+      <KeyFrameDouble value="1" frame="78" interpolationType="cubic"><CubicEaseInterpolator x1="0.42" y1="0" x2="0.58" y2="1"/></KeyFrameDouble>
+      <KeyFrameDouble value="0" frame="108"/>
+    </KeyedProperty>
+  </KeyedObject>
+  <KeyedObject objectId="0:86">
+    <KeyedProperty propertyKey="18">
+      <KeyFrameDouble value="1" frame="0" interpolationType="cubic"><CubicEaseInterpolator x1="0.42" y1="0" x2="0.58" y2="1"/></KeyFrameDouble>
+      <KeyFrameDouble value="0" frame="6" interpolationType="cubic"><CubicEaseInterpolator x1="0.42" y1="0" x2="0.58" y2="1"/></KeyFrameDouble>
+      <KeyFrameDouble value="0" frame="102" interpolationType="cubic"><CubicEaseInterpolator x1="0.42" y1="0" x2="0.58" y2="1"/></KeyFrameDouble>
+      <KeyFrameDouble value="1" frame="108"/>
+    </KeyedProperty>
+  </KeyedObject>
+  <KeyedObject objectId="0:38">
+    <KeyedProperty propertyKey="15">
+      <KeyFrameDouble value="0" frame="0" interpolationType="cubic"><CubicEaseInterpolator x1="0.42" y1="0" x2="0.58" y2="1"/></KeyFrameDouble>
+      <KeyFrameDouble value="0" frame="108"/>
+    </KeyedProperty>
+  </KeyedObject>
+  <KeyedObject objectId="0:39">
+    <KeyedProperty propertyKey="15">
+      <KeyFrameDouble value="0" frame="0" interpolationType="cubic"><CubicEaseInterpolator x1="0.42" y1="0" x2="0.58" y2="1"/></KeyFrameDouble>
+      <KeyFrameDouble value="0" frame="108"/>
+    </KeyedProperty>
+  </KeyedObject>
+  <KeyedObject objectId="0:40">
+    <KeyedProperty propertyKey="15">
+      <KeyFrameDouble value="0" frame="0" interpolationType="cubic"><CubicEaseInterpolator x1="0.42" y1="0" x2="0.58" y2="1"/></KeyFrameDouble>
+      <KeyFrameDouble value="0" frame="108"/>
+    </KeyedProperty>
+  </KeyedObject>
+</LinearAnimation>
+<LinearAnimation loopValue="loop" fps="60" duration="72" name="action_ack_nod_hold" id="0:155">
+  <KeyedObject objectId="0:19">
+    <KeyedProperty propertyKey="14">
+      <KeyFrameDouble value="4" frame="0" interpolationType="cubic"><CubicEaseInterpolator x1="0.42" y1="0" x2="0.58" y2="1"/></KeyFrameDouble>
+      <KeyFrameDouble value="2.5" frame="36" interpolationType="cubic"><CubicEaseInterpolator x1="0.42" y1="0" x2="0.58" y2="1"/></KeyFrameDouble>
+      <KeyFrameDouble value="4" frame="72"/>
+    </KeyedProperty>
+    <KeyedProperty propertyKey="15">
+      <KeyFrameDouble value="0.05" frame="0" interpolationType="cubic"><CubicEaseInterpolator x1="0.42" y1="0" x2="0.58" y2="1"/></KeyFrameDouble>
+      <KeyFrameDouble value="0.05" frame="72"/>
+    </KeyedProperty>
+  </KeyedObject>
+  <KeyedObject objectId="0:24">
+    <KeyedProperty propertyKey="17">
+      <KeyFrameDouble value="0.5" frame="0" interpolationType="cubic"><CubicEaseInterpolator x1="0.42" y1="0" x2="0.58" y2="1"/></KeyFrameDouble>
+      <KeyFrameDouble value="0.5" frame="72"/>
+    </KeyedProperty>
+  </KeyedObject>
+  <KeyedObject objectId="0:80">
+    <KeyedProperty propertyKey="18">
+      <KeyFrameDouble value="1" frame="0" interpolationType="cubic"><CubicEaseInterpolator x1="0.42" y1="0" x2="0.58" y2="1"/></KeyFrameDouble>
+      <KeyFrameDouble value="1" frame="72"/>
+    </KeyedProperty>
+  </KeyedObject>
+  <KeyedObject objectId="0:81">
+    <KeyedProperty propertyKey="18">
+      <KeyFrameDouble value="0" frame="0" interpolationType="cubic"><CubicEaseInterpolator x1="0.42" y1="0" x2="0.58" y2="1"/></KeyFrameDouble>
+      <KeyFrameDouble value="0" frame="72"/>
+    </KeyedProperty>
+  </KeyedObject>
+  <KeyedObject objectId="0:25">
+    <KeyedProperty propertyKey="17">
+      <KeyFrameDouble value="0.5" frame="0" interpolationType="cubic"><CubicEaseInterpolator x1="0.42" y1="0" x2="0.58" y2="1"/></KeyFrameDouble>
+      <KeyFrameDouble value="0.5" frame="72"/>
+    </KeyedProperty>
+  </KeyedObject>
+  <KeyedObject objectId="0:85">
+    <KeyedProperty propertyKey="18">
+      <KeyFrameDouble value="1" frame="0" interpolationType="cubic"><CubicEaseInterpolator x1="0.42" y1="0" x2="0.58" y2="1"/></KeyFrameDouble>
+      <KeyFrameDouble value="1" frame="72"/>
+    </KeyedProperty>
+  </KeyedObject>
+  <KeyedObject objectId="0:86">
+    <KeyedProperty propertyKey="18">
+      <KeyFrameDouble value="0" frame="0" interpolationType="cubic"><CubicEaseInterpolator x1="0.42" y1="0" x2="0.58" y2="1"/></KeyFrameDouble>
+      <KeyFrameDouble value="0" frame="72"/>
+    </KeyedProperty>
+  </KeyedObject>
+  <KeyedObject objectId="0:38">
+    <KeyedProperty propertyKey="15">
+      <KeyFrameDouble value="0" frame="0" interpolationType="cubic"><CubicEaseInterpolator x1="0.42" y1="0" x2="0.58" y2="1"/></KeyFrameDouble>
+      <KeyFrameDouble value="0" frame="72"/>
+    </KeyedProperty>
+  </KeyedObject>
+  <KeyedObject objectId="0:39">
+    <KeyedProperty propertyKey="15">
+      <KeyFrameDouble value="0" frame="0" interpolationType="cubic"><CubicEaseInterpolator x1="0.42" y1="0" x2="0.58" y2="1"/></KeyFrameDouble>
+      <KeyFrameDouble value="0" frame="72"/>
+    </KeyedProperty>
+  </KeyedObject>
+  <KeyedObject objectId="0:40">
+    <KeyedProperty propertyKey="15">
+      <KeyFrameDouble value="0" frame="0" interpolationType="cubic"><CubicEaseInterpolator x1="0.42" y1="0" x2="0.58" y2="1"/></KeyFrameDouble>
+      <KeyFrameDouble value="0" frame="72"/>
+    </KeyedProperty>
+  </KeyedObject>
+</LinearAnimation>
+<LinearAnimation loopValue="oneShot" fps="60" duration="108" name="action_point_target" id="0:156">
+  <KeyedObject objectId="0:38">
+    <KeyedProperty propertyKey="15">
+      <KeyFrameDouble value="0" frame="0" interpolationType="cubic"><CubicEaseInterpolator x1="0.42" y1="0" x2="0.58" y2="1"/></KeyFrameDouble>
+      <KeyFrameDouble value="-1.2" frame="15" interpolationType="cubic"><CubicEaseInterpolator x1="0.42" y1="0" x2="0.58" y2="1"/></KeyFrameDouble>
+      <KeyFrameDouble value="-1.2" frame="87" interpolationType="cubic"><CubicEaseInterpolator x1="0.42" y1="0" x2="0.58" y2="1"/></KeyFrameDouble>
+      <KeyFrameDouble value="0" frame="108"/>
+    </KeyedProperty>
+  </KeyedObject>
+  <KeyedObject objectId="0:39">
+    <KeyedProperty propertyKey="15">
+      <KeyFrameDouble value="0" frame="0" interpolationType="cubic"><CubicEaseInterpolator x1="0.42" y1="0" x2="0.58" y2="1"/></KeyFrameDouble>
+      <KeyFrameDouble value="-1.1" frame="15" interpolationType="cubic"><CubicEaseInterpolator x1="0.42" y1="0" x2="0.58" y2="1"/></KeyFrameDouble>
+      <KeyFrameDouble value="-1.1" frame="87" interpolationType="cubic"><CubicEaseInterpolator x1="0.42" y1="0" x2="0.58" y2="1"/></KeyFrameDouble>
+      <KeyFrameDouble value="0" frame="108"/>
+    </KeyedProperty>
+  </KeyedObject>
+  <KeyedObject objectId="0:40">
+    <KeyedProperty propertyKey="15">
+      <KeyFrameDouble value="0" frame="0" interpolationType="cubic"><CubicEaseInterpolator x1="0.42" y1="0" x2="0.58" y2="1"/></KeyFrameDouble>
+      <KeyFrameDouble value="-0.15" frame="15" interpolationType="cubic"><CubicEaseInterpolator x1="0.42" y1="0" x2="0.58" y2="1"/></KeyFrameDouble>
+      <KeyFrameDouble value="-0.15" frame="87" interpolationType="cubic"><CubicEaseInterpolator x1="0.42" y1="0" x2="0.58" y2="1"/></KeyFrameDouble>
+      <KeyFrameDouble value="0" frame="108"/>
+    </KeyedProperty>
+  </KeyedObject>
+  <KeyedObject objectId="0:19">
+    <KeyedProperty propertyKey="14">
+      <KeyFrameDouble value="0" frame="0" interpolationType="cubic"><CubicEaseInterpolator x1="0.42" y1="0" x2="0.58" y2="1"/></KeyFrameDouble>
+      <KeyFrameDouble value="0" frame="108"/>
+    </KeyedProperty>
+    <KeyedProperty propertyKey="15">
+      <KeyFrameDouble value="0" frame="0" interpolationType="cubic"><CubicEaseInterpolator x1="0.42" y1="0" x2="0.58" y2="1"/></KeyFrameDouble>
+      <KeyFrameDouble value="0.04" frame="15" interpolationType="cubic"><CubicEaseInterpolator x1="0.42" y1="0" x2="0.58" y2="1"/></KeyFrameDouble>
+      <KeyFrameDouble value="0.04" frame="87" interpolationType="cubic"><CubicEaseInterpolator x1="0.42" y1="0" x2="0.58" y2="1"/></KeyFrameDouble>
+      <KeyFrameDouble value="0" frame="108"/>
+    </KeyedProperty>
+  </KeyedObject>
+</LinearAnimation>
+<LinearAnimation loopValue="oneShot" fps="60" duration="1" name="action_point_target_hold" id="0:157">
+  <KeyedObject objectId="0:38">
+    <KeyedProperty propertyKey="15">
+      <KeyFrameDouble value="-1.2" frame="0"/>
+    </KeyedProperty>
+  </KeyedObject>
+  <KeyedObject objectId="0:39">
+    <KeyedProperty propertyKey="15">
+      <KeyFrameDouble value="-1.1" frame="0"/>
+    </KeyedProperty>
+  </KeyedObject>
+  <KeyedObject objectId="0:40">
+    <KeyedProperty propertyKey="15">
+      <KeyFrameDouble value="-0.15" frame="0"/>
+    </KeyedProperty>
+  </KeyedObject>
+  <KeyedObject objectId="0:19">
+    <KeyedProperty propertyKey="14">
+      <KeyFrameDouble value="0" frame="0"/>
+    </KeyedProperty>
+    <KeyedProperty propertyKey="15">
+      <KeyFrameDouble value="0.04" frame="0"/>
+    </KeyedProperty>
+  </KeyedObject>
+</LinearAnimation>
+</Artboard>
+<ImageAsset file="layers/00_hair_back.png" name="hair_back" id="0:43"/>
+<ImageAsset file="layers/01_jacket_back.png" name="jacket_back" id="0:44"/>
+<ImageAsset file="layers/02_underlayer.png" name="underlayer" id="0:45"/>
+<ImageAsset file="layers/03_leg_l_upper.png" name="leg_l_upper" id="0:46"/>
+<ImageAsset file="layers/04_leg_l_lower.png" name="leg_l_lower" id="0:47"/>
+<ImageAsset file="layers/05_boot_l.png" name="boot_l" id="0:48"/>
+<ImageAsset file="layers/06_leg_r_upper.png" name="leg_r_upper" id="0:49"/>
+<ImageAsset file="layers/07_leg_r_lower.png" name="leg_r_lower" id="0:50"/>
+<ImageAsset file="layers/08_boot_r.png" name="boot_r" id="0:51"/>
+<ImageAsset file="layers/09_neck.png" name="neck" id="0:52"/>
+<ImageAsset file="layers/10_jacket.png" name="jacket" id="0:53"/>
+<ImageAsset file="layers/11_arm_l_upper.png" name="arm_l_upper" id="0:54"/>
+<ImageAsset file="layers/12_arm_l_fore.png" name="arm_l_fore" id="0:55"/>
+<ImageAsset file="layers/13_hand_l.png" name="hand_l" id="0:56"/>
+<ImageAsset file="layers/14_arm_r_upper.png" name="arm_r_upper" id="0:57"/>
+<ImageAsset file="layers/15_arm_r_fore.png" name="arm_r_fore" id="0:58"/>
+<ImageAsset file="layers/16_hand_r.png" name="hand_r" id="0:59"/>
+<ImageAsset file="layers/17_face.png" name="face" id="0:60"/>
+<ImageAsset file="layers/18_sclera_l.png" name="sclera_l" id="0:61"/>
+<ImageAsset file="layers/19_eye_l.png" name="eye_l" id="0:62"/>
+<ImageAsset file="layers/20_lid_l.png" name="lid_l" id="0:63"/>
+<ImageAsset file="layers/21_sclera_r.png" name="sclera_r" id="0:64"/>
+<ImageAsset file="layers/22_eye_r.png" name="eye_r" id="0:65"/>
+<ImageAsset file="layers/23_lid_r.png" name="lid_r" id="0:66"/>
+<ImageAsset file="layers/24_brow_l.png" name="brow_l" id="0:67"/>
+<ImageAsset file="layers/25_brow_r.png" name="brow_r" id="0:68"/>
+<ImageAsset file="layers/26_mouth.png" name="mouth" id="0:69"/>
+<ImageAsset file="layers/27_visor_lens.png" name="visor_lens" id="0:70"/>
+<ImageAsset file="layers/28_visor_frame.png" name="visor_frame" id="0:71"/>
+<ImageAsset file="layers/29_hair.png" name="hair" id="0:72"/>
+<ImageAsset file="layers/30_orb_shell.png" name="orb_shell" id="0:73"/>
+<ImageAsset file="layers/31_orb_core.png" name="orb_core" id="0:74"/>
+<ImageAsset file="layers/eyelid_l.png" name="eyelid_l" id="0:77"/>
+<ImageAsset file="layers/eyelid_l_over.png" name="eyelid_over_l" id="0:78"/>
+<ImageAsset file="layers/eye_cover_l.png" name="eye_cover_l" id="0:79"/>
+<ImageAsset file="layers/eyelid_r.png" name="eyelid_r" id="0:82"/>
+<ImageAsset file="layers/eyelid_r_over.png" name="eyelid_over_r" id="0:83"/>
+<ImageAsset file="layers/eye_cover_r.png" name="eye_cover_r" id="0:84"/>
+</Rive>

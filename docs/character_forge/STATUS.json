@@ -1,8 +1,8 @@
 {
   "pack": "VAN-CHARACTER-FORGE-DP-R2",
   "baseline_sha": "3c337efe91faa8461dd28b1f18a26cf346a1b66f",
-  "build_ready": false,
-  "current_stage": "admission",
+  "build_ready": true,
+  "current_stage": "core_rig",
   "rive_authored": false,
   "rive_contract_ready": true,
   "rive_runtime_ready": true,
@@ -11,9 +11,9 @@
   "owner_accepted": false,
   "qual_emb_01": "EXTERNAL_ARTEFACT",
   "core_rig": {
-    "candidate_sha256": null,
-    "emulator_validation": "NOT_RUN",
-    "ci_run": null,
+    "candidate_sha256": "597e63d8993f30a4ee51729435e8d72de2bdabb90b66dc6e3e9194c04c1307a3",
+    "emulator_validation": "PASS",
+    "ci_run": "https://github.com/Vanguduza/Van/actions/runs/36135651806",
     "owner_verdict": "NONE"
   },
   "full_rig": {
@@ -27,14 +27,10 @@
     "last_janky_percent": null
   },
   "blockers": [
-    "SOURCE_SET_NOT_ADMITTED",
-    "OWNER_SOURCE_CONFIRMATION_PENDING",
-    "RIVE_CLI_UNPINNED",
-    "LAYER_ARTIFACT_MISSING",
     "RIVE_ASSET_MISSING",
     "S24_DEVICE_GATES_NOT_RUN"
   ],
-  "next_action": "Run the Netcup Character Forge authoring bootstrap after DIAL control setup, then pin the qualified Rive CLI version before M2.",
+  "next_action": "Owner views the exact core candidate on the S24 and records the core verdict",
   "production": {
     "emulator_validation": "NOT_RUN",
     "ci_run": null,

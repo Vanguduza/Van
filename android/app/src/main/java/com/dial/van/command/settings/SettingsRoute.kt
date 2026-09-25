@@ -1,5 +1,8 @@
 package com.dial.van.command.settings
 
+import com.dial.van.onboarding.AskTrigger
+import com.dial.van.onboarding.VanAsks
+import com.dial.van.onboarding.VanPermission
 import android.content.Intent
 import android.provider.Settings
 import androidx.compose.foundation.layout.Arrangement
@@ -95,28 +98,29 @@ fun SettingsRoute(
         verticalArrangement = Arrangement.spacedBy(tokens.space.space3),
         contentPadding = PaddingValues(vertical = tokens.space.space3),
     ) {
-        item { SectionHeader("Settings & Devices", detail = "Pairing, permissions, voice, notifications, diagnostics") }
+        item { SectionHeader("Settings & Devices", detail = "Connection, permissions, voice, notifications, diagnostics") }
 
         item {
             VanPanel {
                 Column(verticalArrangement = Arrangement.spacedBy(tokens.space.space2)) {
-                    val paired = app.gatewayClient.isPaired()
-                    Text("This phone's pairing", style = tokens.type.headline, color = tokens.color.textPrimary)
+                    // A status, never a setup step: this phone is set up by its installer
+                    // (ADR-RB-026), and nothing in the app pairs it (owner direction, 2026-09-25).
+                    val connected = app.gatewayClient.isPaired()
+                    Text("Connection", style = tokens.type.headline, color = tokens.color.textPrimary)
                     Row(horizontalArrangement = Arrangement.spacedBy(tokens.space.space2)) {
                         StatusChip(
-                            label = if (paired) "PAIRED" else "NOT PAIRED",
-                            role = if (paired) StatusSemantics.ROLE_FAVOURABLE else StatusSemantics.ROLE_EVENT_RISK,
+                            label = if (connected) "CONNECTED" else "NOT SET UP",
+                            role = if (connected) StatusSemantics.ROLE_FAVOURABLE else StatusSemantics.ROLE_EVENT_RISK,
                         )
                         StatusChip(
-                            label = if (app.gatewayClient.hasDeviceIdentity()) "HARDWARE-BOUND" else "NOT BOUND",
+                            label = if (app.gatewayClient.hasDeviceIdentity()) "LOCKED TO THIS PHONE" else "NOT LOCKED",
                             role = if (app.gatewayClient.hasDeviceIdentity()) StatusSemantics.ROLE_FAVOURABLE else StatusSemantics.ROLE_EVENT_RISK,
                         )
                     }
                     Text(
                         when {
-                            paired -> "Ingress, revocable device access and the command signing credential are active."
-                            app.provisioning.configured -> "Waiting for the installer. VAN will not ask you for an address or a code — no screen in this app can change where it connects."
-                            else -> "This build was not given the key it needs to be set up, so it cannot be provisioned at all. A rebuild is what it needs."
+                            connected -> "VAN is connected to your gateway, with access that can be revoked and a signing key held by this phone."
+                            else -> "This phone hasn't been set up for VAN yet. That's done when VAN is installed — there is nothing to enter here."
                         },
                         style = tokens.type.body,
                         color = tokens.color.textSecondary,
@@ -130,7 +134,11 @@ fun SettingsRoute(
                 Column(verticalArrangement = Arrangement.spacedBy(tokens.space.space2)) {
                     Text("Floating VAN", style = tokens.type.headline, color = tokens.color.textPrimary)
                     Row(horizontalArrangement = Arrangement.spacedBy(tokens.space.space2)) {
-                        Button(onClick = { FloatingOverlayService.start(app) }) { Text("Start") }
+                        Button(onClick = {
+                            if (!VanAsks.askIfNeeded(context, VanPermission.OVERLAY, AskTrigger.OWNER_REACHED_FOR_IT)) {
+                                FloatingOverlayService.start(app)
+                            }
+                        }) { Text("Start") }
                         Button(onClick = { FloatingOverlayService.stop(app) }) { Text("Stop") }
                     }
                 }
@@ -148,7 +156,11 @@ fun SettingsRoute(
                             role = if (enabled) StatusSemantics.ROLE_FAVOURABLE else StatusSemantics.ROLE_EVENT_RISK,
                         )
                         Button(
-                            onClick = { context.startActivity(Intent(Settings.ACTION_ACCESSIBILITY_SETTINGS)) },
+                            onClick = {
+                                if (!VanAsks.askIfNeeded(context, VanPermission.DISPLAY_AWARENESS, AskTrigger.OWNER_REACHED_FOR_IT)) {
+                                    context.startActivity(Intent(Settings.ACTION_ACCESSIBILITY_SETTINGS))
+                                }
+                            },
                         ) { Text(if (enabled) "Review" else "Enable") }
                     }
                     Text(

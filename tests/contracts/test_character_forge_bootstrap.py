@@ -268,3 +268,40 @@ def test_android_avd_home_is_explicit_and_shared():
     assert 'as_forge env ANDROID_USER_HOME="$ANDROID_USER_HOME" ANDROID_AVD_HOME="$ANDROID_AVD_HOME"' in qualifier
     assert 'export ANDROID_USER_HOME' in worker
     assert 'export ANDROID_AVD_HOME' in worker
+
+
+def test_scripts_the_bootstrap_runs_do_not_depend_on_their_file_mode():
+    # The first live Netcup run qualified GREEN and then died on "Permission denied":
+    # bootstrap-production-v3.sh was committed 100644 and executed directly from the
+    # checkout. Invoking through bash makes the mode irrelevant; the mode is fixed too.
+    import subprocess
+    text = (ROOT / "deploy" / "character-forge" / "bootstrap-netcup-authoring.sh").read_text()
+    assert 'bash "$WORKSPACE/deploy/character-forge/bootstrap-production-v3.sh"' in text
+    modes = subprocess.run(
+        ["git", "ls-files", "-s", "deploy/character-forge"], cwd=ROOT,
+        capture_output=True, text=True, check=True,
+    ).stdout.splitlines()
+    scripts = [line for line in modes if line.endswith(".sh")]
+    assert scripts and all(line.startswith("100755") for line in scripts), scripts
+
+
+def test_stretchy_build_uses_a_forge_owned_checksum_pinned_node():
+    # Netcup's /usr/bin/node links into another user's home, and apt's nodejs/npm would
+    # replace it. The forge installs its own official Node under INSTALL_ROOT, verified by
+    # checksum, and the V3 step builds Stretchy Studio with that Node only.
+    import re
+    base = (ROOT / "deploy" / "character-forge" / "bootstrap-netcup-authoring.sh").read_text()
+    v3 = (ROOT / "deploy" / "character-forge" / "bootstrap-production-v3.sh").read_text()
+    assert re.search(r'^NODE_VERSION="\d+\.\d+\.\d+"$', base, re.M)
+    assert re.search(r'^NODE_SHA256="[0-9a-f]{64}"$', base, re.M)
+    assert 'NODE_URL="https://nodejs.org/dist/' in base
+    assert 'echo "$NODE_SHA256  $TMP_NODE/$NODE_ARCHIVE" | sha256sum -c -' in base
+    apt_block = base[base.index("apt-get install -y --no-install-recommends"):base.index("[[ -x \"$JAVA17_HOME")]
+    assert not re.search(r"\b(nodejs|npm)\b", apt_block), "apt node would overwrite the host's /usr/bin/node"
+    code = "\n".join(l for l in base.splitlines() if not l.lstrip().startswith("#"))
+    assert not re.search(r"(ln|install|cp|mv)\b[^\n]*/usr/(local/)?bin/node\b", code)
+    assert 'NODE_BIN="$INSTALL_ROOT/node/current/bin"' in v3
+    assert 'env PATH="$NODE_BIN:' in v3 and "bash -lc" not in v3
+    # The health check waits for the port instead of racing `systemctl enable --now`.
+    health = v3[v3.index("enable --now van-stretchy-studio"):]
+    assert health.index("for _ in") < health.index('die "Stretchy Studio health check failed"')

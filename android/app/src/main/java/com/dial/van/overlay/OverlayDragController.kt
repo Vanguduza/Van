@@ -67,6 +67,9 @@ internal class OverlayDragController(private val window: OverlayWindowPort) {
         lastDragAtMs = nowMs
         window.showDismissTarget()
         return state.copy(
+            // Picking VAN up closes any open board: the owner is moving him, not working in
+            // it, and a board dragged along beside him would be pushed off the screen.
+            presentation = if (state.presentation in BOARDS) VanOverlayPresentation.FULL_FLOATING else state.presentation,
             dragging = true,
             dismissTargetVisible = true,
             // Quick controls during a drag are a menu that follows the finger.
@@ -146,5 +149,11 @@ internal class OverlayDragController(private val window: OverlayWindowPort) {
     private companion object {
         /** How much of the previous smoothed velocity survives each new sample. */
         const val VELOCITY_SMOOTHING = 0.7f
+
+        val BOARDS = setOf(
+            VanOverlayPresentation.WORKBOARD_COMPACT,
+            VanOverlayPresentation.WORKBOARD_EXPANDED,
+            VanOverlayPresentation.WORKBOARD_MAXIMIZED,
+        )
     }
 }

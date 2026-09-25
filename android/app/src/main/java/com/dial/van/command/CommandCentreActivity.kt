@@ -1,5 +1,8 @@
 package com.dial.van.command
 
+import com.dial.van.onboarding.AskTrigger
+import com.dial.van.onboarding.VanAsks
+import com.dial.van.onboarding.VanPermission
 import android.content.Intent
 import android.net.Uri
 import android.os.Bundle
@@ -67,10 +70,12 @@ import com.dial.van.design.LocalVanTokens
 import com.dial.van.design.VanDensity
 import com.dial.van.design.components.SectionHeader
 import com.dial.van.design.components.VanPressable
+import com.dial.van.overlay.OverlayRecovery
 import com.dial.van.visual.VanGlassTokens
 import com.dial.van.visual.VanPresence
 import com.dial.van.visual.VanTheme
 import com.dial.van.visual.rememberVanEffectBudget
+import com.dial.van.voice.WakeListenerService
 
 /**
  * The Command Centre shell: the Activity, the theme, and the one `NavHost` DNA §4 describes.
@@ -100,6 +105,20 @@ class CommandCentreActivity : FragmentActivity() {
                 }
             }
         }
+    }
+
+    override fun onResume() {
+        super.onResume()
+        // P1-VOICE-001 — the wake listener's only production caller. Resume, not create:
+        // the owner may grant the microphone or install the wake bundle while VAN is open.
+        WakeListenerService.startIfReady(this)
+        // "Hey Van" is ready but VAN cannot hear: he asks once, himself. A "not now" holds
+        // until the owner reaches for voice.
+        if ((application as VanApplication).wakeModel.status().ready) {
+            VanAsks.askIfNeeded(this, VanPermission.MICROPHONE, AskTrigger.VAN_NEEDS_IT)
+        }
+        // process_kill — a force-stop leaves the overlay off with nothing to bring it back.
+        OverlayRecovery.restoreIfOwnerHadItOn(this)
     }
 
     override fun onNewIntent(intent: Intent) {

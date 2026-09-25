@@ -3,8 +3,8 @@ source_of_truth:
 - android/app/src/main/java/com/dial/van/visual/VanStatusPalette.kt
 - android/app/src/main/java/com/dial/van/visual/VanGlassTokens.kt
 source_sha256:
-  android/app/src/main/java/com/dial/van/visual/VanAuraSpec.kt: ccf978e09a45cf81662f43b2dacf56aae5d0b1900be837f40e59865b2631b18f
-  android/app/src/main/java/com/dial/van/visual/VanStatusPalette.kt: 56b00aabab1164b22ad41c0946a3639b5e3b837aff1294932beeb3e17774ec0f
+  android/app/src/main/java/com/dial/van/visual/VanAuraSpec.kt: 212eb60657be65881bbc0baa4b278a64efa8cb04da0b587d8f8ec07e4fdfef9d
+  android/app/src/main/java/com/dial/van/visual/VanStatusPalette.kt: 5146263447a8f9eece1dff2d108be149eeef13ff6a4a693ed58d84150e4602af
   android/app/src/main/java/com/dial/van/visual/VanGlassTokens.kt: 223a573ffdefa3e61006d6c92be0b006d85b136fe39015246ead8d74643bcd06
 ownership: ANDROID_NATIVE — this table tells the Rive author where the field lives so the character never competes with it;
   nothing here is drawn in the .riv
@@ -312,14 +312,14 @@ states:
       node: true
     status_accent: '#FF1744'
   OFFLINE:
-    intensity: 0.12
-    arc: 0.0
+    intensity: 0.16
+    arc: 0.05
     spark: 0.0
     ground: 0.08
     orb: 0.0
-    filaments: 0
+    filaments: 1
     asymmetry: 0.14
-    deform: 0.1
+    deform: 0.12
     envelope_scale: 1.35
     envelope_alpha: 0.06
     semantic_colour: null

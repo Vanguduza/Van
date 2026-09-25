@@ -18,7 +18,6 @@ import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.offset
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
-import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
@@ -29,6 +28,7 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.platform.LocalDensity
 import androidx.compose.ui.semantics.contentDescription
 import androidx.compose.ui.semantics.semantics
 import androidx.compose.ui.unit.dp
@@ -87,9 +87,11 @@ internal data class VanOverlaySurfaceState(
     /** P1-PERF-002 — false when the screen is off, and the frame loop stops. */
     val animate: Boolean,
     val blurBehindActive: Boolean,
-    /** Measured from the window, because only the service has one. */
-    val maximizedWidthDp: Float,
-    val maximizedHeightDp: Float,
+    /**
+     * Where VAN and any open board sit inside the window, in pixels. Measured by the service
+     * ([WorkboardPlacement]), because only it knows the screen and where VAN is on it.
+     */
+    val layout: WorkboardLayout,
 )
 
 /**
@@ -137,65 +139,103 @@ internal fun VanOverlaySurface(
     val conversation by app.commandController.state.collectAsState()
     val systemLine = chrome.healthLine ?: VanPresence.meshCue(degraded)
 
-    // DNA §6 motion: a presentation change is one continuous surface re-shaping, not a
-    // hard cut. Size is owned by the window (the service resizes the layout params), so
-    // only the content cross-fades/scales; reduced motion collapses both to 0ms.
+    // Reduced motion collapses the board transition below to 0ms.
     val reducedMotion = rememberReducedMotion()
     val transitionMs = VanMotionSpec.sharedElementDurationMs(reducedMotion)
     MaterialTheme {
-        AnimatedContent(
-            targetState = state.presentation,
-            transitionSpec = {
-                (fadeIn(tween(transitionMs)) + scaleIn(tween(transitionMs), initialScale = 0.96f))
-                    .togetherWith(fadeOut(tween(transitionMs / 2)))
-                    .using(null)
-            },
-            label = "overlay-presentation",
-        ) { presentation ->
-        when (presentation) {
-            VanOverlayPresentation.FULL_FLOATING -> FullFloatingPresence(
-                visualState = visualState,
-                showControls = state.quickControlsVisible,
-                state = state,
-                actions = actions,
-            )
-            VanOverlayPresentation.WORKBOARD_COMPACT -> CompactWorkboard(
-                state = state,
-                actions = actions,
-                app = app,
-                visualState = visualState,
-                glass = glass,
-                caption = chrome.caption,
-                healthLine = chrome.healthLine,
-                accent = chrome.accent,
-                latestMessage = conversation.messages.lastOrNull()?.text,
-            )
-            VanOverlayPresentation.WORKBOARD_EXPANDED -> ExpandedWorkboard(
-                state = state,
-                actions = actions,
-                app = app,
-                visualState = visualState,
-                glass = glass,
-                headline = chrome.headline,
-                caption = chrome.caption,
-                systemLine = systemLine,
-                accent = chrome.accent,
-                messages = conversation.messages,
-            )
-            VanOverlayPresentation.WORKBOARD_MAXIMIZED -> MaximizedWorkboard(
-                state = state,
-                actions = actions,
-                app = app,
-                visualState = visualState,
-                glass = glass,
-                headline = chrome.headline,
-                systemLine = systemLine,
-                accent = chrome.accent,
-                messages = conversation.messages,
-            )
+        when (state.presentation) {
             VanOverlayPresentation.MINIMIZED -> MinimizedPresence(visualState, actions)
             VanOverlayPresentation.DOCKED -> DockedPresence(visualState, state, actions)
+            else -> FloatingGroup(state = state, actions = actions, visualState = visualState) { presentation ->
+                // DNA §6 motion: a board change is one continuous surface re-shaping, not a
+                // hard cut. Only the board cross-fades; VAN beside it is never re-created, so
+                // his drag, his animation clock and his aura carry straight through.
+                AnimatedContent(
+                    targetState = presentation,
+                    transitionSpec = {
+                        (fadeIn(tween(transitionMs)) + scaleIn(tween(transitionMs), initialScale = 0.96f))
+                            .togetherWith(fadeOut(tween(transitionMs / 2)))
+                            .using(null)
+                    },
+                    label = "overlay-board",
+                ) { board ->
+                    when (board) {
+                        VanOverlayPresentation.WORKBOARD_COMPACT -> CompactWorkboard(
+                            state = state,
+                            actions = actions,
+                            app = app,
+                            glass = glass,
+                            caption = chrome.caption,
+                            healthLine = chrome.healthLine,
+                            accent = chrome.accent,
+                            latestMessage = conversation.messages.lastOrNull()?.text,
+                        )
+                        VanOverlayPresentation.WORKBOARD_EXPANDED -> ExpandedWorkboard(
+                            state = state,
+                            actions = actions,
+                            app = app,
+                            glass = glass,
+                            headline = chrome.headline,
+                            caption = chrome.caption,
+                            systemLine = systemLine,
+                            accent = chrome.accent,
+                            messages = conversation.messages,
+                        )
+                        VanOverlayPresentation.WORKBOARD_MAXIMIZED -> MaximizedWorkboard(
+                            state = state,
+                            actions = actions,
+                            app = app,
+                            glass = glass,
+                            headline = chrome.headline,
+                            systemLine = systemLine,
+                            accent = chrome.accent,
+                            messages = conversation.messages,
+                        )
+                        else -> QuickControls(
+                            modifier = Modifier.fillMaxSize(),
+                            blurBehindActive = state.blurBehindActive,
+                            onQuickControl = actions.onQuickControl,
+                        )
+                    }
+                }
+            }
         }
+    }
+}
+
+/**
+ * VAN, full body, with whatever board is open beside him (never around him).
+ *
+ * VAN is always the first child and always the same call, so opening or closing a board
+ * does not rebuild him: a drag that starts while a board is open carries on, and his clock
+ * and aura do not restart. Only his body takes his gestures. The rest of his square box is
+ * aura, and a board may sit over that part, so its controls are never under VAN's hit area.
+ */
+@Composable
+internal fun FloatingGroup(
+    state: VanOverlaySurfaceState,
+    actions: VanOverlayActions,
+    visualState: VanVisualState,
+    board: @Composable (VanOverlayPresentation) -> Unit,
+) {
+    val density = LocalDensity.current
+    val layout = state.layout
+    fun px(value: Int) = with(density) { value.toDp() }
+    Box(modifier = Modifier.size(px(layout.windowWidth), px(layout.windowHeight))) {
+        FullFloatingPresence(
+            visualState = visualState,
+            state = state,
+            actions = actions,
+            modifier = Modifier.offset(px(layout.van.x), px(layout.van.y)),
+        )
+        layout.board?.let { rect ->
+            Box(
+                modifier = Modifier
+                    .offset(px(rect.x), px(rect.y))
+                    .size(px(rect.width), px(rect.height)),
+            ) {
+                board(state.presentation)
+            }
         }
     }
 }
@@ -203,38 +243,31 @@ internal fun VanOverlaySurface(
 @Composable
 internal fun FullFloatingPresence(
     visualState: VanVisualState,
-    showControls: Boolean,
     state: VanOverlaySurfaceState,
     actions: VanOverlayActions,
+    modifier: Modifier = Modifier,
 ) {
-    val width = if (showControls) 360 else OverlayTheme.RESTING_HIT_DP
     Box(
-        modifier = Modifier
-            .width(width.dp)
-            .height(OverlayTheme.RESTING_HIT_DP.dp),
-        contentAlignment = Alignment.TopStart,
+        modifier = modifier.size(OverlayTheme.RESTING_HIT_DP.dp),
+        contentAlignment = Alignment.Center,
     ) {
         val budget = rememberVanEffectBudget()
+        // Owner direction (2026-09-25): floating VAN is the whole character, head to shoes,
+        // opaque and in colour, not a head-and-shoulders crop.
         VanEmbodiment(
             animate = state.animate,
             state = visualState,
             budget = budget,
-            presentation = VanPresentation.COMPACT,
+            presentation = VanPresentation.COMMAND_CENTRE,
             characterFraction = OverlayTheme.RESTING_AVATAR_DP / OverlayTheme.RESTING_HIT_DP.toFloat(),
+            modifier = Modifier.fillMaxSize(),
+        )
+        Box(
             modifier = Modifier
-                .size(OverlayTheme.RESTING_HIT_DP.dp)
+                .size(OverlayTheme.FLOATING_BODY_WIDTH_DP.dp, OverlayTheme.FLOATING_BODY_HEIGHT_DP.dp)
                 .semantics { contentDescription = "Van floating assistant" }
                 .then(actions.gestures),
         )
-        if (showControls) {
-            QuickControls(
-                modifier = Modifier
-                    .offset(x = 176.dp, y = 4.dp)
-                    .width(176.dp),
-                blurBehindActive = state.blurBehindActive,
-                onQuickControl = actions.onQuickControl,
-            )
-        }
     }
 }
 

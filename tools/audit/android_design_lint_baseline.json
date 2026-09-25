@@ -21,9 +21,6 @@
     "com/dial/van/overlay/VanOverlaySurface.kt": 1,
     "com/dial/van/overlay/VanOverlayWorkboards.kt": 6
   },
-  "material_card_outside_design": {
-    "com/dial/van/onboarding/OnboardingActivity.kt": 1
-  },
   "raw_color_literal": {
     "com/dial/van/command/CommandCentreComponents.kt": 4,
     "com/dial/van/command/modules/BrowserModules.kt": 17,

@@ -23,7 +23,9 @@ class VanAcceptanceGateTest {
         assertEquals(188, OverlayTheme.COMPACT_HEIGHT_DP)
         assertTrue(OverlayTheme.VAN_GLASS_OVERLAP_DP in 12..24)
         assertEquals(184, OverlayTheme.RESTING_HIT_DP)
-        assertEquals(96, OverlayTheme.RESTING_AVATAR_DP)
+        // Owner direction (2026-09-25): floating VAN is full body inside his resting box.
+        assertEquals(172, OverlayTheme.RESTING_AVATAR_DP)
+        assertTrue(OverlayTheme.FLOATING_BODY_WIDTH_DP < OverlayTheme.RESTING_HIT_DP)
         assertEquals(62, OverlayTheme.MINIMIZED_VISUAL_DP)
         assertTrue(OverlayTheme.MINIMIZED_TOUCH_DP >= 64)
         assertEquals(88, OverlayTheme.DOCK_HIT_DP)

@@ -103,6 +103,11 @@ Example path: `C:\Users\Admin\AppData\Local\android-sdk\platform-tools\adb.exe`
 adb install -r app\build\outputs\apk\debug\app-debug.apk
 ```
 
+That APK runs the offline half of the device checklist only. To be paired, a debug build needs
+`-PVAN_CONNECTIVITY_TRUSTED_KEYS=…` at build time and a gateway reachable over HTTPS: the gateway
+signs no provisioning payload for a loopback address. Follow `docs/PHYSICAL_TEST_RUNBOOK.md`
+before any S24 run.
+
 
 ## Trade preview (overlay `TRADES` mode)
 

@@ -1,0 +1,36 @@
+{
+  "schema_version": 1,
+  "host": "dial-control",
+  "arch": "x86_64",
+  "repository_sha": "be49e8e734181f99733742119912d810a49d0a3b",
+  "rive_cli": {
+    "version": "1.1.1",
+    "reported_version": "rive 1.1.1",
+    "archive_sha256": "41684e9d99fea98e01c2c155e07ec985130b95b640410dc0fbe4ca30c271a7d5",
+    "binary_sha256": "d26bf1f028cd0c164f36bb29b751889b126859aaab5d7c7ef5aa85c6478a3d08",
+    "source": "https://releases.rive.app/cli/v1.1.1/rive-linux-x64.tar.gz"
+  },
+  "inkscape": {
+    "version": "1.2.2",
+    "reported_version": "Inkscape 1.2.2 (b0a8486541, 2022-12-01)"
+  },
+  "vtracer": {
+    "version": "0.6.15"
+  },
+  "rembg": {
+    "version": "2.0.85",
+    "model": "birefnet-general",
+    "model_sha256": "58f621f00f5d756097615970a88a791584600dcf7c45b18a0a6267535a1ebd3c"
+  },
+  "chrome": {
+    "version": "Google Chrome 154.0.8037.57 "
+  },
+  "java": {
+    "version": "openjdk version \"17.0.20.1\" 2026-08-18"
+  },
+  "android": {
+    "command_line_tools_sha256": "4e4c464f145a7512b57d088ac6c278c03c9eea610886b35a5e0804e74eedf583",
+    "emulator": "Android emulator version 37.1.11.0 (build_id 15917651) (CL:N/A)",
+    "avd": "van-character-forge-api31"
+  }
+}

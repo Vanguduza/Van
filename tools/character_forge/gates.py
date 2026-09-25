@@ -14,6 +14,21 @@ CONTRACT=ROOT/"visual-authority"/"rive_contract.json"; SOURCE_RIV=ROOT/"visual-a
 RELEASE_MANIFEST=ROOT/"visual-authority"/"rive"/"manifest.json"; GRADLE=ROOT/"android"/"app"/"build.gradle.kts"
 IDENTITY_DOC=ROOT/"docs"/"VAN_CHARACTER_VISUAL_IDENTITY.md"; VISUAL_ACCEPTANCE_MATRIX=ROOT/"docs"/"VAN_VISUAL_ACCEPTANCE_MATRIX.md"; IDENTITY_LOCK=ROOT/"visual-authority"/"character-forge"/"00-source"/"asset-pack"/"APPROVED_IDENTITY_LOCK.yaml"
 
+LAYER_KINDS=("layer_svg","layer_raster_set")
+
+def decision_adopted(manifest:dict[str,Any],decision_id:str)->bool:
+    return any(d.get("id")==decision_id and d.get("status")=="ADOPTED" for d in manifest.get("decisions") or [])
+
+def admitted_layer(manifest:dict[str,Any])->dict[str,Any]|None:
+    """The M1 layer artifact every later stage binds to: the most recently admitted layer SVG,
+    or (only while owner decision CF-D-09 stands) raster layer set, that nothing superseded."""
+    for artifact in reversed(manifest.get("artifacts") or []):
+        kind=artifact.get("kind")
+        if kind not in LAYER_KINDS or artifact.get("promotion")=="SUPERSEDED": continue
+        if kind=="layer_raster_set" and not decision_adopted(manifest,"CF-D-09"): continue
+        return artifact
+    return None
+
 @dataclass(frozen=True)
 class GateResult:
     gate:str; passed:bool; reasons:tuple[str,...]
@@ -47,7 +62,7 @@ def _receipt_problems(sha, stage, manifest, tools):
     row=_packaging_receipt(sha)
     if not row: return [f"{stage} packaging receipt file missing"]
     problems=[]
-    layer=find_artifact(manifest,kind="layer_svg")
+    layer=admitted_layer(manifest)
     if row.get("stage")!=stage: problems.append(f"{stage} receipt stage mismatch")
     if row.get("contract_sha256")!=sha256_file(CONTRACT): problems.append(f"{stage} receipt contract SHA stale")
     if not layer or row.get("svg_sha256")!=layer.get("sha256"): problems.append(f"{stage} receipt layer SHA stale")
@@ -84,18 +99,26 @@ def m0():
     problems.extend(contract_surface_problems(json.loads(CONTRACT.read_text(encoding="utf-8"))))
     return problems
 
+def _raster_problems(layer):
+    try: from .raster_lint import lint_raster_set
+    except ImportError as exc: return [f"raster layer lint unavailable: {exc}"]
+    report=lint_raster_set((ROOT/str(layer.get("path") or "")).parent)
+    return [f"admitted raster layer set fails lint: {f}" for f in report.findings]
+
 def m1():
-    problems=m0(); manifest=load_yaml(); layer=find_artifact(manifest,kind="layer_svg")
-    tools=_yaml(TOOLS)
-    if str((((tools.get("critical_path") or {}).get("inkscape") or {}).get("version"))) in {"", "None", "UNPINNED"}:
+    problems=m0(); manifest=load_yaml(); layer=admitted_layer(manifest)
+    tools=_yaml(TOOLS); kind=(layer or {}).get("kind","layer_svg")
+    if kind=="layer_svg" and str((((tools.get("critical_path") or {}).get("inkscape") or {}).get("version"))) in {"", "None", "UNPINNED"}:
         problems.append("Inkscape version unpinned")
-    if not layer: problems.append("no admitted layer_svg")
-    elif verify_records([layer]): problems.append("admitted layer_svg hash mismatch")
-    review=((manifest.get("reviews") or {}).get("layer_svg") or {})
+    if not layer: problems.append("no admitted layer_svg (or layer_raster_set under CF-D-09)")
+    elif verify_records([layer]): problems.append(f"admitted {kind} hash mismatch")
+    elif kind=="layer_raster_set": problems.extend(_raster_problems(layer))
+    label="layer SVG" if kind=="layer_svg" else "raster layer set"
+    review=((manifest.get("reviews") or {}).get(kind) or {})
     if review.get("verdict")!="PASS":
-        problems.append("layer SVG independent/owner review not PASS")
+        problems.append(f"{label} independent/owner review not PASS")
     elif layer and review.get("sha256")!=layer.get("sha256"):
-        problems.append("layer SVG review is for a superseded SHA")
+        problems.append(f"{label} review is for a superseded SHA")
     return problems
 
 def m2():
