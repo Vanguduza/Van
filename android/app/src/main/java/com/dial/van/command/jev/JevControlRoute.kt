@@ -7,6 +7,7 @@ import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.layout.weight
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
 import androidx.compose.material3.Button
@@ -113,7 +114,7 @@ fun JevControlRoute(app: VanApplication, onBack: () -> Unit) {
     LaunchedEffect(activityProject) { loadActivity(activityProject) }
 
     Column(
-        modifier = Modifier.fillMaxWidth().padding(horizontal = tokens.space.screenHorizontal),
+        modifier = Modifier.fillMaxWidth().padding(horizontal = tokens.space.pageGutter),
         verticalArrangement = Arrangement.spacedBy(tokens.space.space3),
     ) {
         SectionHeader(
@@ -270,7 +271,7 @@ private fun Modules(modules: List<JevModule>, onSelect: (JevModule) -> Unit) {
             VanPanel(dense = true, modifier = Modifier.clickable { onSelect(module) }) {
                 Row(modifier = Modifier.fillMaxWidth()) {
                     Column(modifier = Modifier.weight(1f)) {
-                        Text(module.id, style = tokens.type.bodyStrong)
+                        Text(module.id, style = tokens.type.headline)
                         Text(
                             "${module.effectDirection} · ${module.consequence} · ${module.ownerSystem}",
                             style = tokens.type.label,
@@ -381,7 +382,7 @@ private fun Activity(projectId: String, outcomes: List<JevOutcome>, onProject: (
                 VanPanel(dense = true) {
                     Row(modifier = Modifier.fillMaxWidth()) {
                         Column(modifier = Modifier.weight(1f)) {
-                            Text(outcome.moduleId, style = tokens.type.bodyStrong)
+                            Text(outcome.moduleId, style = tokens.type.headline)
                             Text(outcome.source, style = tokens.type.label, color = tokens.color.textSecondary)
                             Text(outcome.observedAt, style = tokens.type.label, color = tokens.color.textTertiary)
                         }
@@ -436,7 +437,7 @@ private fun Controls(snapshot: JevServiceSnapshot, onCommand: (String) -> Unit) 
                 )
                 Row(modifier = Modifier.fillMaxWidth()) {
                     Column(modifier = Modifier.weight(1f)) {
-                        Text("Owner activation", style = tokens.type.bodyStrong)
+                        Text("Owner activation", style = tokens.type.headline)
                         Text(
                             if (ownerEnabled) "Eligible qualified modules may use Jev." else "All modules use registered non-Jev paths.",
                             style = tokens.type.body, color = tokens.color.textSecondary,
