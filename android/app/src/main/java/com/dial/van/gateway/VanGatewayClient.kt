@@ -8,6 +8,9 @@ import com.dial.van.BuildConfig
 import com.dial.van.browser.BrowserParsing
 import com.dial.van.browser.BrowserSessionSnapshot
 import com.dial.van.browser.BrowserStreamGrant
+import com.dial.van.dialdev.DialDevActionRequest
+import com.dial.van.dialdev.DialDevChange
+import com.dial.van.dialdev.DialDevSse
 import com.dial.van.security.DeviceProofSigner
 import com.dial.van.security.OwnerDeviceIdentity
 import com.dial.van.security.OwnerApprovalKeyManager
@@ -15,6 +18,10 @@ import com.dial.van.security.OwnerAuthorityToken
 import com.dial.van.trading.StrategyPromotionProtocol
 import com.dial.van.visual.VanLiveVisualState
 import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.channels.awaitClose
+import kotlinx.coroutines.flow.Flow
+import kotlinx.coroutines.flow.callbackFlow
+import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
 import kotlinx.serialization.json.JsonObject
 import org.json.JSONArray
@@ -1007,6 +1014,111 @@ class VanGatewayClient(context: Context) {
         JSONObject().put("degraded", JSONArray(rawGet("/v1/degraded")))
     }
 
+    // ------------------------------------------------------- DIAL development projection
+
+    /**
+     * VAN-DEVCC-R1 §3.4 — the DIAL Development Projection, read through VAN's own gateway.
+     *
+     * Android never calls DIAL: every path here is under [DIAL_DEV_PREFIX] on VAN's gateway,
+     * authenticated like every other owner read (ingress + device token), and the gateway
+     * holds the DIAL-scoped credential in a token file that never reaches this phone. Reads
+     * return the raw envelope body (`com.dial.van.dialdev.DialDevEnvelope.parse` owns it);
+     * the one mutation, [DialDevClient.submitAction], goes through [postProved] like every
+     * other owner mutation.
+     */
+    val dialDev: DialDevClient by lazy { DialDevClient() }
+
+    inner class DialDevClient {
+        suspend fun projects(): String = read("/projects")
+
+        suspend fun home(projectId: String): String = read("/projects/${encodeSegment(projectId)}/home")
+
+        suspend fun stagePlan(projectId: String): String = read("/projects/${encodeSegment(projectId)}/stage-plan")
+
+        suspend fun tasks(projectId: String, view: String): String =
+            read("/projects/${encodeSegment(projectId)}/tasks?view=${encodeQuery(view)}")
+
+        suspend fun graph(projectId: String): String = read("/projects/${encodeSegment(projectId)}/graph")
+
+        suspend fun task(taskId: String): String = read("/tasks/${encodeSegment(taskId)}")
+
+        suspend fun agents(): String = read("/agents")
+
+        suspend fun workspaces(): String = read("/workspaces")
+
+        suspend fun workspace(workspaceId: String): String = read("/workspaces/${encodeSegment(workspaceId)}")
+
+        suspend fun workspaceDiff(workspaceId: String): String = read("/workspaces/${encodeSegment(workspaceId)}/diff")
+
+        /** Read-only and bounded: DIAL serves at most 200 secret-screened lines (§3.2). */
+        suspend fun workspaceTerminalTail(workspaceId: String, lines: Int = 200): String =
+            read("/workspaces/${encodeSegment(workspaceId)}/terminal-tail?lines=${lines.coerceIn(1, 200)}")
+
+        /** The six hub children that are one read each (§6.7–§6.9). */
+        suspend fun section(section: HubSection): String = read("/${section.path}")
+
+        suspend fun evidence(ref: String): String = read("/evidence/${encodeSegment(ref)}")
+
+        suspend fun infrastructure(): String = read("/infrastructure")
+
+        /**
+         * `POST /v1/dial-dev/actions` — device-proofed. Returns the 202 body; a 409
+         * `STALE_VIEW` or any refusal surfaces as [GatewayHttpException] for the caller's
+         * `DialDevActionReducer.onResponse`.
+         */
+        suspend fun submitAction(request: DialDevActionRequest): JSONObject = withContext(Dispatchers.IO) {
+            postProved("$DIAL_DEV_PREFIX/actions", request.toJson())
+        }
+
+        /**
+         * `GET /v1/dial-dev/events` as a stream of `{projection_revision, changed[]}` so a screen
+         * refetches only what changed. The connection is closed when the collector cancels.
+         * Screens also poll at their stale threshold, so a dropped stream costs latency, not truth.
+         */
+        fun events(): Flow<DialDevChange> = callbackFlow {
+            val connection = (URL("$baseUrl$DIAL_DEV_PREFIX/events").openConnection() as HttpURLConnection)
+            val reader = launch(Dispatchers.IO) {
+                try {
+                    connection.requestMethod = "GET"
+                    applyIngressAuth(connection)
+                    connection.setRequestProperty("Accept", "text/event-stream")
+                    connection.connectTimeout = 15_000
+                    connection.readTimeout = 90_000
+                    val code = connection.responseCode
+                    if (code !in 200..299) {
+                        throw GatewayHttpException(code, connection.errorStream?.bufferedReader()?.use { it.readText() } ?: "")
+                    }
+                    val parser = DialDevSse.Parser()
+                    connection.inputStream.bufferedReader().use { lines ->
+                        while (true) {
+                            val line = lines.readLine() ?: break
+                            parser.feed(line)?.let { send(it) }
+                        }
+                    }
+                    close()
+                } catch (exc: Throwable) {
+                    close(exc)
+                }
+            }
+            awaitClose {
+                runCatching { connection.disconnect() }
+                reader.cancel()
+            }
+        }
+
+        private suspend fun read(path: String): String = withContext(Dispatchers.IO) { rawGet("$DIAL_DEV_PREFIX$path") }
+    }
+
+    /** §6.7–§6.9 hub children served by one `GET /v1/dial-dev/{path}` each. */
+    enum class HubSection(val path: String) {
+        REVIEWS("reviews"),
+        MEMORY("memory"),
+        RESEARCH("research"),
+        DESIGN("design"),
+        CI("ci"),
+        SECURITY("security"),
+    }
+
     // ---------------------------------------------------------------------- command status
 
     /** GET /v1/commands/{id} — GAP-F-011: what became of a dispatched command. */
@@ -1446,6 +1558,9 @@ class VanGatewayClient(context: Context) {
 
         /** Rev 1.5 §20 / §34.1. Matches `van_gateway.session.api.SESSION_PREFIX`. */
         const val SESSION_PREFIX = "/v1/session"
+
+        /** VAN-DEVCC-R1 §3.4 — the gateway's DIAL development proxy. Android never calls DIAL. */
+        const val DIAL_DEV_PREFIX = "/v1/dial-dev"
 
         const val TRUST_CONVERSATION = "CONVERSATION"
         const val TRUST_UNTRUSTED = "UNTRUSTED"

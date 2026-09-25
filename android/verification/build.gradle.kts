@@ -231,6 +231,12 @@ sourceSets {
             // `com/dial/van/design/StatusSemantics.kt`).
             "com/dial/van/memory/MemoryModels.kt",
             "com/dial/van/projects/ProjectModels.kt",
+            // VAN-DEVCC-R1 (VAN-DEV-003/004/009) — the DIAL Development Control Centre's pure
+            // half: the §4 state table, the §3.1 envelope → seven-state reducer, the typed
+            // action state machine, and the read models every development screen renders. No
+            // Android or Compose imports (org.json + java.time only), so the rule that matters
+            // most — an agent's "done" never renders as passed — is executed, not asserted.
+            "com/dial/van/dialdev/**",
         )
     }
 }

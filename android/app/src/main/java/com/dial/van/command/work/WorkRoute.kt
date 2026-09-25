@@ -71,6 +71,7 @@ fun WorkRoute(
     onOpenBrowser: () -> Unit,
     onOpenArtemis: () -> Unit,
     onOpenActivity: () -> Unit,
+    onOpenDevelopment: () -> Unit = {},
 ) {
     val tokens = LocalVanTokens.current
     val scope = rememberCoroutineScope()
@@ -172,6 +173,15 @@ fun WorkRoute(
         item {
             OutlinedButton(onClick = onOpenArtemis) {
                 Text("ARTEMIS Android Lab")
+            }
+        }
+
+        // VAN-DEVCC-R1 §2.1 — the Development hub lives under Work (`work/dev`), not as a
+        // ninth destination. VAN shows DIAL's development state and forwards typed owner
+        // commands; it plans and executes none of that work itself.
+        item {
+            OutlinedButton(onClick = onOpenDevelopment) {
+                Text("Development — DIAL projects, tasks, agents, workspaces")
             }
         }
 

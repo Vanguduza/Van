@@ -50,6 +50,7 @@ import com.dial.van.VanApplication
 import com.dial.van.command.attention.AttentionRoute
 import com.dial.van.command.artemis.ArtemisConsoleRoute
 import com.dial.van.command.connected.ConnectedRoute
+import com.dial.van.command.dev.dialDevGraph
 import com.dial.van.command.home.HomeRoute
 import com.dial.van.command.modules.BrowserEscalationsPage
 import com.dial.van.command.modules.BrowserPolicyPage
@@ -202,13 +203,14 @@ internal fun CommandCentreScreen(app: VanApplication, initial: String) {
                             onOpenTrading = { navigateTo(VanRoute.TRADING) },
                         )
                     }
-                    composable(VanRoute.ATTENTION) { AttentionRoute(app) }
+                    composable(VanRoute.ATTENTION) { AttentionRoute(app, onOpenRoute = { nav.navigate(it) }) }
                     composable(VanRoute.WORK) {
                         WorkRoute(
                             app = app,
                             onOpenBrowser = { nav.navigate(VanRoute.WORK_BROWSER) },
                             onOpenArtemis = { nav.navigate(VanRoute.WORK_ARTEMIS) },
                             onOpenActivity = { nav.navigate(VanRoute.WORK_ACTIVITY) },
+                            onOpenDevelopment = { nav.navigate(VanRoute.devHomeRoute()) },
                         )
                     }
                     composable(VanRoute.WORK_ACTIVITY) {
@@ -253,6 +255,7 @@ internal fun CommandCentreScreen(app: VanApplication, initial: String) {
                             onOpenBrowser = { nav.navigate(VanRoute.WORK_BROWSER) },
                             onOpenArtemis = { nav.navigate(VanRoute.WORK_ARTEMIS) },
                             onOpenActivity = { nav.navigate(VanRoute.WORK_ACTIVITY) },
+                            onOpenDevelopment = { nav.navigate(VanRoute.devHomeRoute()) },
                         )
                     }
                     composable(VanRoute.TRADING) {
@@ -281,6 +284,7 @@ internal fun CommandCentreScreen(app: VanApplication, initial: String) {
                             app = app,
                             projectId = projectId,
                             onBack = { nav.popBackStack() },
+                            onOpenDevelopment = { route -> nav.navigate(route) },
                             onAskVan = { text ->
                                 app.commandController.selectProject(projectId)
                                 app.commandController.submitText(text, com.dial.van.control.VanCommandSource.PROJECT)
@@ -302,6 +306,9 @@ internal fun CommandCentreScreen(app: VanApplication, initial: String) {
                     composable(VanRoute.SETTINGS_NOTIFICATIONS) {
                         SettingsNotificationsRoute(app, onBack = { nav.popBackStack() })
                     }
+                    // VAN-DEVCC-R1 §2.1 — the Development Control Centre, every route a child of
+                    // Work (`VanRoute.DEV_TEMPLATES`), registered in `command/dev/DevNavGraph.kt`.
+                    dialDevGraph(app, nav)
                 }
             }
         }

@@ -20,6 +20,7 @@ import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Modifier
 import com.dial.van.VanApplication
+import com.dial.van.command.dev.DevProjectSection
 import com.dial.van.command.objectList
 import com.dial.van.design.LocalVanTokens
 import com.dial.van.design.ScreenState
@@ -41,6 +42,10 @@ import kotlinx.coroutines.launch
  * decisions, next actions." Same data sources as `ProjectsRoute`, scoped to one
  * `projectId`, plus `GET /v1/decisions` (filtered client-side — the `decisions` table has
  * no `project_id` column) and the project-scoped slice of `GET /v1/context/export`.
+ *
+ * The "Development" section (VAN-DEVCC-R1 §2.1) is `command.dev.DevProjectSection`, with its own
+ * `@DataSource("GET /v1/dial-dev/projects")`: whether this project is an admitted DIAL
+ * development project, and a way into its hub (`work/dev?project={id}`).
  */
 private data class ProjectDetailData(
     val model: ProjectDetailModel,
@@ -51,6 +56,7 @@ fun ProjectDetailRoute(
     app: VanApplication,
     projectId: String,
     onBack: () -> Unit,
+    onOpenDevelopment: (String) -> Unit = {},
     onAskVan: (String) -> Unit = {},
 ) {
     val tokens = LocalVanTokens.current
@@ -126,6 +132,8 @@ fun ProjectDetailRoute(
                     }
                 }
             }
+
+            item { DevProjectSection(app, projectId, onOpenDevelopment) }
 
             item { SectionHeader("Current work", detail = "${model.currentWork.size} running") }
             if (model.currentWork.isEmpty()) {

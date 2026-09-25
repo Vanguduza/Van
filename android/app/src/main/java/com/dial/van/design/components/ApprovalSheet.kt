@@ -35,6 +35,12 @@ import kotlinx.coroutines.launch
  * [actionDigest] is the plain-language summary of exactly what will happen — DNA's "action
  * digest" — shown above the approve control every time, never collapsed behind a details
  * toggle: an approval sheet's whole job is to be readable before the thumbprint, not after.
+ *
+ * [confirmation] is an optional slot under the digest for a typed confirmation or a required
+ * reason (VAN-DEVCC-R1 §3.3/§5: revoking a DIAL task is confirmed by typing its id; rejecting a
+ * decision carries the owner's reason). While [approveEnabled] is false the approve control is
+ * disabled — the caller decides when what was typed is enough. Both default to the original
+ * behaviour, so existing call sites are unchanged.
  */
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
@@ -47,6 +53,8 @@ fun ApprovalSheet(
     onApproved: (() -> Unit)? = null,
     approveLabel: String = "Approve",
     cancelLabel: String = "Cancel",
+    approveEnabled: Boolean = true,
+    confirmation: (@Composable () -> Unit)? = null,
 ) {
     val tokens = LocalVanTokens.current
     val sheetState = rememberModalBottomSheetState()
@@ -69,6 +77,7 @@ fun ApprovalSheet(
         ) {
             Text(title, style = tokens.type.title, color = tokens.color.textPrimary)
             Text(actionDigest, style = tokens.type.body, color = tokens.color.textSecondary)
+            confirmation?.invoke()
             if (errorMessage != null) {
                 Text(
                     errorMessage.orEmpty(),
@@ -100,7 +109,7 @@ fun ApprovalSheet(
                         }
                     },
                     modifier = Modifier.fillMaxWidth(),
-                    enabled = !inFlight,
+                    enabled = !inFlight && approveEnabled,
                     colors = ButtonDefaults.buttonColors(
                         containerColor = tokens.color.accentCyan,
                         contentColor = tokens.color.textInverse,

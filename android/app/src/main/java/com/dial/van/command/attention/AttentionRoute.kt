@@ -48,6 +48,11 @@ import org.json.JSONObject
  * @DataSource("GET /v1/decisions") — the decisions section.
  * @DataSource("com.dial.van.control.VanCommandController.state.pendingA4Approval") — the
  *   in-flight owner approval, if there is one.
+ *
+ * VAN-DEVCC-R1 §2.2: DIAL owner decisions and blockers arrive here as ordinary attention items
+ * with `source = "dial-dev"` and a `payload.deep_link` (`van://work/dev/tasks/<id>`). Opening one
+ * lands on that task, where the decision is made against the live projection revision; the item
+ * closes only when the projection shows the decision applied — never on the tap here.
  */
 private data class AttentionData(
     val items: List<JSONObject>,
@@ -55,7 +60,7 @@ private data class AttentionData(
 )
 
 @Composable
-fun AttentionRoute(app: VanApplication) {
+fun AttentionRoute(app: VanApplication, onOpenRoute: (String) -> Unit = {}) {
     val tokens = LocalVanTokens.current
     val scope = rememberCoroutineScope()
     var data by remember { mutableStateOf<AttentionData?>(null) }
@@ -153,10 +158,12 @@ fun AttentionRoute(app: VanApplication) {
             items(visible, key = { it.optString("id") }) { record ->
                 val severity = runCatching { AttentionSeverity.valueOf(record.optString("severity")) }
                     .getOrDefault(AttentionSeverity.INFO)
+                val devRoute = dialDevRouteFor(record)
                 AttentionItem(
                     title = record.optString("title", "Attention item"),
                     severity = severity,
                     detail = record.optString("source").takeIf { it.isNotBlank() },
+                    onOpen = devRoute?.let { route -> { onOpenRoute(route) } },
                     onAck = {
                         scope.launch {
                             runCatching { app.gatewayClient.attentionAck(record.optString("id")) }
@@ -207,6 +214,18 @@ fun AttentionRoute(app: VanApplication) {
             }
         }
     }
+}
+
+/**
+ * A `dial-dev` item's deep link as a route this build knows, or null. Only `van://` links that
+ * resolve through `VanRoute` are followed; anything else is shown but not opened.
+ */
+private fun dialDevRouteFor(record: JSONObject): String? {
+    if (record.optString("source") != "dial-dev") return null
+    val payload = record.optJSONObject("payload")
+    val link = payload?.optString("deep_link").orEmpty()
+    return com.dial.van.command.nav.VanRoute.parseDeepLink(link)
+        ?: payload?.optString("task_id")?.takeIf { it.isNotBlank() }?.let(com.dial.van.command.nav.VanRoute::devTaskRoute)
 }
 
 @Composable
