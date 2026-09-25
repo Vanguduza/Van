@@ -17,7 +17,11 @@ import com.dial.van.design.components.SectionHeader
 import com.dial.van.design.components.VanPanel
 
 @Composable
-internal fun Controls(snapshot: JevServiceSnapshot, onCommand: (String) -> Unit) {
+internal fun Controls(
+    snapshot: JevServiceSnapshot,
+    onOwnerMutation: (String) -> Unit,
+    onOperationalRequest: (String) -> Unit,
+) {
     val tokens = LocalVanTokens.current
     val ownerEnabled = snapshot.global.ownerActive && !snapshot.global.bypassed
     LazyColumn(verticalArrangement = Arrangement.spacedBy(tokens.space.space3)) {
@@ -37,15 +41,15 @@ internal fun Controls(snapshot: JevServiceSnapshot, onCommand: (String) -> Unit)
                     }
                     Switch(
                         checked = ownerEnabled,
-                        onCheckedChange = { enabled -> onCommand(if (enabled) "enable jev" else "disable jev") },
+                        onCheckedChange = { enabled -> onOwnerMutation(if (enabled) "enable jev" else "disable jev") },
                     )
                 }
                 Row(
                     horizontalArrangement = Arrangement.spacedBy(tokens.space.space2),
                     modifier = Modifier.padding(top = tokens.space.space3),
                 ) {
-                    OutlinedButton(onClick = { onCommand("bypass jev") }) { Text("Bypass") }
-                    Button(onClick = { onCommand("restore jev") }) { Text("Restore") }
+                    OutlinedButton(onClick = { onOwnerMutation("bypass jev") }) { Text("Bypass") }
+                    Button(onClick = { onOwnerMutation("restore jev") }) { Text("Restore") }
                 }
             }
         }
@@ -66,13 +70,61 @@ internal fun Controls(snapshot: JevServiceSnapshot, onCommand: (String) -> Unit)
                         Switch(
                             checked = enabled,
                             onCheckedChange = { on ->
-                                onCommand("${if (on) "enable" else "disable"} jev for project $projectId")
+                                onOwnerMutation("${if (on) "enable" else "disable"} jev for project $projectId")
                             },
                         )
                     }
                 }
             }
         }
+
+        item {
+            VanPanel {
+                SectionHeader(
+                    title = "Operations",
+                    detail = "These requests do not mutate Jev directly; Hermes runs the qualified workflow and records evidence.",
+                )
+                Column(verticalArrangement = Arrangement.spacedBy(tokens.space.space2)) {
+                    OutlinedButton(
+                        onClick = {
+                            onOperationalRequest(
+                                "Qualify the DIAL Jev provider now using the registered synthetic canary, model discovery, " +
+                                    "privacy/egress checks and current Rev 2.1 qualification gates. Do not activate any module."
+                            )
+                        },
+                        modifier = Modifier.fillMaxWidth(),
+                    ) { Text("Run provider qualification") }
+                    OutlinedButton(
+                        onClick = {
+                            onOperationalRequest(
+                                "Run the cross-system no-Jev operational-equivalence certification for Development, VAN and " +
+                                    "DIAL Business, including physical provider detachment where safe. Record the certificate."
+                            )
+                        },
+                        modifier = Modifier.fillMaxWidth(),
+                    ) { Text("Run no-Jev certification") }
+                    OutlinedButton(
+                        onClick = {
+                            onOperationalRequest(
+                                "Evaluate marginal Jev contribution across every module with sufficient trusted outcomes. " +
+                                    "Create non-authoritative recommendations only; require independent review before promotion."
+                            )
+                        },
+                        modifier = Modifier.fillMaxWidth(),
+                    ) { Text("Evaluate all modules") }
+                    OutlinedButton(
+                        onClick = {
+                            onOperationalRequest(
+                                "Review Jev provider, module lifecycle, circuit, fallback, calibration and high-confidence error " +
+                                    "telemetry. Surface any module that should be recalibrated, demoted, quarantined or retired."
+                            )
+                        },
+                        modifier = Modifier.fillMaxWidth(),
+                    ) { Text("Run health review") }
+                }
+            }
+        }
+
         item {
             VanPanel {
                 SectionHeader(title = "Privacy & authority")
