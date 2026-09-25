@@ -28,14 +28,31 @@ data class JevServiceSnapshot(
     val modules: List<JevModule>,
 )
 
-data class JevOutcome(
+data class JevActivityItem(
+    val event: String,
     val moduleId: String,
     val requestId: String,
-    val source: String,
-    val success: Boolean,
-    val outcomeQuality: Double?,
+    val provider: String,
+    val lifecycleState: String,
+    val latencyMs: Int,
+    val fallbackReason: String?,
     val observedAt: String,
-    val evidenceRefs: List<String>,
+)
+
+data class JevPerformance(
+    val projectId: String,
+    val moduleId: String?,
+    val decisions: Int,
+    val providerDecisions: Int,
+    val fallbacks: Int,
+    val cacheHits: Int,
+    val fallbackRate: Double,
+    val cacheHitRate: Double,
+    val p50LatencyMs: Double,
+    val p95LatencyMs: Double,
+    val p99LatencyMs: Double,
+    val inputTokens: Int,
+    val outputTokens: Int,
 )
 
 data class JevContribution(
@@ -98,29 +115,42 @@ internal object JevJson {
         )
     }
 
-    fun outcomes(payload: JSONObject): List<JevOutcome> {
+    fun activity(payload: JSONObject): List<JevActivityItem> {
         val items = payload.optJSONArray("items") ?: return emptyList()
         return buildList {
             for (i in 0 until items.length()) {
                 val row = items.optJSONObject(i) ?: continue
-                val evidence = row.optJSONArray("evidence_refs")
-                val refs = buildList {
-                    if (evidence != null) for (j in 0 until evidence.length()) add(evidence.optString(j))
-                }
                 add(
-                    JevOutcome(
+                    JevActivityItem(
+                        event = row.optString("event"),
                         moduleId = row.optString("module_id"),
                         requestId = row.optString("request_id"),
-                        source = row.optString("source"),
-                        success = row.optBoolean("success", false),
-                        outcomeQuality = if (row.has("outcome_quality")) row.optDouble("outcome_quality") else null,
+                        provider = row.optString("provider"),
+                        lifecycleState = row.optString("lifecycle_state"),
+                        latencyMs = row.optInt("latency_ms", 0),
+                        fallbackReason = row.optString("fallback_reason").takeIf { it.isNotBlank() },
                         observedAt = row.optString("observed_at"),
-                        evidenceRefs = refs,
                     )
                 )
             }
         }
     }
+
+    fun performance(payload: JSONObject) = JevPerformance(
+        projectId = payload.optString("project_id"),
+        moduleId = payload.optString("module_id").takeIf { it.isNotBlank() },
+        decisions = payload.optInt("decisions", 0),
+        providerDecisions = payload.optInt("provider_decisions", 0),
+        fallbacks = payload.optInt("fallbacks", 0),
+        cacheHits = payload.optInt("cache_hits", 0),
+        fallbackRate = payload.optDouble("fallback_rate", 0.0),
+        cacheHitRate = payload.optDouble("cache_hit_rate", 0.0),
+        p50LatencyMs = payload.optDouble("p50_latency_ms", 0.0),
+        p95LatencyMs = payload.optDouble("p95_latency_ms", 0.0),
+        p99LatencyMs = payload.optDouble("p99_latency_ms", 0.0),
+        inputTokens = payload.optInt("input_tokens", 0),
+        outputTokens = payload.optInt("output_tokens", 0),
+    )
 
     fun contribution(moduleId: String, payload: JSONObject) = JevContribution(
         moduleId = moduleId,
