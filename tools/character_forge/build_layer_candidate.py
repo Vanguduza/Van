@@ -64,6 +64,9 @@ PRIMITIVE_ONLY = {
     "extra_brow_outer_r",
     "extra_lid_upper_l", "extra_lid_lower_l", "extra_lid_upper_r", "extra_lid_lower_r",
     "extra_visor_glint", "extra_orb_eyes", "extra_orb_rim",
+    # Geometric parts the blockout already draws cleanly and on-lock; traced, the thin visor
+    # trim fragments and the orb's bar eyes pick up the shell's shading.
+    "visor_frame", "orb_core",
 }
 #: Groups that get underlap where higher layers cover their blockout primitive.
 UNDERLAP = re.compile(r"^(arm_|hand_|extra_fingers_|extra_glove_|extra_leg_|extra_boot_|neck$|face$|"
@@ -251,6 +254,12 @@ def assign(groups: list[Group], rgb: np.ndarray, fg: np.ndarray) -> np.ndarray:
     visor_band = groups[index["visor_frame"]].mask | groups[index["visor_lens"]].mask
     visor_band = ndimage.binary_dilation(visor_band, iterations=6)
     move(visor_band & cyan, "visor_frame")
+    # The frame is cyan trim on dark side pods; skin and hair pixels at the lens edge that the
+    # blockout's frame stroke happens to cover belong to the face and hair beneath it.
+    frame_dark = (v < 0.3)
+    stray = at("visor_frame") & ~cyan & ~frame_dark
+    move(stray & skin, "face")
+    move(stray & ~skin, "hair")
 
     # Eyes behind the lens: colour picks the part inside each sclera.
     for side in ("l", "r"):

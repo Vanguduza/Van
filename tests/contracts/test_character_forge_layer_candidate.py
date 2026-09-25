@@ -54,7 +54,7 @@ def test_every_visible_layer_is_traced_and_only_hidden_parts_stay_primitive(cand
     allowed = builder.PRIMITIVE_ONLY | {"extra_face_shadow", "extra_jaw", "mouth_upper",
                                         "mouth_lower", "extra_catchlight_l", "extra_catchlight_r"}
     assert primitive <= allowed, primitive - allowed
-    for core in ("hair", "face", "jacket", "orb_shell", "hand_l", "hand_r", "visor_frame"):
+    for core in ("hair", "face", "jacket", "orb_shell", "hand_l", "hand_r", "neck", "underlayer"):
         assert result["groups"][core]["source"] == "traced"
 
 
