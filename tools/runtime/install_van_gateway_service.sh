@@ -112,10 +112,11 @@ PREFLIGHT
 fi
 echo "PASS van_gateway_preflight"
 if [[ "${VAN_INSTALL_STAGE_ONLY:-}" == "1" ]]; then
-  rm -rf "$RUNTIME_ROOT"
-  mv "$STAGE" "$RUNTIME_ROOT"
+  # Never the live runtime: stage-only must be safe to run on a serving host.
+  rm -rf "$STATE_ROOT/runtime.staged"
+  mv "$STAGE" "$STATE_ROOT/runtime.staged"
   trap - EXIT
-  echo "runtime=$RUNTIME_ROOT (staged only; nothing restarted)"
+  echo "staged=$STATE_ROOT/runtime.staged (the running runtime and unit were not touched)"
   exit 0
 fi
 

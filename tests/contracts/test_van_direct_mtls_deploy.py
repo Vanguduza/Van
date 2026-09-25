@@ -58,7 +58,8 @@ def test_the_installer_ships_a_runtime_that_starts(tmp_path):
     result, state = _stage(tmp_path)
     assert result.returncode == 0, result.stdout + result.stderr
     assert "PASS van_gateway_preflight" in result.stdout
-    runtime = state / "runtime"
+    assert not (state / "runtime").exists(), "stage-only must never replace the live runtime"
+    runtime = state / "runtime.staged"
     # accounts.py imports `commander` from <runtime>/trading at startup.
     assert (runtime / "trading/commander/accounts.py").is_file()
     assert not (runtime / "trading/tests").exists()
