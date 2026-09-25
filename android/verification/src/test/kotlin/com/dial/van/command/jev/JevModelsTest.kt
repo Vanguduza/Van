@@ -28,7 +28,11 @@ class JevModelsTest {
                 .put("deadline_ms", 800)
                 .put("fallback", JSONObject().put("class", "ABSTAIN"))
                 .put("evaluation", JSONObject().put("shadow_required", true))))
-        val health = JSONObject().put("enabled", true).put("circuit", "HEALTHY")
+        val health = JSONObject()
+            .put("enabled", false)
+            .put("deployment_enabled", true)
+            .put("owner_active", false)
+            .put("circuit", "HEALTHY")
         val provider = JSONObject()
             .put("configured", true)
             .put("qualified", false)
@@ -36,7 +40,8 @@ class JevModelsTest {
 
         val snapshot = JevJson.snapshot(status, health, provider)
 
-        assertTrue(snapshot.serviceEnabled)
+        assertFalse(snapshot.serviceEnabled)
+        assertTrue(snapshot.deploymentEnabled)
         assertEquals("HEALTHY", snapshot.circuit)
         assertTrue(snapshot.global.ownerActive)
         assertFalse(snapshot.global.bypassed)
