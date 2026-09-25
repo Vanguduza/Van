@@ -22,6 +22,7 @@ data class JevModule(
 
 data class JevServiceSnapshot(
     val serviceEnabled: Boolean,
+    val deploymentEnabled: Boolean,
     val circuit: String,
     val registryRevision: String?,
     val global: JevGlobalState,
@@ -156,6 +157,7 @@ internal object JevJson {
         }
         return JevServiceSnapshot(
             serviceEnabled = health.optBoolean("enabled", false),
+            deploymentEnabled = health.optBoolean("deployment_enabled", health.optBoolean("enabled", false)),
             circuit = health.optString("circuit", "UNKNOWN"),
             registryRevision = status.optString("registry_revision").takeIf { it.isNotBlank() },
             global = JevGlobalState(
