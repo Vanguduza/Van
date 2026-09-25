@@ -257,7 +257,7 @@ CATALOG: dict[DegradedCode, DegradedCapability] = {
         still_works="Nothing for the revoked device; other paired devices unaffected",
         will_not_do="Accept commands or actions from the revoked device/grant",
         restore_action="Re-pair the device through a new pairing ticket",
-    ),,
+    ),
     DegradedCode.JEV_UNAVAILABLE: DegradedCapability(
         code=DegradedCode.JEV_UNAVAILABLE,
         broken="DIAL Jev judgment service unavailable, bypassed, or not qualified",
