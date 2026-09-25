@@ -52,7 +52,7 @@ verify_source_layout() {
     owner-briefing google-workspace google-intelligence gemini-notebook google-design google-development
     project-steering research decision-support document-work notification-triage
     infrastructure-diagnostics hermes-administration trading-intelligence
-    automation-fabric browser-intelligence
+    automation-fabric browser-intelligence jev-management
   )
   for s in "${skills[@]}"; do
     if [[ ! -f "${SOURCE_ROOT}/skills/${s}/SKILL.md" ]]; then
