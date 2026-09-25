@@ -284,8 +284,13 @@ def build_mission_registry(
 #: Mission verification strategies a success contract may name today.
 WIRED_MISSION_STRATEGIES = (
     "ledger-event", "trading-halt", "browser-evidence", "api-readback",
-    "notebook-source-readback", "owner-fact-readback", "reminder-readback", "jev-readback",
+    "notebook-source-readback", "owner-fact-readback", "reminder-readback",
 )
+
+# Jev itself is optional. This verifier exists only when the Jev projection client is
+# supplied to build_mission_registry; putting it in WIRED_MISSION_STRATEGIES would falsely
+# claim every no-Jev gateway instance has it.
+OPTIONAL_MISSION_STRATEGIES = ("jev-readback",)
 
 
 
@@ -346,6 +351,7 @@ __all__ = [
     "DECLARED_BUT_UNOBSERVABLE_STRATEGIES",
     "UNOBSERVABLE_POSTCONDITION_KINDS",
     "WIRED_MISSION_STRATEGIES",
+    "OPTIONAL_MISSION_STRATEGIES",
     "WIRED_POSTCONDITION_KINDS",
     "build_automation_verifier",
     "build_mission_registry",
