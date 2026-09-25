@@ -284,6 +284,7 @@ internal fun CommandCentreScreen(app: VanApplication, initial: String) {
                             app = app,
                             onOpenVoice = { nav.navigate(VanRoute.SETTINGS_VOICE) },
                             onOpenNotifications = { nav.navigate(VanRoute.SETTINGS_NOTIFICATIONS) },
+                            onOpenJev = { nav.navigate(VanRoute.JEV) },
                         )
                     }
                     composable(VanRoute.JEV) {
@@ -370,7 +371,6 @@ private fun MoreSheet(onDismiss: () -> Unit, onSelect: (String) -> Unit) {
                 Triple(VanRoute.PROJECTS, "Projects", "Health, phase, blockers, next actions"),
                 Triple(VanRoute.CONNECTED, "Connected", "Google planes, Hermes, knowledge readiness"),
                 Triple(VanRoute.SETTINGS, "Settings & Devices", "Pairing, permissions, voice, notifications"),
-                Triple(VanRoute.JEV, "Jev Control", "System-1 modules, live activity, contribution and owner controls"),
             ).forEach { (route, title, detail) ->
                 VanPressable(
                     onClick = { onSelect(route) },
