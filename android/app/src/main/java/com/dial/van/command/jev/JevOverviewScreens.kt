@@ -45,11 +45,11 @@ internal fun Overview(snapshot: JevServiceSnapshot, onRefresh: () -> Unit) {
                     },
                 )
                 Text(
-                    "Deployment switch: ${if (snapshot.serviceEnabled) "enabled" else "disabled"}",
+                    "Deployment switch: ${if (snapshot.deploymentEnabled) "enabled" else "disabled"}",
                     style = tokens.type.body, color = tokens.color.textSecondary,
                 )
                 Text(
-                    "Owner activation: ${if (snapshot.global.ownerActive) "on" else "off"} · bypass: ${if (snapshot.global.bypassed) "on" else "off"}",
+                    "Effective service: ${if (snapshot.serviceEnabled) "enabled" else "disabled"} · owner activation: ${if (snapshot.global.ownerActive) "on" else "off"} · bypass: ${if (snapshot.global.bypassed) "on" else "off"}",
                     style = tokens.type.body, color = tokens.color.textSecondary,
                 )
                 Text("Quarantined modules: $quarantined", style = tokens.type.body, color = tokens.color.textSecondary)
