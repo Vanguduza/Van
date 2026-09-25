@@ -29,7 +29,7 @@ for a in "$@"; do case "$a" in
   *) echo "unknown arg $a" >&2; exit 2;; esac; done
 
 BASE=/opt/van-trading; APP=$BASE/app; VENV=$BASE/venv; SECRETS=$BASE/secrets; CONFIG=$BASE/config; DATA=/var/lib/van-trading; LOGS=/var/log/van-trading
-ADMIN_CIDRS="${VAN_ADMIN_CIDRS:-10.0.0.123/32,10.0.0.184/32}"; CORE_IP="${VAN_CORE_IP:-10.0.1.233}"
+ADMIN_CIDRS="${VAN_ADMIN_CIDRS:-10.0.0.123/32}"; CORE_IP="${VAN_CORE_IP:-10.0.1.233}"
 HERE="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
 STEPS=(); ok() { STEPS+=("OK   $1"); echo "[bootstrap] OK   $1"; }; skip() { STEPS+=("SKIP $1"); echo "[bootstrap] SKIP $1"; }; plan() { STEPS+=("PLAN $1"); echo "[bootstrap] PLAN $1"; }
 run() { if (( DRY_RUN )); then plan "$*"; else "$@"; fi; }

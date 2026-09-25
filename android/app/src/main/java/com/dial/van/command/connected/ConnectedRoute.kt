@@ -24,6 +24,7 @@ import androidx.compose.runtime.setValue
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.unit.dp
 import com.dial.van.VanApplication
+import com.dial.van.command.dev.DevFabricSection
 import com.dial.van.command.objectList
 import com.dial.van.design.LocalVanTokens
 import com.dial.van.design.ScreenState
@@ -41,6 +42,8 @@ import org.json.JSONObject
  *
  * @DataSource("GET /health") — Hermes health, knowledge readiness (`owner_runtime` block).
  * @DataSource("GET /v1/google/planes") — the four Google credentials, one by one.
+ * @DataSource("GET /v1/dial-dev/infrastructure") — the "DIAL development fabric" section
+ *   (VAN-DEVCC-R1 §6.11), rendered by `command.dev.DevFabricSection` with its own seven states.
  */
 private data class ConnectedData(
     val health: JSONObject,
@@ -125,6 +128,8 @@ fun ConnectedRoute(app: VanApplication) {
                     }
                 }
             }
+
+            item { DevFabricSection(app) }
 
             item { SectionHeader("Google", detail = "Four credentials, reported one by one — not one boolean") }
             val capabilities = connected.planes.optJSONArray("capabilities")?.objectList().orEmpty()

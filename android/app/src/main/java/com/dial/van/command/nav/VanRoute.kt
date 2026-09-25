@@ -48,6 +48,43 @@ object VanRoute {
     const val SETTINGS_VOICE = "settings/voice"
     const val SETTINGS_NOTIFICATIONS = "settings/notifications"
 
+    // ---- DIAL Development Control Centre (VAN-DEVCC-R1 §2.1, VAN-DEV-003) -----------------
+    // Routes *inside* Work, not a ninth destination: DNA §4's eight stay eight. Every one of
+    // these has Work as its parent. The hub's own template carries its optional project
+    // switcher argument (`work/dev?project={project}`), so a plain `work/dev` resolves too.
+    const val WORK_DEV = "work/dev?project={project}"
+    const val WORK_DEV_PLAN = "work/dev/{projectId}/plan"
+    const val WORK_DEV_TASKS = "work/dev/{projectId}/tasks?view={view}"
+    const val WORK_DEV_GRAPH = "work/dev/{projectId}/graph"
+    const val WORK_DEV_TASK = "work/dev/tasks/{taskId}"
+    const val WORK_DEV_AGENTS = "work/dev/agents"
+    const val WORK_DEV_WORKSPACES = "work/dev/workspaces"
+    const val WORK_DEV_WORKSPACE = "work/dev/workspaces/{workspaceId}"
+    const val WORK_DEV_RESEARCH = "work/dev/research"
+    const val WORK_DEV_DESIGN = "work/dev/design"
+    const val WORK_DEV_CI = "work/dev/ci"
+    const val WORK_DEV_SECURITY = "work/dev/security"
+    const val WORK_DEV_REVIEWS = "work/dev/reviews"
+    const val WORK_DEV_MEMORY = "work/dev/memory"
+    const val WORK_DEV_EVIDENCE = "work/dev/evidence/{evidenceRef}"
+
+    /** Every Development Control Centre template, in `NavHost` registration order. */
+    val DEV_TEMPLATES: List<String> = listOf(
+        WORK_DEV, WORK_DEV_TASK, WORK_DEV_WORKSPACES, WORK_DEV_WORKSPACE, WORK_DEV_EVIDENCE,
+        WORK_DEV_PLAN, WORK_DEV_TASKS, WORK_DEV_GRAPH, WORK_DEV_AGENTS, WORK_DEV_RESEARCH,
+        WORK_DEV_DESIGN, WORK_DEV_CI, WORK_DEV_SECURITY, WORK_DEV_REVIEWS, WORK_DEV_MEMORY,
+    )
+
+    fun devHomeRoute(projectId: String? = null): String =
+        projectId?.takeIf { it.isNotBlank() }?.let { "work/dev?project=${encodeQuery(it)}" } ?: "work/dev"
+    fun devPlanRoute(projectId: String): String = "work/dev/${encode(projectId)}/plan"
+    fun devTasksRoute(projectId: String, view: String? = null): String =
+        "work/dev/${encode(projectId)}/tasks" + (view?.takeIf { it.isNotBlank() }?.let { "?view=${encodeQuery(it)}" } ?: "")
+    fun devGraphRoute(projectId: String): String = "work/dev/${encode(projectId)}/graph"
+    fun devTaskRoute(taskId: String): String = "work/dev/tasks/${encode(taskId)}"
+    fun devWorkspaceRoute(workspaceId: String): String = "work/dev/workspaces/${encode(workspaceId)}"
+    fun devEvidenceRoute(evidenceRef: String): String = "work/dev/evidence/${encode(evidenceRef)}"
+
     fun missionRoute(missionId: String): String = "work/missions/${encode(missionId)}"
     fun projectRoute(projectId: String): String = "projects/${encode(projectId)}"
 
@@ -57,7 +94,7 @@ object VanRoute {
         WORK_BROWSER_SESSIONS, WORK_BROWSER_POLICY, WORK_MISSION_TEMPLATE, TRADING, MEMORY,
         PROJECTS, PROJECT_DETAIL_TEMPLATE, CONNECTED, SETTINGS,
         SETTINGS_VOICE, SETTINGS_NOTIFICATIONS,
-    )
+    ) + DEV_TEMPLATES
 
     /**
      * Adaptive nav (DNA §4): the five primaries on the bottom bar at [com.dial.van.design.VanDensity.Regular]
@@ -88,12 +125,39 @@ object VanRoute {
         SETTINGS to HOME,
         SETTINGS_VOICE to SETTINGS,
         SETTINGS_NOTIFICATIONS to SETTINGS,
-    )
+    ) + DEV_TEMPLATES.associateWith { WORK }
 
-    /** The template a concrete route matches, or null when nothing in [ALL_TEMPLATES] fits. */
+    /**
+     * The template a concrete route matches, or null when nothing in [ALL_TEMPLATES] fits.
+     *
+     * When two templates match (`work/dev/tasks/{taskId}` and `work/dev/{projectId}/plan` both
+     * fit `work/dev/tasks/plan`), the one with more literal segments wins, then declaration
+     * order — so a literal path always beats a placeholder, and the answer never depends on a
+     * list being reordered. Consequence, stated rather than hidden: a DIAL project whose id is
+     * literally `tasks`, `workspaces` or `evidence` cannot address its own plan/tasks/graph
+     * routes by path; it is still reachable through the hub (`work/dev?project=…`).
+     */
     fun templateFor(concreteRoute: String): String? {
         val segments = concreteRoute.substringBefore('?').split('/').filter { it.isNotEmpty() }
-        return ALL_TEMPLATES.firstOrNull { matches(it, segments) }
+        return ALL_TEMPLATES
+            .withIndex()
+            .filter { matches(it.value, segments) }
+            .sortedWith(compareByDescending<IndexedValue<String>> { literalSegments(it.value) }.thenBy { it.index })
+            .firstOrNull()
+            ?.value
+    }
+
+    private fun literalSegments(template: String): Int =
+        pathOf(template).split('/').count { !(it.startsWith('{') && it.endsWith('}')) }
+
+    /** A template's path part: `work/dev/{projectId}/tasks?view={view}` → `work/dev/{projectId}/tasks`. */
+    private fun pathOf(template: String): String = template.substringBefore('?')
+
+    /** The query argument names a template declares (`?view={view}` → `[view]`). */
+    fun queryNames(template: String): List<String> {
+        val query = template.substringAfter('?', missingDelimiterValue = "")
+        if (query.isEmpty()) return emptyList()
+        return query.split('&').map { it.substringBefore('=') }.filter { it.isNotBlank() }
     }
 
     /** Whether [concreteRoute] resolves to a known destination. */
@@ -106,7 +170,7 @@ object VanRoute {
     }
 
     private fun matches(template: String, segments: List<String>): Boolean {
-        val templateSegments = template.split('/')
+        val templateSegments = pathOf(template).split('/')
         if (templateSegments.size != segments.size) return false
         return templateSegments.zip(segments).all { (t, s) ->
             (t.startsWith('{') && t.endsWith('}') && s.isNotBlank()) || t == s
@@ -115,6 +179,9 @@ object VanRoute {
 
     private fun encode(value: String): String =
         value.replace("/", "%2F")
+
+    private fun encodeQuery(value: String): String =
+        value.replace("%", "%25").replace("&", "%26").replace("=", "%3D").replace("#", "%23").replace(" ", "%20")
 
     // ---- Process-death restoration ------------------------------------------------------
 
@@ -141,9 +208,18 @@ object VanRoute {
             uri.startsWith("$DEEP_LINK_SCHEME://") -> uri.removePrefix("$DEEP_LINK_SCHEME://")
             else -> return null
         }
-        val withoutQuery = body.substringBefore('?').substringBefore('#').trim('/')
+        val withoutFragment = body.substringBefore('#')
+        val withoutQuery = withoutFragment.substringBefore('?').trim('/')
         if (withoutQuery.isEmpty()) return HOME
-        return if (isKnown(withoutQuery)) withoutQuery else null
+        val template = templateFor(withoutQuery) ?: return null
+        // A query survives only where the matched template declares it (the development task
+        // list's `?view=`, the hub's `?project=`); anywhere else it is dropped, as before.
+        val declared = queryNames(template)
+        if (declared.isEmpty()) return withoutQuery
+        val kept = withoutFragment.substringAfter('?', missingDelimiterValue = "")
+            .split('&')
+            .filter { pair -> pair.substringBefore('=') in declared && pair.substringAfter('=', "").isNotBlank() }
+        return if (kept.isEmpty()) withoutQuery else withoutQuery + "?" + kept.joinToString("&")
     }
 
     /** The `van://…` form of a concrete route, for sharing/notification deep links. */

@@ -36,6 +36,15 @@ private val sharedVisualSources = listOf(
     "visual/VanEmbodimentProducers.kt",
     "degraded/DegradedMode.kt",
     "overlay/OverlayTheme.kt",
+    // VAN-DEV-011 (DNA V6) — the Development Control Centre's seven-state previews render the
+    // shipping reducer's output, so the reducer, its parsers, the route registry and the
+    // palette's role colours are compiled here from the app's own source, not re-implemented.
+    "visual/VanPalette.kt",
+    "design/ScreenState.kt",
+    "design/StatusSemantics.kt",
+    "design/LiveBadgeFormat.kt",
+    "command/nav/VanRoute.kt",
+    "dialdev/**",
 ).map { "com/dial/van/$it" }
 
 sourceSets {
@@ -57,6 +66,9 @@ kotlin {
 }
 
 dependencies {
+    // The same org.json pin `android/verification` uses as a stand-in for the platform's own
+    // org.json: `design/ScreenState.kt` and `dialdev/**` parse with it. Preview-only.
+    implementation("org.json:json:20240303")
     testImplementation("junit:junit:4.13.2")
 }
 

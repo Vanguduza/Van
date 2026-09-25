@@ -1,5 +1,7 @@
 from __future__ import annotations
 
+import logging
+
 from contextlib import asynccontextmanager
 import base64
 import binascii
@@ -36,6 +38,10 @@ from van_gateway.briefing.service import BriefingService
 from van_gateway.config import get_settings
 from van_gateway.decisions.service import DecisionCreate, DecisionService
 from van_gateway.degraded.registry import DegradedRegistry
+from van_gateway.dial_dev.api import build_dial_dev_router
+from van_gateway.dial_dev.attention import DialDevAttentionIngest
+from van_gateway.dial_dev.client import DialDevClient
+from van_gateway.dial_dev.config import ACTIONS_PATH as DIAL_DEV_ACTIONS_PATH, DialDevConfig
 from van_gateway.events.bus import EventBus
 from van_gateway.google.control import GoogleControlAuthError, verify_internal_control
 from van_gateway.google.planes import plane_health, summarise
@@ -43,6 +49,8 @@ from van_gateway.google.mesh import GoogleCapabilityRegistry, GoogleCapabilityRo
 from van_gateway.google.service import GoogleAuthError, GoogleService, NARROW_SCOPES
 from van_gateway.google.transport import FakeGoogleTransport, GoogleHttpTransport, GoogleOAuthTokenClient
 from van_gateway.hermes.bridge import HermesBridge
+from van_gateway.mtls.pki import DeviceCA, PkiError
+from van_gateway.mtls.transport import mtls_device_id
 from van_gateway.idempotency.service import IdempotencyService
 from van_gateway.models import (
     ActionClass,
@@ -619,6 +627,15 @@ def create_app() -> FastAPI:
     )
     google_router = GoogleCapabilityRouter(store, google_broker)
 
+    # VAN-DEV-001/002 (DIAL VAN-DEVCC-R1 §3.4) — the DIAL development projection proxy
+    # and the Attention ingestion that follows DIAL's event stream. VAN displays DIAL
+    # state and forwards typed owner commands; it forms no agent loop of its own.
+    dial_dev_config = DialDevConfig.from_settings(settings)
+    dial_dev_client = DialDevClient(dial_dev_config)
+    dial_dev_attention = DialDevAttentionIngest(
+        dial_dev_client, attention, degraded=degraded, events=events,
+    )
+
     # P3-OPS-005 — dedupe that survives a restart, instead of a set() on the instance.
     suppressions = SuppressionStore(store)
     notifications = NotificationIntelligence(suppressions=suppressions)
@@ -841,9 +858,12 @@ def create_app() -> FastAPI:
         await capability_registry.sync()
         if settings.scheduler_enabled:
             await scheduler.start()
+        if dial_dev_config.enabled and dial_dev_config.attention_enabled:
+            dial_dev_attention.start()
         try:
             yield
         finally:
+            await dial_dev_attention.stop()
             await scheduler.stop()
 
     app = FastAPI(title="VAN Gateway", version="0.5.0-dev", lifespan=lifespan)
@@ -853,6 +873,14 @@ def create_app() -> FastAPI:
     app.state.store = store
     app.state.artemis_console = artemis_console
     app.state.auth = auth
+    # Direct mutual-TLS link (van_gateway.mtls). Loaded only when enabled; a configured but
+    # unloadable CA stops the process in van_gateway.mtls.serve rather than serving without it.
+    app.state.device_ca = None
+    if settings.mtls_enabled and settings.mtls_dir:
+        try:
+            app.state.device_ca = DeviceCA(settings.mtls_dir)
+        except PkiError as exc:
+            logging.getLogger("van_gateway.mtls").error("device CA unavailable: %s", exc.message)
     app.state.auth_throttle = throttle
     app.state.credential_rotation = rotation
     app.state.control_authority = control_authority
@@ -891,7 +919,17 @@ def create_app() -> FastAPI:
     app.state.trading = trading
     app.state.onboarding = onboarding
     app.state.strategy_promotions = strategy_promotions
+    app.state.dial_dev_config = dial_dev_config
+    app.state.dial_dev_client = dial_dev_client
+    app.state.dial_dev_attention = dial_dev_attention
     app.include_router(owner_runtime.router)
+    app.include_router(build_dial_dev_router(
+        client=dial_dev_client,
+        config=dial_dev_config,
+        idempotency=idempotency,
+        degraded=degraded,
+        audit=audit,
+    ))
     app.include_router(automation_health.router)
     app.include_router(automation.router)
     app.include_router(temporal_automation.router)
@@ -1218,6 +1256,11 @@ def create_app() -> FastAPI:
             or path == "/v1/google/owner-revoke"
             or path == "/v1/visual/acceptance"
             or path == "/v1/artemis/console/session"
+            # The phone's TLS client certificate is minted here: proof of the bound key.
+            or path == "/v1/devices/tls-certificate"
+            # VAN-DEV-001 — the one DIAL development mutation. Reads under /v1/dial-dev
+            # stay on owner-device authentication without a proof, like every poll.
+            or path == DIAL_DEV_ACTIONS_PATH
         )
 
     async def enforce_device_proof(request: Request, device_id: str) -> JSONResponse | None:
@@ -1404,6 +1447,11 @@ def create_app() -> FastAPI:
             return JSONResponse(status_code=401, content={"detail": "device_access_denied"})
         throttle.record_success("device_token", GLOBAL_SUBJECT)
         request.state.van_device_id = device.device_id
+        certified = mtls_device_id(request.scope)
+        if certified is not None and certified != device.device_id:
+            # Over the direct link the device token alone is not enough: it has to belong to
+            # the device the verified client certificate names.
+            return JSONResponse(status_code=403, content={"detail": "client_certificate_device_mismatch"})
         if requires_device_proof(request.method, request.url.path):
             refusal = await enforce_device_proof(request, device.device_id)
             if refusal is not None:
@@ -1607,10 +1655,48 @@ def create_app() -> FastAPI:
         except AuthError as exc:
             raise HTTPException(status_code=404, detail=exc.message) from exc
         revoked_executions = await owner_runtime.actions.revoke_privileged_for_device(f"device:{device_id}")
+        device_ca = getattr(app.state, "device_ca", None)
+        revoked_certificates = device_ca.revoke_device(device_id) if device_ca is not None else 0
         return {
             "revoked": True,
             "device_id": device_id,
             "revoked_privileged_executions": revoked_executions,
+            "revoked_client_certificates": revoked_certificates,
+        }
+
+    @app.post("/v1/devices/tls-certificate")
+    async def issue_tls_client_certificate(request: Request):
+        """The phone's client certificate for the direct mutual-TLS link.
+
+        Reached with the ingress token, the device token and a device proof (the bound
+        hardware key), with or without a current client certificate, so a phone can enrol
+        and renew. The CSR's key is generated in the phone's Keystore and never leaves it;
+        its commonName must be the authenticated device id. Issuing supersedes (revokes)
+        the device's previous certificates.
+        """
+        device_ca = getattr(app.state, "device_ca", None)
+        if device_ca is None:
+            raise HTTPException(status_code=503, detail="mtls_not_configured")
+        device_id = getattr(request.state, "van_device_id", None)
+        if not device_id:
+            raise HTTPException(status_code=401, detail="device_access_denied")
+        try:
+            body = await request.json()
+        except Exception:
+            raise HTTPException(status_code=400, detail="csr_invalid")
+        csr_pem = body.get("csr_pem") if isinstance(body, dict) else None
+        if not isinstance(csr_pem, str) or len(csr_pem) > 8192:
+            raise HTTPException(status_code=400, detail="csr_invalid")
+        try:
+            issued = device_ca.issue_client(csr_pem, device_id, days=settings.mtls_client_cert_days)
+        except PkiError as exc:
+            raise HTTPException(status_code=400, detail=exc.code) from exc
+        return {
+            "device_id": issued.device_id,
+            "certificate_pem": issued.certificate_pem,
+            "ca_pem": device_ca.ca_pem,
+            "serial": issued.serial_hex,
+            "not_after_unix": issued.not_after_unix,
         }
 
     @app.post("/v1/commands")

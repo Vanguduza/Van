@@ -11,7 +11,9 @@ Environment=PYTHONPATH=%h/.local/share/van/runtime/backend
 EnvironmentFile=%h/.config/van/google-workspace.env
 EnvironmentFile=%h/.config/van/gateway.env
 EnvironmentFile=-%h/.config/van/trading-commander.env
-ExecStart=%h/.local/share/van/venv/bin/uvicorn van_gateway.app:app --host 127.0.0.1 --port 8787
+# Loopback 127.0.0.1:8787 exactly as before; plus the phone's direct mutual-TLS listener
+# (0.0.0.0:8443) when gateway.env sets VAN_MTLS_ENABLED. See van_gateway/mtls/serve.py.
+ExecStart=%h/.local/share/van/venv/bin/python -m van_gateway.mtls.serve
 Restart=on-failure
 RestartSec=3
 UMask=0077

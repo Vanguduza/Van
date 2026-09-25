@@ -80,3 +80,64 @@ def test_runtime_qualification_is_bound_to_exact_clean_repository_sha():
     assert "checkout -q --detach {shlex.quote(expected_sha)}" in rebuild
     assert "--commit-sha={shlex.quote(expected_sha)}" in rebuild
 
+
+
+def _run_firewall_verify(tmp_path, admin_cidrs):
+    """Drive the helper's --verify path against a stub iptables and a fixture rules.v4."""
+    import os
+    import pytest
+    if os.geteuid() != 0:
+        pytest.skip("the helper refuses to run unless it is root")
+    cidrs = [c for c in admin_cidrs.split(",") if c]
+    managed = []
+    for c in cidrs:
+        managed.append(f'-A INPUT -s {c} -p tcp -m state --state NEW -m tcp --dport 22 -m comment --comment "VAN_TRADING_MANAGED admin-ssh" -j ACCEPT')
+        managed.append(f'-A INPUT -s {c} -p tcp -m state --state NEW -m tcp --dport 9133 -m comment --comment "VAN_TRADING_MANAGED commander" -j ACCEPT')
+    reject = "-A INPUT -j REJECT --reject-with icmp-host-prohibited"
+    rules = tmp_path / "rules.v4"
+    rules.write_text("# iptables configuration for Oracle Cloud Infrastructure\n*filter\n" + "\n".join(managed + [reject]) + "\nCOMMIT\n")
+    live = tmp_path / "live.txt"
+    live.write_text("-P INPUT ACCEPT\n" + "\n".join(managed + [reject]) + "\n")
+    bindir = tmp_path / "bin"
+    bindir.mkdir()
+    stub = bindir / "iptables"
+    # -C succeeds only for rules present in the fixture; -S prints the fixture.
+    stub.write_text(
+        "#!/usr/bin/env bash\n"
+        f'LIVE="{live}"\n'
+        'if [[ "$1" == "-S" ]]; then cat "$LIVE"; exit 0; fi\n'
+        'if [[ "$1" == "-C" ]]; then shift 2; want="-A INPUT"; for a in "$@"; do\n'
+        '  if [[ "$a" == *" "* ]]; then want="$want \\"$a\\""; else want="$want $a"; fi; done\n'
+        '  grep -Fxq -- "$want" "$LIVE"; exit $?; fi\n'
+        "exit 0\n"
+    )
+    stub.chmod(0o755)
+    env = {**os.environ, "PATH": f"{bindir}:{os.environ['PATH']}", "VAN_ORACLE_RULES_V4": str(rules), "VAN_ADMIN_CIDRS": admin_cidrs}
+    return subprocess.run(["bash", str(HELPER), "--verify"], text=True, capture_output=True, env=env)
+
+
+def test_firewall_default_no_longer_admits_the_terminated_hermes_address():
+    text = HELPER.read_text()
+    assert 'ADMIN_CIDRS="${VAN_ADMIN_CIDRS:-10.0.0.123/32}"' in text
+    for path in (HELPER, BOOTSTRAP, QUALIFY, REBUILD):
+        body = path.read_text()
+        # 10.0.0.184 may appear only in the comment that records why it was removed.
+        assert "10.0.0.184/32" not in body, path
+
+
+def test_firewall_verify_accepts_a_single_vcn_admin_source(tmp_path):
+    result = _run_firewall_verify(tmp_path, "10.0.0.123/32")
+    assert result.returncode == 0, result.stderr
+    assert result.stdout.strip().endswith("ORACLE_IMAGE_FIREWALL_GREEN")
+
+
+def test_firewall_verify_rejects_overlay_and_empty_admin_lists(tmp_path):
+    overlay = _run_firewall_verify(tmp_path, "10.77.0.1/32")
+    assert overlay.returncode != 0
+    assert "invalid admin CIDR: 10.77.0.1/32" in overlay.stderr
+
+
+def test_firewall_verify_rejects_a_blank_admin_entry(tmp_path):
+    blank = _run_firewall_verify(tmp_path, ",")
+    assert blank.returncode != 0
+    assert "ORACLE_IMAGE_FIREWALL_RED" in blank.stderr

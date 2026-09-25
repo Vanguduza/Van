@@ -63,6 +63,16 @@ object DegradedCatalog {
         "memory" to "Memory is degraded — recent facts may not be saved or recalled.",
         "hermes" to "Delegated agents are degraded — running work may stall.",
         "notifications" to "Notifications are degraded — some updates may arrive late.",
+        // VAN-DEVCC-R1 §3.1 — DIAL development fabric subsystems, as a projection's `degraded[]`
+        // names them. Used when DIAL sends a bare key; its own `effect` sentence wins otherwise.
+        "dial_dev" to "DIAL's development projection is degraded — what VAN shows may lag DIAL.",
+        "orca" to "Orca workspaces are degraded — terminals, diffs and workspace state may be missing.",
+        "spmrf" to "DIAL's shared project memory is degraded — progress and handoffs may lag.",
+        "openviking" to "OpenViking is degraded — semantic recall is unavailable; tasks and evidence still work.",
+        "vekl" to "DIAL's engineering-knowledge layer is degraded — knowledge activations may be missing.",
+        "artemis" to "ARTEMIS Android testing is degraded — Android verification results may be missing.",
+        "zuul" to "Zuul CI is degraded — build and test results may be missing or late.",
+        "hermes_dial" to "DIAL Hermes is degraded — owner steering and task control may be delayed.",
     )
 
     /** A owner-facing sentence for a raw subsystem key, known or not. */

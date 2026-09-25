@@ -89,6 +89,19 @@ class DegradedCode(str, Enum):
     COMPUTER_USE_NO_SURFACE_WORKER = "COMPUTER_USE_NO_SURFACE_WORKER"
     BROWSER_SEMANTIC_UNAVAILABLE = "BROWSER_SEMANTIC_UNAVAILABLE"
     BROWSER_PROFILE_AUTH_REQUIRED = "BROWSER_PROFILE_AUTH_REQUIRED"
+    # VAN-DEV-001/002/010 — the DIAL development fabric, as seen through its projection.
+    # The first two are VAN's own view of the link; the rest mirror the `degraded[]` rows
+    # DIAL reports in the projection envelope, so a DIAL fault degrades only the
+    # Development Control Centre and never VAN's own surfaces.
+    DIAL_DEV_UNAVAILABLE = "DIAL_DEV_UNAVAILABLE"
+    DIAL_DEV_EVENT_STREAM_DOWN = "DIAL_DEV_EVENT_STREAM_DOWN"
+    DIAL_ORCA_DEGRADED = "DIAL_ORCA_DEGRADED"
+    DIAL_SPMRF_DEGRADED = "DIAL_SPMRF_DEGRADED"
+    DIAL_OPENVIKING_DEGRADED = "DIAL_OPENVIKING_DEGRADED"
+    DIAL_VEKL_DEGRADED = "DIAL_VEKL_DEGRADED"
+    DIAL_ARTEMIS_DEGRADED = "DIAL_ARTEMIS_DEGRADED"
+    DIAL_ZUUL_DEGRADED = "DIAL_ZUUL_DEGRADED"
+    DIAL_HERMES_DEGRADED = "DIAL_HERMES_DEGRADED"
 
 
 class ContentTrust(str, Enum):

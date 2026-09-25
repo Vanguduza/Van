@@ -8,19 +8,31 @@ import com.dial.van.BuildConfig
 import com.dial.van.browser.BrowserParsing
 import com.dial.van.browser.BrowserSessionSnapshot
 import com.dial.van.browser.BrowserStreamGrant
+import com.dial.van.dialdev.DialDevActionRequest
+import com.dial.van.dialdev.DialDevChange
+import com.dial.van.dialdev.DialDevSse
 import com.dial.van.security.DeviceProofSigner
+import com.dial.van.security.MutualTlsIdentity
+import com.dial.van.security.MutualTlsScope
 import com.dial.van.security.OwnerDeviceIdentity
 import com.dial.van.security.OwnerApprovalKeyManager
 import com.dial.van.security.OwnerAuthorityToken
 import com.dial.van.trading.StrategyPromotionProtocol
 import com.dial.van.visual.VanLiveVisualState
 import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.channels.awaitClose
+import kotlinx.coroutines.flow.Flow
+import kotlinx.coroutines.flow.callbackFlow
+import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
 import kotlinx.serialization.json.JsonObject
 import org.json.JSONArray
 import org.json.JSONObject
 import java.io.IOException
 import java.net.HttpURLConnection
+import javax.net.ssl.HttpsURLConnection
+import javax.net.ssl.SSLSocketFactory
+import javax.net.ssl.X509TrustManager
 import java.net.URL
 import java.net.URLEncoder
 import java.nio.charset.StandardCharsets
@@ -63,6 +75,50 @@ class VanGatewayClient(context: Context) {
      */
     private val deviceIdentity = OwnerDeviceIdentity()
     private val proofSigner = DeviceProofSigner(deviceIdentity)
+
+    /** The phone's client certificate and the pinned gateway CA for the direct mutual-TLS link. */
+    private val mtls = MutualTlsIdentity(context)
+
+    /**
+     * Every HTTP connection to the gateway is opened here, so each one carries the pinned
+     * trust and the client certificate when the build is configured for the direct link.
+     */
+    private fun open(url: String): HttpURLConnection {
+        val direct = MutualTlsScope.applies(BuildConfig.VAN_GATEWAY_BASE_URL, url)
+        val preEnrolment = MutualTlsScope.isPreEnrolment(url)
+        // Every other route on the direct link refuses a phone without a certificate, so
+        // enrol (or renew) first. Best effort: an unpaired or unbound phone cannot yet, and
+        // the gateway's 403 then says exactly that.
+        if (direct && !preEnrolment) runCatching { ensureTlsIdentity() }
+        val conn = URL(url).openConnection() as HttpURLConnection
+        if (conn is HttpsURLConnection && direct) {
+            val factory = if (preEnrolment) mtls.enrolmentSocketFactory() else mtls.socketFactory()?.first
+            factory?.let { conn.sslSocketFactory = it }
+        }
+        return conn
+    }
+
+    /**
+     * Socket factory + pinned trust for a session WebSocket to [url]: only when [url] is the
+     * direct mutual-TLS endpoint this build pins, otherwise null (platform trust).
+     */
+    fun tlsTransport(url: String): Pair<SSLSocketFactory, X509TrustManager>? =
+        if (MutualTlsScope.applies(BuildConfig.VAN_GATEWAY_BASE_URL, url)) mtls.socketFactory() else null
+
+    /**
+     * Hold a current client certificate for the direct mutual-TLS link: enrol on first use,
+     * renew within thirty days of expiry. Blocking; call off the main thread. A no-op when
+     * the build pins no CA or the phone is not paired yet. The request is proved with the
+     * bound device key, and the certificate's key never leaves the Keystore.
+     */
+    @Synchronized
+    fun ensureTlsIdentity() {
+        if (!mtls.isConfigured || mtls.hasUsableCertificate()) return
+        if (!MutualTlsScope.applies(BuildConfig.VAN_GATEWAY_BASE_URL, baseUrl)) return  // not on the direct link
+        val device = deviceId?.takeIf { it.isNotBlank() } ?: return
+        val answer = postProved(TLS_CERTIFICATE_PATH, JSONObject().put("csr_pem", mtls.certificateRequestPem(device)))
+        mtls.storeCertificate(answer.getString("certificate_pem"))
+    }
 
     /** Whether this device has enrolled a hardware identity (§0D.3). */
     fun hasDeviceIdentity(): Boolean = deviceIdentity.isEnrolled()
@@ -145,7 +201,12 @@ class VanGatewayClient(context: Context) {
      */
     var baseUrl: String
         get() {
-            val configured = prefs.getString(KEY_BASE, null)
+            val saved = prefs.getString(KEY_BASE, null)
+            val configured = MutualTlsScope.effectiveBaseUrl(saved, BuildConfig.VAN_GATEWAY_BASE_URL, mtls.isConfigured)
+            if (configured != null && configured != saved) {
+                // Upgraded onto a build that pins the direct link: move this phone over once.
+                prefs.edit().putString(KEY_BASE, configured).apply()
+            }
             return if (configured.isNullOrBlank()) {
                 defaultGatewayBaseUrl()
             } else {
@@ -399,7 +460,7 @@ class VanGatewayClient(context: Context) {
     }
 
     private fun tradingPromotionPost(path: String, body: JsonObject): Pair<Int, String> {
-        val conn = (URL("$baseUrl$path").openConnection() as HttpURLConnection).apply {
+        val conn = open("$baseUrl$path").apply {
             requestMethod = "POST"
             setRequestProperty("Content-Type", "application/json")
             applyIngressAuth(this)
@@ -425,7 +486,7 @@ class VanGatewayClient(context: Context) {
         val body = com.dial.van.trading.AccountOnboarding.requestBody(
             secret, id, System.currentTimeMillis() / 1000L, action, args, approvalProof,
         )
-        val conn = (URL("$baseUrl/v1/trading/accounts/action").openConnection() as HttpURLConnection).apply {
+        val conn = open("$baseUrl/v1/trading/accounts/action").apply {
             requestMethod = "POST"
             setRequestProperty("Content-Type", "application/json")
             applyIngressAuth(this)
@@ -458,7 +519,7 @@ class VanGatewayClient(context: Context) {
         val body = com.dial.van.trading.AccountOnboarding.requestBody(
             secret, id, System.currentTimeMillis() / 1000L, action, args,
         )
-        val conn = (URL("$baseUrl/v1/trading/accounts/challenge").openConnection() as HttpURLConnection).apply {
+        val conn = open("$baseUrl/v1/trading/accounts/challenge").apply {
             requestMethod = "POST"
             setRequestProperty("Content-Type", "application/json")
             applyIngressAuth(this)
@@ -1007,6 +1068,111 @@ class VanGatewayClient(context: Context) {
         JSONObject().put("degraded", JSONArray(rawGet("/v1/degraded")))
     }
 
+    // ------------------------------------------------------- DIAL development projection
+
+    /**
+     * VAN-DEVCC-R1 §3.4 — the DIAL Development Projection, read through VAN's own gateway.
+     *
+     * Android never calls DIAL: every path here is under [DIAL_DEV_PREFIX] on VAN's gateway,
+     * authenticated like every other owner read (ingress + device token), and the gateway
+     * holds the DIAL-scoped credential in a token file that never reaches this phone. Reads
+     * return the raw envelope body (`com.dial.van.dialdev.DialDevEnvelope.parse` owns it);
+     * the one mutation, [DialDevClient.submitAction], goes through [postProved] like every
+     * other owner mutation.
+     */
+    val dialDev: DialDevClient by lazy { DialDevClient() }
+
+    inner class DialDevClient {
+        suspend fun projects(): String = read("/projects")
+
+        suspend fun home(projectId: String): String = read("/projects/${encodeSegment(projectId)}/home")
+
+        suspend fun stagePlan(projectId: String): String = read("/projects/${encodeSegment(projectId)}/stage-plan")
+
+        suspend fun tasks(projectId: String, view: String): String =
+            read("/projects/${encodeSegment(projectId)}/tasks?view=${encodeQuery(view)}")
+
+        suspend fun graph(projectId: String): String = read("/projects/${encodeSegment(projectId)}/graph")
+
+        suspend fun task(taskId: String): String = read("/tasks/${encodeSegment(taskId)}")
+
+        suspend fun agents(): String = read("/agents")
+
+        suspend fun workspaces(): String = read("/workspaces")
+
+        suspend fun workspace(workspaceId: String): String = read("/workspaces/${encodeSegment(workspaceId)}")
+
+        suspend fun workspaceDiff(workspaceId: String): String = read("/workspaces/${encodeSegment(workspaceId)}/diff")
+
+        /** Read-only and bounded: DIAL serves at most 200 secret-screened lines (§3.2). */
+        suspend fun workspaceTerminalTail(workspaceId: String, lines: Int = 200): String =
+            read("/workspaces/${encodeSegment(workspaceId)}/terminal-tail?lines=${lines.coerceIn(1, 200)}")
+
+        /** The six hub children that are one read each (§6.7–§6.9). */
+        suspend fun section(section: HubSection): String = read("/${section.path}")
+
+        suspend fun evidence(ref: String): String = read("/evidence/${encodeSegment(ref)}")
+
+        suspend fun infrastructure(): String = read("/infrastructure")
+
+        /**
+         * `POST /v1/dial-dev/actions` — device-proofed. Returns the 202 body; a 409
+         * `STALE_VIEW` or any refusal surfaces as [GatewayHttpException] for the caller's
+         * `DialDevActionReducer.onResponse`.
+         */
+        suspend fun submitAction(request: DialDevActionRequest): JSONObject = withContext(Dispatchers.IO) {
+            postProved("$DIAL_DEV_PREFIX/actions", request.toJson())
+        }
+
+        /**
+         * `GET /v1/dial-dev/events` as a stream of `{projection_revision, changed[]}` so a screen
+         * refetches only what changed. The connection is closed when the collector cancels.
+         * Screens also poll at their stale threshold, so a dropped stream costs latency, not truth.
+         */
+        fun events(): Flow<DialDevChange> = callbackFlow {
+            val connection = open("$baseUrl$DIAL_DEV_PREFIX/events")
+            val reader = launch(Dispatchers.IO) {
+                try {
+                    connection.requestMethod = "GET"
+                    applyIngressAuth(connection)
+                    connection.setRequestProperty("Accept", "text/event-stream")
+                    connection.connectTimeout = 15_000
+                    connection.readTimeout = 90_000
+                    val code = connection.responseCode
+                    if (code !in 200..299) {
+                        throw GatewayHttpException(code, connection.errorStream?.bufferedReader()?.use { it.readText() } ?: "")
+                    }
+                    val parser = DialDevSse.Parser()
+                    connection.inputStream.bufferedReader().use { lines ->
+                        while (true) {
+                            val line = lines.readLine() ?: break
+                            parser.feed(line)?.let { send(it) }
+                        }
+                    }
+                    close()
+                } catch (exc: Throwable) {
+                    close(exc)
+                }
+            }
+            awaitClose {
+                runCatching { connection.disconnect() }
+                reader.cancel()
+            }
+        }
+
+        private suspend fun read(path: String): String = withContext(Dispatchers.IO) { rawGet("$DIAL_DEV_PREFIX$path") }
+    }
+
+    /** §6.7–§6.9 hub children served by one `GET /v1/dial-dev/{path}` each. */
+    enum class HubSection(val path: String) {
+        REVIEWS("reviews"),
+        MEMORY("memory"),
+        RESEARCH("research"),
+        DESIGN("design"),
+        CI("ci"),
+        SECURITY("security"),
+    }
+
     // ---------------------------------------------------------------------- command status
 
     /** GET /v1/commands/{id} — GAP-F-011: what became of a dispatched command. */
@@ -1301,7 +1467,7 @@ class VanGatewayClient(context: Context) {
         useIngress: Boolean,
         extraHeaders: Map<String, String> = emptyMap(),
     ): JSONObject = withRetry {
-        val conn = (URL("$rootUrl$path").openConnection() as HttpURLConnection).apply {
+        val conn = open("$rootUrl$path").apply {
             requestMethod = "POST"
             setRequestProperty("Content-Type", "application/json")
             if (useIngress) applyIngressAuth(this)
@@ -1335,7 +1501,7 @@ class VanGatewayClient(context: Context) {
     }
 
     private fun deleteProved(path: String): JSONObject = withRetry {
-        val conn = (URL("$baseUrl$path").openConnection() as HttpURLConnection).apply {
+        val conn = open("$baseUrl$path").apply {
             requestMethod = "DELETE"
             applyIngressAuth(this)
             proofHeaders("DELETE", path, "").forEach { (name, value) ->
@@ -1361,7 +1527,7 @@ class VanGatewayClient(context: Context) {
     }
 
     private fun rawGet(path: String): String = withRetry {
-        val conn = (URL("$baseUrl$path").openConnection() as HttpURLConnection).apply {
+        val conn = open("$baseUrl$path").apply {
             requestMethod = "GET"
             applyIngressAuth(this)
             connectTimeout = 15_000
@@ -1446,6 +1612,10 @@ class VanGatewayClient(context: Context) {
 
         /** Rev 1.5 §20 / §34.1. Matches `van_gateway.session.api.SESSION_PREFIX`. */
         const val SESSION_PREFIX = "/v1/session"
+        const val TLS_CERTIFICATE_PATH = "/v1/devices/tls-certificate"
+
+        /** VAN-DEVCC-R1 §3.4 — the gateway's DIAL development proxy. Android never calls DIAL. */
+        const val DIAL_DEV_PREFIX = "/v1/dial-dev"
 
         const val TRUST_CONVERSATION = "CONVERSATION"
         const val TRUST_UNTRUSTED = "UNTRUSTED"

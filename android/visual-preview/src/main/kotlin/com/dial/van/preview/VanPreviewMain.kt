@@ -49,6 +49,8 @@ fun main(args: Array<String>) {
     // Aura Rev 2 — 8-second motion clips (CI evidence; git-ignored).
     VanAuraMotion.writeMotionClips(outputDir)
     println("wrote aura motion clips under ${File(outputDir, "motion").absolutePath}")
+    // VAN-DEV-011 — every Development Control Centre route in all seven screen states.
+    VanDevControlCentreStates.writeAll(outputDir).forEach { println("wrote ${it.absolutePath}") }
     VanEvidenceMatrix.writeAll(outputDir)
     println(
         "wrote named Rev ${VanEvidenceMatrix.AUTHORITY_REVISION} evidence matrix under " +

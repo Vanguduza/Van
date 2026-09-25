@@ -4,7 +4,7 @@ Target: the dedicated OCI VM (`VM.Standard.A1.Flex`, 2 OCPU / 12 GB, Ubuntu 24.0
 `10.0.1.233`, subnet `10.0.1.0/24`, SSH + control port `9133` admitted only from `10.0.0.0/16`).
 
 ```text
-dial-hermes-control (10.0.0.184)                 van-trading-core (10.0.1.233)                    Windows MT5 worker
+dial-control (overlay 10.77.0.1)                 van-trading-core (10.0.1.233, overlay 10.77.0.4)                    Windows MT5 worker
   Hermes profile van                              vati-commander  :9133  (HTTPS, HMAC, typed)       mt5_bridge_worker :9443
    └─ mcp_servers.van_trading_commander  ───────► vati-vekl       :9134  (loopback, trading VEKL)    (mTLS server + HMAC)
       (stdio shim → signed HTTPS)                 vati-session@<alias>   (DecisionCycle per account)         ▲

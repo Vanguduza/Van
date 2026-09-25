@@ -211,6 +211,14 @@ sourceSets {
             // that agree on every ASCII document and disagree on one accented character.
             "com/dial/van/security/DeviceProofCanonical.kt",
             "com/dial/van/security/VanCanonicalJson.kt",
+            // The CSR the phone sends for its mutual-TLS client certificate. Hand-written DER
+            // because the Keystore key cannot be handed to a library; if a byte is wrong the
+            // gateway refuses the request and the phone never gets onto the direct link.
+            "com/dial/van/security/Pkcs10.kt",
+            // Which connections the pinned CA and client certificate apply to. Wrong in one
+            // direction it strands a phone on an older route; in the other it sends the
+            // client certificate somewhere it was never meant to go.
+            "com/dial/van/security/MutualTlsScope.kt",
             // The Android design system's pure half (docs/design/VAN_PRODUCT_DESIGN_DNA.md).
             // Screen-state reduction, density-tier and motion arithmetic, the domain→colour-role
             // mapping and the chart-axis math have no Compose or Android imports, so — same
@@ -231,6 +239,12 @@ sourceSets {
             // `com/dial/van/design/StatusSemantics.kt`).
             "com/dial/van/memory/MemoryModels.kt",
             "com/dial/van/projects/ProjectModels.kt",
+            // VAN-DEVCC-R1 (VAN-DEV-003/004/009) — the DIAL Development Control Centre's pure
+            // half: the §4 state table, the §3.1 envelope → seven-state reducer, the typed
+            // action state machine, and the read models every development screen renders. No
+            // Android or Compose imports (org.json + java.time only), so the rule that matters
+            // most — an agent's "done" never renders as passed — is executed, not asserted.
+            "com/dial/van/dialdev/**",
         )
     }
 }

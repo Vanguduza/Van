@@ -167,6 +167,14 @@ class VanHermesSessionManager(
         .build()
 
     /**
+     * The client for a socket to [url]. On the direct mutual-TLS endpoint: the pinned gateway
+     * CA and this phone's client certificate. Anywhere else: platform trust. Derived from
+     * [http], so both share one connection pool and dispatcher.
+     */
+    private fun clientFor(url: String): OkHttpClient =
+        gateway.tlsTransport(url)?.let { (factory, trust) -> http.newBuilder().sslSocketFactory(factory, trust).build() } ?: http
+
+    /**
      * Submit owner work over the session.
      *
      * @param actionClass the command's action class, used only to decide what may be
@@ -382,6 +390,10 @@ class VanHermesSessionManager(
      */
     suspend fun start() {
         restoreOutbox()
+        // Enrol or renew the client certificate before the first request that needs it.
+        // A failure here is not fatal: the connect below fails the same way and the
+        // supervisor's normal offline/retry path takes it from there.
+        runCatching { gateway.ensureTlsIdentity() }
         if (_state.value.vanSessionId == null) {
             val opened = runCatching {
                 gateway.sessionOpen(pathId = PRIMARY_PATH_ID, routeId = "primary-ingress")
@@ -396,8 +408,9 @@ class VanHermesSessionManager(
             )
         }
         val sessionId = _state.value.vanSessionId ?: return
-        val request = Request.Builder().url(gateway.sessionSocketUrl(sessionId)).build()
-        socket = http.newWebSocket(request, Listener())
+        val socketUrl = gateway.sessionSocketUrl(sessionId)
+        val request = Request.Builder().url(socketUrl).build()
+        socket = clientFor(socketUrl).newWebSocket(request, Listener())
         publish(SupervisorState.PRIMARY_CONNECTING)
     }
 

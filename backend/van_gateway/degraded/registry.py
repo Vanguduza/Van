@@ -258,6 +258,72 @@ CATALOG: dict[DegradedCode, DegradedCapability] = {
         will_not_do="Accept commands or actions from the revoked device/grant",
         restore_action="Re-pair the device through a new pairing ticket",
     ),
+
+    # VAN-DEV-001/002/010 — DIAL development fabric. VAN only displays DIAL state, so
+    # every one of these degrades the Development Control Centre and nothing else.
+    DegradedCode.DIAL_DEV_UNAVAILABLE: DegradedCapability(
+        code=DegradedCode.DIAL_DEV_UNAVAILABLE,
+        broken="DIAL Development Projection API unreachable, timing out or refusing VAN's credential",
+        still_works="Every VAN surface outside the Development Control Centre; DIAL keeps developing on its own",
+        will_not_do="Show DIAL development state or forward owner development actions; nothing is queued",
+        restore_action="Restore the private overlay to dial-control, check VAN_DIAL_DEV_BASE_URL and the DIAL-scoped token file",
+    ),
+    DegradedCode.DIAL_DEV_EVENT_STREAM_DOWN: DegradedCapability(
+        code=DegradedCode.DIAL_DEV_EVENT_STREAM_DOWN,
+        broken="DIAL development event stream disconnected; the gateway is reconnecting with backoff",
+        still_works="On-demand Development Control Centre reads and owner actions",
+        will_not_do="Raise or close DIAL approvals and blockers in Attention until the stream returns",
+        restore_action="Restore dial-control's /v1/dev/events; ingestion resumes and rehydrates on reconnect",
+    ),
+    DegradedCode.DIAL_ORCA_DEGRADED: DegradedCapability(
+        code=DegradedCode.DIAL_ORCA_DEGRADED,
+        broken="DIAL reports its Orca workspace runtime degraded",
+        still_works="Tasks, stage plan, reviews and evidence as DIAL reports them",
+        will_not_do="Show live workspace, diff or terminal state DIAL cannot observe",
+        restore_action="Recover Orca on dial-control; DIAL clears the row when it is healthy",
+    ),
+    DegradedCode.DIAL_SPMRF_DEGRADED: DegradedCapability(
+        code=DegradedCode.DIAL_SPMRF_DEGRADED,
+        broken="DIAL reports its shared memory / progress record fabric (SPMRF) degraded",
+        still_works="Task and workspace state DIAL still projects",
+        will_not_do="Show progress timelines or handoffs DIAL cannot read",
+        restore_action="Recover SPMRF on dial-control",
+    ),
+    DegradedCode.DIAL_OPENVIKING_DEGRADED: DegradedCapability(
+        code=DegradedCode.DIAL_OPENVIKING_DEGRADED,
+        broken="DIAL reports OpenViking semantic recall unavailable",
+        still_works="Tasks, workspaces and evidence",
+        will_not_do="Show semantic memory projections",
+        restore_action="Recover OpenViking on dial-control",
+    ),
+    DegradedCode.DIAL_VEKL_DEGRADED: DegradedCapability(
+        code=DegradedCode.DIAL_VEKL_DEGRADED,
+        broken="DIAL reports VEKL knowledge activation degraded",
+        still_works="Tasks, workspaces, reviews and evidence",
+        will_not_do="Show current VEKL activations or research forecasts",
+        restore_action="Recover VEKL on dial-control",
+    ),
+    DegradedCode.DIAL_ARTEMIS_DEGRADED: DegradedCapability(
+        code=DegradedCode.DIAL_ARTEMIS_DEGRADED,
+        broken="DIAL reports its ARTEMIS Android testing harness degraded",
+        still_works="Everything except Android verification rows",
+        will_not_do="Show fresh Android verification results",
+        restore_action="Recover ARTEMIS on dial-control",
+    ),
+    DegradedCode.DIAL_ZUUL_DEGRADED: DegradedCapability(
+        code=DegradedCode.DIAL_ZUUL_DEGRADED,
+        broken="DIAL reports its Zuul CI gating degraded",
+        still_works="Tasks, workspaces and previously admitted evidence",
+        will_not_do="Show fresh CI results",
+        restore_action="Recover Zuul on dial-control",
+    ),
+    DegradedCode.DIAL_HERMES_DEGRADED: DegradedCapability(
+        code=DegradedCode.DIAL_HERMES_DEGRADED,
+        broken="DIAL reports its own Hermes orchestrator degraded (not VAN's Hermes profile)",
+        still_works="Read-only projection of the last known development state",
+        will_not_do="Have owner development actions applied until DIAL Hermes recovers",
+        restore_action="Recover DIAL Hermes on dial-control; VAN's Hermes is unaffected",
+    ),
 }
 
 

@@ -67,6 +67,43 @@ Google OAuth tokens, API keys, service credentials, browser cookies and session 
 
 Normal Android calls carry both `X-Van-Ingress-Token` and `X-Van-Device-Token`; command requests additionally carry the existing signed HMAC payload. `/health` intentionally requires only the ingress bearer so service/tunnel probes do not need a device identity.
 
+## Direct phone link (mutual TLS)
+
+The phone connects straight to this gateway on the Hermes host: no tunnel or relay in between.
+One TLS 1.3 connection carries the app's HTTPS calls and its two-way session WebSocket
+(`/v1/session/ws`, 20 s keepalive, resume by sequence number).
+
+- **Both ends authenticate.** The server certificate and every phone's client certificate come
+  from a private VAN device CA. The app pins that CA (`VAN_GATEWAY_CA_PEM_B64` at build time)
+  and trusts no public CA on this link. The phone's key is generated in the Android Keystore
+  and never leaves it; the phone sends a CSR to `POST /v1/devices/tls-certificate` after its
+  device proof, and the gateway signs it for that device only.
+- **The certificate is bound to the device token.** A certificate for one device cannot carry
+  another device's token (403 `client_certificate_device_mismatch`; WebSocket close 4403).
+- **Revocation is immediate.** `POST /v1/devices/{id}/revoke` also revokes the device's
+  certificates. `issued.json` is the authority, checked on every request, and fails closed.
+- **Without a certificate**, only pairing, bootstrap, certificate enrolment and the two
+  browser surfaces that carry their own credential answer. The WebSocket always needs one.
+- **The loopback listener** (`127.0.0.1:8787`, used by Hermes and local tools) is unchanged.
+
+Enable it on the host (idempotent; it keeps an existing CA):
+
+```bash
+tools/runtime/install_van_gateway_service.sh
+tools/runtime/enable_van_mtls.sh --san IP:<public address>   # listens on 8443
+```
+
+The last line it prints is the CA certificate, base64-encoded. It is public. The app pins
+it together with the base URL `https://<public address>:8443`; both are committed in
+`android/van-gateway.properties`, which every app build reads, so update that file whenever
+the CA or the address changes. An installed phone moves to the committed address on upgrade,
+keeping its device id and tokens. The CA key stays
+in `~/.local/share/van/mtls` (mode 0700) and is never printed. Revoke by device with
+`python -m van_gateway.mtls.pki revoke --dir ~/.local/share/van/mtls --device-id <id>`.
+
+The browser surfaces (the ARTEMIS console and the broker OAuth callback) will not trust the
+private CA. Keep them on their current route until they have a publicly trusted name.
+
 ## Observability and operations (Gate 11)
 
 Five routes, four of them behind `VAN_OBSERVABILITY_TOKEN`:

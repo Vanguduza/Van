@@ -61,6 +61,10 @@ cp -a "$ROOT/backend/van_gateway" "$STAGE/backend/"
 cp "$ROOT/backend/requirements.txt" "$STAGE/backend/requirements.txt"
 cp "$ROOT/backend/requirements.lock" "$STAGE/backend/requirements.lock"
 cp -a "$ROOT/registries" "$STAGE/registries"
+# `van_gateway.trading.accounts` puts <runtime>/trading on sys.path and imports `commander`
+# from it. Without this copy the gateway crashes at startup; runtimes that worked had it
+# placed by hand. The trading test suite is not runtime code.
+tar -C "$ROOT" --exclude='trading/tests' --exclude='__pycache__' -cf - trading | tar -C "$STAGE" -xf -
 # GAP-F-018/021 — `qualify_gateway_host.sh` reports the deployed commit on a GREEN
 # qualification. The staged runtime is a plain `cp -a`, not a git checkout, so the SHA has
 # to be captured here, at the one point that still has the source tree's git metadata.
@@ -72,7 +76,49 @@ fi
 # GAP-F-017 — install from the exact-pinned lock, not the floating spec. Two installs of
 # the same commit must resolve to the same bytes; requirements.txt alone cannot promise
 # that once any dependency ships a new release between them.
-"$VENV/bin/python" -m pip install --quiet -r "$STAGE/backend/requirements.lock"
+if [[ "${VAN_INSTALL_STAGE_ONLY:-}" != "1" ]]; then
+  "$VENV/bin/python" -m pip install --quiet -r "$STAGE/backend/requirements.lock"
+fi
+
+# Pre-flight: the staged runtime must build the app with this host's real environment
+# *before* it replaces the running one. A runtime that cannot start never takes the
+# gateway down; the old one keeps serving and this install fails instead.
+if ! (cd "$STAGE/backend" && PYTHONPATH="$STAGE/backend" \
+      VAN_ENV_FILES="$GOOGLE_ENV:$GATEWAY_ENV:$CONFIG_ROOT/trading-commander.env" \
+      timeout 120 "$VENV/bin/python" - <<'PREFLIGHT'
+import os, sys
+from pathlib import Path
+
+# systemd EnvironmentFile semantics, as far as these files use them.
+for name in os.environ.pop("VAN_ENV_FILES").split(":"):
+    path = Path(name)
+    if not path.is_file():
+        continue
+    for line in path.read_text(encoding="utf-8").splitlines():
+        line = line.strip()
+        if not line or line.startswith("#") or "=" not in line:
+            continue
+        key, value = line.split("=", 1)
+        value = value.strip()
+        if len(value) >= 2 and value[0] == value[-1] and value[0] in "'\"":
+            value = value[1:-1]
+        os.environ[key.strip()] = value
+import van_gateway.app  # noqa: F401  builds the app exactly as the unit's process does
+import van_gateway.mtls.serve  # noqa: F401
+PREFLIGHT
+    ); then
+  echo "FAIL van_gateway_preflight: the staged runtime cannot build the app; the running gateway was not touched" >&2
+  exit 4
+fi
+echo "PASS van_gateway_preflight"
+if [[ "${VAN_INSTALL_STAGE_ONLY:-}" == "1" ]]; then
+  # Never the live runtime: stage-only must be safe to run on a serving host.
+  rm -rf "$STATE_ROOT/runtime.staged"
+  mv "$STAGE" "$STATE_ROOT/runtime.staged"
+  trap - EXIT
+  echo "staged=$STATE_ROOT/runtime.staged (the running runtime and unit were not touched)"
+  exit 0
+fi
 
 rm -rf "$RUNTIME_ROOT.previous"
 if [[ -d "$RUNTIME_ROOT" ]]; then

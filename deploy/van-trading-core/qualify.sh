@@ -172,7 +172,7 @@ l = open_ledger("${VAN_COMMANDER_LEDGER}"); ok, n = l.verify_chain(); print(json
 PY
 fi
 if ufw status 2>/dev/null | grep -q "Status: active"; then ufw status | grep -q "9133" && add firewall GREEN "ufw active, 9133 scoped" || add firewall RED "9133 rule missing"; else add firewall RED "ufw inactive"; fi
-if VAN_ADMIN_CIDRS="${VAN_ADMIN_CIDRS:-10.0.0.123/32,10.0.0.184/32}" VAN_PUBLIC_HOST="${VAN_PUBLIC_HOST:-}" bash "$BASE/app/deploy/van-trading-core/oci/harden-oracle-image-firewall.sh" --verify >/tmp/oracle-firewall.log 2>&1; then add oracle_image_firewall GREEN "$(tail -n 1 /tmp/oracle-firewall.log)"; else add oracle_image_firewall RED "$(tail -c 500 /tmp/oracle-firewall.log)"; fi
+if VAN_ADMIN_CIDRS="${VAN_ADMIN_CIDRS:-10.0.0.123/32}" VAN_PUBLIC_HOST="${VAN_PUBLIC_HOST:-}" bash "$BASE/app/deploy/van-trading-core/oci/harden-oracle-image-firewall.sh" --verify >/tmp/oracle-firewall.log 2>&1; then add oracle_image_firewall GREEN "$(tail -n 1 /tmp/oracle-firewall.log)"; else add oracle_image_firewall RED "$(tail -c 500 /tmp/oracle-firewall.log)"; fi
 listeners="$(ss -ltnH 2>/dev/null | awk '{print $4}' | grep -E ':(3000|5432|5433|6543|8000)$' || true)"
 bad_listeners="$(printf '%s
 ' "$listeners" | grep -Ev '^(127\.0\.0\.1|\[::1\]):' || true)"
