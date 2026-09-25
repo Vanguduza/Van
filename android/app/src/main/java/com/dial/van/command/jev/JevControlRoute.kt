@@ -58,6 +58,8 @@ fun JevControlRoute(app: VanApplication, onBack: () -> Unit) {
     var performance by remember { mutableStateOf<JevPerformance?>(null) }
     var selectedContribution by remember { mutableStateOf<JevContribution?>(null) }
     var evaluationProposals by remember { mutableStateOf<List<JevEvaluationProposal>>(emptyList()) }
+    var evaluationReviews by remember { mutableStateOf<List<JevEvaluationReview>>(emptyList()) }
+    var candidateRevisions by remember { mutableStateOf<List<JevCandidateRevision>>(emptyList()) }
 
     fun refresh() {
         scope.launch {
@@ -73,6 +75,10 @@ fun JevControlRoute(app: VanApplication, onBack: () -> Unit) {
                 .onFailure { error = it.message ?: "Jev status unavailable" }
             runCatching { repository.evaluationProposals(limit = 50) }
                 .onSuccess { evaluationProposals = it }
+            runCatching { repository.evaluationReviews(limit = 50) }
+                .onSuccess { evaluationReviews = it }
+            runCatching { repository.evaluationCandidates(limit = 50) }
+                .onSuccess { candidateRevisions = it }
             loading = false
         }
     }
@@ -184,6 +190,8 @@ fun JevControlRoute(app: VanApplication, onBack: () -> Unit) {
                     performance = performance,
                     contribution = selectedContribution,
                     proposals = evaluationProposals,
+                    reviews = evaluationReviews,
+                    candidates = candidateRevisions,
                     onSelect = { module ->
                         selectedModule = module
                         loadContribution(module)
