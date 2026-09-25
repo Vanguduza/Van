@@ -1,0 +1,17 @@
+{
+  "candidate_sha256": "862fcf753f15eca74efe462ab783f8977ab9710c9321a561a0535ab942ff448c",
+  "candidate_path": "visual-authority/character-forge/09-rive-working/van_core_04.riv",
+  "stage": "core_rig",
+  "authoring_tool": "rive_cli",
+  "authoring_version": "1.1.1",
+  "rive_file_id": "LOCAL",
+  "rive_revision": "LOCAL",
+  "svg_sha256": "67af011894d53660293ef2c60388ef45acf1a839eb2fe7f49f61f2554e0d0b1c",
+  "contract_sha256": "67b0390f51fff92de165a439a519dc9ac1f1b18896ed722d0ac94b748b5ecef0",
+  "source_project": "visual-authority/character-forge/09-rive-working/rml/van_core",
+  "source_tree_sha256": "101e32047a9cbf5a8917e9594f3b9d7016a53598b90f439253fd79c17cfa96aa",
+  "source_file_count": 40,
+  "artist": "claude-code-build_rive_core",
+  "exported_at": "2026-09-25T12:17:46.207974+00:00",
+  "notes": "Built on Netcup dial-control by the pinned Rive CLI 1.1.1 (rive <project> --once) from this RML at f0de7a3. Supersedes van_core_03, which failed emulator validation: ACK_NOD was over by 1.2 s and was captured back at rest (0.00029 <= 0.004). The nod now holds from 0.2 s to 1.3 s like the other actions."
+}
