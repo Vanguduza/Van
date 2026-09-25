@@ -61,6 +61,12 @@ cp -a "$ROOT/backend/van_gateway" "$STAGE/backend/"
 cp "$ROOT/backend/requirements.txt" "$STAGE/backend/requirements.txt"
 cp "$ROOT/backend/requirements.lock" "$STAGE/backend/requirements.lock"
 cp -a "$ROOT/registries" "$STAGE/registries"
+# The gateway imports `commander` and `vati` from `<runtime>/trading` in-process
+# (`trading/accounts.py`, `trading/service.py`, `visual/acceptance.py` resolve
+# `parents[3] / "trading"`). Without it the app fails to import at startup —
+# `ModuleNotFoundError: commander` — whenever no remote commander is configured.
+cp -a "$ROOT/trading" "$STAGE/trading"
+find "$STAGE/trading" -type d \( -name tests -o -name __pycache__ \) -prune -exec rm -rf {} +
 # GAP-F-018/021 — `qualify_gateway_host.sh` reports the deployed commit on a GREEN
 # qualification. The staged runtime is a plain `cp -a`, not a git checkout, so the SHA has
 # to be captured here, at the one point that still has the source tree's git metadata.
