@@ -67,6 +67,29 @@ tool anywhere on the Hermes MCP surface; those stay owner-signed (A4) on the own
 - `trading_trade_detail` — full detail for one `trade_intent_id`, for trade review or "why
   is my trade moving".
 
+## Jev subordinate System-1 support
+
+Jev is optional reasoning evidence beneath the active Hermes/VATI cognition run. It is never
+an independent trading engine and never a fallback when the cognition LLM is unavailable.
+
+When `dial_jev` MCP is present and the current reasoning task is eligible:
+
+1. Call `jev_registered_batch` only for the registered `van.trading.*` modules and only with
+   project_id `van`.
+2. Use Jev for narrow typed judgments such as regime classification, setup quality, thesis
+   health and execution-quality/TCA classification.
+3. Treat every result as `authority_effect=NONE`. The result may inform the active reasoning
+   context but may not write a `CognitiveAssessment`, change `risk_multiplier`, produce a
+   `TradeIntent`, alter a stop, select lots, change leverage or call a broker.
+4. If Jev is disabled, unavailable, unqualified, low-confidence or returns fallback/abstention,
+   continue the normal cognition reasoning path without inventing a Jev answer.
+5. Record disagreements explicitly: `JEV_SUPPORTS`, `JEV_CONFLICTS`, or `JEV_ABSTAINS`.
+   A conflict increases uncertainty; it never increases risk.
+6. Jev calls must be made only while this reasoning run is active. Do not schedule an
+   independent background Jev trading loop.
+7. The deterministic VATI Risk Authority and execution boundary remain final regardless of
+   Jev/Fable agreement.
+
 ## Workflow for an analysis request
 
 1. Resolve `account_alias`, venue and the active mandate version (read-only).
