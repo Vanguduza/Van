@@ -654,6 +654,7 @@ def create_app() -> FastAPI:
         owner_fact_author=owner_fact_author,
         reminders=reminders,
         trading=trading,
+        jev=jev_projection.client,
         learning=learning,
     )
 
