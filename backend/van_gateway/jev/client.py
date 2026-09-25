@@ -105,6 +105,9 @@ class JevProjectionClient:
     async def contribution(self, *, project_id: str, module_id: str) -> dict:
         return await self._get("/v1/contribution", {"project_id": project_id, "module_id": module_id})
 
+    async def safety(self, *, project_id: str, module_id: str) -> dict:
+        return await self._get("/v1/safety", {"project_id": project_id, "module_id": module_id})
+
     async def evaluation_packet(self, *, project_id: str, module_id: str) -> dict:
         return await self._get("/v1/evaluation/packet", {"project_id": project_id, "module_id": module_id})
 
