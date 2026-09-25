@@ -31,7 +31,9 @@ How the rig is made, and why:
   each eye by ``build_eyelids`` (``02-ai-working/rig``, pinned by hash), hung from the top of
   the opening with the closed lash line along their lower edge, and sliding down to blink. A
   few lash pixels of the open eye sit in the goggle-frame and hair layers, in front of any
-  lid; a small patch of lid covers them only while the lid is down. Everything else is
+  lid; a small patch of lid covers them only while the lid is down. The frame layer also
+  holds the open eye's liner ring, whose scaled edge would show the sclera's white beneath, so
+  while the eye is open her own pixels there are drawn in front of it. Everything else is
   Candidate B's own pixels.
 
     python3 -m tools.character_forge.build_rive_core
@@ -250,7 +252,8 @@ def build(project: Path = PROJECT) -> dict:
     eyelids, sockets, overs = {}, {}, []
     for side in ("l", "r"):
         lid = lids[side]
-        for key, row in (("eyelid_" + side, lid), ("eyelid_over_" + side, lid.get("over"))):
+        for key, row in (("eyelid_" + side, lid), ("eyelid_over_" + side, lid.get("over")),
+                         ("eye_cover_" + side, lid.get("cover"))):
             if row is None:
                 continue
             shutil.copyfile(EYELIDS / row["file"], project / "layers" / row["file"])
@@ -259,10 +262,12 @@ def build(project: Path = PROJECT) -> dict:
         sockets[side] = eye_socket_xml(side, lid, world["eye_" + side], joint_id["eye_" + side], asset_id["eyelid_" + side])
         eyelids[side] = eyelid_xml(side, feats["eyes"][side]["opening"], world["eyelid_" + side],
                                    joint_id["eyelid_" + side], lid, asset_id["eyelid_" + side])
-        if "over" in lid:
-            joint_id["eyelid_over_" + side] = ids()
-            overs.append(eyelid_over_xml(side, lid["over"], world["head"], joint_id["head"],
-                                         joint_id["eyelid_over_" + side], asset_id["eyelid_over_" + side]))
+        for key, opacity in (("over", 0), ("cover", 1)):
+            name = ("eyelid_over_" if key == "over" else "eye_cover_") + side
+            if key in lid:
+                joint_id[name] = ids()
+                overs.append(head_patch_xml(name, lid[key], world["head"], joint_id["head"], joint_id[name],
+                                            asset_id[name], opacity))
     for r in reversed(drawn):  # front to back: the first sibling draws on top
         name = r["name"]
         joint = FOLLOWS[name]
@@ -326,7 +331,7 @@ def load_eyelids(manifest: dict) -> dict:
         raise ValueError("EYELIDS.json was painted from another source than the admitted layer set")
     for side in ("l", "r"):
         lid = record["lids"][side]
-        for row in (lid, lid.get("over")):
+        for row in (lid, lid.get("over"), lid.get("cover")):
             if row and hashlib.sha256((EYELIDS / row["file"]).read_bytes()).hexdigest() != row["sha256"]:
                 raise ValueError(f"{row['file']}: does not match EYELIDS.json")
     return record["lids"]
@@ -358,13 +363,15 @@ def eye_socket_xml(side: str, lid: dict, pos, joint: str, asset: str) -> str:
             f'<Image {attrs(x=num(cx), y=num(cy), assetId=asset, name="eye_socket_" + side)}/></Node>')
 
 
-def eyelid_over_xml(side: str, over: dict, head, joint: str, node_id: str, asset: str) -> str:
-    """The lid seen through the lens, over the open eye's lash pixels in the frame and hair
-    layers; hidden (opacity 0) except while the lid is down."""
-    cx = over["offset_px"][0] + over["size_px"][0] / 2.0 - head[0]
-    cy = over["offset_px"][1] + over["size_px"][1] / 2.0 - head[1]
-    return (f'<Node name="follow_eyelid_over_{side}" opacity="0" id="{node_id}"><TransformConstraint targetId="{joint}" name="c"/>'
-            f'<Image {attrs(x=num(cx), y=num(cy), assetId=asset, name="eyelid_over_" + side)}/></Node>')
+def head_patch_xml(name: str, patch: dict, head, joint: str, node_id: str, asset: str, opacity: int) -> str:
+    """A patch drawn in front of the goggle frame and hair, following the head: ``eyelid_over``
+    (the lid seen through the lens, over the open eye's lash pixels in those layers; shown only
+    while the lid is down) or ``eye_cover`` (her open-eye pixels over the frame's liner ring,
+    so its scaled edge never shows the sclera beneath; hidden while the lid is down)."""
+    cx = patch["offset_px"][0] + patch["size_px"][0] / 2.0 - head[0]
+    cy = patch["offset_px"][1] + patch["size_px"][1] / 2.0 - head[1]
+    return (f'<Node name="follow_{name}" opacity="{opacity}" id="{node_id}"><TransformConstraint targetId="{joint}" name="c"/>'
+            f'<Image {attrs(x=num(cx), y=num(cy), assetId=asset, name=name)}/></Node>')
 
 
 def inner_mouth_xml(pos, joint) -> str:
@@ -427,6 +434,9 @@ def state_machine(contract: dict, J: dict, ids: Ids) -> tuple[list[str], str]:
         if "eyelid_over_" + side in J:
             blink.key(J["eyelid_over_" + side], OPACITY, (0, 0.0), (2.33, 0.0), (2.37, 1.0), (2.42, 0.0),
                       (4.63, 0.0), (4.67, 1.0), (4.72, 0.0), (6.0, 0.0))
+        if "eye_cover_" + side in J:
+            blink.key(J["eye_cover_" + side], OPACITY, (0, 1.0), (2.30, 1.0), (2.34, 0.0), (2.42, 0.0), (2.46, 1.0),
+                      (4.60, 1.0), (4.64, 0.0), (4.72, 0.0), (4.76, 1.0), (6.0, 1.0))
     sid = ids()
     layer("Blink", [f'<AnimationState animationId="{anim(blink)}" x="200" y="0" id="{sid}"/>'], sid)
 
@@ -527,6 +537,8 @@ def state_machine(contract: dict, J: dict, ids: Ids) -> tuple[list[str], str]:
         nod.key(J["eyelid_" + side], SY, (0, LID_OPEN), (0.2, 0.5), (0.7, 0.5), (1.2, LID_OPEN))
         if "eyelid_over_" + side in J:
             nod.key(J["eyelid_over_" + side], OPACITY, (0, 0.0), (0.2, 1.0), (0.7, 1.0), (1.2, 0.0))
+        if "eye_cover_" + side in J:
+            nod.key(J["eye_cover_" + side], OPACITY, (0, 1.0), (0.1, 0.0), (1.1, 0.0), (1.2, 1.0))
     for j in arm:
         nod.key(J[j], ROT, (0, 0), (1.2, 0))
 

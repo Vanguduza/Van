@@ -79,7 +79,8 @@ def test_the_eyelids_are_the_painted_lids_and_blink() -> None:
     images = {e.get("name"): e for e in root.iter("Image")}
     assets = {e.get("name"): e for e in root.iter("ImageAsset")}
     for side, lid in record["lids"].items():
-        for name, row in ((f"eyelid_{side}", lid), (f"eyelid_over_{side}", lid.get("over"))):
+        for name, row in ((f"eyelid_{side}", lid), (f"eyelid_over_{side}", lid.get("over")),
+                          (f"eye_cover_{side}", lid.get("cover"))):
             if row is None:
                 continue
             assert sha256_file(core.EYELIDS / row["file"]) == row["sha256"], name

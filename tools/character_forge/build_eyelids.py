@@ -129,12 +129,14 @@ def build(out_dir: Path = OUT_DIR, model: Path | None = None) -> dict:
     record = {"model": underlap_fill.MODEL_NAME, "model_sha256": underlap_fill.MODEL_SHA256,
               "source_sha256": hashlib.sha256(source.read_bytes()).hexdigest(), "lid_grow_px": LID_GROW, "lids": {}}
     holes: dict[str, np.ndarray] = {}
+    parts_of: dict[str, np.ndarray] = {}
     for side in ("r", "l"):
         mask = Image.new("L", (shape[1], shape[0]), 0)
         ImageDraw.Draw(mask).polygon([tuple(p) for p in feats["eyes"][side]["opening"]], fill=1, outline=1)
         parts = np.zeros(shape, bool)
         for part in EYE_PARTS:
             parts |= _layer(manifest, f"{part}_{side}", shape)[..., 3] > 0
+        parts_of[side] = parts
         hole = ndimage.binary_dilation(np.asarray(mask, bool), iterations=LID_GROW) | parts
         # The liner hugging the eye goes with it: dark pixels just outside are covered too.
         hole |= ndimage.binary_dilation(hole, iterations=LINER_PX) & ~skinlike & ~frame & ~hair
@@ -194,6 +196,18 @@ def build(out_dir: Path = OUT_DIR, model: Path | None = None) -> dict:
             Image.fromarray((over * 255 + 0.5).astype(np.uint8), "RGBA").save(opath, format="PNG", optimize=True)
             entry["over"] = {"file": opath.name, "offset_px": [int(u0), int(v0)], "size_px": [int(u1 - u0), int(v1 - v0)],
                              "pixels": int((stray > 0).sum()), "sha256": hashlib.sha256(opath.read_bytes()).hexdigest()}
+        # The frame layer also holds the open eye's liner ring. Scaled on a phone, that ring's
+        # soft edge lets the sclera's white beneath show as a pale line round the eye; while the
+        # eye is open, her own final pixels there (a pixel wider) are drawn in front of it.
+        ring = ndimage.binary_dilation(frame & ndimage.binary_dilation(parts_of[side], iterations=1), iterations=1)
+        if ring.any():
+            cy_, cx_ = np.nonzero(ring)
+            v0, v1, u0, u1 = cy_.min(), cy_.max() + 1, cx_.min(), cx_.max() + 1
+            cover = np.concatenate([src[v0:v1, u0:u1, :3], ring[v0:v1, u0:u1, None].astype(np.float32)], -1)
+            cpath = out_dir / f"eye_cover_{side}.png"
+            Image.fromarray((cover * 255 + 0.5).astype(np.uint8), "RGBA").save(cpath, format="PNG", optimize=True)
+            entry["cover"] = {"file": cpath.name, "offset_px": [int(u0), int(v0)], "size_px": [int(u1 - u0), int(v1 - v0)],
+                              "pixels": int(ring.sum()), "sha256": hashlib.sha256(cpath.read_bytes()).hexdigest()}
         record["lids"][side] = entry
     (out_dir / "EYELIDS.json").write_text(json.dumps(record, indent=2) + "\n", encoding="utf-8")
     return record

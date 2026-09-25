@@ -28,6 +28,19 @@
         ],
         "pixels": 41,
         "sha256": "3d99e1490b151f229aaa21c589b307f7bb3570e3ff9795b813a8f650e270ceef"
+      },
+      "cover": {
+        "file": "eye_cover_r.png",
+        "offset_px": [
+          305,
+          137
+        ],
+        "size_px": [
+          35,
+          35
+        ],
+        "pixels": 216,
+        "sha256": "9e1f70f218f0d55f1170696761cec92a4789bd9cb89cb6ab699e82ac92f6cb83"
       }
     },
     "l": {
@@ -54,6 +67,19 @@
         ],
         "pixels": 50,
         "sha256": "77b30507310272c697fafeb6a78670049bf05907e0e4da9ae5e8c05e9e1d4bdc"
+      },
+      "cover": {
+        "file": "eye_cover_l.png",
+        "offset_px": [
+          233,
+          144
+        ],
+        "size_px": [
+          43,
+          35
+        ],
+        "pixels": 286,
+        "sha256": "460b34543b15075eae270132ca37b8b622e0725c9b0ed09fdd78b0083c290b52"
       }
     }
   }
