@@ -475,6 +475,30 @@ private fun Controls(snapshot: JevServiceSnapshot, onCommand: (String) -> Unit) 
         }
         item {
             VanPanel {
+                SectionHeader("Project switches", "Each division can opt out without disabling the shared service.")
+                listOf(
+                    "dial-development-system" to "Development System",
+                    "van" to "VAN",
+                    "dial-business-group" to "DIAL Business",
+                ).forEach { (projectId, label) ->
+                    val enabled = snapshot.global.projects[projectId] ?: true
+                    Row(modifier = Modifier.fillMaxWidth().padding(vertical = tokens.space.space1)) {
+                        Column(modifier = Modifier.weight(1f)) {
+                            Text(label, style = tokens.type.headline)
+                            Text(projectId, style = tokens.type.label, color = tokens.color.textSecondary)
+                        }
+                        Switch(
+                            checked = enabled,
+                            onCheckedChange = { on ->
+                                onCommand("${if (on) "enable" else "disable"} jev for project $projectId")
+                            },
+                        )
+                    }
+                }
+            }
+        }
+        item {
+            VanPanel {
                 SectionHeader("Privacy & authority")
                 Text("Android never receives TypeSafe credentials.", style = tokens.type.body)
                 Text("RESTRICTED/SECRET data is refused before provider egress.", style = tokens.type.body)
