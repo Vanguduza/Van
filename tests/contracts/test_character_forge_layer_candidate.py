@@ -13,10 +13,13 @@ from xml.etree import ElementTree as ET
 
 import pytest
 
-from tools.character_forge import build_layer_candidate as builder
-from tools.character_forge.svg_lint import lint_svg
+# The builder's imaging stack (numpy, scipy, vtracer) is a Character Forge lane dependency,
+# installed on the Netcup workstation and not in CI's backend job. Skip before importing it.
+for _module in ("numpy", "scipy", "vtracer"):
+    pytest.importorskip(_module)
 
-vtracer = pytest.importorskip("vtracer")
+from tools.character_forge import build_layer_candidate as builder  # noqa: E402
+from tools.character_forge.svg_lint import lint_svg  # noqa: E402
 
 
 @pytest.fixture(scope="module")
