@@ -374,7 +374,36 @@ receipts:
   outputs:
   - 597e63d8993f30a4ee51729435e8d72de2bdabb90b66dc6e3e9194c04c1307a3
   timestamp: '2026-09-25T12:33:34.861978+00:00'
-ci_evidence: {}
+- command: record validation
+  actor: claude-code
+  inputs:
+  - 597e63d8993f30a4ee51729435e8d72de2bdabb90b66dc6e3e9194c04c1307a3
+  - https://github.com/Vanguduza/Van/actions/runs/36135651806
+  - e9925964398b4035d678188ebc7c21905d68ea0d
+  outputs:
+  - core_rig=PASS
+  timestamp: '2026-09-25T13:05:10.018345+00:00'
+  reason: CI-stated RiveContractTest outcome bound to the exact SHA, run and commit
+ci_evidence:
+  597e63d8993f30a4ee51729435e8d72de2bdabb90b66dc6e3e9194c04c1307a3:
+    stage: core_rig
+    result: PASS
+    ci_run: https://github.com/Vanguduza/Van/actions/runs/36135651806
+    candidate_sha256: 597e63d8993f30a4ee51729435e8d72de2bdabb90b66dc6e3e9194c04c1307a3
+    binding_file_sha256: b3615624e13d59b71f9e8190b3689143382f5a8e26b578777c2a7967a044bea9
+    validated_commit: e9925964398b4035d678188ebc7c21905d68ea0d
+    tests:
+      artboardIsTransparentOnThreeBackgrounds: passed
+      brokenAssetFallsBack: passed
+      contractSurfaceMatches: passed
+      coreInputsDriveTheRig: passed
+      everyStateAndActionRenders: skipped
+      identityColourFamilies: passed
+      idleSoakFrameStats: skipped
+      invalidInputsDegradeSafely: passed
+      mandatoryCombinations: skipped
+      productionAvatarPathKeepsRive: skipped
+    recorded_at: '2026-09-25T13:05:10.018275+00:00'
 decisions:
 - id: CF-D-02-REV2_1
   status: ADOPTED

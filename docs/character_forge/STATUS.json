@@ -12,8 +12,8 @@
   "qual_emb_01": "EXTERNAL_ARTEFACT",
   "core_rig": {
     "candidate_sha256": "597e63d8993f30a4ee51729435e8d72de2bdabb90b66dc6e3e9194c04c1307a3",
-    "emulator_validation": "NOT_RUN",
-    "ci_run": null,
+    "emulator_validation": "PASS",
+    "ci_run": "https://github.com/Vanguduza/Van/actions/runs/36135651806",
     "owner_verdict": "NONE"
   },
   "full_rig": {
@@ -30,7 +30,7 @@
     "RIVE_ASSET_MISSING",
     "S24_DEVICE_GATES_NOT_RUN"
   ],
-  "next_action": "Push candidate and record android-instrumentation CI evidence for this exact SHA",
+  "next_action": "Owner views the exact core candidate on the S24 and records the core verdict",
   "production": {
     "emulator_validation": "NOT_RUN",
     "ci_run": null,

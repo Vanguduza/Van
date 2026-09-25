@@ -22,8 +22,11 @@ Status on 2026-09-25: **M0 and M1 pass.** `python -m tools.character_forge.cli s
     replayed each gesture from rest.
   - In `van_core_05`, a held `action_code` holds its gesture, which matches production: the
     app holds the code for the gesture's duration, then clears it.
-  Still needed: the CI emulator validation on this SHA, core baseline frames, and the owner's
-  verdict on a real device.
+  - CI emulator validation passed for `van_core_05` in core mode. It ran as run 36135651806
+    on the PR merge commit `e9925964…`, which carries the same bytes. It is recorded, and its
+    58 core frames are the regression baseline in `11-device-evidence/core_baseline`.
+  - Still needed: the owner's verdict on the exact candidate, viewed on the Galaxy S24
+    (`owner record-core-verdict`). This is the owner's alone.
 
 The gates are designed so that nobody can pass them on someone else's behalf. The owner's
 verdicts, the owner's biometric acceptance, physical Galaxy S24 Ultra (SM-S928*) runs and an
