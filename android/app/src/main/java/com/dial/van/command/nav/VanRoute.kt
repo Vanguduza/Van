@@ -56,7 +56,7 @@ object VanRoute {
     val ALL_TEMPLATES: List<String> = listOf(
         HOME, ATTENTION, WORK, WORK_ACTIVITY, WORK_ARTEMIS, WORK_BROWSER, WORK_BROWSER_TASKS, WORK_BROWSER_ESCALATIONS,
         WORK_BROWSER_SESSIONS, WORK_BROWSER_POLICY, WORK_MISSION_TEMPLATE, TRADING, MEMORY,
-        PROJECTS, PROJECT_DETAIL_TEMPLATE, CONNECTED, SETTINGS,
+        PROJECTS, PROJECT_DETAIL_TEMPLATE, CONNECTED, SETTINGS, JEV,
         SETTINGS_VOICE, SETTINGS_NOTIFICATIONS,
     )
 
@@ -67,7 +67,7 @@ object VanRoute {
     val PRIMARY: List<String> = listOf(HOME, ATTENTION, WORK, TRADING, MEMORY)
 
     /** Everything else, reached through the "More" sheet. */
-    val MORE: List<String> = listOf(PROJECTS, CONNECTED, SETTINGS)
+    val MORE: List<String> = listOf(PROJECTS, CONNECTED, SETTINGS, JEV)
 
     /** Child route template → its parent template, for "up"/back-to-parent affordances. */
     val PARENTS: Map<String, String> = mapOf(
@@ -87,6 +87,7 @@ object VanRoute {
         PROJECT_DETAIL_TEMPLATE to PROJECTS,
         CONNECTED to HOME,
         SETTINGS to HOME,
+        JEV to HOME,
         SETTINGS_VOICE to SETTINGS,
         SETTINGS_NOTIFICATIONS to SETTINGS,
     )
