@@ -535,18 +535,20 @@ def state_machine(contract: dict, J: dict, ids: Ids) -> tuple[list[str], str]:
     wave.key(J["wrist_r"], ROT, (0, 0), (0.25, 0.1), (1.55, 0.1), (1.9, 0))
     wave.key(J["nod"], Y, (0, 0), (1.9, 0)).key(J["nod"], ROT, (0, 0), (0.3, -0.03), (1.55, -0.03), (1.9, 0))
 
-    nod = Anim("action_ack_nod", int(1.2 * FPS))
-    # A nod reads from the eyes as much as the head: lids half down with the chin.
-    nod.key(J["nod"], Y, (0, 0), (0.2, 4.0), (0.7, 4.0), (0.9, 1.0), (1.05, 2.5), (1.2, 0))
-    nod.key(J["nod"], ROT, (0, 0), (0.2, 0.05), (0.7, 0.05), (1.2, 0))
+    nod = Anim("action_ack_nod", int(1.8 * FPS))
+    # A nod reads from the eyes as much as the head: lids half down with the chin. It holds as
+    # long as the other actions (to 1.3 s): the emulator settles from the rig's first drawn
+    # frame, so a nod over by 1.2 s was captured back at rest.
+    nod.key(J["nod"], Y, (0, 0), (0.2, 4.0), (1.3, 4.0), (1.45, 1.0), (1.6, 2.5), (1.8, 0))
+    nod.key(J["nod"], ROT, (0, 0), (0.2, 0.05), (1.3, 0.05), (1.8, 0))
     for side in ("l", "r"):
-        nod.key(J["eyelid_" + side], SY, (0, LID_OPEN), (0.2, 0.5), (0.7, 0.5), (1.2, LID_OPEN))
+        nod.key(J["eyelid_" + side], SY, (0, LID_OPEN), (0.2, 0.5), (1.3, 0.5), (1.8, LID_OPEN))
         if "eyelid_over_" + side in J:
-            nod.key(J["eyelid_over_" + side], OPACITY, (0, 0.0), (0.2, 1.0), (0.7, 1.0), (1.2, 0.0))
+            nod.key(J["eyelid_over_" + side], OPACITY, (0, 0.0), (0.2, 1.0), (1.3, 1.0), (1.8, 0.0))
         if "eye_cover_" + side in J:
-            nod.key(J["eye_cover_" + side], OPACITY, (0, 1.0), (0.1, 0.0), (1.1, 0.0), (1.2, 1.0))
+            nod.key(J["eye_cover_" + side], OPACITY, (0, 1.0), (0.1, 0.0), (1.7, 0.0), (1.8, 1.0))
     for j in arm:
-        nod.key(J[j], ROT, (0, 0), (1.2, 0))
+        nod.key(J[j], ROT, (0, 0), (1.8, 0))
 
     point = Anim("action_point_target", int(1.8 * FPS))
     # Up and out along a diagonal, the forearm raised: a straight arm out to the side put the
