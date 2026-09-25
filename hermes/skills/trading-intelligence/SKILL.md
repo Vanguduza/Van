@@ -78,8 +78,9 @@ When `dial_jev` MCP is present and the current reasoning task is eligible:
    project_id `van`.
 2. Use Jev for narrow typed judgments such as regime classification, setup quality, thesis
    health and execution-quality/TCA classification.
-3. Treat every result as `authority_effect=NONE`. The result may inform the active reasoning
-   context but may not write a `CognitiveAssessment`, change `risk_multiplier`, produce a
+3. Treat every result as `authority_effect=NONE`. A result may inform the active reasoning
+   context **only when `apply_effect=true`**. SHADOW/ADVISORY results are recorded for
+   comparison but must not alter the cognition conclusion. No result may write a `CognitiveAssessment`, change `risk_multiplier`, produce a
    `TradeIntent`, alter a stop, select lots, change leverage or call a broker.
 4. If Jev is disabled, unavailable, unqualified, low-confidence or returns fallback/abstention,
    continue the normal cognition reasoning path without inventing a Jev answer.
