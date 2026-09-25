@@ -51,6 +51,7 @@ import com.dial.van.command.attention.AttentionRoute
 import com.dial.van.command.artemis.ArtemisConsoleRoute
 import com.dial.van.command.connected.ConnectedRoute
 import com.dial.van.command.home.HomeRoute
+import com.dial.van.command.jev.JevControlRoute
 import com.dial.van.command.modules.BrowserEscalationsPage
 import com.dial.van.command.modules.BrowserPolicyPage
 import com.dial.van.command.modules.BrowserSessionsPage
