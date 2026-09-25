@@ -8,7 +8,12 @@ Status on 2026-09-25: **M0 and M1 pass.** `python -m tools.character_forge.cli s
 - **M1:** the CF-D-09-HYBRID raster set (`06-raster-clean/candidate_b_front`,
   `layer_raster_set:67af0118…`) is admitted. The owner's PASS review was recorded at the owner's
   instruction on 2026-09-25.
-- **Next:** M2, the core rig.
+- **M2 (in progress):** the core rig is built and staged. `tools/character_forge/build_rive_core.py`
+  generates the RML project `09-rive-working/rml/van_core` from the admitted layers. Netcup's
+  pinned Rive CLI 1.1.1 built `van_core_01.riv` from it (sha256 `3784c7df…`; the build is
+  deterministic). It is receipted and staged into the androidTest and debug assets.
+  Still needed: the CI emulator validation on this SHA, core baseline frames, and the owner's
+  verdict on a real device.
 
 The gates are designed so that nobody can pass them on someone else's behalf. The owner's
 verdicts, the owner's biometric acceptance, physical Galaxy S24 Ultra (SM-S928*) runs and an

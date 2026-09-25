@@ -134,6 +134,16 @@ artifacts:
       recomposite_lens_pixels_over_8: 21
       recomposite_lens_max_error: 19
       head_count: 3.174
+- artifact_id: riv_candidate:3784c7dfd31a295c3f88273691a398328688f7e3abb3b137f4a7f8f1231d15c8
+  kind: riv_candidate
+  path: visual-authority/character-forge/09-rive-working/van_core_01.riv
+  sha256: 3784c7dfd31a295c3f88273691a398328688f7e3abb3b137f4a7f8f1231d15c8
+  stage: core_rig
+  promotion: CANDIDATE
+  produced_by: artist:claude-code-build_rive_core
+  inputs:
+  - layer_raster_set:67af011894d53660293ef2c60388ef45acf1a839eb2fe7f49f61f2554e0d0b1c
+  - source:67b0390f51fff92de165a439a519dc9ac1f1b18896ed722d0ac94b748b5ecef0
 reviews:
   layer_raster_set:
     sha256: 67af011894d53660293ef2c60388ef45acf1a839eb2fe7f49f61f2554e0d0b1c
@@ -244,6 +254,22 @@ receipts:
   - BUILD_READY=true
   timestamp: '2026-09-25T06:59:04.265220+00:00'
   reason: M0 gate transition recorded from the evaluated repository evidence
+- command: rive receipt
+  actor: claude-code
+  inputs:
+  - 67af011894d53660293ef2c60388ef45acf1a839eb2fe7f49f61f2554e0d0b1c
+  - 67b0390f51fff92de165a439a519dc9ac1f1b18896ed722d0ac94b748b5ecef0
+  - 5aeca6563812df693665e41dca5cde858c52299f37518eec4065397dc8c609b4
+  outputs:
+  - 3784c7dfd31a295c3f88273691a398328688f7e3abb3b137f4a7f8f1231d15c8
+  timestamp: '2026-09-25T07:40:51.979057+00:00'
+- command: rive stage-candidate
+  actor: claude-code
+  inputs:
+  - 3784c7dfd31a295c3f88273691a398328688f7e3abb3b137f4a7f8f1231d15c8
+  outputs:
+  - 3784c7dfd31a295c3f88273691a398328688f7e3abb3b137f4a7f8f1231d15c8
+  timestamp: '2026-09-25T07:40:59.831563+00:00'
 ci_evidence: {}
 decisions:
 - id: CF-D-02-REV2_1

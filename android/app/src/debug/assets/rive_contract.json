@@ -1,0 +1,127 @@
+{
+  "artboard": "Van",
+  "state_machine": "VanRuntime",
+  "inputs": [
+    {
+      "name": "state",
+      "type": "number"
+    },
+    {
+      "name": "speaking",
+      "type": "boolean"
+    },
+    {
+      "name": "listening",
+      "type": "boolean"
+    },
+    {
+      "name": "attention_x",
+      "type": "number",
+      "min": -1,
+      "max": 1
+    },
+    {
+      "name": "attention_y",
+      "type": "number",
+      "min": -1,
+      "max": 1
+    },
+    {
+      "name": "mouth_open",
+      "type": "number",
+      "min": 0,
+      "max": 1
+    },
+    {
+      "name": "urgency",
+      "type": "number",
+      "min": 0,
+      "max": 1
+    },
+    {
+      "name": "viseme",
+      "type": "number"
+    },
+    {
+      "name": "action_code",
+      "type": "number"
+    }
+  ],
+  "triggers": [
+    "point",
+    "ack",
+    "celebrate",
+    "warning",
+    "wave",
+    "shrug",
+    "present",
+    "panel"
+  ],
+  "durable_states": {
+    "OFFLINE": 0,
+    "CONNECTING": 1,
+    "IDLE": 2,
+    "ATTENTIVE": 3,
+    "LISTENING": 4,
+    "THINKING": 5,
+    "SEARCHING": 6,
+    "WORKING": 7,
+    "DELEGATING": 8,
+    "SPEAKING": 9,
+    "WAITING": 10,
+    "WAITING_FOR_OWNER": 11,
+    "DEGRADED": 12,
+    "WARNING": 13,
+    "ERROR": 14,
+    "SUCCESS": 15,
+    "URGENT": 16,
+    "SLEEPING": 17
+  },
+  "finite_actions": {
+    "HELLO_WAVE": 1,
+    "ACK_NOD": 2,
+    "POINT_LEFT": 3,
+    "POINT_RIGHT": 4,
+    "POINT_UP": 5,
+    "POINT_DOWN": 6,
+    "POINT_TARGET": 7,
+    "CELEBRATE": 8,
+    "CAUTION": 9,
+    "CONFIRM": 10,
+    "SHRUG": 11,
+    "PRESENT_CARD": 12,
+    "OPEN_PANEL": 13,
+    "CLOSE_PANEL": 14
+  },
+  "identity_lock": {
+    "hair": "silver_white_swept",
+    "visor": "cyan_blue_transparent",
+    "skin": "medium_brown",
+    "skin_token": "#AF6A53",
+    "skin_delta_e2000_max": 8,
+    "eyes": "blue",
+    "jacket": "black_white_technical",
+    "underlayer": "charcoal_technical",
+    "gloves": "black_technical",
+    "headband": "forbidden",
+    "proportions": {
+      "head_count_definition": "hair_crown_to_chin_over_crown_to_sole",
+      "head_count_target": 3.2,
+      "head_count_tolerance": 0.3,
+      "tall_realistic_proportions_forbidden": true
+    },
+    "opacity": "opaque_body_except_visor_and_orb_optics",
+    "accents": "dial_cyan",
+    "companion": "dark_orb_cyan_bar_eyes",
+    "forbid": [
+      "dark_hair",
+      "light_peach_skin",
+      "headband",
+      "generic_robot",
+      "random_mascot",
+      "glassified_body",
+      "tall_realistic_proportions",
+      "legacy_cyan_face_orb"
+    ]
+  }
+}

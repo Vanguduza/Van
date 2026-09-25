@@ -2,7 +2,7 @@
   "pack": "VAN-CHARACTER-FORGE-DP-R2",
   "baseline_sha": "3c337efe91faa8461dd28b1f18a26cf346a1b66f",
   "build_ready": true,
-  "current_stage": "vector",
+  "current_stage": "core_rig",
   "rive_authored": false,
   "rive_contract_ready": true,
   "rive_runtime_ready": true,
@@ -11,7 +11,7 @@
   "owner_accepted": false,
   "qual_emb_01": "EXTERNAL_ARTEFACT",
   "core_rig": {
-    "candidate_sha256": null,
+    "candidate_sha256": "3784c7dfd31a295c3f88273691a398328688f7e3abb3b137f4a7f8f1231d15c8",
     "emulator_validation": "NOT_RUN",
     "ci_run": null,
     "owner_verdict": "NONE"
@@ -30,7 +30,7 @@
     "RIVE_ASSET_MISSING",
     "S24_DEVICE_GATES_NOT_RUN"
   ],
-  "next_action": "M0 and M1 PASS. Build the M2 core rig (IDLE/LISTENING/THINKING/SPEAKING + HELLO_WAVE/ACK_NOD/POINT_TARGET) in RML from the admitted raster layer set with the pinned Rive CLI",
+  "next_action": "Push candidate and record android-instrumentation CI evidence for this exact SHA",
   "production": {
     "emulator_validation": "NOT_RUN",
     "ci_run": null,
