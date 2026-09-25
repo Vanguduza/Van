@@ -76,6 +76,18 @@ tools and AGENTS.md's "may submit inferred/model-derived memory candidates" now 
 
 The context graph is a bounded temporal retrieval primitive, not an autonomous GraphRAG loop. Deterministic lexical retrieval runs locally over current owner facts and graph edges without embeddings, model inference or a remote call. Hot-context capsules are revision-sealed, bounded caches of evidence references used to reduce repeated lookup latency; they are invalidated by context revision/expiry and are never a new truth store. Exact facts remain ahead of graph/lexical retrieval in the critical path; external research remains an escalation.
 
+## Shared DIAL Jev judgment capability
+
+| Server | Purpose | Credential model |
+|---|---|---|
+| `dial_jev` | Optional System-1 typed judgments, bounded subordinate reasoning, module-evaluation packets and independent evaluator proposal/review evidence | Private loopback DIAL Jev control token; no TypeSafe credential reaches VAN; no shell, lifecycle transition, global-control, repository-write or trading execution tool |
+
+`dial_jev` is subordinate evidence beneath Hermes. Its tool surface is intentionally bounded:
+`jev_registered_batch`, `jev_subordinate`, `jev_evaluation_packet`,
+`jev_record_evaluation_proposal`, `jev_record_evaluation_review`, and `jev_status`.
+Jev can be completely bypassed or physically detached without disabling VAN. Trading use is permitted
+only inside an already-active VATI cognition run and can never set size, risk, stops, mandate or execution.
+
 ## Trading (van-trading-core)
 
 | Server | Purpose | Credential model |
