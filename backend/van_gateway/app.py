@@ -464,6 +464,7 @@ def create_app() -> FastAPI:
         store, settings, reminders=reminders, attention=attention, briefing=briefing,
         # GAP-F-008: agent-initiated mutations consult the earned/granted domain trust.
         autonomy=ActionAutonomyGate(domain_trust),
+        jev_advisor=jev_advisor,
     )
     automation_registry = AutomationRegistry(store)
     automation_hot_index = HotWorkflowIndex()
@@ -630,7 +631,7 @@ def create_app() -> FastAPI:
     )
     browser.binder = mission_binder
     automation.binder = mission_binder
-    understanding_api = UnderstandingApi(store, settings)
+    understanding_api = UnderstandingApi(store, settings, jev_advisor=jev_advisor)
     # GAP-F-028: VAN's only self-initiated behaviour — bounded FOLLOW_UP attention items
     # for work the owner left waiting. Never opens a mission or executes an action.
     proactive_followups = ProactiveFollowUpJob(
