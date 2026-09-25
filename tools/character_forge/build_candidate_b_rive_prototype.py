@@ -204,7 +204,7 @@ def vector_node(name: str, rid: int, svg: Path, pivot: tuple[float, float], extr
     # SVG paints later siblings on top; Rive paints earlier siblings on top.
     paths.reverse()
     x, y = pivot
-    node = f'<Node x="{x:.3f}" y="{y:.3f}" name="{name}" id="0:{rid}">' + "".join(paths) + extra + '</Node>'
+    node = f'<Node x="{x:.3f}" y="{y:.3f}" name="{name}" id="0:{rid}">' + extra + "".join(paths) + '</Node>'
     return node, len(paths)
 
 
@@ -269,9 +269,7 @@ def _viseme_shapes(mx: float, my: float) -> str:
         (503, "viseme_3", "Ellipse", 'width="27" height="19"'),
         (504, "viseme_4", "Ellipse", 'width="11" height="18"'),
     ]
-    out = [
-        f'<Shape x="{mx:.2f}" y="{my:.2f}" name="MouthCover" id="0:490"><Ellipse width="45" height="22" originX="0.5" originY="0.5"/><Fill><SolidColor colorValue="FFAF6A53"/></Fill></Shape>'
-    ]
+    out = []
     for rid, name, geom, attrs in specs:
         out.append(
             f'<Shape x="{mx:.2f}" y="{my:.2f}" opacity="0" name="{name}" id="0:{rid}">'
@@ -423,14 +421,16 @@ def build_rml(vectors: dict[str, Path], pivots: dict[str, tuple[float, float]], 
     viseme_animations, viseme_layer = _viseme_animations()
     gaze_animations, gaze_layers = _gaze_layers(input_ids, pivots)
     mouth_animations, mouth_layer = _mouth_open_layer(input_ids)
+    mouth_x = pivots["mouth"][0] - pivots["head"][0]
+    mouth_y = pivots["mouth"][1] - pivots["head"][1]
     head_extra = (
         _gaze_shapes(pivots) +
-        '<Node name="MouthRig" id="0:489">' +
-        _viseme_shapes(
-            pivots["mouth"][0] - pivots["head"][0],
-            pivots["mouth"][1] - pivots["head"][1],
-        ) +
-        '</Node>'
+        f'<Node x="{mouth_x:.2f}" y="{mouth_y:.2f}" name="MouthRig" id="0:489">' +
+        _viseme_shapes(0.0, 0.0) +
+        '</Node>' +
+        f'<Shape x="{mouth_x:.2f}" y="{mouth_y:.2f}" name="MouthCover" id="0:490">'
+        '<Ellipse width="45" height="22" originX="0.5" originY="0.5"/>'
+        '<Fill><SolidColor colorValue="FFAF6A53"/></Fill></Shape>'
     )
     body, body_paths = vector_node("CandidateBBody", 10, vectors["body"], (0.0, 0.0))
     head, head_paths = vector_node("CandidateBHead", 11, vectors["head"], pivots["head"], head_extra)
