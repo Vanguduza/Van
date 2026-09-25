@@ -139,6 +139,23 @@ class Settings(BaseSettings):
     artemis_console_session_ttl_seconds: int = 900
     artemis_console_launch_ttl_seconds: int = 60
 
+    # VAN-DEV-001 (DIAL VAN-DEVCC-R1 §3.4) — the DIAL Development Projection API v1 on
+    # `dial-control`, reached over the private overlay only. VAN displays DIAL state and
+    # forwards typed owner commands; it never plans or executes DIAL work. The DIAL-scoped
+    # bearer lives in a gateway-side token file and never reaches Android. Off by default:
+    # an unconfigured deployment answers 404 on /v1/dial-dev/* rather than inventing state.
+    dial_dev_enabled: bool = False
+    dial_dev_base_url: str = ""
+    dial_dev_token_file: str = ""
+    dial_dev_timeout_s: float = 10.0
+    #: §3.1 — a projection older than this is STALE on the device. Reported to the device
+    #: as a header beside the unchanged envelope; the gateway never rewrites the envelope.
+    dial_dev_stale_ms: int = 30_000
+    #: Workspaces move faster than plans, so they go stale sooner (§3.1).
+    dial_dev_workspaces_stale_ms: int = 10_000
+    #: VAN-DEV-002 — consume DIAL's event stream into Attention while dial_dev is enabled.
+    dial_dev_attention_enabled: bool = True
+
     # Rev 3.1 knowledge-source capability plane. These providers emit evidence
     # or verified mutation receipts only; none can promote itself to owner truth.
     vekl_enabled: bool = False
