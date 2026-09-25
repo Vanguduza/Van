@@ -129,6 +129,38 @@ def _reminder_readback_observation(reminders: ReminderService):
     return observe
 
 
+def _jev_readback_observation(jev: Any):
+    async def observe(context: dict[str, Any]) -> dict[str, Any]:
+        postconditions = context.get("postconditions") or {}
+        kind = str(postconditions.get("kind") or "").strip()
+        if kind == "module":
+            module_id = str(postconditions.get("module_id") or "").strip()
+            if not module_id:
+                raise ValueError("Jev contract names no module")
+            observed = await jev.module(module_id)
+            return {
+                "kind": "module",
+                "module_id": module_id,
+                "status": observed.get("status"),
+                "evidence_ref": f"jev-module://{module_id}",
+            }
+        if kind == "global":
+            operation = str(postconditions.get("operation") or "").strip().lower()
+            project_id = str(postconditions.get("project_id") or "").strip() or None
+            observed = await jev.status()
+            global_state = observed.get("global") or {}
+            result = {"kind": "global", "operation": operation, "project_id": project_id}
+            if project_id:
+                result["project_enabled"] = bool((global_state.get("projects") or {}).get(project_id, True))
+            else:
+                result["owner_active"] = bool(global_state.get("owner_active", True))
+                result["bypassed"] = bool(global_state.get("bypassed", False))
+            result["evidence_ref"] = "jev-global://control"
+            return result
+        raise ValueError("unknown Jev readback contract")
+    return observe
+
+
 def _notebook_readback_observation(knowledge: Any):
     async def observe(context: dict[str, Any]) -> dict[str, Any]:
         postconditions = context.get("postconditions") or {}
@@ -182,7 +214,7 @@ DECLARED_BUT_UNOBSERVABLE_STRATEGIES: dict[str, str] = {
 
 
 def build_mission_registry(
-    *, store: Store, trading: Any, knowledge: Any
+    *, store: Store, trading: Any, knowledge: Any, jev: Any | None = None
 ) -> VerifierRegistry:
     """The registry MissionService runs when a mission asks for a verification outcome.
 
@@ -217,6 +249,15 @@ def build_mission_registry(
     # is the one A4 command an owner issues under time pressure, and until this was
     # registered the mission for it could only ever end COMPLETED_UNVERIFIED.
     registry.register("trading-halt", LedgerEventVerifier(_trading_halt_observation(trading)))
+    if jev is not None:
+        registry.register(
+            "jev-readback",
+            ObservationVerifier(
+                _jev_readback_observation(jev),
+                verifier_version="jev-readback/1",
+                evidence_prefix="jev://",
+            ),
+        )
     # §34 names stored browser artefacts the weakest admissible evidence and this adapter
     # is typed as such. It is registered because the artefacts are real, not because they
     # are strong.
@@ -242,7 +283,7 @@ def build_mission_registry(
 #: Mission verification strategies a success contract may name today.
 WIRED_MISSION_STRATEGIES = (
     "ledger-event", "trading-halt", "browser-evidence", "api-readback",
-    "notebook-source-readback", "owner-fact-readback", "reminder-readback",
+    "notebook-source-readback", "owner-fact-readback", "reminder-readback", "jev-readback",
 )
 
 
