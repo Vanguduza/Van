@@ -201,6 +201,9 @@ jobs:
         with:
           distribution: temurin
           java-version: "17"
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
       # Runs before the Android build because it needs no Android toolchain: it compiles
       # the app's own pure decision files (the owner status projection and the mission read
       # models) on the JVM and executes their tests. When the Android Gradle Plugin cannot
@@ -217,6 +220,23 @@ jobs:
         env:
           VAN_DEBUG_KEYSTORE_BASE64: ${{ secrets.VAN_DEBUG_KEYSTORE_BASE64 }}
         run: bash tools/ci/restore_debug_keystore.sh
+      - name: Build Candidate B mechanics prototype
+        run: |
+          python -m pip install --disable-pip-version-check "Pillow==12.3.0" "vtracer==0.6.15" "PyYAML==6.0.2"
+          sudo apt-get update
+          sudo apt-get install -y --no-install-recommends \
+            libgl1 libegl1 libgles2 libx11-6 libxkbcommon0 libfontconfig1 libfreetype6 libxcb1
+          tmp="$(mktemp -d)"
+          curl -fsSL https://releases.rive.app/cli/v1.1.1/rive-linux-x64.tar.gz -o "$tmp/rive.tar.gz"
+          echo "41684e9d99fea98e01c2c155e07ec985130b95b640410dc0fbe4ca30c271a7d5  $tmp/rive.tar.gz" | sha256sum -c -
+          tar -xzf "$tmp/rive.tar.gz" -C "$tmp"
+          rive_bin="$(find "$tmp" -type f -name rive -perm -u+x -print -quit)"
+          test -n "$rive_bin"
+          mkdir -p "$RUNNER_TEMP/van-character-forge-bin"
+          install -m 0755 "$rive_bin" "$RUNNER_TEMP/van-character-forge-bin/rive"
+          export PATH="$RUNNER_TEMP/van-character-forge-bin:$PATH"
+          python -m tools.character_forge.build_candidate_b_rive_prototype
+          test -s visual-authority/character-forge/08-prototypes/candidate-b-mechanics/build/van_candidate_b_mechanics_proto.riv
       - name: Stage Candidate B Character Rig Lab asset
         run: |
           candidate="visual-authority/character-forge/08-prototypes/candidate-b-mechanics/build/van_candidate_b_mechanics_proto.riv"
@@ -278,11 +298,31 @@ jobs:
         with:
           distribution: temurin
           java-version: "17"
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
       - name: Enable KVM for the emulator
         run: |
           echo 'KERNEL=="kvm", GROUP="kvm", MODE="0666", OPTIONS+="static_node=kvm"' | sudo tee /etc/udev/rules.d/99-kvm4all.rules
           sudo udevadm control --reload-rules
           sudo udevadm trigger --name-match=kvm
+      - name: Build Candidate B mechanics prototype
+        run: |
+          python -m pip install --disable-pip-version-check "Pillow==12.3.0" "vtracer==0.6.15" "PyYAML==6.0.2"
+          sudo apt-get update
+          sudo apt-get install -y --no-install-recommends \
+            libgl1 libegl1 libgles2 libx11-6 libxkbcommon0 libfontconfig1 libfreetype6 libxcb1
+          tmp="$(mktemp -d)"
+          curl -fsSL https://releases.rive.app/cli/v1.1.1/rive-linux-x64.tar.gz -o "$tmp/rive.tar.gz"
+          echo "41684e9d99fea98e01c2c155e07ec985130b95b640410dc0fbe4ca30c271a7d5  $tmp/rive.tar.gz" | sha256sum -c -
+          tar -xzf "$tmp/rive.tar.gz" -C "$tmp"
+          rive_bin="$(find "$tmp" -type f -name rive -perm -u+x -print -quit)"
+          test -n "$rive_bin"
+          mkdir -p "$RUNNER_TEMP/van-character-forge-bin"
+          install -m 0755 "$rive_bin" "$RUNNER_TEMP/van-character-forge-bin/rive"
+          export PATH="$RUNNER_TEMP/van-character-forge-bin:$PATH"
+          python -m tools.character_forge.build_candidate_b_rive_prototype
+          test -s visual-authority/character-forge/08-prototypes/candidate-b-mechanics/build/van_candidate_b_mechanics_proto.riv
       - name: Bind Candidate B mechanics prototype for CI only
         run: |
           prototype="visual-authority/character-forge/08-prototypes/candidate-b-mechanics/build/van_candidate_b_mechanics_proto.riv"
