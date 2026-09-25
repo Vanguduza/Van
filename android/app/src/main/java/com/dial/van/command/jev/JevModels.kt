@@ -26,6 +26,9 @@ data class JevServiceSnapshot(
     val registryRevision: String?,
     val global: JevGlobalState,
     val modules: List<JevModule>,
+    val providerConfigured: Boolean,
+    val providerQualified: Boolean,
+    val providerModels: List<String>,
 )
 
 data class JevActivityItem(
@@ -69,7 +72,7 @@ data class JevContribution(
 )
 
 internal object JevJson {
-    fun snapshot(status: JSONObject, health: JSONObject): JevServiceSnapshot {
+    fun snapshot(status: JSONObject, health: JSONObject, provider: JSONObject): JevServiceSnapshot {
         val globalJson = status.optJSONObject("global") ?: JSONObject()
         val projectsJson = globalJson.optJSONObject("projects") ?: JSONObject()
         val projectMap = buildMap {
@@ -112,6 +115,17 @@ internal object JevJson {
                 projects = projectMap,
             ),
             modules = modules,
+            providerConfigured = provider.optBoolean("configured", false),
+            providerQualified = provider.optBoolean("qualified", false),
+            providerModels = buildList {
+                val rows = provider.optJSONArray("models")
+                if (rows != null) {
+                    for (i in 0 until rows.length()) {
+                        val row = rows.optJSONObject(i)
+                        if (row != null) add(row.optString("name")) else add(rows.optString(i))
+                    }
+                }
+            }.filter { it.isNotBlank() },
         )
     }
 
