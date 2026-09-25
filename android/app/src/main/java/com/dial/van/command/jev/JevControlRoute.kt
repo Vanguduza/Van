@@ -234,6 +234,28 @@ private fun Overview(snapshot: JevServiceSnapshot, onRefresh: () -> Unit) {
         }
         item {
             VanPanel {
+                SectionHeader(
+                    "Provider qualification",
+                    "Configured is not the same as qualified; live eligibility requires evidence.",
+                    trailing = {
+                        StatusChip(
+                            if (snapshot.providerQualified) "QUALIFIED" else if (snapshot.providerConfigured) "UNQUALIFIED" else "UNCONFIGURED",
+                            if (snapshot.providerQualified) StatusSemantics.ROLE_FAVOURABLE
+                            else if (snapshot.providerConfigured) StatusSemantics.ROLE_EVENT_RISK
+                            else StatusSemantics.ROLE_DISABLED,
+                        )
+                    },
+                )
+                Text(
+                    if (snapshot.providerModels.isEmpty()) "No live-qualified model revision recorded."
+                    else "Models: ${snapshot.providerModels.joinToString(", ")}",
+                    style = tokens.type.body,
+                    color = tokens.color.textSecondary,
+                )
+            }
+        }
+        item {
+            VanPanel {
                 SectionHeader("Domain coverage", "One service, isolated use-case contracts.")
                 listOf(
                     "dev." to "Development",
