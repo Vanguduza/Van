@@ -89,6 +89,24 @@ data class JevCandidateRevision(
     val createdAt: String,
 )
 
+data class JevSafetyBreach(
+    val code: String,
+    val value: Double,
+    val threshold: Double,
+    val samples: Int,
+)
+
+data class JevSafetySnapshot(
+    val moduleId: String,
+    val lifecycleState: String,
+    val healthy: Boolean,
+    val outcomeSamples: Int,
+    val highConfidenceErrorRate: Double?,
+    val falseRaiseRate: Double?,
+    val reviewLoadPer100: Double?,
+    val breaches: List<JevSafetyBreach>,
+)
+
 data class JevContribution(
     val moduleId: String,
     val sampleCount: Int,
@@ -256,6 +274,38 @@ internal object JevJson {
                 )
             }
         }
+    }
+
+    fun safety(payload: JSONObject): JevSafetySnapshot {
+        val breachesJson = payload.optJSONArray("breaches")
+        val breaches = buildList {
+            if (breachesJson != null) {
+                for (i in 0 until breachesJson.length()) {
+                    val row = breachesJson.optJSONObject(i) ?: continue
+                    add(
+                        JevSafetyBreach(
+                            code = row.optString("code"),
+                            value = row.optDouble("value", 0.0),
+                            threshold = row.optDouble("threshold", 0.0),
+                            samples = row.optInt("samples", 0),
+                        )
+                    )
+                }
+            }
+        }
+        fun nullableDouble(name: String): Double? =
+            if (!payload.has(name) || payload.isNull(name)) null else payload.optDouble(name)
+
+        return JevSafetySnapshot(
+            moduleId = payload.optString("module_id"),
+            lifecycleState = payload.optString("lifecycle_state"),
+            healthy = payload.optBoolean("healthy", true),
+            outcomeSamples = payload.optInt("outcome_samples", 0),
+            highConfidenceErrorRate = nullableDouble("high_confidence_error_rate"),
+            falseRaiseRate = nullableDouble("false_raise_rate"),
+            reviewLoadPer100 = nullableDouble("review_load_per_100"),
+            breaches = breaches,
+        )
     }
 
     fun contribution(moduleId: String, payload: JSONObject) = JevContribution(
