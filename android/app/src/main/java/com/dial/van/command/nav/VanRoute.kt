@@ -67,7 +67,7 @@ object VanRoute {
     val PRIMARY: List<String> = listOf(HOME, ATTENTION, WORK, TRADING, MEMORY)
 
     /** Everything else, reached through the "More" sheet. */
-    val MORE: List<String> = listOf(PROJECTS, CONNECTED, SETTINGS, JEV)
+    val MORE: List<String> = listOf(PROJECTS, CONNECTED, SETTINGS)
 
     /** Child route template → its parent template, for "up"/back-to-parent affordances. */
     val PARENTS: Map<String, String> = mapOf(
