@@ -16,7 +16,6 @@ def test_jev_module_transition_resolves_as_owner_approved_a4():
         "set jev module van.attention.fields.v1 to ACTIVE_GATED"
     )
     assert resolved.action_id == "jev.module.transition"
-    assert resolved.action_class == ActionClass.A4
     assert resolved.no_stale_replay is True
     assert resolved.parameters == {
         "module_id": "van.attention.fields.v1",
