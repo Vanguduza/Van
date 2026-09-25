@@ -17,4 +17,10 @@ class JevRepository(private val gateway: VanGatewayClient) {
 
     suspend fun evaluationProposals(moduleId: String? = null, limit: Int = 100): List<JevEvaluationProposal> =
         JevJson.proposals(gateway.jevEvaluationProposals(moduleId, limit))
+
+    suspend fun evaluationReviews(proposalId: String? = null, limit: Int = 100): List<JevEvaluationReview> =
+        JevJson.reviews(gateway.jevEvaluationReviews(proposalId, limit))
+
+    suspend fun evaluationCandidates(moduleId: String? = null, limit: Int = 100): List<JevCandidateRevision> =
+        JevJson.candidates(gateway.jevEvaluationCandidates(moduleId, limit))
 }
