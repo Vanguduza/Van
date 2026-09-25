@@ -12,6 +12,7 @@ import com.dial.van.dialdev.DialDevActionRequest
 import com.dial.van.dialdev.DialDevChange
 import com.dial.van.dialdev.DialDevSse
 import com.dial.van.security.DeviceProofSigner
+import com.dial.van.security.MutualTlsIdentity
 import com.dial.van.security.OwnerDeviceIdentity
 import com.dial.van.security.OwnerApprovalKeyManager
 import com.dial.van.security.OwnerAuthorityToken
@@ -28,6 +29,9 @@ import org.json.JSONArray
 import org.json.JSONObject
 import java.io.IOException
 import java.net.HttpURLConnection
+import javax.net.ssl.HttpsURLConnection
+import javax.net.ssl.SSLSocketFactory
+import javax.net.ssl.X509TrustManager
 import java.net.URL
 import java.net.URLEncoder
 import java.nio.charset.StandardCharsets
@@ -70,6 +74,37 @@ class VanGatewayClient(context: Context) {
      */
     private val deviceIdentity = OwnerDeviceIdentity()
     private val proofSigner = DeviceProofSigner(deviceIdentity)
+
+    /** The phone's client certificate and the pinned gateway CA for the direct mutual-TLS link. */
+    private val mtls = MutualTlsIdentity(context)
+
+    /**
+     * Every HTTP connection to the gateway is opened here, so each one carries the pinned
+     * trust and the client certificate when the build is configured for the direct link.
+     */
+    private fun open(url: String): HttpURLConnection {
+        val conn = URL(url).openConnection() as HttpURLConnection
+        if (conn is HttpsURLConnection) {
+            mtls.socketFactory()?.let { (factory, _) -> conn.sslSocketFactory = factory }
+        }
+        return conn
+    }
+
+    /** Socket factory + pinned trust for the session WebSocket, or null without a pinned CA. */
+    fun tlsTransport(): Pair<SSLSocketFactory, X509TrustManager>? = mtls.socketFactory()
+
+    /**
+     * Hold a current client certificate for the direct mutual-TLS link: enrol on first use,
+     * renew within thirty days of expiry. Blocking; call off the main thread. A no-op when
+     * the build pins no CA or the phone is not paired yet. The request is proved with the
+     * bound device key, and the certificate's key never leaves the Keystore.
+     */
+    fun ensureTlsIdentity() {
+        if (!mtls.isConfigured || mtls.hasUsableCertificate()) return
+        val device = deviceId?.takeIf { it.isNotBlank() } ?: return
+        val answer = postProved(TLS_CERTIFICATE_PATH, JSONObject().put("csr_pem", mtls.certificateRequestPem(device)))
+        mtls.storeCertificate(answer.getString("certificate_pem"))
+    }
 
     /** Whether this device has enrolled a hardware identity (§0D.3). */
     fun hasDeviceIdentity(): Boolean = deviceIdentity.isEnrolled()
@@ -406,7 +441,7 @@ class VanGatewayClient(context: Context) {
     }
 
     private fun tradingPromotionPost(path: String, body: JsonObject): Pair<Int, String> {
-        val conn = (URL("$baseUrl$path").openConnection() as HttpURLConnection).apply {
+        val conn = open("$baseUrl$path").apply {
             requestMethod = "POST"
             setRequestProperty("Content-Type", "application/json")
             applyIngressAuth(this)
@@ -432,7 +467,7 @@ class VanGatewayClient(context: Context) {
         val body = com.dial.van.trading.AccountOnboarding.requestBody(
             secret, id, System.currentTimeMillis() / 1000L, action, args, approvalProof,
         )
-        val conn = (URL("$baseUrl/v1/trading/accounts/action").openConnection() as HttpURLConnection).apply {
+        val conn = open("$baseUrl/v1/trading/accounts/action").apply {
             requestMethod = "POST"
             setRequestProperty("Content-Type", "application/json")
             applyIngressAuth(this)
@@ -465,7 +500,7 @@ class VanGatewayClient(context: Context) {
         val body = com.dial.van.trading.AccountOnboarding.requestBody(
             secret, id, System.currentTimeMillis() / 1000L, action, args,
         )
-        val conn = (URL("$baseUrl/v1/trading/accounts/challenge").openConnection() as HttpURLConnection).apply {
+        val conn = open("$baseUrl/v1/trading/accounts/challenge").apply {
             requestMethod = "POST"
             setRequestProperty("Content-Type", "application/json")
             applyIngressAuth(this)
@@ -1076,7 +1111,7 @@ class VanGatewayClient(context: Context) {
          * Screens also poll at their stale threshold, so a dropped stream costs latency, not truth.
          */
         fun events(): Flow<DialDevChange> = callbackFlow {
-            val connection = (URL("$baseUrl$DIAL_DEV_PREFIX/events").openConnection() as HttpURLConnection)
+            val connection = open("$baseUrl$DIAL_DEV_PREFIX/events")
             val reader = launch(Dispatchers.IO) {
                 try {
                     connection.requestMethod = "GET"
@@ -1413,7 +1448,7 @@ class VanGatewayClient(context: Context) {
         useIngress: Boolean,
         extraHeaders: Map<String, String> = emptyMap(),
     ): JSONObject = withRetry {
-        val conn = (URL("$rootUrl$path").openConnection() as HttpURLConnection).apply {
+        val conn = open("$rootUrl$path").apply {
             requestMethod = "POST"
             setRequestProperty("Content-Type", "application/json")
             if (useIngress) applyIngressAuth(this)
@@ -1447,7 +1482,7 @@ class VanGatewayClient(context: Context) {
     }
 
     private fun deleteProved(path: String): JSONObject = withRetry {
-        val conn = (URL("$baseUrl$path").openConnection() as HttpURLConnection).apply {
+        val conn = open("$baseUrl$path").apply {
             requestMethod = "DELETE"
             applyIngressAuth(this)
             proofHeaders("DELETE", path, "").forEach { (name, value) ->
@@ -1473,7 +1508,7 @@ class VanGatewayClient(context: Context) {
     }
 
     private fun rawGet(path: String): String = withRetry {
-        val conn = (URL("$baseUrl$path").openConnection() as HttpURLConnection).apply {
+        val conn = open("$baseUrl$path").apply {
             requestMethod = "GET"
             applyIngressAuth(this)
             connectTimeout = 15_000
@@ -1558,6 +1593,7 @@ class VanGatewayClient(context: Context) {
 
         /** Rev 1.5 §20 / §34.1. Matches `van_gateway.session.api.SESSION_PREFIX`. */
         const val SESSION_PREFIX = "/v1/session"
+        const val TLS_CERTIFICATE_PATH = "/v1/devices/tls-certificate"
 
         /** VAN-DEVCC-R1 §3.4 — the gateway's DIAL development proxy. Android never calls DIAL. */
         const val DIAL_DEV_PREFIX = "/v1/dial-dev"

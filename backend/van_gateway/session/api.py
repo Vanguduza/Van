@@ -22,6 +22,7 @@ from fastapi import APIRouter, HTTPException, Request, WebSocket, WebSocketDisco
 from fastapi.responses import StreamingResponse
 from pydantic import BaseModel, Field
 
+from van_gateway.mtls.transport import mtls_device_id
 from van_gateway.observability import instruments
 from van_gateway.session.models import (
     Direction,
@@ -307,6 +308,12 @@ def build_session_router(
             device = await auth.require_access_token(device_token)
         except Exception:  # AuthError and anything else it raises
             await websocket.close(code=4401)
+            return
+
+        certified = mtls_device_id(websocket.scope)
+        if certified is not None and certified != device.device_id:
+            # Direct mutual-TLS link: the token must belong to the certified device.
+            await websocket.close(code=4403)
             return
 
         session = await sessions.get(van_session_id)

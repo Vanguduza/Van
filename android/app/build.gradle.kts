@@ -16,6 +16,19 @@ val escapedVanGatewayBaseUrl = vanGatewayBaseUrl
     .replace("\"", "\\\"")
 
 /*
+ * Direct mutual-TLS link to the VAN gateway on the Hermes host: the VAN device CA, as the
+ * base64 of its PEM. When set, the app trusts only this CA on the gateway link and presents
+ * a Keystore-backed client certificate the gateway issues. Base64 so the PEM's newlines never
+ * reach the generated Java source.
+ */
+val vanGatewayCaPemB64 = providers.gradleProperty("VAN_GATEWAY_CA_PEM_B64")
+    .orElse(providers.environmentVariable("VAN_GATEWAY_CA_PEM_B64"))
+    .orElse("")
+    .get()
+    .trim()
+require(vanGatewayCaPemB64.matches(Regex("^[A-Za-z0-9+/=]*$"))) { "VAN_GATEWAY_CA_PEM_B64 must be base64" }
+
+/*
  * ADR-RB-027 — the keys this build will accept a signed connectivity manifest from,
  * as newline-separated `kid=PEM` pairs.
  *
@@ -55,6 +68,7 @@ android {
         versionCode = 5
         versionName = "0.5.0-dev"
         buildConfigField("String", "VAN_GATEWAY_BASE_URL", "\"$escapedVanGatewayBaseUrl\"")
+        buildConfigField("String", "VAN_GATEWAY_CA_PEM_B64", "\"$vanGatewayCaPemB64\"")
         buildConfigField(
             "String",
             "VAN_CONNECTIVITY_TRUSTED_KEYS",

@@ -164,6 +164,8 @@ class VanHermesSessionManager(
         .pingInterval(HeartbeatPolicy.ACTIVE_INTERVAL_MS, TimeUnit.MILLISECONDS)
         .connectTimeout(15, TimeUnit.SECONDS)
         .readTimeout(0, TimeUnit.MILLISECONDS) // a WebSocket is supposed to be idle
+        // Direct mutual-TLS link: pinned gateway CA and this phone's client certificate.
+        .apply { gateway.tlsTransport()?.let { (factory, trust) -> sslSocketFactory(factory, trust) } }
         .build()
 
     /**
@@ -382,6 +384,10 @@ class VanHermesSessionManager(
      */
     suspend fun start() {
         restoreOutbox()
+        // Enrol or renew the client certificate before the first request that needs it.
+        // A failure here is not fatal: the connect below fails the same way and the
+        // supervisor's normal offline/retry path takes it from there.
+        runCatching { gateway.ensureTlsIdentity() }
         if (_state.value.vanSessionId == null) {
             val opened = runCatching {
                 gateway.sessionOpen(pathId = PRIMARY_PATH_ID, routeId = "primary-ingress")

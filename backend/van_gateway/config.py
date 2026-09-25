@@ -284,6 +284,25 @@ class Settings(BaseSettings):
     connectivity_signing_key_file: str = ""
     connectivity_signing_kid: str = "connectivity-1"
 
+    # ---- direct mutual-TLS link to the Android app (van_gateway.mtls) ------------------
+    #: The loopback listener the gateway has always had: Hermes, the owner-runtime MCP and
+    #: local tools talk to it. Unchanged by mutual TLS.
+    loopback_host: str = "127.0.0.1"
+    loopback_port: int = 8787
+    #: Public listener the phone connects to directly: TLS 1.3, a client certificate issued
+    #: by the VAN device CA on every route except pre-enrolment ones. Off by default.
+    mtls_enabled: bool = False
+    mtls_bind: str = "0.0.0.0"
+    #: Unprivileged, so the gateway stays a user unit and the host needs no sysctl or
+    #: capability change to serve it.
+    mtls_port: int = 8443
+    #: Directory holding ca.crt, ca.key, server.crt, server.key and issued.json.
+    mtls_dir: str = ""
+    mtls_client_cert_days: int = 365
+    #: WebSocket keepalive on the public listener; also bounds how long a dead phone
+    #: connection lingers.
+    mtls_ws_ping_seconds: int = 20
+
     # ---- GAP-F-018/021: release-time determinism and hardening ------------------
     #: What kind of host this process believes it is running on. Not read anywhere else
     #: in the gateway — its only consumer is `assert_production_safe` below — so setting
