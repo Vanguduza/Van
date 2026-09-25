@@ -27,6 +27,7 @@ class JevProjectionApi:
         self.router.add_api_route("/activity", self.activity, methods=["GET"])
         self.router.add_api_route("/performance", self.performance, methods=["GET"])
         self.router.add_api_route("/contribution", self.contribution, methods=["GET"])
+        self.router.add_api_route("/safety", self.safety, methods=["GET"])
         self.router.add_api_route("/evaluation/packet", self.evaluation_packet, methods=["GET"])
         self.router.add_api_route("/evaluation/proposals", self.evaluation_proposals, methods=["GET"])
         self.router.add_api_route("/evaluation/reviews", self.evaluation_reviews, methods=["GET"])
@@ -83,6 +84,13 @@ class JevProjectionApi:
         module_id: str = Query(min_length=1, max_length=256),
     ) -> dict:
         return await self._call(lambda: self.client.contribution(project_id=project_id, module_id=module_id))
+
+    async def safety(
+        self,
+        project_id: str = Query(default="van", min_length=1, max_length=128),
+        module_id: str = Query(min_length=1, max_length=256),
+    ) -> dict:
+        return await self._call(lambda: self.client.safety(project_id=project_id, module_id=module_id))
 
     async def evaluation_packet(
         self,
