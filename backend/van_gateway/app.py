@@ -46,6 +46,7 @@ from van_gateway.hermes.bridge import HermesBridge
 from van_gateway.idempotency.service import IdempotencyService
 from van_gateway.jev.client import JevProjectionClient
 from van_gateway.jev.api import JevProjectionApi
+from van_gateway.jev.advisor import JevVanAdvisor
 from van_gateway.models import (
     ActionClass,
     AttentionSeverity,
@@ -436,6 +437,12 @@ def create_app() -> FastAPI:
     projects = ProjectRouter(store, project_registry_path)
     audit = AuditService(store)
     degraded = DegradedRegistry()
+    jev_advisor = JevVanAdvisor(
+        base_url=settings.jev_base_url,
+        token_file=settings.jev_consumer_token_file,
+        enabled=settings.jev_enabled,
+        timeout_seconds=min(settings.jev_timeout_seconds, 1.2),
+    )
     jev_projection = JevProjectionApi(
         JevProjectionClient(
             base_url=settings.jev_base_url,
@@ -446,7 +453,7 @@ def create_app() -> FastAPI:
         ),
         degraded,
     )
-    attention = AttentionEngine(store, settings.attention_budget_per_hour)
+    attention = AttentionEngine(store, settings.attention_budget_per_hour, jev_advisor=jev_advisor)
     briefing = BriefingService(store, attention)
     reminders = ReminderService(store)
     decisions = DecisionService(store, attention)
@@ -875,6 +882,7 @@ def create_app() -> FastAPI:
     app.state.learning = learning
     app.state.degraded = degraded
     app.state.jev_projection = jev_projection
+    app.state.jev_advisor = jev_advisor
     app.state.visual_acceptance = visual_acceptance
     # Exposed like `degraded`: which jobs a build actually installs is a property of
     # the running app, and a job list that exists only inside a closure is how
