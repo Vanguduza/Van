@@ -69,6 +69,26 @@ data class JevEvaluationProposal(
     val proposedAt: String,
 )
 
+data class JevEvaluationReview(
+    val reviewId: String,
+    val proposalId: String,
+    val reviewerLineage: String,
+    val decision: String,
+    val rationale: String,
+    val reviewedAt: String,
+)
+
+data class JevCandidateRevision(
+    val candidateId: String,
+    val proposalId: String,
+    val moduleId: String,
+    val baseModuleRevision: String,
+    val candidateModuleRevision: String,
+    val lifecycleState: String,
+    val reviewerLineage: String,
+    val createdAt: String,
+)
+
 data class JevContribution(
     val moduleId: String,
     val sampleCount: Int,
@@ -192,6 +212,46 @@ internal object JevJson {
                         proposerLineage = row.optString("proposer_lineage"),
                         status = row.optString("status"),
                         proposedAt = row.optString("proposed_at"),
+                    )
+                )
+            }
+        }
+    }
+
+    fun reviews(payload: JSONObject): List<JevEvaluationReview> {
+        val items = payload.optJSONArray("items") ?: return emptyList()
+        return buildList {
+            for (i in 0 until items.length()) {
+                val row = items.optJSONObject(i) ?: continue
+                add(
+                    JevEvaluationReview(
+                        reviewId = row.optString("review_id"),
+                        proposalId = row.optString("proposal_id"),
+                        reviewerLineage = row.optString("reviewer_lineage"),
+                        decision = row.optString("decision"),
+                        rationale = row.optString("rationale"),
+                        reviewedAt = row.optString("reviewed_at"),
+                    )
+                )
+            }
+        }
+    }
+
+    fun candidates(payload: JSONObject): List<JevCandidateRevision> {
+        val items = payload.optJSONArray("items") ?: return emptyList()
+        return buildList {
+            for (i in 0 until items.length()) {
+                val row = items.optJSONObject(i) ?: continue
+                add(
+                    JevCandidateRevision(
+                        candidateId = row.optString("candidate_id"),
+                        proposalId = row.optString("proposal_id"),
+                        moduleId = row.optString("module_id"),
+                        baseModuleRevision = row.optString("base_module_revision"),
+                        candidateModuleRevision = row.optString("candidate_module_revision"),
+                        lifecycleState = row.optString("lifecycle_state", "SHADOW"),
+                        reviewerLineage = row.optString("reviewer_lineage"),
+                        createdAt = row.optString("created_at"),
                     )
                 )
             }
