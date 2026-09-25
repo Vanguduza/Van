@@ -90,4 +90,31 @@ class JevModelsTest {
         assertEquals("REVISE", proposals.single().recommendation)
         assertEquals("PENDING_INDEPENDENT_REVIEW", proposals.single().status)
     }
+    @Test
+    fun `review and candidate projections preserve independent lineage`() {
+        val reviews = JevJson.reviews(JSONObject().put("items", JSONArray().put(JSONObject()
+            .put("review_id", "r-1")
+            .put("proposal_id", "p-1")
+            .put("reviewer_lineage", "independent-reviewer")
+            .put("decision", "APPROVE")
+            .put("rationale", "Shadow candidate only.")
+            .put("reviewed_at", "2026-09-25T01:00:00Z"))))
+        assertEquals(1, reviews.size)
+        assertEquals("independent-reviewer", reviews.single().reviewerLineage)
+        assertEquals("APPROVE", reviews.single().decision)
+
+        val candidates = JevJson.candidates(JSONObject().put("items", JSONArray().put(JSONObject()
+            .put("candidate_id", "c-1")
+            .put("proposal_id", "p-1")
+            .put("module_id", "van.memory.relevance.v1")
+            .put("base_module_revision", "base")
+            .put("candidate_module_revision", "candidate")
+            .put("lifecycle_state", "SHADOW")
+            .put("reviewer_lineage", "independent-reviewer")
+            .put("created_at", "2026-09-25T01:05:00Z"))))
+        assertEquals(1, candidates.size)
+        assertEquals("SHADOW", candidates.single().lifecycleState)
+        assertEquals("base", candidates.single().baseModuleRevision)
+        assertEquals("candidate", candidates.single().candidateModuleRevision)
+    }
 }
