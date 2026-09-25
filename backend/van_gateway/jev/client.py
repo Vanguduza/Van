@@ -76,6 +76,9 @@ class JevProjectionClient:
     async def status(self) -> dict:
         return await self._get("/v1/status")
 
+    async def provider(self) -> dict:
+        return await self._get("/v1/provider")
+
     async def modules(self) -> dict:
         return await self._get("/v1/modules")
 
