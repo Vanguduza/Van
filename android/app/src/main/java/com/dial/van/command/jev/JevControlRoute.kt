@@ -7,7 +7,6 @@ import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
-import androidx.compose.foundation.layout.weight
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
 import androidx.compose.material3.Button
@@ -259,7 +258,7 @@ private fun Overview(snapshot: JevServiceSnapshot, onRefresh: () -> Unit) {
             VanPanel {
                 SectionHeader(
                     "Provider qualification",
-                    "Configured is not the same as qualified; live eligibility requires evidence.",
+                    detail = "Configured is not the same as qualified; live eligibility requires evidence.",
                     trailing = {
                         StatusChip(
                             if (snapshot.providerQualified) "QUALIFIED" else if (snapshot.providerConfigured) "UNQUALIFIED" else "UNCONFIGURED",
@@ -279,7 +278,7 @@ private fun Overview(snapshot: JevServiceSnapshot, onRefresh: () -> Unit) {
         }
         item {
             VanPanel {
-                SectionHeader("Domain coverage", "One service, isolated use-case contracts.")
+                SectionHeader("Domain coverage", detail = "One service, isolated use-case contracts.")
                 listOf(
                     "dev." to "Development",
                     "van." to "VAN",
@@ -369,7 +368,7 @@ private fun ModuleDetail(
             VanPanel {
                 SectionHeader(
                     "Lifecycle control",
-                    "Owner-signed A4 controls. DIAL still enforces the lifecycle ceiling, effect direction and independent review.",
+                    detail = "Owner-signed A4 controls. DIAL still enforces the lifecycle ceiling, effect direction and independent review.",
                 )
                 Row(horizontalArrangement = Arrangement.spacedBy(tokens.space.space2)) {
                     listOf("SHADOW", "ADVISORY", "ACTIVE_GATED").forEach { state ->
@@ -388,7 +387,7 @@ private fun ModuleDetail(
         }
         item {
             VanPanel {
-                SectionHeader("Measured contribution", "Counterfactual comparison with the non-Jev path.")
+                SectionHeader("Measured contribution", detail = "Counterfactual comparison with the non-Jev path.")
                 if (contribution == null) {
                     OutlinedButton(onClick = onLoadContribution) { Text("Load contribution evidence") }
                 } else {
@@ -464,7 +463,7 @@ private fun Value(
     LazyColumn(verticalArrangement = Arrangement.spacedBy(tokens.space.space2)) {
         item {
             VanPanel {
-                SectionHeader("Performance & contribution", "Live service telemetry plus counterfactual value against the non-Jev baseline.")
+                SectionHeader("Performance & contribution", detail = "Live service telemetry plus counterfactual value against the non-Jev baseline.")
                 performance?.let { perf ->
                     Row(horizontalArrangement = Arrangement.spacedBy(tokens.space.space3)) {
                         MetricTile("Decisions", perf.decisions.toString(), modifier = Modifier.weight(1f))
@@ -485,7 +484,7 @@ private fun Value(
             VanPanel {
                 SectionHeader(
                     "Independent evaluator",
-                    "LLM proposals are advisory, provenance-bound and require independent review before any lifecycle change.",
+                    detail = "LLM proposals are advisory, provenance-bound and require independent review before any lifecycle change.",
                 )
                 if (proposals.isEmpty()) {
                     Text(
@@ -560,7 +559,7 @@ private fun Controls(snapshot: JevServiceSnapshot, onCommand: (String) -> Unit) 
             VanPanel {
                 SectionHeader(
                     "Global control",
-                    "The deployment kill switch stays server-side. This switch changes owner activation through the signed A4 path.",
+                    detail = "The deployment kill switch stays server-side. This switch changes owner activation through the signed A4 path.",
                 )
                 Row(modifier = Modifier.fillMaxWidth()) {
                     Column(modifier = Modifier.weight(1f)) {
@@ -586,7 +585,7 @@ private fun Controls(snapshot: JevServiceSnapshot, onCommand: (String) -> Unit) 
         }
         item {
             VanPanel {
-                SectionHeader("Project switches", "Each division can opt out without disabling the shared service.")
+                SectionHeader("Project switches", detail = "Each division can opt out without disabling the shared service.")
                 listOf(
                     "dial-development-system" to "Development System",
                     "van" to "VAN",
