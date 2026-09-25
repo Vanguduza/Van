@@ -394,12 +394,21 @@ class RiveContractTest {
         launchScenario(rig, background, state, speaking, listening, attentionX, attentionY, mouthOpen, urgency, viseme, action, trigger, sizeDp).use {
             instrumentation.waitForIdleSync()
             SystemClock.sleep(settleMs)
-            val screen = instrumentation.uiAutomation.takeScreenshot()
-            val density = targetContext.resources.displayMetrics.density
-            val size = min((sizeDp * density).toInt(), min(screen.width, screen.height))
-            val x = ((screen.width - size) / 2).coerceAtLeast(0)
-            val y = ((screen.height - size) / 2).coerceAtLeast(0)
-            val crop = Bitmap.createBitmap(screen, x, y, size, size)
+            fun takeCrop(): Bitmap {
+                val screen = instrumentation.uiAutomation.takeScreenshot()
+                val density = targetContext.resources.displayMetrics.density
+                val size = min((sizeDp * density).toInt(), min(screen.width, screen.height))
+                val x = ((screen.width - size) / 2).coerceAtLeast(0)
+                val y = ((screen.height - size) / 2).coerceAtLeast(0)
+                return Bitmap.createBitmap(screen, x, y, size, size)
+            }
+            var crop = takeCrop()
+            repeat(2) {
+                if (looksBlank(crop)) {
+                    SystemClock.sleep(400L)
+                    crop = takeCrop()
+                }
+            }
             val out = outputDir(rig).resolve("$name.png")
             out.parentFile?.mkdirs()
             FileOutputStream(out).use { crop.compress(Bitmap.CompressFormat.PNG, 100, it) }
