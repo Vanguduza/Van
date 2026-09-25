@@ -100,6 +100,15 @@ class JevProjectionClient:
     async def contribution(self, *, project_id: str, module_id: str) -> dict:
         return await self._get("/v1/contribution", {"project_id": project_id, "module_id": module_id})
 
+    async def evaluation_packet(self, *, project_id: str, module_id: str) -> dict:
+        return await self._get("/v1/evaluation/packet", {"project_id": project_id, "module_id": module_id})
+
+    async def evaluation_proposals(self, *, module_id: str | None = None, limit: int = 100) -> dict:
+        params: dict[str, Any] = {"limit": limit}
+        if module_id:
+            params["module_id"] = module_id
+        return await self._get("/v1/evaluation/proposals", params)
+
     async def transition_module(
         self, *, module_id: str, target_state: str, authority_ref: str,
         reason: str | None = None, owner_approved: bool = False,
