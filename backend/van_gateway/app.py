@@ -44,6 +44,9 @@ from van_gateway.google.service import GoogleAuthError, GoogleService, NARROW_SC
 from van_gateway.google.transport import FakeGoogleTransport, GoogleHttpTransport, GoogleOAuthTokenClient
 from van_gateway.hermes.bridge import HermesBridge
 from van_gateway.idempotency.service import IdempotencyService
+from van_gateway.jev.client import JevProjectionClient
+from van_gateway.jev.api import JevProjectionApi
+from van_gateway.jev.advisor import JevVanAdvisor
 from van_gateway.models import (
     ActionClass,
     AttentionSeverity,
@@ -434,7 +437,23 @@ def create_app() -> FastAPI:
     projects = ProjectRouter(store, project_registry_path)
     audit = AuditService(store)
     degraded = DegradedRegistry()
-    attention = AttentionEngine(store, settings.attention_budget_per_hour)
+    jev_advisor = JevVanAdvisor(
+        base_url=settings.jev_base_url,
+        token_file=settings.jev_consumer_token_file,
+        enabled=settings.jev_enabled,
+        timeout_seconds=min(settings.jev_timeout_seconds, 1.2),
+    )
+    jev_projection = JevProjectionApi(
+        JevProjectionClient(
+            base_url=settings.jev_base_url,
+            read_token_file=settings.jev_projection_token_file,
+            control_token_file=settings.jev_control_token_file,
+            enabled=settings.jev_enabled,
+            timeout_seconds=settings.jev_timeout_seconds,
+        ),
+        degraded,
+    )
+    attention = AttentionEngine(store, settings.attention_budget_per_hour, jev_advisor=jev_advisor)
     briefing = BriefingService(store, attention)
     reminders = ReminderService(store)
     decisions = DecisionService(store, attention)
@@ -445,6 +464,7 @@ def create_app() -> FastAPI:
         store, settings, reminders=reminders, attention=attention, briefing=briefing,
         # GAP-F-008: agent-initiated mutations consult the earned/granted domain trust.
         autonomy=ActionAutonomyGate(domain_trust),
+        jev_advisor=jev_advisor,
     )
     automation_registry = AutomationRegistry(store)
     automation_hot_index = HotWorkflowIndex()
@@ -578,7 +598,7 @@ def create_app() -> FastAPI:
     # the claimant writes. Built before the service because the service fails closed
     # without it.
     verifiers = build_mission_registry(
-        store=store, trading=trading, knowledge=owner_runtime.knowledge,
+        store=store, trading=trading, knowledge=owner_runtime.knowledge, jev=jev_projection.client,
     )
     # P1-AUTO-001 — the dispatcher was constructed with an empty observer map, so every
     # production run came back UNVERIFIABLE and owner_success could never be true; the
@@ -611,7 +631,7 @@ def create_app() -> FastAPI:
     )
     browser.binder = mission_binder
     automation.binder = mission_binder
-    understanding_api = UnderstandingApi(store, settings)
+    understanding_api = UnderstandingApi(store, settings, jev_advisor=jev_advisor)
     # GAP-F-028: VAN's only self-initiated behaviour — bounded FOLLOW_UP attention items
     # for work the owner left waiting. Never opens a mission or executes an action.
     proactive_followups = ProactiveFollowUpJob(
@@ -643,6 +663,7 @@ def create_app() -> FastAPI:
         owner_fact_author=owner_fact_author,
         reminders=reminders,
         trading=trading,
+        jev=jev_projection.client,
         learning=learning,
     )
 
@@ -861,6 +882,8 @@ def create_app() -> FastAPI:
     app.state.owner_memory = owner_memory
     app.state.learning = learning
     app.state.degraded = degraded
+    app.state.jev_projection = jev_projection
+    app.state.jev_advisor = jev_advisor
     app.state.visual_acceptance = visual_acceptance
     # Exposed like `degraded`: which jobs a build actually installs is a property of
     # the running app, and a job list that exists only inside a closure is how
@@ -892,6 +915,7 @@ def create_app() -> FastAPI:
     app.state.onboarding = onboarding
     app.state.strategy_promotions = strategy_promotions
     app.include_router(owner_runtime.router)
+    app.include_router(jev_projection.router)
     app.include_router(automation_health.router)
     app.include_router(automation.router)
     app.include_router(temporal_automation.router)

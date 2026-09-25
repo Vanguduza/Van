@@ -1,4 +1,4 @@
-# Hermes profile metadata — VAN
+﻿# Hermes profile metadata â€” VAN
 # Profile name MUST remain exactly "van"
 
 profile: van
@@ -61,6 +61,7 @@ skills:
     - trading-intelligence
     - automation-fabric
     - browser-intelligence
+    - jev-management
 
 bot:
   chat_spec: bot/BOT_CHAT.md
@@ -124,6 +125,23 @@ mcp_servers:
       resources: false
       prompts: false
     authority: SUBORDINATE_CAPABILITY_NOT_AUTHORITY
+
+  dial_jev:
+    command: node
+    args: ["agent-system/orchestration/judgment/mcp_stdio.mjs"]
+    cwd: "<dial-development-system-root>"
+    env:
+      DIAL_JEV_SERVICE_URL: "http://127.0.0.1:6791"
+      DIAL_JEV_MCP_TOKEN_FILE: "/etc/dial-control/secrets/jev-mcp-token"
+    enabled: true
+    connect_timeout: 10
+    timeout: 30
+    supports_parallel_tool_calls: true
+    tools:
+      include: [jev_registered_batch, jev_subordinate, jev_evaluation_packet, jev_record_evaluation_proposal, jev_record_evaluation_review, jev_status]
+      resources: false
+      prompts: false
+    authority: SUBORDINATE_JUDGMENT_EVIDENCE_NOT_AUTHORITY
 
 registered_projects:
   - van

@@ -165,6 +165,10 @@ ACTION_REVERSIBILITY: dict[str, Reversibility] = {
     # GAP-F-002 — a created reminder can be cancelled (`POST /v1/reminders/{id}/cancel`)
     # any time before it fires.
     "reminder.create": Reversibility.REVERSIBLE,
+    # Jev lifecycle/global controls can be restored through the same owner-signed A4
+    # path. Reversibility never weakens their owner-approval gate.
+    "jev.module.transition": Reversibility.REVERSIBLE,
+    "jev.global.control": Reversibility.REVERSIBLE,
     "secret.exfiltrate": Reversibility.IRREVERSIBLE,
 }
 

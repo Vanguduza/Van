@@ -94,6 +94,20 @@ class TypedCommandResolver:
         """
         self.default_notebook_id = (default_notebook_id or "").strip()
 
+    JEV_MODULE_TRANSITION_PATTERN = re.compile(
+        r"^(?:set|move) jev module (?P<module_id>[A-Za-z0-9._-]+) to "
+        r"(?P<target>DISABLED|SHADOW|ADVISORY|ACTIVE_GATED|ACTIVE|QUARANTINED|BYPASSED)$",
+        re.IGNORECASE,
+    )
+    JEV_GLOBAL_CONTROL_PATTERN = re.compile(
+        r"^(?P<operation>enable|disable|bypass|restore) jev(?: globally)?$",
+        re.IGNORECASE,
+    )
+    JEV_PROJECT_CONTROL_PATTERN = re.compile(
+        r"^(?P<operation>enable|disable) jev for project (?P<project_id>[A-Za-z0-9._-]+)$",
+        re.IGNORECASE,
+    )
+
     HALT_TRADING = {
         "halt trading",
         "stop trading",
@@ -201,6 +215,42 @@ class TypedCommandResolver:
     def resolve(self, text: str) -> CommandResolution:
         raw_compact = re.sub(r"\s+", " ", text.strip())
         normalized = raw_compact.casefold()
+
+        module_transition = self.JEV_MODULE_TRANSITION_PATTERN.fullmatch(raw_compact)
+        if module_transition:
+            return _from_action(
+                "jev.module.transition",
+                text=normalized,
+                intent_id="JEV_MODULE_TRANSITION",
+                parameters={
+                    "module_id": module_transition.group("module_id"),
+                    "target_state": module_transition.group("target").upper(),
+                },
+                rule_id="jev.module.transition.exact.v1",
+            )
+
+        global_control = self.JEV_GLOBAL_CONTROL_PATTERN.fullmatch(raw_compact)
+        if global_control:
+            return _from_action(
+                "jev.global.control",
+                text=normalized,
+                intent_id="JEV_GLOBAL_CONTROL",
+                parameters={"operation": global_control.group("operation").lower()},
+                rule_id="jev.global.control.exact.v1",
+            )
+
+        project_control = self.JEV_PROJECT_CONTROL_PATTERN.fullmatch(raw_compact)
+        if project_control:
+            return _from_action(
+                "jev.global.control",
+                text=normalized,
+                intent_id="JEV_PROJECT_CONTROL",
+                parameters={
+                    "operation": project_control.group("operation").lower(),
+                    "project_id": project_control.group("project_id"),
+                },
+                rule_id="jev.project.control.exact.v1",
+            )
 
         if normalized in self.HALT_TRADING:
             return _from_action(

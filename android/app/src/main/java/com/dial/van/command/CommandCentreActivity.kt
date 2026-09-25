@@ -51,6 +51,7 @@ import com.dial.van.command.attention.AttentionRoute
 import com.dial.van.command.artemis.ArtemisConsoleRoute
 import com.dial.van.command.connected.ConnectedRoute
 import com.dial.van.command.home.HomeRoute
+import com.dial.van.command.jev.JevControlRoute
 import com.dial.van.command.modules.BrowserEscalationsPage
 import com.dial.van.command.modules.BrowserPolicyPage
 import com.dial.van.command.modules.BrowserSessionsPage
@@ -283,7 +284,11 @@ internal fun CommandCentreScreen(app: VanApplication, initial: String) {
                             app = app,
                             onOpenVoice = { nav.navigate(VanRoute.SETTINGS_VOICE) },
                             onOpenNotifications = { nav.navigate(VanRoute.SETTINGS_NOTIFICATIONS) },
+                            onOpenJev = { nav.navigate(VanRoute.JEV) },
                         )
+                    }
+                    composable(VanRoute.JEV) {
+                        JevControlRoute(app = app, onBack = { nav.popBackStack() })
                     }
                     composable(VanRoute.SETTINGS_VOICE) {
                         SettingsVoiceRoute(app, onBack = { nav.popBackStack() })
