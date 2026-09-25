@@ -273,34 +273,49 @@ def build(project: Path = PROJECT) -> dict:
 
 
 def lid_skin(side: str, feats: dict, manifest: dict) -> str:
-    """ARGB of the skin just outside the eye opening, from the admitted face layer (lens off)."""
-    from PIL import Image, ImageDraw  # a forge-host dependency, like the layer builder
+    """ARGB of the upper-lid skin: the band just above the eye opening in the approved art, with
+    the lens tint taken off (the lens layer draws over the lid and puts it back)."""
+    from PIL import Image, ImageDraw, ImageFilter  # a forge-host dependency, like the layer builder
 
-    face = next(r for r in manifest["layers"] if r["name"] == "face")
-    img = Image.open(LAYER_SET / face["file"]).convert("RGBA")
-    ox, oy = face["offset_px"]
-    pts = [(x - ox, y - oy) for x, y in feats["eyes"][side]["opening"]]
-    inner, outer = Image.new("L", img.size, 0), Image.new("L", img.size, 0)
-    ImageDraw.Draw(inner).polygon(pts, fill=255, outline=255)
-    ImageDraw.Draw(outer).polygon(pts, fill=255, outline=255)
-    for _ in range(3):
-        outer = outer.filter(__import__("PIL.ImageFilter", fromlist=["MaxFilter"]).MaxFilter(3))
-    samples = [img.getpixel((x, y)) for y in range(img.height) for x in range(img.width)
-               if outer.getpixel((x, y)) and not inner.getpixel((x, y))]
-    skin = [p for p in samples if p[3] == 255 and p[0] > p[2] and sum(p[:3]) > 240]
+    src = Image.open(ROOT / manifest["source"]).convert("RGBA")
+    pts = feats["eyes"][side]["opening"]
+    near, far = Image.new("L", src.size, 0), Image.new("L", src.size, 0)
+    ImageDraw.Draw(near).polygon(pts, fill=255, outline=255)
+    ImageDraw.Draw(far).polygon(pts, fill=255, outline=255)
+    near = near.filter(ImageFilter.MaxFilter(3))
+    far = far.filter(ImageFilter.MaxFilter(9))
+    top = min(y for _x, y in pts)
+    cy = feats["eyes"][side]["iris"]["cy"]
+    xs = [x for x, _y in pts]
+    skin = []
+    for y in range(int(top) - 5, int(cy)):
+        for x in range(int(min(xs)), int(max(xs)) + 1):
+            r, g, b, a = src.getpixel((x, y))
+            if far.getpixel((x, y)) and not near.getpixel((x, y)) and a == 255 and r > b and r + g + b > 300:
+                skin.append((r, g, b))
     if not skin:
-        raise ValueError(f"no skin sampled around eye {side}")
-    med = [sorted(c)[len(c) // 2] for c in zip(*[p[:3] for p in skin])]
-    return "FF" + "".join(f"{c:02X}" for c in med)
+        raise ValueError(f"no lid skin sampled above eye {side}")
+    med = [sorted(c)[len(c) // 2] / 255.0 for c in zip(*skin)]
+    lens = json.loads((LAYER_SET / "LAYERS.json").read_text(encoding="utf-8"))["lens"]
+    tint = [int(lens["tint"][i:i + 2], 16) / 255.0 for i in (1, 3, 5)]
+    a = float(lens["alpha_max"])
+    rgb = [min(1.0, max(0.0, (c - a * t) / (1 - a))) for c, t in zip(med, tint)]
+    return "FF" + "".join(f"{round(c * 255):02X}" for c in rgb)
 
 
 def eyelid_xml(side: str, opening, pos, joint: str, skin: str) -> str:
-    """The upper lid: the eye opening filled with skin, hung from its top edge, closed at scaleY=1."""
-    verts = "".join(f'<StraightVertex x="{num(x - pos[0])}" y="{num(y - pos[1])}"/>' for x, y in opening)
+    """The upper lid: the eye opening filled with skin, hung from its top edge, closed at scaleY=1,
+    with the closed lash line along its lower edge."""
+    rel = [(x - pos[0], y - pos[1]) for x, y in opening]
+    verts = "".join(f'<StraightVertex x="{num(x)}" y="{num(y)}"/>' for x, y in rel)
+    mid = (max(y for _x, y in rel) + min(y for _x, y in rel)) / 2
+    lower = sorted((p for p in rel if p[1] >= mid), key=lambda p: p[0])
+    lash = "".join(f'<StraightVertex x="{num(x)}" y="{num(y)}"/>' for x, y in lower)
     return (f'<Node name="follow_eyelid_{side}"><TransformConstraint targetId="{joint}" name="c"/>'
             f'<Node name="eyelid_{side}_hinge">'
+            f'<Shape name="eyelid_{side}_lash"><PointsPath isClosed="false" name="p">{lash}</PointsPath>'
+            f'<Stroke thickness="1.6" cap="round" join="round" name="lash"><SolidColor colorValue="FF2B1714" name="c"/></Stroke></Shape>'
             f'<Shape name="eyelid_{side}"><PointsPath isClosed="true" name="p">{verts}</PointsPath>'
-            f'<Stroke thickness="1.3" name="lash"><SolidColor colorValue="FF2B1714" name="c"/></Stroke>'
             f'<Fill name="skin"><SolidColor colorValue="{skin}" name="c"/></Fill></Shape></Node></Node>')
 
 
