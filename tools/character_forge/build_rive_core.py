@@ -120,7 +120,8 @@ class Rig:
             "head_bob": ("chest", p["neck"]),         # breathing bob
             "neck": ("head_bob", p["neck"]),          # state tilt
             "nod": ("neck", p["neck"]),               # action nod
-            "head": ("nod", p["neck"]),               # gaze turn; the face follows this
+            "talk": ("nod", p["neck"]),               # speech lift with mouth_open
+            "head": ("talk", p["neck"]),              # gaze turn; the face follows this
             "eye_l": ("head", eye["l"]), "eye_r": ("head", eye["r"]),
             "eyelid_l": ("head", eye["top_l"]), "eyelid_r": ("head", eye["top_r"]),  # blink
             "look_l": ("eye_l", iris["l"]), "look_r": ("eye_r", iris["r"]),  # state look
@@ -321,7 +322,7 @@ def eyelid_xml(side: str, opening, pos, joint: str, skin: str) -> str:
 
 def inner_mouth_xml(pos, joint) -> str:
     """The mouth interior, closed at scaleY≈0: a dark mouth with tongue and a strip of teeth."""
-    w, h = 20.0, 9.0
+    w, h = 24.0, 12.0
     return (f'<Node name="follow_inner_mouth"><TransformConstraint targetId="{joint}" name="c"/>'
             f'<Node name="inner_mouth">'
             f'<Shape name="teeth" y="{num(-h * 0.32)}"><Rectangle width="{num(w * 0.62)}" height="{num(h * 0.22)}" cornerRadiusTL="1" cornerRadiusTR="1" cornerRadiusBL="1" cornerRadiusBR="1" originX="0.5" originY="0.5" name="p"/>'
@@ -443,7 +444,12 @@ def state_machine(contract: dict, J: dict, ids: Ids) -> tuple[list[str], str]:
     layer("Viseme", body, vids[0])
 
     closed = Anim("mouth_closed", 1).key(J["mouth_open"], SY, (0, 0.0)).key(J["mouth_open"], OPACITY, (0, 0.0))
-    ajar = Anim("mouth_open", 1).key(J["mouth_open"], SY, (0, 1.0)).key(J["mouth_open"], OPACITY, (0, 1.0))
+    # A mouth this size is a few pixels on a phone overlay, so speech also lifts the head a
+    # little as the mouth opens: the motion that reads at 48 dp, and what the emulator's
+    # whole-frame comparison of mouth_open 0 and 1 can see.
+    closed.key(J["talk"], Y, (0, 0.0))
+    ajar = (Anim("mouth_open", 1).key(J["mouth_open"], SY, (0, 1.0)).key(J["mouth_open"], OPACITY, (0, 1.0))
+            .key(J["talk"], Y, (0, -2.0)))
     sid = ids()
     layer("Mouth", [f'<BlendState1DInput inputId="{inputs["mouth_open"]}" x="200" y="0" id="{sid}">'
                     f'<BlendAnimation1D animationId="{anim(closed)}" value="0"/><BlendAnimation1D animationId="{anim(ajar)}" value="1"/></BlendState1DInput>'], sid)
