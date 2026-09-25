@@ -117,4 +117,23 @@ class JevModelsTest {
         assertEquals("base", candidates.single().baseModuleRevision)
         assertEquals("candidate", candidates.single().candidateModuleRevision)
     }
+    @Test
+    fun `safety projection preserves deterministic breach evidence`() {
+        val safety = JevJson.safety(JSONObject()
+            .put("module_id", "van.attention.fields.v1")
+            .put("lifecycle_state", "QUARANTINED")
+            .put("healthy", false)
+            .put("outcome_samples", 40)
+            .put("high_confidence_error_rate", 0.08)
+            .put("breaches", JSONArray().put(JSONObject()
+                .put("code", "HIGH_CONFIDENCE_ERROR_RATE")
+                .put("value", 0.08)
+                .put("threshold", 0.05)
+                .put("samples", 25))))
+        assertFalse(safety.healthy)
+        assertEquals("QUARANTINED", safety.lifecycleState)
+        assertEquals(40, safety.outcomeSamples)
+        assertEquals("HIGH_CONFIDENCE_ERROR_RATE", safety.breaches.single().code)
+        assertEquals(0.05, safety.breaches.single().threshold)
+    }
 }
