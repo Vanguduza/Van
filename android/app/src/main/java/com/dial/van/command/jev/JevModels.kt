@@ -58,6 +58,17 @@ data class JevPerformance(
     val outputTokens: Int,
 )
 
+data class JevEvaluationProposal(
+    val proposalId: String,
+    val moduleId: String,
+    val moduleRevision: String,
+    val recommendation: String,
+    val rationale: String,
+    val proposerLineage: String,
+    val status: String,
+    val proposedAt: String,
+)
+
 data class JevContribution(
     val moduleId: String,
     val sampleCount: Int,
@@ -165,6 +176,27 @@ internal object JevJson {
         inputTokens = payload.optInt("input_tokens", 0),
         outputTokens = payload.optInt("output_tokens", 0),
     )
+
+    fun proposals(payload: JSONObject): List<JevEvaluationProposal> {
+        val items = payload.optJSONArray("items") ?: return emptyList()
+        return buildList {
+            for (i in 0 until items.length()) {
+                val row = items.optJSONObject(i) ?: continue
+                add(
+                    JevEvaluationProposal(
+                        proposalId = row.optString("proposal_id"),
+                        moduleId = row.optString("module_id"),
+                        moduleRevision = row.optString("module_revision"),
+                        recommendation = row.optString("recommendation"),
+                        rationale = row.optString("rationale"),
+                        proposerLineage = row.optString("proposer_lineage"),
+                        status = row.optString("status"),
+                        proposedAt = row.optString("proposed_at"),
+                    )
+                )
+            }
+        }
+    }
 
     fun contribution(moduleId: String, payload: JSONObject) = JevContribution(
         moduleId = moduleId,
