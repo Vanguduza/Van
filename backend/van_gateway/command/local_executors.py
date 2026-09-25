@@ -81,6 +81,7 @@ class LocalExecutionContext:
     owner_fact_author: OwnerFactAuthor | None
     reminders: ReminderService | None
     trading: Any | None
+    jev: Any | None
     device_id: str
     command_id: str
     mission_id: str
@@ -292,6 +293,105 @@ class TradingHaltExecutor:
         )
 
 
+class JevModuleTransitionExecutor:
+    """A4 owner control of one Jev module through the private DIAL service.
+
+    The gateway has already verified the signed command and biometric approval before
+    this executor runs. The DIAL service token is server-side only and the resulting
+    lifecycle state is read back independently before success is reported.
+    """
+
+    async def execute(self, ctx: LocalExecutionContext) -> LocalExecutionResult:
+        if ctx.jev is None:
+            raise LocalExecutionError(
+                "jev_control_unavailable", "Jev control is not wired on this gateway",
+                status="degraded",
+            )
+        module_id = _require(ctx, "module_id")
+        target_state = _require(ctx, "target_state").upper()
+        authority_ref = f"van-command:{ctx.command_id}:owner-approved"
+        try:
+            await ctx.jev.transition_module(
+                module_id=module_id,
+                target_state=target_state,
+                authority_ref=authority_ref,
+                reason="Owner control from VAN Jev Control Centre",
+                owner_approved=True,
+            )
+            observed = await ctx.jev.module(module_id)
+        except Exception as exc:
+            raise LocalExecutionError(
+                "jev_transition_failed", str(exc), status="degraded",
+            ) from exc
+        if str(observed.get("status")) != target_state:
+            raise LocalExecutionError(
+                "jev_transition_not_observed",
+                f"Jev module did not read back as {target_state}",
+                status="degraded",
+            )
+        return LocalExecutionResult(
+            summary=f"Jev module {module_id} is now {target_state}.",
+            evidence_ref=f"jev-module:{module_id}:{target_state}",
+            observed_postcondition={
+                "module_id": module_id,
+                "status": target_state,
+                "authority_ref": authority_ref,
+            },
+        )
+
+
+class JevGlobalControlExecutor:
+    """A4 owner activation/bypass control with server-side Jev credentials only."""
+
+    async def execute(self, ctx: LocalExecutionContext) -> LocalExecutionResult:
+        if ctx.jev is None:
+            raise LocalExecutionError(
+                "jev_control_unavailable", "Jev control is not wired on this gateway",
+                status="degraded",
+            )
+        operation = _require(ctx, "operation").lower()
+        project_id = str(ctx.parameters.get("project_id") or "").strip() or None
+        authority_ref = f"van-command:{ctx.command_id}:owner-approved"
+        kwargs: dict[str, Any] = {
+            "authority_ref": authority_ref,
+            "reason": "Owner control from VAN Jev Control Centre",
+        }
+        if project_id:
+            kwargs["project_id"] = project_id
+            kwargs["project_enabled"] = operation == "enable"
+        elif operation == "enable":
+            kwargs["owner_active"] = True
+            kwargs["bypassed"] = False
+        elif operation == "disable":
+            kwargs["owner_active"] = False
+        elif operation == "bypass":
+            kwargs["bypassed"] = True
+        elif operation == "restore":
+            kwargs["bypassed"] = False
+            kwargs["owner_active"] = True
+        else:
+            raise LocalExecutionError("jev_operation_invalid", f"Unsupported Jev operation: {operation}")
+        try:
+            observed = await ctx.jev.global_control(**kwargs)
+        except Exception as exc:
+            raise LocalExecutionError(
+                "jev_global_control_failed", str(exc), status="degraded",
+            ) from exc
+        if project_id:
+            actual = bool((observed.get("projects") or {}).get(project_id, True))
+            expected = operation == "enable"
+            if actual != expected:
+                raise LocalExecutionError("jev_project_control_not_observed", "Project Jev control did not read back", status="degraded")
+            summary = f"Jev for project {project_id} is {'enabled' if expected else 'disabled'}."
+        else:
+            summary = f"Jev global control applied: {operation}."
+        return LocalExecutionResult(
+            summary=summary,
+            evidence_ref=f"jev-global:{ctx.command_id}",
+            observed_postcondition={"operation": operation, "project_id": project_id, "state": observed},
+        )
+
+
 #: action_id -> executor factory. A factory rather than a shared instance because an
 #: executor may be given per-call state one day; today each is stateless and the factory is
 #: just its class.
@@ -300,6 +400,8 @@ LOCAL_EXECUTORS: dict[str, type[LocalActionExecutor]] = {
     "memory.decision.record": MemoryDecisionRecordExecutor,
     "reminder.create": ReminderCreateExecutor,
     "trading.halt": TradingHaltExecutor,
+    "jev.module.transition": JevModuleTransitionExecutor,
+    "jev.global.control": JevGlobalControlExecutor,
 }
 
 
@@ -313,4 +415,6 @@ __all__ = [
     "MemoryRememberExecutor",
     "ReminderCreateExecutor",
     "TradingHaltExecutor",
+    "JevModuleTransitionExecutor",
+    "JevGlobalControlExecutor",
 ]
