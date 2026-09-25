@@ -76,6 +76,14 @@ class Settings(BaseSettings):
     owner_intent_max_age_seconds: int = 24 * 60 * 60
     attention_budget_per_hour: int = 12
 
+    # DIAL Jev projection. The TypeSafe/provider credential never reaches VAN.
+    # VAN reads only the private DIAL Jev control-plane service through a separate
+    # server-side bearer file.
+    jev_enabled: bool = False
+    jev_base_url: str = "http://127.0.0.1:8765"
+    jev_control_token_file: str = ""
+    jev_timeout_seconds: float = 5.0
+
     # Google Workspace OAuth. Refresh tokens are encrypted in SQLite; client secrets
     # stay in the runtime environment and never enter model-visible payloads.
     google_token_fernet_key: str = ""
