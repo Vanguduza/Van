@@ -219,6 +219,13 @@ jobs:
         run: bash tools/ci/restore_debug_keystore.sh
       - name: Android unit tests, build and lint
         working-directory: android
+        # ADR-RB-026/027: the public half of the connectivity signing key, so this debug APK
+        # can verify the installer's provisioning payload (the owner never pairs the phone).
+        # TEMPORARY TEST KEY (2026-09-25): its private half is only on the Netcup test gateway
+        # behind a temporary Cloudflare tunnel. Debug step only; a release build is given its
+        # production anchor explicitly and never inherits this one.
+        env:
+          VAN_CONNECTIVITY_TRUSTED_KEYS: 'connectivity-1=-----BEGIN PUBLIC KEY-----\nMFkwEwYHKoZIzj0CAQYIKoZIzj0DAQcDQgAEZ+etPHynjN6elDRzUpQn3/kQsc7I\n7QONnbU3earrQpToG3Qa4jpcCl05kQPBImAs/KZRYKNDimAWM/dHSV/Dvg==\n-----END PUBLIC KEY-----'
         run: |
           chmod +x gradlew
           ./gradlew :app:testDebugUnitTest :app:assembleDebug :app:lintDebug

@@ -1,5 +1,8 @@
 package com.dial.van.command
 
+import com.dial.van.onboarding.AskTrigger
+import com.dial.van.onboarding.VanAsks
+import com.dial.van.onboarding.VanPermission
 import android.content.Intent
 import android.net.Uri
 import android.os.Bundle
@@ -109,6 +112,11 @@ class CommandCentreActivity : FragmentActivity() {
         // P1-VOICE-001 — the wake listener's only production caller. Resume, not create:
         // the owner may grant the microphone or install the wake bundle while VAN is open.
         WakeListenerService.startIfReady(this)
+        // "Hey Van" is ready but VAN cannot hear: he asks once, himself. A "not now" holds
+        // until the owner reaches for voice.
+        if ((application as VanApplication).wakeModel.status().ready) {
+            VanAsks.askIfNeeded(this, VanPermission.MICROPHONE, AskTrigger.VAN_NEEDS_IT)
+        }
         // process_kill — a force-stop leaves the overlay off with nothing to bring it back.
         OverlayRecovery.restoreIfOwnerHadItOn(this)
     }

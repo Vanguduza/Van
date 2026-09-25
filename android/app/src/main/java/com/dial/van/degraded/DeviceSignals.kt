@@ -1,5 +1,8 @@
 package com.dial.van.degraded
 
+import com.dial.van.onboarding.AskTrigger
+import com.dial.van.onboarding.VanAsks
+import com.dial.van.onboarding.VanPermission
 import android.Manifest
 import android.content.ComponentName
 import android.content.Context
@@ -69,7 +72,14 @@ object DeviceSignals {
     fun perform(context: Context, app: VanApplication, subsystem: DegradedSubsystem): Boolean =
         when (subsystem.restoreAction) {
             RestoreAction.OPEN_SETTINGS -> {
-                context.startActivity(settingsIntentFor(context, subsystem.id))
+                // The owner pressed the button, so VAN asks in his own words and then takes
+                // them to the page; anything that is not one of his permissions opens as before.
+                val permission = askablePermission(subsystem.id)
+                if (permission == null ||
+                    !VanAsks.askIfNeeded(context, permission, AskTrigger.OWNER_REACHED_FOR_IT)
+                ) {
+                    context.startActivity(settingsIntentFor(context, subsystem.id))
+                }
                 true
             }
             RestoreAction.REQUEST_PERMISSION -> {
@@ -99,6 +109,13 @@ object DeviceSignals {
             }
             RestoreAction.CONTACT_SUPPORT, RestoreAction.NONE -> false
         }
+
+    private fun askablePermission(subsystemId: String): VanPermission? = when (subsystemId) {
+        "overlay" -> VanPermission.OVERLAY
+        "notifications" -> VanPermission.NOTIFICATION_LISTENER
+        "biometric" -> VanPermission.BIOMETRIC
+        else -> null
+    }
 
     private fun settingsIntentFor(context: Context, subsystemId: String): Intent = when (subsystemId) {
         "overlay" -> Intent(

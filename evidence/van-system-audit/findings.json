@@ -1317,9 +1317,10 @@
       "requirement": "See the requirements traceability matrix in the canonical report.",
       "authority": "docs/VAN_WHOLE_SYSTEM_IMPLEMENTATION_AUDIT_AND_CERTIFICATION_REV_1.md s30",
       "repository_evidence": [
-        "android/app/src/main/java/com/dial/van/onboarding/OnboardingActivity.kt:116",
-        "android/app/src/main/java/com/dial/van/onboarding/OnboardingPlan.kt:90",
-        "android/app/src/main/java/com/dial/van/command/settings/SettingsRoute.kt:104"
+        "android/app/src/main/java/com/dial/van/onboarding/VanAsks.kt",
+        "android/app/src/main/java/com/dial/van/onboarding/VanAskPlan.kt",
+        "android/app/src/main/java/com/dial/van/onboarding/VanAskActivity.kt",
+        "android/app/src/main/java/com/dial/van/onboarding/WelcomeActivity.kt"
       ],
       "runtime_evidence": [],
       "affected_components": [
@@ -1332,13 +1333,15 @@
       "remediation_gate": "GATE 10",
       "closure": {
         "state": "INTEGRATED_AND_EVIDENCED",
-        "summary": "Onboarding asks for pairing first and advances on grants, not on intents. Two defects: pairing was not a step at all — it lived at Home > Connections, so a new owner finished onboarding and landed on a dashboard where every call returned 401 with no way to find out why — and every step advanced with `step.intValue++` beside the `startActivity`, so opening a settings screen counted as granting the permission. There is now no step counter to increment: `OnboardingPlan.currentStep` derives where the owner is from what the device reports, the grants are re-read on every `ON_RESUME`, and `mayComplete` cannot return true for an unpaired phone even if every optional step is skipped.",
+        "summary": "Superseded by owner direction (2026-09-25): there is no pairing step and no setup checklist. The phone is provisioned by its installer over ADB (ADR-RB-026), so a first run no longer depends on the owner finding a pairing screen; `WelcomeActivity` is the launcher and shows VAN waving and welcoming the owner back, saying in his own words when this phone is not connected yet. The two original defects stay fixed: every grant is read from Android (`VanAsks.isGranted`) and never inferred from an intent having been fired, and `VanAskActivity` re-reads it on every `ON_RESUME`, finishing only when the device reports it. Each permission is asked for by VAN when a feature needs it (`VanAskPlan.shouldAsk`), a \"not now\" is remembered so VAN does not nag, and an owner reaching for the feature is always asked.",
         "changed": [
-          "android/app/src/main/java/com/dial/van/onboarding/OnboardingActivity.kt",
-          "android/app/src/main/java/com/dial/van/onboarding/OnboardingPlan.kt"
+          "android/app/src/main/java/com/dial/van/onboarding/VanAskActivity.kt",
+          "android/app/src/main/java/com/dial/van/onboarding/VanAskPlan.kt",
+          "android/app/src/main/java/com/dial/van/onboarding/VanAsks.kt",
+          "android/app/src/main/java/com/dial/van/onboarding/WelcomeActivity.kt"
         ],
         "verified_by": [
-          "android/verification/src/test/kotlin/com/dial/van/onboarding/OnboardingPlanTest.kt"
+          "android/verification/src/test/kotlin/com/dial/van/onboarding/VanAskPlanTest.kt"
         ],
         "runtime_evidence": [
           "evidence/van-system-audit/gate-10/kotlin_verification_tests.txt"
@@ -3262,12 +3265,12 @@
       "current_status": "CLOSED",
       "closure": {
         "state": "INTEGRATED_AND_EVIDENCED",
-        "summary": "Owner state survives rotation and process death. Everything was held in `remember`, so rotating the phone, changing the font size or having Android reclaim the process dropped the owner back on Home with their typed text gone; on an assistant meant to stay resident, process death is what happens overnight, not an edge case. `CommandCentreViewModel` holds the selected module and the draft in a `SavedStateHandle`, the onboarding flow keeps its skipped steps and the half-typed pairing address and code in `rememberSaveable`, and the chart keeps the owner's place in the series. The navigation rules are in `CommandNav`, which is pure: saved state is keyed by id rather than ordinal, because ordinals restore the wrong screen the first time a module is inserted into the enum, silently, to an owner whose process Android had just killed.",
+        "summary": "Owner state survives rotation and process death. Everything was held in `remember`, so rotating the phone, changing the font size or having Android reclaim the process dropped the owner back on Home with their typed text gone; on an assistant meant to stay resident, process death is what happens overnight, not an edge case. `CommandCentreViewModel` holds the selected module and the draft in a `SavedStateHandle`, the permissions the owner said \"not now\" to are persisted by `VanAsks` (there is no longer a pairing form or a step list to lose), and the chart keeps the owner's place in the series. The navigation rules are in `CommandNav`, which is pure: saved state is keyed by id rather than ordinal, because ordinals restore the wrong screen the first time a module is inserted into the enum, silently, to an owner whose process Android had just killed.",
         "changed": [
           "android/app/src/main/java/com/dial/van/command/CommandCentreViewModel.kt",
           "android/app/src/main/java/com/dial/van/command/nav/VanNavModel.kt",
           "android/app/src/main/java/com/dial/van/command/CommandCentreActivity.kt",
-          "android/app/src/main/java/com/dial/van/onboarding/OnboardingActivity.kt",
+          "android/app/src/main/java/com/dial/van/onboarding/VanAsks.kt",
           "android/app/src/main/java/com/dial/van/trading/ui/TradeChartCanvas.kt",
           "android/app/build.gradle.kts"
         ],
@@ -3309,7 +3312,7 @@
           "android/app/src/main/res/values/themes.xml",
           "android/app/src/main/res/values-night/themes.xml",
           "android/app/src/main/java/com/dial/van/command/CommandCentreActivity.kt",
-          "android/app/src/main/java/com/dial/van/onboarding/OnboardingActivity.kt",
+          "android/app/src/main/java/com/dial/van/onboarding/WelcomeActivity.kt",
           "android/app/src/main/java/com/dial/van/trading/TradingCommandCentreActivity.kt"
         ],
         "verified_by": [
@@ -5791,7 +5794,7 @@
       "requirement": "docs/VAN_REMOTE_BROWSER_PRODUCTION_BLUEPRINT_REV_1_5.md §0D.2, ADR-RB-026",
       "authority": "VAN Remote Browser Production Blueprint Rev 1.5",
       "repository_evidence": [
-        "android/app/src/main/java/com/dial/van/onboarding/OnboardingActivity.kt",
+        "android/app/src/main/java/com/dial/van/onboarding/WelcomeActivity.kt",
         "android/app/src/main/java/com/dial/van/command/modules/AdminModules.kt",
         "android/app/src/main/java/com/dial/van/gateway/VanGatewayClient.kt"
       ],
@@ -5809,9 +5812,9 @@
       "remediation_gate": "RB C12",
       "closure": {
         "state": "EXTERNALLY_BLOCKED_REPOSITORY_COMPLETE",
-        "summary": "Both forms are gone and replaced by read-only status. The onboarding screen now distinguishes two states that are not the same: a build with a trust anchor is waiting for its installer, and a build without one can never be provisioned and says so rather than leaving the owner watching a screen that cannot change.\n\n`VanGatewayClient.baseUrl` has a private setter and `pairThisDevice` is private, so a new form cannot be written without editing the client. `provisionThisDevice` is the only caller and it does both halves of §0D.3 — pair and bind — because a device that paired without binding is an APK that works on another handset.\n\nTen contract tests read the Android sources, and the strong one is not the label check: it refuses any editable field at all on the two screens that carried the problem, because a rebuild without a label would pass a check that looked for wording.",
+        "summary": "Both forms are gone. Since 2026-09-25 (owner direction) there is no pairing screen or setup step at all: the launcher is VAN's welcome, Settings shows only a read-only connection status, and the phone is set up by its installer (ADR-RB-026).\n\n`VanGatewayClient.baseUrl` has a private setter and `pairThisDevice` is private, so a new form cannot be written without editing the client. `provisionThisDevice` is the only caller and it does both halves of §0D.3 — pair and bind — because a device that paired without binding is an APK that works on another handset.\n\nTen contract tests read the Android sources, and the strong one is not the label check: it refuses any editable field at all on the two screens that carried the problem, because a rebuild without a label would pass a check that looked for wording.",
         "changed": [
-          "android/app/src/main/java/com/dial/van/onboarding/OnboardingActivity.kt",
+          "android/app/src/main/java/com/dial/van/onboarding/WelcomeActivity.kt",
           "android/app/src/main/java/com/dial/van/command/settings/SettingsRoute.kt",
           "android/app/src/main/java/com/dial/van/gateway/VanGatewayClient.kt",
           "android/app/src/main/java/com/dial/van/connectivity/ProvisioningPayload.kt",

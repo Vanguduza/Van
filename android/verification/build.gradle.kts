@@ -126,7 +126,7 @@ sourceSets {
             // is executed rather than reasoned about.
             "com/dial/van/events/VanEventStreamStore.kt",
             "com/dial/van/share/ShareIntake.kt",
-            "com/dial/van/onboarding/OnboardingPlan.kt",
+            "com/dial/van/onboarding/VanAskPlan.kt",
             "com/dial/van/gateway/GatewayRetry.kt",
             "com/dial/van/gateway/ReplayTrigger.kt",
             "com/dial/van/telemetry/DeviceTelemetry.kt",

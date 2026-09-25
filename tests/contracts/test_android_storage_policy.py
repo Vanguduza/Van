@@ -28,9 +28,10 @@ EXPLAINED_PLAIN_PREFERENCES: dict[str, str] = {
         "day, kept apart from the encrypted stores on purpose (see publishFirstSessionOfDay). "
         "The browser session record in the same file is encrypted."
     ),
-    "android/app/src/main/java/com/dial/van/onboarding/OnboardingActivity.kt": (
-        "A single boolean: onboarding finished. It reveals nothing beyond the fact that the "
-        "app has been opened before."
+    "android/app/src/main/java/com/dial/van/onboarding/VanAsks.kt": (
+        "Whether the owner has met VAN on this install (a single boolean), and the ids of the "
+        "permissions they said \"not now\" to. Neither reveals anything beyond how the app has "
+        "been used; the grants themselves are always read from Android, never stored."
     ),
 }
 

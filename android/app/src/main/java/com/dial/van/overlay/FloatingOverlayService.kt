@@ -45,7 +45,6 @@ class FloatingOverlayService : Service(), LifecycleOwner, SavedStateRegistryOwne
     private lateinit var stateStore: OverlayStateStore
     private lateinit var dismissWindow: OverlayDismissWindow<FloatingOverlayService>
 
-
     private val lifecycleRegistry = LifecycleRegistry(this)
     private val savedStateController = SavedStateRegistryController.create(this)
 
@@ -291,6 +290,7 @@ class FloatingOverlayService : Service(), LifecycleOwner, SavedStateRegistryOwne
     }
 
     private fun beginVoice(app: VanApplication) {
+        if (com.dial.van.onboarding.VanAsks.askForVoice(this)) return
         workboardMode = VanWorkboardMode.VOICE
         setPresentation(VanOverlayPresentation.WORKBOARD_EXPANDED)
         app.voiceSession.beginOwnerTurn()

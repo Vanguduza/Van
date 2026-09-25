@@ -40,8 +40,13 @@
         android:supportsRtl="true"
         android:theme="@style/Theme.Van">
 
+        <!--
+          VAN's launch screen: the character waving, welcoming the owner back. It replaced
+          the first-run checklist (owner direction, 2026-09-25) — the phone is provisioned by
+          the installer, so there is nothing to set up before meeting VAN.
+        -->
         <activity
-            android:name=".onboarding.OnboardingActivity"
+            android:name=".onboarding.WelcomeActivity"
             android:exported="true"
             android:theme="@style/Theme.Van">
             <intent-filter>
@@ -49,6 +54,13 @@
                 <category android:name="android.intent.category.LAUNCHER" />
             </intent-filter>
         </activity>
+
+        <!-- VAN asking for one permission in his own words, when a feature needs it. -->
+        <activity
+            android:name=".onboarding.VanAskActivity"
+            android:exported="false"
+            android:excludeFromRecents="true"
+            android:theme="@style/Theme.Van" />
 
         <!--
           Rev 1.5 ADR-RB-026 — the installer's way in, started over ADB and never by the
