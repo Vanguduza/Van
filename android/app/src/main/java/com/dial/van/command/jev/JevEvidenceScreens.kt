@@ -67,6 +67,8 @@ internal fun Value(
     performance: JevPerformance?,
     contribution: JevContribution?,
     proposals: List<JevEvaluationProposal>,
+    reviews: List<JevEvaluationReview>,
+    candidates: List<JevCandidateRevision>,
     onSelect: (JevModule) -> Unit,
     onEvaluate: (JevModule) -> Unit,
 ) {
@@ -90,6 +92,68 @@ internal fun Value(
                         MetricTile(label = "Samples", value = it.sampleCount.toString(), modifier = Modifier.weight(1f))
                         MetricTile(label = "Cost saved", value = "%.3f".format(it.costSavings), modifier = Modifier.weight(1f))
                         MetricTile(label = "Latency", value = "%.0f ms".format(it.latencySavingsMs), modifier = Modifier.weight(1f))
+                    }
+                }
+            }
+        }
+        item {
+            VanPanel {
+                SectionHeader(
+                    title = "Review & candidate lineage",
+                    detail = "Only independently reviewed proposals can create shadow candidate revisions.",
+                )
+                Row(horizontalArrangement = Arrangement.spacedBy(tokens.space.space3)) {
+                    MetricTile(label = "Proposals", value = proposals.size.toString(), modifier = Modifier.weight(1f))
+                    MetricTile(label = "Reviews", value = reviews.size.toString(), modifier = Modifier.weight(1f))
+                    MetricTile(label = "Candidates", value = candidates.size.toString(), modifier = Modifier.weight(1f))
+                }
+                reviews.take(6).forEach { review ->
+                    Row(
+                        modifier = Modifier.fillMaxWidth().padding(vertical = tokens.space.space1),
+                        horizontalArrangement = Arrangement.spacedBy(tokens.space.space2),
+                    ) {
+                        Column(modifier = Modifier.weight(1f)) {
+                            Text(review.proposalId.take(12), style = tokens.type.headline)
+                            Text(
+                                review.rationale.take(160).ifBlank { "No review rationale projected." },
+                                style = tokens.type.label,
+                                color = tokens.color.textSecondary,
+                            )
+                            Text(
+                                "${review.reviewerLineage} · ${review.reviewedAt}",
+                                style = tokens.type.label,
+                                color = tokens.color.textTertiary,
+                            )
+                        }
+                        StatusChip(
+                            label = review.decision,
+                            role = when (review.decision) {
+                                "APPROVE" -> StatusSemantics.ROLE_FAVOURABLE
+                                "REJECT" -> StatusSemantics.ROLE_CRITICAL
+                                else -> StatusSemantics.ROLE_COGNITION
+                            },
+                        )
+                    }
+                }
+                candidates.take(6).forEach { candidate ->
+                    Row(
+                        modifier = Modifier.fillMaxWidth().padding(vertical = tokens.space.space1),
+                        horizontalArrangement = Arrangement.spacedBy(tokens.space.space2),
+                    ) {
+                        Column(modifier = Modifier.weight(1f)) {
+                            Text(candidate.moduleId, style = tokens.type.headline)
+                            Text(
+                                "${candidate.baseModuleRevision.take(10)} → ${candidate.candidateModuleRevision.take(10)}",
+                                style = tokens.type.label,
+                                color = tokens.color.textSecondary,
+                            )
+                            Text(
+                                "${candidate.reviewerLineage} · ${candidate.createdAt}",
+                                style = tokens.type.label,
+                                color = tokens.color.textTertiary,
+                            )
+                        }
+                        StatusChip(label = candidate.lifecycleState, role = jevStatusRole(candidate.lifecycleState))
                     }
                 }
             }
