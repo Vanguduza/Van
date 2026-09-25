@@ -27,3 +27,39 @@ def test_enabling_refuses_a_privileged_port(tmp_path):
                             capture_output=True, text=True, env={"HOME": str(tmp_path), "PATH": "/usr/bin:/bin"})
     assert result.returncode == 2
     assert "port_must_be_unprivileged:443" in result.stderr
+
+
+INSTALL = ROOT / "tools/runtime/install_van_gateway_service.sh"
+
+
+def _stage(tmp_path):
+    """Run the real installer up to and including its pre-flight, against a throwaway home."""
+    import os
+    import sys
+
+    from cryptography.fernet import Fernet
+
+    state, config = tmp_path / "state", tmp_path / "config"
+    (state / "venv/bin").mkdir(parents=True)
+    # A wrapper, not a symlink: a symlinked venv python loses its pyvenv.cfg and its packages.
+    wrapper = state / "venv/bin/python"
+    wrapper.write_text(f'#!/bin/sh\nexec "{sys.executable}" "$@"\n')
+    wrapper.chmod(0o755)
+    config.mkdir()
+    (config / "google-workspace.env").write_text(f"VAN_GOOGLE_TOKEN_FERNET_KEY={Fernet.generate_key().decode()}\n")
+    (config / "gateway.env").write_text(
+        f"VAN_DATABASE_PATH={tmp_path}/db/van.sqlite3\nVAN_HERMES_BASE_URL=http://hermes.invalid\n")
+    env = {"HOME": str(tmp_path), "PATH": os.environ["PATH"], "VAN_STATE_ROOT": str(state),
+           "VAN_CONFIG_ROOT": str(config), "VAN_INSTALL_STAGE_ONLY": "1"}
+    return subprocess.run(["bash", str(INSTALL)], capture_output=True, text=True, env=env, timeout=300), state
+
+
+def test_the_installer_ships_a_runtime_that_starts(tmp_path):
+    result, state = _stage(tmp_path)
+    assert result.returncode == 0, result.stdout + result.stderr
+    assert "PASS van_gateway_preflight" in result.stdout
+    runtime = state / "runtime"
+    # accounts.py imports `commander` from <runtime>/trading at startup.
+    assert (runtime / "trading/commander/accounts.py").is_file()
+    assert not (runtime / "trading/tests").exists()
+    assert (runtime / "backend/van_gateway/mtls/serve.py").is_file()
