@@ -21,6 +21,7 @@ class JevProjectionApi:
         self.router = APIRouter(prefix="/v1/jev", tags=["jev"])
         self.router.add_api_route("/health", self.health, methods=["GET"])
         self.router.add_api_route("/status", self.status, methods=["GET"])
+        self.router.add_api_route("/provider", self.provider, methods=["GET"])
         self.router.add_api_route("/modules", self.modules, methods=["GET"])
         self.router.add_api_route("/modules/{module_id:path}", self.module, methods=["GET"])
         self.router.add_api_route("/activity", self.activity, methods=["GET"])
@@ -48,6 +49,9 @@ class JevProjectionApi:
 
     async def status(self) -> dict:
         return await self._call(self.client.status)
+
+    async def provider(self) -> dict:
+        return await self._call(self.client.provider)
 
     async def modules(self) -> dict:
         return await self._call(self.client.modules)
