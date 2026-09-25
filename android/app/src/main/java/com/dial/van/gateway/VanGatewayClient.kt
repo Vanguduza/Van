@@ -311,6 +311,8 @@ class VanGatewayClient(context: Context) {
 
     suspend fun jevStatus(): JSONObject = withContext(Dispatchers.IO) { getJson("/v1/jev/status") }
 
+    suspend fun jevProvider(): JSONObject = withContext(Dispatchers.IO) { getJson("/v1/jev/provider") }
+
     suspend fun jevModules(): JSONObject = withContext(Dispatchers.IO) { getJson("/v1/jev/modules") }
 
     suspend fun jevModule(moduleId: String): JSONObject = withContext(Dispatchers.IO) {
