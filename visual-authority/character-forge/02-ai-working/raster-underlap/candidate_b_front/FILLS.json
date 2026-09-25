@@ -1,0 +1,245 @@
+{
+  "fills": {
+    "arm_l_fore": {
+      "file": "arm_l_fore.png",
+      "key": "c7a234fe02c940ce8de239e64d26013d1dbfca70a825cf28436f232273feb165",
+      "offset_px": [
+        143,
+        287
+      ],
+      "pixels": 908,
+      "sha256": "beddc4ca859f52dc9421cc59fff5cfe190d9b4c180d5400e15984a03376d7b41",
+      "size_px": [
+        50,
+        35
+      ]
+    },
+    "arm_l_upper": {
+      "file": "arm_l_upper.png",
+      "key": "8cd80fe2a29d985130ef7de254afb6ba7a95a9e7618185aaf9e088ddacf620bd",
+      "offset_px": [
+        169,
+        208
+      ],
+      "pixels": 1075,
+      "sha256": "fa2daec319d1e6c2423cc538b1354b415aaf549ac0a80a5e9821ebf8f4587a4e",
+      "size_px": [
+        56,
+        106
+      ]
+    },
+    "arm_r_fore": {
+      "file": "arm_r_fore.png",
+      "key": "d845b9614d53ac0d5f3423f3b6d9009fbe5e8f5db2dbf3688af7dbc9fd4bccbe",
+      "offset_px": [
+        382,
+        343
+      ],
+      "pixels": 559,
+      "sha256": "596bc8d79dee68d30a01e268d980bc7ac81863dc665aff87a9c57ea92778fd03",
+      "size_px": [
+        35,
+        27
+      ]
+    },
+    "arm_r_upper": {
+      "file": "arm_r_upper.png",
+      "key": "abb27c8b3b60082695a0dc1e45dc29cb83cc88e3dbf53c9048824da57f29084e",
+      "offset_px": [
+        356,
+        299
+      ],
+      "pixels": 720,
+      "sha256": "6ea6ad2167f4d05f4e70dc239f6e585eb956a8c6f67f6653fb8c1df4628aeab5",
+      "size_px": [
+        54,
+        24
+      ]
+    },
+    "eye_l": {
+      "file": "eye_l.png",
+      "key": "f92ee991b22ba724c0e0283af6cbb6fe6e2cd26ac1af02a1cc43d423b6719a29",
+      "offset_px": [
+        247,
+        147
+      ],
+      "pixels": 53,
+      "sha256": "20821045eed014750f99b892d355dfa6b531c5b6166b5be2c12d3a636da0290a",
+      "size_px": [
+        22,
+        12
+      ]
+    },
+    "eye_r": {
+      "file": "eye_r.png",
+      "key": "284930d9516c21503908bfd6465e479d1f43d245f9f6531457dc34758c0c3083",
+      "offset_px": [
+        305,
+        144
+      ],
+      "pixels": 6,
+      "sha256": "6e17ea2ef0d211afd3fe2b872d0a241470007a580ec178d2e3cd70ab13bb06ad",
+      "size_px": [
+        8,
+        6
+      ]
+    },
+    "face": {
+      "file": "face.png",
+      "key": "aac4254480d3e87abf5761b5beecbb3e9d5accaaade86a1aab62ae7d50a08769",
+      "offset_px": [
+        200,
+        46
+      ],
+      "pixels": 11778,
+      "sha256": "24e2aea8c190680849c149a7903c912cdbc3ebbe87be01be7449b4463f86d0b8",
+      "size_px": [
+        172,
+        152
+      ]
+    },
+    "hair_back": {
+      "file": "hair_back.png",
+      "key": "2c7c813be9e5f471866b9829c37f813c3591fcb5094dc9e6fab2172abfdb1fac",
+      "offset_px": [
+        200,
+        46
+      ],
+      "pixels": 11285,
+      "sha256": "99a49831f48ef48b421f5cd11739e40b099cca1a25f17e7a9bdb7ae096a94f9f",
+      "size_px": [
+        172,
+        130
+      ]
+    },
+    "jacket": {
+      "file": "jacket.png",
+      "key": "16dcd8a7a1fc211890962a2baaa1300e63c31965b4d61a7d7e2905cbfac58ff9",
+      "offset_px": [
+        195,
+        223
+      ],
+      "pixels": 4451,
+      "sha256": "fed8ed4b306711e50bfb69cd22896899dae97d03bbb1ca7340ad3680541b9a2d",
+      "size_px": [
+        174,
+        115
+      ]
+    },
+    "jacket_back": {
+      "file": "jacket_back.png",
+      "key": "63d4ae2ff0c70356cb37389d07dfe57c04c6a9ae042b1d1f2f89bd6a577dc028",
+      "offset_px": [
+        216,
+        212
+      ],
+      "pixels": 5701,
+      "sha256": "58655d0077d3b543a757e9a15c1d2550d009f8f21825aedeb47e464f38472004",
+      "size_px": [
+        151,
+        51
+      ]
+    },
+    "leg_l_lower": {
+      "file": "leg_l_lower.png",
+      "key": "190fe08a4506f01a4ba618dd97d4a413e873514aa078737ae8f8b30ccab9253f",
+      "offset_px": [
+        223,
+        478
+      ],
+      "pixels": 685,
+      "sha256": "5ce4604c77c99d2c5f3e816f73520caf7a0d98585f2f86f43f58545d5ab867d8",
+      "size_px": [
+        53,
+        16
+      ]
+    },
+    "leg_l_upper": {
+      "file": "leg_l_upper.png",
+      "key": "ac4e0d864ef95f1f79788569e2389f046e7cdd5008da9c0ac42bb4fa1048d8fe",
+      "offset_px": [
+        216,
+        350
+      ],
+      "pixels": 2607,
+      "sha256": "f0d4657d91aa31bd51ac232886bc55ded6cd0c32e588a23d47414c3d979e5e75",
+      "size_px": [
+        97,
+        118
+      ]
+    },
+    "leg_r_lower": {
+      "file": "leg_r_lower.png",
+      "key": "3a85dfd13839da57d3d5199cc09901c8602344b6d9332f7e799133df1450a5a7",
+      "offset_px": [
+        334,
+        478
+      ],
+      "pixels": 963,
+      "sha256": "6f45e6f9cfb63be95df744f32d09d9d0b338fdc928c6c2478786f786dabd9009",
+      "size_px": [
+        49,
+        39
+      ]
+    },
+    "leg_r_upper": {
+      "file": "leg_r_upper.png",
+      "key": "afdce4a249a1474db0626bd1a0d57579700165bcff31e309cf61296270929b15",
+      "offset_px": [
+        298,
+        350
+      ],
+      "pixels": 1499,
+      "sha256": "69aef3043a09f3f92730d43d3081cd6a077d9ca2d22f09972e05396c0e2eaa3f",
+      "size_px": [
+        71,
+        119
+      ]
+    },
+    "neck": {
+      "file": "neck.png",
+      "key": "4db1d8acbb357a5d3e312237bd0de1a963449058ad2962aa365198cde3e29949",
+      "offset_px": [
+        252,
+        177
+      ],
+      "pixels": 3174,
+      "sha256": "440ab5aaf43f3b2a0770954c1ff0f43aa2fb762d2caa55822febd6cdf348401b",
+      "size_px": [
+        80,
+        75
+      ]
+    },
+    "orb_shell": {
+      "file": "orb_shell.png",
+      "key": "5586d58c794a0d389a4678fc4f040b6ffc8f7156ddd35bcb04e648e2525871d9",
+      "offset_px": [
+        162,
+        192
+      ],
+      "pixels": 226,
+      "sha256": "ef81d9673df3cbf9d4aa40a0b1130bfb284e74e6ea02337950499928050cc926",
+      "size_px": [
+        31,
+        27
+      ]
+    },
+    "underlayer": {
+      "file": "underlayer.png",
+      "key": "7f057f8f5b4a0d6ed8c527aa1f7f805e3c6f3211068a698f8a5c917e34894819",
+      "offset_px": [
+        242,
+        212
+      ],
+      "pixels": 14667,
+      "sha256": "96a18677f7ca8f96860d6fc63b76e1afdb7a84d3a76ad878f52c4623a95ca7b2",
+      "size_px": [
+        109,
+        177
+      ]
+    }
+  },
+  "model": "big-lama",
+  "model_sha256": "7ba7aa7ac37a4d41fdbbeba3a2af7ead18058552997e3a3cd1a3b2210c9e6b4c",
+  "model_url": "https://github.com/enesmsahin/simple-lama-inpainting/releases/download/v0.1.0/big-lama.pt"
+}

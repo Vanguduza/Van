@@ -73,7 +73,8 @@ def test_rig_layers_follow_the_blockout_order_and_are_not_empty(built) -> None:
     assert names == [name for name, _members in raster.LAYERS]
     must_draw = {"hair", "face", "jacket", "underlayer", "neck", "arm_l_upper", "arm_l_fore",
                  "hand_l", "arm_r_upper", "arm_r_fore", "hand_r", "eye_l", "eye_r", "visor_frame",
-                 "visor_lens", "orb_shell", "orb_core", "boot_l", "boot_r"}
+                 "visor_lens", "orb_shell", "orb_core", "boot_l", "boot_r", "brow_l", "brow_r",
+                 "mouth", "lid_l", "lid_r", "sclera_l", "sclera_r"}
     drawn = {layer["name"] for layer in manifest["layers"] if not layer.get("empty")}
     assert must_draw <= drawn, must_draw - drawn
     for layer in manifest["layers"]:
@@ -114,3 +115,63 @@ def test_the_lint_passes_the_built_set_and_catches_tampering(built, tmp_path) ->
     findings = lint_raster_set(tampered).findings
     assert "LAYER_HASH_MISMATCH:orb_core" in findings
     assert any(f.startswith("RECOMPOSITE_NOT_EXACT") for f in findings)
+
+
+def test_hidden_regions_come_from_the_committed_ai_fills(built) -> None:
+    # A layer that fell back to propagation means the cut changed and the cached fills in
+    # 02-ai-working are stale: rebuild with --inpaint on the forge host and commit them.
+    _, manifest = built
+    allowed = {"big-lama", "sclera_white", "skin_rim", "lens_tint"}
+    for layer in manifest["layers"]:
+        if layer.get("underlap_pixels"):
+            assert layer.get("underlap_fill") in allowed, (layer["name"], layer.get("underlap_fill"))
+    assert manifest["underlap_fill_model"]["sha256"] == raster.underlap_fill.MODEL_SHA256
+
+
+def test_the_built_lane_matches_a_fresh_build(built) -> None:
+    out, manifest = built
+    lane = raster.OUT_DIR
+    committed = json.loads((lane / "LAYERS.json").read_text(encoding="utf-8"))
+    assert committed == manifest
+    for layer in manifest["layers"]:
+        assert (lane / layer["file"]).read_bytes() == (out / layer["file"]).read_bytes(), layer["name"]
+
+
+def test_face_features_are_bound_to_the_approved_source(tmp_path) -> None:
+    feats = json.loads(raster.FEATURES.read_text(encoding="utf-8"))
+    assert feats["source_sha256"] == hashlib.sha256(raster.seg.SOURCE.read_bytes()).hexdigest()
+    other = tmp_path / "other.png"
+    Image.new("RGBA", (593, 593)).save(other)
+    with pytest.raises(ValueError):
+        raster.load_features(other)
+
+
+def test_a_stale_fill_is_never_used(tmp_path) -> None:
+    cache = raster.underlap_fill.FillCache(tmp_path)
+    hidden = np.zeros((20, 20), bool)
+    hidden[5:9, 5:9] = True
+    rgb = np.full((20, 20, 3), 0.5, np.float32)
+    key = raster.underlap_fill.fill_key("face", rgb, ~hidden, hidden)
+    painted = cache.put("face", key, np.full((20, 20, 3), 0.25, np.float32), hidden)
+    assert painted is not None and abs(float(painted[6, 6, 0]) - 64 / 255) < 1e-6
+    changed = hidden.copy()
+    changed[10, 10] = True
+    assert cache.get("face", raster.underlap_fill.fill_key("face", rgb, ~changed, changed), changed) is None
+    (tmp_path / "face.png").write_bytes(b"tampered")
+    assert raster.underlap_fill.FillCache(tmp_path).get("face", key, hidden) is None
+
+
+def test_the_lint_refuses_unlabelled_fill(built, tmp_path) -> None:
+    import shutil
+
+    from tools.character_forge.raster_lint import lint_raster_set
+
+    out, _ = built
+    copy = tmp_path / "unlabelled"
+    shutil.copytree(out, copy)
+    data = json.loads((copy / "LAYERS.json").read_text(encoding="utf-8"))
+    for layer in data["layers"]:
+        if layer["name"] == "jacket":
+            layer["underlap_fill"] = None
+    (copy / "LAYERS.json").write_text(json.dumps(data), encoding="utf-8")
+    assert "UNDERLAP_FILL_UNLABELLED:jacket" in lint_raster_set(copy).findings

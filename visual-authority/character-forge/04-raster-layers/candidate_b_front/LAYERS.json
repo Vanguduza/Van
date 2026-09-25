@@ -1,0 +1,872 @@
+{
+  "schema_version": 1,
+  "decision": "CF-D-09",
+  "source": "visual-authority/character-forge/00-source/reference-pack/interim/van_candidate_b_front.png",
+  "source_sha256": "a0d62bf492950bcef23d01390940cb64cfc4e91d55356c61c97c293637502193",
+  "canvas_px": [
+    593,
+    593
+  ],
+  "artboard": [
+    1000.0,
+    1000.0
+  ],
+  "px_to_artboard": 1.6863406408094435,
+  "lens": {
+    "tint": "#3F8ACE",
+    "alpha_max": 0.12,
+    "alpha_mean": 0.1139
+  },
+  "order": "back_to_front",
+  "underlap_fill_model": {
+    "name": "big-lama",
+    "sha256": "7ba7aa7ac37a4d41fdbbeba3a2af7ead18058552997e3a3cd1a3b2210c9e6b4c",
+    "url": "https://github.com/enesmsahin/simple-lama-inpainting/releases/download/v0.1.0/big-lama.pt"
+  },
+  "layers": [
+    {
+      "name": "hair_back",
+      "file": "00_hair_back.png",
+      "members": [
+        "extra_hair_back"
+      ],
+      "offset_px": [
+        197,
+        46
+      ],
+      "size_px": [
+        178,
+        130
+      ],
+      "artboard_box": [
+        332.21,
+        77.57,
+        300.17,
+        219.22
+      ],
+      "own_pixels": 28,
+      "underlap_pixels": 11285,
+      "underlap_fill": "big-lama",
+      "sha256": "03effddde2104a4167caefeab915d53be0b24bf5ff6a7d30ec0d139c2f74c523"
+    },
+    {
+      "name": "jacket_back",
+      "file": "01_jacket_back.png",
+      "members": [
+        "extra_jacket_back"
+      ],
+      "offset_px": [
+        216,
+        190
+      ],
+      "size_px": [
+        156,
+        73
+      ],
+      "artboard_box": [
+        364.25,
+        320.4,
+        263.07,
+        123.1
+      ],
+      "own_pixels": 605,
+      "underlap_pixels": 5701,
+      "underlap_fill": "big-lama",
+      "sha256": "46c366412e88872733abc2240d593f4e7fce6e9788c6547f83a685969460199c"
+    },
+    {
+      "name": "underlayer",
+      "file": "02_underlayer.png",
+      "members": [
+        "underlayer"
+      ],
+      "offset_px": [
+        242,
+        212
+      ],
+      "size_px": [
+        109,
+        177
+      ],
+      "artboard_box": [
+        408.09,
+        357.5,
+        183.81,
+        298.48
+      ],
+      "own_pixels": 3111,
+      "underlap_pixels": 14667,
+      "underlap_fill": "big-lama",
+      "sha256": "eb070714c6d45e5e44a108049984cb3f576cd33a241ef9c5f06c2b36404ff905"
+    },
+    {
+      "name": "leg_l_upper",
+      "file": "03_leg_l_upper.png",
+      "members": [
+        "extra_leg_l_upper"
+      ],
+      "offset_px": [
+        214,
+        350
+      ],
+      "size_px": [
+        99,
+        118
+      ],
+      "artboard_box": [
+        360.88,
+        590.22,
+        166.95,
+        198.99
+      ],
+      "own_pixels": 5023,
+      "underlap_pixels": 2607,
+      "underlap_fill": "big-lama",
+      "sha256": "502d72b578f4f4e09785231f72cd2325e90aa554a18c5ece326b700c315a3387"
+    },
+    {
+      "name": "leg_l_lower",
+      "file": "04_leg_l_lower.png",
+      "members": [
+        "extra_leg_l_lower"
+      ],
+      "offset_px": [
+        222,
+        433
+      ],
+      "size_px": [
+        67,
+        61
+      ],
+      "artboard_box": [
+        374.37,
+        730.19,
+        112.98,
+        102.87
+      ],
+      "own_pixels": 2326,
+      "underlap_pixels": 685,
+      "underlap_fill": "big-lama",
+      "sha256": "d7cc7f3bc76e19c50e3d04d3e71f1a7a996edafeb13cb146c0def681df870acb"
+    },
+    {
+      "name": "boot_l",
+      "file": "05_boot_l.png",
+      "members": [
+        "extra_boot_l"
+      ],
+      "offset_px": [
+        162,
+        478
+      ],
+      "size_px": [
+        137,
+        74
+      ],
+      "artboard_box": [
+        273.19,
+        806.07,
+        231.03,
+        124.79
+      ],
+      "own_pixels": 6019,
+      "underlap_pixels": 0,
+      "underlap_fill": null,
+      "sha256": "730c77a615c01fb5830fe969093741cc8820f308032be08824ff3bd6f0af229f"
+    },
+    {
+      "name": "leg_r_upper",
+      "file": "06_leg_r_upper.png",
+      "members": [
+        "extra_leg_r_upper"
+      ],
+      "offset_px": [
+        298,
+        350
+      ],
+      "size_px": [
+        74,
+        119
+      ],
+      "artboard_box": [
+        502.53,
+        590.22,
+        124.79,
+        200.67
+      ],
+      "own_pixels": 4293,
+      "underlap_pixels": 1499,
+      "underlap_fill": "big-lama",
+      "sha256": "f46b90b71e2f0225e27e139b9fd350c7eb22ae62646ba9abd29abca95635b434"
+    },
+    {
+      "name": "leg_r_lower",
+      "file": "07_leg_r_lower.png",
+      "members": [
+        "extra_leg_r_lower"
+      ],
+      "offset_px": [
+        311,
+        433
+      ],
+      "size_px": [
+        75,
+        84
+      ],
+      "artboard_box": [
+        524.45,
+        730.19,
+        126.48,
+        141.65
+      ],
+      "own_pixels": 3139,
+      "underlap_pixels": 963,
+      "underlap_fill": "big-lama",
+      "sha256": "9f2c763bece85c581961ab577a943d5f739eb9853883730b38710619cacbb78d"
+    },
+    {
+      "name": "boot_r",
+      "file": "08_boot_r.png",
+      "members": [
+        "extra_boot_r"
+      ],
+      "offset_px": [
+        310,
+        478
+      ],
+      "size_px": [
+        111,
+        76
+      ],
+      "artboard_box": [
+        522.77,
+        806.07,
+        187.18,
+        128.16
+      ],
+      "own_pixels": 4357,
+      "underlap_pixels": 0,
+      "underlap_fill": null,
+      "sha256": "87f8143c7951a77c46ff9fa339e89138097a4f8073ab94ebe609a1fd2f61dcf2"
+    },
+    {
+      "name": "neck",
+      "file": "09_neck.png",
+      "members": [
+        "neck"
+      ],
+      "offset_px": [
+        252,
+        177
+      ],
+      "size_px": [
+        80,
+        75
+      ],
+      "artboard_box": [
+        424.96,
+        298.48,
+        134.91,
+        126.48
+      ],
+      "own_pixels": 593,
+      "underlap_pixels": 3174,
+      "underlap_fill": "big-lama",
+      "sha256": "097db3ecf5d6e73d862b9ad087bbe3bd52161271dc4f1c288e3c8bcf3ffff169"
+    },
+    {
+      "name": "jacket",
+      "file": "10_jacket.png",
+      "members": [
+        "jacket",
+        "extra_jacket_collar",
+        "extra_accents_cyan"
+      ],
+      "offset_px": [
+        195,
+        199
+      ],
+      "size_px": [
+        186,
+        183
+      ],
+      "artboard_box": [
+        328.84,
+        335.58,
+        313.66,
+        308.6
+      ],
+      "own_pixels": 17666,
+      "underlap_pixels": 4451,
+      "underlap_fill": "big-lama",
+      "sha256": "080847d46b26f9a7d9b824422941f71b3c84ac95c5eee6ff7550bbb85d96a16c"
+    },
+    {
+      "name": "arm_l_upper",
+      "file": "11_arm_l_upper.png",
+      "members": [
+        "arm_l_upper",
+        "extra_accents_cyan_arm_l_upper"
+      ],
+      "offset_px": [
+        169,
+        208
+      ],
+      "size_px": [
+        86,
+        106
+      ],
+      "artboard_box": [
+        284.99,
+        350.76,
+        145.03,
+        178.75
+      ],
+      "own_pixels": 2524,
+      "underlap_pixels": 1075,
+      "underlap_fill": "big-lama",
+      "sha256": "d8ff64b4d8d5d324ca43cbcc926bf95fc77f65c38b0b207c36ecaff90f9ca5bf"
+    },
+    {
+      "name": "arm_l_fore",
+      "file": "12_arm_l_fore.png",
+      "members": [
+        "arm_l_fore",
+        "extra_accents_cyan_arm_l_fore"
+      ],
+      "offset_px": [
+        143,
+        279
+      ],
+      "size_px": [
+        82,
+        59
+      ],
+      "artboard_box": [
+        241.15,
+        470.49,
+        138.28,
+        99.49
+      ],
+      "own_pixels": 2064,
+      "underlap_pixels": 908,
+      "underlap_fill": "big-lama",
+      "sha256": "5e2b5547ff4ae85e45daa6d590516a4570cdae188c138213dae70c82f620026d"
+    },
+    {
+      "name": "hand_l",
+      "file": "13_hand_l.png",
+      "members": [
+        "hand_l",
+        "extra_glove_l",
+        "extra_fingers_l_index",
+        "extra_fingers_l_mid_ring_pinky",
+        "extra_fingers_l_thumb"
+      ],
+      "offset_px": [
+        106,
+        266
+      ],
+      "size_px": [
+        87,
+        58
+      ],
+      "artboard_box": [
+        178.75,
+        448.57,
+        146.71,
+        97.81
+      ],
+      "own_pixels": 2748,
+      "underlap_pixels": 0,
+      "underlap_fill": null,
+      "sha256": "048b011b04c67d6ab40250be1cf34b1780ef6b4d73e1ccc5c16b34e3c60d247d"
+    },
+    {
+      "name": "arm_r_upper",
+      "file": "14_arm_r_upper.png",
+      "members": [
+        "arm_r_upper",
+        "extra_accents_cyan_arm_r_upper"
+      ],
+      "offset_px": [
+        348,
+        222
+      ],
+      "size_px": [
+        62,
+        101
+      ],
+      "artboard_box": [
+        586.85,
+        374.37,
+        104.55,
+        170.32
+      ],
+      "own_pixels": 3457,
+      "underlap_pixels": 720,
+      "underlap_fill": "big-lama",
+      "sha256": "6d7a3f5415bec0e77c2202d3319bd06958bdb4ae4b1dcd279f5fe250620f93bd"
+    },
+    {
+      "name": "arm_r_fore",
+      "file": "15_arm_r_fore.png",
+      "members": [
+        "arm_r_fore",
+        "extra_accents_cyan_arm_r_fore"
+      ],
+      "offset_px": [
+        356,
+        286
+      ],
+      "size_px": [
+        64,
+        84
+      ],
+      "artboard_box": [
+        600.34,
+        482.29,
+        107.93,
+        141.65
+      ],
+      "own_pixels": 2237,
+      "underlap_pixels": 559,
+      "underlap_fill": "big-lama",
+      "sha256": "0e27121e6805c2f7e825fefc75adfa47ce4c54dea5d6a2c9ad2be74cb465fe7e"
+    },
+    {
+      "name": "hand_r",
+      "file": "16_hand_r.png",
+      "members": [
+        "hand_r",
+        "extra_glove_r",
+        "extra_fingers_r_index",
+        "extra_fingers_r_mid_ring_pinky",
+        "extra_fingers_r_thumb"
+      ],
+      "offset_px": [
+        371,
+        343
+      ],
+      "size_px": [
+        53,
+        82
+      ],
+      "artboard_box": [
+        625.63,
+        578.41,
+        89.38,
+        138.28
+      ],
+      "own_pixels": 2970,
+      "underlap_pixels": 0,
+      "underlap_fill": null,
+      "sha256": "f27f7668bedb8fd42f80dbfbd86bf1a931f026eef972f6c05403909435c6289f"
+    },
+    {
+      "name": "face",
+      "file": "17_face.png",
+      "members": [
+        "face",
+        "extra_face_shadow",
+        "extra_jaw",
+        "extra_ear_l",
+        "extra_ear_r"
+      ],
+      "offset_px": [
+        200,
+        46
+      ],
+      "size_px": [
+        172,
+        158
+      ],
+      "artboard_box": [
+        337.27,
+        77.57,
+        290.05,
+        266.44
+      ],
+      "own_pixels": 6900,
+      "underlap_pixels": 11778,
+      "underlap_fill": "big-lama",
+      "sha256": "9fb09f5c00a2342c8f32cffcdc722d500f6f85d9b0199a311fec9f0b29312772"
+    },
+    {
+      "name": "sclera_l",
+      "file": "18_sclera_l.png",
+      "members": [
+        "extra_sclera_l"
+      ],
+      "offset_px": [
+        235,
+        146
+      ],
+      "size_px": [
+        40,
+        31
+      ],
+      "artboard_box": [
+        396.29,
+        246.21,
+        67.45,
+        52.28
+      ],
+      "own_pixels": 268,
+      "underlap_pixels": 537,
+      "underlap_fill": "sclera_white",
+      "sha256": "6d7f4e03df2bfee8f478968d57c04b6244760f0672bef82e07a078fecbda44cf"
+    },
+    {
+      "name": "eye_l",
+      "file": "19_eye_l.png",
+      "members": [
+        "extra_iris_l",
+        "extra_pupil_l",
+        "extra_catchlight_l"
+      ],
+      "offset_px": [
+        247,
+        147
+      ],
+      "size_px": [
+        23,
+        25
+      ],
+      "artboard_box": [
+        416.53,
+        247.89,
+        38.79,
+        42.16
+      ],
+      "own_pixels": 303,
+      "underlap_pixels": 53,
+      "underlap_fill": "big-lama",
+      "sha256": "7fa4fa86e7735d737b6f04e4c5fe60a4ba87fc25f6644a010a60b54d23394818"
+    },
+    {
+      "name": "lid_l",
+      "file": "20_lid_l.png",
+      "members": [
+        "extra_lid_upper_l",
+        "extra_lid_lower_l"
+      ],
+      "offset_px": [
+        239,
+        148
+      ],
+      "size_px": [
+        32,
+        25
+      ],
+      "artboard_box": [
+        403.04,
+        249.58,
+        53.96,
+        42.16
+      ],
+      "own_pixels": 136,
+      "underlap_pixels": 0,
+      "underlap_fill": null,
+      "sha256": "bfd082d33bb602b762e5d7d9a550a3f5345bd98bd80a645f1fe162954f45a82e"
+    },
+    {
+      "name": "sclera_r",
+      "file": "21_sclera_r.png",
+      "members": [
+        "extra_sclera_r"
+      ],
+      "offset_px": [
+        300,
+        136
+      ],
+      "size_px": [
+        38,
+        35
+      ],
+      "artboard_box": [
+        505.9,
+        229.34,
+        64.08,
+        59.02
+      ],
+      "own_pixels": 340,
+      "underlap_pixels": 546,
+      "underlap_fill": "sclera_white",
+      "sha256": "9be9a50c7ca02978b3131833177e98ed75e3c4e58dc5cc0b73c98a97ca9862b7"
+    },
+    {
+      "name": "eye_r",
+      "file": "22_eye_r.png",
+      "members": [
+        "extra_iris_r",
+        "extra_pupil_r",
+        "extra_catchlight_r"
+      ],
+      "offset_px": [
+        303,
+        144
+      ],
+      "size_px": [
+        22,
+        21
+      ],
+      "artboard_box": [
+        510.96,
+        242.83,
+        37.1,
+        35.41
+      ],
+      "own_pixels": 340,
+      "underlap_pixels": 6,
+      "underlap_fill": "big-lama",
+      "sha256": "9881cb50840d99d61553d5ae597cb33f2ad4ea850e6b56e36db1de65564bba78"
+    },
+    {
+      "name": "lid_r",
+      "file": "23_lid_r.png",
+      "members": [
+        "extra_lid_upper_r",
+        "extra_lid_lower_r"
+      ],
+      "offset_px": [
+        301,
+        141
+      ],
+      "size_px": [
+        33,
+        16
+      ],
+      "artboard_box": [
+        507.59,
+        237.77,
+        55.65,
+        26.98
+      ],
+      "own_pixels": 104,
+      "underlap_pixels": 0,
+      "underlap_fill": null,
+      "sha256": "1eb86bffc97413a4b145e15e16dcc7aa8fb860b404915967f716cef726a02737"
+    },
+    {
+      "name": "brow_l",
+      "file": "24_brow_l.png",
+      "members": [
+        "brow_l",
+        "extra_brow_inner_l",
+        "extra_brow_outer_l"
+      ],
+      "offset_px": [
+        239,
+        128
+      ],
+      "size_px": [
+        31,
+        16
+      ],
+      "artboard_box": [
+        403.04,
+        215.85,
+        52.28,
+        26.98
+      ],
+      "own_pixels": 132,
+      "underlap_pixels": 77,
+      "underlap_fill": "skin_rim",
+      "sha256": "791bed432cd431119dfac63b66629cbad4369eae5adce1da9dae8099608f03c9"
+    },
+    {
+      "name": "brow_r",
+      "file": "25_brow_r.png",
+      "members": [
+        "brow_r",
+        "extra_brow_inner_r",
+        "extra_brow_outer_r"
+      ],
+      "offset_px": [
+        292,
+        122
+      ],
+      "size_px": [
+        40,
+        14
+      ],
+      "artboard_box": [
+        492.41,
+        205.73,
+        67.45,
+        23.61
+      ],
+      "own_pixels": 138,
+      "underlap_pixels": 141,
+      "underlap_fill": "skin_rim",
+      "sha256": "87aa5888087970002f65226fdd2ae1e539b0a8e0f0a65bef4da5d40370f55fa3"
+    },
+    {
+      "name": "mouth",
+      "file": "26_mouth.png",
+      "members": [
+        "mouth_upper",
+        "mouth_lower",
+        "mouth_inner",
+        "extra_teeth",
+        "extra_tongue"
+      ],
+      "offset_px": [
+        266,
+        178
+      ],
+      "size_px": [
+        47,
+        23
+      ],
+      "artboard_box": [
+        448.57,
+        300.17,
+        79.26,
+        38.79
+      ],
+      "own_pixels": 278,
+      "underlap_pixels": 428,
+      "underlap_fill": "skin_rim",
+      "sha256": "03418c7e1b7c596453c1de674335cf111e4cb2c45c5e0bd5659cfc6d4da019ba"
+    },
+    {
+      "name": "visor_lens",
+      "file": "27_visor_lens.png",
+      "members": [
+        "visor_lens"
+      ],
+      "offset_px": [
+        235,
+        137
+      ],
+      "size_px": [
+        118,
+        38
+      ],
+      "artboard_box": [
+        396.29,
+        231.03,
+        198.99,
+        64.08
+      ],
+      "own_pixels": 0,
+      "underlap_pixels": 2999,
+      "underlap_fill": "lens_tint",
+      "sha256": "49457ef52f88699fe6b2b35c79e001b383ce09d88f564b16a0dfa69a6a57ada2"
+    },
+    {
+      "name": "visor_frame",
+      "file": "28_visor_frame.png",
+      "members": [
+        "visor_frame",
+        "extra_visor_pods",
+        "extra_visor_glint"
+      ],
+      "offset_px": [
+        207,
+        127
+      ],
+      "size_px": [
+        162,
+        56
+      ],
+      "artboard_box": [
+        349.07,
+        214.17,
+        273.19,
+        94.44
+      ],
+      "own_pixels": 2474,
+      "underlap_pixels": 0,
+      "underlap_fill": null,
+      "sha256": "bfcdfde3ad5a982a571918e798e66d5d50d772ff7c6df0bb09803ee97cb24586"
+    },
+    {
+      "name": "hair",
+      "file": "29_hair.png",
+      "members": [
+        "hair",
+        "extra_hair_lock_l",
+        "extra_hair_lock_r"
+      ],
+      "offset_px": [
+        192,
+        41
+      ],
+      "size_px": [
+        192,
+        149
+      ],
+      "artboard_box": [
+        323.78,
+        69.14,
+        323.78,
+        251.26
+      ],
+      "own_pixels": 11035,
+      "underlap_pixels": 0,
+      "underlap_fill": null,
+      "sha256": "19801c2ecc3320ed3d2c6304f60287e4351f1e04c97efbe9294c38f8db355779"
+    },
+    {
+      "name": "orb_shell",
+      "file": "30_orb_shell.png",
+      "members": [
+        "orb_shell",
+        "extra_orb_rim",
+        "extra_orb_face"
+      ],
+      "offset_px": [
+        112,
+        155
+      ],
+      "size_px": [
+        105,
+        102
+      ],
+      "artboard_box": [
+        188.87,
+        261.38,
+        177.07,
+        172.01
+      ],
+      "own_pixels": 7800,
+      "underlap_pixels": 226,
+      "underlap_fill": "big-lama",
+      "sha256": "d29b4b067a3fd7b220c80ac3066c8003532f1b58da9cd02165febdf96dafedf9"
+    },
+    {
+      "name": "orb_core",
+      "file": "31_orb_core.png",
+      "members": [
+        "orb_core",
+        "extra_orb_eyes"
+      ],
+      "offset_px": [
+        162,
+        192
+      ],
+      "size_px": [
+        31,
+        27
+      ],
+      "artboard_box": [
+        273.19,
+        323.78,
+        52.28,
+        45.53
+      ],
+      "own_pixels": 226,
+      "underlap_pixels": 0,
+      "underlap_fill": null,
+      "sha256": "8d5ca4e812b9b255068051188ae5f07695234da98d014e47fddf1f5dd9f8953a"
+    }
+  ],
+  "recomposite_max_error": 19,
+  "recomposite_max_error_outside_lens": 0,
+  "recomposite_lens_pixels_over_8": 21,
+  "recomposite_lens_max_error": 19,
+  "recomposite_mean_error": 0.024
+}

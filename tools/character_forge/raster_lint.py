@@ -12,6 +12,10 @@ never takes the manifest's word for a property it can measure:
   that is exact. Inside it a uniform tint cannot undo the very darkest pixels; at most
   ``LENS_MAX_PIXELS_OVER_8`` may differ by more than 8/255, and none by more than
   ``LENS_MAX_ERROR``;
+* **provenance of hidden pixels**: every layer that carries pixels beyond its own says how
+  they were made (``big-lama`` for AI-painted fill, ``sclera_white``, ``skin_rim``,
+  ``lens_tint``, ``propagate``), and the totals are reported so a reviewer sees how much of
+  the set is generated;
 * **proportion**: crown-to-sole over crown-to-chin, measured from what the composite shows
   (the face layer's lowest visible row is the chin), is inside the identity lock.
 """
@@ -35,7 +39,7 @@ APPROVED_SOURCE = ROOT / "visual-authority" / "character-forge" / "00-source" / 
 REQUIRED_RASTER_LAYERS = (
     "hair", "face", "neck", "jacket", "underlayer", "arm_l_upper", "arm_l_fore", "hand_l",
     "arm_r_upper", "arm_r_fore", "hand_r", "sclera_l", "eye_l", "lid_l", "sclera_r", "eye_r",
-    "lid_r", "mouth", "visor_frame", "visor_lens", "orb_shell", "orb_core", "leg_l_upper",
+    "lid_r", "brow_l", "brow_r", "mouth", "visor_frame", "visor_lens", "orb_shell", "orb_core", "leg_l_upper",
     "leg_l_lower", "boot_l", "leg_r_upper", "leg_r_lower", "boot_r",
 )
 LENS_MAX_PIXELS_OVER_8 = 60
@@ -103,13 +107,21 @@ def lint_raster_set(directory: Path, *, approved_source: Path = APPROVED_SOURCE)
         plane[y:y + img.shape[0], x:x + img.shape[1]] = img
         drawn[name] = plane
         order.append(name)
+    fill_pixels: dict[str, int] = {}
+    for layer in layers:
+        extra = int(layer.get("underlap_pixels") or 0)
+        if extra and not layer.get("underlap_fill"):
+            findings.append(f"UNDERLAP_FILL_UNLABELLED:{layer.get('name')}")
+        elif extra:
+            fill_pixels[str(layer["underlap_fill"])] = fill_pixels.get(str(layer["underlap_fill"]), 0) + extra
     for name in REQUIRED_RASTER_LAYERS:
         if name not in names:
             findings.append(f"MISSING_LAYER:{name}")
         elif name not in drawn or not (drawn[name][..., 3] > 0).any():
             findings.append(f"EMPTY_LAYER:{name}")
 
-    metrics: dict[str, Any] = {"layers": len(layers), "drawn": len(drawn), "canvas_px": [w, h]}
+    metrics: dict[str, Any] = {"layers": len(layers), "drawn": len(drawn), "canvas_px": [w, h],
+                               "underlap_fill_pixels": dict(sorted(fill_pixels.items()))}
     if drawn:
         comp = np.zeros((h, w, 4))
         top = np.full((h, w), -1, dtype=np.int32)

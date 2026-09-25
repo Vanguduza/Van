@@ -178,3 +178,17 @@ decisions:
     M1 through vectors admit. Known costs: native resolution only (no invented detail),
     softer edges at extreme poses, a larger .riv.'
   milestone_effect: M1_ACCEPTS_RASTER_LAYER_SET
+- id: CF-D-09-HYBRID
+  status: ADOPTED
+  date: '2026-09-25'
+  authority: owner
+  decision: 'The first raster layer set was judged bad by the owner (misassigned eyes,
+    brows and goggle pixels; smeared fill in hidden regions). Owner instruction 2026-09-25:
+    ''do a hybrid of option 1 and 2'' - (1) cut the face parts, sleeves and torso on
+    hand-placed geometry measured on the approved cut-out rather than on the blockout,
+    and (2) paint the hidden regions of each layer with an AI inpainting model (big-lama,
+    pinned by SHA-256 in TOOLS.yaml) from that layer''s own pixels. Visible pixels stay
+    Candidate B''s own; the neutral pose must still recompose to the source. The AI
+    fill is labelled per layer in LAYERS.json and cached with its model hash in 02-ai-working.
+    A human-painted layer set remains the route to final quality.'
+  milestone_effect: RASTER_UNDERLAP_MAY_BE_AI_PAINTED

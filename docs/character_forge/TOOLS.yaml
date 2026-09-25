@@ -35,3 +35,10 @@ lanes:
   comfyui:
     class: OPTIONAL_AI
     enabled: false
+  big_lama_inpaint:
+    class: OPTIONAL_AI
+    enabled: true
+    used_by: tools/character_forge/underlap_fill.py (CF-D-09 raster layer underlap)
+    model_url: https://github.com/enesmsahin/simple-lama-inpainting/releases/download/v0.1.0/big-lama.pt
+    model_sha256: 7ba7aa7ac37a4d41fdbbeba3a2af7ead18058552997e3a3cd1a3b2210c9e6b4c
+    runtime: torch (CPU), forge host only; builds without it use the committed fill cache
