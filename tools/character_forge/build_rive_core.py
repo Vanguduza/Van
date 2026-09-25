@@ -247,7 +247,7 @@ def build(project: Path = PROJECT) -> dict:
 
     inner_mouth = inner_mouth_xml(world["mouth_open"], joint_id["mouth_open"])
     lids = load_eyelids(manifest)
-    eyelids, overs = {}, []
+    eyelids, sockets, overs = {}, {}, []
     for side in ("l", "r"):
         lid = lids[side]
         for key, row in (("eyelid_" + side, lid), ("eyelid_over_" + side, lid.get("over"))):
@@ -256,6 +256,7 @@ def build(project: Path = PROJECT) -> dict:
             shutil.copyfile(EYELIDS / row["file"], project / "layers" / row["file"])
             asset_id[key] = ids()
             assets.append(f'<ImageAsset {attrs(file="layers/" + row["file"], name=key, id=asset_id[key])}/>')
+        sockets[side] = eye_socket_xml(side, lid, world["eye_" + side], joint_id["eye_" + side], asset_id["eyelid_" + side])
         eyelids[side] = eyelid_xml(side, feats["eyes"][side]["opening"], world["eyelid_" + side],
                                    joint_id["eyelid_" + side], lid, asset_id["eyelid_" + side])
         if "over" in lid:
@@ -278,6 +279,8 @@ def build(project: Path = PROJECT) -> dict:
             drawables.insert(len(drawables) - 1, eyelids[name[-1]])  # in front of the lash line
         if name == "hair":
             drawables[-1:-1] = overs  # in front of the frame and hair, which hold the strays
+        if name.startswith("sclera_"):
+            drawables.append(sockets[name[-1]])  # behind the eye, in front of the face
 
     animations, machine = state_machine(contract, joint_id, ids)
 
@@ -343,6 +346,16 @@ def eyelid_xml(side: str, opening, pos, joint: str, lid: dict, asset: str) -> st
             f'<Shape name="eyelid_{side}_lash"><PointsPath isClosed="false" name="p">{lash}</PointsPath>'
             f'<Stroke thickness="1.6" cap="round" join="round" name="lash"><SolidColor colorValue="FF2B1714" name="c"/></Stroke></Shape>'
             f'<Image {attrs(x=num(cx), y=num(cy), assetId=asset, name="eyelid_" + side)}/></Node></Node>')
+
+
+def eye_socket_xml(side: str, lid: dict, pos, joint: str, asset: str) -> str:
+    """The painted lid skin, whole, beneath the eye's layers. Scaled on a phone, the soft edges
+    of the sclera and lash images let the face layer's pale fill under the eye show as a thin
+    light line round each eye; with her skin behind them, any seam shows skin instead."""
+    cx = lid["offset_px"][0] + lid["size_px"][0] / 2.0 - pos[0]
+    cy = lid["offset_px"][1] + lid["size_px"][1] / 2.0 - pos[1]
+    return (f'<Node name="follow_eye_socket_{side}"><TransformConstraint targetId="{joint}" name="c"/>'
+            f'<Image {attrs(x=num(cx), y=num(cy), assetId=asset, name="eye_socket_" + side)}/></Node>')
 
 
 def eyelid_over_xml(side: str, over: dict, head, joint: str, node_id: str, asset: str) -> str:

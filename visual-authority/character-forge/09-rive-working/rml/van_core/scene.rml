@@ -16,10 +16,12 @@
 <Node name="follow_lid_r"><TransformConstraint targetId="0:23" name="c"/><Image x="0.5" y="-5.4" assetId="0:66" name="lid_r"></Image></Node>
 <Node name="follow_eye_r"><TransformConstraint targetId="0:29" name="c"/><Image x="0.5" y="0.5" assetId="0:65" name="eye_r"><ClippingShape sourceId="0:76" name="clip"/></Image></Node>
 <Node name="follow_sclera_r"><TransformConstraint targetId="0:23" name="c"/><Image x="2" y="-0.9" assetId="0:64" name="sclera_r"></Image></Node>
+<Node name="follow_eye_socket_r"><TransformConstraint targetId="0:23" name="c"/><Image x="1" y="-0.9" assetId="0:80" name="eye_socket_r"/></Node>
 <Node name="follow_eyelid_l"><TransformConstraint targetId="0:24" name="c"/><Node name="eyelid_l_hinge"><Shape name="eyelid_l_lash"><PointsPath isClosed="false" name="p"><StraightVertex x="-16.3077" y="15"/><StraightVertex x="-12.3077" y="21"/><StraightVertex x="-5.3077" y="24"/><StraightVertex x="4.6923" y="25"/><StraightVertex x="12.6923" y="22"/><StraightVertex x="16.6923" y="16"/></PointsPath><Stroke thickness="1.6" cap="round" join="round" name="lash"><SolidColor colorValue="FF2B1714" name="c"/></Stroke></Shape><Image x="1.1923" y="12.5" assetId="0:77" name="eyelid_l"/></Node></Node>
 <Node name="follow_lid_l"><TransformConstraint targetId="0:22" name="c"/><Image x="-0.3077" y="-2.25" assetId="0:63" name="lid_l"></Image></Node>
 <Node name="follow_eye_l"><TransformConstraint targetId="0:28" name="c"/><Image x="-1" y="-2.5" assetId="0:62" name="eye_l"><ClippingShape sourceId="0:75" name="clip"/></Image></Node>
 <Node name="follow_sclera_l"><TransformConstraint targetId="0:22" name="c"/><Image x="-0.3077" y="-1.25" assetId="0:61" name="sclera_l"></Image></Node>
+<Node name="follow_eye_socket_l"><TransformConstraint targetId="0:22" name="c"/><Image x="1.1923" y="-1.25" assetId="0:77" name="eye_socket_l"/></Node>
 <Node name="follow_face"><TransformConstraint targetId="0:21" name="c"/><Image x="-0.4783" y="-93.5205" assetId="0:60" name="face"></Image></Node>
 <Node name="follow_hand_r"><TransformConstraint targetId="0:40" name="c"/><Image x="-0.996" y="32.5289" assetId="0:59" name="hand_r"></Image></Node>
 <Node name="follow_arm_r_fore"><TransformConstraint targetId="0:39" name="c"/><Image x="-6.5229" y="32.5081" assetId="0:58" name="arm_r_fore"></Image></Node>
