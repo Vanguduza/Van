@@ -153,3 +153,28 @@ decisions:
     - android/verification/src/test/kotlin/com/dial/van/visual/VanTradeSemanticTest.kt
     - tests/contracts/test_aura_runtime_contract.py
   milestone_effect: TRADING_AURA_ALWAYS_ON
+- id: CF-D-09-REJECT-TRACED
+  status: ADOPTED
+  date: '2026-09-25'
+  authority: owner
+  decision: 'The traced M1 lane candidate (05-vectors-candidate/van_layers_traced_candidate.svg,
+    sha256 f8768aa5e9a0f6eb653645dbf15a7f56935f835b497cbb8980a38193cb6f1c6e, built
+    by tools/character_forge/build_layer_candidate.py) is rejected by the owner: an
+    automatic trace inside M1''s node budgets does not keep Candidate B''s likeness.
+    It is never admitted.'
+  milestone_effect: TRACED_VECTOR_CANDIDATE_REJECTED
+- id: CF-D-09
+  status: ADOPTED
+  date: '2026-09-25'
+  authority: owner
+  decision: 'M1 may be satisfied by a raster layer set cut from Candidate B''s own
+    native pixels instead of a vector redraw (owner instruction 2026-09-25: ''use
+    option 2''). Each rig part is a PNG layer, pixel-exact to the approved art, with
+    painted underlap where other parts hide it, so the neutral pose recomposes to
+    the source. The Rive rig deforms those images with triangle meshes skinned to
+    bones (Rive CLI 1.1.1 ImageAsset + Image/Mesh/Skin). The identity lock, the 3.2
+    +/- 0.3 head count, the Rive contract and every owner/device gate are unchanged.
+    A vector redraw by an artist remains the long-term target and still satisfies
+    M1 through vectors admit. Known costs: native resolution only (no invented detail),
+    softer edges at extreme poses, a larger .riv.'
+  milestone_effect: M1_ACCEPTS_RASTER_LAYER_SET

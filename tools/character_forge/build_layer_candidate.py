@@ -140,24 +140,28 @@ def load_blockout(path: Path = BLOCKOUT) -> list[Group]:
     return groups
 
 
-def rasterise(group: Group) -> np.ndarray:
-    img = Image.new("L", (N, N), 0)
+def rasterise(group: Group, size: int = N) -> np.ndarray:
+    """The group's blockout primitives as a mask on a `size`-pixel square (artboard scaled)."""
+    img = Image.new("L", (size, size), 0)
     if not group.primitives:
         return np.asarray(img) > 127
     draw = ImageDraw.Draw(img)
+    f = size / N
     for p in group.primitives:
         filled = p.attrs.get("fill", "#000") not in ("none", "")
         width = max(1, round(float(p.attrs.get("stroke-width", "0") or 0)))
         if p.kind == "ellipse":
-            cx, cy = float(p.attrs["cx"]), float(p.attrs["cy"])
-            rx, ry = float(p.attrs["rx"]), float(p.attrs["ry"])
+            cx, cy = float(p.attrs["cx"]) * f, float(p.attrs["cy"]) * f
+            rx, ry = float(p.attrs["rx"]) * f, float(p.attrs["ry"]) * f
             box = [cx - rx, cy - ry, cx + rx, cy + ry]
-            draw.ellipse(box, fill=255 if filled else None, outline=None if filled else 255, width=width)
+            draw.ellipse(box, fill=255 if filled else None, outline=None if filled else 255,
+                         width=max(1, round(width * f)))
         elif len(p.points) >= 3:
+            pts = [(x * f, y * f) for x, y in p.points]
             if filled:
-                draw.polygon(p.points, fill=255)
+                draw.polygon(pts, fill=255)
             else:
-                draw.line(p.points + p.points[:1], fill=255, width=width, joint="curve")
+                draw.line(pts + pts[:1], fill=255, width=max(1, round(width * f)), joint="curve")
     return np.asarray(img) > 127
 
 
@@ -214,7 +218,7 @@ def hsv_arrays(rgb: np.ndarray) -> tuple[np.ndarray, np.ndarray, np.ndarray]:
 
 def assign(groups: list[Group], rgb: np.ndarray, fg: np.ndarray) -> np.ndarray:
     index = {g.gid: i for i, g in enumerate(groups)}
-    label = np.full((N, N), -1, dtype=np.int32)
+    label = np.full(fg.shape, -1, dtype=np.int32)
     for i, g in enumerate(groups):
         if g.gid in PRIMITIVE_ONLY:
             continue
