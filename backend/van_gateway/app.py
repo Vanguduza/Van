@@ -439,7 +439,8 @@ def create_app() -> FastAPI:
     jev_projection = JevProjectionApi(
         JevProjectionClient(
             base_url=settings.jev_base_url,
-            token_file=settings.jev_control_token_file,
+            read_token_file=settings.jev_projection_token_file,
+            control_token_file=settings.jev_control_token_file,
             enabled=settings.jev_enabled,
             timeout_seconds=settings.jev_timeout_seconds,
         ),
