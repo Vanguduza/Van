@@ -111,6 +111,16 @@ fun JevControlRoute(app: VanApplication, onBack: () -> Unit) {
         )
     }
 
+    fun operationalCommand(text: String, projectId: String? = "dial-development-system") {
+        app.commandController.submitText(
+            text = text,
+            source = VanCommandSource.SYSTEM,
+            projectId = projectId,
+            actionClass = "A2",
+            noStaleReplay = false,
+        )
+    }
+
     fun requestEvaluation(module: JevModule) {
         app.commandController.submitText(
             text = "Evaluate Jev marginal contribution for ${module.id} in project ${projectFor(module)}. " +
@@ -180,7 +190,11 @@ fun JevControlRoute(app: VanApplication, onBack: () -> Unit) {
                     },
                     onEvaluate = ::requestEvaluation,
                 )
-                else -> Controls(snapshot!!) { ownerCommand(it) }
+                else -> Controls(
+                    snapshot = snapshot!!,
+                    onOwnerMutation = { ownerCommand(it) },
+                    onOperationalRequest = { operationalCommand(it) },
+                )
             }
         }
     }
