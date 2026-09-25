@@ -217,6 +217,14 @@ jobs:
         env:
           VAN_DEBUG_KEYSTORE_BASE64: ${{ secrets.VAN_DEBUG_KEYSTORE_BASE64 }}
         run: bash tools/ci/restore_debug_keystore.sh
+      - name: Stage Candidate B Character Rig Lab asset
+        run: |
+          candidate="visual-authority/character-forge/08-prototypes/candidate-b-mechanics/build/van_candidate_b_mechanics_proto.riv"
+          test -f "$candidate"
+          mkdir -p android/app/src/debug/assets
+          cp "$candidate" android/app/src/debug/assets/van_candidate.riv
+          printf '%s\n' core > android/app/src/debug/assets/forge_mode.txt
+          echo "Candidate B mechanics prototype staged into the debug-only Character Rig Lab."
       - name: Android unit tests, build and lint
         working-directory: android
         run: |
@@ -275,6 +283,19 @@ jobs:
           echo 'KERNEL=="kvm", GROUP="kvm", MODE="0666", OPTIONS+="static_node=kvm"' | sudo tee /etc/udev/rules.d/99-kvm4all.rules
           sudo udevadm control --reload-rules
           sudo udevadm trigger --name-match=kvm
+      - name: Bind Candidate B mechanics prototype for CI only
+        run: |
+          prototype="visual-authority/character-forge/08-prototypes/candidate-b-mechanics/build/van_candidate_b_mechanics_proto.riv"
+          test_candidate="android/app/src/androidTest/assets/van_candidate.riv"
+          debug_candidate="android/app/src/debug/assets/van_candidate.riv"
+          if [[ -f "$prototype" ]]; then
+            mkdir -p "$(dirname "$test_candidate")" "$(dirname "$debug_candidate")"
+            cp "$prototype" "$test_candidate"
+            cp "$prototype" "$debug_candidate"
+            printf '%s\n' core > android/app/src/androidTest/assets/forge_mode.txt
+            printf '%s\n' core > android/app/src/debug/assets/forge_mode.txt
+            echo "Bound Candidate B mechanics prototype to androidTest and the debug host used by RiveContractTest."
+          fi
       - name: Bind Character Forge validation input
         run: |
           mkdir -p artifacts/character-forge
