@@ -36,7 +36,8 @@ def test_only_active_cognition_prompt_can_expose_jev_to_the_reasoning_llm():
     assert "subordinate evidence only" in text
     assert "Never call Jev as an independent/background trading loop" in text
     assert "risk_multiplier" in text
-    assert "TradeIntent" in text
+    assert "\"order\"" in text
+    assert "mandate or execution" in text
 
     # No SDK/client/import lives in VATI. Jev is reached only as a bounded Hermes
     # tool made available to an already-running cognition model.
