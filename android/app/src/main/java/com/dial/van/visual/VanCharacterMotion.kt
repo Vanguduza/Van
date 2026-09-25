@@ -89,7 +89,10 @@ object VanCharacterMotion {
 
     private fun profile(state: VanDurableState): Profile = when (state) {
         VanDurableState.SLEEPING -> Profile(0.75f, 0.38f, 0.16f, 0.24f, 0.0035f, 0.18f, 0.18f, 0f)
-        VanDurableState.OFFLINE -> Profile(0.42f, 0.22f, 0.12f, 0.16f, 0.0022f, 0.12f, 0.12f, 0f)
+        // Owner direction (2026-09-25): offline VAN is subdued, not frozen. At a 0.42 dp bob
+        // over six seconds he read on the S24 as a still picture, which says "broken", not
+        // "can't reach home". He breathes like a quiet idle; the slate aura says offline.
+        VanDurableState.OFFLINE -> Profile(1.15f, 0.46f, 0.30f, 0.46f, 0.0052f, 0.45f, 0.40f, 0f)
         VanDurableState.IDLE,
         VanDurableState.WAITING,
         -> Profile(1.65f, 0.52f, 0.42f, 0.62f, 0.0065f, 0.55f, 0.48f, 0f)
