@@ -132,3 +132,11 @@ def test_receipts_bind_to_the_admitted_raster_set() -> None:
     manifest = {"decisions": [DECISION], "artifacts": [{"kind": "layer_svg", "sha256": "a" * 64, "promotion": "SUPERSEDED"},
                                                         {"kind": "layer_raster_set", "sha256": sha}]}
     assert gates.admitted_layer(manifest)["sha256"] == sha
+
+
+def test_owner_confirmation_clears_its_own_blocker(forge) -> None:
+    forge.manifest["sources"] = [{"artifact_id": "source:" + "e" * 64, "path": "x", "sha256": "e" * 64}]
+    forge.status["blockers"] = ["OWNER_SOURCE_CONFIRMATION_PENDING"]
+    assert cli.main(["owner", "confirm-source", "--confirm-complete", "--date", "2026-09-25"]) == 0
+    assert forge.manifest["owner_confirmed_complete"] is True
+    assert "OWNER_SOURCE_CONFIRMATION_PENDING" not in forge.status["blockers"]

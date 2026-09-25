@@ -1,13 +1,77 @@
 pack: VAN-CHARACTER-FORGE-DP-R2
 baseline_sha: 3c337efe91faa8461dd28b1f18a26cf346a1b66f
-owner_confirmed_complete: false
-owner_confirmation_date: null
+owner_confirmed_complete: true
+owner_confirmation_date: '2026-09-25'
 source_roots:
 - visual-authority/assets
 - visual-authority/rive_contract.json
 - docs/VAN_CHARACTER_VISUAL_IDENTITY.md
 - docs/VAN_VISUAL_ACCEPTANCE_MATRIX.md
-sources: []
+sources:
+- artifact_id: source:b5e457409f3775ed588594dffd513a1e6fecd639004d1d6ec2f9aa4e69fe8877
+  kind: source
+  path: docs/VAN_CHARACTER_VISUAL_IDENTITY.md
+  sha256: b5e457409f3775ed588594dffd513a1e6fecd639004d1d6ec2f9aa4e69fe8877
+  stage: admitted
+  promotion: CANDIDATE
+  produced_by: owner
+  inputs: []
+- artifact_id: source:fbbdd1656470eaf5b12c66983cfd8cbdd9bdffa1f366cca78e38747e4ae90726
+  kind: source
+  path: docs/VAN_VISUAL_ACCEPTANCE_MATRIX.md
+  sha256: fbbdd1656470eaf5b12c66983cfd8cbdd9bdffa1f366cca78e38747e4ae90726
+  stage: admitted
+  promotion: CANDIDATE
+  produced_by: owner
+  inputs: []
+- artifact_id: source:4535a306f737f620d6ab61d475c8edf206054b9b5805bb7cbf8cb4b1681a4a17
+  kind: source
+  path: visual-authority/assets/pack/owner_board_android_ui_showcase.png
+  sha256: 4535a306f737f620d6ab61d475c8edf206054b9b5805bb7cbf8cb4b1681a4a17
+  stage: admitted
+  promotion: CANDIDATE
+  produced_by: owner
+  inputs: []
+- artifact_id: source:5f84795fd538fbaa442ee6991eb46d761a1d7f84f1c58b42d162b64b8bb9d745
+  kind: source
+  path: visual-authority/assets/pack/owner_board_dial_hermes_showcase.png
+  sha256: 5f84795fd538fbaa442ee6991eb46d761a1d7f84f1c58b42d162b64b8bb9d745
+  stage: admitted
+  promotion: CANDIDATE
+  produced_by: owner
+  inputs: []
+- artifact_id: source:bb82f59c494d639a1b5562455ee3b6830d6f1a1150771cc252bc3c824c4898c1
+  kind: source
+  path: visual-authority/assets/pack/owner_board_futuristic_interface.png
+  sha256: bb82f59c494d639a1b5562455ee3b6830d6f1a1150771cc252bc3c824c4898c1
+  stage: admitted
+  promotion: CANDIDATE
+  produced_by: owner
+  inputs: []
+- artifact_id: source:eb27945a3db1cceea503f2786af0f12ee61109c3570fc985ea410c1c3d9d58bb
+  kind: source
+  path: visual-authority/assets/pack/owner_board_interface_concept.png
+  sha256: eb27945a3db1cceea503f2786af0f12ee61109c3570fc985ea410c1c3d9d58bb
+  stage: admitted
+  promotion: CANDIDATE
+  produced_by: owner
+  inputs: []
+- artifact_id: source:fc986466ee830d4bac4f56ab291416e8ebaf1d6c19c24d5f6468fdbdae5a0fe9
+  kind: source
+  path: visual-authority/assets/pack/owner_board_visual_authority.png
+  sha256: fc986466ee830d4bac4f56ab291416e8ebaf1d6c19c24d5f6468fdbdae5a0fe9
+  stage: admitted
+  promotion: CANDIDATE
+  produced_by: owner
+  inputs: []
+- artifact_id: source:67b0390f51fff92de165a439a519dc9ac1f1b18896ed722d0ac94b748b5ecef0
+  kind: source
+  path: visual-authority/rive_contract.json
+  sha256: 67b0390f51fff92de165a439a519dc9ac1f1b18896ed722d0ac94b748b5ecef0
+  stage: admitted
+  promotion: CANDIDATE
+  produced_by: owner
+  inputs: []
 artifacts:
 - artifact_id: layer_raster_set:67af011894d53660293ef2c60388ef45acf1a839eb2fe7f49f61f2554e0d0b1c
   kind: layer_raster_set
@@ -137,6 +201,49 @@ receipts:
   - PASS
   timestamp: '2026-09-25T06:35:47.089849+00:00'
   reason: review by owner on 2026-09-25
+- command: source admit
+  actor: owner-authorised:claude-code
+  inputs: []
+  outputs:
+  - docs/VAN_CHARACTER_VISUAL_IDENTITY.md:b5e457409f3775ed588594dffd513a1e6fecd639004d1d6ec2f9aa4e69fe8877
+  - docs/VAN_VISUAL_ACCEPTANCE_MATRIX.md:fbbdd1656470eaf5b12c66983cfd8cbdd9bdffa1f366cca78e38747e4ae90726
+  - visual-authority/assets/pack/owner_board_android_ui_showcase.png:4535a306f737f620d6ab61d475c8edf206054b9b5805bb7cbf8cb4b1681a4a17
+  - visual-authority/assets/pack/owner_board_dial_hermes_showcase.png:5f84795fd538fbaa442ee6991eb46d761a1d7f84f1c58b42d162b64b8bb9d745
+  - visual-authority/assets/pack/owner_board_futuristic_interface.png:bb82f59c494d639a1b5562455ee3b6830d6f1a1150771cc252bc3c824c4898c1
+  - visual-authority/assets/pack/owner_board_interface_concept.png:eb27945a3db1cceea503f2786af0f12ee61109c3570fc985ea410c1c3d9d58bb
+  - visual-authority/assets/pack/owner_board_visual_authority.png:fc986466ee830d4bac4f56ab291416e8ebaf1d6c19c24d5f6468fdbdae5a0fe9
+  - visual-authority/rive_contract.json:67b0390f51fff92de165a439a519dc9ac1f1b18896ed722d0ac94b748b5ecef0
+  timestamp: '2026-09-25T06:59:03.819231+00:00'
+- command: owner confirm-source
+  actor: owner-authorised:claude-code
+  inputs:
+  - b5e457409f3775ed588594dffd513a1e6fecd639004d1d6ec2f9aa4e69fe8877
+  - fbbdd1656470eaf5b12c66983cfd8cbdd9bdffa1f366cca78e38747e4ae90726
+  - 4535a306f737f620d6ab61d475c8edf206054b9b5805bb7cbf8cb4b1681a4a17
+  - 5f84795fd538fbaa442ee6991eb46d761a1d7f84f1c58b42d162b64b8bb9d745
+  - bb82f59c494d639a1b5562455ee3b6830d6f1a1150771cc252bc3c824c4898c1
+  - eb27945a3db1cceea503f2786af0f12ee61109c3570fc985ea410c1c3d9d58bb
+  - fc986466ee830d4bac4f56ab291416e8ebaf1d6c19c24d5f6468fdbdae5a0fe9
+  - 67b0390f51fff92de165a439a519dc9ac1f1b18896ed722d0ac94b748b5ecef0
+  outputs:
+  - OWNER_CONFIRMED_COMPLETE
+  timestamp: '2026-09-25T06:59:03.990857+00:00'
+- command: gate m0
+  actor: owner-authorised:claude-code
+  inputs:
+  - 3c337efe91faa8461dd28b1f18a26cf346a1b66f
+  - b5e457409f3775ed588594dffd513a1e6fecd639004d1d6ec2f9aa4e69fe8877
+  - fbbdd1656470eaf5b12c66983cfd8cbdd9bdffa1f366cca78e38747e4ae90726
+  - 4535a306f737f620d6ab61d475c8edf206054b9b5805bb7cbf8cb4b1681a4a17
+  - 5f84795fd538fbaa442ee6991eb46d761a1d7f84f1c58b42d162b64b8bb9d745
+  - bb82f59c494d639a1b5562455ee3b6830d6f1a1150771cc252bc3c824c4898c1
+  - eb27945a3db1cceea503f2786af0f12ee61109c3570fc985ea410c1c3d9d58bb
+  - fc986466ee830d4bac4f56ab291416e8ebaf1d6c19c24d5f6468fdbdae5a0fe9
+  - 67b0390f51fff92de165a439a519dc9ac1f1b18896ed722d0ac94b748b5ecef0
+  outputs:
+  - BUILD_READY=true
+  timestamp: '2026-09-25T06:59:04.265220+00:00'
+  reason: M0 gate transition recorded from the evaluated repository evidence
 ci_evidence: {}
 decisions:
 - id: CF-D-02-REV2_1

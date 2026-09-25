@@ -94,7 +94,10 @@ def cmd_source_admit(args):
         manifest["owner_confirmed_complete"]=False
         manifest["owner_confirmation_date"]=None
     if not status.get("baseline_sha"): status["baseline_sha"]=_git_head()
-    manifest["baseline_sha"]=status["baseline_sha"]; status["current_stage"]="admission"; status["build_ready"]=False
+    manifest["baseline_sha"]=status["baseline_sha"]; status["build_ready"]=False
+    # A changed source set sends the forge back to admission, but no further back than it is:
+    # with a layer artifact admitted, the stage stays vector.
+    status["current_stage"]="vector" if admitted_layer(manifest) else "admission"
     status["blockers"]=_current_blockers(manifest,status)
     status["next_action"]="Owner reviews MANIFEST.yaml source set and sets owner_confirmed_complete: true with owner_confirmation_date"
     append_receipt(manifest,_receipt("source admit",sorted(f"{p}:{s}" for p,s in old),sorted(f"{p}:{s}" for p,s in new),args.actor)); _save(manifest,status)
@@ -488,7 +491,8 @@ def cmd_confirm_source(args):
         print("NO_CHANGE"); return 0
     manifest["owner_confirmed_complete"]=True; manifest["owner_confirmation_date"]=args.date
     append_receipt(manifest,_receipt("owner confirm-source",[r["sha256"] for r in manifest["sources"]],["OWNER_CONFIRMED_COMPLETE"],args.actor))
-    status=load_status(); status["next_action"]="python -m tools.character_forge.cli gate m0"
+    status=load_status(); status["blockers"]=_current_blockers(manifest,status)
+    status["next_action"]="python -m tools.character_forge.cli gate m0"
     _save(manifest,status)
     return 0
 
