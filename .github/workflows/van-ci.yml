@@ -286,12 +286,15 @@ jobs:
       - name: Bind Candidate B mechanics prototype for CI only
         run: |
           prototype="visual-authority/character-forge/08-prototypes/candidate-b-mechanics/build/van_candidate_b_mechanics_proto.riv"
-          candidate="android/app/src/androidTest/assets/van_candidate.riv"
-          if [[ ! -f "$candidate" && -f "$prototype" ]]; then
-            mkdir -p "$(dirname "$candidate")"
-            cp "$prototype" "$candidate"
+          test_candidate="android/app/src/androidTest/assets/van_candidate.riv"
+          debug_candidate="android/app/src/debug/assets/van_candidate.riv"
+          if [[ -f "$prototype" ]]; then
+            mkdir -p "$(dirname "$test_candidate")" "$(dirname "$debug_candidate")"
+            cp "$prototype" "$test_candidate"
+            cp "$prototype" "$debug_candidate"
             printf '%s\n' core > android/app/src/androidTest/assets/forge_mode.txt
-            echo "Bound non-canonical Candidate B mechanics prototype to androidTest only."
+            printf '%s\n' core > android/app/src/debug/assets/forge_mode.txt
+            echo "Bound Candidate B mechanics prototype to androidTest and the debug host used by RiveContractTest."
           fi
       - name: Bind Character Forge validation input
         run: |
