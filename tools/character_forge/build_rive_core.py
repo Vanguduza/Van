@@ -22,7 +22,8 @@ How the rig is made, and why:
 * **Public surface exactly as the contract.** Artboard ``Van``, state machine ``VanRuntime``,
   the nine inputs and eight triggers of ``visual-authority/rive_contract.json``, in its order.
 * **Core scope (VAN_CORE_RIG_TASK.md).** IDLE (2), LISTENING (4), THINKING (5), SPEAKING (9);
-  HELLO_WAVE (1), ACK_NOD (2), POINT_TARGET (7), each by trigger or by ``action_code``; gaze
+  HELLO_WAVE (1), ACK_NOD (2), POINT_TARGET (7), each by trigger (played once) or held
+  while ``action_code`` names it (production sets it for the gesture's duration); gaze
   from ``attention_x/y``; blinks; ``mouth_open`` and visemes 0–4; breathing; orb drift. Any
   other state value holds IDLE. The artboard is transparent and carries no aura.
 * **Two parts she was never painted with.** Candidate B's mouth is a closed smile and her
@@ -558,17 +559,49 @@ def state_machine(contract: dict, J: dict, ids: Ids) -> tuple[list[str], str]:
     point.key(J["wrist_r"], ROT, (0, 0), (0.25, POINT_POSE[2]), (1.45, POINT_POSE[2]), (1.8, 0))
     point.key(J["nod"], Y, (0, 0), (1.8, 0)).key(J["nod"], ROT, (0, 0), (0.25, 0.04), (1.45, 0.04), (1.8, 0))
 
+    # Held by action_code: production holds the code for the gesture's duration (VanMotionMap)
+    # and then clears it, so while the code is set the pose holds (a wave keeps waving) and it
+    # blends back when the code clears. Replaying the one-shot from rest instead spent a third
+    # of every cycle near rest, where a capture read as IDLE.
+    wave_hold = Anim("action_hello_wave_hold", int(0.4 * FPS), "loop")
+    wave_hold.key(J["shoulder_r"], ROT, (0, -1.05), (0.4, -1.05))
+    wave_hold.key(J["elbow_r"], ROT, (0, -1.25), (0.2, -1.7), (0.4, -1.25))
+    wave_hold.key(J["wrist_r"], ROT, (0, 0.1), (0.4, 0.1))
+    wave_hold.key(J["nod"], Y, (0, 0), (0.4, 0)).key(J["nod"], ROT, (0, -0.03), (0.4, -0.03))
+
+    nod_hold = Anim("action_ack_nod_hold", int(1.2 * FPS), "loop")
+    nod_hold.key(J["nod"], Y, (0, 4.0), (0.6, 2.5), (1.2, 4.0))
+    nod_hold.key(J["nod"], ROT, (0, 0.05), (1.2, 0.05))
+    for side in ("l", "r"):
+        nod_hold.key(J["eyelid_" + side], SY, (0, 0.5), (1.2, 0.5))
+        if "eyelid_over_" + side in J:
+            nod_hold.key(J["eyelid_over_" + side], OPACITY, (0, 1.0), (1.2, 1.0))
+        if "eye_cover_" + side in J:
+            nod_hold.key(J["eye_cover_" + side], OPACITY, (0, 0.0), (1.2, 0.0))
+    for j in arm:
+        nod_hold.key(J[j], ROT, (0, 0), (1.2, 0))
+
+    point_hold = Anim("action_point_target_hold", 1)
+    for j, v in zip(arm, POINT_POSE):
+        point_hold.key(J[j], ROT, (0, v))
+    point_hold.key(J["nod"], Y, (0, 0)).key(J["nod"], ROT, (0, 0.04))
+
     none_sid = ids()
-    acts = {1: ("wave", wave), 2: ("ack", nod), 7: ("point", point)}
+    acts = {1: ("wave", wave, wave_hold), 2: ("ack", nod, nod_hold), 7: ("point", point, point_hold)}
     act_sid = {code: ids() for code in acts}
+    hold_sid = {code: ids() for code in acts}
     body_to = []
-    for code, (trigger, _a) in acts.items():
+    for code in acts:  # the held code first: it wins when a trigger and the code arrive together
+        body_to.append(f'<StateTransition stateToId="{hold_sid[code]}" duration="250"><TransitionNumberCondition inputId="{inputs["action_code"]}" opValue="equal" value="{code}"/></StateTransition>')
+    for code, (trigger, _a, _h) in acts.items():
         body_to.append(f'<StateTransition stateToId="{act_sid[code]}" duration="80"><TransitionTriggerCondition inputId="{inputs[trigger]}"/></StateTransition>')
-        body_to.append(f'<StateTransition stateToId="{act_sid[code]}" duration="80"><TransitionNumberCondition inputId="{inputs["action_code"]}" opValue="equal" value="{code}"/></StateTransition>')
     body = [f'<AnimationState animationId="{anim(none)}" x="200" y="0" id="{none_sid}">{"".join(body_to)}</AnimationState>']
-    for i, (code, (_t, a)) in enumerate(acts.items()):
+    for i, (code, (_t, a, h)) in enumerate(acts.items()):
         back = f'<StateTransition stateToId="{none_sid}" duration="120" enableExitTime="true" exitTimeIsPercetange="true" exitTime="100"/>'
         body.append(f'<AnimationState animationId="{anim(a)}" reset="true" x="{400 + 200 * i}" y="160" id="{act_sid[code]}">{back}</AnimationState>')
+        release = (f'<StateTransition stateToId="{none_sid}" duration="300"><TransitionNumberCondition '
+                   f'inputId="{inputs["action_code"]}" opValue="notEqual" value="{code}"/></StateTransition>')
+        body.append(f'<AnimationState animationId="{anim(h)}" x="{400 + 200 * i}" y="320" id="{hold_sid[code]}">{release}</AnimationState>')
     layer("Action", body, none_sid)
 
     lines.append("</StateMachine>")

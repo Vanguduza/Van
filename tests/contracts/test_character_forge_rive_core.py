@@ -91,3 +91,27 @@ def test_the_eyelids_are_the_painted_lids_and_blink() -> None:
     blink = next(a for a in root.iter("LinearAnimation") if a.get("name") == "blink")
     closes = [k for k in blink.iter() if k.tag.startswith("KeyFrame") and k.get("value") == "1"]
     assert closes, "the blink never closes a lid"
+
+
+def test_a_held_action_code_holds_its_gesture() -> None:
+    """Production holds action_code for a gesture's duration, then clears it: the rig holds the
+    gesture while the code names it and releases it when the code changes."""
+    root = ET.parse(core.PROJECT / "scene.rml").getroot()
+    machine = root.find("Artboard").find("StateMachine")
+    code_id = next(e.get("id") for e in machine if e.get("name") == "action_code")
+    layer = next(e for e in machine.iter("StateMachineLayer") if e.get("name") == "Action")
+    states = {e.get("id"): e for e in layer if e.tag == "AnimationState"}
+    names = {a.get("id"): a.get("name") for a in root.iter("LinearAnimation")}
+    none = next(s for s in states.values() if names[s.get("animationId")] == "action_none")
+    for code, name in ((1, "action_hello_wave_hold"), (2, "action_ack_nod_hold"), (7, "action_point_target_hold")):
+        into = [t for t in none.findall("StateTransition")
+                if any(c.get("inputId") == code_id and c.get("opValue") == "equal" and float(c.get("value")) == code
+                       for c in t.findall("TransitionNumberCondition"))]
+        assert len(into) == 1, code
+        held = states[into[0].get("stateToId")]
+        assert names[held.get("animationId")] == name
+        out = held.findall("StateTransition")
+        assert len(out) == 1 and out[0].get("stateToId") == none.get("id")
+        cond = out[0].find("TransitionNumberCondition")
+        assert cond.get("inputId") == code_id and cond.get("opValue") == "notEqual" and float(cond.get("value")) == code
+        assert out[0].get("enableExitTime") is None  # releases as soon as the code clears
