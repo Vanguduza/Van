@@ -117,7 +117,9 @@ sourceSets {
             // one-level "back" rule.
             "com/dial/van/command/nav/VanRoute.kt",
             "com/dial/van/command/nav/VanNavModel.kt",
-            // Jev owner-control read models are pure Kotlin + org.json and must remain testable without Android.\n            "com/dial/van/command/jev/JevModels.kt",\n            // GAP-F-011 — whether a dispatched command's thread still needs polling, and
+            // Jev owner-control read models are pure Kotlin + org.json and must remain testable without Android.
+            "com/dial/van/command/jev/JevModels.kt",
+            // GAP-F-011 — whether a dispatched command's thread still needs polling, and
             // what GET /v1/commands/{id} becomes once it answers.
             "com/dial/van/command/work/ConversationReducer.kt",
             "com/dial/van/events/EventStream.kt",
