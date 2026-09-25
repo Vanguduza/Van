@@ -1,0 +1,17 @@
+{
+  "candidate_sha256": "4d1f8a969ae549dc2635c3522ae0335f7cf98d2a9418980c80d147ccaa75f18c",
+  "candidate_path": "visual-authority/character-forge/09-rive-working/van_core_02.riv",
+  "stage": "core_rig",
+  "authoring_tool": "rive_cli",
+  "authoring_version": "1.1.1",
+  "rive_file_id": "LOCAL",
+  "rive_revision": "LOCAL",
+  "svg_sha256": "67af011894d53660293ef2c60388ef45acf1a839eb2fe7f49f61f2554e0d0b1c",
+  "contract_sha256": "67b0390f51fff92de165a439a519dc9ac1f1b18896ed722d0ac94b748b5ecef0",
+  "source_project": "visual-authority/character-forge/09-rive-working/rml/van_core",
+  "source_tree_sha256": "b63aa17a29d2b9ad4f16cc1a3042c2d129b0e6b311e27462d5af972312403052",
+  "source_file_count": 34,
+  "artist": "claude-code-build_rive_core",
+  "exported_at": "2026-09-25T08:12:04.459731+00:00",
+  "notes": "Built on Netcup dial-control by the pinned Rive CLI 1.1.1 (rive <project> --once) from this RML at 3f1a8e9. Supersedes van_core_01: the emulator found mouth_open 0 and 1 indistinguishable, so the mouth opening is larger and speech lifts the head 2 px."
+}

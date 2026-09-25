@@ -10,8 +10,9 @@ Status on 2026-09-25: **M0 and M1 pass.** `python -m tools.character_forge.cli s
   instruction on 2026-09-25.
 - **M2 (in progress):** the core rig is built and staged. `tools/character_forge/build_rive_core.py`
   generates the RML project `09-rive-working/rml/van_core` from the admitted layers. Netcup's
-  pinned Rive CLI 1.1.1 built `van_core_01.riv` from it (sha256 `3784c7df…`; the build is
-  deterministic). It is receipted and staged into the androidTest and debug assets.
+  pinned Rive CLI 1.1.1 built it deterministically. The staged candidate is `van_core_02.riv`
+  (sha256 `4d1f8a96…`); `van_core_01` failed emulator validation because `mouth_open` read
+  pixel-identical. It is receipted and staged into the androidTest and debug assets.
   Still needed: the CI emulator validation on this SHA, core baseline frames, and the owner's
   verdict on a real device.
 

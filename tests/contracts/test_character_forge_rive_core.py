@@ -52,8 +52,11 @@ def test_layer_copies_are_the_admitted_files() -> None:
             assert sha256_file(core.PROJECT / "layers" / layer["file"]) == layer["sha256"], layer["name"]
 
 
-def test_the_receipt_binds_this_project_and_candidate() -> None:
-    receipt = json.loads((WORKING / "van_core_01.receipt.json").read_text(encoding="utf-8"))
+def test_the_staged_candidate_is_receipted_against_this_project() -> None:
+    staged = json.loads((ROOT / "docs" / "character_forge" / "STATUS.json").read_text(encoding="utf-8"))["core_rig"]["candidate_sha256"]
+    receipts = [json.loads(p.read_text(encoding="utf-8")) for p in WORKING.glob("van_core_*.receipt.json")]
+    receipt = next(r for r in receipts if r["candidate_sha256"] == staged)
+    assert sha256_file(ROOT / "android" / "app" / "src" / "androidTest" / "assets" / "van_candidate.riv") == staged
     tree, count = source_tree_sha256(core.PROJECT)
     assert receipt["source_tree_sha256"] == tree and receipt["source_file_count"] == count
     assert receipt["candidate_sha256"] == sha256_file(ROOT / receipt["candidate_path"])
