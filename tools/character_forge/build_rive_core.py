@@ -25,9 +25,11 @@ How the rig is made, and why:
   HELLO_WAVE (1), ACK_NOD (2), POINT_TARGET (7), each by trigger or by ``action_code``; gaze
   from ``attention_x/y``; blinks; ``mouth_open`` and visemes 0–4; breathing; orb drift. Any
   other state value holds IDLE. The artboard is transparent and carries no aura.
-* **The open mouth is drawn.** Candidate B's mouth is a closed smile; the interior that opens
-  behind it is a small vector shape (dark mouth, tongue, teeth), sized per viseme and opened
-  by ``mouth_open``. It is the one piece of the rig not cut from Candidate B's pixels.
+* **Two small parts are drawn, not cut.** Candidate B's mouth is a closed smile and her eyes
+  are open, so the mouth interior (dark mouth, tongue, teeth; sized per viseme, opened by
+  ``mouth_open``) and the upper eyelids (the eye opening filled with the skin sampled around
+  it, lash-edged, sliding down to blink) are small vector shapes. Everything else is Candidate
+  B's own pixels.
 
     python3 -m tools.character_forge.build_rive_core
 """
@@ -53,6 +55,11 @@ PROJECT = ROOT / "visual-authority" / "character-forge" / "09-rive-working" / "r
 
 X, Y, ROT, SX, SY, OPACITY = 13, 14, 15, 16, 17, 18
 FPS = 60
+#: An open eyelid: folded almost flat onto the lash line (a zero scale would be singular).
+LID_OPEN = 0.02
+#: Rest local position of every keyed joint. Keyframes on x/y are absolute local positions,
+#: so the rig keys offsets from rest and this adds the rest back when writing them.
+REST_XY: dict[str, tuple[float, float]] = {}
 
 #: Which joint each admitted layer follows.
 FOLLOWS = {
@@ -102,6 +109,7 @@ class Rig:
             ys = [q[1] for q in pts]
             cx, _ = polygon_centroid(pts)
             eye[side] = (cx, min(ys) + 0.55 * (max(ys) - min(ys)))
+            eye["top_" + side] = (cx, float(min(ys)))
         iris = {s: (feats["eyes"][s]["iris"]["cx"], feats["eyes"][s]["iris"]["cy"]) for s in ("l", "r")}
         brow = {s: polygon_centroid(feats["brows"][s]) for s in ("l", "r")}
         mouth = polygon_centroid(feats["mouth"])
@@ -113,7 +121,8 @@ class Rig:
             "neck": ("head_bob", p["neck"]),          # state tilt
             "nod": ("neck", p["neck"]),               # action nod
             "head": ("nod", p["neck"]),               # gaze turn; the face follows this
-            "eye_l": ("head", eye["l"]), "eye_r": ("head", eye["r"]),        # blink
+            "eye_l": ("head", eye["l"]), "eye_r": ("head", eye["r"]),
+            "eyelid_l": ("head", eye["top_l"]), "eyelid_r": ("head", eye["top_r"]),  # blink
             "look_l": ("eye_l", iris["l"]), "look_r": ("eye_r", iris["r"]),  # state look
             "iris_l": ("look_l", iris["l"]), "iris_r": ("look_r", iris["r"]),  # gaze
             "brow_l": ("head", brow["l"]), "brow_r": ("head", brow["r"]),
@@ -159,7 +168,9 @@ class Anim:
             out.append(f'  <KeyedObject objectId="{obj}">')
             for prop, pts in props:
                 out.append(f'    <KeyedProperty propertyKey="{prop}">')
+                base = REST_XY.get(obj, (0.0, 0.0))[prop - X] if prop in (X, Y) else 0.0
                 for i, (frame, value) in enumerate(pts):
+                    value += base
                     if i < len(pts) - 1:
                         out.append(f'      <KeyFrameDouble value="{num(value)}" frame="{frame}" interpolationType="cubic">'
                                    '<CubicEaseInterpolator x1="0.42" y1="0" x2="0.58" y2="1"/></KeyFrameDouble>')
@@ -182,6 +193,10 @@ def build(project: Path = PROJECT) -> dict:
     artboard_id, style_id, sm_id = ids(), ids(), ids()
     joint_id = {name: ids() for name in rig.joints}
     world = {name: pos for name, (_parent, pos) in rig.joints.items()}
+    REST_XY.clear()
+    for name, (parent, pos) in rig.joints.items():
+        px, py = (0.0, 0.0) if parent is None else world[parent]
+        REST_XY[joint_id[name]] = (pos[0] - px, pos[1] - py)
 
     # --- the skeleton (draws nothing) -------------------------------------------------------
     def joint_xml(name: str, depth: int) -> list[str]:
@@ -189,7 +204,8 @@ def build(project: Path = PROJECT) -> dict:
         px, py = (0.0, 0.0) if parent is None else world[parent]
         pad = "  " * depth
         kids = [n for n, (p, _) in rig.joints.items() if p == name]
-        head = f'{pad}<Node {attrs(x=num(pos[0] - px), y=num(pos[1] - py), name="rig_" + name, id=joint_id[name])}'
+        rest_sy = LID_OPEN if name.startswith("eyelid_") else None
+        head = f'{pad}<Node {attrs(x=num(pos[0] - px), y=num(pos[1] - py), scaleY=rest_sy, name="rig_" + name, id=joint_id[name])}'
         if not kids:
             return [head + "/>"]
         lines = [head + ">"]
@@ -221,6 +237,9 @@ def build(project: Path = PROJECT) -> dict:
             f'<Shape name="eye_opening_{side}" id="{shape_id}"><PointsPath isClosed="true" name="p">{verts}</PointsPath></Shape></Node>')
 
     inner_mouth = inner_mouth_xml(world["mouth_open"], joint_id["mouth_open"])
+    eyelids = {side: eyelid_xml(side, feats["eyes"][side]["opening"], world["eyelid_" + side],
+                                joint_id["eyelid_" + side], lid_skin(side, feats, manifest))
+               for side in ("l", "r")}
     for r in reversed(drawn):  # front to back: the first sibling draws on top
         name = r["name"]
         joint = FOLLOWS[name]
@@ -233,6 +252,8 @@ def build(project: Path = PROJECT) -> dict:
             f'<Image {attrs(x=num(cx - jx), y=num(cy - jy), assetId=asset_id[name], name=name)}>{clip}</Image></Node>')
         if name == "visor_lens":
             drawables.append(inner_mouth)  # above the mouth layer, beneath the lens
+        if name.startswith("lid_"):
+            drawables.insert(len(drawables) - 1, eyelids[name[-1]])  # in front of the lash line
 
     animations, machine = state_machine(contract, joint_id, ids)
 
@@ -249,6 +270,38 @@ def build(project: Path = PROJECT) -> dict:
     (project / "scene.rml").write_text("\n".join(doc) + "\n", encoding="utf-8")
     return {"project": str(project), "layers": len(drawn),
             "animations": len(animations), "joints": len(rig.joints)}
+
+
+def lid_skin(side: str, feats: dict, manifest: dict) -> str:
+    """ARGB of the skin just outside the eye opening, from the admitted face layer (lens off)."""
+    from PIL import Image, ImageDraw  # a forge-host dependency, like the layer builder
+
+    face = next(r for r in manifest["layers"] if r["name"] == "face")
+    img = Image.open(LAYER_SET / face["file"]).convert("RGBA")
+    ox, oy = face["offset_px"]
+    pts = [(x - ox, y - oy) for x, y in feats["eyes"][side]["opening"]]
+    inner, outer = Image.new("L", img.size, 0), Image.new("L", img.size, 0)
+    ImageDraw.Draw(inner).polygon(pts, fill=255, outline=255)
+    ImageDraw.Draw(outer).polygon(pts, fill=255, outline=255)
+    for _ in range(3):
+        outer = outer.filter(__import__("PIL.ImageFilter", fromlist=["MaxFilter"]).MaxFilter(3))
+    samples = [img.getpixel((x, y)) for y in range(img.height) for x in range(img.width)
+               if outer.getpixel((x, y)) and not inner.getpixel((x, y))]
+    skin = [p for p in samples if p[3] == 255 and p[0] > p[2] and sum(p[:3]) > 240]
+    if not skin:
+        raise ValueError(f"no skin sampled around eye {side}")
+    med = [sorted(c)[len(c) // 2] for c in zip(*[p[:3] for p in skin])]
+    return "FF" + "".join(f"{c:02X}" for c in med)
+
+
+def eyelid_xml(side: str, opening, pos, joint: str, skin: str) -> str:
+    """The upper lid: the eye opening filled with skin, hung from its top edge, closed at scaleY=1."""
+    verts = "".join(f'<StraightVertex x="{num(x - pos[0])}" y="{num(y - pos[1])}"/>' for x, y in opening)
+    return (f'<Node name="follow_eyelid_{side}"><TransformConstraint targetId="{joint}" name="c"/>'
+            f'<Node name="eyelid_{side}_hinge">'
+            f'<Shape name="eyelid_{side}"><PointsPath isClosed="true" name="p">{verts}</PointsPath>'
+            f'<Stroke thickness="1.3" name="lash"><SolidColor colorValue="FF2B1714" name="c"/></Stroke>'
+            f'<Fill name="skin"><SolidColor colorValue="{skin}" name="c"/></Fill></Shape></Node></Node>')
 
 
 def inner_mouth_xml(pos, joint) -> str:
@@ -305,8 +358,9 @@ def state_machine(contract: dict, J: dict, ids: Ids) -> tuple[list[str], str]:
     # --- blink: two blinks in a 6 s loop, away from the first second -----------------------
     blink = Anim("blink", 6 * FPS, "loop")
     for side in ("l", "r"):
-        blink.key(J["eye_" + side], SY, (0, 1.0), (2.30, 1.0), (2.37, 0.12), (2.46, 1.0),
-                  (4.60, 1.0), (4.67, 0.12), (4.76, 1.0), (6.0, 1.0))
+        o = LID_OPEN
+        blink.key(J["eyelid_" + side], SY, (0, o), (2.30, o), (2.37, 1.0), (2.46, o),
+                  (4.60, o), (4.67, 1.0), (4.76, o), (6.0, o))
     sid = ids()
     layer("Blink", [f'<AnimationState animationId="{anim(blink)}" x="200" y="0" id="{sid}"/>'], sid)
 
@@ -323,8 +377,8 @@ def state_machine(contract: dict, J: dict, ids: Ids) -> tuple[list[str], str]:
 
     states = {
         2: pose("state_idle"),
-        4: pose("state_listening", tilt=math.radians(7), brow=-2.0),
-        5: pose("state_thinking", tilt=math.radians(-5), brow=-1.0, look_x=2.0, look_y=-2.2, orb=-8.0),
+        4: pose("state_listening", tilt=math.radians(5), brow=-2.0),
+        5: pose("state_thinking", tilt=math.radians(-4), brow=-1.0, look_x=2.0, look_y=-2.2, orb=-8.0),
         9: pose("state_speaking", tilt=math.radians(2), brow=-1.5),
     }
     sids = {code: ids() for code in states}
@@ -395,8 +449,11 @@ def state_machine(contract: dict, J: dict, ids: Ids) -> tuple[list[str], str]:
     wave.key(J["nod"], Y, (0, 0), (1.9, 0)).key(J["nod"], ROT, (0, 0), (0.3, -0.03), (1.55, -0.03), (1.9, 0))
 
     nod = Anim("action_ack_nod", int(1.2 * FPS))
-    nod.key(J["nod"], Y, (0, 0), (0.2, 7.0), (0.7, 7.0), (0.9, 1.0), (1.05, 4.0), (1.2, 0))
+    # A nod reads from the eyes as much as the head: lids half down with the chin.
+    nod.key(J["nod"], Y, (0, 0), (0.2, 4.0), (0.7, 4.0), (0.9, 1.0), (1.05, 2.5), (1.2, 0))
     nod.key(J["nod"], ROT, (0, 0), (0.2, 0.05), (0.7, 0.05), (1.2, 0))
+    for side in ("l", "r"):
+        nod.key(J["eyelid_" + side], SY, (0, LID_OPEN), (0.2, 0.5), (0.7, 0.5), (1.2, LID_OPEN))
     for j in arm:
         nod.key(J[j], ROT, (0, 0), (1.2, 0))
 
