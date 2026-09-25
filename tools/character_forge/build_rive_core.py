@@ -63,6 +63,8 @@ X, Y, ROT, SX, SY, OPACITY = 13, 14, 15, 16, 17, 18
 FPS = 60
 #: An open eyelid: folded almost flat onto the lash line (a zero scale would be singular).
 LID_OPEN = 0.02
+#: How far the closed lash line sags from the eye's corners towards its lower edge.
+CLOSED_LASH_SAG = 0.5
 #: Rest local position of every keyed joint. Keyframes on x/y are absolute local positions,
 #: so the rig keys offsets from rest and this adds the rest back when writing them.
 REST_XY: dict[str, tuple[float, float]] = {}
@@ -341,9 +343,13 @@ def eyelid_xml(side: str, opening, pos, joint: str, lid: dict, asset: str) -> st
     """The upper lid: her painted skin over the eye, hung from the top of the opening, closed at
     scaleY=1, with the closed lash line along the opening's lower edge."""
     rel = [(x - pos[0], y - pos[1]) for x, y in opening]
-    mid = (max(y for _x, y in rel) + min(y for _x, y in rel)) / 2
-    lower = sorted((p for p in rel if p[1] >= mid), key=lambda p: p[0])
-    lash = "".join(f'<StraightVertex x="{num(x)}" y="{num(y)}"/>' for x, y in lower)
+    # The closed lash line: a smooth arc between the eye's corners, sagging part of the way to
+    # the opening's lower edge (following the opening's own outline drew an angular U).
+    left, right = min(rel), max(rel)
+    sag = CLOSED_LASH_SAG * (max(y for _x, y in rel) - (left[1] + right[1]) / 2)
+    arc = [(left[0] + (right[0] - left[0]) * t, left[1] + (right[1] - left[1]) * t + 4 * sag * t * (1 - t))
+           for t in (i / 16 for i in range(17))]
+    lash = "".join(f'<StraightVertex x="{num(x)}" y="{num(y)}"/>' for x, y in arc)
     cx = lid["offset_px"][0] + lid["size_px"][0] / 2.0 - pos[0]
     cy = lid["offset_px"][1] + lid["size_px"][1] / 2.0 - pos[1]
     return (f'<Node name="follow_eyelid_{side}"><TransformConstraint targetId="{joint}" name="c"/>'
