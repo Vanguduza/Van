@@ -100,7 +100,7 @@ PYHOOK
     owner-briefing google-workspace google-intelligence gemini-notebook google-design google-development
     project-steering research decision-support document-work notification-triage
     infrastructure-diagnostics hermes-administration trading-intelligence
-    automation-fabric browser-intelligence
+    automation-fabric browser-intelligence jev-management
   )
   for s in "${skills[@]}"; do check_file "${TARGET_ROOT}/skills/${s}/SKILL.md" "skill ${s}"; done
 
