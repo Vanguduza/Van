@@ -57,6 +57,7 @@ fun JevControlRoute(app: VanApplication, onBack: () -> Unit) {
     var activityItems by remember { mutableStateOf<List<JevActivityItem>>(emptyList()) }
     var performance by remember { mutableStateOf<JevPerformance?>(null) }
     var selectedContribution by remember { mutableStateOf<JevContribution?>(null) }
+    var selectedSafety by remember { mutableStateOf<JevSafetySnapshot?>(null) }
     var evaluationProposals by remember { mutableStateOf<List<JevEvaluationProposal>>(emptyList()) }
     var evaluationReviews by remember { mutableStateOf<List<JevEvaluationReview>>(emptyList()) }
     var candidateRevisions by remember { mutableStateOf<List<JevCandidateRevision>>(emptyList()) }
@@ -104,6 +105,14 @@ fun JevControlRoute(app: VanApplication, onBack: () -> Unit) {
             runCatching { repository.contribution(projectFor(module), module.id) }
                 .onSuccess { selectedContribution = it; error = null }
                 .onFailure { error = it.message ?: "Contribution evidence unavailable" }
+        }
+    }
+
+    fun loadSafety(module: JevModule) {
+        scope.launch {
+            runCatching { repository.safety(projectFor(module), module.id) }
+                .onSuccess { selectedSafety = it; error = null }
+                .onFailure { error = it.message ?: "Safety evidence unavailable" }
         }
     }
 
@@ -173,8 +182,14 @@ fun JevControlRoute(app: VanApplication, onBack: () -> Unit) {
                 selectedModule != null -> ModuleDetail(
                     module = selectedModule!!,
                     contribution = selectedContribution,
-                    onBack = { selectedModule = null; selectedContribution = null },
+                    safety = selectedSafety,
+                    onBack = {
+                        selectedModule = null
+                        selectedContribution = null
+                        selectedSafety = null
+                    },
                     onLoadContribution = { loadContribution(selectedModule!!) },
+                    onLoadSafety = { loadSafety(selectedModule!!) },
                     onTransition = { target ->
                         ownerCommand("set jev module ${selectedModule!!.id} to $target", projectFor(selectedModule!!))
                     },
@@ -183,6 +198,8 @@ fun JevControlRoute(app: VanApplication, onBack: () -> Unit) {
                 tabIndex == JevTab.MODULES.ordinal -> Modules(snapshot!!.modules) {
                     selectedModule = it
                     selectedContribution = null
+                    selectedSafety = null
+                    loadSafety(it)
                 }
                 tabIndex == JevTab.ACTIVITY.ordinal -> Activity(activityProject, activityItems) { activityProject = it }
                 tabIndex == JevTab.VALUE.ordinal -> Value(
@@ -195,6 +212,7 @@ fun JevControlRoute(app: VanApplication, onBack: () -> Unit) {
                     onSelect = { module ->
                         selectedModule = module
                         loadContribution(module)
+                        loadSafety(module)
                     },
                     onEvaluate = ::requestEvaluation,
                 )
