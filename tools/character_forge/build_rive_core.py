@@ -25,11 +25,14 @@ How the rig is made, and why:
   HELLO_WAVE (1), ACK_NOD (2), POINT_TARGET (7), each by trigger or by ``action_code``; gaze
   from ``attention_x/y``; blinks; ``mouth_open`` and visemes 0–4; breathing; orb drift. Any
   other state value holds IDLE. The artboard is transparent and carries no aura.
-* **Two small parts are drawn, not cut.** Candidate B's mouth is a closed smile and her eyes
-  are open, so the mouth interior (dark mouth, tongue, teeth; sized per viseme, opened by
-  ``mouth_open``) and the upper eyelids (the eye opening filled with the skin sampled around
-  it, lash-edged, sliding down to blink) are small vector shapes. Everything else is Candidate
-  B's own pixels.
+* **Two parts she was never painted with.** Candidate B's mouth is a closed smile and her
+  eyes are open. The mouth interior (dark mouth, tongue, teeth; sized per viseme, opened by
+  ``mouth_open``) is a small vector shape. The upper eyelids are her own skin painted over
+  each eye by ``build_eyelids`` (``02-ai-working/rig``, pinned by hash), hung from the top of
+  the opening with the closed lash line along their lower edge, and sliding down to blink. A
+  few lash pixels of the open eye sit in the goggle-frame and hair layers, in front of any
+  lid; a small patch of lid covers them only while the lid is down. Everything else is
+  Candidate B's own pixels.
 
     python3 -m tools.character_forge.build_rive_core
 """
@@ -52,6 +55,7 @@ FEATURES = ROOT / "visual-authority" / "character-forge" / "03-masks" / "candida
 PIVOTS = ROOT / "visual-authority" / "character-forge" / "00-source" / "reference-pack" / "RIG_PIVOTS.yaml"
 CONTRACT = ROOT / "visual-authority" / "rive_contract.json"
 PROJECT = ROOT / "visual-authority" / "character-forge" / "09-rive-working" / "rml" / "van_core"
+EYELIDS = ROOT / "visual-authority" / "character-forge" / "02-ai-working" / "rig"
 
 X, Y, ROT, SX, SY, OPACITY = 13, 14, 15, 16, 17, 18
 FPS = 60
@@ -60,6 +64,10 @@ LID_OPEN = 0.02
 #: Rest local position of every keyed joint. Keyframes on x/y are absolute local positions,
 #: so the rig keys offsets from rest and this adds the rest back when writing them.
 REST_XY: dict[str, tuple[float, float]] = {}
+#: POINT_TARGET's held pose: right shoulder, elbow and wrist rotation (radians).
+POINT_POSE = (-1.2, -1.1, -0.15)
+#: Every pose must keep the whole figure this far (px) inside the artboard.
+FRAME_MARGIN = 24
 
 #: Which joint each admitted layer follows.
 FOLLOWS = {
@@ -238,9 +246,22 @@ def build(project: Path = PROJECT) -> dict:
             f'<Shape name="eye_opening_{side}" id="{shape_id}"><PointsPath isClosed="true" name="p">{verts}</PointsPath></Shape></Node>')
 
     inner_mouth = inner_mouth_xml(world["mouth_open"], joint_id["mouth_open"])
-    eyelids = {side: eyelid_xml(side, feats["eyes"][side]["opening"], world["eyelid_" + side],
-                                joint_id["eyelid_" + side], lid_skin(side, feats, manifest))
-               for side in ("l", "r")}
+    lids = load_eyelids(manifest)
+    eyelids, overs = {}, []
+    for side in ("l", "r"):
+        lid = lids[side]
+        for key, row in (("eyelid_" + side, lid), ("eyelid_over_" + side, lid.get("over"))):
+            if row is None:
+                continue
+            shutil.copyfile(EYELIDS / row["file"], project / "layers" / row["file"])
+            asset_id[key] = ids()
+            assets.append(f'<ImageAsset {attrs(file="layers/" + row["file"], name=key, id=asset_id[key])}/>')
+        eyelids[side] = eyelid_xml(side, feats["eyes"][side]["opening"], world["eyelid_" + side],
+                                   joint_id["eyelid_" + side], lid, asset_id["eyelid_" + side])
+        if "over" in lid:
+            joint_id["eyelid_over_" + side] = ids()
+            overs.append(eyelid_over_xml(side, lid["over"], world["head"], joint_id["head"],
+                                         joint_id["eyelid_over_" + side], asset_id["eyelid_over_" + side]))
     for r in reversed(drawn):  # front to back: the first sibling draws on top
         name = r["name"]
         joint = FOLLOWS[name]
@@ -255,6 +276,8 @@ def build(project: Path = PROJECT) -> dict:
             drawables.append(inner_mouth)  # above the mouth layer, beneath the lens
         if name.startswith("lid_"):
             drawables.insert(len(drawables) - 1, eyelids[name[-1]])  # in front of the lash line
+        if name == "hair":
+            drawables[-1:-1] = overs  # in front of the frame and hair, which hold the strays
 
     animations, machine = state_machine(contract, joint_id, ids)
 
@@ -273,51 +296,62 @@ def build(project: Path = PROJECT) -> dict:
             "animations": len(animations), "joints": len(rig.joints)}
 
 
-def lid_skin(side: str, feats: dict, manifest: dict) -> str:
-    """ARGB of the upper-lid skin: the band just above the eye opening in the approved art, with
-    the lens tint taken off (the lens layer draws over the lid and puts it back)."""
-    from PIL import Image, ImageDraw, ImageFilter  # a forge-host dependency, like the layer builder
-
-    src = Image.open(ROOT / manifest["source"]).convert("RGBA")
-    pts = feats["eyes"][side]["opening"]
-    near, far = Image.new("L", src.size, 0), Image.new("L", src.size, 0)
-    ImageDraw.Draw(near).polygon(pts, fill=255, outline=255)
-    ImageDraw.Draw(far).polygon(pts, fill=255, outline=255)
-    near = near.filter(ImageFilter.MaxFilter(3))
-    far = far.filter(ImageFilter.MaxFilter(9))
-    top = min(y for _x, y in pts)
-    cy = feats["eyes"][side]["iris"]["cy"]
-    xs = [x for x, _y in pts]
-    skin = []
-    for y in range(int(top) - 5, int(cy)):
-        for x in range(int(min(xs)), int(max(xs)) + 1):
-            r, g, b, a = src.getpixel((x, y))
-            if far.getpixel((x, y)) and not near.getpixel((x, y)) and a == 255 and r > b and r + g + b > 300:
-                skin.append((r, g, b))
-    if not skin:
-        raise ValueError(f"no lid skin sampled above eye {side}")
-    med = [sorted(c)[len(c) // 2] / 255.0 for c in zip(*skin)]
-    lens = json.loads((LAYER_SET / "LAYERS.json").read_text(encoding="utf-8"))["lens"]
-    tint = [int(lens["tint"][i:i + 2], 16) / 255.0 for i in (1, 3, 5)]
-    a = float(lens["alpha_max"])
-    rgb = [min(1.0, max(0.0, (c - a * t) / (1 - a))) for c, t in zip(med, tint)]
-    return "FF" + "".join(f"{round(c * 255):02X}" for c in rgb)
+def arm_extent(manifest: dict, pivots: dict, side: str, pose: tuple[float, float, float]) -> tuple[float, float, float, float]:
+    """Bounding box (x0, x1, y0, y1) of one arm's layer rectangles with its shoulder, elbow and
+    wrist rotated by ``pose`` (radians): forward kinematics over the rig's pivots."""
+    layers = {r["name"]: r for r in manifest["layers"]}
+    chain = [("shoulder", pose[0]), ("elbow", pose[1]), ("wrist", pose[2])]
+    xs, ys = [], []
+    for part, depth in ((f"arm_{side}_upper", 1), (f"arm_{side}_fore", 2), (f"hand_{side}", 3)):
+        x, y = layers[part]["offset_px"]
+        w, h = layers[part]["size_px"]
+        pts = [(x, y), (x + w, y), (x, y + h), (x + w, y + h)]
+        for joint, angle in reversed(chain[:depth]):
+            cx, cy = pivots[f"{joint}_{side}"]
+            c, s = math.cos(angle), math.sin(angle)
+            pts = [(cx + (px - cx) * c - (py - cy) * s, cy + (px - cx) * s + (py - cy) * c) for px, py in pts]
+        xs += [p[0] for p in pts]
+        ys += [p[1] for p in pts]
+    return min(xs), max(xs), min(ys), max(ys)
 
 
-def eyelid_xml(side: str, opening, pos, joint: str, skin: str) -> str:
-    """The upper lid: the eye opening filled with skin, hung from its top edge, closed at scaleY=1,
-    with the closed lash line along its lower edge."""
+def load_eyelids(manifest: dict) -> dict:
+    """The painted upper lids (``build_eyelids``), checked against their record and the art."""
+    record = json.loads((EYELIDS / "EYELIDS.json").read_text(encoding="utf-8"))
+    source = hashlib.sha256((ROOT / manifest["source"]).read_bytes()).hexdigest()
+    if record["source_sha256"] != source:
+        raise ValueError("EYELIDS.json was painted from another source than the admitted layer set")
+    for side in ("l", "r"):
+        lid = record["lids"][side]
+        for row in (lid, lid.get("over")):
+            if row and hashlib.sha256((EYELIDS / row["file"]).read_bytes()).hexdigest() != row["sha256"]:
+                raise ValueError(f"{row['file']}: does not match EYELIDS.json")
+    return record["lids"]
+
+
+def eyelid_xml(side: str, opening, pos, joint: str, lid: dict, asset: str) -> str:
+    """The upper lid: her painted skin over the eye, hung from the top of the opening, closed at
+    scaleY=1, with the closed lash line along the opening's lower edge."""
     rel = [(x - pos[0], y - pos[1]) for x, y in opening]
-    verts = "".join(f'<StraightVertex x="{num(x)}" y="{num(y)}"/>' for x, y in rel)
     mid = (max(y for _x, y in rel) + min(y for _x, y in rel)) / 2
     lower = sorted((p for p in rel if p[1] >= mid), key=lambda p: p[0])
     lash = "".join(f'<StraightVertex x="{num(x)}" y="{num(y)}"/>' for x, y in lower)
+    cx = lid["offset_px"][0] + lid["size_px"][0] / 2.0 - pos[0]
+    cy = lid["offset_px"][1] + lid["size_px"][1] / 2.0 - pos[1]
     return (f'<Node name="follow_eyelid_{side}"><TransformConstraint targetId="{joint}" name="c"/>'
             f'<Node name="eyelid_{side}_hinge">'
             f'<Shape name="eyelid_{side}_lash"><PointsPath isClosed="false" name="p">{lash}</PointsPath>'
             f'<Stroke thickness="1.6" cap="round" join="round" name="lash"><SolidColor colorValue="FF2B1714" name="c"/></Stroke></Shape>'
-            f'<Shape name="eyelid_{side}"><PointsPath isClosed="true" name="p">{verts}</PointsPath>'
-            f'<Fill name="skin"><SolidColor colorValue="{skin}" name="c"/></Fill></Shape></Node></Node>')
+            f'<Image {attrs(x=num(cx), y=num(cy), assetId=asset, name="eyelid_" + side)}/></Node></Node>')
+
+
+def eyelid_over_xml(side: str, over: dict, head, joint: str, node_id: str, asset: str) -> str:
+    """The lid seen through the lens, over the open eye's lash pixels in the frame and hair
+    layers; hidden (opacity 0) except while the lid is down."""
+    cx = over["offset_px"][0] + over["size_px"][0] / 2.0 - head[0]
+    cy = over["offset_px"][1] + over["size_px"][1] / 2.0 - head[1]
+    return (f'<Node name="follow_eyelid_over_{side}" opacity="0" id="{node_id}"><TransformConstraint targetId="{joint}" name="c"/>'
+            f'<Image {attrs(x=num(cx), y=num(cy), assetId=asset, name="eyelid_over_" + side)}/></Node>')
 
 
 def inner_mouth_xml(pos, joint) -> str:
@@ -377,6 +411,9 @@ def state_machine(contract: dict, J: dict, ids: Ids) -> tuple[list[str], str]:
         o = LID_OPEN
         blink.key(J["eyelid_" + side], SY, (0, o), (2.30, o), (2.37, 1.0), (2.46, o),
                   (4.60, o), (4.67, 1.0), (4.76, o), (6.0, o))
+        if "eyelid_over_" + side in J:
+            blink.key(J["eyelid_over_" + side], OPACITY, (0, 0.0), (2.33, 0.0), (2.37, 1.0), (2.42, 0.0),
+                      (4.63, 0.0), (4.67, 1.0), (4.72, 0.0), (6.0, 0.0))
     sid = ids()
     layer("Blink", [f'<AnimationState animationId="{anim(blink)}" x="200" y="0" id="{sid}"/>'], sid)
 
@@ -475,13 +512,17 @@ def state_machine(contract: dict, J: dict, ids: Ids) -> tuple[list[str], str]:
     nod.key(J["nod"], ROT, (0, 0), (0.2, 0.05), (0.7, 0.05), (1.2, 0))
     for side in ("l", "r"):
         nod.key(J["eyelid_" + side], SY, (0, LID_OPEN), (0.2, 0.5), (0.7, 0.5), (1.2, LID_OPEN))
+        if "eyelid_over_" + side in J:
+            nod.key(J["eyelid_over_" + side], OPACITY, (0, 0.0), (0.2, 1.0), (0.7, 1.0), (1.2, 0.0))
     for j in arm:
         nod.key(J[j], ROT, (0, 0), (1.2, 0))
 
     point = Anim("action_point_target", int(1.8 * FPS))
-    point.key(J["shoulder_r"], ROT, (0, 0), (0.25, -1.25), (1.45, -1.25), (1.8, 0))
-    point.key(J["elbow_r"], ROT, (0, 0), (0.25, -0.2), (1.45, -0.2), (1.8, 0))
-    point.key(J["wrist_r"], ROT, (0, 0), (0.25, -0.15), (1.45, -0.15), (1.8, 0))
+    # Up and out along a diagonal, the forearm raised: a straight arm out to the side put the
+    # hand within a few pixels of the artboard edge, so framing cut it off.
+    point.key(J["shoulder_r"], ROT, (0, 0), (0.25, POINT_POSE[0]), (1.45, POINT_POSE[0]), (1.8, 0))
+    point.key(J["elbow_r"], ROT, (0, 0), (0.25, POINT_POSE[1]), (1.45, POINT_POSE[1]), (1.8, 0))
+    point.key(J["wrist_r"], ROT, (0, 0), (0.25, POINT_POSE[2]), (1.45, POINT_POSE[2]), (1.8, 0))
     point.key(J["nod"], Y, (0, 0), (1.8, 0)).key(J["nod"], ROT, (0, 0), (0.25, 0.04), (1.45, 0.04), (1.8, 0))
 
     none_sid = ids()

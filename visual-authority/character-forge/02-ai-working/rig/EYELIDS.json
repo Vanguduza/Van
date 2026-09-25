@@ -1,0 +1,60 @@
+{
+  "model": "big-lama",
+  "model_sha256": "7ba7aa7ac37a4d41fdbbeba3a2af7ead18058552997e3a3cd1a3b2210c9e6b4c",
+  "source_sha256": "a0d62bf492950bcef23d01390940cb64cfc4e91d55356c61c97c293637502193",
+  "lid_grow_px": 2,
+  "lids": {
+    "r": {
+      "method": "big-lama",
+      "file": "eyelid_r.png",
+      "offset_px": [
+        296,
+        134
+      ],
+      "size_px": [
+        44,
+        39
+      ],
+      "sha256": "f919210cc3656125143dc2e43e4a3ebda8e9eae4f078c0f58c9fd96f040b9bb6",
+      "over": {
+        "file": "eyelid_r_over.png",
+        "offset_px": [
+          306,
+          136
+        ],
+        "size_px": [
+          32,
+          21
+        ],
+        "pixels": 41,
+        "sha256": "3d99e1490b151f229aaa21c589b307f7bb3570e3ff9795b813a8f650e270ceef"
+      }
+    },
+    "l": {
+      "method": "mirror_of_r",
+      "file": "eyelid_l.png",
+      "offset_px": [
+        233,
+        144
+      ],
+      "size_px": [
+        47,
+        35
+      ],
+      "sha256": "7e7f5063dddc7b7a4b2a61072146efb789aae72625f8e117344e44d93c717370",
+      "over": {
+        "file": "eyelid_l_over.png",
+        "offset_px": [
+          243,
+          146
+        ],
+        "size_px": [
+          32,
+          31
+        ],
+        "pixels": 50,
+        "sha256": "77b30507310272c697fafeb6a78670049bf05907e0e4da9ae5e8c05e9e1d4bdc"
+      }
+    }
+  }
+}

@@ -3,6 +3,8 @@
 <LayoutComponentStyle name="Artboard Style" id="0:12"/>
 <Node name="follow_orb_core"><TransformConstraint targetId="0:42" name="c"/><Image x="14.0099" y="0.9743" assetId="0:74" name="orb_core"></Image></Node>
 <Node name="follow_orb_shell"><TransformConstraint targetId="0:42" name="c"/><Image x="1.0099" y="1.4743" assetId="0:73" name="orb_shell"></Image></Node>
+<Node name="follow_eyelid_over_l" opacity="0" id="0:79"><TransformConstraint targetId="0:21" name="c"/><Image x="-27.4783" y="-57.0205" assetId="0:78" name="eyelid_over_l"/></Node>
+<Node name="follow_eyelid_over_r" opacity="0" id="0:82"><TransformConstraint targetId="0:21" name="c"/><Image x="35.5217" y="-72.0205" assetId="0:81" name="eyelid_over_r"/></Node>
 <Node name="follow_hair"><TransformConstraint targetId="0:21" name="c"/><Image x="1.5217" y="-103.0205" assetId="0:72" name="hair"></Image></Node>
 <Node name="follow_visor_frame"><TransformConstraint targetId="0:21" name="c"/><Image x="1.5217" y="-63.5205" assetId="0:71" name="visor_frame"></Image></Node>
 <Node name="follow_visor_lens"><TransformConstraint targetId="0:21" name="c"/><Image x="7.5217" y="-62.5205" assetId="0:70" name="visor_lens"></Image></Node>
@@ -10,11 +12,11 @@
 <Node name="follow_mouth"><TransformConstraint targetId="0:32" name="c"/><Image x="1.6818" y="0.5" assetId="0:69" name="mouth"></Image></Node>
 <Node name="follow_brow_r"><TransformConstraint targetId="0:31" name="c"/><Image x="-0.6667" y="1" assetId="0:68" name="brow_r"></Image></Node>
 <Node name="follow_brow_l"><TransformConstraint targetId="0:30" name="c"/><Image x="2.1" y="0.6" assetId="0:67" name="brow_l"></Image></Node>
-<Node name="follow_eyelid_r"><TransformConstraint targetId="0:25" name="c"/><Node name="eyelid_r_hinge"><Shape name="eyelid_r_lash"><PointsPath isClosed="false" name="p"><StraightVertex x="-17" y="14"/><StraightVertex x="-16" y="20"/><StraightVertex x="-13" y="25"/><StraightVertex x="-6" y="28"/><StraightVertex x="5" y="28"/><StraightVertex x="13" y="24"/><StraightVertex x="17" y="17"/></PointsPath><Stroke thickness="1.6" cap="round" join="round" name="lash"><SolidColor colorValue="FF2B1714" name="c"/></Stroke></Shape><Shape name="eyelid_r"><PointsPath isClosed="true" name="p"><StraightVertex x="-17" y="14"/><StraightVertex x="-14" y="7"/><StraightVertex x="-8" y="2"/><StraightVertex x="0" y="0"/><StraightVertex x="8" y="2"/><StraightVertex x="14" y="5"/><StraightVertex x="17" y="10"/><StraightVertex x="17" y="17"/><StraightVertex x="13" y="24"/><StraightVertex x="5" y="28"/><StraightVertex x="-6" y="28"/><StraightVertex x="-13" y="25"/><StraightVertex x="-16" y="20"/></PointsPath><Fill name="skin"><SolidColor colorValue="FF996B65" name="c"/></Fill></Shape></Node></Node>
+<Node name="follow_eyelid_r"><TransformConstraint targetId="0:25" name="c"/><Node name="eyelid_r_hinge"><Shape name="eyelid_r_lash"><PointsPath isClosed="false" name="p"><StraightVertex x="-17" y="14"/><StraightVertex x="-16" y="20"/><StraightVertex x="-13" y="25"/><StraightVertex x="-6" y="28"/><StraightVertex x="5" y="28"/><StraightVertex x="13" y="24"/><StraightVertex x="17" y="17"/></PointsPath><Stroke thickness="1.6" cap="round" join="round" name="lash"><SolidColor colorValue="FF2B1714" name="c"/></Stroke></Shape><Image x="1" y="14.5" assetId="0:80" name="eyelid_r"/></Node></Node>
 <Node name="follow_lid_r"><TransformConstraint targetId="0:23" name="c"/><Image x="0.5" y="-5.4" assetId="0:66" name="lid_r"></Image></Node>
 <Node name="follow_eye_r"><TransformConstraint targetId="0:29" name="c"/><Image x="0.5" y="0.5" assetId="0:65" name="eye_r"><ClippingShape sourceId="0:76" name="clip"/></Image></Node>
 <Node name="follow_sclera_r"><TransformConstraint targetId="0:23" name="c"/><Image x="2" y="-0.9" assetId="0:64" name="sclera_r"></Image></Node>
-<Node name="follow_eyelid_l"><TransformConstraint targetId="0:24" name="c"/><Node name="eyelid_l_hinge"><Shape name="eyelid_l_lash"><PointsPath isClosed="false" name="p"><StraightVertex x="-16.3077" y="15"/><StraightVertex x="-12.3077" y="21"/><StraightVertex x="-5.3077" y="24"/><StraightVertex x="4.6923" y="25"/><StraightVertex x="12.6923" y="22"/><StraightVertex x="16.6923" y="16"/></PointsPath><Stroke thickness="1.6" cap="round" join="round" name="lash"><SolidColor colorValue="FF2B1714" name="c"/></Stroke></Shape><Shape name="eyelid_l"><PointsPath isClosed="true" name="p"><StraightVertex x="-17.3077" y="9"/><StraightVertex x="-14.3077" y="4"/><StraightVertex x="-8.3077" y="1"/><StraightVertex x="0.6923" y="0"/><StraightVertex x="8.6923" y="1"/><StraightVertex x="13.6923" y="4"/><StraightVertex x="16.6923" y="9"/><StraightVertex x="16.6923" y="16"/><StraightVertex x="12.6923" y="22"/><StraightVertex x="4.6923" y="25"/><StraightVertex x="-5.3077" y="24"/><StraightVertex x="-12.3077" y="21"/><StraightVertex x="-16.3077" y="15"/></PointsPath><Fill name="skin"><SolidColor colorValue="FF7F5654" name="c"/></Fill></Shape></Node></Node>
+<Node name="follow_eyelid_l"><TransformConstraint targetId="0:24" name="c"/><Node name="eyelid_l_hinge"><Shape name="eyelid_l_lash"><PointsPath isClosed="false" name="p"><StraightVertex x="-16.3077" y="15"/><StraightVertex x="-12.3077" y="21"/><StraightVertex x="-5.3077" y="24"/><StraightVertex x="4.6923" y="25"/><StraightVertex x="12.6923" y="22"/><StraightVertex x="16.6923" y="16"/></PointsPath><Stroke thickness="1.6" cap="round" join="round" name="lash"><SolidColor colorValue="FF2B1714" name="c"/></Stroke></Shape><Image x="1.1923" y="12.5" assetId="0:77" name="eyelid_l"/></Node></Node>
 <Node name="follow_lid_l"><TransformConstraint targetId="0:22" name="c"/><Image x="-0.3077" y="-2.25" assetId="0:63" name="lid_l"></Image></Node>
 <Node name="follow_eye_l"><TransformConstraint targetId="0:28" name="c"/><Image x="-1" y="-2.5" assetId="0:62" name="eye_l"><ClippingShape sourceId="0:75" name="clip"/></Image></Node>
 <Node name="follow_sclera_l"><TransformConstraint targetId="0:22" name="c"/><Image x="-0.3077" y="-1.25" assetId="0:61" name="sclera_l"></Image></Node>
@@ -86,75 +88,75 @@
   </Node>
 </Node>
 <StateMachine name="VanRuntime" id="0:13">
-  <StateMachineNumber name="state" value="2" id="0:77"/>
-  <StateMachineBool name="speaking" id="0:78"/>
-  <StateMachineBool name="listening" id="0:79"/>
-  <StateMachineNumber name="attention_x" value="0" id="0:80"/>
-  <StateMachineNumber name="attention_y" value="0" id="0:81"/>
-  <StateMachineNumber name="mouth_open" value="0" id="0:82"/>
-  <StateMachineNumber name="urgency" value="0" id="0:83"/>
-  <StateMachineNumber name="viseme" value="0" id="0:84"/>
-  <StateMachineNumber name="action_code" value="0" id="0:85"/>
-  <StateMachineTrigger name="point" id="0:86"/>
-  <StateMachineTrigger name="ack" id="0:87"/>
-  <StateMachineTrigger name="celebrate" id="0:88"/>
-  <StateMachineTrigger name="warning" id="0:89"/>
-  <StateMachineTrigger name="wave" id="0:90"/>
-  <StateMachineTrigger name="shrug" id="0:91"/>
-  <StateMachineTrigger name="present" id="0:92"/>
-  <StateMachineTrigger name="panel" id="0:93"/>
-  <StateMachineLayer name="Breathe" id="0:96">
-    <AnyState x="600" y="-120"/><ExitState x="800" y="-120"/>
-    <EntryState x="0" y="-120"><StateTransition stateToId="0:94"/></EntryState>
-    <AnimationState animationId="0:95" x="200" y="0" id="0:94"/>
-  </StateMachineLayer>
-  <StateMachineLayer name="Blink" id="0:99">
-    <AnyState x="600" y="-120"/><ExitState x="800" y="-120"/>
-    <EntryState x="0" y="-120"><StateTransition stateToId="0:97"/></EntryState>
-    <AnimationState animationId="0:98" x="200" y="0" id="0:97"/>
-  </StateMachineLayer>
-  <StateMachineLayer name="State" id="0:108">
+  <StateMachineNumber name="state" value="2" id="0:83"/>
+  <StateMachineBool name="speaking" id="0:84"/>
+  <StateMachineBool name="listening" id="0:85"/>
+  <StateMachineNumber name="attention_x" value="0" id="0:86"/>
+  <StateMachineNumber name="attention_y" value="0" id="0:87"/>
+  <StateMachineNumber name="mouth_open" value="0" id="0:88"/>
+  <StateMachineNumber name="urgency" value="0" id="0:89"/>
+  <StateMachineNumber name="viseme" value="0" id="0:90"/>
+  <StateMachineNumber name="action_code" value="0" id="0:91"/>
+  <StateMachineTrigger name="point" id="0:92"/>
+  <StateMachineTrigger name="ack" id="0:93"/>
+  <StateMachineTrigger name="celebrate" id="0:94"/>
+  <StateMachineTrigger name="warning" id="0:95"/>
+  <StateMachineTrigger name="wave" id="0:96"/>
+  <StateMachineTrigger name="shrug" id="0:97"/>
+  <StateMachineTrigger name="present" id="0:98"/>
+  <StateMachineTrigger name="panel" id="0:99"/>
+  <StateMachineLayer name="Breathe" id="0:102">
     <AnyState x="600" y="-120"/><ExitState x="800" y="-120"/>
     <EntryState x="0" y="-120"><StateTransition stateToId="0:100"/></EntryState>
-    <AnimationState animationId="0:104" x="200" y="0" id="0:100"><StateTransition stateToId="0:101" duration="300"><TransitionNumberCondition inputId="0:77" opValue="equal" value="4"/></StateTransition><StateTransition stateToId="0:102" duration="300"><TransitionNumberCondition inputId="0:77" opValue="equal" value="5"/></StateTransition><StateTransition stateToId="0:103" duration="300"><TransitionNumberCondition inputId="0:77" opValue="equal" value="9"/></StateTransition></AnimationState>
-    <AnimationState animationId="0:105" x="400" y="0" id="0:101"><StateTransition stateToId="0:100" duration="300"><TransitionNumberCondition inputId="0:77" opValue="notEqual" value="4"/><TransitionNumberCondition inputId="0:77" opValue="notEqual" value="5"/><TransitionNumberCondition inputId="0:77" opValue="notEqual" value="9"/></StateTransition><StateTransition stateToId="0:102" duration="300"><TransitionNumberCondition inputId="0:77" opValue="equal" value="5"/></StateTransition><StateTransition stateToId="0:103" duration="300"><TransitionNumberCondition inputId="0:77" opValue="equal" value="9"/></StateTransition></AnimationState>
-    <AnimationState animationId="0:106" x="600" y="0" id="0:102"><StateTransition stateToId="0:100" duration="300"><TransitionNumberCondition inputId="0:77" opValue="notEqual" value="4"/><TransitionNumberCondition inputId="0:77" opValue="notEqual" value="5"/><TransitionNumberCondition inputId="0:77" opValue="notEqual" value="9"/></StateTransition><StateTransition stateToId="0:101" duration="300"><TransitionNumberCondition inputId="0:77" opValue="equal" value="4"/></StateTransition><StateTransition stateToId="0:103" duration="300"><TransitionNumberCondition inputId="0:77" opValue="equal" value="9"/></StateTransition></AnimationState>
-    <AnimationState animationId="0:107" x="800" y="0" id="0:103"><StateTransition stateToId="0:100" duration="300"><TransitionNumberCondition inputId="0:77" opValue="notEqual" value="4"/><TransitionNumberCondition inputId="0:77" opValue="notEqual" value="5"/><TransitionNumberCondition inputId="0:77" opValue="notEqual" value="9"/></StateTransition><StateTransition stateToId="0:101" duration="300"><TransitionNumberCondition inputId="0:77" opValue="equal" value="4"/></StateTransition><StateTransition stateToId="0:102" duration="300"><TransitionNumberCondition inputId="0:77" opValue="equal" value="5"/></StateTransition></AnimationState>
+    <AnimationState animationId="0:101" x="200" y="0" id="0:100"/>
   </StateMachineLayer>
-  <StateMachineLayer name="Gaze x" id="0:113">
+  <StateMachineLayer name="Blink" id="0:105">
     <AnyState x="600" y="-120"/><ExitState x="800" y="-120"/>
-    <EntryState x="0" y="-120"><StateTransition stateToId="0:109"/></EntryState>
-    <BlendState1DInput inputId="0:80" x="200" y="0" id="0:109"><BlendAnimation1D animationId="0:110" value="-1"/><BlendAnimation1D animationId="0:111" value="0"/><BlendAnimation1D animationId="0:112" value="1"/></BlendState1DInput>
+    <EntryState x="0" y="-120"><StateTransition stateToId="0:103"/></EntryState>
+    <AnimationState animationId="0:104" x="200" y="0" id="0:103"/>
   </StateMachineLayer>
-  <StateMachineLayer name="Gaze y" id="0:118">
+  <StateMachineLayer name="State" id="0:114">
     <AnyState x="600" y="-120"/><ExitState x="800" y="-120"/>
-    <EntryState x="0" y="-120"><StateTransition stateToId="0:114"/></EntryState>
-    <BlendState1DInput inputId="0:81" x="200" y="0" id="0:114"><BlendAnimation1D animationId="0:115" value="-1"/><BlendAnimation1D animationId="0:116" value="0"/><BlendAnimation1D animationId="0:117" value="1"/></BlendState1DInput>
+    <EntryState x="0" y="-120"><StateTransition stateToId="0:106"/></EntryState>
+    <AnimationState animationId="0:110" x="200" y="0" id="0:106"><StateTransition stateToId="0:107" duration="300"><TransitionNumberCondition inputId="0:83" opValue="equal" value="4"/></StateTransition><StateTransition stateToId="0:108" duration="300"><TransitionNumberCondition inputId="0:83" opValue="equal" value="5"/></StateTransition><StateTransition stateToId="0:109" duration="300"><TransitionNumberCondition inputId="0:83" opValue="equal" value="9"/></StateTransition></AnimationState>
+    <AnimationState animationId="0:111" x="400" y="0" id="0:107"><StateTransition stateToId="0:106" duration="300"><TransitionNumberCondition inputId="0:83" opValue="notEqual" value="4"/><TransitionNumberCondition inputId="0:83" opValue="notEqual" value="5"/><TransitionNumberCondition inputId="0:83" opValue="notEqual" value="9"/></StateTransition><StateTransition stateToId="0:108" duration="300"><TransitionNumberCondition inputId="0:83" opValue="equal" value="5"/></StateTransition><StateTransition stateToId="0:109" duration="300"><TransitionNumberCondition inputId="0:83" opValue="equal" value="9"/></StateTransition></AnimationState>
+    <AnimationState animationId="0:112" x="600" y="0" id="0:108"><StateTransition stateToId="0:106" duration="300"><TransitionNumberCondition inputId="0:83" opValue="notEqual" value="4"/><TransitionNumberCondition inputId="0:83" opValue="notEqual" value="5"/><TransitionNumberCondition inputId="0:83" opValue="notEqual" value="9"/></StateTransition><StateTransition stateToId="0:107" duration="300"><TransitionNumberCondition inputId="0:83" opValue="equal" value="4"/></StateTransition><StateTransition stateToId="0:109" duration="300"><TransitionNumberCondition inputId="0:83" opValue="equal" value="9"/></StateTransition></AnimationState>
+    <AnimationState animationId="0:113" x="800" y="0" id="0:109"><StateTransition stateToId="0:106" duration="300"><TransitionNumberCondition inputId="0:83" opValue="notEqual" value="4"/><TransitionNumberCondition inputId="0:83" opValue="notEqual" value="5"/><TransitionNumberCondition inputId="0:83" opValue="notEqual" value="9"/></StateTransition><StateTransition stateToId="0:107" duration="300"><TransitionNumberCondition inputId="0:83" opValue="equal" value="4"/></StateTransition><StateTransition stateToId="0:108" duration="300"><TransitionNumberCondition inputId="0:83" opValue="equal" value="5"/></StateTransition></AnimationState>
   </StateMachineLayer>
-  <StateMachineLayer name="Viseme" id="0:129">
+  <StateMachineLayer name="Gaze x" id="0:119">
     <AnyState x="600" y="-120"/><ExitState x="800" y="-120"/>
-    <EntryState x="0" y="-120"><StateTransition stateToId="0:119"/></EntryState>
-    <AnimationState animationId="0:124" x="200" y="0" id="0:119"><StateTransition stateToId="0:120" duration="60"><TransitionNumberCondition inputId="0:84" opValue="equal" value="1"/></StateTransition><StateTransition stateToId="0:121" duration="60"><TransitionNumberCondition inputId="0:84" opValue="equal" value="2"/></StateTransition><StateTransition stateToId="0:122" duration="60"><TransitionNumberCondition inputId="0:84" opValue="equal" value="3"/></StateTransition><StateTransition stateToId="0:123" duration="60"><TransitionNumberCondition inputId="0:84" opValue="equal" value="4"/></StateTransition></AnimationState>
-    <AnimationState animationId="0:125" x="400" y="0" id="0:120"><StateTransition stateToId="0:119" duration="60"><TransitionNumberCondition inputId="0:84" opValue="equal" value="0"/></StateTransition><StateTransition stateToId="0:121" duration="60"><TransitionNumberCondition inputId="0:84" opValue="equal" value="2"/></StateTransition><StateTransition stateToId="0:122" duration="60"><TransitionNumberCondition inputId="0:84" opValue="equal" value="3"/></StateTransition><StateTransition stateToId="0:123" duration="60"><TransitionNumberCondition inputId="0:84" opValue="equal" value="4"/></StateTransition></AnimationState>
-    <AnimationState animationId="0:126" x="600" y="0" id="0:121"><StateTransition stateToId="0:119" duration="60"><TransitionNumberCondition inputId="0:84" opValue="equal" value="0"/></StateTransition><StateTransition stateToId="0:120" duration="60"><TransitionNumberCondition inputId="0:84" opValue="equal" value="1"/></StateTransition><StateTransition stateToId="0:122" duration="60"><TransitionNumberCondition inputId="0:84" opValue="equal" value="3"/></StateTransition><StateTransition stateToId="0:123" duration="60"><TransitionNumberCondition inputId="0:84" opValue="equal" value="4"/></StateTransition></AnimationState>
-    <AnimationState animationId="0:127" x="800" y="0" id="0:122"><StateTransition stateToId="0:119" duration="60"><TransitionNumberCondition inputId="0:84" opValue="equal" value="0"/></StateTransition><StateTransition stateToId="0:120" duration="60"><TransitionNumberCondition inputId="0:84" opValue="equal" value="1"/></StateTransition><StateTransition stateToId="0:121" duration="60"><TransitionNumberCondition inputId="0:84" opValue="equal" value="2"/></StateTransition><StateTransition stateToId="0:123" duration="60"><TransitionNumberCondition inputId="0:84" opValue="equal" value="4"/></StateTransition></AnimationState>
-    <AnimationState animationId="0:128" x="1000" y="0" id="0:123"><StateTransition stateToId="0:119" duration="60"><TransitionNumberCondition inputId="0:84" opValue="equal" value="0"/></StateTransition><StateTransition stateToId="0:120" duration="60"><TransitionNumberCondition inputId="0:84" opValue="equal" value="1"/></StateTransition><StateTransition stateToId="0:121" duration="60"><TransitionNumberCondition inputId="0:84" opValue="equal" value="2"/></StateTransition><StateTransition stateToId="0:122" duration="60"><TransitionNumberCondition inputId="0:84" opValue="equal" value="3"/></StateTransition></AnimationState>
+    <EntryState x="0" y="-120"><StateTransition stateToId="0:115"/></EntryState>
+    <BlendState1DInput inputId="0:86" x="200" y="0" id="0:115"><BlendAnimation1D animationId="0:116" value="-1"/><BlendAnimation1D animationId="0:117" value="0"/><BlendAnimation1D animationId="0:118" value="1"/></BlendState1DInput>
   </StateMachineLayer>
-  <StateMachineLayer name="Mouth" id="0:133">
+  <StateMachineLayer name="Gaze y" id="0:124">
     <AnyState x="600" y="-120"/><ExitState x="800" y="-120"/>
-    <EntryState x="0" y="-120"><StateTransition stateToId="0:130"/></EntryState>
-    <BlendState1DInput inputId="0:82" x="200" y="0" id="0:130"><BlendAnimation1D animationId="0:131" value="0"/><BlendAnimation1D animationId="0:132" value="1"/></BlendState1DInput>
+    <EntryState x="0" y="-120"><StateTransition stateToId="0:120"/></EntryState>
+    <BlendState1DInput inputId="0:87" x="200" y="0" id="0:120"><BlendAnimation1D animationId="0:121" value="-1"/><BlendAnimation1D animationId="0:122" value="0"/><BlendAnimation1D animationId="0:123" value="1"/></BlendState1DInput>
   </StateMachineLayer>
-  <StateMachineLayer name="Action" id="0:142">
+  <StateMachineLayer name="Viseme" id="0:135">
     <AnyState x="600" y="-120"/><ExitState x="800" y="-120"/>
-    <EntryState x="0" y="-120"><StateTransition stateToId="0:134"/></EntryState>
-    <AnimationState animationId="0:138" x="200" y="0" id="0:134"><StateTransition stateToId="0:135" duration="80"><TransitionTriggerCondition inputId="0:90"/></StateTransition><StateTransition stateToId="0:135" duration="80"><TransitionNumberCondition inputId="0:85" opValue="equal" value="1"/></StateTransition><StateTransition stateToId="0:136" duration="80"><TransitionTriggerCondition inputId="0:87"/></StateTransition><StateTransition stateToId="0:136" duration="80"><TransitionNumberCondition inputId="0:85" opValue="equal" value="2"/></StateTransition><StateTransition stateToId="0:137" duration="80"><TransitionTriggerCondition inputId="0:86"/></StateTransition><StateTransition stateToId="0:137" duration="80"><TransitionNumberCondition inputId="0:85" opValue="equal" value="7"/></StateTransition></AnimationState>
-    <AnimationState animationId="0:139" reset="true" x="400" y="160" id="0:135"><StateTransition stateToId="0:134" duration="120" enableExitTime="true" exitTimeIsPercetange="true" exitTime="100"/></AnimationState>
-    <AnimationState animationId="0:140" reset="true" x="600" y="160" id="0:136"><StateTransition stateToId="0:134" duration="120" enableExitTime="true" exitTimeIsPercetange="true" exitTime="100"/></AnimationState>
-    <AnimationState animationId="0:141" reset="true" x="800" y="160" id="0:137"><StateTransition stateToId="0:134" duration="120" enableExitTime="true" exitTimeIsPercetange="true" exitTime="100"/></AnimationState>
+    <EntryState x="0" y="-120"><StateTransition stateToId="0:125"/></EntryState>
+    <AnimationState animationId="0:130" x="200" y="0" id="0:125"><StateTransition stateToId="0:126" duration="60"><TransitionNumberCondition inputId="0:90" opValue="equal" value="1"/></StateTransition><StateTransition stateToId="0:127" duration="60"><TransitionNumberCondition inputId="0:90" opValue="equal" value="2"/></StateTransition><StateTransition stateToId="0:128" duration="60"><TransitionNumberCondition inputId="0:90" opValue="equal" value="3"/></StateTransition><StateTransition stateToId="0:129" duration="60"><TransitionNumberCondition inputId="0:90" opValue="equal" value="4"/></StateTransition></AnimationState>
+    <AnimationState animationId="0:131" x="400" y="0" id="0:126"><StateTransition stateToId="0:125" duration="60"><TransitionNumberCondition inputId="0:90" opValue="equal" value="0"/></StateTransition><StateTransition stateToId="0:127" duration="60"><TransitionNumberCondition inputId="0:90" opValue="equal" value="2"/></StateTransition><StateTransition stateToId="0:128" duration="60"><TransitionNumberCondition inputId="0:90" opValue="equal" value="3"/></StateTransition><StateTransition stateToId="0:129" duration="60"><TransitionNumberCondition inputId="0:90" opValue="equal" value="4"/></StateTransition></AnimationState>
+    <AnimationState animationId="0:132" x="600" y="0" id="0:127"><StateTransition stateToId="0:125" duration="60"><TransitionNumberCondition inputId="0:90" opValue="equal" value="0"/></StateTransition><StateTransition stateToId="0:126" duration="60"><TransitionNumberCondition inputId="0:90" opValue="equal" value="1"/></StateTransition><StateTransition stateToId="0:128" duration="60"><TransitionNumberCondition inputId="0:90" opValue="equal" value="3"/></StateTransition><StateTransition stateToId="0:129" duration="60"><TransitionNumberCondition inputId="0:90" opValue="equal" value="4"/></StateTransition></AnimationState>
+    <AnimationState animationId="0:133" x="800" y="0" id="0:128"><StateTransition stateToId="0:125" duration="60"><TransitionNumberCondition inputId="0:90" opValue="equal" value="0"/></StateTransition><StateTransition stateToId="0:126" duration="60"><TransitionNumberCondition inputId="0:90" opValue="equal" value="1"/></StateTransition><StateTransition stateToId="0:127" duration="60"><TransitionNumberCondition inputId="0:90" opValue="equal" value="2"/></StateTransition><StateTransition stateToId="0:129" duration="60"><TransitionNumberCondition inputId="0:90" opValue="equal" value="4"/></StateTransition></AnimationState>
+    <AnimationState animationId="0:134" x="1000" y="0" id="0:129"><StateTransition stateToId="0:125" duration="60"><TransitionNumberCondition inputId="0:90" opValue="equal" value="0"/></StateTransition><StateTransition stateToId="0:126" duration="60"><TransitionNumberCondition inputId="0:90" opValue="equal" value="1"/></StateTransition><StateTransition stateToId="0:127" duration="60"><TransitionNumberCondition inputId="0:90" opValue="equal" value="2"/></StateTransition><StateTransition stateToId="0:128" duration="60"><TransitionNumberCondition inputId="0:90" opValue="equal" value="3"/></StateTransition></AnimationState>
+  </StateMachineLayer>
+  <StateMachineLayer name="Mouth" id="0:139">
+    <AnyState x="600" y="-120"/><ExitState x="800" y="-120"/>
+    <EntryState x="0" y="-120"><StateTransition stateToId="0:136"/></EntryState>
+    <BlendState1DInput inputId="0:88" x="200" y="0" id="0:136"><BlendAnimation1D animationId="0:137" value="0"/><BlendAnimation1D animationId="0:138" value="1"/></BlendState1DInput>
+  </StateMachineLayer>
+  <StateMachineLayer name="Action" id="0:148">
+    <AnyState x="600" y="-120"/><ExitState x="800" y="-120"/>
+    <EntryState x="0" y="-120"><StateTransition stateToId="0:140"/></EntryState>
+    <AnimationState animationId="0:144" x="200" y="0" id="0:140"><StateTransition stateToId="0:141" duration="80"><TransitionTriggerCondition inputId="0:96"/></StateTransition><StateTransition stateToId="0:141" duration="80"><TransitionNumberCondition inputId="0:91" opValue="equal" value="1"/></StateTransition><StateTransition stateToId="0:142" duration="80"><TransitionTriggerCondition inputId="0:93"/></StateTransition><StateTransition stateToId="0:142" duration="80"><TransitionNumberCondition inputId="0:91" opValue="equal" value="2"/></StateTransition><StateTransition stateToId="0:143" duration="80"><TransitionTriggerCondition inputId="0:92"/></StateTransition><StateTransition stateToId="0:143" duration="80"><TransitionNumberCondition inputId="0:91" opValue="equal" value="7"/></StateTransition></AnimationState>
+    <AnimationState animationId="0:145" reset="true" x="400" y="160" id="0:141"><StateTransition stateToId="0:140" duration="120" enableExitTime="true" exitTimeIsPercetange="true" exitTime="100"/></AnimationState>
+    <AnimationState animationId="0:146" reset="true" x="600" y="160" id="0:142"><StateTransition stateToId="0:140" duration="120" enableExitTime="true" exitTimeIsPercetange="true" exitTime="100"/></AnimationState>
+    <AnimationState animationId="0:147" reset="true" x="800" y="160" id="0:143"><StateTransition stateToId="0:140" duration="120" enableExitTime="true" exitTimeIsPercetange="true" exitTime="100"/></AnimationState>
   </StateMachineLayer>
 </StateMachine>
-<LinearAnimation loopValue="loop" fps="60" duration="240" name="idle_breathe" id="0:95">
+<LinearAnimation loopValue="loop" fps="60" duration="240" name="idle_breathe" id="0:101">
   <KeyedObject objectId="0:16">
     <KeyedProperty propertyKey="17">
       <KeyFrameDouble value="1" frame="0" interpolationType="cubic"><CubicEaseInterpolator x1="0.42" y1="0" x2="0.58" y2="1"/></KeyFrameDouble>
@@ -182,7 +184,7 @@
     </KeyedProperty>
   </KeyedObject>
 </LinearAnimation>
-<LinearAnimation loopValue="loop" fps="60" duration="360" name="blink" id="0:98">
+<LinearAnimation loopValue="loop" fps="60" duration="360" name="blink" id="0:104">
   <KeyedObject objectId="0:24">
     <KeyedProperty propertyKey="17">
       <KeyFrameDouble value="0.02" frame="0" interpolationType="cubic"><CubicEaseInterpolator x1="0.42" y1="0" x2="0.58" y2="1"/></KeyFrameDouble>
@@ -193,6 +195,18 @@
       <KeyFrameDouble value="1" frame="280" interpolationType="cubic"><CubicEaseInterpolator x1="0.42" y1="0" x2="0.58" y2="1"/></KeyFrameDouble>
       <KeyFrameDouble value="0.02" frame="286" interpolationType="cubic"><CubicEaseInterpolator x1="0.42" y1="0" x2="0.58" y2="1"/></KeyFrameDouble>
       <KeyFrameDouble value="0.02" frame="360"/>
+    </KeyedProperty>
+  </KeyedObject>
+  <KeyedObject objectId="0:79">
+    <KeyedProperty propertyKey="18">
+      <KeyFrameDouble value="0" frame="0" interpolationType="cubic"><CubicEaseInterpolator x1="0.42" y1="0" x2="0.58" y2="1"/></KeyFrameDouble>
+      <KeyFrameDouble value="0" frame="140" interpolationType="cubic"><CubicEaseInterpolator x1="0.42" y1="0" x2="0.58" y2="1"/></KeyFrameDouble>
+      <KeyFrameDouble value="1" frame="142" interpolationType="cubic"><CubicEaseInterpolator x1="0.42" y1="0" x2="0.58" y2="1"/></KeyFrameDouble>
+      <KeyFrameDouble value="0" frame="145" interpolationType="cubic"><CubicEaseInterpolator x1="0.42" y1="0" x2="0.58" y2="1"/></KeyFrameDouble>
+      <KeyFrameDouble value="0" frame="278" interpolationType="cubic"><CubicEaseInterpolator x1="0.42" y1="0" x2="0.58" y2="1"/></KeyFrameDouble>
+      <KeyFrameDouble value="1" frame="280" interpolationType="cubic"><CubicEaseInterpolator x1="0.42" y1="0" x2="0.58" y2="1"/></KeyFrameDouble>
+      <KeyFrameDouble value="0" frame="283" interpolationType="cubic"><CubicEaseInterpolator x1="0.42" y1="0" x2="0.58" y2="1"/></KeyFrameDouble>
+      <KeyFrameDouble value="0" frame="360"/>
     </KeyedProperty>
   </KeyedObject>
   <KeyedObject objectId="0:25">
@@ -207,8 +221,20 @@
       <KeyFrameDouble value="0.02" frame="360"/>
     </KeyedProperty>
   </KeyedObject>
+  <KeyedObject objectId="0:82">
+    <KeyedProperty propertyKey="18">
+      <KeyFrameDouble value="0" frame="0" interpolationType="cubic"><CubicEaseInterpolator x1="0.42" y1="0" x2="0.58" y2="1"/></KeyFrameDouble>
+      <KeyFrameDouble value="0" frame="140" interpolationType="cubic"><CubicEaseInterpolator x1="0.42" y1="0" x2="0.58" y2="1"/></KeyFrameDouble>
+      <KeyFrameDouble value="1" frame="142" interpolationType="cubic"><CubicEaseInterpolator x1="0.42" y1="0" x2="0.58" y2="1"/></KeyFrameDouble>
+      <KeyFrameDouble value="0" frame="145" interpolationType="cubic"><CubicEaseInterpolator x1="0.42" y1="0" x2="0.58" y2="1"/></KeyFrameDouble>
+      <KeyFrameDouble value="0" frame="278" interpolationType="cubic"><CubicEaseInterpolator x1="0.42" y1="0" x2="0.58" y2="1"/></KeyFrameDouble>
+      <KeyFrameDouble value="1" frame="280" interpolationType="cubic"><CubicEaseInterpolator x1="0.42" y1="0" x2="0.58" y2="1"/></KeyFrameDouble>
+      <KeyFrameDouble value="0" frame="283" interpolationType="cubic"><CubicEaseInterpolator x1="0.42" y1="0" x2="0.58" y2="1"/></KeyFrameDouble>
+      <KeyFrameDouble value="0" frame="360"/>
+    </KeyedProperty>
+  </KeyedObject>
 </LinearAnimation>
-<LinearAnimation loopValue="oneShot" fps="60" duration="1" name="state_idle" id="0:104">
+<LinearAnimation loopValue="oneShot" fps="60" duration="1" name="state_idle" id="0:110">
   <KeyedObject objectId="0:18">
     <KeyedProperty propertyKey="15">
       <KeyFrameDouble value="0" frame="0"/>
@@ -246,7 +272,7 @@
     </KeyedProperty>
   </KeyedObject>
 </LinearAnimation>
-<LinearAnimation loopValue="oneShot" fps="60" duration="1" name="state_listening" id="0:105">
+<LinearAnimation loopValue="oneShot" fps="60" duration="1" name="state_listening" id="0:111">
   <KeyedObject objectId="0:18">
     <KeyedProperty propertyKey="15">
       <KeyFrameDouble value="0.0873" frame="0"/>
@@ -284,7 +310,7 @@
     </KeyedProperty>
   </KeyedObject>
 </LinearAnimation>
-<LinearAnimation loopValue="oneShot" fps="60" duration="1" name="state_thinking" id="0:106">
+<LinearAnimation loopValue="oneShot" fps="60" duration="1" name="state_thinking" id="0:112">
   <KeyedObject objectId="0:18">
     <KeyedProperty propertyKey="15">
       <KeyFrameDouble value="-0.0698" frame="0"/>
@@ -322,7 +348,7 @@
     </KeyedProperty>
   </KeyedObject>
 </LinearAnimation>
-<LinearAnimation loopValue="oneShot" fps="60" duration="1" name="state_speaking" id="0:107">
+<LinearAnimation loopValue="oneShot" fps="60" duration="1" name="state_speaking" id="0:113">
   <KeyedObject objectId="0:18">
     <KeyedProperty propertyKey="15">
       <KeyFrameDouble value="0.0349" frame="0"/>
@@ -360,7 +386,7 @@
     </KeyedProperty>
   </KeyedObject>
 </LinearAnimation>
-<LinearAnimation loopValue="oneShot" fps="60" duration="1" name="gaze_x_neg" id="0:110">
+<LinearAnimation loopValue="oneShot" fps="60" duration="1" name="gaze_x_neg" id="0:116">
   <KeyedObject objectId="0:28">
     <KeyedProperty propertyKey="13">
       <KeyFrameDouble value="-3.5" frame="0"/>
@@ -377,7 +403,7 @@
     </KeyedProperty>
   </KeyedObject>
 </LinearAnimation>
-<LinearAnimation loopValue="oneShot" fps="60" duration="1" name="gaze_x_mid" id="0:111">
+<LinearAnimation loopValue="oneShot" fps="60" duration="1" name="gaze_x_mid" id="0:117">
   <KeyedObject objectId="0:28">
     <KeyedProperty propertyKey="13">
       <KeyFrameDouble value="0" frame="0"/>
@@ -394,7 +420,7 @@
     </KeyedProperty>
   </KeyedObject>
 </LinearAnimation>
-<LinearAnimation loopValue="oneShot" fps="60" duration="1" name="gaze_x_pos" id="0:112">
+<LinearAnimation loopValue="oneShot" fps="60" duration="1" name="gaze_x_pos" id="0:118">
   <KeyedObject objectId="0:28">
     <KeyedProperty propertyKey="13">
       <KeyFrameDouble value="3.5" frame="0"/>
@@ -411,7 +437,7 @@
     </KeyedProperty>
   </KeyedObject>
 </LinearAnimation>
-<LinearAnimation loopValue="oneShot" fps="60" duration="1" name="gaze_y_neg" id="0:115">
+<LinearAnimation loopValue="oneShot" fps="60" duration="1" name="gaze_y_neg" id="0:121">
   <KeyedObject objectId="0:28">
     <KeyedProperty propertyKey="14">
       <KeyFrameDouble value="-2" frame="0"/>
@@ -423,7 +449,7 @@
     </KeyedProperty>
   </KeyedObject>
 </LinearAnimation>
-<LinearAnimation loopValue="oneShot" fps="60" duration="1" name="gaze_y_mid" id="0:116">
+<LinearAnimation loopValue="oneShot" fps="60" duration="1" name="gaze_y_mid" id="0:122">
   <KeyedObject objectId="0:28">
     <KeyedProperty propertyKey="14">
       <KeyFrameDouble value="0" frame="0"/>
@@ -435,7 +461,7 @@
     </KeyedProperty>
   </KeyedObject>
 </LinearAnimation>
-<LinearAnimation loopValue="oneShot" fps="60" duration="1" name="gaze_y_pos" id="0:117">
+<LinearAnimation loopValue="oneShot" fps="60" duration="1" name="gaze_y_pos" id="0:123">
   <KeyedObject objectId="0:28">
     <KeyedProperty propertyKey="14">
       <KeyFrameDouble value="2" frame="0"/>
@@ -447,42 +473,42 @@
     </KeyedProperty>
   </KeyedObject>
 </LinearAnimation>
-<LinearAnimation loopValue="oneShot" fps="60" duration="1" name="viseme_0" id="0:124">
+<LinearAnimation loopValue="oneShot" fps="60" duration="1" name="viseme_0" id="0:130">
   <KeyedObject objectId="0:33">
     <KeyedProperty propertyKey="16">
       <KeyFrameDouble value="0.55" frame="0"/>
     </KeyedProperty>
   </KeyedObject>
 </LinearAnimation>
-<LinearAnimation loopValue="oneShot" fps="60" duration="1" name="viseme_1" id="0:125">
+<LinearAnimation loopValue="oneShot" fps="60" duration="1" name="viseme_1" id="0:131">
   <KeyedObject objectId="0:33">
     <KeyedProperty propertyKey="16">
       <KeyFrameDouble value="1" frame="0"/>
     </KeyedProperty>
   </KeyedObject>
 </LinearAnimation>
-<LinearAnimation loopValue="oneShot" fps="60" duration="1" name="viseme_2" id="0:126">
+<LinearAnimation loopValue="oneShot" fps="60" duration="1" name="viseme_2" id="0:132">
   <KeyedObject objectId="0:33">
     <KeyedProperty propertyKey="16">
       <KeyFrameDouble value="1.15" frame="0"/>
     </KeyedProperty>
   </KeyedObject>
 </LinearAnimation>
-<LinearAnimation loopValue="oneShot" fps="60" duration="1" name="viseme_3" id="0:127">
+<LinearAnimation loopValue="oneShot" fps="60" duration="1" name="viseme_3" id="0:133">
   <KeyedObject objectId="0:33">
     <KeyedProperty propertyKey="16">
       <KeyFrameDouble value="0.6" frame="0"/>
     </KeyedProperty>
   </KeyedObject>
 </LinearAnimation>
-<LinearAnimation loopValue="oneShot" fps="60" duration="1" name="viseme_4" id="0:128">
+<LinearAnimation loopValue="oneShot" fps="60" duration="1" name="viseme_4" id="0:134">
   <KeyedObject objectId="0:33">
     <KeyedProperty propertyKey="16">
       <KeyFrameDouble value="0.45" frame="0"/>
     </KeyedProperty>
   </KeyedObject>
 </LinearAnimation>
-<LinearAnimation loopValue="oneShot" fps="60" duration="1" name="mouth_closed" id="0:131">
+<LinearAnimation loopValue="oneShot" fps="60" duration="1" name="mouth_closed" id="0:137">
   <KeyedObject objectId="0:34">
     <KeyedProperty propertyKey="17">
       <KeyFrameDouble value="0" frame="0"/>
@@ -497,7 +523,7 @@
     </KeyedProperty>
   </KeyedObject>
 </LinearAnimation>
-<LinearAnimation loopValue="oneShot" fps="60" duration="1" name="mouth_open" id="0:132">
+<LinearAnimation loopValue="oneShot" fps="60" duration="1" name="mouth_open" id="0:138">
   <KeyedObject objectId="0:34">
     <KeyedProperty propertyKey="17">
       <KeyFrameDouble value="1" frame="0"/>
@@ -512,7 +538,7 @@
     </KeyedProperty>
   </KeyedObject>
 </LinearAnimation>
-<LinearAnimation loopValue="oneShot" fps="60" duration="1" name="action_none" id="0:138">
+<LinearAnimation loopValue="oneShot" fps="60" duration="1" name="action_none" id="0:144">
   <KeyedObject objectId="0:38">
     <KeyedProperty propertyKey="15">
       <KeyFrameDouble value="0" frame="0"/>
@@ -537,7 +563,7 @@
     </KeyedProperty>
   </KeyedObject>
 </LinearAnimation>
-<LinearAnimation loopValue="oneShot" fps="60" duration="114" name="action_hello_wave" id="0:139">
+<LinearAnimation loopValue="oneShot" fps="60" duration="114" name="action_hello_wave" id="0:145">
   <KeyedObject objectId="0:38">
     <KeyedProperty propertyKey="15">
       <KeyFrameDouble value="0" frame="0" interpolationType="cubic"><CubicEaseInterpolator x1="0.42" y1="0" x2="0.58" y2="1"/></KeyFrameDouble>
@@ -580,7 +606,7 @@
     </KeyedProperty>
   </KeyedObject>
 </LinearAnimation>
-<LinearAnimation loopValue="oneShot" fps="60" duration="72" name="action_ack_nod" id="0:140">
+<LinearAnimation loopValue="oneShot" fps="60" duration="72" name="action_ack_nod" id="0:146">
   <KeyedObject objectId="0:19">
     <KeyedProperty propertyKey="14">
       <KeyFrameDouble value="0" frame="0" interpolationType="cubic"><CubicEaseInterpolator x1="0.42" y1="0" x2="0.58" y2="1"/></KeyFrameDouble>
@@ -605,12 +631,28 @@
       <KeyFrameDouble value="0.02" frame="72"/>
     </KeyedProperty>
   </KeyedObject>
+  <KeyedObject objectId="0:79">
+    <KeyedProperty propertyKey="18">
+      <KeyFrameDouble value="0" frame="0" interpolationType="cubic"><CubicEaseInterpolator x1="0.42" y1="0" x2="0.58" y2="1"/></KeyFrameDouble>
+      <KeyFrameDouble value="1" frame="12" interpolationType="cubic"><CubicEaseInterpolator x1="0.42" y1="0" x2="0.58" y2="1"/></KeyFrameDouble>
+      <KeyFrameDouble value="1" frame="42" interpolationType="cubic"><CubicEaseInterpolator x1="0.42" y1="0" x2="0.58" y2="1"/></KeyFrameDouble>
+      <KeyFrameDouble value="0" frame="72"/>
+    </KeyedProperty>
+  </KeyedObject>
   <KeyedObject objectId="0:25">
     <KeyedProperty propertyKey="17">
       <KeyFrameDouble value="0.02" frame="0" interpolationType="cubic"><CubicEaseInterpolator x1="0.42" y1="0" x2="0.58" y2="1"/></KeyFrameDouble>
       <KeyFrameDouble value="0.5" frame="12" interpolationType="cubic"><CubicEaseInterpolator x1="0.42" y1="0" x2="0.58" y2="1"/></KeyFrameDouble>
       <KeyFrameDouble value="0.5" frame="42" interpolationType="cubic"><CubicEaseInterpolator x1="0.42" y1="0" x2="0.58" y2="1"/></KeyFrameDouble>
       <KeyFrameDouble value="0.02" frame="72"/>
+    </KeyedProperty>
+  </KeyedObject>
+  <KeyedObject objectId="0:82">
+    <KeyedProperty propertyKey="18">
+      <KeyFrameDouble value="0" frame="0" interpolationType="cubic"><CubicEaseInterpolator x1="0.42" y1="0" x2="0.58" y2="1"/></KeyFrameDouble>
+      <KeyFrameDouble value="1" frame="12" interpolationType="cubic"><CubicEaseInterpolator x1="0.42" y1="0" x2="0.58" y2="1"/></KeyFrameDouble>
+      <KeyFrameDouble value="1" frame="42" interpolationType="cubic"><CubicEaseInterpolator x1="0.42" y1="0" x2="0.58" y2="1"/></KeyFrameDouble>
+      <KeyFrameDouble value="0" frame="72"/>
     </KeyedProperty>
   </KeyedObject>
   <KeyedObject objectId="0:38">
@@ -632,20 +674,20 @@
     </KeyedProperty>
   </KeyedObject>
 </LinearAnimation>
-<LinearAnimation loopValue="oneShot" fps="60" duration="108" name="action_point_target" id="0:141">
+<LinearAnimation loopValue="oneShot" fps="60" duration="108" name="action_point_target" id="0:147">
   <KeyedObject objectId="0:38">
     <KeyedProperty propertyKey="15">
       <KeyFrameDouble value="0" frame="0" interpolationType="cubic"><CubicEaseInterpolator x1="0.42" y1="0" x2="0.58" y2="1"/></KeyFrameDouble>
-      <KeyFrameDouble value="-1.25" frame="15" interpolationType="cubic"><CubicEaseInterpolator x1="0.42" y1="0" x2="0.58" y2="1"/></KeyFrameDouble>
-      <KeyFrameDouble value="-1.25" frame="87" interpolationType="cubic"><CubicEaseInterpolator x1="0.42" y1="0" x2="0.58" y2="1"/></KeyFrameDouble>
+      <KeyFrameDouble value="-1.2" frame="15" interpolationType="cubic"><CubicEaseInterpolator x1="0.42" y1="0" x2="0.58" y2="1"/></KeyFrameDouble>
+      <KeyFrameDouble value="-1.2" frame="87" interpolationType="cubic"><CubicEaseInterpolator x1="0.42" y1="0" x2="0.58" y2="1"/></KeyFrameDouble>
       <KeyFrameDouble value="0" frame="108"/>
     </KeyedProperty>
   </KeyedObject>
   <KeyedObject objectId="0:39">
     <KeyedProperty propertyKey="15">
       <KeyFrameDouble value="0" frame="0" interpolationType="cubic"><CubicEaseInterpolator x1="0.42" y1="0" x2="0.58" y2="1"/></KeyFrameDouble>
-      <KeyFrameDouble value="-0.2" frame="15" interpolationType="cubic"><CubicEaseInterpolator x1="0.42" y1="0" x2="0.58" y2="1"/></KeyFrameDouble>
-      <KeyFrameDouble value="-0.2" frame="87" interpolationType="cubic"><CubicEaseInterpolator x1="0.42" y1="0" x2="0.58" y2="1"/></KeyFrameDouble>
+      <KeyFrameDouble value="-1.1" frame="15" interpolationType="cubic"><CubicEaseInterpolator x1="0.42" y1="0" x2="0.58" y2="1"/></KeyFrameDouble>
+      <KeyFrameDouble value="-1.1" frame="87" interpolationType="cubic"><CubicEaseInterpolator x1="0.42" y1="0" x2="0.58" y2="1"/></KeyFrameDouble>
       <KeyFrameDouble value="0" frame="108"/>
     </KeyedProperty>
   </KeyedObject>
@@ -703,4 +745,8 @@
 <ImageAsset file="layers/29_hair.png" name="hair" id="0:72"/>
 <ImageAsset file="layers/30_orb_shell.png" name="orb_shell" id="0:73"/>
 <ImageAsset file="layers/31_orb_core.png" name="orb_core" id="0:74"/>
+<ImageAsset file="layers/eyelid_l.png" name="eyelid_l" id="0:77"/>
+<ImageAsset file="layers/eyelid_l_over.png" name="eyelid_over_l" id="0:78"/>
+<ImageAsset file="layers/eyelid_r.png" name="eyelid_r" id="0:80"/>
+<ImageAsset file="layers/eyelid_r_over.png" name="eyelid_over_r" id="0:81"/>
 </Rive>
