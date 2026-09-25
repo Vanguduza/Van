@@ -154,6 +154,16 @@ artifacts:
   inputs:
   - layer_raster_set:67af011894d53660293ef2c60388ef45acf1a839eb2fe7f49f61f2554e0d0b1c
   - source:67b0390f51fff92de165a439a519dc9ac1f1b18896ed722d0ac94b748b5ecef0
+- artifact_id: riv_candidate:bc6466485a9fef2f178df99d8193494429a03aa704a022c8f97455914929f55c
+  kind: riv_candidate
+  path: visual-authority/character-forge/09-rive-working/van_core_03.riv
+  sha256: bc6466485a9fef2f178df99d8193494429a03aa704a022c8f97455914929f55c
+  stage: core_rig
+  promotion: CANDIDATE
+  produced_by: artist:claude-code-build_rive_core
+  inputs:
+  - layer_raster_set:67af011894d53660293ef2c60388ef45acf1a839eb2fe7f49f61f2554e0d0b1c
+  - source:67b0390f51fff92de165a439a519dc9ac1f1b18896ed722d0ac94b748b5ecef0
 reviews:
   layer_raster_set:
     sha256: 67af011894d53660293ef2c60388ef45acf1a839eb2fe7f49f61f2554e0d0b1c
@@ -296,6 +306,22 @@ receipts:
   outputs:
   - 4d1f8a969ae549dc2635c3522ae0335f7cf98d2a9418980c80d147ccaa75f18c
   timestamp: '2026-09-25T08:12:04.633243+00:00'
+- command: rive receipt
+  actor: claude-code
+  inputs:
+  - 67af011894d53660293ef2c60388ef45acf1a839eb2fe7f49f61f2554e0d0b1c
+  - 67b0390f51fff92de165a439a519dc9ac1f1b18896ed722d0ac94b748b5ecef0
+  - 4b165ee97a33020bf92af585f1acdc46d523f719e764d8af807ae756cb1ec819
+  outputs:
+  - bc6466485a9fef2f178df99d8193494429a03aa704a022c8f97455914929f55c
+  timestamp: '2026-09-25T08:49:11.412664+00:00'
+- command: rive stage-candidate
+  actor: claude-code
+  inputs:
+  - bc6466485a9fef2f178df99d8193494429a03aa704a022c8f97455914929f55c
+  outputs:
+  - bc6466485a9fef2f178df99d8193494429a03aa704a022c8f97455914929f55c
+  timestamp: '2026-09-25T08:49:11.618534+00:00'
 ci_evidence: {}
 decisions:
 - id: CF-D-02-REV2_1
