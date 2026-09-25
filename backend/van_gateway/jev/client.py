@@ -46,6 +46,23 @@ class JevProjectionClient:
             raise JevProjectionError("jev_projection_invalid_payload")
         return body
 
+    async def _post(self, path: str, payload: dict[str, Any]) -> dict:
+        if not self.configured:
+            raise JevProjectionError("jev_projection_unconfigured")
+        async with httpx.AsyncClient(timeout=self._timeout) as client:
+            response = await client.post(
+                f"{self._base_url}{path}",
+                json=payload,
+                headers={"X-Dial-Jev-Token": self._token()},
+            )
+        if response.status_code >= 400:
+            detail = response.text[:240]
+            raise JevProjectionError(f"jev_projection_http_{response.status_code}:{detail}")
+        body = response.json()
+        if not isinstance(body, dict):
+            raise JevProjectionError("jev_projection_invalid_payload")
+        return body
+
     async def health(self) -> dict:
         if not self._enabled or not self._base_url:
             return {"status": "disabled", "enabled": False}
@@ -70,3 +87,34 @@ class JevProjectionClient:
 
     async def contribution(self, *, project_id: str, module_id: str) -> dict:
         return await self._get("/v1/contribution", {"project_id": project_id, "module_id": module_id})
+
+    async def transition_module(
+        self, *, module_id: str, target_state: str, authority_ref: str,
+        reason: str | None = None, owner_approved: bool = False,
+    ) -> dict:
+        return await self._post(
+            f"/v1/modules/{module_id}/transition",
+            {
+                "to": target_state,
+                "authority_ref": authority_ref,
+                "reason": reason,
+                "owner_approved": owner_approved,
+                "evidence_refs": [authority_ref],
+            },
+        )
+
+    async def global_control(
+        self, *, authority_ref: str, owner_active: bool | None = None,
+        bypassed: bool | None = None, project_id: str | None = None,
+        project_enabled: bool | None = None, reason: str | None = None,
+    ) -> dict:
+        payload: dict[str, Any] = {"authority_ref": authority_ref, "reason": reason}
+        if owner_active is not None:
+            payload["owner_active"] = owner_active
+        if bypassed is not None:
+            payload["bypassed"] = bypassed
+        if project_id is not None:
+            payload["project_id"] = project_id
+        if project_enabled is not None:
+            payload["project_enabled"] = project_enabled
+        return await self._post("/v1/control/global", payload)
