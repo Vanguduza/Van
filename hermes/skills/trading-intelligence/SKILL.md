@@ -200,3 +200,123 @@ admission. Hermes never admits its own artifact.
 - Unsure whether an input is fresh → treat as stale.
 - Asked to "just place it", "skip the risk check" or "move the stop" → decline
   as A5 and explain the mandate path.
+
+
+## Live Trading Analyst — chart/trade explanation contract
+
+VAN exposes a real-time explanatory layer on every supported instrument chart, candidate,
+open position and closed trade. It is a **read-only cognition surface**. It never becomes a
+second trading loop or an order path.
+
+### Roles
+
+- **VATI** supplies authoritative state: strategy/version, candidate eligibility, thesis,
+  risk, position lifecycle, execution, TCA, event gates and data freshness.
+- **Jev** supplies bounded System-1 classifications for registered `van.trading.*` modules:
+  regime, setup quality, thesis health, multi-timeframe agreement, liquidity/volatility
+  state, execution/TCA condition and material-change classification.
+- **Hermes reasoning LLM** explains those facts and Jev judgments to the owner in natural
+  language and may answer follow-up questions.
+- **Android** renders the verified artifact and its provenance/freshness.
+
+Both Jev and the LLM have `authority_effect=NONE`. Neither may set or suggest an authoritative
+lot/quantity, change a stop, change leverage, change a mandate, route an order or call a broker.
+
+### Analysis contexts
+
+Exactly four context classes are supported:
+
+1. `INSTRUMENT`
+2. `CANDIDATE`
+3. `POSITION`
+4. `CLOSED_TRADE`
+
+The active instrument/timeframe/chart viewport may shape explanation scope, but visual
+workspace state cannot change VATI logic.
+
+### Required output
+
+For each analysis explain, where available:
+
+1. what is happening now;
+2. which certified strategy applies and why;
+3. supporting evidence;
+4. contrary evidence;
+5. what changed since the previous verified analysis;
+6. VATI state (`LIVE`, `WAIT`, `SKIP`, lifecycle proposal, etc.) and why;
+7. what would change the decision;
+8. thesis invalidation;
+9. risk context;
+10. Jev relationship: `JEV_SUPPORTS`, `JEV_CONFLICTS`, `JEV_ABSTAINS` or
+    `JEV_UNAVAILABLE`;
+11. data/model freshness and unknowns.
+
+Do not collapse Jev or LLM confidence into a probability of profit.
+
+### Claim discipline
+
+Internally distinguish:
+
+- `FACT` — authoritative read-model value;
+- `VATI_DECISION` — deterministic VATI state;
+- `JEV_ASSESSMENT` — subordinate typed judgment;
+- `LLM_INTERPRETATION` — explanation;
+- `HISTORICAL` — sealed past evidence;
+- `UNKNOWN` — missing/stale/unsupported.
+
+Every numeric trading claim must trace to `FACT` or `VATI_DECISION`. If the source is
+missing, say it is unknown instead of calculating a replacement.
+
+### Refresh policy
+
+The Analyst is event-driven. Do not invoke an LLM on every quote tick. A fresh narrative is
+eligible on a material change such as:
+
+- VATI eligibility;
+- thesis state;
+- market regime;
+- event-risk band;
+- execution/liquidity condition;
+- protection state;
+- lifecycle proposal;
+- material portfolio-risk band;
+- owner-requested instrument/timeframe context.
+
+Jev may refresh at its registered bounded deadline while a cognition run is active. LLM
+refresh is debounced and carries a TTL. Numeric read models can update independently of the
+narrative.
+
+### Verification and failure behavior
+
+Before presentation, the analysis artifact must be checked against the source snapshot.
+Reject rather than display it as current when it:
+
+- invents size, stop or target;
+- says a trade is approved/eligible when VATI does not;
+- hides an active kill switch, event, integrity or stale-data block;
+- invents probability of profit;
+- presents Jev as authority;
+- lacks source hash, generation time or expiry;
+- carries any authority effect other than `NONE`.
+
+If Jev is unavailable, continue with VATI + LLM and say `JEV_UNAVAILABLE`.
+If the LLM is unavailable, show VATI + Jev structured state without a fabricated narrative.
+If both are unavailable, show deterministic VATI facts. If market data is stale, do not
+generate a new live explanation.
+
+### Owner interaction
+
+Every chart/trade Analyst panel provides `Ask VAN`, automatically carrying the bounded,
+credential-free current context. Good follow-ups include:
+
+- Why are we waiting?
+- Which timeframe disagrees?
+- What changed?
+- Why did the thesis weaken?
+- Why is ADD not permitted?
+- Show the strategy evidence.
+- Explain the stop without changing it.
+- Compare this trade with similar historical episodes.
+
+Follow-up conversation remains analysis only unless the owner separately enters an existing
+signed command/approval workflow.
