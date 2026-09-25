@@ -44,6 +44,8 @@ from van_gateway.google.service import GoogleAuthError, GoogleService, NARROW_SC
 from van_gateway.google.transport import FakeGoogleTransport, GoogleHttpTransport, GoogleOAuthTokenClient
 from van_gateway.hermes.bridge import HermesBridge
 from van_gateway.idempotency.service import IdempotencyService
+from van_gateway.jev.client import JevProjectionClient
+from van_gateway.jev.api import JevProjectionApi
 from van_gateway.models import (
     ActionClass,
     AttentionSeverity,
@@ -434,6 +436,15 @@ def create_app() -> FastAPI:
     projects = ProjectRouter(store, project_registry_path)
     audit = AuditService(store)
     degraded = DegradedRegistry()
+    jev_projection = JevProjectionApi(
+        JevProjectionClient(
+            base_url=settings.jev_base_url,
+            token_file=settings.jev_control_token_file,
+            enabled=settings.jev_enabled,
+            timeout_seconds=settings.jev_timeout_seconds,
+        ),
+        degraded,
+    )
     attention = AttentionEngine(store, settings.attention_budget_per_hour)
     briefing = BriefingService(store, attention)
     reminders = ReminderService(store)
@@ -861,6 +872,7 @@ def create_app() -> FastAPI:
     app.state.owner_memory = owner_memory
     app.state.learning = learning
     app.state.degraded = degraded
+    app.state.jev_projection = jev_projection
     app.state.visual_acceptance = visual_acceptance
     # Exposed like `degraded`: which jobs a build actually installs is a property of
     # the running app, and a job list that exists only inside a closure is how
@@ -892,6 +904,7 @@ def create_app() -> FastAPI:
     app.state.onboarding = onboarding
     app.state.strategy_promotions = strategy_promotions
     app.include_router(owner_runtime.router)
+    app.include_router(jev_projection.router)
     app.include_router(automation_health.router)
     app.include_router(automation.router)
     app.include_router(temporal_automation.router)
