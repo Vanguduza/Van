@@ -173,6 +173,32 @@ BUILTIN_ACTIONS: tuple[ActionDefinition, ...] = (
         },
     ),
     ActionDefinition(
+        action_id="jev.module.transition",
+        action_class=ActionClass.A4,
+        mutates_state=True,
+        allowed_principals={PrincipalType.OWNER_DEVICE},
+        verifier_type=VerifierType.STATE_PREDICATE,
+        no_stale_replay=True,
+        max_age_seconds=30,
+        parameter_schema={
+            "required": ["module_id", "target_state"],
+            "properties": {"module_id": "string", "target_state": "string"},
+        },
+    ),
+    ActionDefinition(
+        action_id="jev.global.control",
+        action_class=ActionClass.A4,
+        mutates_state=True,
+        allowed_principals={PrincipalType.OWNER_DEVICE},
+        verifier_type=VerifierType.STATE_PREDICATE,
+        no_stale_replay=True,
+        max_age_seconds=30,
+        parameter_schema={
+            "required": ["operation"],
+            "properties": {"operation": "string", "project_id": "string"},
+        },
+    ),
+    ActionDefinition(
         action_id="secret.exfiltrate",
         action_class=ActionClass.A5,
         mutates_state=True,
