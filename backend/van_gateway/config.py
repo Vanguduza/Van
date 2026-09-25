@@ -80,9 +80,10 @@ class Settings(BaseSettings):
     # VAN reads only the private DIAL Jev control-plane service through a separate
     # server-side bearer file.
     jev_enabled: bool = False
-    jev_base_url: str = "http://127.0.0.1:8765"
+    jev_base_url: str = "http://127.0.0.1:6791"
     jev_control_token_file: str = ""
     jev_projection_token_file: str = ""
+    jev_consumer_token_file: str = ""
     jev_timeout_seconds: float = 5.0
 
     # Google Workspace OAuth. Refresh tokens are encrypted in SQLite; client secrets
