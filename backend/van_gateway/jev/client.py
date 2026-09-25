@@ -12,22 +12,27 @@ class JevProjectionError(RuntimeError):
 
 
 class JevProjectionClient:
-    def __init__(self, *, base_url: str, token_file: str, enabled: bool, timeout_seconds: float = 5.0):
+    def __init__(
+        self, *, base_url: str, read_token_file: str, control_token_file: str,
+        enabled: bool, timeout_seconds: float = 5.0,
+    ):
         self._base_url = base_url.rstrip("/")
-        self._token_file = token_file
+        self._read_token_file = read_token_file
+        self._control_token_file = control_token_file
         self._enabled = enabled
         self._timeout = timeout_seconds
 
     @property
     def configured(self) -> bool:
-        return self._enabled and bool(self._base_url) and bool(self._token_file)
+        return self._enabled and bool(self._base_url) and bool(self._read_token_file)
 
-    def _token(self) -> str:
-        if not self._token_file:
-            raise JevProjectionError("jev_token_file_unconfigured")
-        token = Path(self._token_file).read_text(encoding="utf-8").strip()
+    @staticmethod
+    def _token(path: str, *, kind: str) -> str:
+        if not path:
+            raise JevProjectionError(f"jev_{kind}_token_file_unconfigured")
+        token = Path(path).read_text(encoding="utf-8").strip()
         if not token:
-            raise JevProjectionError("jev_token_empty")
+            raise JevProjectionError(f"jev_{kind}_token_empty")
         return token
 
     async def _get(self, path: str, params: dict[str, Any] | None = None) -> dict:
@@ -37,7 +42,7 @@ class JevProjectionClient:
             response = await client.get(
                 f"{self._base_url}{path}",
                 params=params,
-                headers={"X-Dial-Jev-Token": self._token()},
+                headers={"X-Dial-Jev-Token": self._token(self._read_token_file, kind="projection")},
             )
         if response.status_code >= 400:
             raise JevProjectionError(f"jev_projection_http_{response.status_code}")
@@ -53,7 +58,7 @@ class JevProjectionClient:
             response = await client.post(
                 f"{self._base_url}{path}",
                 json=payload,
-                headers={"X-Dial-Jev-Token": self._token()},
+                headers={"X-Dial-Jev-Token": self._token(self._control_token_file, kind="control")},
             )
         if response.status_code >= 400:
             detail = response.text[:240]
