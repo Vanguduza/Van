@@ -275,6 +275,16 @@ jobs:
           echo 'KERNEL=="kvm", GROUP="kvm", MODE="0666", OPTIONS+="static_node=kvm"' | sudo tee /etc/udev/rules.d/99-kvm4all.rules
           sudo udevadm control --reload-rules
           sudo udevadm trigger --name-match=kvm
+      - name: Bind Candidate B mechanics prototype for CI only
+        run: |
+          prototype="visual-authority/character-forge/08-prototypes/candidate-b-mechanics/build/van_candidate_b_mechanics_proto.riv"
+          candidate="android/app/src/androidTest/assets/van_candidate.riv"
+          if [[ ! -f "$candidate" && -f "$prototype" ]]; then
+            mkdir -p "$(dirname "$candidate")"
+            cp "$prototype" "$candidate"
+            printf '%s\n' core > android/app/src/androidTest/assets/forge_mode.txt
+            echo "Bound non-canonical Candidate B mechanics prototype to androidTest only."
+          fi
       - name: Bind Character Forge validation input
         run: |
           mkdir -p artifacts/character-forge
