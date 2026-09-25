@@ -38,6 +38,8 @@ class RiveContractTest {
         const val MIN_DISTINCT_RGB = 0.004
         /** ~300 ms into a 600-1800 ms action once the host's 250 ms input delay has elapsed. */
         const val ACTION_PEAK_MS = 550L
+        const val FIRST_FRAME_TIMEOUT_MS = 8_000L
+        const val FIRST_FRAME_POLL_MS = 100L
     }
 
     private val instrumentation get() = InstrumentationRegistry.getInstrumentation()
@@ -393,17 +395,35 @@ class RiveContractTest {
     ): Bitmap {
         launchScenario(rig, background, state, speaking, listening, attentionX, attentionY, mouthOpen, urgency, viseme, action, trigger, sizeDp).use {
             instrumentation.waitForIdleSync()
+            // On the CI emulator's software GL the host is often on screen before Rive's first
+            // frame is composited, and a fixed sleep then captured the bare background (the first
+            // core run compared blank frames: noise 0.08, action diff 0.0). The settle time now
+            // counts from the first frame the rig draws. A rig that never draws still comes back
+            // blank after FIRST_FRAME_TIMEOUT_MS, and the blank checks fail it.
+            awaitFirstFrame(sizeDp)
             SystemClock.sleep(settleMs)
-            val screen = instrumentation.uiAutomation.takeScreenshot()
-            val density = targetContext.resources.displayMetrics.density
-            val size = min((sizeDp * density).toInt(), min(screen.width, screen.height))
-            val x = ((screen.width - size) / 2).coerceAtLeast(0)
-            val y = ((screen.height - size) / 2).coerceAtLeast(0)
-            val crop = Bitmap.createBitmap(screen, x, y, size, size)
+            val crop = grab(sizeDp)
             val out = outputDir(rig).resolve("$name.png")
             out.parentFile?.mkdirs()
             FileOutputStream(out).use { crop.compress(Bitmap.CompressFormat.PNG, 100, it) }
             return crop
+        }
+    }
+
+    private fun grab(sizeDp: Int): Bitmap {
+        val screen = instrumentation.uiAutomation.takeScreenshot()
+        val density = targetContext.resources.displayMetrics.density
+        val size = min((sizeDp * density).toInt(), min(screen.width, screen.height))
+        val x = ((screen.width - size) / 2).coerceAtLeast(0)
+        val y = ((screen.height - size) / 2).coerceAtLeast(0)
+        return Bitmap.createBitmap(screen, x, y, size, size)
+    }
+
+    private fun awaitFirstFrame(sizeDp: Int) {
+        val deadline = SystemClock.uptimeMillis() + FIRST_FRAME_TIMEOUT_MS
+        while (SystemClock.uptimeMillis() < deadline) {
+            if (!looksBlank(grab(sizeDp))) return
+            SystemClock.sleep(FIRST_FRAME_POLL_MS)
         }
     }
 
