@@ -132,7 +132,7 @@ mcp_servers:
     cwd: "<dial-development-system-root>"
     env:
       DIAL_JEV_SERVICE_URL: "http://127.0.0.1:6791"
-      DIAL_JEV_CONTROL_TOKEN_FILE: "/etc/dial-control/secrets/jev-control-token"
+      DIAL_JEV_MCP_TOKEN_FILE: "/etc/dial-control/secrets/jev-mcp-token"
     enabled: true
     connect_timeout: 10
     timeout: 30
