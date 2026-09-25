@@ -39,6 +39,7 @@ object VanRoute {
     const val PROJECT_DETAIL_TEMPLATE = "projects/{projectId}"
     const val CONNECTED = "connected"
     const val SETTINGS = "settings"
+    const val JEV = "jev"
     /**
      * Full-screen children of Settings for the two legacy bodies this rebuild reuses rather
      * than duplicates (`SpeechModule`, `NotificationPolicyModule`) — both are themselves a
