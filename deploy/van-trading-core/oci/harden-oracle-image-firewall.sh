@@ -2,7 +2,10 @@
 set -euo pipefail
 
 RULES_V4="${VAN_ORACLE_RULES_V4:-/etc/iptables/rules.v4}"
-ADMIN_CIDRS="${VAN_ADMIN_CIDRS:-10.0.0.123/32,10.0.0.184/32}"
+# Default admin source is oracle-admin (10.0.0.123). The former dial-hermes-control A1
+# (10.0.0.184) was terminated on 2026-09-25 (DEC-060); dial-control now reaches this host over
+# the WireGuard overlay (10.77.0.1 via wg-dial, DIAL_OVERLAY_MANAGED rules), not the VCN.
+ADMIN_CIDRS="${VAN_ADMIN_CIDRS:-10.0.0.123/32}"
 PUBLIC_HOST="${VAN_PUBLIC_HOST:-}"
 VERIFY_ONLY=0
 [[ "${1:-}" == "--verify" ]] && VERIFY_ONLY=1
@@ -14,7 +17,7 @@ grep -q "iptables configuration for Oracle Cloud Infrastructure" "$RULES_V4" || 
 command -v iptables >/dev/null 2>&1 || die "iptables missing"
 
 IFS=',' read -r -a CIDRS <<< "$ADMIN_CIDRS"
-(( ${#CIDRS[@]} >= 2 )) || die "at least two admin /32 CIDRs required"
+(( ${#CIDRS[@]} >= 1 )) || die "at least one admin /32 CIDR required"
 for cidr in "${CIDRS[@]}"; do
   [[ "$cidr" =~ ^10\.0\.[0-9]{1,3}\.[0-9]{1,3}/32$ ]] || die "invalid admin CIDR: $cidr"
 done

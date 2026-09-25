@@ -4,7 +4,9 @@ import base64, json, os, pathlib, re, shlex, subprocess, sys, tempfile, textwrap
 
 OCI='/home/ubuntu/.local/bin/oci'
 TARGET='van-trading-core'; PRIVATE_IP='10.0.1.233'; TRADING_SUBNET='van-trading-subnet'
-ADMIN_IP='10.0.0.123'; HERMES_IP='10.0.0.184'; VEKL_IP='10.0.0.51'; SHAPE='VM.Standard.A1.Flex'
+# dial-hermes-control's old A1 (10.0.0.184) was terminated 2026-09-25 (DEC-060); dial-control reaches
+# this host over the WireGuard overlay (hub 10.77.0.1), so no VCN rule names it any more.
+ADMIN_IP='10.0.0.123'; VEKL_IP='10.0.0.51'; SHAPE='VM.Standard.A1.Flex'
 VEKL_OCID='ocid1.instance.oc1.af-johannesburg-1.anvg4ljrvbgkoeqcctvikyk5hgz362mirgruwg64fzlhwwox35ozh5bjc2ha'
 OCPUS=2.0; MEMORY_GB=12.0; BOOT_GB=50
 BRANCH=os.environ.get('VAN_REBUILD_BRANCH','main')
@@ -79,9 +81,7 @@ def tcp_rule(source,port,desc):
 def harden_subnet(sub):
     ingress=[
         tcp_rule(f'{ADMIN_IP}/32',22,'SSH from oracle-admin only'),
-        tcp_rule(f'{HERMES_IP}/32',22,'SSH from dial-hermes-control only'),
         tcp_rule(f'{ADMIN_IP}/32',9133,'Commander admin from oracle-admin only'),
-        tcp_rule(f'{HERMES_IP}/32',9133,'Commander MCP from dial-hermes-control only'),
         tcp_rule('0.0.0.0/0',80,'ACME HTTP challenge / redirect'),
         tcp_rule('0.0.0.0/0',443,'Public Caddy TLS edge'),
         {'protocol':'1','source':'10.0.0.0/16','sourceType':'CIDR_BLOCK','isStateless':False,
@@ -133,7 +133,7 @@ def firstboot(public_host, expected_sha):
     trap 'echo FIRSTBOOT_FAILED line=$LINENO rc=$?; touch /var/lib/van-trading-firstboot.failed' ERR
     export DEBIAN_FRONTEND=noninteractive NEEDRESTART_MODE=a
     export VAN_BRANCH={shlex.quote(BRANCH)} VAN_CORE_IP={PRIVATE_IP} VAN_VEKL_WORKER_HOST={VEKL_IP}
-    export VAN_ADMIN_CIDRS={ADMIN_IP}/32,{HERMES_IP}/32
+    export VAN_ADMIN_CIDRS={ADMIN_IP}/32
     for n in $(seq 1 30); do apt-get -o Acquire::Retries=3 update -qq && apt-get install -y -qq --no-install-recommends git ca-certificates curl jq >/dev/null && break; sleep 5; done
     command -v git >/dev/null || exit 41
     rm -rf /opt/van-bootstrap-source
