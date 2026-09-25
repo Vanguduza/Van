@@ -65,7 +65,8 @@ fun JevControlRoute(app: VanApplication, onBack: () -> Unit) {
     var tabIndex by remember { mutableIntStateOf(0) }
     var selectedModule by remember { mutableStateOf<JevModule?>(null) }
     var activityProject by remember { mutableStateOf("van") }
-    var outcomes by remember { mutableStateOf<List<JevOutcome>>(emptyList()) }
+    var activityItems by remember { mutableStateOf<List<JevActivityItem>>(emptyList()) }
+    var performance by remember { mutableStateOf<JevPerformance?>(null) }
     var selectedContribution by remember { mutableStateOf<JevContribution?>(null) }
 
     fun refresh() {
@@ -86,9 +87,17 @@ fun JevControlRoute(app: VanApplication, onBack: () -> Unit) {
 
     fun loadActivity(projectId: String) {
         scope.launch {
-            runCatching { repository.outcomes(projectId) }
-                .onSuccess { outcomes = it; error = null }
+            runCatching { repository.activity(projectId) }
+                .onSuccess { activityItems = it; error = null }
                 .onFailure { error = it.message ?: "Jev activity unavailable" }
+        }
+    }
+
+    fun loadPerformance(projectId: String) {
+        scope.launch {
+            runCatching { repository.performance(projectId) }
+                .onSuccess { performance = it; error = null }
+                .onFailure { error = it.message ?: "Performance evidence unavailable" }
         }
     }
 
@@ -111,7 +120,7 @@ fun JevControlRoute(app: VanApplication, onBack: () -> Unit) {
     }
 
     LaunchedEffect(Unit) { refresh() }
-    LaunchedEffect(activityProject) { loadActivity(activityProject) }
+    LaunchedEffect(activityProject) { loadActivity(activityProject); loadPerformance(activityProject) }
 
     Column(
         modifier = Modifier.fillMaxWidth().padding(horizontal = tokens.space.pageGutter),
@@ -154,8 +163,8 @@ fun JevControlRoute(app: VanApplication, onBack: () -> Unit) {
                     selectedModule = it
                     selectedContribution = null
                 }
-                tabIndex == JevTab.ACTIVITY.ordinal -> Activity(activityProject, outcomes) { activityProject = it }
-                tabIndex == JevTab.VALUE.ordinal -> Value(snapshot!!.modules, selectedContribution) { module ->
+                tabIndex == JevTab.ACTIVITY.ordinal -> Activity(activityProject, activityItems) { activityProject = it }
+                tabIndex == JevTab.VALUE.ordinal -> Value(snapshot!!.modules, performance, selectedContribution) { module ->
                     selectedModule = module
                     loadContribution(module)
                 }
@@ -357,7 +366,7 @@ private fun ModuleDetail(
 }
 
 @Composable
-private fun Activity(projectId: String, outcomes: List<JevOutcome>, onProject: (String) -> Unit) {
+private fun Activity(projectId: String, activity: List<JevActivityItem>, onProject: (String) -> Unit) {
     val tokens = LocalVanTokens.current
     LazyColumn(verticalArrangement = Arrangement.spacedBy(tokens.space.space2)) {
         item {
@@ -371,24 +380,24 @@ private fun Activity(projectId: String, outcomes: List<JevOutcome>, onProject: (
                 }
             }
         }
-        if (outcomes.isEmpty()) {
+        if (activity.isEmpty()) {
             item {
                 VanPanel {
                     Text("No trusted outcomes recorded for this project yet.", style = tokens.type.body, color = tokens.color.textSecondary)
                 }
             }
         } else {
-            items(outcomes, key = { "${it.requestId}:${it.observedAt}" }) { outcome ->
+            items(activity, key = { "${it.requestId}:${it.observedAt}:${it.event}" }) { outcome ->
                 VanPanel(dense = true) {
                     Row(modifier = Modifier.fillMaxWidth()) {
                         Column(modifier = Modifier.weight(1f)) {
                             Text(outcome.moduleId, style = tokens.type.headline)
-                            Text(outcome.source, style = tokens.type.label, color = tokens.color.textSecondary)
+                            Text("${outcome.event} · ${outcome.provider} · ${outcome.latencyMs} ms", style = tokens.type.label, color = tokens.color.textSecondary)
                             Text(outcome.observedAt, style = tokens.type.label, color = tokens.color.textTertiary)
                         }
                         StatusChip(
-                            if (outcome.success) "VERIFIED" else "FAILED",
-                            if (outcome.success) StatusSemantics.ROLE_FAVOURABLE else StatusSemantics.ROLE_CRITICAL,
+                            outcome.lifecycleState.ifBlank { if (outcome.provider == "fallback") "FALLBACK" else "DECISION" },
+                            if (outcome.provider == "fallback") StatusSemantics.ROLE_EVENT_RISK else StatusSemantics.ROLE_COGNITION,
                         )
                     }
                 }
@@ -398,12 +407,19 @@ private fun Activity(projectId: String, outcomes: List<JevOutcome>, onProject: (
 }
 
 @Composable
-private fun Value(modules: List<JevModule>, contribution: JevContribution?, onSelect: (JevModule) -> Unit) {
+private fun Value(modules: List<JevModule>, performance: JevPerformance?, contribution: JevContribution?, onSelect: (JevModule) -> Unit) {
     val tokens = LocalVanTokens.current
     LazyColumn(verticalArrangement = Arrangement.spacedBy(tokens.space.space2)) {
         item {
             VanPanel {
-                SectionHeader("Contribution evaluation", "Tap a module to inspect measured value against its non-Jev baseline.")
+                SectionHeader("Performance & contribution", "Live service telemetry plus counterfactual value against the non-Jev baseline.")
+                performance?.let { perf ->
+                    Row(horizontalArrangement = Arrangement.spacedBy(tokens.space.space3)) {
+                        MetricTile("Decisions", perf.decisions.toString(), modifier = Modifier.weight(1f))
+                        MetricTile("p50", "%.0f ms".format(perf.p50LatencyMs), modifier = Modifier.weight(1f))
+                        MetricTile("Fallback", "%.1f%%".format(perf.fallbackRate * 100), modifier = Modifier.weight(1f))
+                    }
+                }
                 contribution?.let {
                     Row(horizontalArrangement = Arrangement.spacedBy(tokens.space.space3)) {
                         MetricTile("Samples", it.sampleCount.toString(), modifier = Modifier.weight(1f))
