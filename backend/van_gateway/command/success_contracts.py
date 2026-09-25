@@ -157,13 +157,22 @@ def contract_for(resolution: CommandResolution) -> SuccessContract:
         project_id = str(resolution.parameters.get("project_id") or "").strip()
         if not operation:
             return SuccessContract()
+        postconditions = {"kind": "global", "project_id": project_id or None}
+        if project_id:
+            postconditions["project_enabled"] = operation == "enable"
+        elif operation == "enable":
+            postconditions.update({"owner_active": True, "bypassed": False})
+        elif operation == "disable":
+            postconditions.update({"owner_active": False})
+        elif operation == "bypass":
+            postconditions.update({"bypassed": True})
+        elif operation == "restore":
+            postconditions.update({"owner_active": True, "bypassed": False})
+        else:
+            return SuccessContract()
         return SuccessContract(
             verifier_class=JEV_READBACK,
-            postconditions={
-                "kind": "global",
-                "operation": operation,
-                "project_id": project_id or None,
-            },
+            postconditions=postconditions,
             evidence_required=True,
         )
 
