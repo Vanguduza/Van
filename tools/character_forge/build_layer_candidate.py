@@ -165,14 +165,21 @@ MIN_PRIMITIVE_HEIGHT = 6.0
 
 def _thicken(group: Group) -> str:
     """The group's blockout XML, stretched about its centre to MIN_PRIMITIVE_HEIGHT if thinner."""
-    if group.mask is None or not group.mask.any():
+    # Exact geometry, not the rasterised mask: pixel rounding left a 3.3-unit lip at 4.95.
+    ys: list[float] = []
+    for p in group.primitives:
+        if p.kind == "ellipse":
+            cy, ry = float(p.attrs["cy"]), float(p.attrs["ry"])
+            ys += [cy - ry, cy + ry]
+        else:
+            ys += [y for _x, y in p.points]
+    if not ys:
         return group.raw
-    ys = np.nonzero(group.mask.any(axis=1))[0]
-    height = float(ys.max() + 1 - ys.min())
+    height = max(ys) - min(ys)
     if height >= MIN_PRIMITIVE_HEIGHT:
         return group.raw
-    k = MIN_PRIMITIVE_HEIGHT / max(height, 1.0)
-    centre = (ys.max() + 1 + ys.min()) / 2.0
+    k = MIN_PRIMITIVE_HEIGHT / max(height, 0.5)
+    centre = (max(ys) + min(ys)) / 2.0
     inner = group.raw.split(">", 1)[1].rsplit("</g>", 1)[0]
     # On each shape rather than a wrapper group: the lint refuses a group without an id.
     transform = f'transform="matrix(1,0,0,{k:.4g},0,{centre * (1 - k):.4g})" '
