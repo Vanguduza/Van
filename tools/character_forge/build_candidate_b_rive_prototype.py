@@ -450,17 +450,36 @@ def build_rml(vectors: dict[str, Path], pivots: dict[str, tuple[float, float]], 
         state_animations.append(_pose_animation(name, aid, STATES[name], pivots, action=False))
         state_nodes.append(f'<AnimationState x="{(idx%6)*180}" y="{(idx//6)*120}" animationId="0:{aid}" stateName="{name}" id="0:{sid}"/>')
         state_transitions.append(f'<StateTransition stateToId="0:{sid}"><TransitionNumberCondition inputId="0:{input_ids["state"]}" opValue="equal" value="{code}"/></StateTransition>')
-    action_animations, action_nodes, action_transitions = [], [], []
+    action_animations, action_nodes = [], []
+    action_code_transitions, action_trigger_transitions = [], []
+    action_input_id = input_ids["action_code"]
     for idx, (name, code) in enumerate(contract["finite_actions"].items()):
         aid, sid = 400 + idx, 450 + idx
         action_animations.append(_pose_animation(name, aid, ACTIONS[name], pivots, action=True))
-        action_nodes.append(f'<AnimationState x="{(idx%5)*180}" y="{120+(idx//5)*120}" animationId="0:{aid}" stateName="{name}" id="0:{sid}"><StateTransition stateToId="0:449" flags="12" exitTime="100"/></AnimationState>')
-        action_transitions.append(f'<StateTransition stateToId="0:{sid}"><TransitionNumberCondition inputId="0:{input_ids["action_code"]}" opValue="equal" value="{code}"/></StateTransition>')
+        # A persistent numeric action_code must not retrigger the same action every frame.
+        # Hold the action state until the host clears action_code to 0; trigger-only actions
+        # can still play through and return once their timeline reaches 100%.
+        action_nodes.append(
+            f'<AnimationState x="{(idx%5)*180}" y="{120+(idx//5)*120}" '
+            f'animationId="0:{aid}" stateName="{name}" id="0:{sid}">'
+            f'<StateTransition stateToId="0:449" flags="12" exitTime="100">'
+            f'<TransitionNumberCondition inputId="0:{action_input_id}" opValue="equal" value="0"/>'
+            f'</StateTransition></AnimationState>'
+        )
+        action_code_transitions.append(
+            f'<StateTransition stateToId="0:{sid}">'
+            f'<TransitionNumberCondition inputId="0:{action_input_id}" opValue="equal" value="{code}"/>'
+            f'</StateTransition>'
+        )
 
     trigger_map = {"wave":"HELLO_WAVE","ack":"ACK_NOD","point":"POINT_TARGET","celebrate":"CELEBRATE","warning":"CAUTION","shrug":"SHRUG","present":"PRESENT_CARD","panel":"OPEN_PANEL"}
     for trig, action in trigger_map.items():
         sid = 450 + list(contract["finite_actions"]).index(action)
-        action_transitions.append(f'<StateTransition stateToId="0:{sid}"><TransitionTriggerCondition inputId="0:{trigger_ids[trig]}"/></StateTransition>')
+        action_trigger_transitions.append(
+            f'<StateTransition stateToId="0:{sid}">'
+            f'<TransitionTriggerCondition inputId="0:{trigger_ids[trig]}"/>'
+            f'</StateTransition>'
+        )
 
     viseme_animations, viseme_layer = _viseme_animations()
     gaze_animations, gaze_layers = _gaze_layers(input_ids, pivots)
@@ -481,7 +500,15 @@ def build_rml(vectors: dict[str, Path], pivots: dict[str, tuple[float, float]], 
     nodes = [orb, head, forearm_r, forearm_l, body]
     trace_path_count = body_paths + head_paths + fl_paths + fr_paths + orb_paths
     durable_layer = '<StateMachineLayer name="DurablePose" id="0:120"><EntryState x="-240" y="0"><StateTransition stateToId="0:352"/></EntryState><AnyState x="-240" y="-140">' + "".join(state_transitions) + '</AnyState><ExitState x="1200" y="-140"/>' + "".join(state_nodes) + '</StateMachineLayer>'
-    action_layer = '<StateMachineLayer name="FiniteAction" id="0:440"><EntryState x="-240" y="0"><StateTransition stateToId="0:449"/></EntryState><AnyState x="-240" y="-140">' + "".join(action_transitions) + '</AnyState><ExitState x="1200" y="-140"/><AnimationState x="0" y="0" animationId="0:549" stateName="NO_ACTION" id="0:449"/>' + "".join(action_nodes) + '</StateMachineLayer>'
+    action_layer = (
+        '<StateMachineLayer name="FiniteAction" id="0:440">'
+        '<EntryState x="-240" y="0"><StateTransition stateToId="0:449"/></EntryState>'
+        '<AnyState x="-240" y="-140">' + "".join(action_trigger_transitions) + '</AnyState>'
+        '<ExitState x="1200" y="-140"/>'
+        '<AnimationState x="0" y="0" animationId="0:549" stateName="NO_ACTION" id="0:449">'
+        + "".join(action_code_transitions) +
+        '</AnimationState>' + "".join(action_nodes) + '</StateMachineLayer>'
+    )
     neutral_animation = '<LinearAnimation loopValue="1" duration="1" name="NO_ACTION" id="0:549"><KeyedObject objectId="0:10"><KeyedProperty propertyKey="18"><KeyFrameDouble value="1"/></KeyedProperty></KeyedObject></LinearAnimation>'
     rml = (
         '<Rive version="1" kind="fragment"><Artboard defaultStateMachineId="0:100" '
