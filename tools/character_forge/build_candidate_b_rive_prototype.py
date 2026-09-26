@@ -228,21 +228,40 @@ def _pose_animation(name: str, aid: int, pose, pivots: dict[str, tuple[float, fl
     if action:
         mid = 22
         end = duration
+
+        # DurablePose owns the base rotations/positions continuously. Action
+        # motion therefore uses orthogonal transform channels so it composes
+        # instead of being overwritten by the durable layer.
+        def action_offset(degrees: float, radius: float = 24.0) -> tuple[float, float]:
+            rad = math.radians(degrees)
+            return radius * math.sin(rad), -radius * (1.0 - math.cos(rad))
+
         if pose.forearm_l:
-            items.append(_keyed(12, 15, [(0, 0), (mid, math.radians(pose.forearm_l)), (end, 0)]))
+            x, y = pivots["forearm_l"]
+            dx, dy = action_offset(pose.forearm_l)
+            items.append(_keyed(12, 13, [(0, x), (mid, x + dx), (end, x)]))
+            items.append(_keyed(12, 14, [(0, y), (mid, y + dy), (end, y)]))
         if pose.forearm_r:
-            items.append(_keyed(13, 15, [(0, 0), (mid, math.radians(pose.forearm_r)), (end, 0)]))
+            x, y = pivots["forearm_r"]
+            dx, dy = action_offset(pose.forearm_r)
+            items.append(_keyed(13, 13, [(0, x), (mid, x + dx), (end, x)]))
+            items.append(_keyed(13, 14, [(0, y), (mid, y + dy), (end, y)]))
+
+        # Head action channels avoid rotation/y because DurablePose owns those.
         if pose.head_tilt:
-            items.append(_keyed(11, 15, [(0, 0), (mid, math.radians(pose.head_tilt)), (end, 0)]))
+            x = pivots["head"][0]
+            dx = max(-8.0, min(8.0, pose.head_tilt * 0.65))
+            items.append(_keyed(11, 13, [(0, x), (mid, x + dx), (end, x)]))
         if pose.head_drop:
-            y = pivots["head"][1]
-            items.append(_keyed(11, 14, [(0, y), (mid, y + pose.head_drop), (end, y)]))
-        if pose.orb_dx:
-            x = pivots["orb"][0]
-            items.append(_keyed(14, 13, [(0, x), (mid, x + pose.orb_dx), (end, x)]))
-        if pose.orb_dy:
-            y = pivots["orb"][1]
-            items.append(_keyed(14, 14, [(0, y), (mid, y + pose.orb_dy), (end, y)]))
+            squeeze = max(0.88, 1.0 - abs(pose.head_drop) * 0.012)
+            items.append(_keyed(11, 17, [(0, 1.0), (mid, squeeze), (end, 1.0)]))
+
+        # The orb's durable x/y drift stays intact; action emphasis uses scale.
+        if pose.orb_dx or pose.orb_dy:
+            magnitude = min(0.18, (abs(pose.orb_dx) + abs(pose.orb_dy)) / 180.0)
+            scale = 1.0 + max(0.06, magnitude)
+            items.append(_keyed(14, 16, [(0, 1.0), (mid, scale), (end, 1.0)]))
+            items.append(_keyed(14, 17, [(0, 1.0), (mid, scale), (end, 1.0)]))
     else:
         head_y = pivots["head"][1] + pose.head_drop
         orb_x = pivots["orb"][0] + pose.orb_dx
