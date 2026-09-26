@@ -261,42 +261,53 @@ def _pose_animation(name: str, aid: int, pose, pivots: dict[str, tuple[float, fl
     return f'<LinearAnimation loopValue="{loop}" duration="{duration}" name="{name}" id="0:{aid}">' + "".join(items) + "</LinearAnimation>"
 
 
-def _viseme_shapes(mx: float, my: float) -> str:
-    specs = [
-        (500, "viseme_0", "Rectangle", 'width="20" height="2"'),
-        (501, "viseme_1", "Ellipse", 'width="18" height="7"'),
-        (502, "viseme_2", "Ellipse", 'width="24" height="13"'),
-        (503, "viseme_3", "Ellipse", 'width="27" height="19"'),
-        (504, "viseme_4", "Ellipse", 'width="11" height="18"'),
-    ]
-    out = []
-    for rid, name, geom, attrs in specs:
-        out.append(
-            f'<Shape x="{mx:.2f}" y="{my:.2f}" opacity="0" name="{name}" id="0:{rid}">'
-            f'<{geom} {attrs} originX="0.5" originY="0.5"/><Fill><SolidColor colorValue="FF4A2A1A"/></Fill></Shape>'
-        )
-    return "".join(out)
+def _viseme_shapes() -> str:
+    # A single Candidate-B mouth aperture is shared by both speech layers.
+    # Viseme selection owns scaleX; mouth_open owns scaleY. Keeping those axes
+    # orthogonal makes the controls additive instead of letting one layer erase
+    # the other.
+    return (
+        '<Shape name="MouthAperture" id="0:490">'
+        '<Ellipse width="25" height="17" originX="0.5" originY="0.5"/>'
+        '<Fill><SolidColor colorValue="FF45261D"/></Fill>'
+        '</Shape>'
+        '<Shape x="-3.5" y="-2.5" opacity="0.5" name="MouthHighlight" id="0:491">'
+        '<Ellipse width="7" height="3" originX="0.5" originY="0.5"/>'
+        '<Fill><SolidColor colorValue="FFD18470"/></Fill>'
+        '</Shape>'
+    )
+
+
 def _viseme_animations() -> tuple[str, str]:
+    # Five speech silhouettes are expressed as width changes on the same
+    # aperture. MOUTH_OPEN simultaneously controls scaleY on object 489.
+    widths = (0.48, 0.70, 1.00, 0.84, 0.52)
     animations = []
     states = []
-    for i in range(5):
+    for i, scale_x in enumerate(widths):
         aid = 600 + i
         sid = 650 + i
-        keyed = "".join(_keyed(500 + j, 18, [(0, 1 if i == j else 0)]) for j in range(5))
-        animations.append(f'<LinearAnimation loopValue="1" duration="1" name="VISEME_{i}" id="0:{aid}">{keyed}</LinearAnimation>')
-        states.append(f'<AnimationState x="{i*150}" y="80" animationId="0:{aid}" stateName="VISEME_{i}" id="0:{sid}"/>')
+        keyed = _keyed(489, 16, [(0, scale_x)])
+        animations.append(
+            f'<LinearAnimation loopValue="1" duration="1" name="VISEME_{i}" id="0:{aid}">{keyed}</LinearAnimation>'
+        )
+        states.append(
+            f'<AnimationState x="{i*150}" y="80" animationId="0:{aid}" stateName="VISEME_{i}" id="0:{sid}"/>'
+        )
     transitions = "".join(
-        f'<StateTransition stateToId="0:{650+i}"><TransitionNumberCondition inputId="0:108" opValue="equal" value="{i}"/></StateTransition>'
+        f'<StateTransition stateToId="0:{650+i}" duration="55">'
+        f'<TransitionNumberCondition inputId="0:108" opValue="equal" value="{i}"/>'
+        f'</StateTransition>'
         for i in range(5)
     )
     layer = (
         '<StateMachineLayer name="SpeechViseme" id="0:640">'
         '<EntryState x="-220" y="0"><StateTransition stateToId="0:650"/></EntryState>'
-        f'<AnyState x="-220" y="-120">{transitions}</AnyState><ExitState x="900" y="-120"/>' + "".join(states) + '</StateMachineLayer>'
+        f'<AnyState x="-220" y="-120">{transitions}</AnyState><ExitState x="900" y="-120"/>'
+        + "".join(states) +
+        '</StateMachineLayer>'
     )
     return "".join(animations), layer
-
-
 
 
 def _gaze_shapes(pivots: dict[str, tuple[float, float]]) -> str:
@@ -362,25 +373,39 @@ def _gaze_layers(input_ids: dict[str, int], pivots: dict[str, tuple[float, float
 
 
 def _mouth_open_layer(input_ids: dict[str, int]) -> tuple[str, str]:
-    # MouthRig (489) owns the five viseme shapes. Viseme selection changes child opacity;
-    # this orthogonal layer changes the whole mouth aperture, matching SPEECH_SPEC's additive jaw drive.
-    closed = '<LinearAnimation loopValue="1" duration="1" name="MOUTH_CLOSED" id="0:740">' + _keyed(489, 17, [(0, 0.45)]) + '</LinearAnimation>'
-    open_ = '<LinearAnimation loopValue="1" duration="1" name="MOUTH_OPEN" id="0:741">' + _keyed(489, 17, [(0, 1.28)]) + '</LinearAnimation>'
+    # mouth_open owns vertical aperture only; viseme owns horizontal shape.
+    # Three bins with short blends make the prototype visibly responsive while
+    # preserving the public numeric wire contract.
+    closed = (
+        '<LinearAnimation loopValue="1" duration="1" name="MOUTH_CLOSED" id="0:740">'
+        + _keyed(489, 17, [(0, 0.16)]) +
+        '</LinearAnimation>'
+    )
+    half = (
+        '<LinearAnimation loopValue="1" duration="1" name="MOUTH_HALF" id="0:741">'
+        + _keyed(489, 17, [(0, 0.56)]) +
+        '</LinearAnimation>'
+    )
+    open_ = (
+        '<LinearAnimation loopValue="1" duration="1" name="MOUTH_OPEN" id="0:742">'
+        + _keyed(489, 17, [(0, 1.00)]) +
+        '</LinearAnimation>'
+    )
     m = input_ids["mouth_open"]
-    speaking = input_ids["speaking"]
     layer = (
         '<StateMachineLayer name="MouthOpen" id="0:749">'
         '<EntryState x="0" y="0"><StateTransition stateToId="0:750"/></EntryState>'
         '<AnyState x="0" y="-100">'
-        f'<StateTransition stateToId="0:751" duration="70"><TransitionBoolCondition inputId="0:{speaking}" opValue="equal"/><TransitionNumberCondition inputId="0:{m}" opValue="greaterThanOrEqual" value="0.35"/></StateTransition>'
-        f'<StateTransition stateToId="0:750" duration="70"><TransitionNumberCondition inputId="0:{m}" opValue="lessThan" value="0.35"/></StateTransition>'
-        f'<StateTransition stateToId="0:750" duration="70"><TransitionBoolCondition inputId="0:{speaking}" opValue="notEqual"/></StateTransition>'
-        '</AnyState><ExitState x="520" y="-100"/>'
-        '<AnimationState x="160" y="80" animationId="0:740" id="0:750"/>'
-        '<AnimationState x="360" y="80" animationId="0:741" id="0:751"/>'
+        f'<StateTransition stateToId="0:750" duration="55"><TransitionNumberCondition inputId="0:{m}" opValue="lessThan" value="0.25"/></StateTransition>'
+        f'<StateTransition stateToId="0:751" duration="55"><TransitionNumberCondition inputId="0:{m}" opValue="greaterThanOrEqual" value="0.25"/><TransitionNumberCondition inputId="0:{m}" opValue="lessThan" value="0.70"/></StateTransition>'
+        f'<StateTransition stateToId="0:752" duration="55"><TransitionNumberCondition inputId="0:{m}" opValue="greaterThanOrEqual" value="0.70"/></StateTransition>'
+        '</AnyState><ExitState x="640" y="-100"/>'
+        '<AnimationState x="120" y="80" animationId="0:740" id="0:750"/>'
+        '<AnimationState x="300" y="80" animationId="0:741" id="0:751"/>'
+        '<AnimationState x="480" y="80" animationId="0:742" id="0:752"/>'
         '</StateMachineLayer>'
     )
-    return closed + open_, layer
+    return closed + half + open_, layer
 
 
 def build_rml(vectors: dict[str, Path], pivots: dict[str, tuple[float, float]], side: int) -> tuple[str, int]:
@@ -426,11 +451,8 @@ def build_rml(vectors: dict[str, Path], pivots: dict[str, tuple[float, float]], 
     head_extra = (
         _gaze_shapes(pivots) +
         f'<Node x="{mouth_x:.2f}" y="{mouth_y:.2f}" name="MouthRig" id="0:489">' +
-        _viseme_shapes(0.0, 0.0) +
-        '</Node>' +
-        f'<Shape x="{mouth_x:.2f}" y="{mouth_y:.2f}" name="MouthCover" id="0:490">'
-        '<Ellipse width="45" height="22" originX="0.5" originY="0.5"/>'
-        '<Fill><SolidColor colorValue="FFAF6A53"/></Fill></Shape>'
+        _viseme_shapes() +
+        '</Node>'
     )
     body, body_paths = vector_node("CandidateBBody", 10, vectors["body"], (0.0, 0.0))
     head, head_paths = vector_node("CandidateBHead", 11, vectors["head"], pivots["head"], head_extra)
