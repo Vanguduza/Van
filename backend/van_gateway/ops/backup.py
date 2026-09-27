@@ -315,27 +315,31 @@ def restore(
     target = Path(database_path)
     if target.exists() and not overwrite:
         raise BackupError(f"{target} exists; pass overwrite=True to replace it")
+    manifest = read_manifest(backup_dir)
+    document_entries = [
+        entry for entry in manifest.entries if entry.part == BackupPart.DOCUMENTS.value
+    ]
+    target_documents = (
+        Path(document_dir) if document_dir is not None else target.parent / "documents"
+    )
+    # Preflight every destructive destination before touching either one. Restoring the
+    # database and only then discovering that the document directory cannot be replaced
+    # leaves two halves from different backup generations.
+    if document_entries and target_documents.exists() and not overwrite:
+        raise BackupError(
+            f"{target_documents} exists; pass overwrite=True to replace document state"
+        )
+
     target.parent.mkdir(parents=True, exist_ok=True)
     for sidecar in (target.with_name(target.name + "-wal"), target.with_name(target.name + "-shm")):
         if sidecar.exists():
             sidecar.unlink()
     _sqlite_backup(Path(backup_dir) / DATABASE_NAME, target)
-    manifest = read_manifest(backup_dir)
 
-    document_entries = [
-        entry for entry in manifest.entries if entry.part == BackupPart.DOCUMENTS.value
-    ]
     documents_restored = 0
     if document_entries:
         source_documents = Path(backup_dir) / "documents"
-        target_documents = (
-            Path(document_dir) if document_dir is not None else target.parent / "documents"
-        )
         if target_documents.exists():
-            if not overwrite:
-                raise BackupError(
-                    f"{target_documents} exists; pass overwrite=True to replace document state"
-                )
             shutil.rmtree(target_documents)
         shutil.copytree(source_documents, target_documents)
         documents_restored = len(document_entries)
