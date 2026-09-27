@@ -8,10 +8,89 @@ explicitly opt out of access-token exchange and never imply live Google state.
 """
 
 import os
+import base64
+import binascii
 from datetime import datetime, timezone
 from typing import Any
 
 import httpx
+
+
+MAX_GMAIL_ATTACHMENT_BYTES = 10 * 1024 * 1024
+MAX_GMAIL_TEXT_BYTES = 1024 * 1024
+
+
+class GoogleOutcomeUnknown(RuntimeError):
+    """A write may have reached Google, so automatic retry is unsafe."""
+
+
+def _decode_base64url(value: str, *, limit: int) -> bytes:
+    if len(value) > ((limit * 4) // 3 + 16):
+        raise RuntimeError("google_payload_too_large")
+    try:
+        raw = base64.urlsafe_b64decode(value + "=" * (-len(value) % 4))
+    except (ValueError, binascii.Error) as exc:
+        raise RuntimeError("google_base64_invalid") from exc
+    if len(raw) > limit:
+        raise RuntimeError("google_payload_too_large")
+    return raw
+
+
+def _gmail_headers(payload: dict[str, Any]) -> dict[str, str]:
+    out: dict[str, str] = {}
+    for item in payload.get("headers") or []:
+        if isinstance(item, dict) and item.get("name"):
+            out[str(item["name"]).lower()] = str(item.get("value") or "")
+    return out
+
+
+def _normalise_gmail_message(message: dict[str, Any]) -> dict[str, Any]:
+    payload = dict(message.get("payload") or {})
+    metadata = _gmail_headers(payload)
+    plain: list[str] = []
+    html: list[str] = []
+    attachments: list[dict[str, Any]] = []
+
+    def visit(part: dict[str, Any], depth: int) -> None:
+        if depth > 30:
+            raise RuntimeError("gmail_mime_nesting_exceeded")
+        body = dict(part.get("body") or {})
+        filename = str(part.get("filename") or "")
+        attachment_id = str(body.get("attachmentId") or "")
+        mime = str(part.get("mimeType") or "")
+        if filename and attachment_id:
+            attachments.append({
+                "message_id": str(message.get("id") or ""),
+                "attachment_id": attachment_id,
+                "filename": filename[:180],
+                "mime_type": mime,
+                "size": int(body.get("size") or 0),
+            })
+        data = body.get("data")
+        if not filename and data and mime in {"text/plain", "text/html"}:
+            decoded = _decode_base64url(str(data), limit=MAX_GMAIL_TEXT_BYTES).decode(
+                "utf-8", errors="replace"
+            )
+            (plain if mime == "text/plain" else html).append(decoded)
+        for child in part.get("parts") or []:
+            if isinstance(child, dict):
+                visit(child, depth + 1)
+
+    visit(payload, 0)
+    return {
+        "id": str(message.get("id") or ""),
+        "threadId": str(message.get("threadId") or ""),
+        "labelIds": [str(x) for x in message.get("labelIds") or []],
+        "snippet": str(message.get("snippet") or ""),
+        "internalDate": str(message.get("internalDate") or ""),
+        "from": metadata.get("from", ""),
+        "to": metadata.get("to", ""),
+        "subject": metadata.get("subject", ""),
+        "date": metadata.get("date", ""),
+        "body": "\n\n".join(plain) if plain else "\n\n".join(html),
+        "body_format": "text/plain" if plain else ("text/html" if html else "snippet"),
+        "attachments": attachments,
+    }
 
 
 class GoogleOAuthTokenClient:
@@ -63,10 +142,20 @@ class GoogleHttpTransport:
     def __init__(self, client: httpx.AsyncClient | None = None) -> None:
         self._client = client
 
-    async def _request(self, method: str, url: str, token: str, **kwargs: Any) -> Any:
+    async def _request(
+        self,
+        method: str,
+        url: str,
+        token: str,
+        *,
+        headers_extra: dict[str, str] | None = None,
+        **kwargs: Any,
+    ) -> Any:
         client = self._client or httpx.AsyncClient(timeout=30.0)
         owns = self._client is None
         headers = {"Authorization": f"Bearer {token}", "Accept": "application/json"}
+        if headers_extra:
+            headers.update(headers_extra)
         try:
             resp = await client.request(method, url, headers=headers, **kwargs)
             if resp.status_code >= 400:
@@ -104,6 +193,41 @@ class GoogleHttpTransport:
             params={"format": "minimal", "fields": "id,threadId,labelIds"},
         )
 
+    async def gmail_thread_get(self, token: str, thread_id: str) -> dict:
+        data = await self._request(
+            "GET",
+            f"https://gmail.googleapis.com/gmail/v1/users/me/threads/{thread_id}",
+            token,
+            params={"format": "full"},
+        )
+        return {
+            "id": str(data.get("id") or thread_id),
+            "historyId": str(data.get("historyId") or ""),
+            "messages": [
+                _normalise_gmail_message(dict(item))
+                for item in data.get("messages") or []
+                if isinstance(item, dict)
+            ][:100],
+        }
+
+    async def gmail_attachment_get(
+        self, token: str, message_id: str, attachment_id: str
+    ) -> bytes:
+        data = await self._request(
+            "GET",
+            f"https://gmail.googleapis.com/gmail/v1/users/me/messages/{message_id}/attachments/{attachment_id}",
+            token,
+        )
+        declared = int(data.get("size") or 0)
+        if declared > MAX_GMAIL_ATTACHMENT_BYTES:
+            raise RuntimeError("gmail_attachment_too_large")
+        payload = _decode_base64url(
+            str(data.get("data") or ""), limit=MAX_GMAIL_ATTACHMENT_BYTES
+        )
+        if declared and declared != len(payload):
+            raise RuntimeError("gmail_attachment_size_mismatch")
+        return payload
+
     async def calendar_agenda(self, token: str) -> list[dict]:
         data = await self._request("GET", "https://www.googleapis.com/calendar/v3/calendars/primary/events", token, params={"maxResults": 20, "singleEvents": "true", "orderBy": "startTime"})
         return data.get("items", [])
@@ -117,8 +241,122 @@ class GoogleHttpTransport:
             "GET",
             f"https://www.googleapis.com/calendar/v3/calendars/primary/events/{event_id}",
             token,
-            params={"fields": "id,start,end,updated,status"},
+            params={"fields": "id,summary,start,end,updated,status,etag,recurrence,attendees,description,location"},
         )
+
+    async def calendar_event_review(self, token: str, event_id: str) -> dict:
+        event = await self.calendar_event_get(token, event_id)
+        version = str(event.get("etag") or "").strip()
+        if not version:
+            raise RuntimeError("google_calendar_event_version_missing")
+        return {"event": event, "version": version}
+
+    async def _calendar_write(
+        self,
+        method: str,
+        url: str,
+        token: str,
+        *,
+        body: dict[str, Any] | None = None,
+        expected_version: str | None = None,
+    ) -> dict:
+        try:
+            return await self._request(
+                method, url, token,
+                headers_extra=({"If-Match": expected_version} if expected_version else None),
+                json=body,
+            )
+        except httpx.RequestError as exc:
+            raise GoogleOutcomeUnknown("google_outcome_unknown") from exc
+        except RuntimeError as exc:
+            message = str(exc)
+            if message in {"google_http_408"} or any(
+                message == f"google_http_{code}" for code in range(500, 600)
+            ):
+                raise GoogleOutcomeUnknown("google_outcome_unknown") from exc
+            raise
+
+    @staticmethod
+    def _calendar_body(raw: dict[str, Any]) -> dict[str, Any]:
+        allowed = {
+            "summary", "start", "end", "location", "description", "attendees", "recurrence"
+        }
+        body = {k: raw[k] for k in allowed if k in raw}
+        if not str(body.get("summary") or "").strip():
+            raise RuntimeError("google_calendar_summary_required")
+        if not isinstance(body.get("start"), dict) or not isinstance(body.get("end"), dict):
+            raise RuntimeError("google_calendar_time_range_required")
+        attendees = body.get("attendees")
+        if attendees is not None:
+            if not isinstance(attendees, list) or len(attendees) > 100:
+                raise RuntimeError("google_calendar_attendees_invalid")
+        return body
+
+    async def calendar_create(self, token: str, event: dict[str, Any]) -> dict:
+        return await self._calendar_write(
+            "POST",
+            "https://www.googleapis.com/calendar/v3/calendars/primary/events?sendUpdates=all",
+            token,
+            body=self._calendar_body(event),
+        )
+
+    async def calendar_update(
+        self, token: str, event_id: str, event: dict[str, Any], expected_version: str
+    ) -> dict:
+        if not expected_version.strip():
+            raise RuntimeError("google_calendar_expected_version_required")
+        return await self._calendar_write(
+            "PATCH",
+            f"https://www.googleapis.com/calendar/v3/calendars/primary/events/{event_id}?sendUpdates=all",
+            token,
+            body=self._calendar_body(event),
+            expected_version=expected_version,
+        )
+
+    async def calendar_delete(
+        self, token: str, event_id: str, expected_version: str
+    ) -> dict:
+        if not expected_version.strip():
+            raise RuntimeError("google_calendar_expected_version_required")
+        return await self._calendar_write(
+            "DELETE",
+            f"https://www.googleapis.com/calendar/v3/calendars/primary/events/{event_id}?sendUpdates=all",
+            token,
+            expected_version=expected_version,
+        )
+
+    async def calendar_event_review(self, token: str, event_id: str) -> dict:
+        event = await self.calendar_event_get(token, event_id)
+        event.setdefault("etag", '"v1"')
+        return {"event": event, "version": event["etag"]}
+
+    async def calendar_create(self, token: str, event: dict[str, Any]) -> dict:
+        self.calls.append(("calendar_create", (event,)))
+        event_id = f"e{len(self.events) + 1}"
+        result = {"id": event_id, "etag": '"v1"', **event}
+        self.events[event_id] = result
+        return result
+
+    async def calendar_update(
+        self, token: str, event_id: str, event: dict[str, Any], expected_version: str
+    ) -> dict:
+        self.calls.append(("calendar_update", (event_id, expected_version)))
+        current = dict(self.events.get(event_id, {"id": event_id, "etag": '"v1"'}))
+        if current.get("etag") != expected_version:
+            raise RuntimeError("google_http_412")
+        result = {**current, **event, "id": event_id, "etag": '"v2"'}
+        self.events[event_id] = result
+        return result
+
+    async def calendar_delete(
+        self, token: str, event_id: str, expected_version: str
+    ) -> dict:
+        self.calls.append(("calendar_delete", (event_id, expected_version)))
+        current = dict(self.events.get(event_id, {"id": event_id, "etag": '"v1"'}))
+        if current.get("etag") != expected_version:
+            raise RuntimeError("google_http_412")
+        self.events[event_id] = {"id": event_id, "status": "cancelled", "etag": expected_version}
+        return {}
 
     async def drive_search(self, token: str, query: str) -> list[dict]:
         data = await self._request("GET", "https://www.googleapis.com/drive/v3/files", token, params={"q": query, "pageSize": 25, "fields": "files(id,name,mimeType,modifiedTime)"})
@@ -175,6 +413,16 @@ class FakeGoogleTransport:
     async def gmail_message_get(self, token: str, message_id: str) -> dict:
         self.calls.append(("gmail_message_get", (message_id,)))
         return dict(self.messages.get(message_id, {"id": message_id, "labelIds": []}))
+
+    async def gmail_thread_get(self, token: str, thread_id: str) -> dict:
+        self.calls.append(("gmail_thread_get", (thread_id,)))
+        return {"id": thread_id, "messages": [
+            {"id": "m1", "threadId": thread_id, "subject": "Subject", "body": "Body", "attachments": []}
+        ]}
+
+    async def gmail_attachment_get(self, token: str, message_id: str, attachment_id: str) -> bytes:
+        self.calls.append(("gmail_attachment_get", (message_id, attachment_id)))
+        return b"%PDF-1.4\n% fake attachment"
 
     async def calendar_agenda(self, token: str) -> list[dict]:
         self.calls.append(("calendar_agenda", ()))
