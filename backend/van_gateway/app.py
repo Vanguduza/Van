@@ -41,6 +41,12 @@ from van_gateway.config import get_settings
 from van_gateway.decisions.service import DecisionCreate, DecisionService
 from van_gateway.documents.api import build_document_router
 from van_gateway.documents.service import DocumentService
+from van_gateway.goals.api import build_goal_router
+from van_gateway.goals.service import GoalService
+from van_gateway.suggestions.api import build_suggestion_router
+from van_gateway.suggestions.service import SuggestionService
+from van_gateway.conversations.api import build_conversation_router
+from van_gateway.conversations.service import ConversationService
 from van_gateway.degraded.registry import DegradedRegistry
 from van_gateway.dial_dev.api import build_dial_dev_router
 from van_gateway.dial_dev.attention import DialDevAttentionIngest
@@ -449,6 +455,9 @@ def create_app() -> FastAPI:
     attention = AttentionEngine(store, settings.attention_budget_per_hour)
     artifacts = ArtifactService(store)
     documents = DocumentService(store, artifacts)
+    goals = GoalService(store, attention)
+    suggestions = SuggestionService(store, attention)
+    conversations = ConversationService(store)
     briefing = BriefingService(store, attention)
     reminders = ReminderService(store)
     decisions = DecisionService(store, attention)
@@ -897,6 +906,9 @@ def create_app() -> FastAPI:
     app.state.degraded = degraded
     app.state.artifacts = artifacts
     app.state.documents = documents
+    app.state.goals = goals
+    app.state.suggestions = suggestions
+    app.state.conversations = conversations
     app.state.visual_acceptance = visual_acceptance
     # Exposed like `degraded`: which jobs a build actually installs is a property of
     # the running app, and a job list that exists only inside a closure is how
@@ -933,6 +945,9 @@ def create_app() -> FastAPI:
     app.include_router(owner_runtime.router)
     app.include_router(build_artifact_router(artifacts))
     app.include_router(build_document_router(documents))
+    app.include_router(build_goal_router(goals))
+    app.include_router(build_suggestion_router(suggestions))
+    app.include_router(build_conversation_router(conversations))
     app.include_router(build_dial_dev_router(
         client=dial_dev_client,
         config=dial_dev_config,
