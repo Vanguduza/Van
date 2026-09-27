@@ -55,7 +55,7 @@ def test_browser_evidence_identity_is_not_live_session_identity():
     )
     session = InteractiveBrowserSession(
         session_id="session-1", owner_device_id="device-1",
-        profile_alias="public_research", viewport=Viewport(width=1080, height=2400),
+        profile_alias="public_research", viewport=Viewport(width=1080, height=2400, device_scale_factor=1.0),
     )
     assert evidence.evidence_id != session.session_id
     assert "session_id" not in BrowserEvidence.model_fields
