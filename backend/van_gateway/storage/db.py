@@ -791,6 +791,35 @@ CREATE TABLE IF NOT EXISTS conversation_drafts (
 );
 """
 
+MIGRATION_32 = """
+-- OMV-002/009 — a computer worker is an executor, not authority. A durable lease generation
+-- fences stale executors after restart/preemption before they can publish completion.
+CREATE TABLE IF NOT EXISTS computer_worker_leases (
+  surface TEXT PRIMARY KEY,
+  lease_id TEXT NOT NULL,
+  generation INTEGER NOT NULL,
+  holder_id TEXT NOT NULL,
+  expires_at_ms INTEGER NOT NULL,
+  released_at_ms INTEGER,
+  updated_at_ms INTEGER NOT NULL
+);
+
+CREATE TABLE IF NOT EXISTS computer_worker_receipts (
+  receipt_id TEXT PRIMARY KEY,
+  operation_id TEXT NOT NULL,
+  surface TEXT NOT NULL,
+  lease_id TEXT NOT NULL,
+  generation INTEGER NOT NULL,
+  output_sha256 TEXT NOT NULL,
+  exit_code INTEGER,
+  truncated INTEGER NOT NULL DEFAULT 0,
+  created_at_ms INTEGER NOT NULL,
+  FOREIGN KEY(operation_id) REFERENCES computer_operations(operation_id)
+);
+CREATE INDEX IF NOT EXISTS idx_computer_worker_receipts_operation
+  ON computer_worker_receipts(operation_id, created_at_ms);
+"""
+
 MIGRATIONS: dict[int, str] = {
     1: """
     CREATE TABLE IF NOT EXISTS schema_migrations (
@@ -2124,6 +2153,7 @@ MIGRATIONS: dict[int, str] = {
     29: MIGRATION_29,
     30: MIGRATION_30,
     31: MIGRATION_31,
+    32: MIGRATION_32,
 }
 
 
