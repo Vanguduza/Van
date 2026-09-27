@@ -328,39 +328,6 @@ class GoogleHttpTransport:
             expected_version=expected_version,
         )
 
-    async def calendar_event_review(self, token: str, event_id: str) -> dict:
-        event = await self.calendar_event_get(token, event_id)
-        event.setdefault("etag", '"v1"')
-        return {"event": event, "version": event["etag"]}
-
-    async def calendar_create(self, token: str, event: dict[str, Any]) -> dict:
-        self.calls.append(("calendar_create", (event,)))
-        event_id = f"e{len(self.events) + 1}"
-        result = {"id": event_id, "etag": '"v1"', **event}
-        self.events[event_id] = result
-        return result
-
-    async def calendar_update(
-        self, token: str, event_id: str, event: dict[str, Any], expected_version: str
-    ) -> dict:
-        self.calls.append(("calendar_update", (event_id, expected_version)))
-        current = dict(self.events.get(event_id, {"id": event_id, "etag": '"v1"'}))
-        if current.get("etag") != expected_version:
-            raise RuntimeError("google_http_412")
-        result = {**current, **event, "id": event_id, "etag": '"v2"'}
-        self.events[event_id] = result
-        return result
-
-    async def calendar_delete(
-        self, token: str, event_id: str, expected_version: str
-    ) -> dict:
-        self.calls.append(("calendar_delete", (event_id, expected_version)))
-        current = dict(self.events.get(event_id, {"id": event_id, "etag": '"v1"'}))
-        if current.get("etag") != expected_version:
-            raise RuntimeError("google_http_412")
-        self.events[event_id] = {"id": event_id, "status": "cancelled", "etag": expected_version}
-        return {}
-
     async def drive_search(self, token: str, query: str) -> list[dict]:
         data = await self._request("GET", "https://www.googleapis.com/drive/v3/files", token, params={"q": query, "pageSize": 25, "fields": "files(id,name,mimeType,modifiedTime)"})
         return data.get("files", [])
@@ -441,6 +408,39 @@ class FakeGoogleTransport:
     async def calendar_event_get(self, token: str, event_id: str) -> dict:
         self.calls.append(("calendar_event_get", (event_id,)))
         return dict(self.events.get(event_id, {"id": event_id, "start": {}}))
+
+    async def calendar_event_review(self, token: str, event_id: str) -> dict:
+        event = await self.calendar_event_get(token, event_id)
+        event.setdefault("etag", '"v1"')
+        return {"event": event, "version": event["etag"]}
+
+    async def calendar_create(self, token: str, event: dict[str, Any]) -> dict:
+        self.calls.append(("calendar_create", (event,)))
+        event_id = f"e{len(self.events) + 1}"
+        result = {"id": event_id, "etag": '"v1"', **event}
+        self.events[event_id] = result
+        return result
+
+    async def calendar_update(
+        self, token: str, event_id: str, event: dict[str, Any], expected_version: str
+    ) -> dict:
+        self.calls.append(("calendar_update", (event_id, expected_version)))
+        current = dict(self.events.get(event_id, {"id": event_id, "etag": '"v1"'}))
+        if current.get("etag") != expected_version:
+            raise RuntimeError("google_http_412")
+        result = {**current, **event, "id": event_id, "etag": '"v2"'}
+        self.events[event_id] = result
+        return result
+
+    async def calendar_delete(
+        self, token: str, event_id: str, expected_version: str
+    ) -> dict:
+        self.calls.append(("calendar_delete", (event_id, expected_version)))
+        current = dict(self.events.get(event_id, {"id": event_id, "etag": '"v1"'}))
+        if current.get("etag") != expected_version:
+            raise RuntimeError("google_http_412")
+        self.events[event_id] = {"id": event_id, "status": "cancelled", "etag": expected_version}
+        return {}
 
     async def drive_search(self, token: str, query: str) -> list[dict]:
         self.calls.append(("drive_search", (query,)))
