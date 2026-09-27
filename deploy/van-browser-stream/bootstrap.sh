@@ -57,7 +57,7 @@ echo "== users =="
 # Two users, not one. The browser holds the owner's sessions; the agent holds the private
 # key that lets Trading Core talk to it. A single user means a page escaping Chromium reads
 # the control agent's client certificates.
-for user in van-browser van-control; do
+for user in van-browser van-control van-egress; do
   if id "$user" >/dev/null 2>&1; then say "$user exists"; else
     run "useradd --system --no-create-home --shell /usr/sbin/nologin $user"
   fi
@@ -89,7 +89,7 @@ fi
 run "install -m 644 $VAN_BROWSER_GRANT_PUBLIC_KEY $ROOT/pki/grant-verify.pem"
 
 echo "== units =="
-for unit in van-browser-chromium.service van-browser-control-agent.service; do
+for unit in van-browser-egress-proxy.service van-browser-chromium.service van-browser-control-agent.service; do
   run "install -m 644 $(dirname "${BASH_SOURCE[0]}")/systemd/$unit /etc/systemd/system/$unit"
 done
 run "systemctl daemon-reload"
@@ -99,7 +99,7 @@ echo "installed. Nothing is running yet, and nothing here has checked that this 
 echo "safe to run it on. Next:"
 echo
 echo "    sudo bash deploy/van-browser-stream/pki/make-stream-pki.sh"
-echo "    sudo systemctl enable --now van-browser-chromium van-browser-control-agent"
+echo "    sudo systemctl enable --now van-browser-egress-proxy van-browser-chromium van-browser-control-agent"
 echo "    sudo bash deploy/van-browser-stream/qualify.sh"
 echo
 echo "qualify.sh is the gate. Until it exits 0, RB-002 and RB-010 stay BLOCKED."
