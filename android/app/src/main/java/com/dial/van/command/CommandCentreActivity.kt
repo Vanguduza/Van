@@ -276,6 +276,7 @@ internal fun CommandCentreScreen(app: VanApplication, initial: String) {
                             onOpenBrowser = { nav.navigate(VanRoute.WORK_BROWSER) },
                             onOpenArtemis = { nav.navigate(VanRoute.WORK_ARTEMIS) },
                             onOpenActivity = { nav.navigate(VanRoute.WORK_ACTIVITY) },
+                            onOpenConvergence = { nav.navigate(VanRoute.WORK_ASSETS) },
                             onOpenDevelopment = { nav.navigate(VanRoute.devHomeRoute()) },
                         )
                     }
