@@ -43,6 +43,7 @@ from van_gateway.documents.api import build_document_router
 from van_gateway.documents.service import DocumentService
 from van_gateway.goals.api import build_goal_router
 from van_gateway.goals.service import GoalService
+from van_gateway.goals.watch_runner import WatchRunner
 from van_gateway.suggestions.api import build_suggestion_router
 from van_gateway.suggestions.service import SuggestionService
 from van_gateway.conversations.api import build_conversation_router
@@ -532,6 +533,13 @@ def create_app() -> FastAPI:
         ),
     )
 
+    watch_runner = WatchRunner(
+        goals,
+        tasks=browser.tasks,
+        broker=browser.broker,
+        harness=automation_health.harness,
+    )
+
 
     trading = TradingService(
         settings.vati_ledger_path,
@@ -842,6 +850,11 @@ def create_app() -> FastAPI:
     async def _run_proactive_followups() -> dict:
         return await proactive_followups.run(int(time.time() * 1000))
 
+    async def _run_owner_watches() -> dict:
+        # Individual watches carry their own next_run_at_ms. The scheduler tick merely
+        # wakes the bounded runner; a restart therefore does not re-check every watch.
+        return await watch_runner.run(now_ms=int(time.time() * 1000))
+
     def _scheduler_jobs() -> tuple[ScheduledJob, ...]:
         jobs = [
             ScheduledJob("reminders.fire_due", settings.reminder_sweep_seconds, _sweep_reminders),
@@ -851,6 +864,7 @@ def create_app() -> FastAPI:
             ),
             ScheduledJob("ops.retention", settings.retention_interval_seconds, _run_retention),
             ScheduledJob("proactive.follow_ups", settings.reminder_sweep_seconds, _run_proactive_followups),
+            ScheduledJob("owner.watches", settings.reminder_sweep_seconds, _run_owner_watches),
             ScheduledJob("trading.publish_closed", settings.reminder_sweep_seconds, _run_trading_events),
         ]
         if settings.pki_dir:
@@ -929,6 +943,7 @@ def create_app() -> FastAPI:
     app.state.artifacts = artifacts
     app.state.documents = documents
     app.state.goals = goals
+    app.state.watch_runner = watch_runner
     app.state.suggestions = suggestions
     app.state.conversations = conversations
     app.state.visual_acceptance = visual_acceptance
