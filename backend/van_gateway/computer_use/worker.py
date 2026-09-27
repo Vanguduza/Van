@@ -53,6 +53,7 @@ class DockerComputerConfig:
     image: str = "van-computer:openmuse-r1"
     deployment_id: str = "default"
     timeout_seconds: int = 60
+    qualification_file: str = ""
 
     def validate(self) -> None:
         if not _IMAGE.fullmatch(self.image):
@@ -78,6 +79,36 @@ class DockerComputerWorker:
     def __init__(self, config: DockerComputerConfig) -> None:
         config.validate()
         self.config = config
+
+    def _qualification(self) -> dict[str, Any]:
+        if not self.config.qualification_file:
+            raise ComputerWorkerError("COMPUTER_QUALIFICATION_REQUIRED")
+        path = os.path.abspath(os.path.expanduser(self.config.qualification_file))
+        try:
+            raw = json.loads(open(path, "r", encoding="utf-8").read())
+        except (OSError, ValueError, TypeError) as exc:
+            raise ComputerWorkerError("COMPUTER_QUALIFICATION_UNAVAILABLE") from exc
+        if (
+            raw.get("status") != "PASS"
+            or raw.get("qualified") is not True
+            or raw.get("image") != self.config.image
+            or not str(raw.get("image_id") or "").startswith("sha256:")
+        ):
+            raise ComputerWorkerError("COMPUTER_QUALIFICATION_INVALID")
+        return raw
+
+    async def _assert_qualified(self) -> dict[str, Any]:
+        evidence = self._qualification()
+        image = await self._docker(
+            ["image", "inspect", self.config.image, "--format", "{{.Id}}"],
+            timeout_seconds=5,
+        )
+        if image.timed_out or image.exit_code != 0:
+            raise ComputerWorkerError("COMPUTER_IMAGE_UNAVAILABLE")
+        current = image.stdout.decode("utf-8", errors="replace").strip()
+        if current != str(evidence["image_id"]):
+            raise ComputerWorkerError("COMPUTER_QUALIFICATION_IMAGE_DRIFT")
+        return evidence
 
     @staticmethod
     def _identity(deployment: str, workspace: str) -> tuple[str, str]:
@@ -156,10 +187,22 @@ class DockerComputerWorker:
             not info.timed_out and info.exit_code == 0 and
             not image.timed_out and image.exit_code == 0
         )
+        if not ready:
+            return {
+                "enabled": True, "ready": False, "state": "UNAVAILABLE",
+                "image": self.config.image, "network": "disabled",
+            }
+        try:
+            evidence = await self._assert_qualified()
+        except ComputerWorkerError as exc:
+            return {
+                "enabled": True, "ready": False, "state": "UNQUALIFIED",
+                "reason": exc.code, "image": self.config.image, "network": "disabled",
+            }
         return {
-            "enabled": True, "ready": ready,
-            "state": "READY" if ready else "UNAVAILABLE",
-            "image": self.config.image,
+            "enabled": True, "ready": True, "state": "READY",
+            "image": self.config.image, "image_id": evidence["image_id"],
+            "qualified_at": evidence.get("qualified_at"),
             "network": "disabled",
         }
 
@@ -243,6 +286,7 @@ class DockerComputerWorker:
     async def execute(
         self, operation_id: str, request: OperationRequest, lease: ComputerWorkerLease
     ) -> ComputerWorkerResult:
+        await self._assert_qualified()
         workspace = request.target_application.strip()
         container = await self._ensure_running(workspace)
         scope = request.scope
