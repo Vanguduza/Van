@@ -152,7 +152,7 @@ def fill_pdf(data: bytes, values: dict[str, Any]) -> tuple[bytes, PdfInspection]
         elif field.kind is DocumentFieldKind.CHECKBOX:
             if not isinstance(raw, bool):
                 raise PdfDocumentError("PDF_FIELD_VALUE_INVALID", name)
-            mapped[name] = field.on_value or "/Yes" if raw else "/Off"
+            mapped[name] = (field.on_value or "/Yes") if raw else "/Off"
 
     reader = PdfReader(io.BytesIO(data), strict=True)
     writer = PdfWriter()
