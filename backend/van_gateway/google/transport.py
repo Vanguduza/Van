@@ -261,10 +261,13 @@ class GoogleHttpTransport:
         expected_version: str | None = None,
     ) -> dict:
         try:
+            kwargs: dict[str, Any] = {}
+            if body is not None:
+                kwargs["json"] = body
             return await self._request(
                 method, url, token,
                 headers_extra=({"If-Match": expected_version} if expected_version else None),
-                json=body,
+                **kwargs,
             )
         except httpx.RequestError as exc:
             raise GoogleOutcomeUnknown("google_outcome_unknown") from exc
