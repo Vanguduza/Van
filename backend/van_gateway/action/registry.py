@@ -60,6 +60,47 @@ BUILTIN_ACTIONS: tuple[ActionDefinition, ...] = (
         },
     ),
     ActionDefinition(
+        action_id="google.calendar.create",
+        action_class=ActionClass.A4,
+        mutates_state=True,
+        allowed_principals={PrincipalType.OWNER_DEVICE},
+        verifier_type=VerifierType.READ_BACK,
+        no_stale_replay=True,
+        max_age_seconds=30,
+        parameter_schema={
+            "required": ["event"],
+            "properties": {"event": "object"},
+        },
+    ),
+    ActionDefinition(
+        action_id="google.calendar.update",
+        action_class=ActionClass.A4,
+        mutates_state=True,
+        allowed_principals={PrincipalType.OWNER_DEVICE},
+        verifier_type=VerifierType.READ_BACK,
+        no_stale_replay=True,
+        max_age_seconds=30,
+        parameter_schema={
+            "required": ["event_id", "event", "expected_version"],
+            "properties": {
+                "event_id": "string", "event": "object", "expected_version": "string",
+            },
+        },
+    ),
+    ActionDefinition(
+        action_id="google.calendar.delete",
+        action_class=ActionClass.A4,
+        mutates_state=True,
+        allowed_principals={PrincipalType.OWNER_DEVICE},
+        verifier_type=VerifierType.READ_BACK,
+        no_stale_replay=True,
+        max_age_seconds=30,
+        parameter_schema={
+            "required": ["event_id", "expected_version"],
+            "properties": {"event_id": "string", "expected_version": "string"},
+        },
+    ),
+    ActionDefinition(
         action_id="google.notebook.note.create",
         action_class=ActionClass.A3,
         mutates_state=True,
