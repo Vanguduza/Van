@@ -1,0 +1,53 @@
+{
+  "revision": "1.0",
+  "upstream_repo": "CopilotKit/openmuse",
+  "upstream_sha": "34b15bc80340e582fb8c25573646cfb0bbc5184d",
+  "license": "MIT",
+  "sources": [
+    {
+      "path": "packages/integrations/src/pdf.ts",
+      "decision": "ADAPT",
+      "target": "backend/van_gateway/documents/pdf.py"
+    },
+    {
+      "path": "packages/integrations/src/google.ts",
+      "decision": "ADAPT",
+      "target": "backend/van_gateway/google/*"
+    },
+    {
+      "path": "apps/server/src/computer.ts",
+      "decision": "ADAPT",
+      "target": "backend/van_gateway/computer_use/*"
+    },
+    {
+      "path": "apps/server/src/engine/worker.ts",
+      "decision": "REFERENCE_REGRESSIONS",
+      "target": "backend/tests/test_openmuse_regressions.py"
+    },
+    {
+      "path": "apps/server/src/actions.ts",
+      "decision": "REFERENCE_REGRESSIONS",
+      "target": "backend/tests/test_openmuse_regressions.py"
+    },
+    {
+      "path": "apps/server/src/browser.ts",
+      "decision": "ADAPT_BELOW_VAN_AUTHORITY",
+      "target": "services/browser_control_agent/*"
+    },
+    {
+      "path": "apps/worker/*",
+      "decision": "ADAPT_BELOW_VAN_AUTHORITY",
+      "target": "services/browser_control_agent/*"
+    },
+    {
+      "path": "docs/RICH-THREADS.md",
+      "decision": "REIMPLEMENT_SELF_HOSTED",
+      "target": "backend/van_gateway/conversations/*"
+    },
+    {
+      "path": "apps/mobile/src/agent-ui.tsx",
+      "decision": "REFERENCE_UX",
+      "target": "android/app/src/main/java/com/dial/van/*"
+    }
+  ]
+}
