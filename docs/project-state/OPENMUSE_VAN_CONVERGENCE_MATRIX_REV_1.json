@@ -1,0 +1,108 @@
+{
+  "revision": "1.0",
+  "van_baseline": "12feb9033dfc1dd68d7b4d41ac477f0d9dbbc4af",
+  "upstream": {
+    "repo": "CopilotKit/openmuse",
+    "sha": "34b15bc80340e582fb8c25573646cfb0bbc5184d",
+    "license": "MIT"
+  },
+  "packages": [
+    {
+      "id": "OMV-001",
+      "name": "Document Fabric",
+      "required": true,
+      "depends_on": [
+        "OMV-005"
+      ],
+      "state": "PLANNED"
+    },
+    {
+      "id": "OMV-002",
+      "name": "Computer Worker",
+      "required": true,
+      "depends_on": [
+        "OMV-005"
+      ],
+      "state": "PLANNED"
+    },
+    {
+      "id": "OMV-003",
+      "name": "Goals & Watches",
+      "required": true,
+      "depends_on": [
+        "OMV-005"
+      ],
+      "state": "PLANNED"
+    },
+    {
+      "id": "OMV-004",
+      "name": "Evidence-backed Suggestions",
+      "required": true,
+      "depends_on": [
+        "OMV-003"
+      ],
+      "state": "PLANNED"
+    },
+    {
+      "id": "OMV-005",
+      "name": "Owner Artifact Projection",
+      "required": true,
+      "depends_on": [
+        "OMV-009"
+      ],
+      "state": "PLANNED"
+    },
+    {
+      "id": "OMV-006",
+      "name": "Rich Conversation Store",
+      "required": true,
+      "depends_on": [
+        "OMV-005"
+      ],
+      "state": "PLANNED"
+    },
+    {
+      "id": "OMV-007",
+      "name": "Google Depth Expansion",
+      "required": true,
+      "depends_on": [
+        "OMV-001",
+        "OMV-005"
+      ],
+      "state": "PLANNED"
+    },
+    {
+      "id": "OMV-008",
+      "name": "Browser Runtime Harvest",
+      "required": true,
+      "depends_on": [
+        "OMV-009"
+      ],
+      "state": "PLANNED"
+    },
+    {
+      "id": "OMV-009",
+      "name": "Durable Regression Harvest",
+      "required": true,
+      "depends_on": [],
+      "state": "PLANNED"
+    },
+    {
+      "id": "OMV-010",
+      "name": "Personal Finance",
+      "required": false,
+      "depends_on": [
+        "OMV-005"
+      ],
+      "state": "OPTIONAL"
+    }
+  ],
+  "forbidden": [
+    "peer_openmuse_agent",
+    "copilotkit_intelligence_as_truth",
+    "second_attention_plane",
+    "payment_automation",
+    "browser_input_bypass",
+    "memory_authority_replacement"
+  ]
+}
