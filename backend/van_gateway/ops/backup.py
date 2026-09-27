@@ -52,6 +52,7 @@ class BackupPart(str, Enum):
     CONFIGURATION = "CONFIGURATION"
     EVIDENCE = "EVIDENCE"
     PROJECT_STATE = "PROJECT_STATE"
+    DOCUMENTS = "DOCUMENTS"
 
 
 def _digest_file(path: Path) -> str:
@@ -167,6 +168,7 @@ def create_backup(
     configuration_paths: Iterable[str | os.PathLike[str]] = (),
     evidence_dir: str | os.PathLike[str] | None = None,
     project_state_dir: str | os.PathLike[str] | None = None,
+    document_dir: str | os.PathLike[str] | None = None,
     now_unix: int | None = None,
 ) -> Manifest:
     """Write a complete, self-describing backup into `destination`."""
@@ -208,6 +210,13 @@ def create_backup(
     if project_state_dir is not None:
         entries += _copy_tree(Path(project_state_dir), root / "project-state",
                               BackupPart.PROJECT_STATE.value, root)
+    if document_dir is not None:
+        # OMV-001: document rows are useless without the immutable source/output bytes
+        # they digest. Keep them as their own backup part so a restore can prove the
+        # database and the file payloads travelled together.
+        entries += _copy_tree(
+            Path(document_dir), root / "documents", BackupPart.DOCUMENTS.value, root
+        )
 
     connection = sqlite3.connect(str(backup_db))
     try:
@@ -290,6 +299,7 @@ def restore(
     *,
     database_path: str | os.PathLike[str],
     overwrite: bool = False,
+    document_dir: str | os.PathLike[str] | None = None,
 ) -> dict[str, Any]:
     """Restore the database from a verified backup.
 
@@ -311,7 +321,30 @@ def restore(
             sidecar.unlink()
     _sqlite_backup(Path(backup_dir) / DATABASE_NAME, target)
     manifest = read_manifest(backup_dir)
-    return {"restored_to": str(target), "schema_version": manifest.schema_version}
+
+    document_entries = [
+        entry for entry in manifest.entries if entry.part == BackupPart.DOCUMENTS.value
+    ]
+    documents_restored = 0
+    if document_entries:
+        source_documents = Path(backup_dir) / "documents"
+        target_documents = (
+            Path(document_dir) if document_dir is not None else target.parent / "documents"
+        )
+        if target_documents.exists():
+            if not overwrite:
+                raise BackupError(
+                    f"{target_documents} exists; pass overwrite=True to replace document state"
+                )
+            shutil.rmtree(target_documents)
+        shutil.copytree(source_documents, target_documents)
+        documents_restored = len(document_entries)
+
+    return {
+        "restored_to": str(target),
+        "schema_version": manifest.schema_version,
+        "documents_restored": documents_restored,
+    }
 
 
 def drill(
@@ -321,6 +354,7 @@ def drill(
     configuration_paths: Iterable[str | os.PathLike[str]] = (),
     evidence_dir: str | os.PathLike[str] | None = None,
     project_state_dir: str | os.PathLike[str] | None = None,
+    document_dir: str | os.PathLike[str] | None = None,
 ) -> dict[str, Any]:
     """Back up, restore into a scratch location, and prove the copy is the original.
 
@@ -333,10 +367,14 @@ def drill(
     manifest = create_backup(
         database_path=database_path, destination=backup_dir,
         configuration_paths=configuration_paths, evidence_dir=evidence_dir,
-        project_state_dir=project_state_dir,
+        project_state_dir=project_state_dir, document_dir=document_dir,
     )
     verification = verify(backup_dir)
-    restore(backup_dir, database_path=restored, overwrite=True)
+    restored_documents = space / "restored" / "documents"
+    restore(
+        backup_dir, database_path=restored, overwrite=True,
+        document_dir=restored_documents,
+    )
 
     connection = sqlite3.connect(str(restored))
     try:
@@ -364,6 +402,9 @@ def drill(
         "rows_compared": sum(manifest.row_counts.values()),
         "differing_tables": differing,
         "audit_chain": {"backup": manifest.audit_chain, "restored": restored_chain},
+        "documents_compared": sum(
+            1 for entry in manifest.entries if entry.part == BackupPart.DOCUMENTS.value
+        ),
         "restored_to": str(restored),
     }
 
