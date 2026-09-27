@@ -232,14 +232,19 @@ class ComputerInteractionFabric:
         Admission happens before lease acquisition. Completion is accepted only while the
         exact lease generation that started this operation is still active.
         """
-        operation_id = await self.begin(request, now_ms=now_ms)
         worker = self.worker_impls.get(request.surface)
         if worker is None:
-            await self.complete(
-                operation_id, state=OperationState.FAILED,
-                error_code="OPERATION_WORKER_UNBOUND", now_ms=now_ms,
-            )
+            # Refuse before writing PENDING work nobody can perform.
             raise ComputerUseError("OPERATION_WORKER_UNBOUND", request.surface.value)
+        status_fn = getattr(worker, "status", None)
+        if status_fn is not None:
+            status = await status_fn()
+            if not bool(status.get("ready")):
+                raise ComputerUseError(
+                    "OPERATION_WORKER_NOT_READY",
+                    str(status.get("reason") or status.get("state") or request.surface.value),
+                )
+        operation_id = await self.begin(request, now_ms=now_ms)
 
         lease = None
         try:
