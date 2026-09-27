@@ -33,7 +33,7 @@ Commit key: c193d47 (authority/degraded/revoke) · b78cbf4 (Hermes surface) · b
 |---|---|---|---|
 | GAP-F-001 | Owner memory has no gateway write producer | FIXED_AND_EVIDENCED | 528366b `command/local_executors.py` (memory.remember, memory.decision.record → OwnerFactAuthor, CANONICAL_OWNER) · `verification/production.py` owner-fact-readback verifier · `backend/tests/test_local_typed_actions.py` (VERIFIED_SUCCESS only via re-read) · b78cbf4 shim `context_fact_candidate`/`context_edge_candidate` · 5498a6f Memory screen (`memory/MemoryRoute.kt`). |
 | GAP-F-002 | Reminders unreachable from command path | FIXED_AND_EVIDENCED | 528366b `reminder.create` executor + resolver ("remind me to X at/in/on Y"), migration 29 `reminders.source` · reminder-readback verifier · b78cbf4 `reminder_create` tool → `POST /v1/runtime/reminders` (source=hermes) · 5498a6f Home "Upcoming" panel from `GET /v1/reminders`. |
-| GAP-F-003 | Hermes cannot read trading state | FIXED_AND_EVIDENCED | b78cbf4 `/v1/runtime/trading/{status,portfolio,positions,risk,market-state,trade/{id}}` + trading tools · 3d845bc commander `positions`/`assessment` (read-only) · PR #59 exact shim/registration contract now pins **51 tools**. |
+| GAP-F-003 | Hermes cannot read trading state | FIXED_AND_EVIDENCED | b78cbf4 `/v1/runtime/trading/{status,portfolio,positions,risk,market-state,trade/{id}}` + trading tools · 3d845bc commander `positions`/`assessment` (read-only) · PR #59 exact shim/registration contract now pins **54 tools**. |
 | GAP-F-004 | Cognition invoker is a stub advertising a model hierarchy | FIXED_AND_EVIDENCED (repo) / live QUAL-TRD-05 | 3d845bc `trading/vati/cognition/invokers.py` (NullInvoker, HttpJsonInvoker, HermesRunInvoker from session config); read model reports the actual invoker or `MODEL_INVOKER_UNCONFIGURED` · `trading/tests/test_active_trade_e2e.py`. |
 | GAP-F-005 | trading.halt is dispatched to Hermes instead of executed | FIXED_AND_EVIDENCED | 528366b `TradingHaltExecutor` (owner-halt OwnerAuthority token in `client_context.owner_halt_authority_ref`, A4 biometric proof unchanged) · `test_local_typed_actions.py::test_trading_halt_*` · 81805c9 Android halt: `trading/TradingHaltAuthority.kt` signs the owner-halt grant under biometrics, `client_context.owner_halt_authority_ref` threaded through `VanCommandController` → `VanGatewayClient.dispatchCommand`, second biometric on the gateway's A4 challenge. |
 | GAP-F-006 | Browser/automation have no Hermes initiator | FIXED_AND_EVIDENCED | b78cbf4 shim `browser_task_create/assignment_run/task_status/task_evidence`, `automation_route/execute/run_status`; AGENTS.md and skills made truthful. |
@@ -79,7 +79,7 @@ Gateway (FastAPI)
   ├─ CommandOrchestrator ──► LOCAL_EXECUTORS (memory / decision / reminder / trading.halt)
   │        │                    └─ ActionRuntime begin → verify(read-back) → mission VERIFIED_SUCCESS
   │        └─ everything else ──► Hermes run (canonical_context + context_gaps + permitted_strategies)
-  ├─ OwnerRuntimeApi (scoped internal token, ControlScope.RUNTIME) ◄── Hermes MCP shim (51 tools, exact-set contract)
+  ├─ OwnerRuntimeApi (scoped internal token, ControlScope.RUNTIME) ◄── Hermes MCP shim (54 tools, exact-set contract)
   ├─ Learning: calibrate() ← owner corrections; strategies_for() → canonical_context; AutonomyGate
   ├─ Proactive follow-ups (scheduler) · TradingEventBridge (trading.trade.closed → device events)
   └─ Degraded registry (9 codes) → /health.degraded[] → device DegradedModeStore
@@ -214,7 +214,7 @@ The repository now has executable paths for the product gaps found after the Fab
 remains here is deliberately **live evidence**, not missing code:
 
 - **Gateway/Android production path:** stable named HTTPS ingress, production release signing + trust anchor, owner-device provisioning and physical S24 acceptance (overlay, notification listener, biometric approval, Doze, process death/reboot/reconnect, shares, microphone/TTS and docking).
-- **Hermes current-head requalification:** mount the exact **51-tool** `van_owner_runtime` surface and prove VAN command → gateway → Hermes run → MCP tool → `mission_result` → verification → owner-visible final result. Earlier profile/model receipts do not certify the changed interface.
+- **Hermes current-head requalification:** mount the exact **54-tool** `van_owner_runtime` surface and prove VAN command → gateway → Hermes run → MCP tool → `mission_result` → verification → owner-visible final result. Earlier profile/model receipts do not certify the changed interface.
 - **Trading:** live feed provenance, demo broker fills, SHADOW and LIMITED_LIVE progression remain required. The cognition injection path is implemented; provider/Hermes credentials and a live shadow round-trip are deployment evidence.
 - **Voice:** KWS/ASR/speaker assets and the new sherpa TTS bundle/config must be deployed to the S24 and measured. Repository code no longer treats sherpa as a fictional engine.
 - **Temporal:** the repository now self-hosts a loopback-only single-node Temporal 1.32.0 server with isolated PostgreSQL by default, plus the durable worker/bridge. Deployment and a restart/recovery canary are still required before LIVE qualification.
