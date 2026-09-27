@@ -8,7 +8,7 @@ from typing import Any, AsyncIterator
 
 import aiosqlite
 
-SCHEMA_VERSION = 30
+SCHEMA_VERSION = 32
 
 
 MIGRATION_17 = """
