@@ -48,7 +48,8 @@ Allowed tools are deliberately narrow:
 - `context_fact_candidate` / `context_edge_candidate` — INFERRED/MODEL_DERIVED only
 - `knowledge_status`, `vekl_query`, `obsidian_query`, `notebook_enterprise_recent`,
   `notebook_enterprise_get`, `notebook_consumer_ask`, `knowledge_action_execute`
-- `google_status`, `google_capabilities`, `google_gmail_search`, `google_calendar_agenda`,
+- `google_status`, `google_capabilities`, `google_gmail_search`, `google_gmail_thread`,
+  `google_gmail_attachment_import`, `google_calendar_agenda`, `google_calendar_review`,
   `google_drive_search`, `google_contacts_resolve`, `google_tasks_list`, `google_job_plan`,
   `google_action_execute`
 - `trading_portfolio`, `trading_positions`, `trading_risk`, `trading_market_state`,
