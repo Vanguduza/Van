@@ -483,6 +483,7 @@ def create_app() -> FastAPI:
         image=settings.computer_worker_image,
         deployment_id=settings.computer_worker_deployment_id,
         timeout_seconds=settings.computer_worker_timeout_seconds,
+        qualification_file=settings.computer_worker_qualification_file,
     ))
     computer_use = ComputerInteractionFabric(
         store,
