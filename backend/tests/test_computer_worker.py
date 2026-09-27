@@ -25,6 +25,14 @@ class GoodWorker:
         )
 
 
+class NotReadyWorker:
+    async def status(self):
+        return {"ready": False, "state": "UNQUALIFIED", "reason": "missing_receipt"}
+
+    async def execute(self, operation_id, request, lease):
+        raise AssertionError("not-ready worker must never execute")
+
+
 class UnknownWorker:
     async def execute(self, operation_id, request, lease):
         raise ComputerWorkerOutcomeUnknown("COMPUTER_OUTCOME_UNKNOWN")
@@ -150,3 +158,15 @@ async def test_enabled_worker_requires_image_bound_qualification(tmp_path, monke
     status=await worker.status()
     assert status["ready"] is False
     assert status["reason"]=="COMPUTER_QUALIFICATION_IMAGE_DRIFT"
+
+
+@pytest.mark.asyncio
+async def test_not_ready_worker_refuses_before_operation_row_exists(tmp_path):
+    store = await make_store(tmp_path)
+    fabric = ComputerInteractionFabric(
+        store, worker_impls={Surface.TERMINAL: NotReadyWorker()}
+    )
+    with pytest.raises(ComputerUseError, match="OPERATION_WORKER_NOT_READY"):
+        await fabric.execute_operation(terminal_request())
+    row = await store.fetchone("SELECT COUNT(*) AS n FROM computer_operations")
+    assert int(row["n"]) == 0
