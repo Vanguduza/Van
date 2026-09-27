@@ -1308,6 +1308,14 @@ def create_app() -> FastAPI:
             # operations enter through the same POST, so possession of the bound owner key
             # is required before the fabric decides the operation's own class.
             or path == "/v1/computer-use/operations"
+            # OMV-001/003/004/006 — all owner-state mutations introduced by the
+            # convergence pack prove possession of the bound handset key. GET polling
+            # remains proof-free because the method gate above has already returned.
+            or path.startswith("/v1/documents")
+            or path.startswith("/v1/goals")
+            or path.startswith("/v1/watches")
+            or path.startswith("/v1/suggestions")
+            or path.startswith("/v1/conversations")
             # The phone's TLS client certificate is minted here: proof of the bound key.
             or path == "/v1/devices/tls-certificate"
             # VAN-DEV-001 — the one DIAL development mutation. Reads under /v1/dial-dev
