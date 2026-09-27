@@ -212,7 +212,7 @@ fun ConvergenceRoute(
             VanPanel(dense = true) {
                 Column(verticalArrangement = Arrangement.spacedBy(tokens.space.space1)) {
                     Row(horizontalArrangement = Arrangement.spacedBy(tokens.space.space2)) {
-                        StatusChip(label = artifact.optString("kind", "RESULT"), role = StatusSemantics.ROLE_EVIDENCE)
+                        StatusChip(label = artifact.optString("kind", "RESULT"), role = StatusSemantics.ROLE_COGNITION)
                         Text(artifact.optString("title", "Result"), style = tokens.type.headline, color = tokens.color.textPrimary)
                     }
                     val summary = artifact.optString("summary")
