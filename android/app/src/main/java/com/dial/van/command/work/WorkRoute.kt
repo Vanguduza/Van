@@ -71,6 +71,7 @@ fun WorkRoute(
     onOpenBrowser: () -> Unit,
     onOpenArtemis: () -> Unit,
     onOpenActivity: () -> Unit,
+    onOpenConvergence: () -> Unit,
     onOpenDevelopment: () -> Unit = {},
 ) {
     val tokens = LocalVanTokens.current
@@ -173,6 +174,12 @@ fun WorkRoute(
         item {
             OutlinedButton(onClick = onOpenArtemis) {
                 Text("ARTEMIS Android Lab")
+            }
+        }
+
+        item {
+            OutlinedButton(onClick = onOpenConvergence) {
+                Text("Documents, goals & results")
             }
         }
 
