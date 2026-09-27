@@ -110,6 +110,9 @@ from van_gateway.browser.interactive_api import (
 )
 from van_gateway.browser.interactive_service import InteractiveSessionService
 from van_gateway.browser.quality_api import QualityControllers, build_quality_router
+from van_gateway.computer_use.api import build_computer_use_router
+from van_gateway.computer_use.fabric import ComputerInteractionFabric, Surface
+from van_gateway.computer_use.worker import DockerComputerConfig, DockerComputerWorker
 from van_gateway.connectivity.provisioning import (
     build_provisioning_payload,
     sign_provisioning_payload,
@@ -471,10 +474,24 @@ def create_app() -> FastAPI:
     )
     automation_registry = AutomationRegistry(store)
     automation_hot_index = HotWorkflowIndex()
+    computer_worker = DockerComputerWorker(DockerComputerConfig(
+        enabled=settings.computer_worker_enabled,
+        image=settings.computer_worker_image,
+        deployment_id=settings.computer_worker_deployment_id,
+        timeout_seconds=settings.computer_worker_timeout_seconds,
+    ))
+    computer_use = ComputerInteractionFabric(
+        store,
+        worker_impls=(
+            {Surface.TERMINAL: computer_worker}
+            if settings.computer_worker_enabled else {}
+        ),
+    )
     # One index, so `/v1/automation/health` reports the index work is routed
     # through rather than an empty copy of it.
     automation_health = AutomationHealthApi(
-        store, settings, degraded=degraded, hot_index=automation_hot_index
+        store, settings, degraded=degraded, hot_index=automation_hot_index,
+        computer_use=computer_use,
     )
     # The dispatcher shares the owner runtime's ActionRuntime and command
     # authority: an automation run must meet the same single final authority
@@ -920,6 +937,8 @@ def create_app() -> FastAPI:
     app.state.orchestrator = orchestrator
     app.state.owner_runtime = owner_runtime
     app.state.automation_health = automation_health
+    app.state.computer_use = computer_use
+    app.state.computer_worker = computer_worker
     app.state.automation = automation
     app.state.temporal_automation = temporal_automation
     app.state.automation_registry = automation_registry
@@ -948,6 +967,7 @@ def create_app() -> FastAPI:
     app.include_router(build_goal_router(goals))
     app.include_router(build_suggestion_router(suggestions))
     app.include_router(build_conversation_router(conversations))
+    app.include_router(build_computer_use_router(computer_use))
     app.include_router(build_dial_dev_router(
         client=dial_dev_client,
         config=dial_dev_config,
@@ -1281,6 +1301,10 @@ def create_app() -> FastAPI:
             or path == "/v1/google/owner-revoke"
             or path == "/v1/visual/acceptance"
             or path == "/v1/artemis/console/session"
+            # OMV-002 — a computer operation may write the private workspace. Even A1/A2
+            # operations enter through the same POST, so possession of the bound owner key
+            # is required before the fabric decides the operation's own class.
+            or path == "/v1/computer-use/operations"
             # The phone's TLS client certificate is minted here: proof of the bound key.
             or path == "/v1/devices/tls-certificate"
             # VAN-DEV-001 — the one DIAL development mutation. Reads under /v1/dial-dev
