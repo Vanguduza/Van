@@ -1,0 +1,57 @@
+{
+  "revision": "1.0",
+  "waves": [
+    {
+      "wave": 0,
+      "packages": [
+        "OMV-009"
+      ],
+      "exit": "provenance and regression lock green"
+    },
+    {
+      "wave": 1,
+      "packages": [
+        "OMV-005"
+      ],
+      "exit": "artifact contract green"
+    },
+    {
+      "wave": 2,
+      "packages": [
+        "OMV-001",
+        "OMV-002"
+      ],
+      "exit": "document and computer repository paths complete"
+    },
+    {
+      "wave": 3,
+      "packages": [
+        "OMV-008",
+        "OMV-007"
+      ],
+      "exit": "browser and Google depth contracts green"
+    },
+    {
+      "wave": 4,
+      "packages": [
+        "OMV-003",
+        "OMV-004"
+      ],
+      "exit": "goals/watches/suggestions reachable"
+    },
+    {
+      "wave": 5,
+      "packages": [
+        "OMV-006"
+      ],
+      "exit": "self-hosted threads replay-safe"
+    },
+    {
+      "wave": 6,
+      "packages": [
+        "OMV-010"
+      ],
+      "optional": true
+    }
+  ]
+}
