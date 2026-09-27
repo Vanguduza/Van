@@ -1,0 +1,36 @@
+# OMV-008 — exact-IP public-web egress mediation for the owner's Chromium.
+#
+# This is deliberately a separate unprivileged process. It holds no browser profile,
+# no VAN/Gateway credential and no owner signing material. Chromium is configured to use it
+# for HTTP(S) with the implicit loopback bypass removed.
+[Unit]
+Description=VAN Browser exact-IP egress proxy (loopback only)
+After=network-online.target
+Wants=network-online.target
+
+[Service]
+Type=simple
+User=van-egress
+Group=van-egress
+EnvironmentFile=/etc/van-browser-stream/runtime.env
+WorkingDirectory=/opt/van-browser-stream/src
+ExecStart=/opt/van-browser-stream/venv/bin/python -m services.browser_control_agent.egress_proxy --host 127.0.0.1 --port ${VAN_BROWSER_EGRESS_PORT}
+Restart=on-failure
+RestartSec=5
+
+NoNewPrivileges=true
+PrivateTmp=true
+ProtectSystem=strict
+ProtectHome=true
+ProtectKernelTunables=true
+ProtectKernelModules=true
+ProtectControlGroups=true
+RestrictSUIDSGID=true
+RestrictRealtime=true
+LockPersonality=true
+ReadOnlyPaths=/opt/van-browser-stream
+InaccessiblePaths=-/var/lib/van-browser-profiles
+ReadWritePaths=/var/log/van-browser-stream
+
+[Install]
+WantedBy=multi-user.target
