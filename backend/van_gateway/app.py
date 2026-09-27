@@ -19,6 +19,8 @@ from pydantic import BaseModel, Field, ValidationError
 from van_gateway.action.service import ActionPolicyError
 from van_gateway.artemis.console import ArtemisConsoleProxy
 from van_gateway.attention.engine import AttentionEngine
+from van_gateway.artifacts.api import build_artifact_router
+from van_gateway.artifacts.service import ArtifactService
 from van_gateway.audit.service import AuditService
 from van_gateway.auth.service import AuthError, AuthService
 from van_gateway.approval.service import OwnerApprovalError, OwnerApprovalService
@@ -37,6 +39,8 @@ from van_gateway.command.mission_link import CommandMissionLink
 from van_gateway.briefing.service import BriefingService
 from van_gateway.config import get_settings
 from van_gateway.decisions.service import DecisionCreate, DecisionService
+from van_gateway.documents.api import build_document_router
+from van_gateway.documents.service import DocumentService
 from van_gateway.degraded.registry import DegradedRegistry
 from van_gateway.dial_dev.api import build_dial_dev_router
 from van_gateway.dial_dev.attention import DialDevAttentionIngest
@@ -443,6 +447,8 @@ def create_app() -> FastAPI:
     audit = AuditService(store)
     degraded = DegradedRegistry()
     attention = AttentionEngine(store, settings.attention_budget_per_hour)
+    artifacts = ArtifactService(store)
+    documents = DocumentService(store, artifacts)
     briefing = BriefingService(store, attention)
     reminders = ReminderService(store)
     decisions = DecisionService(store, attention)
@@ -889,6 +895,8 @@ def create_app() -> FastAPI:
     app.state.owner_memory = owner_memory
     app.state.learning = learning
     app.state.degraded = degraded
+    app.state.artifacts = artifacts
+    app.state.documents = documents
     app.state.visual_acceptance = visual_acceptance
     # Exposed like `degraded`: which jobs a build actually installs is a property of
     # the running app, and a job list that exists only inside a closure is how
@@ -923,6 +931,8 @@ def create_app() -> FastAPI:
     app.state.dial_dev_client = dial_dev_client
     app.state.dial_dev_attention = dial_dev_attention
     app.include_router(owner_runtime.router)
+    app.include_router(build_artifact_router(artifacts))
+    app.include_router(build_document_router(documents))
     app.include_router(build_dial_dev_router(
         client=dial_dev_client,
         config=dial_dev_config,
