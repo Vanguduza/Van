@@ -171,8 +171,17 @@ class GoalService:
         if body.goal_id and await self._goal(body.goal_id) is None:
             raise GoalServiceError("GOAL_UNKNOWN")
         kind_raw=str(body.condition.get("kind","")).upper()
-        try: WatchConditionKind(kind_raw)
-        except ValueError as exc: raise GoalServiceError("WATCH_CONDITION_INVALID") from exc
+        try:
+            kind = WatchConditionKind(kind_raw)
+        except ValueError as exc:
+            raise GoalServiceError("WATCH_CONDITION_INVALID") from exc
+        if kind in {WatchConditionKind.NUMERIC_ABOVE, WatchConditionKind.NUMERIC_BELOW}:
+            try:
+                float(body.condition["threshold"])
+            except (KeyError, TypeError, ValueError) as exc:
+                raise GoalServiceError("WATCH_THRESHOLD_INVALID") from exc
+        if kind is WatchConditionKind.TEXT_CONTAINS and not str(body.condition.get("text", "")).strip():
+            raise GoalServiceError("WATCH_TEXT_REQUIRED")
         now=int(time.time()*1000) if now_ms is None else now_ms
         watch_id=f"watch_{uuid.uuid4().hex}"
         await self.store.execute(
