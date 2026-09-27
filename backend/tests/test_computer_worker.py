@@ -113,3 +113,40 @@ async def test_unknown_mutation_outcome_is_not_reported_failed_or_success(tmp_pa
     rows = await fabric.for_mission("m1")
     assert rows[0]["state"] == OperationState.OUTCOME_UNKNOWN.value
     assert rows[0]["evidence_ref"] is None
+
+
+@pytest.mark.asyncio
+async def test_enabled_worker_requires_image_bound_qualification(tmp_path, monkeypatch):
+    import json
+    from van_gateway.computer_use.worker import DockerComputerConfig, DockerComputerWorker, _Run
+
+    receipt=tmp_path/"qualification.json"
+    receipt.write_text(json.dumps({
+        "status":"PASS","qualified":True,"image":"van-computer:test",
+        "image_id":"sha256:qualified","qualified_at":"2026-09-27T00:00:00Z",
+    }))
+    worker=DockerComputerWorker(DockerComputerConfig(
+        enabled=True,image="van-computer:test",qualification_file=str(receipt),
+    ))
+
+    async def fake_docker(args, **_kwargs):
+        if args[:2]==["image","inspect"] and "--format" in args:
+            return _Run(b"sha256:qualified\n",b"",0,False,False)
+        if args[:1]==["info"]:
+            return _Run(b"27.0\n",b"",0,False,False)
+        if args[:2]==["image","inspect"]:
+            return _Run(b"[]",b"",0,False,False)
+        raise AssertionError(args)
+
+    monkeypatch.setattr(worker,"_docker",fake_docker)
+    status=await worker.status()
+    assert status["ready"] is True
+    assert status["image_id"]=="sha256:qualified"
+
+    receipt.write_text(json.dumps({
+        "status":"PASS","qualified":True,"image":"van-computer:test",
+        "image_id":"sha256:old","qualified_at":"2026-09-27T00:00:00Z",
+    }))
+    status=await worker.status()
+    assert status["ready"] is False
+    assert status["reason"]=="COMPUTER_QUALIFICATION_IMAGE_DRIFT"
