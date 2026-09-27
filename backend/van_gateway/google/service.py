@@ -11,6 +11,7 @@ from cryptography.fernet import Fernet, InvalidToken
 from van_gateway.action.models import ExecutionStatus, VerificationObservation
 from van_gateway.action.service import ActionPolicyError, ActionRuntime
 from van_gateway.models import DegradedCode, GoogleConnectionStatus
+from van_gateway.google.transport import GoogleOutcomeUnknown
 from van_gateway.storage.db import Store
 
 
@@ -143,6 +144,16 @@ class GoogleService:
         token = await self._api_token(owner_id)
         return await self._require_transport().gmail_message_get(token, message_id)
 
+    async def gmail_thread_get(self, thread_id: str, *, owner_id: str = "owner") -> dict:
+        token = await self._api_token(owner_id)
+        return await self._require_transport().gmail_thread_get(token, thread_id)
+
+    async def gmail_attachment_get(
+        self, message_id: str, attachment_id: str, *, owner_id: str = "owner"
+    ) -> bytes:
+        token = await self._api_token(owner_id)
+        return await self._require_transport().gmail_attachment_get(token, message_id, attachment_id)
+
     async def calendar_agenda(self, *, owner_id: str = "owner") -> list[dict]:
         token = await self._api_token(owner_id)
         return await self._require_transport().calendar_agenda(token)
@@ -154,6 +165,35 @@ class GoogleService:
     async def calendar_event_get(self, event_id: str, *, owner_id: str = "owner") -> dict:
         token = await self._api_token(owner_id)
         return await self._require_transport().calendar_event_get(token, event_id)
+
+    async def calendar_event_review(
+        self, event_id: str, *, owner_id: str = "owner"
+    ) -> dict:
+        token = await self._api_token(owner_id)
+        return await self._require_transport().calendar_event_review(token, event_id)
+
+    async def calendar_create(
+        self, event: dict[str, Any], *, owner_id: str = "owner"
+    ) -> dict:
+        token = await self._api_token(owner_id)
+        return await self._require_transport().calendar_create(token, event)
+
+    async def calendar_update(
+        self, event_id: str, event: dict[str, Any], expected_version: str,
+        *, owner_id: str = "owner",
+    ) -> dict:
+        token = await self._api_token(owner_id)
+        return await self._require_transport().calendar_update(
+            token, event_id, event, expected_version
+        )
+
+    async def calendar_delete(
+        self, event_id: str, expected_version: str, *, owner_id: str = "owner"
+    ) -> dict:
+        token = await self._api_token(owner_id)
+        return await self._require_transport().calendar_delete(
+            token, event_id, expected_version
+        )
 
     async def execute_authorized_action(
         self,
@@ -180,6 +220,9 @@ class GoogleService:
             "google.gmail.draft",
             "google.gmail.send",
             "google.calendar.reschedule",
+            "google.calendar.create",
+            "google.calendar.update",
+            "google.calendar.delete",
         }:
             raise ActionPolicyError("google_action_not_supported")
 
@@ -256,6 +299,98 @@ class GoogleService:
                 )
                 return {"provider": provider, "verification": receipt.model_dump(mode="json")}
 
+            if execution.action_id == "google.calendar.create":
+                event = dict(parameters["event"])
+                provider = await self.calendar_create(event)
+                event_id = str(provider.get("id") or "")
+                if not event_id:
+                    raise GoogleAuthError("calendar_event_id_missing")
+                correlation = {"event_id": event_id}
+                pointer = f"google://calendar/events/{event_id}"
+                await actions.mark_submitted(
+                    execution_id, correlation=correlation, evidence_pointer=pointer
+                )
+                await actions.mark_verifying(execution_id)
+                try:
+                    observed = await self.calendar_event_get(event_id)
+                    success = str(observed.get("id") or "") == event_id
+                except Exception:
+                    success, observed = False, {}
+                receipt = await actions.verify(
+                    VerificationObservation(
+                        execution_id=execution_id, success=success, partial=not success,
+                        correlation=correlation,
+                        observed_postcondition={
+                            "event_id": str(observed.get("id") or ""),
+                            "etag": str(observed.get("etag") or ""),
+                        },
+                        evidence_pointer=pointer,
+                    )
+                )
+                return {"provider": provider, "verification": receipt.model_dump(mode="json")}
+
+            if execution.action_id == "google.calendar.update":
+                event_id = str(parameters["event_id"])
+                event = dict(parameters["event"])
+                expected_version = str(parameters["expected_version"])
+                provider = await self.calendar_update(event_id, event, expected_version)
+                correlation = {"event_id": str(provider.get("id") or event_id)}
+                pointer = f"google://calendar/events/{event_id}"
+                await actions.mark_submitted(
+                    execution_id, correlation=correlation, evidence_pointer=pointer
+                )
+                await actions.mark_verifying(execution_id)
+                try:
+                    observed = await self.calendar_event_get(event_id)
+                    success = (
+                        str(observed.get("id") or "") == event_id
+                        and str(observed.get("etag") or "") != expected_version
+                    )
+                except Exception:
+                    success, observed = False, {}
+                receipt = await actions.verify(
+                    VerificationObservation(
+                        execution_id=execution_id, success=success, partial=not success,
+                        correlation=correlation,
+                        observed_postcondition={
+                            "event_id": str(observed.get("id") or ""),
+                            "etag": str(observed.get("etag") or ""),
+                        },
+                        evidence_pointer=pointer,
+                    )
+                )
+                return {"provider": provider, "verification": receipt.model_dump(mode="json")}
+
+            if execution.action_id == "google.calendar.delete":
+                event_id = str(parameters["event_id"])
+                expected_version = str(parameters["expected_version"])
+                provider = await self.calendar_delete(event_id, expected_version)
+                correlation = {"event_id": event_id}
+                pointer = f"google://calendar/events/{event_id}"
+                await actions.mark_submitted(
+                    execution_id, correlation=correlation, evidence_pointer=pointer
+                )
+                await actions.mark_verifying(execution_id)
+                observed: dict[str, Any] = {}
+                success = False
+                try:
+                    observed = await self.calendar_event_get(event_id)
+                    success = str(observed.get("status") or "") == "cancelled"
+                except Exception as exc:
+                    success = str(exc) == "google_http_404"
+                receipt = await actions.verify(
+                    VerificationObservation(
+                        execution_id=execution_id, success=success, partial=not success,
+                        correlation=correlation,
+                        observed_postcondition={
+                            "event_id": event_id,
+                            "deleted": success,
+                        },
+                        evidence_pointer=pointer,
+                    )
+                )
+                return {"provider": provider, "verification": receipt.model_dump(mode="json")}
+
             event_id = str(parameters["event_id"])
             new_start_unix = int(parameters["new_start_unix"])
             provider = await self.calendar_reschedule(event_id, new_start_unix)
@@ -289,6 +424,13 @@ class GoogleService:
                 )
             )
             return {"provider": provider, "verification": receipt.model_dump(mode="json")}
+        except GoogleOutcomeUnknown as exc:
+            await actions.fail_execution(
+                execution_id,
+                status=ExecutionStatus.CONFLICTED_STATE,
+                error_code="GOOGLE_OUTCOME_UNKNOWN",
+            )
+            raise GoogleAuthError("google_outcome_unknown") from exc
         except (GoogleAuthError, RuntimeError, KeyError, ValueError) as exc:
             await actions.fail_execution(
                 execution_id,
