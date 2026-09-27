@@ -31,7 +31,10 @@ REQUIRED_TOOLS = {
     "google_status",
     "google_capabilities",
     "google_gmail_search",
+    "google_gmail_thread",
+    "google_gmail_attachment_import",
     "google_calendar_agenda",
+    "google_calendar_review",
     "google_drive_search",
     "google_contacts_resolve",
     "google_tasks_list",
@@ -195,7 +198,10 @@ def test_google_mcp_surface_is_read_or_plan_only():
         "/v1/google/status",
         "/v1/google/capabilities",
         "/v1/google/gmail/search",
+        "/v1/google/gmail/thread",
+        "/v1/google/gmail/attachment/import-pdf",
         "/v1/google/calendar/agenda",
+        "/v1/google/calendar/review",
         "/v1/google/drive/search",
         "/v1/google/contacts/resolve",
         "/v1/google/tasks",
@@ -208,6 +214,9 @@ def test_google_mcp_surface_is_read_or_plan_only():
     assert "/v1/google/gmail/draft" not in text
     assert "/v1/google/calendar/reschedule" not in text
     assert "/v1/google/actions/execute" in text
+    assert "name: 'google_gmail_thread'" in text
+    assert "name: 'google_gmail_attachment_import'" in text
+    assert "name: 'google_calendar_review'" in text
     action_tool = re.search(
         r"name: 'google_action_execute'.*?additionalProperties: false", text, re.S
     )
