@@ -764,6 +764,7 @@ def create_app() -> FastAPI:
             database_path=settings.database_path,
             destination=destination,
             project_state_dir=str(Path(__file__).resolve().parents[2] / "docs" / "project-state"),
+            document_dir=str(Path(settings.database_path).resolve().parent / "documents"),
         )
         return {"destination": str(destination), "entries": len(manifest.entries)}
 
@@ -811,6 +812,7 @@ def create_app() -> FastAPI:
             database_path=settings.database_path,
             workspace=workspace,
             project_state_dir=str(Path(__file__).resolve().parents[2] / "docs" / "project-state"),
+            document_dir=str(Path(settings.database_path).resolve().parent / "documents"),
         )
         app.state.ops_backup_drill = report
         if not report["ok"]:
