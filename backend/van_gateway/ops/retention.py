@@ -424,6 +424,7 @@ _PRIMARY_KEY = {
     "action_executions": "execution_id",
     "browser_interactive_sessions": "session_id",
     "van_sessions": "van_session_id",
+    "owner_goals": "goal_id",
 }
 
 
