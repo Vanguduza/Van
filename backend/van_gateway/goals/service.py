@@ -3,9 +3,12 @@ from __future__ import annotations
 import json
 import time
 import uuid
+import math
+from urllib.parse import urlsplit
 from typing import Any
 
 from van_gateway.attention.engine import AttentionEngine
+from van_gateway.browser.subagent import plausible_hostname
 from van_gateway.models import AttentionSeverity
 from van_gateway.storage.db import Store
 
@@ -182,6 +185,25 @@ class GoalService:
                 raise GoalServiceError("WATCH_THRESHOLD_INVALID") from exc
         if kind is WatchConditionKind.TEXT_CONTAINS and not str(body.condition.get("text", "")).strip():
             raise GoalServiceError("WATCH_TEXT_REQUIRED")
+        if body.source_kind is WatchSourceKind.BROWSER:
+            try:
+                parsed = urlsplit(body.target)
+                port = parsed.port
+            except ValueError as exc:
+                raise GoalServiceError("WATCH_BROWSER_TARGET_INVALID") from exc
+            if (
+                parsed.scheme != "https"
+                or not parsed.hostname
+                or parsed.username is not None
+                or parsed.password is not None
+                or (port is not None and port != 443)
+                or not plausible_hostname(parsed.hostname)
+            ):
+                raise GoalServiceError("WATCH_BROWSER_TARGET_INVALID")
+        if kind in {WatchConditionKind.NUMERIC_ABOVE, WatchConditionKind.NUMERIC_BELOW}:
+            threshold = float(body.condition["threshold"])
+            if not math.isfinite(threshold):
+                raise GoalServiceError("WATCH_THRESHOLD_INVALID")
         now=int(time.time()*1000) if now_ms is None else now_ms
         watch_id=f"watch_{uuid.uuid4().hex}"
         await self.store.execute(
@@ -207,6 +229,25 @@ class GoalService:
             rows=await self.store.fetchall("SELECT * FROM watches ORDER BY updated_at_ms DESC LIMIT ?",(max(1,min(limit,500)),))
         else:
             rows=await self.store.fetchall("SELECT * FROM watches WHERE status = ? ORDER BY updated_at_ms DESC LIMIT ?",(status.value,max(1,min(limit,500))))
+        return [self._watch(row) for row in rows]
+
+    async def due_watches(
+        self,
+        *,
+        now_ms: int | None = None,
+        source_kind: WatchSourceKind | None = None,
+        limit: int = 20,
+    ) -> list[Watch]:
+        now = int(time.time() * 1000) if now_ms is None else now_ms
+        params: list[Any] = [now]
+        where = "status = 'ACTIVE' AND next_run_at_ms <= ?"
+        if source_kind is not None:
+            where += " AND source_kind = ?"
+            params.append(source_kind.value)
+        rows = await self.store.fetchall(
+            f"SELECT * FROM watches WHERE {where} ORDER BY next_run_at_ms, created_at_ms LIMIT ?",
+            tuple(params + [max(1, min(limit, 100))]),
+        )
         return [self._watch(row) for row in rows]
 
     async def set_watch_status(self, watch_id: str, status: WatchStatus, *, now_ms: int | None = None) -> Watch:
