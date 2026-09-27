@@ -12,7 +12,7 @@ from van_gateway.artifacts.models import ArtifactKind, ArtifactSensitivity
 from van_gateway.artifacts.service import ArtifactService
 from van_gateway.storage.db import Store
 
-from .models import DocumentRecord, DocumentStatus
+from .models import DocumentField, DocumentRecord, DocumentStatus
 from .pdf import PdfDocumentError, fill_pdf, inspect_pdf
 
 
@@ -57,8 +57,7 @@ class DocumentService:
             output_artifact_id=row["output_artifact_id"], source_sha256=row["source_sha256"],
             output_sha256=row["output_sha256"], page_count=int(row["page_count"]),
             form_kind=row["form_kind"],
-            fields=[__import__("van_gateway.documents.models", fromlist=["DocumentField"]).DocumentField(**x)
-                    for x in json.loads(row["fields_json"] or "[]")],
+            fields=[DocumentField(**x) for x in json.loads(row["fields_json"] or "[]")],
             status=DocumentStatus(row["status"]), error_code=row["error_code"],
             created_at_ms=int(row["created_at_ms"]), updated_at_ms=int(row["updated_at_ms"]),
         )
