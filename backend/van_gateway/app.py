@@ -358,6 +358,9 @@ class TicketConfirmRequest(BaseModel):
 #: route at all.
 GOOGLE_CONTROL_ROUTES: frozenset[str] = frozenset({
     "/v1/google/gmail/search",
+    "/v1/google/calendar/review",
+    "/v1/google/gmail/attachment/import-pdf",
+    "/v1/google/gmail/thread",
     "/v1/google/actions/execute",
     "/v1/google/gmail/send",
     "/v1/google/gmail/draft",
@@ -2238,6 +2241,57 @@ def create_app() -> FastAPI:
             raise HTTPException(status_code=code, detail=str(exc)) from exc
         except GoogleAuthError as exc:
             raise HTTPException(status_code=503, detail=str(exc)) from exc
+
+    @app.get("/v1/google/gmail/thread")
+    async def gmail_thread(
+        thread_id: str,
+        x_van_internal_token: str | None = Header(default=None),
+    ):
+        require_internal_control(x_van_internal_token, ControlScope.GOOGLE)
+        try:
+            return {"thread": _scrubbed(await google.gmail_thread_get(thread_id))}
+        except GoogleAuthError as exc:
+            raise HTTPException(status_code=503, detail=str(exc)) from exc
+
+    @app.post("/v1/google/gmail/attachment/import-pdf")
+    async def gmail_attachment_import_pdf(
+        message_id: str,
+        attachment_id: str,
+        filename: str = "attachment.pdf",
+        project_id: str | None = None,
+        command_id: str | None = None,
+        mission_id: str | None = None,
+        execution_id: str | None = None,
+        x_van_internal_token: str | None = Header(default=None),
+    ):
+        """Import a Gmail attachment through Document Fabric, never into model context."""
+        require_internal_control(x_van_internal_token, ControlScope.GOOGLE)
+        try:
+            data = await google.gmail_attachment_get(message_id, attachment_id)
+            record = await documents.import_pdf(
+                filename=filename, data=data, project_id=project_id, command_id=command_id,
+                mission_id=mission_id, execution_id=execution_id,
+            )
+            return record.model_dump(mode="json")
+        except GoogleAuthError as exc:
+            raise HTTPException(status_code=503, detail=str(exc)) from exc
+        except Exception as exc:
+            code = getattr(exc, "code", "gmail_attachment_import_failed")
+            raise HTTPException(status_code=422, detail=str(code)) from exc
+
+    @app.get("/v1/google/calendar/review")
+    async def calendar_review(
+        event_id: str,
+        x_van_internal_token: str | None = Header(default=None),
+    ):
+        require_internal_control(x_van_internal_token, ControlScope.GOOGLE)
+        try:
+            return _scrubbed(await google.calendar_event_review(event_id))
+        except GoogleAuthError as exc:
+            raise HTTPException(
+                status_code=409 if str(exc) == "google_outcome_unknown" else 503,
+                detail=str(exc),
+            ) from exc
 
     @app.post("/v1/google/actions/execute")
     async def execute_google_action(
