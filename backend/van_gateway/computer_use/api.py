@@ -16,6 +16,7 @@ def build_computer_use_router(fabric: ComputerInteractionFabric) -> APIRouter:
             unavailable = exc.code in {
                 "OPERATION_NO_WORKER_FOR_SURFACE",
                 "OPERATION_WORKER_UNBOUND",
+                "OPERATION_WORKER_NOT_READY",
                 "COMPUTER_UNCONFIGURED",
                 "COMPUTER_DOCKER_UNAVAILABLE",
                 "COMPUTER_DOCKER_TIMEOUT",
