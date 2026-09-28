@@ -8,7 +8,7 @@ from typing import Any, AsyncIterator
 
 import aiosqlite
 
-SCHEMA_VERSION = 32
+SCHEMA_VERSION = 33
 
 
 MIGRATION_17 = """
@@ -818,6 +818,23 @@ CREATE TABLE IF NOT EXISTS computer_worker_receipts (
 );
 CREATE INDEX IF NOT EXISTS idx_computer_worker_receipts_operation
   ON computer_worker_receipts(operation_id, created_at_ms);
+"""
+
+MIGRATION_33 = """
+-- OMV-006 — queued follow-ups belong to a conversation thread but are not execution
+-- authority. They become work only when promoted through the normal owner/Hermes command path.
+CREATE TABLE IF NOT EXISTS conversation_followups (
+  followup_id TEXT PRIMARY KEY,
+  thread_id TEXT NOT NULL,
+  prompt TEXT NOT NULL,
+  status TEXT NOT NULL DEFAULT 'QUEUED',
+  command_id TEXT,
+  created_at_ms INTEGER NOT NULL,
+  updated_at_ms INTEGER NOT NULL,
+  FOREIGN KEY(thread_id) REFERENCES conversation_threads(thread_id)
+);
+CREATE INDEX IF NOT EXISTS idx_conversation_followups_thread
+  ON conversation_followups(thread_id, status, created_at_ms);
 """
 
 MIGRATIONS: dict[int, str] = {
@@ -2154,6 +2171,7 @@ MIGRATIONS: dict[int, str] = {
     30: MIGRATION_30,
     31: MIGRATION_31,
     32: MIGRATION_32,
+    33: MIGRATION_33,
 }
 
 
