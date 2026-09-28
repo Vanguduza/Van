@@ -1,6 +1,8 @@
 from __future__ import annotations
 
 import uuid
+import hashlib
+import json
 from enum import Enum
 from typing import Any
 
@@ -12,6 +14,8 @@ from van_gateway.action.models import VerificationObservation
 from van_gateway.action.registry import install_builtin_actions
 from van_gateway.action.service import ActionPolicyError, ActionRuntime
 from van_gateway.attention.engine import AttentionEngine
+from van_gateway.artifacts.models import ArtifactKind
+from van_gateway.artifacts.service import ArtifactService
 from van_gateway.briefing.service import BriefingService
 from van_gateway.command.authority import CommandAuthorityError, CommandAuthorityService
 from van_gateway.command.resolver import TypedCommandResolver
@@ -191,6 +195,7 @@ class OwnerRuntimeApi:
         reminders: ReminderService | None = None,
         attention: AttentionEngine | None = None,
         briefing: BriefingService | None = None,
+        artifacts: ArtifactService | None = None,
     ) -> None:
         self.store = store
         self.settings = settings
@@ -203,6 +208,7 @@ class OwnerRuntimeApi:
         self.reminders = reminders
         self.attention = attention
         self.briefing = briefing
+        self.artifacts = artifacts
         self.context = OwnerContextService(store)
         self.retrieval = ContextRetrievalService(store, self.context)
         # GAP-F-008: agent-initiated mutating actions are gated by the autonomy policy.
@@ -466,12 +472,42 @@ class OwnerRuntimeApi:
             except MissionError as exc:
                 code = 404 if exc.code == "HERMES_RUN_UNBOUND" else 409
                 raise HTTPException(status_code=code, detail=exc.code) from exc
+
+            artifact_id = None
+            if self.artifacts is not None and mission.is_terminal and mission.final_outcome:
+                source = {
+                    "mission_id": mission.mission_id,
+                    "state": mission.state.value,
+                    "verification_state": mission.verification_state.value,
+                    "final_outcome": mission.final_outcome,
+                }
+                source_digest = hashlib.sha256(
+                    json.dumps(source, sort_keys=True, separators=(",", ":")).encode("utf-8")
+                ).hexdigest()
+                projection = await self.artifacts.ensure_projection(
+                    kind=ArtifactKind.REPORT,
+                    title=f"Mission result · {mission.title}",
+                    summary=mission.final_outcome,
+                    project_id=mission.project_id,
+                    command_id=mission.authority_envelope.source_command_id,
+                    mission_id=mission.mission_id,
+                    canonical_source_type="mission.outcome",
+                    canonical_source_id=mission.mission_id,
+                    canonical_source_digest=source_digest,
+                    evidence_refs=(
+                        list(mission.verification_record.evidence_refs)
+                        if mission.verification_record is not None else []
+                    ),
+                )
+                artifact_id = projection.artifact_id
+
             return {
                 "hermes_run_id": body.hermes_run_id,
                 "mission_id": mission.mission_id,
                 "state": mission.state.value,
                 "verification_state": mission.verification_state.value,
                 "final_outcome": mission.final_outcome,
+                "artifact_id": artifact_id,
             }
 
         @router.post("/resolve")
