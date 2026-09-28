@@ -107,7 +107,7 @@ def _gmail_raw_reply(
     msg["Message-ID"] = f"<{uuid.uuid4().hex}@van.invalid>"
     msg["In-Reply-To"] = source_id
     msg["References"] = joined
-    msg.set_content(body.replace("\\r\\n", "\\n").replace("\\r", "\\n"))
+    msg.set_content(body.replace("\r\n", "\n").replace("\r", "\n"))
     for filename, maintype, subtype, data in normalised:
         msg.add_attachment(data, maintype=maintype, subtype=subtype, filename=filename)
 
