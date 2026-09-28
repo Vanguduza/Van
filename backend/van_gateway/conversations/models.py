@@ -37,3 +37,20 @@ class ConversationThread(BaseModel):
     archived_at_ms:int|None=None
     draft_text:str=""
     messages:list[ConversationMessage]=Field(default_factory=list)
+    followups:list[ConversationFollowUp]=Field(default_factory=list)
+
+
+class FollowUpStatus(str,Enum):
+    QUEUED="QUEUED"
+    PROMOTED="PROMOTED"
+    DISMISSED="DISMISSED"
+
+
+class ConversationFollowUp(BaseModel):
+    followup_id:str
+    thread_id:str
+    prompt:str
+    status:FollowUpStatus
+    command_id:str|None=None
+    created_at_ms:int
+    updated_at_ms:int
