@@ -109,6 +109,60 @@ class ArtifactService:
         )
         return artifact
 
+    async def ensure_projection(
+        self,
+        *,
+        kind: ArtifactKind,
+        title: str,
+        canonical_source_type: str,
+        canonical_source_id: str,
+        canonical_source_digest: str,
+        summary: str = "",
+        owner_id: str = "owner",
+        project_id: str | None = None,
+        command_id: str | None = None,
+        mission_id: str | None = None,
+        execution_id: str | None = None,
+        mime_type: str | None = None,
+        byte_size: int | None = None,
+        content_ref: str | None = None,
+        preview_ref: str | None = None,
+        evidence_refs: list[str] | None = None,
+        sensitivity: ArtifactSensitivity = ArtifactSensitivity.OWNER_PRIVATE,
+        expires_at_ms: int | None = None,
+        now_ms: int | None = None,
+    ) -> OwnerArtifact:
+        """Return the existing projection for the exact canonical source or create it.
+
+        A replayed terminal Mission callback must not manufacture another owner result card.
+        Canonical identity is source type + source id + source digest; title/summary are
+        presentation and cannot change that identity.
+        """
+        digest = canonical_source_digest.strip().lower()
+        row = await self.store.fetchone(
+            """
+            SELECT * FROM owner_artifacts
+             WHERE canonical_source_type = ?
+               AND canonical_source_id = ?
+               AND canonical_source_digest = ?
+             ORDER BY created_at_ms ASC
+             LIMIT 1
+            """,
+            (canonical_source_type.strip(), canonical_source_id.strip(), digest),
+        )
+        if row is not None:
+            return self._row(row)
+        return await self.create(
+            kind=kind, title=title, summary=summary, owner_id=owner_id,
+            project_id=project_id, command_id=command_id, mission_id=mission_id,
+            execution_id=execution_id, mime_type=mime_type, byte_size=byte_size,
+            canonical_source_type=canonical_source_type,
+            canonical_source_id=canonical_source_id,
+            canonical_source_digest=digest, content_ref=content_ref,
+            preview_ref=preview_ref, evidence_refs=evidence_refs,
+            sensitivity=sensitivity, expires_at_ms=expires_at_ms, now_ms=now_ms,
+        )
+
     async def get(self, artifact_id: str) -> OwnerArtifact | None:
         row = await self.store.fetchone(
             "SELECT * FROM owner_artifacts WHERE artifact_id = ?", (artifact_id,)
