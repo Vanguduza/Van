@@ -27,7 +27,7 @@
         "backend/van_gateway/documents/service.py",
         "backend/van_gateway/documents/api.py",
         "backend/tests/test_document_fabric.py",
-        "android/app/src/main/java/com/dial/van/command/work/ConvergenceRoute.kt",
+        "android/app/src/main/java/com/dial/van/command/work/DocumentRoute.kt",
         "backend/van_gateway/ops/backup.py"
       ]
     },
@@ -126,7 +126,7 @@
         "backend/van_gateway/conversations/service.py",
         "backend/van_gateway/conversations/api.py",
         "backend/tests/test_conversation_store.py",
-        "android/app/src/main/java/com/dial/van/command/work/ConvergenceRoute.kt"
+        "android/app/src/main/java/com/dial/van/command/work/ConversationThreadRoute.kt"
       ]
     },
     {
