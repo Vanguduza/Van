@@ -206,3 +206,15 @@ async def test_filled_document_output_is_attached_to_reviewed_reply(tmp_path):
     assert attachments[0].get_content_type()=="application/pdf"
     assert attachments[0].get_payload(decode=True)==output_bytes
     assert len(result["_van_raw_sha256"])==64
+
+
+
+@pytest.mark.asyncio
+async def test_ambiguous_gmail_send_failure_is_outcome_unknown():
+    async def handler(_request: httpx.Request) -> httpx.Response:
+        return httpx.Response(503, json={"error": "unavailable"})
+
+    async with httpx.AsyncClient(transport=httpx.MockTransport(handler)) as client:
+        transport=GoogleHttpTransport(client)
+        with pytest.raises(GoogleOutcomeUnknown):
+            await transport.gmail_send("token","draft-1")
