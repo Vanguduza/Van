@@ -338,6 +338,31 @@ class GoogleHttpTransport:
         data = await self._request("GET", "https://gmail.googleapis.com/gmail/v1/users/me/messages", token, params={"q": query, "maxResults": 25})
         return data.get("messages", [])
 
+    async def _gmail_write(
+        self,
+        method: str,
+        url: str,
+        token: str,
+        **kwargs: Any,
+    ) -> dict:
+        """A transport failure after a Gmail mutation is outcome-unknown, never retryable.
+
+        The API may have accepted a draft/send before the response disappeared. The
+        ActionRuntime reconciles or asks for owner intervention instead of duplicating it.
+        """
+        try:
+            result = await self._request(method, url, token, **kwargs)
+            return dict(result)
+        except httpx.RequestError as exc:
+            raise GoogleOutcomeUnknown("google_outcome_unknown") from exc
+        except RuntimeError as exc:
+            message = str(exc)
+            if message == "google_http_408" or any(
+                message == f"google_http_{code}" for code in range(500, 600)
+            ):
+                raise GoogleOutcomeUnknown("google_outcome_unknown") from exc
+            raise
+
     async def gmail_draft(
         self, token: str, thread_id: str, body: str,
         attachments: list[dict[str, Any]] | None = None,
@@ -348,7 +373,7 @@ class GoogleHttpTransport:
             "GET",
             f"https://gmail.googleapis.com/gmail/v1/users/me/threads/{thread_id}",
             token,
-            params={"format": "metadata", "metadataHeaders": ["Message-ID", "References", "Subject", "From"]},
+            params={"format": "metadata", "metadataHeaders": ["Message-ID", "References", "Subject", "From", "Reply-To"]},
         )
         messages = [item for item in thread.get("messages") or [] if isinstance(item, dict)]
         if not messages:
@@ -361,7 +386,8 @@ class GoogleHttpTransport:
         references = _single_line(metadata.get("references", ""), "references", max_len=950)
         subject = _single_line(metadata.get("subject", ""), "subject")
         from_header = _single_line(metadata.get("from", ""), "from")
-        reply_to = parseaddr(from_header)[1]
+        reply_header = _single_line(metadata.get("reply-to", ""), "reply_to")
+        reply_to = parseaddr(reply_header or from_header)[1]
         if not reply_to or "@" not in reply_to:
             raise RuntimeError("gmail_reply_recipient_invalid")
         profile = await self._request(
@@ -381,7 +407,7 @@ class GoogleHttpTransport:
             references=references,
             attachments=attachments,
         )
-        provider = await self._request(
+        provider = await self._gmail_write(
             "POST",
             "https://gmail.googleapis.com/gmail/v1/users/me/drafts",
             token,
@@ -400,7 +426,12 @@ class GoogleHttpTransport:
         )
 
     async def gmail_send(self, token: str, draft_id: str) -> dict:
-        return await self._request("POST", f"https://gmail.googleapis.com/gmail/v1/users/me/drafts/{draft_id}/send", token, json={})
+        return await self._gmail_write(
+            "POST",
+            f"https://gmail.googleapis.com/gmail/v1/users/me/drafts/{draft_id}/send",
+            token,
+            json={},
+        )
 
     async def gmail_message_get(self, token: str, message_id: str) -> dict:
         return await self._request(
