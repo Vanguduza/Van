@@ -105,3 +105,45 @@ async def test_stale_calendar_version_is_definite_rejection_not_unknown():
                 },
                 '"stale"',
             )
+
+
+@pytest.mark.asyncio
+async def test_gmail_reply_draft_binds_threading_headers():
+    requests = []
+
+    async def handler(request: httpx.Request) -> httpx.Response:
+        requests.append(request)
+        if request.url.path.endswith("/threads/t1"):
+            return httpx.Response(200, json={
+                "id":"t1",
+                "messages":[{
+                    "id":"m1","threadId":"t1",
+                    "payload":{"headers":[
+                        {"name":"Message-ID","value":"<source@example.com>"},
+                        {"name":"References","value":"<older@example.com>"},
+                        {"name":"Subject","value":"Question"},
+                        {"name":"From","value":"Supplier <supplier@example.com>"},
+                    ]},
+                }],
+            })
+        if request.url.path.endswith("/profile"):
+            return httpx.Response(200, json={"emailAddress":"owner@example.com"})
+        if request.url.path.endswith("/drafts"):
+            body=__import__("json").loads(request.content)
+            return httpx.Response(200, json={
+                "id":"d1",
+                "message":{"id":"md1","threadId":body["message"]["threadId"],"raw":body["message"]["raw"]},
+            })
+        raise AssertionError(str(request.url))
+
+    async with httpx.AsyncClient(transport=httpx.MockTransport(handler)) as client:
+        transport=GoogleHttpTransport(client)
+        result=await transport.gmail_draft("token","t1","Thanks")
+    assert result["id"]=="d1"
+    raw=result["message"]["raw"]
+    decoded=base64.urlsafe_b64decode(raw + "=" * (-len(raw) % 4)).decode("utf-8")
+    assert "In-Reply-To: <source@example.com>" in decoded
+    assert "References: <older@example.com> <source@example.com>" in decoded
+    assert "To: supplier@example.com" in decoded
+    assert "Subject: Re: Question" in decoded
+    assert len(result["_van_raw_sha256"])==64
