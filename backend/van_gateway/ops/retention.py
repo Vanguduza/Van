@@ -141,6 +141,7 @@ POLICIES: tuple[TablePolicy, ...] = (
     _p("conversation_threads", _OWNER),
     _p("conversation_messages", _OWNER, note="Conversation history is owner state, not execution truth."),
     _p("conversation_drafts", _OWNER, note="Unsent owner-authored text must not expire by system policy."),
+    _p("conversation_followups", _OWNER, note="Queued owner-facing continuation state is retained until owner lifecycle action."),
     _p("capability_registry", _OWNER, note="Declarations. Withdrawal is recorded, not deleted."),
     _p("sqlite_sequence", _OWNER, note="SQLite's own AUTOINCREMENT bookkeeping."),
 
