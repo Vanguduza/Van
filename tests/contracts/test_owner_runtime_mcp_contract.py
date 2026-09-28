@@ -59,6 +59,7 @@ REQUIRED_TOOLS = {
     "trading_trade_detail",
     "trading_status",
     "reminder_create",
+    "suggestion_create",
     "attention_list",
     "briefing_read",
     "browser_task_create",
@@ -255,6 +256,19 @@ def test_reminder_create_is_owner_behalf_and_not_a_memory_admission():
     assert tool is not None
     assert "own words" in tool.group(0)
     assert "creates no canonical owner fact" in tool.group(0)
+
+
+def test_suggestion_create_is_evidence_backed_and_non_executing():
+    text = SHIM.read_text(encoding="utf-8")
+    assert "suggestion_create: { method: 'POST', path: () => '/v1/runtime/suggestions'" in text
+    tool = re.search(r"name: 'suggestion_create'.*?additionalProperties: false", text, re.S)
+    assert tool is not None
+    block = tool.group(0)
+    assert "source_refs" in block
+    assert "minItems: 1" in block
+    assert "cannot execute the proposed prompt" in block
+    assert "approved" not in block.lower()
+    assert "execution_id" not in block
 
 
 def test_attention_and_briefing_reads_are_read_only():
