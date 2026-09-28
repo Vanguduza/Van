@@ -29,6 +29,7 @@ object VanRoute {
     const val WORK_ARTEMIS = "work/artemis"
     const val WORK_ASSETS = "work/assets"
     const val WORK_DOCUMENT_TEMPLATE = "work/documents/{documentId}"
+    const val WORK_THREAD_TEMPLATE = "work/threads/{threadId}"
     const val WORK_BROWSER = "work/browser"
     const val WORK_BROWSER_TASKS = "work/browser/tasks"
     const val WORK_BROWSER_ESCALATIONS = "work/browser/escalations"
@@ -89,11 +90,12 @@ object VanRoute {
 
     fun missionRoute(missionId: String): String = "work/missions/${encode(missionId)}"
     fun documentRoute(documentId: String): String = "work/documents/${encode(documentId)}"
+    fun threadRoute(threadId: String): String = "work/threads/${encode(threadId)}"
     fun projectRoute(projectId: String): String = "projects/${encode(projectId)}"
 
     /** Every template this app's `NavHost` declares a `composable` for. */
     val ALL_TEMPLATES: List<String> = listOf(
-        HOME, ATTENTION, WORK, WORK_ACTIVITY, WORK_ARTEMIS, WORK_ASSETS, WORK_DOCUMENT_TEMPLATE,
+        HOME, ATTENTION, WORK, WORK_ACTIVITY, WORK_ARTEMIS, WORK_ASSETS, WORK_DOCUMENT_TEMPLATE, WORK_THREAD_TEMPLATE,
         WORK_BROWSER, WORK_BROWSER_TASKS, WORK_BROWSER_ESCALATIONS,
         WORK_BROWSER_SESSIONS, WORK_BROWSER_POLICY, WORK_MISSION_TEMPLATE, TRADING, MEMORY,
         PROJECTS, PROJECT_DETAIL_TEMPLATE, CONNECTED, SETTINGS,
@@ -117,6 +119,7 @@ object VanRoute {
         WORK_ARTEMIS to WORK,
         WORK_ASSETS to WORK,
         WORK_DOCUMENT_TEMPLATE to WORK_ASSETS,
+        WORK_THREAD_TEMPLATE to WORK_ASSETS,
         WORK_BROWSER to WORK,
         WORK_BROWSER_TASKS to WORK_BROWSER,
         WORK_BROWSER_ESCALATIONS to WORK_BROWSER,
