@@ -36,14 +36,15 @@ class SuggestionService:
         )
 
     async def create(self,body:SuggestionCreate,*,now_ms:int|None=None)->Suggestion:
-        if not body.source_refs:
+        refs=list(dict.fromkeys(ref.strip() for ref in body.source_refs if ref.strip()))
+        if not refs:
             raise SuggestionServiceError("SUGGESTION_EVIDENCE_REQUIRED")
         now=int(time.time()*1000) if now_ms is None else now_ms
         sid=f"sug_{uuid.uuid4().hex}"
         item=await self.attention.upsert(
             title=body.title,severity=AttentionSeverity.INFO,source="suggestion",
             dedupe_key=f"suggestion:{sid}",project_id=body.project_id,
-            payload={"suggestion_id":sid,"source_refs":body.source_refs},
+            payload={"suggestion_id":sid,"source_refs":refs},
         )
         await self.store.execute(
             """
@@ -53,7 +54,7 @@ class SuggestionService:
             ) VALUES (?, ?, ?, ?, NULL, ?, 'NEW', ?, ?, ?, ?, NULL)
             """,
             (sid,body.title.strip(),body.rationale.strip(),body.proposed_prompt.strip(),
-             Store.dumps(body.source_refs),item.id,body.project_id,now,now),
+             Store.dumps(refs),item.id,body.project_id,now,now),
         )
         out=await self.get(sid); assert out is not None; return out
 
