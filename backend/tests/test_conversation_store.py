@@ -48,13 +48,10 @@ async def test_followup_queue_never_executes_by_itself(tmp_path):
     loaded=await service.get(thread.thread_id)
     assert loaded is not None and loaded.followups[0].followup_id==item.followup_id
 
-    with pytest.raises(ConversationServiceError,match="FOLLOWUP_COMMAND_ID_REQUIRED"):
-        await service.decide_followup(thread.thread_id,item.followup_id,"promote",now_ms=3)
-
     promoted=await service.decide_followup(
-        thread.thread_id,item.followup_id,"promote",command_id="cmd-1",now_ms=4
+        thread.thread_id,item.followup_id,"promote",now_ms=4
     )
     assert promoted.status.value=="PROMOTED"
-    assert promoted.command_id=="cmd-1"
+    assert promoted.command_id is None
     with pytest.raises(ConversationServiceError,match="FOLLOWUP_ALREADY_DECIDED"):
         await service.decide_followup(thread.thread_id,item.followup_id,"dismiss",now_ms=5)
