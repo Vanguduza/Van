@@ -129,7 +129,10 @@
         "backend/van_gateway/conversations/service.py",
         "backend/van_gateway/conversations/api.py",
         "backend/tests/test_conversation_store.py",
-        "android/app/src/main/java/com/dial/van/command/work/ConversationThreadRoute.kt"
+        "android/app/src/main/java/com/dial/van/command/work/ConversationThreadRoute.kt",
+        "backend/van_gateway/app.py",
+        "backend/van_gateway/runtime_api.py",
+        "backend/tests/test_command_execution_result.py"
       ]
     },
     {
