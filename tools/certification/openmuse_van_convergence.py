@@ -71,6 +71,7 @@ MARKERS: dict[str, tuple[tuple[str, str], ...]] = {
         ("backend/van_gateway/google/transport.py", "expected_version"),
         ("backend/tests/test_google_openmuse_depth.py", "test_gmail_reply_draft_binds_threading_headers"),
         ("backend/tests/test_google_openmuse_depth.py", "test_filled_document_output_is_attached_to_reviewed_reply"),
+        ("backend/tests/test_extra_apis.py", "test_google_filled_pdf_reply_round_trip_is_action_bound"),
         ("backend/tests/test_extra_apis.py", "expected_raw_sha256"),
         ("backend/tests/test_google_openmuse_depth.py", "test_stale_calendar_version_is_definite_rejection_not_unknown"),
     ),
