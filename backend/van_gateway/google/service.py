@@ -232,6 +232,7 @@ class GoogleService:
                 thread_id = str(parameters["thread_id"])
                 body = str(parameters["body"])
                 provider = await self.gmail_draft(thread_id, body)
+                submitted_raw_sha = str(provider.pop("_van_raw_sha256", "") or "")
                 object_id = str(provider.get("id") or "")
                 if not object_id:
                     raise GoogleAuthError("gmail_draft_id_missing")
@@ -247,7 +248,9 @@ class GoogleService:
                     success = (
                         str(observed.get("id") or "") == object_id
                         and str(message.get("threadId") or "") == thread_id
-                        and str(message.get("raw") or "") == body
+                        and bool(submitted_raw_sha)
+                        and hashlib.sha256(str(message.get("raw") or "").encode("ascii")).hexdigest()
+                        == submitted_raw_sha
                     )
                 except Exception:
                     success, observed = False, {}
