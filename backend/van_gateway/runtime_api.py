@@ -3,6 +3,7 @@ from __future__ import annotations
 import uuid
 import hashlib
 import json
+import logging
 from enum import Enum
 from typing import Any
 
@@ -20,6 +21,7 @@ from van_gateway.briefing.service import BriefingService
 from van_gateway.command.authority import CommandAuthorityError, CommandAuthorityService
 from van_gateway.command.resolver import TypedCommandResolver
 from van_gateway.config import Settings
+from van_gateway.conversations.service import ConversationService
 from van_gateway.context.models import (
     ContextEdgeCandidate,
     ContextGraphQuery,
@@ -209,6 +211,7 @@ class OwnerRuntimeApi:
         briefing: BriefingService | None = None,
         artifacts: ArtifactService | None = None,
         suggestions: SuggestionService | None = None,
+        conversations: ConversationService | None = None,
     ) -> None:
         self.store = store
         self.settings = settings
@@ -223,6 +226,7 @@ class OwnerRuntimeApi:
         self.briefing = briefing
         self.artifacts = artifacts
         self.suggestions = suggestions
+        self.conversations = conversations
         self.context = OwnerContextService(store)
         self.retrieval = ContextRetrievalService(store, self.context)
         # GAP-F-008: agent-initiated mutating actions are gated by the autonomy policy.
@@ -546,6 +550,29 @@ class OwnerRuntimeApi:
                     ),
                 )
                 artifact_id = projection.artifact_id
+
+            if (
+                self.conversations is not None
+                and mission.is_terminal
+                and mission.final_outcome
+            ):
+                try:
+                    main_thread = await self.conversations.ensure_main()
+                    await self.conversations.append_projection(
+                        main_thread.thread_id,
+                        projection_key=f"mission:{mission.mission_id}:terminal",
+                        role="VAN",
+                        body=mission.final_outcome,
+                        command_id=mission.authority_envelope.source_command_id,
+                        mission_id=mission.mission_id,
+                        artifact_refs=([artifact_id] if artifact_id else []),
+                        terminal=True,
+                    )
+                except Exception:
+                    logging.getLogger("van_gateway.conversations").exception(
+                        "failed to project terminal mission %s into main thread",
+                        mission.mission_id,
+                    )
 
             return {
                 "hermes_run_id": body.hermes_run_id,
