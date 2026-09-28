@@ -93,3 +93,17 @@ async def test_document_service_rejects_non_pdf(tmp_path):
     service=DocumentService(store,ArtifactService(store),root=str(tmp_path/"docs"))
     with pytest.raises(DocumentServiceError,match="PDF_SIGNATURE_INVALID"):
         await service.import_pdf(filename="bad.pdf",data=b"not pdf")
+
+
+@pytest.mark.asyncio
+async def test_document_fill_proposal_is_source_digest_bound(tmp_path):
+    store=Store(str(tmp_path/"van.sqlite3")); await store.migrate()
+    service=DocumentService(store,ArtifactService(store),root=str(tmp_path/"docs"))
+    record=await service.import_pdf(filename="form.pdf",data=form_pdf())
+    proposal=await service.propose_fill(record.document_id,{"owner_name":"Tapiwa"})
+    assert proposal.document_id==record.document_id
+    assert proposal.source_sha256==record.source_sha256
+    assert proposal.proposed_values["owner_name"]=="Tapiwa"
+    assert proposal.missing_fields==[]
+    assert len(proposal.proposal_sha256)==64
+    assert proposal.requires_owner_confirmation is True
