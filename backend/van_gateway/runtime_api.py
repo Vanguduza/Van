@@ -484,6 +484,7 @@ class OwnerRuntimeApi:
                 source_digest = hashlib.sha256(
                     json.dumps(source, sort_keys=True, separators=(",", ":")).encode("utf-8")
                 ).hexdigest()
+                verification_record = await self.missions.verification_record(mission.mission_id)
                 projection = await self.artifacts.ensure_projection(
                     kind=ArtifactKind.REPORT,
                     title=f"Mission result · {mission.title}",
@@ -495,8 +496,8 @@ class OwnerRuntimeApi:
                     canonical_source_id=mission.mission_id,
                     canonical_source_digest=source_digest,
                     evidence_refs=(
-                        list(mission.verification_record.evidence_refs)
-                        if mission.verification_record is not None else []
+                        list(verification_record.evidence_refs)
+                        if verification_record is not None else []
                     ),
                 )
                 artifact_id = projection.artifact_id
