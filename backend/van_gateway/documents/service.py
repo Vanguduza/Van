@@ -230,7 +230,13 @@ class DocumentService:
                 raise DocumentServiceError("DOCUMENT_OUTPUT_UNAVAILABLE")
         else:
             raise DocumentServiceError("DOCUMENT_VARIANT_INVALID")
-        data = Path(str(path)).read_bytes()
+        resolved = Path(str(path))
+        if not resolved.is_file():
+            raise DocumentServiceError("DOCUMENT_BYTES_MISSING")
+        try:
+            data = resolved.read_bytes()
+        except OSError as exc:
+            raise DocumentServiceError("DOCUMENT_BYTES_UNREADABLE") from exc
         if self._sha(data) != str(expected):
             raise DocumentServiceError("DOCUMENT_DIGEST_MISMATCH")
         return data, str(row["filename"])
