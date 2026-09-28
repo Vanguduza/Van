@@ -52,3 +52,13 @@ class FillDocumentRequest(BaseModel):
     command_id: str | None = None
     mission_id: str | None = None
     execution_id: str | None = None
+
+
+class DocumentFillProposal(BaseModel):
+    document_id: str
+    source_sha256: str
+    proposed_values: dict[str, Any]
+    missing_fields: list[str] = Field(default_factory=list)
+    unknown_fields: list[str] = Field(default_factory=list)
+    proposal_sha256: str
+    requires_owner_confirmation: bool = True
