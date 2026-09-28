@@ -58,6 +58,7 @@ fun ConvergenceRoute(
     app: VanApplication,
     onBack: () -> Unit,
     onOpenDocument: (String) -> Unit,
+    onOpenThread: (String) -> Unit,
 ) {
     val tokens = LocalVanTokens.current
     val scope = rememberCoroutineScope()
@@ -68,6 +69,10 @@ fun ConvergenceRoute(
     var suggestions by remember { mutableStateOf(JSONArray()) }
     var threads by remember { mutableStateOf(JSONArray()) }
     var error by remember { mutableStateOf<String?>(null) }
+    var goalTitle by remember { mutableStateOf("") }
+    var watchTitle by remember { mutableStateOf("") }
+    var watchTarget by remember { mutableStateOf("") }
+    var threadTitle by remember { mutableStateOf("") }
 
     fun refresh() {
         scope.launch {
@@ -146,6 +151,27 @@ fun ConvergenceRoute(
         }
 
         SectionHeader("Goals", detail = "${goals.length()} owner outcomes")
+        VanPanel(dense = true) {
+            Column(verticalArrangement = Arrangement.spacedBy(tokens.space.space2)) {
+                OutlinedTextField(
+                    value = goalTitle,
+                    onValueChange = { goalTitle = it },
+                    label = { Text("New goal") },
+                    modifier = Modifier.fillMaxWidth(),
+                )
+                Button(
+                    enabled = goalTitle.isNotBlank(),
+                    onClick = {
+                        val title = goalTitle.trim()
+                        scope.launch {
+                            runCatching { app.gatewayClient.convergenceCreateGoal(title) }
+                                .onSuccess { goalTitle = ""; refresh() }
+                                .onFailure { error = it.message ?: "Unable to create goal" }
+                        }
+                    },
+                ) { Text("Add goal") }
+            }
+        }
         jsonObjects(goals).take(20).forEach { goal ->
             VanPanel(dense = true) {
                 Column(verticalArrangement = Arrangement.spacedBy(tokens.space.space1)) {
@@ -161,6 +187,34 @@ fun ConvergenceRoute(
         }
 
         SectionHeader("Watches", detail = "${watches.length()} standing checks")
+        VanPanel(dense = true) {
+            Column(verticalArrangement = Arrangement.spacedBy(tokens.space.space2)) {
+                OutlinedTextField(
+                    value = watchTitle,
+                    onValueChange = { watchTitle = it },
+                    label = { Text("Watch name") },
+                    modifier = Modifier.fillMaxWidth(),
+                )
+                OutlinedTextField(
+                    value = watchTarget,
+                    onValueChange = { watchTarget = it },
+                    label = { Text("HTTPS page") },
+                    modifier = Modifier.fillMaxWidth(),
+                )
+                Button(
+                    enabled = watchTitle.isNotBlank() && watchTarget.startsWith("https://"),
+                    onClick = {
+                        val title = watchTitle.trim()
+                        val target = watchTarget.trim()
+                        scope.launch {
+                            runCatching { app.gatewayClient.convergenceCreatePageWatch(title, target) }
+                                .onSuccess { watchTitle = ""; watchTarget = ""; refresh() }
+                                .onFailure { error = it.message ?: "Unable to create watch" }
+                        }
+                    },
+                ) { Text("Add watch") }
+            }
+        }
         jsonObjects(watches).take(20).forEach { watch ->
             VanPanel(dense = true) {
                 Column(verticalArrangement = Arrangement.spacedBy(tokens.space.space1)) {
@@ -229,11 +283,207 @@ fun ConvergenceRoute(
         }
 
         SectionHeader("Conversation threads", detail = "${threads.length()} self-hosted thread(s)")
+        VanPanel(dense = true) {
+            Column(verticalArrangement = Arrangement.spacedBy(tokens.space.space2)) {
+                OutlinedTextField(
+                    value = threadTitle,
+                    onValueChange = { threadTitle = it },
+                    label = { Text("New thread") },
+                    modifier = Modifier.fillMaxWidth(),
+                )
+                Button(
+                    enabled = threadTitle.isNotBlank(),
+                    onClick = {
+                        val title = threadTitle.trim()
+                        scope.launch {
+                            runCatching { app.gatewayClient.convergenceCreateThread(title) }
+                                .onSuccess { created ->
+                                    threadTitle = ""
+                                    refresh()
+                                    created.optString("thread_id").takeIf { it.isNotBlank() }?.let(onOpenThread)
+                                }
+                                .onFailure { error = it.message ?: "Unable to create thread" }
+                        }
+                    },
+                ) { Text("Create thread") }
+            }
+        }
         jsonObjects(threads).take(10).forEach { thread ->
+            val threadId = thread.optString("thread_id")
+            VanPressable(
+                onClick = { if (threadId.isNotBlank()) onOpenThread(threadId) },
+                modifier = Modifier.fillMaxWidth(),
+                contentDescription = "Open ${thread.optString("title", "thread")}",
+            ) {
+                VanPanel(dense = true) {
+                    Row(horizontalArrangement = Arrangement.spacedBy(tokens.space.space2)) {
+                        Text(thread.optString("title", "Thread"), style = tokens.type.headline, color = tokens.color.textPrimary)
+                        StatusChip(label = thread.optString("status", "ACTIVE"), role = statusRole(thread.optString("status")))
+                    }
+                }
+            }
+        }
+    }
+}
+
+
+@Composable
+fun ConversationThreadRoute(
+    app: VanApplication,
+    threadId: String,
+    onBack: () -> Unit,
+) {
+    val tokens = LocalVanTokens.current
+    val scope = rememberCoroutineScope()
+    var thread by remember(threadId) { mutableStateOf<JSONObject?>(null) }
+    var title by remember(threadId) { mutableStateOf("") }
+    var draft by remember(threadId) { mutableStateOf("") }
+    var newFollowUp by remember(threadId) { mutableStateOf("") }
+    var notice by remember(threadId) { mutableStateOf<String?>(null) }
+
+    fun refresh() {
+        scope.launch {
+            runCatching { app.gatewayClient.convergenceThread(threadId) }
+                .onSuccess {
+                    thread = it
+                    title = it.optString("title")
+                    draft = it.optString("draft_text")
+                    notice = null
+                }
+                .onFailure { notice = it.message ?: "Thread unavailable" }
+        }
+    }
+
+    LaunchedEffect(threadId) { refresh() }
+
+    Column(
+        modifier = Modifier.fillMaxSize()
+            .verticalScroll(rememberScrollState())
+            .padding(horizontal = tokens.space.pageGutter, vertical = tokens.space.space3),
+        verticalArrangement = Arrangement.spacedBy(tokens.space.space3),
+    ) {
+        Button(onClick = onBack) { Text("← Threads") }
+        SectionHeader(
+            thread?.optString("title", "Conversation") ?: "Conversation",
+            detail = "Self-hosted context only; replay never re-executes actions",
+        )
+        notice?.let {
+            Text(it, style = tokens.type.label, color = tokens.color.forStatusRole(StatusSemantics.ROLE_EVENT_RISK))
+        }
+
+        OutlinedTextField(
+            value = title,
+            onValueChange = { title = it },
+            label = { Text("Thread title") },
+            modifier = Modifier.fillMaxWidth(),
+        )
+        Row(horizontalArrangement = Arrangement.spacedBy(tokens.space.space2)) {
+            OutlinedButton(
+                enabled = title.isNotBlank(),
+                onClick = {
+                    scope.launch {
+                        runCatching { app.gatewayClient.convergenceRenameThread(threadId, title.trim()) }
+                            .onSuccess { refresh() }
+                            .onFailure { notice = it.message ?: "Rename failed" }
+                    }
+                },
+            ) { Text("Rename") }
+            val archived = thread?.optString("status") == "ARCHIVED"
+            OutlinedButton(onClick = {
+                scope.launch {
+                    runCatching {
+                        app.gatewayClient.convergenceSetThreadStatus(
+                            threadId,
+                            if (archived) "ACTIVE" else "ARCHIVED",
+                        )
+                    }.onSuccess { refresh() }
+                        .onFailure { notice = it.message ?: "Status change failed" }
+                }
+            }) { Text(if (archived) "Restore" else "Archive") }
+        }
+
+        SectionHeader("Draft", detail = "Stored locally in VAN's thread state until you decide what to do")
+        OutlinedTextField(
+            value = draft,
+            onValueChange = { draft = it },
+            label = { Text("Draft") },
+            modifier = Modifier.fillMaxWidth(),
+        )
+        OutlinedButton(onClick = {
+            scope.launch {
+                runCatching { app.gatewayClient.convergenceSaveThreadDraft(threadId, draft) }
+                    .onSuccess { notice = "Draft saved." }
+                    .onFailure { notice = it.message ?: "Unable to save draft" }
+            }
+        }) { Text("Save draft") }
+
+        SectionHeader("Queued follow-ups", detail = "Promotion returns a fresh owner prompt; it never executes here")
+        OutlinedTextField(
+            value = newFollowUp,
+            onValueChange = { newFollowUp = it },
+            label = { Text("Follow-up prompt") },
+            modifier = Modifier.fillMaxWidth(),
+        )
+        Button(
+            enabled = newFollowUp.isNotBlank() && thread?.optString("status") != "ARCHIVED",
+            onClick = {
+                val prompt = newFollowUp.trim()
+                scope.launch {
+                    runCatching { app.gatewayClient.convergenceQueueThreadFollowUp(threadId, prompt) }
+                        .onSuccess { newFollowUp = ""; refresh() }
+                        .onFailure { notice = it.message ?: "Unable to queue follow-up" }
+                }
+            },
+        ) { Text("Queue follow-up") }
+
+        jsonObjects(thread?.optJSONArray("followups") ?: JSONArray()).forEach { item ->
             VanPanel(dense = true) {
-                Row(horizontalArrangement = Arrangement.spacedBy(tokens.space.space2)) {
-                    Text(thread.optString("title", "Thread"), style = tokens.type.headline, color = tokens.color.textPrimary)
-                    StatusChip(label = thread.optString("status", "ACTIVE"), role = statusRole(thread.optString("status")))
+                Column(verticalArrangement = Arrangement.spacedBy(tokens.space.space2)) {
+                    Text(item.optString("prompt"), style = tokens.type.body, color = tokens.color.textPrimary)
+                    StatusChip(label = item.optString("status", "QUEUED"), role = statusRole(item.optString("status")))
+                    if (item.optString("status") == "QUEUED") {
+                        Row(horizontalArrangement = Arrangement.spacedBy(tokens.space.space2)) {
+                            Button(onClick = {
+                                scope.launch {
+                                    runCatching {
+                                        app.gatewayClient.convergenceDecideThreadFollowUp(
+                                            threadId, item.optString("followup_id"), "promote"
+                                        )
+                                    }.onSuccess { result ->
+                                        val prompt = result.optString("fresh_owner_prompt")
+                                        if (prompt.isNotBlank()) {
+                                            app.commandController.submitText(prompt, VanCommandSource.CHAT)
+                                            notice = "Follow-up sent through the normal VAN command path."
+                                        }
+                                        refresh()
+                                    }.onFailure { notice = it.message ?: "Unable to promote follow-up" }
+                                }
+                            }) { Text("Send to VAN") }
+                            OutlinedButton(onClick = {
+                                scope.launch {
+                                    runCatching {
+                                        app.gatewayClient.convergenceDecideThreadFollowUp(
+                                            threadId, item.optString("followup_id"), "dismiss"
+                                        )
+                                    }.onSuccess { refresh() }
+                                        .onFailure { notice = it.message ?: "Unable to dismiss follow-up" }
+                                }
+                            }) { Text("Dismiss") }
+                        }
+                    }
+                }
+            }
+        }
+
+        SectionHeader("Messages", detail = "${thread?.optJSONArray("messages")?.length() ?: 0} stored")
+        jsonObjects(thread?.optJSONArray("messages") ?: JSONArray()).forEach { message ->
+            VanPanel(dense = true) {
+                Column(verticalArrangement = Arrangement.spacedBy(tokens.space.space1)) {
+                    Text(message.optString("role", "VAN"), style = tokens.type.label, color = tokens.color.textSecondary)
+                    Text(message.optString("body"), style = tokens.type.body, color = tokens.color.textPrimary)
+                    if (message.optBoolean("terminal", false)) {
+                        StatusChip(label = "TERMINAL", role = StatusSemantics.ROLE_FAVOURABLE)
+                    }
                 }
             }
         }
