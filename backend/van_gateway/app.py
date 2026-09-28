@@ -472,7 +472,7 @@ def create_app() -> FastAPI:
     # reminders on the owner's behalf and (below, once constructed) read trading state.
     domain_trust = DomainTrustService(store)
     owner_runtime = OwnerRuntimeApi(
-        store, settings, reminders=reminders, attention=attention, briefing=briefing,
+        store, settings, reminders=reminders, attention=attention, briefing=briefing, artifacts=artifacts,
         # GAP-F-008: agent-initiated mutations consult the earned/granted domain trust.
         autonomy=ActionAutonomyGate(domain_trust),
     )
