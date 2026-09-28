@@ -55,6 +55,14 @@ def build_document_router(service: DocumentService) -> APIRouter:
             raise HTTPException(status_code=404, detail="document_unknown")
         return {"document_id": document_id, "fields": [f.model_dump(mode="json") for f in record.fields]}
 
+    @router.post("/{document_id}/proposal")
+    async def propose_document_fill(document_id: str, body: FillDocumentRequest):
+        try:
+            proposal = await service.propose_fill(document_id, body.values)
+        except DocumentServiceError as exc:
+            fail(exc)
+        return proposal.model_dump(mode="json")
+
     @router.post("/{document_id}/fill")
     async def fill_document(document_id: str, body: FillDocumentRequest):
         try:
