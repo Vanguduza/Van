@@ -1,11 +1,14 @@
 {
-  "revision": "1.0",
+  "revision": "1.1",
+  "authority": "docs/OPENMUSE_VAN_CONVERGENCE_DEVELOPMENT_PACK_REV_1.md",
   "van_baseline": "12feb9033dfc1dd68d7b4d41ac477f0d9dbbc4af",
+  "implementation_branch": "gpt/openmuse-van-convergence-r1",
   "upstream": {
     "repo": "CopilotKit/openmuse",
     "sha": "34b15bc80340e582fb8c25573646cfb0bbc5184d",
     "license": "MIT"
   },
+  "repository_completion_rule": "REPOSITORY_COMPLETE means source + deterministic tests + owner/API surface exist. It never implies live host/device/provider certification.",
   "packages": [
     {
       "id": "OMV-001",
@@ -14,7 +17,19 @@
       "depends_on": [
         "OMV-005"
       ],
-      "state": "PLANNED"
+      "repository_state": "REPOSITORY_COMPLETE",
+      "live_state": "DEVICE_ACCEPTANCE_PENDING",
+      "external_gates": [
+        "QUAL-AND-01"
+      ],
+      "evidence": [
+        "backend/van_gateway/documents/pdf.py",
+        "backend/van_gateway/documents/service.py",
+        "backend/van_gateway/documents/api.py",
+        "backend/tests/test_document_fabric.py",
+        "android/app/src/main/java/com/dial/van/command/work/ConvergenceRoute.kt",
+        "backend/van_gateway/ops/backup.py"
+      ]
     },
     {
       "id": "OMV-002",
@@ -23,7 +38,18 @@
       "depends_on": [
         "OMV-005"
       ],
-      "state": "PLANNED"
+      "repository_state": "REPOSITORY_COMPLETE",
+      "live_state": "PENDING_HOST_QUALIFICATION",
+      "external_gates": [
+        "QUAL-OMV-002"
+      ],
+      "evidence": [
+        "backend/van_gateway/computer_use/worker.py",
+        "backend/van_gateway/computer_use/lease.py",
+        "backend/tests/test_computer_worker.py",
+        "services/van_computer_worker/Dockerfile",
+        "deploy/van-computer-worker/qualify.sh"
+      ]
     },
     {
       "id": "OMV-003",
@@ -32,7 +58,18 @@
       "depends_on": [
         "OMV-005"
       ],
-      "state": "PLANNED"
+      "repository_state": "REPOSITORY_COMPLETE",
+      "live_state": "BROWSER_WATCH_CANARY_PENDING",
+      "external_gates": [
+        "QUAL-BRW-01",
+        "QUAL-OMV-003"
+      ],
+      "evidence": [
+        "backend/van_gateway/goals/service.py",
+        "backend/van_gateway/goals/watch_runner.py",
+        "backend/tests/test_goals_watches.py",
+        "android/app/src/main/java/com/dial/van/command/work/ConvergenceRoute.kt"
+      ]
     },
     {
       "id": "OMV-004",
@@ -41,7 +78,17 @@
       "depends_on": [
         "OMV-003"
       ],
-      "state": "PLANNED"
+      "repository_state": "REPOSITORY_COMPLETE",
+      "live_state": "OWNER_DEVICE_ROUND_TRIP_PENDING",
+      "external_gates": [
+        "QUAL-AND-01",
+        "QUAL-HERMES-02"
+      ],
+      "evidence": [
+        "backend/van_gateway/suggestions/service.py",
+        "backend/tests/test_suggestions.py",
+        "android/app/src/main/java/com/dial/van/command/work/ConvergenceRoute.kt"
+      ]
     },
     {
       "id": "OMV-005",
@@ -50,7 +97,17 @@
       "depends_on": [
         "OMV-009"
       ],
-      "state": "PLANNED"
+      "repository_state": "REPOSITORY_COMPLETE",
+      "live_state": "OWNER_DEVICE_RENDER_PENDING",
+      "external_gates": [
+        "QUAL-AND-01"
+      ],
+      "evidence": [
+        "backend/van_gateway/artifacts/models.py",
+        "backend/van_gateway/artifacts/service.py",
+        "backend/tests/test_owner_artifacts.py",
+        "android/app/src/main/java/com/dial/van/command/work/ConvergenceRoute.kt"
+      ]
     },
     {
       "id": "OMV-006",
@@ -59,7 +116,18 @@
       "depends_on": [
         "OMV-005"
       ],
-      "state": "PLANNED"
+      "repository_state": "REPOSITORY_COMPLETE",
+      "live_state": "OWNER_DEVICE_ROUND_TRIP_PENDING",
+      "external_gates": [
+        "QUAL-AND-01",
+        "QUAL-HERMES-02"
+      ],
+      "evidence": [
+        "backend/van_gateway/conversations/service.py",
+        "backend/van_gateway/conversations/api.py",
+        "backend/tests/test_conversation_store.py",
+        "android/app/src/main/java/com/dial/van/command/work/ConvergenceRoute.kt"
+      ]
     },
     {
       "id": "OMV-007",
@@ -69,7 +137,17 @@
         "OMV-001",
         "OMV-005"
       ],
-      "state": "PLANNED"
+      "repository_state": "REPOSITORY_COMPLETE",
+      "live_state": "PENDING_GOOGLE_PROVIDER_CANARY",
+      "external_gates": [
+        "QUAL-OMV-007"
+      ],
+      "evidence": [
+        "backend/van_gateway/google/transport.py",
+        "backend/van_gateway/google/service.py",
+        "backend/tests/test_google_openmuse_depth.py",
+        "hermes/mcp/owner_runtime_stdio.mjs"
+      ]
     },
     {
       "id": "OMV-008",
@@ -78,14 +156,33 @@
       "depends_on": [
         "OMV-009"
       ],
-      "state": "PLANNED"
+      "repository_state": "REPOSITORY_COMPLETE",
+      "live_state": "STREAM_HOST_AND_PROFILE_PENDING",
+      "external_gates": [
+        "QUAL-BRW-03",
+        "QUAL-BRW-04"
+      ],
+      "evidence": [
+        "services/browser_control_agent/egress_proxy.py",
+        "services/browser_control_agent/agent.py",
+        "services/browser_control_agent/tests/test_egress_proxy.py",
+        "deploy/van-browser-stream/qualify.sh"
+      ]
     },
     {
       "id": "OMV-009",
       "name": "Durable Regression Harvest",
       "required": true,
       "depends_on": [],
-      "state": "PLANNED"
+      "repository_state": "REPOSITORY_COMPLETE",
+      "live_state": "NOT_APPLICABLE",
+      "external_gates": [],
+      "evidence": [
+        "backend/tests/test_openmuse_regressions.py",
+        "backend/tests/test_browser_subagent.py",
+        "backend/tests/test_computer_worker.py",
+        "backend/tests/test_goals_watches.py"
+      ]
     },
     {
       "id": "OMV-010",
@@ -94,7 +191,10 @@
       "depends_on": [
         "OMV-005"
       ],
-      "state": "OPTIONAL"
+      "repository_state": "OPTIONAL_NOT_IMPLEMENTED",
+      "live_state": "NOT_APPLICABLE",
+      "external_gates": [],
+      "evidence": []
     }
   ],
   "forbidden": [
@@ -104,5 +204,23 @@
     "payment_automation",
     "browser_input_bypass",
     "memory_authority_replacement"
-  ]
+  ],
+  "director_state": {
+    "required_packages": [
+      "OMV-001",
+      "OMV-002",
+      "OMV-003",
+      "OMV-004",
+      "OMV-005",
+      "OMV-006",
+      "OMV-007",
+      "OMV-008",
+      "OMV-009"
+    ],
+    "repository_requirement": "all required packages REPOSITORY_COMPLETE",
+    "live_rule": "live/device/provider gates remain external until token-free receipts exist; repository completion may not promote them",
+    "optional_packages": [
+      "OMV-010"
+    ]
+  }
 }
