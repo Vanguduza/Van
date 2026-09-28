@@ -2,6 +2,7 @@ from __future__ import annotations
 
 import base64
 import hashlib
+import re
 import time
 from datetime import datetime
 from typing import Any
@@ -10,6 +11,7 @@ from cryptography.fernet import Fernet, InvalidToken
 
 from van_gateway.action.models import ExecutionStatus, VerificationObservation
 from van_gateway.action.service import ActionPolicyError, ActionRuntime
+from van_gateway.documents.service import DocumentService, DocumentServiceError
 from van_gateway.models import DegradedCode, GoogleConnectionStatus
 from van_gateway.google.transport import GoogleOutcomeUnknown
 from van_gateway.storage.db import Store
@@ -39,10 +41,18 @@ class GoogleService:
     configured OAuth token client; test doubles explicitly bypass that exchange.
     """
 
-    def __init__(self, store: Store, fernet_key: str, transport: Any | None = None, oauth: Any | None = None) -> None:
+    def __init__(
+        self,
+        store: Store,
+        fernet_key: str,
+        transport: Any | None = None,
+        oauth: Any | None = None,
+        documents: DocumentService | None = None,
+    ) -> None:
         self.store = store
         self.transport = transport
         self.oauth = oauth
+        self.documents = documents
         self._fernet: Fernet | None = None
         if fernet_key:
             try:
@@ -128,9 +138,33 @@ class GoogleService:
         token = await self._api_token(owner_id)
         return await self._require_transport().gmail_search(token, query)
 
-    async def gmail_draft(self, thread_id: str, body: str, *, owner_id: str = "owner") -> dict:
+    async def gmail_draft(
+        self,
+        thread_id: str,
+        body: str,
+        *,
+        attachment_document_id: str | None = None,
+        owner_id: str = "owner",
+    ) -> dict:
         token = await self._api_token(owner_id)
-        return await self._require_transport().gmail_draft(token, thread_id, body)
+        attachments: list[dict[str, Any]] = []
+        if attachment_document_id:
+            if self.documents is None:
+                raise GoogleAuthError("document_fabric_unbound")
+            try:
+                data, filename = await self.documents.bytes_for(
+                    attachment_document_id, "output"
+                )
+            except DocumentServiceError as exc:
+                raise GoogleAuthError(exc.code) from exc
+            attachments.append({
+                "filename": filename,
+                "mime_type": "application/pdf",
+                "data": data,
+            })
+        return await self._require_transport().gmail_draft(
+            token, thread_id, body, attachments=attachments
+        )
 
     async def gmail_draft_get(self, draft_id: str, *, owner_id: str = "owner") -> dict:
         token = await self._api_token(owner_id)
@@ -231,7 +265,14 @@ class GoogleService:
             if execution.action_id == "google.gmail.draft":
                 thread_id = str(parameters["thread_id"])
                 body = str(parameters["body"])
-                provider = await self.gmail_draft(thread_id, body)
+                attachment_document_id = str(
+                    parameters.get("attachment_document_id") or ""
+                ).strip() or None
+                provider = await self.gmail_draft(
+                    thread_id,
+                    body,
+                    attachment_document_id=attachment_document_id,
+                )
                 submitted_raw_sha = str(provider.pop("_van_raw_sha256", "") or "")
                 object_id = str(provider.get("id") or "")
                 if not object_id:
@@ -267,10 +308,34 @@ class GoogleService:
                         evidence_pointer=pointer,
                     )
                 )
-                return {"provider": provider, "verification": receipt.model_dump(mode="json")}
+                # This review object is what a later A4 send approval binds to. Raw MIME bytes
+                # remain provider data; the owner/runtime receives only the exact digest.
+                if isinstance(provider.get("message"), dict):
+                    provider["message"].pop("raw", None)
+                return {
+                    "provider": provider,
+                    "review": {
+                        "draft_id": object_id,
+                        "thread_id": thread_id,
+                        "raw_sha256": submitted_raw_sha,
+                        "attachment_document_id": attachment_document_id,
+                    },
+                    "verification": receipt.model_dump(mode="json"),
+                }
 
             if execution.action_id == "google.gmail.send":
                 draft_id = str(parameters["draft_id"])
+                expected_raw_sha = str(parameters["expected_raw_sha256"]).strip().lower()
+                if not re.fullmatch(r"[0-9a-f]{64}", expected_raw_sha):
+                    raise GoogleAuthError("gmail_expected_raw_sha256_invalid")
+                reviewed = await self.gmail_draft_get(draft_id)
+                reviewed_message = dict(reviewed.get("message") or {})
+                reviewed_raw = str(reviewed_message.get("raw") or "")
+                if not reviewed_raw:
+                    raise GoogleAuthError("gmail_draft_raw_missing")
+                observed_raw_sha = hashlib.sha256(reviewed_raw.encode("ascii")).hexdigest()
+                if observed_raw_sha != expected_raw_sha:
+                    raise GoogleAuthError("gmail_draft_version_changed")
                 provider = await self.gmail_send(draft_id)
                 message_id = str(provider.get("id") or "")
                 if not message_id:
