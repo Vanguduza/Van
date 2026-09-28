@@ -1,5 +1,8 @@
 from __future__ import annotations
 
+import base64
+import hashlib
+
 import pytest
 from cryptography.fernet import Fernet
 from httpx import ASGITransport, AsyncClient
@@ -182,8 +185,17 @@ async def test_google_fake_transport_requires_authorized_execution_and_readback(
         },
     )
     assert connected.status_code == 200
-    _app.state.google.transport = FakeGoogleTransport()
+    google_transport = FakeGoogleTransport()
+    seed_raw = base64.urlsafe_b64encode(
+        b"From: owner@example.com\r\nTo: supplier@example.com\r\nSubject: Reviewed\r\n\r\nReady"
+    ).decode("ascii").rstrip("=")
+    google_transport.drafts["d1"] = {
+        "id": "d1",
+        "message": {"id": "md1", "threadId": "t1", "raw": seed_raw},
+    }
+    _app.state.google.transport = google_transport
     _app.state.google.oauth = None
+    reviewed_sha = hashlib.sha256(seed_raw.encode("ascii")).hexdigest()
 
     # An internal-control credential is not owner approval. The historical route accepted
     # approved=true here; the new route has no such authority-bearing parameter.
@@ -194,7 +206,7 @@ async def test_google_fake_transport_requires_authorized_execution_and_readback(
     )
     assert bypass.status_code == 422
 
-    parameters = {"draft_id": "d1"}
+    parameters = {"draft_id": "d1", "expected_raw_sha256": reviewed_sha}
     execution = await _app.state.owner_runtime.actions.begin(
         execution_id="exec-google-send",
         command_id="cmd-google-send",
@@ -217,7 +229,7 @@ async def test_google_fake_transport_requires_authorized_execution_and_readback(
     assert ok.status_code == 200, ok.text
     assert ok.json()["verification"]["status"] == "VERIFIED_SUCCESS"
     calls = [name for name, _args in _app.state.google.transport.calls]
-    assert calls == ["gmail_send", "gmail_message_get"]
+    assert calls == ["gmail_draft_get", "gmail_send", "gmail_message_get"]
 
     # A4 without owner approval produces an execution record, but not one the provider
     # executor may use. This separates "has an execution id" from "is authorized".
@@ -229,7 +241,7 @@ async def test_google_fake_transport_requires_authorized_execution_and_readback(
         principal_type=PrincipalType.OWNER_DEVICE,
         requested_by="device:pytest-client",
         idempotency_key="turn-google-send-blocked:google.gmail.send",
-        parameters={"draft_id": "d2"},
+        parameters={"draft_id": "d2", "expected_raw_sha256": "b" * 64},
         snapshot_id=None,
         owner_approved=False,
     )
@@ -238,11 +250,39 @@ async def test_google_fake_transport_requires_authorized_execution_and_readback(
     refused = await ac.post(
         "/v1/google/actions/execute",
         headers=headers,
-        json={"execution_id": blocked.execution_id, "parameters": {"draft_id": "d2"}},
+        json={
+            "execution_id": blocked.execution_id,
+            "parameters": {"draft_id": "d2", "expected_raw_sha256": "b" * 64},
+        },
     )
     assert refused.status_code == 409
     assert refused.json()["detail"] == "execution_not_authorized"
     assert _app.state.google.transport.calls == before
+
+    # Owner approval binds the irreversible send to the exact reviewed MIME bytes.
+    stale_parameters = {"draft_id": "d1", "expected_raw_sha256": "0" * 64}
+    stale = await _app.state.owner_runtime.actions.begin(
+        execution_id="exec-google-send-stale",
+        command_id="cmd-google-send-stale",
+        turn_id="turn-google-send-stale",
+        action_id="google.gmail.send",
+        principal_type=PrincipalType.OWNER_DEVICE,
+        requested_by="device:pytest-client",
+        idempotency_key="turn-google-send-stale:google.gmail.send",
+        parameters=stale_parameters,
+        snapshot_id=None,
+        owner_approved=True,
+    )
+    before_send = len([name for name, _args in google_transport.calls if name == "gmail_send"])
+    stale_response = await ac.post(
+        "/v1/google/actions/execute",
+        headers=headers,
+        json={"execution_id": stale.execution_id, "parameters": stale_parameters},
+    )
+    assert stale_response.status_code == 503
+    assert stale_response.json()["detail"] == "gmail_draft_version_changed"
+    after_send = len([name for name, _args in google_transport.calls if name == "gmail_send"])
+    assert after_send == before_send
 
     scrubbed = GoogleService.scrub_for_prompt({"access_token": "tok", "snippet": "hi"})
     assert "access_token" not in scrubbed
