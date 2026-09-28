@@ -666,7 +666,10 @@ private suspend fun stageAndSharePdf(
     bytes: ByteArray,
 ) {
     val staged = withContext(Dispatchers.IO) {
-        require(bytes.startsWith("%PDF-".toByteArray(Charsets.US_ASCII))) { "pdf_signature_invalid" }
+        val signature = "%PDF-".toByteArray(Charsets.US_ASCII)
+        require(bytes.size >= signature.size && bytes.copyOfRange(0, signature.size).contentEquals(signature)) {
+            "pdf_signature_invalid"
+        }
         val directory = File(context.cacheDir, "document_exports").apply {
             mkdirs()
             require(canonicalPath.startsWith(context.cacheDir.canonicalPath)) { "export_path_invalid" }
