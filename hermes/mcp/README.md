@@ -55,6 +55,7 @@ Allowed tools are deliberately narrow:
 - `trading_portfolio`, `trading_positions`, `trading_risk`, `trading_market_state`,
   `trading_trade_detail`, `trading_status` — read-only; no halt, ticket or account tool
 - `reminder_create` — on the owner's behalf; `text` must be the owner's own words
+- `suggestion_create` — evidence-backed owner suggestion only; creates Attention and never executes its proposed prompt
 - `attention_list`, `briefing_read` — read-only
 - `browser_task_create`, `browser_assignment_run`, `browser_task_status`,
   `browser_task_evidence` — creation carries `command_id`/`mission_id` (that route has no
