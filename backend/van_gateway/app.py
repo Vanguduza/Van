@@ -473,7 +473,7 @@ def create_app() -> FastAPI:
     domain_trust = DomainTrustService(store)
     owner_runtime = OwnerRuntimeApi(
         store, settings, reminders=reminders, attention=attention, briefing=briefing,
-        artifacts=artifacts, suggestions=suggestions,
+        artifacts=artifacts, suggestions=suggestions, conversations=conversations,
         # GAP-F-008: agent-initiated mutations consult the earned/granted domain trust.
         autonomy=ActionAutonomyGate(domain_trust),
     )
