@@ -1788,7 +1788,27 @@ def create_app() -> FastAPI:
     async def commands(req: CommandRequest, request: Request):
         if getattr(request.state, "van_device_id", None) != req.device_id:
             raise HTTPException(status_code=403, detail="device_identity_mismatch")
-        return await orchestrator.handle(req)
+        result = await orchestrator.handle(req)
+        # OMV-006 — only a command that reached the point of becoming owner intent has a
+        # Mission. Invalid signatures/refusals before that point must never be projected as
+        # owner speech. Projection is presentation state and cannot change command outcome.
+        if result.mission_id:
+            try:
+                main_thread = await conversations.ensure_main()
+                await conversations.append_projection(
+                    main_thread.thread_id,
+                    projection_key=f"command:{req.command_id}:owner",
+                    role="OWNER",
+                    body=req.text,
+                    command_id=req.command_id,
+                    mission_id=result.mission_id,
+                    terminal=False,
+                )
+            except Exception:
+                logging.getLogger("van_gateway.conversations").exception(
+                    "failed to project owner command %s into main thread", req.command_id
+                )
+        return result
 
     def _require_binding_service() -> OwnerDeviceBindingService:
         if owner_device_bindings is None:
