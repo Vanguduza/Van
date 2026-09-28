@@ -13,6 +13,7 @@ The harness exists to stop two opposite truth failures:
 from __future__ import annotations
 
 import argparse
+import ast
 import json
 from pathlib import Path
 import re
@@ -163,8 +164,24 @@ def evaluate(root: Path, matrix_override: dict[str, Any] | None = None) -> dict[
         issues.append("sole_agent_runtime_invariant_missing")
 
     computer = _read(root, "backend/van_gateway/computer_use/fabric.py")
+    try:
+        module = ast.parse(computer)
+        operation_type = next(
+            node for node in module.body
+            if isinstance(node, ast.ClassDef) and node.name == "OperationType"
+        )
+        declared_operations = {
+            target.id
+            for node in operation_type.body
+            if isinstance(node, ast.Assign)
+            for target in node.targets
+            if isinstance(target, ast.Name)
+        }
+    except (SyntaxError, StopIteration):
+        issues.append("computer_operation_type_enum_unreadable")
+        declared_operations = set()
     for forbidden_operation in ("RUN_ARBITRARY", "EXECUTE_SHELL", "EVAL_CODE"):
-        if forbidden_operation in computer:
+        if forbidden_operation in declared_operations:
             issues.append(f"computer_forbidden_operation:{forbidden_operation}")
 
     browser_unit = _read(root, "deploy/van-browser-stream/systemd/van-browser-chromium.service")
