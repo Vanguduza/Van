@@ -1,6 +1,7 @@
 package com.dial.van.command.work
 
 import android.content.Context
+import android.content.Intent
 import android.graphics.Bitmap
 import android.graphics.pdf.PdfRenderer
 import android.os.ParcelFileDescriptor
@@ -31,6 +32,7 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.asImageBitmap
 import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.platform.LocalContext
+import androidx.core.content.FileProvider
 import com.dial.van.VanApplication
 import com.dial.van.control.VanCommandSource
 import com.dial.van.design.LocalVanTokens
@@ -586,6 +588,20 @@ fun DocumentRoute(
             }
         }
 
+        val shareVariant = if (document?.optString("output_artifact_id").orEmpty().isNotBlank()) "output" else "source"
+        OutlinedButton(
+            enabled = document != null && !loading,
+            onClick = {
+                val filename = document?.optString("filename", "document.pdf") ?: "document.pdf"
+                scope.launch {
+                    runCatching {
+                        val bytes = app.gatewayClient.convergenceDocumentContent(documentId, shareVariant)
+                        stageAndSharePdf(context, documentId, filename, bytes)
+                    }.onFailure { notice = it.message ?: "Unable to share document" }
+                }
+            },
+        ) { Text("Share copy") }
+
         val fields = jsonObjects(document?.optJSONArray("fields") ?: JSONArray())
         if (fields.isNotEmpty()) {
             SectionHeader("Form fields", detail = "Review values before creating a filled copy")
@@ -640,6 +656,41 @@ fun DocumentRoute(
             Text("This PDF has no supported fillable fields.", style = tokens.type.body, color = tokens.color.textSecondary)
         }
     }
+}
+
+
+private suspend fun stageAndSharePdf(
+    context: Context,
+    documentId: String,
+    filename: String,
+    bytes: ByteArray,
+) {
+    val staged = withContext(Dispatchers.IO) {
+        require(bytes.startsWith("%PDF-".toByteArray(Charsets.US_ASCII))) { "pdf_signature_invalid" }
+        val directory = File(context.cacheDir, "document_exports").apply {
+            mkdirs()
+            require(canonicalPath.startsWith(context.cacheDir.canonicalPath)) { "export_path_invalid" }
+        }
+        val safeId = documentId.filter { it.isLetterOrDigit() || it == '_' || it == '-' }.take(80)
+        val safeName = filename.substringAfterLast('/').substringAfterLast('\\')
+            .filter { it.isLetterOrDigit() || it in "._- " }
+            .trim()
+            .ifBlank { "document.pdf" }
+            .let { if (it.lowercase().endsWith(".pdf")) it else "$it.pdf" }
+            .take(120)
+        File(directory, "$safeId-$safeName").apply { writeBytes(bytes) }
+    }
+    val uri = FileProvider.getUriForFile(
+        context,
+        "${context.packageName}.fileprovider",
+        staged,
+    )
+    val send = Intent(Intent.ACTION_SEND).apply {
+        type = "application/pdf"
+        putExtra(Intent.EXTRA_STREAM, uri)
+        addFlags(Intent.FLAG_GRANT_READ_URI_PERMISSION)
+    }
+    context.startActivity(Intent.createChooser(send, "Share PDF"))
 }
 
 
