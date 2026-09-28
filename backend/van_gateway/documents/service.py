@@ -12,7 +12,7 @@ from van_gateway.artifacts.models import ArtifactKind, ArtifactSensitivity
 from van_gateway.artifacts.service import ArtifactService
 from van_gateway.storage.db import Store
 
-from .models import DocumentField, DocumentRecord, DocumentStatus
+from .models import DocumentField, DocumentFillProposal, DocumentRecord, DocumentStatus
 from .pdf import PdfDocumentError, fill_pdf, inspect_pdf
 
 
@@ -128,7 +128,52 @@ class DocumentService:
         )
         return [self._record(row) for row in rows]
 
+    async def propose_fill(
+        self, document_id: str, values: dict[str, Any]
+    ) -> DocumentFillProposal:
+        record = await self.get(document_id)
+        if record is None:
+            raise DocumentServiceError("DOCUMENT_UNKNOWN")
+        known = {field.name: field for field in record.fields}
+        unknown = sorted(set(values) - set(known))
+        proposed: dict[str, Any] = {}
+        missing: list[str] = []
+        for name, field in known.items():
+            if name in values:
+                raw = values[name]
+                if field.kind.value == "CHECKBOX":
+                    if not isinstance(raw, bool):
+                        raise DocumentServiceError("DOCUMENT_FIELD_VALUE_INVALID", name)
+                    proposed[name] = raw
+                else:
+                    if isinstance(raw, (dict, list, tuple)):
+                        raise DocumentServiceError("DOCUMENT_FIELD_VALUE_INVALID", name)
+                    proposed[name] = "" if raw is None else str(raw)
+            else:
+                current = field.value
+                if current in (None, "", False):
+                    missing.append(name)
+                proposed[name] = current
+        canonical = {
+            "document_id": document_id,
+            "source_sha256": record.source_sha256,
+            "proposed_values": proposed,
+            "missing_fields": missing,
+            "unknown_fields": unknown,
+        }
+        proposal_sha = hashlib.sha256(
+            json.dumps(canonical, sort_keys=True, separators=(",", ":")).encode("utf-8")
+        ).hexdigest()
+        return DocumentFillProposal(
+            **canonical,
+            proposal_sha256=proposal_sha,
+            requires_owner_confirmation=True,
+        )
+
     async def fill(self, document_id: str, values: dict[str, Any], *, now_ms: int | None = None) -> DocumentRecord:
+        proposal = await self.propose_fill(document_id, values)
+        if proposal.unknown_fields:
+            raise DocumentServiceError("DOCUMENT_FIELD_UNKNOWN", ",".join(proposal.unknown_fields))
         row = await self.store.fetchone("SELECT * FROM documents WHERE document_id = ?", (document_id,))
         if row is None:
             raise DocumentServiceError("DOCUMENT_UNKNOWN")
