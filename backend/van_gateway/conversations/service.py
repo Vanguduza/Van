@@ -1,6 +1,7 @@
 from __future__ import annotations
 
 import json
+import hashlib
 import time
 import uuid
 from typing import Any
@@ -183,3 +184,58 @@ class ConversationService:
             status=status,command_id=command_id if status is FollowUpStatus.PROMOTED else None,
             created_at_ms=current.created_at_ms,updated_at_ms=now,
         )
+
+
+    async def append_projection(
+        self,
+        thread_id:str,
+        *,
+        projection_key:str,
+        role:str,
+        body:str,
+        command_id:str|None=None,
+        mission_id:str|None=None,
+        artifact_refs:list[str]|None=None,
+        terminal:bool=False,
+        now_ms:int|None=None,
+    )->ConversationMessage:
+        """Idempotently project canonical work into a thread.
+
+        The projection key is a canonical external identity such as command:<id> or
+        mission:<id>:terminal. Replaying that work reuses the same message row and can
+        never re-execute anything.
+        """
+        if not projection_key.strip():
+            raise ConversationServiceError("MESSAGE_PROJECTION_KEY_REQUIRED")
+        message_id="msgp_"+hashlib.sha256(
+            projection_key.encode("utf-8")
+        ).hexdigest()[:40]
+        existing=await self.store.fetchone(
+            "SELECT * FROM conversation_messages WHERE message_id = ?",(message_id,)
+        )
+        if existing is not None:
+            return self._message(existing)
+        thread=await self.get(thread_id,message_limit=1)
+        if thread is None: raise ConversationServiceError("THREAD_UNKNOWN")
+        if role not in {"OWNER","VAN","SYSTEM"}:
+            raise ConversationServiceError("MESSAGE_ROLE_INVALID")
+        value=body.strip()
+        if not value: raise ConversationServiceError("MESSAGE_BODY_REQUIRED")
+        now=int(time.time()*1000) if now_ms is None else now_ms
+        await self.store.execute(
+            """
+            INSERT OR IGNORE INTO conversation_messages(
+              message_id,thread_id,role,body,command_id,mission_id,
+              artifact_refs_json,terminal,created_at_ms
+            ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?)
+            """,
+            (
+                message_id,thread_id,role,value,command_id,mission_id,
+                Store.dumps(artifact_refs or []),1 if terminal else 0,now,
+            ),
+        )
+        row=await self.store.fetchone(
+            "SELECT * FROM conversation_messages WHERE message_id = ?",(message_id,)
+        )
+        assert row is not None
+        return self._message(row)
