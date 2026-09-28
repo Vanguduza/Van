@@ -14,6 +14,8 @@ import hashlib
 import re
 import uuid
 from datetime import datetime, timezone
+from email.message import EmailMessage
+from email.policy import SMTP
 from email.utils import format_datetime, parseaddr
 from typing import Any
 
@@ -21,6 +23,7 @@ import httpx
 
 
 MAX_GMAIL_ATTACHMENT_BYTES = 10 * 1024 * 1024
+MAX_GMAIL_ATTACHMENTS = 5
 MAX_GMAIL_TEXT_BYTES = 1024 * 1024
 _MESSAGE_ID = re.compile(r"^<[^<>\s]+@[^<>\s]+>$")
 _REFERENCES = re.compile(r"^(?:<[^<>\s]+@[^<>\s]+>\s*)+$")
@@ -40,6 +43,48 @@ def _normalise_subject(value: str) -> str:
 
 
 def _gmail_raw_reply(
+    *,
+    from_address: str,
+    to_address: str,
+    subject: str,
+    body: str,
+    source_message_id: str,
+    references: str,
+    attachments: list[dict[str, Any]] | None = None,
+) -> str:
+    """Build one reviewed reply MIME payload.
+
+    Attachments are byte payloads supplied by a trusted VAN adapter (currently Document
+    Fabric), never paths and never model-authored arbitrary file reads.
+    """
+    sender = _single_line(from_address, "from")
+    recipient = _single_line(to_address, "to")
+    subj = _single_line(subject, "subject")
+    source_id = _single_line(source_message_id, "message_id")
+    refs = _single_line(references, "references", max_len=950)
+    if not _MESSAGE_ID.fullmatch(source_id):
+        raise RuntimeError("gmail_reply_source_message_id_invalid")
+    if refs and not _REFERENCES.fullmatch(refs):
+        raise RuntimeError("gmail_reply_references_invalid")
+    chain = list(dict.fromkeys(re.findall(r"<[^<>\s]+>", refs) + [source_id]))
+    joined = " ".join(chain)
+    if len(joined) > 950:
+        raise RuntimeError("gmail_reply_references_too_long")
+
+    supplied = list(attachments or [])
+    if len(supplied) > MAX_GMAIL_ATTACHMENTS:
+        raise RuntimeError("gmail_attachment_count_exceeded")
+    total = 0
+    normalised: list[tuple[str, str, str, bytes]] = []
+    for item in supplied:
+        filename = _single_line(str(item.get("filename") or ""), "attachment_filename", max_len=180)
+        if not filename or filename in {".", ".."} or "/" in filename or "\\" in filename:
+            raise RuntimeError("gmail_attachment_filename_invalid")
+        mime = _single_line(str(item.get("mime_type") or ""), "attachment_mime", max_len=100)
+        if mime.count("/") != 1:
+            raise RuntimeError("gmail_attachment_mime_invalid")
+        maintype, subtype = mime.split("/", 1)
+        if not re.fullmatch(r"[A-Za-z0-9!#def _gmail_raw_reply(
     *,
     from_address: str,
     to_address: str,
@@ -77,6 +122,69 @@ def _gmail_raw_reply(
         base64.b64encode(normalized_body.encode("utf-8")).decode("ascii"),
     ]
     return base64.urlsafe_b64encode("\r\n".join(headers).encode("utf-8")).decode("ascii").rstrip("=")
+^_.+-]+", maintype) or not re.fullmatch(
+            r"[A-Za-z0-9!#def _gmail_raw_reply(
+    *,
+    from_address: str,
+    to_address: str,
+    subject: str,
+    body: str,
+    source_message_id: str,
+    references: str,
+) -> str:
+    sender = _single_line(from_address, "from")
+    recipient = _single_line(to_address, "to")
+    subj = _single_line(subject, "subject")
+    source_id = _single_line(source_message_id, "message_id")
+    refs = _single_line(references, "references", max_len=950)
+    if not _MESSAGE_ID.fullmatch(source_id):
+        raise RuntimeError("gmail_reply_source_message_id_invalid")
+    if refs and not _REFERENCES.fullmatch(refs):
+        raise RuntimeError("gmail_reply_references_invalid")
+    chain = list(dict.fromkeys(re.findall(r"<[^<>\s]+>", refs) + [source_id]))
+    joined = " ".join(chain)
+    if len(joined) > 950:
+        raise RuntimeError("gmail_reply_references_too_long")
+    normalized_body = body.replace("\r\n", "\n").replace("\r", "\n").replace("\n", "\r\n")
+    headers = [
+        f"From: {sender}",
+        f"To: {recipient}",
+        f"Subject: {subj}",
+        f"Date: {format_datetime(datetime.now(timezone.utc))}",
+        f"Message-ID: <{uuid.uuid4().hex}@van.invalid>",
+        f"In-Reply-To: {source_id}",
+        f"References: {joined}",
+        "MIME-Version: 1.0",
+        "Content-Type: text/plain; charset=UTF-8",
+        "Content-Transfer-Encoding: base64",
+        "",
+        base64.b64encode(normalized_body.encode("utf-8")).decode("ascii"),
+    ]
+    return base64.urlsafe_b64encode("\r\n".join(headers).encode("utf-8")).decode("ascii").rstrip("=")
+^_.+-]+", subtype
+        ):
+            raise RuntimeError("gmail_attachment_mime_invalid")
+        data = item.get("data")
+        if not isinstance(data, bytes):
+            raise RuntimeError("gmail_attachment_bytes_required")
+        total += len(data)
+        if total > MAX_GMAIL_ATTACHMENT_BYTES:
+            raise RuntimeError("gmail_attachment_total_too_large")
+        normalised.append((filename, maintype, subtype, data))
+
+    msg = EmailMessage(policy=SMTP)
+    msg["From"] = sender
+    msg["To"] = recipient
+    msg["Subject"] = subj
+    msg["Date"] = format_datetime(datetime.now(timezone.utc))
+    msg["Message-ID"] = f"<{uuid.uuid4().hex}@van.invalid>"
+    msg["In-Reply-To"] = source_id
+    msg["References"] = joined
+    msg.set_content(body.replace("\r\n", "\n").replace("\r", "\n"))
+    for filename, maintype, subtype, data in normalised:
+        msg.add_attachment(data, maintype=maintype, subtype=subtype, filename=filename)
+
+    return base64.urlsafe_b64encode(msg.as_bytes(policy=SMTP)).decode("ascii").rstrip("=")
 
 
 class GoogleOutcomeUnknown(RuntimeError):
@@ -230,7 +338,10 @@ class GoogleHttpTransport:
         data = await self._request("GET", "https://gmail.googleapis.com/gmail/v1/users/me/messages", token, params={"q": query, "maxResults": 25})
         return data.get("messages", [])
 
-    async def gmail_draft(self, token: str, thread_id: str, body: str) -> dict:
+    async def gmail_draft(
+        self, token: str, thread_id: str, body: str,
+        attachments: list[dict[str, Any]] | None = None,
+    ) -> dict:
         if not thread_id.strip():
             raise RuntimeError("gmail_thread_required")
         thread = await self._request(
@@ -268,6 +379,7 @@ class GoogleHttpTransport:
             body=body,
             source_message_id=source_message_id,
             references=references,
+            attachments=attachments,
         )
         provider = await self._request(
             "POST",
@@ -469,11 +581,20 @@ class FakeGoogleTransport:
         self.calls.append(("gmail_search", (token[:4], query)))
         return [{"id": "m1", "threadId": "t1"}]
 
-    async def gmail_draft(self, token: str, thread_id: str, body: str) -> dict:
+    async def gmail_draft(
+        self, token: str, thread_id: str, body: str,
+        attachments: list[dict[str, Any]] | None = None,
+    ) -> dict:
         self.calls.append(("gmail_draft", (thread_id,)))
-        raw = base64.urlsafe_b64encode(
-            f"From: owner@example.com\r\nTo: sender@example.com\r\nSubject: Re: Subject\r\n\r\n{body}".encode("utf-8")
-        ).decode("ascii").rstrip("=")
+        raw = _gmail_raw_reply(
+            from_address="owner@example.com",
+            to_address="sender@example.com",
+            subject="Re: Subject",
+            body=body,
+            source_message_id="<source@example.com>",
+            references="",
+            attachments=attachments,
+        )
         result = {
             "id": "d1",
             "message": {"id": "md1", "threadId": thread_id, "raw": raw},
