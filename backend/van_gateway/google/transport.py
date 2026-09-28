@@ -10,7 +10,11 @@ explicitly opt out of access-token exchange and never imply live Google state.
 import os
 import base64
 import binascii
+import hashlib
+import re
+import uuid
 from datetime import datetime, timezone
+from email.utils import format_datetime, parseaddr
 from typing import Any
 
 import httpx
@@ -18,6 +22,61 @@ import httpx
 
 MAX_GMAIL_ATTACHMENT_BYTES = 10 * 1024 * 1024
 MAX_GMAIL_TEXT_BYTES = 1024 * 1024
+_MESSAGE_ID = re.compile(r"^<[^<>\s]+@[^<>\s]+>$")
+_REFERENCES = re.compile(r"^(?:<[^<>\s]+@[^<>\s]+>\s*)+$")
+
+
+def _single_line(value: str, field: str, *, max_len: int = 998) -> str:
+    if "\r" in value or "\n" in value:
+        raise RuntimeError(f"gmail_{field}_header_invalid")
+    clean = value.strip()
+    if len(clean) > max_len:
+        raise RuntimeError(f"gmail_{field}_header_too_long")
+    return clean
+
+
+def _normalise_subject(value: str) -> str:
+    return re.sub(r"^(?:\s*re:\s*)+", "", value, flags=re.IGNORECASE).strip()
+
+
+def _gmail_raw_reply(
+    *,
+    from_address: str,
+    to_address: str,
+    subject: str,
+    body: str,
+    source_message_id: str,
+    references: str,
+) -> str:
+    sender = _single_line(from_address, "from")
+    recipient = _single_line(to_address, "to")
+    subj = _single_line(subject, "subject")
+    source_id = _single_line(source_message_id, "message_id")
+    refs = _single_line(references, "references", max_len=950)
+    if not _MESSAGE_ID.fullmatch(source_id):
+        raise RuntimeError("gmail_reply_source_message_id_invalid")
+    if refs and not _REFERENCES.fullmatch(refs):
+        raise RuntimeError("gmail_reply_references_invalid")
+    chain = list(dict.fromkeys(re.findall(r"<[^<>\s]+>", refs) + [source_id]))
+    joined = " ".join(chain)
+    if len(joined) > 950:
+        raise RuntimeError("gmail_reply_references_too_long")
+    normalized_body = body.replace("\r\n", "\n").replace("\r", "\n").replace("\n", "\r\n")
+    headers = [
+        f"From: {sender}",
+        f"To: {recipient}",
+        f"Subject: {subj}",
+        f"Date: {format_datetime(datetime.now(timezone.utc))}",
+        f"Message-ID: <{uuid.uuid4().hex}@van.invalid>",
+        f"In-Reply-To: {source_id}",
+        f"References: {joined}",
+        "MIME-Version: 1.0",
+        "Content-Type: text/plain; charset=UTF-8",
+        "Content-Transfer-Encoding: base64",
+        "",
+        base64.b64encode(normalized_body.encode("utf-8")).decode("ascii"),
+    ]
+    return base64.urlsafe_b64encode("\r\n".join(headers).encode("utf-8")).decode("ascii").rstrip("=")
 
 
 class GoogleOutcomeUnknown(RuntimeError):
@@ -172,7 +231,53 @@ class GoogleHttpTransport:
         return data.get("messages", [])
 
     async def gmail_draft(self, token: str, thread_id: str, body: str) -> dict:
-        return await self._request("POST", "https://gmail.googleapis.com/gmail/v1/users/me/drafts", token, json={"message": {"threadId": thread_id, "raw": body}})
+        if not thread_id.strip():
+            raise RuntimeError("gmail_thread_required")
+        thread = await self._request(
+            "GET",
+            f"https://gmail.googleapis.com/gmail/v1/users/me/threads/{thread_id}",
+            token,
+            params={"format": "metadata", "metadataHeaders": ["Message-ID", "References", "Subject", "From"]},
+        )
+        messages = [item for item in thread.get("messages") or [] if isinstance(item, dict)]
+        if not messages:
+            raise RuntimeError("gmail_reply_source_missing")
+        source = dict(messages[-1])
+        if str(source.get("threadId") or "") != thread_id:
+            raise RuntimeError("gmail_reply_thread_mismatch")
+        metadata = _gmail_headers(dict(source.get("payload") or {}))
+        source_message_id = _single_line(metadata.get("message-id", ""), "message_id")
+        references = _single_line(metadata.get("references", ""), "references", max_len=950)
+        subject = _single_line(metadata.get("subject", ""), "subject")
+        from_header = _single_line(metadata.get("from", ""), "from")
+        reply_to = parseaddr(from_header)[1]
+        if not reply_to or "@" not in reply_to:
+            raise RuntimeError("gmail_reply_recipient_invalid")
+        profile = await self._request(
+            "GET",
+            "https://gmail.googleapis.com/gmail/v1/users/me/profile",
+            token,
+        )
+        sender = str(profile.get("emailAddress") or "").strip()
+        if not sender or "@" not in sender:
+            raise RuntimeError("gmail_profile_email_missing")
+        raw = _gmail_raw_reply(
+            from_address=sender,
+            to_address=reply_to,
+            subject=(subject if subject.lower().startswith("re:") else f"Re: {subject}"),
+            body=body,
+            source_message_id=source_message_id,
+            references=references,
+        )
+        provider = await self._request(
+            "POST",
+            "https://gmail.googleapis.com/gmail/v1/users/me/drafts",
+            token,
+            json={"message": {"threadId": thread_id, "raw": raw}},
+        )
+        result = dict(provider)
+        result["_van_raw_sha256"] = hashlib.sha256(raw.encode("ascii")).hexdigest()
+        return result
 
     async def gmail_draft_get(self, token: str, draft_id: str) -> dict:
         return await self._request(
@@ -366,8 +471,15 @@ class FakeGoogleTransport:
 
     async def gmail_draft(self, token: str, thread_id: str, body: str) -> dict:
         self.calls.append(("gmail_draft", (thread_id,)))
-        result = {"id": "d1", "message": {"id": "md1", "threadId": thread_id, "raw": body}}
-        self.drafts["d1"] = result
+        raw = base64.urlsafe_b64encode(
+            f"From: owner@example.com\r\nTo: sender@example.com\r\nSubject: Re: Subject\r\n\r\n{body}".encode("utf-8")
+        ).decode("ascii").rstrip("=")
+        result = {
+            "id": "d1",
+            "message": {"id": "md1", "threadId": thread_id, "raw": raw},
+            "_van_raw_sha256": hashlib.sha256(raw.encode("ascii")).hexdigest(),
+        }
+        self.drafts["d1"] = dict(result)
         return result
 
     async def gmail_draft_get(self, token: str, draft_id: str) -> dict:
