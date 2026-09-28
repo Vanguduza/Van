@@ -87,7 +87,10 @@
       "evidence": [
         "backend/van_gateway/suggestions/service.py",
         "backend/tests/test_suggestions.py",
-        "android/app/src/main/java/com/dial/van/command/work/ConvergenceRoute.kt"
+        "android/app/src/main/java/com/dial/van/command/work/ConvergenceRoute.kt",
+        "backend/van_gateway/runtime_api.py",
+        "hermes/mcp/owner_runtime_stdio.mjs",
+        "backend/tests/test_runtime_hermes_surface.py"
       ]
     },
     {
