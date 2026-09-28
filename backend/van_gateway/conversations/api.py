@@ -78,7 +78,15 @@ def build_conversation_router(service:ConversationService)->APIRouter:
 
     @router.post("/{thread_id}/followups/{followup_id}/decision")
     async def decide_followup(thread_id:str,followup_id:str,body:FollowUpDecision):
-        try:return (await service.decide_followup(thread_id,followup_id,body.action,command_id=body.command_id)).model_dump(mode="json")
+        try:
+            item=await service.decide_followup(
+                thread_id,followup_id,body.action,command_id=body.command_id
+            )
+            payload=item.model_dump(mode="json")
+            # Promotion is lifecycle state only. The client must submit this prompt through
+            # the ordinary signed command path; this endpoint never dispatches it.
+            payload["fresh_owner_prompt"]=item.prompt if body.action=="promote" else None
+            return payload
         except ConversationServiceError as exc:fail(exc)
 
     @router.post("/{thread_id}/messages")
