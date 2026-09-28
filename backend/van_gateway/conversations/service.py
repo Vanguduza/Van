@@ -7,7 +7,7 @@ from typing import Any
 
 from van_gateway.storage.db import Store
 
-from .models import ConversationMessage,ConversationThread,ThreadKind,ThreadStatus
+from .models import ConversationFollowUp,ConversationMessage,ConversationThread,FollowUpStatus,ThreadKind,ThreadStatus
 
 
 class ConversationServiceError(ValueError):
@@ -19,6 +19,14 @@ class ConversationService:
     """Self-hosted thread state. History is presentation/context, never execution truth."""
 
     def __init__(self,store:Store)->None:self.store=store
+
+    @staticmethod
+    def _followup(row:Any)->ConversationFollowUp:
+        return ConversationFollowUp(
+            followup_id=row["followup_id"],thread_id=row["thread_id"],prompt=row["prompt"],
+            status=FollowUpStatus(row["status"]),command_id=row["command_id"],
+            created_at_ms=int(row["created_at_ms"]),updated_at_ms=int(row["updated_at_ms"]),
+        )
 
     @staticmethod
     def _message(row:Any)->ConversationMessage:
@@ -59,12 +67,17 @@ class ConversationService:
             (thread_id,max(1,min(message_limit,1000))),
         )
         draft=await self.store.fetchone("SELECT draft_text FROM conversation_drafts WHERE thread_id = ?",(thread_id,))
+        followups=await self.store.fetchall(
+            "SELECT * FROM conversation_followups WHERE thread_id = ? ORDER BY created_at_ms ASC",
+            (thread_id,),
+        )
         return ConversationThread(
             thread_id=row["thread_id"],title=row["title"],kind=ThreadKind(row["kind"]),
             status=ThreadStatus(row["status"]),project_id=row["project_id"],
             created_at_ms=int(row["created_at_ms"]),updated_at_ms=int(row["updated_at_ms"]),
             archived_at_ms=row["archived_at_ms"],draft_text="" if draft is None else draft["draft_text"],
             messages=[self._message(m) for m in messages],
+            followups=[self._followup(item) for item in followups],
         )
 
     async def list(self,status:ThreadStatus|None=None,limit:int=100)->list[ConversationThread]:
@@ -124,3 +137,51 @@ class ConversationService:
         )
         await self.store.execute("UPDATE conversation_threads SET updated_at_ms = ? WHERE thread_id = ?",(now,thread_id))
         return ConversationMessage(message_id=mid,thread_id=thread_id,role=role,body=body,command_id=command_id,mission_id=mission_id,artifact_refs=artifact_refs or [],terminal=terminal,created_at_ms=now)
+
+
+    async def queue_followup(
+        self,thread_id:str,prompt:str,*,now_ms:int|None=None
+    )->ConversationFollowUp:
+        thread=await self.get(thread_id,message_limit=1)
+        if thread is None: raise ConversationServiceError("THREAD_UNKNOWN")
+        if thread.status is ThreadStatus.ARCHIVED: raise ConversationServiceError("THREAD_ARCHIVED")
+        value=prompt.strip()
+        if not value: raise ConversationServiceError("FOLLOWUP_PROMPT_REQUIRED")
+        if len(value)>8000: raise ConversationServiceError("FOLLOWUP_PROMPT_TOO_LONG")
+        now=int(time.time()*1000) if now_ms is None else now_ms
+        fid=f"fu_{uuid.uuid4().hex}"
+        await self.store.execute(
+            "INSERT INTO conversation_followups(followup_id,thread_id,prompt,status,command_id,created_at_ms,updated_at_ms) VALUES (?, ?, ?, 'QUEUED', NULL, ?, ?)",
+            (fid,thread_id,value,now,now),
+        )
+        return ConversationFollowUp(
+            followup_id=fid,thread_id=thread_id,prompt=value,status=FollowUpStatus.QUEUED,
+            command_id=None,created_at_ms=now,updated_at_ms=now,
+        )
+
+    async def decide_followup(
+        self,thread_id:str,followup_id:str,action:str,*,command_id:str|None=None,now_ms:int|None=None
+    )->ConversationFollowUp:
+        row=await self.store.fetchone(
+            "SELECT * FROM conversation_followups WHERE thread_id = ? AND followup_id = ?",
+            (thread_id,followup_id),
+        )
+        if row is None: raise ConversationServiceError("FOLLOWUP_UNKNOWN")
+        current=self._followup(row)
+        if current.status is not FollowUpStatus.QUEUED:
+            raise ConversationServiceError("FOLLOWUP_ALREADY_DECIDED")
+        if action not in {"promote","dismiss"}:
+            raise ConversationServiceError("FOLLOWUP_ACTION_INVALID")
+        if action=="promote" and not (command_id or "").strip():
+            raise ConversationServiceError("FOLLOWUP_COMMAND_ID_REQUIRED")
+        status=FollowUpStatus.PROMOTED if action=="promote" else FollowUpStatus.DISMISSED
+        now=int(time.time()*1000) if now_ms is None else now_ms
+        await self.store.execute(
+            "UPDATE conversation_followups SET status = ?, command_id = ?, updated_at_ms = ? WHERE followup_id = ?",
+            (status.value,command_id if status is FollowUpStatus.PROMOTED else None,now,followup_id),
+        )
+        return ConversationFollowUp(
+            followup_id=current.followup_id,thread_id=current.thread_id,prompt=current.prompt,
+            status=status,command_id=command_id if status is FollowUpStatus.PROMOTED else None,
+            created_at_ms=current.created_at_ms,updated_at_ms=now,
+        )
