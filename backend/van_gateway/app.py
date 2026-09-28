@@ -568,7 +568,13 @@ def create_app() -> FastAPI:
     if settings.google_oauth_client_id and settings.google_oauth_client_secret:
         google_transport = GoogleHttpTransport()
         google_oauth = GoogleOAuthTokenClient(settings.google_oauth_client_id, settings.google_oauth_client_secret)
-    google = GoogleService(store, settings.google_token_fernet_key, transport=google_transport, oauth=google_oauth)
+    google = GoogleService(
+        store,
+        settings.google_token_fernet_key,
+        transport=google_transport,
+        oauth=google_oauth,
+        documents=documents,
+    )
     google_registry = GoogleCapabilityRegistry(google_registry_path)
     google_broker = GoogleIdentityBroker(
         store,
