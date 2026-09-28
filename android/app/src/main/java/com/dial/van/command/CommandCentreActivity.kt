@@ -63,6 +63,7 @@ import com.dial.van.command.settings.SettingsNotificationsRoute
 import com.dial.van.command.settings.SettingsRoute
 import com.dial.van.command.settings.SettingsVoiceRoute
 import com.dial.van.command.work.ConvergenceRoute
+import com.dial.van.command.work.ConversationThreadRoute
 import com.dial.van.command.work.DocumentRoute
 import com.dial.van.command.work.WorkActivityRoute
 import com.dial.van.command.work.WorkRoute
@@ -227,6 +228,7 @@ internal fun CommandCentreScreen(app: VanApplication, initial: String) {
                             app = app,
                             onBack = { nav.popBackStack() },
                             onOpenDocument = { documentId -> nav.navigate(VanRoute.documentRoute(documentId)) },
+                            onOpenThread = { threadId -> nav.navigate(VanRoute.threadRoute(threadId)) },
                         )
                     }
                     composable(
@@ -237,6 +239,17 @@ internal fun CommandCentreScreen(app: VanApplication, initial: String) {
                         DocumentRoute(
                             app = app,
                             documentId = documentId,
+                            onBack = { nav.popBackStack() },
+                        )
+                    }
+                    composable(
+                        VanRoute.WORK_THREAD_TEMPLATE,
+                        arguments = listOf(navArgument("threadId") { type = NavType.StringType }),
+                    ) { entry ->
+                        val threadId = entry.arguments?.getString("threadId") ?: ""
+                        ConversationThreadRoute(
+                            app = app,
+                            threadId = threadId,
                             onBack = { nav.popBackStack() },
                         )
                     }
