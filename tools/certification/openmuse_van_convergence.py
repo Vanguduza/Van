@@ -50,7 +50,10 @@ MARKERS: dict[str, tuple[tuple[str, str], ...]] = {
     ),
     "OMV-004": (
         ("backend/van_gateway/suggestions/service.py", "fresh_owner_prompt"),
+        ("backend/van_gateway/runtime_api.py", '@router.post("/suggestions")'),
+        ("hermes/mcp/owner_runtime_stdio.mjs", "name: 'suggestion_create'"),
         ("backend/tests/test_suggestions.py", "assert \"execution_id\" not in result"),
+        ("backend/tests/test_runtime_hermes_surface.py", "test_suggestion_create_requires_evidence_and_never_executes"),
         ("android/app/src/main/java/com/dial/van/command/work/ConvergenceRoute.kt", "convergenceSuggestionDecision"),
     ),
     "OMV-005": (
