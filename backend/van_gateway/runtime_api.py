@@ -60,6 +60,8 @@ from van_gateway.reminders.timeparse import TimeParseError, parse_due_expression
 from van_gateway.research.exa import ExaResearchService, ResearchPolicyError
 from van_gateway.research.models import ResearchSearchRequest
 from van_gateway.storage.db import Store
+from van_gateway.suggestions.models import SuggestionCreate
+from van_gateway.suggestions.service import SuggestionService, SuggestionServiceError
 from van_gateway.trading.service import TradingService
 
 
@@ -154,6 +156,16 @@ class ActionSubmittedBody(BaseModel):
     evidence_pointer: str | None = None
 
 
+class HermesSuggestionCreateBody(BaseModel):
+    """An evidence-backed idea for the owner, never an execution request."""
+
+    title: str = Field(min_length=1, max_length=300)
+    rationale: str = Field(min_length=1, max_length=4000)
+    proposed_prompt: str = Field(min_length=1, max_length=8000)
+    source_refs: list[str] = Field(min_length=1, max_length=100)
+    project_id: str | None = None
+
+
 class HermesReminderCreateBody(BaseModel):
     """What Hermes may ask the gateway to remind the owner about, on the owner's behalf.
 
@@ -196,6 +208,7 @@ class OwnerRuntimeApi:
         attention: AttentionEngine | None = None,
         briefing: BriefingService | None = None,
         artifacts: ArtifactService | None = None,
+        suggestions: SuggestionService | None = None,
     ) -> None:
         self.store = store
         self.settings = settings
@@ -209,6 +222,7 @@ class OwnerRuntimeApi:
         self.attention = attention
         self.briefing = briefing
         self.artifacts = artifacts
+        self.suggestions = suggestions
         self.context = OwnerContextService(store)
         self.retrieval = ContextRetrievalService(store, self.context)
         # GAP-F-008: agent-initiated mutating actions are gated by the autonomy policy.
@@ -409,6 +423,37 @@ class OwnerRuntimeApi:
                 "created_by": "hermes",
                 "mission_id": body.mission_id,
                 "source": body.source,
+            }
+
+        # ------------------------------------------------------ OMV-004 suggestions
+        #
+        # Hermes may surface an evidence-backed idea through the existing SuggestionService.
+        # This creates an Attention item only. It cannot execute the proposed prompt; the
+        # owner must accept/edit it, after which the client submits a fresh signed command.
+        @router.post("/suggestions")
+        async def runtime_create_suggestion(
+            body: HermesSuggestionCreateBody,
+            x_van_internal_token: str | None = Header(default=None),
+        ):
+            self._require_internal(x_van_internal_token)
+            if self.suggestions is None:
+                raise HTTPException(status_code=503, detail="suggestions_unwired")
+            try:
+                suggestion = await self.suggestions.create(
+                    SuggestionCreate(
+                        title=body.title,
+                        rationale=body.rationale,
+                        proposed_prompt=body.proposed_prompt,
+                        source_refs=body.source_refs,
+                        project_id=body.project_id,
+                    )
+                )
+            except SuggestionServiceError as exc:
+                raise HTTPException(status_code=409, detail=exc.code) from exc
+            return {
+                **suggestion.model_dump(mode="json"),
+                "execution_created": False,
+                "owner_decision_required": True,
             }
 
         # ------------------------------------------------------- §GAP-F-003 attention/briefing
