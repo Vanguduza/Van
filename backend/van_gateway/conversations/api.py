@@ -16,6 +16,13 @@ class ThreadStatePatch(BaseModel):
     status:ThreadStatus
 class DraftBody(BaseModel):
     text:str=Field(default="",max_length=20000)
+class FollowUpCreate(BaseModel):
+    prompt:str=Field(min_length=1,max_length=8000)
+class FollowUpDecision(BaseModel):
+    action:str=Field(pattern="^(promote|dismiss)$")
+    command_id:str|None=None
+
+
 class MessageBody(BaseModel):
     role:str
     body:str=Field(min_length=1,max_length=50000)
@@ -62,6 +69,16 @@ def build_conversation_router(service:ConversationService)->APIRouter:
     @router.put("/{thread_id}/draft")
     async def draft(thread_id:str,body:DraftBody):
         try:return (await service.save_draft(thread_id,body.text)).model_dump(mode="json")
+        except ConversationServiceError as exc:fail(exc)
+
+    @router.post("/{thread_id}/followups")
+    async def queue_followup(thread_id:str,body:FollowUpCreate):
+        try:return (await service.queue_followup(thread_id,body.prompt)).model_dump(mode="json")
+        except ConversationServiceError as exc:fail(exc)
+
+    @router.post("/{thread_id}/followups/{followup_id}/decision")
+    async def decide_followup(thread_id:str,followup_id:str,body:FollowUpDecision):
+        try:return (await service.decide_followup(thread_id,followup_id,body.action,command_id=body.command_id)).model_dump(mode="json")
         except ConversationServiceError as exc:fail(exc)
 
     @router.post("/{thread_id}/messages")
