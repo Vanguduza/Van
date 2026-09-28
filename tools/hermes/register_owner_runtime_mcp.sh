@@ -92,6 +92,7 @@ spec = {
             "trading_trade_detail",
             "trading_status",
             "reminder_create",
+            "suggestion_create",
             "attention_list",
             "briefing_read",
             "browser_task_create",
