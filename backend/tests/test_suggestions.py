@@ -14,6 +14,10 @@ async def test_suggestion_requires_evidence_and_acceptance_returns_fresh_prompt_
     service=SuggestionService(store,AttentionEngine(store))
     with pytest.raises(SuggestionServiceError,match="SUGGESTION_EVIDENCE_REQUIRED"):
         await service.create(SuggestionCreate(title="x",rationale="r",proposed_prompt="do x"))
+    with pytest.raises(SuggestionServiceError,match="SUGGESTION_EVIDENCE_REQUIRED"):
+        await service.create(SuggestionCreate(
+            title="x",rationale="r",proposed_prompt="do x",source_refs=["   "]
+        ))
     item=await service.create(SuggestionCreate(
         title="Review supplier",rationale="Mail mentions a changed date",
         proposed_prompt="Review the supplier delivery date",source_refs=["mail:m1"],
