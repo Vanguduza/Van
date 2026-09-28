@@ -600,8 +600,14 @@ class FakeGoogleTransport:
             "message": {"id": "md1", "threadId": thread_id, "raw": raw},
             "_van_raw_sha256": hashlib.sha256(raw.encode("ascii")).hexdigest(),
         }
-        self.drafts["d1"] = dict(result)
-        return result
+        self.drafts["d1"] = {
+            **result,
+            "message": dict(result["message"]),
+        }
+        return {
+            **result,
+            "message": dict(result["message"]),
+        }
 
     async def gmail_draft_get(self, token: str, draft_id: str) -> dict:
         self.calls.append(("gmail_draft_get", (draft_id,)))
