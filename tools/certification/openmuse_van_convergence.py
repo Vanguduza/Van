@@ -33,7 +33,7 @@ MARKERS: dict[str, tuple[tuple[str, str], ...]] = {
         ("backend/van_gateway/documents/service.py", "async def propose_fill("),
         ("backend/van_gateway/documents/pdf.py", "PDF_XFA_UNSUPPORTED"),
         ("backend/tests/test_document_fabric.py", "test_document_fill_proposal_is_source_digest_bound"),
-        ("android/app/src/main/java/com/dial/van/command/work/ConvergenceRoute.kt", "fun DocumentRoute("),
+        ("android/app/src/main/java/com/dial/van/command/work/DocumentRoute.kt", "fun DocumentRoute("),
         ("backend/van_gateway/ops/backup.py", "BackupPart.DOCUMENTS"),
     ),
     "OMV-002": (
@@ -63,7 +63,7 @@ MARKERS: dict[str, tuple[tuple[str, str], ...]] = {
         ("backend/van_gateway/conversations/service.py", "async def queue_followup("),
         ("backend/van_gateway/conversations/api.py", '"/{thread_id}/followups"'),
         ("backend/tests/test_conversation_store.py", "test_followup_queue_never_executes_by_itself"),
-        ("android/app/src/main/java/com/dial/van/command/work/ConvergenceRoute.kt", "fun ConversationThreadRoute("),
+        ("android/app/src/main/java/com/dial/van/command/work/ConversationThreadRoute.kt", "fun ConversationThreadRoute("),
     ),
     "OMV-007": (
         ("backend/van_gateway/google/transport.py", "In-Reply-To:"),
