@@ -241,3 +241,31 @@ OMV-001 through OMV-009 are repository-complete, every remaining live gate is ex
 The target state is not “VAN contains OpenMuse.” It is:
 
 > VAN has absorbed the useful proven OpenMuse capabilities into one coherent owner-assistant architecture while retaining one authority model, one execution identity chain, one verification model and one owner-facing product truth.
+
+
+## 12. Repository implementation closure — Rev 1.1 reconciliation
+
+The canonical machine-readable truth is
+`docs/project-state/OPENMUSE_VAN_CONVERGENCE_MATRIX_REV_1.json`.
+Its Rev 1.1 state records OMV-001 through OMV-009 as
+`REPOSITORY_COMPLETE` and OMV-010 as optional/not implemented.
+
+This wording is intentionally narrower than "production complete". Repository completion
+means the source, authority boundary, deterministic tests and an owner/API surface exist.
+It does **not** promote a host, device or provider dependency. The convergence matrix names
+the remaining external gates explicitly:
+
+- `QUAL-OMV-002` — real host qualification for the subordinate Computer Worker;
+- `QUAL-OMV-003` + `QUAL-BRW-01` — a scheduled Watch through the live Browser Harness;
+- `QUAL-OMV-007` — real Gmail/Calendar depth canary;
+- `QUAL-BRW-03/04` — live Browser Stream Host and managed-profile restart proof;
+- `QUAL-AND-01` — physical S24 owner-surface acceptance;
+- `QUAL-HERMES-02` — current-head Hermes/MCP/result round trip where a feature promotes
+  a fresh prompt into normal VAN execution.
+
+`tools/certification/openmuse_van_convergence.py --check` is the repository closure
+harness. It fails if a required package is no longer complete, its cited evidence
+disappears, the OpenMuse pin/licence drifts, a forbidden authority plane is introduced,
+migration 33 disappears, or the matrix self-promotes a live result.
+
+The harness is repository evidence only. A green harness cannot satisfy any external row.
