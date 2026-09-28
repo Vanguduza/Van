@@ -2,10 +2,12 @@ from __future__ import annotations
 
 import base64
 import hashlib
+import io
 
 import pytest
 from cryptography.fernet import Fernet
 from httpx import ASGITransport, AsyncClient
+from pypdf import PdfWriter
 
 from van_gateway.action.models import ExecutionStatus
 from van_gateway.app import create_app
@@ -325,3 +327,96 @@ async def test_internal_control_token_is_not_general_ingress(client):
         general = await internal.get("/v1/projects")
         assert general.status_code == 401
         assert general.json()["detail"] == "ingress_auth_failed"
+
+
+
+@pytest.mark.asyncio
+async def test_google_filled_pdf_reply_round_trip_is_action_bound(client):
+    """Canonical OpenMuse→VAN acceptance #3 through the real ActionRuntime boundary."""
+    ac, app = client
+    headers = {"X-Van-Internal-Token": "test-internal-token"}
+    connected = await ac.post(
+        "/v1/google/connect",
+        headers=headers,
+        json={
+            "refresh_token": "refresh-round-trip",
+            "scopes": [
+                "https://www.googleapis.com/auth/gmail.readonly",
+                "https://www.googleapis.com/auth/gmail.compose",
+                "https://www.googleapis.com/auth/gmail.send",
+            ],
+        },
+    )
+    assert connected.status_code == 200
+    transport = FakeGoogleTransport()
+    app.state.google.transport = transport
+    app.state.google.oauth = None
+
+    writer=PdfWriter()
+    writer.add_blank_page(width=100,height=100)
+    pdf=io.BytesIO()
+    writer.write(pdf)
+    document=await app.state.documents.import_pdf(
+        filename="permission.pdf",data=pdf.getvalue(),mission_id="mission-google-round-trip"
+    )
+    filled=await app.state.documents.fill(document.document_id,{})
+    assert filled.output_artifact_id
+
+    draft_parameters={
+        "thread_id":"thread-1",
+        "body":"Attached is the completed form.",
+        "attachment_document_id":document.document_id,
+    }
+    draft_execution=await app.state.owner_runtime.actions.begin(
+        execution_id="exec-google-draft-attachment",
+        command_id="cmd-google-draft-attachment",
+        turn_id="turn-google-draft-attachment",
+        action_id="google.gmail.draft",
+        principal_type=PrincipalType.OWNER_DEVICE,
+        requested_by="device:pytest-client",
+        idempotency_key="turn-google-draft-attachment:google.gmail.draft",
+        parameters=draft_parameters,
+        snapshot_id=None,
+        owner_approved=False,
+    )
+    assert draft_execution.status is ExecutionStatus.AUTHORIZED
+    drafted=await ac.post(
+        "/v1/google/actions/execute",
+        headers=headers,
+        json={"execution_id":draft_execution.execution_id,"parameters":draft_parameters},
+    )
+    assert drafted.status_code==200,drafted.text
+    review=drafted.json()["review"]
+    assert review["attachment_document_id"]==document.document_id
+    assert len(review["raw_sha256"])==64
+    assert drafted.json()["verification"]["status"]=="VERIFIED_SUCCESS"
+
+    send_parameters={
+        "draft_id":review["draft_id"],
+        "expected_raw_sha256":review["raw_sha256"],
+    }
+    send_execution=await app.state.owner_runtime.actions.begin(
+        execution_id="exec-google-send-attachment",
+        command_id="cmd-google-send-attachment",
+        turn_id="turn-google-send-attachment",
+        action_id="google.gmail.send",
+        principal_type=PrincipalType.OWNER_DEVICE,
+        requested_by="device:pytest-client",
+        idempotency_key="turn-google-send-attachment:google.gmail.send",
+        parameters=send_parameters,
+        snapshot_id=None,
+        owner_approved=True,
+    )
+    assert send_execution.status is ExecutionStatus.AUTHORIZED
+    sent=await ac.post(
+        "/v1/google/actions/execute",
+        headers=headers,
+        json={"execution_id":send_execution.execution_id,"parameters":send_parameters},
+    )
+    assert sent.status_code==200,sent.text
+    assert sent.json()["verification"]["status"]=="VERIFIED_SUCCESS"
+    calls=[name for name,_args in transport.calls]
+    assert calls==[
+        "gmail_draft","gmail_draft_get",
+        "gmail_draft_get","gmail_send","gmail_message_get",
+    ]
