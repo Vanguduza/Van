@@ -172,8 +172,6 @@ class ConversationService:
             raise ConversationServiceError("FOLLOWUP_ALREADY_DECIDED")
         if action not in {"promote","dismiss"}:
             raise ConversationServiceError("FOLLOWUP_ACTION_INVALID")
-        if action=="promote" and not (command_id or "").strip():
-            raise ConversationServiceError("FOLLOWUP_COMMAND_ID_REQUIRED")
         status=FollowUpStatus.PROMOTED if action=="promote" else FollowUpStatus.DISMISSED
         now=int(time.time()*1000) if now_ms is None else now_ms
         await self.store.execute(
