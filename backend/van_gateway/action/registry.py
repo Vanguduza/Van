@@ -30,7 +30,11 @@ BUILTIN_ACTIONS: tuple[ActionDefinition, ...] = (
         max_age_seconds=300,
         parameter_schema={
             "required": ["thread_id", "body"],
-            "properties": {"thread_id": "string", "body": "string"},
+            "properties": {
+                "thread_id": "string",
+                "body": "string",
+                "attachment_document_id": "string",
+            },
         },
     ),
     ActionDefinition(
@@ -42,8 +46,11 @@ BUILTIN_ACTIONS: tuple[ActionDefinition, ...] = (
         no_stale_replay=True,
         max_age_seconds=30,
         parameter_schema={
-            "required": ["draft_id"],
-            "properties": {"draft_id": "string"},
+            "required": ["draft_id", "expected_raw_sha256"],
+            "properties": {
+                "draft_id": "string",
+                "expected_raw_sha256": "string",
+            },
         },
     ),
     ActionDefinition(
