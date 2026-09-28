@@ -1,13 +1,22 @@
 from __future__ import annotations
 
 import base64
+import io
+from email import policy
+from email.parser import BytesParser
 
 import httpx
 import pytest
+from cryptography.fernet import Fernet
+from pypdf import PdfWriter
 
+from van_gateway.artifacts.service import ArtifactService
+from van_gateway.documents.service import DocumentService
+from van_gateway.google.service import GoogleService
 from van_gateway.google.transport import (
-    GoogleHttpTransport, GoogleOutcomeUnknown, _normalise_gmail_message,
+    FakeGoogleTransport, GoogleHttpTransport, GoogleOutcomeUnknown, _normalise_gmail_message,
 )
+from van_gateway.storage.db import Store
 
 
 def b64url(value: str) -> str:
@@ -146,4 +155,54 @@ async def test_gmail_reply_draft_binds_threading_headers():
     assert "References: <older@example.com> <source@example.com>" in decoded
     assert "To: supplier@example.com" in decoded
     assert "Subject: Re: Question" in decoded
+    assert len(result["_van_raw_sha256"])==64
+
+
+
+@pytest.mark.asyncio
+async def test_filled_document_output_is_attached_to_reviewed_reply(tmp_path):
+    """Acceptance #3: Document Fabric output, not the source, enters the reviewed MIME."""
+    writer=PdfWriter()
+    writer.add_blank_page(width=100,height=100)
+    source_buf=io.BytesIO()
+    writer.write(source_buf)
+
+    store=Store(str(tmp_path/"google-document.sqlite3"))
+    await store.migrate()
+    documents=DocumentService(store,ArtifactService(store),root=str(tmp_path/"documents"))
+    source=await documents.import_pdf(filename="permission.pdf",data=source_buf.getvalue())
+
+    # A static PDF has no form fields, but filling an empty value map still produces a
+    # distinct governed output copy. The Gmail adapter may attach only that output variant.
+    filled=await documents.fill(source.document_id,{})
+    output_bytes,_=await documents.bytes_for(source.document_id,"output")
+    source_bytes,_=await documents.bytes_for(source.document_id,"source")
+    assert filled.output_sha256 is not None
+    assert output_bytes != b""
+    assert source_bytes != b""
+
+    service=GoogleService(
+        store,Fernet.generate_key().decode(),
+        transport=FakeGoogleTransport(),documents=documents,
+    )
+    await service.store_refresh_token(
+        "owner","refresh-test",
+        [
+            "https://www.googleapis.com/auth/gmail.readonly",
+            "https://www.googleapis.com/auth/gmail.compose",
+        ],
+    )
+    result=await service.gmail_draft(
+        "thread-1","Attached is the completed form.",
+        attachment_document_id=source.document_id,
+    )
+    raw=result["message"]["raw"]
+    mime=BytesParser(policy=policy.default).parsebytes(
+        base64.urlsafe_b64decode(raw + "=" * (-len(raw) % 4))
+    )
+    attachments=list(mime.iter_attachments())
+    assert len(attachments)==1
+    assert attachments[0].get_filename()=="permission.pdf"
+    assert attachments[0].get_content_type()=="application/pdf"
+    assert attachments[0].get_payload(decode=True)==output_bytes
     assert len(result["_van_raw_sha256"])==64
