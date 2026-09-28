@@ -64,8 +64,12 @@ MARKERS: dict[str, tuple[tuple[str, str], ...]] = {
     ),
     "OMV-006": (
         ("backend/van_gateway/conversations/service.py", "async def queue_followup("),
+        ("backend/van_gateway/conversations/service.py", "async def append_projection("),
         ("backend/van_gateway/conversations/api.py", '"/{thread_id}/followups"'),
+        ("backend/van_gateway/app.py", 'projection_key=f"command:{req.command_id}:owner"'),
+        ("backend/van_gateway/runtime_api.py", 'projection_key=f"mission:{mission.mission_id}:terminal"'),
         ("backend/tests/test_conversation_store.py", "test_followup_queue_never_executes_by_itself"),
+        ("backend/tests/test_command_execution_result.py", "assert len(van_messages) == 1"),
         ("android/app/src/main/java/com/dial/van/command/work/ConversationThreadRoute.kt", "fun ConversationThreadRoute("),
     ),
     "OMV-007": (
