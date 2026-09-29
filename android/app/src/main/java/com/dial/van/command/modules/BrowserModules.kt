@@ -91,21 +91,7 @@ internal fun BrowserAutomationModule(
         }
         if (status == null && error == null) item { TruthMessage("Loading browser and automation state…") }
         if (error != null) item { TruthMessage(error!!, warning = true) }
-        jevLane?.let { lane ->
-            item {
-                AdminCard(glass) {
-                    Column(verticalArrangement = Arrangement.spacedBy(5.dp)) {
-                        Text("Interaction lanes", color = Color.White, fontSize = 15.sp, fontWeight = FontWeight.Bold)
-                        Text(lane.summary, color = Color(0xFFD7E7EC), fontSize = 11.sp)
-                        Text(
-                            "Deterministic ${if (lane.deterministicExecutor) "wired" else "not wired"} • Stagehand ${if (lane.stagehandFallback) "wired" else "not wired"} • verifier ${if (lane.independentVerifier) "wired" else "not wired"}",
-                            color = Color(VanGlassTokens.EDGE_CYAN),
-                            fontSize = 11.sp,
-                        )
-                    }
-                }
-            }
-        }
+        jevLane?.let { lane -> item { com.dial.van.command.jev.JevBrowserLaneCard(lane, glass) } }
 
         status?.let { s ->
             item {
