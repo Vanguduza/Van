@@ -73,13 +73,47 @@ def _relative(path: Path, root: Path) -> str:
         return path.as_posix()
 
 
+class DuplicateKeyError(ValueError):
+    """A decision record states the same key twice in one mapping."""
+
+
+def _unique_key_yaml_load(text: str) -> Any:
+    """``yaml.safe_load`` that refuses a mapping with a repeated key.
+
+    Reviewer I minor 2: ``safe_load`` keeps the *last* of two equal keys, so appending a
+    second ``owner_decisions_20260929:`` block (all GREEN) to a record silently replaced the
+    real one and flipped ``production_activation_permitted`` to true. Decision records are
+    append-only by rule; a repeated key is a record this model cannot read, i.e. UNKNOWN.
+    Keys merged in with ``<<:`` count too, so a merge cannot override a stated key either.
+    """
+    import yaml  # PyYAML is pinned in backend/requirements.lock; absent => fail closed.
+
+    class UniqueKeyLoader(yaml.SafeLoader):
+        def construct_mapping(self, node, deep=False):  # type: ignore[override]
+            if isinstance(node, yaml.MappingNode):
+                self.flatten_mapping(node)
+                seen: set[Any] = set()
+                for key_node, _ in node.value:
+                    key = self.construct_object(key_node, deep=deep)
+                    try:
+                        duplicate = key in seen
+                    except TypeError:  # unhashable key: let the base loader reject it
+                        continue
+                    if duplicate:
+                        raise DuplicateKeyError(
+                            f"duplicate key {key!r} at line {key_node.start_mark.line + 1}"
+                        )
+                    seen.add(key)
+            return super().construct_mapping(node, deep=deep)
+
+    return yaml.load(text, Loader=UniqueKeyLoader)  # noqa: S506 - SafeLoader subclass
+
+
 def _load_record(path: Path, fmt: str) -> dict[str, Any]:
     """Parse a decision record into a mapping. Raises on anything it cannot read."""
     text = path.read_text(encoding="utf-8")
     if fmt == "yaml":
-        import yaml  # PyYAML is pinned in backend/requirements.lock; absent => fail closed.
-
-        data = yaml.safe_load(text)
+        data = _unique_key_yaml_load(text)
         if not isinstance(data, dict):
             raise ValueError("decision record is not a mapping")
         return data
@@ -242,4 +276,4 @@ def evaluate_production_gates(
     return base
 
 
-__all__ = ["GATE_MODEL", "GateKind", "GateResult", "GateStatus", "evaluate_production_gates"]
+__all__ = ["GATE_MODEL", "DuplicateKeyError", "GateKind", "GateResult", "GateStatus", "evaluate_production_gates"]

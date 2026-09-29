@@ -202,3 +202,48 @@ def test_real_model_covers_every_required_decision_with_owner_and_production_gat
     ingress = next(g for g in decisions["VAN-ADOPT-STAGEHAND-001.yaml"]["gates"]
                    if g["id"] == "signed_ingress")
     assert all("WAIV" not in v for v in ingress["green"])
+
+
+# --------------------------------------------------------------- reviewer I minor 2
+
+
+APPENDED_ALL_GREEN = (
+    "decisions:\n"
+    "  owner_intent: OWNER_INTENT_APPROVED\n"
+    "  production_gate:\n    status: GREEN\n"
+    "  live_qualification:\n    status: GREEN\n"
+    "  signed_ingress:\n    status: SIGNED_INGRESS_VERIFIED\n"
+)
+
+
+def test_an_appended_duplicate_block_cannot_override_the_record(tmp_path):
+    """Probe review-i/probes/gates.py: appending a second all-GREEN block under the same key
+    to the real Stagehand record made safe_load keep the last one -> permitted: True."""
+    record = _record(production="PENDING", live="PENDING", ingress="SIGNED_INGRESS_PENDING")
+    result = _eval(tmp_path, _repo(tmp_path, record + APPENDED_ALL_GREEN))
+    assert result["production_activation_permitted"] is False
+    assert {g["status"] for g in result["gates"]} == {"UNKNOWN"}
+    assert all("duplicate key 'decisions'" in (g["reason"] or "") for g in result["gates"])
+
+
+@pytest.mark.parametrize("record", [
+    _record() + "owner_signature_status: SIGNED\n",                        # top level
+    _record().replace("  owner_intent: OWNER_INTENT_APPROVED\n",
+                      "  owner_intent: PENDING\n  owner_intent: OWNER_INTENT_APPROVED\n"),  # nested
+    "base: &b\n  owner_signature_status: SIGNED\n" + _record().replace(
+        "decision_id: X-001\n", "decision_id: X-001\n<<: *b\n"),        # merge key vs stated key
+])
+def test_any_repeated_key_is_unknown_even_when_every_value_is_green(tmp_path, record):
+    result = _eval(tmp_path, _repo(tmp_path, record))
+    assert result["production_activation_permitted"] is False
+    assert "UNKNOWN" in {g["status"] for g in result["gates"]}
+
+
+def test_the_real_decision_records_have_no_repeated_keys():
+    from van_gateway.automation.production_gates import REPO_ROOT, _unique_key_yaml_load
+
+    model = json.loads(GATE_MODEL.read_text(encoding="utf-8"))
+    for entry in model["required_decisions"]:
+        if entry.get("format", "yaml") == "yaml":
+            path = REPO_ROOT / model["decisions_dir"] / entry["decision"]
+            assert isinstance(_unique_key_yaml_load(path.read_text(encoding="utf-8")), dict)
