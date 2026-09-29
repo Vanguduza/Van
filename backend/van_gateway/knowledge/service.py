@@ -99,6 +99,9 @@ class KnowledgeRuntime:
             model_name=settings.browser_stagehand_model_name,
             max_tier=browser_policy.max_tier,
             timeout_seconds=settings.notebook_consumer_timeout_seconds,
+            # Review I B-1: the adapter enforces the Stagehand production gate itself,
+            # evaluated against these settings.
+            settings=settings,
         )
         self.notebook_consumer = NotebookConsumerProvider(
             store, self.evidence,

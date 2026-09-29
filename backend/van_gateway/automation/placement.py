@@ -21,7 +21,8 @@ What it decides, and what it does not:
   Any other configured pair is reported, not silently accepted, and keeps Stagehand
   production-disabled until another explicit owner decision.
 * It checks the runtime *version identity* (§5): the worker must report the released
-  4.1.0 artifact.
+  4.1.0 artifact, read from the installed package metadata (not a constant), and must
+  not serve ``/act`` (§8).
 * It does **not** decide governance gates (signed owner ingress §2, the health production
   gate §6, the verifier/executor blockers §§7-8). Callers AND this result with those; a
   ``True`` here is necessary, never sufficient.
@@ -34,6 +35,9 @@ that package so placement has exactly one owner.
 
 from __future__ import annotations
 
+import ipaddress
+import re
+import socket
 from collections.abc import Mapping
 from pathlib import Path
 from typing import Any
@@ -54,10 +58,55 @@ STAGEHAND_RELEASE_INTEGRITY = (
     "sha512-PJikMBVoaCRh6TFD7GcmeISmsMq4IwUu1BD5FOsGUVDUxrVqZomWa6W6dF+a/zu4xRZu2Z2xX1nXVMDaCuZWsw=="
 )
 
+#: The worker's /health must say its version was read from the installed package.
+RUNTIME_VERSION_SOURCE = "installed-package-metadata"
+
 PRODUCTION_DISABLED = "PRODUCTION_DISABLED"
 STAGEHAND_PLACEMENT_SATISFIED = "STAGEHAND_PLACEMENT_SATISFIED"
 
-_LOOPBACK = frozenset({"127.0.0.1", "localhost", "::1", "0.0.0.0"})
+_NUMERIC_HOST = re.compile(r"^[0-9a-fx.]+$")
+
+
+def _ip_of(host: str) -> ipaddress.IPv4Address | ipaddress.IPv6Address | None:
+    """The address a literal host denotes, including the shorthand IPv4 forms.
+
+    ``ipaddress`` only accepts the dotted quad, but the resolver behind httpx also
+    accepts ``127.1``, ``2130706433`` and ``0x7f.1`` (inet_aton), all of which reach
+    loopback. Anything numeric-looking is therefore read the way the socket layer reads it.
+    """
+    candidate = host.split("%", 1)[0]  # an IPv6 zone id does not change the address class
+    try:
+        return ipaddress.ip_address(candidate)
+    except ValueError:
+        pass
+    if _NUMERIC_HOST.match(candidate) and any(ch.isdigit() for ch in candidate):
+        try:
+            return ipaddress.IPv4Address(socket.inet_aton(candidate))
+        except (OSError, ValueError):
+            return None
+    return None
+
+
+def _is_local_host(hostname: str | None) -> bool:
+    """True when ``hostname`` cannot be a cross-zone peer: this host or the link.
+
+    Rejects every loopback address (all of 127.0.0.0/8 and ::1, including IPv4-mapped
+    forms), link-local, unspecified, ``localhost`` and any ``*.localhost`` name, each with
+    or without the trailing root dot. An empty host is local too: it names no peer.
+    """
+    host = (hostname or "").strip().lower().strip("[]").rstrip(".")
+    if not host:
+        return True
+    if host == "localhost" or host.endswith(".localhost") or host == "localhost.localdomain":
+        return True
+    ip = _ip_of(host)
+    if ip is None:
+        return False
+    mapped = getattr(ip, "ipv4_mapped", None)
+    for addr in (ip, mapped) if mapped is not None else (ip,):
+        if addr.is_loopback or addr.is_link_local or addr.is_unspecified:
+            return True
+    return False
 
 
 def _norm(value: Any) -> str:
@@ -96,7 +145,7 @@ def stagehand_production_enabled(
     # van-browser-core, or reached without authentication.
     base_url = str(getattr(settings, "browser_stagehand_base_url", "") or "")
     parts = urlsplit(base_url)
-    if parts.scheme != "https" or not parts.hostname or parts.hostname.lower() in _LOOPBACK:
+    if parts.scheme != "https" or _is_local_host(parts.hostname):
         return False, "STAGEHAND_ENDPOINT_NOT_CROSS_ZONE_MTLS"
     for field in ("browser_core_ca_file", "browser_core_client_cert_file", "browser_core_client_key_file"):
         if not _file_present(str(getattr(settings, field, "") or "")):
@@ -116,6 +165,10 @@ def stagehand_production_enabled(
         return False, "VAN_BROWSER_CORE_UNAVAILABLE:worker_not_ok"
     if _norm(worker_health.get("trust_zone")) != VAN_BROWSER_CORE:
         return False, f"STAGEHAND_RUNNING_ZONE_MISMATCH:{_norm(worker_health.get('trust_zone')) or 'unreported'}"
+    # §5 / review I minor 5: the version must be the installed package's own metadata. A
+    # worker that reports a constant can never mismatch, so its version proves nothing.
+    if worker_health.get("runtime_version_source") != RUNTIME_VERSION_SOURCE:
+        return False, "STAGEHAND_RUNTIME_VERSION_UNPROVEN"
     if str(worker_health.get("runtime_version", "")) != STAGEHAND_RELEASE_VERSION:
         return False, "STAGEHAND_RUNTIME_VERSION_MISMATCH"
     if str(worker_health.get("model_name", "")) != f"{CANONICAL_STAGEHAND_PROVIDER}/{CANONICAL_STAGEHAND_MODEL}":
@@ -130,6 +183,9 @@ def stagehand_production_enabled(
         return False, "STAGEHAND_PROVIDER_KEY_ENTERS_BROWSER_MEMORY"
     if worker_health.get("direct_agent_loop") is not False or worker_health.get("model_self_selection") is not False:
         return False, "STAGEHAND_WORKER_AUTHORITY_UNBOUNDED"
+    # §8 / review I minor 5: a worker that serves /act holds an actuation authority.
+    if worker_health.get("act_endpoint_enabled") is not False:
+        return False, "STAGEHAND_WORKER_ACTUATION_EXPOSED"
 
     return True, STAGEHAND_PLACEMENT_SATISFIED
 

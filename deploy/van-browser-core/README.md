@@ -29,7 +29,7 @@ fallback placement. Do not provision Stagehand on `van-trading-core` "for now".
 | Component | Unit | Interface | Notes |
 |---|---|---|---|
 | Browser Harness 0.1.13 + Harness-owned Chromium | `van-browser-harness.service` | 127.0.0.1:9141 | the single executor for browser actuation |
-| Stagehand 4.1.0 semantic worker | `van-stagehand.service` | 127.0.0.1:9140 | observe/extract proposals; `/agent` refused; `/act` not exposed across zones |
+| Stagehand 4.1.0 semantic worker | `van-stagehand.service` | 127.0.0.1:9140 | observe/extract proposals; `/agent` refused; `/act` 404 unless development-only, and never exposed across zones |
 | mTLS edge (Caddy) | `van-browser-core-edge.service` | `VAN_BROWSER_CORE_EDGE_BIND`:9443 | the only cross-zone listener; zone-private CA; one caller (van-gateway) |
 
 Stagehand 4.1.0 is the released artifact: upstream release commit
@@ -37,6 +37,10 @@ Stagehand 4.1.0 is the released artifact: upstream release commit
 `sha512-PJikMBVoaCRh6TFD7GcmeISmsMq4IwUu1BD5FOsGUVDUxrVqZomWa6W6dF+a/zu4xRZu2Z2xX1nXVMDaCuZWsw==`.
 `bootstrap.sh` refuses any other version or integrity. (`ad2bf12e…` is later unreleased
 upstream work and is not 4.1.0.)
+
+`/health.runtime_version` is read from the installed `@browserbasehq/stagehand`
+`package.json` (`runtime_version_source: installed-package-metadata`), never a constant, so a
+different installed artifact fails the gateway placement gate and `qualify.sh`.
 
 Model: `anthropic/claude-sonnet-5` (§4), pinned in `runtime.env.example`; the worker refuses
 a request naming another model. The credential is the file-backed

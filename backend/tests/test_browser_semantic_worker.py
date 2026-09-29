@@ -19,6 +19,12 @@ from van_gateway.browser.subagent import (
 from van_gateway.browser.worker import HybridBrowserWorker
 from van_gateway.models import ActionClass
 
+
+async def _no_owner_control(_task) -> bool:
+    """Review I M-4: the runner fails closed without an owner-control probe; these
+    tests are about other bounds, so the owner is explicitly not holding control."""
+    return False
+
 DOMAIN = "research.example.com"
 
 
@@ -121,7 +127,7 @@ async def test_semantic_assignment_is_one_stagehand_action_per_gateway_step(tmp_
     worker = HybridBrowserWorker(harness, stagehand, task=task)  # type: ignore[arg-type]
 
     verifier = _Verdict("VERIFIED")
-    result = await BrowserSubagentRunner().run(
+    result = await BrowserSubagentRunner(owner_control_probe=_no_owner_control).run(
         assignment=_assignment(task), worker=worker, task=task, verifier=verifier,
     )
 
@@ -149,7 +155,7 @@ async def test_stagehand_payment_proposal_is_refused_before_it_can_act(tmp_path)
     ]])
     worker = HybridBrowserWorker(FakeHarness(), stagehand, task=task)  # type: ignore[arg-type]
 
-    result = await BrowserSubagentRunner().run(
+    result = await BrowserSubagentRunner(owner_control_probe=_no_owner_control).run(
         assignment=_assignment(task), worker=worker, task=task
     )
 
@@ -203,7 +209,7 @@ async def test_stagehand_no_controls_is_a_claim_not_success(tmp_path, verifier, 
     task = await _task(tmp_path)
     stagehand = FakeStagehand([[]])  # Stagehand returns no controls == "done"
     worker = HybridBrowserWorker(FakeHarness(), stagehand, task=task)  # type: ignore[arg-type]
-    result = await BrowserSubagentRunner().run(
+    result = await BrowserSubagentRunner(owner_control_probe=_no_owner_control).run(
         assignment=_assignment(task), worker=worker, task=task, verifier=verifier,
     )
     assert result.stop_reason is expected
@@ -216,7 +222,7 @@ async def test_stagehand_fill_is_refused_not_replayed(tmp_path):
     stagehand = FakeStagehand([[{"method": "fill", "selector": "#q", "arguments": ["x"]}]])
     harness = FakeHarness()
     worker = HybridBrowserWorker(harness, stagehand, task=task)  # type: ignore[arg-type]
-    result = await BrowserSubagentRunner().run(
+    result = await BrowserSubagentRunner(owner_control_probe=_no_owner_control).run(
         assignment=_assignment(task), worker=worker, task=task, verifier=_Verdict("VERIFIED"),
     )
     assert result.stop_reason is SubagentStop.WORKER_ERROR

@@ -21,10 +21,12 @@ Every one of the following ends the task rather than escalating it:
 
 from __future__ import annotations
 
+import inspect
 import ipaddress
 import re
 import time
 import uuid
+from collections.abc import Callable
 from enum import Enum
 from typing import Any, Protocol
 
@@ -66,6 +68,10 @@ class SubagentStop(str, Enum):
     INJECTION_REFUSED = "INJECTION_REFUSED"
     WORKER_ERROR = "WORKER_ERROR"
     NO_PROGRESS = "NO_PROGRESS"
+    #: Owner decision 2026-09-29 §9 / review I M-4: the owner holds control of the
+    #: profile (or control state could not be read). Automation stops and hands over;
+    #: nothing further is proposed or executed. Never success.
+    OWNER_TAKEOVER = "OWNER_TAKEOVER"
 
 
 class SubagentAssignment(BaseModel):
@@ -163,16 +169,46 @@ class SubagentWorker(Protocol):
         ...
 
 
+#: ``(task) -> bool | Awaitable[bool]``: True when the owner holds control of the task's
+#: profile. ``interaction_router.OwnerControlProbe`` is the production implementation.
+OwnerControlProbeFn = Callable[[BrowserTask], Any]
+
+
 class BrowserSubagentRunner:
     """Runs an assignment to completion or to a bounded stop.
 
     The loop is the enforcement point. Each proposed action is checked against the
     assignment *before* it executes, so a worker that drifts is stopped rather than
     corrected-and-continued.
+
+    Owner takeover preempts automation (owner decision 2026-09-29 §9; review I M-4).
+    ``owner_control_probe`` is consulted before every ``propose`` and every ``execute``;
+    when the owner holds control, when the probe fails, or when no probe was supplied
+    (control state unknowable), the run ends with ``OWNER_TAKEOVER`` and hands over.
     """
 
-    def __init__(self, policy: BrowserPolicyEngine | None = None) -> None:
+    def __init__(
+        self,
+        policy: BrowserPolicyEngine | None = None,
+        *,
+        owner_control_probe: OwnerControlProbeFn | None = None,
+    ) -> None:
         self.policy = policy or BrowserPolicyEngine()
+        self.owner_control_probe = owner_control_probe
+
+    async def _owner_preempts(self, task: BrowserTask) -> str | None:
+        """Same rule as the router's ``_owner_preempts``: unknown control state = preempt."""
+        if self.owner_control_probe is None:
+            return "OWNER_CONTROL_STATE_UNKNOWN"
+        try:
+            held = self.owner_control_probe(task)
+            if inspect.isawaitable(held):
+                held = await held
+        except Exception as exc:  # noqa: BLE001 - unreadable control state hands over
+            return f"OWNER_CONTROL_PROBE_FAILED:{type(exc).__name__}"
+        if held is False:
+            return None
+        return "OWNER_HAS_CONTROL" if held is True else "OWNER_CONTROL_STATE_UNKNOWN"
 
     async def run(
         self,
@@ -214,6 +250,12 @@ class BrowserSubagentRunner:
             if assignment.deadline_ms is not None and now >= assignment.deadline_ms:
                 return self._stop(assignment, task, steps, extraction, SubagentStop.DEADLINE_REACHED)
 
+            preempt = await self._owner_preempts(task)
+            if preempt is not None:
+                return self._stop(
+                    assignment, task, steps, extraction, SubagentStop.OWNER_TAKEOVER, detail=preempt,
+                )
+
             try:
                 action = await worker.propose(assignment, list(steps))
             except Exception as exc:  # noqa: BLE001 - a worker fault ends the task
@@ -231,6 +273,14 @@ class BrowserSubagentRunner:
             if violation is not None:
                 stop, detail = violation
                 return self._stop(assignment, task, steps, extraction, stop, detail=detail)
+
+            # Re-checked immediately before actuation: the owner may have taken control
+            # while the worker was proposing (a Stagehand observe can take seconds).
+            preempt = await self._owner_preempts(task)
+            if preempt is not None:
+                return self._stop(
+                    assignment, task, steps, extraction, SubagentStop.OWNER_TAKEOVER, detail=preempt,
+                )
 
             try:
                 observation = await worker.execute(assignment, action)

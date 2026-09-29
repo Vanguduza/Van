@@ -40,8 +40,8 @@ fi
 
 # 3. Worker identity.
 if curl -fsS --max-time 3 http://127.0.0.1:9140/health >/tmp/vbcq-sh.json 2>/dev/null \
-   && jq -e '.ok==true and .trust_zone=="van-browser-core" and .runtime_version=="4.1.0" and .stagehand_release_commit=="cd7b230778cf92269e4cb90e80d97f5113781c51" and .model_name=="anthropic/claude-sonnet-5" and .direct_agent_loop==false and .model_self_selection==false' /tmp/vbcq-sh.json >/dev/null; then
-  add stagehand_identity GREEN "$(jq -c '{runtime_version,trust_zone,model_name,model_key_present,provider_key_in_browser_memory}' /tmp/vbcq-sh.json)"
+   && jq -e '.ok==true and .trust_zone=="van-browser-core" and .runtime_version=="4.1.0" and .runtime_version_source=="installed-package-metadata" and .act_endpoint_enabled==false and .stagehand_release_commit=="cd7b230778cf92269e4cb90e80d97f5113781c51" and .model_name=="anthropic/claude-sonnet-5" and .direct_agent_loop==false and .model_self_selection==false' /tmp/vbcq-sh.json >/dev/null; then
+  add stagehand_identity GREEN "$(jq -c '{runtime_version,runtime_version_source,act_endpoint_enabled,trust_zone,model_name,model_key_present,provider_key_in_browser_memory}' /tmp/vbcq-sh.json)"
 else add stagehand_identity RED "Stagehand health missing or not the van-browser-core 4.1.0 / anthropic/claude-sonnet-5 worker"; fi
 if curl -fsS --max-time 3 http://127.0.0.1:9141/health >/tmp/vbcq-h.json 2>/dev/null \
    && jq -e '.ok==true and .trust_zone=="van-browser-core" and .runtime_version=="0.1.13" and .helper_authoring==false and .raw_cdp_http==false' /tmp/vbcq-h.json >/dev/null; then

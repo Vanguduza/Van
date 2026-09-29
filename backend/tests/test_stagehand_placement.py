@@ -38,6 +38,8 @@ def _healthy(**overrides) -> dict:
         "ok": True,
         "trust_zone": "van-browser-core",
         "runtime_version": "4.1.0",
+        "runtime_version_source": "installed-package-metadata",
+        "act_endpoint_enabled": False,
         "model_name": "anthropic/claude-sonnet-5",
         "model_key_present": True,
         "provider_key_in_browser_memory": False,
@@ -94,6 +96,46 @@ def test_loopback_or_unauthenticated_endpoint_is_not_cross_zone(tmp_path, url):
     )
 
 
+@pytest.mark.parametrize(
+    "url",
+    [
+        # review I minor 4: a literal set let these through.
+        "https://127.0.0.2:9443",
+        "https://localhost.:9443",
+        "https://LOCALHOST:9443",
+        "https://127.255.255.254:9443",
+        "https://127.1:9443",
+        "https://2130706433:9443",
+        "https://0x7f.1:9443",
+        "https://[::1]:9443",
+        "https://[0:0:0:0:0:0:0:1]:9443",
+        "https://[::ffff:127.0.0.1]:9443",
+        "https://[::]:9443",
+        "https://0.0.0.0:9443",
+        "https://0:9443",
+        "https://169.254.169.254:9443",
+        "https://[fe80::1]:9443",
+        "https://browser.localhost:9443",
+        "https://browser.localhost.:9443",
+        "https://localhost.localdomain:9443",
+    ],
+)
+def test_every_loopback_link_local_or_unspecified_host_is_refused(tmp_path, url):
+    s = _ready_settings(tmp_path, browser_stagehand_base_url=url)
+    assert stagehand_production_enabled(s, worker_health=_healthy()) == (
+        False,
+        "STAGEHAND_ENDPOINT_NOT_CROSS_ZONE_MTLS",
+    )
+
+
+@pytest.mark.parametrize(
+    "url", ["https://10.77.0.6:9443/stagehand", "https://browser-core.van.internal:9443", "https://[fd00::6]:9443"]
+)
+def test_cross_zone_hosts_still_pass_the_endpoint_check(tmp_path, url):
+    s = _ready_settings(tmp_path, browser_stagehand_base_url=url)
+    assert stagehand_production_enabled(s, worker_health=_healthy()) == (True, STAGEHAND_PLACEMENT_SATISFIED)
+
+
 def test_missing_mtls_client_identity_disables(tmp_path):
     s = _ready_settings(tmp_path, browser_core_client_key_file=str(tmp_path / "absent.key"))
     enabled, reason = stagehand_production_enabled(s, worker_health=_healthy())
@@ -138,6 +180,33 @@ def test_runtime_version_and_model_must_match(tmp_path):
     assert stagehand_production_enabled(
         s, worker_health=_healthy(model_name="anthropic/claude-sonnet-4-6")
     )[1] == "STAGEHAND_RUNTIME_MODEL_MISMATCH"
+
+
+def test_runtime_version_must_come_from_installed_package_metadata(tmp_path):
+    """Review I minor 5: a constant runtime_version could never fail the check."""
+    s = _ready_settings(tmp_path)
+    for source in (None, "constant", "INSTALLED-PACKAGE-METADATA"):
+        health = _healthy(runtime_version_source=source)
+        if source is None:
+            health.pop("runtime_version_source")
+        assert stagehand_production_enabled(s, worker_health=health) == (
+            False, "STAGEHAND_RUNTIME_VERSION_UNPROVEN",
+        )
+    # An unreadable installed version (null) is a mismatch, not a pass.
+    assert stagehand_production_enabled(s, worker_health=_healthy(runtime_version=None))[1] == (
+        "STAGEHAND_RUNTIME_VERSION_MISMATCH"
+    )
+
+
+@pytest.mark.parametrize("value", [True, None, "false", 0])
+def test_worker_serving_act_is_production_disabled(tmp_path, value):
+    s = _ready_settings(tmp_path)
+    health = _healthy(act_endpoint_enabled=value)
+    if value is None:
+        health.pop("act_endpoint_enabled")
+    assert stagehand_production_enabled(s, worker_health=health) == (
+        False, "STAGEHAND_WORKER_ACTUATION_EXPOSED",
+    )
 
 
 def test_provider_key_in_browser_memory_disables(tmp_path):

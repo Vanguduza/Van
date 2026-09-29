@@ -37,7 +37,7 @@ from van_gateway.browser.models import (
     BrowserTaskStatus,
 )
 from van_gateway.browser.policy import BrowserPolicyEngine, BrowserPolicyError
-from van_gateway.browser.service import BrowserSessionBroker, BrowserTaskService
+from van_gateway.browser.service import BrowserSessionBroker, BrowserTaskNotVerified, BrowserTaskService
 from van_gateway.automation.canonical import digest
 from van_gateway.automation.verifier import PostconditionSpec
 from van_gateway.browser.worker import BrowserTaskPlan, SemanticWorkerUnavailable
@@ -156,7 +156,11 @@ class BrowserApi:
         self.binder = binder
         self.broker = BrowserSessionBroker(store, self.policy)
         self.tasks = BrowserTaskService(store, self.broker, self.policy)
-        self.runner = BrowserSubagentRunner(self.policy)
+        # Review I M-4 / owner decision 2026-09-29 §9: owner takeover preempts the
+        # assignment path exactly as it preempts the B5 router — the same probe.
+        from van_gateway.browser.interaction_router import OwnerControlProbe
+
+        self.runner = BrowserSubagentRunner(self.policy, owner_control_probe=OwnerControlProbe(store))
         self.worker = worker
         #: Owner decision 2026-09-29 §7 — the independent postcondition verifier. None means
         #: every "done" claim is UNVERIFIABLE: fail closed, never COMPLETED.
@@ -882,10 +886,17 @@ class BrowserApi:
         ):
             self._require_internal(x_van_internal_token)
             await self._load_task(task_id)
-            await self.tasks.complete(
-                task_id=task_id, status=body.status,
-                evidence_pointer=body.evidence_pointer, error_code=body.error_code,
-            )
+            try:
+                await self.tasks.complete(
+                    task_id=task_id, status=body.status,
+                    evidence_pointer=body.evidence_pointer, error_code=body.error_code,
+                )
+            except BrowserTaskNotVerified as exc:
+                # §7 / review I M-2: a caller cannot declare success. COMPLETED needs the
+                # independent verifier's VERIFIED verdict on record for this task.
+                raise HTTPException(
+                    status_code=409, detail=f"BROWSER_TASK_NOT_VERIFIED:{exc.latest or 'NO_VERIFICATION'}"
+                ) from exc
             return {"task_id": task_id, "status": body.status.value}
 
         @router.post("/assignments")
@@ -942,8 +953,33 @@ class BrowserApi:
                     status_code=503, detail=f"BROWSER_SEMANTIC_RUNTIME_UNAVAILABLE:{exc}"
                 ) from exc
 
+            if result.verification_outcome is not None:
+                # The verifier's verdict on the worker's "done" claim goes on record for
+                # this task, whatever it was; COMPLETED is only reachable over VERIFIED.
+                await self.tasks.record_verification(
+                    task=task, outcome=result.verification_outcome,
+                    verifier=type(self.verifier).__name__ if self.verifier is not None else "NONE",
+                    detail=result.detail, assignment_id=assignment.assignment_id,
+                )
+
             escalation = None
-            if result.stop_reason in (SubagentStop.SCOPE_VIOLATION, SubagentStop.ACTION_CLASS_VIOLATION):
+            if result.stop_reason is SubagentStop.OWNER_TAKEOVER:
+                # Handed over, not finished: the owner is driving this profile. Not
+                # terminal (completed_at_ms stays NULL) and never success; the task
+                # lease is dropped so automation holds nothing while the owner acts.
+                now = int(time.time() * 1000)
+                await self._release_task_lease(task)
+                await self.store.execute(
+                    "UPDATE browser_tasks SET status = ?, error_code = ?, completed_at_ms = NULL, "
+                    "updated_at_ms = ? WHERE task_id = ?",
+                    (
+                        BrowserTaskStatus.WAITING_FOR_OWNER.value,
+                        f"{SubagentStop.OWNER_TAKEOVER.value}:{result.detail or ''}"[:200],
+                        now, task.task_id,
+                    ),
+                )
+                instruments.record_browser_task(BrowserTaskStatus.WAITING_FOR_OWNER)
+            elif result.stop_reason in (SubagentStop.SCOPE_VIOLATION, SubagentStop.ACTION_CLASS_VIOLATION):
                 escalation = await self._create_boundary_escalation(
                     task=task, assignment=assignment, result=result
                 )
@@ -980,7 +1016,7 @@ class BrowserApi:
                 "stop_reason": result.stop_reason.value,
                 "succeeded": result.succeeded,
                 "verification_outcome": result.verification_outcome,
-                "needs_owner": result.stop_reason is SubagentStop.UNVERIFIABLE,
+                "needs_owner": result.stop_reason in (SubagentStop.UNVERIFIABLE, SubagentStop.OWNER_TAKEOVER),
                 "step_count": result.step_count,
                 "steps": [step.model_dump(mode="json") for step in result.steps],
                 "extraction": result.extraction,

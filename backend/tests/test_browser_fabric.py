@@ -200,6 +200,12 @@ async def test_task_completion_records_status(tmp_path):
         autonomy_tier=AutonomyTier.L1_HARNESS_DETERMINISTIC, action_class=ActionClass.A2,
         target_domain="research.example.com", goal="capture",
     )
+    # Review I M-2: COMPLETED is refused until the verifier's VERIFIED verdict is recorded.
+    from van_gateway.browser.service import BrowserTaskNotVerified
+
+    with pytest.raises(BrowserTaskNotVerified):
+        await service.complete(task_id=task.task_id, status=BrowserTaskStatus.COMPLETED)
+    await service.record_verification(task=task, outcome="VERIFIED", verifier="test")
     await service.complete(
         task_id=task.task_id, status=BrowserTaskStatus.COMPLETED,
         evidence_pointer="gateway://browser/evidence/1",
@@ -374,6 +380,9 @@ async def test_stagehand_envelope_pins_provider(tmp_path):
         ExternalRuntimeRegistry(store), base_url="http://127.0.0.1:9140", enabled=True,
         model_provider="anthropic", model_name="claude-sonnet-5",
         transport=httpx.MockTransport(handler),
+        # Review I B-1: the envelope is under test here, not the production gate
+        # (tests/test_stagehand_adapter_gate.py), so this adapter is handed an open one.
+        production_gate=lambda: (True, "TEST_GATE_OPEN"),
     )
     await adapter.observe(task, "find the download link")
     assert seen["model_provider"] == "anthropic"

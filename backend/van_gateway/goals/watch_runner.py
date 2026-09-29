@@ -144,6 +144,14 @@ class WatchRunner:
                     WatchObservation(observation=observation),
                     now_ms=now,
                 )
+                # §7 / review I M-2: COMPLETED needs a VERIFIED verdict. This task is a
+                # read-only A1 read whose postcondition is the sealed evidence itself, so
+                # the task service reads the evidence row back rather than taking ours.
+                verdict = await self.tasks.verify_read_only_evidence(
+                    task=task, evidence_id=evidence.evidence_id, now_ms=now
+                )
+                if verdict != "VERIFIED":
+                    raise RuntimeError(f"WATCH_EVIDENCE_{verdict}")
                 await self.tasks.complete(
                     task_id=task.task_id,
                     status=BrowserTaskStatus.COMPLETED,
