@@ -1,0 +1,90 @@
+{
+  "schema_version": 1,
+  "zone": "van-browser-core",
+  "authority": "Owner decisions 2026-09-29 §1, §4, §5 (auth-20260929-owner-stagehand-private-plane-gates; owner session instruction, no cryptographic signature claimed)",
+  "hosts": [
+    "Stagehand 4.1.0 semantic worker (van-stagehand.service)",
+    "Browser Harness 0.1.13 deterministic worker and the Harness-owned Chromium (van-browser-harness.service)",
+    "mTLS edge (van-browser-core-edge.service) - the only cross-zone listener"
+  ],
+  "forbidden_production_placements_for_stagehand": [
+    "van-trading-core",
+    "dial-control",
+    "van-private-core"
+  ],
+  "no_direct_authority_over": [
+    "VATI Risk Authority (trading/vati/risk/authority.py RiskAuthority)",
+    "Execution Router (trading/vati/execution/router.py ExecutionRouter)",
+    "broker credentials (Deriv, cTrader, MT5 bridge)",
+    "trading secrets (Commander token, VATI ledger, Supabase store, owner authority keys)",
+    "Owner Model database (VAN gateway store)",
+    "owner-private Hindsight",
+    "owner-private OpenViking",
+    "Project Truth mutation"
+  ],
+  "cross_zone_interfaces": [
+    {
+      "id": "BC-IF-1",
+      "direction": "van-gateway -> van-browser-core",
+      "transport": "HTTPS, TLS 1.3, mutual TLS; client certificate from the zone-private CA (pki/make-browser-core-pki.sh), single caller identity van-gateway",
+      "listener": "edge/Caddyfile on VAN_BROWSER_CORE_EDGE_BIND:9443 (private overlay address)",
+      "operations": [
+        "GET /stagehand/health",
+        "POST /stagehand/observe",
+        "POST /stagehand/extract",
+        "GET /harness/health",
+        "POST /harness/{navigate,page_info,click,fill,press,scroll,screenshot,wait,upload,tabs}"
+      ],
+      "refused": [
+        "/stagehand/act (owner decision §8: no independent Stagehand actuation)",
+        "/stagehand/agent",
+        "raw CDP, shell, helper source, cookies, literal credentials"
+      ],
+      "payload_bounds": "fixed JSON bodies <=128 KiB; secrets only as secretref:// references; profile alias and task domain required"
+    },
+    {
+      "id": "BC-IF-2",
+      "direction": "van-browser-core -> van-browser-stream Browser Control Agent",
+      "transport": "private VCN, mutual TLS; client certificates from deploy/van-browser-stream/pki (browser-harness/stagehand .browser-core identities), scope-checked by the agent",
+      "operations": "the Browser Control Agent wire protocol (services/browser_control_agent); no raw CDP"
+    },
+    {
+      "id": "BC-IF-3",
+      "direction": "van-browser-core -> model provider",
+      "transport": "HTTPS egress to api.anthropic.com only (egress allowlist is an external provisioning gate)",
+      "credential": "file-backed secretref://browser/stagehand-model inside VAN_BROWSER_SECRET_ROOT; never in repository files, page content, Jev payloads or prompts as data",
+      "open_issue": "Stagehand 4.1.0 forwards {modelName, apiKey} to its in-Chromium extension service worker; the key therefore enters browser memory. Stagehand stays PRODUCTION_DISABLED until a client-side LLM callback keeps it out."
+    },
+    {
+      "id": "BC-IF-4",
+      "direction": "van-browser-core -> public web",
+      "transport": "Chromium egress; target domains bounded per task by the gateway's browser policy"
+    }
+  ],
+  "no_inbound_from": [
+    "van-trading-core",
+    "van-private-core",
+    "Hermes/dial-control shells or MCP servers (Hermes reaches the browser only through van-gateway)"
+  ],
+  "unit_env_config_files": [
+    "runtime.env.example",
+    "systemd/van-browser-harness.service",
+    "systemd/van-stagehand.service",
+    "systemd/van-browser-core-edge.service",
+    "edge/Caddyfile",
+    "browser/package.json"
+  ],
+  "stagehand_release": {
+    "package": "@browserbasehq/stagehand",
+    "version": "4.1.0",
+    "upstream_release_commit": "cd7b230778cf92269e4cb90e80d97f5113781c51",
+    "npm_integrity": "sha512-PJikMBVoaCRh6TFD7GcmeISmsMq4IwUu1BD5FOsGUVDUxrVqZomWa6W6dF+a/zu4xRZu2Z2xX1nXVMDaCuZWsw==",
+    "not_this_artifact": "ad2bf12ea7abd95bb1d6f3a59600842a0954fffb is later unreleased upstream work, not 4.1.0"
+  },
+  "stagehand_model": {
+    "provider": "anthropic",
+    "model": "claude-sonnet-5",
+    "stagehand_model_name": "anthropic/claude-sonnet-5",
+    "immutable_snapshot": "UNVERIFIED from the repository sandbox; production qualification stays pending where deterministic pinning is mandatory"
+  }
+}

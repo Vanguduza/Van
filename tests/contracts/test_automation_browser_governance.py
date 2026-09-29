@@ -255,7 +255,7 @@ def test_manifest_matches_deployment_env_pins():
     assert f"N8N_VERSION={manifest['n8n']['version']}" in env
 
     package = json.loads(
-        (ROOT / "deploy" / "van-trading-core" / "browser" / "package.json").read_text(encoding="utf-8")
+        (ROOT / "deploy" / "van-browser-core" / "browser" / "package.json").read_text(encoding="utf-8")
     )
     assert package["dependencies"]["@browserbasehq/stagehand"] == manifest["stagehand"]["version"]
 
@@ -332,21 +332,21 @@ def test_private_browser_workers_are_real_and_fail_closed():
     Live identity/model/profile qualification remains an external gate, but CI prevents the
     private worker processes from silently collapsing back into "environment prepared".
     """
-    browser = ROOT / "deploy" / "van-trading-core" / "browser"
+    # Owner decision 2026-09-29 §1: the production package is deploy/van-browser-core; the
+    # historical deploy/van-trading-core/browser placement is development-only
+    # (tests/contracts/test_van_browser_core_zone.py).
+    zone = ROOT / "deploy" / "van-browser-core"
+    browser = zone / "browser"
     harness = (browser / "harness_service.py").read_text(encoding="utf-8")
     stagehand = (browser / "stagehand_service.mjs").read_text(encoding="utf-8")
-    bootstrap = (browser / "bootstrap-browser-runtime.sh").read_text(encoding="utf-8")
-    env = (browser / "runtime.env.example").read_text(encoding="utf-8")
-    harness_unit = (
-        ROOT / "deploy" / "van-trading-core" / "systemd" / "vati-browser-harness.service"
-    ).read_text(encoding="utf-8")
-    stagehand_unit = (
-        ROOT / "deploy" / "van-trading-core" / "systemd" / "vati-stagehand.service"
-    ).read_text(encoding="utf-8")
+    bootstrap = (zone / "bootstrap.sh").read_text(encoding="utf-8")
+    env = (zone / "runtime.env.example").read_text(encoding="utf-8")
+    harness_unit = (zone / "systemd" / "van-browser-harness.service").read_text(encoding="utf-8")
+    stagehand_unit = (zone / "systemd" / "van-stagehand.service").read_text(encoding="utf-8")
 
     assert "browser-harness==0.1.13" in bootstrap
-    assert "BROWSER_HARNESS_RUNTIME_GREEN" in bootstrap
-    assert "vati-browser-harness.service" in bootstrap
+    assert "VAN_BROWSER_CORE_WORKERS_GREEN" in bootstrap
+    assert "van-browser-harness.service" in bootstrap
     assert "127.0.0.1" in harness
     assert "allow_helper_authoring" in harness
     assert "cdp-endpoint.json" in harness
@@ -362,10 +362,10 @@ def test_private_browser_workers_are_real_and_fail_closed():
     assert "allow_unbounded_agent_loop !== false" in stagehand
     assert "VAN_STAGEHAND_MODEL_KEY_REF" in env
     assert "secretref://browser/stagehand-model" in env
-    assert "STAGEHAND_RUNTIME_GREEN" in bootstrap
-    assert "HARNESS_AND_STAGEHAND_IMPLEMENTED_PENDING_LIVE_QUALIFICATION" in bootstrap
+    assert 's["runtime_version"] == "4.1.0"' in bootstrap
+    assert "VAN_BROWSER_CORE_INSTALLED_PENDING_QUALIFY_AND_GATES" in bootstrap
     assert "User=van-browser" in stagehand_unit
-    assert "Requires=vati-browser-harness.service" in stagehand_unit
+    assert "Requires=van-browser-harness.service" in stagehand_unit
     assert "NoNewPrivileges=true" in stagehand_unit
 
     # The credential is a file-backed secret reference. Neither service file nor bootstrap

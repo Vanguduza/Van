@@ -32,19 +32,23 @@ BIND = os.getenv("VAN_HARNESS_BIND", "127.0.0.1")
 PORT = int(os.getenv("VAN_HARNESS_PORT", "9141"))
 HARNESS_BIN = os.getenv(
     "VAN_BROWSER_HARNESS_BIN",
-    "/opt/van-browser-runtime/harness-venv/bin/browser-harness",
+    "/opt/van-browser-core/runtime/harness-venv/bin/browser-harness",
 )
 CHROMIUM = os.getenv("VAN_CHROMIUM_EXECUTABLE", "")
 PROFILE_ROOT = Path(
-    os.getenv("VAN_BROWSER_PROFILE_ROOT", "/var/lib/van-trading/browser/profiles")
+    os.getenv("VAN_BROWSER_PROFILE_ROOT", "/var/lib/van-browser-core/profiles")
 )
 DOWNLOAD_ROOT = Path(
-    os.getenv("VAN_BROWSER_DOWNLOAD_ROOT", "/var/lib/van-trading/browser/downloads")
+    os.getenv("VAN_BROWSER_DOWNLOAD_ROOT", "/var/lib/van-browser-core/downloads")
 )
 SECRET_ROOT = Path(
-    os.getenv("VAN_BROWSER_SECRET_ROOT", "/var/lib/van-trading/browser/secrets")
+    os.getenv("VAN_BROWSER_SECRET_ROOT", "/var/lib/van-browser-core/secrets")
 )
-RUNTIME_ROOT = Path(os.getenv("VAN_BROWSER_RUNTIME_ROOT", "/run/van-browser"))
+RUNTIME_ROOT = Path(os.getenv("VAN_BROWSER_RUNTIME_ROOT", "/run/van-browser-core"))
+#: Owner decision 2026-09-29 §1 — the trust zone this worker was installed into, written by
+#: deploy/van-browser-core/bootstrap.sh. Reported, never inferred; the gateway's placement
+#: gate refuses production Stagehand unless the zone is van-browser-core.
+TRUST_ZONE = os.getenv("VAN_TRUST_ZONE", "")
 REQUEST_TIMEOUT_SECONDS = float(
     os.getenv("VAN_BROWSER_WORKER_TIMEOUT_SECONDS", "45")
 )
@@ -485,6 +489,7 @@ class Handler(BaseHTTPRequestHandler):
                 "helper_authoring": False,
                 "raw_cdp_http": False,
                 "bind": BIND,
+                "trust_zone": TRUST_ZONE or None,
             })
             return
         self.send_json(404, {"error": "NOT_FOUND"})

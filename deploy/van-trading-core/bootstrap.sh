@@ -271,12 +271,17 @@ if [[ -n "$PUBLIC_HOST" ]]; then
 else
   (( DRY_RUN )) || die "--public-host is required for the complete production bootstrap"
 fi
+# Owner decision 2026-09-29 §1: Stagehand and the Harness-owned Chromium do not run on
+# van-trading-core in production. Their placement is the van-browser-core trust zone
+# (deploy/van-browser-core/bootstrap.sh on its own host). The historical browser package
+# below is development-only and runs only when explicitly requested for a dev host.
 VEKL_WORKER_HOST="${VAN_VEKL_WORKER_HOST:-}"
-if [[ -n "$VEKL_WORKER_HOST" ]]; then
-  if (( DRY_RUN )); then plan "bootstrap Stagehand/Playwright/Temporal runtime for VEKL worker $VEKL_WORKER_HOST"; else VAN_VEKL_WORKER_HOST="$VEKL_WORKER_HOST" bash "$HERE/browser/bootstrap-browser-runtime.sh"; fi
-  ok "browser development runtime foundation"
+if [[ "${VAN_BROWSER_HISTORICAL_DEV_ONLY:-}" == 1 ]]; then
+  [[ -n "$VEKL_WORKER_HOST" ]] || die "VAN_VEKL_WORKER_HOST is required for the dev-only browser runtime"
+  if (( DRY_RUN )); then plan "bootstrap DEV-ONLY historical browser runtime for VEKL worker $VEKL_WORKER_HOST"; else VAN_BROWSER_HISTORICAL_DEV_ONLY=1 VAN_VEKL_WORKER_HOST="$VEKL_WORKER_HOST" bash "$HERE/browser/bootstrap-browser-runtime.sh"; fi
+  ok "browser development runtime foundation (DEV-ONLY, not production)"
 else
-  (( DRY_RUN )) || die "VAN_VEKL_WORKER_HOST is required for complete production bootstrap"
+  ok "browser runtime not installed on van-trading-core (production placement: van-browser-core)"
 fi
 
 # ---------------------------------------------------------------- public TLS front for the MT5 pull bridge (optional)

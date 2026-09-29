@@ -1,0 +1,54 @@
+[Unit]
+Description=VAN Browser Harness worker and Harness-owned Chromium (van-browser-core)
+Documentation=file:///opt/van-browser-core/README.md
+After=network-online.target
+Wants=network-online.target
+# Owner decision 2026-09-29 §1: this unit starts only on a host bootstrapped as
+# van-browser-core. The zone marker is written by deploy/van-browser-core/bootstrap.sh.
+ConditionPathExists=/etc/van-browser-core/zone
+StartLimitIntervalSec=300
+StartLimitBurst=5
+
+[Service]
+Type=simple
+User=van-browser
+Group=van-browser
+EnvironmentFile=/etc/van-browser-core/runtime.env
+WorkingDirectory=/opt/van-browser-core/runtime
+ExecStartPre=/usr/bin/grep -qx van-browser-core /etc/van-browser-core/zone
+ExecStart=/usr/bin/python3.12 /opt/van-browser-core/runtime/harness_service.py
+Restart=on-failure
+RestartSec=5
+TimeoutStartSec=45
+TimeoutStopSec=15
+
+# The worker launches only the pinned local Chromium and browser-harness child. It holds
+# no credential of another trust zone (deploy/van-browser-core/zone.json).
+NoNewPrivileges=true
+PrivateTmp=true
+ProtectSystem=strict
+ProtectHome=true
+ProtectKernelTunables=true
+ProtectKernelModules=true
+ProtectControlGroups=true
+RestrictSUIDSGID=true
+RestrictNamespaces=true
+LockPersonality=true
+MemoryDenyWriteExecute=false
+CapabilityBoundingSet=
+AmbientCapabilities=
+UMask=0077
+ReadWritePaths=/var/lib/van-browser-core /run/van-browser-core /var/log/van-browser-core
+ReadOnlyPaths=/opt/van-browser-core/runtime /etc/van-browser-core/runtime.env
+RestrictAddressFamilies=AF_UNIX AF_INET AF_INET6
+
+CPUWeight=40
+IOWeight=40
+MemoryAccounting=true
+CPUAccounting=true
+TasksAccounting=true
+MemoryMax=3G
+TasksMax=512
+
+[Install]
+WantedBy=multi-user.target

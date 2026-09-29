@@ -29,8 +29,8 @@ WITH_FOREIGN_TEST_CERT=0
 #: The services allowed to call the agent. Adding a name here is granting a machine the
 #: ability to drive the owner's browser; it is not a configuration convenience.
 CLIENTS=(
-  "browser-harness.trading-core.van.internal"
-  "stagehand.trading-core.van.internal"
+  "browser-harness.browser-core.van.internal"
+  "stagehand.browser-core.van.internal"
 )
 
 umask 077
@@ -63,7 +63,7 @@ echo "== client certificates =="
 for name in "${CLIENTS[@]}"; do
   openssl ecparam -name prime256v1 -genkey -noout -out "client-$name.key"
   openssl req -new -key "client-$name.key" -out "client-$name.csr" \
-    -subj "/CN=$name/O=VAN/OU=trading-core"
+    -subj "/CN=$name/O=VAN/OU=van-browser-core"
   printf 'extendedKeyUsage=clientAuth\n' > "client-$name.ext"
   openssl x509 -req -in "client-$name.csr" -CA ca.crt -CAkey ca.key -CAcreateserial \
     -out "client-$name.crt" -days "$DAYS" -sha256 -extfile "client-$name.ext"
@@ -81,7 +81,7 @@ if [ "$WITH_FOREIGN_TEST_CERT" = 1 ]; then
     -subj "/CN=Not The VAN Browser Control CA"
   openssl ecparam -name prime256v1 -genkey -noout -out foreign-client.key
   openssl req -new -key foreign-client.key -out foreign-client.csr \
-    -subj "/CN=browser-harness.trading-core.van.internal"
+    -subj "/CN=browser-harness.browser-core.van.internal"
   # Same common name as a real client on purpose: the agent must reject it on the chain,
   # not on the name, because a name is not a credential.
   openssl x509 -req -in foreign-client.csr -CA foreign-ca.crt -CAkey foreign-ca.key \
@@ -94,6 +94,6 @@ chmod 600 "$PKI_DIR"/*.key
 chmod 644 "$PKI_DIR"/*.crt
 
 echo
-echo "Client key pairs are in $PKI_DIR. Move each one to the Trading Core service that owns"
+echo "Client key pairs are in $PKI_DIR. Move each one to the van-browser-core service that owns"
 echo "it and delete it here: a client key that stays on the server it authenticates to is a"
 echo "key that anyone with this host has."
