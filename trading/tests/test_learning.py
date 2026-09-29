@@ -134,7 +134,7 @@ def test_restart_replays_capsule_health_before_new_decisions(eurusd, tmp_path):
         artifact_hash = f"{i + 1:064x}"
         ledger.append(make_event(
             EventKind.TRADE_EXPERIENCE_ARTIFACT,
-            "test-learning",
+            "vati-cycle",   # the runtime producer that writes these facts (A-VATI M1 allowlist)
             {
                 "artifact_hash": artifact_hash,
                 "environment": "LIVE",
@@ -167,7 +167,7 @@ def test_restart_replays_broker_liquidity_cap_from_contextual_tca(eurusd, tmp_pa
     for i in range(40):
         ledger.append(make_event(
             EventKind.TCA_RECORD,
-            "test-learning",
+            "vati-cycle",
             {
                 "trade_intent_id": f"intent-{i}",
                 "cost_ratio": "2.5",
@@ -341,6 +341,7 @@ def test_cycle_emits_experience_artifacts_but_backtest_evidence_cannot_adjust_li
     assert all(e.environment is Environment.BACKTEST and e.review["outcome"] for e in hooks.episodes)
     assert hooks.adjustments == [] and hooks.demotions == [] and led.count(EventKind.CAPSULE_STATE) == 0   # 0.3 weight × few trades < 30 weighted samples
     assert sum((hooks.health.verdict(sid).weighted_samples for sid in hooks.health._obs), D(0)) == D("0.3") * res.trades
+    assert hooks.refusals == []   # A-VATI M3: the cycle's observed values agree with the ledger evidence
     assert res.ledger_ok and res.decision_replay_identical
     # broker execution facts from a backtest carry zero weight: no learned liquidity cap
     assert all(p._w() == 0 for p in hooks.brokers.profiles.values()) and hooks.broker_liquidity("EURUSD") == 1
@@ -363,6 +364,7 @@ def test_cycle_applies_boundary_checked_demotion_and_capsule_stops_trading(eurus
     led = Ledger(tmp_path / "bt.sqlite")
     # every capsule that closes a trade is demoted on that first close; a demoted capsule never trades again
     assert 1 <= res.trades <= 2 and len(hooks.demotions) == res.trades == led.count(EventKind.CAPSULE_STATE), res.summary()
+    assert hooks.refusals == []
     assert len({sid for sid, _ in hooks.demotions}) == res.trades and all(to == "DEGRADED" for _, to in hooks.demotions)
     evs = list(led.iter(EventKind.CAPSULE_STATE))
     for ev in evs:

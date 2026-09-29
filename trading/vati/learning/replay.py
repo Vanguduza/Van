@@ -21,7 +21,6 @@ from vati.arbiter.strategy_arbiter import ACTIVE_STATES
 from vati.core.events import EventKind
 from vati.learning.episodes import Environment
 from vati.learning.evidence import EvidenceClass, EvidenceError, LedgerEvidenceResolver, make_evidence_ref
-from vati.learning.health import HealthObservation
 from vati.risk.contracts import StrategyState
 from vati.strategies.capsule import Capsule
 
@@ -168,8 +167,10 @@ def restore_learning_runtime(ledger, learning, engines_by_symbol: Mapping[str, o
     tca_n = 0
     health_n = 0
     # C5: every replayed fact cites the ledger event it is read from. Strict: no
-    # session-environment fallback on replay — the event must record its own.
-    resolver = LedgerEvidenceResolver(ledger)
+    # session-environment fallback on replay — the event must record its own —
+    # but the restarted runtime's environment bounds what it may record
+    # (A-VATI M1): no replayed fact is weighted above the runtime reading it.
+    resolver = LedgerEvidenceResolver(ledger, environment_ceiling=learning.environment)
 
     # Broker execution learning is only replayed where the original context was
     # persisted. Absence is not filled from current session state.
@@ -211,29 +212,15 @@ def restore_learning_runtime(ledger, learning, engines_by_symbol: Mapping[str, o
     # Experience artifacts are the durable source of the environment weighting
     # used by strategy health. Do not infer it from the current mandate.
     for event in ledger.iter(EventKind.TRADE_EXPERIENCE_ARTIFACT):
-        p = event.payload
-        try:
-            strategy_id = str(p["strategy_id"])
-            environment = Environment(str(p["environment"]))
-            r_multiple = Decimal(str(p["outcome"]["r_multiple"]))
-            process_ok = bool(p["review"]["process_ok"])
-            tca = p.get("execution", {}).get("tca") or {}
-            cost_ratio = Decimal(str(tca.get("cost_ratio", "1")))
-            if cost_ratio.is_infinite():
-                cost_ratio = Decimal("10")
-            evidence_ref = make_evidence_ref(EvidenceClass.VTIL_ARTIFACT, event.hash)
-        except (ValueError, ArithmeticError, KeyError, TypeError):
+        # A-VATI M3: every value (R, process verdict, cost) is read from the
+        # artifact and the trade's ledger facts, never re-derived here.
+        strategy_id = event.payload.get("strategy_id")
+        if not strategy_id:
             continue
         try:
-            learning.health.observe(HealthObservation(
-                strategy_id=strategy_id,
-                environment=environment,
-                r_multiple=r_multiple,
-                process_ok=process_ok,
-                cost_ratio=min(cost_ratio, Decimal("10")),
-                regime_fit=True,
-                evidence_ref=evidence_ref,
-            ), resolver=resolver, correlation_hint=event.correlation_id)
+            learning.health.observe_evidence(
+                str(strategy_id), make_evidence_ref(EvidenceClass.VTIL_ARTIFACT, event.hash),
+                resolver=resolver, correlation_hint=event.correlation_id)
         except EvidenceError:
             continue
         health_n += 1
