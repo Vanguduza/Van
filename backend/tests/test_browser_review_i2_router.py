@@ -140,11 +140,18 @@ async def test_a_green_van_gate_lets_an_effect_carrying_proposal_execute():
 async def test_the_real_gate_model_keeps_jev_effect_shadow_only():
     permitted, reason = await load_jev_browser_effect_gate()()
     assert permitted is False
-    assert "VAN-JEV-BROWSER-EFFECT-001.yaml:jev_browser_effect" in reason
+    # The lane gate's reason is capped at 200 characters; since review I3 MINOR-4 the record
+    # carries three gates, so the full list is read from the evaluator below.
+    assert "VAN-JEV-BROWSER-EFFECT-001.yaml:" in reason
     state = production_gates.evaluate_production_gates()
     assert state["capability_decisions"] == ["VAN-JEV-BROWSER-EFFECT-001.yaml"]
-    gate = next(g for g in state["capability_gates"] if g["gate"] == "jev_browser_effect")
-    assert (gate["status"], gate["raw_value"]) == ("PENDING", "SHADOW_ONLY")
+    gates = {g["gate"]: g for g in state["capability_gates"]}
+    assert (gates["jev_browser_effect"]["status"], gates["jev_browser_effect"]["raw_value"]) == ("PENDING", "SHADOW_ONLY")
+    # Review I3 MINOR-4: effect also needs the owner's signature and decision reference.
+    assert gates["owner_decision"]["status"] == "PENDING"
+    assert gates["owner_decision_reference"]["status"] == "UNKNOWN"
+    assert "VAN-JEV-BROWSER-EFFECT-001.yaml:jev_browser_effect" in (
+        state["capabilities"]["jev_browser_effect"]["gates_not_green"])
 
 
 def test_production_wiring_has_the_van_jev_effect_gate():
@@ -161,8 +168,12 @@ def _jev_repo(tmp_path: Path, *, jev: str, harness: str = "SIGNED") -> Path:
                       ("VAN-ADOPT-STAGEHAND-001.yaml", "SIGNED")):
         (decisions / name).write_text(f"owner_signature_status: {sig}\n", encoding="utf-8")
     (decisions / "VAN-AMEND-SECURITY-POLICY-001.md").write_text("**Status:** `OWNER_APPROVED`\n", encoding="utf-8")
+    # Review I3 MINOR-4: the capability also needs the owner signature and decision reference;
+    # this matrix is about the status vocabulary and inheritance, so both are present here.
     (decisions / "VAN-JEV-BROWSER-EFFECT-001.yaml").write_text(
-        f"jev_browser_effect:\n  status: {jev}\n", encoding="utf-8")
+        "owner_signature_status: SIGNED\njev_browser_effect:\n  status: "
+        f"{jev}\n  owner_decision_reference: docs/decisions/OWNER-DECISIONS-20261001-JEV.md\n",
+        encoding="utf-8")
     required = [{"decision": n, "format": "yaml", "gates": [simple]} for n in (
         "VAN-ADOPT-N8N-001.yaml", "VAN-ADOPT-BROWSER-HARNESS-001.yaml", "VAN-ADOPT-STAGEHAND-001.yaml")]
     required.append({"decision": "VAN-AMEND-SECURITY-POLICY-001.md", "format": "markdown",

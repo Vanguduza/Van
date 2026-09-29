@@ -170,6 +170,12 @@ def _classify(spec: dict[str, Any], raw: Any) -> tuple[GateStatus, str | None]:
     ):
         if raw in (spec.get(key) or []):
             return status, None
+    # Review I3 MINOR-4: a gate whose GREEN value is a reference (e.g. the owner decision a
+    # record cites) rather than a status word declares the shape it must have. A null, an
+    # empty string or anything else outside the pattern stays UNKNOWN.
+    pattern = spec.get("green_pattern")
+    if isinstance(pattern, str) and pattern and re.fullmatch(pattern, raw):
+        return GateStatus.GREEN, None
     return GateStatus.UNKNOWN, f"{raw!r} is outside the declared vocabulary"
 
 
@@ -181,8 +187,13 @@ def _gate_spec_problem(spec: Any) -> str | None:
             return f"gate spec lacks {field}"
     if spec["kind"] not in {k.value for k in GateKind}:
         return f"unknown gate kind {spec['kind']!r}"
-    if not spec.get("green"):
+    if not spec.get("green") and not spec.get("green_pattern"):
         return "gate declares no GREEN value"
+    if spec.get("green_pattern") is not None:
+        try:
+            re.compile(str(spec["green_pattern"]))
+        except re.error:
+            return "gate green_pattern is not a valid regular expression"
     return None
 
 

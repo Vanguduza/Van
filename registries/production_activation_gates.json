@@ -144,6 +144,22 @@
       "note": "Review I2 N-7. Gates one capability only (jev_browser_effect in backend/van_gateway/automation/production_gates.py CAPABILITY_DECISIONS) and is not part of the global production_activation_permitted summary: SHADOW_ONLY is a legitimate production posture for Jev. Blueprint s11: PROPOSE_ACTION capped at SHADOW until a separate owner decision. dial-jev's own apply_effect/lifecycle report is necessary, never sufficient.",
       "gates": [
         {
+          "id": "owner_decision",
+          "kind": "owner_decision",
+          "path": "owner_signature_status",
+          "green": ["SIGNED"],
+          "pending": ["PENDING", "NOT_APPLICABLE_RECORDS_EXISTING_CAP"],
+          "note": "Review I3 MINOR-4. Effect needs the separate owner decision, so the record must carry an owner signature status of SIGNED; the record as written (NOT_APPLICABLE_RECORDS_EXISTING_CAP) is pending."
+        },
+        {
+          "id": "owner_decision_reference",
+          "kind": "owner_decision",
+          "path": "jev_browser_effect.owner_decision_reference",
+          "green": [],
+          "green_pattern": "docs/decisions/OWNER-DECISIONS-[0-9]{8}-[A-Z0-9-]+\\.md",
+          "note": "Review I3 MINOR-4. GREEN only when the record names the owner decision it rests on as a docs/decisions/OWNER-DECISIONS-*.md path (shape only; the model does not open the file). null, empty or any other value is UNKNOWN."
+        },
+        {
           "id": "jev_browser_effect",
           "kind": "production",
           "path": "jev_browser_effect.status",

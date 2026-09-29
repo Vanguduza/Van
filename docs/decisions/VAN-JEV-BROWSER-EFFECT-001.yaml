@@ -9,13 +9,19 @@
 # dial-jev reporting on itself. It is necessary for VAN to act on a Jev proposal and it is not
 # sufficient: the VAN interaction router executes a Jev proposal only when the
 # `jev_browser_effect` capability of registries/production_activation_gates.json is GREEN, i.e.
-# when `jev_browser_effect.status` below is OWNER_APPROVED_EFFECT *and* the Browser Harness and
+# when, in this record, `owner_signature_status` is SIGNED,
+# `jev_browser_effect.owner_decision_reference` has the shape of a
+# docs/decisions/OWNER-DECISIONS-*.md path (the model does not open it), and
+# `jev_browser_effect.status` is OWNER_APPROVED_EFFECT -- *and* the Browser Harness and
 # Security Policy decisions it inherits are GREEN. Until then every Jev proposal is a SHADOW
 # proposal: re-validated, counted and compared, never executed.
 #
 # Changing `jev_browser_effect.status` requires that separate owner decision, recorded here as an
-# append (the gate model's path then moves to the newer block). An agent, CI or dial-jev cannot
-# make this gate GREEN.
+# append (the gate model's path then moves to the newer block). What the gate model checks is
+# the content of this file, not who wrote it: it makes a one-line status edit insufficient
+# (review I3 MINOR-4), but it cannot by itself stop an agent, CI or dial-jev that edits all
+# three fields. The control against that is Project Truth owner authority over commits to
+# docs/decisions/ (OWNER_EXPLICIT authorization record + PR review), not this record or the model.
 decision_id: VAN-JEV-BROWSER-EFFECT-001
 schema_version: 1
 subject: dial-jev PROPOSE_ACTION effect on the VAN browser interaction router (lane 2)
