@@ -913,7 +913,20 @@ UPDATE owner_model_revisions
 DROP TABLE IF EXISTS temp.m32_before;
 """
 
-MIGRATION_32 = MIGRATION_32_OWNER_MODEL_REPAIR
+MIGRATION_32_OUTBOX_DELIVERY = """
+-- Outbox starvation. drain_outbox read the oldest 100 PENDING rows across every target, so
+-- rows for a target with no handler, or rows whose handler always fails, filled every
+-- batch and handled targets were never reached. Delivery now schedules each row on its
+-- own: a failure sets next_attempt_at_ms (exponential backoff) and, past the attempt
+-- budget, dead_lettered_at_ms. A dead-lettered row stays PENDING (the status CHECK is
+-- unchanged) and is never selected again; it is the operator's to inspect.
+ALTER TABLE owner_model_outbox ADD COLUMN next_attempt_at_ms INTEGER;
+ALTER TABLE owner_model_outbox ADD COLUMN dead_lettered_at_ms INTEGER;
+CREATE INDEX IF NOT EXISTS idx_owner_model_outbox_due
+  ON owner_model_outbox(status, target, dead_lettered_at_ms, created_at_ms);
+"""
+
+MIGRATION_32 = MIGRATION_32_OWNER_MODEL_REPAIR + MIGRATION_32_OUTBOX_DELIVERY
 
 MIGRATIONS: dict[int, str] = {
     1: """
