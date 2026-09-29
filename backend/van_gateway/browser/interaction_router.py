@@ -1096,10 +1096,13 @@ async def _fetch_stagehand_worker_health(stagehand: Any) -> dict[str, Any] | Non
     base = (getattr(stagehand, "base_url", "") or "").rstrip("/")
     if not base:
         return None
+    kwargs_fn = getattr(stagehand, "client_kwargs", None)
+    kwargs = kwargs_fn() if callable(kwargs_fn) else {
+        "base_url": base, "transport": getattr(stagehand, "transport", None),
+    }
+    kwargs["timeout"] = 5.0
     try:
-        async with httpx.AsyncClient(
-            base_url=base, timeout=5.0, transport=getattr(stagehand, "transport", None)
-        ) as client:
+        async with httpx.AsyncClient(**kwargs) as client:
             response = await client.get("/health")
         if response.status_code != 200:
             return None

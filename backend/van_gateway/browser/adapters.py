@@ -84,6 +84,29 @@ class _PrivateWorkerClient:
     def configured(self) -> bool:
         return bool(self.base_url)
 
+    def client_kwargs(self) -> dict[str, Any]:
+        """httpx client arguments, including the van-browser-core mTLS client identity.
+
+        Owner decision 2026-09-29 §1: cross-zone access is the authenticated edge only. When
+        settings name the edge CA and the gateway client cert/key files, every call (and the
+        router's /health read) presents them; the key material stays in files.
+        """
+        kwargs: dict[str, Any] = {
+            "base_url": self.base_url, "timeout": self.timeout_seconds, "transport": self.transport,
+        }
+        if self.transport is None and self.base_url.startswith("https://"):
+            from van_gateway.config import get_settings
+
+            settings = get_settings()
+            ca = getattr(settings, "browser_core_ca_file", "") or ""
+            cert = getattr(settings, "browser_core_client_cert_file", "") or ""
+            key = getattr(settings, "browser_core_client_key_file", "") or ""
+            if ca:
+                kwargs["verify"] = ca
+            if cert and key:
+                kwargs["cert"] = (cert, key)
+        return kwargs
+
     def _assert_usable(self) -> None:
         if not self.enabled:
             raise BrowserAdapterError(f"{self.CAPABILITY.upper()}_DISABLED")
@@ -93,9 +116,7 @@ class _PrivateWorkerClient:
     async def _call(self, path: str, payload: dict[str, Any]) -> dict[str, Any]:
         self._assert_usable()
         try:
-            async with httpx.AsyncClient(
-                base_url=self.base_url, timeout=self.timeout_seconds, transport=self.transport
-            ) as client:
+            async with httpx.AsyncClient(**self.client_kwargs()) as client:
                 response = await client.post(path, json=payload)
         except httpx.HTTPError as exc:
             raise BrowserAdapterError(f"{self.CAPABILITY.upper()}_UNAVAILABLE", str(exc)) from exc

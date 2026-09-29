@@ -261,10 +261,16 @@ async def test_harness_envelope_disables_helper_authoring(tmp_path):
 
 
 async def test_stagehand_unconfigured_without_model_provider(tmp_path):
-    """§418 — no configured provider means the adapter is unconfigured, not defaulted."""
+    """§418 — no configured provider means the adapter is unconfigured, not defaulted.
+
+    Owner decision 2026-09-29 §4: the provider/model come from settings (anthropic /
+    claude-sonnet-5). Settings with no provider leave the adapter unconfigured; the code
+    itself never supplies one.
+    """
     store = await make_store(tmp_path)
     adapter = StagehandAdapter(
-        ExternalRuntimeRegistry(store), base_url="http://127.0.0.1:9140", enabled=True
+        ExternalRuntimeRegistry(store), base_url="http://127.0.0.1:9140", enabled=True,
+        model_provider="", model_name="",
     )
     assert adapter.configured is False
     status = await adapter.status()

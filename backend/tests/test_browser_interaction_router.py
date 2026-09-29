@@ -1027,6 +1027,8 @@ async def test_production_gate_without_placement_module_fails_closed(monkeypatch
     from van_gateway.browser.interaction_router import load_stagehand_production_gate
 
     monkeypatch.setitem(sys.modules, "van_gateway.automation.placement", None)  # import fails
+    import van_gateway.automation as pkg
+    monkeypatch.delattr(pkg, "placement", raising=False)
     assert await load_stagehand_production_gate(Settings())() == (False, "PLACEMENT_GATE_MISSING")
 
 
