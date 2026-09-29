@@ -46,6 +46,7 @@ import inspect
 import json
 import re
 import time
+import unicodedata
 from collections import OrderedDict
 from dataclasses import dataclass, field
 from enum import Enum
@@ -73,6 +74,7 @@ from van_gateway.browser.lane_gates import (  # noqa: F401 - re-export
     step_gate_memo,
     step_gate_scope,
 )
+from van_gateway.browser.jev_eligibility import _CONFUSABLES  # the shared homoglyph fold table
 from van_gateway.browser.models import BrowserTask, BrowserTaskStatus
 from van_gateway.browser.policy import BrowserPolicyError
 from van_gateway.browser.stagehand_proposal import (
@@ -319,6 +321,85 @@ _PAYMENT_FIELD = re.compile(
 )
 
 
+# Review I3 MAJOR-2 — the word-bounded patterns above miss what real pages and selectors
+# look like: `#paynow`, `button.submitorder`, `name=cardnumber`, `autocomplete=cc-csc`,
+# "Kartennummer", and labels that hide a word from `\b` with a zero-width space, a
+# Cyrillic "а" or fullwidth letters. So the text is folded first (NFKC, Unicode format
+# characters dropped, the shared Cyrillic/Greek confusable table from jev_eligibility),
+# and the risk stems below are also matched as *substrings* of the lower-cased,
+# alphanumeric-only text.
+#
+# Trade-off, accepted deliberately: substring stems over-match. A "Buyer guide" link
+# contains "buy", an "order by date" sort contains "order", a Bootstrap `.card` wrapper in
+# a fill selector contains "card", an "undelete" contains "delete". Every such false positive raises the class to
+# A4, which is never automated: the step goes to owner takeover (or a policy refusal).
+# That is the fail-safe direction; a false negative clicks a pay button. The one carve-out
+# is the CSS token "border" (Tailwind/Bootstrap utility classes put it on ordinary
+# buttons), removed before the substring scan only — the word pass still sees `b-order`
+# as "b order", so the carve-out cannot hide a real "order".
+
+#: Commitment stems (any targeted operation -> A4). English plus a small localised set.
+_COMMITMENT_STEMS: tuple[str, ...] = (
+    "pay", "buy", "checkout", "purchase", "order",
+    "delete", "remove", "deactivat", "closeaccount", "cancelaccount", "terminateaccount",
+    # de / es / fr / pt
+    "zahlen", "zahlung", "kaufen", "bestell", "pagar", "pago", "comprar", "acheter",
+)
+
+#: Payment-instrument field stems (fill/select -> A4).
+_PAYMENT_FIELD_STEMS: tuple[str, ...] = (
+    "card", "cvc", "cvv", "iban", "securitycode",
+    "ccnum", "ccexp", "cccsc", "ccname", "cctype",
+    # de / es / fr
+    "karte", "tarjeta", "carte",
+)
+
+#: HTML autocomplete payment tokens (`cc-number`, `cc-csc`, `cc-exp`, `cc-given-name` ...),
+#: top-level, under `attributes`, or in a selector like `#cc-exp`.
+_CC_AUTOCOMPLETE = re.compile(r"(?<![a-z0-9])cc-[a-z]")
+
+#: Removed before the substring scan only (see the trade-off note above).
+_SUBSTRING_CARVE_OUTS: tuple[str, ...] = ("border",)
+
+
+def _fold(text: str) -> str:
+    """NFKC, Unicode format characters (Cf: ZWSP, soft hyphen, bidi) dropped, control
+    characters as spaces, Cyrillic/Greek look-alikes folded to Latin, case-folded."""
+    text = unicodedata.normalize("NFKC", text or "")
+    out = []
+    for char in text:
+        category = unicodedata.category(char)
+        if category == "Cf":
+            continue
+        out.append(" " if category == "Cc" else char)
+    return "".join(out).translate(_CONFUSABLES).casefold()
+
+
+def _squash(folded: str) -> str:
+    """Folded text, carve-outs removed, reduced to ``[a-z0-9]``: ``#pay-now`` -> ``paynow``."""
+    for token in _SUBSTRING_CARVE_OUTS:
+        folded = folded.replace(token, " ")
+    return re.sub(r"[^a-z0-9]+", "", folded)
+
+
+def _reads_as_commitment(text: str) -> bool:
+    folded = _fold(text)
+    if _HIGH_RISK_LABEL.search(folded) or _HIGH_RISK_LABEL.search(_words(folded)):
+        return True
+    squashed = _squash(folded)
+    return any(stem in squashed for stem in _COMMITMENT_STEMS)
+
+
+def _reads_as_payment_field(text: str) -> bool:
+    folded = _fold(text)
+    if _PAYMENT_FIELD.search(folded) or _PAYMENT_FIELD.search(_words(folded)):
+        return True
+    if _CC_AUTOCOMPLETE.search(folded):
+        return True
+    squashed = _squash(folded)
+    return any(stem in squashed for stem in _PAYMENT_FIELD_STEMS)
+
+
 def default_action_classifier(operation: str, target: dict[str, Any] | None, target_entry: Any) -> str:
     """VAN's own (operation, target) -> action class. Conservative by construction.
 
@@ -331,9 +412,9 @@ def default_action_classifier(operation: str, target: dict[str, Any] | None, tar
     label = str(target.get("label") or "") if target is not None else ""
     if operation in TARGETLESS_OPERATIONS:
         base = "A0"
-    elif target is not None and _HIGH_RISK_LABEL.search(label):
+    elif target is not None and _reads_as_commitment(label):
         base = "A4"
-    elif operation in ("fill", "select") and _PAYMENT_FIELD.search(label):
+    elif operation in ("fill", "select") and _reads_as_payment_field(label):
         base = "A4"
     elif operation == "fill":
         base = "A3"
@@ -348,6 +429,8 @@ def default_action_classifier(operation: str, target: dict[str, Any] | None, tar
 _ELEMENT_TEXT_KEYS = (
     "role", "label", "name", "accessible_name", "aria_label", "text", "title", "value",
     "placeholder", "input_type", "type", "id", "href", "action", "formaction",
+    # Review I3 MAJOR-2: `autocomplete=cc-number` names a card field whatever its label says.
+    "autocomplete",
 )
 
 
@@ -379,7 +462,13 @@ def observed_element_text(element: dict[str, Any], locator: str | None) -> str:
                 parts.append(f"{name} {value}")
     if locator:
         parts.append(locator)
-    return " | ".join(parts + [_words(p) for p in parts])
+    # Review I3 MAJOR-2: the folded forms too, so `_words` and the payment boundary see
+    # "pay now" and not only "Pa<ZWSP>y now" or "P<Cyrillic а>y now" (`_words` drops the
+    # Cyrillic letter). The raw forms stay: a soft hyphen reads as a word break raw
+    # ("Pay now") but folds away ("paynow"), and the payment boundary matches words.
+    folded = [_fold(p) for p in parts]
+    texts = parts + [_words(p) for p in parts] + folded + [_words(p) for p in folded]
+    return " | ".join(dict.fromkeys(t for t in texts if t))
 
 
 class HarnessTargetResolver:
