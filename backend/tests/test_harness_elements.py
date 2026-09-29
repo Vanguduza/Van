@@ -337,6 +337,7 @@ def chromium_harness(monkeypatch, tmp_path):
                 "page_info": lambda: {"url": page.url, "title": page.title()},
                 "js": lambda expression: page.evaluate(expression),
                 "cdp": lambda method, **params: cdp.send(method, params),
+                "click_at_xy": lambda x, y: page.mouse.click(x, y),
             }
             return _exec_script(script, namespace, extra)
         return pw.call(job)
@@ -452,3 +453,65 @@ async def test_real_chromium_in_page_snapshot_is_already_redacted(chromium_harne
     assert all("value" not in e for e in raw["elements"])
     amount = next(e for e in raw["elements"] if e["attributes"].get("name") == "amount")
     assert amount["attributes"]["data-account-token"] == "[REDACTED]"
+
+
+_CLICK_LOG = """document.addEventListener('click', (e) => {
+  (window.__vanClicks = window.__vanClicks || []).push(e.target.id || e.target.getAttribute('data-testid') || e.target.textContent);
+  e.preventDefault();
+}, true); true"""
+
+
+async def _route_on_real_page(pw, harness, **step_kw):
+    """One router step against the real fixture page, the Harness resolving and executing."""
+    from van_gateway.browser.adapters import HarnessLeaseFence, harness_lease_fence
+    from van_gateway.browser.interaction_router import HarnessActionExecutor
+
+    pw.call(lambda page, cdp: page.goto(f"https://{DOMAIN}/pay"))
+    pw.call(lambda page, cdp: page.evaluate(_CLICK_LOG))
+    router = tr.make_router(
+        target_resolver=HarnessTargetResolver(harness), executor=HarnessActionExecutor(harness),
+        semantic_fallback=step_kw.pop("stagehand", tr.FakeStagehand(None)),
+        # Lane 2 off: this test is about lanes 1 and 3 on the Harness-resolved element.
+        jev_client=None,
+    )
+    step = tr.step(**step_kw)
+    step.task = _task()
+    with harness_lease_fence(HarnessLeaseFence("public_research", step.task.task_id, 1)):
+        result = await router.route(step)
+    clicks = pw.call(lambda page, cdp: page.evaluate("window.__vanClicks || []"))
+    return result, clicks
+
+
+def _det(locator):
+    from van_gateway.browser.interaction_router import DeterministicAction
+
+    return DeterministicAction(operation="click", locator=locator)
+
+
+def _stagehand(locator, description):
+    from van_gateway.browser.interaction_router import RouterAction, RouterLane
+
+    return tr.FakeStagehand(RouterAction(
+        lane=RouterLane.STAGEHAND, operation="click", locator=locator, value_ref=None, action_class=None,
+        semantic_action={"method": "click", "description": description}, description=description))
+
+
+async def test_real_page_benign_click_resolves_and_executes_pay_goes_to_takeover(chromium_harness):
+    """End to end (integrator request): with real page_info elements, a resolved benign click
+    executes through the Harness on the real page, and a resolved pay control never does."""
+    _module, pw, harness = chromium_harness
+    next_page = 'button[data-testid="next"]'
+
+    ok, clicks = await _route_on_real_page(pw, harness, deterministic_action=_det(next_page))
+    assert ok.state.value == "VERIFIED_SUCCESS", ok.reasons
+    assert clicks == ["next"]
+
+    ok, clicks = await _route_on_real_page(pw, harness, stagehand=_stagehand(next_page, "Next page"))
+    assert ok.state.value == "VERIFIED_SUCCESS", ok.reasons
+    assert clicks == ["next"]
+
+    # "#pay" reads as a neutral locator; the Harness-reported element is the "Pay now" submit.
+    for kw in ({"deterministic_action": _det("#pay")}, {"stagehand": _stagehand("#pay", "Continue")}):
+        pay, clicks = await _route_on_real_page(pw, harness, **kw)
+        assert pay.state.value in ("OWNER_TAKEOVER", "POLICY_REFUSED"), (kw, pay.state, pay.reasons)
+        assert clicks == [], kw
