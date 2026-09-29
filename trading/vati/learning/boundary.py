@@ -20,7 +20,7 @@ from decimal import Decimal
 from enum import Enum
 from typing import Optional
 
-from vati.learning.evidence import EvidenceError, EvidenceResolver, EvidenceSet
+from vati.learning.evidence import EvidenceClass, EvidenceError, EvidenceResolver, EvidenceSet
 
 ONE, ZERO = Decimal(1), Decimal(0)
 
@@ -34,6 +34,18 @@ class LiveTarget(str, Enum):
     REGIME_PROBABILITY = "REGIME_PROBABILITY"
     BROKER_PROFILE = "BROKER_PROFILE"
 
+
+# A-MIN-VAN (reviewer D2): each live target admits only the evidence classes
+# that are facts about it. The broker execution profile learns from execution
+# facts (TCA) only; a shadow-book decision never carries execution weight.
+TARGET_EVIDENCE_CLASSES: dict[LiveTarget, frozenset[EvidenceClass]] = {
+    LiveTarget.BROKER_PROFILE: frozenset({EvidenceClass.TCA_RECORD}),
+    LiveTarget.CAPSULE_HEALTH: frozenset({EvidenceClass.TRADE_REVIEW, EvidenceClass.VTIL_ARTIFACT,
+                                          EvidenceClass.PNL_ATTRIBUTION, EvidenceClass.SHADOW_BOOK_OUTCOME}),
+    LiveTarget.REGIME_PROBABILITY: frozenset({EvidenceClass.TRADE_REVIEW, EvidenceClass.VTIL_ARTIFACT,
+                                              EvidenceClass.PNL_ATTRIBUTION, EvidenceClass.SHADOW_BOOK_OUTCOME}),
+}
+assert set(TARGET_EVIDENCE_CLASSES) == set(LiveTarget), "every live target needs an evidence-class allowlist"
 
 FORBIDDEN_TARGETS = frozenset({"MANDATE", "PLATFORM_CEILINGS", "CAPSULE_LOGIC", "CAPSULE_STATE_PROMOTION", "INSTRUMENT_LIST", "BROKER_CREDENTIALS", "LEVERAGE", "RISK_POLICY", "EXECUTION_POLICY", "PRODUCTION_MODEL_ALIAS"})
 DEMOTION_TARGETS = ("DEGRADED", "SHADOW", "SUSPENDED")
@@ -88,6 +100,11 @@ class LearningBoundary:
             ev = EvidenceSet.resolve(refs, resolver, subject=key)
         except EvidenceError as e:
             raise LearningBoundaryError(f"live evidence rejected: {e}") from None
+        allowed = TARGET_EVIDENCE_CLASSES[target]
+        wrong = sorted({r.evidence_class.value for r in ev.records if r.evidence_class not in allowed})
+        if wrong:
+            raise LearningBoundaryError(f"live evidence rejected: {target.value} does not learn from {wrong} "
+                                        f"(allowed: {sorted(c.value for c in allowed)})")
         # Execution facts from simulated environments weigh zero for the broker profile.
         return ev, ev.weighted_samples(execution_facts=target is LiveTarget.BROKER_PROFILE)
 

@@ -207,6 +207,13 @@ def _payload(evidence_class: EvidenceClass, content: Mapping[str, Any]) -> Mappi
     return content
 
 
+def _least_authoritative(fixed: Environment, ceiling: Environment) -> Environment:
+    """The less authoritative of two environments, by (environment weight,
+    execution-fact weight). On a tie the ledger binding wins."""
+    rank = lambda e: (ENVIRONMENT_WEIGHT[e], EXECUTION_FACT_WEIGHT[e])
+    return fixed if rank(fixed) < rank(ceiling) else ceiling
+
+
 def _environment(evidence_class: EvidenceClass, p: Mapping[str, Any], session_environment: Optional[Environment],
                  environment_ceiling: Optional[Environment]) -> Environment:
     """The environment is the source's, not the payload author's (A-VATI M1).
@@ -216,12 +223,17 @@ def _environment(evidence_class: EvidenceClass, p: Mapping[str, Any], session_en
     is the most authoritative environment any of the ledger's facts can carry: a
     payload may record a *less* authoritative one (a replayed or simulated fact
     written to a live ledger), never a more authoritative one. Without a binding
-    nothing can be weighted."""
-    if evidence_class in CLASS_FIXED_ENVIRONMENT:
-        return CLASS_FIXED_ENVIRONMENT[evidence_class]
+    nothing can be weighted.
+
+    A class-fixed environment (a shadow-book outcome is SHADOW) is bounded by
+    the same binding (A-MIN-VAN, reviewer D2): the record weighs as the less
+    authoritative of the two, so a shadow outcome read from a BACKTEST/REPLAY
+    ledger is a BACKTEST/REPLAY fact, never a SHADOW one."""
     ceiling = environment_ceiling if environment_ceiling is not None else session_environment
     if ceiling is None:
         raise EvidenceError(f"no environment is bound to this ledger: {evidence_class.value} evidence cannot be weighted")
+    if evidence_class in CLASS_FIXED_ENVIRONMENT:
+        return _least_authoritative(CLASS_FIXED_ENVIRONMENT[evidence_class], Environment(ceiling))
     raw = p.get("learning_environment", p.get("environment"))
     if raw is None and session_environment is not None and evidence_class in SESSION_ENVIRONMENT_CLASSES:
         return Environment(session_environment)

@@ -665,3 +665,42 @@ def test_owner_preference_continuity_record_is_rejected():
     with pytest.raises(MemoryBridgeError, match="Owner Model"):
         b.remember(kind="OWNER_PREFERENCE", subject="owner", summary="prefers smaller size on Fridays", now_ms=1_000)
     assert b.records == {}
+
+
+# ------------------------------------------- A-MIN-VAN (reviewer D2 finding 1)
+def _shadow_ledger(n: int, ceiling: Environment):
+    ledger, refs = Ledger(), []
+    for i in range(n):
+        ev = make_event(EventKind.SHADOW_DECISION, "vati-shadow-book",
+                        {"broker": "mt5-a", "symbol": "EURUSD", "session": "LONDON", "strategy_id": SID, "i": i},
+                        event_time_ms=1, received_time_ms=1, correlation_id=f"sx{i}")
+        ledger.append(ev)
+        refs.append(make_evidence_ref(EvidenceClass.SHADOW_BOOK_OUTCOME, ev.hash))
+    return LedgerEvidenceResolver(ledger, environment_ceiling=ceiling), tuple(refs)
+
+
+@pytest.mark.parametrize("ceiling, expect", [(Environment.REPLAY, Environment.REPLAY), (Environment.BACKTEST, Environment.BACKTEST),
+                                             (Environment.DEMO, Environment.DEMO), (Environment.LIVE, Environment.SHADOW)])
+def test_class_fixed_environment_is_bounded_by_the_ledger_ceiling(ceiling, expect):
+    r, refs = _shadow_ledger(1, ceiling)
+    rec = r.resolve(parse_evidence_ref(refs[0]))
+    assert rec.environment is expect
+    if ceiling in (Environment.REPLAY, Environment.BACKTEST):
+        assert rec.weight(execution_facts=True) == 0
+
+
+def test_shadow_outcomes_never_carry_broker_profile_execution_weight():
+    # D2 probe: 43 shadow outcomes under a BACKTEST ceiling were admitted as BROKER_PROFILE evidence (30.1 samples)
+    r, refs = _shadow_ledger(43, Environment.BACKTEST)
+    cache = ResolvedEvidenceCache()
+    for ref in refs:
+        cache.admit(ref, r)
+    with pytest.raises(LearningBoundaryError, match="BROKER_PROFILE does not learn from"):
+        LearningBoundary.admit(LiveAdjustmentProposal(LiveTarget.BROKER_PROFILE, BKEY, D("0"), None, refs), cache)
+    # and even from a LIVE-bound ledger, shadow decisions are not execution facts
+    live, lrefs = _shadow_ledger(43, Environment.LIVE)
+    with pytest.raises(LearningBoundaryError, match="BROKER_PROFILE does not learn from"):
+        LearningBoundary.admit(LiveAdjustmentProposal(LiveTarget.BROKER_PROFILE, BKEY, D("0"), None, lrefs), live)
+    # under the BACKTEST ceiling the same outcomes weigh 0.3 each: too few to demote a capsule
+    with pytest.raises(LearningBoundaryError, match="insufficient environment-weighted samples"):
+        LearningBoundary.admit(LiveAdjustmentProposal(LiveTarget.CAPSULE_HEALTH, SID, D("0"), "SHADOW", refs), cache)
