@@ -18,6 +18,7 @@
 from __future__ import annotations
 
 import asyncio
+import hashlib
 import importlib.util
 import json
 import re
@@ -516,10 +517,35 @@ async def test_a_watch_task_ended_mid_run_does_not_abort_the_other_watches(tmp_p
 # ----------------------------------------------------------------------------- MINOR-4
 
 
-def _jev_capability(tmp_path: Path, record: str) -> dict:
-    """The real gate model's Jev capability decision over a Jev record, the rest GREEN."""
+REF = "docs/decisions/OWNER-DECISIONS-20261001-JEV-BROWSER-EFFECT.md"
+REF_TEXT = "# Owner decision 2026-10-01: Jev browser effect (test fixture)\n"
+REF_SHA = hashlib.sha256(REF_TEXT.encode("utf-8")).hexdigest()
+AUTH_ID = "auth-20261001-owner-jev-browser-effect"
+
+
+def _authorization(**overrides) -> dict:
+    record = {"authorization_id": AUTH_ID, "authority": "OWNER_EXPLICIT",
+              "owner_instruction_record": REF, "revoked": False,
+              "authorized_paths": ["docs/decisions/VAN-JEV-BROWSER-EFFECT-001.yaml (append-only)"]}
+    record.update(overrides)
+    return record
+
+
+def _jev_capability(tmp_path: Path, record: str, *, reference: bool = True,
+                    authorization: dict | None = None) -> dict:
+    """The real gate model's Jev capability decision over a Jev record, the rest GREEN.
+
+    ``reference`` writes the owner decision file ``REF``; ``authorization`` (default: a valid
+    OWNER_EXPLICIT record for ``REF``) is written as ``AUTH_ID``'s Project Truth record.
+    """
     decisions = tmp_path / "docs" / "decisions"
     decisions.mkdir(parents=True)
+    if reference:
+        (tmp_path / REF).write_text(REF_TEXT, encoding="utf-8")
+    auths = tmp_path / "docs" / "project-state" / "authorizations"
+    auths.mkdir(parents=True)
+    (auths / f"{AUTH_ID}.json").write_text(json.dumps(
+        _authorization() if authorization is None else authorization), encoding="utf-8")
     simple = {"id": "owner_decision", "kind": "owner_decision", "path": "owner_signature_status",
               "green": ["SIGNED"], "pending": ["PENDING"]}
     for name in ("VAN-ADOPT-N8N-001.yaml", "VAN-ADOPT-BROWSER-HARNESS-001.yaml", "VAN-ADOPT-STAGEHAND-001.yaml"):
@@ -539,7 +565,23 @@ def _jev_capability(tmp_path: Path, record: str) -> dict:
 
 
 REAL_JEV_RECORD = (ROOT / "docs" / "decisions" / "VAN-JEV-BROWSER-EFFECT-001.yaml").read_text(encoding="utf-8")
-REF = "docs/decisions/OWNER-DECISIONS-20261001-JEV-BROWSER-EFFECT.md"
+
+
+def _approve(s: str) -> str:
+    return (s.replace("status: SHADOW_ONLY", "status: OWNER_APPROVED_EFFECT")
+             .replace("owner_signature_status: NOT_APPLICABLE_RECORDS_EXISTING_CAP", "owner_signature_status: SIGNED"))
+
+
+def _cite(s: str, ref: str = REF) -> str:
+    return _approve(s).replace("owner_decision_reference: null", f"owner_decision_reference: {ref}")
+
+
+def _pin(s: str, sha: str = REF_SHA) -> str:
+    return _cite(s).replace("owner_decision_sha256: null", f'owner_decision_sha256: "{sha}"')
+
+
+def _authorize(s: str, auth_id: str = AUTH_ID) -> str:
+    return _pin(s).replace("owner_decision_authorization_id: null", f"owner_decision_authorization_id: {auth_id}")
 
 
 @pytest.mark.parametrize("label, edit, permitted, not_green", [
@@ -547,25 +589,66 @@ REF = "docs/decisions/OWNER-DECISIONS-20261001-JEV-BROWSER-EFFECT.md"
      ["owner_decision", "owner_decision_reference", "jev_browser_effect"]),
     ("probe: one-line status edit", lambda s: s.replace("status: SHADOW_ONLY", "status: OWNER_APPROVED_EFFECT"),
      False, ["owner_decision", "owner_decision_reference"]),
-    ("status + signature, reference still null",
-     lambda s: s.replace("status: SHADOW_ONLY", "status: OWNER_APPROVED_EFFECT")
-                .replace("owner_signature_status: NOT_APPLICABLE_RECORDS_EXISTING_CAP", "owner_signature_status: SIGNED"),
-     False, ["owner_decision_reference"]),
+    ("status + signature, reference still null", _approve, False, ["owner_decision_reference"]),
     ("status + signature + a reference that is not an owner decision record",
-     lambda s: s.replace("status: SHADOW_ONLY", "status: OWNER_APPROVED_EFFECT")
-                .replace("owner_signature_status: NOT_APPLICABLE_RECORDS_EXISTING_CAP", "owner_signature_status: SIGNED")
-                .replace("owner_decision_reference: null", "owner_decision_reference: agent says ok"),
+     lambda s: _approve(s).replace("owner_decision_reference: null", "owner_decision_reference: agent says ok"),
      False, ["owner_decision_reference"]),
-    ("status + signature + owner decision reference",
-     lambda s: s.replace("status: SHADOW_ONLY", "status: OWNER_APPROVED_EFFECT")
-                .replace("owner_signature_status: NOT_APPLICABLE_RECORDS_EXISTING_CAP", "owner_signature_status: SIGNED")
-                .replace("owner_decision_reference: null", f"owner_decision_reference: {REF}"),
-     True, []),
+    # Review I4 MINOR-B: a reference of the right shape is no longer enough on its own.
+    ("status + signature + reference, no sha256 pin, no authorization", _cite, False, ["owner_decision_reference"]),
+    ("+ sha256 pin, no authorization", _pin, False, ["owner_decision_reference"]),
+    ("+ sha256 pin that does not match", lambda s: _authorize(s).replace(REF_SHA, "0" * 64),
+     False, ["owner_decision_reference"]),
+    ("+ authorization id with no record",
+     lambda s: _pin(s).replace("owner_decision_authorization_id: null",
+                               "owner_decision_authorization_id: auth-20990101-does-not-exist"),
+     False, ["owner_decision_reference"]),
+    ("+ a path that climbs out of docs/decisions",
+     lambda s: _authorize(s).replace(f"owner_decision_reference: {REF}",
+                                     "owner_decision_reference: docs/decisions/../decisions/OWNER-DECISIONS-20261001-JEV-BROWSER-EFFECT.md"),
+     False, ["owner_decision_reference"]),
+    ("status + signature + resolved, pinned and authorized owner decision", _authorize, True, []),
 ])
 def test_jev_effect_needs_an_owner_signature_and_decision_reference(tmp_path, label, edit, permitted, not_green):
-    """Probe jev_gate.py. Edited from the real record, so the fields exercised are the real ones."""
+    """Probes jev_gate.py (I3) and jev_spoof.py (I4). Edited from the real record."""
     record = edit(REAL_JEV_RECORD)
     assert record != REAL_JEV_RECORD or label == "record as committed"
     cap = _jev_capability(tmp_path, record)
     assert cap["production_activation_permitted"] is permitted, cap
     assert cap["gates_not_green"] == [f"VAN-JEV-BROWSER-EFFECT-001.yaml:{g}" for g in not_green]
+
+
+@pytest.mark.parametrize("label, reference, authorization", [
+    ("probe jev_spoof.py: the referenced file does not exist", False, None),
+    ("authorization revoked", True, _authorization(revoked=True)),
+    ("authorization with no revoked field", True,
+     {k: v for k, v in _authorization().items() if k != "revoked"}),
+    ("authorization is OWNER_DERIVED, not OWNER_EXPLICIT", True, _authorization(authority="OWNER_DERIVED")),
+    ("authorization is for a different owner record", True,
+     _authorization(owner_instruction_record="docs/decisions/OWNER-DECISIONS-20260929-STAGEHAND-PRIVATE-PLANE.md")),
+    ("authorization file states a different id", True, _authorization(authorization_id="auth-other")),
+    ("authorization does not name this decision record", True,
+     _authorization(authorized_paths=["docs/decisions/VAN-ADOPT-STAGEHAND-001.yaml (append-only)"])),
+    ("authorization names it only by a glob", True, _authorization(authorized_paths=["docs/decisions/**"])),
+])
+def test_jev_effect_reference_must_resolve_and_be_authorized(tmp_path, label, reference, authorization):
+    """Review I4 MINOR-B. Everything else fully written; only the named part is wrong."""
+    cap = _jev_capability(tmp_path, _authorize(REAL_JEV_RECORD), reference=reference,
+                          authorization=authorization)
+    assert cap["production_activation_permitted"] is False, (label, cap)
+    assert cap["gates_not_green"] == ["VAN-JEV-BROWSER-EFFECT-001.yaml:owner_decision_reference"], label
+
+
+def test_a_green_pattern_outside_an_owner_reference_gate_is_refused(tmp_path):
+    """Review I4 MINOR-B: a shape-only GREEN cannot be reintroduced on an ordinary gate."""
+    (tmp_path / "docs" / "decisions").mkdir(parents=True)
+    (tmp_path / "docs" / "decisions" / "X.yaml").write_text("ref: docs/decisions/OWNER-DECISIONS-20261001-X.md\n",
+                                                           encoding="utf-8")
+    path = tmp_path / "gates.json"
+    path.write_text(json.dumps({"decisions_dir": "docs/decisions", "required_decisions": [{
+        "decision": "X.yaml", "format": "yaml", "gates": [{
+            "id": "ref", "kind": "owner_decision", "path": "ref", "green": [],
+            "green_pattern": "docs/decisions/OWNER-DECISIONS-[0-9]{8}-[A-Z0-9-]+\\.md"}]}]}), encoding="utf-8")
+    state = production_gates.evaluate_production_gates(path, tmp_path)
+    assert state["production_activation_permitted"] is False
+    assert state["gates"][0]["status"] == "UNKNOWN"
+    assert state["gates"][0]["reason"] == "green_pattern is only accepted on an owner_reference gate"

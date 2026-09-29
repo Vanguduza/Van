@@ -10,8 +10,11 @@
 # sufficient: the VAN interaction router executes a Jev proposal only when the
 # `jev_browser_effect` capability of registries/production_activation_gates.json is GREEN, i.e.
 # when, in this record, `owner_signature_status` is SIGNED,
-# `jev_browser_effect.owner_decision_reference` has the shape of a
-# docs/decisions/OWNER-DECISIONS-*.md path (the model does not open it), and
+# `jev_browser_effect.owner_decision_reference` resolves to an existing
+# docs/decisions/OWNER-DECISIONS-*.md file whose sha256 is pinned (and matches) at
+# `jev_browser_effect.owner_decision_sha256`, `jev_browser_effect.owner_decision_authorization_id`
+# names an existing, unrevoked OWNER_EXPLICIT record in docs/project-state/authorizations/
+# for that file whose authorized_paths names this record (review I4 MINOR-B), and
 # `jev_browser_effect.status` is OWNER_APPROVED_EFFECT -- *and* the Browser Harness and
 # Security Policy decisions it inherits are GREEN. Until then every Jev proposal is a SHADOW
 # proposal: re-validated, counted and compared, never executed.
@@ -19,8 +22,9 @@
 # Changing `jev_browser_effect.status` requires that separate owner decision, recorded here as an
 # append (the gate model's path then moves to the newer block). What the gate model checks is
 # the content of this file, not who wrote it: it makes a one-line status edit insufficient
-# (review I3 MINOR-4), but it cannot by itself stop an agent, CI or dial-jev that edits all
-# three fields. The control against that is Project Truth owner authority over commits to
+# (review I3 MINOR-4) and a reference to a file that does not exist insufficient (review I4
+# MINOR-B), but it cannot by itself stop an agent, CI or dial-jev that writes all of those
+# files. The control against that is Project Truth owner authority over commits to
 # docs/decisions/ (OWNER_EXPLICIT authorization record + PR review), not this record or the model.
 decision_id: VAN-JEV-BROWSER-EFFECT-001
 schema_version: 1
@@ -38,3 +42,8 @@ jev_browser_effect:
   # REVOKED: effect withdrawn after approval (BLOCKED).
   status: SHADOW_ONLY
   owner_decision_reference: null
+  # Review I4 MINOR-B (unit G5c): the sha256 of the referenced owner decision file and the
+  # Project Truth authorization record (docs/project-state/authorizations/<id>.json) for it.
+  # Both null until the separate owner decision exists; null is UNKNOWN, never GREEN.
+  owner_decision_sha256: null
+  owner_decision_authorization_id: null

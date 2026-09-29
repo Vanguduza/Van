@@ -155,11 +155,15 @@
         },
         {
           "id": "owner_decision_reference",
-          "kind": "owner_decision",
+          "kind": "owner_reference",
           "path": "jev_browser_effect.owner_decision_reference",
-          "green": [],
           "green_pattern": "docs/decisions/OWNER-DECISIONS-[0-9]{8}-[A-Z0-9-]+\\.md",
-          "note": "Review I3 MINOR-4. GREEN only when the record names the owner decision it rests on as a docs/decisions/OWNER-DECISIONS-*.md path (shape only; the model does not open the file). null, empty or any other value is UNKNOWN."
+          "reference_dir": "docs/decisions",
+          "sha256_path": "jev_browser_effect.owner_decision_sha256",
+          "authorization_path": "jev_browser_effect.owner_decision_authorization_id",
+          "authorizations_dir": "docs/project-state/authorizations",
+          "authorization_authority": ["OWNER_EXPLICIT"],
+          "note": "Review I3 MINOR-4, tightened by review I4 MINOR-B. GREEN only when the reference resolves to an existing docs/decisions/OWNER-DECISIONS-*.md file, the record pins that file's sha256 at owner_decision_sha256 and the pin matches, and owner_decision_authorization_id names an existing, unrevoked OWNER_EXPLICIT authorization record in docs/project-state/authorizations/ whose owner_instruction_record is that file and whose authorized_paths names this record (docs/decisions/VAN-JEV-BROWSER-EFFECT-001.yaml) exactly. A shape-only reference, a missing file, a missing or mismatched pin, or a missing, revoked or unrelated authorization is UNKNOWN."
         },
         {
           "id": "jev_browser_effect",
