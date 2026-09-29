@@ -29,7 +29,7 @@ whether an installed host is what it claims to be.
 
 | Component | Where | Notes |
 |---|---|---|
-| Bounded API | `systemd/van-private-core.service` → `van_gateway.private_core.app:create_private_core_app` | only the two routes above; mTLS required; wildcard bind refused |
+| Bounded API | `systemd/van-private-core.service` → `van_gateway.private_core.app:create_private_core_app` | only the two routes above; mTLS required; any bind outside 10/8, 172.16/12, 192.168/16, 100.64/10, fc00::/7 refused |
 | Owner Cognitive Model, `owner_model_revision`, outbox | `backend/van_gateway/understanding/owner_model*.py` | SQLite under `/var/lib/van-private-core` |
 | Personal-context resolver | `backend/van_gateway/understanding/personal_context_resolver.py` | requested revision must equal the live authoritative revision, else `PERSONAL_CONTEXT_UNAVAILABLE` |
 | Owner-private Hindsight / OpenViking | declared placement only | loopback on this host; outbox targets exist, services do not |

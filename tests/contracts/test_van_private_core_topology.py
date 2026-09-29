@@ -14,6 +14,7 @@ from __future__ import annotations
 
 import json
 import re
+import shlex
 import subprocess
 import sys
 from pathlib import Path
@@ -148,7 +149,8 @@ def test_ingress_is_exactly_the_private_core_app_routes():
     # mutual TLS required, and never a wildcard bind
     assert "--ssl-cert-reqs 2" in unit and "--ssl-ca-certs" in unit
     assert "--host ${VAN_PRIVATE_CORE_BIND}" in unit
-    assert re.search(r'ExecStartPre=.*""\|0\.0\.0\.0\|::', unit)
+    assert re.search(r"ExecStartPre=/opt/van-private-core/venv/bin/python -I -c '.*ipaddress.*"
+                     r"VAN_PRIVATE_CORE_BIND", unit)
     env = dict(line.split("=", 1) for line in
                (ZONE_DIR / "runtime.env.example").read_text().splitlines()
                if line and not line.startswith("#"))
@@ -159,15 +161,44 @@ def test_ingress_is_exactly_the_private_core_app_routes():
         assert env[f"VAN_PRIVATE_{service}_DIR"].startswith("/var/lib/van-private-core/")
 
 
-def test_the_private_core_unit_refuses_a_wildcard_bind():
+def _bind_guard_argv() -> list[str]:
     unit = UNIT.read_text(encoding="utf-8")
     [guard] = [line.split("=", 1)[1] for line in unit.splitlines()
                if line.startswith("ExecStartPre=") and "VAN_PRIVATE_CORE_BIND" in line]
-    command = guard.removeprefix("/bin/sh -c ").strip("'")
-    for bind, ok in (("", False), ("0.0.0.0", False), ("::", False), ("10.77.0.9", True)):
-        r = subprocess.run(["sh", "-c", command], env={"VAN_PRIVATE_CORE_BIND": bind},
-                           capture_output=True, text=True)
-        assert (r.returncode == 0) is ok, (bind, r.stderr)
+    # systemd would expand `$`/`%` and C-escapes; the guard must use none, so shlex's
+    # POSIX split is exactly the argv systemd passes.
+    assert not set(guard) & {"$", "%", "\\"}, guard
+    argv = shlex.split(guard)
+    assert argv[:3] == ["/opt/van-private-core/venv/bin/python", "-I", "-c"], argv
+    return [sys.executable, *argv[1:]]
+
+
+#: A-MIN-VAN (reviewer D2): the old `case` guard matched only "", 0.0.0.0, :: and [::], so
+#: `0`, `0.0.0.0:9140`, `::0` and public addresses all started the service.
+BIND_CASES = (
+    ("", False), ("0.0.0.0", False), ("::", False), ("[::]", False),
+    ("0", False), ("0.0.0.0:9140", False), ("::0", False), ("0:0:0:0:0:0:0:0", False),
+    ("8.8.8.8", False), ("2001:4860:4860::8888", False), ("192.0.2.1", False),
+    ("127.0.0.1", False), ("::1", False), ("169.254.1.1", False), ("fe80::1", False),
+    ("::ffff:10.77.0.9", False), ("[fd00::1]", False), ("10.77.0.9 ", False),
+    ("10.077.0.9", False), ("private-core.internal", False), ("224.0.0.1", False),
+    ("10.77.0.9", True), ("172.16.4.2", True), ("192.168.1.20", True),
+    ("100.101.102.103", True), ("fd7a:115c:a1e0::1", True),
+)
+
+
+@pytest.mark.parametrize("bind,ok", BIND_CASES)
+def test_the_private_core_unit_refuses_a_non_private_bind(bind, ok):
+    r = subprocess.run(_bind_guard_argv(), env={"VAN_PRIVATE_CORE_BIND": bind},
+                       capture_output=True, text=True)
+    assert (r.returncode == 0) is ok, (bind, r.returncode, r.stderr)
+    if not ok:
+        assert "VAN_PRIVATE_CORE_BIND must be" in r.stderr and "Traceback" not in r.stderr, r.stderr
+
+
+def test_the_bind_guard_refuses_when_the_variable_is_unset():
+    r = subprocess.run(_bind_guard_argv(), env={}, capture_output=True, text=True)
+    assert r.returncode != 0 and "VAN_PRIVATE_CORE_BIND must be" in r.stderr
 
 
 def test_nothing_else_deploys_the_private_core_service():
