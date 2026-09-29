@@ -39,6 +39,7 @@ from van_gateway.context.retrieval import (
 from van_gateway.authority.descriptor import Reversibility, describe_action
 from van_gateway.context.service import ContextAdmissionError, OwnerContextService
 from van_gateway.epistemics.models import SemanticClass
+from van_gateway.jev.advisor import JevVanAdvisor
 from van_gateway.reasoning.kernel import (
     AssumptionStatus,
     CriticalReasoningKernel,
@@ -212,6 +213,7 @@ class OwnerRuntimeApi:
         artifacts: ArtifactService | None = None,
         suggestions: SuggestionService | None = None,
         conversations: ConversationService | None = None,
+        jev_advisor: JevVanAdvisor | None = None,
     ) -> None:
         self.store = store
         self.settings = settings
@@ -235,7 +237,7 @@ class OwnerRuntimeApi:
         self.resolver = TypedCommandResolver(
             default_notebook_id=getattr(settings, "notebook_default_id", ""),
         )
-        self.kernel = CriticalReasoningKernel(store)
+        self.kernel = CriticalReasoningKernel(store, jev_advisor=jev_advisor)
         self.knowledge = KnowledgeRuntime(store, settings)
         self.research = ExaResearchService(
             store,
