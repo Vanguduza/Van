@@ -251,12 +251,13 @@ class VanEval:
         )
 
     async def _knowledge(self, target: float, now: int) -> DimensionResult:
-        assertions = await self._count("owner_cognitive_model")
-        unauthorized = await self._scalar(
-            "SELECT COUNT(*) FROM owner_cognitive_model WHERE state = 'CONFIRMED' "
-            "AND owner_confirmed_at_ms IS NULL AND field IN "
-            "('delegation_preferences','accepted_risk_patterns','interruption_preferences')"
-        )
+        # The Owner Model lives in van-private-core (owner decision 2026-09-29 §3); read
+        # its aggregate through its own interface, never its table.
+        from van_gateway.understanding.owner_model import OwnerCognitiveModel
+
+        counts = await OwnerCognitiveModel(self.store).integrity_counts()
+        assertions = counts["assertions"]
+        unauthorized = counts["autonomy_confirmed_without_owner"]
         if assertions == 0:
             return self._unmeasured(EvalDimension.KNOWLEDGE_MEMORY, target,
                                     "no owner-model assertions recorded yet")

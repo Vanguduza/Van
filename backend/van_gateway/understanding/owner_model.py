@@ -547,6 +547,25 @@ class OwnerCognitiveModel:
             "as_of_ms": now,
         }
 
+    async def integrity_counts(self) -> dict[str, int]:
+        """Aggregate counts for VanEval's knowledge dimension — no owner values leave.
+
+        This is the bounded read VanEval uses instead of querying `owner_cognitive_model`
+        itself, so the table has no reader outside the van-private-core modules.
+        """
+        total = await self.store.fetchone("SELECT COUNT(*) FROM owner_cognitive_model")
+        unauthorized = await self.store.fetchone(
+            "SELECT COUNT(*) FROM owner_cognitive_model WHERE state = 'CONFIRMED' "
+            "AND owner_confirmed_at_ms IS NULL AND field IN "
+            "('delegation_preferences','accepted_risk_patterns','interruption_preferences')"
+        )
+        return {
+            "assertions": int(total[0]) if total is not None else 0,
+            "autonomy_confirmed_without_owner": (
+                int(unauthorized[0]) if unauthorized is not None else 0
+            ),
+        }
+
     # --------------------------------------------------------------- reads
 
     async def get(self, assertion_id: str) -> OwnerAssertion | None:
