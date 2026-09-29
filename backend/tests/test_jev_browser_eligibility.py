@@ -328,7 +328,8 @@ def test_export_corpus_for_dds(tmp_path):
         "module": "van.browser.ultrafast.action.v1",
         "metrics": metrics,
         "fixtures": [
-            {"fixture": i["id"], "category": i["category"], **d.as_contract()}
+            {"fixture": i["id"], "category": i["category"], "expected": i["expected"].value,
+             **d.as_contract()}
             for d, i in decisions
         ],
     }
