@@ -134,7 +134,7 @@ def test_restart_replays_capsule_health_before_new_decisions(eurusd, tmp_path):
         artifact_hash = f"{i + 1:064x}"
         ledger.append(make_event(
             EventKind.TRADE_EXPERIENCE_ARTIFACT,
-            "test-learning",
+            "vati-cycle",   # the runtime producer that writes these facts (A-VATI M1 allowlist)
             {
                 "artifact_hash": artifact_hash,
                 "environment": "LIVE",
@@ -167,7 +167,7 @@ def test_restart_replays_broker_liquidity_cap_from_contextual_tca(eurusd, tmp_pa
     for i in range(40):
         ledger.append(make_event(
             EventKind.TCA_RECORD,
-            "test-learning",
+            "vati-cycle",
             {
                 "trade_intent_id": f"intent-{i}",
                 "cost_ratio": "2.5",

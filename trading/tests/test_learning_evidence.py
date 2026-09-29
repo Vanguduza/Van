@@ -35,8 +35,8 @@ class Src:
         self.ledger = Ledger()
         self.resolver = LedgerEvidenceResolver(self.ledger, session_environment=env)
 
-    def append(self, kind: EventKind, payload: dict, corr: str) -> str:
-        ev = make_event(kind, "vati-test", payload, event_time_ms=1_000, received_time_ms=1_000, correlation_id=corr)
+    def append(self, kind: EventKind, payload: dict, corr: str, producer: str = "vati-cycle") -> str:
+        ev = make_event(kind, producer, payload, event_time_ms=1_000, received_time_ms=1_000, correlation_id=corr)
         self.ledger.append(ev)
         return ev.hash
 
@@ -164,7 +164,7 @@ def test_decimal_spelling_cannot_mint_identities():
 def test_fabricated_registration_is_not_admitted():
     t = StrategyHealthTracker()
     assert not hasattr(t.evidence, "register")
-    fake = EvidenceRecord.from_content(EvidenceClass.TRADE_REVIEW, {"strategy_id": SID, "environment": "LIVE"})
+    fake = EvidenceRecord.from_content(EvidenceClass.TRADE_REVIEW, {"strategy_id": SID, "environment": "LIVE"}, environment_ceiling=Environment.LIVE)
 
     class Forger:   # duck-typed resolver that returns invented content
         def resolve(self, ref, *, correlation_hint=None):
@@ -373,9 +373,11 @@ def test_ledger_resolver_verifies_identity_kind_and_environment():
     assert rec.environment is Environment.LIVE and BKEY in rec.subjects and rec.identity == parse_evidence_ref(tca_ref).identity
     with pytest.raises(EvidenceError, match="unresolvable"):
         src.resolver.resolve(EvidenceRef(EvidenceClass.TRADE_REVIEW, rec.identity))
-    with pytest.raises(EvidenceError, match="no environment"):   # session environment applies to TRADE_REVIEW only
+    with pytest.raises(EvidenceError, match="not resolvable"):   # LEDGER_EVENT is reserved: no "any kind" class (A-VATI M1)
         src.resolver.resolve(parse_evidence_ref(make_evidence_ref(EvidenceClass.LEDGER_EVENT, note.hash)))
-    strict = LedgerEvidenceResolver(src.ledger)   # no session environment bound: a review cannot be weighted
+    with pytest.raises(EvidenceError, match="no environment"):   # an unbound resolver cannot weigh anything
+        LedgerEvidenceResolver(src.ledger)
+    strict = LedgerEvidenceResolver(src.ledger, environment_ceiling=Environment.LIVE)   # replay binding: a review cannot be weighted
     with pytest.raises(EvidenceError, match="no environment"):
         strict.resolve(parse_evidence_ref(src.review(SID, 1)))
     both = CompositeEvidenceResolver((ResolvedEvidenceCache(), src.resolver))
@@ -385,6 +387,82 @@ def test_ledger_resolver_verifies_identity_kind_and_environment():
 
 def test_every_allowlisted_class_is_mapped_to_a_vati_source():
     assert set(EVIDENCE_CLASS_SOURCES) == set(EvidenceClass)
+
+
+# --------------------------------------- A-VATI (review D): M1 sources
+def test_review_d_p2_research_synthesis_from_a_derived_producer_is_not_live_evidence():
+    """Review D P2: 30 RESEARCH_SYNTHESIS events by producer 'hindsight-derived' whose
+    payload says environment LIVE were admitted as 30.0 live samples via LEDGER_EVENT."""
+    src = Src()
+    refs = tuple(make_evidence_ref(EvidenceClass.LEDGER_EVENT,
+                                   parse_evidence_ref(make_evidence_ref(EvidenceClass.TRADE_REVIEW, src.append(
+                                       EventKind.RESEARCH_SYNTHESIS, {"strategy_id": "S2", "environment": "LIVE", "n": i}, f"r-{i}",
+                                       producer="hindsight-derived"))).identity)
+                 for i in range(30))
+    with pytest.raises(LearningBoundaryError, match="not resolvable"):
+        LearningBoundary.admit(LiveAdjustmentProposal(LiveTarget.CAPSULE_HEALTH, "S2", D("0"), "SUSPENDED", refs), src.resolver)
+    # and no allowlisted class resolves those events either
+    for cls in (EvidenceClass.TRADE_REVIEW, EvidenceClass.VTIL_ARTIFACT, EvidenceClass.TCA_RECORD):
+        with pytest.raises(EvidenceError):
+            src.resolver.resolve(EvidenceRef(cls, parse_evidence_ref(refs[0]).identity))
+
+
+@pytest.mark.parametrize("producer,match", [
+    ("hindsight-derived", "derived source"),
+    ("vati-research-synthesis", "derived source"),
+    ("openviking-bridge", "derived source"),
+    ("vati-lessons", "derived source"),
+    ("some-tool", "not an allowlisted source"),
+    ("vati-test", "not an allowlisted source"),
+])
+def test_allowlisted_kind_from_a_non_runtime_producer_is_not_evidence(producer, match):
+    src = Src()
+    refs = []
+    for i in range(30):
+        corr = f"{producer}-{i}"
+        refs.append(make_evidence_ref(EvidenceClass.TRADE_REVIEW, src.append(
+            EventKind.TRADE_REVIEW, {"trade_intent_id": corr, "strategy_id": SID, "r_multiple": "-1"}, corr, producer=producer)))
+        refs.append(make_evidence_ref(EvidenceClass.VTIL_ARTIFACT, src.append(
+            EventKind.TRADE_EXPERIENCE_ARTIFACT, {"episode_id": corr, "strategy_id": SID, "environment": "LIVE"}, corr, producer=producer)))
+    with pytest.raises(LearningBoundaryError, match=match):
+        LearningBoundary.admit(LiveAdjustmentProposal(LiveTarget.CAPSULE_HEALTH, SID, D("0"), "SUSPENDED", tuple(refs)), src.resolver)
+    with pytest.raises(EvidenceError, match=match):
+        StrategyHealthTracker().observe(hobs(refs[0]), resolver=src.resolver)
+
+
+def test_payload_cannot_raise_its_environment_above_the_ledger_binding():
+    """The environment is the ledger's runtime binding; a payload may lower it, never raise it."""
+    demo = Src(Environment.DEMO)
+    live_claims = tuple(demo.tca("mt5-a", "EURUSD", "LONDON", i, env=Environment.LIVE) for i in range(40))
+    with pytest.raises(LearningBoundaryError, match="more authoritative"):
+        LearningBoundary.admit(LiveAdjustmentProposal(LiveTarget.BROKER_PROFILE, BKEY, D("0.7"), None, live_claims), demo.resolver)
+    # a lower environment recorded on the same ledger is accepted at its own (lower) weight
+    replayed = tuple(demo.tca("mt5-a", "EURUSD", "LONDON", 100 + i, env=Environment.REPLAY) for i in range(40))
+    adj = LearningBoundary.admit(LiveAdjustmentProposal(LiveTarget.BROKER_PROFILE, BKEY, D("1"), None, replayed), demo.resolver)
+    assert adj.environment_weighted_samples == 0
+
+
+def test_replay_cannot_weigh_a_fact_above_the_restarted_runtime(tmp_path):
+    from vati.learning.replay import restore_learning_runtime
+    led = Ledger(tmp_path / "replay-ceiling.sqlite")
+    for i in range(30):
+        led.append(make_event(EventKind.TRADE_EXPERIENCE_ARTIFACT, "vati-cycle",
+                              {"episode_id": f"i-{i}", "strategy_id": SID, "environment": "LIVE", "outcome": {"r_multiple": "-1"},
+                               "review": {"process_ok": False}, "execution": {"tca": {"cost_ratio": "2.5"}}},
+                              event_time_ms=i, received_time_ms=i, correlation_id=f"i-{i}"))
+    demo = LearningHooks(environment=Environment.DEMO)
+    assert restore_learning_runtime(led, demo, {}).health_observations == 0
+    live = LearningHooks(environment=Environment.LIVE)
+    assert restore_learning_runtime(led, live, {}).health_observations == 30
+
+
+def test_source_allowlist_names_runtime_producers_and_no_derived_kind():
+    from vati.cognition import attribution, shadow_book
+    from vati.learning.evidence import DERIVED_EVENT_KINDS, EVIDENCE_SOURCE_ALLOWLIST
+    assert EVIDENCE_SOURCE_ALLOWLIST[EvidenceClass.PNL_ATTRIBUTION][1] == {attribution.PRODUCER}
+    assert EVIDENCE_SOURCE_ALLOWLIST[EvidenceClass.SHADOW_BOOK_OUTCOME][1] == {shadow_book.PRODUCER}
+    assert EvidenceClass.LEDGER_EVENT not in EVIDENCE_SOURCE_ALLOWLIST
+    assert not {k for k, _ in EVIDENCE_SOURCE_ALLOWLIST.values()} & DERIVED_EVENT_KINDS
 
 
 # ------------------------------------------------------- memory bridge

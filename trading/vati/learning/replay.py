@@ -168,8 +168,10 @@ def restore_learning_runtime(ledger, learning, engines_by_symbol: Mapping[str, o
     tca_n = 0
     health_n = 0
     # C5: every replayed fact cites the ledger event it is read from. Strict: no
-    # session-environment fallback on replay — the event must record its own.
-    resolver = LedgerEvidenceResolver(ledger)
+    # session-environment fallback on replay — the event must record its own —
+    # but the restarted runtime's environment bounds what it may record
+    # (A-VATI M1): no replayed fact is weighted above the runtime reading it.
+    resolver = LedgerEvidenceResolver(ledger, environment_ceiling=learning.environment)
 
     # Broker execution learning is only replayed where the original context was
     # persisted. Absence is not filled from current session state.
