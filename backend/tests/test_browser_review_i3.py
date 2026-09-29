@@ -18,6 +18,7 @@
 from __future__ import annotations
 
 import asyncio
+import hashlib
 import importlib.util
 import json
 import re
@@ -53,6 +54,7 @@ from van_gateway.browser.service import (
     BrowserTaskNotVerified,
     BrowserTaskService,
     BrowserTaskTransitionRefused,
+    TERMINAL_TASK_STATUSES,
 )
 from van_gateway.browser.subagent import OwnerTakeoverRequired, ProposedAction
 from van_gateway.config import get_settings
@@ -463,15 +465,137 @@ async def test_set_working_status_refuses_end_states_and_out_of_order_resume(tmp
     assert row["status"] == "CANCELLED"
 
 
+#: Review I4 MINOR-C: the table name may be schema-qualified (``main.browser_tasks``) and
+#: either part quoted ("", ``, []); UPDATE may carry ``OR <conflict>``; and REPLACE rewrites
+#: a row without an UPDATE. ``UPDATE ...`` in backticks is prose.
+_Q_OPEN, _Q_CLOSE = r'["`\[]?', r'["`\]]?'
+_TASKS_NAME = rf"(?:{_Q_OPEN}\w+{_Q_CLOSE}\s*\.\s*)?{_Q_OPEN}browser_tasks{_Q_CLOSE}"
+TASK_STATUS_WRITE = re.compile(
+    rf"(?<!`)\b(?:UPDATE\s+(?:OR\s+\w+\s+)?{_TASKS_NAME}\s+SET"
+    rf"|(?:REPLACE|INSERT\s+OR\s+REPLACE)\s+INTO\s+{_TASKS_NAME})\b",
+    re.IGNORECASE,
+)
+
+
+@pytest.mark.parametrize("sql", [
+    "UPDATE browser_tasks SET status = ?",
+    "update browser_tasks\n   set status = ?",
+    "UPDATE main.browser_tasks SET status = ?",
+    'UPDATE "browser_tasks" SET status = ?',
+    'UPDATE "main"."browser_tasks" SET status = ?',
+    "UPDATE `browser_tasks` SET status = ?",
+    "UPDATE [browser_tasks] SET status = ?",
+    "UPDATE main . browser_tasks SET status = ?",
+    "UPDATE OR REPLACE browser_tasks SET status = ?",
+    "REPLACE INTO browser_tasks(task_id, status) VALUES (?, ?)",
+    "INSERT OR REPLACE INTO main.browser_tasks(task_id, status) VALUES (?, ?)",
+])
+def test_the_single_writer_pattern_catches_qualified_and_quoted_names(sql):
+    """Probe: ``main.browser_tasks`` and ``"browser_tasks"`` walked past the old pattern."""
+    assert TASK_STATUS_WRITE.search(sql), sql
+
+
+@pytest.mark.parametrize("prose", ["``UPDATE browser_tasks SET status``", "UPDATE browser_tasks_archive SET x"])
+def test_the_single_writer_pattern_ignores_prose_and_other_tables(prose):
+    assert not TASK_STATUS_WRITE.search(prose)
+
+
 def test_no_status_write_bypasses_the_guarded_writer():
-    """Every ``UPDATE browser_tasks ... status`` in VAN is BrowserTaskService._write_status."""
-    # Whole-file, so SQL split over lines is caught too; ``UPDATE ...`` in backticks is prose.
-    pattern = re.compile(r"(?<!`)\bUPDATE\s+browser_tasks\s+SET\b", re.IGNORECASE)
+    """Every status write to ``browser_tasks`` in VAN is BrowserTaskService._write_status.
+
+    A source scan is a tripwire, not the control: migration 34's triggers refuse a status
+    change out of an end state at the database whoever writes it (review I4 MINOR-C).
+    """
     hits = []
     for path in BACKEND.rglob("*.py"):
-        for match in pattern.finditer(path.read_text(encoding="utf-8")):
+        for match in TASK_STATUS_WRITE.finditer(path.read_text(encoding="utf-8")):
             hits.append(f"{path.relative_to(BACKEND).as_posix()}:{match.start()}")
     assert len(hits) == 1 and hits[0].startswith("browser/service.py:"), hits
+
+
+def _terminal_trigger_statuses(sql: str) -> set[str]:
+    return set(re.findall(r"'([A-Z_]+)'", sql.split("BEGIN")[0]))
+
+
+async def test_the_terminal_triggers_name_exactly_the_terminal_statuses(tmp_path):
+    store = await make_store(tmp_path)
+    rows = await store.fetchall(
+        "SELECT name, sql FROM sqlite_master WHERE type = 'trigger' AND tbl_name = 'browser_tasks'")
+    by_name = {r["name"]: r["sql"] for r in rows}
+    assert set(by_name) == {"browser_tasks_terminal_status_sticky", "browser_tasks_terminal_not_replaced"}
+    expected = {s.value for s in TERMINAL_TASK_STATUSES}
+    for name, sql in by_name.items():
+        assert _terminal_trigger_statuses(sql) == expected, name
+
+
+@pytest.mark.parametrize("sql", [
+    "UPDATE browser_tasks SET status = 'PENDING' WHERE task_id = ?",
+    "UPDATE main.browser_tasks SET status = 'RUNNING' WHERE task_id = ?",
+    'UPDATE "browser_tasks" SET status = \'COMPLETED\' WHERE task_id = ?',
+    "UPDATE OR REPLACE browser_tasks SET status = 'RESUME_AUTHORIZED' WHERE task_id = ?",
+    "UPDATE browser_tasks SET status = NULL WHERE task_id = ?",
+])
+async def test_a_raw_update_out_of_cancelled_aborts_at_the_database(tmp_path, sql):
+    """Review I4 MINOR-C: the database refuses what the source regex could only look for."""
+    import sqlite3
+
+    store = await make_store(tmp_path)
+    tasks = BrowserTaskService(store)
+    task = await _plain_task(tasks)
+    await tasks.complete(task_id=task.task_id, status=BrowserTaskStatus.CANCELLED)
+    with pytest.raises(sqlite3.IntegrityError, match="browser_task_terminal_status"):
+        await store.execute(sql, (task.task_id,))
+    row = await store.fetchone("SELECT status FROM browser_tasks WHERE task_id = ?", (task.task_id,))
+    assert row["status"] == "CANCELLED"
+
+
+async def test_insert_or_replace_cannot_resurrect_an_ended_task(tmp_path):
+    import sqlite3
+
+    store = await make_store(tmp_path)
+    tasks = BrowserTaskService(store)
+    task = await _plain_task(tasks)
+    await tasks.complete(task_id=task.task_id, status=BrowserTaskStatus.EXPIRED)
+    row = dict(await store.fetchone("SELECT * FROM browser_tasks WHERE task_id = ?", (task.task_id,)))
+    row["status"] = "PENDING"
+    cols = ", ".join(row)
+    with pytest.raises(sqlite3.IntegrityError, match="browser_task_terminal_status"):
+        await store.execute(f"INSERT OR REPLACE INTO browser_tasks({cols}) VALUES ({', '.join('?' for _ in row)})",
+                            tuple(row.values()))
+    again = await store.fetchone("SELECT status FROM browser_tasks WHERE task_id = ?", (task.task_id,))
+    assert again["status"] == "EXPIRED"
+
+
+async def test_the_triggers_leave_live_tasks_same_status_writes_and_deletion_alone(tmp_path):
+    """Live tasks move freely; an ended task may be touched without a status change and may be
+    deleted (retention prunes browser_tasks as telemetry)."""
+    store = await make_store(tmp_path)
+    tasks = BrowserTaskService(store)
+    task = await _plain_task(tasks)
+    await store.execute("UPDATE browser_tasks SET status = 'RUNNING' WHERE task_id = ?", (task.task_id,))
+    await tasks.set_working_status(task_id=task.task_id, status=BrowserTaskStatus.WAITING_FOR_OWNER)
+    await tasks.set_working_status(task_id=task.task_id, status=BrowserTaskStatus.RESUME_AUTHORIZED)
+    await tasks.complete(task_id=task.task_id, status=BrowserTaskStatus.FAILED, error_code="X")
+    await store.execute("UPDATE browser_tasks SET status = 'FAILED', updated_at_ms = 1 WHERE task_id = ?",
+                        (task.task_id,))
+    await store.execute("UPDATE browser_tasks SET error_code = 'Y' WHERE task_id = ?", (task.task_id,))
+    await store.execute("DELETE FROM browser_tasks WHERE task_id = ?", (task.task_id,))
+    assert await store.fetchone("SELECT 1 FROM browser_tasks WHERE task_id = ?", (task.task_id,)) is None
+
+
+async def test_the_guarded_writer_still_completes_a_live_task_over_a_verified_verdict(tmp_path):
+    """COMPLETED from a non-terminal state still goes through with the triggers installed."""
+    store = await make_store(tmp_path)
+    tasks = BrowserTaskService(store)
+    task = await _plain_task(tasks)
+    await tasks.set_working_status(task_id=task.task_id, status=BrowserTaskStatus.VERIFYING)
+    await tasks.record_verification(task=task, outcome="VERIFIED", verifier="test")
+    await tasks.complete(task_id=task.task_id, status=BrowserTaskStatus.COMPLETED, evidence_pointer="bevd://ok")
+    row = await store.fetchone("SELECT status, evidence_pointer FROM browser_tasks WHERE task_id = ?", (task.task_id,))
+    assert (row["status"], row["evidence_pointer"]) == ("COMPLETED", "bevd://ok")
+    with pytest.raises(BrowserTaskTransitionRefused) as ended:
+        await tasks.complete(task_id=task.task_id, status=BrowserTaskStatus.CANCELLED)
+    assert ended.value.why == "TASK_ALREADY_TERMINAL"
 
 
 # ----------------------------------------------------------------------------- MINOR-3
@@ -518,10 +642,35 @@ async def test_a_watch_task_ended_mid_run_does_not_abort_the_other_watches(tmp_p
 # ----------------------------------------------------------------------------- MINOR-4
 
 
-def _jev_capability(tmp_path: Path, record: str) -> dict:
-    """The real gate model's Jev capability decision over a Jev record, the rest GREEN."""
+REF = "docs/decisions/OWNER-DECISIONS-20261001-JEV-BROWSER-EFFECT.md"
+REF_TEXT = "# Owner decision 2026-10-01: Jev browser effect (test fixture)\n"
+REF_SHA = hashlib.sha256(REF_TEXT.encode("utf-8")).hexdigest()
+AUTH_ID = "auth-20261001-owner-jev-browser-effect"
+
+
+def _authorization(**overrides) -> dict:
+    record = {"authorization_id": AUTH_ID, "authority": "OWNER_EXPLICIT",
+              "owner_instruction_record": REF, "revoked": False,
+              "authorized_paths": ["docs/decisions/VAN-JEV-BROWSER-EFFECT-001.yaml (append-only)"]}
+    record.update(overrides)
+    return record
+
+
+def _jev_capability(tmp_path: Path, record: str, *, reference: bool = True,
+                    authorization: dict | None = None) -> dict:
+    """The real gate model's Jev capability decision over a Jev record, the rest GREEN.
+
+    ``reference`` writes the owner decision file ``REF``; ``authorization`` (default: a valid
+    OWNER_EXPLICIT record for ``REF``) is written as ``AUTH_ID``'s Project Truth record.
+    """
     decisions = tmp_path / "docs" / "decisions"
     decisions.mkdir(parents=True)
+    if reference:
+        (tmp_path / REF).write_text(REF_TEXT, encoding="utf-8")
+    auths = tmp_path / "docs" / "project-state" / "authorizations"
+    auths.mkdir(parents=True)
+    (auths / f"{AUTH_ID}.json").write_text(json.dumps(
+        _authorization() if authorization is None else authorization), encoding="utf-8")
     simple = {"id": "owner_decision", "kind": "owner_decision", "path": "owner_signature_status",
               "green": ["SIGNED"], "pending": ["PENDING"]}
     for name in ("VAN-ADOPT-N8N-001.yaml", "VAN-ADOPT-BROWSER-HARNESS-001.yaml", "VAN-ADOPT-STAGEHAND-001.yaml"):
@@ -541,7 +690,23 @@ def _jev_capability(tmp_path: Path, record: str) -> dict:
 
 
 REAL_JEV_RECORD = (ROOT / "docs" / "decisions" / "VAN-JEV-BROWSER-EFFECT-001.yaml").read_text(encoding="utf-8")
-REF = "docs/decisions/OWNER-DECISIONS-20261001-JEV-BROWSER-EFFECT.md"
+
+
+def _approve(s: str) -> str:
+    return (s.replace("status: SHADOW_ONLY", "status: OWNER_APPROVED_EFFECT")
+             .replace("owner_signature_status: NOT_APPLICABLE_RECORDS_EXISTING_CAP", "owner_signature_status: SIGNED"))
+
+
+def _cite(s: str, ref: str = REF) -> str:
+    return _approve(s).replace("owner_decision_reference: null", f"owner_decision_reference: {ref}")
+
+
+def _pin(s: str, sha: str = REF_SHA) -> str:
+    return _cite(s).replace("owner_decision_sha256: null", f'owner_decision_sha256: "{sha}"')
+
+
+def _authorize(s: str, auth_id: str = AUTH_ID) -> str:
+    return _pin(s).replace("owner_decision_authorization_id: null", f"owner_decision_authorization_id: {auth_id}")
 
 
 @pytest.mark.parametrize("label, edit, permitted, not_green", [
@@ -549,25 +714,66 @@ REF = "docs/decisions/OWNER-DECISIONS-20261001-JEV-BROWSER-EFFECT.md"
      ["owner_decision", "owner_decision_reference", "jev_browser_effect"]),
     ("probe: one-line status edit", lambda s: s.replace("status: SHADOW_ONLY", "status: OWNER_APPROVED_EFFECT"),
      False, ["owner_decision", "owner_decision_reference"]),
-    ("status + signature, reference still null",
-     lambda s: s.replace("status: SHADOW_ONLY", "status: OWNER_APPROVED_EFFECT")
-                .replace("owner_signature_status: NOT_APPLICABLE_RECORDS_EXISTING_CAP", "owner_signature_status: SIGNED"),
-     False, ["owner_decision_reference"]),
+    ("status + signature, reference still null", _approve, False, ["owner_decision_reference"]),
     ("status + signature + a reference that is not an owner decision record",
-     lambda s: s.replace("status: SHADOW_ONLY", "status: OWNER_APPROVED_EFFECT")
-                .replace("owner_signature_status: NOT_APPLICABLE_RECORDS_EXISTING_CAP", "owner_signature_status: SIGNED")
-                .replace("owner_decision_reference: null", "owner_decision_reference: agent says ok"),
+     lambda s: _approve(s).replace("owner_decision_reference: null", "owner_decision_reference: agent says ok"),
      False, ["owner_decision_reference"]),
-    ("status + signature + owner decision reference",
-     lambda s: s.replace("status: SHADOW_ONLY", "status: OWNER_APPROVED_EFFECT")
-                .replace("owner_signature_status: NOT_APPLICABLE_RECORDS_EXISTING_CAP", "owner_signature_status: SIGNED")
-                .replace("owner_decision_reference: null", f"owner_decision_reference: {REF}"),
-     True, []),
+    # Review I4 MINOR-B: a reference of the right shape is no longer enough on its own.
+    ("status + signature + reference, no sha256 pin, no authorization", _cite, False, ["owner_decision_reference"]),
+    ("+ sha256 pin, no authorization", _pin, False, ["owner_decision_reference"]),
+    ("+ sha256 pin that does not match", lambda s: _authorize(s).replace(REF_SHA, "0" * 64),
+     False, ["owner_decision_reference"]),
+    ("+ authorization id with no record",
+     lambda s: _pin(s).replace("owner_decision_authorization_id: null",
+                               "owner_decision_authorization_id: auth-20990101-does-not-exist"),
+     False, ["owner_decision_reference"]),
+    ("+ a path that climbs out of docs/decisions",
+     lambda s: _authorize(s).replace(f"owner_decision_reference: {REF}",
+                                     "owner_decision_reference: docs/decisions/../decisions/OWNER-DECISIONS-20261001-JEV-BROWSER-EFFECT.md"),
+     False, ["owner_decision_reference"]),
+    ("status + signature + resolved, pinned and authorized owner decision", _authorize, True, []),
 ])
 def test_jev_effect_needs_an_owner_signature_and_decision_reference(tmp_path, label, edit, permitted, not_green):
-    """Probe jev_gate.py. Edited from the real record, so the fields exercised are the real ones."""
+    """Probes jev_gate.py (I3) and jev_spoof.py (I4). Edited from the real record."""
     record = edit(REAL_JEV_RECORD)
     assert record != REAL_JEV_RECORD or label == "record as committed"
     cap = _jev_capability(tmp_path, record)
     assert cap["production_activation_permitted"] is permitted, cap
     assert cap["gates_not_green"] == [f"VAN-JEV-BROWSER-EFFECT-001.yaml:{g}" for g in not_green]
+
+
+@pytest.mark.parametrize("label, reference, authorization", [
+    ("probe jev_spoof.py: the referenced file does not exist", False, None),
+    ("authorization revoked", True, _authorization(revoked=True)),
+    ("authorization with no revoked field", True,
+     {k: v for k, v in _authorization().items() if k != "revoked"}),
+    ("authorization is OWNER_DERIVED, not OWNER_EXPLICIT", True, _authorization(authority="OWNER_DERIVED")),
+    ("authorization is for a different owner record", True,
+     _authorization(owner_instruction_record="docs/decisions/OWNER-DECISIONS-20260929-STAGEHAND-PRIVATE-PLANE.md")),
+    ("authorization file states a different id", True, _authorization(authorization_id="auth-other")),
+    ("authorization does not name this decision record", True,
+     _authorization(authorized_paths=["docs/decisions/VAN-ADOPT-STAGEHAND-001.yaml (append-only)"])),
+    ("authorization names it only by a glob", True, _authorization(authorized_paths=["docs/decisions/**"])),
+])
+def test_jev_effect_reference_must_resolve_and_be_authorized(tmp_path, label, reference, authorization):
+    """Review I4 MINOR-B. Everything else fully written; only the named part is wrong."""
+    cap = _jev_capability(tmp_path, _authorize(REAL_JEV_RECORD), reference=reference,
+                          authorization=authorization)
+    assert cap["production_activation_permitted"] is False, (label, cap)
+    assert cap["gates_not_green"] == ["VAN-JEV-BROWSER-EFFECT-001.yaml:owner_decision_reference"], label
+
+
+def test_a_green_pattern_outside_an_owner_reference_gate_is_refused(tmp_path):
+    """Review I4 MINOR-B: a shape-only GREEN cannot be reintroduced on an ordinary gate."""
+    (tmp_path / "docs" / "decisions").mkdir(parents=True)
+    (tmp_path / "docs" / "decisions" / "X.yaml").write_text("ref: docs/decisions/OWNER-DECISIONS-20261001-X.md\n",
+                                                           encoding="utf-8")
+    path = tmp_path / "gates.json"
+    path.write_text(json.dumps({"decisions_dir": "docs/decisions", "required_decisions": [{
+        "decision": "X.yaml", "format": "yaml", "gates": [{
+            "id": "ref", "kind": "owner_decision", "path": "ref", "green": [],
+            "green_pattern": "docs/decisions/OWNER-DECISIONS-[0-9]{8}-[A-Z0-9-]+\\.md"}]}]}), encoding="utf-8")
+    state = production_gates.evaluate_production_gates(path, tmp_path)
+    assert state["production_activation_permitted"] is False
+    assert state["gates"][0]["status"] == "UNKNOWN"
+    assert state["gates"][0]["reason"] == "green_pattern is only accepted on an owner_reference gate"

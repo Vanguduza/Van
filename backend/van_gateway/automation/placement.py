@@ -38,7 +38,8 @@ from __future__ import annotations
 import ipaddress
 import re
 import socket
-from collections.abc import Mapping
+import threading
+from collections.abc import Callable, Iterable, Mapping
 from pathlib import Path
 from typing import Any
 from urllib.parse import urlsplit
@@ -65,6 +66,50 @@ PRODUCTION_DISABLED = "PRODUCTION_DISABLED"
 STAGEHAND_PLACEMENT_SATISFIED = "STAGEHAND_PLACEMENT_SATISFIED"
 
 _NUMERIC_HOST = re.compile(r"^[0-9a-fx.]+$")
+
+#: Review I2 carried minor (probe placement2.py): ``https://localtest.me:9443`` passed, because
+#: only the literal host was classified and that name resolves to 127.0.0.1. A named endpoint
+#: is now resolved and every address it resolves to must be a possible cross-zone peer.
+#:
+#: The zone contract (deploy/van-browser-core/zone.json BC-IF-1, BC-IF-2) puts the only
+#: cross-zone listener on a *private overlay address* inside the private VCN. These are the
+#: private ranges such an address can be in (RFC 1918, the RFC 6598 shared space overlay
+#: meshes use, and IPv6 ULA). Any other private or reserved address class (documentation,
+#: benchmarking, 0/8, 240/4, ...) cannot be that listener and is refused.
+OVERLAY_NETWORKS: tuple[ipaddress.IPv4Network | ipaddress.IPv6Network, ...] = tuple(
+    ipaddress.ip_network(net)
+    for net in ("10.0.0.0/8", "172.16.0.0/12", "192.168.0.0/16", "100.64.0.0/10", "fc00::/7")
+)
+#: getaddrinfo has no timeout of its own; a resolution slower than this fails closed.
+DNS_RESOLVE_TIMEOUT_S = 2.0
+
+#: ``resolver(host) -> addresses`` (textual IPs). Raising, returning nothing or timing out is
+#: unresolvable, which fails closed. Injected by tests so they never need the network.
+Resolver = Callable[[str], Iterable[str]]
+
+
+def _getaddrinfo_resolver(host: str) -> list[str]:
+    """Every address ``host`` resolves to, bounded by ``DNS_RESOLVE_TIMEOUT_S``."""
+    box: dict[str, Any] = {}
+
+    def run() -> None:
+        try:
+            box["infos"] = socket.getaddrinfo(host, None, type=socket.SOCK_STREAM)
+        except Exception as exc:  # noqa: BLE001 — any failure is unresolvable
+            box["error"] = exc
+
+    # A daemon thread, not an executor: a hung lookup must not hold interpreter shutdown.
+    worker = threading.Thread(target=run, name="stagehand-placement-dns", daemon=True)
+    worker.start()
+    worker.join(DNS_RESOLVE_TIMEOUT_S)
+    if worker.is_alive():
+        raise TimeoutError(f"resolving {host!r} took longer than {DNS_RESOLVE_TIMEOUT_S}s")
+    if "error" in box:
+        raise box["error"]
+    return [str(info[4][0]) for info in box["infos"]]
+
+
+DEFAULT_RESOLVER: Resolver = _getaddrinfo_resolver
 
 
 def _ip_of(host: str) -> ipaddress.IPv4Address | ipaddress.IPv6Address | None:
@@ -109,6 +154,46 @@ def _is_local_host(hostname: str | None) -> bool:
     return False
 
 
+def _address_refused(ip: ipaddress.IPv4Address | ipaddress.IPv6Address) -> bool:
+    """True when ``ip`` cannot be the van-browser-core cross-zone edge (see OVERLAY_NETWORKS)."""
+    mapped = getattr(ip, "ipv4_mapped", None)
+    addr = mapped if mapped is not None else ip
+    if addr.is_loopback or addr.is_link_local or addr.is_unspecified or addr.is_multicast:
+        return True
+    if any(addr in net for net in OVERLAY_NETWORKS if net.version == addr.version):
+        return False
+    return addr.is_private or addr.is_reserved
+
+
+def _endpoint_refusal(hostname: str | None, resolver: Resolver) -> str | None:
+    """``None`` when the endpoint host may be the cross-zone edge, else a refusal reason.
+
+    A literal address is classified as written; a name is resolved and refused if it does
+    not resolve, or if *any* address it resolves to is refused (a name with one loopback
+    answer among several can still land on loopback).
+    """
+    if _is_local_host(hostname):
+        return "STAGEHAND_ENDPOINT_NOT_CROSS_ZONE_MTLS"
+    host = (hostname or "").strip().lower().strip("[]").rstrip(".")
+    literal = _ip_of(host)
+    if literal is not None:
+        return "STAGEHAND_ENDPOINT_NOT_CROSS_ZONE_MTLS" if _address_refused(literal) else None
+    try:
+        answers = [str(a) for a in resolver(host)]
+    except Exception:  # noqa: BLE001 — resolution failure, timeout included, fails closed
+        return "STAGEHAND_ENDPOINT_UNRESOLVABLE"
+    if not answers:
+        return "STAGEHAND_ENDPOINT_UNRESOLVABLE"
+    for answer in answers:
+        try:
+            ip = ipaddress.ip_address(answer.split("%", 1)[0])
+        except ValueError:
+            return "STAGEHAND_ENDPOINT_UNRESOLVABLE"
+        if _address_refused(ip):
+            return "STAGEHAND_ENDPOINT_NOT_CROSS_ZONE_MTLS"
+    return None
+
+
 def _norm(value: Any) -> str:
     return str(value or "").strip().lower()
 
@@ -118,7 +203,8 @@ def _file_present(path: str) -> bool:
 
 
 def stagehand_production_enabled(
-    settings: Any, *, worker_health: Mapping[str, Any] | None = None
+    settings: Any, *, worker_health: Mapping[str, Any] | None = None,
+    resolver: Resolver | None = None,
 ) -> tuple[bool, str]:
     """Return ``(enabled, reason)`` for production Stagehand placement and model.
 
@@ -126,7 +212,9 @@ def stagehand_production_enabled(
     can pass a namespace). ``worker_health`` is the JSON body the van-browser-core
     Stagehand worker returned from ``GET /health`` through the mTLS edge, fetched by the
     caller. ``None`` means the zone's availability was not established, which is
-    PRODUCTION_DISABLED — this function never assumes a zone is up.
+    PRODUCTION_DISABLED — this function never assumes a zone is up. ``resolver`` resolves
+    a named endpoint (default: ``DEFAULT_RESOLVER``, getaddrinfo bounded by
+    ``DNS_RESOLVE_TIMEOUT_S``); a literal address never touches it.
     """
 
     if not getattr(settings, "browser_enabled", False):
@@ -145,8 +233,11 @@ def stagehand_production_enabled(
     # van-browser-core, or reached without authentication.
     base_url = str(getattr(settings, "browser_stagehand_base_url", "") or "")
     parts = urlsplit(base_url)
-    if parts.scheme != "https" or _is_local_host(parts.hostname):
+    if parts.scheme != "https":
         return False, "STAGEHAND_ENDPOINT_NOT_CROSS_ZONE_MTLS"
+    refusal = _endpoint_refusal(parts.hostname, resolver or DEFAULT_RESOLVER)
+    if refusal is not None:
+        return False, refusal
     for field in ("browser_core_ca_file", "browser_core_client_cert_file", "browser_core_client_key_file"):
         if not _file_present(str(getattr(settings, field, "") or "")):
             return False, f"STAGEHAND_MTLS_CLIENT_IDENTITY_MISSING:{field}"
@@ -191,11 +282,12 @@ def stagehand_production_enabled(
 
 
 def stagehand_production_state(
-    settings: Any, *, worker_health: Mapping[str, Any] | None = None
+    settings: Any, *, worker_health: Mapping[str, Any] | None = None,
+    resolver: Resolver | None = None,
 ) -> dict[str, Any]:
     """Projection for health/readiness surfaces: state, reason and the pin facts."""
 
-    enabled, reason = stagehand_production_enabled(settings, worker_health=worker_health)
+    enabled, reason = stagehand_production_enabled(settings, worker_health=worker_health, resolver=resolver)
     revision = str(getattr(settings, "browser_stagehand_model_revision", "") or "").strip()
     return {
         "state": "PLACEMENT_SATISFIED" if enabled else PRODUCTION_DISABLED,

@@ -23,6 +23,7 @@ is GREEN.
 
 from __future__ import annotations
 
+import hashlib
 import json
 import re
 from dataclasses import asdict, dataclass
@@ -69,6 +70,15 @@ class GateStatus(str, Enum):
 class GateKind(str, Enum):
     OWNER_DECISION = "owner_decision"
     PRODUCTION = "production"
+    #: Review I4 MINOR-B — a gate whose GREEN value is a *reference* to an owner decision.
+    #: GREEN only when the reference resolves to an existing file under the declared
+    #: directory, the record pins that file's sha256 and the pin matches, and the record
+    #: names an existing, unrevoked Project Truth authorization record for that file.
+    OWNER_REFERENCE = "owner_reference"
+
+
+#: Kinds that report as an owner decision in ``owner_decisions_pending``.
+_OWNER_KINDS = frozenset({GateKind.OWNER_DECISION.value, GateKind.OWNER_REFERENCE.value})
 
 
 @dataclass(frozen=True)
@@ -170,13 +180,97 @@ def _classify(spec: dict[str, Any], raw: Any) -> tuple[GateStatus, str | None]:
     ):
         if raw in (spec.get(key) or []):
             return status, None
-    # Review I3 MINOR-4: a gate whose GREEN value is a reference (e.g. the owner decision a
-    # record cites) rather than a status word declares the shape it must have. A null, an
-    # empty string or anything else outside the pattern stays UNKNOWN.
-    pattern = spec.get("green_pattern")
-    if isinstance(pattern, str) and pattern and re.fullmatch(pattern, raw):
-        return GateStatus.GREEN, None
     return GateStatus.UNKNOWN, f"{raw!r} is outside the declared vocabulary"
+
+
+_SHA256 = re.compile(r"[0-9a-f]{64}")
+_AUTHORIZATION_ID = re.compile(r"[a-z0-9][a-z0-9-]{0,127}")
+
+
+def _inside(path: Path, directory: Path) -> bool:
+    try:
+        path.resolve().relative_to(directory.resolve())
+    except (ValueError, OSError):
+        return False
+    return True
+
+
+def _classify_owner_reference(
+    spec: dict[str, Any], record: dict[str, Any], raw: Any, root: Path, record_source: str
+) -> tuple[GateStatus, str | None]:
+    """Review I4 MINOR-B. The shape of a reference is not the reference.
+
+    Review I3 MINOR-4 made the Jev effect gate need an owner decision *reference*, but
+    checked only that the string looked like ``docs/decisions/OWNER-DECISIONS-*.md``. Three
+    plain-text edits citing a file that does not exist made the capability GREEN (probe
+    ``jev_spoof.py``). GREEN now needs all of:
+
+    * the reference matches ``green_pattern`` and names a regular file inside
+      ``reference_dir`` (no ``..``, no absolute path, no symlink out of the directory);
+    * the record carries, at ``sha256_path``, the sha256 of that file, and it matches;
+    * the record names, at ``authorization_path``, an authorization id whose record
+      ``<authorizations_dir>/<id>.json`` exists, states the same ``authorization_id``, is
+      not revoked, has an ``authority`` in ``authorization_authority``, whose
+      ``owner_instruction_record`` is the referenced file, and whose ``authorized_paths``
+      names this decision record exactly (a glob does not count). The last binding stops an
+      existing authorization for a *different* change (e.g. the Stagehand gates record) from
+      being cited to open this gate.
+
+    Anything missing, unresolvable or mismatched is UNKNOWN. What this cannot establish is
+    who wrote those files; that control is Project Truth owner authority over commits.
+    """
+    if not isinstance(raw, str) or not raw:
+        return GateStatus.UNKNOWN, "owner decision reference is missing"
+    pattern = spec["green_pattern"]
+    if not re.fullmatch(pattern, raw):
+        return GateStatus.UNKNOWN, f"{raw!r} does not have the declared reference shape"
+    reference = Path(raw)
+    if reference.is_absolute() or ".." in reference.parts:
+        return GateStatus.UNKNOWN, f"{raw!r} is not a repository-relative path"
+    target = root / reference
+    if not _inside(target, root / spec["reference_dir"]):
+        return GateStatus.UNKNOWN, f"{raw!r} does not resolve inside {spec['reference_dir']}"
+    if not target.is_file():
+        return GateStatus.UNKNOWN, f"{raw!r} does not resolve to an existing file"
+
+    try:
+        pinned = _resolve(record, spec["sha256_path"])
+    except KeyError:
+        return GateStatus.UNKNOWN, "owner decision sha256 pin is missing"
+    if not isinstance(pinned, str) or not _SHA256.fullmatch(pinned):
+        return GateStatus.UNKNOWN, "owner decision sha256 pin is not a lower-case sha256"
+    actual = hashlib.sha256(target.read_bytes()).hexdigest()
+    if actual != pinned:
+        return GateStatus.UNKNOWN, f"owner decision sha256 mismatch: pinned {pinned}, file {actual}"
+
+    try:
+        auth_id = _resolve(record, spec["authorization_path"])
+    except KeyError:
+        return GateStatus.UNKNOWN, "authorization id is missing"
+    if not isinstance(auth_id, str) or not _AUTHORIZATION_ID.fullmatch(auth_id):
+        return GateStatus.UNKNOWN, "authorization id is missing or malformed"
+    auth_dir = root / spec["authorizations_dir"]
+    auth_path = auth_dir / f"{auth_id}.json"
+    if not _inside(auth_path, auth_dir) or not auth_path.is_file():
+        return GateStatus.UNKNOWN, f"authorization record {auth_id!r} does not exist"
+    try:
+        auth = json.loads(auth_path.read_text(encoding="utf-8"))
+    except (OSError, ValueError) as exc:
+        return GateStatus.UNKNOWN, f"authorization record unreadable: {type(exc).__name__}"
+    if not isinstance(auth, dict) or auth.get("authorization_id") != auth_id:
+        return GateStatus.UNKNOWN, f"authorization record does not state authorization_id {auth_id!r}"
+    if auth.get("revoked") is not False:
+        return GateStatus.UNKNOWN, "authorization record is revoked or does not say it is not"
+    if auth.get("authority") not in spec["authorization_authority"]:
+        return GateStatus.UNKNOWN, f"authorization authority {auth.get('authority')!r} is not accepted"
+    if auth.get("owner_instruction_record") != raw:
+        return GateStatus.UNKNOWN, "authorization record is for a different owner instruction record"
+    paths = auth.get("authorized_paths")
+    if not isinstance(paths, list) or not any(
+        isinstance(entry, str) and entry.split(maxsplit=1)[:1] == [record_source] for entry in paths
+    ):
+        return GateStatus.UNKNOWN, f"authorization record does not authorize {record_source}"
+    return GateStatus.GREEN, None
 
 
 def _gate_spec_problem(spec: Any) -> str | None:
@@ -187,13 +281,25 @@ def _gate_spec_problem(spec: Any) -> str | None:
             return f"gate spec lacks {field}"
     if spec["kind"] not in {k.value for k in GateKind}:
         return f"unknown gate kind {spec['kind']!r}"
-    if not spec.get("green") and not spec.get("green_pattern"):
-        return "gate declares no GREEN value"
-    if spec.get("green_pattern") is not None:
+    if spec["kind"] == GateKind.OWNER_REFERENCE.value:
+        for field in ("green_pattern", "reference_dir", "sha256_path", "authorization_path",
+                      "authorizations_dir"):
+            if not isinstance(spec.get(field), str) or not spec[field]:
+                return f"owner_reference gate lacks {field}"
+        accepted = spec.get("authorization_authority")
+        if not isinstance(accepted, list) or not accepted or not all(isinstance(a, str) for a in accepted):
+            return "owner_reference gate lacks authorization_authority"
         try:
-            re.compile(str(spec["green_pattern"]))
+            re.compile(spec["green_pattern"])
         except re.error:
             return "gate green_pattern is not a valid regular expression"
+        return None
+    # Review I4 MINOR-B: a pattern match is a shape, never a GREEN on its own. Only an
+    # owner_reference gate, which also resolves and pins the file, may declare one.
+    if spec.get("green_pattern") is not None:
+        return "green_pattern is only accepted on an owner_reference gate"
+    if not spec.get("green"):
+        return "gate declares no GREEN value"
     return None
 
 
@@ -298,7 +404,10 @@ def evaluate_production_gates(
                                "path not present in decision record")
                 )
                 continue
-            status, reason = _classify(spec, raw)
+            if kind == GateKind.OWNER_REFERENCE.value:
+                status, reason = _classify_owner_reference(spec, record, raw, root, source)
+            else:
+                status, reason = _classify(spec, raw)
             results.append(
                 GateResult(name, gate_id, kind, status, raw if isinstance(raw, str) else None,
                            source, dotted, reason)
@@ -311,7 +420,7 @@ def evaluate_production_gates(
         {
             r.decision
             for r in results
-            if r.kind == GateKind.OWNER_DECISION.value
+            if r.kind in _OWNER_KINDS
             and r.status is not GateStatus.GREEN
             and r.decision not in missing
         }

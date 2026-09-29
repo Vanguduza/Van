@@ -19,6 +19,7 @@ Each test is one of reviewer I2's probes (review-i2/probes/*.py) turned into a r
 
 from __future__ import annotations
 
+import hashlib
 import json
 import types
 from pathlib import Path
@@ -168,11 +169,22 @@ def _jev_repo(tmp_path: Path, *, jev: str, harness: str = "SIGNED") -> Path:
                       ("VAN-ADOPT-STAGEHAND-001.yaml", "SIGNED")):
         (decisions / name).write_text(f"owner_signature_status: {sig}\n", encoding="utf-8")
     (decisions / "VAN-AMEND-SECURITY-POLICY-001.md").write_text("**Status:** `OWNER_APPROVED`\n", encoding="utf-8")
-    # Review I3 MINOR-4: the capability also needs the owner signature and decision reference;
-    # this matrix is about the status vocabulary and inheritance, so both are present here.
+    # Review I3 MINOR-4 / I4 MINOR-B: the capability also needs the owner signature and a
+    # resolved, sha256-pinned, authorized decision reference; this matrix is about the status
+    # vocabulary and inheritance, so all of those are present here.
+    ref = "docs/decisions/OWNER-DECISIONS-20261001-JEV.md"
+    (tmp_path / ref).write_text("# owner decision (test fixture)\n", encoding="utf-8")
+    auths = tmp_path / "docs" / "project-state" / "authorizations"
+    auths.mkdir(parents=True)
+    (auths / "auth-20261001-jev.json").write_text(json.dumps({
+        "authorization_id": "auth-20261001-jev", "authority": "OWNER_EXPLICIT",
+        "owner_instruction_record": ref, "revoked": False,
+        "authorized_paths": ["docs/decisions/VAN-JEV-BROWSER-EFFECT-001.yaml"]}), encoding="utf-8")
+    sha = hashlib.sha256((tmp_path / ref).read_bytes()).hexdigest()
     (decisions / "VAN-JEV-BROWSER-EFFECT-001.yaml").write_text(
         "owner_signature_status: SIGNED\njev_browser_effect:\n  status: "
-        f"{jev}\n  owner_decision_reference: docs/decisions/OWNER-DECISIONS-20261001-JEV.md\n",
+        f"{jev}\n  owner_decision_reference: {ref}\n  owner_decision_sha256: '{sha}'\n"
+        "  owner_decision_authorization_id: auth-20261001-jev\n",
         encoding="utf-8")
     required = [{"decision": n, "format": "yaml", "gates": [simple]} for n in (
         "VAN-ADOPT-N8N-001.yaml", "VAN-ADOPT-BROWSER-HARNESS-001.yaml", "VAN-ADOPT-STAGEHAND-001.yaml")]
