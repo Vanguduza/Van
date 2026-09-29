@@ -206,6 +206,7 @@ class TestOutcomesReachTheLearningStores:
     async def test_an_owner_correction_reaches_the_growth_ledger(self, tmp_path):
         from van_gateway.understanding.owner_model import (
             OwnerCognitiveModel,
+            ObservationOrigin,
             OwnerModelField,
         )
 
@@ -220,6 +221,7 @@ class TestOutcomesReachTheLearningStores:
         assertion = await model.observe(
             owner_principal_id="owner", field=OwnerModelField.REASONING_PREFERENCE,
             value="short answers", episode_ref=f"mission:{mission.mission_id}",
+            origin=ObservationOrigin.SYSTEM_OBSERVED,
         )
         await model.correct(assertion.assertion_id, new_value="full evidence")
 
@@ -313,6 +315,7 @@ class TestTheOwnerCanBeForgotten:
     async def test_forgetting_removes_what_van_concluded(self, tmp_path):
         from van_gateway.understanding.owner_model import (
             OwnerCognitiveModel,
+            ObservationOrigin,
             OwnerModelField,
         )
 
@@ -326,6 +329,7 @@ class TestTheOwnerCanBeForgotten:
         await model.observe(
             owner_principal_id="owner", field=OwnerModelField.REASONING_PREFERENCE,
             value="short", episode_ref=f"mission:{mission.mission_id}",
+            origin=ObservationOrigin.SYSTEM_OBSERVED,
         )
         assert (await OwnerMemory(store).inventory())["stores"]["owner_cognitive_model"]["rows"] == 1
 
