@@ -51,6 +51,10 @@ from van_gateway.action.models import VerifierType
 from van_gateway.browser.adapters import BrowserAdapterError
 from van_gateway.browser.models import BrowserTask
 from van_gateway.browser.policy import BrowserPolicyError
+from van_gateway.browser.stagehand_proposal import (
+    SemanticProposalRefused,
+    typed_action_from_stagehand,
+)
 
 # ------------------------------------------------------------------------ B1 vocabulary
 
@@ -77,14 +81,6 @@ def _rank(action_class: str) -> int:
     return B1_ACTION_CLASSES.index(action_class)
 
 
-class SemanticProposalRefused(RuntimeError):
-    """Stagehand observed something the router will not hand to the Harness."""
-
-    def __init__(self, code: str) -> None:
-        super().__init__(code)
-        self.code = code
-
-
 class B1ValidationError(ValueError):
     """The B1 payload or a Jev proposal failed VAN's own re-validation."""
 
@@ -109,9 +105,11 @@ class StepState(str, Enum):
     EXECUTING = "EXECUTING"
     VERIFYING = "VERIFYING"
     VERIFIED_SUCCESS = "VERIFIED_SUCCESS"
-    VERIFICATION_FAILED = "VERIFICATION_FAILED"
-    #: Executed, and the verifier could not observe the postcondition. Never success.
-    UNVERIFIED = "UNVERIFIED"
+    #: The verifier observed the postcondition false. The router falls back to the next lane.
+    NOT_SATISFIED = "NOT_SATISFIED"
+    #: The verifier could not observe the postcondition (none declared, no observer, verifier
+    #: absent or failing). Never success; terminal, and escalated to the owner.
+    UNVERIFIABLE = "UNVERIFIABLE"
     EXECUTION_FAILED = "EXECUTION_FAILED"
     OWNER_TAKEOVER = "OWNER_TAKEOVER"
     POLICY_REFUSED = "POLICY_REFUSED"
@@ -169,6 +167,10 @@ class StepResult:
     eligibility_class: str | None = None
     action: RouterAction | None = None
     verification: VerificationResult | None = None
+    #: Earlier lanes whose action executed and was NOT_SATISFIED before this one.
+    attempts: list[dict[str, Any]] = field(default_factory=list)
+    #: True when automation stops and the owner must look (UNVERIFIABLE, takeover).
+    escalated: bool = False
 
     @property
     def verified_success(self) -> bool:
@@ -192,6 +194,8 @@ class StepResult:
                 "outcome": self.verification.outcome.value,
                 "detail": self.verification.detail,
             },
+            "attempts": list(self.attempts),
+            "escalated": self.escalated,
             "verified_success": self.verified_success,
         }
 
@@ -502,6 +506,8 @@ class BrowserInteractionRouter:
         epoch_source: Callable[[BrowserTask, InteractionStep], Awaitable[str | None]] | None = None,
         eligibility_policy: Any = None,
         metrics: RouterMetrics | None = None,
+        owner_control_probe: Callable[[BrowserTask], Awaitable[bool]] | None = None,
+        stagehand_gate: Callable[[], tuple[bool, str]] | None = None,
     ) -> None:
         self.enabled = enabled
         self.executor = executor
@@ -514,6 +520,10 @@ class BrowserInteractionRouter:
         self.epoch_source = epoch_source
         self.eligibility_policy = eligibility_policy
         self.metrics = metrics or RouterMetrics()
+        #: Owner takeover preempts automation (owner decision §9). Unknown = preempted.
+        self.owner_control_probe = owner_control_probe
+        #: Unit M's `stagehand_production_enabled`, bound to settings. Absent = lane off.
+        self.stagehand_gate = stagehand_gate
 
     # ----------------------------------------------------------- lane readiness
 
@@ -540,91 +550,136 @@ class BrowserInteractionRouter:
             "jev_lane_disabled_reasons": self.jev_lane_disabled_reasons(),
             "deterministic_lane": self.executor is not None,
             "stagehand_lane": self.semantic_fallback is not None,
+            "stagehand_lane_disabled_reason": self._stagehand_disabled_reason(),
+            "owner_control_probe": self.owner_control_probe is not None,
             "verifier": self.verifier is not None,
         }
 
     # ----------------------------------------------------------- entry point
 
+    def _stagehand_disabled_reason(self) -> str | None:
+        if self.semantic_fallback is None:
+            return "STAGEHAND_LANE_DISABLED:FALLBACK_MISSING"
+        if self.executor is None:
+            return "STAGEHAND_LANE_DISABLED:EXECUTOR_MISSING"
+        if self.stagehand_gate is None:
+            return "STAGEHAND_LANE_DISABLED:PRODUCTION_GATE_MISSING"
+        try:
+            permitted, reason = self.stagehand_gate()
+        except Exception as exc:  # noqa: BLE001 - a gate fault is "not permitted"
+            return f"STAGEHAND_LANE_DISABLED:PRODUCTION_GATE_FAILED:{type(exc).__name__}"
+        if permitted is not True:
+            return f"STAGEHAND_LANE_DISABLED:{reason or 'PRODUCTION_DISABLED'}"
+        return None
+
+    async def _owner_preempts(self, task: BrowserTask) -> str | None:
+        """Owner takeover preempts automation at any point. Unknown control state = preempt."""
+        if self.owner_control_probe is None:
+            return "OWNER_CONTROL_STATE_UNKNOWN"
+        try:
+            owner_has_control = await self.owner_control_probe(task)
+        except Exception as exc:  # noqa: BLE001
+            return f"OWNER_CONTROL_PROBE_FAILED:{type(exc).__name__}"
+        return "OWNER_HAS_CONTROL" if owner_has_control else None
+
+    def _takeover(self, reasons: list[str], attempts: list[dict[str, Any]], why: str | None = None) -> StepResult:
+        self.metrics.inc("owner_takeovers")
+        if why:
+            reasons = reasons + [f"OWNER_TAKEOVER:{why}"]
+        return StepResult(
+            lane=RouterLane.OWNER_TAKEOVER, state=StepState.OWNER_TAKEOVER,
+            trail=[StepState.OWNER_TAKEOVER.value], reasons=reasons, attempts=attempts,
+            escalated=True,
+            jev_consulted=any(r.startswith("JEV_CONSULTED") for r in reasons),
+            eligibility_class=next((r.split(":", 1)[1] for r in reasons if r.startswith("B2:")), None),
+        )
+
     async def route(self, step: InteractionStep) -> StepResult:
         if not self.enabled:
             raise RuntimeError("BROWSER_INTERACTION_ROUTER_DISABLED")
+        self.metrics.inc("total_steps")
         if step.action_class_ceiling not in PROPOSABLE_ACTION_CLASSES:
             # A4/A5 are never routed autonomously; an unknown ceiling is not guessed at.
-            self.metrics.inc("total_steps")
             self.metrics.inc("policy_refusals")
             return StepResult(
                 lane=RouterLane.POLICY_REFUSAL, state=StepState.POLICY_REFUSED,
                 trail=[StepState.POLICY_REFUSED.value],
                 reasons=[f"STEP_CEILING_NOT_ROUTABLE:{step.action_class_ceiling}"],
             )
-        self.metrics.inc("total_steps")
         reasons: list[str] = []
+        attempts: list[dict[str, Any]] = []
+        # Locked order (owner decision §9). A lane returns None when it has nothing to do.
+        lanes = (self._deterministic_lane, self._jev_lane_entry, self._stagehand_lane)
+        for lane in lanes:
+            preempt = await self._owner_preempts(step.task)
+            if preempt is not None:
+                return self._takeover(reasons, attempts, preempt)
+            result = await lane(step, reasons)
+            if result is None:
+                continue
+            if result.state is StepState.NOT_SATISFIED:
+                # §7: NOT_SATISFIED -> fallback. The page may have changed, so anything
+                # observed before this action is stale and must be re-read.
+                attempts.append(result.to_json())
+                reasons.append(f"{result.lane.value}_NOT_SATISFIED")
+                step.observation = None
+                continue
+            result.attempts = attempts
+            return result
+        return self._takeover(reasons, attempts)
 
-        # 1. deterministic typed lane
-        if step.deterministic_action is not None:
-            if self.executor is None:
-                reasons.append("DETERMINISTIC_LANE_EXECUTOR_MISSING")
-            else:
-                det = step.deterministic_action
-                action = RouterAction(
-                    lane=RouterLane.DETERMINISTIC, operation=det.operation, locator=det.locator,
-                    value_ref=det.value_ref, action_class=None,
-                )
-                self.metrics.inc("deterministic_steps")
-                return await self._execute_and_verify(step, action, reasons, claimed_done=det.operation == "done")
-
-        # 2. Jev proposal lane
-        self.metrics.inc("jev_candidate_steps")
-        jev_result = await self._jev_lane(step, reasons)
-        if jev_result is not None:
-            return jev_result
-
-        # 3. Stagehand semantic fallback
-        if self.semantic_fallback is not None and self.executor is not None:
-            try:
-                proposal = await self.semantic_fallback.propose(step.task, step)
-            except SemanticProposalRefused as exc:
-                proposal = None
-                reasons.append(f"STAGEHAND_PROPOSAL_REFUSED:{exc.code}")
-            except (BrowserAdapterError, BrowserPolicyError, PaymentBoundaryError) as exc:
-                proposal = None
-                reasons.append(f"STAGEHAND_UNAVAILABLE:{getattr(exc, 'code', type(exc).__name__)}")
-            else:
-                if proposal is None:
-                    # "Nothing left to do" from Stagehand is not success (STAGEHAND-VERIFIER-GAP):
-                    # with no action there is nothing to verify, so the owner decides.
-                    reasons.append("STAGEHAND_NO_ACTION")
-            if proposal is not None:
-                # Stagehand output is untrusted and cannot raise the class: VAN classifies
-                # the observed action itself and holds it to the step ceiling.
-                target = {"label": proposal.description or ""}
-                stagehand_class = self.action_classifier(proposal.operation, target, None)
-                if (
-                    stagehand_class not in B1_ACTION_CLASSES
-                    or stagehand_class in NEVER_PROPOSABLE_ACTION_CLASSES
-                    or _rank(stagehand_class) > _rank(step.action_class_ceiling)
-                ):
-                    reasons.append(f"STAGEHAND_ACTION_ABOVE_CEILING:{stagehand_class}")
-                else:
-                    self.metrics.inc("stagehand_steps")
-                    action = RouterAction(
-                        lane=RouterLane.STAGEHAND, operation=proposal.operation,
-                        locator=proposal.locator, value_ref=proposal.value_ref,
-                        action_class=stagehand_class, semantic_action=proposal.semantic_action,
-                        description=proposal.description,
-                    )
-                    return await self._execute_and_verify(step, action, reasons, claimed_done=False)
-        else:
-            reasons.append("STAGEHAND_LANE_UNAVAILABLE")
-
-        # 4. owner takeover
-        self.metrics.inc("owner_takeovers")
-        return StepResult(
-            lane=RouterLane.OWNER_TAKEOVER, state=StepState.OWNER_TAKEOVER,
-            trail=[StepState.OWNER_TAKEOVER.value], reasons=reasons,
-            jev_consulted=any(r.startswith("JEV_CONSULTED") for r in reasons),
-            eligibility_class=next((r.split(":", 1)[1] for r in reasons if r.startswith("B2:")), None),
+    async def _deterministic_lane(self, step: InteractionStep, reasons: list[str]) -> StepResult | None:
+        if step.deterministic_action is None:
+            return None
+        if self.executor is None:
+            reasons.append("DETERMINISTIC_LANE_EXECUTOR_MISSING")
+            return None
+        det = step.deterministic_action
+        action = RouterAction(
+            lane=RouterLane.DETERMINISTIC, operation=det.operation, locator=det.locator,
+            value_ref=det.value_ref, action_class=None,
         )
+        self.metrics.inc("deterministic_steps")
+        return await self._execute_and_verify(step, action, reasons, claimed_done=det.operation == "done")
+
+    async def _jev_lane_entry(self, step: InteractionStep, reasons: list[str]) -> StepResult | None:
+        self.metrics.inc("jev_candidate_steps")
+        return await self._jev_lane(step, reasons)
+
+    async def _stagehand_lane(self, step: InteractionStep, reasons: list[str]) -> StepResult | None:
+        disabled = self._stagehand_disabled_reason()
+        if disabled is not None:
+            reasons.append(disabled)
+            return None
+        try:
+            proposal = await self.semantic_fallback.propose(step.task, step)  # type: ignore[union-attr]
+        except SemanticProposalRefused as exc:
+            reasons.append(f"STAGEHAND_PROPOSAL_REFUSED:{exc.code}")
+            return None
+        except (BrowserAdapterError, BrowserPolicyError, PaymentBoundaryError) as exc:
+            reasons.append(f"STAGEHAND_UNAVAILABLE:{getattr(exc, 'code', type(exc).__name__)}")
+            return None
+        if proposal is None:
+            # "Nothing left to do" from Stagehand is not success (§7): nothing to verify.
+            reasons.append("STAGEHAND_NO_ACTION")
+            return None
+        # Stagehand output is untrusted and cannot raise the class: VAN classifies the
+        # observed action itself and holds it to the step ceiling.
+        stagehand_class = self.action_classifier(proposal.operation, {"label": proposal.description or ""}, None)
+        if (
+            stagehand_class not in B1_ACTION_CLASSES
+            or stagehand_class in NEVER_PROPOSABLE_ACTION_CLASSES
+            or _rank(stagehand_class) > _rank(step.action_class_ceiling)
+        ):
+            reasons.append(f"STAGEHAND_ACTION_ABOVE_CEILING:{stagehand_class}")
+            return None
+        self.metrics.inc("stagehand_steps")
+        action = RouterAction(
+            lane=RouterLane.STAGEHAND, operation=proposal.operation, locator=proposal.locator,
+            value_ref=proposal.value_ref, action_class=stagehand_class,
+            semantic_action=proposal.semantic_action, description=proposal.description,
+        )
+        return await self._execute_and_verify(step, action, reasons, claimed_done=proposal.operation == "done")
 
     # ----------------------------------------------------------- Jev lane
 
@@ -801,7 +856,7 @@ class BrowserInteractionRouter:
         else:
             if result.state is StepState.VERIFIED_SUCCESS:
                 self.metrics.inc("jev_executed_verified_success")
-            elif result.state is StepState.VERIFICATION_FAILED:
+            elif result.state is StepState.NOT_SATISFIED:
                 self.metrics.inc("jev_wrong_actions")
         return result
 
@@ -829,6 +884,14 @@ class BrowserInteractionRouter:
             # `done` is a claim. Nothing executes; the verifier decides.
             trail.append(StepState.VERIFYING.value)
         else:
+            preempt = await self._owner_preempts(step.task)
+            if preempt is not None:
+                self.metrics.inc("owner_takeovers")
+                return StepResult(
+                    lane=RouterLane.OWNER_TAKEOVER, state=StepState.OWNER_TAKEOVER,
+                    trail=trail + [StepState.OWNER_TAKEOVER.value],
+                    reasons=reasons + [f"OWNER_TAKEOVER:{preempt}"], action=action, escalated=True,
+                )
             trail.append(StepState.EXECUTING.value)
             try:
                 await self.executor.execute(step.task, action)  # type: ignore[union-attr]
@@ -848,7 +911,7 @@ class BrowserInteractionRouter:
             trail.append(StepState.VERIFYING.value)
 
         if self.verifier is None:
-            state = StepState.UNVERIFIED
+            state = StepState.UNVERIFIABLE
             reasons = reasons + ["VERIFIER_MISSING"]
             verification = None
         else:
@@ -864,13 +927,15 @@ class BrowserInteractionRouter:
             if verification.outcome is VerificationOutcome.VERIFIED:
                 state = StepState.VERIFIED_SUCCESS
             elif verification.outcome is VerificationOutcome.FAILED:
-                state = StepState.VERIFICATION_FAILED
+                state = StepState.NOT_SATISFIED
             else:
-                state = StepState.UNVERIFIED
+                state = StepState.UNVERIFIABLE
         trail.append(state.value)
+        if state is StepState.UNVERIFIABLE:
+            reasons = reasons + ["ESCALATED:UNVERIFIABLE"]
         return StepResult(
             lane=action.lane, state=state, trail=trail, reasons=reasons, action=action,
-            verification=verification,
+            verification=verification, escalated=state is StepState.UNVERIFIABLE,
         )
 
 
@@ -903,20 +968,12 @@ class HarnessActionExecutor:
         raise BrowserAdapterError("BROWSER_ACTION_UNSUPPORTED", op)
 
 
-#: Stagehand observe() methods the Harness can perform itself, mapped to B1 operations.
-_STAGEHAND_METHODS = {"click": "click", "tap": "click", "press": "press_key", "keypress": "press_key",
-                      "scroll": "scroll", "scrollintoview": "scroll"}
-
-
 class StagehandSemanticFallback:
-    """Stagehand *observes and proposes*; the Browser Harness executes.
+    """Stagehand *observes and proposes*; the Browser Harness executes (owner decision §8).
 
-    Unlike ``HybridBrowserWorker`` (which replays via ``StagehandAdapter.act`` — Stagehand
-    driving CDP itself), this lane never calls ``act``. The observed action is translated
-    into a typed Harness operation on the observed selector. A method the Harness cannot
-    perform without Stagehand (``fill``/``type`` carry literal text; Harness fills only
-    ``secretref://`` references) is refused, not replayed, and the step goes to the owner.
-    ``observe()`` finding no controls is ``None``: never success.
+    ``observe()`` only — this lane never calls ``act()``. The observed candidate becomes a
+    typed Harness operation via ``typed_action_from_stagehand``, or is refused. ``observe()``
+    finding no controls returns ``None``, which is never success.
     """
 
     def __init__(self, stagehand: Any) -> None:
@@ -929,28 +986,45 @@ class StagehandSemanticFallback:
         observation = await self.stagehand.observe(task, instruction)
         if not observation.controls:
             return None
-        candidate = dict(observation.controls[0])
-        method = str(candidate.get("method") or "").strip().lower()
-        operation = _STAGEHAND_METHODS.get(method)
-        if operation is None:
-            raise SemanticProposalRefused(f"METHOD_NOT_HARNESS_EXECUTABLE:{method[:32] or 'none'}")
-        if operation not in step.closed_operation_set:
-            raise SemanticProposalRefused(f"OPERATION_NOT_IN_STEP_SET:{operation}")
-        selector = candidate.get("selector")
-        value = None
-        if operation == "press_key":
-            args = candidate.get("arguments") or []
-            value = str(args[0]) if args else None
-            if not value:
-                raise SemanticProposalRefused("KEY_MISSING")
-        if operation != "scroll" and not (isinstance(selector, str) and selector):
-            raise SemanticProposalRefused("SELECTOR_MISSING")
-        return RouterAction(
-            lane=RouterLane.STAGEHAND, operation=operation,
-            locator=selector if isinstance(selector, str) else None, value_ref=value,
-            action_class=None, semantic_action=candidate,
-            description=str(candidate.get("description") or "")[:2000] or None,
+        typed = typed_action_from_stagehand(
+            observation.controls[0], allowed_operations=step.closed_operation_set,
         )
+        return RouterAction(
+            lane=RouterLane.STAGEHAND, operation=typed.operation, locator=typed.selector,
+            value_ref=typed.key, action_class=None, semantic_action=typed.observed,
+            description=typed.description,
+        )
+
+
+class OwnerControlProbe:
+    """True when the owner holds control of a live interactive session on the task's profile.
+
+    ADR-RB-007 "owner touch wins": the interactive session's control holder is the fence.
+    """
+
+    def __init__(self, store: Any) -> None:
+        self.store = store
+
+    async def __call__(self, task: BrowserTask) -> bool:
+        now = int(time.time() * 1000)
+        row = await self.store.fetchone(
+            "SELECT 1 FROM browser_interactive_sessions WHERE profile_alias = ? "
+            "AND control_holder = 'OWNER' AND terminated_at_ms IS NULL AND expires_at_ms > ? LIMIT 1",
+            (task.profile_alias, now),
+        )
+        return row is not None
+
+
+def load_stagehand_production_gate(settings: Any) -> Callable[[], tuple[bool, str]] | None:
+    """Unit M's ``stagehand_production_enabled(settings)``, imported lazily; ``None`` if absent."""
+    try:
+        from van_gateway.automation import placement  # type: ignore[attr-defined]
+    except ImportError:
+        return None
+    fn = getattr(placement, "stagehand_production_enabled", None)
+    if fn is None:
+        return None
+    return lambda: fn(settings)
 
 
 class HarnessReadBackObserver:
@@ -995,6 +1069,7 @@ def build_interaction_router(
     harness: Any,
     stagehand: Any,
     jev_client: JevProposer | None,
+    store: Any = None,
     eligibility_classifier: EligibilityClassifier | None = None,
     verifier: PostconditionVerifier | None = None,
 ) -> BrowserInteractionRouter:
@@ -1013,6 +1088,8 @@ def build_interaction_router(
         jev_client=jev_client,
         semantic_fallback=StagehandSemanticFallback(stagehand),
         observer=observe,
+        owner_control_probe=OwnerControlProbe(store) if store is not None else None,
+        stagehand_gate=load_stagehand_production_gate(settings),
     )
 
 
@@ -1086,6 +1163,7 @@ __all__ = [
     "InteractionStep",
     "RouterAction",
     "RouterLane",
+    "OwnerControlProbe",
     "RouterMetrics",
     "SemanticProposalRefused",
     "StagehandSemanticFallback",
@@ -1095,6 +1173,7 @@ __all__ = [
     "build_interaction_routes",
     "default_action_classifier",
     "load_eligibility_classifier",
+    "load_stagehand_production_gate",
     "validate_b1_payload",
     "validate_jev_proposal",
 ]

@@ -39,6 +39,7 @@ from van_gateway.browser.models import (
 from van_gateway.browser.policy import BrowserPolicyEngine, BrowserPolicyError
 from van_gateway.browser.service import BrowserSessionBroker, BrowserTaskService
 from van_gateway.automation.canonical import digest
+from van_gateway.automation.verifier import PostconditionSpec
 from van_gateway.browser.worker import BrowserTaskPlan, SemanticWorkerUnavailable
 from van_gateway.browser.subagent import (
     BrowserSubagentRunner,
@@ -128,6 +129,9 @@ class AssignmentBody(BaseModel):
     #: `action_class_ceiling` ends the task exactly as a model-chosen one would. Absent for
     #: a semantic tier, which selects its own actions and needs a runtime to do it.
     plan: BrowserTaskPlan | None = None
+    #: Owner decision 2026-09-29 §7 — what must be observably true for the worker's "done"
+    #: to count. Absent means a "done" claim is UNVERIFIABLE, never COMPLETED.
+    postcondition: PostconditionSpec | None = None
 
 
 class BrowserApi:
@@ -142,6 +146,7 @@ class BrowserApi:
         worker: SubagentWorker | None = None,
         decisions: DecisionService | None = None,
         binder: Any | None = None,
+        verifier: Any | None = None,
     ) -> None:
         self.store = store
         self.settings = settings
@@ -153,6 +158,9 @@ class BrowserApi:
         self.tasks = BrowserTaskService(store, self.broker, self.policy)
         self.runner = BrowserSubagentRunner(self.policy)
         self.worker = worker
+        #: Owner decision 2026-09-29 §7 — the independent postcondition verifier. None means
+        #: every "done" claim is UNVERIFIABLE: fail closed, never COMPLETED.
+        self.verifier = verifier
         #: Programme B / B5 — set by create_app; None keeps the fabric testable alone.
         self.interaction_router: Any | None = None
         self.decisions = decisions
@@ -923,7 +931,8 @@ class BrowserApi:
                 worker = binder(task, body.plan)
             try:
                 result = await self.runner.run(
-                    assignment=assignment, worker=worker, task=task
+                    assignment=assignment, worker=worker, task=task,
+                    verifier=self.verifier, postcondition=body.postcondition,
                 )
             except SemanticWorkerUnavailable as exc:
                 # An L2+ assignment asked for judgement about a page and no semantic
@@ -939,19 +948,22 @@ class BrowserApi:
                     task=task, assignment=assignment, result=result
                 )
             else:
+                # §7: COMPLETED only after VERIFIED. UNVERIFIABLE stays VERIFYING (not
+                # terminal success, not a failure the page caused) and is escalated.
                 terminal_status = BrowserTaskStatus.COMPLETED
-                if result.stop_reason in (SubagentStop.PAYMENT_REFUSED, SubagentStop.INJECTION_REFUSED):
+                if result.stop_reason is SubagentStop.UNVERIFIABLE:
+                    terminal_status = BrowserTaskStatus.VERIFYING
+                elif result.stop_reason in (SubagentStop.PAYMENT_REFUSED, SubagentStop.INJECTION_REFUSED):
                     terminal_status = BrowserTaskStatus.BLOCKED_POLICY
                 elif result.stop_reason is SubagentStop.GOAL_DRIFT:
                     terminal_status = BrowserTaskStatus.BLOCKED_UNSAFE
-                elif result.stop_reason is not SubagentStop.GOAL_ACHIEVED:
+                elif not result.succeeded:
                     terminal_status = BrowserTaskStatus.FAILED
                 await self.tasks.complete(
                     task_id=task.task_id,
                     status=terminal_status,
                     error_code=(
-                        None if result.stop_reason is SubagentStop.GOAL_ACHIEVED
-                        else result.stop_reason.value
+                        None if result.succeeded else result.stop_reason.value
                     ),
                     now_ms=int(time.time() * 1000),
                 )
@@ -967,6 +979,8 @@ class BrowserApi:
                 "turn_id": assignment.turn_id,
                 "stop_reason": result.stop_reason.value,
                 "succeeded": result.succeeded,
+                "verification_outcome": result.verification_outcome,
+                "needs_owner": result.stop_reason is SubagentStop.UNVERIFIABLE,
                 "step_count": result.step_count,
                 "steps": [step.model_dump(mode="json") for step in result.steps],
                 "extraction": result.extraction,

@@ -236,7 +236,7 @@ async def test_an_ordinary_page_is_not_stopped(tmp_path):
         PlannedStep(kind="navigate", domain=DOMAIN, url=f"https://{DOMAIN}/reports"),
     ]))
     result = await BrowserSubagentRunner().run(
-        assignment=_assignment(task), worker=worker, task=task,
+        assignment=_assignment(task), worker=worker, task=task, verifier=_VerifiedReadBack(),
     )
     assert result.stop_reason is SubagentStop.GOAL_ACHIEVED
     assert harness.calls.count("page_info") >= 2
@@ -333,3 +333,13 @@ async def test_binding_a_worker_to_a_task_does_not_mutate_the_shared_one(tmp_pat
     assert shared.task is None
     assert bound.task is first
     assert bound.adapter is shared.adapter
+
+
+class _VerifiedReadBack:
+    """Owner decision 2026-09-29 §7 — GOAL_ACHIEVED now requires an independent VERIFIED."""
+
+    async def verify(self, task, action, postcondition, *, claimed_done):
+        from van_gateway.action.models import VerifierType
+        from van_gateway.automation.verifier import VerificationOutcome, VerificationResult
+
+        return VerificationResult(outcome=VerificationOutcome.VERIFIED, verifier_type=VerifierType.READ_BACK)

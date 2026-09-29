@@ -26,6 +26,18 @@ class FakeHarness:
     def __init__(self) -> None:
         self.calls: list[str] = []
 
+    async def click(self, task, locator):
+        self.calls.append(f"click:{locator}")
+        return {}
+
+    async def press(self, task, key):
+        self.calls.append(f"press:{key}")
+        return {}
+
+    async def scroll(self, task, request):
+        self.calls.append("scroll")
+        return {}
+
     async def page_info(self, task):
         self.calls.append("page_info")
         return {
@@ -65,6 +77,21 @@ async def _task(tmp_path):
     )
 
 
+class _Verdict:
+    """Independent postcondition verifier stand-in (owner decision 2026-09-29 §7)."""
+
+    def __init__(self, outcome: str = "VERIFIED") -> None:
+        self.outcome = outcome
+        self.calls = 0
+
+    async def verify(self, task, action, postcondition, *, claimed_done):
+        from van_gateway.action.models import VerifierType
+        from van_gateway.automation.verifier import VerificationOutcome, VerificationResult
+
+        self.calls += 1
+        return VerificationResult(outcome=VerificationOutcome(self.outcome), verifier_type=VerifierType.READ_BACK)
+
+
 def _assignment(task, **overrides):
     values = dict(
         turn_id="turn-semantic",
@@ -93,14 +120,17 @@ async def test_semantic_assignment_is_one_stagehand_action_per_gateway_step(tmp_
     harness = FakeHarness()
     worker = HybridBrowserWorker(harness, stagehand, task=task)  # type: ignore[arg-type]
 
+    verifier = _Verdict("VERIFIED")
     result = await BrowserSubagentRunner().run(
-        assignment=_assignment(task), worker=worker, task=task
+        assignment=_assignment(task), worker=worker, task=task, verifier=verifier,
     )
 
-    assert result.stop_reason is SubagentStop.GOAL_ACHIEVED
+    assert result.stop_reason is SubagentStop.GOAL_ACHIEVED and result.succeeded
+    assert verifier.calls == 1
     assert result.step_count == 1
-    assert stagehand.acted == [action]
-    assert harness.calls == ["page_info"]
+    # Owner decision 2026-09-29 §8: Stagehand proposed, the Harness executed.
+    assert stagehand.acted == []
+    assert harness.calls == ["click:xpath=//a[@id='quarterly-report']", "page_info"]
     assert len(stagehand.observed) == 2
     assert "Step: 1 of 5" in stagehand.observed[0]
     assert "Step: 2 of 5" in stagehand.observed[1]
@@ -155,4 +185,64 @@ def test_stagehand_internal_agent_loop_is_not_the_gateway_worker():
         / "van_gateway" / "browser" / "worker.py"
     ).read_text(encoding="utf-8")
     assert ".agent(" not in source
+    assert ".act(" not in source  # owner decision 2026-09-29 §8
     assert "one observed action" in source
+
+
+# ---- owner decision 2026-09-29 §7: none of these may produce success -------------------
+
+
+@pytest.mark.asyncio
+@pytest.mark.parametrize("verifier,expected", [
+    (None, SubagentStop.UNVERIFIABLE),               # verifier unavailable
+    (_Verdict("FAILED"), SubagentStop.NOT_SATISFIED),  # postcondition false
+    (_Verdict("UNVERIFIABLE"), SubagentStop.UNVERIFIABLE),
+    (_Verdict("PARTIAL"), SubagentStop.UNVERIFIABLE),
+])
+async def test_stagehand_no_controls_is_a_claim_not_success(tmp_path, verifier, expected):
+    task = await _task(tmp_path)
+    stagehand = FakeStagehand([[]])  # Stagehand returns no controls == "done"
+    worker = HybridBrowserWorker(FakeHarness(), stagehand, task=task)  # type: ignore[arg-type]
+    result = await BrowserSubagentRunner().run(
+        assignment=_assignment(task), worker=worker, task=task, verifier=verifier,
+    )
+    assert result.stop_reason is expected
+    assert not result.succeeded
+
+
+@pytest.mark.asyncio
+async def test_stagehand_fill_is_refused_not_replayed(tmp_path):
+    task = await _task(tmp_path)
+    stagehand = FakeStagehand([[{"method": "fill", "selector": "#q", "arguments": ["x"]}]])
+    harness = FakeHarness()
+    worker = HybridBrowserWorker(harness, stagehand, task=task)  # type: ignore[arg-type]
+    result = await BrowserSubagentRunner().run(
+        assignment=_assignment(task), worker=worker, task=task, verifier=_Verdict("VERIFIED"),
+    )
+    assert result.stop_reason is SubagentStop.WORKER_ERROR
+    assert stagehand.acted == [] and harness.calls == []
+
+
+@pytest.mark.asyncio
+async def test_stagehand_adapter_act_is_disabled_by_default():
+    from van_gateway.automation.external_runtime import ExternalRuntimeRegistry
+    from van_gateway.browser.adapters import StagehandAdapter
+    from van_gateway.browser.policy import BrowserPolicyError
+
+    adapter = StagehandAdapter.__new__(StagehandAdapter)
+    StagehandAdapter.__init__(adapter, ExternalRuntimeRegistry.__new__(ExternalRuntimeRegistry),
+                              base_url="http://127.0.0.1:9140", enabled=True,
+                              model_provider="anthropic", model_name="claude-sonnet-5")
+    task = await _task_for_adapter()
+    with pytest.raises(BrowserPolicyError, match="stagehand_direct_actuation_disabled"):
+        await adapter.act(task, {"kind": "click"})
+
+
+async def _task_for_adapter():
+    from van_gateway.browser.models import BrowserTask, BrowserTaskStatus
+
+    return BrowserTask(
+        task_id="t", profile_alias="public_research", strategy=BrowserStrategy.STAGEHAND,
+        autonomy_tier=AutonomyTier.L4_STAGEHAND_ACT, action_class=ActionClass.A2,
+        target_domain=DOMAIN, goal="g", status=BrowserTaskStatus.PENDING, started_at_ms=0,
+    )

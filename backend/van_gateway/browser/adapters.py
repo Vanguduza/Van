@@ -214,6 +214,7 @@ class StagehandAdapter(_PrivateWorkerClient):
         max_tier: AutonomyTier = AutonomyTier.L5_STAGEHAND_AGENT,
         timeout_seconds: float = 60.0,
         transport: httpx.AsyncBaseTransport | None = None,
+        actuation_enabled: bool = False,
     ) -> None:
         super().__init__(
             registry,
@@ -226,6 +227,10 @@ class StagehandAdapter(_PrivateWorkerClient):
         self.model_provider = model_provider
         self.model_name = model_name
         self.max_tier = max_tier
+        #: Owner decision 2026-09-29 §8 — Stagehand must not actuate on the production
+        #: path. `act()` refuses unless a caller explicitly constructs the adapter with this
+        #: set (non-production only). observe()/extract() are unaffected.
+        self.actuation_enabled = actuation_enabled
 
     @property
     def configured(self) -> bool:
@@ -267,6 +272,8 @@ class StagehandAdapter(_PrivateWorkerClient):
         """L4 — one model-selected action, still refused above the ladder cap."""
         if self.max_tier.ordinal < AutonomyTier.L4_STAGEHAND_ACT.ordinal:
             raise BrowserPolicyError("stagehand_act_not_permitted_at_current_tier")
+        if not self.actuation_enabled:
+            raise BrowserPolicyError("stagehand_direct_actuation_disabled")
         assert_not_automated_payment(
             operation=str(action.get("kind", "")), goal=str(action.get("instruction", "")),
             url=str(action.get("url", "")), domain=task.target_domain, context="stagehand_act",

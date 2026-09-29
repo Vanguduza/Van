@@ -73,6 +73,21 @@ class ExplodingWorker:
         raise AssertionError
 
 
+
+class _Verdict:
+    """Independent postcondition verifier stand-in (owner decision 2026-09-29 §7)."""
+
+    def __init__(self, outcome: str = "VERIFIED") -> None:
+        self.outcome = outcome
+        self.calls = 0
+
+    async def verify(self, task, action, postcondition, *, claimed_done):
+        from van_gateway.action.models import VerifierType
+        from van_gateway.automation.verifier import VerificationOutcome, VerificationResult
+
+        self.calls += 1
+        return VerificationResult(outcome=VerificationOutcome(self.outcome), verifier_type=VerifierType.READ_BACK)
+
 async def _task(tmp_path):
     store = await make_store(tmp_path)
     service = BrowserTaskService(store)
@@ -108,7 +123,7 @@ async def test_worker_selects_its_own_actions_within_the_assignment(tmp_path):
         ProposedAction(kind="finish", domain=DOMAIN, done=True),
     ])
     result = await BrowserSubagentRunner().run(
-        assignment=_assignment(task), worker=worker, task=task
+        assignment=_assignment(task), worker=worker, task=task, verifier=_Verdict()
     )
     assert result.stop_reason is SubagentStop.GOAL_ACHIEVED
     assert result.succeeded
@@ -207,7 +222,7 @@ async def test_restating_the_same_goal_is_not_drift(tmp_path):
         ),
     ])
     result = await BrowserSubagentRunner().run(
-        assignment=_assignment(task), worker=worker, task=task
+        assignment=_assignment(task), worker=worker, task=task, verifier=_Verdict()
     )
     assert result.stop_reason is SubagentStop.GOAL_ACHIEVED
 
@@ -286,7 +301,7 @@ async def test_page_cannot_raise_the_action_class_mid_run(tmp_path):
     worker = ScriptedWorker([ProposedAction(kind="navigate", domain=DOMAIN)], [grabby])
     result = await BrowserSubagentRunner().run(
         assignment=_assignment(task, action_class_ceiling=ActionClass.A2),
-        worker=worker, task=task,
+        worker=worker, task=task, verifier=_Verdict(),
     )
     # The run continues, but clamped — the page got nothing.
     assert result.stop_reason is SubagentStop.GOAL_ACHIEVED
@@ -346,3 +361,39 @@ def test_unrecognised_tier_value_falls_back_to_deterministic(monkeypatch):
     monkeypatch.setenv("VAN_BROWSER_SEMANTIC_MAX_TIER", "L9")
     policy_module.reset_policy_cache()
     assert policy_module.load_browser_policy().max_autonomy_tier == "L3"
+
+
+# ---- owner decision 2026-09-29 §7: a "done" claim is not success ------------------------
+
+
+@pytest.mark.parametrize("verifier,expected", [
+    (None, SubagentStop.UNVERIFIABLE),
+    (_Verdict("FAILED"), SubagentStop.NOT_SATISFIED),
+    (_Verdict("UNVERIFIABLE"), SubagentStop.UNVERIFIABLE),
+])
+async def test_worker_done_is_verified_before_success(tmp_path, verifier, expected):
+    task = await _task(tmp_path)
+    worker = ScriptedWorker([ProposedAction(kind="finish", domain=DOMAIN, done=True)])
+    result = await BrowserSubagentRunner().run(
+        assignment=_assignment(task), worker=worker, task=task, verifier=verifier,
+    )
+    assert result.stop_reason is expected and not result.succeeded
+
+
+async def test_verifier_exception_is_unverifiable(tmp_path):
+    class Boom:
+        async def verify(self, *a, **k):
+            raise RuntimeError("down")
+
+    task = await _task(tmp_path)
+    worker = ScriptedWorker([ProposedAction(kind="finish", domain=DOMAIN, done=True)])
+    result = await BrowserSubagentRunner().run(
+        assignment=_assignment(task), worker=worker, task=task, verifier=Boom(),
+    )
+    assert result.stop_reason is SubagentStop.UNVERIFIABLE and not result.succeeded
+
+
+def test_a_hand_built_goal_achieved_without_verification_is_not_success():
+    from van_gateway.browser.subagent import SubagentResult
+
+    assert not SubagentResult(assignment_id="a", task_id="t", stop_reason=SubagentStop.GOAL_ACHIEVED).succeeded

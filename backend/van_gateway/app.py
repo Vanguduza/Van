@@ -128,6 +128,7 @@ from van_gateway.browser.stream_grants import (
 )
 from van_gateway.browser.worker import HybridBrowserWorker
 from van_gateway.browser.interaction_router import (
+    IndependentPostconditionVerifier,
     build_interaction_router,
     build_interaction_routes,
 )
@@ -557,6 +558,9 @@ def create_app() -> FastAPI:
             automation_health.harness,
             automation_health.stagehand,
         ),
+        # Owner decision 2026-09-29 §7 — a worker's "done" is a claim; this independent
+        # read-back verifier is the only thing that turns it into COMPLETED.
+        verifier=IndependentPostconditionVerifier(automation_health.harness),
     )
     # Programme B / B5 — the interaction router rides on the same harness and Stagehand
     # adapters; it has no browser of its own. The eligibility classifier (B2) is imported
@@ -566,6 +570,7 @@ def create_app() -> FastAPI:
         settings=settings,
         harness=automation_health.harness,
         stagehand=automation_health.stagehand,
+        store=store,
         jev_client=JevProposeActionClient(
             base_url=settings.jev_base_url,
             token_file=settings.jev_consumer_token_file,

@@ -194,6 +194,12 @@ def make_router(**kw: Any) -> BrowserInteractionRouter:
         return EPOCH
 
     kw.setdefault("epoch_source", epoch_source)
+
+    async def owner_idle(task):
+        return False
+
+    kw.setdefault("owner_control_probe", owner_idle)
+    kw.setdefault("stagehand_gate", lambda: (True, "TEST_PERMITTED"))
     return BrowserInteractionRouter(**kw)
 
 
@@ -275,7 +281,7 @@ async def test_stagehand_action_above_ceiling_goes_to_owner_not_executor():
 async def test_stagehand_result_is_success_only_through_the_verifier():
     router = make_router(jev_client=FakeJev(None), verifier=FakeVerifier(VerificationOutcome.UNVERIFIABLE))
     result = await router.route(step())
-    assert result.lane is RouterLane.STAGEHAND and result.state is StepState.UNVERIFIED
+    assert result.lane is RouterLane.STAGEHAND and result.state is StepState.UNVERIFIABLE
     router.verifier = FakeVerifier(VerificationOutcome.VERIFIED)
     assert (await router.route(step())).state is StepState.VERIFIED_SUCCESS
 
@@ -498,10 +504,14 @@ async def test_unresolvable_target_is_rejected():
 
 async def test_jev_done_is_verifying_and_executes_nothing():
     verifier = FakeVerifier(VerificationOutcome.FAILED)
-    router = make_router(jev_client=FakeJev(proposes("done", None)), verifier=verifier)
+    router = make_router(jev_client=FakeJev(proposes("done", None)), verifier=verifier,
+                         semantic_fallback=FakeStagehand(None))
     result = await router.route(step())
-    assert StepState.VERIFYING.value in result.trail
-    assert result.state is StepState.VERIFICATION_FAILED
+    [attempt] = result.attempts
+    assert attempt["lane"] == "JEV" and "VERIFYING" in attempt["trail"]
+    assert attempt["state"] == "NOT_SATISFIED"
+    # NOT_SATISFIED -> fallback; with nothing further, the owner decides.
+    assert result.state is StepState.OWNER_TAKEOVER
     assert router.executor.executed == []
     assert verifier.calls[0][1] is True  # claimed_done
     assert router.metrics.counts["jev_done_postcondition_failures"] == 1
@@ -514,9 +524,9 @@ async def test_jev_done_success_comes_only_from_the_verifier():
 
 
 @pytest.mark.parametrize("outcome,state", [
-    (VerificationOutcome.UNVERIFIABLE, StepState.UNVERIFIED),
-    (VerificationOutcome.PARTIAL, StepState.UNVERIFIED),
-    (VerificationOutcome.FAILED, StepState.VERIFICATION_FAILED),
+    (VerificationOutcome.UNVERIFIABLE, StepState.UNVERIFIABLE),
+    (VerificationOutcome.PARTIAL, StepState.UNVERIFIABLE),
+    (VerificationOutcome.FAILED, StepState.OWNER_TAKEOVER),  # NOT_SATISFIED everywhere
 ])
 async def test_nothing_but_a_verified_outcome_is_success(outcome, state):
     router = make_router(verifier=FakeVerifier(outcome))
@@ -524,10 +534,113 @@ async def test_nothing_but_a_verified_outcome_is_success(outcome, state):
     assert result.state is state and not result.verified_success
 
 
+async def test_unverifiable_is_terminal_and_escalated():
+    stagehand = FakeStagehand(STAGEHAND_ACTION)
+    router = make_router(verifier=FakeVerifier(VerificationOutcome.UNVERIFIABLE), semantic_fallback=stagehand)
+    result = await router.route(step())
+    assert result.state is StepState.UNVERIFIABLE and result.escalated
+    assert "ESCALATED:UNVERIFIABLE" in result.reasons
+    assert stagehand.calls == 0  # no further automation on a page nobody can read
+
+
+async def test_not_satisfied_falls_back_to_the_next_lane():
+    class FirstFailsThenPasses(FakeVerifier):
+        async def verify(self, task, action, postcondition, *, claimed_done):
+            self.calls.append((action, claimed_done))
+            outcome = VerificationOutcome.FAILED if len(self.calls) == 1 else VerificationOutcome.VERIFIED
+            return VerificationResult(outcome=outcome, verifier_type=VerifierType.READ_BACK)
+
+    observed = []
+
+    async def observer(task):
+        observed.append(1)
+        return {"url": "https://docs.example.com/after"}
+
+    router = make_router(verifier=FirstFailsThenPasses(), observer=observer)
+    result = await router.route(step(deterministic_action=DeterministicAction(operation="click", locator="#go")))
+    # The pre-action observation is discarded; the Jev lane re-reads the page.
+    assert observed == [1]
+    assert [a["lane"] for a in result.attempts] == ["DETERMINISTIC"]
+    assert result.lane is RouterLane.JEV and result.state is StepState.VERIFIED_SUCCESS
+    assert "DETERMINISTIC_NOT_SATISFIED" in result.reasons
+
+
+async def test_verifier_unavailable_is_never_success():
+    router = make_router(verifier=None)  # also disables the Jev lane
+    result = await router.route(step(deterministic_action=DeterministicAction(operation="click", locator="#go")))
+    assert result.state is StepState.UNVERIFIABLE and not result.verified_success
+
+
+async def test_verifier_exception_is_never_success():
+    class Boom(FakeVerifier):
+        async def verify(self, *a, **k):
+            raise RuntimeError("observer down")
+
+    result = await make_router(verifier=Boom()).route(step())
+    assert result.state is StepState.UNVERIFIABLE
+
+
+# ---------------------------------------------------------------- owner takeover preempts
+
+
+async def test_owner_takeover_preempts_before_any_lane():
+    async def owner(task):
+        return True
+
+    jev = FakeJev(proposes("click", T_LINK))
+    router = make_router(owner_control_probe=owner, jev_client=jev)
+    result = await router.route(step(deterministic_action=DeterministicAction(operation="click", locator="#go")))
+    assert result.state is StepState.OWNER_TAKEOVER and "OWNER_TAKEOVER:OWNER_HAS_CONTROL" in result.reasons
+    assert router.executor.executed == [] and jev.calls == []
+
+
+async def test_owner_takeover_preempts_between_proposal_and_execution():
+    seen = []
+
+    async def owner_arrives(task):
+        seen.append(1)
+        return len(seen) >= 2  # idle at lane entry, owner grabs control before execution
+
+    router = make_router(owner_control_probe=owner_arrives)
+    result = await router.route(step())
+    assert result.state is StepState.OWNER_TAKEOVER and router.executor.executed == []
+
+
+async def test_missing_owner_control_probe_fails_closed():
+    router = make_router(owner_control_probe=None)
+    result = await router.route(step())
+    assert result.state is StepState.OWNER_TAKEOVER
+    assert "OWNER_TAKEOVER:OWNER_CONTROL_STATE_UNKNOWN" in result.reasons
+
+
+# ---------------------------------------------------------------- Stagehand production gate
+
+
+@pytest.mark.parametrize("gate,reason", [
+    (None, "STAGEHAND_LANE_DISABLED:PRODUCTION_GATE_MISSING"),
+    (lambda: (False, "PRODUCTION_DISABLED"), "STAGEHAND_LANE_DISABLED:PRODUCTION_DISABLED"),
+])
+async def test_stagehand_gate_absent_or_false_skips_to_owner(gate, reason):
+    stagehand = FakeStagehand(STAGEHAND_ACTION)
+    router = make_router(jev_client=FakeJev(None), semantic_fallback=stagehand, stagehand_gate=gate)
+    result = await router.route(step())
+    assert reason in result.reasons and result.lane is RouterLane.OWNER_TAKEOVER
+    assert stagehand.calls == 0
+
+
 async def test_high_confidence_jev_proposal_is_still_not_success_without_verifier_verified():
     router = make_router(verifier=FakeVerifier(VerificationOutcome.UNVERIFIABLE))
     result = await router.route(step())
     assert result.lane is RouterLane.JEV and result.state is not StepState.VERIFIED_SUCCESS
+
+
+async def test_stagehand_says_done_is_never_success_without_the_verifier():
+    done = RouterAction(lane=RouterLane.STAGEHAND, operation="done", locator=None, value_ref=None,
+                        action_class=None, description="task complete")
+    router = make_router(jev_client=FakeJev(None), semantic_fallback=FakeStagehand(done),
+                         verifier=FakeVerifier(VerificationOutcome.UNVERIFIABLE))
+    result = await router.route(step())
+    assert result.state is StepState.UNVERIFIABLE and router.executor.executed == []
 
 
 async def test_executor_failure_is_execution_failed_not_success():

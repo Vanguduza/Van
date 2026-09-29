@@ -44,6 +44,11 @@ from van_gateway.browser.models import (
     BrowserTask,
     InjectionAssessment,
 )
+from van_gateway.browser.policy import BrowserPolicyError
+from van_gateway.browser.stagehand_proposal import (
+    SemanticProposalRefused,
+    typed_action_from_stagehand,
+)
 from van_gateway.browser.subagent import ProposedAction, SubagentAssignment, SubagentStep
 
 
@@ -231,14 +236,14 @@ class AdapterBackedWorker:
 class HybridBrowserWorker:
     """One worker surface for deterministic Harness and semantic Stagehand tiers.
 
-    Stagehand never gets an opaque autonomous loop here. It proposes exactly one observed
-    action, BrowserSubagentRunner checks that proposal against Hermes's immutable
-    assignment, and only then does this worker replay that one observed action. The page is
-    read back through Browser Harness after execution, so Stagehand cannot certify its own
-    effect.
+    Owner decision 2026-09-29 §8: Stagehand must not actuate. At a semantic tier Stagehand
+    ``observe()`` proposes one observed action per gateway step; ``typed_action_from_stagehand`` turns it into a
+    typed Harness operation (or refuses it); BrowserSubagentRunner checks the proposal
+    against Hermes's immutable assignment; then the **Browser Harness** performs it and reads
+    the page back. Stagehand ``act()`` is not called on this path.
 
-    L5 therefore means repeated semantic proposal under the gateway runner's hard bounds,
-    not handing the browser to a second independent agent until it says it is finished.
+    An empty control set is a "done" *claim* (§7): the runner sends it to the independent
+    verifier, and only VERIFIED ends the run as GOAL_ACHIEVED.
     """
 
     def __init__(
@@ -277,6 +282,7 @@ class HybridBrowserWorker:
         )
         observation = await self.stagehand.observe(task, instruction)
         if not observation.controls:
+            # A claim, not a result: the runner verifies it before anything completes.
             return ProposedAction(
                 kind="finish",
                 domain=task.target_domain,
@@ -286,22 +292,23 @@ class HybridBrowserWorker:
             )
 
         candidate = dict(observation.controls[0])
-        method = str(candidate.get("method") or "act").strip().lower()
-        kind = {
-            "type": "fill",
-            "input": "fill",
-            "tap": "click",
-        }.get(method, method)
-        if not kind or len(kind) > 64:
-            kind = "act"
-        description = str(candidate.get("description") or "")[:2000]
+        try:
+            typed = typed_action_from_stagehand(candidate)
+        except SemanticProposalRefused as exc:
+            # Refused rather than replayed through Stagehand: the runner ends the run with
+            # WORKER_ERROR and nothing actuated.
+            raise BrowserPolicyError(f"stagehand_proposal_not_harness_executable:{exc.code}") from exc
+        description = typed.description or ""
         return ProposedAction(
-            kind=kind,
+            kind=typed.operation,
             domain=task.target_domain,
             action_class=assignment.action_class_ceiling,
             instruction=description or instruction,
             rationale=description or "Stagehand semantic proposal",
-            payload={"stagehand_action": candidate},
+            payload={
+                "stagehand_action": candidate,
+                "typed": {"operation": typed.operation, "selector": typed.selector, "key": typed.key},
+            },
         )
 
     async def execute(
@@ -312,11 +319,19 @@ class HybridBrowserWorker:
         task = self.task
         if task is None:
             raise BrowserAdapterError("BROWSER_WORKER_TASK_MISSING", assignment.task_id)
-        observed = action.payload.get("stagehand_action")
-        if not isinstance(observed, dict) or not observed:
-            raise BrowserAdapterError("STAGEHAND_OBSERVED_ACTION_MISSING", action.kind)
-
-        await self.stagehand.act(task, dict(observed))
+        typed = action.payload.get("typed")
+        if not isinstance(typed, dict) or not typed.get("operation"):
+            raise BrowserAdapterError("STAGEHAND_TYPED_ACTION_MISSING", action.kind)
+        operation = typed["operation"]
+        # The Harness is the single executor; Stagehand only proposed.
+        if operation == "click":
+            await self.harness.click(task, str(typed["selector"]))
+        elif operation == "press_key":
+            await self.harness.press(task, str(typed["key"]))
+        elif operation == "scroll":
+            await self.harness.scroll(task, {"selector": typed.get("selector"), "direction": "down"})
+        else:
+            raise BrowserAdapterError("BROWSER_ACTION_UNSUPPORTED", operation)
         payload = await self.harness.page_info(task)
         return AdapterBackedWorker._observation(task, action, payload)
 

@@ -48,7 +48,15 @@ _RANK = {ActionClass.A1: 1, ActionClass.A2: 2, ActionClass.A3: 3, ActionClass.A4
 class SubagentStop(str, Enum):
     """Why an autonomous run ended. Every one is terminal — none escalates."""
 
+    #: Owner decision 2026-09-29 §7: only after the independent postcondition verifier
+    #: returned VERIFIED for the worker's "done" claim. Never from the claim alone.
     GOAL_ACHIEVED = "GOAL_ACHIEVED"
+    #: The worker claimed done and the verifier observed the postcondition false.
+    #: Terminal for this run; Hermes may retry or fall back.
+    NOT_SATISFIED = "NOT_SATISFIED"
+    #: The worker claimed done and nothing could verify it (no postcondition, no verifier,
+    #: observer failure). Never success; the task is escalated, not completed.
+    UNVERIFIABLE = "UNVERIFIABLE"
     BUDGET_EXHAUSTED = "BUDGET_EXHAUSTED"
     DEADLINE_REACHED = "DEADLINE_REACHED"
     SCOPE_VIOLATION = "SCOPE_VIOLATION"
@@ -108,10 +116,17 @@ class SubagentResult(BaseModel):
     steps: list[SubagentStep] = Field(default_factory=list)
     extraction: dict[str, Any] = Field(default_factory=dict)
     detail: str | None = None
+    #: The independent verifier's outcome for a "done" claim, when one was made.
+    verification_outcome: str | None = None
 
     @property
     def succeeded(self) -> bool:
-        return self.stop_reason is SubagentStop.GOAL_ACHIEVED
+        # GOAL_ACHIEVED is only ever set after VERIFIED; checking both keeps a future
+        # caller that constructs a result by hand from turning a claim into success.
+        return (
+            self.stop_reason is SubagentStop.GOAL_ACHIEVED
+            and self.verification_outcome == "VERIFIED"
+        )
 
     @property
     def step_count(self) -> int:
@@ -166,7 +181,12 @@ class BrowserSubagentRunner:
         worker: SubagentWorker,
         task: BrowserTask,
         now_ms: int | None = None,
+        verifier: Any = None,
+        postcondition: Any = None,
     ) -> SubagentResult:
+        """``verifier``/``postcondition``: owner decision 2026-09-29 §7. A worker's ``done``
+        moves the run to VERIFYING and only ``verifier`` returning VERIFIED ends it with
+        GOAL_ACHIEVED. With no verifier the claim is UNVERIFIABLE — never success."""
         # The ladder cap is a policy decision, checked once before any step.
         try:
             self.policy.check_tier(assignment.autonomy_tier)
@@ -203,7 +223,9 @@ class BrowserSubagentRunner:
                 )
 
             if action.done:
-                return self._stop(assignment, task, steps, extraction, SubagentStop.GOAL_ACHIEVED)
+                return await self._verify_done(
+                    assignment, task, steps, extraction, verifier, postcondition
+                )
 
             violation = self._check(assignment, action)
             if violation is not None:
@@ -276,6 +298,41 @@ class BrowserSubagentRunner:
         except PaymentBoundaryError as exc:
             return SubagentStop.PAYMENT_REFUSED, str(exc)
         return None
+
+    async def _verify_done(
+        self,
+        assignment: SubagentAssignment,
+        task: BrowserTask,
+        steps: list[SubagentStep],
+        extraction: dict[str, Any],
+        verifier: Any,
+        postcondition: Any,
+    ) -> SubagentResult:
+        """The worker says the goal is met. That is a claim; the verifier decides."""
+        if verifier is None:
+            result = self._stop(
+                assignment, task, steps, extraction, SubagentStop.UNVERIFIABLE,
+                detail="verifier_unavailable",
+            )
+            result.verification_outcome = "UNVERIFIABLE"
+            return result
+        try:
+            verdict = await verifier.verify(task, None, postcondition, claimed_done=True)
+            outcome = getattr(getattr(verdict, "outcome", None), "value", None)
+            detail = getattr(verdict, "detail", None)
+        except Exception as exc:  # noqa: BLE001 - a verifier fault is never success
+            outcome, detail = "UNVERIFIABLE", f"verifier_failed:{type(exc).__name__}"
+        if outcome == "VERIFIED":
+            stop = SubagentStop.GOAL_ACHIEVED
+        elif outcome == "FAILED":
+            stop = SubagentStop.NOT_SATISFIED
+        else:
+            # PARTIAL is not VERIFIED either: something exists that cannot be proved ours.
+            stop = SubagentStop.UNVERIFIABLE
+            outcome = outcome or "UNVERIFIABLE"
+        result = self._stop(assignment, task, steps, extraction, stop, detail=detail)
+        result.verification_outcome = outcome
+        return result
 
     @staticmethod
     def _stop(
