@@ -48,6 +48,11 @@ from van_gateway.understanding.memory import (
     StrategicMemory,
     SymbioticGrowthLedger,
 )
+from van_gateway.understanding.personal_context_resolver import (
+    PersonalContextResolver,
+    PersonalContextUnavailable,
+    RevisionFencedCapsuleCache,
+)
 from van_gateway.understanding.owner_model import (
     ObservationOrigin,
     OwnerCognitiveModel,
@@ -88,6 +93,11 @@ class UnderstandingApi:
         # P1-LEARN-001 — the owner-facing surface is where corrections arrive, so this is
         # the instance that has to feed the growth ledger.
         self.owner_model = OwnerCognitiveModel(store, learning=LearningFeed(store))
+        # Owner decision 2026-09-29 §3: personal context is served only at the verified
+        # authoritative owner_model_revision; the cache has no TTL and no error fallback.
+        self.personal_context = PersonalContextResolver(
+            self.owner_model, cache=RevisionFencedCapsuleCache()
+        )
         self.vocabulary = SharedVocabularyRegistry(store)
         self.complement = CognitiveComplementMap(store)
         self.growth = SymbioticGrowthLedger(store)
@@ -377,6 +387,27 @@ class UnderstandingApi:
         async def owner_model_revision(owner_principal_id: str = "owner"):
             """Contract C2 — the live Owner Model revision a personal capsule is fenced by."""
             return await self.owner_model.revision(owner_principal_id)
+
+        @router.get("/understanding/personal-context")
+        async def personal_context(
+            owner_model_revision: int,
+            purpose: str,
+            owner_principal_id: str = "owner",
+            project_id: str | None = None,
+            x_van_internal_token: str | None = Header(default=None),
+        ):
+            """C3 served through the revision fence: requested == authoritative, or 409
+            PERSONAL_CONTEXT_UNAVAILABLE. Never a cached capsule the store cannot confirm."""
+            self._require_internal(x_van_internal_token)
+            try:
+                return await self.personal_context.resolve(
+                    owner_principal_id, requested_revision=owner_model_revision,
+                    purpose=purpose, project_id=project_id,
+                )
+            except PersonalContextUnavailable as exc:
+                raise HTTPException(status_code=409, detail=exc.as_detail()) from exc
+            except ValueError as exc:
+                raise HTTPException(status_code=422, detail=str(exc)) from exc
 
         @router.get("/permissions")
         async def permissions():
