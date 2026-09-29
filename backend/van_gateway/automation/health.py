@@ -73,6 +73,13 @@ def governance_state() -> dict[str, Any]:
         "gates": evaluation["gates"],
         "gate_model": evaluation["gate_model"],
         "gate_model_error": evaluation["gate_model_error"],
+        # Reviewer I minor 8 — the same model, per capability. The global flag above keeps
+        # its meaning (every gate GREEN); these say which capability a gate belongs to.
+        "capabilities": evaluation["capabilities"],
+        "production_activation_permitted_by_capability": {
+            name: cap["production_activation_permitted"]
+            for name, cap in evaluation["capabilities"].items()
+        },
     }
 
 
@@ -207,10 +214,32 @@ class AutomationHealthApi:
             "median_first_use_latency_ms": metrics.median_first_use_latency_ms,
         }
 
+    async def _stagehand_production(self, governance: dict[str, Any]) -> dict[str, Any]:
+        """Reviewer I minor 8 — unit M's placement/model state, surfaced, and ANDed with the
+        Stagehand slice of the gate model exactly as the router's Stagehand gate does."""
+        from van_gateway.browser.interaction_router import _fetch_stagehand_worker_health
+
+        try:
+            from van_gateway.automation.placement import stagehand_production_state
+        except ImportError:
+            placement = {"state": "PRODUCTION_DISABLED", "reason": "PLACEMENT_GATE_MISSING"}
+        else:
+            health = await _fetch_stagehand_worker_health(self.stagehand)
+            placement = stagehand_production_state(self.settings, worker_health=health)
+        gates = governance["capabilities"]["stagehand"]
+        return {
+            **placement,
+            "gate_model_permitted": gates["production_activation_permitted"],
+            "gates_not_green": gates["gates_not_green"],
+            "production_activation_permitted": placement.get("state") == "PLACEMENT_SATISFIED"
+            and gates["production_activation_permitted"] is True,
+        }
+
     async def browser_health(self) -> dict[str, Any]:
         harness = await self.harness.status()
         stagehand = await self.stagehand.status()
         policy = load_browser_policy()
+        governance = governance_state()
 
         self._sync_degraded(harness.state, DegradedCode.BROWSER_HARNESS_UNAVAILABLE)
         self._sync_degraded(stagehand.state, DegradedCode.BROWSER_SEMANTIC_UNAVAILABLE)
@@ -219,7 +248,19 @@ class AutomationHealthApi:
             "capability": "browser_fabric",
             "harness": harness.model_dump(mode="json"),
             "stagehand": stagehand.model_dump(mode="json"),
-            "governance": governance_state(),
+            "governance": governance,
+            # Reviewer I minor 8 — per capability, so Stagehand's pending gates do not make
+            # the deterministic Harness path look not-permitted, and Stagehand's own answer
+            # includes its placement (van-browser-core, model, provider-key rules).
+            "production_activation": {
+                "browser_harness": {
+                    "production_activation_permitted": governance["capabilities"]["browser_harness"][
+                        "production_activation_permitted"
+                    ],
+                    "gates_not_green": governance["capabilities"]["browser_harness"]["gates_not_green"],
+                },
+                "stagehand": await self._stagehand_production(governance),
+            },
             "policy_version": policy.policy_version,
             "max_autonomy_tier": policy.max_autonomy_tier,
             "raw_cookie_export_forbidden": policy.raw_cookie_export_forbidden,

@@ -34,6 +34,23 @@ REPO_ROOT = Path(__file__).resolve().parents[3]
 GATE_MODEL = REPO_ROOT / "registries" / "production_activation_gates.json"
 
 
+#: Reviewer I minor 8 — which required decisions each capability's production activation
+#: rests on. The global ``production_activation_permitted`` stays "every gate GREEN"; this
+#: lets the health surface say, for example, that Stagehand's pending gates do not bear on
+#: the deterministic Harness path (owner decision 2026-09-29 §1: "The deterministic browser
+#: path ... may continue according to [its] own policy"). Stagehand acts only through the
+#: Harness, so it inherits the Harness decision. A decision named here that the gate model
+#: does not require makes that capability UNKNOWN, never permitted.
+SECURITY_POLICY_DECISION = "VAN-AMEND-SECURITY-POLICY-001.md"
+CAPABILITY_DECISIONS: dict[str, tuple[str, ...]] = {
+    "n8n": ("VAN-ADOPT-N8N-001.yaml", SECURITY_POLICY_DECISION),
+    "browser_harness": ("VAN-ADOPT-BROWSER-HARNESS-001.yaml", SECURITY_POLICY_DECISION),
+    "stagehand": (
+        "VAN-ADOPT-STAGEHAND-001.yaml", "VAN-ADOPT-BROWSER-HARNESS-001.yaml", SECURITY_POLICY_DECISION,
+    ),
+}
+
+
 class GateStatus(str, Enum):
     GREEN = "GREEN"
     PENDING = "PENDING"
@@ -177,6 +194,15 @@ def evaluate_production_gates(
         "production_gates_not_green": [],
         "gates": [],
         "production_activation_permitted": False,
+        "capabilities": {
+            name: {
+                "decisions": list(decisions),
+                "production_activation_permitted": False,
+                "gates_not_green": [],
+                "error": "gate model unreadable",
+            }
+            for name, decisions in CAPABILITY_DECISIONS.items()
+        },
     }
 
     try:
@@ -264,7 +290,19 @@ def evaluate_production_gates(
         for r in results
         if r.kind == GateKind.PRODUCTION.value and r.status is not GateStatus.GREEN
     ]
+    capabilities: dict[str, Any] = {}
+    for capability, decisions in CAPABILITY_DECISIONS.items():
+        scoped = [r for r in results if r.decision in decisions]
+        unrequired = sorted(set(decisions) - set(names))
+        capabilities[capability] = {
+            "decisions": list(decisions),
+            "production_activation_permitted": bool(scoped) and not unrequired
+            and all(r.status is GateStatus.GREEN for r in scoped),
+            "gates_not_green": [f"{r.decision}:{r.gate}" for r in scoped if r.status is not GateStatus.GREEN],
+            "error": f"not required by the gate model: {', '.join(unrequired)}" if unrequired else None,
+        }
     base.update(
+        capabilities=capabilities,
         required_decisions=names,
         owner_decisions_pending=pending_owner,
         owner_decisions_missing=sorted(missing),
@@ -276,4 +314,4 @@ def evaluate_production_gates(
     return base
 
 
-__all__ = ["GATE_MODEL", "DuplicateKeyError", "GateKind", "GateResult", "GateStatus", "evaluate_production_gates"]
+__all__ = ["CAPABILITY_DECISIONS", "GATE_MODEL", "DuplicateKeyError", "GateKind", "GateResult", "GateStatus", "evaluate_production_gates"]

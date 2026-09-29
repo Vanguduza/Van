@@ -247,3 +247,70 @@ def test_the_real_decision_records_have_no_repeated_keys():
         if entry.get("format", "yaml") == "yaml":
             path = REPO_ROOT / model["decisions_dir"] / entry["decision"]
             assert isinstance(_unique_key_yaml_load(path.read_text(encoding="utf-8")), dict)
+
+
+# --------------------------------------------------------------- reviewer I minor 8
+
+
+def _capability_repo(tmp_path: Path, *, stagehand="PENDING", harness="SIGNED", n8n="SIGNED",
+                     drop: str | None = None) -> Path:
+    decisions = tmp_path / "docs" / "decisions"
+    decisions.mkdir(parents=True)
+    simple = {"id": "owner_decision", "kind": "owner_decision", "path": "owner_signature_status",
+              "green": ["SIGNED"], "pending": ["PENDING"]}
+    prod = {"id": "production_gate", "kind": "production", "path": "production_gate",
+            "green": ["GREEN"], "pending": ["PENDING"]}
+    records = {
+        "VAN-ADOPT-N8N-001.yaml": (f"owner_signature_status: {n8n}\n", [simple]),
+        "VAN-ADOPT-BROWSER-HARNESS-001.yaml": (f"owner_signature_status: {harness}\n", [simple]),
+        "VAN-ADOPT-STAGEHAND-001.yaml": (f"owner_signature_status: SIGNED\nproduction_gate: {stagehand}\n",
+                                         [simple, prod]),
+    }
+    required = []
+    for name, (text, gates) in records.items():
+        (decisions / name).write_text(text, encoding="utf-8")
+        if name != drop:
+            required.append({"decision": name, "format": "yaml", "gates": gates})
+    (decisions / "VAN-AMEND-SECURITY-POLICY-001.md").write_text("**Status:** `OWNER_APPROVED`\n", encoding="utf-8")
+    required.append({"decision": "VAN-AMEND-SECURITY-POLICY-001.md", "format": "markdown",
+                     "gates": [{"id": "owner_decision", "kind": "owner_decision", "path": "Status",
+                                "green": ["OWNER_APPROVED"]}]})
+    path = tmp_path / "gates.json"
+    path.write_text(json.dumps({"decisions_dir": "docs/decisions", "required_decisions": required}), encoding="utf-8")
+    return path
+
+
+def test_stagehand_gates_do_not_make_the_harness_path_look_not_permitted(tmp_path):
+    result = _eval(tmp_path, _capability_repo(tmp_path, stagehand="PENDING"))
+    assert result["production_activation_permitted"] is False  # global meaning unchanged
+    caps = result["capabilities"]
+    assert caps["browser_harness"]["production_activation_permitted"] is True
+    assert caps["n8n"]["production_activation_permitted"] is True
+    assert caps["stagehand"]["production_activation_permitted"] is False
+    assert caps["stagehand"]["gates_not_green"] == ["VAN-ADOPT-STAGEHAND-001.yaml:production_gate"]
+
+
+def test_stagehand_inherits_the_harness_decision(tmp_path):
+    caps = _eval(tmp_path, _capability_repo(tmp_path, stagehand="GREEN", harness="PENDING"))["capabilities"]
+    assert caps["browser_harness"]["production_activation_permitted"] is False
+    assert caps["stagehand"]["production_activation_permitted"] is False
+    assert caps["n8n"]["production_activation_permitted"] is True
+
+
+def test_a_capability_whose_decision_the_model_does_not_require_is_not_permitted(tmp_path):
+    caps = _eval(tmp_path, _capability_repo(tmp_path, drop="VAN-ADOPT-N8N-001.yaml"))["capabilities"]
+    assert caps["n8n"]["production_activation_permitted"] is False
+    assert "VAN-ADOPT-N8N-001.yaml" in caps["n8n"]["error"]
+
+
+def test_an_unreadable_model_permits_no_capability(tmp_path):
+    result = _eval(tmp_path, tmp_path / "missing.json")
+    assert all(c["production_activation_permitted"] is False for c in result["capabilities"].values())
+
+
+def test_health_governance_keeps_its_keys_and_adds_per_capability_fields():
+    state = health.governance_state()
+    assert {"owner_decisions_pending", "owner_decisions_missing", "production_activation_permitted",
+            "production_gates_not_green", "gates", "gate_model", "gate_model_error"} <= set(state)
+    assert set(state["production_activation_permitted_by_capability"]) == {"n8n", "browser_harness", "stagehand"}
+    assert state["production_activation_permitted"] is False

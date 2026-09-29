@@ -183,3 +183,27 @@ async def test_computer_use_degradation_names_what_still_works(client):
     assert "Browser fabric" in entry.still_works
     # The restore action has to name the actual change, or it is a shrug in a field.
     assert "SURFACE_WORKERS" in entry.restore_action
+
+
+async def test_browser_health_surfaces_stagehand_placement_and_per_capability_gates(client):
+    """Reviewer I minor 8 — stagehand_production_state() was never surfaced, and one global
+    flag made Stagehand's pending gates read as the whole browser fabric's."""
+    ac, _app = client
+    body = (await ac.get("/v1/browser/health", headers=HEADERS)).json()
+    activation = body["production_activation"]
+    stagehand = activation["stagehand"]
+    # unit M's projection, verbatim keys, fail-closed here (no van-browser-core worker).
+    assert stagehand["state"] == "PRODUCTION_DISABLED"
+    assert stagehand["reason"]
+    assert stagehand["required_zone"] == "van-browser-core"
+    assert stagehand["model"] == "anthropic/claude-sonnet-5"
+    assert stagehand["production_activation_permitted"] is False
+    assert "VAN-ADOPT-STAGEHAND-001.yaml:production_gate" in stagehand["gates_not_green"]
+    # The Harness path is judged on its own gates, none of them Stagehand's.
+    harness = activation["browser_harness"]
+    assert not any("STAGEHAND" in g for g in harness["gates_not_green"])
+    # Existing semantics are unchanged.
+    assert body["governance"]["production_activation_permitted"] is False
+    assert set(body["governance"]["production_activation_permitted_by_capability"]) == {
+        "n8n", "browser_harness", "stagehand",
+    }
