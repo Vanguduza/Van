@@ -195,8 +195,31 @@ STAGEHAND_ACTION = RouterAction(
 )
 
 
+#: What the Harness observes for the locators the fake Stagehand proposes (reviewer I M-5:
+#: Stagehand actions are classified from this, not from Stagehand's description).
+HARNESS_ELEMENTS: dict[str, dict[str, Any]] = {
+    "a.install": {"ref": "a.install", "role": "link", "label": "Install guide", "href": "/install"},
+    "a#install": {"ref": "a#install", "role": "link", "label": "Install guide", "href": "/install"},
+    "#pay": {"ref": "#pay", "role": "button", "label": "Pay now"},
+}
+
+
+class FakeResolver:
+    def __init__(self, elements: dict[str, dict[str, Any]] | None = None, error: Exception | None = None) -> None:
+        self.elements = HARNESS_ELEMENTS if elements is None else elements
+        self.error = error
+        self.calls: list[str] = []
+
+    async def __call__(self, task, locator):
+        self.calls.append(locator)
+        if self.error is not None:
+            raise self.error
+        return self.elements.get(locator)
+
+
 def make_router(**kw: Any) -> BrowserInteractionRouter:
     kw.setdefault("enabled", True)
+    kw.setdefault("target_resolver", FakeResolver())
     kw.setdefault("executor", FakeExecutor())
     kw.setdefault("verifier", FakeVerifier())
     kw.setdefault("eligibility_classifier", eligible())
@@ -1225,3 +1248,138 @@ async def test_the_real_dds_response_shape_through_the_client_is_shadow(token_fi
     assert router.executor.executed == []
     assert "JEV_SHADOW_NOT_EXECUTED:SHADOW" in result.reasons
     assert result.shadow_jev["valid"] is True
+
+
+# ---------------------------------------------------------------- reviewer I M-5: Stagehand class
+
+
+class _Controls:
+    configured = True
+    enabled = True
+
+    def __init__(self, control):
+        self.control = control
+
+    async def observe(self, task, instruction):
+        return BrowserObservation(task_id=task.task_id, controls=[self.control])
+
+
+PAY_XPATH = "xpath=//button[@id='pay-now']"
+
+
+def _stagehand_router(control, elements=None, **kw):
+    kw.setdefault("jev_client", FakeJev(None))
+    return make_router(
+        semantic_fallback=StagehandSemanticFallback(_Controls(control)),
+        target_resolver=kw.pop("target_resolver", FakeResolver(elements if elements is not None else {})),
+        **kw,
+    )
+
+
+@pytest.mark.parametrize("element", [
+    # The probe (review-i/probes/shclass.py): the Harness sees the id; the text says Continue.
+    {"ref": PAY_XPATH, "role": "button", "label": "Continue", "id": "pay-now"},
+    # Even with no id reported, the selector itself names the payment control.
+    {"ref": PAY_XPATH, "role": "button", "label": "Continue"},
+    # The accessible name the Harness reads disagrees with Stagehand's description.
+    {"ref": PAY_XPATH, "role": "button", "label": "Place order"},
+    {"ref": PAY_XPATH, "role": "button", "label": "Go", "attributes": {"data-action": "checkoutSubmit"}},
+])
+async def test_stagehand_class_comes_from_the_harness_observed_element(element):
+    router = _stagehand_router(
+        {"method": "click", "selector": PAY_XPATH, "description": "Continue", "arguments": []},
+        {PAY_XPATH: element},
+    )
+    result = await router.route(step(action_class_ceiling="A2"))
+    assert router.executor.executed == []
+    assert result.lane is not RouterLane.STAGEHAND
+    assert "STAGEHAND_ACTION_ABOVE_CEILING:A4" in result.reasons
+
+
+async def test_the_payment_boundary_reads_the_observed_element_and_selector():
+    # A permissive classifier lets the click through B1; the boundary still reads what the
+    # Harness saw ("Pay now"), not what Stagehand called it ("Continue").
+    router = _stagehand_router(
+        {"method": "click", "selector": "#b1", "description": "Continue", "arguments": []},
+        {"#b1": {"ref": "#b1", "role": "button", "label": "Pay now"}},
+        action_classifier=lambda op, target, entry: "A1",
+    )
+    result = await router.route(step(action_class_ceiling="A2"))
+    assert result.state is StepState.POLICY_REFUSED and router.executor.executed == []
+    router2 = _stagehand_router(
+        {"method": "click", "selector": PAY_XPATH, "description": "Continue", "arguments": []},
+        {PAY_XPATH: {"ref": PAY_XPATH, "role": "button", "label": "Continue"}},
+        action_classifier=lambda op, target, entry: "A1",
+    )
+    result2 = await router2.route(step(action_class_ceiling="A2"))
+    assert result2.state is StepState.POLICY_REFUSED and router2.executor.executed == []
+
+
+@pytest.mark.parametrize("resolver,code", [
+    (None, "NO_TARGET_RESOLVER"),
+    (FakeResolver({}), "TARGET_NOT_RESOLVED_BY_HARNESS"),
+    (FakeResolver(error=BrowserAdapterError("BROWSER_HARNESS_UNAVAILABLE")), "RESOLVER_FAILED:BrowserAdapterError"),
+    (FakeResolver({"#b1": {"ref": "#b1", "role": "button", "label": "Next", "hidden": True}}), "TARGET_HIDDEN"),
+    (FakeResolver({"#b1": {"ref": "#b1"}}), "TARGET_HAS_NO_ROLE_OR_NAME"),
+])
+async def test_an_unresolvable_stagehand_target_is_owner_takeover(resolver, code):
+    router = _stagehand_router(
+        {"method": "click", "selector": "#b1", "description": "Next page", "arguments": []},
+        target_resolver=resolver,
+    )
+    result = await router.route(step(action_class_ceiling="A2"))
+    assert result.lane is RouterLane.OWNER_TAKEOVER and result.escalated
+    assert f"STAGEHAND_ACTION_UNCLASSIFIABLE:{code}" in result.reasons
+    assert "OWNER_TAKEOVER:STAGEHAND_ACTION_UNCLASSIFIABLE" in result.reasons
+    assert router.executor.executed == []
+
+
+async def test_a_benign_resolved_stagehand_target_still_runs():
+    router = _stagehand_router(
+        {"method": "click", "selector": "#next", "description": "Next page", "arguments": []},
+        {"#next": {"ref": "#next", "role": "link", "label": "Next page", "href": "/p/2"}},
+    )
+    result = await router.route(step(action_class_ceiling="A2"))
+    assert result.lane is RouterLane.STAGEHAND and result.state is StepState.VERIFIED_SUCCESS
+    assert [(a.locator, a.action_class) for a in router.executor.executed] == [("#next", "A2")]
+
+
+async def test_harness_target_resolver_reads_only_the_harness_element_list():
+    from van_gateway.browser.interaction_router import HarnessTargetResolver
+
+    class Harness:
+        def __init__(self, page):
+            self.page = page
+
+        async def page_info(self, task):
+            return self.page
+
+    element = {"ref": "#next", "role": "link", "label": "Next"}
+    assert await HarnessTargetResolver(Harness({"elements": [element]}))(_task(), "#next") == element
+    assert await HarnessTargetResolver(Harness({"elements": [element]}))(_task(), "#other") is None
+    # What the live Harness page_info returns today: no element list -> nothing resolves.
+    assert await HarnessTargetResolver(Harness({"url": "https://x.example", "title": "x"}))(_task(), "#next") is None
+
+
+def test_production_wiring_resolves_stagehand_targets_through_the_harness():
+    from van_gateway.browser.interaction_router import HarnessTargetResolver
+
+    harness = object()
+    router = build_interaction_router(settings=Settings(), harness=harness, stagehand=object(), jev_client=None)
+    assert isinstance(router.target_resolver, HarnessTargetResolver)
+    assert router.target_resolver.harness is harness
+
+
+@pytest.mark.parametrize("selector,element", [
+    ("button#pay_now", {"role": "button", "label": "Continue"}),
+    ("#b2", {"role": "button", "label": "Go", "attributes": {"data-action": "checkoutSubmit"}}),
+    ("[data-testid=placeOrderBtn]", {"role": "button", "label": "Next"}),
+])
+async def test_selector_and_attribute_words_hidden_by_punctuation_or_case_are_read(selector, element):
+    router = _stagehand_router(
+        {"method": "click", "selector": selector, "description": "Continue", "arguments": []},
+        {selector: {"ref": selector, **element}},
+    )
+    result = await router.route(step(action_class_ceiling="A2"))
+    assert router.executor.executed == []
+    assert "STAGEHAND_ACTION_ABOVE_CEILING:A4" in result.reasons

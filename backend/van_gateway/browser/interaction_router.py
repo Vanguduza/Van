@@ -246,6 +246,9 @@ class JevProposer(Protocol):
 
 
 PageObserver = Callable[[BrowserTask], Awaitable[dict[str, Any]]]
+#: Locator -> what the Browser Harness observes of that element (role, accessible name,
+#: attributes), or ``None`` when the Harness cannot resolve it.
+TargetResolver = Callable[[BrowserTask, str], Awaitable[dict[str, Any] | None]]
 EligibilityClassifier = Callable[..., Any]
 ActionClassifier = Callable[[str, dict[str, Any] | None, Any], str]
 
@@ -277,6 +280,63 @@ def default_action_classifier(operation: str, target: dict[str, Any] | None, tar
     if isinstance(declared, str) and declared in B1_ACTION_CLASSES and _rank(declared) > _rank(base):
         return declared
     return base
+
+
+_ELEMENT_TEXT_KEYS = (
+    "role", "label", "name", "accessible_name", "aria_label", "text", "title", "value",
+    "placeholder", "input_type", "type", "id", "href", "action", "formaction",
+)
+
+
+def _words(text: str) -> str:
+    """Selector/attribute text as words: ``//button[@id='payNow_btn']`` -> ``button id pay Now btn``.
+
+    ``_HIGH_RISK_LABEL`` and the payment boundary match whole words, and a selector joins
+    them with punctuation, underscores and camelCase, all of which hide a word boundary.
+    """
+    text = re.sub(r"([a-z])([A-Z])", r"\1 \2", text or "")
+    return re.sub(r"[^A-Za-z0-9]+", " ", text).strip()
+
+
+def observed_element_text(element: dict[str, Any], locator: str | None) -> str:
+    """Everything the Harness observed about the element, plus the selector, as one text.
+
+    This — not the proposer's own description — is what the action class and the payment
+    boundary are judged on (reviewer I M-5).
+    """
+    parts: list[str] = []
+    for key in _ELEMENT_TEXT_KEYS:
+        value = element.get(key)
+        if isinstance(value, str) and value:
+            parts.append(value)
+    attributes = element.get("attributes")
+    if isinstance(attributes, dict):
+        for name, value in attributes.items():
+            if isinstance(value, str):
+                parts.append(f"{name} {value}")
+    if locator:
+        parts.append(locator)
+    return " | ".join(parts + [_words(p) for p in parts])
+
+
+class HarnessTargetResolver:
+    """Resolves a Stagehand locator to the element the Browser Harness itself reports.
+
+    Uses the ``elements`` list of the Harness ``page_info`` (the same list B2 reads). An
+    element is resolved only when its ``ref`` is exactly the locator the Harness will act
+    on. The live Harness does not report elements today, so this resolves nothing and every
+    targeted Stagehand action goes to owner takeover — the fail-closed answer.
+    """
+
+    def __init__(self, harness: Any) -> None:
+        self.harness = harness
+
+    async def __call__(self, task: BrowserTask, locator: str) -> dict[str, Any] | None:
+        page = await self.harness.page_info(task)
+        for raw in (page or {}).get("elements") or ():
+            if isinstance(raw, dict) and raw.get("ref") == locator:
+                return raw
+        return None
 
 
 def load_eligibility_classifier() -> EligibilityClassifier | None:
@@ -585,6 +645,7 @@ class BrowserInteractionRouter:
         metrics: RouterMetrics | None = None,
         owner_control_probe: Callable[[BrowserTask], Awaitable[bool]] | None = None,
         stagehand_gate: Callable[[], Any] | None = None,
+        target_resolver: TargetResolver | None = None,
     ) -> None:
         self.enabled = enabled
         self.executor = executor
@@ -604,6 +665,9 @@ class BrowserInteractionRouter:
         self.owner_control_probe = owner_control_probe
         #: Unit M's `stagehand_production_enabled`, bound to settings. Absent = lane off.
         self.stagehand_gate = stagehand_gate
+        #: Reviewer I M-5: how a Stagehand locator becomes an observed element. Absent =
+        #: every targeted Stagehand action is unclassifiable and goes to the owner.
+        self.target_resolver = target_resolver
 
     # ----------------------------------------------------------- lane readiness
 
@@ -768,9 +832,22 @@ class BrowserInteractionRouter:
             # "Nothing left to do" from Stagehand is not success (§7): nothing to verify.
             reasons.append("STAGEHAND_NO_ACTION")
             return None
-        # Stagehand output is untrusted and cannot raise the class: VAN classifies the
-        # observed action itself and holds it to the step ceiling.
-        stagehand_class = self.action_classifier(proposal.operation, {"label": proposal.description or ""}, None)
+        # Reviewer I M-5 — Stagehand's own description is untrusted text: a selector
+        # `//button[@id='pay-now']` described as "Continue" was executed as A2. VAN
+        # classifies what the *Harness* observes of the target (role, accessible name,
+        # attributes, resolved through the selector) together with the selector itself.
+        # The description is also checked, so it can only make the answer stricter.
+        observed_text = ""
+        if proposal.operation not in TARGETLESS_OPERATIONS:
+            unclassifiable = await self._resolve_stagehand_target(step, proposal)
+            if isinstance(unclassifiable, str):
+                reasons.append(f"STAGEHAND_ACTION_UNCLASSIFIABLE:{unclassifiable}")
+                return self._takeover(reasons, [], "STAGEHAND_ACTION_UNCLASSIFIABLE")
+            observed_text = observed_element_text(unclassifiable, proposal.locator)
+        stagehand_class = self._stricter_class(
+            self.action_classifier(proposal.operation, {"label": observed_text}, None) if observed_text else "A0",
+            self.action_classifier(proposal.operation, {"label": proposal.description or ""}, None),
+        )
         if (
             stagehand_class not in B1_ACTION_CLASSES
             or stagehand_class in NEVER_PROPOSABLE_ACTION_CLASSES
@@ -782,9 +859,39 @@ class BrowserInteractionRouter:
         action = RouterAction(
             lane=RouterLane.STAGEHAND, operation=proposal.operation, locator=proposal.locator,
             value_ref=proposal.value_ref, action_class=stagehand_class,
-            semantic_action=proposal.semantic_action, description=proposal.description,
+            semantic_action=proposal.semantic_action,
+            # The payment boundary in _execute_and_verify reads this: the Harness-observed
+            # element and selector as well as Stagehand's description.
+            description=" | ".join(t for t in (proposal.description, observed_text) if t) or None,
         )
         return await self._execute_and_verify(step, action, reasons, claimed_done=proposal.operation == "done")
+
+    @staticmethod
+    def _stricter_class(*classes: str) -> str:
+        known = [c for c in classes if c in B1_ACTION_CLASSES]
+        if len(known) != len(classes):
+            return next(c for c in classes if c not in B1_ACTION_CLASSES)
+        return max(known, key=_rank)
+
+    async def _resolve_stagehand_target(
+        self, step: InteractionStep, proposal: RouterAction,
+    ) -> dict[str, Any] | str:
+        """The Harness-observed element for the proposal's locator, or why there is none."""
+        if not proposal.locator:
+            return "NO_LOCATOR"
+        if self.target_resolver is None:
+            return "NO_TARGET_RESOLVER"
+        try:
+            element = await self.target_resolver(step.task, proposal.locator)
+        except Exception as exc:  # noqa: BLE001 - cannot observe the target = cannot classify it
+            return f"RESOLVER_FAILED:{type(exc).__name__}"
+        if not isinstance(element, dict) or not element:
+            return "TARGET_NOT_RESOLVED_BY_HARNESS"
+        if element.get("hidden") is True:
+            return "TARGET_HIDDEN"
+        if not any(isinstance(element.get(k), str) and element.get(k) for k in ("role", "label", "name", "accessible_name", "aria_label", "text")):
+            return "TARGET_HAS_NO_ROLE_OR_NAME"
+        return element
 
     # ----------------------------------------------------------- Jev lane
 
@@ -1283,6 +1390,7 @@ def build_interaction_router(
         observer=observe,
         owner_control_probe=OwnerControlProbe(store) if store is not None else None,
         stagehand_gate=load_stagehand_production_gate(settings, stagehand),
+        target_resolver=HarnessTargetResolver(harness),
     )
 
 
@@ -1352,6 +1460,7 @@ __all__ = [
     "BrowserInteractionRouter",
     "DeterministicAction",
     "HarnessActionExecutor",
+    "HarnessTargetResolver",
     "IndependentPostconditionVerifier",
     "InteractionStep",
     "RouterAction",
@@ -1366,6 +1475,7 @@ __all__ = [
     "build_interaction_routes",
     "default_action_classifier",
     "harness_page_to_jev_observation",
+    "observed_element_text",
     "load_eligibility_classifier",
     "load_stagehand_production_gate",
     "validate_b1_payload",
