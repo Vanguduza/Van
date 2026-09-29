@@ -21,7 +21,8 @@ What it decides, and what it does not:
   Any other configured pair is reported, not silently accepted, and keeps Stagehand
   production-disabled until another explicit owner decision.
 * It checks the runtime *version identity* (§5): the worker must report the released
-  4.1.0 artifact.
+  4.1.0 artifact, read from the installed package metadata (not a constant), and must
+  not serve ``/act`` (§8).
 * It does **not** decide governance gates (signed owner ingress §2, the health production
   gate §6, the verifier/executor blockers §§7-8). Callers AND this result with those; a
   ``True`` here is necessary, never sufficient.
@@ -56,6 +57,9 @@ STAGEHAND_RELEASE_COMMIT = "cd7b230778cf92269e4cb90e80d97f5113781c51"
 STAGEHAND_RELEASE_INTEGRITY = (
     "sha512-PJikMBVoaCRh6TFD7GcmeISmsMq4IwUu1BD5FOsGUVDUxrVqZomWa6W6dF+a/zu4xRZu2Z2xX1nXVMDaCuZWsw=="
 )
+
+#: The worker's /health must say its version was read from the installed package.
+RUNTIME_VERSION_SOURCE = "installed-package-metadata"
 
 PRODUCTION_DISABLED = "PRODUCTION_DISABLED"
 STAGEHAND_PLACEMENT_SATISFIED = "STAGEHAND_PLACEMENT_SATISFIED"
@@ -161,6 +165,10 @@ def stagehand_production_enabled(
         return False, "VAN_BROWSER_CORE_UNAVAILABLE:worker_not_ok"
     if _norm(worker_health.get("trust_zone")) != VAN_BROWSER_CORE:
         return False, f"STAGEHAND_RUNNING_ZONE_MISMATCH:{_norm(worker_health.get('trust_zone')) or 'unreported'}"
+    # §5 / review I minor 5: the version must be the installed package's own metadata. A
+    # worker that reports a constant can never mismatch, so its version proves nothing.
+    if worker_health.get("runtime_version_source") != RUNTIME_VERSION_SOURCE:
+        return False, "STAGEHAND_RUNTIME_VERSION_UNPROVEN"
     if str(worker_health.get("runtime_version", "")) != STAGEHAND_RELEASE_VERSION:
         return False, "STAGEHAND_RUNTIME_VERSION_MISMATCH"
     if str(worker_health.get("model_name", "")) != f"{CANONICAL_STAGEHAND_PROVIDER}/{CANONICAL_STAGEHAND_MODEL}":
@@ -175,6 +183,9 @@ def stagehand_production_enabled(
         return False, "STAGEHAND_PROVIDER_KEY_ENTERS_BROWSER_MEMORY"
     if worker_health.get("direct_agent_loop") is not False or worker_health.get("model_self_selection") is not False:
         return False, "STAGEHAND_WORKER_AUTHORITY_UNBOUNDED"
+    # §8 / review I minor 5: a worker that serves /act holds an actuation authority.
+    if worker_health.get("act_endpoint_enabled") is not False:
+        return False, "STAGEHAND_WORKER_ACTUATION_EXPOSED"
 
     return True, STAGEHAND_PLACEMENT_SATISFIED
 

@@ -38,6 +38,8 @@ def _healthy(**overrides) -> dict:
         "ok": True,
         "trust_zone": "van-browser-core",
         "runtime_version": "4.1.0",
+        "runtime_version_source": "installed-package-metadata",
+        "act_endpoint_enabled": False,
         "model_name": "anthropic/claude-sonnet-5",
         "model_key_present": True,
         "provider_key_in_browser_memory": False,
@@ -178,6 +180,33 @@ def test_runtime_version_and_model_must_match(tmp_path):
     assert stagehand_production_enabled(
         s, worker_health=_healthy(model_name="anthropic/claude-sonnet-4-6")
     )[1] == "STAGEHAND_RUNTIME_MODEL_MISMATCH"
+
+
+def test_runtime_version_must_come_from_installed_package_metadata(tmp_path):
+    """Review I minor 5: a constant runtime_version could never fail the check."""
+    s = _ready_settings(tmp_path)
+    for source in (None, "constant", "INSTALLED-PACKAGE-METADATA"):
+        health = _healthy(runtime_version_source=source)
+        if source is None:
+            health.pop("runtime_version_source")
+        assert stagehand_production_enabled(s, worker_health=health) == (
+            False, "STAGEHAND_RUNTIME_VERSION_UNPROVEN",
+        )
+    # An unreadable installed version (null) is a mismatch, not a pass.
+    assert stagehand_production_enabled(s, worker_health=_healthy(runtime_version=None))[1] == (
+        "STAGEHAND_RUNTIME_VERSION_MISMATCH"
+    )
+
+
+@pytest.mark.parametrize("value", [True, None, "false", 0])
+def test_worker_serving_act_is_production_disabled(tmp_path, value):
+    s = _ready_settings(tmp_path)
+    health = _healthy(act_endpoint_enabled=value)
+    if value is None:
+        health.pop("act_endpoint_enabled")
+    assert stagehand_production_enabled(s, worker_health=health) == (
+        False, "STAGEHAND_WORKER_ACTUATION_EXPOSED",
+    )
 
 
 def test_provider_key_in_browser_memory_disables(tmp_path):

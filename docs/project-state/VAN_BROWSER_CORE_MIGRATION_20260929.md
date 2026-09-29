@@ -252,10 +252,12 @@ means rebuilding both operations as typed Browser Harness actions with an indepe
 postcondition verifier. Re-enabling `act()` is not an acceptable fix. NotebookLM
 Enterprise (API) is unaffected.
 
-**Worker `/act` and version identity.** The van-browser-core worker serves `/act` only when
-`VAN_STAGEHAND_ACT_ENDPOINT_DEV_ONLY=1` is set on a development-only placement. Otherwise
-`/act` is `404 NOT_FOUND` and `/health` reports `act_endpoint_enabled: false`.
+**Worker `/act` and version identity.** The van-browser-core worker serves `/act` only on
+an explicitly development-only placement (`VAN_BROWSER_HISTORICAL_DEV_ONLY=1`). Otherwise
+`/act` is `404 NOT_FOUND`, like any unknown path, and `/health` reports
+`act_endpoint_enabled: false`.
 `/health.runtime_version` is read from the installed
 `node_modules/@browserbasehq/stagehand/package.json` (`runtime_version_source:
 installed-package-metadata`), not a constant. The placement gate requires that source, the
-exact 4.1.0 version and `act_endpoint_enabled: false` (review I minor 5).
+exact 4.1.0 version and `act_endpoint_enabled: false`, and `qualify.sh` checks the same
+fields (review I minor 5).

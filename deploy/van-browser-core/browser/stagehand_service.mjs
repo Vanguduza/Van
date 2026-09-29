@@ -17,6 +17,15 @@
  * anthropic/claude-sonnet-5. A request naming anything else is refused rather than
  * silently served with a different model.
  *
+ * Actuation (§8, review I minor 5): Stagehand holds no actuation authority. `/act` exists
+ * only on a development-only placement (VAN_BROWSER_HISTORICAL_DEV_ONLY=1); in every other
+ * state it answers 404 NOT_FOUND like any unknown path, and /health says
+ * act_endpoint_enabled=false.
+ *
+ * Version (§5, review I minor 5): /health.runtime_version is read from the installed
+ * @browserbasehq/stagehand package.json that this process actually imported, not from a
+ * constant, so the gateway placement gate can fail on a mismatch.
+ *
  * Credential (§4): the provider key is a file-backed secret reference on this host. With
  * Stagehand 4.1.0 a `{ modelName, apiKey }` model config is forwarded by the SDK to the
  * Stagehand runtime extension's service worker inside Chromium, which calls the provider
@@ -27,9 +36,11 @@
 import fs from "node:fs";
 import http from "node:http";
 import path from "node:path";
+import { fileURLToPath } from "node:url";
 import { Stagehand, localBrowser } from "@browserbasehq/stagehand";
 import { z } from "zod";
 
+// §5 — the adopted release. EXPECTED only: what is reported is read from the package below.
 const STAGEHAND_VERSION = "4.1.0";
 const STAGEHAND_RELEASE_COMMIT = "cd7b230778cf92269e4cb90e80d97f5113781c51";
 const VAN_BROWSER_CORE = "van-browser-core";
@@ -63,6 +74,30 @@ if (TRUST_ZONE !== VAN_BROWSER_CORE && !HISTORICAL_DEV_ONLY) {
 const PRODUCTION_STATE = TRUST_ZONE === VAN_BROWSER_CORE && !HISTORICAL_DEV_ONLY
   ? "VAN_BROWSER_CORE_PENDING_GATES"
   : "DEV_ONLY_NOT_PRODUCTION";
+// §8 — /act is served only on an explicitly development-only placement.
+const ACT_ENDPOINT_ENABLED = HISTORICAL_DEV_ONLY;
+
+// §5 — the version of the @browserbasehq/stagehand package this process imported, from its
+// own package.json. null when it cannot be read; the gateway treats that as a mismatch.
+function installedStagehandVersion() {
+  try {
+    let dir = path.dirname(fileURLToPath(import.meta.resolve("@browserbasehq/stagehand")));
+    for (let depth = 0; depth < 12; depth += 1) {
+      const candidate = path.join(dir, "package.json");
+      if (fs.existsSync(candidate)) {
+        const pkg = JSON.parse(fs.readFileSync(candidate, "utf8"));
+        if (pkg && pkg.name === "@browserbasehq/stagehand") {
+          return typeof pkg.version === "string" && pkg.version ? pkg.version : null;
+        }
+      }
+      const parent = path.dirname(dir);
+      if (parent === dir) break;
+      dir = parent;
+    }
+  } catch {}
+  return null;
+}
+const INSTALLED_STAGEHAND_VERSION = installedStagehandVersion();
 
 if (!["127.0.0.1", "::1", "localhost"].includes(BIND)) {
   throw new Error("stagehand worker refuses a non-loopback bind");
@@ -320,7 +355,7 @@ async function observe(body) {
     const result = await stagehand.observe(prompt);
     const raw = Array.isArray(result?.data) ? result.data.slice(0, 32) : [];
     const controls = raw.map(sanitizeControl);
-    return { controls, extraction: {}, stagehand_version: STAGEHAND_VERSION };
+    return { controls, extraction: {}, stagehand_version: INSTALLED_STAGEHAND_VERSION };
   });
 }
 
@@ -332,7 +367,7 @@ async function extract(body) {
     return {
       extraction: result?.data ?? {},
       controls: [],
-      stagehand_version: STAGEHAND_VERSION,
+      stagehand_version: INSTALLED_STAGEHAND_VERSION,
     };
   });
 }
@@ -348,7 +383,7 @@ async function act(body) {
         url: String(page.url || "").slice(0, 4096),
         title: String(page.title || "").slice(0, 1024),
       },
-      stagehand_version: STAGEHAND_VERSION,
+      stagehand_version: INSTALLED_STAGEHAND_VERSION,
     };
   });
 }
@@ -356,7 +391,8 @@ async function act(body) {
 const OPERATIONS = new Map([
   ["/observe", observe],
   ["/extract", extract],
-  ["/act", act],
+  // §8 — absent (404 NOT_FOUND) unless the placement is explicitly development-only.
+  ...(ACT_ENDPOINT_ENABLED ? [["/act", act]] : []),
 ]);
 
 function sendJson(res, status, payload) {
@@ -378,7 +414,10 @@ const server = http.createServer((req, res) => {
     return sendJson(res, 200, {
       ok: true,
       service: SERVICE_VERSION,
-      runtime_version: STAGEHAND_VERSION,
+      runtime_version: INSTALLED_STAGEHAND_VERSION,
+      runtime_version_source: "installed-package-metadata",
+      expected_runtime_version: STAGEHAND_VERSION,
+      act_endpoint_enabled: ACT_ENDPOINT_ENABLED,
       bind: BIND,
       model_key_present: modelKeyPresent(),
       model_name: pinnedModelName(),
