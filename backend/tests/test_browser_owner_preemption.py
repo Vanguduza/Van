@@ -26,6 +26,8 @@ from van_gateway.config import get_settings
 from van_gateway.models import ActionClass
 
 CONTROL = [{"method": "click", "selector": "#q", "description": "Open report", "arguments": []}]
+#: What the Harness reports at "#q" (reviewer I2 N-2: the target must resolve to be classified).
+ELEMENTS = [{"ref": "#q", "role": "link", "name": "Quarterly report"}]
 
 
 async def _task(tmp_path):
@@ -77,14 +79,14 @@ async def test_owner_taking_control_mid_step_preempts_before_execute(tmp_path):
     async def probe(_task):
         return next(answers)
 
-    harness, stagehand = FakeHarness(), FakeStagehand([CONTROL, []])
+    harness, stagehand = FakeHarness(ELEMENTS), FakeStagehand([CONTROL, []])
     result = await BrowserSubagentRunner(owner_control_probe=probe).run(
         assignment=_assignment(task), worker=HybridBrowserWorker(harness, stagehand, task=task),
         task=task, verifier=_Verdict("VERIFIED"),
     )
     assert result.stop_reason is SubagentStop.OWNER_TAKEOVER
     assert len(stagehand.observed) == 1  # proposed once
-    assert harness.calls == []  # but never actuated
+    assert harness.actuations == []  # but never actuated
 
 
 async def test_owner_control_is_checked_before_every_step(tmp_path):
@@ -95,13 +97,13 @@ async def test_owner_control_is_checked_before_every_step(tmp_path):
         seen.append(1)
         return len(seen) > 3  # free for propose+execute of step 1 and propose of step 2
 
-    harness, stagehand = FakeHarness(), FakeStagehand([CONTROL, CONTROL, []])
+    harness, stagehand = FakeHarness(ELEMENTS), FakeStagehand([CONTROL, CONTROL, []])
     result = await BrowserSubagentRunner(owner_control_probe=probe).run(
         assignment=_assignment(task), worker=HybridBrowserWorker(harness, stagehand, task=task),
         task=task, verifier=_Verdict("VERIFIED"),
     )
     assert result.stop_reason is SubagentStop.OWNER_TAKEOVER
-    assert harness.calls == ["click:#q", "page_info"]  # step 1 only; step 2 never executed
+    assert harness.actuations == ["click:#q"]  # step 1 only; step 2 never executed
     assert len(seen) == 4
 
 
