@@ -44,12 +44,26 @@ from van_gateway.browser.models import (
     BrowserTask,
     InjectionAssessment,
 )
+from van_gateway.browser.interaction_router import (
+    TARGETLESS_OPERATIONS,
+    HarnessTargetResolver,
+    default_action_classifier,
+    observed_element_text,
+)
 from van_gateway.browser.policy import BrowserPolicyError
 from van_gateway.browser.stagehand_proposal import (
     SemanticProposalRefused,
     typed_action_from_stagehand,
 )
-from van_gateway.browser.subagent import ProposedAction, SubagentAssignment, SubagentStep
+from van_gateway.browser.subagent import (
+    OwnerTakeoverRequired,
+    ProposedAction,
+    SubagentAssignment,
+    SubagentStep,
+)
+from van_gateway.models import ActionClass
+
+_ELEMENT_NAME_KEYS = ("role", "label", "name", "accessible_name", "aria_label", "text")
 
 
 class SemanticWorkerUnavailable(RuntimeError):
@@ -299,17 +313,74 @@ class HybridBrowserWorker:
             # WORKER_ERROR and nothing actuated.
             raise BrowserPolicyError(f"stagehand_proposal_not_harness_executable:{exc.code}") from exc
         description = typed.description or ""
+        # Reviewer I2 N-2 (the M-5 fix, on the /v1/browser/assignments path) — the class and
+        # the payment boundary were judged on Stagehand's own description, and the class was
+        # simply the assignment ceiling, so `//button[@id='pay-now']` described as "Continue"
+        # and `#delete-account` described as "Next" were clicked as A2. The router's rule
+        # applies here too: classify what the *Harness* observes of the target together with
+        # the locator words; the description can only make the answer stricter.
+        observed_text = ""
+        if typed.operation not in TARGETLESS_OPERATIONS:
+            element = await self._resolve_target(task, typed.selector)
+            observed_text = observed_element_text(element, typed.selector)
+        action_class = self._classify(typed.operation, observed_text, description)
+        # The payment boundary in BrowserSubagentRunner._check reads `instruction`, so it runs
+        # over the same Harness-observed text the class was judged on.
+        judged_text = " | ".join(t for t in (description, observed_text) if t)
         return ProposedAction(
             kind=typed.operation,
             domain=task.target_domain,
-            action_class=assignment.action_class_ceiling,
-            instruction=description or instruction,
+            # The class VAN derived, never the ceiling: the runner refuses anything above
+            # the assignment's ceiling (ACTION_CLASS_VIOLATION), so the ceiling caps it.
+            action_class=action_class,
+            instruction=judged_text or instruction,
             rationale=description or "Stagehand semantic proposal",
             payload={
                 "stagehand_action": candidate,
                 "typed": {"operation": typed.operation, "selector": typed.selector, "key": typed.key},
+                "harness_observed_target": observed_text or None,
             },
         )
+
+    async def _resolve_target(self, task: BrowserTask, locator: str | None) -> dict[str, Any]:
+        """The element the Harness itself reports for ``locator``; otherwise owner takeover.
+
+        Mirrors ``BrowserInteractionRouter._resolve_stagehand_target``: a target VAN cannot
+        observe cannot be classified, and an unclassifiable step goes to the owner.
+        """
+        if not locator:
+            raise OwnerTakeoverRequired("STAGEHAND_ACTION_UNCLASSIFIABLE:NO_LOCATOR")
+        try:
+            element = await HarnessTargetResolver(self.harness)(task, locator)
+        except Exception as exc:  # noqa: BLE001 - cannot observe the target = cannot classify it
+            raise OwnerTakeoverRequired(
+                f"STAGEHAND_ACTION_UNCLASSIFIABLE:RESOLVER_FAILED:{type(exc).__name__}"
+            ) from exc
+        if not isinstance(element, dict) or not element:
+            raise OwnerTakeoverRequired("STAGEHAND_ACTION_UNCLASSIFIABLE:TARGET_NOT_RESOLVED_BY_HARNESS")
+        if element.get("hidden") is True:
+            raise OwnerTakeoverRequired("STAGEHAND_ACTION_UNCLASSIFIABLE:TARGET_HIDDEN")
+        if not any(isinstance(element.get(k), str) and element.get(k) for k in _ELEMENT_NAME_KEYS):
+            raise OwnerTakeoverRequired("STAGEHAND_ACTION_UNCLASSIFIABLE:TARGET_HAS_NO_ROLE_OR_NAME")
+        return element
+
+    @staticmethod
+    def _classify(operation: str, observed_text: str, description: str) -> ActionClass:
+        """The stricter of the Harness-observed class and the description's class.
+
+        The router's classifier answers ``A0`` for a change-nothing operation; the subagent's
+        ``ActionClass`` starts at A1, so A0 is proposed as A1. A4 (a commitment such as pay or
+        delete) is proposed as A4 and the runner's ceiling check refuses it.
+        """
+        classes = [
+            default_action_classifier(operation, {"label": observed_text}, None) if observed_text else "A0",
+            default_action_classifier(operation, {"label": description}, None),
+        ]
+        ranks = {"A0": 0, **{cls.value: index + 1 for index, cls in enumerate(ActionClass)}}
+        if any(value not in ranks for value in classes):
+            raise OwnerTakeoverRequired(f"STAGEHAND_ACTION_UNCLASSIFIABLE:CLASS:{classes}")
+        strictest = max(classes, key=ranks.__getitem__)
+        return ActionClass.A1 if strictest == "A0" else ActionClass(strictest)
 
     async def execute(
         self, assignment: SubagentAssignment, action: ProposedAction

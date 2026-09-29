@@ -29,8 +29,12 @@ DOMAIN = "research.example.com"
 
 
 class FakeHarness:
-    def __init__(self) -> None:
+    def __init__(self, elements: list[dict] | None = None) -> None:
         self.calls: list[str] = []
+        #: What the Harness reports of the page's elements (``ref`` = the locator it acts on).
+        #: Reviewer I2 N-2: a Stagehand target is classified on this, so a test that expects
+        #: a click to run has to say what the Harness sees there. None = reports nothing.
+        self.elements = elements
 
     async def click(self, task, locator):
         self.calls.append(f"click:{locator}")
@@ -46,11 +50,19 @@ class FakeHarness:
 
     async def page_info(self, task):
         self.calls.append("page_info")
-        return {
+        page = {
             "url": f"https://{DOMAIN}/report",
             "title": "Report",
             "extraction": {"visible_text": "Quarterly report 2026"},
         }
+        if self.elements is not None:
+            page["elements"] = [dict(e) for e in self.elements]
+        return page
+
+    @property
+    def actuations(self) -> list[str]:
+        """Calls that changed the page; ``page_info`` is a read (the target resolver uses it)."""
+        return [c for c in self.calls if c != "page_info"]
 
 
 class FakeStagehand:
@@ -123,7 +135,7 @@ async def test_semantic_assignment_is_one_stagehand_action_per_gateway_step(tmp_
         "selector": "xpath=//a[@id='quarterly-report']",
     }
     stagehand = FakeStagehand([[action], []])
-    harness = FakeHarness()
+    harness = FakeHarness([{"ref": "xpath=//a[@id='quarterly-report']", "role": "link", "name": "Quarterly report"}])
     worker = HybridBrowserWorker(harness, stagehand, task=task)  # type: ignore[arg-type]
 
     verifier = _Verdict("VERIFIED")
@@ -136,7 +148,9 @@ async def test_semantic_assignment_is_one_stagehand_action_per_gateway_step(tmp_
     assert result.step_count == 1
     # Owner decision 2026-09-29 §8: Stagehand proposed, the Harness executed.
     assert stagehand.acted == []
-    assert harness.calls == ["click:xpath=//a[@id='quarterly-report']", "page_info"]
+    # The resolver's read, the Harness click, then the read-back.
+    assert harness.calls == ["page_info", "click:xpath=//a[@id='quarterly-report']", "page_info"]
+    assert result.steps[0].action_class is ActionClass.A2
     assert len(stagehand.observed) == 2
     assert "Step: 1 of 5" in stagehand.observed[0]
     assert "Step: 2 of 5" in stagehand.observed[1]
@@ -153,7 +167,8 @@ async def test_stagehand_payment_proposal_is_refused_before_it_can_act(tmp_path)
             "selector": "xpath=//button[@id='pay']",
         }
     ]])
-    worker = HybridBrowserWorker(FakeHarness(), stagehand, task=task)  # type: ignore[arg-type]
+    harness = FakeHarness([{"ref": "xpath=//button[@id='pay']", "role": "button", "name": "Pay"}])
+    worker = HybridBrowserWorker(harness, stagehand, task=task)  # type: ignore[arg-type]
 
     result = await BrowserSubagentRunner(owner_control_probe=_no_owner_control).run(
         assignment=_assignment(task), worker=worker, task=task
@@ -161,6 +176,7 @@ async def test_stagehand_payment_proposal_is_refused_before_it_can_act(tmp_path)
 
     assert result.stop_reason is SubagentStop.PAYMENT_REFUSED
     assert stagehand.acted == []
+    assert harness.actuations == []
 
 
 @pytest.mark.asyncio
@@ -174,7 +190,8 @@ async def test_stagehand_cannot_supply_a_second_domain_through_its_action_payloa
             "domain": "evil.example",
         }
     ]])
-    worker = HybridBrowserWorker(FakeHarness(), stagehand, task=task)  # type: ignore[arg-type]
+    harness = FakeHarness([{"ref": "xpath=//a", "role": "link", "name": "Result"}])
+    worker = HybridBrowserWorker(harness, stagehand, task=task)  # type: ignore[arg-type]
     proposal = await worker.propose(_assignment(task), [])
 
     assert proposal.domain == DOMAIN

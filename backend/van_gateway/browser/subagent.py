@@ -139,6 +139,15 @@ class SubagentResult(BaseModel):
         return len(self.steps)
 
 
+class OwnerTakeoverRequired(RuntimeError):
+    """Raised by a worker's ``propose`` when the next step cannot be classified.
+
+    Reviewer I2 N-2: a Stagehand target the Harness cannot resolve has no observable
+    class, so the step is not proposable and the run hands over to the owner (owner
+    decision 2026-09-29 §9, lane 4) rather than ending as a generic worker error.
+    """
+
+
 class ProposedAction(BaseModel):
     """What the worker wants to do next. A proposal, never a decision."""
 
@@ -258,6 +267,11 @@ class BrowserSubagentRunner:
 
             try:
                 action = await worker.propose(assignment, list(steps))
+            except OwnerTakeoverRequired as exc:
+                return self._stop(
+                    assignment, task, steps, extraction, SubagentStop.OWNER_TAKEOVER,
+                    detail=str(exc),
+                )
             except Exception as exc:  # noqa: BLE001 - a worker fault ends the task
                 return self._stop(
                     assignment, task, steps, extraction, SubagentStop.WORKER_ERROR,
@@ -333,13 +347,8 @@ class BrowserSubagentRunner:
         """Every bound the worker cannot widen, checked before the action runs."""
         if action.domain not in assignment.allowed_domains:
             return SubagentStop.SCOPE_VIOLATION, f"domain_outside_assignment:{action.domain}"
-        if _RANK[action.action_class] > _RANK[assignment.action_class_ceiling]:
-            return (
-                SubagentStop.ACTION_CLASS_VIOLATION,
-                f"{action.action_class.value}>{assignment.action_class_ceiling.value}",
-            )
-        if action.restated_goal and digest({"goal": action.restated_goal}) != assignment.goal_digest:
-            return SubagentStop.GOAL_DRIFT, "worker restated a different goal"
+        # Payments first: a pay button is also above any autonomous ceiling (A4), and the
+        # more specific refusal is the one the owner needs to read (reviewer I2 N-2).
         try:
             assert_not_automated_payment(
                 operation=action.kind, goal=action.instruction or "", url=action.url or "",
@@ -347,6 +356,13 @@ class BrowserSubagentRunner:
             )
         except PaymentBoundaryError as exc:
             return SubagentStop.PAYMENT_REFUSED, str(exc)
+        if _RANK[action.action_class] > _RANK[assignment.action_class_ceiling]:
+            return (
+                SubagentStop.ACTION_CLASS_VIOLATION,
+                f"{action.action_class.value}>{assignment.action_class_ceiling.value}",
+            )
+        if action.restated_goal and digest({"goal": action.restated_goal}) != assignment.goal_digest:
+            return SubagentStop.GOAL_DRIFT, "worker restated a different goal"
         return None
 
     async def _verify_done(
@@ -485,6 +501,7 @@ def classify_boundary(
 __all__ = [
     "BrowserSubagentRunner",
     "classify_boundary",
+    "OwnerTakeoverRequired",
     "plausible_hostname",
     "ProposedAction",
     "SubagentAssignment",
