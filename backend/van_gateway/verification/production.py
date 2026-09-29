@@ -129,6 +129,21 @@ def _reminder_readback_observation(reminders: ReminderService):
     return observe
 
 
+def _jev_reported_bool(mapping: Any, key: str, where: str) -> bool:
+    """A boolean dial-jev actually reported. Absent or non-bool raises -> UNVERIFIABLE.
+
+    Reviewer I M-6: ``.get(project_id, True)``, ``owner_active`` defaulting True and
+    ``bypassed`` defaulting False read "Jev said nothing" as "Jev confirmed the owner's
+    command", so an empty status VERIFIED an enable. Silence is not confirmation.
+    """
+    if not isinstance(mapping, dict) or key not in mapping:
+        raise ValueError(f"Jev status does not report {where}")
+    value = mapping[key]
+    if not isinstance(value, bool):
+        raise ValueError(f"Jev status reports {where} as {type(value).__name__}, not a bool")
+    return value
+
+
 def _jev_readback_observation(jev: Any):
     async def observe(context: dict[str, Any]) -> dict[str, Any]:
         postconditions = context.get("postconditions") or {}
@@ -138,24 +153,31 @@ def _jev_readback_observation(jev: Any):
             if not module_id:
                 raise ValueError("Jev contract names no module")
             observed = await jev.module(module_id)
+            status = observed.get("status") if isinstance(observed, dict) else None
+            if not isinstance(status, str) or not status:
+                raise ValueError("Jev does not report the module's status")
             return {
                 "kind": "module",
                 "module_id": module_id,
-                "status": observed.get("status"),
+                "status": status,
                 "evidence_ref": f"jev-module://{module_id}",
             }
         if kind == "global":
             project_id = str(postconditions.get("project_id") or "").strip() or None
             observed = await jev.status()
-            global_state = observed.get("global") or {}
+            global_state = observed.get("global") if isinstance(observed, dict) else None
+            if not isinstance(global_state, dict):
+                raise ValueError("Jev status does not report global control state")
             result = {"kind": "global", "project_id": project_id}
             if project_id:
-                result["project_enabled"] = bool((global_state.get("projects") or {}).get(project_id, True))
+                result["project_enabled"] = _jev_reported_bool(
+                    global_state.get("projects"), project_id, f"project {project_id!r}"
+                )
             else:
                 if "owner_active" in postconditions:
-                    result["owner_active"] = bool(global_state.get("owner_active", True))
+                    result["owner_active"] = _jev_reported_bool(global_state, "owner_active", "owner_active")
                 if "bypassed" in postconditions:
-                    result["bypassed"] = bool(global_state.get("bypassed", False))
+                    result["bypassed"] = _jev_reported_bool(global_state, "bypassed", "bypassed")
             result["evidence_ref"] = "jev-global://control"
             return result
         raise ValueError("unknown Jev readback contract")
