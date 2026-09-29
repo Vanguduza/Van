@@ -153,6 +153,8 @@ class BrowserApi:
         self.tasks = BrowserTaskService(store, self.broker, self.policy)
         self.runner = BrowserSubagentRunner(self.policy)
         self.worker = worker
+        #: Programme B / B5 — set by create_app; None keeps the fabric testable alone.
+        self.interaction_router: Any | None = None
         self.decisions = decisions
         self.router = APIRouter(prefix="/v1/browser", tags=["browser"])
         self._install_routes()

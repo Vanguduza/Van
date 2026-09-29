@@ -139,6 +139,10 @@ class Settings(BaseSettings):
     browser_stagehand_expected_version: str = ""
     browser_stagehand_model_provider: str = ""
     browser_stagehand_model_name: str = ""
+    # Programme B contract B5 — the browser interaction router (deterministic -> dial-jev
+    # PROPOSE_ACTION -> Stagehand -> owner takeover). Off by default: with it off the
+    # /v1/browser/interaction/step route answers 503 and nothing calls dial-jev.
+    browser_interaction_router_enabled: bool = False
 
     # OMV-002 — subordinate persistent Linux workspace. Disabled until the local
     # van-computer image and Docker isolation are qualified on the deployment host.

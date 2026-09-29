@@ -63,7 +63,7 @@ from van_gateway.hermes.bridge import HermesBridge
 from van_gateway.mtls.pki import DeviceCA, PkiError
 from van_gateway.mtls.transport import mtls_device_id
 from van_gateway.idempotency.service import IdempotencyService
-from van_gateway.jev.client import JevProjectionClient
+from van_gateway.jev.client import JevProjectionClient, JevProposeActionClient
 from van_gateway.jev.api import JevProjectionApi
 from van_gateway.jev.advisor import JevVanAdvisor
 from van_gateway.models import (
@@ -127,6 +127,10 @@ from van_gateway.browser.stream_grants import (
     StreamGrantSigner,
 )
 from van_gateway.browser.worker import HybridBrowserWorker
+from van_gateway.browser.interaction_router import (
+    build_interaction_router,
+    build_interaction_routes,
+)
 from van_gateway.session.api import build_session_router, is_session_owner_route
 from van_gateway.voice.speech_stream import SpeechStreamService
 from van_gateway.session.router import (
@@ -554,6 +558,22 @@ def create_app() -> FastAPI:
             automation_health.stagehand,
         ),
     )
+    # Programme B / B5 — the interaction router rides on the same harness and Stagehand
+    # adapters; it has no browser of its own. The eligibility classifier (B2) is imported
+    # lazily and a missing classifier or verifier disables the Jev lane with a recorded
+    # reason. `browser_interaction_router_enabled` defaults False.
+    browser_interaction = build_interaction_router(
+        settings=settings,
+        harness=automation_health.harness,
+        stagehand=automation_health.stagehand,
+        jev_client=JevProposeActionClient(
+            base_url=settings.jev_base_url,
+            token_file=settings.jev_consumer_token_file,
+            enabled=settings.jev_enabled,
+            timeout_seconds=min(settings.jev_timeout_seconds, 1.2),
+        ),
+    )
+    browser.interaction_router = browser_interaction
 
     watch_runner = WatchRunner(
         goals,
@@ -996,6 +1016,7 @@ def create_app() -> FastAPI:
     app.state.automation_hot_index = automation_hot_index
     app.state.automation_dispatcher = automation_dispatcher
     app.state.browser = browser
+    app.state.browser_interaction = browser_interaction
     app.state.capability_registry = capability_registry
     app.state.capability_router = capability_router
     app.state.missions = missions
@@ -1031,6 +1052,7 @@ def create_app() -> FastAPI:
     app.include_router(automation.router)
     app.include_router(temporal_automation.router)
     app.include_router(browser.router)
+    app.include_router(build_interaction_routes(browser, browser_interaction))
     if browser_stream_grants is not None:
         # Rev 1.5 §§22.2, 22.3 — what Hermes is handed when it drives the owner's
         # browser, and what is destroyed when the owner takes it back.

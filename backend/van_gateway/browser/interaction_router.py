@@ -1,0 +1,1100 @@
+"""Programme B contract B5 — the browser interaction router (Jev x OpenMuse Convergence Rev 1).
+
+One browser step, four lanes, in a fixed order:
+
+1. **Deterministic** — a typed Playwright/CDP action the caller already knows
+   (``DeterministicAction``), executed by the Browser Harness.
+2. **dial-jev PROPOSE_ACTION** — only for an observation the B2 classifier
+   (``classify_observation``, unit F) calls ``PUBLIC_ELIGIBLE`` or ``SANITIZABLE_ELIGIBLE``.
+   Jev *proposes* one member of a closed operation set against an opaque target id. VAN then
+   re-applies the B1 contract here in Python (defence in depth) before anything executes.
+3. **Stagehand semantic fallback** — Stagehand ``observe`` proposes one action; the Harness
+   performs it (Stagehand ``act`` is not used here, see ``StagehandSemanticFallback``).
+4. **Owner takeover / policy refusal** — nothing above produced a safe action, or policy
+   refused the one that was produced.
+
+Invariants this module owns (each has a test that removes it and watches it fail):
+
+* default eligibility denies everything; an ineligible observation never reaches Jev;
+* a missing eligibility classifier, verifier, executor or Jev client **disables** the Jev lane
+  with a recorded reason — it is never silently skipped;
+* Jev never executes. The injected executor (Browser Harness) executes;
+* only the independent postcondition verifier yields ``VERIFIED_SUCCESS``; a Jev ``done`` is a
+  claim and moves the step to ``VERIFYING``;
+* the router itself is reachable only when ``browser_interaction_router_enabled`` is set
+  (default ``False``).
+
+External repositories (browser-use/jev-ultrafast, browserbase/stagehand) are reference only
+under DEC-039; nothing here is copied from them.
+"""
+
+from __future__ import annotations
+
+import inspect
+import re
+import time
+from dataclasses import dataclass, field
+from enum import Enum
+from typing import Any, Awaitable, Callable, Protocol
+
+from fastapi import APIRouter, Header, HTTPException
+from pydantic import BaseModel, Field
+
+from van_gateway.automation.payments import PaymentBoundaryError, assert_not_automated_payment
+from van_gateway.automation.verifier import (
+    PostconditionSpec,
+    VerificationOutcome,
+    VerificationResult,
+    WorkflowVerifier,
+)
+from van_gateway.action.models import VerifierType
+from van_gateway.browser.adapters import BrowserAdapterError
+from van_gateway.browser.models import BrowserTask
+from van_gateway.browser.policy import BrowserPolicyError
+
+# ------------------------------------------------------------------------ B1 vocabulary
+
+B1_OPERATIONS: tuple[str, ...] = ("click", "fill", "select", "scroll", "press_key", "done", "abstain")
+B1_ACTION_CLASSES: tuple[str, ...] = ("A0", "A1", "A2", "A3", "A4", "A5")
+PROPOSABLE_ACTION_CLASSES = frozenset({"A0", "A1", "A2", "A3"})
+NEVER_PROPOSABLE_ACTION_CLASSES = frozenset({"A4", "A5"})
+TARGETLESS_OPERATIONS = frozenset({"done", "abstain", "scroll"})
+ELIGIBLE_CLASSES = frozenset({"PUBLIC_ELIGIBLE", "SANITIZABLE_ELIGIBLE"})
+PAYLOAD_SCHEMA = "van.browser.action_payload.v1"
+_PAYLOAD_KEYS = frozenset({
+    "payload_schema", "effect_direction", "closed_operation_set", "origin_class",
+    "targets", "action_class_ceiling", "observation_epoch",
+})
+_OPTIONAL_PAYLOAD_KEYS = frozenset({"value_slots"})
+_TARGET_KEYS = frozenset({"target_id", "role", "label"})
+_TARGET_ID = re.compile(r"^t_[A-Za-z0-9_-]{1,64}$")
+_VALUE_SLOT_ID = re.compile(r"^v_[A-Za-z0-9_-]{1,64}$")
+_EPOCH = re.compile(r"^[A-Za-z0-9_-]{1,64}$")
+_ORIGIN_CLASSES = frozenset({"PUBLIC_ALLOWLISTED", "PUBLIC_UNLISTED"})
+
+
+def _rank(action_class: str) -> int:
+    return B1_ACTION_CLASSES.index(action_class)
+
+
+class SemanticProposalRefused(RuntimeError):
+    """Stagehand observed something the router will not hand to the Harness."""
+
+    def __init__(self, code: str) -> None:
+        super().__init__(code)
+        self.code = code
+
+
+class B1ValidationError(ValueError):
+    """The B1 payload or a Jev proposal failed VAN's own re-validation."""
+
+    def __init__(self, code: str) -> None:
+        super().__init__(code)
+        self.code = code
+
+
+# ------------------------------------------------------------------------ public types
+
+
+class RouterLane(str, Enum):
+    DETERMINISTIC = "DETERMINISTIC"
+    JEV = "JEV"
+    STAGEHAND = "STAGEHAND"
+    OWNER_TAKEOVER = "OWNER_TAKEOVER"
+    POLICY_REFUSAL = "POLICY_REFUSAL"
+
+
+class StepState(str, Enum):
+    PROPOSED = "PROPOSED"
+    EXECUTING = "EXECUTING"
+    VERIFYING = "VERIFYING"
+    VERIFIED_SUCCESS = "VERIFIED_SUCCESS"
+    VERIFICATION_FAILED = "VERIFICATION_FAILED"
+    #: Executed, and the verifier could not observe the postcondition. Never success.
+    UNVERIFIED = "UNVERIFIED"
+    EXECUTION_FAILED = "EXECUTION_FAILED"
+    OWNER_TAKEOVER = "OWNER_TAKEOVER"
+    POLICY_REFUSED = "POLICY_REFUSED"
+
+
+class DeterministicAction(BaseModel):
+    """A typed action the caller already knows. No model involved."""
+
+    operation: str
+    locator: str | None = None
+    #: ``secretref://`` for fill, a key name for press_key.
+    value_ref: str | None = None
+
+
+@dataclass(frozen=True)
+class RouterAction:
+    """What the executor receives. Always the fabric's own locator, never a Jev string."""
+
+    lane: RouterLane
+    operation: str
+    locator: str | None
+    value_ref: str | None
+    action_class: str | None
+    target_id: str | None = None
+    #: Only the Stagehand lane: the observed Stagehand action, kept as evidence. It is never
+    #: replayed through Stagehand; the Harness performs ``operation`` on ``locator``.
+    semantic_action: dict[str, Any] | None = None
+    #: Human-readable text of what is acted on (target label / Stagehand description),
+    #: checked by the payment boundary exactly as the subagent runner checks instructions.
+    description: str | None = None
+
+
+@dataclass
+class InteractionStep:
+    task: BrowserTask
+    #: B1 ceiling for this step, in B1 vocabulary (A0..A3).
+    action_class_ceiling: str
+    closed_operation_set: tuple[str, ...] = ("click", "fill", "select", "scroll", "press_key", "done", "abstain")
+    deterministic_action: DeterministicAction | None = None
+    postcondition: PostconditionSpec | None = None
+    semantic_instruction: str | None = None
+    #: B1 value slot id -> reference the executor resolves (secretref:// or key name).
+    value_slots: dict[str, str] = field(default_factory=dict)
+    #: The page observation for B2. When ``None`` the router asks its observer.
+    observation: dict[str, Any] | None = None
+
+
+@dataclass
+class StepResult:
+    lane: RouterLane
+    state: StepState
+    trail: list[str] = field(default_factory=list)
+    reasons: list[str] = field(default_factory=list)
+    jev_consulted: bool = False
+    eligibility_class: str | None = None
+    action: RouterAction | None = None
+    verification: VerificationResult | None = None
+
+    @property
+    def verified_success(self) -> bool:
+        return self.state is StepState.VERIFIED_SUCCESS
+
+    def to_json(self) -> dict[str, Any]:
+        return {
+            "lane": self.lane.value,
+            "state": self.state.value,
+            "trail": list(self.trail),
+            "reasons": list(self.reasons),
+            "jev_consulted": self.jev_consulted,
+            "eligibility_class": self.eligibility_class,
+            "action": None if self.action is None else {
+                "lane": self.action.lane.value,
+                "operation": self.action.operation,
+                "target_id": self.action.target_id,
+                "action_class": self.action.action_class,
+            },
+            "verification": None if self.verification is None else {
+                "outcome": self.verification.outcome.value,
+                "detail": self.verification.detail,
+            },
+            "verified_success": self.verified_success,
+        }
+
+
+# ------------------------------------------------------------------------ dependencies
+
+
+class ActionExecutor(Protocol):
+    """The Browser Harness / Browser Control Agent. The only thing that acts on the page."""
+
+    async def execute(self, task: BrowserTask, action: RouterAction) -> dict[str, Any]: ...
+
+
+class PostconditionVerifier(Protocol):
+    """Independent of the executor and of Jev. The only source of VERIFIED_SUCCESS."""
+
+    async def verify(
+        self, task: BrowserTask, action: RouterAction,
+        postcondition: PostconditionSpec | None, *, claimed_done: bool,
+    ) -> VerificationResult: ...
+
+
+class SemanticFallback(Protocol):
+    """Stagehand: observe, then propose one observed action (or ``None``)."""
+
+    async def propose(self, task: BrowserTask, step: InteractionStep) -> RouterAction | None: ...
+
+
+class JevProposer(Protocol):
+    async def propose_action(
+        self, *, request: dict[str, Any], caller_action_classes: list[dict[str, Any]],
+        current_epoch: str,
+    ) -> Any: ...
+
+
+PageObserver = Callable[[BrowserTask], Awaitable[dict[str, Any]]]
+EligibilityClassifier = Callable[..., Any]
+ActionClassifier = Callable[[str, dict[str, Any] | None, Any], str]
+
+
+_HIGH_RISK_LABEL = re.compile(
+    r"\b(pay|payment|purchase|buy|checkout|order|transfer|send|submit|confirm|delete|remove|"
+    r"sign|authori[sz]e|approve|subscribe|withdraw|deposit)\b",
+    re.IGNORECASE,
+)
+
+
+def default_action_classifier(operation: str, target: dict[str, Any] | None, target_entry: Any) -> str:
+    """VAN's own (operation, target) -> action class. Conservative by construction.
+
+    ``done``/``scroll``/``abstain`` change nothing -> A0. Anything whose label reads as a
+    commitment (pay, submit, delete, send ...) -> A4, which is never proposable. ``fill``
+    writes owner data -> A3. Other clicks/selects/keys -> A2. A class the fabric attached to
+    the target (``target_entry["action_class"]``) can only raise this, never lower it.
+    """
+    if operation in TARGETLESS_OPERATIONS:
+        base = "A0"
+    elif target is not None and _HIGH_RISK_LABEL.search(str(target.get("label") or "")):
+        base = "A4"
+    elif operation == "fill":
+        base = "A3"
+    else:
+        base = "A2"
+    declared = target_entry.get("action_class") if isinstance(target_entry, dict) else None
+    if isinstance(declared, str) and declared in B1_ACTION_CLASSES and _rank(declared) > _rank(base):
+        return declared
+    return base
+
+
+def load_eligibility_classifier() -> EligibilityClassifier | None:
+    """Unit F's ``classify_observation``, imported lazily; ``None`` when it is not built."""
+    try:
+        from van_gateway.browser import jev_eligibility  # type: ignore[attr-defined]
+    except ImportError:
+        return None
+    return getattr(jev_eligibility, "classify_observation", None)
+
+
+# ------------------------------------------------------------------------ B1 re-validation
+
+
+def validate_b1_payload(payload: Any, *, ceiling: str, closed_operation_set: tuple[str, ...]) -> dict[str, Any]:
+    """Re-check the B2 payload against B1 before it leaves VAN. Returns the B1 *request*
+    (payload minus ``payload_schema`` and ``origin_class``)."""
+    if not isinstance(payload, dict):
+        raise B1ValidationError("PAYLOAD_NOT_OBJECT")
+    keys = set(payload)
+    if not _PAYLOAD_KEYS <= keys:
+        raise B1ValidationError(f"PAYLOAD_KEY_MISSING:{sorted(_PAYLOAD_KEYS - keys)[0]}")
+    unknown = keys - _PAYLOAD_KEYS - _OPTIONAL_PAYLOAD_KEYS
+    if unknown:
+        raise B1ValidationError(f"PAYLOAD_UNKNOWN_KEY:{sorted(unknown)[0]}")
+    if payload["payload_schema"] != PAYLOAD_SCHEMA:
+        raise B1ValidationError("PAYLOAD_SCHEMA_MISMATCH")
+    if payload["effect_direction"] != "PROPOSE_ACTION":
+        raise B1ValidationError("EFFECT_DIRECTION_MISMATCH")
+    if payload["origin_class"] not in _ORIGIN_CLASSES:
+        raise B1ValidationError("ORIGIN_CLASS_INVALID")
+    ops = payload["closed_operation_set"]
+    if not isinstance(ops, list) or not ops or len(set(ops)) != len(ops):
+        raise B1ValidationError("OPERATION_SET_INVALID")
+    for op in ops:
+        if op not in B1_OPERATIONS:
+            raise B1ValidationError(f"OPERATION_NOT_CLOSED:{op}")
+        if op not in closed_operation_set:
+            raise B1ValidationError(f"OPERATION_OUTSIDE_STEP_SET:{op}")
+    targets = payload["targets"]
+    if not isinstance(targets, list):
+        raise B1ValidationError("TARGETS_INVALID")
+    seen: set[str] = set()
+    for target in targets:
+        if not isinstance(target, dict) or set(target) != _TARGET_KEYS:
+            raise B1ValidationError("TARGET_SHAPE_INVALID")
+        tid = target["target_id"]
+        if not isinstance(tid, str) or not _TARGET_ID.match(tid):
+            raise B1ValidationError("TARGET_ID_INVALID")
+        if tid in seen:
+            raise B1ValidationError("TARGET_ID_DUPLICATE")
+        seen.add(tid)
+        for key in ("role", "label"):
+            if not isinstance(target[key], str) or len(target[key]) > 200:
+                raise B1ValidationError(f"TARGET_{key.upper()}_INVALID")
+    payload_ceiling = payload["action_class_ceiling"]
+    if payload_ceiling in NEVER_PROPOSABLE_ACTION_CLASSES:
+        raise B1ValidationError("CEILING_NEVER_PROPOSABLE")
+    if payload_ceiling not in PROPOSABLE_ACTION_CLASSES:
+        raise B1ValidationError("CEILING_INVALID")
+    if _rank(payload_ceiling) > _rank(ceiling):
+        raise B1ValidationError("PAYLOAD_CEILING_ABOVE_STEP_CEILING")
+    epoch = payload["observation_epoch"]
+    if not isinstance(epoch, str) or not _EPOCH.match(epoch):
+        raise B1ValidationError("EPOCH_INVALID")
+    request = {k: payload[k] for k in (
+        "effect_direction", "closed_operation_set", "targets", "action_class_ceiling", "observation_epoch",
+    )}
+    if "value_slots" in payload:
+        slots = payload["value_slots"]
+        if not isinstance(slots, list) or not all(isinstance(s, str) and _VALUE_SLOT_ID.match(s) for s in slots):
+            raise B1ValidationError("VALUE_SLOTS_INVALID")
+        request["value_slots"] = list(slots)
+    return request
+
+
+def validate_jev_proposal(
+    *,
+    request: dict[str, Any],
+    proposal: Any,
+    current_epoch: str | None,
+    classify: Callable[[str, dict[str, Any] | None], str],
+    jev_action_class: str | None = None,
+) -> tuple[str, dict[str, Any] | None, str]:
+    """VAN-side B1 re-validation of a Jev proposal. Returns (operation, target, class).
+
+    Raises ``B1ValidationError`` for every violation; the router treats that as ABSTAIN.
+    """
+    if not isinstance(proposal, dict) or set(proposal) != {"operation", "target_id", "value_ref"}:
+        raise B1ValidationError("PROPOSAL_SHAPE_INVALID")
+    operation = proposal["operation"]
+    if not isinstance(operation, str) or operation not in request["closed_operation_set"]:
+        raise B1ValidationError("OPERATION_NOT_IN_CLOSED_SET")
+    if operation == "abstain":
+        raise B1ValidationError("JEV_ABSTAINED")
+    target_id = proposal["target_id"]
+    target: dict[str, Any] | None = None
+    if target_id is None:
+        if operation not in TARGETLESS_OPERATIONS:
+            raise B1ValidationError("TARGET_REQUIRED")
+    else:
+        target = next((t for t in request["targets"] if t["target_id"] == target_id), None)
+        if target is None:
+            raise B1ValidationError("TARGET_NOT_SUPPLIED")
+    value_ref = proposal["value_ref"]
+    if value_ref is not None and value_ref not in (request.get("value_slots") or []):
+        raise B1ValidationError("VALUE_REF_NOT_SUPPLIED")
+    if not current_epoch or request["observation_epoch"] != current_epoch:
+        raise B1ValidationError("STALE_OBSERVATION_EPOCH")
+    action_class = classify(operation, target)
+    if action_class not in B1_ACTION_CLASSES:
+        raise B1ValidationError("ACTION_CLASS_UNKNOWN")
+    if action_class in NEVER_PROPOSABLE_ACTION_CLASSES:
+        raise B1ValidationError("ACTION_CLASS_NEVER_PROPOSABLE")
+    if _rank(action_class) > _rank(request["action_class_ceiling"]):
+        raise B1ValidationError("ACTION_CLASS_ABOVE_CEILING")
+    if jev_action_class is not None and jev_action_class != action_class:
+        # dial-jev echoes the class it was told; a different one means the two sides
+        # disagree about what this action is, and VAN does not guess which is right.
+        raise B1ValidationError("ACTION_CLASS_DISAGREES_WITH_JEV")
+    return operation, target, action_class
+
+
+# ------------------------------------------------------------------------ metrics (§8)
+
+
+class RouterMetrics:
+    """The §8 pre-registered counters. Every rate is published with its denominator."""
+
+    COUNTERS = (
+        "total_steps",
+        "deterministic_steps",
+        "jev_candidate_steps",
+        "eligible_steps",
+        "b2_privacy_rejections",
+        "dds_egress_rejections",
+        "jev_lane_disabled_steps",
+        "jev_calls",
+        "jev_responses",
+        "jev_proposals_received",
+        "jev_fallbacks",
+        "jev_stale_rejections",
+        "jev_executed",
+        "jev_executed_verified_success",
+        "jev_wrong_actions",
+        "jev_done_proposals",
+        "jev_done_postcondition_failures",
+        "stagehand_steps",
+        "owner_takeovers",
+        "policy_refusals",
+    )
+
+    def __init__(self) -> None:
+        self.counts: dict[str, int] = {name: 0 for name in self.COUNTERS}
+
+    def inc(self, name: str, by: int = 1) -> None:
+        if name not in self.counts:
+            raise KeyError(name)
+        self.counts[name] += by
+
+    def record_owner_judged_wrong(self) -> None:
+        """An owner said an executed Jev proposal was wrong (verifier passed it)."""
+        self.inc("jev_wrong_actions")
+
+    @staticmethod
+    def _rate(numerator: int, denominator: int) -> dict[str, Any]:
+        return {
+            "numerator": numerator,
+            "denominator": denominator,
+            "rate": (numerator / denominator) if denominator else None,
+        }
+
+    def snapshot(self) -> dict[str, Any]:
+        c = self.counts
+        return {
+            "counters": dict(c),
+            "metrics": {
+                "total_steps": c["total_steps"],
+                "eligible_steps": c["eligible_steps"],
+                "eligibility_rate": self._rate(c["eligible_steps"], c["total_steps"]),
+                "success_on_eligible_set": self._rate(c["jev_executed_verified_success"], c["jev_executed"]),
+                "fallback_rate": self._rate(c["jev_fallbacks"], c["eligible_steps"]),
+                "wrong_action_rate": self._rate(c["jev_wrong_actions"], c["jev_executed"]),
+                "stale_action_rate": self._rate(c["jev_stale_rejections"], c["jev_responses"]),
+                "privacy_rejection_rate": self._rate(
+                    c["b2_privacy_rejections"] + c["dds_egress_rejections"], c["total_steps"]
+                ),
+                "postcondition_failure_rate": self._rate(
+                    c["jev_done_postcondition_failures"], c["jev_done_proposals"]
+                ),
+            },
+            "definitions": {
+                "eligible_steps": "steps whose B2 class is PUBLIC_ELIGIBLE or SANITIZABLE_ELIGIBLE; "
+                                  "B2 runs only for steps the deterministic lane did not resolve "
+                                  "(jev_candidate_steps)",
+                "success_on_eligible_set": "VERIFIED_SUCCESS / executed Jev proposals (done excluded)",
+                "stale_action_rate": "STALE_OBSERVATION_EPOCH rejections (DDS or VAN) / well-formed Jev responses",
+            },
+        }
+
+
+# ------------------------------------------------------------------------ router
+
+
+def _class_value(eligibility_class: Any) -> str:
+    value = getattr(eligibility_class, "value", eligibility_class)
+    if isinstance(value, str):
+        return value
+    return str(getattr(eligibility_class, "name", "UNKNOWN"))
+
+
+async def _maybe_await(value: Any) -> Any:
+    return await value if inspect.isawaitable(value) else value
+
+
+def _locator_from_entry(entry: Any) -> str | None:
+    if isinstance(entry, str) and entry:
+        return entry
+    if isinstance(entry, dict):
+        for key in ("locator", "selector", "backend_node_ref", "ref"):
+            value = entry.get(key)
+            if isinstance(value, str) and value:
+                return value
+    return None
+
+
+class BrowserInteractionRouter:
+    """Routes one browser step through the four lanes. Holds no browser authority itself."""
+
+    def __init__(
+        self,
+        *,
+        enabled: bool = False,
+        executor: ActionExecutor | None = None,
+        verifier: PostconditionVerifier | None = None,
+        eligibility_classifier: EligibilityClassifier | None = None,
+        jev_client: JevProposer | None = None,
+        semantic_fallback: SemanticFallback | None = None,
+        observer: PageObserver | None = None,
+        action_classifier: ActionClassifier = default_action_classifier,
+        epoch_source: Callable[[BrowserTask, InteractionStep], Awaitable[str | None]] | None = None,
+        eligibility_policy: Any = None,
+        metrics: RouterMetrics | None = None,
+    ) -> None:
+        self.enabled = enabled
+        self.executor = executor
+        self.verifier = verifier
+        self.eligibility_classifier = eligibility_classifier
+        self.jev_client = jev_client
+        self.semantic_fallback = semantic_fallback
+        self.observer = observer
+        self.action_classifier = action_classifier
+        self.epoch_source = epoch_source
+        self.eligibility_policy = eligibility_policy
+        self.metrics = metrics or RouterMetrics()
+
+    # ----------------------------------------------------------- lane readiness
+
+    def jev_lane_disabled_reasons(self) -> list[str]:
+        """Why the Jev lane cannot run. Empty means it can. Missing deps fail closed."""
+        reasons = []
+        if self.eligibility_classifier is None:
+            reasons.append("JEV_LANE_DISABLED:ELIGIBILITY_CLASSIFIER_MISSING")
+        if self.verifier is None:
+            reasons.append("JEV_LANE_DISABLED:VERIFIER_MISSING")
+        if self.executor is None:
+            reasons.append("JEV_LANE_DISABLED:EXECUTOR_MISSING")
+        if self.jev_client is None:
+            reasons.append("JEV_LANE_DISABLED:JEV_CLIENT_MISSING")
+        elif getattr(self.jev_client, "configured", True) is False:
+            reasons.append("JEV_LANE_DISABLED:JEV_CLIENT_UNCONFIGURED")
+        if self.action_classifier is None:
+            reasons.append("JEV_LANE_DISABLED:ACTION_CLASSIFIER_MISSING")
+        return reasons
+
+    def status(self) -> dict[str, Any]:
+        return {
+            "enabled": self.enabled,
+            "jev_lane_disabled_reasons": self.jev_lane_disabled_reasons(),
+            "deterministic_lane": self.executor is not None,
+            "stagehand_lane": self.semantic_fallback is not None,
+            "verifier": self.verifier is not None,
+        }
+
+    # ----------------------------------------------------------- entry point
+
+    async def route(self, step: InteractionStep) -> StepResult:
+        if not self.enabled:
+            raise RuntimeError("BROWSER_INTERACTION_ROUTER_DISABLED")
+        if step.action_class_ceiling not in PROPOSABLE_ACTION_CLASSES:
+            # A4/A5 are never routed autonomously; an unknown ceiling is not guessed at.
+            self.metrics.inc("total_steps")
+            self.metrics.inc("policy_refusals")
+            return StepResult(
+                lane=RouterLane.POLICY_REFUSAL, state=StepState.POLICY_REFUSED,
+                trail=[StepState.POLICY_REFUSED.value],
+                reasons=[f"STEP_CEILING_NOT_ROUTABLE:{step.action_class_ceiling}"],
+            )
+        self.metrics.inc("total_steps")
+        reasons: list[str] = []
+
+        # 1. deterministic typed lane
+        if step.deterministic_action is not None:
+            if self.executor is None:
+                reasons.append("DETERMINISTIC_LANE_EXECUTOR_MISSING")
+            else:
+                det = step.deterministic_action
+                action = RouterAction(
+                    lane=RouterLane.DETERMINISTIC, operation=det.operation, locator=det.locator,
+                    value_ref=det.value_ref, action_class=None,
+                )
+                self.metrics.inc("deterministic_steps")
+                return await self._execute_and_verify(step, action, reasons, claimed_done=det.operation == "done")
+
+        # 2. Jev proposal lane
+        self.metrics.inc("jev_candidate_steps")
+        jev_result = await self._jev_lane(step, reasons)
+        if jev_result is not None:
+            return jev_result
+
+        # 3. Stagehand semantic fallback
+        if self.semantic_fallback is not None and self.executor is not None:
+            try:
+                proposal = await self.semantic_fallback.propose(step.task, step)
+            except SemanticProposalRefused as exc:
+                proposal = None
+                reasons.append(f"STAGEHAND_PROPOSAL_REFUSED:{exc.code}")
+            except (BrowserAdapterError, BrowserPolicyError, PaymentBoundaryError) as exc:
+                proposal = None
+                reasons.append(f"STAGEHAND_UNAVAILABLE:{getattr(exc, 'code', type(exc).__name__)}")
+            else:
+                if proposal is None:
+                    # "Nothing left to do" from Stagehand is not success (STAGEHAND-VERIFIER-GAP):
+                    # with no action there is nothing to verify, so the owner decides.
+                    reasons.append("STAGEHAND_NO_ACTION")
+            if proposal is not None:
+                # Stagehand output is untrusted and cannot raise the class: VAN classifies
+                # the observed action itself and holds it to the step ceiling.
+                target = {"label": proposal.description or ""}
+                stagehand_class = self.action_classifier(proposal.operation, target, None)
+                if (
+                    stagehand_class not in B1_ACTION_CLASSES
+                    or stagehand_class in NEVER_PROPOSABLE_ACTION_CLASSES
+                    or _rank(stagehand_class) > _rank(step.action_class_ceiling)
+                ):
+                    reasons.append(f"STAGEHAND_ACTION_ABOVE_CEILING:{stagehand_class}")
+                else:
+                    self.metrics.inc("stagehand_steps")
+                    action = RouterAction(
+                        lane=RouterLane.STAGEHAND, operation=proposal.operation,
+                        locator=proposal.locator, value_ref=proposal.value_ref,
+                        action_class=stagehand_class, semantic_action=proposal.semantic_action,
+                        description=proposal.description,
+                    )
+                    return await self._execute_and_verify(step, action, reasons, claimed_done=False)
+        else:
+            reasons.append("STAGEHAND_LANE_UNAVAILABLE")
+
+        # 4. owner takeover
+        self.metrics.inc("owner_takeovers")
+        return StepResult(
+            lane=RouterLane.OWNER_TAKEOVER, state=StepState.OWNER_TAKEOVER,
+            trail=[StepState.OWNER_TAKEOVER.value], reasons=reasons,
+            jev_consulted=any(r.startswith("JEV_CONSULTED") for r in reasons),
+            eligibility_class=next((r.split(":", 1)[1] for r in reasons if r.startswith("B2:")), None),
+        )
+
+    # ----------------------------------------------------------- Jev lane
+
+    async def _observe(self, step: InteractionStep) -> dict[str, Any] | None:
+        if step.observation is not None:
+            return step.observation
+        if self.observer is None:
+            return None
+        return await self.observer(step.task)
+
+    async def _classify(self, observation: Any, step: InteractionStep) -> Any:
+        assert self.eligibility_classifier is not None
+        return await _maybe_await(self.eligibility_classifier(
+            observation,
+            closed_operation_set=tuple(step.closed_operation_set),
+            action_class_ceiling=step.action_class_ceiling,
+            policy=self.eligibility_policy,
+        ))
+
+    async def _current_epoch(self, step: InteractionStep) -> str | None:
+        """The page's epoch *now*, not when it was classified."""
+        if self.epoch_source is not None:
+            return await self.epoch_source(step.task, step)
+        if self.observer is None or self.eligibility_classifier is None:
+            return None
+        fresh = await self.observer(step.task)
+        result = await self._classify(fresh, step)
+        epoch = getattr(result, "observation_epoch", None)
+        return epoch if isinstance(epoch, str) else None
+
+    async def _jev_lane(self, step: InteractionStep, reasons: list[str]) -> StepResult | None:
+        """Returns a terminal result when a Jev proposal was acted on, else ``None``."""
+        if self.eligibility_classifier is None:
+            # Cannot tell eligible from ineligible, so nothing is eligible. Recorded, not silent.
+            self.metrics.inc("jev_lane_disabled_steps")
+            reasons.extend(self.jev_lane_disabled_reasons())
+            return None
+
+        observation = await self._observe(step)
+        if observation is None:
+            self.metrics.inc("jev_lane_disabled_steps")
+            reasons.append("JEV_LANE_DISABLED:NO_OBSERVATION")
+            return None
+        try:
+            eligibility = await self._classify(observation, step)
+        except Exception as exc:  # noqa: BLE001 - a classifier fault is "not eligible"
+            reasons.append(f"B2_CLASSIFIER_FAILED:{type(exc).__name__}")
+            self.metrics.inc("b2_privacy_rejections")
+            return None
+        cls = _class_value(getattr(eligibility, "eligibility_class", None))
+        reasons.append(f"B2:{cls}")
+        payload = getattr(eligibility, "jev_payload", None)
+        if cls not in ELIGIBLE_CLASSES or payload is None:
+            self.metrics.inc("b2_privacy_rejections")
+            return None
+        self.metrics.inc("eligible_steps")
+
+        disabled = self.jev_lane_disabled_reasons()
+        if disabled:
+            self.metrics.inc("jev_lane_disabled_steps")
+            self.metrics.inc("jev_fallbacks")
+            reasons.extend(disabled)
+            return None
+
+        try:
+            request = validate_b1_payload(
+                payload, ceiling=step.action_class_ceiling,
+                closed_operation_set=tuple(step.closed_operation_set),
+            )
+            if request["observation_epoch"] != getattr(eligibility, "observation_epoch", None):
+                raise B1ValidationError("PAYLOAD_EPOCH_NOT_OBSERVATION_EPOCH")
+        except B1ValidationError as exc:
+            self.metrics.inc("jev_fallbacks")
+            reasons.append(f"JEV_REQUEST_REJECTED_BY_VAN:{exc.code}")
+            return None
+
+        target_map = getattr(eligibility, "target_map", None) or {}
+
+        def classify(operation: str, target: dict[str, Any] | None) -> str:
+            entry = target_map.get(target["target_id"]) if target else None
+            return self.action_classifier(operation, target, entry)
+
+        caller_classes: list[dict[str, Any]] = []
+        for op in request["closed_operation_set"]:
+            if op == "abstain":
+                continue
+            if op in TARGETLESS_OPERATIONS:
+                caller_classes.append({"operation": op, "target_id": None, "action_class": classify(op, None)})
+            else:
+                for target in request["targets"]:
+                    caller_classes.append({
+                        "operation": op, "target_id": target["target_id"],
+                        "action_class": classify(op, target),
+                    })
+
+        epoch_at_call = await self._current_epoch(step)
+        if not epoch_at_call or epoch_at_call != request["observation_epoch"]:
+            # The page moved between classification and the call; asking Jev about a page
+            # that no longer exists would only produce a stale proposal.
+            self.metrics.inc("jev_fallbacks")
+            reasons.append("JEV_NOT_CALLED:OBSERVATION_STALE_BEFORE_CALL")
+            return None
+        self.metrics.inc("jev_calls")
+        reasons.append("JEV_CONSULTED")
+        try:
+            response = await self.jev_client.propose_action(  # type: ignore[union-attr]
+                request=request, caller_action_classes=caller_classes,
+                current_epoch=epoch_at_call,
+            )
+        except Exception as exc:  # noqa: BLE001 - any client fault is an abstention
+            response = None
+            reasons.append(f"JEV_CLIENT_FAILED:{type(exc).__name__}")
+        if response is None or not getattr(response, "transport_ok", False):
+            self.metrics.inc("jev_fallbacks")
+            if response is not None:
+                reasons.extend(f"JEV:{r}" for r in response.reasons)
+            return None
+        self.metrics.inc("jev_responses")
+        if any("EGRESS" in r for r in response.reasons):
+            self.metrics.inc("dds_egress_rejections")
+        if not response.proposes:
+            if any("STALE_OBSERVATION_EPOCH" in r for r in response.reasons):
+                self.metrics.inc("jev_stale_rejections")
+            self.metrics.inc("jev_fallbacks")
+            reasons.extend(f"JEV:{r}" for r in response.reasons)
+            return None
+        self.metrics.inc("jev_proposals_received")
+
+        # VAN-side B1 re-validation, against the epoch *now* (right before execution).
+        epoch_now = await self._current_epoch(step)
+        try:
+            operation, target, action_class = validate_jev_proposal(
+                request=request, proposal=response.proposal, current_epoch=epoch_now,
+                classify=classify, jev_action_class=response.action_class,
+            )
+        except B1ValidationError as exc:
+            if exc.code == "STALE_OBSERVATION_EPOCH":
+                self.metrics.inc("jev_stale_rejections")
+            self.metrics.inc("jev_fallbacks")
+            reasons.append(f"JEV_PROPOSAL_REJECTED_BY_VAN:{exc.code}")
+            return None
+
+        locator = None
+        if target is not None:
+            locator = _locator_from_entry(target_map.get(target["target_id"]))
+            if locator is None:
+                self.metrics.inc("jev_fallbacks")
+                reasons.append("JEV_PROPOSAL_REJECTED_BY_VAN:TARGET_NOT_RESOLVABLE")
+                return None
+        value = None
+        slot = response.proposal["value_ref"]
+        if slot is not None:
+            value = step.value_slots.get(slot)
+            if value is None:
+                self.metrics.inc("jev_fallbacks")
+                reasons.append("JEV_PROPOSAL_REJECTED_BY_VAN:VALUE_SLOT_UNBOUND")
+                return None
+
+        action = RouterAction(
+            lane=RouterLane.JEV, operation=operation, locator=locator, value_ref=value,
+            action_class=action_class, target_id=target["target_id"] if target else None,
+            description=target["label"] if target else None,
+        )
+        if operation == "done":
+            self.metrics.inc("jev_done_proposals")
+        else:
+            self.metrics.inc("jev_executed")
+        result = await self._execute_and_verify(step, action, reasons, claimed_done=operation == "done")
+        result.jev_consulted = True
+        result.eligibility_class = cls
+        if operation == "done":
+            if result.state is not StepState.VERIFIED_SUCCESS:
+                self.metrics.inc("jev_done_postcondition_failures")
+        else:
+            if result.state is StepState.VERIFIED_SUCCESS:
+                self.metrics.inc("jev_executed_verified_success")
+            elif result.state is StepState.VERIFICATION_FAILED:
+                self.metrics.inc("jev_wrong_actions")
+        return result
+
+    # ----------------------------------------------------------- execute + verify
+
+    async def _execute_and_verify(
+        self, step: InteractionStep, action: RouterAction, reasons: list[str], *, claimed_done: bool,
+    ) -> StepResult:
+        trail = [StepState.PROPOSED.value]
+        try:
+            assert_not_automated_payment(
+                operation=action.operation, goal=action.description or "",
+                domain=step.task.target_domain,
+                context=f"interaction_router_{action.lane.value.lower()}",
+            )
+        except PaymentBoundaryError as exc:
+            self.metrics.inc("policy_refusals")
+            return StepResult(
+                lane=RouterLane.POLICY_REFUSAL, state=StepState.POLICY_REFUSED,
+                trail=trail + [StepState.POLICY_REFUSED.value], reasons=reasons + [str(exc)],
+                action=action,
+            )
+
+        if claimed_done:
+            # `done` is a claim. Nothing executes; the verifier decides.
+            trail.append(StepState.VERIFYING.value)
+        else:
+            trail.append(StepState.EXECUTING.value)
+            try:
+                await self.executor.execute(step.task, action)  # type: ignore[union-attr]
+            except (BrowserPolicyError, PaymentBoundaryError) as exc:
+                self.metrics.inc("policy_refusals")
+                return StepResult(
+                    lane=RouterLane.POLICY_REFUSAL, state=StepState.POLICY_REFUSED,
+                    trail=trail + [StepState.POLICY_REFUSED.value],
+                    reasons=reasons + [f"POLICY_REFUSED:{exc}"], action=action,
+                )
+            except BrowserAdapterError as exc:
+                return StepResult(
+                    lane=action.lane, state=StepState.EXECUTION_FAILED,
+                    trail=trail + [StepState.EXECUTION_FAILED.value],
+                    reasons=reasons + [f"EXECUTION_FAILED:{exc.code}"], action=action,
+                )
+            trail.append(StepState.VERIFYING.value)
+
+        if self.verifier is None:
+            state = StepState.UNVERIFIED
+            reasons = reasons + ["VERIFIER_MISSING"]
+            verification = None
+        else:
+            try:
+                verification = await self.verifier.verify(
+                    step.task, action, step.postcondition, claimed_done=claimed_done,
+                )
+            except Exception as exc:  # noqa: BLE001 - a verifier fault is never success
+                verification = VerificationResult(
+                    outcome=VerificationOutcome.UNVERIFIABLE, verifier_type=VerifierType.STATE_PREDICATE,
+                    detail=f"verifier_failed:{type(exc).__name__}",
+                )
+            if verification.outcome is VerificationOutcome.VERIFIED:
+                state = StepState.VERIFIED_SUCCESS
+            elif verification.outcome is VerificationOutcome.FAILED:
+                state = StepState.VERIFICATION_FAILED
+            else:
+                state = StepState.UNVERIFIED
+        trail.append(state.value)
+        return StepResult(
+            lane=action.lane, state=state, trail=trail, reasons=reasons, action=action,
+            verification=verification,
+        )
+
+
+# ------------------------------------------------------------------------ production adapters
+
+
+class HarnessActionExecutor:
+    """Executes a routed action through the existing Browser Harness adapter."""
+
+    def __init__(self, harness: Any) -> None:
+        self.harness = harness
+
+    async def execute(self, task: BrowserTask, action: RouterAction) -> dict[str, Any]:
+        op = action.operation
+        if op == "click":
+            if not action.locator:
+                raise BrowserAdapterError("BROWSER_LOCATOR_MISSING", op)
+            return await self.harness.click(task, action.locator)
+        if op == "fill":
+            if not action.locator or not action.value_ref:
+                raise BrowserAdapterError("BROWSER_FILL_REF_MISSING", op)
+            # fill_ref refuses anything that is not a secretref:// reference.
+            return await self.harness.fill_ref(task, action.locator, action.value_ref)
+        if op == "press_key":
+            if not action.value_ref:
+                raise BrowserAdapterError("BROWSER_KEY_MISSING", op)
+            return await self.harness.press(task, action.value_ref)
+        if op == "scroll":
+            return await self.harness.scroll(task, {"direction": "down"})
+        raise BrowserAdapterError("BROWSER_ACTION_UNSUPPORTED", op)
+
+
+#: Stagehand observe() methods the Harness can perform itself, mapped to B1 operations.
+_STAGEHAND_METHODS = {"click": "click", "tap": "click", "press": "press_key", "keypress": "press_key",
+                      "scroll": "scroll", "scrollintoview": "scroll"}
+
+
+class StagehandSemanticFallback:
+    """Stagehand *observes and proposes*; the Browser Harness executes.
+
+    Unlike ``HybridBrowserWorker`` (which replays via ``StagehandAdapter.act`` — Stagehand
+    driving CDP itself), this lane never calls ``act``. The observed action is translated
+    into a typed Harness operation on the observed selector. A method the Harness cannot
+    perform without Stagehand (``fill``/``type`` carry literal text; Harness fills only
+    ``secretref://`` references) is refused, not replayed, and the step goes to the owner.
+    ``observe()`` finding no controls is ``None``: never success.
+    """
+
+    def __init__(self, stagehand: Any) -> None:
+        self.stagehand = stagehand
+
+    async def propose(self, task: BrowserTask, step: InteractionStep) -> RouterAction | None:
+        if not getattr(self.stagehand, "configured", False) or not getattr(self.stagehand, "enabled", False):
+            raise SemanticProposalRefused("STAGEHAND_UNCONFIGURED")
+        instruction = step.semantic_instruction or f"Choose the single next action for: {task.goal}"
+        observation = await self.stagehand.observe(task, instruction)
+        if not observation.controls:
+            return None
+        candidate = dict(observation.controls[0])
+        method = str(candidate.get("method") or "").strip().lower()
+        operation = _STAGEHAND_METHODS.get(method)
+        if operation is None:
+            raise SemanticProposalRefused(f"METHOD_NOT_HARNESS_EXECUTABLE:{method[:32] or 'none'}")
+        if operation not in step.closed_operation_set:
+            raise SemanticProposalRefused(f"OPERATION_NOT_IN_STEP_SET:{operation}")
+        selector = candidate.get("selector")
+        value = None
+        if operation == "press_key":
+            args = candidate.get("arguments") or []
+            value = str(args[0]) if args else None
+            if not value:
+                raise SemanticProposalRefused("KEY_MISSING")
+        if operation != "scroll" and not (isinstance(selector, str) and selector):
+            raise SemanticProposalRefused("SELECTOR_MISSING")
+        return RouterAction(
+            lane=RouterLane.STAGEHAND, operation=operation,
+            locator=selector if isinstance(selector, str) else None, value_ref=value,
+            action_class=None, semantic_action=candidate,
+            description=str(candidate.get("description") or "")[:2000] or None,
+        )
+
+
+class HarnessReadBackObserver:
+    """``PostconditionObserver`` that reads the page back fresh through the harness."""
+
+    def __init__(self, harness: Any) -> None:
+        self.harness = harness
+
+    async def observe(self, spec: PostconditionSpec, context: dict[str, Any]) -> dict[str, Any]:
+        page = await self.harness.page_info(context["task"])
+        observed = dict(page.get("extraction") or {})
+        for key in ("url", "title"):
+            if page.get(key) is not None:
+                observed.setdefault(key, page[key])
+        observed["exists"] = bool(page)
+        return observed
+
+
+class IndependentPostconditionVerifier:
+    """The existing ``WorkflowVerifier`` over a fresh harness read-back.
+
+    No declared postcondition, or no observer for its kind, is ``UNVERIFIABLE`` — never
+    success. Neither the executor's return value nor Jev's claim is consulted.
+    """
+
+    def __init__(self, harness: Any) -> None:
+        self.workflow = WorkflowVerifier({"READ_BACK": HarnessReadBackObserver(harness)})
+
+    async def verify(
+        self, task: BrowserTask, action: RouterAction,
+        postcondition: PostconditionSpec | None, *, claimed_done: bool,
+    ) -> VerificationResult:
+        return await self.workflow.verify(
+            spec=postcondition, verifier_type=VerifierType.READ_BACK,
+            engine_reported_success=claimed_done, context={"task": task},
+        )
+
+
+def build_interaction_router(
+    *,
+    settings: Any,
+    harness: Any,
+    stagehand: Any,
+    jev_client: JevProposer | None,
+    eligibility_classifier: EligibilityClassifier | None = None,
+    verifier: PostconditionVerifier | None = None,
+) -> BrowserInteractionRouter:
+    """Production wiring. Everything optional fails closed; the router is off by default."""
+    classifier = eligibility_classifier if eligibility_classifier is not None else load_eligibility_classifier()
+
+    async def observe(task: BrowserTask) -> dict[str, Any]:
+        return await harness.page_info(task)
+
+    return BrowserInteractionRouter(
+        enabled=bool(getattr(settings, "browser_interaction_router_enabled", False)),
+        # One executor for every lane: the Browser Harness. Jev and Stagehand only propose.
+        executor=HarnessActionExecutor(harness),
+        verifier=verifier if verifier is not None else IndependentPostconditionVerifier(harness),
+        eligibility_classifier=classifier,
+        jev_client=jev_client,
+        semantic_fallback=StagehandSemanticFallback(stagehand),
+        observer=observe,
+    )
+
+
+# ------------------------------------------------------------------------ HTTP surface
+
+
+class InteractionStepBody(BaseModel):
+    task_id: str
+    action_class_ceiling: str = "A1"
+    closed_operation_set: list[str] = Field(default_factory=lambda: list(B1_OPERATIONS))
+    deterministic_action: DeterministicAction | None = None
+    postcondition: PostconditionSpec | None = None
+    semantic_instruction: str | None = None
+    value_slots: dict[str, str] = Field(default_factory=dict)
+
+
+def build_interaction_routes(browser_api: Any, router: BrowserInteractionRouter) -> APIRouter:
+    """``/v1/browser/interaction/*`` — Hermes-scoped, and 503 unless the flag is on.
+
+    The observation is never taken from the request body: the router reads the page
+    itself through the harness, so a caller cannot hand B2 a page it did not see.
+    """
+    api = APIRouter(prefix="/v1/browser/interaction", tags=["browser"])
+
+    def _guard(token: str | None) -> None:
+        browser_api._require_internal(token)
+        browser_api._require_enabled()
+        if not router.enabled:
+            raise HTTPException(status_code=503, detail="BROWSER_INTERACTION_ROUTER_DISABLED")
+
+    @api.get("/status")
+    async def interaction_status(x_van_internal_token: str | None = Header(default=None)):
+        browser_api._require_internal(x_van_internal_token)
+        return router.status()
+
+    @api.get("/metrics")
+    async def interaction_metrics(x_van_internal_token: str | None = Header(default=None)):
+        browser_api._require_internal(x_van_internal_token)
+        return router.metrics.snapshot()
+
+    @api.post("/step")
+    async def interaction_step(
+        body: InteractionStepBody, x_van_internal_token: str | None = Header(default=None),
+    ):
+        _guard(x_van_internal_token)
+        task = await browser_api._load_task(body.task_id)
+        for op in body.closed_operation_set:
+            if op not in B1_OPERATIONS:
+                raise HTTPException(status_code=422, detail=f"OPERATION_NOT_CLOSED:{op}")
+        step = InteractionStep(
+            task=task,
+            action_class_ceiling=body.action_class_ceiling,
+            closed_operation_set=tuple(body.closed_operation_set),
+            deterministic_action=body.deterministic_action,
+            postcondition=body.postcondition,
+            semantic_instruction=body.semantic_instruction,
+            value_slots=dict(body.value_slots),
+        )
+        result = await router.route(step)
+        return {"task_id": task.task_id, "at_ms": int(time.time() * 1000), **result.to_json()}
+
+    return api
+
+
+__all__ = [
+    "B1ValidationError",
+    "BrowserInteractionRouter",
+    "DeterministicAction",
+    "HarnessActionExecutor",
+    "IndependentPostconditionVerifier",
+    "InteractionStep",
+    "RouterAction",
+    "RouterLane",
+    "RouterMetrics",
+    "SemanticProposalRefused",
+    "StagehandSemanticFallback",
+    "StepResult",
+    "StepState",
+    "build_interaction_router",
+    "build_interaction_routes",
+    "default_action_classifier",
+    "load_eligibility_classifier",
+    "validate_b1_payload",
+    "validate_jev_proposal",
+]
