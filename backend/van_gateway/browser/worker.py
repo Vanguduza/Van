@@ -33,6 +33,7 @@ from typing import Any
 
 from pydantic import BaseModel, Field
 
+from van_gateway.automation.payments import looks_like_payment
 from van_gateway.browser.adapters import (
     BrowserAdapterError,
     BrowserHarnessAdapter,
@@ -63,6 +64,28 @@ from van_gateway.browser.subagent import (
     SubagentStep,
 )
 from van_gateway.models import ActionClass
+
+
+#: Plan-step kinds that act on a page element and so have a class of their own.
+TARGETED_PLAN_KINDS = frozenset({"click", "fill", "select"})
+
+
+def classify_target(operation: str, observed_text: str, description: str) -> ActionClass:
+    """The stricter of the class of the Harness-observed target and of the description.
+
+    The router's classifier answers ``A0`` for a change-nothing operation; the subagent's
+    ``ActionClass`` starts at A1, so A0 is proposed as A1. A4/A5 are returned as such; the
+    caller decides whether that is an owner takeover or a runner refusal.
+    """
+    classes = [
+        default_action_classifier(operation, {"label": observed_text}, None) if observed_text else "A0",
+        default_action_classifier(operation, {"label": description}, None),
+    ]
+    ranks = {"A0": 0, **{cls.value: index + 1 for index, cls in enumerate(ActionClass)}}
+    if any(value not in ranks for value in classes):
+        raise OwnerTakeoverRequired(f"ACTION_UNCLASSIFIABLE:CLASS:{classes}")
+    strictest = max(classes, key=ranks.__getitem__)
+    return ActionClass.A1 if strictest == "A0" else ActionClass(strictest)
 
 
 class SemanticWorkerUnavailable(RuntimeError):
@@ -149,16 +172,58 @@ class AdapterBackedWorker:
                 rationale="every planned step has run",
             )
         step = self.plan.steps[index]
+        if step.kind not in TARGETED_PLAN_KINDS:
+            return ProposedAction(
+                kind=step.kind,
+                domain=step.domain,
+                action_class=assignment.action_class_ceiling,
+                url=step.url,
+                instruction=step.instruction,
+                rationale=step.rationale or f"planned step {index + 1}",
+                payload={"plan_index": index},
+            )
+        # Review I3 MAJOR-1 — a planned click/fill/select was stamped with the assignment
+        # ceiling and the runner's payment check read only the step's `instruction`, so
+        # `click #pay-now` "Continue", `click #delete-account` and `fill #card-number` ran as
+        # A2. The shared rule applies here as on router lane 1: classify what the Harness
+        # observes of the target plus the locator's words (the locator alone when the
+        # Harness does not report the element); the instruction can only make it stricter.
+        observed_text = await self._observed_target_text(step.kind, step.locator)
+        instruction = step.instruction or ""
+        action_class = classify_target(step.kind, observed_text, instruction)
+        # The payment boundary in BrowserSubagentRunner._check reads `instruction`: give it
+        # the locator and the observed target too, not only the plan's own words.
+        judged_text = " | ".join(t for t in (instruction, observed_text) if t)
+        if action_class in (ActionClass.A4, ActionClass.A5) and looks_like_payment(
+            operation=step.kind, goal=judged_text,
+        ) is None:
+            # A commitment (delete an account, a card field, a pay button the payment
+            # boundary cannot read) is never autonomous: hand the run to the owner. A
+            # payment is left to the runner, which refuses it as PAYMENT_REFUSED first.
+            raise OwnerTakeoverRequired(
+                f"PLANNED_ACTION_REQUIRES_OWNER:{action_class.value}:step {index + 1}"
+            )
         return ProposedAction(
             kind=step.kind,
             domain=step.domain,
-            # Never above the assignment's ceiling. The runner enforces this too; proposing
-            # something it will refuse is a wasted step and a confusing stop reason.
-            action_class=assignment.action_class_ceiling,
+            # The class VAN derived, never the ceiling: the runner refuses anything above
+            # the assignment's ceiling (ACTION_CLASS_VIOLATION) rather than clamping it.
+            action_class=action_class,
             url=step.url,
-            instruction=step.instruction,
+            instruction=judged_text or None,
             rationale=step.rationale or f"planned step {index + 1}",
+            payload={"plan_index": index, "harness_observed_target": observed_text or None},
         )
+
+    async def _observed_target_text(self, operation: str, locator: str | None) -> str:
+        """``observed_element_text`` of the Harness-resolved target, else the locator's
+        own words — the same fallback router lane 1 uses for an unresolved target."""
+        if not locator:
+            raise OwnerTakeoverRequired(f"PLANNED_ACTION_UNCLASSIFIABLE:NO_LOCATOR:{operation}")
+        element = await resolve_stagehand_target(HarnessTargetResolver(self.adapter), self.task, locator)
+        if isinstance(element, dict):
+            return observed_element_text(element, locator)
+        return observed_element_text({}, locator)
 
     # ---------------------------------------------------------------- execute
 
@@ -168,12 +233,20 @@ class AdapterBackedWorker:
         task = self.task
         if task is None:
             raise BrowserAdapterError("BROWSER_WORKER_TASK_MISSING", assignment.task_id)
-        index = 0  # resolved below for the steps that need their plan entry
         step = None
-        for candidate_index, candidate in enumerate(self.plan.steps):
-            if candidate.kind == action.kind and candidate.domain == action.domain:
-                step, index = candidate, candidate_index
-                break
+        plan_index = action.payload.get("plan_index") if action.payload else None
+        if isinstance(plan_index, int) and not isinstance(plan_index, bool):
+            # The step that was proposed (and classified) is the step that runs: the first
+            # step of the same kind and domain may carry a different locator.
+            if 0 <= plan_index < len(self.plan.steps):
+                candidate = self.plan.steps[plan_index]
+                if candidate.kind == action.kind and candidate.domain == action.domain:
+                    step = candidate
+        else:
+            for candidate in self.plan.steps:
+                if candidate.kind == action.kind and candidate.domain == action.domain:
+                    step = candidate
+                    break
 
         try:
             payload = await self._dispatch(task, action, step)
@@ -355,21 +428,9 @@ class HybridBrowserWorker:
 
     @staticmethod
     def _classify(operation: str, observed_text: str, description: str) -> ActionClass:
-        """The stricter of the Harness-observed class and the description's class.
-
-        The router's classifier answers ``A0`` for a change-nothing operation; the subagent's
-        ``ActionClass`` starts at A1, so A0 is proposed as A1. A4 (a commitment such as pay or
-        delete) is proposed as A4 and the runner's ceiling check refuses it.
-        """
-        classes = [
-            default_action_classifier(operation, {"label": observed_text}, None) if observed_text else "A0",
-            default_action_classifier(operation, {"label": description}, None),
-        ]
-        ranks = {"A0": 0, **{cls.value: index + 1 for index, cls in enumerate(ActionClass)}}
-        if any(value not in ranks for value in classes):
-            raise OwnerTakeoverRequired(f"STAGEHAND_ACTION_UNCLASSIFIABLE:CLASS:{classes}")
-        strictest = max(classes, key=ranks.__getitem__)
-        return ActionClass.A1 if strictest == "A0" else ActionClass(strictest)
+        """The stricter of the Harness-observed class and the description's class
+        (``classify_target``, shared with the deterministic plan path)."""
+        return classify_target(operation, observed_text, description)
 
     async def execute(
         self, assignment: SubagentAssignment, action: ProposedAction

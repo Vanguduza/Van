@@ -267,7 +267,10 @@ async def test_the_worker_actually_drives_the_adapter(tmp_path):
             value_ref="secretref://browser/google-primary",
         ),
     ]))
-    await BrowserSubagentRunner(owner_control_probe=_no_owner_control).run(assignment=_assignment(task), worker=worker, task=task)
+    # A fill writes owner data: A3 under the shared classifier (review I3 MAJOR-1), so the
+    # assignment has to allow A3; an A2 ceiling now refuses the planned fill.
+    await BrowserSubagentRunner(owner_control_probe=_no_owner_control).run(
+        assignment=_assignment(task, action_class_ceiling=ActionClass.A3), worker=worker, task=task)
     assert f"navigate:https://{DOMAIN}/login" in harness.calls
     # A reference, never a literal: §367.3 forbids secret material crossing this boundary.
     assert "fill:#password:secretref://browser/google-primary" in harness.calls
