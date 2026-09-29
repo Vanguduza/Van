@@ -9,7 +9,11 @@ from typing import Optional
 
 from vati.learning.boundary import LearningBoundary, LiveAdjustment, LiveAdjustmentProposal, LiveTarget
 from vati.learning.episodes import ENVIRONMENT_WEIGHT, Environment
-from vati.learning.evidence import EvidenceClass, InMemoryEvidenceStore
+from vati.learning.evidence import EvidenceClass, EvidenceError, LedgerEvidenceResolver, ResolvedEvidenceCache, parse_evidence_ref
+
+# Authoritative ledger events a health observation may stand on. A health
+# observation is derived; its evidence is the source event it cites.
+HEALTH_SOURCE_CLASSES = frozenset({EvidenceClass.TRADE_REVIEW, EvidenceClass.VTIL_ARTIFACT, EvidenceClass.PNL_ATTRIBUTION, EvidenceClass.SHADOW_BOOK_OUTCOME})
 
 ONE, ZERO = Decimal(1), Decimal(0)
 
@@ -22,7 +26,7 @@ class HealthObservation:
     process_ok: bool
     cost_ratio: Decimal            # realised / modelled cost (1 = as modelled)
     regime_fit: bool               # traded inside an eligible regime
-    evidence_ref: str
+    evidence_ref: str              # vati-evidence:<TRADE_REVIEW|VTIL_ARTIFACT|...>:<ledger Event.hash>
 
 
 @dataclass(frozen=True)
@@ -44,22 +48,28 @@ class StrategyHealthTracker:
     _obs: dict[str, list[HealthObservation]] = field(default_factory=dict)
     _below_count: dict[str, int] = field(default_factory=dict)
     _state: dict[str, str] = field(default_factory=dict)
-    # Each observation is registered as STRATEGY_HEALTH_OBSERVATION evidence so the
-    # boundary recomputes the weighted sample count instead of trusting ours.
-    evidence: InMemoryEvidenceStore = field(default_factory=InMemoryEvidenceStore)
+    # Each observation must cite an authoritative ledger event, resolved through a
+    # LedgerEvidenceResolver. Identity is that event's hash, so re-observing the
+    # same fact is a no-op and the boundary recomputes the weighted count itself.
+    evidence: ResolvedEvidenceCache = field(default_factory=ResolvedEvidenceCache)
     _refs: dict[str, list[str]] = field(default_factory=dict)
-    _seq: dict[str, int] = field(default_factory=dict)
 
-    def observe(self, o: HealthObservation) -> HealthVerdict:
-        seq = self._seq.get(o.strategy_id, 0)
-        self._seq[o.strategy_id] = seq + 1
-        ref = self.evidence.register(EvidenceClass.STRATEGY_HEALTH_OBSERVATION, {
-            "strategy_id": o.strategy_id, "environment": o.environment, "r_multiple": o.r_multiple, "process_ok": o.process_ok,
-            "cost_ratio": o.cost_ratio, "regime_fit": o.regime_fit, "source_ref": o.evidence_ref, "observation_seq": seq})
-        buf = self._obs.setdefault(o.strategy_id, [])
+    def observe(self, o: HealthObservation, *, resolver: LedgerEvidenceResolver, correlation_hint: str | None = None) -> HealthVerdict:
+        ref = parse_evidence_ref(o.evidence_ref)
+        if ref.evidence_class not in HEALTH_SOURCE_CLASSES:
+            raise EvidenceError(f"{ref.evidence_class.value} is not a source event for strategy health")
+        rec = self.evidence.admit(ref, resolver, correlation_hint=correlation_hint)
+        if o.strategy_id not in rec.subjects:
+            raise EvidenceError(f"evidence {ref} is not about {o.strategy_id!r}")
+        if Environment(o.environment) is not rec.environment:
+            raise EvidenceError(f"observation environment {o.environment.value} != evidence environment {rec.environment.value}")
         refs = self._refs.setdefault(o.strategy_id, [])
+        canonical = str(ref)
+        if canonical in refs:
+            return self.verdict(o.strategy_id)   # the same fact observed again is not a new sample
+        buf = self._obs.setdefault(o.strategy_id, [])
         buf.append(o)
-        refs.append(ref)
+        refs.append(canonical)
         del buf[:-self.window]
         for old in refs[:-self.window]:
             self.evidence.discard(old)

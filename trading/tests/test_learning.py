@@ -19,7 +19,7 @@ from vati.learning import (
     cluster_failures, curriculum_gate, daily_report, episode_from_ledger, evaluate_missed_opportunity, monthly_report, propose_candidate, run_counterfactuals, weekly_report,
 )
 from vati.learning.boundary import FORBIDDEN_TARGETS, LiveTarget
-from vati.learning.evidence import EvidenceClass, InMemoryEvidenceStore
+from test_learning_evidence import Src, observe_fact, observe_review
 from vati.learning.hooks import LearningHooks
 from vati.learning.replay import restore_learning_runtime
 from vati.market_data import FX_CALENDAR
@@ -33,10 +33,9 @@ EV = ("a" * 64,)
 
 # ------------------------------------------------------------------ boundary
 def _live_health_evidence(key, n, env=Environment.LIVE):
-    """n distinct, resolvable STRATEGY_HEALTH_OBSERVATION records for `key` (C5)."""
-    store = InMemoryEvidenceStore()
-    refs = tuple(store.register(EvidenceClass.STRATEGY_HEALTH_OBSERVATION, {"strategy_id": key, "environment": env, "r_multiple": "-1", "observation_seq": i}) for i in range(n))
-    return store, refs
+    """n distinct TRADE_REVIEW ledger events for `key`, resolved from the ledger (C5)."""
+    src = Src(env)
+    return src.resolver, tuple(src.review(key, i) for i in range(n))
 
 
 def test_boundary_accepts_only_reduce_only_adjustments_on_three_targets():
@@ -66,22 +65,23 @@ def test_boundary_accepts_only_reduce_only_adjustments_on_three_targets():
 
 
 # -------------------------------------------------------------------- health
-def obs(sid, r, env=Environment.LIVE, process_ok=True, cost=D("1"), fit=True, i=0):
-    return HealthObservation(sid, env, D(str(r)), process_ok, cost, fit, f"ev-{sid}-{i}")
+def obs(t, sid, r, env=Environment.LIVE, process_ok=True, cost=D("1"), fit=True, i=0):
+    """Observe one health fact standing on a distinct real TRADE_REVIEW ledger event."""
+    return observe_review(t, sid, r, env=env, process_ok=process_ok, cost=cost, fit=fit, i=i)
 
 
 def test_health_demotes_only_after_sustained_breach_and_never_promotes():
     t = StrategyHealthTracker(certified_expectancy_r={"S": D("0.3")}, sustain=5)
     v = None
     for i in range(30):
-        v = t.observe(obs("S", 0.4, i=i))
+        v = obs(t, "S", 0.4, i=i)
     assert v.health >= D("0.9") and v.state_recommendation is None and v.weighted_samples == D("30")
     adj = t.live_adjustment("S")
     assert adj is not None and adj.multiplier <= 1 and adj.demote_to is None
     # a run of process breaches with heavy cost drift outside eligible regimes
     recs = []
     for i in range(30, 60):
-        recs.append(t.observe(obs("S", -1.0, process_ok=False, cost=D("2.5"), fit=False, i=i)).state_recommendation)
+        recs.append(obs(t, "S", -1.0, process_ok=False, cost=D("2.5"), fit=False, i=i).state_recommendation)
     assert recs[0] is None                          # hysteresis: one bad day does not demote
     assert recs[-1] == "SHADOW"                     # sustained → demotion
     adj = t.live_adjustment("S")
@@ -89,14 +89,14 @@ def test_health_demotes_only_after_sustained_breach_and_never_promotes():
     # backtest-only evidence weighs less: 30 BACKTEST observations are 9 weighted samples → no live adjustment
     t2 = StrategyHealthTracker()
     for i in range(30):
-        t2.observe(obs("B", 0.5, env=Environment.BACKTEST, i=i))
+        obs(t2, "B", 0.5, env=Environment.BACKTEST, i=i)
     assert t2.verdict("B").weighted_samples == D("9.0") and t2.live_adjustment("B") is None
 
 
 def test_health_verdict_reasons_are_explanatory():
     t = StrategyHealthTracker(certified_expectancy_r={"S": D("0.5")}, sustain=1)
     for i in range(10):
-        v = t.observe(obs("S", -0.2, cost=D("1.9"), fit=False, i=i))
+        v = obs(t, "S", -0.2, cost=D("1.9"), fit=False, i=i)
     assert any("expectancy" in r for r in v.reasons) and "cost drift" in v.reasons and any("eligible regimes" in r for r in v.reasons)
 
 
@@ -104,21 +104,21 @@ def test_health_verdict_reasons_are_explanatory():
 def test_broker_learning_ignores_simulated_execution_facts_and_degrades_on_real_ones():
     bl = BrokerLearner()
     for _ in range(50):
-        p = bl.observe(broker="mt5-a", symbol="EURUSD", session="LONDON", environment=Environment.BACKTEST, cost_ratio=D("5"), slippage_pips=D("9"), rejected=True, in_event_window=False)
+        p = observe_fact(bl, broker="mt5-a", symbol="EURUSD", session="LONDON", environment=Environment.BACKTEST, cost_ratio=D("5"), slippage_pips=D("9"), rejected=True, in_event_window=False)
     assert p.state() is BrokerState.CERTIFIED and p._w() == 0 and bl.live_adjustment("mt5-a", "EURUSD", "LONDON") is None
     for _ in range(40):
-        p = bl.observe(broker="mt5-a", symbol="EURUSD", session="LONDON", environment=Environment.LIVE, cost_ratio=D("1.5"), slippage_pips=D("1"), rejected=False, in_event_window=False)
+        p = observe_fact(bl, broker="mt5-a", symbol="EURUSD", session="LONDON", environment=Environment.LIVE, cost_ratio=D("1.5"), slippage_pips=D("1"), rejected=False, in_event_window=False)
     assert p.state() is BrokerState.DEGRADED and p.liquidity_multiplier() == D("0.7")
     adj = bl.live_adjustment("mt5-a", "EURUSD", "LONDON")
     assert adj.target is LiveTarget.BROKER_PROFILE and adj.multiplier == D("0.7")
     for _ in range(10):
-        p = bl.observe(broker="mt5-a", symbol="EURUSD", session="LONDON", environment=Environment.LIVE, cost_ratio=D("1.5"), slippage_pips=D("1"), rejected=True, in_event_window=False)
+        p = observe_fact(bl, broker="mt5-a", symbol="EURUSD", session="LONDON", environment=Environment.LIVE, cost_ratio=D("1.5"), slippage_pips=D("1"), rejected=True, in_event_window=False)
     assert p.state() is BrokerState.SUSPENDED and p.liquidity_multiplier() == 0
     ev = BrokerLearner()
     for _ in range(12):
-        ev.observe(broker="b", symbol="XAUUSD", session="NY", environment=Environment.LIVE, cost_ratio=D("1.0"), slippage_pips=D("1"), rejected=False, in_event_window=False)
+        observe_fact(ev, broker="b", symbol="XAUUSD", session="NY", environment=Environment.LIVE, cost_ratio=D("1.0"), slippage_pips=D("1"), rejected=False, in_event_window=False)
     for _ in range(4):
-        q = ev.observe(broker="b", symbol="XAUUSD", session="NY", environment=Environment.LIVE, cost_ratio=D("3.0"), slippage_pips=D("2"), rejected=False, in_event_window=True)
+        q = observe_fact(ev, broker="b", symbol="XAUUSD", session="NY", environment=Environment.LIVE, cost_ratio=D("3.0"), slippage_pips=D("2"), rejected=False, in_event_window=True)
     assert q.state() is BrokerState.EVENT_LIMITED
 
 
@@ -283,10 +283,10 @@ def test_reports_and_episodes_come_from_a_real_backtest_ledger(eurusd, tmp_path)
     end = max(ev.event_time_ms for ev in led.iter())
     health = StrategyHealthTracker(sustain=1)
     for i in range(35):
-        health.observe(obs("FX-TREND-PULLBACK-01", -1, process_ok=False, cost=D("2.5"), fit=False, i=i))
+        obs(health, "FX-TREND-PULLBACK-01", -1, process_ok=False, cost=D("2.5"), fit=False, i=i)
     brokers = BrokerLearner()
     for _ in range(40):
-        brokers.observe(broker="paper", symbol="EURUSD", session="LONDON", environment=Environment.LIVE, cost_ratio=D("1.5"), slippage_pips=D("1"), rejected=False, in_event_window=False)
+        observe_fact(brokers, broker="paper", symbol="EURUSD", session="LONDON", environment=Environment.LIVE, cost_ratio=D("1.5"), slippage_pips=D("1"), rejected=False, in_event_window=False)
     m = monthly_report(led, month_end_ms=end, health=health, brokers=brokers)
     assert m.cadence == "MONTHLY" and m.trades_closed == res.trades and m.cycles > 0 and 0 <= m.no_trade_share <= 1
     assert m.demotion_recommendations == {"FX-TREND-PULLBACK-01": "SHADOW"} and m.broker_states == {"paper:EURUSD:LONDON": "DEGRADED"}
@@ -356,7 +356,7 @@ def test_cycle_applies_boundary_checked_demotion_and_capsule_stops_trading(eurus
     # 35 weighted live observations of process breaches: the next close crosses the sustain gate
     for i in range(35):
         for sid in ("FX-TREND-PULLBACK-01", "FX-LONDON-BREAKOUT-01"):
-            hooks.health.observe(obs(sid, -1.0, process_ok=False, cost=D("2.5"), fit=False, i=i))
+            obs(hooks.health, sid, -1.0, process_ok=False, cost=D("2.5"), fit=False, i=i)
     engine = fx_engine(cfg)
     bt = BacktestEngine(cfg=cfg, engine=engine, cost_fn=lambda st: D("0.0003"), calendar=FX_CALENDAR, events=EventMatrix(), ledger_path=str(tmp_path / "bt.sqlite"), learning=hooks)
     res = bt.run(synthetic_bars())

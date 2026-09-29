@@ -12,7 +12,7 @@ from typing import Optional
 
 from vati.learning.boundary import LearningBoundary, LiveAdjustment, LiveAdjustmentProposal, LiveTarget
 from vati.learning.episodes import EXECUTION_FACT_WEIGHT, Environment
-from vati.learning.evidence import EvidenceClass, InMemoryEvidenceStore
+from vati.learning.evidence import EvidenceClass, EvidenceError, LedgerEvidenceResolver, ResolvedEvidenceCache, parse_evidence_ref
 
 ONE, ZERO = Decimal(1), Decimal(0)
 
@@ -31,7 +31,7 @@ class BrokerExecutionProfile:
     symbol: str
     session: str
     samples: list = field(default_factory=list)   # (weight, cost_ratio, slippage_pips, rejected:bool, in_event:bool)
-    evidence_refs: list = field(default_factory=list)   # one TCA_RECORD evidence ref per sample
+    evidence_refs: list = field(default_factory=list)   # one TCA_RECORD ledger evidence ref per sample
 
     def _w(self) -> Decimal:
         return sum((s[0] for s in self.samples), ZERO)
@@ -73,13 +73,24 @@ class BrokerExecutionProfile:
 @dataclass
 class BrokerLearner:
     profiles: dict[tuple[str, str, str], BrokerExecutionProfile] = field(default_factory=dict)
-    evidence: InMemoryEvidenceStore = field(default_factory=InMemoryEvidenceStore)
+    evidence: ResolvedEvidenceCache = field(default_factory=ResolvedEvidenceCache)
 
-    def observe(self, *, broker: str, symbol: str, session: str, environment: Environment, cost_ratio: Decimal, slippage_pips: Decimal, rejected: bool, in_event_window: bool) -> BrokerExecutionProfile:
+    def observe(self, *, broker: str, symbol: str, session: str, environment: Environment, cost_ratio: Decimal, slippage_pips: Decimal, rejected: bool, in_event_window: bool,
+                evidence_ref: str, resolver: LedgerEvidenceResolver, correlation_hint: str | None = None) -> BrokerExecutionProfile:
+        """Each execution fact must cite the TCA_RECORD ledger event it came from."""
+        ref = parse_evidence_ref(evidence_ref)
+        if ref.evidence_class is not EvidenceClass.TCA_RECORD:
+            raise EvidenceError(f"broker execution facts must cite a TCA_RECORD, not {ref.evidence_class.value}")
+        rec = self.evidence.admit(ref, resolver, correlation_hint=correlation_hint)
+        key = f"{broker}:{symbol}:{session}"
+        if key not in rec.subjects:
+            raise EvidenceError(f"evidence {ref} is not about {key!r}")
+        if Environment(environment) is not rec.environment:
+            raise EvidenceError(f"fact environment {environment.value} != evidence environment {rec.environment.value}")
         p = self.profiles.setdefault((broker, symbol, session), BrokerExecutionProfile(broker, symbol, session))
-        p.evidence_refs.append(self.evidence.register(EvidenceClass.TCA_RECORD, {
-            "broker": broker, "symbol": symbol, "session": session, "environment": environment, "cost_ratio": cost_ratio,
-            "slippage_pips": slippage_pips, "rejected": rejected, "in_event_window": in_event_window, "observation_seq": len(p.samples)}))
+        if str(ref) in p.evidence_refs:
+            return p   # the same TCA record observed again is not a new sample
+        p.evidence_refs.append(str(ref))
         p.samples.append((EXECUTION_FACT_WEIGHT[environment], cost_ratio, slippage_pips, rejected, in_event_window))
         return p
 

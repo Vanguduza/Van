@@ -20,6 +20,7 @@ from typing import Mapping
 from vati.arbiter.strategy_arbiter import ACTIVE_STATES
 from vati.core.events import EventKind
 from vati.learning.episodes import Environment
+from vati.learning.evidence import EvidenceClass, EvidenceError, LedgerEvidenceResolver, make_evidence_ref
 from vati.learning.health import HealthObservation
 from vati.risk.contracts import StrategyState
 from vati.strategies.capsule import Capsule
@@ -166,6 +167,9 @@ def restore_learning_runtime(ledger, learning, engines_by_symbol: Mapping[str, o
     """Rebuild reduce-only learning inputs before a restarted runtime can decide."""
     tca_n = 0
     health_n = 0
+    # C5: every replayed fact cites the ledger event it is read from. Strict: no
+    # session-environment fallback on replay — the event must record its own.
+    resolver = LedgerEvidenceResolver(ledger)
 
     # Broker execution learning is only replayed where the original context was
     # persisted. Absence is not filled from current session state.
@@ -184,18 +188,24 @@ def restore_learning_runtime(ledger, learning, engines_by_symbol: Mapping[str, o
             continue
         if cost_ratio.is_infinite():
             cost_ratio = Decimal("10")
-        learning.brokers.observe(
-            broker=str(p["broker"]),
-            symbol=str(p["symbol"]),
-            session=str(p["session"]),
-            environment=environment,
-            cost_ratio=cost_ratio,
-            slippage_pips=slippage,
-            rejected=bool(p.get("rejected", False)),
-            in_event_window=str(p["event_window"]) in {
-                "QUIET", "DRIFT", "PRE_BLACKOUT", "POST_BLACKOUT",
-            },
-        )
+        try:
+            learning.brokers.observe(
+                broker=str(p["broker"]),
+                symbol=str(p["symbol"]),
+                session=str(p["session"]),
+                environment=environment,
+                cost_ratio=cost_ratio,
+                slippage_pips=slippage,
+                rejected=bool(p.get("rejected", False)),
+                in_event_window=str(p["event_window"]) in {
+                    "QUIET", "DRIFT", "PRE_BLACKOUT", "POST_BLACKOUT",
+                },
+                evidence_ref=make_evidence_ref(EvidenceClass.TCA_RECORD, event.hash),
+                resolver=resolver,
+                correlation_hint=event.correlation_id,
+            )
+        except EvidenceError:
+            continue
         tca_n += 1
 
     # Experience artifacts are the durable source of the environment weighting
@@ -211,18 +221,21 @@ def restore_learning_runtime(ledger, learning, engines_by_symbol: Mapping[str, o
             cost_ratio = Decimal(str(tca.get("cost_ratio", "1")))
             if cost_ratio.is_infinite():
                 cost_ratio = Decimal("10")
-            evidence_ref = str(p.get("artifact_hash") or event.hash)
+            evidence_ref = make_evidence_ref(EvidenceClass.VTIL_ARTIFACT, event.hash)
         except (ValueError, ArithmeticError, KeyError, TypeError):
             continue
-        learning.health.observe(HealthObservation(
-            strategy_id=strategy_id,
-            environment=environment,
-            r_multiple=r_multiple,
-            process_ok=process_ok,
-            cost_ratio=min(cost_ratio, Decimal("10")),
-            regime_fit=True,
-            evidence_ref=evidence_ref,
-        ))
+        try:
+            learning.health.observe(HealthObservation(
+                strategy_id=strategy_id,
+                environment=environment,
+                r_multiple=r_multiple,
+                process_ok=process_ok,
+                cost_ratio=min(cost_ratio, Decimal("10")),
+                regime_fit=True,
+                evidence_ref=evidence_ref,
+            ), resolver=resolver, correlation_hint=event.correlation_id)
+        except EvidenceError:
+            continue
         health_n += 1
 
     capsule_multipliers = 0

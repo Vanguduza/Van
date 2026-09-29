@@ -484,6 +484,8 @@ class AccountTradeLifecycle:
             # inputs are receipt-derived and do not require reconstructing a
             # stale strategy state.
             self.learning.on_tca(
+                self.ledger,
+                trade_intent_id=receipt.trade_intent_id,
                 symbol=symbol,
                 session="OWNER_TICKET",
                 event_window="QUIET",
@@ -623,6 +625,8 @@ class AccountTradeLifecycle:
         self.entries[intent.trade_intent_id]["cost_ratio"] = tca.cost_ratio
         if self.learning is not None:
             self.learning.on_tca(
+                self.ledger,
+                trade_intent_id=intent.trade_intent_id,
                 symbol=intent.symbol,
                 session=state.session.value,
                 event_window=state.event_window.value,
