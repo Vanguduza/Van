@@ -39,6 +39,30 @@ class PostconditionSpec(BaseModel):
     field: str | None = None
     expected: Any = None
     correlation_keys: list[str] = Field(default_factory=list)
+    #: Reviewer I2 N-1 — the caller-declared value each correlation key must be observed to
+    #: hold. A key with no declared value is only a name for something the observer reports
+    #: about itself (a Harness read-back always carries ``url``, ``title``, ``visible_text``
+    #: and ``exists``), so it can never be observed *wrong* and asserts nothing.
+    expected_correlation: dict[str, Any] = Field(default_factory=dict)
+
+    @property
+    def correlation_predicates(self) -> dict[str, Any]:
+        """Every correlation key the spec names, mapped to its declared expected value.
+
+        A key named in ``correlation_keys`` without a declared value maps to ``None``, which
+        :attr:`undeclared_correlation_keys` reports and :attr:`declares_predicate` refuses.
+        """
+        keys = list(dict.fromkeys([*self.correlation_keys, *self.expected_correlation]))
+        return {key: self.expected_correlation.get(key) for key in keys}
+
+    @property
+    def undeclared_correlation_keys(self) -> list[str]:
+        """Correlation keys that carry no caller-declared expected value, or name the
+        observer's own existence signal. Each one would pass on any readable observation."""
+        return [
+            key for key, value in self.correlation_predicates.items()
+            if value is None or key == EXISTENCE_SIGNAL
+        ]
 
     @property
     def declares_predicate(self) -> bool:
@@ -46,13 +70,19 @@ class PostconditionSpec(BaseModel):
 
         Reviewer I M-1: ``{"kind": "READ_BACK"}`` alone was VERIFIED whenever the observer
         returned anything at all (a readable page is ``exists: True``), so a spec that
-        asserted nothing passed. A predicate is a ``field`` with an ``expected`` value (other
-        than the existence signal itself) or at least one correlation key.
+        asserted nothing passed. Reviewer I2 N-1: ``correlation_keys=["url"]`` (or ``title``,
+        ``exists``, ``visible_text``) did the same, because the observer supplies those keys
+        on every read. A predicate is a ``field`` with an ``expected`` value (other than the
+        existence signal itself) or correlation keys *each* matched against a caller-declared
+        expected value; one undeclared key makes the whole spec assert nothing reliable, so
+        it fails closed rather than silently dropping the key.
         """
+        if self.undeclared_correlation_keys:
+            return False
         has_field_predicate = (
             self.field is not None and self.field != EXISTENCE_SIGNAL and self.expected is not None
         )
-        return has_field_predicate or bool(self.correlation_keys)
+        return has_field_predicate or bool(self.correlation_predicates)
 
 
 class VerificationResult(BaseModel):
@@ -108,7 +138,14 @@ class WorkflowVerifier:
             return VerificationResult(
                 outcome=VerificationOutcome.UNVERIFIABLE,
                 verifier_type=verifier_type,
-                detail="postcondition declares no predicate (field/expected or correlation_keys)",
+                detail=(
+                    "postcondition declares no predicate (field/expected, or correlation keys "
+                    "each with a declared expected value)"
+                    + (
+                        f"; undeclared correlation keys: {sorted(spec.undeclared_correlation_keys)}"
+                        if spec.undeclared_correlation_keys else ""
+                    )
+                ),
             )
 
         observer = self.observers.get(spec.kind)
@@ -148,8 +185,9 @@ class WorkflowVerifier:
                     detail=f"{spec.field} mismatch",
                 )
 
-        correlation = {key: observed.get(key) for key in spec.correlation_keys}
-        if spec.correlation_keys and any(value is None for value in correlation.values()):
+        predicates = spec.correlation_predicates
+        correlation = {key: observed.get(key) for key in predicates}
+        if any(value is None for value in correlation.values()):
             # §166 — a correlated existence check that cannot correlate is partial,
             # because something exists but we cannot prove it is *ours*.
             return VerificationResult(
@@ -158,6 +196,17 @@ class WorkflowVerifier:
                 observed=observed,
                 correlation=correlation,
                 detail="correlation incomplete",
+            )
+        mismatched = sorted(key for key, value in correlation.items() if value != predicates[key])
+        if mismatched:
+            # N-1 — an observed correlation value that is not the declared one is evidence the
+            # effect is someone else's (or absent), never a pass.
+            return VerificationResult(
+                outcome=VerificationOutcome.FAILED,
+                verifier_type=verifier_type,
+                observed=observed,
+                correlation=correlation,
+                detail=f"correlation mismatch: {mismatched}",
             )
 
         return VerificationResult(

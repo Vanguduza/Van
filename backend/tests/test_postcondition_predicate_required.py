@@ -64,8 +64,12 @@ async def test_workflow_verifier_refuses_a_spec_with_no_predicate(spec):
     [
         (PostconditionSpec(kind="READ_BACK", field="title", expected="Report"), VerificationOutcome.VERIFIED),
         (PostconditionSpec(kind="READ_BACK", field="title", expected="Nope"), VerificationOutcome.FAILED),
-        (PostconditionSpec(kind="READ_BACK", correlation_keys=["title"]), VerificationOutcome.VERIFIED),
-        (PostconditionSpec(kind="READ_BACK", correlation_keys=["receipt"]), VerificationOutcome.PARTIAL),
+        # N-1 (reviewer I2): a correlation key is judged only against a declared value.
+        (PostconditionSpec(kind="READ_BACK", correlation_keys=["title"],
+                           expected_correlation={"title": "Report"}), VerificationOutcome.VERIFIED),
+        (PostconditionSpec(kind="READ_BACK", expected_correlation={"title": "Other"}), VerificationOutcome.FAILED),
+        (PostconditionSpec(kind="READ_BACK", correlation_keys=["receipt"],
+                           expected_correlation={"receipt": "r-1"}), VerificationOutcome.PARTIAL),
     ],
 )
 async def test_a_real_predicate_is_still_judged(spec, outcome):
