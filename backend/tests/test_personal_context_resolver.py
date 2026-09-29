@@ -265,3 +265,24 @@ async def test_http_route_is_fenced_and_internal_only(tmp_path):
         assert stale.status_code == 409
         assert stale.json()["detail"]["code"] == PERSONAL_CONTEXT_UNAVAILABLE
         assert stale.json()["detail"]["reason"] == "REVISION_MISMATCH"
+
+
+async def test_a_consumer_cannot_rewrite_the_cached_envelope_for_the_next_consumer(tmp_path):
+    """A-MIN-VAN (reviewer D2 probe RES2): the cache served a shallow copy, so a consumer
+    that appended to `provenance_refs` or rewrote `source_revisions` changed what the next
+    consumer was served. Neither field is under `content_hash`, so integrity never failed."""
+    store, model, a, resolver, cache = await _evidenced(tmp_path)
+    rev = await model.current_revision("owner")
+    first = await resolver.resolve("owner", requested_revision=rev, purpose="p")
+    pristine_refs = list(first["provenance_refs"])
+    first["provenance_refs"].append("mission:FORGED-BY-CONSUMER-1")
+    first["source_revisions"]["owner_model_revision"] = 999
+    first["content"]["assertions"].clear()
+    second = await resolver.resolve("owner", requested_revision=rev, purpose="p")
+    assert second["provenance_refs"] == pristine_refs
+    assert second["source_revisions"] == {"owner_model_revision": rev}
+    assert _values(second) == ["terse"]
+    # a served capsule never aliases the cached entry, nor another served capsule
+    second["provenance_refs"].append("x")
+    third = await resolver.resolve("owner", requested_revision=rev, purpose="p")
+    assert third["provenance_refs"] == pristine_refs and len(cache) == 1

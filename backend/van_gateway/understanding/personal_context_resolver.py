@@ -32,6 +32,7 @@ live C2 read), which the outbox's PERSONAL_CONTEXT_CACHE target also forces for 
 
 from __future__ import annotations
 
+import copy
 import time
 from dataclasses import dataclass
 from enum import Enum
@@ -96,6 +97,11 @@ class RevisionFencedCapsuleCache:
 
     `candidate()` returns an entry only when its revision equals the revision the caller
     has just read from the authoritative store; any other entry is evicted on sight.
+
+    Entries are deep-copied in and out (A-MIN-VAN, reviewer D2): `content_hash` covers
+    only `content`, so a consumer that mutated a nested envelope field of a served capsule
+    (`provenance_refs`, `source_revisions`) would otherwise rewrite the cached entry every
+    later consumer is served, without failing integrity.
     """
 
     def __init__(self) -> None:
@@ -111,10 +117,10 @@ class RevisionFencedCapsuleCache:
         if entry.get("owner_model_revision") != authoritative_revision:
             del self._entries[key]
             return None
-        return entry
+        return copy.deepcopy(entry)
 
     def put(self, key: _CacheKey, capsule: dict[str, Any]) -> None:
-        self._entries[key] = capsule
+        self._entries[key] = copy.deepcopy(capsule)
 
     def evict(self, key: _CacheKey) -> None:
         self._entries.pop(key, None)
