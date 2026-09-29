@@ -637,21 +637,88 @@ CREATE TABLE IF NOT EXISTS owner_model_episodes (
 CREATE INDEX IF NOT EXISTS idx_owner_model_episodes_origin
   ON owner_model_episodes(assertion_id, origin);
 
--- Legacy backfill: every existing supporting episode becomes SYSTEM_OBSERVED. That is what
--- they are — before this migration the only production producer of observe() was the
--- internal-control `/v1/understanding/observe` route, and every episode it accepted had to
--- resolve to a real `missions`/`audit` row (P1-SYM-001). No derived-origin producer
--- existed. The NOT EXISTS guard (not just OR IGNORE) means a re-run never relabels an
--- episode that already has an origin row of any kind.
+-- Legacy backfill. A legacy supporting ref becomes SYSTEM_OBSERVED only if it resolves,
+-- after the same normalisation `OwnerCognitiveModel._require_episode` applies
+-- (`<lowercase kind>:<trimmed id>`), to a real `missions.mission_id` or `audit.command_id`.
+-- That is what the only pre-existing producer (the internal observe route) wrote after
+-- P1-SYM-001; anything else (free text, `hindsight://…`, a mission that does not exist,
+-- rows from before P1-SYM-001 made episodes resolvable) cannot be proven to be something
+-- VAN saw, so it is kept for provenance under its raw spelling as MODEL_INFERRED, which
+-- never evidences. Resolved refs are stored normalised, so two spellings of one mission are
+-- one episode. The trimmed set is ASCII whitespace; an id padded with other Unicode
+-- whitespace fails to resolve here and is labelled MODEL_INFERRED (the fail-closed side).
+--
+-- Never-relabel / idempotency: the NOT EXISTS guard skips a legacy ref if an episode row of
+-- any origin already exists under either its raw or its normalised spelling, so a re-run —
+-- even after the missing mission has since been created — never changes an origin.
 INSERT OR IGNORE INTO owner_model_episodes(
   assertion_id, episode_ref, origin, evidence_refs_json, recorded_at_ms
 )
-SELECT a.assertion_id, j.value, 'SYSTEM_OBSERVED', '[]', a.updated_at_ms
-  FROM owner_cognitive_model a, json_each(a.supporting_episode_refs_json) j
+WITH legacy AS (
+  SELECT a.assertion_id, CAST(j.value AS TEXT) AS raw, a.updated_at_ms AS at_ms
+    FROM owner_cognitive_model a, json_each(a.supporting_episode_refs_json) j
+), parsed AS (
+  SELECT assertion_id, raw, at_ms,
+         CASE WHEN instr(raw, ':') > 0
+              THEN lower(trim(substr(raw, 1, instr(raw, ':') - 1), ' ' || char(9, 10, 11, 12, 13)))
+         END AS kind,
+         CASE WHEN instr(raw, ':') > 0
+              THEN trim(substr(raw, instr(raw, ':') + 1), ' ' || char(9, 10, 11, 12, 13))
+         END AS ident
+    FROM legacy
+), classified AS (
+  SELECT assertion_id, raw, at_ms,
+         CASE WHEN ident IS NOT NULL AND ident != '' AND (
+                (kind = 'mission' AND EXISTS (SELECT 1 FROM missions m WHERE m.mission_id = ident))
+             OR (kind = 'command' AND EXISTS (SELECT 1 FROM audit c WHERE c.command_id = ident)))
+              THEN kind || ':' || ident
+         END AS resolved
+    FROM parsed
+)
+SELECT c.assertion_id, COALESCE(c.resolved, c.raw),
+       CASE WHEN c.resolved IS NULL THEN 'MODEL_INFERRED' ELSE 'SYSTEM_OBSERVED' END,
+       '[]', c.at_ms
+  FROM classified c
  WHERE NOT EXISTS (
    SELECT 1 FROM owner_model_episodes e
-    WHERE e.assertion_id = a.assertion_id AND e.episode_ref = j.value
+    WHERE e.assertion_id = c.assertion_id
+      AND e.episode_ref IN (c.raw, COALESCE(c.resolved, c.raw))
  );
+
+-- A ladder state is only as good as the episodes under it. A legacy CANDIDATE/EVIDENCED
+-- whose support no longer counts (its refs did not resolve) is demoted to what its
+-- SYSTEM_OBSERVED count supports — demote only, never promote. Owner states (CONFIRMED,
+-- REJECTED, CONTESTED) and SUPERSEDED rows are not touched. Deterministic from the episode
+-- table, so a re-run is a no-op.
+UPDATE owner_cognitive_model
+   SET state = CASE WHEN (SELECT COUNT(DISTINCT e.episode_ref) FROM owner_model_episodes e
+                           WHERE e.assertion_id = owner_cognitive_model.assertion_id
+                             AND e.origin = 'SYSTEM_OBSERVED') >= 2
+                    THEN 'CANDIDATE' ELSE 'OBSERVED' END
+ WHERE (state = 'EVIDENCED' AND (SELECT COUNT(DISTINCT e.episode_ref) FROM owner_model_episodes e
+                                  WHERE e.assertion_id = owner_cognitive_model.assertion_id
+                                    AND e.origin = 'SYSTEM_OBSERVED') < 3)
+    OR (state = 'CANDIDATE' AND (SELECT COUNT(DISTINCT e.episode_ref) FROM owner_model_episodes e
+                                  WHERE e.assertion_id = owner_cognitive_model.assertion_id
+                                    AND e.origin = 'SYSTEM_OBSERVED') < 2);
+
+-- `supporting_episode_refs_json` means SYSTEM_OBSERVED refs only from here on (the
+-- model writes it that way); bring legacy rows into line, and recompute ladder-state
+-- confidence from the admissible count with the model's formula (owner-state and
+-- SUPERSEDED confidence is left as written). Idempotent.
+UPDATE owner_cognitive_model
+   SET supporting_episode_refs_json = COALESCE((
+         SELECT json_group_array(ref) FROM (
+           SELECT DISTINCT e.episode_ref AS ref FROM owner_model_episodes e
+            WHERE e.assertion_id = owner_cognitive_model.assertion_id
+              AND e.origin = 'SYSTEM_OBSERVED' ORDER BY e.episode_ref)), '[]'),
+       confidence = CASE
+         WHEN state NOT IN ('OBSERVED', 'CANDIDATE', 'EVIDENCED') THEN confidence
+         ELSE (SELECT CASE WHEN n = 0 THEN 0.0 ELSE MIN(0.95, 0.2 + 0.25 * (n - 1)) END
+                 FROM (SELECT COUNT(DISTINCT e.episode_ref) AS n FROM owner_model_episodes e
+                        WHERE e.assertion_id = owner_cognitive_model.assertion_id
+                          AND e.origin = 'SYSTEM_OBSERVED'))
+       END;
 
 -- C2. A strictly monotonic revision per owner principal, advanced inside the same
 -- transaction as every authoritative Owner Model mutation. Deliberately NOT forgettable:

@@ -269,3 +269,22 @@ async def test_revision_route_returns_the_c2_document(tmp_path):
     assert body["schema"] == "van.owner_model.revision.v1"
     assert body["owner_principal_id"] == "owner" and body["owner_model_revision"] == 1
     assert isinstance(body["as_of_ms"], int)
+
+
+async def test_one_mission_spelled_four_ways_is_one_episode(tmp_path):
+    """N1 — the lookup stripped the id but the ladder counted the caller's spelling, so one
+    mission written four ways was four votes and made an assertion EVIDENCED."""
+    store = await make_store(tmp_path)
+    model = OwnerCognitiveModel(store)
+    mid = (await seed_episodes(store, "one"))["one"].split(":", 1)[1]
+    for spelling in (f"mission:{mid}", f"mission: {mid}", f"mission:\t{mid}",
+                     f"mission:  {mid}", f"MISSION:{mid}", f" Mission :{mid} "):
+        a = await _observe(model, spelling, SYSTEM)
+    assert a.evidencing_episode_count == 1
+    assert a.supporting_episode_refs == [f"mission:{mid}"]
+    assert {e.episode_ref for e in a.episodes} == {f"mission:{mid}"}
+    assert a.state is AssertionState.OBSERVED
+    await _not_actionable(model, a)
+    # The id itself is not case-folded: it is looked up exactly.
+    with pytest.raises(OwnerModelError):
+        await _observe(model, f"mission:{mid.upper()}" if mid != mid.upper() else "mission:X-none", SYSTEM)

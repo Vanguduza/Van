@@ -254,27 +254,34 @@ class OwnerCognitiveModel:
         The ladder counts distinct references, so an unresolvable one is not merely
         untidy: it is a vote. Requiring the prefix as well as the row means a caller
         cannot satisfy the check by passing a bare id that happens to collide.
+
+        Returns the normalised ref (`<lowercase kind>:<stripped id>`), which is what the
+        ladder counts, so one episode is one vote however it was spelled.
         """
-        ref = (episode_ref or "").strip()
-        kind, separator, identifier = ref.partition(":")
-        if not separator or kind not in EPISODE_SOURCES or not identifier.strip():
+        raw = episode_ref or ""
+        kind, separator, identifier = raw.partition(":")
+        kind, identifier = kind.strip().lower(), identifier.strip()
+        if not separator or kind not in EPISODE_SOURCES or not identifier:
             raise OwnerModelError(
                 "OWNER_MODEL_EPISODE_UNRESOLVABLE",
-                f"{ref!r} does not name an episode; expected one of "
+                f"{raw.strip()!r} does not name an episode; expected one of "
                 f"{sorted(f'{k}:<id>' for k in EPISODE_SOURCES)}",
             )
         table, column = EPISODE_SOURCES[kind]
         row = await self.store.fetchone(
             f"SELECT 1 AS present FROM {table} WHERE {column} = ? LIMIT 1",  # noqa: S608
-            (identifier.strip(),),
+            (identifier,),
         )
         if row is None:
             raise OwnerModelError(
                 "OWNER_MODEL_EPISODE_UNKNOWN",
-                f"no {kind} {identifier.strip()!r} exists; an assertion cannot be "
+                f"no {kind} {identifier!r} exists; an assertion cannot be "
                 "evidenced by something that did not happen",
             )
-        return ref
+        # The canonical spelling of the episode that was looked up — not the caller's.
+        # Returning the caller's spelling made `mission:X`, `mission: X` and `MISSION:\tX`
+        # one mission for the lookup and three distinct votes for the ladder.
+        return f"{kind}:{identifier}"
 
     @staticmethod
     def _require_origin(origin: Any) -> ObservationOrigin:
