@@ -339,6 +339,70 @@ def test_qualify_script_is_valid_bash():
     subprocess.run(["bash", "-n", str(ZONE_DIR / "qualify.sh")], check=True)
 
 
+def _qualify_check(root: Path, name: str) -> dict:
+    r = subprocess.run(["bash", str(ZONE_DIR / "qualify.sh")], capture_output=True, text=True,
+                       timeout=120,
+                       env={"PATH": "/usr/bin:/bin", "VAN_PRIVATE_CORE_ENV": str(root / "absent.env"),
+                            "VAN_PRIVATE_CORE_ROOT": str(root), "VAN_PRIVATE_CORE_PORT": "1",
+                            "VAN_PRIVATE_CORE_BIND": "127.0.0.1"})
+    report = json.loads(r.stdout.strip().splitlines()[-1])
+    [check] = [c for c in report["checks"] if c["name"] == name]
+    return check
+
+
+def _deployed_tree(root: Path) -> Path:
+    (root / "src" / "backend" / "van_gateway" / "private_core").mkdir(parents=True)
+    (root / "src" / "backend" / "van_gateway" / "understanding").mkdir(parents=True)
+    site = root / "venv" / "lib" / "python3.11" / "site-packages"
+    for pkg in ("fastapi", "uvicorn", "aiosqlite", "fastapi-0.115.0.dist-info"):
+        (site / pkg).mkdir(parents=True)
+    return site
+
+
+#: A-MIN-VAN (reviewer D2): qualify.sh inspected units, processes and dpkg, never the
+#: service's own src tree or venv, so a host that shipped trading/ or playwright inside the
+#: private core's import path still qualified.
+PRUNE_VIOLATIONS = (
+    "src/trading/vati",
+    "src/backend/van_gateway/browser",
+    "src/backend/van_gateway/automation",
+    "src/backend/van_gateway/computer_use",
+    "src/services/browser_stream_host",
+    "venv/lib/python3.11/site-packages/playwright",
+    "venv/lib/python3.11/site-packages/playwright-1.47.0.dist-info",
+    "venv/lib/python3.11/site-packages/patchright",
+    "venv/lib/python3.11/site-packages/browser_use",
+)
+
+
+def test_qualify_passes_a_pruned_deployed_tree(tmp_path):
+    _deployed_tree(tmp_path)
+    check = _qualify_check(tmp_path, "deployed_tree_pruned")
+    assert check["status"] == "GREEN", check
+
+
+@pytest.mark.parametrize("violation", PRUNE_VIOLATIONS)
+def test_qualify_fails_a_deployed_tree_carrying_browser_or_trading_code(tmp_path, violation):
+    _deployed_tree(tmp_path)
+    (tmp_path / violation).mkdir(parents=True)
+    check = _qualify_check(tmp_path, "deployed_tree_pruned")
+    # the report names the offending path (a trading/ tree is reported at its root)
+    expected = "/trading" if "/trading/" in violation else violation.rsplit("/", 1)[-1]
+    assert check["status"] == "RED" and expected in check["detail"], check
+
+
+def test_qualify_does_not_pass_a_missing_deployed_tree(tmp_path):
+    check = _qualify_check(tmp_path, "deployed_tree_pruned")
+    assert check["status"] == "PENDING", check
+
+
+def test_readme_states_the_pruning_requirement():
+    text = (ZONE_DIR / "README.md").read_text(encoding="utf-8")
+    for needle in ("trading/", "van_gateway/{browser,automation,computer_use}", "services/browser_*",
+                   "playwright", "patchright", "browser_use", "deployed_tree_pruned"):
+        assert needle in text, needle
+
+
 @pytest.mark.parametrize("text,hit", [
     ("ExecStart=node stagehand_service.mjs", "stagehand"),
     ("After=van-browser-chromium.service", "chromium"),

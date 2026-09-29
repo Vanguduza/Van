@@ -43,6 +43,25 @@ else
   record no_forbidden_workloads RED "units=[${forbidden_units//$'\n'/,}] procs=[${forbidden_procs//$'\n'/,}] pkgs=[${forbidden_pkgs//$'\n'/,}]"
 fi
 
+# The service's own deployed tree and venv are pruned (A-MIN-VAN, reviewer D2). A host with
+# no browser unit can still ship the code and packages that drive one inside the service's
+# import path; this plane must not carry them at all.
+core_root="${VAN_PRIVATE_CORE_ROOT:-/opt/van-private-core}"
+core_src="$core_root/src"; core_venv="$core_root/venv"
+if [[ ! -d "$core_src" || ! -d "$core_venv" ]]; then
+  record deployed_tree_pruned PENDING "deployed tree or venv not found under $core_root"
+elif ! tree_hits="$(find "$core_src" \( -type d -name trading \
+        -o -path '*/van_gateway/browser' -o -path '*/van_gateway/automation' \
+        -o -path '*/van_gateway/computer_use' -o -path '*/services/browser_*' \) -prune -print)" \
+     || ! venv_hits="$(find "$core_venv" -path '*/site-packages/*' -prune \( -iname 'playwright*' \
+        -o -iname 'patchright*' -o -iname 'browser_use*' -o -iname 'browser-use*' \) -print)"; then
+  record deployed_tree_pruned PENDING "deployed tree or venv unreadable under $core_root"
+elif [[ -z "$tree_hits$venv_hits" ]]; then
+  record deployed_tree_pruned GREEN "$core_src and $core_venv carry no browser or trading code"
+else
+  record deployed_tree_pruned RED "src=[${tree_hits//$'\n'/,}] venv=[${venv_hits//$'\n'/,}]"
+fi
+
 # 3. The Owner Model store is private to the service account.
 db="${VAN_DATABASE_PATH:-}"
 if [[ "$db" == /var/lib/van-private-core/* && -f "$db" ]] \

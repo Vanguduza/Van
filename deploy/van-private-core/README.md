@@ -41,6 +41,16 @@ broker adapters. The repository names of each are listed in `topology.json` (`mu
 and enforced by `tests/contracts/test_van_private_core_topology.py`; `qualify.sh` checks a
 live host for the same.
 
+### Pruned deployed tree
+
+`/opt/van-private-core/src` is the repository pruned to what the private core imports, not a
+checkout of it. It must not contain `trading/` (at any depth),
+`backend/van_gateway/{browser,automation,computer_use}` or `services/browser_*`, and
+`/opt/van-private-core/venv` must not contain `playwright`, `patchright` or `browser_use`
+(nor their `*.dist-info`). Install the venv from the private core's own requirements, not
+the gateway's. `qualify.sh` check `deployed_tree_pruned` is RED when any of these is present
+and PENDING when the tree or venv cannot be found or read.
+
 ## Run (once a host exists)
 
 ```bash
