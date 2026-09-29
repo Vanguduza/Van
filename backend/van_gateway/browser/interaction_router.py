@@ -30,9 +30,13 @@ under DEC-039; nothing here is copied from them.
 
 from __future__ import annotations
 
+import dataclasses
+import hashlib
 import inspect
+import json
 import re
 import time
+from collections import OrderedDict
 from dataclasses import dataclass, field
 from enum import Enum
 from typing import Any, Awaitable, Callable, Protocol
@@ -478,6 +482,55 @@ async def _maybe_await(value: Any) -> Any:
     return await value if inspect.isawaitable(value) else value
 
 
+def _observation_digest(observation: Any) -> str:
+    if dataclasses.is_dataclass(observation) and not isinstance(observation, type):
+        observation = dataclasses.asdict(observation)
+    raw = json.dumps(observation, sort_keys=True, default=str, separators=(",", ":"))
+    return hashlib.sha256(raw.encode("utf-8")).hexdigest()
+
+
+def harness_page_to_jev_observation(page: Any, *, profile_alias: str) -> Any:
+    """Build B2's ``JevPageObservation`` from what the Browser Harness reports.
+
+    Never guesses in the permissive direction. The Harness ``page_info`` today returns
+    ``url``/``title``/``extraction`` and, when the page marks one, ``account_identity``; it
+    does not return an element list, a login state or a cookie state. So:
+
+    * ``authenticated``/``cookies_present`` are taken only when the Harness reports a real
+      bool; otherwise ``None`` (unknown), which B2 treats as an authenticated session. An
+      ``account_identity`` marker means signed in.
+    * ``elements`` come only from a Harness-reported ``elements`` list; each ``ref`` is the
+      Harness locator used to act on it. No list means no targets, which B2 denies.
+    """
+    from van_gateway.browser.jev_eligibility import JevPageObservation, ObservedElement
+
+    page = page if isinstance(page, dict) else {}
+
+    def tri(key: str) -> bool | None:
+        value = page.get(key)
+        return value if isinstance(value, bool) else None
+
+    authenticated = tri("authenticated")
+    if page.get("account_identity"):
+        authenticated = True
+    elements = []
+    for raw in page.get("elements") or ():
+        if not isinstance(raw, dict) or not isinstance(raw.get("ref"), str) or not raw.get("ref"):
+            continue
+        elements.append(ObservedElement(
+            ref=raw["ref"], role=str(raw.get("role") or ""),
+            label=str(raw.get("label") or ""), aria_label=str(raw.get("aria_label") or ""),
+            placeholder=str(raw.get("placeholder") or ""), title=str(raw.get("title") or ""),
+            value=str(raw.get("value") or ""), input_type=str(raw.get("input_type") or ""),
+            autocomplete=str(raw.get("autocomplete") or ""), hidden=bool(raw.get("hidden", False)),
+        ))
+    return JevPageObservation(
+        url=str(page.get("url") or ""), profile_alias=profile_alias,
+        authenticated=authenticated, cookies_present=tri("cookies_present"),
+        elements=tuple(elements), page_title=str(page.get("title") or ""),
+    )
+
+
 def _locator_from_entry(entry: Any) -> str | None:
     if isinstance(entry, str) and entry:
         return entry
@@ -520,6 +573,9 @@ class BrowserInteractionRouter:
         self.epoch_source = epoch_source
         self.eligibility_policy = eligibility_policy
         self.metrics = metrics or RouterMetrics()
+        #: B2 epochs are random per classification, so "is the page still the one Jev saw?"
+        #: is answered by a digest of the observation the epoch was issued for.
+        self._epoch_digests: OrderedDict[str, str] = OrderedDict()
         #: Owner takeover preempts automation (owner decision §9). Unknown = preempted.
         self.owner_control_probe = owner_control_probe
         #: Unit M's `stagehand_production_enabled`, bound to settings. Absent = lane off.
@@ -699,16 +755,31 @@ class BrowserInteractionRouter:
             policy=self.eligibility_policy,
         ))
 
-    async def _current_epoch(self, step: InteractionStep) -> str | None:
-        """The page's epoch *now*, not when it was classified."""
+    def _remember_epoch(self, epoch: str, observation: Any) -> None:
+        self._epoch_digests[epoch] = _observation_digest(observation)
+        while len(self._epoch_digests) > 64:
+            self._epoch_digests.popitem(last=False)
+
+    async def _current_epoch(self, step: InteractionStep, request_epoch: str) -> str | None:
+        """The page's epoch *now*, not when it was classified.
+
+        A fresh read-back whose digest equals the one the epoch was issued for is the same
+        page, so the epoch still holds; anything else (page changed, no observer, epoch never
+        issued here) is a different epoch and every proposal against the old one is stale.
+        """
         if self.epoch_source is not None:
             return await self.epoch_source(step.task, step)
-        if self.observer is None or self.eligibility_classifier is None:
+        if self.observer is None:
             return None
-        fresh = await self.observer(step.task)
-        result = await self._classify(fresh, step)
-        epoch = getattr(result, "observation_epoch", None)
-        return epoch if isinstance(epoch, str) else None
+        issued_for = self._epoch_digests.get(request_epoch)
+        if issued_for is None:
+            return None
+        try:
+            fresh = await self.observer(step.task)
+        except Exception:  # noqa: BLE001 - cannot re-read the page => cannot prove freshness
+            return None
+        now = _observation_digest(fresh)
+        return request_epoch if now == issued_for else f"page_{now[:16]}"
 
     async def _jev_lane(self, step: InteractionStep, reasons: list[str]) -> StepResult | None:
         """Returns a terminal result when a Jev proposal was acted on, else ``None``."""
@@ -732,7 +803,7 @@ class BrowserInteractionRouter:
         cls = _class_value(getattr(eligibility, "eligibility_class", None))
         reasons.append(f"B2:{cls}")
         payload = getattr(eligibility, "jev_payload", None)
-        if cls not in ELIGIBLE_CLASSES or payload is None:
+        if cls not in ELIGIBLE_CLASSES or payload is None or getattr(eligibility, "eligible", True) is False:
             self.metrics.inc("b2_privacy_rejections")
             return None
         self.metrics.inc("eligible_steps")
@@ -757,6 +828,8 @@ class BrowserInteractionRouter:
             return None
 
         target_map = getattr(eligibility, "target_map", None) or {}
+        if isinstance(getattr(eligibility, "observation_epoch", None), str):
+            self._remember_epoch(eligibility.observation_epoch, observation)
 
         def classify(operation: str, target: dict[str, Any] | None) -> str:
             entry = target_map.get(target["target_id"]) if target else None
@@ -775,7 +848,7 @@ class BrowserInteractionRouter:
                         "action_class": classify(op, target),
                     })
 
-        epoch_at_call = await self._current_epoch(step)
+        epoch_at_call = await self._current_epoch(step, request["observation_epoch"])
         if not epoch_at_call or epoch_at_call != request["observation_epoch"]:
             # The page moved between classification and the call; asking Jev about a page
             # that no longer exists would only produce a stale proposal.
@@ -809,7 +882,7 @@ class BrowserInteractionRouter:
         self.metrics.inc("jev_proposals_received")
 
         # VAN-side B1 re-validation, against the epoch *now* (right before execution).
-        epoch_now = await self._current_epoch(step)
+        epoch_now = await self._current_epoch(step, request["observation_epoch"])
         try:
             operation, target, action_class = validate_jev_proposal(
                 request=request, proposal=response.proposal, current_epoch=epoch_now,
@@ -824,6 +897,8 @@ class BrowserInteractionRouter:
 
         locator = None
         if target is not None:
+            # B2's target_map (t_* -> VAN element ref) is the only way back to the page. An id
+            # that is not in it is invalid, whatever the payload said.
             locator = _locator_from_entry(target_map.get(target["target_id"]))
             if locator is None:
                 self.metrics.inc("jev_fallbacks")
@@ -1076,8 +1151,9 @@ def build_interaction_router(
     """Production wiring. Everything optional fails closed; the router is off by default."""
     classifier = eligibility_classifier if eligibility_classifier is not None else load_eligibility_classifier()
 
-    async def observe(task: BrowserTask) -> dict[str, Any]:
-        return await harness.page_info(task)
+    async def observe(task: BrowserTask) -> Any:
+        # B2 refuses VAN's generic BrowserObservation; it gets the frozen record it defines.
+        return harness_page_to_jev_observation(await harness.page_info(task), profile_alias=task.profile_alias)
 
     return BrowserInteractionRouter(
         enabled=bool(getattr(settings, "browser_interaction_router_enabled", False)),
@@ -1172,6 +1248,7 @@ __all__ = [
     "build_interaction_router",
     "build_interaction_routes",
     "default_action_classifier",
+    "harness_page_to_jev_observation",
     "load_eligibility_classifier",
     "load_stagehand_production_gate",
     "validate_b1_payload",

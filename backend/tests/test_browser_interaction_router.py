@@ -906,3 +906,103 @@ async def test_create_app_wires_router_off_by_default(_env):
     assert router.verifier is not None and router.executor is not None
     assert router.semantic_fallback is not None
     assert router.jev_lane_disabled_reasons()  # Jev off by default too
+
+
+# ---------------------------------------------------------------- against unit F's real B2
+
+
+PUBLIC_PAGE = {
+    "url": "https://docs.python.org/3/library/json.html", "title": "json",
+    "authenticated": False, "cookies_present": False,
+    "elements": [
+        {"ref": "a#next", "role": "link", "label": "Next topic"},
+        {"ref": "#qs", "role": "searchbox", "label": "Quick search"},
+    ],
+}
+
+
+class LabelPickingJev(FakeJev):
+    """Proposes a click on the target with this label, using whatever id B2 minted."""
+
+    def __init__(self, label: str, forged_id: str | None = None) -> None:
+        super().__init__()
+        self.label, self.forged_id = label, forged_id
+
+    async def propose_action(self, *, request, caller_action_classes, current_epoch):
+        self.calls.append({"request": request, "current_epoch": current_epoch})
+        tid = self.forged_id or next(t["target_id"] for t in request["targets"] if t["label"] == self.label)
+        return proposes("click", tid)
+
+
+def real_b2_router(pages, jev, **kw):
+    from van_gateway.browser.interaction_router import harness_page_to_jev_observation
+    from van_gateway.browser.jev_eligibility import classify_observation
+
+    pages = list(pages)
+
+    async def observer(task):
+        page = pages.pop(0) if len(pages) > 1 else pages[0]
+        return harness_page_to_jev_observation(page, profile_alias="public_research")
+
+    kw.setdefault("semantic_fallback", FakeStagehand(None))
+    return make_router(
+        eligibility_classifier=classify_observation, jev_client=jev, observer=observer,
+        epoch_source=None, **kw,
+    )
+
+
+def _real_step(**kw):
+    kw.setdefault("closed_operation_set", ("click", "scroll", "done", "abstain"))
+    return step(observation=None, **kw)
+
+
+async def test_real_b2_harness_page_without_auth_state_never_reaches_jev():
+    jev = LabelPickingJev("Next topic")
+    bare = {"url": PUBLIC_PAGE["url"], "title": "json"}  # what Harness page_info returns today
+    router = real_b2_router([bare], jev)
+    result = await router.route(_real_step())
+    assert jev.calls == [] and "B2:OWNER_PRIVATE" in result.reasons
+
+
+async def test_real_b2_eligible_page_round_trips_to_the_element_ref():
+    jev = LabelPickingJev("Next topic")
+    router = real_b2_router([PUBLIC_PAGE], jev)
+    result = await router.route(_real_step())
+    assert "B2:SANITIZABLE_ELIGIBLE" in result.reasons
+    sent = jev.calls[0]["request"]
+    assert "payload_schema" not in sent and "origin_class" not in sent
+    assert sent["observation_epoch"] == jev.calls[0]["current_epoch"]
+    assert result.lane is RouterLane.JEV and result.state is StepState.VERIFIED_SUCCESS
+    assert router.executor.executed[0].locator == "a#next"
+
+
+async def test_real_b2_page_change_makes_the_proposal_stale():
+    moved = {**PUBLIC_PAGE, "url": "https://docs.python.org/3/library/csv.html"}
+    jev = LabelPickingJev("Next topic")
+    # classify, epoch at call (same page), epoch before execution (page moved)
+    router = real_b2_router([PUBLIC_PAGE, PUBLIC_PAGE, moved], jev)
+    result = await router.route(_real_step())
+    assert len(jev.calls) == 1
+    assert "JEV_PROPOSAL_REJECTED_BY_VAN:STALE_OBSERVATION_EPOCH" in result.reasons
+    assert router.executor.executed == []
+
+
+async def test_real_b2_forged_target_id_is_invalid():
+    jev = LabelPickingJev("Next topic", forged_id="t_0123456789abcdef")
+    router = real_b2_router([PUBLIC_PAGE], jev)
+    result = await router.route(_real_step())
+    assert "JEV_PROPOSAL_REJECTED_BY_VAN:TARGET_NOT_SUPPLIED" in result.reasons
+    assert router.executor.executed == []
+
+
+def test_harness_adapter_never_guesses_permissively():
+    from van_gateway.browser.interaction_router import harness_page_to_jev_observation
+
+    obs = harness_page_to_jev_observation(
+        {**PUBLIC_PAGE, "account_identity": "someone", "cookies_present": "yes"},
+        profile_alias="public_research",
+    )
+    assert obs.authenticated is True       # an identity marker means signed in
+    assert obs.cookies_present is None     # not a bool -> unknown
+    assert [e.ref for e in obs.elements] == ["a#next", "#qs"]
+    assert harness_page_to_jev_observation({}, profile_alias="p").elements == ()
