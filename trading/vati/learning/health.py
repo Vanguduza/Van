@@ -127,7 +127,8 @@ class StrategyHealthTracker:
         ref = parse_evidence_ref(o.evidence_ref)
         if ref.evidence_class not in HEALTH_SOURCE_CLASSES:
             raise EvidenceError(f"{ref.evidence_class.value} is not a source event for strategy health")
-        rec = self.evidence.admit(ref, resolver, correlation_hint=correlation_hint)
+        # Checked before it is cached: a refused observation leaves nothing behind.
+        rec = ResolvedEvidenceCache.resolve_from_ledger(ref, resolver, correlation_hint=correlation_hint)
         if o.strategy_id not in rec.subjects:
             raise EvidenceError(f"evidence {ref} is not about {o.strategy_id!r}")
         if Environment(o.environment) is not rec.environment:
@@ -142,9 +143,8 @@ class StrategyHealthTracker:
         consumed = self._consumed.setdefault(o.strategy_id, set())
         canonical = str(ref)
         if rec.trade_id in consumed:
-            if canonical not in refs:
-                self.evidence.discard(canonical)   # evicted, or another artifact of a counted trade: not a new sample
-            return self.verdict(o.strategy_id)   # the same trade observed again is not a new sample
+            return self.verdict(o.strategy_id)   # the same trade (evicted or not, any artifact) is not a new sample
+        self.evidence.admit(ref, resolver, correlation_hint=correlation_hint)
         consumed.add(rec.trade_id)
         buf = self._obs.setdefault(o.strategy_id, [])
         buf.append(o)
@@ -158,7 +158,7 @@ class StrategyHealthTracker:
     def observe_evidence(self, strategy_id: str, evidence_ref: str, *, resolver: LedgerEvidenceResolver,
                          correlation_hint: str | None = None, regime_fit: bool = True) -> HealthVerdict:
         """Observe a trade whose every value is read from its ledger evidence."""
-        rec = self.evidence.admit(evidence_ref, resolver, correlation_hint=correlation_hint)
+        rec = ResolvedEvidenceCache.resolve_from_ledger(evidence_ref, resolver, correlation_hint=correlation_hint)
         r, proc, cost = health_facts(rec, resolver)
         return self.observe(HealthObservation(strategy_id, rec.environment, r, proc, cost, regime_fit, evidence_ref),
                             resolver=resolver, correlation_hint=correlation_hint)

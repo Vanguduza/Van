@@ -415,13 +415,20 @@ class ResolvedEvidenceCache(TrustedEvidenceResolver):
     def __init__(self) -> None:
         self._records: dict[str, EvidenceRecord] = {}
 
-    def admit(self, ref: str | EvidenceRef, resolver: LedgerEvidenceResolver, *, correlation_hint: Optional[str] = None) -> EvidenceRecord:
+    @staticmethod
+    def resolve_from_ledger(ref: str | EvidenceRef, resolver: LedgerEvidenceResolver, *, correlation_hint: Optional[str] = None) -> EvidenceRecord:
+        """Resolve through an exact LedgerEvidenceResolver without caching, so a
+        producer can check a record before it admits it."""
         if type(resolver) is not LedgerEvidenceResolver:
             raise EvidenceError("only ledger-resolved evidence may be admitted")
         parsed = ref if isinstance(ref, EvidenceRef) else parse_evidence_ref(ref)
         rec = resolver.resolve(parsed, correlation_hint=correlation_hint)
         if rec.identity != parsed.identity or rec.evidence_class is not parsed.evidence_class:
             raise EvidenceError(f"resolver returned a different record for {parsed}")
+        return rec
+
+    def admit(self, ref: str | EvidenceRef, resolver: LedgerEvidenceResolver, *, correlation_hint: Optional[str] = None) -> EvidenceRecord:
+        rec = self.resolve_from_ledger(ref, resolver, correlation_hint=correlation_hint)
         self._records.setdefault(rec.identity, rec)
         return self._records[rec.identity]
 

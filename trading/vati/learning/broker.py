@@ -114,7 +114,8 @@ class BrokerLearner:
         ref = parse_evidence_ref(evidence_ref)
         if ref.evidence_class is not EvidenceClass.TCA_RECORD:
             raise EvidenceError(f"broker execution facts must cite a TCA_RECORD, not {ref.evidence_class.value}")
-        rec = self.evidence.admit(ref, resolver, correlation_hint=correlation_hint)
+        # Checked before it is cached: a refused fact leaves nothing behind.
+        rec = ResolvedEvidenceCache.resolve_from_ledger(ref, resolver, correlation_hint=correlation_hint)
         key = f"{broker}:{symbol}:{session}"
         if key not in rec.subjects:
             raise EvidenceError(f"evidence {ref} is not about {key!r}")
@@ -131,6 +132,7 @@ class BrokerLearner:
         p = self.profiles.setdefault((broker, symbol, session), BrokerExecutionProfile(broker, symbol, session))
         if str(ref) in p.evidence_refs or rec.trade_id in p.trade_ids:
             return p   # the same TCA record (or another record of the same trade) is not a new sample
+        self.evidence.admit(ref, resolver, correlation_hint=correlation_hint)
         p.evidence_refs.append(str(ref))
         p.trade_ids.append(rec.trade_id)
         p.samples.append((EXECUTION_FACT_WEIGHT[environment], cost_ratio, slippage_pips, rejected, in_event_window))

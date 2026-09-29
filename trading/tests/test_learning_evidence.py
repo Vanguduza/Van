@@ -642,6 +642,23 @@ def test_review_d_evicted_trade_is_not_readmitted_as_a_new_sample():
     assert t._refs[SID] == window_before[1:] + [new_ref]
 
 
+def test_refused_observations_leave_nothing_in_the_evidence_cache():
+    src = Src()
+    t, bl = StrategyHealthTracker(), BrokerLearner()
+    ref = src.review(SID, 4242, r="2.5", process_ok=True, cost="1")
+    other = src.review("strat-2", 4243)
+    for bad in (HealthObservation(SID, Environment.LIVE, D("-50"), False, D("10"), True, ref),      # values disagree
+                HealthObservation(SID, Environment.LIVE, D("-1"), False, D("2.5"), False, other),    # another subject
+                HealthObservation(SID, Environment.SHADOW, D("2.5"), True, D("1"), True, ref)):      # another environment
+        with pytest.raises(EvidenceError):
+            t.observe(bad, resolver=src.resolver)
+    fact = src.tca("mt5-a", "EURUSD", "LONDON", 4244)
+    with pytest.raises(EvidenceError):
+        bl.observe(broker="mt5-a", symbol="EURUSD", session="LONDON", environment=Environment.LIVE, cost_ratio=D("9"), slippage_pips=D("1"),
+                   rejected=False, in_event_window=False, evidence_ref=fact, resolver=src.resolver)
+    assert len(t.evidence) == 0 and len(bl.evidence) == 0
+
+
 # ------------------------------------------------------- memory bridge
 def test_owner_preference_continuity_record_is_rejected():
     b = HermesMemoryBridge()
