@@ -109,3 +109,39 @@ async def test_a_failed_row_is_retried_once_its_backoff_elapses(tmp_path):
     done = await drain_outbox(store, {H: flaky}, now_ms=backoff_ms(1))
     assert len(done.delivered) == 1 and calls == [0, 1]
     assert backoff_ms(1) == 1_000 and backoff_ms(3) == 4_000 and backoff_ms(40) == 15 * 60_000
+
+
+async def test_undecodable_payload_row_is_an_attempt_not_a_drain_abort(tmp_path):
+    """A-MIN-VAN (reviewer D2): `json.loads(payload_json)` ran outside the try, so one
+    oldest row with a corrupt payload raised JSONDecodeError out of every drain and the
+    five good rows behind it stayed PENDING forever (10 drains, bad row attempts 0)."""
+    from van_gateway.understanding.owner_model_outbox import DEFAULT_MAX_ATTEMPTS
+
+    store = await make_store(tmp_path)
+    good = await _events(store, 5, targets=(H,))
+    await store.execute(
+        "INSERT INTO owner_model_outbox(outbox_id, target, owner_principal_id, owner_model_revision, "
+        "event_kind, payload_json, created_at_ms) "
+        "VALUES ('bad', 'HINDSIGHT_OWNER', 'owner', 1, 'REJECTED', '{not json', -1)")
+    seen: list[str] = []
+
+    async def ok(event):
+        seen.append(event.outbox_id)
+        return f"r:{event.outbox_id}"
+
+    first = await drain_outbox(store, {H: ok}, now_ms=100)
+    assert sorted(k for k, _ in first.delivered) == sorted(good)
+    assert first.failed == [("bad", H.value, "OUTBOX_PAYLOAD_UNDECODABLE")]
+    assert "bad" not in seen
+    assert await _pending(store, H) == 1
+    now = 100
+    for _ in range(DEFAULT_MAX_ATTEMPTS - 1):
+        now += 10**9
+        report = await drain_outbox(store, {H: ok}, now_ms=now)
+    assert report.dead_lettered == [("bad", H.value, "OUTBOX_PAYLOAD_UNDECODABLE")]
+    bad = await store.fetchone(
+        "SELECT attempts, dead_lettered_at_ms, last_error FROM owner_model_outbox WHERE outbox_id = 'bad'")
+    assert bad["attempts"] == DEFAULT_MAX_ATTEMPTS and bad["dead_lettered_at_ms"] == now
+    assert bad["last_error"] == "OUTBOX_PAYLOAD_UNDECODABLE"
+    after = await drain_outbox(store, {H: ok}, now_ms=now + 10**9)
+    assert after.failed == [] and after.delivered == []

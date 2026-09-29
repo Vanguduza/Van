@@ -175,15 +175,22 @@ async def drain_outbox(
         target = OutboxTarget(str(row["target"]))
         key = (str(row["outbox_id"]), target.value)
         handler = handlers[target]
-        event = OutboxEvent(
-            outbox_id=key[0], target=target,
-            owner_principal_id=str(row["owner_principal_id"]),
-            owner_model_revision=int(row["owner_model_revision"]),
-            event_kind=str(row["event_kind"]),
-            payload=json.loads(str(row["payload_json"])),
-            attempts=int(row["attempts"]),
-        )
         try:
+            # Decoded inside the try (A-MIN-VAN, reviewer D2): a row whose stored payload
+            # cannot be decoded is that row's failed attempt and ends in dead-letter; it
+            # must never abort the drain and starve every row behind it.
+            try:
+                payload = json.loads(str(row["payload_json"]))
+            except ValueError:
+                raise OutboxDeliveryError("OUTBOX_PAYLOAD_UNDECODABLE") from None
+            event = OutboxEvent(
+                outbox_id=key[0], target=target,
+                owner_principal_id=str(row["owner_principal_id"]),
+                owner_model_revision=int(row["owner_model_revision"]),
+                event_kind=str(row["event_kind"]),
+                payload=payload,
+                attempts=int(row["attempts"]),
+            )
             receipt = await handler(event)
             if not isinstance(receipt, str) or not receipt.strip():
                 raise OutboxDeliveryError("OUTBOX_HANDLER_NO_RECEIPT")
