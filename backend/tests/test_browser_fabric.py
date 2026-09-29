@@ -374,6 +374,9 @@ async def test_stagehand_envelope_pins_provider(tmp_path):
         ExternalRuntimeRegistry(store), base_url="http://127.0.0.1:9140", enabled=True,
         model_provider="anthropic", model_name="claude-sonnet-5",
         transport=httpx.MockTransport(handler),
+        # Review I B-1: the envelope is under test here, not the production gate
+        # (tests/test_stagehand_adapter_gate.py), so this adapter is handed an open one.
+        production_gate=lambda: (True, "TEST_GATE_OPEN"),
     )
     await adapter.observe(task, "find the download link")
     assert seen["model_provider"] == "anthropic"

@@ -11,6 +11,8 @@ is off, and reports readiness through the same evidence-backed contract as n8n
 
 from __future__ import annotations
 
+import inspect
+from collections.abc import Callable
 from typing import Any, Protocol
 
 import httpx
@@ -214,12 +216,68 @@ class HttpBrowserHarnessAdapter(_PrivateWorkerClient):
         return await super().status("BROWSER_HARNESS_UNAVAILABLE")
 
 
+#: Sentinel for "no gate argument": the adapter builds the canonical production gate.
+CANONICAL_STAGEHAND_GATE: Any = object()
+
+StagehandProductionGate = Callable[[], Any]
+
+
+def canonical_stagehand_production_gate(
+    adapter: "StagehandAdapter", settings: Any = None
+) -> StagehandProductionGate:
+    """The gate every production Stagehand call passes: the router's own composition.
+
+    Owner decisions 2026-09-29 §§1, 2, 4-6: placement on van-browser-core proved by the
+    worker's live ``/health`` (``placement.stagehand_production_enabled``) AND every
+    production activation gate green (``production_gates.evaluate_production_gates``).
+    It is ``interaction_router.load_stagehand_production_gate`` itself, imported at call
+    time, so the router lane and the adapter cannot drift apart. The import is lazy
+    because the router imports this module. Anything missing fails closed.
+    """
+
+    async def gate() -> tuple[bool, str]:
+        try:
+            from van_gateway.browser.interaction_router import load_stagehand_production_gate
+        except ImportError:
+            return False, "STAGEHAND_PRODUCTION_GATE_MISSING"
+        resolved = settings
+        if resolved is None:
+            from van_gateway.config import get_settings
+
+            resolved = get_settings()
+        # Settings-only placement first: an undeclared zone, a loopback or plain-HTTP
+        # endpoint, missing mTLS identity or a non-decided model is closed without
+        # contacting the worker at all. Only when fresh worker health is the one thing
+        # missing does the full router gate (which reads /health) run.
+        try:
+            from van_gateway.automation import placement
+        except ImportError:
+            return False, "PLACEMENT_GATE_MISSING"
+        placement_fn = getattr(placement, "stagehand_production_enabled", None)
+        if placement_fn is None:
+            return False, "PLACEMENT_GATE_MISSING"
+        permitted, reason = placement_fn(resolved, worker_health=None)
+        if permitted is not True and not str(reason).startswith("VAN_BROWSER_CORE_UNAVAILABLE:"):
+            return False, str(reason or "PRODUCTION_DISABLED")
+        return await load_stagehand_production_gate(resolved, adapter)()
+
+    return gate
+
+
 class StagehandAdapter(_PrivateWorkerClient):
     """§§186-187, 379, 418 — semantic observation and typed extraction.
 
     ``act`` exists but is refused above the admitted ladder cap, and the model
     provider is always the one the gateway configured — page content can never
     choose it (§418).
+
+    Review I B-1: every call that reaches the worker first passes the Stagehand
+    production gate, *inside the adapter*, so no consumer (the assignment worker, the
+    NotebookLM consumer, a future caller) can reach Stagehand while placement or the
+    production gate model says PRODUCTION_DISABLED. Without a ``production_gate``
+    argument the adapter uses ``canonical_stagehand_production_gate``; an explicit
+    ``None`` means the gate is missing, which refuses every call. ``configured`` is
+    False while the gate is closed, so the status surface reports the truth.
     """
 
     CAPABILITY = "stagehand"
@@ -237,6 +295,8 @@ class StagehandAdapter(_PrivateWorkerClient):
         timeout_seconds: float = 60.0,
         transport: httpx.AsyncBaseTransport | None = None,
         actuation_enabled: bool = False,
+        production_gate: StagehandProductionGate | None = CANONICAL_STAGEHAND_GATE,
+        settings: Any = None,
     ) -> None:
         super().__init__(
             registry,
@@ -264,12 +324,53 @@ class StagehandAdapter(_PrivateWorkerClient):
         #: path. `act()` refuses unless a caller explicitly constructs the adapter with this
         #: set (non-production only). observe()/extract() are unaffected.
         self.actuation_enabled = actuation_enabled
+        if production_gate is CANONICAL_STAGEHAND_GATE:
+            production_gate = canonical_stagehand_production_gate(self, settings)
+        self.production_gate: StagehandProductionGate | None = production_gate
+        #: The last gate verdict. Closed until a gate evaluation says otherwise.
+        self.production_gate_state: tuple[bool, str] = (False, "STAGEHAND_PRODUCTION_GATE_NOT_EVALUATED")
 
     @property
-    def configured(self) -> bool:
+    def wiring_configured(self) -> bool:
         # §418 — an unconfigured provider is unconfigured Stagehand. The model is
         # never chosen at runtime, so "no provider" means the adapter cannot run.
         return bool(self.base_url and self.model_provider and self.model_name)
+
+    @property
+    def configured(self) -> bool:
+        """Wired AND the production gate open at its last evaluation (review I B-1)."""
+        return self.wiring_configured and self.production_gate_state[0] is True
+
+    def _assert_usable(self) -> None:
+        if not self.enabled:
+            raise BrowserAdapterError(f"{self.CAPABILITY.upper()}_DISABLED")
+        if not self.wiring_configured:
+            raise BrowserAdapterError(f"{self.CAPABILITY.upper()}_UNCONFIGURED")
+
+    async def evaluate_production_gate(self) -> tuple[bool, str]:
+        """Evaluate the gate, remember the verdict, never raise. Missing = closed."""
+        gate = self.production_gate
+        if gate is None:
+            verdict: tuple[bool, str] = (False, "STAGEHAND_PRODUCTION_GATE_MISSING")
+        else:
+            try:
+                outcome = gate()
+                if inspect.isawaitable(outcome):
+                    outcome = await outcome
+                permitted, reason = outcome
+            except Exception as exc:  # noqa: BLE001 - a gate fault is "not permitted"
+                verdict = (False, f"STAGEHAND_PRODUCTION_GATE_FAILED:{type(exc).__name__}")
+            else:
+                verdict = (permitted is True, str(reason or "PRODUCTION_DISABLED"))
+        self.production_gate_state = verdict
+        return verdict
+
+    async def _call(self, path: str, payload: dict[str, Any]) -> dict[str, Any]:
+        self._assert_usable()
+        permitted, reason = await self.evaluate_production_gate()
+        if not permitted:
+            raise BrowserAdapterError("STAGEHAND_PRODUCTION_DISABLED", reason)
+        return await super()._call(path, payload)
 
     def _envelope(self, task: BrowserTask, **extra: Any) -> dict[str, Any]:
         return {
@@ -331,10 +432,26 @@ class StagehandAdapter(_PrivateWorkerClient):
         raise BrowserPolicyError("direct_stagehand_agent_loop_forbidden")
 
     async def status(self) -> ExternalRuntimeStatus:  # type: ignore[override]
+        if self.enabled and self.wiring_configured:
+            permitted, reason = await self.evaluate_production_gate()
+            if not permitted:
+                # Wired but not permitted: not "configured", and the reason is visible.
+                return ExternalRuntimeStatus(
+                    capability=self.CAPABILITY,
+                    state=RuntimeState.POLICY_DISABLED,
+                    configured=False,
+                    egress_enabled=False,
+                    credential_locus="gateway",
+                    expected_version=self.expected_version,
+                    detail=f"STAGEHAND_PRODUCTION_DISABLED:{reason}",
+                    degraded_code="BROWSER_SEMANTIC_UNAVAILABLE",
+                )
         return await super().status("BROWSER_SEMANTIC_UNAVAILABLE")
 
 
 __all__ = [
+    "CANONICAL_STAGEHAND_GATE",
+    "canonical_stagehand_production_gate",
     "BrowserAdapterError",
     "BrowserHarnessAdapter",
     "HttpBrowserHarnessAdapter",
