@@ -15,9 +15,13 @@ Rules, all deny-biased:
   unadmitted profile, a non-https scheme, an IDN or literal-IP host, an adversarial page, zero
   usable targets or too many targets are ``POLICY_DENIED``. An unknown authentication or cookie
   state is treated as an authenticated session (``OWNER_PRIVATE``).
-* A label that itself carries private data (email, handle, phone/account digit runs, card,
-  IBAN, account-like token, timestamp, owner-profile term) makes the *observation*
-  ineligible. It is never "sanitised" into a shorter label that still leaks. Elements are
+* A label that itself carries private data (email, including one with no TLD; handle;
+  phone/account digit runs, including ones split by ``| : + . - /`` or spelled out as
+  words; card; IBAN; UK postcode; street address; account-like token; timestamp;
+  owner-profile term) makes the *observation* ineligible. So does a page that addresses a
+  person ("Signed in as …", "Hello, <Name>"). A bare personal name is not detectable
+  without refusing ordinary two-word labels; it is caught only through
+  ``owner_private_terms``, which production requires (see ``build_eligibility_policy``). It is never "sanitised" into a shorter label that still leaks. Elements are
   only *withheld* for reasons that are not private data: a URL in the label, homoglyph or
   zero-width obfuscation, an unknown role, an over-long or empty label, a sign-in entry
   point, a personal-data input field, a hidden element.
@@ -326,6 +330,10 @@ def _variants(text: str) -> tuple[str, str, str]:
 # ------------------------------------------------------------------ private detectors
 
 _EMAIL_RE = re.compile(r"[A-Za-z0-9._%+\-]+@[A-Za-z0-9\-]+(?:\.[A-Za-z0-9\-]+)*\.[A-Za-z]{2,}")
+#: Reviewer I minor 1 — ``jane.doe@example`` (no TLD) and ``jane.doe@example/com`` are still
+#: an address. Scanned on the folded/deobfuscated forms only, never the whitespace-squeezed
+#: one, so "Follow @x" (a HANDLE) or "meet @ the desk" do not become emails by squeezing.
+_EMAIL_NO_TLD_RE = re.compile(r"[A-Za-z0-9._%+\-]+@[A-Za-z0-9\-]{2,}")
 _HANDLE_RE = re.compile(r"(?<![\w.@])@[A-Za-z0-9_]{2,}")
 _DATE_TIME_RE = re.compile(
     r"\b\d{4}-\d{1,2}-\d{1,2}(?:[T ]\d{1,2}:\d{2}(?::\d{2})?(?:Z|[+-]\d{2}:?\d{2})?)?\b"
@@ -333,7 +341,24 @@ _DATE_TIME_RE = re.compile(
     r"|\b\d{1,2}:\d{2}(?::\d{2})?\s*(?:[ap]\.?m\.?)?",
     re.I,
 )
-_DIGIT_RUN_RE = re.compile(r"\+?\d(?:[\s\-.()/_,·•]*\d){4,}")
+#: Five or more digits joined by any separator a page uses to split one number, now
+#: including ``|``, ``:`` and ``+`` (reviewer I minor 1: ``Code 481|516``, ``Ref 481:516``,
+#: ``Ref 48+15+16``). Clock times are removed by ``_DATE_TIME_RE`` before this runs.
+_DIGIT_RUN_RE = re.compile(r"\+?\d(?:[\s\-.()/_,·•|:+]*\d){4,}")
+#: Digits spelled out as words ("one two three four five ..."), counted with bare digits.
+_SPELLED_DIGITS = frozenset({
+    "zero", "oh", "one", "two", "three", "four", "five", "six", "seven", "eight", "nine",
+})
+_SPELLED_DIGIT_MIN_RUN = 5
+#: UK postcode shape (``SW1A 1AA``). Upper-case only, which is how postcodes are written;
+#: US ZIP codes are five-digit runs and already a DIGIT_RUN.
+_POSTCODE_RE = re.compile(r"\b(?:GIR ?0AA|[A-Z]{1,2}\d[A-Z\d]? ?\d[A-Z]{2})\b")
+#: A house number followed by a capitalised street name and a street type.
+_STREET_ADDRESS_RE = re.compile(
+    r"\b\d{1,5}[A-Za-z]?,?\s+(?:[A-Z][a-z'\-]+\s+){1,3}"
+    r"(?:Street|St|Road|Rd|Avenue|Ave|Lane|Ln|Drive|Dr|Boulevard|Blvd|Close|Court|Ct|Way|"
+    r"Place|Pl|Terrace|Crescent|Square|Sq|Gardens|Grove|Hill|Parkway|Row|Mews|Walk)\b"
+)
 _IBAN_RE = re.compile(r"\b[A-Z]{2}\d{2}[A-Z0-9]{11,30}\b")
 _TOKEN_RE = re.compile(r"(?=[A-Za-z0-9_\-]*\d)(?=[A-Za-z0-9_\-]*[A-Za-z])[A-Za-z0-9_\-]{20,}")
 _HEX_RE = re.compile(r"\b[0-9a-fA-F]{16,}\b")
@@ -359,6 +384,16 @@ _CREDENTIAL_WORDS_RE = re.compile(
     re.I,
 )
 _SIGNED_IN_RE = re.compile(r"\b(?:sign(?:ed)?\s*out|log(?:ged)?\s*out|logout|signout|switch\s*account)\b", re.I)
+#: Reviewer I minor 1 — "Signed in as Jane Doe", "Logged in as …", "Hello, Jane", "Hi Jane
+#: Doe", "Welcome back, Jane": a page addressing a person by name is a signed-in page. The
+#: greeting is case-insensitive; the name must be capitalised, and generic addressees
+#: ("Hello World", "Hi there") are not names.
+_SIGNED_IN_AS_RE = re.compile(r"\b(?:signed|logged)\s*in\s+as\b", re.I)
+_GREETING_NAME_RE = re.compile(
+    r"(?i:\b(?:hello|hi|hey|howdy|welcome\s+back|good\s+(?:morning|afternoon|evening)))"
+    r"[\s,!:]+(?!(?i:world|there|everyone|everybody|all|again|friend|friends|folks|guest|team|"
+    r"developers?|visitors?|user)\b)[A-Z][a-z'\-]+"
+)
 _AUTH_ENTRY_RE = re.compile(
     r"\b(?:sign\s*in|log\s*in|login|signin|sign\s*up|signup|register|create\s*account|"
     r"my\s*account|your\s*account|account|profile|settings|forgot|reset\s*password)\b",
@@ -417,6 +452,23 @@ def _owner_term_hit(folded: str, squeezed: str, terms: Iterable[str]) -> bool:
     return False
 
 
+def _spelled_digit_run(text: str) -> bool:
+    """Five or more consecutive digits of which at least one is spelled out as a word
+    ("acct one two three four five", "pin nine 8 seven 6 five"). Runs of bare digits alone
+    are ``_DIGIT_RUN_RE``'s job; any other word breaks the run."""
+    run = spelled = 0
+    for token in re.findall(r"[A-Za-z]+|\d", text):
+        word = token.lower()
+        if token.isdigit() or word in _SPELLED_DIGITS:
+            run += 1
+            spelled += not token.isdigit()
+            if run >= _SPELLED_DIGIT_MIN_RUN and spelled:
+                return True
+        else:
+            run = spelled = 0
+    return False
+
+
 def secret_material(text: str) -> bool:
     if not text:
         return False
@@ -441,10 +493,16 @@ def private_data_findings(text: str, *, owner_terms: Sequence[str] = ()) -> list
         found.add("HANDLE")
     if _DATE_TIME_RE.search(deob):
         found.add("TIMESTAMP")
+    if any(_EMAIL_NO_TLD_RE.search(v) for v in (folded, deob)):
+        found.add("EMAIL")
     no_dates = _DATE_TIME_RE.sub(" ", deob)
     runs = [re.sub(r"\D", "", m.group(0)) for m in _DIGIT_RUN_RE.finditer(no_dates)]
-    if runs or sum(c.isdigit() for c in no_dates) >= 7:
+    if runs or sum(c.isdigit() for c in no_dates) >= 7 or _spelled_digit_run(no_dates):
         found.add("DIGIT_RUN")
+    if _POSTCODE_RE.search(folded):
+        found.add("POSTCODE")
+    if _STREET_ADDRESS_RE.search(folded):
+        found.add("STREET_ADDRESS")
     if any(13 <= len(r) <= 19 and _luhn(r) for r in runs):
         found.add("CARD_NUMBER")
     if _IBAN_RE.search(squeezed.upper()):
@@ -764,9 +822,12 @@ def classify_observation(
         private_data_findings(v, owner_terms=terms) for _, v in query_pairs
     ) or set(private_data_findings(path.replace("/", " "), owner_terms=terms)) & _URL_PATH_PRIVATE_CODES:
         f.add(OWNER, "OWNER_PRIVATE_URL")
-    if _SIGNED_IN_RE.search(_normalise(observation.page_title)) or any(
-        _SIGNED_IN_RE.search(_normalise(" ".join((e.label, e.aria_label, e.title))).translate(_CONFUSABLES))
-        for e in elements
+    if any(
+        pattern.search(_normalise(observation.page_title).translate(_CONFUSABLES)) or any(
+            pattern.search(_normalise(" ".join((e.label, e.aria_label, e.title))).translate(_CONFUSABLES))
+            for e in elements
+        )
+        for pattern in (_SIGNED_IN_RE, _SIGNED_IN_AS_RE)
     ):
         f.add(OWNER, "OWNER_SIGNED_IN_EVIDENCE")
     for e in elements:
@@ -775,10 +836,18 @@ def classify_observation(
             codes.update(private_data_findings(t, owner_terms=terms))
         if codes:
             f.add(OWNER, "OWNER_PRIVATE_LABEL:" + ",".join(sorted(codes)))
+        elif any(_GREETING_NAME_RE.search(_normalise(t).translate(_CONFUSABLES))
+                 for t in (e.label, e.aria_label, e.title) if t):
+            # A greeting to a name no detector (or owner term) identified: the page is
+            # addressing a signed-in person. When the name *was* identified, that finding
+            # already makes the page ineligible and is the more specific reason.
+            f.add(OWNER, "OWNER_SIGNED_IN_EVIDENCE")
         if e.value and (e.role in _INPUT_ROLES or e.input_type) and (e.input_type or "").lower() not in ("submit", "button"):
             f.add(OWNER, "OWNER_PRIVATE_INPUT_VALUE")
     if private_data_findings(observation.page_title, owner_terms=terms):
         f.add(OWNER, "OWNER_PRIVATE_TITLE")
+    elif _GREETING_NAME_RE.search(_normalise(observation.page_title).translate(_CONFUSABLES)):
+        f.add(OWNER, "OWNER_SIGNED_IN_EVIDENCE")
 
     if f:
         cls, reasons = f.verdict()

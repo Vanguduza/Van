@@ -662,6 +662,7 @@ class BrowserInteractionRouter:
         owner_control_probe: Callable[[BrowserTask], Awaitable[bool]] | None = None,
         stagehand_gate: Callable[[], Any] | None = None,
         target_resolver: TargetResolver | None = None,
+        require_owner_private_terms: bool = False,
     ) -> None:
         self.enabled = enabled
         self.executor = executor
@@ -684,6 +685,8 @@ class BrowserInteractionRouter:
         #: Reviewer I M-5: how a Stagehand locator becomes an observed element. Absent =
         #: every targeted Stagehand action is unclassifiable and goes to the owner.
         self.target_resolver = target_resolver
+        #: Reviewer I minor 1: production requires B2 to know the owner's own name/handles.
+        self.require_owner_private_terms = require_owner_private_terms
 
     # ----------------------------------------------------------- lane readiness
 
@@ -702,6 +705,10 @@ class BrowserInteractionRouter:
             reasons.append("JEV_LANE_DISABLED:JEV_CLIENT_UNCONFIGURED")
         if self.action_classifier is None:
             reasons.append("JEV_LANE_DISABLED:ACTION_CLASSIFIER_MISSING")
+        if self.require_owner_private_terms and not tuple(
+            getattr(self.eligibility_policy, "owner_private_terms", ()) or ()
+        ):
+            reasons.append("JEV_LANE_DISABLED:OWNER_PRIVATE_TERMS_UNCONFIGURED")
         return reasons
 
     def status(self) -> dict[str, Any]:
@@ -1392,6 +1399,32 @@ class IndependentPostconditionVerifier:
         )
 
 
+def load_owner_private_terms(path: str) -> tuple[str, ...]:
+    """Owner-private terms for B2, one per line. Unset/unreadable/empty -> ``()`` (lane off)."""
+    if not path:
+        return ()
+    try:
+        text = open(path, encoding="utf-8").read()
+    except OSError:
+        return ()
+    terms = []
+    for line in text.splitlines():
+        term = line.strip()
+        if term and not term.startswith("#") and term not in terms:
+            terms.append(term)
+    return tuple(terms)
+
+
+def build_eligibility_policy(settings: Any) -> Any:
+    """B2 policy with the owner's private terms, or ``None`` when none are configured."""
+    terms = load_owner_private_terms(str(getattr(settings, "browser_jev_owner_private_terms_file", "") or ""))
+    if not terms:
+        return None
+    from van_gateway.browser.jev_eligibility import JevEligibilityPolicy
+
+    return JevEligibilityPolicy(owner_private_terms=terms)
+
+
 def build_interaction_router(
     *,
     settings: Any,
@@ -1421,6 +1454,8 @@ def build_interaction_router(
         owner_control_probe=OwnerControlProbe(store) if store is not None else None,
         stagehand_gate=load_stagehand_production_gate(settings, stagehand),
         target_resolver=HarnessTargetResolver(harness),
+        eligibility_policy=build_eligibility_policy(settings),
+        require_owner_private_terms=True,
     )
 
 
@@ -1511,6 +1546,7 @@ __all__ = [
     "StagehandSemanticFallback",
     "StepResult",
     "StepState",
+    "build_eligibility_policy",
     "build_interaction_router",
     "build_interaction_routes",
     "default_action_classifier",
@@ -1518,6 +1554,7 @@ __all__ = [
     "harness_page_to_jev_observation",
     "observed_element_text",
     "load_eligibility_classifier",
+    "load_owner_private_terms",
     "load_stagehand_production_gate",
     "validate_b1_payload",
     "validate_jev_proposal",

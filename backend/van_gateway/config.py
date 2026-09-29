@@ -162,6 +162,13 @@ class Settings(BaseSettings):
     # PROPOSE_ACTION -> Stagehand -> owner takeover). Off by default: with it off the
     # /v1/browser/interaction/step route answers 503 and nothing calls dial-jev.
     browser_interaction_router_enabled: bool = False
+    #: Reviewer I minor 1 — owner names, usernames and handles B2 must treat as private
+    #: (``JevEligibilityPolicy.owner_private_terms``), one per line, ``#`` comments allowed.
+    #: A gateway-held file like the token files; its contents never leave VAN. No owner
+    #: profile in this repository supplies them, so while this is unset, unreadable or empty
+    #: the Jev lane is disabled (JEV_LANE_DISABLED:OWNER_PRIVATE_TERMS_UNCONFIGURED): B2
+    #: cannot recognise the owner's own name on a page it has not been told.
+    browser_jev_owner_private_terms_file: str = ""
 
     # OMV-002 — subordinate persistent Linux workspace. Disabled until the local
     # van-computer image and Docker isolation are qualified on the deployment host.
