@@ -95,6 +95,7 @@ class CommandOrchestrator:
         owner_fact_author: OwnerFactAuthor | None = None,
         reminders: ReminderService | None = None,
         trading: Any | None = None,
+        jev: Any | None = None,
         learning: Any | None = None,
     ) -> None:
         self.auth = auth
@@ -124,6 +125,7 @@ class CommandOrchestrator:
         self.owner_fact_author = owner_fact_author
         self.reminders = reminders
         self.trading = trading
+        self.jev = jev
         # GAP-F-008 (strategies_for read-back) — what VAN has already learned that this
         # mission's authority permits, attached to `canonical_context` as
         # `permitted_strategies`. None by default; without it a command simply carries no
@@ -1121,6 +1123,7 @@ class CommandOrchestrator:
             owner_fact_author=self.owner_fact_author,
             reminders=self.reminders,
             trading=self.trading,
+            jev=self.jev,
             device_id=req.device_id,
             command_id=req.command_id,
             mission_id=mission.mission_id,

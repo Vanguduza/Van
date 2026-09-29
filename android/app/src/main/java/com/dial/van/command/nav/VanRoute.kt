@@ -43,6 +43,12 @@ object VanRoute {
     const val CONNECTED = "connected"
     const val SETTINGS = "settings"
     /**
+     * Jev Intelligence — the owner projection of the one DDS `dial-jev` service. A child of
+     * Settings, not a ninth destination (DNA §4 stays at eight). The Browser & Automation
+     * surface shows the same service as its interaction-router Jev lane.
+     */
+    const val SETTINGS_JEV = "settings/jev"
+    /**
      * Full-screen children of Settings for the two legacy bodies this rebuild reuses rather
      * than duplicates (`SpeechModule`, `NotificationPolicyModule`) — both are themselves a
      * `LazyColumn { fillMaxSize() }`, which cannot be embedded as an item inside Settings'
@@ -99,7 +105,7 @@ object VanRoute {
         WORK_BROWSER, WORK_BROWSER_TASKS, WORK_BROWSER_ESCALATIONS,
         WORK_BROWSER_SESSIONS, WORK_BROWSER_POLICY, WORK_MISSION_TEMPLATE, TRADING, MEMORY,
         PROJECTS, PROJECT_DETAIL_TEMPLATE, CONNECTED, SETTINGS,
-        SETTINGS_VOICE, SETTINGS_NOTIFICATIONS,
+        SETTINGS_VOICE, SETTINGS_NOTIFICATIONS, SETTINGS_JEV,
     ) + DEV_TEMPLATES
 
     /**
@@ -132,6 +138,7 @@ object VanRoute {
         PROJECT_DETAIL_TEMPLATE to PROJECTS,
         CONNECTED to HOME,
         SETTINGS to HOME,
+        SETTINGS_JEV to SETTINGS,
         SETTINGS_VOICE to SETTINGS,
         SETTINGS_NOTIFICATIONS to SETTINGS,
     ) + DEV_TEMPLATES.associateWith { WORK }

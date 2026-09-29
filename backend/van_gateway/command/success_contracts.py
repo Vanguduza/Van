@@ -45,6 +45,7 @@ NOTEBOOK_SOURCE_READBACK = "notebook-source-readback"
 #: executor's own report).
 OWNER_FACT_READBACK = "owner-fact-readback"
 REMINDER_READBACK = "reminder-readback"
+JEV_READBACK = "jev-readback"
 
 #: Why an exactly-resolved action still gets no checkable contract. Recorded rather than
 #: implied: "VAN cannot confirm this" is a supported outcome and the owner is entitled to
@@ -133,6 +134,45 @@ def contract_for(resolution: CommandResolution) -> SuccessContract:
                 "subject": OWNER_SUBJECT, "predicate": "decision", "scope": "decisions",
                 "value": str(decision), "fact_exists": True,
             },
+            evidence_required=True,
+        )
+
+    if action_id == "jev.module.transition":
+        module_id = str(resolution.parameters.get("module_id") or "").strip()
+        target_state = str(resolution.parameters.get("target_state") or "").strip().upper()
+        if not module_id or not target_state:
+            return SuccessContract()
+        return SuccessContract(
+            verifier_class=JEV_READBACK,
+            postconditions={
+                "kind": "module",
+                "module_id": module_id,
+                "status": target_state,
+            },
+            evidence_required=True,
+        )
+
+    if action_id == "jev.global.control":
+        operation = str(resolution.parameters.get("operation") or "").strip().lower()
+        project_id = str(resolution.parameters.get("project_id") or "").strip()
+        if not operation:
+            return SuccessContract()
+        postconditions = {"kind": "global", "project_id": project_id or None}
+        if project_id:
+            postconditions["project_enabled"] = operation == "enable"
+        elif operation == "enable":
+            postconditions.update({"owner_active": True, "bypassed": False})
+        elif operation == "disable":
+            postconditions.update({"owner_active": False})
+        elif operation == "bypass":
+            postconditions.update({"bypassed": True})
+        elif operation == "restore":
+            postconditions.update({"owner_active": True, "bypassed": False})
+        else:
+            return SuccessContract()
+        return SuccessContract(
+            verifier_class=JEV_READBACK,
+            postconditions=postconditions,
             evidence_required=True,
         )
 
@@ -227,6 +267,7 @@ __all__ = [
     "NOTEBOOK_SOURCE_READBACK",
     "NO_CONTRACT_REASONS",
     "TRADING_HALT",
+    "JEV_READBACK",
     "contract_for",
     "no_contract_reason",
 ]

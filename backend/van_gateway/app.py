@@ -63,6 +63,9 @@ from van_gateway.hermes.bridge import HermesBridge
 from van_gateway.mtls.pki import DeviceCA, PkiError
 from van_gateway.mtls.transport import mtls_device_id
 from van_gateway.idempotency.service import IdempotencyService
+from van_gateway.jev.client import JevProjectionClient
+from van_gateway.jev.api import JevProjectionApi
+from van_gateway.jev.advisor import JevVanAdvisor
 from van_gateway.models import (
     ActionClass,
     AttentionSeverity,
@@ -103,6 +106,7 @@ from van_gateway.automation.temporal_bridge import TemporalAutomationApi
 from van_gateway.browser.agent_grant import AgentGrantService
 from van_gateway.browser.api import BrowserApi
 from van_gateway.browser.control_lease import ControlLeaseService
+from van_gateway.browser.interaction_router import InteractionRouter
 from van_gateway.browser.downloads import DownloadBroker
 from van_gateway.browser.downloads_api import build_download_report_router
 from van_gateway.browser.interactive_api import (
@@ -459,7 +463,23 @@ def create_app() -> FastAPI:
     projects = ProjectRouter(store, project_registry_path)
     audit = AuditService(store)
     degraded = DegradedRegistry()
-    attention = AttentionEngine(store, settings.attention_budget_per_hour)
+    jev_advisor = JevVanAdvisor(
+        base_url=settings.jev_base_url,
+        token_file=settings.jev_consumer_token_file,
+        enabled=settings.jev_enabled,
+        timeout_seconds=min(settings.jev_timeout_seconds, 1.2),
+    )
+    jev_projection = JevProjectionApi(
+        JevProjectionClient(
+            base_url=settings.jev_base_url,
+            read_token_file=settings.jev_projection_token_file,
+            control_token_file=settings.jev_control_token_file,
+            enabled=settings.jev_enabled,
+            timeout_seconds=settings.jev_timeout_seconds,
+        ),
+        degraded,
+    )
+    attention = AttentionEngine(store, settings.attention_budget_per_hour, jev_advisor=jev_advisor)
     artifacts = ArtifactService(store)
     documents = DocumentService(store, artifacts)
     goals = GoalService(store, attention)
@@ -476,6 +496,7 @@ def create_app() -> FastAPI:
         artifacts=artifacts, suggestions=suggestions, conversations=conversations,
         # GAP-F-008: agent-initiated mutations consult the earned/granted domain trust.
         autonomy=ActionAutonomyGate(domain_trust),
+        jev_advisor=jev_advisor,
     )
     automation_registry = AutomationRegistry(store)
     automation_hot_index = HotWorkflowIndex()
@@ -617,6 +638,14 @@ def create_app() -> FastAPI:
     interactive_sessions = InteractiveSessionService(
         store, browser.broker, browser_control_leases, events=events,
     )
+    # Programme B B5 — the interaction router is built over the *existing* control-lease model
+    # and the one dial-jev client. It opens no session and starts no service. Eligibility is
+    # left at its default (deny all) until the B2 classifier is wired, so the Jev lane is
+    # never taken; the harness executor and Stagehand lane are attached by their owners.
+    interaction_router = InteractionRouter(
+        leases=browser_control_leases,
+        jev=jev_advisor if jev_advisor.configured else None,
+    )
     # §5.5 — a dedicated ES256 key, separate from owner approval and device enrolment.
     # Absent configuration means grants cannot be minted, which is the honest state of a
     # deployment with no stream host: the routes refuse rather than issuing a credential
@@ -637,7 +666,7 @@ def create_app() -> FastAPI:
     # the claimant writes. Built before the service because the service fails closed
     # without it.
     verifiers = build_mission_registry(
-        store=store, trading=trading, knowledge=owner_runtime.knowledge,
+        store=store, trading=trading, knowledge=owner_runtime.knowledge, jev=jev_projection.client,
     )
     # P1-AUTO-001 — the dispatcher was constructed with an empty observer map, so every
     # production run came back UNVERIFIABLE and owner_success could never be true; the
@@ -711,6 +740,7 @@ def create_app() -> FastAPI:
         owner_fact_author=owner_fact_author,
         reminders=reminders,
         trading=trading,
+        jev=jev_projection.client,
         learning=learning,
     )
 
@@ -954,6 +984,8 @@ def create_app() -> FastAPI:
     app.state.watch_runner = watch_runner
     app.state.suggestions = suggestions
     app.state.conversations = conversations
+    app.state.jev_projection = jev_projection
+    app.state.jev_advisor = jev_advisor
     app.state.visual_acceptance = visual_acceptance
     # Exposed like `degraded`: which jobs a build actually installs is a property of
     # the running app, and a job list that exists only inside a closure is how
@@ -1003,6 +1035,13 @@ def create_app() -> FastAPI:
         degraded=degraded,
         audit=audit,
     ))
+    app.include_router(jev_projection.router)
+
+    @app.get("/v1/browser/interaction-router")
+    async def interaction_router_status() -> dict:
+        """Which B5 lanes are wired. Read-only; the Jev lane names the one dial-jev."""
+        return interaction_router.describe()
+
     app.include_router(automation_health.router)
     app.include_router(automation.router)
     app.include_router(temporal_automation.router)
@@ -1228,6 +1267,7 @@ def create_app() -> FastAPI:
     app.state.session_router = session_router
     app.state.interactive_sessions = interactive_sessions
     app.state.browser_control_leases = browser_control_leases
+    app.state.interaction_router = interaction_router
     app.state.browser_stream_grants = browser_stream_grants
     app.include_router(mission_api.router)
     app.include_router(understanding_api.router)
