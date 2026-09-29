@@ -27,6 +27,7 @@ from services.browser_control_agent.server import BindRefused, require_private_b
 ROOT = Path(__file__).resolve().parents[3]
 PACKAGE = ROOT / "deploy" / "van-browser-stream"
 CHROMIUM_UNIT = PACKAGE / "systemd" / "van-browser-chromium.service"
+EGRESS_UNIT = PACKAGE / "systemd" / "van-browser-egress-proxy.service"
 AGENT_UNIT = PACKAGE / "systemd" / "van-browser-control-agent.service"
 QUALIFY = PACKAGE / "qualify.sh"
 BOOTSTRAP = PACKAGE / "bootstrap.sh"
@@ -45,6 +46,22 @@ class TestTheDebuggerIsFenced:
         unit = CHROMIUM_UNIT.read_text()
         for wrong in ("--remote-debugging-address=0.0.0.0", "--remote-debugging-address=::"):
             assert wrong not in unit
+
+    def test_chromium_is_forced_through_the_exact_ip_proxy(self):
+        unit = CHROMIUM_UNIT.read_text()
+        assert "--proxy-server=http://127.0.0.1:${VAN_BROWSER_EGRESS_PORT}" in unit
+        assert "--proxy-bypass-list=<-loopback>" in unit
+        assert "--disable-quic" in unit
+        assert "--force-webrtc-ip-handling-policy=disable_non_proxied_udp" in unit
+        assert "Requires=van-browser-profiles.mount van-browser-egress-proxy.service" in unit
+        assert "BindsTo=van-browser-egress-proxy.service" in unit
+
+    def test_egress_proxy_is_loopback_only_and_has_no_profile_access(self):
+        unit = EGRESS_UNIT.read_text()
+        assert "User=van-egress" in unit
+        assert "--host 127.0.0.1" in unit
+        assert "InaccessiblePaths=-/var/lib/van-browser-profiles" in unit
+        assert "NoNewPrivileges=true" in unit
 
     def test_the_browser_user_is_not_root_and_has_no_docker(self):
         unit = CHROMIUM_UNIT.read_text()
@@ -139,6 +156,10 @@ class TestQualifyIsHonest:
         """Otherwise the "not public" check passes on a host where nothing is running,
         which is the easiest way to get a green report for a broken machine."""
         assert 'record "cdp_on_loopback"' in QUALIFY.read_text()
+        assert 'record "egress_on_loopback"' in QUALIFY.read_text()
+        assert 'record "egress_not_public"' in QUALIFY.read_text()
+        assert 'record "egress_refuses_private"' in QUALIFY.read_text()
+        assert 'record "chromium_uses_exact_ip_proxy"' in QUALIFY.read_text()
 
     def test_every_recorded_check_can_fail(self):
         """A check with no RED branch is a decoration."""

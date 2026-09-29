@@ -75,6 +75,7 @@ class AutomationHealthApi:
         *,
         degraded: DegradedRegistry,
         hot_index: HotWorkflowIndex | None = None,
+        computer_use: ComputerInteractionFabric | None = None,
     ) -> None:
         self.store = store
         self.settings = settings
@@ -112,7 +113,7 @@ class AutomationHealthApi:
         # health surface is here rather than in its own module because the three fabrics
         # degrade on the same terms and an owner asking "what can VAN act through?" should
         # not have to know they were written separately.
-        self.computer_use = ComputerInteractionFabric(store)
+        self.computer_use = computer_use or ComputerInteractionFabric(store)
         self.router = APIRouter(prefix="/v1", tags=["automation-browser"])
         self._install_routes()
 
@@ -228,12 +229,25 @@ class AutomationHealthApi:
         is the difference between a capability that is honestly unavailable and one a
         matrix lists as BUILT because the code compiles.
         """
-        surfaces = self.computer_use.surfaces()
+        registered = self.computer_use.surfaces()
+        surfaces = dict(registered)
+        worker_status: dict[str, Any] = {}
+        for surface, worker in self.computer_use.worker_impls.items():
+            status_fn = getattr(worker, "status", None)
+            if status_fn is None:
+                worker_status[surface.value] = {"state": "UNKNOWN", "ready": False}
+                surfaces[surface.value] = False
+                continue
+            status = await status_fn()
+            worker_status[surface.value] = status
+            surfaces[surface.value] = bool(status.get("ready"))
         available = sorted(name for name, ready in surfaces.items() if ready)
         self.degraded.set(DegradedCode.COMPUTER_USE_NO_SURFACE_WORKER, not available)
         return {
             "capability": "computer_interaction_fabric",
+            "registered_surfaces": registered,
             "surfaces": surfaces,
+            "worker_status": worker_status,
             "surfaces_with_a_worker": available,
             # A refusal before the ledger write, so an operation nobody can perform never
             # appears as a PENDING row the owner would read as queued work.

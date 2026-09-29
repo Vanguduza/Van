@@ -1,6 +1,9 @@
 from __future__ import annotations
 
 import uuid
+import hashlib
+import json
+import logging
 from enum import Enum
 from typing import Any
 
@@ -12,10 +15,13 @@ from van_gateway.action.models import VerificationObservation
 from van_gateway.action.registry import install_builtin_actions
 from van_gateway.action.service import ActionPolicyError, ActionRuntime
 from van_gateway.attention.engine import AttentionEngine
+from van_gateway.artifacts.models import ArtifactKind
+from van_gateway.artifacts.service import ArtifactService
 from van_gateway.briefing.service import BriefingService
 from van_gateway.command.authority import CommandAuthorityError, CommandAuthorityService
 from van_gateway.command.resolver import TypedCommandResolver
 from van_gateway.config import Settings
+from van_gateway.conversations.service import ConversationService
 from van_gateway.context.models import (
     ContextEdgeCandidate,
     ContextGraphQuery,
@@ -56,6 +62,8 @@ from van_gateway.reminders.timeparse import TimeParseError, parse_due_expression
 from van_gateway.research.exa import ExaResearchService, ResearchPolicyError
 from van_gateway.research.models import ResearchSearchRequest
 from van_gateway.storage.db import Store
+from van_gateway.suggestions.models import SuggestionCreate
+from van_gateway.suggestions.service import SuggestionService, SuggestionServiceError
 from van_gateway.trading.service import TradingService
 
 
@@ -150,6 +158,16 @@ class ActionSubmittedBody(BaseModel):
     evidence_pointer: str | None = None
 
 
+class HermesSuggestionCreateBody(BaseModel):
+    """An evidence-backed idea for the owner, never an execution request."""
+
+    title: str = Field(min_length=1, max_length=300)
+    rationale: str = Field(min_length=1, max_length=4000)
+    proposed_prompt: str = Field(min_length=1, max_length=8000)
+    source_refs: list[str] = Field(min_length=1, max_length=100)
+    project_id: str | None = None
+
+
 class HermesReminderCreateBody(BaseModel):
     """What Hermes may ask the gateway to remind the owner about, on the owner's behalf.
 
@@ -191,6 +209,9 @@ class OwnerRuntimeApi:
         reminders: ReminderService | None = None,
         attention: AttentionEngine | None = None,
         briefing: BriefingService | None = None,
+        artifacts: ArtifactService | None = None,
+        suggestions: SuggestionService | None = None,
+        conversations: ConversationService | None = None,
     ) -> None:
         self.store = store
         self.settings = settings
@@ -203,6 +224,9 @@ class OwnerRuntimeApi:
         self.reminders = reminders
         self.attention = attention
         self.briefing = briefing
+        self.artifacts = artifacts
+        self.suggestions = suggestions
+        self.conversations = conversations
         self.context = OwnerContextService(store)
         self.retrieval = ContextRetrievalService(store, self.context)
         # GAP-F-008: agent-initiated mutating actions are gated by the autonomy policy.
@@ -405,6 +429,37 @@ class OwnerRuntimeApi:
                 "source": body.source,
             }
 
+        # ------------------------------------------------------ OMV-004 suggestions
+        #
+        # Hermes may surface an evidence-backed idea through the existing SuggestionService.
+        # This creates an Attention item only. It cannot execute the proposed prompt; the
+        # owner must accept/edit it, after which the client submits a fresh signed command.
+        @router.post("/suggestions")
+        async def runtime_create_suggestion(
+            body: HermesSuggestionCreateBody,
+            x_van_internal_token: str | None = Header(default=None),
+        ):
+            self._require_internal(x_van_internal_token)
+            if self.suggestions is None:
+                raise HTTPException(status_code=503, detail="suggestions_unwired")
+            try:
+                suggestion = await self.suggestions.create(
+                    SuggestionCreate(
+                        title=body.title,
+                        rationale=body.rationale,
+                        proposed_prompt=body.proposed_prompt,
+                        source_refs=body.source_refs,
+                        project_id=body.project_id,
+                    )
+                )
+            except SuggestionServiceError as exc:
+                raise HTTPException(status_code=409, detail=exc.code) from exc
+            return {
+                **suggestion.model_dump(mode="json"),
+                "execution_created": False,
+                "owner_decision_required": True,
+            }
+
         # ------------------------------------------------------- §GAP-F-003 attention/briefing
         #
         # Read-only projections of the same owner-facing state `/v1/attention` and
@@ -466,12 +521,66 @@ class OwnerRuntimeApi:
             except MissionError as exc:
                 code = 404 if exc.code == "HERMES_RUN_UNBOUND" else 409
                 raise HTTPException(status_code=code, detail=exc.code) from exc
+
+            artifact_id = None
+            if self.artifacts is not None and mission.is_terminal and mission.final_outcome:
+                source = {
+                    "mission_id": mission.mission_id,
+                    "state": mission.state.value,
+                    "verification_state": mission.verification_state.value,
+                    "final_outcome": mission.final_outcome,
+                }
+                source_digest = hashlib.sha256(
+                    json.dumps(source, sort_keys=True, separators=(",", ":")).encode("utf-8")
+                ).hexdigest()
+                verification_record = await self.missions.verification_record(mission.mission_id)
+                projection = await self.artifacts.ensure_projection(
+                    kind=ArtifactKind.REPORT,
+                    title=f"Mission result · {mission.title}",
+                    summary=mission.final_outcome,
+                    project_id=mission.project_id,
+                    command_id=mission.authority_envelope.source_command_id,
+                    mission_id=mission.mission_id,
+                    canonical_source_type="mission.outcome",
+                    canonical_source_id=mission.mission_id,
+                    canonical_source_digest=source_digest,
+                    evidence_refs=(
+                        list(verification_record.evidence_refs)
+                        if verification_record is not None else []
+                    ),
+                )
+                artifact_id = projection.artifact_id
+
+            if (
+                self.conversations is not None
+                and mission.is_terminal
+                and mission.final_outcome
+            ):
+                try:
+                    main_thread = await self.conversations.ensure_main()
+                    await self.conversations.append_projection(
+                        main_thread.thread_id,
+                        projection_key=f"mission:{mission.mission_id}:terminal",
+                        role="VAN",
+                        body=mission.final_outcome,
+                        command_id=mission.authority_envelope.source_command_id,
+                        mission_id=mission.mission_id,
+                        artifact_refs=([artifact_id] if artifact_id else []),
+                        terminal=True,
+                    )
+                except Exception:
+                    logging.getLogger("van_gateway.conversations").exception(
+                        "failed to project terminal mission %s into main thread",
+                        mission.mission_id,
+                    )
+
             return {
                 "hermes_run_id": body.hermes_run_id,
                 "mission_id": mission.mission_id,
                 "state": mission.state.value,
                 "verification_state": mission.verification_state.value,
                 "final_outcome": mission.final_outcome,
+                "artifact_id": artifact_id,
             }
 
         @router.post("/resolve")
