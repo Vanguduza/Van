@@ -135,12 +135,25 @@ class FakeJev:
 
 
 def proposes(operation: str, target_id: str | None, value_ref: str | None = None,
-             action_class: str | None = None) -> ProposeActionResponse:
+             action_class: str | None = None, *, lifecycle_state: str = "ACTIVE",
+             apply_effect: bool = True) -> ProposeActionResponse:
+    """A dial-jev proposal. Defaults to a *fake* ACTIVE module with ``apply_effect: true``
+    so the lane's execute/verify path can be exercised; no real Jev module can carry effect
+    today (blueprint §11). Pass ``lifecycle_state="SHADOW", apply_effect=False`` for what
+    DDS actually returns."""
     return ProposeActionResponse(
         outcome="PROPOSE", state="VERIFYING" if operation == "done" else "PROPOSED",
         proposal={"operation": operation, "target_id": target_id, "value_ref": value_ref},
         confidence=0.9, reasons=(), action_class=action_class,
+        apply_effect=apply_effect, lifecycle_state=lifecycle_state,
     )
+
+
+def shadow(operation: str, target_id: str | None, value_ref: str | None = None,
+           action_class: str | None = None) -> ProposeActionResponse:
+    """What DDS returns today: a proposal from a SHADOW module, ``apply_effect: false``."""
+    return proposes(operation, target_id, value_ref, action_class,
+                    lifecycle_state="SHADOW", apply_effect=False)
 
 
 class FakeExecutor:
@@ -808,7 +821,22 @@ async def test_client_sends_contract_body_and_parses_proposal(token_file):
     (lambda r: httpx.Response(200, json={**GOOD, "surprise": 1}), "JEV_RESPONSE_UNKNOWN_KEY:surprise"),
     (lambda r: httpx.Response(200, json={**GOOD, "executes": True}), "JEV_RESPONSE_CLAIMS_EXECUTION"),
     (lambda r: httpx.Response(200, json={**GOOD, "verified_success": True}), "JEV_RESPONSE_CLAIMS_VERIFIED_SUCCESS"),
-    (lambda r: httpx.Response(200, json={**GOOD, "apply_effect": True}), "JEV_RESPONSE_APPLY_EFFECT_NOT_FALSE"),
+    (lambda r: httpx.Response(200, json={**GOOD, "apply_effect": True}),
+     "JEV_RESPONSE_APPLY_EFFECT_WITHOUT_ACTIVE_LIFECYCLE"),
+    (lambda r: httpx.Response(200, json={**GOOD, "apply_effect": True, "lifecycle_state": "CANDIDATE"}),
+     "JEV_RESPONSE_APPLY_EFFECT_WITHOUT_ACTIVE_LIFECYCLE"),
+    (lambda r: httpx.Response(200, json={k: v for k, v in {**GOOD, "apply_effect": True}.items()
+                                         if k != "lifecycle_state"}),
+     "JEV_RESPONSE_APPLY_EFFECT_WITHOUT_ACTIVE_LIFECYCLE"),
+    (lambda r: httpx.Response(200, json={**GOOD, "apply_effect": "true", "lifecycle_state": "ACTIVE"}),
+     "JEV_RESPONSE_APPLY_EFFECT_INVALID"),
+    (lambda r: httpx.Response(200, json={**GOOD, "lifecycle_state": 3}), "JEV_RESPONSE_LIFECYCLE_STATE_INVALID"),
+    # An ACTIVE, effect-carrying response is still validated like any other.
+    (lambda r: httpx.Response(200, json={**GOOD, "apply_effect": True, "lifecycle_state": "ACTIVE",
+                                         "executes": True}), "JEV_RESPONSE_CLAIMS_EXECUTION"),
+    (lambda r: httpx.Response(200, json={**GOOD, "apply_effect": True, "lifecycle_state": "ACTIVE_GATED",
+                                         "proposal": {"operation": "click"}}),
+     "JEV_RESPONSE_PROPOSAL_SHAPE_INVALID"),
     (lambda r: httpx.Response(200, json={k: v for k, v in GOOD.items() if k != "reasons"}), "JEV_RESPONSE_KEY_MISSING:reasons"),
 ])
 async def test_client_failures_are_abstain(token_file, handler, reason):
@@ -1109,3 +1137,91 @@ def test_stagehand_adapter_model_comes_from_settings_never_a_code_default(monkey
         assert bare.model_name in ("", "claude-sonnet-5") and not (bare.model_name and "sonnet-4" in bare.model_name)
     finally:
         get_settings.cache_clear()
+
+
+# ---------------------------------------------------------------- reviewer I M-3: SHADOW
+
+
+async def test_shadow_proposal_is_recorded_and_never_executed():
+    """PRD Rev 2.1 "SHADOW: Jev runs; consumer ignores result"; blueprint §11."""
+    router = make_router(jev_client=FakeJev(shadow("click", T_LINK)), semantic_fallback=FakeStagehand(None))
+    result = await router.route(step())
+    assert router.executor.executed == []
+    assert result.lane is RouterLane.OWNER_TAKEOVER
+    assert "JEV_SHADOW_NOT_EXECUTED:SHADOW" in result.reasons
+    assert result.jev_consulted is True
+    assert result.shadow_jev == {
+        "lifecycle_state": "SHADOW", "apply_effect": False, "operation": "click",
+        "target_id": T_LINK, "valid": True, "action_class": "A2",
+    }
+    counters = router.metrics.snapshot()["counters"]
+    assert counters["jev_shadow_proposals"] == 1 and counters["jev_shadow_valid"] == 1
+    assert counters["jev_executed"] == 0 and counters["jev_executed_verified_success"] == 0
+    assert counters["jev_proposals_received"] == 1
+
+
+@pytest.mark.parametrize("apply_effect,lifecycle", [
+    (False, "SHADOW"), (False, "ACTIVE"), (False, "ACTIVE_GATED"), (False, None), (True, None),
+    (True, "SHADOW"), (True, "CANDIDATE"),
+])
+async def test_only_effect_under_an_active_lifecycle_executes(apply_effect, lifecycle):
+    response = proposes("click", T_LINK, lifecycle_state=lifecycle, apply_effect=apply_effect)
+    router = make_router(jev_client=FakeJev(response), semantic_fallback=FakeStagehand(None))
+    result = await router.route(step())
+    assert router.executor.executed == []
+    assert result.lane is not RouterLane.JEV
+
+
+@pytest.mark.parametrize("lifecycle", ["ACTIVE", "ACTIVE_GATED"])
+async def test_a_fake_active_module_with_effect_executes_through_the_harness(lifecycle):
+    router = make_router(jev_client=FakeJev(proposes("click", T_LINK, lifecycle_state=lifecycle)))
+    result = await router.route(step())
+    assert result.lane is RouterLane.JEV and result.state is StepState.VERIFIED_SUCCESS
+    assert [a.locator for a in router.executor.executed] == ["a#install"]
+    assert result.shadow_jev is None
+
+
+async def test_shadow_proposal_is_compared_with_what_the_next_lane_did():
+    agree = RouterAction(lane=RouterLane.STAGEHAND, operation="click", locator="a#install",
+                         value_ref=None, action_class=None, description="Install guide")
+    router = make_router(jev_client=FakeJev(shadow("click", T_LINK)), semantic_fallback=FakeStagehand(agree))
+    result = await router.route(step())
+    assert result.lane is RouterLane.STAGEHAND
+    assert result.shadow_jev["agreed"] is True and result.shadow_jev["compared_with_lane"] == "STAGEHAND"
+    router2 = make_router(jev_client=FakeJev(shadow("click", T_SEARCH)), semantic_fallback=FakeStagehand(agree))
+    result2 = await router2.route(step())
+    assert result2.shadow_jev["agreed"] is False
+    for r, agreements in ((router, 1), (router2, 0)):
+        rates = r.metrics.snapshot()["metrics"]["shadow_agreement_rate"]
+        assert rates == {"numerator": agreements, "denominator": 1, "rate": float(agreements)}
+
+
+async def test_a_shadow_proposal_van_rejects_is_counted_invalid():
+    router = make_router(jev_client=FakeJev(shadow("click", "t_notsupplied00001")),
+                         semantic_fallback=FakeStagehand(None))
+    result = await router.route(step())
+    assert result.shadow_jev["valid"] is False
+    assert "JEV_PROPOSAL_REJECTED_BY_VAN:TARGET_NOT_SUPPLIED" in result.reasons
+    assert router.metrics.snapshot()["metrics"]["shadow_validity_rate"]["rate"] == 0.0
+
+
+async def test_the_real_dds_response_shape_through_the_client_is_shadow(token_file):
+    """The probe (review-i/probes/x/step_live.py) against DDS d390afa returned exactly this
+    shape — PROPOSED, apply_effect false, lifecycle SHADOW — and VAN executed it."""
+
+    def handler(request: httpx.Request):
+        import json
+        body = json.loads(request.content)
+        target = next(t["target_id"] for t in body["request"]["targets"] if t["label"] == "Next topic")
+        return httpx.Response(200, json={
+            "outcome": "PROPOSED", "state": "PROPOSED",
+            "proposal": {"operation": "click", "target_id": target, "value_ref": None},
+            "action_class": "A2", "confidence": 0.7, "reasons": [], "executes": False,
+            "verified_success": False, "apply_effect": False, "lifecycle_state": "SHADOW",
+        })
+
+    router = real_b2_router([PUBLIC_PAGE], _client(handler))
+    result = await router.route(_real_step())
+    assert router.executor.executed == []
+    assert "JEV_SHADOW_NOT_EXECUTED:SHADOW" in result.reasons
+    assert result.shadow_jev["valid"] is True

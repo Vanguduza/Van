@@ -179,6 +179,9 @@ _PROPOSAL_KEYS = frozenset({"operation", "target_id", "value_ref"})
 #: The unit-E contract says `PROPOSE`; the DDS reference route emits `PROPOSED`. Both mean
 #: "a proposal is attached". Everything else is an abstention.
 _PROPOSE_OUTCOMES = frozenset({"PROPOSE", "PROPOSED"})
+#: DDS lifecycle states under which a module's output may carry effect (PRD Rev 2.1). Every
+#: other state — SHADOW above all — means "Jev runs; the consumer ignores the result".
+EFFECT_LIFECYCLE_STATES = frozenset({"ACTIVE", "ACTIVE_GATED"})
 
 
 @dataclass(frozen=True)
@@ -196,10 +199,24 @@ class ProposeActionResponse:
     reasons: tuple[str, ...]
     action_class: str | None = None
     transport_ok: bool = True
+    #: What dial-jev said about effect. Absent is False: a response that does not say it
+    #: carries effect does not.
+    apply_effect: bool = False
+    lifecycle_state: str | None = None
 
     @property
     def proposes(self) -> bool:
         return self.outcome == "PROPOSE" and self.proposal is not None
+
+    @property
+    def carries_effect(self) -> bool:
+        """Reviewer I M-3 — may VAN act on this proposal at all?
+
+        Only when dial-jev says ``apply_effect: true`` under an ACTIVE/ACTIVE_GATED
+        lifecycle. Anything else (SHADOW, no lifecycle, ``apply_effect: false``) is a
+        shadow proposal: recorded for comparison, never executed.
+        """
+        return self.apply_effect is True and self.lifecycle_state in EFFECT_LIFECYCLE_STATES
 
 
 def _abstain(reason: str, *, transport_ok: bool = False) -> ProposeActionResponse:
@@ -226,10 +243,19 @@ def parse_propose_action_response(body: Any) -> ProposeActionResponse:
         return _abstain("JEV_RESPONSE_CLAIMS_EXECUTION")
     if body["verified_success"] is not False:
         return _abstain("JEV_RESPONSE_CLAIMS_VERIFIED_SUCCESS")
-    # dial-jev reports apply_effect=false while the module is SHADOW. A browser proposal
-    # never carries effect in Rev 1, so a true here is a contract violation.
-    if body.get("apply_effect", False) is not False:
-        return _abstain("JEV_RESPONSE_APPLY_EFFECT_NOT_FALSE")
+    # dial-jev reports apply_effect=false while the module is SHADOW, and the router treats
+    # every such proposal as a shadow comparison (never executed). apply_effect=true is
+    # accepted only together with an ACTIVE/ACTIVE_GATED lifecycle; a true under any other
+    # lifecycle (or none) contradicts itself and is refused. Everything below still applies
+    # to an effect-carrying response: it is validated exactly like a shadow one.
+    apply_effect = body.get("apply_effect", False)
+    if not isinstance(apply_effect, bool):
+        return _abstain("JEV_RESPONSE_APPLY_EFFECT_INVALID")
+    lifecycle_state = body.get("lifecycle_state")
+    if lifecycle_state is not None and not isinstance(lifecycle_state, str):
+        return _abstain("JEV_RESPONSE_LIFECYCLE_STATE_INVALID")
+    if apply_effect and lifecycle_state not in EFFECT_LIFECYCLE_STATES:
+        return _abstain("JEV_RESPONSE_APPLY_EFFECT_WITHOUT_ACTIVE_LIFECYCLE")
     reasons = body["reasons"]
     if not isinstance(reasons, list) or not all(isinstance(r, str) for r in reasons):
         return _abstain("JEV_RESPONSE_REASONS_INVALID")
@@ -241,6 +267,7 @@ def parse_propose_action_response(body: Any) -> ProposeActionResponse:
         return ProposeActionResponse(
             outcome="ABSTAIN", state=str(body["state"]), proposal=None, confidence=None,
             reasons=tuple(reasons) or ("JEV_ABSTAINED",),
+            apply_effect=apply_effect, lifecycle_state=lifecycle_state,
         )
     proposal = body["proposal"]
     if not isinstance(proposal, dict) or set(proposal) != _PROPOSAL_KEYS:
@@ -258,6 +285,8 @@ def parse_propose_action_response(body: Any) -> ProposeActionResponse:
         confidence=float(confidence),
         reasons=tuple(reasons),
         action_class=action_class,
+        apply_effect=apply_effect,
+        lifecycle_state=lifecycle_state,
     )
 
 

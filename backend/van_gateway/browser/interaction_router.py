@@ -19,6 +19,9 @@ Invariants this module owns (each has a test that removes it and watches it fail
 * a missing eligibility classifier, verifier, executor or Jev client **disables** the Jev lane
   with a recorded reason — it is never silently skipped;
 * Jev never executes. The injected executor (Browser Harness) executes;
+* a Jev proposal is acted on only when dial-jev returns ``apply_effect: true`` under an
+  ``ACTIVE``/``ACTIVE_GATED`` lifecycle. A SHADOW proposal (every one today, blueprint §11)
+  is re-validated, counted and compared with what the next lane did, and never executed;
 * only the independent postcondition verifier yields ``VERIFIED_SUCCESS``; a Jev ``done`` is a
   claim and moves the step to ``VERIFYING``;
 * the router itself is reachable only when ``browser_interaction_router_enabled`` is set
@@ -159,6 +162,9 @@ class InteractionStep:
     value_slots: dict[str, str] = field(default_factory=dict)
     #: The page observation for B2. When ``None`` the router asks its observer.
     observation: dict[str, Any] | None = None
+    #: Set by the Jev lane when dial-jev proposed without effect (SHADOW): what Jev would
+    #: have done, kept for the shadow comparison. Never executed.
+    shadow_jev: dict[str, Any] | None = None
 
 
 @dataclass
@@ -175,6 +181,9 @@ class StepResult:
     attempts: list[dict[str, Any]] = field(default_factory=list)
     #: True when automation stops and the owner must look (UNVERIFIABLE, takeover).
     escalated: bool = False
+    #: The SHADOW Jev proposal for this step, if any, and whether the lane that did act
+    #: agreed with it. Evidence for §8 only; it never influenced what executed.
+    shadow_jev: dict[str, Any] | None = None
 
     @property
     def verified_success(self) -> bool:
@@ -200,6 +209,7 @@ class StepResult:
             },
             "attempts": list(self.attempts),
             "escalated": self.escalated,
+            "shadow_jev": None if self.shadow_jev is None else dict(self.shadow_jev),
             "verified_success": self.verified_success,
         }
 
@@ -414,6 +424,12 @@ class RouterMetrics:
         "jev_wrong_actions",
         "jev_done_proposals",
         "jev_done_postcondition_failures",
+        #: Reviewer I M-3 — proposals dial-jev returned without effect (SHADOW). Counted,
+        #: re-validated and compared, never executed.
+        "jev_shadow_proposals",
+        "jev_shadow_valid",
+        "jev_shadow_comparisons",
+        "jev_shadow_agreements",
         "stagehand_steps",
         "owner_takeovers",
         "policy_refusals",
@@ -457,6 +473,10 @@ class RouterMetrics:
                 "postcondition_failure_rate": self._rate(
                     c["jev_done_postcondition_failures"], c["jev_done_proposals"]
                 ),
+                "shadow_validity_rate": self._rate(c["jev_shadow_valid"], c["jev_shadow_proposals"]),
+                "shadow_agreement_rate": self._rate(
+                    c["jev_shadow_agreements"], c["jev_shadow_comparisons"]
+                ),
             },
             "definitions": {
                 "eligible_steps": "steps whose B2 class is PUBLIC_ELIGIBLE or SANITIZABLE_ELIGIBLE; "
@@ -464,6 +484,10 @@ class RouterMetrics:
                                   "(jev_candidate_steps)",
                 "success_on_eligible_set": "VERIFIED_SUCCESS / executed Jev proposals (done excluded)",
                 "stale_action_rate": "STALE_OBSERVATION_EPOCH rejections (DDS or VAN) / well-formed Jev responses",
+                "shadow_validity_rate": "SHADOW proposals that passed VAN's B1 re-validation / SHADOW proposals",
+                "shadow_agreement_rate": "steps where a later lane executed the same operation on the same "
+                                         "element the SHADOW proposal named / steps with a SHADOW proposal "
+                                         "and an executed later-lane action",
             },
         }
 
@@ -680,8 +704,34 @@ class BrowserInteractionRouter:
                 step.observation = None
                 continue
             result.attempts = attempts
+            return self._finish(step, result)
+        return self._finish(step, self._takeover(reasons, attempts))
+
+    def _finish(self, step: InteractionStep, result: StepResult) -> StepResult:
+        """Attach the SHADOW Jev proposal (if any) and compare it with what actually ran."""
+        if "JEV_CONSULTED" in result.reasons:
+            result.jev_consulted = True
+        shadow = step.shadow_jev
+        if shadow is None:
             return result
-        return self._takeover(reasons, attempts)
+        shadow = dict(shadow)
+        acted = result.action
+        if (
+            shadow.get("valid")
+            and acted is not None
+            and acted.lane is not RouterLane.JEV
+            and StepState.EXECUTING.value in result.trail
+        ):
+            self.metrics.inc("jev_shadow_comparisons")
+            agreed = acted.operation == shadow.get("operation") and acted.locator == shadow.get("locator")
+            if agreed:
+                self.metrics.inc("jev_shadow_agreements")
+            shadow["compared_with_lane"] = acted.lane.value
+            shadow["agreed"] = agreed
+        # The locator is VAN-internal; the record keeps the opaque target id only.
+        shadow.pop("locator", None)
+        result.shadow_jev = shadow
+        return result
 
     async def _deterministic_lane(self, step: InteractionStep, reasons: list[str]) -> StepResult | None:
         if step.deterministic_action is None:
@@ -880,6 +930,21 @@ class BrowserInteractionRouter:
             return None
         self.metrics.inc("jev_proposals_received")
 
+        shadow = not response.carries_effect
+        if shadow:
+            # Reviewer I M-3 — PRD Rev 2.1: "SHADOW: Jev runs; consumer ignores result", and
+            # blueprint §11: no Jev module can carry effect today. The proposal is still
+            # re-validated (so §8 can say how often it *would* have been admissible) and
+            # recorded for comparison, and then this lane falls through. Nothing executes.
+            self.metrics.inc("jev_shadow_proposals")
+            step.shadow_jev = {
+                "lifecycle_state": response.lifecycle_state,
+                "apply_effect": response.apply_effect,
+                "operation": (response.proposal or {}).get("operation"),
+                "target_id": (response.proposal or {}).get("target_id"),
+                "valid": False,
+            }
+
         # VAN-side B1 re-validation, against the epoch *now* (right before execution).
         epoch_now = await self._current_epoch(step, request["observation_epoch"])
         try:
@@ -911,6 +976,13 @@ class BrowserInteractionRouter:
                 self.metrics.inc("jev_fallbacks")
                 reasons.append("JEV_PROPOSAL_REJECTED_BY_VAN:VALUE_SLOT_UNBOUND")
                 return None
+
+        if shadow:
+            self.metrics.inc("jev_shadow_valid")
+            self.metrics.inc("jev_fallbacks")
+            step.shadow_jev.update(valid=True, action_class=action_class, locator=locator)
+            reasons.append(f"JEV_SHADOW_NOT_EXECUTED:{response.lifecycle_state or 'LIFECYCLE_UNREPORTED'}")
+            return None
 
         action = RouterAction(
             lane=RouterLane.JEV, operation=operation, locator=locator, value_ref=value,
