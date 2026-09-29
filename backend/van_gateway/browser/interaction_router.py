@@ -402,6 +402,38 @@ class HarnessTargetResolver:
         return None
 
 
+#: The element fields any one of which names the target well enough to classify it.
+TARGET_NAME_KEYS: tuple[str, ...] = ("role", "label", "name", "accessible_name", "aria_label", "text")
+
+
+async def resolve_stagehand_target(
+    resolver: TargetResolver | None, task: BrowserTask, locator: str | None,
+) -> dict[str, Any] | str:
+    """The one target-validation rule (reviewer I M-5, I2 N-2/N-6): the element the Browser
+    Harness itself reports for ``locator``, or the reason there is none.
+
+    Used by the router's Stagehand lane and deterministic lane and by the assignment
+    worker (``HybridBrowserWorker._resolve_target``), so the paths cannot drift apart. A
+    string return means "cannot classify": no locator, no resolver, a resolver fault, an
+    element the Harness does not report, a hidden element, or one with no role or name.
+    """
+    if not locator:
+        return "NO_LOCATOR"
+    if resolver is None:
+        return "NO_TARGET_RESOLVER"
+    try:
+        element = await resolver(task, locator)
+    except Exception as exc:  # noqa: BLE001 - cannot observe the target = cannot classify it
+        return f"RESOLVER_FAILED:{type(exc).__name__}"
+    if not isinstance(element, dict) or not element:
+        return "TARGET_NOT_RESOLVED_BY_HARNESS"
+    if element.get("hidden") is True:
+        return "TARGET_HIDDEN"
+    if not any(isinstance(element.get(k), str) and element.get(k) for k in TARGET_NAME_KEYS):
+        return "TARGET_HAS_NO_ROLE_OR_NAME"
+    return element
+
+
 def load_eligibility_classifier() -> EligibilityClassifier | None:
     """Unit F's ``classify_observation``, imported lazily; ``None`` when it is not built."""
     try:
@@ -1073,21 +1105,7 @@ class BrowserInteractionRouter:
 
     async def _resolve_target(self, step: InteractionStep, locator: str | None) -> dict[str, Any] | str:
         """The Harness-observed element for ``locator``, or why there is none."""
-        if not locator:
-            return "NO_LOCATOR"
-        if self.target_resolver is None:
-            return "NO_TARGET_RESOLVER"
-        try:
-            element = await self.target_resolver(step.task, locator)
-        except Exception as exc:  # noqa: BLE001 - cannot observe the target = cannot classify it
-            return f"RESOLVER_FAILED:{type(exc).__name__}"
-        if not isinstance(element, dict) or not element:
-            return "TARGET_NOT_RESOLVED_BY_HARNESS"
-        if element.get("hidden") is True:
-            return "TARGET_HIDDEN"
-        if not any(isinstance(element.get(k), str) and element.get(k) for k in ("role", "label", "name", "accessible_name", "aria_label", "text")):
-            return "TARGET_HAS_NO_ROLE_OR_NAME"
-        return element
+        return await resolve_stagehand_target(self.target_resolver, step.task, locator)
 
     # ----------------------------------------------------------- Jev lane
 
@@ -1869,6 +1887,7 @@ __all__ = [
     "load_eligibility_classifier",
     "load_owner_private_terms",
     "load_stagehand_production_gate",
+    "resolve_stagehand_target",
     "validate_b1_payload",
     "validate_jev_proposal",
 ]

@@ -49,6 +49,7 @@ from van_gateway.browser.interaction_router import (
     HarnessTargetResolver,
     default_action_classifier,
     observed_element_text,
+    resolve_stagehand_target,
 )
 from van_gateway.browser.policy import BrowserPolicyError
 from van_gateway.browser.stagehand_proposal import (
@@ -62,8 +63,6 @@ from van_gateway.browser.subagent import (
     SubagentStep,
 )
 from van_gateway.models import ActionClass
-
-_ELEMENT_NAME_KEYS = ("role", "label", "name", "accessible_name", "aria_label", "text")
 
 
 class SemanticWorkerUnavailable(RuntimeError):
@@ -345,23 +344,13 @@ class HybridBrowserWorker:
     async def _resolve_target(self, task: BrowserTask, locator: str | None) -> dict[str, Any]:
         """The element the Harness itself reports for ``locator``; otherwise owner takeover.
 
-        Mirrors ``BrowserInteractionRouter._resolve_stagehand_target``: a target VAN cannot
+        The rule is ``interaction_router.resolve_stagehand_target`` — the one the router's
+        lanes use (unit G3b) — so the two paths cannot drift apart. A target VAN cannot
         observe cannot be classified, and an unclassifiable step goes to the owner.
         """
-        if not locator:
-            raise OwnerTakeoverRequired("STAGEHAND_ACTION_UNCLASSIFIABLE:NO_LOCATOR")
-        try:
-            element = await HarnessTargetResolver(self.harness)(task, locator)
-        except Exception as exc:  # noqa: BLE001 - cannot observe the target = cannot classify it
-            raise OwnerTakeoverRequired(
-                f"STAGEHAND_ACTION_UNCLASSIFIABLE:RESOLVER_FAILED:{type(exc).__name__}"
-            ) from exc
-        if not isinstance(element, dict) or not element:
-            raise OwnerTakeoverRequired("STAGEHAND_ACTION_UNCLASSIFIABLE:TARGET_NOT_RESOLVED_BY_HARNESS")
-        if element.get("hidden") is True:
-            raise OwnerTakeoverRequired("STAGEHAND_ACTION_UNCLASSIFIABLE:TARGET_HIDDEN")
-        if not any(isinstance(element.get(k), str) and element.get(k) for k in _ELEMENT_NAME_KEYS):
-            raise OwnerTakeoverRequired("STAGEHAND_ACTION_UNCLASSIFIABLE:TARGET_HAS_NO_ROLE_OR_NAME")
+        element = await resolve_stagehand_target(HarnessTargetResolver(self.harness), task, locator)
+        if isinstance(element, str):
+            raise OwnerTakeoverRequired(f"STAGEHAND_ACTION_UNCLASSIFIABLE:{element}")
         return element
 
     @staticmethod

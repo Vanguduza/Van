@@ -280,3 +280,35 @@ async def test_outside_a_router_step_the_adapter_still_evaluates_every_call(tmp_
     await sh.observe(task, "a")
     await sh.observe(task, "b")
     assert worker.paths == ["/stagehand/health", "/stagehand/observe"] * 2
+
+
+# ------------------------------------------------------- G3a request: one target rule
+
+
+class _PageHarness:
+    def __init__(self, elements):
+        self.elements = elements
+
+    async def page_info(self, task):
+        return {"elements": self.elements}
+
+
+@pytest.mark.parametrize("elements, locator, why", [
+    ([], "#x", "TARGET_NOT_RESOLVED_BY_HARNESS"),
+    ([{"ref": "#x", "role": "button", "label": "Go", "hidden": True}], "#x", "TARGET_HIDDEN"),
+    ([{"ref": "#x", "href": "/a"}], "#x", "TARGET_HAS_NO_ROLE_OR_NAME"),
+    ([], None, "NO_LOCATOR"),
+])
+async def test_router_lanes_and_the_assignment_worker_share_one_target_rule(elements, locator, why):
+    from van_gateway.browser.interaction_router import HarnessTargetResolver, resolve_stagehand_target
+    from van_gateway.browser.subagent import OwnerTakeoverRequired
+    from van_gateway.browser.worker import HybridBrowserWorker
+
+    harness = _PageHarness(elements)
+    task = tr._task()
+    assert await resolve_stagehand_target(HarnessTargetResolver(harness), task, locator) == why
+    router = tr.make_router(target_resolver=HarnessTargetResolver(harness))
+    assert await router._resolve_target(tr.step(), locator) == why
+    worker = HybridBrowserWorker(harness=harness, stagehand=None, task=task)
+    with pytest.raises(OwnerTakeoverRequired, match=f"STAGEHAND_ACTION_UNCLASSIFIABLE:{why}"):
+        await worker._resolve_target(task, locator)
