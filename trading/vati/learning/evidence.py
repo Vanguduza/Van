@@ -244,15 +244,42 @@ def _subjects(p: Mapping[str, Any]) -> frozenset[str]:
     return frozenset(out)
 
 
+# Payload fields that name the trade a fact is about. When present they must
+# agree with the ledger correlation id, which is the trade identity (A-VATI M2).
+TRADE_ID_FIELDS = ("trade_intent_id", "episode_id")
+
+
+def _trade_id(content: Mapping[str, Any], p: Mapping[str, Any], identity: str) -> str:
+    """One trade is one sample: the identity of the trade a record is about.
+
+    For a ledger event it is the correlation id (= trade_intent_id), which every
+    artifact of that trade (TCA, review, experience artifact, attribution)
+    carries. A payload that names a different trade is inconsistent."""
+    if "kind" in content and "payload" in content and "producer" in content:
+        corr = content.get("correlation_id")
+        if not isinstance(corr, str) or not corr.strip():
+            raise EvidenceError("ledger evidence names no trade (empty correlation_id); it cannot be a sample")
+        for k in TRADE_ID_FIELDS:
+            if p.get(k) is not None and str(p[k]) != corr:
+                raise EvidenceError(f"evidence payload {k}={p[k]!r} disagrees with its ledger correlation_id {corr!r}")
+        return corr
+    for k in TRADE_ID_FIELDS:
+        if p.get(k):
+            return str(p[k])
+    return identity
+
+
 @dataclass(frozen=True)
 class EvidenceRecord:
     """Immutable resolved evidence. Content is held as canonical JSON so it
-    cannot be mutated after its identity was verified."""
+    cannot be mutated after its identity was verified. `trade_id` is the trade
+    the fact is about: several records of one trade are one sample."""
     evidence_class: EvidenceClass
     identity: str
     canonical: str
     environment: Environment
     subjects: frozenset[str]
+    trade_id: str
 
     @classmethod
     def from_content(cls, evidence_class: EvidenceClass, content: Mapping[str, Any], *, identity: Optional[str] = None,
@@ -266,7 +293,8 @@ class EvidenceRecord:
         # Re-read from the canonical form: what is weighted is what was hashed.
         body = json.loads(canonical)
         p = _payload(evidence_class, body)
-        return cls(evidence_class, computed, canonical, _environment(evidence_class, p, session_environment, environment_ceiling), _subjects(p))
+        return cls(evidence_class, computed, canonical, _environment(evidence_class, p, session_environment, environment_ceiling), _subjects(p),
+                   _trade_id(body, p, computed))
 
     def verify(self) -> None:
         if hashlib.sha256(self.canonical.encode("utf-8")).hexdigest() != self.identity:
@@ -410,7 +438,12 @@ TRUSTED_RESOLVER_TYPES = (LedgerEvidenceResolver, ResolvedEvidenceCache, Composi
 # ------------------------------------------------------------ evidence set
 @dataclass(frozen=True)
 class EvidenceSet:
-    """Resolved, identity-de-duplicated evidence for one adjustment subject."""
+    """Resolved, identity-de-duplicated evidence for one adjustment subject.
+
+    Records are de-duplicated by identity, and samples are counted per trade
+    (A-VATI M2): a TRADE_REVIEW and the TRADE_EXPERIENCE_ARTIFACT of the same
+    trade are one sample, however many artifacts cite it. A trade cited through
+    records of different environments weighs as its least authoritative one."""
     records: tuple[EvidenceRecord, ...]
 
     @classmethod
@@ -438,5 +471,13 @@ class EvidenceSet:
     def refs(self) -> tuple[str, ...]:
         return tuple(r.ref for r in self.records)
 
+    @property
+    def trades(self) -> frozenset[str]:
+        return frozenset(r.trade_id for r in self.records)
+
     def weighted_samples(self, *, execution_facts: bool) -> Decimal:
-        return sum((r.weight(execution_facts=execution_facts) for r in self.records), ZERO)
+        per_trade: dict[str, Decimal] = {}
+        for r in self.records:
+            w = r.weight(execution_facts=execution_facts)
+            per_trade[r.trade_id] = min(per_trade.get(r.trade_id, w), w)
+        return sum(per_trade.values(), ZERO)

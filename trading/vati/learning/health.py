@@ -53,6 +53,9 @@ class StrategyHealthTracker:
     # same fact is a no-op and the boundary recomputes the weighted count itself.
     evidence: ResolvedEvidenceCache = field(default_factory=ResolvedEvidenceCache)
     _refs: dict[str, list[str]] = field(default_factory=dict)
+    # One trade is one sample (A-VATI M2): the trade each window entry stands on,
+    # so a TRADE_REVIEW and the experience artifact of that trade count once.
+    _trades: dict[str, list[str]] = field(default_factory=dict)
 
     def observe(self, o: HealthObservation, *, resolver: LedgerEvidenceResolver, correlation_hint: str | None = None) -> HealthVerdict:
         ref = parse_evidence_ref(o.evidence_ref)
@@ -64,16 +67,21 @@ class StrategyHealthTracker:
         if Environment(o.environment) is not rec.environment:
             raise EvidenceError(f"observation environment {o.environment.value} != evidence environment {rec.environment.value}")
         refs = self._refs.setdefault(o.strategy_id, [])
+        trades = self._trades.setdefault(o.strategy_id, [])
         canonical = str(ref)
-        if canonical in refs:
-            return self.verdict(o.strategy_id)   # the same fact observed again is not a new sample
+        if canonical in refs or rec.trade_id in trades:
+            if canonical not in refs:
+                self.evidence.discard(canonical)   # another artifact of a trade already counted: not a new sample
+            return self.verdict(o.strategy_id)   # the same fact (or trade) observed again is not a new sample
         buf = self._obs.setdefault(o.strategy_id, [])
         buf.append(o)
         refs.append(canonical)
+        trades.append(rec.trade_id)
         del buf[:-self.window]
         for old in refs[:-self.window]:
             self.evidence.discard(old)
         del refs[:-self.window]
+        del trades[:-self.window]
         return self.verdict(o.strategy_id)
 
     def verdict(self, strategy_id: str) -> HealthVerdict:

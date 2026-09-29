@@ -32,6 +32,7 @@ class BrokerExecutionProfile:
     session: str
     samples: list = field(default_factory=list)   # (weight, cost_ratio, slippage_pips, rejected:bool, in_event:bool)
     evidence_refs: list = field(default_factory=list)   # one TCA_RECORD ledger evidence ref per sample
+    trade_ids: list = field(default_factory=list)       # one trade per sample (A-VATI M2)
 
     def _w(self) -> Decimal:
         return sum((s[0] for s in self.samples), ZERO)
@@ -88,9 +89,10 @@ class BrokerLearner:
         if Environment(environment) is not rec.environment:
             raise EvidenceError(f"fact environment {environment.value} != evidence environment {rec.environment.value}")
         p = self.profiles.setdefault((broker, symbol, session), BrokerExecutionProfile(broker, symbol, session))
-        if str(ref) in p.evidence_refs:
-            return p   # the same TCA record observed again is not a new sample
+        if str(ref) in p.evidence_refs or rec.trade_id in p.trade_ids:
+            return p   # the same TCA record (or another record of the same trade) is not a new sample
         p.evidence_refs.append(str(ref))
+        p.trade_ids.append(rec.trade_id)
         p.samples.append((EXECUTION_FACT_WEIGHT[environment], cost_ratio, slippage_pips, rejected, in_event_window))
         return p
 

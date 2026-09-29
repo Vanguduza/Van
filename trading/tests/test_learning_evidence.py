@@ -465,6 +465,70 @@ def test_source_allowlist_names_runtime_producers_and_no_derived_kind():
     assert not {k for k, _ in EVIDENCE_SOURCE_ALLOWLIST.values()} & DERIVED_EVENT_KINDS
 
 
+# ----------------------------------- A-VATI (review D): M2 trade identity
+def _trade_artifacts(src: Src, corr: str, sid: str = SID) -> tuple[str, str]:
+    """The TRADE_REVIEW and the TRADE_EXPERIENCE_ARTIFACT of one trade, as the runtime writes them."""
+    review = make_evidence_ref(EvidenceClass.TRADE_REVIEW, src.append(
+        EventKind.TRADE_REVIEW, {"trade_intent_id": corr, "strategy_id": sid, "r_multiple": "-1", "process_ok": False}, corr))
+    artifact = make_evidence_ref(EvidenceClass.VTIL_ARTIFACT, src.append(
+        EventKind.TRADE_EXPERIENCE_ARTIFACT, {"episode_id": corr, "strategy_id": sid, "environment": src.env.value,
+                                             "outcome": {"r_multiple": "-1"}, "review": {"process_ok": False},
+                                             "execution": {"tca": {"cost_ratio": "2.5"}}}, corr))
+    return review, artifact
+
+
+def test_review_d_p1_one_trade_cited_by_two_artifacts_is_one_sample_at_the_boundary():
+    """Review D P1: 15 trades, each cited by its TRADE_REVIEW and its experience artifact,
+    were admitted as 30.0 samples and demoted to SUSPENDED."""
+    src = Src()
+    refs = tuple(r for i in range(15) for r in _trade_artifacts(src, f"t-{i}"))
+    assert len(refs) == 30
+    with pytest.raises(LearningBoundaryError, match=r"insufficient environment-weighted samples \(15\.0"):
+        LearningBoundary.admit(LiveAdjustmentProposal(LiveTarget.CAPSULE_HEALTH, SID, D("0"), "SUSPENDED", refs), src.resolver)
+    with pytest.raises(LearningBoundaryError, match="caller-supplied"):
+        LearningBoundary.check(LiveAdjustment(LiveTarget.CAPSULE_HEALTH, SID, D("0"), "SUSPENDED", refs, D(30)), src.resolver)
+    # 30 distinct trades cited twice each are 30 samples, not 60
+    refs30 = tuple(r for i in range(30) for r in _trade_artifacts(src, f"u-{i}"))
+    adj = LearningBoundary.admit(LiveAdjustmentProposal(LiveTarget.CAPSULE_HEALTH, SID, D("0.5"), "DEGRADED", refs30), src.resolver)
+    assert adj.environment_weighted_samples == D("30.0")
+
+
+def test_review_d_p1b_one_trade_observed_through_two_classes_counts_once_in_the_tracker():
+    src = Src()
+    t = StrategyHealthTracker()
+    review, artifact = _trade_artifacts(src, "t-once")
+    t.observe(hobs(review), resolver=src.resolver)
+    v = t.observe(hobs(artifact), resolver=src.resolver)
+    assert v.weighted_samples == D("1.0") and len(t._obs[SID]) == 1 and len(t.evidence) == 1
+
+
+def test_one_trade_with_two_tca_records_is_one_broker_sample():
+    src = Src()
+    bl = BrokerLearner()
+    refs = []
+    for seq in (1, 2):   # e.g. a live TCA and a restart-recovered TCA of the same fill
+        refs.append(make_evidence_ref(EvidenceClass.TCA_RECORD, src.append(EventKind.TCA_RECORD, {
+            "trade_intent_id": "t-fill", "learning_environment": "LIVE", "broker": "mt5-a", "symbol": "EURUSD", "session": "LONDON",
+            "event_window": "QUIET", "cost_ratio": "1.5", "slippage": "1", "rejected": False, "seq": seq}, "t-fill")))
+        p = bl.observe(broker="mt5-a", symbol="EURUSD", session="LONDON", environment=Environment.LIVE, cost_ratio=D("1.5"), slippage_pips=D("1"),
+                       rejected=False, in_event_window=False, evidence_ref=refs[-1], resolver=src.resolver)
+    assert len(p.samples) == 1 and p._w() == D("1.0")
+    with pytest.raises(LearningBoundaryError, match="caller-supplied"):
+        LearningBoundary.check(LiveAdjustment(LiveTarget.BROKER_PROFILE, BKEY, D("1"), None, tuple(refs), D("2.0")), src.resolver)
+
+
+def test_payload_naming_another_trade_than_its_ledger_correlation_is_refused():
+    src = Src()
+    bad = make_evidence_ref(EvidenceClass.TRADE_REVIEW, src.append(
+        EventKind.TRADE_REVIEW, {"trade_intent_id": "t-A", "strategy_id": SID, "r_multiple": "-1"}, "t-B"))
+    with pytest.raises(EvidenceError, match="disagrees with its ledger correlation_id"):
+        src.resolver.resolve(parse_evidence_ref(bad))
+    uncorrelated = make_evidence_ref(EvidenceClass.TRADE_REVIEW, src.append(
+        EventKind.TRADE_REVIEW, {"strategy_id": SID, "r_multiple": "-1"}, ""))
+    with pytest.raises(EvidenceError, match="names no trade"):
+        src.resolver.resolve(parse_evidence_ref(uncorrelated))
+
+
 # ------------------------------------------------------- memory bridge
 def test_owner_preference_continuity_record_is_rejected():
     b = HermesMemoryBridge()
