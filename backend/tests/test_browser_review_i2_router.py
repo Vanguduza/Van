@@ -63,9 +63,15 @@ async def test_a_payment_or_irreversible_deterministic_action_goes_to_the_owner(
     s.task = s.task.model_copy(update={"action_class": ActionClass(task_class)} if task_class != "A0"
                                else {"action_class": "A0"})
     result = await router.route(s)
-    assert result.lane is RouterLane.OWNER_TAKEOVER and result.state is StepState.OWNER_TAKEOVER
     assert "DETERMINISTIC_ACTION_NOT_AUTOMATABLE:A4" in result.reasons
     assert ex.executed == []
+    if det.locator == "#pay-now":
+        # Payments first (review I4 MAJOR-A): the payment boundary reads "pay now" in the
+        # locator words and refuses it as a payment before the ordinary takeover.
+        assert result.lane is RouterLane.POLICY_REFUSAL and result.state is StepState.POLICY_REFUSED
+        assert any("automated_payment_prohibited" in r for r in result.reasons)
+    else:
+        assert result.lane is RouterLane.OWNER_TAKEOVER and result.state is StepState.OWNER_TAKEOVER
 
 
 async def test_the_harness_observed_element_decides_not_an_innocent_locator():
@@ -74,7 +80,9 @@ async def test_the_harness_observed_element_decides_not_an_innocent_locator():
     ex = tr.FakeExecutor()
     router = tr.make_router(executor=ex, target_resolver=tr.FakeResolver(elements))
     paying = await router.route(tr.step(deterministic_action=DeterministicAction(operation="click", locator="#b1")))
-    assert paying.state is StepState.OWNER_TAKEOVER and ex.executed == []
+    # Payments first (review I4 MAJOR-A): refused as a payment, never executed.
+    assert paying.state is StepState.POLICY_REFUSED and ex.executed == []
+    assert any("automated_payment_prohibited" in r for r in paying.reasons)
     fine = await router.route(tr.step(deterministic_action=DeterministicAction(operation="click", locator="#b2")))
     assert fine.state is StepState.VERIFIED_SUCCESS
     assert [(a.locator, a.action_class) for a in ex.executed] == [("#b2", "A2")]

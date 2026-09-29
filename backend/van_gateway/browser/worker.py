@@ -49,8 +49,10 @@ from van_gateway.browser.interaction_router import (
     TARGETLESS_OPERATIONS,
     HarnessTargetResolver,
     default_action_classifier,
-    observed_element_text,
+    judged_text,
+    observed_target,
     resolve_stagehand_target,
+    supplementary_action_class,
 )
 from van_gateway.browser.policy import BrowserPolicyError
 from van_gateway.browser.stagehand_proposal import (
@@ -70,17 +72,26 @@ from van_gateway.models import ActionClass
 TARGETED_PLAN_KINDS = frozenset({"click", "fill", "select"})
 
 
-def classify_target(operation: str, observed_text: str, description: str) -> ActionClass:
+def classify_target(
+    operation: str, observed_text: str, description: str, *, target: dict[str, Any] | None = None,
+) -> ActionClass:
     """The stricter of the class of the Harness-observed target and of the description.
 
-    The router's classifier answers ``A0`` for a change-nothing operation; the subagent's
-    ``ActionClass`` starts at A1, so A0 is proposed as A1. A4/A5 are returned as such; the
-    caller decides whether that is an owner takeover or a runner refusal.
+    ``target`` is ``interaction_router.observed_target`` (the Harness element or the reason
+    it did not resolve, plus the locator), so the fail-safe structural rules (review I4
+    MAJOR-A, ``action_risk``) see the element's type, inputmode, maxlength and placeholder,
+    not only its text. The description can only make the class stricter; an empty one is
+    neutral. The router's classifier answers ``A0`` for a change-nothing operation; the
+    subagent's ``ActionClass`` starts at A1, so A0 is proposed as A1. A4/A5 are returned as
+    such; the caller decides whether that is an owner takeover or a runner refusal.
     """
-    classes = [
-        default_action_classifier(operation, {"label": observed_text}, None) if observed_text else "A0",
-        default_action_classifier(operation, {"label": description}, None),
-    ]
+    if target is not None:
+        observed = default_action_classifier(operation, target, None)
+    elif observed_text:
+        observed = default_action_classifier(operation, {"label": observed_text}, None)
+    else:
+        observed = "A0"
+    classes = [observed, supplementary_action_class(operation, description)]
     ranks = {"A0": 0, **{cls.value: index + 1 for index, cls in enumerate(ActionClass)}}
     if any(value not in ranks for value in classes):
         raise OwnerTakeoverRequired(f"ACTION_UNCLASSIFIABLE:CLASS:{classes}")
@@ -188,14 +199,16 @@ class AdapterBackedWorker:
         # A2. The shared rule applies here as on router lane 1: classify what the Harness
         # observes of the target plus the locator's words (the locator alone when the
         # Harness does not report the element); the instruction can only make it stricter.
-        observed_text = await self._observed_target_text(step.kind, step.locator)
+        target = await self._observed_target(step.kind, step.locator)
+        observed_text = target["label"]
         instruction = step.instruction or ""
-        action_class = classify_target(step.kind, observed_text, instruction)
+        action_class = classify_target(step.kind, observed_text, instruction, target=target)
         # The payment boundary in BrowserSubagentRunner._check reads `instruction`: give it
-        # the locator and the observed target too, not only the plan's own words.
-        judged_text = " | ".join(t for t in (instruction, observed_text) if t)
+        # the locator and the observed target too, raw and folded, not only the plan's own
+        # words (review I4 MAJOR-A: "Páy now", "#pɑy-now" reach it as "pay now").
+        judged = judged_text(instruction, observed_text)
         if action_class in (ActionClass.A4, ActionClass.A5) and looks_like_payment(
-            operation=step.kind, goal=judged_text,
+            operation=step.kind, goal=judged,
         ) is None:
             # A commitment (delete an account, a card field, a pay button the payment
             # boundary cannot read) is never autonomous: hand the run to the owner. A
@@ -210,20 +223,19 @@ class AdapterBackedWorker:
             # the assignment's ceiling (ACTION_CLASS_VIOLATION) rather than clamping it.
             action_class=action_class,
             url=step.url,
-            instruction=judged_text or None,
+            instruction=judged or None,
             rationale=step.rationale or f"planned step {index + 1}",
             payload={"plan_index": index, "harness_observed_target": observed_text or None},
         )
 
-    async def _observed_target_text(self, operation: str, locator: str | None) -> str:
-        """``observed_element_text`` of the Harness-resolved target, else the locator's
-        own words — the same fallback router lane 1 uses for an unresolved target."""
+    async def _observed_target(self, operation: str, locator: str | None) -> dict[str, Any]:
+        """The classifier target for the Harness-resolved element, or for the bare locator
+        when the Harness does not report it — the same rule router lane 1 uses for an
+        unresolved target (``action_risk`` R6: a plain-ASCII click may run, a write may not)."""
         if not locator:
             raise OwnerTakeoverRequired(f"PLANNED_ACTION_UNCLASSIFIABLE:NO_LOCATOR:{operation}")
         element = await resolve_stagehand_target(HarnessTargetResolver(self.adapter), self.task, locator)
-        if isinstance(element, dict):
-            return observed_element_text(element, locator)
-        return observed_element_text({}, locator)
+        return observed_target(operation, element, locator)
 
     # ---------------------------------------------------------------- execute
 
@@ -392,20 +404,22 @@ class HybridBrowserWorker:
         # applies here too: classify what the *Harness* observes of the target together with
         # the locator words; the description can only make the answer stricter.
         observed_text = ""
+        target = None
         if typed.operation not in TARGETLESS_OPERATIONS:
             element = await self._resolve_target(task, typed.selector)
-            observed_text = observed_element_text(element, typed.selector)
-        action_class = self._classify(typed.operation, observed_text, description)
+            target = observed_target(typed.operation, element, typed.selector)
+            observed_text = target["label"]
+        action_class = self._classify(typed.operation, observed_text, description, target=target)
         # The payment boundary in BrowserSubagentRunner._check reads `instruction`, so it runs
-        # over the same Harness-observed text the class was judged on.
-        judged_text = " | ".join(t for t in (description, observed_text) if t)
+        # over the same Harness-observed text the class was judged on, raw and folded.
+        judged = judged_text(description, observed_text)
         return ProposedAction(
             kind=typed.operation,
             domain=task.target_domain,
             # The class VAN derived, never the ceiling: the runner refuses anything above
             # the assignment's ceiling (ACTION_CLASS_VIOLATION), so the ceiling caps it.
             action_class=action_class,
-            instruction=judged_text or instruction,
+            instruction=judged or instruction,
             rationale=description or "Stagehand semantic proposal",
             payload={
                 "stagehand_action": candidate,
@@ -427,10 +441,12 @@ class HybridBrowserWorker:
         return element
 
     @staticmethod
-    def _classify(operation: str, observed_text: str, description: str) -> ActionClass:
+    def _classify(
+        operation: str, observed_text: str, description: str, *, target: dict[str, Any] | None = None,
+    ) -> ActionClass:
         """The stricter of the Harness-observed class and the description's class
         (``classify_target``, shared with the deterministic plan path)."""
-        return classify_target(operation, observed_text, description)
+        return classify_target(operation, observed_text, description, target=target)
 
     async def execute(
         self, assignment: SubagentAssignment, action: ProposedAction

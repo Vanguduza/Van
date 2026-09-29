@@ -46,7 +46,6 @@ import inspect
 import json
 import re
 import time
-import unicodedata
 from collections import OrderedDict
 from dataclasses import dataclass, field
 from enum import Enum
@@ -74,7 +73,16 @@ from van_gateway.browser.lane_gates import (  # noqa: F401 - re-export
     step_gate_memo,
     step_gate_scope,
 )
-from van_gateway.browser.jev_eligibility import _CONFUSABLES  # the shared homoglyph fold table
+from van_gateway.browser.action_risk import (
+    HIGH_RISK_WORDS,
+    RiskAssessment,
+    assess_action,
+    assess_supplementary_text,
+    element_texts,
+    judged_text,
+)
+from van_gateway.browser.action_risk import fold as _risk_fold
+from van_gateway.browser.action_risk import words as _risk_words
 from van_gateway.browser.models import BrowserTask, BrowserTaskStatus
 from van_gateway.browser.policy import BrowserPolicyError
 from van_gateway.browser.stagehand_proposal import (
@@ -305,179 +313,94 @@ EligibilityClassifier = Callable[..., Any]
 ActionClassifier = Callable[[str, dict[str, Any] | None, Any], str]
 
 
-_HIGH_RISK_LABEL = re.compile(
-    r"\b(pay|payment|purchase|buy|checkout|order|transfer|send|submit|confirm|delete|remove|"
-    r"sign|authori[sz]e|approve|subscribe|withdraw|deposit)\b",
-    re.IGNORECASE,
-)
+# Review I4 MAJOR-A — the classifier is ``action_risk`` (see its docstring for the rules,
+# the unresolved-target decision and the false-positive trade-off). Structural fail-safe
+# rules are the primary control; the stem denylist is defence in depth. The historic names
+# below stay importable.
+_HIGH_RISK_LABEL = HIGH_RISK_WORDS
+_fold = _risk_fold
+_words = _risk_words
 
 
-#: Review I2 N-6 — a field that takes a payment instrument. Typing into one is part of paying,
-#: whatever the button next to it says, so a fill/select there is A4 like "Pay now".
-_PAYMENT_FIELD = re.compile(
-    r"\b(card|cvv|cvc|cvv2|csc|iban|bic|swift|expiry|expiration|security code|"
-    r"sort code|account number|routing|billing)\b",
-    re.IGNORECASE,
-)
+def _target_evidence(target: dict[str, Any] | None) -> tuple[dict[str, Any] | None, str | None, bool]:
+    """(element, locator, resolved) for a classifier ``target``.
+
+    The router and the workers pass ``{"label": <observed text>, "element": <Harness
+    element or None>, "locator": ..., "resolved": bool}``; a Jev B1 target is
+    ``{"target_id", "role", "label"}``; older callers pass ``{"label": text}``. A target with
+    neither element nor locator is judged on its role and label as a pseudo-element.
+    """
+    if target is None:
+        return None, None, False
+    if "element" in target or "locator" in target:
+        element = target.get("element") if isinstance(target.get("element"), dict) else None
+        resolved = bool(target.get("resolved", element is not None)) and element is not None
+        locator = target.get("locator") if isinstance(target.get("locator"), str) else None
+        return element, locator, resolved
+    pseudo = {k: target.get(k) for k in ("role", "label") if isinstance(target.get(k), str) and target.get(k)}
+    return pseudo, None, True
 
 
-# Review I3 MAJOR-2 — the word-bounded patterns above miss what real pages and selectors
-# look like: `#paynow`, `button.submitorder`, `name=cardnumber`, `autocomplete=cc-csc`,
-# "Kartennummer", and labels that hide a word from `\b` with a zero-width space, a
-# Cyrillic "а" or fullwidth letters. So the text is folded first (NFKC, Unicode format
-# characters dropped, the shared Cyrillic/Greek confusable table from jev_eligibility),
-# and the risk stems below are also matched as *substrings* of the lower-cased,
-# alphanumeric-only text.
-#
-# Trade-off, accepted deliberately: substring stems over-match. A "Buyer guide" link
-# contains "buy", an "order by date" sort contains "order", a Bootstrap `.card` wrapper in
-# a fill selector contains "card", an "undelete" contains "delete". Every such false positive raises the class to
-# A4, which is never automated: the step goes to owner takeover (or a policy refusal).
-# That is the fail-safe direction; a false negative clicks a pay button. The one carve-out
-# is the CSS token "border" (Tailwind/Bootstrap utility classes put it on ordinary
-# buttons), removed before the substring scan only — the word pass still sees `b-order`
-# as "b order", so the carve-out cannot hide a real "order".
-
-#: Commitment stems (any targeted operation -> A4). English plus a small localised set.
-_COMMITMENT_STEMS: tuple[str, ...] = (
-    "pay", "buy", "checkout", "purchase", "order",
-    "delete", "remove", "deactivat", "closeaccount", "cancelaccount", "terminateaccount",
-    # de / es / fr / pt
-    "zahlen", "zahlung", "kaufen", "bestell", "pagar", "pago", "comprar", "acheter",
-)
-
-#: Payment-instrument field stems (fill/select -> A4).
-_PAYMENT_FIELD_STEMS: tuple[str, ...] = (
-    "card", "cvc", "cvv", "iban", "securitycode",
-    "ccnum", "ccexp", "cccsc", "ccname", "cctype",
-    # de / es / fr
-    "karte", "tarjeta", "carte",
-)
-
-#: HTML autocomplete payment tokens (`cc-number`, `cc-csc`, `cc-exp`, `cc-given-name` ...),
-#: top-level, under `attributes`, or in a selector like `#cc-exp`.
-_CC_AUTOCOMPLETE = re.compile(r"(?<![a-z0-9])cc-[a-z]")
-
-#: Removed before the substring scan only (see the trade-off note above).
-_SUBSTRING_CARVE_OUTS: tuple[str, ...] = ("border",)
-
-
-def _fold(text: str) -> str:
-    """NFKC, Unicode format characters (Cf: ZWSP, soft hyphen, bidi) dropped, control
-    characters as spaces, Cyrillic/Greek look-alikes folded to Latin, case-folded."""
-    text = unicodedata.normalize("NFKC", text or "")
-    out = []
-    for char in text:
-        category = unicodedata.category(char)
-        if category == "Cf":
-            continue
-        out.append(" " if category == "Cc" else char)
-    return "".join(out).translate(_CONFUSABLES).casefold()
-
-
-def _squash(folded: str) -> str:
-    """Folded text, carve-outs removed, reduced to ``[a-z0-9]``: ``#pay-now`` -> ``paynow``."""
-    for token in _SUBSTRING_CARVE_OUTS:
-        folded = folded.replace(token, " ")
-    return re.sub(r"[^a-z0-9]+", "", folded)
-
-
-def _reads_as_commitment(text: str) -> bool:
-    folded = _fold(text)
-    if _HIGH_RISK_LABEL.search(folded) or _HIGH_RISK_LABEL.search(_words(folded)):
-        return True
-    squashed = _squash(folded)
-    return any(stem in squashed for stem in _COMMITMENT_STEMS)
-
-
-def _reads_as_payment_field(text: str) -> bool:
-    folded = _fold(text)
-    if _PAYMENT_FIELD.search(folded) or _PAYMENT_FIELD.search(_words(folded)):
-        return True
-    if _CC_AUTOCOMPLETE.search(folded):
-        return True
-    squashed = _squash(folded)
-    return any(stem in squashed for stem in _PAYMENT_FIELD_STEMS)
+def explain_action_class(operation: str, target: dict[str, Any] | None) -> RiskAssessment:
+    """``default_action_classifier`` with the rules that decided it."""
+    element, locator, resolved = _target_evidence(target)
+    return assess_action(operation, element=element, locator=locator, resolved=resolved)
 
 
 def default_action_classifier(operation: str, target: dict[str, Any] | None, target_entry: Any) -> str:
-    """VAN's own (operation, target) -> action class. Conservative by construction.
+    """VAN's own (operation, target) -> action class. Fails safe (review I4 MAJOR-A).
 
-    ``done``/``scroll``/``abstain`` change nothing -> A0. Anything whose label reads as a
-    commitment (pay, submit, delete, send ...) -> A4, which is never proposable; so is a
-    fill/select into a payment-instrument field (card number, CVV, IBAN ...). ``fill``
-    writes owner data -> A3. Other clicks/selects/keys -> A2. A class the fabric attached to
-    the target (``target_entry["action_class"]``) can only raise this, never lower it.
+    ``done``/``scroll``/``abstain`` -> A0. A targeted click/fill/select is A4 unless
+    ``action_risk.assess_action`` positively establishes it is low-risk (Latin/ASCII text,
+    no risk stem, a role outside the risky set, no payment/secret-field signal, a resolved
+    element or — clicks only — a plain-ASCII locator); then fill -> A3, click/select -> A2.
+    ``press_key`` -> A2 unless its target text trips the same rules. A class the fabric
+    attached to the target (``target_entry["action_class"]``) can only raise this.
     """
-    label = str(target.get("label") or "") if target is not None else ""
-    if operation in TARGETLESS_OPERATIONS:
-        base = "A0"
-    elif target is not None and _reads_as_commitment(label):
-        base = "A4"
-    elif operation in ("fill", "select") and _reads_as_payment_field(label):
-        base = "A4"
-    elif operation == "fill":
-        base = "A3"
-    else:
-        base = "A2"
+    base = explain_action_class(operation, target).action_class
     declared = target_entry.get("action_class") if isinstance(target_entry, dict) else None
     if isinstance(declared, str) and declared in B1_ACTION_CLASSES and _rank(declared) > _rank(base):
         return declared
     return base
 
 
-_ELEMENT_TEXT_KEYS = (
-    "role", "label", "name", "accessible_name", "aria_label", "text", "title", "value",
-    "placeholder", "input_type", "type", "id", "href", "action", "formaction",
-    # Review I3 MAJOR-2: `autocomplete=cc-number` names a card field whatever its label says.
-    "autocomplete",
-)
-
-
-def _words(text: str) -> str:
-    """Selector/attribute text as words: ``//button[@id='payNow_btn']`` -> ``button id pay Now btn``.
-
-    ``_HIGH_RISK_LABEL`` and the payment boundary match whole words, and a selector joins
-    them with punctuation, underscores and camelCase, all of which hide a word boundary.
-    """
-    text = re.sub(r"([a-z])([A-Z])", r"\1 \2", text or "")
-    return re.sub(r"[^A-Za-z0-9]+", " ", text).strip()
+def supplementary_action_class(operation: str, text: str | None) -> str:
+    """The class a description/instruction adds: A0 (no signal) or A4. Only ever combined
+    with the target's class by taking the stricter, so an empty description is neutral."""
+    return assess_supplementary_text(operation, text).action_class
 
 
 def observed_element_text(element: dict[str, Any], locator: str | None) -> str:
-    """Everything the Harness observed about the element, plus the selector, as one text.
+    """Everything the Harness observed about the element, plus the selector, as one text —
+    raw, word-split and folded — for the payment boundary and the step record.
 
-    This — not the proposer's own description — is what the action class and the payment
-    boundary are judged on (reviewer I M-5).
+    Reads every string the element carries (``action_risk.element_texts``), so ``data-*``,
+    ``class``, ``aria-describedby`` text and the accessible description are included.
     """
-    parts: list[str] = []
-    for key in _ELEMENT_TEXT_KEYS:
-        value = element.get(key)
-        if isinstance(value, str) and value:
-            parts.append(value)
-    attributes = element.get("attributes")
-    if isinstance(attributes, dict):
-        for name, value in attributes.items():
-            if isinstance(value, str):
-                parts.append(f"{name} {value}")
-    if locator:
-        parts.append(locator)
-    # Review I3 MAJOR-2: the folded forms too, so `_words` and the payment boundary see
-    # "pay now" and not only "Pa<ZWSP>y now" or "P<Cyrillic а>y now" (`_words` drops the
-    # Cyrillic letter). The raw forms stay: a soft hyphen reads as a word break raw
-    # ("Pay now") but folds away ("paynow"), and the payment boundary matches words.
-    folded = [_fold(p) for p in parts]
-    texts = parts + [_words(p) for p in parts] + folded + [_words(p) for p in folded]
-    return " | ".join(dict.fromkeys(t for t in texts if t))
+    return judged_text(*element_texts(element or {}, locator))
+
+
+def observed_target(operation: str, element: dict[str, Any] | str | None, locator: str | None) -> dict[str, Any]:
+    """The classifier ``target`` for a Harness resolution result (element dict, or the
+    string reason it did not resolve)."""
+    resolved = isinstance(element, dict)
+    return {
+        "label": observed_element_text(element if resolved else {}, locator),
+        "element": element if resolved else None,
+        "locator": locator,
+        "resolved": resolved,
+    }
 
 
 class HarnessTargetResolver:
     """Resolves a Stagehand locator to the element the Browser Harness itself reports.
 
     Uses the ``elements`` list of the Harness ``page_info`` (the same list B2 reads). An
-    element is resolved only when its ``ref`` is exactly the locator the Harness will act
-    on. The live Harness does not report elements today, so this resolves nothing and every
-    targeted Stagehand action goes to owner takeover — the fail-closed answer.
+    element is resolved only when its ``locator`` (the unit G5b element shape:
+    ``{locator, role, name, description, attributes{...}, type, autocomplete, placeholder,
+    inputmode, maxlength, pattern, hidden}``) or legacy ``ref`` is exactly the locator the
+    Harness will act on. When the Harness reports no elements this resolves nothing, and the
+    classifier applies its unresolved-target rule (``action_risk`` R6).
     """
 
     def __init__(self, harness: Any) -> None:
@@ -486,7 +409,7 @@ class HarnessTargetResolver:
     async def __call__(self, task: BrowserTask, locator: str) -> dict[str, Any] | None:
         page = await self.harness.page_info(task)
         for raw in (page or {}).get("elements") or ():
-            if isinstance(raw, dict) and raw.get("ref") == locator:
+            if isinstance(raw, dict) and locator in (raw.get("locator"), raw.get("ref")):
                 return raw
         return None
 
@@ -1098,16 +1021,19 @@ class BrowserInteractionRouter:
             det_class, observed_text = "A0", ""
         else:
             element = await self._resolve_target(step, det.locator)
-            if isinstance(element, dict):
-                observed_text = observed_element_text(element, det.locator)
-            else:
-                # Unresolved: classify on the locator's words. A payment or irreversible hit
-                # there goes to the owner rather than being guessed about.
+            if not isinstance(element, dict):
+                # Unresolved (review I4 MAJOR-A, action_risk R6): a click is A2 only on a
+                # plain-ASCII locator with no risk stem; a fill/select is A4.
                 reasons.append(f"DETERMINISTIC_TARGET_UNRESOLVED:{element}")
-                observed_text = " | ".join(t for t in (det.locator or "", _words(det.locator or "")) if t)
-            det_class = self.action_classifier(det.operation, {"label": observed_text}, None)
+            target = observed_target(det.operation, element, det.locator)
+            observed_text = target["label"]
+            det_class = self.action_classifier(det.operation, target, None)
+            self._record_risk_rules(reasons, "DETERMINISTIC", det.operation, target)
         if det_class not in B1_ACTION_CLASSES or det_class in NEVER_PROPOSABLE_ACTION_CLASSES:
             reasons.append(f"DETERMINISTIC_ACTION_NOT_AUTOMATABLE:{det_class}")
+            refused = self._payment_refusal_first(step, det.operation, observed_text, "deterministic", reasons)
+            if refused is not None:
+                return refused
             return self._takeover(reasons, [], "DETERMINISTIC_ACTION_REQUIRES_OWNER")
         if _rank(det_class) > _rank(step.action_class_ceiling):
             self.metrics.inc("policy_refusals")
@@ -1156,10 +1082,16 @@ class BrowserInteractionRouter:
             if isinstance(unclassifiable, str):
                 reasons.append(f"STAGEHAND_ACTION_UNCLASSIFIABLE:{unclassifiable}")
                 return self._takeover(reasons, [], "STAGEHAND_ACTION_UNCLASSIFIABLE")
-            observed_text = observed_element_text(unclassifiable, proposal.locator)
+            target = observed_target(proposal.operation, unclassifiable, proposal.locator)
+            observed_text = target["label"]
+            observed_class = self.action_classifier(proposal.operation, target, None)
+            self._record_risk_rules(reasons, "STAGEHAND", proposal.operation, target)
+        else:
+            observed_class = "A0"
         stagehand_class = self._stricter_class(
-            self.action_classifier(proposal.operation, {"label": observed_text}, None) if observed_text else "A0",
-            self.action_classifier(proposal.operation, {"label": proposal.description or ""}, None),
+            observed_class,
+            # Stagehand's description can only make the class stricter; empty is neutral.
+            supplementary_action_class(proposal.operation, proposal.description),
         )
         if (
             stagehand_class not in B1_ACTION_CLASSES
@@ -1167,6 +1099,13 @@ class BrowserInteractionRouter:
             or _rank(stagehand_class) > _rank(step.action_class_ceiling)
         ):
             reasons.append(f"STAGEHAND_ACTION_ABOVE_CEILING:{stagehand_class}")
+            if stagehand_class in NEVER_PROPOSABLE_ACTION_CLASSES:
+                refused = self._payment_refusal_first(
+                    step, proposal.operation, judged_text(proposal.description, observed_text),
+                    "stagehand", reasons,
+                )
+                if refused is not None:
+                    return refused
             return None
         self.metrics.inc("stagehand_steps")
         action = RouterAction(
@@ -1178,6 +1117,33 @@ class BrowserInteractionRouter:
             description=" | ".join(t for t in (proposal.description, observed_text) if t) or None,
         )
         return await self._execute_and_verify(step, action, reasons, claimed_done=proposal.operation == "done")
+
+    def _record_risk_rules(self, reasons: list[str], lane: str, operation: str, target: dict[str, Any]) -> None:
+        """Which ``action_risk`` rules decided the class (default classifier only)."""
+        if self.action_classifier is default_action_classifier:
+            rules = explain_action_class(operation, target).rules
+            reasons.append(f"{lane}_ACTION_RISK:{';'.join(rules)}")
+
+    def _payment_refusal_first(
+        self, step: InteractionStep, operation: str, text: str, lane: str, reasons: list[str],
+    ) -> StepResult | None:
+        """Payments first: an A4 the payment boundary recognises is refused as a payment
+        (POLICY_REFUSED) rather than handed over as an ordinary takeover — the more
+        specific refusal is the one the owner needs to read. ``None`` when it is not a
+        payment. Either way nothing executes."""
+        try:
+            assert_not_automated_payment(
+                operation=operation, goal=text or "", domain=step.task.target_domain,
+                context=f"interaction_router_{lane}",
+            )
+        except PaymentBoundaryError as exc:
+            self.metrics.inc("policy_refusals")
+            return StepResult(
+                lane=RouterLane.POLICY_REFUSAL, state=StepState.POLICY_REFUSED,
+                trail=[StepState.PROPOSED.value, StepState.POLICY_REFUSED.value],
+                reasons=reasons + [str(exc)],
+            )
+        return None
 
     @staticmethod
     def _stricter_class(*classes: str) -> str:
@@ -1999,6 +1965,9 @@ __all__ = [
     "build_interaction_router",
     "build_interaction_routes",
     "default_action_classifier",
+    "explain_action_class",
+    "observed_target",
+    "supplementary_action_class",
     "effective_step_ceiling",
     "harness_page_to_jev_observation",
     "observed_element_text",
