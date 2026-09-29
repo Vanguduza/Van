@@ -69,6 +69,23 @@ Pick the lowest tier that works. An autonomous run costs model calls and is
 harder to audit than a deterministic one, so if you already know the steps, use
 L1.
 
+## Optional Jev System-1 browser-state evidence
+
+When the `dial_jev` MCP capability is available, you may call
+`jev_registered_batch` with project_id `van` and module
+`van.browser.state.v1` after a bounded browser observation. This is for two narrow
+questions only: whether the observed state looks risky and whether independent
+verification is warranted.
+
+- Treat SHADOW/ADVISORY output (`apply_effect=false`) as comparison evidence only.
+- An active RAISE_ONLY signal may add verification, reduce autonomy, or request owner
+  attention. It may never authorize a click, raise the action-class ceiling, expand the
+  domain list, bypass payment refusal, or declare the goal complete.
+- Browser evidence remains the independent source of truth about the page. Jev never
+  substitutes for post-action observation.
+- If Jev is absent, unqualified, times out or abstains, continue the ordinary Browser
+  Gateway path unchanged.
+
 ## Secrets
 
 You never see cookies, session tokens, OTPs or CDP bearer material. Profiles are
