@@ -516,3 +516,96 @@ blocker_closure_20260929:
     - owner_decisions_20260929.hosting.zone_status (UNPROVISIONED => Stagehand PRODUCTION_DISABLED)
     - owner_decisions_20260929.model.pin_status (UNVERIFIED)
     - owner_decisions_20260929.version.live_qualification.status (PENDING)
+
+# =====================================================================================
+# APPENDED 2026-09-29 (fourth append) — correction to blocker_closure_20260929 after
+# independent review I4. Append-only: every byte above this line is preserved unchanged.
+# Review I4 found that the I3-MAJOR-3 disposition above ("Harness lease-generation fence")
+# overstated the fence: at VAN 65865d00 it worked one way only (MINOR-A). This block records
+# what the fence covers after unit G5b's fix, and one wording correction. It does not reopen
+# either blocker (both stay CLOSED; the gate model's blocker paths are unchanged) and changes
+# no product, security, money, provider or owner-control intent.
+# Authority class: OWNER_DERIVED (the owner ordered the review findings closed by the runtime
+# work: docs/decisions/OWNER-DECISIONS-20260929-STAGEHAND-PRIVATE-PLANE.md sections 8-10).
+# =====================================================================================
+blocker_closure_correction_20260929:
+  authority_class: OWNER_DERIVED
+  authority_basis:
+    owner_record: docs/decisions/OWNER-DECISIONS-20260929-STAGEHAND-PRIVATE-PLANE.md
+    owner_record_sha256: 64f1c0560ef88776d0d199392d315767ea3576827e335ba2da8081d12e307c81
+    owner_sections: [8, 9, 10]
+  signature_claimed: none
+  corrects: blocker_closure_20260929.follow_up_findings_from_the_same_review[I3-MAJOR-3].disposition
+  independent_review:
+    id: I4
+    reviewed_commit: 65865d00
+    finding: I4-MINOR-A
+    evidence_probe: review-i4/probes/test_i4_fence.py (held outside this repository)
+    fixed_by: unit G5b, VAN 529619bd
+    reproduced_at_65865d00: >-
+      (1) a /step whose lease lapsed and was re-taken by task2 still clicked on task2's page
+      and returned VERIFIED_SUCCESS; (2) /assignments Harness calls carried no lease fence;
+      (3) the Harness accepted a stale generation 4 after an unfenced new holder, and after a
+      Harness restart (its fence was in memory only).
+  what_the_fence_did_not_cover_at_65865d00:
+    - Only /interaction/step sent lease_generation; /assignments, the watch runner and the
+      notebook consumer sent none.
+    - The Harness accepted unfenced envelopes, so an unfenced holder never advanced the fence.
+    - The Harness kept the newest generation in memory; a restart forgot it.
+    - /step never called broker.assert_lease_active and had no deadline, so it could outlive
+      its lease.
+  what_the_fence_covers_after_unit_g5b:
+    gateway_callers: >-
+      Every gateway caller of the Browser Harness runs under a HarnessLeaseFence built from
+      the task's broker lease (adapters.broker_lease_fence): /interaction/step and
+      /assignments (BrowserSessionBroker.lease_for_task_run: the lease the task holds, or one
+      taken for the run and released only if still held), the watch runner and the notebook
+      consumer. Before every fenced Harness call the fence's guard calls
+      broker.assert_lease_active (lease id, holder and generation must match and the lease
+      must not have expired) and renews the lease once two thirds of its TTL has elapsed; a
+      lapsed or re-taken lease raises BROWSER_HARNESS_LEASE_LOST and nothing is sent. The
+      adapter refuses to send a mutating operation (navigate, click, fill, press, scroll,
+      upload) without a fence.
+    step_deadline: >-
+      /interaction/step confirms (and if due renews) its lease before routing and runs the
+      router step under asyncio.wait_for with a deadline shorter than the remaining lease
+      (at most 30 s, at least a quarter of the remainder, before expiry); past it the step
+      is stopped with 504 BROWSER_STEP_DEADLINE_EXCEEDED and its own lease is released.
+    harness_worker: >-
+      The Harness refuses a mutating operation without lease_generation (428
+      LEASE_FENCE_REQUIRED); reads (page_info, describe, screenshot, tabs, wait) may be
+      unfenced and are checked when fenced. It persists the newest generation and holder per
+      profile under VAN_HARNESS_STATE_ROOT (fsynced before the action runs), so a restart
+      does not re-admit a stale generation; unreadable fence state refuses (503
+      LEASE_FENCE_STATE_INVALID) rather than resetting.
+    owner_interactive_input: >-
+      Exempt from the Harness fence because it never passes through the Harness worker: it
+      travels the browser stream host / control agent path, fenced by the interactive
+      control lease and control generation (InteractiveSessionService.assert_may_actuate).
+      The owner preempts automation: an owner session holds the profile lease, which
+      advances the generation every automated Harness call is re-checked against.
+  limits_after_unit_g5b:
+    - The Harness-side refusal knows only generations it has been sent; a holder that never
+      calls the Harness (an owner interactive session) is enforced by the gateway guard, not
+      by the Harness.
+    - The guard and the Harness request are separate steps; a lease cannot be re-taken in
+      between while it is live, and the step deadline keeps a /step inside its lease, but
+      /assignments has no whole-run deadline (each call is re-checked instead).
+    - The in-flight run marker and the step deadline are per gateway process.
+    - Stagehand's observe() connection to the Harness-owned Chromium is not fenced (it is
+      read-only by policy; blocker_closure_20260929 limit (1) on direct actuation stands).
+  wording_corrections:
+    - corrects: blocker_closure_20260929.blockers.STAGEHAND-VERIFIER-GAP-20260929.limitation
+      note: >-
+        The watch runner is verified by BrowserTaskService.verify_read_only_evidence (the
+        sealed A1 evidence row read back, verifier READ_ONLY_EVIDENCE_READ_BACK), not by
+        WorkflowVerifier. The rest of that limitation stands.
+    - corrects: blocker_closure_20260929.blockers.STAGEHAND-DIRECT-ACTUATION-20260929.limitation
+      note: >-
+        Limit (3) ("the live Harness reports no element list") is superseded by unit G5b: the
+        Harness page_info now reports a bounded elements list (and a describe operation for
+        one locator), so a targeted Stagehand proposal resolves when the Harness reports that
+        exact locator and goes to owner takeover otherwise. Limits (1) and (2) stand.
+  blockers_status_unchanged:
+    STAGEHAND-VERIFIER-GAP-20260929: CLOSED
+    STAGEHAND-DIRECT-ACTUATION-20260929: CLOSED

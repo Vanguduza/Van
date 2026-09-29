@@ -559,3 +559,51 @@ def test_private_browser_workers_are_real_and_fail_closed():
     for text in (stagehand, bootstrap, env, stagehand_unit):
         assert "sk-ant-" not in text
         assert "sk-proj-" not in text
+
+
+#: sha256 of VAN-ADOPT-STAGEHAND-001.yaml through the end of blocker_closure_20260929 (the
+#: third append; VAN 65865d00). The review-I4 fence correction (unit G5b) is appended after
+#: the marker below; nothing above it may change.
+STAGEHAND_BLOCKER_CLOSURE_SHA256 = "6bc5a0a160519da45ce1990eeb5d2aadcb233b4ec819f86fc113ed57e5347d78"
+STAGEHAND_FENCE_CORRECTION_MARKER = (
+    "\n\n# ====================================================================================="
+    "\n# APPENDED 2026-09-29 (fourth append)"
+)
+
+
+def test_stagehand_fence_correction_is_appended_and_leaves_the_blockers_closed():
+    """Review I4 MINOR-A: the I3-MAJOR-3 disposition overstated the fence. The correction is
+    a later append (the closure text stays byte-for-byte), both blockers stay CLOSED and the
+    gate model still reads them from the closure block."""
+    import yaml
+
+    text = (DECISIONS / "VAN-ADOPT-STAGEHAND-001.yaml").read_text(encoding="utf-8")
+    assert text.count(STAGEHAND_FENCE_CORRECTION_MARKER) == 1
+    prior = text.split(STAGEHAND_FENCE_CORRECTION_MARKER, 1)[0] + "\n"
+    assert hashlib.sha256(prior.encode("utf-8")).hexdigest() == STAGEHAND_BLOCKER_CLOSURE_SHA256, (
+        "text above the fence-correction append was edited; append instead"
+    )
+    doc = yaml.safe_load(text)
+    fix = doc["blocker_closure_correction_20260929"]
+    assert (fix["authority_class"], fix["signature_claimed"]) == ("OWNER_DERIVED", "none")
+    assert fix["authority_basis"]["owner_record_sha256"] == OWNER_DECISIONS_20260929_SHA256
+    assert (fix["independent_review"]["id"], fix["independent_review"]["finding"]) == ("I4", "I4-MINOR-A")
+    covers = fix["what_the_fence_covers_after_unit_g5b"]
+    assert {"gateway_callers", "step_deadline", "harness_worker", "owner_interactive_input"} <= set(covers)
+    for caller in ("/interaction/step", "/assignments", "watch runner", "notebook consumer", "assert_lease_active"):
+        assert caller in covers["gateway_callers"], caller
+    assert "LEASE_FENCE_REQUIRED" in covers["harness_worker"] and "VAN_HARNESS_STATE_ROOT" in covers["harness_worker"]
+    notes = {c["corrects"]: c["note"] for c in fix["wording_corrections"]}
+    watch = notes["blocker_closure_20260929.blockers.STAGEHAND-VERIFIER-GAP-20260929.limitation"]
+    assert "verify_read_only_evidence" in watch and "not by WorkflowVerifier" in watch
+    assert "WorkflowVerifier" in watch
+    assert fix["blockers_status_unchanged"] == {
+        "STAGEHAND-VERIFIER-GAP-20260929": "CLOSED", "STAGEHAND-DIRECT-ACTUATION-20260929": "CLOSED"}
+    closure = doc["blocker_closure_20260929"]["blockers"]
+    assert all(b["status"] == "CLOSED" for b in closure.values())
+    model = json.loads((ROOT / "registries" / "production_activation_gates.json").read_text(encoding="utf-8"))
+    stagehand = next(d for d in model["required_decisions"] if d["decision"] == "VAN-ADOPT-STAGEHAND-001.yaml")
+    paths = {g["id"]: g["path"] for g in stagehand["gates"]}
+    assert paths["blocker_verifier_gap"] == "blocker_closure_20260929.blockers.STAGEHAND-VERIFIER-GAP-20260929.status"
+    assert paths["blocker_direct_actuation"] == (
+        "blocker_closure_20260929.blockers.STAGEHAND-DIRECT-ACTUATION-20260929.status")
