@@ -37,6 +37,7 @@ from van_gateway.evolution.radar import (
 from van_gateway.evolution.vaneval import VanEval
 from van_gateway.proactive.autonomy import DomainTrustService, ProactivePolicyService
 from van_gateway.reasoning.kernel import CriticalReasoningKernel
+from van_gateway.jev.advisor import JevVanAdvisor
 from van_gateway.storage.db import Store
 from van_gateway.reasoning.calibration import RelationshipCalibrationEngine
 from van_gateway.understanding.memory import (
@@ -78,7 +79,9 @@ class StrategicMemoryBody(BaseModel):
 class UnderstandingApi:
     """`/v1/understanding`, `/v1/technology-radar`, `/v1/eval`, `/v1/autonomy`."""
 
-    def __init__(self, store: Store, settings: Settings) -> None:
+    def __init__(
+        self, store: Store, settings: Settings, *, jev_advisor: JevVanAdvisor | None = None
+    ) -> None:
         self.store = store
         self.settings = settings
         # P1-LEARN-001 — the owner-facing surface is where corrections arrive, so this is
@@ -87,7 +90,7 @@ class UnderstandingApi:
         self.vocabulary = SharedVocabularyRegistry(store)
         self.complement = CognitiveComplementMap(store)
         self.growth = SymbioticGrowthLedger(store)
-        self.kernel = CriticalReasoningKernel(store)
+        self.kernel = CriticalReasoningKernel(store, jev_advisor=jev_advisor)
         # P2-DEAD-001 — §75. The engine decides how VAN says a thing and how hard it pushes,
         # never what it is willing to call true. It was complete, tested and imported by
         # nothing, so every answer came out at one fixed register regardless of how
