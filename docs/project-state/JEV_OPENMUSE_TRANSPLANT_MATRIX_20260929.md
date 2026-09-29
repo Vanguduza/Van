@@ -99,6 +99,8 @@ Counts: TRANSPLANT 31 · ADAPT 5 · MANUAL_MERGE 13 · DROP 1 · SUPERSEDED 0 (=
 | `backend/tests/test_browser_interaction_router.py` | Router, B1, lease preemption, outage tests |
 | `backend/tests/test_one_jev_system.py` | Fails on a second Jev service/daemon/browser session |
 | `backend/tests/test_jev_no_generic_executor.py` | No `execute` primitive reachable from Jev output |
+| `android/…/command/modules/BrowserModules.kt` (OpenMuse file, additive) | Browser & Automation "Interaction lanes" card reading `/v1/browser/interaction-router`; a read failure never blanks the page |
+| `GET /v1/browser/interaction-router` (in `app.py`) | Read-only lane status; behind the global ingress/device auth middleware |
 
 ## Semantic reconciliation of the 13 overlaps
 
