@@ -56,7 +56,7 @@ from van_gateway.automation.verifier import (
 )
 from van_gateway.action.models import VerifierType
 from van_gateway.browser.adapters import BrowserAdapterError
-from van_gateway.browser.models import BrowserTask
+from van_gateway.browser.models import BrowserTask, BrowserTaskStatus
 from van_gateway.browser.policy import BrowserPolicyError
 from van_gateway.browser.stagehand_proposal import (
     SemanticProposalRefused,
@@ -86,6 +86,22 @@ _ORIGIN_CLASSES = frozenset({"PUBLIC_ALLOWLISTED", "PUBLIC_UNLISTED"})
 
 def _rank(action_class: str) -> int:
     return B1_ACTION_CLASSES.index(action_class)
+
+
+#: Task states a step may run in — the same pair ``/v1/browser/assignments`` admits.
+RUNNABLE_TASK_STATUSES = frozenset({BrowserTaskStatus.PENDING, BrowserTaskStatus.RESUME_AUTHORIZED})
+
+
+def effective_step_ceiling(step_ceiling: str, task: BrowserTask) -> str:
+    """Reviewer I M-8 — a step can never act above the class the task was admitted at.
+
+    The caller's ceiling is capped at ``task.action_class``; a task class VAN does not know
+    caps to A0 (nothing but done/scroll/abstain), never upward.
+    """
+    task_class = getattr(getattr(task, "action_class", None), "value", getattr(task, "action_class", None))
+    if not isinstance(task_class, str) or task_class not in B1_ACTION_CLASSES:
+        return "A0"
+    return task_class if _rank(task_class) < _rank(step_ceiling) else step_ceiling
 
 
 class B1ValidationError(ValueError):
@@ -749,7 +765,21 @@ class BrowserInteractionRouter:
                 trail=[StepState.POLICY_REFUSED.value],
                 reasons=[f"STEP_CEILING_NOT_ROUTABLE:{step.action_class_ceiling}"],
             )
+        if step.task.status not in RUNNABLE_TASK_STATUSES:
+            # Reviewer I M-8 — a COMPLETED/FAILED/CANCELLED/... task is not driven further.
+            # The HTTP route answers 409 before this; this holds for any other caller.
+            self.metrics.inc("policy_refusals")
+            status = getattr(step.task.status, "value", step.task.status)
+            return StepResult(
+                lane=RouterLane.POLICY_REFUSAL, state=StepState.POLICY_REFUSED,
+                trail=[StepState.POLICY_REFUSED.value],
+                reasons=[f"BROWSER_TASK_NOT_RUNNABLE:{status}"],
+            )
         reasons: list[str] = []
+        capped = effective_step_ceiling(step.action_class_ceiling, step.task)
+        if capped != step.action_class_ceiling:
+            reasons.append(f"STEP_CEILING_CAPPED_BY_TASK:{step.action_class_ceiling}->{capped}")
+            step.action_class_ceiling = capped
         attempts: list[dict[str, Any]] = []
         # Locked order (owner decision §9). A lane returns None when it has nothing to do.
         lanes = (self._deterministic_lane, self._jev_lane_entry, self._stagehand_lane)
@@ -1437,6 +1467,16 @@ def build_interaction_routes(browser_api: Any, router: BrowserInteractionRouter)
     ):
         _guard(x_van_internal_token)
         task = await browser_api._load_task(body.task_id)
+        # Reviewer I M-8 — the same lifecycle gate /v1/browser/assignments applies.
+        status = task.status
+        if status is BrowserTaskStatus.WAITING_FOR_OWNER:
+            sync = getattr(browser_api, "_sync_waiting_owner_decision", None)
+            if sync is not None:
+                status = await sync(task)
+        if status not in RUNNABLE_TASK_STATUSES:
+            raise HTTPException(status_code=409, detail=f"BROWSER_TASK_NOT_RUNNABLE:{status.value}")
+        if status is not task.status:
+            task = task.model_copy(update={"status": status})
         for op in body.closed_operation_set:
             if op not in B1_OPERATIONS:
                 raise HTTPException(status_code=422, detail=f"OPERATION_NOT_CLOSED:{op}")
@@ -1474,6 +1514,7 @@ __all__ = [
     "build_interaction_router",
     "build_interaction_routes",
     "default_action_classifier",
+    "effective_step_ceiling",
     "harness_page_to_jev_observation",
     "observed_element_text",
     "load_eligibility_classifier",

@@ -1383,3 +1383,96 @@ async def test_selector_and_attribute_words_hidden_by_punctuation_or_case_are_re
     result = await router.route(step(action_class_ceiling="A2"))
     assert router.executor.executed == []
     assert "STAGEHAND_ACTION_ABOVE_CEILING:A4" in result.reasons
+
+
+# ---------------------------------------------------------------- reviewer I M-8: task class + lifecycle
+
+
+def _fill_router():
+    return make_router(
+        eligibility_classifier=eligible(action_class_ceiling="A3", closed_operation_set=["click", "fill", "abstain"],
+                                        value_slots=["v_q"]),
+        jev_client=FakeJev(proposes("fill", T_SEARCH, "v_q")), semantic_fallback=FakeStagehand(None),
+    )
+
+
+def _fill_step(task_class=ActionClass.A2, status=BrowserTaskStatus.PENDING):
+    s = step(action_class_ceiling="A3", closed_operation_set=("click", "fill", "abstain"),
+             value_slots={"v_q": "secretref://browser/q"})
+    s.task = s.task.model_copy(update={"action_class": task_class, "status": status})
+    return s
+
+
+async def test_step_ceiling_is_capped_at_the_task_admitted_class():
+    """Probe review-i/probes/ceiling.py: an A3 step on an A2 task executed an A3 fill."""
+    router = _fill_router()
+    s = _fill_step(ActionClass.A2)
+    result = await router.route(s)
+    assert router.executor.executed == []
+    assert "STEP_CEILING_CAPPED_BY_TASK:A3->A2" in result.reasons
+    assert s.action_class_ceiling == "A2"
+
+
+async def test_an_a3_task_still_permits_an_a3_step():
+    router = _fill_router()
+    result = await router.route(_fill_step(ActionClass.A3))
+    assert result.lane is RouterLane.JEV and [a.action_class for a in router.executor.executed] == ["A3"]
+    assert not any(r.startswith("STEP_CEILING_CAPPED_BY_TASK") for r in result.reasons)
+
+
+async def test_a_lower_step_ceiling_is_never_raised_by_the_task():
+    router = make_router(jev_client=FakeJev(proposes("click", T_LINK)))
+    s = step(action_class_ceiling="A1")
+    s.task = s.task.model_copy(update={"action_class": ActionClass.A5})
+    result = await router.route(s)
+    assert s.action_class_ceiling == "A1" and router.executor.executed == []
+
+
+@pytest.mark.parametrize("status", [
+    s for s in BrowserTaskStatus if s not in (BrowserTaskStatus.PENDING, BrowserTaskStatus.RESUME_AUTHORIZED)
+])
+async def test_a_task_that_is_not_runnable_is_refused(status):
+    router = make_router(jev_client=FakeJev(proposes("click", T_LINK)))
+    s = step(deterministic_action=DeterministicAction(operation="click", locator="#go"))
+    s.task = s.task.model_copy(update={"status": status})
+    result = await router.route(s)
+    assert result.state is StepState.POLICY_REFUSED
+    assert result.reasons == [f"BROWSER_TASK_NOT_RUNNABLE:{status.value}"]
+    assert router.executor.executed == []
+
+
+async def test_a_resume_authorized_task_is_runnable():
+    router = make_router()
+    s = step(deterministic_action=DeterministicAction(operation="click", locator="#go"))
+    s.task = s.task.model_copy(update={"status": BrowserTaskStatus.RESUME_AUTHORIZED})
+    assert (await router.route(s)).state is StepState.VERIFIED_SUCCESS
+
+
+async def test_route_is_409_for_a_completed_task_and_caps_the_ceiling(_env, tmp_path):
+    router = make_router(
+        eligibility_classifier=eligible(action_class_ceiling="A3", closed_operation_set=["click", "fill", "abstain"],
+                                        value_slots=["v_q"]),
+        jev_client=FakeJev(proposes("fill", T_SEARCH, "v_q")), semantic_fallback=FakeStagehand(None),
+    )
+    ac, api = await _http(tmp_path, router)
+    async with ac:
+        await ac.post("/v1/browser/profiles", json={"profile_alias": "public_research"}, headers=HEADERS)
+        created = await ac.post("/v1/browser/tasks", json={
+            "profile_alias": "public_research", "strategy": "STAGEHAND",
+            "autonomy_tier": "L4_STAGEHAND_ACT", "action_class": "A2",
+            "target_domain": "docs.example.com", "goal": "find the install page",
+        }, headers=HEADERS)
+        assert created.status_code == 200, created.text
+        task_id = created.json()["task_id"]
+        body = {"task_id": task_id, "action_class_ceiling": "A3",
+                "closed_operation_set": ["click", "fill", "abstain"],
+                "value_slots": {"v_q": "secretref://browser/q"},
+                "observation": None, "postcondition": {"kind": "READ_BACK", "field": "title", "expected": "x"}}
+        capped = await ac.post("/v1/browser/interaction/step", json=body, headers=HEADERS)
+        await api.tasks.complete(task_id=task_id, status=BrowserTaskStatus.COMPLETED)
+        refused = await ac.post("/v1/browser/interaction/step", json=body, headers=HEADERS)
+    assert capped.status_code == 200, capped.text
+    assert "STEP_CEILING_CAPPED_BY_TASK:A3->A2" in capped.json()["reasons"]
+    assert router.executor.executed == []
+    assert refused.status_code == 409
+    assert refused.json()["detail"] == "BROWSER_TASK_NOT_RUNNABLE:COMPLETED"
