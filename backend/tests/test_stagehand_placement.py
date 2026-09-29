@@ -94,6 +94,46 @@ def test_loopback_or_unauthenticated_endpoint_is_not_cross_zone(tmp_path, url):
     )
 
 
+@pytest.mark.parametrize(
+    "url",
+    [
+        # review I minor 4: a literal set let these through.
+        "https://127.0.0.2:9443",
+        "https://localhost.:9443",
+        "https://LOCALHOST:9443",
+        "https://127.255.255.254:9443",
+        "https://127.1:9443",
+        "https://2130706433:9443",
+        "https://0x7f.1:9443",
+        "https://[::1]:9443",
+        "https://[0:0:0:0:0:0:0:1]:9443",
+        "https://[::ffff:127.0.0.1]:9443",
+        "https://[::]:9443",
+        "https://0.0.0.0:9443",
+        "https://0:9443",
+        "https://169.254.169.254:9443",
+        "https://[fe80::1]:9443",
+        "https://browser.localhost:9443",
+        "https://browser.localhost.:9443",
+        "https://localhost.localdomain:9443",
+    ],
+)
+def test_every_loopback_link_local_or_unspecified_host_is_refused(tmp_path, url):
+    s = _ready_settings(tmp_path, browser_stagehand_base_url=url)
+    assert stagehand_production_enabled(s, worker_health=_healthy()) == (
+        False,
+        "STAGEHAND_ENDPOINT_NOT_CROSS_ZONE_MTLS",
+    )
+
+
+@pytest.mark.parametrize(
+    "url", ["https://10.77.0.6:9443/stagehand", "https://browser-core.van.internal:9443", "https://[fd00::6]:9443"]
+)
+def test_cross_zone_hosts_still_pass_the_endpoint_check(tmp_path, url):
+    s = _ready_settings(tmp_path, browser_stagehand_base_url=url)
+    assert stagehand_production_enabled(s, worker_health=_healthy()) == (True, STAGEHAND_PLACEMENT_SATISFIED)
+
+
 def test_missing_mtls_client_identity_disables(tmp_path):
     s = _ready_settings(tmp_path, browser_core_client_key_file=str(tmp_path / "absent.key"))
     enabled, reason = stagehand_production_enabled(s, worker_health=_healthy())

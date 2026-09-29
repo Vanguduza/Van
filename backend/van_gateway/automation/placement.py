@@ -34,6 +34,9 @@ that package so placement has exactly one owner.
 
 from __future__ import annotations
 
+import ipaddress
+import re
+import socket
 from collections.abc import Mapping
 from pathlib import Path
 from typing import Any
@@ -57,7 +60,49 @@ STAGEHAND_RELEASE_INTEGRITY = (
 PRODUCTION_DISABLED = "PRODUCTION_DISABLED"
 STAGEHAND_PLACEMENT_SATISFIED = "STAGEHAND_PLACEMENT_SATISFIED"
 
-_LOOPBACK = frozenset({"127.0.0.1", "localhost", "::1", "0.0.0.0"})
+_NUMERIC_HOST = re.compile(r"^[0-9a-fx.]+$")
+
+
+def _ip_of(host: str) -> ipaddress.IPv4Address | ipaddress.IPv6Address | None:
+    """The address a literal host denotes, including the shorthand IPv4 forms.
+
+    ``ipaddress`` only accepts the dotted quad, but the resolver behind httpx also
+    accepts ``127.1``, ``2130706433`` and ``0x7f.1`` (inet_aton), all of which reach
+    loopback. Anything numeric-looking is therefore read the way the socket layer reads it.
+    """
+    candidate = host.split("%", 1)[0]  # an IPv6 zone id does not change the address class
+    try:
+        return ipaddress.ip_address(candidate)
+    except ValueError:
+        pass
+    if _NUMERIC_HOST.match(candidate) and any(ch.isdigit() for ch in candidate):
+        try:
+            return ipaddress.IPv4Address(socket.inet_aton(candidate))
+        except (OSError, ValueError):
+            return None
+    return None
+
+
+def _is_local_host(hostname: str | None) -> bool:
+    """True when ``hostname`` cannot be a cross-zone peer: this host or the link.
+
+    Rejects every loopback address (all of 127.0.0.0/8 and ::1, including IPv4-mapped
+    forms), link-local, unspecified, ``localhost`` and any ``*.localhost`` name, each with
+    or without the trailing root dot. An empty host is local too: it names no peer.
+    """
+    host = (hostname or "").strip().lower().strip("[]").rstrip(".")
+    if not host:
+        return True
+    if host == "localhost" or host.endswith(".localhost") or host == "localhost.localdomain":
+        return True
+    ip = _ip_of(host)
+    if ip is None:
+        return False
+    mapped = getattr(ip, "ipv4_mapped", None)
+    for addr in (ip, mapped) if mapped is not None else (ip,):
+        if addr.is_loopback or addr.is_link_local or addr.is_unspecified:
+            return True
+    return False
 
 
 def _norm(value: Any) -> str:
@@ -96,7 +141,7 @@ def stagehand_production_enabled(
     # van-browser-core, or reached without authentication.
     base_url = str(getattr(settings, "browser_stagehand_base_url", "") or "")
     parts = urlsplit(base_url)
-    if parts.scheme != "https" or not parts.hostname or parts.hostname.lower() in _LOOPBACK:
+    if parts.scheme != "https" or _is_local_host(parts.hostname):
         return False, "STAGEHAND_ENDPOINT_NOT_CROSS_ZONE_MTLS"
     for field in ("browser_core_ca_file", "browser_core_client_cert_file", "browser_core_client_key_file"):
         if not _file_present(str(getattr(settings, field, "") or "")):
