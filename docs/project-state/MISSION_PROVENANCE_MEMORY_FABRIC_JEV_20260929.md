@@ -56,5 +56,5 @@ row originally put HEAD `ad2bf12e` beside the `4.1.0` tag, which read as if they
 code. They are not: `ad2bf12e` is later unreleased upstream work, and the adopted artifact is the
 released 4.1.0 (release commit `cd7b2307…`, npm integrity
 `sha512-PJikMBVoaCRh6TFD7GcmeISmsMq4IwUu1BD5FOsGUVDUxrVqZomWa6W6dF+a/zu4xRZu2Z2xX1nXVMDaCuZWsw==`,
-matching `deploy/van-trading-core/browser/package-lock.json`). Owner decision §5,
+matching `deploy/van-browser-core/browser/package-lock.json`, moved from `deploy/van-trading-core/browser/` by the van-browser-core migration). Owner decision §5,
 `docs/decisions/OWNER-DECISIONS-20260929-STAGEHAND-PRIVATE-PLANE.md`.
