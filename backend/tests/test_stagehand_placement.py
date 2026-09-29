@@ -133,7 +133,119 @@ def test_every_loopback_link_local_or_unspecified_host_is_refused(tmp_path, url)
 )
 def test_cross_zone_hosts_still_pass_the_endpoint_check(tmp_path, url):
     s = _ready_settings(tmp_path, browser_stagehand_base_url=url)
-    assert stagehand_production_enabled(s, worker_health=_healthy()) == (True, STAGEHAND_PLACEMENT_SATISFIED)
+    # The named host resolves (injected, no network) to an overlay address.
+    resolver = _Resolver({"browser-core.van.internal": ["10.77.0.6"]})
+    assert stagehand_production_enabled(s, worker_health=_healthy(), resolver=resolver) == (
+        True, STAGEHAND_PLACEMENT_SATISFIED)
+
+
+# ------------------------------------------------ review I2 carried minor: DNS to loopback
+
+
+class _Resolver:
+    """Injected resolver: a fixed answer table, and a record of what was asked."""
+
+    def __init__(self, table: dict[str, object]) -> None:
+        self.table = table
+        self.asked: list[str] = []
+
+    def __call__(self, host: str):
+        self.asked.append(host)
+        answer = self.table.get(host, OSError("NXDOMAIN"))
+        if isinstance(answer, BaseException):
+            raise answer
+        return answer
+
+
+@pytest.mark.parametrize("answers", [
+    ["127.0.0.1"],                    # probe placement2.py: localtest.me
+    ["10.77.0.6", "127.0.0.1"],       # one loopback answer among overlay ones
+    ["::1"],
+    ["::ffff:127.0.0.1"],
+    ["169.254.169.254"],
+    ["fe80::1%eth0"],
+    ["0.0.0.0"],
+    ["::"],
+    ["224.0.0.1"],
+    ["192.0.2.10"],                   # private (documentation), not overlay
+    ["198.18.0.1"],                   # private (benchmarking), not overlay
+    ["240.0.0.1"],                    # reserved
+])
+def test_a_name_resolving_to_a_refused_address_is_not_cross_zone(tmp_path, answers):
+    s = _ready_settings(tmp_path, browser_stagehand_base_url="https://localtest.me:9443")
+    resolver = _Resolver({"localtest.me": answers})
+    assert stagehand_production_enabled(s, worker_health=_healthy(), resolver=resolver) == (
+        False, "STAGEHAND_ENDPOINT_NOT_CROSS_ZONE_MTLS")
+    assert resolver.asked == ["localtest.me"]
+
+
+@pytest.mark.parametrize("answer", [
+    OSError("NXDOMAIN"), TimeoutError("slow"), [], ["not-an-address"],
+])
+def test_an_unresolvable_name_fails_closed(tmp_path, answer):
+    s = _ready_settings(tmp_path, browser_stagehand_base_url="https://browser-core.van.internal:9443")
+    resolver = _Resolver({"browser-core.van.internal": answer})
+    assert stagehand_production_enabled(s, worker_health=_healthy(), resolver=resolver) == (
+        False, "STAGEHAND_ENDPOINT_UNRESOLVABLE")
+
+
+@pytest.mark.parametrize("answers", [
+    ["10.77.0.6"], ["172.16.4.2"], ["192.168.1.9"], ["100.64.1.2"], ["fd00::6"], ["10.0.0.5", "fd00::5"],
+])
+def test_a_name_resolving_only_to_overlay_addresses_passes(tmp_path, answers):
+    s = _ready_settings(tmp_path, browser_stagehand_base_url="https://browser-core.van.internal.:9443")
+    resolver = _Resolver({"browser-core.van.internal": answers})
+    assert stagehand_production_enabled(s, worker_health=_healthy(), resolver=resolver) == (
+        True, STAGEHAND_PLACEMENT_SATISFIED)
+
+
+@pytest.mark.parametrize("url", ["https://192.0.2.10:9443", "https://198.18.0.1:9443", "https://240.0.0.1:9443"])
+def test_a_literal_private_non_overlay_address_is_refused(tmp_path, url):
+    s = _ready_settings(tmp_path, browser_stagehand_base_url=url)
+    resolver = _Resolver({})
+    assert stagehand_production_enabled(s, worker_health=_healthy(), resolver=resolver) == (
+        False, "STAGEHAND_ENDPOINT_NOT_CROSS_ZONE_MTLS")
+    assert resolver.asked == []  # a literal address never touches the resolver
+
+
+def test_the_default_resolver_is_getaddrinfo_and_its_answers_are_classified(tmp_path, monkeypatch):
+    """The production path (no injected resolver), with getaddrinfo faked: no network."""
+    import socket
+
+    from van_gateway.automation import placement
+
+    asked = []
+
+    def fake_getaddrinfo(host, port, *args, **kwargs):
+        asked.append(host)
+        return [(socket.AF_INET, socket.SOCK_STREAM, 6, "", ("127.0.0.1", 0))]
+
+    monkeypatch.setattr(placement.socket, "getaddrinfo", fake_getaddrinfo)
+    s = _ready_settings(tmp_path, browser_stagehand_base_url="https://localtest.me:9443")
+    assert stagehand_production_enabled(s, worker_health=_healthy()) == (
+        False, "STAGEHAND_ENDPOINT_NOT_CROSS_ZONE_MTLS")
+    assert asked == ["localtest.me"]
+
+
+def test_the_default_resolver_times_out_closed(tmp_path, monkeypatch):
+    import threading
+
+    from van_gateway.automation import placement
+
+    release = threading.Event()
+
+    def hung_getaddrinfo(*args, **kwargs):
+        release.wait(5)
+        return [(2, 1, 6, "", ("10.77.0.6", 0))]
+
+    monkeypatch.setattr(placement.socket, "getaddrinfo", hung_getaddrinfo)
+    monkeypatch.setattr(placement, "DNS_RESOLVE_TIMEOUT_S", 0.05)
+    s = _ready_settings(tmp_path, browser_stagehand_base_url="https://browser-core.van.internal:9443")
+    try:
+        assert stagehand_production_enabled(s, worker_health=_healthy()) == (
+            False, "STAGEHAND_ENDPOINT_UNRESOLVABLE")
+    finally:
+        release.set()
 
 
 def test_missing_mtls_client_identity_disables(tmp_path):
