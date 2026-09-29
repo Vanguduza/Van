@@ -5,7 +5,9 @@ n8n-backed automations only, a missing Stagehand leaves the deterministic and
 native paths intact, and VATI T0 is independent of all of it. This module reports
 that truthfully — including reporting `PENDING_OWNER` while the adoption
 decisions and Security Policy amendment are unsigned, rather than implying the
-fabric is merely switched off.
+fabric is merely switched off — and, since owner decision 2026-09-29 §6, reporting
+production activation as permitted only when every gate in the explicit gate model
+(`production_gates.py`) is GREEN.
 """
 
 from __future__ import annotations
@@ -21,6 +23,7 @@ from van_gateway.automation.external_runtime import ExternalRuntimeRegistry, Run
 from van_gateway.automation.n8n_client import N8nManagementClient
 from van_gateway.automation.deadletter import DeadLetterService
 from van_gateway.automation.policy import load_automation_policy, load_browser_policy
+from van_gateway.automation.production_gates import GATE_MODEL, evaluate_production_gates
 from van_gateway.automation.registry import HotWorkflowIndex
 from van_gateway.automation.telemetry import TelemetryService
 from van_gateway.automation.workflow_health import WorkflowHealthService
@@ -34,34 +37,42 @@ from van_gateway.storage.db import Store
 REPO_ROOT = Path(__file__).resolve().parents[3]
 DECISIONS = REPO_ROOT / "docs" / "decisions"
 
-#: The decisions that gate production activation (§§365, 368).
-REQUIRED_DECISIONS = (
-    "VAN-ADOPT-N8N-001.yaml",
-    "VAN-ADOPT-STAGEHAND-001.yaml",
-    "VAN-ADOPT-BROWSER-HARNESS-001.yaml",
-    "VAN-AMEND-SECURITY-POLICY-001.md",
-)
+#: The decisions that gate production activation (§§365, 368). Derived from the explicit
+#: gate model so the list and the gates cannot drift apart; kept as a name for callers.
+def _required_decisions() -> tuple[str, ...]:
+    try:
+        model = json.loads(GATE_MODEL.read_text(encoding="utf-8"))
+        return tuple(str(e["decision"]) for e in model["required_decisions"])
+    except Exception:  # noqa: BLE001 — the gate evaluation itself reports the error
+        return ()
+
+
+REQUIRED_DECISIONS = _required_decisions()
 
 
 def governance_state() -> dict[str, Any]:
-    """Report whether the owner has signed the gating decisions.
+    """Report whether production activation is permitted, and why.
 
-    An agent cannot set these (§365); it can only read them, which is exactly
-    why this is computed rather than configured.
+    Owner decision 2026-09-29 §6: this used to declare activation permitted when no required
+    decision file contained the literal ``owner_signature_status: PENDING``, which ignored
+    every production gate (Stagehand's ``production_gate.status: PENDING`` among them). It now
+    evaluates the explicit gate model in ``registries/production_activation_gates.json``:
+    activation is permitted only when every governance *and* production gate is GREEN, and
+    anything unknown, missing or unparseable fails closed.
+
+    An agent cannot set these (§365); it can only read them, which is exactly why this is
+    computed rather than configured. The first three keys keep their original meaning for
+    existing consumers; ``gates`` is the per-gate breakdown that explains the answer.
     """
-    pending: list[str] = []
-    missing: list[str] = []
-    for name in REQUIRED_DECISIONS:
-        path = DECISIONS / name
-        if not path.is_file():
-            missing.append(name)
-            continue
-        if "owner_signature_status: PENDING" in path.read_text(encoding="utf-8"):
-            pending.append(name)
+    evaluation = evaluate_production_gates()
     return {
-        "owner_decisions_pending": sorted(pending),
-        "owner_decisions_missing": sorted(missing),
-        "production_activation_permitted": not pending and not missing,
+        "owner_decisions_pending": evaluation["owner_decisions_pending"],
+        "owner_decisions_missing": evaluation["owner_decisions_missing"],
+        "production_activation_permitted": evaluation["production_activation_permitted"],
+        "production_gates_not_green": evaluation["production_gates_not_green"],
+        "gates": evaluation["gates"],
+        "gate_model": evaluation["gate_model"],
+        "gate_model_error": evaluation["gate_model_error"],
     }
 
 
