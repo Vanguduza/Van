@@ -616,6 +616,32 @@ def test_hooks_refuse_a_disagreeing_close_without_interrupting_it():
     assert adj is None and SID not in hooks.health._obs and len(hooks.refusals) == 1 and "disagrees" in hooks.refusals[0]
 
 
+# ------------------------- A-VATI (review D): minor, the health window
+def test_review_d_evicted_trade_is_not_readmitted_as_a_new_sample():
+    """Review D: after 61 trades, re-observing the first (aged out of the 60-item window) was accepted as a new sample."""
+    src = Src()
+    t = StrategyHealthTracker()
+    refs = [src.review(SID, 5000 + i, r="-1", process_ok=True, cost="1") for i in range(t.window + 1)]
+    for ref in refs:
+        t.observe(HealthObservation(SID, Environment.LIVE, D("-1"), True, D("1"), True, ref), resolver=src.resolver)
+    window_before, obs_before = list(t._refs[SID]), list(t._obs[SID])
+    assert refs[0] not in window_before and len(window_before) == t.window
+    for ref in (refs[0], refs[1], refs[-1]):   # evicted, evicted, still in the window
+        t.observe(HealthObservation(SID, Environment.LIVE, D("-1"), True, D("1"), True, ref), resolver=src.resolver)
+    assert t._refs[SID] == window_before and t._obs[SID] == obs_before and len(t.evidence) == t.window
+    # an evicted trade re-cited through its other artifact is not a new sample either
+    corr = f"{SID}-5000"
+    art = make_evidence_ref(EvidenceClass.VTIL_ARTIFACT, src.append(EventKind.TRADE_EXPERIENCE_ARTIFACT, {
+        "episode_id": corr, "strategy_id": SID, "environment": "LIVE", "outcome": {"r_multiple": "-1"}, "review": {"process_ok": True},
+        "execution": {"tca": {"cost_ratio": "1"}}}, corr))
+    t.observe(HealthObservation(SID, Environment.LIVE, D("-1"), True, D("1"), True, art), resolver=src.resolver)
+    assert t._refs[SID] == window_before and len(t.evidence) == t.window
+    # a genuinely new trade still enters and evicts the oldest
+    new_ref = src.review(SID, 9999, r="-1", process_ok=True, cost="1")
+    t.observe(HealthObservation(SID, Environment.LIVE, D("-1"), True, D("1"), True, new_ref), resolver=src.resolver)
+    assert t._refs[SID] == window_before[1:] + [new_ref]
+
+
 # ------------------------------------------------------- memory bridge
 def test_owner_preference_continuity_record_is_rejected():
     b = HermesMemoryBridge()

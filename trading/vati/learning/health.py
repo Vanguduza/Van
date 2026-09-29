@@ -115,9 +115,13 @@ class StrategyHealthTracker:
     # same fact is a no-op and the boundary recomputes the weighted count itself.
     evidence: ResolvedEvidenceCache = field(default_factory=ResolvedEvidenceCache)
     _refs: dict[str, list[str]] = field(default_factory=dict)
-    # One trade is one sample (A-VATI M2): the trade each window entry stands on,
-    # so a TRADE_REVIEW and the experience artifact of that trade count once.
-    _trades: dict[str, list[str]] = field(default_factory=dict)
+    # One trade is one sample (A-VATI M2), and once counted it is never counted
+    # again (A-VATI minor): the trades a strategy's health has consumed are
+    # remembered for the tracker's lifetime, not just while they sit in the
+    # 60-item window, because ledger evidence never stops being admissible. A
+    # trade that ages out of the window is not re-admitted as a new sample. One
+    # id per closed trade; a restart rebuilds it by replaying each trade once.
+    _consumed: dict[str, set[str]] = field(default_factory=dict)
 
     def observe(self, o: HealthObservation, *, resolver: LedgerEvidenceResolver, correlation_hint: str | None = None) -> HealthVerdict:
         ref = parse_evidence_ref(o.evidence_ref)
@@ -135,21 +139,20 @@ class StrategyHealthTracker:
                                 f"its evidence {ref} (r={r}, process_ok={proc}, cost_ratio={cost})")
         o = HealthObservation(o.strategy_id, rec.environment, r, proc, cost, bool(o.regime_fit), o.evidence_ref)
         refs = self._refs.setdefault(o.strategy_id, [])
-        trades = self._trades.setdefault(o.strategy_id, [])
+        consumed = self._consumed.setdefault(o.strategy_id, set())
         canonical = str(ref)
-        if canonical in refs or rec.trade_id in trades:
+        if rec.trade_id in consumed:
             if canonical not in refs:
-                self.evidence.discard(canonical)   # another artifact of a trade already counted: not a new sample
-            return self.verdict(o.strategy_id)   # the same fact (or trade) observed again is not a new sample
+                self.evidence.discard(canonical)   # evicted, or another artifact of a counted trade: not a new sample
+            return self.verdict(o.strategy_id)   # the same trade observed again is not a new sample
+        consumed.add(rec.trade_id)
         buf = self._obs.setdefault(o.strategy_id, [])
         buf.append(o)
         refs.append(canonical)
-        trades.append(rec.trade_id)
         del buf[:-self.window]
         for old in refs[:-self.window]:
             self.evidence.discard(old)
         del refs[:-self.window]
-        del trades[:-self.window]
         return self.verdict(o.strategy_id)
 
     def observe_evidence(self, strategy_id: str, evidence_ref: str, *, resolver: LedgerEvidenceResolver,
