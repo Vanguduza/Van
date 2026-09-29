@@ -57,6 +57,13 @@ from van_gateway.automation.verifier import (
 )
 from van_gateway.action.models import VerifierType
 from van_gateway.browser.adapters import BrowserAdapterError
+# Shared with the Stagehand adapter and the browser API (unit G2a); re-exported here so the
+# router's public names are unchanged.
+from van_gateway.browser.lane_gates import (  # noqa: F401 - re-export
+    OwnerControlProbe,
+    _fetch_stagehand_worker_health,
+    load_stagehand_production_gate,
+)
 from van_gateway.browser.models import BrowserTask, BrowserTaskStatus
 from van_gateway.browser.policy import BrowserPolicyError
 from van_gateway.browser.stagehand_proposal import (
@@ -1303,6 +1310,8 @@ class RouterStepLedger:
     this kind. What is stored is the step's outcome — lane, state, trail, reason codes, the
     action's operation/opaque target/class, the verification outcome, the SHADOW comparison —
     and the §8 counter increments it caused. No locator, label, value or page content.
+    The step's verifier verdicts go through ``BrowserTaskService.record_verification`` (the
+    record ``complete(COMPLETED)`` requires) and the step record cites them.
     """
 
     def __init__(self, store: Any) -> None:
@@ -1334,11 +1343,42 @@ class RouterStepLedger:
             "metric_increments": dict(increments),
         }
 
+    async def _record_verdicts(self, step: InteractionStep, result: StepResult) -> list[str]:
+        """Write the step's verifier verdicts through the task service's own verdict record.
+
+        Unit G2a made ``BrowserTaskService.complete(COMPLETED)`` require that the task's
+        latest ``record_verification`` verdict is VERIFIED. Router steps use that same record,
+        in order: each NOT_SATISFIED attempt, then the final verdict. A step that acted on the
+        page (or claimed done) and has no verdict records UNVERIFIABLE, so an earlier VERIFIED
+        can never stand for a page a later step changed.
+        """
+        from van_gateway.browser.service import BrowserTaskService
+
+        tasks = BrowserTaskService(self.store)
+        verdicts: list[tuple[str, str | None]] = []
+        for attempt in result.attempts:
+            verification = attempt.get("verification") or {}
+            if verification.get("outcome"):
+                verdicts.append((str(verification["outcome"]), f"{attempt.get('lane')}:{verification.get('detail')}"))
+        if result.verification is not None:
+            verdicts.append((result.verification.outcome.value, f"{result.lane.value}:{result.verification.detail}"))
+        elif StepState.EXECUTING.value in result.trail or StepState.VERIFYING.value in result.trail:
+            verdicts.append((VerificationOutcome.UNVERIFIABLE.value,
+                             f"{result.lane.value}:router_step_without_verdict:{result.state.value}"))
+        ids = []
+        for outcome, detail in verdicts:
+            ids.append(await tasks.record_verification(
+                task=step.task, outcome=outcome, verifier="INTERACTION_ROUTER", detail=detail,
+            ))
+        return ids
+
     async def record(self, step: InteractionStep, result: StepResult, increments: dict[str, int]) -> str:
         from van_gateway.automation.canonical import digest, new_id
         from van_gateway.browser.policy import BrowserPolicyEngine, BrowserPolicyError
 
+        verdict_ids = await self._record_verdicts(step, result)
         record = self._record_json(step, result, increments)
+        record["verdict_evidence_ids"] = verdict_ids
         try:
             BrowserPolicyEngine.assert_no_secrets(record, context="router_step")
         except BrowserPolicyError:
@@ -1451,83 +1491,6 @@ class StagehandSemanticFallback:
             value_ref=typed.key, action_class=None, semantic_action=typed.observed,
             description=typed.description,
         )
-
-
-class OwnerControlProbe:
-    """True when the owner holds control of a live interactive session on the task's profile.
-
-    ADR-RB-007 "owner touch wins": the interactive session's control holder is the fence.
-    """
-
-    def __init__(self, store: Any) -> None:
-        self.store = store
-
-    async def __call__(self, task: BrowserTask) -> bool:
-        now = int(time.time() * 1000)
-        row = await self.store.fetchone(
-            "SELECT 1 FROM browser_interactive_sessions WHERE profile_alias = ? "
-            "AND control_holder = 'OWNER' AND terminated_at_ms IS NULL AND expires_at_ms > ? LIMIT 1",
-            (task.profile_alias, now),
-        )
-        return row is not None
-
-
-async def _fetch_stagehand_worker_health(stagehand: Any) -> dict[str, Any] | None:
-    """GET the Stagehand worker's ``/health`` through the van-browser-core edge. None on any failure."""
-    import httpx
-
-    base = (getattr(stagehand, "base_url", "") or "").rstrip("/")
-    if not base:
-        return None
-    kwargs_fn = getattr(stagehand, "client_kwargs", None)
-    kwargs = kwargs_fn() if callable(kwargs_fn) else {
-        "base_url": base, "transport": getattr(stagehand, "transport", None),
-    }
-    kwargs["timeout"] = 5.0
-    try:
-        async with httpx.AsyncClient(**kwargs) as client:
-            response = await client.get("/health")
-        if response.status_code != 200:
-            return None
-        body = response.json()
-        return body if isinstance(body, dict) else None
-    except Exception:  # noqa: BLE001 - unreachable health is absent health
-        return None
-
-
-def load_stagehand_production_gate(settings: Any, stagehand: Any = None) -> Callable[[], Any]:
-    """The Stagehand lane's production gate: placement/model AND the production gate model.
-
-    * unit M's ``stagehand_production_enabled(settings, worker_health=...)`` (placement on
-      van-browser-core + model/provider-key rules), fed the worker's live ``/health``; absent
-      module or absent health fails closed;
-    * ``evaluate_production_gates()`` (owner decision §6; includes signed ingress and the
-      §7/§8 blocker records) must report ``production_activation_permitted``.
-    """
-
-    async def gate() -> tuple[bool, str]:
-        try:
-            from van_gateway.automation import placement  # type: ignore[attr-defined]
-        except ImportError:
-            return False, "PLACEMENT_GATE_MISSING"
-        fn = getattr(placement, "stagehand_production_enabled", None)
-        if fn is None:
-            return False, "PLACEMENT_GATE_MISSING"
-        health = await _fetch_stagehand_worker_health(stagehand) if stagehand is not None else None
-        permitted, reason = fn(settings, worker_health=health)
-        if permitted is not True:
-            return False, str(reason or "PRODUCTION_DISABLED")
-        try:
-            from van_gateway.automation.production_gates import evaluate_production_gates
-        except ImportError:
-            return False, "PRODUCTION_GATE_MODEL_MISSING"
-        gates = evaluate_production_gates()
-        if gates.get("production_activation_permitted") is not True:
-            not_green = ",".join(gates.get("production_gates_not_green") or [])[:200]
-            return False, f"PRODUCTION_GATES_NOT_GREEN:{not_green or gates.get('gate_model_error') or 'UNKNOWN'}"
-        return True, str(reason)
-
-    return gate
 
 
 class HarnessReadBackObserver:

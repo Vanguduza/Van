@@ -126,6 +126,9 @@ class AutomationHealthApi:
             or self._manifest("stagehand"),
             model_provider=settings.browser_stagehand_model_provider,
             model_name=settings.browser_stagehand_model_name,
+            # Unit G2a: the adapter's production gate reads *these* settings (placement,
+            # model, mTLS identity), so health reports the gate's verdict for this process.
+            settings=settings,
         )
         # P2-CU-001 — the fabric is constructed in production for the first time. Its
         # health surface is here rather than in its own module because the three fabrics

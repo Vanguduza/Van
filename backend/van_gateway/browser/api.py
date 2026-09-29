@@ -28,6 +28,7 @@ from pydantic import BaseModel, Field
 
 from van_gateway.auth.control_scopes import ControlScope, require_scoped_internal
 from van_gateway.observability import instruments
+from van_gateway.browser.lane_gates import OwnerControlProbe
 from van_gateway.browser.models import (
     AutonomyTier,
     BrowserBoundaryType,
@@ -158,8 +159,6 @@ class BrowserApi:
         self.tasks = BrowserTaskService(store, self.broker, self.policy)
         # Review I M-4 / owner decision 2026-09-29 §9: owner takeover preempts the
         # assignment path exactly as it preempts the B5 router — the same probe.
-        from van_gateway.browser.interaction_router import OwnerControlProbe
-
         self.runner = BrowserSubagentRunner(self.policy, owner_control_probe=OwnerControlProbe(store))
         self.worker = worker
         #: Owner decision 2026-09-29 §7 — the independent postcondition verifier. None means

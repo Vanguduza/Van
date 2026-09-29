@@ -207,3 +207,36 @@ async def test_browser_health_surfaces_stagehand_placement_and_per_capability_ga
     assert set(body["governance"]["production_activation_permitted_by_capability"]) == {
         "n8n", "browser_harness", "stagehand",
     }
+
+
+async def test_browser_health_stagehand_status_is_the_gate_verdict_for_these_settings(monkeypatch):
+    """Unit G2a request: health builds StagehandAdapter with its own settings, so a wired but
+    not-permitted Stagehand reports POLICY_DISABLED and the reason, not CONFIGURED."""
+    monkeypatch.setenv("VAN_BROWSER_ENABLED", "1")
+    monkeypatch.setenv("VAN_BROWSER_STAGEHAND_BASE_URL", "http://127.0.0.1:9/stagehand")
+    monkeypatch.setenv("VAN_BROWSER_STAGEHAND_ZONE", "van-browser-core")
+    get_settings.cache_clear()
+    app = create_app()
+    async with AsyncClient(transport=ASGITransport(app=app), base_url="http://test",
+                           headers={"X-Van-Ingress-Token": INGRESS}) as ac:
+        async with app.router.lifespan_context(app):
+            body = (await ac.get("/v1/browser/health", headers=HEADERS)).json()
+    assert body["stagehand"]["state"] == "POLICY_DISABLED"
+    assert body["stagehand"]["detail"] == "STAGEHAND_PRODUCTION_DISABLED:STAGEHAND_ENDPOINT_NOT_CROSS_ZONE_MTLS"
+    assert body["production_activation"]["stagehand"]["reason"] == "STAGEHAND_ENDPOINT_NOT_CROSS_ZONE_MTLS"
+
+
+async def test_health_stagehand_gate_uses_the_health_settings_not_the_process_default(tmp_path):
+    from tests.conftest_automation import make_store
+    from van_gateway.automation.health import AutomationHealthApi
+    from van_gateway.config import Settings
+    from van_gateway.degraded.registry import DegradedRegistry
+
+    store = await make_store(tmp_path)
+    settings = Settings(browser_enabled=True, browser_stagehand_zone="van-browser-core",
+                        browser_stagehand_base_url="http://127.0.0.1:9/stagehand")
+    api = AutomationHealthApi(store, settings, degraded=DegradedRegistry())
+    status = await api.stagehand.status()
+    assert status.state.value == "POLICY_DISABLED"
+    # The process default has the browser fabric off; the reason proves these settings were read.
+    assert status.detail == "STAGEHAND_PRODUCTION_DISABLED:STAGEHAND_ENDPOINT_NOT_CROSS_ZONE_MTLS"

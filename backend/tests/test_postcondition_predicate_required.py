@@ -118,7 +118,8 @@ async def test_subagent_assignment_path_inherits_the_rule_through_the_verifier(t
     harness = FakeHarness()
     stagehand = FakeStagehand([[]])  # no controls: the worker claims it is done
     worker = HybridBrowserWorker(harness, stagehand, task=task)
-    result = await BrowserSubagentRunner(BrowserPolicyEngine()).run(
+    runner = BrowserSubagentRunner(BrowserPolicyEngine(), owner_control_probe=_owner_free)
+    result = await runner.run(
         assignment=_assignment(task), worker=worker, task=task,
         verifier=IndependentPostconditionVerifier(harness),
         postcondition=PostconditionSpec(kind="READ_BACK"),

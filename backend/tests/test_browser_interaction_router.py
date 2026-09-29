@@ -1116,7 +1116,12 @@ class _EdgeStagehand:
 async def test_gate_passes_live_worker_health_and_ands_with_production_gates(monkeypatch):
     from van_gateway.browser.interaction_router import load_stagehand_production_gate
 
-    seen = _fake_placement(monkeypatch, lambda h: (bool(h), "PLACEMENT_OK" if h else "NO_HEALTH"))
+    # The real placement contract: with settings satisfied and no health yet, the reason is
+    # VAN_BROWSER_CORE_UNAVAILABLE:..., the only verdict on which /health is then read.
+    seen = _fake_placement(
+        monkeypatch,
+        lambda h: (True, "PLACEMENT_OK") if h else (False, "VAN_BROWSER_CORE_UNAVAILABLE:health_unverified"),
+    )
     import van_gateway.automation.production_gates as pg
 
     monkeypatch.setattr(pg, "evaluate_production_gates", lambda: {
@@ -1469,6 +1474,9 @@ async def test_route_is_409_for_a_completed_task_and_caps_the_ceiling(_env, tmp_
                 "value_slots": {"v_q": "secretref://browser/q"},
                 "observation": None, "postcondition": {"kind": "READ_BACK", "field": "title", "expected": "x"}}
         capped = await ac.post("/v1/browser/interaction/step", json=body, headers=HEADERS)
+        # G2a: COMPLETED needs a recorded VERIFIED verdict first.
+        await api.tasks.record_verification(task=await api._load_task(task_id), outcome="VERIFIED",
+                                            verifier="test")
         await api.tasks.complete(task_id=task_id, status=BrowserTaskStatus.COMPLETED)
         refused = await ac.post("/v1/browser/interaction/step", json=body, headers=HEADERS)
     assert capped.status_code == 200, capped.text
@@ -1476,3 +1484,22 @@ async def test_route_is_409_for_a_completed_task_and_caps_the_ceiling(_env, tmp_
     assert router.executor.executed == []
     assert refused.status_code == 409
     assert refused.json()["detail"] == "BROWSER_TASK_NOT_RUNNABLE:COMPLETED"
+
+
+async def test_gate_closes_on_settings_without_contacting_the_endpoint(monkeypatch):
+    """Unit G2a request: an undeclared/loopback/plain-HTTP endpoint is never contacted."""
+    from van_gateway.browser.interaction_router import load_stagehand_production_gate
+
+    calls = []
+
+    class Loopback:
+        base_url = "http://127.0.0.1:9/stagehand"
+        transport = httpx.MockTransport(lambda r: calls.append(r) or httpx.Response(200, json={"ok": True}))
+
+    settings = Settings(browser_enabled=True, browser_stagehand_zone="van-browser-core",
+                        browser_stagehand_base_url="http://127.0.0.1:9/stagehand")
+    ok, reason = await load_stagehand_production_gate(settings, Loopback())()
+    assert ok is False and reason == "STAGEHAND_ENDPOINT_NOT_CROSS_ZONE_MTLS"
+    ok, reason = await load_stagehand_production_gate(Settings(), Loopback())()
+    assert ok is False and reason == "BROWSER_FABRIC_DISABLED"
+    assert calls == []

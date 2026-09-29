@@ -158,7 +158,7 @@ async def test_http_step_is_listed_in_the_task_evidence_and_metrics_say_persiste
     assert stepped.status_code == 200, stepped.text
     assert stepped.json()["ledger_ref"].startswith("browser-evidence://")
     kinds = [row["kind"] for row in evidence.json()]
-    assert kinds == [ROUTER_STEP_EVIDENCE_KIND]
+    assert kinds == ["postcondition_verification", ROUTER_STEP_EVIDENCE_KIND]
     assert metrics.json()["persisted"] is True
 
 
@@ -170,3 +170,76 @@ def test_production_wiring_has_a_ledger_when_a_store_is_given():
                                       jev_client=None, store=object())
     assert isinstance(router.ledger, RouterStepLedger)
     assert router.status()["metrics_persisted"] is True
+
+
+async def test_router_verdicts_use_the_task_verdict_record_that_completion_requires(tmp_path):
+    """Unit G2a: complete(COMPLETED) needs the latest record_verification verdict VERIFIED."""
+    import pytest
+
+    from van_gateway.browser.adapters import BrowserAdapterError
+    from van_gateway.browser.models import BrowserTaskStatus
+    from van_gateway.browser.service import BrowserTaskNotVerified
+    from test_browser_interaction_router import DeterministicAction, FakeExecutor, FakeVerifier
+    from van_gateway.automation.verifier import VerificationOutcome
+
+    store = await make_store(tmp_path)
+    task = await _real_task(store)
+    tasks = BrowserTaskService(store)
+    ledger = RouterStepLedger(store)
+    router = make_router(ledger=ledger)
+    await router.route(_step_for(task, deterministic_action=DeterministicAction(operation="click", locator="#a")))
+    assert await tasks.latest_verification(task.task_id) == "VERIFIED"
+
+    # A later step that acted and could not be verified supersedes it.
+    router.executor = FakeExecutor(BrowserAdapterError("BROWSER_HARNESS_UNAVAILABLE"))
+    failed = await router.route(_step_for(task, deterministic_action=DeterministicAction(operation="click", locator="#b")))
+    assert failed.state is StepState.EXECUTION_FAILED
+    assert await tasks.latest_verification(task.task_id) == "UNVERIFIABLE"
+    with pytest.raises(BrowserTaskNotVerified):
+        await tasks.complete(task_id=task.task_id, status=BrowserTaskStatus.COMPLETED)
+
+    # A NOT_SATISFIED attempt and the final verdict are both recorded, in order.
+    router.executor = FakeExecutor()
+    router.verifier = FakeVerifier(VerificationOutcome.FAILED)
+    router.semantic_fallback = FakeStagehand(None)
+    router.jev_client = FakeJev(proposes("click", T_LINK))
+    nosat = await router.route(_step_for(task, deterministic_action=DeterministicAction(operation="click", locator="#c")))
+    records = await ledger.steps_for_task(task.task_id)
+    assert len(records[-1]["verdict_evidence_ids"]) == len(nosat.attempts) == 1  # takeover adds none
+    assert await tasks.latest_verification(task.task_id) == "FAILED"
+
+    router.verifier = FakeVerifier(VerificationOutcome.VERIFIED)
+    await router.route(_step_for(task, deterministic_action=DeterministicAction(operation="click", locator="#d")))
+    await tasks.complete(task_id=task.task_id, status=BrowserTaskStatus.COMPLETED)
+
+
+async def test_a_step_that_did_nothing_records_no_verdict(tmp_path):
+    store = await make_store(tmp_path)
+    task = await _real_task(store)
+    router = make_router(ledger=RouterStepLedger(store), jev_client=FakeJev(None),
+                         semantic_fallback=FakeStagehand(None))
+    result = await router.route(_step_for(task))
+    assert result.state is StepState.OWNER_TAKEOVER
+    assert await BrowserTaskService(store).latest_verification(task.task_id) is None
+
+
+async def test_router_verdict_rows_are_not_mission_browser_evidence_either(tmp_path):
+    from test_browser_interaction_router import FakeVerifier
+    from van_gateway.automation.verifier import VerificationOutcome
+
+    store = await make_store(tmp_path)
+    task = await _real_task(store)
+    await store.execute(
+        "INSERT INTO missions(mission_id, owner_principal_id, origin, origin_channel, "
+        "title, goal, created_at_ms, updated_at_ms) VALUES ('m2', 'owner', 'OWNER_VOICE', 'VOICE', 't', 'g', 0, 0)",
+    )
+    await store.execute(
+        "INSERT INTO mission_activities(activity_id, mission_id, activity_type, capability_id, "
+        "executor, executor_ref, started_at_ms) VALUES ('act2', 'm2', 'BROWSE', 'cap', 'BROWSER_FABRIC', ?, 0)",
+        (task.task_id,),
+    )
+    router = make_router(ledger=RouterStepLedger(store), verifier=FakeVerifier(VerificationOutcome.UNVERIFIABLE))
+    await router.route(_step_for(task))
+    rows = await store.fetchall("SELECT kind FROM browser_evidence WHERE task_id = ?", (task.task_id,))
+    assert sorted(r["kind"] for r in rows) == ["interaction_router_step", "postcondition_verification"]
+    assert await observations.browser_evidence_readback(store, "m2") == {"evidence_captured": False}

@@ -23,6 +23,7 @@ from van_gateway.automation.external_runtime import (
     RuntimeState,
 )
 from van_gateway.automation.payments import assert_not_automated_payment
+from van_gateway.browser.lane_gates import load_stagehand_production_gate
 from van_gateway.browser.models import AutonomyTier, BrowserObservation, BrowserTask
 from van_gateway.browser.policy import BrowserPolicyError
 
@@ -230,35 +231,20 @@ def canonical_stagehand_production_gate(
     Owner decisions 2026-09-29 §§1, 2, 4-6: placement on van-browser-core proved by the
     worker's live ``/health`` (``placement.stagehand_production_enabled``) AND every
     production activation gate green (``production_gates.evaluate_production_gates``).
-    It is ``interaction_router.load_stagehand_production_gate`` itself, imported at call
-    time, so the router lane and the adapter cannot drift apart. The import is lazy
-    because the router imports this module. Anything missing fails closed.
+    It is ``lane_gates.load_stagehand_production_gate`` itself — the function the router
+    re-exports and its Stagehand lane uses — so the two cannot drift apart. Anything missing
+    fails closed.
     """
 
     async def gate() -> tuple[bool, str]:
-        try:
-            from van_gateway.browser.interaction_router import load_stagehand_production_gate
-        except ImportError:
-            return False, "STAGEHAND_PRODUCTION_GATE_MISSING"
         resolved = settings
         if resolved is None:
             from van_gateway.config import get_settings
 
             resolved = get_settings()
-        # Settings-only placement first: an undeclared zone, a loopback or plain-HTTP
-        # endpoint, missing mTLS identity or a non-decided model is closed without
-        # contacting the worker at all. Only when fresh worker health is the one thing
-        # missing does the full router gate (which reads /health) run.
-        try:
-            from van_gateway.automation import placement
-        except ImportError:
-            return False, "PLACEMENT_GATE_MISSING"
-        placement_fn = getattr(placement, "stagehand_production_enabled", None)
-        if placement_fn is None:
-            return False, "PLACEMENT_GATE_MISSING"
-        permitted, reason = placement_fn(resolved, worker_health=None)
-        if permitted is not True and not str(reason).startswith("VAN_BROWSER_CORE_UNAVAILABLE:"):
-            return False, str(reason or "PRODUCTION_DISABLED")
+        # Settings-only placement is checked first inside the shared gate: an undeclared
+        # zone, a loopback or plain-HTTP endpoint, missing mTLS identity or a non-decided
+        # model is closed without contacting the worker at all.
         return await load_stagehand_production_gate(resolved, adapter)()
 
     return gate
