@@ -7,6 +7,22 @@
  * Harness worker. Direct Stagehand agent loops are intentionally refused: L5 autonomy is
  * implemented by BrowserSubagentRunner repeatedly asking for one observed action and
  * enforcing Hermes's domain/action-class/payment/budget bounds before replay.
+ *
+ * Placement (owner decision 2026-09-29 §1): this worker runs in production only in the
+ * dedicated van-browser-core trust zone. It refuses to start anywhere else unless the
+ * host is explicitly marked as the historical development-only placement, and then it
+ * reports DEV_ONLY_NOT_PRODUCTION on /health.
+ *
+ * Model (§4): the provider/model is pinned by deployment configuration to
+ * anthropic/claude-sonnet-5. A request naming anything else is refused rather than
+ * silently served with a different model.
+ *
+ * Credential (§4): the provider key is a file-backed secret reference on this host. With
+ * Stagehand 4.1.0 a `{ modelName, apiKey }` model config is forwarded by the SDK to the
+ * Stagehand runtime extension's service worker inside Chromium, which calls the provider
+ * from there. /health therefore reports provider_key_in_browser_memory=true, and the
+ * gateway placement gate keeps Stagehand PRODUCTION_DISABLED until a client-side LLM
+ * callback (the SDK's `model: { generate }` path) keeps the key out of the browser.
  */
 import fs from "node:fs";
 import http from "node:http";
@@ -15,6 +31,9 @@ import { Stagehand, localBrowser } from "@browserbasehq/stagehand";
 import { z } from "zod";
 
 const STAGEHAND_VERSION = "4.1.0";
+const STAGEHAND_RELEASE_COMMIT = "cd7b230778cf92269e4cb90e80d97f5113781c51";
+const VAN_BROWSER_CORE = "van-browser-core";
+const FORBIDDEN_ZONES = new Set(["van-trading-core", "dial-control", "van-private-core"]);
 const SERVICE_VERSION = "van-stagehand-worker/1";
 const MAX_BODY_BYTES = 131072;
 const MAX_RESPONSE_BYTES = 1024 * 1024;
@@ -27,10 +46,23 @@ const SECRET_RE = /^secretref:\/\/browser\/([A-Za-z0-9._-]{1,128})$/;
 const BIND = process.env.VAN_STAGEHAND_BIND || "127.0.0.1";
 const PORT = Number(process.env.VAN_STAGEHAND_PORT || "9140");
 const HARNESS_URL = (process.env.VAN_HARNESS_INTERNAL_URL || "http://127.0.0.1:9141").replace(/\/$/, "");
-const RUNTIME_ROOT = path.resolve(process.env.VAN_BROWSER_RUNTIME_ROOT || "/run/van-browser");
-const SECRET_ROOT = path.resolve(process.env.VAN_BROWSER_SECRET_ROOT || "/var/lib/van-trading/browser/secrets");
+const RUNTIME_ROOT = path.resolve(process.env.VAN_BROWSER_RUNTIME_ROOT || "/run/van-browser-core");
+const SECRET_ROOT = path.resolve(process.env.VAN_BROWSER_SECRET_ROOT || "/var/lib/van-browser-core/secrets");
 const MODEL_KEY_REF = process.env.VAN_STAGEHAND_MODEL_KEY_REF || "secretref://browser/stagehand-model";
 const REQUEST_TIMEOUT_MS = Number(process.env.VAN_BROWSER_WORKER_TIMEOUT_SECONDS || "45") * 1000;
+const TRUST_ZONE = String(process.env.VAN_TRUST_ZONE || "").trim().toLowerCase();
+const HISTORICAL_DEV_ONLY = process.env.VAN_BROWSER_HISTORICAL_DEV_ONLY === "1";
+const PINNED_PROVIDER = String(process.env.VAN_STAGEHAND_MODEL_PROVIDER || "anthropic").trim().toLowerCase();
+const PINNED_MODEL = String(process.env.VAN_STAGEHAND_MODEL_NAME || "claude-sonnet-5").trim();
+
+// §1 — refuse to run outside van-browser-core unless explicitly development-only. A
+// forbidden zone without the flag is a production placement and never starts.
+if (TRUST_ZONE !== VAN_BROWSER_CORE && !HISTORICAL_DEV_ONLY) {
+  throw new Error(`stagehand worker refuses trust zone ${TRUST_ZONE || "(undeclared)"}: production placement is ${VAN_BROWSER_CORE} only`);
+}
+const PRODUCTION_STATE = TRUST_ZONE === VAN_BROWSER_CORE && !HISTORICAL_DEV_ONLY
+  ? "VAN_BROWSER_CORE_PENDING_GATES"
+  : "DEV_ONLY_NOT_PRODUCTION";
 
 if (!["127.0.0.1", "::1", "localhost"].includes(BIND)) {
   throw new Error("stagehand worker refuses a non-loopback bind");
@@ -71,6 +103,10 @@ function safeModel(value, provider) {
     throw new WorkerError("MODEL_PROVIDER_MISMATCH", 422);
   }
   return raw.includes("/") ? raw : provider + "/" + raw;
+}
+
+function pinnedModelName() {
+  return safeModel(PINNED_MODEL, safeProvider(PINNED_PROVIDER));
 }
 
 function safeChild(root, name) {
@@ -250,6 +286,10 @@ async function withStagehand(body, fn) {
   const domain = safeDomain(body.target_domain);
   const provider = safeProvider(body.model_provider);
   const modelName = safeModel(body.model_name, provider);
+  // §4 — the model is deployment-pinned. No request can substitute another one.
+  if (modelName !== pinnedModelName()) {
+    throw new WorkerError("MODEL_NOT_OWNER_DECIDED", 409);
+  }
   const apiKey = resolveSecret(MODEL_KEY_REF);
 
   return withAliasLock(alias, async () => {
@@ -341,6 +381,13 @@ const server = http.createServer((req, res) => {
       runtime_version: STAGEHAND_VERSION,
       bind: BIND,
       model_key_present: modelKeyPresent(),
+      model_name: pinnedModelName(),
+      provider_key_in_browser_memory: true,
+      stagehand_release_commit: STAGEHAND_RELEASE_COMMIT,
+      trust_zone: TRUST_ZONE || null,
+      production_state: FORBIDDEN_ZONES.has(TRUST_ZONE) || HISTORICAL_DEV_ONLY
+        ? "DEV_ONLY_NOT_PRODUCTION"
+        : PRODUCTION_STATE,
       direct_agent_loop: false,
       model_self_selection: false,
     });
@@ -386,7 +433,7 @@ const server = http.createServer((req, res) => {
 });
 
 server.listen(PORT, BIND, () => {
-  process.stdout.write(\`[van-stagehand] listening on \${BIND}:\${PORT}\\n\`);
+  process.stdout.write(`[van-stagehand] listening on ${BIND}:${PORT} zone=${TRUST_ZONE || "undeclared"}\n`);
 });
 
 function shutdown() {

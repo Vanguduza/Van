@@ -4,7 +4,7 @@ import ast
 from pathlib import Path
 
 ROOT = Path(__file__).resolve().parents[2]
-SERVICE = ROOT / "deploy/van-trading-core/browser/harness_service.py"
+SERVICE = ROOT / "deploy/van-browser-core/browser/harness_service.py"
 BOOTSTRAP = ROOT / "deploy/van-trading-core/browser/bootstrap-browser-runtime.sh"
 UNIT = ROOT / "deploy/van-trading-core/systemd/vati-browser-harness.service"
 ADAPTER = ROOT / "backend/van_gateway/browser/adapters.py"

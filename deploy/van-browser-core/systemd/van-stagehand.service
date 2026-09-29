@@ -1,0 +1,56 @@
+[Unit]
+Description=VAN Stagehand semantic browser worker (van-browser-core)
+Documentation=file:///opt/van-browser-core/README.md
+After=network-online.target van-browser-harness.service
+Wants=network-online.target
+Requires=van-browser-harness.service
+# Owner decision 2026-09-29 §1: production Stagehand runs only in van-browser-core.
+ConditionPathExists=/etc/van-browser-core/zone
+StartLimitIntervalSec=300
+StartLimitBurst=5
+
+[Service]
+Type=simple
+User=van-browser
+Group=van-browser
+EnvironmentFile=/etc/van-browser-core/runtime.env
+WorkingDirectory=/opt/van-browser-core/runtime
+ExecStartPre=/usr/bin/grep -qx van-browser-core /etc/van-browser-core/zone
+ExecStart=/usr/bin/node /opt/van-browser-core/runtime/stagehand_service.mjs
+Restart=on-failure
+RestartSec=5
+TimeoutStartSec=45
+TimeoutStopSec=15
+
+# Stagehand may contact only the configured model provider (egress allowlist is a
+# provisioning gate), shares no shell, raw cookie or generic CDP HTTP surface with
+# Hermes/Gateway, and holds no credential of another trust zone
+# (deploy/van-browser-core/zone.json).
+NoNewPrivileges=true
+PrivateTmp=true
+ProtectSystem=strict
+ProtectHome=true
+ProtectKernelTunables=true
+ProtectKernelModules=true
+ProtectControlGroups=true
+RestrictSUIDSGID=true
+RestrictNamespaces=true
+LockPersonality=true
+MemoryDenyWriteExecute=false
+CapabilityBoundingSet=
+AmbientCapabilities=
+UMask=0077
+ReadWritePaths=/var/lib/van-browser-core /run/van-browser-core /var/log/van-browser-core
+ReadOnlyPaths=/opt/van-browser-core/runtime /etc/van-browser-core/runtime.env
+RestrictAddressFamilies=AF_UNIX AF_INET AF_INET6
+
+CPUWeight=20
+IOWeight=20
+MemoryAccounting=true
+CPUAccounting=true
+TasksAccounting=true
+MemoryMax=1536M
+TasksMax=384
+
+[Install]
+WantedBy=multi-user.target

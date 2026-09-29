@@ -127,8 +127,27 @@ class Settings(BaseSettings):
     browser_harness_expected_version: str = ""
     browser_stagehand_base_url: str = "http://127.0.0.1:9140"
     browser_stagehand_expected_version: str = ""
-    browser_stagehand_model_provider: str = ""
-    browser_stagehand_model_name: str = ""
+    #: Owner decision 2026-09-29 §4 (OQ-STAGEHAND-MODEL): canonical provider Anthropic,
+    #: canonical model Claude Sonnet 5. These are the model *name*; the provider
+    #: credential stays gateway/runtime-held (a file-backed secretref on the worker) and
+    #: never appears here. `automation/placement.py` keeps Stagehand PRODUCTION_DISABLED
+    #: if either is changed away from the owner-decided pair, so an override is visible
+    #: rather than a silent downgrade.
+    browser_stagehand_model_provider: str = "anthropic"
+    browser_stagehand_model_name: str = "claude-sonnet-5"
+    #: Immutable provider snapshot/revision for the model above, if Anthropic exposes one.
+    #: Empty = not established (owner decision §4 PIN RULE: the production qualification
+    #: gate stays pending where deterministic pinning is mandatory).
+    browser_stagehand_model_revision: str = ""
+    #: Owner decision 2026-09-29 §1 (OQ-STAGEHAND-HOST): the trust zone the configured
+    #: Stagehand worker runs in. Only `van-browser-core` can ever enable production
+    #: Stagehand; empty or any other zone keeps it PRODUCTION_DISABLED.
+    browser_stagehand_zone: str = ""
+    #: Gateway-side client identity for the van-browser-core mTLS edge
+    #: (deploy/van-browser-core/pki). Paths only; the key material stays in files.
+    browser_core_ca_file: str = ""
+    browser_core_client_cert_file: str = ""
+    browser_core_client_key_file: str = ""
 
     # OMV-002 — subordinate persistent Linux workspace. Disabled until the local
     # van-computer image and Docker isolation are qualified on the deployment host.
