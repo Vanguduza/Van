@@ -12,7 +12,10 @@ is off, and reports readiness through the same evidence-backed contract as n8n
 from __future__ import annotations
 
 import inspect
-from collections.abc import Callable
+from collections.abc import Callable, Iterator
+from contextlib import contextmanager
+from contextvars import ContextVar
+from dataclasses import dataclass
 from typing import Any, Protocol
 
 import httpx
@@ -35,6 +38,40 @@ class BrowserAdapterError(RuntimeError):
         self.detail = detail
 
 
+@dataclass(frozen=True)
+class HarnessLeaseFence:
+    """The page lease a Harness call is made under (review I3 MAJOR-3).
+
+    Sent in every Harness action envelope while it is set, so the Harness worker can refuse
+    a call carrying a generation older than the newest it has seen for that profile: work
+    still holding a lease the profile has since been re-leased past is not applied to
+    whoever holds it now.
+    """
+
+    profile_alias: str
+    holder_id: str
+    generation: int
+
+
+_HARNESS_LEASE_FENCE: ContextVar[HarnessLeaseFence | None] = ContextVar(
+    "van_harness_lease_fence", default=None
+)
+
+
+@contextmanager
+def harness_lease_fence(fence: HarnessLeaseFence | None) -> Iterator[None]:
+    """Run the enclosed Harness calls under ``fence`` (``/interaction/step`` sets it)."""
+    token = _HARNESS_LEASE_FENCE.set(fence)
+    try:
+        yield
+    finally:
+        _HARNESS_LEASE_FENCE.reset(token)
+
+
+def current_harness_lease_fence() -> HarnessLeaseFence | None:
+    return _HARNESS_LEASE_FENCE.get()
+
+
 class BrowserHarnessAdapter(Protocol):
     """§383 — the narrow typed production surface.
 
@@ -53,6 +90,14 @@ class BrowserHarnessAdapter(Protocol):
     async def wait(self, task: BrowserTask, condition: dict[str, Any]) -> dict[str, Any]: ...
     async def upload(self, task: BrowserTask, locator: str, file_ref: str) -> dict[str, Any]: ...
     async def tabs(self, task: BrowserTask) -> dict[str, Any]: ...
+
+
+def _error_code(response: httpx.Response) -> str | None:
+    try:
+        body = response.json()
+    except ValueError:
+        return None
+    return str(body.get("error")) if isinstance(body, dict) and body.get("error") else None
 
 
 class _PrivateWorkerClient:
@@ -124,6 +169,9 @@ class _PrivateWorkerClient:
         except httpx.HTTPError as exc:
             raise BrowserAdapterError(f"{self.CAPABILITY.upper()}_UNAVAILABLE", str(exc)) from exc
         if response.status_code >= 400:
+            if response.status_code == 409 and _error_code(response) == "LEASE_GENERATION_STALE":
+                # Review I3 MAJOR-3: the worker has seen a newer lease on this profile.
+                raise BrowserAdapterError(f"{self.CAPABILITY.upper()}_LEASE_GENERATION_STALE")
             raise BrowserAdapterError(
                 f"{self.CAPABILITY.upper()}_REQUEST_FAILED", str(response.status_code)
             )
@@ -169,7 +217,7 @@ class HttpBrowserHarnessAdapter(_PrivateWorkerClient):
         )
 
     def _envelope(self, task: BrowserTask, **extra: Any) -> dict[str, Any]:
-        return {
+        envelope = {
             "task_id": task.task_id,
             "profile_alias": task.profile_alias,
             "target_domain": task.target_domain,
@@ -179,6 +227,13 @@ class HttpBrowserHarnessAdapter(_PrivateWorkerClient):
             "allow_helper_authoring": False,
             **extra,
         }
+        fence = _HARNESS_LEASE_FENCE.get()
+        if fence is not None and fence.profile_alias == task.profile_alias:
+            # Review I3 MAJOR-3: the lease this call runs under; the worker refuses a
+            # generation older than the newest it has seen for the profile.
+            envelope["lease_holder_id"] = fence.holder_id
+            envelope["lease_generation"] = int(fence.generation)
+        return envelope
 
     async def navigate(self, task: BrowserTask, url: str) -> dict[str, Any]:
         return await self._call("/navigate", self._envelope(task, url=url))
@@ -440,6 +495,9 @@ __all__ = [
     "canonical_stagehand_production_gate",
     "BrowserAdapterError",
     "BrowserHarnessAdapter",
+    "HarnessLeaseFence",
     "HttpBrowserHarnessAdapter",
+    "current_harness_lease_fence",
+    "harness_lease_fence",
     "StagehandAdapter",
 ]

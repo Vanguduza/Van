@@ -41,6 +41,7 @@ from van_gateway.browser.policy import BrowserPolicyEngine, BrowserPolicyError
 from van_gateway.browser.service import (
     BrowserSessionBroker,
     BrowserTaskNotVerified,
+    BrowserTaskRunInFlight,
     BrowserTaskService,
     BrowserTaskTransitionRefused,
 )
@@ -329,6 +330,12 @@ class BrowserApi:
             return {"status": BrowserTaskStatus.BLOCKED_UNSAFE.value, "escalated": False}
 
         reason = result.stop_reason.value
+        # Review I3 MINOR-2: the task moves to WAITING_FOR_OWNER through the guarded writer
+        # before anything is put to the owner. A task that ended while its run was in flight
+        # (e.g. CANCELLED) refuses here, and no question is raised for it.
+        await self.tasks.set_working_status(
+            task_id=task.task_id, status=BrowserTaskStatus.WAITING_FOR_OWNER, error_code=reason,
+        )
         # The key carries *what was asked for*, not just why the run stopped.
         # Keyed on the reason alone, a second overrun for a different domain
         # collided with the first and the owner was never asked about it.
@@ -395,11 +402,6 @@ class BrowserApi:
                 BrowserEscalationStatus.OPEN.value, now + self.ESCALATION_TTL_MS, now, now,
             ),
         )
-        await self.store.execute(
-            "UPDATE browser_tasks SET status = ?, error_code = ?, completed_at_ms = NULL, "
-            "updated_at_ms = ? WHERE task_id = ?",
-            (BrowserTaskStatus.WAITING_FOR_OWNER.value, reason, now, task.task_id),
-        )
         return {
             "status": BrowserTaskStatus.WAITING_FOR_OWNER.value,
             "boundary_type": boundary_type.value,
@@ -422,11 +424,7 @@ class BrowserApi:
         """
         status = BrowserEscalationStatus(str(existing["status"]))
         if status is BrowserEscalationStatus.OPEN:
-            await self.store.execute(
-                "UPDATE browser_tasks SET status = ?, error_code = ?, updated_at_ms = ? "
-                "WHERE task_id = ?",
-                (BrowserTaskStatus.WAITING_FOR_OWNER.value, reason, now, task.task_id),
-            )
+            # Already WAITING_FOR_OWNER (set by the caller through the guarded writer).
             return {
                 "status": BrowserTaskStatus.WAITING_FOR_OWNER.value,
                 "escalated": True,
@@ -493,6 +491,32 @@ class BrowserApi:
             f"remain prohibited on the browser at every class."
         )
 
+    async def _sync_task_status(
+        self, task: BrowserTask, status: BrowserTaskStatus, error_code: str | None, now: int
+    ) -> BrowserTaskStatus:
+        """The owner-decision sync's task write, through the guarded writers (I3 MINOR-2).
+
+        An end state goes through ``complete()``, RESUME_AUTHORIZED through
+        ``set_working_status`` (from WAITING_FOR_OWNER only). If the task ended meanwhile, the
+        write is refused and the task's actual status is returned: the sync never moves a
+        task out of an end state.
+        """
+        try:
+            if status is BrowserTaskStatus.RESUME_AUTHORIZED:
+                await self.tasks.set_working_status(
+                    task_id=task.task_id, status=status, error_code=error_code, now_ms=now,
+                )
+            else:
+                await self.tasks.complete(
+                    task_id=task.task_id, status=status, error_code=error_code, now_ms=now,
+                )
+        except BrowserTaskTransitionRefused:
+            row = await self.store.fetchone(
+                "SELECT status FROM browser_tasks WHERE task_id = ?", (task.task_id,)
+            )
+            return BrowserTaskStatus(str(row["status"])) if row is not None else task.status
+        return status
+
     async def _sync_waiting_owner_decision(self, task: BrowserTask) -> BrowserTaskStatus:
         row = await self.store.fetchone(
             """
@@ -529,15 +553,9 @@ class BrowserApi:
                 "WHERE escalation_id = ?",
                 (BrowserEscalationStatus.EXPIRED.value, now, row["escalation_id"]),
             )
-            await self.store.execute(
-                "UPDATE browser_tasks SET status = ?, error_code = ?, completed_at_ms = ?, "
-                "updated_at_ms = ? WHERE task_id = ?",
-                (
-                    BrowserTaskStatus.EXPIRED.value, "BROWSER_ESCALATION_EXPIRED",
-                    now, now, task.task_id,
-                ),
+            return await self._sync_task_status(
+                task, BrowserTaskStatus.EXPIRED, "BROWSER_ESCALATION_EXPIRED", now,
             )
-            return BrowserTaskStatus.EXPIRED
 
         if decision_status is DecisionStatus.APPROVED:
             current_scope = json.loads(str(row["current_scope_json"]))
@@ -562,16 +580,10 @@ class BrowserApi:
                         now, row["escalation_id"],
                     ),
                 )
-                await self.store.execute(
-                    "UPDATE browser_tasks SET status = ?, error_code = ?, completed_at_ms = ?, "
-                    "updated_at_ms = ? WHERE task_id = ?",
-                    (
-                        BrowserTaskStatus.BLOCKED_POLICY.value,
-                        "BROWSER_ACTION_CLASS_NEVER_PERMITTED",
-                        now, now, task.task_id,
-                    ),
+                return await self._sync_task_status(
+                    task, BrowserTaskStatus.BLOCKED_POLICY,
+                    "BROWSER_ACTION_CLASS_NEVER_PERMITTED", now,
                 )
-                return BrowserTaskStatus.BLOCKED_POLICY
             authorization_id = f"bsauth_{row['escalation_id']}"
             await self.store.execute(
                 """
@@ -591,21 +603,13 @@ class BrowserApi:
                 "UPDATE browser_escalations SET status = ?, updated_at_ms = ? WHERE escalation_id = ?",
                 (BrowserEscalationStatus.APPROVED.value, now, row["escalation_id"]),
             )
-            await self.store.execute(
-                "UPDATE browser_tasks SET status = ?, error_code = NULL, updated_at_ms = ? WHERE task_id = ?",
-                (BrowserTaskStatus.RESUME_AUTHORIZED.value, now, task.task_id),
-            )
-            return BrowserTaskStatus.RESUME_AUTHORIZED
+            return await self._sync_task_status(task, BrowserTaskStatus.RESUME_AUTHORIZED, None, now)
         if decision_status is DecisionStatus.REJECTED:
             await self.store.execute(
                 "UPDATE browser_escalations SET status = ?, updated_at_ms = ? WHERE escalation_id = ?",
                 (BrowserEscalationStatus.REJECTED.value, now, row["escalation_id"]),
             )
-            await self.store.execute(
-                "UPDATE browser_tasks SET status = ?, completed_at_ms = ?, updated_at_ms = ? WHERE task_id = ?",
-                (BrowserTaskStatus.CANCELLED.value, now, now, task.task_id),
-            )
-            return BrowserTaskStatus.CANCELLED
+            return await self._sync_task_status(task, BrowserTaskStatus.CANCELLED, None, now)
         return BrowserTaskStatus.WAITING_FOR_OWNER
 
 
@@ -956,125 +960,163 @@ class BrowserApi:
                 raise HTTPException(status_code=503, detail="BROWSER_WORKER_UNCONFIGURED")
 
             task = await self._load_task(body.task_id)
-            status = task.status
-            if status is BrowserTaskStatus.WAITING_FOR_OWNER:
-                status = await self._sync_waiting_owner_decision(task)
-            if status not in (BrowserTaskStatus.PENDING, BrowserTaskStatus.RESUME_AUTHORIZED):
-                raise HTTPException(status_code=409, detail=f"BROWSER_TASK_NOT_RUNNABLE:{status.value}")
-
-            assignment = SubagentAssignment(
-                turn_id=body.turn_id, command_id=body.command_id, task_id=body.task_id,
-                goal=body.goal, allowed_domains=list(body.allowed_domains),
-                action_class_ceiling=body.action_class_ceiling,
-                autonomy_tier=body.autonomy_tier, max_steps=body.max_steps,
-                deadline_ms=body.deadline_ms,
-                max_steps_without_progress=body.max_steps_without_progress,
-            )
-            if status is BrowserTaskStatus.RESUME_AUTHORIZED:
-                await self._enforce_resume_authorization(task, assignment)
-            # P2-BROW-001 — the worker is bound to *this* task and its plan before it
-            # runs. A long-lived worker mutated per assignment would let two concurrent
-            # assignments overwrite each other's task id, and the adapter is the only part
-            # that is legitimately shared.
-            worker = self.worker
-            binder = getattr(worker, "for_task", None)
-            if binder is not None:
-                worker = binder(task, body.plan)
+            # Review I3 MAJOR-3: one run per task at a time. An /assignments run and an
+            # /interaction/step run on the same task would otherwise share the page and its
+            # lease, and whichever finished first would drop the lease under the other.
             try:
-                result = await self.runner.run(
-                    assignment=assignment, worker=worker, task=task,
-                    verifier=self.verifier, postcondition=body.postcondition,
-                )
-            except SemanticWorkerUnavailable as exc:
-                # An L2+ assignment asked for judgement about a page and no semantic
-                # runtime is configured. Walking the deterministic plan instead would be
-                # answering a different question and reporting success on this one.
+                run_token = self.tasks.claim_run(task.task_id, "ASSIGNMENT")
+            except BrowserTaskRunInFlight as exc:
                 raise HTTPException(
-                    status_code=503, detail=f"BROWSER_SEMANTIC_RUNTIME_UNAVAILABLE:{exc}"
+                    status_code=409, detail=f"BROWSER_TASK_RUN_IN_FLIGHT:{exc.kind}"
                 ) from exc
+            try:
+                return await self._run_assignment(body, task, run_token)
+            finally:
+                self.tasks.release_run(task.task_id, run_token)
 
-            if result.verification_outcome is not None:
-                # The verifier's verdict on the worker's "done" claim goes on record for
-                # this task, whatever it was; COMPLETED is only reachable over VERIFIED.
-                await self.tasks.record_verification(
-                    task=task, outcome=result.verification_outcome,
-                    verifier=type(self.verifier).__name__ if self.verifier is not None else "NONE",
-                    detail=result.detail, assignment_id=assignment.assignment_id,
-                )
+    async def _run_assignment(
+        self, body: "AssignmentBody", task: BrowserTask, run_token: str
+    ) -> dict[str, Any]:
+        """The body of ``POST /assignments``, run while the task's in-flight marker is held."""
+        status = task.status
+        if status is BrowserTaskStatus.WAITING_FOR_OWNER:
+            status = await self._sync_waiting_owner_decision(task)
+        if status not in (BrowserTaskStatus.PENDING, BrowserTaskStatus.RESUME_AUTHORIZED):
+            raise HTTPException(status_code=409, detail=f"BROWSER_TASK_NOT_RUNNABLE:{status.value}")
 
-            escalation = None
-            if result.stop_reason is SubagentStop.OWNER_TAKEOVER:
-                # Handed over, not finished: the owner is driving this profile. Not
-                # terminal (completed_at_ms stays NULL) and never success; the task
-                # lease is dropped so automation holds nothing while the owner acts.
-                now = int(time.time() * 1000)
-                await self._release_task_lease(task)
-                await self.store.execute(
-                    "UPDATE browser_tasks SET status = ?, error_code = ?, completed_at_ms = NULL, "
-                    "updated_at_ms = ? WHERE task_id = ?",
-                    (
-                        BrowserTaskStatus.WAITING_FOR_OWNER.value,
-                        f"{SubagentStop.OWNER_TAKEOVER.value}:{result.detail or ''}"[:200],
-                        now, task.task_id,
-                    ),
-                )
-                instruments.record_browser_task(BrowserTaskStatus.WAITING_FOR_OWNER)
-            elif result.stop_reason in (SubagentStop.SCOPE_VIOLATION, SubagentStop.ACTION_CLASS_VIOLATION):
-                escalation = await self._create_boundary_escalation(
-                    task=task, assignment=assignment, result=result
+        assignment = SubagentAssignment(
+            turn_id=body.turn_id, command_id=body.command_id, task_id=body.task_id,
+            goal=body.goal, allowed_domains=list(body.allowed_domains),
+            action_class_ceiling=body.action_class_ceiling,
+            autonomy_tier=body.autonomy_tier, max_steps=body.max_steps,
+            deadline_ms=body.deadline_ms,
+            max_steps_without_progress=body.max_steps_without_progress,
+        )
+        if status is BrowserTaskStatus.RESUME_AUTHORIZED:
+            await self._enforce_resume_authorization(task, assignment)
+        # P2-BROW-001 — the worker is bound to *this* task and its plan before it
+        # runs. A long-lived worker mutated per assignment would let two concurrent
+        # assignments overwrite each other's task id, and the adapter is the only part
+        # that is legitimately shared.
+        worker = self.worker
+        binder = getattr(worker, "for_task", None)
+        if binder is not None:
+            worker = binder(task, body.plan)
+        try:
+            result = await self.runner.run(
+                assignment=assignment, worker=worker, task=task,
+                verifier=self.verifier, postcondition=body.postcondition,
+            )
+        except SemanticWorkerUnavailable as exc:
+            # An L2+ assignment asked for judgement about a page and no semantic
+            # runtime is configured. Walking the deterministic plan instead would be
+            # answering a different question and reporting success on this one.
+            raise HTTPException(
+                status_code=503, detail=f"BROWSER_SEMANTIC_RUNTIME_UNAVAILABLE:{exc}"
+            ) from exc
+
+        if result.verification_outcome is not None:
+            # The verifier's verdict on the worker's "done" claim goes on record for
+            # this task, whatever it was; COMPLETED is only reachable over VERIFIED.
+            await self.tasks.record_verification(
+                task=task, outcome=result.verification_outcome,
+                verifier=type(self.verifier).__name__ if self.verifier is not None else "NONE",
+                detail=result.detail, assignment_id=assignment.assignment_id,
+            )
+
+        escalation = None
+        try:
+            escalation = await self._record_run_outcome(task, assignment, result, run_token)
+        except BrowserTaskTransitionRefused as exc:
+            # Review I3 MINOR-2: the task reached an end state while this run was in flight
+            # (e.g. /complete CANCELLED). It stays there; the run's outcome is not applied.
+            raise HTTPException(
+                status_code=409,
+                detail=f"BROWSER_TASK_ENDED_DURING_RUN:{exc.current or 'UNKNOWN'}",
+            ) from exc
+        if escalation is not None:
+            instruments.record_browser_task("ESCALATED")
+        return self._assignment_response(assignment, task, result, escalation)
+
+    async def _record_run_outcome(
+        self, task: BrowserTask, assignment: SubagentAssignment, result, run_token: str
+    ) -> dict[str, Any] | None:
+        """Apply a finished run to its task, through the guarded writers only (I3 MINOR-2).
+
+        Raises ``BrowserTaskTransitionRefused`` when the task ended while the run was in
+        flight. Returns the escalation, if one was raised.
+        """
+        escalation = None
+        if result.stop_reason is SubagentStop.OWNER_TAKEOVER:
+            # Handed over, not finished: the owner is driving this profile. Not
+            # terminal (completed_at_ms stays NULL) and never success; the task
+            # lease is dropped so automation holds nothing while the owner acts.
+            await self._release_task_lease(task)
+            await self.tasks.set_working_status(
+                task_id=task.task_id, status=BrowserTaskStatus.WAITING_FOR_OWNER,
+                error_code=f"{SubagentStop.OWNER_TAKEOVER.value}:{result.detail or ''}"[:200],
+            )
+            instruments.record_browser_task(BrowserTaskStatus.WAITING_FOR_OWNER)
+        elif result.stop_reason in (SubagentStop.SCOPE_VIOLATION, SubagentStop.ACTION_CLASS_VIOLATION):
+            escalation = await self._create_boundary_escalation(
+                task=task, assignment=assignment, result=result
+            )
+        else:
+            # §7: COMPLETED only after VERIFIED. UNVERIFIABLE stays VERIFYING (not
+            # terminal success, not a failure the page caused) and is escalated.
+            terminal_status = BrowserTaskStatus.COMPLETED
+            if result.stop_reason is SubagentStop.UNVERIFIABLE:
+                terminal_status = BrowserTaskStatus.VERIFYING
+            elif result.stop_reason in (SubagentStop.PAYMENT_REFUSED, SubagentStop.INJECTION_REFUSED):
+                terminal_status = BrowserTaskStatus.BLOCKED_POLICY
+            elif result.stop_reason is SubagentStop.GOAL_DRIFT:
+                terminal_status = BrowserTaskStatus.BLOCKED_UNSAFE
+            elif not result.succeeded:
+                terminal_status = BrowserTaskStatus.FAILED
+            error_code = None if result.succeeded else result.stop_reason.value
+            if terminal_status is BrowserTaskStatus.VERIFYING:
+                # Not an end state (review I2 N-3): held for the owner, never success.
+                await self.tasks.hold_for_verification(
+                    task_id=task.task_id, error_code=error_code,
+                    now_ms=int(time.time() * 1000),
                 )
             else:
-                # §7: COMPLETED only after VERIFIED. UNVERIFIABLE stays VERIFYING (not
-                # terminal success, not a failure the page caused) and is escalated.
-                terminal_status = BrowserTaskStatus.COMPLETED
-                if result.stop_reason is SubagentStop.UNVERIFIABLE:
-                    terminal_status = BrowserTaskStatus.VERIFYING
-                elif result.stop_reason in (SubagentStop.PAYMENT_REFUSED, SubagentStop.INJECTION_REFUSED):
-                    terminal_status = BrowserTaskStatus.BLOCKED_POLICY
-                elif result.stop_reason is SubagentStop.GOAL_DRIFT:
-                    terminal_status = BrowserTaskStatus.BLOCKED_UNSAFE
-                elif not result.succeeded:
-                    terminal_status = BrowserTaskStatus.FAILED
-                error_code = None if result.succeeded else result.stop_reason.value
-                if terminal_status is BrowserTaskStatus.VERIFYING:
-                    # Not an end state (review I2 N-3): held for the owner, never success.
-                    await self.tasks.hold_for_verification(
-                        task_id=task.task_id, error_code=error_code,
-                        now_ms=int(time.time() * 1000),
-                    )
-                else:
-                    await self.tasks.complete(
-                        task_id=task.task_id, status=terminal_status, error_code=error_code,
-                        now_ms=int(time.time() * 1000),
-                    )
-                # P3-OBS-002 — "browser task status" is one of Gate 11's named
-                # metrics. Recorded at the one place a task reaches a terminal
-                # status, so a new stop reason is counted without being added here.
-                instruments.record_browser_task(terminal_status)
-            if escalation is not None:
-                instruments.record_browser_task("ESCALATED")
-            return {
-                "assignment_id": assignment.assignment_id,
-                "task_id": task.task_id,
-                "turn_id": assignment.turn_id,
-                "stop_reason": result.stop_reason.value,
-                "succeeded": result.succeeded,
-                "verification_outcome": result.verification_outcome,
-                "needs_owner": result.stop_reason in (SubagentStop.UNVERIFIABLE, SubagentStop.OWNER_TAKEOVER),
-                "step_count": result.step_count,
-                "steps": [step.model_dump(mode="json") for step in result.steps],
-                "extraction": result.extraction,
-                "detail": result.detail,
-                "escalation": escalation,
-                # Stated so the subordination is observable, not just documented.
-                "assigned_by_turn": assignment.turn_id,
-                "bounds": {
-                    "max_steps": assignment.max_steps,
-                    "allowed_domains": assignment.allowed_domains,
-                    "action_class_ceiling": assignment.action_class_ceiling.value,
-                    "autonomy_tier": assignment.autonomy_tier.value,
-                },
-            }
+                await self.tasks.complete(
+                    task_id=task.task_id, status=terminal_status, error_code=error_code,
+                    now_ms=int(time.time() * 1000), run_token=run_token,
+                )
+            # P3-OBS-002 — "browser task status" is one of Gate 11's named
+            # metrics. Recorded at the one place a task reaches a terminal
+            # status, so a new stop reason is counted without being added here.
+            instruments.record_browser_task(terminal_status)
+        return escalation
+
+    @staticmethod
+    def _assignment_response(
+        assignment: SubagentAssignment, task: BrowserTask, result, escalation: dict[str, Any] | None
+    ) -> dict[str, Any]:
+        return {
+            "assignment_id": assignment.assignment_id,
+            "task_id": task.task_id,
+            "turn_id": assignment.turn_id,
+            "stop_reason": result.stop_reason.value,
+            "succeeded": result.succeeded,
+            "verification_outcome": result.verification_outcome,
+            "needs_owner": result.stop_reason in (SubagentStop.UNVERIFIABLE, SubagentStop.OWNER_TAKEOVER),
+            "step_count": result.step_count,
+            "steps": [step.model_dump(mode="json") for step in result.steps],
+            "extraction": result.extraction,
+            "detail": result.detail,
+            "escalation": escalation,
+            # Stated so the subordination is observable, not just documented.
+            "assigned_by_turn": assignment.turn_id,
+            "bounds": {
+                "max_steps": assignment.max_steps,
+                "allowed_domains": assignment.allowed_domains,
+                "action_class_ceiling": assignment.action_class_ceiling.value,
+                "autonomy_tier": assignment.autonomy_tier.value,
+            },
+        }
 
 
 __all__ = ["BrowserApi"]

@@ -87,6 +87,24 @@ class BrowserTaskTransitionRefused(BrowserPolicyError):
         self.why = why
 
 
+class BrowserTaskRunInFlight(BrowserPolicyError):
+    """A second run (``/interaction/step`` or ``/assignments``) on a task that already has one
+    in flight (review I3 MAJOR-3)."""
+
+    def __init__(self, task_id: str, kind: str) -> None:
+        super().__init__(f"browser_task_run_in_flight:{kind}")
+        self.task_id = task_id
+        self.kind = kind
+
+
+#: Review I3 MAJOR-3 / MINOR-1. The runs in flight in this process, keyed by
+#: ``(store path, task_id)`` -> ``(token, kind)``. A claim is a check-and-set with no await in
+#: between, so on one event loop it is atomic: two concurrent ``/step`` calls on the same task
+#: cannot both hold it. Process-local by construction; the durable fence across processes is
+#: the profile lease and its generation.
+_RUNS_IN_FLIGHT: dict[tuple[str, str], tuple[str, str]] = {}
+
+
 class BrowserSessionBroker:
     """§§182-183 — profile registry plus exclusive, time-bounded page leases."""
 
@@ -279,6 +297,26 @@ class BrowserSessionBroker:
         )
 
 
+    async def release_lease_if_held(self, lease: PageLease, *, now_ms: int | None = None) -> bool:
+        """Release ``lease`` only if it is still the profile's live holding (review I3 MAJOR-3).
+
+        Lease id, holder and generation must all still match. A lease that lapsed and was
+        taken by someone else is left alone, so a finishing step can never drop another
+        holder's lease. Returns whether anything was released.
+        """
+        now = int(time.time() * 1000) if now_ms is None else now_ms
+        async with self.store.connection() as db:
+            cur = await db.execute(
+                "UPDATE browser_profiles SET lease_holder = NULL, lease_expires_at_ms = NULL, "
+                "lease_holder_kind = NULL, lease_holder_id = NULL, updated_at_ms = ? "
+                "WHERE profile_alias = ? AND lease_holder = ? AND lease_holder_id = ? "
+                "AND lease_generation = ?",
+                (now, lease.profile_alias, lease.lease_id, lease.holder_id, int(lease.generation)),
+            )
+            await db.commit()
+            return cur.rowcount == 1
+
+
 class BrowserTaskService:
     """Creates policy-checked tasks and seals their evidence."""
 
@@ -456,22 +494,64 @@ class BrowserTaskService:
         )
         return outcome
 
-    async def latest_verification(self, task_id: str) -> str | None:
-        """The outcome of the task's most recent verdict, or None when there is none."""
+    #: The latest verdict row for a task. ``complete(COMPLETED)`` re-evaluates this inside its
+    #: UPDATE so the verdict it checked is the verdict still on record when it writes.
+    _LATEST_VERDICT_SQL = (
+        "SELECT evidence_id FROM browser_evidence WHERE task_id = ? AND kind = ? "
+        "ORDER BY created_at_ms DESC, rowid DESC LIMIT 1"
+    )
+
+    async def _latest_verdict(self, task_id: str) -> tuple[str | None, str | None]:
+        """``(evidence_id, outcome)`` of the task's most recent verdict, or ``(None, None)``."""
         row = await self.store.fetchone(
-            "SELECT evidence_json FROM browser_evidence WHERE task_id = ? AND kind = ? "
+            "SELECT evidence_id, evidence_json FROM browser_evidence WHERE task_id = ? AND kind = ? "
             "ORDER BY created_at_ms DESC, rowid DESC LIMIT 1",
             (task_id, VERIFICATION_EVIDENCE_KIND),
         )
         if row is None:
-            return None
+            return None, None
         try:
             import json
 
             outcome = json.loads(str(row["evidence_json"])).get("outcome")
         except (ValueError, AttributeError):
-            return "UNREADABLE"
-        return str(outcome) if outcome is not None else "UNREADABLE"
+            return str(row["evidence_id"]), "UNREADABLE"
+        return str(row["evidence_id"]), (str(outcome) if outcome is not None else "UNREADABLE")
+
+    async def latest_verification(self, task_id: str) -> str | None:
+        """The outcome of the task's most recent verdict, or None when there is none."""
+        return (await self._latest_verdict(task_id))[1]
+
+    # ------------------------------------------------------- runs in flight (I3 MAJOR-3)
+
+    def _run_key(self, task_id: str) -> tuple[str, str]:
+        return (str(getattr(self.store, "path", id(self.store))), task_id)
+
+    def claim_run(self, task_id: str, kind: str) -> str:
+        """Mark a run of ``task_id`` in flight and return its token; refuse a second one.
+
+        Synchronous on purpose: the check and the set cannot be separated by an await, so on
+        the event loop the claim is atomic. ``/interaction/step`` and ``/assignments`` both
+        claim, so a step cannot overlap another step or an assignment run on the same task.
+        """
+        key = self._run_key(task_id)
+        held = _RUNS_IN_FLIGHT.get(key)
+        if held is not None:
+            raise BrowserTaskRunInFlight(task_id, held[1])
+        token = f"brun_{uuid.uuid4().hex}"
+        _RUNS_IN_FLIGHT[key] = (token, kind)
+        return token
+
+    def release_run(self, task_id: str, token: str) -> None:
+        """Clear the marker, only if it is still the one ``token`` claimed."""
+        key = self._run_key(task_id)
+        held = _RUNS_IN_FLIGHT.get(key)
+        if held is not None and held[0] == token:
+            del _RUNS_IN_FLIGHT[key]
+
+    def run_in_flight(self, task_id: str) -> tuple[str, str] | None:
+        """``(token, kind)`` of the run in flight on ``task_id``, or None."""
+        return _RUNS_IN_FLIGHT.get(self._run_key(task_id))
 
     async def complete(
         self,
@@ -481,6 +561,7 @@ class BrowserTaskService:
         evidence_pointer: str | None = None,
         error_code: str | None = None,
         now_ms: int | None = None,
+        run_token: str | None = None,
     ) -> None:
         """Set a task's end state. The one choke point for every caller.
 
@@ -491,50 +572,110 @@ class BrowserTaskService:
         * COMPLETED only over a VERIFIED verdict (§7, review I M-2).
         * A task that has ended stays ended: the update is conditional on the current status
           not being terminal, so two racing callers cannot both write an end state.
+        * COMPLETED is refused while a run is in flight on the task (review I3 MINOR-1): the
+          step still actuating may record a verdict that is not VERIFIED. Only the run that
+          holds the marker (``run_token``) may complete its own task.
+        * COMPLETED is written only if the verdict it checked is still the task's latest: the
+          UPDATE re-reads the latest verdict id, so a verdict appended between the check and
+          the write refuses the completion instead of being overtaken by it.
         """
         if status not in COMPLETABLE_TASK_STATUSES:
             raise BrowserTaskTransitionRefused(task_id, None, status.value, "NOT_A_TERMINAL_STATUS")
+        verdict_id: str | None = None
         if status is BrowserTaskStatus.COMPLETED:
-            latest = await self.latest_verification(task_id)
+            in_flight = self.run_in_flight(task_id)
+            if in_flight is not None and in_flight[0] != run_token:
+                raise BrowserTaskTransitionRefused(
+                    task_id, None, status.value, f"RUN_IN_FLIGHT_{in_flight[1]}",
+                )
+            verdict_id, latest = await self._latest_verdict(task_id)
             if latest != VERIFIED:
                 raise BrowserTaskNotVerified(task_id, latest)
         await self._write_status(
             task_id=task_id, status=status, evidence_pointer=evidence_pointer,
-            error_code=error_code, completed=True, now_ms=now_ms,
+            error_code=error_code, completed=True, now_ms=now_ms, verdict_id=verdict_id,
+        )
+
+    #: Non-terminal states a guarded writer may set (review I3 MINOR-2). PENDING is reachable
+    #: only by creating a task; the rest are end states and go through ``complete()``.
+    WORKING_TASK_STATUSES = frozenset({
+        BrowserTaskStatus.WAITING_FOR_OWNER,
+        BrowserTaskStatus.RESUME_AUTHORIZED,
+        BrowserTaskStatus.VERIFYING,
+    })
+
+    async def set_working_status(
+        self, *, task_id: str, status: BrowserTaskStatus, error_code: str | None = None,
+        now_ms: int | None = None,
+    ) -> None:
+        """Move a live task to WAITING_FOR_OWNER / RESUME_AUTHORIZED / VERIFYING.
+
+        Review I3 MINOR-2: every status write outside ``complete()`` goes through here, so it
+        carries the same ``status NOT IN (terminal)`` guard and row-count check: a task that
+        ended while its run was in flight (e.g. CANCELLED) stays ended. RESUME_AUTHORIZED is
+        additionally only reachable from WAITING_FOR_OWNER (the owner-decision sync).
+        """
+        if status not in self.WORKING_TASK_STATUSES:
+            raise BrowserTaskTransitionRefused(task_id, None, status.value, "NOT_A_WORKING_STATUS")
+        await self._write_status(
+            task_id=task_id, status=status, evidence_pointer=None, error_code=error_code,
+            completed=False, now_ms=now_ms,
+            require_current=(
+                BrowserTaskStatus.WAITING_FOR_OWNER
+                if status is BrowserTaskStatus.RESUME_AUTHORIZED else None
+            ),
         )
 
     async def hold_for_verification(
         self, *, task_id: str, error_code: str | None = None, now_ms: int | None = None
     ) -> None:
         """VERIFYING: a done claim nobody could verify. Not terminal, never success (§7)."""
-        await self._write_status(
-            task_id=task_id, status=BrowserTaskStatus.VERIFYING, evidence_pointer=None,
-            error_code=error_code, completed=False, now_ms=now_ms,
+        await self.set_working_status(
+            task_id=task_id, status=BrowserTaskStatus.VERIFYING, error_code=error_code,
+            now_ms=now_ms,
         )
 
     async def _write_status(
         self, *, task_id: str, status: BrowserTaskStatus, evidence_pointer: str | None,
         error_code: str | None, completed: bool, now_ms: int | None,
+        verdict_id: str | None = None, require_current: BrowserTaskStatus | None = None,
     ) -> None:
+        """The only ``UPDATE browser_tasks SET status`` in VAN. Never out of an end state."""
         now = int(time.time() * 1000) if now_ms is None else now_ms
         terminal = tuple(s.value for s in TERMINAL_TASK_STATUSES)
         placeholders = ", ".join("?" for _ in terminal)
+        sql = (
+            "UPDATE browser_tasks SET status = ?, evidence_pointer = ?, error_code = ?, "
+            f"completed_at_ms = ?, updated_at_ms = ? WHERE task_id = ? AND status NOT IN ({placeholders})"
+        )
+        params: list[Any] = [
+            status.value, evidence_pointer, error_code, now if completed else None, now,
+            task_id, *terminal,
+        ]
+        if require_current is not None:
+            sql += " AND status = ?"
+            params.append(require_current.value)
+        if verdict_id is not None:
+            sql += f" AND ({self._LATEST_VERDICT_SQL}) = ?"
+            params.extend([task_id, VERIFICATION_EVIDENCE_KIND, verdict_id])
         async with self.store.connection() as db:
-            cur = await db.execute(
-                "UPDATE browser_tasks SET status = ?, evidence_pointer = ?, error_code = ?, "
-                f"completed_at_ms = ?, updated_at_ms = ? WHERE task_id = ? AND status NOT IN ({placeholders})",
-                (status.value, evidence_pointer, error_code, now if completed else None, now,
-                 task_id, *terminal),
-            )
+            cur = await db.execute(sql, tuple(params))
             await db.commit()
             changed = cur.rowcount
         if changed != 1:
             row = await self.store.fetchone("SELECT status FROM browser_tasks WHERE task_id = ?", (task_id,))
             current = None if row is None else str(row["status"])
-            raise BrowserTaskTransitionRefused(
-                task_id, current, status.value,
-                "TASK_UNKNOWN" if row is None else "TASK_ALREADY_TERMINAL",
-            )
+            if row is None:
+                why = "TASK_UNKNOWN"
+            elif current in terminal:
+                why = "TASK_ALREADY_TERMINAL"
+            elif require_current is not None and current != require_current.value:
+                why = f"REQUIRES_{require_current.value}"
+            else:
+                # Live task, so the verdict condition failed: a newer verdict landed between
+                # the check and the write. Judge the completion against that one.
+                raise BrowserTaskNotVerified(task_id, await self.latest_verification(task_id))
+            raise BrowserTaskTransitionRefused(task_id, current, status.value, why)
 
 __all__ = [
     "COMPLETABLE_TASK_STATUSES",
@@ -542,6 +683,7 @@ __all__ = [
     "ROUTER_STEP_EVIDENCE_KIND",
     "TERMINAL_TASK_STATUSES",
     "VERIFICATION_EVIDENCE_KIND",
+    "BrowserTaskRunInFlight",
     "BrowserTaskTransitionRefused",
     "is_reserved_evidence_kind",
     "BrowserSessionBroker",

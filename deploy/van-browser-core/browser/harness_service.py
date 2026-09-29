@@ -465,6 +465,44 @@ OPERATIONS = {
 }
 
 
+class LeaseFence:
+    """Review I3 MAJOR-3 — refuse actions under a stale page-lease generation.
+
+    The gateway's broker increments a profile's lease generation on every acquisition and
+    sends the generation an action runs under (``lease_generation`` + ``lease_holder_id``).
+    The worker remembers the newest generation it has seen per profile and refuses any
+    fenced action carrying an older one, so work still holding a lease the profile has
+    since been re-leased past is not applied to the new holder's page. An envelope without
+    a generation is not fenced (callers that do not yet send one are unchanged).
+    """
+
+    def __init__(self) -> None:
+        self._lock = threading.Lock()
+        self._newest: dict[str, tuple[int, str]] = {}
+
+    def check(self, alias: str, body: dict[str, Any]) -> None:
+        raw = body.get("lease_generation")
+        if raw is None:
+            return
+        if isinstance(raw, bool) or not isinstance(raw, int) or raw < 1:
+            raise WorkerError("LEASE_GENERATION_INVALID", 422)
+        holder = body.get("lease_holder_id")
+        if not isinstance(holder, str) or not holder or len(holder) > 128:
+            raise WorkerError("LEASE_HOLDER_REQUIRED", 422)
+        with self._lock:
+            newest = self._newest.get(alias)
+            if newest is not None:
+                if raw < newest[0]:
+                    raise WorkerError("LEASE_GENERATION_STALE", 409)
+                if raw == newest[0] and holder != newest[1]:
+                    # One generation has exactly one holder.
+                    raise WorkerError("LEASE_GENERATION_STALE", 409)
+            self._newest[alias] = (raw, holder)
+
+
+FENCE = LeaseFence()
+
+
 class Handler(BaseHTTPRequestHandler):
     server_version = SERVICE_VERSION
 
@@ -511,6 +549,7 @@ class Handler(BaseHTTPRequestHandler):
                 raise WorkerError("HELPER_AUTHORING_FORBIDDEN", 403)
             alias = safe_alias(body.get("profile_alias"))
             domain = safe_domain(body.get("target_domain"))
+            FENCE.check(alias, body)
             if self.path == "/page_info":
                 result = page_info_result(alias, domain)
             elif self.path == "/screenshot":

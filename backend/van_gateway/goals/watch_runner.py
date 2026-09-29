@@ -18,7 +18,9 @@ from urllib.parse import urlsplit
 from van_gateway.browser.models import (
     AutonomyTier, BrowserStrategy, BrowserTaskStatus,
 )
-from van_gateway.browser.service import BrowserSessionBroker, BrowserTaskService
+from van_gateway.browser.service import (
+    BrowserSessionBroker, BrowserTaskService, BrowserTaskTransitionRefused,
+)
 from van_gateway.models import ActionClass
 
 from .models import Watch, WatchConditionKind, WatchObservation, WatchSourceKind
@@ -169,12 +171,18 @@ class WatchRunner:
                     now_ms=now,
                 )
                 if task is not None:
-                    await self.tasks.complete(
-                        task_id=task.task_id,
-                        status=BrowserTaskStatus.FAILED,
-                        error_code=code[:200],
-                        now_ms=now,
-                    )
+                    try:
+                        await self.tasks.complete(
+                            task_id=task.task_id,
+                            status=BrowserTaskStatus.FAILED,
+                            error_code=code[:200],
+                            now_ms=now,
+                        )
+                    except BrowserTaskTransitionRefused:
+                        # Review I3 MINOR-3: the task already ended elsewhere (e.g. CANCELLED
+                        # mid-run). End states are sticky, so there is nothing to write; the
+                        # failure is on the watch's record and the other watches still run.
+                        pass
             finally:
                 if lease is not None:
                     await self.broker.release_lease(lease, now_ms=now)

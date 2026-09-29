@@ -62,7 +62,7 @@ from van_gateway.automation.verifier import (
     WorkflowVerifier,
 )
 from van_gateway.action.models import VerifierType
-from van_gateway.browser.adapters import BrowserAdapterError
+from van_gateway.browser.adapters import BrowserAdapterError, HarnessLeaseFence, harness_lease_fence
 # Shared with the Stagehand adapter and the browser API (unit G2a); re-exported here so the
 # router's public names are unchanged.
 from van_gateway.browser.lane_gates import (  # noqa: F401 - re-export
@@ -1754,12 +1754,17 @@ class InteractionStepBody(BaseModel):
     value_slots: dict[str, str] = Field(default_factory=dict)
 
 
-async def _step_page_lease(browser_api: Any, task: BrowserTask) -> Any:
-    """The page lease a ``/step`` runs under (review I2 N-5). Returns a lease to release, or
-    ``None`` when the task already held a live one. 409 when anything else holds the profile."""
+async def _step_page_lease(browser_api: Any, task: BrowserTask) -> tuple[Any, HarnessLeaseFence]:
+    """The page lease a ``/step`` runs under (review I2 N-5, I3 MAJOR-3).
+
+    Returns ``(acquired, fence)``: ``acquired`` is the lease this step took and must give
+    back, or ``None`` when the task already held a live one (which the step then must not
+    release); ``fence`` is the holder and generation sent to the Harness with every action.
+    409 when anything else holds the profile.
+    """
     now = int(time.time() * 1000)
     row = await browser_api.store.fetchone(
-        "SELECT lease_holder, lease_expires_at_ms, lease_holder_kind, lease_holder_id "
+        "SELECT lease_holder, lease_expires_at_ms, lease_holder_kind, lease_holder_id, lease_generation "
         "FROM browser_profiles WHERE profile_alias = ?",
         (task.profile_alias,),
     )
@@ -1771,13 +1776,16 @@ async def _step_page_lease(browser_api: Any, task: BrowserTask) -> Any:
             (row["lease_holder_kind"] or "TASK") == "TASK" and row["lease_holder_id"] == task.task_id
         )
         if held_by_task:
-            return None
+            return None, HarnessLeaseFence(
+                task.profile_alias, task.task_id, int(row["lease_generation"] or 0)
+            )
         raise HTTPException(status_code=409, detail=f"browser_profile_leased:{task.profile_alias}")
     try:
-        return await browser_api.broker.acquire_lease(profile_alias=task.profile_alias, task_id=task.task_id)
+        lease = await browser_api.broker.acquire_lease(profile_alias=task.profile_alias, task_id=task.task_id)
     except BrowserPolicyError as exc:
         # Taken between the read and the acquire: the atomic acquire is the arbiter.
         raise HTTPException(status_code=409, detail=str(exc)) from exc
+    return lease, HarnessLeaseFence(task.profile_alias, lease.holder_id, int(lease.generation))
 
 
 def build_interaction_routes(browser_api: Any, router: BrowserInteractionRouter) -> APIRouter:
@@ -1786,6 +1794,8 @@ def build_interaction_routes(browser_api: Any, router: BrowserInteractionRouter)
     The observation is never taken from the request body: the router reads the page
     itself through the harness, so a caller cannot hand B2 a page it did not see.
     """
+    from van_gateway.browser.service import BrowserTaskRunInFlight
+
     api = APIRouter(prefix="/v1/browser/interaction", tags=["browser"])
 
     def _guard(token: str | None) -> None:
@@ -1813,6 +1823,20 @@ def build_interaction_routes(browser_api: Any, router: BrowserInteractionRouter)
     ):
         _guard(x_van_internal_token)
         task = await browser_api._load_task(body.task_id)
+        # Review I3 MAJOR-3 — one run per task at a time. A second /step (or an /assignments
+        # run) on a task with a step in flight is refused, not interleaved: the in-flight step
+        # holds the task's page lease, and a concurrent one would keep actuating after the
+        # first had given the lease back.
+        try:
+            run_token = browser_api.tasks.claim_run(task.task_id, "STEP")
+        except BrowserTaskRunInFlight as exc:
+            raise HTTPException(status_code=409, detail=f"BROWSER_TASK_RUN_IN_FLIGHT:{exc.kind}") from exc
+        try:
+            return await _run_step(body, task)
+        finally:
+            browser_api.tasks.release_run(task.task_id, run_token)
+
+    async def _run_step(body: InteractionStepBody, task: BrowserTask) -> dict[str, Any]:
         # Reviewer I M-8 — the same lifecycle gate /v1/browser/assignments applies.
         status = task.status
         if status is BrowserTaskStatus.WAITING_FOR_OWNER:
@@ -1830,7 +1854,7 @@ def build_interaction_routes(browser_api: Any, router: BrowserInteractionRouter)
         # lease: it uses the one the task already holds, or takes one for the step and gives
         # it back; another holder on the profile (a task, or the owner's interactive session)
         # refuses the step rather than sharing the page.
-        acquired = await _step_page_lease(browser_api, task)
+        acquired, fence = await _step_page_lease(browser_api, task)
         try:
             step = InteractionStep(
                 task=task,
@@ -1850,10 +1874,15 @@ def build_interaction_routes(browser_api: Any, router: BrowserInteractionRouter)
                 grant = await consume(task)
                 step.resume_ceiling = grant.get("approved_action_class_ceiling") or step.action_class_ceiling
                 step.resume_authorization_id = grant.get("authorization_id")
-            result = await router.route(step)
+            # The Harness is told which lease generation each action runs under, and refuses
+            # a generation older than the newest it has seen for the profile.
+            with harness_lease_fence(fence):
+                result = await router.route(step)
         finally:
             if acquired is not None:
-                await browser_api.broker.release_lease(acquired)
+                # Only the lease this step took, and only while it still holds it (lease id,
+                # holder and generation must all match): never another holder's.
+                await browser_api.broker.release_lease_if_held(acquired)
         return {"task_id": task.task_id, "at_ms": int(time.time() * 1000), **result.to_json()}
 
     return api
