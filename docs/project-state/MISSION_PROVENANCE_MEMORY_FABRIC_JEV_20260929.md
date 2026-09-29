@@ -50,3 +50,10 @@ context interface only.
 
 OpenViking HEAD has moved since the Rev 1.1 review commit `1f4f7039`. These are observations,
 not adoption pins; exact-version adoption requires the qualification gates in each blueprint.
+
+Clarification appended 2026-09-29 (owner decision §5, auth-20260929-owner-stagehand-private-plane-gates):
+the stagehand row records two different commits. `ad2bf12e…` is the default-branch HEAD, later
+unreleased upstream work — it is **not** Stagehand 4.1.0. The adopted artifact is the released
+`@browserbasehq/stagehand@4.1.0`: upstream release commit
+`cd7b230778cf92269e4cb90e80d97f5113781c51`, npm integrity
+`sha512-PJikMBVoaCRh6TFD7GcmeISmsMq4IwUu1BD5FOsGUVDUxrVqZomWa6W6dF+a/zu4xRZu2Z2xX1nXVMDaCuZWsw==`.
