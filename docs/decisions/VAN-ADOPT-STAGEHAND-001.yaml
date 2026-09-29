@@ -73,3 +73,177 @@ owner_decision_record:
     Owner instruction given directly in the implementation session; Project Truth authority
     under PROJECT_CANONICAL_STATE.json. Not a device-signed gateway command; a production
     deployment should additionally capture the owner-signed record through signed ingress.
+
+# =====================================================================================
+# APPENDED 2026-09-29 — Programme B (Jev × OpenMuse Convergence Rev 1) reconciliation.
+# Append-only: every key above this line, including the owner's 2026-09-18 decision
+# record, is preserved byte-for-byte. Nothing here re-dates, re-signs or widens it.
+# Authority for this append: auth-20260929-owner-jev-openmuse-convergence-r1
+# (docs/project-state/MISSION_PROVENANCE_MEMORY_FABRIC_JEV_20260929.md) — an owner
+# session instruction; no device, biometric or cryptographic signature is claimed.
+# DEC-039: browserbase/stagehand upstream is reference only; nothing was copied from it.
+# =====================================================================================
+reconciliation_20260929:
+  source_blueprint: >-
+    DDS docs/dial/final-audit/06_DEVELOPMENT_SYSTEM/DIAL_JEV_OPENMUSE_CONVERGENCE_BLUEPRINT_REV1.md
+    @ 39d3777, sections 3 (B5), 4 and 10
+  owner_approval_2026_09_18:
+    preserved_unchanged: true
+    what_it_authorizes: >-
+      Stagehand as a Hermes-managed subagent semantic browser layer (architecture approval,
+      autonomy ceiling L5 inside Hermes-assigned bounds). It does not certify a live runtime
+      and does not choose a production host.
+    evidence_present:
+      - kind: session instruction transcribed into this record
+        ref: owner_decision_record.owner_words (above)
+      - kind: session pointer
+        ref: evidence://owner/session/01JhzRtSJ6z18Vcx8Eo2yYB5#automation-browser-fabric-approval
+        note: >-
+          An opaque pointer. It does not resolve to any artifact in this repository (grep of
+          the tree finds it only in the four 2026-09-18 decision records that cite it; there
+          is no evidence/owner/ directory).
+      - kind: same-day corroboration
+        ref: docs/decisions/VAN-AMEND-SECURITY-POLICY-001.md (OWNER_APPROVED, 2026-09-18)
+    evidence_absent:
+      - >-
+        No device-signed, biometric or otherwise cryptographically signed owner-ingress record
+        of the 2026-09-18 approval exists in the repository. The record above already says it
+        is "Not a device-signed gateway command"; that remains true on 2026-09-29.
+      - No hash, signature or transcript excerpt binding the session pointer to its content.
+    reading: >-
+      owner_signature_status SIGNED above means "owner-approved in session under Project
+      Truth authority" (the meaning the 2026-09-18 record gives it). It must not be read as
+      cryptographic proof. No signature is invented here.
+
+  production_gate:
+    status: PENDING
+    meaning: >-
+      Stagehand may not be relied on in production until every item in blocking_on is
+      resolved. The owner approval above is necessary but not sufficient.
+    blocking_on:
+      - signed-ingress evidence for the 2026-09-18 approval, or an explicit owner waiver
+      - an owner hosting decision for the Stagehand worker (see hosting)
+      - live worker/model canary (tools/certification/certify_browser_fabric.py stagehand);
+        no van_browser_stagehand_attestation.json is committed
+      - the B5 router and the postcondition-verifier gap below
+    external_gate_row: >-
+      docs/EXTERNAL_GATES.md "Stagehand local semantic browser" = REPO_COMPLETE / PENDING_LIVE;
+      REMOTE_BROWSER_IMPLEMENTATION_MATRIX RB-040 (Stagehand live gate) and RB-041 are BLOCKED
+      behind RB-002 (owner streaming-host decision).
+    not_to_be_confused_with: >-
+      backend/van_gateway/automation/health.py governance_state() reports
+      production_activation_permitted=true because it only checks that no required decision
+      carries a PENDING owner signature. It does not read this production gate.
+
+  hosting:
+    where_it_runs_in_code_today:
+      worker: deploy/van-trading-core/browser/stagehand_service.mjs (Node >=22.18 <23)
+      unit: deploy/van-trading-core/systemd/vati-stagehand.service (User=van-browser,
+        Requires=vati-browser-harness.service, EnvironmentFile=/opt/van-trading/config/browser-runtime.env)
+      installer: deploy/van-trading-core/browser/bootstrap-browser-runtime.sh (exits 43 on a
+        Stagehand version other than 4.1.0)
+      bind: 127.0.0.1:9140 loopback only; refuses a non-loopback VAN_STAGEHAND_BIND
+      browser: attaches via localBrowser.connect to the Harness-owned Chromium CDP endpoint
+        (loopback cdp-endpoint.json); no Browserbase cloud
+      gateway_client: backend/van_gateway/browser/adapters.py StagehandAdapter
+        (settings.browser_stagehand_base_url default http://127.0.0.1:9140)
+      worker_surface: backend/van_gateway/browser/worker.py HybridBrowserWorker under
+        backend/van_gateway/browser/subagent.py BrowserSubagentRunner
+    observation: >-
+      Every deploy artifact for Stagehand lives under deploy/van-trading-core and is
+      configured from /opt/van-trading, i.e. it is packaged to co-reside with Trading Core.
+      No live deployment evidence exists for any host.
+    undecided:
+      - which host runs Stagehand + the Harness-owned Chromium in production
+      - whether that is the dedicated Browser Stream Host recommended (by delegation, not
+        signature) in docs/decisions/VAN-ADOPT-REMOTE-BROWSER-STREAMING-001.yaml, or a
+        separate private browser host
+      - model provider/model for Stagehand (browser_stagehand_model_provider/_name default
+        empty, so StagehandAdapter.configured is false)
+
+  version:
+    repo_pin:
+      manifest: deploy/van-trading-core/browser/package.json "@browserbasehq/stagehand" = "4.1.0" (exact)
+      lockfile: >-
+        deploy/van-trading-core/browser/package-lock.json (lockfileVersion 3) resolves
+        stagehand-4.1.0.tgz with integrity
+        sha512-PJikMBVoaCRh6TFD7GcmeISmsMq4IwUu1BD5FOsGUVDUxrVqZomWa6W6dF+a/zu4xRZu2Z2xX1nXVMDaCuZWsw==
+      registry: registries/automation_browser_dependencies.json stagehand.version 4.1.0,
+        pin_status UNPINNED_VERIFY_AT_ADOPTION
+    observed_upstream_2026_09_29:
+      npm_dist_tag_latest: "4.1.0"
+      npm_4_1_0_integrity_matches_lockfile: true
+      release_tag: "@browserbasehq/stagehand@4.1.0 -> commit cd7b230778cf92269e4cb90e80d97f5113781c51"
+      default_branch_head: ad2bf12ea7abd95bb1d6f3a59600842a0954fffb
+      head_is_release: false
+      head_note: >-
+        HEAD ad2bf12e is an unreleased commit ahead of the 4.1.0 tag; npm publishes it only as
+        4.2.0-alpha-ad2bf12e... The blueprint's "ad2bf12e (@browserbasehq/stagehand@4.1.0)" and
+        the mission provenance table pair HEAD with the latest tag; they are not the same code.
+    reading: >-
+      The repo pins the released 4.1.0 exactly and its lockfile integrity matches the npm
+      registry. It does not pin, and must not be read as pinning, upstream HEAD. pin_status
+      remains UNPINNED_VERIFY_AT_ADOPTION until a live runtime reports 4.1.0 through the
+      gateway health check. No dependency was changed by this reconciliation.
+
+  programme_b_router_position:
+    contract: B5 (blueprint section 3)
+    order:
+      - deterministic typed Playwright/CDP (Browser Harness)
+      - dial-jev PROPOSE_ACTION, only when B2 classify_observation is eligible
+      - Stagehand semantic fallback (this decision)
+      - owner takeover / policy refusal
+    invariants:
+      - Jev proposes only; Jev never executes a browser action and holds no Chromium,
+        browser session, router or credential plane (B0/B1)
+      - Stagehand is reached only after the deterministic lane and the Jev lane have
+        abstained, been ineligible or failed; default router eligibility denies everything
+      - Stagehand output is UNTRUSTED_EXTERNAL and may not raise the action class
+      - a Stagehand result counts as success only after the same independent postcondition
+        verifier used for every other lane returns VERIFIED_SUCCESS; Stagehand cannot
+        certify its own effect
+      - Stagehand is not a Jev dependency
+    implementation_state: >-
+      The B5 router is Subagent G's deliverable and does not exist in VAN on this branch
+      (no Jev/PROPOSE_ACTION reference under backend/van_gateway/browser or capability).
+      This section records the required position; it is not evidence that it is wired.
+    gap_found:
+      id: STAGEHAND-VERIFIER-GAP-20260929
+      finding: >-
+        In HybridBrowserWorker.propose, a Stagehand observe() that returns no controls yields
+        ProposedAction(done=True); BrowserSubagentRunner stops with GOAL_ACHIEVED and
+        browser/api.py marks the task COMPLETED with succeeded=true. No independent
+        postcondition verifier (backend/van_gateway/automation/verifier.py is used only by
+        the automation dispatch/production paths) runs on the browser subagent path, so
+        Stagehand's "nothing left to do" is currently accepted as success.
+      also: >-
+        Stagehand act() replays the observed action itself over CDP on the shared Chromium;
+        the Harness only reads the page back afterwards. The B5 target says the Harness /
+        Browser Control Agent executes.
+      disposition: open; to be closed by the B5 router work, not by this record
+
+  owner_decisions_required:
+    # Open questions only. None of these is decided by this record.
+    - id: OQ-STAGEHAND-HOST
+      question: >-
+        Where does the production Stagehand worker (with the Harness-owned Chromium) run?
+      recommendation: >-
+        A private browser host, not the trading host. Current packaging co-resides with
+        Trading Core; VAN-ADOPT-REMOTE-BROWSER-STREAMING-001 already rejects co-residing
+        Chromium with Trading Core for the streaming path.
+    - id: OQ-STAGEHAND-SIGNED-INGRESS
+      question: >-
+        Provide device-signed / signed-ingress evidence of the 2026-09-18 approval, or
+        explicitly waive it for production?
+    - id: OQ-VAN-PRIVATE-PLANE-HOST
+      question: >-
+        Provision the VAN private-plane host (and its VCN attachment) that the chosen
+        placement needs? The repository cannot do this.
+    - id: OQ-STAGEHAND-MODEL
+      question: >-
+        Which model provider and model does the Stagehand worker use (gateway-held
+        credential, explicitly configured per section 418)?
+    - id: OQ-STAGEHAND-VERSION-AT-ADOPTION
+      question: >-
+        Confirm 4.1.0 (the released, lockfile-pinned version) as the production adoption
+        pin, rather than any post-4.1.0 upstream HEAD?

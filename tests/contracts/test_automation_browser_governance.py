@@ -75,6 +75,44 @@ def test_browser_subagent_decision_is_recorded():
     assert "subagent_invariants:" in text
 
 
+#: sha256 of VAN-ADOPT-STAGEHAND-001.yaml as the owner's 2026-09-18 decision left it. Later
+#: reconciliations are appended after the marker below; the approved text above it is frozen.
+STAGEHAND_2026_09_18_SHA256 = "0553d1bdc5b2285218c7f1667808a6ee0d6fc7fede1fb538d03d353b99b6e9d6"
+STAGEHAND_APPEND_MARKER = (
+    "\n# ====================================================================================="
+    "\n# APPENDED 2026-09-29"
+)
+
+
+def test_stagehand_reconciliation_is_append_only_and_keeps_production_pending():
+    """Programme B: the 2026-09-18 approval is preserved; production stays PENDING.
+
+    The approval authorises the architecture. It is not signed-ingress evidence and does not
+    choose a host, so the appended production gate must stay PENDING until the owner resolves
+    the open questions, and the Jev lane must precede Stagehand in the B5 order.
+    """
+    import yaml
+
+    text = (DECISIONS / "VAN-ADOPT-STAGEHAND-001.yaml").read_text(encoding="utf-8")
+    assert STAGEHAND_APPEND_MARKER in text
+    approved = text.split(STAGEHAND_APPEND_MARKER, 1)[0]
+    assert hashlib.sha256(approved.encode("utf-8")).hexdigest() == STAGEHAND_2026_09_18_SHA256, (
+        "the owner's 2026-09-18 Stagehand decision text was edited; append instead"
+    )
+
+    rec = yaml.safe_load(text)["reconciliation_20260929"]
+    assert rec["owner_approval_2026_09_18"]["preserved_unchanged"] is True
+    assert rec["owner_approval_2026_09_18"]["evidence_absent"], "absent evidence must be stated"
+    assert rec["production_gate"]["status"] == "PENDING"
+    order = rec["programme_b_router_position"]["order"]
+    assert [i for i, lane in enumerate(order) if "PROPOSE_ACTION" in lane] == [1]
+    assert "Stagehand" in order[2] and "owner takeover" in order[3]
+    ids = {q["id"] for q in rec["owner_decisions_required"]}
+    assert {"OQ-STAGEHAND-HOST", "OQ-STAGEHAND-SIGNED-INGRESS", "OQ-VAN-PRIVATE-PLANE-HOST"} <= ids
+    for q in rec["owner_decisions_required"]:
+        assert "decision" not in q, "open questions must not carry a decision"
+
+
 def test_security_policy_amendment_was_applied():
     """§368 — the amendment is owner-approved and now lives in the locked policy."""
     amendment = (DECISIONS / "VAN-AMEND-SECURITY-POLICY-001.md").read_text(encoding="utf-8")
