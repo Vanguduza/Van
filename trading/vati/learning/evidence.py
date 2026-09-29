@@ -98,6 +98,10 @@ EVIDENCE_SOURCE_ALLOWLIST: Mapping[EvidenceClass, tuple[EventKind, frozenset[str
     EvidenceClass.VTIL_ARTIFACT: (EventKind.TRADE_EXPERIENCE_ARTIFACT, RUNTIME_PRODUCERS),
 }
 
+# The decision-quality verdict of a trade (GAP-F-003) is the authoritative
+# process_ok for strategy health when it exists (A-VATI M3).
+DECISION_QUALITY_PRODUCERS = frozenset({"vati-decision-quality"})   # vati.cognition.attribution.DecisionQualityLedger
+
 # Kept for callers: the event kind each resolvable class names.
 LEDGER_EVENT_KIND: Mapping[EvidenceClass, EventKind] = {c: k for c, (k, _) in EVIDENCE_SOURCE_ALLOWLIST.items()}
 
@@ -367,6 +371,24 @@ class LedgerEvidenceResolver(TrustedEvidenceResolver):
             if ev.hash == ref.identity:
                 return ev
         return None
+
+    def trade_fact(self, evidence_class: EvidenceClass, trade_id: str) -> Optional[EvidenceRecord]:
+        """The latest allowlisted `evidence_class` event of one trade, resolved
+        (e.g. the TCA_RECORD that holds a reviewed trade's cost ratio)."""
+        kind, producers = EVIDENCE_SOURCE_ALLOWLIST[evidence_class]
+        hit = None
+        for ev in self.ledger.iter(kind, correlation_id=trade_id):
+            if ev.producer in producers:
+                hit = ev
+        return None if hit is None else self.resolve(EvidenceRef(evidence_class, hit.hash), correlation_hint=trade_id)
+
+    def decision_quality(self, trade_id: str) -> Optional[Mapping[str, Any]]:
+        """The latest decision-quality verdict payload of one trade, if any."""
+        hit = None
+        for ev in self.ledger.iter(EventKind.DECISION_QUADRANT, correlation_id=trade_id):
+            if ev.producer in DECISION_QUALITY_PRODUCERS and str(ev.payload.get("trade_intent_id", trade_id)) == trade_id:
+                hit = ev
+        return None if hit is None else json.loads(canonical_json(hit.payload))
 
     def resolve(self, ref: EvidenceRef, *, correlation_hint: Optional[str] = None) -> EvidenceRecord:
         if ref.evidence_class not in LEDGER_EVENT_KIND:

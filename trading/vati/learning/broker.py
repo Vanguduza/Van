@@ -15,6 +15,38 @@ from vati.learning.episodes import EXECUTION_FACT_WEIGHT, Environment
 from vati.learning.evidence import EvidenceClass, EvidenceError, LedgerEvidenceResolver, ResolvedEvidenceCache, parse_evidence_ref
 
 ONE, ZERO = Decimal(1), Decimal(0)
+EVENT_WINDOWS = frozenset({"QUIET", "DRIFT", "PRE_BLACKOUT", "POST_BLACKOUT"})
+
+
+def _tca_decimal(p, key: str, ref) -> Decimal:
+    v = p.get(key)
+    if v is None or isinstance(v, bool):
+        raise EvidenceError(f"TCA evidence {ref} records no {key}")
+    try:
+        d = Decimal(str(v))
+    except (ArithmeticError, ValueError):
+        raise EvidenceError(f"TCA evidence {ref} records a malformed {key} {v!r}") from None
+    if d.is_nan():
+        raise EvidenceError(f"TCA evidence {ref} records a malformed {key} {v!r}")
+    return d
+
+
+def tca_facts(rec) -> tuple[Decimal, Decimal, bool, bool]:
+    """(cost_ratio, slippage, rejected, in_event_window) read from a TCA_RECORD (A-VATI M3).
+    A value the record does not carry is refused, never defaulted."""
+    p = rec.content["payload"]
+    cost = _tca_decimal(p, "cost_ratio", rec.ref)
+    if cost.is_infinite():
+        cost = Decimal("10")   # no modelled cost: the runtime's own cap (hooks.on_tca, replay)
+    slippage = _tca_decimal(p, "slippage", rec.ref)
+    if slippage.is_infinite():
+        raise EvidenceError(f"TCA evidence {rec.ref} records a malformed slippage")
+    rejected, window = p.get("rejected"), p.get("event_window")
+    if not isinstance(rejected, bool):
+        raise EvidenceError(f"TCA evidence {rec.ref} records no rejected flag")
+    if not isinstance(window, str):
+        raise EvidenceError(f"TCA evidence {rec.ref} records no event_window")
+    return cost, slippage, rejected, window in EVENT_WINDOWS
 
 
 class BrokerState(str, Enum):
@@ -88,6 +120,14 @@ class BrokerLearner:
             raise EvidenceError(f"evidence {ref} is not about {key!r}")
         if Environment(environment) is not rec.environment:
             raise EvidenceError(f"fact environment {environment.value} != evidence environment {rec.environment.value}")
+        # A-VATI M3: the execution facts are the TCA record's, not the caller's.
+        cost, slip, rej, in_ev = tca_facts(rec)
+        if cost_ratio.is_infinite():
+            cost_ratio = Decimal("10")
+        if cost_ratio != cost or slippage_pips != slip or bool(rejected) is not rej or bool(in_event_window) is not in_ev:
+            raise EvidenceError(f"execution fact (cost_ratio={cost_ratio}, slippage={slippage_pips}, rejected={rejected}, in_event_window={in_event_window}) "
+                                f"disagrees with its evidence {ref} (cost_ratio={cost}, slippage={slip}, rejected={rej}, in_event_window={in_ev})")
+        cost_ratio, slippage_pips, rejected, in_event_window = cost, slip, rej, in_ev
         p = self.profiles.setdefault((broker, symbol, session), BrokerExecutionProfile(broker, symbol, session))
         if str(ref) in p.evidence_refs or rec.trade_id in p.trade_ids:
             return p   # the same TCA record (or another record of the same trade) is not a new sample

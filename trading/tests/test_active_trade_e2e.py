@@ -438,6 +438,11 @@ def test_capsule_health_is_driven_by_the_decision_axis_downwards_only(world: Wor
 
     adjustment = world.learning.health.live_adjustment(STRATEGY)
     assert adjustment is not None, "the learning boundary never produced an adjustment"
+    # A-VATI M3: every value the lifecycle observed agrees with the ledger evidence
+    # it cites (R from the review, process from the decision-quality verdict, cost
+    # from the TCA record), so no close was refused.
+    assert world.learning.refusals == []
+    assert world.learning.health.verdict(STRATEGY).weighted_samples == Decimal(trades)
     quality = world.lifecycle.decision_quality.health_multiplier(STRATEGY)
 
     health = world.engine.m.capsule_health.get(STRATEGY)

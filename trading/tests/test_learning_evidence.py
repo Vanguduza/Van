@@ -40,14 +40,18 @@ class Src:
         self.ledger.append(ev)
         return ev.hash
 
-    def review(self, sid: str, i: int, **extra) -> str:
-        """A TradeReview-shaped TRADE_REVIEW event (no environment in its payload, as in production)."""
-        h = self.append(EventKind.TRADE_REVIEW, {"trade_intent_id": f"{sid}-{i}", "strategy_id": sid, "r_multiple": "-1", **extra}, f"{sid}-{i}")
+    def review(self, sid: str, i: int, *, r: str = "-1", process_ok: bool = False, cost: str = "2.5", **extra) -> str:
+        """One closed trade as the runtime records it: its entry TCA_RECORD, then a TradeReview-shaped
+        TRADE_REVIEW (no environment in its payload, as in production). The observed values live in
+        the ledger, where the health tracker reads them (A-VATI M3)."""
+        corr = f"{sid}-{i}"
+        self.append(EventKind.TCA_RECORD, {"trade_intent_id": corr, "learning_environment": self.env.value, "cost_ratio": cost}, corr)
+        h = self.append(EventKind.TRADE_REVIEW, {"trade_intent_id": corr, "strategy_id": sid, "r_multiple": r, "process_ok": process_ok, **extra}, corr)
         return make_evidence_ref(EvidenceClass.TRADE_REVIEW, h)
 
     def tca(self, broker: str, symbol: str, session: str, i: int, env: Environment | None = None, **extra) -> str:
         h = self.append(EventKind.TCA_RECORD, {"learning_environment": (env or self.env).value, "broker": broker, "symbol": symbol, "session": session,
-                                               "event_window": "QUIET", "cost_ratio": "1.5", "slippage": "1", "seq": i, **extra}, f"tca-{i}")
+                                               "event_window": "NORMAL", "cost_ratio": "1.5", "slippage": "1", "rejected": False, "seq": i, **extra}, f"tca-{i}")
         return make_evidence_ref(EvidenceClass.TCA_RECORD, h)
 
 
@@ -60,13 +64,14 @@ def _src(env: Environment) -> Src:
 
 def observe_review(t: StrategyHealthTracker, sid, r, *, env=Environment.LIVE, process_ok=True, cost=D("1"), fit=True, i=0):
     src = _src(env)
-    ref = src.review(sid, i)
+    ref = src.review(sid, i, r=str(r), process_ok=process_ok, cost=str(cost))
     return t.observe(HealthObservation(sid, env, D(str(r)), process_ok, cost, fit, ref), resolver=src.resolver)
 
 
 def observe_fact(bl: BrokerLearner, *, broker, symbol, session, environment, cost_ratio, slippage_pips, rejected, in_event_window, i=None):
     src = _src(environment)
-    ref = src.tca(broker, symbol, session, next(_SEQ) if i is None else i)
+    ref = src.tca(broker, symbol, session, next(_SEQ) if i is None else i, cost_ratio=str(cost_ratio), slippage=str(slippage_pips),
+                  rejected=rejected, event_window="PRE_BLACKOUT" if in_event_window else "NORMAL")
     return bl.observe(broker=broker, symbol=symbol, session=session, environment=environment, cost_ratio=cost_ratio, slippage_pips=slippage_pips,
                       rejected=rejected, in_event_window=in_event_window, evidence_ref=ref, resolver=src.resolver)
 
@@ -149,12 +154,12 @@ def test_same_real_trade_review_observed_30_times_counts_once():
 
 def test_decimal_spelling_cannot_mint_identities():
     t, src = StrategyHealthTracker(), Src()
-    ref = src.review(SID, 11)
+    ref = src.review(SID, 11, r="1")
     for r in ("1", "1.0", "1.00"):
         t.observe(hobs(ref, r=r), resolver=src.resolver)
     assert len(t._obs[SID]) == 1 and len(t.evidence) == 1
     bl = BrokerLearner()
-    fact = src.tca("mt5-a", "EURUSD", "LONDON", 11)
+    fact = src.tca("mt5-a", "EURUSD", "LONDON", 11, cost_ratio="1", slippage="1")
     for c in (D(1), D("1.0"), D("1.00")):
         bl.observe(broker="mt5-a", symbol="EURUSD", session="LONDON", environment=Environment.LIVE, cost_ratio=c, slippage_pips=c,
                    rejected=False, in_event_window=False, evidence_ref=fact, resolver=src.resolver)
@@ -198,10 +203,11 @@ def test_hooks_learn_only_from_ledger_events_and_never_from_intent_ids():
         assert hooks.on_tca(led, trade_intent_id=f"intent-{i}", symbol="EURUSD", session="LONDON", event_window="QUIET", cost_ratio=D("1.5"), slippage=D("1")) is None
     assert SID not in hooks.health._obs and hooks.brokers.profiles == {}
     # the same review re-seen 40 times is one sample
-    led.append(make_event(EventKind.TRADE_REVIEW, "vati-cycle", {"trade_intent_id": "intent-x", "strategy_id": SID, "r_multiple": "-1"}, event_time_ms=1, received_time_ms=1, correlation_id="intent-x"))
+    led.append(make_event(EventKind.TCA_RECORD, "vati-cycle", {"trade_intent_id": "intent-x", "learning_environment": "LIVE", "cost_ratio": "2.5"}, event_time_ms=1, received_time_ms=1, correlation_id="intent-x"))
+    led.append(make_event(EventKind.TRADE_REVIEW, "vati-cycle", {"trade_intent_id": "intent-x", "strategy_id": SID, "r_multiple": "-1", "process_ok": False}, event_time_ms=1, received_time_ms=1, correlation_id="intent-x"))
     for _ in range(40):
         hooks.on_review(led, trade_intent_id="intent-x", strategy_id=SID, r_multiple=D("-1"), process_ok=False, cost_ratio=D("2.5"))
-    assert hooks.health.verdict(SID).weighted_samples == D("1.0")
+    assert hooks.health.verdict(SID).weighted_samples == D("1.0") and hooks.refusals == []
 
 
 def test_positive_path_30_distinct_real_trade_reviews_still_demote():
@@ -210,15 +216,17 @@ def test_positive_path_30_distinct_real_trade_reviews_still_demote():
     adj = None
     for i in range(30):
         corr = f"intent-{i}"
-        led.append(make_event(EventKind.TRADE_REVIEW, "vati-cycle", {"trade_intent_id": corr, "strategy_id": SID, "r_multiple": "-1"}, event_time_ms=i, received_time_ms=i, correlation_id=corr))
-        led.append(make_event(EventKind.TCA_RECORD, "vati-cycle", {"learning_environment": "LIVE", "broker": "mt5-a", "symbol": "EURUSD", "session": "LONDON", "event_window": "QUIET", "cost_ratio": "1.5"},
+        led.append(make_event(EventKind.TRADE_REVIEW, "vati-cycle", {"trade_intent_id": corr, "strategy_id": SID, "r_multiple": "-1", "process_ok": False}, event_time_ms=i, received_time_ms=i, correlation_id=corr))
+        led.append(make_event(EventKind.TCA_RECORD, "vati-cycle", {"learning_environment": "LIVE", "broker": "mt5-a", "symbol": "EURUSD", "session": "LONDON", "event_window": "QUIET", "cost_ratio": "1.5",
+                                                                   "slippage": "1", "rejected": False},
                               event_time_ms=i, received_time_ms=i, correlation_id=corr))
-        _, adj = hooks.on_review(led, trade_intent_id=corr, strategy_id=SID, r_multiple=D("-1"), process_ok=False, cost_ratio=D("2.5"), regime_fit=False)
+        _, adj = hooks.on_review(led, trade_intent_id=corr, strategy_id=SID, r_multiple=D("-1"), process_ok=False, cost_ratio=D("1.5"), regime_fit=False)
         badj = hooks.on_tca(led, trade_intent_id=corr, symbol="EURUSD", session="LONDON", event_window="QUIET", cost_ratio=D("1.5"), slippage=D("1"))
     assert adj is not None and adj.demote_to == "SHADOW" and adj.multiplier < D("0.4") and adj.environment_weighted_samples == D("30.0")
     assert all(parse_evidence_ref(r).evidence_class is EvidenceClass.TRADE_REVIEW for r in adj.evidence_refs) and len(set(adj.evidence_refs)) == 30
     assert LearningBoundary.check(adj, hooks.health.evidence) is adj
     assert badj is not None and badj.multiplier == D("0.7") and badj.environment_weighted_samples == D("30.0")
+    assert hooks.refusals == []
 
 
 # ----------------------------------------------------- boundary: grammar
@@ -468,6 +476,7 @@ def test_source_allowlist_names_runtime_producers_and_no_derived_kind():
 # ----------------------------------- A-VATI (review D): M2 trade identity
 def _trade_artifacts(src: Src, corr: str, sid: str = SID) -> tuple[str, str]:
     """The TRADE_REVIEW and the TRADE_EXPERIENCE_ARTIFACT of one trade, as the runtime writes them."""
+    src.append(EventKind.TCA_RECORD, {"trade_intent_id": corr, "learning_environment": src.env.value, "cost_ratio": "2.5"}, corr)
     review = make_evidence_ref(EvidenceClass.TRADE_REVIEW, src.append(
         EventKind.TRADE_REVIEW, {"trade_intent_id": corr, "strategy_id": sid, "r_multiple": "-1", "process_ok": False}, corr))
     artifact = make_evidence_ref(EvidenceClass.VTIL_ARTIFACT, src.append(
@@ -509,7 +518,7 @@ def test_one_trade_with_two_tca_records_is_one_broker_sample():
     for seq in (1, 2):   # e.g. a live TCA and a restart-recovered TCA of the same fill
         refs.append(make_evidence_ref(EvidenceClass.TCA_RECORD, src.append(EventKind.TCA_RECORD, {
             "trade_intent_id": "t-fill", "learning_environment": "LIVE", "broker": "mt5-a", "symbol": "EURUSD", "session": "LONDON",
-            "event_window": "QUIET", "cost_ratio": "1.5", "slippage": "1", "rejected": False, "seq": seq}, "t-fill")))
+            "event_window": "NORMAL", "cost_ratio": "1.5", "slippage": "1", "rejected": False, "seq": seq}, "t-fill")))
         p = bl.observe(broker="mt5-a", symbol="EURUSD", session="LONDON", environment=Environment.LIVE, cost_ratio=D("1.5"), slippage_pips=D("1"),
                        rejected=False, in_event_window=False, evidence_ref=refs[-1], resolver=src.resolver)
     assert len(p.samples) == 1 and p._w() == D("1.0")
@@ -527,6 +536,84 @@ def test_payload_naming_another_trade_than_its_ledger_correlation_is_refused():
         EventKind.TRADE_REVIEW, {"strategy_id": SID, "r_multiple": "-1"}, ""))
     with pytest.raises(EvidenceError, match="names no trade"):
         src.resolver.resolve(parse_evidence_ref(uncorrelated))
+
+
+# ------------------------------- A-VATI (review D): M3 values from evidence
+def test_review_d_p3_observation_values_must_be_the_cited_reviews():
+    """Review D P3: r=-50/process_ok=False citing a review whose payload says r=2.5/process_ok=True was accepted (health 0.000)."""
+    src = Src()
+    ref = src.review("S3", 1, r="2.5", process_ok=True, cost="1")
+    t = StrategyHealthTracker()
+    for r, proc, cost in ((D("-50"), False, D("10")), (D("-50"), True, D("1")), (D("2.5"), False, D("1")), (D("2.5"), True, D("3"))):
+        with pytest.raises(EvidenceError, match="disagrees with its evidence"):
+            t.observe(HealthObservation("S3", Environment.LIVE, r, proc, cost, True, ref), resolver=src.resolver)
+    assert "S3" not in t._obs and t.verdict("S3").weighted_samples == 0
+    v = t.observe(HealthObservation("S3", Environment.LIVE, D("2.50"), True, D("1.0"), True, ref), resolver=src.resolver)
+    assert v.weighted_samples == D("1.0") and t._obs["S3"][0].r_multiple == D("2.5")
+    # the evidence-only path reads the same values without a caller
+    t2 = StrategyHealthTracker()
+    t2.observe_evidence("S3", ref, resolver=src.resolver)
+    assert (t2._obs["S3"][0].r_multiple, t2._obs["S3"][0].process_ok, t2._obs["S3"][0].cost_ratio) == (D("2.5"), True, D("1"))
+
+
+def test_review_d_p3b_broker_execution_facts_must_be_the_cited_tca_records():
+    src = Src()
+    fact = src.tca("mt5-a", "EURUSD", "LONDON", 1, cost_ratio="1.0", slippage="0.1", rejected=False, event_window="NORMAL")
+    bl = BrokerLearner()
+    for cost, slip, rej, ev in ((D("9"), D("50"), True, True), (D("1.0"), D("0.1"), True, False), (D("1.0"), D("0.1"), False, True), (D("1.2"), D("0.1"), False, False)):
+        with pytest.raises(EvidenceError, match="disagrees with its evidence"):
+            bl.observe(broker="mt5-a", symbol="EURUSD", session="LONDON", environment=Environment.LIVE, cost_ratio=cost, slippage_pips=slip,
+                       rejected=rej, in_event_window=ev, evidence_ref=fact, resolver=src.resolver)
+    assert bl.profiles == {}
+    p = bl.observe(broker="mt5-a", symbol="EURUSD", session="LONDON", environment=Environment.LIVE, cost_ratio=D("1"), slippage_pips=D("0.10"),
+                   rejected=False, in_event_window=False, evidence_ref=fact, resolver=src.resolver)
+    assert p.samples == [(D("1.0"), D("1.0"), D("0.1"), False, False)]
+
+
+@pytest.mark.parametrize("missing", ["r_multiple", "process_ok", "tca", "tca_cost"])
+def test_a_value_the_evidence_does_not_record_is_refused_not_defaulted(missing):
+    src = Src()
+    corr = f"miss-{missing}"
+    if missing != "tca":
+        src.append(EventKind.TCA_RECORD, {"trade_intent_id": corr, "learning_environment": "LIVE",
+                                          **({} if missing == "tca_cost" else {"cost_ratio": "1"})}, corr)
+    payload = {"trade_intent_id": corr, "strategy_id": SID, "r_multiple": "-1", "process_ok": False}
+    payload.pop(missing, None)
+    ref = make_evidence_ref(EvidenceClass.TRADE_REVIEW, src.append(EventKind.TRADE_REVIEW, payload, corr))
+    with pytest.raises(EvidenceError, match="records no|no TCA_RECORD"):
+        StrategyHealthTracker().observe(HealthObservation(SID, Environment.LIVE, D("-1"), False, D("1"), True, ref), resolver=src.resolver)
+    tca = src.tca("mt5-a", "EURUSD", "LONDON", 5)
+    rec = src.resolver.resolve(parse_evidence_ref(tca))
+    for key in ("cost_ratio", "slippage", "rejected", "event_window"):
+        bare = {k: v for k, v in rec.content["payload"].items() if k != key}
+        ref2 = make_evidence_ref(EvidenceClass.TCA_RECORD, src.append(EventKind.TCA_RECORD, {**bare, "seq": f"no-{key}"}, f"tca-no-{key}"))
+        with pytest.raises(EvidenceError, match="records no"):
+            BrokerLearner().observe(broker="mt5-a", symbol="EURUSD", session="LONDON", environment=Environment.LIVE, cost_ratio=D("1.5"), slippage_pips=D("1"),
+                                    rejected=False, in_event_window=False, evidence_ref=ref2, resolver=src.resolver)
+
+
+def test_decision_quality_verdict_is_the_process_evidence_when_the_ledger_holds_one():
+    """GAP-F-003 keeps working: the runtime passes the decision-quality verdict, and that verdict is on the ledger."""
+    src = Src()
+    ref = src.review(SID, 77, process_ok=True)   # the review's own flag is the runtime's constant True
+    src.append(EventKind.DECISION_QUADRANT, {"trade_intent_id": f"{SID}-77", "faults": ["STOP_WIDENED"]}, f"{SID}-77", producer="vati-decision-quality")
+    t = StrategyHealthTracker()
+    with pytest.raises(EvidenceError, match="disagrees"):
+        t.observe(HealthObservation(SID, Environment.LIVE, D("-1"), True, D("2.5"), True, ref), resolver=src.resolver)
+    assert t.observe(HealthObservation(SID, Environment.LIVE, D("-1"), False, D("2.5"), True, ref), resolver=src.resolver).weighted_samples == D("1.0")
+    # a verdict from any other producer is not the decision-quality ledger
+    ref2 = src.review(SID, 78, process_ok=True)
+    src.append(EventKind.DECISION_QUADRANT, {"trade_intent_id": f"{SID}-78", "faults": ["X"]}, f"{SID}-78", producer="hindsight-derived")
+    assert StrategyHealthTracker().observe(HealthObservation(SID, Environment.LIVE, D("-1"), True, D("2.5"), True, ref2), resolver=src.resolver).weighted_samples == D("1.0")
+
+
+def test_hooks_refuse_a_disagreeing_close_without_interrupting_it():
+    hooks = LearningHooks(environment=Environment.LIVE, broker="mt5-a")
+    led = Ledger()
+    led.append(make_event(EventKind.TCA_RECORD, "vati-cycle", {"trade_intent_id": "t-x", "learning_environment": "LIVE", "cost_ratio": "1"}, event_time_ms=1, received_time_ms=1, correlation_id="t-x"))
+    led.append(make_event(EventKind.TRADE_REVIEW, "vati-cycle", {"trade_intent_id": "t-x", "strategy_id": SID, "r_multiple": "2.5", "process_ok": True}, event_time_ms=1, received_time_ms=1, correlation_id="t-x"))
+    ep, adj = hooks.on_review(led, trade_intent_id="t-x", strategy_id=SID, r_multiple=D("-50"), process_ok=False, cost_ratio=D("10"))
+    assert adj is None and SID not in hooks.health._obs and len(hooks.refusals) == 1 and "disagrees" in hooks.refusals[0]
 
 
 # ------------------------------------------------------- memory bridge
