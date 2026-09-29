@@ -209,22 +209,52 @@ class AutomationDispatcher:
             engine_reported_success=bool(engine_result.get("success", False)),
             context={"run_id": run_id, "inputs": inputs, "engine": engine_result},
         )
+        # Reviewer I2 issue (a) — the Action Runtime checks the execution's correlation (the
+        # engine's own execution id) against the observation. That value must come from the
+        # independent observation; merging the engine's id back in compared it with itself.
+        # An engine id the observer did not report cannot be correlated: something may exist,
+        # but it is not proven to be this run's (§166), so the receipt is PARTIAL, not success.
+        observed_correlation = dict(verification.correlation)
+        for key in correlation:
+            observed_value = verification.observed.get(key)
+            if observed_value is not None and key not in observed_correlation:
+                observed_correlation[key] = observed_value
+        engine_uncorrelated = sorted(
+            key for key, value in correlation.items()
+            if value in (None, "") or observed_correlation.get(key) is None
+        )
+        verified = verification.outcome is VerificationOutcome.VERIFIED
         receipt = await self.actions.verify(
             VerificationObservation(
                 execution_id=execution.execution_id,
-                success=verification.outcome is VerificationOutcome.VERIFIED,
-                correlation=verification.correlation or correlation,
+                success=verified and not engine_uncorrelated,
+                correlation=observed_correlation,
                 observed_postcondition=verification.observed,
                 evidence_pointer=verification.evidence_pointer,
-                partial=verification.outcome is VerificationOutcome.PARTIAL,
+                partial=verification.outcome is VerificationOutcome.PARTIAL
+                or (verified and bool(engine_uncorrelated)),
             )
         )
-        status = {
-            VerificationOutcome.VERIFIED: RunStatus.VERIFIED_SUCCESS,
-            VerificationOutcome.PARTIAL: RunStatus.PARTIAL_SUCCESS,
-            VerificationOutcome.UNVERIFIABLE: RunStatus.UNVERIFIABLE,
-            VerificationOutcome.FAILED: RunStatus.FAILED,
-        }[verification.outcome]
+        failure_detail = verification.detail
+        if verified:
+            # Run success needs BOTH the verifier's VERIFIED and the action receipt's
+            # VERIFIED_SUCCESS; either one alone left owner_success=True beside an execution
+            # recorded VERIFICATION_FAILED.
+            status = {
+                ExecutionStatus.VERIFIED_SUCCESS: RunStatus.VERIFIED_SUCCESS,
+                ExecutionStatus.PARTIAL_SUCCESS: RunStatus.PARTIAL_SUCCESS,
+                ExecutionStatus.UNVERIFIABLE: RunStatus.UNVERIFIABLE,
+            }.get(receipt.status, RunStatus.FAILED)
+            if engine_uncorrelated:
+                failure_detail = f"ENGINE_CORRELATION_UNOBSERVED:{','.join(engine_uncorrelated)}"
+            elif status is RunStatus.FAILED:
+                failure_detail = "ENGINE_CORRELATION_MISMATCH"
+        else:
+            status = {
+                VerificationOutcome.PARTIAL: RunStatus.PARTIAL_SUCCESS,
+                VerificationOutcome.UNVERIFIABLE: RunStatus.UNVERIFIABLE,
+                VerificationOutcome.FAILED: RunStatus.FAILED,
+            }[verification.outcome]
         await self._update_run(
             run_id, status=status, now=now, evidence_pointer=receipt.evidence_pointer,
             verifier_status=receipt.status.value,
@@ -238,7 +268,7 @@ class AutomationDispatcher:
             await self._record_failure(
                 run_id=run_id, capability_id=capability_id, artifact=artifact,
                 failure_class=FailureClass.VERIFICATION,
-                error_code=verification.detail or "VERIFICATION_FAILED",
+                error_code=failure_detail or "VERIFICATION_FAILED",
                 now=completed, started=now,
             )
         else:
@@ -259,7 +289,12 @@ class AutomationDispatcher:
             run_id=run_id, capability_id=capability_id, artifact_id=artifact.artifact_id,
             status=status, execution=await self.actions.get_execution(execution.execution_id),
             verification_outcome=verification.outcome, evidence_pointer=receipt.evidence_pointer,
-            detail={"verifier_detail": verification.detail} if verification.detail else {},
+            detail={
+                key: value for key, value in (
+                    ("verifier_detail", failure_detail),
+                    ("action_receipt_status", receipt.status.value),
+                ) if value
+            },
         )
 
     # ----------------------------------------------------------------- pieces

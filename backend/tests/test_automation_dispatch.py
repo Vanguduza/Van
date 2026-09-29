@@ -140,7 +140,8 @@ async def _build(tmp_path, *, observer: _Observer | None = None, engine_success:
 
 
 async def test_verified_run_reports_owner_success(tmp_path):
-    # The caller declares the value its correlation key must hold (reviewer I2 N-1).
+    # The observer independently reports the engine execution it saw the effect of; the
+    # caller declares the value its correlation key must hold (reviewer I2 N-1 / issue (a)).
     observer = _Observer({"exists": True, "evidence_pointer": "gateway://evidence/1",
                           "n8n_execution_id": "n8n-exec-9"})
     _store, dispatcher = await _build(tmp_path, observer=observer)
@@ -155,6 +156,7 @@ async def test_verified_run_reports_owner_success(tmp_path):
     )
     assert result.status is RunStatus.VERIFIED_SUCCESS
     assert result.owner_success is True
+    assert result.execution.status is ExecutionStatus.VERIFIED_SUCCESS
     assert observer.calls == 1
 
 
@@ -294,7 +296,10 @@ async def test_unready_runtime_blocks_execution(tmp_path):
 
 
 async def test_run_is_recorded_with_execution_linkage(tmp_path):
-    observer = _Observer({"exists": True, "state": "DELIVERED"})
+    # Reviewer I2 issue (a): this used to pass with an observer that never saw the engine
+    # run, because the dispatcher merged the engine's own id back in and the Action Runtime
+    # compared it with itself. The observer must report which execution it saw.
+    observer = _Observer({"exists": True, "state": "DELIVERED", "n8n_execution_id": "n8n-exec-9"})
     store, dispatcher = await _build(tmp_path, observer=observer)
     result = await dispatcher.dispatch(
         capability_id="wfcap_statements", action_id=ACTION_ID, command_id="cmd-owner-1",
