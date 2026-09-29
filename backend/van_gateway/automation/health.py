@@ -263,6 +263,13 @@ class AutomationHealthApi:
                     "gates_not_green": governance["capabilities"]["browser_harness"]["gates_not_green"],
                 },
                 "stagehand": await self._stagehand_production(governance),
+                # Review I2 N-7 — VAN's own gate on Jev browser effect (SHADOW only until GREEN).
+                "jev_browser_effect": {
+                    "production_activation_permitted": governance["capabilities"]["jev_browser_effect"][
+                        "production_activation_permitted"
+                    ],
+                    "gates_not_green": governance["capabilities"]["jev_browser_effect"]["gates_not_green"],
+                },
             },
             "policy_version": policy.policy_version,
             "max_autonomy_tier": policy.max_autonomy_tier,

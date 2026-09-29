@@ -7,19 +7,60 @@ imports are unchanged.
 
 * ``OwnerControlProbe`` — owner takeover preempts automation (owner decision 2026-09-29 §9).
 * ``load_stagehand_production_gate`` — the Stagehand production gate (placement on
-  van-browser-core AND the production gate model), settings-first.
+  van-browser-core AND the Stagehand slice of the production gate model), settings-first.
+* ``load_jev_browser_effect_gate`` — VAN's own gate on Jev browser effect (review I2 N-7).
+* ``step_gate_scope`` / ``step_gate_memo`` — one gate evaluation per router step (N-10).
 """
 
 from __future__ import annotations
 
+import contextlib
+import contextvars
 import time
-from typing import Any, Callable
+from typing import Any, AsyncIterator, Awaitable, Callable
 
 from van_gateway.browser.models import BrowserTask
 
 #: ``placement.stagehand_production_enabled`` reasons that mean "settings are fine, only the
 #: worker's live /health is missing" — the one case where the endpoint may be contacted.
 WORKER_HEALTH_PENDING_PREFIX = "VAN_BROWSER_CORE_UNAVAILABLE:"
+
+#: Review I2 N-10 — gate verdicts already evaluated in the current router step. ``None``
+#: outside a step, where every call evaluates afresh (the assignment path, the notebook
+#: consumer, the health surface).
+_STEP_GATE_VERDICTS: contextvars.ContextVar[dict[Any, Any] | None] = contextvars.ContextVar(
+    "van_browser_step_gate_verdicts", default=None
+)
+
+
+@contextlib.asynccontextmanager
+async def step_gate_scope() -> AsyncIterator[None]:
+    """One router step: each gate is evaluated at most once inside it, and reused.
+
+    A verdict never outlives the step, so nothing is cached across steps; within the step
+    the lane decision and the adapter call it leads to read the *same* verdict instead of
+    re-deriving it (and re-reading the worker's /health) three times.
+    """
+    token = _STEP_GATE_VERDICTS.set({})
+    try:
+        yield
+    finally:
+        _STEP_GATE_VERDICTS.reset(token)
+
+
+async def step_gate_memo(key: Any, evaluate: Callable[[], Awaitable[Any]]) -> Any:
+    """``await evaluate()``, memoised under ``key`` for the current step (if any).
+
+    A raised gate is not memoised: the caller turns it into a closed verdict each time.
+    """
+    verdicts = _STEP_GATE_VERDICTS.get()
+    if verdicts is None:
+        return await evaluate()
+    if key in verdicts:
+        return verdicts[key]
+    verdict = await evaluate()
+    verdicts[key] = verdict
+    return verdict
 
 
 class OwnerControlProbe:
@@ -75,6 +116,13 @@ def load_stagehand_production_gate(settings: Any, stagehand: Any = None) -> Call
     """
 
     async def gate() -> tuple[bool, str]:
+        if stagehand is None:
+            return await evaluate()
+        # Keyed by the adapter and settings, so the router's lane gate and the adapter's own
+        # canonical gate (the same function over the same adapter) share one evaluation.
+        return await step_gate_memo(("stagehand_production_gate", id(stagehand), id(settings)), evaluate)
+
+    async def evaluate() -> tuple[bool, str]:
         try:
             from van_gateway.automation import placement  # type: ignore[attr-defined]
         except ImportError:
@@ -97,17 +145,67 @@ def load_stagehand_production_gate(settings: Any, stagehand: Any = None) -> Call
             from van_gateway.automation.production_gates import evaluate_production_gates
         except ImportError:
             return False, "PRODUCTION_GATE_MODEL_MISSING"
-        gates = evaluate_production_gates()
-        if gates.get("production_activation_permitted") is not True:
-            not_green = ",".join(gates.get("production_gates_not_green") or [])[:200]
-            return False, f"PRODUCTION_GATES_NOT_GREEN:{not_green or gates.get('gate_model_error') or 'UNKNOWN'}"
+        # Review I2 N-8: the Stagehand *capability slice* of the gate model (its adoption
+        # record, the Harness record it acts through, the Security Policy amendment) — the
+        # scope /v1/browser/health reports for Stagehand. The global flag also covers n8n,
+        # which does not bear on this lane; it stays the overall summary.
+        verdict = capability_gate_verdict(evaluate_production_gates(), STAGEHAND_GATE_SLICE)
+        if verdict[0] is not True:
+            return verdict
         return True, str(reason)
 
     return gate
 
 
+STAGEHAND_GATE_SLICE = "stagehand"
+#: Review I2 N-7 — the gate model capability for Jev browser effect.
+JEV_BROWSER_EFFECT_GATE_SLICE = "jev_browser_effect"
+
+
+def capability_gate_verdict(gates: dict[str, Any], capability: str) -> tuple[bool, str]:
+    """(permitted, reason) for one capability slice of ``evaluate_production_gates()``.
+
+    Missing slice, unreadable model or any gate not GREEN is closed.
+    """
+    slice_ = (gates.get("capabilities") or {}).get(capability)
+    if not isinstance(slice_, dict):
+        return False, f"PRODUCTION_GATES_NOT_GREEN:{capability}:CAPABILITY_NOT_IN_GATE_MODEL"
+    if slice_.get("production_activation_permitted") is not True:
+        not_green = ",".join(slice_.get("gates_not_green") or [])[:200]
+        detail = not_green or slice_.get("error") or gates.get("gate_model_error") or "UNKNOWN"
+        return False, f"PRODUCTION_GATES_NOT_GREEN:{detail}"
+    return True, f"{capability.upper()}_GATES_GREEN"
+
+
+def load_jev_browser_effect_gate() -> Callable[[], Any]:
+    """VAN's gate on acting on a Jev browser proposal (review I2 N-7).
+
+    Blueprint §11: no Jev module can carry effect today, and PROPOSE_ACTION stays SHADOW
+    until a separate owner decision. dial-jev's ``apply_effect: true`` under ACTIVE is its own
+    report and is not that decision. This gate reads the ``jev_browser_effect`` slice of the
+    production gate model (``VAN-JEV-BROWSER-EFFECT-001.yaml``, which starts SHADOW_ONLY, plus
+    the Harness record Jev's actions go through and the Security Policy amendment). Anything
+    not GREEN — including a missing model or record — keeps every Jev proposal a shadow.
+    """
+
+    async def gate() -> tuple[bool, str]:
+        try:
+            from van_gateway.automation.production_gates import evaluate_production_gates
+        except ImportError:
+            return False, "PRODUCTION_GATE_MODEL_MISSING"
+        return capability_gate_verdict(evaluate_production_gates(), JEV_BROWSER_EFFECT_GATE_SLICE)
+
+    return gate
+
+
 __all__ = [
+    "JEV_BROWSER_EFFECT_GATE_SLICE",
     "OwnerControlProbe",
+    "STAGEHAND_GATE_SLICE",
     "WORKER_HEALTH_PENDING_PREFIX",
+    "capability_gate_verdict",
+    "load_jev_browser_effect_gate",
     "load_stagehand_production_gate",
+    "step_gate_memo",
+    "step_gate_scope",
 ]

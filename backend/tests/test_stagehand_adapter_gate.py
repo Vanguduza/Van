@@ -154,7 +154,10 @@ async def test_canonical_gate_is_placement_with_live_health_and_production_gates
 
     monkeypatch.setattr(placement, "stagehand_production_enabled", fake_placement)
     monkeypatch.setattr(production_gates, "evaluate_production_gates", lambda: {
+        # Review I2 N-8: the lane reads the Stagehand capability slice, as health does.
         "production_activation_permitted": False, "production_gates_not_green": ["D:signed_ingress"],
+        "capabilities": {"stagehand": {"production_activation_permitted": False,
+                                       "gates_not_green": ["D:signed_ingress"]}},
     })
     stagehand = _adapter(store, recorder, settings=Settings(browser_enabled=True))
 
@@ -164,7 +167,11 @@ async def test_canonical_gate_is_placement_with_live_health_and_production_gates
     assert seen["health"] == {"ok": True}  # the live worker /health was read
     assert recorder.paths == ["/health"]
 
-    monkeypatch.setattr(production_gates, "evaluate_production_gates", lambda: {"production_activation_permitted": True})
+    monkeypatch.setattr(production_gates, "evaluate_production_gates", lambda: {
+        # Stagehand slice GREEN; the global summary (n8n too) need not be.
+        "production_activation_permitted": False,
+        "capabilities": {"stagehand": {"production_activation_permitted": True, "gates_not_green": []}},
+    })
     await stagehand.observe(task, "look")
     assert recorder.paths == ["/health", "/health", "/observe"]
     assert stagehand.configured is True

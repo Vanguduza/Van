@@ -312,5 +312,5 @@ def test_health_governance_keeps_its_keys_and_adds_per_capability_fields():
     state = health.governance_state()
     assert {"owner_decisions_pending", "owner_decisions_missing", "production_activation_permitted",
             "production_gates_not_green", "gates", "gate_model", "gate_model_error"} <= set(state)
-    assert set(state["production_activation_permitted_by_capability"]) == {"n8n", "browser_harness", "stagehand"}
+    assert set(state["production_activation_permitted_by_capability"]) == {"n8n", "browser_harness", "stagehand", "jev_browser_effect"}
     assert state["production_activation_permitted"] is False

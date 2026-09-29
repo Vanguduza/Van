@@ -38,7 +38,12 @@ from van_gateway.browser.models import (
     BrowserTaskStatus,
 )
 from van_gateway.browser.policy import BrowserPolicyEngine, BrowserPolicyError
-from van_gateway.browser.service import BrowserSessionBroker, BrowserTaskNotVerified, BrowserTaskService
+from van_gateway.browser.service import (
+    BrowserSessionBroker,
+    BrowserTaskNotVerified,
+    BrowserTaskService,
+    BrowserTaskTransitionRefused,
+)
 from van_gateway.automation.canonical import digest
 from van_gateway.automation.verifier import PostconditionSpec
 from van_gateway.browser.worker import BrowserTaskPlan, SemanticWorkerUnavailable
@@ -607,6 +612,27 @@ class BrowserApi:
     async def _enforce_resume_authorization(
         self, task: BrowserTask, assignment: SubagentAssignment
     ) -> None:
+        await self.consume_resume_authorization(
+            task, requested_domains=list(assignment.allowed_domains),
+            requested_class=assignment.action_class_ceiling,
+        )
+
+    async def consume_resume_authorization(
+        self,
+        task: BrowserTask,
+        *,
+        requested_domains: list[str] | None = None,
+        requested_class: ActionClass | None = None,
+    ) -> dict[str, Any]:
+        """Bind one run of a RESUME_AUTHORIZED task to the owner's ACTIVE authorization.
+
+        The status alone is not the owner's answer; the authorization row is, and it is
+        single-use. Used by ``/assignments`` (which refuses a scope or class above the
+        approval) and by ``/interaction/step`` (review I2 N-4, which caps its ceiling at the
+        approved class). The consumption is conditional on the row still being ACTIVE, so two
+        concurrent resumes cannot both spend it. Returns ``{"authorization_id",
+        "approved_action_class_ceiling", "approved_domains"}``.
+        """
         row = await self.store.fetchone(
             """
             SELECT authorization_id, approved_domains_json,
@@ -620,20 +646,29 @@ class BrowserApi:
         )
         if row is None:
             raise HTTPException(status_code=409, detail="BROWSER_RESUME_AUTHORIZATION_MISSING")
-        approved_domains = set(json.loads(str(row["approved_domains_json"])))
-        requested_domains = set(assignment.allowed_domains)
-        if not requested_domains.issubset(approved_domains):
+        approved_domains = list(json.loads(str(row["approved_domains_json"])))
+        if requested_domains is not None and not set(requested_domains).issubset(set(approved_domains)):
             raise HTTPException(status_code=409, detail="BROWSER_RESUME_SCOPE_EXCEEDS_APPROVAL")
         approved_class_raw = row["approved_action_class_ceiling"]
-        if approved_class_raw:
+        approved_class = ActionClass(str(approved_class_raw)) if approved_class_raw else None
+        if approved_class is not None and requested_class is not None:
             rank = {ActionClass.A1: 1, ActionClass.A2: 2, ActionClass.A3: 3, ActionClass.A4: 4, ActionClass.A5: 5}
-            approved_class = ActionClass(str(approved_class_raw))
-            if rank[assignment.action_class_ceiling] > rank[approved_class]:
+            if rank.get(requested_class, 99) > rank.get(approved_class, 0):
                 raise HTTPException(status_code=409, detail="BROWSER_RESUME_CLASS_EXCEEDS_APPROVAL")
-        await self.store.execute(
-            "UPDATE browser_scope_authorizations SET status = 'CONSUMED', consumed_at_ms = ? WHERE authorization_id = ?",
-            (int(time.time() * 1000), row["authorization_id"]),
-        )
+        async with self.store.connection() as db:
+            cur = await db.execute(
+                "UPDATE browser_scope_authorizations SET status = 'CONSUMED', consumed_at_ms = ? "
+                "WHERE authorization_id = ? AND status = 'ACTIVE'",
+                (int(time.time() * 1000), row["authorization_id"]),
+            )
+            await db.commit()
+            if cur.rowcount != 1:
+                raise HTTPException(status_code=409, detail="BROWSER_RESUME_AUTHORIZATION_MISSING")
+        return {
+            "authorization_id": str(row["authorization_id"]),
+            "approved_action_class_ceiling": approved_class.value if approved_class is not None else None,
+            "approved_domains": approved_domains,
+        }
 
     # ------------------------------------------------------------- routes
 
@@ -890,6 +925,12 @@ class BrowserApi:
                     task_id=task_id, status=body.status,
                     evidence_pointer=body.evidence_pointer, error_code=body.error_code,
                 )
+            except BrowserTaskTransitionRefused as exc:
+                # Review I2 N-3: an end state only, and never out of one. RESUME_AUTHORIZED
+                # comes from the owner's decision and PENDING from task creation, not here.
+                raise HTTPException(
+                    status_code=409, detail=f"BROWSER_TASK_TRANSITION_REFUSED:{exc.why}:{exc.current or 'UNKNOWN'}->{exc.requested}",
+                ) from exc
             except BrowserTaskNotVerified as exc:
                 # §7 / review I M-2: a caller cannot declare success. COMPLETED needs the
                 # independent verifier's VERIFIED verdict on record for this task.
@@ -994,14 +1035,18 @@ class BrowserApi:
                     terminal_status = BrowserTaskStatus.BLOCKED_UNSAFE
                 elif not result.succeeded:
                     terminal_status = BrowserTaskStatus.FAILED
-                await self.tasks.complete(
-                    task_id=task.task_id,
-                    status=terminal_status,
-                    error_code=(
-                        None if result.succeeded else result.stop_reason.value
-                    ),
-                    now_ms=int(time.time() * 1000),
-                )
+                error_code = None if result.succeeded else result.stop_reason.value
+                if terminal_status is BrowserTaskStatus.VERIFYING:
+                    # Not an end state (review I2 N-3): held for the owner, never success.
+                    await self.tasks.hold_for_verification(
+                        task_id=task.task_id, error_code=error_code,
+                        now_ms=int(time.time() * 1000),
+                    )
+                else:
+                    await self.tasks.complete(
+                        task_id=task.task_id, status=terminal_status, error_code=error_code,
+                        now_ms=int(time.time() * 1000),
+                    )
                 # P3-OBS-002 — "browser task status" is one of Gate 11's named
                 # metrics. Recorded at the one place a task reaches a terminal
                 # status, so a new stop reason is counted without being added here.

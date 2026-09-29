@@ -42,11 +42,19 @@ GATE_MODEL = REPO_ROOT / "registries" / "production_activation_gates.json"
 #: Harness, so it inherits the Harness decision. A decision named here that the gate model
 #: does not require makes that capability UNKNOWN, never permitted.
 SECURITY_POLICY_DECISION = "VAN-AMEND-SECURITY-POLICY-001.md"
+JEV_BROWSER_EFFECT_DECISION = "VAN-JEV-BROWSER-EFFECT-001.yaml"
 CAPABILITY_DECISIONS: dict[str, tuple[str, ...]] = {
     "n8n": ("VAN-ADOPT-N8N-001.yaml", SECURITY_POLICY_DECISION),
     "browser_harness": ("VAN-ADOPT-BROWSER-HARNESS-001.yaml", SECURITY_POLICY_DECISION),
     "stagehand": (
         "VAN-ADOPT-STAGEHAND-001.yaml", "VAN-ADOPT-BROWSER-HARNESS-001.yaml", SECURITY_POLICY_DECISION,
+    ),
+    # Review I2 N-7 — VAN's own gate on Jev browser effect. Blueprint §11: no Jev module can
+    # carry effect today; PROPOSE_ACTION stays SHADOW until a separate owner decision. The
+    # record starts SHADOW_ONLY (pending). Jev's actions go through the Harness, so the
+    # Harness decision is inherited like Stagehand's.
+    "jev_browser_effect": (
+        JEV_BROWSER_EFFECT_DECISION, "VAN-ADOPT-BROWSER-HARNESS-001.yaml", SECURITY_POLICY_DECISION,
     ),
 }
 
@@ -211,6 +219,12 @@ def evaluate_production_gates(
         decisions_dir = root / model.get("decisions_dir", "docs/decisions")
         if not isinstance(required, list) or not required:
             raise ValueError("model declares no required decisions")
+        # Review I2 N-7: decisions that gate one capability only (e.g. Jev browser effect,
+        # which stays SHADOW_ONLY as a legitimate production posture). Evaluated exactly like
+        # required ones, reported per capability, and not part of the global summary.
+        capability_only = model.get("capability_decisions", [])
+        if not isinstance(capability_only, list):
+            raise ValueError("capability_decisions is not a list")
     except Exception as exc:  # noqa: BLE001 — any unreadable model is a closed gate
         base["gate_model_error"] = f"{type(exc).__name__}: {exc}"
         return base
@@ -218,7 +232,10 @@ def evaluate_production_gates(
     results: list[GateResult] = []
     missing: list[str] = []
     names: list[str] = []
-    for entry in required:
+    capability_names: list[str] = []
+    global_count = len(required)
+    for index, entry in enumerate(list(required) + list(capability_only)):
+        is_global = index < global_count
         name = entry.get("decision") if isinstance(entry, dict) else None
         if not isinstance(name, str) or not name:
             results.append(
@@ -226,7 +243,7 @@ def evaluate_production_gates(
                            None, model_source, "", "decision entry has no name")
             )
             continue
-        names.append(name)
+        (names if is_global else capability_names).append(name)
         path = decisions_dir / name
         source = _relative(path, root)
         gates = entry.get("gates")
@@ -276,6 +293,9 @@ def evaluate_production_gates(
                            source, dotted, reason)
             )
 
+    all_results = results
+    capability_only_names = set(capability_names) - set(names)
+    results = [r for r in all_results if r.decision not in capability_only_names]
     pending_owner = sorted(
         {
             r.decision
@@ -291,9 +311,10 @@ def evaluate_production_gates(
         if r.kind == GateKind.PRODUCTION.value and r.status is not GateStatus.GREEN
     ]
     capabilities: dict[str, Any] = {}
+    declared = set(names) | set(capability_names)
     for capability, decisions in CAPABILITY_DECISIONS.items():
-        scoped = [r for r in results if r.decision in decisions]
-        unrequired = sorted(set(decisions) - set(names))
+        scoped = [r for r in all_results if r.decision in decisions]
+        unrequired = sorted(set(decisions) - declared)
         capabilities[capability] = {
             "decisions": list(decisions),
             "production_activation_permitted": bool(scoped) and not unrequired
@@ -304,8 +325,10 @@ def evaluate_production_gates(
     base.update(
         capabilities=capabilities,
         required_decisions=names,
+        capability_decisions=capability_names,
+        capability_gates=[r.as_dict() for r in all_results if r.decision in capability_only_names],
         owner_decisions_pending=pending_owner,
-        owner_decisions_missing=sorted(missing),
+        owner_decisions_missing=sorted(m for m in missing if m not in capability_only_names),
         production_gates_not_green=not_green,
         gates=[r.as_dict() for r in results],
         production_activation_permitted=bool(results)
@@ -314,4 +337,4 @@ def evaluate_production_gates(
     return base
 
 
-__all__ = ["CAPABILITY_DECISIONS", "GATE_MODEL", "DuplicateKeyError", "GateKind", "GateResult", "GateStatus", "evaluate_production_gates"]
+__all__ = ["CAPABILITY_DECISIONS", "GATE_MODEL", "JEV_BROWSER_EFFECT_DECISION", "DuplicateKeyError", "GateKind", "GateResult", "GateStatus", "evaluate_production_gates"]

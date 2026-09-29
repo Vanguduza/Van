@@ -36,6 +36,33 @@ from van_gateway.storage.db import Store
 #: ``complete(status=COMPLETED)`` requires the task's latest verdict to be VERIFIED.
 VERIFICATION_EVIDENCE_KIND = "postcondition_verification"
 VERIFIED = "VERIFIED"
+#: Review I2 N-11. The interaction router's per-step record (``RouterStepLedger``) lives in
+#: ``browser_evidence`` under this kind and is read back as "the steps this task took". Only
+#: the ledger writes it; ``seal_evidence`` refuses it like the verdict kind.
+ROUTER_STEP_EVIDENCE_KIND = "interaction_router_step"
+#: Kinds only VAN's own verifier / router may write. Compared case-insensitively and with
+#: surrounding whitespace ignored, so ``Interaction_Router_Step`` is the same reserved kind.
+RESERVED_EVIDENCE_KINDS = frozenset({VERIFICATION_EVIDENCE_KIND, ROUTER_STEP_EVIDENCE_KIND})
+
+#: Review I2 N-3. The statuses a task ends in. Nothing moves a task out of one of these.
+TERMINAL_TASK_STATUSES = frozenset({
+    BrowserTaskStatus.COMPLETED,
+    BrowserTaskStatus.FAILED,
+    BrowserTaskStatus.DENIED,
+    BrowserTaskStatus.BLOCKED_POLICY,
+    BrowserTaskStatus.BLOCKED_UNSAFE,
+    BrowserTaskStatus.CANCELLED,
+    BrowserTaskStatus.EXPIRED,
+})
+#: What ``complete()`` may set: a terminal status, COMPLETED only over a VERIFIED verdict.
+#: PENDING and RESUME_AUTHORIZED are authority, not end states: PENDING is reachable only by
+#: creating the task and RESUME_AUTHORIZED only through the owner-decision sync. The
+#: non-terminal working states are written by the paths that own them.
+COMPLETABLE_TASK_STATUSES = TERMINAL_TASK_STATUSES
+
+
+def is_reserved_evidence_kind(kind: str) -> bool:
+    return str(kind or "").strip().casefold() in RESERVED_EVIDENCE_KINDS
 
 
 class BrowserTaskNotVerified(BrowserPolicyError):
@@ -47,6 +74,17 @@ class BrowserTaskNotVerified(BrowserPolicyError):
         )
         self.task_id = task_id
         self.latest = latest
+
+
+class BrowserTaskTransitionRefused(BrowserPolicyError):
+    """A status change ``complete()`` does not perform (review I2 N-3)."""
+
+    def __init__(self, task_id: str, current: str | None, requested: str, why: str) -> None:
+        super().__init__(f"browser_task_transition_refused:{why}:{current or 'UNKNOWN'}->{requested}")
+        self.task_id = task_id
+        self.current = current
+        self.requested = requested
+        self.why = why
 
 
 class BrowserSessionBroker:
@@ -314,8 +352,9 @@ class BrowserTaskService:
         now_ms: int | None = None,
     ) -> BrowserEvidence:
         """§§184-185 — digests only, and refuse anything secret-shaped."""
-        if kind == VERIFICATION_EVIDENCE_KIND:
-            # §7: a verdict is recorded by the verifier path, never sealed by a caller.
+        if is_reserved_evidence_kind(kind):
+            # §7: a verdict is recorded by the verifier path, and a router step record by
+            # the router's ledger (review I2 N-11) — never sealed by a caller.
             raise BrowserPolicyError("browser_evidence_kind_reserved_for_verifier")
         for payload, context in ((dom, "dom"), (extraction, "extraction")):
             if payload is not None:
@@ -443,26 +482,68 @@ class BrowserTaskService:
         error_code: str | None = None,
         now_ms: int | None = None,
     ) -> None:
-        """Set a task's end state. COMPLETED only over a VERIFIED verdict (§7, review I M-2).
+        """Set a task's end state. The one choke point for every caller.
 
-        This is the one place a browser task can become COMPLETED, so every caller — the
-        internal ``/complete`` route, the assignment path, the watch runner, the notebook
-        consumer — is held to the same rule. Nothing any lane says is a verdict.
+        * Only a terminal status may be set (review I2 N-3). ``/complete`` used to accept any
+          status, so a caller could write RESUME_AUTHORIZED on a task still waiting for the
+          owner, or PENDING on one the owner had rejected, and then drive it. PENDING and
+          RESUME_AUTHORIZED are refused here whoever asks.
+        * COMPLETED only over a VERIFIED verdict (§7, review I M-2).
+        * A task that has ended stays ended: the update is conditional on the current status
+          not being terminal, so two racing callers cannot both write an end state.
         """
+        if status not in COMPLETABLE_TASK_STATUSES:
+            raise BrowserTaskTransitionRefused(task_id, None, status.value, "NOT_A_TERMINAL_STATUS")
         if status is BrowserTaskStatus.COMPLETED:
             latest = await self.latest_verification(task_id)
             if latest != VERIFIED:
                 raise BrowserTaskNotVerified(task_id, latest)
-        now = int(time.time() * 1000) if now_ms is None else now_ms
-        await self.store.execute(
-            "UPDATE browser_tasks SET status = ?, evidence_pointer = ?, error_code = ?, "
-            "completed_at_ms = ?, updated_at_ms = ? WHERE task_id = ?",
-            (status.value, evidence_pointer, error_code, now, now, task_id),
+        await self._write_status(
+            task_id=task_id, status=status, evidence_pointer=evidence_pointer,
+            error_code=error_code, completed=True, now_ms=now_ms,
         )
 
+    async def hold_for_verification(
+        self, *, task_id: str, error_code: str | None = None, now_ms: int | None = None
+    ) -> None:
+        """VERIFYING: a done claim nobody could verify. Not terminal, never success (§7)."""
+        await self._write_status(
+            task_id=task_id, status=BrowserTaskStatus.VERIFYING, evidence_pointer=None,
+            error_code=error_code, completed=False, now_ms=now_ms,
+        )
+
+    async def _write_status(
+        self, *, task_id: str, status: BrowserTaskStatus, evidence_pointer: str | None,
+        error_code: str | None, completed: bool, now_ms: int | None,
+    ) -> None:
+        now = int(time.time() * 1000) if now_ms is None else now_ms
+        terminal = tuple(s.value for s in TERMINAL_TASK_STATUSES)
+        placeholders = ", ".join("?" for _ in terminal)
+        async with self.store.connection() as db:
+            cur = await db.execute(
+                "UPDATE browser_tasks SET status = ?, evidence_pointer = ?, error_code = ?, "
+                f"completed_at_ms = ?, updated_at_ms = ? WHERE task_id = ? AND status NOT IN ({placeholders})",
+                (status.value, evidence_pointer, error_code, now if completed else None, now,
+                 task_id, *terminal),
+            )
+            await db.commit()
+            changed = cur.rowcount
+        if changed != 1:
+            row = await self.store.fetchone("SELECT status FROM browser_tasks WHERE task_id = ?", (task_id,))
+            current = None if row is None else str(row["status"])
+            raise BrowserTaskTransitionRefused(
+                task_id, current, status.value,
+                "TASK_UNKNOWN" if row is None else "TASK_ALREADY_TERMINAL",
+            )
 
 __all__ = [
+    "COMPLETABLE_TASK_STATUSES",
+    "RESERVED_EVIDENCE_KINDS",
+    "ROUTER_STEP_EVIDENCE_KIND",
+    "TERMINAL_TASK_STATUSES",
     "VERIFICATION_EVIDENCE_KIND",
+    "BrowserTaskTransitionRefused",
+    "is_reserved_evidence_kind",
     "BrowserSessionBroker",
     "BrowserTaskNotVerified",
     "BrowserTaskService",

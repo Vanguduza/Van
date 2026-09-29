@@ -20,8 +20,14 @@ Invariants this module owns (each has a test that removes it and watches it fail
   with a recorded reason — it is never silently skipped;
 * Jev never executes. The injected executor (Browser Harness) executes;
 * a Jev proposal is acted on only when dial-jev returns ``apply_effect: true`` under an
-  ``ACTIVE``/``ACTIVE_GATED`` lifecycle. A SHADOW proposal (every one today, blueprint §11)
-  is re-validated, counted and compared with what the next lane did, and never executed;
+  ``ACTIVE``/``ACTIVE_GATED`` lifecycle **and** VAN's own ``jev_browser_effect`` gate is GREEN
+  (review I2 N-7; the gate model record starts SHADOW_ONLY). A SHADOW proposal (every one
+  today, blueprint §11) is re-validated, counted and compared with what the next lane did,
+  and never executed;
+* a deterministic action is classified like any other (Harness-observed element plus locator
+  words), capped at the step ceiling, and a payment/irreversible hit goes to the owner (N-6);
+* a RESUME_AUTHORIZED task runs only bound to the owner's ACTIVE scope authorization, capped
+  at its approved class (N-4);
 * only the independent postcondition verifier yields ``VERIFIED_SUCCESS``; a Jev ``done`` is a
   claim and moves the step to ``VERIFYING``;
 * the router itself is reachable only when ``browser_interaction_router_enabled`` is set
@@ -62,7 +68,10 @@ from van_gateway.browser.adapters import BrowserAdapterError
 from van_gateway.browser.lane_gates import (  # noqa: F401 - re-export
     OwnerControlProbe,
     _fetch_stagehand_worker_health,
+    load_jev_browser_effect_gate,
     load_stagehand_production_gate,
+    step_gate_memo,
+    step_gate_scope,
 )
 from van_gateway.browser.models import BrowserTask, BrowserTaskStatus
 from van_gateway.browser.policy import BrowserPolicyError
@@ -100,16 +109,24 @@ def _rank(action_class: str) -> int:
 RUNNABLE_TASK_STATUSES = frozenset({BrowserTaskStatus.PENDING, BrowserTaskStatus.RESUME_AUTHORIZED})
 
 
-def effective_step_ceiling(step_ceiling: str, task: BrowserTask) -> str:
+def effective_step_ceiling(step_ceiling: str, task: BrowserTask, approved_ceiling: str | None = None) -> str:
     """Reviewer I M-8 — a step can never act above the class the task was admitted at.
 
     The caller's ceiling is capped at ``task.action_class``; a task class VAN does not know
-    caps to A0 (nothing but done/scroll/abstain), never upward.
+    caps to A0 (nothing but done/scroll/abstain), never upward. Review I2 N-4: a resumed
+    task is also capped at the ceiling the owner approved (``approved_ceiling``); an
+    approved ceiling VAN does not know caps to A0 the same way.
     """
     task_class = getattr(getattr(task, "action_class", None), "value", getattr(task, "action_class", None))
     if not isinstance(task_class, str) or task_class not in B1_ACTION_CLASSES:
         return "A0"
-    return task_class if _rank(task_class) < _rank(step_ceiling) else step_ceiling
+    capped = task_class if _rank(task_class) < _rank(step_ceiling) else step_ceiling
+    if approved_ceiling is not None:
+        if approved_ceiling not in B1_ACTION_CLASSES:
+            return "A0"
+        if _rank(approved_ceiling) < _rank(capped):
+            capped = approved_ceiling
+    return capped
 
 
 class B1ValidationError(ValueError):
@@ -189,6 +206,12 @@ class InteractionStep:
     #: Set by the Jev lane when dial-jev proposed without effect (SHADOW): what Jev would
     #: have done, kept for the shadow comparison. Never executed.
     shadow_jev: dict[str, Any] | None = None
+    #: Review I2 N-4. For a RESUME_AUTHORIZED task: the class ceiling of the owner's ACTIVE
+    #: scope authorization, bound (and consumed) by the caller for this step. A resumed task
+    #: without one is refused; ``None`` on a PENDING task means "no owner approval involved".
+    resume_ceiling: str | None = None
+    #: The authorization this step was bound to, for the step record.
+    resume_authorization_id: str | None = None
 
 
 @dataclass
@@ -287,17 +310,30 @@ _HIGH_RISK_LABEL = re.compile(
 )
 
 
+#: Review I2 N-6 — a field that takes a payment instrument. Typing into one is part of paying,
+#: whatever the button next to it says, so a fill/select there is A4 like "Pay now".
+_PAYMENT_FIELD = re.compile(
+    r"\b(card|cvv|cvc|cvv2|csc|iban|bic|swift|expiry|expiration|security code|"
+    r"sort code|account number|routing|billing)\b",
+    re.IGNORECASE,
+)
+
+
 def default_action_classifier(operation: str, target: dict[str, Any] | None, target_entry: Any) -> str:
     """VAN's own (operation, target) -> action class. Conservative by construction.
 
     ``done``/``scroll``/``abstain`` change nothing -> A0. Anything whose label reads as a
-    commitment (pay, submit, delete, send ...) -> A4, which is never proposable. ``fill``
+    commitment (pay, submit, delete, send ...) -> A4, which is never proposable; so is a
+    fill/select into a payment-instrument field (card number, CVV, IBAN ...). ``fill``
     writes owner data -> A3. Other clicks/selects/keys -> A2. A class the fabric attached to
     the target (``target_entry["action_class"]``) can only raise this, never lower it.
     """
+    label = str(target.get("label") or "") if target is not None else ""
     if operation in TARGETLESS_OPERATIONS:
         base = "A0"
-    elif target is not None and _HIGH_RISK_LABEL.search(str(target.get("label") or "")):
+    elif target is not None and _HIGH_RISK_LABEL.search(label):
+        base = "A4"
+    elif operation in ("fill", "select") and _PAYMENT_FIELD.search(label):
         base = "A4"
     elif operation == "fill":
         base = "A3"
@@ -700,6 +736,7 @@ class BrowserInteractionRouter:
         target_resolver: TargetResolver | None = None,
         require_owner_private_terms: bool = False,
         ledger: "RouterStepLedger | None" = None,
+        jev_effect_gate: Callable[[], Any] | None = None,
     ) -> None:
         self.enabled = enabled
         self.executor = executor
@@ -727,6 +764,9 @@ class BrowserInteractionRouter:
         #: Reviewer I minor 6: every step is written to the browser task's evidence ledger.
         self.ledger = ledger
         self._metrics_loaded = ledger is None
+        #: Review I2 N-7 — VAN's own gate on Jev browser effect. dial-jev's ``apply_effect``
+        #: is its self-report; it is necessary, never sufficient. Absent = SHADOW only.
+        self.jev_effect_gate = jev_effect_gate
 
     # ----------------------------------------------------------- lane readiness
 
@@ -773,7 +813,12 @@ class BrowserInteractionRouter:
         if self.stagehand_gate is None:
             return "STAGEHAND_LANE_DISABLED:PRODUCTION_GATE_MISSING"
         try:
-            permitted, reason = await _maybe_await(self.stagehand_gate())
+            # Review I2 N-10: evaluated once per step (``step_gate_scope`` in ``route``); the
+            # adapter's own gate check for this step's observe reads the same verdict.
+            permitted, reason = await step_gate_memo(
+                ("router_stagehand_gate", id(self.stagehand_gate)),
+                lambda: _maybe_await(self.stagehand_gate()),
+            )
         except Exception as exc:  # noqa: BLE001 - a gate fault is "not permitted"
             return f"STAGEHAND_LANE_DISABLED:PRODUCTION_GATE_FAILED:{type(exc).__name__}"
         if permitted is not True:
@@ -819,7 +864,8 @@ class BrowserInteractionRouter:
         increments: dict[str, int] = {}
         token = _STEP_INCREMENTS.set(increments)
         try:
-            result = await self._route(step)
+            async with step_gate_scope():
+                result = await self._route(step)
         finally:
             _STEP_INCREMENTS.reset(token)
         if self.ledger is not None:
@@ -849,11 +895,26 @@ class BrowserInteractionRouter:
                 trail=[StepState.POLICY_REFUSED.value],
                 reasons=[f"BROWSER_TASK_NOT_RUNNABLE:{status}"],
             )
+        if step.task.status is BrowserTaskStatus.RESUME_AUTHORIZED and step.resume_ceiling is None:
+            # Review I2 N-4 — RESUME_AUTHORIZED is the owner's answer, and what the owner
+            # approved is the ACTIVE scope authorization, not the status. A resumed step the
+            # caller did not bind to that authorization does not run.
+            self.metrics.inc("policy_refusals")
+            return StepResult(
+                lane=RouterLane.POLICY_REFUSAL, state=StepState.POLICY_REFUSED,
+                trail=[StepState.POLICY_REFUSED.value],
+                reasons=["BROWSER_RESUME_AUTHORIZATION_MISSING"],
+            )
         reasons: list[str] = []
         capped = effective_step_ceiling(step.action_class_ceiling, step.task)
         if capped != step.action_class_ceiling:
             reasons.append(f"STEP_CEILING_CAPPED_BY_TASK:{step.action_class_ceiling}->{capped}")
             step.action_class_ceiling = capped
+        if step.resume_ceiling is not None:
+            approved = effective_step_ceiling(step.action_class_ceiling, step.task, step.resume_ceiling)
+            if approved != step.action_class_ceiling:
+                reasons.append(f"STEP_CEILING_CAPPED_BY_OWNER_APPROVAL:{step.action_class_ceiling}->{approved}")
+                step.action_class_ceiling = approved
         attempts: list[dict[str, Any]] = []
         # Locked order (owner decision §9). A lane returns None when it has nothing to do.
         lanes = (self._deterministic_lane, self._jev_lane_entry, self._stagehand_lane)
@@ -908,9 +969,36 @@ class BrowserInteractionRouter:
             reasons.append("DETERMINISTIC_LANE_EXECUTOR_MISSING")
             return None
         det = step.deterministic_action
+        # Review I2 N-6 — a typed action is still classified. The caller knowing the locator
+        # does not make `#pay-now` an A1 click: the class comes from VAN's classifier over what
+        # the Harness observes of the element plus the locator's own words, exactly as the
+        # Stagehand lane does, and the payment boundary reads the same text.
+        if det.operation in TARGETLESS_OPERATIONS:
+            det_class, observed_text = "A0", ""
+        else:
+            element = await self._resolve_target(step, det.locator)
+            if isinstance(element, dict):
+                observed_text = observed_element_text(element, det.locator)
+            else:
+                # Unresolved: classify on the locator's words. A payment or irreversible hit
+                # there goes to the owner rather than being guessed about.
+                reasons.append(f"DETERMINISTIC_TARGET_UNRESOLVED:{element}")
+                observed_text = " | ".join(t for t in (det.locator or "", _words(det.locator or "")) if t)
+            det_class = self.action_classifier(det.operation, {"label": observed_text}, None)
+        if det_class not in B1_ACTION_CLASSES or det_class in NEVER_PROPOSABLE_ACTION_CLASSES:
+            reasons.append(f"DETERMINISTIC_ACTION_NOT_AUTOMATABLE:{det_class}")
+            return self._takeover(reasons, [], "DETERMINISTIC_ACTION_REQUIRES_OWNER")
+        if _rank(det_class) > _rank(step.action_class_ceiling):
+            self.metrics.inc("policy_refusals")
+            return StepResult(
+                lane=RouterLane.POLICY_REFUSAL, state=StepState.POLICY_REFUSED,
+                trail=[StepState.POLICY_REFUSED.value],
+                reasons=reasons + [f"DETERMINISTIC_ACTION_ABOVE_CEILING:{det_class}>{step.action_class_ceiling}"],
+            )
         action = RouterAction(
             lane=RouterLane.DETERMINISTIC, operation=det.operation, locator=det.locator,
-            value_ref=det.value_ref, action_class=None,
+            value_ref=det.value_ref, action_class=det_class,
+            description=observed_text or None,
         )
         self.metrics.inc("deterministic_steps")
         return await self._execute_and_verify(step, action, reasons, claimed_done=det.operation == "done")
@@ -981,12 +1069,16 @@ class BrowserInteractionRouter:
         self, step: InteractionStep, proposal: RouterAction,
     ) -> dict[str, Any] | str:
         """The Harness-observed element for the proposal's locator, or why there is none."""
-        if not proposal.locator:
+        return await self._resolve_target(step, proposal.locator)
+
+    async def _resolve_target(self, step: InteractionStep, locator: str | None) -> dict[str, Any] | str:
+        """The Harness-observed element for ``locator``, or why there is none."""
+        if not locator:
             return "NO_LOCATOR"
         if self.target_resolver is None:
             return "NO_TARGET_RESOLVER"
         try:
-            element = await self.target_resolver(step.task, proposal.locator)
+            element = await self.target_resolver(step.task, locator)
         except Exception as exc:  # noqa: BLE001 - cannot observe the target = cannot classify it
             return f"RESOLVER_FAILED:{type(exc).__name__}"
         if not isinstance(element, dict) or not element:
@@ -1142,6 +1234,14 @@ class BrowserInteractionRouter:
         self.metrics.inc("jev_proposals_received")
 
         shadow = not response.carries_effect
+        van_gate_reason: str | None = None
+        if not shadow:
+            # Review I2 N-7 — dial-jev saying ACTIVE + apply_effect is its own report. VAN's
+            # gate decides; until it is GREEN the proposal is a shadow like any other.
+            van_gate_reason = await self._jev_effect_gate_closed_reason()
+            if van_gate_reason is not None:
+                shadow = True
+                reasons.append(f"JEV_EFFECT_NOT_PERMITTED_BY_VAN:{van_gate_reason}")
         if shadow:
             # Reviewer I M-3 — PRD Rev 2.1: "SHADOW: Jev runs; consumer ignores result", and
             # blueprint §11: no Jev module can carry effect today. The proposal is still
@@ -1192,7 +1292,9 @@ class BrowserInteractionRouter:
             self.metrics.inc("jev_shadow_valid")
             self.metrics.inc("jev_fallbacks")
             step.shadow_jev.update(valid=True, action_class=action_class, locator=locator)
-            reasons.append(f"JEV_SHADOW_NOT_EXECUTED:{response.lifecycle_state or 'LIFECYCLE_UNREPORTED'}")
+            reasons.append(
+                f"JEV_SHADOW_NOT_EXECUTED:{'VAN_JEV_EFFECT_GATE' if van_gate_reason else (response.lifecycle_state or 'LIFECYCLE_UNREPORTED')}"
+            )
             return None
 
         action = RouterAction(
@@ -1216,6 +1318,21 @@ class BrowserInteractionRouter:
             elif result.state is StepState.NOT_SATISFIED:
                 self.metrics.inc("jev_wrong_actions")
         return result
+
+    async def _jev_effect_gate_closed_reason(self) -> str | None:
+        """None only when VAN's Jev browser-effect gate is GREEN for this step. Fails closed."""
+        if self.jev_effect_gate is None:
+            return "JEV_EFFECT_GATE_MISSING"
+        try:
+            permitted, reason = await step_gate_memo(
+                ("router_jev_effect_gate", id(self.jev_effect_gate)),
+                lambda: _maybe_await(self.jev_effect_gate()),
+            )
+        except Exception as exc:  # noqa: BLE001 - a gate fault is "not permitted"
+            return f"JEV_EFFECT_GATE_FAILED:{type(exc).__name__}"
+        if permitted is not True:
+            return str(reason or "JEV_EFFECT_SHADOW_ONLY")
+        return None
 
     # ----------------------------------------------------------- execute + verify
 
@@ -1298,7 +1415,8 @@ class BrowserInteractionRouter:
 
 # ------------------------------------------------------------------------ step ledger
 
-ROUTER_STEP_EVIDENCE_KIND = "interaction_router_step"
+# Defined beside the verdict kind in the task service, which refuses both from callers.
+from van_gateway.browser.service import ROUTER_STEP_EVIDENCE_KIND  # noqa: E402
 
 
 class RouterStepLedger:
@@ -1324,6 +1442,7 @@ class RouterStepLedger:
         return {
             "router_step": 1,
             "step_ceiling": step.action_class_ceiling,
+            "resume_authorization_id": step.resume_authorization_id,
             "task_action_class": getattr(step.task.action_class, "value", step.task.action_class),
             "lane": body["lane"],
             "state": body["state"],
@@ -1477,7 +1596,19 @@ class StagehandSemanticFallback:
         self.stagehand = stagehand
 
     async def propose(self, task: BrowserTask, step: InteractionStep) -> RouterAction | None:
-        if not getattr(self.stagehand, "configured", False) or not getattr(self.stagehand, "enabled", False):
+        if not getattr(self.stagehand, "enabled", False):
+            raise SemanticProposalRefused("STAGEHAND_UNCONFIGURED")
+        evaluate = getattr(self.stagehand, "evaluate_production_gate", None)
+        if evaluate is not None:
+            # Review I2 N-10: `configured` is the verdict of the adapter's *last* gate
+            # evaluation, which is stale (closed) on a fresh adapter. Ask the gate now; inside
+            # a router step this is the step's single evaluation, shared with observe().
+            if not getattr(self.stagehand, "wiring_configured", False):
+                raise SemanticProposalRefused("STAGEHAND_UNCONFIGURED")
+            permitted, reason = await evaluate()
+            if permitted is not True:
+                raise SemanticProposalRefused(f"STAGEHAND_PRODUCTION_DISABLED:{reason}")
+        elif not getattr(self.stagehand, "configured", False):
             raise SemanticProposalRefused("STAGEHAND_UNCONFIGURED")
         instruction = step.semantic_instruction or f"Choose the single next action for: {task.goal}"
         observation = await self.stagehand.observe(task, instruction)
@@ -1583,6 +1714,8 @@ def build_interaction_router(
         observer=observe,
         owner_control_probe=OwnerControlProbe(store) if store is not None else None,
         stagehand_gate=load_stagehand_production_gate(settings, stagehand),
+        # Review I2 N-7: VAN's own Jev browser-effect gate (SHADOW only until GREEN).
+        jev_effect_gate=load_jev_browser_effect_gate(),
         target_resolver=HarnessTargetResolver(harness),
         eligibility_policy=build_eligibility_policy(settings),
         require_owner_private_terms=True,
@@ -1601,6 +1734,32 @@ class InteractionStepBody(BaseModel):
     postcondition: PostconditionSpec | None = None
     semantic_instruction: str | None = None
     value_slots: dict[str, str] = Field(default_factory=dict)
+
+
+async def _step_page_lease(browser_api: Any, task: BrowserTask) -> Any:
+    """The page lease a ``/step`` runs under (review I2 N-5). Returns a lease to release, or
+    ``None`` when the task already held a live one. 409 when anything else holds the profile."""
+    now = int(time.time() * 1000)
+    row = await browser_api.store.fetchone(
+        "SELECT lease_holder, lease_expires_at_ms, lease_holder_kind, lease_holder_id "
+        "FROM browser_profiles WHERE profile_alias = ?",
+        (task.profile_alias,),
+    )
+    if row is None:
+        raise HTTPException(status_code=409, detail=f"browser_profile_unregistered:{task.profile_alias}")
+    live = row["lease_holder"] is not None and int(row["lease_expires_at_ms"] or 0) > now
+    if live:
+        held_by_task = (
+            (row["lease_holder_kind"] or "TASK") == "TASK" and row["lease_holder_id"] == task.task_id
+        )
+        if held_by_task:
+            return None
+        raise HTTPException(status_code=409, detail=f"browser_profile_leased:{task.profile_alias}")
+    try:
+        return await browser_api.broker.acquire_lease(profile_alias=task.profile_alias, task_id=task.task_id)
+    except BrowserPolicyError as exc:
+        # Taken between the read and the acquire: the atomic acquire is the arbiter.
+        raise HTTPException(status_code=409, detail=str(exc)) from exc
 
 
 def build_interaction_routes(browser_api: Any, router: BrowserInteractionRouter) -> APIRouter:
@@ -1649,16 +1808,34 @@ def build_interaction_routes(browser_api: Any, router: BrowserInteractionRouter)
         for op in body.closed_operation_set:
             if op not in B1_OPERATIONS:
                 raise HTTPException(status_code=422, detail=f"OPERATION_NOT_CLOSED:{op}")
-        step = InteractionStep(
-            task=task,
-            action_class_ceiling=body.action_class_ceiling,
-            closed_operation_set=tuple(body.closed_operation_set),
-            deterministic_action=body.deterministic_action,
-            postcondition=body.postcondition,
-            semantic_instruction=body.semantic_instruction,
-            value_slots=dict(body.value_slots),
-        )
-        result = await router.route(step)
+        # Review I2 N-5 — §183 "exclusive while live". The step runs under the task's page
+        # lease: it uses the one the task already holds, or takes one for the step and gives
+        # it back; another holder on the profile (a task, or the owner's interactive session)
+        # refuses the step rather than sharing the page.
+        acquired = await _step_page_lease(browser_api, task)
+        try:
+            step = InteractionStep(
+                task=task,
+                action_class_ceiling=body.action_class_ceiling,
+                closed_operation_set=tuple(body.closed_operation_set),
+                deterministic_action=body.deterministic_action,
+                postcondition=body.postcondition,
+                semantic_instruction=body.semantic_instruction,
+                value_slots=dict(body.value_slots),
+            )
+            if status is BrowserTaskStatus.RESUME_AUTHORIZED:
+                # Review I2 N-4 — the owner's ACTIVE authorization is bound to this step and
+                # consumed, as /assignments does; the step is capped at its approved class.
+                consume = getattr(browser_api, "consume_resume_authorization", None)
+                if consume is None:
+                    raise HTTPException(status_code=409, detail="BROWSER_RESUME_AUTHORIZATION_MISSING")
+                grant = await consume(task)
+                step.resume_ceiling = grant.get("approved_action_class_ceiling") or step.action_class_ceiling
+                step.resume_authorization_id = grant.get("authorization_id")
+            result = await router.route(step)
+        finally:
+            if acquired is not None:
+                await browser_api.broker.release_lease(acquired)
         return {"task_id": task.task_id, "at_ms": int(time.time() * 1000), **result.to_json()}
 
     return api

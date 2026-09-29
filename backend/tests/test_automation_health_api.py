@@ -205,8 +205,11 @@ async def test_browser_health_surfaces_stagehand_placement_and_per_capability_ga
     # Existing semantics are unchanged.
     assert body["governance"]["production_activation_permitted"] is False
     assert set(body["governance"]["production_activation_permitted_by_capability"]) == {
-        "n8n", "browser_harness", "stagehand",
+        "n8n", "browser_harness", "stagehand", "jev_browser_effect",
     }
+    # Review I2 N-7: Jev browser effect has its own VAN gate, SHADOW_ONLY today.
+    assert activation["jev_browser_effect"]["production_activation_permitted"] is False
+    assert "VAN-JEV-BROWSER-EFFECT-001.yaml:jev_browser_effect" in activation["jev_browser_effect"]["gates_not_green"]
 
 
 async def test_browser_health_stagehand_status_is_the_gate_verdict_for_these_settings(monkeypatch):

@@ -236,6 +236,9 @@ def make_router(**kw: Any) -> BrowserInteractionRouter:
 
     kw.setdefault("owner_control_probe", owner_idle)
     kw.setdefault("stagehand_gate", lambda: (True, "TEST_PERMITTED"))
+    # Review I2 N-7: VAN's Jev-effect gate, opened here so the lane's execute path can be
+    # exercised against a fake ACTIVE module; production wiring reads the gate model.
+    kw.setdefault("jev_effect_gate", lambda: (True, "TEST_PERMITTED"))
     return BrowserInteractionRouter(**kw)
 
 
@@ -1125,14 +1128,21 @@ async def test_gate_passes_live_worker_health_and_ands_with_production_gates(mon
     import van_gateway.automation.production_gates as pg
 
     monkeypatch.setattr(pg, "evaluate_production_gates", lambda: {
+        # Review I2 N-8: the lane reads the Stagehand capability slice, as health does.
         "production_activation_permitted": False, "production_gates_not_green": ["X:signed_ingress"],
+        "capabilities": {"stagehand": {"production_activation_permitted": False,
+                                       "gates_not_green": ["X:signed_ingress"]}},
     })
     gate = load_stagehand_production_gate(Settings(), _EdgeStagehand({"status": "ok", "version": "4.1.0"}))
     ok, reason = await gate()
     assert seen["health"] == {"status": "ok", "version": "4.1.0"}
     assert ok is False and reason == "PRODUCTION_GATES_NOT_GREEN:X:signed_ingress"
 
-    monkeypatch.setattr(pg, "evaluate_production_gates", lambda: {"production_activation_permitted": True})
+    monkeypatch.setattr(pg, "evaluate_production_gates", lambda: {
+        # Stagehand slice GREEN; the global summary (n8n too) need not be.
+        "production_activation_permitted": False,
+        "capabilities": {"stagehand": {"production_activation_permitted": True, "gates_not_green": []}},
+    })
     assert await gate() == (True, "PLACEMENT_OK")
 
 
@@ -1446,11 +1456,31 @@ async def test_a_task_that_is_not_runnable_is_refused(status):
     assert router.executor.executed == []
 
 
-async def test_a_resume_authorized_task_is_runnable():
+async def test_a_resume_authorized_task_runs_only_bound_to_the_owner_authorization():
+    """Review I2 N-4. This test used to assert that the RESUME_AUTHORIZED *status* alone made a
+    step runnable, which is the bug: the owner approved an authorization row (single-use,
+    with its own class ceiling), not a status. Unbound, the step is refused; bound, it runs
+    capped at the approved class."""
     router = make_router()
     s = step(deterministic_action=DeterministicAction(operation="click", locator="#go"))
     s.task = s.task.model_copy(update={"status": BrowserTaskStatus.RESUME_AUTHORIZED})
-    assert (await router.route(s)).state is StepState.VERIFIED_SUCCESS
+    refused = await router.route(s)
+    assert refused.state is StepState.POLICY_REFUSED
+    assert refused.reasons == ["BROWSER_RESUME_AUTHORIZATION_MISSING"]
+    assert router.executor.executed == []
+
+    bound = step(deterministic_action=DeterministicAction(operation="click", locator="#go"),
+                 resume_ceiling="A2", resume_authorization_id="bsauth_x")
+    bound.task = bound.task.model_copy(update={"status": BrowserTaskStatus.RESUME_AUTHORIZED})
+    assert (await router.route(bound)).state is StepState.VERIFIED_SUCCESS
+
+    capped = step(deterministic_action=DeterministicAction(operation="click", locator="#go"),
+                  resume_ceiling="A1")
+    capped.task = capped.task.model_copy(update={"status": BrowserTaskStatus.RESUME_AUTHORIZED})
+    result = await router.route(capped)
+    assert "STEP_CEILING_CAPPED_BY_OWNER_APPROVAL:A2->A1" in result.reasons
+    assert result.state is StepState.POLICY_REFUSED  # an A2 click above the approved A1
+    assert [a.locator for a in router.executor.executed] == ["#go"]  # only the bound A2 step
 
 
 async def test_route_is_409_for_a_completed_task_and_caps_the_ceiling(_env, tmp_path):
